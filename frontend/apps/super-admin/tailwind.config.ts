@@ -1,12 +1,19 @@
-import type { Config } from "tailwindcss";
-import sharedConfig from "@pos-saas/ui-themes/tailwind.config";
-
-const config: Config = {
+/** @type {import('tailwindcss').Config} */
+module.exports = {
+  darkMode: 'class',
   content: [
-    "./src/**/*.{js,ts,jsx,tsx,mdx}",
-    "../../packages/ui-components/src/**/*.{js,ts,jsx,tsx,mdx}",
+    './src/app/**/*.{js,ts,jsx,tsx,mdx}',
+    './src/components/**/*.{js,ts,jsx,tsx,mdx}',
+    './src/**/*.{js,ts,jsx,tsx,mdx}',
   ],
-  presets: [sharedConfig],
+  theme: {
+    extend: {
+      colors: {
+        primary: 'rgb(var(--primary) / <alpha-value>)',
+        secondary: 'rgb(var(--secondary) / <alpha-value>)',
+        accent: 'rgb(var(--accent) / <alpha-value>)',
+      },
+    },
+  },
+  plugins: [],
 };
-
-export default config;
