@@ -7,6 +7,7 @@
     "dev:dashboard": "pnpm --filter @pos-saas/dashboard dev",
     "dev:restaurant": "pnpm --filter @pos-saas/restaurant-website dev",
     "dev:landing": "pnpm --filter @pos-saas/landing dev",
+    "dev:super-admin": "pnpm --filter @pos-saas/super-admin dev",
     "build": "turbo run build",
     "lint": "turbo run lint",
     "clean": "turbo run clean"
