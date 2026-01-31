@@ -1,14 +1,13 @@
 'use client'
 
 import { useEffect } from 'react'
-import { useRouter, usePathname } from 'next/navigation'
+import { usePathname } from 'next/navigation'
 import { useAuthStore } from '@/stores/authStore'
 import { getConfig } from '@/lib/config'
 import { Store, Users, ShoppingCart, TrendingUp } from 'lucide-react'
 import { createTranslator, getLocaleFromPath } from '@/lib/translations'
 
 export default function DashboardPage() {
-  const router = useRouter()
   const pathname = usePathname()
   const locale = getLocaleFromPath(pathname)
   const t = createTranslator(locale)
@@ -20,16 +19,23 @@ export default function DashboardPage() {
   const isAuthenticated = !!(user && token)
 
   useEffect(() => {
-    console.log('=== DASHBOARD: Checking auth ===')
-    console.log('User:', user?.email, 'Authenticated:', isAuthenticated)
+    // Skip redirect if in debug mode
+    if (typeof window !== 'undefined') {
+      const debugMode = new URLSearchParams(window.location.search).get('debug') === 'true'
+      if (debugMode) {
+        return
+      }
+    }
 
     if (!isAuthenticated) {
-      console.log('Not authenticated, redirecting to login')
       window.location.href = `${getConfig().landingUrl}/auth/login`
     }
-  }, [isAuthenticated, user, router])
+  }, [isAuthenticated, user])
 
-  if (!isAuthenticated) {
+  // Allow rendering if in debug mode, even if not authenticated
+  const debugMode = typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('debug') === 'true'
+
+  if (!isAuthenticated && !debugMode) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>

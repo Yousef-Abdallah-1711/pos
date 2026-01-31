@@ -12,24 +12,35 @@ export default function LocaleHomePage() {
   const token = useAuthStore((state) => state.token)
 
   // Extract locale from pathname (e.g., /en -> 'en')
-  const locale = pathname.split('/')[1] || 'en'
+  const pathParts = pathname.split('/').filter(Boolean)
+  const locale = pathParts.length > 0 ? pathParts[0] : 'en'
+
+  // Check if this is a valid locale (simple check - just lowercase letters)
+  const isValidLocale = /^[a-z]{2}$/.test(locale)
 
   // Check if authenticated by checking if user and token exist
   const isAuthenticated = !!(user && token)
 
   useEffect(() => {
-    console.log('=== LOCALE HOME: Checking auth ===')
-    console.log('User:', user?.email, 'Authenticated:', isAuthenticated)
-    console.log('Locale:', locale)
+    // Don't redirect if locale is invalid (e.g., /dashboard was interpreted as locale)
+    if (!isValidLocale) {
+      window.location.href = `${getConfig().dashboardUrl}/en/dashboard`
+      return
+    }
+
+    // Check for debug mode
+    const debugMode = typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('debug') === 'true'
+    if (debugMode) {
+      router.replace(`/${locale}/dashboard${window.location.search}`)
+      return
+    }
 
     if (isAuthenticated) {
-      console.log('Redirecting to dashboard')
       router.replace(`/${locale}/dashboard`)
     } else {
-      console.log('Not authenticated, redirecting to login')
       window.location.href = `${getConfig().landingUrl}/auth/login`
     }
-  }, [isAuthenticated, user, router, locale])
+  }, [isAuthenticated, user, router, locale, isValidLocale])
 
   return (
     <div className="min-h-screen flex items-center justify-center">
