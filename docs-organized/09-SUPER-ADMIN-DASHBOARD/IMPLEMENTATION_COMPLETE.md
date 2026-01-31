@@ -631,3 +631,80 @@ For questions about this implementation, refer to:
 **Implementation Status**: ✅ **COMPLETE AND PRODUCTION READY**
 
 All 9 phases have been successfully implemented with full functionality, comprehensive security measures, and extensive audit logging.
+
+---
+
+## 🚀 NEW FEATURE: Direct Tenant Dashboard Access
+
+### Feature Request
+Add a button on the tenant detail page (`/dashboard/tenants/{id}`) that allows the super admin to directly access and auto-login to the tenant's dashboard at `http://localhost:3001/`.
+
+### TODO List
+
+- [x] **1. Backend: Create Tenant Dashboard Login Endpoint**
+  - ✅ Endpoint: `POST /api/v1/super-admin/tenants/{id}/dashboard-login`
+  - ✅ Generates secure one-time token (32 bytes, hex-encoded)
+  - ✅ Token expiry: 30 seconds
+  - ✅ Returns token and redirect URL to `http://localhost:3001/auth/super-admin-login?token={token}`
+
+- [x] **2. Backend: Create Token Exchange Endpoint**
+  - ✅ Endpoint: `POST /api/v1/auth/token-exchange`
+  - ✅ Validates one-time token
+  - ✅ Returns `{success: true, data: {user, token}}`
+  - ✅ Proper error handling and logging
+
+- [x] **3. Frontend (Super Admin): Add "Enter Dashboard" Button**
+  - ✅ Button added to tenant detail page (`/apps/super-admin/src/app/dashboard/tenants/[id]/page.tsx`)
+  - ✅ Label: "Enter Dashboard"
+  - ✅ Icon: LogIn icon from lucide-react
+  - ✅ Placement: Top-right of tenant info card header
+
+- [x] **4. Frontend (Super Admin): Implement Button Click Handler**
+  - ✅ Calls `POST /api/v1/super-admin/tenants/{id}/dashboard-login`
+  - ✅ Receives one-time token
+  - ✅ Opens `http://localhost:3001/auth/super-admin-login?token={token}` in new tab
+  - ✅ Shows loading state and success toast
+
+- [x] **5. Frontend (Landing): Create Token Exchange Page**
+  - ✅ Page: `/apps/landing/src/app/auth/super-admin-login/page.tsx`
+  - ✅ Reads token from URL using `window.location.search`
+  - ✅ Calls `/api/v1/auth/token-exchange` endpoint
+  - ✅ Stores auth in Zustand store via `setAuth(user, token)`
+  - ✅ Auto-redirects to `/dashboard` on success
+  - ✅ Uses `useRef` to prevent double execution
+
+- [x] **6. Add Audit Logging**
+  - ✅ Logged as `ACCESS_DASHBOARD` action
+  - ✅ Includes: super_admin_id, tenant_id, IP address, user agent
+  - ✅ Stored in `super_admin_audit_logs` table
+
+- [x] **7. Security Considerations**
+  - ✅ One-time tokens with cryptographic randomness
+  - ✅ 30-second expiry prevents replay attacks
+  - ✅ Super admin authentication required
+  - ✅ Full audit trail of all access
+  - ✅ Proper error handling and validation
+
+- [x] **8. Testing**
+  - ✅ Button appears on tenant detail page
+  - ✅ Clicking opens new tab with correct URL
+  - ✅ Token exchange works correctly
+  - ✅ Auto-login to dashboard functional
+  - ✅ Tested with curl and verified response structures
+
+### Implementation Priority
+**HIGH** - Enhances super admin workflow for tenant support and debugging
+
+### Estimated Components
+- Backend: 2 new endpoints
+- Frontend Super Admin: 1 button component + click handler
+- Frontend Dashboard: 1 new auth page
+- Database: Uses existing audit log table
+
+### Related Files
+- `backend/internal/handler/http/super_admin_handler.go` - Add new endpoint
+- `backend/internal/usecase/super_admin_tenant_usecase.go` - Add token generation
+- `frontend/apps/super-admin/src/app/dashboard/tenants/[id]/page.tsx` - Add button
+- `frontend/apps/dashboard/src/app/[locale]/auth/super-admin-login/page.tsx` - New page
+
+---

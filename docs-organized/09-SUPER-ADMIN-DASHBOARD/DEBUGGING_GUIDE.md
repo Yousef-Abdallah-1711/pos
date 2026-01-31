@@ -384,5 +384,95 @@ curl http://localhost:8080
 
 ---
 
-**Last Updated:** 2024-01-30
-**Status:** Production Ready
+## CURRENT ISSUE: Dashboard Access and Debug Mode
+
+### Problem Statement
+
+When a super admin tries to access the tenant dashboard via the auto-login flow:
+
+**Expected Flow:**
+1. Super admin clicks "Enter Dashboard" button on tenant detail page (port 3004)
+2. Generate one-time token on backend
+3. Redirect to landing app token exchange page (port 3001)
+4. Token exchange returns JWT and user data
+5. Redirect to dashboard app with auth params in URL: `/dashboard?auth_token=...&auth_user=...&debug=true`
+6. **Debug panel should appear** showing all authentication steps
+7. User can click "Try Dashboard" to access the actual dashboard
+
+**Actual Behavior:**
+- When visiting `/dashboard?auth_token=...&auth_user=...&debug=true`
+- Page immediately redirects to login page: `http://localhost:3001/auth/login`
+- Debug panel never appears
+- Auth parameters in URL are ignored
+
+### Root Cause Analysis
+
+**Discovery 1:** Even the unprotected test page (`/en/test-url`) redirects to login
+- This proves the redirect is NOT coming from DashboardAuthProvider component
+- The redirect happens at a **higher level** (layout, middleware, or Next.js router)
+
+**Current Finding:**
+- The dashboard app has a `[locale]` routing pattern
+- All routes must match `/[locale]/path` pattern
+- When visiting `/dashboard`, Next.js may not match the route correctly
+- When visiting `/en/dashboard`, it should work, but still redirects
+
+### Testing Procedure
+
+To debug this issue:
+
+**Test 1: Simple Test Page (No Auth)**
+```
+http://localhost:3002/en/test-url?auth_token=...&auth_user=...&debug=true
+```
+
+Expected: Blue test page appears showing URL and query parameters
+Actual: Redirects to login instead
+
+**Test 2: Dashboard with Debug Mode**
+```
+http://localhost:3002/en/dashboard?auth_token=...&auth_user=...&debug=true
+```
+
+Expected: Dark debug panel with all logs
+Actual: Redirects to login instead
+
+### Next Steps to Resolve
+
+1. **Investigate Route Protection**
+   - Check if there's a global middleware redirecting unauthenticated users
+   - Check the [locale] layout for any auth checks
+   - Look for Next.js route protection in next.config.js
+
+2. **Verify URL Parameters**
+   - Confirm `?auth_token=` and `?auth_user=` reach the component
+   - Debug if they're being stripped by Next.js router
+
+3. **Disable Auth Check for Debug Mode**
+   - Once debug=true is confirmed in URL, skip all auth checks
+   - Render the debug panel regardless of authentication status
+
+4. **Files to Investigate**
+   - `frontend/apps/dashboard/src/app/[locale]/layout.tsx` - Auth checks?
+   - `frontend/apps/dashboard/src/app/[locale]/dashboard/layout.tsx` - DashboardAuthProvider
+   - `frontend/apps/dashboard/next.config.js` - Route redirects?
+   - `frontend/apps/dashboard/src/middleware.ts` - Global middleware?
+
+### Debug Logs Location
+
+When debug mode works, logs are stored in localStorage:
+```javascript
+localStorage.getItem('debug_logs') // Array of {time, msg} objects
+```
+
+### Related Files
+
+- Landing app token exchange: `frontend/apps/landing/src/app/auth/super-admin-login/page.tsx`
+- Dashboard auth provider: `frontend/apps/dashboard/src/components/providers/DashboardAuthProvider.tsx`
+- Dashboard layouts: `frontend/apps/dashboard/src/app/[locale]/dashboard/layout.tsx`
+
+---
+
+**Last Updated:** 2026-01-31
+**Status:** In Progress - Debugging Global Redirect Issue
+**Priority:** High - Blocks super admin dashboard access feature
