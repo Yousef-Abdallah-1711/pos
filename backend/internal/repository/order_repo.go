@@ -219,14 +219,24 @@ func (r *OrderRepository) GetOrderByNumber(tenantID, restaurantID int64, orderNu
 
 // ListOrders retrieves paginated orders for a restaurant
 func (r *OrderRepository) ListOrders(tenantID, restaurantID int64, filters *domain.OrderListFilters) (*domain.OrderListResponse, error) {
-	query := `
-		SELECT
-			id, tenant_id, restaurant_id, order_number, customer_name, customer_email,
-			customer_phone, subtotal, tax_amount, discount_amount, delivery_fee,
-			total_amount, payment_status, status, order_source, created_at, updated_at
-		FROM orders
-		WHERE tenant_id = $1 AND restaurant_id = $2
+	baseQuery := `
+		FROM orders o
 	`
+	if filters != nil && filters.AssignedDriverID != nil {
+		baseQuery += `
+		JOIN driver_assignments da ON da.order_id = o.id
+		`
+	}
+	baseQuery += `
+		WHERE o.tenant_id = $1 AND o.restaurant_id = $2
+	`
+	query := `
+		SELECT DISTINCT
+			o.id, o.tenant_id, o.restaurant_id, o.order_number, o.customer_name, o.customer_email,
+			o.customer_phone, o.subtotal, o.tax_amount, o.discount_amount, o.delivery_fee,
+			o.total_amount, o.payment_status, o.status, o.order_source, o.created_at, o.updated_at
+	` + baseQuery
+	countQuery := "SELECT COUNT(DISTINCT o.id) " + baseQuery
 
 	args := []interface{}{tenantID, restaurantID}
 	argCount := 2
@@ -235,55 +245,78 @@ func (r *OrderRepository) ListOrders(tenantID, restaurantID int64, filters *doma
 	if filters != nil {
 		if filters.Status != "" && domain.ValidStatus(filters.Status) {
 			argCount++
-			query += fmt.Sprintf(" AND status = $%d", argCount)
+			clause := fmt.Sprintf(" AND o.status = $%d", argCount)
+			query += clause
+			countQuery += clause
 			args = append(args, filters.Status)
 		}
 
 		if filters.PaymentStatus != "" && domain.ValidPaymentStatus(filters.PaymentStatus) {
 			argCount++
-			query += fmt.Sprintf(" AND payment_status = $%d", argCount)
+			clause := fmt.Sprintf(" AND o.payment_status = $%d", argCount)
+			query += clause
+			countQuery += clause
 			args = append(args, filters.PaymentStatus)
 		}
 
 		if filters.CustomerName != "" {
 			argCount++
-			query += fmt.Sprintf(" AND customer_name ILIKE $%d", argCount)
+			clause := fmt.Sprintf(" AND o.customer_name ILIKE $%d", argCount)
+			query += clause
+			countQuery += clause
 			args = append(args, "%"+filters.CustomerName+"%")
 		}
 
 		if filters.CustomerEmail != "" {
 			argCount++
-			query += fmt.Sprintf(" AND customer_email ILIKE $%d", argCount)
+			clause := fmt.Sprintf(" AND o.customer_email ILIKE $%d", argCount)
+			query += clause
+			countQuery += clause
 			args = append(args, "%"+filters.CustomerEmail+"%")
 		}
 
 		if !filters.StartDate.IsZero() {
 			argCount++
-			query += fmt.Sprintf(" AND created_at >= $%d", argCount)
+			clause := fmt.Sprintf(" AND o.created_at >= $%d", argCount)
+			query += clause
+			countQuery += clause
 			args = append(args, filters.StartDate)
 		}
 
 		if !filters.EndDate.IsZero() {
 			argCount++
-			query += fmt.Sprintf(" AND created_at <= $%d", argCount)
+			clause := fmt.Sprintf(" AND o.created_at <= $%d", argCount)
+			query += clause
+			countQuery += clause
 			args = append(args, filters.EndDate)
 		}
 
 		if filters.MinAmount > 0 {
 			argCount++
-			query += fmt.Sprintf(" AND total_amount >= $%d", argCount)
+			clause := fmt.Sprintf(" AND o.total_amount >= $%d", argCount)
+			query += clause
+			countQuery += clause
 			args = append(args, filters.MinAmount)
 		}
 
 		if filters.MaxAmount > 0 {
 			argCount++
-			query += fmt.Sprintf(" AND total_amount <= $%d", argCount)
+			clause := fmt.Sprintf(" AND o.total_amount <= $%d", argCount)
+			query += clause
+			countQuery += clause
 			args = append(args, filters.MaxAmount)
+		}
+
+		if filters.AssignedDriverID != nil {
+			argCount++
+			clause := fmt.Sprintf(" AND da.driver_id = $%d", argCount)
+			query += clause
+			countQuery += clause
+			args = append(args, *filters.AssignedDriverID)
 		}
 	}
 
 	// Count total matching orders
-	countQuery := strings.Replace(query, "SELECT id, tenant_id, restaurant_id, order_number, customer_name, customer_email, customer_phone, subtotal, tax_amount, discount_amount, delivery_fee, total_amount, payment_status, status, order_source, created_at, updated_at", "SELECT COUNT(*)", 1)
 	var total int64
 	err := r.db.QueryRow(countQuery, args...).Scan(&total)
 	if err != nil {
@@ -516,14 +549,15 @@ func (r *OrderRepository) CancelOrder(tenantID, restaurantID, orderID int64, rea
 }
 
 // CreateOrderItem inserts an order item
-func (r *OrderRepository) CreateOrderItem(item *domain.OrderItem) (*domain.OrderItem, error) {
+func (r *OrderRepository) CreateOrderItem(tenantID, restaurantID int64, item *domain.OrderItem) (*domain.OrderItem, error) {
 	query := `
 		INSERT INTO order_items (
-			order_id, product_id, variant_id, product_name, variant_name,
+			order_id, tenant_id, restaurant_id,
+			product_id, variant_id, product_name, variant_name,
 			quantity, unit_price, discount_amount, total_price,
 			special_instructions, addons
 		) VALUES (
-			$1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11
+			$1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13
 		)
 		RETURNING id, created_at, updated_at
 	`
@@ -556,6 +590,8 @@ func (r *OrderRepository) CreateOrderItem(item *domain.OrderItem) (*domain.Order
 
 	err := r.db.QueryRow(query,
 		item.OrderID,
+		tenantID,
+		restaurantID,
 		item.ProductID,
 		variantID,
 		item.ProductName,

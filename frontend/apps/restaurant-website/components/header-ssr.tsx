@@ -22,8 +22,9 @@ function HeaderSSRComponent({
   cartItemsCount = 0,
   locale = "en",
 }: HeaderSSRProps) {
+  const safeLocale = (locale || "en").toLowerCase() as "en" | "ar";
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const isRTL = locale === "ar";
+  const isRTL = safeLocale === "ar";
 
   // Use theme values directly from props with fallbacks
   const restaurantName = themeData?.identity?.site_title || "Restaurant";
@@ -32,24 +33,24 @@ function HeaderSSRComponent({
   const headerTextColor = themeData?.header?.text_color || "#000000";
   const headerTagline =
     themeData?.header?.tagline ||
-    (locale === "en" ? "Order Food Online" : "اطلب الطعام أونلاين");
+    (safeLocale === "en" ? "Order Food Online" : "اطلب الطعام أونلاين");
 
   // Use navigation items from theme, or default locale-aware links
   const themeLinkItems = themeData?.header?.navigation_items ?? [];
   const navLinks = themeLinkItems.length > 0
     ? themeLinkItems.map((item) => ({
-        href: item.href.startsWith("/") ? `/${locale}${item.href}` : item.href,
+        href: item.href.startsWith("/") ? `/${safeLocale}${item.href}` : item.href,
         label: item.label,
       }))
     : [
-        { href: `/${locale}/menu`, label: locale === "en" ? "Menu" : "القائمة" },
+        { href: `/${safeLocale}/menu`, label: safeLocale === "en" ? "Menu" : "القائمة" },
         {
-          href: `/${locale}/orders`,
-          label: locale === "en" ? "Orders" : "الطلبات",
+          href: `/${safeLocale}/orders`,
+          label: safeLocale === "en" ? "Orders" : "الطلبات",
         },
         {
-          href: `/${locale}/settings`,
-          label: locale === "en" ? "Settings" : "الإعدادات",
+          href: `/${safeLocale}/settings`,
+          label: safeLocale === "en" ? "Settings" : "الإعدادات",
         },
       ];
 
@@ -66,7 +67,7 @@ function HeaderSSRComponent({
         <div className="flex justify-between items-center h-16">
           {/* Logo + Restaurant Name */}
           <Link
-            href={`/${locale}`}
+            href={`/${safeLocale}`}
             className="flex items-center gap-2 hover:opacity-80 transition-opacity"
           >
             {logoUrl ? (
@@ -121,7 +122,7 @@ function HeaderSSRComponent({
 
             {/* Cart Icon */}
             <Link
-              href={`/${locale}/cart`}
+              href={`/${safeLocale}/cart`}
               className="relative p-2 rounded-lg transition-all hover:opacity-80"
               style={{
                 backgroundColor: `${headerTextColor}10`,

@@ -64,8 +64,12 @@ const DashboardAuthProvider = ({ children }: { children: ReactNode }) => {
               // Mark that we applied URL auth this session
               urlAuthApplied.current = true
 
-              // Use the impersonationToken as the auth token for subsequent requests
-              setAuth(impersonatedUser, impersonationToken)
+              // Store impersonation token in sessionStorage for API requests
+              sessionStorage.setItem('impersonation_token', impersonationToken)
+
+              // Create a dummy token for auth store (needed for UI to show logged in)
+              // The actual auth will happen via the impersonation token header
+              setAuth(impersonatedUser, 'impersonated')
 
               // Clean URL
               await new Promise(resolve => setTimeout(resolve, 100))

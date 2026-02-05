@@ -1,5 +1,7 @@
 # 📚 POS SaaS Platform - Complete Documentation Index
 
+**Update (2026-01-26):** Current blockers and remaining tasks are tracked in [docs-organized/99-REMAINING-WORK.md](docs-organized/99-REMAINING-WORK.md). Older "production ready" statements should be treated as historical.
+
 **Last Updated:** January 8, 2026 (with latest fixes)
 **Version:** 1.1.0
 **Status:** ✅ Fully Organized & Updated
@@ -26,7 +28,20 @@ This documentation has been reorganized by **feature** to make it easier to find
 | **04-MODULES** | Feature modules | HR, Products, Notifications |
 | **05-INFRASTRUCTURE** | Scalability & deployment | Multi-tenancy, deployment, RTL support |
 | **06-TESTING** | Testing & QA | Integration tests, performance analysis |
-| **07-PHASE-COMPLETION** | Project phases | Completion summaries & quick starts |
+| **07-WEBSITE-ECOMMERCE-PLAN** | Ecommerce delivery plan | Status, roadmap, production verification |
+
+---
+
+## 🧭 Docs Index (Current)
+
+- [docs-organized/ORGANIZATION_SUMMARY.md](docs-organized/ORGANIZATION_SUMMARY.md)
+- [docs-organized/99-REMAINING-WORK.md](docs-organized/99-REMAINING-WORK.md)
+- [docs-organized/07-website-ecommerce-plan/06-CURRENT-STATUS-AND-FINDINGS.md](docs-organized/07-website-ecommerce-plan/06-CURRENT-STATUS-AND-FINDINGS.md)
+- [docs-organized/07-website-ecommerce-plan/08-REMAINING-PHASES-AND-ROADMAP.md](docs-organized/07-website-ecommerce-plan/08-REMAINING-PHASES-AND-ROADMAP.md)
+- [docs-organized/07-website-ecommerce-plan/09-ECOMMERCE-PRODUCTION-READY-VERIFICATION.md](docs-organized/07-website-ecommerce-plan/09-ECOMMERCE-PRODUCTION-READY-VERIFICATION.md)
+- [docs-organized/02-API-BACKEND/README.md](docs-organized/02-API-BACKEND/README.md)
+- [docs-organized/02-API-BACKEND/API_REFERENCE_V2.0.0.md](docs-organized/02-API-BACKEND/API_REFERENCE_V2.0.0.md)
+- [docs-organized/03-FRONTEND-DASHBOARD/README.md](docs-organized/03-FRONTEND-DASHBOARD/README.md)
 
 ---
 
@@ -126,12 +141,10 @@ docs-organized/
 │   ├── PHASE_1_5_INTEGRATION_TESTS.md        # Integration test suite
 │   └── PERFORMANCE_COMPARISON_ANALYSIS.md    # Performance comparison
 │
-└── 07-PHASE-COMPLETION/
-    ├── PHASE_1_COMPLETION.md                 # Phase 1 summary
-    ├── PHASE_6.2_COMPLETE_SUMMARY.md         # Phase 6.2 summary
-    ├── PHASE_6.3_COMPLETE_SUMMARY.md         # Phase 6.3 summary
-    ├── PHASE_6.3_QUICK_START.md              # Phase 6.3 quick start
-    └── PHASE_6.4_GLOBAL_SCALING_COMPLETE.md # Phase 6.4 scaling summary
+└── 07-WEBSITE-ECOMMERCE-PLAN/
+    ├── 06-CURRENT-STATUS-AND-FINDINGS.md
+    ├── 08-REMAINING-PHASES-AND-ROADMAP.md
+    └── 09-ECOMMERCE-PRODUCTION-READY-VERIFICATION.md
 ```
 
 ---
@@ -305,4 +318,3 @@ This documentation is organized by **feature/domain** rather than by project pha
 ---
 
 **Need a specific document? Use the directory structure or check the feature folder most relevant to your task.**
-

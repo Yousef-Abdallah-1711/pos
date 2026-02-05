@@ -20,6 +20,28 @@ export function ProductForm({ product, categories, onSubmit, onCancel }) {
   const [imageFile, setImageFile] = useState(null)
   const [imagePreview, setImagePreview] = useState(product?.main_image_url || '')
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const toNumber = (value, fallback = 0) => {
+    const parsed = Number(value)
+    return Number.isFinite(parsed) ? parsed : fallback
+  }
+  const toOptionalNumber = (value) => {
+    if (value === '' || value === null || value === undefined) {
+      return undefined
+    }
+    const parsed = Number(value)
+    return Number.isFinite(parsed) ? parsed : undefined
+  }
+  const toInt = (value, fallback = 0) => {
+    const parsed = Number.parseInt(String(value), 10)
+    return Number.isNaN(parsed) ? fallback : parsed
+  }
+  const toOptionalInt = (value) => {
+    if (value === '' || value === null || value === undefined) {
+      return undefined
+    }
+    const parsed = Number.parseInt(String(value), 10)
+    return Number.isNaN(parsed) ? undefined : parsed
+  }
 
   const { control, handleSubmit, formState: { errors }, watch } = useForm({
     defaultValues: {
@@ -64,15 +86,15 @@ export function ProductForm({ product, categories, onSubmit, onCancel }) {
       const cleanData = {
         ...data,
         // Convert string inputs to proper numbers
-        category_id: data.category_id ? parseInt(data.category_id.toString()) : 0,
-        price: parseFloat(data.price?.toString() || '') || 0,
-        cost: data.cost ? parseFloat(data.cost.toString()) : undefined,
-        discount_price: data.discount_price ? parseFloat(data.discount_price.toString()) : undefined,
-        discount_percentage: data.discount_percentage ? parseFloat(data.discount_percentage.toString()) : undefined,
-        quantity_in_stock: parseInt((data.quantity_in_stock || 0).toString()),
-        low_stock_threshold: parseInt((data.low_stock_threshold || 0).toString()),
-        display_order: parseInt((data.display_order || 0).toString()),
-        calories: data.calories ? parseInt(data.calories.toString()) : undefined,
+        category_id: data.category_id ? toInt(data.category_id, 0) : 0,
+        price: toNumber(data.price, 0),
+        cost: toOptionalNumber(data.cost),
+        discount_price: toOptionalNumber(data.discount_price),
+        discount_percentage: toOptionalNumber(data.discount_percentage),
+        quantity_in_stock: toInt(data.quantity_in_stock, 0),
+        low_stock_threshold: toInt(data.low_stock_threshold, 0),
+        display_order: toInt(data.display_order, 0),
+        calories: toOptionalInt(data.calories),
         // Ensure empty strings are handled as undefined or appropriate empty values for optional fields
         description_en: data.description_en || "",
         description_ar: data.description_ar || "",
@@ -80,9 +102,6 @@ export function ProductForm({ product, categories, onSubmit, onCancel }) {
       }
 
 
-
-      console.log('DEBUG: Form Submission Raw:', data);
-      console.log('DEBUG: Form Submission Cleaned:', cleanData);
 
       // Add all data as JSON string in 'data' field (backend expects this)
       formData.append('data', JSON.stringify(cleanData))

@@ -28,6 +28,21 @@ export function ImpersonationModal({
   const [copied, setCopied] = useState(false);
   const { setImpersonation } = useAuthStore();
 
+  const handleEndCurrentSession = async () => {
+    try {
+      setIsLoading(true);
+      await superAdminAPI.endImpersonation();
+      setImpersonation(null);
+      toast.success("Previous session ended");
+      // Now start the new impersonation
+      await handleStartImpersonation();
+    } catch (error) {
+      toast.error("Failed to end current session");
+      console.error(error);
+      setIsLoading(false);
+    }
+  };
+
   const handleStartImpersonation = async () => {
     try {
       setIsLoading(true);
@@ -35,12 +50,9 @@ export function ImpersonationModal({
 
       setImpersonationToken(response.token);
 
-      // Construct dashboard URL
-      const baseUrl = process.env.NEXT_PUBLIC_API_URL?.replace(
-        "/api/v1",
-        ""
-      ) || "http://localhost:3002";
-      const url = `${baseUrl}/dashboard?impersonation_token=${response.token}`;
+      // Construct dashboard URL - Dashboard runs on port 3002
+      const dashboardBaseUrl = process.env.NEXT_PUBLIC_DASHBOARD_URL || "http://localhost:3002";
+      const url = `${dashboardBaseUrl}/en/dashboard?impersonation_token=${response.token}`;
       setDashboardUrl(url);
 
       // Update impersonation state
@@ -52,8 +64,19 @@ export function ImpersonationModal({
       });
 
       toast.success("Impersonation session started");
-    } catch (error) {
-      toast.error("Failed to start impersonation");
+    } catch (error: unknown) {
+      // Extract error message from API response
+      const axiosError = error as { response?: { data?: { error?: string } }; message?: string };
+      const errorMessage = axiosError.response?.data?.error || axiosError.message || "Failed to start impersonation";
+
+      // Check if it's an active session error
+      if (errorMessage.includes("active impersonation session")) {
+        toast.error("You have an active session. Ending it first...");
+        // Auto-end the current session and retry
+        await handleEndCurrentSession();
+      } else {
+        toast.error(errorMessage);
+      }
       console.error(error);
     } finally {
       setIsLoading(false);

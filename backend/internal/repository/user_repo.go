@@ -128,14 +128,15 @@ func (r *UserRepository) GetByEmail(ctx context.Context, email string) (*domain.
 
 	var user domain.User
 	var avatarURL sql.NullString
+	var isSuperAdmin sql.NullBool
 
 	err := r.db.QueryRowContext(ctx, `
-		SELECT id, tenant_id, restaurant_id, email, password_hash, name, phone, avatar_url, role, status, created_at, updated_at
+		SELECT id, tenant_id, restaurant_id, email, password_hash, name, phone, avatar_url, role, status, is_super_admin, created_at, updated_at
 		FROM users
 		WHERE email = $1
 	`, email).Scan(
 		&user.ID, &user.TenantID, &user.RestaurantID, &user.Email, &user.PasswordHash,
-		&user.Name, &user.Phone, &avatarURL, &user.Role, &user.Status,
+		&user.Name, &user.Phone, &avatarURL, &user.Role, &user.Status, &isSuperAdmin,
 		&user.CreatedAt, &user.UpdatedAt,
 	)
 
@@ -152,6 +153,11 @@ func (r *UserRepository) GetByEmail(ctx context.Context, email string) (*domain.
 	// Handle NULL avatar_url
 	if avatarURL.Valid {
 		user.AvatarURL = avatarURL.String
+	}
+
+	// Handle NULL is_super_admin
+	if isSuperAdmin.Valid {
+		user.IsSuperAdmin = isSuperAdmin.Bool
 	}
 
 	return &user, nil

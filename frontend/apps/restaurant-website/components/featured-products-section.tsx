@@ -19,6 +19,8 @@ interface Product {
   category?: string;
   is_available?: boolean;
   isAvailable?: boolean;
+  track_inventory?: boolean;
+  quantity_in_stock?: number;
   rating?: number;
 }
 
@@ -57,6 +59,8 @@ export function FeaturedProductsSection({
         name: product.name || product.name_en || 'Product',
         price: product.price || 0,
         image: product.image || product.main_image_url || '',
+        track_inventory: product.track_inventory,
+        quantity_in_stock: product.quantity_in_stock,
       });
     }
   }, [addToCart]);

@@ -28,17 +28,29 @@ export default function AuditLogsPage() {
   useEffect(() => {
     const fetchLogs = async () => {
       try {
+        console.log("[AuditLogsPage] Fetching logs with:", { page, limit, filterAction });
         setIsLoading(true);
         const data = await superAdminAPI.getAuditLogs(
           page,
           limit,
           filterAction || undefined
         );
-        setLogs(data.data);
-        setTotal(data.total);
+        console.log("[AuditLogsPage] Full response structure:", data);
+        console.log("[AuditLogsPage] data.data:", data?.data);
+        console.log("[AuditLogsPage] data.meta:", data?.meta);
+        console.log("[AuditLogsPage] data.total:", data?.total);
+
+        // Handle both structures: {data: [], meta: {}} and {data: [], total: 2}
+        const logsArray = Array.isArray(data) ? data : (data?.data || []);
+        const totalCount = typeof data?.total === 'number' ? data.total : (data?.meta?.total || 0);
+
+        console.log("[AuditLogsPage] Setting state with logs:", logsArray, "total:", totalCount);
+        setLogs(logsArray);
+        setTotal(totalCount);
       } catch (error) {
+        console.error("[AuditLogsPage] Error fetching logs:", error);
         toast.error("Failed to load audit logs");
-        console.error(error);
+        setLogs([]);
       } finally {
         setIsLoading(false);
       }
@@ -48,7 +60,7 @@ export default function AuditLogsPage() {
   }, [page, filterAction]);
 
   const totalPages = Math.ceil(total / limit);
-  const uniqueActions = Array.from(new Set(logs.map((log) => log.action)));
+  const uniqueActions = logs && logs.length > 0 ? Array.from(new Set(logs.map((log) => log.action))) : [];
 
   return (
     <div className="space-y-6">
@@ -92,7 +104,7 @@ export default function AuditLogsPage() {
             <p className="mt-4 text-gray-600">Loading audit logs...</p>
           </div>
         </div>
-      ) : logs.length === 0 ? (
+      ) : !logs || logs.length === 0 ? (
         <div className="bg-white rounded-lg shadow p-12 text-center">
           <AlertCircle className="mx-auto text-gray-400" size={48} />
           <p className="text-gray-600 mt-4">No audit logs found</p>

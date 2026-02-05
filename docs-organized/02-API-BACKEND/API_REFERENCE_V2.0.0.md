@@ -105,6 +105,26 @@ Response: { success: true }
 
 ## Orders API
 
+### Current POS Order Endpoints (v1)
+```
+Public
+GET /api/v1/public/orders/number/{number}/lookup
+GET /api/v1/public/orders/{id}
+GET /api/v1/public/orders/{id}/status
+GET /api/v1/public/orders/{id}/track
+POST /api/v1/public/orders
+DELETE /api/v1/public/orders/{id}
+
+Admin
+GET /api/v1/admin/orders
+GET /api/v1/admin/orders/{id}
+PUT /api/v1/admin/orders/{id}/status
+POST /api/v1/admin/orders/{id}/assign
+DELETE /api/v1/admin/orders/{id}
+GET /api/v1/admin/orders/stats
+GET /api/v1/admin/orders/export
+```
+
 ### List User Orders
 ```
 GET /orders
@@ -133,6 +153,19 @@ Response: { id, status }
 ```
 
 ---
+
+## Drivers API (Admin)
+
+### Driver Management
+```
+GET /api/v1/admin/drivers
+GET /api/v1/admin/drivers/available
+GET /api/v1/admin/drivers/{id}
+POST /api/v1/admin/drivers
+PUT /api/v1/admin/drivers/{id}
+PUT /api/v1/admin/drivers/{id}/status
+DELETE /api/v1/admin/drivers/{id}
+```
 
 ## Users API
 
@@ -418,4 +451,3 @@ Coming soon in v2.0.0:
 - 🐛 **Issues**: https://github.com/example/issues
 - 💬 **Chat**: https://slack.example.com
 - 📧 **Email**: api-support@example.com
-

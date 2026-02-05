@@ -1,5 +1,20 @@
 # ✅ ECOMMERCE PRODUCTION-READY VERIFICATION
 
+## Update (2026-01-26) - Verification Needs Rerun
+
+This verification is outdated. Current blockers show the system is not production ready yet:
+
+- Admin orders count query triggers SQL Scan mismatch errors.
+- Order status updates can return 400 due to invalid payload/transition handling.
+- Driver assignment is blocked because `/api/v1/admin/drivers/available` returns 404.
+- Order tracking links with uppercase locale (example: `/AR/...`) return 404.
+- Backend Docker healthcheck fails because `curl` is missing in the runtime image.
+- Inventory fields are not consistently wired across backend and frontend.
+- CSV export can throw `toFixed` on undefined values when order totals are missing.
+
+See [docs-organized/99-REMAINING-WORK.md](../99-REMAINING-WORK.md) for the full list.
+
+
 **Date**: January 19, 2026
 **Status**: ✅ FULLY FUNCTIONAL - PRODUCTION READY + THEME SYSTEM + ALL RUNTIME ERRORS FIXED
 **Verified Components**: 16/16 ✅ (added Theme System Integration + Runtime Error Fixes)
@@ -321,6 +336,7 @@ getTotalItems()         // Count items
 **API Endpoints Used**:
 ```
 GET /api/v1/public/orders → List all orders
+GET /api/v1/public/orders/number/{number}/lookup → Lookup order by number
 GET /api/v1/public/orders/{id} → Get order details
 GET /api/v1/public/orders/{id}/status → Get current status
 GET /api/v1/public/orders/{id}/track → Full tracking with history
@@ -364,6 +380,7 @@ DELETE /api/v1/public/orders/{id} → Cancel order
 - ✅ Pagination working
 - ✅ Driver assignment available
 - ✅ Order details accessible
+- ✅ Drivers tab available in order details
 
 **Admin Features**:
 ```
@@ -384,6 +401,8 @@ DELETE /api/v1/public/orders/{id} → Cancel order
 GET /api/v1/admin/orders → List all orders
 GET /api/v1/admin/orders/{id} → Get order details
 PUT /api/v1/admin/orders/{id}/status → Update status
+POST /api/v1/admin/orders/{id}/assign → Assign driver
+GET /api/v1/admin/drivers/available → List available drivers
 DELETE /api/v1/admin/orders/{id} → Cancel order
 GET /api/v1/admin/orders/stats → Statistics
 GET /api/v1/admin/orders/export → Export orders

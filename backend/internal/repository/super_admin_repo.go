@@ -2,15 +2,34 @@ package repository
 
 import (
 	"context"
+	"crypto/rand"
 	"database/sql"
+	"encoding/hex"
 	"fmt"
 	"log"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/lib/pq"
 	"pos-saas/internal/domain"
 )
+
+// DashboardLoginToken stores one-time tokens for super admin dashboard access
+type DashboardLoginToken struct {
+	Token        string
+	TenantID     int64
+	SuperAdminID int64
+	ExpiresAt    time.Time
+}
+
+// In-memory token storage (use Redis in production)
+var dashboardTokenStore = struct {
+	sync.RWMutex
+	tokens map[string]*DashboardLoginToken
+}{
+	tokens: make(map[string]*DashboardLoginToken),
+}
 
 // SuperAdminRepository handles super admin database operations
 type SuperAdminRepository struct {
@@ -277,16 +296,33 @@ func (r *SuperAdminRepository) ListAllTenants(ctx context.Context, filter domain
 	for rows.Next() {
 		var ts domain.TenantWithStats
 		var lastActivity sql.NullTime
+		var logoURL, email, phone, domain, subscriptionPlan sql.NullString
 
 		err := rows.Scan(
-			&ts.ID, &ts.Name, &ts.Slug, &ts.Domain, &ts.Email, &ts.Phone, &ts.LogoURL,
-			&ts.SubscriptionPlan, &ts.MaxRestaurants, &ts.MaxUsers, &ts.IsActive,
+			&ts.ID, &ts.Name, &ts.Slug, &domain, &email, &phone, &logoURL,
+			&subscriptionPlan, &ts.MaxRestaurants, &ts.MaxUsers, &ts.IsActive,
 			&ts.CreatedAt, &ts.UpdatedAt,
 			&ts.TotalUsers, &ts.TotalRestaurants, &ts.TotalOrders, &lastActivity,
 		)
 		if err != nil {
 			log.Printf("[SuperAdminRepository] ERROR: Failed to scan tenant: %v\n", err)
 			return nil, 0, fmt.Errorf("failed to scan tenant: %w", err)
+		}
+
+		if domain.Valid {
+			ts.Domain = domain.String
+		}
+		if email.Valid {
+			ts.Email = email.String
+		}
+		if phone.Valid {
+			ts.Phone = phone.String
+		}
+		if logoURL.Valid {
+			ts.LogoURL = logoURL.String
+		}
+		if subscriptionPlan.Valid {
+			ts.SubscriptionPlan = subscriptionPlan.String
 		}
 
 		if lastActivity.Valid {
@@ -311,6 +347,7 @@ func (r *SuperAdminRepository) GetTenantByID(ctx context.Context, tenantID int64
 
 	var ts domain.TenantWithStats
 	var lastActivity sql.NullTime
+	var logoURL, email, phone, domain, subscriptionPlan sql.NullString
 
 	err := r.db.QueryRowContext(ctx, `
 		SELECT t.id, t.name, t.slug, t.domain, t.email, t.phone, t.logo_url,
@@ -323,8 +360,8 @@ func (r *SuperAdminRepository) GetTenantByID(ctx context.Context, tenantID int64
 		FROM tenants t
 		WHERE t.id = $1
 	`, tenantID).Scan(
-		&ts.ID, &ts.Name, &ts.Slug, &ts.Domain, &ts.Email, &ts.Phone, &ts.LogoURL,
-		&ts.SubscriptionPlan, &ts.MaxRestaurants, &ts.MaxUsers, &ts.IsActive,
+		&ts.ID, &ts.Name, &ts.Slug, &domain, &email, &phone, &logoURL,
+		&subscriptionPlan, &ts.MaxRestaurants, &ts.MaxUsers, &ts.IsActive,
 		&ts.CreatedAt, &ts.UpdatedAt,
 		&ts.TotalUsers, &ts.TotalRestaurants, &ts.TotalOrders, &lastActivity,
 	)
@@ -337,6 +374,22 @@ func (r *SuperAdminRepository) GetTenantByID(ctx context.Context, tenantID int64
 	if err != nil {
 		log.Printf("[SuperAdminRepository] ERROR: Failed to query tenant: %v\n", err)
 		return nil, fmt.Errorf("failed to fetch tenant: %w", err)
+	}
+
+	if domain.Valid {
+		ts.Domain = domain.String
+	}
+	if email.Valid {
+		ts.Email = email.String
+	}
+	if phone.Valid {
+		ts.Phone = phone.String
+	}
+	if logoURL.Valid {
+		ts.LogoURL = logoURL.String
+	}
+	if subscriptionPlan.Valid {
+		ts.SubscriptionPlan = subscriptionPlan.String
 	}
 
 	if lastActivity.Valid {
@@ -565,4 +618,130 @@ func (r *SuperAdminRepository) GetUserByID(ctx context.Context, userID int64) (*
 	}
 
 	return &user, nil
+}
+
+// GenerateDashboardLoginToken generates a one-time token for dashboard access
+func (r *SuperAdminRepository) GenerateDashboardLoginToken(ctx context.Context, superAdminID, tenantID int64) (string, error) {
+	log.Printf("[SuperAdminRepository] GenerateDashboardLoginToken: superAdminID=%d, tenantID=%d\n", superAdminID, tenantID)
+
+	// Generate a random token
+	tokenBytes := make([]byte, 32)
+	_, err := rand.Read(tokenBytes)
+	if err != nil {
+		log.Printf("[SuperAdminRepository] ERROR: Failed to generate random token: %v\n", err)
+		return "", fmt.Errorf("failed to generate token: %w", err)
+	}
+
+	token := hex.EncodeToString(tokenBytes)
+
+	// Store the token with tenant info (expires in 30 seconds)
+	dashboardTokenStore.Lock()
+	dashboardTokenStore.tokens[token] = &DashboardLoginToken{
+		Token:        token,
+		TenantID:     tenantID,
+		SuperAdminID: superAdminID,
+		ExpiresAt:    time.Now().Add(30 * time.Second),
+	}
+	dashboardTokenStore.Unlock()
+
+	log.Printf("[SuperAdminRepository] Dashboard login token stored: %s (first 16 chars) for tenant %d\n", token[:16], tenantID)
+
+	return token, nil
+}
+
+// ValidateDashboardLoginToken validates a one-time token and returns the tenant ID
+func (r *SuperAdminRepository) ValidateDashboardLoginToken(ctx context.Context, token string) (*DashboardLoginToken, error) {
+	log.Printf("[SuperAdminRepository] ValidateDashboardLoginToken: token=%s (first 16 chars)\n", token[:min(16, len(token))])
+
+	dashboardTokenStore.Lock()
+	defer dashboardTokenStore.Unlock()
+
+	tokenData, exists := dashboardTokenStore.tokens[token]
+	if !exists {
+		log.Printf("[SuperAdminRepository] Token not found\n")
+		return nil, fmt.Errorf("invalid or expired token")
+	}
+
+	// Check expiry
+	if time.Now().After(tokenData.ExpiresAt) {
+		// Remove expired token
+		delete(dashboardTokenStore.tokens, token)
+		log.Printf("[SuperAdminRepository] Token expired\n")
+		return nil, fmt.Errorf("token expired")
+	}
+
+	// Remove token (one-time use)
+	delete(dashboardTokenStore.tokens, token)
+	log.Printf("[SuperAdminRepository] Token validated for tenant %d\n", tokenData.TenantID)
+
+	return tokenData, nil
+}
+
+// GetFirstAdminUserByTenantID finds the first admin/owner/manager user in a tenant
+// Priority: owner > admin > manager > any other active user
+func (r *SuperAdminRepository) GetFirstAdminUserByTenantID(ctx context.Context, tenantID int64) (*domain.User, error) {
+	log.Printf("[SuperAdminRepository] GetFirstAdminUserByTenantID: tenantID=%d\n", tenantID)
+
+	var user domain.User
+	var avatarURL, phone sql.NullString
+	var restaurantID sql.NullInt32
+	var lastLogin sql.NullTime
+
+	// Get the first user in the tenant, prioritizing owner > admin > manager > others
+	err := r.db.QueryRowContext(ctx, `
+		SELECT id, tenant_id, restaurant_id, email, password_hash, name, phone, avatar_url,
+		       role, status, is_super_admin, last_login, created_at, updated_at
+		FROM users
+		WHERE tenant_id = $1 AND status = 'active'
+		ORDER BY
+			CASE
+				WHEN role = 'owner' THEN 0
+				WHEN role = 'admin' THEN 1
+				WHEN role = 'manager' THEN 2
+				ELSE 3
+			END,
+			created_at ASC
+		LIMIT 1
+	`, tenantID).Scan(
+		&user.ID, &user.TenantID, &restaurantID, &user.Email, &user.PasswordHash,
+		&user.Name, &phone, &avatarURL, &user.Role, &user.Status, &user.IsSuperAdmin,
+		&lastLogin, &user.CreatedAt, &user.UpdatedAt,
+	)
+
+	if err == sql.ErrNoRows {
+		log.Printf("[SuperAdminRepository] No admin user found in tenant %d\n", tenantID)
+		return nil, fmt.Errorf("no admin user found in tenant")
+	}
+
+	if err != nil {
+		log.Printf("[SuperAdminRepository] ERROR: Failed to query admin user: %v\n", err)
+		return nil, fmt.Errorf("failed to fetch admin user: %w", err)
+	}
+
+	if avatarURL.Valid {
+		user.AvatarURL = avatarURL.String
+	}
+	if phone.Valid {
+		user.Phone = phone.String
+	}
+	if restaurantID.Valid {
+		rid := int(restaurantID.Int32)
+		user.RestaurantID = &rid
+	}
+	if lastLogin.Valid {
+		user.LastLogin = &lastLogin.Time
+	}
+
+	// Clear sensitive data
+	user.PasswordHash = ""
+
+	log.Printf("[SuperAdminRepository] Found admin user: %s (ID: %d) for tenant %d\n", user.Email, user.ID, tenantID)
+	return &user, nil
+}
+
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
 }

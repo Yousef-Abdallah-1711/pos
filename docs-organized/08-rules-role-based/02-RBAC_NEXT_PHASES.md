@@ -4,6 +4,17 @@
 **Recently Completed:** Phase 1-3 (User Management & Multi-Tenant Auth) ✅
 **Phases Remaining:** 12-18+ (Future)
 
+## Update (2026-01-26)
+
+Before starting new phases, fix current RBAC and user-management blockers:
+
+- Ensure new users appear in the users list after creation.
+- Seed default roles/permissions for each tenant, including a Driver role with limited order access.
+- Validate access-control and roles pages against real permissions.
+
+Track these in [docs-organized/99-REMAINING-WORK.md](../99-REMAINING-WORK.md).
+
+
 ---
 
 # Recently Completed Phases (Phase 1-3)

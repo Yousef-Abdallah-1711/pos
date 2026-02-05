@@ -3,6 +3,18 @@
 **Status:** Phase 3 (Multi-Tenant Login) Complete ✅
 **Overall Progress:** Phase 0-11 (RBAC) + Phase 1-3 (User Management & Multi-Tenant Auth)
 
+## Update (2026-01-26) - Issues Found
+
+The RBAC UI and APIs need re-verification. Current issues reported during testing:
+
+- Users created in the dashboard are not visible in the users list (verify API, tenant context, and DB connectivity).
+- Access-control and roles pages need validation against the real permission model and tenant scope.
+- Default roles/permissions (including a Driver role) are missing or not consistently seeded.
+- Debug logging is overly verbose in stable paths and should be reduced.
+
+See [docs-organized/99-REMAINING-WORK.md](../99-REMAINING-WORK.md) for the full task list.
+
+
 ---
 
 ## Executive Summary

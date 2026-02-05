@@ -1,5 +1,14 @@
 # 🛣️ PRODUCTION ROADMAP - Ecommerce Website
 
+## Update (2026-01-26) - Status Correction
+
+Earlier "production ready" statements in this file are outdated. Current blockers and priorities are tracked in:
+
+- [docs-organized/99-REMAINING-WORK.md](../99-REMAINING-WORK.md)
+
+Use that file as the active roadmap until the blockers are closed.
+
+
 **Last Updated**: January 19, 2026
 **Current Phase**: 4/4 COMPLETE - Runtime Error Fixes & Defensive Programming ✅
 **Status**: PRODUCTION READY - ALL RUNTIME ERRORS FIXED, ZERO CONSOLE ERRORS
@@ -72,14 +81,14 @@
 ---
 
 ### Phase 5: Order Management Features (3-4 hours)
-**Objective**: Add order tracking and history
+**Objective**: Expand order tracking, history, and notifications
 
-**Features to Add**:
-1. Order status page with real-time updates
-2. Order history display
-3. Order details view
-4. Estimated delivery time
-5. Order notifications
+**Features to Add / Finalize**:
+1. Order status page with real-time updates (tracking page shipped)
+2. Order history display (already live)
+3. Order details view (already live)
+4. Estimated delivery time (shown on tracking page)
+5. Order notifications (still pending)
 
 **Files to Modify**:
 - `app/[locale]/orders/page.tsx`
@@ -92,6 +101,7 @@
 ### 🚗 PHASE 6: Driver System End-to-End Testing (2-3 hours)
 
 **Objective**: Verify all driver system functionality works correctly
+**Update**: Driver endpoints are now wired in backend and dashboard (available + assign routes).
 
 **What to Test**:
 

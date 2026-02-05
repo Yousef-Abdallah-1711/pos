@@ -247,8 +247,6 @@ export function EnhancedPreview({
               {/* Screen content with zoom applied */}
               <div
                 style={{
-                  width: '100%',
-                  height: '100%',
                   overflow: 'auto',
                   transform: `scale(${zoomLevel / 100})`,
                   transformOrigin: 'top left',

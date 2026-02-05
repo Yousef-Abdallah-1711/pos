@@ -22,11 +22,11 @@ func NewUserRoleRepository(db *sql.DB) *UserRoleRepository {
 // GetUserRoles retrieves all roles assigned to a user in a specific tenant
 func (r *UserRoleRepository) GetUserRoles(ctx context.Context, userID int64, tenantID int64) ([]domain.Role, error) {
 	query := `
-		SELECT DISTINCT r.id, r.tenant_id, r.name, r.description, r.is_system, r.created_at, r.updated_at
+		SELECT DISTINCT r.id, r.tenant_id, r.role_name, COALESCE(r.description, ''), r.role_code, r.is_system_role, r.created_at, r.updated_at
 		FROM user_roles ur
 		JOIN roles r ON ur.role_id = r.id
-		WHERE ur.user_id = $1 AND ur.tenant_id = $2
-		ORDER BY r.is_system DESC, r.name ASC
+		WHERE ur.user_id = $1 AND ur.tenant_id = $2 AND r.is_active = TRUE
+		ORDER BY r.is_system_role DESC, r.role_name ASC
 	`
 
 	rows, err := r.db.QueryContext(ctx, query, userID, tenantID)
@@ -38,25 +38,25 @@ func (r *UserRoleRepository) GetUserRoles(ctx context.Context, userID int64, ten
 	var roles []domain.Role
 	for rows.Next() {
 		role := domain.Role{}
-		// TODO: Update to use correct HR Role fields (RoleName, etc.)
-		// This is a placeholder until schema is clarified
-		var tempName, tempDesc string
+		var tempName, tempDesc, tempRoleCode string
 		var tempIsSystem bool
 		err := rows.Scan(
 			&role.ID,
 			&role.TenantID,
-			&tempName,          // Will need to map to correct field
-			&tempDesc,          // Will need to map to correct field
-			&tempIsSystem,      // Will need to map to correct field
+			&tempName,
+			&tempDesc,
+			&tempRoleCode,
+			&tempIsSystem,
 			&role.CreatedAt,
 			&role.UpdatedAt,
 		)
 		if err != nil {
 			return nil, err
 		}
-		// Map temp values to Role fields
 		role.RoleName = tempName
 		role.Description = tempDesc
+		role.RoleCode = tempRoleCode
+		role.IsSystemRole = tempIsSystem
 		roles = append(roles, role)
 	}
 

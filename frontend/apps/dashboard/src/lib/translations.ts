@@ -6,11 +6,14 @@
 
 import enMessages from '@/i18n/messages/en.json'
 import arMessages from '@/i18n/messages/ar.json'
+import { debugError, debugWarn } from '@/lib/debug'
 
 const messages = {
   en: enMessages,
   ar: arMessages,
 }
+
+const missingKeyCache = new Set<string>()
 
 export type Locale = 'en' | 'ar'
 export type TranslationPath = string
@@ -35,14 +38,18 @@ export function getTranslation(
       if (value && typeof value === 'object' && key in value) {
         value = value[key]
       } else {
-        console.warn(`Translation key not found: ${locale}.${path}`)
+        const cacheKey = `${locale}.${path}`
+        if (!missingKeyCache.has(cacheKey)) {
+          missingKeyCache.add(cacheKey)
+          debugWarn(`Translation key not found: ${cacheKey}`)
+        }
         return fallback || path
       }
     }
 
     return typeof value === 'string' ? value : fallback || path
   } catch (error) {
-    console.error(`Error accessing translation: ${locale}.${path}`, error)
+    debugError(`Error accessing translation: ${locale}.${path}`, error)
     return fallback || path
   }
 }

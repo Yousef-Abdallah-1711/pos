@@ -34,6 +34,8 @@ export function MenuPageContent({ locale, themeData, restaurantSlug }: MenuPageC
         name: product.name_en || product.name || 'Product',
         price: product.price || 0,
         image: product.main_image_url || product.image || '',
+        track_inventory: product.track_inventory,
+        quantity_in_stock: product.quantity_in_stock,
       });
     }
   }, [addToCart]);
@@ -80,6 +82,9 @@ export function MenuPageContent({ locale, themeData, restaurantSlug }: MenuPageC
                   description: product.description_en || product.description || '',
                   price: product.price || 0,
                   image: product.main_image_url || product.image || '',
+                  track_inventory: product.track_inventory,
+                  quantity_in_stock: product.quantity_in_stock,
+                  is_available: product.is_available,
                 }}
                 onAddToCart={handleAddToCart}
                 locale={locale}

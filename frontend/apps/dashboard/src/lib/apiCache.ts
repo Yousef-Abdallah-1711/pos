@@ -1,3 +1,5 @@
+import { debugLog, debugError } from '@/lib/debug'
+
 /**
  * Simple API Response Caching Utility
  * Caches API responses for a specified duration (default 30 seconds)
@@ -32,7 +34,7 @@ class APICache {
       return null
     }
 
-    console.log(`[APICache] Cache HIT for key: ${key} (age: ${age}ms)`)
+    debugLog(`[APICache] Cache HIT for key: ${key} (age: ${age}ms)`)
     return entry.data
   }
 
@@ -40,7 +42,7 @@ class APICache {
    * Set cache data with TTL (default 30 seconds)
    */
   set(key: string, data: any, ttlMs: number = 30000): void {
-    console.log(`[APICache] Cache SET for key: ${key} with TTL: ${ttlMs}ms`)
+    debugLog(`[APICache] Cache SET for key: ${key} with TTL: ${ttlMs}ms`)
     this.cache.set(key, {
       data,
       timestamp: Date.now(),
@@ -53,7 +55,7 @@ class APICache {
    */
   clear(key: string): void {
     this.cache.delete(key)
-    console.log(`[APICache] Cache CLEAR for key: ${key}`)
+    debugLog(`[APICache] Cache CLEAR for key: ${key}`)
   }
 
   /**
@@ -61,7 +63,7 @@ class APICache {
    */
   clearAll(): void {
     this.cache.clear()
-    console.log('[APICache] Cache CLEAR ALL')
+    debugLog('[APICache] Cache CLEAR ALL')
   }
 
   /**
@@ -107,7 +109,7 @@ export async function cachedFetch(
 
     return data
   } catch (error) {
-    console.error('[APICache] Fetch error:', error)
+    debugError('[APICache] Fetch error:', error)
     throw error
   }
 }

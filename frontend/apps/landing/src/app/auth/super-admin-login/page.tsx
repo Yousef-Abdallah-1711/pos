@@ -58,8 +58,20 @@ export default function SuperAdminLoginPage() {
         } else {
           throw new Error("No JWT token or user received");
         }
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "An error occurred");
+      } catch (err: unknown) {
+        // Extract error message from API response or error object
+        let errorMessage = "An error occurred during authentication";
+
+        if (err && typeof err === 'object') {
+          const axiosError = err as { response?: { data?: { error?: string } }; message?: string };
+          if (axiosError.response?.data?.error) {
+            errorMessage = axiosError.response.data.error;
+          } else if (axiosError.message) {
+            errorMessage = axiosError.message;
+          }
+        }
+
+        setError(errorMessage);
         setIsLoading(false);
       }
     };

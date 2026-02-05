@@ -225,7 +225,7 @@ func TestOrderEndpointPaths(t *testing.T) {
 		{
 			name:        "Get order by number",
 			method:      http.MethodGet,
-			path:        "/api/v1/public/orders/number/ORD-2025-000001",
+			path:        "/api/v1/public/orders/number/ORD-2025-000001/lookup",
 			description: "GET endpoint for retrieving order by order number",
 		},
 		{

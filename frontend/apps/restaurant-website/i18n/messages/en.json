@@ -224,6 +224,7 @@
     "invalidEmail": "Please enter a valid email",
     "invalidPhone": "Please enter a valid phone number",
     "orderNotFound": "Order not found",
+    "insufficientInventory": "Some items are out of stock. Please update your cart.",
     "somethingWentWrong": "Something went wrong. Please try again."
   }
 }

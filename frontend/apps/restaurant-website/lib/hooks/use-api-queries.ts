@@ -198,7 +198,9 @@ export function useOrderByNumber(orderNumber: string) {
   return useQuery({
     queryKey: queryKeys.orderByNumber(orderNumber),
     queryFn: async () => {
-      const response = await apiClient.get<OrderResponse>(`/public/orders/number/${orderNumber}`);
+      const response = await apiClient.get<OrderResponse>(
+        `/public/orders/number/${orderNumber}/lookup`,
+      );
       return response;
     },
     enabled: !!orderNumber && orderNumber.length > 0,

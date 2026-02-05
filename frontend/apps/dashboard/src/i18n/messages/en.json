@@ -178,6 +178,15 @@
     "deleteSuccess": "Driver deleted successfully",
     "deleteFailed": "Failed to delete driver",
     "loading": "Loading drivers...",
+    "columns": {
+      "name": "Name",
+      "contact": "Contact",
+      "vehicle": "Vehicle",
+      "status": "Status",
+      "deliveries": "Deliveries",
+      "rating": "Rating",
+      "actions": "Actions"
+    },
     "filters": {
       "all": "All Drivers",
       "active": "Active",
@@ -204,6 +213,10 @@
       "available": "Available",
       "busy": "Busy",
       "offline": "Offline"
+    },
+    "actionLabels": {
+      "activate": "Activate",
+      "deactivate": "Deactivate"
     },
     "assignmentModal": {
       "title": "Assign Driver",

@@ -4,6 +4,7 @@ import { QueryProvider } from "@/components/providers/query-provider";
 import { ThemeProvider } from "@/components/theme-provider";
 import { SubdomainProvider } from "@/lib/subdomain-context";
 import { WebVitalsProvider } from "@/components/providers/web-vitals-provider";
+import { Toaster } from "sonner";
 import "../styles/globals.css";
 import "../styles/theme-variables.css";
 
@@ -58,6 +59,7 @@ export default function RootLayout({
         <SubdomainProvider>
           <ThemeProvider>
             <QueryProvider>{children}</QueryProvider>
+            <Toaster position="top-right" richColors />
           </ThemeProvider>
         </SubdomainProvider>
       </body>

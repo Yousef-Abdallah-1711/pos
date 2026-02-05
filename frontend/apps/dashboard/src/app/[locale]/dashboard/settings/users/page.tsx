@@ -80,7 +80,8 @@ export default function UsersPage() {
       })
       if (usersRes.ok) {
         const data = await usersRes.json()
-        setUsers(data?.data || [])
+        const usersList = Array.isArray(data) ? data : data?.data || data?.users || []
+        setUsers(usersList)
       } else {
         throw new Error('Failed to fetch users')
       }
@@ -91,7 +92,8 @@ export default function UsersPage() {
       })
       if (rolesRes.ok) {
         const data = await rolesRes.json()
-        setRoles(data?.data || [])
+        const rolesList = Array.isArray(data) ? data : data?.data || data?.roles || []
+        setRoles(rolesList)
       }
     } catch (err) {
       setError('Failed to load users: ' + (err instanceof Error ? err.message : 'Unknown error'))

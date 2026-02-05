@@ -259,7 +259,30 @@
       "Bash(npx next build)",
       "Bash(Remove-Item \"c:\\\\Users\\\\OPT\\\\Desktop\\\\POS\\\\frontend\\\\apps\\\\restaurant-website\\\\.next\" -Recurse -Force -ErrorAction SilentlyContinue)",
       "Bash(Remove-Item \"c:\\\\Users\\\\OPT\\\\Desktop\\\\POS\\\\frontend\\\\apps\\\\dashboard\\\\.next\" -Recurse -Force -ErrorAction SilentlyContinue)",
-      "Bash(Remove-Item \"c:\\\\Users\\\\OPT\\\\Desktop\\\\POS\\\\frontend\\\\apps\\\\landing\\\\.next\" -Recurse -Force -ErrorAction SilentlyContinue)"
+      "Bash(Remove-Item \"c:\\\\Users\\\\OPT\\\\Desktop\\\\POS\\\\frontend\\\\apps\\\\landing\\\\.next\" -Recurse -Force -ErrorAction SilentlyContinue)",
+      "Bash(__NEW_LINE_69008fab3b44280e__ echo \"\")",
+      "Bash(__NEW_LINE_9d8fed8bf37db531__ echo \"\")",
+      "Bash(next.config)",
+      "Bash(tailwind:*)",
+      "Bash(postcss \")",
+      "Bash(Get-Process)",
+      "Bash(Select-Object -Property ProcessName, Id)",
+      "Bash(Where-Object {$_ProcessName -like \"*go*\" -or $_ProcessName -like \"*backend*\"})",
+      "Bash(TOKEN=\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxMywiZW1haWwiOiJzdXBlcmFkbWluQHBvcy1zYWFzLmNvbSIsInN1cGVyX2FkbWluX2lkIjoxLCJpc19zdXBlcl9hZG1pbiI6dHJ1ZSwiZXhwIjowLCJpc3MiOiJwb3Mtc2Fhcy1zdXBlci1hZG1pbiIsImlhdCI6MTc2OTc4NzM5MH0.5noSeSqLSfCNhahF6SoVRvbJvvQQNgFDuUEFHW5idPk\")",
+      "Bash(TOKEN=\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxMywiZW1haWwiOiJzdXBlcmFkbWluQHBvcy1zYWFzLmNvbSIsInN1cGVyX2FkbWluX2lkIjoxLCJpc19zdXBlcl9hZG1pbiI6dHJ1ZSwiZXhwIjowLCJpc3MiOiJwb3Mtc2Fhcy1zdXBlci1hZG1pbiIsImlhdCI6MTc2OTg0NjExNn0.FGulaMjfwZbC4yTODSf2Wn51jjAv9ytzcazuouBtBiE\")",
+      "Bash(__NEW_LINE_b9aca285656b0974__ echo \"Testing dashboard login token generation for tenant 1...\")",
+      "Bash(__NEW_LINE_53542bce743fea2d__ curl -i -X POST http://localhost:8080/api/v1/super-admin/tenants/1/dashboard-login -H \"Content-Type: application/json\" -H \"Authorization: Bearer $TOKEN\")",
+      "Bash(tee:*)",
+      "Bash(for:*)",
+      "Bash(do echo \"waiting $i...\")",
+      "Bash(TOKEN=\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxMywiZW1haWwiOiJzdXBlcmFkbWluQHBvcy1zYWFzLmNvbSIsInN1cGVyX2FkbWluX2lkIjoxLCJpc19zdXBlcl9hZG1pbiI6dHJ1ZSwiZXhwIjowLCJpc3MiOiJwb3Mtc2Fhcy1zdXBlci1hZG1pbiIsImlhdCI6MTc2OTg4Njc1NH0.j3N1FKGMlkD5HkczLgA_qVqGnBp3Kn4ZQzYj5KhXJ-I\")",
+      "Bash(__NEW_LINE_5b36606565dd8b25__ echo \"Testing dashboard login token generation for tenant 1...\")",
+      "Bash(DASH_TOKEN=\"0c08a98f7c49779b65af01a3bdd2f4d964a50cf7f0bf4e2bd3b82732eeed5cdc\")",
+      "Bash(__NEW_LINE_bf17a080ab320ced__ echo \"Testing token exchange with full output...\")",
+      "Bash(./api.exe)",
+      "Bash(npx next build:*)",
+      "Bash(git diff:*)",
+      "Bash(git status:*)"
     ]
   }
 }

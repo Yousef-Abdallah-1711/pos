@@ -6,7 +6,6 @@ import Link from 'next/link'
 import { useAuthStore } from '@/stores/authStore'
 import { useHasPermission } from '@/hooks/useRbac'
 import { api } from '@/lib/api'
-import { debugAuthState } from '@/lib/auth-debug'
 import { Button } from '@/components/ui/button'
 import { DriverAssignmentModal } from '@/components/driver-assignment-modal'
 import { toast } from 'sonner'
@@ -37,7 +36,9 @@ interface Order {
   payment_status: string
   payment_method: string
   subtotal: number
+  tax: number
   delivery_fee: number
+  discount: number
   total: number
   items_count: number
   created_at: string
@@ -49,11 +50,11 @@ export default function OrdersPage() {
   const t = createTranslator(locale)
 
   // Check RBAC permissions for Orders module
-  const canViewOrders = useHasPermission(
+  const { hasPermission: canViewOrders, loading: canViewLoading } = useHasPermission(
     MODULE_IDS.ORDERS,
     PERMISSION_LEVELS.READ,
   )
-  const canDeleteOrders = useHasPermission(
+  const { hasPermission: canDeleteOrders, loading: canDeleteLoading } = useHasPermission(
     MODULE_IDS.ORDERS,
     PERMISSION_LEVELS.DELETE,
   )
@@ -70,6 +71,14 @@ export default function OrdersPage() {
   const [isAssignmentModalOpen, setIsAssignmentModalOpen] = useState(false)
   const [selectedOrderForAssignment, setSelectedOrderForAssignment] = useState<Order | null>(null)
   const token = useAuthStore((state) => state.token)
+
+  if (canViewLoading) {
+    return (
+      <div className="flex justify-center items-center h-96">
+        <Loader className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    )
+  }
 
   // Show permission denied if user can't view orders
   if (!canViewOrders) {
@@ -99,11 +108,15 @@ export default function OrdersPage() {
   }
 
   useEffect(() => {
-    // Debug auth state on component mount
-    console.log('🔍 OrdersPage mounted - Debugging auth state...');
-    debugAuthState();
+    if (canViewLoading) {
+      return
+    }
+    if (!token || !canViewOrders) {
+      setLoading(false)
+      return
+    }
     fetchOrders()
-  }, [token, statusFilter, paymentFilter, page, searchQuery])
+  }, [token, statusFilter, paymentFilter, page, searchQuery, canViewOrders, canViewLoading])
 
   const fetchOrders = async () => {
     setLoading(true)
@@ -141,6 +154,10 @@ export default function OrdersPage() {
   }
 
   const handleCancelOrder = async (orderId: number) => {
+    if (canDeleteLoading || !canDeleteOrders) {
+      toast.error(t('orders.permissionDenied', 'You do not have permission to cancel orders.'))
+      return
+    }
     if (!confirm(t('orders.confirmCancel'))) return
 
     try {
@@ -290,14 +307,6 @@ export default function OrdersPage() {
           <div className="flex-1">
             <h3 className="font-semibold text-red-800 dark:text-red-300">Error Loading Orders</h3>
             <p className="text-sm text-red-700 dark:text-red-400 mt-1">{error}</p>
-            {error.includes('Missing tenant') && (
-              <div className="mt-3 p-3 bg-red-100 dark:bg-red-900/40 rounded text-sm">
-                <p className="font-mono text-red-900 dark:text-red-200 text-xs">💡 Debug Info:</p>
-                <p className="text-red-800 dark:text-red-300 text-xs mt-1">
-                  Open browser console and run: <code className="bg-red-200 dark:bg-red-900 px-1 rounded">debugAuthState()</code>
-                </p>
-              </div>
-            )}
           </div>
         </div>
       )}
@@ -410,7 +419,7 @@ export default function OrdersPage() {
                               </Button>
                             )}
                             {order.status !== 'cancelled' && order.status !== 'delivered' && (
-                              canDeleteOrders ? (
+                              !canDeleteLoading && canDeleteOrders ? (
                                 <Button
                                   variant="outline"
                                   size="sm"

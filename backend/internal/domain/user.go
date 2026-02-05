@@ -17,6 +17,7 @@ type User struct {
 	AvatarURL    string     `json:"avatar_url"`
 	Role         string     `json:"role"`
 	Status       string     `json:"status"`
+	IsSuperAdmin bool       `json:"is_super_admin"`
 	LastLogin    *time.Time `json:"last_login,omitempty"`
 	CreatedAt    time.Time  `json:"created_at"`
 	UpdatedAt    time.Time  `json:"updated_at"`

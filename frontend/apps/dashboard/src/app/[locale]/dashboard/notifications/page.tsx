@@ -7,7 +7,7 @@ import { useNotifications, Notification, NotificationModule, NotificationPriorit
 import { createTranslator, getLocaleFromPath } from '@/lib/translations'
 import { Button } from '@/components/ui/button'
 import { NotificationActions } from '@/components/notifications/NotificationActions'
-import { Bell, Trash2, CheckCheck, Clock, AlertTriangle, Info, CheckCircle, AlertCircle, Settings, Lock } from 'lucide-react'
+import { Bell, Trash2, CheckCheck, Clock, AlertTriangle, Info, CheckCircle, AlertCircle, Settings, Lock, Loader2 } from 'lucide-react'
 import { MODULE_IDS, PERMISSION_LEVELS } from '@/lib/rbac'
 
 const notificationModuleIcons: Record<NotificationModule, any> = {
@@ -39,14 +39,15 @@ export default function NotificationsPage() {
   const isRTL = locale === 'ar'
 
   // Check RBAC permissions for Notifications module
-  const canViewNotifications = useHasPermission(
+  const { hasPermission: canViewNotifications, loading: canViewLoading } = useHasPermission(
     MODULE_IDS.NOTIFICATIONS,
     PERMISSION_LEVELS.READ,
   )
-  const canDeleteNotifications = useHasPermission(
+  const { hasPermission: canDeleteNotifications, loading: canDeleteLoading } = useHasPermission(
     MODULE_IDS.NOTIFICATIONS,
     PERMISSION_LEVELS.DELETE,
   )
+  const permissionLoading = canViewLoading || canDeleteLoading
 
   const {
     notifications,
@@ -62,6 +63,14 @@ export default function NotificationsPage() {
   } = useNotifications()
 
   // Show permission denied if user can't view notifications
+  if (permissionLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="w-8 h-8 animate-spin text-primary-600" />
+      </div>
+    )
+  }
+
   if (!canViewNotifications) {
     return (
       <div className="space-y-6">

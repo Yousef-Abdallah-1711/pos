@@ -7,7 +7,7 @@ INSERT INTO users (tenant_id, email, password_hash, name, phone, role, status, i
 SELECT
     1, -- Default to tenant 1 (or create a system tenant)
     'superadmin@pos-saas.com',
-    '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZRGdjGj/n3.Q7PVkB.5r5FKu5J5Pu', -- SuperAdmin@123
+    '$2a$10$6tgEoGE0dusUMtJ0RUd4VO3IACTDD2vb0676WfMyPvbVQU9oo2p06', -- SuperAdmin@123
     'Super Admin',
     '+1234567890',
     'super_admin',

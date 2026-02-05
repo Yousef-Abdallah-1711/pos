@@ -11,7 +11,7 @@ import { Input } from '@/components/ui/input'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { api } from '@/lib/api'
 import { toast } from 'sonner'
-import { Plus, AlertCircle, Lock } from 'lucide-react'
+import { Plus, AlertCircle, Lock, Loader2 } from 'lucide-react'
 import { createTranslator, getLocaleFromPath } from '@/lib/translations'
 import { PageHeaderSkeleton, TableSkeleton } from '@/components/skeletons'
 import { MODULE_IDS, PERMISSION_LEVELS } from '@/lib/rbac'
@@ -39,16 +39,25 @@ export default function PayrollPage() {
   const t = createTranslator(locale)
 
   // Check RBAC permissions for Salaries module
-  const canViewSalaries = useHasPermission(
+  const { hasPermission: canViewSalaries, loading: canViewLoading } = useHasPermission(
     MODULE_IDS.SALARIES,
     PERMISSION_LEVELS.READ,
   )
-  const canCreateSalaries = useHasPermission(
+  const { hasPermission: canCreateSalaries, loading: canCreateLoading } = useHasPermission(
     MODULE_IDS.SALARIES,
     PERMISSION_LEVELS.WRITE,
   )
+  const permissionLoading = canViewLoading || canCreateLoading
 
   // Show permission denied if user can't view salaries
+  if (permissionLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="w-8 h-8 animate-spin text-primary-600" />
+      </div>
+    )
+  }
+
   if (!canViewSalaries) {
     return (
       <div className="space-y-6">
@@ -209,10 +218,17 @@ export default function PayrollPage() {
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">{t('hr.payroll.title')}</h1>
           <p className="text-gray-500 dark:text-gray-400 mt-1">{t('hr.payroll.managePayroll')}</p>
         </div>
-        <Button onClick={() => { setIsEditMode(false); setSelectedSalary(null); setShowForm(true) }} className="gap-2 w-full sm:w-auto">
-          <Plus className="h-4 w-4" />
-          {t('hr.payroll.createSalary')}
-        </Button>
+        {canCreateSalaries ? (
+          <Button onClick={() => { setIsEditMode(false); setSelectedSalary(null); setShowForm(true) }} className="gap-2 w-full sm:w-auto">
+            <Plus className="h-4 w-4" />
+            {t('hr.payroll.createSalary')}
+          </Button>
+        ) : (
+          <Button disabled className="gap-2 w-full sm:w-auto opacity-50 cursor-not-allowed" title="You don't have permission to create salaries">
+            <Plus className="h-4 w-4" />
+            {t('hr.payroll.createSalary')}
+          </Button>
+        )}
       </div>
 
       <div className="flex flex-col md:flex-row gap-4 bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700">

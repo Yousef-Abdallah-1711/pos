@@ -35,9 +35,9 @@ func TestPublicOrderRoutes(t *testing.T) {
 			description:    "Get order endpoint should be registered",
 		},
 		{
-			name:           "GET /api/v1/public/orders/number/ORD-2025-000001",
+			name:           "GET /api/v1/public/orders/number/ORD-2025-000001/lookup",
 			method:         "GET",
-			path:           "/api/v1/public/orders/number/ORD-2025-000001",
+			path:           "/api/v1/public/orders/number/ORD-2025-000001/lookup",
 			expectedStatus: http.StatusBadRequest, // Missing tenant context
 			description:    "Get order by number endpoint should be registered",
 		},
@@ -375,7 +375,7 @@ func TestOrderRoutePathPatterns(t *testing.T) {
 			paths: []string{
 				"/api/v1/public/orders",
 				"/api/v1/public/orders/1",
-				"/api/v1/public/orders/number/ORD-2025-000001",
+				"/api/v1/public/orders/number/ORD-2025-000001/lookup",
 				"/api/v1/public/orders/1/status",
 				"/api/v1/public/orders/1/track",
 				"/api/v1/public/orders/validate",

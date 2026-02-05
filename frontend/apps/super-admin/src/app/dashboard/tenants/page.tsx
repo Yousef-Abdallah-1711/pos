@@ -17,13 +17,25 @@ export default function TenantsPage() {
   useEffect(() => {
     const fetchTenants = async () => {
       try {
+        console.log("[TenantsPage] Fetching tenants with:", { page, limit, searchQuery });
         setIsLoading(true);
         const data = await superAdminAPI.listTenants(page, limit, searchQuery);
-        setTenants(data.data);
-        setTotal(data.total);
+        console.log("[TenantsPage] Full response structure:", data);
+        console.log("[TenantsPage] data.data:", data?.data);
+        console.log("[TenantsPage] data.meta:", data?.meta);
+        console.log("[TenantsPage] data.total:", data?.total);
+
+        // Handle both structures: {data: [], meta: {}} and {data: [], total: 2}
+        const tenantsArray = Array.isArray(data) ? data : (data?.data || []);
+        const totalCount = typeof data?.total === 'number' ? data.total : (data?.meta?.total || 0);
+
+        console.log("[TenantsPage] Setting state with tenants:", tenantsArray, "total:", totalCount);
+        setTenants(tenantsArray);
+        setTotal(totalCount);
       } catch (error) {
+        console.error("[TenantsPage] Error fetching tenants:", error);
         toast.error("Failed to load tenants");
-        console.error(error);
+        setTenants([]);
       } finally {
         setIsLoading(false);
       }
@@ -67,7 +79,7 @@ export default function TenantsPage() {
             <p className="mt-4 text-gray-600">Loading tenants...</p>
           </div>
         </div>
-      ) : tenants.length === 0 ? (
+      ) : !tenants || tenants.length === 0 ? (
         <div className="bg-white rounded-lg shadow p-12 text-center">
           <AlertCircle className="mx-auto text-gray-400" size={48} />
           <p className="text-gray-600 mt-4">No tenants found</p>

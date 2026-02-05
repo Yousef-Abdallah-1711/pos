@@ -31,13 +31,29 @@ class SuperAdminAPI {
           config.headers.Authorization = `Bearer ${token}`;
         }
       }
+      console.log(`[API] ${config.method?.toUpperCase()} ${config.url}`, {
+        params: config.params,
+      });
       return config;
     });
 
     // Handle errors
     this.client.interceptors.response.use(
-      (response) => response,
+      (response) => {
+        console.log(`[API] Response:`, {
+          url: response.config.url,
+          status: response.status,
+          data: response.data,
+        });
+        return response;
+      },
       (error: AxiosError<ApiError>) => {
+        console.error(`[API] Error:`, {
+          url: error.config?.url,
+          status: error.response?.status,
+          message: error.message,
+          data: error.response?.data,
+        });
         if (error.response?.status === 401) {
           // Clear auth data on 401
           if (typeof window !== "undefined") {
@@ -77,20 +93,28 @@ class SuperAdminAPI {
   // Tenant endpoints
   async listTenants(
     page: number = 1,
-    limit: number = 20,
+    pageSize: number = 20,
     searchQuery?: string
   ): Promise<PaginatedResponse<Tenant>> {
-    const response = await this.client.get<ApiResponse<PaginatedResponse<Tenant>>>(
+    const response = await this.client.get(
       "/tenants",
       {
         params: {
           page,
-          limit,
+          page_size: pageSize,
           search: searchQuery,
         },
       }
     );
-    return response.data.data!;
+    // Backend returns { success, data: [...tenants], meta: {...} }
+    const meta = response.data.meta || {};
+    return {
+      data: response.data.data || [],
+      total: meta.total || 0,
+      page: meta.page || page,
+      limit: meta.page_size || pageSize,
+      pages: meta.total_pages || 1,
+    };
   }
 
   async getTenant(id: number): Promise<Tenant> {
@@ -103,15 +127,24 @@ class SuperAdminAPI {
   async getTenantUsers(
     tenantId: number,
     page: number = 1,
-    limit: number = 20
+    pageSize: number = 20
   ): Promise<PaginatedResponse<User>> {
-    const response = await this.client.get<ApiResponse<PaginatedResponse<User>>>(
+    const response = await this.client.get(
       `/tenants/${tenantId}/users`,
       {
-        params: { page, limit },
+        params: { page, page_size: pageSize },
       }
     );
-    return response.data.data!;
+    // Backend returns { success, data: [...users], meta: {...} }
+    // Transform to match PaginatedResponse<User> structure
+    const meta = response.data.meta || {};
+    return {
+      data: response.data.data || [],
+      total: meta.total || 0,
+      page: meta.page || page,
+      limit: meta.page_size || pageSize,
+      pages: meta.total_pages || 1,
+    };
   }
 
   async disableTenant(id: number): Promise<Tenant> {
@@ -131,20 +164,28 @@ class SuperAdminAPI {
   // User endpoints
   async listUsers(
     page: number = 1,
-    limit: number = 20,
+    pageSize: number = 20,
     searchQuery?: string
   ): Promise<PaginatedResponse<User>> {
-    const response = await this.client.get<ApiResponse<PaginatedResponse<User>>>(
+    const response = await this.client.get(
       "/users",
       {
         params: {
           page,
-          limit,
+          page_size: pageSize,
           search: searchQuery,
         },
       }
     );
-    return response.data.data!;
+    // Backend returns { success, data: [...users], meta: {...} }
+    const meta = response.data.meta || {};
+    return {
+      data: response.data.data || [],
+      total: meta.total || 0,
+      page: meta.page || page,
+      limit: meta.page_size || pageSize,
+      pages: meta.total_pages || 1,
+    };
   }
 
   async getUser(id: number): Promise<User> {
@@ -186,23 +227,37 @@ class SuperAdminAPI {
   // Audit log endpoints
   async getAuditLogs(
     page: number = 1,
-    limit: number = 20,
+    pageSize: number = 20,
     action?: string,
     startDate?: string,
     endDate?: string
   ): Promise<PaginatedResponse<AuditLog>> {
-    const response = await this.client.get<ApiResponse<PaginatedResponse<AuditLog>>>(
+    const response = await this.client.get(
       "/audit-logs",
       {
         params: {
           page,
-          limit,
+          page_size: pageSize,
           action,
           start_date: startDate,
           end_date: endDate,
         },
       }
     );
+    // Backend returns { success, data: [...logs], meta: {...} }
+    const meta = response.data.meta || {};
+    return {
+      data: response.data.data || [],
+      total: meta.total || 0,
+      page: meta.page || page,
+      limit: meta.page_size || pageSize,
+      pages: meta.total_pages || 1,
+    };
+  }
+
+  // Dashboard Login endpoint
+  async generateDashboardLoginToken(tenantId: number): Promise<{ token: string; redirect_url: string; expires_in_seconds: number }> {
+    const response = await this.client.post<ApiResponse<{ token: string; dashboard_url: string; redirect_url: string; expires_in_seconds: number }>>(`/tenants/${tenantId}/dashboard-login`);
     return response.data.data!;
   }
 

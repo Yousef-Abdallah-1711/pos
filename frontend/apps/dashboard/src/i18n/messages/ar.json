@@ -178,6 +178,15 @@
     "deleteSuccess": "تم حذف السائق بنجاح",
     "deleteFailed": "فشل حذف السائق",
     "loading": "جاري تحميل السائقين...",
+    "columns": {
+      "name": "الاسم",
+      "contact": "بيانات الاتصال",
+      "vehicle": "المركبة",
+      "status": "الحالة",
+      "deliveries": "التوصيلات",
+      "rating": "التقييم",
+      "actions": "الإجراءات"
+    },
     "filters": {
       "all": "جميع السائقين",
       "active": "نشط",
@@ -204,6 +213,10 @@
       "available": "متاح",
       "busy": "مشغول",
       "offline": "غير متصل"
+    },
+    "actionLabels": {
+      "activate": "تفعيل",
+      "deactivate": "تعطيل"
     },
     "assignmentModal": {
       "title": "تعيين سائق",

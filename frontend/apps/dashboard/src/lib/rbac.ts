@@ -17,11 +17,17 @@ export const PERMISSION_LEVELS = {
 // Module IDs (must match backend migrations)
 export const MODULE_IDS = {
   PRODUCTS: 1,
-  HR: 2,
-  NOTIFICATIONS: 3,
-  ORDERS: 4,
-  THEMES: 5,
-  SETTINGS: 6,
+  CATEGORIES: 2,
+  HR: 3,
+  NOTIFICATIONS: 4,
+  SETTINGS: 5,
+  USERS: 6,
+  ROLES: 7,
+  REPORTS: 8,
+  THEMES: 9,
+  ORDERS: 10,
+  LEAVES: 11,
+  SALARIES: 12,
 } as const
 
 // Permission level hierarchy (higher number = more permissions)
@@ -296,11 +302,17 @@ export const permissionCache = new PermissionCache()
 export const getModuleName = (moduleId: number): string => {
   const names: Record<number, string> = {
     [MODULE_IDS.PRODUCTS]: 'Products',
+    [MODULE_IDS.CATEGORIES]: 'Categories',
     [MODULE_IDS.HR]: 'HR',
     [MODULE_IDS.NOTIFICATIONS]: 'Notifications',
-    [MODULE_IDS.ORDERS]: 'Orders',
-    [MODULE_IDS.THEMES]: 'Themes',
     [MODULE_IDS.SETTINGS]: 'Settings',
+    [MODULE_IDS.USERS]: 'Users',
+    [MODULE_IDS.ROLES]: 'Roles',
+    [MODULE_IDS.REPORTS]: 'Reports',
+    [MODULE_IDS.THEMES]: 'Themes',
+    [MODULE_IDS.ORDERS]: 'Orders',
+    [MODULE_IDS.LEAVES]: 'Leaves',
+    [MODULE_IDS.SALARIES]: 'Payroll',
   }
   return names[moduleId] || `Module ${moduleId}`
 }

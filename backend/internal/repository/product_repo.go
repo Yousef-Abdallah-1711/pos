@@ -239,7 +239,7 @@ func (r *ProductRepository) ListProducts(tenantID, restaurantID int, filters *Pr
 	query := `
 		SELECT
 			id, tenant_id, restaurant_id, category_id, sku,
-			name_en, name_ar, price, is_available, featured,
+			name_en, name_ar, price, is_available, track_inventory, quantity_in_stock, low_stock_threshold, featured,
 			display_order, main_image_url, status, created_at
 		FROM products
 		WHERE tenant_id = $1 AND restaurant_id = $2 AND status != 'deleted'
@@ -311,7 +311,7 @@ func (r *ProductRepository) ListProducts(tenantID, restaurantID int, filters *Pr
 
 		err := rows.Scan(
 			&p.ID, &p.TenantID, &p.RestaurantID, &categoryID, &sku,
-			&p.NameEn, &nameAr, &p.Price, &p.IsAvailable, &p.Featured,
+			&p.NameEn, &nameAr, &p.Price, &p.IsAvailable, &p.TrackInventory, &p.QuantityInStock, &p.LowStockThreshold, &p.Featured,
 			&p.DisplayOrder, &mainImageURL, &p.Status, &p.CreatedAt,
 		)
 		if err != nil {
@@ -339,49 +339,65 @@ func (r *ProductRepository) ListProducts(tenantID, restaurantID int, filters *Pr
 // UpdateProduct updates an existing product
 func (r *ProductRepository) UpdateProduct(product *domain.Product) (*domain.Product, error) {
 	fmt.Printf("DEBUG: Repo.UpdateProduct started for ID: %d\n", product.ID)
-	// Build dynamic update query
-	updates := []string{}
-	args := []interface{}{}
-	argNum := 1
-
-	if product.NameEn != "" {
-		updates = append(updates, fmt.Sprintf("name_en = $%d", argNum))
-		args = append(args, product.NameEn)
-		argNum++
+	var categoryID sql.NullInt64
+	if product.CategoryID > 0 {
+		categoryID = sql.NullInt64{Int64: int64(product.CategoryID), Valid: true}
 	}
-	if product.NameAr != "" {
-		updates = append(updates, fmt.Sprintf("name_ar = $%d", argNum))
-		args = append(args, product.NameAr)
-		argNum++
-	}
-	if product.Price > 0 {
-		updates = append(updates, fmt.Sprintf("price = $%d", argNum))
-		args = append(args, product.Price)
-		argNum++
-	}
-	// Always update is_available regardless of its value
-	updates = append(updates, fmt.Sprintf("is_available = $%d", argNum))
-	args = append(args, product.IsAvailable)
-	argNum++
 
-	updates = append(updates, fmt.Sprintf("updated_by = $%d", argNum))
-	args = append(args, product.UpdatedBy)
-	argNum++
+	nameAr := sql.NullString{String: product.NameAr, Valid: product.NameAr != ""}
+	descEn := sql.NullString{String: product.DescriptionEn, Valid: product.DescriptionEn != ""}
+	descAr := sql.NullString{String: product.DescriptionAr, Valid: product.DescriptionAr != ""}
 
-	updates = append(updates, "updated_at = CURRENT_TIMESTAMP")
-
-	// Add product ID and tenant ID to args BEFORE constructing query
-	args = append(args, product.ID, product.TenantID)
-
-	query := fmt.Sprintf(`
+	query := `
 		UPDATE products
-		SET %s
-		WHERE id = $%d AND tenant_id = $%d
+		SET
+			category_id = $1,
+			name_en = $2,
+			name_ar = $3,
+			description_en = $4,
+			description_ar = $5,
+			price = $6,
+			cost = $7,
+			discount_price = $8,
+			is_available = $9,
+			track_inventory = $10,
+			quantity_in_stock = $11,
+			low_stock_threshold = $12,
+			featured = $13,
+			is_vegetarian = $14,
+			is_vegan = $15,
+			is_spicy = $16,
+			is_gluten_free = $17,
+			updated_by = $18,
+			updated_at = CURRENT_TIMESTAMP
+		WHERE id = $19 AND tenant_id = $20
 		RETURNING updated_at
-	`, strings.Join(updates, ", "), argNum, argNum+1)
+	`
 
 	fmt.Printf("DEBUG: Executing UPDATE query: %s\n", query)
-	err := r.db.QueryRow(query, args...).Scan(&product.UpdatedAt)
+	err := r.db.QueryRow(
+		query,
+		categoryID,
+		product.NameEn,
+		nameAr,
+		descEn,
+		descAr,
+		product.Price,
+		product.Cost,
+		product.DiscountPrice,
+		product.IsAvailable,
+		product.TrackInventory,
+		product.QuantityInStock,
+		product.LowStockThreshold,
+		product.Featured,
+		product.IsVegetarian,
+		product.IsVegan,
+		product.IsSpicy,
+		product.IsGlutenFree,
+		product.UpdatedBy,
+		product.ID,
+		product.TenantID,
+	).Scan(&product.UpdatedAt)
 	if err == sql.ErrNoRows {
 		return nil, errors.New("product not found")
 	}
@@ -430,6 +446,7 @@ func (r *ProductRepository) ListPublic(tenantID, restaurantID int, lang string) 
 			calories, protein_g, carbs_g, fat_g, fiber_g, allergens,
 			is_vegetarian, is_vegan, is_spicy, is_gluten_free,
 			is_available, available_from, available_until,
+			track_inventory, quantity_in_stock, low_stock_threshold,
 			main_image_url, featured, status,
 			created_at
 		FROM products
@@ -457,6 +474,7 @@ func (r *ProductRepository) ListPublic(tenantID, restaurantID int, lang string) 
 			&p.Calories, &p.ProteinG, &p.CarbsG, &p.FatG, &p.FiberG, &allergens,
 			&p.IsVegetarian, &p.IsVegan, &p.IsSpicy, &p.IsGlutenFree,
 			&p.IsAvailable, &p.AvailableFrom, &p.AvailableUntil,
+			&p.TrackInventory, &p.QuantityInStock, &p.LowStockThreshold,
 			&mainImageURL, &p.Featured, &p.Status,
 			&p.CreatedAt,
 		)
@@ -484,6 +502,7 @@ func (r *ProductRepository) ListByCategoryPublic(tenantID, restaurantID, categor
 			calories, protein_g, carbs_g, fat_g, fiber_g, allergens,
 			is_vegetarian, is_vegan, is_spicy, is_gluten_free,
 			is_available, available_from, available_until,
+			track_inventory, quantity_in_stock, low_stock_threshold,
 			main_image_url, featured, status,
 			created_at
 		FROM products
@@ -510,6 +529,7 @@ func (r *ProductRepository) ListByCategoryPublic(tenantID, restaurantID, categor
 			&p.Calories, &p.ProteinG, &p.CarbsG, &p.FatG, &p.FiberG, &allergens,
 			&p.IsVegetarian, &p.IsVegan, &p.IsSpicy, &p.IsGlutenFree,
 			&p.IsAvailable, &p.AvailableFrom, &p.AvailableUntil,
+			&p.TrackInventory, &p.QuantityInStock, &p.LowStockThreshold,
 			&mainImageURL, &p.Featured, &p.Status,
 			&p.CreatedAt,
 		)
@@ -537,6 +557,7 @@ func (r *ProductRepository) SearchPublic(tenantID, restaurantID int, queryStr st
 			calories, protein_g, carbs_g, fat_g, fiber_g, allergens,
 			is_vegetarian, is_vegan, is_spicy, is_gluten_free,
 			is_available, available_from, available_until,
+			track_inventory, quantity_in_stock, low_stock_threshold,
 			main_image_url, featured, status,
 			created_at
 		FROM products
@@ -563,6 +584,7 @@ func (r *ProductRepository) SearchPublic(tenantID, restaurantID int, queryStr st
 			&p.Calories, &p.ProteinG, &p.CarbsG, &p.FatG, &p.FiberG, &allergens,
 			&p.IsVegetarian, &p.IsVegan, &p.IsSpicy, &p.IsGlutenFree,
 			&p.IsAvailable, &p.AvailableFrom, &p.AvailableUntil,
+			&p.TrackInventory, &p.QuantityInStock, &p.LowStockThreshold,
 			&mainImageURL, &p.Featured, &p.Status,
 			&p.CreatedAt,
 		)

@@ -1,3 +1,4 @@
+'use client'
 // src/lib/config.ts
 export const getConfig = () => {
   // In production, we'll use relative URLs or same-domain approach

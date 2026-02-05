@@ -8,6 +8,7 @@ import { z } from 'zod';
 import { Button } from '@pos-saas/ui';
 import { AlertCircle, CheckCircle, Loader } from 'lucide-react';
 import Link from 'next/link';
+import { toast } from 'sonner';
 import { getLocaleFromPath, createTranslator } from '@/lib/translations';
 import { useCartStore } from '@/lib/store/cart-store';
 import { useCreateOrder } from '@/lib/hooks/use-api-queries';
@@ -106,6 +107,19 @@ export function CheckoutPageContent({ locale, themeData }: CheckoutPageContentPr
   const onSubmit = (data: CheckoutFormData) => {
     setError(null);
 
+    const insufficientItems = cartItems.filter(
+      (item) =>
+        (item.trackInventory ?? false) &&
+        (item.quantityInStock ?? 0) > -1 &&
+        (item.quantityInStock ?? 0) < item.quantity
+    );
+    if (insufficientItems.length > 0) {
+      const inventoryMessage = t('errors.insufficientInventory') || 'Insufficient inventory for one or more items.';
+      toast.error(inventoryMessage);
+      setError(inventoryMessage);
+      return;
+    }
+
     // Transform cart items to backend format (snake_case)
     const orderItems = cartItems.map((item) => ({
       product_id: item.productId,
@@ -128,12 +142,31 @@ export function CheckoutPageContent({ locale, themeData }: CheckoutPageContentPr
       } as any,
       {
         onSuccess: (response) => {
-          setSuccessOrderNumber(response.data.orderNumber);
+          const orderNumber =
+            response?.data?.orderNumber ||
+            response?.data?.order_number ||
+            response?.orderNumber ||
+            response?.order_number;
+          if (orderNumber) {
+            setSuccessOrderNumber(orderNumber);
+          }
           clearCart();
           reset();
         },
         onError: (err: any) => {
-          const message = err.response?.data?.error || err.response?.data?.message || t('errors.somethingWentWrong');
+          const rawMessage = err.response?.data?.error || err.response?.data?.message;
+          const message = typeof rawMessage === 'string' && rawMessage.trim().length > 0
+            ? rawMessage
+            : t('errors.somethingWentWrong');
+          const normalized = message.toLowerCase();
+
+          if (normalized.includes('insufficient inventory')) {
+            const inventoryMessage = t('errors.insufficientInventory');
+            toast.error(inventoryMessage);
+            setError(inventoryMessage);
+            return;
+          }
+
           setError(message);
         },
       }

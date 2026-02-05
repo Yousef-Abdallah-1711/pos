@@ -72,7 +72,7 @@ func (r *AuthRepository) CreateTenantWithUser(req *domain.RegisterRequest) (*dom
 		INSERT INTO restaurants (tenant_id, name, slug, description, address, theme, status)
 		VALUES ($1, $2, $3, $4, $5, 'modern-default', 'active')
 		RETURNING id
-	`, tenantID, req.RestaurantName, slug, "My Restaurant", "Address not set", ).Scan(&restaurantID)
+	`, tenantID, req.RestaurantName, slug, "My Restaurant", "Address not set").Scan(&restaurantID)
 
 	if err != nil {
 		return nil, fmt.Errorf("failed to create restaurant: %w", err)
@@ -155,38 +155,22 @@ func (r *AuthRepository) CreateTenantWithUser(req *domain.RegisterRequest) (*dom
 		return nil, fmt.Errorf("failed to create default theme: %w", err)
 	}
 
-	// 7. Create or get ADMIN role and assign to user
-	var adminRoleID int64
-	err = tx.QueryRow(`
-		SELECT id FROM roles
-		WHERE tenant_id = $1 AND restaurant_id = $2 AND role_name = 'ADMIN'
-		LIMIT 1
-	`, tenantID, restaurantID).Scan(&adminRoleID)
-
-	// If ADMIN role doesn't exist, create it
-	if err == sql.ErrNoRows {
-		err = tx.QueryRow(`
-			INSERT INTO roles (tenant_id, restaurant_id, role_name, role_code, description, is_system_role, created_by, created_at, updated_at)
-			VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-			RETURNING id
-		`, tenantID, restaurantID, "ADMIN", "ADMIN", "Administrator role with full system access", true, user.ID, time.Now(), time.Now()).Scan(&adminRoleID)
-
-		if err != nil {
-			return nil, fmt.Errorf("failed to create ADMIN role: %w", err)
-		}
-	} else if err != nil {
-		return nil, fmt.Errorf("failed to query ADMIN role: %w", err)
+	// 7. Seed default roles and permissions for the new tenant/restaurant
+	roleIDs, err := seedDefaultRolesAndPermissions(tx, int64(tenantID), int64(restaurantID), int64(user.ID))
+	if err != nil {
+		return nil, err
 	}
 
 	// 8. Assign ADMIN role to the new user
-	_, err = tx.Exec(`
-		INSERT INTO user_roles (tenant_id, user_id, role_id, assigned_by)
-		VALUES ($1, $2, $3, $4)
-		ON CONFLICT (tenant_id, user_id, role_id) DO NOTHING
-	`, tenantID, user.ID, adminRoleID, user.ID)
-
-	if err != nil {
-		return nil, fmt.Errorf("failed to assign ADMIN role to user: %w", err)
+	if adminRoleID, ok := roleIDs["ADMIN"]; ok {
+		_, err = tx.Exec(`
+			INSERT INTO user_roles (tenant_id, user_id, role_id, assigned_by)
+			VALUES ($1, $2, $3, $4)
+			ON CONFLICT (tenant_id, user_id, role_id) DO NOTHING
+		`, tenantID, user.ID, adminRoleID, user.ID)
+		if err != nil {
+			return nil, fmt.Errorf("failed to assign ADMIN role to user: %w", err)
+		}
 	}
 
 	// Commit transaction
@@ -199,9 +183,6 @@ func (r *AuthRepository) CreateTenantWithUser(req *domain.RegisterRequest) (*dom
 
 // FindUserByEmail finds a user by email
 func (r *AuthRepository) FindUserByEmail(email string) (*domain.User, error) {
-	fmt.Printf("=== REPOSITORY: FindUserByEmail ===\n")
-	fmt.Printf("Searching for email: %s\n", email)
-
 	var user domain.User
 	var avatarURL sql.NullString
 	err := r.db.QueryRow(`
@@ -215,11 +196,9 @@ func (r *AuthRepository) FindUserByEmail(email string) (*domain.User, error) {
 	)
 
 	if err == sql.ErrNoRows {
-		fmt.Printf("ERROR: No active user found with email: %s\n", email)
 		return nil, errors.New("user not found")
 	}
 	if err != nil {
-		fmt.Printf("ERROR: Database query failed: %v\n", err)
 		return nil, err
 	}
 
@@ -227,21 +206,14 @@ func (r *AuthRepository) FindUserByEmail(email string) (*domain.User, error) {
 	if avatarURL.Valid {
 		user.AvatarURL = avatarURL.String
 	}
-
-	fmt.Printf("User found in DB - ID: %d, Email: %s\n", user.ID, user.Email)
-	fmt.Printf("Password hash retrieved from DB (length: %d)\n", len(user.PasswordHash))
 	return &user, nil
 }
 
 // FindUserByEmailAllTenants finds all users with the given email across all tenants
 // This is used for multi-tenant login detection
 func (r *AuthRepository) FindUserByEmailAllTenants(email string) ([]domain.User, error) {
-	fmt.Printf("=== REPOSITORY: FindUserByEmailAllTenants ===\n")
-	fmt.Printf("Searching for all tenants with email: %s\n", email)
-
 	// Handle stub mode (no database)
 	if r.db == nil {
-		fmt.Println("STUB MODE: Returning mock user for testing")
 		// In stub mode, return a mock user for testing multi-tenant login
 		// Generate a bcrypt hash for "password123" for testing
 		hashedPassword, _ := bcrypt.GenerateFromPassword([]byte("password123"), bcrypt.DefaultCost)
@@ -268,7 +240,6 @@ func (r *AuthRepository) FindUserByEmailAllTenants(email string) ([]domain.User,
 	`, email)
 
 	if err != nil {
-		fmt.Printf("ERROR: Database query failed: %v\n", err)
 		return nil, err
 	}
 	defer rows.Close()
@@ -283,7 +254,6 @@ func (r *AuthRepository) FindUserByEmailAllTenants(email string) ([]domain.User,
 			&user.CreatedAt, &user.UpdatedAt,
 		)
 		if err != nil {
-			fmt.Printf("ERROR: Failed to scan user row: %v\n", err)
 			return nil, err
 		}
 
@@ -296,11 +266,9 @@ func (r *AuthRepository) FindUserByEmailAllTenants(email string) ([]domain.User,
 	}
 
 	if err = rows.Err(); err != nil {
-		fmt.Printf("ERROR: Row iteration failed: %v\n", err)
 		return nil, err
 	}
 
-	fmt.Printf("Found %d users with email %s across tenants\n", len(users), email)
 	return users, nil
 }
 
@@ -308,7 +276,6 @@ func (r *AuthRepository) FindUserByEmailAllTenants(email string) ([]domain.User,
 func (r *AuthRepository) UpdateLastLogin(userID int) error {
 	// In stub mode, skip database update
 	if r.db == nil {
-		fmt.Printf("STUB MODE: Skipping UpdateLastLogin for user %d\n", userID)
 		return nil
 	}
 	_, err := r.db.Exec(`UPDATE users SET last_login = $1 WHERE id = $2`, time.Now(), userID)
@@ -320,6 +287,157 @@ func (r *AuthRepository) CheckEmailExists(email string) (bool, error) {
 	var exists bool
 	err := r.db.QueryRow(`SELECT EXISTS(SELECT 1 FROM users WHERE email = $1)`, email).Scan(&exists)
 	return exists, err
+}
+
+func seedDefaultRolesAndPermissions(tx *sql.Tx, tenantID, restaurantID, createdBy int64) (map[string]int64, error) {
+	type roleSeed struct {
+		Code        string
+		Name        string
+		Description string
+		AccessLevel string
+	}
+
+	roleSeeds := []roleSeed{
+		{Code: "ADMIN", Name: "Administrator", Description: "Full system access", AccessLevel: "admin"},
+		{Code: "MANAGER", Name: "Manager", Description: "Management access", AccessLevel: "manager"},
+		{Code: "EMPLOYEE", Name: "Employee", Description: "Staff access", AccessLevel: "basic"},
+		{Code: "DRIVER", Name: "Driver", Description: "Driver access to assigned orders", AccessLevel: "basic"},
+	}
+
+	roleIDs := make(map[string]int64, len(roleSeeds))
+	for _, seed := range roleSeeds {
+		var roleID int64
+		err := tx.QueryRow(`
+			SELECT id FROM roles
+			WHERE tenant_id = $1 AND restaurant_id = $2 AND role_code = $3
+			LIMIT 1
+		`, tenantID, restaurantID, seed.Code).Scan(&roleID)
+		if err == sql.ErrNoRows {
+			err = tx.QueryRow(`
+				INSERT INTO roles (
+					tenant_id, restaurant_id, role_name, role_code, description,
+					access_level, is_system_role, is_active, created_by, created_at, updated_at
+				)
+				VALUES ($1, $2, $3, $4, $5, $6, TRUE, TRUE, $7, $8, $9)
+				RETURNING id
+			`, tenantID, restaurantID, seed.Name, seed.Code, seed.Description, seed.AccessLevel, createdBy, time.Now(), time.Now()).Scan(&roleID)
+			if err != nil {
+				return nil, fmt.Errorf("failed to create %s role: %w", seed.Code, err)
+			}
+		} else if err != nil {
+			return nil, fmt.Errorf("failed to query %s role: %w", seed.Code, err)
+		}
+
+		roleIDs[seed.Code] = roleID
+	}
+
+	modules, err := fetchModuleIDs(tx)
+	if err != nil {
+		return nil, err
+	}
+
+	now := time.Now()
+	for roleCode, roleID := range roleIDs {
+		for moduleName, moduleID := range modules {
+			level := permissionForRole(roleCode, moduleName)
+			if level == "" {
+				level = domain.PermissionNone
+			}
+
+			_, err := tx.Exec(`
+				INSERT INTO role_permissions (tenant_id, role_id, module_id, permission_level, created_at, updated_at)
+				VALUES ($1, $2, $3, $4, $5, $6)
+				ON CONFLICT (tenant_id, role_id, module_id)
+				DO UPDATE SET permission_level = EXCLUDED.permission_level, updated_at = EXCLUDED.updated_at
+			`, tenantID, roleID, moduleID, level, now, now)
+			if err != nil {
+				return nil, fmt.Errorf("failed to seed permissions for %s: %w", roleCode, err)
+			}
+		}
+	}
+
+	return roleIDs, nil
+}
+
+func fetchModuleIDs(tx *sql.Tx) (map[string]int64, error) {
+	rows, err := tx.Query(`SELECT id, name FROM modules WHERE is_active = TRUE`)
+	if err != nil {
+		return nil, fmt.Errorf("failed to load modules: %w", err)
+	}
+	defer rows.Close()
+
+	modules := map[string]int64{}
+	for rows.Next() {
+		var id int64
+		var name string
+		if err := rows.Scan(&id, &name); err != nil {
+			return nil, fmt.Errorf("failed to scan module: %w", err)
+		}
+		modules[name] = id
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("failed to load modules: %w", err)
+	}
+
+	return modules, nil
+}
+
+func permissionForRole(roleCode string, moduleName string) string {
+	moduleName = strings.ToUpper(moduleName)
+
+	if roleCode == "ADMIN" {
+		return domain.PermissionAdmin
+	}
+
+	managerPermissions := map[string]string{
+		"PRODUCTS":      domain.PermissionWrite,
+		"CATEGORIES":    domain.PermissionWrite,
+		"ORDERS":        domain.PermissionWrite,
+		"HR":            domain.PermissionWrite,
+		"LEAVES":        domain.PermissionWrite,
+		"SALARIES":      domain.PermissionRead,
+		"NOTIFICATIONS": domain.PermissionWrite,
+		"SETTINGS":      domain.PermissionRead,
+		"USERS":         domain.PermissionRead,
+		"ROLES":         domain.PermissionRead,
+		"REPORTS":       domain.PermissionRead,
+		"THEMES":        domain.PermissionRead,
+	}
+
+	employeePermissions := map[string]string{
+		"PRODUCTS":      domain.PermissionRead,
+		"CATEGORIES":    domain.PermissionRead,
+		"ORDERS":        domain.PermissionRead,
+		"HR":            domain.PermissionRead,
+		"LEAVES":        domain.PermissionRead,
+		"NOTIFICATIONS": domain.PermissionRead,
+	}
+
+	driverPermissions := map[string]string{
+		"ORDERS":        domain.PermissionRead,
+		"NOTIFICATIONS": domain.PermissionRead,
+	}
+
+	switch roleCode {
+	case "MANAGER":
+		if level, ok := managerPermissions[moduleName]; ok {
+			return level
+		}
+		return domain.PermissionNone
+	case "EMPLOYEE":
+		if level, ok := employeePermissions[moduleName]; ok {
+			return level
+		}
+		return domain.PermissionNone
+	case "DRIVER":
+		if level, ok := driverPermissions[moduleName]; ok {
+			return level
+		}
+		return domain.PermissionNone
+	default:
+		return domain.PermissionNone
+	}
 }
 
 // Helper function to generate slug

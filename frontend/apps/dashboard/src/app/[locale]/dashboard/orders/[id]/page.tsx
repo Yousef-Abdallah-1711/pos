@@ -7,6 +7,8 @@ import { useAuthStore } from '@/stores/authStore'
 import { useHasPermission } from '@/hooks/useRbac'
 import { api } from '@/lib/api'
 import { Button } from '@/components/ui/button'
+import { DriverAssignmentModal } from '@/components/driver-assignment-modal'
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { toast } from 'sonner'
 import {
   ArrowLeft,
@@ -77,6 +79,23 @@ const STATUS_OPTIONS = [
   { value: 'cancelled', label: 'Cancelled' },
 ]
 
+const STATUS_TRANSITIONS: Record<string, string[]> = {
+  pending: ['confirmed', 'cancelled'],
+  confirmed: ['preparing', 'cancelled'],
+  preparing: ['ready'],
+  ready: ['out_for_delivery', 'cancelled'],
+  out_for_delivery: ['delivered'],
+  delivered: [],
+  cancelled: [],
+}
+
+const getStatusOptions = (currentStatus: string) => {
+  const allowed = STATUS_TRANSITIONS[currentStatus] || []
+  const allowedSet = new Set([currentStatus, ...allowed])
+  const filtered = STATUS_OPTIONS.filter((option) => allowedSet.has(option.value))
+  return filtered.length > 0 ? filtered : STATUS_OPTIONS
+}
+
 const STATUS_COLORS: Record<string, string> = {
   pending: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400',
   confirmed: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400',
@@ -115,6 +134,7 @@ export default function OrderDetailsPage() {
   const [loading, setLoading] = useState(true)
   const [updatingStatus, setUpdatingStatus] = useState(false)
   const [selectedStatus, setSelectedStatus] = useState<string>('')
+  const [isAssignmentModalOpen, setIsAssignmentModalOpen] = useState(false)
   const token = useAuthStore((state) => state.token)
 
   const isRTL = locale === 'ar'
@@ -215,6 +235,8 @@ export default function OrderDetailsPage() {
     )
   }
 
+  const canAssignDriver = canUpdateOrders && !['cancelled', 'delivered'].includes(order.status)
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -256,7 +278,13 @@ export default function OrderDetailsPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <Tabs defaultValue="details" className="space-y-6">
+        <TabsList>
+          <TabsTrigger value="details">{t('orders.details.orderInfo')}</TabsTrigger>
+          <TabsTrigger value="drivers">{t('navigation.drivers')}</TabsTrigger>
+        </TabsList>
+        <TabsContent value="details">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Column - Order Details */}
         <div className="lg:col-span-2 space-y-6">
           {/* Order Items */}
@@ -340,7 +368,7 @@ export default function OrderDetailsPage() {
                   </div>
                 ))
               ) : (
-                <p className="text-gray-500 dark:text-gray-400">{t('common.noData')}</p>
+                <p className="text-gray-500 dark:text-gray-400">{t('messages.noData')}</p>
               )}
             </div>
           </div>
@@ -450,7 +478,7 @@ export default function OrderDetailsPage() {
                   disabled={updatingStatus}
                   className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-50"
                 >
-                  {STATUS_OPTIONS.map((option) => (
+                  {getStatusOptions(order.status).map((option) => (
                     <option key={option.value} value={option.value}>
                       {option.label}
                     </option>
@@ -478,6 +506,45 @@ export default function OrderDetailsPage() {
           </div>
         </div>
       </div>
+        </TabsContent>
+        <TabsContent value="drivers">
+          <div className="space-y-6">
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                    {t('drivers.assignDriver')}
+                  </h2>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    {t('drivers.manageDrivers')}
+                  </p>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <Link href={`/${locale}/dashboard/drivers`}>
+                    <Button variant="outline" size="sm">
+                      {t('navigation.drivers')}
+                    </Button>
+                  </Link>
+                  <Button
+                    size="sm"
+                    onClick={() => setIsAssignmentModalOpen(true)}
+                    disabled={!canAssignDriver}
+                  >
+                    {t('drivers.assignDriver')}
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </TabsContent>
+      </Tabs>
+      <DriverAssignmentModal
+        isOpen={isAssignmentModalOpen}
+        orderId={order.id}
+        orderNumber={order.order_number}
+        onClose={() => setIsAssignmentModalOpen(false)}
+        onAssignSuccess={fetchOrder}
+      />
     </div>
   )
 }

@@ -11,7 +11,7 @@ import { Input } from '@/components/ui/input'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { api } from '@/lib/api'
 import { toast } from 'sonner'
-import { Plus, AlertCircle, Lock } from 'lucide-react'
+import { Plus, AlertCircle, Lock, Loader2 } from 'lucide-react'
 import { createTranslator, getLocaleFromPath } from '@/lib/translations'
 import { PageHeaderSkeleton, TableSkeleton } from '@/components/skeletons'
 import { MODULE_IDS, PERMISSION_LEVELS } from '@/lib/rbac'
@@ -39,16 +39,25 @@ export default function AttendancePage() {
   const t = createTranslator(locale)
 
   // Check RBAC permissions for Attendance module (using HR module for attendance)
-  const canViewAttendance = useHasPermission(
+  const { hasPermission: canViewAttendance, loading: canViewLoading } = useHasPermission(
     MODULE_IDS.HR,
     PERMISSION_LEVELS.READ,
   )
-  const canCreateAttendance = useHasPermission(
+  const { hasPermission: canCreateAttendance, loading: canCreateLoading } = useHasPermission(
     MODULE_IDS.HR,
     PERMISSION_LEVELS.WRITE,
   )
+  const permissionLoading = canViewLoading || canCreateLoading
 
   // Show permission denied if user can't view attendance
+  if (permissionLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="w-8 h-8 animate-spin text-primary-600" />
+      </div>
+    )
+  }
+
   if (!canViewAttendance) {
     return (
       <div className="space-y-6">
@@ -219,14 +228,21 @@ export default function AttendancePage() {
             {t('hr.attendance.manageAttendance')}
           </p>
         </div>
-        <Button onClick={() => {
-          setIsEditMode(false)
-          setSelectedRecord(null)
-          setShowForm(true)
-        }} className="gap-2 w-full sm:w-auto">
-          <Plus className="h-4 w-4" />
-          {t('hr.attendance.recordAttendance')}
-        </Button>
+        {canCreateAttendance ? (
+          <Button onClick={() => {
+            setIsEditMode(false)
+            setSelectedRecord(null)
+            setShowForm(true)
+          }} className="gap-2 w-full sm:w-auto">
+            <Plus className="h-4 w-4" />
+            {t('hr.attendance.recordAttendance')}
+          </Button>
+        ) : (
+          <Button disabled className="gap-2 w-full sm:w-auto opacity-50 cursor-not-allowed" title="You don't have permission to record attendance">
+            <Plus className="h-4 w-4" />
+            {t('hr.attendance.recordAttendance')}
+          </Button>
+        )}
       </div>
 
       {/* Filters */}

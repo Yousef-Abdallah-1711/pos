@@ -17,13 +17,25 @@ export default function UsersPage() {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
+        console.log("[UsersPage] Fetching users with:", { page, limit, searchQuery });
         setIsLoading(true);
         const data = await superAdminAPI.listUsers(page, limit, searchQuery);
-        setUsers(data.data);
-        setTotal(data.total);
+        console.log("[UsersPage] Full response structure:", data);
+        console.log("[UsersPage] data.data:", data?.data);
+        console.log("[UsersPage] data.meta:", data?.meta);
+        console.log("[UsersPage] data.total:", data?.total);
+
+        // Handle both structures: {data: [], meta: {}} and {data: [], total: 2}
+        const usersArray = Array.isArray(data) ? data : (data?.data || []);
+        const totalCount = typeof data?.total === 'number' ? data.total : (data?.meta?.total || 0);
+
+        console.log("[UsersPage] Setting state with users:", usersArray, "total:", totalCount);
+        setUsers(usersArray);
+        setTotal(totalCount);
       } catch (error) {
+        console.error("[UsersPage] Error fetching users:", error);
         toast.error("Failed to load users");
-        console.error(error);
+        setUsers([]);
       } finally {
         setIsLoading(false);
       }
@@ -67,7 +79,7 @@ export default function UsersPage() {
             <p className="mt-4 text-gray-600">Loading users...</p>
           </div>
         </div>
-      ) : users.length === 0 ? (
+      ) : !users || users.length === 0 ? (
         <div className="bg-white rounded-lg shadow p-12 text-center">
           <AlertCircle className="mx-auto text-gray-400" size={48} />
           <p className="text-gray-600 mt-4">No users found</p>

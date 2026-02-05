@@ -20,7 +20,7 @@ Complete reference for the backend API and services.
 
 - **Progress:** 95% → 98% ⬆️
 - **Core API:** ✅ Complete - all endpoints functional
-- **Public API:** ✅ NEW - 4 public endpoints for restaurant websites
+- **Public API:** ✅ Theme + orders endpoints live for restaurant websites
 - **Testing:** Ready for integration testing
 
 ### Latest Additions (Evening Session)
@@ -30,6 +30,11 @@ Complete reference for the backend API and services.
 - No authentication required
 - Restaurant website theme loading enabled
 - See: [PUBLIC_THEME_API.md](PUBLIC_THEME_API.md)
+
+**Public Orders API** ✅
+- Order lookup by number
+- Status + tracking history endpoints
+- Used by order tracking page
 
 **Theme Repository** ✅
 - New method: `GetByRestaurantAndActive(restaurantID)`
@@ -78,6 +83,22 @@ GET /api/v1/public/restaurants/{slug}/sections
 
 GET /api/v1/public/restaurants/{slug}/settings
 └─ Colors, typography, identity settings only
+
+GET /api/v1/public/orders/number/{number}/lookup
+└─ Lookup order by order number
+
+GET /api/v1/public/orders/{id}/status
+└─ Lightweight status endpoint
+
+GET /api/v1/public/orders/{id}/track
+└─ Tracking status + history
+```
+
+### Admin Driver Endpoints
+```
+GET /api/v1/admin/drivers
+GET /api/v1/admin/drivers/available
+POST /api/v1/admin/orders/{id}/assign
 ```
 
 ---
@@ -195,4 +216,3 @@ None currently. All public API endpoints functional.
 - **Frontend Integration:** [03-FRONTEND-DASHBOARD/API_INTEGRATION.md](../03-FRONTEND-DASHBOARD/API_INTEGRATION.md)
 - **Multi-Tenancy:** [05-INFRASTRUCTURE/MULTI_TENANCY/](../05-INFRASTRUCTURE/MULTI_TENANCY/)
 - **Latest Updates:** [UPDATE_SESSION_2026_01_08_EVENING.md](../UPDATE_SESSION_2026_01_08_EVENING.md)
-

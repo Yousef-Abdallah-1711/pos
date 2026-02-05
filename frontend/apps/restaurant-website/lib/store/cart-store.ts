@@ -7,14 +7,25 @@ export interface CartItem {
   name: string;
   price: number;
   quantity: number;
+  trackInventory?: boolean;
+  quantityInStock?: number;
   image?: string;
   notes?: string;
   total: number;
 }
 
+export interface AddToCartProduct {
+  id: number;
+  name: string;
+  price: number;
+  image?: string;
+  track_inventory?: boolean;
+  quantity_in_stock?: number;
+}
+
 interface CartStore {
   items: CartItem[];
-  addItem: (product: { id: number; name: string; price: number; image?: string }) => void;
+  addItem: (product: AddToCartProduct) => void;
   removeItem: (productId: number) => void;
   updateQuantity: (productId: number, quantity: number) => void;
   updateNotes: (productId: number, notes: string) => void;
@@ -34,16 +45,36 @@ export const useCartStore = create<CartStore>()(
       addItem: (product) => {
         set((state) => {
           const existingItem = state.items.find((item) => item.productId === product.id);
+          const quantityInStock = Number(
+            product.quantity_in_stock ?? existingItem?.quantityInStock ?? 0
+          );
+          const trackInventory =
+            typeof product.track_inventory === 'boolean'
+              ? product.track_inventory
+              : existingItem?.trackInventory ?? false;
+          if (trackInventory && quantityInStock <= 0) {
+            return state;
+          }
 
           if (existingItem) {
             // Increase quantity - create new array with updated item
+            const nextQuantity = existingItem.quantity + 1;
+            const cappedQuantity =
+              trackInventory && quantityInStock > 0
+                ? Math.min(nextQuantity, quantityInStock)
+                : nextQuantity;
+
+            if (cappedQuantity === existingItem.quantity) {
+              return state;
+            }
+
             return {
               items: state.items.map((item) =>
                 item.productId === product.id
                   ? {
                     ...item,
-                    quantity: item.quantity + 1,
-                    total: (item.quantity + 1) * item.price,
+                    quantity: cappedQuantity,
+                    total: cappedQuantity * item.price,
                   }
                   : item
               ),
@@ -59,6 +90,8 @@ export const useCartStore = create<CartStore>()(
                   name: product.name,
                   price: product.price,
                   quantity: 1,
+                  trackInventory,
+                  quantityInStock,
                   image: product.image,
                   total: product.price,
                 },
@@ -75,21 +108,31 @@ export const useCartStore = create<CartStore>()(
       },
 
       updateQuantity: (productId, quantity) => {
-        if (quantity <= 0) {
-          get().removeItem(productId);
-          return;
-        }
-
         set((state) => ({
-          items: state.items.map((item) =>
-            item.productId === productId
-              ? {
-                ...item,
-                quantity,
-                total: quantity * item.price,
+          items: state.items
+            .map((item) => {
+              if (item.productId !== productId) return item;
+
+              if (quantity <= 0) {
+                return null;
               }
-              : item
-          ),
+
+              const available = Number(item.quantityInStock ?? 0);
+              const trackInventory = item.trackInventory ?? false;
+              const targetQuantity =
+                trackInventory && available > 0 ? Math.min(quantity, available) : quantity;
+
+              if (targetQuantity <= 0) {
+                return null;
+              }
+
+              return {
+                ...item,
+                quantity: targetQuantity,
+                total: targetQuantity * item.price,
+              };
+            })
+            .filter((item): item is CartItem => item !== null),
         }));
       },
 

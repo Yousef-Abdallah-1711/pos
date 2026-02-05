@@ -139,6 +139,7 @@ const (
 	AuditActionExportData      = "EXPORT_DATA"
 	AuditActionUpdateIPWhitelist = "UPDATE_IP_WHITELIST"
 	AuditActionUpdateSettings  = "UPDATE_SETTINGS"
+	AuditActionAccessDashboard = "ACCESS_DASHBOARD"
 )
 
 // Audit target type constants

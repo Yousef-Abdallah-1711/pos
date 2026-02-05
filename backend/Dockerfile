@@ -25,9 +25,9 @@ FROM alpine:3.20
 
 # Install runtime dependencies with retry logic for package mirrors
 RUN apk update && \
-    apk add --no-cache ca-certificates postgresql-client || \
-    (apk update && apk add --no-cache ca-certificates postgresql-client) || \
-    (sleep 5 && apk update && apk add --no-cache ca-certificates postgresql-client)
+    apk add --no-cache ca-certificates postgresql-client curl || \
+    (apk update && apk add --no-cache ca-certificates postgresql-client curl) || \
+    (sleep 5 && apk update && apk add --no-cache ca-certificates postgresql-client curl)
 
 WORKDIR /root/
 

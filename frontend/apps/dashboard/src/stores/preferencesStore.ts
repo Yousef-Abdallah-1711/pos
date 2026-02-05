@@ -1,5 +1,7 @@
+'use client'
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import { debugLog } from '@/lib/debug'
 
 export interface UserSettings {
   id: number
@@ -18,7 +20,7 @@ interface PreferencesState {
   settings: UserSettings | null
   isLoading: boolean
   error: string | null
-  
+
   // Actions
   setSettings: (settings: UserSettings) => void
   updateLanguage: (language: 'en' | 'ar') => void
@@ -50,7 +52,7 @@ export const usePreferencesStore = create<PreferencesState>()(
       error: null,
 
       setSettings: (settings) => {
-        console.log('[PreferencesStore] Setting preferences:', settings)
+        debugLog('[PreferencesStore] Setting preferences')
         set({ settings, error: null })
         // Apply theme immediately
         applyTheme(settings.theme)
@@ -100,7 +102,7 @@ export const usePreferencesStore = create<PreferencesState>()(
 // Helper function to apply theme
 function applyTheme(theme: 'light' | 'dark' | 'system') {
   const root = document.documentElement
-  
+
   if (theme === 'system') {
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
     root.classList.toggle('dark', prefersDark)
@@ -157,7 +159,7 @@ function HSLToHex(h: number, s: number, l: number): string {
 
 function generateColorShades(baseColor: string): Record<string, string> {
   const { h, s } = hexToHSL(baseColor)
-  
+
   return {
     '50': HSLToHex(h, Math.max(s - 30, 10), 97),
     '100': HSLToHex(h, Math.max(s - 20, 15), 94),
@@ -175,21 +177,21 @@ function generateColorShades(baseColor: string): Record<string, string> {
 // Helper function to apply colors to CSS variables
 function applyColors(primary: string, secondary: string, accent: string) {
   const root = document.documentElement
-  
+
   const primaryShades = generateColorShades(primary)
   const secondaryShades = generateColorShades(secondary)
   const accentShades = generateColorShades(accent)
-  
+
   // Apply primary color shades
   Object.entries(primaryShades).forEach(([shade, color]) => {
     root.style.setProperty(`--primary-${shade}`, color)
   })
-  
+
   // Apply secondary color shades
   Object.entries(secondaryShades).forEach(([shade, color]) => {
     root.style.setProperty(`--secondary-${shade}`, color)
   })
-  
+
   // Apply accent color shades
   Object.entries(accentShades).forEach(([shade, color]) => {
     root.style.setProperty(`--accent-${shade}`, color)

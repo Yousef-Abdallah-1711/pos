@@ -67,7 +67,7 @@ export default function DriversPage() {
 
       setDrivers(driverList)
     } catch (error) {
-      toast.error('Failed to load drivers')
+      toast.error(t('drivers.loadFailed'))
       console.error('[DRIVERS_PAGE] Error:', error)
     } finally {
       setLoading(false)
@@ -78,22 +78,22 @@ export default function DriversPage() {
     try {
       const newStatus = currentStatus === 'active' ? 'inactive' : 'active'
       await api.put(`/admin/drivers/${driverId}/status`, { status: newStatus })
-      toast.success(`Driver status updated to ${newStatus}`)
+      toast.success(t('drivers.updateSuccess'))
       fetchDrivers()
     } catch (error) {
-      toast.error('Failed to update driver status')
+      toast.error(t('drivers.updateFailed'))
     }
   }
 
   const handleDeleteDriver = async (driverId: number) => {
-    if (!confirm('Are you sure you want to delete this driver?')) return
+    if (!confirm(t('drivers.confirmDelete'))) return
 
     try {
       await api.delete(`/admin/drivers/${driverId}`)
-      toast.success('Driver deleted successfully')
+      toast.success(t('drivers.deleteSuccess'))
       fetchDrivers()
     } catch (error) {
-      toast.error('Failed to delete driver')
+      toast.error(t('drivers.deleteFailed'))
     }
   }
 
@@ -104,14 +104,14 @@ export default function DriversPage() {
         <div>
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
             <Truck className="h-8 w-8 text-primary" />
-            Drivers
+            {t('drivers.title')}
           </h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">Manage delivery drivers</p>
+          <p className="text-gray-600 dark:text-gray-400 mt-1">{t('drivers.manageDrivers')}</p>
         </div>
         <Link href={`/${locale}/dashboard/drivers/new`}>
           <Button>
             <Plus className="h-4 w-4 mr-2" />
-            Add Driver
+            {t('drivers.addDriver')}
           </Button>
         </Link>
       </div>
@@ -129,10 +129,10 @@ export default function DriversPage() {
             }`}
           >
             {f === 'all'
-              ? 'All Drivers'
+              ? t('drivers.filters.all')
               : f === 'active'
-              ? 'Active'
-              : 'Available'}
+              ? t('drivers.filters.active')
+              : t('drivers.filters.available')}
           </button>
         ))}
       </div>
@@ -142,12 +142,12 @@ export default function DriversPage() {
         {loading ? (
           <div className="p-8 text-center">
             <Loader className="h-8 w-8 animate-spin text-primary mx-auto mb-2" />
-            <p className="text-gray-600 dark:text-gray-400">Loading drivers...</p>
+            <p className="text-gray-600 dark:text-gray-400">{t('drivers.loading')}</p>
           </div>
         ) : drivers.length === 0 ? (
           <div className="p-8 text-center">
             <AlertCircle className="h-12 w-12 text-gray-400 mx-auto mb-2" />
-            <p className="text-gray-600 dark:text-gray-400">No drivers found</p>
+            <p className="text-gray-600 dark:text-gray-400">{t('drivers.noDrivers')}</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -155,25 +155,25 @@ export default function DriversPage() {
               <thead className="bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
                 <tr>
                   <th className={`px-6 py-3 text-left text-sm font-semibold text-gray-900 dark:text-white ${isRTL ? 'text-right' : ''}`}>
-                    Name
+                    {t('drivers.columns.name')}
                   </th>
                   <th className={`px-6 py-3 text-left text-sm font-semibold text-gray-900 dark:text-white ${isRTL ? 'text-right' : ''}`}>
-                    Contact
+                    {t('drivers.columns.contact')}
                   </th>
                   <th className={`px-6 py-3 text-left text-sm font-semibold text-gray-900 dark:text-white ${isRTL ? 'text-right' : ''}`}>
-                    Vehicle
+                    {t('drivers.columns.vehicle')}
                   </th>
                   <th className={`px-6 py-3 text-left text-sm font-semibold text-gray-900 dark:text-white ${isRTL ? 'text-right' : ''}`}>
-                    Status
+                    {t('drivers.columns.status')}
                   </th>
                   <th className={`px-6 py-3 text-left text-sm font-semibold text-gray-900 dark:text-white ${isRTL ? 'text-right' : ''}`}>
-                    Deliveries
+                    {t('drivers.columns.deliveries')}
                   </th>
                   <th className={`px-6 py-3 text-left text-sm font-semibold text-gray-900 dark:text-white ${isRTL ? 'text-right' : ''}`}>
-                    Rating
+                    {t('drivers.columns.rating')}
                   </th>
                   <th className={`px-6 py-3 text-left text-sm font-semibold text-gray-900 dark:text-white ${isRTL ? 'text-right' : ''}`}>
-                    Actions
+                    {t('drivers.columns.actions')}
                   </th>
                 </tr>
               </thead>
@@ -215,7 +215,7 @@ export default function DriversPage() {
                               : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300'
                           }`}
                         >
-                          {driver.status}
+                          {t(`drivers.statusLabels.${driver.status}`)}
                         </span>
                         <span
                           className={`px-3 py-1 rounded-full text-xs font-semibold w-fit ${
@@ -224,7 +224,7 @@ export default function DriversPage() {
                               : 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300'
                           }`}
                         >
-                          {driver.availability_status}
+                          {t(`drivers.statusLabels.${driver.availability_status}`)}
                         </span>
                       </div>
                     </td>
@@ -261,7 +261,11 @@ export default function DriversPage() {
                           size="sm"
                           variant="outline"
                           onClick={() => handleToggleStatus(driver.id, driver.status)}
-                          title={driver.status === 'active' ? 'Deactivate' : 'Activate'}
+                          title={
+                            driver.status === 'active'
+                              ? t('drivers.actionLabels.deactivate')
+                              : t('drivers.actionLabels.activate')
+                          }
                         >
                           {driver.status === 'active' ? (
                             <ToggleRight className="h-4 w-4 text-green-600" />
@@ -290,23 +294,23 @@ export default function DriversPage() {
       {drivers.length > 0 && (
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
-            <p className="text-sm text-gray-600 dark:text-gray-400">Total Drivers</p>
+            <p className="text-sm text-gray-600 dark:text-gray-400">{t('drivers.stats.totalDrivers')}</p>
             <p className="text-2xl font-bold text-gray-900 dark:text-white">{drivers.length}</p>
           </div>
           <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
-            <p className="text-sm text-gray-600 dark:text-gray-400">Active</p>
+            <p className="text-sm text-gray-600 dark:text-gray-400">{t('drivers.stats.activeDrivers')}</p>
             <p className="text-2xl font-bold text-green-600">
               {drivers.filter((d) => d.status === 'active').length}
             </p>
           </div>
           <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
-            <p className="text-sm text-gray-600 dark:text-gray-400">Available</p>
+            <p className="text-sm text-gray-600 dark:text-gray-400">{t('drivers.stats.availableDrivers')}</p>
             <p className="text-2xl font-bold text-blue-600">
               {drivers.filter((d) => d.availability_status === 'available').length}
             </p>
           </div>
           <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
-            <p className="text-sm text-gray-600 dark:text-gray-400">Active Orders</p>
+            <p className="text-sm text-gray-600 dark:text-gray-400">{t('drivers.stats.activeOrders')}</p>
             <p className="text-2xl font-bold text-purple-600">
               {drivers.reduce((sum, d) => sum + d.active_orders_count, 0)}
             </p>

@@ -334,3 +334,45 @@ func (uc *SuperAdminTenantUseCase) GetAuditLogs(
 
 	return domain.NewPaginatedResponse(logs, total, pagination.Page, pagination.PageSize), nil
 }
+
+// GenerateDashboardLoginToken generates a one-time token for accessing the tenant dashboard
+func (uc *SuperAdminTenantUseCase) GenerateDashboardLoginToken(
+	ctx context.Context,
+	superAdminID int64,
+	tenantID int64,
+	ip, userAgent string,
+) (string, error) {
+	log.Printf("[SuperAdminTenantUseCase] GenerateDashboardLoginToken: superAdminID=%d, tenantID=%d\n", superAdminID, tenantID)
+
+	// Verify tenant exists
+	tenant, err := uc.superAdminRepo.GetTenantByID(ctx, tenantID)
+	if err != nil {
+		return "", fmt.Errorf("failed to verify tenant: %w", err)
+	}
+
+	// Get first admin/manager user from tenant for impersonation
+	// For now, we'll use a generic token that the dashboard will resolve
+	// The actual user selection will happen on the dashboard side
+	token, err := uc.superAdminRepo.GenerateDashboardLoginToken(ctx, superAdminID, tenantID)
+	if err != nil {
+		return "", fmt.Errorf("failed to generate token: %w", err)
+	}
+
+	// Log the action
+	targetType := domain.AuditTargetTenant
+	_ = uc.auditRepo.LogAction(ctx, &domain.SuperAdminAuditLog{
+		SuperAdminID: superAdminID,
+		Action:       domain.AuditActionAccessDashboard,
+		TargetType:   &targetType,
+		TargetID:     &tenantID,
+		Details: map[string]interface{}{
+			"tenant_name": tenant.Name,
+			"tenant_slug": tenant.Slug,
+		},
+		IPAddress: ip,
+		UserAgent: userAgent,
+	})
+
+	log.Printf("[SuperAdminTenantUseCase] Dashboard login token generated for tenant: %d\n", tenantID)
+	return token, nil
+}

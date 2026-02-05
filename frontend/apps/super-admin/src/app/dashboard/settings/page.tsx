@@ -129,7 +129,7 @@ export default function SettingsPage() {
         </div>
 
         {/* IP List */}
-        {ipWhitelist.length === 0 ? (
+        {!ipWhitelist || ipWhitelist.length === 0 ? (
           <div className="text-center py-8 bg-gray-50 rounded-lg">
             <p className="text-gray-600">No IP addresses in whitelist</p>
             <p className="text-sm text-gray-500 mt-1">

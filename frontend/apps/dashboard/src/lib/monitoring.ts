@@ -5,6 +5,8 @@ export interface PerformanceMetric {
   description: string
 }
 
+const ENABLE_DEBUG_LOGS = process.env.NEXT_PUBLIC_DEBUG_LOGS === 'true'
+
 /**
  * Report all Web Vitals metrics
  * These are Google's Core Web Vitals that affect SEO and UX
@@ -115,7 +117,9 @@ export async function reportWebVitals() {
       })
     })
   } catch (error) {
-    console.error('Failed to load web-vitals:', error)
+    if (ENABLE_DEBUG_LOGS) {
+      console.error('Failed to load web-vitals:', error)
+    }
   }
 }
 
@@ -132,9 +136,11 @@ function logMetric(metric: PerformanceMetric) {
 
   const unit = metric.name === 'CLS' ? '' : 'ms'
 
-  console.log(
-    `${emoji} [${metric.name}] ${metric.value}${unit} - ${metric.description}`
-  )
+  if (ENABLE_DEBUG_LOGS) {
+    console.log(
+      `${emoji} [${metric.name}] ${metric.value}${unit} - ${metric.description}`
+    )
+  }
 
   // Send to analytics if available
   if (typeof window !== 'undefined' && window.gtag) {
@@ -158,9 +164,11 @@ export function trackPageLoad(pageName: string) {
 
     const emoji = loadTime > 3000 ? '⚠️' : loadTime > 5000 ? '❌' : '✅'
 
-    console.log(
-      `${emoji} [${pageName}] Load time: ${Math.round(loadTime)}ms`
-    )
+    if (ENABLE_DEBUG_LOGS) {
+      console.log(
+        `${emoji} [${pageName}] Load time: ${Math.round(loadTime)}ms`
+      )
+    }
 
     // Send to analytics
     if (typeof window !== 'undefined' && window.gtag) {
@@ -184,9 +192,11 @@ export function measureApiCall(apiName: string) {
 
     const emoji = duration > 2000 ? '⚠️' : '✅'
 
-    console.log(
-      `${emoji} [API] ${apiName}: ${Math.round(duration)}ms ${success ? '✓' : '✗'}`
-    )
+    if (ENABLE_DEBUG_LOGS) {
+      console.log(
+        `${emoji} [API] ${apiName}: ${Math.round(duration)}ms ${success ? '✓' : '✗'}`
+      )
+    }
 
     // Send to analytics
     if (typeof window !== 'undefined' && window.gtag) {

@@ -142,7 +142,7 @@ func (h *PublicOrderHandler) GetOrder(w http.ResponseWriter, r *http.Request) {
 }
 
 // GetOrderByNumber retrieves order details by order number
-// GET /api/v1/public/orders/number/{order_number}
+// GET /api/v1/public/orders/number/{order_number}/lookup
 // Returns: Full Order with items
 func (h *PublicOrderHandler) GetOrderByNumber(w http.ResponseWriter, r *http.Request) {
 	// Get tenant and restaurant from context

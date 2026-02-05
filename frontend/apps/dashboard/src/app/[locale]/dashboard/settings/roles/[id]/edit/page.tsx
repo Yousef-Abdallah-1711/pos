@@ -3,16 +3,16 @@
 import { useEffect, useState, use } from 'react'
 import { useAuthStore } from '@/stores/authStore'
 import { useHasPermission } from '@/hooks/useRbac'
-import { MODULE_IDS, PERMISSION_LEVELS } from '@/lib/rbac'
+import { MODULE_IDS, PERMISSION_LEVELS, getPermissionDescription } from '@/lib/rbac'
 import { useRouter, usePathname } from 'next/navigation'
 import { Loader2, Lock, ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 
 interface PermissionModule {
-  moduleId: string
+  moduleId: number
   moduleName: string
   permissions: {
-    level: number
+    level: string
     name: string
     description: string
   }[]
@@ -24,45 +24,93 @@ interface RoleData {
   description: string
   role_permissions?: Array<{
     module_id: string
-    level: number
+    level: string
   }>
 }
+
+const PERMISSION_OPTIONS = [
+  {
+    level: PERMISSION_LEVELS.READ,
+    name: 'Read',
+    description: getPermissionDescription(PERMISSION_LEVELS.READ),
+  },
+  {
+    level: PERMISSION_LEVELS.WRITE,
+    name: 'Write',
+    description: getPermissionDescription(PERMISSION_LEVELS.WRITE),
+  },
+  {
+    level: PERMISSION_LEVELS.DELETE,
+    name: 'Delete',
+    description: getPermissionDescription(PERMISSION_LEVELS.DELETE),
+  },
+  {
+    level: PERMISSION_LEVELS.ADMIN,
+    name: 'Admin',
+    description: getPermissionDescription(PERMISSION_LEVELS.ADMIN),
+  },
+]
 
 const MODULES: PermissionModule[] = [
   {
     moduleId: MODULE_IDS.PRODUCTS,
     moduleName: 'Products',
-    permissions: [
-      { level: PERMISSION_LEVELS.READ, name: 'View Products', description: 'Can view product list' },
-      { level: PERMISSION_LEVELS.WRITE, name: 'Create & Edit', description: 'Can create and edit products' },
-      { level: PERMISSION_LEVELS.DELETE, name: 'Delete', description: 'Can delete products' },
-    ],
+    permissions: PERMISSION_OPTIONS,
+  },
+  {
+    moduleId: MODULE_IDS.CATEGORIES,
+    moduleName: 'Categories',
+    permissions: PERMISSION_OPTIONS,
   },
   {
     moduleId: MODULE_IDS.ORDERS,
     moduleName: 'Orders',
-    permissions: [
-      { level: PERMISSION_LEVELS.READ, name: 'View Orders', description: 'Can view order list' },
-      { level: PERMISSION_LEVELS.WRITE, name: 'Create & Edit', description: 'Can create and edit orders' },
-      { level: PERMISSION_LEVELS.DELETE, name: 'Cancel', description: 'Can cancel orders' },
-    ],
+    permissions: PERMISSION_OPTIONS,
   },
   {
     moduleId: MODULE_IDS.HR,
     moduleName: 'HR & Payroll',
-    permissions: [
-      { level: PERMISSION_LEVELS.READ, name: 'View', description: 'Can view HR data' },
-      { level: PERMISSION_LEVELS.WRITE, name: 'Create & Edit', description: 'Can manage HR records' },
-      { level: PERMISSION_LEVELS.DELETE, name: 'Delete', description: 'Can delete HR records' },
-    ],
+    permissions: PERMISSION_OPTIONS,
+  },
+  {
+    moduleId: MODULE_IDS.LEAVES,
+    moduleName: 'Leaves',
+    permissions: PERMISSION_OPTIONS,
+  },
+  {
+    moduleId: MODULE_IDS.SALARIES,
+    moduleName: 'Payroll',
+    permissions: PERMISSION_OPTIONS,
   },
   {
     moduleId: MODULE_IDS.NOTIFICATIONS,
     moduleName: 'Notifications',
-    permissions: [
-      { level: PERMISSION_LEVELS.READ, name: 'View', description: 'Can view notifications' },
-      { level: PERMISSION_LEVELS.DELETE, name: 'Delete', description: 'Can delete notifications' },
-    ],
+    permissions: PERMISSION_OPTIONS,
+  },
+  {
+    moduleId: MODULE_IDS.SETTINGS,
+    moduleName: 'Settings',
+    permissions: PERMISSION_OPTIONS,
+  },
+  {
+    moduleId: MODULE_IDS.USERS,
+    moduleName: 'Users',
+    permissions: PERMISSION_OPTIONS,
+  },
+  {
+    moduleId: MODULE_IDS.ROLES,
+    moduleName: 'Roles',
+    permissions: PERMISSION_OPTIONS,
+  },
+  {
+    moduleId: MODULE_IDS.REPORTS,
+    moduleName: 'Reports',
+    permissions: PERMISSION_OPTIONS,
+  },
+  {
+    moduleId: MODULE_IDS.THEMES,
+    moduleName: 'Themes',
+    permissions: PERMISSION_OPTIONS,
   },
 ]
 
@@ -84,7 +132,7 @@ export default function EditRolePage({ params: paramsPromise }: EditRolePageProp
   const { hasPermission: isAdmin, loading: permissionLoading } = useHasPermission(MODULE_IDS.SETTINGS, PERMISSION_LEVELS.WRITE)
 
   const [formData, setFormData] = useState<RoleData | null>(null)
-  const [selectedPermissions, setSelectedPermissions] = useState<Record<string, number>>({})
+  const [selectedPermissions, setSelectedPermissions] = useState<Record<number, string>>({})
   const [isSaving, setIsSaving] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
@@ -118,9 +166,9 @@ export default function EditRolePage({ params: paramsPromise }: EditRolePageProp
 
         // Initialize selected permissions
         if (data.permissions) {
-          const perms: Record<string, number> = {}
+          const perms: Record<number, string> = {}
           data.permissions.forEach((perm: any) => {
-            perms[perm.module_id] = perm.level
+            perms[Number(perm.module_id)] = perm.level
           })
           setSelectedPermissions(perms)
         }
@@ -135,7 +183,7 @@ export default function EditRolePage({ params: paramsPromise }: EditRolePageProp
     }
   }
 
-  const handlePermissionChange = (moduleId: string, level: number) => {
+  const handlePermissionChange = (moduleId: number, level: string) => {
     if (selectedPermissions[moduleId] === level) {
       const newPerms = { ...selectedPermissions }
       delete newPerms[moduleId]
@@ -161,7 +209,7 @@ export default function EditRolePage({ params: paramsPromise }: EditRolePageProp
         roleName: formData.name,
         description: formData.description,
         permissions: Object.entries(selectedPermissions).map(([moduleId, level]) => ({
-          moduleId: moduleId,
+          moduleId: Number(moduleId),
           level,
         })),
       }

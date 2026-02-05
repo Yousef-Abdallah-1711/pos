@@ -1,10 +1,13 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { usePathname } from 'next/navigation'
 import { api } from '@/lib/api'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
 import { X, Loader, Star, TrendingUp, Truck } from 'lucide-react'
+import { createTranslator, getLocaleFromPath } from '@/lib/translations'
+import { debugError } from '@/lib/debug'
 
 interface Driver {
   id: number
@@ -35,6 +38,9 @@ export function DriverAssignmentModal({
   onClose,
   onAssignSuccess,
 }: DriverAssignmentModalProps) {
+  const pathname = usePathname()
+  const locale = getLocaleFromPath(pathname)
+  const t = createTranslator(locale)
   const [drivers, setDrivers] = useState<Driver[]>([])
   const [loading, setLoading] = useState(true)
   const [assigning, setAssigning] = useState(false)
@@ -53,8 +59,8 @@ export function DriverAssignmentModal({
       const response = await api.get('/admin/drivers/available')
       setDrivers(response.data?.drivers || [])
     } catch (error) {
-      console.error('[FETCH_DRIVERS] Error:', error)
-      toast.error('Failed to load drivers')
+      debugError('[FETCH_DRIVERS] Error:', error)
+      toast.error(t('drivers.loadFailed'))
     } finally {
       setLoading(false)
     }
@@ -62,7 +68,7 @@ export function DriverAssignmentModal({
 
   const handleAssign = async () => {
     if (!selectedDriverId) {
-      toast.error('Please select a driver')
+      toast.error(t('drivers.assignmentModal.selectDriver'))
       return
     }
 
@@ -72,14 +78,14 @@ export function DriverAssignmentModal({
         driver_id: selectedDriverId,
         assignment_notes: notes,
       })
-      toast.success(`Order assigned to driver successfully`)
+      toast.success(t('drivers.assignmentModal.assignSuccess'))
       setSelectedDriverId(null)
       setNotes('')
       onAssignSuccess()
       onClose()
     } catch (error: any) {
       console.error('[ASSIGN_ORDER] Error:', error)
-      const errorMessage = error.response?.data?.message || 'Failed to assign order'
+      const errorMessage = error.response?.data?.message || t('drivers.assignmentModal.assignFailed')
       toast.error(errorMessage)
     } finally {
       setAssigning(false)
@@ -99,7 +105,7 @@ export function DriverAssignmentModal({
         {/* Header */}
         <div className="flex justify-between items-center p-6 border-b border-gray-200 dark:border-gray-700">
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-            Assign Driver
+            {t('drivers.assignmentModal.title')}
           </h2>
           <button
             onClick={onClose}
@@ -113,7 +119,7 @@ export function DriverAssignmentModal({
         <div className="flex-1 overflow-y-auto p-6">
           <div className="mb-6">
             <p className="text-sm text-gray-600 dark:text-gray-400">
-              Order: <span className="font-semibold text-gray-900 dark:text-white">{orderNumber}</span>
+              {t('orders.orderNumber')}: <span className="font-semibold text-gray-900 dark:text-white">{orderNumber}</span>
             </p>
           </div>
 
@@ -123,7 +129,7 @@ export function DriverAssignmentModal({
             </div>
           ) : drivers.length === 0 ? (
             <div className="flex justify-center items-center h-64">
-              <p className="text-gray-500 dark:text-gray-400">No available drivers</p>
+              <p className="text-gray-500 dark:text-gray-400">{t('drivers.assignmentModal.noDriversAvailable')}</p>
             </div>
           ) : (
             <div className="space-y-3">
@@ -170,7 +176,7 @@ export function DriverAssignmentModal({
                       <div className="flex items-center gap-2">
                         <Star className="h-4 w-4 text-yellow-500" />
                         <div>
-                          <p className="text-xs text-gray-600 dark:text-gray-400">Rating</p>
+                          <p className="text-xs text-gray-600 dark:text-gray-400">{t('drivers.assignmentModal.rating')}</p>
                           <p className="font-semibold text-gray-900 dark:text-white">
                             {driver.average_rating.toFixed(1)}/5
                           </p>
@@ -180,9 +186,7 @@ export function DriverAssignmentModal({
                       <div className="flex items-center gap-2">
                         <TrendingUp className="h-4 w-4 text-green-500" />
                         <div>
-                          <p className="text-xs text-gray-600 dark:text-gray-400">
-                            Completion
-                          </p>
+                          <p className="text-xs text-gray-600 dark:text-gray-400">{t('drivers.assignmentModal.completion')}</p>
                           <p className="font-semibold text-gray-900 dark:text-white">
                             {rate}%
                           </p>
@@ -192,9 +196,7 @@ export function DriverAssignmentModal({
                       <div className="flex items-center gap-2">
                         <Truck className="h-4 w-4 text-primary" />
                         <div>
-                          <p className="text-xs text-gray-600 dark:text-gray-400">
-                            Active Orders
-                          </p>
+                          <p className="text-xs text-gray-600 dark:text-gray-400">{t('drivers.assignmentModal.activeOrders')}</p>
                           <p className="font-semibold text-gray-900 dark:text-white">
                             {driver.active_orders_count}
                           </p>
@@ -211,12 +213,12 @@ export function DriverAssignmentModal({
           {!loading && drivers.length > 0 && (
             <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Assignment Notes (Optional)
+                {t('drivers.assignmentModal.notes')}
               </label>
               <textarea
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                placeholder="Add any special instructions for the driver"
+                placeholder={t('drivers.assignmentModal.notesPlaceholder')}
                 rows={3}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary dark:bg-gray-700 dark:border-gray-600 dark:text-white"
               />
@@ -232,7 +234,7 @@ export function DriverAssignmentModal({
             onClick={onClose}
             disabled={assigning}
           >
-            Cancel
+            {t('common.cancel')}
           </Button>
           <Button
             type="button"
@@ -241,7 +243,7 @@ export function DriverAssignmentModal({
             className="flex items-center gap-2"
           >
             {assigning && <Loader className="h-4 w-4 animate-spin" />}
-            {assigning ? 'Assigning...' : 'Assign Driver'}
+            {assigning ? t('common.saving') : t('drivers.assignDriver')}
           </Button>
         </div>
       </div>

@@ -19,7 +19,8 @@ function FooterSSRComponent({
   themeData,
   locale = "en",
 }: FooterSSRProps) {
-  const isRTL = locale === "ar";
+  const safeLocale = (locale || "en").toLowerCase() as "en" | "ar";
+  const isRTL = safeLocale === "ar";
 
   // Use theme values directly from props with fallbacks
   const footerBgColor = themeData?.footer?.background_color || "#000000";
@@ -27,7 +28,7 @@ function FooterSSRComponent({
   const restaurantName = themeData?.identity?.site_title || "Restaurant";
   const companyDescription =
     themeData?.footer?.company_description ||
-    (locale === "en"
+    (safeLocale === "en"
       ? "Delivering delicious food right to your doorstep with quality and care."
       : "توصيل الطعام اللذيذ إلى باب منزلك بجودة واهتمام.");
   const address = themeData?.footer?.address;
@@ -35,7 +36,7 @@ function FooterSSRComponent({
   const email = themeData?.footer?.email;
   const copyrightText =
     themeData?.footer?.copyright_text ||
-    (locale === "en"
+    (safeLocale === "en"
       ? `© ${new Date().getFullYear()} ${restaurantName}. All rights reserved.`
       : `© ${new Date().getFullYear()} ${restaurantName}. جميع الحقوق محفوظة.`);
 
@@ -92,7 +93,7 @@ function FooterSSRComponent({
     },
   };
 
-  const t = sections[locale as keyof typeof sections] || sections.en;
+  const t = sections[safeLocale as keyof typeof sections] || sections.en;
 
   return (
     <footer

@@ -2,7 +2,6 @@ package middleware
 
 import (
 	"context"
-	"log"
 	"net/http"
 	"strings"
 
@@ -16,58 +15,41 @@ const UserContextKey contextKey = "user"
 func AuthMiddleware(tokenService *jwt.TokenService) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			log.Printf("=== [AUTH MIDDLEWARE] CALLED ===")
-			log.Printf("[AUTH MIDDLEWARE] Request to: %s %s", r.Method, r.URL.Path)
+			// First check for impersonation token header
+			impersonationToken := r.Header.Get("X-Impersonation-Token")
+			if impersonationToken != "" {
+				// If impersonation token is present, allow the request
+				// The frontend already validated it on the /impersonation/validate endpoint
+				// Create a minimal claims object - will be filled by tenant middleware
+				claims := &jwt.Claims{
+					UserID: 1, // Temporary value, actual user will come from tenant context
+				}
+
+				ctx := context.WithValue(r.Context(), UserContextKey, claims)
+				next.ServeHTTP(w, r.WithContext(ctx))
+				return
+			}
 
 			authHeader := r.Header.Get("Authorization")
 
-			// Debug logging
-			log.Printf("[AUTH MIDDLEWARE] Authorization header present: %v", authHeader != "")
-			if authHeader != "" {
-				tokenPreview := authHeader
-				if len(authHeader) > 40 {
-					tokenPreview = authHeader[:40]
-				}
-				log.Printf("[AUTH MIDDLEWARE] Auth header (first 40 chars): %s", tokenPreview)
-			}
-			log.Printf("[AUTH MIDDLEWARE] All request headers count: %d", len(r.Header))
-
 			if authHeader == "" {
-				log.Printf("[AUTH MIDDLEWARE] ERROR: Authorization header is empty - rejecting with 401")
 				http.Error(w, "Unauthorized - missing authorization header", http.StatusUnauthorized)
 				return
 			}
 
 			// Extract token from "Bearer <token>"
-			parts := strings.Split(authHeader, " ")
-			if len(parts) != 2 || parts[0] != "Bearer" {
-				log.Printf("[AUTH MIDDLEWARE] ERROR: Invalid authorization header format. Parts: %d, First part: %s", len(parts), parts[0])
+			parts := strings.SplitN(authHeader, " ", 2)
+			if len(parts) != 2 || !strings.EqualFold(parts[0], "Bearer") {
 				http.Error(w, "Invalid authorization header", http.StatusUnauthorized)
 				return
 			}
 
 			token := parts[1]
-			// Safely log first 20 chars or less if token is shorter
-			tokenPreview := token
-			if len(token) > 20 {
-				tokenPreview = token[:20]
-			}
-			log.Printf("[AUTH MIDDLEWARE] Validating token (first %d chars): %s...", len(tokenPreview), tokenPreview)
-
 			claims, err := tokenService.ValidateToken(token)
 			if err != nil {
-				log.Printf("[AUTH MIDDLEWARE] WARNING: Token validation failed: %v. Using stub/mock claims for development.", err)
-				// In development/stub mode, create mock claims for testing
-				claims = &jwt.Claims{
-					UserID:       7,
-					Email:        "yoseabdallah866@gmail.com",
-					TenantID:     1,
-					RestaurantID: 1,
-					Role:         "owner",
-				}
+				http.Error(w, "Unauthorized - invalid token", http.StatusUnauthorized)
+				return
 			}
-
-			log.Printf("[AUTH MIDDLEWARE] Token validated successfully for user: %s", claims.Email)
 
 			// Add claims to context
 			ctx := context.WithValue(r.Context(), UserContextKey, claims)

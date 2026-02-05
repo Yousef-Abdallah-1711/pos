@@ -259,6 +259,54 @@ func (h *SuperAdminHandler) GetTenantUsers(w http.ResponseWriter, r *http.Reques
 	})
 }
 
+// GenerateDashboardLoginToken generates a one-time token for accessing tenant dashboard
+func (h *SuperAdminHandler) GenerateDashboardLoginToken(w http.ResponseWriter, r *http.Request) {
+	log.Printf("[SuperAdminHandler] GenerateDashboardLoginToken request\n")
+
+	superAdminID := middleware.GetSuperAdminID(r)
+	if superAdminID == 0 {
+		respondJSON(w, http.StatusUnauthorized, map[string]interface{}{
+			"success": false,
+			"error":   "unauthorized",
+		})
+		return
+	}
+
+	// Get tenant ID from path
+	tenantIDStr := r.PathValue("id")
+	tenantID, err := strconv.ParseInt(tenantIDStr, 10, 64)
+	if err != nil {
+		respondJSON(w, http.StatusBadRequest, map[string]interface{}{
+			"success": false,
+			"error":   "invalid tenant ID",
+		})
+		return
+	}
+
+	ip := middleware.GetClientIP(r)
+	userAgent := r.UserAgent()
+
+	token, err := h.tenantUC.GenerateDashboardLoginToken(r.Context(), superAdminID, tenantID, ip, userAgent)
+	if err != nil {
+		log.Printf("[SuperAdminHandler] GenerateDashboardLoginToken failed: %v\n", err)
+		respondJSON(w, http.StatusInternalServerError, map[string]interface{}{
+			"success": false,
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	respondJSON(w, http.StatusOK, map[string]interface{}{
+		"success": true,
+		"data": map[string]interface{}{
+			"token":                 token,
+			"dashboard_url":         "http://localhost:3001/auth/super-admin-login",
+			"redirect_url":          "http://localhost:3001/auth/super-admin-login?token=" + token,
+			"expires_in_seconds":    30,
+		},
+	})
+}
+
 // DisableTenant disables a tenant
 func (h *SuperAdminHandler) DisableTenant(w http.ResponseWriter, r *http.Request) {
 	log.Printf("[SuperAdminHandler] DisableTenant request\n")

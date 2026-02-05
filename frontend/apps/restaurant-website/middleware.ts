@@ -23,11 +23,22 @@ export function middleware(request: NextRequest) {
   // - /ar/menu → ar
   // - /en → en
   const pathParts = pathname.split('/');
-  const locale = pathParts[1] || 'en'; // Default to 'en' if not specified
+  const rawLocale = pathParts[1] || 'en'; // Default to 'en' if not specified
+  const normalizedLocale = rawLocale.toLowerCase();
 
   // Validate locale is one of the supported ones
   const supportedLocales = ['en', 'ar'];
-  const validLocale = supportedLocales.includes(locale) ? locale : 'en';
+  const validLocale = supportedLocales.includes(normalizedLocale) ? normalizedLocale : 'en';
+
+  // Redirect uppercase or unsupported locales to a canonical, lowercase path
+  if (rawLocale !== validLocale) {
+    const normalizedParts = [...pathParts];
+    normalizedParts[1] = validLocale;
+    const normalizedPath = normalizedParts.join('/') || '/';
+    const redirectURL = request.nextUrl.clone();
+    redirectURL.pathname = normalizedPath.startsWith('/') ? normalizedPath : `/${normalizedPath}`;
+    return NextResponse.redirect(redirectURL, 308);
+  }
 
   // Store in request headers (server-side, cannot be tampered by client)
   const requestHeaders = new Headers(request.headers);

@@ -1,6 +1,7 @@
 package usecase
 
 import (
+	"context"
 	"errors"
 	"fmt"
 
@@ -11,8 +12,9 @@ import (
 )
 
 type AuthUseCase struct {
-	repo         *repository.AuthRepository
-	tokenService *jwt.TokenService
+	repo           *repository.AuthRepository
+	superAdminRepo *repository.SuperAdminRepository
+	tokenService   *jwt.TokenService
 }
 
 func NewAuthUseCase(repo *repository.AuthRepository, tokenService *jwt.TokenService) *AuthUseCase {
@@ -20,6 +22,11 @@ func NewAuthUseCase(repo *repository.AuthRepository, tokenService *jwt.TokenServ
 		repo:         repo,
 		tokenService: tokenService,
 	}
+}
+
+// SetSuperAdminRepo sets the super admin repository for token exchange
+func (u *AuthUseCase) SetSuperAdminRepo(repo *repository.SuperAdminRepository) {
+	u.superAdminRepo = repo
 }
 
 // Register creates a new tenant, restaurant, and admin user
@@ -262,4 +269,88 @@ func (u *AuthUseCase) ForgotPassword(req *domain.ForgotPasswordRequest) error {
 	// TODO: Generate reset token and send email
 	// For now, just return success
 	return nil
+}
+
+// ExchangeSuperAdminToken exchanges a super admin one-time token for a regular JWT
+// This validates the token, retrieves the tenant info, finds an admin user, and generates a JWT
+func (u *AuthUseCase) ExchangeSuperAdminToken(token *string) (*domain.AuthResponse, error) {
+	if token == nil || *token == "" {
+		return nil, errors.New("invalid token")
+	}
+
+	fmt.Printf("\n========================================\n")
+	fmt.Printf("🔄 TOKEN EXCHANGE DEBUG START\n")
+	fmt.Printf("========================================\n")
+	fmt.Printf("Token received (first 32 chars): %s\n", (*token)[:min(32, len(*token))])
+
+	// Check if super admin repo is configured
+	if u.superAdminRepo == nil {
+		fmt.Println("❌ ERROR: Super admin repository not configured")
+		return nil, errors.New("super admin access not configured")
+	}
+	fmt.Println("✅ Super admin repository configured")
+
+	ctx := context.Background()
+
+	// 1. Validate the token and get the tenant ID
+	fmt.Println("\n→ Step 1: Validating dashboard login token...")
+	tokenData, err := u.superAdminRepo.ValidateDashboardLoginToken(ctx, *token)
+	if err != nil {
+		fmt.Printf("❌ ERROR: Token validation failed: %v\n", err)
+		return nil, fmt.Errorf("invalid or expired token: %w", err)
+	}
+
+	fmt.Printf("✅ Token validated successfully\n")
+	fmt.Printf("   TenantID: %d\n", tokenData.TenantID)
+	fmt.Printf("   SuperAdminID: %d\n", tokenData.SuperAdminID)
+	fmt.Printf("   ExpiresAt: %s\n", tokenData.ExpiresAt)
+
+	// 2. Get the first admin user from that tenant
+	fmt.Printf("\n→ Step 2: Looking up admin/owner user for tenant %d...\n", tokenData.TenantID)
+	user, err := u.superAdminRepo.GetFirstAdminUserByTenantID(ctx, tokenData.TenantID)
+	if err != nil {
+		fmt.Printf("❌ ERROR: Failed to get admin user: %v\n", err)
+		return nil, fmt.Errorf("no admin user found in tenant %d - please create a user first", tokenData.TenantID)
+	}
+
+	fmt.Printf("✅ Found admin user:\n")
+	fmt.Printf("   ID: %d\n", user.ID)
+	fmt.Printf("   Email: %s\n", user.Email)
+	fmt.Printf("   Name: %s\n", user.Name)
+	fmt.Printf("   Role: %s\n", user.Role)
+	fmt.Printf("   TenantID: %d\n", user.TenantID)
+	if user.RestaurantID != nil {
+		fmt.Printf("   RestaurantID: %d\n", *user.RestaurantID)
+	}
+
+	// 2.5 CRITICAL: Verify the returned user belongs to the correct tenant
+	// This is a safety check to prevent cross-tenant login issues
+	if user.TenantID != int(tokenData.TenantID) {
+		fmt.Printf("❌ CRITICAL ERROR: Tenant ID mismatch!\n")
+		fmt.Printf("   Expected TenantID: %d\n", tokenData.TenantID)
+		fmt.Printf("   Actual TenantID: %d\n", user.TenantID)
+		return nil, fmt.Errorf("security error: user tenant mismatch - expected %d, got %d", tokenData.TenantID, user.TenantID)
+	}
+	fmt.Printf("✅ Tenant ID verification passed\n")
+
+	// 3. Generate JWT token for the admin user
+	fmt.Println("\n→ Step 3: Generating JWT token...")
+	jwtToken, err := u.tokenService.GenerateToken(user.ID, user.TenantID, user.RestaurantID, user.Email, user.Role)
+	if err != nil {
+		fmt.Printf("❌ ERROR: Failed to generate JWT: %v\n", err)
+		return nil, fmt.Errorf("failed to generate token: %w", err)
+	}
+
+	fmt.Printf("✅ JWT generated successfully\n")
+	fmt.Printf("   Token length: %d\n", len(jwtToken))
+	fmt.Printf("   User: %s\n", user.Email)
+
+	fmt.Printf("\n========================================\n")
+	fmt.Printf("✅ TOKEN EXCHANGE COMPLETED SUCCESSFULLY\n")
+	fmt.Printf("========================================\n\n")
+
+	return &domain.AuthResponse{
+		User:  user,
+		Token: jwtToken,
+	}, nil
 }

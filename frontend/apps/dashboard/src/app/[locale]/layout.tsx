@@ -17,9 +17,9 @@ export const metadata: Metadata = {
 
 type Props = {
   children: React.ReactNode
-  params: {
+  params: Promise<{
     locale: string
-  }
+  }>
 }
 
 // NOTE: Phase 1 - English only, locale support disabled
@@ -31,6 +31,7 @@ export default async function LocaleLayout({
   children,
   params,
 }: Props) {
+  const { locale: paramLocale } = await params
   // Phase 1: Use English only
   const locale = 'en'
   const isRTL = false

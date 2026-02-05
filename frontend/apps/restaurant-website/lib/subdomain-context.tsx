@@ -1,6 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useState } from "react";
+import { parseSubdomain } from "./subdomain";
 import type { SubdomainContext } from "./subdomain";
 
 interface SubdomainContextType extends SubdomainContext {
@@ -28,12 +29,15 @@ export function SubdomainProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     async function initContext() {
       try {
-        // Get subdomain info from cookies set by middleware
-        const restaurantSlug = getCookie("restaurant-slug");
-        const isRestaurantSite = getCookie("is-restaurant-site") === "true";
-
         // Get host from window.location
         const host = typeof window !== "undefined" ? window.location.host : "";
+        const parsed = parseSubdomain(host);
+
+        // Get subdomain info from cookies set by middleware (fallback to host parsing)
+        const cookieSlug = getCookie("restaurant-slug");
+        const cookieIsRestaurantSite = getCookie("is-restaurant-site") === "true";
+        const restaurantSlug = cookieSlug || parsed.slug;
+        const isRestaurantSite = cookieSlug ? cookieIsRestaurantSite : parsed.isRestaurantSite;
 
         // If we have a restaurant slug, fetch the restaurant info to get IDs
         if (restaurantSlug && isRestaurantSite && typeof window !== "undefined") {

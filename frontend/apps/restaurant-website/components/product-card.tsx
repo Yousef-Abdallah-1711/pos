@@ -57,7 +57,12 @@ function ProductCardComponent({
     setIsAdded(true);
   };
 
-  const isAvailable = product.isAvailable !== false && product.is_available !== false;
+  const quantityInStock = Number(product.quantity_in_stock ?? 0);
+  const isOutOfStock = product.track_inventory && quantityInStock <= 0;
+  const isAvailable = product.isAvailable !== false && product.is_available !== false && !isOutOfStock;
+  const unavailableLabel = locale === "en" ? "Unavailable" : "غير متوفر";
+  const outOfStockLabel = locale === "en" ? "Out of Stock" : "نفد المخزون";
+  const badgeLabel = isOutOfStock ? outOfStockLabel : unavailableLabel;
 
   // Fallback colors if theme not loaded
   const bgColor = themeColors?.background || "#ffffff";
@@ -115,7 +120,7 @@ function ProductCardComponent({
             style={{ backgroundColor: "rgba(0, 0, 0, 0.5)" }}
           >
             <span style={{ color: "#ffffff", fontWeight: "600" }}>
-              {locale === "en" ? "Unavailable" : "غير متوفر"}
+              {badgeLabel}
             </span>
           </div>
         )}
@@ -238,7 +243,7 @@ function ProductCardComponent({
             </div>
           ) : (
             <Button disabled variant="outline" size="sm">
-              {locale === "en" ? "Unavailable" : "غير متوفر"}
+              {badgeLabel}
             </Button>
           )}
         </div>

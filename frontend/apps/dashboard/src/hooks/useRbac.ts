@@ -60,9 +60,10 @@ export const useUserPermissions = () => {
       try {
         setLoading(true)
         const response = await rbacApi.getUserPermissions()
-        setPermissions(response.data || {})
+        const resolved = (response as { data?: UserPermissions })?.data ?? response
+        setPermissions(resolved || {})
         // Cache the permissions
-        permissionCache.set('current_user', response.data || {})
+        permissionCache.set('current_user', (resolved as UserPermissions) || {})
       } catch (err) {
         setError(err instanceof Error ? err : new Error(String(err)))
       } finally {

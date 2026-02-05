@@ -116,7 +116,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Recent Activity */}
-      {stats && stats.recent_activity.length > 0 && (
+      {stats?.recent_activity && stats.recent_activity.length > 0 && (
         <div className="bg-white rounded-lg shadow p-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">
             Recent Activity

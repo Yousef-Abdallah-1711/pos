@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { superAdminAPI } from "@/lib/api";
 import type { Tenant, User, PaginatedResponse } from "@/types";
-import { ArrowLeft, Users as UsersIcon, AlertCircle } from "lucide-react";
+import { ArrowLeft, Users as UsersIcon, AlertCircle, LogIn } from "lucide-react";
 import { ImpersonationButton } from "@/components/impersonation/ImpersonationButton";
 import { toast } from "sonner";
 
@@ -16,6 +16,7 @@ export default function TenantDetailPage() {
   const [tenant, setTenant] = useState<Tenant | null>(null);
   const [users, setUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isDashboardLoading, setIsDashboardLoading] = useState(false);
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
   const limit = 10;
@@ -43,6 +44,24 @@ export default function TenantDetailPage() {
   }, [tenantId, page]);
 
   const totalPages = Math.ceil(total / limit);
+
+  const handleEnterDashboard = async () => {
+    try {
+      setIsDashboardLoading(true);
+      console.log("[TenantDetailPage] Generating dashboard login token for tenant:", tenantId);
+      const response = await superAdminAPI.generateDashboardLoginToken(tenantId);
+      console.log("[TenantDetailPage] Dashboard login token generated:", response);
+
+      // Open the dashboard in a new tab with the token
+      window.open(response.redirect_url, "_blank");
+      toast.success("Opening tenant dashboard...");
+    } catch (error) {
+      console.error("[TenantDetailPage] Failed to generate dashboard login token:", error);
+      toast.error("Failed to generate dashboard access token");
+    } finally {
+      setIsDashboardLoading(false);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -88,9 +107,28 @@ export default function TenantDetailPage() {
 
       {/* Tenant Info Card */}
       <div className="bg-white rounded-lg shadow p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">
-          Tenant Information
-        </h2>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-semibold text-gray-900">
+            Tenant Information
+          </h2>
+          <div className="flex items-center gap-2">
+            {(!users || users.length === 0) && (
+              <span className="text-sm text-amber-600 flex items-center gap-1">
+                <AlertCircle size={14} />
+                No admin users available
+              </span>
+            )}
+            <button
+              onClick={handleEnterDashboard}
+              disabled={isDashboardLoading || !users || users.length === 0}
+              title={!users || users.length === 0 ? "Cannot enter dashboard: No admin users in this tenant" : "Enter tenant dashboard"}
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              <LogIn size={18} />
+              {isDashboardLoading ? "Opening..." : "Enter Dashboard"}
+            </button>
+          </div>
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <label className="text-sm font-medium text-gray-600">Name</label>
@@ -126,7 +164,7 @@ export default function TenantDetailPage() {
           Users in this Tenant
         </h2>
 
-        {users.length === 0 ? (
+        {!users || users.length === 0 ? (
           <div className="text-center py-8">
             <UsersIcon className="mx-auto text-gray-400" size={48} />
             <p className="text-gray-600 mt-4">No users in this tenant</p>

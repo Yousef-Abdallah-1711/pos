@@ -23,7 +23,7 @@ export function SettingsSidebar({ locale }: SettingsSidebarProps) {
   const pathname = usePathname()
 
   // Check if user is admin (can manage roles)
-  const isAdmin = useHasPermission(MODULE_IDS.SETTINGS, PERMISSION_LEVELS.WRITE)
+  const { hasPermission: isAdmin } = useHasPermission(MODULE_IDS.SETTINGS, PERMISSION_LEVELS.WRITE)
 
   const isActive = (path: string) => pathname.includes(path)
 

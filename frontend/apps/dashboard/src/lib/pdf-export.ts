@@ -43,6 +43,11 @@ type Order = {
   }[];
 };
 
+const formatAmount = (value: number | null | undefined) => {
+  const numericValue = typeof value === 'number' ? value : 0;
+  return Number.isFinite(numericValue) ? numericValue.toFixed(2) : '0.00';
+};
+
 /**
  * Export a single order as PDF invoice
  */
@@ -144,23 +149,23 @@ export function exportOrdersToCSV(orders: Order[], filename: string = 'orders-ex
     ];
 
     // Prepare CSV rows
-    const rows = orders.map((order) => [
-      order.order_number,
-      `"${order.customer_name}"`, // Quote strings with special chars
-      `"${order.customer_email}"`,
-      `"${order.customer_phone}"`,
-      `"${order.delivery_address}"`,
-      order.items?.length || 0,
-      order.subtotal.toFixed(2),
-      order.tax.toFixed(2),
-      order.delivery_fee.toFixed(2),
-      order.discount.toFixed(2),
-      order.total.toFixed(2),
-      order.status,
-      order.payment_status,
-      order.payment_method,
-      new Date(order.created_at).toLocaleString(),
-    ]);
+      const rows = orders.map((order) => [
+        order.order_number,
+        `"${order.customer_name}"`, // Quote strings with special chars
+        `"${order.customer_email}"`,
+        `"${order.customer_phone}"`,
+        `"${order.delivery_address}"`,
+        order.items?.length || 0,
+        formatAmount(order.subtotal),
+        formatAmount(order.tax),
+        formatAmount(order.delivery_fee),
+        formatAmount(order.discount),
+        formatAmount(order.total),
+        order.status,
+        order.payment_status,
+        order.payment_method,
+        new Date(order.created_at).toLocaleString(),
+      ]);
 
     // Build CSV content
     const csvContent = [
@@ -204,8 +209,8 @@ function generateOrderHTML(order: Order): string {
     <tr>
       <td style="padding: 8px; border-bottom: 1px solid #e0e0e0;">${item.product_name}</td>
       <td style="padding: 8px; border-bottom: 1px solid #e0e0e0; text-align: center;">${item.quantity}</td>
-      <td style="padding: 8px; border-bottom: 1px solid #e0e0e0; text-align: right;">$${item.unit_price.toFixed(2)}</td>
-      <td style="padding: 8px; border-bottom: 1px solid #e0e0e0; text-align: right;">$${item.subtotal.toFixed(2)}</td>
+      <td style="padding: 8px; border-bottom: 1px solid #e0e0e0; text-align: right;">$${formatAmount(item.unit_price)}</td>
+      <td style="padding: 8px; border-bottom: 1px solid #e0e0e0; text-align: right;">$${formatAmount(item.subtotal)}</td>
     </tr>
     ${
       item.special_instructions
@@ -274,35 +279,35 @@ function generateOrderHTML(order: Order): string {
         <div style="width: 300px;">
           <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #ddd;">
             <span>Subtotal:</span>
-            <span>$${order.subtotal.toFixed(2)}</span>
+            <span>$${formatAmount(order.subtotal)}</span>
           </div>
           ${
             order.tax > 0
               ? `
             <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #ddd;">
               <span>Tax:</span>
-              <span>$${order.tax.toFixed(2)}</span>
+              <span>$${formatAmount(order.tax)}</span>
             </div>
           `
               : ''
           }
           <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #ddd;">
             <span>Delivery Fee:</span>
-            <span>$${order.delivery_fee.toFixed(2)}</span>
+            <span>$${formatAmount(order.delivery_fee)}</span>
           </div>
           ${
             order.discount > 0
               ? `
             <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #ddd; color: #2e7d32;">
               <span>Discount:</span>
-              <span>-$${order.discount.toFixed(2)}</span>
+              <span>-$${formatAmount(order.discount)}</span>
             </div>
           `
               : ''
           }
           <div style="display: flex; justify-content: space-between; padding: 12px 0; font-size: 16px; font-weight: bold; border-top: 2px solid #333;">
             <span>Total:</span>
-            <span>$${order.total.toFixed(2)}</span>
+            <span>$${formatAmount(order.total)}</span>
           </div>
         </div>
       </div>

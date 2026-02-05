@@ -16,7 +16,7 @@ const messages: Record<Locale, any> = {
  */
 export function getLocaleFromPath(pathname: string): Locale {
   const segments = pathname.split('/').filter(Boolean);
-  const locale = segments[0];
+  const locale = (segments[0] || '').toLowerCase();
   return (LOCALES.includes(locale as Locale) ? locale : DEFAULT_LOCALE) as Locale;
 }
 

@@ -146,7 +146,7 @@ func (uc *OrderUseCase) CreateOrder(
 	// Create order items
 	for _, item := range items {
 		item.OrderID = createdOrder.ID
-		_, err := uc.orderRepo.CreateOrderItem(&item)
+		_, err := uc.orderRepo.CreateOrderItem(tenantID, restaurantID, &item)
 		if err != nil {
 			return nil, fmt.Errorf("failed to create order item: %w", err)
 		}
@@ -176,6 +176,9 @@ func (uc *OrderUseCase) GetOrderByNumber(tenantID, restaurantID int64, orderNumb
 
 // ListOrders retrieves paginated orders with filtering
 func (uc *OrderUseCase) ListOrders(tenantID, restaurantID int64, filters *domain.OrderListFilters) (*domain.OrderListResponse, error) {
+	if filters == nil {
+		filters = &domain.OrderListFilters{}
+	}
 	// Set default pagination if not provided
 	if filters.Page < 1 {
 		filters.Page = 1

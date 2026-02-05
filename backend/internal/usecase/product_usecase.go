@@ -147,17 +147,56 @@ func (uc *ProductUseCase) UpdateProduct(
 	}
 
 	// Apply updates
+	if req.CategoryID != nil {
+		product.CategoryID = *req.CategoryID
+	}
 	if req.NameEn != nil {
 		product.NameEn = *req.NameEn
 	}
 	if req.NameAr != nil {
 		product.NameAr = *req.NameAr
 	}
-	if req.Price != nil && *req.Price > 0 {
+	if req.DescriptionEn != nil {
+		product.DescriptionEn = *req.DescriptionEn
+	}
+	if req.DescriptionAr != nil {
+		product.DescriptionAr = *req.DescriptionAr
+	}
+	if req.Price != nil {
 		product.Price = *req.Price
+	}
+	if req.Cost != nil {
+		product.Cost = req.Cost
+	}
+	if req.DiscountPrice != nil {
+		product.DiscountPrice = req.DiscountPrice
 	}
 	if req.IsAvailable != nil {
 		product.IsAvailable = *req.IsAvailable
+	}
+	if req.TrackInventory != nil {
+		product.TrackInventory = *req.TrackInventory
+	}
+	if req.QuantityInStock != nil {
+		product.QuantityInStock = *req.QuantityInStock
+	}
+	if req.LowStockThreshold != nil {
+		product.LowStockThreshold = *req.LowStockThreshold
+	}
+	if req.Featured != nil {
+		product.Featured = *req.Featured
+	}
+	if req.IsVegetarian != nil {
+		product.IsVegetarian = *req.IsVegetarian
+	}
+	if req.IsVegan != nil {
+		product.IsVegan = *req.IsVegan
+	}
+	if req.IsSpicy != nil {
+		product.IsSpicy = *req.IsSpicy
+	}
+	if req.IsGlutenFree != nil {
+		product.IsGlutenFree = *req.IsGlutenFree
 	}
 
 	product.UpdatedBy = &userID

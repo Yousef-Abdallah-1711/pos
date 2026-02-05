@@ -1,10 +1,10 @@
 'use client'
 
 import React, { useState } from 'react'
-import { useUserRoles, useRoles } from '@/hooks/useRbac'
+import { useUserRoles, useUserPermissions } from '@/hooks/useRbac'
 import { UserRoleAssignment } from '@/components/rbac/UserRoleAssignment'
 import { PermissionBoundary } from '@/components/rbac/PermissionBoundary'
-import { MODULE_IDS, PERMISSION_LEVELS, getModuleName } from '@/lib/rbac'
+import { MODULE_IDS, PERMISSION_LEVELS, getModuleName, getPermissionDescription } from '@/lib/rbac'
 import { AlertCircle, User, Lock, Shield } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -24,6 +24,7 @@ export const RBACSettings: React.FC<RBACSettingsProps> = ({
   userName,
 }) => {
   const { roles, loading } = useUserRoles(userId)
+  const { permissions, loading: permissionsLoading } = useUserPermissions()
   const [showRoleAssignment, setShowRoleAssignment] = useState(false)
 
   return (
@@ -127,6 +128,8 @@ export const RBACSettings: React.FC<RBACSettingsProps> = ({
                 <PermissionModuleSummary
                   key={moduleId}
                   moduleId={moduleId}
+                  permissionLevel={permissions[moduleId]}
+                  loading={permissionsLoading}
                 />
               ))}
             </div>
@@ -149,9 +152,12 @@ export const RBACSettings: React.FC<RBACSettingsProps> = ({
  * PermissionModuleSummary Component
  * Display permission level for a single module
  */
-const PermissionModuleSummary: React.FC<{ moduleId: number }> = ({ moduleId }) => {
-  const { permissions } = useUserRoles(0) // This won't work as expected
-  // Instead, we'll use useUserPermissions from the parent context or as a separate hook
+const PermissionModuleSummary: React.FC<{
+  moduleId: number
+  permissionLevel?: string
+  loading: boolean
+}> = ({ moduleId, permissionLevel, loading }) => {
+  const level = permissionLevel || PERMISSION_LEVELS.NONE
 
   return (
     <div className="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
@@ -159,7 +165,7 @@ const PermissionModuleSummary: React.FC<{ moduleId: number }> = ({ moduleId }) =
         {getModuleName(moduleId)}
       </p>
       <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-        Permission level displayed here
+        {loading ? 'Loading permissions...' : `${level} - ${getPermissionDescription(level)}`}
       </p>
     </div>
   )

@@ -21,36 +21,18 @@ func TenantContextMiddleware(next http.Handler) http.Handler {
 		var tenantID int64
 		var restaurantID int64
 
-		fmt.Printf("[DEBUG TENANT MIDDLEWARE] Processing request: %s %s\n", r.Method, r.URL.Path)
-		log.Printf("[TENANT MIDDLEWARE] Processing request: %s %s", r.Method, r.URL.Path)
-		log.Printf("[TENANT MIDDLEWARE] Context keys available: %v", r.Context())
-
 		// Try to get from JWT claims first (most secure)
 		claims := GetUserClaims(r)
-		log.Printf("[TENANT MIDDLEWARE] GetUserClaims result: %v (is nil: %v)", claims, claims == nil)
 		if claims != nil {
-			log.Printf("[TENANT MIDDLEWARE] Claims struct: UserID=%d, Email=%s, TenantID=%d, RestaurantID=%d, Role=%s",
-				claims.UserID, claims.Email, claims.TenantID, claims.RestaurantID, claims.Role)
-		}
-
-		if claims != nil {
-			log.Printf("[TENANT MIDDLEWARE] Claims found - TenantID: %d, RestaurantID: %d", claims.TenantID, claims.RestaurantID)
-
 			// Explicit conversion from int to int64
 			tenantID = int64(claims.TenantID)
 			restaurantID = int64(claims.RestaurantID)
 
-			log.Printf("[TENANT MIDDLEWARE] After conversion - TenantID: %d (>0: %v), RestaurantID: %d (>0: %v)",
-				tenantID, tenantID > 0, restaurantID, restaurantID > 0)
-
 			if tenantID > 0 && restaurantID > 0 {
-				log.Printf("[TENANT MIDDLEWARE] Extracted from JWT - Tenant ID: %d, Restaurant ID: %d", tenantID, restaurantID)
 				ctx := context.WithValue(r.Context(), TenantContextKey, tenantID)
 				ctx = context.WithValue(ctx, RestaurantContextKey, restaurantID)
 				next.ServeHTTP(w, r.WithContext(ctx))
 				return
-			} else {
-				log.Printf("[TENANT MIDDLEWARE] WARNING: Claims found but IDs are 0 - TenantID: %d, RestaurantID: %d", tenantID, restaurantID)
 			}
 		}
 
@@ -74,7 +56,6 @@ func TenantContextMiddleware(next http.Handler) http.Handler {
 				return
 			}
 
-			log.Printf("[TENANT MIDDLEWARE] Extracted from headers - Tenant ID: %d, Restaurant ID: %d", tenantID, restaurantID)
 			ctx := context.WithValue(r.Context(), TenantContextKey, tenantID)
 			ctx = context.WithValue(ctx, RestaurantContextKey, restaurantID)
 			next.ServeHTTP(w, r.WithContext(ctx))
@@ -82,8 +63,7 @@ func TenantContextMiddleware(next http.Handler) http.Handler {
 		}
 
 		// If no tenant context is found, it's an error
-		log.Printf("[TENANT MIDDLEWARE] ERROR: Missing tenant context - no JWT claims and no headers found")
-		log.Printf("[TENANT MIDDLEWARE] ERROR: X-Tenant-ID header: '%s', X-Restaurant-ID header: '%s'", r.Header.Get("X-Tenant-ID"), r.Header.Get("X-Restaurant-ID"))
+		log.Printf("[TENANT MIDDLEWARE] Missing tenant context for %s %s", r.Method, r.URL.Path)
 		http.Error(w, "Missing tenant context", http.StatusBadRequest)
 	})
 }

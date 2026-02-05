@@ -19,7 +19,11 @@ export function Sidebar() {
   const locale = getLocaleFromPath(pathname)
   const t = createTranslator(locale)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-  const [expandedItems, setExpandedItems] = useState<string[]>([t('navigation.products'), t('navigation.hr')])
+  const [expandedItems, setExpandedItems] = useState<string[]>([
+    t('navigation.orders'),
+    t('navigation.products'),
+    t('navigation.hr'),
+  ])
 
   const sidebarItems: SidebarItem[] = [
     {
@@ -29,8 +33,11 @@ export function Sidebar() {
     },
     {
       label: t('navigation.orders'),
-      href: `/dashboard/orders`,
       icon: <Truck className="h-5 w-5" />,
+      children: [
+        { label: t('navigation.orders'), href: `/dashboard/orders` },
+        { label: t('navigation.drivers'), href: `/dashboard/drivers` },
+      ],
     },
     {
       label: t('navigation.products'),
