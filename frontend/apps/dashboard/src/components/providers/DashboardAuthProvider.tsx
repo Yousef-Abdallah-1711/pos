@@ -86,11 +86,14 @@ const DashboardAuthProvider = ({ children }: { children: ReactNode }) => {
       // Process URL auth params if any
       await processAuth()
 
-      // Then mark as processed
+      // Wait longer for Zustand persist middleware to write to localStorage
+      // This is crucial for the API interceptor to pick up the token
+      await new Promise(resolve => setTimeout(resolve, 200))
+
+      // Then mark as processed - this will trigger the second useEffect
       setUrlAuthProcessed(true)
 
-      // Wait for Zustand persist middleware to hydrate from localStorage
-      // This is crucial for the store to load saved auth data
+      // Wait for hydration state to update
       await new Promise(resolve => setTimeout(resolve, 100))
       setIsHydrated(true)
     }
@@ -108,14 +111,22 @@ const DashboardAuthProvider = ({ children }: { children: ReactNode }) => {
       return
     }
 
-    // If URL auth was just applied this session, trust Zustand state (not localStorage)
-    // This avoids race conditions where localStorage might have stale data
-    if (urlAuthApplied.current && user && token) {
-      // Auth from URL params was successfully applied
-      return
+    // If URL auth was just applied this session AND we have auth in Zustand state, we're good
+    // This avoids checking localStorage which might not have been written yet
+    if (urlAuthApplied.current) {
+      if (user && token) {
+        // Auth from URL params was successfully applied - stay authenticated
+        return
+      } else {
+        // URL auth was applied but failed - redirect to login
+        const landingUrl = getConfig().landingUrl
+        const redirectUrl = `${landingUrl}/auth/login`
+        window.location.href = redirectUrl
+        return
+      }
     }
 
-    // Check localStorage directly as it's the source of truth
+    // If no URL auth was applied, check localStorage for existing session
     const savedAuth = localStorage.getItem('auth-storage')
 
     let localStorageAuth = null
@@ -143,12 +154,9 @@ const DashboardAuthProvider = ({ children }: { children: ReactNode }) => {
     if (!finalIsAuthenticated) {
       const landingUrl = getConfig().landingUrl
       const redirectUrl = `${landingUrl}/auth/login`
-      // Use setTimeout to ensure state is fully updated before redirect
-      setTimeout(() => {
-        window.location.href = redirectUrl
-      }, 100)
+      window.location.href = redirectUrl
     }
-  }, [isHydrated, urlAuthProcessed, isAuthenticated, user, token])
+  }, [isHydrated, urlAuthProcessed])
 
   // If not hydrated or not authenticated, show loading while redirecting
   if (!isHydrated || !urlAuthProcessed || !isAuthenticated) {
