@@ -59,13 +59,13 @@ const DashboardAuthProvider = ({ children }: { children: ReactNode }) => {
           if (response.ok) {
             const result = await response.json()
             if (result.success && result.data) {
-              const { user: impersonatedUser, session_id } = result.data
+              const { user: impersonatedUser } = result.data
 
               // Mark that we applied URL auth this session
               urlAuthApplied.current = true
 
-              // Use the session_id as the token for impersonation
-              setAuth(impersonatedUser, session_id)
+              // Use the impersonationToken as the auth token for subsequent requests
+              setAuth(impersonatedUser, impersonationToken)
 
               // Clean URL
               await new Promise(resolve => setTimeout(resolve, 100))
