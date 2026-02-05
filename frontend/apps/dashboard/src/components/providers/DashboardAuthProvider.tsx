@@ -42,13 +42,12 @@ const DashboardAuthProvider = ({ children }: { children: ReactNode }) => {
           setAuth(authUser, authToken)
 
           // Wait a moment for Zustand to save to localStorage, then clean URL
-          setTimeout(() => {
-            // Remove auth params from URL for cleanliness
-            const cleanUrl = window.location.pathname
-            window.history.replaceState({}, document.title, cleanUrl)
-          }, 100)
+          await new Promise(resolve => setTimeout(resolve, 100))
+          const cleanUrl = window.location.pathname
+          window.history.replaceState({}, document.title, cleanUrl)
         } catch (error) {
           // Error parsing auth params - continue with normal flow
+          console.error('Failed to process auth token:', error)
         }
       }
       // Handle impersonation token
@@ -69,31 +68,37 @@ const DashboardAuthProvider = ({ children }: { children: ReactNode }) => {
               setAuth(impersonatedUser, session_id)
 
               // Clean URL
-              setTimeout(() => {
-                const cleanUrl = window.location.pathname
-                window.history.replaceState({}, document.title, cleanUrl)
-              }, 100)
+              await new Promise(resolve => setTimeout(resolve, 100))
+              const cleanUrl = window.location.pathname
+              window.history.replaceState({}, document.title, cleanUrl)
             }
+          } else {
+            console.error('Token validation failed with status:', response.status)
           }
         } catch (error) {
           console.error('Failed to validate impersonation token:', error)
           // Continue with normal flow
         }
       }
-
-      setUrlAuthProcessed(true)
     }
 
-    processAuth()
+    const initAuth = async () => {
+      // Process URL auth params if any
+      await processAuth()
 
-    // Wait for Zustand persist middleware to hydrate from localStorage
-    // This is crucial for the store to load saved auth data
-    const timer = setTimeout(() => {
+      // Then mark as processed
+      setUrlAuthProcessed(true)
+
+      // Wait for Zustand persist middleware to hydrate from localStorage
+      // This is crucial for the store to load saved auth data
+      await new Promise(resolve => setTimeout(resolve, 100))
       setIsHydrated(true)
-    }, 100)
+    }
+
+    initAuth()
 
     return () => {
-      clearTimeout(timer)
+      // Cleanup if needed
     }
   }, [setAuth])
 
