@@ -23,8 +23,10 @@ export default function LocaleHomePage() {
 
   useEffect(() => {
     // Don't redirect if locale is invalid (e.g., /dashboard was interpreted as locale)
+    // Preserve query parameters during redirect (important for auth flow)
     if (!isValidLocale) {
-      window.location.href = `${getConfig().dashboardUrl}/en/dashboard`
+      const queryString = window.location.search || ''
+      window.location.href = `${getConfig().dashboardUrl}/en/dashboard${queryString}`
       return
     }
 

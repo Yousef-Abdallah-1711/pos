@@ -1,3 +1,4 @@
+'use client'
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
@@ -19,6 +20,7 @@ interface AuthState {
   setAuth: (user: User, token: string) => void
   logout: () => void
   isAuthenticated: () => boolean
+  initializeFromCookie: () => void
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -27,18 +29,36 @@ export const useAuthStore = create<AuthState>()(
       user: null,
       token: null,
       setAuth: (user, token) => {
-        console.log('=== Setting auth - User:', user.email, 'Token:', token.substring(0, 20) + '...')
         set({ user, token })
       },
       logout: () => {
-        console.log('=== Logging out ===')
         set({ user: null, token: null })
       },
       isAuthenticated: () => {
         const state = get()
-        const hasAuth = !!(state.user && state.token)
-        console.log('=== isAuthenticated check:', hasAuth, '===')
-        return hasAuth
+        return !!(state.user && state.token)
+      },
+      initializeFromCookie: () => {
+        try {
+          const cookieString = document.cookie
+          const cookies = cookieString.split('; ').reduce((acc, cookie) => {
+            const [key, value] = cookie.split('=')
+            if (key && value) {
+              acc[key] = decodeURIComponent(value)
+            }
+            return acc
+          }, {} as Record<string, string>)
+
+          const token = cookies['auth_token']
+          const userStr = cookies['auth_user']
+
+          if (token && userStr) {
+            const user = JSON.parse(userStr)
+            set({ user, token })
+          }
+        } catch (error) {
+          // Silent fail - cookie initialization is optional
+        }
       },
     }),
     {

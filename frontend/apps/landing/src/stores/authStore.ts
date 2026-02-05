@@ -28,20 +28,14 @@ export const useAuthStore = create<AuthState>()(
       token: null,
       isAuthenticated: false,
       setAuth: (user, token) => {
-        console.log('=== LANDING AUTH STORE: setAuth called ===')
-        console.log('User:', user)
-        console.log('Token (first 20 chars):', token?.substring(0, 20) + '...')
         localStorage.setItem('token', token)
         localStorage.setItem('user', JSON.stringify(user))
         set({ user, token, isAuthenticated: true })
-        console.log('Auth state updated successfully')
       },
       logout: () => {
-        console.log('=== LANDING AUTH STORE: logout called ===')
         localStorage.removeItem('token')
         localStorage.removeItem('user')
         set({ user: null, token: null, isAuthenticated: false })
-        console.log('Auth state cleared')
       },
     }),
     {
