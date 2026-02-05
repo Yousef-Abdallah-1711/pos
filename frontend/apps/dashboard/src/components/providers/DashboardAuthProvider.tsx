@@ -1,6 +1,6 @@
 'use client'
 
-import { ReactNode, useEffect, useState } from 'react';
+import { ReactNode, useEffect, useState, useRef } from 'react';
 import { useAuthStore } from '@/stores/authStore';
 import { getConfig } from '@/lib/config';
 
@@ -10,6 +10,7 @@ const DashboardAuthProvider = ({ children }: { children: ReactNode }) => {
   const setAuth = useAuthStore((state) => state.setAuth)
   const [isHydrated, setIsHydrated] = useState(false)
   const [urlAuthProcessed, setUrlAuthProcessed] = useState(false)
+  const urlAuthApplied = useRef(false) // Track if URL auth was applied this session
 
   // Check if authenticated by checking if user and token exist
   const isAuthenticated = !!(user && token)
@@ -21,31 +22,69 @@ const DashboardAuthProvider = ({ children }: { children: ReactNode }) => {
       return
     }
 
-    // First, try to initialize from URL parameters (for super admin login redirect)
-    const params = new URLSearchParams(window.location.search)
-    const authToken = params.get('auth_token')
-    const authUserStr = params.get('auth_user')
+    const processAuth = async () => {
+      // First, try to initialize from URL parameters (for super admin login redirect)
+      const params = new URLSearchParams(window.location.search)
+      const authToken = params.get('auth_token')
+      const authUserStr = params.get('auth_user')
+      const impersonationToken = params.get('impersonation_token')
 
-    if (authToken && authUserStr) {
-      try {
-        const authUser = JSON.parse(decodeURIComponent(authUserStr))
+      // Handle regular auth token + user
+      if (authToken && authUserStr) {
+        try {
+          const authUser = JSON.parse(decodeURIComponent(authUserStr))
 
-        // Call setAuth to update the Zustand store
-        // The persist middleware will automatically save to localStorage
-        setAuth(authUser, authToken)
+          // Mark that we applied URL auth this session
+          urlAuthApplied.current = true
 
-        // Wait a moment for Zustand to save to localStorage, then clean URL
-        setTimeout(() => {
-          // Remove auth params from URL for cleanliness
-          const cleanUrl = window.location.pathname
-          window.history.replaceState({}, document.title, cleanUrl)
-        }, 100)
-      } catch (error) {
-        // Error parsing auth params - continue with normal flow
+          // Call setAuth to update the Zustand store
+          // The persist middleware will automatically save to localStorage
+          setAuth(authUser, authToken)
+
+          // Wait a moment for Zustand to save to localStorage, then clean URL
+          setTimeout(() => {
+            // Remove auth params from URL for cleanliness
+            const cleanUrl = window.location.pathname
+            window.history.replaceState({}, document.title, cleanUrl)
+          }, 100)
+        } catch (error) {
+          // Error parsing auth params - continue with normal flow
+        }
       }
+      // Handle impersonation token
+      else if (impersonationToken) {
+        try {
+          const apiUrl = getConfig().apiUrl
+          const response = await fetch(`${apiUrl}/impersonation/validate?token=${encodeURIComponent(impersonationToken)}`)
+
+          if (response.ok) {
+            const result = await response.json()
+            if (result.success && result.data) {
+              const { user: impersonatedUser, session_id } = result.data
+
+              // Mark that we applied URL auth this session
+              urlAuthApplied.current = true
+
+              // Use the session_id as the token for impersonation
+              setAuth(impersonatedUser, session_id)
+
+              // Clean URL
+              setTimeout(() => {
+                const cleanUrl = window.location.pathname
+                window.history.replaceState({}, document.title, cleanUrl)
+              }, 100)
+            }
+          }
+        } catch (error) {
+          console.error('Failed to validate impersonation token:', error)
+          // Continue with normal flow
+        }
+      }
+
+      setUrlAuthProcessed(true)
     }
 
-    setUrlAuthProcessed(true)
+    processAuth()
 
     // Wait for Zustand persist middleware to hydrate from localStorage
     // This is crucial for the store to load saved auth data
@@ -61,6 +100,13 @@ const DashboardAuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     // Only run regular auth check after hydration and URL params processed
     if (!isHydrated || !urlAuthProcessed) {
+      return
+    }
+
+    // If URL auth was just applied this session, trust Zustand state (not localStorage)
+    // This avoids race conditions where localStorage might have stale data
+    if (urlAuthApplied.current && user && token) {
+      // Auth from URL params was successfully applied
       return
     }
 
