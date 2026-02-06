@@ -285,7 +285,9 @@
       "Bash(git status:*)",
       "Bash(cmd //c \"taskkill /F /PID 16764\")",
       "Bash(where:*)",
-      "Bash(do curl -s -o /dev/null -w \"Port $port: %{http_code}\\\\n\" http://localhost:$port)"
+      "Bash(do curl -s -o /dev/null -w \"Port $port: %{http_code}\\\\n\" http://localhost:$port)",
+      "Bash(__NEW_LINE_2087787e3cd07de5__ git add -A)",
+      "Bash(__NEW_LINE_2087787e3cd07de5__ echo \"\")"
     ]
   }
 }
