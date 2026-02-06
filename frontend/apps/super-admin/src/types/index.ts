@@ -141,3 +141,46 @@ export interface ApiError {
   error: string;
   message?: string;
 }
+
+// Subscription Management
+export type SubscriptionStatus = 'trial' | 'active' | 'expired' | 'suspended' | 'disabled';
+
+export interface TenantSubscriptionInfo {
+  tenant_id: number;
+  tenant_name: string;
+  slug: string;
+  subscription_status: SubscriptionStatus;
+  trial_start_date: string | null;
+  trial_end_date: string | null;
+  trial_days: number;
+  days_remaining: number;
+  is_disabled: boolean;
+  disabled_at: string | null;
+  disabled_reason: string | null;
+  can_access: boolean;
+  block_reason: string | null;
+}
+
+export interface SubscriptionHistoryItem {
+  id: number;
+  tenant_id: number;
+  action: string;
+  performed_by: number | null;
+  old_status: string | null;
+  new_status: string | null;
+  old_trial_end_date: string | null;
+  new_trial_end_date: string | null;
+  days_added: number | null;
+  reason: string | null;
+  ip_address: string | null;
+  user_agent: string | null;
+  metadata: Record<string, unknown> | null;
+  created_at: string;
+}
+
+export interface SubscriptionHistoryResponse {
+  items: SubscriptionHistoryItem[];
+  total: number;
+  page: number;
+  page_size: number;
+}

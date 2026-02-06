@@ -123,29 +123,29 @@ func TestOrderCreationValidation(t *testing.T) {
 		{
 			name: "Valid complete order",
 			order: &domain.Order{
-				TenantID:              1,
-				RestaurantID:          1,
-				OrderNumber:           "ORD-2025-000002",
-				CustomerName:          "Jane Doe",
-				CustomerEmail:         "jane@example.com",
-				CustomerPhone:         "1234567890",
-				DeliveryAddress:       "123 Main St",
-				DeliveryCity:          "City",
-				DeliveryArea:          "Area",
-				DeliveryZipCode:       "12345",
-				DeliveryLatitude:      40.7128,
-				DeliveryLongitude:     -74.0060,
-				DeliveryInstructions:  "Ring bell twice",
-				Subtotal:              100.00,
-				TaxAmount:             10.00,
-				DiscountAmount:        5.00,
-				DeliveryFee:           5.00,
-				TotalAmount:           110.00,
-				PaymentMethod:         "card",
-				PaymentStatus:         "pending",
-				Status:                "pending",
-				Notes:                 "Handle with care",
-				OrderSource:           "website",
+				TenantID:             1,
+				RestaurantID:         1,
+				OrderNumber:          "ORD-2025-000002",
+				CustomerName:         "Jane Doe",
+				CustomerEmail:        "jane@example.com",
+				CustomerPhone:        "1234567890",
+				DeliveryAddress:      "123 Main St",
+				DeliveryCity:         "City",
+				DeliveryArea:         "Area",
+				DeliveryZipCode:      "12345",
+				DeliveryLatitude:     40.7128,
+				DeliveryLongitude:    -74.0060,
+				DeliveryInstructions: "Ring bell twice",
+				Subtotal:             100.00,
+				TaxAmount:            10.00,
+				DiscountAmount:       5.00,
+				DeliveryFee:          5.00,
+				TotalAmount:          110.00,
+				PaymentMethod:        "card",
+				PaymentStatus:        "pending",
+				Status:               "pending",
+				Notes:                "Handle with care",
+				OrderSource:          "website",
 			},
 			description: "Order with all optional fields",
 			shouldPass:  true,
@@ -219,13 +219,13 @@ func TestOrderItemValidation(t *testing.T) {
 		{
 			name: "Item with special instructions",
 			item: &domain.OrderItem{
-				OrderID:              1,
-				ProductID:            1,
-				ProductName:          "Pizza",
-				Quantity:             1,
-				UnitPrice:            10.00,
-				TotalPrice:           10.00,
-				SpecialInstructions:  "No onions, extra cheese",
+				OrderID:             1,
+				ProductID:           1,
+				ProductName:         "Pizza",
+				Quantity:            1,
+				UnitPrice:           10.00,
+				TotalPrice:          10.00,
+				SpecialInstructions: "No onions, extra cheese",
 			},
 			description: "Item with special instructions",
 			shouldPass:  true,
@@ -481,10 +481,10 @@ func TestStatusTransitionValidation(t *testing.T) {
 // TestPaymentStatusValidation tests payment status values
 func TestPaymentStatusValidation(t *testing.T) {
 	tests := []struct {
-		name         string
-		status       string
+		name          string
+		status        string
 		shouldBeValid bool
-		description  string
+		description   string
 	}{
 		{"pending", "pending", true, "Order payment not yet received"},
 		{"paid", "paid", true, "Order payment received"},

@@ -13,7 +13,7 @@ type RBACRole struct {
 	TenantID     int64
 	RestaurantID int64
 	RoleName     string
-	Description string
+	Description  string
 	RoleCode     string
 	IsSystemRole bool
 	IsActive     bool

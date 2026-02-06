@@ -125,9 +125,9 @@ func TestRBACPermissionHandler_AssignPermission(t *testing.T) {
 
 	// Create request
 	reqBody := AssignPermissionRequest{
-		RoleID:            1,
-		ModuleID:          1,
-		PermissionLevel:   domain.PermissionRead,
+		RoleID:          1,
+		ModuleID:        1,
+		PermissionLevel: domain.PermissionRead,
 	}
 	body, _ := json.Marshal(reqBody)
 
@@ -204,13 +204,13 @@ func TestRBACUserRoleHandler_AssignRoleToUser(t *testing.T) {
 
 // Mock repositories for handler testing
 type MockRoleRepository struct {
-	roles map[int64]*domain.Role
+	roles  map[int64]*domain.Role
 	nextID int64
 }
 
 func NewMockRoleRepository() *MockRoleRepository {
 	return &MockRoleRepository{
-		roles: make(map[int64]*domain.Role),
+		roles:  make(map[int64]*domain.Role),
 		nextID: 1,
 	}
 }

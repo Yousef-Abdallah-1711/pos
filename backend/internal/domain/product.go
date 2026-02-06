@@ -172,23 +172,23 @@ type CreateProductRequest struct {
 
 // UpdateProductRequest is the request DTO for updating products
 type UpdateProductRequest struct {
-	CategoryID         *int     `json:"category_id"`
-	NameEn             *string  `json:"name_en"`
-	NameAr             *string  `json:"name_ar"`
-	DescriptionEn      *string  `json:"description_en"`
-	DescriptionAr      *string  `json:"description_ar"`
-	Price              *float64 `json:"price"`
-	Cost               *float64 `json:"cost"`
-	DiscountPrice      *float64 `json:"discount_price"`
-	IsAvailable        *bool    `json:"is_available"`
-	TrackInventory     *bool    `json:"track_inventory"`
-	QuantityInStock    *int     `json:"quantity_in_stock"`
-	LowStockThreshold  *int     `json:"low_stock_threshold"`
-	Featured           *bool    `json:"featured"`
-	IsVegetarian       *bool    `json:"is_vegetarian"`
-	IsVegan            *bool    `json:"is_vegan"`
-	IsSpicy            *bool    `json:"is_spicy"`
-	IsGlutenFree       *bool    `json:"is_gluten_free"`
+	CategoryID        *int     `json:"category_id"`
+	NameEn            *string  `json:"name_en"`
+	NameAr            *string  `json:"name_ar"`
+	DescriptionEn     *string  `json:"description_en"`
+	DescriptionAr     *string  `json:"description_ar"`
+	Price             *float64 `json:"price"`
+	Cost              *float64 `json:"cost"`
+	DiscountPrice     *float64 `json:"discount_price"`
+	IsAvailable       *bool    `json:"is_available"`
+	TrackInventory    *bool    `json:"track_inventory"`
+	QuantityInStock   *int     `json:"quantity_in_stock"`
+	LowStockThreshold *int     `json:"low_stock_threshold"`
+	Featured          *bool    `json:"featured"`
+	IsVegetarian      *bool    `json:"is_vegetarian"`
+	IsVegan           *bool    `json:"is_vegan"`
+	IsSpicy           *bool    `json:"is_spicy"`
+	IsGlutenFree      *bool    `json:"is_gluten_free"`
 }
 
 // ProductListResponse is paginated list response

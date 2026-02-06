@@ -8,21 +8,21 @@ import (
 
 // Employee represents an employee in the system
 type Employee struct {
-	ID           int       `json:"id"`
-	TenantID     int       `json:"tenant_id"`
-	RestaurantID int       `json:"restaurant_id"`
+	ID           int `json:"id"`
+	TenantID     int `json:"tenant_id"`
+	RestaurantID int `json:"restaurant_id"`
 
 	// Personal Information
-	EmployeeCode  string         `json:"employee_code"`
-	FirstName     string         `json:"first_name"`
-	LastName      string         `json:"last_name"`
-	FirstNameAr   string         `json:"first_name_ar,omitempty"`
-	LastNameAr    string         `json:"last_name_ar,omitempty"`
-	Email         string         `json:"email"`
-	Phone         string         `json:"phone,omitempty"`
-	DateOfBirth   *time.Time     `json:"date_of_birth,omitempty"`
-	Gender        string         `json:"gender,omitempty"` // 'male', 'female', 'other'
-	NationalID    string         `json:"national_id,omitempty"`
+	EmployeeCode string     `json:"employee_code"`
+	FirstName    string     `json:"first_name"`
+	LastName     string     `json:"last_name"`
+	FirstNameAr  string     `json:"first_name_ar,omitempty"`
+	LastNameAr   string     `json:"last_name_ar,omitempty"`
+	Email        string     `json:"email"`
+	Phone        string     `json:"phone,omitempty"`
+	DateOfBirth  *time.Time `json:"date_of_birth,omitempty"`
+	Gender       string     `json:"gender,omitempty"` // 'male', 'female', 'other'
+	NationalID   string     `json:"national_id,omitempty"`
 
 	// Address Information
 	Address    string `json:"address,omitempty"`
@@ -34,7 +34,7 @@ type Employee struct {
 	// Employment Information
 	HireDate         time.Time  `json:"hire_date"`
 	TerminationDate  *time.Time `json:"termination_date,omitempty"`
-	EmploymentType   string     `json:"employment_type"` // 'full_time', 'part_time', 'contract', 'intern'
+	EmploymentType   string     `json:"employment_type"`   // 'full_time', 'part_time', 'contract', 'intern'
 	EmploymentStatus string     `json:"employment_status"` // 'active', 'on_leave', 'suspended', 'terminated'
 	Position         string     `json:"position"`
 	Department       string     `json:"department,omitempty"`
@@ -60,11 +60,11 @@ type Employee struct {
 	Notes           string          `json:"notes,omitempty"`
 
 	// System Fields
-	IsActive  bool       `json:"is_active"`
-	CreatedAt time.Time  `json:"created_at"`
-	UpdatedAt time.Time  `json:"updated_at"`
-	CreatedBy *int       `json:"created_by,omitempty"`
-	UpdatedBy *int       `json:"updated_by,omitempty"`
+	IsActive  bool      `json:"is_active"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+	CreatedBy *int      `json:"created_by,omitempty"`
+	UpdatedBy *int      `json:"updated_by,omitempty"`
 
 	// Relations (populated on demand)
 	Roles []Role `json:"roles,omitempty"`
@@ -72,9 +72,9 @@ type Employee struct {
 
 // Role represents an employee role with permissions
 type Role struct {
-	ID           int       `json:"id"`
-	TenantID     int       `json:"tenant_id"`
-	RestaurantID int       `json:"restaurant_id"`
+	ID           int `json:"id"`
+	TenantID     int `json:"tenant_id"`
+	RestaurantID int `json:"restaurant_id"`
 
 	// Role Information
 	RoleName      string `json:"role_name"`
@@ -98,52 +98,52 @@ type Role struct {
 	MaxSalary *float64 `json:"max_salary,omitempty"`
 
 	// System Fields
-	IsActive     bool       `json:"is_active"`
-	IsSystemRole bool       `json:"is_system_role"`
-	DisplayOrder int        `json:"display_order"`
-	CreatedAt    time.Time  `json:"created_at"`
-	UpdatedAt    time.Time  `json:"updated_at"`
-	CreatedBy    *int       `json:"created_by,omitempty"`
-	UpdatedBy    *int       `json:"updated_by,omitempty"`
+	IsActive     bool      `json:"is_active"`
+	IsSystemRole bool      `json:"is_system_role"`
+	DisplayOrder int       `json:"display_order"`
+	CreatedAt    time.Time `json:"created_at"`
+	UpdatedAt    time.Time `json:"updated_at"`
+	CreatedBy    *int      `json:"created_by,omitempty"`
+	UpdatedBy    *int      `json:"updated_by,omitempty"`
 }
 
 // EmployeeRole represents the junction between employees and roles
 type EmployeeRole struct {
-	ID             int        `json:"id"`
-	TenantID       int        `json:"tenant_id"`
-	EmployeeID     int        `json:"employee_id"`
-	RoleID         int        `json:"role_id"`
-	AssignedDate   time.Time  `json:"assigned_date"`
-	EffectiveFrom  time.Time  `json:"effective_from"`
-	EffectiveTo    *time.Time `json:"effective_to,omitempty"`
-	IsPrimary      bool       `json:"is_primary"`
-	AssignedBy     *int       `json:"assigned_by,omitempty"`
-	AssignmentNotes string    `json:"assignment_notes,omitempty"`
-	IsActive       bool       `json:"is_active"`
-	CreatedAt      time.Time  `json:"created_at"`
-	UpdatedAt      time.Time  `json:"updated_at"`
+	ID              int        `json:"id"`
+	TenantID        int        `json:"tenant_id"`
+	EmployeeID      int        `json:"employee_id"`
+	RoleID          int        `json:"role_id"`
+	AssignedDate    time.Time  `json:"assigned_date"`
+	EffectiveFrom   time.Time  `json:"effective_from"`
+	EffectiveTo     *time.Time `json:"effective_to,omitempty"`
+	IsPrimary       bool       `json:"is_primary"`
+	AssignedBy      *int       `json:"assigned_by,omitempty"`
+	AssignmentNotes string     `json:"assignment_notes,omitempty"`
+	IsActive        bool       `json:"is_active"`
+	CreatedAt       time.Time  `json:"created_at"`
+	UpdatedAt       time.Time  `json:"updated_at"`
 }
 
 // Attendance represents employee daily attendance
 type Attendance struct {
-	ID           int       `json:"id"`
-	TenantID     int       `json:"tenant_id"`
-	RestaurantID int       `json:"restaurant_id"`
-	EmployeeID   int       `json:"employee_id"`
+	ID           int `json:"id"`
+	TenantID     int `json:"tenant_id"`
+	RestaurantID int `json:"restaurant_id"`
+	EmployeeID   int `json:"employee_id"`
 
 	// Attendance Date
 	AttendanceDate time.Time `json:"attendance_date"`
 
 	// Clock Times
-	ClockIn             *time.Time `json:"clock_in,omitempty"`
-	ClockOut            *time.Time `json:"clock_out,omitempty"`
-	ScheduledClockIn    *string    `json:"scheduled_clock_in,omitempty"` // TIME format
-	ScheduledClockOut   *string    `json:"scheduled_clock_out,omitempty"` // TIME format
+	ClockIn           *time.Time `json:"clock_in,omitempty"`
+	ClockOut          *time.Time `json:"clock_out,omitempty"`
+	ScheduledClockIn  *string    `json:"scheduled_clock_in,omitempty"`  // TIME format
+	ScheduledClockOut *string    `json:"scheduled_clock_out,omitempty"` // TIME format
 
 	// Break Times
-	BreakStart         *time.Time `json:"break_start,omitempty"`
-	BreakEnd           *time.Time `json:"break_end,omitempty"`
-	TotalBreakMinutes  int        `json:"total_break_minutes"`
+	BreakStart        *time.Time `json:"break_start,omitempty"`
+	BreakEnd          *time.Time `json:"break_end,omitempty"`
+	TotalBreakMinutes int        `json:"total_break_minutes"`
 
 	// Calculated Fields
 	TotalHours    *float64 `json:"total_hours,omitempty"`
@@ -151,20 +151,20 @@ type Attendance struct {
 	OvertimeHours float64  `json:"overtime_hours"`
 
 	// Attendance Status
-	Status                 string `json:"status"` // 'present', 'absent', 'late', 'half_day', 'on_leave', 'holiday', 'weekend'
-	IsLate                 bool   `json:"is_late"`
-	LateByMinutes          int    `json:"late_by_minutes"`
-	IsEarlyDeparture       bool   `json:"is_early_departure"`
-	EarlyDepartureMinutes  int    `json:"early_departure_minutes"`
+	Status                string `json:"status"` // 'present', 'absent', 'late', 'half_day', 'on_leave', 'holiday', 'weekend'
+	IsLate                bool   `json:"is_late"`
+	LateByMinutes         int    `json:"late_by_minutes"`
+	IsEarlyDeparture      bool   `json:"is_early_departure"`
+	EarlyDepartureMinutes int    `json:"early_departure_minutes"`
 
 	// Overtime
-	IsOvertime       bool       `json:"is_overtime"`
-	OvertimeApproved bool       `json:"overtime_approved"`
-	OvertimeApprovedBy *int     `json:"overtime_approved_by,omitempty"`
+	IsOvertime         bool       `json:"is_overtime"`
+	OvertimeApproved   bool       `json:"overtime_approved"`
+	OvertimeApprovedBy *int       `json:"overtime_approved_by,omitempty"`
 	OvertimeApprovedAt *time.Time `json:"overtime_approved_at,omitempty"`
 
 	// Location Tracking
-	ClockInLocation  json.RawMessage `json:"clock_in_location,omitempty"` // JSON object
+	ClockInLocation  json.RawMessage `json:"clock_in_location,omitempty"`  // JSON object
 	ClockOutLocation json.RawMessage `json:"clock_out_location,omitempty"` // JSON object
 	ClockInIP        string          `json:"clock_in_ip,omitempty"`
 	ClockOutIP       string          `json:"clock_out_ip,omitempty"`
@@ -174,8 +174,8 @@ type Attendance struct {
 	ClockOutDevice string `json:"clock_out_device,omitempty"`
 
 	// Notes
-	Notes        string `json:"notes,omitempty"`
-	AdminNotes   string `json:"admin_notes,omitempty"`
+	Notes         string `json:"notes,omitempty"`
+	AdminNotes    string `json:"admin_notes,omitempty"`
 	AbsenceReason string `json:"absence_reason,omitempty"`
 
 	// Approval
@@ -193,10 +193,10 @@ type Attendance struct {
 
 // Salary represents employee payroll records
 type Salary struct {
-	ID             int       `json:"id"`
-	TenantID       int       `json:"tenant_id"`
-	RestaurantID   int       `json:"restaurant_id"`
-	EmployeeID     int       `json:"employee_id"`
+	ID           int `json:"id"`
+	TenantID     int `json:"tenant_id"`
+	RestaurantID int `json:"restaurant_id"`
+	EmployeeID   int `json:"employee_id"`
 
 	// Payroll Period
 	PayPeriodStart time.Time  `json:"pay_period_start"`
@@ -223,13 +223,13 @@ type Salary struct {
 	EarningsDetails json.RawMessage `json:"earnings_details,omitempty"` // JSON object
 
 	// Deductions
-	Tax               float64 `json:"tax"`
-	SocialInsurance   float64 `json:"social_insurance"`
-	HealthInsurance   float64 `json:"health_insurance"`
-	Pension           float64 `json:"pension"`
-	LoanDeduction     float64 `json:"loan_deduction"`
-	AdvanceDeduction  float64 `json:"advance_deduction"`
-	OtherDeductions   float64 `json:"other_deductions"`
+	Tax              float64 `json:"tax"`
+	SocialInsurance  float64 `json:"social_insurance"`
+	HealthInsurance  float64 `json:"health_insurance"`
+	Pension          float64 `json:"pension"`
+	LoanDeduction    float64 `json:"loan_deduction"`
+	AdvanceDeduction float64 `json:"advance_deduction"`
+	OtherDeductions  float64 `json:"other_deductions"`
 
 	// Deductions Details
 	DeductionsDetails json.RawMessage `json:"deductions_details,omitempty"` // JSON object
@@ -240,16 +240,16 @@ type Salary struct {
 	NetSalary       float64 `json:"net_salary"`
 
 	// Attendance Summary
-	DaysWorked        int     `json:"days_worked"`
-	DaysAbsent        int     `json:"days_absent"`
-	TotalHoursWorked  float64 `json:"total_hours_worked"`
+	DaysWorked         int     `json:"days_worked"`
+	DaysAbsent         int     `json:"days_absent"`
+	TotalHoursWorked   float64 `json:"total_hours_worked"`
 	TotalOvertimeHours float64 `json:"total_overtime_hours"`
 
 	// Payment Information
-	PaymentMethod      string `json:"payment_method"` // 'cash', 'bank_transfer', 'check', 'mobile_money'
-	PaymentReference   string `json:"payment_reference,omitempty"`
-	BankAccountNumber  string `json:"bank_account_number,omitempty"`
-	BankName           string `json:"bank_name,omitempty"`
+	PaymentMethod     string `json:"payment_method"` // 'cash', 'bank_transfer', 'check', 'mobile_money'
+	PaymentReference  string `json:"payment_reference,omitempty"`
+	BankAccountNumber string `json:"bank_account_number,omitempty"`
+	BankName          string `json:"bank_name,omitempty"`
 
 	// Status
 	Status string     `json:"status"` // 'pending', 'processing', 'paid', 'cancelled', 'on_hold'
@@ -276,20 +276,20 @@ type Salary struct {
 
 // Leave represents employee leave requests
 type Leave struct {
-	ID           int       `json:"id"`
-	TenantID     int       `json:"tenant_id"`
-	RestaurantID int       `json:"restaurant_id"`
-	EmployeeID   int       `json:"employee_id"`
+	ID           int `json:"id"`
+	TenantID     int `json:"tenant_id"`
+	RestaurantID int `json:"restaurant_id"`
+	EmployeeID   int `json:"employee_id"`
 
 	// Leave Period
-	StartDate      time.Time `json:"start_date"`
-	EndDate        time.Time `json:"end_date"`
-	TotalDays      int       `json:"total_days"`
-	IsHalfDay      bool      `json:"is_half_day"`
-	HalfDayPeriod  string    `json:"half_day_period,omitempty"` // 'morning', 'afternoon'
+	StartDate     time.Time `json:"start_date"`
+	EndDate       time.Time `json:"end_date"`
+	TotalDays     int       `json:"total_days"`
+	IsHalfDay     bool      `json:"is_half_day"`
+	HalfDayPeriod string    `json:"half_day_period,omitempty"` // 'morning', 'afternoon'
 
 	// Leave Type
-	LeaveType     string `json:"leave_type"` // 'annual', 'sick', 'casual', 'maternity', 'paternity', etc.
+	LeaveType     string `json:"leave_type"`     // 'annual', 'sick', 'casual', 'maternity', 'paternity', etc.
 	LeaveCategory string `json:"leave_category"` // 'paid', 'unpaid'
 
 	// Leave Details
@@ -310,13 +310,13 @@ type Leave struct {
 	ApprovedAt    *time.Time `json:"approved_at,omitempty"`
 	ApprovalNotes string     `json:"approval_notes,omitempty"`
 
-	RejectedBy     *int       `json:"rejected_by,omitempty"`
-	RejectedAt     *time.Time `json:"rejected_at,omitempty"`
-	RejectionReason string    `json:"rejection_reason,omitempty"`
+	RejectedBy      *int       `json:"rejected_by,omitempty"`
+	RejectedAt      *time.Time `json:"rejected_at,omitempty"`
+	RejectionReason string     `json:"rejection_reason,omitempty"`
 
-	CancelledBy     *int       `json:"cancelled_by,omitempty"`
-	CancelledAt     *time.Time `json:"cancelled_at,omitempty"`
-	CancellationReason string  `json:"cancellation_reason,omitempty"`
+	CancelledBy        *int       `json:"cancelled_by,omitempty"`
+	CancelledAt        *time.Time `json:"cancelled_at,omitempty"`
+	CancellationReason string     `json:"cancellation_reason,omitempty"`
 
 	// Leave Balance Impact
 	DeductedFromBalance bool     `json:"deducted_from_balance"`
@@ -324,16 +324,16 @@ type Leave struct {
 	BalanceAfter        *float64 `json:"balance_after,omitempty"`
 
 	// HR Notes
-	HRNotes        string `json:"hr_notes,omitempty"`
-	HandoverNotes  string `json:"handover_notes,omitempty"`
+	HRNotes       string `json:"hr_notes,omitempty"`
+	HandoverNotes string `json:"handover_notes,omitempty"`
 
 	// Replacement/Coverage
 	ReplacementEmployeeID *int `json:"replacement_employee_id,omitempty"`
 	HandoverCompleted     bool `json:"handover_completed"`
 
 	// Notification Settings
-	NotifyManager    bool       `json:"notify_manager"`
-	NotifyHR         bool       `json:"notify_hr"`
+	NotifyManager      bool       `json:"notify_manager"`
+	NotifyHR           bool       `json:"notify_hr"`
 	NotificationSentAt *time.Time `json:"notification_sent_at,omitempty"`
 
 	// System Fields

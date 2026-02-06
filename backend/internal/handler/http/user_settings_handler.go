@@ -399,7 +399,7 @@ func (h *UserSettingsHandler) UpdateProfile(w http.ResponseWriter, r *http.Reque
 	}
 
 	var req struct {
-		Name      string `json:"name"`
+		Name      string  `json:"name"`
 		AvatarURL *string `json:"avatar_url"`
 	}
 
@@ -470,14 +470,14 @@ func (h *UserSettingsHandler) ListUsers(w http.ResponseWriter, r *http.Request) 
 
 	// Transform users to response format (without password hashes)
 	type UserResponse struct {
-		ID         int64   `json:"id"`
-		Name       string  `json:"name"`
-		Email      string  `json:"email"`
-		Role       string  `json:"role"`
-		Phone      *string `json:"phone,omitempty"`
-		AvatarURL  *string `json:"avatar_url,omitempty"`
-		Status     string  `json:"status"`
-		CreatedAt  string  `json:"created_at"`
+		ID        int64   `json:"id"`
+		Name      string  `json:"name"`
+		Email     string  `json:"email"`
+		Role      string  `json:"role"`
+		Phone     *string `json:"phone,omitempty"`
+		AvatarURL *string `json:"avatar_url,omitempty"`
+		Status    string  `json:"status"`
+		CreatedAt string  `json:"created_at"`
 	}
 
 	response := make([]UserResponse, 0, len(users))

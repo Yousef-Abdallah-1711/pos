@@ -17,8 +17,8 @@ import (
 
 // ProductHandler handles HTTP requests for products
 type ProductHandler struct {
-	uc                *usecase.ProductUseCase
-	tenantValidator   *auth.TenantValidator
+	uc              *usecase.ProductUseCase
+	tenantValidator *auth.TenantValidator
 }
 
 // NewProductHandler creates new product handler
@@ -28,7 +28,6 @@ func NewProductHandler(uc *usecase.ProductUseCase) *ProductHandler {
 		tenantValidator: auth.NewTenantValidator(),
 	}
 }
-
 
 // checkProductPermission verifies user has required permission for product operations
 func (h *ProductHandler) checkProductPermission(
@@ -397,7 +396,7 @@ func (h *ProductHandler) GetLowStockAlerts(w http.ResponseWriter, r *http.Reques
 	}
 
 	respondJSON(w, http.StatusOK, map[string]interface{}{
-		"count":     len(products),
-		"products":  products,
+		"count":    len(products),
+		"products": products,
 	})
 }

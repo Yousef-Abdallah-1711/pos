@@ -20,14 +20,14 @@ type UserSettings struct {
 
 // SettingsAuditLog tracks changes to user settings
 type SettingsAuditLog struct {
-	ID          int64      `json:"id"`
-	UserID      int64      `json:"user_id"`
-	SettingName string     `json:"setting_name"`
-	OldValue    *string    `json:"old_value"`
-	NewValue    *string    `json:"new_value"`
-	ChangedBy   int64      `json:"changed_by"`
-	ChangedAt   time.Time  `json:"changed_at"`
-	IPAddress   string     `json:"ip_address"`
+	ID          int64     `json:"id"`
+	UserID      int64     `json:"user_id"`
+	SettingName string    `json:"setting_name"`
+	OldValue    *string   `json:"old_value"`
+	NewValue    *string   `json:"new_value"`
+	ChangedBy   int64     `json:"changed_by"`
+	ChangedAt   time.Time `json:"changed_at"`
+	IPAddress   string    `json:"ip_address"`
 }
 
 // PasswordChangeHistory tracks password changes
@@ -53,11 +53,11 @@ type EmailChangeRequest struct {
 
 // UserProfile represents basic user profile information
 type UserProfile struct {
-	ID       int64     `json:"id"`
-	Name     string    `json:"name"`
-	Email    string    `json:"email"`
-	Role     string    `json:"role"`
+	ID        int64     `json:"id"`
+	Name      string    `json:"name"`
+	Email     string    `json:"email"`
+	Role      string    `json:"role"`
 	AvatarURL *string   `json:"avatar_url"`
-	Phone    *string   `json:"phone"`
+	Phone     *string   `json:"phone"`
 	CreatedAt time.Time `json:"created_at"`
 }

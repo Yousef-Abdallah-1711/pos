@@ -30,12 +30,12 @@ func (u *User) VerifyPassword(password string) bool {
 }
 
 type RegisterRequest struct {
-	Name            string `json:"name"`
-	Email           string `json:"email"`
-	Password        string `json:"password"`
-	RestaurantName  string `json:"restaurant_name"`
-	RestaurantSlug  string `json:"restaurant_slug"` // Subdomain for website (e.g., "my-restaurant")
-	Phone           string `json:"phone"`
+	Name           string `json:"name"`
+	Email          string `json:"email"`
+	Password       string `json:"password"`
+	RestaurantName string `json:"restaurant_name"`
+	RestaurantSlug string `json:"restaurant_slug"` // Subdomain for website (e.g., "my-restaurant")
+	Phone          string `json:"phone"`
 }
 
 type LoginRequest struct {
@@ -63,10 +63,10 @@ type TenantInfo struct {
 
 // MultiTenantLoginResponse is returned when a user has accounts in multiple tenants
 type MultiTenantLoginResponse struct {
-	Success            bool           `json:"success"`
-	MultipleTenants    bool           `json:"multiple_tenants"`
-	Tenants            []TenantInfo   `json:"tenants"`
-	Message            string         `json:"message,omitempty"`
+	Success         bool         `json:"success"`
+	MultipleTenants bool         `json:"multiple_tenants"`
+	Tenants         []TenantInfo `json:"tenants"`
+	Message         string       `json:"message,omitempty"`
 }
 
 // TenantSelectionRequest is sent to /api/v1/auth/login/confirm

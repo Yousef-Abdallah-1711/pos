@@ -6,6 +6,8 @@ import { usePathname } from 'next/navigation'
 import { ChefHat, Store, ShoppingCart, Users, BarChart3, Settings, Menu, ChevronDown, ChevronRight, Package, FolderOpen, Archive, Palette, Truck } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { createTranslator, getLocaleFromPath } from '@/lib/translations'
+import { useTenantStatus } from '@/hooks/useTenantStatus'
+import { BlockedSidebar } from '@/components/blocked/BlockedSidebar'
 
 interface SidebarItem {
   label: string
@@ -18,12 +20,18 @@ export function Sidebar() {
   const pathname = usePathname()
   const locale = getLocaleFromPath(pathname)
   const t = createTranslator(locale)
+  const { isBlocked } = useTenantStatus()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [expandedItems, setExpandedItems] = useState<string[]>([
     t('navigation.orders'),
     t('navigation.products'),
     t('navigation.hr'),
   ])
+
+  // Show blocked sidebar if tenant is blocked
+  if (isBlocked) {
+    return <BlockedSidebar />
+  }
 
   const sidebarItems: SidebarItem[] = [
     {

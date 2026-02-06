@@ -22,11 +22,11 @@ const (
 
 // ImpersonationInfo holds information about the current impersonation
 type ImpersonationInfo struct {
-	IsImpersonated   bool
-	SuperAdminID     int64
-	TargetUserID     int64
-	TargetTenantID   int64
-	SessionID        int64
+	IsImpersonated bool
+	SuperAdminID   int64
+	TargetUserID   int64
+	TargetTenantID int64
+	SessionID      int64
 }
 
 // ImpersonationMiddleware detects and validates impersonation tokens
@@ -88,11 +88,11 @@ func ImpersonationMiddleware(impersonationRepo *repository.ImpersonationReposito
 
 			// Create impersonation info
 			info := &ImpersonationInfo{
-				IsImpersonated:   true,
-				SuperAdminID:     session.SuperAdminID,
-				TargetUserID:     session.TargetUserID,
-				TargetTenantID:   session.TargetTenantID,
-				SessionID:        session.ID,
+				IsImpersonated: true,
+				SuperAdminID:   session.SuperAdminID,
+				TargetUserID:   session.TargetUserID,
+				TargetTenantID: session.TargetTenantID,
+				SessionID:      session.ID,
 			}
 
 			// Add to context

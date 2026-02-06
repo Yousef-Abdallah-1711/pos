@@ -246,11 +246,11 @@ func TestSetConfig(t *testing.T) {
 // TestNewTheme tests theme constructor
 func TestNewTheme(t *testing.T) {
 	tests := []struct {
-		name    string
+		name      string
 		themeName string
-		slug    string
-		tenantID int64
-		wantErr bool
+		slug      string
+		tenantID  int64
+		wantErr   bool
 	}{
 		{"valid", "Modern Theme", "modern-theme", 1, false},
 		{"missing name", "", "modern-theme", 1, true},
@@ -312,8 +312,8 @@ func TestThemeCreateRequest(t *testing.T) {
 func TestThemeUpdateRequest(t *testing.T) {
 	isActive := true
 	req := &ThemeUpdateRequest{
-		Name:      "Updated Theme",
-		IsActive:  &isActive,
+		Name:     "Updated Theme",
+		IsActive: &isActive,
 	}
 
 	if req.Name != "Updated Theme" || *req.IsActive != true {

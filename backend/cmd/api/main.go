@@ -133,6 +133,12 @@ func main() {
 		superAdminAuditRepo = repository.NewSuperAdminAuditRepository(db)
 	}
 
+	// Subscription repositories (Phase 1-8 - SaaS Trial/Subscription System)
+	var subscriptionRepo repository.SubscriptionRepository
+	if db != nil {
+		subscriptionRepo = repository.NewSubscriptionRepository(db)
+	}
+
 	// NOTE: V2 repositories will be implemented in Phase 2
 	// themeRepo := repository.NewThemeRepositoryV2(db)
 	// componentRepo := repository.NewComponentRepositoryV2(db)
@@ -181,6 +187,12 @@ func main() {
 		superAdminAuthUC = usecase.NewSuperAdminAuthUseCase(superAdminRepo, userRepo, superAdminAuditRepo, superAdminTokenService)
 		impersonationUC = usecase.NewImpersonationUseCase(impersonationRepo, superAdminRepo, superAdminAuditRepo)
 		superAdminTenantUC = usecase.NewSuperAdminTenantUseCase(superAdminRepo, superAdminAuditRepo)
+	}
+
+	// Subscription use case (Phase 1-8 - SaaS Trial/Subscription System)
+	var subscriptionUC *usecase.SubscriptionUseCase
+	if db != nil && subscriptionRepo != nil && superAdminAuditRepo != nil {
+		subscriptionUC = usecase.NewSubscriptionUseCase(subscriptionRepo, superAdminAuditRepo)
 	}
 
 	// NOTE: Old theme use cases commented out - replaced with v2 repository API
@@ -234,6 +246,12 @@ func main() {
 	if superAdminAuthUC != nil && superAdminTenantUC != nil && impersonationUC != nil {
 		superAdminHandler = handler.NewSuperAdminHandler(superAdminAuthUC, superAdminTenantUC)
 		impersonationHandler = handler.NewImpersonationHandler(impersonationUC)
+	}
+
+	// Subscription handler (Phase 1-8 - SaaS Trial/Subscription System)
+	var subscriptionHandler *handler.SubscriptionHandler
+	if subscriptionUC != nil {
+		subscriptionHandler = handler.NewSubscriptionHandler(subscriptionUC)
 	}
 
 	// NOTE: Theme handlers commented out - old API being replaced with v2
@@ -302,6 +320,22 @@ func main() {
 		w.Write([]byte(`{"status":"ok"}`))
 	})
 
+	// Test route to verify routing
+	mux.Handle("GET /api/v1/public/test-routing/{slug}", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		slug := r.PathValue("slug")
+		w.Header().Set("Content-Type", "application/json")
+		w.Write([]byte(fmt.Sprintf(`{"message":"test route works","slug":"%s"}`, slug)))
+	}))
+
+	// Public Subscription Routes (Phase 1-8 - SaaS Trial/Subscription System)
+	// Tenant status check by slug (no authentication)
+	if subscriptionHandler != nil {
+		log.Println("✅ Registering public subscription routes")
+		mux.Handle("GET /api/v1/public/tenant-status/{slug}", http.HandlerFunc(subscriptionHandler.GetTenantStatusBySlug))
+	} else {
+		log.Println("⚠️ subscriptionHandler is nil, skipping public subscription route")
+	}
+
 	// NOTE: Protected routes are now registered individually with middleware wrapping below.
 	// This ensures proper execution order: Auth -> TenantContext -> Handler
 
@@ -312,6 +346,15 @@ func main() {
 		// The last middleware applied is the outermost and executes first
 		wrapped := middleware.TenantContextMiddleware(next)        // This will be innermost (execute 2nd)
 		wrapped = middleware.AuthMiddleware(tokenService)(wrapped) // This will be outermost (execute 1st)
+		return wrapped
+	}
+
+	// Helper function to wrap handlers with auth, tenant, and subscription status middleware
+	wrapProtectedWithStatus := func(next http.Handler) http.Handler {
+		// Apply middleware in REVERSE order of execution
+		wrapped := middleware.TenantStatusMiddleware(subscriptionRepo)(next) // innermost (execute 3rd)
+		wrapped = middleware.TenantContextMiddleware(wrapped)                 // execute 2nd
+		wrapped = middleware.AuthMiddleware(tokenService)(wrapped)            // outermost (execute 1st)
 		return wrapped
 	}
 
@@ -352,6 +395,13 @@ func main() {
 	mux.Handle("POST /api/v1/categories", wrapProtected(http.HandlerFunc(categoryHandler.CreateCategory)))
 	mux.Handle("PUT /api/v1/categories/{id}", wrapProtected(http.HandlerFunc(categoryHandler.UpdateCategory)))
 	mux.Handle("DELETE /api/v1/categories/{id}", wrapProtected(http.HandlerFunc(categoryHandler.DeleteCategory)))
+
+	// Subscription endpoints (Phase 1-8 - SaaS Trial/Subscription System)
+	// Tenant status check (requires authentication)
+	// Note: TenantStatusMiddleware will skip this path internally (see shouldSkipStatusCheck)
+	if subscriptionHandler != nil && subscriptionRepo != nil {
+		mux.Handle("GET /api/v1/tenant/status", wrapProtectedWithStatus(http.HandlerFunc(subscriptionHandler.GetTenantStatus)))
+	}
 
 	// HR Module - Employee management endpoints (require authentication + RBAC permission)
 	// Module ID 2 = HR (from migrations)
@@ -1045,6 +1095,29 @@ func main() {
 
 		log.Println("✅ Super Admin routes registered")
 	}
+
+	// Super Admin Subscription Management Routes (Phase 1-8 - SaaS Trial/Subscription System)
+	if superAdminHandler != nil && subscriptionHandler != nil && superAdminTokenService != nil {
+		// Helper function to wrap super admin routes with auth middleware (reuse from above)
+		wrapSuperAdmin := func(next http.Handler) http.Handler {
+			// Apply middleware in REVERSE order of execution
+			wrapped := middleware.RequireSuperAdmin(superAdminRepo)(next)
+			wrapped = middleware.ValidateIPWhitelist(superAdminRepo)(wrapped)
+			wrapped = middleware.SuperAdminAuthMiddleware(superAdminTokenService)(wrapped)
+			wrapped = middleware.RateLimitSuperAdmin(30)(wrapped) // 30 requests per minute
+			return wrapped
+		}
+
+		// Subscription management endpoints (super admin only)
+		mux.Handle("POST /api/v1/super-admin/tenants/{id}/extend-trial", wrapSuperAdmin(http.HandlerFunc(subscriptionHandler.ExtendTenantTrial)))
+		mux.Handle("POST /api/v1/super-admin/tenants/{id}/disable", wrapSuperAdmin(http.HandlerFunc(subscriptionHandler.DisableTenant)))
+		mux.Handle("POST /api/v1/super-admin/tenants/{id}/enable", wrapSuperAdmin(http.HandlerFunc(subscriptionHandler.EnableTenant)))
+		mux.Handle("DELETE /api/v1/super-admin/tenants/{id}", wrapSuperAdmin(http.HandlerFunc(subscriptionHandler.DeleteTenant)))
+		mux.Handle("GET /api/v1/super-admin/tenants/{id}/subscription-history", wrapSuperAdmin(http.HandlerFunc(subscriptionHandler.GetSubscriptionHistory)))
+
+		log.Println("✅ Subscription management routes registered")
+	}
+
 
 	// Apply CORS middleware to all routes
 	corsHandler := middleware.CORSMiddleware(mux)

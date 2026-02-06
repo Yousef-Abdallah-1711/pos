@@ -39,11 +39,11 @@ func NewSubdomainValidator() *SubdomainValidator {
 			"localhost": true,
 			"127":       true,
 			// Common services
-			"git":       true,
-			"gitlab":    true,
-			"github":    true,
-			"jenkins":   true,
-			"docker":    true,
+			"git":        true,
+			"gitlab":     true,
+			"github":     true,
+			"jenkins":    true,
+			"docker":     true,
 			"kubernetes": true,
 		},
 	}

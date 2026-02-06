@@ -18,13 +18,13 @@ func createValidThemeRequest() *models.CreateThemeRequest {
 	return &models.CreateThemeRequest{
 		Name: "Test Theme",
 		Colors: models.ThemeColors{
-			Primary:     "#3b82f6",
-			Secondary:   "#1e40af",
-			Accent:      "#0ea5e9",
-			Background:  "#ffffff",
-			Text:        "#000000",
-			Border:      "#e5e7eb",
-			Shadow:      "#000000",
+			Primary:    "#3b82f6",
+			Secondary:  "#1e40af",
+			Accent:     "#0ea5e9",
+			Background: "#ffffff",
+			Text:       "#000000",
+			Border:     "#e5e7eb",
+			Shadow:     "#000000",
 		},
 		Typography: models.TypographySettings{
 			FontFamily:   "Inter",
@@ -33,8 +33,8 @@ func createValidThemeRequest() *models.CreateThemeRequest {
 			LineHeight:   1.5,
 		},
 		Identity: models.WebsiteIdentity{
-			SiteTitle: "Test Restaurant",
-			LogoURL:   "https://example.com/logo.png",
+			SiteTitle:  "Test Restaurant",
+			LogoURL:    "https://example.com/logo.png",
 			FaviconURL: "https://example.com/favicon.ico",
 		},
 	}
@@ -110,9 +110,9 @@ func TestMultipleValidationErrorsIntegration(t *testing.T) {
 
 	// Introduce multiple errors
 	req.Name = ""                         // Missing required
-	req.Colors.Primary = "invalid"         // Invalid color
-	req.Typography.BaseFontSize = 999      // Out of range
-	req.Typography.FontFamily = "BadFont"  // Invalid font
+	req.Colors.Primary = "invalid"        // Invalid color
+	req.Typography.BaseFontSize = 999     // Out of range
+	req.Typography.FontFamily = "BadFont" // Invalid font
 
 	validationResult := validator.ValidateThemeCreate(req)
 
@@ -195,38 +195,38 @@ func TestColorRangeValidationIntegration(t *testing.T) {
 	validator := setupTestValidator(t)
 
 	testCases := []struct {
-		name      string
-		colors    []string
+		name       string
+		colors     []string
 		shouldFail bool
 	}{
 		{
-			name:      "Valid 6-digit hex colors",
-			colors:    []string{"#000000", "#ffffff", "#3b82f6", "#ff0000"},
+			name:       "Valid 6-digit hex colors",
+			colors:     []string{"#000000", "#ffffff", "#3b82f6", "#ff0000"},
 			shouldFail: false,
 		},
 		{
-			name:      "Valid 3-digit hex colors",
-			colors:    []string{"#fff", "#000", "#f00"},
+			name:       "Valid 3-digit hex colors",
+			colors:     []string{"#fff", "#000", "#f00"},
 			shouldFail: false,
 		},
 		{
-			name:      "Valid 8-digit hex with alpha",
-			colors:    []string{"#000000ff", "#ffffff80", "#3b82f6cc"},
+			name:       "Valid 8-digit hex with alpha",
+			colors:     []string{"#000000ff", "#ffffff80", "#3b82f6cc"},
 			shouldFail: false,
 		},
 		{
-			name:      "Invalid missing hash",
-			colors:    []string{"000000", "ffffff"},
+			name:       "Invalid missing hash",
+			colors:     []string{"000000", "ffffff"},
 			shouldFail: false, // Validator may accept without hash
 		},
 		{
-			name:      "Invalid characters",
-			colors:    []string{"#gggggg", "#zzzzzz"},
+			name:       "Invalid characters",
+			colors:     []string{"#gggggg", "#zzzzzz"},
 			shouldFail: true,
 		},
 		{
-			name:      "Invalid too short",
-			colors:    []string{"#ff", "#ab"},
+			name:       "Invalid too short",
+			colors:     []string{"#ff", "#ab"},
 			shouldFail: true,
 		},
 	}
@@ -234,13 +234,13 @@ func TestColorRangeValidationIntegration(t *testing.T) {
 	for _, tc := range testCases {
 		for _, color := range tc.colors {
 			colors := &models.ThemeColors{
-				Primary:     color,
-				Secondary:   "#000000",
-				Accent:      "#000000",
-				Background:  "#ffffff",
-				Text:        "#000000",
-				Border:      "#e5e7eb",
-				Shadow:      "#000000",
+				Primary:    color,
+				Secondary:  "#000000",
+				Accent:     "#000000",
+				Background: "#ffffff",
+				Text:       "#000000",
+				Border:     "#e5e7eb",
+				Shadow:     "#000000",
 			}
 
 			errors := validator.ValidateColors(colors)

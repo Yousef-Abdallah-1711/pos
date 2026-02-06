@@ -30,7 +30,7 @@ func TestNewThemeRepository(t *testing.T) {
 // TestRepositoryMethodSignatures verifies all methods exist and have correct signatures
 func TestRepositoryMethodSignatures(t *testing.T) {
 	tests := []struct {
-		name      string
+		name       string
 		methodName string
 	}{
 		{"Create", "Create"},
@@ -260,11 +260,11 @@ func TestThemeRepositoryVersionHandling(t *testing.T) {
 // TestThemeRepositorySlugUniqueness tests unique constraint assumptions
 func TestThemeRepositorySlugUniqueness(t *testing.T) {
 	tests := []struct {
-		name     string
-		tenant   int64
-		slug1    string
-		slug2    string
-		sameTenant bool
+		name           string
+		tenant         int64
+		slug1          string
+		slug2          string
+		sameTenant     bool
 		shouldConflict bool
 	}{
 		{"different slugs", 1, "theme-a", "theme-b", true, false},

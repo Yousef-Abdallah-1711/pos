@@ -63,11 +63,23 @@ api.interceptors.request.use((config) => {
     // sessionStorage might not be available in some contexts
   }
 
+  console.log('[API] Request interceptor - url:', config.url, 'impersonationToken:', !!impersonationToken, 'token:', !!token)
+
   if (impersonationToken && !isAuthEndpoint) {
     // If using impersonation token, add it as a custom header
     config.headers['X-Impersonation-Token'] = impersonationToken
+    console.log('[API] Added X-Impersonation-Token header')
+
+    // Also add tenant context from user if available
+    if (tenantId) {
+      config.headers['X-Tenant-ID'] = tenantId.toString()
+    }
+    if (restaurantId) {
+      config.headers['X-Restaurant-ID'] = restaurantId.toString()
+    }
   } else if (token && !isAuthEndpoint) {
     config.headers.Authorization = `Bearer ${token}`
+    console.log('[API] Added Authorization header')
 
     // Add tenant context headers from user object
     if (tenantId) {
@@ -108,8 +120,19 @@ api.interceptors.response.use(
     }
 
     // Only logout on actual authentication failures, not tenant context errors
-    if (error.response?.status === 401 && !isTenantContextError) {
+    // Also don't logout if using impersonation - let the provider handle it
+    let isUsingImpersonation = false
+    try {
+      isUsingImpersonation = !!sessionStorage.getItem('impersonation_token')
+    } catch (e) {
+      // sessionStorage might not be available
+    }
+
+    console.log('[API] Error handler - status:', error.response?.status, 'isTenantContextError:', isTenantContextError, 'isUsingImpersonation:', isUsingImpersonation)
+
+    if (error.response?.status === 401 && !isTenantContextError && !isUsingImpersonation) {
       debugWarn('[API] 401 auth error - logging out')
+      console.log('[API] Logging out due to 401')
       localStorage.removeItem('token')
       localStorage.removeItem('user')
       localStorage.removeItem('auth-storage')
@@ -123,9 +146,22 @@ api.interceptors.response.use(
           // Fallback to default URL if config import fails
           window.location.href = 'http://localhost:3001/auth/login'
         })
+    } else if (error.response?.status === 401 && isUsingImpersonation) {
+      console.log('[API] Got 401 while impersonating - NOT logging out, backend should handle impersonation token')
     }
     return Promise.reject(error)
   }
 )
+
+// API function to check tenant status
+export async function getTenantStatus() {
+  try {
+    const response = await api.get('/tenant/status')
+    return response.data
+  } catch (error) {
+    console.error('[API] Failed to get tenant status:', error)
+    throw error
+  }
+}
 
 export default api

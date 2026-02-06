@@ -282,7 +282,10 @@
       "Bash(./api.exe)",
       "Bash(npx next build:*)",
       "Bash(git diff:*)",
-      "Bash(git status:*)"
+      "Bash(git status:*)",
+      "Bash(cmd //c \"taskkill /F /PID 16764\")",
+      "Bash(where:*)",
+      "Bash(do curl -s -o /dev/null -w \"Port $port: %{http_code}\\\\n\" http://localhost:$port)"
     ]
   }
 }

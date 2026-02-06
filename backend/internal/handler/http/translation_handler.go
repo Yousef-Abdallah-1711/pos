@@ -223,8 +223,8 @@ func (h *TranslationHandler) HealthCheck(w http.ResponseWriter, r *http.Request)
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(map[string]interface{}{
-		"status": "ok",
-		"service": "translation-service",
+		"status":             "ok",
+		"service":            "translation-service",
 		"supportedLanguages": []string{"en", "ar"},
 	})
 }

@@ -198,8 +198,8 @@ func (h *RBACPermissionHandler) CheckPermission(w http.ResponseWriter, r *http.R
 
 	hasPermission := domain.PermissionValues[highest] >= domain.PermissionValues[requiredLevel]
 	respondJSON(w, http.StatusOK, map[string]interface{}{
-		"has_permission":  hasPermission,
-		"module_id":       moduleID,
+		"has_permission":   hasPermission,
+		"module_id":        moduleID,
 		"permission_level": highest,
 	})
 }

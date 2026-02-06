@@ -188,20 +188,20 @@ func (h *AdminThemeHandlerV2) GetTheme(w http.ResponseWriter, r *http.Request) {
 
 	// Flatten the response - extract components and other fields from config
 	responseMap := map[string]interface{}{
-		"id":           theme.ID,
-		"tenant_id":    theme.TenantID,
+		"id":            theme.ID,
+		"tenant_id":     theme.TenantID,
 		"restaurant_id": theme.RestaurantID,
-		"name":         theme.Name,
-		"slug":         theme.Slug,
-		"description":  theme.Description,
-		"is_active":    theme.IsActive,
-		"is_published": theme.IsPublished,
-		"version":      theme.Version,
-		"created_by":   theme.CreatedBy,
-		"updated_by":   theme.UpdatedBy,
-		"created_at":   theme.CreatedAt,
-		"updated_at":   theme.UpdatedAt,
-		"published_at": theme.PublishedAt,
+		"name":          theme.Name,
+		"slug":          theme.Slug,
+		"description":   theme.Description,
+		"is_active":     theme.IsActive,
+		"is_published":  theme.IsPublished,
+		"version":       theme.Version,
+		"created_by":    theme.CreatedBy,
+		"updated_by":    theme.UpdatedBy,
+		"created_at":    theme.CreatedAt,
+		"updated_at":    theme.UpdatedAt,
+		"published_at":  theme.PublishedAt,
 	}
 
 	// Parse config and merge its fields into response

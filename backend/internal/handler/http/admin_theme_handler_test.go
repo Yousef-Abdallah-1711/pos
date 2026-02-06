@@ -197,14 +197,14 @@ func TestUpdateSectionContent(t *testing.T) {
 		description2   string
 	}{
 		{
-			name:         "update hero section",
-			restaurantID: "1",
-			sectionID:    "1",
-			title:        "Welcome to Our Restaurant",
-			subtitle:     "Experience authentic flavors",
-			description:  "Our new hero text",
+			name:           "update hero section",
+			restaurantID:   "1",
+			sectionID:      "1",
+			title:          "Welcome to Our Restaurant",
+			subtitle:       "Experience authentic flavors",
+			description:    "Our new hero text",
 			expectedStatus: http.StatusOK,
-			description2: "Should update hero section content",
+			description2:   "Should update hero section content",
 		},
 		{
 			name:           "empty title",
@@ -385,10 +385,10 @@ func TestPathParameterExtraction(t *testing.T) {
 // TestAuthenticationRequired tests that endpoints require authentication
 func TestAuthenticationRequired(t *testing.T) {
 	tests := []struct {
-		name     string
-		method   string
-		path     string
-		public   bool
+		name        string
+		method      string
+		path        string
+		public      bool
 		description string
 	}{
 		{
@@ -452,12 +452,12 @@ func TestAuthenticationRequired(t *testing.T) {
 // TestTenantIsolation tests that requests are properly isolated by tenant
 func TestTenantIsolation(t *testing.T) {
 	tests := []struct {
-		name        string
+		name         string
 		restaurantID int64
-		tenantID    int64
-		otherTenant int64
+		tenantID     int64
+		otherTenant  int64
 		shouldAccess bool
-		description string
+		description  string
 	}{
 		{
 			name:         "same tenant access",

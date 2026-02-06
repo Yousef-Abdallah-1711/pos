@@ -19,45 +19,45 @@ func TestCreateTheme(t *testing.T) {
 		{
 			name: "valid theme creation",
 			theme: &domain.RestaurantTheme{
-				RestaurantID:  1,
-				TenantID:      1,
-				PrimaryColor:  "#3b82f6",
+				RestaurantID:   1,
+				TenantID:       1,
+				PrimaryColor:   "#3b82f6",
 				SecondaryColor: "#10b981",
-				AccentColor:   "#f59e0b",
-				FontFamily:    "Inter",
+				AccentColor:    "#f59e0b",
+				FontFamily:     "Inter",
 			},
 			wantErr: false,
 		},
 		{
 			name: "missing restaurant ID",
 			theme: &domain.RestaurantTheme{
-				RestaurantID:  0,
-				TenantID:      1,
-				PrimaryColor:  "#3b82f6",
+				RestaurantID:   0,
+				TenantID:       1,
+				PrimaryColor:   "#3b82f6",
 				SecondaryColor: "#10b981",
-				AccentColor:   "#f59e0b",
+				AccentColor:    "#f59e0b",
 			},
 			wantErr: true,
 		},
 		{
 			name: "missing tenant ID",
 			theme: &domain.RestaurantTheme{
-				RestaurantID:  1,
-				TenantID:      0,
-				PrimaryColor:  "#3b82f6",
+				RestaurantID:   1,
+				TenantID:       0,
+				PrimaryColor:   "#3b82f6",
 				SecondaryColor: "#10b981",
-				AccentColor:   "#f59e0b",
+				AccentColor:    "#f59e0b",
 			},
 			wantErr: true,
 		},
 		{
 			name: "invalid primary color",
 			theme: &domain.RestaurantTheme{
-				RestaurantID:  1,
-				TenantID:      1,
-				PrimaryColor:  "not-a-color",
+				RestaurantID:   1,
+				TenantID:       1,
+				PrimaryColor:   "not-a-color",
 				SecondaryColor: "#10b981",
-				AccentColor:   "#f59e0b",
+				AccentColor:    "#f59e0b",
 			},
 			wantErr: true,
 		},
@@ -121,32 +121,32 @@ func TestGetThemeByRestaurantID(t *testing.T) {
 // TestUpdateTheme tests updating theme properties
 func TestUpdateTheme(t *testing.T) {
 	tests := []struct {
-		name             string
-		themeID          int64
-		newPrimaryColor  string
+		name              string
+		themeID           int64
+		newPrimaryColor   string
 		newSecondaryColor string
-		wantErr          bool
+		wantErr           bool
 	}{
 		{
-			name:             "valid color update",
-			themeID:          1,
-			newPrimaryColor:  "#ff0000",
+			name:              "valid color update",
+			themeID:           1,
+			newPrimaryColor:   "#ff0000",
 			newSecondaryColor: "#00ff00",
-			wantErr:          false,
+			wantErr:           false,
 		},
 		{
-			name:             "invalid primary color",
-			themeID:          1,
-			newPrimaryColor:  "invalid",
+			name:              "invalid primary color",
+			themeID:           1,
+			newPrimaryColor:   "invalid",
 			newSecondaryColor: "#00ff00",
-			wantErr:          true,
+			wantErr:           true,
 		},
 		{
-			name:             "non-existent theme",
-			themeID:          999,
-			newPrimaryColor:  "#ff0000",
+			name:              "non-existent theme",
+			themeID:           999,
+			newPrimaryColor:   "#ff0000",
 			newSecondaryColor: "#00ff00",
-			wantErr:          true,
+			wantErr:           true,
 		},
 	}
 
@@ -164,9 +164,9 @@ func TestUpdateTheme(t *testing.T) {
 // TestCreateSection tests creating theme sections
 func TestCreateSection(t *testing.T) {
 	tests := []struct {
-		name        string
-		section     *domain.ThemeSection
-		wantErr     bool
+		name    string
+		section *domain.ThemeSection
+		wantErr bool
 	}{
 		{
 			name: "valid hero section",
@@ -307,10 +307,10 @@ func TestUpdateSectionOrder(t *testing.T) {
 // TestDeleteSection tests deleting theme sections
 func TestDeleteSection(t *testing.T) {
 	tests := []struct {
-		name        string
-		sectionID   int64
-		themeID     int64
-		expectErr   bool
+		name      string
+		sectionID int64
+		themeID   int64
+		expectErr bool
 	}{
 		{
 			name:      "valid section delete",

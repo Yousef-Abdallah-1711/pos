@@ -169,8 +169,8 @@ func RateLimitSuperAdmin(requestsPerMinute int) func(http.Handler) http.Handler 
 	// Simple in-memory rate limiter
 	// In production, use Redis or similar
 	type clientInfo struct {
-		count    int
-		resetAt  time.Time
+		count   int
+		resetAt time.Time
 	}
 	clients := make(map[string]*clientInfo)
 

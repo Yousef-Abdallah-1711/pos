@@ -124,22 +124,22 @@ type SuperAdminAuditLog struct {
 
 // Audit action constants
 const (
-	AuditActionLoginSuccess    = "LOGIN_SUCCESS"
-	AuditActionLoginFailed     = "LOGIN_FAILED"
-	AuditActionLogout          = "LOGOUT"
-	AuditActionImpersonateStart = "IMPERSONATE_START"
-	AuditActionImpersonateEnd   = "IMPERSONATE_END"
-	AuditActionViewTenant      = "VIEW_TENANT"
-	AuditActionViewUser        = "VIEW_USER"
-	AuditActionViewTenantList  = "VIEW_TENANT_LIST"
-	AuditActionViewUserList    = "VIEW_USER_LIST"
-	AuditActionDisableTenant   = "DISABLE_TENANT"
-	AuditActionEnableTenant    = "ENABLE_TENANT"
-	AuditActionViewAuditLogs   = "VIEW_AUDIT_LOGS"
-	AuditActionExportData      = "EXPORT_DATA"
+	AuditActionLoginSuccess      = "LOGIN_SUCCESS"
+	AuditActionLoginFailed       = "LOGIN_FAILED"
+	AuditActionLogout            = "LOGOUT"
+	AuditActionImpersonateStart  = "IMPERSONATE_START"
+	AuditActionImpersonateEnd    = "IMPERSONATE_END"
+	AuditActionViewTenant        = "VIEW_TENANT"
+	AuditActionViewUser          = "VIEW_USER"
+	AuditActionViewTenantList    = "VIEW_TENANT_LIST"
+	AuditActionViewUserList      = "VIEW_USER_LIST"
+	AuditActionDisableTenant     = "DISABLE_TENANT"
+	AuditActionEnableTenant      = "ENABLE_TENANT"
+	AuditActionViewAuditLogs     = "VIEW_AUDIT_LOGS"
+	AuditActionExportData        = "EXPORT_DATA"
 	AuditActionUpdateIPWhitelist = "UPDATE_IP_WHITELIST"
-	AuditActionUpdateSettings  = "UPDATE_SETTINGS"
-	AuditActionAccessDashboard = "ACCESS_DASHBOARD"
+	AuditActionUpdateSettings    = "UPDATE_SETTINGS"
+	AuditActionAccessDashboard   = "ACCESS_DASHBOARD"
 )
 
 // Audit target type constants
@@ -153,9 +153,9 @@ const (
 // TenantWithStats represents a tenant with additional statistics for super admin view
 type TenantWithStats struct {
 	Tenant
-	TotalUsers       int       `json:"total_users"`
-	TotalRestaurants int       `json:"total_restaurants"`
-	TotalOrders      int       `json:"total_orders"`
+	TotalUsers       int        `json:"total_users"`
+	TotalRestaurants int        `json:"total_restaurants"`
+	TotalOrders      int        `json:"total_orders"`
 	LastActivityAt   *time.Time `json:"last_activity_at,omitempty"`
 }
 
@@ -197,14 +197,14 @@ type ImpersonationResponse struct {
 
 // SuperAdminDashboardStats represents statistics for the super admin dashboard
 type SuperAdminDashboardStats struct {
-	TotalTenants        int       `json:"total_tenants"`
-	ActiveTenants       int       `json:"active_tenants"`
-	TotalUsers          int       `json:"total_users"`
-	TotalOrders         int       `json:"total_orders"`
-	NewTenantsToday     int       `json:"new_tenants_today"`
-	NewUsersToday       int       `json:"new_users_today"`
-	ActiveImpersonations int      `json:"active_impersonations"`
-	LastUpdated         time.Time `json:"last_updated"`
+	TotalTenants         int       `json:"total_tenants"`
+	ActiveTenants        int       `json:"active_tenants"`
+	TotalUsers           int       `json:"total_users"`
+	TotalOrders          int       `json:"total_orders"`
+	NewTenantsToday      int       `json:"new_tenants_today"`
+	NewUsersToday        int       `json:"new_users_today"`
+	ActiveImpersonations int       `json:"active_impersonations"`
+	LastUpdated          time.Time `json:"last_updated"`
 }
 
 // AuditLogFilter represents filters for querying audit logs
@@ -220,18 +220,18 @@ type AuditLogFilter struct {
 
 // TenantFilter represents filters for querying tenants
 type TenantFilter struct {
-	Search    *string `json:"search,omitempty"`
-	IsActive  *bool   `json:"is_active,omitempty"`
+	Search    *string    `json:"search,omitempty"`
+	IsActive  *bool      `json:"is_active,omitempty"`
 	StartDate *time.Time `json:"start_date,omitempty"`
 	EndDate   *time.Time `json:"end_date,omitempty"`
 }
 
 // UserFilter represents filters for querying users across all tenants
 type UserFilter struct {
-	Search       *string `json:"search,omitempty"`
-	TenantID     *int64  `json:"tenant_id,omitempty"`
-	Role         *string `json:"role,omitempty"`
-	IsSuperAdmin *bool   `json:"is_super_admin,omitempty"`
+	Search       *string    `json:"search,omitempty"`
+	TenantID     *int64     `json:"tenant_id,omitempty"`
+	Role         *string    `json:"role,omitempty"`
+	IsSuperAdmin *bool      `json:"is_super_admin,omitempty"`
 	StartDate    *time.Time `json:"start_date,omitempty"`
 	EndDate      *time.Time `json:"end_date,omitempty"`
 }

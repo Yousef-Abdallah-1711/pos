@@ -185,11 +185,11 @@ func (h *ImpersonationHandler) GetImpersonationStatus(w http.ResponseWriter, r *
 	respondJSON(w, http.StatusOK, map[string]interface{}{
 		"success": true,
 		"data": map[string]interface{}{
-			"is_impersonating":  true,
-			"target_user_id":    session.TargetUserID,
-			"target_tenant_id":  session.TargetTenantID,
-			"started_at":        session.StartedAt,
-			"expires_at":        session.ExpiresAt,
+			"is_impersonating": true,
+			"target_user_id":   session.TargetUserID,
+			"target_tenant_id": session.TargetTenantID,
+			"started_at":       session.StartedAt,
+			"expires_at":       session.ExpiresAt,
 		},
 	})
 }
@@ -256,10 +256,10 @@ func (h *ImpersonationHandler) CheckImpersonation(w http.ResponseWriter, r *http
 	respondJSON(w, http.StatusOK, map[string]interface{}{
 		"success": true,
 		"data": map[string]interface{}{
-			"is_impersonated":   true,
-			"super_admin_id":    info.SuperAdminID,
-			"target_user_id":    info.TargetUserID,
-			"target_tenant_id":  info.TargetTenantID,
+			"is_impersonated":  true,
+			"super_admin_id":   info.SuperAdminID,
+			"target_user_id":   info.TargetUserID,
+			"target_tenant_id": info.TargetTenantID,
 		},
 	})
 }

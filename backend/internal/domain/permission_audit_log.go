@@ -33,16 +33,16 @@ type AuditDetails struct {
 
 // Action type constants
 const (
-	ActionCreateRole         = "CREATE_ROLE"
-	ActionUpdateRole         = "UPDATE_ROLE"
-	ActionDeleteRole         = "DELETE_ROLE"
-	ActionAssignPermission   = "ASSIGN_PERMISSION"
-	ActionRevokePermission   = "REVOKE_PERMISSION"
-	ActionAssignUserRole     = "ASSIGN_USER_ROLE"
-	ActionRevokeUserRole     = "REVOKE_USER_ROLE"
-	ActionCreateModule       = "CREATE_MODULE"
-	ActionUpdateModule       = "UPDATE_MODULE"
-	ActionDeleteModule       = "DELETE_MODULE"
+	ActionCreateRole       = "CREATE_ROLE"
+	ActionUpdateRole       = "UPDATE_ROLE"
+	ActionDeleteRole       = "DELETE_ROLE"
+	ActionAssignPermission = "ASSIGN_PERMISSION"
+	ActionRevokePermission = "REVOKE_PERMISSION"
+	ActionAssignUserRole   = "ASSIGN_USER_ROLE"
+	ActionRevokeUserRole   = "REVOKE_USER_ROLE"
+	ActionCreateModule     = "CREATE_MODULE"
+	ActionUpdateModule     = "UPDATE_MODULE"
+	ActionDeleteModule     = "DELETE_MODULE"
 )
 
 // ValidActions defines all valid audit log actions

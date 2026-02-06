@@ -161,11 +161,11 @@ func TestOrderItemTableIndexes(t *testing.T) {
 // TestOrderItemTableForeignKeys tests OrderItem foreign keys
 func TestOrderItemTableForeignKeys(t *testing.T) {
 	foreignKeys := []struct {
-		name       string
-		table      string
-		column     string
-		references string
-		onDelete   string
+		name        string
+		table       string
+		column      string
+		references  string
+		onDelete    string
 		description string
 	}{
 		{
@@ -278,39 +278,39 @@ func TestRestaurantSettingsEnhancements(t *testing.T) {
 // TestMigrationSequence tests that migrations should be run in correct order
 func TestMigrationSequence(t *testing.T) {
 	migrations := []struct {
-		number      int
-		filename    string
-		description string
+		number       int
+		filename     string
+		description  string
 		dependencies []string
 	}{
 		{
-			number:      60,
-			filename:    "060_create_orders_table.sql",
-			description: "Create orders table",
+			number:       60,
+			filename:     "060_create_orders_table.sql",
+			description:  "Create orders table",
 			dependencies: []string{"tenants", "restaurants"},
 		},
 		{
-			number:      61,
-			filename:    "061_create_order_items_table.sql",
-			description: "Create order_items table",
+			number:       61,
+			filename:     "061_create_order_items_table.sql",
+			description:  "Create order_items table",
 			dependencies: []string{"orders", "products", "product_variants"},
 		},
 		{
-			number:      62,
-			filename:    "062_create_order_status_history_table.sql",
-			description: "Create order_status_history table",
+			number:       62,
+			filename:     "062_create_order_status_history_table.sql",
+			description:  "Create order_status_history table",
 			dependencies: []string{"orders", "users"},
 		},
 		{
-			number:      63,
-			filename:    "063_enhance_restaurant_config_with_theme.sql",
-			description: "Enhance restaurant_config with theme",
+			number:       63,
+			filename:     "063_enhance_restaurant_config_with_theme.sql",
+			description:  "Enhance restaurant_config with theme",
 			dependencies: []string{"restaurant_config"},
 		},
 		{
-			number:      64,
-			filename:    "064_enhance_restaurant_settings_for_orders.sql",
-			description: "Enhance restaurant_settings for orders",
+			number:       64,
+			filename:     "064_enhance_restaurant_settings_for_orders.sql",
+			description:  "Enhance restaurant_settings for orders",
 			dependencies: []string{"restaurant_settings"},
 		},
 	}
@@ -375,12 +375,12 @@ func TestColorFormatValidation(t *testing.T) {
 // TestOrderPricingCalculation tests pricing calculations
 func TestOrderPricingCalculation(t *testing.T) {
 	tests := []struct {
-		name            string
-		subtotal        float64
-		taxAmount       float64
-		discountAmount  float64
-		deliveryFee     float64
-		expectedTotal   float64
+		name           string
+		subtotal       float64
+		taxAmount      float64
+		discountAmount float64
+		deliveryFee    float64
+		expectedTotal  float64
 	}{
 		{
 			name:           "Simple order",

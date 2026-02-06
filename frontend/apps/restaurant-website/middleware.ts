@@ -1,14 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { checkTenantStatus, shouldSkipStatusCheck } from '@/lib/checkTenantStatus';
 
 /**
  * Middleware to extract restaurant context from request
  * - Extracts restaurant slug from subdomain (e.g., demo.localhost:3000 → demo)
  * - Extracts locale from URL pathname (e.g., /en/menu → en)
+ * - Checks tenant status (trial expired, disabled, etc.)
+ * - Redirects to maintenance page if tenant is blocked
  * - Stores both in request headers for use in server components
  */
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const host = request.headers.get('host') || '';
   const pathname = request.nextUrl.pathname;
+
+  console.log(`[Middleware] Processing request - host: ${host}, path: ${pathname}`);
 
   // Extract restaurant slug from subdomain
   // Examples:
@@ -32,6 +37,7 @@ export function middleware(request: NextRequest) {
 
   // Redirect uppercase or unsupported locales to a canonical, lowercase path
   if (rawLocale !== validLocale) {
+    console.log(`[Middleware] Redirecting to normalized locale: ${validLocale}`);
     const normalizedParts = [...pathParts];
     normalizedParts[1] = validLocale;
     const normalizedPath = normalizedParts.join('/') || '/';
@@ -40,10 +46,59 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(redirectURL, 308);
   }
 
+  // Check if this path should skip status check
+  if (shouldSkipStatusCheck(pathname)) {
+    console.log(`[Middleware] Skipping status check for path: ${pathname}`);
+    const requestHeaders = new Headers(request.headers);
+    requestHeaders.set('x-restaurant-slug', restaurantSlug);
+    requestHeaders.set('x-restaurant-locale', validLocale);
+
+    return NextResponse.next({
+      request: {
+        headers: requestHeaders,
+      },
+    });
+  }
+
+  // Check tenant status only for restaurant sites with valid slugs
+  let blockReason = null;
+  if (restaurantSlug && restaurantSlug !== 'localhost' && restaurantSlug !== 'www') {
+    console.log(`[Middleware] Checking tenant status for slug: ${restaurantSlug}`);
+
+    try {
+      const status = await checkTenantStatus(restaurantSlug);
+
+      console.log(
+        `[Middleware] Tenant status for ${restaurantSlug}: canAccess=${status.canAccess}, reason=${status.blockReason}`
+      );
+
+      if (!status.canAccess) {
+        console.log(`[Middleware] Tenant blocked with reason: ${status.blockReason} - redirecting to maintenance`);
+        blockReason = status.blockReason;
+
+        // Redirect to maintenance page
+        const maintenanceUrl = request.nextUrl.clone();
+        maintenanceUrl.pathname = '/maintenance';
+
+        // Pass block reason as header for maintenance page to use
+        const response = NextResponse.redirect(maintenanceUrl);
+        response.headers.set('x-block-reason', blockReason || 'maintenance');
+
+        return response;
+      }
+    } catch (error) {
+      console.error(`[Middleware] Error checking tenant status for ${restaurantSlug}:`, error);
+      // On error, allow access (fail open to avoid blocking legitimate requests)
+    }
+  }
+
   // Store in request headers (server-side, cannot be tampered by client)
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set('x-restaurant-slug', restaurantSlug);
   requestHeaders.set('x-restaurant-locale', validLocale);
+  if (blockReason) {
+    requestHeaders.set('x-block-reason', blockReason);
+  }
 
   // Continue to the next middleware/route with updated headers
   return NextResponse.next({

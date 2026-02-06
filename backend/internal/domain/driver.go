@@ -14,7 +14,7 @@ type Driver struct {
 	LicenseNumber       string     `json:"license_number"`
 	VehicleType         string     `json:"vehicle_type,omitempty"`
 	VehicleNumber       string     `json:"vehicle_number,omitempty"`
-	Status              string     `json:"status"` // active, inactive, on_duty, off_duty
+	Status              string     `json:"status"`              // active, inactive, on_duty, off_duty
 	AvailabilityStatus  string     `json:"availability_status"` // available, busy, offline
 	CurrentLatitude     *float64   `json:"current_latitude,omitempty"`
 	CurrentLongitude    *float64   `json:"current_longitude,omitempty"`
@@ -57,12 +57,12 @@ type DriverAssignment struct {
 
 // DriverLocation represents driver location history
 type DriverLocation struct {
-	ID        int       `json:"id"`
-	DriverID  int       `json:"driver_id"`
-	OrderID   *int      `json:"order_id,omitempty"`
-	Latitude  float64   `json:"latitude"`
-	Longitude float64   `json:"longitude"`
-	Accuracy  *int      `json:"accuracy,omitempty"`
+	ID         int       `json:"id"`
+	DriverID   int       `json:"driver_id"`
+	OrderID    *int      `json:"order_id,omitempty"`
+	Latitude   float64   `json:"latitude"`
+	Longitude  float64   `json:"longitude"`
+	Accuracy   *int      `json:"accuracy,omitempty"`
 	RecordedAt time.Time `json:"recorded_at"`
 }
 
@@ -81,18 +81,18 @@ type DriverStats struct {
 
 // CreateDriverRequest represents the request to create a new driver
 type CreateDriverRequest struct {
-	FirstName     string `json:"first_name" validate:"required"`
-	LastName      string `json:"last_name" validate:"required"`
-	Email         string `json:"email" validate:"required,email"`
-	PhoneNumber   string `json:"phone_number" validate:"required"`
-	LicenseNumber string `json:"license_number" validate:"required"`
-	VehicleType   string `json:"vehicle_type"`
-	VehicleNumber string `json:"vehicle_number"`
+	FirstName     string     `json:"first_name" validate:"required"`
+	LastName      string     `json:"last_name" validate:"required"`
+	Email         string     `json:"email" validate:"required,email"`
+	PhoneNumber   string     `json:"phone_number" validate:"required"`
+	LicenseNumber string     `json:"license_number" validate:"required"`
+	VehicleType   string     `json:"vehicle_type"`
+	VehicleNumber string     `json:"vehicle_number"`
 	DateOfBirth   *time.Time `json:"date_of_birth,omitempty"`
-	Address       string `json:"address,omitempty"`
-	City          string `json:"city,omitempty"`
-	State         string `json:"state,omitempty"`
-	ZipCode       string `json:"zip_code,omitempty"`
+	Address       string     `json:"address,omitempty"`
+	City          string     `json:"city,omitempty"`
+	State         string     `json:"state,omitempty"`
+	ZipCode       string     `json:"zip_code,omitempty"`
 }
 
 // UpdateDriverRequest represents the request to update a driver
@@ -119,8 +119,8 @@ type AssignOrderRequest struct {
 
 // UpdateAssignmentStatusRequest represents the request to update assignment status
 type UpdateAssignmentStatusRequest struct {
-	Status  string `json:"status" validate:"required"`
-	Notes   string `json:"notes,omitempty"`
+	Status string `json:"status" validate:"required"`
+	Notes  string `json:"notes,omitempty"`
 }
 
 // RateDeliveryRequest represents the request to rate a delivery

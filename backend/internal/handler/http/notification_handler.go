@@ -16,8 +16,8 @@ import (
 
 // NotificationHandler handles HTTP requests for notifications
 type NotificationHandler struct {
-	uc                *usecase.NotificationUseCase
-	tenantValidator   *auth.TenantValidator
+	uc              *usecase.NotificationUseCase
+	tenantValidator *auth.TenantValidator
 }
 
 // NewNotificationHandler creates new notification handler
@@ -27,7 +27,6 @@ func NewNotificationHandler(uc *usecase.NotificationUseCase) *NotificationHandle
 		tenantValidator: auth.NewTenantValidator(),
 	}
 }
-
 
 // checkNotificationPermission verifies user has required permission for notification operations
 func (h *NotificationHandler) checkNotificationPermission(
@@ -40,7 +39,6 @@ func (h *NotificationHandler) checkNotificationPermission(
 		log.Printf("[NOTIFICATION HANDLER] Permission check failed: %v", err)
 		return 0, fmt.Errorf("forbidden")
 	}
-
 
 	return tenantID, nil
 }

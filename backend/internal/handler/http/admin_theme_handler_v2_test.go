@@ -72,9 +72,9 @@ func TestHandlerMethodSignatures(t *testing.T) {
 // TestThemeCreateRequestParsing tests request parsing
 func TestThemeCreateRequestParsing(t *testing.T) {
 	tests := []struct {
-		name    string
-		req     *domain.ThemeCreateRequest
-		valid   bool
+		name  string
+		req   *domain.ThemeCreateRequest
+		valid bool
 	}{
 		{
 			name: "valid request",
@@ -185,11 +185,11 @@ func TestHTTPStatusCodes(t *testing.T) {
 // TestPaginationParameters tests pagination query parameters
 func TestPaginationParameters(t *testing.T) {
 	tests := []struct {
-		name           string
-		pageParam      string
-		pageSizeParam  string
-		expectedPage   int
-		expectedSize   int
+		name          string
+		pageParam     string
+		pageSizeParam string
+		expectedPage  int
+		expectedSize  int
 	}{
 		{"default", "", "", 1, 10},
 		{"page 2", "2", "10", 2, 10},

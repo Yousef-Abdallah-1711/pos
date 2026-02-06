@@ -65,11 +65,11 @@ func TestValidPaymentStatus(t *testing.T) {
 // TestCanTransitionStatus tests the CanTransitionStatus function
 func TestCanTransitionStatus(t *testing.T) {
 	tests := []struct {
-		name         string
-		oldStatus    string
-		newStatus    string
-		expected     bool
-		description  string
+		name        string
+		oldStatus   string
+		newStatus   string
+		expected    bool
+		description string
 	}{
 		// Valid transitions
 		{"pending to confirmed", "pending", "confirmed", true, "Standard flow"},
@@ -151,19 +151,19 @@ func TestGenerateOrderNumber(t *testing.T) {
 // TestOrderStructMarshaling tests JSON marshaling of Order
 func TestOrderStructMarshaling(t *testing.T) {
 	order := &Order{
-		ID:           1,
-		TenantID:     10,
-		RestaurantID: 5,
-		OrderNumber:  "ORD-2025-000001",
-		CustomerName: "John Doe",
+		ID:            1,
+		TenantID:      10,
+		RestaurantID:  5,
+		OrderNumber:   "ORD-2025-000001",
+		CustomerName:  "John Doe",
 		CustomerEmail: "john@example.com",
 		CustomerPhone: "1234567890",
-		Status:       "pending",
+		Status:        "pending",
 		PaymentStatus: "pending",
-		Subtotal:     100.00,
-		TotalAmount:  110.00,
-		CreatedAt:    time.Now(),
-		UpdatedAt:    time.Now(),
+		Subtotal:      100.00,
+		TotalAmount:   110.00,
+		CreatedAt:     time.Now(),
+		UpdatedAt:     time.Now(),
 	}
 
 	// Test marshaling to JSON
@@ -473,8 +473,8 @@ func TestOrderListResponse(t *testing.T) {
 // TestOrderStatsStruct tests OrderStats struct
 func TestOrderStatsStruct(t *testing.T) {
 	stats := OrderStats{
-		TotalOrders:      50,
-		TotalRevenue:     5000.00,
+		TotalOrders:       50,
+		TotalRevenue:      5000.00,
 		AverageOrderValue: 100.00,
 		OrdersByStatus: map[string]int64{
 			"pending":    10,

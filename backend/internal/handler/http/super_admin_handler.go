@@ -299,10 +299,10 @@ func (h *SuperAdminHandler) GenerateDashboardLoginToken(w http.ResponseWriter, r
 	respondJSON(w, http.StatusOK, map[string]interface{}{
 		"success": true,
 		"data": map[string]interface{}{
-			"token":                 token,
-			"dashboard_url":         "http://localhost:3001/auth/super-admin-login",
-			"redirect_url":          "http://localhost:3001/auth/super-admin-login?token=" + token,
-			"expires_in_seconds":    30,
+			"token":              token,
+			"dashboard_url":      "http://localhost:3001/auth/super-admin-login",
+			"redirect_url":       "http://localhost:3001/auth/super-admin-login?token=" + token,
+			"expires_in_seconds": 30,
 		},
 	})
 }

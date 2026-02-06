@@ -95,7 +95,7 @@ func TestListOrdersRequestParsing(t *testing.T) {
 
 			if req.URL.Query().Get("page") != "" || req.URL.Query().Get("limit") != "" {
 				// Verify query params are parsed correctly
-			if req.URL.Query().Get("page") == "" {
+				if req.URL.Query().Get("page") == "" {
 					// This is expected for some tests
 				}
 			}
@@ -210,10 +210,10 @@ func TestCancelOrderRequest(t *testing.T) {
 // TestPaymentStatusUpdateRequest tests payment status update request
 func TestPaymentStatusUpdateRequest(t *testing.T) {
 	tests := []struct {
-		name           string
-		paymentStatus  string
-		expectedValid  bool
-		description    string
+		name          string
+		paymentStatus string
+		expectedValid bool
+		description   string
 	}{
 		{
 			name:          "Mark as paid",
@@ -441,9 +441,9 @@ func TestStatusTransitionValidation(t *testing.T) {
 // TestPaymentStatusValidation tests payment status values
 func TestPaymentStatusValidation(t *testing.T) {
 	tests := []struct {
-		status       string
-		isValid      bool
-		description  string
+		status      string
+		isValid     bool
+		description string
 	}{
 		{"pending", true, "Pending is valid payment status"},
 		{"paid", true, "Paid is valid payment status"},
@@ -468,9 +468,9 @@ func TestPaymentStatusValidation(t *testing.T) {
 // TestOrderStatusValidation tests order status values
 func TestOrderStatusValidation(t *testing.T) {
 	tests := []struct {
-		status       string
-		isValid      bool
-		description  string
+		status      string
+		isValid     bool
+		description string
 	}{
 		{"pending", true, "Pending is valid order status"},
 		{"confirmed", true, "Confirmed is valid order status"},
@@ -564,12 +564,12 @@ func TestFilterStructure(t *testing.T) {
 // TestOrderResponseStructure tests order response structure
 func TestAdminOrderResponseStructure(t *testing.T) {
 	order := &domain.Order{
-		ID:           1,
-		OrderNumber:  "ORD-2025-000001",
-		CustomerName: "John Doe",
-		Status:       "pending",
+		ID:            1,
+		OrderNumber:   "ORD-2025-000001",
+		CustomerName:  "John Doe",
+		Status:        "pending",
 		PaymentStatus: "pending",
-		TotalAmount:  150.00,
+		TotalAmount:   150.00,
 	}
 
 	if order.ID != 1 {

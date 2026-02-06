@@ -10,7 +10,6 @@ import (
 //	router := http.NewServeMux()
 //	router = middleware.CachingMiddlewareStack(router)
 //	http.ListenAndServe(":8080", router)
-//
 func CachingMiddlewareStack(next http.Handler) http.Handler {
 	// Apply middleware in order (executes in reverse order)
 	// 1. Cache headers based on content type
@@ -173,17 +172,17 @@ var CommonCachePatterns = map[string]string{
 
 // HTTPCacheHeaders contains common HTTP cache-related headers
 type HTTPCacheHeaders struct {
-	CacheControl       string
-	ETag               string
-	LastModified       string
-	Expires            string
-	Vary               string
-	Age                string
-	Pragma             string
-	IfNoneMatch        string
-	IfModifiedSince    string
-	Expires_RFC1123    string
-	Expires_RFC2822    string
+	CacheControl    string
+	ETag            string
+	LastModified    string
+	Expires         string
+	Vary            string
+	Age             string
+	Pragma          string
+	IfNoneMatch     string
+	IfModifiedSince string
+	Expires_RFC1123 string
+	Expires_RFC2822 string
 }
 
 // GetCacheHeaders returns recommended headers for different scenarios
@@ -191,15 +190,15 @@ func GetCacheHeaders(scenario string) HTTPCacheHeaders {
 	switch scenario {
 	case "static":
 		return HTTPCacheHeaders{
-			CacheControl:   "public, max-age=31536000, immutable",
-			Vary:           "Accept-Encoding",
+			CacheControl:    "public, max-age=31536000, immutable",
+			Vary:            "Accept-Encoding",
 			Expires_RFC1123: "Thu, 31 Dec 2099 23:59:59 GMT",
 		}
 
 	case "html":
 		return HTTPCacheHeaders{
-			CacheControl:   "public, max-age=3600, must-revalidate",
-			Vary:           "Accept-Encoding, Accept",
+			CacheControl: "public, max-age=3600, must-revalidate",
+			Vary:         "Accept-Encoding, Accept",
 		}
 
 	case "api":

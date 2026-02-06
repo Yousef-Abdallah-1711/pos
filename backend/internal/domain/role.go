@@ -12,17 +12,17 @@ type SimpleRole struct {
 	TenantID    int64
 	Name        string // ADMIN, MANAGER, STAFF, VIEWER, or custom name
 	Description string
-	IsSystem    bool      // System roles cannot be deleted
+	IsSystem    bool // System roles cannot be deleted
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
 }
 
 // RoleConstants defines standard role names
 const (
-	RoleAdmin    = "ADMIN"
-	RoleManager  = "MANAGER"
-	RoleStaff    = "STAFF"
-	RoleViewer   = "VIEWER"
+	RoleAdmin   = "ADMIN"
+	RoleManager = "MANAGER"
+	RoleStaff   = "STAFF"
+	RoleViewer  = "VIEWER"
 )
 
 // Validate checks if role has required fields
@@ -99,9 +99,9 @@ func (m *ModuleDefinition) Validate() error {
 
 // PermissionLevel represents the level of access a role has to a module
 type PermissionLevel struct {
-	ID    int64
-	Name  string // READ, WRITE, DELETE, ADMIN, NONE
-	Value int    // Numeric value for comparison: 0=NONE, 1=READ, 2=WRITE, 3=DELETE, 4=ADMIN
+	ID          int64
+	Name        string // READ, WRITE, DELETE, ADMIN, NONE
+	Value       int    // Numeric value for comparison: 0=NONE, 1=READ, 2=WRITE, 3=DELETE, 4=ADMIN
 	Description string
 }
 

@@ -9,21 +9,21 @@ import (
 
 // Theme represents a complete theme configuration for a restaurant/tenant
 type Theme struct {
-	ID        int64           `json:"id"`
-	TenantID  int64           `json:"tenant_id"`
-	RestaurantID int64        `json:"restaurant_id,omitempty"`
-	Name      string          `json:"name"`
-	Slug      string          `json:"slug"`
-	Config    json.RawMessage `json:"config"` // Entire theme as JSON - JSONB from DB
-	Description string        `json:"description,omitempty"`
-	IsActive  bool            `json:"is_active"`
-	IsPublished bool          `json:"is_published"`
-	Version   int             `json:"version"`
-	CreatedBy *int64          `json:"created_by,omitempty"`
-	UpdatedBy *int64          `json:"updated_by,omitempty"`
-	CreatedAt time.Time       `json:"created_at"`
-	UpdatedAt time.Time       `json:"updated_at"`
-	PublishedAt *time.Time    `json:"published_at,omitempty"`
+	ID           int64           `json:"id"`
+	TenantID     int64           `json:"tenant_id"`
+	RestaurantID int64           `json:"restaurant_id,omitempty"`
+	Name         string          `json:"name"`
+	Slug         string          `json:"slug"`
+	Config       json.RawMessage `json:"config"` // Entire theme as JSON - JSONB from DB
+	Description  string          `json:"description,omitempty"`
+	IsActive     bool            `json:"is_active"`
+	IsPublished  bool            `json:"is_published"`
+	Version      int             `json:"version"`
+	CreatedBy    *int64          `json:"created_by,omitempty"`
+	UpdatedBy    *int64          `json:"updated_by,omitempty"`
+	CreatedAt    time.Time       `json:"created_at"`
+	UpdatedAt    time.Time       `json:"updated_at"`
+	PublishedAt  *time.Time      `json:"published_at,omitempty"`
 }
 
 // ThemeConfig is the structure of the config JSONB field
@@ -31,13 +31,13 @@ type Theme struct {
 type ThemeConfig struct {
 	Styling struct {
 		Colors struct {
-			Primary     string `json:"primary"`       // e.g. #3b82f6
-			Secondary   string `json:"secondary"`     // e.g. #1e40af
-			Accent      string `json:"accent"`        // e.g. #0ea5e9
-			Background  string `json:"background"`    // e.g. #ffffff
-			Text        string `json:"text"`          // e.g. #1f2937
-			Border      string `json:"border"`        // e.g. #e5e7eb
-			Shadow      string `json:"shadow"`        // e.g. #000000
+			Primary    string `json:"primary"`    // e.g. #3b82f6
+			Secondary  string `json:"secondary"`  // e.g. #1e40af
+			Accent     string `json:"accent"`     // e.g. #0ea5e9
+			Background string `json:"background"` // e.g. #ffffff
+			Text       string `json:"text"`       // e.g. #1f2937
+			Border     string `json:"border"`     // e.g. #e5e7eb
+			Shadow     string `json:"shadow"`     // e.g. #000000
 		} `json:"colors"`
 		Typography struct {
 			FontSans     string  `json:"font_sans"`     // e.g. Inter, Arial
@@ -50,18 +50,18 @@ type ThemeConfig struct {
 	} `json:"styling"`
 
 	Header struct {
-		LogoURL    string `json:"logo_url"`
-		NavBg      string `json:"nav_bg"`
-		NavText    string `json:"nav_text"`
-		NavHeight  int    `json:"nav_height"`
-		Sticky     bool   `json:"sticky"`
+		LogoURL   string `json:"logo_url"`
+		NavBg     string `json:"nav_bg"`
+		NavText   string `json:"nav_text"`
+		NavHeight int    `json:"nav_height"`
+		Sticky    bool   `json:"sticky"`
 	} `json:"header"`
 
 	Footer struct {
-		Text       string `json:"text"`
-		BgColor    string `json:"bg_color"`
-		TextColor  string `json:"text_color"`
-		Links      []struct {
+		Text      string `json:"text"`
+		BgColor   string `json:"bg_color"`
+		TextColor string `json:"text_color"`
+		Links     []struct {
 			Label string `json:"label"`
 			URL   string `json:"url"`
 		} `json:"links"`
@@ -69,20 +69,20 @@ type ThemeConfig struct {
 
 	HomePage struct {
 		Sections []struct {
-			ID       string                 `json:"id"`
-			Type     string                 `json:"type"` // hero, products, testimonials, etc
-			Order    int                    `json:"order"`
-			Enabled  bool                   `json:"enabled"`
-			Config   map[string]interface{} `json:"config"`
+			ID      string                 `json:"id"`
+			Type    string                 `json:"type"` // hero, products, testimonials, etc
+			Order   int                    `json:"order"`
+			Enabled bool                   `json:"enabled"`
+			Config  map[string]interface{} `json:"config"`
 		} `json:"sections"`
 	} `json:"homepage"`
 
 	DarkMode struct {
-		Enabled         bool   `json:"enabled"`
-		PrimaryDark     string `json:"primary_dark"`
-		SecondaryDark   string `json:"secondary_dark"`
-		BackgroundDark  string `json:"background_dark"`
-		TextDark        string `json:"text_dark"`
+		Enabled        bool   `json:"enabled"`
+		PrimaryDark    string `json:"primary_dark"`
+		SecondaryDark  string `json:"secondary_dark"`
+		BackgroundDark string `json:"background_dark"`
+		TextDark       string `json:"text_dark"`
 	} `json:"dark_mode"`
 
 	RTL struct {
@@ -223,14 +223,14 @@ func (t *Theme) SetConfig(cfg *ThemeConfig) error {
 // NewTheme creates a new theme with validation
 func NewTheme(name, slug string, tenantID int64) (*Theme, error) {
 	theme := &Theme{
-		Name:      name,
-		Slug:      slug,
-		TenantID:  tenantID,
-		IsActive:  false,
+		Name:        name,
+		Slug:        slug,
+		TenantID:    tenantID,
+		IsActive:    false,
 		IsPublished: false,
-		Version:   1,
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
+		Version:     1,
+		CreatedAt:   time.Now(),
+		UpdatedAt:   time.Now(),
 	}
 
 	if err := theme.Validate(); err != nil {

@@ -223,11 +223,11 @@ func (h *PublicOrderHandler) GetOrderStatus(w http.ResponseWriter, r *http.Reque
 	respondJSON(w, http.StatusOK, map[string]interface{}{
 		"success": true,
 		"data": map[string]interface{}{
-			"order_number":      order.OrderNumber,
-			"status":            order.Status,
-			"payment_status":    order.PaymentStatus,
-			"total_amount":      order.TotalAmount,
-			"created_at":        order.CreatedAt,
+			"order_number":       order.OrderNumber,
+			"status":             order.Status,
+			"payment_status":     order.PaymentStatus,
+			"total_amount":       order.TotalAmount,
+			"created_at":         order.CreatedAt,
 			"estimated_delivery": order.EstimatedDeliveryTime,
 		},
 	})
@@ -280,15 +280,15 @@ func (h *PublicOrderHandler) TrackOrder(w http.ResponseWriter, r *http.Request) 
 	respondJSON(w, http.StatusOK, map[string]interface{}{
 		"success": true,
 		"data": map[string]interface{}{
-			"order_number":      order.OrderNumber,
-			"status":            order.Status,
-			"payment_status":    order.PaymentStatus,
-			"customer_name":     order.CustomerName,
-			"customer_phone":    order.CustomerPhone,
-			"total_amount":      order.TotalAmount,
+			"order_number":       order.OrderNumber,
+			"status":             order.Status,
+			"payment_status":     order.PaymentStatus,
+			"customer_name":      order.CustomerName,
+			"customer_phone":     order.CustomerPhone,
+			"total_amount":       order.TotalAmount,
 			"estimated_delivery": order.EstimatedDeliveryTime,
-			"created_at":        order.CreatedAt,
-			"status_history":    history,
+			"created_at":         order.CreatedAt,
+			"status_history":     history,
 		},
 	})
 }
@@ -343,10 +343,10 @@ func (h *PublicOrderHandler) ValidateOrder(w http.ResponseWriter, r *http.Reques
 		"success": true,
 		"message": "Order is valid",
 		"data": map[string]interface{}{
-			"customer_name":  req.CustomerName,
-			"customer_phone": req.CustomerPhone,
-			"payment_method": req.PaymentMethod,
-			"item_count":     len(req.Items),
+			"customer_name":      req.CustomerName,
+			"customer_phone":     req.CustomerPhone,
+			"payment_method":     req.PaymentMethod,
+			"item_count":         len(req.Items),
 			"estimated_subtotal": subtotal,
 			// Estimated totals would include tax, delivery, etc.
 		},

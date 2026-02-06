@@ -267,6 +267,54 @@ class SuperAdminAPI {
       ip_whitelist: ipList,
     });
   }
+
+  // Subscription endpoints
+  async getTenantSubscription(tenantId: number) {
+    const response = await this.client.get<ApiResponse>(`/tenants/${tenantId}/subscription`);
+    return response.data.data;
+  }
+
+  async extendTenantTrial(
+    tenantId: number,
+    days: number,
+    reason?: string
+  ): Promise<{ new_trial_end_date: string; days_added: number; total_trial_days: number }> {
+    const response = await this.client.post<ApiResponse>(`/tenants/${tenantId}/extend-trial`, {
+      days,
+      reason,
+    });
+    return response.data.data as any;
+  }
+
+  async disableTenant(tenantId: number, reason: string): Promise<{ disabled_at: string; previous_status: string }> {
+    const response = await this.client.post<ApiResponse>(`/tenants/${tenantId}/disable`, {
+      reason,
+    });
+    return response.data.data as any;
+  }
+
+  async enableTenant(tenantId: number): Promise<{ enabled_at: string; restored_status: string }> {
+    const response = await this.client.post<ApiResponse>(`/tenants/${tenantId}/enable`);
+    return response.data.data as any;
+  }
+
+  async deleteTenant(tenantId: number, reason?: string): Promise<{ message: string; deleted_at: string }> {
+    const response = await this.client.delete<ApiResponse>(`/tenants/${tenantId}?confirm=true`, {
+      data: { reason },
+    });
+    return response.data.data as any;
+  }
+
+  async getSubscriptionHistory(
+    tenantId: number,
+    page: number = 1,
+    pageSize: number = 20
+  ): Promise<{ items: any[]; total: number; page: number; page_size: number }> {
+    const response = await this.client.get<ApiResponse>(`/tenants/${tenantId}/subscription-history`, {
+      params: { page, page_size: pageSize },
+    });
+    return response.data.data as any;
+  }
 }
 
 export const superAdminAPI = new SuperAdminAPI();

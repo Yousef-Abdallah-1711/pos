@@ -71,8 +71,8 @@ func (h *PublicHomepageHandler) GetHomepageData(w http.ResponseWriter, r *http.R
 				"id":           theme.ID,
 				"name":         theme.Name,
 				"slug":         theme.Slug,
-				"config":       configData,        // Parsed config
-				"rawConfig":    theme.Config,      // Raw JSONB config
+				"config":       configData,   // Parsed config
+				"rawConfig":    theme.Config, // Raw JSONB config
 				"is_active":    theme.IsActive,
 				"is_published": theme.IsPublished,
 				"created_at":   theme.CreatedAt,
@@ -121,7 +121,7 @@ func (h *PublicHomepageHandler) GetThemeOnly(w http.ResponseWriter, r *http.Requ
 	// Build response matching the frontend expectations
 	response := map[string]interface{}{
 		"success": true,
-		"data": configData,
+		"data":    configData,
 	}
 
 	OKResponse(w, response)

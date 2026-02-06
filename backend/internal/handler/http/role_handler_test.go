@@ -203,17 +203,17 @@ func TestCreateRoleFullData(t *testing.T) {
 	maxSalary := 50000.0
 
 	inputBody := map[string]interface{}{
-		"role_name":              "Senior Manager",
-		"role_code":              "ROLE-001",
-		"description":            "Manages team operations",
-		"access_level":           "5",
-		"can_approve_leaves":     true,
-		"can_approve_overtime":   true,
-		"can_manage_payroll":     true,
-		"can_view_reports":       true,
-		"min_salary":             minSalary,
-		"max_salary":             maxSalary,
-		"display_order":          1,
+		"role_name":            "Senior Manager",
+		"role_code":            "ROLE-001",
+		"description":          "Manages team operations",
+		"access_level":         "5",
+		"can_approve_leaves":   true,
+		"can_approve_overtime": true,
+		"can_manage_payroll":   true,
+		"can_view_reports":     true,
+		"min_salary":           minSalary,
+		"max_salary":           maxSalary,
+		"display_order":        1,
 	}
 
 	req := createRoleRequestWithClaims("POST", "/api/v1/hr/roles", inputBody, claims)

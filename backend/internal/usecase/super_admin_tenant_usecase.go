@@ -200,9 +200,9 @@ func (uc *SuperAdminTenantUseCase) GetUserDetails(
 		TargetType:   &targetType,
 		TargetID:     &userID,
 		Details: map[string]interface{}{
-			"user_email":   user.Email,
-			"user_name":    user.Name,
-			"user_tenant":  user.TenantID,
+			"user_email":  user.Email,
+			"user_name":   user.Name,
+			"user_tenant": user.TenantID,
 		},
 		IPAddress: ip,
 		UserAgent: userAgent,

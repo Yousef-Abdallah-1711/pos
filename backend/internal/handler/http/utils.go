@@ -39,11 +39,11 @@ type ValidationErrorDetail struct {
 
 // ValidationErrorResponse represents a validation error response with field-level details
 type ValidationErrorResponse struct {
-	Success bool                      `json:"success"`
-	Error   string                    `json:"error"`
-	Code    string                    `json:"code"`
-	Status  int                       `json:"status"`
-	Details []ValidationErrorDetail   `json:"details,omitempty"`
+	Success bool                    `json:"success"`
+	Error   string                  `json:"error"`
+	Code    string                  `json:"code"`
+	Status  int                     `json:"status"`
+	Details []ValidationErrorDetail `json:"details,omitempty"`
 }
 
 // ErrorCode represents standard error codes
@@ -51,30 +51,30 @@ type ErrorCode string
 
 const (
 	// Validation errors
-	ErrValidationFailed    ErrorCode = "VALIDATION_ERROR"
-	ErrInvalidHexColor     ErrorCode = "INVALID_HEX_COLOR"
-	ErrInvalidURL          ErrorCode = "INVALID_URL"
-	ErrInvalidFont         ErrorCode = "INVALID_FONT"
-	ErrOutOfRange          ErrorCode = "OUT_OF_RANGE"
-	ErrRequiredField       ErrorCode = "REQUIRED_FIELD"
+	ErrValidationFailed     ErrorCode = "VALIDATION_ERROR"
+	ErrInvalidHexColor      ErrorCode = "INVALID_HEX_COLOR"
+	ErrInvalidURL           ErrorCode = "INVALID_URL"
+	ErrInvalidFont          ErrorCode = "INVALID_FONT"
+	ErrOutOfRange           ErrorCode = "OUT_OF_RANGE"
+	ErrRequiredField        ErrorCode = "REQUIRED_FIELD"
 	ErrSQLInjectionDetected ErrorCode = "SQL_INJECTION_DETECTED"
 
 	// Resource errors
-	ErrNotFound            ErrorCode = "NOT_FOUND"
-	ErrConflict            ErrorCode = "CONFLICT"
-	ErrDuplicate           ErrorCode = "DUPLICATE"
+	ErrNotFound  ErrorCode = "NOT_FOUND"
+	ErrConflict  ErrorCode = "CONFLICT"
+	ErrDuplicate ErrorCode = "DUPLICATE"
 
 	// Authentication/Authorization errors
-	ErrUnauthorized        ErrorCode = "UNAUTHORIZED"
-	ErrForbidden           ErrorCode = "FORBIDDEN"
+	ErrUnauthorized ErrorCode = "UNAUTHORIZED"
+	ErrForbidden    ErrorCode = "FORBIDDEN"
 
 	// Request errors
-	ErrBadRequest          ErrorCode = "BAD_REQUEST"
-	ErrInvalidRequest      ErrorCode = "INVALID_REQUEST"
+	ErrBadRequest     ErrorCode = "BAD_REQUEST"
+	ErrInvalidRequest ErrorCode = "INVALID_REQUEST"
 
 	// Server errors
-	ErrInternalServer      ErrorCode = "INTERNAL_SERVER_ERROR"
-	ErrServiceUnavailable  ErrorCode = "SERVICE_UNAVAILABLE"
+	ErrInternalServer     ErrorCode = "INTERNAL_SERVER_ERROR"
+	ErrServiceUnavailable ErrorCode = "SERVICE_UNAVAILABLE"
 )
 
 // SuccessResponse writes a successful response

@@ -257,8 +257,8 @@ func TestOrderEndpointPaths(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if tt.method != http.MethodGet && tt.method != http.MethodPost &&
-			   tt.method != http.MethodPut && tt.method != http.MethodDelete &&
-			   tt.method != http.MethodPatch {
+				tt.method != http.MethodPut && tt.method != http.MethodDelete &&
+				tt.method != http.MethodPatch {
 				t.Errorf("Invalid HTTP method: %s", tt.method)
 			}
 
@@ -298,19 +298,19 @@ func TestOrderRequestBodyParsing(t *testing.T) {
 		{
 			name: "Request with all fields",
 			body: domain.CreateOrderRequest{
-				CustomerName:     "Jane Smith",
-				CustomerEmail:    "jane@example.com",
-				CustomerPhone:    "9876543210",
-				DeliveryAddress:  "123 Main St",
-				DeliveryCity:     "City",
-				PaymentMethod:    "card",
-				OrderSource:      "website",
-				Notes:            "Handle with care",
+				CustomerName:    "Jane Smith",
+				CustomerEmail:   "jane@example.com",
+				CustomerPhone:   "9876543210",
+				DeliveryAddress: "123 Main St",
+				DeliveryCity:    "City",
+				PaymentMethod:   "card",
+				OrderSource:     "website",
+				Notes:           "Handle with care",
 				Items: []domain.CreateOrderItemRequest{
 					{
-						ProductID:            1,
-						Quantity:             1,
-						SpecialInstructions:  "No onions",
+						ProductID:           1,
+						Quantity:            1,
+						SpecialInstructions: "No onions",
 					},
 				},
 			},
@@ -362,28 +362,28 @@ func TestErrorResponses(t *testing.T) {
 			errorMessage:    "Invalid order data",
 			errorCode:       http.StatusBadRequest,
 			expectedMessage: "Invalid order data",
-			description:    "4xx errors should include error message",
+			description:     "4xx errors should include error message",
 		},
 		{
 			name:            "Not found error",
 			errorMessage:    "Order not found",
 			errorCode:       http.StatusNotFound,
 			expectedMessage: "Order not found",
-			description:    "404 errors should include not found message",
+			description:     "404 errors should include not found message",
 		},
 		{
 			name:            "Conflict error",
 			errorMessage:    "Cannot cancel delivered order",
 			errorCode:       http.StatusConflict,
 			expectedMessage: "Cannot cancel delivered order",
-			description:    "409 errors should include conflict reason",
+			description:     "409 errors should include conflict reason",
 		},
 		{
 			name:            "Server error",
 			errorMessage:    "Internal database error",
 			errorCode:       http.StatusInternalServerError,
 			expectedMessage: "Internal database error",
-			description:    "5xx errors should include error details",
+			description:     "5xx errors should include error details",
 		},
 	}
 
@@ -572,11 +572,11 @@ func TestOrderDatesAndTiming(t *testing.T) {
 	now := time.Now()
 
 	tests := []struct {
-		name             string
-		createdAt        time.Time
+		name              string
+		createdAt         time.Time
 		estimatedDelivery *time.Time
-		isValid          bool
-		description      string
+		isValid           bool
+		description       string
 	}{
 		{
 			name:              "Future delivery time",

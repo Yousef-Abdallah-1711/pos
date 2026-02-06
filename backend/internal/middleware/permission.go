@@ -8,8 +8,8 @@ import (
 type contextKeyPermission string
 
 const (
-	RequiredModuleContextKey      contextKeyPermission = "required_module_id"
-	RequiredPermissionContextKey  contextKeyPermission = "required_permission_level"
+	RequiredModuleContextKey     contextKeyPermission = "required_module_id"
+	RequiredPermissionContextKey contextKeyPermission = "required_permission_level"
 )
 
 // WithRequiredPermission wraps a handler and sets required module and permission level in context

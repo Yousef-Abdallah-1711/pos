@@ -8,23 +8,23 @@ import (
 
 // LegacyTheme represents a restaurant's website theme configuration (legacy, use Theme from theme.go instead)
 type LegacyTheme struct {
-	ID                int64     `json:"id"`
-	RestaurantID      int64     `json:"restaurant_id"`
-	TenantID          int64     `json:"tenant_id"`
-	TemplateName      string    `json:"template_name"` // modern, classic, minimalist
-	PrimaryColor      string    `json:"primary_color"`
-	SecondaryColor    string    `json:"secondary_color"`
-	AccentColor       string    `json:"accent_color"`
-	BackgroundColor   string    `json:"background_color"`
-	TextColor         string    `json:"text_color"`
-	FontFamily        string    `json:"font_family"`
-	FontSizeBase      int       `json:"font_size_base"`
-	BorderRadius      int       `json:"border_radius"`
-	LogoURL           string    `json:"logo_url"`
-	FaviconURL        string    `json:"favicon_url"`
-	IsActive          bool      `json:"is_active"`
-	CreatedAt         time.Time `json:"created_at"`
-	UpdatedAt         time.Time `json:"updated_at"`
+	ID              int64     `json:"id"`
+	RestaurantID    int64     `json:"restaurant_id"`
+	TenantID        int64     `json:"tenant_id"`
+	TemplateName    string    `json:"template_name"` // modern, classic, minimalist
+	PrimaryColor    string    `json:"primary_color"`
+	SecondaryColor  string    `json:"secondary_color"`
+	AccentColor     string    `json:"accent_color"`
+	BackgroundColor string    `json:"background_color"`
+	TextColor       string    `json:"text_color"`
+	FontFamily      string    `json:"font_family"`
+	FontSizeBase    int       `json:"font_size_base"`
+	BorderRadius    int       `json:"border_radius"`
+	LogoURL         string    `json:"logo_url"`
+	FaviconURL      string    `json:"favicon_url"`
+	IsActive        bool      `json:"is_active"`
+	CreatedAt       time.Time `json:"created_at"`
+	UpdatedAt       time.Time `json:"updated_at"`
 }
 
 // HomepageSection represents a customizable homepage section
@@ -51,31 +51,31 @@ type HomepageSection struct {
 
 // WebsiteSettings represents global website configuration
 type WebsiteSettings struct {
-	ID                  int64     `json:"id"`
-	RestaurantID        int64     `json:"restaurant_id"`
-	TenantID            int64     `json:"tenant_id"`
-	SiteTitle           string    `json:"site_title"`
-	SiteDescription     string    `json:"site_description"`
-	SiteKeywords        string    `json:"site_keywords"`
-	Phone               string    `json:"phone"`
-	Email               string    `json:"email"`
-	Address             string    `json:"address"`
-	City                string    `json:"city"`
-	Country             string    `json:"country"`
-	OpeningTime         string    `json:"opening_time"` // HH:MM format
-	ClosingTime         string    `json:"closing_time"` // HH:MM format
-	Timezone            string    `json:"timezone"`
-	EnableOrders        bool      `json:"enable_orders"`
-	EnableDelivery      bool      `json:"enable_delivery"`
-	EnableReservations  bool      `json:"enable_reservations"`
-	FacebookURL         string    `json:"facebook_url"`
-	InstagramURL        string    `json:"instagram_url"`
-	TwitterURL          string    `json:"twitter_url"`
-	MetaTitle           string    `json:"meta_title"`
-	MetaDescription     string    `json:"meta_description"`
-	OGImageURL          string    `json:"og_image_url"`
-	CreatedAt           time.Time `json:"created_at"`
-	UpdatedAt           time.Time `json:"updated_at"`
+	ID                 int64     `json:"id"`
+	RestaurantID       int64     `json:"restaurant_id"`
+	TenantID           int64     `json:"tenant_id"`
+	SiteTitle          string    `json:"site_title"`
+	SiteDescription    string    `json:"site_description"`
+	SiteKeywords       string    `json:"site_keywords"`
+	Phone              string    `json:"phone"`
+	Email              string    `json:"email"`
+	Address            string    `json:"address"`
+	City               string    `json:"city"`
+	Country            string    `json:"country"`
+	OpeningTime        string    `json:"opening_time"` // HH:MM format
+	ClosingTime        string    `json:"closing_time"` // HH:MM format
+	Timezone           string    `json:"timezone"`
+	EnableOrders       bool      `json:"enable_orders"`
+	EnableDelivery     bool      `json:"enable_delivery"`
+	EnableReservations bool      `json:"enable_reservations"`
+	FacebookURL        string    `json:"facebook_url"`
+	InstagramURL       string    `json:"instagram_url"`
+	TwitterURL         string    `json:"twitter_url"`
+	MetaTitle          string    `json:"meta_title"`
+	MetaDescription    string    `json:"meta_description"`
+	OGImageURL         string    `json:"og_image_url"`
+	CreatedAt          time.Time `json:"created_at"`
+	UpdatedAt          time.Time `json:"updated_at"`
 }
 
 // ThemeTemplate defines pre-built theme templates
@@ -122,36 +122,36 @@ var ThemeTemplates = map[string]ThemeTemplate{
 
 // HomepageData represents complete homepage data for rendering
 type HomepageData struct {
-	Theme    *LegacyTheme       `json:"theme"`
-	Sections []HomepageSection  `json:"sections"`
-	Settings *WebsiteSettings   `json:"settings"`
-	Products []Product          `json:"products"`
+	Theme    *LegacyTheme      `json:"theme"`
+	Sections []HomepageSection `json:"sections"`
+	Settings *WebsiteSettings  `json:"settings"`
+	Products []Product         `json:"products"`
 }
 
 // SectionConfig helpers for different section types
 
 // HeroSectionConfig configuration for hero section
 type HeroSectionConfig struct {
-	CTAButtonText    string  `json:"cta_button_text"`
-	CTAButtonURL     string  `json:"cta_button_url"`
-	Height           string  `json:"height"` // e.g., "500px"
-	OverlayOpacity   float64 `json:"overlay_opacity"` // 0-1
-	TextAlignment    string  `json:"text_alignment"` // left, center, right
+	CTAButtonText  string  `json:"cta_button_text"`
+	CTAButtonURL   string  `json:"cta_button_url"`
+	Height         string  `json:"height"`          // e.g., "500px"
+	OverlayOpacity float64 `json:"overlay_opacity"` // 0-1
+	TextAlignment  string  `json:"text_alignment"`  // left, center, right
 }
 
 // FeaturedProductsConfig configuration for featured products section
 type FeaturedProductsConfig struct {
-	MaxProducts       int       `json:"max_products"` // 3-12
-	DisplayType       string    `json:"display_type"` // grid, carousel, list
-	ShowPrice         bool      `json:"show_price"`
-	ShowCategory      bool      `json:"show_category"`
-	CategoriesToShow  []int64   `json:"categories_to_show"` // null means all
-	BackgroundStyle   string    `json:"background_style"`   // light, dark
+	MaxProducts      int     `json:"max_products"` // 3-12
+	DisplayType      string  `json:"display_type"` // grid, carousel, list
+	ShowPrice        bool    `json:"show_price"`
+	ShowCategory     bool    `json:"show_category"`
+	CategoriesToShow []int64 `json:"categories_to_show"` // null means all
+	BackgroundStyle  string  `json:"background_style"`   // light, dark
 }
 
 // TestimonialsConfig configuration for testimonials section
 type TestimonialsConfig struct {
-	MaxTestimonials int `json:"max_testimonials"`
+	MaxTestimonials int    `json:"max_testimonials"`
 	DisplayType     string `json:"display_type"` // carousel
 	ShowRating      bool   `json:"show_rating"`
 	AutoRotate      bool   `json:"auto_rotate"`

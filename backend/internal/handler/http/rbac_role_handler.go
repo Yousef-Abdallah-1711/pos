@@ -12,14 +12,14 @@ import (
 
 // RBACRoleHandler manages RBAC role endpoints.
 type RBACRoleHandler struct {
-	roleRepo          *repository.RBACRoleRepository
+	roleRepo           *repository.RBACRoleRepository
 	rolePermissionRepo *repository.RolePermissionRepository
 }
 
 // NewRBACRoleHandler creates a new RBAC role handler.
 func NewRBACRoleHandler(roleRepo *repository.RBACRoleRepository, rolePermissionRepo *repository.RolePermissionRepository) *RBACRoleHandler {
 	return &RBACRoleHandler{
-		roleRepo:          roleRepo,
+		roleRepo:           roleRepo,
 		rolePermissionRepo: rolePermissionRepo,
 	}
 }
@@ -42,13 +42,13 @@ type rolePermissionResponse struct {
 }
 
 type roleDetailResponse struct {
-	ID          int64                   `json:"id"`
-	Name        string                  `json:"name"`
-	RoleName    string                  `json:"role_name"`
-	RoleCode    string                  `json:"role_code"`
-	Description string                  `json:"description"`
-	IsSystem    bool                    `json:"is_system"`
-	CreatedAt   string                  `json:"created_at"`
+	ID          int64                    `json:"id"`
+	Name        string                   `json:"name"`
+	RoleName    string                   `json:"role_name"`
+	RoleCode    string                   `json:"role_code"`
+	Description string                   `json:"description"`
+	IsSystem    bool                     `json:"is_system"`
+	CreatedAt   string                   `json:"created_at"`
 	Permissions []rolePermissionResponse `json:"permissions"`
 }
 
