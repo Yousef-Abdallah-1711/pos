@@ -28,23 +28,14 @@ export default function AuditLogsPage() {
   useEffect(() => {
     const fetchLogs = async () => {
       try {
-        console.log("[AuditLogsPage] Fetching logs with:", { page, limit, filterAction });
         setIsLoading(true);
         const data = await superAdminAPI.getAuditLogs(
           page,
           limit,
           filterAction || undefined
         );
-        console.log("[AuditLogsPage] Full response structure:", data);
-        console.log("[AuditLogsPage] data.data:", data?.data);
-        console.log("[AuditLogsPage] data.meta:", data?.meta);
-        console.log("[AuditLogsPage] data.total:", data?.total);
-
-        // Handle both structures: {data: [], meta: {}} and {data: [], total: 2}
         const logsArray = Array.isArray(data) ? data : (data?.data || []);
-        const totalCount = typeof data?.total === 'number' ? data.total : (data?.meta?.total || 0);
-
-        console.log("[AuditLogsPage] Setting state with logs:", logsArray, "total:", totalCount);
+        const totalCount = typeof data?.total === 'number' ? data.total : 0;
         setLogs(logsArray);
         setTotal(totalCount);
       } catch (error) {

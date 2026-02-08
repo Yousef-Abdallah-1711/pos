@@ -15,7 +15,7 @@ import type {
 class SuperAdminAPI {
   private client: AxiosInstance;
 
-  constructor(baseURL: string = process.env.NEXT_PUBLIC_SUPER_ADMIN_API_URL) {
+  constructor(baseURL: string = process.env.NEXT_PUBLIC_SUPER_ADMIN_API_URL || '') {
     this.client = axios.create({
       baseURL,
       headers: {
@@ -145,20 +145,6 @@ class SuperAdminAPI {
       limit: meta.page_size || pageSize,
       pages: meta.total_pages || 1,
     };
-  }
-
-  async disableTenant(id: number): Promise<Tenant> {
-    const response = await this.client.put<ApiResponse<Tenant>>(
-      `/tenants/${id}/disable`
-    );
-    return response.data.data!;
-  }
-
-  async enableTenant(id: number): Promise<Tenant> {
-    const response = await this.client.put<ApiResponse<Tenant>>(
-      `/tenants/${id}/enable`
-    );
-    return response.data.data!;
   }
 
   // User endpoints

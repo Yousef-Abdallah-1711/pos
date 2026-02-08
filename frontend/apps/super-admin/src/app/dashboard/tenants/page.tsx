@@ -17,19 +17,11 @@ export default function TenantsPage() {
   useEffect(() => {
     const fetchTenants = async () => {
       try {
-        console.log("[TenantsPage] Fetching tenants with:", { page, limit, searchQuery });
         setIsLoading(true);
         const data = await superAdminAPI.listTenants(page, limit, searchQuery);
-        console.log("[TenantsPage] Full response structure:", data);
-        console.log("[TenantsPage] data.data:", data?.data);
-        console.log("[TenantsPage] data.meta:", data?.meta);
-        console.log("[TenantsPage] data.total:", data?.total);
 
-        // Handle both structures: {data: [], meta: {}} and {data: [], total: 2}
         const tenantsArray = Array.isArray(data) ? data : (data?.data || []);
-        const totalCount = typeof data?.total === 'number' ? data.total : (data?.meta?.total || 0);
-
-        console.log("[TenantsPage] Setting state with tenants:", tenantsArray, "total:", totalCount);
+        const totalCount = typeof data?.total === 'number' ? data.total : 0;
         setTenants(tenantsArray);
         setTotal(totalCount);
       } catch (error) {

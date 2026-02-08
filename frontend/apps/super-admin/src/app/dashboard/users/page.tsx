@@ -17,19 +17,11 @@ export default function UsersPage() {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        console.log("[UsersPage] Fetching users with:", { page, limit, searchQuery });
         setIsLoading(true);
         const data = await superAdminAPI.listUsers(page, limit, searchQuery);
-        console.log("[UsersPage] Full response structure:", data);
-        console.log("[UsersPage] data.data:", data?.data);
-        console.log("[UsersPage] data.meta:", data?.meta);
-        console.log("[UsersPage] data.total:", data?.total);
 
-        // Handle both structures: {data: [], meta: {}} and {data: [], total: 2}
         const usersArray = Array.isArray(data) ? data : (data?.data || []);
-        const totalCount = typeof data?.total === 'number' ? data.total : (data?.meta?.total || 0);
-
-        console.log("[UsersPage] Setting state with users:", usersArray, "total:", totalCount);
+        const totalCount = typeof data?.total === 'number' ? data.total : 0;
         setUsers(usersArray);
         setTotal(totalCount);
       } catch (error) {

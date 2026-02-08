@@ -1,6 +1,7 @@
 # SaaS Trial & Subscription System - Quick Reference
 
 **For Developers Who Want Answers Fast**
+**Last Updated**: 2026-02-08 | **Build Status**: ✅ Verified
 
 ---
 
@@ -16,6 +17,9 @@ cd frontend && pnpm run dev
 # Test
 curl http://localhost:8080/api/v1/health  # Should return {"status":"ok"}
 curl http://localhost:8080/api/v1/public/tenant-status/test-tenant
+
+# Super Admin Dashboard (manage subscriptions)
+# Open: http://localhost:3004/dashboard/tenants
 ```
 
 ---
@@ -167,13 +171,15 @@ Already integrated - just verify `/maintenance` route exists.
 - Routes: `backend/cmd/api/main.go` (search for "subscription")
 
 ### Frontend
+- Super Admin: `frontend/apps/super-admin/src/app/dashboard/tenants/[id]/page.tsx` (subscription management UI)
+- Super Admin Components: `frontend/apps/super-admin/src/components/tenants/*` (modals, badges, counters)
 - Dashboard: `frontend/apps/dashboard/src/{stores,hooks,components/blocked,components/providers}/*`
 - Restaurant: `frontend/apps/restaurant-website/{lib,middleware,components}/*`
 
 ### Docs
-- This file: `docs-organized/SAAS-TRIAL-SUBSCRIPTION-QUICK-REFERENCE.md`
-- Complete guide: `docs-organized/SAAS-TRIAL-SUBSCRIPTION-COMPLETE-REFERENCE.md`
-- Original docs: `docs-organized/10-SAAS-TRIAL-SUBSCRIPTION/` (legacy)
+- This file: `docs-organized/10-Sass-Trial-Subscription/SAAS-TRIAL-SUBSCRIPTION-QUICK-REFERENCE.md`
+- Complete guide: `docs-organized/10-Sass-Trial-Subscription/SAAS-TRIAL-SUBSCRIPTION-COMPLETE-REFERENCE.md`
+- Management guide: `TENANT-SUBSCRIPTION-MANAGEMENT-GUIDE.md` (root)
 
 ---
 
@@ -257,5 +263,5 @@ curl https://api.example.com/api/v1/health
 
 ---
 
-**Last Updated**: 2026-02-06
-**Status**: ✅ Production Ready
+**Last Updated**: 2026-02-08
+**Status**: ✅ Production Ready & Build-Verified

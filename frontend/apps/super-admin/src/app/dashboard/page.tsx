@@ -45,7 +45,7 @@ export default function DashboardPage() {
       <div>
         <h1 className="text-3xl font-bold text-gray-900">Welcome back!</h1>
         <p className="text-gray-600 mt-2">
-          Here's an overview of your POS SaaS platform
+          Here&apos;s an overview of your POS SaaS platform
         </p>
       </div>
 
@@ -164,7 +164,7 @@ function StatCard({
 }: {
   title: string;
   value: number;
-  icon: React.ReactNode;
+  icon: React.ElementType;
   color: string;
   iconColor: string;
 }) {

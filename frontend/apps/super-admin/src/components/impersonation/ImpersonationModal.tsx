@@ -134,7 +134,7 @@ export function ImpersonationModal({
             <div className="text-sm text-amber-900">
               <p className="font-medium mb-1">Important</p>
               <p>
-                You will have full access to this user's dashboard. All actions
+                You will have full access to this user&apos;s dashboard. All actions
                 will be logged for audit purposes.
               </p>
             </div>

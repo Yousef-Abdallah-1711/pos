@@ -45,7 +45,7 @@ export default function LoginPage() {
       router.push("/dashboard");
     } catch (err: unknown) {
       const errorMessage =
-        (err as Record<string, unknown>)?.response?.data?.error ||
+        (err as any)?.response?.data?.error ||
         "Failed to login. Please check your credentials.";
       setError(String(errorMessage));
       setAuthError(String(errorMessage));

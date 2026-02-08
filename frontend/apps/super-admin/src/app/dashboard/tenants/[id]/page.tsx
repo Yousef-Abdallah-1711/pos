@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { superAdminAPI } from "@/lib/api";
-import type { Tenant, User, PaginatedResponse } from "@/types";
+import type { Tenant, User, PaginatedResponse, SubscriptionStatus } from "@/types";
 import { ArrowLeft, Users as UsersIcon, AlertCircle, LogIn, Calendar, Clock, Lock, CheckCircle, Trash2, RefreshCw } from "lucide-react";
 import { ImpersonationButton } from "@/components/impersonation/ImpersonationButton";
 import { ExtendTrialModal } from "@/components/tenants/ExtendTrialModal";
@@ -17,7 +17,7 @@ import { toast } from "sonner";
 
 interface SubscriptionInfo {
   tenant_id: number;
-  subscription_status: string;
+  subscription_status: SubscriptionStatus;
   trial_start_date: string | null;
   trial_end_date: string | null;
   trial_days: number;
@@ -77,9 +77,8 @@ export default function TenantDetailPage() {
       setUsers(usersData.data);
       setTotal(usersData.total);
 
-      if (subData?.data) {
-        console.log("[TenantDetailPage] Subscription data:", subData.data);
-        setSubscriptionInfo(subData.data);
+      if (subData) {
+        setSubscriptionInfo(subData as SubscriptionInfo);
       }
     } catch (error) {
       console.error("[TenantDetailPage] Error fetching data:", error);
@@ -92,11 +91,9 @@ export default function TenantDetailPage() {
   // Fetch subscription history
   const fetchSubscriptionHistory = async () => {
     try {
-      console.log("[TenantDetailPage] Fetching subscription history for tenant:", tenantId);
       const response = await superAdminAPI.getSubscriptionHistory(tenantId, 5, 0);
-      if (response?.data) {
-        setSubscriptionHistory(response.data);
-        console.log("[TenantDetailPage] Got subscription history:", response.data);
+      if (response?.items) {
+        setSubscriptionHistory(response.items as SubscriptionHistory[]);
       }
     } catch (error) {
       console.error("[TenantDetailPage] Error fetching subscription history:", error);
@@ -134,8 +131,8 @@ export default function TenantDetailPage() {
     setIsRefreshingSubscription(true);
     try {
       const response = await superAdminAPI.getTenantSubscription(tenantId);
-      if (response?.data) {
-        setSubscriptionInfo(response.data);
+      if (response) {
+        setSubscriptionInfo(response as SubscriptionInfo);
         toast.success("Subscription data refreshed");
         fetchSubscriptionHistory();
       }
@@ -268,7 +265,7 @@ export default function TenantDetailPage() {
             {/* Trial Days Counter */}
             <div className="p-4 bg-gray-50 rounded-lg">
               <p className="text-sm font-medium text-gray-600 mb-2">Trial Days Remaining</p>
-              <TrialDaysCounter daysRemaining={subscriptionInfo.days_remaining} />
+              <TrialDaysCounter trialEndDate={subscriptionInfo.trial_end_date} trialDays={subscriptionInfo.trial_days} showProgress />
             </div>
 
             {/* Trial End Date */}
@@ -300,7 +297,7 @@ export default function TenantDetailPage() {
                   Active
                 </span>
               )}
-            </p>
+            </div>
           </div>
 
           {/* Action Buttons */}
@@ -359,7 +356,7 @@ export default function TenantDetailPage() {
       {subscriptionHistory.length > 0 && (
         <div className="bg-white rounded-lg shadow p-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">Recent Subscription Changes</h2>
-          <SubscriptionHistoryTable items={subscriptionHistory} />
+          <SubscriptionHistoryTable tenantId={tenantId} />
         </div>
       )}
 
@@ -443,37 +440,37 @@ export default function TenantDetailPage() {
       </div>
 
       {/* Modals */}
-      {showExtendModal && (
-        <ExtendTrialModal
-          tenantId={tenantId}
-          onClose={() => setShowExtendModal(false)}
-          onSuccess={handleAfterAction}
-        />
-      )}
-      {showDisableModal && (
-        <DisableTenantModal
-          tenantId={tenantId}
-          tenantName={tenant.name}
-          onClose={() => setShowDisableModal(false)}
-          onSuccess={handleAfterAction}
-        />
-      )}
-      {showEnableModal && (
-        <EnableTenantModal
-          tenantId={tenantId}
-          tenantName={tenant.name}
-          onClose={() => setShowEnableModal(false)}
-          onSuccess={handleAfterAction}
-        />
-      )}
-      {showDeleteModal && (
-        <DeleteTenantModal
-          tenantId={tenantId}
-          tenantName={tenant.name}
-          onClose={() => setShowDeleteModal(false)}
-          onSuccess={() => router.push("/dashboard/tenants")}
-        />
-      )}
+      <ExtendTrialModal
+        tenantId={tenantId}
+        tenantName={tenant.name}
+        currentTrialEndDate={subscriptionInfo?.trial_end_date ?? null}
+        isOpen={showExtendModal}
+        onClose={() => setShowExtendModal(false)}
+        onSuccess={handleAfterAction}
+      />
+      <DisableTenantModal
+        tenantId={tenantId}
+        tenantName={tenant.name}
+        isOpen={showDisableModal}
+        onClose={() => setShowDisableModal(false)}
+        onSuccess={handleAfterAction}
+      />
+      <EnableTenantModal
+        tenantId={tenantId}
+        tenantName={tenant.name}
+        disabledReason={subscriptionInfo?.disabled_reason ?? null}
+        disabledAt={subscriptionInfo?.disabled_at ?? null}
+        isOpen={showEnableModal}
+        onClose={() => setShowEnableModal(false)}
+        onSuccess={handleAfterAction}
+      />
+      <DeleteTenantModal
+        tenantId={tenantId}
+        tenantName={tenant.name}
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onSuccess={() => router.push("/dashboard/tenants")}
+      />
     </div>
   );
 }
