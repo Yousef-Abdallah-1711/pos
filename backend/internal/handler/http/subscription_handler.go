@@ -73,6 +73,30 @@ func (h *SubscriptionHandler) GetTenantStatusBySlug(w http.ResponseWriter, r *ht
 	OKResponse(w, response)
 }
 
+// GetTenantSubscriptionByID handles GET /api/v1/super-admin/tenants/{id}/subscription
+// Returns subscription info for a specific tenant (super admin only)
+func (h *SubscriptionHandler) GetTenantSubscriptionByID(w http.ResponseWriter, r *http.Request) {
+	tenantIDStr := r.PathValue("id")
+	log.Printf("[SubscriptionHandler] GetTenantSubscriptionByID - tenant_id: %s\n", tenantIDStr)
+
+	tenantID, err := strconv.ParseInt(tenantIDStr, 10, 64)
+	if err != nil {
+		log.Printf("[SubscriptionHandler] ERROR: Invalid tenant ID: %s\n", tenantIDStr)
+		BadRequestResponse(w, "invalid tenant ID")
+		return
+	}
+
+	info, err := h.useCase.GetTenantSubscription(r.Context(), tenantID)
+	if err != nil {
+		log.Printf("[SubscriptionHandler] ERROR: Failed to get tenant subscription - error: %v\n", err)
+		NotFoundResponse(w, "tenant subscription not found")
+		return
+	}
+
+	log.Printf("[SubscriptionHandler] GetTenantSubscriptionByID success - status: %s\n", info.SubscriptionStatus)
+	OKResponse(w, info)
+}
+
 // ExtendTenantTrial handles POST /api/v1/super-admin/tenants/{id}/extend-trial
 // Extends the trial period for a tenant (super admin only)
 func (h *SubscriptionHandler) ExtendTenantTrial(w http.ResponseWriter, r *http.Request) {

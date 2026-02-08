@@ -1109,6 +1109,7 @@ func main() {
 		}
 
 		// Subscription management endpoints (super admin only)
+		mux.Handle("GET /api/v1/super-admin/tenants/{id}/subscription", wrapSuperAdmin(http.HandlerFunc(subscriptionHandler.GetTenantSubscriptionByID)))
 		mux.Handle("POST /api/v1/super-admin/tenants/{id}/extend-trial", wrapSuperAdmin(http.HandlerFunc(subscriptionHandler.ExtendTenantTrial)))
 		mux.Handle("POST /api/v1/super-admin/tenants/{id}/disable", wrapSuperAdmin(http.HandlerFunc(subscriptionHandler.DisableTenant)))
 		mux.Handle("POST /api/v1/super-admin/tenants/{id}/enable", wrapSuperAdmin(http.HandlerFunc(subscriptionHandler.EnableTenant)))
