@@ -15,6 +15,7 @@ import {
   Brain,
   LogOut,
 } from 'lucide-react'
+import { debugError } from '@/lib/debug'
 import { getErrorLogger } from '@/lib/error-handling/error-logger'
 import {
   getRecoverySuggestions,
@@ -89,8 +90,8 @@ export class EnhancedErrorBoundary extends React.Component<
 
     // Log to console in development
     if (process.env.NODE_ENV === 'development') {
-      console.error('🔴 [ErrorBoundary] Caught error:', error)
-      console.error('🔴 [ErrorBoundary] Error info:', errorInfo)
+      debugError('🔴 [ErrorBoundary] Caught error:', error)
+      debugError('🔴 [ErrorBoundary] Error info:', errorInfo)
     }
   }
 

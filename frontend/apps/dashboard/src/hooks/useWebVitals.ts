@@ -7,6 +7,7 @@
  */
 
 import { useEffect, useRef, useState } from 'react'
+import { debugLog, debugWarn } from '@/lib/debug'
 import {
   WebVitalMetric,
   observeLCP,
@@ -43,7 +44,7 @@ export function useWebVitals() {
           ...prev,
           lcp: metric,
         }))
-        console.log(formatMetric(metric))
+        debugLog(formatMetric(metric))
       })
     )
 
@@ -54,7 +55,7 @@ export function useWebVitals() {
           ...prev,
           fid: metric,
         }))
-        console.log(formatMetric(metric))
+        debugLog(formatMetric(metric))
       })
     )
 
@@ -65,7 +66,7 @@ export function useWebVitals() {
           ...prev,
           cls: metric,
         }))
-        console.log(formatMetric(metric))
+        debugLog(formatMetric(metric))
       })
     )
 
@@ -76,7 +77,7 @@ export function useWebVitals() {
           ...prev,
           ttfb: metric,
         }))
-        console.log(formatMetric(metric))
+        debugLog(formatMetric(metric))
       })
     )
 
@@ -87,7 +88,7 @@ export function useWebVitals() {
           ...prev,
           fcp: metric,
         }))
-        console.log(formatMetric(metric))
+        debugLog(formatMetric(metric))
       })
     )
 
@@ -100,11 +101,11 @@ export function useWebVitals() {
               ...prev,
               inp: metric,
             }))
-            console.log(formatMetric(metric))
+            debugLog(formatMetric(metric))
           })
         )
       } catch (error) {
-        console.warn('[Web Vitals] INP not supported')
+        debugWarn('[Web Vitals] INP not supported')
       }
     }
 
@@ -257,7 +258,7 @@ export function useLongTasks() {
 
       return () => observer.disconnect()
     } catch (error) {
-      console.warn('[Long Tasks] Not supported:', error)
+      debugWarn('[Long Tasks] Not supported:', error)
     }
   }, [])
 

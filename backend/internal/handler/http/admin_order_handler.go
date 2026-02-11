@@ -341,8 +341,13 @@ func (h *AdminOrderHandler) UpdateOrderStatus(w http.ResponseWriter, r *http.Req
 		Reason: reason,
 	})
 	if err != nil {
-		if strings.Contains(err.Error(), "invalid") || strings.Contains(err.Error(), "cannot transition") {
-			respondError(w, http.StatusBadRequest, err.Error())
+		errMsg := err.Error()
+		if strings.Contains(errMsg, "not found") {
+			respondError(w, http.StatusNotFound, "Order not found")
+			return
+		}
+		if strings.Contains(errMsg, "invalid order status") || strings.Contains(errMsg, "cannot transition") {
+			respondError(w, http.StatusBadRequest, errMsg)
 			return
 		}
 		respondError(w, http.StatusInternalServerError, "Failed to update order status")

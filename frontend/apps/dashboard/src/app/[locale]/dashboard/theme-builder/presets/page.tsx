@@ -7,6 +7,7 @@ import { ThemeData } from '@/types/theme'
 import * as themeApi from '@/lib/api/themeApi'
 import { toast } from 'sonner'
 import { getLocaleFromPath } from '@/lib/translations'
+import { debugLog, debugError } from '@/lib/debug'
 import { PresetsGallery } from '@/components/theme/PresetsGallery'
 
 export default function PresetsPage() {
@@ -22,12 +23,12 @@ export default function PresetsPage() {
     const loadPresets = async () => {
       try {
         setIsLoading(true)
-        console.log('📡 Loading theme presets...')
+        debugLog('📡 Loading theme presets...')
         const presetsData = await themeApi.getThemePresets(100)
-        console.log('✅ Got presets:', presetsData)
+        debugLog('✅ Got presets:', presetsData)
         setPresets(presetsData)
       } catch (err) {
-        console.error('Failed to load presets:', err)
+        debugError('Failed to load presets:', err)
         toast.error('Failed to load theme presets')
         setPresets([])
       } finally {
@@ -41,12 +42,12 @@ export default function PresetsPage() {
   const handleSelectPreset = async (preset: ThemeData) => {
     try {
       setIsSelecting(true)
-      console.log('Creating theme from preset:', preset.name)
+      debugLog('Creating theme from preset:', preset.name)
       const newTheme = await themeApi.duplicateTheme(preset.id, `${preset.name} (Custom)`)
       toast.success(`Theme created from "${preset.name}"`)
       router.push(`/${locale}/dashboard/theme-builder/editor/${newTheme.id}`)
     } catch (err) {
-      console.error('Failed to create theme from preset:', err)
+      debugError('Failed to create theme from preset:', err)
       const errorMessage = err instanceof Error ? err.message : 'Failed to create theme'
       toast.error(errorMessage)
       setIsSelecting(false)

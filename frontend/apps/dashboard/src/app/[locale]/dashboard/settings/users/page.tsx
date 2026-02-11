@@ -5,6 +5,7 @@ import { useAuthStore } from '@/stores/authStore'
 import { useHasPermission } from '@/hooks/useRbac'
 import { MODULE_IDS, PERMISSION_LEVELS } from '@/lib/rbac'
 import { Loader2, Lock, Search, Plus, Edit2, Trash2, X, Eye, EyeOff } from 'lucide-react'
+import { debugError } from '@/lib/debug'
 
 interface Role {
   id: number
@@ -97,7 +98,7 @@ export default function UsersPage() {
       }
     } catch (err) {
       setError('Failed to load users: ' + (err instanceof Error ? err.message : 'Unknown error'))
-      console.error(err)
+      debugError(err)
     } finally {
       setIsLoading(false)
     }
@@ -138,7 +139,7 @@ export default function UsersPage() {
         setSelectedRoles((data?.data || []).map((r: Role) => r.id))
       }
     } catch (err) {
-      console.error('Failed to fetch user roles:', err)
+      debugError('Failed to fetch user roles:', err)
     }
     setActiveModal('roles')
   }

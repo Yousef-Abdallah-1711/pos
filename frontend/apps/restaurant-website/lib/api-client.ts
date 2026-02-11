@@ -1,4 +1,5 @@
 import axios, { AxiosInstance, AxiosError, InternalAxiosRequestConfig } from "axios";
+import { debugLog, debugError } from './debug';
 
 /**
  * API Client with Axios
@@ -48,7 +49,7 @@ class ApiClient {
 
         // Log request in development
         if (process.env.NODE_ENV === "development") {
-          console.log(`[API] ${config.method?.toUpperCase()} ${config.url}`, {
+          debugLog(`[API] ${config.method?.toUpperCase()} ${config.url}`, {
             tenantId,
             restaurantId,
             headers: config.headers
@@ -67,7 +68,7 @@ class ApiClient {
       (response) => {
         // Log successful responses in development
         if (process.env.NODE_ENV === "development") {
-          console.log(`[API] Response from ${response.config.url}`, response.data);
+          debugLog(`[API] Response from ${response.config.url}`, response.data);
         }
         return response;
       },
@@ -83,22 +84,22 @@ class ApiClient {
 
         if (error.response?.status === 403) {
           // Forbidden
-          console.error("[API] Forbidden:", error.response.data);
+          debugError("[API] Forbidden:", error.response.data);
         }
 
         if (error.response?.status === 404) {
           // Not found
-          console.error("[API] Not found:", error.config?.url);
+          debugError("[API] Not found:", error.config?.url);
         }
 
         if (error.response?.status === 500) {
           // Server error
-          console.error("[API] Server error:", error.response.data);
+          debugError("[API] Server error:", error.response.data);
         }
 
         // Log error in development
         if (process.env.NODE_ENV === "development") {
-          console.error(`[API] Error from ${error.config?.url}`, {
+          debugError(`[API] Error from ${error.config?.url}`, {
             status: error.response?.status,
             data: error.response?.data,
             message: error.message,

@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
+import { debugWarn } from '../debug';
 import type { Metric } from 'web-vitals';
 
 /**
@@ -41,7 +42,7 @@ export function useWebVitals() {
       } catch (error) {
         // Silently fail - don't break app if monitoring fails
         if (process.env.NODE_ENV === 'development') {
-          console.warn('Failed to send Web Vital metric:', metric.name, error);
+          debugWarn('Failed to send Web Vital metric:', metric.name, error);
         }
       }
     };
@@ -58,7 +59,7 @@ export function useWebVitals() {
       vitals.onTTFB?.(handleMetric);
     }).catch((error) => {
       if (process.env.NODE_ENV === 'development') {
-        console.warn('Failed to load web-vitals:', error);
+        debugWarn('Failed to load web-vitals:', error);
       }
     });
   }, []);

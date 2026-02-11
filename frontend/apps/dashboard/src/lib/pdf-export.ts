@@ -9,6 +9,8 @@
  * exportOrderToPDF(orderData, 'order-123.pdf')
  */
 
+import { debugLog, debugError } from '@/lib/debug'
+
 type Order = {
   id: number;
   order_number: string;
@@ -108,13 +110,13 @@ export async function exportOrderToPDF(order: Order, filename: string = `order-$
 
       // Download PDF
       pdf.save(filename);
-      console.log(`✅ PDF exported: ${filename}`);
+      debugLog(`✅ PDF exported: ${filename}`);
     } finally {
       // Clean up
       document.body.removeChild(tempDiv);
     }
   } catch (error) {
-    console.error('❌ PDF export error:', error);
+    debugError('❌ PDF export error:', error);
 
     if (error instanceof Error && error.message.includes('jspdf')) {
       throw new Error('jsPDF library not installed. Run: npm install jspdf html2canvas');
@@ -186,9 +188,9 @@ export function exportOrdersToCSV(orders: Order[], filename: string = 'orders-ex
     link.click();
     document.body.removeChild(link);
 
-    console.log(`✅ CSV exported: ${filename}`);
+    debugLog(`✅ CSV exported: ${filename}`);
   } catch (error) {
-    console.error('❌ CSV export error:', error);
+    debugError('❌ CSV export error:', error);
     throw error;
   }
 }

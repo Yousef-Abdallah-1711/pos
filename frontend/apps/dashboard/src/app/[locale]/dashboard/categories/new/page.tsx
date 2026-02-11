@@ -7,6 +7,7 @@ import { toast } from 'sonner'
 import { createTranslator, getLocaleFromPath } from '@/lib/translations'
 import { CategoryFormPage } from '@/components/categories/CategoryFormPage'
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbSeparator, BreadcrumbPage } from '@/components/ui/breadcrumb'
+import { debugError } from '@/lib/debug'
 
 export default function CreateCategoryPage() {
   const router = useRouter()
@@ -25,7 +26,7 @@ export default function CreateCategoryPage() {
       router.push(`/${locale}/dashboard/categories`)
     } catch (error) {
       toast.error(t('categories.createFailed') || 'Failed to create category')
-      console.error(error)
+      debugError(error)
     }
   }
 

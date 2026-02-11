@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { toast } from 'sonner'
+import { debugLog as debugLogFn, debugError } from '@/lib/debug'
 import { AlertCircle, Loader, Clock } from 'lucide-react'
 import { api } from '@/lib/api'
 
@@ -46,7 +47,7 @@ export function AttendanceForm({ attendance, employees = [], onSubmit, onCancel 
           setEmployeesList(emps)
           addDebugLog(`Loaded ${emps.length} employees`)
         } catch (error) {
-          console.error('Failed to load employees:', error)
+          debugError('Failed to load employees:', error)
         }
       }
       fetchEmployees()
@@ -84,7 +85,7 @@ export function AttendanceForm({ attendance, employees = [], onSubmit, onCancel 
       }
 
       addDebugLog(`Cleaned data: ${JSON.stringify(cleanData)}`)
-      console.log('DEBUG: Attendance Form Submission', { raw: data, cleaned: cleanData })
+      debugLogFn('DEBUG: Attendance Form Submission', { raw: data, cleaned: cleanData })
 
       await onSubmit(cleanData)
       addDebugLog('Form submission successful')
@@ -92,7 +93,7 @@ export function AttendanceForm({ attendance, employees = [], onSubmit, onCancel 
       const errorMsg = error?.response?.data?.message || error?.message || 'Failed to save attendance'
       setApiError(errorMsg)
       addDebugLog(`Error: ${errorMsg}`)
-      console.error('Attendance Form Error:', error)
+      debugError('Attendance Form Error:', error)
       toast.error(errorMsg)
     } finally {
       setIsSubmitting(false)

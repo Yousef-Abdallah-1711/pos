@@ -7,6 +7,7 @@
  */
 
 import { useCallback, useState } from 'react'
+import { debugWarn } from '@/lib/debug'
 
 interface UsePreloadRouteOptions {
   delay?: number
@@ -37,7 +38,7 @@ export function usePreloadRoute(
       options?.onSuccess?.()
     } catch (error) {
       const err = error instanceof Error ? error : new Error('Failed to preload route')
-      console.warn('Route preload failed:', err)
+      debugWarn('Route preload failed:', err)
       options?.onError?.(err)
     } finally {
       setIsLoading(false)
@@ -82,7 +83,7 @@ export function usePreloadRoutes(
       options?.onSuccess?.()
     } catch (error) {
       const err = error instanceof Error ? error : new Error('Failed to preload routes')
-      console.warn('Routes preload failed:', err)
+      debugWarn('Routes preload failed:', err)
       options?.onError?.(err)
     } finally {
       setIsLoading(false)

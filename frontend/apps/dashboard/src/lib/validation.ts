@@ -3,6 +3,8 @@
  * Validates user input before API calls to catch errors early
  */
 
+import { debugWarn } from '@/lib/debug'
+
 /**
  * Validates hex color format
  * @param color - Color string to validate (e.g., "#FF0000", "FF0000", "#FFF", "FFF")
@@ -60,7 +62,7 @@ export function validateUrl(url: string, allowEmpty = true): boolean {
  */
 export function validateRequired(value: string | undefined, fieldName: string): boolean {
   if (!value || typeof value !== 'string' || value.trim() === '') {
-    console.warn(`⚠️ [Validation] ${fieldName} is required`)
+    debugWarn(`⚠️ [Validation] ${fieldName} is required`)
     return false
   }
   return true
@@ -101,12 +103,12 @@ export function validateNumberRange(
   fieldName: string
 ): boolean {
   if (value === undefined || typeof value !== 'number') {
-    console.warn(`⚠️ [Validation] ${fieldName} must be a number`)
+    debugWarn(`⚠️ [Validation] ${fieldName} must be a number`)
     return false
   }
 
   if (value < min || value > max) {
-    console.warn(`⚠️ [Validation] ${fieldName} must be between ${min} and ${max}, got ${value}`)
+    debugWarn(`⚠️ [Validation] ${fieldName} must be between ${min} and ${max}, got ${value}`)
     return false
   }
 
@@ -229,7 +231,7 @@ export function validateColorContrast(color1: string, color2: string): boolean {
     // WCAG AA standard is 4.5:1
     return contrastRatio >= 4.5
   } catch (err) {
-    console.warn('⚠️ [Validation] Could not calculate contrast ratio:', err)
+    debugWarn('⚠️ [Validation] Could not calculate contrast ratio:', err)
     return true // Allow if can't calculate
   }
 }

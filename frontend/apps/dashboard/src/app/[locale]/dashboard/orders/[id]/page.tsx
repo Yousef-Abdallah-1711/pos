@@ -29,6 +29,7 @@ import {
 import { createTranslator, getLocaleFromPath } from '@/lib/translations'
 import { MODULE_IDS, PERMISSION_LEVELS } from '@/lib/rbac'
 import { exportOrderToPDF, exportOrdersToCSV } from '@/lib/pdf-export'
+import { debugError } from '@/lib/debug'
 
 interface OrderItem {
   id: number
@@ -180,7 +181,7 @@ export default function OrderDetailsPage() {
       setSelectedStatus(orderData.status)
     } catch (error) {
       toast.error('Failed to load order details')
-      console.error('[ORDER_DETAILS] Error:', error)
+      debugError('[ORDER_DETAILS] Error:', error)
     } finally {
       setLoading(false)
     }
@@ -202,7 +203,7 @@ export default function OrderDetailsPage() {
       fetchOrder()
     } catch (error) {
       toast.error(t('orders.statusUpdateFailed'))
-      console.error('[UPDATE_STATUS] Error:', error)
+      debugError('[UPDATE_STATUS] Error:', error)
     } finally {
       setUpdatingStatus(false)
     }
@@ -214,7 +215,7 @@ export default function OrderDetailsPage() {
       await exportOrderToPDF(order as any, `${order.order_number}.pdf`)
       toast.success('PDF exported successfully')
     } catch (error: any) {
-      console.error('[EXPORT_PDF] Error:', error)
+      debugError('[EXPORT_PDF] Error:', error)
       toast.error(error.message || 'Failed to export PDF')
     }
   }

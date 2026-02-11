@@ -4,6 +4,7 @@ import { useState, useMemo } from 'react'
 import { Palette, ChevronRight, Layers } from 'lucide-react'
 import { ThemeData } from '@/types/theme'
 import { getComponentCount, getThemeCategory, getThemeTags } from '@/lib/themeLoader'
+import { debugError } from '@/lib/debug'
 
 interface PresetsGalleryProps {
   presets: ThemeData[]
@@ -28,7 +29,7 @@ function getPresetColors(preset: ThemeData) {
       text: '#1f2937'
     }
   } catch (err) {
-    console.error('Error parsing preset colors:', err)
+    debugError('Error parsing preset colors:', err)
     return {
       primary: '#3b82f6',
       secondary: '#1e40af',
@@ -47,7 +48,7 @@ function getThemeComponents(preset: ThemeData): number {
     }
     return 0
   } catch (err) {
-    console.error('Error getting component count:', err)
+    debugError('Error getting component count:', err)
     return 0
   }
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useState } from "react";
+import { debugWarn } from './debug';
 import { parseSubdomain } from "./subdomain";
 import type { SubdomainContext } from "./subdomain";
 
@@ -56,7 +57,7 @@ export function SubdomainProvider({ children }: { children: React.ReactNode }) {
               }
             }
           } catch (fetchError) {
-            console.warn("[SubdomainProvider] Failed to fetch restaurant info:", fetchError);
+            debugWarn("[SubdomainProvider] Failed to fetch restaurant info:", fetchError);
           }
         }
 

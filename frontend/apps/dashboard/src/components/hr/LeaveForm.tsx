@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { toast } from 'sonner'
+import { debugLog as debugLogFn, debugError } from '@/lib/debug'
 import { AlertCircle, Loader, FileText } from 'lucide-react'
 import { api } from '@/lib/api'
 
@@ -61,7 +62,7 @@ export function LeaveForm({ leave, employees = [], onSubmit, onCancel }: LeaveFo
           setEmployeesList(emps)
           addDebugLog(`Loaded ${emps.length} employees`)
         } catch (error) {
-          console.error('Failed to load employees:', error)
+          debugError('Failed to load employees:', error)
         }
       }
       fetchEmployees()
@@ -110,7 +111,7 @@ export function LeaveForm({ leave, employees = [], onSubmit, onCancel }: LeaveFo
       }
 
       addDebugLog(`Cleaned data: ${JSON.stringify(cleanData)}`)
-      console.log('DEBUG: Leave Form Submission', { raw: data, cleaned: cleanData })
+      debugLogFn('DEBUG: Leave Form Submission', { raw: data, cleaned: cleanData })
 
       await onSubmit(cleanData)
       addDebugLog('Form submission successful')
@@ -118,7 +119,7 @@ export function LeaveForm({ leave, employees = [], onSubmit, onCancel }: LeaveFo
       const errorMsg = error?.response?.data?.message || error?.message || 'Failed to save leave'
       setApiError(errorMsg)
       addDebugLog(`Error: ${errorMsg}`)
-      console.error('Leave Form Error:', error)
+      debugError('Leave Form Error:', error)
       toast.error(errorMsg)
     } finally {
       setIsSubmitting(false)

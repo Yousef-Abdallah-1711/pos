@@ -2,6 +2,7 @@
 
 import React, { ReactNode, ErrorInfo } from 'react'
 import { AlertCircle, RotateCcw } from 'lucide-react'
+import { debugLog, debugError } from '@/lib/debug'
 
 interface ErrorBoundaryProps {
   children: ReactNode
@@ -41,8 +42,8 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error('🔴 [ErrorBoundary] Caught error:', error);
-    console.error('🔴 [ErrorBoundary] Error info:', errorInfo);
+    debugError('🔴 [ErrorBoundary] Caught error:', error);
+    debugError('🔴 [ErrorBoundary] Error info:', errorInfo);
 
     this.setState({
       error,
@@ -56,7 +57,7 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
   }
 
   handleRetry = () => {
-    console.log('🔄 [ErrorBoundary] Retrying...')
+    debugLog('🔄 [ErrorBoundary] Retrying...')
     this.setState({
       hasError: false,
       error: null,

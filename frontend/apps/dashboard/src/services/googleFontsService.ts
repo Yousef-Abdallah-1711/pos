@@ -3,6 +3,8 @@
  * Manages fetching, caching, and managing Google Fonts data
  */
 
+import { debugError } from '@/lib/debug'
+
 export interface GoogleFont {
   id: string
   family: string
@@ -189,7 +191,7 @@ export const googleFontsService = {
       const updated = [font, ...filtered].slice(0, MAX_RECENT_FONTS)
       localStorage.setItem(STORAGE_KEY, JSON.stringify(updated))
     } catch (error) {
-      console.error('Failed to save recent font:', error)
+      debugError('Failed to save recent font:', error)
     }
   },
 
@@ -200,7 +202,7 @@ export const googleFontsService = {
     try {
       return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]') as GoogleFont[]
     } catch (error) {
-      console.error('Failed to load recent fonts:', error)
+      debugError('Failed to load recent fonts:', error)
       return []
     }
   },

@@ -9,6 +9,7 @@ import { EmployeeForm } from '@/components/hr/EmployeeForm'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { api } from '@/lib/api'
+import { debugLog, debugError } from '@/lib/debug'
 import { toast } from 'sonner'
 import { Plus, AlertCircle, Lock } from 'lucide-react'
 import { createTranslator, getLocaleFromPath } from '@/lib/translations'
@@ -70,16 +71,16 @@ export default function EmployeesPage() {
       setDebugInfo(`Fetching employees at ${new Date().toLocaleTimeString()}`)
 
       try {
-        console.log('[EMPLOYEES_PAGE] Starting fetch...')
+        debugLog('[EMPLOYEES_PAGE] Starting fetch...')
         const response = await api.get('/hr/employees')
-        console.log('[EMPLOYEES_PAGE] Response:', response.data)
+        debugLog('[EMPLOYEES_PAGE] Response:', response.data)
 
         const employeesList = Array.isArray(response.data) ? response.data : response.data?.employees || []
         setEmployees(employeesList)
         setDebugInfo(`Successfully loaded ${employeesList.length} employees at ${new Date().toLocaleTimeString()}`)
       } catch (error: any) {
         const errorMsg = error?.response?.data?.message || error?.message || 'Failed to load employees'
-        console.error('[EMPLOYEES_PAGE] Error:', error)
+        debugError('[EMPLOYEES_PAGE] Error:', error)
         setApiError(errorMsg)
         setDebugInfo(`Error: ${errorMsg} at ${new Date().toLocaleTimeString()}`)
         toast.error(errorMsg)
@@ -95,16 +96,16 @@ export default function EmployeesPage() {
 
   const handleCreateEmployee = async (formData: any) => {
     try {
-      console.log('[CREATE_EMPLOYEE] Submitting:', formData)
+      debugLog('[CREATE_EMPLOYEE] Submitting:', formData)
       const response = await api.post('/hr/employees', formData)
-      console.log('[CREATE_EMPLOYEE] Response:', response.data)
+      debugLog('[CREATE_EMPLOYEE] Response:', response.data)
 
       setEmployees([response.data, ...employees])
       setShowForm(false)
       toast.success('Employee created successfully')
     } catch (error: any) {
       const errorMsg = error?.response?.data?.message || error?.message || 'Failed to create employee'
-      console.error('[CREATE_EMPLOYEE] Error:', error)
+      debugError('[CREATE_EMPLOYEE] Error:', error)
       toast.error(errorMsg)
       throw error
     }
@@ -112,9 +113,9 @@ export default function EmployeesPage() {
 
   const handleUpdateEmployee = async (employeeId: number, formData: any) => {
     try {
-      console.log('[UPDATE_EMPLOYEE] Submitting:', formData)
+      debugLog('[UPDATE_EMPLOYEE] Submitting:', formData)
       const response = await api.put(`/hr/employees/${employeeId}`, formData)
-      console.log('[UPDATE_EMPLOYEE] Response:', response.data)
+      debugLog('[UPDATE_EMPLOYEE] Response:', response.data)
 
       setEmployees(employees.map((e) => (e.id === employeeId ? { ...e, ...formData } : e)))
       setShowForm(false)
@@ -123,7 +124,7 @@ export default function EmployeesPage() {
       toast.success('Employee updated successfully')
     } catch (error: any) {
       const errorMsg = error?.response?.data?.message || error?.message || 'Failed to update employee'
-      console.error('[UPDATE_EMPLOYEE] Error:', error)
+      debugError('[UPDATE_EMPLOYEE] Error:', error)
       toast.error(errorMsg)
       throw error
     }
@@ -131,15 +132,15 @@ export default function EmployeesPage() {
 
   const handleDeleteEmployee = async (employeeId: number) => {
     try {
-      console.log('[DELETE_EMPLOYEE] Deleting:', employeeId)
+      debugLog('[DELETE_EMPLOYEE] Deleting:', employeeId)
       await api.delete(`/hr/employees/${employeeId}`)
-      console.log('[DELETE_EMPLOYEE] Success')
+      debugLog('[DELETE_EMPLOYEE] Success')
 
       setEmployees(employees.filter((e) => e.id !== employeeId))
       toast.success('Employee deleted successfully')
     } catch (error: any) {
       const errorMsg = error?.response?.data?.message || error?.message || 'Failed to delete employee'
-      console.error('[DELETE_EMPLOYEE] Error:', error)
+      debugError('[DELETE_EMPLOYEE] Error:', error)
       toast.error(errorMsg)
     }
   }

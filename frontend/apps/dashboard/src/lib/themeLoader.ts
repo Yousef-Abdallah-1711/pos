@@ -4,6 +4,7 @@
 
 import { ThemeJson, BilingualText, ParsedThemeJson } from "@/types/themeJson"
 import { ThemeData, ComponentConfig } from "@/types/theme"
+import { debugError } from '@/lib/debug'
 
 export function extractText(
   value: BilingualText | undefined, 
@@ -63,7 +64,7 @@ export function loadThemeFromJson(jsonData: any): ParsedThemeJson | null {
     }
     return themeJson as ParsedThemeJson
   } catch (error) {
-    console.error("Failed to parse theme JSON:", error)
+    debugError("Failed to parse theme JSON:", error)
     return null
   }
 }

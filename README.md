@@ -1,364 +1,565 @@
-# 📚 POS SaaS Platform - Complete Documentation Index
+# POS SaaS Platform
 
-**Update (2026-01-26):** Current blockers and remaining tasks are tracked in [docs-organized/99-REMAINING-WORK.md](docs-organized/99-REMAINING-WORK.md). Older "production ready" statements should be treated as historical.
+**Multi-tenant Point-of-Sale SaaS platform** with restaurant management, online ordering, HR, theme customization, and subscription management.
 
-**Last Updated:** February 8, 2026
-**Version:** 1.2.0
-**Status:** ✅ Fully Organized & Updated
-
-**🆕 LATEST (Feb 8, 2026):**
-- ✅ Super Admin Tenant Subscription Management UI IMPLEMENTED
-- ✅ All build errors FIXED (super-admin app builds cleanly)
-- ✅ Extend trial, disable/enable tenant, delete tenant from dashboard
-- ✅ Subscription history with audit trail
-- ✅ Documentation updated and consolidated
-- See [TENANT-SUBSCRIPTION-MANAGEMENT-GUIDE.md](TENANT-SUBSCRIPTION-MANAGEMENT-GUIDE.md) for usage guide
+**Last Updated:** February 11, 2026
 
 ---
 
-## 🎯 Quick Navigation
+## Quick Start
 
-This documentation has been reorganized by **feature** to make it easier to find what you need.
+```bash
+# Backend (Go API - Port 8080)
+cd backend
+cp .env.example .env        # Configure DB, JWT_SECRET
+go run cmd/api/main.go
 
-| Section | Purpose | Key Files |
-|---------|---------|-----------|
-| **🆕 SAAS TRIAL/SUBSCRIPTION** | Trial management & subscription control | Complete reference, quick reference, integration guides |
-| **00-GETTING-STARTED** | Setup & overview | Implementation guide, project overview |
-| **01-THEME-SYSTEM** | Theme builder features | Architecture, phases, implementation guides |
-| **02-API-BACKEND** | Backend API & services | API docs, validation, error handling |
-| **03-FRONTEND-DASHBOARD** | Dashboard application | Architecture, testing, components |
-| **04-MODULES** | Feature modules | HR, Products, Notifications |
-| **05-INFRASTRUCTURE** | Scalability & deployment | Multi-tenancy, deployment, RTL support |
-| **06-TESTING** | Testing & QA | Integration tests, performance analysis |
-| **07-WEBSITE-ECOMMERCE-PLAN** | Ecommerce delivery plan | Status, roadmap, production verification |
+# Frontend (All 4 apps via Turbo)
+cd frontend
+pnpm install
+pnpm dev                    # Starts all apps in parallel
 
----
+# Or run individual apps:
+pnpm dev:dashboard          # Port 3002
+pnpm dev:landing            # Port 3001
+pnpm dev:restaurant         # Port 3003
+pnpm dev:super-admin        # Port 3004
 
-## 🆕 SaaS Trial & Subscription System
+# Docker (Backend + PostgreSQL)
+docker-compose up -d
+```
 
-**Status:** ✅ **COMPLETE, BUILD-VERIFIED & PRODUCTION READY** (2026-02-08)
-
-A complete trial management and subscription control system with 8 implementation phases, 6,000+ lines of code, 130+ test cases, and full Super Admin UI.
-
-### Quick Links
-- **📖 Complete Reference**: [SAAS-TRIAL-SUBSCRIPTION-COMPLETE-REFERENCE.md](docs-organized/10-Sass-Trial-Subscription/SAAS-TRIAL-SUBSCRIPTION-COMPLETE-REFERENCE.md) - Full guide with all details
-- **⚡ Quick Reference**: [SAAS-TRIAL-SUBSCRIPTION-QUICK-REFERENCE.md](docs-organized/10-Sass-Trial-Subscription/SAAS-TRIAL-SUBSCRIPTION-QUICK-REFERENCE.md) - Fast answers for developers
-- **🎮 Management Guide**: [TENANT-SUBSCRIPTION-MANAGEMENT-GUIDE.md](TENANT-SUBSCRIPTION-MANAGEMENT-GUIDE.md) - How to manage tenants from the dashboard
-- **🚀 5-Minute Start**: See Quick Reference → "5-Minute Quick Start"
-
-### Key Features
-- ✅ 15-day free trials for new tenants
-- ✅ Super admin controls (extend, disable, delete, re-enable)
-- ✅ Automatic expiration and blocking
-- ✅ Complete audit trail
-- ✅ Dashboard overlay for blocked users
-- ✅ Restaurant website maintenance page
-- ✅ 130+ comprehensive test cases
-- ✅ Production-ready code
-
-### Implementation Summary
-| Phase | Component | Status |
-|-------|-----------|--------|
-| 1 | Database Schema | ✅ 3 migrations, 10 new columns, audit table |
-| 2 | Backend Domain & Repository | ✅ Models, interfaces, implementations |
-| 3 | Backend API Endpoints | ✅ 7 handlers, all CRUD operations |
-| 4 | Middleware | ✅ Tenant status check, blocking logic |
-| 5 | Super Admin Dashboard | ✅ 8+ components, full management UI on tenant detail page |
-| 6 | Dashboard Blocked State | ✅ Overlay, sidebar, notifications |
-| 7 | Restaurant Website | ✅ Maintenance page, routing |
-| 8 | Testing & Docs | ✅ 130+ test cases, complete guides |
+### Default Credentials
+- **Super Admin:** Created via migration `109_seed_super_admin.sql`
+- **Regular Users:** Register via Landing app (Port 3001) `/auth/register`
 
 ---
 
+## Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| **Backend** | Go 1.18+ (stdlib `net/http`, no framework) |
+| **Database** | PostgreSQL 15 (58+ migrations) |
+| **Auth** | JWT (HS256, 24h expiry), bcrypt passwords |
+| **Frontend** | Next.js 15, React 18, TypeScript 5.7 |
+| **Monorepo** | Turbo 2.3 + pnpm 9.0 workspaces |
+| **State** | Zustand 4.5 (with persist middleware) |
+| **Styling** | Tailwind CSS 3.4, Radix UI, Lucide icons |
+| **Forms** | React Hook Form + Zod validation |
+| **HTTP** | Axios 1.7 (frontend), stdlib (backend) |
+| **i18n** | next-intl (EN + AR with RTL support) |
+| **Container** | Docker + Docker Compose |
+
 ---
 
-## 🧭 Docs Index (Current)
-
-- [docs-organized/ORGANIZATION_SUMMARY.md](docs-organized/ORGANIZATION_SUMMARY.md)
-- [docs-organized/99-REMAINING-WORK.md](docs-organized/99-REMAINING-WORK.md)
-- [docs-organized/07-website-ecommerce-plan/06-CURRENT-STATUS-AND-FINDINGS.md](docs-organized/07-website-ecommerce-plan/06-CURRENT-STATUS-AND-FINDINGS.md)
-- [docs-organized/07-website-ecommerce-plan/08-REMAINING-PHASES-AND-ROADMAP.md](docs-organized/07-website-ecommerce-plan/08-REMAINING-PHASES-AND-ROADMAP.md)
-- [docs-organized/07-website-ecommerce-plan/09-ECOMMERCE-PRODUCTION-READY-VERIFICATION.md](docs-organized/07-website-ecommerce-plan/09-ECOMMERCE-PRODUCTION-READY-VERIFICATION.md)
-- [docs-organized/02-API-BACKEND/README.md](docs-organized/02-API-BACKEND/README.md)
-- [docs-organized/02-API-BACKEND/API_REFERENCE_V2.0.0.md](docs-organized/02-API-BACKEND/API_REFERENCE_V2.0.0.md)
-- [docs-organized/03-FRONTEND-DASHBOARD/README.md](docs-organized/03-FRONTEND-DASHBOARD/README.md)
-
----
-
-## 📁 Directory Structure
+## Architecture Overview
 
 ```
-docs-organized/
+                    ┌─────────────────────────────────────────┐
+                    │           PostgreSQL 15                  │
+                    │    (58+ migrations, row-level tenancy)   │
+                    └──────────────────┬──────────────────────┘
+                                       │
+                    ┌──────────────────┴──────────────────────┐
+                    │       Go Backend API (:8080)             │
+                    │  Clean Architecture (Handler→UseCase→Repo)│
+                    │  JWT Auth | RBAC | Multi-Tenant Middleware│
+                    └──┬────────┬────────┬────────┬───────────┘
+                       │        │        │        │
+          ┌────────────┘   ┌────┘   ┌────┘   ┌────┘
+          ▼                ▼        ▼        ▼
+   Landing (:3001)   Dashboard   Restaurant  Super-Admin
+   Auth/Register     (:3002)     Website     (:3004)
+   Marketing page    Admin UI    (:3003)     Tenant mgmt
+                     CRUD ops    Subdomain   Impersonation
+                     HR/Orders   multi-tenant Audit logs
+                     Theme edit  Cart/Checkout Subscriptions
+```
+
+### Multi-Tenancy Model
+
+- **Database:** Row-level isolation via `tenant_id` on every table
+- **Backend:** `TenantContextMiddleware` extracts tenant from JWT claims
+- **Dashboard:** `X-Tenant-ID` / `X-Restaurant-ID` headers on every API call
+- **Restaurant Website:** Subdomain extraction in Next.js middleware (`demo.localhost:3000` -> slug `demo`)
+- **Security:** Triple-check validation (JWT -> context -> query WHERE clause)
+
+---
+
+## Project Structure
+
+```
+POS/
+├── backend/                          Go API server
+│   ├── cmd/api/main.go              Entry point (1133 lines, all routes)
+│   ├── internal/
+│   │   ├── domain/                  Entity models (User, Product, Order, Tenant, etc.)
+│   │   ├── handler/http/            38+ HTTP handlers
+│   │   ├── middleware/              11 middleware (auth, tenant, RBAC, status, CORS)
+│   │   ├── repository/             15+ data access repos
+│   │   ├── usecase/                9 business logic use cases
+│   │   ├── service/                Theme + cache services
+│   │   └── pkg/jwt/                Token service
+│   ├── migrations/                  58+ SQL migration files
+│   ├── Dockerfile
+│   └── .env.example
 │
-├── 00-GETTING-STARTED/
-│   ├── IMPLEMENTATION_START_HERE.md          # 👈 Start here for new developers
-│   ├── PROJECT_OVERVIEW.md                   # Project description & tech stack
-│   └── README.md                             # (this file)
-│
-├── 01-THEME-SYSTEM/
-│   ├── THEME_SYSTEM_COMPLETE_ANALYSIS.md     # Current status & blockers
-│   ├── PHASE_5_REMAINING_TASKS.md            # Tasks to complete MVP
-│   ├── PHASE_3_IMPLEMENTATION_SUMMARY.md     # Backend implementation
-│   ├── PHASE_3_COMPLETE_TASK_CHECKLIST.md    # Phase 3 checklist
-│   ├── PHASE_3_THEME_APPLICATION_INTEGRATION_PLAN.md
-│   ├── README_PHASE_3.md                     # Phase 3 overview
-│   ├── DEVELOPER_SPRINT_GUIDE.md             # Sprint planning guide
-│   ├── MULTI_THEME_FEATURE_COMPLETE.md       # Multi-theme details
-│   └── THEME_ARCHITECTURE_SCALABILITY.md     # Scalability considerations
-│
-├── 02-API-BACKEND/
-│   ├── API_DOCUMENTATION.md                  # REST API endpoints
-│   ├── API_REFERENCE_V2.0.0.md              # API v2.0.0 reference
-│   ├── SECURITY_API_REFERENCE.md             # Security specifications
-│   ├── VERSION_HISTORY_API.md                # Version history endpoint
-│   ├── ERROR_HANDLING.md                     # Backend error handling
-│   └── VALIDATION.md                         # Input validation rules
-│
-├── 03-FRONTEND-DASHBOARD/
-│   ├── ARCHITECTURE.md                       # Frontend architecture
-│   ├── API_INTEGRATION.md                    # Frontend API integration
-│   ├── CODE_REVIEW_SUMMARY.md                # Code review findings
-│   ├── COMPLETION_REPORT.md                  # Phase completion report
-│   ├── DASHBOARD_README.md                   # Dashboard app guide
-│   ├── IMPLEMENTATION_CHECKLIST.md           # Implementation tasks
-│   ├── LIGHTHOUSE_AUDIT.md                   # Performance audit results
-│   ├── PHASE_5_TESTING_GUIDE.md              # Phase 5 testing guide
-│   ├── PRODUCTION_READINESS.md               # Production checklist
-│   ├── TESTING_STRATEGY.md                   # Test strategy
-│   ├── TEST_EXECUTION_REPORT.md              # Test results
-│   ├── THEME_BUILDER_STORE_GUIDE.md          # Zustand store guide
-│   ├── ERROR_BOUNDARY_GUIDE.md               # Error boundary patterns
-│   ├── TROUBLESHOOTING.md                    # Common issues & fixes
+├── frontend/                         Next.js monorepo
+│   ├── apps/
+│   │   ├── dashboard/               Admin dashboard (:3002)
+│   │   │   └── src/
+│   │   │       ├── app/[locale]/dashboard/   Page routes
+│   │   │       ├── components/               Feature-organized components
+│   │   │       ├── stores/                   Zustand stores (auth, tenant, preferences)
+│   │   │       ├── hooks/                    Custom hooks (RBAC, notifications, etc.)
+│   │   │       ├── lib/                      API client, debug, validation, utils
+│   │   │       │   ├── api.ts                Main axios client + interceptors
+│   │   │       │   ├── api/themeApi.ts        Theme endpoints
+│   │   │       │   └── debug.ts              Debug logging wrapper
+│   │   │       ├── i18n/                     EN + AR translations
+│   │   │       └── types/                    TypeScript definitions
+│   │   │
+│   │   ├── landing/                 Auth & marketing (:3001)
+│   │   │   └── src/app/auth/        Login, Register pages
+│   │   │
+│   │   ├── restaurant-website/      Public storefront (:3003)
+│   │   │   ├── middleware.ts        Subdomain + locale + tenant status
+│   │   │   └── lib/
+│   │   │       ├── store/           Cart + Theme stores
+│   │   │       ├── api/             API clients
+│   │   │       ├── hooks/           Theme, web vitals
+│   │   │       ├── debug.ts         Debug logging wrapper
+│   │   │       └── checkTenantStatus.ts
+│   │   │
+│   │   └── super-admin/             Platform admin (:3004)
+│   │       └── src/
+│   │           ├── components/tenants/   Extend trial, disable, delete
+│   │           ├── components/impersonation/  Impersonation UI
+│   │           └── lib/api.ts           SuperAdminAPI class
 │   │
-│   ├── COMPONENTS/
-│   │   ├── COMPONENT_LIBRARY.md              # Component library reference
-│   │   ├── COMPONENTS_CREATED.md             # Created components list
-│   │   ├── CACHE_SYSTEM.md                   # Component cache system
-│   │   ├── DISCOVERY_SYSTEM.md               # Component discovery
-│   │   └── MOCK_DATA_SYSTEM.md               # Mock data system
+│   ├── packages/
+│   │   ├── ui/                      Radix UI + CVA components
+│   │   ├── ui-components/           Atomic design library
+│   │   └── theme/                   next-themes provider
 │   │
-│   └── PERFORMANCE/
-│       ├── PERFORMANCE_GUIDE.md              # Performance optimization guide
-│       ├── TASK_5.1_CODE_SPLITTING.md        # Code splitting strategy
-│       ├── TASK_5.2_BUNDLE_OPTIMIZATION.md   # Bundle size optimization
-│       ├── TASK_5.3_SERVICE_WORKER_CACHING.md # Service worker setup
-│       ├── TASK_5.4_CLIENT_CACHE.md          # Client-side caching
-│       └── TASK_5.6_WEB_VITALS_MONITORING.md # Web Vitals tracking
+│   └── turbo.json                   Build pipeline config
 │
-├── 04-MODULES/
-│   ├── HR/
-│   │   └── HR_MODULE_DOCUMENTATION.md        # HR module features & API
-│   │
-│   ├── PRODUCTS/
-│   │   └── PRODUCT_MODULE_DOCUMENTATION.md   # Products module guide
-│   │
-│   └── NOTIFICATIONS/
-│       └── COMPLETE_NOTIFICATION_SYSTEM_GUIDE.md # Notification system
-│
-├── 05-INFRASTRUCTURE/
-│   ├── MULTILANG_RTL_RESPONSIVE.md           # Multi-language & RTL support
-│   ├── ARCHITECTURE_ROADMAP_SUMMARY.md       # Architecture roadmap
-│   ├── PROJECT_STATUS.md                     # Overall project status
-│   │
-│   ├── MULTI_TENANCY/
-│   │   ├── DATABASE_SHARDING.md              # Database sharding strategy
-│   │   ├── TENANT_ISOLATION_SECURITY.md      # Multi-tenant security
-│   │   ├── MULTI_TENANT_AUTH.md              # Multi-tenant authentication
-│   │   ├── SHARDING_SERVER_SETUP.md          # Server setup guide
-│   │   ├── COMPLETE_RUNBOOK.md               # Operations runbook
-│   │   ├── IMPLEMENTATION_SUMMARY.md         # Implementation details
-│   │   ├── MIGRATION_TOOLING.md              # Migration tools
-│   │   └── HEALTH_CHECKS_MONITORING.md       # Health check setup
-│   │
-│   └── DEPLOYMENT/
-│       ├── PRODUCTION_DEPLOYMENT_CHECKLIST.md
-│       ├── HTTP_CACHING_HEADERS.md           # HTTP caching strategy
-│       ├── LOAD_TESTING.md                   # Load testing procedures
-│       ├── PERFORMANCE_BENCHMARKING.md       # Benchmark results
-│       └── BACKWARD_COMPATIBILITY_TESTING.md # Compatibility tests
-│
-├── 06-TESTING/
-│   ├── PHASE_1_5_INTEGRATION_TESTS.md        # Integration test suite
-│   └── PERFORMANCE_COMPARISON_ANALYSIS.md    # Performance comparison
-│
-├── 07-WEBSITE-ECOMMERCE-PLAN/
-│   ├── 06-CURRENT-STATUS-AND-FINDINGS.md
-│   ├── 08-REMAINING-PHASES-AND-ROADMAP.md
-│   └── 09-ECOMMERCE-PRODUCTION-READY-VERIFICATION.md
-│
-└── 10-Sass-Trial-Subscription/
-    ├── SAAS-TRIAL-SUBSCRIPTION-COMPLETE-REFERENCE.md  # Complete reference (800+ lines)
-    └── SAAS-TRIAL-SUBSCRIPTION-QUICK-REFERENCE.md     # Quick reference for devs
+├── docker-compose.yml               PostgreSQL + Backend
+├── docs-organized/                   70+ documentation files
+└── README.md                         This file
 ```
 
 ---
 
-## 🚀 Where to Start?
+## Backend Architecture
 
-### For New Developers
-1. Read [**IMPLEMENTATION_START_HERE.md**](00-GETTING-STARTED/IMPLEMENTATION_START_HERE.md)
-2. Review [**PROJECT_OVERVIEW.md**](00-GETTING-STARTED/PROJECT_OVERVIEW.md)
-3. Check [**THEME_SYSTEM_COMPLETE_ANALYSIS.md**](01-THEME-SYSTEM/THEME_SYSTEM_COMPLETE_ANALYSIS.md) for current status
+### Clean Architecture Layers
 
-### For Frontend Development
-1. [**Frontend Architecture**](03-FRONTEND-DASHBOARD/ARCHITECTURE.md)
-2. [**API Integration Guide**](03-FRONTEND-DASHBOARD/API_INTEGRATION.md)
-3. [**Component Library**](03-FRONTEND-DASHBOARD/COMPONENTS/COMPONENT_LIBRARY.md)
-4. [**Performance Optimization**](03-FRONTEND-DASHBOARD/PERFORMANCE/PERFORMANCE_GUIDE.md)
+```
+HTTP Request → CORS → Auth → TenantContext → [RBAC] → [TenantStatus] → Handler → UseCase → Repository → PostgreSQL
+```
 
-### For Backend Development
-1. [**API Documentation**](02-API-BACKEND/API_DOCUMENTATION.md)
-2. [**Error Handling**](02-API-BACKEND/ERROR_HANDLING.md)
-3. [**Validation Rules**](02-API-BACKEND/VALIDATION.md)
-4. [**Security Reference**](02-API-BACKEND/SECURITY_API_REFERENCE.md)
+### Middleware Chain
 
-### For DevOps/Infrastructure
-1. [**Deployment Checklist**](05-INFRASTRUCTURE/DEPLOYMENT/PRODUCTION_DEPLOYMENT_CHECKLIST.md)
-2. [**Multi-Tenancy Setup**](05-INFRASTRUCTURE/MULTI_TENANCY/COMPLETE_RUNBOOK.md)
-3. [**Database Sharding**](05-INFRASTRUCTURE/MULTI_TENANCY/DATABASE_SHARDING.md)
-4. [**Health Monitoring**](05-INFRASTRUCTURE/MULTI_TENANCY/HEALTH_CHECKS_MONITORING.md)
+| Middleware | Purpose |
+|-----------|---------|
+| `CORSMiddleware` | Cross-origin headers |
+| `AuthMiddleware` | JWT validation (HS256), stores claims in context |
+| `TenantContextMiddleware` | Extracts tenant_id + restaurant_id from JWT claims |
+| `WithRequiredPermission` | RBAC check (module_id + permission_level) |
+| `TenantStatusMiddleware` | Blocks expired trials / disabled tenants |
+| `SuperAdminAuthMiddleware` | Separate JWT secret (15min expiry) |
+| `RateLimitSuperAdmin` | 30 req/min for super admin |
+| `ValidateIPWhitelist` | IP allowlist for super admin |
+| `ImpersonationMiddleware` | Validates `X-Impersonation-Token` header |
 
-### For QA/Testing
-1. [**Testing Strategy**](03-FRONTEND-DASHBOARD/TESTING_STRATEGY.md)
-2. [**Phase 5 Testing Guide**](03-FRONTEND-DASHBOARD/PHASE_5_TESTING_GUIDE.md)
-3. [**Integration Tests**](06-TESTING/PHASE_1_5_INTEGRATION_TESTS.md)
-4. [**Performance Benchmarks**](06-TESTING/PERFORMANCE_COMPARISON_ANALYSIS.md)
+### Route Wrapping Pattern (main.go)
 
-### For Theme System Work
-1. [**Theme System Analysis**](01-THEME-SYSTEM/THEME_SYSTEM_COMPLETE_ANALYSIS.md) - Current blockers & status
-2. [**Phase 5 Remaining Tasks**](01-THEME-SYSTEM/PHASE_5_REMAINING_TASKS.md) - What needs to be done
-3. [**Theme Architecture**](01-THEME-SYSTEM/THEME_ARCHITECTURE_SCALABILITY.md) - Design & scalability
-4. [**Sprint Guide**](01-THEME-SYSTEM/DEVELOPER_SPRINT_GUIDE.md) - Planning & execution
+```go
+// Standard protected route
+wrapProtected := AuthMiddleware → TenantContextMiddleware → Handler
 
----
+// RBAC-protected route
+wrapWithPermission := AuthMiddleware → TenantContext → WithRequiredPermission(moduleID, level) → Handler
 
-## 📊 Project Status Summary
+// With subscription check
+wrapProtectedWithStatus := AuthMiddleware → TenantContext → TenantStatus → Handler
 
-| Component | Status | Progress |
-|-----------|--------|----------|
-| **Backend** | ✅ Complete | 95% |
-| **Frontend** | 🔄 In Progress | 80% |
-| **Theme System** | 🔄 In Progress | 70% |
-| **Database** | ✅ Complete | Schema ready, seeding needed |
-| **API** | ✅ Complete | All endpoints working |
-| **Multi-Tenancy** | ✅ Complete | 95% |
-| **Documentation** | ✅ Complete | 100% (Reorganized) |
+// Super admin route
+wrapSuperAdmin := RateLimit → SuperAdminAuth → IPWhitelist → RequireSuperAdmin → Handler
+```
 
----
+### API Endpoints (120+)
 
-## 🎯 Current Focus - Theme System Phase 5
+**Auth (Public):**
+```
+POST   /api/v1/auth/register
+POST   /api/v1/auth/login
+POST   /api/v1/auth/login/confirm        (multi-tenant selection)
+POST   /api/v1/auth/token-exchange        (super admin impersonation)
+GET    /api/v1/auth/check-subdomain
+```
 
-**Critical Tasks:**
-- [ ] Seed database with 10 production themes
-- [ ] Fix theme save/load persistence
-- [ ] Integrate mock data into preview
-- [ ] Fix color picker modal
-- [ ] Test export/import functionality
-- [ ] Test responsive preview
-- [ ] Test language switching (EN/AR)
+**Public Restaurant API (No Auth):**
+```
+GET    /api/v1/public/restaurants/{slug}/menu
+GET    /api/v1/public/restaurants/{slug}/products
+GET    /api/v1/public/restaurants/{slug}/categories
+GET    /api/v1/public/restaurants/{slug}/info
+GET    /api/v1/public/restaurants/{slug}/homepage
+GET    /api/v1/public/restaurants/{slug}/theme
+POST   /api/v1/public/orders
+GET    /api/v1/public/orders/{id}
+GET    /api/v1/public/orders/number/{number}/lookup
+GET    /api/v1/public/tenant-status/{slug}
+```
 
-**Timeline:** 3-5 days to MVP completion
+**Protected Admin API:**
+```
+GET/POST/PUT/DELETE  /api/v1/products        (RBAC: module 1)
+GET/POST/PUT/DELETE  /api/v1/categories
+GET/PUT/DELETE       /api/v1/admin/orders     (RBAC: module 10)
+GET/POST/PUT/DELETE  /api/v1/admin/drivers
+GET/POST             /api/v1/notifications
+GET/POST/PUT/DELETE  /api/v1/rbac/roles
+POST/DELETE/GET      /api/v1/rbac/permissions
+GET/PUT              /api/v1/users/{id}/settings
+GET/POST/PUT/DELETE  /api/v1/admin/themes
+GET                  /api/v1/tenant/status
+```
 
-See [PHASE_5_REMAINING_TASKS.md](01-THEME-SYSTEM/PHASE_5_REMAINING_TASKS.md) for detailed task breakdown.
+**Super Admin API:**
+```
+POST   /api/v1/super-admin/auth/login
+GET    /api/v1/super-admin/dashboard/stats
+GET    /api/v1/super-admin/tenants
+GET    /api/v1/super-admin/tenants/{id}
+POST   /api/v1/super-admin/tenants/{id}/extend-trial
+POST   /api/v1/super-admin/tenants/{id}/disable
+POST   /api/v1/super-admin/tenants/{id}/enable
+DELETE /api/v1/super-admin/tenants/{id}
+GET    /api/v1/super-admin/tenants/{id}/subscription-history
+POST   /api/v1/super-admin/impersonate/{userID}
+GET    /api/v1/super-admin/audit-logs
+```
 
----
+### Authentication Flow
 
-## 🔗 Key Resources
+```
+Register: POST /auth/register
+  → Create Tenant (trial 15 days) → Restaurant → User (role=owner) → JWT
 
-### API References
-- Main API Documentation: [02-API-BACKEND/API_DOCUMENTATION.md](02-API-BACKEND/API_DOCUMENTATION.md)
-- API v2.0.0 Reference: [02-API-BACKEND/API_REFERENCE_V2.0.0.md](02-API-BACKEND/API_REFERENCE_V2.0.0.md)
-- Security APIs: [02-API-BACKEND/SECURITY_API_REFERENCE.md](02-API-BACKEND/SECURITY_API_REFERENCE.md)
+Login: POST /auth/login
+  → Verify bcrypt password → Check multi-tenant
+  → If 1 tenant: return JWT
+  → If N tenants: return tenant list → POST /auth/login/confirm → JWT
 
-### Architecture & Design
-- Frontend Architecture: [03-FRONTEND-DASHBOARD/ARCHITECTURE.md](03-FRONTEND-DASHBOARD/ARCHITECTURE.md)
-- Theme System Architecture: [01-THEME-SYSTEM/THEME_ARCHITECTURE_SCALABILITY.md](01-THEME-SYSTEM/THEME_ARCHITECTURE_SCALABILITY.md)
-- Infrastructure Architecture: [05-INFRASTRUCTURE/ARCHITECTURE_ROADMAP_SUMMARY.md](05-INFRASTRUCTURE/ARCHITECTURE_ROADMAP_SUMMARY.md)
+JWT Claims: { user_id, tenant_id, restaurant_id, email, role, exp }
+Super Admin JWT: Separate secret (JWT_SECRET + "_super_admin"), 15min expiry
+```
 
-### Performance & Optimization
-- Performance Guide: [03-FRONTEND-DASHBOARD/PERFORMANCE/PERFORMANCE_GUIDE.md](03-FRONTEND-DASHBOARD/PERFORMANCE/PERFORMANCE_GUIDE.md)
-- Code Splitting: [03-FRONTEND-DASHBOARD/PERFORMANCE/TASK_5.1_CODE_SPLITTING.md](03-FRONTEND-DASHBOARD/PERFORMANCE/TASK_5.1_CODE_SPLITTING.md)
-- Bundle Optimization: [03-FRONTEND-DASHBOARD/PERFORMANCE/TASK_5.2_BUNDLE_OPTIMIZATION.md](03-FRONTEND-DASHBOARD/PERFORMANCE/TASK_5.2_BUNDLE_OPTIMIZATION.md)
+### Database Schema (Key Tables)
 
-### Operations & Deployment
-- Deployment Checklist: [05-INFRASTRUCTURE/DEPLOYMENT/PRODUCTION_DEPLOYMENT_CHECKLIST.md](05-INFRASTRUCTURE/DEPLOYMENT/PRODUCTION_DEPLOYMENT_CHECKLIST.md)
-- Load Testing: [05-INFRASTRUCTURE/DEPLOYMENT/LOAD_TESTING.md](05-INFRASTRUCTURE/DEPLOYMENT/LOAD_TESTING.md)
-- Operations Runbook: [05-INFRASTRUCTURE/MULTI_TENANCY/COMPLETE_RUNBOOK.md](05-INFRASTRUCTURE/MULTI_TENANCY/COMPLETE_RUNBOOK.md)
-
-### Troubleshooting
-- Frontend Issues: [03-FRONTEND-DASHBOARD/TROUBLESHOOTING.md](03-FRONTEND-DASHBOARD/TROUBLESHOOTING.md)
-- Backend Errors: [02-API-BACKEND/ERROR_HANDLING.md](02-API-BACKEND/ERROR_HANDLING.md)
-
----
-
-## 📋 Feature-Based Module Documentation
-
-### Theme System (Complete)
-- Overview: [01-THEME-SYSTEM/THEME_SYSTEM_COMPLETE_ANALYSIS.md](01-THEME-SYSTEM/THEME_SYSTEM_COMPLETE_ANALYSIS.md)
-- Tasks: [01-THEME-SYSTEM/PHASE_5_REMAINING_TASKS.md](01-THEME-SYSTEM/PHASE_5_REMAINING_TASKS.md)
-
-### HR Module
-- Documentation: [04-MODULES/HR/HR_MODULE_DOCUMENTATION.md](04-MODULES/HR/HR_MODULE_DOCUMENTATION.md)
-
-### Products Module
-- Documentation: [04-MODULES/PRODUCTS/PRODUCT_MODULE_DOCUMENTATION.md](04-MODULES/PRODUCTS/PRODUCT_MODULE_DOCUMENTATION.md)
-
-### Notifications Module
-- Documentation: [04-MODULES/NOTIFICATIONS/COMPLETE_NOTIFICATION_SYSTEM_GUIDE.md](04-MODULES/NOTIFICATIONS/COMPLETE_NOTIFICATION_SYSTEM_GUIDE.md)
-
----
-
-## 🛠 Technology Stack
-
-- **Backend**: Go (Golang)
-- **Frontend**: Next.js 15.5.9, React 18.3.1, TypeScript
-- **Database**: PostgreSQL with multi-tenancy support
-- **State Management**: Zustand (frontend)
-- **UI Framework**: Tailwind CSS, Radix UI
-- **API**: REST with JWT authentication
-- **Deployment**: Multi-region with database sharding
-
-See [PROJECT_OVERVIEW.md](00-GETTING-STARTED/PROJECT_OVERVIEW.md) for complete tech stack details.
-
----
-
-## 📞 Support & Resources
-
-### Documentation Organization
-This documentation is organized by **feature/domain** rather than by project phases:
-- Use the directory structure above to find docs by feature
-- Each folder contains all related documentation for that feature
-- Cross-references are provided for related features
-
-### File Naming Convention
-- `*_GUIDE.md` - How-to guides and walkthroughs
-- `*_DOCUMENTATION.md` - Complete reference documentation
-- `*_SUMMARY.md` - High-level overviews and summaries
-- `*_CHECKLIST.md` - Task checklists and completion tracking
-- `*_ARCHITECTURE.md` - System design and architecture
-- `README.md` - Directory overviews and quick references
-
-### Getting Help
-1. Check the relevant feature folder's documentation
-2. Use the Quick Navigation table at the top
-3. Search within [TROUBLESHOOTING.md](03-FRONTEND-DASHBOARD/TROUBLESHOOTING.md)
-4. Review error handling docs: [02-API-BACKEND/ERROR_HANDLING.md](02-API-BACKEND/ERROR_HANDLING.md)
+```
+tenants          → id, name, slug, subscription_status, trial_dates, is_disabled
+users            → id, tenant_id, restaurant_id, email, password_hash, role, is_super_admin
+restaurants      → id, tenant_id, name, slug, theme, feature_flags
+products         → id, tenant_id, restaurant_id, name_en/ar, price, inventory
+categories       → id, tenant_id, restaurant_id, name_en/ar, display_order
+orders           → id, tenant_id, restaurant_id, order_number, customer_info, items, status
+drivers          → id, tenant_id, name, status, availability, rating
+employees        → id, tenant_id, employee_number, salary, department
+rbac_roles       → id, tenant_id, code, name, is_system
+role_permissions → id, role_id, module_id, permission_level
+user_roles       → id, user_id, role_id
+super_admins     → id, user_id, ip_whitelist, secret_key
+impersonation_sessions → id, super_admin_id, target_user_id, token_hash, expires_at
+subscription_history   → id, tenant_id, action, old/new_status, days_added, reason
+themes           → id, tenant_id, restaurant_id, name, config, is_active
+```
 
 ---
 
-## ✅ Documentation Maintenance
+## Frontend Architecture
 
-**Last Reorganization:** February 8, 2026
-**Total Documentation Files:** 70+
-**Folders:** 13 organized by feature
-**Status:** All files organized and indexed
+### Dashboard App (:3002)
 
-### To Keep Documentation Updated:
-1. Add new docs to the appropriate feature folder
-2. Update the directory structure above if new folders are created
-3. Update the file descriptions if documentation changes
-4. Keep cross-references current
+**Page Routes:** (`/[locale]/dashboard/...`)
+```
+/dashboard                    Overview (stats, charts)
+/dashboard/products           Product CRUD (list, new, [id]/edit)
+/dashboard/categories         Category CRUD
+/dashboard/orders             Order management ([id] detail)
+/dashboard/drivers            Driver management (new, [id])
+/dashboard/inventory          Stock management
+/dashboard/hr/employees       Employee CRUD
+/dashboard/hr/attendance      Attendance tracking
+/dashboard/hr/leaves          Leave management
+/dashboard/hr/payroll         Payroll/salary
+/dashboard/hr/roles           HR roles
+/dashboard/settings           User settings (profile, appearance, access-control)
+/dashboard/settings/users     User management
+/dashboard/settings/roles     Role CRUD
+/dashboard/theme-builder      Theme editor (presets, editor/[id])
+/dashboard/rbac/roles         RBAC role management
+```
+
+**Zustand Stores:**
+| Store | Key | Persisted | Purpose |
+|-------|-----|-----------|---------|
+| `authStore` | `auth-storage` | Yes (localStorage) | User, token, login/logout |
+| `tenantStatusStore` | N/A | No | Trial/subscription status |
+| `preferencesStore` | `preferences-storage` | Yes | UI settings (theme, locale) |
+| `themeBuilderStore` | N/A | No | Theme editor state |
+
+**API Client (`lib/api.ts`):**
+- Axios instance with base URL `http://localhost:8080/api/v1`
+- Request interceptor: Adds `Authorization: Bearer {token}`, `X-Tenant-ID`, `X-Restaurant-ID`
+- Impersonation: Uses `X-Impersonation-Token` from sessionStorage instead of Bearer
+- Response interceptor: Auto-logout on 401 (redirects to landing app)
+
+**Key Hooks:**
+| Hook | Purpose |
+|------|---------|
+| `useTenantStatus()` | Returns `{ status, daysRemaining, isBlocked, isLoading }` |
+| `useRbac()` / `useHasPermission()` | RBAC permission checking |
+| `useNotifications()` | Notification CRUD + stats |
+| `useWebVitals()` | Performance monitoring (LCP, CLS, FID) |
+| `useServiceWorker()` | Offline support |
+
+**Layout Components:**
+- `DashboardLayout.tsx` - Main wrapper (sidebar + header + content)
+- `Sidebar.tsx` - Navigation with expandable groups + `SidebarSubscriptionBadge`
+- `TrialWarningBanner.tsx` - Amber banner when trial <= 7 days remaining
+
+### Restaurant Website (:3003)
+
+**Subdomain Multi-Tenancy:**
+```
+demo.localhost:3000/en/menu
+  ↓ middleware.ts
+  1. Extract slug from subdomain: "demo"
+  2. Extract locale from path: "en"
+  3. Validate locale (redirect if invalid)
+  4. Check tenant status via API
+  5. If blocked → redirect to /maintenance
+  6. Set headers: x-restaurant-slug, x-restaurant-locale
+```
+
+**Theme System:**
+- Server-side theme loading (`get-theme-server.ts`)
+- Multi-layer cache: memory → localStorage → API (with retry + backoff)
+- Theme data: colors, typography, identity, header, footer, components array
+- Applied via CSS variables and Tailwind classes
+
+**Cart/Checkout:**
+- Zustand cart store persisted to localStorage
+- Cart → Checkout form → `POST /public/orders` → Order confirmation
+- Inventory-aware quantity limits
+
+### Landing App (:3001)
+
+- Marketing homepage (Hero, Features, Pricing, Testimonials)
+- Auth pages: `/auth/login`, `/auth/register`
+- Multi-tenant login flow (tenant selector modal)
+- Redirects to Dashboard after successful login
+
+### Super-Admin App (:3004)
+
+- Platform-wide tenant management
+- Tenant list with search/pagination
+- Tenant detail: extend trial, disable/enable, delete
+- Subscription history with audit trail
+- User impersonation (generates token, opens Dashboard in new tab)
+- Audit log viewer (filter by action, date range)
+- Dashboard stats (total tenants, active trials, etc.)
 
 ---
 
-**Need a specific document? Use the directory structure or check the feature folder most relevant to your task.**
+## Key Patterns & Conventions
+
+### Debug Logging
+
+All console calls go through debug wrappers that respect environment variables:
+
+```typescript
+// Dashboard: import { debugLog, debugError, debugWarn } from '@/lib/debug'
+// Restaurant: import { debugLog, debugError, debugWarn } from '@/lib/debug'
+
+// Controlled by: NEXT_PUBLIC_DEBUG_LOGS=true (client) or DEBUG_LOGS=true (server)
+// Production: disabled by default, zero console output
+```
+
+### i18n & RTL
+
+- Locale from URL path: `/en/dashboard` or `/ar/dashboard`
+- `createTranslator(locale)` returns `t()` function
+- `isRTL = locale === 'ar'` for conditional RTL classes
+- Root layout sets `dir="rtl"` attribute
+- CSS handles RTL via `[dir="rtl"]` selectors
+
+### Tenant Status Flow
+
+```
+Dashboard mounts → TenantStatusProvider calls GET /tenant/status
+  → If canAccess: true → show dashboard normally
+  → If canAccess: false → show BlockedOverlay (trial_expired / disabled)
+
+Sidebar shows: SidebarSubscriptionBadge (plan name + days remaining)
+Header shows: TrialWarningBanner (when <= 7 days remaining, dismissible)
+```
+
+### RBAC
+
+```
+Modules: Products(1), Categories(2), Orders(10), HR(5), etc.
+Levels: READ, WRITE, DELETE, ADMIN
+
+Backend: wrapWithPermission(handler, moduleID, "WRITE")
+Frontend: useHasPermission(MODULE_IDS.PRODUCTS, PERMISSION_LEVELS.EDIT)
+```
+
+### Error Handling
+
+```json
+// Standard API response
+{ "success": true, "data": { ... } }
+{ "success": false, "error": "message", "code": "ERROR_CODE" }
+
+// HTTP Status Codes
+200 - Success (GET/PUT/DELETE)
+201 - Created (POST)
+400 - Bad Request (validation)
+401 - Unauthorized (missing/invalid JWT)
+403 - Forbidden (RBAC / tenant blocked)
+404 - Not Found
+500 - Server Error
+```
+
+---
+
+## SaaS Trial & Subscription System
+
+### Lifecycle
+
+```
+Tenant registers → trial (15 days) → [extend trial / upgrade]
+                                    → trial_expired → blocked
+                                    → [admin disables] → disabled → blocked
+                                    → [admin enables] → restored
+                                    → [admin deletes] → soft delete
+```
+
+### Backend (Fully Implemented)
+
+- 8 API endpoints for subscription management
+- `TenantStatusMiddleware` blocks expired/disabled tenants
+- `subscription_history` table for audit trail
+- Domain methods: `IsTrialActive()`, `CanAccess()`, `DaysRemainingInTrial()`
+
+### Frontend Status
+
+| Feature | Dashboard (:3002) | Restaurant (:3003) | Super-Admin (:3004) |
+|---------|-------------------|---------------------|---------------------|
+| Blocking overlay | Done | Done (maintenance page) | N/A |
+| Sidebar badge | Done | N/A | N/A |
+| Trial warning | Done (banner) | N/A | N/A |
+| Extend trial | N/A | N/A | Done |
+| Disable/Enable | N/A | N/A | Done |
+| Delete tenant | N/A | N/A | Done |
+| History view | N/A | N/A | Done |
+| Impersonation | Accepts token | N/A | Done (generates token) |
+
+---
+
+## Environment Variables
+
+### Backend (.env)
+```bash
+PORT=8080
+DB_HOST=localhost
+DB_PORT=5432
+DB_USER=postgres
+DB_PASSWORD=postgres
+DB_NAME=pos_saas
+DB_SSLMODE=disable
+JWT_SECRET=your-secret-key
+JWT_EXPIRY=24h
+CORS_ALLOWED_ORIGINS=http://localhost:3001,http://localhost:3002,http://localhost:3003,http://localhost:3004
+```
+
+### Frontend (.env.local)
+```bash
+NEXT_PUBLIC_API_URL=http://localhost:8080/api/v1
+NEXT_PUBLIC_DASHBOARD_URL=http://localhost:3002
+NEXT_PUBLIC_LANDING_URL=http://localhost:3001
+NEXT_PUBLIC_DEBUG_LOGS=false          # Set true for console output
+```
+
+---
+
+## Database Migrations
+
+```
+001-005   Core: tenants, restaurants, users, categories, products
+012-017   Products: images, inventory, audit logs
+020-027   HR: employees, roles, attendance, salaries, leaves, reviews
+040       User settings
+050       Notifications
+060-066   Orders: orders, items, status_history, indexes
+067-090   Themes: themes, presets, components, history, sections
+070-072   Drivers: drivers, assignments, location_history
+099-106   RBAC: modules, permission_levels, roles, permissions, user_roles
+107-109   Super Admin: super_admins, impersonation, audit_logs
+110-112   Subscription: tenant fields, history, trial seeding
+```
+
+Run migrations: `go run cmd/migrate/main.go` or via Docker entrypoint.
+
+---
+
+## Development Notes
+
+### Adding a New Feature
+
+1. **Backend:** Domain model → Repository → UseCase → Handler → Register route in `main.go`
+2. **Frontend:** Page in `app/[locale]/dashboard/` → Components → Hook/API call → Add to Sidebar
+3. **Translation:** Add keys to `i18n/messages/en.json` and `ar.json`
+4. **RBAC:** Add module in migration → Register permission checks
+
+### File Naming Conventions
+
+```
+Backend:   snake_case.go (product_handler.go, auth_repo.go)
+Frontend:  PascalCase.tsx (ProductForm.tsx), camelCase.ts (authStore.ts)
+Pages:     page.tsx (Next.js convention)
+Hooks:     use*.ts (useRbac.ts, useTenantStatus.ts)
+Stores:    *Store.ts (authStore.ts, tenantStatusStore.ts)
+```
+
+### Common Gotchas
+
+- **Tenant context:** Every API call needs `X-Tenant-ID` header (handled by axios interceptor)
+- **Impersonation:** Uses `sessionStorage` (not localStorage) - clears on tab close
+- **Locale:** URL must include locale (`/en/dashboard`, not `/dashboard`)
+- **Debug logs:** All `console.log/error/warn` wrapped in `debugLog/debugError/debugWarn` - enable with `NEXT_PUBLIC_DEBUG_LOGS=true`
+- **Super admin JWT:** Different secret (`JWT_SECRET + "_super_admin"`), 15min expiry
+
+---
+
+## Detailed Documentation
+
+See [docs-organized/](docs-organized/) for in-depth guides:
+
+| Topic | Path |
+|-------|------|
+| Getting Started | `docs-organized/00-GETTING-STARTED/` |
+| Theme System | `docs-organized/01-THEME-SYSTEM/` |
+| API Reference | `docs-organized/02-API-BACKEND/API_REFERENCE_V2.0.0.md` |
+| Frontend Architecture | `docs-organized/03-FRONTEND-DASHBOARD/` |
+| HR Module | `docs-organized/04-MODULES/HR/` |
+| Multi-Tenancy | `docs-organized/05-INFRASTRUCTURE/MULTI_TENANCY/` |
+| Deployment | `docs-organized/05-INFRASTRUCTURE/DEPLOYMENT/` |
+| SaaS Subscription | `docs-organized/10-Sass-Trial-Subscription/` |
+| Remaining Work | `docs-organized/99-REMAINING-WORK.md` |

@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { api } from '@/lib/api'
 import { apiCache } from '@/lib/apiCache'
+import { debugError } from '@/lib/debug'
 
 export type NotificationType = 'low_stock' | 'order' | 'employee' | 'leave' | 'inventory' | 'attendance' | 'system'
 export type NotificationModule = 'products' | 'orders' | 'hr' | 'inventory' | 'system'
@@ -105,7 +106,7 @@ export function useNotifications() {
         setUnreadCount(data.unread)
         setTotalCount(data.total)
       } catch (err) {
-        console.error('Failed to fetch notifications:', err)
+        debugError('Failed to fetch notifications:', err)
         setError('Failed to load notifications')
         setNotifications([])
         setUnreadCount(0)
@@ -121,7 +122,7 @@ export function useNotifications() {
       const response = await api.get<NotificationStats>('/notifications/stats')
       setStats(response.data)
     } catch (err) {
-      console.error('Failed to fetch notification stats:', err)
+      debugError('Failed to fetch notification stats:', err)
     }
   }, [])
 
@@ -130,7 +131,7 @@ export function useNotifications() {
       const response = await api.get<{ unread: number }>('/notifications/unread-count')
       setUnreadCount(response.data.unread)
     } catch (err) {
-      console.error('Failed to fetch unread count:', err)
+      debugError('Failed to fetch unread count:', err)
     }
   }, [])
 
@@ -155,7 +156,7 @@ export function useNotifications() {
         // Fetch fresh unread count
         await fetchUnreadCount()
       } catch (err) {
-        console.error('Failed to mark notification as read:', err)
+        debugError('Failed to mark notification as read:', err)
       }
     },
     [fetchUnreadCount]
@@ -182,7 +183,7 @@ export function useNotifications() {
         // Fetch fresh unread count
         await fetchUnreadCount()
       } catch (err) {
-        console.error('Failed to mark notification as unread:', err)
+        debugError('Failed to mark notification as unread:', err)
       }
     },
     [fetchUnreadCount]
@@ -206,7 +207,7 @@ export function useNotifications() {
       // Fetch fresh data
       await fetchStats()
     } catch (err) {
-      console.error('Failed to mark all notifications as read:', err)
+      debugError('Failed to mark all notifications as read:', err)
     }
   }, [fetchStats])
 
@@ -226,7 +227,7 @@ export function useNotifications() {
       // Invalidate cache
       apiCache.remove('notifications_{}')
     } catch (err) {
-      console.error('Failed to delete notification:', err)
+      debugError('Failed to delete notification:', err)
     }
   }, [notifications])
 

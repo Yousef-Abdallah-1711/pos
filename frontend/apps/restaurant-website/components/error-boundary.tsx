@@ -2,6 +2,7 @@
 
 import React, { ReactNode, Component, ErrorInfo } from "react";
 import { AlertTriangle, RefreshCw } from "lucide-react";
+import { debugError } from "@/lib/debug";
 
 interface Props {
   children: ReactNode;
@@ -42,7 +43,7 @@ export class ErrorBoundary extends Component<Props, State> {
   componentDidCatch(error: Error, info: ErrorInfo) {
     // Log error in development
     if (process.env.NODE_ENV === "development") {
-      console.error(`[${this.props.section || "ErrorBoundary"}] Caught error:`, error, info);
+      debugError(`[${this.props.section || "ErrorBoundary"}] Caught error:`, error, info);
     }
 
     // Call error callback if provided

@@ -1,3 +1,5 @@
+import { debugWarn } from '../debug';
+
 /**
  * Centralized API Configuration
  * All API endpoints and configuration should be defined here
@@ -60,7 +62,7 @@ export function validateApiConfig(): void {
   const apiUrl = getApiBaseUrl();
 
   if (!apiUrl) {
-    console.warn(
+    debugWarn(
       'API_URL not configured. Set NEXT_PUBLIC_API_URL environment variable. ' +
       'Falling back to localhost:8080/api/v1'
     );

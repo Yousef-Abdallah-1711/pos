@@ -1,4 +1,5 @@
 import { headers } from 'next/headers';
+import { debugError, debugWarn } from '../debug';
 
 /**
  * Server-side theme data structure
@@ -81,7 +82,7 @@ export async function getThemeDataServer(
     }
 
     if (!slug) {
-      console.error('Restaurant slug not found in parameter or headers');
+      debugError('Restaurant slug not found in parameter or headers');
       return null;
     }
 
@@ -96,9 +97,9 @@ export async function getThemeDataServer(
 
     if (!response.ok) {
       if (response.status === 404) {
-        console.warn(`Theme not found for restaurant: ${slug}`);
+        debugWarn(`Theme not found for restaurant: ${slug}`);
       } else {
-        console.error(`Failed to fetch theme: ${response.status}`);
+        debugError(`Failed to fetch theme: ${response.status}`);
       }
       return null;
     }
@@ -110,14 +111,14 @@ export async function getThemeDataServer(
 
     // Ensure theme is an object before returning
     if (typeof theme !== 'object' || theme === null) {
-      console.warn('Theme data is not a valid object');
+      debugWarn('Theme data is not a valid object');
       return null;
     }
 
     // Return theme even if some fields are missing - components have defensive fallbacks
     return theme as ServerThemeData;
   } catch (error) {
-    console.error('Error fetching theme:', error);
+    debugError('Error fetching theme:', error);
     return null;
   }
 }

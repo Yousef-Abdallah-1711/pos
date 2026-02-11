@@ -7,6 +7,7 @@ import { MODULE_IDS, PERMISSION_LEVELS } from '@/lib/rbac'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Loader2, Plus, Edit2, Trash2, Lock } from 'lucide-react'
+import { debugError } from '@/lib/debug'
 
 interface Role {
   id: number
@@ -62,7 +63,7 @@ export default function RolesPage() {
       }
     } catch (err) {
       setError('Error loading roles')
-      console.error(err)
+      debugError(err)
     } finally {
       setIsLoading(false)
     }
@@ -88,7 +89,7 @@ export default function RolesPage() {
       }
     } catch (err) {
       setError('Error deleting role')
-      console.error(err)
+      debugError(err)
     } finally {
       setIsDeleting(false)
     }

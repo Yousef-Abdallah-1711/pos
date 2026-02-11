@@ -7,6 +7,7 @@ import { MODULE_IDS, PERMISSION_LEVELS, getPermissionDescription } from '@/lib/r
 import { useRouter, usePathname } from 'next/navigation'
 import { Loader2, Lock, ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
+import { debugError } from '@/lib/debug'
 
 interface PermissionModule {
   moduleId: number
@@ -177,7 +178,7 @@ export default function EditRolePage({ params: paramsPromise }: EditRolePageProp
       }
     } catch (err) {
       setError('Error loading role')
-      console.error(err)
+      debugError(err)
     } finally {
       setIsLoading(false)
     }
@@ -234,7 +235,7 @@ export default function EditRolePage({ params: paramsPromise }: EditRolePageProp
       }
     } catch (err) {
       setError('Error updating role')
-      console.error(err)
+      debugError(err)
     } finally {
       setIsSaving(false)
     }

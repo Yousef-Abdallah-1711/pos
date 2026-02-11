@@ -9,6 +9,7 @@ import { createTranslator, getLocaleFromPath } from '@/lib/translations'
 import { CategoryFormPage } from '@/components/categories/CategoryFormPage'
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbSeparator, BreadcrumbPage } from '@/components/ui/breadcrumb'
 import { FormSkeleton } from '@/components/skeletons'
+import { debugError } from '@/lib/debug'
 
 interface Category {
   id: number
@@ -36,7 +37,7 @@ export default function EditCategoryPage() {
         setCategory(response.data)
       } catch (error) {
         toast.error('Failed to load category')
-        console.error('Failed to load category:', error)
+        debugError('Failed to load category:', error)
         router.push(`/${locale}/dashboard/categories`)
       } finally {
         setLoading(false)
@@ -59,7 +60,7 @@ export default function EditCategoryPage() {
       router.push(`/${locale}/dashboard/categories`)
     } catch (error) {
       toast.error(t('categories.updateFailed') || 'Failed to update category')
-      console.error(error)
+      debugError(error)
     }
   }
 

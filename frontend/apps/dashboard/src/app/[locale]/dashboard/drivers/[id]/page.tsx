@@ -17,6 +17,7 @@ import {
   AlertCircle,
 } from 'lucide-react'
 import { createTranslator, getLocaleFromPath } from '@/lib/translations'
+import { debugError } from '@/lib/debug'
 
 interface Driver {
   id: number
@@ -124,7 +125,7 @@ export default function EditDriverPage() {
         notes: driverData.notes || '',
       })
     } catch (error: any) {
-      console.error('[DRIVER_DETAILS] Error:', error)
+      debugError('[DRIVER_DETAILS] Error:', error)
       toast.error('Failed to load driver details')
       router.push(`/${locale}/dashboard/drivers`)
     } finally {
@@ -184,7 +185,7 @@ export default function EditDriverPage() {
       toast.success('Driver updated successfully')
       fetchDriver()
     } catch (error: any) {
-      console.error('[UPDATE_DRIVER] Error:', error)
+      debugError('[UPDATE_DRIVER] Error:', error)
       const errorMessage = error.response?.data?.message || 'Failed to update driver'
       toast.error(errorMessage)
     } finally {

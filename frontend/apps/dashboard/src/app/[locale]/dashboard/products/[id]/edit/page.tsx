@@ -13,6 +13,7 @@ import { ProductFormPage } from '@/components/products/ProductFormPage'
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbSeparator, BreadcrumbPage } from '@/components/ui/breadcrumb'
 import { FormSkeleton } from '@/components/skeletons'
 import { Lock } from 'lucide-react'
+import { debugError } from '@/lib/debug'
 
 interface Product {
   id: number
@@ -66,7 +67,7 @@ export default function EditProductPage() {
         setProduct(productResponse.data)
       } catch (error) {
         toast.error('Failed to load data')
-        console.error('Failed to load data:', error)
+        debugError('Failed to load data:', error)
         router.push(`/${locale}/dashboard/products`)
       } finally {
         setLoading(false)
@@ -90,7 +91,7 @@ export default function EditProductPage() {
       router.push(`/${locale}/dashboard/products`)
     } catch (error) {
       toast.error(t('products.updateFailed'))
-      console.error(error)
+      debugError(error)
     }
   }
 

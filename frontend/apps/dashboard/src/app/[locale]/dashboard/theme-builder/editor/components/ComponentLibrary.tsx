@@ -6,6 +6,7 @@ import { useThemeStore } from '@/hooks/useThemeStore'
 import { ComponentConfig, ComponentType } from '@/types/theme'
 import { componentRegistry } from '@pos-saas/ui-components/registry'
 import { toggleComponentEnabled } from '@/lib/utils/themeAdvancedUtils'
+import { debugWarn } from '@/lib/debug'
 
 // Helper function to extract label from translation objects
 function extractLabel(label: any): string {
@@ -87,7 +88,7 @@ export function ComponentLibrary() {
     // Map registry ID to dashboard ComponentType
     const componentType = REGISTRY_TO_COMPONENT_TYPE[registryId] as ComponentType
     if (!componentType) {
-      console.warn(`Unknown component type mapping for ${registryId}`)
+      debugWarn(`Unknown component type mapping for ${registryId}`)
       return
     }
 

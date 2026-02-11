@@ -31,6 +31,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { useForm, Controller } from 'react-hook-form'
 import { Package, AlertTriangle } from 'lucide-react'
 import { createTranslator, getLocaleFromPath } from '@/lib/translations'
+import { debugError } from '@/lib/debug'
 
 interface Product {
   id: number
@@ -84,7 +85,7 @@ export default function InventoryPage() {
       setInventoryLogs([])
     } catch (error: any) {
       toast.error(error.response?.data?.error || 'Failed to load data')
-      console.error('Error loading data:', error)
+      debugError('Error loading data:', error)
     } finally {
       setLoading(false)
     }
@@ -113,7 +114,7 @@ export default function InventoryPage() {
       loadData()
     } catch (error: any) {
       toast.error(error.response?.data?.error || 'Failed to adjust inventory')
-      console.error('Error adjusting inventory:', error)
+      debugError('Error adjusting inventory:', error)
     }
   }
 

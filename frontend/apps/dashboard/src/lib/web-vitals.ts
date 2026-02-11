@@ -9,6 +9,8 @@
  * - FCP (First Contentful Paint) - target: <1.8s
  */
 
+import { debugError, debugWarn } from '@/lib/debug'
+
 export interface WebVitalMetric {
   name: string
   value: number
@@ -83,7 +85,7 @@ function getRating(
  */
 export function observeLCP(callback: VitalsCallback): () => void {
   if (!('PerformanceObserver' in window)) {
-    console.warn('[Web Vitals] PerformanceObserver not supported')
+    debugWarn('[Web Vitals] PerformanceObserver not supported')
     return () => {}
   }
 
@@ -110,7 +112,7 @@ export function observeLCP(callback: VitalsCallback): () => void {
 
     return () => observer.disconnect()
   } catch (error) {
-    console.error('[Web Vitals] LCP observation failed:', error)
+    debugError('[Web Vitals] LCP observation failed:', error)
     return () => {}
   }
 }
@@ -125,7 +127,7 @@ export function observeLCP(callback: VitalsCallback): () => void {
  */
 export function observeFID(callback: VitalsCallback): () => void {
   if (!('PerformanceObserver' in window)) {
-    console.warn('[Web Vitals] PerformanceObserver not supported')
+    debugWarn('[Web Vitals] PerformanceObserver not supported')
     return () => {}
   }
 
@@ -153,7 +155,7 @@ export function observeFID(callback: VitalsCallback): () => void {
 
     return () => observer.disconnect()
   } catch (error) {
-    console.error('[Web Vitals] FID observation failed:', error)
+    debugError('[Web Vitals] FID observation failed:', error)
     return () => {}
   }
 }
@@ -166,7 +168,7 @@ export function observeFID(callback: VitalsCallback): () => void {
  */
 export function observeCLS(callback: VitalsCallback): () => void {
   if (!('PerformanceObserver' in window)) {
-    console.warn('[Web Vitals] PerformanceObserver not supported')
+    debugWarn('[Web Vitals] PerformanceObserver not supported')
     return () => {}
   }
 
@@ -198,7 +200,7 @@ export function observeCLS(callback: VitalsCallback): () => void {
 
     return () => observer.disconnect()
   } catch (error) {
-    console.error('[Web Vitals] CLS observation failed:', error)
+    debugError('[Web Vitals] CLS observation failed:', error)
     return () => {}
   }
 }
@@ -229,7 +231,7 @@ export function observeTTFB(callback: VitalsCallback): () => void {
 
     return () => {}
   } catch (error) {
-    console.error('[Web Vitals] TTFB observation failed:', error)
+    debugError('[Web Vitals] TTFB observation failed:', error)
     return () => {}
   }
 }
@@ -242,7 +244,7 @@ export function observeTTFB(callback: VitalsCallback): () => void {
  */
 export function observeFCP(callback: VitalsCallback): () => void {
   if (!('PerformanceObserver' in window)) {
-    console.warn('[Web Vitals] PerformanceObserver not supported')
+    debugWarn('[Web Vitals] PerformanceObserver not supported')
     return () => {}
   }
 
@@ -269,7 +271,7 @@ export function observeFCP(callback: VitalsCallback): () => void {
 
     return () => observer.disconnect()
   } catch (error) {
-    console.error('[Web Vitals] FCP observation failed:', error)
+    debugError('[Web Vitals] FCP observation failed:', error)
     return () => {}
   }
 }
@@ -283,7 +285,7 @@ export function observeFCP(callback: VitalsCallback): () => void {
  */
 export function observeINP(callback: VitalsCallback): () => void {
   if (!('PerformanceObserver' in window)) {
-    console.warn('[Web Vitals] PerformanceObserver not supported')
+    debugWarn('[Web Vitals] PerformanceObserver not supported')
     return () => {}
   }
 
@@ -311,7 +313,7 @@ export function observeINP(callback: VitalsCallback): () => void {
 
     return () => observer.disconnect()
   } catch (error) {
-    console.error('[Web Vitals] INP observation failed:', error)
+    debugError('[Web Vitals] INP observation failed:', error)
     return () => {}
   }
 }

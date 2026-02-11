@@ -2,6 +2,7 @@
 
 import { ReactNode, useEffect } from 'react'
 import { useTenantStatusStore } from '@/stores/tenantStatusStore'
+import { debugLog } from '@/lib/debug'
 
 interface TenantStatusProviderProps {
   children: ReactNode
@@ -16,14 +17,14 @@ export function TenantStatusProvider({
 
   // Check status on mount and periodically
   useEffect(() => {
-    console.log('[TenantStatusProvider] Mounting - checking tenant status')
+    debugLog('[TenantStatusProvider] Mounting - checking tenant status')
 
     // Initial check
     checkStatus()
 
     // Set up periodic checks
     const intervalId = setInterval(() => {
-      console.log('[TenantStatusProvider] Periodic check - checking tenant status')
+      debugLog('[TenantStatusProvider] Periodic check - checking tenant status')
       checkStatus()
     }, checkInterval)
 
@@ -35,7 +36,7 @@ export function TenantStatusProvider({
   // Re-check on window focus
   useEffect(() => {
     const handleFocus = () => {
-      console.log('[TenantStatusProvider] Window focused - rechecking tenant status')
+      debugLog('[TenantStatusProvider] Window focused - rechecking tenant status')
       checkStatus()
     }
 

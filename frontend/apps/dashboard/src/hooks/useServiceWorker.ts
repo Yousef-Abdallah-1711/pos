@@ -9,6 +9,7 @@
  */
 
 import { useEffect, useState, useCallback } from 'react'
+import { debugLog, debugWarn, debugError } from '@/lib/debug'
 
 interface ServiceWorkerState {
   isSupported: boolean
@@ -49,7 +50,7 @@ export function useServiceWorker(options: UseServiceWorkerOptions = {}) {
     const isSupported = 'serviceWorker' in navigator
 
     if (!isSupported) {
-      console.warn('[SW] Service Workers not supported')
+      debugWarn('[SW] Service Workers not supported')
       setState((prev) => ({ ...prev, isSupported: false }))
       return
     }
@@ -62,7 +63,7 @@ export function useServiceWorker(options: UseServiceWorkerOptions = {}) {
           scope: '/',
         })
 
-        console.log('[SW] Registered successfully:', registration)
+        debugLog('[SW] Registered successfully:', registration)
         setState((prev) => ({
           ...prev,
           isReady: true,
@@ -78,7 +79,7 @@ export function useServiceWorker(options: UseServiceWorkerOptions = {}) {
           if (newWorker) {
             newWorker.addEventListener('statechange', () => {
               if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                console.log('[SW] Update available')
+                debugLog('[SW] Update available')
                 setState((prev) => ({ ...prev, isUpdateAvailable: true }))
                 onUpdateAvailable?.()
               }
@@ -96,7 +97,7 @@ export function useServiceWorker(options: UseServiceWorkerOptions = {}) {
           return () => clearInterval(interval)
         }
       } catch (error) {
-        console.error('[SW] Registration failed:', error)
+        debugError('[SW] Registration failed:', error)
       }
     }
 
@@ -129,7 +130,7 @@ export function useServiceWorker(options: UseServiceWorkerOptions = {}) {
   const applyUpdate = useCallback(async () => {
     if (!state.registration?.waiting) return
 
-    console.log('[SW] Applying update...')
+    debugLog('[SW] Applying update...')
     onUpdating?.()
 
     // Tell waiting service worker to skip waiting and activate
@@ -149,7 +150,7 @@ export function useServiceWorker(options: UseServiceWorkerOptions = {}) {
   const clearCache = useCallback(async () => {
     if (!state.registration) return
 
-    console.log('[SW] Clearing cache...')
+    debugLog('[SW] Clearing cache...')
     state.registration.active?.postMessage({ type: 'CLEAR_CACHE' })
 
     // Also clear through Cache API directly
@@ -223,7 +224,7 @@ export function useBackgroundSync(tag: string) {
     const supported = 'serviceWorker' in navigator && 'SyncManager' in window
 
     if (!supported) {
-      console.warn('[BG-SYNC] Not supported')
+      debugWarn('[BG-SYNC] Not supported')
       return
     }
 
@@ -236,10 +237,10 @@ export function useBackgroundSync(tag: string) {
     try {
       const registration = await navigator.serviceWorker.ready
       await registration.sync.register(tag)
-      console.log('[BG-SYNC] Registered:', tag)
+      debugLog('[BG-SYNC] Registered:', tag)
       setIsRegistered(true)
     } catch (error) {
-      console.error('[BG-SYNC] Registration failed:', error)
+      debugError('[BG-SYNC] Registration failed:', error)
     }
   }, [isSupported, tag])
 
@@ -274,10 +275,10 @@ export function usePersistentStorage() {
     try {
       const isPersisted = await navigator.storage.persist()
       setIsPersisted(isPersisted)
-      console.log('[STORAGE] Persistence:', isPersisted)
+      debugLog('[STORAGE] Persistence:', isPersisted)
       return isPersisted
     } catch (error) {
-      console.error('[STORAGE] Failed:', error)
+      debugError('[STORAGE] Failed:', error)
       return false
     }
   }, [isSupported])

@@ -4,6 +4,7 @@ import { useEffect } from 'react'
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 import { useAuthStore } from '@/stores/authStore'
 import { getConfig } from '@/lib/config'
+import { debugLog, debugError } from '@/lib/debug'
 
 export default function AuthCallbackContent() {
   const router = useRouter()
@@ -15,13 +16,13 @@ export default function AuthCallbackContent() {
     const token = searchParams.get('token')
     const userParam = searchParams.get('user')
 
-    console.log('=== CALLBACK: Processing auth ===')
-    console.log('Token:', !!token, 'User:', !!userParam)
+    debugLog('=== CALLBACK: Processing auth ===')
+    debugLog('Token:', !!token, 'User:', !!userParam)
 
     if (token && userParam) {
       try {
         const user = JSON.parse(decodeURIComponent(userParam))
-        console.log('Saving auth for user:', user.email)
+        debugLog('Saving auth for user:', user.email)
 
         // Save auth to store
         setAuth(user, token)
@@ -30,15 +31,15 @@ export default function AuthCallbackContent() {
         const pathSegments = pathname.split('/')
         const locale = ['en', 'ar'].includes(pathSegments[1]) ? pathSegments[1] : 'en'
 
-        console.log('Redirecting to dashboard for locale:', locale)
+        debugLog('Redirecting to dashboard for locale:', locale)
         // Redirect to dashboard with proper locale prefix
         window.location.href = `${getConfig().dashboardUrl}/${locale}/dashboard`
       } catch (error) {
-        console.error('Auth callback error:', error)
+        debugError('Auth callback error:', error)
         window.location.href = `${getConfig().landingUrl}/auth/login`
       }
     } else {
-      console.log('No auth data, redirecting to login')
+      debugLog('No auth data, redirecting to login')
       window.location.href = `${getConfig().landingUrl}/auth/login`
     }
   }, [searchParams, setAuth, router, pathname])

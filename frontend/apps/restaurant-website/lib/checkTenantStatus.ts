@@ -1,3 +1,5 @@
+import { debugLog, debugWarn, debugError } from './debug'
+
 /**
  * Utility function to check tenant status from server-side
  * Used by middleware to determine if tenant can access their website
@@ -43,7 +45,7 @@ export function clearStatusCache(slug?: string) {
  */
 export async function checkTenantStatus(slug: string): Promise<TenantStatusResult> {
   if (!slug) {
-    console.warn('[checkTenantStatus] No slug provided')
+    debugWarn('[checkTenantStatus] No slug provided')
     return {
       canAccess: false,
       blockReason: 'invalid_tenant',
@@ -53,17 +55,17 @@ export async function checkTenantStatus(slug: string): Promise<TenantStatusResul
   // Check cache first
   const cached = statusCache.get(slug)
   if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
-    console.log(`[checkTenantStatus] Cache HIT for slug: ${slug}`)
+    debugLog(`[checkTenantStatus] Cache HIT for slug: ${slug}`)
     return cached.data
   }
 
   try {
-    console.log(`[checkTenantStatus] Checking status for slug: ${slug}`)
+    debugLog(`[checkTenantStatus] Checking status for slug: ${slug}`)
 
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api/v1'
     const url = `${apiUrl}/public/tenant-status/${encodeURIComponent(slug)}`
 
-    console.log(`[checkTenantStatus] Fetching from: ${url}`)
+    debugLog(`[checkTenantStatus] Fetching from: ${url}`)
 
     const response = await fetch(url, {
       method: 'GET',
@@ -77,7 +79,7 @@ export async function checkTenantStatus(slug: string): Promise<TenantStatusResul
     })
 
     if (!response.ok) {
-      console.warn(`[checkTenantStatus] API returned status: ${response.status}`)
+      debugWarn(`[checkTenantStatus] API returned status: ${response.status}`)
 
       // If 404 or 400, tenant doesn't exist
       if (response.status === 404 || response.status === 400) {
@@ -95,7 +97,7 @@ export async function checkTenantStatus(slug: string): Promise<TenantStatusResul
     }
 
     const responseData = await response.json()
-    console.log(`[checkTenantStatus] API Response:`, responseData)
+    debugLog(`[checkTenantStatus] API Response:`, responseData)
 
     // Extract status from API response
     const result: TenantStatusResult = {
@@ -110,13 +112,13 @@ export async function checkTenantStatus(slug: string): Promise<TenantStatusResul
       timestamp: Date.now(),
     })
 
-    console.log(
+    debugLog(
       `[checkTenantStatus] Status for ${slug}: canAccess=${result.canAccess}, reason=${result.blockReason}`
     )
 
     return result
   } catch (error) {
-    console.error(`[checkTenantStatus] Error checking status for ${slug}:`, error)
+    debugError(`[checkTenantStatus] Error checking status for ${slug}:`, error)
 
     // On error, deny access (fail secure)
     return {

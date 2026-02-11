@@ -1,4 +1,5 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosError } from 'axios'
+import { debugError } from '../debug'
 
 /**
  * API Client for Restaurant Website
@@ -125,16 +126,16 @@ export const apiClient = {
 function handleError(error: unknown, url: string, method: string): void {
   if (axios.isAxiosError(error)) {
     const axiosError = error as AxiosError
-    console.error(`[API ${method}] ${url}`)
-    console.error('Status:', axiosError.response?.status)
-    console.error('Data:', axiosError.response?.data)
-    console.error('Message:', axiosError.message)
+    debugError(`[API ${method}] ${url}`)
+    debugError('Status:', axiosError.response?.status)
+    debugError('Data:', axiosError.response?.data)
+    debugError('Message:', axiosError.message)
   } else if (error instanceof Error) {
-    console.error(`[API ${method}] ${url}`)
-    console.error('Error:', error.message)
+    debugError(`[API ${method}] ${url}`)
+    debugError('Error:', error.message)
   } else {
-    console.error(`[API ${method}] ${url}`)
-    console.error('Unknown error:', error)
+    debugError(`[API ${method}] ${url}`)
+    debugError('Unknown error:', error)
   }
 }
 

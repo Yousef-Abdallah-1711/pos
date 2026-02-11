@@ -24,6 +24,7 @@ import {
 import { createTranslator, getLocaleFromPath } from '@/lib/translations'
 import { MODULE_IDS, PERMISSION_LEVELS } from '@/lib/rbac'
 import { exportOrdersToCSV } from '@/lib/pdf-export'
+import { debugError } from '@/lib/debug'
 
 interface Order {
   id: number
@@ -147,7 +148,7 @@ export default function OrdersPage() {
       const errorMsg = error.response?.data?.error || error.message || t('orders.loadFailed');
       setError(errorMsg);
       toast.error(errorMsg)
-      console.error('[ORDERS_PAGE] Error:', error)
+      debugError('[ORDERS_PAGE] Error:', error)
     } finally {
       setLoading(false)
     }
@@ -167,7 +168,7 @@ export default function OrdersPage() {
       toast.success(t('orders.cancelSuccess'))
     } catch (error) {
       toast.error(t('orders.cancelFailed'))
-      console.error('[CANCEL_ORDER] Error:', error)
+      debugError('[CANCEL_ORDER] Error:', error)
     }
   }
 
@@ -177,7 +178,7 @@ export default function OrdersPage() {
       exportOrdersToCSV(orders as any, filename)
       toast.success('Orders exported to CSV')
     } catch (error: any) {
-      console.error('[EXPORT_CSV] Error:', error)
+      debugError('[EXPORT_CSV] Error:', error)
       toast.error('Failed to export CSV')
     }
   }

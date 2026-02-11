@@ -9,6 +9,7 @@ import { useThemeStore } from '@/hooks/useThemeStore'
 import { ThemeData } from '@/types/theme'
 import * as themeApi from '@/lib/api/themeApi'
 import { toast } from 'sonner'
+import { debugLog, debugWarn, debugError } from '@/lib/debug'
 
 import { EditorSidebar } from '../components/EditorSidebar'
 import { EditorPreview } from '../components/EditorPreview'
@@ -257,7 +258,7 @@ export default function ThemeEditorPage({ params: paramsPromise }: EditorPagePro
   useEffect(() => {
     const loadTheme = async () => {
       if (!user?.restaurant_id) {
-        console.warn('⚠️ [ThemeEditor] Missing restaurant_id')
+        debugWarn('⚠️ [ThemeEditor] Missing restaurant_id')
         setIsLoading(false)
         return
       }
@@ -265,40 +266,40 @@ export default function ThemeEditorPage({ params: paramsPromise }: EditorPagePro
       try {
         setIsLoading(true)
         setError(null)
-        console.log('📡 [ThemeEditor] Loading theme:', params.id)
+        debugLog('📡 [ThemeEditor] Loading theme:', params.id)
         const theme = await themeApi.getTheme(params.id)
-        console.log('✅ [ThemeEditor] Theme loaded:', theme)
-        console.log('📊 [ThemeEditor] Components from backend:', theme.components?.length || 0, 'components')
+        debugLog('✅ [ThemeEditor] Theme loaded:', theme)
+        debugLog('📊 [ThemeEditor] Components from backend:', theme.components?.length || 0, 'components')
         if (theme.components) {
           theme.components.forEach((comp, idx) => {
-            console.log(`  Component ${idx}: id=${comp.id}, type=${comp.type}, enabled=${comp.enabled}`)
+            debugLog(`  Component ${idx}: id=${comp.id}, type=${comp.type}, enabled=${comp.enabled}`)
           })
         }
         const normalizedTheme = normalizeTheme(theme)
-        console.log('📊 [ThemeEditor] After normalize:', normalizedTheme.components?.length || 0, 'components')
+        debugLog('📊 [ThemeEditor] After normalize:', normalizedTheme.components?.length || 0, 'components')
         setCurrentTheme(normalizedTheme)
       } catch (err) {
-        console.error('❌ [ThemeEditor] Caught error during load')
-        console.error('❌ [ThemeEditor] Error instanceof Error:', err instanceof Error)
-        console.error('❌ [ThemeEditor] Error type:', typeof err)
-        console.error('❌ [ThemeEditor] Error constructor:', err && (err as any).constructor?.name)
-        console.error('❌ [ThemeEditor] Full error object:', err)
+        debugError('❌ [ThemeEditor] Caught error during load')
+        debugError('❌ [ThemeEditor] Error instanceof Error:', err instanceof Error)
+        debugError('❌ [ThemeEditor] Error type:', typeof err)
+        debugError('❌ [ThemeEditor] Error constructor:', err && (err as any).constructor?.name)
+        debugError('❌ [ThemeEditor] Full error object:', err)
 
         let errorMessage = 'Failed to load theme'
         if (err instanceof Error) {
           errorMessage = err.message
-          console.error('❌ [ThemeEditor] Error message:', err.message)
-          console.error('❌ [ThemeEditor] Error stack:', err.stack)
+          debugError('❌ [ThemeEditor] Error message:', err.message)
+          debugError('❌ [ThemeEditor] Error stack:', err.stack)
         } else if (typeof err === 'string') {
           errorMessage = err
-          console.error('❌ [ThemeEditor] String error:', err)
+          debugError('❌ [ThemeEditor] String error:', err)
         } else if (err && typeof err === 'object') {
           const errObj = err as any
           errorMessage = errObj.message || errObj.error || JSON.stringify(err)
-          console.error('❌ [ThemeEditor] Object error:', errorMessage)
+          debugError('❌ [ThemeEditor] Object error:', errorMessage)
         }
 
-        console.error('❌ [ThemeEditor] Final error message to display:', errorMessage)
+        debugError('❌ [ThemeEditor] Final error message to display:', errorMessage)
         setError(errorMessage)
       } finally {
         setIsLoading(false)
@@ -372,17 +373,17 @@ export default function ThemeEditorPage({ params: paramsPromise }: EditorPagePro
         components,
       }
 
-      console.log('📤 [ThemeEditor] Saving theme with data:', updateData)
-      console.log('📤 [ThemeEditor] Components being saved:', updateData.components)
-      console.log('📤 [ThemeEditor] Component count:', updateData.components?.length || 0)
+      debugLog('📤 [ThemeEditor] Saving theme with data:', updateData)
+      debugLog('📤 [ThemeEditor] Components being saved:', updateData.components)
+      debugLog('📤 [ThemeEditor] Component count:', updateData.components?.length || 0)
       if (updateData.components && updateData.components.length > 0) {
-        console.log('📤 [ThemeEditor] First component details:', updateData.components[0])
+        debugLog('📤 [ThemeEditor] First component details:', updateData.components[0])
       }
       await themeApi.updateTheme(params.id, updateData)
       setDirty(false)
       toast.success(`Theme "${currentTheme.name}" saved successfully`)
     } catch (err) {
-      console.error('Failed to save theme:', err)
+      debugError('Failed to save theme:', err)
       const errorMessage = err instanceof Error ? err.message : 'Failed to save theme'
       setError(errorMessage)
       toast.error(errorMessage)
@@ -435,7 +436,7 @@ export default function ThemeEditorPage({ params: paramsPromise }: EditorPagePro
   return (
     <ErrorBoundary
       onError={(error) => {
-        console.error('Theme editor error:', error)
+        debugError('Theme editor error:', error)
         setError(error.message)
       }}
     >

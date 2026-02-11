@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { X, Eye } from "lucide-react";
+import { debugError } from "@/lib/debug";
 import { Button } from "@pos-saas/ui";
 import { useThemeStore } from "@/lib/store/theme-store";
 import { useThemeColors } from "@/lib/hooks/use-theme";
@@ -80,7 +81,7 @@ export function ThemePreview({
       await loadTheme(theme.slug);
       onApply?.(theme.slug);
     } catch (error) {
-      console.error("Failed to apply theme:", error);
+      debugError("Failed to apply theme:", error);
     } finally {
       setIsApplying(false);
     }

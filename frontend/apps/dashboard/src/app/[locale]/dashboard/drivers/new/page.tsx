@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
 import { ArrowLeft, Loader } from 'lucide-react'
 import { createTranslator, getLocaleFromPath } from '@/lib/translations'
+import { debugError } from '@/lib/debug'
 
 interface FormData {
   first_name: string
@@ -119,7 +120,7 @@ export default function AddDriverPage() {
       toast.success('Driver added successfully')
       router.push(`/${locale}/dashboard/drivers`)
     } catch (error: any) {
-      console.error('[ADD_DRIVER] Error:', error)
+      debugError('[ADD_DRIVER] Error:', error)
       const errorMessage = error.response?.data?.message || 'Failed to add driver'
       toast.error(errorMessage)
     } finally {

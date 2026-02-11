@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog'
 import { api } from '@/lib/api'
+import { debugLog, debugError } from '@/lib/debug'
 import { toast } from 'sonner'
 import { Plus, AlertCircle, Lock } from 'lucide-react'
 import { createTranslator, getLocaleFromPath } from '@/lib/translations'
@@ -112,7 +113,7 @@ export default function LeavesPage() {
         const empList = Array.isArray(response.data) ? response.data : response.data?.employees || []
         setEmployees(empList)
       } catch (error) {
-        console.error('Failed to load employees:', error)
+        debugError('Failed to load employees:', error)
       }
     }
 
@@ -129,14 +130,14 @@ export default function LeavesPage() {
       setDebugInfo(`Fetching leave requests at ${new Date().toLocaleTimeString()}`)
 
       try {
-        console.log('[LEAVES_PAGE] Starting fetch with dates:', { startDate, endDate })
+        debugLog('[LEAVES_PAGE] Starting fetch with dates:', { startDate, endDate })
         const response = await api.get('/hr/leaves', {
           params: {
             start_date: startDate,
             end_date: endDate,
           },
         })
-        console.log('[LEAVES_PAGE] Response:', response.data)
+        debugLog('[LEAVES_PAGE] Response:', response.data)
 
         const leavesList = Array.isArray(response.data) ? response.data : response.data?.leaves || []
 
@@ -152,7 +153,7 @@ export default function LeavesPage() {
         setDebugInfo(`Successfully loaded ${enrichedLeaves.length} leave requests at ${new Date().toLocaleTimeString()}`)
       } catch (error: any) {
         const errorMsg = error?.response?.data?.message || error?.message || t('hr.leaves.loadFailed', 'Failed to load leaves')
-        console.error('[LEAVES_PAGE] Error:', error)
+        debugError('[LEAVES_PAGE] Error:', error)
         setApiError(errorMsg)
         setDebugInfo(`Error: ${errorMsg} at ${new Date().toLocaleTimeString()}`)
         toast.error(errorMsg)
@@ -168,16 +169,16 @@ export default function LeavesPage() {
 
   const handleCreateLeave = async (formData: any) => {
     try {
-      console.log('[CREATE_LEAVE] Submitting:', formData)
+      debugLog('[CREATE_LEAVE] Submitting:', formData)
       const response = await api.post('/hr/leaves', formData)
-      console.log('[CREATE_LEAVE] Response:', response.data)
+      debugLog('[CREATE_LEAVE] Response:', response.data)
 
       setLeaves([response.data, ...leaves])
       setShowForm(false)
       toast.success(t('hr.leaves.successCreated', 'Leave request created successfully'))
     } catch (error: any) {
       const errorMsg = error?.response?.data?.message || error?.message || t('hr.leaves.errorCreated', 'Failed to create leave')
-      console.error('[CREATE_LEAVE] Error:', error)
+      debugError('[CREATE_LEAVE] Error:', error)
       toast.error(errorMsg)
       throw error
     }
@@ -185,9 +186,9 @@ export default function LeavesPage() {
 
   const handleUpdateLeave = async (leaveId: number, formData: any) => {
     try {
-      console.log('[UPDATE_LEAVE] Submitting:', formData)
+      debugLog('[UPDATE_LEAVE] Submitting:', formData)
       const response = await api.put(`/hr/leaves/${leaveId}`, formData)
-      console.log('[UPDATE_LEAVE] Response:', response.data)
+      debugLog('[UPDATE_LEAVE] Response:', response.data)
 
       setLeaves(leaves.map((l) => (l.id === leaveId ? { ...l, ...formData } : l)))
       setShowForm(false)
@@ -196,7 +197,7 @@ export default function LeavesPage() {
       toast.success(t('hr.leaves.successUpdated', 'Leave request updated successfully'))
     } catch (error: any) {
       const errorMsg = error?.response?.data?.message || error?.message || t('hr.leaves.errorUpdated', 'Failed to update leave')
-      console.error('[UPDATE_LEAVE] Error:', error)
+      debugError('[UPDATE_LEAVE] Error:', error)
       toast.error(errorMsg)
       throw error
     }
@@ -204,15 +205,15 @@ export default function LeavesPage() {
 
   const handleDeleteLeave = async (leaveId: number) => {
     try {
-      console.log('[DELETE_LEAVE] Deleting:', leaveId)
+      debugLog('[DELETE_LEAVE] Deleting:', leaveId)
       await api.delete(`/hr/leaves/${leaveId}`)
-      console.log('[DELETE_LEAVE] Success')
+      debugLog('[DELETE_LEAVE] Success')
 
       setLeaves(leaves.filter((l) => l.id !== leaveId))
       toast.success(t('hr.leaves.successDeleted', 'Leave request deleted successfully'))
     } catch (error: any) {
       const errorMsg = error?.response?.data?.message || error?.message || t('hr.leaves.errorDeleted', 'Failed to delete leave')
-      console.error('[DELETE_LEAVE] Error:', error)
+      debugError('[DELETE_LEAVE] Error:', error)
       toast.error(errorMsg)
     }
   }
@@ -221,18 +222,18 @@ export default function LeavesPage() {
     if (!actionDialog.leaveId) return
 
     try {
-      console.log('[APPROVE_LEAVE] Approving:', actionDialog.leaveId)
+      debugLog('[APPROVE_LEAVE] Approving:', actionDialog.leaveId)
       await api.post(`/hr/leaves/${actionDialog.leaveId}/approve`, {
         notes: actionDialog.input,
       })
-      console.log('[APPROVE_LEAVE] Success')
+      debugLog('[APPROVE_LEAVE] Success')
 
       setLeaves(leaves.map(l => l.id === actionDialog.leaveId ? { ...l, status: 'approved' } : l))
       setActionDialog({ type: null, leaveId: null, open: false, input: '' })
       toast.success(t('hr.leaves.successApproved', 'Leave request approved'))
     } catch (error: any) {
       const errorMsg = error?.response?.data?.message || error?.message || t('hr.leaves.errorApproved', 'Failed to approve leave')
-      console.error('[APPROVE_LEAVE] Error:', error)
+      debugError('[APPROVE_LEAVE] Error:', error)
       toast.error(errorMsg)
     }
   }
@@ -241,18 +242,18 @@ export default function LeavesPage() {
     if (!actionDialog.leaveId) return
 
     try {
-      console.log('[REJECT_LEAVE] Rejecting:', actionDialog.leaveId)
+      debugLog('[REJECT_LEAVE] Rejecting:', actionDialog.leaveId)
       await api.post(`/hr/leaves/${actionDialog.leaveId}/reject`, {
         reason: actionDialog.input,
       })
-      console.log('[REJECT_LEAVE] Success')
+      debugLog('[REJECT_LEAVE] Success')
 
       setLeaves(leaves.map(l => l.id === actionDialog.leaveId ? { ...l, status: 'rejected' } : l))
       setActionDialog({ type: null, leaveId: null, open: false, input: '' })
       toast.success(t('hr.leaves.successRejected', 'Leave request rejected'))
     } catch (error: any) {
       const errorMsg = error?.response?.data?.message || error?.message || t('hr.leaves.errorRejected', 'Failed to reject leave')
-      console.error('[REJECT_LEAVE] Error:', error)
+      debugError('[REJECT_LEAVE] Error:', error)
       toast.error(errorMsg)
     }
   }

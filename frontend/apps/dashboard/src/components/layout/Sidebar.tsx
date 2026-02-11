@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { createTranslator, getLocaleFromPath } from '@/lib/translations'
 import { useTenantStatus } from '@/hooks/useTenantStatus'
 import { BlockedSidebar } from '@/components/blocked/BlockedSidebar'
+import { SidebarSubscriptionBadge } from '@/components/layout/SidebarSubscriptionBadge'
 
 interface SidebarItem {
   label: string
@@ -119,7 +120,8 @@ export function Sidebar() {
           </Link>
         </div>
 
-        <nav className="p-4">
+        <div className="flex flex-col h-[calc(100%-65px)]">
+        <nav className="p-4 flex-1 overflow-y-auto">
           <ul className="space-y-2">
             {sidebarItems.map((item) => (
               <li key={item.label}>
@@ -175,6 +177,8 @@ export function Sidebar() {
             ))}
           </ul>
         </nav>
+        <SidebarSubscriptionBadge />
+        </div>
       </aside>
 
       {/* Overlay for mobile */}

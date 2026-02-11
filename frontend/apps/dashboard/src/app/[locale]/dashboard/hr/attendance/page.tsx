@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { api } from '@/lib/api'
+import { debugLog, debugError } from '@/lib/debug'
 import { toast } from 'sonner'
 import { Plus, AlertCircle, Lock, Loader2 } from 'lucide-react'
 import { createTranslator, getLocaleFromPath } from '@/lib/translations'
@@ -107,7 +108,7 @@ export default function AttendancePage() {
         const empList = Array.isArray(response.data) ? response.data : response.data?.employees || []
         setEmployees(empList)
       } catch (error) {
-        console.error('Failed to load employees:', error)
+        debugError('Failed to load employees:', error)
       }
     }
 
@@ -124,14 +125,14 @@ export default function AttendancePage() {
       setDebugInfo(`Fetching attendance records at ${new Date().toLocaleTimeString()}`)
 
       try {
-        console.log('[ATTENDANCE_PAGE] Starting fetch with dates:', { startDate, endDate })
+        debugLog('[ATTENDANCE_PAGE] Starting fetch with dates:', { startDate, endDate })
         const response = await api.get('/hr/attendance', {
           params: {
             start_date: startDate,
             end_date: endDate,
           },
         })
-        console.log('[ATTENDANCE_PAGE] Response:', response.data)
+        debugLog('[ATTENDANCE_PAGE] Response:', response.data)
 
         const attendanceList = Array.isArray(response.data) ? response.data : response.data?.attendance || []
 
@@ -147,7 +148,7 @@ export default function AttendancePage() {
         setDebugInfo(`Successfully loaded ${enrichedAttendance.length} attendance records at ${new Date().toLocaleTimeString()}`)
       } catch (error: any) {
         const errorMsg = error?.response?.data?.message || error?.message || t('hr.attendance.loadFailed', 'Failed to load attendance')
-        console.error('[ATTENDANCE_PAGE] Error:', error)
+        debugError('[ATTENDANCE_PAGE] Error:', error)
         setApiError(errorMsg)
         setDebugInfo(`Error: ${errorMsg} at ${new Date().toLocaleTimeString()}`)
         toast.error(errorMsg)
@@ -163,16 +164,16 @@ export default function AttendancePage() {
 
   const handleCreateAttendance = async (formData: any) => {
     try {
-      console.log('[CREATE_ATTENDANCE] Submitting:', formData)
+      debugLog('[CREATE_ATTENDANCE] Submitting:', formData)
       const response = await api.post('/hr/attendance/clock-in', formData)
-      console.log('[CREATE_ATTENDANCE] Response:', response.data)
+      debugLog('[CREATE_ATTENDANCE] Response:', response.data)
 
       setAttendance([response.data, ...attendance])
       setShowForm(false)
       toast.success(t('hr.attendance.successCreated', 'Attendance recorded successfully'))
     } catch (error: any) {
       const errorMsg = error?.response?.data?.message || error?.message || t('hr.attendance.errorCreated', 'Failed to record attendance')
-      console.error('[CREATE_ATTENDANCE] Error:', error)
+      debugError('[CREATE_ATTENDANCE] Error:', error)
       toast.error(errorMsg)
       throw error
     }
@@ -180,9 +181,9 @@ export default function AttendancePage() {
 
   const handleUpdateAttendance = async (recordId: number, formData: any) => {
     try {
-      console.log('[UPDATE_ATTENDANCE] Submitting:', formData)
+      debugLog('[UPDATE_ATTENDANCE] Submitting:', formData)
       const response = await api.put(`/hr/attendance/${recordId}`, formData)
-      console.log('[UPDATE_ATTENDANCE] Response:', response.data)
+      debugLog('[UPDATE_ATTENDANCE] Response:', response.data)
 
       setAttendance(attendance.map((r) => (r.id === recordId ? { ...r, ...formData } : r)))
       setShowForm(false)
@@ -191,7 +192,7 @@ export default function AttendancePage() {
       toast.success(t('hr.attendance.successUpdated', 'Attendance updated successfully'))
     } catch (error: any) {
       const errorMsg = error?.response?.data?.message || error?.message || t('hr.attendance.errorUpdated', 'Failed to update attendance')
-      console.error('[UPDATE_ATTENDANCE] Error:', error)
+      debugError('[UPDATE_ATTENDANCE] Error:', error)
       toast.error(errorMsg)
       throw error
     }
@@ -199,15 +200,15 @@ export default function AttendancePage() {
 
   const handleDeleteAttendance = async (recordId: number) => {
     try {
-      console.log('[DELETE_ATTENDANCE] Deleting:', recordId)
+      debugLog('[DELETE_ATTENDANCE] Deleting:', recordId)
       await api.delete(`/hr/attendance/${recordId}`)
-      console.log('[DELETE_ATTENDANCE] Success')
+      debugLog('[DELETE_ATTENDANCE] Success')
 
       setAttendance(attendance.filter((r) => r.id !== recordId))
       toast.success(t('hr.attendance.successDeleted', 'Attendance record deleted successfully'))
     } catch (error: any) {
       const errorMsg = error?.response?.data?.message || error?.message || t('hr.attendance.errorDeleted', 'Failed to delete attendance')
-      console.error('[DELETE_ATTENDANCE] Error:', error)
+      debugError('[DELETE_ATTENDANCE] Error:', error)
       toast.error(errorMsg)
     }
   }

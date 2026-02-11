@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Checkbox } from '@/components/ui/checkbox'
 import { toast } from 'sonner'
+import { debugLog } from '@/lib/debug'
 import { AlertCircle, Loader, Plus, X } from 'lucide-react'
 
 interface RoleFormProps {
@@ -91,28 +92,28 @@ export function RoleForm({ role, onSubmit, onCancel }: RoleFormProps) {
       }
 
       // DEBUG: Log the request data
-      console.group('[CREATE_ROLE] DEBUG - Submitting role data')
-      console.log('Raw form data:', data)
-      console.log('Selected permissions:', selectedPermissions)
-      console.log('Cleaned data being sent:', cleanData)
-      console.log('Timestamp:', new Date().toISOString())
-      console.groupEnd()
+      debugLog('[CREATE_ROLE] DEBUG - Submitting role data')
+      debugLog('Raw form data:', data)
+      debugLog('Selected permissions:', selectedPermissions)
+      debugLog('Cleaned data being sent:', cleanData)
+      debugLog('Timestamp:', new Date().toISOString())
+      // groupEnd (debug)
 
       await onSubmit(cleanData)
 
-      console.log('[CREATE_ROLE] SUCCESS - Role created successfully')
+      debugLog('[CREATE_ROLE] SUCCESS - Role created successfully')
     } catch (error: any) {
       const errorMsg = error?.response?.data?.message || error?.message || 'Failed to save role'
 
       // DEBUG: Detailed error logging
-      console.group('[CREATE_ROLE] ERROR - Detailed Debug Info')
-      console.log('Error Type:', error?.constructor?.name || typeof error)
-      console.log('Error Message:', error?.message)
-      console.log('Status Code:', error?.response?.status)
-      console.log('Response Data:', error?.response?.data)
-      console.log('Error Stack:', error?.stack)
-      console.log('Full Error Object:', error)
-      console.groupEnd()
+      debugLog('[CREATE_ROLE] ERROR - Detailed Debug Info')
+      debugLog('Error Type:', error?.constructor?.name || typeof error)
+      debugLog('Error Message:', error?.message)
+      debugLog('Status Code:', error?.response?.status)
+      debugLog('Response Data:', error?.response?.data)
+      debugLog('Error Stack:', error?.stack)
+      debugLog('Full Error Object:', error)
+      // groupEnd (debug)
 
       setApiError(errorMsg)
       toast.error(errorMsg)

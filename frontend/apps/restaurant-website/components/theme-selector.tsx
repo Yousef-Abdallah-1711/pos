@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Palette, Check } from "lucide-react";
+import { debugError } from "@/lib/debug";
 import { useThemeStore } from "@/lib/store/theme-store";
 import { useThemeColors } from "@/lib/hooks/use-theme";
 
@@ -45,7 +46,7 @@ export function ThemeSelector({
       await loadTheme(themeSlug);
       onThemeChange?.(themeSlug);
     } catch (error) {
-      console.error("Failed to load theme:", error);
+      debugError("Failed to load theme:", error);
     } finally {
       setLoading(false);
     }

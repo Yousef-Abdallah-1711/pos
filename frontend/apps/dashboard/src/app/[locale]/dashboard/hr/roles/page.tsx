@@ -8,6 +8,7 @@ import { RoleForm } from '@/components/hr/RoleForm'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { api } from '@/lib/api'
+import { debugLog, debugError } from '@/lib/debug'
 import { toast } from 'sonner'
 import { Plus, AlertCircle } from 'lucide-react'
 import { createTranslator, getLocaleFromPath } from '@/lib/translations'
@@ -48,16 +49,16 @@ export default function RolesPage() {
       setDebugInfo(`Fetching roles at ${new Date().toLocaleTimeString()}`)
 
       try {
-        console.log('[ROLES_PAGE] Starting fetch...')
+        debugLog('[ROLES_PAGE] Starting fetch...')
         const response = await api.get('/hr/roles')
-        console.log('[ROLES_PAGE] Response:', response.data)
+        debugLog('[ROLES_PAGE] Response:', response.data)
 
         const rolesList = Array.isArray(response.data) ? response.data : response.data?.roles || []
         setRoles(rolesList)
         setDebugInfo(`Successfully loaded ${rolesList.length} roles at ${new Date().toLocaleTimeString()}`)
       } catch (error: any) {
         const errorMsg = error?.response?.data?.message || error?.message || 'Failed to load roles'
-        console.error('[ROLES_PAGE] Error:', error)
+        debugError('[ROLES_PAGE] Error:', error)
         setApiError(errorMsg)
         setDebugInfo(`Error: ${errorMsg} at ${new Date().toLocaleTimeString()}`)
         toast.error(errorMsg)
@@ -73,16 +74,16 @@ export default function RolesPage() {
 
   const handleCreateRole = async (formData: any) => {
     try {
-      console.log('[CREATE_ROLE] Submitting:', formData)
+      debugLog('[CREATE_ROLE] Submitting:', formData)
       const response = await api.post('/hr/roles', formData)
-      console.log('[CREATE_ROLE] Response:', response.data)
+      debugLog('[CREATE_ROLE] Response:', response.data)
 
       setRoles([response.data, ...roles])
       setShowForm(false)
       toast.success(t('hr.roles.createSuccess', 'Role created successfully'))
     } catch (error: any) {
       const errorMsg = error?.response?.data?.message || error?.message || t('hr.roles.createFailed', 'Failed to create role')
-      console.error('[CREATE_ROLE] Error:', error)
+      debugError('[CREATE_ROLE] Error:', error)
       toast.error(errorMsg)
       throw error
     }
@@ -90,9 +91,9 @@ export default function RolesPage() {
 
   const handleUpdateRole = async (roleId: number, formData: any) => {
     try {
-      console.log('[UPDATE_ROLE] Submitting:', formData)
+      debugLog('[UPDATE_ROLE] Submitting:', formData)
       const response = await api.put(`/hr/roles/${roleId}`, formData)
-      console.log('[UPDATE_ROLE] Response:', response.data)
+      debugLog('[UPDATE_ROLE] Response:', response.data)
 
       setRoles(roles.map((r) => (r.id === roleId ? { ...r, ...formData } : r)))
       setShowForm(false)
@@ -101,7 +102,7 @@ export default function RolesPage() {
       toast.success(t('hr.roles.updateSuccess', 'Role updated successfully'))
     } catch (error: any) {
       const errorMsg = error?.response?.data?.message || error?.message || t('hr.roles.updateFailed', 'Failed to update role')
-      console.error('[UPDATE_ROLE] Error:', error)
+      debugError('[UPDATE_ROLE] Error:', error)
       toast.error(errorMsg)
       throw error
     }
@@ -109,15 +110,15 @@ export default function RolesPage() {
 
   const handleDeleteRole = async (roleId: number) => {
     try {
-      console.log('[DELETE_ROLE] Deleting:', roleId)
+      debugLog('[DELETE_ROLE] Deleting:', roleId)
       await api.delete(`/hr/roles/${roleId}`)
-      console.log('[DELETE_ROLE] Success')
+      debugLog('[DELETE_ROLE] Success')
 
       setRoles(roles.filter((r) => r.id !== roleId))
       toast.success(t('hr.roles.deleteSuccess', 'Role deleted successfully'))
     } catch (error: any) {
       const errorMsg = error?.response?.data?.message || error?.message || t('hr.roles.deleteFailed', 'Failed to delete role')
-      console.error('[DELETE_ROLE] Error:', error)
+      debugError('[DELETE_ROLE] Error:', error)
       toast.error(errorMsg)
     }
   }

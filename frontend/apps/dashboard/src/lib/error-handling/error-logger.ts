@@ -3,6 +3,8 @@
  * Provides centralized error logging, categorization, and reporting
  */
 
+import { debugError, debugWarn } from '@/lib/debug'
+
 export type ErrorSeverity = 'low' | 'medium' | 'high' | 'critical'
 
 export type ErrorCategory =
@@ -201,7 +203,7 @@ class ErrorLoggerService {
 
     // Log to console in development
     if (this.config.environment === 'development') {
-      console.error(`[${category.toUpperCase()}] ${message}`, {
+      debugError(`[${category.toUpperCase()}] ${message}`, {
         severity,
         context,
         stack,
@@ -350,7 +352,7 @@ class ErrorLoggerService {
     try {
       localStorage.setItem('errorLogs', JSON.stringify(this.logs))
     } catch (e) {
-      console.warn('Failed to save error logs to localStorage', e)
+      debugWarn('Failed to save error logs to localStorage', e)
     }
   }
 
@@ -361,7 +363,7 @@ class ErrorLoggerService {
         this.logs = JSON.parse(stored)
       }
     } catch (e) {
-      console.warn('Failed to load error logs from localStorage', e)
+      debugWarn('Failed to load error logs from localStorage', e)
     }
   }
 
@@ -369,7 +371,7 @@ class ErrorLoggerService {
     try {
       localStorage.removeItem('errorLogs')
     } catch (e) {
-      console.warn('Failed to remove error logs from localStorage', e)
+      debugWarn('Failed to remove error logs from localStorage', e)
     }
   }
 
@@ -381,7 +383,7 @@ class ErrorLoggerService {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(errorLog),
       }).catch((e) => {
-        console.warn('Failed to send error log to remote', e)
+        debugWarn('Failed to send error log to remote', e)
       })
     }
   }

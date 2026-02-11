@@ -12,6 +12,8 @@ import { Sidebar } from '@/components/layout/Sidebar'
 import { LanguageSwitcher } from '@/components/layout/LanguageSwitcher'
 import { NotificationCenter } from '@/components/notifications/NotificationCenter'
 import { createTranslator, getLocaleFromPath } from '@/lib/translations'
+import { debugError } from '@/lib/debug'
+import { TrialWarningBanner } from '@/components/layout/TrialWarningBanner'
 
 export default function DashboardLayout({
   children,
@@ -79,7 +81,7 @@ export default function DashboardLayout({
           })
         }
       } catch (error) {
-        console.error('[DashboardLayout] Failed to load preferences:', error)
+        debugError('[DashboardLayout] Failed to load preferences:', error)
       } finally {
         setLoading(false)
       }
@@ -263,6 +265,9 @@ export default function DashboardLayout({
             </div>
           </div>
         </header>
+
+        {/* Trial Warning Banner */}
+        <TrialWarningBanner />
 
         {/* Main Content */}
         <main className="w-full">

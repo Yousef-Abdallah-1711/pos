@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { debugWarn, debugError } from '../debug'
 import { persist, createJSONStorage } from 'zustand/middleware'
 
 /**
@@ -197,7 +198,7 @@ export const useThemeStore = create<ThemeStoreState>()(
 
             // Log retry attempts in development
             if (process.env.NODE_ENV === 'development') {
-              console.warn(`Theme load attempt ${attempt + 1}/${MAX_RETRIES + 1} failed:`, error)
+              debugWarn(`Theme load attempt ${attempt + 1}/${MAX_RETRIES + 1} failed:`, error)
             }
 
             // Wait before retry (exponential backoff)
@@ -208,7 +209,7 @@ export const useThemeStore = create<ThemeStoreState>()(
         }
 
         // All retries failed - load default theme
-        console.error(`Failed to load theme after ${MAX_RETRIES + 1} attempts: ${slug}`, lastError)
+        debugError(`Failed to load theme after ${MAX_RETRIES + 1} attempts: ${slug}`, lastError)
 
         try {
           const { getDefaultTheme } = await import('@/lib/utils/default-theme')

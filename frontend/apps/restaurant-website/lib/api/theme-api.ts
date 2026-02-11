@@ -1,4 +1,5 @@
 import { apiClient } from './api-client'
+import { debugError } from '../debug'
 import type { ThemeData } from '@/lib/store/theme-store'
 
 /**
@@ -83,7 +84,7 @@ export async function getAllThemes(): Promise<ThemeData[]> {
     )
     return themes || []
   } catch (error) {
-    console.error('Failed to fetch all themes:', error)
+    debugError('Failed to fetch all themes:', error)
     return []
   }
 }

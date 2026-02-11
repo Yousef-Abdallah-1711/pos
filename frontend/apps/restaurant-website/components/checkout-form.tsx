@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { debugError } from "@/lib/debug";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Button, Input } from "@pos-saas/ui";
@@ -63,7 +64,7 @@ export function CheckoutForm({
       reset();
       setTimeout(() => setSubmitSuccess(false), 5000);
     } catch (error) {
-      console.error("Checkout error:", error);
+      debugError("Checkout error:", error);
     }
   };
 

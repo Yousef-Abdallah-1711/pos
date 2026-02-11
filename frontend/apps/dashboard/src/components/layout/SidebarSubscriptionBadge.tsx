@@ -1,0 +1,97 @@
+'use client'
+
+import { Crown, Clock, AlertTriangle } from 'lucide-react'
+import { useTenantStatus } from '@/hooks/useTenantStatus'
+
+export function SidebarSubscriptionBadge() {
+  const { status, daysRemaining, isLoading } = useTenantStatus()
+
+  if (isLoading || !status) return null
+
+  const getStatusConfig = () => {
+    if (status === 'active') {
+      return {
+        label: 'Pro Plan',
+        icon: <Crown className="h-4 w-4" />,
+        bgColor: 'bg-green-50 dark:bg-green-900/20',
+        textColor: 'text-green-700 dark:text-green-400',
+        borderColor: 'border-green-200 dark:border-green-800',
+      }
+    }
+
+    if (status === 'trial') {
+      const days = daysRemaining ?? 0
+      if (days > 7) {
+        return {
+          label: 'Pro Trial',
+          sublabel: `${days} days left`,
+          icon: <Clock className="h-4 w-4" />,
+          bgColor: 'bg-blue-50 dark:bg-blue-900/20',
+          textColor: 'text-blue-700 dark:text-blue-400',
+          borderColor: 'border-blue-200 dark:border-blue-800',
+        }
+      }
+      if (days > 3) {
+        return {
+          label: 'Pro Trial',
+          sublabel: `${days} days left`,
+          icon: <Clock className="h-4 w-4" />,
+          bgColor: 'bg-yellow-50 dark:bg-yellow-900/20',
+          textColor: 'text-yellow-700 dark:text-yellow-400',
+          borderColor: 'border-yellow-200 dark:border-yellow-800',
+        }
+      }
+      if (days > 0) {
+        return {
+          label: 'Pro Trial',
+          sublabel: `${days} day${days === 1 ? '' : 's'} left`,
+          icon: <AlertTriangle className="h-4 w-4" />,
+          bgColor: 'bg-red-50 dark:bg-red-900/20',
+          textColor: 'text-red-700 dark:text-red-400',
+          borderColor: 'border-red-200 dark:border-red-800',
+        }
+      }
+      return {
+        label: 'Trial Expired',
+        icon: <AlertTriangle className="h-4 w-4" />,
+        bgColor: 'bg-red-50 dark:bg-red-900/20',
+        textColor: 'text-red-700 dark:text-red-400',
+        borderColor: 'border-red-200 dark:border-red-800',
+      }
+    }
+
+    if (status === 'expired') {
+      return {
+        label: 'Expired',
+        icon: <AlertTriangle className="h-4 w-4" />,
+        bgColor: 'bg-red-50 dark:bg-red-900/20',
+        textColor: 'text-red-700 dark:text-red-400',
+        borderColor: 'border-red-200 dark:border-red-800',
+      }
+    }
+
+    return {
+      label: status.charAt(0).toUpperCase() + status.slice(1),
+      icon: <Crown className="h-4 w-4" />,
+      bgColor: 'bg-gray-50 dark:bg-gray-700',
+      textColor: 'text-gray-600 dark:text-gray-400',
+      borderColor: 'border-gray-200 dark:border-gray-600',
+    }
+  }
+
+  const config = getStatusConfig()
+
+  return (
+    <div className={`mx-4 mb-4 p-3 rounded-lg border ${config.bgColor} ${config.borderColor}`}>
+      <div className={`flex items-center gap-2 ${config.textColor}`}>
+        {config.icon}
+        <span className="text-sm font-medium">{config.label}</span>
+      </div>
+      {config.sublabel && (
+        <p className={`text-xs mt-1 ${config.textColor} opacity-80`}>
+          {config.sublabel}
+        </p>
+      )}
+    </div>
+  )
+}

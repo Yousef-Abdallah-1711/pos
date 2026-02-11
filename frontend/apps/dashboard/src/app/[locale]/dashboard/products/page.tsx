@@ -13,6 +13,7 @@ import { Plus, Lock } from 'lucide-react'
 import { createTranslator, getLocaleFromPath } from '@/lib/translations'
 import { PageHeaderSkeleton, TableSkeleton } from '@/components/skeletons'
 import { MODULE_IDS, PERMISSION_LEVELS } from '@/lib/rbac'
+import { debugError } from '@/lib/debug'
 
 interface Product {
   id: number
@@ -91,7 +92,7 @@ export default function ProductsPage() {
         setProducts(response.data.products || [])
       } catch (error) {
         toast.error(t('failedToLoad'))
-        console.error(error)
+        debugError(error)
       } finally {
         setLoading(false)
       }
@@ -107,7 +108,7 @@ export default function ProductsPage() {
         const response = await api.get('/categories')
         setCategories(response.data || [])
       } catch (error) {
-        console.error('Failed to load categories:', error)
+        debugError('Failed to load categories:', error)
       }
     }
 
@@ -133,7 +134,7 @@ export default function ProductsPage() {
       toast.success(t('products.deleteSuccess'))
     } catch (error) {
       toast.error(t('products.deleteFailed'))
-      console.error(error)
+      debugError(error)
     }
   }
 

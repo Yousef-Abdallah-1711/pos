@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import { AlertCircle, RotateCcw, Home } from 'lucide-react';
+import { debugError } from '@/lib/debug';
 import Link from 'next/link';
 
 interface ErrorProps {
@@ -18,7 +19,7 @@ export default function Error({ error, reset, params }: ErrorProps) {
 
   // Log error to console for debugging
   useEffect(() => {
-    console.error('Page Error:', error);
+    debugError('Page Error:', error);
   }, [error]);
 
   const homeUrl = `/${locale}`;

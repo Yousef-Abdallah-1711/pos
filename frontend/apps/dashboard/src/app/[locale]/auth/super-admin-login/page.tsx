@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/stores/authStore";
 import { api } from "@/lib/api";
 import { AlertCircle, CheckCircle } from "lucide-react";
+import { debugLog, debugError } from '@/lib/debug';
 
 export default function SuperAdminLoginPage() {
   const router = useRouter();
@@ -25,47 +26,47 @@ export default function SuperAdminLoginPage() {
         // Get token from URL query parameters using window.location
         const params = new URLSearchParams(window.location.search);
         const token = params.get("token");
-        console.log("[SuperAdminLogin] Component mounted, token from URL:", token ? "present" : "missing");
+        debugLog("[SuperAdminLogin] Component mounted, token from URL:", token ? "present" : "missing");
 
         if (!token) {
-          console.error("[SuperAdminLogin] No token provided");
+          debugError("[SuperAdminLogin] No token provided");
           setError("No token provided. Invalid access link.");
           setIsLoading(false);
           return;
         }
 
         // Exchange the one-time token for a regular JWT
-        console.log("[SuperAdminLogin] Exchanging token for JWT...");
+        debugLog("[SuperAdminLogin] Exchanging token for JWT...");
         const response = await api.post("/auth/token-exchange", { token });
 
-        console.log("[SuperAdminLogin] Token exchange response:", response.status);
+        debugLog("[SuperAdminLogin] Token exchange response:", response.status);
         const data = response.data;
-        console.log("[SuperAdminLogin] Token exchange successful", data);
+        debugLog("[SuperAdminLogin] Token exchange successful", data);
 
         // Store the JWT token and user
         const authData = data.data || data;
         if (authData?.token && authData?.user) {
-          console.log("[SuperAdminLogin] Setting auth with user:", authData.user.email);
+          debugLog("[SuperAdminLogin] Setting auth with user:", authData.user.email);
           setAuth(authData.user, authData.token);
 
           // Store in localStorage for persistence
           localStorage.setItem('token', authData.token)
           localStorage.setItem('user', JSON.stringify(authData.user))
-          console.log("[SuperAdminLogin] ✅ Auth stored in localStorage");
+          debugLog("[SuperAdminLogin] ✅ Auth stored in localStorage");
 
           setSuccess(true);
 
           // Redirect to dashboard after 2 seconds
           setTimeout(() => {
-            console.log("[SuperAdminLogin] Redirecting to dashboard...");
+            debugLog("[SuperAdminLogin] Redirecting to dashboard...");
             router.replace("/en/dashboard");
           }, 2000);
         } else {
-          console.error("[SuperAdminLogin] Missing token or user in response:", authData);
+          debugError("[SuperAdminLogin] Missing token or user in response:", authData);
           throw new Error("No JWT token or user received");
         }
       } catch (err) {
-        console.error("[SuperAdminLogin] Error:", err);
+        debugError("[SuperAdminLogin] Error:", err);
         setError(err instanceof Error ? err.message : "An error occurred");
         setIsLoading(false);
       }

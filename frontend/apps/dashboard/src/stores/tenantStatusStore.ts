@@ -3,6 +3,7 @@
 import { create } from 'zustand'
 import { TenantStatusState, TenantStatusResponse, SubscriptionStatus } from '@/types/tenant-status'
 import { api } from '@/lib/api'
+import { debugLog, debugError, debugWarn } from '@/lib/debug'
 
 interface TenantStatusStoreState extends TenantStatusState {
   setStatus: (status: Partial<TenantStatusState>) => void
@@ -42,12 +43,12 @@ export const useTenantStatusStore = create<TenantStatusStoreState>((set) => ({
   checkStatus: async () => {
     set({ isLoading: true, error: null })
     try {
-      console.log('[TenantStatusStore] Checking tenant status...')
+      debugLog('[TenantStatusStore] Checking tenant status...')
       const response = await api.get<TenantStatusResponse>('/tenant/status')
 
       if (response.data.success) {
         const data = response.data.data
-        console.log('[TenantStatusStore] Status check successful:', {
+        debugLog('[TenantStatusStore] Status check successful:', {
           canAccess: data.can_access,
           blockReason: data.block_reason,
         })
@@ -62,14 +63,14 @@ export const useTenantStatusStore = create<TenantStatusStoreState>((set) => ({
           lastChecked: new Date(),
         })
       } else {
-        console.warn('[TenantStatusStore] Status check returned success: false')
+        debugWarn('[TenantStatusStore] Status check returned success: false')
         set({
           isLoading: false,
           error: 'Failed to check tenant status',
         })
       }
     } catch (error: any) {
-      console.error('[TenantStatusStore] Error checking tenant status:', error)
+      debugError('[TenantStatusStore] Error checking tenant status:', error)
 
       // Handle 403 Forbidden with TENANT_ACCESS_BLOCKED
       if (error.response?.status === 403) {
@@ -77,7 +78,7 @@ export const useTenantStatusStore = create<TenantStatusStoreState>((set) => ({
         const reason = error.response?.data?.error?.reason || 'unknown'
         const message = error.response?.data?.error?.message || 'Access denied'
 
-        console.log('[TenantStatusStore] Tenant is blocked:', { errorCode, reason, message })
+        debugLog('[TenantStatusStore] Tenant is blocked:', { errorCode, reason, message })
 
         set({
           canAccess: false,

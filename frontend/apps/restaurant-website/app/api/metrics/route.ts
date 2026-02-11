@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { debugLog, debugError } from '@/lib/debug';
 
 /**
  * API endpoint for receiving Web Vitals and performance metrics
@@ -47,7 +48,7 @@ export async function POST(request: NextRequest) {
 
     // Log in development
     if (process.env.NODE_ENV === 'development') {
-      console.log('[📊 Metric]', {
+      debugLog('[📊 Metric]', {
         name: metric.name,
         value: `${metric.value?.toFixed?.(2) ?? metric.value}ms`,
         rating: metric.rating,
@@ -63,7 +64,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('[❌ Metrics Error]', error);
+    debugError('[❌ Metrics Error]', error);
     return NextResponse.json(
       { error: 'Failed to process metric' },
       { status: 500 }

@@ -17,6 +17,7 @@ import {
 } from '@/components/ui/table'
 import { createTranslator, getLocaleFromPath } from '@/lib/translations'
 import { PageHeaderSkeleton, TableSkeleton } from '@/components/skeletons'
+import { debugError } from '@/lib/debug'
 
 interface Category {
   id: number
@@ -51,7 +52,7 @@ export default function CategoriesPage() {
     } catch (error: any) {
       const errorMsg = error.response?.data?.error || t('categories.loadFailed', 'Failed to load categories')
       toast.error(errorMsg)
-      console.error('Error loading categories:', error)
+      debugError('Error loading categories:', error)
     } finally {
       setLoading(false)
     }
@@ -70,7 +71,7 @@ export default function CategoriesPage() {
     } catch (error: any) {
       const errorMsg = error.response?.data?.error || t('categories.deleteFailed', 'Failed to delete category')
       toast.error(errorMsg)
-      console.error('Error deleting category:', error)
+      debugError('Error deleting category:', error)
     }
   }
 

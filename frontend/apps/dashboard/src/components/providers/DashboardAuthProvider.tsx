@@ -5,6 +5,7 @@ import { useAuthStore } from '@/stores/authStore';
 import { useTenantStatusStore } from '@/stores/tenantStatusStore';
 import { getConfig } from '@/lib/config';
 import { BlockedOverlay } from '@/components/blocked/BlockedOverlay';
+import { debugLog, debugError } from '@/lib/debug';
 
 const DashboardAuthProvider = ({ children }: { children: ReactNode }) => {
   const user = useAuthStore((state) => state.user)
@@ -21,7 +22,7 @@ const DashboardAuthProvider = ({ children }: { children: ReactNode }) => {
   // Check if authenticated by checking if user and token exist
   const isAuthenticated = !!(user && token)
 
-  console.log('[DashboardAuthProvider] Render - user:', !!user, 'token:', !!token, 'isAuthenticated:', isAuthenticated, 'isHydrated:', isHydrated, 'urlAuthProcessed:', urlAuthProcessed)
+  debugLog('[DashboardAuthProvider] Render - user:', !!user, 'token:', !!token, 'isAuthenticated:', isAuthenticated, 'isHydrated:', isHydrated, 'urlAuthProcessed:', urlAuthProcessed)
 
   // Wait for Zustand to hydrate from localStorage on mount
   useEffect(() => {
@@ -30,7 +31,7 @@ const DashboardAuthProvider = ({ children }: { children: ReactNode }) => {
       return
     }
 
-    console.log('[DashboardAuthProvider] First useEffect running')
+    debugLog('[DashboardAuthProvider] First useEffect running')
 
     const processAuth = async () => {
       // First, try to initialize from URL parameters (for super admin login redirect)
@@ -39,13 +40,13 @@ const DashboardAuthProvider = ({ children }: { children: ReactNode }) => {
       const authUserStr = params.get('auth_user')
       const impersonationToken = params.get('impersonation_token')
 
-      console.log('[DashboardAuthProvider] URL params - authToken:', !!authToken, 'impersonationToken:', !!impersonationToken)
+      debugLog('[DashboardAuthProvider] URL params - authToken:', !!authToken, 'impersonationToken:', !!impersonationToken)
 
       // Handle regular auth token + user
       if (authToken && authUserStr) {
         try {
           const authUser = JSON.parse(decodeURIComponent(authUserStr))
-          console.log('[DashboardAuthProvider] Processing regular auth token')
+          debugLog('[DashboardAuthProvider] Processing regular auth token')
 
           // Mark that we applied URL auth this session
           urlAuthApplied.current = true
@@ -58,29 +59,29 @@ const DashboardAuthProvider = ({ children }: { children: ReactNode }) => {
           await new Promise(resolve => setTimeout(resolve, 100))
           const cleanUrl = window.location.pathname
           window.history.replaceState({}, document.title, cleanUrl)
-          console.log('[DashboardAuthProvider] Regular auth token processed successfully')
+          debugLog('[DashboardAuthProvider] Regular auth token processed successfully')
         } catch (error) {
           // Error parsing auth params - continue with normal flow
-          console.error('[DashboardAuthProvider] Failed to process auth token:', error)
+          debugError('[DashboardAuthProvider] Failed to process auth token:', error)
         }
       }
       // Handle impersonation token
       else if (impersonationToken) {
-        console.log('[DashboardAuthProvider] Processing impersonation token...')
+        debugLog('[DashboardAuthProvider] Processing impersonation token...')
         try {
           const apiUrl = getConfig().apiUrl
-          console.log('[DashboardAuthProvider] Validating token at:', `${apiUrl}/impersonation/validate`)
+          debugLog('[DashboardAuthProvider] Validating token at:', `${apiUrl}/impersonation/validate`)
           const response = await fetch(`${apiUrl}/impersonation/validate?token=${encodeURIComponent(impersonationToken)}`)
 
-          console.log('[DashboardAuthProvider] Validation response status:', response.status)
+          debugLog('[DashboardAuthProvider] Validation response status:', response.status)
 
           if (response.ok) {
             const result = await response.json()
-            console.log('[DashboardAuthProvider] Validation result:', result)
+            debugLog('[DashboardAuthProvider] Validation result:', result)
 
             if (result.success && result.data) {
               const { user: impersonatedUser } = result.data
-              console.log('[DashboardAuthProvider] Impersonated user:', impersonatedUser.email)
+              debugLog('[DashboardAuthProvider] Impersonated user:', impersonatedUser.email)
 
               // Mark that we applied URL auth this session
               urlAuthApplied.current = true
@@ -88,55 +89,55 @@ const DashboardAuthProvider = ({ children }: { children: ReactNode }) => {
 
               // Store impersonation token in sessionStorage for API requests
               sessionStorage.setItem('impersonation_token', impersonationToken)
-              console.log('[DashboardAuthProvider] Stored impersonation token in sessionStorage')
+              debugLog('[DashboardAuthProvider] Stored impersonation token in sessionStorage')
 
               // Create a dummy token for auth store (needed for UI to show logged in)
               // The actual auth will happen via the impersonation token header
               setAuth(impersonatedUser, 'impersonated')
-              console.log('[DashboardAuthProvider] Called setAuth with impersonated user')
+              debugLog('[DashboardAuthProvider] Called setAuth with impersonated user')
 
               // Clean URL
               await new Promise(resolve => setTimeout(resolve, 100))
               const cleanUrl = window.location.pathname
               window.history.replaceState({}, document.title, cleanUrl)
-              console.log('[DashboardAuthProvider] URL cleaned, impersonation complete')
+              debugLog('[DashboardAuthProvider] URL cleaned, impersonation complete')
             } else {
-              console.error('[DashboardAuthProvider] Validation result missing success or data:', result)
+              debugError('[DashboardAuthProvider] Validation result missing success or data:', result)
             }
           } else {
-            console.error('[DashboardAuthProvider] Token validation failed with status:', response.status)
+            debugError('[DashboardAuthProvider] Token validation failed with status:', response.status)
             const errorText = await response.text()
-            console.error('[DashboardAuthProvider] Error response:', errorText)
+            debugError('[DashboardAuthProvider] Error response:', errorText)
           }
         } catch (error) {
-          console.error('[DashboardAuthProvider] Failed to validate impersonation token:', error)
+          debugError('[DashboardAuthProvider] Failed to validate impersonation token:', error)
           // Continue with normal flow
         }
       } else {
-        console.log('[DashboardAuthProvider] No URL auth params found')
+        debugLog('[DashboardAuthProvider] No URL auth params found')
       }
     }
 
     const initAuth = async () => {
-      console.log('[DashboardAuthProvider] initAuth starting')
+      debugLog('[DashboardAuthProvider] initAuth starting')
       // Process URL auth params if any
       await processAuth()
 
       // Wait longer for Zustand persist middleware to write to localStorage
       // This is crucial for the API interceptor to pick up the token
-      console.log('[DashboardAuthProvider] Waiting 200ms for Zustand to persist...')
+      debugLog('[DashboardAuthProvider] Waiting 200ms for Zustand to persist...')
       await new Promise(resolve => setTimeout(resolve, 200))
 
       // Then mark as processed - this will trigger the second useEffect
-      console.log('[DashboardAuthProvider] Setting urlAuthProcessed = true')
+      debugLog('[DashboardAuthProvider] Setting urlAuthProcessed = true')
       setUrlAuthProcessed(true)
 
       // Wait for hydration state to update
       await new Promise(resolve => setTimeout(resolve, 100))
-      console.log('[DashboardAuthProvider] Setting isHydrated = true')
+      debugLog('[DashboardAuthProvider] Setting isHydrated = true')
       setIsHydrated(true)
 
-      console.log('[DashboardAuthProvider] initAuth complete - urlAuthApplied:', urlAuthApplied.current, 'impersonationSuccess:', impersonationSuccess.current)
+      debugLog('[DashboardAuthProvider] initAuth complete - urlAuthApplied:', urlAuthApplied.current, 'impersonationSuccess:', impersonationSuccess.current)
     }
 
     initAuth()
@@ -147,25 +148,25 @@ const DashboardAuthProvider = ({ children }: { children: ReactNode }) => {
   }, [setAuth])
 
   useEffect(() => {
-    console.log('[DashboardAuthProvider] Second useEffect - isHydrated:', isHydrated, 'urlAuthProcessed:', urlAuthProcessed)
+    debugLog('[DashboardAuthProvider] Second useEffect - isHydrated:', isHydrated, 'urlAuthProcessed:', urlAuthProcessed)
 
     // Only run regular auth check after hydration and URL params processed
     if (!isHydrated || !urlAuthProcessed) {
-      console.log('[DashboardAuthProvider] Not ready yet, skipping auth check')
+      debugLog('[DashboardAuthProvider] Not ready yet, skipping auth check')
       return
     }
 
-    console.log('[DashboardAuthProvider] Auth check - urlAuthApplied:', urlAuthApplied.current, 'impersonationSuccess:', impersonationSuccess.current, 'user:', !!user, 'token:', token)
+    debugLog('[DashboardAuthProvider] Auth check - urlAuthApplied:', urlAuthApplied.current, 'impersonationSuccess:', impersonationSuccess.current, 'user:', !!user, 'token:', token)
 
     // Check tenant status after successful auth
     if (user && token) {
-      console.log('[DashboardAuthProvider] Authenticated, checking tenant status')
+      debugLog('[DashboardAuthProvider] Authenticated, checking tenant status')
       checkStatus()
     }
 
     // If impersonation was successful, don't redirect
     if (impersonationSuccess.current) {
-      console.log('[DashboardAuthProvider] Impersonation was successful, staying authenticated')
+      debugLog('[DashboardAuthProvider] Impersonation was successful, staying authenticated')
       return
     }
 
@@ -174,11 +175,11 @@ const DashboardAuthProvider = ({ children }: { children: ReactNode }) => {
     if (urlAuthApplied.current) {
       if (user && token) {
         // Auth from URL params was successfully applied - stay authenticated
-        console.log('[DashboardAuthProvider] URL auth applied and have user/token, staying authenticated')
+        debugLog('[DashboardAuthProvider] URL auth applied and have user/token, staying authenticated')
         return
       } else {
         // URL auth was applied but failed - redirect to login
-        console.log('[DashboardAuthProvider] URL auth applied but NO user/token, redirecting to login')
+        debugLog('[DashboardAuthProvider] URL auth applied but NO user/token, redirecting to login')
         const landingUrl = getConfig().landingUrl
         const redirectUrl = `${landingUrl}/auth/login`
         window.location.href = redirectUrl
@@ -188,7 +189,7 @@ const DashboardAuthProvider = ({ children }: { children: ReactNode }) => {
 
     // If no URL auth was applied, check localStorage for existing session
     const savedAuth = localStorage.getItem('auth-storage')
-    console.log('[DashboardAuthProvider] Checking localStorage, savedAuth exists:', !!savedAuth)
+    debugLog('[DashboardAuthProvider] Checking localStorage, savedAuth exists:', !!savedAuth)
 
     let localStorageAuth = null
     if (savedAuth) {
@@ -196,14 +197,14 @@ const DashboardAuthProvider = ({ children }: { children: ReactNode }) => {
         const parsed = JSON.parse(savedAuth)
         const hasUser = !!parsed.state?.user
         const hasToken = !!parsed.state?.token
-        console.log('[DashboardAuthProvider] localStorage parsed - hasUser:', hasUser, 'hasToken:', hasToken)
+        debugLog('[DashboardAuthProvider] localStorage parsed - hasUser:', hasUser, 'hasToken:', hasToken)
 
         // If localStorage has auth, use that as source of truth
         if (hasUser && hasToken) {
           localStorageAuth = parsed.state
         }
       } catch (e) {
-        console.error('[DashboardAuthProvider] Error parsing localStorage:', e)
+        debugError('[DashboardAuthProvider] Error parsing localStorage:', e)
       }
     }
 
@@ -213,15 +214,15 @@ const DashboardAuthProvider = ({ children }: { children: ReactNode }) => {
     const finalToken = token || localStorageAuth?.token
     const finalIsAuthenticated = !!(finalUser && finalToken)
 
-    console.log('[DashboardAuthProvider] Final auth check - finalUser:', !!finalUser, 'finalToken:', !!finalToken, 'finalIsAuthenticated:', finalIsAuthenticated)
+    debugLog('[DashboardAuthProvider] Final auth check - finalUser:', !!finalUser, 'finalToken:', !!finalToken, 'finalIsAuthenticated:', finalIsAuthenticated)
 
     if (!finalIsAuthenticated) {
-      console.log('[DashboardAuthProvider] NOT authenticated, redirecting to login')
+      debugLog('[DashboardAuthProvider] NOT authenticated, redirecting to login')
       const landingUrl = getConfig().landingUrl
       const redirectUrl = `${landingUrl}/auth/login`
       window.location.href = redirectUrl
     } else {
-      console.log('[DashboardAuthProvider] Authenticated, staying on dashboard')
+      debugLog('[DashboardAuthProvider] Authenticated, staying on dashboard')
     }
   }, [isHydrated, urlAuthProcessed, user, token, checkStatus])
 
@@ -229,7 +230,7 @@ const DashboardAuthProvider = ({ children }: { children: ReactNode }) => {
   // But if impersonation was successful, we should be authenticated
   const shouldShowLoading = !isHydrated || !urlAuthProcessed || (!isAuthenticated && !impersonationSuccess.current)
 
-  console.log('[DashboardAuthProvider] Render check - shouldShowLoading:', shouldShowLoading, 'isHydrated:', isHydrated, 'urlAuthProcessed:', urlAuthProcessed, 'isAuthenticated:', isAuthenticated, 'impersonationSuccess:', impersonationSuccess.current)
+  debugLog('[DashboardAuthProvider] Render check - shouldShowLoading:', shouldShowLoading, 'isHydrated:', isHydrated, 'urlAuthProcessed:', urlAuthProcessed, 'isAuthenticated:', isAuthenticated, 'impersonationSuccess:', impersonationSuccess.current)
 
   if (shouldShowLoading) {
     return (
@@ -241,12 +242,12 @@ const DashboardAuthProvider = ({ children }: { children: ReactNode }) => {
 
   // If tenant is blocked, show blocked overlay
   if (!canAccess && blockReason) {
-    console.log('[DashboardAuthProvider] Tenant is blocked, showing overlay')
+    debugLog('[DashboardAuthProvider] Tenant is blocked, showing overlay')
     return <BlockedOverlay blockReason={blockReason} />
   }
 
   // User is authenticated and hydrated, show dashboard
-  console.log('[DashboardAuthProvider] Showing dashboard content')
+  debugLog('[DashboardAuthProvider] Showing dashboard content')
   return <>{children}</>
 };
 

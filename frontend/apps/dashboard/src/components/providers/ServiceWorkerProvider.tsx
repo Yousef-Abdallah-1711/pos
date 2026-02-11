@@ -9,6 +9,7 @@
 import { useServiceWorker } from '@/hooks/useServiceWorker'
 import { AlertCircle, Download, RefreshCw } from 'lucide-react'
 import { useEffect, useState } from 'react'
+import { debugLog } from '@/lib/debug'
 
 export function ServiceWorkerProvider({ children }: { children: React.ReactNode }) {
   const [showUpdatePrompt, setShowUpdatePrompt] = useState(false)
@@ -18,7 +19,7 @@ export function ServiceWorkerProvider({ children }: { children: React.ReactNode 
       setShowUpdatePrompt(true)
     },
     onInstalled: () => {
-      console.log('✅ Service Worker installed successfully')
+      debugLog('✅ Service Worker installed successfully')
     },
     enableAutoUpdate: true,
     checkInterval: 60000, // Check every minute
@@ -27,8 +28,8 @@ export function ServiceWorkerProvider({ children }: { children: React.ReactNode 
   useEffect(() => {
     if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
       // Log status
-      console.log('[SW] Ready:', sw.isReady)
-      console.log('[SW] Offline:', sw.isOffline)
+      debugLog('[SW] Ready:', sw.isReady)
+      debugLog('[SW] Offline:', sw.isOffline)
     }
   }, [sw.isReady, sw.isOffline])
 

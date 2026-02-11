@@ -7,6 +7,7 @@ import * as themeApi from '@/lib/api/themeApi'
 import { useThemeStore } from '@/hooks/useThemeStore'
 import { formatHistoryDate, getTimeElapsed } from '@/lib/utils/themeAdvancedUtils'
 import { toast } from 'sonner'
+import { debugLog, debugError } from '@/lib/debug'
 
 interface ThemeHistoryEntry {
   id: string
@@ -35,7 +36,7 @@ export function ThemeHistory({ themeId }: ThemeHistoryProps) {
       try {
         setIsLoading(true)
         setError(null)
-        console.log('📜 [ThemeHistory] Loading history for theme:', themeId)
+        debugLog('📜 [ThemeHistory] Loading history for theme:', themeId)
 
         // Note: Backend endpoint returns history as part of theme details
         // We would ideally have a dedicated getThemeHistory endpoint
@@ -48,7 +49,7 @@ export function ThemeHistory({ themeId }: ThemeHistoryProps) {
         // For now, show info that history is available when backend supports it
         setHistory([])
       } catch (err) {
-        console.error('❌ [ThemeHistory] Error loading history:', err)
+        debugError('❌ [ThemeHistory] Error loading history:', err)
         const errorMessage = err instanceof Error ? err.message : 'Failed to load history'
         setError(errorMessage)
       } finally {
@@ -69,7 +70,7 @@ export function ThemeHistory({ themeId }: ThemeHistoryProps) {
     try {
       setIsRollingBack(true)
       setError(null)
-      console.log('↩️ [ThemeHistory] Rolling back to version:', versionId)
+      debugLog('↩️ [ThemeHistory] Rolling back to version:', versionId)
 
       // When backend history endpoint is ready, we'll call:
       // const restoredTheme = await themeApi.rollbackThemeVersion(themeId, versionId)
@@ -77,7 +78,7 @@ export function ThemeHistory({ themeId }: ThemeHistoryProps) {
 
       toast.success('Version restored successfully')
     } catch (err) {
-      console.error('❌ [ThemeHistory] Rollback failed:', err)
+      debugError('❌ [ThemeHistory] Rollback failed:', err)
       const errorMessage = err instanceof Error ? err.message : 'Failed to restore version'
       setError(errorMessage)
       toast.error(errorMessage)

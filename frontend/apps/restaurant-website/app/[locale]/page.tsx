@@ -3,6 +3,7 @@ import { DynamicHomePage } from '@/components/dynamic-home-page';
 import { HeaderSSR } from '@/components/header-ssr';
 import { FooterSSR } from '@/components/footer-ssr';
 import { getThemeDataServer, getDefaultThemeData } from '@/lib/api/get-theme-server';
+import { debugError } from '@/lib/debug';
 import { AlertCircle } from 'lucide-react';
 import type { Metadata } from 'next';
 
@@ -98,7 +99,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       generator: 'Next.js',
     };
   } catch (error) {
-    console.error('Failed to generate metadata:', error);
+    debugError('Failed to generate metadata:', error);
     return {
       title: 'Restaurant',
       description: 'Order delicious food online.',
@@ -212,7 +213,7 @@ export default async function HomePage({ params }: PageProps) {
       </div>
     );
   } catch (error) {
-    console.error('Failed to load restaurant data:', error);
+    debugError('Failed to load restaurant data:', error);
     return (
       <div className="flex items-center justify-center min-h-screen bg-white dark:bg-gray-900">
         <div className="text-center max-w-md">

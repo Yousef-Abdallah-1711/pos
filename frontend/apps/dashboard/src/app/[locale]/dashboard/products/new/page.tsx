@@ -13,6 +13,7 @@ import { ProductFormPage } from '@/components/products/ProductFormPage'
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbSeparator, BreadcrumbPage } from '@/components/ui/breadcrumb'
 import { FormSkeleton } from '@/components/skeletons'
 import { Lock } from 'lucide-react'
+import { debugError } from '@/lib/debug'
 
 interface Category {
   id: number
@@ -56,7 +57,7 @@ export default function CreateProductPage() {
         setCategories(categoryData)
       } catch (error) {
         toast.error('Failed to load categories')
-        console.error('Failed to load categories:', error)
+        debugError('Failed to load categories:', error)
         setCategories([])
       } finally {
         setLoading(false)
@@ -80,7 +81,7 @@ export default function CreateProductPage() {
       router.push(`/${locale}/dashboard/products`)
     } catch (error) {
       toast.error(t('products.createFailed'))
-      console.error(error)
+      debugError(error)
     }
   }
 

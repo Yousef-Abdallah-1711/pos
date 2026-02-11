@@ -84,7 +84,7 @@ export function DriverAssignmentModal({
       onAssignSuccess()
       onClose()
     } catch (error: any) {
-      console.error('[ASSIGN_ORDER] Error:', error)
+      debugError('[ASSIGN_ORDER] Error:', error)
       const errorMessage = error.response?.data?.message || t('drivers.assignmentModal.assignFailed')
       toast.error(errorMessage)
     } finally {

@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react'
 import { usePathname } from 'next/navigation'
+import { debugLog, debugWarn } from '@/lib/debug'
 
 /**
  * PerformanceMonitor Component
@@ -20,7 +21,7 @@ export function PerformanceMonitor() {
 
       const emoji = loadTime > 5000 ? '❌' : loadTime > 3000 ? '⚠️' : '✅'
 
-      console.log(
+      debugLog(
         `${emoji} [Page Load] ${pathname} - ${Math.round(loadTime)}ms`
       )
 
@@ -34,7 +35,7 @@ export function PerformanceMonitor() {
 
       // Warn if page is slow
       if (loadTime > 3000) {
-        console.warn(
+        debugWarn(
           `⚠️ [Performance] Page ${pathname} is slow (${Math.round(loadTime)}ms)`
         )
       }

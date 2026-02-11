@@ -1,3 +1,5 @@
+import { debugLog, debugError } from '@/lib/debug'
+
 export interface PerformanceMetric {
   name: string
   value: number
@@ -118,7 +120,7 @@ export async function reportWebVitals() {
     })
   } catch (error) {
     if (ENABLE_DEBUG_LOGS) {
-      console.error('Failed to load web-vitals:', error)
+      debugError('Failed to load web-vitals:', error)
     }
   }
 }
@@ -137,7 +139,7 @@ function logMetric(metric: PerformanceMetric) {
   const unit = metric.name === 'CLS' ? '' : 'ms'
 
   if (ENABLE_DEBUG_LOGS) {
-    console.log(
+    debugLog(
       `${emoji} [${metric.name}] ${metric.value}${unit} - ${metric.description}`
     )
   }
@@ -165,7 +167,7 @@ export function trackPageLoad(pageName: string) {
     const emoji = loadTime > 3000 ? '⚠️' : loadTime > 5000 ? '❌' : '✅'
 
     if (ENABLE_DEBUG_LOGS) {
-      console.log(
+      debugLog(
         `${emoji} [${pageName}] Load time: ${Math.round(loadTime)}ms`
       )
     }
@@ -193,7 +195,7 @@ export function measureApiCall(apiName: string) {
     const emoji = duration > 2000 ? '⚠️' : '✅'
 
     if (ENABLE_DEBUG_LOGS) {
-      console.log(
+      debugLog(
         `${emoji} [API] ${apiName}: ${Math.round(duration)}ms ${success ? '✓' : '✗'}`
       )
     }

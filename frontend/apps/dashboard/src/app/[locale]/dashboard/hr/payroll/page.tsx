@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { api } from '@/lib/api'
+import { debugLog, debugError } from '@/lib/debug'
 import { toast } from 'sonner'
 import { Plus, AlertCircle, Lock, Loader2 } from 'lucide-react'
 import { createTranslator, getLocaleFromPath } from '@/lib/translations'
@@ -104,7 +105,7 @@ export default function PayrollPage() {
         const empList = Array.isArray(response.data) ? response.data : response.data?.employees || []
         setEmployees(empList)
       } catch (error) {
-        console.error('Failed to load employees:', error)
+        debugError('Failed to load employees:', error)
       }
     }
     if (token) fetchEmployees()
@@ -117,9 +118,9 @@ export default function PayrollPage() {
       setDebugInfo(`Fetching salaries at ${new Date().toLocaleTimeString()}`)
 
       try {
-        console.log('[PAYROLL_PAGE] Starting fetch...')
+        debugLog('[PAYROLL_PAGE] Starting fetch...')
         const response = await api.get('/hr/salaries', { params: { start_date: startDate, end_date: endDate } })
-        console.log('[PAYROLL_PAGE] Response:', response.data)
+        debugLog('[PAYROLL_PAGE] Response:', response.data)
 
         const salariesList = Array.isArray(response.data) ? response.data : response.data?.salaries || []
         const enrichedSalaries = salariesList.map(s => ({
@@ -133,7 +134,7 @@ export default function PayrollPage() {
         setDebugInfo(`Successfully loaded ${enrichedSalaries.length} salary records`)
       } catch (error: any) {
         const errorMsg = error?.response?.data?.message || error?.message || t('hr.payroll.loadFailed', 'Failed to load salaries')
-        console.error('[PAYROLL_PAGE] Error:', error)
+        debugError('[PAYROLL_PAGE] Error:', error)
         setApiError(errorMsg)
         setDebugInfo(`Error: ${errorMsg}`)
         toast.error(errorMsg)
@@ -147,15 +148,15 @@ export default function PayrollPage() {
 
   const handleCreateSalary = async (formData: any) => {
     try {
-      console.log('[CREATE_SALARY] Submitting:', formData)
+      debugLog('[CREATE_SALARY] Submitting:', formData)
       const response = await api.post('/hr/salaries', formData)
-      console.log('[CREATE_SALARY] Response:', response.data)
+      debugLog('[CREATE_SALARY] Response:', response.data)
       setSalaries([response.data, ...salaries])
       setShowForm(false)
       toast.success(t('hr.payroll.successCreated', 'Salary record created successfully'))
     } catch (error: any) {
       const errorMsg = error?.response?.data?.message || error?.message || t('hr.payroll.errorCreated', 'Failed to create salary')
-      console.error('[CREATE_SALARY] Error:', error)
+      debugError('[CREATE_SALARY] Error:', error)
       toast.error(errorMsg)
       throw error
     }
@@ -163,9 +164,9 @@ export default function PayrollPage() {
 
   const handleUpdateSalary = async (salaryId: number, formData: any) => {
     try {
-      console.log('[UPDATE_SALARY] Submitting:', formData)
+      debugLog('[UPDATE_SALARY] Submitting:', formData)
       const response = await api.put(`/hr/salaries/${salaryId}`, formData)
-      console.log('[UPDATE_SALARY] Response:', response.data)
+      debugLog('[UPDATE_SALARY] Response:', response.data)
       setSalaries(salaries.map(s => s.id === salaryId ? { ...s, ...formData } : s))
       setShowForm(false)
       setSelectedSalary(null)
@@ -173,7 +174,7 @@ export default function PayrollPage() {
       toast.success(t('hr.payroll.successUpdated', 'Salary record updated successfully'))
     } catch (error: any) {
       const errorMsg = error?.response?.data?.message || error?.message || t('hr.payroll.errorUpdated', 'Failed to update salary')
-      console.error('[UPDATE_SALARY] Error:', error)
+      debugError('[UPDATE_SALARY] Error:', error)
       toast.error(errorMsg)
       throw error
     }
@@ -181,26 +182,26 @@ export default function PayrollPage() {
 
   const handleDeleteSalary = async (salaryId: number) => {
     try {
-      console.log('[DELETE_SALARY] Deleting:', salaryId)
+      debugLog('[DELETE_SALARY] Deleting:', salaryId)
       await api.delete(`/hr/salaries/${salaryId}`)
       setSalaries(salaries.filter(s => s.id !== salaryId))
       toast.success(t('hr.payroll.successDeleted', 'Salary record deleted successfully'))
     } catch (error: any) {
       const errorMsg = error?.response?.data?.message || error?.message || t('hr.payroll.errorDeleted', 'Failed to delete salary')
-      console.error('[DELETE_SALARY] Error:', error)
+      debugError('[DELETE_SALARY] Error:', error)
       toast.error(errorMsg)
     }
   }
 
   const handleMarkPaid = async (salaryId: number) => {
     try {
-      console.log('[MARK_PAID] Marking salary as paid:', salaryId)
+      debugLog('[MARK_PAID] Marking salary as paid:', salaryId)
       await api.post(`/hr/salaries/${salaryId}/mark-paid`, { payment_reference: `PAY-${Date.now()}` })
       setSalaries(salaries.map(s => s.id === salaryId ? { ...s, status: 'paid' } : s))
       toast.success(t('hr.payroll.successMarkedPaid', 'Salary marked as paid'))
     } catch (error: any) {
       const errorMsg = error?.response?.data?.message || error?.message || t('hr.payroll.errorMarkedPaid', 'Failed to mark salary as paid')
-      console.error('[MARK_PAID] Error:', error)
+      debugError('[MARK_PAID] Error:', error)
       toast.error(errorMsg)
     }
   }

@@ -2,6 +2,7 @@
 
 import React, { ReactNode } from 'react'
 import { AlertTriangle } from 'lucide-react'
+import { debugError } from '@/lib/debug'
 
 interface EditorErrorBoundaryProps {
   children: ReactNode
@@ -34,7 +35,7 @@ export class EditorErrorBoundary extends React.Component<
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     this.setState({ error, errorInfo })
-    console.error('Editor error:', error, errorInfo)
+    debugError('Editor error:', error, errorInfo)
   }
 
   handleReset = () => {

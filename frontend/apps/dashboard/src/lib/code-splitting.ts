@@ -7,6 +7,7 @@
 
 import dynamic from 'next/dynamic'
 import { ComponentType } from 'react'
+import { debugWarn } from '@/lib/debug'
 
 // Loading skeleton component
 export const LoadingFallback = () => (
@@ -96,7 +97,7 @@ export function preloadRoute(
 
   const timer = setTimeout(() => {
     importFn().catch((err) => {
-      console.warn('Failed to preload route:', err)
+      debugWarn('Failed to preload route:', err)
     })
   }, delay)
 
@@ -131,7 +132,7 @@ export function preloadRoutes(
 
       importFn()
         .catch((err) => {
-          console.warn('Failed to preload route:', err)
+          debugWarn('Failed to preload route:', err)
         })
         .finally(() => {
           loadingCount--

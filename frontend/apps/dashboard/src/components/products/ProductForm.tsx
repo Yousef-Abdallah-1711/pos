@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { toast } from 'sonner'
+import { debugError } from '@/lib/debug'
 
 export function ProductForm({ product, categories, onSubmit, onCancel }) {
   const pathname = usePathname()
@@ -114,7 +115,7 @@ export function ProductForm({ product, categories, onSubmit, onCancel }) {
       await onSubmit(formData)
     } catch (error) {
       toast.error('Failed to save product')
-      console.error(error)
+      debugError(error)
     } finally {
       setIsSubmitting(false)
     }

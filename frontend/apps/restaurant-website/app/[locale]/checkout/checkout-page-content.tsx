@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
+import { debugLog } from '@/lib/debug';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -128,7 +129,7 @@ export function CheckoutPageContent({ locale, themeData }: CheckoutPageContentPr
     }));
 
     // Debug payload
-    console.log('[Checkout] Submitting order items:', orderItems);
+    debugLog('[Checkout] Submitting order items:', orderItems);
 
     createOrder(
       {

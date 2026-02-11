@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { toast } from 'sonner'
+import { debugLog as debugLogFn, debugError } from '@/lib/debug'
 import { AlertCircle, Loader } from 'lucide-react'
 import { api } from '@/lib/api'
 
@@ -58,7 +59,7 @@ export function SalaryForm({ salary, employees = [], onSubmit, onCancel }: Salar
           setEmployeesList(emps)
           addDebugLog(`Loaded ${emps.length} employees`)
         } catch (error) {
-          console.error('Failed to load employees:', error)
+          debugError('Failed to load employees:', error)
         }
       }
       fetchEmployees()
@@ -113,7 +114,7 @@ export function SalaryForm({ salary, employees = [], onSubmit, onCancel }: Salar
       }
 
       addDebugLog(`Cleaned data: ${JSON.stringify(cleanData)}`)
-      console.log('DEBUG: Salary Form Submission', { raw: data, cleaned: cleanData })
+      debugLogFn('DEBUG: Salary Form Submission', { raw: data, cleaned: cleanData })
 
       await onSubmit(cleanData)
       addDebugLog('Form submission successful')
@@ -121,7 +122,7 @@ export function SalaryForm({ salary, employees = [], onSubmit, onCancel }: Salar
       const errorMsg = error?.response?.data?.message || error?.message || 'Failed to save salary'
       setApiError(errorMsg)
       addDebugLog(`Error: ${errorMsg}`)
-      console.error('Salary Form Error:', error)
+      debugError('Salary Form Error:', error)
       toast.error(errorMsg)
     } finally {
       setIsSubmitting(false)

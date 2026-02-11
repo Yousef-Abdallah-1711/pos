@@ -8,6 +8,7 @@ import { createTranslator, getLocaleFromPath } from '@/lib/translations'
 import { ThemeData } from '@/types/theme'
 import * as themeApi from '@/lib/api/themeApi'
 import { toast } from 'sonner'
+import { debugLog, debugWarn, debugError } from '@/lib/debug'
 import { ExportDialog } from '@/components/theme/ExportDialog'
 
 
@@ -47,7 +48,7 @@ export default function ThemeBuilderPage() {
     📍 Pathname: ${pathname}
     ===============================
     `
-    console.log(debugMsg)
+    debugLog(debugMsg)
     setDebugInfo(debugMsg)
   }, [user?.email, user?.id, user?.restaurant_id, user?.name, token, locale, pathname])
 
@@ -58,20 +59,20 @@ export default function ThemeBuilderPage() {
   // ===========================================
   useEffect(() => {
     const fetchThemes = async () => {
-      console.log('📡 [fetchThemes] Starting fetch...')
-      console.log('📡 [fetchThemes] User restaurant_id:', user?.restaurant_id)
-      console.log('📡 [fetchThemes] Token:', token ? 'EXISTS' : 'MISSING')
+      debugLog('📡 [fetchThemes] Starting fetch...')
+      debugLog('📡 [fetchThemes] User restaurant_id:', user?.restaurant_id)
+      debugLog('📡 [fetchThemes] Token:', token ? 'EXISTS' : 'MISSING')
 
       // Check if we have the required data
       if (!user?.restaurant_id) {
-        console.warn('⚠️  [fetchThemes] Missing restaurant_id! User object:', user)
+        debugWarn('⚠️  [fetchThemes] Missing restaurant_id! User object:', user)
         setError('No restaurant found. Please log in again.')
         setIsLoading(false)
         return
       }
 
       if (!token) {
-        console.warn('⚠️  [fetchThemes] Missing JWT token!')
+        debugWarn('⚠️  [fetchThemes] Missing JWT token!')
         setError('No authentication token. Please log in again.')
         setIsLoading(false)
         return
@@ -80,14 +81,14 @@ export default function ThemeBuilderPage() {
       try {
         setIsLoading(true)
         setError(null)
-        console.log('📡 [fetchThemes] Calling themeApi.getThemes()...')
+        debugLog('📡 [fetchThemes] Calling themeApi.getThemes()...')
         const fetchedThemes = await themeApi.getThemes()
-        console.log('✅ [fetchThemes] Success! Got themes:', fetchedThemes)
+        debugLog('✅ [fetchThemes] Success! Got themes:', fetchedThemes)
         setThemes(fetchedThemes)
       } catch (err) {
-        console.error('❌ [fetchThemes] Error:', err)
-        console.error('❌ [fetchThemes] Error type:', err instanceof Error ? 'Error object' : typeof err)
-        console.error('❌ [fetchThemes] Full error:', JSON.stringify(err, null, 2))
+        debugError('❌ [fetchThemes] Error:', err)
+        debugError('❌ [fetchThemes] Error type:', err instanceof Error ? 'Error object' : typeof err)
+        debugError('❌ [fetchThemes] Full error:', JSON.stringify(err, null, 2))
 
         // More detailed error message
         let errorMessage = 'Failed to load themes'
@@ -110,7 +111,7 @@ export default function ThemeBuilderPage() {
     if (user?.restaurant_id && token) {
       fetchThemes()
     } else {
-      console.warn('⚠️  [useEffect] Skipping fetch - waiting for auth. User:', !!user, 'Token:', !!token)
+      debugWarn('⚠️  [useEffect] Skipping fetch - waiting for auth. User:', !!user, 'Token:', !!token)
     }
   }, [user?.restaurant_id, token])
 
@@ -158,7 +159,7 @@ export default function ThemeBuilderPage() {
       const themeName = themes.find(t => t.id === themeId)?.name || 'Theme'
       toast.success(`Theme "${themeName}" activated successfully`)
     } catch (err) {
-      console.error('Failed to activate theme:', err)
+      debugError('Failed to activate theme:', err)
       const errorMessage = err instanceof Error ? err.message : 'Failed to activate theme'
       setError(errorMessage)
       toast.error(errorMessage)
@@ -176,7 +177,7 @@ export default function ThemeBuilderPage() {
       setThemes(themes.filter(t => t.id !== themeId))
       toast.success('Theme deleted successfully')
     } catch (err) {
-      console.error('Failed to delete theme:', err)
+      debugError('Failed to delete theme:', err)
       const errorMessage = err instanceof Error ? err.message : 'Failed to delete theme'
       setError(errorMessage)
       toast.error(errorMessage)
@@ -190,7 +191,7 @@ export default function ThemeBuilderPage() {
       setThemes([...themes, duplicatedTheme])
       toast.success(`Theme duplicated as "${duplicatedTheme.name}"`)
     } catch (err) {
-      console.error('Failed to duplicate theme:', err)
+      debugError('Failed to duplicate theme:', err)
       const errorMessage = err instanceof Error ? err.message : 'Failed to duplicate theme'
       setError(errorMessage)
       toast.error(errorMessage)

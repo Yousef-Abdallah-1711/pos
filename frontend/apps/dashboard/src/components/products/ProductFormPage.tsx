@@ -11,6 +11,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Checkbox } from '@/components/ui/checkbox'
 import { toast } from 'sonner'
+import { debugLog, debugError } from '@/lib/debug'
 
 export function ProductFormPage({ product, categories, onSubmit, onCancel }) {
   const pathname = usePathname()
@@ -100,8 +101,8 @@ export function ProductFormPage({ product, categories, onSubmit, onCancel }) {
         name_ar: data.name_ar || "",
       }
 
-      console.log('DEBUG: Form Submission Raw:', data);
-      console.log('DEBUG: Form Submission Cleaned:', cleanData);
+      debugLog('DEBUG: Form Submission Raw:', data);
+      debugLog('DEBUG: Form Submission Cleaned:', cleanData);
 
       // Add all data as JSON string in 'data' field (backend expects this)
       formData.append('data', JSON.stringify(cleanData))
@@ -114,7 +115,7 @@ export function ProductFormPage({ product, categories, onSubmit, onCancel }) {
       await onSubmit(formData)
     } catch (error) {
       toast.error('Failed to save product')
-      console.error(error)
+      debugError(error)
     } finally {
       setIsSubmitting(false)
     }

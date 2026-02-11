@@ -18,6 +18,7 @@ import {
   Loader,
 } from 'lucide-react'
 import { createTranslator, getLocaleFromPath } from '@/lib/translations'
+import { debugError } from '@/lib/debug'
 
 interface Driver {
   id: number
@@ -68,7 +69,7 @@ export default function DriversPage() {
       setDrivers(driverList)
     } catch (error) {
       toast.error(t('drivers.loadFailed'))
-      console.error('[DRIVERS_PAGE] Error:', error)
+      debugError('[DRIVERS_PAGE] Error:', error)
     } finally {
       setLoading(false)
     }

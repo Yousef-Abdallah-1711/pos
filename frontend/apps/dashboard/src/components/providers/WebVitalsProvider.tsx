@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react'
 import { reportWebVitals } from '@/lib/monitoring'
+import { debugError } from '@/lib/debug'
 
 /**
  * WebVitalsProvider Component
@@ -12,7 +13,7 @@ export function WebVitalsProvider() {
   useEffect(() => {
     // Start reporting Web Vitals asynchronously
     reportWebVitals().catch((error) => {
-      console.error('Web Vitals reporting error:', error)
+      debugError('Web Vitals reporting error:', error)
     })
   }, [])
 

@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { Copy, Check } from 'lucide-react'
+import { debugLog } from '@/lib/debug'
 
 interface ColorPickerProps {
   label: string
@@ -35,7 +36,7 @@ export function ColorPicker({ label, value, onChange, description }: ColorPicker
 
   const handleColorInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newColor = e.target.value
-    console.log(`🎨 [ColorPicker] Color selected: ${newColor}`)
+    debugLog(`🎨 [ColorPicker] Color selected: ${newColor}`)
     onChange(newColor)
     setInputValue(newColor)
     // Close picker after selection

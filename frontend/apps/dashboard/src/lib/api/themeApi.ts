@@ -8,6 +8,7 @@
 
 import axios, { AxiosError } from 'axios'
 import { ThemeData, CreateThemeRequest, UpdateThemeRequest } from '@/types/theme'
+import { debugLog, debugWarn, debugError } from '@/lib/debug'
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080'
 const API_VERSION = '/api/v1'
@@ -30,7 +31,7 @@ apiClient.interceptors.request.use((config) => {
     // Get the full auth state from localStorage
     const authStorageRaw = localStorage.getItem('auth-storage')
     if (!authStorageRaw) {
-      console.warn('⚠️ [API Request] No auth-storage found in localStorage')
+      debugWarn('⚠️ [API Request] No auth-storage found in localStorage')
       return config
     }
 
@@ -39,14 +40,14 @@ apiClient.interceptors.request.use((config) => {
     const token = authState?.state?.token
 
     if (token) {
-      console.log('✅ [API Request] Token found, adding to Authorization header')
+      debugLog('✅ [API Request] Token found, adding to Authorization header')
       config.headers.Authorization = `Bearer ${token}`
     } else {
-      console.warn('⚠️ [API Request] Token not found in auth-storage.state.token')
-      console.log('📦 [API Request] Auth storage contents:', authState)
+      debugWarn('⚠️ [API Request] Token not found in auth-storage.state.token')
+      debugLog('📦 [API Request] Auth storage contents:', authState)
     }
   } catch (err) {
-    console.error('❌ [API Request] Error parsing auth-storage:', err)
+    debugError('❌ [API Request] Error parsing auth-storage:', err)
   }
 
   return config
@@ -59,19 +60,19 @@ apiClient.interceptors.request.use((config) => {
 apiClient.interceptors.response.use(
   (response) => response,
   (error: AxiosError) => {
-    console.error('❌ [API Response] Error:', error.response?.status, error.response?.statusText)
-    console.error('❌ [API Response] Full Data:', error.response?.data)
+    debugError('❌ [API Response] Error:', error.response?.status, error.response?.statusText)
+    debugError('❌ [API Response] Full Data:', error.response?.data)
 
     // More detailed error logging
     if (error.response?.data) {
       const errorData = error.response.data as any
-      console.error('❌ [API Response] Error Message:', errorData.error || errorData.message || 'Unknown error')
-      console.error('❌ [API Response] Full Error Object:', JSON.stringify(errorData, null, 2))
+      debugError('❌ [API Response] Error Message:', errorData.error || errorData.message || 'Unknown error')
+      debugError('❌ [API Response] Full Error Object:', JSON.stringify(errorData, null, 2))
     }
 
     // Handle 401 Unauthorized - session expired or invalid token
     if (error.response?.status === 401) {
-      console.log('🔑 [API Response] 401 Unauthorized - Clearing auth and redirecting to login')
+      debugLog('🔑 [API Response] 401 Unauthorized - Clearing auth and redirecting to login')
       // Clear the auth storage
       localStorage.removeItem('auth-storage')
       // Redirect to login
@@ -105,15 +106,15 @@ export interface ApiError {
  */
 export async function getThemePresets(limit: number = 100): Promise<any[]> {
   try {
-    console.log('📥 [getThemePresets] Fetching theme presets with limit:', limit)
+    debugLog('📥 [getThemePresets] Fetching theme presets with limit:', limit)
     const response = await apiClient.get<any>(
       `/admin/theme-presets?limit=${limit}&page=1`
     )
 
-    console.log('📦 [getThemePresets] Full API Response:', response.data)
+    debugLog('📦 [getThemePresets] Full API Response:', response.data)
 
     let data = response.data?.data || response.data?.presets || []
-    console.log('✅ [getThemePresets] Got', Array.isArray(data) ? data.length : 0, 'presets')
+    debugLog('✅ [getThemePresets] Got', Array.isArray(data) ? data.length : 0, 'presets')
 
     // Parse config JSON for each preset
     if (Array.isArray(data)) {
@@ -128,7 +129,7 @@ export async function getThemePresets(limit: number = 100): Promise<any[]> {
               _rawConfig: preset.config,
             }
           } catch (err) {
-            console.warn('⚠️ [getThemePresets] Failed to parse preset config:', err)
+            debugWarn('⚠️ [getThemePresets] Failed to parse preset config:', err)
             return preset
           }
         }
@@ -138,7 +139,7 @@ export async function getThemePresets(limit: number = 100): Promise<any[]> {
 
     return Array.isArray(data) ? data : []
   } catch (error) {
-    console.warn('⚠️ [getThemePresets] Failed to fetch presets:', error)
+    debugWarn('⚠️ [getThemePresets] Failed to fetch presets:', error)
     // Return empty array instead of throwing to prevent UI crashes
     return []
   }
@@ -149,19 +150,19 @@ export async function getThemePresets(limit: number = 100): Promise<any[]> {
  */
 export async function getThemes(limit: number = 100): Promise<ThemeData[]> {
   try {
-    console.log('📥 [getThemes] Fetching themes with limit:', limit)
+    debugLog('📥 [getThemes] Fetching themes with limit:', limit)
     const response = await apiClient.get<any>(
       `/admin/themes?limit=${limit}&page=1`
     )
     
     // Log full response for debugging
-    console.log('📦 [getThemes] Full API Response:', response.data)
+    debugLog('📦 [getThemes] Full API Response:', response.data)
     
     // Handle both response formats
     const data = response.data?.data || response.data?.themes || []
     const pagination = response.data?.pagination || {}
     
-    console.log('✅ [getThemes] Response structure:', {
+    debugLog('✅ [getThemes] Response structure:', {
       totalThemes: pagination.total || 0,
       currentCount: Array.isArray(data) ? data.length : 0,
       pagination: pagination,
@@ -172,7 +173,7 @@ export async function getThemes(limit: number = 100): Promise<ThemeData[]> {
     if (Array.isArray(data)) {
       // If there are more pages and we didn't fetch all, fetch remaining
       if (pagination.totalPages && pagination.totalPages > 1 && data.length < pagination.total) {
-        console.log(`📄 [getThemes] Multiple pages detected. Total: ${pagination.total}, Fetched: ${data.length}`)
+        debugLog(`📄 [getThemes] Multiple pages detected. Total: ${pagination.total}, Fetched: ${data.length}`)
         const allThemes = [...data]
         
         // Fetch remaining pages
@@ -186,7 +187,7 @@ export async function getThemes(limit: number = 100): Promise<ThemeData[]> {
           }
         }
         
-        console.log(`✅ [getThemes] Fetched all ${allThemes.length} themes across ${pagination.totalPages} pages`)
+        debugLog(`✅ [getThemes] Fetched all ${allThemes.length} themes across ${pagination.totalPages} pages`)
         return allThemes
       }
       
@@ -204,17 +205,17 @@ export async function getThemes(limit: number = 100): Promise<ThemeData[]> {
  */
 export async function getTheme(themeId: string): Promise<ThemeData> {
   try {
-    console.log('📥 [getTheme] Fetching theme:', themeId)
+    debugLog('📥 [getTheme] Fetching theme:', themeId)
     // Add timestamp to bypass cache
     const response = await apiClient.get<any>(
       `/admin/themes/${themeId}?_t=${Date.now()}`
     )
 
     // Log the full response for debugging
-    console.log('📦 [getTheme] Response status:', response.status)
-    console.log('📦 [getTheme] Response.data type:', typeof response.data)
-    console.log('📦 [getTheme] Response.data:', response.data)
-    console.log('📦 [getTheme] Response keys:', response.data ? Object.keys(response.data) : 'no data')
+    debugLog('📦 [getTheme] Response status:', response.status)
+    debugLog('📦 [getTheme] Response.data type:', typeof response.data)
+    debugLog('📦 [getTheme] Response.data:', response.data)
+    debugLog('📦 [getTheme] Response keys:', response.data ? Object.keys(response.data) : 'no data')
 
     // Handle different response formats - data, theme, or direct object
     let theme = response.data?.data || response.data?.theme || response.data
@@ -222,21 +223,21 @@ export async function getTheme(themeId: string): Promise<ThemeData> {
     // Validate theme exists
     if (!theme) {
       const errorMsg = `Theme not found in response. Response was: ${JSON.stringify(response.data)}`
-      console.error('❌ [getTheme]', errorMsg)
+      debugError('❌ [getTheme]', errorMsg)
       throw new Error(errorMsg)
     }
 
     // Validate theme is not an empty object
     if (typeof theme === 'object' && Object.keys(theme).length === 0) {
       const errorMsg = `Theme object is empty. Full response: ${JSON.stringify(response.data)}`
-      console.error('❌ [getTheme]', errorMsg)
+      debugError('❌ [getTheme]', errorMsg)
       throw new Error(errorMsg)
     }
 
     // Validate theme has required properties
     if (!theme.id) {
       const errorMsg = `Theme missing id. Theme: ${JSON.stringify(theme)}`
-      console.error('❌ [getTheme]', errorMsg)
+      debugError('❌ [getTheme]', errorMsg)
       throw new Error(errorMsg)
     }
 
@@ -244,9 +245,9 @@ export async function getTheme(themeId: string): Promise<ThemeData> {
     // When created from a preset, config contains the full theme JSON
     if (theme.config && typeof theme.config === 'string') {
       try {
-        console.log('🔄 [getTheme] Parsing config JSON from preset...')
+        debugLog('🔄 [getTheme] Parsing config JSON from preset...')
         const parsedConfig = JSON.parse(theme.config)
-        console.log('✅ [getTheme] Parsed config:', {
+        debugLog('✅ [getTheme] Parsed config:', {
           hasComponents: !!parsedConfig.components,
           componentCount: Array.isArray(parsedConfig.components) ? parsedConfig.components.length : 0
         })
@@ -258,12 +259,12 @@ export async function getTheme(themeId: string): Promise<ThemeData> {
           _rawConfig: theme.config,
         }
       } catch (parseErr) {
-        console.warn('⚠️ [getTheme] Failed to parse config JSON:', parseErr)
+        debugWarn('⚠️ [getTheme] Failed to parse config JSON:', parseErr)
         // Continue with theme as-is if JSON parsing fails
       }
     }
 
-    console.log('✅ [getTheme] Received theme:', {
+    debugLog('✅ [getTheme] Received theme:', {
       id: theme.id,
       name: theme.name,
       components: Array.isArray(theme.components) ? theme.components.length : 0,
@@ -273,25 +274,25 @@ export async function getTheme(themeId: string): Promise<ThemeData> {
     return theme
   } catch (error) {
     // Log comprehensive error info
-    console.error('❌ [getTheme] Caught error')
-    console.error('❌ [getTheme] Error instanceof Error:', error instanceof Error)
-    console.error('❌ [getTheme] Error type:', typeof error)
-    console.error('❌ [getTheme] Error constructor:', error && (error as any).constructor?.name)
+    debugError('❌ [getTheme] Caught error')
+    debugError('❌ [getTheme] Error instanceof Error:', error instanceof Error)
+    debugError('❌ [getTheme] Error type:', typeof error)
+    debugError('❌ [getTheme] Error constructor:', error && (error as any).constructor?.name)
 
     if (axios.isAxiosError(error)) {
-      console.error('❌ [getTheme] Axios error status:', error.response?.status)
-      console.error('❌ [getTheme] Axios error data:', error.response?.data)
-      console.error('❌ [getTheme] Axios error message:', error.message)
+      debugError('❌ [getTheme] Axios error status:', error.response?.status)
+      debugError('❌ [getTheme] Axios error data:', error.response?.data)
+      debugError('❌ [getTheme] Axios error message:', error.message)
     } else if (error instanceof Error) {
-      console.error('❌ [getTheme] Error message:', error.message)
-      console.error('❌ [getTheme] Error stack:', error.stack)
+      debugError('❌ [getTheme] Error message:', error.message)
+      debugError('❌ [getTheme] Error stack:', error.stack)
     } else {
-      console.error('❌ [getTheme] Non-Error object:', error)
+      debugError('❌ [getTheme] Non-Error object:', error)
     }
 
     // Always throw a proper Error instance
     const apiError = handleApiError(error)
-    console.error('❌ [getTheme] About to throw error with message:', apiError.message)
+    debugError('❌ [getTheme] About to throw error with message:', apiError.message)
     throw apiError
   }
 }
@@ -326,7 +327,7 @@ export async function updateTheme(
   request: UpdateThemeRequest
 ): Promise<ThemeData> {
   try {
-    console.log('🔄 [updateTheme] Sending to backend:', {
+    debugLog('🔄 [updateTheme] Sending to backend:', {
       themeId,
       componentCount: request.components?.length || 0,
       components: request.components?.map((c) => ({ id: c.id, type: c.type, order: c.order })) || []
@@ -337,8 +338,8 @@ export async function updateTheme(
     )
 
     // Log response for debugging
-    console.log('📦 [updateTheme] Response status:', response.status)
-    console.log('📦 [updateTheme] Response.data:', response.data)
+    debugLog('📦 [updateTheme] Response status:', response.status)
+    debugLog('📦 [updateTheme] Response.data:', response.data)
 
     // Handle different response formats - data, theme, or direct object
     const theme = response.data?.data || response.data?.theme || response.data
@@ -347,7 +348,7 @@ export async function updateTheme(
       throw new Error('Failed to update theme: empty response')
     }
 
-    console.log('✅ [updateTheme] Response from backend:', {
+    debugLog('✅ [updateTheme] Response from backend:', {
       componentCount: theme.components?.length || 0,
       components: theme.components?.map((c) => ({ id: c.id, type: c.type })) || []
     })
@@ -401,9 +402,9 @@ export async function duplicateTheme(
     // When duplicating from a preset, config contains the full theme JSON
     if (theme.config && typeof theme.config === 'string') {
       try {
-        console.log('🔄 [duplicateTheme] Parsing config JSON from preset...')
+        debugLog('🔄 [duplicateTheme] Parsing config JSON from preset...')
         const parsedConfig = JSON.parse(theme.config)
-        console.log('✅ [duplicateTheme] Parsed config:', {
+        debugLog('✅ [duplicateTheme] Parsed config:', {
           hasComponents: !!parsedConfig.components,
           componentCount: Array.isArray(parsedConfig.components) ? parsedConfig.components.length : 0
         })
@@ -415,7 +416,7 @@ export async function duplicateTheme(
           _rawConfig: theme.config,
         }
       } catch (parseErr) {
-        console.warn('⚠️ [duplicateTheme] Failed to parse config JSON:', parseErr)
+        debugWarn('⚠️ [duplicateTheme] Failed to parse config JSON:', parseErr)
         // Continue with theme as-is if JSON parsing fails
       }
     }
