@@ -66,6 +66,7 @@ export async function middleware(request: NextRequest) {
   }
 
   // Check tenant status only for restaurant sites with valid slugs
+  // Skip for localhost (development) and www (not a restaurant slug)
   let blockReason = null;
   if (restaurantSlug && restaurantSlug !== 'localhost' && restaurantSlug !== 'www') {
     debugLog(`[Middleware] Checking tenant status for slug: ${restaurantSlug}`);
@@ -95,6 +96,8 @@ export async function middleware(request: NextRequest) {
       debugError(`[Middleware] Error checking tenant status for ${restaurantSlug}:`, error);
       // On error, allow access (fail open to avoid blocking legitimate requests)
     }
+  } else if (restaurantSlug === 'localhost') {
+    debugLog(`[Middleware] Development mode - localhost detected, skipping tenant status check`);
   }
 
   // Store in request headers (server-side, cannot be tampered by client)
