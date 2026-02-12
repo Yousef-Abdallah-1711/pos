@@ -51,9 +51,13 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(redirectURL, 307);
   }
 
-  // Check if this path should skip status check
-  if (shouldSkipStatusCheck(pathname)) {
-    debugLog(`[Middleware] Skipping status check for path: ${pathname}`);
+  // Check if this path should skip status check OR if it's localhost (development)
+  // Localhost is always skipped from tenant status checks
+  const isLocalhost = restaurantSlug === 'localhost' || restaurantSlug === 'www';
+  const shouldSkip = shouldSkipStatusCheck(pathname) || isLocalhost;
+
+  if (shouldSkip) {
+    debugLog(`[Middleware] Skipping status check for path: ${pathname}${isLocalhost ? ' (localhost development mode)' : ''}`);
     const requestHeaders = new Headers(request.headers);
     requestHeaders.set('x-restaurant-slug', restaurantSlug);
     requestHeaders.set('x-restaurant-locale', validLocale);
@@ -65,8 +69,7 @@ export async function middleware(request: NextRequest) {
     });
   }
 
-  // Check tenant status only for restaurant sites with valid slugs
-  // Skip for localhost (development) and www (not a restaurant slug)
+  // Check tenant status only for REAL restaurant slugs (not localhost/www)
   let blockReason = null;
   if (restaurantSlug && restaurantSlug !== 'localhost' && restaurantSlug !== 'www') {
     debugLog(`[Middleware] Checking tenant status for slug: ${restaurantSlug}`);
@@ -96,8 +99,6 @@ export async function middleware(request: NextRequest) {
       debugError(`[Middleware] Error checking tenant status for ${restaurantSlug}:`, error);
       // On error, allow access (fail open to avoid blocking legitimate requests)
     }
-  } else if (restaurantSlug === 'localhost') {
-    debugLog(`[Middleware] Development mode - localhost detected, skipping tenant status check`);
   }
 
   // Store in request headers (server-side, cannot be tampered by client)
