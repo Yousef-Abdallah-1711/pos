@@ -50,33 +50,7 @@ export default function LeavesPage() {
     PERMISSION_LEVELS.WRITE,
   )
 
-  // Show permission denied if user can't view leaves
-  if (!canViewLeaves) {
-    return (
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-            {t('hr.leaves.title')}
-          </h1>
-        </div>
-
-        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-6">
-          <div className="flex gap-3 items-start">
-            <Lock className="h-5 w-5 text-red-600 dark:text-red-400 mt-0.5 flex-shrink-0" />
-            <div>
-              <h2 className="font-semibold text-red-900 dark:text-red-300">
-                Access Denied
-              </h2>
-              <p className="text-sm text-red-800 dark:text-red-400 mt-1">
-                You do not have permission to view leave requests. Please contact your administrator.
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-    )
-  }
-
+  // Move ALL hooks BEFORE early returns to avoid Hook order violation
   const [leaves, setLeaves] = useState<Leave[]>([])
   const [employees, setEmployees] = useState<Employee[]>([])
   const [loading, setLoading] = useState(false)
@@ -104,6 +78,33 @@ export default function LeavesPage() {
   )
 
   const token = useAuthStore((state) => state.token)
+
+  // Show permission denied if user can't view leaves
+  if (!canViewLeaves) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+            {t('hr.leaves.title')}
+          </h1>
+        </div>
+
+        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-6">
+          <div className="flex gap-3 items-start">
+            <Lock className="h-5 w-5 text-red-600 dark:text-red-400 mt-0.5 flex-shrink-0" />
+            <div>
+              <h2 className="font-semibold text-red-900 dark:text-red-300">
+                Access Denied
+              </h2>
+              <p className="text-sm text-red-800 dark:text-red-400 mt-1">
+                You do not have permission to view leave requests. Please contact your administrator.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   // Fetch employees
   useEffect(() => {
