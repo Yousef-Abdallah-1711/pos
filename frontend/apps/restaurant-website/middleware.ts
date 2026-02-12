@@ -40,14 +40,15 @@ export async function middleware(request: NextRequest) {
   const validLocale = supportedLocales.includes(normalizedLocale) ? normalizedLocale : 'en';
 
   // Redirect uppercase or unsupported locales to a canonical, lowercase path
-  if (rawLocale !== validLocale) {
+  // But skip redirect for root path - let Next.js handle the [locale] routing
+  if (rawLocale !== validLocale && pathname !== '/') {
     debugLog(`[Middleware] Redirecting to normalized locale: ${validLocale}`);
     const normalizedParts = [...pathParts];
     normalizedParts[1] = validLocale;
-    const normalizedPath = normalizedParts.join('/') || '/';
+    const normalizedPath = normalizedParts.join('/').replace(/^\/+/, '/') || '/';
     const redirectURL = request.nextUrl.clone();
-    redirectURL.pathname = normalizedPath.startsWith('/') ? normalizedPath : `/${normalizedPath}`;
-    return NextResponse.redirect(redirectURL, 308);
+    redirectURL.pathname = normalizedPath;
+    return NextResponse.redirect(redirectURL, 307);
   }
 
   // Check if this path should skip status check
