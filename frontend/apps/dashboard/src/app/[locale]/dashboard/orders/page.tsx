@@ -73,52 +73,6 @@ export default function OrdersPage() {
   const [selectedOrderForAssignment, setSelectedOrderForAssignment] = useState<Order | null>(null)
   const token = useAuthStore((state) => state.token)
 
-  if (canViewLoading) {
-    return (
-      <div className="flex justify-center items-center h-96">
-        <Loader className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    )
-  }
-
-  // Show permission denied if user can't view orders
-  if (!canViewOrders) {
-    return (
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-            {t('orders.title')}
-          </h1>
-        </div>
-
-        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-6">
-          <div className="flex gap-3 items-start">
-            <Lock className="h-5 w-5 text-red-600 dark:text-red-400 mt-0.5 flex-shrink-0" />
-            <div>
-              <h2 className="font-semibold text-red-900 dark:text-red-300">
-                Access Denied
-              </h2>
-              <p className="text-sm text-red-800 dark:text-red-400 mt-1">
-                You do not have permission to view orders. Please contact your administrator.
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-    )
-  }
-
-  useEffect(() => {
-    if (canViewLoading) {
-      return
-    }
-    if (!token || !canViewOrders) {
-      setLoading(false)
-      return
-    }
-    fetchOrders()
-  }, [token, statusFilter, paymentFilter, page, searchQuery, canViewOrders, canViewLoading])
-
   const fetchOrders = async () => {
     setLoading(true)
     setError(null)
@@ -152,6 +106,53 @@ export default function OrdersPage() {
     } finally {
       setLoading(false)
     }
+  }
+
+  // Move useEffect BEFORE early returns to avoid Hook order violation
+  useEffect(() => {
+    if (canViewLoading) {
+      return
+    }
+    if (!token || !canViewOrders) {
+      setLoading(false)
+      return
+    }
+    fetchOrders()
+  }, [token, statusFilter, paymentFilter, page, searchQuery, canViewOrders, canViewLoading])
+
+  if (canViewLoading) {
+    return (
+      <div className="flex justify-center items-center h-96">
+        <Loader className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    )
+  }
+
+  // Show permission denied if user can't view orders
+  if (!canViewOrders) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+            {t('orders.title')}
+          </h1>
+        </div>
+
+        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-6">
+          <div className="flex gap-3 items-start">
+            <Lock className="h-5 w-5 text-red-600 dark:text-red-400 mt-0.5 flex-shrink-0" />
+            <div>
+              <h2 className="font-semibold text-red-900 dark:text-red-300">
+                Access Denied
+              </h2>
+              <p className="text-sm text-red-800 dark:text-red-400 mt-1">
+                You do not have permission to view orders. Please contact your administrator.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   const handleCancelOrder = async (orderId: number) => {
