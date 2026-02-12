@@ -50,6 +50,22 @@ export default function AttendancePage() {
   )
   const permissionLoading = canViewLoading || canCreateLoading
 
+  // Move ALL hooks BEFORE early returns to avoid Hook order violation
+  const [attendance, setAttendance] = useState<Attendance[]>([])
+  const [employees, setEmployees] = useState<Employee[]>([])
+  const [loading, setLoading] = useState(false)
+  const [selectedRecord, setSelectedRecord] = useState<Attendance | null>(null)
+  const [showForm, setShowForm] = useState(false)
+  const [isEditMode, setIsEditMode] = useState(false)
+  const [apiError, setApiError] = useState<string | null>(null)
+  const [debugInfo, setDebugInfo] = useState<string>('')
+  const [startDate, setStartDate] = useState(
+    new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+  )
+  const [endDate, setEndDate] = useState(new Date().toISOString().split('T')[0])
+
+  const token = useAuthStore((state) => state.token)
+
   // Show permission denied if user can't view attendance
   if (permissionLoading) {
     return (
@@ -84,21 +100,6 @@ export default function AttendancePage() {
       </div>
     )
   }
-
-  const [attendance, setAttendance] = useState<Attendance[]>([])
-  const [employees, setEmployees] = useState<Employee[]>([])
-  const [loading, setLoading] = useState(false)
-  const [selectedRecord, setSelectedRecord] = useState<Attendance | null>(null)
-  const [showForm, setShowForm] = useState(false)
-  const [isEditMode, setIsEditMode] = useState(false)
-  const [apiError, setApiError] = useState<string | null>(null)
-  const [debugInfo, setDebugInfo] = useState<string>('')
-  const [startDate, setStartDate] = useState(
-    new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
-  )
-  const [endDate, setEndDate] = useState(new Date().toISOString().split('T')[0])
-
-  const token = useAuthStore((state) => state.token)
 
   // Fetch employees
   useEffect(() => {

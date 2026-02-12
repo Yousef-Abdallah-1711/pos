@@ -50,6 +50,20 @@ export default function PayrollPage() {
   )
   const permissionLoading = canViewLoading || canCreateLoading
 
+  // Move ALL hooks BEFORE early returns to avoid Hook order violation
+  const [salaries, setSalaries] = useState<Salary[]>([])
+  const [employees, setEmployees] = useState<Employee[]>([])
+  const [loading, setLoading] = useState(false)
+  const [selectedSalary, setSelectedSalary] = useState<Salary | null>(null)
+  const [showForm, setShowForm] = useState(false)
+  const [isEditMode, setIsEditMode] = useState(false)
+  const [apiError, setApiError] = useState<string | null>(null)
+  const [debugInfo, setDebugInfo] = useState<string>('')
+  const [startDate, setStartDate] = useState(new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0])
+  const [endDate, setEndDate] = useState(new Date().toISOString().split('T')[0])
+
+  const token = useAuthStore((state) => state.token)
+
   // Show permission denied if user can't view salaries
   if (permissionLoading) {
     return (
@@ -84,19 +98,6 @@ export default function PayrollPage() {
       </div>
     )
   }
-
-  const [salaries, setSalaries] = useState<Salary[]>([])
-  const [employees, setEmployees] = useState<Employee[]>([])
-  const [loading, setLoading] = useState(false)
-  const [selectedSalary, setSelectedSalary] = useState<Salary | null>(null)
-  const [showForm, setShowForm] = useState(false)
-  const [isEditMode, setIsEditMode] = useState(false)
-  const [apiError, setApiError] = useState<string | null>(null)
-  const [debugInfo, setDebugInfo] = useState<string>('')
-  const [startDate, setStartDate] = useState(new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0])
-  const [endDate, setEndDate] = useState(new Date().toISOString().split('T')[0])
-
-  const token = useAuthStore((state) => state.token)
 
   useEffect(() => {
     const fetchEmployees = async () => {
