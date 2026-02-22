@@ -21,6 +21,9 @@ export const Header: React.FC<HeaderProps> = ({
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const textColor = config.textColor || '#111827'
+  const backgroundColor = config.backgroundColor || '#ffffff'
+  const headerHeight = config.height || 64
+  const headerPadding = config.padding || 16
   const showLogo = config.showLogo !== false
   const showShadow = config.showShadow !== false
   const hasNavigation = Boolean(config.navigationItems && config.navigationItems.length > 0)
@@ -38,6 +41,8 @@ export const Header: React.FC<HeaderProps> = ({
       ? 'theme-header-nav-vertical'
       : 'theme-header-nav-horizontal'
   const navLeftGap = config.navPosition === 'left' ? 32 : 0
+  const navMarginLeft = isArabic ? 0 : navLeftGap
+  const navMarginRight = isArabic ? navLeftGap : 0
 
   const logoContent = (
     <div className="theme-header-logo">
@@ -129,50 +134,72 @@ export const Header: React.FC<HeaderProps> = ({
 
       <style>{`
         .theme-header {
-          background-color: ${config.backgroundColor || '#ffffff'};
+          background-color: ${backgroundColor};
           color: ${textColor};
-          height: ${config.height || 64}px;
-          padding: 0 ${config.padding || 16}px;
-          box-shadow: ${showShadow ? '0 1px 3px rgba(0,0,0,0.1)' : 'none'};
+          min-height: ${headerHeight}px;
+          padding: 0 ${headerPadding}px;
+          border-bottom: 1px solid ${textColor}22;
+          box-shadow: ${showShadow ? '0 12px 32px rgba(15, 23, 42, 0.12)' : 'none'};
           position: ${config.stickyHeader ? 'sticky' : 'relative'};
           top: 0;
-          z-index: 50;
+          z-index: 60;
           direction: ${isArabic ? 'rtl' : 'ltr'};
+          backdrop-filter: ${config.stickyHeader ? 'saturate(1.15) blur(10px)' : 'none'};
         }
 
         .theme-header-inner {
-          height: 100%;
+          height: ${headerHeight}px;
           display: flex;
           align-items: center;
           justify-content: space-between;
+          gap: 12px;
+          width: 100%;
+          max-width: 1280px;
+          margin: 0 auto;
         }
 
         .theme-header-logo-link {
           color: inherit;
           text-decoration: none;
+          display: inline-flex;
+          align-items: center;
+          min-width: 0;
+          transition: opacity 0.2s ease;
+        }
+
+        .theme-header-logo-link:hover {
+          opacity: 0.92;
         }
 
         .theme-header-logo {
           display: flex;
           align-items: center;
-          gap: 16px;
+          gap: 12px;
+          min-width: 0;
         }
 
         .theme-header-logo-image {
           height: ${config.logoHeight || 40}px;
           object-fit: contain;
+          max-width: 200px;
         }
 
         .theme-header-logo-text {
           font-weight: 700;
           font-size: 18px;
+          letter-spacing: 0.01em;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
         }
 
         .theme-header-nav {
-          gap: 24px;
+          gap: 8px;
           font-size: 14px;
           flex: 1;
-          margin-left: ${navLeftGap}px;
+          align-items: center;
+          margin-left: ${navMarginLeft}px;
+          margin-right: ${navMarginRight}px;
         }
 
         .theme-header-nav-horizontal {
@@ -198,41 +225,92 @@ export const Header: React.FC<HeaderProps> = ({
         .theme-header-link {
           color: inherit;
           text-decoration: none;
-          transition: opacity 0.2s;
+          transition: opacity 0.2s ease, background-color 0.2s ease, transform 0.2s ease;
           cursor: pointer;
+          opacity: 0.92;
+          padding: 9px 12px;
+          border-radius: 999px;
+          line-height: 1;
+          font-weight: 500;
         }
 
         .theme-header-link:hover {
-          opacity: 0.8;
+          opacity: 1;
+          background-color: ${textColor}12;
+          transform: translateY(-1px);
+        }
+
+        .theme-header-link:focus-visible {
+          outline: 2px solid ${textColor}55;
+          outline-offset: 2px;
+          opacity: 1;
         }
 
         .theme-header-mobile-button {
-          background: none;
-          border: none;
+          background: ${textColor}0f;
+          border: 1px solid ${textColor}22;
           color: inherit;
           cursor: pointer;
           padding: 8px;
+          width: 40px;
+          height: 40px;
+          border-radius: 12px;
+          align-items: center;
+          justify-content: center;
+          transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+        }
+
+        .theme-header-mobile-button:hover {
+          background: ${textColor}18;
+          border-color: ${textColor}30;
+          transform: translateY(-1px);
         }
 
         .theme-header-mobile-nav {
-          margin-top: 16px;
-          padding-top: 16px;
-          border-top: 1px solid ${textColor}40;
+          margin: 8px auto 12px;
+          width: 100%;
+          max-width: 1280px;
+          padding: 10px;
+          border: 1px solid ${textColor}24;
+          border-radius: 16px;
+          background: ${backgroundColor};
+          box-shadow: 0 14px 34px rgba(15, 23, 42, 0.14);
           display: flex;
           flex-direction: column;
-          gap: 8px;
+          gap: 6px;
         }
 
         .theme-header-mobile-link {
           color: inherit;
           text-decoration: none;
-          padding: 8px 16px;
-          transition: opacity 0.2s;
+          padding: 12px 14px;
+          transition: opacity 0.2s ease, background-color 0.2s ease;
           cursor: pointer;
+          border-radius: 12px;
+          font-weight: 500;
+          line-height: 1.15;
+          opacity: 0.92;
         }
 
         .theme-header-mobile-link:hover {
-          opacity: 0.8;
+          opacity: 1;
+          background: ${textColor}10;
+        }
+
+        .theme-header-mobile-link:focus-visible {
+          outline: 2px solid ${textColor}50;
+          outline-offset: 2px;
+        }
+
+        @media (max-width: 767px) {
+          .theme-header {
+            padding: 0 max(12px, ${headerPadding - 4}px);
+          }
+
+          .theme-header-logo-text {
+            font-size: 16px;
+            max-width: 60vw;
+          }
         }
       `}</style>
     </header>

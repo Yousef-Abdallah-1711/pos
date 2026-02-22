@@ -840,31 +840,36 @@ Desktop (1200px):
 ### Frontend Components
 
 **Theme Builder Pages**:
-- `/src/app/[locale]/dashboard/theme-builder/page.tsx` - Main page
-- `/src/app/[locale]/dashboard/theme-builder/presets/page.tsx` - Presets gallery
-- `/src/app/[locale]/dashboard/theme-builder/editor/page.tsx` - Editor list
-- `/src/app/[locale]/dashboard/theme-builder/editor/[id]/page.tsx` - Single editor
+- `/frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/page.tsx` - Main page (theme list)
+- `/frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/presets/page.tsx` - Presets gallery
+- `/frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/editor/[id]/page.tsx` - Single editor
 
 **Components**:
-- `/src/components/theme/PresetsGallery.tsx` - Theme gallery display
-- `/src/components/theme/EditorSidebar.tsx` - Settings panel (left)
-- `/src/components/theme/EditorPreview.tsx` - Live preview (right)
-- `/src/components/theme/ComponentBuilder.tsx` - Component management
-- `/src/components/theme/ColorPicker.tsx` - Color picker modal
-- `/src/components/theme/FontSelector.tsx` - Font family selector
-- `/src/components/theme/ExportDialog.tsx` - Export theme
-- `/src/components/theme/ImportDialog.tsx` - Import theme
+- `/frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/editor/components/EditorSidebar.tsx` - Settings panel (left)
+- `/frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/editor/components/EditorPreview.tsx` - Live preview (right)
+- `/frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/editor/components/ComponentLibrary.tsx` - Component add/reorder/toggle UI
+- `/frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/editor/components/ComponentEditor.tsx` - Routes to per-component editors
+- `/frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/components/ColorPicker.tsx` - Color picker
+- `/frontend/apps/dashboard/src/components/editors/HeaderEditor.tsx` - Header editor
+- `/frontend/apps/dashboard/src/components/editors/FooterEditor.tsx` - Footer editor
+- `/frontend/apps/dashboard/src/components/theme/ExportDialog.tsx` - Export theme
+- `/frontend/apps/dashboard/src/components/theme/ImportDialog.tsx` - Import theme (if enabled in current build)
 
 **State Management**:
-- `/src/store/themeBuilderStore.ts` - Zustand store for theme state
-- `/src/store/useThemeEditor.ts` - Theme editor hook
+- `/frontend/apps/dashboard/src/hooks/useThemeStore.ts` - Active Theme Builder editor store (current editor route)
+- `/frontend/apps/dashboard/src/stores/themeBuilderStore.ts` - Older/store utility path still present in repo
+- `/frontend/apps/dashboard/src/stores/themeBuilderHooks.ts` - Associated hooks for older store path
 
 **APIs & Utilities**:
-- `/src/lib/api/themeApi.ts` - API client
-- `/src/lib/themeLoader.ts` - Theme utilities
-- `/src/lib/bilingualUtils.ts` - EN/AR helpers
-- `/src/types/themeJson.ts` - Type definitions
-- `/src/types/theme.ts` - Core theme types
+- `/frontend/apps/dashboard/src/lib/api/themeApi.ts` - Theme API client
+- `/frontend/apps/dashboard/src/types/theme.ts` - Core dashboard theme types
+- `/frontend/apps/restaurant-website/lib/api/get-theme-server.ts` - Storefront theme extraction/normalization entry
+
+**Shared Runtime Renderers (Preview + Storefront)**:
+- `/frontend/layers/ui-themes/src/components/Header.tsx` - Data-driven header renderer
+- `/frontend/layers/ui-themes/src/components/Footer.tsx` - Data-driven footer renderer
+- `/frontend/layers/ui-themes/src/components/SectionRenderer.tsx` - Dynamic section renderer
+- `/frontend/layers/ui-themes/src/sections/*.tsx` - Actual section implementations (hero/products/cta/etc.)
 
 ### Styling
 
