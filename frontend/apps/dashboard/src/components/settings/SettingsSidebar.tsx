@@ -12,7 +12,9 @@ import {
   Shield,
   Users,
   Key,
-  Settings
+  Settings,
+  Store,
+  CreditCard
 } from 'lucide-react'
 
 interface SettingsSidebarProps {
@@ -35,6 +37,12 @@ export function SettingsSidebar({ locale }: SettingsSidebarProps) {
       description: 'Profile, security, preferences'
     },
     {
+      href: `/${locale}/dashboard/settings/restaurant`,
+      label: 'Restaurant',
+      icon: Store,
+      description: 'Contact info, maintenance page'
+    },
+    {
       href: `/${locale}/dashboard/settings/appearance`,
       label: 'Appearance',
       icon: Palette,
@@ -45,6 +53,12 @@ export function SettingsSidebar({ locale }: SettingsSidebarProps) {
       label: 'Access Control',
       icon: Shield,
       description: 'View your roles and permissions'
+    },
+    {
+      href: `/${locale}/dashboard/settings/billing`,
+      label: 'Billing & Subscription',
+      icon: CreditCard,
+      description: 'Manage plans and payments'
     },
   ]
 

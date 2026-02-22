@@ -25,6 +25,12 @@ interface ContrastReportProps {
   showDetails?: boolean;
 }
 
+function getLevelClass(level: ContrastResult["level"]): "level-aaa" | "level-aa" | "level-fail" {
+  if (level === "AAA") return "level-aaa";
+  if (level === "AA") return "level-aa";
+  return "level-fail";
+}
+
 /**
  * Contrast Report Dashboard
  * Shows WCAG AA/AAA compliance for theme colors
@@ -51,17 +57,17 @@ export function ContrastReport({
       {
         foreground: finalColors.text || "#1f2937",
         background: finalColors.background || "#ffffff",
-        name: locale === "en" ? "Text on Background" : "النص على الخلفية",
+        name: locale === "en" ? "Text on Background" : "Ø§Ù„Ù†Øµ Ø¹Ù„Ù‰ Ø§Ù„Ø®Ù„ÙÙŠØ©",
       },
       {
         foreground: finalColors.primary || "#f97316",
         background: finalColors.background || "#ffffff",
-        name: locale === "en" ? "Primary on Background" : "الأساسي على الخلفية",
+        name: locale === "en" ? "Primary on Background" : "Ø§Ù„Ø£Ø³Ø§Ø³ÙŠ Ø¹Ù„Ù‰ Ø§Ù„Ø®Ù„ÙÙŠØ©",
       },
       {
         foreground: "#ffffff",
         background: finalColors.primary || "#f97316",
-        name: locale === "en" ? "White on Primary" : "أبيض على الأساسي",
+        name: locale === "en" ? "White on Primary" : "Ø£Ø¨ÙŠØ¶ Ø¹Ù„Ù‰ Ø§Ù„Ø£Ø³Ø§Ø³ÙŠ",
       },
       {
         foreground: finalColors.secondary || "#0ea5e9",
@@ -69,17 +75,17 @@ export function ContrastReport({
         name:
           locale === "en"
             ? "Secondary on Background"
-            : "الثانوي على الخلفية",
+            : "Ø§Ù„Ø«Ø§Ù†ÙˆÙŠ Ø¹Ù„Ù‰ Ø§Ù„Ø®Ù„ÙÙŠØ©",
       },
       {
         foreground: "#ffffff",
         background: finalColors.secondary || "#0ea5e9",
-        name: locale === "en" ? "White on Secondary" : "أبيض على الثانوي",
+        name: locale === "en" ? "White on Secondary" : "Ø£Ø¨ÙŠØ¶ Ø¹Ù„Ù‰ Ø§Ù„Ø«Ø§Ù†ÙˆÙŠ",
       },
       {
         foreground: finalColors.accent || "#fbbf24",
         background: finalColors.background || "#ffffff",
-        name: locale === "en" ? "Accent on Background" : "التمييز على الخلفية",
+        name: locale === "en" ? "Accent on Background" : "Ø§Ù„ØªÙ…ÙŠÙŠØ² Ø¹Ù„Ù‰ Ø§Ù„Ø®Ù„ÙÙŠØ©",
       },
       {
         foreground: finalColors.text || "#1f2937",
@@ -87,7 +93,7 @@ export function ContrastReport({
         name:
           locale === "en"
             ? "Text on Accent"
-            : "النص على لون التمييز",
+            : "Ø§Ù„Ù†Øµ Ø¹Ù„Ù‰ Ù„ÙˆÙ† Ø§Ù„ØªÙ…ÙŠÙŠØ²",
       },
       {
         foreground: finalColors.border || "#e5e7eb",
@@ -95,7 +101,7 @@ export function ContrastReport({
         name:
           locale === "en"
             ? "Border on Background"
-            : "الحدود على الخلفية",
+            : "Ø§Ù„Ø­Ø¯ÙˆØ¯ Ø¹Ù„Ù‰ Ø§Ù„Ø®Ù„ÙÙŠØ©",
       },
     ],
     [finalColors, locale]
@@ -152,165 +158,105 @@ export function ContrastReport({
       largeText: "Large Text (18pt+)",
     },
     ar: {
-      contrastReport: "تقرير التباين",
-      wcagCompliance: "ملخص توافق WCAG",
-      colorPairs: "أزواج الألوان",
-      ratio: "النسبة",
-      wcagLevel: "مستوى WCAG",
-      passes: "يمر",
-      passingPairs: "الأزواج الناجحة",
-      failingPairs: "الأزواج الفاشلة",
-      meetsAAA: "يستوفي AAA (7:1)",
-      meetsAA: "يستوفي AA (4.5:1)",
-      doesNotMeet: "لا يستوفي",
-      sampleText: "نص عينة",
-      normal: "النص العادي",
-      largeText: "النص الكبير (18pt+)",
+      contrastReport: "ØªÙ‚Ø±ÙŠØ± Ø§Ù„ØªØ¨Ø§ÙŠÙ†",
+      wcagCompliance: "Ù…Ù„Ø®Øµ ØªÙˆØ§ÙÙ‚ WCAG",
+      colorPairs: "Ø£Ø²ÙˆØ§Ø¬ Ø§Ù„Ø£Ù„ÙˆØ§Ù†",
+      ratio: "Ø§Ù„Ù†Ø³Ø¨Ø©",
+      wcagLevel: "Ù…Ø³ØªÙˆÙ‰ WCAG",
+      passes: "ÙŠÙ…Ø±",
+      passingPairs: "Ø§Ù„Ø£Ø²ÙˆØ§Ø¬ Ø§Ù„Ù†Ø§Ø¬Ø­Ø©",
+      failingPairs: "Ø§Ù„Ø£Ø²ÙˆØ§Ø¬ Ø§Ù„ÙØ§Ø´Ù„Ø©",
+      meetsAAA: "ÙŠØ³ØªÙˆÙÙŠ AAA (7:1)",
+      meetsAA: "ÙŠØ³ØªÙˆÙÙŠ AA (4.5:1)",
+      doesNotMeet: "Ù„Ø§ ÙŠØ³ØªÙˆÙÙŠ",
+      sampleText: "Ù†Øµ Ø¹ÙŠÙ†Ø©",
+      normal: "Ø§Ù„Ù†Øµ Ø§Ù„Ø¹Ø§Ø¯ÙŠ",
+      largeText: "Ø§Ù„Ù†Øµ Ø§Ù„ÙƒØ¨ÙŠØ± (18pt+)",
     },
   };
 
   const t = labels[locale as keyof typeof labels] || labels.en;
-
   const allPassing = compliance.fail === 0;
+  const baseTextColor = (themeColors as any)?.text || "#1f2937";
+  const subtitleColor = "hsl(var(--theme-text) / 0.6)";
+  const subtleColor = "hsl(var(--theme-text) / 0.5)";
+  const mutedColor = "hsl(var(--theme-text) / 0.7)";
+
+  const pairStyles = colorPairs
+    .map(
+      (pair, index) => `
+      .result-${index} .sample-preview,
+      .result-${index} .sample-preview-lg {
+        color: ${pair.foreground};
+        background-color: ${pair.background};
+      }
+
+      .result-${index} .foreground-swatch {
+        background-color: ${pair.foreground};
+      }
+
+      .result-${index} .background-swatch {
+        background-color: ${pair.background};
+      }
+    `
+    )
+    .join("\n");
 
   return (
-    <div className="w-full space-y-6">
+    <div className={`contrast-report w-full space-y-6 ${isRTL ? "rtl" : "ltr"}`}>
       {/* Header */}
       <div>
-        <h2
-          className="text-2xl font-bold mb-2"
-          style={{ color: (themeColors as any)?.text || "#1f2937" }}
-        >
-          {t.contrastReport}
-        </h2>
-        <p
-          className="text-sm"
-          style={{ color: `hsl(var(--theme-text) / 0.6)` }}
-        >
-          {themeName}
-        </p>
+        <h2 className="report-title text-2xl font-bold mb-2">{t.contrastReport}</h2>
+        <p className="report-subtitle text-sm">{themeName}</p>
       </div>
 
       {/* Compliance Summary */}
       <div className="grid grid-cols-3 gap-4">
-        {/* AAA Count */}
-        <div
-          className="p-4 rounded-lg border"
-          style={{
-            backgroundColor: "#f0fdf4",
-            borderColor: "#22c55e",
-          }}
-        >
-          <p
-            className="text-2xl font-bold"
-            style={{ color: "#16a34a" }}
-          >
-            {compliance.AAA}
-          </p>
-          <p
-            className="text-xs"
-            style={{ color: "#16a34a" }}
-          >
-            {t.meetsAAA}
-          </p>
+        <div className="summary-card summary-aaa p-4 rounded-lg border">
+          <p className="summary-value text-2xl font-bold">{compliance.AAA}</p>
+          <p className="summary-label text-xs">{t.meetsAAA}</p>
         </div>
 
-        {/* AA Count */}
-        <div
-          className="p-4 rounded-lg border"
-          style={{
-            backgroundColor: "#fef3c7",
-            borderColor: "#f59e0b",
-          }}
-        >
-          <p
-            className="text-2xl font-bold"
-            style={{ color: "#d97706" }}
-          >
-            {compliance.AA}
-          </p>
-          <p
-            className="text-xs"
-            style={{ color: "#d97706" }}
-          >
-            {t.meetsAA}
-          </p>
+        <div className="summary-card summary-aa p-4 rounded-lg border">
+          <p className="summary-value text-2xl font-bold">{compliance.AA}</p>
+          <p className="summary-label text-xs">{t.meetsAA}</p>
         </div>
 
-        {/* Fail Count */}
         <div
-          className="p-4 rounded-lg border"
-          style={{
-            backgroundColor: compliance.fail === 0 ? "#f0fdf4" : "#fee2e2",
-            borderColor: compliance.fail === 0 ? "#22c55e" : "#ef4444",
-          }}
+          className={`summary-card summary-fail p-4 rounded-lg border ${
+            compliance.fail === 0 ? "is-pass" : "is-fail"
+          }`}
         >
-          <p
-            className="text-2xl font-bold"
-            style={{
-              color: compliance.fail === 0 ? "#16a34a" : "#dc2626",
-            }}
-          >
-            {compliance.fail}
-          </p>
-          <p
-            className="text-xs"
-            style={{
-              color: compliance.fail === 0 ? "#16a34a" : "#dc2626",
-            }}
-          >
-            {t.failingPairs}
-          </p>
+          <p className="summary-value text-2xl font-bold">{compliance.fail}</p>
+          <p className="summary-label text-xs">{t.failingPairs}</p>
         </div>
       </div>
 
       {/* Overall Status */}
-      <div
-        className="p-4 rounded-lg border flex items-start gap-3"
-        style={{
-          backgroundColor: allPassing ? "#f0fdf4" : "#fee2e2",
-          borderColor: allPassing ? "#22c55e" : "#ef4444",
-        }}
-      >
+      <div className={`overall-status p-4 rounded-lg border flex items-start gap-3 ${allPassing ? "pass" : "fail"}`}>
         {allPassing ? (
-          <CheckCircle2
-            className="h-5 w-5 flex-shrink-0 mt-0.5"
-            style={{ color: "#16a34a" }}
-          />
+          <CheckCircle2 className="overall-icon pass h-5 w-5 flex-shrink-0 mt-0.5" />
         ) : (
-          <AlertCircle
-            className="h-5 w-5 flex-shrink-0 mt-0.5"
-            style={{ color: "#dc2626" }}
-          />
+          <AlertCircle className="overall-icon fail h-5 w-5 flex-shrink-0 mt-0.5" />
         )}
         <div>
-          <h4
-            className="font-semibold mb-1"
-            style={{
-              color: allPassing ? "#16a34a" : "#dc2626",
-            }}
-          >
+          <h4 className={`overall-title font-semibold mb-1 ${allPassing ? "pass" : "fail"}`}>
             {allPassing
               ? locale === "en"
                 ? "All Color Pairs Pass WCAG AA"
-                : "جميع أزواج الألوان تستوفي معايير WCAG AA"
+                : "Ø¬Ù…ÙŠØ¹ Ø£Ø²ÙˆØ§Ø¬ Ø§Ù„Ø£Ù„ÙˆØ§Ù† ØªØ³ØªÙˆÙÙŠ Ù…Ø¹Ø§ÙŠÙŠØ± WCAG AA"
               : locale === "en"
                 ? "Some Color Pairs Do Not Meet WCAG AA"
-                : "بعض أزواج الألوان لا تستوفي معايير WCAG AA"}
+                : "Ø¨Ø¹Ø¶ Ø£Ø²ÙˆØ§Ø¬ Ø§Ù„Ø£Ù„ÙˆØ§Ù† Ù„Ø§ ØªØ³ØªÙˆÙÙŠ Ù…Ø¹Ø§ÙŠÙŠØ± WCAG AA"}
           </h4>
-          <p
-            className="text-sm"
-            style={{
-              color: allPassing ? "#16a34a" : "#dc2626",
-            }}
-          >
+          <p className={`overall-description text-sm ${allPassing ? "pass" : "fail"}`}>
             {allPassing
               ? locale === "en"
                 ? "Your theme meets WCAG AA accessibility standards for all tested color combinations."
-                : "يستوفي موضوعك معايير WCAG AA للوصول الشامل لجميع مجموعات الألوان المختبرة."
+                : "ÙŠØ³ØªÙˆÙÙŠ Ù…ÙˆØ¶ÙˆØ¹Ùƒ Ù…Ø¹Ø§ÙŠÙŠØ± WCAG AA Ù„Ù„ÙˆØµÙˆÙ„ Ø§Ù„Ø´Ø§Ù…Ù„ Ù„Ø¬Ù…ÙŠØ¹ Ù…Ø¬Ù…ÙˆØ¹Ø§Øª Ø§Ù„Ø£Ù„ÙˆØ§Ù† Ø§Ù„Ù…Ø®ØªØ¨Ø±Ø©."
               : locale === "en"
                 ? "Review the color pairs below and adjust colors to meet WCAG AA (4.5:1 contrast ratio)."
-                : "راجع أزواج الألوان أدناه واضبط الألوان لاستيفاء معايير WCAG AA (نسبة تباين 4.5:1)."}
+                : "Ø±Ø§Ø¬Ø¹ Ø£Ø²ÙˆØ§Ø¬ Ø§Ù„Ø£Ù„ÙˆØ§Ù† Ø£Ø¯Ù†Ø§Ù‡ ÙˆØ§Ø¶Ø¨Ø· Ø§Ù„Ø£Ù„ÙˆØ§Ù† Ù„Ø§Ø³ØªÙŠÙØ§Ø¡ Ù…Ø¹Ø§ÙŠÙŠØ± WCAG AA (Ù†Ø³Ø¨Ø© ØªØ¨Ø§ÙŠÙ† 4.5:1)."}
           </p>
         </div>
       </div>
@@ -318,213 +264,82 @@ export function ContrastReport({
       {/* Detailed Results */}
       {showDetails && (
         <div>
-          <h3
-            className="font-semibold mb-4"
-            style={{ color: (themeColors as any)?.text || "#1f2937" }}
-          >
-            {t.colorPairs}
-          </h3>
+          <h3 className="details-title font-semibold mb-4">{t.colorPairs}</h3>
 
           <div className="space-y-2">
             {results.map((result, index) => {
               const pair = colorPairs[index];
               const isExpanded = expandedPair === result.name;
+              const levelClass = getLevelClass(result.level);
 
               return (
                 <div
                   key={result.name}
-                  className="border rounded-lg overflow-hidden"
-                  style={{
-                    borderColor:
-                      result.level === "Fail"
-                        ? "#ef4444"
-                        : result.level === "AA"
-                          ? "#f59e0b"
-                          : "#22c55e",
-                  }}
+                  className={`result-item result-${index} ${levelClass} border rounded-lg overflow-hidden`}
                 >
                   {/* Summary Row */}
                   <button
-                    onClick={() =>
-                      setExpandedPair(
-                        isExpanded ? null : result.name
-                      )
-                    }
+                    onClick={() => setExpandedPair(isExpanded ? null : result.name)}
                     className={`w-full p-4 flex items-center justify-between hover:bg-black/5 transition-colors ${
                       isRTL ? "text-right" : ""
                     }`}
                   >
                     <div className="flex items-center gap-3 flex-1">
                       {result.level === "Fail" ? (
-                        <AlertTriangle
-                          className="h-5 w-5 flex-shrink-0"
-                          style={{ color: "#ef4444" }}
-                        />
+                        <AlertTriangle className="status-icon fail h-5 w-5 flex-shrink-0" />
                       ) : (
                         <CheckCircle2
-                          className="h-5 w-5 flex-shrink-0"
-                          style={{
-                            color:
-                              result.level === "AAA"
-                                ? "#16a34a"
-                                : "#d97706",
-                          }}
+                          className={`status-icon ${
+                            result.level === "AAA" ? "aaa" : "aa"
+                          } h-5 w-5 flex-shrink-0`}
                         />
                       )}
                       <div className={isRTL ? "text-right" : "text-left"}>
-                        <p
-                          className="font-medium"
-                          style={{
-                            color: (themeColors as any)?.text || "#1f2937",
-                          }}
-                        >
-                          {result.name}
-                        </p>
-                        <p
-                          className="text-xs"
-                          style={{
-                            color: `hsl(var(--theme-text) / 0.5)`,
-                          }}
-                        >
+                        <p className="result-name font-medium">{result.name}</p>
+                        <p className="result-ratio text-xs">
                           {t.ratio}: {result.ratio.toFixed(2)}:1
                         </p>
                       </div>
                     </div>
-                    <span
-                      className="px-3 py-1 rounded-full text-xs font-semibold"
-                      style={{
-                        backgroundColor:
-                          result.level === "Fail"
-                            ? "#fee2e2"
-                            : result.level === "AA"
-                              ? "#fef3c7"
-                              : "#f0fdf4",
-                        color:
-                          result.level === "Fail"
-                            ? "#dc2626"
-                            : result.level === "AA"
-                              ? "#d97706"
-                              : "#16a34a",
-                      }}
-                    >
+                    <span className={`result-badge px-3 py-1 rounded-full text-xs font-semibold ${levelClass}`}>
                       {result.level}
                     </span>
                   </button>
 
                   {/* Details Row */}
                   {isExpanded && pair && (
-                    <div
-                      className="p-4 border-t space-y-4"
-                      style={{
-                        backgroundColor: `hsl(var(--theme-background) / 0.3)`,
-                        borderTopColor: "currentColor",
-                      }}
-                    >
+                    <div className="details-row p-4 border-t space-y-4">
                       {/* Sample Text */}
                       <div>
-                        <p
-                          className="text-xs font-semibold mb-2"
-                          style={{
-                            color: `hsl(var(--theme-text) / 0.7)`,
-                          }}
-                        >
-                          {t.sampleText}
-                        </p>
-                        <p
-                          className="text-sm mb-2"
-                          style={{
-                            color: pair.foreground,
-                            backgroundColor: pair.background,
-                            padding: "12px",
-                            borderRadius: "4px",
-                          }}
-                        >
+                        <p className="details-label text-xs font-semibold mb-2">{t.sampleText}</p>
+                        <p className="sample-preview text-sm mb-2">
                           {locale === "en"
                             ? "The quick brown fox jumps over the lazy dog"
-                            : "الثعلب البني السريع يقفز فوق الكلب الكسول"}
+                            : "Ø§Ù„Ø«Ø¹Ù„Ø¨ Ø§Ù„Ø¨Ù†ÙŠ Ø§Ù„Ø³Ø±ÙŠØ¹ ÙŠÙ‚ÙØ² ÙÙˆÙ‚ Ø§Ù„ÙƒÙ„Ø¨ Ø§Ù„ÙƒØ³ÙˆÙ„"}
                         </p>
                       </div>
 
                       {/* Large Text Sample */}
                       <div>
-                        <p
-                          className="text-xs font-semibold mb-2"
-                          style={{
-                            color: `hsl(var(--theme-text) / 0.7)`,
-                          }}
-                        >
-                          {t.largeText}
-                        </p>
-                        <p
-                          className="text-lg mb-2"
-                          style={{
-                            color: pair.foreground,
-                            backgroundColor: pair.background,
-                            padding: "12px",
-                            borderRadius: "4px",
-                          }}
-                        >
-                          Heading
-                        </p>
+                        <p className="details-label text-xs font-semibold mb-2">{t.largeText}</p>
+                        <p className="sample-preview-lg text-lg mb-2">Heading</p>
                       </div>
 
                       {/* Color Values */}
                       <div className="grid grid-cols-2 gap-4 text-xs">
                         <div>
-                          <p
-                            className="font-semibold mb-1"
-                            style={{
-                              color: `hsl(var(--theme-text) / 0.7)`,
-                            }}
-                          >
-                            {locale === "en"
-                              ? "Foreground"
-                              : "الأمام"}
+                          <p className="details-label text-xs font-semibold mb-1">
+                            {locale === "en" ? "Foreground" : "Ø§Ù„Ø£Ù…Ø§Ù…"}
                           </p>
-                          <div
-                            className="h-8 rounded border"
-                            style={{
-                              backgroundColor:
-                                pair.foreground,
-                              borderColor: "currentColor",
-                            }}
-                          />
-                          <p
-                            className="mt-1 font-mono"
-                            style={{
-                              color: `hsl(var(--theme-text) / 0.5)`,
-                            }}
-                          >
-                            {pair.foreground}
-                          </p>
+                          <div className="color-swatch foreground-swatch h-8 rounded border" />
+                          <p className="color-value mt-1 font-mono">{pair.foreground}</p>
                         </div>
                         <div>
-                          <p
-                            className="font-semibold mb-1"
-                            style={{
-                              color: `hsl(var(--theme-text) / 0.7)`,
-                            }}
-                          >
-                            {locale === "en"
-                              ? "Background"
-                              : "الخلفية"}
+                          <p className="details-label text-xs font-semibold mb-1">
+                            {locale === "en" ? "Background" : "Ø§Ù„Ø®Ù„ÙÙŠØ©"}
                           </p>
-                          <div
-                            className="h-8 rounded border"
-                            style={{
-                              backgroundColor:
-                                pair.background,
-                              borderColor: "currentColor",
-                            }}
-                          />
-                          <p
-                            className="mt-1 font-mono"
-                            style={{
-                              color: `hsl(var(--theme-text) / 0.5)`,
-                            }}
-                          >
-                            {pair.background}
-                          </p>
+                          <div className="color-swatch background-swatch h-8 rounded border" />
+                          <p className="color-value mt-1 font-mono">{pair.background}</p>
                         </div>
                       </div>
                     </div>
@@ -535,6 +350,157 @@ export function ContrastReport({
           </div>
         </div>
       )}
+
+      <style jsx>{`
+        .contrast-report {
+          --report-text: ${baseTextColor};
+          --report-subtitle: ${subtitleColor};
+          --report-subtle: ${subtleColor};
+          --report-muted: ${mutedColor};
+          --report-detail-border: hsl(var(--theme-text) / 0.12);
+        }
+
+        .contrast-report.rtl {
+          direction: rtl;
+        }
+
+        .report-title,
+        .details-title,
+        .result-name {
+          color: var(--report-text);
+        }
+
+        .report-subtitle {
+          color: var(--report-subtitle);
+        }
+
+        .summary-aaa {
+          background-color: #f0fdf4;
+          border-color: #22c55e;
+        }
+
+        .summary-aaa .summary-value,
+        .summary-aaa .summary-label {
+          color: #16a34a;
+        }
+
+        .summary-aa {
+          background-color: #fef3c7;
+          border-color: #f59e0b;
+        }
+
+        .summary-aa .summary-value,
+        .summary-aa .summary-label {
+          color: #d97706;
+        }
+
+        .summary-fail.is-pass {
+          background-color: #f0fdf4;
+          border-color: #22c55e;
+        }
+
+        .summary-fail.is-pass .summary-value,
+        .summary-fail.is-pass .summary-label {
+          color: #16a34a;
+        }
+
+        .summary-fail.is-fail {
+          background-color: #fee2e2;
+          border-color: #ef4444;
+        }
+
+        .summary-fail.is-fail .summary-value,
+        .summary-fail.is-fail .summary-label {
+          color: #dc2626;
+        }
+
+        .overall-status.pass {
+          background-color: #f0fdf4;
+          border-color: #22c55e;
+        }
+
+        .overall-status.fail {
+          background-color: #fee2e2;
+          border-color: #ef4444;
+        }
+
+        .overall-icon.pass,
+        .overall-title.pass,
+        .overall-description.pass {
+          color: #16a34a;
+        }
+
+        .overall-icon.fail,
+        .overall-title.fail,
+        .overall-description.fail {
+          color: #dc2626;
+        }
+
+        .result-item.level-fail {
+          border-color: #ef4444;
+        }
+
+        .result-item.level-aa {
+          border-color: #f59e0b;
+        }
+
+        .result-item.level-aaa {
+          border-color: #22c55e;
+        }
+
+        .status-icon.fail {
+          color: #ef4444;
+        }
+
+        .status-icon.aa {
+          color: #d97706;
+        }
+
+        .status-icon.aaa {
+          color: #16a34a;
+        }
+
+        .result-ratio,
+        .color-value {
+          color: var(--report-subtle);
+        }
+
+        .result-badge.level-fail {
+          background-color: #fee2e2;
+          color: #dc2626;
+        }
+
+        .result-badge.level-aa {
+          background-color: #fef3c7;
+          color: #d97706;
+        }
+
+        .result-badge.level-aaa {
+          background-color: #f0fdf4;
+          color: #16a34a;
+        }
+
+        .details-row {
+          background-color: hsl(var(--theme-background) / 0.3);
+          border-top-color: var(--report-detail-border);
+        }
+
+        .details-label {
+          color: var(--report-muted);
+        }
+
+        .sample-preview,
+        .sample-preview-lg {
+          padding: 12px;
+          border-radius: 4px;
+        }
+
+        .color-swatch {
+          border-color: var(--report-detail-border);
+        }
+
+        ${pairStyles}
+      `}</style>
     </div>
   );
 }

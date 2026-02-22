@@ -12,6 +12,14 @@ export interface TenantStatusResponse {
     trial_end_date?: string | null
     days_remaining?: number | null
     is_disabled?: boolean
+    subscription_expires_at?: string | null
+    last_payment_at?: string | null
+    plan?: {
+      id: string
+      name?: string
+      price: number
+      currency: string
+    }
   }
 }
 

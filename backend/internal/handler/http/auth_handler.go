@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"pos-saas/internal/domain"
 	"pos-saas/internal/usecase"
@@ -27,7 +28,11 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 
 	response, err := h.useCase.Register(&req)
 	if err != nil {
-		respondError(w, http.StatusBadRequest, err.Error())
+		statusCode := http.StatusBadRequest
+		if strings.Contains(err.Error(), "already exists") || strings.Contains(err.Error(), "already taken") {
+			statusCode = http.StatusConflict
+		}
+		respondError(w, statusCode, err.Error())
 		return
 	}
 

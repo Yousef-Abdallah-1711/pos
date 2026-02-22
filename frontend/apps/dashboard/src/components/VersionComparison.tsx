@@ -29,8 +29,10 @@ export function VersionComparison({
   comparison,
   className = '',
 }: VersionComparisonProps): JSX.Element {
+  const progressWidth = comparison ? Math.min(comparison.percentageDifference, 100) : 0
+
   return (
-    <div className={`rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden ${className}`}>
+    <div className={`version-comparison rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden ${className}`}>
       {/* Header */}
       <div className="bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4">
         <div className="flex items-center justify-between mb-4">
@@ -41,10 +43,7 @@ export function VersionComparison({
                 {comparison.changeCount} change{comparison.changeCount !== 1 ? 's' : ''}
               </span>
               <div className="w-24 h-2 bg-gray-300 dark:bg-gray-600 rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-blue-500 transition-all"
-                  style={{ width: `${Math.min(comparison.percentageDifference, 100)}%` }}
-                />
+                <div className="comparison-progress-fill h-full bg-blue-500 transition-all" />
               </div>
             </div>
           )}
@@ -122,6 +121,12 @@ export function VersionComparison({
           </div>
         )}
       </div>
+
+      <style jsx>{`
+        .comparison-progress-fill {
+          width: ${progressWidth}%;
+        }
+      `}</style>
     </div>
   )
 }

@@ -233,6 +233,12 @@ func (r *EmployeeRepository) CreateEmployee(employee *domain.Employee) (int, err
 		RETURNING id
 	`
 
+	// Handle nullable gender - database check constraint only allows 'male', 'female', 'other'
+	var gender interface{}
+	if employee.Gender == "male" || employee.Gender == "female" || employee.Gender == "other" {
+		gender = employee.Gender
+	}
+
 	// Handle nil/empty Documents - convert to valid JSON
 	var documents interface{} = employee.Documents
 	log.Printf("[REPO] CreateEmployee: Documents field length = %d\n", len(employee.Documents))
@@ -255,7 +261,7 @@ func (r *EmployeeRepository) CreateEmployee(employee *domain.Employee) (int, err
 		query,
 		employee.TenantID, employee.RestaurantID, employee.EmployeeCode,
 		employee.FirstName, employee.LastName, employee.FirstNameAr, employee.LastNameAr,
-		employee.Email, employee.Phone, employee.DateOfBirth, employee.Gender,
+		employee.Email, employee.Phone, employee.DateOfBirth, gender,
 		employee.NationalID, employee.Address, employee.City, employee.State,
 		employee.PostalCode, employee.Country, employee.HireDate, employee.EmploymentType,
 		employee.EmploymentStatus, employee.Position, employee.Department,

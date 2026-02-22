@@ -136,8 +136,16 @@ function normalizeTheme(theme: any): ThemeData {
     return items.map((item: any) => ({
       ...item,
       label: extractLabel(item.label),
+      id: item?.id ? String(item.id) : undefined,
+      href: typeof item?.href === 'string' ? item.href : '/',
     }))
   }
+
+  const themeHeader = theme.header || theme.header_config || {}
+  const themeFooter = theme.footer || theme.footer_config || {}
+  const themeIdentity = theme.identity || {}
+  const themeTypography = theme.typography || {}
+  const themeColors = theme.colors || {}
 
   const normalizedTheme = {
     ...theme,
@@ -165,9 +173,15 @@ function normalizeTheme(theme: any): ThemeData {
       stickyHeader: false,
       showShadow: true,
       hideNavOnMobile: false,
-      ...theme.header,
-      logoText: extractLabel(theme.header?.logoText),
-      navigationItems: normalizeNavItems(theme.header?.navigationItems),
+      ...themeHeader,
+      logoUrl: themeHeader.logoUrl || themeHeader.logo_url || '',
+      logoText: extractLabel(themeHeader.logoText || themeHeader.logo_text),
+      navigationItems: normalizeNavItems(themeHeader.navigationItems || themeHeader.navigation_items),
+      backgroundColor: themeHeader.backgroundColor || themeHeader.background_color || '#3b82f6',
+      textColor: themeHeader.textColor || themeHeader.text_color || '#ffffff',
+      height: Number(themeHeader.height || themeHeader.navHeight || themeHeader.nav_height || 64),
+      stickyHeader: Boolean(themeHeader.stickyHeader || themeHeader.sticky),
+      showShadow: themeHeader.showShadow !== false && themeHeader.shadow !== false,
     },
     footer: {
       companyName: 'My Restaurant',
@@ -191,30 +205,35 @@ function normalizeTheme(theme: any): ThemeData {
       showBackToTop: true,
       columns: 3,
       layout: 'expanded',
-      ...theme.footer,
+      ...themeFooter,
       // Normalize all footer string fields that might be translation objects
-      companyName: extractLabel(theme.footer?.companyName),
-      companyDescription: extractLabel(theme.footer?.companyDescription),
-      address: extractLabel(theme.footer?.address),
-      phone: extractLabel(theme.footer?.phone),
-      email: extractLabel(theme.footer?.email),
-      copyrightText: extractLabel(theme.footer?.copyrightText),
-      legalLinks: normalizeNavItems(theme.footer?.legalLinks),
-      footerSections: (theme.footer?.footerSections || []).map((section: any) => ({
+      companyName: extractLabel(themeFooter.companyName || themeFooter.company_name || themeIdentity.siteTitle || themeIdentity.site_title),
+      companyDescription: extractLabel(themeFooter.companyDescription || themeFooter.company_description),
+      address: extractLabel(themeFooter.address),
+      phone: extractLabel(themeFooter.phone),
+      email: extractLabel(themeFooter.email),
+      copyrightText: extractLabel(themeFooter.copyrightText || themeFooter.copyright_text),
+      legalLinks: normalizeNavItems(themeFooter.legalLinks || themeFooter.legal_links),
+      footerSections: (themeFooter.footerSections || themeFooter.footer_sections || themeFooter.sections || []).map((section: any) => ({
         ...section,
         title: extractLabel(section.title),
         links: normalizeNavItems(section.links),
       })),
-      socialLinks: (theme.footer?.socialLinks || []).map((link: any) => ({
+      socialLinks: (themeFooter.socialLinks || themeFooter.social_links || []).map((link: any) => ({
         ...link,
+        id: link?.id ? String(link.id) : undefined,
         platform: extractLabel(link.platform),
       })),
+      backgroundColor: themeFooter.backgroundColor || themeFooter.background_color || '#1f2937',
+      textColor: themeFooter.textColor || themeFooter.text_color || '#ffffff',
     },
     identity: {
-      siteTitle: extractLabel(theme.identity?.siteTitle),
-      ...theme.identity,
+      siteTitle: extractLabel(themeIdentity.siteTitle || themeIdentity.site_title),
+      logoUrl: themeIdentity.logoUrl || themeIdentity.logo_url || '',
+      faviconUrl: themeIdentity.faviconUrl || themeIdentity.favicon_url || '',
+      domain: themeIdentity.domain || '',
     },
-    customCss: theme.customCss || '',
+    customCss: theme.customCss || theme.custom_css || '',
     typography: {
       fontFamily: 'Inter',
       baseFontSize: 14,
@@ -223,11 +242,37 @@ function normalizeTheme(theme: any): ThemeData {
       fontWeights: [400, 700],
       fontSize: 14,
       fontStyle: 'normal',
-      ...theme.typography,
+      ...themeTypography,
+      fontFamily: themeTypography.fontFamily || themeTypography.font_family || 'Inter',
+      baseFontSize: Number(themeTypography.baseFontSize || themeTypography.base_size || themeTypography.base_font_size || 14),
+      borderRadius: Number(themeTypography.borderRadius || themeTypography.border_radius || 8),
+      lineHeight: Number(themeTypography.lineHeight || themeTypography.line_height || 1.5),
+    },
+    colors: {
+      primary: '#3b82f6',
+      secondary: '#1e40af',
+      accent: '#0ea5e9',
+      background: '#ffffff',
+      text: '#1f2937',
+      border: '#e5e7eb',
+      shadow: '#1f2937',
+      ...themeColors,
     },
     // Use actual components from backend - DO NOT auto-fill with defaults
     // If backend says 0 components, show 0 components
-    components: Array.isArray(theme.components) ? theme.components : [],
+    components: Array.isArray(theme.components)
+      ? theme.components.map((component: any, index: number) => ({
+          ...component,
+          id: component?.id ? String(component.id) : `component-${index + 1}`,
+          title: extractLabel(component?.title || component?.type || 'Component'),
+          displayOrder: Number(
+            component?.displayOrder !== undefined ? component.displayOrder : component?.order !== undefined ? component.order : index
+          ),
+          config: component?.config || component?.settings || {},
+          settings: component?.settings || component?.config || {},
+          enabled: component?.enabled !== false,
+        }))
+      : [],
   }
 
   return normalizedTheme
@@ -320,6 +365,9 @@ export default function ThemeEditorPage({ params: paramsPromise }: EditorPagePro
       // Backend expects: id, type, title (BilingualText), order, enabled, settings (not config)
       const components = currentTheme.components.map((comp, index) => {
         const config = comp.config || {}
+        const displayOrder = Number(
+          comp.displayOrder !== undefined ? comp.displayOrder : (comp as any).order !== undefined ? (comp as any).order : index
+        )
 
         // Extract bilingual fields from config
         const title = {
@@ -343,10 +391,13 @@ export default function ThemeEditorPage({ params: paramsPromise }: EditorPagePro
         } : undefined
 
         const component: any = {
+          id: comp.id ? String(comp.id) : `component-${index + 1}`,
           type: comp.type,
           title,
-          order: index,
+          order: displayOrder,
+          displayOrder,
           enabled: comp.enabled,
+          config,
           settings: config,
         }
 
@@ -354,23 +405,39 @@ export default function ThemeEditorPage({ params: paramsPromise }: EditorPagePro
         if (subtitle && (subtitle.en || subtitle.ar)) component.subtitle = subtitle
         if (description && (description.en || description.ar)) component.description = description
         if (buttonText && (buttonText.en || buttonText.ar)) component.buttonText = buttonText
-        if (comp.id) component.id = comp.id
 
         return component
       }) as any
 
-      const updateData = {
-        name: currentTheme.name,
-        description: currentTheme.description,
+      const themeConfig = {
         colors: currentTheme.colors,
         typography: {
           fontFamily: currentTheme.typography.fontFamily,
           baseFontSize: currentTheme.typography.baseFontSize,
           borderRadius: currentTheme.typography.borderRadius,
           lineHeight: currentTheme.typography.lineHeight,
+          fontWeights: currentTheme.typography.fontWeights || [400, 700],
+          fontStyle: currentTheme.typography.fontStyle || 'normal',
         },
         identity: currentTheme.identity,
+        header: currentTheme.header,
+        footer: currentTheme.footer,
         components,
+        customCss: currentTheme.customCss || '',
+      }
+
+      const updateData = {
+        name: currentTheme.name,
+        slug: currentTheme.slug,
+        description: currentTheme.description,
+        colors: themeConfig.colors,
+        typography: themeConfig.typography,
+        identity: currentTheme.identity,
+        header_config: currentTheme.header,
+        footer_config: currentTheme.footer,
+        components,
+        customCss: currentTheme.customCss || '',
+        config: themeConfig,
       }
 
       debugLog('📤 [ThemeEditor] Saving theme with data:', updateData)

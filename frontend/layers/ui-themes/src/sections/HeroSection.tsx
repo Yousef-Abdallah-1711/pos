@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import React from 'react'
 import { ChevronRight } from 'lucide-react'
@@ -7,13 +7,6 @@ import { getMockDataForComponent } from '../mockData'
 
 /**
  * HeroSection: Main hero banner component for websites
- *
- * Displays a full-width hero section with:
- * - Background image support
- * - Title, subtitle, and description
- * - Call-to-action button
- * - Configurable overlay opacity and text alignment
- * - RTL support for Arabic
  */
 export const HeroSection: React.FC<HeroSectionProps> = ({
   title_en = '',
@@ -26,71 +19,65 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
   config = {},
   isArabic = false,
 }) => {
-  // Use provided values or fallback to mock data
   const mockData = getMockDataForComponent('hero')
 
-  const title = isArabic ? (title_ar || mockData.title_ar) : (title_en || mockData.title_en)
-  const subtitle = isArabic ? (subtitle_ar || mockData.subtitle_ar) : (subtitle_en || mockData.subtitle_en)
-  const description = isArabic ? (description_ar || mockData.description_ar) : (description_en || mockData.description_en)
+  const title = isArabic ? title_ar || mockData.title_ar : title_en || mockData.title_en
+  const subtitle = isArabic ? subtitle_ar || mockData.subtitle_ar : subtitle_en || mockData.subtitle_en
+  const description = isArabic ? description_ar || mockData.description_ar : description_en || mockData.description_en
   const bgImage = background_image_url || mockData.background_image_url || ''
 
-  const ctaText = config.cta_button_text || (isArabic ? 'اطلب الآن' : 'Learn More')
+  const ctaText = config.cta_button_text || (isArabic ? 'Learn More' : 'Learn More')
   const ctaUrl = config.cta_button_url || '#'
-  const height = config.height === 'large' ? '600px' : config.height === 'medium' ? '500px' : config.height === 'small' ? '400px' : (config.height || '500px')
+  const height =
+    config.height === 'large'
+      ? 'min-h-[34rem]'
+      : config.height === 'small'
+        ? 'min-h-[24rem]'
+        : 'min-h-[28rem]'
+
   const overlayOpacity = config.overlay_opacity !== undefined ? config.overlay_opacity : 0.3
   const textAlignment = config.text_alignment || 'center'
 
+  const textAlignClass =
+    textAlignment === 'left' ? 'text-left' : textAlignment === 'right' ? 'text-right' : 'text-center'
+
+  const justifyClass =
+    textAlignment === 'left'
+      ? 'items-start'
+      : textAlignment === 'right'
+        ? 'items-end'
+        : 'items-center'
+
   return (
     <section
-      className="relative w-full overflow-hidden flex items-center justify-center"
+      dir={isArabic ? 'rtl' : 'ltr'}
+      className={`hero-section relative w-full overflow-hidden flex ${height}`}
       style={{
-        height,
-        backgroundImage: bgImage ? `url(${bgImage})` : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        backgroundImage: bgImage
+          ? `linear-gradient(rgba(0,0,0,${overlayOpacity}), rgba(0,0,0,${overlayOpacity})), url(${bgImage})`
+          : `linear-gradient(135deg, rgba(17,24,39,${Math.max(overlayOpacity, 0.7)}), rgba(59,130,246,${Math.max(overlayOpacity, 0.7)}))`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
-        direction: isArabic ? 'rtl' : 'ltr',
       }}
     >
-      {/* Overlay */}
-      <div
-        className="absolute inset-0 bg-black"
-        style={{ opacity: overlayOpacity }}
-      />
+      <div className="relative z-10 w-full max-w-6xl mx-auto px-6 py-14 sm:py-20 flex">
+        <div className={`w-full max-w-3xl flex flex-col gap-4 sm:gap-5 ${textAlignClass} ${justifyClass}`}>
+          {title && <h1 className="text-3xl sm:text-5xl md:text-6xl font-bold text-white leading-tight break-words">{title}</h1>}
 
-      {/* Content */}
-      <div
-        className="relative z-10 max-w-4xl mx-auto px-6 w-full"
-        style={{
-          textAlign: textAlignment as any,
-        }}
-      >
-        {title && (
-          <h1 className="text-5xl md:text-6xl font-bold text-white mb-4">
-            {title}
-          </h1>
-        )}
+          {subtitle && <p className="text-lg sm:text-2xl text-gray-100 break-words">{subtitle}</p>}
 
-        {subtitle && (
-          <p className="text-xl md:text-2xl text-gray-200 mb-6">
-            {subtitle}
-          </p>
-        )}
+          {description && <p className="text-base sm:text-lg text-gray-200 max-w-2xl break-words">{description}</p>}
 
-        {description && (
-          <p className="text-lg text-gray-300 mb-8 max-w-2xl" style={{ marginLeft: textAlignment === 'center' ? 'auto' : '0', marginRight: textAlignment === 'center' ? 'auto' : '0' }}>
-            {description}
-          </p>
-        )}
-
-        {ctaText && (
-          <a
-            href={ctaUrl}
-            className="btn-primary inline-flex items-center gap-2 text-lg"
-          >
-            {ctaText}
-            <ChevronRight className="h-5 w-5" />
-          </a>
-        )}
+          {ctaText && (
+            <a
+              href={ctaUrl}
+              className={`btn-primary inline-flex items-center gap-2 text-base sm:text-lg w-fit ${isArabic ? 'flex-row-reverse' : ''}`}
+            >
+              {ctaText}
+              <ChevronRight className={`h-5 w-5 ${isArabic ? 'rotate-180' : ''}`} />
+            </a>
+          )}
+        </div>
       </div>
     </section>
   )

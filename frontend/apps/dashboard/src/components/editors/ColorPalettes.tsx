@@ -133,6 +133,7 @@ const PRESET_PALETTES: ColorPalette[] = [
 export function ColorPalettes({ onApply }: ColorPalettesProps) {
   const [copiedPaletteId, setCopiedPaletteId] = useState<string | null>(null)
   const [selectedCategory, setSelectedCategory] = useState<'all' | ColorPalette['category']>('all')
+  const getSafePaletteId = (id: string) => id.replace(/[^a-zA-Z0-9_-]/g, '-')
 
   const filteredPalettes =
     selectedCategory === 'all'
@@ -151,6 +152,31 @@ export function ColorPalettes({ onApply }: ColorPalettesProps) {
     setCopiedPaletteId(paletteId)
     setTimeout(() => setCopiedPaletteId(null), 2000)
   }
+
+  const paletteColorRules = PRESET_PALETTES.map((palette) => {
+    const safeId = getSafePaletteId(palette.id)
+    const stripRules = Object.values(palette.colors)
+      .map(
+        (color, idx) => `
+          .palette-strip-${safeId}-${idx} {
+            background-color: ${color};
+          }
+        `
+      )
+      .join('\n')
+
+    const detailRules = Object.entries(palette.colors)
+      .map(
+        ([key, color]) => `
+          .palette-detail-${safeId}-${key} {
+            background-color: ${color};
+          }
+        `
+      )
+      .join('\n')
+
+    return `${stripRules}\n${detailRules}`
+  }).join('\n')
 
   return (
     <div className="space-y-4">
@@ -188,8 +214,7 @@ export function ColorPalettes({ onApply }: ColorPalettesProps) {
                 {Object.values(palette.colors).map((color, idx) => (
                   <div
                     key={idx}
-                    className="flex-1"
-                    style={{ backgroundColor: color }}
+                    className={`flex-1 palette-strip-${getSafePaletteId(palette.id)}-${idx}`}
                     title={color}
                   />
                 ))}
@@ -238,8 +263,7 @@ export function ColorPalettes({ onApply }: ColorPalettesProps) {
                         title={`${key}: ${color}`}
                       >
                         <div
-                          className="w-6 h-6 rounded border border-gray-300 dark:border-gray-600 mb-1"
-                          style={{ backgroundColor: color }}
+                          className={`w-6 h-6 rounded border border-gray-300 dark:border-gray-600 mb-1 palette-detail-${getSafePaletteId(palette.id)}-${key}`}
                         />
                         <span className="text-xs text-gray-500 dark:text-gray-400 capitalize">
                           {key === 'background' ? 'bg' : key === 'text' ? 'txt' : key.substring(0, 3)}
@@ -256,10 +280,13 @@ export function ColorPalettes({ onApply }: ColorPalettesProps) {
         {/* Info Box */}
         <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg">
           <p className="text-xs text-blue-700 dark:text-blue-300">
-            💡 <strong>Pro Tip:</strong> Click "Apply" to instantly apply a palette to all 7 theme colors. You can
-            then fine-tune individual colors using the color pickers above.
+            Tip: Click "Apply" to instantly apply a palette to all theme colors, then fine-tune individual colors.
           </p>
         </div>
+
+        <style jsx>{`
+          ${paletteColorRules}
+        `}</style>
       </div>
     </div>
   )

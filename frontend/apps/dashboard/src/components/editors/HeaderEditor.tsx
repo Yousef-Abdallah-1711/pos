@@ -73,6 +73,12 @@ export function HeaderEditor({
   const [editingItemId, setEditingItemId] = useState<string | null>(null)
   const [editingLabel, setEditingLabel] = useState('')
   const [editingHref, setEditingHref] = useState('')
+  const navJustify =
+    headerConfig.navPosition === 'left'
+      ? 'flex-start'
+      : headerConfig.navPosition === 'center'
+        ? 'center'
+        : 'flex-end'
 
   const handleConfigChange = useCallback(
     (key: keyof HeaderConfig, value: any) => {
@@ -218,17 +224,7 @@ export function HeaderEditor({
         {/* Desktop Preview */}
         <div className="space-y-2">
           <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">Desktop Preview</h4>
-          <div
-            style={{
-              backgroundColor: headerConfig.backgroundColor || '#ffffff',
-              color: headerConfig.textColor || '#000000',
-              height: `${headerConfig.height || 80}px`,
-              padding: `0 ${headerConfig.padding || 16}px`,
-              boxShadow: headerConfig.shadow ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
-              position: headerConfig.stickyHeader ? 'sticky' : 'relative',
-            }}
-            className="border border-gray-200 dark:border-gray-700 rounded-lg flex items-center justify-between"
-          >
+          <div className="header-preview-desktop border border-gray-200 dark:border-gray-700 rounded-lg flex items-center justify-between">
             {/* Logo */}
             {headerConfig.showLogo && (
               <div className="flex items-center gap-2">
@@ -236,8 +232,7 @@ export function HeaderEditor({
                   <img
                     src={headerConfig.logoUrl}
                     alt="Logo"
-                    style={{ height: `${headerConfig.logoHeight || 40}px` }}
-                    className="object-contain"
+                    className="header-logo-desktop object-contain"
                   />
                 )}
                 {headerConfig.logoText && <span className="font-bold">{headerConfig.logoText}</span>}
@@ -245,18 +240,7 @@ export function HeaderEditor({
             )}
 
             {/* Navigation */}
-            <div
-              style={{
-                display: 'flex',
-                gap: '2rem',
-                justifyContent:
-                  headerConfig.navPosition === 'left'
-                    ? 'flex-start'
-                    : headerConfig.navPosition === 'center'
-                      ? 'center'
-                      : 'flex-end',
-              }}
-            >
+            <div className="header-preview-nav">
               {(headerConfig.navigationItems || []).map((item) => (
                 <a key={item.id} href={item.href} className="text-sm hover:opacity-70">
                   {item.label}
@@ -269,15 +253,7 @@ export function HeaderEditor({
         {/* Mobile Preview */}
         <div className="space-y-2">
           <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">Mobile Preview</h4>
-          <div
-            style={{
-              backgroundColor: headerConfig.backgroundColor || '#ffffff',
-              color: headerConfig.textColor || '#000000',
-              height: `${headerConfig.height || 80}px`,
-              padding: `0 ${headerConfig.padding || 16}px`,
-            }}
-            className="border border-gray-200 dark:border-gray-700 rounded-lg flex items-center justify-between w-full max-w-sm"
-          >
+          <div className="header-preview-mobile border border-gray-200 dark:border-gray-700 rounded-lg flex items-center justify-between w-full max-w-sm">
             {/* Logo Mobile */}
             {headerConfig.showLogo && (
               <div className="flex items-center gap-2">
@@ -285,8 +261,7 @@ export function HeaderEditor({
                   <img
                     src={headerConfig.logoUrl}
                     alt="Logo"
-                    style={{ height: `${headerConfig.logoHeight || 40}px` }}
-                    className="object-contain"
+                    className="header-logo-mobile object-contain"
                   />
                 )}
               </div>
@@ -296,6 +271,34 @@ export function HeaderEditor({
             <div className="text-2xl">☰</div>
           </div>
         </div>
+        <style jsx>{`
+          .header-preview-desktop {
+            background-color: ${headerConfig.backgroundColor || '#ffffff'};
+            color: ${headerConfig.textColor || '#000000'};
+            height: ${headerConfig.height || 80}px;
+            padding: 0 ${headerConfig.padding || 16}px;
+            box-shadow: ${headerConfig.shadow ? '0 1px 3px rgba(0,0,0,0.1)' : 'none'};
+            position: ${headerConfig.stickyHeader ? 'sticky' : 'relative'};
+          }
+
+          .header-preview-mobile {
+            background-color: ${headerConfig.backgroundColor || '#ffffff'};
+            color: ${headerConfig.textColor || '#000000'};
+            height: ${headerConfig.height || 80}px;
+            padding: 0 ${headerConfig.padding || 16}px;
+          }
+
+          .header-logo-desktop,
+          .header-logo-mobile {
+            height: ${headerConfig.logoHeight || 40}px;
+          }
+
+          .header-preview-nav {
+            display: flex;
+            gap: 2rem;
+            justify-content: ${navJustify};
+          }
+        `}</style>
       </div>
     )
   }

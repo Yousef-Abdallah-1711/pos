@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { usePathname } from 'next/navigation'
 import { useAuthStore } from '@/stores/authStore'
 import { useHasPermission } from '@/hooks/useRbac'
@@ -37,7 +37,7 @@ interface Employee {
 export default function PayrollPage() {
   const pathname = usePathname()
   const locale = getLocaleFromPath(pathname)
-  const t = createTranslator(locale)
+  const t = useMemo(() => createTranslator(locale), [locale])
 
   // Check RBAC permissions for Salaries module
   const { hasPermission: canViewSalaries, loading: canViewLoading } = useHasPermission(
@@ -50,7 +50,7 @@ export default function PayrollPage() {
   )
   const permissionLoading = canViewLoading || canCreateLoading
 
-  // Move ALL hooks BEFORE early returns to avoid Hook order violation
+  // ALL hooks MUST be before early returns to avoid Hook order violation
   const [salaries, setSalaries] = useState<Salary[]>([])
   const [employees, setEmployees] = useState<Employee[]>([])
   const [loading, setLoading] = useState(false)
@@ -63,6 +63,60 @@ export default function PayrollPage() {
   const [endDate, setEndDate] = useState(new Date().toISOString().split('T')[0])
 
   const token = useAuthStore((state) => state.token)
+
+  // Fetch employees - hook MUST be before early returns
+  useEffect(() => {
+    if (!token || !canViewSalaries || permissionLoading) return
+
+    const fetchEmployees = async () => {
+      try {
+        const response = await api.get('/hr/employees')
+        const empList = Array.isArray(response.data) ? response.data : (response.data?.data || response.data?.employees || [])
+        setEmployees(empList)
+      } catch (error) {
+        debugError('Failed to load employees:', error)
+      }
+    }
+    fetchEmployees()
+  }, [token, canViewSalaries, permissionLoading])
+
+  // Fetch salaries - hook MUST be before early returns
+  useEffect(() => {
+    if (!token || !canViewSalaries || permissionLoading) return
+
+    const fetchSalaries = async () => {
+      setLoading(true)
+      setApiError(null)
+      setDebugInfo(`Fetching salaries at ${new Date().toLocaleTimeString()}`)
+
+      try {
+        debugLog('[PAYROLL_PAGE] Starting fetch...')
+        const response = await api.get('/hr/salaries', { params: { start_date: startDate, end_date: endDate } })
+        debugLog('[PAYROLL_PAGE] Response:', response.data)
+
+        const salariesList = Array.isArray(response.data) ? response.data : (response.data?.data || response.data?.salaries || [])
+        const enrichedSalaries = salariesList.map(s => ({
+          ...s,
+          employee_name: employees.find(e => e.id === s.employee_id)
+            ? `${employees.find(e => e.id === s.employee_id)?.first_name} ${employees.find(e => e.id === s.employee_id)?.last_name}`
+            : undefined,
+        }))
+
+        setSalaries(enrichedSalaries)
+        setDebugInfo(`Successfully loaded ${enrichedSalaries.length} salary records`)
+      } catch (error: any) {
+        const errorMsg = error?.response?.data?.message || error?.message || 'Failed to load salaries'
+        debugError('[PAYROLL_PAGE] Error:', error)
+        setApiError(errorMsg)
+        setDebugInfo(`Error: ${errorMsg}`)
+        toast.error(errorMsg)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchSalaries()
+  }, [token, startDate, endDate, employees, canViewSalaries, permissionLoading])
 
   // Show permission denied if user can't view salaries
   if (permissionLoading) {
@@ -99,60 +153,13 @@ export default function PayrollPage() {
     )
   }
 
-  useEffect(() => {
-    const fetchEmployees = async () => {
-      try {
-        const response = await api.get('/hr/employees')
-        const empList = Array.isArray(response.data) ? response.data : response.data?.employees || []
-        setEmployees(empList)
-      } catch (error) {
-        debugError('Failed to load employees:', error)
-      }
-    }
-    if (token) fetchEmployees()
-  }, [token])
-
-  useEffect(() => {
-    const fetchSalaries = async () => {
-      setLoading(true)
-      setApiError(null)
-      setDebugInfo(`Fetching salaries at ${new Date().toLocaleTimeString()}`)
-
-      try {
-        debugLog('[PAYROLL_PAGE] Starting fetch...')
-        const response = await api.get('/hr/salaries', { params: { start_date: startDate, end_date: endDate } })
-        debugLog('[PAYROLL_PAGE] Response:', response.data)
-
-        const salariesList = Array.isArray(response.data) ? response.data : response.data?.salaries || []
-        const enrichedSalaries = salariesList.map(s => ({
-          ...s,
-          employee_name: employees.find(e => e.id === s.employee_id)
-            ? `${employees.find(e => e.id === s.employee_id)?.first_name} ${employees.find(e => e.id === s.employee_id)?.last_name}`
-            : undefined,
-        }))
-
-        setSalaries(enrichedSalaries)
-        setDebugInfo(`Successfully loaded ${enrichedSalaries.length} salary records`)
-      } catch (error: any) {
-        const errorMsg = error?.response?.data?.message || error?.message || t('hr.payroll.loadFailed', 'Failed to load salaries')
-        debugError('[PAYROLL_PAGE] Error:', error)
-        setApiError(errorMsg)
-        setDebugInfo(`Error: ${errorMsg}`)
-        toast.error(errorMsg)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    if (token) fetchSalaries()
-  }, [token, startDate, endDate, employees, t])
-
   const handleCreateSalary = async (formData: any) => {
     try {
       debugLog('[CREATE_SALARY] Submitting:', formData)
       const response = await api.post('/hr/salaries', formData)
       debugLog('[CREATE_SALARY] Response:', response.data)
-      setSalaries([response.data, ...salaries])
+      const created = response.data?.data || response.data
+      setSalaries([created, ...salaries])
       setShowForm(false)
       toast.success(t('hr.payroll.successCreated', 'Salary record created successfully'))
     } catch (error: any) {

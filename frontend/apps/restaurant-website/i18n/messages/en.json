@@ -33,7 +33,8 @@
     "deliveryFee": "Delivery Fee",
     "tax": "Tax",
     "grandTotal": "Grand Total",
-    "free": "Free"
+    "free": "Free",
+    "refresh": "Refresh"
   },
   "navigation": {
     "home": "Home",
@@ -226,5 +227,31 @@
     "orderNotFound": "Order not found",
     "insufficientInventory": "Some items are out of stock. Please update your cart.",
     "somethingWentWrong": "Something went wrong. Please try again."
+  },
+  "maintenance": {
+    "trialExpired": {
+      "title": "We'll Be Back Soon!",
+      "subtitle": "Trial Period Ended",
+      "description": "Our online ordering system is temporarily unavailable as we update our service. The restaurant is currently working to restore access. Please check back soon or contact us directly for orders."
+    },
+    "tenantDisabled": {
+      "title": "Service Temporarily Unavailable",
+      "subtitle": "Account Disabled",
+      "description": "We apologize for the inconvenience. Our online ordering system is temporarily unavailable. Please contact the restaurant directly to place your order."
+    },
+    "error": {
+      "title": "Something Went Wrong",
+      "subtitle": "Technical Issue",
+      "description": "Our online ordering system is experiencing technical difficulties. Please try again later or contact us directly for assistance."
+    },
+    "default": {
+      "title": "We Are Currently Offline",
+      "subtitle": "Scheduled Maintenance",
+      "description": "We are performing scheduled maintenance to improve your experience. We will be back online shortly. Thank you for your patience!"
+    },
+    "estimatedReturnTime": "Estimated return time:",
+    "contactUs": "Contact Us",
+    "thankYou": "Thank you for choosing",
+    "customColors": "Custom Colors"
   }
 }

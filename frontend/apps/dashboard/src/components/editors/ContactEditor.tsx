@@ -612,52 +612,31 @@ export function ContactEditor({
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 {/* Form */}
-                <div
-                  style={{ backgroundColor: config.formBackgroundColor || '#ffffff' }}
-                  className="rounded-lg p-6 shadow-lg"
-                >
+                <div className="contact-preview-form rounded-lg p-6 shadow-lg">
                   <form className="space-y-4">
                     {(config.formFields || []).map((field) => (
                       <div key={field.id}>
-                        <label
-                          style={{ color: config.labelColor || '#374151' }}
-                          className="block text-sm font-medium mb-1"
-                        >
+                        <label className="contact-preview-label block text-sm font-medium mb-1">
                           {field.label}
                           {field.required && <span className="text-red-500">*</span>}
                         </label>
                         {field.type === 'textarea' ? (
                           <textarea
                             placeholder={field.placeholder}
-                            style={{
-                              backgroundColor: config.inputBackgroundColor || '#ffffff',
-                              borderColor: config.inputBorderColor || '#d1d5db',
-                              color: config.inputTextColor || '#111827',
-                            }}
                             rows={4}
-                            className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="contact-preview-input w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                           />
                         ) : (
                           <input
                             type={field.type}
                             placeholder={field.placeholder}
-                            style={{
-                              backgroundColor: config.inputBackgroundColor || '#ffffff',
-                              borderColor: config.inputBorderColor || '#d1d5db',
-                              color: config.inputTextColor || '#111827',
-                            }}
-                            className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="contact-preview-input w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                           />
                         )}
                       </div>
                     ))}
 
-                    <button
-                      style={{
-                        backgroundColor: config.submitButtonColor || '#3b82f6',
-                      }}
-                      className="w-full text-white font-medium py-2 rounded-lg hover:opacity-90 transition-opacity"
-                    >
+                    <button className="contact-preview-submit w-full text-white font-medium py-2 rounded-lg hover:opacity-90 transition-opacity">
                       {config.submitButtonText || 'Send Message'}
                     </button>
                   </form>
@@ -714,7 +693,7 @@ export function ContactEditor({
                     width="100%"
                     height={config.mapHeight || 400}
                     frameBorder="0"
-                    style={{ border: 0, borderRadius: '0.5rem' }}
+                    className="contact-preview-map"
                     src={config.mapEmbedUrl}
                     allowFullScreen
                     loading="lazy"
@@ -722,6 +701,30 @@ export function ContactEditor({
                   />
                 </div>
               )}
+              <style jsx>{`
+                .contact-preview-form {
+                  background-color: ${config.formBackgroundColor || '#ffffff'};
+                }
+
+                .contact-preview-label {
+                  color: ${config.labelColor || '#374151'};
+                }
+
+                .contact-preview-input {
+                  background-color: ${config.inputBackgroundColor || '#ffffff'};
+                  border-color: ${config.inputBorderColor || '#d1d5db'};
+                  color: ${config.inputTextColor || '#111827'};
+                }
+
+                .contact-preview-submit {
+                  background-color: ${config.submitButtonColor || '#3b82f6'};
+                }
+
+                .contact-preview-map {
+                  border: 0;
+                  border-radius: 0.5rem;
+                }
+              `}</style>
             </div>
           </div>
         </div>

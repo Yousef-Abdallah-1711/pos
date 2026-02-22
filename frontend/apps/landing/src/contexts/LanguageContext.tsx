@@ -1,6 +1,7 @@
 'use client'
 
-import { createContext, useContext, useState, useEffect } from 'react'
+import { createContext, useContext, useEffect } from 'react'
+import { useRouter, usePathname } from 'next/navigation'
 import { translations, type Language, type Translations } from '@/lib/translations'
 
 interface LanguageContextType {
@@ -12,35 +13,37 @@ interface LanguageContextType {
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined)
 
-export function LanguageProvider({ children }: { children: React.ReactNode }) {
-  const [language, setLanguage] = useState<Language>('en')
-  const dir = language === 'ar' ? 'rtl' : 'ltr'
+interface LanguageProviderProps {
+  children: React.ReactNode
+  locale: Language
+}
+
+export function LanguageProvider({ children, locale }: LanguageProviderProps) {
+  const router = useRouter()
+  const pathname = usePathname()
+  const dir = locale === 'ar' ? 'rtl' : 'ltr'
 
   useEffect(() => {
-    // Load saved language from localStorage
-    const saved = localStorage.getItem('language') as Language
-    if (saved && (saved === 'en' || saved === 'ar')) {
-      setLanguage(saved)
-    }
-  }, [])
-
-  useEffect(() => {
-    // Save language to localStorage and update HTML dir attribute
-    localStorage.setItem('language', language)
+    // Update HTML attributes for RTL support
     document.documentElement.dir = dir
-    document.documentElement.lang = language
-  }, [language, dir])
+    document.documentElement.lang = locale
+  }, [locale, dir])
 
-  const handleSetLanguage = (lang: Language) => {
-    setLanguage(lang)
+  const setLanguage = (lang: Language) => {
+    // Swap locale segment in the current URL
+    const segments = pathname.split('/')
+    // segments[0] is '', segments[1] is the current locale
+    segments[1] = lang
+    const newPath = segments.join('/')
+    router.push(newPath)
   }
 
   return (
     <LanguageContext.Provider
       value={{
-        language,
-        setLanguage: handleSetLanguage,
-        t: translations[language],
+        language: locale,
+        setLanguage,
+        t: translations[locale],
         dir,
       }}
     >

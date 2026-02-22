@@ -13,16 +13,13 @@ export default async function TrackOrderPage({ params }: PageProps) {
   // Fetch theme server-side
   const themeData = (await getThemeDataServer()) ?? getDefaultThemeData();
 
-  // Extract theme from nested response structure
-  const themeDataExtracted = themeData.data?.data?.config || themeData.data?.config || themeData;
-
   return (
     <>
-      <HeaderSSR themeData={themeDataExtracted} cartItemsCount={0} locale={locale} />
+      <HeaderSSR themeData={themeData} cartItemsCount={0} locale={locale} />
       <main>
         <TrackPageContent />
       </main>
-      <FooterSSR themeData={themeDataExtracted} locale={locale} />
+      <FooterSSR themeData={themeData} locale={locale} />
     </>
   );
 }

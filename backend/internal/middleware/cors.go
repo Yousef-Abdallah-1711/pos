@@ -1,30 +1,92 @@
 package middleware
 
 import (
-	"fmt"
 	"net/http"
+	"net/url"
+	"os"
+	"strings"
+	"sync"
+)
+
+var (
+	corsOriginsOnce sync.Once
+	corsOrigins     map[string]struct{}
 )
 
 func CORSMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		fmt.Println("=== CORS MIDDLEWARE ===")
-		fmt.Printf("Incoming request: %s %s\n", r.Method, r.URL.Path)
-		fmt.Printf("Origin: %s\n", r.Header.Get("Origin"))
-		fmt.Printf("Content-Type: %s\n", r.Header.Get("Content-Type"))
+	corsOriginsOnce.Do(loadAllowedOrigins)
 
-		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Tenant-ID, X-Restaurant-ID")
-		w.Header().Set("Access-Control-Allow-Credentials", "true")
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		origin := normalizeOrigin(r.Header.Get("Origin"))
+		originAllowed := isOriginAllowed(origin)
+
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Tenant-ID, X-Restaurant-ID, X-Impersonation-Token")
+		w.Header().Set("Access-Control-Expose-Headers", "X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset, Retry-After")
+		w.Header().Add("Vary", "Origin")
+
+		if originAllowed {
+			w.Header().Set("Access-Control-Allow-Origin", origin)
+			w.Header().Set("Access-Control-Allow-Credentials", "true")
+		}
 
 		if r.Method == "OPTIONS" {
-			fmt.Println("OPTIONS preflight request - responding with 200")
+			if origin != "" && !originAllowed {
+				w.WriteHeader(http.StatusForbidden)
+				return
+			}
 			w.WriteHeader(http.StatusOK)
 			return
 		}
 
-		fmt.Println("Passing request to handler...")
 		next.ServeHTTP(w, r)
-		fmt.Println("=== END CORS MIDDLEWARE ===")
 	})
+}
+
+func loadAllowedOrigins() {
+	corsOrigins = make(map[string]struct{})
+
+	raw := strings.TrimSpace(os.Getenv("CORS_ORIGINS"))
+	if raw == "" {
+		raw = "http://localhost:3001,http://localhost:3002,http://localhost:3003,http://localhost:3004"
+	}
+
+	for _, item := range strings.Split(raw, ",") {
+		origin := normalizeOrigin(item)
+		if origin == "" {
+			continue
+		}
+		corsOrigins[origin] = struct{}{}
+	}
+
+	// Phase 8: allow Paymob hosted origin for iframe/payment communication.
+	corsOrigins["https://accept.paymob.com"] = struct{}{}
+}
+
+func isOriginAllowed(origin string) bool {
+	if origin == "" {
+		return false
+	}
+	if _, ok := corsOrigins[origin]; ok {
+		return true
+	}
+	// Keep local development flexible for alternate ports.
+	return isLocalhostOrigin(origin)
+}
+
+func isLocalhostOrigin(origin string) bool {
+	parsed, err := url.Parse(origin)
+	if err != nil {
+		return false
+	}
+	host := strings.ToLower(parsed.Hostname())
+	return host == "localhost" || host == "127.0.0.1"
+}
+
+func normalizeOrigin(origin string) string {
+	trimmed := strings.TrimSpace(origin)
+	if trimmed == "" {
+		return ""
+	}
+	return strings.TrimSuffix(trimmed, "/")
 }

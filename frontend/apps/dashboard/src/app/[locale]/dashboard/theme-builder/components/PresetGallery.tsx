@@ -136,6 +136,21 @@ const PRESET_TEMPLATES: ThemePreset[] = [
 export function PresetGallery({ isOpen, onClose, onSelectPreset }: PresetGalleryProps) {
   if (!isOpen) return null
 
+  const getSafePresetId = (id: string) => id.replace(/[^a-zA-Z0-9_-]/g, '-')
+  const presetColorRules = PRESET_TEMPLATES.map((preset) => {
+    const safeId = getSafePresetId(preset.id)
+    return Object.values(preset.colors)
+      .slice(0, 7)
+      .map(
+        (color, idx) => `
+          .preset-${safeId}-color-${idx} {
+            background-color: ${color};
+          }
+        `
+      )
+      .join('\n')
+  }).join('\n')
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-2xl max-w-5xl w-full max-h-[90vh] overflow-y-auto">
@@ -171,8 +186,7 @@ export function PresetGallery({ isOpen, onClose, onSelectPreset }: PresetGallery
                 {Object.values(preset.colors).slice(0, 7).map((color, idx) => (
                   <div
                     key={idx}
-                    className="flex-1 rounded"
-                    style={{ backgroundColor: color }}
+                    className={`flex-1 rounded preset-${getSafePresetId(preset.id)}-color-${idx}`}
                   />
                 ))}
               </div>
@@ -201,6 +215,9 @@ export function PresetGallery({ isOpen, onClose, onSelectPreset }: PresetGallery
             Select a preset to apply it to your current theme. You can customize all settings after.
           </p>
         </div>
+        <style jsx>{`
+          ${presetColorRules}
+        `}</style>
       </div>
     </div>
   )

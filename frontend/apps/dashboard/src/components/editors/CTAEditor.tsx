@@ -550,82 +550,22 @@ export function CTAEditor({
       )}
 
       {previewMode && (
-        <div
-          style={{
-            backgroundColor: config.backgroundColor || '#f3f4f6',
-            minHeight: `${config.minHeight || 300}px`,
-            padding: `${config.padding || 60}px`,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems:
-              config.alignment === 'left' ? 'flex-start' : config.alignment === 'right' ? 'flex-end' : 'center',
-            justifyContent: 'center',
-          }}
-          className="rounded-lg border border-gray-200 dark:border-gray-700"
-        >
+        <div className="cta-preview-shell rounded-lg border border-gray-200 dark:border-gray-700">
           <div className="max-w-2xl">
             <h2 className="text-4xl font-bold text-gray-900 dark:text-white text-center mb-4">
               {component.title?.en || 'Ready to Get Started?'}
             </h2>
 
             {component.subtitle && (
-              <p style={{ color: config.descriptionColor || '#6b7280' }} className="text-lg text-center mb-8">
+              <p className="cta-preview-description text-lg text-center mb-8">
                 {component.subtitle.en}
               </p>
             )}
 
-            <div
-              style={{
-                display: 'flex',
-                flexDirection: config.buttonLayout === 'stacked' ? 'column' : 'row',
-                gap: '1rem',
-                justifyContent: 'center',
-              }}
-            >
+            <div className="cta-preview-buttons">
               {/* Primary Button */}
               <button
-                style={{
-                  backgroundColor:
-                    config.primaryButtonStyle === 'solid'
-                      ? config.primaryButtonColor || '#3b82f6'
-                      : 'transparent',
-                  color:
-                    config.primaryButtonStyle === 'solid'
-                      ? 'white'
-                      : config.primaryButtonColor || '#3b82f6',
-                  borderColor: config.primaryButtonColor || '#3b82f6',
-                  borderWidth: config.primaryButtonStyle === 'outline' ? '2px' : '0',
-                  borderRadius: `${config.borderRadius || 8}px`,
-                  padding:
-                    config.primaryButtonSize === 'sm'
-                      ? '0.5rem 1.5rem'
-                      : config.primaryButtonSize === 'md'
-                        ? '0.75rem 2rem'
-                        : config.primaryButtonSize === 'lg'
-                          ? '1rem 2.5rem'
-                          : '1.25rem 3rem',
-                  fontSize:
-                    config.primaryButtonSize === 'sm'
-                      ? '0.875rem'
-                      : config.primaryButtonSize === 'md'
-                        ? '1rem'
-                        : config.primaryButtonSize === 'lg'
-                          ? '1.125rem'
-                          : '1.25rem',
-                }}
-                className="font-semibold transition-all hover:shadow-lg"
-                onMouseEnter={(e) => {
-                  if (config.primaryButtonStyle === 'solid') {
-                    (e.target as HTMLButtonElement).style.backgroundColor =
-                      config.primaryButtonHoverColor || '#2563eb'
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (config.primaryButtonStyle === 'solid') {
-                    (e.target as HTMLButtonElement).style.backgroundColor =
-                      config.primaryButtonColor || '#3b82f6'
-                  }
-                }}
+                className="cta-preview-primary font-semibold transition-all hover:shadow-lg"
               >
                 {config.primaryButtonText || 'Get Started'}
               </button>
@@ -633,54 +573,127 @@ export function CTAEditor({
               {/* Secondary Button */}
               {config.showSecondaryButton && (
                 <button
-                  style={{
-                    backgroundColor:
-                      config.secondaryButtonStyle === 'solid'
-                        ? config.secondaryButtonColor || '#9ca3af'
-                        : 'transparent',
-                    color:
-                      config.secondaryButtonStyle === 'solid'
-                        ? 'white'
-                        : config.secondaryButtonColor || '#9ca3af',
-                    borderColor: config.secondaryButtonColor || '#9ca3af',
-                    borderWidth: config.secondaryButtonStyle === 'outline' ? '2px' : '0',
-                    borderRadius: `${config.borderRadius || 8}px`,
-                    padding:
-                      config.secondaryButtonSize === 'sm'
-                        ? '0.5rem 1.5rem'
-                        : config.secondaryButtonSize === 'md'
-                          ? '0.75rem 2rem'
-                          : config.secondaryButtonSize === 'lg'
-                            ? '1rem 2.5rem'
-                            : '1.25rem 3rem',
-                    fontSize:
-                      config.secondaryButtonSize === 'sm'
-                        ? '0.875rem'
-                        : config.secondaryButtonSize === 'md'
-                          ? '1rem'
-                          : config.secondaryButtonSize === 'lg'
-                            ? '1.125rem'
-                            : '1.25rem',
-                  }}
-                  className="font-semibold transition-all hover:shadow-lg"
-                  onMouseEnter={(e) => {
-                    if (config.secondaryButtonStyle === 'solid') {
-                      (e.target as HTMLButtonElement).style.backgroundColor =
-                        config.secondaryButtonHoverColor || '#6b7280'
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (config.secondaryButtonStyle === 'solid') {
-                      (e.target as HTMLButtonElement).style.backgroundColor =
-                        config.secondaryButtonColor || '#9ca3af'
-                    }
-                  }}
+                  className="cta-preview-secondary font-semibold transition-all hover:shadow-lg"
                 >
                   {config.secondaryButtonText || 'Learn More'}
                 </button>
               )}
             </div>
           </div>
+          <style jsx>{`
+            .cta-preview-shell {
+              background-color: ${config.backgroundColor || '#f3f4f6'};
+              min-height: ${config.minHeight || 300}px;
+              padding: ${config.padding || 60}px;
+              display: flex;
+              flex-direction: column;
+              align-items: ${
+                config.alignment === 'left'
+                  ? 'flex-start'
+                  : config.alignment === 'right'
+                    ? 'flex-end'
+                    : 'center'
+              };
+              justify-content: center;
+            }
+
+            .cta-preview-description {
+              color: ${config.descriptionColor || '#6b7280'};
+            }
+
+            .cta-preview-buttons {
+              display: flex;
+              flex-direction: ${config.buttonLayout === 'stacked' ? 'column' : 'row'};
+              gap: 1rem;
+              justify-content: center;
+            }
+
+            .cta-preview-primary {
+              background-color: ${
+                config.primaryButtonStyle === 'solid'
+                  ? config.primaryButtonColor || '#3b82f6'
+                  : 'transparent'
+              };
+              color: ${
+                config.primaryButtonStyle === 'solid'
+                  ? '#ffffff'
+                  : config.primaryButtonColor || '#3b82f6'
+              };
+              border-color: ${config.primaryButtonColor || '#3b82f6'};
+              border-style: solid;
+              border-width: ${config.primaryButtonStyle === 'outline' ? '2px' : '0'};
+              border-radius: ${config.borderRadius || 8}px;
+              padding: ${
+                config.primaryButtonSize === 'sm'
+                  ? '0.5rem 1.5rem'
+                  : config.primaryButtonSize === 'md'
+                    ? '0.75rem 2rem'
+                    : config.primaryButtonSize === 'lg'
+                      ? '1rem 2.5rem'
+                      : '1.25rem 3rem'
+              };
+              font-size: ${
+                config.primaryButtonSize === 'sm'
+                  ? '0.875rem'
+                  : config.primaryButtonSize === 'md'
+                    ? '1rem'
+                    : config.primaryButtonSize === 'lg'
+                      ? '1.125rem'
+                      : '1.25rem'
+              };
+            }
+
+            .cta-preview-primary:hover {
+              background-color: ${
+                config.primaryButtonStyle === 'solid'
+                  ? config.primaryButtonHoverColor || '#2563eb'
+                  : 'transparent'
+              };
+            }
+
+            .cta-preview-secondary {
+              background-color: ${
+                config.secondaryButtonStyle === 'solid'
+                  ? config.secondaryButtonColor || '#9ca3af'
+                  : 'transparent'
+              };
+              color: ${
+                config.secondaryButtonStyle === 'solid'
+                  ? '#ffffff'
+                  : config.secondaryButtonColor || '#9ca3af'
+              };
+              border-color: ${config.secondaryButtonColor || '#9ca3af'};
+              border-style: solid;
+              border-width: ${config.secondaryButtonStyle === 'outline' ? '2px' : '0'};
+              border-radius: ${config.borderRadius || 8}px;
+              padding: ${
+                config.secondaryButtonSize === 'sm'
+                  ? '0.5rem 1.5rem'
+                  : config.secondaryButtonSize === 'md'
+                    ? '0.75rem 2rem'
+                    : config.secondaryButtonSize === 'lg'
+                      ? '1rem 2.5rem'
+                      : '1.25rem 3rem'
+              };
+              font-size: ${
+                config.secondaryButtonSize === 'sm'
+                  ? '0.875rem'
+                  : config.secondaryButtonSize === 'md'
+                    ? '1rem'
+                    : config.secondaryButtonSize === 'lg'
+                      ? '1.125rem'
+                      : '1.25rem'
+              };
+            }
+
+            .cta-preview-secondary:hover {
+              background-color: ${
+                config.secondaryButtonStyle === 'solid'
+                  ? config.secondaryButtonHoverColor || '#6b7280'
+                  : 'transparent'
+              };
+            }
+          `}</style>
         </div>
       )}
     </div>

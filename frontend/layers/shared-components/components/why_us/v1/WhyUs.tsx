@@ -32,7 +32,7 @@ export const WhyUs: React.FC<WhyUsProps> = ({
   return (
     <section
       className="w-full py-16 px-4 bg-gray-50"
-      style={{ direction: isArabic ? 'rtl' : 'ltr' }}
+      dir={isArabic ? 'rtl' : 'ltr'}
     >
       <div className="max-w-6xl mx-auto">
         {/* Header */}
@@ -88,8 +88,8 @@ export const WhyUs: React.FC<WhyUsProps> = ({
 export default WhyUs
 
 // Component Definition for Registry
-import { ComponentDefinition } from '../../registry/types'
-import { manifest } from './manifest.json'
+import { ComponentDefinition } from '../../../registry/types'
+import manifest from '../manifest.json'
 
 export const definition: ComponentDefinition = {
   id: 'why_us',

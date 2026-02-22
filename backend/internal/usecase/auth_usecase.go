@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 
 	"golang.org/x/crypto/bcrypt"
 	"pos-saas/internal/domain"
@@ -40,6 +41,26 @@ func (u *AuthUseCase) Register(req *domain.RegisterRequest) (*domain.AuthRespons
 		return nil, errors.New("password must be at least 6 characters")
 	}
 
+	validator := NewSubdomainValidator()
+	slugProvided := strings.TrimSpace(req.RestaurantSlug) != ""
+	if slugProvided {
+		formattedSlug, err := validator.ValidateAndFormat(req.RestaurantSlug)
+		if err != nil {
+			return nil, err
+		}
+		req.RestaurantSlug = formattedSlug
+
+		exists, err := u.repo.CheckTenantSlugExists(req.RestaurantSlug)
+		if err != nil {
+			return nil, fmt.Errorf("failed to validate subdomain: %w", err)
+		}
+		if exists {
+			return nil, errors.New("subdomain already exists")
+		}
+	} else {
+		req.RestaurantSlug = validator.ToSlug(req.RestaurantName)
+	}
+
 	// Check if email already exists
 	exists, err := u.repo.CheckEmailExists(req.Email)
 	if err != nil {
@@ -52,6 +73,15 @@ func (u *AuthUseCase) Register(req *domain.RegisterRequest) (*domain.AuthRespons
 	// Create tenant with user
 	user, err := u.repo.CreateTenantWithUser(req)
 	if err != nil {
+		if errors.Is(err, repository.ErrTenantSlugExists) {
+			return nil, errors.New("subdomain already exists")
+		}
+		if errors.Is(err, repository.ErrTenantNameExists) {
+			return nil, errors.New("restaurant name already exists")
+		}
+		if errors.Is(err, repository.ErrTenantDomainExists) {
+			return nil, errors.New("restaurant domain already exists")
+		}
 		return nil, fmt.Errorf("failed to register: %w", err)
 	}
 
@@ -239,15 +269,18 @@ func min(a, b int) int {
 func (u *AuthUseCase) CheckSubdomainAvailability(slug string) (bool, string) {
 	validator := NewSubdomainValidator()
 
-	// Validate format
-	if err := validator.ValidateSlug(slug); err != nil {
+	formattedSlug, err := validator.ValidateAndFormat(slug)
+	if err != nil {
 		return false, err.Error()
 	}
 
-	// Check if slug is already taken in database
-	// Note: This requires a RestaurantRepository method to check slug existence
-	// For now, we'll just validate the format
-	// TODO: Add database check once RestaurantRepository has CheckSlugExists method
+	exists, err := u.repo.CheckTenantSlugExists(formattedSlug)
+	if err != nil {
+		return false, "unable to check subdomain availability"
+	}
+	if exists {
+		return false, "subdomain is already taken"
+	}
 
 	return true, "Subdomain is available"
 }

@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { superAdminAPI } from "@/lib/api";
 import type { Tenant, User, PaginatedResponse, SubscriptionStatus } from "@/types";
-import { ArrowLeft, Users as UsersIcon, AlertCircle, LogIn, Calendar, Clock, Lock, CheckCircle, Trash2, RefreshCw } from "lucide-react";
+import { ArrowLeft, Users as UsersIcon, AlertCircle, LogIn, Calendar, Clock, Lock, CheckCircle, Trash2, RefreshCw, Undo2 } from "lucide-react";
 import { ImpersonationButton } from "@/components/impersonation/ImpersonationButton";
 import { ExtendTrialModal } from "@/components/tenants/ExtendTrialModal";
 import { DisableTenantModal } from "@/components/tenants/DisableTenantModal";
@@ -38,6 +38,7 @@ interface SubscriptionHistory {
   new_trial_end_date: string | null;
   days_added: number | null;
   reason: string | null;
+  metadata?: Record<string, unknown> | null;
   created_at: string;
 }
 
@@ -59,6 +60,9 @@ export default function TenantDetailPage() {
   const [showDisableModal, setShowDisableModal] = useState(false);
   const [showEnableModal, setShowEnableModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showRefundModal, setShowRefundModal] = useState(false);
+  const [isRefunding, setIsRefunding] = useState(false);
+  const [historyRefreshKey, setHistoryRefreshKey] = useState(0);
   const limit = 10;
 
   // Fetch all data
@@ -91,7 +95,7 @@ export default function TenantDetailPage() {
   // Fetch subscription history
   const fetchSubscriptionHistory = async () => {
     try {
-      const response = await superAdminAPI.getSubscriptionHistory(tenantId, 5, 0);
+      const response = await superAdminAPI.getSubscriptionHistory(tenantId, 1, 20);
       if (response?.items) {
         setSubscriptionHistory(response.items as SubscriptionHistory[]);
       }
@@ -109,6 +113,27 @@ export default function TenantDetailPage() {
       fetchSubscriptionHistory();
     }
   }, [subscriptionInfo]);
+
+  const lastRefundablePayment = useMemo(() => {
+    for (const item of subscriptionHistory) {
+      if (item.action !== "PAYMENT_SUCCESS") {
+        continue;
+      }
+      const metadata = item.metadata ?? {};
+      const paymentID = Number((metadata as any).payment_id);
+      if (!Number.isFinite(paymentID) || paymentID <= 0) {
+        continue;
+      }
+      const amountCents = Number((metadata as any).amount_cents);
+      const currencyRaw = (metadata as any).currency;
+      return {
+        paymentID,
+        amountCents: Number.isFinite(amountCents) && amountCents > 0 ? amountCents : 0,
+        currency: typeof currencyRaw === "string" && currencyRaw.trim() ? currencyRaw : "EGP",
+      };
+    }
+    return null;
+  }, [subscriptionHistory]);
 
   const totalPages = Math.ceil(total / limit);
 
@@ -134,7 +159,8 @@ export default function TenantDetailPage() {
       if (response) {
         setSubscriptionInfo(response as SubscriptionInfo);
         toast.success("Subscription data refreshed");
-        fetchSubscriptionHistory();
+        await fetchSubscriptionHistory();
+        setHistoryRefreshKey((current) => current + 1);
       }
     } catch (error) {
       console.error("Error refreshing subscription:", error);
@@ -146,6 +172,34 @@ export default function TenantDetailPage() {
 
   const handleAfterAction = () => {
     handleRefreshSubscription();
+  };
+
+  const formatMoneyFromCents = (amountCents: number, currency: string) => {
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: currency || "EGP",
+      maximumFractionDigits: 2,
+    }).format((amountCents || 0) / 100);
+  };
+
+  const handleRefundPayment = async () => {
+    if (!lastRefundablePayment) {
+      toast.error("No refundable payment found");
+      return;
+    }
+
+    setIsRefunding(true);
+    try {
+      await superAdminAPI.refundPayment(lastRefundablePayment.paymentID);
+      toast.success("Payment refunded and subscription reverted");
+      setShowRefundModal(false);
+      await handleRefreshSubscription();
+    } catch (error: any) {
+      const backendMessage = error?.response?.data?.error;
+      toast.error(backendMessage || "Failed to refund payment");
+    } finally {
+      setIsRefunding(false);
+    }
   };
 
   if (isLoading) {
@@ -340,6 +394,16 @@ export default function TenantDetailPage() {
               <Trash2 size={16} />
               Delete Tenant
             </button>
+
+            <button
+              onClick={() => setShowRefundModal(true)}
+              disabled={!lastRefundablePayment || isRefunding}
+              className="flex items-center gap-2 px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              title={lastRefundablePayment ? "Refund latest successful payment" : "No refundable payment available"}
+            >
+              <Undo2 size={16} />
+              Refund Last Payment
+            </button>
           </div>
 
           {/* Disabled Reason */}
@@ -356,7 +420,7 @@ export default function TenantDetailPage() {
       {subscriptionHistory.length > 0 && (
         <div className="bg-white rounded-lg shadow p-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">Recent Subscription Changes</h2>
-          <SubscriptionHistoryTable tenantId={tenantId} />
+          <SubscriptionHistoryTable key={historyRefreshKey} tenantId={tenantId} />
         </div>
       )}
 
@@ -471,6 +535,35 @@ export default function TenantDetailPage() {
         onClose={() => setShowDeleteModal(false)}
         onSuccess={() => router.push("/dashboard/tenants")}
       />
+
+      {showRefundModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
+            <h3 className="text-lg font-semibold text-gray-900">Refund Last Payment</h3>
+            <p className="mt-2 text-sm text-gray-600">
+              {lastRefundablePayment
+                ? `This will refund ${formatMoneyFromCents(lastRefundablePayment.amountCents, lastRefundablePayment.currency)} and revert subscription access.`
+                : "No refundable payment is available for this tenant."}
+            </p>
+            <div className="mt-6 flex items-center justify-end gap-2">
+              <button
+                onClick={() => setShowRefundModal(false)}
+                disabled={isRefunding}
+                className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleRefundPayment}
+                disabled={!lastRefundablePayment || isRefunding}
+                className="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isRefunding ? "Refunding..." : "Confirm Refund"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

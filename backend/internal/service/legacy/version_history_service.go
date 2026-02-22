@@ -1,3 +1,6 @@
+//go:build legacy
+// +build legacy
+
 /**
  * VersionHistoryService
  * Manages theme version history, snapshots, rollbacks, and comparisons

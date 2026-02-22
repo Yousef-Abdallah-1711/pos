@@ -55,5 +55,3 @@ export type { TestimonialsProps } from './testimonials/v1/types'
 export type { ContactProps } from './contact/v1/types'
 export type { CTAProps } from './cta/v1/types'
 export type { WhyUsProps } from './why_us/v1/types'
-
-export { registerDefaultComponents }

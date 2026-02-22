@@ -2,6 +2,8 @@
 // NOTE: next-intl plugin disabled for Phase 1 due to ESM/CommonJS conflicts
 // Will be re-enabled in Phase 2 after resolving module resolution issues
 const withNextIntl = (config) => config // Identity function - no-op
+const isWindows = process.platform === 'win32'
+const enableCustomSplitChunks = process.env.NEXT_CUSTOM_SPLIT_CHUNKS === 'true'
 
 const nextConfig = {
   reactStrictMode: true,
@@ -19,15 +21,21 @@ const nextConfig = {
     // Use modern formats and optimize by default
     minimumCacheTTL: 31536000, // 1 year for static images
   },
-  output: 'standalone',
+  // Windows local builds can fail with EPERM on standalone symlink tracing.
+  output: isWindows ? undefined : 'standalone',
   outputFileTracingRoot: require('path').join(__dirname, '../../'),
 
   // ===== CODE SPLITTING CONFIGURATION =====
   // Optimized webpack configuration for better code splitting
-  webpack: (config, { isServer }) => {
+  webpack: (config, { isServer, dev }) => {
+    // Keep Next.js defaults during development and SSR to avoid runtime chunk
+    // instability in App Router pages (e.g. products page module factory errors).
+    if (dev || isServer || !enableCustomSplitChunks) {
+      return config
+    }
+
     config.optimization = {
       ...config.optimization,
-      runtimeChunk: 'single',
       splitChunks: {
         chunks: 'all',
         cacheGroups: {
@@ -94,7 +102,6 @@ const nextConfig = {
     optimizePackageImports: [
       '@radix-ui/react-icons',
       '@radix-ui/react-dialog',
-      '@radix-ui/react-select',
       'lucide-react',
       'date-fns',
     ],

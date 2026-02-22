@@ -30,6 +30,33 @@ export default function ThemeBuilderPage() {
 
   // Dialog states
   const [exportThemeId, setExportThemeId] = useState<string | null>(null)
+  const [isBulkActionRunning, setIsBulkActionRunning] = useState(false)
+  const getSafeThemeClass = (id: string) => id.replace(/[^a-zA-Z0-9_-]/g, '-')
+
+  const getThemeTimestamp = (theme: ThemeData): number => {
+    const date = new Date(theme.updatedAt || theme.createdAt)
+    return Number.isNaN(date.getTime()) ? 0 : date.getTime()
+  }
+
+  const formatUpdatedDate = (theme: ThemeData): string => {
+    const timestamp = getThemeTimestamp(theme)
+    if (!timestamp) return 'Unknown Date'
+    return new Date(timestamp).toLocaleDateString()
+  }
+
+  const websiteHost = useMemo(() => {
+    const activeThemeDomain = themes.find((theme) => theme.isActive)?.identity?.domain?.trim()
+    const fallbackHost = user?.restaurant_id
+      ? `restaurant-${user.restaurant_id}.localhost:3003`
+      : 'demo.localhost:3003'
+    return activeThemeDomain || fallbackHost
+  }, [themes, user?.restaurant_id])
+
+  const websiteUrl = useMemo(() => {
+    return websiteHost.startsWith('http://') || websiteHost.startsWith('https://')
+      ? websiteHost
+      : `http://${websiteHost}`
+  }, [websiteHost])
 
   // ===========================================
   // 🔍 DEBUG: Log component mount and auth status
@@ -137,13 +164,37 @@ export default function ThemeBuilderPage() {
     if (sortBy === 'name') {
       sorted.sort((a, b) => a.name.localeCompare(b.name))
     } else if (sortBy === 'date') {
-      sorted.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
+      sorted.sort((a, b) => getThemeTimestamp(b) - getThemeTimestamp(a))
     } else if (sortBy === 'status') {
       sorted.sort((a, b) => (b.isActive ? 1 : 0) - (a.isActive ? 1 : 0))
     }
 
     return sorted
   }, [themes, searchQuery, filterStatus, sortBy])
+
+  const themeColorRules = useMemo(
+    () =>
+      filteredAndSortedThemes
+        .map((theme) => {
+          const safeId = getSafeThemeClass(theme.id)
+          return `
+            .theme-card-${safeId} .theme-preview-bg {
+              background-color: ${theme.colors?.background || '#ffffff'};
+            }
+            .theme-card-${safeId} .swatch-primary {
+              background-color: ${theme.colors?.primary || '#3b82f6'};
+            }
+            .theme-card-${safeId} .swatch-secondary {
+              background-color: ${theme.colors?.secondary || '#1e40af'};
+            }
+            .theme-card-${safeId} .swatch-accent {
+              background-color: ${theme.colors?.accent || '#0ea5e9'};
+            }
+          `
+        })
+        .join('\n'),
+    [filteredAndSortedThemes]
+  )
 
   const handleActivateTheme = async (themeId: string) => {
     try {
@@ -167,6 +218,12 @@ export default function ThemeBuilderPage() {
   }
 
   const handleDeleteTheme = async (themeId: string) => {
+    const themeToDelete = themes.find((theme) => theme.id === themeId)
+    if (themeToDelete?.isActive) {
+      toast.error('Deactivate this theme before deleting it')
+      return
+    }
+
     if (!window.confirm('Are you sure you want to delete this theme?')) {
       return
     }
@@ -181,6 +238,136 @@ export default function ThemeBuilderPage() {
       const errorMessage = err instanceof Error ? err.message : 'Failed to delete theme'
       setError(errorMessage)
       toast.error(errorMessage)
+    }
+  }
+
+  const buildMigrationPayload = (theme: ThemeData) => {
+    const components = (theme.components || []).map((component, index) => {
+      const order = typeof component.displayOrder === 'number'
+        ? component.displayOrder
+        : index
+      const config = component.config || component.settings || {}
+      return {
+        id: String(component.id),
+        type: component.type,
+        title: {
+          en: config.title_en || config.title || component.title || '',
+          ar: config.title_ar || '',
+        },
+        order,
+        displayOrder: order,
+        enabled: component.enabled !== false,
+        config,
+        settings: config,
+      }
+    })
+
+    const fullConfig = {
+      colors: theme.colors,
+      typography: theme.typography,
+      identity: theme.identity,
+      header: theme.header,
+      footer: theme.footer,
+      components,
+      customCss: theme.customCss || '',
+    }
+
+    return {
+      name: theme.name,
+      slug: theme.slug,
+      description: theme.description,
+      colors: theme.colors,
+      typography: theme.typography,
+      identity: theme.identity,
+      header_config: theme.header,
+      footer_config: theme.footer,
+      components,
+      customCss: theme.customCss || '',
+      config: fullConfig,
+    }
+  }
+
+  const handleMigrateThemes = async () => {
+    const themesToMigrate = themes
+    if (themesToMigrate.length === 0) {
+      toast.error('No themes available to migrate')
+      return
+    }
+
+    try {
+      setIsBulkActionRunning(true)
+      setError(null)
+
+      for (const theme of themesToMigrate) {
+        await themeApi.updateTheme(theme.id, buildMigrationPayload(theme) as any)
+      }
+
+      const refreshedThemes = await themeApi.getThemes()
+      setThemes(refreshedThemes)
+      toast.success(`Migrated ${themesToMigrate.length} theme(s) to the latest schema`)
+    } catch (err) {
+      debugError('Failed to migrate themes:', err)
+      const errorMessage = err instanceof Error ? err.message : 'Failed to migrate themes'
+      setError(errorMessage)
+      toast.error(errorMessage)
+    } finally {
+      setIsBulkActionRunning(false)
+    }
+  }
+
+  const handleKeepTwoThemes = async () => {
+    if (themes.length <= 2) {
+      toast.success('Already limited to 2 themes')
+      return
+    }
+
+    const sortedByRecent = [...themes].sort((a, b) => getThemeTimestamp(b) - getThemeTimestamp(a))
+    const keepIds = new Set<string>()
+    const activeTheme = sortedByRecent.find((theme) => theme.isActive)
+
+    if (activeTheme) {
+      keepIds.add(activeTheme.id)
+    }
+
+    for (const theme of sortedByRecent) {
+      if (keepIds.size >= 2) break
+      keepIds.add(theme.id)
+    }
+
+    const keepThemes = sortedByRecent.filter((theme) => keepIds.has(theme.id))
+    const themesToDelete = themes.filter((theme) => !keepIds.has(theme.id))
+
+    if (themesToDelete.length === 0) {
+      toast.success('Already limited to 2 themes')
+      return
+    }
+
+    if (!window.confirm(`This will delete ${themesToDelete.length} theme(s) and keep only 2 themes. Continue?`)) {
+      return
+    }
+
+    try {
+      setIsBulkActionRunning(true)
+      setError(null)
+
+      for (const theme of keepThemes) {
+        await themeApi.updateTheme(theme.id, buildMigrationPayload(theme) as any)
+      }
+
+      for (const theme of themesToDelete) {
+        await themeApi.deleteTheme(theme.id)
+      }
+
+      const refreshedThemes = await themeApi.getThemes()
+      setThemes(refreshedThemes)
+      toast.success('Kept 2 themes and deleted the rest')
+    } catch (err) {
+      debugError('Failed to keep only two themes:', err)
+      const errorMessage = err instanceof Error ? err.message : 'Failed to clean up themes'
+      setError(errorMessage)
+      toast.error(errorMessage)
+    } finally {
+      setIsBulkActionRunning(false)
     }
   }
 
@@ -259,19 +446,12 @@ export default function ThemeBuilderPage() {
               <div>
                 <p className="text-sm font-medium text-blue-900">Your Website</p>
                 <p className="text-sm text-blue-700 font-mono">
-                  {/*
-                    Subdomain Format Options:
-                    - Development: restaurant-{id}.localhost:3000
-                    - Production: {slug}.yourdomain.com
-                    - Multi-tenant: tenant-{id}.yourdomain.com
-                    Customize this in environment variables or fetch restaurant slug from API
-                  */}
-                  restaurant-{user.restaurant_id}.localhost:3000
+                  {websiteHost}
                 </p>
               </div>
             </div>
             <a
-              href={`http://restaurant-${user.restaurant_id}.localhost:3000`}
+              href={websiteUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition flex items-center gap-2 whitespace-nowrap"
@@ -308,6 +488,20 @@ export default function ThemeBuilderPage() {
                 className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition"
               >
                 + Create Theme
+              </button>
+              <button
+                onClick={() => handleMigrateThemes()}
+                disabled={isBulkActionRunning}
+                className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white rounded-lg font-medium transition"
+              >
+                {isBulkActionRunning ? 'Working...' : 'Migrate Configs'}
+              </button>
+              <button
+                onClick={handleKeepTwoThemes}
+                disabled={isBulkActionRunning}
+                className="px-4 py-2 bg-red-600 hover:bg-red-700 disabled:bg-red-400 text-white rounded-lg font-medium transition"
+              >
+                Keep 2 Themes
               </button>
             </div>
           </div>
@@ -364,18 +558,14 @@ export default function ThemeBuilderPage() {
               {filteredAndSortedThemes.map((theme) => (
               <div
                 key={theme.id}
-                className="bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition flex flex-col"
+                className={`bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition flex flex-col theme-card-${getSafeThemeClass(theme.id)}`}
               >
                 {/* Theme Preview */}
-                <div className="h-28 flex gap-2 p-3"
-                  style={{ backgroundColor: theme.colors?.background }}>
+                <div className="theme-preview-bg h-28 flex gap-2 p-3">
                   {['primary', 'secondary', 'accent'].map((color) => (
                     <div
                       key={color}
-                      className="flex-1 rounded-md shadow-sm"
-                      style={{
-                        backgroundColor: theme.colors?.[color as keyof typeof theme.colors],
-                      }}
+                      className={`flex-1 rounded-md shadow-sm swatch-${color}`}
                     />
                   ))}
                 </div>
@@ -386,7 +576,7 @@ export default function ThemeBuilderPage() {
                     <div>
                       <h3 className="font-bold text-gray-900">{theme.name}</h3>
                       <p className="text-xs text-gray-500 mt-0.5">
-                        Updated {new Date(theme.updatedAt).toLocaleDateString()}
+                        Updated {formatUpdatedDate(theme)}
                       </p>
                     </div>
                     {theme.isActive && (
@@ -437,7 +627,7 @@ export default function ThemeBuilderPage() {
                     </button>
                   )}
 
-                  {theme.isActive && (
+                  {!theme.isActive && (
                     <button
                       onClick={() => handleDeleteTheme(theme.id)}
                       className="mt-2 w-full px-3 py-2 bg-red-50 text-red-600 rounded hover:bg-red-100 text-sm font-medium transition flex items-center justify-center gap-1"
@@ -462,6 +652,10 @@ export default function ThemeBuilderPage() {
           onClose={() => setExportThemeId(null)}
         />
       )}
+
+      <style jsx>{`
+        ${themeColorRules}
+      `}</style>
 
     </div>
   )

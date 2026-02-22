@@ -112,6 +112,52 @@ export interface DashboardStats {
   recent_activity: AuditLog[];
 }
 
+// Payment Monitoring
+export interface PaymentMetrics {
+  total_payments: number;
+  successful_payments: number;
+  failed_payments: number;
+  success_rate: number;
+  total_revenue_cents: number;
+  total_revenue_formatted: string;
+  avg_processing_time_ms: number;
+  period: "today" | "week" | "month" | "all";
+  generated_at: string;
+}
+
+export interface WebhookHealthEvent {
+  timestamp: string;
+  paymob_order_id: number;
+  status: string;
+  hmac_valid: boolean;
+  processing_time_ms: number;
+  source: string;
+  error?: string;
+  retry_queue_record_id?: number;
+}
+
+export interface WebhookHealthSummary {
+  total_events: number;
+  successful_events: number;
+  failed_events: number;
+  success_rate: number;
+  avg_processing_time_ms: number;
+}
+
+export interface WebhookRetryQueueStats {
+  pending: number;
+  processing: number;
+  success: number;
+  failed: number;
+}
+
+export interface WebhookHealthResponse {
+  events: WebhookHealthEvent[];
+  summary: WebhookHealthSummary;
+  retry_queue: WebhookRetryQueueStats;
+  generated_at: string;
+}
+
 // Pagination
 export interface PaginationParams {
   page: number;
@@ -183,4 +229,14 @@ export interface SubscriptionHistoryResponse {
   total: number;
   page: number;
   page_size: number;
+}
+
+export interface RefundPaymentResponse {
+  payment_id: number;
+  tenant_id: number;
+  status: string;
+  subscription_status: SubscriptionStatus;
+  refunded_at: string;
+  amount_cents: number;
+  currency: string;
 }

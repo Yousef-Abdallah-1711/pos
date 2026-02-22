@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { usePathname } from 'next/navigation'
 import { useAuthStore } from '@/stores/authStore'
 import { useHasPermission } from '@/hooks/useRbac'
@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { api } from '@/lib/api'
 import { debugLog, debugError } from '@/lib/debug'
 import { toast } from 'sonner'
-import { Plus, AlertCircle, Lock } from 'lucide-react'
+import { Plus, AlertCircle, Lock, Loader2 } from 'lucide-react'
 import { createTranslator, getLocaleFromPath } from '@/lib/translations'
 import { MODULE_IDS, PERMISSION_LEVELS } from '@/lib/rbac'
 import { PageHeaderSkeleton, TableSkeleton } from '@/components/skeletons'
@@ -37,21 +37,22 @@ interface Employee {
 export default function EmployeesPage() {
   const pathname = usePathname()
   const locale = getLocaleFromPath(pathname)
-  const t = createTranslator(locale)
+  const t = useMemo(() => createTranslator(locale), [locale])
 
-  // Check RBAC permissions for HR module
-  const canViewEmployees = useHasPermission(
+  // Check RBAC permissions for HR module - properly destructure the hook return
+  const { hasPermission: canViewEmployees, loading: canViewLoading } = useHasPermission(
     MODULE_IDS.HR,
     PERMISSION_LEVELS.READ,
   )
-  const canCreateEmployees = useHasPermission(
+  const { hasPermission: canCreateEmployees, loading: canCreateLoading } = useHasPermission(
     MODULE_IDS.HR,
     PERMISSION_LEVELS.WRITE,
   )
-  const canDeleteEmployees = useHasPermission(
+  const { hasPermission: canDeleteEmployees, loading: canDeleteLoading } = useHasPermission(
     MODULE_IDS.HR,
     PERMISSION_LEVELS.DELETE,
   )
+  const permissionLoading = canViewLoading || canCreateLoading || canDeleteLoading
 
   const [employees, setEmployees] = useState<Employee[]>([])
   const [loading, setLoading] = useState(false)
@@ -63,8 +64,10 @@ export default function EmployeesPage() {
 
   const token = useAuthStore((state) => state.token)
 
-  // Fetch employees
+  // Fetch employees - hook MUST be before early returns
   useEffect(() => {
+    if (!token || !canViewEmployees || permissionLoading) return
+
     const fetchEmployees = async () => {
       setLoading(true)
       setApiError(null)
@@ -75,7 +78,7 @@ export default function EmployeesPage() {
         const response = await api.get('/hr/employees')
         debugLog('[EMPLOYEES_PAGE] Response:', response.data)
 
-        const employeesList = Array.isArray(response.data) ? response.data : response.data?.employees || []
+        const employeesList = Array.isArray(response.data) ? response.data : (response.data?.data || response.data?.employees || [])
         setEmployees(employeesList)
         setDebugInfo(`Successfully loaded ${employeesList.length} employees at ${new Date().toLocaleTimeString()}`)
       } catch (error: any) {
@@ -89,10 +92,8 @@ export default function EmployeesPage() {
       }
     }
 
-    if (token) {
-      fetchEmployees()
-    }
-  }, [token])
+    fetchEmployees()
+  }, [token, canViewEmployees, permissionLoading])
 
   const handleCreateEmployee = async (formData: any) => {
     try {
@@ -100,7 +101,8 @@ export default function EmployeesPage() {
       const response = await api.post('/hr/employees', formData)
       debugLog('[CREATE_EMPLOYEE] Response:', response.data)
 
-      setEmployees([response.data, ...employees])
+      const created = response.data?.data || response.data
+      setEmployees([created, ...employees])
       setShowForm(false)
       toast.success('Employee created successfully')
     } catch (error: any) {
@@ -149,6 +151,15 @@ export default function EmployeesPage() {
     setSelectedEmployee(employee)
     setIsEditMode(true)
     setShowForm(true)
+  }
+
+  // Show loading while permissions are being checked
+  if (permissionLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="w-8 h-8 animate-spin text-primary-600" />
+      </div>
+    )
   }
 
   // Show permission denied if user can't view employees

@@ -62,7 +62,27 @@ export default function NotificationsPage() {
     deleteNotification,
   } = useNotifications()
 
-  // Show permission denied if user can't view notifications
+  // All hooks must be declared before any conditional returns
+  const [filterModule, setFilterModule] = useState<string>('')
+  const [filterPriority, setFilterPriority] = useState<string>('')
+  const [showUnreadOnly, setShowUnreadOnly] = useState(false)
+  const [sortBy, setSortBy] = useState<'created_at' | 'priority'>('created_at')
+  const [page, setPage] = useState(1)
+
+  // Apply filters and sorting
+  useEffect(() => {
+    if (!canViewNotifications || permissionLoading) return
+    fetchNotifications({
+      module: filterModule || undefined,
+      priority: filterPriority || undefined,
+      is_read: showUnreadOnly ? false : undefined,
+      sort: sortBy,
+      page,
+      limit: 20,
+    })
+  }, [filterModule, filterPriority, showUnreadOnly, sortBy, page, fetchNotifications, canViewNotifications, permissionLoading])
+
+  // Show permission loading
   if (permissionLoading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -97,24 +117,6 @@ export default function NotificationsPage() {
       </div>
     )
   }
-
-  const [filterModule, setFilterModule] = useState<string>('')
-  const [filterPriority, setFilterPriority] = useState<string>('')
-  const [showUnreadOnly, setShowUnreadOnly] = useState(false)
-  const [sortBy, setSortBy] = useState<'created_at' | 'priority'>('created_at')
-  const [page, setPage] = useState(1)
-
-  // Apply filters and sorting
-  useEffect(() => {
-    fetchNotifications({
-      module: filterModule || undefined,
-      priority: filterPriority || undefined,
-      is_read: showUnreadOnly ? false : undefined,
-      sort: sortBy,
-      page,
-      limit: 20,
-    })
-  }, [filterModule, filterPriority, showUnreadOnly, sortBy, page, fetchNotifications])
 
   const handleNotificationClick = (notification: Notification) => {
     if (!notification.is_read) {

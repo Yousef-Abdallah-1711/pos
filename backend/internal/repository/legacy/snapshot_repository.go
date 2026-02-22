@@ -1,3 +1,6 @@
+//go:build legacy
+// +build legacy
+
 /**
  * SnapshotRepository Interface
  * Defines operations for theme snapshot storage

@@ -68,8 +68,31 @@ export const RecommendationList: React.FC<RecommendationListProps> = ({
     )
   }
 
+  const primaryColor = theme?.colors?.primary || '#3b82f6'
+  const successColor = theme?.colors?.success || '#10b981'
+  const warningColor = theme?.colors?.warning || '#f59e0b'
+  const errorColor = theme?.colors?.error || '#ef4444'
+
+  const recommendationRules = recommendations
+    .map((rec, index) => {
+      const scoreColor =
+        rec.relevanceScore > 0.7
+          ? successColor
+          : rec.relevanceScore > 0.4
+            ? warningColor
+            : errorColor
+
+      return `
+        .recommendation-${index} .${styles.scoreFill} {
+          width: ${rec.relevanceScore * 100}%;
+          background-color: ${scoreColor};
+        }
+      `
+    })
+    .join('\n')
+
   return (
-    <div className={styles.container}>
+    <div className={`recommendations-themed ${styles.container}`}>
       {recommendations.map((rec, index) => {
         const isHovered = hoveredIndex === index
         const typeIcon = RecommendationTypeIcon[rec.recommendationType] || '⭐'
@@ -78,17 +101,12 @@ export const RecommendationList: React.FC<RecommendationListProps> = ({
         return (
           <div
             key={`${rec.id}-${index}`}
-            className={`${styles.recommendationCard} ${isHovered ? styles.hovered : ''}`}
+            className={`${styles.recommendationCard} recommendation-${index} ${isHovered ? styles.hovered : ''}`}
             onMouseEnter={() => setHoveredIndex(index)}
             onMouseLeave={() => setHoveredIndex(null)}
             onClick={() => handleClick(rec)}
           >
-            <div
-              className={styles.rankBadge}
-              style={{
-                backgroundColor: theme?.colors?.primary,
-              }}
-            >
+            <div className={styles.rankBadge}>
               #{rec.position}
             </div>
 
@@ -105,18 +123,7 @@ export const RecommendationList: React.FC<RecommendationListProps> = ({
             </div>
 
             <div className={styles.scoreBar}>
-              <div
-                className={styles.scoreFill}
-                style={{
-                  width: `${rec.relevanceScore * 100}%`,
-                  backgroundColor:
-                    rec.relevanceScore > 0.7
-                      ? theme?.colors?.success || '#10b981'
-                      : rec.relevanceScore > 0.4
-                        ? theme?.colors?.warning || '#f59e0b'
-                        : theme?.colors?.error || '#ef4444',
-                }}
-              />
+              <div className={styles.scoreFill} />
             </div>
 
             <div className={styles.stats}>
@@ -132,18 +139,25 @@ export const RecommendationList: React.FC<RecommendationListProps> = ({
             </div>
 
             {isHovered && (
-              <div
-                className={styles.cta}
-                style={{
-                  backgroundColor: theme?.colors?.primary,
-                }}
-              >
+              <div className={styles.cta}>
                 View Component →
               </div>
             )}
           </div>
         )
       })}
+
+      <style>{`
+        .recommendations-themed .${styles.rankBadge} {
+          background-color: ${primaryColor};
+        }
+
+        .recommendations-themed .${styles.cta} {
+          background-color: ${primaryColor};
+        }
+
+        ${recommendationRules}
+      `}</style>
     </div>
   )
 }

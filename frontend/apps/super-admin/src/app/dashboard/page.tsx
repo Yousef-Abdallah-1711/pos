@@ -109,6 +109,10 @@ export default function DashboardPage() {
             href="/dashboard/audit-logs"
           />
           <QuickActionButton
+            label="Payment Health"
+            href="/dashboard/payments"
+          />
+          <QuickActionButton
             label="Manage Settings"
             href="/dashboard/settings"
           />

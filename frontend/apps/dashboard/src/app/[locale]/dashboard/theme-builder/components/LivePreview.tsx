@@ -2,7 +2,7 @@
 
 import { useThemeStore } from '@/hooks/useThemeStore'
 import { Smartphone, Monitor } from 'lucide-react'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { ThemeProvider, SectionRenderer } from '@pos-saas/ui-themes'
 
 /**
@@ -26,8 +26,32 @@ export function LivePreview() {
     )
   }
 
+  const paletteItems = [
+    { name: 'Primary', color: theme.colors.primary },
+    { name: 'Secondary', color: theme.colors.secondary },
+    { name: 'Accent', color: theme.colors.accent },
+    { name: 'Background', color: theme.colors.background },
+    { name: 'Text', color: theme.colors.text },
+    { name: 'Border', color: theme.colors.border },
+  ]
+
+  const paletteRules = useMemo(
+    () =>
+      paletteItems
+        .map(
+          (item, index) => `
+            .palette-item-${index} .palette-swatch {
+              background-color: ${item.color};
+              border-color: ${theme.colors.border};
+            }
+          `
+        )
+        .join('\n'),
+    [paletteItems, theme.colors.border]
+  )
+
   return (
-    <div className="h-full flex flex-col bg-gray-100 dark:bg-gray-900">
+    <div className="live-preview-themed h-full flex flex-col bg-gray-100 dark:bg-gray-900">
       {/* Controls */}
       <div className="flex items-center justify-between p-4 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
         <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Live Preview</h3>
@@ -69,13 +93,7 @@ export function LivePreview() {
           <ThemeProvider theme={theme}>
             <div className="bg-white">
               {/* Header */}
-              <div
-                style={{
-                  backgroundColor: theme.colors.primary,
-                  padding: '2rem',
-                }}
-                className="text-white"
-              >
+              <div className="preview-header text-white">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     {theme.identity.logoUrl && (
@@ -122,21 +140,14 @@ export function LivePreview() {
                 ) : (
                   // Default preview if no components
                   <div className="py-16 px-8 text-center bg-gray-50">
-                    <h2 className="text-3xl font-bold mb-4"
-                      style={{ color: theme.colors.primary }}>
+                    <h2 className="preview-title text-3xl font-bold mb-4">
                       Welcome to {theme.identity.siteTitle}
                     </h2>
                     <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
                       Start adding components to see your website come to life.
                       Create sections for Hero, Products, Contact, and more!
                     </p>
-                    <button
-                      style={{
-                        backgroundColor: theme.colors.accent,
-                        color: 'white',
-                      }}
-                      className="px-8 py-3 rounded-lg font-semibold hover:opacity-90 transition"
-                    >
+                    <button className="preview-cta-button px-8 py-3 rounded-lg font-semibold hover:opacity-90 transition">
                       Add Components
                     </button>
                   </div>
@@ -144,25 +155,12 @@ export function LivePreview() {
               </div>
 
               {/* Color Palette Display */}
-              <div className="p-8 bg-gray-50 border-t" style={{ borderColor: theme.colors.border }}>
+              <div className="palette-section p-8 bg-gray-50 border-t">
                 <h3 className="text-lg font-semibold mb-4">Theme Colors</h3>
                 <div className="grid grid-cols-2 gap-4 max-w-sm">
-                  {[
-                    { name: 'Primary', color: theme.colors.primary },
-                    { name: 'Secondary', color: theme.colors.secondary },
-                    { name: 'Accent', color: theme.colors.accent },
-                    { name: 'Background', color: theme.colors.background },
-                    { name: 'Text', color: theme.colors.text },
-                    { name: 'Border', color: theme.colors.border },
-                  ].map((item) => (
-                    <div key={item.name} className="flex items-center gap-3">
-                      <div
-                        style={{
-                          backgroundColor: item.color,
-                          borderColor: theme.colors.border,
-                        }}
-                        className="w-10 h-10 rounded-lg border-2"
-                      />
+                  {paletteItems.map((item, index) => (
+                    <div key={item.name} className={`palette-item-${index} flex items-center gap-3`}>
+                      <div className="palette-swatch w-10 h-10 rounded-lg border-2" />
                       <span className="text-sm font-medium">{item.name}</span>
                     </div>
                   ))}
@@ -170,19 +168,40 @@ export function LivePreview() {
               </div>
 
               {/* Footer */}
-              <div
-                style={{
-                  backgroundColor: theme.colors.text,
-                  color: theme.colors.background,
-                }}
-                className="p-6 text-center text-sm"
-              >
+              <div className="preview-footer p-6 text-center text-sm">
                 <p>© 2025 {theme.identity.siteTitle}. All rights reserved.</p>
               </div>
             </div>
           </ThemeProvider>
         </div>
       </div>
+
+      <style jsx>{`
+        .preview-header {
+          background-color: ${theme.colors.primary};
+          padding: 2rem;
+        }
+
+        .preview-title {
+          color: ${theme.colors.primary};
+        }
+
+        .preview-cta-button {
+          background-color: ${theme.colors.accent};
+          color: #ffffff;
+        }
+
+        .palette-section {
+          border-color: ${theme.colors.border};
+        }
+
+        .preview-footer {
+          background-color: ${theme.colors.text};
+          color: ${theme.colors.background};
+        }
+
+        ${paletteRules}
+      `}</style>
     </div>
   )
 }

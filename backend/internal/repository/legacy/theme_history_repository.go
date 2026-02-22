@@ -1,3 +1,6 @@
+//go:build legacy
+// +build legacy
+
 /**
  * ThemeHistoryRepository Interface
  * Defines operations for theme version history records

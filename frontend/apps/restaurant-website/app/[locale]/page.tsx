@@ -2,7 +2,7 @@ import { headers } from 'next/headers';
 import { DynamicHomePage } from '@/components/dynamic-home-page';
 import { HeaderSSR } from '@/components/header-ssr';
 import { FooterSSR } from '@/components/footer-ssr';
-import { getThemeDataServer, getDefaultThemeData } from '@/lib/api/get-theme-server';
+import { extractThemeConfig, getDefaultThemeData } from '@/lib/api/get-theme-server';
 import { debugError } from '@/lib/debug';
 import { AlertCircle } from 'lucide-react';
 import type { Metadata } from 'next';
@@ -45,15 +45,24 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     }
 
     const themeData = await themeResponse.json();
-    const theme = themeData.data?.data?.config || themeData.data?.config || {};
+    const theme = extractThemeConfig(themeData) || {};
 
     // Extract metadata from theme
-    const siteTitle = theme.identity?.siteTitle || theme.site_title || 'Restaurant';
+    const siteTitle =
+      theme.identity?.siteTitle ||
+      theme.identity?.site_title ||
+      theme.site_title ||
+      'Restaurant';
     const description =
       theme.footer?.companyInfo?.description ||
       theme.footer?.companyDescription ||
+      theme.footer?.company_description ||
       'Order delicious food online from our restaurant.';
-    const logoUrl = theme.identity?.logoUrl || theme.logo_url || '';
+    const logoUrl =
+      theme.identity?.logoUrl ||
+      theme.identity?.logo_url ||
+      theme.logo_url ||
+      '';
 
     const canonicalUrl = `https://${restaurantSlug}.example.com/${locale}`;
 
@@ -182,8 +191,7 @@ export default async function HomePage({ params }: PageProps) {
       productsResponse.json(),
     ]);
 
-    // Extract theme from nested response structure
-    const themeDataExtracted = themeData.data?.data?.config || themeData.data?.config || themeData;
+    const themeDataExtracted = extractThemeConfig(themeData) || getDefaultThemeData();
 
     return (
       <div className="flex flex-col min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100">

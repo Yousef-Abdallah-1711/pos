@@ -20,22 +20,15 @@ export function ManagerPreview({
   fontFamily,
   logoUrl,
 }: ManagerPreviewProps) {
-  const styles = {
-    fontFamily: fontFamily,
-  };
-
   // Filter visible sections and sort by order
   const visibleSections = sections
     .filter(s => s.is_visible)
     .sort((a, b) => a.order - b.order);
 
   return (
-    <div style={styles} className="bg-white dark:bg-gray-900">
+    <div className="manager-preview bg-white dark:bg-gray-900">
       {/* Header */}
-      <div
-        style={{ backgroundColor: primaryColor }}
-        className="p-6 text-white flex items-center justify-between"
-      >
+      <div className="preview-header p-6 text-white flex items-center justify-between">
         {logoUrl ? (
           <img
             src={logoUrl}
@@ -93,6 +86,16 @@ export function ManagerPreview({
           <p>© 2024 Our Restaurant. All rights reserved.</p>
         </div>
       </div>
+
+      <style jsx>{`
+        .manager-preview {
+          font-family: ${fontFamily};
+        }
+
+        .preview-header {
+          background-color: ${primaryColor};
+        }
+      `}</style>
     </div>
   );
 }
@@ -110,30 +113,25 @@ function SectionPreview({
   secondaryColor,
   accentColor,
 }: SectionPreviewProps) {
-  const buttonStyle = {
-    backgroundColor: accentColor,
-    color: '#000',
-  };
+  let content: JSX.Element;
 
   switch (section.section_type) {
     case 'hero':
-      return (
-        <div
-          style={{ background: `linear-gradient(135deg, ${primaryColor} 0%, ${secondaryColor} 100%)` }}
-          className="p-12 text-white text-center"
-        >
+      content = (
+        <div className="section-hero p-12 text-white text-center">
           <h1 className="text-4xl font-bold mb-4">{section.title}</h1>
           <p className="text-lg mb-6">{section.subtitle}</p>
           {section.content?.buttonText && (
-            <button style={buttonStyle} className="px-8 py-3 rounded font-semibold hover:opacity-90">
+            <button className="section-accent-button px-8 py-3 rounded font-semibold hover:opacity-90">
               {section.content.buttonText}
             </button>
           )}
         </div>
       );
+      break;
 
     case 'featured_items':
-      return (
+      content = (
         <div className="p-12 bg-gray-50 dark:bg-gray-800">
           <h2 className="text-3xl font-bold mb-8 text-gray-900 dark:text-white">
             {section.title}
@@ -144,10 +142,7 @@ function SectionPreview({
           <div className="grid grid-cols-3 gap-6">
             {[1, 2, 3].map((i) => (
               <div key={i} className="bg-white dark:bg-gray-700 rounded-lg overflow-hidden shadow">
-                <div
-                  style={{ backgroundColor: primaryColor }}
-                  className="h-32 flex items-center justify-center text-white text-sm"
-                >
+                <div className="featured-image h-32 flex items-center justify-center text-white text-sm">
                   Featured Product {i}
                 </div>
                 <div className="p-4">
@@ -155,7 +150,7 @@ function SectionPreview({
                   <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
                     Delicious and authentic dish
                   </p>
-                  <button style={buttonStyle} className="w-full py-2 rounded text-sm font-medium">
+                  <button className="section-accent-button w-full py-2 rounded text-sm font-medium">
                     View Details
                   </button>
                 </div>
@@ -164,9 +159,10 @@ function SectionPreview({
           </div>
         </div>
       );
+      break;
 
     case 'why_choose_us':
-      return (
+      content = (
         <div className="p-12 bg-white dark:bg-gray-900">
           <h2 className="text-3xl font-bold mb-8 text-gray-900 dark:text-white">
             {section.title}
@@ -180,7 +176,7 @@ function SectionPreview({
             ].map((item) => (
               <div key={item.title} className="text-center">
                 <div className="text-4xl mb-4">{item.icon}</div>
-                <h3 style={{ color: primaryColor }} className="font-semibold text-lg">
+                <h3 className="section-primary-text font-semibold text-lg">
                   {item.title}
                 </h3>
               </div>
@@ -188,9 +184,10 @@ function SectionPreview({
           </div>
         </div>
       );
+      break;
 
     case 'info_cards':
-      return (
+      content = (
         <div className="p-12 bg-gray-50 dark:bg-gray-800">
           <h2 className="text-3xl font-bold mb-8 text-gray-900 dark:text-white">
             {section.title}
@@ -211,25 +208,24 @@ function SectionPreview({
           </div>
         </div>
       );
+      break;
 
     case 'cta':
-      return (
-        <div
-          style={{ backgroundColor: secondaryColor }}
-          className="p-12 text-white text-center"
-        >
+      content = (
+        <div className="section-cta p-12 text-white text-center">
           <h2 className="text-3xl font-bold mb-4">{section.title}</h2>
           {section.subtitle && <p className="text-lg mb-6">{section.subtitle}</p>}
           {section.content?.buttonText && (
-            <button style={buttonStyle} className="px-8 py-3 rounded font-semibold hover:opacity-90">
+            <button className="section-accent-button px-8 py-3 rounded font-semibold hover:opacity-90">
               {section.content.buttonText}
             </button>
           )}
         </div>
       );
+      break;
 
     case 'testimonials':
-      return (
+      content = (
         <div className="p-12 bg-white dark:bg-gray-900">
           <h2 className="text-3xl font-bold mb-8 text-gray-900 dark:text-white">
             {section.title}
@@ -251,9 +247,10 @@ function SectionPreview({
           </div>
         </div>
       );
+      break;
 
     default:
-      return (
+      content = (
         <div className="p-12 bg-gray-50 dark:bg-gray-800">
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
             {section.title}
@@ -266,5 +263,34 @@ function SectionPreview({
           )}
         </div>
       );
+      break;
   }
+
+  return (
+    <>
+      {content}
+      <style jsx>{`
+        .section-hero {
+          background: linear-gradient(135deg, ${primaryColor} 0%, ${secondaryColor} 100%);
+        }
+
+        .section-cta {
+          background-color: ${secondaryColor};
+        }
+
+        .section-accent-button {
+          background-color: ${accentColor};
+          color: #000000;
+        }
+
+        .featured-image {
+          background-color: ${primaryColor};
+        }
+
+        .section-primary-text {
+          color: ${primaryColor};
+        }
+      `}</style>
+    </>
+  );
 }

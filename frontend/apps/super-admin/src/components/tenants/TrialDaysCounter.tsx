@@ -54,17 +54,19 @@ export function TrialDaysCounter({
   }
 
   return (
-    <div className={className}>
+    <div className={`trial-days-counter ${className}`}>
       <span className={`font-semibold ${getColorClass()}`}>{displayText}</span>
 
       {showProgress && (
         <div className="mt-2 w-full bg-gray-200 rounded-full h-2">
-          <div
-            className={`h-2 rounded-full transition-all duration-300 ${getProgressColor()}`}
-            style={{ width: `${Math.max(0, progressPercent)}%` }}
-          />
+          <div className={`trial-progress-fill h-2 rounded-full transition-all duration-300 ${getProgressColor()}`} />
         </div>
       )}
+      <style jsx>{`
+        .trial-progress-fill {
+          width: ${Math.max(0, progressPercent)}%;
+        }
+      `}</style>
     </div>
   )
 }

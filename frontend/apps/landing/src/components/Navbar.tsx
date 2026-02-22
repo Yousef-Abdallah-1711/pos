@@ -1,113 +1,122 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useTheme } from 'next-themes'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { Button } from '@/components/ui/button'
-import { Moon, Sun, Menu, X, Globe, ChefHat } from 'lucide-react'
+import { Moon, Sun, Menu, X, ChefHat, Globe } from 'lucide-react'
 import Link from 'next/link'
 
 export function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const { theme, setTheme } = useTheme()
+  const [scrolled, setScrolled] = useState(false)
+  const [mounted, setMounted] = useState(false)
+  const { resolvedTheme, setTheme } = useTheme()
   const { language, setLanguage, t, dir } = useLanguage()
 
-  const toggleTheme = () => {
-    setTheme(theme === 'dark' ? 'light' : 'dark')
-  }
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 20)
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
 
-  const toggleLanguage = () => {
-    setLanguage(language === 'en' ? 'ar' : 'en')
-  }
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  const isDarkTheme = mounted && resolvedTheme === 'dark'
+
+  const locale = language
+  const otherLocale = locale === 'en' ? 'ar' : 'en'
+  const otherLocaleLabel = locale === 'en' ? 'العربية' : 'English'
+
+  const navLinks = [
+    { href: '#features', label: t.nav.features },
+    { href: '#pricing', label: t.nav.pricing },
+    { href: '#about', label: t.nav.about },
+    { href: '#contact', label: t.nav.contact },
+  ]
 
   return (
-    <nav className="fixed top-0 w-full bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 z-50">
+    <nav
+      dir={dir}
+      className={`fixed top-0 w-full z-50 transition-all duration-300 ${
+        scrolled
+          ? 'bg-white/95 dark:bg-gray-900/95 backdrop-blur-md shadow-sm border-b border-gray-200/50 dark:border-gray-800/50'
+          : 'bg-transparent'
+      }`}
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 font-bold text-xl">
-            <ChefHat className="h-8 w-8 text-primary-600 dark:text-primary-400" />
-            <span className="hidden sm:inline text-gray-900 dark:text-white">
-              Restaurant POS
+          <Link href={`/${locale}`} className="flex items-center gap-2.5 font-bold text-xl group">
+            <div className="w-9 h-9 bg-gradient-to-br from-orange-500 to-red-600 rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-orange-200 dark:group-hover:shadow-orange-900 transition-shadow">
+              <ChefHat className="h-5 w-5 text-white" />
+            </div>
+            <span className="hidden sm:inline text-gray-900 dark:text-white font-extrabold tracking-tight">
+              Restaurant<span className="text-orange-500">POS</span>
             </span>
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-8">
-            <Link
-              href="#features"
-              className="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition"
-            >
-              {t.nav.features}
-            </Link>
-            <Link
-              href="#pricing"
-              className="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition"
-            >
-              {t.nav.pricing}
-            </Link>
-            <Link
-              href="#about"
-              className="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition"
-            >
-              {t.nav.about}
-            </Link>
-            <Link
-              href="#contact"
-              className="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition"
-            >
-              {t.nav.contact}
-            </Link>
+          <div className="hidden md:flex items-center gap-1">
+            {navLinks.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100/80 dark:hover:bg-gray-800/80 rounded-lg transition-all"
+              >
+                {link.label}
+              </Link>
+            ))}
           </div>
 
           {/* Actions */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5">
             {/* Theme Toggle */}
             <button
-              onClick={toggleTheme}
-              className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition"
+              onClick={() => setTheme(isDarkTheme ? 'light' : 'dark')}
+              className="p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
               aria-label="Toggle theme"
             >
-              {theme === 'dark' ? (
-                <Sun className="h-5 w-5 text-gray-700 dark:text-gray-300" />
+              {mounted ? (
+                isDarkTheme ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />
               ) : (
-                <Moon className="h-5 w-5 text-gray-700 dark:text-gray-300" />
+                <Moon className="h-5 w-5" />
               )}
             </button>
 
             {/* Language Toggle */}
             <button
-              onClick={toggleLanguage}
-              className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition flex items-center gap-1"
-              aria-label="Toggle language"
+              onClick={() => setLanguage(otherLocale as 'en' | 'ar')}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
+              aria-label="Switch language"
             >
-              <Globe className="h-5 w-5 text-gray-700 dark:text-gray-300" />
-              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                {language === 'en' ? 'AR' : 'EN'}
-              </span>
+              <Globe className="h-4 w-4" />
+              <span>{otherLocaleLabel}</span>
             </button>
 
             {/* Desktop Buttons */}
             <div className="hidden md:flex items-center gap-2 ms-2">
               <Button variant="ghost" size="sm" asChild>
-                <Link href="/auth/login">{t.nav.login}</Link>
+                <Link href={`/${locale}/auth/login`}>{t.nav.login}</Link>
               </Button>
-              <Button size="sm" asChild>
-                <Link href="/auth/register">{t.nav.getStarted}</Link>
+              <Button
+                size="sm"
+                asChild
+                className="bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white shadow-md hover:shadow-orange-200 dark:hover:shadow-orange-900 border-0 transition-all"
+              >
+                <Link href={`/${locale}/auth/register`}>{t.nav.getStarted}</Link>
               </Button>
             </div>
 
             {/* Mobile Menu Button */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition"
+              className="md:hidden p-2 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
               aria-label="Toggle menu"
             >
-              {mobileMenuOpen ? (
-                <X className="h-6 w-6 text-gray-700 dark:text-gray-300" />
-              ) : (
-                <Menu className="h-6 w-6 text-gray-700 dark:text-gray-300" />
-              )}
+              {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </button>
           </div>
         </div>
@@ -115,42 +124,27 @@ export function Navbar() {
 
       {/* Mobile Menu */}
       {mobileMenuOpen && (
-        <div className="md:hidden border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900">
-          <div className="px-4 py-4 space-y-3">
-            <Link
-              href="#features"
-              className="block py-2 text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              {t.nav.features}
-            </Link>
-            <Link
-              href="#pricing"
-              className="block py-2 text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              {t.nav.pricing}
-            </Link>
-            <Link
-              href="#about"
-              className="block py-2 text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              {t.nav.about}
-            </Link>
-            <Link
-              href="#contact"
-              className="block py-2 text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              {t.nav.contact}
-            </Link>
-            <div className="pt-4 border-t border-gray-200 dark:border-gray-800 space-y-2">
+        <div className="md:hidden border-t border-gray-200 dark:border-gray-800 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md">
+          <div className="px-4 py-4 space-y-1">
+            {navLinks.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="block px-3 py-2.5 text-base font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-all"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                {link.label}
+              </Link>
+            ))}
+            <div className="pt-4 mt-4 border-t border-gray-200 dark:border-gray-800 space-y-2">
               <Button variant="outline" className="w-full" asChild>
-                <Link href="/auth/login">{t.nav.login}</Link>
+                <Link href={`/${locale}/auth/login`}>{t.nav.login}</Link>
               </Button>
-              <Button className="w-full" asChild>
-                <Link href="/auth/register">{t.nav.getStarted}</Link>
+              <Button
+                className="w-full bg-gradient-to-r from-orange-500 to-red-600 text-white border-0"
+                asChild
+              >
+                <Link href={`/${locale}/auth/register`}>{t.nav.getStarted}</Link>
               </Button>
             </div>
           </div>

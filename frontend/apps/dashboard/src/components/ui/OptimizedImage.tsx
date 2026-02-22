@@ -10,7 +10,7 @@
  */
 
 import Image, { ImageProps } from 'next/image'
-import { CSSProperties, useState } from 'react'
+import { useState } from 'react'
 
 interface OptimizedImageProps extends Omit<ImageProps, 'onLoadingComplete'> {
   variant?: 'thumbnail' | 'hero' | 'avatar' | 'default'
@@ -67,15 +67,13 @@ export function OptimizedImage({
 
   // Use fallback if image fails to load
   const imageSrc = hasError && fallback ? fallback : src
+  const maxWidth = width || config.maxWidth
+  const maxHeight = height || config.maxHeight
+  const ratio = width && height ? `${width}/${height}` : 'auto'
 
   return (
     <div
-      className={`relative overflow-hidden bg-gray-100 ${containerClassName}`}
-      style={{
-        maxWidth: width || config.maxWidth,
-        maxHeight: height || config.maxHeight,
-        aspectRatio: width && height ? `${width}/${height}` : undefined,
-      } as CSSProperties}
+      className={`optimized-image-container relative overflow-hidden bg-gray-100 ${containerClassName}`}
     >
       <Image
         src={imageSrc}
@@ -109,6 +107,13 @@ export function OptimizedImage({
           <span className="text-xs text-gray-500">Failed to load image</span>
         </div>
       )}
+      <style jsx>{`
+        .optimized-image-container {
+          max-width: ${maxWidth}px;
+          max-height: ${maxHeight}px;
+          aspect-ratio: ${ratio};
+        }
+      `}</style>
     </div>
   )
 }
@@ -156,7 +161,7 @@ export function AspectRatioImage({
   ...props
 }: OptimizedImageProps & { ratio?: string }) {
   return (
-    <div className="relative w-full" style={{ aspectRatio: ratio }}>
+    <div className="aspect-ratio-image relative w-full">
       <Image
         src={src}
         alt={alt}
@@ -164,6 +169,11 @@ export function AspectRatioImage({
         className="object-cover"
         {...props}
       />
+      <style jsx>{`
+        .aspect-ratio-image {
+          aspect-ratio: ${ratio};
+        }
+      `}</style>
     </div>
   )
 }

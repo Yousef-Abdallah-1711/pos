@@ -53,16 +53,16 @@ export function VirtualList<T>({
   }, [])
 
   const totalHeight = items.length * itemHeight
+  const trailingSpacerHeight = Math.max(0, totalHeight - (offsetY + visibleItems.length * itemHeight))
 
   return (
     <div
       ref={containerRef}
-      className={`overflow-y-auto ${className}`}
-      style={{ height: containerHeight }}
+      className={`virtual-list-container overflow-y-auto ${className}`}
       onScroll={handleScroll}
     >
       {/* Invisible spacer before visible items */}
-      <div style={{ height: offsetY }} />
+      <div className="virtual-list-spacer-before" />
 
       {/* Visible items */}
       <div>
@@ -74,7 +74,20 @@ export function VirtualList<T>({
       </div>
 
       {/* Invisible spacer after visible items */}
-      <div style={{ height: Math.max(0, totalHeight - (offsetY + visibleItems.length * itemHeight)) }} />
+      <div className="virtual-list-spacer-after" />
+      <style jsx>{`
+        .virtual-list-container {
+          height: ${containerHeight}px;
+        }
+
+        .virtual-list-spacer-before {
+          height: ${offsetY}px;
+        }
+
+        .virtual-list-spacer-after {
+          height: ${trailingSpacerHeight}px;
+        }
+      `}</style>
     </div>
   )
 }

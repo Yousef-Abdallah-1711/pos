@@ -18,7 +18,7 @@ export interface RemoteCursorProps {
 }
 
 export const RemoteCursor: React.FC<RemoteCursorProps> = ({ cursor, content, editorElement }) => {
-  const [cursorStyle, setCursorStyle] = useState<React.CSSProperties>({})
+  const [cursorPosition, setCursorPosition] = useState<{ left: number; top: number } | null>(null)
   const [isVisible, setIsVisible] = useState(true)
 
   useEffect(() => {
@@ -45,10 +45,7 @@ export const RemoteCursor: React.FC<RemoteCursorProps> = ({ cursor, content, edi
       const coords = getCaretCoordinates(textarea, position)
       document.body.removeChild(clone)
 
-      setCursorStyle({
-        left: `${coords.left}px`,
-        top: `${coords.top}px`,
-      })
+      setCursorPosition(coords)
 
       setIsVisible(true)
     } catch {
@@ -56,25 +53,26 @@ export const RemoteCursor: React.FC<RemoteCursorProps> = ({ cursor, content, edi
     }
   }, [cursor.position, content, editorElement])
 
-  if (!isVisible) {
+  if (!isVisible || !cursorPosition) {
     return null
   }
 
   return (
-    <div
-      className={styles.cursor}
-      style={{
-        ...cursorStyle,
-        backgroundColor: cursor.color,
-      }}
-      title={cursor.username}
-    >
-      <div
-        className={styles.label}
-        style={{ backgroundColor: cursor.color }}
-      >
+    <div className={`${styles.cursor} remote-cursor`} title={cursor.username}>
+      <div className={`${styles.label} remote-cursor-label`}>
         {cursor.username}
       </div>
+      <style>{`
+        .remote-cursor {
+          left: ${cursorPosition.left}px;
+          top: ${cursorPosition.top}px;
+          background-color: ${cursor.color};
+        }
+
+        .remote-cursor-label {
+          background-color: ${cursor.color};
+        }
+      `}</style>
     </div>
   )
 }

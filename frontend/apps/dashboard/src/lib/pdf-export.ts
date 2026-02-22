@@ -204,20 +204,21 @@ function generateOrderHTML(order: Order): string {
     month: 'long',
     day: 'numeric',
   });
+  const paymentStatusClass = order.payment_status === 'paid' ? 'invoice-badge-paid' : 'invoice-badge-unpaid';
 
   const itemsHTML = order.items
     .map(
       (item) => `
     <tr>
-      <td style="padding: 8px; border-bottom: 1px solid #e0e0e0;">${item.product_name}</td>
-      <td style="padding: 8px; border-bottom: 1px solid #e0e0e0; text-align: center;">${item.quantity}</td>
-      <td style="padding: 8px; border-bottom: 1px solid #e0e0e0; text-align: right;">$${formatAmount(item.unit_price)}</td>
-      <td style="padding: 8px; border-bottom: 1px solid #e0e0e0; text-align: right;">$${formatAmount(item.subtotal)}</td>
+      <td class="invoice-cell">${item.product_name}</td>
+      <td class="invoice-cell invoice-cell-center">${item.quantity}</td>
+      <td class="invoice-cell invoice-cell-right">$${formatAmount(item.unit_price)}</td>
+      <td class="invoice-cell invoice-cell-right">$${formatAmount(item.subtotal)}</td>
     </tr>
     ${
       item.special_instructions
         ? `<tr>
-          <td colspan="4" style="padding: 4px 8px; font-size: 12px; color: #666; font-style: italic;">
+          <td colspan="4" class="invoice-item-note">
             Note: ${item.special_instructions}
           </td>
         </tr>`
@@ -228,47 +229,206 @@ function generateOrderHTML(order: Order): string {
     .join('');
 
   return `
-    <div style="font-family: Arial, sans-serif; color: #333;">
+    <div class="invoice-root">
+      <style>
+        .invoice-root {
+          font-family: Arial, sans-serif;
+          color: #333;
+        }
+
+        .invoice-header {
+          text-align: center;
+          margin-bottom: 30px;
+          border-bottom: 2px solid #007bff;
+          padding-bottom: 20px;
+        }
+
+        .invoice-title {
+          margin: 0;
+          color: #007bff;
+          font-size: 28px;
+        }
+
+        .invoice-order-number {
+          margin: 5px 0;
+          color: #666;
+        }
+
+        .invoice-meta {
+          display: flex;
+          justify-content: space-between;
+          margin-bottom: 30px;
+        }
+
+        .invoice-column {
+          flex: 1;
+        }
+
+        .invoice-column-right {
+          text-align: right;
+        }
+
+        .invoice-section-title {
+          margin: 0 0 10px 0;
+          color: #333;
+        }
+
+        .invoice-text {
+          margin: 5px 0;
+        }
+
+        .invoice-text-muted {
+          margin: 5px 0;
+          color: #666;
+        }
+
+        .invoice-text-italic {
+          font-style: italic;
+        }
+
+        .invoice-badge {
+          display: inline-block;
+          padding: 4px 8px;
+          border-radius: 4px;
+        }
+
+        .invoice-badge-status {
+          background-color: #e8f5e9;
+          color: #2e7d32;
+        }
+
+        .invoice-badge-paid {
+          background-color: #e8f5e9;
+          color: #2e7d32;
+        }
+
+        .invoice-badge-unpaid {
+          background-color: #fff3e0;
+          color: #e65100;
+        }
+
+        .invoice-table {
+          width: 100%;
+          margin-bottom: 30px;
+          border-collapse: collapse;
+        }
+
+        .invoice-table-head {
+          background-color: #f5f5f5;
+          border-bottom: 2px solid #ddd;
+        }
+
+        .invoice-heading {
+          padding: 10px;
+          font-weight: bold;
+          text-align: left;
+        }
+
+        .invoice-heading-center {
+          text-align: center;
+        }
+
+        .invoice-heading-right {
+          text-align: right;
+        }
+
+        .invoice-cell {
+          padding: 8px;
+          border-bottom: 1px solid #e0e0e0;
+          text-align: left;
+        }
+
+        .invoice-cell-center {
+          text-align: center;
+        }
+
+        .invoice-cell-right {
+          text-align: right;
+        }
+
+        .invoice-item-note {
+          padding: 4px 8px;
+          font-size: 12px;
+          color: #666;
+          font-style: italic;
+        }
+
+        .invoice-totals-wrap {
+          display: flex;
+          justify-content: flex-end;
+          margin-bottom: 30px;
+        }
+
+        .invoice-totals {
+          width: 300px;
+        }
+
+        .invoice-total-row {
+          display: flex;
+          justify-content: space-between;
+          padding: 8px 0;
+          border-bottom: 1px solid #ddd;
+        }
+
+        .invoice-total-row-discount {
+          color: #2e7d32;
+        }
+
+        .invoice-total-row-final {
+          display: flex;
+          justify-content: space-between;
+          padding: 12px 0;
+          font-size: 16px;
+          font-weight: bold;
+          border-top: 2px solid #333;
+        }
+
+        .invoice-footer {
+          text-align: center;
+          color: #666;
+          font-size: 12px;
+          padding-top: 20px;
+          border-top: 1px solid #ddd;
+        }
+      </style>
       <!-- Header -->
-      <div style="text-align: center; margin-bottom: 30px; border-bottom: 2px solid #007bff; padding-bottom: 20px;">
-        <h1 style="margin: 0; color: #007bff; font-size: 28px;">INVOICE</h1>
-        <p style="margin: 5px 0; color: #666;">Order #${order.order_number}</p>
+      <div class="invoice-header">
+        <h1 class="invoice-title">INVOICE</h1>
+        <p class="invoice-order-number">Order #${order.order_number}</p>
       </div>
 
-      <div style="display: flex; justify-content: space-between; margin-bottom: 30px;">
+      <div class="invoice-meta">
         <!-- Customer Info -->
-        <div style="flex: 1;">
-          <h3 style="margin: 0 0 10px 0; color: #333;">Bill To:</h3>
-          <p style="margin: 5px 0;"><strong>${order.customer_name}</strong></p>
-          <p style="margin: 5px 0; color: #666;">${order.customer_email}</p>
-          <p style="margin: 5px 0; color: #666;">${order.customer_phone}</p>
-          <p style="margin: 5px 0; color: #666;">${order.delivery_address}</p>
+        <div class="invoice-column">
+          <h3 class="invoice-section-title">Bill To:</h3>
+          <p class="invoice-text"><strong>${order.customer_name}</strong></p>
+          <p class="invoice-text-muted">${order.customer_email}</p>
+          <p class="invoice-text-muted">${order.customer_phone}</p>
+          <p class="invoice-text-muted">${order.delivery_address}</p>
           ${
             order.delivery_notes
-              ? `<p style="margin: 5px 0; color: #666; font-style: italic;">Note: ${order.delivery_notes}</p>`
+              ? `<p class="invoice-text-muted invoice-text-italic">Note: ${order.delivery_notes}</p>`
               : ''
           }
         </div>
 
         <!-- Order Info -->
-        <div style="flex: 1; text-align: right;">
-          <p style="margin: 5px 0;"><strong>Date:</strong> ${createdDate}</p>
-          <p style="margin: 5px 0;"><strong>Status:</strong> <span style="padding: 4px 8px; background-color: #e8f5e9; color: #2e7d32; border-radius: 4px;">${order.status}</span></p>
-          <p style="margin: 5px 0;"><strong>Payment Method:</strong> ${order.payment_method}</p>
-          <p style="margin: 5px 0;"><strong>Payment Status:</strong> <span style="padding: 4px 8px; background-color: ${
-            order.payment_status === 'paid' ? '#e8f5e9' : '#fff3e0'
-          }; color: ${order.payment_status === 'paid' ? '#2e7d32' : '#e65100'}; border-radius: 4px;">${order.payment_status}</span></p>
+        <div class="invoice-column invoice-column-right">
+          <p class="invoice-text"><strong>Date:</strong> ${createdDate}</p>
+          <p class="invoice-text"><strong>Status:</strong> <span class="invoice-badge invoice-badge-status">${order.status}</span></p>
+          <p class="invoice-text"><strong>Payment Method:</strong> ${order.payment_method}</p>
+          <p class="invoice-text"><strong>Payment Status:</strong> <span class="invoice-badge ${paymentStatusClass}">${order.payment_status}</span></p>
         </div>
       </div>
 
       <!-- Items Table -->
-      <table style="width: 100%; margin-bottom: 30px; border-collapse: collapse;">
+      <table class="invoice-table">
         <thead>
-          <tr style="background-color: #f5f5f5; border-bottom: 2px solid #ddd;">
-            <th style="padding: 10px; text-align: left; font-weight: bold;">Item</th>
-            <th style="padding: 10px; text-align: center; font-weight: bold;">Qty</th>
-            <th style="padding: 10px; text-align: right; font-weight: bold;">Unit Price</th>
-            <th style="padding: 10px; text-align: right; font-weight: bold;">Total</th>
+          <tr class="invoice-table-head">
+            <th class="invoice-heading">Item</th>
+            <th class="invoice-heading invoice-heading-center">Qty</th>
+            <th class="invoice-heading invoice-heading-right">Unit Price</th>
+            <th class="invoice-heading invoice-heading-right">Total</th>
           </tr>
         </thead>
         <tbody>
@@ -277,37 +437,37 @@ function generateOrderHTML(order: Order): string {
       </table>
 
       <!-- Totals -->
-      <div style="display: flex; justify-content: flex-end; margin-bottom: 30px;">
-        <div style="width: 300px;">
-          <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #ddd;">
+      <div class="invoice-totals-wrap">
+        <div class="invoice-totals">
+          <div class="invoice-total-row">
             <span>Subtotal:</span>
             <span>$${formatAmount(order.subtotal)}</span>
           </div>
           ${
             order.tax > 0
               ? `
-            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #ddd;">
+            <div class="invoice-total-row">
               <span>Tax:</span>
               <span>$${formatAmount(order.tax)}</span>
             </div>
           `
               : ''
           }
-          <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #ddd;">
+          <div class="invoice-total-row">
             <span>Delivery Fee:</span>
             <span>$${formatAmount(order.delivery_fee)}</span>
           </div>
           ${
             order.discount > 0
               ? `
-            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #ddd; color: #2e7d32;">
+            <div class="invoice-total-row invoice-total-row-discount">
               <span>Discount:</span>
               <span>-$${formatAmount(order.discount)}</span>
             </div>
           `
               : ''
           }
-          <div style="display: flex; justify-content: space-between; padding: 12px 0; font-size: 16px; font-weight: bold; border-top: 2px solid #333;">
+          <div class="invoice-total-row-final">
             <span>Total:</span>
             <span>$${formatAmount(order.total)}</span>
           </div>
@@ -315,9 +475,9 @@ function generateOrderHTML(order: Order): string {
       </div>
 
       <!-- Footer -->
-      <div style="text-align: center; color: #666; font-size: 12px; padding-top: 20px; border-top: 1px solid #ddd;">
+      <div class="invoice-footer">
         <p>Thank you for your order!</p>
-        <p style="margin: 5px 0;">Generated on ${new Date().toLocaleString()}</p>
+        <p class="invoice-text">Generated on ${new Date().toLocaleString()}</p>
       </div>
     </div>
   `;

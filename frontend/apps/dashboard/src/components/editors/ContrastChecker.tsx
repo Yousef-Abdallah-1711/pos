@@ -125,6 +125,15 @@ export function ContrastChecker({ colors, showDetails = true }: ContrastCheckerP
   const allPass = contrastResults.every((r) => r.wcagAA)
   const allPassAAA = contrastResults.every((r) => r.wcagAAA)
   const failures = contrastResults.filter((r) => !r.wcagAA)
+  const swatchRules = contrastResults
+    .map(
+      (result) => `
+        .contrast-swatch-${result.colorKey} {
+          background-color: ${result.textColor};
+        }
+      `
+    )
+    .join('\n')
 
   return (
     <div className="space-y-4">
@@ -174,8 +183,7 @@ export function ContrastChecker({ colors, showDetails = true }: ContrastCheckerP
               <div className="flex items-start justify-between gap-2">
                 <div className="flex items-center gap-2 flex-1">
                   <div
-                    className="w-8 h-8 rounded border-2 border-gray-300 dark:border-gray-600"
-                    style={{ backgroundColor: result.textColor }}
+                    className={`w-8 h-8 rounded border-2 border-gray-300 dark:border-gray-600 contrast-swatch-${result.colorKey}`}
                   />
                   <div className="flex-1">
                     <p className="text-sm font-medium capitalize text-gray-900 dark:text-white">
@@ -261,6 +269,9 @@ export function ContrastChecker({ colors, showDetails = true }: ContrastCheckerP
           </ul>
         </div>
       )}
+      <style jsx>{`
+        ${swatchRules}
+      `}</style>
     </div>
   )
 }

@@ -1,6 +1,6 @@
 'use client'
 
-import { ChefHat, Lock, LogOut } from 'lucide-react'
+import { ChefHat, CreditCard, Lock, LogOut } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { useAuthStore } from '@/stores/authStore'
@@ -13,6 +13,8 @@ export function BlockedSidebar() {
   const locale = getLocaleFromPath(pathname)
   const logout = useAuthStore((state) => state.logout)
   const isRTL = locale === 'ar'
+  const billingHref = `/${locale}/dashboard/settings/billing`
+  const isBillingPage = pathname.includes('/dashboard/settings/billing')
 
   const handleLogout = () => {
     logout()
@@ -45,6 +47,17 @@ export function BlockedSidebar() {
             </p>
           </div>
         </div>
+        <Link
+          href={billingHref}
+          className={`mt-3 flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium transition ${
+            isBillingPage
+              ? 'bg-primary-100 text-primary-700 border-primary-200 dark:bg-primary-900/30 dark:text-primary-300 dark:border-primary-800'
+              : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700 dark:hover:bg-gray-700'
+          }`}
+        >
+          <CreditCard className="h-4 w-4" />
+          Billing & Subscription
+        </Link>
       </div>
 
       {/* Disabled Menu Items */}

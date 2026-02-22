@@ -230,12 +230,7 @@ export function FooterEditor({
         </div>
 
         <div
-          style={{
-            backgroundColor: footerConfig.backgroundColor || '#1f2937',
-            color: footerConfig.textColor || '#ffffff',
-            padding: `${footerConfig.padding || 48}px 24px`,
-          }}
-          className="border border-gray-200 dark:border-gray-700 rounded-lg"
+          className="footer-preview-root border border-gray-200 dark:border-gray-700 rounded-lg"
         >
           <div className="grid grid-cols-3 gap-8 max-w-6xl mx-auto mb-8">
             {/* Company Info */}
@@ -275,8 +270,7 @@ export function FooterEditor({
                     <li key={idx}>
                       <a
                         href={link.href}
-                        style={{ color: footerConfig.linkColor || '#3b82f6' }}
-                        className="text-sm hover:opacity-80"
+                        className="footer-preview-link text-sm hover:opacity-80"
                       >
                         {link.label}
                       </a>
@@ -295,8 +289,7 @@ export function FooterEditor({
                   <a
                     key={link.id}
                     href={link.url}
-                    style={{ color: footerConfig.linkColor || '#3b82f6' }}
-                    className="text-sm hover:opacity-80"
+                    className="footer-preview-link text-sm hover:opacity-80"
                   >
                     {link.platform.toUpperCase()}
                   </a>
@@ -319,6 +312,17 @@ export function FooterEditor({
             )}
           </div>
         </div>
+        <style jsx>{`
+          .footer-preview-root {
+            background-color: ${footerConfig.backgroundColor || '#1f2937'};
+            color: ${footerConfig.textColor || '#ffffff'};
+            padding: ${footerConfig.padding || 48}px 24px;
+          }
+
+          .footer-preview-link {
+            color: ${footerConfig.linkColor || '#3b82f6'};
+          }
+        `}</style>
       </div>
     )
   }

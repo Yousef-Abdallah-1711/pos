@@ -9,7 +9,6 @@ import { ComponentDefinition, ComponentNotFoundError, componentRegistry } from '
  * Component loader with error handling and fallback
  */
 export class ComponentLoader {
-  private static readonly CACHE_TTL = 5 * 60 * 1000 // 5 minutes
   private static loadingPromises: Map<string, Promise<ComponentDefinition>> = new Map()
 
   /**

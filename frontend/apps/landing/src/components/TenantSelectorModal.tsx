@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useAuthStore } from '@/stores/authStore'
 import { getConfig } from '@/lib/config'
 import { toast } from 'sonner'
+import { useLanguage } from '@/contexts/LanguageContext'
 
 interface Tenant {
   tenant_id: number
@@ -29,6 +30,7 @@ export function TenantSelectorModal({
 }: TenantSelectorModalProps) {
   const router = useRouter()
   const setAuth = useAuthStore((state) => state.setAuth)
+  const { t, dir } = useLanguage()
   const [selectedTenantId, setSelectedTenantId] = useState<number | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -59,27 +61,24 @@ export function TenantSelectorModal({
 
       if (!response.ok) {
         const errorData = await response.json()
-        throw new Error(errorData.error || 'Failed to select organization')
+        throw new Error(errorData.error || t.auth.tenantSelector.failedToSelect)
       }
 
       const data = await response.json()
 
-      // Store auth data
       if (data.user && data.token) {
         setAuth(data.user, data.token)
-        toast.success('Login successful!')
+        toast.success(t.auth.login.loginSuccess)
 
-        // Redirect to dashboard
         const { dashboardUrl } = getConfig()
         window.location.href = `${dashboardUrl}/auth/callback?token=${encodeURIComponent(data.token)}&user=${encodeURIComponent(JSON.stringify(data.user))}`
       }
 
-      // Call callback if provided
       if (onTenantSelected) {
         onTenantSelected(tenantId)
       }
     } catch (err) {
-      const errorMsg = err instanceof Error ? err.message : 'An error occurred'
+      const errorMsg = err instanceof Error ? err.message : t.auth.tenantSelector.anError
       setError(errorMsg)
       toast.error(errorMsg)
       setIsLoading(false)
@@ -89,13 +88,13 @@ export function TenantSelectorModal({
 
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
-      <div className="bg-white dark:bg-gray-900 rounded-lg shadow-xl p-8 w-full max-w-md mx-4">
+      <div dir={dir} className="bg-white dark:bg-gray-900 rounded-lg shadow-xl p-8 w-full max-w-md mx-4">
         <div className="mb-6">
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-            Select Organization
+            {t.auth.tenantSelector.title}
           </h2>
           <p className="text-gray-600 dark:text-gray-400 mt-2">
-            You have accounts in multiple organizations. Please select which one you'd like to access.
+            {t.auth.tenantSelector.description}
           </p>
         </div>
 
@@ -111,7 +110,7 @@ export function TenantSelectorModal({
               key={tenant.tenant_id}
               onClick={() => handleSelectTenant(tenant.tenant_id)}
               disabled={isLoading}
-              className={`w-full text-left p-4 border rounded-lg transition-all ${
+              className={`w-full text-${dir === 'rtl' ? 'right' : 'left'} p-4 border rounded-lg transition-all ${
                 selectedTenantId === tenant.tenant_id
                   ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30 dark:border-blue-400'
                   : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
@@ -139,7 +138,7 @@ export function TenantSelectorModal({
                   </div>
                 </div>
                 {selectedTenantId === tenant.tenant_id && isLoading && (
-                  <div className="ml-2 flex items-center">
+                  <div className={`${dir === 'rtl' ? 'mr-2' : 'ml-2'} flex items-center`}>
                     <div className="animate-spin h-5 w-5 border-2 border-blue-500 border-t-transparent rounded-full"></div>
                   </div>
                 )}
@@ -150,7 +149,7 @@ export function TenantSelectorModal({
 
         <div className="mt-6 text-sm text-gray-600 dark:text-gray-400">
           <p>
-            Logged in as: <strong>{email}</strong>
+            {t.auth.tenantSelector.loggedInAs} <strong>{email}</strong>
           </p>
         </div>
       </div>

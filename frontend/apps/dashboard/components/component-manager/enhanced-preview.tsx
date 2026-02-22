@@ -52,6 +52,8 @@ export function EnhancedPreview({
   const currentDevice = DEVICE_SPECS[deviceMode];
   const previewWidth = (currentDevice.width * zoomLevel) / 100;
   const previewHeight = (currentDevice.height * zoomLevel) / 100;
+  const zoomScale = zoomLevel / 100;
+  const inverseScale = 100 / zoomScale;
 
   const handleZoomIn = () => {
     setZoomLevel(prev => Math.min(prev + 10, 200));
@@ -86,7 +88,7 @@ export function EnhancedPreview({
   };
 
   return (
-    <div className="space-y-4">
+    <div className="enhanced-preview space-y-4">
       {/* Toolbar */}
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
         <div className="flex flex-wrap items-center justify-between gap-4">
@@ -196,13 +198,7 @@ export function EnhancedPreview({
               <h3 className="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-2">ORIGINAL</h3>
               <div
                 id="preview-content"
-                className="bg-white rounded border border-gray-200 dark:border-gray-700 overflow-auto"
-                style={{
-                  width: previewWidth,
-                  height: previewHeight,
-                  transform: `scale(${zoomLevel / 100})`,
-                  transformOrigin: 'top left',
-                }}
+                className="comparison-preview-frame bg-white rounded border border-gray-200 dark:border-gray-700 overflow-auto"
               >
                 <ManagerPreview
                   sections={sections}
@@ -231,29 +227,12 @@ export function EnhancedPreview({
           <div className="flex items-start justify-center overflow-x-auto">
             <div
               id="preview-content"
-              className={`bg-white dark:bg-gray-800 rounded border border-gray-300 dark:border-gray-600 shadow-lg overflow-hidden flex-shrink-0 ${
-                deviceMode !== 'desktop' ? 'border-8 border-gray-900 dark:border-gray-950' : ''
+              className={`single-preview-frame bg-white dark:bg-gray-800 rounded border border-gray-300 dark:border-gray-600 shadow-lg overflow-hidden flex-shrink-0 ${
+                deviceMode !== 'desktop' ? 'device-framed border-8 border-gray-900 dark:border-gray-950' : ''
               }`}
-              style={{
-                width: previewWidth,
-                height: previewHeight,
-                // Device frame effect for mobile/tablet
-                ...(deviceMode !== 'desktop' && {
-                  borderRadius: '12px',
-                  boxShadow: '0 20px 60px rgba(0, 0, 0, 0.15)',
-                }),
-              }}
             >
               {/* Screen content with zoom applied */}
-              <div
-                style={{
-                  overflow: 'auto',
-                  transform: `scale(${zoomLevel / 100})`,
-                  transformOrigin: 'top left',
-                  width: `${100 / (zoomLevel / 100)}%`,
-                  height: `${100 / (zoomLevel / 100)}%`,
-                }}
-              >
+              <div className="single-preview-content">
                 <ManagerPreview
                   sections={sections}
                   primaryColor={primaryColor}
@@ -282,6 +261,33 @@ export function EnhancedPreview({
           </div>
         </div>
       </div>
+
+      <style jsx>{`
+        .comparison-preview-frame {
+          width: ${previewWidth}px;
+          height: ${previewHeight}px;
+          transform: scale(${zoomScale});
+          transform-origin: top left;
+        }
+
+        .single-preview-frame {
+          width: ${previewWidth}px;
+          height: ${previewHeight}px;
+        }
+
+        .single-preview-content {
+          overflow: auto;
+          transform: scale(${zoomScale});
+          transform-origin: top left;
+          width: ${inverseScale}%;
+          height: ${inverseScale}%;
+        }
+
+        .device-framed {
+          border-radius: 12px;
+          box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+        }
+      `}</style>
     </div>
   );
 }

@@ -4,7 +4,6 @@ import { ReactNode, useEffect, useState, useRef } from 'react';
 import { useAuthStore } from '@/stores/authStore';
 import { useTenantStatusStore } from '@/stores/tenantStatusStore';
 import { getConfig } from '@/lib/config';
-import { BlockedOverlay } from '@/components/blocked/BlockedOverlay';
 import { debugLog, debugError } from '@/lib/debug';
 
 const DashboardAuthProvider = ({ children }: { children: ReactNode }) => {
@@ -240,13 +239,8 @@ const DashboardAuthProvider = ({ children }: { children: ReactNode }) => {
     )
   }
 
-  // If tenant is blocked, show blocked overlay
-  if (!canAccess && blockReason) {
-    debugLog('[DashboardAuthProvider] Tenant is blocked, showing overlay')
-    return <BlockedOverlay blockReason={blockReason} />
-  }
-
   // User is authenticated and hydrated, show dashboard
+  // Note: blocked state is handled inside DashboardLayout (shows disabled sidebar + blocked content)
   debugLog('[DashboardAuthProvider] Showing dashboard content')
   return <>{children}</>
 };

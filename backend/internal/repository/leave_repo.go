@@ -148,11 +148,17 @@ func (r *LeaveRepository) CreateLeave(leave *domain.Leave) (int, error) {
 		RETURNING id
 	`
 
+	// Handle half_day_period: must be NULL when is_half_day is false (DB constraint)
+	var halfDayPeriod interface{}
+	if leave.IsHalfDay && leave.HalfDayPeriod != "" {
+		halfDayPeriod = leave.HalfDayPeriod
+	}
+
 	var id int
 	err := r.db.QueryRow(
 		query,
 		leave.TenantID, leave.RestaurantID, leave.EmployeeID, leave.StartDate,
-		leave.EndDate, leave.TotalDays, leave.IsHalfDay, leave.HalfDayPeriod,
+		leave.EndDate, leave.TotalDays, leave.IsHalfDay, halfDayPeriod,
 		leave.LeaveType, leave.LeaveCategory, leave.Reason, leave.ContactNumber,
 		leave.ContactAddress, leave.EmergencyContact, leave.Status, leave.CreatedBy,
 	).Scan(&id)

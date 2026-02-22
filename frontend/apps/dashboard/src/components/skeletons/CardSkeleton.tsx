@@ -2,7 +2,7 @@
 
 export function CardSkeleton({ count = 3 }: { count?: number }) {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div className="card-skeleton grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       {[...Array(count)].map((_, i) => (
         <div
           key={i}
@@ -19,9 +19,14 @@ export function CardSkeleton({ count = 3 }: { count?: number }) {
           </div>
 
           {/* Footer Button */}
-          <div className="h-10 bg-gray-200 dark:bg-gray-700 rounded w-full animate-pulse" style={{ marginTop: '1.5rem' }} />
+          <div className="card-skeleton-footer h-10 bg-gray-200 dark:bg-gray-700 rounded w-full animate-pulse" />
         </div>
       ))}
+      <style jsx>{`
+        .card-skeleton-footer {
+          margin-top: 1.5rem;
+        }
+      `}</style>
     </div>
   )
 }

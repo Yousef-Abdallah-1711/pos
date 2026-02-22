@@ -11,16 +11,15 @@ export default async function TrackOrderNumberPage({ params }: PageProps) {
   const { locale, orderNumber } = await params;
 
   const themeData = (await getThemeDataServer()) ?? getDefaultThemeData();
-  const themeDataExtracted = themeData.data?.data?.config || themeData.data?.config || themeData;
   const initialOrderNumber = decodeURIComponent(orderNumber);
 
   return (
     <>
-      <HeaderSSR themeData={themeDataExtracted} cartItemsCount={0} locale={locale} />
+      <HeaderSSR themeData={themeData} cartItemsCount={0} locale={locale} />
       <main>
         <TrackPageContent initialOrderNumber={initialOrderNumber} />
       </main>
-      <FooterSSR themeData={themeDataExtracted} locale={locale} />
+      <FooterSSR themeData={themeData} locale={locale} />
     </>
   );
 }

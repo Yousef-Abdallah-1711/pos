@@ -1,4 +1,4 @@
-/**
+﻿/**
  * TestimonialsEditor Component
  * Specialized editor for testimonials/reviews carousel sections
  */
@@ -542,7 +542,7 @@ export function TestimonialsEditor({
                                   : 'text-gray-300 dark:text-gray-600'
                               }`}
                             >
-                              ★
+                              Ã¢Ëœâ€¦
                             </button>
                           ))}
                         </div>
@@ -606,7 +606,7 @@ export function TestimonialsEditor({
                                   star <= testimonial.rating ? 'text-yellow-400' : 'text-gray-300'
                                 }`}
                               >
-                                ★
+                                Ã¢Ëœâ€¦
                               </span>
                             ))}
                           </div>
@@ -629,7 +629,7 @@ export function TestimonialsEditor({
 
       {previewMode && (
         <div className="rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden bg-gray-50 dark:bg-gray-900 p-8">
-          <div className="max-w-6xl mx-auto">
+          <div className="max-w-6xl mx-auto testimonials-preview">
             <h2 className="text-3xl font-bold text-gray-900 dark:text-white text-center mb-12">
               {component.title?.en || 'What Customers Say'}
             </h2>
@@ -641,10 +641,7 @@ export function TestimonialsEditor({
                     {config.showQuoteIcon && (
                       <div className="text-5xl text-gray-300 dark:text-gray-600 mb-4">"</div>
                     )}
-                    <p
-                      style={{ color: config.contentColor || '#6b7280' }}
-                      className="text-lg mb-6 italic"
-                    >
+                    <p className="testimonial-content text-lg mb-6 italic">
                       {(config.testimonials || [])[0]?.content}
                     </p>
                     <div className="flex items-center gap-4">
@@ -654,15 +651,12 @@ export function TestimonialsEditor({
                           alt={(config.testimonials || [])[0].author}
                           className="w-12 h-12 rounded-full object-cover"
                           onError={(e) => {
-                            (e.target as HTMLImageElement).style.display = 'none'
+                            e.currentTarget.classList.add('hidden')
                           }}
                         />
                       )}
                       <div>
-                        <p
-                          style={{ color: config.authorColor || '#1f2937' }}
-                          className="font-semibold"
-                        >
+                        <p className="testimonial-author font-semibold">
                           {(config.testimonials || [])[0]?.author}
                         </p>
                         {config.showAuthorTitle && (config.testimonials || [])[0]?.authorTitle && (
@@ -677,10 +671,9 @@ export function TestimonialsEditor({
                         {[1, 2, 3, 4, 5].map((star) => (
                           <span
                             key={star}
-                            style={{ color: config.ratingColor || '#fbbf24' }}
-                            className="text-xl"
+                            className="testimonial-rating text-xl"
                           >
-                            {star <= ((config.testimonials || [])[0]?.rating || 5) ? '★' : '☆'}
+                            {star <= ((config.testimonials || [])[0]?.rating || 5) ? 'â˜…' : 'â˜†'}
                           </span>
                         ))}
                       </div>
@@ -689,32 +682,16 @@ export function TestimonialsEditor({
                 )}
               </div>
             ) : (
-              <div
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: `repeat(${config.columns || 1}, 1fr)`,
-                  gap: `${config.spacing || 16}px`,
-                }}
-              >
+              <div className="testimonials-preview-grid">
                 {(config.testimonials || []).map((testimonial) => (
                   <div
                     key={testimonial.id}
-                    style={{
-                      backgroundColor: config.cardBackgroundColor || '#ffffff',
-                      borderRadius: `${config.borderRadius || 8}px`,
-                      ...(config.cardStyle === 'shadow' && {
-                        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-                      }),
-                      ...(config.cardStyle === 'border' && {
-                        border: '1px solid #e5e7eb',
-                      }),
-                    }}
-                    className="p-6"
+                    className="testimonials-preview-card p-6"
                   >
                     {config.showQuoteIcon && (
                       <div className="text-4xl text-gray-300 dark:text-gray-600 mb-3">"</div>
                     )}
-                    <p style={{ color: config.contentColor || '#6b7280' }} className="mb-4 italic">
+                    <p className="testimonial-content mb-4 italic">
                       {testimonial.content}
                     </p>
                     <div className="flex items-center gap-3">
@@ -724,12 +701,12 @@ export function TestimonialsEditor({
                           alt={testimonial.author}
                           className="w-10 h-10 rounded-full object-cover"
                           onError={(e) => {
-                            (e.target as HTMLImageElement).style.display = 'none'
+                            e.currentTarget.classList.add('hidden')
                           }}
                         />
                       )}
                       <div>
-                        <p style={{ color: config.authorColor || '#1f2937' }} className="font-semibold">
+                        <p className="testimonial-author font-semibold">
                           {testimonial.author}
                         </p>
                         {config.showAuthorTitle && testimonial.authorTitle && (
@@ -744,10 +721,9 @@ export function TestimonialsEditor({
                         {[1, 2, 3, 4, 5].map((star) => (
                           <span
                             key={star}
-                            style={{ color: config.ratingColor || '#fbbf24' }}
-                            className="text-lg"
+                            className="testimonial-rating text-lg"
                           >
-                            {star <= testimonial.rating ? '★' : '☆'}
+                            {star <= testimonial.rating ? 'â˜…' : 'â˜†'}
                           </span>
                         ))}
                       </div>
@@ -756,6 +732,32 @@ export function TestimonialsEditor({
                 ))}
               </div>
             )}
+            <style jsx>{`
+              .testimonials-preview-grid {
+                display: grid;
+                grid-template-columns: repeat(${config.columns || 1}, 1fr);
+                gap: ${config.spacing || 16}px;
+              }
+
+              .testimonials-preview-card {
+                background-color: ${config.cardBackgroundColor || '#ffffff'};
+                border-radius: ${config.borderRadius || 8}px;
+                ${config.cardStyle === 'shadow' ? 'box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);' : ''}
+                ${config.cardStyle === 'border' ? 'border: 1px solid #e5e7eb;' : ''}
+              }
+
+              .testimonial-content {
+                color: ${config.contentColor || '#6b7280'};
+              }
+
+              .testimonial-author {
+                color: ${config.authorColor || '#1f2937'};
+              }
+
+              .testimonial-rating {
+                color: ${config.ratingColor || '#fbbf24'};
+              }
+            `}</style>
           </div>
         </div>
       )}

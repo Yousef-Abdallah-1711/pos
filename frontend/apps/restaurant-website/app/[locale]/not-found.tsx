@@ -4,7 +4,7 @@ import Link from 'next/link';
 export default function NotFound() {
   // Use English as default for not-found page
   const locale = 'en';
-  const isRTL = locale === 'ar';
+  const isRTL = false;
 
   const homeUrl = `/${locale}`;
   const menuUrl = `/${locale}/menu`;

@@ -131,7 +131,6 @@ export class ComponentResolver {
    * Returns true if targetVersion matches or is compatible with requiredVersion
    */
   static isCompatible(
-    componentId: string,
     requiredVersion: string,
     targetVersion: string
   ): boolean {
@@ -216,7 +215,7 @@ export class ComponentResolver {
     const compatible: ComponentDefinition[] = []
 
     versions.forEach(version => {
-      if (this.isCompatible(componentId, requiredVersion, version)) {
+      if (this.isCompatible(requiredVersion, version)) {
         const component = componentRegistry.getComponent(componentId, version)
         if (component) {
           compatible.push(component)

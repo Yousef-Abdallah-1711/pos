@@ -220,6 +220,7 @@ export interface CustomSectionProps extends BaseSectionProps {
  * Header component configuration
  */
 export interface HeaderConfig {
+  homeHref?: string
   logoUrl?: string
   logoText?: string
   logoHeight?: number
@@ -276,7 +277,7 @@ export interface FooterConfig {
   showLegal?: boolean
   showBackToTop?: boolean
   columns?: number
-  layout?: 'expanded' | 'compact'
+  layout?: 'expanded' | 'compact' | 'minimal'
 }
 
 /**

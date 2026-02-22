@@ -5,6 +5,9 @@ import type {
   SuperAdminLoginRequest,
   SuperAdminLoginResponse,
   DashboardStats,
+  PaymentMetrics,
+  WebhookHealthResponse,
+  RefundPaymentResponse,
   PaginatedResponse,
   Tenant,
   User,
@@ -12,12 +15,17 @@ import type {
   ImpersonationToken,
 } from "@/types";
 
+const DEFAULT_SUPER_ADMIN_API_URL = "http://localhost:8080/api/v1/super-admin";
+const API_TIMEOUT_MS = 10000;
+
 class SuperAdminAPI {
   private client: AxiosInstance;
 
-  constructor(baseURL: string = process.env.NEXT_PUBLIC_SUPER_ADMIN_API_URL || '') {
+  constructor(baseURL: string = process.env.NEXT_PUBLIC_SUPER_ADMIN_API_URL || "") {
+    const resolvedBaseURL = baseURL || DEFAULT_SUPER_ADMIN_API_URL;
     this.client = axios.create({
-      baseURL,
+      baseURL: resolvedBaseURL,
+      timeout: API_TIMEOUT_MS,
       headers: {
         "Content-Type": "application/json",
       },
@@ -31,29 +39,42 @@ class SuperAdminAPI {
           config.headers.Authorization = `Bearer ${token}`;
         }
       }
-      console.log(`[API] ${config.method?.toUpperCase()} ${config.url}`, {
-        params: config.params,
-      });
+      if (process.env.NODE_ENV === "development") {
+        console.log(`[API] ${config.method?.toUpperCase()} ${config.url}`, {
+          baseURL: config.baseURL,
+          params: config.params,
+        });
+      }
       return config;
     });
 
     // Handle errors
     this.client.interceptors.response.use(
       (response) => {
-        console.log(`[API] Response:`, {
-          url: response.config.url,
-          status: response.status,
-          data: response.data,
-        });
+        if (process.env.NODE_ENV === "development") {
+          console.log(`[API] Response:`, {
+            url: response.config.url,
+            status: response.status,
+          });
+        }
         return response;
       },
       (error: AxiosError<ApiError>) => {
-        console.error(`[API] Error:`, {
-          url: error.config?.url,
-          status: error.response?.status,
-          message: error.message,
-          data: error.response?.data,
-        });
+        const isNetworkError = !error.response;
+        const normalizedError = {
+          url: error.config?.url ?? "unknown",
+          baseURL: error.config?.baseURL ?? resolvedBaseURL,
+          method: error.config?.method?.toUpperCase() ?? "GET",
+          status: error.response?.status ?? null,
+          code: error.code ?? null,
+          message: isNetworkError
+            ? `Network error: backend may be unavailable at ${error.config?.baseURL ?? resolvedBaseURL}`
+            : error.message,
+          data: error.response?.data ?? null,
+        };
+
+        console.error("[API] Error:", normalizedError);
+
         if (error.response?.status === 401) {
           // Clear auth data on 401
           if (typeof window !== "undefined") {
@@ -86,6 +107,27 @@ class SuperAdminAPI {
   async getDashboardStats(): Promise<DashboardStats> {
     const response = await this.client.get<ApiResponse<DashboardStats>>(
       "/dashboard/stats"
+    );
+    return response.data.data!;
+  }
+
+  async getPaymentMetrics(
+    period: "today" | "week" | "month" | "all" = "month"
+  ): Promise<PaymentMetrics> {
+    const response = await this.client.get<ApiResponse<PaymentMetrics>>(
+      "/payment-metrics",
+      { params: { period } }
+    );
+    return response.data.data!;
+  }
+
+  async getWebhookHealth(
+    period: "today" | "week" | "month" | "all" = "month",
+    limit: number = 50
+  ): Promise<WebhookHealthResponse> {
+    const response = await this.client.get<ApiResponse<WebhookHealthResponse>>(
+      "/webhook-health",
+      { params: { period, limit } }
     );
     return response.data.data!;
   }
@@ -300,6 +342,14 @@ class SuperAdminAPI {
       params: { page, page_size: pageSize },
     });
     return response.data.data as any;
+  }
+
+  async refundPayment(paymentId: number, reason?: string): Promise<RefundPaymentResponse> {
+    const response = await this.client.post<ApiResponse<RefundPaymentResponse>>(
+      `/payments/${paymentId}/refund`,
+      reason ? { reason } : {}
+    );
+    return response.data.data!;
   }
 }
 

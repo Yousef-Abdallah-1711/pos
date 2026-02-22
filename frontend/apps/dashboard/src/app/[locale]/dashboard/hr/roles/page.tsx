@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { usePathname } from 'next/navigation'
 import { useAuthStore } from '@/stores/authStore'
 import { RoleList } from '@/components/hr/RoleList'
@@ -29,7 +29,7 @@ interface Role {
 export default function RolesPage() {
   const pathname = usePathname()
   const locale = getLocaleFromPath(pathname)
-  const t = createTranslator(locale)
+  const t = useMemo(() => createTranslator(locale), [locale])
 
   const [roles, setRoles] = useState<Role[]>([])
   const [loading, setLoading] = useState(false)
@@ -53,7 +53,7 @@ export default function RolesPage() {
         const response = await api.get('/hr/roles')
         debugLog('[ROLES_PAGE] Response:', response.data)
 
-        const rolesList = Array.isArray(response.data) ? response.data : response.data?.roles || []
+        const rolesList = Array.isArray(response.data) ? response.data : (response.data?.data || response.data?.roles || [])
         setRoles(rolesList)
         setDebugInfo(`Successfully loaded ${rolesList.length} roles at ${new Date().toLocaleTimeString()}`)
       } catch (error: any) {
@@ -78,7 +78,8 @@ export default function RolesPage() {
       const response = await api.post('/hr/roles', formData)
       debugLog('[CREATE_ROLE] Response:', response.data)
 
-      setRoles([response.data, ...roles])
+      const created = response.data?.data || response.data
+      setRoles([created, ...roles])
       setShowForm(false)
       toast.success(t('hr.roles.createSuccess', 'Role created successfully'))
     } catch (error: any) {

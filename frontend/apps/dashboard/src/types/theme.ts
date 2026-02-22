@@ -154,6 +154,8 @@ export interface CreateThemeRequest {
   header?: HeaderConfig
   footer?: FooterConfig
   components?: ComponentConfig[]
+  customCss?: string
+  config?: Record<string, any>
 }
 
 export interface UpdateThemeRequest {
@@ -164,9 +166,13 @@ export interface UpdateThemeRequest {
   typography?: TypographySettings
   identity?: WebsiteIdentity
   websiteIdentity?: WebsiteIdentity // API spec uses this name
+  header?: HeaderConfig
+  footer?: FooterConfig
   header_config?: HeaderConfig
   footer_config?: FooterConfig
   components?: ComponentConfig[]
+  customCss?: string
+  config?: Record<string, any>
 }
 
 export interface ApiResponse<T = any> {

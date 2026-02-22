@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { usePathname } from 'next/navigation'
 import { useAuthStore } from '@/stores/authStore'
 import { useHasPermission } from '@/hooks/useRbac'
@@ -12,7 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogD
 import { api } from '@/lib/api'
 import { debugLog, debugError } from '@/lib/debug'
 import { toast } from 'sonner'
-import { Plus, AlertCircle, Lock } from 'lucide-react'
+import { Plus, AlertCircle, Lock, Loader2 } from 'lucide-react'
 import { createTranslator, getLocaleFromPath } from '@/lib/translations'
 import { PageHeaderSkeleton, TableSkeleton } from '@/components/skeletons'
 import { MODULE_IDS, PERMISSION_LEVELS } from '@/lib/rbac'
@@ -38,19 +38,20 @@ interface Employee {
 export default function LeavesPage() {
   const pathname = usePathname()
   const locale = getLocaleFromPath(pathname)
-  const t = createTranslator(locale)
+  const t = useMemo(() => createTranslator(locale), [locale])
 
-  // Check RBAC permissions for Leaves module
-  const canViewLeaves = useHasPermission(
+  // Check RBAC permissions - properly destructure the hook return
+  const { hasPermission: canViewLeaves, loading: canViewLoading } = useHasPermission(
     MODULE_IDS.LEAVES,
     PERMISSION_LEVELS.READ,
   )
-  const canCreateLeaves = useHasPermission(
+  const { hasPermission: canCreateLeaves, loading: canCreateLoading } = useHasPermission(
     MODULE_IDS.LEAVES,
     PERMISSION_LEVELS.WRITE,
   )
+  const permissionLoading = canViewLoading || canCreateLoading
 
-  // Move ALL hooks BEFORE early returns to avoid Hook order violation
+  // ALL hooks MUST be before early returns to avoid Hook order violation
   const [leaves, setLeaves] = useState<Leave[]>([])
   const [employees, setEmployees] = useState<Employee[]>([])
   const [loading, setLoading] = useState(false)
@@ -79,6 +80,77 @@ export default function LeavesPage() {
 
   const token = useAuthStore((state) => state.token)
 
+  // Fetch employees - hook MUST be before early returns
+  useEffect(() => {
+    if (!token || !canViewLeaves || permissionLoading) return
+
+    const fetchEmployees = async () => {
+      try {
+        const response = await api.get('/hr/employees')
+        const empList = Array.isArray(response.data) ? response.data : (response.data?.data || response.data?.employees || [])
+        setEmployees(empList)
+      } catch (error) {
+        debugError('Failed to load employees:', error)
+      }
+    }
+
+    fetchEmployees()
+  }, [token, canViewLeaves, permissionLoading])
+
+  // Fetch leaves - hook MUST be before early returns
+  useEffect(() => {
+    if (!token || !canViewLeaves || permissionLoading) return
+
+    const fetchLeaves = async () => {
+      setLoading(true)
+      setApiError(null)
+      setDebugInfo(`Fetching leave requests at ${new Date().toLocaleTimeString()}`)
+
+      try {
+        debugLog('[LEAVES_PAGE] Starting fetch with dates:', { startDate, endDate })
+        const response = await api.get('/hr/leaves', {
+          params: {
+            start_date: startDate,
+            end_date: endDate,
+          },
+        })
+        debugLog('[LEAVES_PAGE] Response:', response.data)
+
+        const leavesList = Array.isArray(response.data) ? response.data : (response.data?.data || response.data?.leaves || [])
+
+        // Enrich with employee names
+        const enrichedLeaves = leavesList.map(leave => ({
+          ...leave,
+          employee_name: employees.find(e => e.id === leave.employee_id)
+            ? `${employees.find(e => e.id === leave.employee_id)?.first_name} ${employees.find(e => e.id === leave.employee_id)?.last_name}`
+            : undefined,
+        }))
+
+        setLeaves(enrichedLeaves)
+        setDebugInfo(`Successfully loaded ${enrichedLeaves.length} leave requests at ${new Date().toLocaleTimeString()}`)
+      } catch (error: any) {
+        const errorMsg = error?.response?.data?.message || error?.message || 'Failed to load leaves'
+        debugError('[LEAVES_PAGE] Error:', error)
+        setApiError(errorMsg)
+        setDebugInfo(`Error: ${errorMsg} at ${new Date().toLocaleTimeString()}`)
+        toast.error(errorMsg)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchLeaves()
+  }, [token, startDate, endDate, employees, canViewLeaves, permissionLoading])
+
+  // Show loading while permissions are being checked
+  if (permissionLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="w-8 h-8 animate-spin text-primary-600" />
+      </div>
+    )
+  }
+
   // Show permission denied if user can't view leaves
   if (!canViewLeaves) {
     return (
@@ -106,75 +178,14 @@ export default function LeavesPage() {
     )
   }
 
-  // Fetch employees
-  useEffect(() => {
-    const fetchEmployees = async () => {
-      try {
-        const response = await api.get('/hr/employees')
-        const empList = Array.isArray(response.data) ? response.data : response.data?.employees || []
-        setEmployees(empList)
-      } catch (error) {
-        debugError('Failed to load employees:', error)
-      }
-    }
-
-    if (token) {
-      fetchEmployees()
-    }
-  }, [token])
-
-  // Fetch leaves
-  useEffect(() => {
-    const fetchLeaves = async () => {
-      setLoading(true)
-      setApiError(null)
-      setDebugInfo(`Fetching leave requests at ${new Date().toLocaleTimeString()}`)
-
-      try {
-        debugLog('[LEAVES_PAGE] Starting fetch with dates:', { startDate, endDate })
-        const response = await api.get('/hr/leaves', {
-          params: {
-            start_date: startDate,
-            end_date: endDate,
-          },
-        })
-        debugLog('[LEAVES_PAGE] Response:', response.data)
-
-        const leavesList = Array.isArray(response.data) ? response.data : response.data?.leaves || []
-
-        // Enrich with employee names
-        const enrichedLeaves = leavesList.map(leave => ({
-          ...leave,
-          employee_name: employees.find(e => e.id === leave.employee_id)
-            ? `${employees.find(e => e.id === leave.employee_id)?.first_name} ${employees.find(e => e.id === leave.employee_id)?.last_name}`
-            : undefined,
-        }))
-
-        setLeaves(enrichedLeaves)
-        setDebugInfo(`Successfully loaded ${enrichedLeaves.length} leave requests at ${new Date().toLocaleTimeString()}`)
-      } catch (error: any) {
-        const errorMsg = error?.response?.data?.message || error?.message || t('hr.leaves.loadFailed', 'Failed to load leaves')
-        debugError('[LEAVES_PAGE] Error:', error)
-        setApiError(errorMsg)
-        setDebugInfo(`Error: ${errorMsg} at ${new Date().toLocaleTimeString()}`)
-        toast.error(errorMsg)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    if (token) {
-      fetchLeaves()
-    }
-  }, [token, startDate, endDate, employees, t])
-
   const handleCreateLeave = async (formData: any) => {
     try {
       debugLog('[CREATE_LEAVE] Submitting:', formData)
       const response = await api.post('/hr/leaves', formData)
       debugLog('[CREATE_LEAVE] Response:', response.data)
 
-      setLeaves([response.data, ...leaves])
+      const created = response.data?.data || response.data
+      setLeaves([created, ...leaves])
       setShowForm(false)
       toast.success(t('hr.leaves.successCreated', 'Leave request created successfully'))
     } catch (error: any) {

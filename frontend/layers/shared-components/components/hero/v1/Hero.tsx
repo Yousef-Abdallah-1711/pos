@@ -1,7 +1,6 @@
 'use client'
 
 import React from 'react'
-import { ChevronRight } from 'lucide-react'
 import type { HeroProps } from './types'
 import { mockData } from './mockData'
 
@@ -37,31 +36,16 @@ export const Hero: React.FC<HeroProps> = ({
   const height = config.height === 'large' ? '600px' : config.height === 'medium' ? '500px' : config.height === 'small' ? '400px' : (config.height || '500px')
   const overlayOpacity = config.overlay_opacity !== undefined ? config.overlay_opacity : 0.3
   const textAlignment = config.text_alignment || 'center'
+  const direction = isArabic ? 'rtl' : 'ltr'
+  const backgroundValue = bgImage ? `url(${bgImage})` : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
 
   return (
-    <section
-      className="relative w-full overflow-hidden flex items-center justify-center"
-      style={{
-        height,
-        backgroundImage: bgImage ? `url(${bgImage})` : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        direction: isArabic ? 'rtl' : 'ltr',
-      }}
-    >
+    <section className="hero-section relative w-full overflow-hidden flex items-center justify-center">
       {/* Overlay */}
-      <div
-        className="absolute inset-0 bg-black"
-        style={{ opacity: overlayOpacity }}
-      />
+      <div className="hero-overlay absolute inset-0 bg-black" />
 
       {/* Content */}
-      <div
-        className="relative z-10 max-w-4xl mx-auto px-6 w-full"
-        style={{
-          textAlign: textAlignment as any,
-        }}
-      >
+      <div className="hero-content relative z-10 max-w-4xl mx-auto px-6 w-full">
         {title && (
           <h1 className="text-5xl md:text-6xl font-bold text-white mb-4">
             {title}
@@ -75,7 +59,7 @@ export const Hero: React.FC<HeroProps> = ({
         )}
 
         {description && (
-          <p className="text-lg text-gray-300 mb-8 max-w-2xl" style={{ marginLeft: textAlignment === 'center' ? 'auto' : '0', marginRight: textAlignment === 'center' ? 'auto' : '0' }}>
+          <p className="hero-description text-lg text-gray-300 mb-8 max-w-2xl">
             {description}
           </p>
         )}
@@ -86,10 +70,33 @@ export const Hero: React.FC<HeroProps> = ({
             className="btn-primary inline-flex items-center gap-2 text-lg"
           >
             {ctaText}
-            <ChevronRight className="h-5 w-5" />
+            <span aria-hidden="true">→</span>
           </a>
         )}
       </div>
+
+      <style>{`
+        .hero-section {
+          height: ${height};
+          background-image: ${backgroundValue};
+          background-size: cover;
+          background-position: center;
+          direction: ${direction};
+        }
+
+        .hero-overlay {
+          opacity: ${overlayOpacity};
+        }
+
+        .hero-content {
+          text-align: ${textAlignment};
+        }
+
+        .hero-description {
+          margin-left: ${textAlignment === 'center' ? 'auto' : '0'};
+          margin-right: ${textAlignment === 'center' ? 'auto' : '0'};
+        }
+      `}</style>
     </section>
   )
 }
@@ -97,8 +104,8 @@ export const Hero: React.FC<HeroProps> = ({
 export default Hero
 
 // Component Definition for Registry
-import { ComponentDefinition } from '../../registry/types'
-import { manifest } from './manifest.json'
+import { ComponentDefinition } from '../../../registry/types'
+import manifest from '../manifest.json'
 
 export const definition: ComponentDefinition = {
   id: 'hero',

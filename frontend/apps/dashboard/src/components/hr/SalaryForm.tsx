@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
+import { usePathname } from 'next/navigation'
 import { useForm, Controller } from 'react-hook-form'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -9,6 +10,7 @@ import { toast } from 'sonner'
 import { debugLog as debugLogFn, debugError } from '@/lib/debug'
 import { AlertCircle, Loader } from 'lucide-react'
 import { api } from '@/lib/api'
+import { createTranslator, getLocaleFromPath } from '@/lib/translations'
 
 interface SalaryFormProps {
   salary?: any
@@ -18,12 +20,16 @@ interface SalaryFormProps {
 }
 
 export function SalaryForm({ salary, employees = [], onSubmit, onCancel }: SalaryFormProps) {
+  const pathname = usePathname()
+  const locale = getLocaleFromPath(pathname)
+  const t = useMemo(() => createTranslator(locale), [locale])
+
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [apiError, setApiError] = useState<string | null>(null)
   const [debugLog, setDebugLog] = useState<string[]>([])
   const [employeesList, setEmployeesList] = useState(employees)
 
-  const { control, handleSubmit, formState: { errors }, watch } = useForm({
+  const { control, handleSubmit, formState: { errors } } = useForm({
     defaultValues: {
       employee_id: salary?.employee_id || '',
       pay_period_start: salary?.pay_period_start?.split('T')[0] || '',
@@ -55,7 +61,7 @@ export function SalaryForm({ salary, employees = [], onSubmit, onCancel }: Salar
       const fetchEmployees = async () => {
         try {
           const response = await api.get('/hr/employees')
-          const emps = Array.isArray(response.data) ? response.data : response.data?.employees || []
+          const emps = Array.isArray(response.data) ? response.data : (response.data?.data || response.data?.employees || [])
           setEmployeesList(emps)
           addDebugLog(`Loaded ${emps.length} employees`)
         } catch (error) {
@@ -79,13 +85,13 @@ export function SalaryForm({ salary, employees = [], onSubmit, onCancel }: Salar
       addDebugLog('Starting form submission...')
 
       if (!data.employee_id) {
-        throw new Error('Employee is required')
+        throw new Error(t('hr.payroll.employeeRequired'))
       }
       if (!data.pay_period_start) {
-        throw new Error('Pay period start date is required')
+        throw new Error(t('hr.payroll.payPeriodStartRequired'))
       }
       if (!data.pay_period_end) {
-        throw new Error('Pay period end date is required')
+        throw new Error(t('hr.payroll.payPeriodEndRequired'))
       }
 
       addDebugLog('Validation passed')
@@ -119,7 +125,7 @@ export function SalaryForm({ salary, employees = [], onSubmit, onCancel }: Salar
       await onSubmit(cleanData)
       addDebugLog('Form submission successful')
     } catch (error: any) {
-      const errorMsg = error?.response?.data?.message || error?.message || 'Failed to save salary'
+      const errorMsg = error?.response?.data?.message || error?.message || t('hr.payroll.saveFailed')
       setApiError(errorMsg)
       addDebugLog(`Error: ${errorMsg}`)
       debugError('Salary Form Error:', error)
@@ -135,7 +141,7 @@ export function SalaryForm({ salary, employees = [], onSubmit, onCancel }: Salar
         <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 flex gap-3">
           <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
           <div>
-            <h3 className="font-semibold text-red-900 dark:text-red-300">Error Saving Salary</h3>
+            <h3 className="font-semibold text-red-900 dark:text-red-300">{t('hr.payroll.errorSaving')}</h3>
             <p className="text-red-700 dark:text-red-400 text-sm mt-1">{apiError}</p>
           </div>
         </div>
@@ -143,27 +149,27 @@ export function SalaryForm({ salary, employees = [], onSubmit, onCancel }: Salar
 
       <Tabs defaultValue="general" className="w-full">
         <TabsList className="grid w-full grid-cols-4 bg-gray-100 dark:bg-gray-800 p-1">
-          <TabsTrigger value="general">General</TabsTrigger>
-          <TabsTrigger value="earnings">Earnings</TabsTrigger>
-          <TabsTrigger value="deductions">Deductions</TabsTrigger>
-          <TabsTrigger value="records">Records</TabsTrigger>
+          <TabsTrigger value="general">{t('hr.payroll.general')}</TabsTrigger>
+          <TabsTrigger value="earnings">{t('hr.payroll.earnings')}</TabsTrigger>
+          <TabsTrigger value="deductions">{t('hr.payroll.deductions')}</TabsTrigger>
+          <TabsTrigger value="records">{t('hr.payroll.records')}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="general" className="space-y-4 mt-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <label className="block text-sm font-medium">Employee *</label>
+              <label className="block text-sm font-medium">{t('hr.payroll.employee')} *</label>
               <Controller
                 name="employee_id"
                 control={control}
-                rules={{ required: 'Employee is required' }}
+                rules={{ required: t('hr.payroll.employeeRequired') }}
                 render={({ field }) => (
                   <select
                     {...field}
                     className={`w-full px-3 py-2 border rounded-md bg-white dark:bg-gray-800 ${errors.employee_id ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'}`}
                     disabled={!!salary}
                   >
-                    <option value="">Select employee...</option>
+                    <option value="">{t('hr.payroll.selectEmployee')}</option>
                     {employeesList.map(emp => (
                       <option key={emp.id} value={emp.id}>
                         {emp.first_name} {emp.last_name}
@@ -175,15 +181,15 @@ export function SalaryForm({ salary, employees = [], onSubmit, onCancel }: Salar
             </div>
 
             <div className="space-y-2">
-              <label className="block text-sm font-medium">Status</label>
+              <label className="block text-sm font-medium">{t('hr.payroll.status')}</label>
               <Controller
                 name="status"
                 control={control}
                 render={({ field }) => (
                   <select {...field} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800">
-                    <option value="pending">Pending</option>
-                    <option value="approved">Approved</option>
-                    <option value="paid">Paid</option>
+                    <option value="pending">{t('hr.payroll.pending')}</option>
+                    <option value="approved">{t('hr.leaves.approved')}</option>
+                    <option value="paid">{t('hr.payroll.paid')}</option>
                   </select>
                 )}
               />
@@ -192,11 +198,11 @@ export function SalaryForm({ salary, employees = [], onSubmit, onCancel }: Salar
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <label className="block text-sm font-medium">Pay Period Start *</label>
+              <label className="block text-sm font-medium">{t('hr.payroll.payPeriodStart')} *</label>
               <Controller
                 name="pay_period_start"
                 control={control}
-                rules={{ required: 'Start date is required' }}
+                rules={{ required: t('hr.payroll.payPeriodStartRequired') }}
                 render={({ field }) => (
                   <Input {...field} type="date" />
                 )}
@@ -204,11 +210,11 @@ export function SalaryForm({ salary, employees = [], onSubmit, onCancel }: Salar
             </div>
 
             <div className="space-y-2">
-              <label className="block text-sm font-medium">Pay Period End *</label>
+              <label className="block text-sm font-medium">{t('hr.payroll.payPeriodEnd')} *</label>
               <Controller
                 name="pay_period_end"
                 control={control}
-                rules={{ required: 'End date is required' }}
+                rules={{ required: t('hr.payroll.payPeriodEndRequired') }}
                 render={({ field }) => (
                   <Input {...field} type="date" />
                 )}
@@ -218,7 +224,7 @@ export function SalaryForm({ salary, employees = [], onSubmit, onCancel }: Salar
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <label className="block text-sm font-medium">Base Salary</label>
+              <label className="block text-sm font-medium">{t('hr.payroll.baseSalary')}</label>
               <Controller
                 name="base_salary"
                 control={control}
@@ -248,28 +254,16 @@ export function SalaryForm({ salary, employees = [], onSubmit, onCancel }: Salar
         <TabsContent value="earnings" className="space-y-4 mt-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <label className="block text-sm font-medium">Overtime Hours</label>
+              <label className="block text-sm font-medium">{t('hr.payroll.overtime')}</label>
               <Controller name="overtime_hours" control={control} render={({ field }) => <Input {...field} type="number" step="0.5" placeholder="0" />} />
             </div>
             <div className="space-y-2">
-              <label className="block text-sm font-medium">Overtime Rate</label>
-              <Controller name="overtime_rate" control={control} render={({ field }) => <Input {...field} type="number" step="0.01" placeholder="0.00" />} />
-            </div>
-            <div className="space-y-2">
-              <label className="block text-sm font-medium">Bonus</label>
+              <label className="block text-sm font-medium">{t('hr.payroll.bonus')}</label>
               <Controller name="bonus" control={control} render={({ field }) => <Input {...field} type="number" step="0.01" placeholder="0.00" />} />
             </div>
             <div className="space-y-2">
-              <label className="block text-sm font-medium">Commission</label>
-              <Controller name="commission" control={control} render={({ field }) => <Input {...field} type="number" step="0.01" placeholder="0.00" />} />
-            </div>
-            <div className="space-y-2">
-              <label className="block text-sm font-medium">Allowances</label>
+              <label className="block text-sm font-medium">{t('hr.payroll.allowances')}</label>
               <Controller name="allowances" control={control} render={({ field }) => <Input {...field} type="number" step="0.01" placeholder="0.00" />} />
-            </div>
-            <div className="space-y-2">
-              <label className="block text-sm font-medium">Tips</label>
-              <Controller name="tips" control={control} render={({ field }) => <Input {...field} type="number" step="0.01" placeholder="0.00" />} />
             </div>
           </div>
         </TabsContent>
@@ -277,28 +271,16 @@ export function SalaryForm({ salary, employees = [], onSubmit, onCancel }: Salar
         <TabsContent value="deductions" className="space-y-4 mt-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <label className="block text-sm font-medium">Tax</label>
+              <label className="block text-sm font-medium">{t('hr.payroll.tax')}</label>
               <Controller name="tax" control={control} render={({ field }) => <Input {...field} type="number" step="0.01" placeholder="0.00" />} />
             </div>
             <div className="space-y-2">
-              <label className="block text-sm font-medium">Social Insurance</label>
+              <label className="block text-sm font-medium">{t('hr.payroll.insurance')}</label>
               <Controller name="social_insurance" control={control} render={({ field }) => <Input {...field} type="number" step="0.01" placeholder="0.00" />} />
             </div>
             <div className="space-y-2">
-              <label className="block text-sm font-medium">Health Insurance</label>
-              <Controller name="health_insurance" control={control} render={({ field }) => <Input {...field} type="number" step="0.01" placeholder="0.00" />} />
-            </div>
-            <div className="space-y-2">
-              <label className="block text-sm font-medium">Pension</label>
-              <Controller name="pension" control={control} render={({ field }) => <Input {...field} type="number" step="0.01" placeholder="0.00" />} />
-            </div>
-            <div className="space-y-2">
-              <label className="block text-sm font-medium">Loan Deduction</label>
+              <label className="block text-sm font-medium">{t('hr.payroll.otherDeductions')}</label>
               <Controller name="loan_deduction" control={control} render={({ field }) => <Input {...field} type="number" step="0.01" placeholder="0.00" />} />
-            </div>
-            <div className="space-y-2">
-              <label className="block text-sm font-medium">Advance Deduction</label>
-              <Controller name="advance_deduction" control={control} render={({ field }) => <Input {...field} type="number" step="0.01" placeholder="0.00" />} />
             </div>
           </div>
         </TabsContent>
@@ -306,30 +288,8 @@ export function SalaryForm({ salary, employees = [], onSubmit, onCancel }: Salar
         <TabsContent value="records" className="space-y-4 mt-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <label className="block text-sm font-medium">Days Worked</label>
-              <Controller name="days_worked" control={control} render={({ field }) => <Input {...field} type="number" min="0" max="31" />} />
-            </div>
-            <div className="space-y-2">
-              <label className="block text-sm font-medium">Days Absent</label>
-              <Controller name="days_absent" control={control} render={({ field }) => <Input {...field} type="number" min="0" max="31" />} />
-            </div>
-            <div className="space-y-2">
-              <label className="block text-sm font-medium">Total Hours Worked</label>
+              <label className="block text-sm font-medium">{t('hr.attendance.totalHours')}</label>
               <Controller name="total_hours_worked" control={control} render={({ field }) => <Input {...field} type="number" step="0.5" placeholder="0" />} />
-            </div>
-            <div className="space-y-2">
-              <label className="block text-sm font-medium">Payment Method</label>
-              <Controller
-                name="payment_method"
-                control={control}
-                render={({ field }) => (
-                  <select {...field} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800">
-                    <option value="bank_transfer">Bank Transfer</option>
-                    <option value="cash">Cash</option>
-                    <option value="cheque">Cheque</option>
-                  </select>
-                )}
-              />
             </div>
           </div>
         </TabsContent>
@@ -350,11 +310,11 @@ export function SalaryForm({ salary, employees = [], onSubmit, onCancel }: Salar
 
       <div className="flex justify-end gap-2 pt-4 border-t">
         <Button type="button" variant="outline" onClick={onCancel}>
-          Cancel
+          {t('common.cancel')}
         </Button>
         <Button type="submit" disabled={isSubmitting} className="gap-2">
           {isSubmitting && <Loader className="h-4 w-4 animate-spin" />}
-          {isSubmitting ? 'Saving...' : salary ? 'Update Salary' : 'Create Salary'}
+          {isSubmitting ? t('common.saving') : salary ? t('hr.payroll.update') : t('hr.payroll.create')}
         </Button>
       </div>
     </form>

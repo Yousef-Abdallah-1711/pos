@@ -35,7 +35,7 @@ export const Products: React.FC<ProductsProps> = ({
   return (
     <section
       className="w-full py-16 px-4 bg-white"
-      style={{ direction: isArabic ? 'rtl' : 'ltr' }}
+      dir={isArabic ? 'rtl' : 'ltr'}
     >
       <div className="max-w-6xl mx-auto">
         {/* Header */}
@@ -117,8 +117,8 @@ export const Products: React.FC<ProductsProps> = ({
 export default Products
 
 // Component Definition for Registry
-import { ComponentDefinition } from '../../registry/types'
-import { manifest } from './manifest.json'
+import { ComponentDefinition } from '../../../registry/types'
+import manifest from '../manifest.json'
 
 export const definition: ComponentDefinition = {
   id: 'products',

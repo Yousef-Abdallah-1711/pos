@@ -62,11 +62,14 @@ func (h *SubscriptionHandler) GetTenantStatusBySlug(w http.ResponseWriter, r *ht
 		return
 	}
 
-	// Return simplified response for public use
+	// Return simplified response for public use (includes contact info for maintenance page)
 	response := map[string]interface{}{
 		"can_access":     info.CanAccess,
 		"block_reason":   info.BlockReason,
 		"is_maintenance": !info.CanAccess,
+		"tenant_name":    info.TenantName,
+		"contact_email":  info.ContactEmail,
+		"contact_phone":  info.ContactPhone,
 	}
 
 	log.Printf("[SubscriptionHandler] GetTenantStatusBySlug success - can_access: %v\n", info.CanAccess)
@@ -103,8 +106,8 @@ func (h *SubscriptionHandler) ExtendTenantTrial(w http.ResponseWriter, r *http.R
 	tenantIDStr := r.PathValue("id")
 	log.Printf("[SubscriptionHandler] ExtendTenantTrial - tenant_id: %s\n", tenantIDStr)
 
-	// Get user from context (set by auth middleware)
-	userID := middleware.GetUserID(r)
+	// Get super admin from context (set by super admin auth middleware)
+	userID := middleware.GetSuperAdminID(r)
 	if userID == 0 {
 		log.Printf("[SubscriptionHandler] ERROR: No user in context\n")
 		UnauthorizedResponse(w, "user not authenticated")
@@ -175,8 +178,8 @@ func (h *SubscriptionHandler) DisableTenant(w http.ResponseWriter, r *http.Reque
 	tenantIDStr := r.PathValue("id")
 	log.Printf("[SubscriptionHandler] DisableTenant - tenant_id: %s\n", tenantIDStr)
 
-	// Get user from context
-	userID := middleware.GetUserID(r)
+	// Get super admin from context (set by super admin auth middleware)
+	userID := middleware.GetSuperAdminID(r)
 	if userID == 0 {
 		log.Printf("[SubscriptionHandler] ERROR: No user in context\n")
 		UnauthorizedResponse(w, "user not authenticated")
@@ -238,8 +241,8 @@ func (h *SubscriptionHandler) EnableTenant(w http.ResponseWriter, r *http.Reques
 	tenantIDStr := r.PathValue("id")
 	log.Printf("[SubscriptionHandler] EnableTenant - tenant_id: %s\n", tenantIDStr)
 
-	// Get user from context
-	userID := middleware.GetUserID(r)
+	// Get super admin from context (set by super admin auth middleware)
+	userID := middleware.GetSuperAdminID(r)
 	if userID == 0 {
 		log.Printf("[SubscriptionHandler] ERROR: No user in context\n")
 		UnauthorizedResponse(w, "user not authenticated")
@@ -285,8 +288,8 @@ func (h *SubscriptionHandler) DeleteTenant(w http.ResponseWriter, r *http.Reques
 	tenantIDStr := r.PathValue("id")
 	log.Printf("[SubscriptionHandler] DeleteTenant - tenant_id: %s\n", tenantIDStr)
 
-	// Get user from context
-	userID := middleware.GetUserID(r)
+	// Get super admin from context (set by super admin auth middleware)
+	userID := middleware.GetSuperAdminID(r)
 	if userID == 0 {
 		log.Printf("[SubscriptionHandler] ERROR: No user in context\n")
 		UnauthorizedResponse(w, "user not authenticated")

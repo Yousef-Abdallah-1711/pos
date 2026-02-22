@@ -47,7 +47,7 @@ export function PerformanceMonitor({
   }[position]
 
   return (
-    <div className={`fixed ${positionClass} z-50 font-mono text-xs`}>
+    <div className={`performance-monitor fixed ${positionClass} z-50 font-mono text-xs`}>
       {compact && (
         <button
           onClick={() => setIsOpen(!isOpen)}
@@ -68,10 +68,7 @@ export function PerformanceMonitor({
               </span>
             </div>
             <div className="bg-gray-800 rounded-full h-2 w-full overflow-hidden">
-              <div
-                className={`h-full transition-all ${getScoreColor(score)}`}
-                style={{ width: `${score}%` }}
-              />
+              <div className={`performance-score-fill h-full transition-all ${getScoreColor(score)}`} />
             </div>
             <span className="text-xs text-gray-400 mt-1 block capitalize">
               {rating}
@@ -194,6 +191,11 @@ export function PerformanceMonitor({
           </div>
         </div>
       )}
+      <style jsx>{`
+        .performance-score-fill {
+          width: ${score}%;
+        }
+      `}</style>
     </div>
   )
 }

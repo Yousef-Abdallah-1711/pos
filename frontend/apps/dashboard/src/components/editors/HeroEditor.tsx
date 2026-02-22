@@ -461,72 +461,84 @@ export function HeroEditor({
 
       {previewMode && (
         <div className="rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
-          <div
-            style={{
-              backgroundImage: `linear-gradient(
-                rgba(${hexToRgb(heroConfig.overlayColor || '#000000')},
-                ${heroConfig.overlayOpacity || 0.5}),
-                rgba(${hexToRgb(heroConfig.overlayColor || '#000000')},
-                ${heroConfig.overlayOpacity || 0.5})
-              ),
-              url('${heroConfig.backgroundImage}')`,
-              backgroundSize: heroConfig.backgroundSize || 'cover',
-              backgroundPosition: heroConfig.backgroundPosition || 'center',
-              minHeight: `${heroConfig.minHeight || 400}px`,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: heroConfig.textAlign === 'left' ? 'flex-start' : heroConfig.textAlign === 'right' ? 'flex-end' : 'center',
-              padding: `${heroConfig.contentPadding || 40}px`,
-            }}
-          >
-            <div style={{ color: heroConfig.textColor || '#ffffff', textAlign: heroConfig.textAlign || 'center' }}>
+          <div className="hero-preview-shell">
+            <div className="hero-preview-content">
               <h1 className="text-4xl font-bold mb-4">{component.title?.en || 'Hero Title'}</h1>
               <p className="text-lg mb-6 max-w-2xl">{component.subtitle?.en || 'Hero subtitle goes here'}</p>
               {heroConfig.ctaButtonText && (
                 <button
-                  style={{
-                    backgroundColor:
-                      heroConfig.ctaButtonStyle === 'solid'
-                        ? heroConfig.ctaButtonColor || '#3b82f6'
-                        : 'transparent',
-                    color:
-                      heroConfig.ctaButtonStyle === 'solid'
-                        ? 'white'
-                        : heroConfig.ctaButtonColor || '#3b82f6',
-                    borderColor: heroConfig.ctaButtonColor || '#3b82f6',
-                    borderWidth: heroConfig.ctaButtonStyle === 'outline' ? '2px' : '0',
-                    padding:
-                      heroConfig.ctaButtonSize === 'sm'
-                        ? '0.5rem 1rem'
-                        : heroConfig.ctaButtonSize === 'lg'
-                          ? '1rem 2rem'
-                          : '0.75rem 1.5rem',
-                    fontSize:
-                      heroConfig.ctaButtonSize === 'sm'
-                        ? '0.875rem'
-                        : heroConfig.ctaButtonSize === 'lg'
-                          ? '1.125rem'
-                          : '1rem',
-                  }}
-                  className="font-semibold rounded-lg transition-colors"
-                  onMouseEnter={(e) => {
-                    if (heroConfig.ctaButtonStyle === 'solid') {
-                      (e.target as HTMLButtonElement).style.backgroundColor =
-                        heroConfig.ctaButtonHoverColor || '#2563eb'
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (heroConfig.ctaButtonStyle === 'solid') {
-                      (e.target as HTMLButtonElement).style.backgroundColor =
-                        heroConfig.ctaButtonColor || '#3b82f6'
-                    }
-                  }}
+                  className="hero-preview-cta font-semibold rounded-lg transition-colors"
                 >
                   {heroConfig.ctaButtonText}
                 </button>
               )}
             </div>
           </div>
+          <style jsx>{`
+            .hero-preview-shell {
+              background-image: linear-gradient(
+                  rgba(${hexToRgb(heroConfig.overlayColor || '#000000')}, ${heroConfig.overlayOpacity || 0.5}),
+                  rgba(${hexToRgb(heroConfig.overlayColor || '#000000')}, ${heroConfig.overlayOpacity || 0.5})
+                ),
+                url('${heroConfig.backgroundImage}');
+              background-size: ${heroConfig.backgroundSize || 'cover'};
+              background-position: ${heroConfig.backgroundPosition || 'center'};
+              min-height: ${heroConfig.minHeight || 400}px;
+              display: flex;
+              align-items: center;
+              justify-content: ${
+                heroConfig.textAlign === 'left'
+                  ? 'flex-start'
+                  : heroConfig.textAlign === 'right'
+                    ? 'flex-end'
+                    : 'center'
+              };
+              padding: ${heroConfig.contentPadding || 40}px;
+            }
+
+            .hero-preview-content {
+              color: ${heroConfig.textColor || '#ffffff'};
+              text-align: ${heroConfig.textAlign || 'center'};
+            }
+
+            .hero-preview-cta {
+              background-color: ${
+                heroConfig.ctaButtonStyle === 'solid'
+                  ? heroConfig.ctaButtonColor || '#3b82f6'
+                  : 'transparent'
+              };
+              color: ${
+                heroConfig.ctaButtonStyle === 'solid'
+                  ? '#ffffff'
+                  : heroConfig.ctaButtonColor || '#3b82f6'
+              };
+              border-color: ${heroConfig.ctaButtonColor || '#3b82f6'};
+              border-style: solid;
+              border-width: ${heroConfig.ctaButtonStyle === 'outline' ? '2px' : '0'};
+              padding: ${
+                heroConfig.ctaButtonSize === 'sm'
+                  ? '0.5rem 1rem'
+                  : heroConfig.ctaButtonSize === 'lg'
+                    ? '1rem 2rem'
+                    : '0.75rem 1.5rem'
+              };
+              font-size: ${
+                heroConfig.ctaButtonSize === 'sm'
+                  ? '0.875rem'
+                  : heroConfig.ctaButtonSize === 'lg'
+                    ? '1.125rem'
+                    : '1rem'
+              };
+            }
+
+            .hero-preview-cta:hover {
+              background-color: ${
+                heroConfig.ctaButtonStyle === 'solid'
+                  ? heroConfig.ctaButtonHoverColor || '#2563eb'
+                  : 'transparent'
+              };
+            }
+          `}</style>
         </div>
       )}
     </div>

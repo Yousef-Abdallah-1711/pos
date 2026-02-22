@@ -21,10 +21,16 @@ const FONT_FAMILIES = [
 ];
 
 export function FontSelector({ selectedFont, onFontChange }: FontSelectorProps) {
+  const fontFamilyRules = FONT_FAMILIES.map(
+    (font, index) => `.font-item-${index} { font-family: '${font.id}', sans-serif; }`
+  ).join('\n');
+
+  const selectedFontEscaped = selectedFont.replace(/'/g, "\\'");
+
   return (
-    <div className="space-y-3">
+    <div className="font-selector space-y-3">
       <div className="grid grid-cols-1 gap-2">
-        {FONT_FAMILIES.map((font) => (
+        {FONT_FAMILIES.map((font, index) => (
           <button
             key={font.id}
             onClick={() => onFontChange(font.id)}
@@ -34,10 +40,7 @@ export function FontSelector({ selectedFont, onFontChange }: FontSelectorProps) 
                 : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500'
             }`}
           >
-            <div
-              className="text-sm font-medium text-gray-900 dark:text-white"
-              style={{ fontFamily: font.id }}
-            >
+            <div className={`font-item-${index} text-sm font-medium text-gray-900 dark:text-white`}>
               {font.name}
             </div>
             <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">
@@ -52,10 +55,7 @@ export function FontSelector({ selectedFont, onFontChange }: FontSelectorProps) 
       {/* Font Preview */}
       <div className="mt-4 space-y-2">
         <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Preview</p>
-        <div
-          className="p-4 bg-gray-50 dark:bg-gray-700 rounded border border-gray-200 dark:border-gray-600"
-          style={{ fontFamily: selectedFont }}
-        >
+        <div className="selected-font-preview p-4 bg-gray-50 dark:bg-gray-700 rounded border border-gray-200 dark:border-gray-600">
           <p className="text-lg font-medium text-gray-900 dark:text-white">
             The quick brown fox jumps
           </p>
@@ -80,6 +80,14 @@ export function FontSelector({ selectedFont, onFontChange }: FontSelectorProps) 
           </span>
         </div>
       </div>
+
+      <style jsx>{`
+        .selected-font-preview {
+          font-family: '${selectedFontEscaped}', sans-serif;
+        }
+
+        ${fontFamilyRules}
+      `}</style>
     </div>
   );
 }

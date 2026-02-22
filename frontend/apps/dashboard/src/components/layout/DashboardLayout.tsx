@@ -14,6 +14,8 @@ import { NotificationCenter } from '@/components/notifications/NotificationCente
 import { createTranslator, getLocaleFromPath } from '@/lib/translations'
 import { debugError } from '@/lib/debug'
 import { TrialWarningBanner } from '@/components/layout/TrialWarningBanner'
+import { useTenantStatus } from '@/hooks/useTenantStatus'
+import { BlockedOverlay } from '@/components/blocked/BlockedOverlay'
 
 export default function DashboardLayout({
   children,
@@ -31,6 +33,7 @@ export default function DashboardLayout({
   const { theme, setTheme } = useTheme()
   const [isProfileOpen, setIsProfileOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
+  const { isBlocked, blockReason } = useTenantStatus()
 
   const isLoggedIn = !!(user && token)
 
@@ -116,6 +119,8 @@ export default function DashboardLayout({
   }
 
   const isRTL = locale === 'ar'
+  const blockedBypassPaths = ['/dashboard/settings/billing']
+  const shouldBypassBlockedOverlay = blockedBypassPaths.some((path) => pathname.includes(path))
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex">
@@ -267,11 +272,15 @@ export default function DashboardLayout({
         </header>
 
         {/* Trial Warning Banner */}
-        <TrialWarningBanner />
+        {!isBlocked && <TrialWarningBanner />}
 
         {/* Main Content */}
         <main className="w-full">
-          {children}
+          {isBlocked && blockReason && !shouldBypassBlockedOverlay ? (
+            <BlockedOverlay blockReason={blockReason} />
+          ) : (
+            children
+          )}
         </main>
       </div>
     </div>

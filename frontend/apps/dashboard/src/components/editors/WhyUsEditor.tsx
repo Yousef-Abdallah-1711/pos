@@ -88,7 +88,7 @@ export function WhyUsEditor({
       id: `feature-${Date.now()}`,
       title: 'Feature Title',
       description: 'Feature description goes here',
-      icon: '⭐',
+      icon: 'â­',
       iconType: 'emoji',
     }
 
@@ -247,7 +247,7 @@ export function WhyUsEditor({
                         : 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white hover:bg-gray-300 dark:hover:bg-gray-600'
                     }`}
                   >
-                    {shape === 'circle' ? '●' : shape === 'square' ? '■' : '◆'}
+                    {shape === 'circle' ? 'â—' : shape === 'square' ? 'â– ' : 'â—†'}
                   </button>
                 ))}
               </div>
@@ -507,7 +507,7 @@ export function WhyUsEditor({
                     <>
                       <div className="flex items-start justify-between">
                         <div className="flex items-start gap-2 flex-1">
-                          <span className="text-2xl">{feature.icon || '⭐'}</span>
+                          <span className="text-2xl">{feature.icon || 'â­'}</span>
                           <div>
                             <p className="font-medium text-gray-900 dark:text-white">
                               {feature.title}
@@ -534,74 +534,82 @@ export function WhyUsEditor({
       )}
 
       {previewMode && (
-        <div
-          style={{ backgroundColor: config.backgroundColor || '#ffffff' }}
-          className="rounded-lg border border-gray-200 dark:border-gray-700 p-8"
-        >
-          <h2 className="text-2xl font-bold mb-8" style={{ color: config.titleColor || '#1f2937' }}>
+        <div className="whyus-preview-shell rounded-lg border border-gray-200 dark:border-gray-700 p-8">
+          <h2 className="whyus-preview-title text-2xl font-bold mb-8">
             {component.title?.en || 'Why Choose Us'}
           </h2>
 
-          <div
-            style={{
-              display: config.layout === 'grid' ? 'grid' : 'flex',
-              gridTemplateColumns:
-                config.layout === 'grid'
-                  ? `repeat(${config.columns || 3}, 1fr)`
-                  : undefined,
-              flexDirection: config.layout === 'list' ? 'column' : undefined,
-              gap: `${config.spacing || 24}px`,
-            }}
-          >
+          <div className="whyus-preview-layout">
             {(config.features || []).map((feature) => (
-              <div
-                key={feature.id}
-                style={{
-                  ...(config.cardStyle === 'shadow' && {
-                    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-                  }),
-                  ...(config.cardStyle === 'border' && {
-                    border: '1px solid #e5e7eb',
-                  }),
-                  borderRadius: `${config.borderRadius || 8}px`,
-                  padding: '1.5rem',
-                }}
-              >
-                <div
-                  style={{
-                    backgroundColor: config.iconBackgroundColor || '#e0f2fe',
-                    width: `${config.iconSize || 48}px`,
-                    height: `${config.iconSize || 48}px`,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    borderRadius:
-                      config.iconShape === 'circle'
-                        ? '9999px'
-                        : config.iconShape === 'rounded-square'
-                          ? '0.5rem'
-                          : '0',
-                    fontSize: `${(config.iconSize || 48) * 0.6}px`,
-                    marginBottom: '1rem',
-                  }}
-                >
+              <div key={feature.id} className="whyus-preview-card">
+                <div className="whyus-preview-icon">
                   {feature.icon || '⭐'}
                 </div>
 
-                <h3
-                  style={{ color: config.titleColor || '#1f2937' }}
-                  className="font-semibold text-lg mb-2"
-                >
+                <h3 className="whyus-preview-item-title font-semibold text-lg mb-2">
                   {feature.title}
                 </h3>
 
-                <p style={{ color: config.descriptionColor || '#6b7280' }} className="text-sm">
+                <p className="whyus-preview-item-description text-sm">
                   {feature.description}
                 </p>
 
                 {config.showDividers && (
                   <div className="mt-4 pt-4 border-t border-gray-300 dark:border-gray-600" />
                 )}
+              </div>
+            ))}
+          </div>
+          <style jsx>{`
+            .whyus-preview-shell {
+              background-color: ${config.backgroundColor || '#ffffff'};
+            }
+
+            .whyus-preview-title,
+            .whyus-preview-item-title {
+              color: ${config.titleColor || '#1f2937'};
+            }
+
+            .whyus-preview-item-description {
+              color: ${config.descriptionColor || '#6b7280'};
+            }
+
+            .whyus-preview-layout {
+              display: ${config.layout === 'grid' ? 'grid' : 'flex'};
+              grid-template-columns: ${
+                config.layout === 'grid' ? `repeat(${config.columns || 3}, 1fr)` : 'none'
+              };
+              flex-direction: ${config.layout === 'list' ? 'column' : 'row'};
+              gap: ${config.spacing || 24}px;
+            }
+
+            .whyus-preview-card {
+              border-radius: ${config.borderRadius || 8}px;
+              padding: 1.5rem;
+              ${config.cardStyle === 'shadow' ? 'box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);' : ''}
+              ${config.cardStyle === 'border' ? 'border: 1px solid #e5e7eb;' : ''}
+            }
+
+            .whyus-preview-icon {
+              background-color: ${config.iconBackgroundColor || '#e0f2fe'};
+              width: ${config.iconSize || 48}px;
+              height: ${config.iconSize || 48}px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              border-radius: ${
+                config.iconShape === 'circle'
+                  ? '9999px'
+                  : config.iconShape === 'rounded-square'
+                    ? '0.5rem'
+                    : '0'
+              };
+              font-size: ${(config.iconSize || 48) * 0.6}px;
+              margin-bottom: 1rem;
+            }
+          `}</style>
+        </div>
+      )}
               </div>
             ))}
           </div>

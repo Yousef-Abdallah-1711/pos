@@ -1,4 +1,4 @@
-/**
+﻿/**
  * ProductGridEditor Component
  * Specialized editor for product grid/showcase components
  */
@@ -524,42 +524,23 @@ export function ProductGridEditor({
       )}
 
       {previewMode && (
-        <div
-          style={{ backgroundColor: gridConfig.backgroundColor || '#ffffff' }}
-          className="rounded-lg border border-gray-200 dark:border-gray-700 p-8"
-        >
+        <div className="product-grid-preview-shell rounded-lg border border-gray-200 dark:border-gray-700 p-8">
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
             {component.title?.en || 'Our Products'}
           </h2>
 
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: `repeat(${gridConfig.columns || 3}, 1fr)`,
-              gap: `${gridConfig.spacing || 16}px`,
-            }}
-          >
+          <div className="product-grid-preview-layout">
             {availableProducts.slice(0, gridConfig.itemsPerPage || 12).map((product) => (
               <div
                 key={product.id}
-                style={{
-                  backgroundColor: gridConfig.cardBackgroundColor || '#ffffff',
-                  borderRadius: `${gridConfig.borderRadius || 8}px`,
-                  ...(gridConfig.borderStyle === 'shadow' && {
-                    boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-                  }),
-                  ...(gridConfig.borderStyle === 'border' && {
-                    border: '1px solid #e5e7eb',
-                  }),
-                }}
-                className="overflow-hidden hover:shadow-lg transition-shadow"
+                className="product-grid-preview-card overflow-hidden hover:shadow-lg transition-shadow"
               >
                 <img
                   src={product.image}
                   alt={product.name}
-                  className="w-full h-48 object-cover"
+                  className="product-grid-preview-image w-full h-48 object-cover"
                   onError={(e) => {
-                    (e.target as HTMLImageElement).style.backgroundColor = '#f3f4f6'
+                    e.currentTarget.classList.add('image-error')
                   }}
                 />
                 <div className="p-4">
@@ -567,25 +548,13 @@ export function ProductGridEditor({
                     {product.name}
                   </h3>
                   {gridConfig.showPrice && (
-                    <p
-                      style={{ color: gridConfig.priceColor || '#ef4444' }}
-                      className="text-lg font-bold mb-3"
-                    >
+                    <p className="product-grid-preview-price text-lg font-bold mb-3">
                       ${product.price.toFixed(2)}
                     </p>
                   )}
                   {gridConfig.showCTA && (
                     <button
-                      style={{
-                        backgroundColor: gridConfig.ctaColor || '#3b82f6',
-                        width: '100%',
-                        padding: '0.5rem 1rem',
-                        borderRadius: '0.375rem',
-                        color: 'white',
-                        fontWeight: '500',
-                        cursor: 'pointer',
-                      }}
-                      className="hover:opacity-90 transition-opacity"
+                      className="product-grid-preview-cta hover:opacity-90 transition-opacity"
                     >
                       {gridConfig.ctaText || 'View Product'}
                     </button>
@@ -594,6 +563,42 @@ export function ProductGridEditor({
               </div>
             ))}
           </div>
+          <style jsx>{`
+            .product-grid-preview-shell {
+              background-color: ${gridConfig.backgroundColor || '#ffffff'};
+            }
+
+            .product-grid-preview-layout {
+              display: grid;
+              grid-template-columns: repeat(${gridConfig.columns || 3}, 1fr);
+              gap: ${gridConfig.spacing || 16}px;
+            }
+
+            .product-grid-preview-card {
+              background-color: ${gridConfig.cardBackgroundColor || '#ffffff'};
+              border-radius: ${gridConfig.borderRadius || 8}px;
+              ${gridConfig.borderStyle === 'shadow' ? 'box-shadow: 0 2px 8px rgba(0,0,0,0.1);' : ''}
+              ${gridConfig.borderStyle === 'border' ? 'border: 1px solid #e5e7eb;' : ''}
+            }
+
+            .product-grid-preview-image.image-error {
+              background-color: #f3f4f6;
+            }
+
+            .product-grid-preview-price {
+              color: ${gridConfig.priceColor || '#ef4444'};
+            }
+
+            .product-grid-preview-cta {
+              background-color: ${gridConfig.ctaColor || '#3b82f6'};
+              width: 100%;
+              padding: 0.5rem 1rem;
+              border-radius: 0.375rem;
+              color: #ffffff;
+              font-weight: 500;
+              cursor: pointer;
+            }
+          `}</style>
         </div>
       )}
     </div>

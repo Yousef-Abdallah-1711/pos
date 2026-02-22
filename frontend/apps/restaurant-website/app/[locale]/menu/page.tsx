@@ -24,26 +24,20 @@ export default async function MenuPage({ params }: MenuPageProps) {
   const restaurantSlug = headersList.get('x-restaurant-slug') || 'demo';
 
   // Fetch theme server-side
-  let themeData = await getThemeDataServer();
-  if (!themeData) {
-    themeData = getDefaultThemeData();
-  }
-
-  // Extract theme from nested response structure
-  const themeDataExtracted = themeData.data?.data?.config || themeData.data?.config || themeData;
+  const themeData = (await getThemeDataServer()) ?? getDefaultThemeData();
 
   return (
     <div className="flex flex-col min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100">
       {/* Header */}
-      <HeaderSSR themeData={themeDataExtracted} locale={locale} cartItemsCount={0} />
+      <HeaderSSR themeData={themeData} locale={locale} cartItemsCount={0} />
 
       {/* Main Content */}
       <main className="flex-1 w-full">
-        <MenuPageContent locale={locale} themeData={themeDataExtracted} restaurantSlug={restaurantSlug} />
+        <MenuPageContent locale={locale} themeData={themeData} restaurantSlug={restaurantSlug} />
       </main>
 
       {/* Footer */}
-      <FooterSSR themeData={themeDataExtracted} locale={locale} />
+      <FooterSSR themeData={themeData} locale={locale} />
     </div>
   );
 }

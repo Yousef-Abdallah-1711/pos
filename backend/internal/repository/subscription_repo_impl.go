@@ -27,6 +27,9 @@ func (r *SubscriptionRepositoryImpl) GetTenantSubscriptionInfo(ctx context.Conte
 
 	var info domain.TenantSubscriptionInfo
 	var disabledReason sql.NullString
+	var subscriptionPlan sql.NullString
+	var subscriptionExpiresAt sql.NullTime
+	var lastPaymentAt sql.NullTime
 
 	err := r.db.QueryRowContext(ctx, `
 		SELECT
@@ -34,12 +37,17 @@ func (r *SubscriptionRepositoryImpl) GetTenantSubscriptionInfo(ctx context.Conte
 			name,
 			slug,
 			subscription_status,
+			subscription_plan,
 			trial_start_date,
 			trial_end_date,
+			subscription_expires_at,
+			last_payment_at,
 			trial_days,
 			is_disabled,
 			disabled_at,
-			disabled_reason
+			disabled_reason,
+			COALESCE(email, ''),
+			COALESCE(phone, '')
 		FROM tenants
 		WHERE id = $1
 	`, tenantID).Scan(
@@ -47,12 +55,17 @@ func (r *SubscriptionRepositoryImpl) GetTenantSubscriptionInfo(ctx context.Conte
 		&info.TenantName,
 		&info.Slug,
 		&info.SubscriptionStatus,
+		&subscriptionPlan,
 		&info.TrialStartDate,
 		&info.TrialEndDate,
+		&subscriptionExpiresAt,
+		&lastPaymentAt,
 		&info.TrialDays,
 		&info.IsDisabled,
 		&info.DisabledAt,
 		&disabledReason,
+		&info.ContactEmail,
+		&info.ContactPhone,
 	)
 
 	if err == sql.ErrNoRows {
@@ -69,6 +82,18 @@ func (r *SubscriptionRepositoryImpl) GetTenantSubscriptionInfo(ctx context.Conte
 	if disabledReason.Valid {
 		info.DisabledReason = &disabledReason.String
 	}
+	if subscriptionPlan.Valid && subscriptionPlan.String != "" {
+		info.SubscriptionPlan = subscriptionPlan.String
+	} else {
+		info.SubscriptionPlan = "monthly"
+	}
+	if subscriptionExpiresAt.Valid {
+		info.SubscriptionExpiresAt = &subscriptionExpiresAt.Time
+	}
+	if lastPaymentAt.Valid {
+		info.LastPaymentAt = &lastPaymentAt.Time
+	}
+	info.Plan = buildPlanSummary(info.SubscriptionPlan)
 
 	// Calculate days remaining
 	if info.TrialEndDate != nil && time.Now().Before(*info.TrialEndDate) {
@@ -99,6 +124,32 @@ func (r *SubscriptionRepositoryImpl) GetTenantSubscriptionInfo(ctx context.Conte
 		info.SubscriptionStatus, info.DaysRemaining, info.CanAccess)
 
 	return &info, nil
+}
+
+func buildPlanSummary(planID string) *domain.SubscriptionPlanSummary {
+	switch planID {
+	case "free", "trial":
+		return &domain.SubscriptionPlanSummary{
+			ID:       "free",
+			Name:     "Free Trial",
+			Price:    0,
+			Currency: "EGP",
+		}
+	case "monthly", "":
+		return &domain.SubscriptionPlanSummary{
+			ID:       "monthly",
+			Name:     "Pro Plan",
+			Price:    500,
+			Currency: "EGP",
+		}
+	default:
+		return &domain.SubscriptionPlanSummary{
+			ID:       planID,
+			Name:     "Pro Plan",
+			Price:    500,
+			Currency: "EGP",
+		}
+	}
 }
 
 // GetTenantSubscriptionBySlug retrieves subscription info by tenant slug

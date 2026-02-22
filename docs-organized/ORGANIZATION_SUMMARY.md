@@ -6,6 +6,7 @@
 **Folders Created:** 12 feature-based directories
 **Last Update:** Added Phase 4 documentation for runtime error fixes and defensive programming
 **Update (2026-01-26):** Documentation remains organized, but the system is not production-ready. See [99-REMAINING-WORK.md](99-REMAINING-WORK.md) for open issues.
+**Update (2026-02-21):** Landing app fully refactored — URL-based i18n routing, modern redesign, single 500 EGP/month pricing plan. HR backend handlers added. Dashboard Arabic locale enabled. See [99-REMAINING-WORK.md](99-REMAINING-WORK.md) for completed items and remaining issues.
 
 ---
 

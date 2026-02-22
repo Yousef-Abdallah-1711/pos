@@ -6,6 +6,7 @@ import { usePreferencesStore } from '@/stores/preferencesStore'
 import { Save, Loader2, Check } from 'lucide-react'
 import { createTranslator, getLocaleFromPath } from '@/lib/translations'
 import { usePathname } from 'next/navigation'
+import * as themeApi from '@/lib/api/themeApi'
 
 export default function AppearanceSettingsPage() {
   const pathname = usePathname()
@@ -24,6 +25,66 @@ export default function AppearanceSettingsPage() {
 
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'success' | 'error'>('idle')
   const [errorMessage, setErrorMessage] = useState('')
+  const previewColorRules = `
+    .appearance-preview-primary { background-color: ${appearanceForm.primaryColor}; }
+    .appearance-preview-secondary { background-color: ${appearanceForm.secondaryColor}; }
+    .appearance-preview-accent { background-color: ${appearanceForm.accentColor}; }
+  `
+
+  const syncBrandColorsToActiveTheme = async () => {
+    const themes = await themeApi.getThemes()
+    const activeTheme = themes.find((theme) => theme.isActive)
+    if (!activeTheme) return
+
+    const mergedColors = {
+      ...activeTheme.colors,
+      primary: appearanceForm.primaryColor,
+      secondary: appearanceForm.secondaryColor,
+      accent: appearanceForm.accentColor,
+    }
+
+    const components = (activeTheme.components || []).map((component, index) => {
+      const order = typeof component.displayOrder === 'number' ? component.displayOrder : index
+      const config = component.config || component.settings || {}
+      return {
+        id: String(component.id),
+        type: component.type,
+        title: {
+          en: config.title_en || config.title || component.title || '',
+          ar: config.title_ar || '',
+        },
+        order,
+        displayOrder: order,
+        enabled: component.enabled !== false,
+        config,
+        settings: config,
+      }
+    })
+
+    const config = {
+      colors: mergedColors,
+      typography: activeTheme.typography,
+      identity: activeTheme.identity,
+      header: activeTheme.header,
+      footer: activeTheme.footer,
+      components,
+      customCss: activeTheme.customCss || '',
+    }
+
+    await themeApi.updateTheme(activeTheme.id, {
+      name: activeTheme.name,
+      slug: activeTheme.slug,
+      description: activeTheme.description,
+      colors: mergedColors,
+      typography: activeTheme.typography,
+      identity: activeTheme.identity,
+      header_config: activeTheme.header,
+      footer_config: activeTheme.footer,
+      components: components as any,
+      customCss: activeTheme.customCss || '',
+      config,
+    } as any)
+  }
 
   // Initialize form when settings are loaded
   useEffect(() => {
@@ -88,20 +149,25 @@ export default function AppearanceSettingsPage() {
         }),
       })
 
-      if (response.ok) {
-        const data = await response.json()
-        if (settings) {
-          const updatedSettings = {
-            ...settings,
+        if (response.ok) {
+          const data = await response.json()
+          if (settings) {
+            const updatedSettings = {
+              ...settings,
             primaryColor: data.primary_color,
             secondaryColor: data.secondary_color,
             accentColor: data.accent_color,
           }
           setSettings(updatedSettings)
-        }
-        setSaveStatus('success')
-        setTimeout(() => setSaveStatus('idle'), 2000)
-      } else {
+          }
+          try {
+            await syncBrandColorsToActiveTheme()
+          } catch (syncError) {
+            console.warn('Failed to sync colors to active website theme', syncError)
+          }
+          setSaveStatus('success')
+          setTimeout(() => setSaveStatus('idle'), 2000)
+        } else {
         const error = await response.json()
         setErrorMessage(error.error || t('settings.appearanceTitle'))
         setSaveStatus('error')
@@ -237,22 +303,13 @@ export default function AppearanceSettingsPage() {
         <div className="mt-6 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
           <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Preview</h3>
           <div className="flex flex-col sm:flex-row gap-4">
-            <button
-              className="px-4 py-2 rounded-lg text-white text-sm font-medium"
-              style={{ backgroundColor: appearanceForm.primaryColor }}
-            >
+            <button className="appearance-preview-primary px-4 py-2 rounded-lg text-white text-sm font-medium">
               Primary
             </button>
-            <button
-              className="px-4 py-2 rounded-lg text-white text-sm font-medium"
-              style={{ backgroundColor: appearanceForm.secondaryColor }}
-            >
+            <button className="appearance-preview-secondary px-4 py-2 rounded-lg text-white text-sm font-medium">
               Secondary
             </button>
-            <button
-              className="px-4 py-2 rounded-lg text-white text-sm font-medium"
-              style={{ backgroundColor: appearanceForm.accentColor }}
-            >
+            <button className="appearance-preview-accent px-4 py-2 rounded-lg text-white text-sm font-medium">
               Accent
             </button>
           </div>
@@ -262,6 +319,9 @@ export default function AppearanceSettingsPage() {
           {renderSaveButton(handleSaveColors, t('settings.appearanceTitle'))}
         </div>
       </div>
+      <style jsx>{`
+        ${previewColorRules}
+      `}</style>
     </div>
   )
 }

@@ -70,6 +70,7 @@ interface ThemeData {
   header: HeaderConfig;
   footer: FooterConfig;
   components: ThemeComponent[];
+  customCss?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -257,6 +258,7 @@ export function DynamicHomePage({
 
         // IMPORTANT: Extract components from config.components
         components: componentsFromConfig,
+        customCss: configData.customCss || configData.custom_css || '',
       };
 
       return {
@@ -295,7 +297,26 @@ export function DynamicHomePage({
 
       // Apply to body for global font
       document.body.style.fontFamily = typography.fontFamily;
+
+      const customCss = homepageData.theme.customCss || '';
+      const styleId = 'restaurant-theme-custom-css';
+      let styleTag = document.getElementById(styleId) as HTMLStyleElement | null;
+
+      if (!styleTag) {
+        styleTag = document.createElement('style');
+        styleTag.id = styleId;
+        document.head.appendChild(styleTag);
+      }
+
+      styleTag.textContent = customCss;
     }
+
+    return () => {
+      const styleTag = document.getElementById('restaurant-theme-custom-css');
+      if (styleTag) {
+        styleTag.remove();
+      }
+    };
   }, [homepageData]);
 
   if (error || !homepageData?.theme) {
@@ -322,7 +343,11 @@ export function DynamicHomePage({
   // Filter enabled components and sort by displayOrder
   const visibleComponents = components
     .filter(c => c.enabled)
-    .sort((a, b) => a.displayOrder - b.displayOrder);
+    .sort((a: any, b: any) => {
+      const orderA = typeof a.displayOrder === 'number' ? a.displayOrder : (typeof a.order === 'number' ? a.order : 0);
+      const orderB = typeof b.displayOrder === 'number' ? b.displayOrder : (typeof b.order === 'number' ? b.order : 0);
+      return orderA - orderB;
+    });
 
   const isRTL = locale === 'ar';
 

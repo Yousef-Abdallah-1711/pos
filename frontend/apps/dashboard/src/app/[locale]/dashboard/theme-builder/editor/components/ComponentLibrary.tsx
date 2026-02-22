@@ -5,7 +5,6 @@ import { Plus, Trash2, GripVertical, Search, X, Eye, EyeOff } from 'lucide-react
 import { useThemeStore } from '@/hooks/useThemeStore'
 import { ComponentConfig, ComponentType } from '@/types/theme'
 import { componentRegistry } from '@pos-saas/ui-components/registry'
-import { toggleComponentEnabled } from '@/lib/utils/themeAdvancedUtils'
 import { debugWarn } from '@/lib/debug'
 
 // Helper function to extract label from translation objects
@@ -22,7 +21,7 @@ function extractLabel(label: any): string {
 const REGISTRY_TO_COMPONENT_TYPE: Record<string, ComponentType> = {
   'hero-section': 'hero',
   'products-section': 'products',
-  'why-choose-us-section': 'why_us',
+  'why-us-section': 'why_us',
   'contact-section': 'contact',
   'testimonials-section': 'testimonials',
   'cta-section': 'cta',
@@ -42,9 +41,6 @@ export function ComponentLibrary() {
   const [showLibrary, setShowLibrary] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
-
-  // ✅ FIX: Check if theme and components exist
-  if (!theme || !theme.components) return null
 
   // Get all draggable components from registry
   const registryComponents = useMemo(() => {
@@ -81,6 +77,9 @@ export function ComponentLibrary() {
     })
   }, [registryComponents, searchQuery, selectedCategory])
 
+  if (!theme) return null
+  const themeComponents = theme.components || []
+
   const handleAddComponent = (registryId: string) => {
     const registryComp = registryComponents.find((c) => c.id === registryId)
     if (!registryComp) return
@@ -93,22 +92,20 @@ export function ComponentLibrary() {
     }
 
     const newComponent: ComponentConfig = {
-      id: Date.now(),
+      id: `component-${Date.now()}`,
       type: componentType,
       title: registryComp.name,
-      displayOrder: theme.components?.length || 0,
+      displayOrder: themeComponents.length,
       enabled: true,
       config: registryComp.defaultConfig || {},
     }
     addComponent(newComponent)
   }
 
-  const handleToggleComponent = (componentId: string | number) => {
-    if (!theme?.components) return
-    const updatedComponents = theme.components.map((comp) =>
-      comp.id === componentId ? { ...comp, enabled: !comp.enabled } : comp
-    )
-    updateComponent(String(componentId), { enabled: updatedComponents.find((c) => c.id === componentId)?.enabled || false })
+  const handleToggleComponent = (componentId: string) => {
+    const target = themeComponents.find((comp) => String(comp.id) === componentId)
+    if (!target) return
+    updateComponent(componentId, { enabled: !target.enabled })
   }
 
   const handleDragStart = (id: string) => {
@@ -119,15 +116,15 @@ export function ComponentLibrary() {
     e.preventDefault()
   }
 
-  const handleDrop = (targetId: string | number) => {
-    if (!draggedItem || draggedItem === targetId || !theme.components) return
+  const handleDrop = (targetId: string) => {
+    if (!draggedItem || draggedItem === targetId) return
 
-    const draggedIdx = theme.components.findIndex((c) => c.id === draggedItem)
-    const targetIdx = theme.components.findIndex((c) => c.id === targetId)
+    const draggedIdx = themeComponents.findIndex((c) => String(c.id) === draggedItem)
+    const targetIdx = themeComponents.findIndex((c) => String(c.id) === targetId)
 
     if (draggedIdx < 0 || targetIdx < 0) return
 
-    const newComponents = [...theme.components]
+    const newComponents = [...themeComponents]
     const [draggedComp] = newComponents.splice(draggedIdx, 1)
     newComponents.splice(targetIdx, 0, draggedComp)
 
@@ -147,29 +144,29 @@ export function ComponentLibrary() {
       <div>
         <div className="flex items-center justify-between mb-3">
           <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">
-            Current Components ({theme.components?.length || 0})
+            Current Components ({themeComponents.length})
           </h4>
         </div>
 
         <div className="space-y-2 max-h-64 overflow-y-auto">
-          {!theme.components || theme.components.length === 0 ? (
+          {themeComponents.length === 0 ? (
             <p className="text-xs text-gray-500 dark:text-gray-400 py-4 text-center">
               No components added yet
             </p>
           ) : (
-            theme.components.map((component) => (
+            themeComponents.map((component) => (
               <div
                 key={component.id}
                 draggable
-                onDragStart={() => handleDragStart(component.id)}
+                onDragStart={() => handleDragStart(String(component.id))}
                 onDragOver={handleDragOver}
-                onDrop={() => handleDrop(component.id)}
-                onClick={() => selectComponent(component.id)}
+                onDrop={() => handleDrop(String(component.id))}
+                onClick={() => selectComponent(String(component.id))}
                 className={`p-3 rounded-lg border-2 transition cursor-move ${
-                  selectedComponentId === component.id
+                  selectedComponentId === String(component.id)
                     ? 'border-primary-600 bg-primary-50 dark:bg-primary-900/20'
                     : 'border-gray-200 dark:border-gray-600 hover:border-primary-300'
-                } ${draggedItem === component.id ? 'opacity-50' : ''}`}
+                } ${draggedItem === String(component.id) ? 'opacity-50' : ''}`}
               >
                 <div className="flex items-center gap-2">
                   <GripVertical className="h-4 w-4 text-gray-400 flex-shrink-0" />
@@ -181,13 +178,13 @@ export function ComponentLibrary() {
                       {component.type}
                     </p>
                   </div>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      handleToggleComponent(component.id)
-                    }}
-                    className="p-1 text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition"
-                    title={component.enabled ? 'Hide component' : 'Show component'}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        handleToggleComponent(String(component.id))
+                      }}
+                      className="p-1 text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition"
+                      title={component.enabled ? 'Hide component' : 'Show component'}
                   >
                     {component.enabled ? (
                       <Eye className="h-4 w-4" />
@@ -195,13 +192,13 @@ export function ComponentLibrary() {
                       <EyeOff className="h-4 w-4 opacity-50" />
                     )}
                   </button>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      deleteComponent(component.id)
-                    }}
-                    className="p-1 text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition"
-                  >
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        deleteComponent(String(component.id))
+                      }}
+                      className="p-1 text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition"
+                    >
                     <Trash2 className="h-4 w-4" />
                   </button>
                 </div>

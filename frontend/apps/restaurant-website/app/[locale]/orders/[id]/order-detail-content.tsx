@@ -50,6 +50,8 @@ export default function OrderDetailContent() {
     );
   }
 
+  const orderData = order as any;
+
   const handleCancelOrder = () => {
     cancelOrder(orderId, {
       onSuccess: () => {
@@ -61,7 +63,7 @@ export default function OrderDetailContent() {
     });
   };
 
-  const canCancelOrder = ['pending', 'confirmed', 'preparing'].includes(order.status);
+  const canCancelOrder = ['pending', 'confirmed', 'preparing'].includes(orderData.status);
 
   // Create status array for OrderStatusTracker
   const allStatuses = [
@@ -80,7 +82,7 @@ export default function OrderDetailContent() {
         <div className={`max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 ${isRTL ? 'text-right' : ''}`}>
           <h1 className="text-4xl font-bold mb-2">{t('orders.title')}</h1>
           <p className="text-gray-100">
-            {t('common.orderNumber')}: {order.orderNumber}
+            {t('common.orderNumber')}: {orderData.orderNumber}
           </p>
         </div>
       </div>
@@ -99,7 +101,7 @@ export default function OrderDetailContent() {
           {/* Order Status */}
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-8">
             <h2 className="text-2xl font-bold mb-8">{t('orderTracking.status')}</h2>
-            <OrderStatusTracker statuses={allStatuses} currentStatus={order.status} locale={locale} />
+            <OrderStatusTracker statuses={allStatuses} currentStatus={orderData.status} locale={locale} />
           </div>
 
           {/* Order Information */}
@@ -110,23 +112,23 @@ export default function OrderDetailContent() {
               <div className={`space-y-3 ${isRTL ? 'text-right' : ''}`}>
                 <div className={`flex justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
                   <span className="text-gray-600 dark:text-gray-400">{t('common.orderNumber')}</span>
-                  <span className="font-semibold">{order.orderNumber}</span>
+                  <span className="font-semibold">{orderData.orderNumber}</span>
                 </div>
                 <div className={`flex justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
                   <span className="text-gray-600 dark:text-gray-400">{t('common.total')}</span>
-                  <span className="font-semibold text-lg">${order.totalAmount.toFixed(2)}</span>
+                  <span className="font-semibold text-lg">${orderData.totalAmount.toFixed(2)}</span>
                 </div>
                 <div className={`flex justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
                   <span className="text-gray-600 dark:text-gray-400">{t('orders.orderDate')}</span>
                   <span className="font-semibold">
-                    {new Date(order.createdAt).toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US')}
+                    {new Date(orderData.createdAt).toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US')}
                   </span>
                 </div>
-                {order.estimatedDelivery && (
+                {orderData.estimatedDelivery && (
                   <div className={`flex justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
                     <span className="text-gray-600 dark:text-gray-400">{t('orders.estimatedDelivery')}</span>
                     <span className="font-semibold">
-                      {new Date(order.estimatedDelivery).toLocaleDateString(
+                      {new Date(orderData.estimatedDelivery).toLocaleDateString(
                         locale === 'ar' ? 'ar-EG' : 'en-US'
                       )}
                     </span>
@@ -139,22 +141,22 @@ export default function OrderDetailContent() {
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
               <h3 className="text-lg font-semibold mb-4">{t('checkout.customerInformation')}</h3>
               <div className={`space-y-3 ${isRTL ? 'text-right' : ''}`}>
-                {order.customerName && (
+                {orderData.customerName && (
                   <div>
                     <p className="text-sm text-gray-600 dark:text-gray-400">{t('checkout.fullName')}</p>
-                    <p className="font-semibold">{order.customerName}</p>
+                    <p className="font-semibold">{orderData.customerName}</p>
                   </div>
                 )}
-                {order.customerEmail && (
+                {orderData.customerEmail && (
                   <div>
                     <p className="text-sm text-gray-600 dark:text-gray-400">{t('checkout.email')}</p>
-                    <p className="font-semibold">{order.customerEmail}</p>
+                    <p className="font-semibold">{orderData.customerEmail}</p>
                   </div>
                 )}
-                {order.customerPhone && (
+                {orderData.customerPhone && (
                   <div>
                     <p className="text-sm text-gray-600 dark:text-gray-400">{t('checkout.phone')}</p>
-                    <p className="font-semibold">{order.customerPhone}</p>
+                    <p className="font-semibold">{orderData.customerPhone}</p>
                   </div>
                 )}
               </div>
@@ -162,19 +164,19 @@ export default function OrderDetailContent() {
           </div>
 
           {/* Delivery Address */}
-          {order.deliveryAddress && (
+          {orderData.deliveryAddress && (
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
               <h3 className="text-lg font-semibold mb-4">{t('checkout.deliveryAddress')}</h3>
-              <p className={isRTL ? 'text-right' : ''}>{order.deliveryAddress}</p>
+              <p className={isRTL ? 'text-right' : ''}>{orderData.deliveryAddress}</p>
             </div>
           )}
 
           {/* Order Items */}
-          {order.items && order.items.length > 0 && (
+          {orderData.items && orderData.items.length > 0 && (
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
               <h3 className="text-lg font-semibold mb-4">{t('orderTracking.orderDetails')}</h3>
               <div className="space-y-3">
-                {order.items.map((item, idx) => (
+                {orderData.items.map((item, idx) => (
                   <div
                     key={idx}
                     className={`flex justify-between items-center pb-3 border-b border-gray-200 dark:border-gray-700 last:border-0 last:pb-0 ${isRTL ? 'flex-row-reverse text-right' : ''}`}
@@ -203,7 +205,7 @@ export default function OrderDetailContent() {
               </Button>
             </Link>
 
-            <Link href={`/${locale}/orders/track/${order.orderNumber}`} className="flex-1 sm:flex-none">
+            <Link href={`/${locale}/orders/track/${orderData.orderNumber}`} className="flex-1 sm:flex-none">
               <Button variant="outline" className="w-full sm:w-auto">
                 {t('orders.trackOrder')}
               </Button>

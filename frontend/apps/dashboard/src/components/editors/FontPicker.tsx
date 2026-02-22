@@ -234,14 +234,23 @@ export function FontPicker({
 
   const previewText =
     "Pack my box with five dozen liquor jugs. The quick brown fox jumps over the lazy dog. Sphinx of black quartz, judge my vow."
-  const previewStyle: React.CSSProperties = {
-    fontFamily: selectedFont ? `'${selectedFont.family}', sans-serif` : 'system-ui',
-    fontSize: `${fontConfig.fontSize || 16}px`,
-    fontStyle: fontConfig.fontStyle || 'normal',
-    fontWeight: fontConfig.fontWeight || 400,
-    lineHeight: fontConfig.lineHeight || 1.6,
-    letterSpacing: `${fontConfig.letterSpacing || 0}px`,
-  }
+  const selectedFontFamily = selectedFont ? selectedFont.family.replace(/'/g, "\\'") : ''
+  const previewFontFamily = selectedFont ? `'${selectedFontFamily}', sans-serif` : 'system-ui'
+  const previewFontSize = fontConfig.fontSize || 16
+  const previewFontStyle = fontConfig.fontStyle || 'normal'
+  const previewFontWeight = fontConfig.fontWeight || 400
+  const previewLineHeight = fontConfig.lineHeight || 1.6
+  const previewLetterSpacing = fontConfig.letterSpacing || 0
+  const getSafeFontId = (id: string) => id.replace(/[^a-zA-Z0-9_-]/g, '-')
+  const fontFamilyRules = fonts
+    .map(
+      (font) => `
+        .font-family-${getSafeFontId(font.id)} {
+          font-family: '${font.family.replace(/'/g, "\\'")}', sans-serif;
+        }
+      `
+    )
+    .join('\n')
 
   // Preview Mode
   if (previewMode) {
@@ -280,10 +289,10 @@ export function FontPicker({
           )}
 
           {/* Preview Text */}
-          <div className="space-y-3">
+            <div className="space-y-3">
             <h4 className="font-semibold text-gray-900 dark:text-white">Preview</h4>
             <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6">
-              <p style={previewStyle} className="text-gray-900 dark:text-white">
+              <p className="font-preview-text text-gray-900 dark:text-white">
                 {previewText}
               </p>
             </div>
@@ -294,12 +303,7 @@ export function FontPicker({
             <h4 className="font-semibold text-gray-900 dark:text-white">Heading (24px, Bold)</h4>
             <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6">
               <h1
-                style={{
-                  ...previewStyle,
-                  fontSize: '24px',
-                  fontWeight: 700,
-                }}
-                className="text-gray-900 dark:text-white"
+                className="font-preview-text font-preview-heading text-gray-900 dark:text-white"
               >
                 This is a heading
               </h1>
@@ -396,7 +400,7 @@ export function FontPicker({
                     : 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
                 }`}
               >
-                <div style={{ fontFamily: `'${font.family}', sans-serif` }}>
+                <div className={`font-family-${getSafeFontId(font.id)}`}>
                   <div className="font-semibold text-gray-900 dark:text-white">{font.family}</div>
                 </div>
                 <div className="flex items-center justify-between mt-1">
@@ -511,11 +515,29 @@ export function FontPicker({
       {/* Live Preview */}
       {selectedFont && (
         <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6">
-          <p style={previewStyle} className="text-gray-900 dark:text-white">
+          <p className="font-preview-text text-gray-900 dark:text-white">
             The quick brown fox jumps over the lazy dog
           </p>
         </div>
       )}
+
+      <style jsx>{`
+        .font-preview-text {
+          font-family: ${previewFontFamily};
+          font-size: ${previewFontSize}px;
+          font-style: ${previewFontStyle};
+          font-weight: ${previewFontWeight};
+          line-height: ${previewLineHeight};
+          letter-spacing: ${previewLetterSpacing}px;
+        }
+
+        .font-preview-heading {
+          font-size: 24px;
+          font-weight: 700;
+        }
+
+        ${fontFamilyRules}
+      `}</style>
     </div>
   )
 }

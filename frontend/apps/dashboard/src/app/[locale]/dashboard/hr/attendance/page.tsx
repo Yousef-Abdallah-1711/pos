@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { usePathname } from 'next/navigation'
 import { useAuthStore } from '@/stores/authStore'
 import { useHasPermission } from '@/hooks/useRbac'
@@ -37,7 +37,7 @@ interface Employee {
 export default function AttendancePage() {
   const pathname = usePathname()
   const locale = getLocaleFromPath(pathname)
-  const t = createTranslator(locale)
+  const t = useMemo(() => createTranslator(locale), [locale])
 
   // Check RBAC permissions for Attendance module (using HR module for attendance)
   const { hasPermission: canViewAttendance, loading: canViewLoading } = useHasPermission(
@@ -50,7 +50,7 @@ export default function AttendancePage() {
   )
   const permissionLoading = canViewLoading || canCreateLoading
 
-  // Move ALL hooks BEFORE early returns to avoid Hook order violation
+  // ALL hooks MUST be before early returns to avoid Hook order violation
   const [attendance, setAttendance] = useState<Attendance[]>([])
   const [employees, setEmployees] = useState<Employee[]>([])
   const [loading, setLoading] = useState(false)
@@ -65,6 +65,68 @@ export default function AttendancePage() {
   const [endDate, setEndDate] = useState(new Date().toISOString().split('T')[0])
 
   const token = useAuthStore((state) => state.token)
+
+  // Fetch employees - hook MUST be before early returns
+  useEffect(() => {
+    if (!token || !canViewAttendance || permissionLoading) return
+
+    const fetchEmployees = async () => {
+      try {
+        const response = await api.get('/hr/employees')
+        const empList = Array.isArray(response.data) ? response.data : (response.data?.data || response.data?.employees || [])
+        setEmployees(empList)
+      } catch (error) {
+        debugError('Failed to load employees:', error)
+      }
+    }
+
+    fetchEmployees()
+  }, [token, canViewAttendance, permissionLoading])
+
+  // Fetch attendance - hook MUST be before early returns
+  useEffect(() => {
+    if (!token || !canViewAttendance || permissionLoading) return
+
+    const fetchAttendance = async () => {
+      setLoading(true)
+      setApiError(null)
+      setDebugInfo(`Fetching attendance records at ${new Date().toLocaleTimeString()}`)
+
+      try {
+        debugLog('[ATTENDANCE_PAGE] Starting fetch with dates:', { startDate, endDate })
+        const response = await api.get('/hr/attendance', {
+          params: {
+            start_date: startDate,
+            end_date: endDate,
+          },
+        })
+        debugLog('[ATTENDANCE_PAGE] Response:', response.data)
+
+        const attendanceList = Array.isArray(response.data) ? response.data : (response.data?.data || response.data?.attendance || [])
+
+        // Enrich with employee names
+        const enrichedAttendance = attendanceList.map(record => ({
+          ...record,
+          employee_name: employees.find(e => e.id === record.employee_id)
+            ? `${employees.find(e => e.id === record.employee_id)?.first_name} ${employees.find(e => e.id === record.employee_id)?.last_name}`
+            : undefined,
+        }))
+
+        setAttendance(enrichedAttendance)
+        setDebugInfo(`Successfully loaded ${enrichedAttendance.length} attendance records at ${new Date().toLocaleTimeString()}`)
+      } catch (error: any) {
+        const errorMsg = error?.response?.data?.message || error?.message || 'Failed to load attendance'
+        debugError('[ATTENDANCE_PAGE] Error:', error)
+        setApiError(errorMsg)
+        setDebugInfo(`Error: ${errorMsg} at ${new Date().toLocaleTimeString()}`)
+        toast.error(errorMsg)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchAttendance()
+  }, [token, startDate, endDate, employees, canViewAttendance, permissionLoading])
 
   // Show permission denied if user can't view attendance
   if (permissionLoading) {
@@ -101,75 +163,14 @@ export default function AttendancePage() {
     )
   }
 
-  // Fetch employees
-  useEffect(() => {
-    const fetchEmployees = async () => {
-      try {
-        const response = await api.get('/hr/employees')
-        const empList = Array.isArray(response.data) ? response.data : response.data?.employees || []
-        setEmployees(empList)
-      } catch (error) {
-        debugError('Failed to load employees:', error)
-      }
-    }
-
-    if (token) {
-      fetchEmployees()
-    }
-  }, [token])
-
-  // Fetch attendance
-  useEffect(() => {
-    const fetchAttendance = async () => {
-      setLoading(true)
-      setApiError(null)
-      setDebugInfo(`Fetching attendance records at ${new Date().toLocaleTimeString()}`)
-
-      try {
-        debugLog('[ATTENDANCE_PAGE] Starting fetch with dates:', { startDate, endDate })
-        const response = await api.get('/hr/attendance', {
-          params: {
-            start_date: startDate,
-            end_date: endDate,
-          },
-        })
-        debugLog('[ATTENDANCE_PAGE] Response:', response.data)
-
-        const attendanceList = Array.isArray(response.data) ? response.data : response.data?.attendance || []
-
-        // Enrich with employee names
-        const enrichedAttendance = attendanceList.map(record => ({
-          ...record,
-          employee_name: employees.find(e => e.id === record.employee_id)
-            ? `${employees.find(e => e.id === record.employee_id)?.first_name} ${employees.find(e => e.id === record.employee_id)?.last_name}`
-            : undefined,
-        }))
-
-        setAttendance(enrichedAttendance)
-        setDebugInfo(`Successfully loaded ${enrichedAttendance.length} attendance records at ${new Date().toLocaleTimeString()}`)
-      } catch (error: any) {
-        const errorMsg = error?.response?.data?.message || error?.message || t('hr.attendance.loadFailed', 'Failed to load attendance')
-        debugError('[ATTENDANCE_PAGE] Error:', error)
-        setApiError(errorMsg)
-        setDebugInfo(`Error: ${errorMsg} at ${new Date().toLocaleTimeString()}`)
-        toast.error(errorMsg)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    if (token) {
-      fetchAttendance()
-    }
-  }, [token, startDate, endDate, employees, t])
-
   const handleCreateAttendance = async (formData: any) => {
     try {
       debugLog('[CREATE_ATTENDANCE] Submitting:', formData)
       const response = await api.post('/hr/attendance/clock-in', formData)
       debugLog('[CREATE_ATTENDANCE] Response:', response.data)
 
-      setAttendance([response.data, ...attendance])
+      const created = response.data?.data || response.data
+      setAttendance([created, ...attendance])
       setShowForm(false)
       toast.success(t('hr.attendance.successCreated', 'Attendance recorded successfully'))
     } catch (error: any) {

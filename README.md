@@ -2,7 +2,23 @@
 
 **Multi-tenant Point-of-Sale SaaS platform** with restaurant management, online ordering, HR, theme customization, and subscription management.
 
-**Last Updated:** February 11, 2026
+**Last Updated:** February 21, 2026
+
+## Recent Updates (February 21, 2026)
+
+- Theme-builder and storefront integration is now aligned: storefront header/footer render from active theme config instead of shared static layout.
+- Backend global compile path restored: `cd backend && go build ./...` now passes after isolating deprecated legacy-only packages behind `legacy` build tags.
+- Frontend inline-style hardening completed across active code paths:
+  - Removed React inline style props (`style={{...}}` and `style={...}`) from `frontend/**` active files.
+  - Converted theme-builder editor previews to scoped class-based styling (`<style jsx>` with generated classes).
+  - Converted `frontend/apps/dashboard/src/lib/pdf-export.ts` invoice HTML template from inline `style="..."` attributes to class-based CSS.
+- Current style-string exceptions are intentional and limited to sanitizer/testing literals:
+  - `frontend/apps/dashboard/src/components/editors/CustomCSSEditor.tsx`
+  - `frontend/apps/dashboard/src/components/editors/__tests__/CustomCSSEditor.test.tsx`
+- Added Paymob Phase 9 DB-backed verification path:
+  - Script: `backend/scripts/phase9_db_verify.ps1`
+  - Seed SQL: `backend/scripts/paymob_phase9_seed.sql`
+  - Runbook: `docs-organized/11-PAYMOB-PAYMENT-INTEGRATION/PHASE9-DB-VERIFICATION-PATH.md`
 
 ---
 
@@ -31,7 +47,7 @@ docker-compose up -d
 
 ### Default Credentials
 - **Super Admin:** Created via migration `109_seed_super_admin.sql`
-- **Regular Users:** Register via Landing app (Port 3001) `/auth/register`
+- **Regular Users:** Register via Landing app (Port 3001) at `/en/auth/register`
 
 ---
 
@@ -48,7 +64,7 @@ docker-compose up -d
 | **Styling** | Tailwind CSS 3.4, Radix UI, Lucide icons |
 | **Forms** | React Hook Form + Zod validation |
 | **HTTP** | Axios 1.7 (frontend), stdlib (backend) |
-| **i18n** | next-intl (EN + AR with RTL support) |
+| **i18n** | next-intl (Dashboard/Restaurant) + URL-based routing (Landing) — EN + AR with RTL support |
 | **Container** | Docker + Docker Compose |
 
 ---
@@ -82,7 +98,7 @@ docker-compose up -d
 - **Database:** Row-level isolation via `tenant_id` on every table
 - **Backend:** `TenantContextMiddleware` extracts tenant from JWT claims
 - **Dashboard:** `X-Tenant-ID` / `X-Restaurant-ID` headers on every API call
-- **Restaurant Website:** Subdomain extraction in Next.js middleware (`demo.localhost:3000` -> slug `demo`)
+- **Restaurant Website:** Subdomain extraction in Next.js middleware (`demo.localhost:3003` -> slug `demo`)
 - **Security:** Triple-check validation (JWT -> context -> query WHERE clause)
 
 ---
@@ -121,7 +137,23 @@ POS/
 │   │   │       └── types/                    TypeScript definitions
 │   │   │
 │   │   ├── landing/                 Auth & marketing (:3001)
-│   │   │   └── src/app/auth/        Login, Register pages
+│   │   │   └── src/
+│   │   │       ├── middleware.ts     Locale detection + redirect (/en, /ar)
+│   │   │       ├── app/
+│   │   │       │   ├── layout.tsx   Root layout (ThemeProvider only)
+│   │   │       │   ├── page.tsx     Redirect → /en
+│   │   │       │   └── [locale]/    URL-based i18n (en | ar)
+│   │   │       │       ├── layout.tsx       LanguageProvider + Toaster
+│   │   │       │       ├── page.tsx         Landing page (all sections)
+│   │   │       │       └── auth/
+│   │   │       │           ├── login/       Login page
+│   │   │       │           ├── register/    Register page
+│   │   │       │           └── super-admin-login/
+│   │   │       ├── components/      Navbar, Hero, Features, HowItWorks,
+│   │   │       │                    Pricing, Testimonials, CTA, Footer
+│   │   │       ├── contexts/        LanguageContext (URL-based locale)
+│   │   │       ├── lib/             translations.ts, config.ts
+│   │   │       └── stores/          authStore (Zustand)
 │   │   │
 │   │   ├── restaurant-website/      Public storefront (:3003)
 │   │   │   ├── middleware.ts        Subdomain + locale + tenant status
@@ -337,7 +369,7 @@ themes           → id, tenant_id, restaurant_id, name, config, is_active
 
 **Subdomain Multi-Tenancy:**
 ```
-demo.localhost:3000/en/menu
+demo.localhost:3003/en/menu
   ↓ middleware.ts
   1. Extract slug from subdomain: "demo"
   2. Extract locale from path: "en"
@@ -349,8 +381,10 @@ demo.localhost:3000/en/menu
 
 **Theme System:**
 - Server-side theme loading (`get-theme-server.ts`)
+- Theme payload normalization across public API response variants (`data.data`, `data.config`, `theme.config`, JSON string config)
 - Multi-layer cache: memory → localStorage → API (with retry + backoff)
 - Theme data: colors, typography, identity, header, footer, components array
+- Storefront header/footer are rendered directly from active theme config (no static global header/footer)
 - Applied via CSS variables and Tailwind classes
 
 **Cart/Checkout:**
@@ -360,10 +394,29 @@ demo.localhost:3000/en/menu
 
 ### Landing App (:3001)
 
-- Marketing homepage (Hero, Features, Pricing, Testimonials)
-- Auth pages: `/auth/login`, `/auth/register`
-- Multi-tenant login flow (tenant selector modal)
-- Redirects to Dashboard after successful login
+**URL-based i18n routing** — all pages under `/en/...` or `/ar/...`. Middleware redirects bare paths to `/en`.
+
+**Landing Page Sections:**
+- `Navbar` — Sticky glassmorphism, orange/red gradient CTA, language toggle (URL-based), mobile menu
+- `Hero` — Dark POS mockup, animated floating stats cards, badge "30-Day Free Trial"
+- `Features` — 6 feature cards (POS, Kitchen Display, Online Ordering, Analytics, Multi-Restaurant, Mobile Apps)
+- `HowItWorks` — 3-step process: Sign Up → Set Up → Start Selling
+- `Pricing` — Single plan: **500 EGP/month** after 30-day free trial (no credit card required)
+- `Testimonials` — 3 testimonials with star ratings
+- `CTA` — Red gradient, full-width call-to-action
+- `Footer` — All link text from translations (EN + AR)
+
+**Auth Pages:** `/en/auth/login`, `/en/auth/register`, `/en/auth/super-admin-login`
+
+**i18n Architecture:**
+- `middleware.ts` — Validates locale segment, redirects to `/en` if missing
+- `LanguageContext.tsx` — Accepts `locale` prop from server, toggle uses `router.push()` to swap URL segment
+- Language toggle: `setLanguage('ar')` → navigates to `/ar/current-path`
+- RTL: `document.documentElement.dir` set via `useEffect` in LanguageProvider
+
+**Multi-tenant login flow:**
+- `TenantSelectorModal` — shown when user has multiple tenants
+- On tenant select: `POST /auth/login/confirm` → redirect to Dashboard auth callback
 
 ### Super-Admin App (:3004)
 
@@ -393,11 +446,20 @@ All console calls go through debug wrappers that respect environment variables:
 
 ### i18n & RTL
 
+**Dashboard + Restaurant Website:**
 - Locale from URL path: `/en/dashboard` or `/ar/dashboard`
 - `createTranslator(locale)` returns `t()` function
 - `isRTL = locale === 'ar'` for conditional RTL classes
 - Root layout sets `dir="rtl"` attribute
 - CSS handles RTL via `[dir="rtl"]` selectors
+
+**Landing App:**
+- Locale from URL segment: `/en/...` or `/ar/...`
+- `middleware.ts` redirects root and locale-less paths to `/en`
+- `LanguageProvider` accepts `locale` prop (from server, no localStorage)
+- Language toggle calls `router.push()` swapping URL segment (`/en/` ↔ `/ar/`)
+- RTL applied via `useEffect` → `document.documentElement.dir`
+- Translations in `src/lib/translations.ts` (EN + AR, inline TypeScript object)
 
 ### Tenant Status Flow
 
@@ -441,10 +503,16 @@ Frontend: useHasPermission(MODULE_IDS.PRODUCTS, PERMISSION_LEVELS.EDIT)
 
 ## SaaS Trial & Subscription System
 
+### Pricing
+
+- **Free Trial:** 30 days (seeded via migration `112_seed_trial_data.sql`)
+- **Subscription:** 500 EGP/month (all features included, no tiers)
+- **No credit card required** to start trial
+
 ### Lifecycle
 
 ```
-Tenant registers → trial (15 days) → [extend trial / upgrade]
+Tenant registers → trial (30 days) → [extend trial / subscribe]
                                     → trial_expired → blocked
                                     → [admin disables] → disabled → blocked
                                     → [admin enables] → restored
@@ -543,8 +611,11 @@ Stores:    *Store.ts (authStore.ts, tenantStatusStore.ts)
 - **Tenant context:** Every API call needs `X-Tenant-ID` header (handled by axios interceptor)
 - **Impersonation:** Uses `sessionStorage` (not localStorage) - clears on tab close
 - **Locale:** URL must include locale (`/en/dashboard`, not `/dashboard`)
+- **Subdomain testing on localhost:** If `demo.localhost` DNS is unavailable, test using Host header (`curl -H "Host: demo.localhost:3003" http://localhost:3003/en`)
 - **Debug logs:** All `console.log/error/warn` wrapped in `debugLog/debugError/debugWarn` - enable with `NEXT_PUBLIC_DEBUG_LOGS=true`
 - **Super admin JWT:** Different secret (`JWT_SECRET + "_super_admin"`), 15min expiry
+- **Windows file-lock issue (Next.js):** If dev fails with `EPERM ... .next/trace`, stop node processes using that app, delete its `.next` folder, then restart `pnpm dev`.
+- **Monorepo dev run:** `turbo run dev --parallel` can fail from non-critical workspace package errors. For focused work use package filters (for example `pnpm --filter @pos-saas/dashboard dev`).
 
 ---
 

@@ -6,60 +6,79 @@ import { debugError, debugWarn } from '../debug';
  * Matches the API response format from theme endpoint
  */
 export interface ServerThemeData {
-  id: string;
-  name: string;
-  slug: string;
-  colors: {
-    primary: string;
-    secondary: string;
-    accent: string;
-    background: string;
-    text: string;
-    border: string;
-    shadow: string;
-  };
-  typography: {
-    font_family: string;
-    base_font_size: number;
-    border_radius: number;
-    line_height: number;
-  };
-  identity: {
-    site_title: string;
-    logo_url: string;
-    favicon_url: string;
-  };
-  header: {
-    background_color: string;
-    text_color: string;
-    tagline: string;
-    height: number;
-    navigation_items: Array<{
-      id?: string;
-      label: string;
-      href: string;
-      order?: number;
-    }>;
-  };
-  footer: {
-    background_color: string;
-    text_color: string;
-    company_description: string;
-    address: string;
-    phone: string;
-    email: string;
-    copyright_text: string;
-    social_links: Array<{
-      platform: string;
-      url: string;
-    }>;
-    footer_sections: Array<{
-      id: string;
-      title: string;
-      links?: Array<{ label: string; href: string }>;
-    }>;
-    legal_links: Array<{ label: string; href: string }>;
-  };
+  id?: string | number;
+  name?: string;
+  slug?: string;
+  colors?: Record<string, any>;
+  typography?: Record<string, any>;
+  identity?: Record<string, any>;
+  header?: Record<string, any>;
+  footer?: Record<string, any>;
+  components?: Array<any>;
+  customCss?: string;
+  [key: string]: any;
+}
+
+function parseJsonIfString(value: any): any {
+  if (typeof value !== 'string') {
+    return value;
+  }
+
+  try {
+    return JSON.parse(value);
+  } catch {
+    return null;
+  }
+}
+
+function isThemeConfigCandidate(value: any): value is Record<string, any> {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    return false;
+  }
+
+  const themeKeys = [
+    'colors',
+    'typography',
+    'identity',
+    'header',
+    'footer',
+    'components',
+    'customCss',
+    'custom_css',
+  ];
+
+  return themeKeys.some((key) => key in value);
+}
+
+/**
+ * Extracts the actual theme config object from inconsistent API payload shapes.
+ * Handles nested wrappers like:
+ * - { success, data: { data: {...themeConfig} } }
+ * - { success, data: {...themeConfig} }
+ * - { success, data: { theme: { config: {...themeConfig} } } }
+ */
+export function extractThemeConfig(payload: any): ServerThemeData | null {
+  const candidates = [
+    payload?.data?.data?.config,
+    payload?.data?.config,
+    payload?.data?.data,
+    payload?.data?.theme?.config,
+    payload?.data?.theme,
+    payload?.theme?.config,
+    payload?.theme,
+    payload?.config,
+    payload?.data,
+    payload,
+  ];
+
+  for (const candidate of candidates) {
+    const parsed = parseJsonIfString(candidate);
+    if (isThemeConfigCandidate(parsed)) {
+      return parsed as ServerThemeData;
+    }
+  }
+
+  return null;
 }
 
 /**
@@ -87,7 +106,10 @@ export async function getThemeDataServer(
     }
 
     // Fetch theme data from API
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api/v1';
+    const apiUrl =
+      process.env.NEXT_PUBLIC_API_BASE_URL ||
+      process.env.NEXT_PUBLIC_API_URL ||
+      'http://localhost:8080/api/v1';
     const response = await fetch(
       `${apiUrl}/public/restaurants/${slug}/theme`,
       {
@@ -105,9 +127,7 @@ export async function getThemeDataServer(
     }
 
     const data = await response.json();
-
-    // Extract theme from nested response structure
-    const theme = data.data?.data?.config || data.data?.config || data;
+    const theme = extractThemeConfig(data);
 
     // Ensure theme is an object before returning
     if (typeof theme !== 'object' || theme === null) {

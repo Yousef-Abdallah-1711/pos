@@ -22,9 +22,8 @@ type Props = {
   }>
 }
 
-// NOTE: Phase 1 - English only, locale support disabled
 export function generateStaticParams() {
-  return [{ locale: 'en' }]
+  return [{ locale: 'en' }, { locale: 'ar' }]
 }
 
 export default async function LocaleLayout({
@@ -32,17 +31,18 @@ export default async function LocaleLayout({
   params,
 }: Props) {
   const { locale: paramLocale } = await params
-  // Phase 1: Use English only
-  const locale = 'en'
-  const isRTL = false
-  const dir = 'ltr'
+  const locale = paramLocale === 'ar' ? 'ar' : 'en'
+  const isRTL = locale === 'ar'
+  const dir = isRTL ? 'rtl' : 'ltr'
 
   return (
     <AuthProvider>
       <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
         <WebVitalsProvider />
         <PerformanceMonitor />
-        {children}
+        <div lang={locale} dir={dir} className={inter.className}>
+          {children}
+        </div>
         <Toaster position={isRTL ? 'top-left' : 'top-right'} richColors />
       </ThemeProvider>
     </AuthProvider>

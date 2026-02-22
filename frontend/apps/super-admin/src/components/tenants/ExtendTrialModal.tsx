@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { superAdminAPI } from '@/lib/api'
 import type { SubscriptionHistoryItem } from '@/types'
 
 interface ExtendTrialModalProps {
@@ -48,21 +49,7 @@ export function ExtendTrialModal({
     setIsLoading(true)
 
     try {
-      const response = await fetch(
-        `/api/v1/super-admin/tenants/${tenantId}/extend-trial`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            days: daysNum,
-            reason: reason || undefined,
-          }),
-        }
-      )
-
-      if (!response.ok) {
-        throw new Error('Failed to extend trial')
-      }
+      await superAdminAPI.extendTenantTrial(tenantId, daysNum, reason || undefined)
 
       onSuccess()
       onClose()

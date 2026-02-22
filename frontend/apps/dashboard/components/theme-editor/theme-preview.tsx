@@ -1,7 +1,6 @@
 'use client';
 
 import React from 'react';
-import { Button } from '@pos-saas/ui';
 
 interface ThemePreviewProps {
   primaryColor: string;
@@ -18,17 +17,10 @@ export function ThemePreview({
   logoUrl,
   fontFamily,
 }: ThemePreviewProps) {
-  const styles = {
-    fontFamily: fontFamily,
-  };
-
   return (
-    <div style={styles}>
+    <div className="theme-preview">
       {/* Header */}
-      <div
-        style={{ backgroundColor: primaryColor }}
-        className="p-6 text-white flex items-center justify-between"
-      >
+      <div className="preview-header p-6 text-white flex items-center justify-between">
         {logoUrl ? (
           <img
             src={logoUrl}
@@ -46,16 +38,10 @@ export function ThemePreview({
       </div>
 
       {/* Hero Section */}
-      <div
-        style={{ background: `linear-gradient(135deg, ${primaryColor} 0%, ${secondaryColor} 100%)` }}
-        className="p-12 text-white text-center"
-      >
+      <div className="preview-hero p-12 text-white text-center">
         <h1 className="text-4xl font-bold mb-4">Welcome to Our Restaurant</h1>
         <p className="text-lg mb-6">Experience authentic flavors and exceptional service</p>
-        <button
-          style={{ backgroundColor: accentColor, color: '#000' }}
-          className="px-8 py-3 rounded font-semibold hover:opacity-90 transition-opacity"
-        >
+        <button className="accent-button px-8 py-3 rounded font-semibold hover:opacity-90 transition-opacity">
           Order Now
         </button>
       </div>
@@ -66,10 +52,7 @@ export function ThemePreview({
         <div className="grid grid-cols-3 gap-6">
           {[1, 2, 3].map((i) => (
             <div key={i} className="bg-white rounded-lg overflow-hidden shadow">
-              <div
-                style={{ backgroundColor: primaryColor }}
-                className="h-32 flex items-center justify-center"
-              >
+              <div className="featured-image h-32 flex items-center justify-center">
                 <span className="text-white text-sm">Image {i}</span>
               </div>
               <div className="p-4">
@@ -77,10 +60,7 @@ export function ThemePreview({
                 <p className="text-sm text-gray-600 mb-4">
                   Delicious and authentic dish
                 </p>
-                <button
-                  style={{ backgroundColor: accentColor, color: '#000' }}
-                  className="w-full py-2 rounded text-sm font-medium hover:opacity-90 transition-opacity"
-                >
+                <button className="accent-button w-full py-2 rounded text-sm font-medium hover:opacity-90 transition-opacity">
                   View Details
                 </button>
               </div>
@@ -101,10 +81,7 @@ export function ThemePreview({
           ].map((item) => (
             <div key={item.title} className="text-center">
               <div className="text-4xl mb-4">{item.icon}</div>
-              <h3
-                style={{ color: primaryColor }}
-                className="font-semibold text-lg"
-              >
+              <h3 className="primary-text font-semibold text-lg">
                 {item.title}
               </h3>
               <p className="text-sm text-gray-600 mt-2">
@@ -116,16 +93,10 @@ export function ThemePreview({
       </div>
 
       {/* CTA Section */}
-      <div
-        style={{ backgroundColor: secondaryColor }}
-        className="p-12 text-white text-center"
-      >
+      <div className="preview-cta p-12 text-white text-center">
         <h2 className="text-3xl font-bold mb-4">Ready to Order?</h2>
         <p className="text-lg mb-6">Delicious food is just a click away</p>
-        <button
-          style={{ backgroundColor: accentColor, color: '#000' }}
-          className="px-8 py-3 rounded font-semibold hover:opacity-90 transition-opacity"
-        >
+        <button className="accent-button px-8 py-3 rounded font-semibold hover:opacity-90 transition-opacity">
           Start Ordering
         </button>
       </div>
@@ -150,6 +121,37 @@ export function ThemePreview({
           <p>© 2024 Our Restaurant. All rights reserved.</p>
         </div>
       </div>
+
+      <style jsx>{`
+        .theme-preview {
+          font-family: ${fontFamily};
+        }
+
+        .preview-header {
+          background-color: ${primaryColor};
+        }
+
+        .preview-hero {
+          background: linear-gradient(135deg, ${primaryColor} 0%, ${secondaryColor} 100%);
+        }
+
+        .accent-button {
+          background-color: ${accentColor};
+          color: #000000;
+        }
+
+        .featured-image {
+          background-color: ${primaryColor};
+        }
+
+        .primary-text {
+          color: ${primaryColor};
+        }
+
+        .preview-cta {
+          background-color: ${secondaryColor};
+        }
+      `}</style>
     </div>
   );
 }

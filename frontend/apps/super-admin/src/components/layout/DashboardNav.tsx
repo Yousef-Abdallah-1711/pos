@@ -8,6 +8,7 @@ import {
   Building2,
   Users,
   FileText,
+  Webhook,
   Settings,
   LogOut,
 } from "lucide-react";
@@ -32,6 +33,11 @@ const navigationItems = [
     name: "Audit Logs",
     href: "/dashboard/audit-logs",
     icon: FileText,
+  },
+  {
+    name: "Payments",
+    href: "/dashboard/payments",
+    icon: Webhook,
   },
   {
     name: "Settings",

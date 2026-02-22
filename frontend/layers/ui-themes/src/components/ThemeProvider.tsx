@@ -24,22 +24,8 @@ import type { ThemeProviderProps } from '../types'
  * - --line-height
  */
 export const ThemeProvider: React.FC<ThemeProviderProps> = ({ theme, children }) => {
-  const cssVariables = {
-    '--color-primary': theme.colors.primary,
-    '--color-secondary': theme.colors.secondary,
-    '--color-accent': theme.colors.accent,
-    '--color-background': theme.colors.background,
-    '--color-text': theme.colors.text,
-    '--color-border': theme.colors.border,
-    '--color-shadow': theme.colors.shadow,
-    '--font-family': theme.typography.fontFamily,
-    '--font-size-base': `${theme.typography.baseFontSize}px`,
-    '--border-radius': `${theme.typography.borderRadius}px`,
-    '--line-height': `${theme.typography.lineHeight}`,
-  } as React.CSSProperties
-
   return (
-    <div style={cssVariables}>
+    <div>
       <style>{`
         :root {
           --color-primary: ${theme.colors.primary};

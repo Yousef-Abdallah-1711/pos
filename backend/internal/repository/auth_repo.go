@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/lib/pq"
 	"golang.org/x/crypto/bcrypt"
 	"pos-saas/internal/domain"
 )
@@ -14,6 +15,12 @@ import (
 type AuthRepository struct {
 	db *sql.DB
 }
+
+var (
+	ErrTenantSlugExists   = errors.New("restaurant slug already exists")
+	ErrTenantNameExists   = errors.New("restaurant name already exists")
+	ErrTenantDomainExists = errors.New("restaurant domain already exists")
+)
 
 func NewAuthRepository(db *sql.DB) *AuthRepository {
 	return &AuthRepository{db: db}
@@ -29,20 +36,40 @@ func (r *AuthRepository) CreateTenantWithUser(req *domain.RegisterRequest) (*dom
 
 	// Use provided subdomain slug, or generate from restaurant name if not provided
 	slug := req.RestaurantSlug
+	slugProvided := strings.TrimSpace(slug) != ""
 	if slug == "" {
 		slug = generateSlug(req.RestaurantName)
 	}
+	if slug == "" {
+		slug = "restaurant"
+	}
+	baseSlug := slug
 
 	// 1. Create Tenant
 	var tenantID int
-	err = tx.QueryRow(`
-		INSERT INTO tenants (name, slug, domain, email, phone, subscription_plan, max_restaurants, max_users, is_active)
-		VALUES ($1, $2, $3, $4, $5, 'free', 1, 5, true)
-		RETURNING id
-	`, req.RestaurantName, slug, slug+".pos.com", req.Email, req.Phone).Scan(&tenantID)
+	for attempt := 0; attempt < 20; attempt++ {
+		err = tx.QueryRow(`
+			INSERT INTO tenants (name, slug, domain, email, phone, subscription_plan, max_restaurants, max_users, is_active)
+			VALUES ($1, $2, $3, $4, $5, 'free', 1, 5, true)
+			RETURNING id
+		`, req.RestaurantName, slug, slug+".pos.com", req.Email, req.Phone).Scan(&tenantID)
+		if err == nil {
+			break
+		}
 
-	if err != nil {
-		return nil, fmt.Errorf("failed to create tenant: %w", err)
+		mappedErr := mapTenantInsertError(err)
+		if errors.Is(mappedErr, ErrTenantSlugExists) || errors.Is(mappedErr, ErrTenantDomainExists) {
+			if slugProvided {
+				return nil, ErrTenantSlugExists
+			}
+			slug = fmt.Sprintf("%s-%d", baseSlug, attempt+2)
+			continue
+		}
+
+		return nil, fmt.Errorf("failed to create tenant: %w", mappedErr)
+	}
+	if tenantID == 0 {
+		return nil, ErrTenantSlugExists
 	}
 
 	// 2. Hash password
@@ -284,8 +311,20 @@ func (r *AuthRepository) UpdateLastLogin(userID int) error {
 
 // CheckEmailExists checks if email already exists
 func (r *AuthRepository) CheckEmailExists(email string) (bool, error) {
+	if r.db == nil {
+		return false, nil
+	}
 	var exists bool
 	err := r.db.QueryRow(`SELECT EXISTS(SELECT 1 FROM users WHERE email = $1)`, email).Scan(&exists)
+	return exists, err
+}
+
+func (r *AuthRepository) CheckTenantSlugExists(slug string) (bool, error) {
+	if r.db == nil {
+		return false, nil
+	}
+	var exists bool
+	err := r.db.QueryRow(`SELECT EXISTS(SELECT 1 FROM tenants WHERE slug = $1)`, slug).Scan(&exists)
 	return exists, err
 }
 
@@ -452,4 +491,30 @@ func generateSlug(name string) string {
 		return -1
 	}, slug)
 	return slug
+}
+
+func mapTenantInsertError(err error) error {
+	var pqErr *pq.Error
+	if errors.As(err, &pqErr) && pqErr.Code == "23505" {
+		switch pqErr.Constraint {
+		case "tenants_slug_key":
+			return ErrTenantSlugExists
+		case "tenants_name_key":
+			return ErrTenantNameExists
+		case "tenants_domain_key":
+			return ErrTenantDomainExists
+		}
+	}
+
+	errText := err.Error()
+	switch {
+	case strings.Contains(errText, "tenants_slug_key"):
+		return ErrTenantSlugExists
+	case strings.Contains(errText, "tenants_name_key"):
+		return ErrTenantNameExists
+	case strings.Contains(errText, "tenants_domain_key"):
+		return ErrTenantDomainExists
+	default:
+		return err
+	}
 }

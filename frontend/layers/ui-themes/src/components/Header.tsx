@@ -12,174 +12,229 @@ export interface HeaderProps {
   config: HeaderConfig
   isArabic?: boolean
   onNavigationClick?: (href: string) => void
-  theme: {
-    colors: any
-  }
 }
 
 export const Header: React.FC<HeaderProps> = ({
   config,
   isArabic = false,
   onNavigationClick,
-  theme,
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const textColor = config.textColor || '#111827'
+  const showLogo = config.showLogo !== false
+  const showShadow = config.showShadow !== false
+  const hasNavigation = Boolean(config.navigationItems && config.navigationItems.length > 0)
+  const sortedNavigationItems = [...(config.navigationItems || [])].sort(
+    (a, b) => (a.order || 0) - (b.order || 0)
+  )
+  const navPositionClass =
+    config.navPosition === 'left'
+      ? 'theme-header-nav-left'
+      : config.navPosition === 'center'
+        ? 'theme-header-nav-center'
+        : 'theme-header-nav-right'
+  const navAlignmentClass =
+    config.navAlignment === 'vertical'
+      ? 'theme-header-nav-vertical'
+      : 'theme-header-nav-horizontal'
+  const navLeftGap = config.navPosition === 'left' ? 32 : 0
+
+  const logoContent = (
+    <div className="theme-header-logo">
+      {showLogo && (config.logoUrl || config.logoText) && (
+        <>
+          {config.logoUrl && (
+            <img
+              src={config.logoUrl}
+              alt="Logo"
+              className="theme-header-logo-image"
+            />
+          )}
+          {config.logoText && <span className="theme-header-logo-text">{config.logoText}</span>}
+        </>
+      )}
+    </div>
+  )
 
   return (
-    <header
-      style={{
-        backgroundColor: config.backgroundColor,
-        color: config.textColor,
-        height: `${config.height}px`,
-        padding: `0 ${config.padding || 16}px`,
-        boxShadow: config.showShadow ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
-        position: config.stickyHeader ? 'sticky' : 'relative',
-        top: 0,
-        zIndex: 50,
-        direction: isArabic ? 'rtl' : 'ltr',
-      }}
-    >
-      <div
-        style={{
-          height: '100%',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-        }}
-      >
+    <header className="theme-header">
+      <div className="theme-header-inner">
         {/* Logo Section */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          {config.showLogo && (config.logoUrl || config.logoText) && (
-            <>
-              {config.logoUrl && (
-                <img
-                  src={config.logoUrl}
-                  alt="Logo"
-                  style={{
-                    height: `${config.logoHeight || 40}px`,
-                    objectFit: 'contain',
-                  }}
-                />
-              )}
-              {config.logoText && (
-                <span
-                  style={{
-                    fontWeight: 'bold',
-                    fontSize: '18px',
-                  }}
-                >
-                  {config.logoText}
-                </span>
-              )}
-            </>
-          )}
-        </div>
+        {config.homeHref ? (
+          <a href={config.homeHref} className="theme-header-logo-link">
+            {logoContent}
+          </a>
+        ) : (
+          logoContent
+        )}
 
         {/* Desktop Navigation */}
-        {!config.hideNavOnMobile && config.navigationItems && config.navigationItems.length > 0 && (
+        {hasNavigation && (
           <nav
-            style={{
-              display: 'flex',
-              gap: '24px',
-              fontSize: '14px',
-              justifyContent:
-                config.navPosition === 'left'
-                  ? 'flex-start'
-                  : config.navPosition === 'center'
-                    ? 'center'
-                    : 'flex-end',
-              flex: 1,
-              marginLeft: config.navPosition === 'left' ? '32px' : '0',
-            }}
-            className="hidden md:flex"
+            className={`theme-header-nav ${navPositionClass} ${navAlignmentClass} hidden md:flex`}
           >
-            {config.navigationItems
-              .sort((a, b) => (a.order || 0) - (b.order || 0))
-              .map((item) => (
-                <a
-                  key={item.id || item.label}
-                  href={item.href}
-                  onClick={(e) => {
+            {sortedNavigationItems.map((item) => (
+              <a
+                key={item.id || item.label}
+                href={item.href}
+                onClick={(e) => {
+                  if (onNavigationClick) {
                     e.preventDefault()
-                    onNavigationClick?.(item.href)
-                  }}
-                  style={{
-                    color: 'inherit',
-                    textDecoration: 'none',
-                    transition: 'opacity 0.2s',
-                    cursor: 'pointer',
-                  }}
-                  onMouseEnter={(e) => {
-                    ;(e.target as HTMLAnchorElement).style.opacity = '0.8'
-                  }}
-                  onMouseLeave={(e) => {
-                    ;(e.target as HTMLAnchorElement).style.opacity = '1'
-                  }}
-                >
-                  {item.label}
-                </a>
-              ))}
+                    onNavigationClick(item.href)
+                  }
+                }}
+                className="theme-header-link"
+              >
+                {item.label}
+              </a>
+            ))}
           </nav>
         )}
 
         {/* Mobile Menu Button */}
-        <button
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          style={{
-            display: 'none',
-            background: 'none',
-            border: 'none',
-            color: 'inherit',
-            cursor: 'pointer',
-            padding: '8px',
-          }}
-          className="md:hidden flex"
-          aria-label="Toggle menu"
-        >
-          {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-        </button>
+        {!config.hideNavOnMobile && hasNavigation && (
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="theme-header-mobile-button md:hidden flex"
+            aria-label="Toggle menu"
+          >
+            {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
+        )}
       </div>
 
       {/* Mobile Navigation */}
       {mobileMenuOpen &&
         !config.hideNavOnMobile &&
-        config.navigationItems &&
-        config.navigationItems.length > 0 && (
-          <nav
-            style={{
-              marginTop: '16px',
-              paddingTop: '16px',
-              borderTop: `1px solid ${config.textColor}40`,
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '8px',
-            }}
-            className="md:hidden"
-          >
-            {config.navigationItems
-              .sort((a, b) => (a.order || 0) - (b.order || 0))
-              .map((item) => (
-                <a
-                  key={item.id || item.label}
-                  href={item.href}
-                  onClick={(e) => {
+        hasNavigation && (
+          <nav className="theme-header-mobile-nav md:hidden">
+            {sortedNavigationItems.map((item) => (
+              <a
+                key={item.id || item.label}
+                href={item.href}
+                onClick={(e) => {
+                  if (onNavigationClick) {
                     e.preventDefault()
-                    onNavigationClick?.(item.href)
-                    setMobileMenuOpen(false)
-                  }}
-                  style={{
-                    color: 'inherit',
-                    textDecoration: 'none',
-                    padding: '8px 16px',
-                    transition: 'opacity 0.2s',
-                    cursor: 'pointer',
-                  }}
-                >
-                  {item.label}
-                </a>
-              ))}
+                    onNavigationClick(item.href)
+                  }
+                  setMobileMenuOpen(false)
+                }}
+                className="theme-header-mobile-link"
+              >
+                {item.label}
+              </a>
+            ))}
           </nav>
         )}
+
+      <style>{`
+        .theme-header {
+          background-color: ${config.backgroundColor || '#ffffff'};
+          color: ${textColor};
+          height: ${config.height || 64}px;
+          padding: 0 ${config.padding || 16}px;
+          box-shadow: ${showShadow ? '0 1px 3px rgba(0,0,0,0.1)' : 'none'};
+          position: ${config.stickyHeader ? 'sticky' : 'relative'};
+          top: 0;
+          z-index: 50;
+          direction: ${isArabic ? 'rtl' : 'ltr'};
+        }
+
+        .theme-header-inner {
+          height: 100%;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+        }
+
+        .theme-header-logo-link {
+          color: inherit;
+          text-decoration: none;
+        }
+
+        .theme-header-logo {
+          display: flex;
+          align-items: center;
+          gap: 16px;
+        }
+
+        .theme-header-logo-image {
+          height: ${config.logoHeight || 40}px;
+          object-fit: contain;
+        }
+
+        .theme-header-logo-text {
+          font-weight: 700;
+          font-size: 18px;
+        }
+
+        .theme-header-nav {
+          gap: 24px;
+          font-size: 14px;
+          flex: 1;
+          margin-left: ${navLeftGap}px;
+        }
+
+        .theme-header-nav-horizontal {
+          flex-direction: row;
+        }
+
+        .theme-header-nav-vertical {
+          flex-direction: column;
+        }
+
+        .theme-header-nav-left {
+          justify-content: flex-start;
+        }
+
+        .theme-header-nav-center {
+          justify-content: center;
+        }
+
+        .theme-header-nav-right {
+          justify-content: flex-end;
+        }
+
+        .theme-header-link {
+          color: inherit;
+          text-decoration: none;
+          transition: opacity 0.2s;
+          cursor: pointer;
+        }
+
+        .theme-header-link:hover {
+          opacity: 0.8;
+        }
+
+        .theme-header-mobile-button {
+          background: none;
+          border: none;
+          color: inherit;
+          cursor: pointer;
+          padding: 8px;
+        }
+
+        .theme-header-mobile-nav {
+          margin-top: 16px;
+          padding-top: 16px;
+          border-top: 1px solid ${textColor}40;
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+        }
+
+        .theme-header-mobile-link {
+          color: inherit;
+          text-decoration: none;
+          padding: 8px 16px;
+          transition: opacity 0.2s;
+          cursor: pointer;
+        }
+
+        .theme-header-mobile-link:hover {
+          opacity: 0.8;
+        }
+      `}</style>
     </header>
   )
 }

@@ -57,7 +57,18 @@ Run the super admin dashboard in development mode:
 pnpm --filter @pos-saas/super-admin dev
 ```
 
-The app will be available at `http://localhost:3001`
+The app will be available at `http://localhost:3004`
+
+### Backend Required (No Docker Fallback)
+
+If Docker Desktop is not running, start backend + embedded PostgreSQL directly:
+
+```bash
+cd backend
+powershell -ExecutionPolicy Bypass -File .\scripts\start_local_no_docker.ps1
+```
+
+Then run super-admin normally.
 
 ### Build
 

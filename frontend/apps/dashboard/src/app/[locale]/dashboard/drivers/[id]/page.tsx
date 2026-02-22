@@ -572,15 +572,12 @@ export default function EditDriverPage() {
               </div>
 
               <div className="pt-3 border-t border-gray-200 dark:border-gray-700">
-                <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
                   Completion Rate
                 </p>
                 <div className="flex items-center gap-2">
                   <div className="flex-1 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-green-500 transition-all"
-                      style={{ width: `${completionRate}%` }}
-                    ></div>
+                    <div className="completion-rate-fill h-full bg-green-500 transition-all"></div>
                   </div>
                   <span className="text-sm font-semibold text-gray-900 dark:text-white">
                     {completionRate}%
@@ -618,6 +615,11 @@ export default function EditDriverPage() {
           </div>
         </div>
       </div>
+      <style jsx>{`
+        .completion-rate-fill {
+          width: ${completionRate}%;
+        }
+      `}</style>
     </div>
   )
 }

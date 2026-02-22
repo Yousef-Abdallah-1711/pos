@@ -1,14 +1,5 @@
-'use client'
+import { redirect } from 'next/navigation'
 
-import { useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-
-export default function LoginPage() {
-  const router = useRouter()
-
-  useEffect(() => {
-    router.push('/auth/login')
-  }, [router])
-
-  return null
+export default function LoginShortcut() {
+  redirect('/en/auth/login')
 }

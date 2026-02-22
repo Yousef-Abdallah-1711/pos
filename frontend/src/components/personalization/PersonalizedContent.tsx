@@ -59,15 +59,12 @@ export const PersonalizedContent: React.FC<PersonalizedContentProps> = ({
     )
   }
 
+  const headerBg = theme?.colors?.primary || '#3b82f6'
+  const headerText = theme?.colors?.text || '#ffffff'
+
   return (
-    <div className={styles.container}>
-      <div
-        className={styles.header}
-        style={{
-          backgroundColor: theme?.colors?.primary,
-          color: theme?.colors?.text,
-        }}
-      >
+    <div className={`personalized-content-themed ${styles.container}`}>
+      <div className={styles.header}>
         <h2 className={styles.title}>Personalized For You</h2>
         {showMetrics && userFeatures && (
           <div className={styles.metricsPreview}>
@@ -142,10 +139,16 @@ export const PersonalizedContent: React.FC<PersonalizedContentProps> = ({
       <button className={styles.refreshButton} onClick={() => refresh()}>
         Refresh Recommendations
       </button>
+
+      <style>{`
+        .personalized-content-themed .${styles.header} {
+          background-color: ${headerBg};
+          color: ${headerText};
+        }
+      `}</style>
     </div>
   )
 }
 
 PersonalizedContent.displayName = 'PersonalizedContent'
 PersonalizedContent.description = 'Displays personalized content recommendations based on user behavior'
-PersonalizedContent.icon = 'personalization'

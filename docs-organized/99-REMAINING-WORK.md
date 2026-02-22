@@ -1,8 +1,62 @@
-# Remaining Work (2026-01-26)
+# Remaining Work (Updated 2026-02-21)
+
+## Completed Since Last Update (Feb 2026)
+
+### Landing App — Full Refactor ✅
+- **URL-based i18n routing**: Migrated from localStorage/context-based language switching to Next.js `[locale]` URL segments (`/en/...`, `/ar/...`)
+- **Middleware**: New `src/middleware.ts` — detects locale, redirects bare paths to `/en`
+- **New folder structure**: All pages under `src/app/[locale]/` — landing, auth, register, super-admin-login
+- **LanguageContext refactor**: Now accepts `locale` prop from server (no localStorage), language toggle uses `router.push()`
+- **Modern redesign**: Navbar (glassmorphism), Hero (dark POS mockup, stats), Features (gradient cards), HowItWorks (3-step, NEW section), Pricing (single plan), Testimonials, CTA, Footer
+- **Pricing updated**: Single plan — 500 EGP/month after 30-day free trial (replaced 3-tier Free/Pro/Enterprise)
+- **All translations**: Full EN + AR parity in `src/lib/translations.ts`
+
+### Dashboard — Arabic Locale Enabled ✅
+- Added `ar` to `generateStaticParams()` in dashboard locale layout
+- Arabic UI now accessible at `/ar/dashboard/...`
+
+### HR Module — Backend Handlers ✅
+- New files: `hr_employee_handler.go`, `hr_attendance_handler.go`, `hr_leave_handler.go`, `hr_salary_handler.go`
+- Routes registered in `main.go`
+
+### HR Module — Frontend Translations ✅
+- `AttendanceForm.tsx`, `LeaveForm.tsx`, `SalaryForm.tsx` — full EN + AR translations
+
+### Restaurant Website Fixes ✅
+- Middleware: Removed redirect loop, properly handles locale + maintenance routing
+- All pages updated to use `next/link` instead of `<a>` tags for navigation
+- Order tracking, cart, checkout, menu, settings pages — translation fixes
+
+### Super-Admin ExtendTrialModal ✅
+- Fixed 404 error on trial extension API call
+- Corrected endpoint URL construction in `ExtendTrialModal.tsx`
+
+### Frontend Styling Hardening (Inline Style Cleanup) [Done]
+- Removed React inline style props from active frontend code paths (`style={{...}}`, `style={...}`) across dashboard, landing, restaurant website, shared layers, and ui-themes.
+- Refactored dynamic editor previews to class-based styling with scoped `<style jsx>` blocks (no inline style objects).
+- Refactored invoice HTML generator in `frontend/apps/dashboard/src/lib/pdf-export.ts` to class-based CSS (removed inline `style="..."` attributes).
+- Validation snapshot:
+  - `rg -n "style=\\{\\{" frontend -S -g "!**/*.disabled"` -> 0
+  - `rg -n "style=\\{" frontend -S -g "!**/*.disabled"` -> 0
+  - Remaining `style=` occurrences are intentional sanitizer/test literals in:
+    - `frontend/apps/dashboard/src/components/editors/CustomCSSEditor.tsx`
+    - `frontend/apps/dashboard/src/components/editors/__tests__/CustomCSSEditor.test.tsx`
+
+### Paymob Phase 9 Progress (Feb 21, 2026) ✅
+- `go build ./...` backend blocker resolved by isolating deprecated legacy-only packages behind `legacy` build tags.
+- Phase 9 DB-backed verification path added:
+  - `backend/scripts/phase9_db_verify.ps1`
+  - `backend/scripts/paymob_phase9_seed.sql`
+  - `docs-organized/11-PAYMOB-PAYMENT-INTEGRATION/PHASE9-DB-VERIFICATION-PATH.md`
+- Remaining Paymob closeout tasks now focus on running the DB-backed script in an environment with working Docker/PostgreSQL and recording final `9.2/9.3` runtime results.
+
+---
+
+# Open Issues
 
 This file tracks open issues and incomplete tasks found during the latest verification. It is the active checklist until all items below are closed. Each task includes target file paths and a minimal test plan.
 
-## Critical blockers
+## Critical Blockers
 
 ### 1) Docker healthcheck + DB connectivity
 - Fix runtime healthcheck (missing `curl`).
@@ -46,6 +100,20 @@ This file tracks open issues and incomplete tasks found during the latest verifi
   - Test:
     - `/AR/orders/track/{number}` redirects or loads correctly
     - `/ar/orders/track/{number}` loads correctly
+
+### 6) Shared-components TypeScript drift in watch mode
+- `pnpm dev` currently reports high-volume TS errors from `@pos/shared-components` tests and component typings (manifest shape mismatch, outdated API assumptions, missing module paths, duplicate exports).
+  - Paths: `frontend/layers/shared-components/__tests__/*`, `frontend/layers/shared-components/components/*`, `frontend/layers/shared-components/utils/*`
+  - Test:
+    - `pnpm --filter @pos/shared-components dev` runs with 0 TS errors
+    - `pnpm --filter @pos/shared-components test` passes
+
+### 7) Next.js EPERM trace lock on Windows
+- Landing app (and sometimes other Next apps) can fail with: `EPERM: operation not permitted, open .../.next/trace`.
+  - Paths: `frontend/apps/landing/.next` (runtime artifact)
+  - Test:
+    - after cleaning `.next` and restarting dev, `pnpm --filter @pos-saas/landing dev` stays running
+    - full `pnpm dev` no longer exits due to trace file lock
 
 ## Inventory end-to-end
 
@@ -117,7 +185,8 @@ This file tracks open issues and incomplete tasks found during the latest verifi
 - `docs-organized/08-rules-role-based/01-RBAC_CURRENT_STATUS.md`
 - `docs-organized/08-rules-role-based/02-RBAC_NEXT_PHASES.md`
 - `docs-organized/ORGANIZATION_SUMMARY.md`
-- `README.md`
+- `docs-organized/03-FRONTEND-DASHBOARD/COMPLETION_REPORT.md` (keep historical status clearly labeled)
+- `docs-organized/01-THEME-SYSTEM/06-THEME-BUILDER-PRODUCTION-TODO.md`
 
 ## Verification checklist
 
@@ -129,3 +198,5 @@ This file tracks open issues and incomplete tasks found during the latest verifi
 - Order tracking works for `/en/` and `/ar/` routes (including uppercase locale redirect)
 - Create user shows in users list and can be assigned roles
 - Inventory: out-of-stock products cannot be added to cart when tracking is enabled
+- `rg -n "style=\\{\\{" frontend -S -g "!**/*.disabled"` returns 0
+- `rg -n "style=\\{" frontend -S -g "!**/*.disabled"` returns 0

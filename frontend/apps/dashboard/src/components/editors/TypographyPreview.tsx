@@ -67,8 +67,20 @@ export function TypographyPreview({ typography, textColor = '#000000' }: Typogra
     ]
   }, [typography.baseFontSize, typography.lineHeight])
 
+  const sampleRules = fontScale
+    .map(
+      (item, index) => `
+        .typography-sample-${index} {
+          font-size: ${item.size}px;
+          line-height: ${item.lineHeight};
+          font-weight: ${item.weight};
+        }
+      `
+    )
+    .join('\n')
+
   return (
-    <div className="space-y-6">
+    <div className="typography-preview space-y-6">
       <div>
         <h3 className="font-semibold text-sm text-gray-900 dark:text-white mb-4">
           Typography Scale Preview
@@ -78,10 +90,7 @@ export function TypographyPreview({ typography, textColor = '#000000' }: Typogra
         <div className="grid grid-cols-2 gap-3 mb-6 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
           <div>
             <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">Font Family</p>
-            <p
-              className="text-sm font-medium text-gray-900 dark:text-white truncate"
-              style={{ fontFamily: typography.fontFamily }}
-            >
+            <p className="typography-font-family text-sm font-medium text-gray-900 dark:text-white truncate">
               {typography.fontFamily.split(',')[0]}
             </p>
           </div>
@@ -123,16 +132,7 @@ export function TypographyPreview({ typography, textColor = '#000000' }: Typogra
               </div>
 
               {/* Sample Text */}
-              <p
-                style={{
-                  fontFamily: typography.fontFamily,
-                  fontSize: `${item.size}px`,
-                  lineHeight: item.lineHeight,
-                  fontWeight: item.weight,
-                  color: textColor
-                }}
-                className="dark:text-white"
-              >
+              <p className={`typography-sample typography-sample-${index} dark:text-white`}>
                 {item.sampleText}
               </p>
 
@@ -167,6 +167,18 @@ export function TypographyPreview({ typography, textColor = '#000000' }: Typogra
           </ul>
         </div>
       </div>
+      <style jsx>{`
+        .typography-font-family,
+        .typography-sample {
+          font-family: ${typography.fontFamily};
+        }
+
+        .typography-sample {
+          color: ${textColor};
+        }
+
+        ${sampleRules}
+      `}</style>
     </div>
   )
 }

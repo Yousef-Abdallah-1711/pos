@@ -1,3 +1,6 @@
+//go:build legacy
+// +build legacy
+
 /**
  * Theme Version Routes
  * Configures all theme version history and rollback endpoints

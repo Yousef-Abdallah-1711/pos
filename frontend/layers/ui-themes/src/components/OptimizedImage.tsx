@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, useMemo } from 'react'
+import React, { useEffect, useRef, useState, useMemo, useId } from 'react'
 import { useAssetUrl } from '../hooks/useAssetUrl'
 
 export interface OptimizedImageProps {
@@ -19,6 +19,15 @@ export interface OptimizedImageProps {
   formats?: ('webp' | 'avif' | 'jpeg' | 'png')[]
   fit?: 'contain' | 'cover' | 'fill' | 'scale-down'
 }
+
+const camelToKebab = (value: string): string =>
+  value.replace(/[A-Z]/g, (match) => `-${match.toLowerCase()}`)
+
+const serializeStyleObject = (style: React.CSSProperties): string =>
+  Object.entries(style)
+    .filter(([, val]) => val !== undefined && val !== null)
+    .map(([prop, val]) => `${camelToKebab(prop)}: ${String(val)};`)
+    .join(' ')
 
 export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   assetId,
@@ -42,6 +51,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   const [hasError, setHasError] = useState(false)
   const imgRef = useRef<HTMLImageElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
+  const reactId = useId()
 
   // Get CDN URLs for different formats
   const { assetUrl, isLoading } = useAssetUrl(assetId, { formats, quality })
@@ -109,63 +119,32 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
 
   // Aspect ratio padding for placeholder
   const aspectRatio = width && height ? (height / width) * 100 : 0
-
-  const containerStyle: React.CSSProperties = {
-    position: 'relative',
-    overflow: 'hidden',
-    ...style,
-  }
-
-  const placeholderStyle: React.CSSProperties = {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: placeholderColor,
-    opacity: isLoaded ? 0 : 1,
-    transition: 'opacity 0.3s ease-in-out',
-    zIndex: 0,
-  }
-
-  const blurPlaceholderStyle: React.CSSProperties = {
-    ...placeholderStyle,
-    backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 ${width || 100} ${height || 100}'%3E%3Cfilter id='b'%3E%3CfeGaussianBlur stdDeviation='20'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' fill='${placeholderColor.replace('#', '%23')}'/%3E%3C/filter%3E%3C/svg%3E")`,
-    backgroundSize: 'cover',
-  }
-
-  const imageStyle: React.CSSProperties = {
-    display: isLoaded ? 'block' : 'none',
-    width: '100%',
-    height: '100%',
-    objectFit: fit as any,
-    objectPosition: 'center',
-    zIndex: 1,
-    position: 'relative',
-  }
+  const hasAspectSpacer = aspectRatio > 0 && !width && !height
+  const encodedPlaceholderColor = placeholderColor.replace('#', '%23')
+  const instanceClass = useMemo(
+    () => `optimized-image-${reactId.replace(/[:]/g, '')}`,
+    [reactId]
+  )
+  const customContainerCss = useMemo(() => serializeStyleObject(style), [style])
 
   return (
     <div
       ref={containerRef}
-      className={className}
-      style={containerStyle}
+      className={`${instanceClass} optimized-image ${className}`.trim()}
       data-asset-id={assetId}
       data-loaded={isLoaded}
       data-error={hasError}
     >
       {/* Placeholder */}
-      {!isLoaded && placeholder === 'blur' && <div style={blurPlaceholderStyle} />}
-      {!isLoaded && placeholder === 'color' && <div style={placeholderStyle} />}
+      {!isLoaded && placeholder === 'blur' && (
+        <div className="oi-placeholder oi-placeholder-blur" />
+      )}
+      {!isLoaded && placeholder === 'color' && (
+        <div className="oi-placeholder oi-placeholder-color" />
+      )}
 
       {/* Aspect ratio preserver */}
-      {aspectRatio > 0 && !width && !height && (
-        <div
-          style={{
-            width: '100%',
-            paddingBottom: `${aspectRatio}%`,
-          }}
-        />
-      )}
+      {hasAspectSpacer && <div className="oi-aspect-preserver" />}
 
       {/* Image */}
       {(isInView || !lazy) && assetUrl && !hasError && (
@@ -192,7 +171,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
             alt={alt}
             width={width}
             height={height}
-            style={imageStyle}
+            className={`oi-image ${isLoaded ? 'is-loaded' : 'is-loading'}`}
             onLoad={handleLoad}
             onError={handleError}
             loading={lazy && !priority ? 'lazy' : 'eager'}
@@ -203,58 +182,98 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
 
       {/* Error state */}
       {hasError && (
-        <div
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            backgroundColor: '#f0f0f0',
-            color: '#999',
-            fontSize: '14px',
-            textAlign: 'center',
-            padding: '16px',
-            zIndex: 1,
-          }}
-        >
+        <div className="oi-error">
           <span>Failed to load image</span>
         </div>
       )}
 
       {/* Loading indicator (optional) */}
       {!isLoaded && isLoading && (
-        <div
-          style={{
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            zIndex: 2,
-          }}
-        >
-          <div
-            style={{
-              width: '24px',
-              height: '24px',
-              border: '2px solid #f0f0f0',
-              borderTop: '2px solid #999',
-              borderRadius: '50%',
-              animation: 'spin 0.6s linear infinite',
-            }}
-          />
-          <style>
-            {`
-              @keyframes spin {
-                to { transform: rotate(360deg); }
-              }
-            `}
-          </style>
+        <div className="oi-loading-indicator">
+          <div className="oi-spinner" />
         </div>
       )}
+
+      <style>{`
+        .${instanceClass} {
+          position: relative;
+          overflow: hidden;
+          ${customContainerCss}
+        }
+
+        .${instanceClass} .oi-placeholder {
+          position: absolute;
+          inset: 0;
+          background-color: ${placeholderColor};
+          opacity: ${isLoaded ? 0 : 1};
+          transition: opacity 0.3s ease-in-out;
+          z-index: 0;
+        }
+
+        .${instanceClass} .oi-placeholder-blur {
+          background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 ${width || 100} ${height || 100}'%3E%3Cfilter id='b'%3E%3CfeGaussianBlur stdDeviation='20'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' fill='${encodedPlaceholderColor}'/%3E%3C/filter%3E%3C/svg%3E");
+          background-size: cover;
+        }
+
+        .${instanceClass} .oi-aspect-preserver {
+          width: 100%;
+          padding-bottom: ${hasAspectSpacer ? `${aspectRatio}%` : '0'};
+        }
+
+        .${instanceClass} .oi-image {
+          width: 100%;
+          height: 100%;
+          object-fit: ${fit};
+          object-position: center;
+          z-index: 1;
+          position: relative;
+        }
+
+        .${instanceClass} .oi-image.is-loading {
+          display: none;
+        }
+
+        .${instanceClass} .oi-image.is-loaded {
+          display: block;
+        }
+
+        .${instanceClass} .oi-error {
+          position: absolute;
+          inset: 0;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background-color: #f0f0f0;
+          color: #999;
+          font-size: 14px;
+          text-align: center;
+          padding: 16px;
+          z-index: 1;
+        }
+
+        .${instanceClass} .oi-loading-indicator {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          z-index: 2;
+        }
+
+        .${instanceClass} .oi-spinner {
+          width: 24px;
+          height: 24px;
+          border: 2px solid #f0f0f0;
+          border-top: 2px solid #999;
+          border-radius: 50%;
+          animation: oi-spin 0.6s linear infinite;
+        }
+
+        @keyframes oi-spin {
+          to {
+            transform: rotate(360deg);
+          }
+        }
+      `}</style>
     </div>
   )
 }

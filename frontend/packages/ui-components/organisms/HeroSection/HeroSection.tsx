@@ -33,31 +33,16 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
   const height = config.height || '500px'
   const overlayOpacity = config.overlay_opacity || 0.3
   const textAlignment = config.text_alignment || 'center'
+  const direction = isArabic ? 'rtl' : 'ltr'
+  const backgroundImage = background_image_url ? `url(${background_image_url})` : 'none'
 
   return (
-    <section
-      className="relative w-full overflow-hidden flex items-center justify-center"
-      style={{
-        height,
-        backgroundImage: background_image_url ? `url(${background_image_url})` : 'none',
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        direction: isArabic ? 'rtl' : 'ltr',
-      }}
-    >
+    <section className="hero-section-component relative w-full overflow-hidden flex items-center justify-center">
       {/* Overlay */}
-      <div
-        className="absolute inset-0 bg-black"
-        style={{ opacity: overlayOpacity }}
-      />
+      <div className="hero-overlay absolute inset-0 bg-black" />
 
       {/* Content */}
-      <div
-        className="relative z-10 max-w-4xl mx-auto px-6 text-center w-full"
-        style={{
-          textAlign: textAlignment as any,
-        }}
-      >
+      <div className="hero-content relative z-10 max-w-4xl mx-auto px-6 text-center w-full">
         {title && (
           <h1 className="text-5xl md:text-6xl font-bold text-white mb-4">
             {title}
@@ -71,7 +56,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
         )}
 
         {description && (
-          <p className="text-lg text-gray-300 mb-8 max-w-2xl mx-auto">
+          <p className="hero-description text-lg text-gray-300 mb-8 max-w-2xl mx-auto">
             {description}
           </p>
         )}
@@ -86,6 +71,29 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
           </a>
         )}
       </div>
+
+      <style>{`
+        .hero-section-component {
+          height: ${height};
+          background-image: ${backgroundImage};
+          background-size: cover;
+          background-position: center;
+          direction: ${direction};
+        }
+
+        .hero-overlay {
+          opacity: ${overlayOpacity};
+        }
+
+        .hero-content {
+          text-align: ${textAlignment};
+        }
+
+        .hero-description {
+          margin-left: ${textAlignment === 'center' ? 'auto' : '0'};
+          margin-right: ${textAlignment === 'center' ? 'auto' : '0'};
+        }
+      `}</style>
     </section>
   )
 }

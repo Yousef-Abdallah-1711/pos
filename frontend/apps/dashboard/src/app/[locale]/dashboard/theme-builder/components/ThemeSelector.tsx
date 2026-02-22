@@ -52,6 +52,7 @@ export function ThemeSelector() {
   const setCurrentTheme = useThemeStore((state) => state.setCurrentTheme)
 
   const [showActions, setShowActions] = useState<string | null>(null)
+  const getSafeThemeId = (id: string) => id.replace(/[^a-zA-Z0-9_-]/g, '-')
 
   const handleApplyPreset = (preset: any) => {
     if (!currentTheme) return
@@ -62,6 +63,47 @@ export function ThemeSelector() {
       colors: preset.colors,
     })
   }
+
+  const presetColorRules = PRESET_THEMES.map((preset) => {
+    const safeId = getSafeThemeId(preset.id)
+    return Object.values(preset.colors)
+      .slice(0, 3)
+      .map(
+        (color, idx) => `
+          .preset-${safeId}-color-${idx} {
+            background-color: ${String(color)};
+          }
+        `
+      )
+      .join('\n')
+  }).join('\n')
+
+  const customThemeColorRules = themes
+    .map((theme) => {
+      const safeId = getSafeThemeId(theme.id)
+      const defaultColors = {
+        primary: '#3b82f6',
+        secondary: '#1e40af',
+        accent: '#0ea5e9',
+      }
+      const themeColors = theme.colors || defaultColors
+      const palette = [
+        themeColors.primary || defaultColors.primary,
+        themeColors.secondary || defaultColors.secondary,
+        themeColors.accent || defaultColors.accent,
+      ]
+
+      return palette
+        .map(
+          (color, idx) => `
+            .theme-${safeId}-color-${idx} {
+              background-color: ${color};
+            }
+          `
+        )
+        .join('\n')
+    })
+    .join('\n')
 
   return (
     <div className="h-full flex flex-col bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700">
@@ -91,8 +133,7 @@ export function ThemeSelector() {
                   .map((color, idx) => (
                     <div
                       key={idx}
-                      className="w-6 h-6 rounded"
-                      style={{ backgroundColor: color as string }}
+                      className={`w-6 h-6 rounded preset-${getSafeThemeId(preset.id)}-color-${idx}`}
                     />
                   ))}
               </div>
@@ -142,8 +183,7 @@ export function ThemeSelector() {
                     {colorPalette.map((color, idx) => (
                       <div
                         key={idx}
-                        className="w-5 h-5 rounded"
-                        style={{ backgroundColor: color }}
+                        className={`w-5 h-5 rounded theme-${getSafeThemeId(theme.id)}-color-${idx}`}
                       />
                     ))}
                   </div>
@@ -183,6 +223,10 @@ export function ThemeSelector() {
           )}
         </div>
       </div>
+      <style jsx>{`
+        ${presetColorRules}
+        ${customThemeColorRules}
+      `}</style>
 
       {/* Import/Export */}
       <div className="p-6 border-t border-gray-200 dark:border-gray-700 space-y-2">

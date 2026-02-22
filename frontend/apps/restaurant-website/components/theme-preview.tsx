@@ -1,12 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { X, Eye } from "lucide-react";
+import { X } from "lucide-react";
 import { debugError } from "@/lib/debug";
 import { Button } from "@pos-saas/ui";
 import { useThemeStore } from "@/lib/store/theme-store";
-import { useThemeColors } from "@/lib/hooks/use-theme";
-import { hexToHsl } from "@/lib/utils/theme-colors";
 
 interface Theme {
   slug: string;
@@ -42,7 +40,6 @@ export function ThemePreview({
 }: ThemePreviewProps) {
   const { currentTheme, loadTheme } = useThemeStore();
   const [isApplying, setIsApplying] = useState(false);
-  const isRTL = locale === "ar";
 
   const labels = {
     en: {
@@ -93,23 +90,17 @@ export function ThemePreview({
   const textColor = theme.colors.text;
   const borderColor = theme.colors.border;
   const primaryColor = theme.colors.primary;
+  const mutedTextColor = `${textColor}b3`;
+  const subtleTextColor = `${textColor}99`;
+  const softBgColor = `${bgColor}cc`;
+  const inputBgColor = `${textColor}08`;
+  const isApplied = currentTheme?.slug === theme.slug;
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div
-        className="bg-white dark:bg-gray-900 rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto"
-        style={{
-          backgroundColor: bgColor,
-          color: textColor,
-        }}
-      >
+    <div className="theme-preview fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+      <div className="preview-surface bg-white dark:bg-gray-900 rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div
-          className="flex items-center justify-between p-6 border-b sticky top-0"
-          style={{
-            borderBottomColor: borderColor,
-          }}
-        >
+        <div className="preview-header flex items-center justify-between p-6 border-b sticky top-0">
           <h2 className="text-2xl font-bold">{t.preview}</h2>
           <button
             onClick={onClose}
@@ -123,123 +114,60 @@ export function ThemePreview({
         <div className="p-6 space-y-8">
           {/* Theme Info */}
           <div>
-            <h3
-              className="text-xl font-semibold mb-2"
-              style={{ color: primaryColor }}
-            >
+            <h3 className="theme-name text-xl font-semibold mb-2">
               {theme.name}
             </h3>
-            <p
-              className="text-sm"
-              style={{ color: `${textColor}b3` }}
-            >
+            <p className="theme-description text-sm">
               {theme.description}
             </p>
           </div>
 
           {/* Color Palette */}
           <div>
-            <h4
-              className="font-semibold mb-4"
-              style={{ color: textColor }}
-            >
+            <h4 className="section-title font-semibold mb-4">
               {t.primaryColor}
             </h4>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               <div>
-                <div
-                  className="h-16 rounded-lg mb-2 border"
-                  style={{
-                    backgroundColor: theme.colors.primary,
-                    borderColor: borderColor,
-                  }}
-                />
-                <p
-                  className="text-xs font-mono"
-                  style={{ color: `${textColor}99` }}
-                >
+                <div className="palette-box palette-primary h-16 rounded-lg mb-2 border" />
+                <p className="palette-value text-xs font-mono">
                   {theme.colors.primary}
                 </p>
               </div>
 
               <div>
-                <div
-                  className="h-16 rounded-lg mb-2 border"
-                  style={{
-                    backgroundColor: theme.colors.secondary,
-                    borderColor: borderColor,
-                  }}
-                />
-                <p
-                  className="text-xs font-mono"
-                  style={{ color: `${textColor}99` }}
-                >
+                <div className="palette-box palette-secondary h-16 rounded-lg mb-2 border" />
+                <p className="palette-value text-xs font-mono">
                   {theme.colors.secondary}
                 </p>
               </div>
 
               <div>
-                <div
-                  className="h-16 rounded-lg mb-2 border"
-                  style={{
-                    backgroundColor: theme.colors.accent,
-                    borderColor: borderColor,
-                  }}
-                />
-                <p
-                  className="text-xs font-mono"
-                  style={{ color: `${textColor}99` }}
-                >
+                <div className="palette-box palette-accent h-16 rounded-lg mb-2 border" />
+                <p className="palette-value text-xs font-mono">
                   {theme.colors.accent}
                 </p>
               </div>
 
               <div>
-                <div
-                  className="h-16 rounded-lg mb-2 border"
-                  style={{
-                    backgroundColor: theme.colors.background,
-                    borderColor: borderColor,
-                    border: `2px solid ${borderColor}`,
-                  }}
-                />
-                <p
-                  className="text-xs font-mono"
-                  style={{ color: `${textColor}99` }}
-                >
+                <div className="palette-box palette-background h-16 rounded-lg mb-2 border" />
+                <p className="palette-value text-xs font-mono">
                   {theme.colors.background}
                 </p>
               </div>
 
               <div>
-                <div
-                  className="h-16 rounded-lg mb-2 flex items-center justify-center text-center"
-                  style={{
-                    backgroundColor: textColor,
-                    color: bgColor,
-                  }}
-                >
+                <div className="palette-box palette-text h-16 rounded-lg mb-2 flex items-center justify-center text-center">
                   Aa
                 </div>
-                <p
-                  className="text-xs font-mono"
-                  style={{ color: `${textColor}99` }}
-                >
+                <p className="palette-value text-xs font-mono">
                   {theme.colors.text}
                 </p>
               </div>
 
               <div>
-                <div
-                  className="h-16 rounded-lg mb-2 border-2"
-                  style={{
-                    borderColor: theme.colors.border,
-                  }}
-                />
-                <p
-                  className="text-xs font-mono"
-                  style={{ color: `${textColor}99` }}
-                >
+                <div className="palette-box palette-border h-16 rounded-lg mb-2 border-2" />
+                <p className="palette-value text-xs font-mono">
                   {theme.colors.border}
                 </p>
               </div>
@@ -248,47 +176,24 @@ export function ThemePreview({
 
           {/* Sample Components */}
           <div>
-            <h4
-              className="font-semibold mb-4"
-              style={{ color: textColor }}
-            >
+            <h4 className="section-title font-semibold mb-4">
               {t.sampleComponents}
             </h4>
 
             <div className="space-y-4">
               {/* Sample Button */}
               <div>
-                <button
-                  style={{
-                    backgroundColor: primaryColor,
-                    color: "#ffffff",
-                    padding: "0.5rem 1rem",
-                    borderRadius: "0.5rem",
-                  }}
-                  className="font-medium"
-                >
+                <button className="sample-button font-medium">
                   Sample Button
                 </button>
               </div>
 
               {/* Sample Card */}
-              <div
-                className="p-4 rounded-lg border"
-                style={{
-                  borderColor: borderColor,
-                  backgroundColor: `${bgColor}cc`,
-                }}
-              >
-                <h5
-                  className="font-semibold mb-2"
-                  style={{ color: primaryColor }}
-                >
+              <div className="sample-card p-4 rounded-lg border">
+                <h5 className="sample-card-title font-semibold mb-2">
                   Sample Card
                 </h5>
-                <p
-                  className="text-sm"
-                  style={{ color: `${textColor}99` }}
-                >
+                <p className="sample-card-description text-sm">
                   This is a sample card with the theme colors applied.
                 </p>
               </div>
@@ -297,31 +202,13 @@ export function ThemePreview({
               <input
                 type="text"
                 placeholder="Sample input field"
-                style={{
-                  backgroundColor: `${textColor}08`,
-                  color: textColor,
-                  borderColor: borderColor,
-                  borderWidth: "1px",
-                  padding: "0.5rem",
-                  borderRadius: "0.375rem",
-                  width: "100%",
-                }}
+                className="sample-input"
               />
 
               {/* Sample Badge */}
               <div className="flex gap-2 flex-wrap">
                 {["New", "Featured", "Trending"].map((badge) => (
-                  <span
-                    key={badge}
-                    style={{
-                      backgroundColor: theme.colors.accent,
-                      color: textColor,
-                      padding: "0.25rem 0.75rem",
-                      borderRadius: "9999px",
-                      fontSize: "0.875rem",
-                      fontWeight: "500",
-                    }}
-                  >
+                  <span key={badge} className="sample-badge">
                     {badge}
                   </span>
                 ))}
@@ -331,12 +218,7 @@ export function ThemePreview({
         </div>
 
         {/* Footer */}
-        <div
-          className="flex justify-end gap-3 p-6 border-t"
-          style={{
-            borderTopColor: borderColor,
-          }}
-        >
+        <div className="preview-footer flex justify-end gap-3 p-6 border-t">
           <Button
             variant="outline"
             onClick={onClose}
@@ -346,21 +228,122 @@ export function ThemePreview({
           </Button>
           <Button
             onClick={handleApply}
-            disabled={isApplying || currentTheme?.slug === theme.slug}
-            style={
-              !isApplying && currentTheme?.slug !== theme.slug
-                ? {
-                    backgroundColor: primaryColor,
-                    color: "#ffffff",
-                    borderColor: primaryColor,
-                  }
-                : undefined
-            }
+            disabled={isApplying || isApplied}
+            className={!isApplying && !isApplied ? "theme-preview-apply" : undefined}
           >
             {isApplying ? t.loading : t.applyTheme}
           </Button>
         </div>
       </div>
+      <style jsx>{`
+        .theme-preview {
+          --preview-bg: ${bgColor};
+          --preview-text: ${textColor};
+          --preview-border: ${borderColor};
+          --preview-primary: ${primaryColor};
+          --preview-accent: ${theme.colors.accent};
+          --preview-secondary: ${theme.colors.secondary};
+          --preview-muted: ${mutedTextColor};
+          --preview-subtle: ${subtleTextColor};
+          --preview-soft-bg: ${softBgColor};
+          --preview-input-bg: ${inputBgColor};
+        }
+
+        .preview-surface {
+          background-color: var(--preview-bg);
+          color: var(--preview-text);
+        }
+
+        .preview-header {
+          border-bottom-color: var(--preview-border);
+          background-color: var(--preview-bg);
+        }
+
+        .preview-footer {
+          border-top-color: var(--preview-border);
+        }
+
+        .theme-name,
+        .sample-card-title {
+          color: var(--preview-primary);
+        }
+
+        .theme-description,
+        .palette-value,
+        .sample-card-description {
+          color: var(--preview-subtle);
+        }
+
+        .section-title {
+          color: var(--preview-text);
+        }
+
+        .palette-box {
+          border-color: var(--preview-border);
+        }
+
+        .palette-primary {
+          background-color: var(--preview-primary);
+        }
+
+        .palette-secondary {
+          background-color: var(--preview-secondary);
+        }
+
+        .palette-accent {
+          background-color: var(--preview-accent);
+        }
+
+        .palette-background {
+          background-color: var(--preview-bg);
+          border-width: 2px;
+        }
+
+        .palette-text {
+          background-color: var(--preview-text);
+          color: var(--preview-bg);
+        }
+
+        .palette-border {
+          border-color: var(--preview-border);
+        }
+
+        .sample-button {
+          background-color: var(--preview-primary);
+          color: #ffffff;
+          padding: 0.5rem 1rem;
+          border-radius: 0.5rem;
+        }
+
+        .sample-card {
+          border-color: var(--preview-border);
+          background-color: var(--preview-soft-bg);
+        }
+
+        .sample-input {
+          width: 100%;
+          border: 1px solid var(--preview-border);
+          border-radius: 0.375rem;
+          padding: 0.5rem;
+          background-color: var(--preview-input-bg);
+          color: var(--preview-text);
+        }
+
+        .sample-badge {
+          background-color: var(--preview-accent);
+          color: var(--preview-text);
+          padding: 0.25rem 0.75rem;
+          border-radius: 9999px;
+          font-size: 0.875rem;
+          font-weight: 500;
+        }
+
+        :global(.theme-preview-apply) {
+          background-color: var(--preview-primary) !important;
+          border-color: var(--preview-primary) !important;
+          color: #ffffff !important;
+        }
+      `}</style>
     </div>
   );
 }

@@ -133,8 +133,16 @@ export function ColorCustomizer({
   onSecondaryChange,
   onAccentChange,
 }: ColorCustomizerProps) {
+  const presetColorRules = COLOR_PRESETS.map(
+    (preset, index) => `
+      .preset-${index}-primary { background-color: ${preset.primary}; }
+      .preset-${index}-secondary { background-color: ${preset.secondary}; }
+      .preset-${index}-accent { background-color: ${preset.accent}; }
+    `
+  ).join('\n');
+
   return (
-    <div className="space-y-6">
+    <div className="color-customizer space-y-6">
       {/* Color Inputs */}
       <div className="space-y-4">
         <ColorInput
@@ -159,18 +167,15 @@ export function ColorCustomizer({
         <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Preview</p>
         <div className="grid grid-cols-3 gap-2">
           <div
-            className="h-16 rounded border border-gray-200 dark:border-gray-700"
-            style={{ backgroundColor: primaryColor }}
+            className="preview-color preview-primary h-16 rounded border border-gray-200 dark:border-gray-700"
             title="Primary"
           />
           <div
-            className="h-16 rounded border border-gray-200 dark:border-gray-700"
-            style={{ backgroundColor: secondaryColor }}
+            className="preview-color preview-secondary h-16 rounded border border-gray-200 dark:border-gray-700"
             title="Secondary"
           />
           <div
-            className="h-16 rounded border border-gray-200 dark:border-gray-700"
-            style={{ backgroundColor: accentColor }}
+            className="preview-color preview-accent h-16 rounded border border-gray-200 dark:border-gray-700"
             title="Accent"
           />
         </div>
@@ -180,7 +185,7 @@ export function ColorCustomizer({
       <div className="space-y-2">
         <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Presets</p>
         <div className="space-y-2">
-          {COLOR_PRESETS.map((preset) => (
+          {COLOR_PRESETS.map((preset, index) => (
             <button
               key={preset.name}
               onClick={() => {
@@ -191,18 +196,9 @@ export function ColorCustomizer({
               className="w-full flex items-center gap-3 p-3 rounded border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-left"
             >
               <div className="flex gap-1">
-                <div
-                  className="w-6 h-6 rounded border border-gray-200"
-                  style={{ backgroundColor: preset.primary }}
-                />
-                <div
-                  className="w-6 h-6 rounded border border-gray-200"
-                  style={{ backgroundColor: preset.secondary }}
-                />
-                <div
-                  className="w-6 h-6 rounded border border-gray-200"
-                  style={{ backgroundColor: preset.accent }}
-                />
+                <div className={`w-6 h-6 rounded border border-gray-200 preset-${index}-primary`} />
+                <div className={`w-6 h-6 rounded border border-gray-200 preset-${index}-secondary`} />
+                <div className={`w-6 h-6 rounded border border-gray-200 preset-${index}-accent`} />
               </div>
               <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
                 {preset.name}
@@ -211,6 +207,21 @@ export function ColorCustomizer({
           ))}
         </div>
       </div>
+      <style jsx>{`
+        .preview-primary {
+          background-color: ${primaryColor};
+        }
+
+        .preview-secondary {
+          background-color: ${secondaryColor};
+        }
+
+        .preview-accent {
+          background-color: ${accentColor};
+        }
+
+        ${presetColorRules}
+      `}</style>
     </div>
   );
 }

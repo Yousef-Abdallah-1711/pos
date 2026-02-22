@@ -1,6 +1,8 @@
 'use client'
 
 import { AlertCircle, Clock, Lock, Phone, Mail } from 'lucide-react'
+import { createTranslator } from '@/lib/translations'
+import type { Locale } from '@/lib/translations'
 
 interface MaintenancePageProps {
   restaurantName?: string
@@ -8,6 +10,7 @@ interface MaintenancePageProps {
   contactEmail?: string
   contactPhone?: string
   estimatedReturnTime?: string
+  locale?: Locale
 }
 
 export function MaintenancePage({
@@ -16,43 +19,42 @@ export function MaintenancePage({
   contactEmail,
   contactPhone,
   estimatedReturnTime,
+  locale = 'en',
 }: MaintenancePageProps) {
+  const t = createTranslator(locale)
+
   const getContent = () => {
     switch (reason) {
       case 'trial_expired':
         return {
           icon: <Clock className="h-16 w-16 text-orange-500" />,
-          title: "We'll Be Back Soon!",
-          subtitle: 'Trial Period Ended',
-          description:
-            'Our online ordering system is temporarily unavailable as we update our service. The restaurant is currently working to restore access. Please check back soon or contact us directly for orders.',
+          title: t('maintenance.trialExpired.title'),
+          subtitle: t('maintenance.trialExpired.subtitle'),
+          description: t('maintenance.trialExpired.description'),
           color: 'orange',
         }
       case 'tenant_disabled':
         return {
           icon: <Lock className="h-16 w-16 text-red-500" />,
-          title: 'Service Temporarily Unavailable',
-          subtitle: 'Account Disabled',
-          description:
-            'We apologize for the inconvenience. Our online ordering system is temporarily unavailable. Please contact the restaurant directly to place your order.',
+          title: t('maintenance.tenantDisabled.title'),
+          subtitle: t('maintenance.tenantDisabled.subtitle'),
+          description: t('maintenance.tenantDisabled.description'),
           color: 'red',
         }
       case 'error':
         return {
           icon: <AlertCircle className="h-16 w-16 text-red-500" />,
-          title: 'Something Went Wrong',
-          subtitle: 'Technical Issue',
-          description:
-            'Our online ordering system is experiencing technical difficulties. Please try again later or contact us directly for assistance.',
+          title: t('maintenance.error.title'),
+          subtitle: t('maintenance.error.subtitle'),
+          description: t('maintenance.error.description'),
           color: 'red',
         }
       default:
         return {
           icon: <Clock className="h-16 w-16 text-blue-500" />,
-          title: 'We Are Currently Offline',
-          subtitle: 'Scheduled Maintenance',
-          description:
-            'We are performing scheduled maintenance to improve your experience. We will be back online shortly. Thank you for your patience!',
+          title: t('maintenance.default.title'),
+          subtitle: t('maintenance.default.subtitle'),
+          description: t('maintenance.default.description'),
           color: 'blue',
         }
     }
@@ -86,7 +88,7 @@ export function MaintenancePage({
         {/* Estimated Return Time */}
         {estimatedReturnTime && (
           <div className="bg-white dark:bg-gray-800 rounded-lg p-4 mb-8 text-center border border-gray-200 dark:border-gray-700">
-            <p className="text-sm text-gray-600 dark:text-gray-300 mb-1">Estimated return time:</p>
+            <p className="text-sm text-gray-600 dark:text-gray-300 mb-1">{t('maintenance.estimatedReturnTime')}</p>
             <p className="text-lg font-semibold text-gray-900 dark:text-white">{estimatedReturnTime}</p>
           </div>
         )}
@@ -94,7 +96,7 @@ export function MaintenancePage({
         {/* Contact Information */}
         {(contactPhone || contactEmail) && (
           <div className="bg-white dark:bg-gray-800 rounded-lg p-6 mb-8">
-            <h3 className="font-semibold text-gray-900 dark:text-white mb-4 text-center">Contact Us</h3>
+            <h3 className="font-semibold text-gray-900 dark:text-white mb-4 text-center">{t('maintenance.contactUs')}</h3>
 
             <div className="space-y-3">
               {/* Phone */}
@@ -125,7 +127,7 @@ export function MaintenancePage({
         {/* Restaurant Name */}
         {restaurantName && (
           <p className="text-center text-gray-500 dark:text-gray-400 text-sm">
-            Thank you for choosing <span className="font-semibold text-gray-900 dark:text-white">{restaurantName}</span>
+            {t('maintenance.thankYou')} <span className="font-semibold text-gray-900 dark:text-white">{restaurantName}</span>
           </p>
         )}
       </div>

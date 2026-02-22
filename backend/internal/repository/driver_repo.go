@@ -79,11 +79,13 @@ func (r *driverRepository) GetByID(ctx context.Context, id int) (*domain.Driver,
 	driver := &domain.Driver{}
 	query := `
 		SELECT id, tenant_id, restaurant_id, first_name, last_name, email, phone_number,
-		       license_number, vehicle_type, vehicle_number, status, availability_status,
+		       license_number, COALESCE(vehicle_type, ''), COALESCE(vehicle_number, ''),
+		       status, availability_status,
 		       current_latitude, current_longitude, total_deliveries, completed_deliveries,
 		       cancelled_deliveries, average_rating, active_orders_count, date_of_birth,
-		       address, city, state, zip_code, is_verified, verification_date, joined_date,
-		       last_active, notes, created_at, updated_at
+		       COALESCE(address, ''), COALESCE(city, ''), COALESCE(state, ''),
+		       COALESCE(zip_code, ''), is_verified, verification_date, joined_date,
+		       last_active, COALESCE(notes, ''), created_at, updated_at
 		FROM drivers WHERE id = $1
 	`
 
@@ -113,11 +115,13 @@ func (r *driverRepository) GetByEmail(ctx context.Context, email string) (*domai
 	driver := &domain.Driver{}
 	query := `
 		SELECT id, tenant_id, restaurant_id, first_name, last_name, email, phone_number,
-		       license_number, vehicle_type, vehicle_number, status, availability_status,
+		       license_number, COALESCE(vehicle_type, ''), COALESCE(vehicle_number, ''),
+		       status, availability_status,
 		       current_latitude, current_longitude, total_deliveries, completed_deliveries,
 		       cancelled_deliveries, average_rating, active_orders_count, date_of_birth,
-		       address, city, state, zip_code, is_verified, verification_date, joined_date,
-		       last_active, notes, created_at, updated_at
+		       COALESCE(address, ''), COALESCE(city, ''), COALESCE(state, ''),
+		       COALESCE(zip_code, ''), is_verified, verification_date, joined_date,
+		       last_active, COALESCE(notes, ''), created_at, updated_at
 		FROM drivers WHERE email = $1 LIMIT 1
 	`
 
@@ -142,11 +146,13 @@ func (r *driverRepository) GetByEmail(ctx context.Context, email string) (*domai
 func (r *driverRepository) GetByTenantAndRestaurant(ctx context.Context, tenantID, restaurantID int) ([]domain.Driver, error) {
 	query := `
 		SELECT id, tenant_id, restaurant_id, first_name, last_name, email, phone_number,
-		       license_number, vehicle_type, vehicle_number, status, availability_status,
+		       license_number, COALESCE(vehicle_type, ''), COALESCE(vehicle_number, ''),
+		       status, availability_status,
 		       current_latitude, current_longitude, total_deliveries, completed_deliveries,
 		       cancelled_deliveries, average_rating, active_orders_count, date_of_birth,
-		       address, city, state, zip_code, is_verified, verification_date, joined_date,
-		       last_active, notes, created_at, updated_at
+		       COALESCE(address, ''), COALESCE(city, ''), COALESCE(state, ''),
+		       COALESCE(zip_code, ''), is_verified, verification_date, joined_date,
+		       last_active, COALESCE(notes, ''), created_at, updated_at
 		FROM drivers
 		WHERE tenant_id = $1 AND restaurant_id = $2
 		ORDER BY created_at DESC
@@ -256,11 +262,13 @@ func (r *driverRepository) UpdateAvailability(ctx context.Context, id int, statu
 func (r *driverRepository) GetAvailableDrivers(ctx context.Context, tenantID, restaurantID int) ([]domain.Driver, error) {
 	query := `
 		SELECT id, tenant_id, restaurant_id, first_name, last_name, email, phone_number,
-		       license_number, vehicle_type, vehicle_number, status, availability_status,
+		       license_number, COALESCE(vehicle_type, ''), COALESCE(vehicle_number, ''),
+		       status, availability_status,
 		       current_latitude, current_longitude, total_deliveries, completed_deliveries,
 		       cancelled_deliveries, average_rating, active_orders_count, date_of_birth,
-		       address, city, state, zip_code, is_verified, verification_date, joined_date,
-		       last_active, notes, created_at, updated_at
+		       COALESCE(address, ''), COALESCE(city, ''), COALESCE(state, ''),
+		       COALESCE(zip_code, ''), is_verified, verification_date, joined_date,
+		       last_active, COALESCE(notes, ''), created_at, updated_at
 		FROM drivers
 		WHERE tenant_id = $1 AND restaurant_id = $2 AND status = 'active' AND availability_status = 'available'
 		ORDER BY active_orders_count ASC, average_rating DESC

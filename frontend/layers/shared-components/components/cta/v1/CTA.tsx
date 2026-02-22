@@ -33,15 +33,10 @@ export const CTA: React.FC<CTAProps> = ({
     : (mockData.button_text_ar && isArabic ? mockData.button_text_ar : (mockData.button_text_en || (isArabic ? 'اطلب الآن' : 'Order Now')))
   const buttonUrl = config.button_url || mockData.button_url || '#'
   const backgroundColor = config.background_color || '#3b82f6'
+  const direction = isArabic ? 'rtl' : 'ltr'
 
   return (
-    <section
-      className="w-full py-20 px-4 text-white"
-      style={{
-        backgroundColor,
-        direction: isArabic ? 'rtl' : 'ltr',
-      }}
-    >
+    <section className="cta-section w-full py-20 px-4 text-white">
       <div className="max-w-4xl mx-auto text-center">
         {displayTitle && <h2 className="text-4xl font-bold mb-4">{displayTitle}</h2>}
 
@@ -56,6 +51,13 @@ export const CTA: React.FC<CTAProps> = ({
           </a>
         )}
       </div>
+
+      <style>{`
+        .cta-section {
+          background-color: ${backgroundColor};
+          direction: ${direction};
+        }
+      `}</style>
     </section>
   )
 }
@@ -63,8 +65,8 @@ export const CTA: React.FC<CTAProps> = ({
 export default CTA
 
 // Component Definition for Registry
-import { ComponentDefinition } from '../../registry/types'
-import { manifest } from './manifest.json'
+import { ComponentDefinition } from '../../../registry/types'
+import manifest from '../manifest.json'
 
 export const definition: ComponentDefinition = {
   id: 'cta',

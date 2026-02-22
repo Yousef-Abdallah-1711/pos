@@ -46,19 +46,25 @@ type SubscriptionHistory struct {
 
 // TenantSubscriptionInfo holds comprehensive subscription information for a tenant
 type TenantSubscriptionInfo struct {
-	TenantID           int64      `json:"tenant_id"`
-	TenantName         string     `json:"tenant_name"`
-	Slug               string     `json:"slug"`
-	SubscriptionStatus string     `json:"subscription_status"`
-	TrialStartDate     *time.Time `json:"trial_start_date,omitempty"`
-	TrialEndDate       *time.Time `json:"trial_end_date,omitempty"`
-	TrialDays          int        `json:"trial_days"`
-	DaysRemaining      int        `json:"days_remaining"`
-	IsDisabled         bool       `json:"is_disabled"`
-	DisabledAt         *time.Time `json:"disabled_at,omitempty"`
-	DisabledReason     *string    `json:"disabled_reason,omitempty"`
-	CanAccess          bool       `json:"can_access"`
-	BlockReason        *string    `json:"block_reason,omitempty"`
+	TenantID              int64                    `json:"tenant_id"`
+	TenantName            string                   `json:"tenant_name"`
+	Slug                  string                   `json:"slug"`
+	SubscriptionStatus    string                   `json:"subscription_status"`
+	SubscriptionPlan      string                   `json:"subscription_plan,omitempty"`
+	TrialStartDate        *time.Time               `json:"trial_start_date,omitempty"`
+	TrialEndDate          *time.Time               `json:"trial_end_date,omitempty"`
+	SubscriptionExpiresAt *time.Time               `json:"subscription_expires_at"`
+	LastPaymentAt         *time.Time               `json:"last_payment_at"`
+	TrialDays             int                      `json:"trial_days"`
+	DaysRemaining         int                      `json:"days_remaining"`
+	IsDisabled            bool                     `json:"is_disabled"`
+	DisabledAt            *time.Time               `json:"disabled_at,omitempty"`
+	DisabledReason        *string                  `json:"disabled_reason,omitempty"`
+	CanAccess             bool                     `json:"can_access"`
+	BlockReason           *string                  `json:"block_reason,omitempty"`
+	Plan                  *SubscriptionPlanSummary `json:"plan,omitempty"`
+	ContactEmail          string                   `json:"contact_email,omitempty"`
+	ContactPhone          string                   `json:"contact_phone,omitempty"`
 }
 
 // CreateHistoryRecordParams holds parameters for creating a subscription history record
@@ -127,7 +133,10 @@ func ValidateSubscriptionAction(action string) bool {
 	switch action {
 	case ActionTrialStarted, ActionTrialExtended, ActionTrialExpired,
 		ActionTenantDisabled, ActionTenantEnabled, ActionDeletionScheduled,
-		ActionDeletionCancelled, ActionTenantDeleted, ActionStatusChanged:
+		ActionDeletionCancelled, ActionTenantDeleted, ActionStatusChanged,
+		ActionPaymentInitiated, ActionPaymentSuccess, ActionPaymentFailed,
+		ActionSubscriptionActivated, ActionSubscriptionExpired,
+		ActionPaymentRefunded, ActionSubscriptionCancelled:
 		return true
 	}
 	return false

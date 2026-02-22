@@ -323,6 +323,13 @@ func UnauthorizedResponseWithCode(w http.ResponseWriter, message string, code Er
 	json.NewEncoder(w).Encode(response)
 }
 
+// writeJSON is a general-purpose helper for writing JSON responses with any status code
+func writeJSON(w http.ResponseWriter, statusCode int, data interface{}) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(statusCode)
+	json.NewEncoder(w).Encode(data)
+}
+
 // ForbiddenResponseWithCode writes a 403 Forbidden response with error code
 func ForbiddenResponseWithCode(w http.ResponseWriter, message string, code ErrorCode) {
 	w.Header().Set("Content-Type", "application/json")

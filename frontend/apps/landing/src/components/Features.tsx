@@ -7,83 +7,96 @@ import {
   Globe,
   BarChart3,
   Store,
-  Smartphone
+  Smartphone,
 } from 'lucide-react'
 
-const iconMap = {
-  pos: CreditCard,
-  kitchen: ChefHat,
-  online: Globe,
-  analytics: BarChart3,
-  multi: Store,
-  mobile: Smartphone,
-}
+const features = [
+  {
+    key: 'pos' as const,
+    icon: CreditCard,
+    gradient: 'from-blue-500 to-blue-600',
+    bgLight: 'bg-blue-50 dark:bg-blue-900/20',
+    border: 'group-hover:border-blue-200 dark:group-hover:border-blue-800',
+  },
+  {
+    key: 'kitchen' as const,
+    icon: ChefHat,
+    gradient: 'from-orange-500 to-red-500',
+    bgLight: 'bg-orange-50 dark:bg-orange-900/20',
+    border: 'group-hover:border-orange-200 dark:group-hover:border-orange-800',
+  },
+  {
+    key: 'online' as const,
+    icon: Globe,
+    gradient: 'from-green-500 to-emerald-600',
+    bgLight: 'bg-green-50 dark:bg-green-900/20',
+    border: 'group-hover:border-green-200 dark:group-hover:border-green-800',
+  },
+  {
+    key: 'analytics' as const,
+    icon: BarChart3,
+    gradient: 'from-purple-500 to-violet-600',
+    bgLight: 'bg-purple-50 dark:bg-purple-900/20',
+    border: 'group-hover:border-purple-200 dark:group-hover:border-purple-800',
+  },
+  {
+    key: 'multi' as const,
+    icon: Store,
+    gradient: 'from-pink-500 to-rose-600',
+    bgLight: 'bg-pink-50 dark:bg-pink-900/20',
+    border: 'group-hover:border-pink-200 dark:group-hover:border-pink-800',
+  },
+  {
+    key: 'mobile' as const,
+    icon: Smartphone,
+    gradient: 'from-indigo-500 to-blue-600',
+    bgLight: 'bg-indigo-50 dark:bg-indigo-900/20',
+    border: 'group-hover:border-indigo-200 dark:group-hover:border-indigo-800',
+  },
+]
 
 export function Features() {
-  const { t } = useLanguage()
-
-  const features = [
-    {
-      key: 'pos',
-      icon: iconMap.pos,
-      color: 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400',
-    },
-    {
-      key: 'kitchen',
-      icon: iconMap.kitchen,
-      color: 'bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400',
-    },
-    {
-      key: 'online',
-      icon: iconMap.online,
-      color: 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400',
-    },
-    {
-      key: 'analytics',
-      icon: iconMap.analytics,
-      color: 'bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400',
-    },
-    {
-      key: 'multi',
-      icon: iconMap.multi,
-      color: 'bg-pink-100 dark:bg-pink-900/30 text-pink-600 dark:text-pink-400',
-    },
-    {
-      key: 'mobile',
-      icon: iconMap.mobile,
-      color: 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400',
-    },
-  ]
+  const { t, dir } = useLanguage()
 
   return (
-    <section id="features" className="py-20 px-4 sm:px-6 lg:px-8 bg-white dark:bg-gray-900">
+    <section id="features" className="py-24 px-4 sm:px-6 lg:px-8 bg-white dark:bg-gray-900" dir={dir}>
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="text-center mb-16">
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4">
-            {(t as any).features.title}
+          <span className="inline-block text-sm font-semibold text-orange-600 dark:text-orange-400 uppercase tracking-wider mb-3">
+            Features
+          </span>
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-gray-900 dark:text-white mb-4 tracking-tight">
+            {t.features.title}
           </h2>
-          <p className="text-lg sm:text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
-            {(t as any).features.subtitle}
+          <p className="text-lg sm:text-xl text-gray-500 dark:text-gray-400 max-w-3xl mx-auto">
+            {t.features.subtitle}
           </p>
         </div>
 
         {/* Features Grid */}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
-          {features.map(({ key, icon: Icon, color }) => (
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {features.map(({ key, icon: Icon, gradient, bgLight, border }) => (
             <div
               key={key}
-              className="group p-6 rounded-2xl border border-gray-200 dark:border-gray-800 hover:border-primary-300 dark:hover:border-primary-700 transition-all hover:shadow-lg bg-white dark:bg-gray-800"
+              className={`group relative p-6 rounded-2xl border border-gray-200 dark:border-gray-800 hover:shadow-xl transition-all duration-300 bg-white dark:bg-gray-800/50 ${border} cursor-default`}
             >
-              <div className={`w-14 h-14 rounded-xl ${color} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
-                <Icon className="h-7 w-7" />
+              {/* Icon */}
+              <div className={`w-14 h-14 rounded-xl ${bgLight} flex items-center justify-center mb-5 transition-transform duration-300 group-hover:scale-110`}>
+                <div className={`w-9 h-9 rounded-lg bg-gradient-to-br ${gradient} flex items-center justify-center shadow-sm`}>
+                  <Icon className="h-5 w-5 text-white" />
+                </div>
               </div>
-              <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
-                {((t as any).features?.[key as any]?.title)}
+
+              <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
+                {t.features[key].title}
               </h3>
-              <p className="text-gray-600 dark:text-gray-300">
-                {((t as any).features?.[key as any]?.description)}
+              <p className="text-gray-500 dark:text-gray-400 text-sm leading-relaxed">
+                {t.features[key].description}
               </p>
+
+              {/* Subtle gradient overlay on hover */}
+              <div className={`absolute inset-0 rounded-2xl bg-gradient-to-br ${gradient} opacity-0 group-hover:opacity-[0.03] transition-opacity duration-300`} />
             </div>
           ))}
         </div>

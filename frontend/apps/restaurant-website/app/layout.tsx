@@ -47,13 +47,19 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
+  params,
 }: {
   children: React.ReactNode;
+  params: Promise<{ locale?: string }>;
 }) {
+  const resolvedParams = await params;
+  const locale = resolvedParams?.locale === 'ar' ? 'ar' : 'en';
+  const dir = locale === 'ar' ? 'rtl' : 'ltr';
+
   return (
-    <html lang="en">
+    <html lang={locale} dir={dir}>
       <body className={inter.className}>
         <WebVitalsProvider />
         <SubdomainProvider>

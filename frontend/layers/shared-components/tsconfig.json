@@ -47,7 +47,16 @@
     }
   },
   "include": [
-    "**/*.ts",
-    "**/*.tsx"
+    "components/**/*.ts",
+    "components/**/*.tsx",
+    "registry/**/*.ts",
+    "registry/**/*.tsx",
+    "utils/**/*.ts",
+    "utils/**/*.tsx"
+  ],
+  "exclude": [
+    "__tests__",
+    "node_modules",
+    ".turbo"
   ]
 }

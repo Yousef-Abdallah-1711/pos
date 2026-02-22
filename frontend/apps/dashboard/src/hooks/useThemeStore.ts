@@ -217,7 +217,8 @@ export const useThemeStore = create<ThemeStore>((set) => ({
       if (!state.currentTheme) return state
       const newComponent = {
         ...component,
-        order: state.currentTheme.components.length,
+        id: component.id ? String(component.id) : `component-${state.currentTheme.components.length + 1}`,
+        displayOrder: state.currentTheme.components.length,
       }
       return {
         currentTheme: {
@@ -235,7 +236,7 @@ export const useThemeStore = create<ThemeStore>((set) => ({
         currentTheme: {
           ...state.currentTheme,
           components: state.currentTheme.components.map((comp) =>
-            comp.id === id ? { ...comp, ...updates } : comp
+            String(comp.id) === String(id) ? { ...comp, ...updates } : comp
           ),
         },
         isDirty: true,
@@ -248,10 +249,10 @@ export const useThemeStore = create<ThemeStore>((set) => ({
       return {
         currentTheme: {
           ...state.currentTheme,
-          components: state.currentTheme.components.filter((comp) => comp.id !== id),
+          components: state.currentTheme.components.filter((comp) => String(comp.id) !== String(id)),
         },
         isDirty: true,
-        selectedComponentId: state.selectedComponentId === id ? null : state.selectedComponentId,
+        selectedComponentId: state.selectedComponentId === String(id) ? null : state.selectedComponentId,
       }
     }),
 
@@ -263,7 +264,9 @@ export const useThemeStore = create<ThemeStore>((set) => ({
           ...state.currentTheme,
           components: components.map((comp, idx) => ({
             ...comp,
-            order: idx,
+            id: comp.id ? String(comp.id) : `component-${idx + 1}`,
+            displayOrder: idx,
+            ...(typeof (comp as any).order === 'number' ? { order: idx } : {}),
           })),
         },
         isDirty: true,

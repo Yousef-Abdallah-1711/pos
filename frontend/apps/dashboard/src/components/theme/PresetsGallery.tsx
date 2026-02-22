@@ -12,6 +12,10 @@ interface PresetsGalleryProps {
   isLoading?: boolean
 }
 
+function getSafePresetId(id: string): string {
+  return id.replace(/[^a-zA-Z0-9_-]/g, '-')
+}
+
 // Helper function to extract colors from preset data
 function getPresetColors(preset: ThemeData) {
   try {
@@ -83,6 +87,34 @@ export function PresetsGallery({ presets, onSelectPreset, isLoading = false }: P
     return Object.entries(categories).filter(([_, items]) => items.length > 0)
   }, [presets])
 
+  const presetColorRules = useMemo(
+    () =>
+      presets
+        .map((preset) => {
+          const safeId = getSafePresetId(preset.id)
+          const colors = getPresetColors(preset)
+          const palette = [
+            colors.primary,
+            colors.secondary,
+            colors.accent,
+            colors.background,
+            colors.text,
+          ]
+
+          return palette
+            .map(
+              (color, idx) => `
+                .preset-color-${safeId}-${idx} {
+                  background-color: ${color || '#ccc'};
+                }
+              `
+            )
+            .join('\n')
+        })
+        .join('\n'),
+    [presets]
+  )
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-8">
@@ -144,8 +176,7 @@ export function PresetsGallery({ presets, onSelectPreset, isLoading = false }: P
                       ].map((color, idx) => (
                         <div
                           key={idx}
-                          className="flex-1 rounded-md shadow-sm hover:shadow-md transition"
-                          style={{ backgroundColor: color || '#ccc' }}
+                          className={`flex-1 rounded-md shadow-sm hover:shadow-md transition preset-color-${getSafePresetId(preset.id)}-${idx}`}
                           title={color || 'No color'}
                         />
                       ))
@@ -199,6 +230,9 @@ export function PresetsGallery({ presets, onSelectPreset, isLoading = false }: P
           </div>
         </div>
       ))}
+      <style jsx>{`
+        ${presetColorRules}
+      `}</style>
 
       {/* Info Box */}
       <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg">

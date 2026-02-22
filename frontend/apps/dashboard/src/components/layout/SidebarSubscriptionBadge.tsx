@@ -1,9 +1,15 @@
 'use client'
 
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import { Crown, Clock, AlertTriangle } from 'lucide-react'
 import { useTenantStatus } from '@/hooks/useTenantStatus'
+import { getLocaleFromPath } from '@/lib/translations'
 
 export function SidebarSubscriptionBadge() {
+  const pathname = usePathname()
+  const locale = getLocaleFromPath(pathname)
+  const billingHref = `/${locale}/dashboard/settings/billing`
   const { status, daysRemaining, isLoading } = useTenantStatus()
 
   if (isLoading || !status) return null
@@ -42,9 +48,10 @@ export function SidebarSubscriptionBadge() {
         }
       }
       if (days > 0) {
+        const remainingText = `${days} day${days === 1 ? '' : 's'} left`
         return {
           label: 'Pro Trial',
-          sublabel: `${days} day${days === 1 ? '' : 's'} left`,
+          sublabel: days < 3 ? `${remainingText} • Subscribe now` : remainingText,
           icon: <AlertTriangle className="h-4 w-4" />,
           bgColor: 'bg-red-50 dark:bg-red-900/20',
           textColor: 'text-red-700 dark:text-red-400',
@@ -54,19 +61,21 @@ export function SidebarSubscriptionBadge() {
       return {
         label: 'Trial Expired',
         icon: <AlertTriangle className="h-4 w-4" />,
-        bgColor: 'bg-red-50 dark:bg-red-900/20',
-        textColor: 'text-red-700 dark:text-red-400',
-        borderColor: 'border-red-200 dark:border-red-800',
+        sublabel: 'Tap to subscribe',
+        bgColor: 'bg-orange-50 dark:bg-orange-900/20',
+        textColor: 'text-orange-700 dark:text-orange-400',
+        borderColor: 'border-orange-200 dark:border-orange-800',
       }
     }
 
     if (status === 'expired') {
       return {
-        label: 'Expired',
+        label: 'Subscription Expired',
         icon: <AlertTriangle className="h-4 w-4" />,
-        bgColor: 'bg-red-50 dark:bg-red-900/20',
-        textColor: 'text-red-700 dark:text-red-400',
-        borderColor: 'border-red-200 dark:border-red-800',
+        sublabel: 'Tap to subscribe',
+        bgColor: 'bg-orange-50 dark:bg-orange-900/20',
+        textColor: 'text-orange-700 dark:text-orange-400',
+        borderColor: 'border-orange-200 dark:border-orange-800',
       }
     }
 
@@ -82,16 +91,20 @@ export function SidebarSubscriptionBadge() {
   const config = getStatusConfig()
 
   return (
-    <div className={`mx-4 mb-4 p-3 rounded-lg border ${config.bgColor} ${config.borderColor}`}>
-      <div className={`flex items-center gap-2 ${config.textColor}`}>
-        {config.icon}
-        <span className="text-sm font-medium">{config.label}</span>
+    <Link href={billingHref} className="mx-4 mb-4 block">
+      <div
+        className={`p-3 rounded-lg border transition-all hover:shadow-sm hover:brightness-95 ${config.bgColor} ${config.borderColor}`}
+      >
+        <div className={`flex items-center gap-2 ${config.textColor}`}>
+          {config.icon}
+          <span className="text-sm font-medium">{config.label}</span>
+        </div>
+        {config.sublabel && (
+          <p className={`text-xs mt-1 ${config.textColor} opacity-80`}>
+            {config.sublabel}
+          </p>
+        )}
       </div>
-      {config.sublabel && (
-        <p className={`text-xs mt-1 ${config.textColor} opacity-80`}>
-          {config.sublabel}
-        </p>
-      )}
-    </div>
+    </Link>
   )
 }

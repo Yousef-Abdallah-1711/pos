@@ -287,7 +287,15 @@
       "Bash(where:*)",
       "Bash(do curl -s -o /dev/null -w \"Port $port: %{http_code}\\\\n\" http://localhost:$port)",
       "Bash(__NEW_LINE_2087787e3cd07de5__ git add -A)",
-      "Bash(__NEW_LINE_2087787e3cd07de5__ echo \"\")"
+      "Bash(__NEW_LINE_2087787e3cd07de5__ echo \"\")",
+      "Bash(pg_isready:*)",
+      "Bash(net start:*)",
+      "Bash(redirect \")",
+      "Bash([ -f \"c:\\\\Users\\\\OPT\\\\Desktop\\\\POS\\\\frontend\\\\apps\\\\dashboard\\\\src\\\\components\\\\skeletons.tsx\" ])",
+      "Bash(cmd /c \"taskkill /PID 10296 /F\")",
+      "Bash(cmd /c \"taskkill /PID 10296 /F 2>&1\")",
+      "WebFetch(domain:developers.paymob.com)",
+      "WebFetch(domain:github.com)"
     ]
   }
 }

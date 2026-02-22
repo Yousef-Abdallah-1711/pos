@@ -132,8 +132,20 @@ export const CollaborativeEditor: React.FC<CollaborativeEditorProps> = ({
     [resolveComment]
   )
 
+  const containerBackground = theme?.colors?.background || '#ffffff'
+  const saveButtonBackground = theme?.colors?.primary || '#3b82f6'
+  const participantRules = participants
+    .map(
+      (p, index) => `
+        .participant-${index} {
+          background-color: ${p.color};
+        }
+      `
+    )
+    .join('\n')
+
   return (
-    <div className={styles.container} style={{ backgroundColor: theme?.colors?.background }}>
+    <div className={`${styles.container} collaborative-editor-themed`}>
       <div className={styles.header}>
         <h2 className={styles.title}>
           {resourceType === 'component' ? 'Component' : 'Theme'} Editor
@@ -150,9 +162,8 @@ export const CollaborativeEditor: React.FC<CollaborativeEditorProps> = ({
 
           {onSave && (
             <button
-              className={styles.saveButton}
+              className={`${styles.saveButton} themed-save-button`}
               onClick={() => onSave(content)}
-              style={{ backgroundColor: theme?.colors?.primary }}
             >
               Save
             </button>
@@ -217,11 +228,10 @@ export const CollaborativeEditor: React.FC<CollaborativeEditorProps> = ({
         </div>
 
         <div className={styles.participants}>
-          {participants.map((p) => (
+          {participants.map((p, index) => (
             <div
               key={p.userId}
-              className={styles.participantBadge}
-              style={{ backgroundColor: p.color }}
+              className={`${styles.participantBadge} participant-${index}`}
               title={p.username}
             >
               {p.username.charAt(0).toUpperCase()}
@@ -229,6 +239,17 @@ export const CollaborativeEditor: React.FC<CollaborativeEditorProps> = ({
           ))}
         </div>
       </div>
+      <style>{`
+        .collaborative-editor-themed {
+          background-color: ${containerBackground};
+        }
+
+        .themed-save-button {
+          background-color: ${saveButtonBackground};
+        }
+
+        ${participantRules}
+      `}</style>
     </div>
   )
 }

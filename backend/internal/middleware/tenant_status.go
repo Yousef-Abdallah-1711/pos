@@ -2,22 +2,44 @@ package middleware
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"strings"
+	"sync"
+	"time"
 
 	"pos-saas/internal/repository"
+	"pos-saas/internal/service"
 )
 
-// TenantStatusMiddleware checks if a tenant can access the system
-// Based on subscription status (trial not expired, not disabled, etc.)
-// This middleware should be applied AFTER authentication and tenant context middleware
+const tenantStatusCacheTTL = 30 * time.Second
+
+type cachedTenantAccess struct {
+	CanAccess   bool   `json:"can_access"`
+	BlockReason string `json:"block_reason,omitempty"`
+}
+
+var (
+	tenantStatusCacheOnce sync.Once
+	tenantStatusCache     service.KVCache
+)
+
+func getTenantStatusCache() service.KVCache {
+	tenantStatusCacheOnce.Do(func() {
+		tenantStatusCache = service.NewCacheFromEnv()
+	})
+	return tenantStatusCache
+}
+
+// TenantStatusMiddleware checks if a tenant can access the system.
+// Based on subscription status (trial not expired, not disabled, etc.).
+// This middleware should be applied AFTER authentication and tenant context middleware.
 func TenantStatusMiddleware(subscriptionRepo repository.SubscriptionRepository) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			log.Printf("[TenantStatusMiddleware] Checking tenant status - path: %s\n", r.URL.Path)
 
-			// Get tenant from context (set by tenant middleware)
 			tenantID := GetTenantID(r)
 			if tenantID == 0 {
 				log.Printf("[TenantStatusMiddleware] Skip check - no tenant in context\n")
@@ -25,23 +47,53 @@ func TenantStatusMiddleware(subscriptionRepo repository.SubscriptionRepository) 
 				return
 			}
 
-			// Check if this path should skip the status check
 			if shouldSkipStatusCheck(r.URL.Path) {
 				log.Printf("[TenantStatusMiddleware] Skip check - path matched skip list - path: %s\n", r.URL.Path)
 				next.ServeHTTP(w, r)
 				return
 			}
 
+			cache := getTenantStatusCache()
+			cacheKey := fmt.Sprintf("tenant_access:%d", tenantID)
+			if cache != nil {
+				cached, err := cache.Get(r.Context(), cacheKey)
+				if err == nil && strings.TrimSpace(cached) != "" {
+					var access cachedTenantAccess
+					if err := json.Unmarshal([]byte(cached), &access); err == nil {
+						if !access.CanAccess {
+							reason := strings.TrimSpace(access.BlockReason)
+							if reason == "" {
+								reason = "internal_error"
+							}
+							log.Printf("[TenantStatusMiddleware] Tenant BLOCKED (cache) - tenant_id: %d, reason: %s\n", tenantID, reason)
+							respondTenantBlocked(w, reason, getBlockMessage(reason))
+							return
+						}
+
+						log.Printf("[TenantStatusMiddleware] Tenant has access (cache) - tenant_id: %d\n", tenantID)
+						next.ServeHTTP(w, r)
+						return
+					}
+				}
+			}
+
 			log.Printf("[TenantStatusMiddleware] Performing access check - tenant_id: %d\n", tenantID)
 
-			// Check if tenant can access the system
 			canAccess, blockReason, err := subscriptionRepo.CheckTenantAccess(r.Context(), tenantID)
-
 			if err != nil {
 				log.Printf("[TenantStatusMiddleware] ERROR: Failed to check access - error: %v\n", err)
-				// On error, deny access for safety
 				respondTenantBlocked(w, "internal_error", "Unable to verify access")
 				return
+			}
+
+			if cache != nil {
+				payload, marshalErr := json.Marshal(cachedTenantAccess{
+					CanAccess:   canAccess,
+					BlockReason: blockReason,
+				})
+				if marshalErr == nil {
+					_ = cache.Set(r.Context(), cacheKey, string(payload), tenantStatusCacheTTL)
+				}
 			}
 
 			if !canAccess {
@@ -56,33 +108,29 @@ func TenantStatusMiddleware(subscriptionRepo repository.SubscriptionRepository) 
 	}
 }
 
-// shouldSkipStatusCheck returns true if the request path should skip tenant status checks
+// shouldSkipStatusCheck returns true if the request path should skip tenant status checks.
 func shouldSkipStatusCheck(path string) bool {
-	// Normalize path
 	path = strings.TrimSpace(path)
 
-	// Skip paths - paths that should NOT be blocked even if tenant access is denied
 	skipPaths := []string{
-		"/api/v1/tenant/status",       // Allow checking own status
-		"/api/v1/auth/logout",         // Allow logout when blocked
-		"/api/v1/auth/refresh",        // Allow token refresh when blocked
-		"/api/v1/auth/validate-token", // Allow token validation
+		"/api/v1/tenant/status",
+		"/api/v1/auth/logout",
+		"/api/v1/auth/refresh",
+		"/api/v1/auth/validate-token",
 	}
 
-	// Check exact matches
 	for _, skipPath := range skipPaths {
 		if path == skipPath || strings.HasPrefix(path, skipPath) {
 			return true
 		}
 	}
 
-	// Skip prefixes - entire path groups to skip
 	skipPrefixes := []string{
-		"/api/v1/public/",      // Public routes don't need tenant context
-		"/api/v1/super-admin/", // Super admin routes handle their own auth
-		"/api/v1/auth/",        // Auth routes handle access independently
-		"/health",              // Health checks
-		"/metrics",             // Metrics endpoints
+		"/api/v1/public/",
+		"/api/v1/super-admin/",
+		"/api/v1/auth/",
+		"/health",
+		"/metrics",
 	}
 
 	for _, prefix := range skipPrefixes {
@@ -94,7 +142,7 @@ func shouldSkipStatusCheck(path string) bool {
 	return false
 }
 
-// getBlockMessage returns a user-friendly message for the block reason
+// getBlockMessage returns a user-friendly message for the block reason.
 func getBlockMessage(reason string) string {
 	switch reason {
 	case "trial_expired":
@@ -108,7 +156,7 @@ func getBlockMessage(reason string) string {
 	}
 }
 
-// respondTenantBlocked writes a 403 Forbidden response when tenant access is blocked
+// respondTenantBlocked writes a 403 response when tenant access is blocked.
 func respondTenantBlocked(w http.ResponseWriter, reason string, message string) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusForbidden)
@@ -126,5 +174,5 @@ func respondTenantBlocked(w http.ResponseWriter, reason string, message string) 
 		},
 	}
 
-	json.NewEncoder(w).Encode(response)
+	_ = json.NewEncoder(w).Encode(response)
 }

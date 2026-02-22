@@ -1,3 +1,6 @@
+//go:build legacy
+// +build legacy
+
 /**
  * Version History Models
  * Defines structures for version control and rollback functionality
