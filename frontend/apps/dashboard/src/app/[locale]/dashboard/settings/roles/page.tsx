@@ -8,6 +8,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Loader2, Plus, Edit2, Trash2, Lock } from 'lucide-react'
 import { debugError } from '@/lib/debug'
+import { getConfig } from '@/lib/config'
 
 interface Role {
   id: number
@@ -46,9 +47,10 @@ export default function RolesPage() {
   const fetchRoles = async () => {
     if (!token || !user) return
     setIsLoading(true)
+    const { apiUrl } = getConfig()
     try {
       const response = await fetch(
-        `http://localhost:8080/api/v1/rbac/roles`,
+        `${apiUrl}/rbac/roles`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -73,8 +75,9 @@ export default function RolesPage() {
     if (!token || !user) return
     setIsDeleting(true)
     try {
+      const { apiUrl } = getConfig()
       const response = await fetch(
-        `http://localhost:8080/api/v1/rbac/roles/${roleId}`,
+        `${apiUrl}/rbac/roles/${roleId}`,
         {
           method: 'DELETE',
           headers: { Authorization: `Bearer ${token}` },

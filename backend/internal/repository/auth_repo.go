@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"os"
 	"strings"
 	"time"
 
@@ -46,13 +47,18 @@ func (r *AuthRepository) CreateTenantWithUser(req *domain.RegisterRequest) (*dom
 	baseSlug := slug
 
 	// 1. Create Tenant
+	restaurantDomain := os.Getenv("RESTAURANT_DOMAIN")
+	if restaurantDomain == "" {
+		restaurantDomain = "localhost:3003"
+	}
+
 	var tenantID int
 	for attempt := 0; attempt < 20; attempt++ {
 		err = tx.QueryRow(`
 			INSERT INTO tenants (name, slug, domain, email, phone, subscription_plan, max_restaurants, max_users, is_active)
 			VALUES ($1, $2, $3, $4, $5, 'free', 1, 5, true)
 			RETURNING id
-		`, req.RestaurantName, slug, slug+".pos.com", req.Email, req.Phone).Scan(&tenantID)
+		`, req.RestaurantName, slug, slug+"."+restaurantDomain, req.Email, req.Phone).Scan(&tenantID)
 		if err == nil {
 			break
 		}
@@ -119,7 +125,7 @@ func (r *AuthRepository) CreateTenantWithUser(req *domain.RegisterRequest) (*dom
 			"siteTitle": "` + req.RestaurantName + `",
 			"logoUrl": "",
 			"faviconUrl": "",
-			"domain": "` + slug + `.localhost:3000"
+			"domain": "` + slug + `.` + restaurantDomain + `"
 		},
 		"colors": {
 			"primary": "#3b82f6",

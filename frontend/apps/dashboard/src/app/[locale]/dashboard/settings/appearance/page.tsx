@@ -7,6 +7,7 @@ import { Save, Loader2, Check } from 'lucide-react'
 import { createTranslator, getLocaleFromPath } from '@/lib/translations'
 import { usePathname } from 'next/navigation'
 import * as themeApi from '@/lib/api/themeApi'
+import { getConfig } from '@/lib/config'
 
 export default function AppearanceSettingsPage() {
   const pathname = usePathname()
@@ -103,7 +104,7 @@ export default function AppearanceSettingsPage() {
 
     setSaveStatus('saving')
     try {
-      const response = await fetch(`http://localhost:8080/api/v1/users/${user.id}/settings/theme`, {
+      const response = await fetch(`${getConfig().apiUrl}/users/${user.id}/settings/theme`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -136,7 +137,7 @@ export default function AppearanceSettingsPage() {
 
     setSaveStatus('saving')
     try {
-      const response = await fetch(`http://localhost:8080/api/v1/users/${user.id}/settings/theme-colors`, {
+      const response = await fetch(`${getConfig().apiUrl}/users/${user.id}/settings/theme-colors`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

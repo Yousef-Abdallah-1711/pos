@@ -6,6 +6,7 @@ import { useHasPermission } from '@/hooks/useRbac'
 import { MODULE_IDS, PERMISSION_LEVELS } from '@/lib/rbac'
 import { Loader2, Lock, Search, Plus, Edit2, Trash2, X, Eye, EyeOff } from 'lucide-react'
 import { debugError } from '@/lib/debug'
+import { getConfig } from '@/lib/config'
 
 interface Role {
   id: number
@@ -74,9 +75,10 @@ export default function UsersPage() {
     if (!token) return
     setIsLoading(true)
     setError('')
+    const { apiUrl } = getConfig()
     try {
       // Fetch users
-      const usersRes = await fetch('http://localhost:8080/api/v1/users', {
+      const usersRes = await fetch(`${apiUrl}/users`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       if (usersRes.ok) {
@@ -88,7 +90,7 @@ export default function UsersPage() {
       }
 
       // Fetch roles
-      const rolesRes = await fetch('http://localhost:8080/api/v1/rbac/roles', {
+      const rolesRes = await fetch(`${apiUrl}/rbac/roles`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       if (rolesRes.ok) {
@@ -131,7 +133,8 @@ export default function UsersPage() {
     setSelectedUser(u)
     setSelectedRoles([])
     try {
-      const res = await fetch(`http://localhost:8080/api/v1/rbac/users/${u.id}/roles`, {
+      const { apiUrl } = getConfig()
+      const res = await fetch(`${apiUrl}/rbac/users/${u.id}/roles`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       if (res.ok) {
@@ -161,7 +164,8 @@ export default function UsersPage() {
     setIsSubmitting(true)
     setError('')
     try {
-      const res = await fetch('http://localhost:8080/api/v1/users', {
+      const { apiUrl } = getConfig()
+      const res = await fetch(`${apiUrl}/users`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -204,7 +208,8 @@ export default function UsersPage() {
     setIsSubmitting(true)
     setError('')
     try {
-      const res = await fetch(`http://localhost:8080/api/v1/users/${selectedUser.id}`, {
+      const { apiUrl } = getConfig()
+      const res = await fetch(`${apiUrl}/users/${selectedUser.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -239,7 +244,8 @@ export default function UsersPage() {
     setIsSubmitting(true)
     setError('')
     try {
-      const res = await fetch(`http://localhost:8080/api/v1/users/${selectedUser.id}`, {
+      const { apiUrl } = getConfig()
+      const res = await fetch(`${apiUrl}/users/${selectedUser.id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
       })
@@ -274,7 +280,8 @@ export default function UsersPage() {
     setError('')
     try {
       // Fetch current roles
-      const currentRes = await fetch(`http://localhost:8080/api/v1/rbac/users/${selectedUser.id}/roles`, {
+      const { apiUrl } = getConfig()
+      const currentRes = await fetch(`${apiUrl}/rbac/users/${selectedUser.id}/roles`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       const currentRoles = currentRes.ok ? (await currentRes.json())?.data || [] : []
@@ -284,7 +291,7 @@ export default function UsersPage() {
       for (const roleId of currentRoleIds) {
         if (!selectedRoles.includes(roleId)) {
           await fetch(
-            `http://localhost:8080/api/v1/rbac/users/${selectedUser.id}/roles/${roleId}`,
+            `${apiUrl}/rbac/users/${selectedUser.id}/roles/${roleId}`,
             { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } }
           )
         }
@@ -293,7 +300,7 @@ export default function UsersPage() {
       // Add new roles
       for (const roleId of selectedRoles) {
         if (!currentRoleIds.includes(roleId)) {
-          await fetch(`http://localhost:8080/api/v1/rbac/users/${selectedUser.id}/roles`, {
+          await fetch(`${apiUrl}/rbac/users/${selectedUser.id}/roles`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',

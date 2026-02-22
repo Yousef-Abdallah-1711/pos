@@ -1,0 +1,31 @@
+{
+    "timestamp":  "2026-02-21T23:59:30",
+    "config":  {
+                   "use_docker":  false,
+                   "start_backend":  true,
+                   "tenant_id":  1,
+                   "restaurant_id":  1,
+                   "mock_base_url":  "http://localhost:8080",
+                   "live_base_url":  "http://localhost:8081"
+               },
+    "checks":  {
+                   "9.2.plans":  200,
+                   "9.2.initiate_auth":  200,
+                   "9.2.payments_auth_before":  200,
+                   "9.2.current_auth":  200,
+                   "9.3.missing_auth":  401,
+                   "9.2.webhook_success_first":  200,
+                   "9.3.duplicate_webhook_second":  200,
+                   "9.2.payments_auth_after":  200,
+                   "9.3.initiate_for_amount_test":  200,
+                   "9.3.amount_mismatch":  400,
+                   "9.3.sql_injection_input":  400,
+                   "9.3.hmac_tampered_live":  401
+               },
+    "details":  {
+
+                },
+    "notes":  [
+                  "docker setup skipped; ensure PostgreSQL + seeded data are ready manually"
+              ]
+}

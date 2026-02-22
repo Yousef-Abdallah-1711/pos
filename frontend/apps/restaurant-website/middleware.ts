@@ -20,11 +20,19 @@ export async function middleware(request: NextRequest) {
 
   // Extract restaurant slug from subdomain
   const restaurantSlug = host.split('.')[0];
+  const supportedLocales = ['en', 'ar'];
+
+  // Redirect root path `/` to `/en` (default locale)
+  const pathParts = pathname.split('/');
+  const firstSegment = pathParts[1] || '';
+  if (pathname === '/' || (!supportedLocales.includes(firstSegment.toLowerCase()) && !firstSegment.startsWith('_next') && firstSegment !== 'favicon.ico' && firstSegment !== 'public' && firstSegment !== 'api')) {
+    const url = request.nextUrl.clone();
+    url.pathname = `/en${pathname === '/' ? '' : pathname}`;
+    return NextResponse.redirect(url);
+  }
 
   // Extract locale from pathname
-  const pathParts = pathname.split('/');
-  const rawLocale = pathParts[1] || 'en';
-  const supportedLocales = ['en', 'ar'];
+  const rawLocale = firstSegment || 'en';
   const validLocale = supportedLocales.includes(rawLocale.toLowerCase()) ? rawLocale.toLowerCase() : 'en';
 
   // Set headers

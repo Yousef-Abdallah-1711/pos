@@ -13,6 +13,7 @@ import { LanguageSwitcher } from '@/components/layout/LanguageSwitcher'
 import { NotificationCenter } from '@/components/notifications/NotificationCenter'
 import { createTranslator, getLocaleFromPath } from '@/lib/translations'
 import { debugError } from '@/lib/debug'
+import { getConfig } from '@/lib/config'
 import { TrialWarningBanner } from '@/components/layout/TrialWarningBanner'
 import { useTenantStatus } from '@/hooks/useTenantStatus'
 import { BlockedOverlay } from '@/components/blocked/BlockedOverlay'
@@ -64,7 +65,8 @@ export default function DashboardLayout({
 
       setLoading(true)
       try {
-        const response = await fetch(`http://localhost:8080/api/v1/users/${user.id}/settings`, {
+        const { apiUrl } = getConfig()
+        const response = await fetch(`${apiUrl}/users/${user.id}/settings`, {
           headers: { Authorization: `Bearer ${token}` },
         })
 

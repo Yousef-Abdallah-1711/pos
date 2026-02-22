@@ -8,6 +8,7 @@ import { useRouter, usePathname } from 'next/navigation'
 import { Loader2, Lock, ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 import { debugError } from '@/lib/debug'
+import { getConfig } from '@/lib/config'
 
 interface PermissionModule {
   moduleId: number
@@ -152,9 +153,10 @@ export default function EditRolePage({ params: paramsPromise }: EditRolePageProp
   const fetchRole = async () => {
     if (!token || !user) return
     setIsLoading(true)
+    const { apiUrl } = getConfig()
     try {
       const response = await fetch(
-        `http://localhost:8080/api/v1/rbac/roles/${id}`,
+        `${apiUrl}/rbac/roles/${id}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -215,8 +217,9 @@ export default function EditRolePage({ params: paramsPromise }: EditRolePageProp
         })),
       }
 
+      const { apiUrl } = getConfig()
       const response = await fetch(
-        `http://localhost:8080/api/v1/rbac/roles/${id}`,
+        `${apiUrl}/rbac/roles/${id}`,
         {
           method: 'PUT',
           headers: {

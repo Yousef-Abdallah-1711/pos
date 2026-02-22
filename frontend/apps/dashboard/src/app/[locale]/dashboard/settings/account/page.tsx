@@ -5,6 +5,7 @@ import { useAuthStore } from '@/stores/authStore'
 import { Save, Loader2, Check, X } from 'lucide-react'
 import { createTranslator, getLocaleFromPath } from '@/lib/translations'
 import { usePathname } from 'next/navigation'
+import { getConfig } from '@/lib/config'
 
 export default function AccountSettingsPage() {
   const pathname = usePathname()
@@ -35,7 +36,8 @@ export default function AccountSettingsPage() {
 
     setSaveStatus('saving')
     try {
-      const response = await fetch(`http://localhost:8080/api/v1/users/${user.id}/profile`, {
+      const { apiUrl } = getConfig()
+      const response = await fetch(`${apiUrl}/users/${user.id}/profile`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -78,7 +80,8 @@ export default function AccountSettingsPage() {
 
     setSaveStatus('saving')
     try {
-      const response = await fetch(`http://localhost:8080/api/v1/users/${user.id}/settings/change-password`, {
+      const { apiUrl } = getConfig()
+      const response = await fetch(`${apiUrl}/users/${user.id}/settings/change-password`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

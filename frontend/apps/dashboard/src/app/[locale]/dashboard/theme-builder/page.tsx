@@ -46,9 +46,10 @@ export default function ThemeBuilderPage() {
 
   const websiteHost = useMemo(() => {
     const activeThemeDomain = themes.find((theme) => theme.isActive)?.identity?.domain?.trim()
+    const restaurantDomain = process.env.NEXT_PUBLIC_RESTAURANT_DOMAIN || 'localhost:3003'
     const fallbackHost = user?.restaurant_id
-      ? `restaurant-${user.restaurant_id}.localhost:3003`
-      : 'demo.localhost:3003'
+      ? `restaurant-${user.restaurant_id}.${restaurantDomain}`
+      : `demo.${restaurantDomain}`
     return activeThemeDomain || fallbackHost
   }, [themes, user?.restaurant_id])
 

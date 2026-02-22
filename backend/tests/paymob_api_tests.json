@@ -1,0 +1,269 @@
+{
+  "info": {
+    "_postman_id": "f4e86a8c-53d3-4f30-bf36-8b9f17f6f5f8",
+    "name": "Paymob API Tests",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "const token = pm.environment.get('jwt_token');",
+          "const impersonation = pm.environment.get('impersonation_token');",
+          "const tenantId = pm.environment.get('tenant_id');",
+          "const restaurantId = pm.environment.get('restaurant_id');",
+          "",
+          "if (token) {",
+          "  pm.request.headers.upsert({ key: 'Authorization', value: `Bearer ${token}` });",
+          "} else if (impersonation) {",
+          "  pm.request.headers.upsert({ key: 'X-Impersonation-Token', value: impersonation });",
+          "  if (tenantId) pm.request.headers.upsert({ key: 'X-Tenant-ID', value: String(tenantId) });",
+          "  if (restaurantId) pm.request.headers.upsert({ key: 'X-Restaurant-ID', value: String(restaurantId) });",
+          "}",
+          "pm.request.headers.upsert({ key: 'Content-Type', value: 'application/json' });"
+        ]
+      }
+    }
+  ],
+  "item": [
+    {
+      "name": "GET Plans",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/v1/subscription/plans",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "subscription",
+            "plans"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('plans endpoint returns 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('plans response has data.plans array', function () {",
+              "  const body = pm.response.json();",
+              "  pm.expect(body.success).to.eql(true);",
+              "  pm.expect(body.data).to.be.an('object');",
+              "  pm.expect(body.data.plans).to.be.an('array');",
+              "  pm.expect(body.data.plans.length).to.be.greaterThan(0);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "POST Initiate Payment",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"plan_id\":\"monthly\"}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/v1/subscription/initiate",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "subscription",
+            "initiate"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('initiate endpoint returns 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('initiate response has iframe URL and order IDs', function () {",
+              "  const body = pm.response.json();",
+              "  pm.expect(body.success).to.eql(true);",
+              "  pm.expect(body.data).to.be.an('object');",
+              "  pm.expect(body.data.iframe_url).to.be.a('string');",
+              "  pm.expect(body.data.paymob_order_id).to.be.a('number');",
+              "  pm.expect(body.data.merchant_order_id).to.be.a('string');",
+              "",
+              "  pm.environment.set('paymob_order_id', String(body.data.paymob_order_id));",
+              "  pm.environment.set('merchant_order_id', body.data.merchant_order_id);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "GET Payment History",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/v1/subscription/payments?page=1&page_size=20",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "subscription",
+            "payments"
+          ],
+          "query": [
+            {
+              "key": "page",
+              "value": "1"
+            },
+            {
+              "key": "page_size",
+              "value": "20"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('payment history endpoint returns 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('payment history response has pagination keys', function () {",
+              "  const body = pm.response.json();",
+              "  pm.expect(body.success).to.eql(true);",
+              "  pm.expect(body.data).to.be.an('object');",
+              "  pm.expect(body.data.payments).to.be.an('array');",
+              "  pm.expect(body.data.total).to.be.a('number');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "GET Current Subscription",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/v1/subscription/current",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "subscription",
+            "current"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('current subscription endpoint returns 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('current subscription contains status and plan object', function () {",
+              "  const body = pm.response.json();",
+              "  pm.expect(body.success).to.eql(true);",
+              "  pm.expect(body.data).to.be.an('object');",
+              "  pm.expect(body.data.subscription_status).to.be.a('string');",
+              "  pm.expect(body.data.plan).to.be.an('object');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "POST Paymob Webhook",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"type\": \"TRANSACTION\",\n  \"hmac\": \"mock_hmac\",\n  \"obj\": {\n    \"id\": {{transaction_id}},\n    \"amount_cents\": 50000,\n    \"success\": true,\n    \"currency\": \"EGP\",\n    \"is_auth\": true,\n    \"is_capture\": true,\n    \"is_refunded\": false,\n    \"is_voided\": false,\n    \"is_3d_secure\": false,\n    \"is_standalone_payment\": true,\n    \"has_parent_transaction\": false,\n    \"error_occured\": false,\n    \"pending\": false,\n    \"integration_id\": 0,\n    \"owner\": 0,\n    \"created_at\": \"{{timestamp_iso}}\",\n    \"order\": {\n      \"id\": {{paymob_order_id}},\n      \"merchant_order_id\": \"{{merchant_order_id}}\"\n    },\n    \"source_data\": {\n      \"pan\": \"5123456789011111\",\n      \"sub_type\": \"mastercard\",\n      \"type\": \"card\"\n    }\n  }\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/v1/webhook/paymob?hmac=mock_hmac",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "webhook",
+            "paymob"
+          ],
+          "query": [
+            {
+              "key": "hmac",
+              "value": "mock_hmac"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.environment.set('transaction_id', String(Date.now()));",
+              "pm.environment.set('timestamp_iso', new Date().toISOString());"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('webhook endpoint returns 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('webhook response acknowledges receipt', function () {",
+              "  const body = pm.response.json();",
+              "  pm.expect(body.success).to.eql(true);",
+              "  pm.expect(body.data).to.be.an('object');",
+              "  pm.expect(body.data.received).to.eql(true);",
+              "});"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

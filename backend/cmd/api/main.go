@@ -192,7 +192,11 @@ func main() {
 	if superAdminRepo != nil {
 		authUseCase.SetSuperAdminRepo(superAdminRepo)
 	}
-	productUC := usecase.NewProductUseCase(productRepo, notificationRepo, "http://localhost:8080/uploads")
+	uploadBaseURL := os.Getenv("UPLOAD_BASE_URL")
+	if uploadBaseURL == "" {
+		uploadBaseURL = "http://localhost:8080/uploads"
+	}
+	productUC := usecase.NewProductUseCase(productRepo, notificationRepo, uploadBaseURL)
 	// NOTE: User settings use case reserved for Phase 2
 	notificationUC := usecase.NewNotificationUseCase(notificationRepo)
 	orderUC := usecase.NewOrderUseCase(orderRepo, productRepo)
@@ -317,7 +321,10 @@ func main() {
 			webhookRetryQueue = service.NewWebhookRetryQueue(db)
 
 			// Worker retries transient webhook failures (1m -> 5m -> 30m -> 2h -> 12h).
-			baseURL := "http://localhost:" + cfg.Server.Port
+			baseURL := os.Getenv("WEBHOOK_BASE_URL")
+		if baseURL == "" {
+			baseURL = "http://localhost:" + cfg.Server.Port
+		}
 			retryWorker := service.NewWebhookRetryWorker(db, baseURL, webhookMonitor, errorTracker)
 			retryWorker.Start(context.Background())
 

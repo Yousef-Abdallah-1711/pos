@@ -45,3 +45,21 @@ backend/bin/
 # Temp
 tmp/
 temp/
+tmp_*
+nul
+
+# Build artifacts
+*.tsbuildinfo
+*.pid
+*.bak
+
+# Disabled files (legacy/unused)
+*.disabled
+
+# Environment (keep examples only)
+.env.production
+!.env.example
+!.env.production.example
+
+# Test artifacts
+newman-*.xml

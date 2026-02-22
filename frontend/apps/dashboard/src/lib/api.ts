@@ -144,7 +144,7 @@ api.interceptors.response.use(
         })
         .catch(() => {
           // Fallback to default URL if config import fails
-          window.location.href = 'http://localhost:3001/auth/login'
+          window.location.href = `${process.env.NEXT_PUBLIC_LANDING_URL || 'http://localhost:3001'}/auth/login`
         })
     } else if (error.response?.status === 401 && isUsingImpersonation) {
       debugLog('[API] Got 401 while impersonating - NOT logging out, backend should handle impersonation token')

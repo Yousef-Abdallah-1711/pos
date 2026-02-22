@@ -47,7 +47,7 @@ func loadAllowedOrigins() {
 	corsOrigins = make(map[string]struct{})
 
 	raw := strings.TrimSpace(os.Getenv("CORS_ORIGINS"))
-	if raw == "" {
+	if raw == "" && strings.EqualFold(strings.TrimSpace(os.Getenv("ENV")), "development") {
 		raw = "http://localhost:3001,http://localhost:3002,http://localhost:3003,http://localhost:3004"
 	}
 

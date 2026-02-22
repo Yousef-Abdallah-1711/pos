@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"os"
 	"strconv"
 
 	"pos-saas/internal/domain"
@@ -296,12 +297,18 @@ func (h *SuperAdminHandler) GenerateDashboardLoginToken(w http.ResponseWriter, r
 		return
 	}
 
+	dashboardURL := os.Getenv("DASHBOARD_URL")
+	if dashboardURL == "" {
+		dashboardURL = "http://localhost:3001"
+	}
+	loginPath := dashboardURL + "/auth/super-admin-login"
+
 	respondJSON(w, http.StatusOK, map[string]interface{}{
 		"success": true,
 		"data": map[string]interface{}{
 			"token":              token,
-			"dashboard_url":      "http://localhost:3001/auth/super-admin-login",
-			"redirect_url":       "http://localhost:3001/auth/super-admin-login?token=" + token,
+			"dashboard_url":      loginPath,
+			"redirect_url":       loginPath + "?token=" + token,
 			"expires_in_seconds": 30,
 		},
 	})
