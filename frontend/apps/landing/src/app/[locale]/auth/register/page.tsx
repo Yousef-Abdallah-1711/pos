@@ -216,7 +216,7 @@ export default function RegisterPage() {
               {errors.restaurantSlug && <p className="text-sm text-red-500">{errors.restaurantSlug.message}</p>}
               <p className="text-xs text-gray-500 dark:text-gray-400">
                 {t.auth.register.websiteAccessible}{' '}
-                <strong>{restaurantSlug ? restaurantSlug.toLowerCase() : 'your-subdomain'}.{process.env.NEXT_PUBLIC_RESTAURANT_DOMAIN || 'localhost:3003'}</strong>
+                <strong>{restaurantSlug ? restaurantSlug.toLowerCase() : 'your-subdomain'}.{getConfig().restaurantDomain}</strong>
               </p>
             </div>
 

@@ -3,9 +3,11 @@ package http
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"pos-saas/internal/domain"
+	"strings"
 	"testing"
 	"time"
 )
@@ -653,5 +655,51 @@ func BenchmarkJSONMarshaling(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		_, _ = json.Marshal(order)
+	}
+}
+
+func TestClassifyCreateOrderError(t *testing.T) {
+	tests := []struct {
+		name           string
+		err            error
+		expectedStatus int
+		expectedText   string
+	}{
+		{
+			name:           "table not found maps to 404",
+			err:            errors.New("table 9 not found: table not found"),
+			expectedStatus: http.StatusNotFound,
+			expectedText:   "table 9 not found",
+		},
+		{
+			name:           "maintenance maps to conflict",
+			err:            errors.New("table 9 is under maintenance"),
+			expectedStatus: http.StatusConflict,
+			expectedText:   "maintenance",
+		},
+		{
+			name:           "validation maps to bad request",
+			err:            errors.New("order validation failed: customer phone is required"),
+			expectedStatus: http.StatusBadRequest,
+			expectedText:   "validation failed",
+		},
+		{
+			name:           "unknown failure maps to internal",
+			err:            errors.New("unexpected repository failure"),
+			expectedStatus: http.StatusInternalServerError,
+			expectedText:   "Failed to create order",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			status, message := classifyCreateOrderError(tt.err)
+			if status != tt.expectedStatus {
+				t.Fatalf("expected status %d, got %d", tt.expectedStatus, status)
+			}
+			if !strings.Contains(message, tt.expectedText) {
+				t.Fatalf("expected message to contain %q, got %q", tt.expectedText, message)
+			}
+		})
 	}
 }

@@ -1,4 +1,10 @@
 /**
+ * LOCAL/TEST-ONLY SCRIPT
+ *
+ * Defaults to localhost for local/staging load checks.
+ * Override target safely with:
+ *   BASE_URL=https://api.staging.example.com k6 run backend/tests/load/normal-load.js
+ *
  * k6 Load Testing - Normal Load Scenario
  *
  * Normal load test with 100 concurrent users
@@ -15,7 +21,7 @@ const errorRate = new Rate('errors')
 const httpDuration = new Trend('http_req_duration')
 const httpRequests = new Counter('http_requests')
 
-const BASE_URL = __ENV.BASE_URL || 'http://localhost:8080'
+const BASE_URL = (__ENV.BASE_URL || 'http://localhost:8080').replace(/\/$/, '')
 const USERS = 100
 
 export const options = {

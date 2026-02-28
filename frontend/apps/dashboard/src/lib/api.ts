@@ -1,11 +1,32 @@
 'use client'
 import axios from 'axios'
+import { getConfig } from './config'
 import { debugError, debugLog, debugWarn } from '@/lib/debug'
+import { recordPerformanceMetric } from '@/lib/performance'
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api/v1'
+const API_URL = getConfig().apiUrl
+const DEFAULT_API_TIMEOUT_MS = 6000
+const rawApiTimeout = Number.parseInt(process.env.NEXT_PUBLIC_API_TIMEOUT_MS || '', 10)
+const API_TIMEOUT_MS = Number.isFinite(rawApiTimeout) && rawApiTimeout > 0
+  ? rawApiTimeout
+  : DEFAULT_API_TIMEOUT_MS
+
+const buildApiMetricKey = (url?: string) => {
+  if (!url) {
+    return 'api.unknown'
+  }
+
+  const normalized = url
+    .replace(/\d+/g, ':id')
+    .replace(/[?].*$/, '')
+    .replace(/^\/+/, '')
+
+  return `api.${normalized || 'root'}`
+}
 
 export const api = axios.create({
   baseURL: API_URL,
+  timeout: API_TIMEOUT_MS,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -13,6 +34,23 @@ export const api = axios.create({
 
 // Add token and tenant context to requests
 api.interceptors.request.use((config) => {
+  const timedConfig = config as typeof config & {
+    __perf?: {
+      startedAt: number
+      metricKey: string
+    }
+  }
+
+  if (typeof config.timeout !== 'number' || config.timeout <= 0) {
+    config.timeout = API_TIMEOUT_MS
+  }
+  if (typeof window !== 'undefined' && window.performance) {
+    timedConfig.__perf = {
+      startedAt: window.performance.now(),
+      metricKey: buildApiMetricKey(config.url),
+    }
+  }
+
   // Get token from Zustand store (which persists to localStorage under 'auth-storage')
   let token = null
   let user = null
@@ -106,9 +144,39 @@ api.interceptors.request.use((config) => {
 // Handle 401 errors
 api.interceptors.response.use(
   (response) => {
+    const timedConfig = response.config as typeof response.config & {
+      __perf?: {
+        startedAt: number
+        metricKey: string
+      }
+    }
+
+    if (typeof window !== 'undefined' && timedConfig.__perf?.startedAt) {
+      recordPerformanceMetric(
+        timedConfig.__perf.metricKey,
+        window.performance.now() - timedConfig.__perf.startedAt
+      )
+    }
+
     return response
   },
   (error) => {
+    const timedConfig = error?.config as
+      | (typeof error.config & {
+          __perf?: {
+            startedAt: number
+            metricKey: string
+          }
+        })
+      | undefined
+
+    if (typeof window !== 'undefined' && timedConfig?.__perf?.startedAt) {
+      recordPerformanceMetric(
+        timedConfig.__perf.metricKey,
+        window.performance.now() - timedConfig.__perf.startedAt
+      )
+    }
+
     debugError('[API] Request failed:', error)
 
     // Check if it's a "Missing tenant information" error
@@ -143,8 +211,7 @@ api.interceptors.response.use(
           window.location.href = `${landingUrl}/auth/login`
         })
         .catch(() => {
-          // Fallback to default URL if config import fails
-          window.location.href = `${process.env.NEXT_PUBLIC_LANDING_URL || 'http://localhost:3001'}/auth/login`
+          window.location.href = '/auth/login'
         })
     } else if (error.response?.status === 401 && isUsingImpersonation) {
       debugLog('[API] Got 401 while impersonating - NOT logging out, backend should handle impersonation token')

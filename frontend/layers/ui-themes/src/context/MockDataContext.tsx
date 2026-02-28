@@ -1,13 +1,13 @@
 import React, { createContext, ReactNode, useMemo } from 'react'
 
 // Mock data imports
-import { HERO_MOCK_DATA } from '../sections/HeroSection/mockData'
-import { PRODUCTS_MOCK_DATA } from '../sections/ProductsSection/mockData'
-import { WHY_CHOOSE_US_MOCK_DATA } from '../sections/WhyChooseUsSection/mockData'
-import { TESTIMONIALS_MOCK_DATA } from '../sections/TestimonialsSection/mockData'
-import { CTA_MOCK_DATA } from '../sections/CTASection/mockData'
-import { CONTACT_MOCK_DATA } from '../sections/ContactSection/mockData'
-import { CUSTOM_MOCK_DATA } from '../sections/CustomSection/mockData'
+import { HERO_MOCK_DATA } from '../sections/marketing/HeroSection/mockData'
+import { PRODUCTS_MOCK_DATA } from '../sections/commerce/ProductsSection/mockData'
+import { WHY_CHOOSE_US_MOCK_DATA } from '../sections/content/WhyChooseUsSection/mockData'
+import { TESTIMONIALS_MOCK_DATA } from '../sections/marketing/TestimonialsSection/mockData'
+import { CTA_MOCK_DATA } from '../sections/marketing/CTASection/mockData'
+import { CONTACT_MOCK_DATA } from '../sections/forms/ContactSection/mockData'
+import { CUSTOM_MOCK_DATA } from '../sections/custom/CustomSection/mockData'
 
 /**
  * Mock data registry mapping component IDs to their mock data

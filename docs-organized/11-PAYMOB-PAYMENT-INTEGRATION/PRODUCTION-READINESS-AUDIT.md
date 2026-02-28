@@ -302,6 +302,9 @@ The Paymob payment integration is **production-ready** across:
 
 ### Pre-Production (Staging)
 
+> URL note: the curl commands below use `localhost` as local/staging examples.
+> For production verification, use your deployed API domain (for example `https://api.yourdomain.com`).
+
 ```bash
 ☑️ Database
   - [ ] Run migrations 114, 115, 116 on staging DB

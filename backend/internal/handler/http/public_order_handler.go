@@ -2,7 +2,6 @@ package http
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
@@ -36,14 +35,8 @@ func NewPublicOrderHandler(
 // Returns: Created Order with ID
 func (h *PublicOrderHandler) CreateOrder(w http.ResponseWriter, r *http.Request) {
 	// Get tenant and restaurant from context
-	fmt.Printf("[DEBUG] CreateOrder called\n")
-	fmt.Printf("[DEBUG] Context keys: %v\n", r.Context())
 	tenantID := middleware.GetTenantID(r)
-	fmt.Printf("[DEBUG] TenantID from context: %d\n", tenantID)
 	if tenantID == 0 {
-		// Log request headers for debugging
-		fmt.Printf("[DEBUG] Headers: X-Tenant-ID=%s, X-Restaurant-ID=%s\n",
-			r.Header.Get("X-Tenant-ID"), r.Header.Get("X-Restaurant-ID"))
 		respondError(w, http.StatusUnauthorized, "Missing tenant information")
 		return
 	}
@@ -69,20 +62,10 @@ func (h *PublicOrderHandler) CreateOrder(w http.ResponseWriter, r *http.Request)
 	// Create order via usecase
 	order, err := h.orderUC.CreateOrder(tenantID, restaurantID, &req)
 	if err != nil {
-		// Check error type and respond appropriately
-		if strings.Contains(err.Error(), "validation failed") ||
-			strings.Contains(err.Error(), "not found") ||
-			strings.Contains(err.Error(), "not available") ||
-			strings.Contains(err.Error(), "insufficient") {
-			respondError(w, http.StatusBadRequest, err.Error())
-			return
-		}
-		respondError(w, http.StatusInternalServerError, "Failed to create order")
+		statusCode, message := classifyCreateOrderError(err)
+		respondError(w, statusCode, message)
 		return
 	}
-
-	// Log order creation
-	fmt.Printf("Order created: %s for customer %s\n", order.OrderNumber, order.CustomerName)
 
 	// Return created order
 	respondJSON(w, http.StatusCreated, map[string]interface{}{
@@ -91,11 +74,36 @@ func (h *PublicOrderHandler) CreateOrder(w http.ResponseWriter, r *http.Request)
 			"id":            order.ID,
 			"order_number":  order.OrderNumber,
 			"customer_name": order.CustomerName,
+			"table_id":      order.TableID,
 			"total_amount":  order.TotalAmount,
 			"status":        order.Status,
 			"created_at":    order.CreatedAt,
 		},
 	})
+}
+
+func classifyCreateOrderError(err error) (statusCode int, message string) {
+	if err == nil {
+		return http.StatusInternalServerError, "Failed to create order"
+	}
+
+	message = err.Error()
+	lowerMessage := strings.ToLower(message)
+
+	switch {
+	case strings.Contains(lowerMessage, "table") && strings.Contains(lowerMessage, "not found"):
+		return http.StatusNotFound, message
+	case strings.Contains(lowerMessage, "maintenance"):
+		return http.StatusConflict, message
+	case strings.Contains(lowerMessage, "validation failed"),
+		strings.Contains(lowerMessage, "not available"),
+		strings.Contains(lowerMessage, "insufficient"),
+		strings.Contains(lowerMessage, "invalid"),
+		strings.Contains(lowerMessage, "required"):
+		return http.StatusBadRequest, message
+	default:
+		return http.StatusInternalServerError, "Failed to create order"
+	}
 }
 
 // GetOrder retrieves order details by ID
@@ -305,13 +313,17 @@ func (h *PublicOrderHandler) ValidateOrder(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
+	if req.OrderSource == "" {
+		req.OrderSource = "website"
+	}
+
 	// Validate request structure
 	errors := make(map[string]string)
 
 	if req.CustomerName == "" {
 		errors["customer_name"] = "Customer name is required"
 	}
-	if req.CustomerPhone == "" {
+	if req.CustomerPhone == "" && !strings.EqualFold(strings.TrimSpace(req.OrderSource), "pos") {
 		errors["customer_phone"] = "Customer phone is required"
 	}
 	if req.PaymentMethod == "" {

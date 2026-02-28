@@ -211,8 +211,8 @@ func TestThemeRepositoryNullHandling(t *testing.T) {
 		wantNil     bool
 	}{
 		{"all nil", nil, nil, nil, true},
-		{"all set", ptrInt64(1), ptrInt64(2), ptrTime(time.Now()), false},
-		{"partial nil", ptrInt64(1), nil, nil, true},
+		{"all set", ptrInt64Theme(1), ptrInt64Theme(2), ptrTime(time.Now()), false},
+		{"partial nil", ptrInt64Theme(1), nil, nil, true},
 	}
 
 	for _, tt := range tests {
@@ -344,7 +344,7 @@ func TestThemeRepositoryConfigHandling(t *testing.T) {
 }
 
 // Helper functions
-func ptrInt64(v int64) *int64 {
+func ptrInt64Theme(v int64) *int64 {
 	return &v
 }
 

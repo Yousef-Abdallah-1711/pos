@@ -1,7 +1,7 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
-import { OrderStatusTracker } from '@/components/order-status-tracker';
+import { OrderStatusTracker } from '@/components/commerce/order-status-tracker';
 import { Button } from '@pos-saas/ui';
 import { Package, AlertCircle, Loader } from 'lucide-react';
 import Link from 'next/link';

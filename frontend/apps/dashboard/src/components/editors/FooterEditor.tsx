@@ -1,9 +1,11 @@
 'use client'
 
 import React, { useState, useCallback, useMemo } from 'react'
+import { usePathname } from 'next/navigation'
 import { Plus, Trash2, ChevronUp, ChevronDown, Mail, MapPin, Phone } from 'lucide-react'
 import type { ThemeComponent, FooterConfig as ThemeFooterConfig } from '@/types/theme'
 import { useUpdateFooter, useThemeFooter } from '@/stores'
+import { getLocaleFromPath } from '@/lib/translations'
 
 interface FooterEditorProps {
   component?: ThemeComponent
@@ -51,6 +53,11 @@ export function FooterEditor({
   className = '',
   useStore = false,
 }: FooterEditorProps): JSX.Element {
+  const pathname = usePathname()
+  const locale = getLocaleFromPath(pathname)
+  const isRTL = locale === 'ar'
+  const tx = (en: string, ar: string) => (isRTL ? ar : en)
+
   const storeFooter = useThemeFooter()
   const updateFooter = useUpdateFooter()
 
@@ -117,7 +124,7 @@ export function FooterEditor({
   const addSection = useCallback(() => {
     const newSection: FooterSection = {
       id: `section-${Date.now()}`,
-      title: 'New Section',
+      title: tx('New Section', 'قسم جديد'),
       links: [],
       order: (footerConfig.footerSections?.length || 0) + 1,
     }
@@ -218,14 +225,14 @@ export function FooterEditor({
 
   if (previewMode) {
     return (
-      <div className={`w-full space-y-4 ${className}`}>
+      <div dir={isRTL ? 'rtl' : 'ltr'} className={`w-full space-y-4 ${className} ${isRTL ? 'text-right' : ''}`}>
         <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Footer Preview</h3>
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{tx('Footer Preview', 'معاينة التذييل')}</h3>
           <button
             onClick={() => setPreviewMode(false)}
             className="px-3 py-2 text-sm bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition"
           >
-            Back to Settings
+            {tx('Back to Settings', 'العودة إلى الإعدادات')}
           </button>
         </div>
 
@@ -328,22 +335,22 @@ export function FooterEditor({
   }
 
   return (
-    <div className={`w-full space-y-6 ${className}`}>
+    <div dir={isRTL ? 'rtl' : 'ltr'} className={`w-full space-y-6 ${className} ${isRTL ? 'text-right' : ''}`}>
       {/* Header */}
       <div>
-        <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-2">Footer Configuration</h2>
+        <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-2">{tx('Footer Configuration', 'إعدادات التذييل')}</h2>
         <p className="text-sm text-gray-600 dark:text-gray-400">
-          Configure your website footer with company info, sections, and social links.
+          {tx('Configure your website footer with company info, sections, and social links.', 'قم بإعداد تذييل موقعك مع معلومات الشركة والأقسام وروابط التواصل.')}
         </p>
       </div>
 
       {/* Company Information */}
       <div className="space-y-4 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
-        <h3 className="font-semibold text-gray-900 dark:text-white">Company Information</h3>
+        <h3 className="font-semibold text-gray-900 dark:text-white">{tx('Company Information', 'معلومات الشركة')}</h3>
 
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Company Name
+            {tx('Company Name', 'اسم الشركة')}
           </label>
           <input
             type="text"
@@ -356,7 +363,7 @@ export function FooterEditor({
 
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Description
+            {tx('Description', 'الوصف')}
           </label>
           <textarea
             value={footerConfig.companyDescription || ''}
@@ -370,7 +377,7 @@ export function FooterEditor({
         <div className="grid grid-cols-1 gap-3">
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Phone
+              {tx('Phone', 'الهاتف')}
             </label>
             <input
               type="tel"
@@ -383,7 +390,7 @@ export function FooterEditor({
 
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Email
+              {tx('Email', 'البريد الإلكتروني')}
             </label>
             <input
               type="email"
@@ -396,7 +403,7 @@ export function FooterEditor({
 
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Address
+              {tx('Address', 'العنوان')}
             </label>
             <textarea
               value={footerConfig.address || ''}
@@ -412,13 +419,13 @@ export function FooterEditor({
       {/* Footer Sections */}
       <div className="space-y-4 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
         <div className="flex items-center justify-between">
-          <h3 className="font-semibold text-gray-900 dark:text-white">Footer Sections</h3>
+          <h3 className="font-semibold text-gray-900 dark:text-white">{tx('Footer Sections', 'أقسام التذييل')}</h3>
           <button
             onClick={addSection}
             className="flex items-center gap-1.5 px-3 py-1.5 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition"
           >
             <Plus className="h-4 w-4" />
-            Add Section
+            {tx('Add Section', 'إضافة قسم')}
           </button>
         </div>
 
@@ -437,7 +444,7 @@ export function FooterEditor({
                     onClick={() => setEditingSection(null)}
                     className="px-2 py-1 text-sm bg-green-600 hover:bg-green-700 text-white rounded transition"
                   >
-                    Done
+                    {tx('Done', 'تم')}
                   </button>
                 </div>
               ) : (
@@ -447,7 +454,7 @@ export function FooterEditor({
                     onClick={() => setEditingSection(section.id)}
                   >
                     <div className="font-medium text-gray-900 dark:text-white">{section.title}</div>
-                    <div className="text-xs text-gray-500 dark:text-gray-400">{section.links.length} links</div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400">{section.links.length} {tx('links', 'روابط')}</div>
                   </div>
                   <button
                     onClick={() => deleteSection(section.id)}
@@ -465,13 +472,13 @@ export function FooterEditor({
       {/* Social Links */}
       <div className="space-y-4 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
         <div className="flex items-center justify-between">
-          <h3 className="font-semibold text-gray-900 dark:text-white">Social Media Links</h3>
+          <h3 className="font-semibold text-gray-900 dark:text-white">{tx('Social Media Links', 'روابط التواصل الاجتماعي')}</h3>
           <button
             onClick={addSocialLink}
             className="flex items-center gap-1.5 px-3 py-1.5 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition"
           >
             <Plus className="h-4 w-4" />
-            Add Link
+            {tx('Add Link', 'إضافة رابط')}
           </button>
         </div>
 
@@ -509,11 +516,11 @@ export function FooterEditor({
 
       {/* Legal Section */}
       <div className="space-y-4 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
-        <h3 className="font-semibold text-gray-900 dark:text-white">Legal & Copyright</h3>
+        <h3 className="font-semibold text-gray-900 dark:text-white">{tx('Legal & Copyright', 'القانونية وحقوق النشر')}</h3>
 
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Copyright Text
+            {tx('Copyright Text', 'نص حقوق النشر')}
           </label>
           <input
             type="text"
@@ -531,18 +538,18 @@ export function FooterEditor({
             onChange={(e) => handleConfigChange('showLegal', e.target.checked)}
             className="rounded"
           />
-          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Show Legal Links</span>
+          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{tx('Show Legal Links', 'إظهار الروابط القانونية')}</span>
         </label>
       </div>
 
       {/* Styling */}
       <div className="space-y-4 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
-        <h3 className="font-semibold text-gray-900 dark:text-white">Styling</h3>
+        <h3 className="font-semibold text-gray-900 dark:text-white">{tx('Styling', 'التنسيق')}</h3>
 
         <div className="grid grid-cols-3 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Background
+              {tx('Background', 'الخلفية')}
             </label>
             <input
               type="color"
@@ -554,7 +561,7 @@ export function FooterEditor({
 
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Text Color
+              {tx('Text Color', 'لون النص')}
             </label>
             <input
               type="color"
@@ -566,7 +573,7 @@ export function FooterEditor({
 
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Link Color
+              {tx('Link Color', 'لون الروابط')}
             </label>
             <input
               type="color"
@@ -579,7 +586,7 @@ export function FooterEditor({
 
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Padding: {footerConfig.padding || 48}px
+            {tx('Padding', 'الحشو')}: {footerConfig.padding || 48}px
           </label>
           <input
             type="range"
@@ -598,7 +605,7 @@ export function FooterEditor({
             onChange={(e) => handleConfigChange('showBackToTop', e.target.checked)}
             className="rounded"
           />
-          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Show Back to Top</span>
+          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{tx('Show Back to Top', 'إظهار العودة للأعلى')}</span>
         </label>
       </div>
 
@@ -608,7 +615,7 @@ export function FooterEditor({
           onClick={() => setPreviewMode(true)}
           className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition"
         >
-          Preview Footer
+          {tx('Preview Footer', 'معاينة التذييل')}
         </button>
       </div>
     </div>

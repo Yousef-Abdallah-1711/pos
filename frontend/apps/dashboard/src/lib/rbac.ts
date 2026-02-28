@@ -5,10 +5,13 @@
 
 import { api } from './api'
 
+const RBAC_PERMISSIONS_TIMEOUT_MS = 2500
+
 // Permission level constants (must match backend)
 export const PERMISSION_LEVELS = {
   NONE: 'NONE',
   READ: 'READ',
+  EXPORT: 'EXPORT',
   WRITE: 'WRITE',
   DELETE: 'DELETE',
   ADMIN: 'ADMIN',
@@ -28,27 +31,54 @@ export const MODULE_IDS = {
   ORDERS: 10,
   LEAVES: 11,
   SALARIES: 12,
+  KDS: 13,
+  TABLES: 14,
 } as const
 
 // Permission level hierarchy (higher number = more permissions)
 const PERMISSION_HIERARCHY: Record<string, number> = {
   [PERMISSION_LEVELS.NONE]: 0,
   [PERMISSION_LEVELS.READ]: 1,
-  [PERMISSION_LEVELS.WRITE]: 2,
-  [PERMISSION_LEVELS.DELETE]: 3,
-  [PERMISSION_LEVELS.ADMIN]: 4,
+  [PERMISSION_LEVELS.EXPORT]: 2,
+  [PERMISSION_LEVELS.WRITE]: 3,
+  [PERMISSION_LEVELS.DELETE]: 4,
+  [PERMISSION_LEVELS.ADMIN]: 5,
+}
+
+const normalizePermissionLevelInput = (value: unknown): string | undefined => {
+  if (typeof value === 'string') {
+    const normalized = value.trim().toUpperCase()
+    return normalized in PERMISSION_HIERARCHY ? normalized : undefined
+  }
+
+  if (value && typeof value === 'object') {
+    const obj = value as Record<string, unknown>
+    const nested =
+      obj.permission_level ??
+      obj.permissionLevel ??
+      obj.level
+    return normalizePermissionLevelInput(nested)
+  }
+
+  return undefined
 }
 
 /**
  * Check if permission level A is greater than or equal to permission level B
  */
 export const hasPermissionLevel = (
-  userLevel: string | undefined,
+  userLevel: unknown,
   requiredLevel: string
 ): boolean => {
-  if (!userLevel) return false
-  const userValue = PERMISSION_HIERARCHY[userLevel] ?? -1
-  const requiredValue = PERMISSION_HIERARCHY[requiredLevel] ?? -1
+  const normalizedUserLevel = normalizePermissionLevelInput(userLevel)
+  const normalizedRequiredLevel = normalizePermissionLevelInput(requiredLevel)
+
+  if (!normalizedUserLevel || !normalizedRequiredLevel) {
+    return false
+  }
+
+  const userValue = PERMISSION_HIERARCHY[normalizedUserLevel] ?? -1
+  const requiredValue = PERMISSION_HIERARCHY[normalizedRequiredLevel] ?? -1
   return userValue >= requiredValue
 }
 
@@ -68,6 +98,7 @@ export const getNextPermissionLevel = (current: string): string | null => {
   const levels = [
     PERMISSION_LEVELS.NONE,
     PERMISSION_LEVELS.READ,
+    PERMISSION_LEVELS.EXPORT,
     PERMISSION_LEVELS.WRITE,
     PERMISSION_LEVELS.DELETE,
     PERMISSION_LEVELS.ADMIN,
@@ -83,6 +114,7 @@ export const getPreviousPermissionLevel = (current: string): string | null => {
   const levels = [
     PERMISSION_LEVELS.NONE,
     PERMISSION_LEVELS.READ,
+    PERMISSION_LEVELS.EXPORT,
     PERMISSION_LEVELS.WRITE,
     PERMISSION_LEVELS.DELETE,
     PERMISSION_LEVELS.ADMIN,
@@ -194,6 +226,7 @@ export const rbacApi = {
     permissionLevel: string = PERMISSION_LEVELS.READ
   ) => {
     const response = await api.get('/rbac/check-permission', {
+      timeout: RBAC_PERMISSIONS_TIMEOUT_MS,
       params: {
         moduleId,
         permissionLevel,
@@ -203,7 +236,9 @@ export const rbacApi = {
   },
 
   getUserPermissions: async () => {
-    const response = await api.get('/rbac/me/permissions')
+    const response = await api.get('/rbac/me/permissions', {
+      timeout: RBAC_PERMISSIONS_TIMEOUT_MS,
+    })
     return response.data
   },
 
@@ -259,33 +294,120 @@ export const rbacApi = {
 class PermissionCache {
   private cache: Map<string, { permissions: UserPermissions; timestamp: number }>
   private ttl: number = 5 * 60 * 1000 // 5 minutes
+  private storageKey = 'rbac-permission-cache-v1'
 
   constructor() {
     this.cache = new Map()
   }
 
+  private getStorageItem(userId: string) {
+    if (typeof window === 'undefined') {
+      return null
+    }
+
+    try {
+      const raw = window.localStorage.getItem(this.storageKey)
+      if (!raw) {
+        return null
+      }
+
+      const parsed = JSON.parse(raw) as Record<
+        string,
+        { permissions: UserPermissions; timestamp: number }
+      >
+      const entry = parsed[userId]
+      if (!entry || typeof entry !== 'object') {
+        return null
+      }
+      return entry
+    } catch {
+      return null
+    }
+  }
+
+  private setStorageItem(userId: string, payload: { permissions: UserPermissions; timestamp: number }) {
+    if (typeof window === 'undefined') {
+      return
+    }
+
+    try {
+      const raw = window.localStorage.getItem(this.storageKey)
+      const parsed = raw
+        ? (JSON.parse(raw) as Record<string, { permissions: UserPermissions; timestamp: number }>)
+        : {}
+
+      parsed[userId] = payload
+      window.localStorage.setItem(this.storageKey, JSON.stringify(parsed))
+    } catch {
+      // Ignore localStorage failures.
+    }
+  }
+
+  private removeStorageItem(userId?: string) {
+    if (typeof window === 'undefined') {
+      return
+    }
+
+    try {
+      if (!userId) {
+        window.localStorage.removeItem(this.storageKey)
+        return
+      }
+
+      const raw = window.localStorage.getItem(this.storageKey)
+      if (!raw) {
+        return
+      }
+      const parsed = JSON.parse(raw) as Record<
+        string,
+        { permissions: UserPermissions; timestamp: number }
+      >
+      delete parsed[userId]
+      window.localStorage.setItem(this.storageKey, JSON.stringify(parsed))
+    } catch {
+      // Ignore localStorage failures.
+    }
+  }
+
+  private isExpired(timestamp: number) {
+    return Date.now() - timestamp > this.ttl
+  }
+
   set(userId: string, permissions: UserPermissions): void {
-    this.cache.set(userId, { permissions, timestamp: Date.now() })
+    const payload = { permissions, timestamp: Date.now() }
+    this.cache.set(userId, payload)
+    this.setStorageItem(userId, payload)
   }
 
   get(userId: string): UserPermissions | null {
     const entry = this.cache.get(userId)
-    if (!entry) return null
-
-    // Check if cache is expired
-    if (Date.now() - entry.timestamp > this.ttl) {
+    if (entry && !this.isExpired(entry.timestamp)) {
+      return entry.permissions
+    }
+    if (entry && this.isExpired(entry.timestamp)) {
       this.cache.delete(userId)
+    }
+
+    const storedEntry = this.getStorageItem(userId)
+    if (!storedEntry) {
+      return null
+    }
+    if (this.isExpired(storedEntry.timestamp)) {
+      this.removeStorageItem(userId)
       return null
     }
 
-    return entry.permissions
+    this.cache.set(userId, storedEntry)
+    return storedEntry.permissions
   }
 
   clear(userId?: string): void {
     if (userId) {
       this.cache.delete(userId)
+      this.removeStorageItem(userId)
     } else {
       this.cache.clear()
+      this.removeStorageItem()
     }
   }
 
@@ -313,6 +435,8 @@ export const getModuleName = (moduleId: number): string => {
     [MODULE_IDS.ORDERS]: 'Orders',
     [MODULE_IDS.LEAVES]: 'Leaves',
     [MODULE_IDS.SALARIES]: 'Payroll',
+    [MODULE_IDS.KDS]: 'Kitchen Display',
+    [MODULE_IDS.TABLES]: 'Tables',
   }
   return names[moduleId] || `Module ${moduleId}`
 }
@@ -324,6 +448,7 @@ export const getPermissionDescription = (level: string): string => {
   const descriptions: Record<string, string> = {
     [PERMISSION_LEVELS.NONE]: 'No access',
     [PERMISSION_LEVELS.READ]: 'View only',
+    [PERMISSION_LEVELS.EXPORT]: 'View and export',
     [PERMISSION_LEVELS.WRITE]: 'View and edit',
     [PERMISSION_LEVELS.DELETE]: 'View, edit, and delete',
     [PERMISSION_LEVELS.ADMIN]: 'Full access (admin)',

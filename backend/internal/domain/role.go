@@ -100,8 +100,8 @@ func (m *ModuleDefinition) Validate() error {
 // PermissionLevel represents the level of access a role has to a module
 type PermissionLevel struct {
 	ID          int64
-	Name        string // READ, WRITE, DELETE, ADMIN, NONE
-	Value       int    // Numeric value for comparison: 0=NONE, 1=READ, 2=WRITE, 3=DELETE, 4=ADMIN
+	Name        string // READ, EXPORT, WRITE, DELETE, ADMIN, NONE
+	Value       int    // Numeric value for comparison hierarchy
 	Description string
 }
 
@@ -109,18 +109,20 @@ type PermissionLevel struct {
 const (
 	PermissionNone   = "NONE"   // No access (value 0)
 	PermissionRead   = "READ"   // Read-only (value 1)
-	PermissionWrite  = "WRITE"  // Read and write (value 2)
-	PermissionDelete = "DELETE" // Read, write, and delete (value 3)
-	PermissionAdmin  = "ADMIN"  // Full admin access (value 4)
+	PermissionExport = "EXPORT" // Read + export reports/files (value 2)
+	PermissionWrite  = "WRITE"  // Read and write (value 3)
+	PermissionDelete = "DELETE" // Read, write, and delete (value 4)
+	PermissionAdmin  = "ADMIN"  // Full admin access (value 5)
 )
 
 // PermissionValues maps permission names to numeric values
 var PermissionValues = map[string]int{
 	PermissionNone:   0,
 	PermissionRead:   1,
-	PermissionWrite:  2,
-	PermissionDelete: 3,
-	PermissionAdmin:  4,
+	PermissionExport: 2,
+	PermissionWrite:  3,
+	PermissionDelete: 4,
+	PermissionAdmin:  5,
 }
 
 // Validate checks if permission level has required fields
@@ -184,6 +186,7 @@ func (rp *RolePermission) Validate() error {
 	validLevels := []string{
 		PermissionNone,
 		PermissionRead,
+		PermissionExport,
 		PermissionWrite,
 		PermissionDelete,
 		PermissionAdmin,

@@ -29,8 +29,9 @@ COPY . ./apps/dashboard
 
 WORKDIR /app/apps/dashboard
 
-# Set environment variable for build
-ENV NEXT_PUBLIC_API_URL=http://localhost:8080/api/v1
+# Build-time URL config must be provided by CI/CD for production builds.
+ARG NEXT_PUBLIC_API_URL
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 ENV NEXT_TELEMETRY_DISABLED=1
 
 # Build the app

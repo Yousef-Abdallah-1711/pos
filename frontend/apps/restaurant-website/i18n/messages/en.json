@@ -105,6 +105,7 @@
     "orderSummary": "Order Summary",
     "customerInformation": "Customer Information",
     "fullName": "Full Name",
+    "optional": "Optional",
     "email": "Email Address",
     "phone": "Phone Number",
     "deliveryInformation": "Delivery Information",
@@ -123,6 +124,20 @@
     "trackOrder": "Track your order",
     "backToMenu": "Back to Menu"
   },
+  "tableOrdering": {
+    "dineInOrder": "Dine-in Order",
+    "table": "Table",
+    "payAtTable": "Pay at table",
+    "payAtTableHint": "Pay directly at your table after the order is served.",
+    "invalidTableTitle": "Table QR not recognized",
+    "invalidTable": "This table QR is invalid or unavailable.",
+    "openMenu": "Open menu",
+    "statusWarnings": {
+      "occupied": "This table is currently marked as occupied. You can still place your order.",
+      "reserved": "This table is currently reserved. Please confirm with staff before ordering.",
+      "maintenance": "This table is marked for maintenance. Please ask staff if this table is active."
+    }
+  },
   "orders": {
     "title": "Order History",
     "trackOrder": "Track Order",
@@ -134,8 +149,7 @@
     "totalAmount": "Total Amount",
     "estimatedDelivery": "Estimated Delivery",
     "restaurant": "Restaurant",
-    "viewDetails": "View Details",
-    "trackOrder": "Track Order"
+    "viewDetails": "View Details"
   },
   "orderTracking": {
     "title": "Track Your Order",
@@ -201,7 +215,12 @@
     "about": "About",
     "company": "Company",
     "legal": "Legal",
-    "contact": "Contact",
+    "contact": {
+      "hours": "Hours",
+      "address": "Address",
+      "phone": "Phone",
+      "email": "Email"
+    },
     "links": {
       "about": "About Us",
       "faq": "FAQ",
@@ -211,12 +230,6 @@
       "privacy": "Privacy Policy",
       "cookies": "Cookie Policy",
       "contact": "Contact Us"
-    },
-    "contact": {
-      "hours": "Hours",
-      "address": "Address",
-      "phone": "Phone",
-      "email": "Email"
     },
     "social": "Follow Us"
   },

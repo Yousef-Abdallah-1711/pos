@@ -1,21 +1,37 @@
-﻿'use client'
+'use client'
 
-import { useCallback } from 'react'
-import { ProductCard } from '@/components/product-card-simple'
+import { useCallback, useEffect } from 'react'
+import { ProductCard } from '@/components/commerce/product-card-simple'
 import { useCartStore } from '@/lib/store/cart-store'
 import { createTranslator } from '@/lib/translations'
 import Link from 'next/link'
 import { Loader } from 'lucide-react'
 import { useProducts } from '@/lib/hooks/use-api-queries'
 import type { ServerThemeData } from '@/lib/api/get-theme-server'
+import type { TableStatusNotice } from '@/lib/table-ordering'
+
+export interface TableContext {
+  tableId: number
+  tableNumber: number
+  tableName?: string | null
+  tableStatus?: string
+}
 
 interface MenuPageContentProps {
   locale: 'en' | 'ar'
   themeData: ServerThemeData
   restaurantSlug: string
+  tableContext?: TableContext | null
+  tableStatusNotice?: TableStatusNotice | null
 }
 
-export function MenuPageContent({ locale, themeData, restaurantSlug }: MenuPageContentProps) {
+export function MenuPageContent({
+  locale,
+  themeData,
+  restaurantSlug,
+  tableContext = null,
+  tableStatusNotice = null,
+}: MenuPageContentProps) {
   const isRTL = locale === 'ar'
   const t = createTranslator(locale)
 
@@ -23,9 +39,19 @@ export function MenuPageContent({ locale, themeData, restaurantSlug }: MenuPageC
   const secondaryColor = themeData?.colors?.secondary || '#0ea5e9'
 
   const addToCart = useCartStore((state) => state.addItem)
+  const setTableContext = useCartStore((state) => state.setTableContext)
   const cartItems = useCartStore((state) => state.getTotalItems())
 
   const { data: products = [], isLoading } = useProducts(restaurantSlug)
+
+  useEffect(() => {
+    if (!tableContext?.tableId) {
+      return
+    }
+
+    const label = tableContext.tableName || `Table #${tableContext.tableNumber}`
+    setTableContext(tableContext.tableId, label)
+  }, [setTableContext, tableContext])
 
   const handleAddToCart = useCallback(
     (product: any, quantity: number) => {
@@ -64,6 +90,28 @@ export function MenuPageContent({ locale, themeData, restaurantSlug }: MenuPageC
       </div>
 
       <div className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 ${isRTL ? 'text-right' : ''}`}>
+        {tableContext && (
+          <div
+            className={`mb-6 rounded-lg border px-4 py-3 text-sm font-medium bg-orange-50 border-orange-200 text-orange-900 dark:bg-orange-900/20 dark:border-orange-700 dark:text-orange-200 ${
+              isRTL ? 'text-right' : ''
+            }`}
+          >
+            {t('tableOrdering.dineInOrder')} - {t('tableOrdering.table')} #{tableContext.tableNumber}
+          </div>
+        )}
+
+        {tableStatusNotice && (
+          <div
+            className={`mb-6 rounded-lg border px-4 py-3 text-sm font-medium ${
+              tableStatusNotice.level === 'critical'
+                ? 'border-red-200 bg-red-50 text-red-900 dark:border-red-800 dark:bg-red-900/20 dark:text-red-200'
+                : 'border-amber-200 bg-amber-50 text-amber-900 dark:border-amber-700 dark:bg-amber-900/20 dark:text-amber-200'
+            } ${isRTL ? 'text-right' : ''}`}
+          >
+            {t(tableStatusNotice.translationKey)}
+          </div>
+        )}
+
         <div className={`mb-6 ${isRTL ? 'text-right' : ''}`}>
           <h2 className="text-2xl font-semibold">{t('menu.allItems')}</h2>
           <p className="text-gray-600 dark:text-gray-400">

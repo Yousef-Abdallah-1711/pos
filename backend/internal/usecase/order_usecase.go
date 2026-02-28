@@ -1,17 +1,23 @@
 package usecase
 
 import (
+	"context"
 	"errors"
 	"fmt"
+	"log"
 	"pos-saas/internal/domain"
 	"pos-saas/internal/repository"
+	"strings"
 	"time"
 )
 
 // OrderUseCase handles order business logic
 type OrderUseCase struct {
-	orderRepo   *repository.OrderRepository
-	productRepo *repository.ProductRepository
+	orderRepo      *repository.OrderRepository
+	productRepo    *repository.ProductRepository
+	tableRepo      *repository.TableRepository
+	kdsRepo        *repository.KDSRepository
+	kdsBroadcaster KDSBroadcaster
 }
 
 // NewOrderUseCase creates new order use case
@@ -20,6 +26,21 @@ func NewOrderUseCase(orderRepo *repository.OrderRepository, productRepo *reposit
 		orderRepo:   orderRepo,
 		productRepo: productRepo,
 	}
+}
+
+// SetKDSRepository links KDS integration to order lifecycle updates.
+func (uc *OrderUseCase) SetKDSRepository(kdsRepo *repository.KDSRepository) {
+	uc.kdsRepo = kdsRepo
+}
+
+// SetKDSBroadcaster links websocket broadcasts for new KDS orders.
+func (uc *OrderUseCase) SetKDSBroadcaster(broadcaster KDSBroadcaster) {
+	uc.kdsBroadcaster = broadcaster
+}
+
+// SetTableRepository links table integration to order creation flow.
+func (uc *OrderUseCase) SetTableRepository(tableRepo *repository.TableRepository) {
+	uc.tableRepo = tableRepo
 }
 
 // CreateOrder handles order creation with all business logic
@@ -44,13 +65,19 @@ func (uc *OrderUseCase) CreateOrder(
 	}
 
 	// Create order entity
+	customerPhone := strings.TrimSpace(req.CustomerPhone)
+	if customerPhone == "" && strings.EqualFold(strings.TrimSpace(req.OrderSource), "pos") {
+		// POS walk-in orders can omit phone in UI; keep DB constraint satisfied.
+		customerPhone = "N/A"
+	}
+
 	order := &domain.Order{
 		TenantID:             tenantID,
 		RestaurantID:         restaurantID,
 		OrderNumber:          orderNumber,
 		CustomerName:         req.CustomerName,
 		CustomerEmail:        req.CustomerEmail,
-		CustomerPhone:        req.CustomerPhone,
+		CustomerPhone:        customerPhone,
 		DeliveryAddress:      req.DeliveryAddress,
 		DeliveryCity:         req.DeliveryCity,
 		DeliveryArea:         req.DeliveryArea,
@@ -61,6 +88,22 @@ func (uc *OrderUseCase) CreateOrder(
 		Status:               "pending",
 		OrderSource:          req.OrderSource,
 		Notes:                req.Notes,
+	}
+
+	if req.TableID != nil {
+		if uc.tableRepo == nil {
+			return nil, errors.New("table repository is not configured")
+		}
+
+		table, err := uc.tableRepo.GetTableByID(tenantID, restaurantID, *req.TableID)
+		if err != nil {
+			return nil, fmt.Errorf("table %d not found: %w", *req.TableID, err)
+		}
+		if table.Status == domain.TableStatusMaintenance {
+			return nil, fmt.Errorf("table %d is under maintenance", *req.TableID)
+		}
+
+		order.TableID = req.TableID
 	}
 
 	// Handle optional delivery coordinates
@@ -153,7 +196,38 @@ func (uc *OrderUseCase) CreateOrder(
 	}
 
 	// Reload order with items
-	return uc.orderRepo.GetOrderByID(tenantID, restaurantID, createdOrder.ID)
+	finalOrder, err := uc.orderRepo.GetOrderByID(tenantID, restaurantID, createdOrder.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	// Table integration: mark table as occupied for dine-in orders.
+	if finalOrder.TableID != nil && uc.tableRepo != nil {
+		if statusErr := uc.tableRepo.UpdateTableStatus(tenantID, restaurantID, *finalOrder.TableID, string(domain.TableStatusOccupied)); statusErr != nil {
+			log.Printf("[TABLES] failed to set table occupied after order create: tenant=%d restaurant=%d table=%d order=%d err=%v", tenantID, restaurantID, *finalOrder.TableID, finalOrder.ID, statusErr)
+		}
+	}
+
+	// POS integration: confirm immediately so new tickets are visible in KDS without manual approval.
+	if strings.EqualFold(strings.TrimSpace(finalOrder.OrderSource), "pos") {
+		confirmReq := &domain.UpdateOrderStatusRequest{
+			Status: "confirmed",
+			Reason: "Auto-confirmed POS order",
+		}
+		if confirmErr := uc.UpdateOrderStatus(tenantID, restaurantID, finalOrder.ID, confirmReq); confirmErr != nil {
+			// Keep order creation successful even when status transition/KDS enqueue fails.
+			log.Printf("[KDS] failed to auto-confirm POS order: tenant=%d restaurant=%d order=%d err=%v", tenantID, restaurantID, finalOrder.ID, confirmErr)
+		} else {
+			updatedOrder, reloadErr := uc.orderRepo.GetOrderByID(tenantID, restaurantID, finalOrder.ID)
+			if reloadErr != nil {
+				log.Printf("[KDS] failed to reload POS order after auto-confirm: tenant=%d restaurant=%d order=%d err=%v", tenantID, restaurantID, finalOrder.ID, reloadErr)
+			} else {
+				finalOrder = updatedOrder
+			}
+		}
+	}
+
+	return finalOrder, nil
 }
 
 // GetOrder retrieves a single order by ID
@@ -222,6 +296,19 @@ func (uc *OrderUseCase) UpdateOrderStatus(
 	err = uc.orderRepo.UpdateOrderStatus(tenantID, restaurantID, orderID, req.Status, nil, req.Reason)
 	if err != nil {
 		return fmt.Errorf("failed to update order status: %w", err)
+	}
+
+	// KDS integration: enqueue order when it transitions to confirmed.
+	if req.Status == "confirmed" && order.Status != "confirmed" && uc.kdsRepo != nil {
+		kdsOrder, enqueueErr := uc.kdsRepo.EnqueueOrder(context.Background(), tenantID, restaurantID, orderID)
+		if enqueueErr != nil {
+			// Keep order status update successful even if KDS enqueue fails.
+			log.Printf("[KDS] enqueue failed after order confirmation: tenant=%d restaurant=%d order=%d err=%v", tenantID, restaurantID, orderID, enqueueErr)
+		} else if uc.kdsBroadcaster != nil {
+			if broadcastErr := uc.kdsBroadcaster.BroadcastKDSUpdate(context.Background(), tenantID, restaurantID, "order_new", kdsOrder); broadcastErr != nil {
+				log.Printf("[KDS] order_new broadcast failed: tenant=%d restaurant=%d order=%d err=%v", tenantID, restaurantID, orderID, broadcastErr)
+			}
+		}
 	}
 
 	return nil
@@ -405,7 +492,7 @@ func (uc *OrderUseCase) validateCreateOrderRequest(req *domain.CreateOrderReques
 		return errors.New("customer name is required")
 	}
 
-	if req.CustomerPhone == "" {
+	if req.CustomerPhone == "" && !strings.EqualFold(strings.TrimSpace(req.OrderSource), "pos") {
 		return errors.New("customer phone is required")
 	}
 
@@ -428,6 +515,10 @@ func (uc *OrderUseCase) validateCreateOrderRequest(req *domain.CreateOrderReques
 
 	if len(req.Items) == 0 {
 		return errors.New("order must have at least one item")
+	}
+
+	if req.TableID != nil && *req.TableID <= 0 {
+		return errors.New("table_id must be greater than 0")
 	}
 
 	// Validate items

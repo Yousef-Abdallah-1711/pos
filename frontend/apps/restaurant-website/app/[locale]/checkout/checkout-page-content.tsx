@@ -1,7 +1,6 @@
 ﻿'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { debugLog } from '@/lib/debug'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -16,10 +15,13 @@ import { useCreateOrder } from '@/lib/hooks/use-api-queries'
 import type { ServerThemeData } from '@/lib/api/get-theme-server'
 
 const checkoutSchema = z.object({
-  customerName: z.string().min(2, 'Name is required'),
-  customerEmail: z.string().email('Invalid email'),
+  customerName: z.string().optional(),
+  customerEmail: z
+    .string()
+    .optional()
+    .refine((value) => !value || /\S+@\S+\.\S+/.test(value), 'Invalid email'),
   customerPhone: z.string().min(10, 'Phone is required'),
-  deliveryAddress: z.string().min(5, 'Address is required'),
+  deliveryAddress: z.string().optional(),
   specialInstructions: z.string().optional(),
   paymentMethod: z.literal('cash'),
 })
@@ -32,7 +34,6 @@ interface CheckoutPageContentProps {
 }
 
 export function CheckoutPageContent({ locale, themeData }: CheckoutPageContentProps) {
-  const router = useRouter()
   const isRTL = locale === 'ar'
   const t = createTranslator(locale)
 
@@ -42,6 +43,9 @@ export function CheckoutPageContent({ locale, themeData }: CheckoutPageContentPr
   const cartItems = useCartStore((state) => state.items)
   const cartTotal = useCartStore((state) => state.getTotal())
   const clearCart = useCartStore((state) => state.clearCart)
+  const tableId = useCartStore((state) => state.tableId)
+  const tableName = useCartStore((state) => state.tableName)
+  const isDineIn = tableId !== null
 
   const { mutate: createOrder, isPending: isLoading } = useCreateOrder()
   const [error, setError] = useState<string | null>(null)
@@ -56,11 +60,16 @@ export function CheckoutPageContent({ locale, themeData }: CheckoutPageContentPr
     resolver: zodResolver(checkoutSchema),
     defaultValues: {
       paymentMethod: 'cash',
+      customerName: '',
+      customerEmail: '',
+      customerPhone: '',
+      deliveryAddress: '',
     },
   })
 
-  const deliveryFee = cartTotal > 50 ? 0 : 5.99
+  const deliveryFee = isDineIn ? 0 : cartTotal > 50 ? 0 : 5.99
   const grandTotal = cartTotal + deliveryFee
+  const menuPath = isDineIn && tableId ? `/${locale}/table/${tableId}/menu` : `/${locale}/menu`
 
   if (successOrderNumber) {
     return (
@@ -75,7 +84,7 @@ export function CheckoutPageContent({ locale, themeData }: CheckoutPageContentPr
           <p className="text-gray-600 dark:text-gray-400 mb-4">{t('checkout.orderNumber')}:</p>
           <p className="checkout-success-order text-2xl font-bold mb-6">{successOrderNumber}</p>
           <div className={`flex gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
-            <Link href={`/${locale}/menu`} className="flex-1">
+            <Link href={menuPath} className="flex-1">
               <Button className="w-full">{t('common.menu')}</Button>
             </Link>
             <Link href={`/${locale}/orders/track/${successOrderNumber}`} className="flex-1">
@@ -95,7 +104,7 @@ export function CheckoutPageContent({ locale, themeData }: CheckoutPageContentPr
         <div className={`text-center ${isRTL ? 'text-right' : ''}`}>
           <AlertCircle className="h-16 w-16 text-gray-400 mx-auto mb-4" />
           <h1 className="text-2xl font-bold mb-2">{t('cart.empty')}</h1>
-          <Link href={`/${locale}/menu`}>
+          <Link href={menuPath}>
             <Button className="mt-4">{t('menu.readyToCheckout')}</Button>
           </Link>
         </div>
@@ -105,6 +114,26 @@ export function CheckoutPageContent({ locale, themeData }: CheckoutPageContentPr
 
   const onSubmit = (data: CheckoutFormData) => {
     setError(null)
+
+    const customerName = data.customerName?.trim() || ''
+    const customerEmail = data.customerEmail?.trim() || ''
+    const customerPhone = data.customerPhone?.trim() || ''
+    const deliveryAddress = data.deliveryAddress?.trim() || ''
+
+    if (!isDineIn && customerName.length < 2) {
+      setError(`${t('checkout.fullName')} ${t('errors.required')}`)
+      return
+    }
+
+    if (!customerPhone || customerPhone.length < 10) {
+      setError(`${t('checkout.phone')} ${t('errors.required')}`)
+      return
+    }
+
+    if (!isDineIn && deliveryAddress.length < 5) {
+      setError(`${t('checkout.deliveryAddress')} ${t('errors.required')}`)
+      return
+    }
 
     const insufficientItems = cartItems.filter(
       (item) =>
@@ -131,14 +160,16 @@ export function CheckoutPageContent({ locale, themeData }: CheckoutPageContentPr
 
     createOrder(
       {
-        customer_name: data.customerName,
-        customer_email: data.customerEmail,
-        customer_phone: data.customerPhone,
-        delivery_address: data.deliveryAddress,
+        customer_name: customerName || tableName || `Table #${tableId}`,
+        customer_email: customerEmail,
+        customer_phone: customerPhone,
+        delivery_address: isDineIn ? '' : deliveryAddress,
         payment_method: data.paymentMethod,
         notes: data.specialInstructions || '',
         items: orderItems,
-      } as any,
+        table_id: isDineIn && tableId ? tableId : undefined,
+        order_source: isDineIn ? 'dine_in' : 'website',
+      },
       {
         onSuccess: (response) => {
           const responseData = (response?.data as any) || (response as any)
@@ -179,6 +210,16 @@ export function CheckoutPageContent({ locale, themeData }: CheckoutPageContentPr
       </div>
 
       <div className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 ${isRTL ? 'text-right' : ''}`}>
+        {isDineIn && (
+          <div
+            className={`mb-6 rounded-lg border px-4 py-3 text-sm font-medium bg-orange-50 border-orange-200 text-orange-900 dark:bg-orange-900/20 dark:border-orange-700 dark:text-orange-200 ${
+              isRTL ? 'text-right' : ''
+            }`}
+          >
+            {t('tableOrdering.dineInOrder')} - {tableName || `${t('tableOrdering.table')} #${tableId}`}
+          </div>
+        )}
+
         <div className={`grid grid-cols-1 lg:grid-cols-3 gap-8 ${isRTL ? 'lg:grid-flow-col-dense' : ''}`}>
           <div className={`lg:col-span-2 ${isRTL ? 'lg:order-2' : ''}`}>
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
@@ -194,7 +235,10 @@ export function CheckoutPageContent({ locale, themeData }: CheckoutPageContentPr
                   <h2 className="text-2xl font-bold mb-4">{t('checkout.customerInformation')}</h2>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium mb-1">{t('checkout.fullName')}</label>
+                      <label className="block text-sm font-medium mb-1">
+                        {t('checkout.fullName')}
+                        {isDineIn ? ` (${t('checkout.optional')})` : ''}
+                      </label>
                       <input
                         {...register('customerName')}
                         type="text"
@@ -240,36 +284,38 @@ export function CheckoutPageContent({ locale, themeData }: CheckoutPageContentPr
                   </div>
                 </div>
 
-                <div>
-                  <h2 className="text-2xl font-bold mb-4">{t('checkout.deliveryInformation')}</h2>
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-medium mb-1">{t('checkout.deliveryAddress')}</label>
-                      <textarea
-                        {...register('deliveryAddress')}
-                        className={`w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 dark:bg-gray-700 dark:text-white ${
-                          isRTL ? 'text-right' : ''
-                        } ${errors.deliveryAddress ? 'border-red-500' : ''}`}
-                        rows={3}
-                        placeholder={t('checkout.deliveryAddress')}
-                      />
-                      {errors.deliveryAddress && (
-                        <p className="text-red-500 text-sm mt-1">{errors.deliveryAddress.message}</p>
-                      )}
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium mb-1">{t('checkout.specialInstructions')}</label>
-                      <textarea
-                        {...register('specialInstructions')}
-                        className={`w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 dark:bg-gray-700 dark:text-white ${
-                          isRTL ? 'text-right' : ''
-                        }`}
-                        rows={2}
-                        placeholder={t('checkout.specialInstructions')}
-                      />
+                {!isDineIn && (
+                  <div>
+                    <h2 className="text-2xl font-bold mb-4">{t('checkout.deliveryInformation')}</h2>
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-sm font-medium mb-1">{t('checkout.deliveryAddress')}</label>
+                        <textarea
+                          {...register('deliveryAddress')}
+                          className={`w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 dark:bg-gray-700 dark:text-white ${
+                            isRTL ? 'text-right' : ''
+                          } ${errors.deliveryAddress ? 'border-red-500' : ''}`}
+                          rows={3}
+                          placeholder={t('checkout.deliveryAddress')}
+                        />
+                        {errors.deliveryAddress && (
+                          <p className="text-red-500 text-sm mt-1">{errors.deliveryAddress.message}</p>
+                        )}
+                      </div>
                     </div>
                   </div>
+                )}
+
+                <div>
+                  <label className="block text-sm font-medium mb-1">{t('checkout.specialInstructions')}</label>
+                  <textarea
+                    {...register('specialInstructions')}
+                    className={`w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 dark:bg-gray-700 dark:text-white ${
+                      isRTL ? 'text-right' : ''
+                    }`}
+                    rows={2}
+                    placeholder={t('checkout.specialInstructions')}
+                  />
                 </div>
 
                 <div>
@@ -277,9 +323,11 @@ export function CheckoutPageContent({ locale, themeData }: CheckoutPageContentPr
                   <div className="checkout-payment-card p-4 border-2 rounded-lg bg-green-50 dark:bg-green-900/20">
                     <input {...register('paymentMethod')} type="hidden" value="cash" />
                     <span className="font-semibold text-green-700 dark:text-green-400">
-                      ðŸ’µ {t('checkout.cash')} (Cash on Delivery)
+                      ðŸ’µ {t('checkout.cash')} {isDineIn ? `(${t('tableOrdering.payAtTable')})` : '(Cash on Delivery)'}
                     </span>
-                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Pay when your order arrives</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                      {isDineIn ? t('tableOrdering.payAtTableHint') : 'Pay when your order arrives'}
+                    </p>
                   </div>
                 </div>
 

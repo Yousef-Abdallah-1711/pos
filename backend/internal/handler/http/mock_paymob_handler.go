@@ -9,7 +9,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
-	"os"
+	appconfig "pos-saas/internal/config"
 	"strconv"
 	"strings"
 	"time"
@@ -271,14 +271,15 @@ func withBillingStatus(baseURL string, status string, orderID int64) string {
 }
 
 func defaultBillingRedirectURL(r *http.Request) string {
-	dashboardBase := strings.TrimSpace(os.Getenv("DASHBOARD_URL"))
-	if dashboardBase == "" {
-		dashboardBase = strings.TrimSpace(os.Getenv("NEXT_PUBLIC_DASHBOARD_URL"))
+	dashboardBase, err := appconfig.ResolveRuntimeURL(
+		[]string{"DASHBOARD_URL", "NEXT_PUBLIC_DASHBOARD_URL"},
+		"http://localhost:3002",
+		"dashboard URL",
+	)
+	if err != nil {
+		log.Printf("[MockPaymob] dashboard URL configuration error: %v", err)
+		return ""
 	}
-	if dashboardBase == "" {
-		dashboardBase = "http://localhost:3002"
-	}
-	dashboardBase = strings.TrimRight(dashboardBase, "/")
 
 	locale := detectLocale(r)
 	return fmt.Sprintf("%s/%s/dashboard/settings/billing", dashboardBase, locale)
@@ -302,14 +303,15 @@ func normalizeBillingRedirectURL(raw string) string {
 	// Convert app-relative URLs into absolute dashboard URLs so opening the iframe
 	// directly in a new tab does not redirect back to backend host.
 	if strings.HasPrefix(parsed.Path, "/") {
-		base := strings.TrimSpace(os.Getenv("DASHBOARD_URL"))
-		if base == "" {
-			base = strings.TrimSpace(os.Getenv("NEXT_PUBLIC_DASHBOARD_URL"))
+		base, err := appconfig.ResolveRuntimeURL(
+			[]string{"DASHBOARD_URL", "NEXT_PUBLIC_DASHBOARD_URL"},
+			"http://localhost:3002",
+			"dashboard URL",
+		)
+		if err != nil {
+			log.Printf("[MockPaymob] dashboard URL configuration error: %v", err)
+			return ""
 		}
-		if base == "" {
-			base = "http://localhost:3002"
-		}
-		base = strings.TrimRight(base, "/")
 		return base + parsed.String()
 	}
 

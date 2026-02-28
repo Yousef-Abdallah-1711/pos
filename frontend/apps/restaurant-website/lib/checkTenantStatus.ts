@@ -1,4 +1,5 @@
 import { debugLog, debugWarn, debugError } from './debug'
+import { getApiBaseUrl } from './config/api'
 
 /**
  * Utility function to check tenant status from server-side
@@ -62,7 +63,7 @@ export async function checkTenantStatus(slug: string): Promise<TenantStatusResul
   try {
     debugLog(`[checkTenantStatus] Checking status for slug: ${slug}`)
 
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api/v1'
+    const apiUrl = getApiBaseUrl()
     const url = `${apiUrl}/public/tenant-status/${encodeURIComponent(slug)}`
 
     debugLog(`[checkTenantStatus] Fetching from: ${url}`)

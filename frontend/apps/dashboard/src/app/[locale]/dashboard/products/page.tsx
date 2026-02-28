@@ -91,7 +91,7 @@ export default function ProductsPage() {
 
         setProducts(response.data.products || [])
       } catch (error) {
-        toast.error(t('failedToLoad'))
+        toast.error(t('products.loadFailed', 'Failed to load products'))
         debugError(error)
       } finally {
         setLoading(false)
@@ -148,10 +148,10 @@ export default function ProductsPage() {
             <Lock className="h-5 w-5 text-red-600 dark:text-red-400 mt-0.5 flex-shrink-0" />
             <div>
               <h2 className="font-semibold text-red-900 dark:text-red-300">
-                Access Denied
+                {t('products.accessDeniedTitle', 'Access Denied')}
               </h2>
               <p className="text-sm text-red-800 dark:text-red-400 mt-1">
-                You do not have permission to view products. Please contact your administrator.
+                {t('products.accessDeniedText', 'You do not have permission to view products. Please contact your administrator.')}
               </p>
             </div>
           </div>

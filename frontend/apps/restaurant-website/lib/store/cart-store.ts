@@ -25,6 +25,10 @@ export interface AddToCartProduct {
 
 interface CartStore {
   items: CartItem[];
+  tableId: number | null;
+  tableName: string | null;
+  setTableContext: (tableId: number, tableName?: string | null) => void;
+  clearTableContext: () => void;
   addItem: (product: AddToCartProduct) => void;
   removeItem: (productId: number) => void;
   updateQuantity: (productId: number, quantity: number) => void;
@@ -41,6 +45,22 @@ export const useCartStore = create<CartStore>()(
   persist(
     (set, get) => ({
       items: [],
+      tableId: null,
+      tableName: null,
+
+      setTableContext: (tableId, tableName) => {
+        set({
+          tableId,
+          tableName: tableName?.trim() || null,
+        });
+      },
+
+      clearTableContext: () => {
+        set({
+          tableId: null,
+          tableName: null,
+        });
+      },
 
       addItem: (product) => {
         set((state) => {
@@ -165,6 +185,8 @@ export const useCartStore = create<CartStore>()(
       name: "cart-store",
       partialize: (state) => ({
         items: state.items,
+        tableId: state.tableId,
+        tableName: state.tableName,
       }),
     }
   )
@@ -177,5 +199,7 @@ export const useCartStore = create<CartStore>()(
 export const selectCartItems = (state: CartStore) => state.items;
 export const selectCartTotal = (state: CartStore) => state.getTotal();
 export const selectCartItemsCount = (state: CartStore) => state.getTotalItems();
+export const selectCartTableId = (state: CartStore) => state.tableId;
+export const selectCartTableName = (state: CartStore) => state.tableName;
 export const selectCartItemByProductId = (productId: number) => (state: CartStore) =>
   state.items.find((item) => item.productId === productId);

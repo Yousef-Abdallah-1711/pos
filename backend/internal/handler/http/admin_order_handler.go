@@ -34,10 +34,15 @@ func NewAdminOrderHandler(orderUC *usecase.OrderUseCase, driverRepo repository.D
 type adminOrderSummary struct {
 	ID              int64     `json:"id"`
 	OrderNumber     string    `json:"order_number"`
+	OrderSource     string    `json:"order_source"`
 	CustomerName    string    `json:"customer_name"`
 	CustomerEmail   string    `json:"customer_email"`
 	CustomerPhone   string    `json:"customer_phone"`
 	DeliveryAddress string    `json:"delivery_address"`
+	TableID         *int64    `json:"table_id,omitempty"`
+	TableNumber     *int      `json:"table_number,omitempty"`
+	TableName       string    `json:"table_name,omitempty"`
+	TableLocation   string    `json:"table_location,omitempty"`
 	Status          string    `json:"status"`
 	PaymentStatus   string    `json:"payment_status"`
 	PaymentMethod   string    `json:"payment_method"`
@@ -68,25 +73,36 @@ type adminOrderHistory struct {
 	ChangedBy string    `json:"changed_by,omitempty"`
 }
 
+type adminOrderTableInfo struct {
+	ID         int64  `json:"id"`
+	Number     int    `json:"number"`
+	Name       string `json:"name,omitempty"`
+	Location   string `json:"location,omitempty"`
+	Capacity   int    `json:"capacity,omitempty"`
+	IsAssigned bool   `json:"is_assigned"`
+}
+
 type adminOrderDetail struct {
-	ID              int64               `json:"id"`
-	OrderNumber     string              `json:"order_number"`
-	CustomerName    string              `json:"customer_name"`
-	CustomerEmail   string              `json:"customer_email"`
-	CustomerPhone   string              `json:"customer_phone"`
-	DeliveryAddress string              `json:"delivery_address"`
-	DeliveryNotes   string              `json:"delivery_notes,omitempty"`
-	Status          string              `json:"status"`
-	PaymentStatus   string              `json:"payment_status"`
-	PaymentMethod   string              `json:"payment_method"`
-	Subtotal        float64             `json:"subtotal"`
-	Tax             float64             `json:"tax"`
-	DeliveryFee     float64             `json:"delivery_fee"`
-	Discount        float64             `json:"discount"`
-	Total           float64             `json:"total"`
-	CreatedAt       time.Time           `json:"created_at"`
-	Items           []adminOrderItem    `json:"items"`
-	StatusHistory   []adminOrderHistory `json:"status_history"`
+	ID              int64                `json:"id"`
+	OrderNumber     string               `json:"order_number"`
+	OrderSource     string               `json:"order_source"`
+	CustomerName    string               `json:"customer_name"`
+	CustomerEmail   string               `json:"customer_email"`
+	CustomerPhone   string               `json:"customer_phone"`
+	DeliveryAddress string               `json:"delivery_address"`
+	DeliveryNotes   string               `json:"delivery_notes,omitempty"`
+	Status          string               `json:"status"`
+	PaymentStatus   string               `json:"payment_status"`
+	PaymentMethod   string               `json:"payment_method"`
+	Subtotal        float64              `json:"subtotal"`
+	Tax             float64              `json:"tax"`
+	DeliveryFee     float64              `json:"delivery_fee"`
+	Discount        float64              `json:"discount"`
+	Total           float64              `json:"total"`
+	CreatedAt       time.Time            `json:"created_at"`
+	Table           *adminOrderTableInfo `json:"table,omitempty"`
+	Items           []adminOrderItem     `json:"items"`
+	StatusHistory   []adminOrderHistory  `json:"status_history"`
 }
 
 // ListOrders lists orders with pagination and filters.
@@ -112,6 +128,15 @@ func (h *AdminOrderHandler) ListOrders(w http.ResponseWriter, r *http.Request) {
 	filters.PaymentStatus = strings.TrimSpace(query.Get("payment_status"))
 	filters.CustomerName = strings.TrimSpace(query.Get("customer_name"))
 	filters.CustomerEmail = strings.TrimSpace(query.Get("customer_email"))
+	filters.OrderSource = strings.TrimSpace(query.Get("order_source"))
+	if rawTableID := strings.TrimSpace(query.Get("table_id")); rawTableID != "" {
+		tableID, parseErr := strconv.ParseInt(rawTableID, 10, 64)
+		if parseErr != nil || tableID <= 0 {
+			respondError(w, http.StatusBadRequest, "Invalid table_id")
+			return
+		}
+		filters.TableID = &tableID
+	}
 
 	search := strings.TrimSpace(query.Get("search"))
 	if search != "" && filters.CustomerName == "" && filters.CustomerEmail == "" {
@@ -167,10 +192,15 @@ func (h *AdminOrderHandler) ListOrders(w http.ResponseWriter, r *http.Request) {
 		orders = append(orders, adminOrderSummary{
 			ID:              orderForResponse.ID,
 			OrderNumber:     orderForResponse.OrderNumber,
+			OrderSource:     orderForResponse.OrderSource,
 			CustomerName:    orderForResponse.CustomerName,
 			CustomerEmail:   orderForResponse.CustomerEmail,
 			CustomerPhone:   orderForResponse.CustomerPhone,
 			DeliveryAddress: orderForResponse.DeliveryAddress,
+			TableID:         orderForResponse.TableID,
+			TableNumber:     orderForResponse.TableNumber,
+			TableName:       orderForResponse.TableName,
+			TableLocation:   orderForResponse.TableLocation,
 			Status:          orderForResponse.Status,
 			PaymentStatus:   orderForResponse.PaymentStatus,
 			PaymentMethod:   orderForResponse.PaymentMethod,
@@ -279,9 +309,26 @@ func (h *AdminOrderHandler) GetOrder(w http.ResponseWriter, r *http.Request) {
 		deliveryNotes = order.Notes
 	}
 
+	var tableInfo *adminOrderTableInfo
+	if order.TableID != nil {
+		tableInfo = &adminOrderTableInfo{
+			ID:         *order.TableID,
+			Name:       order.TableName,
+			Location:   order.TableLocation,
+			IsAssigned: true,
+		}
+		if order.TableNumber != nil {
+			tableInfo.Number = *order.TableNumber
+		}
+		if order.TableCapacity != nil {
+			tableInfo.Capacity = *order.TableCapacity
+		}
+	}
+
 	respondJSON(w, http.StatusOK, adminOrderDetail{
 		ID:              order.ID,
 		OrderNumber:     order.OrderNumber,
+		OrderSource:     order.OrderSource,
 		CustomerName:    order.CustomerName,
 		CustomerEmail:   order.CustomerEmail,
 		CustomerPhone:   order.CustomerPhone,
@@ -296,6 +343,7 @@ func (h *AdminOrderHandler) GetOrder(w http.ResponseWriter, r *http.Request) {
 		Discount:        order.DiscountAmount,
 		Total:           order.TotalAmount,
 		CreatedAt:       order.CreatedAt,
+		Table:           tableInfo,
 		Items:           items,
 		StatusHistory:   statusHistory,
 	})

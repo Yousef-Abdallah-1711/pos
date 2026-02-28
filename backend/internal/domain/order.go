@@ -8,10 +8,15 @@ import (
 
 // Order represents a customer order from a restaurant
 type Order struct {
-	ID           int64  `json:"id"`
-	TenantID     int64  `json:"tenant_id"`
-	RestaurantID int64  `json:"restaurant_id"`
-	OrderNumber  string `json:"order_number"`
+	ID            int64  `json:"id"`
+	TenantID      int64  `json:"tenant_id"`
+	RestaurantID  int64  `json:"restaurant_id"`
+	OrderNumber   string `json:"order_number"`
+	TableID       *int64 `json:"table_id,omitempty"`
+	TableNumber   *int   `json:"table_number,omitempty"`
+	TableName     string `json:"table_name,omitempty"`
+	TableLocation string `json:"table_location,omitempty"`
+	TableCapacity *int   `json:"table_capacity,omitempty"`
 
 	// Customer Information
 	CustomerName  string `json:"customer_name"`
@@ -103,6 +108,7 @@ type CreateOrderRequest struct {
 	CustomerName  string `json:"customer_name" validate:"required"`
 	CustomerEmail string `json:"customer_email"`
 	CustomerPhone string `json:"customer_phone" validate:"required"`
+	TableID       *int64 `json:"table_id"`
 
 	DeliveryAddress      string   `json:"delivery_address"`
 	DeliveryCity         string   `json:"delivery_city"`
@@ -147,6 +153,8 @@ type OrderListFilters struct {
 	PaymentStatus    string
 	CustomerName     string
 	CustomerEmail    string
+	OrderSource      string
+	TableID          *int64
 	StartDate        time.Time
 	EndDate          time.Time
 	MinAmount        float64

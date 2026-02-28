@@ -29,23 +29,18 @@ export type {
 } from './types'
 
 // Components
-export { ThemeProvider } from './components/ThemeProvider'
-export { SectionRenderer } from './components/SectionRenderer'
-export { Header } from './components/Header'
-export { Footer } from './components/Footer'
+export { ThemeProvider, SectionRenderer, Header, Footer } from './components'
 
 // Sections
-export { HeroSection } from './sections/HeroSection'
-export { ProductsSection } from './sections/ProductsSection'
-export { WhyChooseUsSection } from './sections/WhyChooseUsSection'
-export { ContactSection } from './sections/ContactSection'
-export { TestimonialsSection } from './sections/TestimonialsSection'
-export { CTASection } from './sections/CTASection'
-export { CustomSection } from './sections/CustomSection'
-
-// Theme Definitions
-export { AVAILABLE_THEMES, RAKMYAT_THEME_BASE } from './themes'
-export type { AvailableThemeKey } from './themes'
+export {
+  HeroSection,
+  ProductsSection,
+  WhyChooseUsSection,
+  ContactSection,
+  TestimonialsSection,
+  CTASection,
+  CustomSection,
+} from './sections'
 
 // Component Registry System
 export { componentRegistry, resolveDynamicComponent, ComponentLoadingFallback, ComponentErrorFallback } from './registry/componentRegistry'

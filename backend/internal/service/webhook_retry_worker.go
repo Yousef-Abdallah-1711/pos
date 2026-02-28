@@ -10,6 +10,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	appconfig "pos-saas/internal/config"
 	"strings"
 	"time"
 )
@@ -141,7 +142,11 @@ func NewWebhookRetryWorker(
 		normalizedBase = strings.TrimRight(strings.TrimSpace(os.Getenv("APP_BASE_URL")), "/")
 	}
 	if normalizedBase == "" {
-		normalizedBase = "http://localhost:8080"
+		if appconfig.IsProductionMode() {
+			log.Printf("[PaymentWebhook] APP_BASE_URL is required in production for retry worker")
+		} else {
+			normalizedBase = "http://localhost:8080"
+		}
 	}
 
 	return &WebhookRetryWorker{

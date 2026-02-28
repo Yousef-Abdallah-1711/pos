@@ -4,6 +4,10 @@
 **Last Updated:** February 22, 2026
 **Build Version:** Phase 1-14 Complete
 
+> URL note: many commands in this checklist use `localhost` for local/staging smoke tests.
+> For production execution, replace those endpoints/hosts with your deployed domains
+> (for example `https://api.yourdomain.com`) and managed database hosts.
+
 ---
 
 ## 📋 Pre-Deployment Verification (Run Before Every Deploy)
@@ -102,7 +106,7 @@ psql -h localhost -U postgres -d pos_saas -c "\dt payments; \dt tenants;"
 psql -h localhost -U postgres -d pos_saas -c "\di" | grep payment
 ```
 
-#### A.2 Backend Deployment
+#### A.2 Backend Deployment (Local/Staging Smoke Example)
 ```bash
 # 1. Build
 cd backend
@@ -122,7 +126,7 @@ curl http://localhost:8080/api/v1/subscription/plans | jq '.plans[0].price'
 # Should return: 500
 ```
 
-#### A.3 Frontend Deployment
+#### A.3 Frontend Deployment (Local/Staging Smoke Example)
 ```bash
 # 1. Individual app builds (these work on Windows)
 cd frontend/apps/dashboard && pnpm install && pnpm build
@@ -138,7 +142,7 @@ export NEXT_PUBLIC_PAYMOB_MODE=mock
 # Navigate to http://localhost:3001/dashboard/settings/billing
 ```
 
-#### A.4 Smoke Testing (15 minutes)
+#### A.4 Smoke Testing (15 minutes, Local/Staging Example)
 ```bash
 # Test 1: Get subscription plans
 curl -s http://localhost:8080/api/v1/subscription/plans | jq '.plans'

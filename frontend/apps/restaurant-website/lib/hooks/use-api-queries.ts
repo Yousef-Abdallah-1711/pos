@@ -28,6 +28,24 @@ export interface OrderItem {
   notes?: string;
 }
 
+export interface CreateOrderItemPayload {
+  product_id: number;
+  quantity: number;
+  special_instructions?: string;
+}
+
+export interface CreateOrderPayload {
+  customer_name: string;
+  customer_email: string;
+  customer_phone: string;
+  delivery_address?: string;
+  items: CreateOrderItemPayload[];
+  payment_method: string;
+  notes?: string;
+  table_id?: number;
+  order_source?: 'website' | 'dine_in';
+}
+
 export interface Order {
   id: number;
   orderNumber: string;
@@ -218,15 +236,7 @@ export function useCreateOrder() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (orderData: {
-      customerName: string;
-      customerEmail: string;
-      customerPhone: string;
-      deliveryAddress: string;
-      items: OrderItem[];
-      paymentMethod: string;
-      specialInstructions?: string;
-    }) => {
+    mutationFn: async (orderData: CreateOrderPayload) => {
       const response = await apiClient.post<OrderResponse>("/public/orders", orderData);
       return response;
     },

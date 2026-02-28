@@ -10,7 +10,7 @@ const AuthProvider = ({ children }: { children: ReactNode }) => {
     const preferences = usePreferencesStore.getState().settings
     if (preferences) {
       const { setSettings } = usePreferencesStore.getState()
-      // This will trigger applyTheme() and applyColors() via the store's setter
+      // Re-apply persisted preference-driven UI state (colors and metadata)
       setSettings(preferences)
     }
   }, [])

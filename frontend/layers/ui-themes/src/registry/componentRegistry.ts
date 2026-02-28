@@ -75,13 +75,13 @@ class ComponentRegistryManager {
 
       // Register components dynamically based on discovery
       const componentMap: Record<string, () => Promise<any>> = {
-        hero: () => import('../sections/HeroSection').then(m => ({ default: m.HeroSection })),
-        products: () => import('../sections/ProductsSection').then(m => ({ default: m.ProductsSection })),
-        why_us: () => import('../sections/WhyChooseUsSection').then(m => ({ default: m.WhyChooseUsSection })),
-        contact: () => import('../sections/ContactSection').then(m => ({ default: m.ContactSection })),
-        testimonials: () => import('../sections/TestimonialsSection').then(m => ({ default: m.TestimonialsSection })),
-        cta: () => import('../sections/CTASection').then(m => ({ default: m.CTASection })),
-        custom: () => import('../sections/CustomSection').then(m => ({ default: m.CustomSection })),
+        hero: () => import('../sections/marketing/HeroSection').then(m => ({ default: m.HeroSection })),
+        products: () => import('../sections/commerce/ProductsSection').then(m => ({ default: m.ProductsSection })),
+        why_us: () => import('../sections/content/WhyChooseUsSection').then(m => ({ default: m.WhyChooseUsSection })),
+        contact: () => import('../sections/forms/ContactSection').then(m => ({ default: m.ContactSection })),
+        testimonials: () => import('../sections/marketing/TestimonialsSection').then(m => ({ default: m.TestimonialsSection })),
+        cta: () => import('../sections/marketing/CTASection').then(m => ({ default: m.CTASection })),
+        custom: () => import('../sections/custom/CustomSection').then(m => ({ default: m.CustomSection })),
       }
 
       for (const discovered of this.discoveredComponents) {
@@ -119,7 +119,7 @@ class ComponentRegistryManager {
       name: 'Hero Section',
       aliases: ['hero-section', 'hero_section'],
       version: '1.0.0',
-      component: lazy(() => import('../sections/HeroSection').then(m => ({ default: m.HeroSection }))),
+      component: lazy(() => import('../sections/marketing/HeroSection').then(m => ({ default: m.HeroSection }))),
       description: 'Large hero banner with title, subtitle, description, and CTA button',
     })
 
@@ -128,7 +128,7 @@ class ComponentRegistryManager {
       name: 'Products Section',
       aliases: ['products-section', 'products_section', 'featured_products', 'product_grid'],
       version: '1.0.0',
-      component: lazy(() => import('../sections/ProductsSection').then(m => ({ default: m.ProductsSection }))),
+      component: lazy(() => import('../sections/commerce/ProductsSection').then(m => ({ default: m.ProductsSection }))),
       description: 'Display products in grid or list layout',
     })
 
@@ -137,7 +137,7 @@ class ComponentRegistryManager {
       name: 'Why Choose Us Section',
       aliases: ['why-us', 'why_choose_us', 'why-choose-us', 'features'],
       version: '1.0.0',
-      component: lazy(() => import('../sections/WhyChooseUsSection').then(m => ({ default: m.WhyChooseUsSection }))),
+      component: lazy(() => import('../sections/content/WhyChooseUsSection').then(m => ({ default: m.WhyChooseUsSection }))),
       description: 'Highlight features or benefits with multiple columns',
     })
 
@@ -146,7 +146,7 @@ class ComponentRegistryManager {
       name: 'Contact Section',
       aliases: ['contact-section', 'contact_section', 'contact_us'],
       version: '1.0.0',
-      component: lazy(() => import('../sections/ContactSection').then(m => ({ default: m.ContactSection }))),
+      component: lazy(() => import('../sections/forms/ContactSection').then(m => ({ default: m.ContactSection }))),
       description: 'Contact information with optional form and map',
     })
 
@@ -155,7 +155,7 @@ class ComponentRegistryManager {
       name: 'Testimonials Section',
       aliases: ['testimonials-section', 'testimonials_section', 'reviews'],
       version: '1.0.0',
-      component: lazy(() => import('../sections/TestimonialsSection').then(m => ({ default: m.TestimonialsSection }))),
+      component: lazy(() => import('../sections/marketing/TestimonialsSection').then(m => ({ default: m.TestimonialsSection }))),
       description: 'Display customer testimonials in grid or carousel',
     })
 
@@ -164,7 +164,7 @@ class ComponentRegistryManager {
       name: 'Call To Action Section',
       aliases: ['cta-section', 'cta_section', 'call_to_action'],
       version: '1.0.0',
-      component: lazy(() => import('../sections/CTASection').then(m => ({ default: m.CTASection }))),
+      component: lazy(() => import('../sections/marketing/CTASection').then(m => ({ default: m.CTASection }))),
       description: 'Prominent call-to-action section with button',
     })
 
@@ -173,7 +173,7 @@ class ComponentRegistryManager {
       name: 'Custom Section',
       aliases: ['custom-section', 'custom_section', 'html'],
       version: '1.0.0',
-      component: lazy(() => import('../sections/CustomSection').then(m => ({ default: m.CustomSection }))),
+      component: lazy(() => import('../sections/custom/CustomSection').then(m => ({ default: m.CustomSection }))),
       description: 'Custom HTML or markdown content',
     })
 

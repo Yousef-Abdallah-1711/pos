@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { usePathname } from 'next/navigation'
+import { usePathname, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { useAuthStore } from '@/stores/authStore'
 import { useHasPermission } from '@/hooks/useRbac'
@@ -29,10 +29,15 @@ import { debugError } from '@/lib/debug'
 interface Order {
   id: number
   order_number: string
+  order_source?: string
   customer_name: string
   customer_email: string
   customer_phone: string
   delivery_address: string
+  table_id?: number
+  table_number?: number
+  table_name?: string
+  table_location?: string
   status: string
   payment_status: string
   payment_method: string
@@ -47,6 +52,7 @@ interface Order {
 
 export default function OrdersPage() {
   const pathname = usePathname()
+  const searchParams = useSearchParams()
   const locale = getLocaleFromPath(pathname)
   const t = createTranslator(locale)
 
@@ -65,6 +71,7 @@ export default function OrdersPage() {
   const [error, setError] = useState<string | null>(null)
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [paymentFilter, setPaymentFilter] = useState<string>('all')
+  const [tableFilter, setTableFilter] = useState<string>(() => searchParams.get('table_id') || 'all')
   const [searchQuery, setSearchQuery] = useState<string>('')
   const [page, setPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
@@ -88,6 +95,10 @@ export default function OrdersPage() {
 
       if (paymentFilter !== 'all') {
         params.payment_status = paymentFilter
+      }
+
+      if (tableFilter !== 'all') {
+        params.table_id = tableFilter
       }
 
       if (searchQuery.trim()) {
@@ -118,7 +129,19 @@ export default function OrdersPage() {
       return
     }
     fetchOrders()
-  }, [token, statusFilter, paymentFilter, page, searchQuery, canViewOrders, canViewLoading])
+  }, [token, statusFilter, paymentFilter, tableFilter, page, searchQuery, canViewOrders, canViewLoading])
+
+  useEffect(() => {
+    const urlTableID = searchParams.get('table_id')
+    if (!urlTableID) {
+      return
+    }
+
+    if (urlTableID !== tableFilter) {
+      setTableFilter(urlTableID)
+      setPage(1)
+    }
+  }, [searchParams, tableFilter])
 
   if (canViewLoading) {
     return (
@@ -143,10 +166,10 @@ export default function OrdersPage() {
             <Lock className="h-5 w-5 text-red-600 dark:text-red-400 mt-0.5 flex-shrink-0" />
             <div>
               <h2 className="font-semibold text-red-900 dark:text-red-300">
-                Access Denied
+                {t('orders.accessDeniedTitle', 'Access Denied')}
               </h2>
               <p className="text-sm text-red-800 dark:text-red-400 mt-1">
-                You do not have permission to view orders. Please contact your administrator.
+                {t('orders.accessDeniedText', 'You do not have permission to view orders. Please contact your administrator.')}
               </p>
             </div>
           </div>
@@ -176,11 +199,11 @@ export default function OrdersPage() {
   const handleExportCSV = () => {
     try {
       const filename = `orders-export-${new Date().toISOString().split('T')[0]}.csv`
-      exportOrdersToCSV(orders as any, filename)
-      toast.success('Orders exported to CSV')
+      exportOrdersToCSV(orders as any, filename, locale)
+      toast.success(t('orders.exportCsvSuccess', 'Orders exported to CSV'))
     } catch (error: any) {
       debugError('[EXPORT_CSV] Error:', error)
-      toast.error('Failed to export CSV')
+      toast.error(t('orders.exportCsvFailed', 'Failed to export CSV'))
     }
   }
 
@@ -195,9 +218,14 @@ export default function OrdersPage() {
       cancelled: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400',
     }
 
+    const statusLabel =
+      locale === 'ar'
+        ? t(`orders.filters.${status}`, status.replace(/_/g, ' '))
+        : status.replace(/_/g, ' ').charAt(0).toUpperCase() + status.replace(/_/g, ' ').slice(1)
+
     return (
       <span className={`px-3 py-1 text-xs font-semibold rounded-full ${colors[status] || 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400'}`}>
-        {status.replace(/_/g, ' ').charAt(0).toUpperCase() + status.replace(/_/g, ' ').slice(1)}
+        {statusLabel}
       </span>
     )
   }
@@ -210,14 +238,79 @@ export default function OrdersPage() {
       refunded: 'bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400',
     }
 
+    const paymentLabel =
+      locale === 'ar'
+        ? t(`orders.paymentFilters.${paymentStatus}`, paymentStatus)
+        : paymentStatus.charAt(0).toUpperCase() + paymentStatus.slice(1)
+
     return (
       <span className={`px-3 py-1 text-xs font-semibold rounded-full ${colors[paymentStatus] || 'bg-gray-100 dark:bg-gray-900/30'}`}>
-        {paymentStatus.charAt(0).toUpperCase() + paymentStatus.slice(1)}
+        {paymentLabel}
+      </span>
+    )
+  }
+
+  const getOrderSourceBadge = (orderSource?: string) => {
+    const source = orderSource || 'website'
+    const config: Record<string, { label: string; className: string }> = {
+      website: {
+        label: t('orders.sources.website', 'Online'),
+        className: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
+      },
+      dine_in: {
+        label: t('orders.sources.dine_in', 'Dine-in'),
+        className: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300',
+      },
+      mobile_app: {
+        label: t('orders.sources.mobile_app', 'Mobile'),
+        className: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300',
+      },
+      phone: {
+        label: t('orders.sources.phone', 'Phone'),
+        className: 'bg-teal-100 text-teal-800 dark:bg-teal-900/30 dark:text-teal-300',
+      },
+      pos: {
+        label: t('orders.sources.pos', 'POS'),
+        className: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300',
+      },
+    }
+
+    const resolved = config[source] || config.website
+    return (
+      <span className={`inline-flex rounded-full px-2 py-0.5 text-[11px] font-semibold ${resolved.className}`}>
+        {resolved.label}
       </span>
     )
   }
 
   const isRTL = locale === 'ar'
+  const iconGapClass = isRTL ? 'ml-1' : 'mr-1'
+  const rangeStart = totalOrders > 0 ? (page - 1) * 20 + 1 : 0
+  const rangeEnd = Math.min(page * 20, totalOrders)
+  const tableOptions = Array.from(
+    new Map(
+      orders
+        .filter((order) => typeof order.table_id === 'number' && typeof order.table_number === 'number')
+        .map((order) => [
+          order.table_id as number,
+          {
+            tableID: order.table_id as number,
+            label: `${t('navigation.tables', 'Tables')} #${order.table_number}${order.table_name ? ` - ${order.table_name}` : ''}`,
+          },
+        ])
+    ).values()
+  )
+  const tableFilterOptions =
+    tableFilter !== 'all' &&
+    !tableOptions.some((option) => String(option.tableID) === tableFilter)
+      ? [
+          ...tableOptions,
+          {
+            tableID: Number.parseInt(tableFilter, 10),
+            label: `${t('navigation.tables', 'Tables')} #${tableFilter}`,
+          },
+        ]
+      : tableOptions
 
   return (
     <div className="space-y-6">
@@ -236,9 +329,9 @@ export default function OrdersPage() {
             variant="outline"
             size="sm"
             onClick={handleExportCSV}
-            title="Export orders list as CSV"
+            title={t('orders.exportCsvTitle', 'Export orders list as CSV')}
           >
-            <Download className="h-4 w-4 mr-2" />
+            <Download className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
             <span className="hidden sm:inline">CSV</span>
           </Button>
         )}
@@ -260,7 +353,7 @@ export default function OrdersPage() {
           />
         </div>
 
-        {/* Status and Payment Filters */}
+        {/* Status and Payment/Table Filters */}
         <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
           <div className="flex items-center gap-2">
             <Filter className="h-5 w-5 text-gray-400" />
@@ -299,6 +392,24 @@ export default function OrdersPage() {
               <option value="refunded">{t('orders.paymentFilters.refunded')}</option>
             </select>
           </div>
+
+          <div>
+            <select
+              value={tableFilter}
+              onChange={(e) => {
+                setTableFilter(e.target.value)
+                setPage(1)
+              }}
+              className="px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary"
+            >
+              <option value="all">{t('orders.tableFilterAll', 'All Tables')}</option>
+              {tableFilterOptions.map((option) => (
+                <option key={option.tableID} value={option.tableID}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
       </div>
 
@@ -307,7 +418,7 @@ export default function OrdersPage() {
         <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 flex gap-3">
           <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
           <div className="flex-1">
-            <h3 className="font-semibold text-red-800 dark:text-red-300">Error Loading Orders</h3>
+            <h3 className="font-semibold text-red-800 dark:text-red-300">{t('orders.errorLoadingTitle', 'Error Loading Orders')}</h3>
             <p className="text-sm text-red-700 dark:text-red-400 mt-1">{error}</p>
           </div>
         </div>
@@ -325,28 +436,28 @@ export default function OrdersPage() {
               <table className="w-full">
                 <thead className="bg-gray-50 dark:bg-gray-700">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    <th className={`px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider ${isRTL ? 'text-right' : 'text-left'}`}>
                       {t('orders.orderNumber')}
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    <th className={`px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider ${isRTL ? 'text-right' : 'text-left'}`}>
                       {t('orders.customer')}
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    <th className={`px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider ${isRTL ? 'text-right' : 'text-left'}`}>
                       {t('orders.items')}
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    <th className={`px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider ${isRTL ? 'text-right' : 'text-left'}`}>
                       {t('orders.total')}
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    <th className={`px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider ${isRTL ? 'text-right' : 'text-left'}`}>
                       {t('orders.status')}
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    <th className={`px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider ${isRTL ? 'text-right' : 'text-left'}`}>
                       {t('orders.paymentStatus')}
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    <th className={`px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider ${isRTL ? 'text-right' : 'text-left'}`}>
                       {t('orders.createdAt')}
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    <th className={`px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider ${isRTL ? 'text-right' : 'text-left'}`}>
                       {t('orders.actions')}
                     </th>
                   </tr>
@@ -368,6 +479,14 @@ export default function OrdersPage() {
                           >
                             {order.order_number}
                           </Link>
+                          <div className="mt-1 flex flex-wrap items-center gap-1">
+                            {getOrderSourceBadge(order.order_source)}
+                            {typeof order.table_number === 'number' && (
+                              <span className="inline-flex rounded-full border border-amber-300 bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-800 dark:border-amber-500/40 dark:bg-amber-500/20 dark:text-amber-200">
+                                {t('navigation.tables', 'Tables')} #{order.table_number}
+                              </span>
+                            )}
+                          </div>
                         </td>
                         <td className="px-6 py-4">
                           <div className="text-sm">
@@ -402,7 +521,7 @@ export default function OrdersPage() {
                           <div className="flex flex-col gap-1">
                             <Link href={`/${locale}/dashboard/orders/${order.id}`}>
                               <Button variant="outline" size="sm" className="w-full">
-                                <Eye className="h-4 w-4 mr-1" />
+                                <Eye className={`h-4 w-4 ${iconGapClass}`} />
                                 {t('orders.viewDetails')}
                               </Button>
                             </Link>
@@ -416,8 +535,8 @@ export default function OrdersPage() {
                                   setIsAssignmentModalOpen(true)
                                 }}
                               >
-                                <Truck className="h-4 w-4 mr-1" />
-                                Assign Driver
+                                <Truck className={`h-4 w-4 ${iconGapClass}`} />
+                                {t('drivers.assignDriver', 'Assign Driver')}
                               </Button>
                             )}
                             {order.status !== 'cancelled' && order.status !== 'delivered' && (
@@ -428,7 +547,7 @@ export default function OrdersPage() {
                                   className="w-full text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
                                   onClick={() => handleCancelOrder(order.id)}
                                 >
-                                  <XCircle className="h-4 w-4 mr-1" />
+                                  <XCircle className={`h-4 w-4 ${iconGapClass}`} />
                                   {t('orders.cancelOrder')}
                                 </Button>
                               ) : (
@@ -436,10 +555,10 @@ export default function OrdersPage() {
                                   size="sm"
                                   variant="destructive"
                                   disabled
-                                  title="You don't have permission to cancel orders"
+                                  title={t('orders.permissionDeniedCancel', "You don't have permission to cancel orders")}
                                   className="w-full"
                                 >
-                                  <XCircle className="h-4 w-4 mr-1" />
+                                  <XCircle className={`h-4 w-4 ${iconGapClass}`} />
                                   {t('orders.cancelOrder')}
                                 </Button>
                               )
@@ -455,17 +574,17 @@ export default function OrdersPage() {
 
             {/* Pagination */}
             {totalPages > 1 && (
-              <div className="flex justify-center items-center gap-4 p-6 border-t border-gray-200 dark:border-gray-700">
+              <div className={`flex justify-center items-center gap-4 p-6 border-t border-gray-200 dark:border-gray-700 ${isRTL ? 'flex-row-reverse' : ''}`}>
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => setPage(Math.max(1, page - 1))}
                   disabled={page === 1}
                 >
-                  <ChevronLeft className="h-4 w-4" />
+                  {isRTL ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
                 </Button>
                 <span className="text-sm text-gray-600 dark:text-gray-400">
-                  Page {page} of {totalPages}
+                  {`${t('orders.paginationPage', 'Page')} ${page} ${t('orders.paginationOf', 'of')} ${totalPages}`}
                 </span>
                 <Button
                   variant="outline"
@@ -473,7 +592,7 @@ export default function OrdersPage() {
                   onClick={() => setPage(Math.min(totalPages, page + 1))}
                   disabled={page === totalPages}
                 >
-                  <ChevronRight className="h-4 w-4" />
+                  {isRTL ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
                 </Button>
               </div>
             )}
@@ -481,7 +600,7 @@ export default function OrdersPage() {
             {/* Summary */}
             {totalOrders > 0 && (
               <div className="px-6 py-3 bg-gray-50 dark:bg-gray-700/50 border-t border-gray-200 dark:border-gray-700 text-sm text-gray-600 dark:text-gray-400">
-                Showing {(page - 1) * 20 + 1} to {Math.min(page * 20, totalOrders)} of {totalOrders} orders
+                {`${t('orders.showing', 'Showing')} ${rangeStart} ${t('orders.to', 'to')} ${rangeEnd} ${t('orders.of', 'of')} ${totalOrders} ${t('orders.ordersLabel', 'orders')}`}
               </div>
             )}
           </>

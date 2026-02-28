@@ -17,6 +17,7 @@ export function ProductFormPage({ product, categories, onSubmit, onCancel }) {
   const pathname = usePathname()
   const locale = getLocaleFromPath(pathname)
   const t = createTranslator(locale)
+  const isRTL = locale === 'ar'
   const [imageFile, setImageFile] = useState(null)
   const [imagePreview, setImagePreview] = useState(product?.main_image_url || '')
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -114,7 +115,7 @@ export function ProductFormPage({ product, categories, onSubmit, onCancel }) {
 
       await onSubmit(formData)
     } catch (error) {
-      toast.error('Failed to save product')
+      toast.error(t('products.saveFailed', 'Failed to save product'))
       debugError(error)
     } finally {
       setIsSubmitting(false)
@@ -126,13 +127,13 @@ export function ProductFormPage({ product, categories, onSubmit, onCancel }) {
       {/* General Information Section */}
       <section className="space-y-6">
         <div className="pb-4 border-b">
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">General Information</h2>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Basic product details and naming</p>
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">{t('products.generalInformation', 'General Information')}</h2>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{t('products.productBasicDetails', 'Basic product details and naming')}</p>
         </div>
 
         {/* Image Upload */}
         <div className="space-y-2">
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Product Image</label>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('products.productImage', 'Product Image')}</label>
           <Input
             type="file"
             accept="image/*"
@@ -143,7 +144,7 @@ export function ProductFormPage({ product, categories, onSubmit, onCancel }) {
             <div className="relative w-40 h-40 mt-2">
               <Image
                 src={imagePreview}
-                alt="Preview"
+                alt={t('products.imagePreviewAlt', 'Preview')}
                 fill
                 className="object-cover rounded"
               />
@@ -154,18 +155,18 @@ export function ProductFormPage({ product, categories, onSubmit, onCancel }) {
         {/* Names - English and Arabic */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Name (English) *</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('products.nameEnglishRequired', 'Name (English) *')}</label>
             <Controller
               name="name_en"
               control={control}
-              rules={{ required: 'English name is required' }}
-              render={({ field }) => <Input {...field} placeholder="e.g., Grilled Chicken" />}
+              rules={{ required: t('products.nameEnglishRequiredError', 'English name is required') }}
+              render={({ field }) => <Input {...field} placeholder={t('products.nameEnglishPlaceholder', 'e.g., Grilled Chicken')} />}
             />
             {errors.name_en && <span className="text-red-500 text-sm">{errors.name_en.message}</span>}
           </div>
 
           <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Name (Arabic)</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('products.nameArabicLabel', 'Name (Arabic)')}</label>
             <Controller
               name="name_ar"
               control={control}
@@ -177,14 +178,14 @@ export function ProductFormPage({ product, categories, onSubmit, onCancel }) {
 
         {/* Category */}
         <div className="space-y-2">
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Category</label>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('products.categoryLabel', 'Category')}</label>
           <Controller
             name="category_id"
             control={control}
             render={({ field }) => (
               <Select value={field.value.toString()} onValueChange={field.onChange}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select category" />
+                  <SelectValue placeholder={t('products.selectCategory', 'Select category')} />
                 </SelectTrigger>
                 <SelectContent>
                   {categories.map((cat) => (
@@ -204,18 +205,18 @@ export function ProductFormPage({ product, categories, onSubmit, onCancel }) {
         {/* Descriptions - English and Arabic */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Description (English)</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('products.descriptionEnglishLabel', 'Description (English)')}</label>
             <Controller
               name="description_en"
               control={control}
               render={({ field }) => (
-                <Textarea {...field} placeholder="Describe the product..." rows={4} />
+                <Textarea {...field} placeholder={t('products.descriptionEnglishPlaceholder', 'Describe the product...')} rows={4} />
               )}
             />
           </div>
 
           <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Description (Arabic)</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('products.descriptionArabicLabel', 'Description (Arabic)')}</label>
             <Controller
               name="description_ar"
               control={control}
@@ -228,7 +229,7 @@ export function ProductFormPage({ product, categories, onSubmit, onCancel }) {
 
         {/* Availability Toggles */}
         <div className="space-y-4">
-          <div className="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-800 rounded">
+          <div className={`flex items-center space-x-3 ${isRTL ? 'space-x-reverse' : ''} p-3 bg-gray-50 dark:bg-gray-800 rounded`}>
             <Controller
               name="is_available"
               control={control}
@@ -237,12 +238,12 @@ export function ProductFormPage({ product, categories, onSubmit, onCancel }) {
               )}
             />
             <div>
-              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Available</label>
-              <p className="text-xs text-gray-500 dark:text-gray-400">Mark this product as available for purchase</p>
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">{t('products.availableLabel', 'Available')}</label>
+              <p className="text-xs text-gray-500 dark:text-gray-400">{t('products.availableHelp', 'Mark this product as available for purchase')}</p>
             </div>
           </div>
 
-          <div className="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-800 rounded">
+          <div className={`flex items-center space-x-3 ${isRTL ? 'space-x-reverse' : ''} p-3 bg-gray-50 dark:bg-gray-800 rounded`}>
             <Controller
               name="featured"
               control={control}
@@ -251,8 +252,8 @@ export function ProductFormPage({ product, categories, onSubmit, onCancel }) {
               )}
             />
             <div>
-              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Featured Product</label>
-              <p className="text-xs text-gray-500 dark:text-gray-400">Display prominently in menu</p>
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">{t('products.featuredLabel', 'Featured Product')}</label>
+              <p className="text-xs text-gray-500 dark:text-gray-400">{t('products.featuredHelp', 'Display prominently in menu')}</p>
             </div>
           </div>
         </div>
@@ -261,24 +262,24 @@ export function ProductFormPage({ product, categories, onSubmit, onCancel }) {
       {/* Pricing Section */}
       <section className="space-y-6">
         <div className="pb-4 border-b">
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Pricing</h2>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Set prices and discounts</p>
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">{t('products.pricingSectionTitle', 'Pricing')}</h2>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{t('products.pricingSectionHelp', 'Set prices and discounts')}</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Price (EGP) *</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('products.priceEgpRequired', 'Price (EGP) *')}</label>
             <Controller
               name="price"
               control={control}
-              rules={{ required: 'Price is required', min: { value: 0.01, message: 'Price must be greater than 0' } }}
+              rules={{ required: t('products.priceRequired', 'Price is required'), min: { value: 0.01, message: t('products.priceMinError', 'Price must be greater than 0') } }}
               render={({ field }) => <Input {...field} type="number" step="0.01" placeholder="0.00" />}
             />
             {errors.price && <span className="text-red-500 text-sm">{errors.price.message}</span>}
           </div>
 
           <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Cost (EGP)</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('products.costEgpLabel', 'Cost (EGP)')}</label>
             <Controller
               name="cost"
               control={control}
@@ -287,7 +288,7 @@ export function ProductFormPage({ product, categories, onSubmit, onCancel }) {
           </div>
 
           <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Discount Price (EGP)</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('products.discountPriceEgpLabel', 'Discount Price (EGP)')}</label>
             <Controller
               name="discount_price"
               control={control}
@@ -300,11 +301,11 @@ export function ProductFormPage({ product, categories, onSubmit, onCancel }) {
       {/* Inventory Section */}
       <section className="space-y-6">
         <div className="pb-4 border-b">
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Inventory</h2>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Manage stock and tracking</p>
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">{t('products.inventorySectionTitle', 'Inventory')}</h2>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{t('products.inventorySectionHelp', 'Manage stock and tracking')}</p>
         </div>
 
-        <div className="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-800 rounded mb-4">
+        <div className={`flex items-center space-x-3 ${isRTL ? 'space-x-reverse' : ''} p-3 bg-gray-50 dark:bg-gray-800 rounded mb-4`}>
           <Controller
             name="track_inventory"
             control={control}
@@ -313,14 +314,14 @@ export function ProductFormPage({ product, categories, onSubmit, onCancel }) {
             )}
           />
           <div>
-            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Track Inventory</label>
-            <p className="text-xs text-gray-500 dark:text-gray-400">Monitor stock levels for this product</p>
+            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">{t('products.trackInventoryLabel', 'Track Inventory')}</label>
+            <p className="text-xs text-gray-500 dark:text-gray-400">{t('products.trackInventoryHelp', 'Monitor stock levels for this product')}</p>
           </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Quantity in Stock</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('products.quantityInStockLabel', 'Quantity in Stock')}</label>
             <Controller
               name="quantity_in_stock"
               control={control}
@@ -329,7 +330,7 @@ export function ProductFormPage({ product, categories, onSubmit, onCancel }) {
           </div>
 
           <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Low Stock Threshold</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('products.lowStockThresholdLabel', 'Low Stock Threshold')}</label>
             <Controller
               name="low_stock_threshold"
               control={control}
@@ -342,13 +343,13 @@ export function ProductFormPage({ product, categories, onSubmit, onCancel }) {
       {/* Classification Section */}
       <section className="space-y-6">
         <div className="pb-4 border-b">
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Classification</h2>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Dietary and allergen information</p>
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">{t('products.classificationSectionTitle', 'Classification')}</h2>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{t('products.classificationSectionHelp', 'Dietary and allergen information')}</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-3">
-            <div className="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-800 rounded">
+            <div className={`flex items-center space-x-3 ${isRTL ? 'space-x-reverse' : ''} p-3 bg-gray-50 dark:bg-gray-800 rounded`}>
               <Controller
                 name="is_vegetarian"
                 control={control}
@@ -356,10 +357,10 @@ export function ProductFormPage({ product, categories, onSubmit, onCancel }) {
                   <Checkbox checked={field.value} onCheckedChange={field.onChange} />
                 )}
               />
-              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Vegetarian</label>
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">{t('products.vegetarian', 'Vegetarian')}</label>
             </div>
 
-            <div className="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-800 rounded">
+            <div className={`flex items-center space-x-3 ${isRTL ? 'space-x-reverse' : ''} p-3 bg-gray-50 dark:bg-gray-800 rounded`}>
               <Controller
                 name="is_vegan"
                 control={control}
@@ -367,12 +368,12 @@ export function ProductFormPage({ product, categories, onSubmit, onCancel }) {
                   <Checkbox checked={field.value} onCheckedChange={field.onChange} />
                 )}
               />
-              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Vegan</label>
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">{t('products.vegan', 'Vegan')}</label>
             </div>
           </div>
 
           <div className="space-y-3">
-            <div className="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-800 rounded">
+            <div className={`flex items-center space-x-3 ${isRTL ? 'space-x-reverse' : ''} p-3 bg-gray-50 dark:bg-gray-800 rounded`}>
               <Controller
                 name="is_spicy"
                 control={control}
@@ -380,10 +381,10 @@ export function ProductFormPage({ product, categories, onSubmit, onCancel }) {
                   <Checkbox checked={field.value} onCheckedChange={field.onChange} />
                 )}
               />
-              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Spicy</label>
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">{t('products.spicy', 'Spicy')}</label>
             </div>
 
-            <div className="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-800 rounded">
+            <div className={`flex items-center space-x-3 ${isRTL ? 'space-x-reverse' : ''} p-3 bg-gray-50 dark:bg-gray-800 rounded`}>
               <Controller
                 name="is_gluten_free"
                 control={control}
@@ -391,7 +392,7 @@ export function ProductFormPage({ product, categories, onSubmit, onCancel }) {
                   <Checkbox checked={field.value} onCheckedChange={field.onChange} />
                 )}
               />
-              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Gluten Free</label>
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">{t('products.glutenFree', 'Gluten Free')}</label>
             </div>
           </div>
         </div>
@@ -400,10 +401,14 @@ export function ProductFormPage({ product, categories, onSubmit, onCancel }) {
       {/* Form Actions */}
       <div className="flex justify-end gap-3 pt-6 border-t">
         <Button type="button" variant="outline" onClick={onCancel}>
-          Cancel
+          {t('common.cancel', 'Cancel')}
         </Button>
         <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? 'Saving...' : product ? 'Update Product' : 'Create Product'}
+          {isSubmitting
+            ? t('common.saving', 'Saving...')
+            : product
+              ? t('products.updateProductButton', 'Update Product')
+              : t('products.createProductButton', 'Create Product')}
         </Button>
       </div>
     </form>

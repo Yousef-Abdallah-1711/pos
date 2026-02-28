@@ -493,7 +493,7 @@ useCancelOrder()             // Mutation: cancel order
 
 **What's Working**:
 - ✅ Axios client configured
-- ✅ Base URL: `http://localhost:8080/api/v1`
+- ✅ Base URL (local dev example): `http://localhost:8080/api/v1` (production/staging should use env-configured API domain)
 - ✅ Auth headers added automatically
 - ✅ Tenant context headers added
 - ✅ Error handling implemented

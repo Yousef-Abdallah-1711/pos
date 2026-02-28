@@ -1,8 +1,10 @@
 'use client'
 
 import { useMemo } from 'react'
+import { usePathname } from 'next/navigation'
 import { AlertCircle, CheckCircle, AlertTriangle } from 'lucide-react'
 import { GlobalColors } from '@/types/theme'
+import { createTranslator, getLocaleFromPath } from '@/lib/translations'
 
 interface ContrastCheckerProps {
   colors: GlobalColors
@@ -72,6 +74,12 @@ function checkWCAG(ratio: number): {
 }
 
 export function ContrastChecker({ colors, showDetails = true }: ContrastCheckerProps) {
+  const pathname = usePathname()
+  const locale = getLocaleFromPath(pathname)
+  const t = createTranslator(locale)
+  const colorName = (key: string) =>
+    t(`themeBuilderEditor.colors.${key}`, key.charAt(0).toUpperCase() + key.slice(1))
+
   const contrastResults = useMemo<ContrastResult[]>(() => {
     const textColor = colors.text
     const bgColor = colors.background
@@ -157,17 +165,17 @@ export function ContrastChecker({ colors, showDetails = true }: ContrastCheckerP
         <div className="flex-1">
           <h4 className="font-semibold text-sm mb-1">
             {allPassAAA
-              ? 'WCAG AAA - Enhanced Contrast'
+              ? t('themeBuilderEditor.contrast.wcagAAA', 'WCAG AAA - Enhanced Contrast')
               : allPass
-                ? 'WCAG AA - Minimum Contrast'
-                : `${failures.length} Contrast Issues`}
+                ? t('themeBuilderEditor.contrast.wcagAA', 'WCAG AA - Minimum Contrast')
+                : `${failures.length} ${t('themeBuilderEditor.contrast.issues', 'Contrast Issues')}`}
           </h4>
           <p className="text-xs text-gray-600 dark:text-gray-400">
             {allPassAAA
-              ? 'All colors meet enhanced accessibility standards'
+              ? t('themeBuilderEditor.contrast.allEnhanced', 'All colors meet enhanced accessibility standards')
               : allPass
-                ? 'All colors meet minimum accessibility standards'
-                : `${failures.length} color combination(s) fail WCAG AA standard (4.5:1)`}
+                ? t('themeBuilderEditor.contrast.allMinimum', 'All colors meet minimum accessibility standards')
+                : `${failures.length} ${t('themeBuilderEditor.contrast.failAA', 'color combination(s) fail WCAG AA standard (4.5:1)')}`}
           </p>
         </div>
       </div>
@@ -187,10 +195,10 @@ export function ContrastChecker({ colors, showDetails = true }: ContrastCheckerP
                   />
                   <div className="flex-1">
                     <p className="text-sm font-medium capitalize text-gray-900 dark:text-white">
-                      {result.colorKey} on Background
+                      {colorName(result.colorKey)} {t('themeBuilderEditor.contrast.onBackground', 'on Background')}
                     </p>
                     <p className="text-xs text-gray-500 dark:text-gray-400">
-                      Ratio: {result.contrastRatio.toFixed(2)}:1
+                      {t('themeBuilderEditor.contrast.ratio', 'Ratio')}: {result.contrastRatio.toFixed(2)}:1
                     </p>
                   </div>
                 </div>
@@ -198,7 +206,7 @@ export function ContrastChecker({ colors, showDetails = true }: ContrastCheckerP
                 <div className="flex gap-1">
                   {result.wcagAA && (
                     <div
-                      title="Meets WCAG AA (4.5:1)"
+                      title={t('themeBuilderEditor.contrast.meetsAA', 'Meets WCAG AA (4.5:1)')}
                       className="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 text-xs font-medium rounded"
                     >
                       AA
@@ -206,7 +214,7 @@ export function ContrastChecker({ colors, showDetails = true }: ContrastCheckerP
                   )}
                   {result.wcagAAA && (
                     <div
-                      title="Meets WCAG AAA (7:1)"
+                      title={t('themeBuilderEditor.contrast.meetsAAA', 'Meets WCAG AAA (7:1)')}
                       className="px-2 py-1 bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 text-xs font-medium rounded"
                     >
                       AAA
@@ -214,11 +222,11 @@ export function ContrastChecker({ colors, showDetails = true }: ContrastCheckerP
                   )}
                   {!result.wcagAA && (
                     <div
-                      title="Does not meet WCAG AA"
+                      title={t('themeBuilderEditor.contrast.notMeetAA', 'Does not meet WCAG AA')}
                       className="px-2 py-1 bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300 text-xs font-medium rounded flex items-center gap-1"
                     >
                       <AlertCircle className="h-3 w-3" />
-                      Fail
+                      {t('themeBuilderEditor.contrast.fail', 'Fail')}
                     </div>
                   )}
                 </div>
@@ -234,7 +242,7 @@ export function ContrastChecker({ colors, showDetails = true }: ContrastCheckerP
                       }`}
                     />
                     <span className="text-gray-600 dark:text-gray-400">
-                      Large AA {result.largeTextAA ? '✓' : '✗'}
+                      {t('themeBuilderEditor.contrast.largeAA', 'Large AA')} {result.largeTextAA ? '✓' : '✗'}
                     </span>
                   </div>
                   <div className="flex items-center gap-1">
@@ -244,7 +252,7 @@ export function ContrastChecker({ colors, showDetails = true }: ContrastCheckerP
                       }`}
                     />
                     <span className="text-gray-600 dark:text-gray-400">
-                      Large AAA {result.largeTextAAA ? '✓' : '✗'}
+                      {t('themeBuilderEditor.contrast.largeAAA', 'Large AAA')} {result.largeTextAAA ? '✓' : '✗'}
                     </span>
                   </div>
                 </div>
@@ -258,12 +266,12 @@ export function ContrastChecker({ colors, showDetails = true }: ContrastCheckerP
       {failures.length > 0 && (
         <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded-lg">
           <p className="text-xs font-medium text-yellow-800 dark:text-yellow-300 mb-2">
-            💡 Recommendations:
+            {t('themeBuilderEditor.contrast.recommendations', 'Recommendations:')}
           </p>
           <ul className="text-xs text-yellow-700 dark:text-yellow-400 space-y-1 list-disc list-inside">
             {failures.map((f) => (
               <li key={f.colorKey}>
-                Increase contrast for {f.colorKey} (current: {f.contrastRatio.toFixed(2)}:1, need: 4.5:1)
+                {t('themeBuilderEditor.contrast.increaseContrastFor', 'Increase contrast for')} {colorName(f.colorKey)} ({t('themeBuilderEditor.contrast.current', 'current')}: {f.contrastRatio.toFixed(2)}:1, {t('themeBuilderEditor.contrast.need', 'need')}: 4.5:1)
               </li>
             ))}
           </ul>

@@ -146,7 +146,7 @@ See [docs-organized/99-REMAINING-WORK.md](../99-REMAINING-WORK.md) for the full 
 7. ✅ RTL support for Arabic with proper text direction
 
 **Implementation Details**:
-- **File**: `apps/restaurant-website/components/dynamic-home-page.tsx`
+- **File**: `apps/restaurant-website/components/homepage/dynamic-home-page.tsx`
 - **API Endpoint**: `GET /api/v1/public/restaurants/{slug}/homepage`
 - **Response**: Complete theme config with colors, typography, header, footer, components
 - **Components Used**:

@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8080/api/v1';
+import { getApiBaseUrl } from './lib/config/api';
 
 /**
  * Middleware to extract restaurant context from request
@@ -12,6 +11,14 @@ const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8080/
 export async function middleware(request: NextRequest) {
   const host = request.headers.get('host') || '';
   const pathname = request.nextUrl.pathname;
+
+  const legacyTableRouteMatch = pathname.match(/^\/table\/(\d+)\/(en|ar)\/menu\/?$/i);
+  if (legacyTableRouteMatch) {
+    const [, tableId, locale] = legacyTableRouteMatch;
+    const url = request.nextUrl.clone();
+    url.pathname = `/${locale.toLowerCase()}/table/${tableId}/menu`;
+    return NextResponse.redirect(url);
+  }
 
   // Skip middleware for maintenance page (avoid redirect loop)
   if (pathname.startsWith('/maintenance')) {
@@ -40,11 +47,17 @@ export async function middleware(request: NextRequest) {
   requestHeaders.set('x-restaurant-slug', restaurantSlug);
   requestHeaders.set('x-restaurant-locale', validLocale);
 
+  const localeTableRouteMatch = pathname.match(/^\/(en|ar)\/table\/(\d+)\/menu\/?$/i);
+  if (localeTableRouteMatch) {
+    requestHeaders.set('x-table-id', localeTableRouteMatch[2]);
+  }
+
   // For real subdomains (not localhost/www), check tenant status
   const isRealSubdomain = restaurantSlug !== 'localhost' && restaurantSlug !== 'www' && restaurantSlug !== '';
   if (isRealSubdomain) {
     try {
-      const res = await fetch(`${API_BASE}/public/tenant-status/${restaurantSlug}`, {
+      const apiBase = getApiBaseUrl();
+      const res = await fetch(`${apiBase}/public/tenant-status/${restaurantSlug}`, {
         headers: { 'Content-Type': 'application/json' },
       });
 

@@ -3,6 +3,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import axios from "axios";
 import { superAdminAPI } from "@/lib/api";
+import { getSuperAdminApiBaseUrl } from "@/lib/config";
 import type { PaymentMetrics, WebhookHealthResponse } from "@/types";
 import { toast } from "sonner";
 import { Activity, Clock3, RefreshCw, WalletCards, Webhook } from "lucide-react";
@@ -55,7 +56,11 @@ function summaryCardClass(theme: "blue" | "green" | "orange" | "purple") {
 function getErrorMessage(error: unknown) {
   if (axios.isAxiosError(error)) {
     if (!error.response) {
-      return "Cannot connect to backend API. Start backend on http://localhost:8080 and try again.";
+      try {
+        return `Cannot connect to backend API (${getSuperAdminApiBaseUrl()}). Check environment configuration and backend availability.`;
+      } catch {
+        return "Cannot connect to backend API. Check super-admin API URL configuration and backend availability.";
+      }
     }
     const apiMessage =
       (error.response.data as { message?: string; error?: string } | undefined)?.message ||

@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { initiateSubscriptionPayment } from '@/lib/api'
+import { getConfig } from '@/lib/config'
 import { useTenantStatusStore } from '@/stores/tenantStatusStore'
 import { toast } from 'sonner'
 
@@ -24,7 +25,7 @@ function normalizeIframeURL(rawURL: string) {
     return rawURL
   }
 
-  const apiBaseURL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api/v1'
+  const apiBaseURL = getConfig().apiUrl
   const apiOrigin = new URL(apiBaseURL).origin
   if (rawURL.startsWith('/')) {
     return `${apiOrigin}${rawURL}`
@@ -121,4 +122,3 @@ export function usePayment(options?: UsePaymentOptions) {
     error,
   }
 }
-

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useState } from "react";
+import { getApiBaseUrl } from './config/api';
 import { debugWarn } from './debug';
 import { parseSubdomain } from "./subdomain";
 import type { SubdomainContext } from "./subdomain";
@@ -43,7 +44,7 @@ export function SubdomainProvider({ children }: { children: React.ReactNode }) {
         // If we have a restaurant slug, fetch the restaurant info to get IDs
         if (restaurantSlug && isRestaurantSite && typeof window !== "undefined") {
           try {
-            const apiBase = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080/api/v1";
+            const apiBase = getApiBaseUrl();
             const response = await fetch(`${apiBase}/public/restaurants/${restaurantSlug}/info`);
             if (response.ok) {
               const data = await response.json();

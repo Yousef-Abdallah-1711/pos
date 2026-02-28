@@ -1,4 +1,10 @@
 /**
+ * LOCAL/TEST-ONLY SCRIPT
+ *
+ * Defaults to localhost for local/staging stress checks.
+ * Override target safely with:
+ *   BASE_URL=https://api.staging.example.com k6 run backend/tests/load/peak-load.js
+ *
  * k6 Load Testing - Peak Load Scenario
  *
  * Peak/stress test with 1000-10000 concurrent users
@@ -16,7 +22,7 @@ const httpDuration = new Trend('http_req_duration')
 const httpRequests = new Counter('http_requests')
 const responseTime = new Histogram('response_times')
 
-const BASE_URL = __ENV.BASE_URL || 'http://localhost:8080'
+const BASE_URL = (__ENV.BASE_URL || 'http://localhost:8080').replace(/\/$/, '')
 const VUS = parseInt(__ENV.VUS || '1000')
 
 export const options = {

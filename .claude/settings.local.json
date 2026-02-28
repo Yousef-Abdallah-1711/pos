@@ -295,7 +295,8 @@
       "Bash(cmd /c \"taskkill /PID 10296 /F\")",
       "Bash(cmd /c \"taskkill /PID 10296 /F 2>&1\")",
       "WebFetch(domain:developers.paymob.com)",
-      "WebFetch(domain:github.com)"
+      "WebFetch(domain:github.com)",
+      "Bash(cd:)"
     ]
   }
 }

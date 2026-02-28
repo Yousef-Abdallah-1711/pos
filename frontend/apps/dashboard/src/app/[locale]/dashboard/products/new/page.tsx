@@ -56,7 +56,7 @@ export default function CreateProductPage() {
         apiCache.set('categories', categoryData, 300000)
         setCategories(categoryData)
       } catch (error) {
-        toast.error('Failed to load categories')
+        toast.error(t('categories.loadFailed', 'Failed to load categories'))
         debugError('Failed to load categories:', error)
         setCategories([])
       } finally {
@@ -118,10 +118,10 @@ export default function CreateProductPage() {
             <Lock className="h-5 w-5 text-red-600 dark:text-red-400 mt-0.5 flex-shrink-0" />
             <div>
               <h2 className="font-semibold text-red-900 dark:text-red-300">
-                Access Denied
+                {t('products.accessDeniedTitle', 'Access Denied')}
               </h2>
               <p className="text-sm text-red-800 dark:text-red-400 mt-1">
-                You do not have permission to create products. Please contact your administrator.
+                {t('products.accessDeniedCreateText', 'You do not have permission to create products. Please contact your administrator.')}
               </p>
             </div>
           </div>
@@ -152,7 +152,7 @@ export default function CreateProductPage() {
       <div>
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{t('products.createNewProduct')}</h1>
         <p className="text-gray-500 dark:text-gray-400 mt-2">
-          {t('products.addProductDescription') || 'Add a new product to your menu'}
+          {t('products.addProductDescription', 'Add a new product to your menu')}
         </p>
       </div>
 

@@ -5,21 +5,57 @@ import { debugWarn } from '../debug';
  * All API endpoints and configuration should be defined here
  */
 
-/**
- * Get the base API URL from environment variables
- * Falls back to localhost development server if not configured
- */
-export function getApiBaseUrl(): string {
-  if (typeof window === 'undefined') {
-    // Server-side
-    return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api/v1';
+const DEV_API_BASE_URL = 'http://localhost:8080/api/v1';
+let hasWarnedAboutDevFallback = false;
+
+function normalizeBaseUrl(url: string): string {
+  return url.replace(/\/+$/, '');
+}
+
+function getConfiguredApiBaseUrl(): string | null {
+  const raw =
+    process.env.NEXT_PUBLIC_API_BASE_URL ||
+    process.env.NEXT_PUBLIC_API_URL ||
+    '';
+
+  const trimmed = raw.trim();
+  if (!trimmed) {
+    return null;
   }
 
-  // Client-side
-  return (
-    process.env.NEXT_PUBLIC_API_URL ||
-    process.env.NEXT_PUBLIC_API_BASE_URL ||
-    'http://localhost:8080/api/v1'
+  return normalizeBaseUrl(trimmed);
+}
+
+export function isProductionRuntime(): boolean {
+  return process.env.NODE_ENV === 'production';
+}
+
+/**
+ * Resolve the base API URL.
+ * - Prefers env configuration
+ * - Allows localhost fallback in development only
+ * - Throws in production when missing to avoid silently calling localhost
+ */
+export function getApiBaseUrl(): string {
+  const configured = getConfiguredApiBaseUrl();
+  if (configured) {
+    return configured;
+  }
+
+  if (!isProductionRuntime()) {
+    if (!hasWarnedAboutDevFallback) {
+      hasWarnedAboutDevFallback = true;
+      debugWarn(
+        '[config/api] NEXT_PUBLIC_API_BASE_URL (or NEXT_PUBLIC_API_URL) is not set. ' +
+        `Using development fallback: ${DEV_API_BASE_URL}`
+      );
+    }
+    return DEV_API_BASE_URL;
+  }
+
+  throw new Error(
+    '[config/api] Missing required API base URL in production. ' +
+    'Set NEXT_PUBLIC_API_BASE_URL (preferred) or NEXT_PUBLIC_API_URL.'
   );
 }
 
@@ -59,17 +95,5 @@ export function buildApiUrl(endpoint: string, baseUrl?: string): string {
  * Validate that required environment variables are set
  */
 export function validateApiConfig(): void {
-  const apiUrl = getApiBaseUrl();
-
-  if (!apiUrl) {
-    debugWarn(
-      'API_URL not configured. Set NEXT_PUBLIC_API_URL environment variable. ' +
-      'Falling back to localhost:8080/api/v1'
-    );
-  }
-}
-
-// Validate on module load
-if (typeof window !== 'undefined') {
-  validateApiConfig();
+  getApiBaseUrl();
 }

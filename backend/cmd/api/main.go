@@ -17,7 +17,9 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	"pos-saas/internal/config"
 	handler "pos-saas/internal/handler/http"
+	kdsws "pos-saas/internal/handler/ws"
 	"pos-saas/internal/middleware"
+	"pos-saas/internal/observability"
 	"pos-saas/internal/pkg/database"
 	"pos-saas/internal/pkg/jwt"
 	"pos-saas/internal/repository"
@@ -69,10 +71,15 @@ func init() {
 }
 
 func main() {
+	startedAt := time.Now()
+
 	// Load configuration
 	cfg, err := config.Load()
 	if err != nil {
 		log.Fatalf("Failed to load config: %v", err)
+	}
+	if err := config.ValidateProductionURLConfig(); err != nil {
+		log.Fatalf("Invalid production URL configuration: %v", err)
 	}
 
 	// Connect to database
@@ -82,6 +89,7 @@ func main() {
 		log.Printf("⚠️ Warning: Failed to connect to database: %v. Continuing without database (stub mode).", err)
 		db = nil
 	} else {
+		startDBHealthMonitor(db, 15*time.Second)
 		defer db.Close()
 	}
 
@@ -90,6 +98,17 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to create token service: %v", err)
 	}
+
+	// KDS websocket hub (Phase 4)
+	kdsHub := kdsws.NewKDSHub()
+	go kdsHub.Run()
+	defer func() {
+		shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		if shutdownErr := kdsHub.Shutdown(shutdownCtx); shutdownErr != nil {
+			log.Printf("[KDS WS] graceful shutdown timed out: %v", shutdownErr)
+		}
+	}()
 
 	// Initialize repositories
 	authRepo := repository.NewAuthRepository(db)
@@ -100,6 +119,8 @@ func main() {
 
 	// Order Management repositories
 	orderRepo := repository.NewOrderRepository(db)
+	tableRepo := repository.NewTableRepository(db)
+	kdsRepo := repository.NewKDSRepository(db)
 
 	// Driver Management repository
 	driverRepo := repository.NewDriverRepository(db)
@@ -192,14 +213,24 @@ func main() {
 	if superAdminRepo != nil {
 		authUseCase.SetSuperAdminRepo(superAdminRepo)
 	}
-	uploadBaseURL := os.Getenv("UPLOAD_BASE_URL")
-	if uploadBaseURL == "" {
-		uploadBaseURL = "http://localhost:8080/uploads"
+	uploadBaseURL, err := config.ResolveRuntimeURL(
+		[]string{"UPLOAD_BASE_URL"},
+		"http://localhost:"+cfg.Server.Port+"/uploads",
+		"upload base URL",
+	)
+	if err != nil {
+		log.Fatalf("Invalid upload URL configuration: %v", err)
 	}
 	productUC := usecase.NewProductUseCase(productRepo, notificationRepo, uploadBaseURL)
 	// NOTE: User settings use case reserved for Phase 2
 	notificationUC := usecase.NewNotificationUseCase(notificationRepo)
 	orderUC := usecase.NewOrderUseCase(orderRepo, productRepo)
+	orderUC.SetTableRepository(tableRepo)
+	orderUC.SetKDSRepository(kdsRepo)
+	orderUC.SetKDSBroadcaster(kdsHub)
+	tableUC := usecase.NewTableUseCase(tableRepo)
+	kdsUC := usecase.NewKDSUseCase(kdsRepo)
+	kdsUC.SetBroadcaster(kdsHub)
 
 	// RBAC use cases (Phase 2 - commented out, not used in current phase)
 	// 	// roleUC := usecase.NewRoleUseCase(roleRepo, auditLogRepo)
@@ -260,6 +291,10 @@ func main() {
 	// Order Management handlers
 	publicOrderHandler := handler.NewPublicOrderHandler(orderUC, restaurantRepo)
 	adminOrderHandler := handler.NewAdminOrderHandler(orderUC, driverRepo, userRoleRepo)
+	tableHandler := handler.NewTableHandler(tableUC)
+	kdsHandler := handler.NewKDSHandler(kdsUC)
+	kdsWSHandler := kdsws.NewKDSWSHandler(kdsHub, tokenService)
+	reportHandler := handler.NewReportHandler(db)
 
 	// Driver Management handler
 	adminDriverHandler := handler.NewAdminDriverHandler(driverRepo, orderUC)
@@ -321,10 +356,14 @@ func main() {
 			webhookRetryQueue = service.NewWebhookRetryQueue(db)
 
 			// Worker retries transient webhook failures (1m -> 5m -> 30m -> 2h -> 12h).
-			baseURL := os.Getenv("WEBHOOK_BASE_URL")
-		if baseURL == "" {
-			baseURL = "http://localhost:" + cfg.Server.Port
-		}
+			baseURL, err := config.ResolveRuntimeURL(
+				[]string{"WEBHOOK_BASE_URL", "APP_BASE_URL"},
+				"http://localhost:"+cfg.Server.Port,
+				"webhook base URL",
+			)
+			if err != nil {
+				log.Fatalf("Invalid webhook URL configuration: %v", err)
+			}
 			retryWorker := service.NewWebhookRetryWorker(db, baseURL, webhookMonitor, errorTracker)
 			retryWorker.Start(context.Background())
 
@@ -374,6 +413,10 @@ func main() {
 	mux.HandleFunc("GET /api/v1/public/restaurants/{slug}/theme", publicHomepageHandler.GetThemeOnly)
 	mux.HandleFunc("GET /api/v1/public/restaurants/{slug}/sections", publicHomepageHandler.GetSectionsOnly)
 	mux.HandleFunc("GET /api/v1/public/restaurants/{slug}/settings", publicHomepageHandler.GetSettingsOnly)
+	mux.Handle(
+		"GET /api/v1/public/table/{id}/info",
+		middleware.RateLimitByIP(120)(http.HandlerFunc(tableHandler.GetPublicTableInfo)),
+	)
 
 	// Public routes - Order API (minimal authentication required)
 	// These routes require X-Tenant-ID and X-Restaurant-ID headers from middleware context
@@ -403,10 +446,62 @@ func main() {
 	// Component library route (public - no authentication required)
 	// mux.HandleFunc("GET /api/v1/admin/components", themeHandler.GetComponentLibrary)
 
-	// Health check
+	checkDBHealth := func(ctx context.Context) (bool, string) {
+		if db == nil {
+			return false, "database_not_configured"
+		}
+
+		dbCtx, cancel := context.WithTimeout(ctx, 1200*time.Millisecond)
+		defer cancel()
+
+		if err := db.PingContext(dbCtx); err != nil {
+			return false, err.Error()
+		}
+		return true, "ok"
+	}
+
+	// Health check endpoints
 	mux.HandleFunc("GET /api/v1/health", func(w http.ResponseWriter, r *http.Request) {
+		dbHealthy, dbStatus := checkDBHealth(r.Context())
+		status := "ok"
+		if !dbHealthy {
+			status = "degraded"
+		}
+
 		w.Header().Set("Content-Type", "application/json")
-		w.Write([]byte(`{"status":"ok"}`))
+		_ = json.NewEncoder(w).Encode(map[string]interface{}{
+			"status":     status,
+			"uptime_sec": int64(time.Since(startedAt).Seconds()),
+			"db_healthy": dbHealthy,
+			"db_status":  dbStatus,
+		})
+	})
+
+	mux.HandleFunc("GET /api/v1/health/ready", func(w http.ResponseWriter, r *http.Request) {
+		dbHealthy, dbStatus := checkDBHealth(r.Context())
+		statusCode := http.StatusOK
+		status := "ready"
+		if !dbHealthy {
+			statusCode = http.StatusServiceUnavailable
+			status = "not_ready"
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(statusCode)
+		_ = json.NewEncoder(w).Encode(map[string]interface{}{
+			"status":     status,
+			"uptime_sec": int64(time.Since(startedAt).Seconds()),
+			"db_healthy": dbHealthy,
+			"db_status":  dbStatus,
+		})
+	})
+
+	mux.HandleFunc("GET /api/v1/health/metrics", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(map[string]interface{}{
+			"success": true,
+			"data":    observability.Snapshot(),
+		})
 	})
 
 	// Test route to verify routing
@@ -447,6 +542,12 @@ func main() {
 	// NOTE: Protected routes are now registered individually with middleware wrapping below.
 	// This ensures proper execution order: Auth -> TenantContext -> Handler
 
+	// Helper function to wrap handlers with auth only (no tenant middleware)
+	// Use this for RBAC endpoints that read claims.TenantID directly from JWT
+	wrapAuthOnly := func(next http.Handler) http.Handler {
+		return middleware.AuthMiddleware(tokenService)(next)
+	}
+
 	// Helper function to wrap handlers with auth and tenant middleware
 	wrapProtected := func(next http.Handler) http.Handler {
 		// Apply middleware in REVERSE order of execution
@@ -475,6 +576,19 @@ func main() {
 		// 		wrapped = middleware.PermissionMiddleware(permissionUC)(wrapped)                       // permission check
 		wrapped = middleware.TenantContextMiddleware(wrapped)      // tenant context
 		wrapped = middleware.AuthMiddleware(tokenService)(wrapped) // outermost (auth first)
+		return wrapped
+	}
+
+	// KDS-specific wrapper adds per-user rate limits for Phase 8 hardening.
+	wrapKDSWithPermission := func(next http.Handler, permissionLevel string, includeBumpLimit bool) http.Handler {
+		wrapped := next
+		if includeBumpLimit {
+			wrapped = middleware.RateLimitByUserWindow(5, time.Second)(wrapped)
+		}
+		wrapped = middleware.RateLimitByUser(60)(wrapped)
+		wrapped = middleware.WithRequiredPermission(13, permissionLevel)(wrapped)
+		wrapped = middleware.TenantContextMiddleware(wrapped)
+		wrapped = middleware.AuthMiddleware(tokenService)(wrapped)
 		return wrapped
 	}
 
@@ -517,6 +631,23 @@ func main() {
 	// Note: TenantStatusMiddleware will skip this path internally (see shouldSkipStatusCheck)
 	if subscriptionHandler != nil && subscriptionRepo != nil {
 		mux.Handle("GET /api/v1/tenant/status", wrapProtectedWithStatus(http.HandlerFunc(subscriptionHandler.GetTenantStatus)))
+	} else {
+		// Compatibility fallback in environments where subscription module is disabled.
+		mux.Handle("GET /api/v1/tenant/status", wrapProtected(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusOK)
+			_ = json.NewEncoder(w).Encode(map[string]interface{}{
+				"success": true,
+				"data": map[string]interface{}{
+					"can_access":          true,
+					"block_reason":        nil,
+					"status":              "unknown",
+					"subscription_status": "unknown",
+					"trial_end_date":      nil,
+					"days_remaining":      nil,
+				},
+			})
+		})))
 	}
 
 	// Tenant contact info endpoints (for maintenance page contact details)
@@ -741,30 +872,31 @@ func main() {
 		json.NewEncoder(w).Encode(map[string]interface{}{"success": true})
 	}), 2, "DELETE"))
 
-	// RBAC endpoints
+	// RBAC endpoints - use wrapAuthOnly because RBAC handlers read claims.TenantID
+	// directly from JWT, they don't need TenantContextMiddleware (which requires restaurant_id)
 	if rbacRoleHandler != nil && rbacPermissionHandler != nil && rbacUserRoleHandler != nil {
 		// Role management
-		mux.Handle("GET /api/v1/rbac/roles", wrapProtected(http.HandlerFunc(rbacRoleHandler.ListRoles)))
-		mux.Handle("GET /api/v1/rbac/roles/{id}", wrapProtected(http.HandlerFunc(rbacRoleHandler.GetRole)))
-		mux.Handle("POST /api/v1/rbac/roles", wrapProtected(http.HandlerFunc(rbacRoleHandler.CreateRole)))
-		mux.Handle("PUT /api/v1/rbac/roles/{id}", wrapProtected(http.HandlerFunc(rbacRoleHandler.UpdateRole)))
-		mux.Handle("DELETE /api/v1/rbac/roles/{id}", wrapProtected(http.HandlerFunc(rbacRoleHandler.DeleteRole)))
+		mux.Handle("GET /api/v1/rbac/roles", wrapAuthOnly(http.HandlerFunc(rbacRoleHandler.ListRoles)))
+		mux.Handle("GET /api/v1/rbac/roles/{id}", wrapAuthOnly(http.HandlerFunc(rbacRoleHandler.GetRole)))
+		mux.Handle("POST /api/v1/rbac/roles", wrapAuthOnly(http.HandlerFunc(rbacRoleHandler.CreateRole)))
+		mux.Handle("PUT /api/v1/rbac/roles/{id}", wrapAuthOnly(http.HandlerFunc(rbacRoleHandler.UpdateRole)))
+		mux.Handle("DELETE /api/v1/rbac/roles/{id}", wrapAuthOnly(http.HandlerFunc(rbacRoleHandler.DeleteRole)))
 
 		// Permission management
-		mux.Handle("POST /api/v1/rbac/permissions/assign", wrapProtected(http.HandlerFunc(rbacPermissionHandler.AssignPermission)))
-		mux.Handle("DELETE /api/v1/rbac/permissions/{roleId}/{moduleId}", wrapProtected(http.HandlerFunc(rbacPermissionHandler.RevokePermission)))
-		mux.Handle("GET /api/v1/rbac/roles/{roleId}/permissions", wrapProtected(http.HandlerFunc(rbacPermissionHandler.GetRolePermissions)))
-		mux.Handle("GET /api/v1/rbac/check-permission", wrapProtected(http.HandlerFunc(rbacPermissionHandler.CheckPermission)))
-		mux.Handle("GET /api/v1/rbac/me/permissions", wrapProtected(http.HandlerFunc(rbacPermissionHandler.GetUserPermissions)))
+		mux.Handle("POST /api/v1/rbac/permissions/assign", wrapAuthOnly(http.HandlerFunc(rbacPermissionHandler.AssignPermission)))
+		mux.Handle("DELETE /api/v1/rbac/permissions/{roleId}/{moduleId}", wrapAuthOnly(http.HandlerFunc(rbacPermissionHandler.RevokePermission)))
+		mux.Handle("GET /api/v1/rbac/roles/{roleId}/permissions", wrapAuthOnly(http.HandlerFunc(rbacPermissionHandler.GetRolePermissions)))
+		mux.Handle("GET /api/v1/rbac/check-permission", wrapAuthOnly(http.HandlerFunc(rbacPermissionHandler.CheckPermission)))
+		mux.Handle("GET /api/v1/rbac/me/permissions", wrapAuthOnly(http.HandlerFunc(rbacPermissionHandler.GetUserPermissions)))
 
 		// User-role assignment
-		mux.Handle("POST /api/v1/rbac/users/{userId}/roles", wrapProtected(http.HandlerFunc(rbacUserRoleHandler.AssignRoleToUser)))
-		mux.Handle("DELETE /api/v1/rbac/users/{userId}/roles/{roleId}", wrapProtected(http.HandlerFunc(rbacUserRoleHandler.RemoveRoleFromUser)))
-		mux.Handle("GET /api/v1/rbac/users/{userId}/roles", wrapProtected(http.HandlerFunc(rbacUserRoleHandler.GetUserRoles)))
-		mux.Handle("GET /api/v1/rbac/me/roles", wrapProtected(http.HandlerFunc(rbacUserRoleHandler.GetMyRoles)))
-		mux.Handle("POST /api/v1/rbac/users-by-email/{email}/roles", wrapProtected(http.HandlerFunc(rbacUserRoleHandler.AssignRoleToUserByEmail)))
-		mux.Handle("DELETE /api/v1/rbac/users-by-email/{email}/roles/{roleId}", wrapProtected(http.HandlerFunc(rbacUserRoleHandler.RemoveRoleFromUserByEmail)))
-		mux.Handle("GET /api/v1/rbac/users-by-email/{email}/roles", wrapProtected(http.HandlerFunc(rbacUserRoleHandler.GetUserRolesByEmail)))
+		mux.Handle("POST /api/v1/rbac/users/{userId}/roles", wrapAuthOnly(http.HandlerFunc(rbacUserRoleHandler.AssignRoleToUser)))
+		mux.Handle("DELETE /api/v1/rbac/users/{userId}/roles/{roleId}", wrapAuthOnly(http.HandlerFunc(rbacUserRoleHandler.RemoveRoleFromUser)))
+		mux.Handle("GET /api/v1/rbac/users/{userId}/roles", wrapAuthOnly(http.HandlerFunc(rbacUserRoleHandler.GetUserRoles)))
+		mux.Handle("GET /api/v1/rbac/me/roles", wrapAuthOnly(http.HandlerFunc(rbacUserRoleHandler.GetMyRoles)))
+		mux.Handle("POST /api/v1/rbac/users-by-email/{email}/roles", wrapAuthOnly(http.HandlerFunc(rbacUserRoleHandler.AssignRoleToUserByEmail)))
+		mux.Handle("DELETE /api/v1/rbac/users-by-email/{email}/roles/{roleId}", wrapAuthOnly(http.HandlerFunc(rbacUserRoleHandler.RemoveRoleFromUserByEmail)))
+		mux.Handle("GET /api/v1/rbac/users-by-email/{email}/roles", wrapAuthOnly(http.HandlerFunc(rbacUserRoleHandler.GetUserRolesByEmail)))
 	}
 
 	// HR Module - Attendance management endpoints (require authentication + RBAC permission)
@@ -1040,6 +1172,37 @@ func main() {
 	mux.Handle("DELETE /api/v1/admin/orders/{id}", wrapWithPermission(http.HandlerFunc(adminOrderHandler.CancelOrder), 10, "DELETE"))
 	mux.Handle("GET /api/v1/admin/orders/{id}", wrapWithPermission(http.HandlerFunc(adminOrderHandler.GetOrder), 10, "READ"))
 	mux.Handle("GET /api/v1/admin/orders", wrapWithPermission(http.HandlerFunc(adminOrderHandler.ListOrders), 10, "READ"))
+
+	// Table Management endpoints (require authentication)
+	// Module ID 14 = TABLES (from migration 132_add_tables_rbac_module.sql)
+	mux.Handle("POST /api/v1/tables", wrapWithPermission(http.HandlerFunc(tableHandler.CreateTable), 14, "WRITE"))
+	mux.Handle("GET /api/v1/tables", wrapWithPermission(http.HandlerFunc(tableHandler.ListTables), 14, "READ"))
+	mux.Handle("GET /api/v1/tables/stats", wrapWithPermission(http.HandlerFunc(tableHandler.GetTableStats), 14, "READ"))
+	mux.Handle("GET /api/v1/tables/layouts", wrapWithPermission(http.HandlerFunc(tableHandler.GetLayouts), 14, "READ"))
+	mux.Handle("POST /api/v1/tables/layouts", wrapWithPermission(http.HandlerFunc(tableHandler.CreateLayout), 14, "WRITE"))
+	mux.Handle("PUT /api/v1/tables/positions", wrapWithPermission(http.HandlerFunc(tableHandler.UpdatePositions), 14, "WRITE"))
+	mux.Handle("GET /api/v1/tables/{id}", wrapWithPermission(http.HandlerFunc(tableHandler.GetTable), 14, "READ"))
+	mux.Handle("PUT /api/v1/tables/{id}", wrapWithPermission(http.HandlerFunc(tableHandler.UpdateTable), 14, "WRITE"))
+	mux.Handle("DELETE /api/v1/tables/{id}", wrapWithPermission(http.HandlerFunc(tableHandler.DeleteTable), 14, "DELETE"))
+	mux.Handle("PUT /api/v1/tables/{id}/status", wrapWithPermission(http.HandlerFunc(tableHandler.UpdateStatus), 14, "WRITE"))
+
+	// KDS (Kitchen Display System) endpoints
+	// Module ID 13 = KDS (from migration 126_add_kds_rbac_module.sql)
+	mux.HandleFunc("GET /api/v1/kds/ws", kdsWSHandler.ServeWS)
+	mux.Handle("GET /api/v1/kds/queue", wrapKDSWithPermission(http.HandlerFunc(kdsHandler.GetQueue), "READ", false))
+	mux.Handle("PUT /api/v1/kds/orders/{id}/bump", wrapKDSWithPermission(http.HandlerFunc(kdsHandler.BumpOrder), "WRITE", true))
+	mux.Handle("PUT /api/v1/kds/orders/{id}/recall", wrapKDSWithPermission(http.HandlerFunc(kdsHandler.RecallOrder), "WRITE", false))
+	mux.Handle("GET /api/v1/kds/stats", wrapKDSWithPermission(http.HandlerFunc(kdsHandler.GetStats), "READ", false))
+	mux.Handle("GET /api/v1/kds/analytics", wrapKDSWithPermission(http.HandlerFunc(kdsHandler.GetAnalytics), "ADMIN", false))
+	mux.Handle("GET /api/v1/kds/settings", wrapKDSWithPermission(http.HandlerFunc(kdsHandler.GetSettings), "READ", false))
+	mux.Handle("PUT /api/v1/kds/settings", wrapKDSWithPermission(http.HandlerFunc(kdsHandler.UpdateSettings), "ADMIN", false))
+
+	// Reports module uses seeded module ID 8 (REPORTS)
+	mux.Handle("GET /api/v1/reports/overview", wrapWithPermission(http.HandlerFunc(reportHandler.GetOverviewReport), 8, "READ"))
+	mux.Handle("GET /api/v1/reports/sales", wrapWithPermission(http.HandlerFunc(reportHandler.GetSalesReport), 8, "READ"))
+	mux.Handle("GET /api/v1/reports/profitability", wrapWithPermission(http.HandlerFunc(reportHandler.GetProfitabilityReport), 8, "READ"))
+	mux.Handle("GET /api/v1/reports/inventory", wrapWithPermission(http.HandlerFunc(reportHandler.GetInventoryReport), 8, "READ"))
+	mux.Handle("POST /api/v1/reports/export", wrapWithPermission(http.HandlerFunc(reportHandler.ExportReport), 8, "EXPORT"))
 
 	// Admin Driver Management endpoints (require authentication)
 	mux.Handle("POST /api/v1/admin/drivers", wrapProtected(http.HandlerFunc(adminDriverHandler.CreateDriver)))
@@ -1491,11 +1654,51 @@ func main() {
 	// Apply global middleware
 	corsHandler := middleware.CORSMiddleware(mux)
 	compressedHandler := middleware.GzipMiddleware(corsHandler)
+	metricsHandler := middleware.RequestMetricsMiddleware(compressedHandler)
 
 	// Start server
 	log.Printf("🚀 Server started on port %s", cfg.Server.Port)
-	log.Printf("📍 API URL: http://localhost:%s/api/v1", cfg.Server.Port)
-	if err := http.ListenAndServe(":"+cfg.Server.Port, compressedHandler); err != nil {
-		log.Fatalf("Failed to start server: %v", err)
+	if publicBaseURL, err := config.ResolveRuntimeURL([]string{"APP_BASE_URL"}, "http://localhost:"+cfg.Server.Port, "app base URL"); err == nil {
+		log.Printf("📍 API URL: %s/api/v1", publicBaseURL)
+	} else {
+		log.Printf("📍 API URL: /api/v1 (APP_BASE_URL not configured)")
 	}
+	if err := http.ListenAndServe(":"+cfg.Server.Port, metricsHandler); err != nil {
+		log.Printf("Failed to start server: %v", err)
+		return
+	}
+}
+
+func startDBHealthMonitor(db *sql.DB, interval time.Duration) {
+	if db == nil {
+		return
+	}
+
+	go func() {
+		ticker := time.NewTicker(interval)
+		defer ticker.Stop()
+
+		var previousHealthy *bool
+
+		check := func() {
+			ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+			defer cancel()
+
+			err := db.PingContext(ctx)
+			healthy := err == nil
+			if previousHealthy == nil || healthy != *previousHealthy {
+				if healthy {
+					log.Printf("[DB Health] status=healthy")
+				} else {
+					log.Printf("[DB Health] status=unhealthy error=%v", err)
+				}
+				previousHealthy = &healthy
+			}
+		}
+
+		check()
+		for range ticker.C {
+			check()
+		}
+	}()
 }

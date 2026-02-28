@@ -1,10 +1,12 @@
 'use client'
 
 import React, { useState, useCallback, useEffect, useMemo } from 'react'
+import { usePathname } from 'next/navigation'
 import { Search, Star, TrendingUp } from 'lucide-react'
 import type { ThemeComponent, TypographySettings } from '@/types/theme'
 import { googleFontsService, type GoogleFont } from '@/services/googleFontsService'
 import { useUpdateTypography, useThemeTypography } from '@/stores'
+import { getLocaleFromPath } from '@/lib/translations'
 
 interface FontPickerProps {
   component?: ThemeComponent
@@ -39,6 +41,14 @@ export function FontPicker({
   className = '',
   useStore = false,
 }: FontPickerProps): JSX.Element {
+  const pathname = usePathname()
+  const locale = getLocaleFromPath(pathname)
+  const isRTL = locale === 'ar'
+  const tx = (en: string, ar: string) => {
+    if (!isRTL) return en
+    return /[ÃØÙðâ]/.test(ar) ? en : ar
+  }
+
   const storeTypography = useThemeTypography()
   const updateTypography = useUpdateTypography()
 
@@ -255,14 +265,14 @@ export function FontPicker({
   // Preview Mode
   if (previewMode) {
     return (
-      <div className={`w-full space-y-4 ${className}`}>
+      <div dir={isRTL ? 'rtl' : 'ltr'} className={`w-full space-y-4 ${className} ${isRTL ? 'text-right' : ''}`}>
         <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Font Preview</h3>
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{tx('Font Preview', 'Ã™â€¦Ã˜Â¹Ã˜Â§Ã™Å Ã™â€ Ã˜Â© Ã˜Â§Ã™â€žÃ˜Â®Ã˜Â·')}</h3>
           <button
             onClick={() => setPreviewMode(false)}
             className="px-3 py-2 text-sm bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition"
           >
-            Back to Settings
+            {tx('Back to Settings', 'Ã˜Â§Ã™â€žÃ˜Â¹Ã™Ë†Ã˜Â¯Ã˜Â© Ã˜Â¥Ã™â€žÃ™â€° Ã˜Â§Ã™â€žÃ˜Â¥Ã˜Â¹Ã˜Â¯Ã˜Â§Ã˜Â¯Ã˜Â§Ã˜Âª')}
           </button>
         </div>
 
@@ -272,17 +282,17 @@ export function FontPicker({
             <div className="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
               <h4 className="font-semibold text-gray-900 dark:text-white mb-2">{selectedFont.family}</h4>
               <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
-                {selectedFont.category} • {selectedFont.weights.length} weights
+                {selectedFont.category} - {selectedFont.weights.length} weights
               </p>
               <div className="space-y-2 text-xs text-gray-600 dark:text-gray-400">
                 <p>
-                  <strong>Selected Weight:</strong> {fontConfig.fontWeight || 400}
+                  <strong>{tx('Selected Weight:', 'Ã˜Â§Ã™â€žÃ™Ë†Ã˜Â²Ã™â€  Ã˜Â§Ã™â€žÃ™â€¦Ã˜Â­Ã˜Â¯Ã˜Â¯:')}</strong> {fontConfig.fontWeight || 400}
                 </p>
                 <p>
-                  <strong>Font Size:</strong> {fontConfig.fontSize || 16}px
+                  <strong>{tx('Font Size:', 'Ã˜Â­Ã˜Â¬Ã™â€¦ Ã˜Â§Ã™â€žÃ˜Â®Ã˜Â·:')}</strong> {fontConfig.fontSize || 16}px
                 </p>
                 <p>
-                  <strong>Line Height:</strong> {fontConfig.lineHeight || 1.6}
+                  <strong>{tx('Line Height:', 'Ã˜Â§Ã˜Â±Ã˜ÂªÃ™ÂÃ˜Â§Ã˜Â¹ Ã˜Â§Ã™â€žÃ˜Â³Ã˜Â·Ã˜Â±:')}</strong> {fontConfig.lineHeight || 1.6}
                 </p>
               </div>
             </div>
@@ -290,7 +300,7 @@ export function FontPicker({
 
           {/* Preview Text */}
             <div className="space-y-3">
-            <h4 className="font-semibold text-gray-900 dark:text-white">Preview</h4>
+            <h4 className="font-semibold text-gray-900 dark:text-white">{tx('Preview', 'Ã™â€¦Ã˜Â¹Ã˜Â§Ã™Å Ã™â€ Ã˜Â©')}</h4>
             <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6">
               <p className="font-preview-text text-gray-900 dark:text-white">
                 {previewText}
@@ -300,12 +310,12 @@ export function FontPicker({
 
           {/* Heading Preview */}
           <div className="space-y-3">
-            <h4 className="font-semibold text-gray-900 dark:text-white">Heading (24px, Bold)</h4>
+            <h4 className="font-semibold text-gray-900 dark:text-white">{tx('Heading (24px, Bold)', 'Ã˜Â¹Ã™â€ Ã™Ë†Ã˜Â§Ã™â€  (24pxÃ˜Å’ Ã˜Â¹Ã˜Â±Ã™Å Ã˜Â¶)')}</h4>
             <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6">
               <h1
                 className="font-preview-text font-preview-heading text-gray-900 dark:text-white"
               >
-                This is a heading
+                {tx('This is a heading', 'Ã™â€¡Ã˜Â°Ã˜Â§ Ã˜Â¹Ã™â€ Ã™Ë†Ã˜Â§Ã™â€  Ã˜ÂªÃ˜Â¬Ã˜Â±Ã™Å Ã˜Â¨Ã™Å ')}
               </h1>
             </div>
           </div>
@@ -316,30 +326,30 @@ export function FontPicker({
 
   // Editor Mode
   return (
-    <div className={`w-full space-y-6 ${className}`}>
+    <div dir={isRTL ? 'rtl' : 'ltr'} className={`w-full space-y-6 ${className} ${isRTL ? 'text-right' : ''}`}>
       {/* Header */}
       <div>
-        <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-2">Font Picker</h2>
+        <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-2">{tx('Font Picker', 'Ã˜Â§Ã˜Â®Ã˜ÂªÃ™Å Ã˜Â§Ã˜Â± Ã˜Â§Ã™â€žÃ˜Â®Ã˜Â·')}</h2>
         <p className="text-sm text-gray-600 dark:text-gray-400">
-          Choose from popular Google Fonts and customize weight, size, and styling.
+          {tx('Choose from popular Google Fonts and customize weight, size, and styling.', 'Ã˜Â§Ã˜Â®Ã˜ÂªÃ˜Â± Ã™â€¦Ã™â€  Ã˜Â®Ã˜Â·Ã™Ë†Ã˜Â· Google Ã˜Â§Ã™â€žÃ˜Â´Ã˜Â§Ã˜Â¦Ã˜Â¹Ã˜Â© Ã™Ë†Ã˜Â®Ã˜ÂµÃ˜Âµ Ã˜Â§Ã™â€žÃ™Ë†Ã˜Â²Ã™â€  Ã™Ë†Ã˜Â§Ã™â€žÃ˜Â­Ã˜Â¬Ã™â€¦ Ã™Ë†Ã˜Â§Ã™â€žÃ˜ÂªÃ™â€ Ã˜Â³Ã™Å Ã™â€š.')}
         </p>
       </div>
 
       {/* Search */}
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+        <Search className={`absolute top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 ${isRTL ? 'right-3' : 'left-3'}`} />
         <input
           type="text"
-          placeholder="Search fonts..."
+          placeholder={tx('Search fonts...', 'Ã˜Â§Ã˜Â¨Ã˜Â­Ã˜Â« Ã˜Â¹Ã™â€  Ã˜Â§Ã™â€žÃ˜Â®Ã˜Â·Ã™Ë†Ã˜Â·...')}
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full pl-10 pr-4 py-2 border border-gray-200 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white text-sm"
+          className={`w-full py-2 border border-gray-200 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white text-sm ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'}`}
         />
       </div>
 
       {/* Category Tabs */}
       <div className="flex gap-2 overflow-x-auto pb-2">
-        {(['all', 'sans-serif', 'serif', 'monospace'] as const).map((cat) => (
+            {(['all', 'sans-serif', 'serif', 'monospace'] as const).map((cat) => (
           <button
             key={cat}
             onClick={() => setCategory(cat)}
@@ -349,7 +359,13 @@ export function FontPicker({
                 : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
             }`}
           >
-            {cat.charAt(0).toUpperCase() + cat.slice(1)}
+            {cat === 'all'
+              ? tx('All', 'Ã˜Â§Ã™â€žÃ™Æ’Ã™â€ž')
+              : cat === 'sans-serif'
+                ? tx('Sans Serif', 'Ã˜Â¨Ã˜Â¯Ã™Ë†Ã™â€  Ã˜Â²Ã™Ë†Ã˜Â§Ã˜Â¦Ã˜Â¯')
+                : cat === 'serif'
+                  ? tx('Serif', 'Ã™â€¦Ã˜Â²Ã˜Â®Ã˜Â±Ã™Â')
+                  : tx('Monospace', 'Ã˜Â£Ã˜Â­Ã˜Â§Ã˜Â¯Ã™Å  Ã˜Â§Ã™â€žÃ™â€¦Ã˜Â³Ã˜Â§Ã™ÂÃ˜Â©')}
           </button>
         ))}
       </div>
@@ -357,7 +373,7 @@ export function FontPicker({
       {/* Recent Fonts */}
       {!searchQuery && recentFonts.length > 0 && (
         <div className="space-y-2">
-          <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">Recent</h3>
+          <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">{tx('Recent', 'Ã˜Â§Ã™â€žÃ˜Â£Ã˜Â®Ã™Å Ã˜Â±Ã˜Â©')}</h3>
           <div className="grid grid-cols-2 gap-2">
             {recentFonts.map((font) => (
               <button
@@ -380,13 +396,13 @@ export function FontPicker({
       {/* Font List */}
       <div className="space-y-2">
         <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-          {searchQuery ? 'Search Results' : category === 'all' ? 'Popular Fonts' : `${category} Fonts`}
-          <span className="text-gray-500 dark:text-gray-500 ml-2">({fonts.length})</span>
+          {searchQuery ? tx('Search Results', 'Ã™â€ Ã˜ÂªÃ˜Â§Ã˜Â¦Ã˜Â¬ Ã˜Â§Ã™â€žÃ˜Â¨Ã˜Â­Ã˜Â«') : category === 'all' ? tx('Popular Fonts', 'Ã˜Â§Ã™â€žÃ˜Â®Ã˜Â·Ã™Ë†Ã˜Â· Ã˜Â§Ã™â€žÃ˜Â´Ã˜Â§Ã˜Â¦Ã˜Â¹Ã˜Â©') : `${category} ${tx('Fonts', 'Ã˜Â®Ã˜Â·Ã™Ë†Ã˜Â·')}`}
+          <span className={`text-gray-500 dark:text-gray-500 ${isRTL ? 'mr-2' : 'ml-2'}`}>({fonts.length})</span>
         </h3>
 
         {fonts.length === 0 ? (
           <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-            <p className="text-sm">No fonts found. Try a different search.</p>
+            <p className="text-sm">{tx('No fonts found. Try a different search.', 'Ã™â€žÃ™â€¦ Ã™Å Ã˜ÂªÃ™â€¦ Ã˜Â§Ã™â€žÃ˜Â¹Ã˜Â«Ã™Ë†Ã˜Â± Ã˜Â¹Ã™â€žÃ™â€° Ã˜Â®Ã˜Â·Ã™Ë†Ã˜Â·. Ã˜Â¬Ã˜Â±Ã™â€˜Ã˜Â¨ Ã˜Â¨Ã˜Â­Ã˜Â«Ã™â€¹Ã˜Â§ Ã™â€¦Ã˜Â®Ã˜ÂªÃ™â€žÃ™ÂÃ™â€¹Ã˜Â§.')}</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-2 max-h-64 overflow-y-auto">
@@ -408,7 +424,7 @@ export function FontPicker({
                   {font.popularity && font.popularity <= 3 && (
                     <div className="flex items-center gap-1 text-yellow-500">
                       <TrendingUp className="h-3 w-3" />
-                      <span className="text-xs">Popular</span>
+                      <span className="text-xs">{tx('Popular', 'Ã˜Â´Ã˜Â§Ã˜Â¦Ã˜Â¹')}</span>
                     </div>
                   )}
                 </div>
@@ -421,12 +437,12 @@ export function FontPicker({
       {/* Font Configuration */}
       {selectedFont && (
         <div className="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg p-4 space-y-4">
-          <h3 className="font-semibold text-gray-900 dark:text-white">Font Configuration</h3>
+          <h3 className="font-semibold text-gray-900 dark:text-white">{tx('Font Configuration', 'Ã˜Â¥Ã˜Â¹Ã˜Â¯Ã˜Â§Ã˜Â¯Ã˜Â§Ã˜Âª Ã˜Â§Ã™â€žÃ˜Â®Ã˜Â·')}</h3>
 
           {/* Font Weight Selection */}
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Font Weights
+              {tx('Font Weights', 'Ã˜Â£Ã™Ë†Ã˜Â²Ã˜Â§Ã™â€  Ã˜Â§Ã™â€žÃ˜Â®Ã˜Â·')}
             </label>
             <div className="flex flex-wrap gap-2">
               {selectedFont.weights.map((weight) => (
@@ -449,7 +465,7 @@ export function FontPicker({
           {selectedFont.italics && (
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Font Style
+                {tx('Font Style', 'Ã™â€ Ã™â€¦Ã˜Â· Ã˜Â§Ã™â€žÃ˜Â®Ã˜Â·')}
               </label>
               <div className="flex gap-2">
                 {(['normal', 'italic'] as const).map((style) => (
@@ -462,7 +478,7 @@ export function FontPicker({
                         : 'bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:border-gray-300'
                     }`}
                   >
-                    {style.charAt(0).toUpperCase() + style.slice(1)}
+                    {style === 'normal' ? tx('Normal', 'Ã˜Â¹Ã˜Â§Ã˜Â¯Ã™Å ') : tx('Italic', 'Ã™â€¦Ã˜Â§Ã˜Â¦Ã™â€ž')}
                   </button>
                 ))}
               </div>
@@ -472,7 +488,7 @@ export function FontPicker({
           {/* Font Size */}
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Font Size: {fontConfig.fontSize || 16}px
+              {tx('Font Size', 'Ã˜Â­Ã˜Â¬Ã™â€¦ Ã˜Â§Ã™â€žÃ˜Â®Ã˜Â·')}: {fontConfig.fontSize || 16}px
             </label>
             <input
               type="range"
@@ -487,7 +503,7 @@ export function FontPicker({
           {/* Line Height */}
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Line Height: {(fontConfig.lineHeight || 1.6).toFixed(1)}
+              {tx('Line Height', 'Ã˜Â§Ã˜Â±Ã˜ÂªÃ™ÂÃ˜Â§Ã˜Â¹ Ã˜Â§Ã™â€žÃ˜Â³Ã˜Â·Ã˜Â±')}: {(fontConfig.lineHeight || 1.6).toFixed(1)}
             </label>
             <input
               type="range"
@@ -508,7 +524,7 @@ export function FontPicker({
           onClick={() => setPreviewMode(true)}
           className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition"
         >
-          Preview Font
+          {tx('Preview Font', 'Ã™â€¦Ã˜Â¹Ã˜Â§Ã™Å Ã™â€ Ã˜Â© Ã˜Â§Ã™â€žÃ˜Â®Ã˜Â·')}
         </button>
       </div>
 

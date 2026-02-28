@@ -4,6 +4,33 @@
 
 ---
 
+## Current Status (What Is Already Done In Repo)
+
+The following deployment-readiness work is already implemented in the codebase:
+
+- URL/domain runtime hardening across backend + all frontend apps (`restaurant-website`, `dashboard`, `landing`, `super-admin`)
+- Development-only localhost fallbacks with production fail-fast behavior for missing required URL/domain env vars
+- Clean local vs production env templates (`.env.example` and `.env.production.example`)
+- CI guardrail for hardcoded localhost regressions in runtime code:
+  - `.github/workflows/runtime-localhost-guardrail.yml`
+  - `scripts/check_runtime_localhost.py`
+- CI smoke checks for URL/domain configuration:
+  - `.github/workflows/url-domain-config-smoke.yml`
+  - `scripts/smoke_check_url_domain_config.py`
+- Unit tests for URL/config resolvers (frontend apps) and backend production URL validation
+- Post-deploy endpoint verification helper:
+  - `scripts/verify_deployment_endpoints.py`
+
+What is still manual/external (not done from repo code):
+
+- Real DNS records and wildcard DNS
+- Real staging/production secrets and env values
+- Reverse proxy deployment (Nginx/Caddy) and SSL certificate setup
+- Paymob webhook configuration in Paymob dashboard
+- Staging deployment execution, QA signoff, rollback rehearsal, production cutover
+
+---
+
 ## Architecture Overview
 
 ```
@@ -101,6 +128,52 @@ Requirements:
 
 ## Deployment Steps
 
+### Step 0: CI + Smoke Validation (Before Touching Staging/Production)
+
+Run these checks from your local machine (or CI) before any deployment:
+
+```bash
+# URL/domain hardening smoke checks (env templates + resolver tests + backend config validation)
+python scripts/smoke_check_url_domain_config.py
+```
+
+Required CI workflows to enable as branch-protection checks:
+- `Runtime Localhost Guardrail` (`.github/workflows/runtime-localhost-guardrail.yml`)
+- `URL/Domain Config Smoke` (`.github/workflows/url-domain-config-smoke.yml`)
+
+### Recommended Execution Order (Do These 8 In Order)
+
+1. Set real production/staging domains and secrets (DNS + env vars + Paymob credentials).
+2. Enable the CI workflows above as required checks.
+3. Run `python scripts/smoke_check_url_domain_config.py` and fix failures.
+4. Perform a full staging deployment (Steps 1-6 below).
+5. Complete the Pre-Launch QA Checklist on staging.
+6. Verify wildcard tenant routing and a themed storefront page on staging.
+7. Rehearse the Rollback Procedure on staging.
+8. Perform production deployment and post-deploy verification.
+
+### Staging Deployment First (Recommended)
+
+Use this guide for **staging first**, then repeat for production after QA signoff.
+
+Minimum staging flow:
+
+1. Create staging DNS records (or temporary hosts) for:
+   - API
+   - landing
+   - dashboard
+   - admin
+   - one sample tenant subdomain
+2. Prepare staging secrets/env values from:
+   - `backend/.env.production.example`
+   - `frontend/apps/*/.env.production.example`
+3. Run local/CI preflight checks:
+   - `python scripts/smoke_check_url_domain_config.py`
+4. Execute Steps 1-6 below against staging infrastructure
+5. Complete the Pre-Launch QA Checklist (on staging)
+6. Rehearse rollback on staging
+7. Promote same configuration pattern to production
+
 ### Step 1: Database Setup
 
 ```bash
@@ -147,6 +220,10 @@ cd ../super-admin && pnpm build
 ```
 
 ### Step 4: Reverse Proxy (Nginx Example)
+
+`proxy_pass http://localhost:PORT` below refers to internal upstreams on the same server/VM.
+In containers or multi-host deployments, replace those with internal service names/private IPs.
+Public URLs should still be the production domains declared in each `server_name`.
 
 ```nginx
 # Landing Page
@@ -213,7 +290,7 @@ docker-compose logs -f backend
 
 ---
 
-## Pre-Launch QA Checklist
+## Pre-Launch QA Checklist (Complete On Staging Before Production)
 
 ### Backend
 - [ ] `go build ./cmd/api` passes
@@ -253,6 +330,24 @@ docker-compose logs -f backend
 - [ ] Webhook health dashboard operational
 - [ ] Database connection monitoring active
 - [ ] Log aggregation configured
+
+### Post-Deploy Verification Command (Staging/Production)
+
+Use this helper script after staging or production deploys:
+
+```bash
+python scripts/verify_deployment_endpoints.py \
+  --api-url https://api.yourdomain.com \
+  --landing-url https://www.yourdomain.com \
+  --dashboard-url https://dashboard.yourdomain.com \
+  --admin-url https://admin.yourdomain.com \
+  --restaurant-url https://demo.yourdomain.com
+```
+
+Notes:
+- `--restaurant-url` should be a real tenant subdomain in the target environment.
+- Add `--insecure` only for temporary staging checks with self-signed certificates.
+- Run this after **staging deploy** and again after **production deploy**.
 
 ---
 

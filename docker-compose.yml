@@ -62,6 +62,15 @@ services:
       # Logging
       LOG_LEVEL: info
 
+      # Local URL/Domain Configuration (required because backend runs with ENV=production in this compose setup)
+      CORS_ORIGINS: http://localhost:3001,http://localhost:3002,http://localhost:3003,http://localhost:3004,http://demo.localhost:3003
+      APP_BASE_URL: http://localhost:8080
+      DASHBOARD_URL: http://localhost:3002
+      LANDING_URL: http://localhost:3001
+      RESTAURANT_DOMAIN: localhost:3003
+      UPLOAD_BASE_URL: http://localhost:8080/uploads
+      WEBHOOK_BASE_URL: http://localhost:8080
+
     ports:
       - "8080:8080"
     depends_on:

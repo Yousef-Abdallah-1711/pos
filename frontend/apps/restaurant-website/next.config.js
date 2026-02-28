@@ -1,13 +1,14 @@
+const path = require('path');
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  outputFileTracingRoot: path.join(__dirname, '../..'),
   experimental: {
     optimizePackageImports: ["@radix-ui/react-icons"],
   },
-  // Environment variables exposed to the browser
-  env: {
-    NEXT_PUBLIC_API_BASE_URL: process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080/api/v1",
-  },
+  // NEXT_PUBLIC_* variables are exposed automatically by Next.js.
+  // Do not inject localhost defaults here; runtime config should fail in production when missing.
   // Configure external image sources
   images: {
     remotePatterns: [

@@ -8,6 +8,7 @@ import { useRouter, usePathname } from 'next/navigation'
 import { Loader2, Lock, ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 import { debugError } from '@/lib/debug'
+import { getConfig } from '@/lib/config'
 
 interface PermissionModule {
   moduleId: number
@@ -55,7 +56,17 @@ const MODULES: PermissionModule[] = [
   },
   {
     moduleId: MODULE_IDS.ORDERS,
-    moduleName: 'Orders',
+    moduleName: 'Orders & POS',
+    permissions: PERMISSION_OPTIONS,
+  },
+  {
+    moduleId: MODULE_IDS.KDS,
+    moduleName: 'Kitchen Display (KDS)',
+    permissions: PERMISSION_OPTIONS,
+  },
+  {
+    moduleId: MODULE_IDS.TABLES,
+    moduleName: 'Tables',
     permissions: PERMISSION_OPTIONS,
   },
   {
@@ -164,7 +175,7 @@ export default function NewRolePage() {
         })),
       }
 
-      const response = await fetch(`http://localhost:8080/api/v1/rbac/roles`, {
+      const response = await fetch(`${getConfig().apiUrl}/rbac/roles`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

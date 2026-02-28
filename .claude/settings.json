@@ -3,7 +3,10 @@
     "allow": [
       "Bash(timeout:*)",
       "Bash(ping:*)",
-      "Bash(git rm:*)"
+      "Bash(git rm:*)",
+      "mcp__plugin_playwright_playwright__browser_navigate",
+      "mcp__plugin_playwright_playwright__browser_snapshot",
+      "mcp__plugin_playwright_playwright__browser_take_screenshot"
     ]
   },
   "enabledPlugins": {

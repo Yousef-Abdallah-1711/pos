@@ -1,8 +1,10 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
+import { usePathname } from 'next/navigation'
 import { Copy, Check } from 'lucide-react'
 import { debugLog } from '@/lib/debug'
+import { getLocaleFromPath } from '@/lib/translations'
 
 interface ColorPickerProps {
   label: string
@@ -12,6 +14,10 @@ interface ColorPickerProps {
 }
 
 export function ColorPicker({ label, value, onChange, description }: ColorPickerProps) {
+  const pathname = usePathname()
+  const locale = getLocaleFromPath(pathname)
+  const isRTL = locale === 'ar'
+  const tx = (en: string, ar: string) => (isRTL ? ar : en)
   const [copied, setCopied] = useState(false)
   const [inputValue, setInputValue] = useState(value)
   const [showPicker, setShowPicker] = useState(false)
@@ -63,7 +69,7 @@ export function ColorPicker({ label, value, onChange, description }: ColorPicker
   }, [showPicker])
 
   return (
-    <div className="space-y-2">
+    <div dir={isRTL ? 'rtl' : 'ltr'} className={`space-y-2 ${isRTL ? 'text-right' : ''}`}>
       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
         {label}
       </label>
@@ -89,7 +95,7 @@ export function ColorPicker({ label, value, onChange, description }: ColorPicker
             type="text"
             value={inputValue}
             onChange={handleInputChange}
-            placeholder="#000000"
+            placeholder={tx('#000000', '#000000')}
             className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white text-sm font-mono"
           />
 
@@ -99,11 +105,11 @@ export function ColorPicker({ label, value, onChange, description }: ColorPicker
           >
             {copied ? (
               <>
-                <Check className="h-3 w-3" /> Copied
+                <Check className="h-3 w-3" /> {tx('Copied', 'تم النسخ')}
               </>
             ) : (
               <>
-                <Copy className="h-3 w-3" /> Copy
+                <Copy className="h-3 w-3" /> {tx('Copy', 'نسخ')}
               </>
             )}
           </button>

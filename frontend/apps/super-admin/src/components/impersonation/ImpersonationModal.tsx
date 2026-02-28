@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { useAuthStore } from "@/stores/authStore";
 import { superAdminAPI } from "@/lib/api";
+import { getDashboardBaseUrl } from "@/lib/config";
 import type { User } from "@/types";
 import { X, AlertCircle, Copy, Check } from "lucide-react";
 import { toast } from "sonner";
@@ -51,7 +52,7 @@ export function ImpersonationModal({
       setImpersonationToken(response.token);
 
       // Construct dashboard URL - Dashboard runs on port 3002
-      const dashboardBaseUrl = process.env.NEXT_PUBLIC_DASHBOARD_URL || "http://localhost:3002";
+      const dashboardBaseUrl = getDashboardBaseUrl();
       const url = `${dashboardBaseUrl}/en/dashboard?impersonation_token=${response.token}`;
       setDashboardUrl(url);
 

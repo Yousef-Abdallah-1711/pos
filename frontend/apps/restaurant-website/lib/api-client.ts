@@ -1,4 +1,5 @@
 import axios, { AxiosInstance, AxiosError, InternalAxiosRequestConfig } from "axios";
+import { getApiBaseUrl } from './config/api';
 import { debugLog, debugError } from './debug';
 
 /**
@@ -10,14 +11,11 @@ class ApiClient {
   private baseURL: string;
 
   constructor(baseURL?: string) {
-    this.baseURL = baseURL || process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080/api/v1";
+    this.baseURL = baseURL || getApiBaseUrl();
 
     this.instance = axios.create({
       baseURL: this.baseURL,
       timeout: 30000,
-      headers: {
-        "Content-Type": "application/json",
-      },
     });
 
     this.setupInterceptors();
@@ -34,6 +32,10 @@ class ApiClient {
         const token = typeof window !== "undefined" ? localStorage.getItem("auth-token") : null;
         if (token) {
           config.headers.Authorization = `Bearer ${token}`;
+        }
+
+        if (config.method && !['get', 'head', 'options'].includes(config.method.toLowerCase())) {
+          config.headers['Content-Type'] = 'application/json'
         }
 
         // Add tenant and restaurant headers if available

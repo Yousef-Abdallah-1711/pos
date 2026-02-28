@@ -1,8 +1,10 @@
 'use client'
 
 import { useState } from 'react'
+import { usePathname } from 'next/navigation'
 import { Palette, Copy, Check } from 'lucide-react'
 import { GlobalColors } from '@/types/theme'
+import { createTranslator, getLocaleFromPath } from '@/lib/translations'
 
 interface ColorPalette {
   id: string
@@ -131,6 +133,10 @@ const PRESET_PALETTES: ColorPalette[] = [
 ]
 
 export function ColorPalettes({ onApply }: ColorPalettesProps) {
+  const pathname = usePathname()
+  const locale = getLocaleFromPath(pathname)
+  const t = createTranslator(locale)
+  const isRTL = locale === 'ar'
   const [copiedPaletteId, setCopiedPaletteId] = useState<string | null>(null)
   const [selectedCategory, setSelectedCategory] = useState<'all' | ColorPalette['category']>('all')
   const getSafePaletteId = (id: string) => id.replace(/[^a-zA-Z0-9_-]/g, '-')
@@ -141,11 +147,11 @@ export function ColorPalettes({ onApply }: ColorPalettesProps) {
       : PRESET_PALETTES.filter((p) => p.category === selectedCategory)
 
   const categories: Array<{ value: 'all' | ColorPalette['category']; label: string }> = [
-    { value: 'all', label: 'All Palettes' },
-    { value: 'professional', label: 'Professional' },
-    { value: 'creative', label: 'Creative' },
-    { value: 'minimal', label: 'Minimal' },
-    { value: 'bold', label: 'Bold' }
+    { value: 'all', label: t('themeBuilderEditor.palettes.all', 'All Palettes') },
+    { value: 'professional', label: t('themeBuilderEditor.palettes.professional', 'Professional') },
+    { value: 'creative', label: t('themeBuilderEditor.palettes.creative', 'Creative') },
+    { value: 'minimal', label: t('themeBuilderEditor.palettes.minimal', 'Minimal') },
+    { value: 'bold', label: t('themeBuilderEditor.palettes.bold', 'Bold') }
   ]
 
   const handleCopyPalette = (paletteId: string) => {
@@ -179,10 +185,10 @@ export function ColorPalettes({ onApply }: ColorPalettesProps) {
   }).join('\n')
 
   return (
-    <div className="space-y-4">
+    <div className={`space-y-4 ${isRTL ? 'text-right' : ''}`}>
       <div>
         <h3 className="font-semibold text-sm text-gray-900 dark:text-white mb-3">
-          Color Palettes
+          {t('themeBuilderEditor.colorPalettes', 'Color Palettes')}
         </h3>
 
         {/* Category Filter */}
@@ -222,12 +228,12 @@ export function ColorPalettes({ onApply }: ColorPalettesProps) {
 
               {/* Palette Info & Actions */}
               <div className="p-3 bg-white dark:bg-gray-800">
-                <div className="flex items-center justify-between mb-2">
+                <div className={`flex items-center justify-between mb-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
                   <h4 className="text-sm font-medium text-gray-900 dark:text-white">
                     {palette.name}
                   </h4>
                   <span className="text-xs px-2 py-1 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 capitalize">
-                    {palette.category}
+                    {t(`themeBuilderEditor.palettes.${palette.category}`, palette.category)}
                   </span>
                 </div>
 
@@ -238,12 +244,12 @@ export function ColorPalettes({ onApply }: ColorPalettesProps) {
                     className="flex-1 px-3 py-2 bg-primary-600 hover:bg-primary-700 text-white text-xs font-medium rounded transition flex items-center justify-center gap-1"
                   >
                     <Palette className="h-3 w-3" />
-                    Apply
+                    {t('themeBuilderEditor.apply', 'Apply')}
                   </button>
                   <button
                     onClick={() => handleCopyPalette(palette.id)}
                     className="px-3 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 text-xs font-medium rounded transition flex items-center justify-center gap-1"
-                    title="Copy palette colors"
+                    title={t('themeBuilderEditor.copyPaletteColors', 'Copy palette colors')}
                   >
                     {copiedPaletteId === palette.id ? (
                       <Check className="h-3 w-3" />
@@ -280,7 +286,7 @@ export function ColorPalettes({ onApply }: ColorPalettesProps) {
         {/* Info Box */}
         <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg">
           <p className="text-xs text-blue-700 dark:text-blue-300">
-            Tip: Click "Apply" to instantly apply a palette to all theme colors, then fine-tune individual colors.
+            {t('themeBuilderEditor.paletteTip', 'Tip: Click "Apply" to instantly apply a palette to all theme colors, then fine-tune individual colors.')}
           </p>
         </div>
 

@@ -9,7 +9,9 @@ import { ThemeData } from '@/types/theme'
 import * as themeApi from '@/lib/api/themeApi'
 import { toast } from 'sonner'
 import { debugLog, debugWarn, debugError } from '@/lib/debug'
+import { getConfig } from '@/lib/config'
 import { ExportDialog } from '@/components/theme/ExportDialog'
+import { ThemeBuilderSubTabs } from './components/ThemeBuilderSubTabs'
 
 
 export default function ThemeBuilderPage() {
@@ -17,6 +19,7 @@ export default function ThemeBuilderPage() {
   const router = useRouter()
   const locale = getLocaleFromPath(pathname)
   const t = createTranslator(locale)
+  const tb = (path: string, fallback: string) => t(`themeBuilder.${path}`, fallback)
   const user = useAuthStore((state) => state.user)
   const token = useAuthStore((state) => state.token)
 
@@ -27,6 +30,7 @@ export default function ThemeBuilderPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'inactive'>('all')
   const [sortBy, setSortBy] = useState<'name' | 'date' | 'status'>('date')
+  const showDebugPanel = process.env.NEXT_PUBLIC_DEBUG_LOGS === 'true'
 
   // Dialog states
   const [exportThemeId, setExportThemeId] = useState<string | null>(null)
@@ -40,13 +44,13 @@ export default function ThemeBuilderPage() {
 
   const formatUpdatedDate = (theme: ThemeData): string => {
     const timestamp = getThemeTimestamp(theme)
-    if (!timestamp) return 'Unknown Date'
-    return new Date(timestamp).toLocaleDateString()
+    if (!timestamp) return tb('unknownDate', 'Unknown Date')
+    return new Date(timestamp).toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US')
   }
 
   const websiteHost = useMemo(() => {
     const activeThemeDomain = themes.find((theme) => theme.isActive)?.identity?.domain?.trim()
-    const restaurantDomain = process.env.NEXT_PUBLIC_RESTAURANT_DOMAIN || 'localhost:3003'
+    const restaurantDomain = getConfig().restaurantDomain
     const fallbackHost = user?.restaurant_id
       ? `restaurant-${user.restaurant_id}.${restaurantDomain}`
       : `demo.${restaurantDomain}`
@@ -94,14 +98,14 @@ export default function ThemeBuilderPage() {
       // Check if we have the required data
       if (!user?.restaurant_id) {
         debugWarn('⚠️  [fetchThemes] Missing restaurant_id! User object:', user)
-        setError('No restaurant found. Please log in again.')
+        setError(tb('errors.noRestaurant', 'No restaurant found. Please log in again.'))
         setIsLoading(false)
         return
       }
 
       if (!token) {
         debugWarn('⚠️  [fetchThemes] Missing JWT token!')
-        setError('No authentication token. Please log in again.')
+        setError(tb('errors.noAuthToken', 'No authentication token. Please log in again.'))
         setIsLoading(false)
         return
       }
@@ -119,7 +123,7 @@ export default function ThemeBuilderPage() {
         debugError('❌ [fetchThemes] Full error:', JSON.stringify(err, null, 2))
 
         // More detailed error message
-        let errorMessage = 'Failed to load themes'
+        let errorMessage = tb('errors.loadThemes', 'Failed to load themes')
         if (err instanceof Error) {
           errorMessage = err.message
           // Check if it's an auth error
@@ -209,7 +213,7 @@ export default function ThemeBuilderPage() {
       })))
 
       const themeName = themes.find(t => t.id === themeId)?.name || 'Theme'
-      toast.success(`Theme "${themeName}" activated successfully`)
+      toast.success(tb('toasts.activateSuccess', `Theme "${themeName}" activated successfully`))
     } catch (err) {
       debugError('Failed to activate theme:', err)
       const errorMessage = err instanceof Error ? err.message : 'Failed to activate theme'
@@ -221,11 +225,11 @@ export default function ThemeBuilderPage() {
   const handleDeleteTheme = async (themeId: string) => {
     const themeToDelete = themes.find((theme) => theme.id === themeId)
     if (themeToDelete?.isActive) {
-      toast.error('Deactivate this theme before deleting it')
+      toast.error(tb('toasts.deactivateBeforeDelete', 'Deactivate this theme before deleting it'))
       return
     }
 
-    if (!window.confirm('Are you sure you want to delete this theme?')) {
+    if (!window.confirm(tb('confirm.deleteTheme', 'Are you sure you want to delete this theme?'))) {
       return
     }
 
@@ -233,7 +237,7 @@ export default function ThemeBuilderPage() {
       setError(null)
       await themeApi.deleteTheme(themeId)
       setThemes(themes.filter(t => t.id !== themeId))
-      toast.success('Theme deleted successfully')
+      toast.success(tb('toasts.deleteSuccess', 'Theme deleted successfully'))
     } catch (err) {
       debugError('Failed to delete theme:', err)
       const errorMessage = err instanceof Error ? err.message : 'Failed to delete theme'
@@ -291,7 +295,7 @@ export default function ThemeBuilderPage() {
   const handleMigrateThemes = async () => {
     const themesToMigrate = themes
     if (themesToMigrate.length === 0) {
-      toast.error('No themes available to migrate')
+      toast.error(tb('toasts.noThemesToMigrate', 'No themes available to migrate'))
       return
     }
 
@@ -305,7 +309,7 @@ export default function ThemeBuilderPage() {
 
       const refreshedThemes = await themeApi.getThemes()
       setThemes(refreshedThemes)
-      toast.success(`Migrated ${themesToMigrate.length} theme(s) to the latest schema`)
+      toast.success(tb('toasts.migrateSuccess', `Migrated ${themesToMigrate.length} theme(s) to the latest schema`))
     } catch (err) {
       debugError('Failed to migrate themes:', err)
       const errorMessage = err instanceof Error ? err.message : 'Failed to migrate themes'
@@ -318,7 +322,7 @@ export default function ThemeBuilderPage() {
 
   const handleKeepTwoThemes = async () => {
     if (themes.length <= 2) {
-      toast.success('Already limited to 2 themes')
+      toast.success(tb('toasts.alreadyTwoThemes', 'Already limited to 2 themes'))
       return
     }
 
@@ -339,11 +343,11 @@ export default function ThemeBuilderPage() {
     const themesToDelete = themes.filter((theme) => !keepIds.has(theme.id))
 
     if (themesToDelete.length === 0) {
-      toast.success('Already limited to 2 themes')
+      toast.success(tb('toasts.alreadyTwoThemes', 'Already limited to 2 themes'))
       return
     }
 
-    if (!window.confirm(`This will delete ${themesToDelete.length} theme(s) and keep only 2 themes. Continue?`)) {
+    if (!window.confirm(tb('confirm.keepTwoThemes', `This will delete ${themesToDelete.length} theme(s) and keep only 2 themes. Continue?`))) {
       return
     }
 
@@ -361,7 +365,7 @@ export default function ThemeBuilderPage() {
 
       const refreshedThemes = await themeApi.getThemes()
       setThemes(refreshedThemes)
-      toast.success('Kept 2 themes and deleted the rest')
+      toast.success(tb('toasts.keepTwoSuccess', 'Kept 2 themes and deleted the rest'))
     } catch (err) {
       debugError('Failed to keep only two themes:', err)
       const errorMessage = err instanceof Error ? err.message : 'Failed to clean up themes'
@@ -377,7 +381,7 @@ export default function ThemeBuilderPage() {
       setError(null)
       const duplicatedTheme = await themeApi.duplicateTheme(themeId, `${themeName} (Copy)`)
       setThemes([...themes, duplicatedTheme])
-      toast.success(`Theme duplicated as "${duplicatedTheme.name}"`)
+      toast.success(tb('toasts.duplicateSuccess', `Theme duplicated as "${duplicatedTheme.name}"`))
     } catch (err) {
       debugError('Failed to duplicate theme:', err)
       const errorMessage = err instanceof Error ? err.message : 'Failed to duplicate theme'
@@ -394,7 +398,7 @@ export default function ThemeBuilderPage() {
       <div className="flex items-center justify-center h-screen">
         <div className="text-center">
           <Loader2 className="h-12 w-12 animate-spin text-blue-600 mx-auto mb-4" />
-          <p className="text-gray-600">Loading themes...</p>
+          <p className="text-gray-600">{tb('loading', 'Loading themes...')}</p>
         </div>
       </div>
     )
@@ -407,13 +411,13 @@ export default function ThemeBuilderPage() {
         <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex gap-3">
           <AlertCircle className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
           <div>
-            <h3 className="font-semibold text-red-900">Error</h3>
+            <h3 className="font-semibold text-red-900">{tb('errorTitle', 'Error')}</h3>
             <p className="text-red-700 text-sm">{error}</p>
             <button
               onClick={() => window.location.reload()}
               className="mt-2 text-sm text-red-600 hover:text-red-700 font-medium"
             >
-              Retry
+              {tb('retry', 'Retry')}
             </button>
           </div>
         </div>
@@ -423,19 +427,23 @@ export default function ThemeBuilderPage() {
 
   return (
     <div className="p-6 max-w-7xl mx-auto">
-      {/* DEBUG INFO - Always visible for troubleshooting */}
-      <div className="mb-6 p-4 bg-gray-100 border border-gray-300 rounded-lg font-mono text-xs text-gray-700 whitespace-pre-wrap">
-        <div className="font-bold mb-2">🔍 DEBUG INFO (Copy for support):</div>
-        {debugInfo}
-      </div>
+      <ThemeBuilderSubTabs />
+
+      {/* DEBUG INFO - Hidden unless debug logs are explicitly enabled */}
+      {showDebugPanel && (
+        <div className="mb-6 p-4 bg-gray-100 border border-gray-300 rounded-lg font-mono text-xs text-gray-700 whitespace-pre-wrap" dir="ltr">
+          <div className="font-bold mb-2">{tb('debugTitle', '🔍 DEBUG INFO (Copy for support):')}</div>
+          {debugInfo}
+        </div>
+      )}
 
       {/* Header with Website Preview */}
       <div className="mb-8">
         <div className="flex items-center gap-3 mb-2">
           <Palette className="h-8 w-8 text-blue-600" />
-          <h1 className="text-3xl font-bold text-gray-900">Theme Builder</h1>
+          <h1 className="text-3xl font-bold text-gray-900">{tb('title', 'Theme Builder')}</h1>
         </div>
-        <p className="text-gray-600 mb-4">Create and manage website themes</p>
+        <p className="text-gray-600 mb-4">{tb('subtitle', 'Create and manage website themes')}</p>
 
         {/* Website Subdomain Card */}
         {user?.restaurant_id && (
@@ -445,7 +453,7 @@ export default function ThemeBuilderPage() {
                 <Eye className="h-5 w-5 text-white" />
               </div>
               <div>
-                <p className="text-sm font-medium text-blue-900">Your Website</p>
+                <p className="text-sm font-medium text-blue-900">{tb('yourWebsite', 'Your Website')}</p>
                 <p className="text-sm text-blue-700 font-mono">
                   {websiteHost}
                 </p>
@@ -458,7 +466,7 @@ export default function ThemeBuilderPage() {
               className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition flex items-center gap-2 whitespace-nowrap"
             >
               <Eye className="h-4 w-4" />
-              Preview Website
+              {tb('previewWebsite', 'Preview Website')}
             </a>
           </div>
         )}
@@ -468,41 +476,41 @@ export default function ThemeBuilderPage() {
       {themes.length > 0 && (
         <div className="mb-12">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-bold text-gray-900">Your Themes ({filteredAndSortedThemes.length})</h2>
+            <h2 className="text-xl font-bold text-gray-900">{tb('yourThemes', 'Your Themes')} ({filteredAndSortedThemes.length})</h2>
             <div className="flex gap-2">
               <button
                 onClick={() => router.push(`/${locale}/dashboard/theme-builder/presets`)}
                 className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium transition flex items-center gap-2"
               >
                 <Palette className="h-4 w-4" />
-                From Template
+                {tb('fromTemplate', 'From Template')}
               </button>
               <button
                 onClick={() => router.push(`/${locale}/dashboard/theme-builder/import`)}
                 className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition flex items-center gap-2"
               >
                 <Upload className="h-4 w-4" />
-                Import
+                {tb('import', 'Import')}
               </button>
               <button
                 onClick={() => router.push(`/${locale}/dashboard/theme-builder/editor/new`)}
                 className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition"
               >
-                + Create Theme
+                {tb('createTheme', '+ Create Theme')}
               </button>
               <button
                 onClick={() => handleMigrateThemes()}
                 disabled={isBulkActionRunning}
                 className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white rounded-lg font-medium transition"
               >
-                {isBulkActionRunning ? 'Working...' : 'Migrate Configs'}
+                {isBulkActionRunning ? tb('working', 'Working...') : tb('migrateConfigs', 'Migrate Configs')}
               </button>
               <button
                 onClick={handleKeepTwoThemes}
                 disabled={isBulkActionRunning}
                 className="px-4 py-2 bg-red-600 hover:bg-red-700 disabled:bg-red-400 text-white rounded-lg font-medium transition"
               >
-                Keep 2 Themes
+                {tb('keepTwoThemes', 'Keep 2 Themes')}
               </button>
             </div>
           </div>
@@ -515,7 +523,7 @@ export default function ThemeBuilderPage() {
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                   <input
                     type="text"
-                    placeholder="Search themes..."
+                    placeholder={tb('searchPlaceholder', 'Search themes...')}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -529,9 +537,9 @@ export default function ThemeBuilderPage() {
                   onChange={(e) => setFilterStatus(e.target.value as any)}
                   className="px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
-                  <option value="all">All Themes</option>
-                  <option value="active">Active Only</option>
-                  <option value="inactive">Inactive</option>
+                  <option value="all">{tb('filters.allThemes', 'All Themes')}</option>
+                  <option value="active">{tb('filters.activeOnly', 'Active Only')}</option>
+                  <option value="inactive">{tb('filters.inactive', 'Inactive')}</option>
                 </select>
 
                 <select
@@ -539,9 +547,9 @@ export default function ThemeBuilderPage() {
                   onChange={(e) => setSortBy(e.target.value as any)}
                   className="px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
-                  <option value="date">Recent First</option>
-                  <option value="name">Name (A-Z)</option>
-                  <option value="status">Active First</option>
+                  <option value="date">{tb('sort.recentFirst', 'Recent First')}</option>
+                  <option value="name">{tb('sort.nameAsc', 'Name (A-Z)')}</option>
+                  <option value="status">{tb('sort.activeFirst', 'Active First')}</option>
                 </select>
               </div>
             </div>
@@ -551,8 +559,8 @@ export default function ThemeBuilderPage() {
           {filteredAndSortedThemes.length === 0 ? (
             <div className="text-center py-12 bg-gray-50 rounded-lg">
               <Palette className="h-12 w-12 text-gray-300 mx-auto mb-3" />
-              <p className="text-gray-500 font-medium">No themes found</p>
-              <p className="text-gray-400 text-sm mt-1">Try adjusting your search or filters</p>
+              <p className="text-gray-500 font-medium">{tb('empty.noThemesFound', 'No themes found')}</p>
+              <p className="text-gray-400 text-sm mt-1">{tb('empty.tryAdjustingFilters', 'Try adjusting your search or filters')}</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -577,13 +585,13 @@ export default function ThemeBuilderPage() {
                     <div>
                       <h3 className="font-bold text-gray-900">{theme.name}</h3>
                       <p className="text-xs text-gray-500 mt-0.5">
-                        Updated {formatUpdatedDate(theme)}
+                        {tb('updatedPrefix', 'Updated')} {formatUpdatedDate(theme)}
                       </p>
                     </div>
                     {theme.isActive && (
                       <div className="flex items-center gap-1 bg-green-100 text-green-700 px-2 py-1 rounded-full text-xs font-medium whitespace-nowrap">
                         <Check className="h-3 w-3" />
-                        Active
+                        {tb('activeBadge', 'Active')}
                       </div>
                     )}
                   </div>
@@ -596,26 +604,26 @@ export default function ThemeBuilderPage() {
                     <button
                       onClick={() => router.push(`/${locale}/dashboard/theme-builder/editor/${theme.id}`)}
                       className="px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm font-medium transition flex items-center justify-center gap-1"
-                      title="Edit theme"
+                      title={tb('actions.editTitle', 'Edit theme')}
                     >
                       <Eye className="h-3 w-3" />
-                      Edit
+                      {tb('actions.edit', 'Edit')}
                     </button>
                     <button
                       onClick={() => handleDuplicateTheme(theme.id, theme.name)}
                       className="px-3 py-2 bg-gray-100 text-gray-700 rounded hover:bg-gray-200 text-sm font-medium transition flex items-center justify-center gap-1"
-                      title="Duplicate theme"
+                      title={tb('actions.copyTitle', 'Duplicate theme')}
                     >
                       <Copy className="h-3 w-3" />
-                      Copy
+                      {tb('actions.copy', 'Copy')}
                     </button>
                     <button
                       onClick={() => setExportThemeId(theme.id)}
                       className="px-3 py-2 bg-orange-100 text-orange-700 rounded hover:bg-orange-200 text-sm font-medium transition flex items-center justify-center gap-1"
-                      title="Export theme as JSON"
+                      title={tb('actions.exportTitle', 'Export theme as JSON')}
                     >
                       <Download className="h-3 w-3" />
-                      Export
+                      {tb('actions.export', 'Export')}
                     </button>
                   </div>
 
@@ -624,7 +632,7 @@ export default function ThemeBuilderPage() {
                       onClick={() => handleActivateTheme(theme.id)}
                       className="mt-2 w-full px-3 py-2 bg-yellow-50 text-yellow-700 rounded hover:bg-yellow-100 text-sm font-medium transition"
                     >
-                      Activate Theme
+                      {tb('actions.activate', 'Activate Theme')}
                     </button>
                   )}
 
@@ -634,7 +642,7 @@ export default function ThemeBuilderPage() {
                       className="mt-2 w-full px-3 py-2 bg-red-50 text-red-600 rounded hover:bg-red-100 text-sm font-medium transition flex items-center justify-center gap-1"
                     >
                       <Trash2 className="h-3 w-3" />
-                      Delete
+                      {tb('actions.delete', 'Delete')}
                     </button>
                   )}
                 </div>

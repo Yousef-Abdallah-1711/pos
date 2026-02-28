@@ -75,7 +75,6 @@ export const routeCodeSplits = {
       attendance: () => import('@/app/[locale]/dashboard/hr/attendance/page'),
       leaves: () => import('@/app/[locale]/dashboard/hr/leaves/page'),
       payroll: () => import('@/app/[locale]/dashboard/hr/payroll/page'),
-      roles: () => import('@/app/[locale]/dashboard/hr/roles/page'),
     },
 
     // Other sections

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { usePathname, useParams } from 'next/navigation'
 import Link from 'next/link'
 import { useAuthStore } from '@/stores/authStore'
@@ -28,7 +28,7 @@ import {
 } from 'lucide-react'
 import { createTranslator, getLocaleFromPath } from '@/lib/translations'
 import { MODULE_IDS, PERMISSION_LEVELS } from '@/lib/rbac'
-import { exportOrderToPDF, exportOrdersToCSV } from '@/lib/pdf-export'
+import { exportOrderToPDF } from '@/lib/pdf-export'
 import { debugError } from '@/lib/debug'
 
 interface OrderItem {
@@ -52,6 +52,7 @@ interface StatusHistory {
 interface Order {
   id: number
   order_number: string
+  order_source?: string
   customer_name: string
   customer_email: string
   customer_phone: string
@@ -66,6 +67,14 @@ interface Order {
   discount: number
   total: number
   created_at: string
+  table?: {
+    id: number
+    number: number
+    name?: string
+    location?: string
+    capacity?: number
+    is_assigned: boolean
+  } | null
   items: OrderItem[]
   status_history: StatusHistory[]
 }
@@ -121,11 +130,11 @@ export default function OrderDetailsPage() {
   const t = createTranslator(locale)
 
   // Check RBAC permissions for Orders module
-  const canViewOrders = useHasPermission(
+  const { hasPermission: canViewOrders, loading: canViewLoading } = useHasPermission(
     MODULE_IDS.ORDERS,
     PERMISSION_LEVELS.READ,
   )
-  const canUpdateOrders = useHasPermission(
+  const { hasPermission: canUpdateOrders, loading: canUpdateLoading } = useHasPermission(
     MODULE_IDS.ORDERS,
     PERMISSION_LEVELS.WRITE,
   )
@@ -138,7 +147,40 @@ export default function OrderDetailsPage() {
   const [isAssignmentModalOpen, setIsAssignmentModalOpen] = useState(false)
   const token = useAuthStore((state) => state.token)
 
-  const isRTL = locale === 'ar'
+  const fetchOrder = useCallback(async () => {
+    setLoading(true)
+    try {
+      const response = await api.get(`/admin/orders/${orderId}`)
+      const orderData = response.data
+      setOrder(orderData)
+      setSelectedStatus(orderData.status)
+    } catch (error) {
+      toast.error('Failed to load order details')
+      debugError('[ORDER_DETAILS] Error:', error)
+    } finally {
+      setLoading(false)
+    }
+  }, [orderId])
+
+  useEffect(() => {
+    if (canViewLoading || canUpdateLoading) {
+      return
+    }
+    if (!token || !canViewOrders) {
+      setLoading(false)
+      return
+    }
+
+    void fetchOrder()
+  }, [token, canViewOrders, canViewLoading, canUpdateLoading, fetchOrder])
+
+  if (canViewLoading || canUpdateLoading) {
+    return (
+      <div className="flex justify-center items-center h-96">
+        <Loader className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    )
+  }
 
   // Show permission denied if user can't view orders
   if (!canViewOrders) {
@@ -156,35 +198,16 @@ export default function OrderDetailsPage() {
             <Lock className="h-5 w-5 text-red-600 dark:text-red-400 mt-0.5 flex-shrink-0" />
             <div>
               <h2 className="font-semibold text-red-900 dark:text-red-300">
-                Access Denied
+                {t('orders.accessDeniedTitle', 'Access Denied')}
               </h2>
               <p className="text-sm text-red-800 dark:text-red-400 mt-1">
-                You do not have permission to view order details. Please contact your administrator.
+                {t('orders.accessDeniedText', 'You do not have permission to view order details. Please contact your administrator.')}
               </p>
             </div>
           </div>
         </div>
       </div>
     )
-  }
-
-  useEffect(() => {
-    fetchOrder()
-  }, [orderId, token])
-
-  const fetchOrder = async () => {
-    setLoading(true)
-    try {
-      const response = await api.get(`/admin/orders/${orderId}`)
-      const orderData = response.data
-      setOrder(orderData)
-      setSelectedStatus(orderData.status)
-    } catch (error) {
-      toast.error('Failed to load order details')
-      debugError('[ORDER_DETAILS] Error:', error)
-    } finally {
-      setLoading(false)
-    }
   }
 
   const handleUpdateStatus = async () => {
@@ -237,6 +260,22 @@ export default function OrderDetailsPage() {
   }
 
   const canAssignDriver = canUpdateOrders && !['cancelled', 'delivered'].includes(order.status)
+  const isDineInOrder =
+    order.order_source === 'dine_in' || (order.table?.is_assigned ?? false)
+
+  const orderSourceLabel = (() => {
+    switch (order.order_source) {
+      case 'dine_in':
+        return t('orders.sources.dine_in', 'Dine-in')
+      case 'mobile_app':
+        return t('orders.sources.mobile_app', 'Mobile')
+      case 'phone':
+        return t('orders.sources.phone', 'Phone')
+      case 'website':
+      default:
+        return t('orders.sources.website', 'Online')
+    }
+  })()
 
   return (
     <div className="space-y-6">
@@ -253,6 +292,17 @@ export default function OrderDetailsPage() {
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
               {t('orders.orderNumber')} {order.order_number}
             </h1>
+            <div className="mt-2 flex flex-wrap items-center gap-2">
+              <span className="inline-flex rounded-full border border-indigo-200 bg-indigo-50 px-2 py-1 text-xs font-semibold text-indigo-700 dark:border-indigo-500/40 dark:bg-indigo-500/15 dark:text-indigo-200">
+                {orderSourceLabel}
+              </span>
+              {order.table?.is_assigned && (
+                <span className="inline-flex rounded-full border border-amber-300 bg-amber-50 px-2 py-1 text-xs font-semibold text-amber-800 dark:border-amber-500/40 dark:bg-amber-500/15 dark:text-amber-200">
+                  {t('navigation.tables', 'Tables')} #{order.table.number}
+                  {order.table.name ? ` - ${order.table.name}` : ''}
+                </span>
+              )}
+            </div>
             <p className="text-gray-500 dark:text-gray-400">
               {new Date(order.created_at).toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US', {
                 year: 'numeric',
@@ -407,6 +457,14 @@ export default function OrderDetailsPage() {
                   {order.payment_method.replace(/_/g, ' ').charAt(0).toUpperCase() + order.payment_method.replace(/_/g, ' ').slice(1)}
                 </p>
               </div>
+              <div>
+                <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">
+                  {t('orders.orderSource', 'Order Source')}
+                </p>
+                <p className="text-sm text-gray-900 dark:text-white">
+                  {orderSourceLabel}
+                </p>
+              </div>
             </div>
           </div>
 
@@ -427,19 +485,53 @@ export default function OrderDetailsPage() {
                 <Phone className="h-5 w-5 text-gray-400 mt-0.5 flex-shrink-0" />
                 <p className="text-sm text-gray-900 dark:text-white">{order.customer_phone}</p>
               </div>
-              <div className="flex items-start gap-3">
-                <MapPin className="h-5 w-5 text-gray-400 mt-0.5 flex-shrink-0" />
-                <div>
-                  <p className="text-sm text-gray-900 dark:text-white">{order.delivery_address}</p>
-                  {order.delivery_notes && (
-                    <p className="text-sm text-gray-600 dark:text-gray-400 italic mt-1">
-                      {order.delivery_notes}
-                    </p>
-                  )}
+              {!isDineInOrder ? (
+                <div className="flex items-start gap-3">
+                  <MapPin className="h-5 w-5 text-gray-400 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <p className="text-sm text-gray-900 dark:text-white">{order.delivery_address}</p>
+                    {order.delivery_notes && (
+                      <p className="text-sm text-gray-600 dark:text-gray-400 italic mt-1">
+                        {order.delivery_notes}
+                      </p>
+                    )}
+                  </div>
                 </div>
-              </div>
+              ) : (
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  {t('orders.dineInNoDelivery', 'Dine-in order, delivery details are not required.')}
+                </p>
+              )}
             </div>
           </div>
+
+          {order.table?.is_assigned && (
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+              <h2 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">
+                {t('navigation.tables', 'Tables')}
+              </h2>
+              <div className="space-y-2 text-sm text-gray-800 dark:text-gray-200">
+                <p>
+                  <span className="text-gray-500 dark:text-gray-400">{t('tables.tableNumber')}: </span>
+                  {order.table.number}
+                </p>
+                <p>
+                  <span className="text-gray-500 dark:text-gray-400">{t('tables.tableName')}: </span>
+                  {order.table.name || t('common.notAvailable', 'N/A')}
+                </p>
+                <p>
+                  <span className="text-gray-500 dark:text-gray-400">{t('tables.location')}: </span>
+                  {order.table.location
+                    ? t(`tables.locations.${order.table.location}`, order.table.location)
+                    : t('common.notAvailable', 'N/A')}
+                </p>
+                <p>
+                  <span className="text-gray-500 dark:text-gray-400">{t('tables.capacity')}: </span>
+                  {order.table.capacity || 0}
+                </p>
+              </div>
+            </div>
+          )}
 
           {/* Delivery Tracking */}
           {(order.status === 'out_for_delivery' || order.status === 'delivered') && (

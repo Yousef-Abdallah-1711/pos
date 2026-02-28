@@ -1,6 +1,6 @@
 import { AlertCircle } from 'lucide-react';
-import { HeaderSSR } from '@/components/header-ssr';
-import { FooterSSR } from '@/components/footer-ssr';
+import { HeaderSSR } from '@/components/layout/header-ssr';
+import { FooterSSR } from '@/components/layout/footer-ssr';
 import { getThemeDataServer, getDefaultThemeData } from '@/lib/api/get-theme-server';
 import { CartPageContent } from './cart-page-content';
 

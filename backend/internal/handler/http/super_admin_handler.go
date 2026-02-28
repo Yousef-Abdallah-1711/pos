@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
-	"os"
+	appconfig "pos-saas/internal/config"
 	"strconv"
 
 	"pos-saas/internal/domain"
@@ -297,9 +297,18 @@ func (h *SuperAdminHandler) GenerateDashboardLoginToken(w http.ResponseWriter, r
 		return
 	}
 
-	dashboardURL := os.Getenv("DASHBOARD_URL")
-	if dashboardURL == "" {
-		dashboardURL = "http://localhost:3001"
+	dashboardURL, resolveErr := appconfig.ResolveRuntimeURL(
+		[]string{"DASHBOARD_URL", "NEXT_PUBLIC_DASHBOARD_URL"},
+		"http://localhost:3001",
+		"dashboard URL",
+	)
+	if resolveErr != nil {
+		log.Printf("[SuperAdminHandler] Dashboard URL configuration error: %v\n", resolveErr)
+		respondJSON(w, http.StatusInternalServerError, map[string]interface{}{
+			"success": false,
+			"error":   "dashboard URL is not configured",
+		})
+		return
 	}
 	loginPath := dashboardURL + "/auth/super-admin-login"
 

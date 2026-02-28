@@ -54,8 +54,6 @@ export const usePreferencesStore = create<PreferencesState>()(
       setSettings: (settings) => {
         debugLog('[PreferencesStore] Setting preferences')
         set({ settings, error: null })
-        // Apply theme immediately
-        applyTheme(settings.theme)
         // Apply colors immediately
         applyColors(settings.primaryColor, settings.secondaryColor, settings.accentColor)
         // Dispatch custom event for real-time sync across components
@@ -76,7 +74,6 @@ export const usePreferencesStore = create<PreferencesState>()(
         const current = get().settings
         if (current) {
           set({ settings: { ...current, theme } })
-          applyTheme(theme)
         }
       },
 
@@ -98,18 +95,6 @@ export const usePreferencesStore = create<PreferencesState>()(
     }
   )
 )
-
-// Helper function to apply theme
-function applyTheme(theme: 'light' | 'dark' | 'system') {
-  const root = document.documentElement
-
-  if (theme === 'system') {
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
-    root.classList.toggle('dark', prefersDark)
-  } else {
-    root.classList.toggle('dark', theme === 'dark')
-  }
-}
 
 // Helper function to generate color shades from a base color
 function hexToHSL(hex: string): { h: number; s: number; l: number } {
@@ -195,16 +180,5 @@ function applyColors(primary: string, secondary: string, accent: string) {
   // Apply accent color shades
   Object.entries(accentShades).forEach(([shade, color]) => {
     root.style.setProperty(`--accent-${shade}`, color)
-  })
-}
-
-// Initialize theme on store hydration
-if (typeof window !== 'undefined') {
-  // Listen for system theme changes
-  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
-    const settings = usePreferencesStore.getState().settings
-    if (settings?.theme === 'system') {
-      document.documentElement.classList.toggle('dark', e.matches)
-    }
   })
 }

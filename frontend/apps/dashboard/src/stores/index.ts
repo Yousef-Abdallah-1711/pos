@@ -2,6 +2,16 @@
 export { useAuthStore } from './authStore'
 export type { AuthState } from './authStore'
 
+// POS Store
+export { usePOSStore } from './posStore'
+export type {
+  PaymentMethod as POSPaymentMethod,
+  POSAddItemProduct,
+  POSCartItem,
+  HeldOrder as POSHeldOrder,
+  POSState,
+} from './posStore'
+
 // Preferences Store
 export * from './preferencesStore'
 

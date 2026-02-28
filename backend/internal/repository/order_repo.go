@@ -29,10 +29,10 @@ func (r *OrderRepository) CreateOrder(order *domain.Order) (*domain.Order, error
 			delivery_zip_code, delivery_latitude, delivery_longitude,
 			delivery_instructions, subtotal, tax_amount, discount_amount,
 			delivery_fee, total_amount, payment_method, payment_status,
-			status, estimated_delivery_time, notes, order_source
+			status, estimated_delivery_time, notes, order_source, table_id
 		) VALUES (
 			$1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15,
-			$16, $17, $18, $19, $20, $21, $22, $23, $24
+			$16, $17, $18, $19, $20, $21, $22, $23, $24, $25
 		)
 		RETURNING id, created_at, updated_at
 	`
@@ -42,6 +42,7 @@ func (r *OrderRepository) CreateOrder(order *domain.Order) (*domain.Order, error
 	var deliveryLatitude, deliveryLongitude sql.NullFloat64
 	var paymentMethod sql.NullString
 	var estimatedDeliveryTime sql.NullTime
+	var tableID sql.NullInt64
 
 	if order.CustomerEmail != "" {
 		customerEmail = sql.NullString{String: order.CustomerEmail, Valid: true}
@@ -73,6 +74,9 @@ func (r *OrderRepository) CreateOrder(order *domain.Order) (*domain.Order, error
 	if order.EstimatedDeliveryTime != nil {
 		estimatedDeliveryTime = sql.NullTime{Time: *order.EstimatedDeliveryTime, Valid: true}
 	}
+	if order.TableID != nil && *order.TableID > 0 {
+		tableID = sql.NullInt64{Int64: *order.TableID, Valid: true}
+	}
 
 	err := r.db.QueryRow(query,
 		order.TenantID,
@@ -99,6 +103,7 @@ func (r *OrderRepository) CreateOrder(order *domain.Order) (*domain.Order, error
 		estimatedDeliveryTime,
 		order.Notes,
 		order.OrderSource,
+		tableID,
 	).Scan(&order.ID, &order.CreatedAt, &order.UpdatedAt)
 
 	if err != nil {
@@ -115,15 +120,20 @@ func (r *OrderRepository) CreateOrder(order *domain.Order) (*domain.Order, error
 func (r *OrderRepository) GetOrderByID(tenantID, restaurantID, orderID int64) (*domain.Order, error) {
 	query := `
 		SELECT
-			id, tenant_id, restaurant_id, order_number, customer_name, customer_email,
-			customer_phone, delivery_address, delivery_city, delivery_area,
-			delivery_zip_code, delivery_latitude, delivery_longitude,
-			delivery_instructions, subtotal, tax_amount, discount_amount,
-			delivery_fee, total_amount, payment_method, payment_status,
-			status, estimated_delivery_time, actual_delivery_time, notes, order_source,
-			created_at, updated_at
-		FROM orders
-		WHERE id = $1 AND tenant_id = $2 AND restaurant_id = $3
+			o.id, o.tenant_id, o.restaurant_id, o.order_number, o.customer_name, o.customer_email,
+			o.customer_phone, o.delivery_address, o.delivery_city, o.delivery_area,
+			o.delivery_zip_code, o.delivery_latitude, o.delivery_longitude,
+			o.delivery_instructions, o.subtotal, o.tax_amount, o.discount_amount,
+			o.delivery_fee, o.total_amount, o.payment_method, o.payment_status,
+			o.status, o.estimated_delivery_time, o.actual_delivery_time, o.notes, o.order_source,
+			o.table_id, t.table_number, COALESCE(t.name, ''), COALESCE(t.location, ''), t.capacity,
+			o.created_at, o.updated_at
+		FROM orders o
+		LEFT JOIN restaurant_tables t
+			ON t.id = o.table_id
+			AND t.tenant_id = o.tenant_id
+			AND t.restaurant_id = o.restaurant_id
+		WHERE o.id = $1 AND o.tenant_id = $2 AND o.restaurant_id = $3
 	`
 
 	order := &domain.Order{}
@@ -131,6 +141,11 @@ func (r *OrderRepository) GetOrderByID(tenantID, restaurantID, orderID int64) (*
 	var deliveryLatitude, deliveryLongitude sql.NullFloat64
 	var paymentMethod, notes sql.NullString
 	var estimatedDeliveryTime, actualDeliveryTime sql.NullTime
+	var tableID sql.NullInt64
+	var tableNumber sql.NullInt32
+	var tableName sql.NullString
+	var tableLocation sql.NullString
+	var tableCapacity sql.NullInt32
 
 	err := r.db.QueryRow(query, orderID, tenantID, restaurantID).Scan(
 		&order.ID, &order.TenantID, &order.RestaurantID, &order.OrderNumber,
@@ -140,6 +155,7 @@ func (r *OrderRepository) GetOrderByID(tenantID, restaurantID, orderID int64) (*
 		&deliveryInstructions, &order.Subtotal, &order.TaxAmount, &order.DiscountAmount,
 		&order.DeliveryFee, &order.TotalAmount, &paymentMethod, &order.PaymentStatus,
 		&order.Status, &estimatedDeliveryTime, &actualDeliveryTime, &notes, &order.OrderSource,
+		&tableID, &tableNumber, &tableName, &tableLocation, &tableCapacity,
 		&order.CreatedAt, &order.UpdatedAt,
 	)
 
@@ -187,6 +203,23 @@ func (r *OrderRepository) GetOrderByID(tenantID, restaurantID, orderID int64) (*
 	if notes.Valid {
 		order.Notes = notes.String
 	}
+	if tableID.Valid {
+		order.TableID = &tableID.Int64
+	}
+	if tableNumber.Valid {
+		tableNumberValue := int(tableNumber.Int32)
+		order.TableNumber = &tableNumberValue
+	}
+	if tableName.Valid {
+		order.TableName = tableName.String
+	}
+	if tableLocation.Valid {
+		order.TableLocation = tableLocation.String
+	}
+	if tableCapacity.Valid {
+		tableCapacityValue := int(tableCapacity.Int32)
+		order.TableCapacity = &tableCapacityValue
+	}
 
 	// Get order items
 	items, err := r.GetOrderItems(tenantID, orderID)
@@ -221,6 +254,10 @@ func (r *OrderRepository) GetOrderByNumber(tenantID, restaurantID int64, orderNu
 func (r *OrderRepository) ListOrders(tenantID, restaurantID int64, filters *domain.OrderListFilters) (*domain.OrderListResponse, error) {
 	baseQuery := `
 		FROM orders o
+		LEFT JOIN restaurant_tables t
+		  ON t.id = o.table_id
+		 AND t.tenant_id = o.tenant_id
+		 AND t.restaurant_id = o.restaurant_id
 	`
 	if filters != nil && filters.AssignedDriverID != nil {
 		baseQuery += `
@@ -234,7 +271,9 @@ func (r *OrderRepository) ListOrders(tenantID, restaurantID int64, filters *doma
 		SELECT DISTINCT
 			o.id, o.tenant_id, o.restaurant_id, o.order_number, o.customer_name, o.customer_email,
 			o.customer_phone, o.subtotal, o.tax_amount, o.discount_amount, o.delivery_fee,
-			o.total_amount, o.payment_status, o.status, o.order_source, o.created_at, o.updated_at
+			o.total_amount, o.payment_status, o.status, o.order_source, o.table_id,
+			t.table_number, COALESCE(t.name, ''), COALESCE(t.location, ''), t.capacity,
+			o.created_at, o.updated_at
 	` + baseQuery
 	countQuery := "SELECT COUNT(DISTINCT o.id) " + baseQuery
 
@@ -273,6 +312,22 @@ func (r *OrderRepository) ListOrders(tenantID, restaurantID int64, filters *doma
 			query += clause
 			countQuery += clause
 			args = append(args, "%"+filters.CustomerEmail+"%")
+		}
+
+		if filters.OrderSource != "" {
+			argCount++
+			clause := fmt.Sprintf(" AND o.order_source = $%d", argCount)
+			query += clause
+			countQuery += clause
+			args = append(args, filters.OrderSource)
+		}
+
+		if filters.TableID != nil && *filters.TableID > 0 {
+			argCount++
+			clause := fmt.Sprintf(" AND o.table_id = $%d", argCount)
+			query += clause
+			countQuery += clause
+			args = append(args, *filters.TableID)
 		}
 
 		if !filters.StartDate.IsZero() {
@@ -324,7 +379,7 @@ func (r *OrderRepository) ListOrders(tenantID, restaurantID int64, filters *doma
 	}
 
 	// Add ordering and pagination
-	query += " ORDER BY created_at DESC"
+	query += " ORDER BY o.created_at DESC"
 
 	if filters != nil && filters.Limit > 0 {
 		offset := (filters.Page - 1) * filters.Limit
@@ -343,13 +398,19 @@ func (r *OrderRepository) ListOrders(tenantID, restaurantID int64, filters *doma
 	for rows.Next() {
 		order := domain.Order{}
 		var customerEmail sql.NullString
+		var tableID sql.NullInt64
+		var tableNumber sql.NullInt32
+		var tableName sql.NullString
+		var tableLocation sql.NullString
+		var tableCapacity sql.NullInt32
 
 		err := rows.Scan(
 			&order.ID, &order.TenantID, &order.RestaurantID, &order.OrderNumber,
 			&order.CustomerName, &customerEmail,
 			&order.CustomerPhone, &order.Subtotal, &order.TaxAmount, &order.DiscountAmount,
 			&order.DeliveryFee, &order.TotalAmount, &order.PaymentStatus, &order.Status,
-			&order.OrderSource, &order.CreatedAt, &order.UpdatedAt,
+			&order.OrderSource, &tableID, &tableNumber, &tableName, &tableLocation, &tableCapacity,
+			&order.CreatedAt, &order.UpdatedAt,
 		)
 
 		if err != nil {
@@ -358,6 +419,23 @@ func (r *OrderRepository) ListOrders(tenantID, restaurantID int64, filters *doma
 
 		if customerEmail.Valid {
 			order.CustomerEmail = customerEmail.String
+		}
+		if tableID.Valid {
+			order.TableID = &tableID.Int64
+		}
+		if tableNumber.Valid {
+			tableNumberValue := int(tableNumber.Int32)
+			order.TableNumber = &tableNumberValue
+		}
+		if tableName.Valid {
+			order.TableName = tableName.String
+		}
+		if tableLocation.Valid {
+			order.TableLocation = tableLocation.String
+		}
+		if tableCapacity.Valid {
+			tableCapacityValue := int(tableCapacity.Int32)
+			order.TableCapacity = &tableCapacityValue
 		}
 
 		orders = append(orders, order)

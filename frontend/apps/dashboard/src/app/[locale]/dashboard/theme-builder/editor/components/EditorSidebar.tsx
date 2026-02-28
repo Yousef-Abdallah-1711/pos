@@ -1,8 +1,10 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { usePathname } from 'next/navigation'
 import { Palette, Home, Settings, Layout, Copyright, Code, Edit3, ChevronLeft, Clock } from 'lucide-react'
 import { useThemeStore } from '@/hooks/useThemeStore'
+import { createTranslator, getLocaleFromPath } from '@/lib/translations'
 import { ColorPicker } from '../../components/ColorPicker'
 import { ComponentLibrary } from './ComponentLibrary'
 import { ComponentEditor } from './ComponentEditor'
@@ -38,6 +40,10 @@ function extractLabel(label: any): string {
  * When a tab is clicked, its content displays in the sidebar (not collapsible)
  */
 export function EditorSidebar() {
+  const pathname = usePathname()
+  const locale = getLocaleFromPath(pathname)
+  const t = createTranslator(locale)
+  const isRTL = locale === 'ar'
   const theme = useThemeStore((state) => state.currentTheme)
   const selectedComponentId = useThemeStore((state) => state.selectedComponentId)
   const updateColors = useThemeStore((state) => state.updateThemeColors)
@@ -58,8 +64,8 @@ export function EditorSidebar() {
 
   if (!theme) {
     return (
-      <div className="flex items-center justify-center h-full text-gray-500">
-        No theme selected
+        <div className="flex items-center justify-center h-full text-gray-500">
+        {t('themeBuilderEditor.noThemeSelected', 'No theme selected')}
       </div>
     )
   }
@@ -160,20 +166,20 @@ export function EditorSidebar() {
           <button
             onClick={() => setActiveTab(previousTab)}
             className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 border border-gray-200 dark:border-gray-600"
-            title="Go back to previous tab"
+            title={t('themeBuilderEditor.backToPreviousTab', 'Go back to previous tab')}
           >
-            <ChevronLeft className="h-4 w-4 flex-shrink-0" />
-            <span>Back</span>
+            <ChevronLeft className={`h-4 w-4 flex-shrink-0 ${isRTL ? 'rotate-180' : ''}`} />
+            <span>{t('common.back', 'Back')}</span>
           </button>
         )}
         <div className="grid grid-cols-2 gap-2 pt-2">
           {[
-            { id: 'colors' as TabType, label: 'Colors', icon: <Palette className="h-4 w-4" /> },
-            { id: 'homepage' as TabType, label: 'Homepage', icon: <Home className="h-4 w-4" /> },
-            { id: 'header' as TabType, label: 'Header', icon: <Layout className="h-4 w-4" /> },
-            { id: 'footer' as TabType, label: 'Footer', icon: <Copyright className="h-4 w-4" /> },
-            { id: 'settings' as TabType, label: 'Settings', icon: <Settings className="h-4 w-4" /> },
-            { id: 'history' as TabType, label: 'History', icon: <Clock className="h-4 w-4" /> },
+            { id: 'colors' as TabType, label: t('themeBuilderEditor.tabs.colors', 'Colors'), icon: <Palette className="h-4 w-4" /> },
+            { id: 'homepage' as TabType, label: t('themeBuilderEditor.tabs.homepage', 'Homepage'), icon: <Home className="h-4 w-4" /> },
+            { id: 'header' as TabType, label: t('themeBuilderEditor.tabs.header', 'Header'), icon: <Layout className="h-4 w-4" /> },
+            { id: 'footer' as TabType, label: t('themeBuilderEditor.tabs.footer', 'Footer'), icon: <Copyright className="h-4 w-4" /> },
+            { id: 'settings' as TabType, label: t('themeBuilderEditor.tabs.settings', 'Settings'), icon: <Settings className="h-4 w-4" /> },
+            { id: 'history' as TabType, label: t('themeBuilderEditor.tabs.history', 'History'), icon: <Clock className="h-4 w-4" /> },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -183,7 +189,7 @@ export function EditorSidebar() {
                   ? 'bg-primary-600 text-white shadow-md ring-2 ring-primary-400 ring-opacity-50'
                   : 'bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 border border-gray-200 dark:border-gray-600'
               }`}
-              title={`Open ${tab.label} settings`}
+              title={t('themeBuilderEditor.openTabSettings', 'Open settings')}
             >
               {tab.icon}
               <span className="leading-tight">{tab.label}</span>
@@ -206,50 +212,50 @@ export function EditorSidebar() {
             <div>
               <h3 className="font-semibold text-gray-900 dark:text-white mb-4 text-sm flex items-center gap-2">
                 <Palette className="h-4 w-4 text-primary-600" />
-                Global Colors
+                {t('themeBuilderEditor.globalColors', 'Global Colors')}
               </h3>
               <div className="space-y-4">
                 <ColorPicker
-                  label="Primary"
+                  label={t('themeBuilderEditor.colors.primary', 'Primary')}
                   value={colors.primary}
                   onChange={(color) => updateColors({ primary: color })}
-                  description="Main brand color"
+                  description={t('themeBuilderEditor.colors.primaryDesc', 'Main brand color')}
                 />
                 <ColorPicker
-                  label="Secondary"
+                  label={t('themeBuilderEditor.colors.secondary', 'Secondary')}
                   value={colors.secondary}
                   onChange={(color) => updateColors({ secondary: color })}
-                  description="Complementary color"
+                  description={t('themeBuilderEditor.colors.secondaryDesc', 'Complementary color')}
                 />
                 <ColorPicker
-                  label="Accent"
+                  label={t('themeBuilderEditor.colors.accent', 'Accent')}
                   value={colors.accent}
                   onChange={(color) => updateColors({ accent: color })}
-                  description="Highlight color"
+                  description={t('themeBuilderEditor.colors.accentDesc', 'Highlight color')}
                 />
                 <ColorPicker
-                  label="Background"
+                  label={t('themeBuilderEditor.colors.background', 'Background')}
                   value={colors.background}
                   onChange={(color) => updateColors({ background: color })}
-                  description="Page background"
+                  description={t('themeBuilderEditor.colors.backgroundDesc', 'Page background')}
                 />
                 <ColorPicker
-                  label="Text"
+                  label={t('themeBuilderEditor.colors.text', 'Text')}
                   value={colors.text}
                   onChange={(color) => updateColors({ text: color })}
-                  description="Text color"
+                  description={t('themeBuilderEditor.colors.textDesc', 'Text color')}
                 />
                 <ColorPicker
-                  label="Border"
+                  label={t('themeBuilderEditor.colors.border', 'Border')}
                   value={colors.border}
                   onChange={(color) => updateColors({ border: color })}
-                  description="Border color"
+                  description={t('themeBuilderEditor.colors.borderDesc', 'Border color')}
                 />
                 <ColorPicker
-                  label="Shadow"
+                  label={t('themeBuilderEditor.colors.shadow', 'Shadow')}
                   value={colors.shadow}
                   onChange={(color) => updateColors({ shadow: color })}
-                  description="Shadow color"
+                  description={t('themeBuilderEditor.colors.shadowDesc', 'Shadow color')}
                 />
               </div>
             </div>
@@ -267,7 +273,7 @@ export function EditorSidebar() {
             <div>
               <h3 className="font-semibold text-gray-900 dark:text-white mb-4 text-sm flex items-center gap-2">
                 <Home className="h-4 w-4 text-primary-600" />
-                Page Components
+                {t('themeBuilderEditor.pageComponents', 'Page Components')}
               </h3>
               <ComponentLibrary />
             </div>
@@ -280,14 +286,14 @@ export function EditorSidebar() {
             <div>
               <h3 className="font-semibold text-gray-900 dark:text-white mb-4 text-sm flex items-center gap-2">
                 <Layout className="h-4 w-4 text-primary-600" />
-                Header Configuration
+                {t('themeBuilderEditor.headerConfiguration', 'Header Configuration')}
               </h3>
               <EditorErrorBoundary componentType="header">
                 <HeaderEditor
                   component={{
                     id: 'header',
                     type: 'custom',
-                    title: 'Header',
+                    title: t('themeBuilderEditor.tabs.header', 'Header'),
                     displayOrder: 0,
                     enabled: true,
                     config: header,
@@ -309,14 +315,14 @@ export function EditorSidebar() {
             <div>
               <h3 className="font-semibold text-gray-900 dark:text-white mb-4 text-sm flex items-center gap-2">
                 <Copyright className="h-4 w-4 text-primary-600" />
-                Footer Configuration
+                {t('themeBuilderEditor.footerConfiguration', 'Footer Configuration')}
               </h3>
               <EditorErrorBoundary componentType="footer">
                 <FooterEditor
                   component={{
                     id: 'footer',
                     type: 'custom',
-                    title: 'Footer',
+                    title: t('themeBuilderEditor.tabs.footer', 'Footer'),
                     displayOrder: 0,
                     enabled: true,
                     config: footer,
@@ -339,14 +345,14 @@ export function EditorSidebar() {
             <div>
               <h3 className="font-semibold text-gray-900 dark:text-white mb-4 text-sm flex items-center gap-2">
                 <Settings className="h-4 w-4 text-primary-600" />
-                Typography
+                {t('themeBuilderEditor.typography', 'Typography')}
               </h3>
               <EditorErrorBoundary componentType="font-picker">
                 <FontPicker
                   component={{
                     id: 'typography',
                     type: 'custom',
-                    title: 'Font Selection',
+                    title: t('themeBuilderEditor.fontSelection', 'Font Selection'),
                     displayOrder: 0,
                     enabled: true,
                     config: {
@@ -382,14 +388,14 @@ export function EditorSidebar() {
             {/* Custom CSS */}
             <div>
               <h3 className="font-semibold text-gray-900 dark:text-white mb-4 text-sm">
-                Custom CSS
+                {t('themeBuilderEditor.customCss', 'Custom CSS')}
               </h3>
               <EditorErrorBoundary componentType="custom-css-editor">
                 <CustomCSSEditor
                   component={{
                     id: 'custom-css',
                     type: 'custom',
-                    title: 'Custom CSS',
+                    title: t('themeBuilderEditor.customCss', 'Custom CSS'),
                     displayOrder: 0,
                     enabled: true,
                     config: {
@@ -415,8 +421,9 @@ export function EditorSidebar() {
             <>
               <div className="p-4 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
                 <p className="text-sm text-blue-700 dark:text-blue-400">
-                  <Edit3 className="h-4 w-4 inline mr-2" />
-                  Editing component: <strong>{extractLabel(selectedComponent.title)}</strong>
+                  <Edit3 className={`h-4 w-4 inline ${isRTL ? 'ml-2' : 'mr-2'}`} />
+                  {t('themeBuilderEditor.editingComponent', 'Editing component')}:{' '}
+                  <strong>{extractLabel(selectedComponent.title)}</strong>
                 </p>
               </div>
               <ComponentEditor component={selectedComponent} />
@@ -430,7 +437,7 @@ export function EditorSidebar() {
             <div>
               <h3 className="font-semibold text-gray-900 dark:text-white mb-4 text-sm flex items-center gap-2">
                 <Clock className="h-4 w-4 text-primary-600" />
-                Theme Version History
+                {t('themeBuilderEditor.themeVersionHistory', 'Theme Version History')}
               </h3>
               <ThemeHistory themeId={theme.id} />
             </div>

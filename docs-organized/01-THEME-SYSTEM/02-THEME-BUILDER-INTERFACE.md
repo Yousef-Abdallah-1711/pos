@@ -866,10 +866,10 @@ Desktop (1200px):
 - `/frontend/apps/restaurant-website/lib/api/get-theme-server.ts` - Storefront theme extraction/normalization entry
 
 **Shared Runtime Renderers (Preview + Storefront)**:
-- `/frontend/layers/ui-themes/src/components/Header.tsx` - Data-driven header renderer
-- `/frontend/layers/ui-themes/src/components/Footer.tsx` - Data-driven footer renderer
-- `/frontend/layers/ui-themes/src/components/SectionRenderer.tsx` - Dynamic section renderer
-- `/frontend/layers/ui-themes/src/sections/*.tsx` - Actual section implementations (hero/products/cta/etc.)
+- `/frontend/layers/ui-themes/src/components/layout/Header.tsx` - Data-driven header renderer
+- `/frontend/layers/ui-themes/src/components/layout/Footer.tsx` - Data-driven footer renderer
+- `/frontend/layers/ui-themes/src/components/runtime/SectionRenderer.tsx` - Dynamic section renderer
+- `/frontend/layers/ui-themes/src/sections/{marketing,commerce,content,forms,custom}/*.tsx` - Actual section implementations (hero/products/cta/etc.)
 
 ### Styling
 

@@ -1,9 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, Poppins } from "next/font/google";
-import { QueryProvider } from "@/components/providers/query-provider";
-import { ThemeProvider } from "@/components/theme-provider";
+import { QueryProvider } from "@/components/providers/core/query-provider";
+import { ThemeProvider } from "@/components/providers/theme-provider";
 import { SubdomainProvider } from "@/lib/subdomain-context";
-import { WebVitalsProvider } from "@/components/providers/web-vitals-provider";
+import { WebVitalsProvider } from "@/components/providers/core/web-vitals-provider";
 import { Toaster } from "sonner";
 import "../styles/globals.css";
 import "../styles/theme-variables.css";

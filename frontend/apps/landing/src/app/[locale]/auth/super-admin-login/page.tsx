@@ -4,6 +4,7 @@ import React, { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/stores/authStore";
 import { api } from "@/lib/api";
+import { getConfig } from "@/lib/config";
 import { AlertCircle, CheckCircle, Loader2 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 
@@ -43,7 +44,7 @@ export default function SuperAdminLoginPage() {
 
           const userParam = encodeURIComponent(JSON.stringify(authData.user));
           const tokenParam = encodeURIComponent(authData.token);
-          const dashboardBaseUrl = process.env.NEXT_PUBLIC_DASHBOARD_URL || 'http://localhost:3002';
+          const dashboardBaseUrl = getConfig().dashboardUrl;
           const dashboardUrl = `${dashboardBaseUrl}/en/dashboard?auth_token=${tokenParam}&auth_user=${userParam}`;
 
           setSuccess(true);

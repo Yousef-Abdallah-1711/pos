@@ -1,4 +1,5 @@
 import { headers } from 'next/headers';
+import { getApiBaseUrl } from '../config/api';
 import { debugError, debugWarn } from '../debug';
 
 /**
@@ -106,10 +107,7 @@ export async function getThemeDataServer(
     }
 
     // Fetch theme data from API
-    const apiUrl =
-      process.env.NEXT_PUBLIC_API_BASE_URL ||
-      process.env.NEXT_PUBLIC_API_URL ||
-      'http://localhost:8080/api/v1';
+    const apiUrl = getApiBaseUrl();
     const response = await fetch(
       `${apiUrl}/public/restaurants/${slug}/theme`,
       {

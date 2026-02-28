@@ -8,13 +8,16 @@ interface PlanCardProps {
   plan: SubscriptionPlan
   isActive: boolean
   isLoading: boolean
+  locale?: 'en' | 'ar'
   subscribeLabel?: string
   activeLabel?: string
+  annualSaveLabel?: string
+  translateFeature?: (feature: string) => string
   onSubscribe: (planID: string) => void
 }
 
-function formatMoneyFromCents(amountCents: number, currency: string) {
-  return new Intl.NumberFormat('en-US', {
+function formatMoneyFromCents(amountCents: number, currency: string, locale: 'en' | 'ar') {
+  return new Intl.NumberFormat(locale === 'ar' ? 'ar-EG' : 'en-US', {
     style: 'currency',
     currency: currency || 'EGP',
     maximumFractionDigits: 2,
@@ -31,10 +34,18 @@ export function PlanCard({
   plan,
   isActive,
   isLoading,
+  locale = 'en',
   subscribeLabel = 'Subscribe Now',
   activeLabel = 'Already Active',
+  annualSaveLabel = 'Save 17%',
+  translateFeature,
   onSubscribe,
 }: PlanCardProps) {
+  const periodLabel =
+    locale === 'ar'
+      ? ((plan.period || '').toLowerCase() === 'year' || (plan.period || '').toLowerCase() === 'annual' ? 'سنة' : 'شهر')
+      : (plan.period || '')
+
   return (
     <div className="rounded-lg border border-gray-200 dark:border-gray-700 p-5">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -43,12 +54,12 @@ export function PlanCard({
             <p className="text-lg font-semibold text-gray-900 dark:text-white">{plan.name}</p>
             {isAnnualPlan(plan) && (
               <span className="inline-flex rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-medium text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300">
-                Save 17%
+                {annualSaveLabel}
               </span>
             )}
           </div>
           <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">
-            {formatMoneyFromCents(plan.price_cents, plan.currency)} / {plan.period}
+            {formatMoneyFromCents(plan.price_cents, plan.currency, locale)} / {periodLabel}
           </p>
         </div>
         <Button
@@ -66,7 +77,7 @@ export function PlanCard({
           {plan.features.map((feature) => (
             <li key={feature} className="flex items-start gap-2">
               <CheckCircle2 className="h-4 w-4 mt-0.5 text-green-500" />
-              <span>{feature}</span>
+              <span>{translateFeature ? translateFeature(feature) : feature}</span>
             </li>
           ))}
         </ul>

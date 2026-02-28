@@ -9,8 +9,9 @@
 import axios, { AxiosError } from 'axios'
 import { ThemeData, CreateThemeRequest, UpdateThemeRequest, ComponentConfig, ComponentType } from '@/types/theme'
 import { debugLog, debugWarn, debugError } from '@/lib/debug'
+import { getConfig } from '@/lib/config'
 
-const API_BASE_URL_RAW = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api/v1'
+const API_BASE_URL_RAW = getConfig().apiUrl
 const API_BASE_URL = API_BASE_URL_RAW.replace(/\/+$/, '')
 const API_ROOT = API_BASE_URL.endsWith('/api/v1') ? API_BASE_URL : `${API_BASE_URL}/api/v1`
 

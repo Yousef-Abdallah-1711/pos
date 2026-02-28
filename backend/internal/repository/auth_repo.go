@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	appconfig "pos-saas/internal/config"
 	"strings"
 	"time"
 
@@ -49,6 +50,9 @@ func (r *AuthRepository) CreateTenantWithUser(req *domain.RegisterRequest) (*dom
 	// 1. Create Tenant
 	restaurantDomain := os.Getenv("RESTAURANT_DOMAIN")
 	if restaurantDomain == "" {
+		if appconfig.IsProductionMode() {
+			return nil, fmt.Errorf("RESTAURANT_DOMAIN is required in production")
+		}
 		restaurantDomain = "localhost:3003"
 	}
 
@@ -439,6 +443,7 @@ func permissionForRole(roleCode string, moduleName string) string {
 		"PRODUCTS":      domain.PermissionWrite,
 		"CATEGORIES":    domain.PermissionWrite,
 		"ORDERS":        domain.PermissionWrite,
+		"TABLES":        domain.PermissionWrite,
 		"HR":            domain.PermissionWrite,
 		"LEAVES":        domain.PermissionWrite,
 		"SALARIES":      domain.PermissionRead,
@@ -448,15 +453,18 @@ func permissionForRole(roleCode string, moduleName string) string {
 		"ROLES":         domain.PermissionRead,
 		"REPORTS":       domain.PermissionRead,
 		"THEMES":        domain.PermissionRead,
+		"KDS":           domain.PermissionAdmin,
 	}
 
 	employeePermissions := map[string]string{
 		"PRODUCTS":      domain.PermissionRead,
 		"CATEGORIES":    domain.PermissionRead,
 		"ORDERS":        domain.PermissionRead,
+		"TABLES":        domain.PermissionRead,
 		"HR":            domain.PermissionRead,
 		"LEAVES":        domain.PermissionRead,
 		"NOTIFICATIONS": domain.PermissionRead,
+		"KDS":           domain.PermissionWrite,
 	}
 
 	driverPermissions := map[string]string{

@@ -1,4 +1,5 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosError } from 'axios'
+import { getApiBaseUrl } from '../config/api'
 import { debugError } from '../debug'
 
 /**
@@ -7,7 +8,7 @@ import { debugError } from '../debug'
  * No authentication required for public endpoints
  */
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api/v1'
+const API_URL = getApiBaseUrl()
 
 /**
  * Create axios instance for API calls
@@ -26,7 +27,6 @@ export const apiClient = {
         ...config,
         timeout: config?.timeout || 10000,
         headers: {
-          'Content-Type': 'application/json',
           ...config?.headers,
         },
       })
@@ -105,7 +105,6 @@ export const apiClient = {
         ...config,
         timeout: config?.timeout || 10000,
         headers: {
-          'Content-Type': 'application/json',
           ...config?.headers,
         },
       })

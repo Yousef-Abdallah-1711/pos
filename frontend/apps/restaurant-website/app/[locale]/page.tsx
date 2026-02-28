@@ -1,8 +1,9 @@
 import { headers } from 'next/headers';
-import { DynamicHomePage } from '@/components/dynamic-home-page';
-import { HeaderSSR } from '@/components/header-ssr';
-import { FooterSSR } from '@/components/footer-ssr';
+import { DynamicHomePage } from '@/components/homepage/dynamic-home-page';
+import { HeaderSSR } from '@/components/layout/header-ssr';
+import { FooterSSR } from '@/components/layout/footer-ssr';
 import { extractThemeConfig, getDefaultThemeData } from '@/lib/api/get-theme-server';
+import { getApiBaseUrl } from '@/lib/config/api';
 import { debugError } from '@/lib/debug';
 import { AlertCircle } from 'lucide-react';
 import type { Metadata } from 'next';
@@ -32,7 +33,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   try {
     // Fetch theme data for metadata (used for OG tags)
-    const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8080/api/v1';
+    const apiUrl = getApiBaseUrl();
     const themeResponse = await fetch(
       `${apiUrl}/public/restaurants/${restaurantSlug}/theme`,
       {
@@ -142,7 +143,7 @@ export default async function HomePage({ params }: PageProps) {
 
   try {
     // Fetch all data in PARALLEL (not sequential!)
-    const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8080/api/v1';
+    const apiUrl = getApiBaseUrl();
 
     const [homepageResponse, themeResponse, productsResponse] = await Promise.all([
       fetch(`${apiUrl}/public/restaurants/${restaurantSlug}/homepage`, {

@@ -1,4 +1,5 @@
-import axios, { AxiosInstance, AxiosError } from "axios";
+import axios, { AxiosInstance } from "axios";
+import { getSuperAdminApiBaseUrl } from "@/lib/config";
 import type {
   ApiResponse,
   ApiError,
@@ -15,14 +16,52 @@ import type {
   ImpersonationToken,
 } from "@/types";
 
-const DEFAULT_SUPER_ADMIN_API_URL = "http://localhost:8080/api/v1/super-admin";
 const API_TIMEOUT_MS = 10000;
+
+type NormalizedClientError = {
+  url: string;
+  baseURL: string;
+  method: string;
+  status: number | null;
+  code: string | null;
+  message: string;
+  data: unknown;
+};
+
+function normalizeClientError(
+  error: unknown,
+  fallbackBaseURL: string
+): NormalizedClientError {
+  const axiosError = axios.isAxiosError<ApiError>(error) ? error : null;
+  const isNetworkError = Boolean(axiosError && !axiosError.response);
+
+  let message = "Unknown client error";
+  if (error instanceof SyntaxError && error.message.includes("Unexpected end of JSON input")) {
+    message = "Backend returned an empty or malformed JSON response.";
+  } else if (axiosError) {
+    message = isNetworkError
+      ? `Network error: backend may be unavailable at ${axiosError.config?.baseURL ?? fallbackBaseURL}`
+      : axiosError.message;
+  } else if (error instanceof Error) {
+    message = error.message;
+  }
+
+  return {
+    url: axiosError?.config?.url ?? "unknown",
+    baseURL: axiosError?.config?.baseURL ?? fallbackBaseURL,
+    method: axiosError?.config?.method?.toUpperCase() ?? "GET",
+    status: axiosError?.response?.status ?? null,
+    code: axiosError?.code ?? (error instanceof Error ? error.name : null),
+    message,
+    data: axiosError?.response?.data ?? null,
+  };
+}
 
 class SuperAdminAPI {
   private client: AxiosInstance;
 
-  constructor(baseURL: string = process.env.NEXT_PUBLIC_SUPER_ADMIN_API_URL || "") {
-    const resolvedBaseURL = baseURL || DEFAULT_SUPER_ADMIN_API_URL;
+  constructor(baseURL: string = "") {
+    const resolvedBaseURL = baseURL || getSuperAdminApiBaseUrl();
     this.client = axios.create({
       baseURL: resolvedBaseURL,
       timeout: API_TIMEOUT_MS,
@@ -59,23 +98,18 @@ class SuperAdminAPI {
         }
         return response;
       },
-      (error: AxiosError<ApiError>) => {
-        const isNetworkError = !error.response;
-        const normalizedError = {
-          url: error.config?.url ?? "unknown",
-          baseURL: error.config?.baseURL ?? resolvedBaseURL,
-          method: error.config?.method?.toUpperCase() ?? "GET",
-          status: error.response?.status ?? null,
-          code: error.code ?? null,
-          message: isNetworkError
-            ? `Network error: backend may be unavailable at ${error.config?.baseURL ?? resolvedBaseURL}`
-            : error.message,
-          data: error.response?.data ?? null,
-        };
+      (error: unknown) => {
+        const normalizedError = normalizeClientError(error, resolvedBaseURL);
 
-        console.error("[API] Error:", normalizedError);
+        if (process.env.NODE_ENV === "development") {
+          // Use warn to avoid Next.js dev "Console Error" overlay for handled API failures.
+          console.warn("[API] Request failed:", normalizedError);
+        }
 
-        if (error.response?.status === 401) {
+        const isUnauthorized =
+          axios.isAxiosError<ApiError>(error) && error.response?.status === 401;
+
+        if (isUnauthorized) {
           // Clear auth data on 401
           if (typeof window !== "undefined") {
             localStorage.removeItem("super-admin-token");

@@ -18,6 +18,10 @@ func NewRestaurantRepository(db *sql.DB) *RestaurantRepository {
 
 // GetBySlug retrieves a restaurant by slug
 func (r *RestaurantRepository) GetBySlug(slug string) (*domain.Restaurant, error) {
+	if r.db == nil {
+		return nil, fmt.Errorf("restaurant repository unavailable: database not initialized")
+	}
+
 	query := `
 		SELECT 
 			id, tenant_id, name, slug, description, logo_url, hero_image_url,

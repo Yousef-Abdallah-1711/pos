@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"pos-saas/internal/config"
 	"strings"
 	"sync"
 )
@@ -47,7 +48,7 @@ func loadAllowedOrigins() {
 	corsOrigins = make(map[string]struct{})
 
 	raw := strings.TrimSpace(os.Getenv("CORS_ORIGINS"))
-	if raw == "" && strings.EqualFold(strings.TrimSpace(os.Getenv("ENV")), "development") {
+	if raw == "" && config.IsDevelopmentMode() {
 		raw = "http://localhost:3001,http://localhost:3002,http://localhost:3003,http://localhost:3004"
 	}
 
@@ -70,8 +71,8 @@ func isOriginAllowed(origin string) bool {
 	if _, ok := corsOrigins[origin]; ok {
 		return true
 	}
-	// Keep local development flexible for alternate ports.
-	return isLocalhostOrigin(origin)
+	// Keep local development flexible for alternate ports only outside production.
+	return config.IsDevelopmentMode() && isLocalhostOrigin(origin)
 }
 
 func isLocalhostOrigin(origin string) bool {
@@ -80,7 +81,12 @@ func isLocalhostOrigin(origin string) bool {
 		return false
 	}
 	host := strings.ToLower(parsed.Hostname())
-	return host == "localhost" || host == "127.0.0.1"
+	if host == "localhost" || host == "127.0.0.1" {
+		return true
+	}
+
+	// Support local tenant subdomains in development (e.g. demo.localhost:3003).
+	return strings.HasSuffix(host, ".localhost")
 }
 
 func normalizeOrigin(origin string) string {

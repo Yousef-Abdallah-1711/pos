@@ -32,11 +32,11 @@ function createDefaultComponents() {
       displayOrder: 0,
       config: {
         title_en: 'Welcome to Our Restaurant',
-        title_ar: 'مرحبا بك في مطعمنا',
+        title_ar: 'Ù…Ø±Ø­Ø¨Ø§ Ø¨Ùƒ ÙÙŠ Ù…Ø·Ø¹Ù…Ù†Ø§',
         subtitle_en: 'Experience authentic flavors and exceptional service',
-        subtitle_ar: 'اختبر النكهات الأصلية والخدمة الاستثنائية',
+        subtitle_ar: 'Ø§Ø®ØªØ¨Ø± Ø§Ù„Ù†ÙƒÙ‡Ø§Øª Ø§Ù„Ø£ØµÙ„ÙŠØ© ÙˆØ§Ù„Ø®Ø¯Ù…Ø© Ø§Ù„Ø§Ø³ØªØ«Ù†Ø§Ø¦ÙŠØ©',
         description_en: 'Join us for an unforgettable dining experience',
-        description_ar: 'انضم إلينا لتجربة طعام لا تُنسى',
+        description_ar: 'Ø§Ù†Ø¶Ù… Ø¥Ù„ÙŠÙ†Ø§ Ù„ØªØ¬Ø±Ø¨Ø© Ø·Ø¹Ø§Ù… Ù„Ø§ ØªÙÙ†Ø³Ù‰',
         cta_button_text: 'Learn More',
         cta_button_url: '#',
         height: 'medium',
@@ -51,7 +51,7 @@ function createDefaultComponents() {
       displayOrder: 1,
       config: {
         title_en: 'Our Products',
-        title_ar: 'منتجاتنا',
+        title_ar: 'Ù…Ù†ØªØ¬Ø§ØªÙ†Ø§',
         layout: 'grid',
         columns: 3,
         show_prices: true,
@@ -66,7 +66,7 @@ function createDefaultComponents() {
       displayOrder: 2,
       config: {
         title_en: 'Why Choose Us',
-        title_ar: 'لماذا اختيارنا',
+        title_ar: 'Ù„Ù…Ø§Ø°Ø§ Ø§Ø®ØªÙŠØ§Ø±Ù†Ø§',
         layout: 'grid',
         columns: 4,
       },
@@ -79,7 +79,7 @@ function createDefaultComponents() {
       displayOrder: 3,
       config: {
         title_en: 'What Our Customers Say',
-        title_ar: 'ما يقوله عملاؤنا',
+        title_ar: 'Ù…Ø§ ÙŠÙ‚ÙˆÙ„Ù‡ Ø¹Ù…Ù„Ø§Ø¤Ù†Ø§',
         layout: 'grid',
       },
     },
@@ -91,7 +91,7 @@ function createDefaultComponents() {
       displayOrder: 4,
       config: {
         title_en: 'Contact Us',
-        title_ar: 'اتصل بنا',
+        title_ar: 'Ø§ØªØµÙ„ Ø¨Ù†Ø§',
         show_form: true,
         show_map: true,
       },
@@ -104,11 +104,11 @@ function createDefaultComponents() {
       displayOrder: 5,
       config: {
         title_en: 'Ready to Get Started?',
-        title_ar: 'هل أنت مستعد للبدء؟',
+        title_ar: 'Ù‡Ù„ Ø£Ù†Øª Ù…Ø³ØªØ¹Ø¯ Ù„Ù„Ø¨Ø¯Ø¡ØŸ',
         description_en: 'Order now and get 10% off your first meal',
-        description_ar: 'اطلب الآن واحصل على خصم 10% على وجبتك الأولى',
+        description_ar: 'Ø§Ø·Ù„Ø¨ Ø§Ù„Ø¢Ù† ÙˆØ§Ø­ØµÙ„ Ø¹Ù„Ù‰ Ø®ØµÙ… 10% Ø¹Ù„Ù‰ ÙˆØ¬Ø¨ØªÙƒ Ø§Ù„Ø£ÙˆÙ„Ù‰',
         button_text_en: 'Order Now',
-        button_text_ar: 'اطلب الآن',
+        button_text_ar: 'Ø§Ø·Ù„Ø¨ Ø§Ù„Ø¢Ù†',
         button_url: '#',
         background_color: '#3b82f6',
       },
@@ -189,7 +189,7 @@ function normalizeTheme(theme: any): ThemeData {
       address: '123 Main Street',
       phone: '(555) 123-4567',
       email: 'contact@restaurant.com',
-      copyrightText: '© 2025 My Restaurant. All rights reserved.',
+      copyrightText: 'Â© 2025 My Restaurant. All rights reserved.',
       socialLinks: [],
       footerSections: [],
       legalLinks: [
@@ -279,13 +279,18 @@ function normalizeTheme(theme: any): ThemeData {
 }
 
 export default function ThemeEditorPage({ params: paramsPromise }: EditorPageProps) {
-  // ⚠️ FIX: In Next.js 15.5.9, params is now a Promise, use React.use() to unwrap it
+  // âš ï¸ FIX: In Next.js 15.5.9, params is now a Promise, use React.use() to unwrap it
   const params = use(paramsPromise)
 
   const pathname = usePathname()
   const router = useRouter()
   const locale = getLocaleFromPath(pathname)
   const t = createTranslator(locale)
+  const isRTL = locale === 'ar'
+  const tx = (en: string, ar: string) => {
+    if (!isRTL) return en
+    return /[ÃØÙðâ]/.test(ar) ? en : ar
+  }
   const user = useAuthStore((state) => state.user)
 
   const currentTheme = useThemeStore((state) => state.currentTheme)
@@ -299,11 +304,11 @@ export default function ThemeEditorPage({ params: paramsPromise }: EditorPagePro
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  // ✅ FIX: Load theme once params and user are available
+  // âœ… FIX: Load theme once params and user are available
   useEffect(() => {
     const loadTheme = async () => {
       if (!user?.restaurant_id) {
-        debugWarn('⚠️ [ThemeEditor] Missing restaurant_id')
+        debugWarn('âš ï¸ [ThemeEditor] Missing restaurant_id')
         setIsLoading(false)
         return
       }
@@ -311,40 +316,40 @@ export default function ThemeEditorPage({ params: paramsPromise }: EditorPagePro
       try {
         setIsLoading(true)
         setError(null)
-        debugLog('📡 [ThemeEditor] Loading theme:', params.id)
+        debugLog('ðŸ“¡ [ThemeEditor] Loading theme:', params.id)
         const theme = await themeApi.getTheme(params.id)
-        debugLog('✅ [ThemeEditor] Theme loaded:', theme)
-        debugLog('📊 [ThemeEditor] Components from backend:', theme.components?.length || 0, 'components')
+        debugLog('âœ… [ThemeEditor] Theme loaded:', theme)
+        debugLog('ðŸ“Š [ThemeEditor] Components from backend:', theme.components?.length || 0, 'components')
         if (theme.components) {
           theme.components.forEach((comp, idx) => {
             debugLog(`  Component ${idx}: id=${comp.id}, type=${comp.type}, enabled=${comp.enabled}`)
           })
         }
         const normalizedTheme = normalizeTheme(theme)
-        debugLog('📊 [ThemeEditor] After normalize:', normalizedTheme.components?.length || 0, 'components')
+        debugLog('ðŸ“Š [ThemeEditor] After normalize:', normalizedTheme.components?.length || 0, 'components')
         setCurrentTheme(normalizedTheme)
       } catch (err) {
-        debugError('❌ [ThemeEditor] Caught error during load')
-        debugError('❌ [ThemeEditor] Error instanceof Error:', err instanceof Error)
-        debugError('❌ [ThemeEditor] Error type:', typeof err)
-        debugError('❌ [ThemeEditor] Error constructor:', err && (err as any).constructor?.name)
-        debugError('❌ [ThemeEditor] Full error object:', err)
+        debugError('âŒ [ThemeEditor] Caught error during load')
+        debugError('âŒ [ThemeEditor] Error instanceof Error:', err instanceof Error)
+        debugError('âŒ [ThemeEditor] Error type:', typeof err)
+        debugError('âŒ [ThemeEditor] Error constructor:', err && (err as any).constructor?.name)
+        debugError('âŒ [ThemeEditor] Full error object:', err)
 
-        let errorMessage = 'Failed to load theme'
+        let errorMessage = tx('Failed to load theme', 'ÙØ´Ù„ ØªØ­Ù…ÙŠÙ„ Ø§Ù„Ù‚Ø§Ù„Ø¨')
         if (err instanceof Error) {
           errorMessage = err.message
-          debugError('❌ [ThemeEditor] Error message:', err.message)
-          debugError('❌ [ThemeEditor] Error stack:', err.stack)
+          debugError('âŒ [ThemeEditor] Error message:', err.message)
+          debugError('âŒ [ThemeEditor] Error stack:', err.stack)
         } else if (typeof err === 'string') {
           errorMessage = err
-          debugError('❌ [ThemeEditor] String error:', err)
+          debugError('âŒ [ThemeEditor] String error:', err)
         } else if (err && typeof err === 'object') {
           const errObj = err as any
           errorMessage = errObj.message || errObj.error || JSON.stringify(err)
-          debugError('❌ [ThemeEditor] Object error:', errorMessage)
+          debugError('âŒ [ThemeEditor] Object error:', errorMessage)
         }
 
-        debugError('❌ [ThemeEditor] Final error message to display:', errorMessage)
+        debugError('âŒ [ThemeEditor] Final error message to display:', errorMessage)
         setError(errorMessage)
       } finally {
         setIsLoading(false)
@@ -440,18 +445,18 @@ export default function ThemeEditorPage({ params: paramsPromise }: EditorPagePro
         config: themeConfig,
       }
 
-      debugLog('📤 [ThemeEditor] Saving theme with data:', updateData)
-      debugLog('📤 [ThemeEditor] Components being saved:', updateData.components)
-      debugLog('📤 [ThemeEditor] Component count:', updateData.components?.length || 0)
+      debugLog('ðŸ“¤ [ThemeEditor] Saving theme with data:', updateData)
+      debugLog('ðŸ“¤ [ThemeEditor] Components being saved:', updateData.components)
+      debugLog('ðŸ“¤ [ThemeEditor] Component count:', updateData.components?.length || 0)
       if (updateData.components && updateData.components.length > 0) {
-        debugLog('📤 [ThemeEditor] First component details:', updateData.components[0])
+        debugLog('ðŸ“¤ [ThemeEditor] First component details:', updateData.components[0])
       }
       await themeApi.updateTheme(params.id, updateData)
       setDirty(false)
-      toast.success(`Theme "${currentTheme.name}" saved successfully`)
+      toast.success(tx(`Theme "${currentTheme.name}" saved successfully`, `ØªÙ… Ø­ÙØ¸ Ø§Ù„Ù‚Ø§Ù„Ø¨ "${currentTheme.name}" Ø¨Ù†Ø¬Ø§Ø­`))
     } catch (err) {
       debugError('Failed to save theme:', err)
-      const errorMessage = err instanceof Error ? err.message : 'Failed to save theme'
+      const errorMessage = err instanceof Error ? err.message : tx('Failed to save theme', 'ÙØ´Ù„ Ø­ÙØ¸ Ø§Ù„Ù‚Ø§Ù„Ø¨')
       setError(errorMessage)
       toast.error(errorMessage)
     } finally {
@@ -464,7 +469,7 @@ export default function ThemeEditorPage({ params: paramsPromise }: EditorPagePro
       <div className="flex items-center justify-center h-screen">
         <div className="text-center">
           <Loader2 className="h-8 w-8 animate-spin text-primary-600 mx-auto mb-4" />
-          <p className="text-gray-600 dark:text-gray-400">Loading theme editor...</p>
+          <p className="text-gray-600 dark:text-gray-400">{tx('Loading theme editor...', 'Ø¬Ø§Ø±ÙŠ ØªØ­Ù…ÙŠÙ„ Ù…Ø­Ø±Ø± Ø§Ù„Ù‚Ø§Ù„Ø¨...')}</p>
         </div>
       </div>
     )
@@ -476,13 +481,13 @@ export default function ThemeEditorPage({ params: paramsPromise }: EditorPagePro
         <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 flex gap-3">
           <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
           <div>
-            <h3 className="font-semibold text-red-900 dark:text-red-300">Error</h3>
+            <h3 className="font-semibold text-red-900 dark:text-red-300">{tx('Error', 'Ø®Ø·Ø£')}</h3>
             <p className="text-red-700 dark:text-red-200 text-sm">{error}</p>
             <button
               onClick={() => window.location.reload()}
               className="mt-2 text-sm text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 font-medium"
             >
-              Retry
+              {tx('Retry', 'Ø¥Ø¹Ø§Ø¯Ø© Ø§Ù„Ù…Ø­Ø§ÙˆÙ„Ø©')}
             </button>
           </div>
         </div>
@@ -494,7 +499,7 @@ export default function ThemeEditorPage({ params: paramsPromise }: EditorPagePro
     return (
       <div className="p-6 max-w-4xl mx-auto">
         <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
-          <p className="text-yellow-700 dark:text-yellow-200">Theme not found</p>
+          <p className="text-yellow-700 dark:text-yellow-200">{tx('Theme not found', 'Ù„Ù… ÙŠØªÙ… Ø§Ù„Ø¹Ø«ÙˆØ± Ø¹Ù„Ù‰ Ø§Ù„Ù‚Ø§Ù„Ø¨')}</p>
         </div>
       </div>
     )
@@ -510,8 +515,8 @@ export default function ThemeEditorPage({ params: paramsPromise }: EditorPagePro
       <div className="w-full h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
         {/* Error Bar */}
         {error && (
-          <div className="bg-red-50 dark:bg-red-900/20 border-b border-red-200 dark:border-red-800 px-6 py-3 flex items-center justify-between">
-            <div className="flex items-center gap-2">
+          <div className={`bg-red-50 dark:bg-red-900/20 border-b border-red-200 dark:border-red-800 px-6 py-3 flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
+            <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
               <AlertCircle className="h-4 w-4 text-red-600 dark:text-red-400" />
               <p className="text-sm text-red-700 dark:text-red-200">{error}</p>
             </div>
@@ -525,40 +530,42 @@ export default function ThemeEditorPage({ params: paramsPromise }: EditorPagePro
         )}
 
         {/* Header - Sticky */}
-        <div className="sticky top-0 z-40 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4 flex items-center justify-between shadow-sm">
-          <div className="flex items-center gap-4 min-w-0">
+        <div className={`sticky top-0 z-40 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4 flex items-center justify-between shadow-sm ${isRTL ? 'flex-row-reverse' : ''}`}>
+          <div className={`flex items-center gap-4 min-w-0 ${isRTL ? 'flex-row-reverse' : ''}`}>
             <button
               onClick={() => router.back()}
               className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition flex-shrink-0"
-              title="Go back"
+              title={t('common.back', 'Back')}
             >
-              <ArrowLeft className="h-5 w-5" />
+              <ArrowLeft className={`h-5 w-5 ${isRTL ? 'rotate-180' : ''}`} />
             </button>
             <div className="min-w-0">
               <h1 className="text-2xl font-bold text-gray-900 dark:text-white truncate">
                 {extractLabel(currentTheme?.name)}
               </h1>
-              <p className="text-sm text-gray-600 dark:text-gray-400">Editing theme</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                {t('themeBuilderEditor.editingTheme', 'Editing theme')}
+              </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-3 flex-shrink-0">
+          <div className={`flex items-center gap-3 flex-shrink-0 ${isRTL ? 'flex-row-reverse' : ''}`}>
             {isDirty && (
               <button
                 onClick={handleSave}
                 disabled={isSaving}
                 className="flex items-center gap-2 px-4 py-2 bg-primary-600 hover:bg-primary-700 disabled:bg-primary-400 disabled:cursor-not-allowed text-white rounded-lg font-medium transition-colors"
-                title="Save changes"
+                title={t('themeBuilderEditor.saveChanges', 'Save changes')}
               >
                 {isSaving ? (
                   <>
                     <Loader2 className="h-4 w-4 animate-spin" />
-                    <span className="hidden sm:inline">Saving...</span>
+                    <span className="hidden sm:inline">{t('common.saving', 'Saving...')}</span>
                   </>
                 ) : (
                   <>
                     <Save className="h-4 w-4" />
-                    <span className="hidden sm:inline">Save</span>
+                    <span className="hidden sm:inline">{t('common.save', 'Save')}</span>
                   </>
                 )}
               </button>
@@ -567,7 +574,7 @@ export default function ThemeEditorPage({ params: paramsPromise }: EditorPagePro
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
               className="md:hidden p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition"
-              title={sidebarOpen ? 'Hide sidebar' : 'Show sidebar'}
+              title={sidebarOpen ? t('themeBuilderEditor.hideSidebar', 'Hide sidebar') : t('themeBuilderEditor.showSidebar', 'Show sidebar')}
             >
               {sidebarOpen ? (
                 <X className="h-5 w-5" />
@@ -582,7 +589,7 @@ export default function ThemeEditorPage({ params: paramsPromise }: EditorPagePro
         <div className="flex flex-1 overflow-hidden gap-0 w-full">
           {/* Sidebar - Collapsible with Smooth Transitions */}
           {sidebarOpen && (
-            <div className="w-full md:w-96 overflow-hidden border-r border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 flex-shrink-0">
+            <div className={`w-full md:w-96 overflow-hidden ${isRTL ? 'md:border-l' : 'md:border-r'} border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 flex-shrink-0`}>
               <EditorSidebar />
             </div>
           )}

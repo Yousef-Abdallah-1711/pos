@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { usePathname } from 'next/navigation'
@@ -30,11 +30,11 @@ import { toast } from 'sonner'
 
 const PAGE_SIZE = 10
 
-function formatDate(value?: string | null) {
+function formatDate(value: string | null | undefined, locale: 'en' | 'ar') {
   if (!value) return '-'
   const date = new Date(value)
   if (Number.isNaN(date.getTime())) return '-'
-  return date.toLocaleDateString()
+  return date.toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US')
 }
 
 function getSubscriptionPill(status?: string) {
@@ -52,8 +52,8 @@ function getSubscriptionPill(status?: string) {
   }
 }
 
-function formatPlanPrice(plan: SubscriptionPlan) {
-  return new Intl.NumberFormat('en-US', {
+function formatPlanPrice(plan: SubscriptionPlan, locale: 'en' | 'ar') {
+  return new Intl.NumberFormat(locale === 'ar' ? 'ar-EG' : 'en-US', {
     style: 'currency',
     currency: plan.currency || 'EGP',
     maximumFractionDigits: 2,
@@ -82,6 +82,7 @@ export default function BillingSettingsPage() {
   const [errorMessage, setErrorMessage] = useState('')
   const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false)
   const [isCancelling, setIsCancelling] = useState(false)
+  const isRTL = locale === 'ar'
 
   const loadCurrentAndPlans = useCallback(async () => {
     setErrorMessage('')
@@ -200,7 +201,15 @@ export default function BillingSettingsPage() {
   const isCancellationScheduled = Boolean(
     currentSubscription?.cancel_at_period_end || currentSubscription?.subscription_cancelled_at
   )
-  const subscriptionExpiryText = formatDate(currentSubscription?.subscription_expires_at)
+  const subscriptionExpiryText = formatDate(currentSubscription?.subscription_expires_at, locale)
+  const cancellationScheduledText = t(
+    'settings.billingPage.cancellationScheduled',
+    'Subscription will expire on {date}.'
+  ).replace('{date}', subscriptionExpiryText)
+  const cancelConfirmDescriptionText = t(
+    'settings.billingPage.cancelConfirmDescription',
+    'Your subscription will remain active until {date}.'
+  ).replace('{date}', subscriptionExpiryText)
   const currentPlanID = currentSubscription?.current_plan?.id || currentSubscription?.plan?.id || ''
   const selectedPlan = plans.find((plan) => plan.id === selectedPlanID) || plans[0] || null
   const plansToRender = selectedPlan ? [selectedPlan] : plans
@@ -268,10 +277,7 @@ export default function BillingSettingsPage() {
 
         {isCancellationScheduled && (
           <div className="mt-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-900/40 dark:bg-amber-900/20 dark:text-amber-200">
-            {t(
-              'settings.billingPage.cancellationScheduled',
-              `Subscription will expire on ${subscriptionExpiryText}.`
-            )}
+            {cancellationScheduledText}
           </div>
         )}
 
@@ -302,7 +308,7 @@ export default function BillingSettingsPage() {
                   key={plan.id}
                   type="button"
                   onClick={() => setSelectedPlanID(plan.id)}
-                  className={`rounded-lg border p-4 text-left transition ${
+                  className={`rounded-lg border p-4 transition ${isRTL ? 'text-right' : 'text-left'} ${
                     selected
                       ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
                       : 'border-gray-200 dark:border-gray-700 hover:border-primary-300'
@@ -310,7 +316,7 @@ export default function BillingSettingsPage() {
                 >
                   <p className="text-sm font-semibold text-gray-900 dark:text-white">{plan.name}</p>
                   <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                    {formatPlanPrice(plan)} / {plan.period}
+                    {formatPlanPrice(plan, locale)} / {locale === 'ar' ? (isAnnualPlan(plan) ? 'سنة' : 'شهر') : plan.period}
                   </p>
                   {isAnnualPlan(plan) && (
                     <span className="inline-flex mt-2 rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-medium text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300">
@@ -329,8 +335,25 @@ export default function BillingSettingsPage() {
               plan={plan}
               isActive={isActiveSubscription && currentPlanID === plan.id}
               isLoading={paymentFlow.isLoading}
+              locale={locale}
               subscribeLabel={t('settings.billingPage.subscribeNow', 'Subscribe Now')}
               activeLabel={t('settings.billingPage.activePlan', 'Already Active')}
+              annualSaveLabel={t('settings.billingPage.saveAnnual', 'Save 17%')}
+              translateFeature={(feature) => {
+                const featureMap: Record<string, string> = {
+                  'Full POS System': t('settings.billingPage.features.fullPosSystem', 'Full POS System'),
+                  'Kitchen Display System': t('settings.billingPage.features.kitchenDisplaySystem', 'Kitchen Display System'),
+                  'Online Ordering Website': t('settings.billingPage.features.onlineOrderingWebsite', 'Online Ordering Website'),
+                  'Analytics and Reports': t('settings.billingPage.features.analyticsAndReports', 'Analytics and Reports'),
+                  'Multi-Restaurant Management': t('settings.billingPage.features.multiRestaurantManagement', 'Multi-Restaurant Management'),
+                  'Mobile Apps': t('settings.billingPage.features.mobileApps', 'Mobile Apps'),
+                  'Unlimited Staff': t('settings.billingPage.features.unlimitedStaff', 'Unlimited Staff'),
+                  'Priority Support': t('settings.billingPage.features.prioritySupport', 'Priority Support'),
+                  'Free Updates': t('settings.billingPage.features.freeUpdates', 'Free Updates'),
+                  'Driver Management': t('settings.billingPage.features.driverManagement', 'Driver Management'),
+                }
+                return featureMap[feature] || feature
+              }}
               onSubscribe={(planID) => {
                 void paymentFlow.initiatePayment(planID)
               }}
@@ -352,6 +375,8 @@ export default function BillingSettingsPage() {
           total={totalPayments}
           page={page}
           pageSize={PAGE_SIZE}
+          locale={locale}
+          isRTL={isRTL}
           isLoading={isHistoryLoading}
           onPageChange={setPage}
           labels={{
@@ -365,6 +390,8 @@ export default function BillingSettingsPage() {
             pagination: t('settings.billingPage.pagination', 'Page'),
             previous: t('settings.billingPage.previous', 'Previous'),
             next: t('settings.billingPage.next', 'Next'),
+            loading: t('settings.billingPage.loadingHistory', 'Loading payment history...'),
+            cardFallback: t('settings.billingPage.cardFallback', 'Card'),
           }}
         />
       </section>
@@ -394,10 +421,7 @@ export default function BillingSettingsPage() {
               {t('settings.billingPage.cancelConfirmTitle', 'Cancel subscription?')}
             </DialogTitle>
             <DialogDescription>
-              {t(
-                'settings.billingPage.cancelConfirmDescription',
-                `Your subscription will remain active until ${subscriptionExpiryText}.`
-              )}
+              {cancelConfirmDescriptionText}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -427,3 +451,4 @@ export default function BillingSettingsPage() {
     </div>
   )
 }
+

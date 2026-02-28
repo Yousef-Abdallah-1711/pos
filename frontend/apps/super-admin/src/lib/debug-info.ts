@@ -1,4 +1,5 @@
 // Debug information and status checks for the Super Admin Dashboard
+import { getSuperAdminApiBaseUrl } from "@/lib/config";
 
 export function logDebugInfo() {
   console.log("=== POS SaaS Super Admin Dashboard - Debug Info ===");
@@ -16,7 +17,12 @@ export function logDebugInfo() {
   }
 
   console.log("\nAPI Endpoints that will be used:");
-  const baseUrl = process.env.NEXT_PUBLIC_SUPER_ADMIN_API_URL || "http://localhost:8080/api/v1/super-admin";
+  let baseUrl = "";
+  try {
+    baseUrl = getSuperAdminApiBaseUrl();
+  } catch (error) {
+    console.warn("[SuperAdmin Debug] API base URL configuration error:", error);
+  }
   console.log("- Dashboard stats:", `${baseUrl}/dashboard/stats`);
   console.log("- List tenants:", `${baseUrl}/tenants`);
   console.log("- List users:", `${baseUrl}/users`);

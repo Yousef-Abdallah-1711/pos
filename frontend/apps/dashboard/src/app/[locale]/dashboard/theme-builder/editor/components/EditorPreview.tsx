@@ -1,10 +1,12 @@
 'use client'
 
 import { useState } from 'react'
+import { usePathname } from 'next/navigation'
 import { useThemeStore } from '@/hooks/useThemeStore'
 import { Footer, Header, SectionRenderer, type FooterConfig, type HeaderConfig } from '@pos-saas/ui-themes'
 import { Smartphone, Monitor, Tablet, RefreshCw } from 'lucide-react'
 import { mockRestaurantData } from '@/lib/mockData'
+import { createTranslator, getLocaleFromPath } from '@/lib/translations'
 import type { ThemeData } from '@/types/theme'
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -183,19 +185,22 @@ function enrichComponentWithMockData(component: any) {
 }
 
 export function EditorPreview() {
+  const pathname = usePathname()
+  const appLocale = getLocaleFromPath(pathname)
+  const t = createTranslator(appLocale)
   const theme = useThemeStore((state) => state.currentTheme)
   const [viewMode, setViewMode] = useState<'desktop' | 'tablet' | 'mobile'>('desktop')
-  const [isArabic, setIsArabic] = useState(false)
+  const [isArabic, setIsArabic] = useState(appLocale === 'ar')
 
   if (!theme) {
     return (
       <div className="flex items-center justify-center h-full bg-gray-100 dark:bg-gray-900 text-gray-500">
-        No theme selected
+        {t('themeBuilderEditor.noThemeSelected', 'No theme selected')}
       </div>
     )
   }
 
-  const locale: 'en' | 'ar' = isArabic ? 'ar' : 'en'
+  const previewLocale: 'en' | 'ar' = isArabic ? 'ar' : 'en'
 
   const colors = {
     primary: theme.colors?.primary || '#3b82f6',
@@ -214,8 +219,8 @@ export function EditorPreview() {
     lineHeight: theme.typography?.lineHeight || 1.5,
   }
 
-  const headerConfig = normalizeHeaderConfig(theme, locale)
-  const footerConfig = normalizeFooterConfig(theme, locale)
+  const headerConfig = normalizeHeaderConfig(theme, previewLocale)
+  const footerConfig = normalizeFooterConfig(theme, previewLocale)
 
   const getCSSVariables = () => {
     return `
@@ -240,7 +245,9 @@ export function EditorPreview() {
     <div className="h-full flex flex-col bg-gray-100 dark:bg-gray-900">
       <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
         <div className="flex items-center justify-between px-4 py-4">
-          <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Live Preview</h3>
+          <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
+            {t('themeBuilderEditor.livePreview', 'Live Preview')}
+          </h3>
 
           <div className="flex items-center gap-1 bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
             <button
@@ -261,14 +268,14 @@ export function EditorPreview() {
                   : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
               }`}
             >
-              العربية
+              {t('themeBuilderEditor.preview.arabic', 'Arabic')}
             </button>
           </div>
 
           <div className="flex items-center gap-1 bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
             <button
               onClick={() => setViewMode('desktop')}
-              title="Desktop"
+              title={t('themeBuilderEditor.preview.desktop', 'Desktop')}
               className={`px-3 py-1 rounded-md text-sm transition flex items-center gap-1 ${
                 viewMode === 'desktop'
                   ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white'
@@ -276,11 +283,11 @@ export function EditorPreview() {
               }`}
             >
               <Monitor className="h-4 w-4" />
-              Desktop
+              {t('themeBuilderEditor.preview.desktop', 'Desktop')}
             </button>
             <button
               onClick={() => setViewMode('tablet')}
-              title="Tablet"
+              title={t('themeBuilderEditor.preview.tablet', 'Tablet')}
               className={`px-3 py-1 rounded-md text-sm transition flex items-center gap-1 ${
                 viewMode === 'tablet'
                   ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white'
@@ -288,11 +295,11 @@ export function EditorPreview() {
               }`}
             >
               <Tablet className="h-4 w-4" />
-              Tablet
+              {t('themeBuilderEditor.preview.tablet', 'Tablet')}
             </button>
             <button
               onClick={() => setViewMode('mobile')}
-              title="Mobile"
+              title={t('themeBuilderEditor.preview.mobile', 'Mobile')}
               className={`px-3 py-1 rounded-md text-sm transition flex items-center gap-1 ${
                 viewMode === 'mobile'
                   ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white'
@@ -300,11 +307,11 @@ export function EditorPreview() {
               }`}
             >
               <Smartphone className="h-4 w-4" />
-              Mobile
+              {t('themeBuilderEditor.preview.mobile', 'Mobile')}
             </button>
           </div>
 
-          <button className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition" title="Refresh preview">
+          <button className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition" title={t('themeBuilderEditor.preview.refresh', 'Refresh preview')}>
             <RefreshCw className="h-4 w-4" />
           </button>
         </div>

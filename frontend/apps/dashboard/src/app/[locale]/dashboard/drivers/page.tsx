@@ -111,7 +111,7 @@ export default function DriversPage() {
         </div>
         <Link href={`/${locale}/dashboard/drivers/new`}>
           <Button>
-            <Plus className="h-4 w-4 mr-2" />
+            <Plus className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
             {t('drivers.addDriver')}
           </Button>
         </Link>
@@ -200,10 +200,10 @@ export default function DriversPage() {
                     <td className="px-6 py-4">
                       <div className={isRTL ? 'text-right' : ''}>
                         <div className="text-sm text-gray-900 dark:text-white">
-                          {driver.vehicle_type || 'N/A'}
+                          {driver.vehicle_type || t('common.notAvailable', 'N/A')}
                         </div>
                         <div className="text-sm text-gray-600 dark:text-gray-400">
-                          {driver.vehicle_number || '-'}
+                          {driver.vehicle_number || t('common.notAvailable', '-')}
                         </div>
                       </div>
                     </td>
@@ -247,7 +247,7 @@ export default function DriversPage() {
                     <td className="px-6 py-4">
                       <div className={isRTL ? 'text-right' : ''}>
                         <div className="text-sm font-semibold text-gray-900 dark:text-white">
-                          ★ {driver.average_rating.toFixed(1)}
+                          * {driver.average_rating.toFixed(1)}
                         </div>
                       </div>
                     </td>

@@ -193,7 +193,10 @@ func (h *RBACPermissionHandler) CheckPermission(w http.ResponseWriter, r *http.R
 			respondError(w, http.StatusInternalServerError, "Failed to check permissions")
 			return
 		}
+
+		fallbackLevel := fallbackPermissionLevelForRole(role, moduleID)
 		highest = maxPermissionLevel(highest, roleLevel)
+		highest = maxPermissionLevel(highest, fallbackLevel)
 	}
 
 	hasPermission := domain.PermissionValues[highest] >= domain.PermissionValues[requiredLevel]
@@ -233,6 +236,28 @@ func (h *RBACPermissionHandler) GetUserPermissions(w http.ResponseWriter, r *htt
 			}
 			permissions[perm.ModuleID] = maxPermissionLevel(current, perm.PermissionLevel)
 		}
+
+		// Compatibility fallback:
+		// older tenants may have module 13 but missing explicit role_permissions rows.
+		kdsFallback := fallbackPermissionLevelForRole(role, 13)
+		if kdsFallback != domain.PermissionNone {
+			current := permissions[13]
+			if current == "" {
+				current = domain.PermissionNone
+			}
+			permissions[13] = maxPermissionLevel(current, kdsFallback)
+		}
+
+		// Compatibility fallback:
+		// older tenants may have module 14 (TABLES) without explicit role_permissions rows.
+		tablesFallback := fallbackPermissionLevelForRole(role, 14)
+		if tablesFallback != domain.PermissionNone {
+			current := permissions[14]
+			if current == "" {
+				current = domain.PermissionNone
+			}
+			permissions[14] = maxPermissionLevel(current, tablesFallback)
+		}
 	}
 
 	respondJSON(w, http.StatusOK, permissions)
@@ -251,4 +276,38 @@ func maxPermissionLevel(current string, candidate string) string {
 		return candidate
 	}
 	return current
+}
+
+func fallbackPermissionLevelForRole(role domain.Role, moduleID int64) string {
+	code := strings.ToUpper(strings.TrimSpace(role.RoleCode))
+	if code == "" {
+		code = strings.ToUpper(strings.TrimSpace(role.RoleName))
+	}
+
+	switch moduleID {
+	case 13: // KDS
+		switch code {
+		case "ADMIN", "ADMINISTRATOR", "OWNER", "MANAGER":
+			return domain.PermissionAdmin
+		case "KITCHEN_STAFF", "KITCHEN_LEAD", "CHEF", "EMPLOYEE":
+			return domain.PermissionWrite
+		case "KITCHEN_VIEWER":
+			return domain.PermissionRead
+		default:
+			return domain.PermissionNone
+		}
+	case 14: // TABLES
+		switch code {
+		case "ADMIN", "ADMINISTRATOR", "OWNER":
+			return domain.PermissionAdmin
+		case "MANAGER":
+			return domain.PermissionWrite
+		case "KITCHEN_STAFF", "KITCHEN_LEAD", "CHEF", "KITCHEN_VIEWER", "EMPLOYEE", "WAITER", "HOST", "CASHIER":
+			return domain.PermissionRead
+		default:
+			return domain.PermissionNone
+		}
+	default:
+		return domain.PermissionNone
+	}
 }

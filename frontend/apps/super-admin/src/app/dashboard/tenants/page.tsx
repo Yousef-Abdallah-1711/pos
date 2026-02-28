@@ -25,7 +25,10 @@ export default function TenantsPage() {
         setTenants(tenantsArray);
         setTotal(totalCount);
       } catch (error) {
-        console.error("[TenantsPage] Error fetching tenants:", error);
+        if (process.env.NODE_ENV === "development") {
+          // Handled request failures should not trigger the dev console-error overlay.
+          console.warn("[TenantsPage] Failed to fetch tenants:", error);
+        }
         toast.error("Failed to load tenants");
         setTenants([]);
       } finally {

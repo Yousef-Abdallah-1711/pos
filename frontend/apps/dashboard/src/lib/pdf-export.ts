@@ -129,26 +129,49 @@ export async function exportOrderToPDF(order: Order, filename: string = `order-$
 /**
  * Export multiple orders as CSV
  */
-export function exportOrdersToCSV(orders: Order[], filename: string = 'orders-export.csv') {
+export function exportOrdersToCSV(
+  orders: Order[],
+  filename: string = 'orders-export.csv',
+  locale: 'en' | 'ar' = 'en'
+) {
   try {
+    const isArabic = locale === 'ar'
     // Prepare CSV headers
-    const headers = [
-      'Order Number',
-      'Customer Name',
-      'Email',
-      'Phone',
-      'Delivery Address',
-      'Items Count',
-      'Subtotal',
-      'Tax',
-      'Delivery Fee',
-      'Discount',
-      'Total',
-      'Status',
-      'Payment Status',
-      'Payment Method',
-      'Created Date',
-    ];
+    const headers = isArabic
+      ? [
+          'رقم الطلب',
+          'اسم العميل',
+          'البريد الإلكتروني',
+          'الهاتف',
+          'عنوان التوصيل',
+          'عدد العناصر',
+          'الإجمالي الفرعي',
+          'الضريبة',
+          'رسوم التوصيل',
+          'الخصم',
+          'الإجمالي',
+          'الحالة',
+          'حالة الدفع',
+          'طريقة الدفع',
+          'تاريخ الإنشاء',
+        ]
+      : [
+          'Order Number',
+          'Customer Name',
+          'Email',
+          'Phone',
+          'Delivery Address',
+          'Items Count',
+          'Subtotal',
+          'Tax',
+          'Delivery Fee',
+          'Discount',
+          'Total',
+          'Status',
+          'Payment Status',
+          'Payment Method',
+          'Created Date',
+        ];
 
     // Prepare CSV rows
       const rows = orders.map((order) => [
@@ -163,10 +186,10 @@ export function exportOrdersToCSV(orders: Order[], filename: string = 'orders-ex
         formatAmount(order.delivery_fee),
         formatAmount(order.discount),
         formatAmount(order.total),
-        order.status,
-        order.payment_status,
+        localizeOrderStatus(order.status, locale),
+        localizePaymentStatus(order.payment_status, locale),
         order.payment_method,
-        new Date(order.created_at).toLocaleString(),
+        new Date(order.created_at).toLocaleString(isArabic ? 'ar-EG' : 'en-US'),
       ]);
 
     // Build CSV content
@@ -176,7 +199,8 @@ export function exportOrdersToCSV(orders: Order[], filename: string = 'orders-ex
     ].join('\n');
 
     // Download CSV
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const bom = '\uFEFF'
+    const blob = new Blob([bom + csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
     const url = URL.createObjectURL(blob);
 
@@ -193,6 +217,31 @@ export function exportOrdersToCSV(orders: Order[], filename: string = 'orders-ex
     debugError('❌ CSV export error:', error);
     throw error;
   }
+}
+
+function localizeOrderStatus(status: string, locale: 'en' | 'ar') {
+  if (locale !== 'ar') return status
+  const map: Record<string, string> = {
+    pending: 'قيد الانتظار',
+    confirmed: 'مؤكد',
+    preparing: 'قيد التحضير',
+    ready: 'جاهز',
+    out_for_delivery: 'قيد التوصيل',
+    delivered: 'تم التوصيل',
+    cancelled: 'ملغى',
+  }
+  return map[status] || status
+}
+
+function localizePaymentStatus(status: string, locale: 'en' | 'ar') {
+  if (locale !== 'ar') return status
+  const map: Record<string, string> = {
+    pending: 'قيد الانتظار',
+    paid: 'مدفوع',
+    failed: 'فشل',
+    refunded: 'مسترد',
+  }
+  return map[status] || status
 }
 
 /**

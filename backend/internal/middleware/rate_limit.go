@@ -13,10 +13,42 @@ type rateLimitClient struct {
 	resetAt time.Time
 }
 
+type rateLimitKeyFunc func(*http.Request) string
+
 // RateLimitByIP applies an in-memory per-IP rate limit windowed by one minute.
 func RateLimitByIP(requestsPerMinute int) func(http.Handler) http.Handler {
-	if requestsPerMinute <= 0 {
-		requestsPerMinute = 60
+	return rateLimitWithKey(requestsPerMinute, time.Minute, func(r *http.Request) string {
+		return "ip:" + GetClientIP(r)
+	})
+}
+
+// RateLimitByUser applies an in-memory per-user rate limit windowed by one minute.
+// If user claims are unavailable, it falls back to IP address.
+func RateLimitByUser(requestsPerMinute int) func(http.Handler) http.Handler {
+	return RateLimitByUserWindow(requestsPerMinute, time.Minute)
+}
+
+// RateLimitByUserWindow applies an in-memory per-user limit for a custom window.
+// If user claims are unavailable, it falls back to IP address.
+func RateLimitByUserWindow(limit int, window time.Duration) func(http.Handler) http.Handler {
+	return rateLimitWithKey(limit, window, getUserRateLimitKey)
+}
+
+func getUserRateLimitKey(r *http.Request) string {
+	userID := GetUserID(r)
+	if userID > 0 {
+		return "user:" + strconv.FormatInt(userID, 10)
+	}
+
+	return "ip:" + GetClientIP(r)
+}
+
+func rateLimitWithKey(limit int, window time.Duration, keyFn rateLimitKeyFunc) func(http.Handler) http.Handler {
+	if limit <= 0 {
+		limit = 60
+	}
+	if window <= 0 {
+		window = time.Minute
 	}
 
 	clients := make(map[string]rateLimitClient)
@@ -24,19 +56,23 @@ func RateLimitByIP(requestsPerMinute int) func(http.Handler) http.Handler {
 
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			ip := GetClientIP(r)
+			key := keyFn(r)
+			if key == "" {
+				key = "global"
+			}
+
 			now := time.Now()
 
 			mu.Lock()
-			client, exists := clients[ip]
+			client, exists := clients[key]
 			if !exists || now.After(client.resetAt) {
 				client = rateLimitClient{
 					count:   0,
-					resetAt: now.Add(time.Minute),
+					resetAt: now.Add(window),
 				}
 			}
 
-			if client.count >= requestsPerMinute {
+			if client.count >= limit {
 				retryAfter := int(time.Until(client.resetAt).Seconds())
 				if retryAfter < 1 {
 					retryAfter = 1
@@ -54,12 +90,12 @@ func RateLimitByIP(requestsPerMinute int) func(http.Handler) http.Handler {
 			}
 
 			client.count++
-			clients[ip] = client
-			remaining := requestsPerMinute - client.count
+			clients[key] = client
+			remaining := limit - client.count
 			resetAt := client.resetAt
 			mu.Unlock()
 
-			w.Header().Set("X-RateLimit-Limit", intToString(requestsPerMinute))
+			w.Header().Set("X-RateLimit-Limit", intToString(limit))
 			w.Header().Set("X-RateLimit-Remaining", intToString(remaining))
 			w.Header().Set("X-RateLimit-Reset", intToString(int(resetAt.Unix())))
 

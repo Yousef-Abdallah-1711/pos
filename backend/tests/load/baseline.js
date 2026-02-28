@@ -1,4 +1,10 @@
 /**
+ * LOCAL/TEST-ONLY SCRIPT
+ *
+ * Defaults to localhost for local performance checks.
+ * Override target safely with:
+ *   BASE_URL=https://api.staging.example.com k6 run backend/tests/load/baseline.js
+ *
  * k6 Load Testing - Baseline Scenario
  *
  * Baseline test with 10 concurrent users
@@ -18,7 +24,7 @@ const httpRequests = new Counter('http_requests')
 const concurrentUsers = new Gauge('concurrent_users')
 
 // Configuration
-const BASE_URL = __ENV.BASE_URL || 'http://localhost:8080'
+const BASE_URL = (__ENV.BASE_URL || 'http://localhost:8080').replace(/\/$/, '')
 const DURATION = __ENV.DURATION || '5m'
 const USERS = 10
 

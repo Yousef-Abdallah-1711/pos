@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
+    "predev": "node scripts/dev-preflight.js",
     "dev": "turbo run dev --parallel",
     "dev:dashboard": "pnpm --filter @pos-saas/dashboard dev",
     "dev:restaurant": "pnpm --filter @pos-saas/restaurant-website dev",

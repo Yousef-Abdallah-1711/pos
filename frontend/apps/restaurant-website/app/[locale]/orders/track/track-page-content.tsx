@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
-import { OrderStatusTracker, type OrderStatus } from '@/components/order-status-tracker';
+import { OrderStatusTracker, type OrderStatus } from '@/components/commerce/order-status-tracker';
 import { Button } from '@pos-saas/ui';
 import { Search, Package, MapPin, Clock, AlertCircle } from 'lucide-react';
 import Link from 'next/link';

@@ -20,10 +20,10 @@ Stabilize Theme Builder so each restaurant can run exactly 2 reliable themes wit
   - File: `frontend/apps/dashboard/src/hooks/useThemeStore.ts`
 - [x] Fix component ordering fallback (`displayOrder` and `order`).
   - File: `frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/editor/components/EditorPreview.tsx`
-  - File: `frontend/apps/restaurant-website/components/dynamic-home-page.tsx`
+  - File: `frontend/apps/restaurant-website/components/homepage/dynamic-home-page.tsx`
 - [x] Enable header/footer runtime compatibility for both camelCase and snake_case configs.
-  - File: `frontend/apps/restaurant-website/components/header-ssr.tsx`
-  - File: `frontend/apps/restaurant-website/components/footer-ssr.tsx`
+  - File: `frontend/apps/restaurant-website/components/layout/header-ssr.tsx`
+  - File: `frontend/apps/restaurant-website/components/layout/footer-ssr.tsx`
 - [x] Fix public theme response extraction to support nested API payload variants (`data.data`, `data.config`, `theme.config`, JSON string config).
   - File: `frontend/apps/restaurant-website/lib/api/get-theme-server.ts`
   - File: `frontend/apps/restaurant-website/app/[locale]/page.tsx`
@@ -39,10 +39,10 @@ Stabilize Theme Builder so each restaurant can run exactly 2 reliable themes wit
 - [x] Replace static-like storefront header/footer with theme-config-driven runtime renderer (uses HeaderEditor/FooterEditor fields).
   - Header fields now respected at runtime: `logoUrl`, `logoText`, `logoHeight`, `showLogo`, `navigationItems`, `navPosition`, `navAlignment`, `backgroundColor`, `textColor`, `height`, `padding`, `stickyHeader`, `showShadow|shadow`, `hideNavOnMobile`.
   - Footer fields now respected at runtime: `companyName`, `companyDescription`, `address`, `phone`, `email`, `copyrightText`, `socialLinks`, `footerSections`, `legalLinks`, `backgroundColor`, `textColor`, `linkColor`, `padding`, `showLinks`, `showLegal`, `showBackToTop`, `columns`, `layout`.
-  - File: `frontend/apps/restaurant-website/components/header-ssr.tsx`
-  - File: `frontend/apps/restaurant-website/components/footer-ssr.tsx`
+  - File: `frontend/apps/restaurant-website/components/layout/header-ssr.tsx`
+  - File: `frontend/apps/restaurant-website/components/layout/footer-ssr.tsx`
 - [x] Apply custom CSS on restaurant homepage runtime.
-  - File: `frontend/apps/restaurant-website/components/dynamic-home-page.tsx`
+  - File: `frontend/apps/restaurant-website/components/homepage/dynamic-home-page.tsx`
 - [x] Add color sync from dashboard appearance settings to active website theme.
   - File: `frontend/apps/dashboard/src/app/[locale]/dashboard/settings/appearance/page.tsx`
 - [x] Add Theme Builder bulk actions: migrate configs and keep only 2 themes.

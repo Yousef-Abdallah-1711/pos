@@ -1,9 +1,11 @@
 'use client'
 
 import React, { useState, useCallback, useMemo } from 'react'
+import { usePathname } from 'next/navigation'
 import { Plus, Trash2, ChevronUp, ChevronDown, Eye, EyeOff } from 'lucide-react'
 import type { ThemeComponent, HeaderConfig as ThemeHeaderConfig } from '@/types/theme'
 import { useUpdateHeader, useThemeHeader } from '@/stores'
+import { getLocaleFromPath } from '@/lib/translations'
 
 interface HeaderEditorProps {
   component?: ThemeComponent
@@ -38,6 +40,11 @@ export function HeaderEditor({
   className = '',
   useStore = false,
 }: HeaderEditorProps): JSX.Element {
+  const pathname = usePathname()
+  const locale = getLocaleFromPath(pathname)
+  const isRTL = locale === 'ar'
+  const tx = (en: string, ar: string) => (isRTL ? ar : en)
+
   const storeHeader = useThemeHeader()
   const updateHeader = useUpdateHeader()
 
@@ -108,7 +115,7 @@ export function HeaderEditor({
   const addNavItem = useCallback(() => {
     const newItem: NavItem = {
       id: `nav-${Date.now()}`,
-      label: 'New Link',
+      label: tx('New Link', 'رابط جديد'),
       href: '#',
       order: (headerConfig.navigationItems?.length || 0) + 1,
     }
@@ -210,20 +217,20 @@ export function HeaderEditor({
 
   if (previewMode) {
     return (
-      <div className={`w-full space-y-4 ${className}`}>
+      <div dir={isRTL ? 'rtl' : 'ltr'} className={`w-full space-y-4 ${className} ${isRTL ? 'text-right' : ''}`}>
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Header Preview</h3>
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{tx('Header Preview', 'Ù…Ø¹Ø§ÙŠÙ†Ø© Ø§Ù„ØªØ±ÙˆÙŠØ³Ø©')}</h3>
           <button
             onClick={() => setPreviewMode(false)}
             className="px-3 py-2 text-sm bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition"
           >
-            Back to Settings
+            {tx('Back to Settings', 'Ø§Ù„Ø¹ÙˆØ¯Ø© Ø¥Ù„Ù‰ Ø§Ù„Ø¥Ø¹Ø¯Ø§Ø¯Ø§Øª')}
           </button>
         </div>
 
         {/* Desktop Preview */}
         <div className="space-y-2">
-          <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">Desktop Preview</h4>
+          <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">{tx('Desktop Preview', 'Ù…Ø¹Ø§ÙŠÙ†Ø© Ø³Ø·Ø­ Ø§Ù„Ù…ÙƒØªØ¨')}</h4>
           <div className="header-preview-desktop border border-gray-200 dark:border-gray-700 rounded-lg flex items-center justify-between">
             {/* Logo */}
             {headerConfig.showLogo && (
@@ -231,7 +238,7 @@ export function HeaderEditor({
                 {headerConfig.logoUrl && (
                   <img
                     src={headerConfig.logoUrl}
-                    alt="Logo"
+                    alt={tx('Logo', 'Ø§Ù„Ø´Ø¹Ø§Ø±')}
                     className="header-logo-desktop object-contain"
                   />
                 )}
@@ -252,7 +259,7 @@ export function HeaderEditor({
 
         {/* Mobile Preview */}
         <div className="space-y-2">
-          <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">Mobile Preview</h4>
+          <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">{tx('Mobile Preview', 'Ù…Ø¹Ø§ÙŠÙ†Ø© Ø§Ù„Ø¬ÙˆØ§Ù„')}</h4>
           <div className="header-preview-mobile border border-gray-200 dark:border-gray-700 rounded-lg flex items-center justify-between w-full max-w-sm">
             {/* Logo Mobile */}
             {headerConfig.showLogo && (
@@ -260,7 +267,7 @@ export function HeaderEditor({
                 {headerConfig.logoUrl && (
                   <img
                     src={headerConfig.logoUrl}
-                    alt="Logo"
+                    alt={tx('Logo', 'Ø§Ù„Ø´Ø¹Ø§Ø±')}
                     className="header-logo-mobile object-contain"
                   />
                 )}
@@ -268,7 +275,7 @@ export function HeaderEditor({
             )}
 
             {/* Mobile Menu Icon */}
-            <div className="text-2xl">☰</div>
+            <div className="text-2xl">&#9776;</div>
           </div>
         </div>
         <style jsx>{`
@@ -304,18 +311,18 @@ export function HeaderEditor({
   }
 
   return (
-    <div className={`w-full space-y-6 ${className}`}>
+    <div dir={isRTL ? 'rtl' : 'ltr'} className={`w-full space-y-6 ${className} ${isRTL ? 'text-right' : ''}`}>
       {/* Header */}
       <div>
-        <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-2">Header Configuration</h2>
+        <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-2">{tx('Header Configuration', 'Ø¥Ø¹Ø¯Ø§Ø¯Ø§Øª Ø§Ù„ØªØ±ÙˆÙŠØ³Ø©')}</h2>
         <p className="text-sm text-gray-600 dark:text-gray-400">
-          Configure your website header with logo, navigation items, and styling.
+          {tx('Configure your website header with logo, navigation items, and styling.', 'Ù‚Ù… Ø¨Ø¥Ø¹Ø¯Ø§Ø¯ ØªØ±ÙˆÙŠØ³Ø© Ù…ÙˆÙ‚Ø¹Ùƒ Ù…Ø¹ Ø§Ù„Ø´Ø¹Ø§Ø± ÙˆØ±ÙˆØ§Ø¨Ø· Ø§Ù„ØªÙ†Ù‚Ù„ ÙˆØ§Ù„ØªÙ†Ø³ÙŠÙ‚.')}
         </p>
       </div>
 
       {/* Logo Section */}
       <div className="space-y-4 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
-        <h3 className="font-semibold text-gray-900 dark:text-white">Logo Settings</h3>
+        <h3 className="font-semibold text-gray-900 dark:text-white">{tx('Logo Settings', 'Ø¥Ø¹Ø¯Ø§Ø¯Ø§Øª Ø§Ù„Ø´Ø¹Ø§Ø±')}</h3>
 
         <label className="flex items-center gap-2 cursor-pointer">
           <input
@@ -324,14 +331,14 @@ export function HeaderEditor({
             onChange={(e) => handleConfigChange('showLogo', e.target.checked)}
             className="rounded"
           />
-          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Show Logo</span>
+          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{tx('Show Logo', 'Ø¥Ø¸Ù‡Ø§Ø± Ø§Ù„Ø´Ø¹Ø§Ø±')}</span>
         </label>
 
         {headerConfig.showLogo && (
           <>
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Logo URL
+                {tx('Logo URL', 'Ø±Ø§Ø¨Ø· Ø§Ù„Ø´Ø¹Ø§Ø±')}
               </label>
               <input
                 type="url"
@@ -344,7 +351,7 @@ export function HeaderEditor({
 
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Logo Height: {headerConfig.logoHeight || 40}px
+                {tx('Logo Height', 'Ø§Ø±ØªÙØ§Ø¹ Ø§Ù„Ø´Ø¹Ø§Ø±')}: {headerConfig.logoHeight || 40}px
               </label>
               <input
                 type="range"
@@ -358,13 +365,13 @@ export function HeaderEditor({
 
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Logo Text (Alternative)
+                {tx('Logo Text (Alternative)', 'Ù†Øµ Ø§Ù„Ø´Ø¹Ø§Ø± (Ø¨Ø¯ÙŠÙ„)')}
               </label>
               <input
                 type="text"
                 value={headerConfig.logoText || ''}
                 onChange={(e) => handleConfigChange('logoText', e.target.value)}
-                placeholder="Your Brand Name"
+                placeholder={tx('Your Brand Name', 'Ø§Ø³Ù… Ø¹Ù„Ø§Ù…ØªÙƒ Ø§Ù„ØªØ¬Ø§Ø±ÙŠØ©')}
                 className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white text-sm"
               />
             </div>
@@ -375,13 +382,13 @@ export function HeaderEditor({
       {/* Navigation Section */}
       <div className="space-y-4 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
         <div className="flex items-center justify-between">
-          <h3 className="font-semibold text-gray-900 dark:text-white">Navigation Items</h3>
+          <h3 className="font-semibold text-gray-900 dark:text-white">{tx('Navigation Items', 'Ø¹Ù†Ø§ØµØ± Ø§Ù„ØªÙ†Ù‚Ù„')}</h3>
           <button
             onClick={addNavItem}
             className="flex items-center gap-1.5 px-3 py-1.5 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition"
           >
             <Plus className="h-4 w-4" />
-            Add Item
+            {tx('Add Item', 'Ø¥Ø¶Ø§ÙØ© Ø¹Ù†ØµØ±')}
           </button>
         </div>
 
@@ -389,30 +396,30 @@ export function HeaderEditor({
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Position
+              {tx('Position', 'Ø§Ù„Ù…ÙˆØ¶Ø¹')}
             </label>
             <select
               value={headerConfig.navPosition || 'right'}
               onChange={(e) => handleConfigChange('navPosition', e.target.value as any)}
               className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white text-sm"
             >
-              <option value="left">Left</option>
-              <option value="center">Center</option>
-              <option value="right">Right</option>
+              <option value="left">{tx('Left', 'ÙŠØ³Ø§Ø±')}</option>
+              <option value="center">{tx('Center', 'ÙˆØ³Ø·')}</option>
+              <option value="right">{tx('Right', 'ÙŠÙ…ÙŠÙ†')}</option>
             </select>
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Alignment
+              {tx('Alignment', 'Ø§Ù„Ø§ØªØ¬Ø§Ù‡')}
             </label>
             <select
               value={headerConfig.navAlignment || 'horizontal'}
               onChange={(e) => handleConfigChange('navAlignment', e.target.value as any)}
               className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white text-sm"
             >
-              <option value="horizontal">Horizontal</option>
-              <option value="vertical">Vertical</option>
+              <option value="horizontal">{tx('Horizontal', 'Ø£ÙÙ‚ÙŠ')}</option>
+              <option value="vertical">{tx('Vertical', 'Ø¹Ù…ÙˆØ¯ÙŠ')}</option>
             </select>
           </div>
         </div>
@@ -428,14 +435,14 @@ export function HeaderEditor({
                       type="text"
                       value={editingLabel}
                       onChange={(e) => setEditingLabel(e.target.value)}
-                      placeholder="Label"
+                      placeholder={tx('Label', 'Ø§Ù„Ø§Ø³Ù…')}
                       className="px-2 py-1 border border-gray-200 dark:border-gray-600 rounded dark:bg-gray-700 dark:text-white text-sm"
                     />
                     <input
                       type="text"
                       value={editingHref}
                       onChange={(e) => setEditingHref(e.target.value)}
-                      placeholder="URL"
+                      placeholder={tx('URL', 'Ø§Ù„Ø±Ø§Ø¨Ø·')}
                       className="px-2 py-1 border border-gray-200 dark:border-gray-600 rounded dark:bg-gray-700 dark:text-white text-sm"
                     />
                   </div>
@@ -447,13 +454,13 @@ export function HeaderEditor({
                       }}
                       className="px-2 py-1 text-sm bg-green-600 hover:bg-green-700 text-white rounded transition"
                     >
-                      Save
+                      {tx('Save', 'Ø­ÙØ¸')}
                     </button>
                     <button
                       onClick={() => setEditingItemId(null)}
                       className="px-2 py-1 text-sm bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white rounded transition"
                     >
-                      Cancel
+                      {tx('Cancel', 'Ø¥Ù„ØºØ§Ø¡')}
                     </button>
                   </div>
                 </>
@@ -502,12 +509,12 @@ export function HeaderEditor({
 
       {/* Styling Section */}
       <div className="space-y-4 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
-        <h3 className="font-semibold text-gray-900 dark:text-white">Styling</h3>
+        <h3 className="font-semibold text-gray-900 dark:text-white">{tx('Styling', 'Ø§Ù„ØªÙ†Ø³ÙŠÙ‚')}</h3>
 
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Background Color
+              {tx('Background Color', 'Ù„ÙˆÙ† Ø§Ù„Ø®Ù„ÙÙŠØ©')}
             </label>
             <input
               type="color"
@@ -519,7 +526,7 @@ export function HeaderEditor({
 
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Text Color
+              {tx('Text Color', 'Ù„ÙˆÙ† Ø§Ù„Ù†Øµ')}
             </label>
             <input
               type="color"
@@ -533,7 +540,7 @@ export function HeaderEditor({
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Height: {headerConfig.height || 80}px
+              {tx('Height', 'Ø§Ù„Ø§Ø±ØªÙØ§Ø¹')}: {headerConfig.height || 80}px
             </label>
             <input
               type="range"
@@ -547,7 +554,7 @@ export function HeaderEditor({
 
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Padding: {headerConfig.padding || 16}px
+              {tx('Padding', 'Ø§Ù„Ø­Ø´Ùˆ')}: {headerConfig.padding || 16}px
             </label>
             <input
               type="range"
@@ -569,7 +576,7 @@ export function HeaderEditor({
               onChange={(e) => handleConfigChange('stickyHeader', e.target.checked)}
               className="rounded"
             />
-            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Sticky Header</span>
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{tx('Sticky Header', 'ØªØ±ÙˆÙŠØ³Ø© Ø«Ø§Ø¨ØªØ©')}</span>
           </label>
 
           <label className="flex items-center gap-2 cursor-pointer">
@@ -579,7 +586,7 @@ export function HeaderEditor({
               onChange={(e) => handleConfigChange('shadow', e.target.checked)}
               className="rounded"
             />
-            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Show Shadow</span>
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{tx('Show Shadow', 'Ø¥Ø¸Ù‡Ø§Ø± Ø§Ù„Ø¸Ù„')}</span>
           </label>
 
           <label className="flex items-center gap-2 cursor-pointer">
@@ -589,7 +596,7 @@ export function HeaderEditor({
               onChange={(e) => handleConfigChange('hideNavOnMobile', e.target.checked)}
               className="rounded"
             />
-            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Hide Nav on Mobile</span>
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{tx('Hide Nav on Mobile', 'Ø¥Ø®ÙØ§Ø¡ Ø§Ù„ØªÙ†Ù‚Ù„ Ø¹Ù„Ù‰ Ø§Ù„Ø¬ÙˆØ§Ù„')}</span>
           </label>
         </div>
       </div>
@@ -600,7 +607,7 @@ export function HeaderEditor({
           onClick={() => setPreviewMode(true)}
           className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition"
         >
-          Preview Header
+          {tx('Preview Header', 'Ù…Ø¹Ø§ÙŠÙ†Ø© Ø§Ù„ØªØ±ÙˆÙŠØ³Ø©')}
         </button>
       </div>
     </div>

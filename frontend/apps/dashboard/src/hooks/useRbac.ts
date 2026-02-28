@@ -15,6 +15,147 @@ import {
   PermissionCheckResponse,
 } from '@/lib/rbac'
 
+const CURRENT_USER_PERMISSION_CACHE_KEY = 'current_user'
+const PRIVILEGED_KDS_ROLES = new Set(['owner', 'admin', 'manager', 'super_admin'])
+
+const normalizePermissionLevelString = (value: unknown): string | null => {
+  if (typeof value !== 'string') {
+    return null
+  }
+
+  const normalized = value.trim().toUpperCase()
+  const validLevels = new Set([
+    PERMISSION_LEVELS.NONE,
+    PERMISSION_LEVELS.READ,
+    PERMISSION_LEVELS.EXPORT,
+    PERMISSION_LEVELS.WRITE,
+    PERMISSION_LEVELS.DELETE,
+    PERMISSION_LEVELS.ADMIN,
+  ])
+
+  return validLevels.has(normalized) ? normalized : null
+}
+
+const extractPermissionLevel = (value: unknown): string | null => {
+  const direct = normalizePermissionLevelString(value)
+  if (direct) {
+    return direct
+  }
+
+  if (value && typeof value === 'object') {
+    const record = value as Record<string, unknown>
+    return (
+      extractPermissionLevel(record.permission_level) ||
+      extractPermissionLevel(record.permissionLevel) ||
+      extractPermissionLevel(record.level)
+    )
+  }
+
+  return null
+}
+
+const normalizePermissionsPayload = (payload: unknown): UserPermissions => {
+  const normalized: UserPermissions = {}
+  const assign = (moduleIdValue: unknown, levelValue: unknown) => {
+    const moduleId = Number(moduleIdValue)
+    const level = extractPermissionLevel(levelValue)
+    if (!Number.isFinite(moduleId) || moduleId <= 0 || !level) {
+      return
+    }
+    normalized[moduleId] = level
+  }
+
+  const processArray = (items: unknown[]) => {
+    items.forEach((item) => {
+      if (!item || typeof item !== 'object') {
+        return
+      }
+      const record = item as Record<string, unknown>
+      assign(
+        record.module_id ?? record.moduleId ?? record.id,
+        record.permission_level ?? record.permissionLevel ?? record.level ?? record.permission
+      )
+    })
+  }
+
+  const resolved = (payload as { data?: unknown })?.data ?? payload
+  if (Array.isArray(resolved)) {
+    processArray(resolved)
+    return normalized
+  }
+
+  if (resolved && typeof resolved === 'object') {
+    const record = resolved as Record<string, unknown>
+
+    if (Array.isArray(record.permissions)) {
+      processArray(record.permissions)
+    }
+    if (Array.isArray(record.data)) {
+      processArray(record.data)
+    }
+
+    Object.entries(record).forEach(([key, value]) => {
+      assign(key, value)
+    })
+  }
+
+  return normalized
+}
+
+const readCurrentUserRole = (): string | null => {
+  if (typeof window === 'undefined') {
+    return null
+  }
+
+  try {
+    const authStorage = window.localStorage.getItem('auth-storage')
+    if (authStorage) {
+      const parsed = JSON.parse(authStorage) as {
+        state?: { user?: { role?: string } }
+        user?: { role?: string }
+      }
+      const role = parsed.state?.user?.role || parsed.user?.role
+      if (role) {
+        return String(role).toLowerCase()
+      }
+    }
+  } catch {
+    // Ignore malformed local auth payloads.
+  }
+
+  try {
+    const userRaw = window.localStorage.getItem('user')
+    if (!userRaw) {
+      return null
+    }
+    const parsed = JSON.parse(userRaw) as { role?: string }
+    return parsed.role ? String(parsed.role).toLowerCase() : null
+  } catch {
+    return null
+  }
+}
+
+const canUseKDSRoleFallback = () => {
+  const role = readCurrentUserRole()
+  return role ? PRIVILEGED_KDS_ROLES.has(role) : false
+}
+
+const applyKDSRoleFallback = (permissions: UserPermissions): UserPermissions => {
+  if (!canUseKDSRoleFallback()) {
+    return permissions
+  }
+
+  const currentLevel = extractPermissionLevel(permissions[MODULE_IDS.KDS])
+  if (currentLevel) {
+    return permissions
+  }
+
+  return {
+    ...permissions,
+    [MODULE_IDS.KDS]: PERMISSION_LEVELS.ADMIN,
+  }
+}
+
 /**
  * Hook to check if user has a specific permission
  * Returns true if user has the required permission level for the module
@@ -23,25 +164,63 @@ export const useHasPermission = (
   moduleId: number,
   requiredLevel: string = PERMISSION_LEVELS.READ
 ) => {
-  const [hasPermission, setHasPermission] = useState<boolean>(false)
-  const [loading, setLoading] = useState(true)
+  const initialCached = applyKDSRoleFallback(
+    permissionCache.get(CURRENT_USER_PERMISSION_CACHE_KEY) || {}
+  )
+  const [hasPermission, setHasPermission] = useState<boolean>(
+    hasPermissionLevel(initialCached?.[moduleId], requiredLevel)
+  )
+  const [loading, setLoading] = useState(initialCached && Object.keys(initialCached).length === 0)
   const [error, setError] = useState<Error | null>(null)
 
   useEffect(() => {
+    let active = true
+
     const checkPermission = async () => {
-      try {
-        setLoading(true)
-        const response = await rbacApi.checkPermission(moduleId, requiredLevel)
-        setHasPermission(response.has_permission || false)
-      } catch (err) {
-        setError(err instanceof Error ? err : new Error(String(err)))
-        setHasPermission(false)
-      } finally {
+      const cached = permissionCache.get(CURRENT_USER_PERMISSION_CACHE_KEY)
+      if (cached && active) {
+        setHasPermission(hasPermissionLevel(cached[moduleId], requiredLevel))
         setLoading(false)
+      }
+
+      try {
+        if (!cached && active) {
+          setLoading(true)
+        }
+        const response = await rbacApi.checkPermission(moduleId, requiredLevel)
+        if (!active) {
+          return
+        }
+        if (moduleId === MODULE_IDS.KDS && canUseKDSRoleFallback()) {
+          setHasPermission(true)
+        } else {
+          setHasPermission(response.has_permission || false)
+        }
+        setError(null)
+      } catch (err) {
+        if (!active) {
+          return
+        }
+        if (!cached) {
+          if (moduleId === MODULE_IDS.KDS && canUseKDSRoleFallback()) {
+            setHasPermission(true)
+            setError(null)
+            return
+          }
+          setError(err instanceof Error ? err : new Error(String(err)))
+          setHasPermission(false)
+        }
+      } finally {
+        if (active) {
+          setLoading(false)
+        }
       }
     }
 
-    checkPermission()
+    void checkPermission()
+    return () => {
+      active = false
+    }
   }, [moduleId, requiredLevel])
 
   return { hasPermission, loading, error }
@@ -51,27 +230,71 @@ export const useHasPermission = (
  * Hook to get all user permissions
  */
 export const useUserPermissions = () => {
-  const [permissions, setPermissions] = useState<UserPermissions>({})
-  const [loading, setLoading] = useState(true)
+  const cachedPermissions = applyKDSRoleFallback(
+    permissionCache.get(CURRENT_USER_PERMISSION_CACHE_KEY) || {}
+  )
+  const [permissions, setPermissions] = useState<UserPermissions>(cachedPermissions)
+  const [loading, setLoading] = useState(Object.keys(cachedPermissions).length === 0)
   const [error, setError] = useState<Error | null>(null)
 
   useEffect(() => {
+    let active = true
+
     const fetchPermissions = async () => {
-      try {
-        setLoading(true)
-        const response = await rbacApi.getUserPermissions()
-        const resolved = (response as { data?: UserPermissions })?.data ?? response
-        setPermissions(resolved || {})
-        // Cache the permissions
-        permissionCache.set('current_user', (resolved as UserPermissions) || {})
-      } catch (err) {
-        setError(err instanceof Error ? err : new Error(String(err)))
-      } finally {
+      const cached = permissionCache.get(CURRENT_USER_PERMISSION_CACHE_KEY)
+      if (cached && active) {
+        // Serve cached permissions immediately, then revalidate in background.
+        setPermissions(cached)
         setLoading(false)
+      }
+
+      try {
+        if (!cached && active) {
+          setLoading(true)
+        }
+        const response = await rbacApi.getUserPermissions()
+        const resolved = applyKDSRoleFallback(normalizePermissionsPayload(response))
+        if (!active) {
+          return
+        }
+        setPermissions(resolved)
+        // Cache the permissions
+        permissionCache.set(CURRENT_USER_PERMISSION_CACHE_KEY, resolved)
+        setError(null)
+      } catch (err) {
+        if (!active) {
+          return
+        }
+
+        // Fail soft: keep cached permissions if available.
+        const fallback = permissionCache.get(CURRENT_USER_PERMISSION_CACHE_KEY)
+        if (fallback) {
+          setPermissions(applyKDSRoleFallback(fallback))
+        } else {
+          if (canUseKDSRoleFallback()) {
+            const roleFallbackPermissions: UserPermissions = {
+              [MODULE_IDS.KDS]: PERMISSION_LEVELS.ADMIN,
+            }
+            setPermissions(roleFallbackPermissions)
+            permissionCache.set(CURRENT_USER_PERMISSION_CACHE_KEY, roleFallbackPermissions)
+            setError(null)
+          } else {
+            setPermissions({})
+            setError(err instanceof Error ? err : new Error(String(err)))
+          }
+        }
+      } finally {
+        if (active) {
+          setLoading(false)
+        }
       }
     }
 
-    fetchPermissions()
+    void fetchPermissions()
+
+    return () => {
+      active = false
+    }
   }, [])
 
   const checkPermission = useCallback(

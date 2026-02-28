@@ -121,7 +121,8 @@
     "success": "تم تقديم الطلب بنجاح!",
     "orderNumber": "رقم الطلب",
     "trackOrder": "تتبع طلبك",
-    "backToMenu": "العودة إلى القائمة"
+    "backToMenu": "العودة إلى القائمة",
+    "optional": "Optional"
   },
   "orders": {
     "title": "سجل الطلبات",
@@ -134,8 +135,7 @@
     "totalAmount": "المبلغ الإجمالي",
     "estimatedDelivery": "التسليم المتوقع",
     "restaurant": "المطعم",
-    "viewDetails": "عرض التفاصيل",
-    "trackOrder": "تتبع الطلب"
+    "viewDetails": "عرض التفاصيل"
   },
   "orderTracking": {
     "title": "تتبع طلبك",
@@ -201,7 +201,12 @@
     "about": "حول",
     "company": "الشركة",
     "legal": "قانوني",
-    "contact": "اتصل",
+    "contact": {
+      "hours": "الساعات",
+      "address": "العنوان",
+      "phone": "الهاتف",
+      "email": "البريد الإلكتروني"
+    },
     "links": {
       "about": "معلومات عنا",
       "faq": "الأسئلة الشائعة",
@@ -211,12 +216,6 @@
       "privacy": "سياسة الخصوصية",
       "cookies": "سياسة ملفات تعريف الارتباط",
       "contact": "اتصل بنا"
-    },
-    "contact": {
-      "hours": "الساعات",
-      "address": "العنوان",
-      "phone": "الهاتف",
-      "email": "البريد الإلكتروني"
     },
     "social": "تابعنا"
   },
@@ -253,5 +252,19 @@
     "contactUs": "اتصل بنا",
     "thankYou": "شكراً لاختيارك",
     "customColors": "ألوان مخصصة"
+  },
+  "tableOrdering": {
+    "dineInOrder": "Dine-in Order",
+    "table": "Table",
+    "payAtTable": "Pay at table",
+    "payAtTableHint": "Pay directly at your table after the order is served.",
+    "invalidTable": "This table QR is invalid or unavailable.",
+    "openMenu": "Open menu",
+    "invalidTableTitle": "Table QR not recognized",
+    "statusWarnings": {
+      "occupied": "This table is currently marked as occupied. You can still place your order.",
+      "reserved": "This table is currently reserved. Please confirm with staff before ordering.",
+      "maintenance": "This table is marked for maintenance. Please ask staff if this table is active."
+    }
   }
 }

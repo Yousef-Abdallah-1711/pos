@@ -1,6 +1,6 @@
-﻿'use client'
+'use client'
 
-import { OrderList } from '@/components/order-list'
+import { OrderList } from '@/components/commerce/order-list'
 import { Button } from '@pos-saas/ui'
 import { RefreshCw, Loader } from 'lucide-react'
 import Link from 'next/link'

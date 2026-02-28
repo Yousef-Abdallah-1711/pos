@@ -1,8 +1,8 @@
-﻿'use client'
+'use client'
 
 import Link from 'next/link'
 import { useCartStore } from '@/lib/store/cart-store'
-import { Cart } from '@/components/cart'
+import { Cart } from '@/components/commerce/cart'
 import { createTranslator } from '@/lib/translations'
 import { Button } from '@pos-saas/ui'
 import { ShoppingBag } from 'lucide-react'
@@ -21,7 +21,13 @@ export function CartPageContent({ locale, themeData }: CartPageContentProps) {
   const secondaryColor = themeData?.colors?.secondary || '#0ea5e9'
 
   const cartItems = useCartStore((state) => state.items)
-  const cartTotal = useCartStore((state) => state.getTotalItems())
+  const cartItemsCount = useCartStore((state) => state.getTotalItems())
+  const orderSubtotal = useCartStore((state) => state.getTotal())
+  const tableId = useCartStore((state) => state.tableId)
+  const tableName = useCartStore((state) => state.tableName)
+  const isDineIn = tableId !== null
+  const deliveryFee = isDineIn ? 0 : orderSubtotal > 50 ? 0 : 5.99
+  const grandTotal = orderSubtotal + deliveryFee
 
   if (cartItems.length === 0) {
     return (
@@ -44,12 +50,22 @@ export function CartPageContent({ locale, themeData }: CartPageContentProps) {
         <div className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 ${isRTL ? 'text-right' : ''}`}>
           <h1 className="text-4xl font-bold mb-2">{t('cart.title')}</h1>
           <p className="text-gray-100">
-            {cartTotal} {t('cart.items')}
+            {cartItemsCount} {t('cart.items')}
           </p>
         </div>
       </div>
 
       <div className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 ${isRTL ? 'text-right' : ''}`}>
+        {isDineIn && (
+          <div
+            className={`mb-6 rounded-lg border px-4 py-3 text-sm font-medium bg-orange-50 border-orange-200 text-orange-900 dark:bg-orange-900/20 dark:border-orange-700 dark:text-orange-200 ${
+              isRTL ? 'text-right' : ''
+            }`}
+          >
+            {t('tableOrdering.dineInOrder')} - {tableName || `${t('tableOrdering.table')} #${tableId}`}
+          </div>
+        )}
+
         <div className={`grid grid-cols-1 lg:grid-cols-3 gap-8 ${isRTL ? 'lg:grid-flow-col-dense' : ''}`}>
           <div className={`lg:col-span-2 ${isRTL ? 'lg:order-2' : ''}`}>
             <Cart locale={locale} />
@@ -62,33 +78,26 @@ export function CartPageContent({ locale, themeData }: CartPageContentProps) {
               <div className={`space-y-2 mb-6 pb-6 border-b border-gray-200 dark:border-gray-700 ${isRTL ? 'text-right' : ''}`}>
                 <div className={`flex justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
                   <span className="text-gray-600 dark:text-gray-400">{t('cart.items')}</span>
-                  <span className="font-semibold">{cartTotal}</span>
+                  <span className="font-semibold">{cartItemsCount}</span>
                 </div>
               </div>
 
               <div className={`space-y-3 mb-6 ${isRTL ? 'text-right' : ''}`}>
                 <div className={`flex justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
                   <span className="text-gray-600 dark:text-gray-400">{t('common.subtotal')}</span>
-                  <span className="font-semibold">${useCartStore.getState().getTotal().toFixed(2)}</span>
+                  <span className="font-semibold">${orderSubtotal.toFixed(2)}</span>
                 </div>
 
                 <div className={`flex justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
                   <span className="text-gray-600 dark:text-gray-400">{t('cart.deliveryFee')}</span>
                   <span className="text-sm text-green-600">
-                    {useCartStore.getState().getTotal() > 50 ? t('common.free') : `$5.99`}
+                    {deliveryFee === 0 ? t('common.free') : `$${deliveryFee.toFixed(2)}`}
                   </span>
                 </div>
 
                 <div className={`flex justify-between text-lg border-t border-gray-200 dark:border-gray-700 pt-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
                   <span className="font-bold">{t('common.total')}</span>
-                  <span className="cart-total-value text-2xl font-bold">
-                    ${
-                      (
-                        useCartStore.getState().getTotal() +
-                        (useCartStore.getState().getTotal() > 50 ? 0 : 5.99)
-                      ).toFixed(2)
-                    }
-                  </span>
+                  <span className="cart-total-value text-2xl font-bold">${grandTotal.toFixed(2)}</span>
                 </div>
               </div>
 

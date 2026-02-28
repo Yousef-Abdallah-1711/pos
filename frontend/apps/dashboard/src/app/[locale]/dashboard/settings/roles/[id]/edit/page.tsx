@@ -66,7 +66,17 @@ const MODULES: PermissionModule[] = [
   },
   {
     moduleId: MODULE_IDS.ORDERS,
-    moduleName: 'Orders',
+    moduleName: 'Orders & POS',
+    permissions: PERMISSION_OPTIONS,
+  },
+  {
+    moduleId: MODULE_IDS.KDS,
+    moduleName: 'Kitchen Display (KDS)',
+    permissions: PERMISSION_OPTIONS,
+  },
+  {
+    moduleId: MODULE_IDS.TABLES,
+    moduleName: 'Tables',
     permissions: PERMISSION_OPTIONS,
   },
   {

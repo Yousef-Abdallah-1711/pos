@@ -1,5 +1,5 @@
 import { Metadata } from 'next'
-import { MaintenancePage } from '@/components/MaintenancePage'
+import { MaintenancePage } from '@/components/system/MaintenancePage'
 
 export const metadata: Metadata = {
   title: 'Temporarily Unavailable | Restaurant',
