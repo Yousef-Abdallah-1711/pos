@@ -308,6 +308,17 @@ export const useUserPermissions = () => {
   return { permissions, checkPermission, loading, error }
 }
 
+export const warmupCurrentUserPermissions = async () => {
+  try {
+    const response = await rbacApi.getUserPermissions()
+    const resolved = applyKDSRoleFallback(normalizePermissionsPayload(response))
+    permissionCache.set(CURRENT_USER_PERMISSION_CACHE_KEY, resolved)
+    return resolved
+  } catch {
+    return null
+  }
+}
+
 /**
  * Hook to manage roles with CRUD operations
  */

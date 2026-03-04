@@ -445,6 +445,104 @@ Coming soon in v2.0.0:
 
 ---
 
+## POS SaaS Phase 6 Endpoints (Accounting + Advanced HR)
+
+All endpoints below are protected (`Authorization: Bearer <token>`) and tenant-scoped.
+
+### Accounting (RBAC module 15)
+
+```
+GET/POST     /api/v1/accounting/accounts
+GET/PUT/DEL  /api/v1/accounting/accounts/{id}
+GET/POST     /api/v1/accounting/journal-entries
+GET/PUT      /api/v1/accounting/journal-entries/{id}
+POST         /api/v1/accounting/journal-entries/{id}/post
+POST         /api/v1/accounting/journal-entries/{id}/void
+GET          /api/v1/accounting/ledger
+GET          /api/v1/accounting/trial-balance
+GET/POST     /api/v1/accounting/bank-accounts
+GET/PUT/DEL  /api/v1/accounting/bank-accounts/{id}
+GET          /api/v1/accounting/bank-accounts/{id}/transactions
+GET/POST     /api/v1/accounting/customers
+GET/PUT/DEL  /api/v1/accounting/customers/{id}
+GET          /api/v1/accounting/customers/{id}/statement
+GET/POST     /api/v1/accounting/customer-invoices
+GET/PUT      /api/v1/accounting/customer-invoices/{id}
+POST         /api/v1/accounting/customer-invoices/{id}/send
+POST         /api/v1/accounting/customer-invoices/{id}/void
+GET          /api/v1/accounting/customer-invoices/overdue
+GET/POST     /api/v1/accounting/supplier-invoices
+GET/PUT      /api/v1/accounting/supplier-invoices/{id}
+POST         /api/v1/accounting/supplier-invoices/{id}/approve
+POST         /api/v1/accounting/supplier-invoices/{id}/void
+GET/POST     /api/v1/accounting/payments/received
+GET/POST     /api/v1/accounting/payments/made
+```
+
+### Suppliers (RBAC module 16)
+
+```
+GET/POST     /api/v1/suppliers
+GET/PUT/DEL  /api/v1/suppliers/{id}
+```
+
+### Financial Reports + Tax (RBAC module 17)
+
+```
+GET/POST     /api/v1/accounting/tax/periods
+GET/PUT/DEL  /api/v1/accounting/tax/periods/{id}
+POST         /api/v1/accounting/tax/periods/{id}/close
+GET          /api/v1/accounting/tax/vat-report
+```
+
+### HR Performance (RBAC module 18)
+
+```
+GET/POST     /api/v1/hr/performance
+GET/PUT/DEL  /api/v1/hr/performance/{id}
+POST         /api/v1/hr/performance/{id}/acknowledge
+POST         /api/v1/hr/performance/{id}/complete
+GET          /api/v1/hr/performance/employee/{employeeId}
+```
+
+### HR Training (RBAC module 19)
+
+```
+GET/POST     /api/v1/hr/training
+GET/PUT/DEL  /api/v1/hr/training/{id}
+GET          /api/v1/hr/training/expiring
+```
+
+### Contracts/Insurance/Resignations (RBAC module 20)
+
+```
+GET/POST     /api/v1/hr/insurance
+GET/PUT/DEL  /api/v1/hr/insurance/{id}
+GET          /api/v1/hr/insurance/expiring
+GET/POST     /api/v1/hr/contracts
+GET/PUT/DEL  /api/v1/hr/contracts/{id}
+POST         /api/v1/hr/contracts/{id}/renew
+GET          /api/v1/hr/contracts/expiring
+GET/POST     /api/v1/hr/resignations
+GET/PUT/DEL  /api/v1/hr/resignations/{id}
+POST         /api/v1/hr/resignations/{id}/acknowledge
+POST         /api/v1/hr/resignations/{id}/complete
+GET          /api/v1/hr/resignations/{id}/settlement
+```
+
+### HR Reports Dashboard
+
+```
+GET          /api/v1/reports/hr/headcount
+GET          /api/v1/reports/hr/turnover
+GET          /api/v1/reports/hr/absenteeism
+GET          /api/v1/reports/hr/overtime
+GET          /api/v1/reports/hr/leave-balances
+GET          /api/v1/reports/hr/training-compliance
+```
+
+---
+
 ## Support
 
 - 📖 **Full Docs**: https://docs.example.com

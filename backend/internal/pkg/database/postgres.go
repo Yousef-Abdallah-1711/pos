@@ -38,11 +38,19 @@ func Connect(cfg *config.DatabaseConfig) (*sql.DB, error) {
 			connMaxLifetime = parsed
 		}
 	}
+	connMaxIdleTime := 2 * time.Minute
+	if cfg.ConnMaxIdleTime != "" {
+		parsed, err := time.ParseDuration(cfg.ConnMaxIdleTime)
+		if err == nil && parsed > 0 {
+			connMaxIdleTime = parsed
+		}
+	}
 
 	db.SetMaxOpenConns(maxOpenConns)
 	db.SetMaxIdleConns(maxIdleConns)
 	db.SetConnMaxLifetime(connMaxLifetime)
+	db.SetConnMaxIdleTime(connMaxIdleTime)
 
-	log.Printf("Database connected successfully (max_open=%d max_idle=%d conn_max_lifetime=%s)", maxOpenConns, maxIdleConns, connMaxLifetime)
+	log.Printf("Database connected successfully (max_open=%d max_idle=%d conn_max_lifetime=%s conn_max_idle=%s)", maxOpenConns, maxIdleConns, connMaxLifetime, connMaxIdleTime)
 	return db, nil
 }

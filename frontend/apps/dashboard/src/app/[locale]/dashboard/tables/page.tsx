@@ -12,7 +12,6 @@ import {
   RefreshCcw,
   X,
 } from 'lucide-react'
-import { jsPDF } from 'jspdf'
 import QRCode from 'qrcode'
 import { Button } from '@/components/ui/button'
 import { useHasPermission } from '@/hooks/useRbac'
@@ -168,6 +167,7 @@ export default function TablesPage() {
 
     setPrintingAllQr(true)
     try {
+      const { jsPDF } = await import('jspdf')
       const doc = new jsPDF({
         orientation: 'portrait',
         unit: 'mm',

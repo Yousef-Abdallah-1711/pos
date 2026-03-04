@@ -219,6 +219,121 @@ export function exportOrdersToCSV(
   }
 }
 
+/**
+ * Export a generic financial report table as PDF.
+ */
+export async function exportFinancialReportToPDF(
+  title: string,
+  rows: Array<Record<string, string | number>>,
+  filename: string = 'financial-report.pdf',
+  template: 'generic' | 'profit-loss' | 'balance-sheet' | 'vat' = 'generic'
+) {
+  try {
+    const { jsPDF } = await import('jspdf')
+
+    const pdf = new jsPDF({
+      orientation: 'portrait',
+      unit: 'mm',
+      format: 'a4',
+    })
+
+    const pageWidth = pdf.internal.pageSize.getWidth()
+    const marginX = 12
+    const startY = 16
+    const lineHeight = 7
+    const usableWidth = pageWidth - marginX * 2
+
+    pdf.setFontSize(16)
+    pdf.text(title, marginX, startY)
+
+    pdf.setFontSize(10)
+    pdf.setTextColor(120, 120, 120)
+    pdf.text(`Generated: ${new Date().toLocaleString()}`, marginX, startY + 6)
+    pdf.setTextColor(20, 20, 20)
+
+    if (!rows.length) {
+      pdf.setFontSize(12)
+      pdf.text('No data available', marginX, startY + 16)
+      pdf.save(filename)
+      return
+    }
+
+    const columns = getReportColumns(template, rows)
+    const colWidth = usableWidth / Math.max(columns.length, 1)
+    let y = startY + 16
+
+    pdf.setDrawColor(200, 200, 200)
+    pdf.setFillColor(245, 245, 245)
+    pdf.rect(marginX, y - 5, usableWidth, lineHeight, 'F')
+    pdf.setFontSize(10)
+    pdf.setFont('helvetica', 'bold')
+    columns.forEach((col, index) => {
+      const x = marginX + index * colWidth + 1
+      pdf.text(col.label, x, y)
+    })
+
+    y += lineHeight
+    pdf.setFont('helvetica', 'normal')
+
+    rows.forEach((row) => {
+      if (y > 285) {
+        pdf.addPage()
+        y = 20
+      }
+      columns.forEach((col, index) => {
+        const x = marginX + index * colWidth + 1
+        const value = row[col.key]
+        const text =
+          typeof value === 'number'
+            ? Number.isFinite(value)
+              ? value.toLocaleString(undefined, { maximumFractionDigits: 2 })
+              : '0'
+            : String(value ?? '')
+        pdf.text(text.slice(0, 24), x, y)
+      })
+      y += lineHeight
+    })
+
+    pdf.save(filename)
+  } catch (error) {
+    debugError('Financial report PDF export error:', error)
+    throw error
+  }
+}
+
+function getReportColumns(
+  template: 'generic' | 'profit-loss' | 'balance-sheet' | 'vat',
+  rows: Array<Record<string, string | number>>
+) {
+  if (template === 'profit-loss') {
+    return [
+      { key: 'section', label: 'Section' },
+      { key: 'code', label: 'Code' },
+      { key: 'account', label: 'Account' },
+      { key: 'amount', label: 'Amount' },
+    ]
+  }
+  if (template === 'balance-sheet') {
+    return [
+      { key: 'section', label: 'Section' },
+      { key: 'code', label: 'Code' },
+      { key: 'account', label: 'Account' },
+      { key: 'amount', label: 'Amount' },
+    ]
+  }
+  if (template === 'vat') {
+    return [
+      { key: 'metric', label: 'Metric' },
+      { key: 'amount', label: 'Amount' },
+    ]
+  }
+
+  return Object.keys(rows[0] || {}).map((key) => ({
+    key,
+    label: key.replace(/_/g, ' '),
+  }))
+}
+
 function localizeOrderStatus(status: string, locale: 'en' | 'ar') {
   if (locale !== 'ar') return status
   const map: Record<string, string> = {

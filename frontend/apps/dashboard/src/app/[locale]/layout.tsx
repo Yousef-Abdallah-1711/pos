@@ -1,9 +1,11 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
+import { Suspense } from 'react'
 import '../globals.css'
 import '@/styles/rtl.css'
 import { ThemeProvider } from 'next-themes'
 import { Toaster } from 'sonner'
+import { NextIntlClientProvider } from 'next-intl'
 import AuthProvider from '@/components/providers/AuthProvider'
 import { PerformanceMonitor } from '@/components/providers/PerformanceMonitor'
 import { WebVitalsProvider } from '@/components/providers/WebVitalsProvider'
@@ -26,6 +28,13 @@ export function generateStaticParams() {
   return [{ locale: 'en' }, { locale: 'ar' }]
 }
 
+async function getLocaleMessages(locale: 'en' | 'ar') {
+  if (locale === 'ar') {
+    return (await import('@/i18n/messages/ar.json')).default
+  }
+  return (await import('@/i18n/messages/en.json')).default
+}
+
 export default async function LocaleLayout({
   children,
   params,
@@ -34,17 +43,24 @@ export default async function LocaleLayout({
   const locale = paramLocale === 'ar' ? 'ar' : 'en'
   const isRTL = locale === 'ar'
   const dir = isRTL ? 'rtl' : 'ltr'
+  const messages = await getLocaleMessages(locale)
 
   return (
-    <AuthProvider>
-      <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
-        <WebVitalsProvider />
-        <PerformanceMonitor />
-        <div lang={locale} dir={dir} className={inter.className}>
-          {children}
-        </div>
-        <Toaster position={isRTL ? 'top-left' : 'top-right'} richColors />
-      </ThemeProvider>
-    </AuthProvider>
+    <NextIntlClientProvider locale={locale} messages={messages}>
+      <Suspense
+        fallback={<div lang={locale} dir={dir} className={`${inter.className} min-h-screen bg-gray-50 dark:bg-gray-900`} />}
+      >
+        <AuthProvider>
+          <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
+            <WebVitalsProvider />
+            <PerformanceMonitor />
+            <div lang={locale} dir={dir} className={inter.className}>
+              {children}
+            </div>
+            <Toaster position={isRTL ? 'top-left' : 'top-right'} richColors />
+          </ThemeProvider>
+        </AuthProvider>
+      </Suspense>
+    </NextIntlClientProvider>
   )
 }

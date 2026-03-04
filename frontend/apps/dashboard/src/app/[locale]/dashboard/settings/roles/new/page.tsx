@@ -114,6 +114,36 @@ const MODULES: PermissionModule[] = [
     moduleName: 'Themes',
     permissions: PERMISSION_OPTIONS,
   },
+  {
+    moduleId: MODULE_IDS.ACCOUNTING,
+    moduleName: 'Accounting',
+    permissions: PERMISSION_OPTIONS,
+  },
+  {
+    moduleId: MODULE_IDS.SUPPLIERS,
+    moduleName: 'Suppliers',
+    permissions: PERMISSION_OPTIONS,
+  },
+  {
+    moduleId: MODULE_IDS.FINANCIAL_REPORTS,
+    moduleName: 'Financial Reports',
+    permissions: PERMISSION_OPTIONS,
+  },
+  {
+    moduleId: MODULE_IDS.PERFORMANCE,
+    moduleName: 'Performance',
+    permissions: PERMISSION_OPTIONS,
+  },
+  {
+    moduleId: MODULE_IDS.TRAINING,
+    moduleName: 'Training',
+    permissions: PERMISSION_OPTIONS,
+  },
+  {
+    moduleId: MODULE_IDS.CONTRACTS,
+    moduleName: 'Contracts',
+    permissions: PERMISSION_OPTIONS,
+  },
 ]
 
 export default function NewRolePage() {

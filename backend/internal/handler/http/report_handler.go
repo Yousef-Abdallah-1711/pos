@@ -1696,11 +1696,11 @@ func newReportPDF(title string, filters map[string]interface{}, generatedAt stri
 	if isArabic {
 		headerAlign = "R"
 		footerAlign = "L"
-		dateRangeLabel = asciiSafe("???")
-		granularityLabel = asciiSafe("???????")
-		topLimitLabel = asciiSafe("???? ??????")
-		generatedAtLabel = asciiSafe("?? ???????")
-		pageLabel = "????"
+		dateRangeLabel = asciiSafe("الفترة")
+		granularityLabel = asciiSafe("التجميع")
+		topLimitLabel = asciiSafe("الحد الأعلى")
+		generatedAtLabel = asciiSafe("وقت التوليد")
+		pageLabel = "صفحة"
 	}
 	pdf.SetHeaderFuncMode(func() {
 		pdf.SetFillColor(31, 41, 55)
@@ -1784,7 +1784,13 @@ func writePDFSectionTitle(pdf *fpdf.Fpdf, title string) {
 	pdf.SetFillColor(249, 250, 251)
 	pdf.SetTextColor(17, 24, 39)
 	pdf.SetFont("Arial", "B", 11)
-	pdf.CellFormat(0, 8, title, "1", 1, "L", true, 0, "")
+	align := "L"
+	cellTitle := title
+	if containsArabicText(title) {
+		align = "R"
+		cellTitle = asciiSafe(title)
+	}
+	pdf.CellFormat(0, 8, cellTitle, "1", 1, align, true, 0, "")
 	pdf.Ln(1)
 }
 

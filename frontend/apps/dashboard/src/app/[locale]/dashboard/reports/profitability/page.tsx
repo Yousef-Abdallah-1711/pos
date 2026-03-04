@@ -2,11 +2,15 @@
 
 import { useCallback, useMemo, useState, type ReactNode } from 'react'
 import { usePathname } from 'next/navigation'
-import { BarChart, Bar, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
+import { BarChart, Bar, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from '@/components/reports/lazy-recharts'
 import { DollarSign, Loader, Lock, RefreshCw, TrendingUp } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
-import { ExportButton, KpiCard, LastUpdatedIndicator, ReportChart, ReportTable } from '@/components/reports'
+import { ExportButton } from '@/components/reports/ExportButton'
+import { KpiCard } from '@/components/reports/KpiCard'
+import { LastUpdatedIndicator } from '@/components/reports/LastUpdatedIndicator'
+import { ReportChart } from '@/components/reports/ReportChart'
+import { ReportTable } from '@/components/reports/ReportTable'
 import { useReports } from '@/hooks/useReports'
 import { getLocaleFromPath } from '@/lib/translations'
 import { getProfitabilityReportLabels } from '@/lib/reportsTranslations'
@@ -204,7 +208,7 @@ export default function ProfitabilityReportsPage() {
           </div>
 
           <ReportChart title={labels.topItems} bodyClassName="h-80">
-              <ResponsiveContainer width="100%" height="100%">
+              <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={280}>
                 <BarChart data={chartData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#94a3b8" opacity={0.2} />
                   <XAxis dataKey="name" tick={{ fontSize: 12 }} interval={0} angle={-20} textAnchor="end" height={60} />

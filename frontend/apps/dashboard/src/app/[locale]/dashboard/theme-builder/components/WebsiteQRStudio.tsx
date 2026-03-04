@@ -12,7 +12,6 @@ import {
   QrCode,
   Wand2,
 } from 'lucide-react'
-import { jsPDF } from 'jspdf'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { debugError } from '@/lib/debug'
@@ -322,6 +321,7 @@ export function WebsiteQRStudio({
 
     setProcessingAction('pdf')
     try {
+      const { jsPDF } = await import('jspdf')
       const doc = new jsPDF({
         orientation: 'portrait',
         unit: 'mm',

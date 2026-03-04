@@ -6,6 +6,7 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 
@@ -202,9 +203,12 @@ func RateLimitSuperAdmin(requestsPerMinute int) func(http.Handler) http.Handler 
 
 // GetClientIP extracts the real client IP from the request
 func GetClientIP(r *http.Request) string {
+	remoteIP := extractRemoteIP(r.RemoteAddr)
+	trustForwarded := isTrustedProxy(remoteIP)
+
 	// Check X-Forwarded-For header first
-	xff := r.Header.Get("X-Forwarded-For")
-	if xff != "" {
+	xff := strings.TrimSpace(r.Header.Get("X-Forwarded-For"))
+	if trustForwarded && xff != "" {
 		// Take the first IP in the list
 		ips := strings.Split(xff, ",")
 		if len(ips) > 0 {
@@ -216,17 +220,52 @@ func GetClientIP(r *http.Request) string {
 	}
 
 	// Check X-Real-IP header
-	xri := r.Header.Get("X-Real-IP")
-	if xri != "" && net.ParseIP(xri) != nil {
+	xri := strings.TrimSpace(r.Header.Get("X-Real-IP"))
+	if trustForwarded && xri != "" && net.ParseIP(xri) != nil {
 		return xri
 	}
 
 	// Fall back to RemoteAddr
-	ip, _, err := net.SplitHostPort(r.RemoteAddr)
-	if err != nil {
-		return r.RemoteAddr
+	if remoteIP != "" {
+		return remoteIP
 	}
-	return ip
+	return r.RemoteAddr
+}
+
+func extractRemoteIP(remoteAddr string) string {
+	ip, _, err := net.SplitHostPort(remoteAddr)
+	if err != nil {
+		return strings.TrimSpace(remoteAddr)
+	}
+	return strings.TrimSpace(ip)
+}
+
+func isTrustedProxy(remoteIP string) bool {
+	parsed := net.ParseIP(strings.TrimSpace(remoteIP))
+	if parsed == nil {
+		return false
+	}
+
+	cidrList := strings.TrimSpace(os.Getenv("TRUSTED_PROXY_CIDRS"))
+	if cidrList == "" {
+		// Safe default: only trust loopback/local proxy.
+		return parsed.IsLoopback()
+	}
+
+	for _, raw := range strings.Split(cidrList, ",") {
+		cidr := strings.TrimSpace(raw)
+		if cidr == "" {
+			continue
+		}
+		_, network, err := net.ParseCIDR(cidr)
+		if err != nil {
+			continue
+		}
+		if network.Contains(parsed) {
+			return true
+		}
+	}
+	return false
 }
 
 // GetSuperAdminClaims retrieves super admin claims from context

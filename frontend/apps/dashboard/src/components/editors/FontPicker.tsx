@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import React, { useState, useCallback, useEffect, useMemo } from 'react'
 import { usePathname } from 'next/navigation'
@@ -46,7 +46,7 @@ export function FontPicker({
   const isRTL = locale === 'ar'
   const tx = (en: string, ar: string) => {
     if (!isRTL) return en
-    return /[ÃØÙðâ]/.test(ar) ? en : ar
+        return /[ÃØÙðâ]/.test(ar) ? en : ar
   }
 
   const storeTypography = useThemeTypography()
@@ -267,12 +267,12 @@ export function FontPicker({
     return (
       <div dir={isRTL ? 'rtl' : 'ltr'} className={`w-full space-y-4 ${className} ${isRTL ? 'text-right' : ''}`}>
         <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{tx('Font Preview', 'Ã™â€¦Ã˜Â¹Ã˜Â§Ã™Å Ã™â€ Ã˜Â© Ã˜Â§Ã™â€žÃ˜Â®Ã˜Â·')}</h3>
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{tx('Font Preview', 'Ãƒâ„¢Ã¢â‚¬Â¦ÃƒËœÃ‚Â¹ÃƒËœÃ‚Â§Ãƒâ„¢Ã…Â Ãƒâ„¢Ã¢â‚¬Â ÃƒËœÃ‚Â© ÃƒËœÃ‚Â§Ãƒâ„¢Ã¢â‚¬Å¾ÃƒËœÃ‚Â®ÃƒËœÃ‚Â·')}</h3>
           <button
             onClick={() => setPreviewMode(false)}
             className="px-3 py-2 text-sm bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition"
           >
-            {tx('Back to Settings', 'Ã˜Â§Ã™â€žÃ˜Â¹Ã™Ë†Ã˜Â¯Ã˜Â© Ã˜Â¥Ã™â€žÃ™â€° Ã˜Â§Ã™â€žÃ˜Â¥Ã˜Â¹Ã˜Â¯Ã˜Â§Ã˜Â¯Ã˜Â§Ã˜Âª')}
+            {tx('Back to Settings', 'ÃƒËœÃ‚Â§Ãƒâ„¢Ã¢â‚¬Å¾ÃƒËœÃ‚Â¹Ãƒâ„¢Ã‹â€ ÃƒËœÃ‚Â¯ÃƒËœÃ‚Â© ÃƒËœÃ‚Â¥Ãƒâ„¢Ã¢â‚¬Å¾Ãƒâ„¢Ã¢â‚¬Â° ÃƒËœÃ‚Â§Ãƒâ„¢Ã¢â‚¬Å¾ÃƒËœÃ‚Â¥ÃƒËœÃ‚Â¹ÃƒËœÃ‚Â¯ÃƒËœÃ‚Â§ÃƒËœÃ‚Â¯ÃƒËœÃ‚Â§ÃƒËœÃ‚Âª')}
           </button>
         </div>
 
@@ -286,13 +286,13 @@ export function FontPicker({
               </p>
               <div className="space-y-2 text-xs text-gray-600 dark:text-gray-400">
                 <p>
-                  <strong>{tx('Selected Weight:', 'Ã˜Â§Ã™â€žÃ™Ë†Ã˜Â²Ã™â€  Ã˜Â§Ã™â€žÃ™â€¦Ã˜Â­Ã˜Â¯Ã˜Â¯:')}</strong> {fontConfig.fontWeight || 400}
+                  <strong>{tx('Selected Weight:', 'ÃƒËœÃ‚Â§Ãƒâ„¢Ã¢â‚¬Å¾Ãƒâ„¢Ã‹â€ ÃƒËœÃ‚Â²Ãƒâ„¢Ã¢â‚¬Â  ÃƒËœÃ‚Â§Ãƒâ„¢Ã¢â‚¬Å¾Ãƒâ„¢Ã¢â‚¬Â¦ÃƒËœÃ‚Â­ÃƒËœÃ‚Â¯ÃƒËœÃ‚Â¯:')}</strong> {fontConfig.fontWeight || 400}
                 </p>
                 <p>
-                  <strong>{tx('Font Size:', 'Ã˜Â­Ã˜Â¬Ã™â€¦ Ã˜Â§Ã™â€žÃ˜Â®Ã˜Â·:')}</strong> {fontConfig.fontSize || 16}px
+                  <strong>{tx('Font Size:', 'ÃƒËœÃ‚Â­ÃƒËœÃ‚Â¬Ãƒâ„¢Ã¢â‚¬Â¦ ÃƒËœÃ‚Â§Ãƒâ„¢Ã¢â‚¬Å¾ÃƒËœÃ‚Â®ÃƒËœÃ‚Â·:')}</strong> {fontConfig.fontSize || 16}px
                 </p>
                 <p>
-                  <strong>{tx('Line Height:', 'Ã˜Â§Ã˜Â±Ã˜ÂªÃ™ÂÃ˜Â§Ã˜Â¹ Ã˜Â§Ã™â€žÃ˜Â³Ã˜Â·Ã˜Â±:')}</strong> {fontConfig.lineHeight || 1.6}
+                  <strong>{tx('Line Height:', 'ÃƒËœÃ‚Â§ÃƒËœÃ‚Â±ÃƒËœÃ‚ÂªÃƒâ„¢Ã‚ÂÃƒËœÃ‚Â§ÃƒËœÃ‚Â¹ ÃƒËœÃ‚Â§Ãƒâ„¢Ã¢â‚¬Å¾ÃƒËœÃ‚Â³ÃƒËœÃ‚Â·ÃƒËœÃ‚Â±:')}</strong> {fontConfig.lineHeight || 1.6}
                 </p>
               </div>
             </div>
@@ -300,7 +300,7 @@ export function FontPicker({
 
           {/* Preview Text */}
             <div className="space-y-3">
-            <h4 className="font-semibold text-gray-900 dark:text-white">{tx('Preview', 'Ã™â€¦Ã˜Â¹Ã˜Â§Ã™Å Ã™â€ Ã˜Â©')}</h4>
+            <h4 className="font-semibold text-gray-900 dark:text-white">{tx('Preview', 'Ãƒâ„¢Ã¢â‚¬Â¦ÃƒËœÃ‚Â¹ÃƒËœÃ‚Â§Ãƒâ„¢Ã…Â Ãƒâ„¢Ã¢â‚¬Â ÃƒËœÃ‚Â©')}</h4>
             <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6">
               <p className="font-preview-text text-gray-900 dark:text-white">
                 {previewText}
@@ -310,12 +310,12 @@ export function FontPicker({
 
           {/* Heading Preview */}
           <div className="space-y-3">
-            <h4 className="font-semibold text-gray-900 dark:text-white">{tx('Heading (24px, Bold)', 'Ã˜Â¹Ã™â€ Ã™Ë†Ã˜Â§Ã™â€  (24pxÃ˜Å’ Ã˜Â¹Ã˜Â±Ã™Å Ã˜Â¶)')}</h4>
+            <h4 className="font-semibold text-gray-900 dark:text-white">{tx('Heading (24px, Bold)', 'ÃƒËœÃ‚Â¹Ãƒâ„¢Ã¢â‚¬Â Ãƒâ„¢Ã‹â€ ÃƒËœÃ‚Â§Ãƒâ„¢Ã¢â‚¬Â  (24pxÃƒËœÃ…â€™ ÃƒËœÃ‚Â¹ÃƒËœÃ‚Â±Ãƒâ„¢Ã…Â ÃƒËœÃ‚Â¶)')}</h4>
             <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6">
               <h1
                 className="font-preview-text font-preview-heading text-gray-900 dark:text-white"
               >
-                {tx('This is a heading', 'Ã™â€¡Ã˜Â°Ã˜Â§ Ã˜Â¹Ã™â€ Ã™Ë†Ã˜Â§Ã™â€  Ã˜ÂªÃ˜Â¬Ã˜Â±Ã™Å Ã˜Â¨Ã™Å ')}
+                {tx('This is a heading', 'Ãƒâ„¢Ã¢â‚¬Â¡ÃƒËœÃ‚Â°ÃƒËœÃ‚Â§ ÃƒËœÃ‚Â¹Ãƒâ„¢Ã¢â‚¬Â Ãƒâ„¢Ã‹â€ ÃƒËœÃ‚Â§Ãƒâ„¢Ã¢â‚¬Â  ÃƒËœÃ‚ÂªÃƒËœÃ‚Â¬ÃƒËœÃ‚Â±Ãƒâ„¢Ã…Â ÃƒËœÃ‚Â¨Ãƒâ„¢Ã…Â ')}
               </h1>
             </div>
           </div>
@@ -329,9 +329,9 @@ export function FontPicker({
     <div dir={isRTL ? 'rtl' : 'ltr'} className={`w-full space-y-6 ${className} ${isRTL ? 'text-right' : ''}`}>
       {/* Header */}
       <div>
-        <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-2">{tx('Font Picker', 'Ã˜Â§Ã˜Â®Ã˜ÂªÃ™Å Ã˜Â§Ã˜Â± Ã˜Â§Ã™â€žÃ˜Â®Ã˜Â·')}</h2>
+        <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-2">{tx('Font Picker', 'ÃƒËœÃ‚Â§ÃƒËœÃ‚Â®ÃƒËœÃ‚ÂªÃƒâ„¢Ã…Â ÃƒËœÃ‚Â§ÃƒËœÃ‚Â± ÃƒËœÃ‚Â§Ãƒâ„¢Ã¢â‚¬Å¾ÃƒËœÃ‚Â®ÃƒËœÃ‚Â·')}</h2>
         <p className="text-sm text-gray-600 dark:text-gray-400">
-          {tx('Choose from popular Google Fonts and customize weight, size, and styling.', 'Ã˜Â§Ã˜Â®Ã˜ÂªÃ˜Â± Ã™â€¦Ã™â€  Ã˜Â®Ã˜Â·Ã™Ë†Ã˜Â· Google Ã˜Â§Ã™â€žÃ˜Â´Ã˜Â§Ã˜Â¦Ã˜Â¹Ã˜Â© Ã™Ë†Ã˜Â®Ã˜ÂµÃ˜Âµ Ã˜Â§Ã™â€žÃ™Ë†Ã˜Â²Ã™â€  Ã™Ë†Ã˜Â§Ã™â€žÃ˜Â­Ã˜Â¬Ã™â€¦ Ã™Ë†Ã˜Â§Ã™â€žÃ˜ÂªÃ™â€ Ã˜Â³Ã™Å Ã™â€š.')}
+          {tx('Choose from popular Google Fonts and customize weight, size, and styling.', 'ÃƒËœÃ‚Â§ÃƒËœÃ‚Â®ÃƒËœÃ‚ÂªÃƒËœÃ‚Â± Ãƒâ„¢Ã¢â‚¬Â¦Ãƒâ„¢Ã¢â‚¬Â  ÃƒËœÃ‚Â®ÃƒËœÃ‚Â·Ãƒâ„¢Ã‹â€ ÃƒËœÃ‚Â· Google ÃƒËœÃ‚Â§Ãƒâ„¢Ã¢â‚¬Å¾ÃƒËœÃ‚Â´ÃƒËœÃ‚Â§ÃƒËœÃ‚Â¦ÃƒËœÃ‚Â¹ÃƒËœÃ‚Â© Ãƒâ„¢Ã‹â€ ÃƒËœÃ‚Â®ÃƒËœÃ‚ÂµÃƒËœÃ‚Âµ ÃƒËœÃ‚Â§Ãƒâ„¢Ã¢â‚¬Å¾Ãƒâ„¢Ã‹â€ ÃƒËœÃ‚Â²Ãƒâ„¢Ã¢â‚¬Â  Ãƒâ„¢Ã‹â€ ÃƒËœÃ‚Â§Ãƒâ„¢Ã¢â‚¬Å¾ÃƒËœÃ‚Â­ÃƒËœÃ‚Â¬Ãƒâ„¢Ã¢â‚¬Â¦ Ãƒâ„¢Ã‹â€ ÃƒËœÃ‚Â§Ãƒâ„¢Ã¢â‚¬Å¾ÃƒËœÃ‚ÂªÃƒâ„¢Ã¢â‚¬Â ÃƒËœÃ‚Â³Ãƒâ„¢Ã…Â Ãƒâ„¢Ã¢â‚¬Å¡.')}
         </p>
       </div>
 
@@ -340,7 +340,7 @@ export function FontPicker({
         <Search className={`absolute top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 ${isRTL ? 'right-3' : 'left-3'}`} />
         <input
           type="text"
-          placeholder={tx('Search fonts...', 'Ã˜Â§Ã˜Â¨Ã˜Â­Ã˜Â« Ã˜Â¹Ã™â€  Ã˜Â§Ã™â€žÃ˜Â®Ã˜Â·Ã™Ë†Ã˜Â·...')}
+          placeholder={tx('Search fonts...', 'ÃƒËœÃ‚Â§ÃƒËœÃ‚Â¨ÃƒËœÃ‚Â­ÃƒËœÃ‚Â« ÃƒËœÃ‚Â¹Ãƒâ„¢Ã¢â‚¬Â  ÃƒËœÃ‚Â§Ãƒâ„¢Ã¢â‚¬Å¾ÃƒËœÃ‚Â®ÃƒËœÃ‚Â·Ãƒâ„¢Ã‹â€ ÃƒËœÃ‚Â·...')}
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className={`w-full py-2 border border-gray-200 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white text-sm ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'}`}
@@ -360,12 +360,12 @@ export function FontPicker({
             }`}
           >
             {cat === 'all'
-              ? tx('All', 'Ã˜Â§Ã™â€žÃ™Æ’Ã™â€ž')
+              ? tx('All', 'ÃƒËœÃ‚Â§Ãƒâ„¢Ã¢â‚¬Å¾Ãƒâ„¢Ã†â€™Ãƒâ„¢Ã¢â‚¬Å¾')
               : cat === 'sans-serif'
-                ? tx('Sans Serif', 'Ã˜Â¨Ã˜Â¯Ã™Ë†Ã™â€  Ã˜Â²Ã™Ë†Ã˜Â§Ã˜Â¦Ã˜Â¯')
+                ? tx('Sans Serif', 'ÃƒËœÃ‚Â¨ÃƒËœÃ‚Â¯Ãƒâ„¢Ã‹â€ Ãƒâ„¢Ã¢â‚¬Â  ÃƒËœÃ‚Â²Ãƒâ„¢Ã‹â€ ÃƒËœÃ‚Â§ÃƒËœÃ‚Â¦ÃƒËœÃ‚Â¯')
                 : cat === 'serif'
-                  ? tx('Serif', 'Ã™â€¦Ã˜Â²Ã˜Â®Ã˜Â±Ã™Â')
-                  : tx('Monospace', 'Ã˜Â£Ã˜Â­Ã˜Â§Ã˜Â¯Ã™Å  Ã˜Â§Ã™â€žÃ™â€¦Ã˜Â³Ã˜Â§Ã™ÂÃ˜Â©')}
+                  ? tx('Serif', 'Ãƒâ„¢Ã¢â‚¬Â¦ÃƒËœÃ‚Â²ÃƒËœÃ‚Â®ÃƒËœÃ‚Â±Ãƒâ„¢Ã‚Â')
+                  : tx('Monospace', 'ÃƒËœÃ‚Â£ÃƒËœÃ‚Â­ÃƒËœÃ‚Â§ÃƒËœÃ‚Â¯Ãƒâ„¢Ã…Â  ÃƒËœÃ‚Â§Ãƒâ„¢Ã¢â‚¬Å¾Ãƒâ„¢Ã¢â‚¬Â¦ÃƒËœÃ‚Â³ÃƒËœÃ‚Â§Ãƒâ„¢Ã‚ÂÃƒËœÃ‚Â©')}
           </button>
         ))}
       </div>
@@ -373,7 +373,7 @@ export function FontPicker({
       {/* Recent Fonts */}
       {!searchQuery && recentFonts.length > 0 && (
         <div className="space-y-2">
-          <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">{tx('Recent', 'Ã˜Â§Ã™â€žÃ˜Â£Ã˜Â®Ã™Å Ã˜Â±Ã˜Â©')}</h3>
+          <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">{tx('Recent', 'ÃƒËœÃ‚Â§Ãƒâ„¢Ã¢â‚¬Å¾ÃƒËœÃ‚Â£ÃƒËœÃ‚Â®Ãƒâ„¢Ã…Â ÃƒËœÃ‚Â±ÃƒËœÃ‚Â©')}</h3>
           <div className="grid grid-cols-2 gap-2">
             {recentFonts.map((font) => (
               <button
@@ -396,13 +396,13 @@ export function FontPicker({
       {/* Font List */}
       <div className="space-y-2">
         <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-          {searchQuery ? tx('Search Results', 'Ã™â€ Ã˜ÂªÃ˜Â§Ã˜Â¦Ã˜Â¬ Ã˜Â§Ã™â€žÃ˜Â¨Ã˜Â­Ã˜Â«') : category === 'all' ? tx('Popular Fonts', 'Ã˜Â§Ã™â€žÃ˜Â®Ã˜Â·Ã™Ë†Ã˜Â· Ã˜Â§Ã™â€žÃ˜Â´Ã˜Â§Ã˜Â¦Ã˜Â¹Ã˜Â©') : `${category} ${tx('Fonts', 'Ã˜Â®Ã˜Â·Ã™Ë†Ã˜Â·')}`}
+          {searchQuery ? tx('Search Results', 'Ãƒâ„¢Ã¢â‚¬Â ÃƒËœÃ‚ÂªÃƒËœÃ‚Â§ÃƒËœÃ‚Â¦ÃƒËœÃ‚Â¬ ÃƒËœÃ‚Â§Ãƒâ„¢Ã¢â‚¬Å¾ÃƒËœÃ‚Â¨ÃƒËœÃ‚Â­ÃƒËœÃ‚Â«') : category === 'all' ? tx('Popular Fonts', 'ÃƒËœÃ‚Â§Ãƒâ„¢Ã¢â‚¬Å¾ÃƒËœÃ‚Â®ÃƒËœÃ‚Â·Ãƒâ„¢Ã‹â€ ÃƒËœÃ‚Â· ÃƒËœÃ‚Â§Ãƒâ„¢Ã¢â‚¬Å¾ÃƒËœÃ‚Â´ÃƒËœÃ‚Â§ÃƒËœÃ‚Â¦ÃƒËœÃ‚Â¹ÃƒËœÃ‚Â©') : `${category} ${tx('Fonts', 'ÃƒËœÃ‚Â®ÃƒËœÃ‚Â·Ãƒâ„¢Ã‹â€ ÃƒËœÃ‚Â·')}`}
           <span className={`text-gray-500 dark:text-gray-500 ${isRTL ? 'mr-2' : 'ml-2'}`}>({fonts.length})</span>
         </h3>
 
         {fonts.length === 0 ? (
           <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-            <p className="text-sm">{tx('No fonts found. Try a different search.', 'Ã™â€žÃ™â€¦ Ã™Å Ã˜ÂªÃ™â€¦ Ã˜Â§Ã™â€žÃ˜Â¹Ã˜Â«Ã™Ë†Ã˜Â± Ã˜Â¹Ã™â€žÃ™â€° Ã˜Â®Ã˜Â·Ã™Ë†Ã˜Â·. Ã˜Â¬Ã˜Â±Ã™â€˜Ã˜Â¨ Ã˜Â¨Ã˜Â­Ã˜Â«Ã™â€¹Ã˜Â§ Ã™â€¦Ã˜Â®Ã˜ÂªÃ™â€žÃ™ÂÃ™â€¹Ã˜Â§.')}</p>
+            <p className="text-sm">{tx('No fonts found. Try a different search.', 'Ãƒâ„¢Ã¢â‚¬Å¾Ãƒâ„¢Ã¢â‚¬Â¦ Ãƒâ„¢Ã…Â ÃƒËœÃ‚ÂªÃƒâ„¢Ã¢â‚¬Â¦ ÃƒËœÃ‚Â§Ãƒâ„¢Ã¢â‚¬Å¾ÃƒËœÃ‚Â¹ÃƒËœÃ‚Â«Ãƒâ„¢Ã‹â€ ÃƒËœÃ‚Â± ÃƒËœÃ‚Â¹Ãƒâ„¢Ã¢â‚¬Å¾Ãƒâ„¢Ã¢â‚¬Â° ÃƒËœÃ‚Â®ÃƒËœÃ‚Â·Ãƒâ„¢Ã‹â€ ÃƒËœÃ‚Â·. ÃƒËœÃ‚Â¬ÃƒËœÃ‚Â±Ãƒâ„¢Ã¢â‚¬ËœÃƒËœÃ‚Â¨ ÃƒËœÃ‚Â¨ÃƒËœÃ‚Â­ÃƒËœÃ‚Â«Ãƒâ„¢Ã¢â‚¬Â¹ÃƒËœÃ‚Â§ Ãƒâ„¢Ã¢â‚¬Â¦ÃƒËœÃ‚Â®ÃƒËœÃ‚ÂªÃƒâ„¢Ã¢â‚¬Å¾Ãƒâ„¢Ã‚ÂÃƒâ„¢Ã¢â‚¬Â¹ÃƒËœÃ‚Â§.')}</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-2 max-h-64 overflow-y-auto">
@@ -424,7 +424,7 @@ export function FontPicker({
                   {font.popularity && font.popularity <= 3 && (
                     <div className="flex items-center gap-1 text-yellow-500">
                       <TrendingUp className="h-3 w-3" />
-                      <span className="text-xs">{tx('Popular', 'Ã˜Â´Ã˜Â§Ã˜Â¦Ã˜Â¹')}</span>
+                      <span className="text-xs">{tx('Popular', 'ÃƒËœÃ‚Â´ÃƒËœÃ‚Â§ÃƒËœÃ‚Â¦ÃƒËœÃ‚Â¹')}</span>
                     </div>
                   )}
                 </div>
@@ -437,12 +437,12 @@ export function FontPicker({
       {/* Font Configuration */}
       {selectedFont && (
         <div className="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg p-4 space-y-4">
-          <h3 className="font-semibold text-gray-900 dark:text-white">{tx('Font Configuration', 'Ã˜Â¥Ã˜Â¹Ã˜Â¯Ã˜Â§Ã˜Â¯Ã˜Â§Ã˜Âª Ã˜Â§Ã™â€žÃ˜Â®Ã˜Â·')}</h3>
+          <h3 className="font-semibold text-gray-900 dark:text-white">{tx('Font Configuration', 'ÃƒËœÃ‚Â¥ÃƒËœÃ‚Â¹ÃƒËœÃ‚Â¯ÃƒËœÃ‚Â§ÃƒËœÃ‚Â¯ÃƒËœÃ‚Â§ÃƒËœÃ‚Âª ÃƒËœÃ‚Â§Ãƒâ„¢Ã¢â‚¬Å¾ÃƒËœÃ‚Â®ÃƒËœÃ‚Â·')}</h3>
 
           {/* Font Weight Selection */}
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              {tx('Font Weights', 'Ã˜Â£Ã™Ë†Ã˜Â²Ã˜Â§Ã™â€  Ã˜Â§Ã™â€žÃ˜Â®Ã˜Â·')}
+              {tx('Font Weights', 'ÃƒËœÃ‚Â£Ãƒâ„¢Ã‹â€ ÃƒËœÃ‚Â²ÃƒËœÃ‚Â§Ãƒâ„¢Ã¢â‚¬Â  ÃƒËœÃ‚Â§Ãƒâ„¢Ã¢â‚¬Å¾ÃƒËœÃ‚Â®ÃƒËœÃ‚Â·')}
             </label>
             <div className="flex flex-wrap gap-2">
               {selectedFont.weights.map((weight) => (
@@ -465,7 +465,7 @@ export function FontPicker({
           {selectedFont.italics && (
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                {tx('Font Style', 'Ã™â€ Ã™â€¦Ã˜Â· Ã˜Â§Ã™â€žÃ˜Â®Ã˜Â·')}
+                {tx('Font Style', 'Ãƒâ„¢Ã¢â‚¬Â Ãƒâ„¢Ã¢â‚¬Â¦ÃƒËœÃ‚Â· ÃƒËœÃ‚Â§Ãƒâ„¢Ã¢â‚¬Å¾ÃƒËœÃ‚Â®ÃƒËœÃ‚Â·')}
               </label>
               <div className="flex gap-2">
                 {(['normal', 'italic'] as const).map((style) => (
@@ -478,7 +478,7 @@ export function FontPicker({
                         : 'bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:border-gray-300'
                     }`}
                   >
-                    {style === 'normal' ? tx('Normal', 'Ã˜Â¹Ã˜Â§Ã˜Â¯Ã™Å ') : tx('Italic', 'Ã™â€¦Ã˜Â§Ã˜Â¦Ã™â€ž')}
+                    {style === 'normal' ? tx('Normal', 'ÃƒËœÃ‚Â¹ÃƒËœÃ‚Â§ÃƒËœÃ‚Â¯Ãƒâ„¢Ã…Â ') : tx('Italic', 'Ãƒâ„¢Ã¢â‚¬Â¦ÃƒËœÃ‚Â§ÃƒËœÃ‚Â¦Ãƒâ„¢Ã¢â‚¬Å¾')}
                   </button>
                 ))}
               </div>
@@ -488,7 +488,7 @@ export function FontPicker({
           {/* Font Size */}
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              {tx('Font Size', 'Ã˜Â­Ã˜Â¬Ã™â€¦ Ã˜Â§Ã™â€žÃ˜Â®Ã˜Â·')}: {fontConfig.fontSize || 16}px
+              {tx('Font Size', 'ÃƒËœÃ‚Â­ÃƒËœÃ‚Â¬Ãƒâ„¢Ã¢â‚¬Â¦ ÃƒËœÃ‚Â§Ãƒâ„¢Ã¢â‚¬Å¾ÃƒËœÃ‚Â®ÃƒËœÃ‚Â·')}: {fontConfig.fontSize || 16}px
             </label>
             <input
               type="range"
@@ -503,7 +503,7 @@ export function FontPicker({
           {/* Line Height */}
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              {tx('Line Height', 'Ã˜Â§Ã˜Â±Ã˜ÂªÃ™ÂÃ˜Â§Ã˜Â¹ Ã˜Â§Ã™â€žÃ˜Â³Ã˜Â·Ã˜Â±')}: {(fontConfig.lineHeight || 1.6).toFixed(1)}
+              {tx('Line Height', 'ÃƒËœÃ‚Â§ÃƒËœÃ‚Â±ÃƒËœÃ‚ÂªÃƒâ„¢Ã‚ÂÃƒËœÃ‚Â§ÃƒËœÃ‚Â¹ ÃƒËœÃ‚Â§Ãƒâ„¢Ã¢â‚¬Å¾ÃƒËœÃ‚Â³ÃƒËœÃ‚Â·ÃƒËœÃ‚Â±')}: {(fontConfig.lineHeight || 1.6).toFixed(1)}
             </label>
             <input
               type="range"
@@ -524,7 +524,7 @@ export function FontPicker({
           onClick={() => setPreviewMode(true)}
           className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition"
         >
-          {tx('Preview Font', 'Ã™â€¦Ã˜Â¹Ã˜Â§Ã™Å Ã™â€ Ã˜Â© Ã˜Â§Ã™â€žÃ˜Â®Ã˜Â·')}
+          {tx('Preview Font', 'Ãƒâ„¢Ã¢â‚¬Â¦ÃƒËœÃ‚Â¹ÃƒËœÃ‚Â§Ãƒâ„¢Ã…Â Ãƒâ„¢Ã¢â‚¬Â ÃƒËœÃ‚Â© ÃƒËœÃ‚Â§Ãƒâ„¢Ã¢â‚¬Å¾ÃƒËœÃ‚Â®ÃƒËœÃ‚Â·')}
         </button>
       </div>
 

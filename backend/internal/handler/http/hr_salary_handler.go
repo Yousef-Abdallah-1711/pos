@@ -3,6 +3,8 @@ package http
 import (
 	"database/sql"
 	"encoding/json"
+	"errors"
+	"io"
 	"log"
 	"net/http"
 	"strconv"
@@ -11,17 +13,24 @@ import (
 	"pos-saas/internal/domain"
 	"pos-saas/internal/middleware"
 	"pos-saas/internal/repository"
+	"pos-saas/internal/usecase"
 )
 
 // HRSalaryHandler handles HR salary/payroll management endpoints
 type HRSalaryHandler struct {
-	salaryRepo *repository.SalaryRepository
-	db         *sql.DB
+	salaryRepo  *repository.SalaryRepository
+	db          *sql.DB
+	autoPosting usecase.AutoPostingService
 }
 
 // NewHRSalaryHandler creates a new HR salary handler
 func NewHRSalaryHandler(salaryRepo *repository.SalaryRepository, db *sql.DB) *HRSalaryHandler {
 	return &HRSalaryHandler{salaryRepo: salaryRepo, db: db}
+}
+
+// SetAutoPostingEngine links accounting auto-posting to salary payment updates.
+func (h *HRSalaryHandler) SetAutoPostingEngine(engine usecase.AutoPostingService) {
+	h.autoPosting = engine
 }
 
 // ListSalaries handles GET /hr/salaries?start_date=...&end_date=...
@@ -107,31 +116,31 @@ func (h *HRSalaryHandler) CreateSalary(w http.ResponseWriter, r *http.Request) {
 	userID := int(middleware.GetUserID(r))
 
 	var req struct {
-		EmployeeID      int     `json:"employee_id"`
-		PayPeriodStart  string  `json:"pay_period_start"`
-		PayPeriodEnd    string  `json:"pay_period_end"`
-		BaseSalary      float64 `json:"base_salary"`
-		Currency        string  `json:"currency"`
-		OvertimeHours   float64 `json:"overtime_hours"`
-		OvertimeRate    float64 `json:"overtime_rate"`
-		Bonus           float64 `json:"bonus"`
-		Commission      float64 `json:"commission"`
-		Allowances      float64 `json:"allowances"`
-		Tips            float64 `json:"tips"`
-		OtherEarnings   float64 `json:"other_earnings"`
-		Tax             float64 `json:"tax"`
-		SocialInsurance float64 `json:"social_insurance"`
-		HealthInsurance float64 `json:"health_insurance"`
-		Pension         float64 `json:"pension"`
-		LoanDeduction   float64 `json:"loan_deduction"`
-		AdvanceDeduction float64 `json:"advance_deduction"`
-		OtherDeductions float64 `json:"other_deductions"`
-		DaysWorked      int     `json:"days_worked"`
-		DaysAbsent      int     `json:"days_absent"`
+		EmployeeID         int     `json:"employee_id"`
+		PayPeriodStart     string  `json:"pay_period_start"`
+		PayPeriodEnd       string  `json:"pay_period_end"`
+		BaseSalary         float64 `json:"base_salary"`
+		Currency           string  `json:"currency"`
+		OvertimeHours      float64 `json:"overtime_hours"`
+		OvertimeRate       float64 `json:"overtime_rate"`
+		Bonus              float64 `json:"bonus"`
+		Commission         float64 `json:"commission"`
+		Allowances         float64 `json:"allowances"`
+		Tips               float64 `json:"tips"`
+		OtherEarnings      float64 `json:"other_earnings"`
+		Tax                float64 `json:"tax"`
+		SocialInsurance    float64 `json:"social_insurance"`
+		HealthInsurance    float64 `json:"health_insurance"`
+		Pension            float64 `json:"pension"`
+		LoanDeduction      float64 `json:"loan_deduction"`
+		AdvanceDeduction   float64 `json:"advance_deduction"`
+		OtherDeductions    float64 `json:"other_deductions"`
+		DaysWorked         int     `json:"days_worked"`
+		DaysAbsent         int     `json:"days_absent"`
 		TotalHoursWorked   float64 `json:"total_hours_worked"`
 		TotalOvertimeHours float64 `json:"total_overtime_hours"`
-		PaymentMethod   string  `json:"payment_method"`
-		Status          string  `json:"status"`
+		PaymentMethod      string  `json:"payment_method"`
+		Status             string  `json:"status"`
 	}
 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -393,7 +402,12 @@ func (h *HRSalaryHandler) MarkAsPaid(w http.ResponseWriter, r *http.Request) {
 	var req struct {
 		PaymentReference string `json:"payment_reference"`
 	}
-	json.NewDecoder(r.Body).Decode(&req)
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil && !errors.Is(err, io.EOF) {
+		writeJSON(w, http.StatusBadRequest, map[string]interface{}{
+			"success": false, "error": "Invalid request body",
+		})
+		return
+	}
 
 	log.Printf("[HR-Salary] MarkAsPaid: tenantID=%d, restaurantID=%d, id=%d, paidBy=%d\n",
 		tenantID, restaurantID, id, userID)
@@ -404,6 +418,21 @@ func (h *HRSalaryHandler) MarkAsPaid(w http.ResponseWriter, r *http.Request) {
 			"success": false, "error": "Failed to mark salary as paid",
 		})
 		return
+	}
+
+	if h.autoPosting != nil {
+		salary, err := h.salaryRepo.GetSalaryByID(tenantID, restaurantID, id)
+		if err != nil {
+			log.Printf("[AccountingAutoPost] salary reload failed tenant=%d restaurant=%d salary=%d err=%v", tenantID, restaurantID, id, err)
+		} else if salary != nil {
+			postedBy := &userID
+			if userID <= 0 {
+				postedBy = nil
+			}
+			if err := h.autoPosting.PostPayrollEntry(salary, postedBy); err != nil {
+				log.Printf("[AccountingAutoPost] payroll posting failed tenant=%d restaurant=%d salary=%d err=%v", tenantID, restaurantID, id, err)
+			}
+		}
 	}
 
 	log.Printf("[HR-Salary] MarkAsPaid SUCCESS: id=%d\n", id)

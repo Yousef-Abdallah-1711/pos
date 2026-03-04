@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useRef } from 'react'
+import { Suspense, useEffect, useState, useRef } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { useAuthStore } from '@/stores/authStore'
@@ -14,6 +14,7 @@ import { NotificationCenter } from '@/components/notifications/NotificationCente
 import { createTranslator, getLocaleFromPath } from '@/lib/translations'
 import { debugError } from '@/lib/debug'
 import { getConfig } from '@/lib/config'
+import { commonRoutes, preloadRoutes } from '@/lib/code-splitting'
 import { TrialWarningBanner } from '@/components/layout/TrialWarningBanner'
 import { useTenantStatus } from '@/hooks/useTenantStatus'
 import { BlockedOverlay } from '@/components/blocked/BlockedOverlay'
@@ -33,6 +34,8 @@ export default function DashboardLayout({
   const { settings, setSettings, setLoading, updateTheme } = usePreferencesStore()
   const { resolvedTheme, setTheme } = useTheme()
   const [isProfileOpen, setIsProfileOpen] = useState(false)
+  const [isSidebarMobileOpen, setIsSidebarMobileOpen] = useState(false)
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
   const { isBlocked, blockReason } = useTenantStatus()
 
@@ -47,6 +50,21 @@ export default function DashboardLayout({
     }
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
+  useEffect(() => {
+    const saved = window.localStorage.getItem('dashboard.sidebar.collapsed')
+    if (saved === '1') {
+      setIsSidebarCollapsed(true)
+    }
+  }, [])
+
+  useEffect(() => {
+    window.localStorage.setItem('dashboard.sidebar.collapsed', isSidebarCollapsed ? '1' : '0')
+  }, [isSidebarCollapsed])
+
+  useEffect(() => {
+    preloadRoutes(commonRoutes, { staggerDelay: 600, maxConcurrent: 2 })
   }, [])
 
   useEffect(() => {
@@ -134,32 +152,35 @@ export default function DashboardLayout({
   return (
     <div className={`min-h-screen flex ${isFullscreenRoute ? 'bg-gray-50 text-gray-900 dark:bg-slate-950 dark:text-slate-100' : 'bg-gray-50 dark:bg-gray-900'}`}>
       {/* Sidebar */}
-      {!isFullscreenRoute && <Sidebar />}
+      {!isFullscreenRoute && (
+        <Sidebar
+          isMobileOpen={isSidebarMobileOpen}
+          onMobileToggle={() => setIsSidebarMobileOpen((prev) => !prev)}
+          isCollapsed={isSidebarCollapsed}
+          onCollapsedChange={setIsSidebarCollapsed}
+        />
+      )}
 
       {/* Main Content Area */}
-      <div className={`flex-1 ${isFullscreenRoute ? '' : isRTL ? 'md:mr-64' : 'md:ml-64'}`}>
+      <div className={`flex-1 ${isFullscreenRoute ? '' : isRTL ? (isSidebarCollapsed ? 'md:mr-20' : 'md:mr-64') : (isSidebarCollapsed ? 'md:ml-20' : 'md:ml-64')} transition-all duration-300`}>
         {/* Header */}
         {!isFullscreenRoute && (
           <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-30">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <div className={`flex justify-between items-center h-16 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                {/* Mobile menu button - now positioned on the left side of header */}
-                <div className="md:hidden">
+              <div className={`flex items-center justify-between h-16 gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                {/* Mobile menu button */}
+                <div className="md:hidden flex-shrink-0">
                   <Button
                     variant="outline"
                     size="icon"
-                    onClick={() => {
-                      // This would toggle the sidebar on mobile
-                      // For now, we'll just add a placeholder
-                    }}
+                    onClick={() => setIsSidebarMobileOpen((prev) => !prev)}
                     className="bg-white dark:bg-gray-800"
                   >
                     <Menu className="h-5 w-5" />
                   </Button>
                 </div>
 
-                {/* Right Side */}
-                <div className={`flex items-center gap-4 ${isRTL ? 'ml-auto flex-row-reverse' : 'mr-auto'}`}>
+                <div className={`flex items-center gap-2 sm:gap-3 ${isRTL ? 'mr-auto flex-row-reverse' : 'ml-auto'}`}>
                   {/* Notification Center */}
                   <NotificationCenter />
 
@@ -189,12 +210,12 @@ export default function DashboardLayout({
                   <div className="relative" ref={dropdownRef}>
                     <button
                       onClick={() => setIsProfileOpen(!isProfileOpen)}
-                      className={`flex items-center gap-3 px-3 py-2 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition ${isRTL ? 'flex-row-reverse' : ''}`}
+                      className={`flex items-center gap-2 sm:gap-3 px-2 sm:px-3 py-2 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition ${isRTL ? 'flex-row-reverse' : ''}`}
                     >
                       <div className="w-8 h-8 rounded-full bg-primary-500 flex items-center justify-center text-white font-medium">
                         {user?.name?.charAt(0).toUpperCase() || 'U'}
                       </div>
-                      <div className={`hidden sm:block ${isRTL ? 'text-right' : 'text-left'}`}>
+                      <div className={`hidden lg:block ${isRTL ? 'text-right' : 'text-left'}`}>
                         <p className="text-sm font-medium text-gray-900 dark:text-white">
                           {user?.name}
                         </p>
@@ -288,9 +309,11 @@ export default function DashboardLayout({
           {isBlocked && blockReason && !shouldBypassBlockedOverlay ? (
             <BlockedOverlay blockReason={blockReason} />
           ) : (
-            <div className={contentWrapperClass}>
-              {children}
-            </div>
+            <Suspense fallback={<div className="h-[60vh] w-full animate-pulse rounded-xl bg-gray-200 dark:bg-gray-800" />}>
+              <div className={contentWrapperClass}>
+                {children}
+              </div>
+            </Suspense>
           )}
         </main>
       </div>

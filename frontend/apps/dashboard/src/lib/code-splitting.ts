@@ -5,21 +5,33 @@
  * It helps reduce initial bundle size by lazy-loading route-specific code.
  */
 
-import dynamic from 'next/dynamic'
-import { ComponentType } from 'react'
+import dynamic, { type DynamicOptionsLoadingProps } from 'next/dynamic'
+import { ComponentType, type ReactNode, createElement } from 'react'
 import { debugWarn } from '@/lib/debug'
 
 // Loading skeleton component
-export const LoadingFallback = () => (
-  <div className="flex items-center justify-center h-screen">
-    <div className="text-center">
-      <div className="inline-block">
-        <div className="w-12 h-12 border-4 border-gray-200 border-t-blue-600 rounded-full animate-spin mb-4" />
-      </div>
-      <p className="text-gray-600 text-sm">Loading...</p>
-    </div>
-  </div>
-)
+export const LoadingFallback = () =>
+  createElement(
+    'div',
+    { className: 'flex items-center justify-center h-screen' },
+    createElement(
+      'div',
+      { className: 'text-center' },
+      createElement(
+        'div',
+        { className: 'inline-block' },
+        createElement('div', {
+          className:
+            'w-12 h-12 border-4 border-gray-200 border-t-blue-600 rounded-full animate-spin mb-4',
+        })
+      ),
+      createElement(
+        'p',
+        { className: 'text-gray-600 text-sm' },
+        'Loading...'
+      )
+    )
+  )
 
 /**
  * Create a code-split route component
@@ -28,13 +40,13 @@ export const LoadingFallback = () => (
 export function createDynamicRoute<P extends object>(
   importFn: () => Promise<{ default: ComponentType<P> }>,
   options?: {
-    loading?: ComponentType
+    loading?: (loadingProps: DynamicOptionsLoadingProps) => ReactNode
     ssr?: boolean
     delay?: number
   }
 ) {
   return dynamic(importFn, {
-    loading: options?.loading || LoadingFallback,
+    loading: options?.loading ?? (() => LoadingFallback()),
     ssr: options?.ssr !== false,
     ...(options?.delay && { delay: options.delay })
   })
@@ -91,7 +103,7 @@ export const routeCodeSplits = {
 export function preloadRoute(
   importFn: () => Promise<any>,
   delay: number = 0
-): void {
+) {
   if (typeof window === 'undefined') return
 
   const timer = setTimeout(() => {

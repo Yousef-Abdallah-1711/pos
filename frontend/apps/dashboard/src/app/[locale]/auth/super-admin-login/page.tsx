@@ -3,6 +3,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/stores/authStore";
+import { warmupCurrentUserPermissions } from "@/hooks/useRbac";
 import { api } from "@/lib/api";
 import { AlertCircle, CheckCircle } from "lucide-react";
 import { debugLog, debugError } from '@/lib/debug';
@@ -48,6 +49,7 @@ export default function SuperAdminLoginPage() {
         if (authData?.token && authData?.user) {
           debugLog("[SuperAdminLogin] Setting auth with user:", authData.user.email);
           setAuth(authData.user, authData.token);
+          void warmupCurrentUserPermissions();
 
           // Store in localStorage for persistence
           localStorage.setItem('token', authData.token)

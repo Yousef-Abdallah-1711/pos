@@ -10,6 +10,19 @@ const rawApiTimeout = Number.parseInt(process.env.NEXT_PUBLIC_API_TIMEOUT_MS || 
 const API_TIMEOUT_MS = Number.isFinite(rawApiTimeout) && rawApiTimeout > 0
   ? rawApiTimeout
   : DEFAULT_API_TIMEOUT_MS
+const AUTH_CACHE_TTL_MS = 1500
+const REQUEST_DEDUP_WINDOW_MS = 100
+
+type AuthContextSnapshot = {
+  token: string | null
+  user: any
+  tenantId: number | null
+  restaurantId: number | null
+  cachedAt: number
+}
+
+let authContextCache: AuthContextSnapshot | null = null
+const pendingRequests = new Map<string, { promise: Promise<any>; startedAt: number }>()
 
 const buildApiMetricKey = (url?: string) => {
   if (!url) {
@@ -32,6 +45,88 @@ export const api = axios.create({
   },
 })
 
+const buildDedupKey = (config: any) => {
+  const method = String(config?.method || 'get').toLowerCase()
+  if (method !== 'get') {
+    return null
+  }
+  const url = String(config?.url || '')
+  const params = config?.params ? JSON.stringify(config.params) : ''
+  const data = config?.data ? (typeof config.data === 'string' ? config.data : JSON.stringify(config.data)) : ''
+  return `${method}:${url}:${params}:${data}`
+}
+
+const originalRequest = api.request.bind(api)
+api.request = ((config: any) => {
+  const key = buildDedupKey(config)
+  if (!key) {
+    return originalRequest(config)
+  }
+  const existing = pendingRequests.get(key)
+  const now = Date.now()
+  if (existing && now - existing.startedAt <= REQUEST_DEDUP_WINDOW_MS) {
+    return existing.promise
+  }
+
+  const promise = originalRequest(config)
+    .finally(() => {
+      pendingRequests.delete(key)
+    })
+  pendingRequests.set(key, { promise, startedAt: now })
+  return promise
+}) as typeof api.request
+
+function readAuthContext(): AuthContextSnapshot {
+  const now = Date.now()
+  if (authContextCache && now-authContextCache.cachedAt < AUTH_CACHE_TTL_MS) {
+    return authContextCache
+  }
+
+  let token: string | null = null
+  let user: any = null
+  let tenantId: number | null = null
+  let restaurantId: number | null = null
+
+  try {
+    const authStorage = localStorage.getItem('auth-storage')
+    if (authStorage) {
+      const parsed = JSON.parse(authStorage)
+      token = parsed.state?.token || parsed.token
+      user = parsed.state?.user || parsed.user
+      tenantId = user?.tenant_id || user?.tenantId || null
+      restaurantId = user?.restaurant_id || user?.restaurantId || null
+    }
+  } catch (e) {
+    debugError('[API] Failed to parse auth-storage:', e)
+  }
+
+  if (!token) {
+    token = localStorage.getItem('token')
+  }
+
+  if (!user) {
+    try {
+      const userStr = localStorage.getItem('user')
+      if (userStr) {
+        user = JSON.parse(userStr)
+        tenantId = user?.tenant_id || user?.tenantId
+        restaurantId = user?.restaurant_id || user?.restaurantId
+      }
+    } catch (e) {
+      debugError('[API] Failed to parse user from localStorage:', e)
+    }
+  }
+
+  authContextCache = {
+    token,
+    user,
+    tenantId: tenantId ?? null,
+    restaurantId: restaurantId ?? null,
+    cachedAt: now,
+  }
+  return authContextCache
+}
+
 // Add token and tenant context to requests
 api.interceptors.request.use((config) => {
   const timedConfig = config as typeof config & {
@@ -51,44 +146,7 @@ api.interceptors.request.use((config) => {
     }
   }
 
-  // Get token from Zustand store (which persists to localStorage under 'auth-storage')
-  let token = null
-  let user = null
-  let tenantId = null
-  let restaurantId = null
-
-  try {
-    const authStorage = localStorage.getItem('auth-storage')
-    if (authStorage) {
-      const parsed = JSON.parse(authStorage)
-      token = parsed.state?.token || parsed.token
-      user = parsed.state?.user || parsed.user
-
-      // Extract tenant context with multiple fallback options
-      tenantId = user?.tenant_id || user?.tenantId || null
-      restaurantId = user?.restaurant_id || user?.restaurantId || null
-    }
-  } catch (e) {
-    debugError('[API] Failed to parse auth-storage:', e)
-  }
-
-  // Fallback to direct localStorage keys
-  if (!token) {
-    token = localStorage.getItem('token')
-  }
-
-  if (!user) {
-    try {
-      const userStr = localStorage.getItem('user')
-      if (userStr) {
-        user = JSON.parse(userStr)
-        tenantId = user?.tenant_id || user?.tenantId
-        restaurantId = user?.restaurant_id || user?.restaurantId
-      }
-    } catch (e) {
-      debugError('[API] Failed to parse user from localStorage:', e)
-    }
-  }
+  const { token, tenantId, restaurantId } = readAuthContext()
 
   // Don't add token to auth endpoints (like login, register)
   const isAuthEndpoint = config.url?.includes('/auth/')
@@ -204,6 +262,7 @@ api.interceptors.response.use(
       localStorage.removeItem('token')
       localStorage.removeItem('user')
       localStorage.removeItem('auth-storage')
+      authContextCache = null
       // Redirect to landing app login
       import('./config')
         .then(({ getConfig }) => {

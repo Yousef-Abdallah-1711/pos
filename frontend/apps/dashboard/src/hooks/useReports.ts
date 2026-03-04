@@ -79,6 +79,9 @@ export function useReports<T>({
   useEffect(() => {
     if (!enabled || pollIntervalMs <= 0) return
     const id = window.setInterval(() => {
+      if (document.visibilityState !== 'visible') {
+        return
+      }
       void refetch(true)
     }, pollIntervalMs)
     return () => window.clearInterval(id)

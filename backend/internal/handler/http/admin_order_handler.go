@@ -457,6 +457,7 @@ func (h *AdminOrderHandler) CancelOrder(w http.ResponseWriter, r *http.Request) 
 func (h *AdminOrderHandler) UpdatePaymentStatus(w http.ResponseWriter, r *http.Request) {
 	tenantID := middleware.GetTenantID(r)
 	restaurantID := middleware.GetRestaurantID(r)
+	userID := int(middleware.GetUserID(r))
 	if tenantID == 0 || restaurantID == 0 {
 		respondError(w, http.StatusBadRequest, "Missing tenant context")
 		return
@@ -487,6 +488,14 @@ func (h *AdminOrderHandler) UpdatePaymentStatus(w http.ResponseWriter, r *http.R
 		}
 		respondError(w, http.StatusInternalServerError, "Failed to update payment status")
 		return
+	}
+
+	if strings.EqualFold(strings.TrimSpace(req.PaymentStatus), "paid") {
+		var postedBy *int
+		if userID > 0 {
+			postedBy = &userID
+		}
+		h.orderUC.AutoPostPaidOrderByID(tenantID, restaurantID, orderID, postedBy)
 	}
 
 	respondJSON(w, http.StatusOK, map[string]interface{}{

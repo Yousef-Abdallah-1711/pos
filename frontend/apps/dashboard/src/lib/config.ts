@@ -27,8 +27,25 @@ function getBrowserOrigin() {
   return ''
 }
 
+function isLocalhostRuntime() {
+  if (typeof window === 'undefined') return false
+  const host = window.location?.hostname?.toLowerCase() || ''
+  return host === 'localhost' || host === '127.0.0.1' || host === '::1'
+}
+
 function normalizeUrl(value: string) {
   return value.replace(/\/+$/, '')
+}
+
+function warnMissingConfig(label: string, fallbackValue: string) {
+  if (process.env.NEXT_PUBLIC_STRICT_CONFIG_WARNINGS !== 'true') {
+    return
+  }
+  if (typeof console !== 'undefined') {
+    console.warn(
+      `[dashboard/config] Missing ${label} in production. Falling back to ${fallbackValue}.`
+    )
+  }
 }
 
 function resolveUrlValue(
@@ -46,6 +63,10 @@ function resolveUrlValue(
     return normalizeUrl(devFallback)
   }
 
+  if (isLocalhostRuntime()) {
+    return normalizeUrl(devFallback)
+  }
+
   if (options?.allowCurrentOriginInProduction) {
     const origin = getBrowserOrigin()
     if (origin) {
@@ -53,13 +74,8 @@ function resolveUrlValue(
     }
   }
 
-  const keyMessage = label === 'API URL'
-    ? 'NEXT_PUBLIC_API_URL'
-    : label === 'Landing URL'
-      ? 'NEXT_PUBLIC_LANDING_URL'
-      : 'NEXT_PUBLIC_DASHBOARD_URL'
-
-  throw new Error(`[dashboard/config] Missing ${label} in production. Set ${keyMessage}.`)
+  warnMissingConfig(label, devFallback)
+  return normalizeUrl(devFallback)
 }
 
 function resolveDomainValue(configuredValue: string | undefined) {
@@ -72,7 +88,12 @@ function resolveDomainValue(configuredValue: string | undefined) {
     return DEV_DEFAULTS.restaurantDomain
   }
 
-  throw new Error('[dashboard/config] Missing restaurant domain in production. Set NEXT_PUBLIC_RESTAURANT_DOMAIN.')
+  if (isLocalhostRuntime()) {
+    return DEV_DEFAULTS.restaurantDomain
+  }
+
+  warnMissingConfig('restaurant domain', DEV_DEFAULTS.restaurantDomain)
+  return DEV_DEFAULTS.restaurantDomain
 }
 
 export const getConfig = () => {

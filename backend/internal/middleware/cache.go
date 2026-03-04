@@ -218,11 +218,8 @@ func SecurityHeadersMiddleware(next http.Handler) http.Handler {
 		// Prevent MIME type sniffing
 		w.Header().Set("X-Content-Type-Options", "nosniff")
 
-		// Enable XSS protection (for older browsers)
-		w.Header().Set("X-XSS-Protection", "1; mode=block")
-
 		// Clickjacking protection
-		w.Header().Set("X-Frame-Options", "SAMEORIGIN")
+		w.Header().Set("X-Frame-Options", "DENY")
 
 		// Referrer policy
 		w.Header().Set("Referrer-Policy", "strict-origin-when-cross-origin")
@@ -230,7 +227,7 @@ func SecurityHeadersMiddleware(next http.Handler) http.Handler {
 		// Content Security Policy
 		w.Header().Set(
 			"Content-Security-Policy",
-			"default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https:",
+			"default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https:; frame-ancestors 'none'; base-uri 'self'; form-action 'self'",
 		)
 
 		// Feature-Policy (Permissions-Policy)
@@ -238,6 +235,9 @@ func SecurityHeadersMiddleware(next http.Handler) http.Handler {
 			"Permissions-Policy",
 			"accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()",
 		)
+		if r.TLS != nil {
+			w.Header().Set("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload")
+		}
 
 		next.ServeHTTP(w, r)
 	})

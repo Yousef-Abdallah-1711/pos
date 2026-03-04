@@ -43,7 +43,10 @@ export function HeaderEditor({
   const pathname = usePathname()
   const locale = getLocaleFromPath(pathname)
   const isRTL = locale === 'ar'
-  const tx = (en: string, ar: string) => (isRTL ? ar : en)
+  const tx = (en: string, ar: string) => {
+    if (!isRTL) return en
+    return /[ÃØÙðâ]/.test(ar) ? en : ar
+  }
 
   const storeHeader = useThemeHeader()
   const updateHeader = useUpdateHeader()

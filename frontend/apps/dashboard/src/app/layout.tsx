@@ -13,11 +13,14 @@ export default function RootLayout({
 }: {
   children: React.ReactNode
 }) {
+  const enableVercelAnalytics =
+    process.env.NEXT_PUBLIC_ENABLE_VERCEL_ANALYTICS === 'true' || process.env.VERCEL === '1'
+
   return (
     <html lang="en" suppressHydrationWarning>
       <body>
         {children}
-        <Analytics />
+        {enableVercelAnalytics ? <Analytics /> : null}
       </body>
     </html>
   )

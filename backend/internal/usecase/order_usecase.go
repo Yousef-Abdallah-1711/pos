@@ -18,6 +18,7 @@ type OrderUseCase struct {
 	tableRepo      *repository.TableRepository
 	kdsRepo        *repository.KDSRepository
 	kdsBroadcaster KDSBroadcaster
+	autoPosting    AutoPostingService
 }
 
 // NewOrderUseCase creates new order use case
@@ -36,6 +37,11 @@ func (uc *OrderUseCase) SetKDSRepository(kdsRepo *repository.KDSRepository) {
 // SetKDSBroadcaster links websocket broadcasts for new KDS orders.
 func (uc *OrderUseCase) SetKDSBroadcaster(broadcaster KDSBroadcaster) {
 	uc.kdsBroadcaster = broadcaster
+}
+
+// SetAutoPostingEngine links accounting auto-posting to paid order flows.
+func (uc *OrderUseCase) SetAutoPostingEngine(engine AutoPostingService) {
+	uc.autoPosting = engine
 }
 
 // SetTableRepository links table integration to order creation flow.
@@ -448,6 +454,37 @@ func (uc *OrderUseCase) UpdatePaymentStatus(tenantID, restaurantID, orderID int6
 	}
 
 	return nil
+}
+
+// AutoPostPaidOrder creates the sales and COGS journal entries for a paid order.
+func (uc *OrderUseCase) AutoPostPaidOrder(order *domain.Order, postedBy *int) {
+	if uc.autoPosting == nil || order == nil {
+		return
+	}
+	if !strings.EqualFold(strings.TrimSpace(order.PaymentStatus), "paid") {
+		return
+	}
+
+	if err := uc.autoPosting.PostSalesEntry(order, postedBy); err != nil {
+		log.Printf("[AccountingAutoPost] sales posting failed tenant=%d restaurant=%d order=%d err=%v", order.TenantID, order.RestaurantID, order.ID, err)
+	}
+	if err := uc.autoPosting.PostCOGSEntry(order, postedBy); err != nil {
+		log.Printf("[AccountingAutoPost] cogs posting failed tenant=%d restaurant=%d order=%d err=%v", order.TenantID, order.RestaurantID, order.ID, err)
+	}
+}
+
+// AutoPostPaidOrderByID reloads the order before posting to accounting.
+func (uc *OrderUseCase) AutoPostPaidOrderByID(tenantID, restaurantID, orderID int64, postedBy *int) {
+	if uc.autoPosting == nil {
+		return
+	}
+
+	order, err := uc.GetOrder(tenantID, restaurantID, orderID)
+	if err != nil {
+		log.Printf("[AccountingAutoPost] failed to reload order for posting tenant=%d restaurant=%d order=%d err=%v", tenantID, restaurantID, orderID, err)
+		return
+	}
+	uc.AutoPostPaidOrder(order, postedBy)
 }
 
 // GetOrderStats retrieves order statistics

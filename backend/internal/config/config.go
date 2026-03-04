@@ -28,6 +28,7 @@ type DatabaseConfig struct {
 	SSLMode         string
 	MaxOpenConns    int
 	MaxIdleConns    int
+	ConnMaxIdleTime string
 	ConnMaxLifetime string
 }
 
@@ -42,7 +43,7 @@ func Load() (*Config, error) {
 
 	dbPort, _ := strconv.Atoi(getEnv("DB_PORT", "5432"))
 
-	return &Config{
+	cfg := &Config{
 		Server: ServerConfig{
 			Port: getEnv("PORT", "8080"),
 			Env:  getEnv("ENV", "development"),
@@ -54,15 +55,24 @@ func Load() (*Config, error) {
 			Password:        getEnv("DB_PASSWORD", "postgres"),
 			DBName:          getEnv("DB_NAME", "pos_saas"),
 			SSLMode:         getEnv("DB_SSLMODE", "disable"),
-			MaxOpenConns:    getEnvInt("DB_MAX_OPEN_CONNS", 25),
-			MaxIdleConns:    getEnvInt("DB_MAX_IDLE_CONNS", 10),
+			MaxOpenConns:    getEnvInt("DB_MAX_OPEN_CONNS", 75),
+			MaxIdleConns:    getEnvInt("DB_MAX_IDLE_CONNS", 25),
+			ConnMaxIdleTime: getEnv("DB_CONN_MAX_IDLE_TIME", "2m"),
 			ConnMaxLifetime: getEnv("DB_CONN_MAX_LIFETIME", "5m"),
 		},
 		JWT: JWTConfig{
 			Secret: getEnv("JWT_SECRET", "your-secret-key-change-this"),
 			Expiry: getEnv("JWT_EXPIRY", "24h"),
 		},
-	}, nil
+	}
+
+	if cfg.Server.Env == "production" {
+		if cfg.JWT.Secret == "your-secret-key-change-this" || len(cfg.JWT.Secret) < 32 {
+			return nil, fmt.Errorf("JWT_SECRET must be set to a secure value (>= 32 chars) in production")
+		}
+	}
+
+	return cfg, nil
 }
 
 func (c *DatabaseConfig) DSN() string {

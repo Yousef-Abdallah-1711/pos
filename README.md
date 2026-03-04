@@ -1,10 +1,19 @@
-# POS SaaS Platform
+﻿# POS SaaS Platform
 
 **Multi-tenant Point-of-Sale SaaS platform** with restaurant management, online ordering, HR, theme customization, and subscription management.
 
-**Last Updated:** February 21, 2026
+**Last Updated:** March 3, 2026
 
-## Recent Updates (February 21, 2026)
+## Recent Updates (March 3, 2026)
+
+- Phase 6 (HR + Accounting) completed end-to-end:
+  - Added migration range `136..157` and RBAC modules `15..20`.
+  - Implemented accounting APIs/UI (accounts, journal entries, ledger, bank accounts, suppliers, customers, invoices, payments, tax, financial reports).
+  - Implemented advanced HR APIs/UI (performance, training, insurance, contracts, resignations, HR reports).
+  - Added validation/deployment artifacts:
+    - `docs-organized/04-MODULES/updated-hr-accounting-system/05-PHASE-6-VALIDATION-REPORT.md`
+    - `docs-organized/04-MODULES/updated-hr-accounting-system/06-PHASE-6-PRODUCTION-DEPLOYMENT-CHECKLIST.md`
+    - `backend/scripts/rollback_phase6_accounting_hr.sql`
 
 - Theme-builder and storefront integration is now aligned: storefront header/footer render from active theme config instead of shared static layout.
 - Backend global compile path restored: `cd backend && go build ./...` now passes after isolating deprecated legacy-only packages behind `legacy` build tags.
@@ -56,7 +65,7 @@ docker-compose up -d
 | Layer | Technology |
 |-------|-----------|
 | **Backend** | Go 1.18+ (stdlib `net/http`, no framework) |
-| **Database** | PostgreSQL 15 (58+ migrations) |
+| **Database** | PostgreSQL 15 (157+ migrations) |
 | **Auth** | JWT (HS256, 24h expiry), bcrypt passwords |
 | **Frontend** | Next.js 15, React 18, TypeScript 5.7 |
 | **Monorepo** | Turbo 2.3 + pnpm 9.0 workspaces |
@@ -64,7 +73,7 @@ docker-compose up -d
 | **Styling** | Tailwind CSS 3.4, Radix UI, Lucide icons |
 | **Forms** | React Hook Form + Zod validation |
 | **HTTP** | Axios 1.7 (frontend), stdlib (backend) |
-| **i18n** | next-intl (Dashboard/Restaurant) + URL-based routing (Landing) — EN + AR with RTL support |
+| **i18n** | next-intl (Dashboard/Restaurant) + URL-based routing (Landing) â€” EN + AR with RTL support |
 | **Container** | Docker + Docker Compose |
 
 ---
@@ -72,19 +81,19 @@ docker-compose up -d
 ## Architecture Overview
 
 ```
-                    ┌─────────────────────────────────────────┐
-                    │           PostgreSQL 15                  │
-                    │    (58+ migrations, row-level tenancy)   │
-                    └──────────────────┬──────────────────────┘
-                                       │
-                    ┌──────────────────┴──────────────────────┐
-                    │       Go Backend API (:8080)             │
-                    │  Clean Architecture (Handler→UseCase→Repo)│
-                    │  JWT Auth | RBAC | Multi-Tenant Middleware│
-                    └──┬────────┬────────┬────────┬───────────┘
-                       │        │        │        │
-          ┌────────────┘   ┌────┘   ┌────┘   ┌────┘
-          ▼                ▼        ▼        ▼
+                    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+                    â”‚           PostgreSQL 15                  â”‚
+                    â”‚    (157+ migrations, row-level tenancy)   â”‚
+                    â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+                                       â”‚
+                    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”´â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+                    â”‚       Go Backend API (:8080)             â”‚
+                    â”‚  Clean Architecture (Handlerâ†’UseCaseâ†’Repo)â”‚
+                    â”‚  JWT Auth | RBAC | Multi-Tenant Middlewareâ”‚
+                    â””â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+                       â”‚        â”‚        â”‚        â”‚
+          â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜   â”Œâ”€â”€â”€â”€â”˜   â”Œâ”€â”€â”€â”€â”˜   â”Œâ”€â”€â”€â”€â”˜
+          â–¼                â–¼        â–¼        â–¼
    Landing (:3001)   Dashboard   Restaurant  Super-Admin
    Auth/Register     (:3002)     Website     (:3004)
    Marketing page    Admin UI    (:3003)     Tenant mgmt
@@ -107,79 +116,79 @@ docker-compose up -d
 
 ```
 POS/
-├── backend/                          Go API server
-│   ├── cmd/api/main.go              Entry point (1133 lines, all routes)
-│   ├── internal/
-│   │   ├── domain/                  Entity models (User, Product, Order, Tenant, etc.)
-│   │   ├── handler/http/            38+ HTTP handlers
-│   │   ├── middleware/              11 middleware (auth, tenant, RBAC, status, CORS)
-│   │   ├── repository/             15+ data access repos
-│   │   ├── usecase/                9 business logic use cases
-│   │   ├── service/                Theme + cache services
-│   │   └── pkg/jwt/                Token service
-│   ├── migrations/                  58+ SQL migration files
-│   ├── Dockerfile
-│   └── .env.example
-│
-├── frontend/                         Next.js monorepo
-│   ├── apps/
-│   │   ├── dashboard/               Admin dashboard (:3002)
-│   │   │   └── src/
-│   │   │       ├── app/[locale]/dashboard/   Page routes
-│   │   │       ├── components/               Feature-organized components
-│   │   │       ├── stores/                   Zustand stores (auth, tenant, preferences)
-│   │   │       ├── hooks/                    Custom hooks (RBAC, notifications, etc.)
-│   │   │       ├── lib/                      API client, debug, validation, utils
-│   │   │       │   ├── api.ts                Main axios client + interceptors
-│   │   │       │   ├── api/themeApi.ts        Theme endpoints
-│   │   │       │   └── debug.ts              Debug logging wrapper
-│   │   │       ├── i18n/                     EN + AR translations
-│   │   │       └── types/                    TypeScript definitions
-│   │   │
-│   │   ├── landing/                 Auth & marketing (:3001)
-│   │   │   └── src/
-│   │   │       ├── middleware.ts     Locale detection + redirect (/en, /ar)
-│   │   │       ├── app/
-│   │   │       │   ├── layout.tsx   Root layout (ThemeProvider only)
-│   │   │       │   ├── page.tsx     Redirect → /en
-│   │   │       │   └── [locale]/    URL-based i18n (en | ar)
-│   │   │       │       ├── layout.tsx       LanguageProvider + Toaster
-│   │   │       │       ├── page.tsx         Landing page (all sections)
-│   │   │       │       └── auth/
-│   │   │       │           ├── login/       Login page
-│   │   │       │           ├── register/    Register page
-│   │   │       │           └── super-admin-login/
-│   │   │       ├── components/      Navbar, Hero, Features, HowItWorks,
-│   │   │       │                    Pricing, Testimonials, CTA, Footer
-│   │   │       ├── contexts/        LanguageContext (URL-based locale)
-│   │   │       ├── lib/             translations.ts, config.ts
-│   │   │       └── stores/          authStore (Zustand)
-│   │   │
-│   │   ├── restaurant-website/      Public storefront (:3003)
-│   │   │   ├── middleware.ts        Subdomain + locale + tenant status
-│   │   │   └── lib/
-│   │   │       ├── store/           Cart + Theme stores
-│   │   │       ├── api/             API clients
-│   │   │       ├── hooks/           Theme, web vitals
-│   │   │       ├── debug.ts         Debug logging wrapper
-│   │   │       └── checkTenantStatus.ts
-│   │   │
-│   │   └── super-admin/             Platform admin (:3004)
-│   │       └── src/
-│   │           ├── components/tenants/   Extend trial, disable, delete
-│   │           ├── components/impersonation/  Impersonation UI
-│   │           └── lib/api.ts           SuperAdminAPI class
-│   │
-│   ├── packages/
-│   │   ├── ui/                      Radix UI + CVA components
-│   │   ├── ui-components/           Atomic design library
-│   │   └── theme/                   next-themes provider
-│   │
-│   └── turbo.json                   Build pipeline config
-│
-├── docker-compose.yml               PostgreSQL + Backend
-├── docs-organized/                   70+ documentation files
-└── README.md                         This file
+â”œâ”€â”€ backend/                          Go API server
+â”‚   â”œâ”€â”€ cmd/api/main.go              Entry point (1133 lines, all routes)
+â”‚   â”œâ”€â”€ internal/
+â”‚   â”‚   â”œâ”€â”€ domain/                  Entity models (User, Product, Order, Tenant, etc.)
+â”‚   â”‚   â”œâ”€â”€ handler/http/            38+ HTTP handlers
+â”‚   â”‚   â”œâ”€â”€ middleware/              11 middleware (auth, tenant, RBAC, status, CORS)
+â”‚   â”‚   â”œâ”€â”€ repository/             15+ data access repos
+â”‚   â”‚   â”œâ”€â”€ usecase/                9 business logic use cases
+â”‚   â”‚   â”œâ”€â”€ service/                Theme + cache services
+â”‚   â”‚   â””â”€â”€ pkg/jwt/                Token service
+â”‚   â”œâ”€â”€ migrations/                 157+ SQL migration files
+â”‚   â”œâ”€â”€ Dockerfile
+â”‚   â””â”€â”€ .env.example
+â”‚
+â”œâ”€â”€ frontend/                         Next.js monorepo
+â”‚   â”œâ”€â”€ apps/
+â”‚   â”‚   â”œâ”€â”€ dashboard/               Admin dashboard (:3002)
+â”‚   â”‚   â”‚   â””â”€â”€ src/
+â”‚   â”‚   â”‚       â”œâ”€â”€ app/[locale]/dashboard/   Page routes
+â”‚   â”‚   â”‚       â”œâ”€â”€ components/               Feature-organized components
+â”‚   â”‚   â”‚       â”œâ”€â”€ stores/                   Zustand stores (auth, tenant, preferences)
+â”‚   â”‚   â”‚       â”œâ”€â”€ hooks/                    Custom hooks (RBAC, notifications, etc.)
+â”‚   â”‚   â”‚       â”œâ”€â”€ lib/                      API client, debug, validation, utils
+â”‚   â”‚   â”‚       â”‚   â”œâ”€â”€ api.ts                Main axios client + interceptors
+â”‚   â”‚   â”‚       â”‚   â”œâ”€â”€ api/themeApi.ts        Theme endpoints
+â”‚   â”‚   â”‚       â”‚   â””â”€â”€ debug.ts              Debug logging wrapper
+â”‚   â”‚   â”‚       â”œâ”€â”€ i18n/                     EN + AR translations
+â”‚   â”‚   â”‚       â””â”€â”€ types/                    TypeScript definitions
+â”‚   â”‚   â”‚
+â”‚   â”‚   â”œâ”€â”€ landing/                 Auth & marketing (:3001)
+â”‚   â”‚   â”‚   â””â”€â”€ src/
+â”‚   â”‚   â”‚       â”œâ”€â”€ middleware.ts     Locale detection + redirect (/en, /ar)
+â”‚   â”‚   â”‚       â”œâ”€â”€ app/
+â”‚   â”‚   â”‚       â”‚   â”œâ”€â”€ layout.tsx   Root layout (ThemeProvider only)
+â”‚   â”‚   â”‚       â”‚   â”œâ”€â”€ page.tsx     Redirect â†’ /en
+â”‚   â”‚   â”‚       â”‚   â””â”€â”€ [locale]/    URL-based i18n (en | ar)
+â”‚   â”‚   â”‚       â”‚       â”œâ”€â”€ layout.tsx       LanguageProvider + Toaster
+â”‚   â”‚   â”‚       â”‚       â”œâ”€â”€ page.tsx         Landing page (all sections)
+â”‚   â”‚   â”‚       â”‚       â””â”€â”€ auth/
+â”‚   â”‚   â”‚       â”‚           â”œâ”€â”€ login/       Login page
+â”‚   â”‚   â”‚       â”‚           â”œâ”€â”€ register/    Register page
+â”‚   â”‚   â”‚       â”‚           â””â”€â”€ super-admin-login/
+â”‚   â”‚   â”‚       â”œâ”€â”€ components/      Navbar, Hero, Features, HowItWorks,
+â”‚   â”‚   â”‚       â”‚                    Pricing, Testimonials, CTA, Footer
+â”‚   â”‚   â”‚       â”œâ”€â”€ contexts/        LanguageContext (URL-based locale)
+â”‚   â”‚   â”‚       â”œâ”€â”€ lib/             translations.ts, config.ts
+â”‚   â”‚   â”‚       â””â”€â”€ stores/          authStore (Zustand)
+â”‚   â”‚   â”‚
+â”‚   â”‚   â”œâ”€â”€ restaurant-website/      Public storefront (:3003)
+â”‚   â”‚   â”‚   â”œâ”€â”€ middleware.ts        Subdomain + locale + tenant status
+â”‚   â”‚   â”‚   â””â”€â”€ lib/
+â”‚   â”‚   â”‚       â”œâ”€â”€ store/           Cart + Theme stores
+â”‚   â”‚   â”‚       â”œâ”€â”€ api/             API clients
+â”‚   â”‚   â”‚       â”œâ”€â”€ hooks/           Theme, web vitals
+â”‚   â”‚   â”‚       â”œâ”€â”€ debug.ts         Debug logging wrapper
+â”‚   â”‚   â”‚       â””â”€â”€ checkTenantStatus.ts
+â”‚   â”‚   â”‚
+â”‚   â”‚   â””â”€â”€ super-admin/             Platform admin (:3004)
+â”‚   â”‚       â””â”€â”€ src/
+â”‚   â”‚           â”œâ”€â”€ components/tenants/   Extend trial, disable, delete
+â”‚   â”‚           â”œâ”€â”€ components/impersonation/  Impersonation UI
+â”‚   â”‚           â””â”€â”€ lib/api.ts           SuperAdminAPI class
+â”‚   â”‚
+â”‚   â”œâ”€â”€ packages/
+â”‚   â”‚   â”œâ”€â”€ ui/                      Radix UI + CVA components
+â”‚   â”‚   â”œâ”€â”€ ui-components/           Atomic design library
+â”‚   â”‚   â””â”€â”€ theme/                   next-themes provider
+â”‚   â”‚
+â”‚   â””â”€â”€ turbo.json                   Build pipeline config
+â”‚
+â”œâ”€â”€ docker-compose.yml               PostgreSQL + Backend
+â”œâ”€â”€ docs-organized/                   70+ documentation files
+â””â”€â”€ README.md                         This file
 ```
 
 ---
@@ -189,7 +198,7 @@ POS/
 ### Clean Architecture Layers
 
 ```
-HTTP Request → CORS → Auth → TenantContext → [RBAC] → [TenantStatus] → Handler → UseCase → Repository → PostgreSQL
+HTTP Request â†’ CORS â†’ Auth â†’ TenantContext â†’ [RBAC] â†’ [TenantStatus] â†’ Handler â†’ UseCase â†’ Repository â†’ PostgreSQL
 ```
 
 ### Middleware Chain
@@ -210,16 +219,16 @@ HTTP Request → CORS → Auth → TenantContext → [RBAC] → [TenantStatus] �
 
 ```go
 // Standard protected route
-wrapProtected := AuthMiddleware → TenantContextMiddleware → Handler
+wrapProtected := AuthMiddleware â†’ TenantContextMiddleware â†’ Handler
 
 // RBAC-protected route
-wrapWithPermission := AuthMiddleware → TenantContext → WithRequiredPermission(moduleID, level) → Handler
+wrapWithPermission := AuthMiddleware â†’ TenantContext â†’ WithRequiredPermission(moduleID, level) â†’ Handler
 
 // With subscription check
-wrapProtectedWithStatus := AuthMiddleware → TenantContext → TenantStatus → Handler
+wrapProtectedWithStatus := AuthMiddleware â†’ TenantContext â†’ TenantStatus â†’ Handler
 
 // Super admin route
-wrapSuperAdmin := RateLimit → SuperAdminAuth → IPWhitelist → RequireSuperAdmin → Handler
+wrapSuperAdmin := RateLimit â†’ SuperAdminAuth â†’ IPWhitelist â†’ RequireSuperAdmin â†’ Handler
 ```
 
 ### API Endpoints (120+)
@@ -280,12 +289,12 @@ GET    /api/v1/super-admin/audit-logs
 
 ```
 Register: POST /auth/register
-  → Create Tenant (trial 15 days) → Restaurant → User (role=owner) → JWT
+  â†’ Create Tenant (trial 15 days) â†’ Restaurant â†’ User (role=owner) â†’ JWT
 
 Login: POST /auth/login
-  → Verify bcrypt password → Check multi-tenant
-  → If 1 tenant: return JWT
-  → If N tenants: return tenant list → POST /auth/login/confirm → JWT
+  â†’ Verify bcrypt password â†’ Check multi-tenant
+  â†’ If 1 tenant: return JWT
+  â†’ If N tenants: return tenant list â†’ POST /auth/login/confirm â†’ JWT
 
 JWT Claims: { user_id, tenant_id, restaurant_id, email, role, exp }
 Super Admin JWT: Separate secret (JWT_SECRET + "_super_admin"), 15min expiry
@@ -294,21 +303,21 @@ Super Admin JWT: Separate secret (JWT_SECRET + "_super_admin"), 15min expiry
 ### Database Schema (Key Tables)
 
 ```
-tenants          → id, name, slug, subscription_status, trial_dates, is_disabled
-users            → id, tenant_id, restaurant_id, email, password_hash, role, is_super_admin
-restaurants      → id, tenant_id, name, slug, theme, feature_flags
-products         → id, tenant_id, restaurant_id, name_en/ar, price, inventory
-categories       → id, tenant_id, restaurant_id, name_en/ar, display_order
-orders           → id, tenant_id, restaurant_id, order_number, customer_info, items, status
-drivers          → id, tenant_id, name, status, availability, rating
-employees        → id, tenant_id, employee_number, salary, department
-rbac_roles       → id, tenant_id, code, name, is_system
-role_permissions → id, role_id, module_id, permission_level
-user_roles       → id, user_id, role_id
-super_admins     → id, user_id, ip_whitelist, secret_key
-impersonation_sessions → id, super_admin_id, target_user_id, token_hash, expires_at
-subscription_history   → id, tenant_id, action, old/new_status, days_added, reason
-themes           → id, tenant_id, restaurant_id, name, config, is_active
+tenants          â†’ id, name, slug, subscription_status, trial_dates, is_disabled
+users            â†’ id, tenant_id, restaurant_id, email, password_hash, role, is_super_admin
+restaurants      â†’ id, tenant_id, name, slug, theme, feature_flags
+products         â†’ id, tenant_id, restaurant_id, name_en/ar, price, inventory
+categories       â†’ id, tenant_id, restaurant_id, name_en/ar, display_order
+orders           â†’ id, tenant_id, restaurant_id, order_number, customer_info, items, status
+drivers          â†’ id, tenant_id, name, status, availability, rating
+employees        â†’ id, tenant_id, employee_number, salary, department
+rbac_roles       â†’ id, tenant_id, code, name, is_system
+role_permissions â†’ id, role_id, module_id, permission_level
+user_roles       â†’ id, user_id, role_id
+super_admins     â†’ id, user_id, ip_whitelist, secret_key
+impersonation_sessions â†’ id, super_admin_id, target_user_id, token_hash, expires_at
+subscription_history   â†’ id, tenant_id, action, old/new_status, days_added, reason
+themes           â†’ id, tenant_id, restaurant_id, name, config, is_active
 ```
 
 ---
@@ -370,53 +379,53 @@ themes           → id, tenant_id, restaurant_id, name, config, is_active
 **Subdomain Multi-Tenancy:**
 ```
 demo.localhost:3003/en/menu
-  ↓ middleware.ts
+  â†“ middleware.ts
   1. Extract slug from subdomain: "demo"
   2. Extract locale from path: "en"
   3. Validate locale (redirect if invalid)
   4. Check tenant status via API
-  5. If blocked → redirect to /maintenance
+  5. If blocked â†’ redirect to /maintenance
   6. Set headers: x-restaurant-slug, x-restaurant-locale
 ```
 
 **Theme System:**
 - Server-side theme loading (`get-theme-server.ts`)
 - Theme payload normalization across public API response variants (`data.data`, `data.config`, `theme.config`, JSON string config)
-- Multi-layer cache: memory → localStorage → API (with retry + backoff)
+- Multi-layer cache: memory â†’ localStorage â†’ API (with retry + backoff)
 - Theme data: colors, typography, identity, header, footer, components array
 - Storefront header/footer are rendered directly from active theme config (no static global header/footer)
 - Applied via CSS variables and Tailwind classes
 
 **Cart/Checkout:**
 - Zustand cart store persisted to localStorage
-- Cart → Checkout form → `POST /public/orders` → Order confirmation
+- Cart â†’ Checkout form â†’ `POST /public/orders` â†’ Order confirmation
 - Inventory-aware quantity limits
 
 ### Landing App (:3001)
 
-**URL-based i18n routing** — all pages under `/en/...` or `/ar/...`. Middleware redirects bare paths to `/en`.
+**URL-based i18n routing** â€” all pages under `/en/...` or `/ar/...`. Middleware redirects bare paths to `/en`.
 
 **Landing Page Sections:**
-- `Navbar` — Sticky glassmorphism, orange/red gradient CTA, language toggle (URL-based), mobile menu
-- `Hero` — Dark POS mockup, animated floating stats cards, badge "30-Day Free Trial"
-- `Features` — 6 feature cards (POS, Kitchen Display, Online Ordering, Analytics, Multi-Restaurant, Mobile Apps)
-- `HowItWorks` — 3-step process: Sign Up → Set Up → Start Selling
-- `Pricing` — Single plan: **500 EGP/month** after 30-day free trial (no credit card required)
-- `Testimonials` — 3 testimonials with star ratings
-- `CTA` — Red gradient, full-width call-to-action
-- `Footer` — All link text from translations (EN + AR)
+- `Navbar` â€” Sticky glassmorphism, orange/red gradient CTA, language toggle (URL-based), mobile menu
+- `Hero` â€” Dark POS mockup, animated floating stats cards, badge "30-Day Free Trial"
+- `Features` â€” 6 feature cards (POS, Kitchen Display, Online Ordering, Analytics, Multi-Restaurant, Mobile Apps)
+- `HowItWorks` â€” 3-step process: Sign Up â†’ Set Up â†’ Start Selling
+- `Pricing` â€” Single plan: **500 EGP/month** after 30-day free trial (no credit card required)
+- `Testimonials` â€” 3 testimonials with star ratings
+- `CTA` â€” Red gradient, full-width call-to-action
+- `Footer` â€” All link text from translations (EN + AR)
 
 **Auth Pages:** `/en/auth/login`, `/en/auth/register`, `/en/auth/super-admin-login`
 
 **i18n Architecture:**
-- `middleware.ts` — Validates locale segment, redirects to `/en` if missing
-- `LanguageContext.tsx` — Accepts `locale` prop from server, toggle uses `router.push()` to swap URL segment
-- Language toggle: `setLanguage('ar')` → navigates to `/ar/current-path`
+- `middleware.ts` â€” Validates locale segment, redirects to `/en` if missing
+- `LanguageContext.tsx` â€” Accepts `locale` prop from server, toggle uses `router.push()` to swap URL segment
+- Language toggle: `setLanguage('ar')` â†’ navigates to `/ar/current-path`
 - RTL: `document.documentElement.dir` set via `useEffect` in LanguageProvider
 
 **Multi-tenant login flow:**
-- `TenantSelectorModal` — shown when user has multiple tenants
-- On tenant select: `POST /auth/login/confirm` → redirect to Dashboard auth callback
+- `TenantSelectorModal` â€” shown when user has multiple tenants
+- On tenant select: `POST /auth/login/confirm` â†’ redirect to Dashboard auth callback
 
 ### Super-Admin App (:3004)
 
@@ -457,16 +466,16 @@ All console calls go through debug wrappers that respect environment variables:
 - Locale from URL segment: `/en/...` or `/ar/...`
 - `middleware.ts` redirects root and locale-less paths to `/en`
 - `LanguageProvider` accepts `locale` prop (from server, no localStorage)
-- Language toggle calls `router.push()` swapping URL segment (`/en/` ↔ `/ar/`)
-- RTL applied via `useEffect` → `document.documentElement.dir`
+- Language toggle calls `router.push()` swapping URL segment (`/en/` â†” `/ar/`)
+- RTL applied via `useEffect` â†’ `document.documentElement.dir`
 - Translations in `src/lib/translations.ts` (EN + AR, inline TypeScript object)
 
 ### Tenant Status Flow
 
 ```
-Dashboard mounts → TenantStatusProvider calls GET /tenant/status
-  → If canAccess: true → show dashboard normally
-  → If canAccess: false → show BlockedOverlay (trial_expired / disabled)
+Dashboard mounts â†’ TenantStatusProvider calls GET /tenant/status
+  â†’ If canAccess: true â†’ show dashboard normally
+  â†’ If canAccess: false â†’ show BlockedOverlay (trial_expired / disabled)
 
 Sidebar shows: SidebarSubscriptionBadge (plan name + days remaining)
 Header shows: TrialWarningBanner (when <= 7 days remaining, dismissible)
@@ -512,11 +521,11 @@ Frontend: useHasPermission(MODULE_IDS.PRODUCTS, PERMISSION_LEVELS.EDIT)
 ### Lifecycle
 
 ```
-Tenant registers → trial (30 days) → [extend trial / subscribe]
-                                    → trial_expired → blocked
-                                    → [admin disables] → disabled → blocked
-                                    → [admin enables] → restored
-                                    → [admin deletes] → soft delete
+Tenant registers â†’ trial (30 days) â†’ [extend trial / subscribe]
+                                    â†’ trial_expired â†’ blocked
+                                    â†’ [admin disables] â†’ disabled â†’ blocked
+                                    â†’ [admin enables] â†’ restored
+                                    â†’ [admin deletes] â†’ soft delete
 ```
 
 ### Backend (Fully Implemented)
@@ -591,10 +600,10 @@ Run migrations: `go run cmd/migrate/main.go` or via Docker entrypoint.
 
 ### Adding a New Feature
 
-1. **Backend:** Domain model → Repository → UseCase → Handler → Register route in `main.go`
-2. **Frontend:** Page in `app/[locale]/dashboard/` → Components → Hook/API call → Add to Sidebar
+1. **Backend:** Domain model â†’ Repository â†’ UseCase â†’ Handler â†’ Register route in `main.go`
+2. **Frontend:** Page in `app/[locale]/dashboard/` â†’ Components â†’ Hook/API call â†’ Add to Sidebar
 3. **Translation:** Add keys to `i18n/messages/en.json` and `ar.json`
-4. **RBAC:** Add module in migration → Register permission checks
+4. **RBAC:** Add module in migration â†’ Register permission checks
 
 ### File Naming Conventions
 
@@ -634,3 +643,4 @@ See [docs-organized/](docs-organized/) for in-depth guides:
 | Deployment | `docs-organized/05-INFRASTRUCTURE/DEPLOYMENT/` |
 | SaaS Subscription | `docs-organized/10-Sass-Trial-Subscription/` |
 | Remaining Work | `docs-organized/99-REMAINING-WORK.md` |
+

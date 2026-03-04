@@ -67,6 +67,10 @@ func (h *PublicOrderHandler) CreateOrder(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
+	if strings.EqualFold(strings.TrimSpace(req.PaymentMethod), "online") || strings.EqualFold(strings.TrimSpace(order.PaymentStatus), "paid") {
+		h.orderUC.AutoPostPaidOrder(order, nil)
+	}
+
 	// Return created order
 	respondJSON(w, http.StatusCreated, map[string]interface{}{
 		"success": true,

@@ -10,7 +10,6 @@ import {
   type ReactNode,
 } from 'react'
 import { Copy, Download, ExternalLink, FileText, Loader2, QrCode, X } from 'lucide-react'
-import { jsPDF } from 'jspdf'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { type RestaurantTable } from '@/lib/api/tablesApi'
@@ -214,6 +213,7 @@ export function QRBuilderModal({
 
     setProcessingAction('pdf')
     try {
+      const { jsPDF } = await import('jspdf')
       const doc = new jsPDF({
         orientation: 'portrait',
         unit: 'mm',

@@ -1,8 +1,8 @@
-# POS SaaS - Project Knowledge Base
+﻿# POS SaaS - Project Knowledge Base
 
-**Version:** 3.0.0
+**Version:** 3.1.0
 **Status:** Production Ready (Multi-tenant, RBAC, Real-time, Payment Integration)
-**Last Updated:** 2026-02-25
+**Last Updated:** 2026-03-03
 **Target Scale:** 1M+ Users / Multi-tenant SaaS
 
 ---
@@ -33,7 +33,7 @@
 **POS SaaS** is a multi-tenant, production-grade Point-of-Sale system for restaurant management:
 
 - **Multi-tenant Support** - Isolated data per restaurant chain/franchise
-- **RBAC** - 14 modules with 6 hierarchical permission levels
+- **RBAC** - 20 modules with 6 hierarchical permission levels
 - **4 Frontend Apps** - Dashboard, Restaurant Website, Landing Page, Super Admin
 - **Real-time KDS** - WebSocket-powered Kitchen Display System
 - **Table Management** - Dine-in table ordering with QR codes
@@ -267,7 +267,7 @@ backend/
 |   +-- repository/           (38 repo files - PostgreSQL data access)
 |   +-- usecase/              (business logic layer)
 |   +-- observability/        (perf_metrics.go)
-+-- migrations/               (98 migration files, numbered 1-135 + legacy)
++-- migrations/               (157 migration files, numbered 1-157 + legacy)
 +-- tests/load/               (k6 load tests: baseline, normal, peak)
 ```
 
@@ -360,7 +360,7 @@ Orders support: optional `TableID` (dine-in), delivery address with geo-coordina
 
 ## RBAC (Role-Based Access Control)
 
-### Module IDs (1-14)
+### Module IDs (1-20)
 
 | ID | Module | Purpose | Typical Users |
 |----|--------|---------|---------------|
@@ -378,6 +378,12 @@ Orders support: optional `TableID` (dine-in), delivery address with geo-coordina
 | 12 | SALARIES | Payroll management | Admin, Accountant |
 | 13 | KDS | Kitchen Display System | Kitchen Staff |
 | 14 | TABLES | Table management | Admin, Manager, Staff |
+| 15 | ACCOUNTING | Chart of accounts, journal entries, ledger | Admin, Accountant |
+| 16 | SUPPLIERS | Supplier master data and purchasing | Admin, Procurement |
+| 17 | FINANCIAL_REPORTS | Financial statements and VAT reporting | Admin, Accountant, Manager |
+| 18 | PERFORMANCE | Employee performance reviews | HR, Manager |
+| 19 | TRAINING | Training records and certification tracking | HR, Manager |
+| 20 | CONTRACTS | Contracts, insurance, resignations workflows | HR, Admin |
 
 ### Permission Levels (Hierarchical)
 
@@ -399,7 +405,7 @@ NONE (0)      - No access (hidden from UI)
 
 | Role | ID | Key Permissions |
 |------|-----|----------------|
-| ADMIN | 4 | All 14 modules with ADMIN level |
+| ADMIN | 4 | All 20 modules with ADMIN level |
 | MANAGER | 9 | Products, Categories, Orders, HR, Leaves, Reports - WRITE |
 | EMPLOYEE | 10 | Products, Categories, Orders, HR, Leaves - READ |
 | DRIVER | 11 | Orders - READ |
@@ -437,7 +443,7 @@ user_roles       { id, tenant_id, user_id, role_id, assigned_by, created_at }
 ### Key RBAC Files
 
 **Frontend:**
-- `lib/rbac.ts` - `MODULE_IDS` (1-14), `PERMISSION_LEVELS`, `rbacApi`
+- `lib/rbac.ts` - `MODULE_IDS` (1-20), `PERMISSION_LEVELS`, `rbacApi`
 - `hooks/useRbac.ts` - `useHasPermission()`, `useUserPermissions()`
 - `components/layout/Sidebar.tsx` - Permission-filtered menu items
 
@@ -471,7 +477,7 @@ CREATE INDEX idx_user_roles_user ON user_roles(user_id, tenant_id);
 
 ### Migration History
 
-98 migration files (numbered 1-135). Key milestones:
+157 migration files (numbered 1-157). Key milestones:
 
 | Range | Feature |
 |-------|---------|
@@ -483,6 +489,7 @@ CREATE INDEX idx_user_roles_user ON user_roles(user_id, tenant_id);
 | 120-123 | Reports module + export permissions |
 | 124-129 | KDS (queue, settings, analytics, performance indexes) |
 | 130-135 | Tables (restaurant_tables, table_id on orders, layouts, RBAC module) |
+| 136-157 | Accounting + advanced HR (chart of accounts, journal, ledger, tax, financial reports, performance/training/insurance/contracts/resignations) |
 
 ---
 
@@ -565,6 +572,75 @@ PUT          /api/v1/leaves/{id}/approve
 GET/POST     /api/v1/salaries
 PUT          /api/v1/salaries/{id}/mark-paid
 
+# Accounting (module 15)
+GET/POST     /api/v1/accounting/accounts
+GET/PUT/DEL  /api/v1/accounting/accounts/{id}
+GET/POST     /api/v1/accounting/journal-entries
+GET/PUT      /api/v1/accounting/journal-entries/{id}
+POST         /api/v1/accounting/journal-entries/{id}/post
+POST         /api/v1/accounting/journal-entries/{id}/void
+GET          /api/v1/accounting/ledger
+GET          /api/v1/accounting/trial-balance
+GET/POST     /api/v1/accounting/bank-accounts
+GET/PUT/DEL  /api/v1/accounting/bank-accounts/{id}
+GET          /api/v1/accounting/bank-accounts/{id}/transactions
+GET/POST     /api/v1/accounting/customers
+GET/PUT/DEL  /api/v1/accounting/customers/{id}
+GET          /api/v1/accounting/customers/{id}/statement
+GET/POST     /api/v1/accounting/customer-invoices
+GET/PUT      /api/v1/accounting/customer-invoices/{id}
+POST         /api/v1/accounting/customer-invoices/{id}/send
+POST         /api/v1/accounting/customer-invoices/{id}/void
+GET          /api/v1/accounting/customer-invoices/overdue
+GET/POST     /api/v1/accounting/supplier-invoices
+GET/PUT      /api/v1/accounting/supplier-invoices/{id}
+POST         /api/v1/accounting/supplier-invoices/{id}/approve
+POST         /api/v1/accounting/supplier-invoices/{id}/void
+GET/POST     /api/v1/accounting/payments/received
+GET/POST     /api/v1/accounting/payments/made
+
+# Suppliers (module 16)
+GET/POST     /api/v1/suppliers
+GET/PUT/DEL  /api/v1/suppliers/{id}
+
+# Financial Reports + Tax (module 17)
+GET/POST     /api/v1/accounting/tax/periods
+GET/PUT/DEL  /api/v1/accounting/tax/periods/{id}
+POST         /api/v1/accounting/tax/periods/{id}/close
+GET          /api/v1/accounting/tax/vat-report
+GET          /api/v1/reports/hr/headcount
+GET          /api/v1/reports/hr/turnover
+GET          /api/v1/reports/hr/absenteeism
+GET          /api/v1/reports/hr/overtime
+GET          /api/v1/reports/hr/leave-balances
+GET          /api/v1/reports/hr/training-compliance
+
+# Performance (module 18)
+GET/POST     /api/v1/hr/performance
+GET/PUT/DEL  /api/v1/hr/performance/{id}
+POST         /api/v1/hr/performance/{id}/acknowledge
+POST         /api/v1/hr/performance/{id}/complete
+GET          /api/v1/hr/performance/employee/{employeeId}
+
+# Training (module 19)
+GET/POST     /api/v1/hr/training
+GET/PUT/DEL  /api/v1/hr/training/{id}
+GET          /api/v1/hr/training/expiring
+
+# Contracts (module 20)
+GET/POST     /api/v1/hr/insurance
+GET/PUT/DEL  /api/v1/hr/insurance/{id}
+GET          /api/v1/hr/insurance/expiring
+GET/POST     /api/v1/hr/contracts
+GET/PUT/DEL  /api/v1/hr/contracts/{id}
+POST         /api/v1/hr/contracts/{id}/renew
+GET          /api/v1/hr/contracts/expiring
+GET/POST     /api/v1/hr/resignations
+GET/PUT/DEL  /api/v1/hr/resignations/{id}
+POST         /api/v1/hr/resignations/{id}/acknowledge
+POST         /api/v1/hr/resignations/{id}/complete
+GET          /api/v1/hr/resignations/{id}/settlement
+
 # RBAC
 GET          /api/v1/rbac/check-permission
 GET          /api/v1/rbac/me/permissions
@@ -623,6 +699,31 @@ GET    /api/v1/super-admin/payments
 ---
 
 ## Feature Modules
+
+### Accounting + Advanced HR (Phase 6)
+
+Enterprise accounting and HR operations layer added in migration range `136..157`.
+
+**Backend key files:**
+- `internal/domain/accounting.go`, `internal/domain/accounting_phase3.go`, `internal/domain/hr_advanced.go`, `internal/domain/auto_posting.go`
+- `internal/repository/*account*.go`, `journal_entry_repo.go`, `general_ledger_repo.go`, `tax_repo.go`, `performance_review_repo.go`, `training_repo.go`, `insurance_repo.go`, `contract_repo.go`, `resignation_repo.go`
+- `internal/usecase/accounting_usecase.go`, `financial_report_usecase.go`, `auto_posting_engine.go`
+- `internal/handler/http/*account*.go`, `financial_report_handler.go`, `hr_report_handler.go`, `performance_handler.go`, `training_handler.go`, `insurance_handler.go`, `contract_handler.go`, `resignation_handler.go`
+
+**Frontend key files:**
+- `apps/dashboard/src/app/[locale]/dashboard/accounting/**`
+- `apps/dashboard/src/app/[locale]/dashboard/reports/financial/**`
+- `apps/dashboard/src/app/[locale]/dashboard/reports/hr/**`
+- `apps/dashboard/src/app/[locale]/dashboard/hr/{performance,training,insurance,contracts,resignations}/**`
+- `apps/dashboard/src/components/accounting/**`
+- `apps/dashboard/src/components/financial-reports/**`
+- `apps/dashboard/src/components/hr-advanced/**`
+
+**Highlights:**
+- Journal posting with fiscal-period safeguards.
+- Auto-posting engine integration for order and salary events.
+- Financial reporting with caching and optimized ledger queries.
+- Advanced HR workflows (performance, training, insurance, contracts, resignations).
 
 ### Kitchen Display System (KDS)
 
@@ -924,6 +1025,7 @@ Backend can run with `db = nil` for development without PostgreSQL - handlers re
 
 | Version | Date | Changes |
 |---------|------|---------|
+| 3.1.0 | 2026-03-03 | Phase 6 complete: accounting + advanced HR modules, migrations 136-157, RBAC modules 15-20, financial/HR reports, deployment + rollback documentation |
 | 3.0.0 | 2026-02-25 | KDS, Tables, Reports, Paymob, Theme Builder, full 14-module RBAC, 4 frontend apps |
 | 2.0.0 | 2026-02-24 | RBAC system complete, frontend filtering, 1M user readiness |
 | 1.5.0 | 2026-02-20 | Multi-tenant isolation, backend RBAC endpoints |
@@ -931,5 +1033,6 @@ Backend can run with `db = nil` for development without PostgreSQL - handlers re
 
 ---
 
-**Last Updated:** 2026-02-25
+**Last Updated:** 2026-03-03
 **Maintained By:** Development Team
+

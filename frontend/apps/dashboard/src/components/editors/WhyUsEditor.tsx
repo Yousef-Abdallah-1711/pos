@@ -610,11 +610,6 @@ export function WhyUsEditor({
           `}</style>
         </div>
       )}
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
     </div>
   )
 }

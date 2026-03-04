@@ -33,6 +33,12 @@ export const MODULE_IDS = {
   SALARIES: 12,
   KDS: 13,
   TABLES: 14,
+  ACCOUNTING: 15,
+  SUPPLIERS: 16,
+  FINANCIAL_REPORTS: 17,
+  PERFORMANCE: 18,
+  TRAINING: 19,
+  CONTRACTS: 20,
 } as const
 
 // Permission level hierarchy (higher number = more permissions)
@@ -437,6 +443,12 @@ export const getModuleName = (moduleId: number): string => {
     [MODULE_IDS.SALARIES]: 'Payroll',
     [MODULE_IDS.KDS]: 'Kitchen Display',
     [MODULE_IDS.TABLES]: 'Tables',
+    [MODULE_IDS.ACCOUNTING]: 'Accounting',
+    [MODULE_IDS.SUPPLIERS]: 'Suppliers',
+    [MODULE_IDS.FINANCIAL_REPORTS]: 'Financial Reports',
+    [MODULE_IDS.PERFORMANCE]: 'Performance',
+    [MODULE_IDS.TRAINING]: 'Training',
+    [MODULE_IDS.CONTRACTS]: 'Contracts',
   }
   return names[moduleId] || `Module ${moduleId}`
 }

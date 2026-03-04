@@ -1,16 +1,13 @@
 /** @type {import('next').NextConfig} */
-// NOTE: next-intl plugin disabled for Phase 1 due to ESM/CommonJS conflicts
-// Will be re-enabled in Phase 2 after resolving module resolution issues
-const withNextIntl = (config) => config // Identity function - no-op
+const createNextIntlPlugin = require('next-intl/plugin')
+const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts')
 const isWindows = process.platform === 'win32'
 const enableCustomSplitChunks = process.env.NEXT_CUSTOM_SPLIT_CHUNKS === 'true'
+const isProd = process.env.NODE_ENV === 'production'
 
 const nextConfig = {
   reactStrictMode: true,
   transpilePackages: ['@pos-saas/ui', '@pos-saas/types'],
-  typescript: {
-    ignoreBuildErrors: true, // Ignore TypeScript errors during build to unblock development
-  },
   images: {
     domains: ['localhost', 'images.unsplash.com'],
     // Enable AVIF for better compression (25-30% smaller than WebP)
@@ -104,6 +101,11 @@ const nextConfig = {
       '@radix-ui/react-dialog',
       'lucide-react',
       'date-fns',
+      'recharts',
+      '@tanstack/react-table',
+      '@tanstack/react-query',
+      'jspdf',
+      'html2canvas',
     ],
   },
 
@@ -149,6 +151,35 @@ const nextConfig = {
             key: 'Cache-Control',
             value: 'public, max-age=3600, s-maxage=3600',
           },
+          {
+            key: 'X-Frame-Options',
+            value: 'DENY',
+          },
+          {
+            key: 'X-Content-Type-Options',
+            value: 'nosniff',
+          },
+          {
+            key: 'Referrer-Policy',
+            value: 'strict-origin-when-cross-origin',
+          },
+          {
+            key: 'Permissions-Policy',
+            value: 'camera=(), microphone=(), geolocation=()',
+          },
+          {
+            key: 'Content-Security-Policy',
+            value:
+              "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://va.vercel-scripts.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; connect-src 'self' https: http: ws: wss:; font-src 'self' data:; frame-ancestors 'none'; base-uri 'self'; form-action 'self'",
+          },
+          ...(isProd
+            ? [
+                {
+                  key: 'Strict-Transport-Security',
+                  value: 'max-age=31536000; includeSubDomains; preload',
+                },
+              ]
+            : []),
         ],
       },
     ]

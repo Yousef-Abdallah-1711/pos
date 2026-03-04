@@ -25,10 +25,14 @@ import {
   PieChart,
   Pie,
   Cell,
-} from 'recharts'
+} from '@/components/reports/lazy-recharts'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
-import { ExportButton, KpiCard, LastUpdatedIndicator, ReportChart, ReportTable } from '@/components/reports'
+import { ExportButton } from '@/components/reports/ExportButton'
+import { KpiCard } from '@/components/reports/KpiCard'
+import { LastUpdatedIndicator } from '@/components/reports/LastUpdatedIndicator'
+import { ReportChart } from '@/components/reports/ReportChart'
+import { ReportTable } from '@/components/reports/ReportTable'
 import { useReports } from '@/hooks/useReports'
 import { getLocaleFromPath } from '@/lib/translations'
 import { getSalesReportLabels } from '@/lib/reportsTranslations'
@@ -286,7 +290,7 @@ export default function SalesReportsPage() {
 
           <div className="grid grid-cols-1 2xl:grid-cols-3 gap-6">
             <ReportChart title={labels.salesTrend} className="2xl:col-span-2" bodyClassName="h-80">
-              <ResponsiveContainer width="100%" height="100%">
+              <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={280}>
                 <LineChart data={trendData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#94a3b8" opacity={0.2} />
                   <XAxis dataKey="bucket" tick={{ fontSize: 12 }} />
@@ -306,7 +310,7 @@ export default function SalesReportsPage() {
 
             <ReportChart title={labels.topCategories}>
               <div className="h-80">
-                <ResponsiveContainer width="100%" height="100%">
+                <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={280}>
                   <PieChart>
                     <Pie data={topCategories} dataKey="revenue" nameKey="name" outerRadius={100} innerRadius={56}>
                       {topCategories.map((_, index) => (
@@ -336,7 +340,7 @@ export default function SalesReportsPage() {
           </div>
 
           <ReportChart title={labels.hourlySales} bodyClassName="h-80">
-            <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={280}>
               <BarChart data={hourlyData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#94a3b8" opacity={0.2} />
                 <XAxis dataKey="hour" tickFormatter={(h) => `${h}:00`} tick={{ fontSize: 12 }} />

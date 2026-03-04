@@ -3,6 +3,7 @@
 import { useEffect } from 'react'
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 import { useAuthStore } from '@/stores/authStore'
+import { warmupCurrentUserPermissions } from '@/hooks/useRbac'
 import { getConfig } from '@/lib/config'
 import { debugLog, debugError } from '@/lib/debug'
 
@@ -30,6 +31,7 @@ export default function AuthCallbackContent() {
 
         // Save auth to store
         setAuth(user, token)
+        void warmupCurrentUserPermissions()
 
         debugLog('Redirecting to dashboard...')
         // Redirect to localized dashboard
