@@ -1,0 +1,6 @@
+export { GlassHeader } from './GlassHeader'
+export { GradientHeader } from './GradientHeader'
+export { SolidHeader } from './SolidHeader'
+export { FloatingHeader } from './FloatingHeader'
+export { MinimalHeader } from './MinimalHeader'
+export type { HeaderVariantProps } from './shared'

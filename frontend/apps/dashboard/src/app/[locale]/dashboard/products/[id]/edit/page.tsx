@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter, usePathname, useParams } from 'next/navigation'
 import { useAuthStore } from '@/stores/authStore'
-import { useHasPermission } from '@/hooks/useRbac'
+import { useUserPermissions } from '@/hooks/useRbac'
 import { api } from '@/lib/api'
 import { apiCache } from '@/lib/apiCache'
 import { toast } from 'sonner'
@@ -35,10 +35,8 @@ export default function EditProductPage() {
   const t = createTranslator(locale)
 
   // Check RBAC permissions for Products module
-  const canUpdateProducts = useHasPermission(
-    MODULE_IDS.PRODUCTS,
-    PERMISSION_LEVELS.WRITE,
-  )
+  const { checkPermission, loading: permissionLoading } = useUserPermissions()
+  const canUpdateProducts = checkPermission(MODULE_IDS.PRODUCTS, PERMISSION_LEVELS.WRITE)
 
   const productId = params.id as string
   const [product, setProduct] = useState<Product | null>(null)
@@ -74,10 +72,10 @@ export default function EditProductPage() {
       }
     }
 
-    if (token && productId) {
+    if (token && productId && canUpdateProducts && !permissionLoading) {
       fetchData()
     }
-  }, [token, productId, locale, router])
+  }, [token, productId, locale, router, canUpdateProducts, permissionLoading])
 
   const handleUpdateProduct = async (formData: any) => {
     try {
@@ -104,6 +102,14 @@ export default function EditProductPage() {
     { href: `/${locale}/dashboard/products/${productId}`, label: product?.name_en || 'Product' },
     { label: t('products.editProduct') }
   ]
+
+  if (permissionLoading) {
+    return (
+      <div className="space-y-6">
+        <FormSkeleton />
+      </div>
+    )
+  }
 
   // Show permission denied if user can't update products
   if (!canUpdateProducts) {

@@ -34,7 +34,14 @@
     "tax": "Tax",
     "grandTotal": "Grand Total",
     "free": "Free",
-    "refresh": "Refresh"
+    "refresh": "Refresh",
+    "apply": "Apply",
+    "retry": "Retry",
+    "yes": "Yes",
+    "no": "No",
+    "done": "Done",
+    "next": "Next",
+    "previous": "Previous"
   },
   "navigation": {
     "home": "Home",
@@ -69,7 +76,14 @@
     "tryAdjusting": "Try adjusting your search or filters",
     "clearFilters": "Clear filters",
     "itemsInCart": "items in cart",
-    "readyToCheckout": "Ready to checkout?"
+    "readyToCheckout": "Ready to checkout?",
+    "categories": "Categories",
+    "allCategories": "All categories",
+    "priceRange": "Price range",
+    "resetFilters": "Reset filters",
+    "sortBy": "Sort by",
+    "topRated": "Top rated",
+    "newest": "Newest"
   },
   "product": {
     "addToCart": "Add to Cart",
@@ -81,7 +95,11 @@
     "description": "Description",
     "ingredients": "Ingredients",
     "relatedProducts": "Related Products",
-    "reviews": "Reviews"
+    "reviews": "Reviews",
+    "add_to_cart": "Add",
+    "unavailable": "Unavailable",
+    "from": "From",
+    "customize": "Customize"
   },
   "cart": {
     "title": "Shopping Cart",
@@ -98,7 +116,11 @@
     "confirmClear": "Are you sure you want to clear your cart?",
     "removeItem": "Remove Item",
     "specialNotes": "Special Notes (Optional)",
-    "quantity": "Quantity"
+    "quantity": "Quantity",
+    "delivery": "Delivery",
+    "minimumOrder": "Minimum order",
+    "notes": "Order notes",
+    "checkoutNow": "Checkout now"
   },
   "checkout": {
     "title": "Checkout",
@@ -122,7 +144,16 @@
     "success": "Order placed successfully!",
     "orderNumber": "Order Number",
     "trackOrder": "Track your order",
-    "backToMenu": "Back to Menu"
+    "backToMenu": "Back to Menu",
+    "steps": {
+      "cart": "Cart",
+      "info": "Info",
+      "payment": "Payment",
+      "done": "Done"
+    },
+    "place_order": "Place Order",
+    "select_method": "Select payment method",
+    "phoneHint": "Egyptian mobile number"
   },
   "tableOrdering": {
     "dineInOrder": "Dine-in Order",
@@ -149,7 +180,12 @@
     "totalAmount": "Total Amount",
     "estimatedDelivery": "Estimated Delivery",
     "restaurant": "Restaurant",
-    "viewDetails": "View Details"
+    "viewDetails": "View Details",
+    "active": "Active",
+    "delivered": "Delivered",
+    "cancelled": "Cancelled",
+    "reorder": "Reorder",
+    "rateOrder": "Rate order"
   },
   "orderTracking": {
     "title": "Track Your Order",
@@ -209,7 +245,16 @@
     "saved": "Preferences saved successfully!",
     "account": "Account Settings",
     "notifications": "Notifications",
-    "privacy": "Privacy & Security"
+    "privacy": "Privacy & Security",
+    "tabs": {
+      "language": "Language",
+      "appearance": "Appearance",
+      "cart": "Cart",
+      "notifications": "Notifications"
+    },
+    "clearCart": "Clear cart",
+    "savedAddress": "Saved address",
+    "comingSoon": "Coming soon"
   },
   "footer": {
     "about": "About",
@@ -239,7 +284,11 @@
     "invalidPhone": "Please enter a valid phone number",
     "orderNotFound": "Order not found",
     "insufficientInventory": "Some items are out of stock. Please update your cart.",
-    "somethingWentWrong": "Something went wrong. Please try again."
+    "somethingWentWrong": "Something went wrong. Please try again.",
+    "network": "No internet connection",
+    "timeout": "Request timeout",
+    "paymentFailed": "Payment failed. Try again.",
+    "productUnavailable": "This product is currently unavailable"
   },
   "maintenance": {
     "trialExpired": {
@@ -266,5 +315,80 @@
     "contactUs": "Contact Us",
     "thankYou": "Thank you for choosing",
     "customColors": "Custom Colors"
+  },
+  "header": {
+    "orderNow": "Order Now",
+    "orderViaWhatsApp": "Order via WhatsApp",
+    "browseMenu": "Browse Menu",
+    "searchPlaceholder": "Search products...",
+    "darkMode": "Dark mode",
+    "lightMode": "Light mode",
+    "systemMode": "System mode"
+  },
+  "language": {
+    "switchToArabic": "Switch to Arabic",
+    "switchToEnglish": "Switch to English",
+    "current": "Current language"
+  },
+  "theme": {
+    "title": "Theme",
+    "appearance": "Appearance",
+    "mode": "Mode",
+    "chooseMode": "Choose appearance mode",
+    "preview": "Preview",
+    "template": "Template",
+    "variants": "Variants"
+  },
+  "search": {
+    "title": "Search",
+    "noResults": "No products found",
+    "products": "Products",
+    "categories": "Categories",
+    "clearSearch": "Clear search",
+    "popular": "Popular searches"
+  },
+  "payment": {
+    "title": "Payment",
+    "cash": "Cash on Delivery",
+    "paymob_online": "Online Card (Paymob)",
+    "screenshot_transfer": "Bank Transfer Screenshot",
+    "payNow": "Pay Now",
+    "uploadReceipt": "Upload Receipt",
+    "pendingVerification": "Pending Verification",
+    "failed": "Payment failed",
+    "retry": "Retry payment",
+    "switchToCash": "Switch to cash"
+  },
+  "order_detail": {
+    "title": "Order Details",
+    "items": "Items",
+    "timeline": "Order Timeline",
+    "customerInfo": "Customer Information",
+    "paymentInfo": "Payment Information",
+    "uploadReceipt": "Upload Receipt",
+    "track": "Track Order"
+  },
+  "track": {
+    "title": "Track Order",
+    "orderNumber": "Order Number",
+    "notFound": "Order not found",
+    "checkNumber": "Please verify your order number",
+    "orderNow": "Order now"
+  },
+  "sections": {
+    "hero": "Hero",
+    "featured_products": "Featured Products",
+    "categories": "Categories",
+    "why_choose_us": "Why Choose Us",
+    "gallery": "Gallery",
+    "testimonials": "Testimonials",
+    "cta": "Call To Action",
+    "contact": "Contact"
+  },
+  "whatsapp": {
+    "title": "WhatsApp",
+    "order": "Order via WhatsApp",
+    "quickMessage": "Hello, I want to place an order",
+    "openChat": "Open WhatsApp Chat"
   }
 }

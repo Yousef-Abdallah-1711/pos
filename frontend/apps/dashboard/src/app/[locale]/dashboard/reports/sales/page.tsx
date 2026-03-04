@@ -38,7 +38,7 @@ import { getLocaleFromPath } from '@/lib/translations'
 import { getSalesReportLabels } from '@/lib/reportsTranslations'
 import { MODULE_IDS, PERMISSION_LEVELS } from '@/lib/rbac'
 import { exportReportFile, getSalesReport } from '@/lib/api/reportsApi'
-import { useHasPermission } from '@/hooks/useRbac'
+import { useUserPermissions } from '@/hooks/useRbac'
 import { debugError } from '@/lib/debug'
 import type { SalesReportData, SalesGranularity } from '@/types/reports'
 
@@ -81,10 +81,8 @@ export default function SalesReportsPage() {
   const isRTL = locale === 'ar'
   const labels = useMemo(() => getSalesReportLabels(locale), [locale])
 
-  const { hasPermission: canViewReports, loading: permissionLoading } = useHasPermission(
-    MODULE_IDS.REPORTS,
-    PERMISSION_LEVELS.READ,
-  )
+  const { checkPermission, loading: permissionLoading } = useUserPermissions()
+  const canViewReports = checkPermission(MODULE_IDS.REPORTS, PERMISSION_LEVELS.READ)
 
   const [filters, setFilters] = useState<SalesFiltersState>(() => defaultFilters())
 

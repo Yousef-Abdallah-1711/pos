@@ -1,10 +1,12 @@
 package http
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 
 	"pos-saas/internal/domain"
 	"pos-saas/internal/middleware"
@@ -14,6 +16,8 @@ import (
 type CustomerAccountHandler struct {
 	customerRepo *repository.CustomerAccountRepository
 }
+
+const customerAcctHandlerTimeout = 10 * time.Second
 
 func NewCustomerAccountHandler(customerRepo *repository.CustomerAccountRepository) *CustomerAccountHandler {
 	return &CustomerAccountHandler{customerRepo: customerRepo}
@@ -34,7 +38,9 @@ func (h *CustomerAccountHandler) ListCustomers(w http.ResponseWriter, r *http.Re
 		pageSize = 100
 	}
 
-	customers, err := h.customerRepo.ListCustomers(tenantID, restaurantID)
+	ctx, cancel := context.WithTimeout(r.Context(), customerAcctHandlerTimeout)
+	defer cancel()
+	customers, total, err := h.customerRepo.ListCustomersPaged(ctx, tenantID, restaurantID, page, pageSize)
 	if err != nil {
 		writeJSON(w, http.StatusInternalServerError, map[string]interface{}{
 			"success": false,
@@ -43,19 +49,9 @@ func (h *CustomerAccountHandler) ListCustomers(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	total := len(customers)
-	offset := (page - 1) * pageSize
-	if offset > total {
-		offset = total
-	}
-	end := offset + pageSize
-	if end > total {
-		end = total
-	}
-
 	writeJSON(w, http.StatusOK, map[string]interface{}{
 		"success": true,
-		"data":    customers[offset:end],
+		"data":    customers,
 		"pagination": map[string]interface{}{
 			"page":      page,
 			"page_size": pageSize,

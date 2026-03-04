@@ -1,6 +1,7 @@
 package http
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"strconv"
@@ -15,6 +16,8 @@ import (
 type BankAccountHandler struct {
 	bankRepo *repository.BankAccountRepository
 }
+
+const bankAccountHandlerTimeout = 10 * time.Second
 
 func NewBankAccountHandler(bankRepo *repository.BankAccountRepository) *BankAccountHandler {
 	return &BankAccountHandler{bankRepo: bankRepo}
@@ -35,7 +38,9 @@ func (h *BankAccountHandler) ListBankAccounts(w http.ResponseWriter, r *http.Req
 		pageSize = 100
 	}
 
-	accounts, err := h.bankRepo.ListBankAccounts(tenantID, restaurantID)
+	ctx, cancel := context.WithTimeout(r.Context(), bankAccountHandlerTimeout)
+	defer cancel()
+	accounts, total, err := h.bankRepo.ListBankAccountsPaged(ctx, tenantID, restaurantID, page, pageSize)
 	if err != nil {
 		writeJSON(w, http.StatusInternalServerError, map[string]interface{}{
 			"success": false,
@@ -44,19 +49,9 @@ func (h *BankAccountHandler) ListBankAccounts(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	total := len(accounts)
-	offset := (page - 1) * pageSize
-	if offset > total {
-		offset = total
-	}
-	end := offset + pageSize
-	if end > total {
-		end = total
-	}
-
 	writeJSON(w, http.StatusOK, map[string]interface{}{
 		"success": true,
-		"data":    accounts[offset:end],
+		"data":    accounts,
 		"pagination": map[string]interface{}{
 			"page":      page,
 			"page_size": pageSize,

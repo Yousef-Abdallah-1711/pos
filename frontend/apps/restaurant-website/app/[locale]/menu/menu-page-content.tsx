@@ -1,14 +1,15 @@
 'use client'
 
-import { useCallback, useEffect } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { ProductCard } from '@/components/commerce/product-card-simple'
-import { useCartStore } from '@/lib/store/cart-store'
+import { useCart } from '@/lib/hooks/use-cart'
 import { createTranslator } from '@/lib/translations'
 import Link from 'next/link'
 import { Loader } from 'lucide-react'
 import { useProducts } from '@/lib/hooks/use-api-queries'
 import type { ServerThemeData } from '@/lib/api/get-theme-server'
 import type { TableStatusNotice } from '@/lib/table-ordering'
+import { CartSheet } from '@/components/commerce/CartSheet'
 
 export interface TableContext {
   tableId: number
@@ -34,13 +35,12 @@ export function MenuPageContent({
 }: MenuPageContentProps) {
   const isRTL = locale === 'ar'
   const t = createTranslator(locale)
+  const [isCartOpen, setIsCartOpen] = useState(false)
 
   const primaryColor = themeData?.colors?.primary || '#f97316'
   const secondaryColor = themeData?.colors?.secondary || '#0ea5e9'
 
-  const addToCart = useCartStore((state) => state.addItem)
-  const setTableContext = useCartStore((state) => state.setTableContext)
-  const cartItems = useCartStore((state) => state.getTotalItems())
+  const { addItem: addToCart, setTableContext, totalItems: cartItems } = useCart()
 
   const { data: products = [], isLoading } = useProducts(restaurantSlug)
 
@@ -65,6 +65,7 @@ export function MenuPageContent({
           quantity_in_stock: product.quantity_in_stock,
         })
       }
+      setIsCartOpen(true)
     },
     [addToCart]
   )
@@ -177,6 +178,7 @@ export function MenuPageContent({
           color: ${primaryColor};
         }
       `}</style>
+      <CartSheet locale={locale} open={isCartOpen} onOpenChange={setIsCartOpen} />
     </>
   )
 }

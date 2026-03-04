@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"pos-saas/internal/domain"
+	"pos-saas/internal/middleware"
 	"pos-saas/internal/usecase"
 )
 
@@ -63,6 +64,10 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	fmt.Println("SUCCESS: Login successful, sending response")
+	csrfToken, csrfErr := middleware.GenerateCSRFToken()
+	if csrfErr == nil {
+		middleware.SetCSRFCookie(w, r, csrfToken)
+	}
 	respondJSON(w, http.StatusOK, response)
 }
 
@@ -89,6 +94,10 @@ func (h *AuthHandler) LoginConfirm(w http.ResponseWriter, r *http.Request) {
 	}
 
 	fmt.Println("SUCCESS: LoginConfirm successful, sending response")
+	csrfToken, csrfErr := middleware.GenerateCSRFToken()
+	if csrfErr == nil {
+		middleware.SetCSRFCookie(w, r, csrfToken)
+	}
 	respondJSON(w, http.StatusOK, response)
 }
 
@@ -158,6 +167,10 @@ func (h *AuthHandler) TokenExchange(w http.ResponseWriter, r *http.Request) {
 	}
 
 	fmt.Println("SUCCESS: Token exchange successful")
+	csrfToken, csrfErr := middleware.GenerateCSRFToken()
+	if csrfErr == nil {
+		middleware.SetCSRFCookie(w, r, csrfToken)
+	}
 	respondJSON(w, http.StatusOK, map[string]interface{}{
 		"success": true,
 		"data":    response,

@@ -1,6 +1,7 @@
 package http
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"strconv"
@@ -14,6 +15,8 @@ import (
 type TrainingHandler struct {
 	repo *repository.TrainingRepository
 }
+
+const trainingHandlerTimeout = 10 * time.Second
 
 func NewTrainingHandler(repo *repository.TrainingRepository) *TrainingHandler {
 	return &TrainingHandler{repo: repo}
@@ -33,23 +36,16 @@ func (h *TrainingHandler) List(w http.ResponseWriter, r *http.Request) {
 	if pageSize > 100 {
 		pageSize = 100
 	}
-	data, err := h.repo.List(tenantID, restaurantID)
+	ctx, cancel := context.WithTimeout(r.Context(), trainingHandlerTimeout)
+	defer cancel()
+	data, total, err := h.repo.ListPaged(ctx, tenantID, restaurantID, page, pageSize)
 	if err != nil {
 		respondError(w, http.StatusInternalServerError, "Failed to load training records")
 		return
 	}
-	total := len(data)
-	offset := (page - 1) * pageSize
-	if offset > total {
-		offset = total
-	}
-	end := offset + pageSize
-	if end > total {
-		end = total
-	}
 	respondJSON(w, http.StatusOK, map[string]interface{}{
 		"success": true,
-		"data":    data[offset:end],
+		"data":    data,
 		"pagination": map[string]interface{}{
 			"page":      page,
 			"page_size": pageSize,

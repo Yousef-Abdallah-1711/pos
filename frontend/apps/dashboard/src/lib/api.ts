@@ -127,6 +127,19 @@ function readAuthContext(): AuthContextSnapshot {
   return authContextCache
 }
 
+const readCookie = (name: string): string | null => {
+  if (typeof document === 'undefined') {
+    return null
+  }
+  const parts = document.cookie.split(';').map((p) => p.trim())
+  for (const part of parts) {
+    if (part.startsWith(`${name}=`)) {
+      return decodeURIComponent(part.slice(name.length + 1))
+    }
+  }
+  return null
+}
+
 // Add token and tenant context to requests
 api.interceptors.request.use((config) => {
   const timedConfig = config as typeof config & {
@@ -147,6 +160,13 @@ api.interceptors.request.use((config) => {
   }
 
   const { token, tenantId, restaurantId } = readAuthContext()
+  const method = String(config.method || 'get').toLowerCase()
+  if (!['get', 'head', 'options'].includes(method)) {
+    const csrfToken = readCookie('csrf_token')
+    if (csrfToken) {
+      config.headers['X-CSRF-Token'] = csrfToken
+    }
+  }
 
   // Don't add token to auth endpoints (like login, register)
   const isAuthEndpoint = config.url?.includes('/auth/')

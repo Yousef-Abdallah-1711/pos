@@ -5,7 +5,7 @@ import { useParams, usePathname, useRouter } from 'next/navigation'
 import { ArrowLeft, Loader2, Lock, PencilLine, QrCode } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
-import { useHasPermission } from '@/hooks/useRbac'
+import { useUserPermissions } from '@/hooks/useRbac'
 import {
   type RestaurantTable,
   type TableStatus,
@@ -33,10 +33,9 @@ export default function TableDetailsPage() {
 
   const tableID = Number.parseInt(String(params.id || ''), 10)
 
-  const { hasPermission: canViewTables, loading: canViewLoading } =
-    useHasPermission(MODULE_IDS.TABLES, PERMISSION_LEVELS.READ)
-  const { hasPermission: canManageTables, loading: canManageLoading } =
-    useHasPermission(MODULE_IDS.TABLES, PERMISSION_LEVELS.WRITE)
+  const { checkPermission, loading: permissionLoading } = useUserPermissions()
+  const canViewTables = checkPermission(MODULE_IDS.TABLES, PERMISSION_LEVELS.READ)
+  const canManageTables = checkPermission(MODULE_IDS.TABLES, PERMISSION_LEVELS.WRITE)
 
   const [table, setTable] = useState<RestaurantTable | null>(null)
   const [loading, setLoading] = useState(true)
@@ -61,10 +60,10 @@ export default function TableDetailsPage() {
   }
 
   useEffect(() => {
-    if (!canViewLoading && canViewTables) {
+    if (!permissionLoading && canViewTables) {
       void loadTable()
     }
-  }, [canViewLoading, canViewTables, tableID])
+  }, [permissionLoading, canViewTables, tableID])
 
   const handleStatusAction = async (nextStatus: TableStatus) => {
     if (!table || nextStatus === table.status) {
@@ -106,7 +105,7 @@ export default function TableDetailsPage() {
     }
   }
 
-  if (canViewLoading || canManageLoading || loading) {
+  if (permissionLoading || loading) {
     return (
       <div className="flex h-80 items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />

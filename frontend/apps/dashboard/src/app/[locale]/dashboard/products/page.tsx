@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { useAuthStore } from '@/stores/authStore'
-import { useHasPermission } from '@/hooks/useRbac'
+import { useUserPermissions } from '@/hooks/useRbac'
 import { ProductList } from '@/components/products/ProductList'
 import { Button } from '@/components/ui/button'
 import { api } from '@/lib/api'
@@ -59,22 +59,18 @@ export default function ProductsPage() {
   const token = useAuthStore((state) => state.token)
 
   // Check RBAC permissions for Products module
-  const canViewProducts = useHasPermission(
-    MODULE_IDS.PRODUCTS,
-    PERMISSION_LEVELS.READ,
-  )
-  const canCreateProducts = useHasPermission(
-    MODULE_IDS.PRODUCTS,
-    PERMISSION_LEVELS.WRITE,
-  )
-  const canDeleteProducts = useHasPermission(
-    MODULE_IDS.PRODUCTS,
-    PERMISSION_LEVELS.DELETE,
-  )
+  const { checkPermission, loading: permissionLoading } = useUserPermissions()
+  const canViewProducts = checkPermission(MODULE_IDS.PRODUCTS, PERMISSION_LEVELS.READ)
+  const canCreateProducts = checkPermission(MODULE_IDS.PRODUCTS, PERMISSION_LEVELS.WRITE)
+  const canDeleteProducts = checkPermission(MODULE_IDS.PRODUCTS, PERMISSION_LEVELS.DELETE)
 
   // Fetch products
   useEffect(() => {
     const fetchProducts = async () => {
+      if (permissionLoading || !canViewProducts) {
+        setLoading(false)
+        return
+      }
       setLoading(true)
       try {
         const params: any = {
@@ -99,11 +95,14 @@ export default function ProductsPage() {
     }
 
     fetchProducts()
-  }, [filters, token])
+  }, [filters, token, permissionLoading, canViewProducts])
 
   // Fetch categories
   useEffect(() => {
     const fetchCategories = async () => {
+      if (permissionLoading || !canViewProducts) {
+        return
+      }
       try {
         const response = await api.get('/categories')
         setCategories(response.data || [])
@@ -113,7 +112,7 @@ export default function ProductsPage() {
     }
 
     fetchCategories()
-  }, [token])
+  }, [token, permissionLoading, canViewProducts])
 
 
   const handleDeleteProduct = async (productId: number) => {
@@ -138,6 +137,15 @@ export default function ProductsPage() {
     }
   }
 
+
+  if (permissionLoading) {
+    return (
+      <div className="space-y-6">
+        <PageHeaderSkeleton />
+        <TableSkeleton rows={8} />
+      </div>
+    )
+  }
 
   // Show permission denied if user can't view products
   if (!canViewProducts) {

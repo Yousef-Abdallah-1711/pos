@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { usePathname, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { useAuthStore } from '@/stores/authStore'
-import { useHasPermission } from '@/hooks/useRbac'
+import { useUserPermissions } from '@/hooks/useRbac'
 import { api } from '@/lib/api'
 import { Button } from '@/components/ui/button'
 import { DriverAssignmentModal } from '@/components/driver-assignment-modal'
@@ -57,14 +57,9 @@ export default function OrdersPage() {
   const t = createTranslator(locale)
 
   // Check RBAC permissions for Orders module
-  const { hasPermission: canViewOrders, loading: canViewLoading } = useHasPermission(
-    MODULE_IDS.ORDERS,
-    PERMISSION_LEVELS.READ,
-  )
-  const { hasPermission: canDeleteOrders, loading: canDeleteLoading } = useHasPermission(
-    MODULE_IDS.ORDERS,
-    PERMISSION_LEVELS.DELETE,
-  )
+  const { checkPermission, loading: permissionLoading } = useUserPermissions()
+  const canViewOrders = checkPermission(MODULE_IDS.ORDERS, PERMISSION_LEVELS.READ)
+  const canDeleteOrders = checkPermission(MODULE_IDS.ORDERS, PERMISSION_LEVELS.DELETE)
 
   const [orders, setOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(true)
@@ -121,7 +116,7 @@ export default function OrdersPage() {
 
   // Move useEffect BEFORE early returns to avoid Hook order violation
   useEffect(() => {
-    if (canViewLoading) {
+    if (permissionLoading) {
       return
     }
     if (!token || !canViewOrders) {
@@ -129,7 +124,7 @@ export default function OrdersPage() {
       return
     }
     fetchOrders()
-  }, [token, statusFilter, paymentFilter, tableFilter, page, searchQuery, canViewOrders, canViewLoading])
+  }, [token, statusFilter, paymentFilter, tableFilter, page, searchQuery, canViewOrders, permissionLoading])
 
   useEffect(() => {
     const urlTableID = searchParams.get('table_id')
@@ -143,7 +138,7 @@ export default function OrdersPage() {
     }
   }, [searchParams, tableFilter])
 
-  if (canViewLoading) {
+  if (permissionLoading) {
     return (
       <div className="flex justify-center items-center h-96">
         <Loader className="h-8 w-8 animate-spin text-primary" />
@@ -179,7 +174,7 @@ export default function OrdersPage() {
   }
 
   const handleCancelOrder = async (orderId: number) => {
-    if (canDeleteLoading || !canDeleteOrders) {
+    if (!canDeleteOrders) {
       toast.error(t('orders.permissionDenied', 'You do not have permission to cancel orders.'))
       return
     }
@@ -540,7 +535,7 @@ export default function OrdersPage() {
                               </Button>
                             )}
                             {order.status !== 'cancelled' && order.status !== 'delivered' && (
-                              !canDeleteLoading && canDeleteOrders ? (
+                              canDeleteOrders ? (
                                 <Button
                                   variant="outline"
                                   size="sm"

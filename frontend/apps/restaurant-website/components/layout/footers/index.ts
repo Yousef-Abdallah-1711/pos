@@ -1,0 +1,6 @@
+export { ExpandedFooter } from './ExpandedFooter'
+export { CompactFooter } from './CompactFooter'
+export { CardsFooter } from './CardsFooter'
+export { SocialHeavyFooter } from './SocialHeavyFooter'
+export { MinimalFooter } from './MinimalFooter'
+export type { FooterVariantProps } from './shared'

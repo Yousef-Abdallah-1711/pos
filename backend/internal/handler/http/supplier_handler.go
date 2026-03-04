@@ -1,10 +1,12 @@
 package http
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 
 	"pos-saas/internal/domain"
 	"pos-saas/internal/middleware"
@@ -14,6 +16,8 @@ import (
 type SupplierHandler struct {
 	supplierRepo *repository.SupplierRepository
 }
+
+const supplierHandlerTimeout = 10 * time.Second
 
 func NewSupplierHandler(supplierRepo *repository.SupplierRepository) *SupplierHandler {
 	return &SupplierHandler{supplierRepo: supplierRepo}
@@ -34,7 +38,9 @@ func (h *SupplierHandler) ListSuppliers(w http.ResponseWriter, r *http.Request) 
 		pageSize = 100
 	}
 
-	suppliers, err := h.supplierRepo.ListSuppliers(tenantID, restaurantID)
+	ctx, cancel := context.WithTimeout(r.Context(), supplierHandlerTimeout)
+	defer cancel()
+	suppliers, total, err := h.supplierRepo.ListSuppliersPaged(ctx, tenantID, restaurantID, page, pageSize)
 	if err != nil {
 		writeJSON(w, http.StatusInternalServerError, map[string]interface{}{
 			"success": false,
@@ -43,19 +49,9 @@ func (h *SupplierHandler) ListSuppliers(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	total := len(suppliers)
-	offset := (page - 1) * pageSize
-	if offset > total {
-		offset = total
-	}
-	end := offset + pageSize
-	if end > total {
-		end = total
-	}
-
 	writeJSON(w, http.StatusOK, map[string]interface{}{
 		"success": true,
-		"data":    suppliers[offset:end],
+		"data":    suppliers,
 		"pagination": map[string]interface{}{
 			"page":      page,
 			"page_size": pageSize,

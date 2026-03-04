@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useAuthStore } from '@/stores/authStore'
-import { useHasPermission } from '@/hooks/useRbac'
+import { useUserPermissions } from '@/hooks/useRbac'
 import { MODULE_IDS, PERMISSION_LEVELS } from '@/lib/rbac'
 import { Loader2, Lock, Search, Plus, Edit2, Trash2, X, Eye, EyeOff } from 'lucide-react'
 import { debugError } from '@/lib/debug'
@@ -32,10 +32,8 @@ export default function UsersPage() {
   const user = useAuthStore((state) => state.user)
   const token = useAuthStore((state) => state.token)
 
-  const { hasPermission: isAdmin, loading: permissionLoading } = useHasPermission(
-    MODULE_IDS.SETTINGS,
-    PERMISSION_LEVELS.WRITE
-  )
+  const { checkPermission, loading: permissionLoading } = useUserPermissions()
+  const isAdmin = checkPermission(MODULE_IDS.SETTINGS, PERMISSION_LEVELS.WRITE)
 
   // User Management State
   const [users, setUsers] = useState<User[]>([])

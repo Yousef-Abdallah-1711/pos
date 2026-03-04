@@ -14,7 +14,7 @@ import {
 } from 'lucide-react'
 import QRCode from 'qrcode'
 import { Button } from '@/components/ui/button'
-import { useHasPermission } from '@/hooks/useRbac'
+import { useUserPermissions } from '@/hooks/useRbac'
 import { useTables, type TableFilter } from '@/hooks/useTables'
 import {
   type RestaurantTable,
@@ -36,16 +36,10 @@ export default function TablesPage() {
   const t = createTranslator(locale)
   const isRTL = locale === 'ar'
 
-  const { hasPermission: canViewTables, loading: canViewLoading } =
-    useHasPermission(MODULE_IDS.TABLES, PERMISSION_LEVELS.READ)
-  const { hasPermission: canManageTables } = useHasPermission(
-    MODULE_IDS.TABLES,
-    PERMISSION_LEVELS.WRITE
-  )
-  const { hasPermission: canDeleteTables } = useHasPermission(
-    MODULE_IDS.TABLES,
-    PERMISSION_LEVELS.DELETE
-  )
+  const { checkPermission, loading: permissionLoading } = useUserPermissions()
+  const canViewTables = checkPermission(MODULE_IDS.TABLES, PERMISSION_LEVELS.READ)
+  const canManageTables = checkPermission(MODULE_IDS.TABLES, PERMISSION_LEVELS.WRITE)
+  const canDeleteTables = checkPermission(MODULE_IDS.TABLES, PERMISSION_LEVELS.DELETE)
 
   const {
     tables,
@@ -245,7 +239,7 @@ export default function TablesPage() {
     }
   }
 
-  if (canViewLoading) {
+  if (permissionLoading) {
     return (
       <div className="flex items-center justify-center h-80">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />

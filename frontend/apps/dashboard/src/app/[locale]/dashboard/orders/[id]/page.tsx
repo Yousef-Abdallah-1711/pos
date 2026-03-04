@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { usePathname, useParams } from 'next/navigation'
 import Link from 'next/link'
 import { useAuthStore } from '@/stores/authStore'
-import { useHasPermission } from '@/hooks/useRbac'
+import { useUserPermissions } from '@/hooks/useRbac'
 import { api } from '@/lib/api'
 import { Button } from '@/components/ui/button'
 import { DriverAssignmentModal } from '@/components/driver-assignment-modal'
@@ -130,14 +130,9 @@ export default function OrderDetailsPage() {
   const t = createTranslator(locale)
 
   // Check RBAC permissions for Orders module
-  const { hasPermission: canViewOrders, loading: canViewLoading } = useHasPermission(
-    MODULE_IDS.ORDERS,
-    PERMISSION_LEVELS.READ,
-  )
-  const { hasPermission: canUpdateOrders, loading: canUpdateLoading } = useHasPermission(
-    MODULE_IDS.ORDERS,
-    PERMISSION_LEVELS.WRITE,
-  )
+  const { checkPermission, loading: permissionLoading } = useUserPermissions()
+  const canViewOrders = checkPermission(MODULE_IDS.ORDERS, PERMISSION_LEVELS.READ)
+  const canUpdateOrders = checkPermission(MODULE_IDS.ORDERS, PERMISSION_LEVELS.WRITE)
 
   const orderId = params.id as string
   const [order, setOrder] = useState<Order | null>(null)
@@ -163,7 +158,7 @@ export default function OrderDetailsPage() {
   }, [orderId])
 
   useEffect(() => {
-    if (canViewLoading || canUpdateLoading) {
+    if (permissionLoading) {
       return
     }
     if (!token || !canViewOrders) {
@@ -172,9 +167,9 @@ export default function OrderDetailsPage() {
     }
 
     void fetchOrder()
-  }, [token, canViewOrders, canViewLoading, canUpdateLoading, fetchOrder])
+  }, [token, canViewOrders, permissionLoading, fetchOrder])
 
-  if (canViewLoading || canUpdateLoading) {
+  if (permissionLoading) {
     return (
       <div className="flex justify-center items-center h-96">
         <Loader className="h-8 w-8 animate-spin text-primary" />

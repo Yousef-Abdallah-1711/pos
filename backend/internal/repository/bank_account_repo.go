@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 	"fmt"
@@ -17,8 +18,22 @@ func NewBankAccountRepository(db *sql.DB) *BankAccountRepository {
 	return &BankAccountRepository{db: db}
 }
 
-func (r *BankAccountRepository) ListBankAccounts(tenantID, restaurantID int) ([]domain.BankAccount, error) {
-	rows, err := r.db.Query(`
+func (r *BankAccountRepository) ListBankAccountsPaged(ctx context.Context, tenantID, restaurantID, page, pageSize int) ([]domain.BankAccount, int, error) {
+	var total int
+	if err := r.db.QueryRowContext(
+		ctx,
+		`SELECT COUNT(1) FROM bank_accounts_ledger WHERE tenant_id = $1 AND restaurant_id = $2`,
+		tenantID,
+		restaurantID,
+	).Scan(&total); err != nil {
+		return nil, 0, err
+	}
+
+	offset := (page - 1) * pageSize
+	if offset < 0 {
+		offset = 0
+	}
+	rows, err := r.db.QueryContext(ctx, `
 		SELECT
 			id, tenant_id, restaurant_id, account_name, COALESCE(account_name_ar, ''),
 			bank_name, COALESCE(bank_branch, ''), account_number, COALESCE(iban, ''),
@@ -29,25 +44,31 @@ func (r *BankAccountRepository) ListBankAccounts(tenantID, restaurantID int) ([]
 		FROM bank_accounts_ledger
 		WHERE tenant_id = $1 AND restaurant_id = $2
 		ORDER BY is_primary DESC, account_name ASC
-	`, tenantID, restaurantID)
+		LIMIT $3 OFFSET $4
+	`, tenantID, restaurantID, pageSize, offset)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 	defer rows.Close()
 
-	accounts := make([]domain.BankAccount, 0)
+	accounts := make([]domain.BankAccount, 0, pageSize)
 	for rows.Next() {
 		account, err := scanBankAccount(rows)
 		if err != nil {
-			return nil, err
+			return nil, 0, err
 		}
 		accounts = append(accounts, account)
 	}
 	if err := rows.Err(); err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
-	return accounts, nil
+	return accounts, total, nil
+}
+
+func (r *BankAccountRepository) ListBankAccounts(tenantID, restaurantID int) ([]domain.BankAccount, error) {
+	accounts, _, err := r.ListBankAccountsPaged(context.Background(), tenantID, restaurantID, 1, 1000000)
+	return accounts, err
 }
 
 func (r *BankAccountRepository) GetBankAccountByID(tenantID, restaurantID, id int) (*domain.BankAccount, error) {

@@ -4,14 +4,14 @@
 
 - `layout/`
   - Shared page chrome for runtime and theme preview integration.
-  - `ThemeHeader.tsx` and `ThemeFooter.tsx` normalize server theme data and render `@pos-saas/ui-themes` layout components.
+  - `Header.tsx` and `Footer.tsx` normalize server theme data and render `@pos-saas/ui-themes` layout components.
   - `header-ssr.tsx` and `footer-ssr.tsx` are the route-facing wrappers used by storefront pages.
-  - `theme-layout-normalizers.ts` maps API/theme data into shared UI config.
+  - `layout-normalizers.ts` maps API/theme data into shared UI config.
 - `homepage/`
   - Homepage theme-builder runtime components.
-  - `dynamic-home-page.tsx` renders section order from theme config.
-  - `featured-products-section.tsx` appends live products after theme sections.
-  - `error-boundary.tsx` isolates section rendering failures.
+  - `home-page-content.tsx` renders section order from theme config.
+  - Featured products are appended inside `home-page-content.tsx`.
+  - Section error boundaries live in `home-page-content.tsx`.
 - `commerce/`
   - Reusable storefront commerce UI used by menu/cart/orders pages.
   - Product cards, cart widget, order list, and order tracking UI.
@@ -26,5 +26,6 @@
 - Do not duplicate header/footer markup in app code.
 - Use `@pos-saas/ui-themes` `Header` and `Footer` for all theme layouts.
 - Use `@pos-saas/ui-themes` `SectionRenderer` + `frontend/layers/ui-themes/src/sections/*` for homepage theme sections.
-- Put API-to-UI mapping logic only in `layout/theme-layout-normalizers.ts`.
+- Put API-to-UI mapping logic only in `layout/layout-normalizers.ts`.
 - Keep route files importing layout wrappers (`layout/header-ssr.tsx`, `layout/footer-ssr.tsx`) unless doing a full migration.
+

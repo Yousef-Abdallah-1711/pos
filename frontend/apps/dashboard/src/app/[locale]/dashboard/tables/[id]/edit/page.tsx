@@ -5,7 +5,7 @@ import { useParams, usePathname, useRouter } from 'next/navigation'
 import { ArrowLeft, Loader2, Lock } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
-import { useHasPermission } from '@/hooks/useRbac'
+import { useUserPermissions } from '@/hooks/useRbac'
 import { AddTableForm } from '../../components/AddTableForm'
 import {
   type RestaurantTable,
@@ -25,10 +25,9 @@ export default function EditTablePage() {
 
   const tableID = Number.parseInt(String(params.id || ''), 10)
 
-  const { hasPermission: canViewTables, loading: canViewLoading } =
-    useHasPermission(MODULE_IDS.TABLES, PERMISSION_LEVELS.READ)
-  const { hasPermission: canManageTables, loading: canManageLoading } =
-    useHasPermission(MODULE_IDS.TABLES, PERMISSION_LEVELS.WRITE)
+  const { checkPermission, loading: permissionLoading } = useUserPermissions()
+  const canViewTables = checkPermission(MODULE_IDS.TABLES, PERMISSION_LEVELS.READ)
+  const canManageTables = checkPermission(MODULE_IDS.TABLES, PERMISSION_LEVELS.WRITE)
 
   const [table, setTable] = useState<RestaurantTable | null>(null)
   const [loading, setLoading] = useState(true)
@@ -53,10 +52,10 @@ export default function EditTablePage() {
       }
     }
 
-    if (!canViewLoading && canViewTables) {
+    if (!permissionLoading && canViewTables) {
       void fetchTable()
     }
-  }, [canViewLoading, canViewTables, tableID, t])
+  }, [permissionLoading, canViewTables, tableID, t])
 
   const handleUpdateTable = async (
     payload: Parameters<typeof tablesApi.update>[1]
@@ -81,7 +80,7 @@ export default function EditTablePage() {
     }
   }
 
-  if (canViewLoading || canManageLoading) {
+  if (permissionLoading) {
     return (
       <div className="flex items-center justify-center h-80">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />

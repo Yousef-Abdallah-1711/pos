@@ -1,62 +1,42 @@
-'use client';
+import { NextIntlClientProvider } from 'next-intl'
+import { notFound } from 'next/navigation'
+import enMessages from '@/i18n/messages/en.json'
+import arMessages from '@/i18n/messages/ar.json'
+import { getThemeDataServer, getDefaultThemeData } from '@/lib/api/get-theme-server'
+import { LayoutChrome } from '@/components/layout/layout-chrome'
+import '../../styles/globals.css'
 
-import { use } from 'react';
-import { NextIntlClientProvider } from 'next-intl';
-import '../../styles/globals.css';
+type Locale = 'en' | 'ar'
 
-type Locale = 'en' | 'ar';
-
-// Messages for next-intl with proper nested structure (NO dots in keys!)
 const messages = {
-  en: {
-    nav: {
-      home: 'Home',
-      menu: 'Menu',
-      about: 'About',
-      contact: 'Contact',
-    },
-    cart: {
-      title: 'Shopping Cart',
-    },
-    checkout: {
-      title: 'Checkout',
-    },
-  },
-  ar: {
-    nav: {
-      home: 'الرئيسية',
-      menu: 'القائمة',
-      about: 'عن',
-      contact: 'اتصل',
-    },
-    cart: {
-      title: 'سلة التسوق',
-    },
-    checkout: {
-      title: 'الدفع',
-    },
-  },
-};
+  en: enMessages,
+  ar: arMessages,
+}
 
-export default function LocaleLayout({
+export default async function LocaleLayout({
   children,
   params,
 }: {
-  children: React.ReactNode;
-  params: Promise<{ locale: string }>;
+  children: React.ReactNode
+  params: Promise<{ locale: string }>
 }) {
-  const { locale: localeParam } = use(params);
-  const locale = (localeParam as Locale) || 'en';
-  const direction = locale === 'ar' ? 'rtl' : 'ltr';
+  const { locale: localeParam } = await params
+
+  if (localeParam !== 'en' && localeParam !== 'ar') {
+    notFound()
+  }
+
+  const locale = localeParam as Locale
+  const direction = locale === 'ar' ? 'rtl' : 'ltr'
+  const themeData = (await getThemeDataServer()) || getDefaultThemeData()
 
   return (
-    <NextIntlClientProvider
-      locale={locale}
-      messages={messages[locale] || messages.en}
-    >
-      <div lang={locale} dir={direction}>
-        {children}
+    <NextIntlClientProvider locale={locale} messages={messages[locale]}>
+      <div lang={locale} dir={direction} className={locale === 'ar' ? 'font-arabic' : ''}>
+        <LayoutChrome locale={locale} themeData={themeData}>
+          {children}
+        </LayoutChrome>
       </div>
     </NextIntlClientProvider>
-  );
+  )
 }

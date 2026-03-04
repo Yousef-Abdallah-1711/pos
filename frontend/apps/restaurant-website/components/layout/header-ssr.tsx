@@ -2,7 +2,7 @@
 
 import { memo } from 'react'
 import type { ServerThemeData } from '@/lib/api/get-theme-server'
-import { ThemeHeader } from './ThemeHeader'
+import { Header } from './Header'
 
 interface HeaderSSRProps {
   themeData: ServerThemeData
@@ -11,7 +11,7 @@ interface HeaderSSRProps {
 }
 
 function HeaderSSRComponent({ themeData, locale = 'en' }: HeaderSSRProps) {
-  return <ThemeHeader themeData={themeData} locale={locale} />
+  return <Header themeData={themeData} locale={locale} />
 }
 
 export const HeaderSSR = memo(HeaderSSRComponent)

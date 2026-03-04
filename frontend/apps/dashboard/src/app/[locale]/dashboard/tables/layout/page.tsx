@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { useHasPermission } from '@/hooks/useRbac'
+import { useUserPermissions } from '@/hooks/useRbac'
 import { useTables } from '@/hooks/useTables'
 import {
   type RestaurantTable,
@@ -43,10 +43,9 @@ export default function TablesLayoutPage() {
   const t = createTranslator(locale)
   const isRTL = locale === 'ar'
 
-  const { hasPermission: canViewTables, loading: canViewLoading } =
-    useHasPermission(MODULE_IDS.TABLES, PERMISSION_LEVELS.READ)
-  const { hasPermission: canManageTables, loading: canManageLoading } =
-    useHasPermission(MODULE_IDS.TABLES, PERMISSION_LEVELS.WRITE)
+  const { checkPermission, loading: permissionLoading } = useUserPermissions()
+  const canViewTables = checkPermission(MODULE_IDS.TABLES, PERMISSION_LEVELS.READ)
+  const canManageTables = checkPermission(MODULE_IDS.TABLES, PERMISSION_LEVELS.WRITE)
 
   const { tables, loading, refresh } = useTables('all')
 
@@ -93,7 +92,7 @@ export default function TablesLayoutPage() {
   }, [])
 
   useEffect(() => {
-    if (canViewLoading) {
+    if (permissionLoading) {
       return
     }
 
@@ -103,7 +102,7 @@ export default function TablesLayoutPage() {
     }
 
     void loadLayouts()
-  }, [canViewLoading, canViewTables, loadLayouts])
+  }, [permissionLoading, canViewTables, loadLayouts])
 
   const selectedLayoutData = useMemo(() => {
     if (typeof selectedLayout !== 'number') {
@@ -244,7 +243,7 @@ export default function TablesLayoutPage() {
     }
   }
 
-  if (canViewLoading || canManageLoading || loading || layoutsLoading) {
+  if (permissionLoading || loading || layoutsLoading) {
     return (
       <div className="flex h-80 items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />

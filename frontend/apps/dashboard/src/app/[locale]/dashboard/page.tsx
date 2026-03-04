@@ -28,7 +28,7 @@ import { getConfig } from '@/lib/config'
 import { debugError } from '@/lib/debug'
 import { createTranslator, getLocaleFromPath } from '@/lib/translations'
 import { useAuthStore } from '@/stores/authStore'
-import { useHasPermission } from '@/hooks/useRbac'
+import { useUserPermissions } from '@/hooks/useRbac'
 import { MODULE_IDS, PERMISSION_LEVELS } from '@/lib/rbac'
 
 interface DashboardOrder {
@@ -246,14 +246,15 @@ export default function DashboardPage() {
   const token = useAuthStore((state) => state.token)
 
   // Permission checks for each module
-  const { hasPermission: canViewReports } = useHasPermission(MODULE_IDS.REPORTS, PERMISSION_LEVELS.READ)
-  const { hasPermission: canViewOrders } = useHasPermission(MODULE_IDS.ORDERS, PERMISSION_LEVELS.READ)
-  const { hasPermission: canViewProducts } = useHasPermission(MODULE_IDS.PRODUCTS, PERMISSION_LEVELS.READ)
-  const { hasPermission: canViewCategories } = useHasPermission(MODULE_IDS.CATEGORIES, PERMISSION_LEVELS.READ)
-  const { hasPermission: canViewHR } = useHasPermission(MODULE_IDS.HR, PERMISSION_LEVELS.READ)
-  const { hasPermission: canViewTables } = useHasPermission(MODULE_IDS.TABLES, PERMISSION_LEVELS.READ)
-  const { hasPermission: canViewKDS } = useHasPermission(MODULE_IDS.KDS, PERMISSION_LEVELS.READ)
-  const { hasPermission: canUsePOS } = useHasPermission(MODULE_IDS.ORDERS, PERMISSION_LEVELS.WRITE)
+  const { checkPermission, loading: permissionsLoading } = useUserPermissions()
+  const canViewReports = checkPermission(MODULE_IDS.REPORTS, PERMISSION_LEVELS.READ)
+  const canViewOrders = checkPermission(MODULE_IDS.ORDERS, PERMISSION_LEVELS.READ)
+  const canViewProducts = checkPermission(MODULE_IDS.PRODUCTS, PERMISSION_LEVELS.READ)
+  const canViewCategories = checkPermission(MODULE_IDS.CATEGORIES, PERMISSION_LEVELS.READ)
+  const canViewHR = checkPermission(MODULE_IDS.HR, PERMISSION_LEVELS.READ)
+  const canViewTables = checkPermission(MODULE_IDS.TABLES, PERMISSION_LEVELS.READ)
+  const canViewKDS = checkPermission(MODULE_IDS.KDS, PERMISSION_LEVELS.READ)
+  const canUsePOS = checkPermission(MODULE_IDS.ORDERS, PERMISSION_LEVELS.WRITE)
 
   const [overview, setOverview] = useState<DashboardOverviewData>(EMPTY_OVERVIEW)
   const [isLoading, setIsLoading] = useState(true)
@@ -274,6 +275,9 @@ export default function DashboardPage() {
   }, [debugMode, isAuthenticated, locale])
 
   useEffect(() => {
+    if (permissionsLoading) {
+      return
+    }
     if (!isAuthenticated && !debugMode) return
 
     let cancelled = false
@@ -415,7 +419,7 @@ export default function DashboardPage() {
     return () => {
       cancelled = true
     }
-  }, [debugMode, isAuthenticated, token, user?.restaurant_id, canViewTables])
+  }, [debugMode, isAuthenticated, token, user?.restaurant_id, canViewTables, permissionsLoading])
 
   const setupTasks = useMemo(() => {
     const items = [
@@ -591,6 +595,16 @@ export default function DashboardPage() {
         <div className="flex items-center gap-3 text-gray-600 dark:text-gray-300">
           <Loader2 className="h-5 w-5 animate-spin" />
           <span>{t('auth.redirectingToLogin', 'Redirecting to login...')}</span>
+        </div>
+      </div>
+    )
+  }
+  if (permissionsLoading) {
+    return (
+      <div className="min-h-[40vh] flex items-center justify-center">
+        <div className="flex items-center gap-3 text-gray-600 dark:text-gray-300">
+          <Loader2 className="h-5 w-5 animate-spin" />
+          <span>{t('common.loading', 'Loading...')}</span>
         </div>
       </div>
     )

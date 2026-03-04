@@ -9,6 +9,10 @@ import (
 	"pos-saas/internal/usecase"
 )
 
+func setPublicCacheHeaders(w http.ResponseWriter) {
+	w.Header().Set("Cache-Control", "public, max-age=300, stale-while-revalidate=600")
+}
+
 // PublicMenuHandler handles public-facing menu API requests (no authentication required)
 type PublicMenuHandler struct {
 	productUC      *usecase.ProductUseCase
@@ -32,6 +36,7 @@ func NewPublicMenuHandler(
 // GetRestaurantMenu returns the full menu for a restaurant
 // GET /api/v1/public/restaurants/{slug}/menu
 func (h *PublicMenuHandler) GetRestaurantMenu(w http.ResponseWriter, r *http.Request) {
+	setPublicCacheHeaders(w)
 	slug := r.PathValue("slug")
 	language := r.URL.Query().Get("lang")
 	if language == "" {
@@ -73,6 +78,7 @@ func (h *PublicMenuHandler) GetRestaurantMenu(w http.ResponseWriter, r *http.Req
 // GetCategoryProducts returns products for a specific category
 // GET /api/v1/public/restaurants/{slug}/categories/{categoryId}/products
 func (h *PublicMenuHandler) GetCategoryProducts(w http.ResponseWriter, r *http.Request) {
+	setPublicCacheHeaders(w)
 	slug := r.PathValue("slug")
 	categoryIDStr := r.PathValue("categoryId")
 	language := r.URL.Query().Get("lang")
@@ -106,6 +112,7 @@ func (h *PublicMenuHandler) GetCategoryProducts(w http.ResponseWriter, r *http.R
 // GetProductDetails returns detailed information about a single product
 // GET /api/v1/public/restaurants/{slug}/products/{productId}
 func (h *PublicMenuHandler) GetProductDetails(w http.ResponseWriter, r *http.Request) {
+	setPublicCacheHeaders(w)
 	slug := r.PathValue("slug")
 	productIDStr := r.PathValue("productId")
 	language := r.URL.Query().Get("lang")
@@ -150,6 +157,7 @@ func convertImages(imgs []domain.ProductImage) []domain.ProductImage {
 // SearchProducts searches for products by name or description
 // GET /api/v1/public/restaurants/{slug}/search?q=pizza
 func (h *PublicMenuHandler) SearchProducts(w http.ResponseWriter, r *http.Request) {
+	setPublicCacheHeaders(w)
 	slug := r.PathValue("slug")
 	query := r.URL.Query().Get("q")
 	language := r.URL.Query().Get("lang")
@@ -184,6 +192,7 @@ func (h *PublicMenuHandler) SearchProducts(w http.ResponseWriter, r *http.Reques
 // GetRestaurantProducts returns all products for a restaurant
 // GET /api/v1/public/restaurants/{slug}/products
 func (h *PublicMenuHandler) GetRestaurantProducts(w http.ResponseWriter, r *http.Request) {
+	setPublicCacheHeaders(w)
 	slug := r.PathValue("slug")
 	language := r.URL.Query().Get("lang")
 	if language == "" {
@@ -210,6 +219,7 @@ func (h *PublicMenuHandler) GetRestaurantProducts(w http.ResponseWriter, r *http
 // GetRestaurantCategories returns all categories for a restaurant
 // GET /api/v1/public/restaurants/{slug}/categories
 func (h *PublicMenuHandler) GetRestaurantCategories(w http.ResponseWriter, r *http.Request) {
+	setPublicCacheHeaders(w)
 	slug := r.PathValue("slug")
 	language := r.URL.Query().Get("lang")
 	if language == "" {
@@ -236,6 +246,7 @@ func (h *PublicMenuHandler) GetRestaurantCategories(w http.ResponseWriter, r *ht
 // GetRestaurantInfo returns restaurant information
 // GET /api/v1/public/restaurants/{slug}/info
 func (h *PublicMenuHandler) GetRestaurantInfo(w http.ResponseWriter, r *http.Request) {
+	setPublicCacheHeaders(w)
 	slug := r.PathValue("slug")
 
 	restaurant, err := h.restaurantRepo.GetBySlug(slug)

@@ -439,11 +439,21 @@ func main() {
 	mux := http.NewServeMux()
 
 	// Public routes - Authentication
-	mux.HandleFunc("POST /api/v1/auth/register", authHandler.Register)
-	mux.HandleFunc("POST /api/v1/auth/login", authHandler.Login)
+	mux.Handle("POST /api/v1/auth/register", middleware.MaxBodyBytesMiddleware(1<<20)(http.HandlerFunc(authHandler.Register)))
+	mux.Handle(
+		"POST /api/v1/auth/login",
+		middleware.RateLimitByIP(5)(
+			middleware.MaxBodyBytesMiddleware(1<<20)(http.HandlerFunc(authHandler.Login)),
+		),
+	)
 	mux.HandleFunc("POST /api/v1/auth/login/confirm", authHandler.LoginConfirm)
 	mux.HandleFunc("POST /api/v1/auth/token-exchange", authHandler.TokenExchange)
-	mux.HandleFunc("POST /api/v1/auth/forgot-password", authHandler.ForgotPassword)
+	mux.Handle(
+		"POST /api/v1/auth/forgot-password",
+		middleware.RateLimitByIP(3)(
+			middleware.MaxBodyBytesMiddleware(1<<20)(http.HandlerFunc(authHandler.ForgotPassword)),
+		),
+	)
 	mux.HandleFunc("GET /api/v1/auth/check-subdomain", authHandler.CheckSubdomainAvailability)
 
 	// Public routes - Menu API (no authentication required)
@@ -524,6 +534,9 @@ func main() {
 			"db_status":  dbStatus,
 		})
 	})
+	mux.HandleFunc("GET /health", func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, "/api/v1/health", http.StatusTemporaryRedirect)
+	})
 
 	mux.HandleFunc("GET /api/v1/health/ready", func(w http.ResponseWriter, r *http.Request) {
 		dbHealthy, dbStatus := checkDBHealth(r.Context())
@@ -542,6 +555,9 @@ func main() {
 			"db_healthy": dbHealthy,
 			"db_status":  dbStatus,
 		})
+	})
+	mux.HandleFunc("GET /ready", func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, "/api/v1/health/ready", http.StatusTemporaryRedirect)
 	})
 
 	mux.HandleFunc("GET /api/v1/health/metrics", func(w http.ResponseWriter, r *http.Request) {
@@ -593,7 +609,9 @@ func main() {
 	// Helper function to wrap handlers with auth only (no tenant middleware)
 	// Use this for RBAC endpoints that read claims.TenantID directly from JWT
 	wrapAuthOnly := func(next http.Handler) http.Handler {
-		return middleware.AuthMiddleware(tokenService)(next)
+		wrapped := middleware.CSRFMiddleware(next)
+		wrapped = middleware.AuthMiddleware(tokenService)(wrapped)
+		return wrapped
 	}
 
 	// Helper function to wrap handlers with auth and tenant middleware
@@ -601,7 +619,8 @@ func main() {
 		// Apply middleware in REVERSE order of execution
 		// Auth must execute FIRST to set claims in context, then Tenant can read them
 		// The last middleware applied is the outermost and executes first
-		wrapped := middleware.TenantContextMiddleware(next)        // This will be innermost (execute 2nd)
+		wrapped := middleware.CSRFMiddleware(next)
+		wrapped = middleware.TenantContextMiddleware(wrapped)      // This will be innermost (execute 2nd)
 		wrapped = middleware.AuthMiddleware(tokenService)(wrapped) // This will be outermost (execute 1st)
 		return wrapped
 	}
@@ -609,9 +628,10 @@ func main() {
 	// Helper function to wrap handlers with auth, tenant, and subscription status middleware
 	wrapProtectedWithStatus := func(next http.Handler) http.Handler {
 		// Apply middleware in REVERSE order of execution
-		wrapped := middleware.TenantStatusMiddleware(subscriptionRepo)(next) // innermost (execute 3rd)
-		wrapped = middleware.TenantContextMiddleware(wrapped)                // execute 2nd
-		wrapped = middleware.AuthMiddleware(tokenService)(wrapped)           // outermost (execute 1st)
+		wrapped := middleware.CSRFMiddleware(next)
+		wrapped = middleware.TenantStatusMiddleware(subscriptionRepo)(wrapped) // innermost (execute 3rd)
+		wrapped = middleware.TenantContextMiddleware(wrapped)                  // execute 2nd
+		wrapped = middleware.AuthMiddleware(tokenService)(wrapped)             // outermost (execute 1st)
 		return wrapped
 	}
 
@@ -620,7 +640,8 @@ func main() {
 	// Common module IDs: Products=1, HR=2, Notifications=3, Orders=4, etc.
 	wrapWithPermission := func(next http.Handler, moduleID int64, permissionLevel string) http.Handler {
 		// Apply middleware in REVERSE order of execution
-		wrapped := middleware.WithRequiredPermission(moduleID, permissionLevel)(next) // innermost
+		wrapped := middleware.CSRFMiddleware(next)
+		wrapped = middleware.WithRequiredPermission(moduleID, permissionLevel)(wrapped) // innermost
 		// 		wrapped = middleware.PermissionMiddleware(permissionUC)(wrapped)                       // permission check
 		wrapped = middleware.TenantContextMiddleware(wrapped)      // tenant context
 		wrapped = middleware.AuthMiddleware(tokenService)(wrapped) // outermost (auth first)
@@ -629,7 +650,7 @@ func main() {
 
 	// KDS-specific wrapper adds per-user rate limits for Phase 8 hardening.
 	wrapKDSWithPermission := func(next http.Handler, permissionLevel string, includeBumpLimit bool) http.Handler {
-		wrapped := next
+		wrapped := middleware.CSRFMiddleware(next)
 		if includeBumpLimit {
 			wrapped = middleware.RateLimitByUserWindow(5, time.Second)(wrapped)
 		}
@@ -1841,7 +1862,9 @@ func main() {
 	}
 
 	// Apply global middleware
-	corsHandler := middleware.CORSMiddleware(mux)
+	jsonBodyLimitHandler := middleware.MaxJSONBodyBytesMiddleware(1 << 20)(mux)
+	timeoutHandler := middleware.TimeoutMiddleware(30 * time.Second)(jsonBodyLimitHandler)
+	corsHandler := middleware.CORSMiddleware(timeoutHandler)
 	compressedHandler := middleware.GzipMiddleware(corsHandler)
 	securedHandler := middleware.SecurityHeadersMiddleware(compressedHandler)
 	metricsHandler := middleware.RequestMetricsMiddleware(securedHandler)

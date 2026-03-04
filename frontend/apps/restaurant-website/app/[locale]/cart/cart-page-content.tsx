@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useCartStore } from '@/lib/store/cart-store'
+import { useCart } from '@/lib/hooks/use-cart'
 import { Cart } from '@/components/commerce/cart'
 import { createTranslator } from '@/lib/translations'
 import { Button } from '@pos-saas/ui'
@@ -20,11 +20,7 @@ export function CartPageContent({ locale, themeData }: CartPageContentProps) {
   const primaryColor = themeData?.colors?.primary || '#f97316'
   const secondaryColor = themeData?.colors?.secondary || '#0ea5e9'
 
-  const cartItems = useCartStore((state) => state.items)
-  const cartItemsCount = useCartStore((state) => state.getTotalItems())
-  const orderSubtotal = useCartStore((state) => state.getTotal())
-  const tableId = useCartStore((state) => state.tableId)
-  const tableName = useCartStore((state) => state.tableName)
+  const { items: cartItems, totalItems: cartItemsCount, totalPrice: orderSubtotal, tableId, tableName } = useCart()
   const isDineIn = tableId !== null
   const deliveryFee = isDineIn ? 0 : orderSubtotal > 50 ? 0 : 5.99
   const grandTotal = orderSubtotal + deliveryFee

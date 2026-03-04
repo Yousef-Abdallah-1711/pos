@@ -1,8 +1,6 @@
 import Link from 'next/link'
 import { headers } from 'next/headers'
 import { AlertCircle } from 'lucide-react'
-import { HeaderSSR } from '@/components/layout/header-ssr'
-import { FooterSSR } from '@/components/layout/footer-ssr'
 import { getThemeDataServer, getDefaultThemeData } from '@/lib/api/get-theme-server'
 import type { ServerThemeData } from '@/lib/api/get-theme-server'
 import { getApiBaseUrl } from '@/lib/config/api'
@@ -58,43 +56,37 @@ async function getPublicTableInfo(tableId: number): Promise<TablePublicInfo | nu
 function InvalidTableState({
   locale,
   t,
-  themeData,
   tableId,
 }: {
   locale: 'en' | 'ar'
   t: (path: string, fallback?: string) => string
-  themeData: ServerThemeData
   tableId?: number
 }) {
   return (
-    <div className="flex flex-col min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100">
-      <HeaderSSR themeData={themeData} locale={locale} cartItemsCount={0} />
-      <main className="flex-1 w-full flex items-center justify-center px-4 py-8">
-        <div className="max-w-md w-full rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 p-6 text-center shadow-sm">
-          <AlertCircle className="h-10 w-10 text-red-600 dark:text-red-400 mx-auto mb-3" />
-          <h1 className="text-lg font-semibold text-red-900 dark:text-red-200">
-            {t('tableOrdering.invalidTableTitle')}
-          </h1>
-          <p className="mt-2 text-sm text-red-800 dark:text-red-300">
-            {t('tableOrdering.invalidTable')}
+    <main className="min-h-screen w-full px-4 py-8 flex items-center justify-center">
+      <div className="max-w-md w-full rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 p-6 text-center shadow-sm">
+        <AlertCircle className="h-10 w-10 text-red-600 dark:text-red-400 mx-auto mb-3" />
+        <h1 className="text-lg font-semibold text-red-900 dark:text-red-200">
+          {t('tableOrdering.invalidTableTitle')}
+        </h1>
+        <p className="mt-2 text-sm text-red-800 dark:text-red-300">
+          {t('tableOrdering.invalidTable')}
+        </p>
+        {tableId ? (
+          <p className="mt-3 text-xs text-red-700/80 dark:text-red-200/80">
+            {t('tableOrdering.table')} #{tableId}
           </p>
-          {tableId ? (
-            <p className="mt-3 text-xs text-red-700/80 dark:text-red-200/80">
-              {t('tableOrdering.table')} #{tableId}
-            </p>
-          ) : null}
-          <div className="mt-6">
-            <Link
-              href={`/${locale}/menu`}
-              className="inline-flex items-center justify-center rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
-            >
-              {t('tableOrdering.openMenu')}
-            </Link>
-          </div>
+        ) : null}
+        <div className="mt-6">
+          <Link
+            href={`/${locale}/menu`}
+            className="inline-flex items-center justify-center rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
+          >
+            {t('tableOrdering.openMenu')}
+          </Link>
         </div>
-      </main>
-      <FooterSSR themeData={themeData} locale={locale} />
-    </div>
+      </div>
+    </main>
   )
 }
 
@@ -107,7 +99,7 @@ export default async function TableMenuPage({ params }: TableMenuPageProps) {
   const themeData = (await getThemeDataServer()) ?? getDefaultThemeData()
 
   if (!Number.isFinite(tableId) || tableId <= 0) {
-    return <InvalidTableState locale={locale} t={t} themeData={themeData} />
+    return <InvalidTableState locale={locale} t={t} />
   }
 
   const tableInfo = await getPublicTableInfo(tableId)
@@ -119,7 +111,6 @@ export default async function TableMenuPage({ params }: TableMenuPageProps) {
       <InvalidTableState
         locale={locale}
         t={t}
-        themeData={themeData}
         tableId={tableId}
       />
     )
@@ -129,23 +120,19 @@ export default async function TableMenuPage({ params }: TableMenuPageProps) {
   const statusNotice = getTableStatusNotice(tableInfo.status)
 
   return (
-    <div className="flex flex-col min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100">
-      <HeaderSSR themeData={themeData} locale={locale} cartItemsCount={0} />
-      <main className="flex-1 w-full">
-        <MenuPageContent
-          locale={locale}
-          themeData={themeData}
-          restaurantSlug={restaurantSlug}
-          tableContext={{
-            tableId: tableInfo.id,
-            tableNumber: tableInfo.table_number,
-            tableName: tableInfo.name || null,
-            tableStatus: tableInfo.status,
-          }}
-          tableStatusNotice={statusNotice}
-        />
-      </main>
-      <FooterSSR themeData={themeData} locale={locale} />
-    </div>
+    <main className="min-h-screen w-full bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100">
+      <MenuPageContent
+        locale={locale}
+        themeData={themeData}
+        restaurantSlug={restaurantSlug}
+        tableContext={{
+          tableId: tableInfo.id,
+          tableNumber: tableInfo.table_number,
+          tableName: tableInfo.name || null,
+          tableStatus: tableInfo.status,
+        }}
+        tableStatusNotice={statusNotice}
+      />
+    </main>
   )
 }

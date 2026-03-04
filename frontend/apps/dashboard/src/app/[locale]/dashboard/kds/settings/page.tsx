@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { AxiosError } from 'axios'
 import { AlertCircle, ArrowLeft, Loader2, Lock, Save } from 'lucide-react'
-import { useHasPermission } from '@/hooks/useRbac'
+import { useUserPermissions } from '@/hooks/useRbac'
 import type { KDSDisplayDensity, KDSSettings } from '@/hooks/useKDS'
 import { api } from '@/lib/api'
 import { MODULE_IDS, PERMISSION_LEVELS } from '@/lib/rbac'
@@ -106,10 +106,8 @@ export default function KDSSettingsPage() {
   const t = createTranslator(locale)
   const isRTL = locale === 'ar'
 
-  const { hasPermission: canManageSettings, loading: permissionLoading } = useHasPermission(
-    MODULE_IDS.KDS,
-    PERMISSION_LEVELS.ADMIN
-  )
+  const { checkPermission, loading: permissionLoading } = useUserPermissions()
+  const canManageSettings = checkPermission(MODULE_IDS.KDS, PERMISSION_LEVELS.ADMIN)
 
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)

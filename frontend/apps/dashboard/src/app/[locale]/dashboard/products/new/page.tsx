@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { useAuthStore } from '@/stores/authStore'
-import { useHasPermission } from '@/hooks/useRbac'
+import { useUserPermissions } from '@/hooks/useRbac'
 import { api } from '@/lib/api'
 import { apiCache } from '@/lib/apiCache'
 import { toast } from 'sonner'
@@ -28,10 +28,8 @@ export default function CreateProductPage() {
   const t = createTranslator(locale)
 
   // Check RBAC permissions for Products module
-  const canCreateProducts = useHasPermission(
-    MODULE_IDS.PRODUCTS,
-    PERMISSION_LEVELS.WRITE,
-  )
+  const { checkPermission, loading: permissionLoading } = useUserPermissions()
+  const canCreateProducts = checkPermission(MODULE_IDS.PRODUCTS, PERMISSION_LEVELS.WRITE)
 
   const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(true)
@@ -64,10 +62,10 @@ export default function CreateProductPage() {
       }
     }
 
-    if (token) {
+    if (token && canCreateProducts && !permissionLoading) {
       fetchCategories()
     }
-  }, [token])
+  }, [token, canCreateProducts, permissionLoading])
 
   const handleCreateProduct = async (formData: any) => {
     try {
@@ -93,6 +91,14 @@ export default function CreateProductPage() {
     { href: `/${locale}/dashboard/products`, label: t('products.title') },
     { label: t('products.createNewProduct') }
   ]
+
+  if (permissionLoading) {
+    return (
+      <div className="space-y-6">
+        <FormSkeleton />
+      </div>
+    )
+  }
 
   // Show permission denied if user can't create products
   if (!canCreateProducts) {

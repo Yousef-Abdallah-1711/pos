@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 	"time"
@@ -16,8 +17,22 @@ func NewContractRepository(db *sql.DB) *ContractRepository {
 	return &ContractRepository{db: db}
 }
 
-func (r *ContractRepository) List(tenantID, restaurantID int) ([]domain.EmploymentContract, error) {
-	rows, err := r.db.Query(`
+func (r *ContractRepository) ListPaged(ctx context.Context, tenantID, restaurantID, page, pageSize int) ([]domain.EmploymentContract, int, error) {
+	var total int
+	if err := r.db.QueryRowContext(
+		ctx,
+		`SELECT COUNT(1) FROM employment_contracts WHERE tenant_id = $1 AND restaurant_id = $2`,
+		tenantID,
+		restaurantID,
+	).Scan(&total); err != nil {
+		return nil, 0, err
+	}
+
+	offset := (page - 1) * pageSize
+	if offset < 0 {
+		offset = 0
+	}
+	rows, err := r.db.QueryContext(ctx, `
 		SELECT
 			id, tenant_id, restaurant_id, employee_id, contract_type, contract_number, start_date, end_date,
 			salary_amount, currency, status, renewed_from_id, notes,
@@ -25,12 +40,13 @@ func (r *ContractRepository) List(tenantID, restaurantID int) ([]domain.Employme
 		FROM employment_contracts
 		WHERE tenant_id = $1 AND restaurant_id = $2
 		ORDER BY start_date DESC, id DESC
-	`, tenantID, restaurantID)
+		LIMIT $3 OFFSET $4
+	`, tenantID, restaurantID, pageSize, offset)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 	defer rows.Close()
-	out := make([]domain.EmploymentContract, 0)
+	out := make([]domain.EmploymentContract, 0, pageSize)
 	for rows.Next() {
 		var item domain.EmploymentContract
 		var renewedFromID, createdBy, updatedBy sql.NullInt64
@@ -39,7 +55,7 @@ func (r *ContractRepository) List(tenantID, restaurantID int) ([]domain.Employme
 			&item.SalaryAmount, &item.Currency, &item.Status, &renewedFromID, &item.Notes,
 			&item.CreatedAt, &item.UpdatedAt, &createdBy, &updatedBy,
 		); err != nil {
-			return nil, err
+			return nil, 0, err
 		}
 		if renewedFromID.Valid {
 			v := int(renewedFromID.Int64)
@@ -55,7 +71,12 @@ func (r *ContractRepository) List(tenantID, restaurantID int) ([]domain.Employme
 		}
 		out = append(out, item)
 	}
-	return out, rows.Err()
+	return out, total, rows.Err()
+}
+
+func (r *ContractRepository) List(tenantID, restaurantID int) ([]domain.EmploymentContract, error) {
+	out, _, err := r.ListPaged(context.Background(), tenantID, restaurantID, 1, 1000000)
+	return out, err
 }
 
 func (r *ContractRepository) GetByID(tenantID, restaurantID, id int) (*domain.EmploymentContract, error) {

@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 	"fmt"
@@ -16,8 +17,22 @@ func NewSupplierRepository(db *sql.DB) *SupplierRepository {
 	return &SupplierRepository{db: db}
 }
 
-func (r *SupplierRepository) ListSuppliers(tenantID, restaurantID int) ([]domain.Supplier, error) {
-	rows, err := r.db.Query(`
+func (r *SupplierRepository) ListSuppliersPaged(ctx context.Context, tenantID, restaurantID, page, pageSize int) ([]domain.Supplier, int, error) {
+	var total int
+	if err := r.db.QueryRowContext(
+		ctx,
+		`SELECT COUNT(1) FROM suppliers WHERE tenant_id = $1 AND restaurant_id = $2`,
+		tenantID,
+		restaurantID,
+	).Scan(&total); err != nil {
+		return nil, 0, err
+	}
+
+	offset := (page - 1) * pageSize
+	if offset < 0 {
+		offset = 0
+	}
+	rows, err := r.db.QueryContext(ctx, `
 		SELECT
 			id, tenant_id, restaurant_id, supplier_code, company_name,
 			COALESCE(company_name_ar, ''), COALESCE(contact_person, ''),
@@ -33,25 +48,31 @@ func (r *SupplierRepository) ListSuppliers(tenantID, restaurantID int) ([]domain
 		FROM suppliers
 		WHERE tenant_id = $1 AND restaurant_id = $2
 		ORDER BY company_name ASC
-	`, tenantID, restaurantID)
+		LIMIT $3 OFFSET $4
+	`, tenantID, restaurantID, pageSize, offset)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 	defer rows.Close()
 
-	suppliers := make([]domain.Supplier, 0)
+	suppliers := make([]domain.Supplier, 0, pageSize)
 	for rows.Next() {
 		supplier, err := scanSupplier(rows)
 		if err != nil {
-			return nil, err
+			return nil, 0, err
 		}
 		suppliers = append(suppliers, supplier)
 	}
 	if err := rows.Err(); err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
-	return suppliers, nil
+	return suppliers, total, nil
+}
+
+func (r *SupplierRepository) ListSuppliers(tenantID, restaurantID int) ([]domain.Supplier, error) {
+	suppliers, _, err := r.ListSuppliersPaged(context.Background(), tenantID, restaurantID, 1, 1000000)
+	return suppliers, err
 }
 
 func (r *SupplierRepository) GetSupplierByID(tenantID, restaurantID, id int) (*domain.Supplier, error) {

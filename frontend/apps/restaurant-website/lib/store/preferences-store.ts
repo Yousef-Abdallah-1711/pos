@@ -1,9 +1,12 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
+export type DarkModePreference = 'light' | 'dark' | 'system';
+
 export interface PreferencesSettings {
   language: 'en' | 'ar';
-  theme: 'light' | 'dark' | 'system';
+  theme: DarkModePreference;
+  darkMode: DarkModePreference;
   primaryColor: string;
   secondaryColor: string;
   accentColor: string;
@@ -13,7 +16,8 @@ interface PreferencesState {
   settings: PreferencesSettings;
   setSettings: (settings: PreferencesSettings) => void;
   updateLanguage: (language: 'en' | 'ar') => void;
-  updateTheme: (theme: 'light' | 'dark' | 'system') => void;
+  updateTheme: (theme: DarkModePreference) => void;
+  setDarkMode: (mode: DarkModePreference) => void;
   updateColors: (primaryColor: string, secondaryColor: string, accentColor: string) => void;
   applyTheme: () => void;
   applyColors: () => void;
@@ -22,6 +26,7 @@ interface PreferencesState {
 const DEFAULT_SETTINGS: PreferencesSettings = {
   language: 'en',
   theme: 'system',
+  darkMode: 'system',
   primaryColor: '#3b82f6',
   secondaryColor: '#10b981',
   accentColor: '#f59e0b',
@@ -30,7 +35,7 @@ const DEFAULT_SETTINGS: PreferencesSettings = {
 /**
  * Apply theme to DOM
  */
-function applyThemeToDom(theme: 'light' | 'dark' | 'system') {
+function applyThemeToDom(theme: DarkModePreference) {
   if (typeof window === 'undefined') return;
 
   const htmlElement = document.documentElement;
@@ -66,7 +71,7 @@ export const usePreferencesStore = create<PreferencesState>()(
 
       setSettings: (settings) => {
         set({ settings });
-        applyThemeToDom(settings.theme);
+        applyThemeToDom(settings.darkMode ?? settings.theme);
         applyColorsToDom(settings.primaryColor, settings.secondaryColor, settings.accentColor);
       },
 
@@ -78,7 +83,13 @@ export const usePreferencesStore = create<PreferencesState>()(
 
       updateTheme: (theme) => {
         const { settings } = get();
-        const newSettings = { ...settings, theme };
+        const newSettings = { ...settings, theme, darkMode: theme };
+        get().setSettings(newSettings);
+      },
+
+      setDarkMode: (mode) => {
+        const { settings } = get();
+        const newSettings = { ...settings, darkMode: mode, theme: mode };
         get().setSettings(newSettings);
       },
 
@@ -90,7 +101,7 @@ export const usePreferencesStore = create<PreferencesState>()(
 
       applyTheme: () => {
         const { settings } = get();
-        applyThemeToDom(settings.theme);
+        applyThemeToDom(settings.darkMode ?? settings.theme);
       },
 
       applyColors: () => {

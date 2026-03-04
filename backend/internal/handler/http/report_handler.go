@@ -695,36 +695,84 @@ func (h *ReportHandler) GetOverviewReport(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	salesSummary, err := h.querySalesSummary(tenantID, restaurantID, dateFrom, dateToExclusive)
-	if err != nil {
-		endpointErr = err
-		respondError(w, http.StatusInternalServerError, "Failed to load sales summary")
-		return
-	}
-	salesTop, err := h.queryTopItems(tenantID, restaurantID, dateFrom, dateToExclusive, 1)
-	if err != nil {
-		endpointErr = err
-		respondError(w, http.StatusInternalServerError, "Failed to load sales top item")
-		return
+	var (
+		salesSummary   salesSummaryResponse
+		salesTop       []salesTopItem
+		profitSummary  profitabilitySummaryResponse
+		profitTop      []profitabilityItem
+		inventoryItems []inventoryTurnoverItem
+		firstErr       error
+		errMu          sync.Mutex
+	)
+
+	setErr := func(err error) {
+		if err == nil {
+			return
+		}
+		errMu.Lock()
+		if firstErr == nil {
+			firstErr = err
+		}
+		errMu.Unlock()
 	}
 
-	profitSummary, err := h.queryProfitabilitySummary(tenantID, restaurantID, dateFrom, dateToExclusive)
-	if err != nil {
-		endpointErr = err
-		respondError(w, http.StatusInternalServerError, "Failed to load profitability summary")
-		return
-	}
-	profitTop, _, err := h.queryProfitabilityItems(tenantID, restaurantID, dateFrom, dateToExclusive, 1)
-	if err != nil {
-		endpointErr = err
-		respondError(w, http.StatusInternalServerError, "Failed to load profitability top item")
-		return
-	}
+	var wg sync.WaitGroup
+	wg.Add(5)
 
-	inventoryItems, err := h.queryInventoryTurnoverItems(tenantID, restaurantID, dateFrom, dateToExclusive, daysInRange)
-	if err != nil {
-		endpointErr = err
-		respondError(w, http.StatusInternalServerError, "Failed to load inventory overview")
+	go func() {
+		defer wg.Done()
+		out, qErr := h.querySalesSummary(tenantID, restaurantID, dateFrom, dateToExclusive)
+		if qErr != nil {
+			setErr(qErr)
+			return
+		}
+		salesSummary = out
+	}()
+
+	go func() {
+		defer wg.Done()
+		out, qErr := h.queryTopItems(tenantID, restaurantID, dateFrom, dateToExclusive, 1)
+		if qErr != nil {
+			setErr(qErr)
+			return
+		}
+		salesTop = out
+	}()
+
+	go func() {
+		defer wg.Done()
+		out, qErr := h.queryProfitabilitySummary(tenantID, restaurantID, dateFrom, dateToExclusive)
+		if qErr != nil {
+			setErr(qErr)
+			return
+		}
+		profitSummary = out
+	}()
+
+	go func() {
+		defer wg.Done()
+		top, _, qErr := h.queryProfitabilityItems(tenantID, restaurantID, dateFrom, dateToExclusive, 1)
+		if qErr != nil {
+			setErr(qErr)
+			return
+		}
+		profitTop = top
+	}()
+
+	go func() {
+		defer wg.Done()
+		out, qErr := h.queryInventoryTurnoverItems(tenantID, restaurantID, dateFrom, dateToExclusive, daysInRange)
+		if qErr != nil {
+			setErr(qErr)
+			return
+		}
+		inventoryItems = out
+	}()
+
+	wg.Wait()
+	if firstErr != nil {
+		endpointErr = firstErr
+		respondError(w, http.StatusInternalServerError, "Failed to load reports overview")
 		return
 	}
 	inventorySummary := summarizeInventoryItems(inventoryItems)

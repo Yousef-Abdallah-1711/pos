@@ -1,6 +1,6 @@
 ﻿'use client'
 
-import { useCartStore } from '@/lib/store/cart-store'
+import { useCart } from '@/lib/hooks/use-cart'
 import { Button } from '@pos-saas/ui'
 import { Minus, Plus, Trash2, ShoppingCart } from 'lucide-react'
 import Image from 'next/image'
@@ -16,18 +16,12 @@ interface CartProps {
  * Uses theme CSS variables for colors
  */
 export function Cart({ locale = 'en' }: CartProps) {
-  const items = useCartStore((state) => state.items)
-  const removeItem = useCartStore((state) => state.removeItem)
-  const updateQuantity = useCartStore((state) => state.updateQuantity)
-  const updateNotes = useCartStore((state) => state.updateNotes)
-  const getTotal = useCartStore((state) => state.getTotal)
-  const getTotalItems = useCartStore((state) => state.getTotalItems)
-  const clearCart = useCartStore((state) => state.clearCart)
+  const { items, removeItem, updateQty: updateQuantity, updateNotes, totalPrice, totalItems, clearCart } = useCart()
   const themeColors = useThemeColors() as any
 
   const isRTL = locale === 'ar'
-  const total = getTotal()
-  const itemCount = getTotalItems()
+  const total = totalPrice
+  const itemCount = totalItems
 
   const bgColor = (themeColors as any)?.background || '#ffffff'
   const textColor = (themeColors as any)?.text || '#1f2937'

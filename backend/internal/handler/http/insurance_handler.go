@@ -1,6 +1,7 @@
 package http
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"strconv"
@@ -14,6 +15,8 @@ import (
 type InsuranceHandler struct {
 	repo *repository.InsuranceRepository
 }
+
+const insuranceHandlerTimeout = 10 * time.Second
 
 func NewInsuranceHandler(repo *repository.InsuranceRepository) *InsuranceHandler {
 	return &InsuranceHandler{repo: repo}
@@ -33,23 +36,16 @@ func (h *InsuranceHandler) List(w http.ResponseWriter, r *http.Request) {
 	if pageSize > 100 {
 		pageSize = 100
 	}
-	data, err := h.repo.List(tenantID, restaurantID)
+	ctx, cancel := context.WithTimeout(r.Context(), insuranceHandlerTimeout)
+	defer cancel()
+	data, total, err := h.repo.ListPaged(ctx, tenantID, restaurantID, page, pageSize)
 	if err != nil {
 		respondError(w, http.StatusInternalServerError, "Failed to load insurance records")
 		return
 	}
-	total := len(data)
-	offset := (page - 1) * pageSize
-	if offset > total {
-		offset = total
-	}
-	end := offset + pageSize
-	if end > total {
-		end = total
-	}
 	respondJSON(w, http.StatusOK, map[string]interface{}{
 		"success": true,
-		"data":    data[offset:end],
+		"data":    data,
 		"pagination": map[string]interface{}{
 			"page":      page,
 			"page_size": pageSize,

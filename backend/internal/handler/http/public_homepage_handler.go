@@ -46,6 +46,13 @@ func (h *PublicHomepageHandler) GetHomepageData(w http.ResponseWriter, r *http.R
 
 	fmt.Printf("DEBUG GetHomepageData: Found restaurant id=%d, slug='%s'\n", restaurant.ID, restaurant.Slug)
 
+	cacheKey := buildPublicThemeCacheKey(int64(restaurant.ID), "homepage")
+	if cached, found := getCachedPublicThemePayload(cacheKey); found {
+		w.Header().Set("Cache-Control", "public, max-age=300, stale-while-revalidate=600")
+		OKResponse(w, cached)
+		return
+	}
+
 	// Get active theme for restaurant
 	theme, err := h.themeRepo.GetByRestaurantAndActive(r.Context(), int64(restaurant.ID))
 	if err != nil {
@@ -86,6 +93,8 @@ func (h *PublicHomepageHandler) GetHomepageData(w http.ResponseWriter, r *http.R
 		},
 	}
 
+	setCachedPublicThemePayload(cacheKey, response)
+	w.Header().Set("Cache-Control", "public, max-age=300, stale-while-revalidate=600")
 	OKResponse(w, response)
 }
 
@@ -102,6 +111,13 @@ func (h *PublicHomepageHandler) GetThemeOnly(w http.ResponseWriter, r *http.Requ
 	restaurant, err := h.restaurantRepo.GetBySlug(slug)
 	if err != nil {
 		NotFoundResponse(w, "restaurant not found")
+		return
+	}
+
+	cacheKey := buildPublicThemeCacheKey(int64(restaurant.ID), "theme")
+	if cached, found := getCachedPublicThemePayload(cacheKey); found {
+		w.Header().Set("Cache-Control", "public, max-age=300, stale-while-revalidate=600")
+		OKResponse(w, cached)
 		return
 	}
 
@@ -124,6 +140,8 @@ func (h *PublicHomepageHandler) GetThemeOnly(w http.ResponseWriter, r *http.Requ
 		"data":    configData,
 	}
 
+	setCachedPublicThemePayload(cacheKey, response)
+	w.Header().Set("Cache-Control", "public, max-age=300, stale-while-revalidate=600")
 	OKResponse(w, response)
 }
 
@@ -140,6 +158,13 @@ func (h *PublicHomepageHandler) GetSectionsOnly(w http.ResponseWriter, r *http.R
 	restaurant, err := h.restaurantRepo.GetBySlug(slug)
 	if err != nil {
 		NotFoundResponse(w, "restaurant not found")
+		return
+	}
+
+	cacheKey := buildPublicThemeCacheKey(int64(restaurant.ID), "sections")
+	if cached, found := getCachedPublicThemePayload(cacheKey); found {
+		w.Header().Set("Cache-Control", "public, max-age=300, stale-while-revalidate=600")
+		OKResponse(w, cached)
 		return
 	}
 
@@ -168,6 +193,8 @@ func (h *PublicHomepageHandler) GetSectionsOnly(w http.ResponseWriter, r *http.R
 		"data":    components,
 	}
 
+	setCachedPublicThemePayload(cacheKey, response)
+	w.Header().Set("Cache-Control", "public, max-age=300, stale-while-revalidate=600")
 	OKResponse(w, response)
 }
 
@@ -184,6 +211,13 @@ func (h *PublicHomepageHandler) GetSettingsOnly(w http.ResponseWriter, r *http.R
 	restaurant, err := h.restaurantRepo.GetBySlug(slug)
 	if err != nil {
 		NotFoundResponse(w, "restaurant not found")
+		return
+	}
+
+	cacheKey := buildPublicThemeCacheKey(int64(restaurant.ID), "settings")
+	if cached, found := getCachedPublicThemePayload(cacheKey); found {
+		w.Header().Set("Cache-Control", "public, max-age=300, stale-while-revalidate=600")
+		OKResponse(w, cached)
 		return
 	}
 
@@ -209,5 +243,7 @@ func (h *PublicHomepageHandler) GetSettingsOnly(w http.ResponseWriter, r *http.R
 		},
 	}
 
+	setCachedPublicThemePayload(cacheKey, response)
+	w.Header().Set("Cache-Control", "public, max-age=300, stale-while-revalidate=600")
 	OKResponse(w, response)
 }

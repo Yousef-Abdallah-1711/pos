@@ -6,7 +6,7 @@ import { useTranslations } from 'next-intl'
 import { usePathname } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { useHRReports } from '@/hooks/useHRReports'
-import { useHasPermission } from '@/hooks/useRbac'
+import { useUserPermissions } from '@/hooks/useRbac'
 import { MODULE_IDS, PERMISSION_LEVELS } from '@/lib/rbac'
 import { getLocaleFromPath } from '@/lib/translations'
 
@@ -31,7 +31,8 @@ export default function HRReportsPage() {
   const locale = getLocaleFromPath(pathname)
   const isRTL = locale === 'ar'
   const [filters, setFilters] = useState(defaultFilters)
-  const { hasPermission, loading: permissionLoading } = useHasPermission(MODULE_IDS.REPORTS, PERMISSION_LEVELS.READ)
+  const { checkPermission, loading: permissionLoading } = useUserPermissions()
+  const hasPermission = checkPermission(MODULE_IDS.REPORTS, PERMISSION_LEVELS.READ)
   const { headcount, turnover, absenteeism, overtime, leaveBalances, trainingCompliance, loading, error, refresh } = useHRReports(filters)
 
   const numberFormat = useMemo(
