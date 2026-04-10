@@ -2,7 +2,8 @@
 
 import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { useAuth } from '@/hooks/useAuth'
+import { getConfig } from '@/lib/config'
+import { useAuthStore } from '@/stores/authStore'
 
 interface Tenant {
   tenant_id: number
@@ -26,7 +27,7 @@ export function TenantSelectorModal({
   onTenantSelected,
 }: TenantSelectorModalProps) {
   const router = useRouter()
-  const { setToken, setUser } = useAuth()
+  const setAuth = useAuthStore((state) => state.setAuth)
   const [selectedTenantId, setSelectedTenantId] = useState<number | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -41,7 +42,7 @@ export function TenantSelectorModal({
     setError(null)
 
     try {
-      const response = await fetch('/api/v1/auth/login/confirm', {
+      const response = await fetch(`${getConfig().apiUrl}/auth/login/confirm`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -59,15 +60,8 @@ export function TenantSelectorModal({
 
       const data = await response.json()
 
-      // Store token and user in auth context
-      if (data.token) {
-        setToken(data.token)
-        localStorage.setItem('token', data.token)
-      }
-
       if (data.user) {
-        setUser(data.user)
-        localStorage.setItem('user', JSON.stringify(data.user))
+        setAuth(data.user, data.token ?? null)
       }
 
       // Call callback if provided

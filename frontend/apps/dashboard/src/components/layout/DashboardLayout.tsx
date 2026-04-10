@@ -1,7 +1,7 @@
 'use client'
 
 import { Suspense, useEffect, useState, useRef } from 'react'
-import { useRouter, usePathname } from 'next/navigation'
+import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { useAuthStore } from '@/stores/authStore'
 import { usePreferencesStore } from '@/stores/preferencesStore'
@@ -12,12 +12,14 @@ import { Sidebar } from '@/components/layout/Sidebar'
 import { LanguageSwitcher } from '@/components/layout/LanguageSwitcher'
 import { NotificationCenter } from '@/components/notifications/NotificationCenter'
 import { createTranslator, getLocaleFromPath } from '@/lib/translations'
+import { getDashboardLoginUrl } from '@/lib/authSession'
 import { debugError } from '@/lib/debug'
 import { getConfig } from '@/lib/config'
 import { commonRoutes, preloadRoutes } from '@/lib/code-splitting'
 import { TrialWarningBanner } from '@/components/layout/TrialWarningBanner'
 import { useTenantStatus } from '@/hooks/useTenantStatus'
 import { BlockedOverlay } from '@/components/blocked/BlockedOverlay'
+import { authFetch } from '@/lib/authFetch'
 
 export default function DashboardLayout({
   children,
@@ -27,9 +29,7 @@ export default function DashboardLayout({
   const pathname = usePathname()
   const locale = getLocaleFromPath(pathname)
   const t = createTranslator(locale)
-  const router = useRouter()
   const user = useAuthStore((state) => state.user)
-  const token = useAuthStore((state) => state.token)
   const logout = useAuthStore((state) => state.logout)
   const { settings, setSettings, setLoading, updateTheme } = usePreferencesStore()
   const { resolvedTheme, setTheme } = useTheme()
@@ -39,7 +39,7 @@ export default function DashboardLayout({
   const dropdownRef = useRef<HTMLDivElement>(null)
   const { isBlocked, blockReason } = useTenantStatus()
 
-  const isLoggedIn = !!(user && token)
+  const isLoggedIn = !!user
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -69,14 +69,14 @@ export default function DashboardLayout({
 
   useEffect(() => {
     if (!isLoggedIn) {
-      router.push(`/${locale}/auth/login`)
+      window.location.href = getDashboardLoginUrl(pathname)
     }
-  }, [isLoggedIn, router, locale])
+  }, [isLoggedIn, pathname])
 
   // Load user preferences on mount
   useEffect(() => {
     const loadPreferences = async () => {
-      if (!user?.id || !token) return
+      if (!user?.id) return
 
       // Skip if settings already loaded
       if (settings && settings.userId === user.id) return
@@ -84,9 +84,7 @@ export default function DashboardLayout({
       setLoading(true)
       try {
         const { apiUrl } = getConfig()
-        const response = await fetch(`${apiUrl}/users/${user.id}/settings`, {
-          headers: { Authorization: `Bearer ${token}` },
-        })
+        const response = await authFetch(`${apiUrl}/users/${user.id}/settings`)
 
         if (response.ok) {
           const data = await response.json()
@@ -111,7 +109,7 @@ export default function DashboardLayout({
     }
 
     loadPreferences()
-  }, [user?.id, token, settings, setLoading, setSettings])
+  }, [user?.id, settings, setLoading, setSettings])
 
   // Sync theme and colors globally when settings change
   useEffect(() => {
@@ -124,7 +122,7 @@ export default function DashboardLayout({
 
   const handleLogout = () => {
     logout()
-    router.push(`/${locale}/auth/login`)
+    window.location.href = getDashboardLoginUrl(pathname)
   }
 
   if (!isLoggedIn) {

@@ -5,6 +5,17 @@ import (
 	"strings"
 )
 
+const embeddedCheckoutFrameAncestors = "http://localhost:3002 http://127.0.0.1:3002"
+
+func allowsEmbeddedCheckout(path string) bool {
+	switch path {
+	case "/api/v1/mock/paymob/iframe", "/api/v1/mock/paymob/process":
+		return true
+	default:
+		return false
+	}
+}
+
 // CacheConfig defines caching strategy for different content types
 type CacheConfig struct {
 	// Cache-Control directive
@@ -215,20 +226,27 @@ func CompressThenCacheMiddleware(next http.Handler) http.Handler {
 // SecurityHeadersMiddleware adds security headers
 func SecurityHeadersMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		allowEmbeddedCheckout := allowsEmbeddedCheckout(r.URL.Path)
+
 		// Prevent MIME type sniffing
 		w.Header().Set("X-Content-Type-Options", "nosniff")
 
 		// Clickjacking protection
-		w.Header().Set("X-Frame-Options", "DENY")
+		if allowEmbeddedCheckout {
+			w.Header().Del("X-Frame-Options")
+		} else {
+			w.Header().Set("X-Frame-Options", "DENY")
+		}
 
 		// Referrer policy
 		w.Header().Set("Referrer-Policy", "strict-origin-when-cross-origin")
 
 		// Content Security Policy
-		w.Header().Set(
-			"Content-Security-Policy",
-			"default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https:; frame-ancestors 'none'; base-uri 'self'; form-action 'self'",
-		)
+		cspValue := "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https:; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
+		if allowEmbeddedCheckout {
+			cspValue = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https:; frame-ancestors " + embeddedCheckoutFrameAncestors + "; base-uri 'self'; form-action 'self'"
+		}
+		w.Header().Set("Content-Security-Policy", cspValue)
 
 		// Feature-Policy (Permissions-Policy)
 		w.Header().Set(

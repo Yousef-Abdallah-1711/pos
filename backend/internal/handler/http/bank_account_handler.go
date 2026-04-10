@@ -2,7 +2,6 @@ package http
 
 import (
 	"context"
-	"encoding/json"
 	"net/http"
 	"strconv"
 	"strings"
@@ -101,7 +100,7 @@ func (h *BankAccountHandler) CreateBankAccount(w http.ResponseWriter, r *http.Re
 	userID := int(middleware.GetUserID(r))
 
 	var req domain.CreateBankAccountRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+	if err := decodeJSONStrict(r, &req); err != nil {
 		writeJSON(w, http.StatusBadRequest, map[string]interface{}{
 			"success": false,
 			"error":   "Invalid request body",
@@ -174,7 +173,7 @@ func (h *BankAccountHandler) UpdateBankAccount(w http.ResponseWriter, r *http.Re
 	}
 
 	var req domain.UpdateBankAccountRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+	if err := decodeJSONStrict(r, &req); err != nil {
 		writeJSON(w, http.StatusBadRequest, map[string]interface{}{
 			"success": false,
 			"error":   "Invalid request body",

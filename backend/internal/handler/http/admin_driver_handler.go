@@ -1,7 +1,6 @@
 package http
 
 import (
-	"encoding/json"
 	"net/http"
 	"strconv"
 	"strings"
@@ -134,7 +133,7 @@ func (h *AdminDriverHandler) CreateDriver(w http.ResponseWriter, r *http.Request
 	}
 
 	var req driverPayload
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+	if err := decodeJSONStrict(r, &req); err != nil {
 		respondError(w, http.StatusBadRequest, "Invalid request body")
 		return
 	}
@@ -195,8 +194,13 @@ func (h *AdminDriverHandler) ListDrivers(w http.ResponseWriter, r *http.Request)
 		respondError(w, http.StatusBadRequest, "Missing tenant context")
 		return
 	}
+	page := parsePositiveIntQuery(r.URL.Query().Get("page"), 1)
+	pageSize := parsePositiveIntQuery(r.URL.Query().Get("page_size"), 20)
+	if pageSize > 200 {
+		pageSize = 200
+	}
 
-	drivers, err := h.driverRepo.GetByTenantAndRestaurant(r.Context(), int(tenantID), int(restaurantID))
+	drivers, total, err := h.driverRepo.GetByTenantAndRestaurantPaged(r.Context(), int(tenantID), int(restaurantID), page, pageSize)
 	if err != nil {
 		respondError(w, http.StatusInternalServerError, "Failed to list drivers")
 		return
@@ -209,7 +213,24 @@ func (h *AdminDriverHandler) ListDrivers(w http.ResponseWriter, r *http.Request)
 
 	respondJSON(w, http.StatusOK, map[string]interface{}{
 		"drivers": response,
+		"pagination": map[string]interface{}{
+			"page":        page,
+			"page_size":   pageSize,
+			"total":       total,
+			"total_pages": (total + pageSize - 1) / pageSize,
+		},
 	})
+}
+
+func parsePositiveIntQuery(value string, fallback int) int {
+	if strings.TrimSpace(value) == "" {
+		return fallback
+	}
+	parsed, err := strconv.Atoi(value)
+	if err != nil || parsed <= 0 {
+		return fallback
+	}
+	return parsed
 }
 
 // GetAvailableDrivers lists available drivers.
@@ -295,7 +316,7 @@ func (h *AdminDriverHandler) UpdateDriver(w http.ResponseWriter, r *http.Request
 	}
 
 	var req driverPayload
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+	if err := decodeJSONStrict(r, &req); err != nil {
 		respondError(w, http.StatusBadRequest, "Invalid request body")
 		return
 	}
@@ -400,7 +421,7 @@ func (h *AdminDriverHandler) UpdateDriverStatus(w http.ResponseWriter, r *http.R
 	var req struct {
 		Status string `json:"status"`
 	}
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+	if err := decodeJSONStrict(r, &req); err != nil {
 		respondError(w, http.StatusBadRequest, "Invalid request body")
 		return
 	}
@@ -438,7 +459,7 @@ func (h *AdminDriverHandler) AssignOrderToDriver(w http.ResponseWriter, r *http.
 	}
 
 	var req domain.AssignOrderRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+	if err := decodeJSONStrict(r, &req); err != nil {
 		respondError(w, http.StatusBadRequest, "Invalid request body")
 		return
 	}

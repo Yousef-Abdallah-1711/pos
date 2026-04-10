@@ -14,6 +14,7 @@ import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbSeparator, Breadc
 import { FormSkeleton } from '@/components/skeletons'
 import { Lock } from 'lucide-react'
 import { debugError } from '@/lib/debug'
+import { hasAuthenticatedSession } from '@/lib/authSession'
 
 interface Category {
   id: number
@@ -33,7 +34,9 @@ export default function CreateProductPage() {
 
   const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(true)
+  const user = useAuthStore((state) => state.user)
   const token = useAuthStore((state) => state.token)
+  const hasSession = hasAuthenticatedSession(user, token)
 
   // Fetch categories with caching
   useEffect(() => {
@@ -62,10 +65,15 @@ export default function CreateProductPage() {
       }
     }
 
-    if (token && canCreateProducts && !permissionLoading) {
+    if (hasSession && canCreateProducts && !permissionLoading) {
       fetchCategories()
+      return
     }
-  }, [token, canCreateProducts, permissionLoading])
+
+    if (!permissionLoading) {
+      setLoading(false)
+    }
+  }, [hasSession, canCreateProducts, permissionLoading])
 
   const handleCreateProduct = async (formData: any) => {
     try {

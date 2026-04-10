@@ -1,14 +1,14 @@
 'use client'
 
 import { useEffect } from 'react'
-import { useRouter, useSearchParams, usePathname } from 'next/navigation'
+import { useSearchParams, usePathname } from 'next/navigation'
+import { getDashboardLoginUrl } from '@/lib/authSession'
 import { useAuthStore } from '@/stores/authStore'
 import { warmupCurrentUserPermissions } from '@/hooks/useRbac'
 import { getConfig } from '@/lib/config'
 import { debugLog, debugError } from '@/lib/debug'
 
 export default function AuthCallbackContent() {
-  const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
   const setAuth = useAuthStore((state) => state.setAuth)
@@ -38,13 +38,13 @@ export default function AuthCallbackContent() {
         window.location.href = `${getConfig().dashboardUrl}/${locale}/dashboard`
       } catch (error) {
         debugError('Auth callback error:', error)
-        window.location.href = `${getConfig().landingUrl}/auth/login`
+        window.location.href = getDashboardLoginUrl(pathname)
       }
     } else {
       debugLog('No auth data, redirecting to login')
-      window.location.href = `${getConfig().landingUrl}/auth/login`
+      window.location.href = getDashboardLoginUrl(pathname)
     }
-  }, [searchParams, setAuth, router, pathname])
+  }, [searchParams, setAuth, pathname])
 
   return (
     <div className="min-h-screen flex items-center justify-center">

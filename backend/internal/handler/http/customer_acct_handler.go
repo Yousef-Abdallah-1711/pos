@@ -2,7 +2,6 @@ package http
 
 import (
 	"context"
-	"encoding/json"
 	"net/http"
 	"strconv"
 	"strings"
@@ -101,7 +100,7 @@ func (h *CustomerAccountHandler) CreateCustomer(w http.ResponseWriter, r *http.R
 	userID := int(middleware.GetUserID(r))
 
 	var req domain.CreateCustomerAccountRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+	if err := decodeJSONStrict(r, &req); err != nil {
 		writeJSON(w, http.StatusBadRequest, map[string]interface{}{
 			"success": false,
 			"error":   "Invalid request body",
@@ -201,7 +200,7 @@ func (h *CustomerAccountHandler) UpdateCustomer(w http.ResponseWriter, r *http.R
 	}
 
 	var req domain.UpdateCustomerAccountRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+	if err := decodeJSONStrict(r, &req); err != nil {
 		writeJSON(w, http.StatusBadRequest, map[string]interface{}{
 			"success": false,
 			"error":   "Invalid request body",

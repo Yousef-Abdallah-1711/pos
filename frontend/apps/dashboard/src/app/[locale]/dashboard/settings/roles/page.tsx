@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { hasAuthenticatedSession } from '@/lib/authSession'
 import { useAuthStore } from '@/stores/authStore'
 import { useUserPermissions } from '@/hooks/useRbac'
 import { MODULE_IDS, PERMISSION_LEVELS } from '@/lib/rbac'
@@ -9,6 +10,7 @@ import { usePathname } from 'next/navigation'
 import { Loader2, Plus, Edit2, Trash2, Lock } from 'lucide-react'
 import { debugError } from '@/lib/debug'
 import { getConfig } from '@/lib/config'
+import { authFetch } from '@/lib/authFetch'
 
 interface Role {
   id: number
@@ -21,6 +23,7 @@ interface Role {
 export default function RolesPage() {
   const user = useAuthStore((state) => state.user)
   const token = useAuthStore((state) => state.token)
+  const hasSession = hasAuthenticatedSession(user, token)
   const pathname = usePathname()
   const locale = pathname.split('/')[1] || 'en'
 
@@ -46,16 +49,11 @@ export default function RolesPage() {
   }, [isAdmin, permissionLoading, token])
 
   const fetchRoles = async () => {
-    if (!token || !user) return
+    if (!hasSession || !user) return
     setIsLoading(true)
     const { apiUrl } = getConfig()
     try {
-      const response = await fetch(
-        `${apiUrl}/rbac/roles`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      )
+      const response = await authFetch(`${apiUrl}/rbac/roles`)
 
       if (response.ok) {
         const data = await response.json()
@@ -73,17 +71,13 @@ export default function RolesPage() {
   }
 
   const handleDelete = async (roleId: number) => {
-    if (!token || !user) return
+    if (!hasSession || !user) return
     setIsDeleting(true)
     try {
       const { apiUrl } = getConfig()
-      const response = await fetch(
-        `${apiUrl}/rbac/roles/${roleId}`,
-        {
-          method: 'DELETE',
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      )
+      const response = await authFetch(`${apiUrl}/rbac/roles/${roleId}`, {
+        method: 'DELETE',
+      })
 
       if (response.ok) {
         setRoles(roles.filter((r) => r.id !== roleId))

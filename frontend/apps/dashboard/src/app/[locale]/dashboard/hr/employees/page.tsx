@@ -15,6 +15,7 @@ import { Plus, AlertCircle, Lock, Loader2 } from 'lucide-react'
 import { createTranslator, getLocaleFromPath } from '@/lib/translations'
 import { MODULE_IDS, PERMISSION_LEVELS } from '@/lib/rbac'
 import { PageHeaderSkeleton, TableSkeleton } from '@/components/skeletons'
+import { hasAuthenticatedSession } from '@/lib/authSession'
 
 interface Employee {
   id: number
@@ -53,11 +54,13 @@ export default function EmployeesPage() {
   const [apiError, setApiError] = useState<string | null>(null)
   const [debugInfo, setDebugInfo] = useState<string>('')
 
+  const user = useAuthStore((state) => state.user)
   const token = useAuthStore((state) => state.token)
+  const hasSession = hasAuthenticatedSession(user, token)
 
   // Fetch employees - hook MUST be before early returns
   useEffect(() => {
-    if (!token || !canViewEmployees || permissionLoading) return
+    if (!hasSession || !canViewEmployees || permissionLoading) return
 
     const fetchEmployees = async () => {
       setLoading(true)
@@ -84,7 +87,7 @@ export default function EmployeesPage() {
     }
 
     fetchEmployees()
-  }, [token, canViewEmployees, permissionLoading])
+  }, [hasSession, canViewEmployees, permissionLoading])
 
   const handleCreateEmployee = async (formData: any) => {
     try {

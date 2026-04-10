@@ -14,6 +14,7 @@ import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbSeparator, Breadc
 import { FormSkeleton } from '@/components/skeletons'
 import { Lock } from 'lucide-react'
 import { debugError } from '@/lib/debug'
+import { hasAuthenticatedSession } from '@/lib/authSession'
 
 interface Product {
   id: number
@@ -42,7 +43,9 @@ export default function EditProductPage() {
   const [product, setProduct] = useState<Product | null>(null)
   const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(true)
+  const user = useAuthStore((state) => state.user)
   const token = useAuthStore((state) => state.token)
+  const hasSession = hasAuthenticatedSession(user, token)
 
   // Fetch product and categories with caching
   useEffect(() => {
@@ -72,10 +75,15 @@ export default function EditProductPage() {
       }
     }
 
-    if (token && productId && canUpdateProducts && !permissionLoading) {
+    if (hasSession && productId && canUpdateProducts && !permissionLoading) {
       fetchData()
+      return
     }
-  }, [token, productId, locale, router, canUpdateProducts, permissionLoading])
+
+    if (!permissionLoading) {
+      setLoading(false)
+    }
+  }, [hasSession, productId, locale, router, canUpdateProducts, permissionLoading])
 
   const handleUpdateProduct = async (formData: any) => {
     try {

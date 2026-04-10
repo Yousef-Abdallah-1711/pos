@@ -16,6 +16,7 @@ import { Plus, AlertCircle, Lock, Loader2 } from 'lucide-react'
 import { createTranslator, getLocaleFromPath } from '@/lib/translations'
 import { PageHeaderSkeleton, TableSkeleton } from '@/components/skeletons'
 import { MODULE_IDS, PERMISSION_LEVELS } from '@/lib/rbac'
+import { hasAuthenticatedSession } from '@/lib/authSession'
 
 interface Leave {
   id: number
@@ -72,11 +73,13 @@ export default function LeavesPage() {
     new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
   )
 
+  const user = useAuthStore((state) => state.user)
   const token = useAuthStore((state) => state.token)
+  const hasSession = hasAuthenticatedSession(user, token)
 
   // Fetch employees - hook MUST be before early returns
   useEffect(() => {
-    if (!token || !canViewLeaves || permissionLoading) return
+    if (!hasSession || !canViewLeaves || permissionLoading) return
 
     const fetchEmployees = async () => {
       try {
@@ -89,11 +92,11 @@ export default function LeavesPage() {
     }
 
     fetchEmployees()
-  }, [token, canViewLeaves, permissionLoading])
+  }, [hasSession, canViewLeaves, permissionLoading])
 
   // Fetch leaves - hook MUST be before early returns
   useEffect(() => {
-    if (!token || !canViewLeaves || permissionLoading) return
+    if (!hasSession || !canViewLeaves || permissionLoading) return
 
     const fetchLeaves = async () => {
       setLoading(true)
@@ -134,7 +137,7 @@ export default function LeavesPage() {
     }
 
     fetchLeaves()
-  }, [token, startDate, endDate, employees, canViewLeaves, permissionLoading])
+  }, [hasSession, startDate, endDate, employees, canViewLeaves, permissionLoading])
 
   // Show loading while permissions are being checked
   if (permissionLoading) {

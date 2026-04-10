@@ -26,6 +26,31 @@ func NewCustomerInvoiceRepository(db *sql.DB, journalRepo *JournalEntryRepositor
 }
 
 func (r *CustomerInvoiceRepository) ListInvoices(tenantID, restaurantID int) ([]domain.CustomerInvoice, error) {
+	invoices, _, err := r.ListInvoicesPaged(tenantID, restaurantID, 1, 100000)
+	return invoices, err
+}
+
+func (r *CustomerInvoiceRepository) ListInvoicesPaged(tenantID, restaurantID, page, pageSize int) ([]domain.CustomerInvoice, int, error) {
+	if page < 1 {
+		page = 1
+	}
+	if pageSize < 1 {
+		pageSize = 20
+	}
+	if pageSize > 200 {
+		pageSize = 200
+	}
+	offset := (page - 1) * pageSize
+
+	var total int
+	if err := r.db.QueryRow(`
+		SELECT COUNT(*)
+		FROM invoices_customer ic
+		WHERE ic.tenant_id = $1 AND ic.restaurant_id = $2
+	`, tenantID, restaurantID).Scan(&total); err != nil {
+		return nil, 0, err
+	}
+
 	rows, err := r.db.Query(`
 		SELECT
 			ic.id, ic.tenant_id, ic.restaurant_id, ic.invoice_number,
@@ -43,9 +68,10 @@ func (r *CustomerInvoiceRepository) ListInvoices(tenantID, restaurantID int) ([]
 		JOIN customers_accounting c ON c.id = ic.customer_id
 		WHERE ic.tenant_id = $1 AND ic.restaurant_id = $2
 		ORDER BY ic.invoice_date DESC, ic.id DESC
-	`, tenantID, restaurantID)
+		LIMIT $3 OFFSET $4
+	`, tenantID, restaurantID, pageSize, offset)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 	defer rows.Close()
 
@@ -53,15 +79,15 @@ func (r *CustomerInvoiceRepository) ListInvoices(tenantID, restaurantID int) ([]
 	for rows.Next() {
 		invoice, err := scanCustomerInvoice(rows)
 		if err != nil {
-			return nil, err
+			return nil, 0, err
 		}
 		invoices = append(invoices, invoice)
 	}
 	if err := rows.Err(); err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
-	return invoices, nil
+	return invoices, total, nil
 }
 
 func (r *CustomerInvoiceRepository) GetInvoiceByID(tenantID, restaurantID, id int) (*domain.CustomerInvoice, error) {
@@ -296,6 +322,35 @@ func (r *CustomerInvoiceRepository) VoidInvoice(tenantID, restaurantID, id int, 
 }
 
 func (r *CustomerInvoiceRepository) GetOverdueInvoices(tenantID, restaurantID int) ([]domain.CustomerInvoice, error) {
+	invoices, _, err := r.GetOverdueInvoicesPaged(tenantID, restaurantID, 1, 100000)
+	return invoices, err
+}
+
+func (r *CustomerInvoiceRepository) GetOverdueInvoicesPaged(tenantID, restaurantID, page, pageSize int) ([]domain.CustomerInvoice, int, error) {
+	if page < 1 {
+		page = 1
+	}
+	if pageSize < 1 {
+		pageSize = 20
+	}
+	if pageSize > 200 {
+		pageSize = 200
+	}
+	offset := (page - 1) * pageSize
+
+	var total int
+	if err := r.db.QueryRow(`
+		SELECT COUNT(*)
+		FROM invoices_customer ic
+		WHERE ic.tenant_id = $1
+		  AND ic.restaurant_id = $2
+		  AND ic.status NOT IN ('paid', 'void', 'draft')
+		  AND ic.balance_due > 0
+		  AND ic.due_date < CURRENT_DATE
+	`, tenantID, restaurantID).Scan(&total); err != nil {
+		return nil, 0, err
+	}
+
 	rows, err := r.db.Query(`
 		SELECT
 			ic.id, ic.tenant_id, ic.restaurant_id, ic.invoice_number,
@@ -313,9 +368,10 @@ func (r *CustomerInvoiceRepository) GetOverdueInvoices(tenantID, restaurantID in
 		  AND ic.balance_due > 0
 		  AND ic.due_date < CURRENT_DATE
 		ORDER BY ic.due_date ASC
-	`, tenantID, restaurantID)
+		LIMIT $3 OFFSET $4
+	`, tenantID, restaurantID, pageSize, offset)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 	defer rows.Close()
 
@@ -323,14 +379,14 @@ func (r *CustomerInvoiceRepository) GetOverdueInvoices(tenantID, restaurantID in
 	for rows.Next() {
 		invoice, err := scanCustomerInvoice(rows)
 		if err != nil {
-			return nil, err
+			return nil, 0, err
 		}
 		invoices = append(invoices, invoice)
 	}
 	if err := rows.Err(); err != nil {
-		return nil, err
+		return nil, 0, err
 	}
-	return invoices, nil
+	return invoices, total, nil
 }
 
 func (r *CustomerInvoiceRepository) createInvoiceTx(tx *sql.Tx, invoice *domain.CustomerInvoice) (int, error) {

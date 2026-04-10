@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { hasAuthenticatedSession } from '@/lib/authSession'
 import { useAuthStore } from '@/stores/authStore'
 import { useUserPermissions } from '@/hooks/useRbac'
 import { MODULE_IDS, PERMISSION_LEVELS, getPermissionDescription } from '@/lib/rbac'
@@ -9,6 +10,7 @@ import { Loader2, Lock, ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 import { debugError } from '@/lib/debug'
 import { getConfig } from '@/lib/config'
+import { authFetch } from '@/lib/authFetch'
 
 interface PermissionModule {
   moduleId: number
@@ -149,6 +151,7 @@ const MODULES: PermissionModule[] = [
 export default function NewRolePage() {
   const user = useAuthStore((state) => state.user)
   const token = useAuthStore((state) => state.token)
+  const hasSession = hasAuthenticatedSession(user, token)
   const router = useRouter()
   const pathname = usePathname()
   const locale = pathname.split('/')[1] || 'en'
@@ -190,7 +193,7 @@ export default function NewRolePage() {
       return
     }
 
-    if (!token || !user) return
+    if (!hasSession || !user) return
 
     setIsSaving(true)
     try {
@@ -203,11 +206,10 @@ export default function NewRolePage() {
         })),
       }
 
-      const response = await fetch(`${getConfig().apiUrl}/rbac/roles`, {
+      const response = await authFetch(`${getConfig().apiUrl}/rbac/roles`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(roleData),
       })

@@ -30,6 +30,7 @@ import { createTranslator, getLocaleFromPath } from '@/lib/translations'
 import { MODULE_IDS, PERMISSION_LEVELS } from '@/lib/rbac'
 import { exportOrderToPDF } from '@/lib/pdf-export'
 import { debugError } from '@/lib/debug'
+import { hasAuthenticatedSession } from '@/lib/authSession'
 
 interface OrderItem {
   id: number
@@ -137,37 +138,48 @@ export default function OrderDetailsPage() {
   const orderId = params.id as string
   const [order, setOrder] = useState<Order | null>(null)
   const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState<string | null>(null)
   const [updatingStatus, setUpdatingStatus] = useState(false)
   const [selectedStatus, setSelectedStatus] = useState<string>('')
   const [isAssignmentModalOpen, setIsAssignmentModalOpen] = useState(false)
+  const user = useAuthStore((state) => state.user)
   const token = useAuthStore((state) => state.token)
+  const hasSession = hasAuthenticatedSession(user, token)
 
   const fetchOrder = useCallback(async () => {
     setLoading(true)
+    setLoadError(null)
     try {
       const response = await api.get(`/admin/orders/${orderId}`)
       const orderData = response.data
       setOrder(orderData)
       setSelectedStatus(orderData.status)
-    } catch (error) {
-      toast.error('Failed to load order details')
+    } catch (error: any) {
+      setOrder(null)
+      const status = error?.response?.status
+      const message =
+        status === 404
+          ? t('orders.notFound', 'Order not found')
+          : t('orders.loadFailed', 'Failed to load order details')
+      setLoadError(message)
+      toast.error(message)
       debugError('[ORDER_DETAILS] Error:', error)
     } finally {
       setLoading(false)
     }
-  }, [orderId])
+  }, [orderId, t])
 
   useEffect(() => {
     if (permissionLoading) {
       return
     }
-    if (!token || !canViewOrders) {
+    if (!hasSession || !canViewOrders) {
       setLoading(false)
       return
     }
 
     void fetchOrder()
-  }, [token, canViewOrders, permissionLoading, fetchOrder])
+  }, [hasSession, canViewOrders, permissionLoading, fetchOrder])
 
   if (permissionLoading) {
     return (
@@ -248,8 +260,26 @@ export default function OrderDetailsPage() {
 
   if (!order) {
     return (
-      <div className="flex justify-center items-center h-96">
-        <div className="text-gray-500">{t('common.loading')}</div>
+      <div className="space-y-6">
+        <Link href={`/${locale}/dashboard/orders`}>
+          <Button variant="outline" size="sm">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            {t('common.back')}
+          </Button>
+        </Link>
+
+        <div className="rounded-lg border border-gray-200 bg-white p-6 text-center dark:border-gray-700 dark:bg-gray-800">
+          <FileText className="mx-auto h-10 w-10 text-gray-400" />
+          <h2 className="mt-4 text-lg font-semibold text-gray-900 dark:text-white">
+            {loadError || t('orders.notFound', 'Order not found')}
+          </h2>
+          <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+            {t(
+              'orders.notFoundDescription',
+              'This order may have been removed or the link is invalid.'
+            )}
+          </p>
+        </div>
       </div>
     )
   }

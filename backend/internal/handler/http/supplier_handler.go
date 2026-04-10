@@ -2,7 +2,6 @@ package http
 
 import (
 	"context"
-	"encoding/json"
 	"net/http"
 	"strconv"
 	"strings"
@@ -101,7 +100,7 @@ func (h *SupplierHandler) CreateSupplier(w http.ResponseWriter, r *http.Request)
 	userID := int(middleware.GetUserID(r))
 
 	var req domain.CreateSupplierRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+	if err := decodeJSONStrict(r, &req); err != nil {
 		writeJSON(w, http.StatusBadRequest, map[string]interface{}{
 			"success": false,
 			"error":   "Invalid request body",
@@ -207,7 +206,7 @@ func (h *SupplierHandler) UpdateSupplier(w http.ResponseWriter, r *http.Request)
 	}
 
 	var req domain.UpdateSupplierRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+	if err := decodeJSONStrict(r, &req); err != nil {
 		writeJSON(w, http.StatusBadRequest, map[string]interface{}{
 			"success": false,
 			"error":   "Invalid request body",

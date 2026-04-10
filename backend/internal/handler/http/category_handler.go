@@ -1,7 +1,6 @@
 package http
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -71,7 +70,7 @@ func (h *CategoryHandler) CreateCategory(w http.ResponseWriter, r *http.Request)
 		IsActive      bool   `json:"is_active"`
 	}
 
-	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
+	if err := decodeJSONStrict(r, &input); err != nil {
 		fmt.Printf("ERROR: CreateCategory JSON decode failed: %v\n", err)
 		respondError(w, http.StatusBadRequest, "Invalid request body")
 		return
@@ -135,7 +134,7 @@ func (h *CategoryHandler) UpdateCategory(w http.ResponseWriter, r *http.Request)
 		IsActive      bool   `json:"is_active"`
 	}
 
-	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
+	if err := decodeJSONStrict(r, &input); err != nil {
 		fmt.Printf("ERROR: UpdateCategory JSON decode failed: %v\n", err)
 		respondError(w, http.StatusBadRequest, "Invalid request body")
 		return

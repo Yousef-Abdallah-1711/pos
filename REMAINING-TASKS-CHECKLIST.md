@@ -105,10 +105,11 @@
   - Add rate limiter: 3 attempts per minute on `/auth/forgot-password`
   - Use in-memory token bucket (or Redis for multi-instance)
 
-- [ ] **S6: Input validation hardening** (PARTIAL: added global JSON max body middleware (1MB) + field length validation on core HR create/update handlers; full decode/input-length audit still pending)
+- [x] **S6: Input validation hardening**
   - Audit all `json.Decode` calls for max body size limits
   - Add `http.MaxBytesReader` wrapper: `r.Body = http.MaxBytesReader(w, r.Body, 1<<20)` (1MB)
   - Validate string lengths on all user inputs (name, email, description fields)
+  - Implemented global JSON body size limit middleware + strict shared JSON decode (`DisallowUnknownFields`, single-object enforcement) and recursive payload string-length checks for non-HR handlers.
 
 ---
 

@@ -17,6 +17,7 @@ type DriverRepository interface {
 	GetByID(ctx context.Context, id int) (*domain.Driver, error)
 	GetByEmail(ctx context.Context, email string) (*domain.Driver, error)
 	GetByTenantAndRestaurant(ctx context.Context, tenantID, restaurantID int) ([]domain.Driver, error)
+	GetByTenantAndRestaurantPaged(ctx context.Context, tenantID, restaurantID, page, pageSize int) ([]domain.Driver, int, error)
 	Update(ctx context.Context, driver *domain.Driver) error
 	Delete(ctx context.Context, id int) error
 
@@ -144,6 +145,32 @@ func (r *driverRepository) GetByEmail(ctx context.Context, email string) (*domai
 
 // GetByTenantAndRestaurant retrieves all drivers for a restaurant
 func (r *driverRepository) GetByTenantAndRestaurant(ctx context.Context, tenantID, restaurantID int) ([]domain.Driver, error) {
+	drivers, _, err := r.GetByTenantAndRestaurantPaged(ctx, tenantID, restaurantID, 1, 1000000)
+	return drivers, err
+}
+
+func (r *driverRepository) GetByTenantAndRestaurantPaged(ctx context.Context, tenantID, restaurantID, page, pageSize int) ([]domain.Driver, int, error) {
+	if page <= 0 {
+		page = 1
+	}
+	if pageSize <= 0 {
+		pageSize = 20
+	}
+	if pageSize > 200 {
+		pageSize = 200
+	}
+	offset := (page - 1) * pageSize
+
+	const countQuery = `
+		SELECT COUNT(*)
+		FROM drivers
+		WHERE tenant_id = $1 AND restaurant_id = $2
+	`
+	var total int
+	if err := r.db.QueryRowContext(ctx, countQuery, tenantID, restaurantID).Scan(&total); err != nil {
+		return nil, 0, fmt.Errorf("failed to count drivers: %w", err)
+	}
+
 	query := `
 		SELECT id, tenant_id, restaurant_id, first_name, last_name, email, phone_number,
 		       license_number, COALESCE(vehicle_type, ''), COALESCE(vehicle_number, ''),
@@ -156,11 +183,12 @@ func (r *driverRepository) GetByTenantAndRestaurant(ctx context.Context, tenantI
 		FROM drivers
 		WHERE tenant_id = $1 AND restaurant_id = $2
 		ORDER BY created_at DESC
+		LIMIT $3 OFFSET $4
 	`
 
-	rows, err := r.db.QueryContext(ctx, query, tenantID, restaurantID)
+	rows, err := r.db.QueryContext(ctx, query, tenantID, restaurantID, pageSize, offset)
 	if err != nil {
-		return nil, fmt.Errorf("failed to query drivers: %w", err)
+		return nil, 0, fmt.Errorf("failed to query drivers: %w", err)
 	}
 	defer rows.Close()
 
@@ -178,12 +206,12 @@ func (r *driverRepository) GetByTenantAndRestaurant(ctx context.Context, tenantI
 			&driver.JoinedDate, &driver.LastActive, &driver.Notes, &driver.CreatedAt, &driver.UpdatedAt,
 		)
 		if err != nil {
-			return nil, fmt.Errorf("failed to scan driver: %w", err)
+			return nil, 0, fmt.Errorf("failed to scan driver: %w", err)
 		}
 		drivers = append(drivers, driver)
 	}
 
-	return drivers, rows.Err()
+	return drivers, total, rows.Err()
 }
 
 // Update updates an existing driver

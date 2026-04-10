@@ -274,7 +274,7 @@ func (h *SubscriptionHandler) EnableTenant(w http.ResponseWriter, r *http.Reques
 	info, _ := h.useCase.GetTenantSubscription(r.Context(), tenantID)
 
 	response := map[string]interface{}{
-		"is_disabled":     info.IsDisabled,
+		"is_disabled":         info.IsDisabled,
 		"subscription_status": info.SubscriptionStatus,
 	}
 

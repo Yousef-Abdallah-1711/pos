@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"time"
 
 	"pos-saas/internal/domain"
 	"pos-saas/internal/middleware"
@@ -22,8 +23,19 @@ func NewAuthHandler(useCase *usecase.AuthUseCase) *AuthHandler {
 // Register handles user registration
 func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 	var req domain.RegisterRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+	if err := decodeJSONStrict(r, &req); err != nil {
 		respondError(w, http.StatusBadRequest, "Invalid request body")
+		return
+	}
+	if err := validateStringLengths(
+		stringLengthRule{Name: "name", Value: req.Name, Max: 120},
+		stringLengthRule{Name: "email", Value: req.Email, Max: 254},
+		stringLengthRule{Name: "restaurant_name", Value: req.RestaurantName, Max: 150},
+		stringLengthRule{Name: "restaurant_slug", Value: req.RestaurantSlug, Max: 63},
+		stringLengthRule{Name: "phone", Value: req.Phone, Max: 32},
+		stringLengthRule{Name: "password", Value: req.Password, Max: 128},
+	); err != nil {
+		respondError(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -37,6 +49,7 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	setAuthCookie(w, r, response.Token)
 	respondJSON(w, http.StatusCreated, response)
 }
 
@@ -48,9 +61,15 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	fmt.Printf("Content-Type: %s\n", r.Header.Get("Content-Type"))
 
 	var req domain.LoginRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+	if err := decodeJSONStrict(r, &req); err != nil {
 		fmt.Printf("ERROR: Failed to decode request body: %v\n", err)
 		respondError(w, http.StatusBadRequest, "Invalid request body")
+		return
+	}
+	if err := validateStringLengths(
+		stringLengthRule{Name: "email", Value: req.Email, Max: 254},
+	); err != nil {
+		respondError(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -64,9 +83,12 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	fmt.Println("SUCCESS: Login successful, sending response")
-	csrfToken, csrfErr := middleware.GenerateCSRFToken()
-	if csrfErr == nil {
-		middleware.SetCSRFCookie(w, r, csrfToken)
+	if authResp, ok := response.(*domain.AuthResponse); ok {
+		setAuthCookie(w, r, authResp.Token)
+		csrfToken, csrfErr := middleware.GenerateCSRFToken()
+		if csrfErr == nil {
+			middleware.SetCSRFCookie(w, r, csrfToken)
+		}
 	}
 	respondJSON(w, http.StatusOK, response)
 }
@@ -78,9 +100,15 @@ func (h *AuthHandler) LoginConfirm(w http.ResponseWriter, r *http.Request) {
 	fmt.Printf("Request URL: %s\n", r.URL.String())
 
 	var req domain.TenantSelectionRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+	if err := decodeJSONStrict(r, &req); err != nil {
 		fmt.Printf("ERROR: Failed to decode request body: %v\n", err)
 		respondError(w, http.StatusBadRequest, "Invalid request body")
+		return
+	}
+	if err := validateStringLengths(
+		stringLengthRule{Name: "email", Value: req.Email, Max: 254},
+	); err != nil {
+		respondError(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -94,6 +122,7 @@ func (h *AuthHandler) LoginConfirm(w http.ResponseWriter, r *http.Request) {
 	}
 
 	fmt.Println("SUCCESS: LoginConfirm successful, sending response")
+	setAuthCookie(w, r, response.Token)
 	csrfToken, csrfErr := middleware.GenerateCSRFToken()
 	if csrfErr == nil {
 		middleware.SetCSRFCookie(w, r, csrfToken)
@@ -120,8 +149,14 @@ func (h *AuthHandler) CheckSubdomainAvailability(w http.ResponseWriter, r *http.
 // ForgotPassword handles password reset request
 func (h *AuthHandler) ForgotPassword(w http.ResponseWriter, r *http.Request) {
 	var req domain.ForgotPasswordRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+	if err := decodeJSONStrict(r, &req); err != nil {
 		respondError(w, http.StatusBadRequest, "Invalid request body")
+		return
+	}
+	if err := validateStringLengths(
+		stringLengthRule{Name: "email", Value: req.Email, Max: 254},
+	); err != nil {
+		respondError(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -143,9 +178,15 @@ func (h *AuthHandler) TokenExchange(w http.ResponseWriter, r *http.Request) {
 	var req struct {
 		Token string `json:"token"`
 	}
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+	if err := decodeJSONStrict(r, &req); err != nil {
 		fmt.Printf("ERROR: Failed to decode request body: %v\n", err)
 		respondError(w, http.StatusBadRequest, "Invalid request body")
+		return
+	}
+	if err := validateStringLengths(
+		stringLengthRule{Name: "token", Value: req.Token, Max: 2048},
+	); err != nil {
+		respondError(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -167,6 +208,7 @@ func (h *AuthHandler) TokenExchange(w http.ResponseWriter, r *http.Request) {
 	}
 
 	fmt.Println("SUCCESS: Token exchange successful")
+	setAuthCookie(w, r, response.Token)
 	csrfToken, csrfErr := middleware.GenerateCSRFToken()
 	if csrfErr == nil {
 		middleware.SetCSRFCookie(w, r, csrfToken)
@@ -193,4 +235,21 @@ func respondJSON(w http.ResponseWriter, code int, payload interface{}) {
 
 func respondError(w http.ResponseWriter, code int, message string) {
 	respondJSON(w, code, map[string]string{"error": message})
+}
+
+func setAuthCookie(w http.ResponseWriter, r *http.Request, token string) {
+	token = strings.TrimSpace(token)
+	if token == "" {
+		return
+	}
+	secure := r.TLS != nil || strings.EqualFold(strings.TrimSpace(r.Header.Get("X-Forwarded-Proto")), "https")
+	http.SetCookie(w, &http.Cookie{
+		Name:     "auth_token",
+		Value:    token,
+		Path:     "/",
+		HttpOnly: true,
+		Secure:   secure,
+		SameSite: http.SameSiteStrictMode,
+		MaxAge:   int((24 * time.Hour).Seconds()),
+	})
 }

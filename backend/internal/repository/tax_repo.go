@@ -48,6 +48,31 @@ func NewTaxRepository(db *sql.DB) *TaxRepository {
 }
 
 func (r *TaxRepository) ListTaxPeriods(tenantID, restaurantID int) ([]TaxPeriod, error) {
+	items, _, err := r.ListTaxPeriodsPaged(tenantID, restaurantID, 1, 100000)
+	return items, err
+}
+
+func (r *TaxRepository) ListTaxPeriodsPaged(tenantID, restaurantID, page, pageSize int) ([]TaxPeriod, int, error) {
+	if page < 1 {
+		page = 1
+	}
+	if pageSize < 1 {
+		pageSize = 20
+	}
+	if pageSize > 200 {
+		pageSize = 200
+	}
+	offset := (page - 1) * pageSize
+
+	var total int
+	if err := r.db.QueryRow(`
+		SELECT COUNT(*)
+		FROM tax_periods
+		WHERE tenant_id = $1 AND restaurant_id = $2
+	`, tenantID, restaurantID).Scan(&total); err != nil {
+		return nil, 0, err
+	}
+
 	rows, err := r.db.Query(`
 		SELECT
 			id, tenant_id, restaurant_id, period_name, period_start, period_end,
@@ -56,9 +81,10 @@ func (r *TaxRepository) ListTaxPeriods(tenantID, restaurantID int) ([]TaxPeriod,
 		FROM tax_periods
 		WHERE tenant_id = $1 AND restaurant_id = $2
 		ORDER BY period_start DESC, id DESC
-	`, tenantID, restaurantID)
+		LIMIT $3 OFFSET $4
+	`, tenantID, restaurantID, pageSize, offset)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 	defer rows.Close()
 
@@ -85,7 +111,7 @@ func (r *TaxRepository) ListTaxPeriods(tenantID, restaurantID int) ([]TaxPeriod,
 			&item.CreatedAt,
 			&item.UpdatedAt,
 		); err != nil {
-			return nil, err
+			return nil, 0, err
 		}
 		if closedBy.Valid {
 			v := int(closedBy.Int64)
@@ -93,7 +119,7 @@ func (r *TaxRepository) ListTaxPeriods(tenantID, restaurantID int) ([]TaxPeriod,
 		}
 		out = append(out, item)
 	}
-	return out, rows.Err()
+	return out, total, rows.Err()
 }
 
 func (r *TaxRepository) GetTaxPeriodByID(tenantID, restaurantID, id int) (TaxPeriod, error) {

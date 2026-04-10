@@ -1,16 +1,16 @@
 package http
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 	"strconv"
 
-	"golang.org/x/crypto/bcrypt"
 	"pos-saas/internal/domain"
 	"pos-saas/internal/middleware"
 	"pos-saas/internal/repository"
+
+	"golang.org/x/crypto/bcrypt"
 )
 
 // UserSettingsHandler handles HTTP requests for user settings
@@ -93,7 +93,7 @@ func (h *UserSettingsHandler) UpdateLanguage(w http.ResponseWriter, r *http.Requ
 		Language string `json:"language"`
 	}
 
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+	if err := decodeJSONStrict(r, &req); err != nil {
 		log.Printf("[UpdateLanguage] ERROR: Failed to decode request: %v", err)
 		respondError(w, http.StatusBadRequest, "Invalid request body")
 		return
@@ -147,7 +147,7 @@ func (h *UserSettingsHandler) UpdateTheme(w http.ResponseWriter, r *http.Request
 		Theme string `json:"theme"`
 	}
 
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+	if err := decodeJSONStrict(r, &req); err != nil {
 		log.Printf("[UpdateTheme] ERROR: Failed to decode request: %v", err)
 		respondError(w, http.StatusBadRequest, "Invalid request body")
 		return
@@ -201,7 +201,7 @@ func (h *UserSettingsHandler) UpdateColors(w http.ResponseWriter, r *http.Reques
 		AccentColor    string `json:"accent_color"`
 	}
 
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+	if err := decodeJSONStrict(r, &req); err != nil {
 		log.Printf("[UpdateColors] ERROR: Failed to decode request: %v", err)
 		respondError(w, http.StatusBadRequest, "Invalid request body")
 		return
@@ -256,7 +256,7 @@ func (h *UserSettingsHandler) ChangePassword(w http.ResponseWriter, r *http.Requ
 		ConfirmPassword string `json:"confirm_password"`
 	}
 
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+	if err := decodeJSONStrict(r, &req); err != nil {
 		log.Printf("[ChangePassword] ERROR: Failed to decode request: %v", err)
 		respondError(w, http.StatusBadRequest, "Invalid request body")
 		return
@@ -403,7 +403,7 @@ func (h *UserSettingsHandler) UpdateProfile(w http.ResponseWriter, r *http.Reque
 		AvatarURL *string `json:"avatar_url"`
 	}
 
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+	if err := decodeJSONStrict(r, &req); err != nil {
 		log.Printf("[UpdateProfile] ERROR: Failed to decode request: %v", err)
 		respondError(w, http.StatusBadRequest, "Invalid request body")
 		return

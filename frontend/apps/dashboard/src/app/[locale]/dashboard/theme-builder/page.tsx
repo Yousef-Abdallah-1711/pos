@@ -12,6 +12,7 @@ import { debugLog, debugWarn, debugError } from '@/lib/debug'
 import { getConfig } from '@/lib/config'
 import { ExportDialog } from '@/components/theme/ExportDialog'
 import { ThemeBuilderSubTabs } from './components/ThemeBuilderSubTabs'
+import { hasAuthenticatedSession } from '@/lib/authSession'
 
 
 export default function ThemeBuilderPage() {
@@ -22,6 +23,7 @@ export default function ThemeBuilderPage() {
   const tb = (path: string, fallback: string) => t(`themeBuilder.${path}`, fallback)
   const user = useAuthStore((state) => state.user)
   const token = useAuthStore((state) => state.token)
+  const hasSession = hasAuthenticatedSession(user, token)
 
   const [themes, setThemes] = useState<ThemeData[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -35,7 +37,7 @@ export default function ThemeBuilderPage() {
   // Dialog states
   const [exportThemeId, setExportThemeId] = useState<string | null>(null)
   const [isBulkActionRunning, setIsBulkActionRunning] = useState(false)
-  const getSafeThemeClass = (id: string) => id.replace(/[^a-zA-Z0-9_-]/g, '-')
+  const getSafeThemeClass = (id: unknown) => String(id ?? 'theme').replace(/[^a-zA-Z0-9_-]/g, '-')
 
   const getThemeTimestamp = (theme: ThemeData): number => {
     const date = new Date(theme.updatedAt || theme.createdAt)
@@ -93,7 +95,7 @@ export default function ThemeBuilderPage() {
     const fetchThemes = async () => {
       debugLog('📡 [fetchThemes] Starting fetch...')
       debugLog('📡 [fetchThemes] User restaurant_id:', user?.restaurant_id)
-      debugLog('📡 [fetchThemes] Token:', token ? 'EXISTS' : 'MISSING')
+      debugLog('📡 [fetchThemes] Session:', hasSession ? 'READY' : 'MISSING')
 
       // Check if we have the required data
       if (!user?.restaurant_id) {
@@ -103,9 +105,9 @@ export default function ThemeBuilderPage() {
         return
       }
 
-      if (!token) {
-        debugWarn('⚠️  [fetchThemes] Missing JWT token!')
-        setError(tb('errors.noAuthToken', 'No authentication token. Please log in again.'))
+      if (!hasSession) {
+        debugWarn('⚠️  [fetchThemes] Missing authenticated session!')
+        setError(tb('errors.noAuthToken', 'No authenticated session. Please log in again.'))
         setIsLoading(false)
         return
       }
@@ -140,12 +142,15 @@ export default function ThemeBuilderPage() {
     }
 
     // Only fetch if we're ready
-    if (user?.restaurant_id && token) {
+    if (user?.restaurant_id && hasSession) {
       fetchThemes()
+    } else if (!user?.restaurant_id) {
+      setThemes([])
+      setIsLoading(false)
     } else {
-      debugWarn('⚠️  [useEffect] Skipping fetch - waiting for auth. User:', !!user, 'Token:', !!token)
+      debugWarn('⚠️  [useEffect] Skipping fetch - waiting for auth. User:', !!user, 'Session:', hasSession)
     }
-  }, [user?.restaurant_id, token])
+  }, [user, user?.restaurant_id, hasSession])
 
 
   const filteredAndSortedThemes = useMemo(() => {

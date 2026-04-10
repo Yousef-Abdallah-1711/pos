@@ -1,7 +1,6 @@
 package http
 
 import (
-	"encoding/json"
 	"log"
 	"net/http"
 	"strconv"
@@ -108,7 +107,7 @@ func (h *ImpersonationHandler) EndImpersonationByToken(w http.ResponseWriter, r 
 	var body struct {
 		Token string `json:"token"`
 	}
-	if err := json.NewDecoder(r.Body).Decode(&body); err == nil && body.Token != "" {
+	if err := decodeJSONStrictAllowEmpty(r, &body); err == nil && body.Token != "" {
 		token = body.Token
 	}
 

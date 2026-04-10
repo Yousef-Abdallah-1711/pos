@@ -3,12 +3,12 @@
 import { ReactNode, useEffect, useState, useRef } from 'react';
 import { useAuthStore } from '@/stores/authStore';
 import { useTenantStatusStore } from '@/stores/tenantStatusStore';
+import { getDashboardLoginUrl } from '@/lib/authSession';
 import { getConfig } from '@/lib/config';
 import { debugLog, debugError } from '@/lib/debug';
 
 const DashboardAuthProvider = ({ children }: { children: ReactNode }) => {
   const user = useAuthStore((state) => state.user)
-  const token = useAuthStore((state) => state.token)
   const setAuth = useAuthStore((state) => state.setAuth)
   const canAccess = useTenantStatusStore((state) => state.canAccess)
   const blockReason = useTenantStatusStore((state) => state.blockReason)
@@ -18,10 +18,10 @@ const DashboardAuthProvider = ({ children }: { children: ReactNode }) => {
   const urlAuthApplied = useRef(false) // Track if URL auth was applied this session
   const impersonationSuccess = useRef(false) // Track if impersonation was successful
 
-  // Check if authenticated by checking if user and token exist
-  const isAuthenticated = !!(user && token)
+  // Cookie-backed auth: user presence is sufficient for authenticated UI state.
+  const isAuthenticated = !!user
 
-  debugLog('[DashboardAuthProvider] Render - user:', !!user, 'token:', !!token, 'isAuthenticated:', isAuthenticated, 'isHydrated:', isHydrated, 'urlAuthProcessed:', urlAuthProcessed)
+  debugLog('[DashboardAuthProvider] Render - user:', !!user, 'isAuthenticated:', isAuthenticated, 'isHydrated:', isHydrated, 'urlAuthProcessed:', urlAuthProcessed)
 
   // Wait for Zustand to hydrate from localStorage on mount
   useEffect(() => {
@@ -122,6 +122,11 @@ const DashboardAuthProvider = ({ children }: { children: ReactNode }) => {
       // Process URL auth params if any
       await processAuth()
 
+      const authState = useAuthStore.getState()
+      if (!authState.user) {
+        authState.initializeFromCookie()
+      }
+
       // Wait longer for Zustand persist middleware to write to localStorage
       // This is crucial for the API interceptor to pick up the token
       debugLog('[DashboardAuthProvider] Waiting 200ms for Zustand to persist...')
@@ -155,10 +160,10 @@ const DashboardAuthProvider = ({ children }: { children: ReactNode }) => {
       return
     }
 
-    debugLog('[DashboardAuthProvider] Auth check - urlAuthApplied:', urlAuthApplied.current, 'impersonationSuccess:', impersonationSuccess.current, 'user:', !!user, 'token:', token)
+    debugLog('[DashboardAuthProvider] Auth check - urlAuthApplied:', urlAuthApplied.current, 'impersonationSuccess:', impersonationSuccess.current, 'user:', !!user)
 
     // Check tenant status after successful auth
-    if (user && token) {
+    if (user) {
       debugLog('[DashboardAuthProvider] Authenticated, checking tenant status')
       checkStatus()
     }
@@ -172,21 +177,19 @@ const DashboardAuthProvider = ({ children }: { children: ReactNode }) => {
     // If URL auth was just applied this session AND we have auth in Zustand state, we're good
     // This avoids checking localStorage which might not have been written yet
     if (urlAuthApplied.current) {
-      if (user && token) {
-        // Auth from URL params was successfully applied - stay authenticated
-        debugLog('[DashboardAuthProvider] URL auth applied and have user/token, staying authenticated')
+      if (user) {
+        // Auth from URL params was successfully applied - stay authenticated.
+        debugLog('[DashboardAuthProvider] URL auth applied and user is present, staying authenticated')
         return
       } else {
         // URL auth was applied but failed - redirect to login
-        debugLog('[DashboardAuthProvider] URL auth applied but NO user/token, redirecting to login')
-        const landingUrl = getConfig().landingUrl
-        const redirectUrl = `${landingUrl}/auth/login`
-        window.location.href = redirectUrl
+        debugLog('[DashboardAuthProvider] URL auth applied but no user found, redirecting to login')
+        window.location.href = getDashboardLoginUrl()
         return
       }
     }
 
-    // If no URL auth was applied, check localStorage for existing session
+    // If no URL auth was applied, check persisted user in localStorage.
     const savedAuth = localStorage.getItem('auth-storage')
     debugLog('[DashboardAuthProvider] Checking localStorage, savedAuth exists:', !!savedAuth)
 
@@ -195,11 +198,10 @@ const DashboardAuthProvider = ({ children }: { children: ReactNode }) => {
       try {
         const parsed = JSON.parse(savedAuth)
         const hasUser = !!parsed.state?.user
-        const hasToken = !!parsed.state?.token
-        debugLog('[DashboardAuthProvider] localStorage parsed - hasUser:', hasUser, 'hasToken:', hasToken)
+        debugLog('[DashboardAuthProvider] localStorage parsed - hasUser:', hasUser)
 
-        // If localStorage has auth, use that as source of truth
-        if (hasUser && hasToken) {
+        // Cookie-backed auth: hydrate from user object even if token is absent.
+        if (hasUser) {
           localStorageAuth = parsed.state
         }
       } catch (e) {
@@ -210,20 +212,17 @@ const DashboardAuthProvider = ({ children }: { children: ReactNode }) => {
     // Determine final authentication state
     // Use Zustand state if available, otherwise use localStorage
     const finalUser = user || localStorageAuth?.user
-    const finalToken = token || localStorageAuth?.token
-    const finalIsAuthenticated = !!(finalUser && finalToken)
+    const finalIsAuthenticated = !!finalUser
 
-    debugLog('[DashboardAuthProvider] Final auth check - finalUser:', !!finalUser, 'finalToken:', !!finalToken, 'finalIsAuthenticated:', finalIsAuthenticated)
+    debugLog('[DashboardAuthProvider] Final auth check - finalUser:', !!finalUser, 'finalIsAuthenticated:', finalIsAuthenticated)
 
     if (!finalIsAuthenticated) {
       debugLog('[DashboardAuthProvider] NOT authenticated, redirecting to login')
-      const landingUrl = getConfig().landingUrl
-      const redirectUrl = `${landingUrl}/auth/login`
-      window.location.href = redirectUrl
+      window.location.href = getDashboardLoginUrl()
     } else {
       debugLog('[DashboardAuthProvider] Authenticated, staying on dashboard')
     }
-  }, [isHydrated, urlAuthProcessed, user, token, checkStatus])
+  }, [isHydrated, urlAuthProcessed, user, checkStatus])
 
   // If not hydrated or not authenticated, show loading while redirecting
   // But if impersonation was successful, we should be authenticated

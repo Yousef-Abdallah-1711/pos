@@ -1,92 +1,69 @@
 /**
  * Theme API Service
- * Handles all API calls for theme management
- *
- * ⚠️ IMPORTANT: This service reads JWT token from Zustand auth-storage, not localStorage directly
- * The token is stored in Zustand's persist middleware under the key 'auth-storage'
+ * Handles all API calls for theme management.
  */
 
 import axios, { AxiosError } from 'axios'
 import { ThemeData, CreateThemeRequest, UpdateThemeRequest, ComponentConfig, ComponentType } from '@/types/theme'
+import { getDashboardLoginUrl, hasUsableBearerToken } from '@/lib/authSession'
 import { debugLog, debugWarn, debugError } from '@/lib/debug'
 import { getConfig } from '@/lib/config'
+import { useAuthStore } from '@/stores/authStore'
 
 const API_BASE_URL_RAW = getConfig().apiUrl
 const API_BASE_URL = API_BASE_URL_RAW.replace(/\/+$/, '')
 const API_ROOT = API_BASE_URL.endsWith('/api/v1') ? API_BASE_URL : `${API_BASE_URL}/api/v1`
 
-// Create axios instance with default config
 const apiClient = axios.create({
   baseURL: API_ROOT,
+  withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
   },
 })
 
-// ==============================================
-// 🔐 AUTH INTERCEPTOR: Get token from Zustand auth-storage
-// This reads the token from localStorage where Zustand persists it
-// Key: 'auth-storage' (contains entire auth state as JSON)
-// ==============================================
+// Keep Authorization fallback for legacy flows while primary auth uses httpOnly cookies.
 apiClient.interceptors.request.use((config) => {
   try {
-    // Get the full auth state from localStorage
-    const authStorageRaw = localStorage.getItem('auth-storage')
-    if (!authStorageRaw) {
-      debugWarn('⚠️ [API Request] No auth-storage found in localStorage')
+    if (typeof window === 'undefined') {
       return config
     }
 
-    // Parse the JSON to get the token
-    const authState = JSON.parse(authStorageRaw)
-    const token = authState?.state?.token
-
-    if (token) {
-      debugLog('✅ [API Request] Token found, adding to Authorization header')
+    const token = useAuthStore.getState().token
+    if (hasUsableBearerToken(token) && !config.headers?.Authorization) {
+      debugLog('[themeApi] Adding Authorization fallback header from in-memory auth store')
       config.headers.Authorization = `Bearer ${token}`
-    } else {
-      debugWarn('⚠️ [API Request] Token not found in auth-storage.state.token')
-      debugLog('📦 [API Request] Auth storage contents:', authState)
     }
   } catch (err) {
-    debugError('❌ [API Request] Error parsing auth-storage:', err)
+    debugError('[themeApi] Failed to read auth store token:', err)
   }
 
   return config
 })
 
-// ==============================================
-// ⚠️ ERROR INTERCEPTOR: Handle auth failures
-// Clears auth and redirects to login on 401
-// ==============================================
 apiClient.interceptors.response.use(
   (response) => response,
   (error: AxiosError) => {
-    debugError('❌ [API Response] Error:', error.response?.status, error.response?.statusText)
-    debugError('❌ [API Response] Full Data:', error.response?.data)
+    debugError('themeApi response error:', error.response?.status, error.response?.statusText)
+    debugError('themeApi response data:', error.response?.data)
 
-    // More detailed error logging
     if (error.response?.data) {
       const errorData = error.response.data as any
-      debugError('❌ [API Response] Error Message:', errorData.error || errorData.message || 'Unknown error')
-      debugError('❌ [API Response] Full Error Object:', JSON.stringify(errorData, null, 2))
+      debugError('themeApi error message:', errorData.error || errorData.message || 'Unknown error')
+      debugError('themeApi full error object:', JSON.stringify(errorData, null, 2))
     }
 
-    // Handle 401 Unauthorized - session expired or invalid token
     if (error.response?.status === 401) {
-      debugLog('🔑 [API Response] 401 Unauthorized - Clearing auth and redirecting to login')
-      // Clear the auth storage
-      localStorage.removeItem('auth-storage')
-      // Redirect to login
+      debugLog('themeApi received 401, clearing auth state')
+      useAuthStore.getState().logout()
       if (typeof window !== 'undefined') {
-        window.location.href = '/en/login'
+        window.location.href = getDashboardLoginUrl()
       }
     }
 
     return Promise.reject(error)
   }
 )
-
 // Types
 export interface ApiResponse<T> {
   success: boolean

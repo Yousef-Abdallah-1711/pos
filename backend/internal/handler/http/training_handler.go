@@ -2,7 +2,6 @@ package http
 
 import (
 	"context"
-	"encoding/json"
 	"net/http"
 	"strconv"
 	"time"
@@ -163,7 +162,7 @@ func decodeTrainingPayload(r *http.Request) (domain.TrainingRecord, error) {
 		CertificateExpiry string `json:"certificate_expiry"`
 		Notes             string `json:"notes"`
 	}
-	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+	if err := decodeJSONStrict(r, &body); err != nil {
 		return domain.TrainingRecord{}, err
 	}
 	if body.EmployeeID <= 0 || body.TrainingTitle == "" || body.TrainingType == "" || body.StartDate == "" {

@@ -2,9 +2,9 @@
 
 import { useEffect } from 'react'
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
+import { getDashboardLoginUrl } from '@/lib/authSession'
 import { useAuthStore } from '@/stores/authStore'
 import { warmupCurrentUserPermissions } from '@/hooks/useRbac'
-import { getConfig } from '@/lib/config'
 import { debugLog, debugError } from '@/lib/debug'
 
 export default function AuthCallbackContent() {
@@ -38,13 +38,13 @@ export default function AuthCallbackContent() {
         router.replace(`/${locale}/dashboard`)
       } catch (error) {
         debugError('Auth callback error:', error)
-        window.location.href = `${getConfig().landingUrl}/auth/login`
+        window.location.href = getDashboardLoginUrl(pathname)
       }
     } else {
       debugLog('No auth data, redirecting to login')
-      window.location.href = `${getConfig().landingUrl}/auth/login`
+      window.location.href = getDashboardLoginUrl(pathname)
     }
-  }, [searchParams, setAuth, router, locale])
+  }, [searchParams, setAuth, router, locale, pathname])
 
   return (
     <div className="min-h-screen flex items-center justify-center">

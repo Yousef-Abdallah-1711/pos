@@ -2,7 +2,6 @@ package http
 
 import (
 	"context"
-	"encoding/json"
 	"net/http"
 	"strconv"
 	"time"
@@ -162,7 +161,7 @@ func decodeInsurancePayload(r *http.Request) (domain.InsuranceTracking, error) {
 		Status         string  `json:"status"`
 		Notes          string  `json:"notes"`
 	}
-	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+	if err := decodeJSONStrict(r, &body); err != nil {
 		return domain.InsuranceTracking{}, err
 	}
 	if body.EmployeeID <= 0 || body.PolicyType == "" || body.ProviderName == "" || body.PolicyNumber == "" || body.CoverageStart == "" || body.CoverageEnd == "" {

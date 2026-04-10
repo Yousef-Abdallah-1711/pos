@@ -7,9 +7,10 @@ import (
 	"testing"
 	"time"
 
-	sqlmock "github.com/DATA-DOG/go-sqlmock"
 	"pos-saas/internal/repository"
 	"pos-saas/internal/usecase"
+
+	sqlmock "github.com/DATA-DOG/go-sqlmock"
 )
 
 func TestKDSFlowDisplayBumpAndStatusUpdate(t *testing.T) {

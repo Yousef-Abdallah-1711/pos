@@ -14,6 +14,7 @@ import { createTranslator, getLocaleFromPath } from '@/lib/translations'
 import { PageHeaderSkeleton, TableSkeleton } from '@/components/skeletons'
 import { MODULE_IDS, PERMISSION_LEVELS } from '@/lib/rbac'
 import { debugError } from '@/lib/debug'
+import { hasAuthenticatedSession } from '@/lib/authSession'
 
 interface Product {
   id: number
@@ -56,7 +57,9 @@ export default function ProductsPage() {
     sortOrder: 'DESC',
   })
 
+  const user = useAuthStore((state) => state.user)
   const token = useAuthStore((state) => state.token)
+  const hasSession = hasAuthenticatedSession(user, token)
 
   // Check RBAC permissions for Products module
   const { checkPermission, loading: permissionLoading } = useUserPermissions()
@@ -67,7 +70,7 @@ export default function ProductsPage() {
   // Fetch products
   useEffect(() => {
     const fetchProducts = async () => {
-      if (permissionLoading || !canViewProducts) {
+      if (!hasSession || permissionLoading || !canViewProducts) {
         setLoading(false)
         return
       }
@@ -95,12 +98,12 @@ export default function ProductsPage() {
     }
 
     fetchProducts()
-  }, [filters, token, permissionLoading, canViewProducts])
+  }, [filters, hasSession, permissionLoading, canViewProducts])
 
   // Fetch categories
   useEffect(() => {
     const fetchCategories = async () => {
-      if (permissionLoading || !canViewProducts) {
+      if (!hasSession || permissionLoading || !canViewProducts) {
         return
       }
       try {
@@ -112,7 +115,7 @@ export default function ProductsPage() {
     }
 
     fetchCategories()
-  }, [token, permissionLoading, canViewProducts])
+  }, [hasSession, permissionLoading, canViewProducts])
 
 
   const handleDeleteProduct = async (productId: number) => {

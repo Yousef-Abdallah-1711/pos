@@ -1,7 +1,6 @@
 package http
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"strings"
@@ -22,8 +21,19 @@ func NewPaymentAccountingHandler(paymentRepo *repository.PaymentAccountingReposi
 func (h *PaymentAccountingHandler) ListPaymentsReceived(w http.ResponseWriter, r *http.Request) {
 	tenantID := int(middleware.GetTenantID(r))
 	restaurantID := int(middleware.GetRestaurantID(r))
+	page := GetQueryParamInt(r, "page", 1)
+	pageSize := GetQueryParamInt(r, "page_size", 20)
+	if page < 1 {
+		page = 1
+	}
+	if pageSize < 1 {
+		pageSize = 20
+	}
+	if pageSize > 200 {
+		pageSize = 200
+	}
 
-	payments, err := h.paymentRepo.ListPaymentsReceived(tenantID, restaurantID)
+	payments, total, err := h.paymentRepo.ListPaymentsReceivedPaged(tenantID, restaurantID, page, pageSize)
 	if err != nil {
 		writeJSON(w, http.StatusInternalServerError, map[string]interface{}{
 			"success": false,
@@ -35,6 +45,12 @@ func (h *PaymentAccountingHandler) ListPaymentsReceived(w http.ResponseWriter, r
 	writeJSON(w, http.StatusOK, map[string]interface{}{
 		"success": true,
 		"data":    payments,
+		"pagination": map[string]interface{}{
+			"page":       page,
+			"page_size":  pageSize,
+			"total":      total,
+			"totalPages": (total + pageSize - 1) / pageSize,
+		},
 	})
 }
 
@@ -44,7 +60,7 @@ func (h *PaymentAccountingHandler) CreatePaymentReceived(w http.ResponseWriter, 
 	userID := int(middleware.GetUserID(r))
 
 	var req domain.CreatePaymentReceivedRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+	if err := decodeJSONStrict(r, &req); err != nil {
 		writeJSON(w, http.StatusBadRequest, map[string]interface{}{
 			"success": false,
 			"error":   "Invalid request body",
@@ -76,8 +92,19 @@ func (h *PaymentAccountingHandler) CreatePaymentReceived(w http.ResponseWriter, 
 func (h *PaymentAccountingHandler) ListPaymentsMade(w http.ResponseWriter, r *http.Request) {
 	tenantID := int(middleware.GetTenantID(r))
 	restaurantID := int(middleware.GetRestaurantID(r))
+	page := GetQueryParamInt(r, "page", 1)
+	pageSize := GetQueryParamInt(r, "page_size", 20)
+	if page < 1 {
+		page = 1
+	}
+	if pageSize < 1 {
+		pageSize = 20
+	}
+	if pageSize > 200 {
+		pageSize = 200
+	}
 
-	payments, err := h.paymentRepo.ListPaymentsMade(tenantID, restaurantID)
+	payments, total, err := h.paymentRepo.ListPaymentsMadePaged(tenantID, restaurantID, page, pageSize)
 	if err != nil {
 		writeJSON(w, http.StatusInternalServerError, map[string]interface{}{
 			"success": false,
@@ -89,6 +116,12 @@ func (h *PaymentAccountingHandler) ListPaymentsMade(w http.ResponseWriter, r *ht
 	writeJSON(w, http.StatusOK, map[string]interface{}{
 		"success": true,
 		"data":    payments,
+		"pagination": map[string]interface{}{
+			"page":       page,
+			"page_size":  pageSize,
+			"total":      total,
+			"totalPages": (total + pageSize - 1) / pageSize,
+		},
 	})
 }
 
@@ -98,7 +131,7 @@ func (h *PaymentAccountingHandler) CreatePaymentMade(w http.ResponseWriter, r *h
 	userID := int(middleware.GetUserID(r))
 
 	var req domain.CreatePaymentMadeRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+	if err := decodeJSONStrict(r, &req); err != nil {
 		writeJSON(w, http.StatusBadRequest, map[string]interface{}{
 			"success": false,
 			"error":   "Invalid request body",

@@ -1,8 +1,10 @@
 'use client'
 import axios from 'axios'
+import { getDashboardLoginUrl, hasUsableBearerToken } from '@/lib/authSession'
 import { getConfig } from './config'
 import { debugError, debugLog, debugWarn } from '@/lib/debug'
 import { recordPerformanceMetric } from '@/lib/performance'
+import { useAuthStore } from '@/stores/authStore'
 
 const API_URL = getConfig().apiUrl
 const DEFAULT_API_TIMEOUT_MS = 6000
@@ -39,6 +41,7 @@ const buildApiMetricKey = (url?: string) => {
 
 export const api = axios.create({
   baseURL: API_URL,
+  withCredentials: true,
   timeout: API_TIMEOUT_MS,
   headers: {
     'Content-Type': 'application/json',
@@ -88,33 +91,13 @@ function readAuthContext(): AuthContextSnapshot {
   let restaurantId: number | null = null
 
   try {
-    const authStorage = localStorage.getItem('auth-storage')
-    if (authStorage) {
-      const parsed = JSON.parse(authStorage)
-      token = parsed.state?.token || parsed.token
-      user = parsed.state?.user || parsed.user
-      tenantId = user?.tenant_id || user?.tenantId || null
-      restaurantId = user?.restaurant_id || user?.restaurantId || null
-    }
+    const authState = useAuthStore.getState()
+    token = authState.token
+    user = authState.user
+    tenantId = user?.tenant_id || user?.tenantId || null
+    restaurantId = user?.restaurant_id || user?.restaurantId || null
   } catch (e) {
-    debugError('[API] Failed to parse auth-storage:', e)
-  }
-
-  if (!token) {
-    token = localStorage.getItem('token')
-  }
-
-  if (!user) {
-    try {
-      const userStr = localStorage.getItem('user')
-      if (userStr) {
-        user = JSON.parse(userStr)
-        tenantId = user?.tenant_id || user?.tenantId
-        restaurantId = user?.restaurant_id || user?.restaurantId
-      }
-    } catch (e) {
-      debugError('[API] Failed to parse user from localStorage:', e)
-    }
+    debugError('[API] Failed to read auth store:', e)
   }
 
   authContextCache = {
@@ -193,7 +176,7 @@ api.interceptors.request.use((config) => {
     if (restaurantId) {
       config.headers['X-Restaurant-ID'] = restaurantId.toString()
     }
-  } else if (token && !isAuthEndpoint) {
+  } else if (hasUsableBearerToken(token) && !isAuthEndpoint) {
     config.headers.Authorization = `Bearer ${token}`
     debugLog('[API] Added Authorization header')
 
@@ -279,19 +262,9 @@ api.interceptors.response.use(
     if (error.response?.status === 401 && !isTenantContextError && !isUsingImpersonation) {
       debugWarn('[API] 401 auth error - logging out')
       debugLog('[API] Logging out due to 401')
-      localStorage.removeItem('token')
-      localStorage.removeItem('user')
-      localStorage.removeItem('auth-storage')
+      useAuthStore.getState().logout()
       authContextCache = null
-      // Redirect to landing app login
-      import('./config')
-        .then(({ getConfig }) => {
-          const { landingUrl } = getConfig()
-          window.location.href = `${landingUrl}/auth/login`
-        })
-        .catch(() => {
-          window.location.href = '/auth/login'
-        })
+      window.location.href = getDashboardLoginUrl()
     } else if (error.response?.status === 401 && isUsingImpersonation) {
       debugLog('[API] Got 401 while impersonating - NOT logging out, backend should handle impersonation token')
     }

@@ -1,11 +1,13 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { hasAuthenticatedSession } from '@/lib/authSession'
 import { useAuthStore } from '@/stores/authStore'
 import { Save, Loader2, Check, X } from 'lucide-react'
 import { createTranslator, getLocaleFromPath } from '@/lib/translations'
 import { usePathname } from 'next/navigation'
 import { getConfig } from '@/lib/config'
+import { authFetch } from '@/lib/authFetch'
 
 export default function AccountSettingsPage() {
   const pathname = usePathname()
@@ -13,6 +15,7 @@ export default function AccountSettingsPage() {
   const t = createTranslator(locale)
   const user = useAuthStore((state) => state.user)
   const token = useAuthStore((state) => state.token)
+  const hasSession = hasAuthenticatedSession(user, token)
 
   // Form states
   const [profileForm, setProfileForm] = useState({ name: '', avatarUrl: '' })
@@ -32,16 +35,15 @@ export default function AccountSettingsPage() {
   }, [user])
 
   const handleSaveProfile = async () => {
-    if (!user?.id || !token) return
+    if (!user?.id || !hasSession) return
 
     setSaveStatus('saving')
     try {
       const { apiUrl } = getConfig()
-      const response = await fetch(`${apiUrl}/users/${user.id}/profile`, {
+      const response = await authFetch(`${apiUrl}/users/${user.id}/profile`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           name: profileForm.name,
@@ -64,7 +66,7 @@ export default function AccountSettingsPage() {
   }
 
   const handleChangePassword = async () => {
-    if (!user?.id || !token) return
+    if (!user?.id || !hasSession) return
 
     if (passwordForm.newPassword !== passwordForm.confirmPassword) {
       setErrorMessage(t('settings.passwordMismatch'))
@@ -81,11 +83,10 @@ export default function AccountSettingsPage() {
     setSaveStatus('saving')
     try {
       const { apiUrl } = getConfig()
-      const response = await fetch(`${apiUrl}/users/${user.id}/settings/change-password`, {
+      const response = await authFetch(`${apiUrl}/users/${user.id}/settings/change-password`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           current_password: passwordForm.currentPassword,

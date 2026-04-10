@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
+import { getDashboardLoginUrl } from "@/lib/authSession";
 import { useAuthStore } from "@/stores/authStore";
 import { warmupCurrentUserPermissions } from "@/hooks/useRbac";
 import { api } from "@/lib/api";
@@ -51,10 +52,6 @@ export default function SuperAdminLoginPage() {
           setAuth(authData.user, authData.token);
           void warmupCurrentUserPermissions();
 
-          // Store in localStorage for persistence
-          localStorage.setItem('token', authData.token)
-          localStorage.setItem('user', JSON.stringify(authData.user))
-          debugLog("[SuperAdminLogin] ✅ Auth stored in localStorage");
 
           setSuccess(true);
 
@@ -102,7 +99,9 @@ export default function SuperAdminLoginPage() {
             </h1>
             <p className="text-red-600 mb-6">{error}</p>
             <button
-              onClick={() => router.replace("/en/login")}
+              onClick={() => {
+                window.location.href = getDashboardLoginUrl("/en/dashboard")
+              }}
               className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
             >
               Go to Login

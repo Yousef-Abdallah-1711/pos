@@ -24,7 +24,7 @@ import {
 
 import { Button } from '@/components/ui/button'
 import { api } from '@/lib/api'
-import { getConfig } from '@/lib/config'
+import { getDashboardLoginUrl, hasAuthenticatedSession } from '@/lib/authSession'
 import { debugError } from '@/lib/debug'
 import { createTranslator, getLocaleFromPath } from '@/lib/translations'
 import { useAuthStore } from '@/stores/authStore'
@@ -262,7 +262,7 @@ export default function DashboardPage() {
   const [overviewError, setOverviewError] = useState<string | null>(null)
   const hasLoadedOverviewRef = useRef(false)
 
-  const isAuthenticated = !!(user && token)
+  const isAuthenticated = hasAuthenticatedSession(user, token)
   const debugMode = typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('debug') === 'true'
 
   const dashboardRoute = (path: string) => `/${locale}${path}`
@@ -270,9 +270,9 @@ export default function DashboardPage() {
   useEffect(() => {
     if (debugMode) return
     if (!isAuthenticated) {
-      window.location.href = `${getConfig().landingUrl}/${locale}/auth/login`
+      window.location.href = getDashboardLoginUrl(pathname)
     }
-  }, [debugMode, isAuthenticated, locale])
+  }, [debugMode, isAuthenticated, pathname])
 
   useEffect(() => {
     if (permissionsLoading) {

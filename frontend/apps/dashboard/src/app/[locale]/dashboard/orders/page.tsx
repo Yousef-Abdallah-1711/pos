@@ -25,6 +25,7 @@ import { createTranslator, getLocaleFromPath } from '@/lib/translations'
 import { MODULE_IDS, PERMISSION_LEVELS } from '@/lib/rbac'
 import { exportOrdersToCSV } from '@/lib/pdf-export'
 import { debugError } from '@/lib/debug'
+import { hasAuthenticatedSession } from '@/lib/authSession'
 
 interface Order {
   id: number
@@ -73,7 +74,9 @@ export default function OrdersPage() {
   const [totalOrders, setTotalOrders] = useState(0)
   const [isAssignmentModalOpen, setIsAssignmentModalOpen] = useState(false)
   const [selectedOrderForAssignment, setSelectedOrderForAssignment] = useState<Order | null>(null)
+  const user = useAuthStore((state) => state.user)
   const token = useAuthStore((state) => state.token)
+  const hasSession = hasAuthenticatedSession(user, token)
 
   const fetchOrders = async () => {
     setLoading(true)
@@ -119,12 +122,12 @@ export default function OrdersPage() {
     if (permissionLoading) {
       return
     }
-    if (!token || !canViewOrders) {
+    if (!hasSession || !canViewOrders) {
       setLoading(false)
       return
     }
     fetchOrders()
-  }, [token, statusFilter, paymentFilter, tableFilter, page, searchQuery, canViewOrders, permissionLoading])
+  }, [hasSession, statusFilter, paymentFilter, tableFilter, page, searchQuery, canViewOrders, permissionLoading])
 
   useEffect(() => {
     const urlTableID = searchParams.get('table_id')

@@ -31,6 +31,7 @@ import {
   PaginationPrevious,
 } from '@/components/ui/pagination'
 import { Skeleton } from '@/components/ui/skeleton'
+import { canRenderDashboardProductImage } from '@/lib/productImages'
 
 export function ProductList({
   products,
@@ -145,14 +146,18 @@ export function ProductList({
               return (
                 <TableRow key={product.id}>
                   <TableCell>
-                    {product.main_image_url && (
+                    {canRenderDashboardProductImage(product.main_image_url) ? (
                       <Image
                         src={product.main_image_url}
-                        alt={product.name_en}
+                        alt={product.name_en || 'Product image'}
                         width={40}
                         height={40}
                         className="object-cover rounded"
                       />
+                    ) : (
+                      <div className="flex h-10 w-10 items-center justify-center rounded bg-gray-100 text-sm font-medium text-gray-500 dark:bg-gray-800 dark:text-gray-300">
+                        {getProductPlaceholder(product.name_en)}
+                      </div>
                     )}
                   </TableCell>
                   <TableCell className="font-medium">{product.name_en}</TableCell>
@@ -251,3 +256,7 @@ export function ProductList({
     </div>
   )
 }
+  const getProductPlaceholder = (name) => {
+    const normalizedName = String(name || '').trim()
+    return normalizedName ? normalizedName.charAt(0).toUpperCase() : '?'
+  }

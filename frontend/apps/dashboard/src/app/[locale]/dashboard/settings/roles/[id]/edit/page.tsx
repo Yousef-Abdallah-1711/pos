@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState, use } from 'react'
+import { hasAuthenticatedSession } from '@/lib/authSession'
 import { useAuthStore } from '@/stores/authStore'
 import { useUserPermissions } from '@/hooks/useRbac'
 import { MODULE_IDS, PERMISSION_LEVELS, getPermissionDescription } from '@/lib/rbac'
@@ -9,6 +10,7 @@ import { Loader2, Lock, ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 import { debugError } from '@/lib/debug'
 import { getConfig } from '@/lib/config'
+import { authFetch } from '@/lib/authFetch'
 
 interface PermissionModule {
   moduleId: number
@@ -166,6 +168,7 @@ export default function EditRolePage({ params: paramsPromise }: EditRolePageProp
   const { id } = use(paramsPromise)
   const user = useAuthStore((state) => state.user)
   const token = useAuthStore((state) => state.token)
+  const hasSession = hasAuthenticatedSession(user, token)
   const router = useRouter()
   const pathname = usePathname()
   const locale = pathname.split('/')[1] || 'en'
@@ -192,16 +195,11 @@ export default function EditRolePage({ params: paramsPromise }: EditRolePageProp
   }, [isAdmin, permissionLoading, token])
 
   const fetchRole = async () => {
-    if (!token || !user) return
+    if (!hasSession || !user) return
     setIsLoading(true)
     const { apiUrl } = getConfig()
     try {
-      const response = await fetch(
-        `${apiUrl}/rbac/roles/${id}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      )
+      const response = await authFetch(`${apiUrl}/rbac/roles/${id}`)
 
       if (response.ok) {
         const responseData = await response.json()
@@ -209,9 +207,10 @@ export default function EditRolePage({ params: paramsPromise }: EditRolePageProp
         setFormData(data)
 
         // Initialize selected permissions
-        if (data.permissions) {
+        const permissions = data.permissions || data.role_permissions || []
+        if (Array.isArray(permissions)) {
           const perms: Record<number, string> = {}
-          data.permissions.forEach((perm: any) => {
+          permissions.forEach((perm: any) => {
             perms[Number(perm.module_id)] = perm.level
           })
           setSelectedPermissions(perms)
@@ -245,7 +244,7 @@ export default function EditRolePage({ params: paramsPromise }: EditRolePageProp
       return
     }
 
-    if (!token || !user) return
+    if (!hasSession || !user) return
 
     setIsSaving(true)
     try {
@@ -259,17 +258,13 @@ export default function EditRolePage({ params: paramsPromise }: EditRolePageProp
       }
 
       const { apiUrl } = getConfig()
-      const response = await fetch(
-        `${apiUrl}/rbac/roles/${id}`,
-        {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(roleData),
-        }
-      )
+      const response = await authFetch(`${apiUrl}/rbac/roles/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(roleData),
+      })
 
       if (response.ok) {
         router.push(`/${locale}/dashboard/settings/roles`)

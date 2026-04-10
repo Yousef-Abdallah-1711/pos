@@ -89,7 +89,7 @@ func (h *ProductHandler) CreateProduct(w http.ResponseWriter, r *http.Request) {
 		}
 	} else {
 		fmt.Println("DEBUG: No 'data' field found, trying body decode")
-		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		if err := decodeJSONStrict(r, &req); err != nil {
 			fmt.Printf("ERROR: JSON Body Decode failed: %v\n", err)
 			respondError(w, http.StatusBadRequest, "Invalid request body: "+err.Error())
 			return
@@ -295,7 +295,7 @@ func (h *ProductHandler) UpdateProduct(w http.ResponseWriter, r *http.Request) {
 	} else {
 		// Try to parse from JSON body directly
 		fmt.Println("DEBUG: No 'data' form field, executing JSON decode from body")
-		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		if err := decodeJSONStrict(r, &req); err != nil {
 			fmt.Printf("ERROR: Failed to decode request body: %v\n", err)
 			respondError(w, http.StatusBadRequest, "Invalid request body")
 			return

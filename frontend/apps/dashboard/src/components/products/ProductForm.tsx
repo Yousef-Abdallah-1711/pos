@@ -13,6 +13,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { toast } from 'sonner'
 import { debugError } from '@/lib/debug'
+import { canRenderDashboardProductImage } from '@/lib/productImages'
 
 export function ProductForm({ product, categories, onSubmit, onCancel }) {
   const pathname = usePathname()
@@ -142,7 +143,7 @@ export function ProductForm({ product, categories, onSubmit, onCancel }) {
               onChange={handleImageChange}
               className="w-full"
             />
-            {imagePreview && (
+            {imagePreview && canRenderDashboardProductImage(imagePreview) && (
               <div className="relative w-40 h-40 mt-2">
                 <Image
                   src={imagePreview}

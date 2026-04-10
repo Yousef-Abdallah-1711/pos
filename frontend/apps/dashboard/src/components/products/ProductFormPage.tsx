@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox'
 import { toast } from 'sonner'
 import { debugLog, debugError } from '@/lib/debug'
+import { canRenderDashboardProductImage } from '@/lib/productImages'
 
 export function ProductFormPage({ product, categories, onSubmit, onCancel }) {
   const pathname = usePathname()
@@ -140,7 +141,7 @@ export function ProductFormPage({ product, categories, onSubmit, onCancel }) {
             onChange={handleImageChange}
             className="w-full"
           />
-          {imagePreview && (
+          {imagePreview && canRenderDashboardProductImage(imagePreview) && (
             <div className="relative w-40 h-40 mt-2">
               <Image
                 src={imagePreview}

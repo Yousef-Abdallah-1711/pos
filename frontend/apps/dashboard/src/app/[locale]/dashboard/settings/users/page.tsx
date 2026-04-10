@@ -1,12 +1,14 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { hasAuthenticatedSession } from '@/lib/authSession'
 import { useAuthStore } from '@/stores/authStore'
 import { useUserPermissions } from '@/hooks/useRbac'
 import { MODULE_IDS, PERMISSION_LEVELS } from '@/lib/rbac'
 import { Loader2, Lock, Search, Plus, Edit2, Trash2, X, Eye, EyeOff } from 'lucide-react'
 import { debugError } from '@/lib/debug'
 import { getConfig } from '@/lib/config'
+import { authFetch } from '@/lib/authFetch'
 
 interface Role {
   id: number
@@ -31,6 +33,7 @@ type ModalType = 'create' | 'edit' | 'delete' | 'roles' | null
 export default function UsersPage() {
   const user = useAuthStore((state) => state.user)
   const token = useAuthStore((state) => state.token)
+  const hasSession = hasAuthenticatedSession(user, token)
 
   const { checkPermission, loading: permissionLoading } = useUserPermissions()
   const isAdmin = checkPermission(MODULE_IDS.SETTINGS, PERMISSION_LEVELS.WRITE)
@@ -70,15 +73,13 @@ export default function UsersPage() {
   }, [isAdmin, permissionLoading, token])
 
   const fetchData = async () => {
-    if (!token) return
+    if (!hasSession) return
     setIsLoading(true)
     setError('')
     const { apiUrl } = getConfig()
     try {
       // Fetch users
-      const usersRes = await fetch(`${apiUrl}/users`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
+      const usersRes = await authFetch(`${apiUrl}/users`)
       if (usersRes.ok) {
         const data = await usersRes.json()
         const usersList = Array.isArray(data) ? data : data?.data || data?.users || []
@@ -88,9 +89,7 @@ export default function UsersPage() {
       }
 
       // Fetch roles
-      const rolesRes = await fetch(`${apiUrl}/rbac/roles`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
+      const rolesRes = await authFetch(`${apiUrl}/rbac/roles`)
       if (rolesRes.ok) {
         const data = await rolesRes.json()
         const rolesList = Array.isArray(data) ? data : data?.data || data?.roles || []
@@ -132,9 +131,7 @@ export default function UsersPage() {
     setSelectedRoles([])
     try {
       const { apiUrl } = getConfig()
-      const res = await fetch(`${apiUrl}/rbac/users/${u.id}/roles`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
+      const res = await authFetch(`${apiUrl}/rbac/users/${u.id}/roles`)
       if (res.ok) {
         const data = await res.json()
         setSelectedRoles((data?.data || []).map((r: Role) => r.id))
@@ -152,7 +149,7 @@ export default function UsersPage() {
 
   const handleCreateUser = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!token) return
+    if (!hasSession) return
 
     if (!formData.email || !formData.password || !formData.name) {
       setError('Email, password, and name are required')
@@ -163,11 +160,10 @@ export default function UsersPage() {
     setError('')
     try {
       const { apiUrl } = getConfig()
-      const res = await fetch(`${apiUrl}/users`, {
+      const res = await authFetch(`${apiUrl}/users`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           name: formData.name,
@@ -196,7 +192,7 @@ export default function UsersPage() {
 
   const handleUpdateUser = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!token || !selectedUser) return
+    if (!hasSession || !selectedUser) return
 
     if (!formData.name || !formData.email) {
       setError('Name and email are required')
@@ -207,11 +203,10 @@ export default function UsersPage() {
     setError('')
     try {
       const { apiUrl } = getConfig()
-      const res = await fetch(`${apiUrl}/users/${selectedUser.id}`, {
+      const res = await authFetch(`${apiUrl}/users/${selectedUser.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           name: formData.name,
@@ -237,15 +232,14 @@ export default function UsersPage() {
   }
 
   const handleDeleteUser = async () => {
-    if (!token || !selectedUser) return
+    if (!hasSession || !selectedUser) return
 
     setIsSubmitting(true)
     setError('')
     try {
       const { apiUrl } = getConfig()
-      const res = await fetch(`${apiUrl}/users/${selectedUser.id}`, {
+      const res = await authFetch(`${apiUrl}/users/${selectedUser.id}`, {
         method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` },
       })
 
       if (!res.ok) {
@@ -272,25 +266,23 @@ export default function UsersPage() {
   }
 
   const handleSaveRoles = async () => {
-    if (!token || !selectedUser) return
+    if (!hasSession || !selectedUser) return
 
     setIsSubmitting(true)
     setError('')
     try {
       // Fetch current roles
       const { apiUrl } = getConfig()
-      const currentRes = await fetch(`${apiUrl}/rbac/users/${selectedUser.id}/roles`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
+      const currentRes = await authFetch(`${apiUrl}/rbac/users/${selectedUser.id}/roles`)
       const currentRoles = currentRes.ok ? (await currentRes.json())?.data || [] : []
       const currentRoleIds = currentRoles.map((r: Role) => r.id)
 
       // Remove roles that are no longer selected
       for (const roleId of currentRoleIds) {
         if (!selectedRoles.includes(roleId)) {
-          await fetch(
+          await authFetch(
             `${apiUrl}/rbac/users/${selectedUser.id}/roles/${roleId}`,
-            { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } }
+            { method: 'DELETE' }
           )
         }
       }
@@ -298,11 +290,10 @@ export default function UsersPage() {
       // Add new roles
       for (const roleId of selectedRoles) {
         if (!currentRoleIds.includes(roleId)) {
-          await fetch(`${apiUrl}/rbac/users/${selectedUser.id}/roles`, {
+          await authFetch(`${apiUrl}/rbac/users/${selectedUser.id}/roles`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
-              Authorization: `Bearer ${token}`,
             },
             body: JSON.stringify({ roleId }),
           })

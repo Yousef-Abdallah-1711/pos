@@ -1,7 +1,6 @@
 package http
 
 import (
-	"encoding/json"
 	"log"
 	"net/http"
 	appconfig "pos-saas/internal/config"
@@ -34,7 +33,7 @@ func (h *SuperAdminHandler) Login(w http.ResponseWriter, r *http.Request) {
 	log.Printf("[SuperAdminHandler] Login request\n")
 
 	var req domain.SuperAdminLoginRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+	if err := decodeJSONStrict(r, &req); err != nil {
 		respondJSON(w, http.StatusBadRequest, map[string]interface{}{
 			"success": false,
 			"error":   "invalid request body",
@@ -351,7 +350,7 @@ func (h *SuperAdminHandler) DisableTenant(w http.ResponseWriter, r *http.Request
 	var body struct {
 		Reason string `json:"reason"`
 	}
-	_ = json.NewDecoder(r.Body).Decode(&body)
+	_ = decodeJSONStrictAllowEmpty(r, &body)
 
 	ip := middleware.GetClientIP(r)
 	userAgent := r.UserAgent()
@@ -556,7 +555,7 @@ func (h *SuperAdminHandler) UpdateIPWhitelist(w http.ResponseWriter, r *http.Req
 	var body struct {
 		IPWhitelist []string `json:"ip_whitelist"`
 	}
-	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+	if err := decodeJSONStrict(r, &body); err != nil {
 		respondJSON(w, http.StatusBadRequest, map[string]interface{}{
 			"success": false,
 			"error":   "invalid request body",

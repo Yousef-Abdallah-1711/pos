@@ -94,4 +94,3 @@ func TestOrderAutoPostingIntegration_OrderPaidCreatesSalesAndCOGS(t *testing.T) 
 		t.Fatalf("unmet sqlmock expectations: %v", err)
 	}
 }
-

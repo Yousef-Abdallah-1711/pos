@@ -2,8 +2,8 @@
 
 import { Lock, Mail, LogOut } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { getDashboardLoginUrl } from '@/lib/authSession'
 import { useAuthStore } from '@/stores/authStore'
-import { getConfig } from '@/lib/config'
 
 interface AccountDisabledScreenProps {
   disabledReason?: string | null
@@ -18,8 +18,7 @@ export function AccountDisabledScreen({
 
   const handleLogout = () => {
     logout()
-    const landingUrl = getConfig().landingUrl
-    window.location.href = `${landingUrl}/auth/login`
+    window.location.href = getDashboardLoginUrl()
   }
 
   return (

@@ -2,7 +2,6 @@ package http
 
 import (
 	"context"
-	"encoding/json"
 	"net/http"
 	"strconv"
 	"time"
@@ -221,7 +220,7 @@ func decodeResignationPayload(r *http.Request) (domain.Resignation, error) {
 		UnusedLeaveBalance float64 `json:"unused_leave_balance"`
 		SettlementAmount   float64 `json:"settlement_amount"`
 	}
-	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+	if err := decodeJSONStrict(r, &body); err != nil {
 		return domain.Resignation{}, err
 	}
 	if body.EmployeeID <= 0 || body.ResignationDate == "" || body.LastWorkingDate == "" || body.Reason == "" {

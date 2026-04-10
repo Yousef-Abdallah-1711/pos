@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useMemo } from 'react'
+import { hasAuthenticatedSession } from '@/lib/authSession'
 import { useAuthStore } from '@/stores/authStore'
 import { api } from '@/lib/api'
 import { Save, Loader2, Check, X, Store, Mail, Phone } from 'lucide-react'
@@ -15,14 +16,16 @@ export default function RestaurantSettingsPage() {
   const locale = getLocaleFromPath(pathname)
   const t = useMemo(() => createTranslator(locale), [locale])
   const isRTL = locale === 'ar'
+  const user = useAuthStore((state) => state.user)
   const token = useAuthStore((state) => state.token)
+  const hasSession = hasAuthenticatedSession(user, token)
 
   const [form, setForm] = useState({ email: '', phone: '', name: '' })
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'success' | 'error'>('idle')
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    if (!token) return
+    if (!hasSession) return
 
     const fetchContactInfo = async () => {
       try {
@@ -41,7 +44,7 @@ export default function RestaurantSettingsPage() {
     }
 
     fetchContactInfo()
-  }, [token])
+  }, [hasSession])
 
   const handleSave = async () => {
     setSaveStatus('saving')

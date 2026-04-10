@@ -2,7 +2,6 @@ package http
 
 import (
 	"context"
-	"encoding/json"
 	"net/http"
 	"strconv"
 	"time"
@@ -153,7 +152,7 @@ func (h *ContractHandler) Renew(w http.ResponseWriter, r *http.Request) {
 		SalaryAmount float64 `json:"salary_amount"`
 		Currency     string  `json:"currency"`
 	}
-	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+	if err := decodeJSONStrict(r, &body); err != nil {
 		respondError(w, http.StatusBadRequest, "Invalid request body")
 		return
 	}
@@ -208,7 +207,7 @@ func decodeContractPayload(r *http.Request) (domain.EmploymentContract, error) {
 		Status         string  `json:"status"`
 		Notes          string  `json:"notes"`
 	}
-	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+	if err := decodeJSONStrict(r, &body); err != nil {
 		return domain.EmploymentContract{}, err
 	}
 	if body.EmployeeID <= 0 || body.ContractType == "" || body.ContractNumber == "" || body.StartDate == "" {
