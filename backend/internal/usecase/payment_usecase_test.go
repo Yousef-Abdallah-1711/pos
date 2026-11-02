@@ -25,6 +25,7 @@ type testPaymobClient struct {
 	orderCalls  int
 	keyCalls    int
 	verifyCalls int
+	refundCalls int
 }
 
 func (c *testPaymobClient) Authenticate() (string, error) {
@@ -60,6 +61,7 @@ func (c *testPaymobClient) GetPaymentKey(authToken string, orderID int64, amount
 }
 
 func (c *testPaymobClient) RefundTransaction(authToken string, transactionID int64, amountCents int) error {
+	c.refundCalls++
 	return nil
 }
 

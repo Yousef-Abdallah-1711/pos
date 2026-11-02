@@ -266,6 +266,15 @@ importers:
         specifier: ^4.5.0
         version: 4.5.7(@types/react@18.3.27)(immer@11.1.4)(react@18.3.1)
     devDependencies:
+      '@testing-library/jest-dom':
+        specifier: ^6.1.4
+        version: 6.9.1
+      '@testing-library/react':
+        specifier: ^16.3.1
+        version: 16.3.1(@testing-library/dom@10.4.1)(@types/react-dom@18.3.7(@types/react@18.3.27))(@types/react@18.3.27)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@testing-library/user-event':
+        specifier: ^14.6.1
+        version: 14.6.1(@testing-library/dom@10.4.1)
       '@types/node':
         specifier: ^22.10.2
         version: 22.19.3
@@ -275,6 +284,9 @@ importers:
       '@types/react-dom':
         specifier: ^18.3.1
         version: 18.3.7(@types/react@18.3.27)
+      '@vitejs/plugin-react':
+        specifier: ^5.1.2
+        version: 5.1.2(vite@7.3.0(@types/node@22.19.3)(jiti@1.21.7)(tsx@4.21.0))
       autoprefixer:
         specifier: ^10.4.20
         version: 10.4.23(postcss@8.5.6)
@@ -284,6 +296,9 @@ importers:
       eslint-config-next:
         specifier: ^15.1.0
         version: 15.5.9(eslint@9.39.2(jiti@1.21.7))(typescript@5.9.3)
+      jsdom:
+        specifier: ^26.1.0
+        version: 26.1.0
       postcss:
         specifier: ^8.4.49
         version: 8.5.6
@@ -295,7 +310,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^4.0.16
-        version: 4.0.16(@types/node@22.19.3)(jiti@1.21.7)(jsdom@27.4.0)(msw@2.12.7(@types/node@22.19.3)(typescript@5.9.3))(tsx@4.21.0)
+        version: 4.0.16(@types/node@22.19.3)(jiti@1.21.7)(jsdom@26.1.0)(msw@2.12.7(@types/node@22.19.3)(typescript@5.9.3))(tsx@4.21.0)
 
   apps/restaurant-website:
     dependencies:
@@ -369,6 +384,12 @@ importers:
         specifier: ^4.5.0
         version: 4.5.7(@types/react@18.3.27)(immer@11.1.4)(react@18.3.1)
     devDependencies:
+      '@testing-library/jest-dom':
+        specifier: ^6.1.4
+        version: 6.9.1
+      '@testing-library/react':
+        specifier: ^16.3.1
+        version: 16.3.1(@testing-library/dom@10.4.1)(@types/react-dom@18.3.7(@types/react@18.3.27))(@types/react@18.3.27)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@testing-library/user-event':
         specifier: ^14.6.1
         version: 14.6.1(@testing-library/dom@10.4.1)
@@ -390,6 +411,12 @@ importers:
       eslint-config-next:
         specifier: ^15.1.0
         version: 15.5.9(eslint@9.39.2(jiti@1.21.7))(typescript@5.9.3)
+      jest:
+        specifier: 29.7.0
+        version: 29.7.0(@types/node@22.19.3)
+      jest-environment-jsdom:
+        specifier: 29.7.0
+        version: 29.7.0
       msw:
         specifier: ^2.12.7
         version: 2.12.7(@types/node@22.19.3)(typescript@5.9.3)

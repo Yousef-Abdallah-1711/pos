@@ -5,7 +5,9 @@ import (
 	"encoding/json"
 	"strings"
 	"testing"
+	"time"
 
+	"github.com/DATA-DOG/go-sqlmock"
 	"pos-saas/internal/domain"
 	"pos-saas/internal/service"
 )
@@ -177,5 +179,72 @@ func TestWebhookSecurity_CurrencyMismatchIsRejected(t *testing.T) {
 	}
 	if repo.updateStatusCnt != 0 {
 		t.Fatal("no state change allowed")
+	}
+}
+
+func TestUpdatePaymentStatusTx_ConcurrentSuccessAlreadyProcessedIsIdempotent(t *testing.T) {
+	db, mock, err := sqlmock.New()
+	if err != nil {
+		t.Fatalf("create sql mock: %v", err)
+	}
+	defer db.Close()
+
+	mock.ExpectBegin()
+	tx, err := db.BeginTx(context.Background(), nil)
+	if err != nil {
+		t.Fatalf("begin payment transaction: %v", err)
+	}
+	paidAt := time.Now()
+	mock.ExpectExec(`WHERE id = \$7\s+AND status IN \('pending', 'failed'\)`).
+		WithArgs(domain.PaymentStatusSuccess, nil, nil, nil, nil, &paidAt, int64(71)).
+		WillReturnResult(sqlmock.NewResult(0, 0))
+
+	uc := &PaymentUseCase{}
+	err = uc.updatePaymentStatusTx(tx, context.Background(), 71, domain.PaymentStatusSuccess, nil, nil, nil, nil, &paidAt)
+	if err != errWebhookAlreadyProcessed {
+		t.Fatalf("expected guarded duplicate success to be idempotent, got %v", err)
+	}
+
+	mock.ExpectRollback()
+	if err := tx.Rollback(); err != nil {
+		t.Fatalf("rollback mock transaction: %v", err)
+	}
+	if err := mock.ExpectationsWereMet(); err != nil {
+		t.Fatalf("unmet SQL expectations: %v", err)
+	}
+}
+
+func TestRefundPayment_WhenConcurrentRefundAlreadyCommitted_SkipsProviderCall(t *testing.T) {
+	db, mock, err := sqlmock.New()
+	if err != nil {
+		t.Fatalf("create sql mock: %v", err)
+	}
+	defer db.Close()
+
+	repo := newTestPaymentRepo()
+	paymentID := pendingPaymentWithOrder(t, repo, domain.PaymentStatusSuccess, 9020)
+	transactionID := int64(8020)
+	repo.payments[paymentID].PaymobTransactionID = &transactionID
+
+	subRepo := newTestSubscriptionRepo()
+	subRepo.infoByTenant[1] = &domain.TenantSubscriptionInfo{}
+	paymob := &testPaymobClient{}
+	uc := NewPaymentUseCase(repo, subRepo, nil, paymob, db)
+
+	mock.ExpectBegin()
+	mock.ExpectQuery(`SELECT status FROM payments WHERE id = \$1 FOR UPDATE`).
+		WithArgs(paymentID).
+		WillReturnRows(sqlmock.NewRows([]string{"status"}).AddRow(domain.PaymentStatusRefunded))
+	mock.ExpectRollback()
+
+	_, err = uc.RefundPayment(context.Background(), paymentID, 1, nil, "", "")
+	if err == nil || !strings.Contains(err.Error(), "no longer refundable") {
+		t.Fatalf("expected row lock to reject a refund after another request committed, got %v", err)
+	}
+	if paymob.refundCalls != 0 {
+		t.Fatalf("provider refund must not be called after refund state changed, calls=%d", paymob.refundCalls)
+	}
+	if err := mock.ExpectationsWereMet(); err != nil {
+		t.Fatalf("unmet SQL expectations: %v", err)
 	}
 }

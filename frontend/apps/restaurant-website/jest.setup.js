@@ -5,12 +5,15 @@ import '@testing-library/jest-dom'
 // to avoid module resolution issues in Jest environment
 
 // Mock localStorage
+const localStorageData = new Map()
 const localStorageMock = {
   getItem: jest.fn(),
-  setItem: jest.fn(),
-  removeItem: jest.fn(),
-  clear: jest.fn(),
+	setItem: jest.fn((key, value) => localStorageData.set(key, String(value))),
+	removeItem: jest.fn((key) => localStorageData.delete(key)),
+	clear: jest.fn(() => localStorageData.clear()),
 }
+
+localStorageMock.getItem.mockImplementation((key) => localStorageData.get(key) ?? null)
 
 Object.defineProperty(global, 'localStorage', {
   value: localStorageMock,

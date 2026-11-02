@@ -131,8 +131,8 @@ describe("Color Utilities", () => {
 
   describe("Realistic theme colors", () => {
     const themeColors = {
-      primary: "#f97316",
-      secondary: "#0ea5e9",
+      primary: "#c2410c",
+      secondary: "#0369a1",
       accent: "#fbbf24",
       background: "#ffffff",
       text: "#1f2937",

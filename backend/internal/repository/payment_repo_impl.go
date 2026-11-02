@@ -142,7 +142,7 @@ func (r *PaymentRepositoryImpl) UpdatePaymentOrder(ctx context.Context, id int64
 func (r *PaymentRepositoryImpl) UpdatePaymentStatus(ctx context.Context, id int64, status string, txnID *int64, cardLastFour *string, cardBrand *string, errorMsg *string, paidAt *time.Time) error {
 	log.Printf("[PaymentRepo] UpdatePaymentStatus - payment_id: %d, status: %s\n", id, status)
 
-	result, err := r.db.ExecContext(ctx, `
+	query := `
 		UPDATE payments
 		SET status = $1,
 			paymob_transaction_id = COALESCE($2, paymob_transaction_id),
@@ -152,7 +152,11 @@ func (r *PaymentRepositoryImpl) UpdatePaymentStatus(ctx context.Context, id int6
 			paid_at = $6,
 			updated_at = NOW()
 		WHERE id = $7
-	`, status, txnID, cardLastFour, cardBrand, errorMsg, paidAt, id)
+	`
+	if status == domain.PaymentStatusFailed {
+		query += ` AND status = 'pending'`
+	}
+	result, err := r.db.ExecContext(ctx, query, status, txnID, cardLastFour, cardBrand, errorMsg, paidAt, id)
 	if err != nil {
 		return fmt.Errorf("failed to update payment status: %w", err)
 	}
@@ -162,7 +166,17 @@ func (r *PaymentRepositoryImpl) UpdatePaymentStatus(ctx context.Context, id int6
 		return fmt.Errorf("failed to read affected rows: %w", err)
 	}
 	if rowsAffected == 0 {
-		return fmt.Errorf("payment not found")
+		var currentStatus string
+		if err := r.db.QueryRowContext(ctx, `SELECT status FROM payments WHERE id = $1`, id).Scan(&currentStatus); err != nil {
+			if err == sql.ErrNoRows {
+				return fmt.Errorf("payment not found")
+			}
+			return fmt.Errorf("failed to read current payment status: %w", err)
+		}
+		if status == domain.PaymentStatusFailed && (currentStatus == domain.PaymentStatusFailed || currentStatus == domain.PaymentStatusSuccess || currentStatus == domain.PaymentStatusRefunded) {
+			return nil
+		}
+		return fmt.Errorf("payment status changed before update")
 	}
 
 	return nil

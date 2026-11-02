@@ -1,0 +1,2906 @@
+[
+ {
+  "method": "POST",
+  "path": "/api/v1/auth/register",
+  "wrapper": "RateLimitByIP",
+  "module": null,
+  "level": null,
+  "class": "PUBLIC"
+ },
+ {
+  "method": "POST",
+  "path": "/api/v1/auth/login",
+  "wrapper": "RateLimitByIP",
+  "module": null,
+  "level": null,
+  "class": "PUBLIC"
+ },
+ {
+  "method": "POST",
+  "path": "/api/v1/auth/login/confirm",
+  "wrapper": "RateLimitByIP",
+  "module": null,
+  "level": null,
+  "class": "PUBLIC"
+ },
+ {
+  "method": "POST",
+  "path": "/api/v1/auth/token-exchange",
+  "wrapper": "RateLimitByIP",
+  "module": null,
+  "level": null,
+  "class": "PUBLIC"
+ },
+ {
+  "method": "POST",
+  "path": "/api/v1/auth/forgot-password",
+  "wrapper": "RateLimitByIP",
+  "module": null,
+  "level": null,
+  "class": "PUBLIC"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/auth/check-subdomain",
+  "wrapper": null,
+  "module": null,
+  "level": null,
+  "class": "PUBLIC"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/public/restaurants/{slug}/menu",
+  "wrapper": null,
+  "module": null,
+  "level": null,
+  "class": "PUBLIC"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/public/restaurants/{slug}/products",
+  "wrapper": null,
+  "module": null,
+  "level": null,
+  "class": "PUBLIC"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/public/restaurants/{slug}/categories",
+  "wrapper": null,
+  "module": null,
+  "level": null,
+  "class": "PUBLIC"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/public/restaurants/{slug}/info",
+  "wrapper": null,
+  "module": null,
+  "level": null,
+  "class": "PUBLIC"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/public/restaurants/{slug}/categories/{categoryId}/products",
+  "wrapper": null,
+  "module": null,
+  "level": null,
+  "class": "PUBLIC"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/public/restaurants/{slug}/products/{productId}",
+  "wrapper": null,
+  "module": null,
+  "level": null,
+  "class": "PUBLIC"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/public/restaurants/{slug}/search",
+  "wrapper": null,
+  "module": null,
+  "level": null,
+  "class": "PUBLIC"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/public/restaurants/{slug}/homepage",
+  "wrapper": null,
+  "module": null,
+  "level": null,
+  "class": "PUBLIC"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/public/restaurants/{slug}/theme",
+  "wrapper": null,
+  "module": null,
+  "level": null,
+  "class": "PUBLIC"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/public/restaurants/{slug}/sections",
+  "wrapper": null,
+  "module": null,
+  "level": null,
+  "class": "PUBLIC"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/public/restaurants/{slug}/settings",
+  "wrapper": null,
+  "module": null,
+  "level": null,
+  "class": "PUBLIC"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/public/table/{id}/info",
+  "wrapper": "RateLimitByIP",
+  "module": null,
+  "level": null,
+  "class": "PUBLIC"
+ },
+ {
+  "method": "POST",
+  "path": "/api/v1/public/orders",
+  "wrapper": "tenantContext",
+  "module": null,
+  "level": null,
+  "class": "PUBLIC"
+ },
+ {
+  "method": "POST",
+  "path": "/api/v1/public/orders/validate",
+  "wrapper": "tenantContext",
+  "module": null,
+  "level": null,
+  "class": "PUBLIC"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/public/orders/number/{number}/lookup",
+  "wrapper": "tenantContext",
+  "module": null,
+  "level": null,
+  "class": "PUBLIC"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/public/orders/{id}/status",
+  "wrapper": "tenantContext",
+  "module": null,
+  "level": null,
+  "class": "PUBLIC"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/public/orders/{id}/track",
+  "wrapper": "tenantContext",
+  "module": null,
+  "level": null,
+  "class": "PUBLIC"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/public/orders/{id}",
+  "wrapper": "tenantContext",
+  "module": null,
+  "level": null,
+  "class": "PUBLIC"
+ },
+ {
+  "method": "DELETE",
+  "path": "/api/v1/public/orders/{id}",
+  "wrapper": "tenantContext",
+  "module": null,
+  "level": null,
+  "class": "PUBLIC"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/translations/health",
+  "wrapper": null,
+  "module": null,
+  "level": null,
+  "class": "PUBLIC"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/translations/languages",
+  "wrapper": null,
+  "module": null,
+  "level": null,
+  "class": "PUBLIC"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/translations/{language}",
+  "wrapper": null,
+  "module": null,
+  "level": null,
+  "class": "PUBLIC"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/translations/{language}/{namespace}/{key}",
+  "wrapper": null,
+  "module": null,
+  "level": null,
+  "class": "PUBLIC"
+ },
+ {
+  "method": "POST",
+  "path": "/api/v1/translations/{language}/upload",
+  "wrapper": "SuperAdminAuthMiddleware",
+  "module": null,
+  "level": null,
+  "class": "SUPER_ADMIN"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/admin/components",
+  "wrapper": null,
+  "module": null,
+  "level": null,
+  "class": "PUBLIC"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/health",
+  "wrapper": null,
+  "module": null,
+  "level": null,
+  "class": "PUBLIC"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/health/ready",
+  "wrapper": null,
+  "module": null,
+  "level": null,
+  "class": "PUBLIC"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/health/metrics",
+  "wrapper": "RequireInternalToken",
+  "module": null,
+  "level": null,
+  "class": "SERVICE_INTERNAL"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/public/test-routing/{slug}",
+  "wrapper": null,
+  "module": null,
+  "level": null,
+  "class": "PUBLIC"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/public/tenant-status/{slug}",
+  "wrapper": null,
+  "module": null,
+  "level": null,
+  "class": "PUBLIC"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/subscription/plans",
+  "wrapper": null,
+  "module": null,
+  "level": null,
+  "class": "PUBLIC"
+ },
+ {
+  "method": "POST",
+  "path": "/api/v1/webhook/paymob",
+  "wrapper": "RateLimitByIP",
+  "module": null,
+  "level": null,
+  "class": "WEBHOOK"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/mock/paymob/iframe",
+  "wrapper": null,
+  "module": null,
+  "level": null,
+  "class": "PUBLIC"
+ },
+ {
+  "method": "POST",
+  "path": "/api/v1/mock/paymob/process",
+  "wrapper": null,
+  "module": null,
+  "level": null,
+  "class": "PUBLIC"
+ },
+ {
+  "method": "POST",
+  "path": "/api/v1/subscription/initiate",
+  "wrapper": "wrapProtectedNoStatus",
+  "module": null,
+  "level": null,
+  "class": "AUTHENTICATED (self-service / billing / status)"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/subscription/payments",
+  "wrapper": "wrapProtectedNoStatus",
+  "module": null,
+  "level": null,
+  "class": "AUTHENTICATED (self-service / billing / status)"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/subscription/current",
+  "wrapper": "wrapProtectedNoStatus",
+  "module": null,
+  "level": null,
+  "class": "AUTHENTICATED (self-service / billing / status)"
+ },
+ {
+  "method": "POST",
+  "path": "/api/v1/subscription/cancel",
+  "wrapper": "wrapProtectedNoStatus",
+  "module": null,
+  "level": null,
+  "class": "AUTHENTICATED (self-service / billing / status)"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/me",
+  "wrapper": "wrapProtectedNoStatus",
+  "module": null,
+  "level": null,
+  "class": "AUTHENTICATED (self-service / billing / status)"
+ },
+ {
+  "method": "POST",
+  "path": "/api/v1/products",
+  "wrapper": "wrapWithPermission",
+  "module": "1",
+  "level": "WRITE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/products",
+  "wrapper": "wrapWithPermission",
+  "module": "1",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/products/alerts/low-stock",
+  "wrapper": "wrapWithPermission",
+  "module": "1",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/products/{id}",
+  "wrapper": "wrapWithPermission",
+  "module": "1",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "PUT",
+  "path": "/api/v1/products/{id}",
+  "wrapper": "wrapWithPermission",
+  "module": "1",
+  "level": "WRITE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "DELETE",
+  "path": "/api/v1/products/{id}",
+  "wrapper": "wrapWithPermission",
+  "module": "1",
+  "level": "DELETE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/categories",
+  "wrapper": "wrapWithPermission",
+  "module": "2",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/categories/{id}",
+  "wrapper": "wrapWithPermission",
+  "module": "2",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "POST",
+  "path": "/api/v1/categories",
+  "wrapper": "wrapWithPermission",
+  "module": "2",
+  "level": "WRITE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "PUT",
+  "path": "/api/v1/categories/{id}",
+  "wrapper": "wrapWithPermission",
+  "module": "2",
+  "level": "WRITE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "DELETE",
+  "path": "/api/v1/categories/{id}",
+  "wrapper": "wrapWithPermission",
+  "module": "2",
+  "level": "DELETE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/tenant/status",
+  "wrapper": "wrapProtectedWithStatus",
+  "module": null,
+  "level": null,
+  "class": "AUTHENTICATED (self-service / billing / status)"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/tenant/status",
+  "wrapper": "wrapProtectedNoStatus",
+  "module": null,
+  "level": null,
+  "class": "AUTHENTICATED (self-service / billing / status)"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/tenant/contact-info",
+  "wrapper": "wrapWithPermission",
+  "module": "5",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "PUT",
+  "path": "/api/v1/tenant/contact-info",
+  "wrapper": "wrapWithPermission",
+  "module": "5",
+  "level": "WRITE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/hr/employees",
+  "wrapper": "wrapWithPermission",
+  "module": "3",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/hr/employees/{id}",
+  "wrapper": "wrapWithPermission",
+  "module": "3",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "POST",
+  "path": "/api/v1/hr/employees",
+  "wrapper": "wrapWithPermission",
+  "module": "3",
+  "level": "WRITE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "PUT",
+  "path": "/api/v1/hr/employees/{id}",
+  "wrapper": "wrapWithPermission",
+  "module": "3",
+  "level": "WRITE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "DELETE",
+  "path": "/api/v1/hr/employees/{id}",
+  "wrapper": "wrapWithPermission",
+  "module": "3",
+  "level": "DELETE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/hr/roles",
+  "wrapper": "wrapWithPermission",
+  "module": "3",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "POST",
+  "path": "/api/v1/hr/roles",
+  "wrapper": "wrapWithPermission",
+  "module": "3",
+  "level": "WRITE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "PUT",
+  "path": "/api/v1/hr/roles/{id}",
+  "wrapper": "wrapWithPermission",
+  "module": "3",
+  "level": "WRITE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "DELETE",
+  "path": "/api/v1/hr/roles/{id}",
+  "wrapper": "wrapWithPermission",
+  "module": "3",
+  "level": "DELETE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/rbac/roles",
+  "wrapper": "wrapAuthPermission",
+  "module": "7",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/rbac/roles/{id}",
+  "wrapper": "wrapAuthPermission",
+  "module": "7",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "POST",
+  "path": "/api/v1/rbac/roles",
+  "wrapper": "wrapAuthPermission",
+  "module": "7",
+  "level": "WRITE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "PUT",
+  "path": "/api/v1/rbac/roles/{id}",
+  "wrapper": "wrapAuthPermission",
+  "module": "7",
+  "level": "WRITE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "DELETE",
+  "path": "/api/v1/rbac/roles/{id}",
+  "wrapper": "wrapAuthPermission",
+  "module": "7",
+  "level": "DELETE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "POST",
+  "path": "/api/v1/rbac/permissions/assign",
+  "wrapper": "wrapAuthPermission",
+  "module": "7",
+  "level": "ADMIN",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "DELETE",
+  "path": "/api/v1/rbac/permissions/{roleId}/{moduleId}",
+  "wrapper": "wrapAuthPermission",
+  "module": "7",
+  "level": "ADMIN",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/rbac/roles/{roleId}/permissions",
+  "wrapper": "wrapAuthPermission",
+  "module": "7",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/rbac/check-permission",
+  "wrapper": "wrapAuthOnly",
+  "module": null,
+  "level": null,
+  "class": "AUTHENTICATED (self-service / billing / status)"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/rbac/me/permissions",
+  "wrapper": "wrapAuthOnly",
+  "module": null,
+  "level": null,
+  "class": "AUTHENTICATED (self-service / billing / status)"
+ },
+ {
+  "method": "POST",
+  "path": "/api/v1/rbac/users/{userId}/roles",
+  "wrapper": "wrapAuthPermission",
+  "module": "7",
+  "level": "ADMIN",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "DELETE",
+  "path": "/api/v1/rbac/users/{userId}/roles/{roleId}",
+  "wrapper": "wrapAuthPermission",
+  "module": "7",
+  "level": "ADMIN",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/rbac/users/{userId}/roles",
+  "wrapper": "wrapAuthPermission",
+  "module": "7",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/rbac/me/roles",
+  "wrapper": "wrapAuthOnly",
+  "module": null,
+  "level": null,
+  "class": "AUTHENTICATED (self-service / billing / status)"
+ },
+ {
+  "method": "POST",
+  "path": "/api/v1/rbac/users-by-email/{email}/roles",
+  "wrapper": "wrapAuthPermission",
+  "module": "7",
+  "level": "ADMIN",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "DELETE",
+  "path": "/api/v1/rbac/users-by-email/{email}/roles/{roleId}",
+  "wrapper": "wrapAuthPermission",
+  "module": "7",
+  "level": "ADMIN",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/rbac/users-by-email/{email}/roles",
+  "wrapper": "wrapAuthPermission",
+  "module": "7",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/hr/attendance",
+  "wrapper": "wrapWithPermission",
+  "module": "3",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/hr/attendance/{id}",
+  "wrapper": "wrapWithPermission",
+  "module": "3",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "POST",
+  "path": "/api/v1/hr/attendance",
+  "wrapper": "wrapWithPermission",
+  "module": "3",
+  "level": "WRITE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "POST",
+  "path": "/api/v1/hr/attendance/clock-in",
+  "wrapper": "wrapWithPermission",
+  "module": "3",
+  "level": "WRITE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "PUT",
+  "path": "/api/v1/hr/attendance/{id}",
+  "wrapper": "wrapWithPermission",
+  "module": "3",
+  "level": "WRITE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "DELETE",
+  "path": "/api/v1/hr/attendance/{id}",
+  "wrapper": "wrapWithPermission",
+  "module": "3",
+  "level": "DELETE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/hr/leaves",
+  "wrapper": "wrapWithPermission",
+  "module": "11",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/hr/leaves/{id}",
+  "wrapper": "wrapWithPermission",
+  "module": "11",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "POST",
+  "path": "/api/v1/hr/leaves",
+  "wrapper": "wrapWithPermission",
+  "module": "11",
+  "level": "WRITE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "PUT",
+  "path": "/api/v1/hr/leaves/{id}",
+  "wrapper": "wrapWithPermission",
+  "module": "11",
+  "level": "WRITE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "DELETE",
+  "path": "/api/v1/hr/leaves/{id}",
+  "wrapper": "wrapWithPermission",
+  "module": "11",
+  "level": "DELETE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "POST",
+  "path": "/api/v1/hr/leaves/{id}/approve",
+  "wrapper": "wrapWithPermission",
+  "module": "11",
+  "level": "WRITE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "POST",
+  "path": "/api/v1/hr/leaves/{id}/reject",
+  "wrapper": "wrapWithPermission",
+  "module": "11",
+  "level": "WRITE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/hr/salaries",
+  "wrapper": "wrapWithPermission",
+  "module": "12",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/hr/salaries/{id}",
+  "wrapper": "wrapWithPermission",
+  "module": "12",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "POST",
+  "path": "/api/v1/hr/salaries",
+  "wrapper": "wrapWithPermission",
+  "module": "12",
+  "level": "WRITE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "PUT",
+  "path": "/api/v1/hr/salaries/{id}",
+  "wrapper": "wrapWithPermission",
+  "module": "12",
+  "level": "WRITE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "DELETE",
+  "path": "/api/v1/hr/salaries/{id}",
+  "wrapper": "wrapWithPermission",
+  "module": "12",
+  "level": "DELETE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "POST",
+  "path": "/api/v1/hr/salaries/{id}/mark-paid",
+  "wrapper": "wrapWithPermission",
+  "module": "12",
+  "level": "WRITE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/accounting/accounts",
+  "wrapper": "wrapWithPermission",
+  "module": "15",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "POST",
+  "path": "/api/v1/accounting/accounts",
+  "wrapper": "wrapWithPermission",
+  "module": "15",
+  "level": "WRITE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/accounting/accounts/{id}",
+  "wrapper": "wrapWithPermission",
+  "module": "15",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "PUT",
+  "path": "/api/v1/accounting/accounts/{id}",
+  "wrapper": "wrapWithPermission",
+  "module": "15",
+  "level": "WRITE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "DELETE",
+  "path": "/api/v1/accounting/accounts/{id}",
+  "wrapper": "wrapWithPermission",
+  "module": "15",
+  "level": "DELETE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/accounting/journal-entries",
+  "wrapper": "wrapWithPermission",
+  "module": "15",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "POST",
+  "path": "/api/v1/accounting/journal-entries",
+  "wrapper": "wrapWithPermission",
+  "module": "15",
+  "level": "WRITE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "POST",
+  "path": "/api/v1/accounting/journal-entries/{id}/post",
+  "wrapper": "wrapWithPermission",
+  "module": "15",
+  "level": "WRITE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "POST",
+  "path": "/api/v1/accounting/journal-entries/{id}/void",
+  "wrapper": "wrapWithPermission",
+  "module": "15",
+  "level": "WRITE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/accounting/journal-entries/{id}",
+  "wrapper": "wrapWithPermission",
+  "module": "15",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "PUT",
+  "path": "/api/v1/accounting/journal-entries/{id}",
+  "wrapper": "wrapWithPermission",
+  "module": "15",
+  "level": "WRITE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/accounting/ledger",
+  "wrapper": "wrapWithPermission",
+  "module": "15",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/accounting/trial-balance",
+  "wrapper": "wrapWithPermission",
+  "module": "15",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/accounting/bank-accounts",
+  "wrapper": "wrapWithPermission",
+  "module": "15",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "POST",
+  "path": "/api/v1/accounting/bank-accounts",
+  "wrapper": "wrapWithPermission",
+  "module": "15",
+  "level": "WRITE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/accounting/bank-accounts/{id}/transactions",
+  "wrapper": "wrapWithPermission",
+  "module": "15",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/accounting/bank-accounts/{id}",
+  "wrapper": "wrapWithPermission",
+  "module": "15",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "PUT",
+  "path": "/api/v1/accounting/bank-accounts/{id}",
+  "wrapper": "wrapWithPermission",
+  "module": "15",
+  "level": "WRITE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "DELETE",
+  "path": "/api/v1/accounting/bank-accounts/{id}",
+  "wrapper": "wrapWithPermission",
+  "module": "15",
+  "level": "DELETE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/accounting/customers",
+  "wrapper": "wrapWithPermission",
+  "module": "15",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "POST",
+  "path": "/api/v1/accounting/customers",
+  "wrapper": "wrapWithPermission",
+  "module": "15",
+  "level": "WRITE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/accounting/customers/{id}/statement",
+  "wrapper": "wrapWithPermission",
+  "module": "15",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/accounting/customers/{id}",
+  "wrapper": "wrapWithPermission",
+  "module": "15",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "PUT",
+  "path": "/api/v1/accounting/customers/{id}",
+  "wrapper": "wrapWithPermission",
+  "module": "15",
+  "level": "WRITE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "DELETE",
+  "path": "/api/v1/accounting/customers/{id}",
+  "wrapper": "wrapWithPermission",
+  "module": "15",
+  "level": "DELETE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/accounting/customer-invoices",
+  "wrapper": "wrapWithPermission",
+  "module": "15",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "POST",
+  "path": "/api/v1/accounting/customer-invoices",
+  "wrapper": "wrapWithPermission",
+  "module": "15",
+  "level": "WRITE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/accounting/customer-invoices/overdue",
+  "wrapper": "wrapWithPermission",
+  "module": "15",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "POST",
+  "path": "/api/v1/accounting/customer-invoices/{id}/send",
+  "wrapper": "wrapWithPermission",
+  "module": "15",
+  "level": "WRITE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/accounting/customer-invoices/{id}/pdf",
+  "wrapper": "wrapWithPermission",
+  "module": "15",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "POST",
+  "path": "/api/v1/accounting/customer-invoices/{id}/send-email",
+  "wrapper": "wrapWithPermission",
+  "module": "15",
+  "level": "WRITE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "POST",
+  "path": "/api/v1/accounting/customer-invoices/{id}/void",
+  "wrapper": "wrapWithPermission",
+  "module": "15",
+  "level": "WRITE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/accounting/customer-invoices/{id}",
+  "wrapper": "wrapWithPermission",
+  "module": "15",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "PUT",
+  "path": "/api/v1/accounting/customer-invoices/{id}",
+  "wrapper": "wrapWithPermission",
+  "module": "15",
+  "level": "WRITE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/accounting/supplier-invoices",
+  "wrapper": "wrapWithPermission",
+  "module": "15",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "POST",
+  "path": "/api/v1/accounting/supplier-invoices",
+  "wrapper": "wrapWithPermission",
+  "module": "15",
+  "level": "WRITE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "POST",
+  "path": "/api/v1/accounting/supplier-invoices/{id}/approve",
+  "wrapper": "wrapWithPermission",
+  "module": "15",
+  "level": "WRITE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "POST",
+  "path": "/api/v1/accounting/supplier-invoices/{id}/void",
+  "wrapper": "wrapWithPermission",
+  "module": "15",
+  "level": "WRITE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/accounting/supplier-invoices/{id}",
+  "wrapper": "wrapWithPermission",
+  "module": "15",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "PUT",
+  "path": "/api/v1/accounting/supplier-invoices/{id}",
+  "wrapper": "wrapWithPermission",
+  "module": "15",
+  "level": "WRITE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/accounting/payments/received",
+  "wrapper": "wrapWithPermission",
+  "module": "15",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "POST",
+  "path": "/api/v1/accounting/payments/received",
+  "wrapper": "wrapWithPermission",
+  "module": "15",
+  "level": "WRITE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/accounting/payments/made",
+  "wrapper": "wrapWithPermission",
+  "module": "15",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "POST",
+  "path": "/api/v1/accounting/payments/made",
+  "wrapper": "wrapWithPermission",
+  "module": "15",
+  "level": "WRITE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/accounting/bank-reconciliation/sessions",
+  "wrapper": "wrapWithPermission",
+  "module": "15",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "POST",
+  "path": "/api/v1/accounting/bank-reconciliation/sessions",
+  "wrapper": "wrapWithPermission",
+  "module": "15",
+  "level": "WRITE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "POST",
+  "path": "/api/v1/accounting/bank-reconciliation/sessions/{id}/lines",
+  "wrapper": "wrapWithPermission",
+  "module": "15",
+  "level": "WRITE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "POST",
+  "path": "/api/v1/accounting/bank-reconciliation/sessions/{id}/complete",
+  "wrapper": "wrapWithPermission",
+  "module": "15",
+  "level": "WRITE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/accounting/recurring-journals",
+  "wrapper": "wrapWithPermission",
+  "module": "15",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "POST",
+  "path": "/api/v1/accounting/recurring-journals",
+  "wrapper": "wrapWithPermission",
+  "module": "15",
+  "level": "WRITE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "PUT",
+  "path": "/api/v1/accounting/recurring-journals/{id}",
+  "wrapper": "wrapWithPermission",
+  "module": "15",
+  "level": "WRITE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "DELETE",
+  "path": "/api/v1/accounting/recurring-journals/{id}",
+  "wrapper": "wrapWithPermission",
+  "module": "15",
+  "level": "DELETE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "POST",
+  "path": "/api/v1/accounting/recurring-journals/{id}/run",
+  "wrapper": "wrapWithPermission",
+  "module": "15",
+  "level": "WRITE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/accounting/budgets",
+  "wrapper": "wrapWithPermission",
+  "module": "15",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "POST",
+  "path": "/api/v1/accounting/budgets",
+  "wrapper": "wrapWithPermission",
+  "module": "15",
+  "level": "WRITE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/accounting/exchange-rates",
+  "wrapper": "wrapWithPermission",
+  "module": "15",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "POST",
+  "path": "/api/v1/accounting/exchange-rates",
+  "wrapper": "wrapWithPermission",
+  "module": "15",
+  "level": "WRITE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/accounting/exchange-rates/convert",
+  "wrapper": "wrapWithPermission",
+  "module": "15",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/accounting/supplier-payment-schedules",
+  "wrapper": "wrapWithPermission",
+  "module": "15",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "POST",
+  "path": "/api/v1/accounting/supplier-payment-schedules",
+  "wrapper": "wrapWithPermission",
+  "module": "15",
+  "level": "WRITE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/accounting/supplier-payment-reminders",
+  "wrapper": "wrapWithPermission",
+  "module": "15",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "POST",
+  "path": "/api/v1/accounting/supplier-payment-schedules/{id}/send-reminder",
+  "wrapper": "wrapWithPermission",
+  "module": "15",
+  "level": "WRITE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "POST",
+  "path": "/api/v1/accounting/einvoice/{id}/submit",
+  "wrapper": "wrapWithPermission",
+  "module": "15",
+  "level": "WRITE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/accounting/einvoice/submissions",
+  "wrapper": "wrapWithPermission",
+  "module": "15",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/accounting/excel/chart-of-accounts/export",
+  "wrapper": "wrapWithPermission",
+  "module": "15",
+  "level": "EXPORT",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "POST",
+  "path": "/api/v1/accounting/excel/chart-of-accounts/import",
+  "wrapper": "wrapWithPermission",
+  "module": "15",
+  "level": "WRITE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/accounting/excel/journal-entries/export",
+  "wrapper": "wrapWithPermission",
+  "module": "15",
+  "level": "EXPORT",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "POST",
+  "path": "/api/v1/accounting/excel/journal-entries/import",
+  "wrapper": "wrapWithPermission",
+  "module": "15",
+  "level": "WRITE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/suppliers",
+  "wrapper": "wrapWithPermission",
+  "module": "16",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "POST",
+  "path": "/api/v1/suppliers",
+  "wrapper": "wrapWithPermission",
+  "module": "16",
+  "level": "WRITE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/suppliers/{id}",
+  "wrapper": "wrapWithPermission",
+  "module": "16",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "PUT",
+  "path": "/api/v1/suppliers/{id}",
+  "wrapper": "wrapWithPermission",
+  "module": "16",
+  "level": "WRITE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "DELETE",
+  "path": "/api/v1/suppliers/{id}",
+  "wrapper": "wrapWithPermission",
+  "module": "16",
+  "level": "DELETE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/users",
+  "wrapper": "wrapWithPermission",
+  "module": "6",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/users",
+  "wrapper": "wrapWithPermission",
+  "module": "6",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/users/{userId}/settings",
+  "wrapper": "wrapProtected",
+  "module": null,
+  "level": null,
+  "class": "AUTHENTICATED (self-service / billing / status)"
+ },
+ {
+  "method": "PUT",
+  "path": "/api/v1/users/{userId}/settings/language",
+  "wrapper": "wrapProtected",
+  "module": null,
+  "level": null,
+  "class": "AUTHENTICATED (self-service / billing / status)"
+ },
+ {
+  "method": "PUT",
+  "path": "/api/v1/users/{userId}/settings/theme",
+  "wrapper": "wrapProtected",
+  "module": null,
+  "level": null,
+  "class": "AUTHENTICATED (self-service / billing / status)"
+ },
+ {
+  "method": "PUT",
+  "path": "/api/v1/users/{userId}/settings/theme-colors",
+  "wrapper": "wrapProtected",
+  "module": null,
+  "level": null,
+  "class": "AUTHENTICATED (self-service / billing / status)"
+ },
+ {
+  "method": "POST",
+  "path": "/api/v1/users/{userId}/settings/change-password",
+  "wrapper": "wrapProtected",
+  "module": null,
+  "level": null,
+  "class": "AUTHENTICATED (self-service / billing / status)"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/users/{userId}/profile",
+  "wrapper": "wrapProtected",
+  "module": null,
+  "level": null,
+  "class": "AUTHENTICATED (self-service / billing / status)"
+ },
+ {
+  "method": "PUT",
+  "path": "/api/v1/users/{userId}/profile",
+  "wrapper": "wrapProtected",
+  "module": null,
+  "level": null,
+  "class": "AUTHENTICATED (self-service / billing / status)"
+ },
+ {
+  "method": "POST",
+  "path": "/api/v1/users",
+  "wrapper": "wrapWithPermission",
+  "module": "6",
+  "level": "WRITE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "PUT",
+  "path": "/api/v1/users/{id}",
+  "wrapper": "wrapWithPermission",
+  "module": "6",
+  "level": "WRITE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "DELETE",
+  "path": "/api/v1/users/{id}",
+  "wrapper": "wrapWithPermission",
+  "module": "6",
+  "level": "DELETE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "POST",
+  "path": "/api/v1/users",
+  "wrapper": "wrapWithPermission",
+  "module": "6",
+  "level": "WRITE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "PUT",
+  "path": "/api/v1/users/{id}",
+  "wrapper": "wrapWithPermission",
+  "module": "6",
+  "level": "WRITE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "DELETE",
+  "path": "/api/v1/users/{id}",
+  "wrapper": "wrapWithPermission",
+  "module": "6",
+  "level": "DELETE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/admin/orders/stats",
+  "wrapper": "wrapWithPermission",
+  "module": "10",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/admin/orders/export",
+  "wrapper": "wrapWithPermission",
+  "module": "10",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/admin/orders/{id}/history",
+  "wrapper": "wrapWithPermission",
+  "module": "10",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "PUT",
+  "path": "/api/v1/admin/orders/{id}/status",
+  "wrapper": "wrapWithPermission",
+  "module": "10",
+  "level": "WRITE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "PUT",
+  "path": "/api/v1/admin/orders/{id}/payment-status",
+  "wrapper": "wrapWithPermission",
+  "module": "10",
+  "level": "WRITE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "DELETE",
+  "path": "/api/v1/admin/orders/{id}",
+  "wrapper": "wrapWithPermission",
+  "module": "10",
+  "level": "DELETE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/admin/orders/{id}",
+  "wrapper": "wrapWithPermission",
+  "module": "10",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/admin/orders",
+  "wrapper": "wrapWithPermission",
+  "module": "10",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "POST",
+  "path": "/api/v1/tables",
+  "wrapper": "wrapWithPermission",
+  "module": "14",
+  "level": "WRITE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/tables",
+  "wrapper": "wrapWithPermission",
+  "module": "14",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/tables/stats",
+  "wrapper": "wrapWithPermission",
+  "module": "14",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/tables/layouts",
+  "wrapper": "wrapWithPermission",
+  "module": "14",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "POST",
+  "path": "/api/v1/tables/layouts",
+  "wrapper": "wrapWithPermission",
+  "module": "14",
+  "level": "WRITE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "PUT",
+  "path": "/api/v1/tables/positions",
+  "wrapper": "wrapWithPermission",
+  "module": "14",
+  "level": "WRITE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/tables/{id}",
+  "wrapper": "wrapWithPermission",
+  "module": "14",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "PUT",
+  "path": "/api/v1/tables/{id}",
+  "wrapper": "wrapWithPermission",
+  "module": "14",
+  "level": "WRITE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "DELETE",
+  "path": "/api/v1/tables/{id}",
+  "wrapper": "wrapWithPermission",
+  "module": "14",
+  "level": "DELETE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "PUT",
+  "path": "/api/v1/tables/{id}/status",
+  "wrapper": "wrapWithPermission",
+  "module": "14",
+  "level": "WRITE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/kds/ws",
+  "wrapper": null,
+  "module": null,
+  "level": null,
+  "class": "PUBLIC"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/kds/queue",
+  "wrapper": "wrapKDSWithPermission",
+  "module": null,
+  "level": null,
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "PUT",
+  "path": "/api/v1/kds/orders/{id}/bump",
+  "wrapper": "wrapKDSWithPermission",
+  "module": null,
+  "level": null,
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "PUT",
+  "path": "/api/v1/kds/orders/{id}/recall",
+  "wrapper": "wrapKDSWithPermission",
+  "module": null,
+  "level": null,
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/kds/stats",
+  "wrapper": "wrapKDSWithPermission",
+  "module": null,
+  "level": null,
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/kds/analytics",
+  "wrapper": "wrapKDSWithPermission",
+  "module": null,
+  "level": null,
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/kds/settings",
+  "wrapper": "wrapKDSWithPermission",
+  "module": null,
+  "level": null,
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "PUT",
+  "path": "/api/v1/kds/settings",
+  "wrapper": "wrapKDSWithPermission",
+  "module": null,
+  "level": null,
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/reports/overview",
+  "wrapper": "wrapWithPermission",
+  "module": "8",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/reports/sales",
+  "wrapper": "wrapWithPermission",
+  "module": "8",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/reports/profitability",
+  "wrapper": "wrapWithPermission",
+  "module": "8",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/reports/inventory",
+  "wrapper": "wrapWithPermission",
+  "module": "8",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "POST",
+  "path": "/api/v1/reports/export",
+  "wrapper": "wrapWithPermission",
+  "module": "8",
+  "level": "EXPORT",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/reports/financial/profit-loss",
+  "wrapper": "wrapWithPermission",
+  "module": "17",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/reports/financial/balance-sheet",
+  "wrapper": "wrapWithPermission",
+  "module": "17",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/reports/financial/cash-flow",
+  "wrapper": "wrapWithPermission",
+  "module": "17",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/reports/financial/receivables-aging",
+  "wrapper": "wrapWithPermission",
+  "module": "17",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/reports/financial/payables-aging",
+  "wrapper": "wrapWithPermission",
+  "module": "17",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/reports/financial/inventory-valuation",
+  "wrapper": "wrapWithPermission",
+  "module": "17",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/reports/financial/trial-balance",
+  "wrapper": "wrapWithPermission",
+  "module": "17",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/reports/financial/kpis",
+  "wrapper": "wrapWithPermission",
+  "module": "17",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/reports/financial/menu-profitability",
+  "wrapper": "wrapWithPermission",
+  "module": "17",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/reports/financial/break-even",
+  "wrapper": "wrapWithPermission",
+  "module": "17",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/reports/financial/predictive-cash-flow",
+  "wrapper": "wrapWithPermission",
+  "module": "17",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/reports/hr/headcount",
+  "wrapper": "wrapWithPermission",
+  "module": "8",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/reports/hr/turnover",
+  "wrapper": "wrapWithPermission",
+  "module": "8",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/reports/hr/absenteeism",
+  "wrapper": "wrapWithPermission",
+  "module": "8",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/reports/hr/overtime",
+  "wrapper": "wrapWithPermission",
+  "module": "8",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/reports/hr/leave-balances",
+  "wrapper": "wrapWithPermission",
+  "module": "8",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/reports/hr/training-compliance",
+  "wrapper": "wrapWithPermission",
+  "module": "8",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/reports/hr/cost-analysis",
+  "wrapper": "wrapWithPermission",
+  "module": "8",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/reports/hr/social-insurance",
+  "wrapper": "wrapWithPermission",
+  "module": "8",
+  "level": "EXPORT",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/audit/export",
+  "wrapper": "wrapWithPermission",
+  "module": "17",
+  "level": "EXPORT",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/accounting/tax/periods",
+  "wrapper": "wrapWithPermission",
+  "module": "17",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "POST",
+  "path": "/api/v1/accounting/tax/periods",
+  "wrapper": "wrapWithPermission",
+  "module": "17",
+  "level": "WRITE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/accounting/tax/periods/{id}",
+  "wrapper": "wrapWithPermission",
+  "module": "17",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "PUT",
+  "path": "/api/v1/accounting/tax/periods/{id}",
+  "wrapper": "wrapWithPermission",
+  "module": "17",
+  "level": "WRITE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "DELETE",
+  "path": "/api/v1/accounting/tax/periods/{id}",
+  "wrapper": "wrapWithPermission",
+  "module": "17",
+  "level": "DELETE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/accounting/tax/vat-report",
+  "wrapper": "wrapWithPermission",
+  "module": "17",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "POST",
+  "path": "/api/v1/accounting/tax/periods/{id}/close",
+  "wrapper": "wrapWithPermission",
+  "module": "17",
+  "level": "WRITE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/hr/performance",
+  "wrapper": "wrapWithPermission",
+  "module": "18",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "POST",
+  "path": "/api/v1/hr/performance",
+  "wrapper": "wrapWithPermission",
+  "module": "18",
+  "level": "WRITE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/hr/performance/{id}",
+  "wrapper": "wrapWithPermission",
+  "module": "18",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "PUT",
+  "path": "/api/v1/hr/performance/{id}",
+  "wrapper": "wrapWithPermission",
+  "module": "18",
+  "level": "WRITE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "DELETE",
+  "path": "/api/v1/hr/performance/{id}",
+  "wrapper": "wrapWithPermission",
+  "module": "18",
+  "level": "DELETE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "POST",
+  "path": "/api/v1/hr/performance/{id}/acknowledge",
+  "wrapper": "wrapWithPermission",
+  "module": "18",
+  "level": "WRITE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "POST",
+  "path": "/api/v1/hr/performance/{id}/complete",
+  "wrapper": "wrapWithPermission",
+  "module": "18",
+  "level": "WRITE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/hr/performance/employee/{employeeId}",
+  "wrapper": "wrapWithPermission",
+  "module": "18",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/hr/training",
+  "wrapper": "wrapWithPermission",
+  "module": "19",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "POST",
+  "path": "/api/v1/hr/training",
+  "wrapper": "wrapWithPermission",
+  "module": "19",
+  "level": "WRITE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/hr/training/{id}",
+  "wrapper": "wrapWithPermission",
+  "module": "19",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "PUT",
+  "path": "/api/v1/hr/training/{id}",
+  "wrapper": "wrapWithPermission",
+  "module": "19",
+  "level": "WRITE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "DELETE",
+  "path": "/api/v1/hr/training/{id}",
+  "wrapper": "wrapWithPermission",
+  "module": "19",
+  "level": "DELETE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/hr/training/expiring",
+  "wrapper": "wrapWithPermission",
+  "module": "19",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/hr/insurance",
+  "wrapper": "wrapWithPermission",
+  "module": "20",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "POST",
+  "path": "/api/v1/hr/insurance",
+  "wrapper": "wrapWithPermission",
+  "module": "20",
+  "level": "WRITE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/hr/insurance/{id}",
+  "wrapper": "wrapWithPermission",
+  "module": "20",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "PUT",
+  "path": "/api/v1/hr/insurance/{id}",
+  "wrapper": "wrapWithPermission",
+  "module": "20",
+  "level": "WRITE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "DELETE",
+  "path": "/api/v1/hr/insurance/{id}",
+  "wrapper": "wrapWithPermission",
+  "module": "20",
+  "level": "DELETE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/hr/insurance/expiring",
+  "wrapper": "wrapWithPermission",
+  "module": "20",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/hr/contracts",
+  "wrapper": "wrapWithPermission",
+  "module": "20",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "POST",
+  "path": "/api/v1/hr/contracts",
+  "wrapper": "wrapWithPermission",
+  "module": "20",
+  "level": "WRITE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/hr/contracts/{id}",
+  "wrapper": "wrapWithPermission",
+  "module": "20",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "PUT",
+  "path": "/api/v1/hr/contracts/{id}",
+  "wrapper": "wrapWithPermission",
+  "module": "20",
+  "level": "WRITE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "DELETE",
+  "path": "/api/v1/hr/contracts/{id}",
+  "wrapper": "wrapWithPermission",
+  "module": "20",
+  "level": "DELETE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "POST",
+  "path": "/api/v1/hr/contracts/{id}/renew",
+  "wrapper": "wrapWithPermission",
+  "module": "20",
+  "level": "WRITE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/hr/contracts/expiring",
+  "wrapper": "wrapWithPermission",
+  "module": "20",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/hr/resignations",
+  "wrapper": "wrapWithPermission",
+  "module": "20",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "POST",
+  "path": "/api/v1/hr/resignations",
+  "wrapper": "wrapWithPermission",
+  "module": "20",
+  "level": "WRITE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/hr/resignations/{id}",
+  "wrapper": "wrapWithPermission",
+  "module": "20",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "PUT",
+  "path": "/api/v1/hr/resignations/{id}",
+  "wrapper": "wrapWithPermission",
+  "module": "20",
+  "level": "WRITE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "DELETE",
+  "path": "/api/v1/hr/resignations/{id}",
+  "wrapper": "wrapWithPermission",
+  "module": "20",
+  "level": "DELETE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "POST",
+  "path": "/api/v1/hr/resignations/{id}/acknowledge",
+  "wrapper": "wrapWithPermission",
+  "module": "20",
+  "level": "WRITE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "POST",
+  "path": "/api/v1/hr/resignations/{id}/complete",
+  "wrapper": "wrapWithPermission",
+  "module": "20",
+  "level": "WRITE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/hr/resignations/{id}/settlement",
+  "wrapper": "wrapWithPermission",
+  "module": "20",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "POST",
+  "path": "/api/v1/admin/drivers",
+  "wrapper": "wrapWithPermission",
+  "module": "10",
+  "level": "WRITE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/admin/drivers",
+  "wrapper": "wrapWithPermission",
+  "module": "10",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/admin/drivers/available",
+  "wrapper": "wrapWithPermission",
+  "module": "10",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/admin/drivers/{id}",
+  "wrapper": "wrapWithPermission",
+  "module": "10",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "PUT",
+  "path": "/api/v1/admin/drivers/{id}",
+  "wrapper": "wrapWithPermission",
+  "module": "10",
+  "level": "WRITE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "DELETE",
+  "path": "/api/v1/admin/drivers/{id}",
+  "wrapper": "wrapWithPermission",
+  "module": "10",
+  "level": "DELETE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "PUT",
+  "path": "/api/v1/admin/drivers/{id}/status",
+  "wrapper": "wrapWithPermission",
+  "module": "10",
+  "level": "WRITE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "POST",
+  "path": "/api/v1/admin/orders/{orderId}/assign",
+  "wrapper": "wrapWithPermission",
+  "module": "10",
+  "level": "WRITE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/admin/drivers/{id}/stats",
+  "wrapper": "wrapWithPermission",
+  "module": "10",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "POST",
+  "path": "/api/v1/admin/drivers/{id}/location",
+  "wrapper": "wrapWithPermission",
+  "module": "10",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/admin/drivers/{id}/location",
+  "wrapper": "wrapWithPermission",
+  "module": "10",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/notifications",
+  "wrapper": "wrapWithPermission",
+  "module": "4",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/notifications/stats",
+  "wrapper": "wrapWithPermission",
+  "module": "4",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/notifications/unread-count",
+  "wrapper": "wrapWithPermission",
+  "module": "4",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "POST",
+  "path": "/api/v1/notifications",
+  "wrapper": "wrapWithPermission",
+  "module": "4",
+  "level": "WRITE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "POST",
+  "path": "/api/v1/notifications/mark-all-read",
+  "wrapper": "wrapWithPermission",
+  "module": "4",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "POST",
+  "path": "/api/v1/notifications/{id}/read",
+  "wrapper": "wrapWithPermission",
+  "module": "4",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "POST",
+  "path": "/api/v1/notifications/{id}/unread",
+  "wrapper": "wrapWithPermission",
+  "module": "4",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/notifications/{id}",
+  "wrapper": "wrapWithPermission",
+  "module": "4",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "DELETE",
+  "path": "/api/v1/notifications/{id}",
+  "wrapper": "wrapWithPermission",
+  "module": "4",
+  "level": "DELETE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/notifications",
+  "wrapper": "wrapWithPermission",
+  "module": "4",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/notifications/stats",
+  "wrapper": "wrapWithPermission",
+  "module": "4",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/notifications/unread-count",
+  "wrapper": "wrapWithPermission",
+  "module": "4",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "POST",
+  "path": "/api/v1/notifications",
+  "wrapper": "wrapWithPermission",
+  "module": "4",
+  "level": "WRITE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "POST",
+  "path": "/api/v1/notifications/mark-all-read",
+  "wrapper": "wrapWithPermission",
+  "module": "4",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "POST",
+  "path": "/api/v1/notifications/{id}/read",
+  "wrapper": "wrapWithPermission",
+  "module": "4",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "POST",
+  "path": "/api/v1/notifications/{id}/unread",
+  "wrapper": "wrapWithPermission",
+  "module": "4",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/notifications/{id}",
+  "wrapper": "wrapWithPermission",
+  "module": "4",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "DELETE",
+  "path": "/api/v1/notifications/{id}",
+  "wrapper": "wrapWithPermission",
+  "module": "4",
+  "level": "DELETE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/admin/themes",
+  "wrapper": "wrapWithPermission",
+  "module": "9",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "POST",
+  "path": "/api/v1/admin/themes",
+  "wrapper": "wrapWithPermission",
+  "module": "9",
+  "level": "WRITE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/admin/themes/{id}",
+  "wrapper": "wrapWithPermission",
+  "module": "9",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "PUT",
+  "path": "/api/v1/admin/themes/{id}",
+  "wrapper": "wrapWithPermission",
+  "module": "9",
+  "level": "WRITE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "DELETE",
+  "path": "/api/v1/admin/themes/{id}",
+  "wrapper": "wrapWithPermission",
+  "module": "9",
+  "level": "DELETE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "POST",
+  "path": "/api/v1/admin/themes/{id}/activate",
+  "wrapper": "wrapWithPermission",
+  "module": "9",
+  "level": "WRITE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "POST",
+  "path": "/api/v1/admin/themes/{id}/duplicate",
+  "wrapper": "wrapWithPermission",
+  "module": "9",
+  "level": "WRITE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/admin/themes/{id}/history",
+  "wrapper": "wrapWithPermission",
+  "module": "9",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/admin/theme-presets",
+  "wrapper": "wrapWithPermission",
+  "module": "9",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/rbac/roles",
+  "wrapper": "wrapWithPermission",
+  "module": "7",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "POST",
+  "path": "/api/v1/rbac/roles",
+  "wrapper": "wrapWithPermission",
+  "module": "7",
+  "level": "WRITE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/rbac/roles/{id}",
+  "wrapper": "wrapWithPermission",
+  "module": "7",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "PUT",
+  "path": "/api/v1/rbac/roles/{id}",
+  "wrapper": "wrapWithPermission",
+  "module": "7",
+  "level": "WRITE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "DELETE",
+  "path": "/api/v1/rbac/roles/{id}",
+  "wrapper": "wrapWithPermission",
+  "module": "7",
+  "level": "DELETE",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/rbac/me/roles",
+  "wrapper": "wrapProtectedNoStatus",
+  "module": null,
+  "level": null,
+  "class": "AUTHENTICATED (self-service / billing / status)"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/rbac/users/{userId}/roles",
+  "wrapper": "wrapWithPermission",
+  "module": "7",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "POST",
+  "path": "/api/v1/rbac/users/{userId}/roles",
+  "wrapper": "wrapWithPermission",
+  "module": "7",
+  "level": "ADMIN",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "DELETE",
+  "path": "/api/v1/rbac/users/{userId}/roles/{roleId}",
+  "wrapper": "wrapWithPermission",
+  "module": "7",
+  "level": "ADMIN",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/rbac/me/permissions",
+  "wrapper": "wrapProtectedNoStatus",
+  "module": null,
+  "level": null,
+  "class": "AUTHENTICATED (self-service / billing / status)"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/rbac/check-permission",
+  "wrapper": "wrapProtected",
+  "module": null,
+  "level": null,
+  "class": "AUTHENTICATED (self-service / billing / status)"
+ },
+ {
+  "method": "POST",
+  "path": "/api/v1/super-admin/auth/login",
+  "wrapper": "RateLimitByIP",
+  "module": null,
+  "level": null,
+  "class": "SUPER_ADMIN"
+ },
+ {
+  "method": "POST",
+  "path": "/api/v1/super-admin/auth/logout",
+  "wrapper": "wrapSuperAdmin",
+  "module": null,
+  "level": null,
+  "class": "SUPER_ADMIN"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/super-admin/dashboard/stats",
+  "wrapper": "wrapSuperAdmin",
+  "module": null,
+  "level": null,
+  "class": "SUPER_ADMIN"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/super-admin/payment-metrics",
+  "wrapper": "wrapSuperAdmin",
+  "module": null,
+  "level": null,
+  "class": "SUPER_ADMIN"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/super-admin/webhook-health",
+  "wrapper": "wrapSuperAdmin",
+  "module": null,
+  "level": null,
+  "class": "SUPER_ADMIN"
+ },
+ {
+  "method": "POST",
+  "path": "/api/v1/super-admin/payments/{id}/refund",
+  "wrapper": "wrapSuperAdmin",
+  "module": null,
+  "level": null,
+  "class": "SUPER_ADMIN"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/super-admin/tenants",
+  "wrapper": "wrapSuperAdmin",
+  "module": null,
+  "level": null,
+  "class": "SUPER_ADMIN"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/super-admin/tenants/{id}",
+  "wrapper": "wrapSuperAdmin",
+  "module": null,
+  "level": null,
+  "class": "SUPER_ADMIN"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/super-admin/tenants/{id}/users",
+  "wrapper": "wrapSuperAdmin",
+  "module": null,
+  "level": null,
+  "class": "SUPER_ADMIN"
+ },
+ {
+  "method": "POST",
+  "path": "/api/v1/super-admin/tenants/{id}/dashboard-login",
+  "wrapper": "wrapSuperAdmin",
+  "module": null,
+  "level": null,
+  "class": "SUPER_ADMIN"
+ },
+ {
+  "method": "PUT",
+  "path": "/api/v1/super-admin/tenants/{id}/disable",
+  "wrapper": "wrapSuperAdmin",
+  "module": null,
+  "level": null,
+  "class": "SUPER_ADMIN"
+ },
+ {
+  "method": "PUT",
+  "path": "/api/v1/super-admin/tenants/{id}/enable",
+  "wrapper": "wrapSuperAdmin",
+  "module": null,
+  "level": null,
+  "class": "SUPER_ADMIN"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/super-admin/users",
+  "wrapper": "wrapSuperAdmin",
+  "module": null,
+  "level": null,
+  "class": "SUPER_ADMIN"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/super-admin/users/{id}",
+  "wrapper": "wrapSuperAdmin",
+  "module": null,
+  "level": null,
+  "class": "SUPER_ADMIN"
+ },
+ {
+  "method": "POST",
+  "path": "/api/v1/super-admin/impersonate/{userID}",
+  "wrapper": "wrapSuperAdmin",
+  "module": null,
+  "level": null,
+  "class": "SUPER_ADMIN"
+ },
+ {
+  "method": "POST",
+  "path": "/api/v1/super-admin/impersonate/end",
+  "wrapper": "wrapSuperAdmin",
+  "module": null,
+  "level": null,
+  "class": "SUPER_ADMIN"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/super-admin/impersonate/status",
+  "wrapper": "wrapSuperAdmin",
+  "module": null,
+  "level": null,
+  "class": "SUPER_ADMIN"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/super-admin/audit-logs",
+  "wrapper": "wrapSuperAdmin",
+  "module": null,
+  "level": null,
+  "class": "SUPER_ADMIN"
+ },
+ {
+  "method": "PUT",
+  "path": "/api/v1/super-admin/settings/ip-whitelist",
+  "wrapper": "wrapSuperAdmin",
+  "module": null,
+  "level": null,
+  "class": "SUPER_ADMIN"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/impersonation/validate",
+  "wrapper": null,
+  "module": null,
+  "level": null,
+  "class": "SESSION_TOKEN (impersonation token validated by handler)"
+ },
+ {
+  "method": "POST",
+  "path": "/api/v1/impersonation/end",
+  "wrapper": null,
+  "module": null,
+  "level": null,
+  "class": "SESSION_TOKEN (impersonation token validated by handler)"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/impersonation/check",
+  "wrapper": null,
+  "module": null,
+  "level": null,
+  "class": "SESSION_TOKEN (impersonation token validated by handler)"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/super-admin/tenants/{id}/subscription",
+  "wrapper": "wrapSuperAdmin",
+  "module": null,
+  "level": null,
+  "class": "SUPER_ADMIN"
+ },
+ {
+  "method": "POST",
+  "path": "/api/v1/super-admin/tenants/{id}/extend-trial",
+  "wrapper": "wrapSuperAdmin",
+  "module": null,
+  "level": null,
+  "class": "SUPER_ADMIN"
+ },
+ {
+  "method": "POST",
+  "path": "/api/v1/super-admin/tenants/{id}/disable",
+  "wrapper": "wrapSuperAdmin",
+  "module": null,
+  "level": null,
+  "class": "SUPER_ADMIN"
+ },
+ {
+  "method": "POST",
+  "path": "/api/v1/super-admin/tenants/{id}/enable",
+  "wrapper": "wrapSuperAdmin",
+  "module": null,
+  "level": null,
+  "class": "SUPER_ADMIN"
+ },
+ {
+  "method": "DELETE",
+  "path": "/api/v1/super-admin/tenants/{id}",
+  "wrapper": "wrapSuperAdmin",
+  "module": null,
+  "level": null,
+  "class": "SUPER_ADMIN"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/super-admin/tenants/{id}/subscription-history",
+  "wrapper": "wrapSuperAdmin",
+  "module": null,
+  "level": null,
+  "class": "SUPER_ADMIN"
+ }
+]

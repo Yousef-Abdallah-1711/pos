@@ -586,9 +586,6 @@ func (uc *PaymentUseCase) RefundPayment(
 	if err != nil {
 		return nil, fmt.Errorf("failed to authenticate with paymob: %w", err)
 	}
-	if err := uc.paymobClient.RefundTransaction(authToken, *payment.PaymobTransactionID, payment.AmountCents); err != nil {
-		return nil, fmt.Errorf("failed to refund paymob transaction: %w", err)
-	}
 
 	subscriptionInfo, err := uc.subscriptionRepo.GetTenantSubscriptionInfo(ctx, payment.TenantID)
 	if err != nil {
@@ -602,6 +599,15 @@ func (uc *PaymentUseCase) RefundPayment(
 		return nil, fmt.Errorf("failed to start refund transaction: %w", err)
 	}
 	defer tx.Rollback()
+	if err := uc.lockRefundablePaymentTx(tx, ctx, payment.ID); err != nil {
+		return nil, err
+	}
+
+	// Keep the payment row locked until the provider result and local refund state commit.
+	// This prevents two concurrent refund requests from issuing duplicate provider calls.
+	if err := uc.paymobClient.RefundTransaction(authToken, *payment.PaymobTransactionID, payment.AmountCents); err != nil {
+		return nil, fmt.Errorf("failed to refund paymob transaction: %w", err)
+	}
 
 	paidAt := payment.PaidAt
 	if paidAt == nil {
@@ -655,6 +661,21 @@ func (uc *PaymentUseCase) RefundPayment(
 		AmountCents:        payment.AmountCents,
 		Currency:           payment.Currency,
 	}, nil
+}
+
+func (uc *PaymentUseCase) lockRefundablePaymentTx(tx *sql.Tx, ctx context.Context, paymentID int64) error {
+	var status string
+	err := tx.QueryRowContext(ctx, `SELECT status FROM payments WHERE id = $1 FOR UPDATE`, paymentID).Scan(&status)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return fmt.Errorf("payment not found")
+		}
+		return fmt.Errorf("failed to lock payment for refund: %w", err)
+	}
+	if status != domain.PaymentStatusSuccess {
+		return fmt.Errorf("payment is no longer refundable")
+	}
+	return nil
 }
 
 func (uc *PaymentUseCase) listPlans(ctx context.Context) []domain.SubscriptionPlan {
@@ -761,7 +782,7 @@ func (uc *PaymentUseCase) updatePaymentStatusTx(
 	errorMsg *string,
 	paidAt *time.Time,
 ) error {
-	result, err := tx.ExecContext(ctx, `
+	query := `
 		UPDATE payments
 		SET status = $1,
 			paymob_transaction_id = COALESCE($2, paymob_transaction_id),
@@ -771,7 +792,16 @@ func (uc *PaymentUseCase) updatePaymentStatusTx(
 			paid_at = $6,
 			updated_at = NOW()
 		WHERE id = $7
-	`, status, txnID, cardLastFour, cardBrand, errorMsg, paidAt, id)
+	`
+	switch status {
+	case domain.PaymentStatusSuccess:
+		query += ` AND status IN ('pending', 'failed')`
+	case domain.PaymentStatusRefunded:
+		query += ` AND status = 'success'`
+	default:
+		return fmt.Errorf("unsupported transactional payment status: %s", status)
+	}
+	result, err := tx.ExecContext(ctx, query, status, txnID, cardLastFour, cardBrand, errorMsg, paidAt, id)
 	if err != nil {
 		return fmt.Errorf("failed to update payment status: %w", err)
 	}
@@ -784,7 +814,7 @@ func (uc *PaymentUseCase) updatePaymentStatusTx(
 		if status == domain.PaymentStatusSuccess {
 			return errWebhookAlreadyProcessed
 		}
-		return fmt.Errorf("payment not found")
+		return fmt.Errorf("payment is no longer refundable")
 	}
 
 	return nil
@@ -860,15 +890,26 @@ func (uc *PaymentUseCase) clearSubscriptionAfterRefundTx(
 	tenantID int64,
 	nextStatus string,
 ) error {
-	result, err := tx.ExecContext(ctx, `
+	query := `
 		UPDATE tenants
 		SET subscription_status = $1,
-			subscription_plan = CASE WHEN $1 = $2 THEN 'trial' ELSE subscription_plan END,
 			subscription_expires_at = NULL,
 			subscription_cancelled_at = NULL,
 			updated_at = NOW()
-		WHERE id = $3
-	`, nextStatus, domain.StatusTrial, tenantID)
+		WHERE id = $2
+	`
+	if nextStatus == domain.StatusTrial {
+		query = `
+			UPDATE tenants
+			SET subscription_status = $1,
+				subscription_plan = 'trial',
+				subscription_expires_at = NULL,
+				subscription_cancelled_at = NULL,
+				updated_at = NOW()
+			WHERE id = $2
+		`
+	}
+	result, err := tx.ExecContext(ctx, query, nextStatus, tenantID)
 	if err != nil {
 		return fmt.Errorf("failed to update tenant status after refund: %w", err)
 	}

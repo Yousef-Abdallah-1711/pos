@@ -2,6 +2,7 @@ package http
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 	"strconv"
 	"strings"
@@ -254,14 +255,9 @@ func (h *AdminDriverHandler) GetDriver(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	driver, err := h.driverRepo.GetByID(r.Context(), driverID)
+	driver, err := h.driverRepo.GetByID(r.Context(), driverID, int(tenantID), int(restaurantID))
 	if err != nil {
 		respondError(w, http.StatusNotFound, "Driver not found")
-		return
-	}
-
-	if driver.TenantID != int(tenantID) || driver.RestaurantID != int(restaurantID) {
-		respondError(w, http.StatusForbidden, "Driver not found")
 		return
 	}
 
@@ -284,16 +280,11 @@ func (h *AdminDriverHandler) UpdateDriver(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	existing, err := h.driverRepo.GetByID(r.Context(), driverID)
+	existing, err := h.driverRepo.GetByID(r.Context(), driverID, int(tenantID), int(restaurantID))
 	if err != nil {
 		respondError(w, http.StatusNotFound, "Driver not found")
 		return
 	}
-	if existing.TenantID != int(tenantID) || existing.RestaurantID != int(restaurantID) {
-		respondError(w, http.StatusForbidden, "Driver not found")
-		return
-	}
-
 	var req driverPayload
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		respondError(w, http.StatusBadRequest, "Invalid request body")
@@ -320,12 +311,12 @@ func (h *AdminDriverHandler) UpdateDriver(w http.ResponseWriter, r *http.Request
 	existing.ZipCode = strings.TrimSpace(req.ZipCode)
 	existing.Notes = strings.TrimSpace(req.Notes)
 
-	if err := h.driverRepo.Update(r.Context(), existing); err != nil {
+	if err := h.driverRepo.Update(r.Context(), existing, int(tenantID), int(restaurantID)); err != nil {
 		respondError(w, http.StatusInternalServerError, "Failed to update driver")
 		return
 	}
 
-	updated, _ := h.driverRepo.GetByID(r.Context(), driverID)
+	updated, _ := h.driverRepo.GetByID(r.Context(), driverID, int(tenantID), int(restaurantID))
 	if updated == nil {
 		updated = existing
 	}
@@ -351,17 +342,12 @@ func (h *AdminDriverHandler) DeleteDriver(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	driver, err := h.driverRepo.GetByID(r.Context(), driverID)
+	_, err = h.driverRepo.GetByID(r.Context(), driverID, int(tenantID), int(restaurantID))
 	if err != nil {
 		respondError(w, http.StatusNotFound, "Driver not found")
 		return
 	}
-	if driver.TenantID != int(tenantID) || driver.RestaurantID != int(restaurantID) {
-		respondError(w, http.StatusForbidden, "Driver not found")
-		return
-	}
-
-	if err := h.driverRepo.Delete(r.Context(), driverID); err != nil {
+	if err := h.driverRepo.Delete(r.Context(), driverID, int(tenantID), int(restaurantID)); err != nil {
 		respondError(w, http.StatusInternalServerError, "Failed to delete driver")
 		return
 	}
@@ -387,16 +373,11 @@ func (h *AdminDriverHandler) UpdateDriverStatus(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	driver, err := h.driverRepo.GetByID(r.Context(), driverID)
+	_, err = h.driverRepo.GetByID(r.Context(), driverID, int(tenantID), int(restaurantID))
 	if err != nil {
 		respondError(w, http.StatusNotFound, "Driver not found")
 		return
 	}
-	if driver.TenantID != int(tenantID) || driver.RestaurantID != int(restaurantID) {
-		respondError(w, http.StatusForbidden, "Driver not found")
-		return
-	}
-
 	var req struct {
 		Status string `json:"status"`
 	}
@@ -411,7 +392,7 @@ func (h *AdminDriverHandler) UpdateDriverStatus(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	if err := h.driverRepo.UpdateStatus(r.Context(), driverID, status); err != nil {
+	if err := h.driverRepo.UpdateStatus(r.Context(), driverID, int(tenantID), int(restaurantID), status); err != nil {
 		respondError(w, http.StatusInternalServerError, "Failed to update driver status")
 		return
 	}
@@ -452,26 +433,11 @@ func (h *AdminDriverHandler) AssignOrderToDriver(w http.ResponseWriter, r *http.
 		return
 	}
 
-	driver, err := h.driverRepo.GetByID(r.Context(), req.DriverID)
+	_, err = h.driverRepo.GetByID(r.Context(), req.DriverID, int(tenantID), int(restaurantID))
 	if err != nil {
 		respondError(w, http.StatusNotFound, "Driver not found")
 		return
 	}
-	if driver.TenantID != int(tenantID) || driver.RestaurantID != int(restaurantID) {
-		respondError(w, http.StatusForbidden, "Driver not found")
-		return
-	}
-
-	existingAssignment, err := h.driverRepo.GetAssignmentByOrderID(r.Context(), orderID)
-	if err != nil {
-		respondError(w, http.StatusInternalServerError, "Failed to check existing assignments")
-		return
-	}
-	if existingAssignment != nil {
-		respondError(w, http.StatusConflict, "Order already assigned to a driver")
-		return
-	}
-
 	assignment := domain.DriverAssignment{
 		OrderID:         orderID,
 		DriverID:        req.DriverID,
@@ -479,13 +445,14 @@ func (h *AdminDriverHandler) AssignOrderToDriver(w http.ResponseWriter, r *http.
 		AssignmentNotes: strings.TrimSpace(req.AssignmentNotes),
 	}
 
-	if err := h.driverRepo.AssignOrder(r.Context(), &assignment); err != nil {
+	if err := h.driverRepo.AssignOrder(r.Context(), &assignment, int(tenantID), int(restaurantID)); err != nil {
+		if errors.Is(err, repository.ErrOrderAlreadyAssigned) {
+			respondError(w, http.StatusConflict, "Order already assigned to a driver")
+			return
+		}
 		respondError(w, http.StatusInternalServerError, "Failed to assign order")
 		return
 	}
-
-	_ = h.driverRepo.UpdateAvailability(r.Context(), req.DriverID, "busy")
-	_ = h.driverRepo.UpdateActiveOrders(r.Context(), req.DriverID, driver.ActiveOrdersCount+1)
 
 	respondJSON(w, http.StatusOK, map[string]interface{}{
 		"success":    true,

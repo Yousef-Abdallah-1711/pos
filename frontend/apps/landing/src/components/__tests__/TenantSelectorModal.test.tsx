@@ -1,4 +1,5 @@
 import React from 'react'
+import { vi, type Mock } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { useRouter } from 'next/navigation'
@@ -6,20 +7,15 @@ import { useAuthStore } from '@/stores/authStore'
 import { TenantSelectorModal } from '../TenantSelectorModal'
 import * as sonner from 'sonner'
 
-// Mock dependencies
-jest.mock('next/navigation')
-jest.mock('@/stores/authStore')
-jest.mock('sonner')
-
 // Mock fetch globally
-global.fetch = jest.fn()
+global.fetch = vi.fn()
 
 describe('TenantSelectorModal', () => {
-  const mockPush = jest.fn()
-  const mockSetAuth = jest.fn()
+  const mockPush = vi.fn()
+  const mockSetAuth = vi.fn()
   const mockToast = {
-    success: jest.fn(),
-    error: jest.fn(),
+    success: vi.fn(),
+    error: vi.fn(),
   }
 
   const mockTenants = [
@@ -38,15 +34,14 @@ describe('TenantSelectorModal', () => {
   ]
 
   beforeEach(() => {
-    jest.clearAllMocks()
-    ;(useRouter as jest.Mock).mockReturnValue({
+    vi.clearAllMocks()
+    ;(useRouter as Mock).mockReturnValue({
       push: mockPush,
     })
-    ;(useAuthStore as jest.Mock).mockReturnValue({
-      setAuth: mockSetAuth,
-    })
-    ;(sonner.toast as any) = mockToast
-    ;(global.fetch as jest.Mock).mockClear()
+    ;(useAuthStore as unknown as Mock).mockImplementation(() => mockSetAuth)
+    sonner.toast.success = mockToast.success
+    sonner.toast.error = mockToast.error
+    ;(global.fetch as Mock).mockReset()
   })
 
   describe('Rendering', () => {
@@ -118,13 +113,13 @@ describe('TenantSelectorModal', () => {
     it('should handle tenant selection successfully', async () => {
       const mockResponse = {
         ok: true,
-        json: jest.fn().mockResolvedValue({
+        json: vi.fn().mockResolvedValue({
           user: { id: 101, email: 'user@test.com' },
           token: 'mock-token',
         }),
       }
 
-      ;(global.fetch as jest.Mock).mockResolvedValueOnce(mockResponse)
+      ;(global.fetch as Mock).mockResolvedValueOnce(mockResponse)
 
       render(
         <TenantSelectorModal
@@ -161,12 +156,12 @@ describe('TenantSelectorModal', () => {
     it('should display error message on failed tenant selection', async () => {
       const mockError = {
         ok: false,
-        json: jest.fn().mockResolvedValue({
+        json: vi.fn().mockResolvedValue({
           error: 'User not found in selected organization',
         }),
       }
 
-      ;(global.fetch as jest.Mock).mockResolvedValueOnce(mockError)
+      ;(global.fetch as Mock).mockResolvedValueOnce(mockError)
 
       render(
         <TenantSelectorModal
@@ -188,7 +183,7 @@ describe('TenantSelectorModal', () => {
     })
 
     it('should disable buttons while loading', async () => {
-      ;(global.fetch as jest.Mock).mockImplementation(
+      ;(global.fetch as Mock).mockImplementation(
         () => new Promise(resolve => setTimeout(resolve, 1000))
       )
 
@@ -219,13 +214,13 @@ describe('TenantSelectorModal', () => {
     it('should highlight selected tenant', async () => {
       const mockResponse = {
         ok: true,
-        json: jest.fn().mockResolvedValue({
+        json: vi.fn().mockResolvedValue({
           user: { id: 101 },
           token: 'mock-token',
         }),
       }
 
-      ;(global.fetch as jest.Mock).mockImplementation(
+      ;(global.fetch as Mock).mockImplementation(
         () => new Promise(resolve => setTimeout(resolve, 100))
       )
 
@@ -248,7 +243,7 @@ describe('TenantSelectorModal', () => {
     })
 
     it('should show loading spinner when selecting tenant', async () => {
-      ;(global.fetch as jest.Mock).mockImplementation(
+      ;(global.fetch as Mock).mockImplementation(
         () => new Promise(resolve => setTimeout(resolve, 500))
       )
 
@@ -304,16 +299,16 @@ describe('TenantSelectorModal', () => {
 
   describe('Callback', () => {
     it('should call onTenantSelected callback after successful login', async () => {
-      const mockCallback = jest.fn()
+      const mockCallback = vi.fn()
       const mockResponse = {
         ok: true,
-        json: jest.fn().mockResolvedValue({
+        json: vi.fn().mockResolvedValue({
           user: { id: 101 },
           token: 'mock-token',
         }),
       }
 
-      ;(global.fetch as jest.Mock).mockResolvedValueOnce(mockResponse)
+      ;(global.fetch as Mock).mockResolvedValueOnce(mockResponse)
 
       render(
         <TenantSelectorModal

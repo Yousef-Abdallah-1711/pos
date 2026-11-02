@@ -149,6 +149,7 @@ interface ThemeStoreState {
   error: string | null
   loadTheme: (slug: string) => Promise<void>
   setTheme: (theme: ThemeData) => void
+  setError: (error: string | null) => void
   clearError: () => void
   reset: () => void
 }
@@ -233,6 +234,10 @@ export const useThemeStore = create<ThemeStoreState>()(
        */
       setTheme: (theme: ThemeData) => {
         set({ currentTheme: theme, error: null })
+      },
+
+      setError: (error: string | null) => {
+        set({ error })
       },
 
       /**

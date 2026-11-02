@@ -11,7 +11,11 @@
  * @returns [R, G, B] array with values 0-255
  */
 export function hexToRgb(hex: string): [number, number, number] {
-  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)
+	const normalized = hex.trim().replace(/^#/, '')
+	const expanded = normalized.length === 3
+		? normalized.split('').map((digit) => `${digit}${digit}`).join('')
+		: normalized
+	const result = /^([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(expanded)
   if (!result) {
     throw new Error(`Invalid hex color: ${hex}`)
   }

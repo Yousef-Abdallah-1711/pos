@@ -249,7 +249,7 @@ func (h *AdminOrderHandler) GetOrder(w http.ResponseWriter, r *http.Request) {
 			respondError(w, http.StatusNotFound, "Order not found")
 			return
 		}
-		assignment, err := h.driverRepo.GetAssignmentByOrderID(r.Context(), int(orderID))
+		assignment, err := h.driverRepo.GetAssignmentByOrderID(r.Context(), int(orderID), int(tenantID), int(restaurantID))
 		if err != nil {
 			respondError(w, http.StatusInternalServerError, "Failed to verify order assignment")
 			return
@@ -534,7 +534,7 @@ func (h *AdminOrderHandler) GetOrderHistory(w http.ResponseWriter, r *http.Reque
 			respondError(w, http.StatusNotFound, "Order not found")
 			return
 		}
-		assignment, err := h.driverRepo.GetAssignmentByOrderID(r.Context(), int(orderID))
+		assignment, err := h.driverRepo.GetAssignmentByOrderID(r.Context(), int(orderID), int(tenantID), int(restaurantID))
 		if err != nil {
 			respondError(w, http.StatusInternalServerError, "Failed to verify order assignment")
 			return
@@ -747,14 +747,10 @@ func (h *AdminOrderHandler) resolveDriverContext(r *http.Request, tenantID, rest
 		return nil, true, nil
 	}
 
-	driver, err := h.driverRepo.GetByEmail(r.Context(), email)
+	driver, err := h.driverRepo.GetByEmail(r.Context(), email, int(tenantID), int(restaurantID))
 	if err != nil {
 		return nil, true, nil
 	}
-	if driver.TenantID != int(tenantID) || driver.RestaurantID != int(restaurantID) {
-		return nil, true, nil
-	}
-
 	return driver, true, nil
 }
 

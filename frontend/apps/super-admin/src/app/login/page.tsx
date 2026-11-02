@@ -11,7 +11,7 @@ export default function LoginPage() {
   const { setToken, setSuperAdmin, setError: setAuthError, setLoading } =
     useAuthStore();
   const [email, setEmail] = useState("superadmin@pos-saas.com");
-  const [password, setPassword] = useState("SuperAdmin@123");
+  const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -124,18 +124,6 @@ export default function LoginPage() {
             </button>
           </form>
 
-          {/* Info Box */}
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <p className="text-sm text-blue-700">
-              <strong>Demo Credentials:</strong>
-            </p>
-            <p className="text-sm text-blue-600 mt-1">
-              Email: superadmin@pos-saas.com
-            </p>
-            <p className="text-sm text-blue-600">
-              Password: SuperAdmin@123
-            </p>
-          </div>
         </div>
 
         {/* Footer */}

@@ -30,7 +30,7 @@ describe('super-admin URL config resolver', () => {
   })
 
   it('uses localhost dev defaults outside production', async () => {
-    process.env.NODE_ENV = 'development'
+    Object.assign(process.env, { NODE_ENV: 'development' })
     const { getSuperAdminApiBaseUrl, getDashboardBaseUrl } = await loadConfigModule()
 
     expect(getSuperAdminApiBaseUrl()).toBe('http://localhost:8080/api/v1/super-admin')
@@ -38,7 +38,7 @@ describe('super-admin URL config resolver', () => {
   })
 
   it('normalizes configured production URLs', async () => {
-    process.env.NODE_ENV = 'production'
+    Object.assign(process.env, { NODE_ENV: 'production' })
     process.env.NEXT_PUBLIC_SUPER_ADMIN_API_URL = 'https://api.example.com/api/v1/super-admin/'
     process.env.NEXT_PUBLIC_DASHBOARD_URL = 'https://dashboard.example.com//'
 
@@ -49,7 +49,7 @@ describe('super-admin URL config resolver', () => {
   })
 
   it('throws in production when required values are missing', async () => {
-    process.env.NODE_ENV = 'production'
+    Object.assign(process.env, { NODE_ENV: 'production' })
     const { getSuperAdminApiBaseUrl, getDashboardBaseUrl } = await loadConfigModule()
 
     expect(() => getSuperAdminApiBaseUrl()).toThrow(/NEXT_PUBLIC_SUPER_ADMIN_API_URL/)

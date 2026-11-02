@@ -1,0 +1,19 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    labels:
+      com.pos.disposable: "true"
+      com.pos.purpose: "phase-2a-security-closure"
+    environment:
+      POSTGRES_USER: closure_test
+      POSTGRES_HOST_AUTH_METHOD: trust
+      POSTGRES_DB: pos_security_closure_test
+    ports:
+      - "127.0.0.1:15434:5432"
+    tmpfs:
+      - /var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U closure_test -d pos_security_closure_test"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
