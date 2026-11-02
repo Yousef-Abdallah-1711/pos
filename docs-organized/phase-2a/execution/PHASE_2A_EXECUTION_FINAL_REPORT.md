@@ -12,7 +12,7 @@
 | WS03 Payment integrity | IMPLEMENTED BUT UNVERIFIED | State guards and unit tests pass; concurrent PostgreSQL behavior and provider reconciliation open. |
 | WS04 Frontend tests | PARTIAL | Landing 35/35, Website 64/64, Super Admin 3/3. Dashboard has 530/639 passing tests with 109 failures; app typecheck passes while test-source typecheck remains failing. |
 | WS05 Isolated infrastructure | PARTIAL / NOT VERIFIED | Existing disposable project is API+Postgres only; no complete four-app/Redis ownership fixture or browser journey. |
-| WS06 CI gates | PARTIAL / NOT VERIFIED | Hosted GitHub Actions not run; full required gate set not proven. |
+| WS06 CI gates | PARTIAL / FAILING BASELINE WORKFLOWS | Both observed workflows fail on known baseline issues: Dashboard localhost guardrail and Dashboard URL resolver assertions. Full required gate set is not proven. |
 | WS07 Backend architecture | TODO | No extraction performed. |
 | WS08 Frontend architecture | PARTIAL | Test setup/dependency ownership and existing theme test corrections; shared contracts not refactored. |
 | WS09 Engineering foundation | TODO | No implementation. |
