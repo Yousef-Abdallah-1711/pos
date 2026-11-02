@@ -179,7 +179,7 @@ Open browser DevTools (F12) → Console tab to see:
 # Test backend connectivity
 curl -X POST http://localhost:8080/api/v1/super-admin/auth/login \
   -H "Content-Type: application/json" \
-  -d '{"email":"superadmin@pos-saas.com","password":"SuperAdmin@123"}'
+  -d '{"email":"superadmin@pos-saas.com","password":"[locally configured]"}'
 ```
 
 Expected response:
@@ -246,7 +246,7 @@ pnpm dev
 4. Look for any errors
 5. Try logging in with credentials:
    - Email: superadmin@pos-saas.com
-   - Password: SuperAdmin@123
+   - Password: Set locally using the development seed script.
 
 ### Step 5: Check Build Output
 

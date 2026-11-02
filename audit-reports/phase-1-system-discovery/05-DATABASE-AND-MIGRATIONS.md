@@ -90,11 +90,11 @@ Destructive statements: none in forward migrations (grep for DROP TABLE/COLUMN, 
   - UPDATE line on posted entry rejected
   - Cross-tenant line insert rejected
 
-### DB-013 [P1] Migration 109 seeds a super admin with a known password and fixed email into every environment; 099 seeds a test tenant/restaurant
+### DB-013 [P1] Migration 109 seeds a super admin with a super-admin with a legacy hash and fixed email into every environment; 099 seeds a test tenant/restaurant
 
 - **Category:** security
 - **Source:** `backend/migrations/109_seed_super_admin.sql`, `backend/migrations/099_add_test_restaurant.sql`
-- **Evidence:** 109_seed_super_admin.sql:5-8 password comment "SuperAdmin@123" with bcrypt hash, email superadmin@pos-saas.com, ip_whitelist NULL = all IPs (:26), is_super_admin true, attached to tenant 1. docker-entrypoint.sh:11 runs ./migrate at every container start including production (docker-compose.prod.yml uses the same image). 099_add_test_restaurant.sql:6-34 inserts "Test Tenant"/"restaurant-1" and a theme in any environment.
+- **Evidence:** 109_seed_super_admin.sql:5-8 legacy seeded bcrypt hash (literal redacted), email superadmin@pos-saas.com, ip_whitelist NULL = all IPs (:26), is_super_admin true, attached to tenant 1. docker-entrypoint.sh:11 runs ./migrate at every container start including production (docker-compose.prod.yml uses the same image). 099_add_test_restaurant.sql:6-34 inserts "Test Tenant"/"restaurant-1" and a theme in any environment.
 - **Suspected root cause:** Seed data placed in schema migrations.
 - **Recommended fix:** Remove seeds from migrations; create the super admin via a one-time CLI with an env-provided password; rotate/disable this account on any deployed DB; require IP allowlist/MFA for super admin.
 - **Required regression tests:**

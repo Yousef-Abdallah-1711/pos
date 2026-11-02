@@ -229,12 +229,12 @@
     "issue_id": "SEC-010",
     "severity": "P1",
     "category": "secrets",
-    "title": "Seed migration creates a platform super admin with a documented password and no IP whitelist",
+    "title": "Seed migration creates a platform super admin with a seeded super admin with a known legacy hash and no IP whitelist",
     "source_files": [
       "backend/migrations/109_seed_super_admin.sql"
     ],
     "evidence": [
-      "109:5 and 109:10 comment states the password and hash; 109:22-28 ip_whitelist NULL means all IPs allowed; email superadmin@pos-saas.com"
+      "migration 109 originally contained a known bcrypt hash; 109:22-28 ip_whitelist NULL means all IPs allowed; email superadmin@pos-saas.com"
     ],
     "suspected_root_cause": "Convenience seed intended for setup shipped as a migration that runs in all environments.",
     "recommended_fix": "Remove seeded credential; provision via one-time CLI with random password forced to change; require IP whitelist/2FA for super admin; rotate if any environment used it.",

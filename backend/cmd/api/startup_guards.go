@@ -6,22 +6,19 @@ import (
 	"errors"
 	"fmt"
 	"time"
-
-	"golang.org/x/crypto/bcrypt"
 )
 
 const (
-	// Seeded by migration 109 and documented in the repository; must never survive in production.
-	seededSuperAdminEmail    = "superadmin@pos-saas.com"
-	seededSuperAdminPassword = "SuperAdmin@123"
+	seededSuperAdminEmail      = "superadmin@pos-saas.com"
+	seededSuperAdminLegacyHash = "$2a$10$6tgEoGE0dusUMtJ0RUd4VO3IACTDD2vb0676WfMyPvbVQU9oo2p06"
 )
 
-// isSeededDefaultPassword reports whether hash is the bcrypt hash of the documented seed password.
+// isSeededDefaultPassword detects an account that still carries migration 109's legacy hash.
 func isSeededDefaultPassword(hash string) bool {
 	if hash == "" {
 		return false
 	}
-	return bcrypt.CompareHashAndPassword([]byte(hash), []byte(seededSuperAdminPassword)) == nil
+	return hash == seededSuperAdminLegacyHash
 }
 
 // productionStartupGuards refuses to start a production API that is unsafe by default:

@@ -7,12 +7,12 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-// The hash below is the one shipped in migration 109.
-const seededHashFromMigration109 = "$2a$10$6tgEoGE0dusUMtJ0RUd4VO3IACTDD2vb0676WfMyPvbVQU9oo2p06"
+// The hash below identifies accounts that were not rotated after the original migration 109.
+const legacySeededSuperAdminHash = "$2a$10$6tgEoGE0dusUMtJ0RUd4VO3IACTDD2vb0676WfMyPvbVQU9oo2p06"
 
 func TestIsSeededDefaultPassword(t *testing.T) {
-	if !isSeededDefaultPassword(seededHashFromMigration109) {
-		t.Fatal("the migration 109 hash must be recognised as the default password")
+	if !isSeededDefaultPassword(legacySeededSuperAdminHash) {
+		t.Fatal("the legacy migration 109 hash must be rejected")
 	}
 	rotated, err := bcrypt.GenerateFromPassword([]byte("a-new-strong-password-1"), bcrypt.MinCost)
 	if err != nil {

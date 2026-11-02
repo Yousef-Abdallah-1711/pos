@@ -26,7 +26,7 @@ This guide explains how to use the POS SaaS Super Admin Dashboard to manage your
 2. You will be redirected to the login page
 3. Enter your super admin credentials:
    - **Email**: superadmin@pos-saas.com
-   - **Password**: SuperAdmin@123
+   - **Password**: Set locally using the development seed script.
 
 ### First Login
 

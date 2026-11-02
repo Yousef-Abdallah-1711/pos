@@ -15,7 +15,7 @@ Scope: authentication, RBAC, tenant isolation, payments, public endpoints, secre
 | SEC-007 | P1 | Unauthenticated POST /translations/{language}/upload overwrites global in-memory translations; unsynchronized map write |
 | SEC-008 | P1 | Subscription/disabled status is not enforced server side on data routes |
 | SEC-009 | P1 | No rate limiting or lockout on tenant login, login/confirm, register, forgot-password, token-exchange |
-| SEC-010 | P1 | Seed migration creates a platform super admin with a documented password and no IP whitelist |
+| SEC-010 | P1 | Seed migration creates a platform super admin with a seeded super admin with a known legacy hash and no IP whitelist |
 | SEC-012 | P1 | DB-down stub mode in production: server stays up and login accepts any email with a fixed test password as tenant owner |
 | SEC-015 | P1 | Webhook replay/refund-callback can re-activate a refunded subscription; transaction type/flags ignored |
 | SEC-026 | P1 | Authenticated tokens lacking restaurant_id can override tenant and restaurant through request headers |
@@ -194,13 +194,13 @@ Scope: authentication, RBAC, tenant isolation, payments, public endpoints, secre
   - Limiter keyed by email+IP
   - Register throttled
 
-### SEC-010 [P1] Seed migration creates a platform super admin with a documented password and no IP whitelist
+### SEC-010 [P1] Seed migration creates a platform super admin with a seeded super admin with a known legacy hash and no IP whitelist
 
 - Category: secrets
 - Status: OPEN
 - Files: `backend/migrations/109_seed_super_admin.sql`
 - Evidence:
-  - 109:5 and 109:10 comment states the password and hash; 109:22-28 ip_whitelist NULL means all IPs allowed; email superadmin@pos-saas.com
+  - migration 109 originally contained a known bcrypt hash; 109:22-28 ip_whitelist NULL means all IPs allowed; email superadmin@pos-saas.com
 - Root cause: Convenience seed intended for setup shipped as a migration that runs in all environments.
 - Recommended fix: Remove seeded credential; provision via one-time CLI with random password forced to change; require IP whitelist/2FA for super admin; rotate if any environment used it.
 - Required regression tests:
