@@ -94,10 +94,12 @@ export function observeLCP(callback: VitalsCallback): () => void {
       const entries = list.getEntries()
       const lastEntry = entries[entries.length - 1]
 
+      const lcpEntry = lastEntry as PerformanceEntry & { renderTime?: number; loadTime?: number }
+      const lcpTime = lcpEntry.renderTime || lcpEntry.loadTime || 0
       const metric: WebVitalMetric = {
         name: 'LCP',
-        value: lastEntry.renderTime || lastEntry.loadTime,
-        rating: getRating('lcp', lastEntry.renderTime || lastEntry.loadTime),
+        value: lcpTime,
+        rating: getRating('lcp', lcpTime),
         id: `lcp-${Date.now()}`,
         navigationType: 'navigation',
       }
@@ -349,7 +351,7 @@ export function getPerformanceSummary(): Record<string, any> {
     tcp: navigationEntry.connectEnd - navigationEntry.connectStart,
     ttfb: navigationEntry.responseStart - navigationEntry.fetchStart,
     download: navigationEntry.responseEnd - navigationEntry.responseStart,
-    domParsing: navigationEntry.domInteractive - navigationEntry.domLoading,
+    domParsing: navigationEntry.domInteractive - (navigationEntry as PerformanceNavigationTiming & { domLoading?: number }).domLoading!,
     domInteractive: navigationEntry.domInteractive - navigationEntry.fetchStart,
     domComplete: navigationEntry.domComplete - navigationEntry.fetchStart,
     loadComplete: navigationEntry.loadEventEnd - navigationEntry.fetchStart,

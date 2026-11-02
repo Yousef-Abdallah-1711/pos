@@ -421,7 +421,7 @@ export default function SupplierInvoicesPage() {
             accounts={flatAccounts}
             suppliers={suppliers}
             initialValues={selectedInvoice}
-            onSubmit={handleInvoiceSubmit}
+            onSubmit={(payload) => handleInvoiceSubmit(payload as SupplierInvoiceFormInput)}
             onCancel={() => setShowInvoiceForm(false)}
             submitting={submitting}
             locale={locale}
@@ -441,7 +441,7 @@ export default function SupplierInvoicesPage() {
             bankAccounts={bankAccounts}
             suppliers={suppliers}
             supplierInvoices={invoices}
-            onSubmit={handlePaymentSubmit}
+            onSubmit={(payload) => handlePaymentSubmit(payload as PaymentMadeFormInput)}
             onCancel={() => setShowPaymentForm(false)}
             submitting={paymentSubmitting}
           />

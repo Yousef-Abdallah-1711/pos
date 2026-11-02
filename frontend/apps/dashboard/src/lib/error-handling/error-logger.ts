@@ -39,7 +39,7 @@ interface ErrorLoggerConfig {
   environment?: 'development' | 'production' | 'staging'
 }
 
-class ErrorLoggerService {
+export class ErrorLoggerService {
   private logs: ErrorLog[] = []
   private config: Required<ErrorLoggerConfig>
   private maxLogs: number = 100

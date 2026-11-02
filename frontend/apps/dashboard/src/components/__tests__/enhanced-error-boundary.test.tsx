@@ -10,31 +10,31 @@ import { getErrorLogger } from '@/lib/error-handling/error-logger'
 import { getRecoverySuggestions, getErrorAdvice } from '@/lib/error-handling/error-recovery-suggestions'
 
 // Mock the error logger
-jest.mock('@/lib/error-handling/error-logger', () => ({
-  getErrorLogger: jest.fn(() => ({
-    logComponentError: jest.fn(),
-    log: jest.fn(),
-    getAllLogs: jest.fn(() => []),
+vi.mock('@/lib/error-handling/error-logger', () => ({
+  getErrorLogger: vi.fn(() => ({
+    logComponentError: vi.fn(),
+    log: vi.fn(),
+    getAllLogs: vi.fn(() => []),
   })),
 }))
 
 // Mock the recovery suggestions
-jest.mock('@/lib/error-handling/error-recovery-suggestions', () => ({
-  getRecoverySuggestions: jest.fn(() => [
+vi.mock('@/lib/error-handling/error-recovery-suggestions', () => ({
+  getRecoverySuggestions: vi.fn(() => [
     {
       title: 'Try Again',
       description: 'Attempt to reload the component',
-      action: { label: 'Retry', onClick: jest.fn() },
+      action: { label: 'Retry', onClick: vi.fn() },
       priority: 1,
     },
     {
       title: 'Go to Dashboard',
       description: 'Return to the main dashboard',
-      action: { label: 'Dashboard', onClick: jest.fn() },
+      action: { label: 'Dashboard', onClick: vi.fn() },
       priority: 2,
     },
   ]),
-  getErrorAdvice: jest.fn(() => 'An unexpected error occurred. Please try again or contact support.'),
+  getErrorAdvice: vi.fn(() => 'An unexpected error occurred. Please try again or contact support.'),
 }))
 
 // Component that throws an error
@@ -68,18 +68,27 @@ const ClickErrorComponent: React.FC = () => {
   )
 }
 
+// These tests make components throw on purpose. React reports a boundary-caught error to window 'error' as
+// well; Vitest's jsdom environment turns that into an "Uncaught" failure unless a listener is registered
+// (Jest ignored it). Registering one keeps the expected throws from failing unrelated assertions.
+const swallowExpectedWindowErrors = (event: ErrorEvent) => {
+  event.preventDefault()
+}
+beforeEach(() => window.addEventListener('error', swallowExpectedWindowErrors))
+afterEach(() => window.removeEventListener('error', swallowExpectedWindowErrors))
+
 describe('EnhancedErrorBoundary', () => {
   // Suppress console.error for error boundary tests
   beforeAll(() => {
-    jest.spyOn(console, 'error').mockImplementation(() => {})
+    vi.spyOn(console, 'error').mockImplementation(() => {})
   })
 
   afterAll(() => {
-    jest.restoreAllMocks()
+    vi.restoreAllMocks()
   })
 
   afterEach(() => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
     localStorage.clear()
     sessionStorage.clear()
   })
@@ -147,11 +156,11 @@ describe('EnhancedErrorBoundary', () => {
   describe('Error Logging Integration', () => {
     it('should call error logger when error occurs', () => {
       const mockLogger = {
-        logComponentError: jest.fn(),
-        log: jest.fn(),
-        getAllLogs: jest.fn(() => []),
+        logComponentError: vi.fn(),
+        log: vi.fn(),
+        getAllLogs: vi.fn(() => []),
       }
-      ;(getErrorLogger as jest.Mock).mockReturnValue(mockLogger)
+      ;(getErrorLogger as vi.Mock).mockReturnValue(mockLogger)
 
       render(
         <EnhancedErrorBoundary>
@@ -170,11 +179,11 @@ describe('EnhancedErrorBoundary', () => {
 
     it('should pass context to error logger', () => {
       const mockLogger = {
-        logComponentError: jest.fn(),
-        log: jest.fn(),
-        getAllLogs: jest.fn(() => []),
+        logComponentError: vi.fn(),
+        log: vi.fn(),
+        getAllLogs: vi.fn(() => []),
       }
-      ;(getErrorLogger as jest.Mock).mockReturnValue(mockLogger)
+      ;(getErrorLogger as vi.Mock).mockReturnValue(mockLogger)
 
       const testContext = { userId: '123', theme: 'dark' }
 
@@ -192,7 +201,7 @@ describe('EnhancedErrorBoundary', () => {
     })
 
     it('should call optional onError callback', () => {
-      const onError = jest.fn()
+      const onError = vi.fn()
 
       render(
         <EnhancedErrorBoundary onError={onError}>
@@ -260,7 +269,7 @@ describe('EnhancedErrorBoundary', () => {
     })
 
     it('should not display suggestions when empty array returned', () => {
-      ;(getRecoverySuggestions as jest.Mock).mockReturnValueOnce([])
+      ;(getRecoverySuggestions as vi.Mock).mockReturnValueOnce([])
 
       render(
         <EnhancedErrorBoundary>
@@ -369,7 +378,7 @@ describe('EnhancedErrorBoundary', () => {
     })
 
     it('should show alert when max retries exceeded', () => {
-      const alertSpy = jest.spyOn(window, 'alert').mockImplementation()
+      const alertSpy = vi.spyOn(window, 'alert').mockImplementation()
 
       render(
         <EnhancedErrorBoundary>
@@ -434,8 +443,8 @@ describe('EnhancedErrorBoundary', () => {
     })
 
     it('should clear auth data on logout', () => {
-      const setItemSpy = jest.spyOn(Storage.prototype, 'setItem')
-      const removeItemSpy = jest.spyOn(Storage.prototype, 'removeItem')
+      const setItemSpy = vi.spyOn(Storage.prototype, 'setItem')
+      const removeItemSpy = vi.spyOn(Storage.prototype, 'removeItem')
 
       render(
         <EnhancedErrorBoundary>
@@ -544,7 +553,7 @@ describe('EnhancedErrorBoundary', () => {
 
       const refId1 = screen.getByText(/Error Reference ID/i).textContent
 
-      jest.clearAllMocks()
+      vi.clearAllMocks()
 
       rerender(
         <EnhancedErrorBoundary>

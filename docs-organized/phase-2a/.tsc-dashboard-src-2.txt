@@ -1,0 +1,166 @@
+ Container pos-dev-frontend-install-run-339c622fd95d Creating 
+ Container pos-dev-frontend-install-run-339c622fd95d Created 
+src/app/[locale]/dashboard/accounting/customer-invoices/page.tsx(457,13): error TS2322: Type '(payload: CustomerInvoiceFormInput) => Promise<void>' is not assignable to type '(payload: CustomerInvoiceFormInput | SupplierInvoiceFormInput) => void | Promise<void>'.
+  Types of parameters 'payload' and 'payload' are incompatible.
+    Type 'CustomerInvoiceFormInput | SupplierInvoiceFormInput' is not assignable to type 'CustomerInvoiceFormInput'.
+      Property 'customer_id' is missing in type 'SupplierInvoiceFormInput' but required in type 'CustomerInvoiceFormInput'.
+src/app/[locale]/dashboard/accounting/customer-invoices/page.tsx(477,13): error TS2322: Type '(payload: PaymentReceivedFormInput) => Promise<void>' is not assignable to type '(payload: PaymentReceivedFormInput | PaymentMadeFormInput) => void | Promise<void>'.
+  Types of parameters 'payload' and 'payload' are incompatible.
+    Type 'PaymentReceivedFormInput | PaymentMadeFormInput' is not assignable to type 'PaymentReceivedFormInput'.
+      Property 'customer_id' is missing in type 'PaymentMadeFormInput' but required in type 'PaymentReceivedFormInput'.
+src/app/[locale]/dashboard/accounting/supplier-invoices/page.tsx(424,13): error TS2322: Type '(payload: SupplierInvoiceFormInput) => Promise<void>' is not assignable to type '(payload: CustomerInvoiceFormInput | SupplierInvoiceFormInput) => void | Promise<void>'.
+  Types of parameters 'payload' and 'payload' are incompatible.
+    Type 'CustomerInvoiceFormInput | SupplierInvoiceFormInput' is not assignable to type 'SupplierInvoiceFormInput'.
+      Property 'supplier_id' is missing in type 'CustomerInvoiceFormInput' but required in type 'SupplierInvoiceFormInput'.
+src/app/[locale]/dashboard/accounting/supplier-invoices/page.tsx(444,13): error TS2322: Type '(payload: PaymentMadeFormInput) => Promise<void>' is not assignable to type '(payload: PaymentReceivedFormInput | PaymentMadeFormInput) => void | Promise<void>'.
+  Types of parameters 'payload' and 'payload' are incompatible.
+    Type 'PaymentReceivedFormInput | PaymentMadeFormInput' is not assignable to type 'PaymentMadeFormInput'.
+      Property 'supplier_id' is missing in type 'PaymentReceivedFormInput' but required in type 'PaymentMadeFormInput'.
+src/app/[locale]/dashboard/hr/attendance/page.tsx(108,55): error TS7006: Parameter 'record' implicitly has an 'any' type.
+src/app/[locale]/dashboard/hr/leaves/page.tsx(122,47): error TS7006: Parameter 'leave' implicitly has an 'any' type.
+src/app/[locale]/dashboard/hr/payroll/page.tsx(98,51): error TS7006: Parameter 's' implicitly has an 'any' type.
+src/app/[locale]/dashboard/kds/page.tsx(68,21): error TS2322: Type '() => Promise<boolean>' is not assignable to type '() => void | Promise<void>'.
+  Type 'Promise<boolean>' is not assignable to type 'void | Promise<void>'.
+    Type 'Promise<boolean>' is not assignable to type 'Promise<void>'.
+      Type 'boolean' is not assignable to type 'void'.
+src/app/[locale]/dashboard/reports/overview/page.tsx(180,39): error TS2339: Property 'slowMoving' does not exist on type '{ title: string; subtitle: string; dateFrom: string; dateTo: string; refresh: string; sales: string; profitability: string; inventory: string; revenue: string; orders: string; grossMargin: string; ... 14 more ...; inventoryValue: string; }'.
+src/app/[locale]/dashboard/reports/sales/page.tsx(299,21): error TS2322: Type '(value: number, name: string) => [string, string]' is not assignable to type 'Formatter<ValueType, NameType> & ((value: ValueType, name: NameType, item: Payload<ValueType, NameType>, index: number, payload: Payload<...>[]) => ReactNode | [...])'.
+  Type '(value: number, name: string) => [string, string]' is not assignable to type 'Formatter<ValueType, NameType>'.
+    Types of parameters 'value' and 'value' are incompatible.
+      Type 'ValueType | undefined' is not assignable to type 'number'.
+        Type 'undefined' is not assignable to type 'number'.
+src/app/[locale]/dashboard/reports/sales/page.tsx(320,30): error TS2322: Type '(value: number) => string' is not assignable to type 'Formatter<ValueType, NameType> & ((value: ValueType, name: NameType, item: Payload<ValueType, NameType>, index: number, payload: Payload<...>[]) => ReactNode | [...])'.
+  Type '(value: number) => string' is not assignable to type 'Formatter<ValueType, NameType>'.
+    Types of parameters 'value' and 'value' are incompatible.
+      Type 'ValueType | undefined' is not assignable to type 'number'.
+        Type 'undefined' is not assignable to type 'number'.
+src/app/[locale]/dashboard/reports/sales/page.tsx(350,19): error TS2322: Type '(value: number, name: string) => [string, string]' is not assignable to type 'Formatter<ValueType, NameType> & ((value: ValueType, name: NameType, item: Payload<ValueType, NameType>, index: number, payload: Payload<...>[]) => ReactNode | [...])'.
+  Type '(value: number, name: string) => [string, string]' is not assignable to type 'Formatter<ValueType, NameType>'.
+    Types of parameters 'value' and 'value' are incompatible.
+      Type 'ValueType | undefined' is not assignable to type 'number'.
+        Type 'undefined' is not assignable to type 'number'.
+src/app/[locale]/dashboard/theme-builder/components/ComponentBuilder.tsx(66,7): error TS2353: Object literal may only specify known properties, and 'order' does not exist in type 'ComponentConfig'.
+src/app/[locale]/dashboard/theme-builder/components/LivePreview.tsx(135,27): error TS2322: Type 'ComponentConfig' is not assignable to type 'ThemeComponent'.
+  Types of property 'id' are incompatible.
+    Type 'string' is not assignable to type 'number'.
+src/app/[locale]/dashboard/theme-builder/editor/[id]/page.tsx(177,7): error TS1117: An object literal cannot have multiple properties with the same name.
+src/app/[locale]/dashboard/theme-builder/editor/[id]/page.tsx(178,7): error TS1117: An object literal cannot have multiple properties with the same name.
+src/app/[locale]/dashboard/theme-builder/editor/[id]/page.tsx(179,7): error TS1117: An object literal cannot have multiple properties with the same name.
+src/app/[locale]/dashboard/theme-builder/editor/[id]/page.tsx(180,7): error TS1117: An object literal cannot have multiple properties with the same name.
+src/app/[locale]/dashboard/theme-builder/editor/[id]/page.tsx(181,7): error TS1117: An object literal cannot have multiple properties with the same name.
+src/app/[locale]/dashboard/theme-builder/editor/[id]/page.tsx(182,7): error TS1117: An object literal cannot have multiple properties with the same name.
+src/app/[locale]/dashboard/theme-builder/editor/[id]/page.tsx(183,7): error TS1117: An object literal cannot have multiple properties with the same name.
+src/app/[locale]/dashboard/theme-builder/editor/[id]/page.tsx(184,7): error TS1117: An object literal cannot have multiple properties with the same name.
+src/app/[locale]/dashboard/theme-builder/editor/[id]/page.tsx(210,7): error TS1117: An object literal cannot have multiple properties with the same name.
+src/app/[locale]/dashboard/theme-builder/editor/[id]/page.tsx(211,7): error TS1117: An object literal cannot have multiple properties with the same name.
+src/app/[locale]/dashboard/theme-builder/editor/[id]/page.tsx(212,7): error TS1117: An object literal cannot have multiple properties with the same name.
+src/app/[locale]/dashboard/theme-builder/editor/[id]/page.tsx(213,7): error TS1117: An object literal cannot have multiple properties with the same name.
+src/app/[locale]/dashboard/theme-builder/editor/[id]/page.tsx(214,7): error TS1117: An object literal cannot have multiple properties with the same name.
+src/app/[locale]/dashboard/theme-builder/editor/[id]/page.tsx(215,7): error TS1117: An object literal cannot have multiple properties with the same name.
+src/app/[locale]/dashboard/theme-builder/editor/[id]/page.tsx(216,7): error TS1117: An object literal cannot have multiple properties with the same name.
+src/app/[locale]/dashboard/theme-builder/editor/[id]/page.tsx(217,7): error TS1117: An object literal cannot have multiple properties with the same name.
+src/app/[locale]/dashboard/theme-builder/editor/[id]/page.tsx(222,7): error TS1117: An object literal cannot have multiple properties with the same name.
+src/app/[locale]/dashboard/theme-builder/editor/[id]/page.tsx(227,7): error TS1117: An object literal cannot have multiple properties with the same name.
+src/app/[locale]/dashboard/theme-builder/editor/[id]/page.tsx(228,7): error TS1117: An object literal cannot have multiple properties with the same name.
+src/app/[locale]/dashboard/theme-builder/editor/[id]/page.tsx(246,7): error TS1117: An object literal cannot have multiple properties with the same name.
+src/app/[locale]/dashboard/theme-builder/editor/[id]/page.tsx(247,7): error TS1117: An object literal cannot have multiple properties with the same name.
+src/app/[locale]/dashboard/theme-builder/editor/[id]/page.tsx(248,7): error TS1117: An object literal cannot have multiple properties with the same name.
+src/app/[locale]/dashboard/theme-builder/editor/[id]/page.tsx(249,7): error TS1117: An object literal cannot have multiple properties with the same name.
+src/app/[locale]/dashboard/theme-builder/editor/components/EditorPreview.tsx(179,35): error TS2339: Property 'infoCards' does not exist on type '{ hero: { title: { en: string; ar: string; }; subtitle: { en: string; ar: string; }; description: { en: string; ar: string; }; buttonText: { en: string; ar: string; }; ctaText: { en: string; ar: string; }; backgroundImage: string; }; ... 5 more ...; footer: { ...; }; }'.
+src/app/[locale]/dashboard/theme-builder/import/page.tsx(80,9): error TS2322: Type 'GlobalColors | undefined' is not assignable to type 'GlobalColors'.
+  Type 'undefined' is not assignable to type 'GlobalColors'.
+src/app/[locale]/dashboard/theme-builder/import/page.tsx(81,9): error TS2322: Type 'TypographySettings | undefined' is not assignable to type 'TypographySettings'.
+  Type 'undefined' is not assignable to type 'TypographySettings'.
+src/components/TenantSelectorModal.tsx(5,25): error TS2307: Cannot find module '@/hooks/useAuth' or its corresponding type declarations.
+src/components/accounting/AccountTree.tsx(314,3): error TS2322: Type '({ children: Account[]; id: number; tenant_id: number; restaurant_id: number; account_code: string; account_name: string; account_name_ar?: string | undefined; description?: string | undefined; ... 14 more ...; updated_at?: string | undefined; } | null)[]' is not assignable to type 'Account[]'.
+  Type '{ children: Account[]; id: number; tenant_id: number; restaurant_id: number; account_code: string; account_name: string; account_name_ar?: string | undefined; description?: string | undefined; ... 14 more ...; updated_at?: string | undefined; } | null' is not assignable to type 'Account'.
+    Type 'null' is not assignable to type 'Account'.
+src/components/accounting/AccountTree.tsx(335,35): error TS2677: A type predicate's type must be assignable to its parameter's type.
+  Type 'Account' is not assignable to type '{ children: Account[]; id: number; tenant_id: number; restaurant_id: number; account_code: string; account_name: string; account_name_ar?: string; description?: string; description_ar?: string; ... 13 more ...; updated_at?: string; }'.
+    Types of property 'children' are incompatible.
+      Type 'Account[] | undefined' is not assignable to type 'Account[]'.
+        Type 'undefined' is not assignable to type 'Account[]'.
+src/components/accounting/LedgerView.tsx(35,44): error TS2345: Argument of type 'string' is not assignable to parameter of type 'Locale'.
+src/components/accounting/TrialBalanceTable.tsx(28,44): error TS2345: Argument of type 'string' is not assignable to parameter of type 'Locale'.
+src/components/categories/CategoryFormPage.tsx(13,36): error TS7031: Binding element 'category' implicitly has an 'any' type.
+src/components/categories/CategoryFormPage.tsx(13,46): error TS7031: Binding element 'onSubmit' implicitly has an 'any' type.
+src/components/categories/CategoryFormPage.tsx(13,56): error TS7031: Binding element 'onCancel' implicitly has an 'any' type.
+src/components/editors/CTAEditor.tsx(556,33): error TS2339: Property 'en' does not exist on type 'string'.
+src/components/editors/CTAEditor.tsx(559,24): error TS2339: Property 'subtitle' does not exist on type 'ComponentConfig'.
+src/components/editors/CTAEditor.tsx(561,28): error TS2339: Property 'subtitle' does not exist on type 'ComponentConfig'.
+src/components/editors/FooterEditor.tsx(37,11): error TS2430: Interface 'FooterConfig' incorrectly extends interface 'import("/app/apps/dashboard/src/types/theme").FooterConfig'.
+  Types of property 'layout' are incompatible.
+    Type '"expanded" | "compact" | "minimal" | undefined' is not assignable to type '"expanded" | "compact" | undefined'.
+      Type '"minimal"' is not assignable to type '"expanded" | "compact" | undefined'.
+src/components/editors/FooterEditor.tsx(440,52): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+src/components/editors/FooterEditor.tsx(454,54): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'SetStateAction<string | null>'.
+  Type 'undefined' is not assignable to type 'SetStateAction<string | null>'.
+src/components/editors/FooterEditor.tsx(460,50): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+src/components/editors/FooterEditor.tsx(490,51): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+src/components/editors/FooterEditor.tsx(502,51): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+src/components/editors/FooterEditor.tsx(507,49): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+src/components/editors/HeaderEditor.tsx(290,40): error TS2339: Property 'shadow' does not exist on type 'HeaderConfig'.
+src/components/editors/HeaderEditor.tsx(455,39): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+src/components/editors/HeaderEditor.tsx(475,40): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'SetStateAction<string | null>'.
+  Type 'undefined' is not assignable to type 'SetStateAction<string | null>'.
+src/components/editors/HeaderEditor.tsx(486,50): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+src/components/editors/HeaderEditor.tsx(493,50): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+src/components/editors/HeaderEditor.tsx(500,52): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+src/components/editors/HeaderEditor.tsx(588,37): error TS2339: Property 'shadow' does not exist on type 'HeaderConfig'.
+src/components/editors/HeaderEditor.tsx(589,51): error TS2345: Argument of type '"shadow"' is not assignable to parameter of type 'keyof HeaderConfig'.
+src/components/editors/HeroEditor.tsx(466,73): error TS2339: Property 'en' does not exist on type 'string'.
+src/components/editors/HeroEditor.tsx(467,64): error TS2339: Property 'subtitle' does not exist on type 'ComponentConfig'.
+src/components/editors/ProductGridEditor.tsx(529,31): error TS2339: Property 'en' does not exist on type 'string'.
+src/components/editors/TestimonialsEditor.tsx(634,33): error TS2339: Property 'en' does not exist on type 'string'.
+src/components/editors/WhyUsEditor.tsx(539,31): error TS2339: Property 'en' does not exist on type 'string'.
+src/components/hr/EmployeeList.tsx(84,13): error TS2722: Cannot invoke an object which is possibly 'undefined'.
+src/components/monitoring/PerformanceMonitor.tsx(403,22): error TS2339: Property 'gray' does not exist on type '{ green: string; yellow: string; red: string; }'.
+src/components/notifications/NotificationBell.tsx(6,28): error TS2305: Module '"@/hooks/useNotifications"' has no exported member 'LowStockProduct'.
+src/components/notifications/NotificationBell.tsx(11,26): error TS2339: Property 'count' does not exist on type '{ notifications: Notification[]; unreadCount: number; totalCount: number; loading: boolean; error: string | null; stats: NotificationStats | null; fetchNotifications: (filters?: NotificationFilters, forceRefresh?: boolean) => Promise<...>; ... 7 more ...; clearAllCaches: () => void; }'.
+src/components/notifications/NotificationBell.tsx(25,26): error TS2559: Type 'true' has no properties in common with type 'NotificationFilters'.
+src/components/notifications/NotificationBell.tsx(31,28): error TS2559: Type 'true' has no properties in common with type 'NotificationFilters'.
+src/hooks/useCache.ts(64,20): error TS2347: Untyped function calls may not accept type arguments.
+src/hooks/useCache.ts(134,14): error TS2347: Untyped function calls may not accept type arguments.
+src/hooks/useNotifications.ts(154,18): error TS2339: Property 'remove' does not exist on type 'APICache'.
+src/hooks/useNotifications.ts(181,18): error TS2339: Property 'remove' does not exist on type 'APICache'.
+src/hooks/useNotifications.ts(205,16): error TS2339: Property 'remove' does not exist on type 'APICache'.
+src/hooks/useNotifications.ts(228,16): error TS2339: Property 'remove' does not exist on type 'APICache'.
+src/hooks/useNotifications.ts(237,16): error TS2339: Property 'remove' does not exist on type 'APICache'.
+src/hooks/useNotifications.ts(244,14): error TS2339: Property 'remove' does not exist on type 'APICache'.
+src/hooks/usePOSBackgroundSync.ts(105,13): error TS18048: 'registration.sync' is possibly 'undefined'.
+src/hooks/useRbac.ts(36,26): error TS2345: Argument of type 'string' is not assignable to parameter of type '"NONE" | "READ" | "EXPORT" | "WRITE" | "DELETE" | "ADMIN"'.
+src/hooks/useServiceWorker.ts(239,26): error TS2339: Property 'sync' does not exist on type 'ServiceWorkerRegistration'.
+src/lib/rbac.ts(112,39): error TS2345: Argument of type 'string' is not assignable to parameter of type '"NONE" | "READ" | "EXPORT" | "WRITE" | "DELETE" | "ADMIN"'.
+src/lib/rbac.ts(128,39): error TS2345: Argument of type 'string' is not assignable to parameter of type '"NONE" | "READ" | "EXPORT" | "WRITE" | "DELETE" | "ADMIN"'.
+src/lib/utils/themeAdvancedUtils.ts(25,5): error TS2322: Type '{ id: number; type: ComponentType; title: string; displayOrder: number; enabled: boolean; config?: Record<string, any> | undefined; settings?: Record<string, any> | undefined; styles?: Record<...> | undefined; createdAt?: string | undefined; updatedAt?: string | undefined; }[]' is not assignable to type 'ComponentConfig[]'.
+  Type '{ id: number; type: ComponentType; title: string; displayOrder: number; enabled: boolean; config?: Record<string, any>; settings?: Record<string, any>; styles?: Record<string, any>; createdAt?: string; updatedAt?: string; }' is not assignable to type 'ComponentConfig'.
+    Types of property 'id' are incompatible.
+      Type 'number' is not assignable to type 'string'.
+src/lib/web-vitals.ts(99,26): error TS2339: Property 'renderTime' does not exist on type 'PerformanceEntry'.
+src/lib/web-vitals.ts(99,50): error TS2339: Property 'loadTime' does not exist on type 'PerformanceEntry'.
+src/lib/web-vitals.ts(100,44): error TS2339: Property 'renderTime' does not exist on type 'PerformanceEntry'.
+src/lib/web-vitals.ts(100,68): error TS2339: Property 'loadTime' does not exist on type 'PerformanceEntry'.
+src/lib/web-vitals.ts(352,66): error TS2339: Property 'domLoading' does not exist on type 'PerformanceNavigationTiming'.
+src/stores/index.ts(3,15): error TS2459: Module '"./authStore"' declares 'AuthState' locally, but it is not exported.
+src/stores/themeBuilderStore.ts(264,7): error TS2322: Type '() => boolean | ""' is not assignable to type '() => boolean'.
+  Type 'string | boolean' is not assignable to type 'boolean'.
+    Type 'string' is not assignable to type 'boolean'.
+src/stores/themeBuilderStore.ts(282,7): error TS2322: Type '() => boolean | ""' is not assignable to type '() => boolean'.
+  Type 'string | boolean' is not assignable to type 'boolean'.
+    Type 'string' is not assignable to type 'boolean'.
+src/stores/themeBuilderStore.ts(309,7): error TS2322: Type '() => boolean | ""' is not assignable to type '() => boolean'.
+  Type 'string | boolean' is not assignable to type 'boolean'.
+    Type 'string' is not assignable to type 'boolean'.
+src/stores/themeBuilderUtils.ts(399,16): error TS2304: Cannot find name 'hexToHex'.
+src/stores/themeBuilderUtils.ts(400,13): error TS2304: Cannot find name 'hexToHex'.
+src/types/version-history.ts(6,15): error TS2305: Module '"./theme"' has no exported member 'Theme'.
+

@@ -34,9 +34,29 @@ interface FooterSection {
   order: number
 }
 
-interface FooterConfig extends ThemeFooterConfig {
+interface FooterConfig extends Omit<ThemeFooterConfig, 'footerSections' | 'socialLinks'> {
+  footerSections?: FooterSection[]
+  socialLinks: SocialLink[]
   layout?: 'compact' | 'expanded' | 'minimal'
   legalLinks?: LinkItem[]
+}
+
+/** Sections and social links saved without ids cannot be edited (lookups are by id): give them stable ones. */
+function withFooterIds(config: ThemeFooterConfig): Omit<ThemeFooterConfig, 'footerSections' | 'socialLinks'> & { footerSections: FooterSection[]; socialLinks: SocialLink[] } {
+  return {
+    ...config,
+    footerSections: (config.footerSections ?? []).map((section, index) => ({
+      ...section,
+      id: section.id ?? `section-${index + 1}`,
+      order: section.order ?? index + 1,
+    })),
+    socialLinks: (config.socialLinks ?? []).map((link, index) => ({
+      ...link,
+      id: link.id ?? `social-${index + 1}`,
+      order: link.order ?? index + 1,
+      platform: link.platform as SocialLink['platform'],
+    })),
+  }
 }
 
 const SOCIAL_PLATFORMS = ['facebook', 'twitter', 'instagram', 'linkedin', 'youtube'] as const
@@ -64,7 +84,7 @@ export function FooterEditor({
   const initialFooterConfig: FooterConfig = useMemo(() => {
     if (useStore && storeFooter) {
       return {
-        ...storeFooter,
+        ...withFooterIds(storeFooter),
         layout: 'expanded',
         legalLinks: [
           { label: 'Privacy Policy', href: '/privacy' },
@@ -72,7 +92,12 @@ export function FooterEditor({
         ],
       }
     }
-    return (component?.config as unknown as FooterConfig) || {
+    if (component?.config) {
+      return withFooterIds(component.config as unknown as ThemeFooterConfig) as FooterConfig
+    }
+    return {
+      companyName: '',
+      showLinks: true,
       footerSections: [],
       socialLinks: [],
       backgroundColor: '#1f2937',

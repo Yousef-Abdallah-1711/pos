@@ -3,7 +3,6 @@ package http
 import (
 	"net/http"
 	"strconv"
-	"strings"
 
 	"pos-saas/internal/domain"
 	"pos-saas/internal/middleware"
@@ -264,50 +263,9 @@ func (h *RBACPermissionHandler) GetUserPermissions(w http.ResponseWriter, r *htt
 }
 
 func maxPermissionLevel(current string, candidate string) string {
-	current = strings.ToUpper(strings.TrimSpace(current))
-	candidate = strings.ToUpper(strings.TrimSpace(candidate))
-	if current == "" {
-		current = domain.PermissionNone
-	}
-	if candidate == "" {
-		candidate = domain.PermissionNone
-	}
-	if domain.PermissionValues[candidate] > domain.PermissionValues[current] {
-		return candidate
-	}
-	return current
+	return domain.MaxPermissionLevel(current, candidate)
 }
 
 func fallbackPermissionLevelForRole(role domain.Role, moduleID int64) string {
-	code := strings.ToUpper(strings.TrimSpace(role.RoleCode))
-	if code == "" {
-		code = strings.ToUpper(strings.TrimSpace(role.RoleName))
-	}
-
-	switch moduleID {
-	case 13: // KDS
-		switch code {
-		case "ADMIN", "ADMINISTRATOR", "OWNER", "MANAGER":
-			return domain.PermissionAdmin
-		case "KITCHEN_STAFF", "KITCHEN_LEAD", "CHEF", "EMPLOYEE":
-			return domain.PermissionWrite
-		case "KITCHEN_VIEWER":
-			return domain.PermissionRead
-		default:
-			return domain.PermissionNone
-		}
-	case 14: // TABLES
-		switch code {
-		case "ADMIN", "ADMINISTRATOR", "OWNER":
-			return domain.PermissionAdmin
-		case "MANAGER":
-			return domain.PermissionWrite
-		case "KITCHEN_STAFF", "KITCHEN_LEAD", "CHEF", "KITCHEN_VIEWER", "EMPLOYEE", "WAITER", "HOST", "CASHIER":
-			return domain.PermissionRead
-		default:
-			return domain.PermissionNone
-		}
-	default:
-		return domain.PermissionNone
-	}
+	return domain.FallbackPermissionLevel(role, moduleID)
 }

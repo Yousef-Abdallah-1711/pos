@@ -902,3 +902,36 @@ func (r *OrderRepository) DeleteOrder(tenantID, restaurantID, orderID int64) err
 	// We prefer to cancel orders rather than delete them for audit trail
 	return r.CancelOrder(tenantID, restaurantID, orderID, "Deleted by admin")
 }
+
+
+// SetPublicTokenHash stores the hash of the public tracking token for an order.
+func (r *OrderRepository) SetPublicTokenHash(tenantID, restaurantID, orderID int64, hash string) error {
+	res, err := r.db.Exec(
+		`UPDATE orders SET public_token_hash = $1 WHERE id = $2 AND tenant_id = $3 AND restaurant_id = $4`,
+		hash, orderID, tenantID, restaurantID,
+	)
+	if err != nil {
+		return fmt.Errorf("failed to store public token: %w", err)
+	}
+	if n, _ := res.RowsAffected(); n == 0 {
+		return errors.New("order not found")
+	}
+	return nil
+}
+
+// GetPublicAccessInfo returns the stored public token hash (empty for legacy orders) and the
+// customer phone of an order, scoped to tenant and restaurant.
+func (r *OrderRepository) GetPublicAccessInfo(tenantID, restaurantID, orderID int64) (hash string, phone string, err error) {
+	var h sql.NullString
+	err = r.db.QueryRow(
+		`SELECT public_token_hash, customer_phone FROM orders WHERE id = $1 AND tenant_id = $2 AND restaurant_id = $3`,
+		orderID, tenantID, restaurantID,
+	).Scan(&h, &phone)
+	if err == sql.ErrNoRows {
+		return "", "", errors.New("order not found")
+	}
+	if err != nil {
+		return "", "", fmt.Errorf("failed to read order access info: %w", err)
+	}
+	return h.String, phone, nil
+}

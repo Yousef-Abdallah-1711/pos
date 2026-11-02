@@ -151,7 +151,7 @@ export function useNotifications() {
         setUnreadCount((prev) => Math.max(0, prev - 1))
 
         // Invalidate cache
-        apiCache.remove('notifications_{}')
+        apiCache.clear('notifications_{}')
 
         // Fetch fresh unread count
         await fetchUnreadCount()
@@ -178,7 +178,7 @@ export function useNotifications() {
         setUnreadCount((prev) => prev + 1)
 
         // Invalidate cache
-        apiCache.remove('notifications_{}')
+        apiCache.clear('notifications_{}')
 
         // Fetch fresh unread count
         await fetchUnreadCount()
@@ -202,7 +202,7 @@ export function useNotifications() {
       setUnreadCount(0)
 
       // Invalidate cache
-      apiCache.remove('notifications_{}')
+      apiCache.clear('notifications_{}')
 
       // Fetch fresh data
       await fetchStats()
@@ -225,7 +225,7 @@ export function useNotifications() {
       }
 
       // Invalidate cache
-      apiCache.remove('notifications_{}')
+      apiCache.clear('notifications_{}')
     } catch (err) {
       debugError('Failed to delete notification:', err)
     }
@@ -234,14 +234,14 @@ export function useNotifications() {
   const refreshNotifications = useCallback(
     async (filters?: NotificationFilters) => {
       // Invalidate all notification caches
-      apiCache.remove('notifications_{}')
+      apiCache.clear('notifications_{}')
       await fetchNotifications(filters, true)
     },
     [fetchNotifications]
   )
 
   const clearAllCaches = useCallback(() => {
-    apiCache.remove('notifications_{}')
+    apiCache.clear('notifications_{}')
   }, [])
 
   // Initial fetch on mount

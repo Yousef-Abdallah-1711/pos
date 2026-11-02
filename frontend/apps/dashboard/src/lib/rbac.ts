@@ -109,7 +109,7 @@ export const getNextPermissionLevel = (current: string): string | null => {
     PERMISSION_LEVELS.DELETE,
     PERMISSION_LEVELS.ADMIN,
   ]
-  const currentIndex = levels.indexOf(current)
+  const currentIndex = (levels as readonly string[]).indexOf(current)
   return currentIndex < levels.length - 1 ? levels[currentIndex + 1] : null
 }
 
@@ -125,7 +125,7 @@ export const getPreviousPermissionLevel = (current: string): string | null => {
     PERMISSION_LEVELS.DELETE,
     PERMISSION_LEVELS.ADMIN,
   ]
-  const currentIndex = levels.indexOf(current)
+  const currentIndex = (levels as readonly string[]).indexOf(current)
   return currentIndex > 0 ? levels[currentIndex - 1] : null
 }
 

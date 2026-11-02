@@ -8,6 +8,9 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
     setupFiles: ['./vitest.setup.ts'],
+    // tests/visual-regression holds Playwright specs (run with Playwright, not Vitest).
+    // components/ and lib/ at the app root are unreferenced duplicates of src/ code (see PHASE_2B_HANDOFF.md).
+    exclude: ['**/node_modules/**', 'tests/visual-regression/**', 'components/**', 'lib/**'],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html', 'lcov'],

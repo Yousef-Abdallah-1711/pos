@@ -3,7 +3,7 @@
  * Types for theme versioning and rollback functionality
  */
 
-import type { Theme } from './theme'
+import type { ThemeData as Theme } from './theme'
 
 /**
  * Type of change made to a theme

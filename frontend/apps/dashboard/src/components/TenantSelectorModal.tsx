@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { useAuth } from '@/hooks/useAuth'
+import { useAuthStore } from '@/stores/authStore'
 
 interface Tenant {
   tenant_id: number
@@ -15,6 +15,8 @@ interface Tenant {
 interface TenantSelectorModalProps {
   isOpen: boolean
   email: string
+  /** Proof of password verification returned by POST /auth/login; required by /auth/login/confirm. */
+  selectionToken: string
   tenants: Tenant[]
   onTenantSelected?: (tenantId: number) => void
 }
@@ -22,11 +24,12 @@ interface TenantSelectorModalProps {
 export function TenantSelectorModal({
   isOpen,
   email,
+  selectionToken,
   tenants,
   onTenantSelected,
 }: TenantSelectorModalProps) {
   const router = useRouter()
-  const { setToken, setUser } = useAuth()
+  const setAuth = useAuthStore((state) => state.setAuth)
   const [selectedTenantId, setSelectedTenantId] = useState<number | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -49,6 +52,7 @@ export function TenantSelectorModal({
         body: JSON.stringify({
           email,
           tenant_id: tenantId,
+          selection_token: selectionToken,
         }),
       })
 
@@ -59,15 +63,9 @@ export function TenantSelectorModal({
 
       const data = await response.json()
 
-      // Store token and user in auth context
-      if (data.token) {
-        setToken(data.token)
-        localStorage.setItem('token', data.token)
-      }
-
-      if (data.user) {
-        setUser(data.user)
-        localStorage.setItem('user', JSON.stringify(data.user))
+      // Store token and user in the auth store (it persists them)
+      if (data.token && data.user) {
+        setAuth(data.user, data.token)
       }
 
       // Call callback if provided

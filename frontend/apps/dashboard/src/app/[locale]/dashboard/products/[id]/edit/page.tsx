@@ -14,18 +14,7 @@ import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbSeparator, Breadc
 import { FormSkeleton } from '@/components/skeletons'
 import { Lock } from 'lucide-react'
 import { debugError } from '@/lib/debug'
-
-interface Product {
-  id: number
-  name: string
-  [key: string]: any
-}
-
-interface Category {
-  id: number
-  name: string
-  [key: string]: any
-}
+import type { ProductDetails as Product, ProductCategory as Category } from '@/components/products/product-types'
 
 export default function EditProductPage() {
   const router = useRouter()
@@ -35,10 +24,11 @@ export default function EditProductPage() {
   const t = createTranslator(locale)
 
   // Check RBAC permissions for Products module
-  const canUpdateProducts = useHasPermission(
+  const canUpdateProductsPermission = useHasPermission(
     MODULE_IDS.PRODUCTS,
     PERMISSION_LEVELS.WRITE,
   )
+  const canUpdateProducts = canUpdateProductsPermission.loading || canUpdateProductsPermission.hasPermission
 
   const productId = params.id as string
   const [product, setProduct] = useState<Product | null>(null)

@@ -61,7 +61,7 @@ export function useCachedValue<T>(
     }
 
     // Check if already in cache
-    const cached = (cache as any).get<T>(key)
+    const cached = (cache as any).get(key) as T | undefined
     if (cached !== undefined) {
       setValue(cached)
       setIsLoading(false)
@@ -131,7 +131,7 @@ export function useCache(
 
   const get = useCallback(
     <T = any,>(key: string) => {
-      return (cache as any).get<T>(key)
+      return (cache as any).get(key) as T | undefined
     },
     [cache]
   )

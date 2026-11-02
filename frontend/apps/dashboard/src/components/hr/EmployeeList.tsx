@@ -81,7 +81,7 @@ export function EmployeeList({ employees, loading, onEdit, onDelete, canDelete =
 
   const handleConfirmDelete = async () => {
     if (deleteConfirm.id) {
-      await onDelete(deleteConfirm.id)
+      await onDelete?.(deleteConfirm.id)
       setDeleteConfirm({ open: false, id: null })
       setCurrentPage(1)
     }

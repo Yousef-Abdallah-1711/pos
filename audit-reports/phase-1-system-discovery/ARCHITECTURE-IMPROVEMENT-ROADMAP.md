@@ -1,0 +1,9 @@
+# Remediation & Architecture Roadmap (not executed)
+1. **Critical security/integrity:** remove impersonation header bypass (derive from signed token only); derive tenant/restaurant solely from verified JWT, reject header overrides; require password on login-confirm; make `WithRequiredPermission` actually check role_permissions and apply it uniformly (incl. `/rbac/*`, categories, users, drivers, themes); force `PAYMOB_MODE` explicit and fail startup in production when mock; scope theme/order/driver/role-permission queries by tenant+restaurant; remove seeded super-admin password; gate `/health/metrics`; add RLS or a non-superuser DB role.
+2. **Core workflows:** transactional order creation with inventory decrement and collision-free order numbers; add `/inventory/adjust`; fix POS offline idempotency (client-generated order key) and SW origin/auth; enforce subscription status in middleware; set trial dates at registration (one trial length).
+3. **Contracts/errors:** typed domain errors → HTTP mapper, stop leaking `err.Error()`; register or remove orphan frontend calls; request IDs.
+4. **Accounting:** fail (not plug) unbalanced entries; DB-level balance check; row locks for numbering; reversal on refund/cancel; numeric types.
+5. **UI/a11y/i18n:** fix `/login` redirect, storefront locale/`dir`, `dir` on super-admin; logout flow.
+6. **Architecture:** thin handlers (123 endpoints bypass use cases; 40 SQL closures in main.go); delete ~31.6k lines of `legacy`-tagged code; split main.go; centralise permission gates on the frontend; dedupe workspace packages.
+7. **Performance/scale:** after correctness; sharding is unwired — decide keep/remove.
+8. **Dependencies & hardening:** registry/CVE pass; CI build+test+lint; backups/restore drills; graceful shutdown/timeouts; structured logging.

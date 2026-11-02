@@ -1,6 +1,7 @@
 import axios, { AxiosInstance, AxiosError, InternalAxiosRequestConfig } from "axios";
 import { getApiBaseUrl } from './config/api';
 import { debugLog, debugError } from './debug';
+import { isCreateOrderRequest, rememberOrderToken, tokenForOrderUrl } from './order-access';
 
 /**
  * API Client with Axios
@@ -38,6 +39,12 @@ class ApiClient {
           config.headers['Content-Type'] = 'application/json'
         }
 
+        // Prove ownership of public orders placed from this device (see order-access.ts)
+        const orderToken = tokenForOrderUrl(config.url);
+        if (orderToken && !config.headers["X-Order-Token"]) {
+          config.headers["X-Order-Token"] = orderToken;
+        }
+
         // Add tenant and restaurant headers if available
         const tenantId = typeof window !== "undefined" ? localStorage.getItem("tenant-id") : null;
         const restaurantId = typeof window !== "undefined" ? localStorage.getItem("restaurant-id") : null;
@@ -68,6 +75,11 @@ class ApiClient {
     // Response interceptor
     this.instance.interceptors.response.use(
       (response) => {
+        // Order creation returns the public tracking token exactly once: keep it for later lookups
+        if (isCreateOrderRequest(response.config?.method, response.config?.url)) {
+          rememberOrderToken(response.data);
+        }
+
         // Log successful responses in development
         if (process.env.NODE_ENV === "development") {
           debugLog(`[API] Response from ${response.config.url}`, response.data);

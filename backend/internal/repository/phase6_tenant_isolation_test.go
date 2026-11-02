@@ -275,8 +275,12 @@ func TestPhase6TenantIsolation_PerformanceReviewRepositoryListUsesTenantAndResta
 	defer db.Close()
 
 	repo := NewPerformanceReviewRepository(db)
-	mock.ExpectQuery(`FROM performance_reviews`).
+	// COUNT(*) first (pagination), then the page query; both must carry tenant and restaurant.
+	mock.ExpectQuery(`SELECT COUNT\(\*\)\s+FROM performance_reviews`).
 		WithArgs(7, 11).
+		WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(0))
+	mock.ExpectQuery(`FROM performance_reviews`).
+		WithArgs(7, 11, 200, 0).
 		WillReturnRows(sqlmock.NewRows([]string{"id"}))
 
 	records, err := repo.List(7, 11)

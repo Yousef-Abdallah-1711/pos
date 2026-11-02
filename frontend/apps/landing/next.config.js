@@ -9,6 +9,7 @@ const nextConfig = {
   },
   // Avoid Windows EPERM symlink failures during standalone trace copy.
   output: isWindows ? undefined : 'standalone',
+  outputFileTracingRoot: require('path').join(__dirname, '../../'),
 }
 
 module.exports = nextConfig

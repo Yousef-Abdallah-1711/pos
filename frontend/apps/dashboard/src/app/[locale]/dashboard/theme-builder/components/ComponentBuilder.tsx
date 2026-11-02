@@ -63,7 +63,7 @@ export function ComponentBuilder() {
       id: `component-${Date.now()}`,
       type,
       title: `${COMPONENT_TYPES.find((c) => c.type === type)?.label || type}`,
-      order: theme.components.length,
+      displayOrder: theme.components.length, // was `order`, a field ComponentConfig does not have
       enabled: true,
       settings: {},
     }

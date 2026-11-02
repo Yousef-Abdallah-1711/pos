@@ -7,6 +7,7 @@
 
 import React, { useState, useCallback } from 'react'
 import type { ThemeComponent } from '@/types/theme'
+import { previewText } from '@/lib/previewText'
 
 interface HeroEditorProps {
   component: ThemeComponent
@@ -463,8 +464,8 @@ export function HeroEditor({
         <div className="rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
           <div className="hero-preview-shell">
             <div className="hero-preview-content">
-              <h1 className="text-4xl font-bold mb-4">{component.title?.en || 'Hero Title'}</h1>
-              <p className="text-lg mb-6 max-w-2xl">{component.subtitle?.en || 'Hero subtitle goes here'}</p>
+              <h1 className="text-4xl font-bold mb-4">{previewText(component.title, 'Hero Title')}</h1>
+              <p className="text-lg mb-6 max-w-2xl">{previewText(component.subtitle, 'Hero subtitle goes here')}</p>
               {heroConfig.ctaButtonText && (
                 <button
                   className="hero-preview-cta font-semibold rounded-lg transition-colors"

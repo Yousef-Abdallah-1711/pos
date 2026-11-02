@@ -1,3 +1,8 @@
+//go:build ignore
+// +build ignore
+
+// Standalone helper: run with `go run ./scripts/embedded_pg_daemon.go` (excluded from `go build ./...`, which cannot hold two mains).
+
 package main
 
 import (

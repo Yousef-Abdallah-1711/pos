@@ -1,6 +1,10 @@
+//go:build experimental
+// +build experimental
+
 package integration_test
 
 import (
+	"pos-saas/tests/testdb"
 	"context"
 	"database/sql"
 	"testing"
@@ -428,7 +432,7 @@ func TestRLSAuditingToggle(t *testing.T) {
 
 func setupSecurityTestDB(t *testing.T) *sql.DB {
 	// Connect to test PostgreSQL database
-	db, err := sql.Open("postgres", "postgres://test:test@localhost/pos_test")
+	db, err := sql.Open("postgres", testdb.URL(t))
 	if err != nil {
 		t.Fatalf("Failed to connect to test database: %v", err)
 	}

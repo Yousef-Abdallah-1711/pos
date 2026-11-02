@@ -71,6 +71,10 @@ export default function ImportThemePage() {
       setError('No valid theme to import')
       return
     }
+    if (!parsedTheme.colors || !parsedTheme.typography) {
+      setError('Theme file must include colors and typography')
+      return
+    }
 
     try {
       setIsLoading(true)

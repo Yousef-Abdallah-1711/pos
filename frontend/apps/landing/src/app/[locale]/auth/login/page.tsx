@@ -40,6 +40,7 @@ export default function LoginPage() {
   const [showTenantSelector, setShowTenantSelector] = useState(false)
   const [selectedEmail, setSelectedEmail] = useState('')
   const [availableTenants, setAvailableTenants] = useState<Tenant[]>([])
+  const [selectionToken, setSelectionToken] = useState('')
 
   const loginSchema = z.object({
     email: z.string().email(t.auth.validation.invalidEmail),
@@ -62,6 +63,7 @@ export default function LoginPage() {
       if (response.data.multiple_tenants && response.data.tenants && response.data.tenants.length > 1) {
         setSelectedEmail(data.email)
         setAvailableTenants(response.data.tenants)
+        setSelectionToken(response.data.selection_token ?? '')
         setShowTenantSelector(true)
         toast.info(t.auth.login.multipleTenants)
         setIsLoading(false)
@@ -197,6 +199,7 @@ export default function LoginPage() {
       <TenantSelectorModal
         isOpen={showTenantSelector}
         email={selectedEmail}
+        selectionToken={selectionToken}
         tenants={availableTenants}
         onTenantSelected={handleTenantSelected}
       />

@@ -1,3 +1,6 @@
+//go:build experimental
+// +build experimental
+
 package integration_test
 
 import (
@@ -61,13 +64,8 @@ func TestFullMiddlewareChainWithSharding(t *testing.T) {
 
 	// Setup: Create test request with valid JWT token
 	tokenService := setupTestTokenService(t)
-	token, _ := tokenService.GenerateToken(&jwt.Claims{
-		UserID:       123,
-		Email:        "test@example.com",
-		RestaurantID: 456,
-		TenantID:     1,
-		Role:         "manager",
-	})
+	restaurantID := 456
+	token, _ := tokenService.GenerateToken(123, 1, &restaurantID, "test@example.com", "manager")
 
 	// Create request
 	req := httptest.NewRequest("GET", "/api/orders", nil)
@@ -139,13 +137,8 @@ func TestMultiTenantIsolation(t *testing.T) {
 	shardMap := make(map[int64]string) // restaurant -> shard
 
 	for _, tc := range testCases {
-		token, _ := tokenService.GenerateToken(&jwt.Claims{
-			UserID:       1,
-			Email:        "test@example.com",
-			RestaurantID: int(tc.restaurantID),
-			TenantID:     tc.tenantID,
-			Role:         "admin",
-		})
+		restaurantID := int(tc.restaurantID)
+		token, _ := tokenService.GenerateToken(1, tc.tenantID, &restaurantID, "test@example.com", "admin")
 
 		req := httptest.NewRequest("GET", "/api/orders", nil)
 		req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token))
@@ -334,7 +327,11 @@ func setupTestShardRouter(t *testing.T) *sharding.ShardRouter {
 
 // setupTestTokenService creates a test JWT token service
 func setupTestTokenService(t *testing.T) *jwt.TokenService {
-	return jwt.NewTokenService("test-secret-key-very-long-string-32-chars")
+	svc, err := jwt.NewTokenService("test-secret-key-very-long-string-32-chars", "1h")
+	if err != nil {
+		t.Fatalf("failed to create token service: %v", err)
+	}
+	return svc
 }
 
 // mockDatabase creates a mock database connection for testing

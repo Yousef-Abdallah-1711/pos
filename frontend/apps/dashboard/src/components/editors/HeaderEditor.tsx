@@ -23,9 +23,25 @@ interface NavItem {
   isActive?: boolean
 }
 
-interface HeaderConfig extends ThemeHeaderConfig {
+interface HeaderConfig extends Omit<ThemeHeaderConfig, 'navigationItems'> {
+  navigationItems: NavItem[]
+  shadow?: boolean
   transparentBackground?: boolean
   mobileMenuStyle?: 'hamburger' | 'drawer' | 'collapse'
+}
+
+/**
+ * Items saved without ids cannot be edited (the editor looks them up by id), so give them stable ones.
+ */
+function withNavIds(config: ThemeHeaderConfig): Omit<ThemeHeaderConfig, 'navigationItems'> & { navigationItems: NavItem[] } {
+  return {
+    ...config,
+    navigationItems: (config.navigationItems ?? []).map((item, index) => ({
+      ...item,
+      id: item.id ?? `nav-${index + 1}`,
+      order: item.order ?? index + 1,
+    })),
+  }
 }
 
 /**
@@ -54,12 +70,15 @@ export function HeaderEditor({
   const initialHeaderConfig: HeaderConfig = useMemo(() => {
     if (useStore && storeHeader) {
       return {
-        ...storeHeader,
+        ...withNavIds(storeHeader),
         transparentBackground: false,
         mobileMenuStyle: 'hamburger',
       }
     }
-    return (component?.config as unknown as HeaderConfig) || {
+    if (component?.config) {
+      return withNavIds(component.config as unknown as ThemeHeaderConfig) as HeaderConfig
+    }
+    return {
       navigationItems: [],
       navPosition: 'right',
       navAlignment: 'horizontal',

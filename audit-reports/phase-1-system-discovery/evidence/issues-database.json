@@ -1,0 +1,435 @@
+[
+  {
+    "issue_id": "DB-001",
+    "severity": "P0",
+    "category": "multi-tenancy",
+    "title": "Request headers X-Tenant-ID / X-Restaurant-ID override JWT tenant when JWT restaurant_id is 0",
+    "source_files": [
+      "backend/internal/middleware/tenant.go",
+      "backend/internal/pkg/jwt/token.go",
+      "backend/internal/repository/auth_repo.go"
+    ],
+    "evidence": "tenant.go:26-37 uses JWT claims only if tenantID>0 AND restaurantID>0; otherwise tenant.go:39-63 falls through to headers and trusts them for BOTH tenant and restaurant, even when a valid JWT is present. token.go:14 has RestaurantID int omitempty, and users.restaurant_id is nullable (003_create_users.sql:7, ON DELETE SET NULL; auth_repo.go:230 scans *int), so any user with NULL restaurant_id (e.g. the seeded super admin, migration 109 inserts no restaurant_id) gets restaurant_id 0 in the token and therefore full header control of tenant+restaurant on every wrapProtected / wrapWithPermission route (main.go:604-639). Static analysis; not exercised dynamically.",
+    "suspected_root_cause": "Backward-compat header fallback applied to authenticated requests; \"claims present but incomplete\" is treated like \"no claims\".",
+    "recommended_fix": "If claims != nil, ALWAYS use claims.TenantID; reject (403) when restaurant_id is 0 unless the route is explicitly tenant-level, and never read headers on authenticated routes. Restrict header fallback to a separate explicit public middleware that resolves tenant/restaurant from the slug server-side (see DB-002).",
+    "required_tests": [
+      "Authenticated user with JWT restaurant_id=0 sends X-Tenant-ID of another tenant -> 403, no data",
+      "JWT tenant A + header tenant B -> always tenant A",
+      "Table-driven test across every wrapProtected route group"
+    ],
+    "status": "OPEN"
+  },
+  {
+    "issue_id": "DB-002",
+    "severity": "P0",
+    "category": "multi-tenancy",
+    "title": "Unauthenticated public order endpoints trust client-supplied tenant/restaurant headers; sequential IDs allow order PII enumeration and cancellation",
+    "source_files": [
+      "backend/cmd/api/main.go",
+      "backend/internal/handler/http/public_order_handler.go",
+      "backend/internal/middleware/tenant.go"
+    ],
+    "evidence": "main.go:472-484 register POST/GET/DELETE /api/v1/public/orders*, wrapped only in TenantContextMiddleware (no auth; no rate limiter on these lines). With no JWT, tenant.go:40-63 takes tenant/restaurant from headers. public_order_handler.go:117-139 GetOrder(tenantID,restaurantID,orderID) and :376-404 CancelOrder use that header-derived scope; orders.id is BIGSERIAL (060_create_orders_table.sql:7) and order_number is predictable (DB-010). Restaurant IDs are discoverable via public slug endpoints (main.go:449-457). I found no proof-of-ownership (customer phone/token) check in these handlers. Orders hold name/email/phone/address (060:13-22). Not exercised dynamically.",
+    "suspected_root_cause": "Public endpoints reuse the internal header-based tenant middleware; orders identified by guessable sequential ids/numbers with no per-order secret.",
+    "recommended_fix": "Resolve restaurant from slug server-side; require an unguessable per-order tracking token for status/track/cancel; redact PII in public responses; add rate limiting; remove header trust.",
+    "required_tests": [
+      "Unauthenticated GET /public/orders/{id} with correct tenant/restaurant headers but no tracking token -> 401/404",
+      "Cancel without token rejected",
+      "Enumeration over ids returns no PII",
+      "Rate-limit test"
+    ],
+    "status": "OPEN"
+  },
+  {
+    "issue_id": "DB-003",
+    "severity": "P0",
+    "category": "multi-tenancy",
+    "title": "Theme v2 get/update/delete/activate have no tenant check (cross-tenant IDOR, any authenticated role)",
+    "source_files": [
+      "backend/internal/handler/http/admin_theme_handler_v2.go",
+      "backend/internal/service/theme_service.go",
+      "backend/internal/repository/theme_repository.go",
+      "backend/cmd/api/main.go"
+    ],
+    "evidence": "Routes main.go:1462-1469 use wrapProtected only (no RBAC permission). admin_theme_handler_v2.go:322 UpdateTheme and :356 DeleteTheme pass only the path id to the service; theme_service.go:224-300 does repo.GetByID(ctx,id) then Update/Delete with no comparison of theme.TenantID to the caller tenant (theme.TenantID is read only for cache invalidation, :268,:298). theme_repository.go:300-330 UPDATE themes_v2 ... WHERE id=$10 and :355-360 DELETE FROM themes_v2 WHERE id=$1 carry no tenant_id. Cache key theme:%d (theme_service.go:200) is tenant-agnostic. Static analysis; not exercised dynamically.",
+    "suspected_root_cause": "Handler/service signatures omit tenant context; repository methods keyed by id only.",
+    "recommended_fix": "Pass tenantID/restaurantID from context into service+repo; add AND tenant_id=$ AND restaurant_id=$ to every themes_v2 statement; add RBAC permission to theme routes; tenant-scope cache keys.",
+    "required_tests": [
+      "Tenant B PUT/DELETE/activate/GET on tenant A theme id -> 404",
+      "Cache does not serve tenant A theme to tenant B",
+      "Cashier role cannot delete theme"
+    ],
+    "status": "OPEN"
+  },
+  {
+    "issue_id": "DB-004",
+    "severity": "P1",
+    "category": "multi-tenancy",
+    "title": "RBAC RevokePermission deletes role permissions by role_id without tenant check; RBAC admin routes have no authorization-level gate",
+    "source_files": [
+      "backend/internal/handler/http/rbac_permission_handler.go",
+      "backend/internal/repository/role_permission_repository.go",
+      "backend/cmd/api/main.go"
+    ],
+    "evidence": "rbac_permission_handler.go:94-117 reads roleId/moduleId from the path and calls role_permission_repository.go:139-145 DELETE FROM role_permissions WHERE role_id=$1 AND module_id=$2 (no tenant_id, no role ownership lookup), unlike AssignPermission (:72-84) which verifies the role via roleRepo.GetByID(tenant,restaurant,role). Routes main.go:925-936 use wrapAuthOnly: any authenticated user reaches role/permission/user-role management; handlers check tenant membership but grep for admin/role checks in rbac_*_handler.go found only the system-role delete guard (rbac_role_handler.go:328). Privilege-escalation reachability is for the auth auditor to confirm.",
+    "suspected_root_cause": "Repository method omitted tenant param; RBAC handlers rely on authentication only.",
+    "recommended_fix": "Add tenant_id to Revoke/RevokeAll/GetByRoleAndModule; verify role ownership in handler; gate all /rbac mutations behind an explicit admin permission.",
+    "required_tests": [
+      "Tenant B revoke on tenant A role -> 404",
+      "Cashier JWT cannot assign permissions/roles",
+      "Regression for RevokeAll"
+    ],
+    "status": "OPEN"
+  },
+  {
+    "issue_id": "DB-005",
+    "severity": "P1",
+    "category": "database",
+    "title": "Row-Level Security does not exist in the deployed schema; RLS script and manager are dead code; documentation claims RLS",
+    "source_files": [
+      "backend/internal/security/rls_policies.sql",
+      "backend/internal/security/rls.go",
+      "backend/migrations",
+      "backend/tests/integration/security_rls_integration_test.go",
+      "docs-organized/05-INFRASTRUCTURE/MULTI_TENANCY/TENANT_ISOLATION_SECURITY.md"
+    ],
+    "evidence": "grep for \"ENABLE ROW LEVEL|CREATE POLICY\" across backend/migrations returns 0 hits (DB was down; static). The only RLS SQL is internal/security/rls_policies.sql (340 lines; policies for restaurants/orders/customers/payments/order_items, :57-61), not in migrations/, not run by cmd/migrate, and it references a customers table that no migration creates (accounting uses customers_accounting). grep shows NewRLSManager/SetTenantContext are not used outside internal/security and tests. App connects as DB_USER=postgres (docker-compose.yml:86, config.go:54, .env.prod.example:13), a superuser that bypasses RLS even if enabled. TENANT_ISOLATION_SECURITY.md:10,18-38 presents RLS as implemented.",
+    "suspected_root_cause": "RLS designed in a later phase but never integrated into migrations or the request path; docs written ahead of implementation.",
+    "recommended_fix": "Either implement properly (migration enabling RLS+FORCE on all tenant tables, non-superuser app role, per-request SET LOCAL app.current_tenant_id in a transaction) or remove claims from docs. Treat app-layer scoping as the only control until then.",
+    "required_tests": [
+      "Integration test with non-superuser role: SELECT without tenant GUC returns 0 rows",
+      "Cross-tenant SELECT/UPDATE blocked at DB",
+      "CI check that every table with tenant_id has RLS enabled"
+    ],
+    "status": "OPEN"
+  },
+  {
+    "issue_id": "DB-006",
+    "severity": "P2",
+    "category": "sharding",
+    "title": "Shard router jump-hash ignores the key: every restaurant maps to the same shard",
+    "source_files": [
+      "backend/internal/sharding/router.go"
+    ],
+    "evidence": "router.go:67-83: the loop mutates hashValue (line 77) but never uses it; bucket depends only on numShards. Computed loop result (python reproduction of lines 71-80): numShards 2->1, 3->2, 4->3, 5->3, 8->5, 16->12 for ALL keys, then % numShards (line 59). Real jump hash needs (b+1)*2^31/((key>>33)+1). tests/unit/middleware/sharding_test.go:125 claims distribution across 4 shards; not run (needs live shards). Not wired into the main API (DB-008), so no production impact today.",
+    "suspected_root_cause": "Incorrect port of the Lamping-Veach jump consistent hash; no key-distribution unit test without live DB.",
+    "recommended_fix": "Replace with a correct jump hash or a persisted tenant->shard directory table; add a pure unit test asserting uniform distribution over 100k keys and minimal movement when adding a shard.",
+    "required_tests": [
+      "Distribution chi-square test over 100k keys, N=4",
+      "Consistency test: adding shard N+1 moves ~1/(N+1) keys",
+      "Determinism test"
+    ],
+    "status": "OPEN"
+  },
+  {
+    "issue_id": "DB-007",
+    "severity": "P1",
+    "category": "sharding",
+    "title": "Shard migration tool would copy entire tables (not one restaurant), uses invalid SQL, and rollback deletes ALL target data",
+    "source_files": [
+      "backend/internal/sharding/migration.go",
+      "backend/cmd/migrate-shard/main.go",
+      "backend/internal/handlers/shard_migration_api.go"
+    ],
+    "evidence": "migration.go:223-245: SELECT * FROM <table> ORDER BY id LIMIT/OFFSET with no restaurant/tenant filter; tables hardcoded [\"orders\",\"order_items\",\"payments\",\"customers\",\"restaurants\"] (:200) - omits products, journal_entries, employees etc.; \"customers\" does not exist. Offset carried across tables (:217). rows.Close deferred inside a loop (:244). Column list formatted with fmt.Sprintf(\"%s\", columns) (:307, :437) which renders \"[a b c]\" - invalid SQL. Rollback (:373-389) runs DELETE FROM <table> on the TARGET shard with no WHERE; cmd/migrate-shard defaults --rollback-on-error=true (main.go:36), so any error wipes the target shard. Dual-write follower write is fire-and-forget (:455-461) with unsynchronised errorCount. Never executed (no shards available); CLI defaults to user postgres.",
+    "suspected_root_cause": "Prototype written without a real schema; no tests with live data.",
+    "recommended_fix": "Do not use against real data. Rewrite as a per-tenant scoped, FK-ordered, transactional copy with checksum verification and a safe rollback (delete only rows tagged with the migration).",
+    "required_tests": [
+      "Migrate one tenant between two throwaway shards; row counts + checksums per table equal",
+      "Other tenants on target untouched after rollback",
+      "Failure injection mid-copy"
+    ],
+    "status": "OPEN"
+  },
+  {
+    "issue_id": "DB-008",
+    "severity": "P2",
+    "category": "sharding",
+    "title": "Sharding and scaling packages are not wired into the API (experimental); documentation claims production-ready",
+    "source_files": [
+      "backend/cmd/api/main.go",
+      "backend/internal/sharding",
+      "backend/internal/scaling",
+      "backend/internal/handlers/scaling_api.go",
+      "docs-organized/05-INFRASTRUCTURE/MULTI_TENANCY/IMPLEMENTATION_SUMMARY.md"
+    ],
+    "evidence": "cmd/api/main.go imports (top ~60 lines) include no internal/sharding, internal/scaling or internal/handlers. grep: ShardingMiddleware/NewShardRouter appear only in internal/sharding, internal/middleware/sharding.go, internal/handlers/sharding_example.go and tests. Repositories take a single *sql.DB. scaling/autoscaler.go:226,267 \"In production, call cloud provider API\" (no-op), failover_manager.go:250 stub, load_balancer.go:239 stub GeoIP. scaling_api.go:34-35 registers \"servers/:id/metrics\" (not Go 1.22 pattern syntax) and has no auth. IMPLEMENTATION_SUMMARY.md:3,422 says COMPLETED / production-ready; DATABASE_SHARDING.md:3 says In Progress. ~3,970 lines unused.",
+    "suspected_root_cause": "Scaffolding committed as \"complete\" without integration.",
+    "recommended_fix": "Mark packages experimental in docs, move behind a build tag or delete; do not advertise horizontal scalability.",
+    "required_tests": [
+      "CI check that unused packages are excluded",
+      "If revived: end-to-end test routing two tenants to two shards through the real API"
+    ],
+    "status": "OPEN"
+  },
+  {
+    "issue_id": "DB-009",
+    "severity": "P2",
+    "category": "sharding",
+    "title": "Shard key is restaurant_id but accounting/RBAC/subscription data is tenant-scoped; cross-shard transactions undefined",
+    "source_files": [
+      "backend/internal/middleware/sharding.go",
+      "backend/internal/sharding/router.go"
+    ],
+    "evidence": "middleware/sharding.go:35-49 routes by RestaurantID only; users, tenants, roles, role_permissions, subscriptions and payments (115_create_payments_table.sql: tenant_id only) are tenant-level and several repos query across a tenant (subscription_repo_impl.go). No code coordinates 2PC/saga. GetAllConnections (router.go:134-160) opens unmanaged pools and leaks them on error. Global UNIQUEs (orders.order_number 060:10, tenants.slug) cannot be enforced across shards. DSN hardcodes sslmode=disable (router.go:81).",
+    "suspected_root_cause": "Shard key chosen without data-model analysis.",
+    "recommended_fix": "Shard by tenant_id (all restaurants of a tenant co-located); keep a global control-plane DB for tenants/users/plans; replace global uniques with (tenant_id, ...) uniques.",
+    "required_tests": [
+      "Tenant-level report across its restaurants runs on a single shard",
+      "Global uniqueness test for control-plane tables"
+    ],
+    "status": "OPEN"
+  },
+  {
+    "issue_id": "DB-010",
+    "severity": "P1",
+    "category": "data-integrity",
+    "title": "Order numbers collide and are globally unique; generator ignores tenant and uses unix-time modulo",
+    "source_files": [
+      "backend/internal/domain/order.go",
+      "backend/internal/usecase/order_usecase.go",
+      "backend/migrations/060_create_orders_table.sql"
+    ],
+    "evidence": "order_usecase.go:64 GenerateOrderNumber(tenantID, time.Now().Unix()%1000000); domain/order.go:242-244 ignores tenantID and returns \"ORD-<year>-%06d\". The value repeats every 1,000,000 s (~11.6 days) and two orders in the same second (any tenant) collide. orders.order_number VARCHAR(50) NOT NULL UNIQUE is GLOBAL (060:10): collisions across tenants cause a unique violation (500) on order creation, and numbers are guessable (see DB-002). Not reproduced dynamically.",
+    "suspected_root_cause": "Placeholder comment at order_usecase.go:62 \"In production, this should query the current order count\".",
+    "recommended_fix": "Per-restaurant counter (sequence table with row lock) and UNIQUE(tenant_id, restaurant_id, order_number); add a random component for public tracking.",
+    "required_tests": [
+      "Concurrent 100 order creates in the same second: no 500s, all unique",
+      "Two tenants can hold the same order_number",
+      "Number does not repeat after 11 days (clock mock)"
+    ],
+    "status": "OPEN"
+  },
+  {
+    "issue_id": "DB-011",
+    "severity": "P1",
+    "category": "data-integrity",
+    "title": "Order creation is not transactional; inventory is checked but never decremented; totals computed in float64 with hardcoded 10% tax",
+    "source_files": [
+      "backend/internal/usecase/order_usecase.go",
+      "backend/internal/repository/order_repo.go"
+    ],
+    "evidence": "order_usecase.go:178-189 CreateOrder inserts the order, then loops CreateOrderItem as separate statements; order_repo.go has no tx in the create path, so a failure leaves an order with missing items. Inventory: order_usecase.go:130-132 only checks product.QuantityInStock < qty; grep shows quantity_in_stock is written only by UpdateProduct (product_repo.go:364): no decrement on sale, and check-then-act is racy. subtotal := 0.0 float64 (:70), TaxAmount = subtotal*0.10 (:174); discount never validated (:176-178). DB: no CHECK that order_items.total_price = qty*unit_price or orders.total = subtotal+tax-discount+fee (060:46-52 only >=0).",
+    "suspected_root_cause": "Business logic prototyped in the usecase; no DB-level invariants.",
+    "recommended_fix": "Wrap order+items+inventory decrement in one tx with SELECT ... FOR UPDATE on stock; compute money with integer minor units or decimal; add CHECK constraints; per-restaurant tax rate.",
+    "required_tests": [
+      "Fault-injection: item insert failure leaves no order row",
+      "Concurrent orders for the last unit: exactly one succeeds",
+      "Total-consistency CHECK rejects tampered rows"
+    ],
+    "status": "OPEN"
+  },
+  {
+    "issue_id": "DB-012",
+    "severity": "P1",
+    "category": "data-integrity",
+    "title": "Journal entry balance is not enforced by the database; trigger named validate_journal_balance only sums; posted lines are mutable",
+    "source_files": [
+      "backend/migrations/137_create_journal_entries.sql",
+      "backend/internal/repository/journal_entry_repo.go"
+    ],
+    "evidence": "137:76-114 function validate_journal_balance() computes SUM(debit),SUM(credit) and UPDATEs journal_entries.total_*; it never raises when they differ. No CHECK/constraint trigger on journal_entries(total_debit=total_credit) in 137 or later migrations (grep total_debit in 153-160 returns nothing). Balance is verified only in app code at post time: journal_entry_repo.go:393-395 math.Abs(totalDebit-totalCredit) > 0.009 on float64 (tolerates almost one cent). No trigger prevents UPDATE/DELETE of journal_entry_lines for posted/void entries (only repo-level draft check :272-274 before delete :329). journal_entry_lines.tenant_id (137:56) is not an FK and lines carry no restaurant_id. Row-level trigger recomputes totals per row (O(n^2)).",
+    "suspected_root_cause": "Balance rule implemented only in Go; misleading trigger name.",
+    "recommended_fix": "Add a DEFERRABLE INITIALLY DEFERRED constraint trigger raising when a posted entry is unbalanced; block writes to lines of posted/void entries; composite FK (journal_entry_id,tenant_id); use decimal in Go and exact equality.",
+    "required_tests": [
+      "Direct SQL insert of unbalanced posted entry rejected",
+      "UPDATE line on posted entry rejected",
+      "Cross-tenant line insert rejected"
+    ],
+    "status": "OPEN"
+  },
+  {
+    "issue_id": "DB-013",
+    "severity": "P1",
+    "category": "security",
+    "title": "Migration 109 seeds a super admin with a known password and fixed email into every environment; 099 seeds a test tenant/restaurant",
+    "source_files": [
+      "backend/migrations/109_seed_super_admin.sql",
+      "backend/migrations/099_add_test_restaurant.sql"
+    ],
+    "evidence": "109_seed_super_admin.sql:5-8 password comment \"SuperAdmin@123\" with bcrypt hash, email superadmin@pos-saas.com, ip_whitelist NULL = all IPs (:26), is_super_admin true, attached to tenant 1. docker-entrypoint.sh:11 runs ./migrate at every container start including production (docker-compose.prod.yml uses the same image). 099_add_test_restaurant.sql:6-34 inserts \"Test Tenant\"/\"restaurant-1\" and a theme in any environment.",
+    "suspected_root_cause": "Seed data placed in schema migrations.",
+    "recommended_fix": "Remove seeds from migrations; create the super admin via a one-time CLI with an env-provided password; rotate/disable this account on any deployed DB; require IP allowlist/MFA for super admin.",
+    "required_tests": [
+      "Fresh prod-profile migrate leaves users table empty",
+      "Login with the documented default credential fails"
+    ],
+    "status": "OPEN"
+  },
+  {
+    "issue_id": "DB-014",
+    "severity": "P2",
+    "category": "migrations",
+    "title": "Migration runner lacks locking, checksums, explicit transaction control and rollbacks; runs at every container start",
+    "source_files": [
+      "backend/cmd/migrate/main.go",
+      "backend/docker-entrypoint.sh"
+    ],
+    "evidence": "cmd/migrate/main.go:48-95 sorts filenames lexically (sort.Strings), tracks only the filename in schema_migrations(version), executes each file with one db.Exec and inserts the version row in a separate statement (:85-90): a crash in between re-runs a non-idempotent file. No pg_advisory_lock while docker-entrypoint.sh:11 runs ./migrate on every start, so replicas race. No checksum; no down migrations (7 *.down.sql.disabled never run). Duplicate numeric prefixes: 067,070,071,072,075,076,078,079,080,099,104,105,106 (evidence/database-evidence/duplicate-migration-prefixes.txt); active duplicates: 067x2, 070x2, 071x2, 072x2, 078 (seed + disabled), 099, 104x2 (permission_audit_logs + role_permissions), 105, 106; order relies on lexical tie-break (067_create_themes_table < 067_theme_migrations_placeholder). 123 files, 107 active .sql, 16 .disabled; many numeric gaps (006-011, 018-019, 028-039, 041-049, 051-059, 081-089, 091-098).",
+    "suspected_root_cause": "Home-grown runner; accretive numbering across branches.",
+    "recommended_fix": "Adopt golang-migrate/goose or add advisory lock + transaction per file + checksum; unique numeric versions; run migrations as a separate job, not in the app entrypoint.",
+    "required_tests": [
+      "Two concurrent migrate processes: one waits, schema applied once",
+      "CI fails on duplicate version numbers",
+      "Clean DB to head then compare against baseline schema dump"
+    ],
+    "status": "OPEN"
+  },
+  {
+    "issue_id": "DB-015",
+    "severity": "P3",
+    "category": "migrations",
+    "title": "Dead/misleading and non-idempotent migrations; three coexisting theme models",
+    "source_files": [
+      "backend/migrations/147_create_performance_reviews.sql",
+      "backend/migrations/026_create_performance_reviews_table.sql",
+      "backend/migrations/067_create_themes_table.sql",
+      "backend/migrations/999_theme_migration_legacy.sql"
+    ],
+    "evidence": "147 is CREATE TABLE IF NOT EXISTS performance_reviews with a different column set than 026 (areas_to_improve vs areas_for_improvement; no review_type); once 026 has run it is a silent no-op, and the repository matches 026 (performance_review_repo.go:163-170, columns areas_for_improvement/reviewer_comments), so 147 is dead but misleading (domain/hr_advanced.go:20 uses AreasToImprove). Files without IF NOT EXISTS / ON CONFLICT: 065, 067_placeholder, 073, 078_seed, 105, 106, 112, 120, 122, 126, 127, 132, 134, 135, 155, 156, 159 (DML backfills/seeds mixed into schema migrations). Theme models themes (067), themes_v2 (070) and restaurant_themes (999) coexist; 075-080 theme versions are disabled.",
+    "suspected_root_cause": "Parallel feature branches re-created tables.",
+    "recommended_fix": "Delete dead 147, consolidate theme models, make backfills idempotent.",
+    "required_tests": [
+      "Schema snapshot test after full migrate matches committed expected schema"
+    ],
+    "status": "OPEN"
+  },
+  {
+    "issue_id": "DB-016",
+    "severity": "P2",
+    "category": "migrations",
+    "title": "Hardcoded role grant and destructive/incomplete rollback script",
+    "source_files": [
+      "backend/migrations/050_create_notifications_system.sql",
+      "backend/scripts/rollback_phase6_accounting_hr.sql"
+    ],
+    "evidence": "050_create_notifications_system.sql:150-151 GRANT EXECUTE ON FUNCTION ... TO postgres fails if that role does not exist and grants nothing to a least-privilege app role. scripts/rollback_phase6_accounting_hr.sql drops performance_reviews CASCADE (also the table from migration 026, an earlier phase) and does not delete schema_migrations rows, so migrate will skip recreating dropped tables. Forward migrations contain no DROP TABLE/COLUMN/TRUNCATE/DELETE (grep) - good.",
+    "suspected_root_cause": "Rollback written by phase, not by migration.",
+    "recommended_fix": "Replace with versioned down migrations; remove or parameterise role grants; delete schema_migrations rows in rollback.",
+    "required_tests": [
+      "Up/down/up cycle on clean DB succeeds",
+      "Migration run as a non-postgres role succeeds"
+    ],
+    "status": "OPEN"
+  },
+  {
+    "issue_id": "DB-017",
+    "severity": "P2",
+    "category": "multi-tenancy",
+    "title": "Repository methods without tenant/restaurant predicates (defence-in-depth gaps); GetOrderItems/GetOrderStatusHistory ignore tenant",
+    "source_files": [
+      "backend/internal/repository/driver_repo.go",
+      "backend/internal/repository/order_repo.go",
+      "backend/internal/repository/homepage_section_repository.go",
+      "backend/internal/repository/restaurant_theme_repo.go",
+      "backend/internal/repository/theme_repository.go",
+      "backend/internal/repository/payment_repo_impl.go",
+      "backend/internal/repository/user_repo.go"
+    ],
+    "evidence": "See table in 06 and evidence/database-evidence/repository-tenant-scan.txt. driver_repo.go: Update (:198 WHERE id=$16), Delete (:228), UpdateStatus (:249), UpdateAvailability, UpdateLocation, assignments, stats are by id only; safety depends on handler pre-checks comparing driver.TenantID (admin_driver_handler.go:263,292,359,...). Drivers routes use wrapProtected only (main.go:1397-1403, no RBAC). order_repo.go:693-700 GetOrderItems and :756-762 GetOrderStatusHistory accept tenantID but query WHERE order_id=$1 only (callers check the order first, e.g. public_order_handler.go:285). homepage_section DeleteSection/website_settings are restaurant-scoped but not tenant-scoped; restaurant_theme_repo UpdateSection/DeleteSection by theme_id only; payment_repo_impl.go UpdatePaymentOrder/UpdatePaymentStatus WHERE id=$n only; user_repo.go UpdatePassword/UpdateProfile by user id (callers not individually traced).",
+    "suspected_root_cause": "Authorization done in handlers instead of enforced in the data layer.",
+    "recommended_fix": "Make tenant_id (and restaurant_id where applicable) mandatory parameters of every repository method and part of WHERE; CI lint scanning repo SQL for tenant predicates.",
+    "required_tests": [
+      "Per-repository cross-tenant matrix test (tenant B cannot read/update/delete tenant A row by id)",
+      "Static SQL-lint test in CI"
+    ],
+    "status": "OPEN"
+  },
+  {
+    "issue_id": "DB-018",
+    "severity": "P2",
+    "category": "data-integrity",
+    "title": "Tenant/restaurant consistency not enforced by composite FKs; denormalised tenant_id can drift; slug uniqueness only per tenant",
+    "source_files": [
+      "backend/migrations/065_add_restaurant_id_to_order_items.sql",
+      "backend/migrations/137_create_journal_entries.sql",
+      "backend/migrations/002_create_restaurants.sql",
+      "backend/internal/repository/restaurant_repo.go"
+    ],
+    "evidence": "order_items.tenant_id/restaurant_id are separate FKs (065:24-26) with nothing tying them to orders; same pattern in journal_entry_lines.tenant_id (no FK at all, 137:56), invoice_*_lines, bank_reconciliation_lines. Tables with no tenant_id column (script over migrations): order_status_history, product_images, inventory, low_stock_alerts, driver_assignments, driver_location_history, theme_sections, theme_history, user_settings, etc. Four tenant-bearing tables lack a leading tenant/restaurant index: bank_reconciliation_lines, invoice_customer_lines, invoice_supplier_lines, journal_entry_lines (indexed by parent id). restaurants UNIQUE(tenant_id,slug) (002:30) while public lookup is slug-only (restaurant_repo.go:20-33 WHERE slug=$1, no LIMIT/ORDER): global uniqueness currently comes only from tenants.slug UNIQUE at registration (auth_repo.go:337) - tenants.max_restaurants is app-only.",
+    "suspected_root_cause": "tenant_id added as a denormalised column without UNIQUE(id,tenant_id) parent keys.",
+    "recommended_fix": "Add UNIQUE(id,tenant_id[,restaurant_id]) on parents and composite FKs on children; enforce global slug uniqueness or make lookup tenant-aware.",
+    "required_tests": [
+      "INSERT child with mismatched tenant rejected by DB",
+      "Duplicate restaurant slug across tenants rejected or disambiguated"
+    ],
+    "status": "OPEN"
+  },
+  {
+    "issue_id": "DB-019",
+    "severity": "P2",
+    "category": "data-integrity",
+    "title": "Money types: DB numeric is sound but Go uses float64; id types mixed; ON DELETE CASCADE on orders",
+    "source_files": [
+      "backend/internal/usecase/order_usecase.go",
+      "backend/internal/repository/journal_entry_repo.go",
+      "backend/migrations/060_create_orders_table.sql",
+      "backend/migrations/115_create_payments_table.sql"
+    ],
+    "evidence": "Money columns across migrations (grep): 54 NUMERIC, 24 DECIMAL, 5 INTEGER (payments.amount_cents INTEGER, 115:7) and no FLOAT/REAL/MONEY columns - sound; precision differs (orders DECIMAL(10,2) vs accounting NUMERIC(15,2)). Go uses float64 for subtotal/tax (order_usecase.go:70,174) and ledger deltas (journal_entry_repo.go:777). orders/order_items cascade-delete from restaurants/tenants (060:44-45), so deleting a restaurant erases sales history, whereas accounting tables use plain REFERENCES. Ids: orders BIGSERIAL, accounting SERIAL (INT) - e.g. journal_entries.reference_id INT -> orders.id BIGINT.",
+    "suspected_root_cause": "No money-type convention.",
+    "recommended_fix": "Use decimal or minor units end to end; BIGINT everywhere; soft-delete tenants/restaurants and RESTRICT FKs on financial records.",
+    "required_tests": [
+      "Round-trip decimal tests on totals",
+      "FK RESTRICT test: cannot delete a restaurant that has orders"
+    ],
+    "status": "OPEN"
+  },
+  {
+    "issue_id": "DB-020",
+    "severity": "P3",
+    "category": "security",
+    "title": "Payment provider auth token stored in plaintext; DB defaults to superuser and sslmode=disable",
+    "source_files": [
+      "backend/migrations/115_create_payments_table.sql",
+      "backend/internal/config/config.go",
+      "docker-compose.prod.yml",
+      ".env.prod.example"
+    ],
+    "evidence": "115:23 paymob_auth_token TEXT stored as received; only card_last_four/brand are kept (no PAN - good). Positive: partial UNIQUE idx_payments_paymob_order_success (115:48-50) prevents duplicate success per Paymob order; merchant_order_id UNIQUE (:35). docker-compose.prod.yml:63 and .env.prod.example:16 default DB_SSLMODE=disable; DB_USER defaults to the postgres superuser (config.go:54).",
+    "suspected_root_cause": "Defaults optimised for local dev.",
+    "recommended_fix": "Do not persist short-lived auth tokens (or encrypt); require sslmode=require/verify-full in prod; create a least-privilege app role.",
+    "required_tests": [
+      "Prod config validation rejects sslmode=disable and superuser"
+    ],
+    "status": "OPEN"
+  },
+  {
+    "issue_id": "DB-021",
+    "severity": "P3",
+    "category": "multi-tenancy",
+    "title": "KDS websocket is JWT-scoped (good) but CheckOrigin always true and token in query string; upload serving unverified",
+    "source_files": [
+      "backend/internal/handler/ws/kds_ws_handler.go",
+      "backend/internal/handler/ws/kds_hub.go",
+      "backend/internal/usecase/product_usecase.go"
+    ],
+    "evidence": "kds_ws_handler.go:98-114 validates the JWT from ?token= and derives tenantID/restaurantID from claims (not headers); room key tenant:%d:restaurant:%d (kds_hub.go:171) - SCOPED. CheckOrigin returns true (:83-87, TODO) enabling cross-site websocket hijack if a token is obtainable; token in URL leaks to logs. Uploads: product images are stored under ./uploads/products/<tenant>/<product>/ (product_usecase.go:299-304) but I found no route serving /uploads in cmd/api/main.go; serving (nginx/static) and ACLs not verified.",
+    "suspected_root_cause": "Dev shortcuts.",
+    "recommended_fix": "Whitelist origins; use first-message auth or short-lived ws ticket; verify upload serving path/ACL.",
+    "required_tests": [
+      "WS from disallowed Origin rejected",
+      "Tenant A token cannot receive tenant B room messages"
+    ],
+    "status": "OPEN"
+  },
+  {
+    "issue_id": "DB-022",
+    "severity": "P3",
+    "category": "database",
+    "title": "Duplicate indexes and weak state-transition protection",
+    "source_files": [
+      "backend/migrations/003_create_users.sql",
+      "backend/migrations/066_add_restaurant_id_indexes.sql",
+      "backend/migrations/060_create_orders_table.sql"
+    ],
+    "evidence": "Same-name duplicates (second is a no-op IF NOT EXISTS in 066): idx_users_restaurant, idx_categories_restaurant, idx_products_restaurant, idx_orders_restaurant_created, idx_order_items_restaurant(+_created); distinct-name duplicates: idx_performance_reviews_tenant vs _tenant_restaurant, idx_attendance_date vs _date_range, theme_history created_at indexes. Order status/payment_status only have value CHECKs (060:46-47); no trigger enforces legal transitions or that payment_status=paid has a payments row; transitions are app-only (order_repo.go:471-540). Positives: tenants.subscription_status CHECK (110:29); salaries trigger computes net_salary and CHECKs amounts (024:93-97,148). tenants.is_active coexists with subscription_status (auth_repo.go:63) as a second source of truth.",
+    "suspected_root_cause": "Incremental migrations.",
+    "recommended_fix": "Drop duplicates; add a transition trigger or state-machine table; unify tenant active flag.",
+    "required_tests": [
+      "Illegal status transition via SQL rejected",
+      "Tenant disabled flag consistent with subscription_status"
+    ],
+    "status": "OPEN"
+  }
+]

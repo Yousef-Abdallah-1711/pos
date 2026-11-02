@@ -18,6 +18,8 @@ interface Tenant {
 interface TenantSelectorModalProps {
   isOpen: boolean
   email: string
+  /** Proof of password verification returned by POST /auth/login; required by /auth/login/confirm. */
+  selectionToken: string
   tenants: Tenant[]
   onTenantSelected?: (tenantId: number) => void
 }
@@ -25,6 +27,7 @@ interface TenantSelectorModalProps {
 export function TenantSelectorModal({
   isOpen,
   email,
+  selectionToken,
   tenants,
   onTenantSelected,
 }: TenantSelectorModalProps) {
@@ -55,6 +58,7 @@ export function TenantSelectorModal({
           body: JSON.stringify({
             email,
             tenant_id: tenantId,
+            selection_token: selectionToken,
           }),
         }
       )

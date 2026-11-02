@@ -19,8 +19,12 @@ func TestPhase6SQLInjection_ListJournalEntriesTreatsInjectedFiltersAsParameters(
 	injectedStatus := "posted' OR 1=1 --"
 	injectedType := "manual'; DROP TABLE journal_entries; --"
 
-	mock.ExpectQuery(`FROM journal_entries`).
+	// Pagination added a COUNT(*) query first; both queries must bind the injected filters as parameters.
+	mock.ExpectQuery(`SELECT COUNT\(\*\) FROM journal_entries`).
 		WithArgs(7, 11, injectedStatus, injectedType).
+		WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(0))
+	mock.ExpectQuery(`FROM journal_entries`).
+		WithArgs(7, 11, injectedStatus, injectedType, 200, 0).
 		WillReturnRows(sqlmock.NewRows([]string{
 			"id", "tenant_id", "restaurant_id", "entry_number", "entry_date", "fiscal_period",
 			"description", "description_ar", "reference_type", "reference_id", "reference_number",

@@ -2,6 +2,8 @@ package middleware
 
 import (
 	"context"
+	"database/sql"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -13,59 +15,125 @@ const (
 	RestaurantContextKey contextKey = "restaurantID"
 )
 
-// TenantContextMiddleware adds tenant and restaurant context from JWT claims or headers.
-// Priority: JWT claims > Headers (X-Tenant-ID, X-Restaurant-ID)
-// This ensures secure extraction from authenticated JWT tokens while maintaining backward compatibility.
+// RestaurantVerifier confirms that a restaurant belongs to a tenant. It is the
+// only way a client-supplied restaurant identifier is ever trusted.
+type RestaurantVerifier interface {
+	RestaurantBelongsToTenant(ctx context.Context, restaurantID, tenantID int64) (bool, error)
+}
+
+// SQLRestaurantVerifier verifies tenant/restaurant ownership against the restaurants table.
+type SQLRestaurantVerifier struct {
+	DB *sql.DB
+}
+
+func (v SQLRestaurantVerifier) RestaurantBelongsToTenant(ctx context.Context, restaurantID, tenantID int64) (bool, error) {
+	if v.DB == nil {
+		return false, errors.New("restaurant verifier has no database")
+	}
+	var ok bool
+	err := v.DB.QueryRowContext(ctx,
+		`SELECT EXISTS (SELECT 1 FROM restaurants WHERE id = $1 AND tenant_id = $2)`,
+		restaurantID, tenantID).Scan(&ok)
+	return ok, err
+}
+
+// TenantContextMiddleware is the strict default: it has no restaurant verifier,
+// so it never trusts client-supplied tenant/restaurant headers. Use
+// NewTenantContextMiddleware with a verifier where headers must be honoured.
 func TenantContextMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		var tenantID int64
-		var restaurantID int64
+	return NewTenantContextMiddleware(nil)(next)
+}
 
-		// Try to get from JWT claims first (most secure)
-		claims := GetUserClaims(r)
-		if claims != nil {
-			// Explicit conversion from int to int64
-			tenantID = int64(claims.TenantID)
-			restaurantID = int64(claims.RestaurantID)
-
-			if tenantID > 0 && restaurantID > 0 {
+// NewTenantContextMiddleware resolves the tenant/restaurant for a request.
+//
+//   - Authenticated requests: the tenant always comes from the verified JWT
+//     claims. X-Tenant-ID is ignored. The restaurant comes from the claims; only
+//     if the token carries no restaurant may X-Restaurant-ID select one, and only
+//     when the verifier confirms it belongs to the token's tenant.
+//   - Anonymous requests (public storefront): X-Tenant-ID / X-Restaurant-ID must be
+//     present, numeric and positive, and the verifier must confirm the pair is
+//     consistent. Authorization of the specific resource is the handler's job.
+//   - Without a verifier, header-derived restaurants are rejected (fail closed).
+func NewTenantContextMiddleware(verifier RestaurantVerifier) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			serve := func(tenantID, restaurantID int64) {
 				ctx := context.WithValue(r.Context(), TenantContextKey, tenantID)
 				ctx = context.WithValue(ctx, RestaurantContextKey, restaurantID)
 				next.ServeHTTP(w, r.WithContext(ctx))
-				return
-			}
-		}
-
-		// Fallback to headers for backward compatibility
-		tenantIDStr := r.Header.Get("X-Tenant-ID")
-		restaurantIDStr := r.Header.Get("X-Restaurant-ID")
-
-		if tenantIDStr != "" && restaurantIDStr != "" {
-			var err error
-			tenantID, err = strconv.ParseInt(tenantIDStr, 10, 64)
-			if err != nil {
-				log.Printf("[TENANT MIDDLEWARE] Invalid X-Tenant-ID: %v", err)
-				http.Error(w, "Invalid tenant ID", http.StatusBadRequest)
-				return
 			}
 
-			restaurantID, err = strconv.ParseInt(restaurantIDStr, 10, 64)
-			if err != nil {
-				log.Printf("[TENANT MIDDLEWARE] Invalid X-Restaurant-ID: %v", err)
-				http.Error(w, "Invalid restaurant ID", http.StatusBadRequest)
+			if claims := GetUserClaims(r); claims != nil {
+				tenantID := int64(claims.TenantID)
+				if tenantID <= 0 {
+					log.Printf("[TENANT SECURITY] REJECTED: authenticated token has no tenant for %s %s", r.Method, r.URL.Path)
+					http.Error(w, "Missing tenant context", http.StatusForbidden)
+					return
+				}
+				if h := r.Header.Get("X-Tenant-ID"); h != "" && h != strconv.FormatInt(tenantID, 10) {
+					log.Printf("[TENANT SECURITY] Ignoring X-Tenant-ID=%q that differs from authenticated tenant %d", h, tenantID)
+				}
+				if claims.RestaurantID > 0 {
+					serve(tenantID, int64(claims.RestaurantID))
+					return
+				}
+				restaurantID, ok := parsePositiveHeader(r, "X-Restaurant-ID")
+				if !ok {
+					http.Error(w, "Missing restaurant context", http.StatusBadRequest)
+					return
+				}
+				if !verifyRestaurant(w, r, verifier, restaurantID, tenantID) {
+					return
+				}
+				serve(tenantID, restaurantID)
 				return
 			}
 
-			ctx := context.WithValue(r.Context(), TenantContextKey, tenantID)
-			ctx = context.WithValue(ctx, RestaurantContextKey, restaurantID)
-			next.ServeHTTP(w, r.WithContext(ctx))
-			return
-		}
+			tenantID, okT := parsePositiveHeader(r, "X-Tenant-ID")
+			restaurantID, okR := parsePositiveHeader(r, "X-Restaurant-ID")
+			if !okT || !okR {
+				log.Printf("[TENANT MIDDLEWARE] Missing or invalid tenant context for %s %s", r.Method, r.URL.Path)
+				http.Error(w, "Missing tenant context", http.StatusBadRequest)
+				return
+			}
+			if !verifyRestaurant(w, r, verifier, restaurantID, tenantID) {
+				return
+			}
+			serve(tenantID, restaurantID)
+		})
+	}
+}
 
-		// If no tenant context is found, it's an error
-		log.Printf("[TENANT MIDDLEWARE] Missing tenant context for %s %s", r.Method, r.URL.Path)
-		http.Error(w, "Missing tenant context", http.StatusBadRequest)
-	})
+func parsePositiveHeader(r *http.Request, name string) (int64, bool) {
+	raw := r.Header.Get(name)
+	if raw == "" {
+		return 0, false
+	}
+	v, err := strconv.ParseInt(raw, 10, 64)
+	if err != nil || v <= 0 {
+		return 0, false
+	}
+	return v, true
+}
+
+func verifyRestaurant(w http.ResponseWriter, r *http.Request, verifier RestaurantVerifier, restaurantID, tenantID int64) bool {
+	if verifier == nil {
+		log.Printf("[TENANT SECURITY] REJECTED: no restaurant verifier configured for %s %s", r.Method, r.URL.Path)
+		http.Error(w, "Tenant context cannot be verified", http.StatusForbidden)
+		return false
+	}
+	ok, err := verifier.RestaurantBelongsToTenant(r.Context(), restaurantID, tenantID)
+	if err != nil {
+		log.Printf("[TENANT SECURITY] REJECTED: restaurant verification failed: %v", err)
+		http.Error(w, "Tenant context cannot be verified", http.StatusServiceUnavailable)
+		return false
+	}
+	if !ok {
+		log.Printf("[TENANT SECURITY] REJECTED: restaurant %d does not belong to tenant %d", restaurantID, tenantID)
+		http.Error(w, "Restaurant does not belong to tenant", http.StatusForbidden)
+		return false
+	}
+	return true
 }
 
 // GetTenantID retrieves tenant ID from request context

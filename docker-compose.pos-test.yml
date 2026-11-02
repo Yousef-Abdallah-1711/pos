@@ -1,0 +1,70 @@
+# DISPOSABLE security/integration test stack (Phase 2A). Never holds real data.
+#   docker compose -f docker-compose.pos-test.yml up -d --build
+#   sh scripts/test-stack/security-smoke.sh
+#   docker compose -f docker-compose.pos-test.yml down -v
+# Separate compose project, DB name, ports, tmpfs database, test-only secrets, mock payments.
+name: pos-test
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: pos-test-postgres
+    labels:
+      com.pos.disposable: "true"
+    command: ["postgres", "-c", "max_connections=100"]
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: test-only-password
+      POSTGRES_DB: pos_test_disposable
+      # Separate schema-owner and runtime identities (backend/scripts/db/create_runtime_roles.sql)
+      POS_MIGRATOR_PASSWORD: test-only-migrator-password
+      POS_APP_PASSWORD: test-only-app-password
+    volumes:
+      - ./scripts/test-stack/init-roles.sh:/docker-entrypoint-initdb.d/10-init-roles.sh:ro
+      - ./backend/scripts/db/create_runtime_roles.sql:/pos/create_runtime_roles.sql:ro
+    ports:
+      - "127.0.0.1:15433:5432"
+    tmpfs:
+      - /var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d pos_test_disposable"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks: [pos-test-net]
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: pos-test-backend
+    labels:
+      com.pos.disposable: "true"
+    environment:
+      PORT: 8080
+      ENV: test
+      POS_DISPOSABLE_TEST_STACK: "1"
+      DB_HOST: postgres
+      DB_PORT: 5432
+      # Runtime: restricted role. Migrations run as the schema owner (see docker-entrypoint.sh).
+      DB_USER: pos_app
+      DB_PASSWORD: test-only-app-password
+      MIGRATE_DB_USER: pos_migrator
+      MIGRATE_DB_PASSWORD: test-only-migrator-password
+      DB_NAME: pos_test_disposable
+      DB_SSLMODE: disable
+      JWT_SECRET: test-only-jwt-secret-0123456789abcdef0123456789
+      JWT_EXPIRY: 1h
+      PAYMOB_MODE: mock
+      RBAC_ENFORCEMENT: enforce
+      LOG_LEVEL: debug
+    ports:
+      - "127.0.0.1:18080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks: [pos-test-net]
+
+networks:
+  pos-test-net:
+    driver: bridge

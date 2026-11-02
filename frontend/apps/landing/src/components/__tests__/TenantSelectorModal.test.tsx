@@ -55,6 +55,7 @@ describe('TenantSelectorModal', () => {
         <TenantSelectorModal
           isOpen={false}
           email="user@test.com"
+          selectionToken="proof-token"
           tenants={mockTenants}
         />
       )
@@ -64,7 +65,7 @@ describe('TenantSelectorModal', () => {
 
     it('should not render when tenants list is empty', () => {
       const { container } = render(
-        <TenantSelectorModal isOpen={true} email="user@test.com" tenants={[]} />
+        <TenantSelectorModal isOpen={true} email="user@test.com" selectionToken="proof-token" tenants={[]} />
       )
 
       expect(container.firstChild).toBeNull()
@@ -75,6 +76,7 @@ describe('TenantSelectorModal', () => {
         <TenantSelectorModal
           isOpen={true}
           email="user@test.com"
+          selectionToken="proof-token"
           tenants={mockTenants}
         />
       )
@@ -86,7 +88,7 @@ describe('TenantSelectorModal', () => {
 
     it('should display user email in modal', () => {
       render(
-        <TenantSelectorModal
+        <TenantSelectorModal selectionToken="proof-token"
           isOpen={true}
           email="testuser@example.com"
           tenants={mockTenants}
@@ -101,6 +103,7 @@ describe('TenantSelectorModal', () => {
         <TenantSelectorModal
           isOpen={true}
           email="user@test.com"
+          selectionToken="proof-token"
           tenants={mockTenants}
         />
       )
@@ -127,6 +130,7 @@ describe('TenantSelectorModal', () => {
         <TenantSelectorModal
           isOpen={true}
           email="user@test.com"
+          selectionToken="proof-token"
           tenants={mockTenants}
         />
       )
@@ -142,6 +146,7 @@ describe('TenantSelectorModal', () => {
             body: JSON.stringify({
               email: 'user@test.com',
               tenant_id: 1,
+              selection_token: 'proof-token',
             }),
           })
         )
@@ -167,6 +172,7 @@ describe('TenantSelectorModal', () => {
         <TenantSelectorModal
           isOpen={true}
           email="user@test.com"
+          selectionToken="proof-token"
           tenants={mockTenants}
         />
       )
@@ -190,6 +196,7 @@ describe('TenantSelectorModal', () => {
         <TenantSelectorModal
           isOpen={true}
           email="user@test.com"
+          selectionToken="proof-token"
           tenants={mockTenants}
         />
       )
@@ -226,6 +233,7 @@ describe('TenantSelectorModal', () => {
         <TenantSelectorModal
           isOpen={true}
           email="user@test.com"
+          selectionToken="proof-token"
           tenants={mockTenants}
         />
       )
@@ -248,6 +256,7 @@ describe('TenantSelectorModal', () => {
         <TenantSelectorModal
           isOpen={true}
           email="user@test.com"
+          selectionToken="proof-token"
           tenants={mockTenants}
         />
       )
@@ -269,6 +278,7 @@ describe('TenantSelectorModal', () => {
         <TenantSelectorModal
           isOpen={true}
           email="user@test.com"
+          selectionToken="proof-token"
           tenants={mockTenants}
         />
       )
@@ -281,6 +291,7 @@ describe('TenantSelectorModal', () => {
         <TenantSelectorModal
           isOpen={true}
           email="user@test.com"
+          selectionToken="proof-token"
           tenants={mockTenants}
         />
       )
@@ -308,6 +319,7 @@ describe('TenantSelectorModal', () => {
         <TenantSelectorModal
           isOpen={true}
           email="user@test.com"
+          selectionToken="proof-token"
           tenants={mockTenants}
           onTenantSelected={mockCallback}
         />

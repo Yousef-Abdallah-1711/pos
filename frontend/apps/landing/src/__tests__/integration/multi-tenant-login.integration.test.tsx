@@ -103,6 +103,7 @@ describe('Multi-Tenant Login Integration Tests', () => {
         data: {
           success: true,
           multiple_tenants: true,
+          selection_token: 'proof-token',
           tenants: [
             {
               tenant_id: 1,
@@ -166,6 +167,7 @@ describe('Multi-Tenant Login Integration Tests', () => {
             body: JSON.stringify({
               email: 'multi@example.com',
               tenant_id: 2,
+              selection_token: 'proof-token',
             }),
           })
         )

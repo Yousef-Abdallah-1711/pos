@@ -268,7 +268,7 @@ export const useThemeBuilderStore = create<ThemeBuilderState>()(
         if (!typography) return false
 
         return (
-          typography.fontFamily &&
+          Boolean(typography.fontFamily) &&
           typography.fontFamily.trim().length > 0 &&
           typography.baseFontSize > 0 &&
           typography.baseFontSize < 100 &&
@@ -285,7 +285,7 @@ export const useThemeBuilderStore = create<ThemeBuilderState>()(
 
         if (!identity) return false
 
-        return identity.siteTitle && identity.siteTitle.trim().length > 0
+        return Boolean(identity.siteTitle) && identity.siteTitle.trim().length > 0
       },
 
       validateHeader: () => {
@@ -315,11 +315,11 @@ export const useThemeBuilderStore = create<ThemeBuilderState>()(
         const hexRegex = /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/
 
         return (
-          footer.companyName &&
+          Boolean(footer.companyName) &&
           footer.companyName.trim().length > 0 &&
           hexRegex.test(footer.backgroundColor) &&
           hexRegex.test(footer.textColor) &&
-          footer.copyrightText &&
+          Boolean(footer.copyrightText) &&
           footer.copyrightText.trim().length > 0
         )
       },

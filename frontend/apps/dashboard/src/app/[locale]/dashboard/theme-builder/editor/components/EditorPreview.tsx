@@ -176,7 +176,7 @@ function enrichComponentWithMockData(component: any) {
       break
     case 'info-cards':
       enriched.mockData = {
-        cards: mockRestaurantData.infoCards || [],
+        cards: [], // mockRestaurantData has no info cards
       }
       break
   }

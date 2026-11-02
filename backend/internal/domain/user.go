@@ -67,10 +67,13 @@ type MultiTenantLoginResponse struct {
 	MultipleTenants bool         `json:"multiple_tenants"`
 	Tenants         []TenantInfo `json:"tenants"`
 	Message         string       `json:"message,omitempty"`
+	// SelectionToken proves the password step succeeded; it must be echoed to /auth/login/confirm.
+	SelectionToken string `json:"selection_token,omitempty"`
 }
 
 // TenantSelectionRequest is sent to /api/v1/auth/login/confirm
 type TenantSelectionRequest struct {
-	Email    string `json:"email"`
-	TenantID int    `json:"tenant_id"`
+	Email          string `json:"email"`
+	TenantID       int    `json:"tenant_id"`
+	SelectionToken string `json:"selection_token"`
 }

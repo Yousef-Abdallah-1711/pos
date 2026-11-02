@@ -14,30 +14,11 @@ import { createTranslator, getLocaleFromPath } from '@/lib/translations'
 import { PageHeaderSkeleton, TableSkeleton } from '@/components/skeletons'
 import { MODULE_IDS, PERMISSION_LEVELS } from '@/lib/rbac'
 import { debugError } from '@/lib/debug'
-
-interface Product {
-  id: number
-  name: string
-  description?: string
-  price: number
-  category_id?: number
-  [key: string]: any
-}
-
-interface Category {
-  id: number
-  name: string
-  [key: string]: any
-}
-
-interface Filters {
-  page: number
-  pageSize: number
-  categoryId: number | null
-  searchText: string
-  sortBy: string
-  sortOrder: string
-}
+import type {
+  ProductSummary as Product,
+  ProductCategory as Category,
+  ProductListFilters as Filters,
+} from '@/components/products/product-types'
 
 export default function ProductsPage() {
   const pathname = usePathname()
@@ -59,18 +40,19 @@ export default function ProductsPage() {
   const token = useAuthStore((state) => state.token)
 
   // Check RBAC permissions for Products module
-  const canViewProducts = useHasPermission(
+  const canViewProductsPermission = useHasPermission(
     MODULE_IDS.PRODUCTS,
     PERMISSION_LEVELS.READ,
   )
+  const canViewProducts = canViewProductsPermission.loading || canViewProductsPermission.hasPermission
   const canCreateProducts = useHasPermission(
     MODULE_IDS.PRODUCTS,
     PERMISSION_LEVELS.WRITE,
-  )
+  ).hasPermission
   const canDeleteProducts = useHasPermission(
     MODULE_IDS.PRODUCTS,
     PERMISSION_LEVELS.DELETE,
-  )
+  ).hasPermission
 
   // Fetch products
   useEffect(() => {

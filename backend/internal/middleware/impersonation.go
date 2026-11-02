@@ -2,11 +2,13 @@ package middleware
 
 import (
 	"context"
+	"errors"
 	"log"
 	"net/http"
 	"strings"
 
 	"pos-saas/internal/domain"
+	"pos-saas/internal/pkg/jwt"
 	"pos-saas/internal/repository"
 )
 
@@ -212,4 +214,63 @@ func GetImpersonationSession(r *http.Request) *domain.ImpersonationSession {
 		return nil
 	}
 	return session
+}
+
+
+// RepositoryImpersonationAuthenticator validates impersonation tokens against
+// the impersonation_sessions table (hashed token, active flag, expiry) and
+// resolves the impersonated user from the users table.
+type RepositoryImpersonationAuthenticator struct {
+	sessions *repository.ImpersonationRepository
+	users    *repository.SuperAdminRepository
+}
+
+// NewImpersonationAuthenticator returns nil when either repository is
+// unavailable; callers must treat a nil authenticator as "impersonation off".
+func NewImpersonationAuthenticator(sessions *repository.ImpersonationRepository, users *repository.SuperAdminRepository) ImpersonationAuthenticator {
+	if sessions == nil || users == nil {
+		return nil
+	}
+	return &RepositoryImpersonationAuthenticator{sessions: sessions, users: users}
+}
+
+func (a *RepositoryImpersonationAuthenticator) AuthenticateImpersonation(ctx context.Context, token string) (*jwt.Claims, *ImpersonationInfo, error) {
+	session, err := a.sessions.ValidateToken(ctx, token)
+	if err != nil {
+		return nil, nil, err
+	}
+	if !session.IsValid() {
+		return nil, nil, errors.New("impersonation session is not valid")
+	}
+
+	user, err := a.users.GetUserByID(ctx, session.TargetUserID)
+	if err != nil {
+		return nil, nil, err
+	}
+	if user.IsSuperAdmin {
+		return nil, nil, errors.New("cannot impersonate a super admin")
+	}
+	if int64(user.TenantID) != session.TargetTenantID {
+		return nil, nil, errors.New("impersonation target tenant mismatch")
+	}
+
+	restaurantID := 0
+	if user.RestaurantID != nil {
+		restaurantID = int(*user.RestaurantID)
+	}
+	claims := &jwt.Claims{
+		UserID:       int(user.ID),
+		Email:        user.Email,
+		TenantID:     int(user.TenantID),
+		RestaurantID: restaurantID,
+		Role:         user.Role,
+	}
+	info := &ImpersonationInfo{
+		IsImpersonated: true,
+		SuperAdminID:   session.SuperAdminID,
+		TargetUserID:   session.TargetUserID,
+		TargetTenantID: session.TargetTenantID,
+		SessionID:      session.ID,
+	}
+	return claims, info, nil
 }

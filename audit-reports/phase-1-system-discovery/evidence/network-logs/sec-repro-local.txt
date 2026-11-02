@@ -1,0 +1,13 @@
+# SEC-001 repro (local dev stack, read-only GETs) 2026-11-01T22:50:31+02:00
+## GET /api/v1/products headers: [none]
+HTTP 401
+Unauthorized - missing authorization header
+
+## GET /api/v1/products headers: [-H X-Impersonation-Token:x -H X-Tenant-ID:1 -H X-Restaurant-ID:1]
+HTTP 403
+{"error":"Insufficient permissions"}
+## public order lookup, no auth, GET /api/v1/public/orders/1 with tenant headers
+HTTP 404
+{"error":"Order not found"}
+## GET /api/v1/health/metrics no auth
+HTTP 200

@@ -52,6 +52,11 @@ pnpm dev:super-admin        # Port 3004
 
 # Docker (Backend + PostgreSQL)
 docker-compose up -d
+
+# Docker
+docker compose up --build                                   # DEV: Postgres + API (hot reload) + all 4 frontends (3001-3004, 8080)
+cp .env.prod.example .env.prod                              # PROD: fill in real values first
+docker compose --env-file .env.prod -f docker-compose.prod.yml up -d --build
 ```
 
 ### Default Credentials

@@ -396,8 +396,8 @@ export const generatePaletteFromPrimary = (primaryColor: string): Partial<Global
   // Simple palette generation
   return {
     primary: primaryColor,
-    secondary: hexToHex(rgb.r * 0.8, rgb.g * 0.8, rgb.b * 0.8),
-    accent: hexToHex(rgb.r * 1.1, rgb.g * 0.6, rgb.b * 0.6),
+    secondary: rgbToHex(Math.round(rgb.r * 0.8), Math.round(rgb.g * 0.8), Math.round(rgb.b * 0.8)),
+    accent: rgbToHex(Math.min(255, Math.round(rgb.r * 1.1)), Math.round(rgb.g * 0.6), Math.round(rgb.b * 0.6)),
   }
 }
 

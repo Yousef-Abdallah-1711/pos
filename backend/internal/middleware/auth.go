@@ -12,20 +12,43 @@ type contextKey string
 
 const UserContextKey contextKey = "user"
 
-func AuthMiddleware(tokenService *jwt.TokenService) func(http.Handler) http.Handler {
+// ImpersonationAuthenticator validates a presented impersonation token against
+// server-side session state and returns the identity of the impersonated user.
+// A nil error means the token is genuine, active and unexpired.
+type ImpersonationAuthenticator interface {
+	AuthenticateImpersonation(ctx context.Context, token string) (*jwt.Claims, *ImpersonationInfo, error)
+}
+
+// AuthMiddleware authenticates requests with a bearer JWT. When an
+// ImpersonationAuthenticator is supplied, an X-Impersonation-Token header is
+// accepted only if that authenticator validates it. The mere presence of the
+// header never authenticates a request, and an invalid impersonation token is
+// never silently replaced by another credential.
+func AuthMiddleware(tokenService *jwt.TokenService, impersonation ...ImpersonationAuthenticator) func(http.Handler) http.Handler {
+	var impersonationAuth ImpersonationAuthenticator
+	if len(impersonation) > 0 {
+		impersonationAuth = impersonation[0]
+	}
+
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			// First check for impersonation token header
-			impersonationToken := r.Header.Get("X-Impersonation-Token")
-			if impersonationToken != "" {
-				// If impersonation token is present, allow the request
-				// The frontend already validated it on the /impersonation/validate endpoint
-				// Create a minimal claims object - will be filled by tenant middleware
-				claims := &jwt.Claims{
-					UserID: 1, // Temporary value, actual user will come from tenant context
+			if impersonationToken := r.Header.Get("X-Impersonation-Token"); impersonationToken != "" {
+				if impersonationAuth == nil {
+					http.Error(w, "Unauthorized - impersonation not supported", http.StatusUnauthorized)
+					return
+				}
+				claims, info, err := impersonationAuth.AuthenticateImpersonation(r.Context(), impersonationToken)
+				if err != nil || claims == nil {
+					http.Error(w, "Unauthorized - invalid impersonation token", http.StatusUnauthorized)
+					return
 				}
 
 				ctx := context.WithValue(r.Context(), UserContextKey, claims)
+				if info != nil {
+					ctx = context.WithValue(ctx, ImpersonationContextKey, info)
+					ctx = context.WithValue(ctx, IsImpersonatedContextKey, true)
+					ctx = context.WithValue(ctx, OriginalSuperAdminIDKey, info.SuperAdminID)
+				}
 				next.ServeHTTP(w, r.WithContext(ctx))
 				return
 			}

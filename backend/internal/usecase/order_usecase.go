@@ -207,6 +207,17 @@ func (uc *OrderUseCase) CreateOrder(
 		return nil, err
 	}
 
+	// Public access credential: the raw token is returned once; only its hash is stored.
+	trackingToken, tokenHash, tokenErr := domain.GeneratePublicTrackingToken()
+	if tokenErr == nil {
+		tokenErr = uc.orderRepo.SetPublicTokenHash(tenantID, restaurantID, finalOrder.ID, tokenHash)
+	}
+	if tokenErr != nil {
+		// The order stays valid; it is simply not publicly trackable.
+		log.Printf("[ORDERS] failed to issue public tracking token: tenant=%d restaurant=%d order=%d err=%v", tenantID, restaurantID, finalOrder.ID, tokenErr)
+		trackingToken = ""
+	}
+
 	// Table integration: mark table as occupied for dine-in orders.
 	if finalOrder.TableID != nil && uc.tableRepo != nil {
 		if statusErr := uc.tableRepo.UpdateTableStatus(tenantID, restaurantID, *finalOrder.TableID, string(domain.TableStatusOccupied)); statusErr != nil {
@@ -233,7 +244,23 @@ func (uc *OrderUseCase) CreateOrder(
 		}
 	}
 
+	finalOrder.TrackingToken = trackingToken
 	return finalOrder, nil
+}
+
+// AuthorizePublicOrderAccess decides whether an unauthenticated caller may read or cancel an order.
+// Access requires the order's tracking token or, as a fallback for the manual order-number lookup,
+// the customer phone used at checkout. Legacy orders (no stored token) are only reachable by phone.
+// Any failure, including a missing order, returns false so callers can answer an identical 404.
+func (uc *OrderUseCase) AuthorizePublicOrderAccess(tenantID, restaurantID, orderID int64, token, phone string) bool {
+	storedHash, orderPhone, err := uc.orderRepo.GetPublicAccessInfo(tenantID, restaurantID, orderID)
+	if err != nil {
+		return false
+	}
+	if domain.VerifyPublicTrackingToken(token, storedHash) {
+		return true
+	}
+	return domain.PhonesMatch(phone, orderPhone)
 }
 
 // GetOrder retrieves a single order by ID

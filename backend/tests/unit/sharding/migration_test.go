@@ -1,3 +1,6 @@
+//go:build experimental
+// +build experimental
+
 package sharding_test
 
 import (

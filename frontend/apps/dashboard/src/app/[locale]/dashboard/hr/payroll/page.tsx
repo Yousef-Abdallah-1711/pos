@@ -94,7 +94,7 @@ export default function PayrollPage() {
         const response = await api.get('/hr/salaries', { params: { start_date: startDate, end_date: endDate } })
         debugLog('[PAYROLL_PAGE] Response:', response.data)
 
-        const salariesList = Array.isArray(response.data) ? response.data : (response.data?.data || response.data?.salaries || [])
+        const salariesList: any[] = Array.isArray(response.data) ? response.data : (response.data?.data || response.data?.salaries || [])
         const enrichedSalaries = salariesList.map(s => ({
           ...s,
           employee_name: employees.find(e => e.id === s.employee_id)

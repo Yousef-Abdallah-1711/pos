@@ -102,7 +102,7 @@ export const usePOSBackgroundSync = (options?: UsePOSBackgroundSyncOptions) => {
         return false
       }
 
-      await registration.sync.register(POS_ORDER_SYNC_TAG)
+      await (registration as ServiceWorkerRegistration & { sync?: { register(tag: string): Promise<void> } }).sync?.register(POS_ORDER_SYNC_TAG)
       setSyncSupported(true)
       return true
     } catch (error) {

@@ -204,6 +204,20 @@ func (uc *PaymentUseCase) HandleWebhook(ctx context.Context, rawPayload []byte, 
 		return nil
 	}
 
+	// A refunded payment is terminal: a replayed or late "success" event must never re-activate
+	// the subscription it was refunded for.
+	if payment.Status == domain.PaymentStatusRefunded {
+		log.Printf("[PaymentUseCase] HandleWebhook ignored - payment_id: %d is refunded\n", payment.ID)
+		return nil
+	}
+
+	// Refund and void callbacks are acknowledged but never activate or extend a subscription;
+	// they need manual reconciliation.
+	if payload.Obj.IsRefunded || payload.Obj.IsVoided {
+		log.Printf("[PaymentUseCase] HandleWebhook refund/void event acknowledged without state change - payment_id: %d\n", payment.ID)
+		return nil
+	}
+
 	planID := strings.TrimSpace(payment.PlanID)
 	if planID == "" {
 		planID = "monthly"

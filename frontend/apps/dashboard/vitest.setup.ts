@@ -5,11 +5,31 @@
 
 import { expect, afterEach, vi } from 'vitest'
 import { cleanup } from '@testing-library/react'
+import '@testing-library/jest-dom/vitest'
 
 // Cleanup after each test
 afterEach(() => {
   cleanup()
 })
+
+// next/navigation hooks return null/throw outside the App Router, but the app derives the locale from
+// usePathname() (getLocaleFromPath(pathname) calls .split on it). Individual tests can still override
+// this with their own vi.mock('next/navigation', ...).
+vi.mock('next/navigation', () => ({
+  usePathname: () => '/en/dashboard',
+  useRouter: () => ({
+    push: vi.fn(),
+    replace: vi.fn(),
+    back: vi.fn(),
+    forward: vi.fn(),
+    refresh: vi.fn(),
+    prefetch: vi.fn(),
+  }),
+  useSearchParams: () => new URLSearchParams(),
+  useParams: () => ({ locale: 'en' }),
+  redirect: vi.fn(),
+  notFound: vi.fn(),
+}))
 
 // Mock matchMedia
 Object.defineProperty(window, 'matchMedia', {

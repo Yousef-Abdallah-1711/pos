@@ -1,0 +1,2 @@
+# Production Gap Analysis
+Blocking gaps before any real tenant data: (1) authentication and tenant-isolation clusters A–F; (2) payment mode safety G (also in this repo's new `docker-compose.prod.yml`); (3) subscription enforcement H; (4) no CI build/test gate; (5) no backup/restore; (6) migrations unsafe to run concurrently / on every start; (7) no structured logging, request IDs or error normalization; (8) accounting integrity (FIN-001/003/005); (9) dashboard does not typecheck (705 errors). See quality/PRODUCTION-READINESS.md for the gate table.

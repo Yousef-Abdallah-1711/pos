@@ -19,9 +19,10 @@ import { getTrialBalance } from '@/lib/api/accountingApi'
 import { createTranslator } from '@/lib/translations'
 import { debugError } from '@/lib/debug'
 import type { TrialBalanceResponse, TrialBalanceRow } from '@/types/accounting'
+import type { Locale } from '@/lib/translations'
 
 interface TrialBalanceTableProps {
-  locale: string
+  locale: Locale
 }
 
 export function TrialBalanceTable({ locale }: TrialBalanceTableProps) {

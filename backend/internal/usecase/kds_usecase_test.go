@@ -60,6 +60,7 @@ func TestKDSUseCaseGetQueueAppliesDefaultStatuses(t *testing.T) {
 		"restaurant_id",
 		"order_id",
 		"order_number",
+		"order_source",
 		"customer_name",
 		"status",
 		"priority",
@@ -77,11 +78,11 @@ func TestKDSUseCaseGetQueueAppliesDefaultStatuses(t *testing.T) {
 		"table_name",
 	}).
 		AddRow(
-			int64(1), int64(10), int64(20), int64(101), "ORD-1", "Alice", "new", 0, "expo",
+			int64(1), int64(10), int64(20), int64(101), "ORD-1", "website", "Alice", "new", 0, "expo",
 			[]byte("[]"), "", receivedAt, nil, nil, nil, receivedAt, receivedAt, nil, nil, "",
 		).
 		AddRow(
-			int64(2), int64(10), int64(20), int64(102), "ORD-2", "Bob", "completed", 1, "expo",
+			int64(2), int64(10), int64(20), int64(102), "ORD-2", "website", "Bob", "completed", 1, "expo",
 			[]byte("[]"), "", receivedAt, receivedAt, completedAt, int64(9), receivedAt, completedAt, int64(44), int32(7), "Patio",
 		)
 
@@ -150,6 +151,7 @@ func TestKDSUseCaseBumpOrderBroadcastsUpdates(t *testing.T) {
 				"restaurant_id",
 				"order_id",
 				"order_number",
+				"order_source",
 				"customer_name",
 				"status",
 				"priority",
@@ -166,7 +168,7 @@ func TestKDSUseCaseBumpOrderBroadcastsUpdates(t *testing.T) {
 				"table_number",
 				"table_name",
 			}).AddRow(
-				int64(99), int64(1), int64(2), int64(501), "ORD-501", "Alice", "in_progress", 0, "expo",
+				int64(99), int64(1), int64(2), int64(501), "ORD-501", "website", "Alice", "in_progress", 0, "expo",
 				[]byte("[]"), "", receivedAt, startedAt, nil, int64(9), receivedAt, startedAt, int64(77), int32(12), "Main Hall",
 			),
 		)
@@ -210,6 +212,7 @@ func TestKDSUseCaseRecallOrderBroadcastsUpdates(t *testing.T) {
 				"restaurant_id",
 				"order_id",
 				"order_number",
+				"order_source",
 				"customer_name",
 				"status",
 				"priority",
@@ -226,7 +229,7 @@ func TestKDSUseCaseRecallOrderBroadcastsUpdates(t *testing.T) {
 				"table_number",
 				"table_name",
 			}).AddRow(
-				int64(88), int64(1), int64(2), int64(500), "ORD-500", "Bob", "ready", 0, "expo",
+				int64(88), int64(1), int64(2), int64(500), "ORD-500", "website", "Bob", "ready", 0, "expo",
 				[]byte("[]"), "", receivedAt, startedAt, nil, int64(7), receivedAt, startedAt, nil, nil, "",
 			),
 		)

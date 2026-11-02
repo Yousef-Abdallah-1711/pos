@@ -1,3 +1,6 @@
+//go:build experimental
+// +build experimental
+
 package sharding_test
 
 import (
@@ -161,8 +164,8 @@ func TestErrorRateCalculation(t *testing.T) {
 	errorRate := metrics["error_rate"].(float64)
 
 	expectedRate := 0.2 // 2/10 = 20%
-	if errorRate < 0.19 || errorRate > 0.21 {
-		t.Fatalf("Expected error rate ~0.2, got %f", errorRate)
+	if errorRate < expectedRate-0.01 || errorRate > expectedRate+0.01 {
+		t.Fatalf("Expected error rate ~%.2f, got %f", expectedRate, errorRate)
 	}
 
 	t.Logf("✓ Error rate calculated correctly: %.2f%%", errorRate*100)

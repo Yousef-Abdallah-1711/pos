@@ -312,7 +312,7 @@ function AccountNode({
 
 function filterAccounts(accounts: Account[], searchTerm: string, typeFilter: string): Account[] {
   return accounts
-    .map((account) => {
+    .map((account): Account | null => {
       const children = filterAccounts(account.children || [], searchTerm, typeFilter)
       const matchesSearch =
         searchTerm === '' ||

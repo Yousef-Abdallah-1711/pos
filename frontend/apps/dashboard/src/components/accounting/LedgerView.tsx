@@ -25,10 +25,11 @@ import { getLedger } from '@/lib/api/accountingApi'
 import { createTranslator } from '@/lib/translations'
 import { debugError } from '@/lib/debug'
 import type { Account, GeneralLedgerLine, LedgerPeriodSummary } from '@/types/accounting'
+import type { Locale } from '@/lib/translations'
 
 interface LedgerViewProps {
   accounts: Account[]
-  locale: string
+  locale: Locale
 }
 
 export function LedgerView({ accounts, locale }: LedgerViewProps) {

@@ -157,6 +157,39 @@ func (h *AdminThemeHandlerV2) ListThemePresets(w http.ResponseWriter, r *http.Re
 	respondJSON(w, http.StatusOK, response)
 }
 
+// loadOwnedTheme loads a theme by ID and verifies it belongs to the caller's
+// tenant and restaurant. Foreign or missing themes are indistinguishable (404),
+// so theme IDs of other tenants are never confirmed to exist.
+func (h *AdminThemeHandlerV2) loadOwnedTheme(w http.ResponseWriter, r *http.Request, id int64) (*domain.Theme, bool) {
+	tenantID := middleware.GetTenantID(r)
+	restaurantID := middleware.GetRestaurantID(r)
+	if tenantID <= 0 {
+		respondError(w, http.StatusUnauthorized, "missing authentication context")
+		return nil, false
+	}
+
+	theme, err := h.service.GetTheme(r.Context(), id)
+	if err != nil {
+		if strings.Contains(err.Error(), "not found") {
+			respondError(w, http.StatusNotFound, "theme not found")
+		} else {
+			respondError(w, http.StatusInternalServerError, "failed to load theme")
+		}
+		return nil, false
+	}
+	if !themeBelongsToCaller(theme, tenantID, restaurantID) {
+		respondError(w, http.StatusNotFound, "theme not found")
+		return nil, false
+	}
+	return theme, true
+}
+
+// themeBelongsToCaller reports whether the theme is owned by the caller's tenant
+// and (when the theme is restaurant-scoped) restaurant.
+func themeBelongsToCaller(theme *domain.Theme, tenantID, restaurantID int64) bool {
+	return theme != nil && theme.TenantID == tenantID && (theme.RestaurantID == 0 || theme.RestaurantID == restaurantID)
+}
+
 // GetTheme handles GET /api/v1/admin/themes/{id}
 // Retrieves a specific theme by ID
 func (h *AdminThemeHandlerV2) GetTheme(w http.ResponseWriter, r *http.Request) {
@@ -175,14 +208,9 @@ func (h *AdminThemeHandlerV2) GetTheme(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Get theme via service
-	theme, err := h.service.GetTheme(r.Context(), id)
-	if err != nil {
-		if strings.Contains(err.Error(), "not found") {
-			respondError(w, http.StatusNotFound, err.Error())
-		} else {
-			respondError(w, http.StatusInternalServerError, err.Error())
-		}
+	// Get theme via service (tenant/restaurant ownership enforced)
+	theme, ok := h.loadOwnedTheme(w, r, id)
+	if !ok {
 		return
 	}
 
@@ -242,6 +270,10 @@ func (h *AdminThemeHandlerV2) UpdateTheme(w http.ResponseWriter, r *http.Request
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
 		respondError(w, http.StatusBadRequest, "invalid theme ID")
+		return
+	}
+
+	if _, ok := h.loadOwnedTheme(w, r, id); !ok {
 		return
 	}
 
@@ -352,6 +384,10 @@ func (h *AdminThemeHandlerV2) DeleteTheme(w http.ResponseWriter, r *http.Request
 		return
 	}
 
+	if _, ok := h.loadOwnedTheme(w, r, id); !ok {
+		return
+	}
+
 	// Delete theme via service
 	err = h.service.DeleteTheme(r.Context(), id)
 	if err != nil {
@@ -382,6 +418,10 @@ func (h *AdminThemeHandlerV2) ActivateTheme(w http.ResponseWriter, r *http.Reque
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
 		respondError(w, http.StatusBadRequest, "invalid theme ID")
+		return
+	}
+
+	if _, ok := h.loadOwnedTheme(w, r, id); !ok {
 		return
 	}
 
@@ -446,6 +486,10 @@ func (h *AdminThemeHandlerV2) DuplicateTheme(w http.ResponseWriter, r *http.Requ
 
 	// Get the source theme (could be from user themes or presets)
 	sourceTheme, err := h.service.GetTheme(r.Context(), id)
+	if err == nil && !themeBelongsToCaller(sourceTheme, tenantID, restaurantID) {
+		// A theme owned by someone else is treated exactly like a missing one.
+		sourceTheme, err = nil, fmt.Errorf("theme not found")
+	}
 	if err != nil {
 		// If not found in user themes, try to get it as a preset
 		log.Printf("[ThemeHandler] Theme %d not found in user themes, trying presets", id)

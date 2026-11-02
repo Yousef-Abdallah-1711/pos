@@ -13,6 +13,7 @@ import { toast } from 'sonner'
 import { debugLog } from '@/lib/debug'
 import { AlertCircle, CheckCircle, Loader } from 'lucide-react'
 import { createTranslator, getLocaleFromPath } from '@/lib/translations'
+import { errorText } from '@/lib/form-errors'
 
 interface EmployeeFormProps {
   employee?: any
@@ -145,7 +146,7 @@ export function EmployeeForm({ employee, onSubmit, onCancel, existingEmails = []
               {errors.first_name && (
                 <span className="text-red-500 text-sm flex items-center gap-1">
                   <AlertCircle className="h-4 w-4" />
-                  {errors.first_name.message}
+                  {errorText(errors.first_name)}
                 </span>
               )}
             </div>
@@ -217,7 +218,7 @@ export function EmployeeForm({ employee, onSubmit, onCancel, existingEmails = []
               {errors.email && (
                 <span className="text-red-500 text-sm flex items-center gap-1">
                   <AlertCircle className="h-4 w-4" />
-                  {errors.email.message}
+                  {errorText(errors.email)}
                 </span>
               )}
             </div>

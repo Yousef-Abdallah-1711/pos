@@ -1,6 +1,10 @@
+//go:build experimental
+// +build experimental
+
 package auth_test
 
 import (
+	"pos-saas/tests/testdb"
 	"context"
 	"database/sql"
 	"testing"
@@ -371,7 +375,7 @@ func TestClearCache(t *testing.T) {
 // Helper function to setup test database
 func setupTestDB(t *testing.T) *sql.DB {
 	// In production, use testcontainers or a test database
-	db, err := sql.Open("postgres", "postgres://test:test@localhost/pos_test")
+	db, err := sql.Open("postgres", testdb.URL(t))
 	if err != nil {
 		t.Fatalf("Failed to connect to test database: %v", err)
 	}

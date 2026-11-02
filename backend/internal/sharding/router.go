@@ -58,27 +58,25 @@ func (sr *ShardRouter) getShardNumber(restaurantID string) int {
 	return sr.jumpHash(restaurantID) % sr.numShards
 }
 
-// jumpHash implements the jump hash algorithm
-// Reference: https://arxiv.org/pdf/1406.2294.pdf
+// jumpHash maps a key to a shard in [0, numShards) with the Lamping-Veach jump consistent hash
+// (https://arxiv.org/abs/1406.2294). The result depends on the key, is stable for a given
+// (key, numShards), and when numShards grows only ~1/n of the keys move (always to the new shard).
 func (sr *ShardRouter) jumpHash(key string) int {
-	// Step 1: Hash the key using MD5
-	hash := md5.Sum([]byte(key))
-
-	// Step 2: Convert first 8 bytes to uint64
-	hashValue := binary.BigEndian.Uint64(hash[:8])
-
-	// Step 3: Apply jump hash algorithm
-	var bucket int64 = 0
-	var jump int64 = 1
-
-	for jump < int64(sr.numShards) {
-		bucket = jump
-		// Use floating-point math to avoid overflow
-		hashValue = hashValue*MULTIPLIER + INCREMENT
-		jump = int64(float64(jump)*1.4426950408889634) + 1 // ln(2) + 1
+	if sr.numShards <= 1 {
+		return 0
 	}
 
-	return int(bucket)
+	// Spread the key over 64 bits (MD5 is used only as a uniform mixer, not for security).
+	sum := md5.Sum([]byte(key))
+	k := binary.BigEndian.Uint64(sum[:8])
+
+	var b, j int64 = -1, 0
+	for j < int64(sr.numShards) {
+		b = j
+		k = k*2862933555777941757 + 1
+		j = int64(float64(b+1) * (float64(int64(1)<<31) / float64((k>>33)+1)))
+	}
+	return int(b)
 }
 
 // GetDSN returns the database connection string for the shard

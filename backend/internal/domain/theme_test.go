@@ -126,7 +126,7 @@ func TestSlugValidation(t *testing.T) {
 	}{
 		{"valid slug", "modern-theme", true},
 		{"valid slug with numbers", "theme-v2-premium", true},
-		{"single char", "a", true},
+		{"single char", "a", false}, // slugs require 3-50 chars (isValidSlug)
 		{"slug too short", "ab", false},
 		{"slug too long", "a" + string(make([]byte, 49)), false},
 		{"uppercase", "Modern-Theme", false},

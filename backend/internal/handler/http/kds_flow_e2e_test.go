@@ -45,6 +45,7 @@ func TestKDSFlowDisplayBumpAndStatusUpdate(t *testing.T) {
 				"restaurant_id",
 				"order_id",
 				"order_number",
+				"order_source",
 				"customer_name",
 				"status",
 				"priority",
@@ -61,7 +62,7 @@ func TestKDSFlowDisplayBumpAndStatusUpdate(t *testing.T) {
 				"table_number",
 				"table_name",
 			}).AddRow(
-				int64(501), int64(1), int64(2), int64(9001), "ORD-9001", "Kitchen Ticket", "new", 1, "expo",
+				int64(501), int64(1), int64(2), int64(9001), "ORD-9001", "website", "Kitchen Ticket", "new", 1, "expo",
 				[]byte(`[{"product_name":"Burger","quantity":1}]`), "no onion", receivedAt, nil, nil, nil, receivedAt, receivedAt, int64(88), int32(8), "VIP",
 			),
 		)
@@ -90,6 +91,7 @@ func TestKDSFlowDisplayBumpAndStatusUpdate(t *testing.T) {
 				"restaurant_id",
 				"order_id",
 				"order_number",
+				"order_source",
 				"customer_name",
 				"status",
 				"priority",
@@ -106,7 +108,7 @@ func TestKDSFlowDisplayBumpAndStatusUpdate(t *testing.T) {
 				"table_number",
 				"table_name",
 			}).AddRow(
-				int64(501), int64(1), int64(2), int64(9001), "ORD-9001", "Kitchen Ticket", "in_progress", 1, "expo",
+				int64(501), int64(1), int64(2), int64(9001), "ORD-9001", "website", "Kitchen Ticket", "in_progress", 1, "expo",
 				[]byte(`[{"product_name":"Burger","quantity":1}]`), "no onion", receivedAt, startedAt, nil, int64(7), receivedAt, startedAt, int64(88), int32(8), "VIP",
 			),
 		)
@@ -121,6 +123,7 @@ func TestKDSFlowDisplayBumpAndStatusUpdate(t *testing.T) {
 				"restaurant_id",
 				"order_id",
 				"order_number",
+				"order_source",
 				"customer_name",
 				"status",
 				"priority",
@@ -137,7 +140,7 @@ func TestKDSFlowDisplayBumpAndStatusUpdate(t *testing.T) {
 				"table_number",
 				"table_name",
 			}).AddRow(
-				int64(501), int64(1), int64(2), int64(9001), "ORD-9001", "Kitchen Ticket", "in_progress", 1, "expo",
+				int64(501), int64(1), int64(2), int64(9001), "ORD-9001", "website", "Kitchen Ticket", "in_progress", 1, "expo",
 				[]byte(`[{"product_name":"Burger","quantity":1}]`), "no onion", receivedAt, startedAt, nil, int64(7), receivedAt, startedAt, int64(88), int32(8), "VIP",
 			),
 		)

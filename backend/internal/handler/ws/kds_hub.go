@@ -178,16 +178,16 @@ func (h *KDSHub) Run() {
 	for {
 		select {
 		case client := <-h.register:
-			room := client.roomKey()
-			if h.rooms[room] == nil {
-				h.rooms[room] = make(map[*KDSClient]struct{})
-			}
-			h.rooms[room][client] = struct{}{}
+			h.addClient(client)
 
 		case client := <-h.unregister:
 			h.removeClient(client)
 
 		case message := <-h.broadcast:
+			// select picks randomly among ready channels, so a client that registered before this
+			// broadcast was queued may still be waiting in h.register. Apply pending registrations
+			// first, otherwise the update would be silently dropped for that client.
+			h.drainRegistrations()
 			room := buildKDSRoomKey(message.tenantID, message.restaurantID)
 			clients := h.rooms[room]
 			for client := range clients {
@@ -208,6 +208,26 @@ func (h *KDSHub) Run() {
 				}
 				delete(h.rooms, room)
 			}
+			return
+		}
+	}
+}
+
+func (h *KDSHub) addClient(client *KDSClient) {
+	room := client.roomKey()
+	if h.rooms[room] == nil {
+		h.rooms[room] = make(map[*KDSClient]struct{})
+	}
+	h.rooms[room][client] = struct{}{}
+}
+
+// drainRegistrations applies every registration already queued, without blocking.
+func (h *KDSHub) drainRegistrations() {
+	for {
+		select {
+		case client := <-h.register:
+			h.addClient(client)
+		default:
 			return
 		}
 	}

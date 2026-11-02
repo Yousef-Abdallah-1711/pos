@@ -5,6 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"sync"
+	"time"
 
 	"golang.org/x/crypto/bcrypt"
 	"pos-saas/internal/domain"
@@ -12,17 +14,56 @@ import (
 	"pos-saas/internal/repository"
 )
 
+// loginConfirmStore is the persistence needed by LoginConfirm.
+type loginConfirmStore interface {
+	FindUserByEmailAllTenants(email string) ([]domain.User, error)
+	UpdateLastLogin(userID int) error
+}
+
+// selectionTokenTTL bounds how long a multi-tenant login proof stays valid.
+const selectionTokenTTL = 5 * time.Minute
+
 type AuthUseCase struct {
 	repo           *repository.AuthRepository
 	superAdminRepo *repository.SuperAdminRepository
 	tokenService   *jwt.TokenService
+	confirmStore   loginConfirmStore
+
+	// usedSelections remembers consumed selection-token IDs until they expire.
+	// It is per-process; running several API replicas needs a shared store.
+	selectionMu    sync.Mutex
+	usedSelections map[string]time.Time
 }
 
 func NewAuthUseCase(repo *repository.AuthRepository, tokenService *jwt.TokenService) *AuthUseCase {
-	return &AuthUseCase{
+	uc := &AuthUseCase{
 		repo:         repo,
 		tokenService: tokenService,
 	}
+	if repo != nil {
+		uc.confirmStore = repo
+	}
+	return uc
+}
+
+// consumeSelection marks a selection token ID as used; false means it was already used.
+func (u *AuthUseCase) consumeSelection(id string, expires time.Time) bool {
+	u.selectionMu.Lock()
+	defer u.selectionMu.Unlock()
+	if u.usedSelections == nil {
+		u.usedSelections = make(map[string]time.Time)
+	}
+	now := time.Now()
+	for k, exp := range u.usedSelections {
+		if now.After(exp) {
+			delete(u.usedSelections, k)
+		}
+	}
+	if _, used := u.usedSelections[id]; used {
+		return false
+	}
+	u.usedSelections[id] = expires
+	return true
 }
 
 // SetSuperAdminRepo sets the super admin repository for token exchange
@@ -104,7 +145,6 @@ func (u *AuthUseCase) Register(req *domain.RegisterRequest) (*domain.AuthRespons
 func (u *AuthUseCase) Login(req *domain.LoginRequest) (interface{}, error) {
 	fmt.Println("=== LOGIN USE CASE DEBUG START ===")
 	fmt.Printf("Login attempt for email: %s\n", req.Email)
-	fmt.Printf("Password length received: %d\n", len(req.Password))
 
 	// Validate input
 	if req.Email == "" || req.Password == "" {
@@ -130,11 +170,9 @@ func (u *AuthUseCase) Login(req *domain.LoginRequest) (interface{}, error) {
 	// Verify password against the first user (all have same email, should have same password)
 	firstUser := &users[0]
 	fmt.Printf("Verifying password for first user - ID: %d, Email: %s\n", firstUser.ID, firstUser.Email)
-	fmt.Printf("Password hash from DB (first 30 chars): %s...\n", firstUser.PasswordHash[:30])
 
 	// Verify password
 	fmt.Println("Comparing password with bcrypt...")
-	fmt.Printf("Input password (first 3 chars): %s***\n", req.Password[:min(3, len(req.Password))])
 	err = bcrypt.CompareHashAndPassword([]byte(firstUser.PasswordHash), []byte(req.Password))
 	if err != nil {
 		fmt.Printf("ERROR: Password comparison failed: %v\n", err)
@@ -189,35 +227,53 @@ func (u *AuthUseCase) Login(req *domain.LoginRequest) (interface{}, error) {
 		tenantList = append(tenantList, tenantInfo)
 	}
 
+	tenantIDs := make([]int, 0, len(users))
+	for _, user := range users {
+		tenantIDs = append(tenantIDs, user.TenantID)
+	}
+	selectionToken, err := u.tokenService.GenerateSelectionToken(firstUser.Email, tenantIDs, selectionTokenTTL)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create selection token: %w", err)
+	}
+
 	fmt.Println("=== LOGIN USE CASE DEBUG END (SUCCESS - MULTIPLE TENANTS) ===")
 	return &domain.MultiTenantLoginResponse{
 		Success:         true,
 		MultipleTenants: true,
 		Tenants:         tenantList,
 		Message:         "Multiple organizations found. Please select one.",
+		SelectionToken:  selectionToken,
 	}, nil
 }
 
-// LoginConfirm confirms tenant selection and generates JWT token for the selected tenant
+// LoginConfirm exchanges a multi-tenant login proof (issued by Login after the
+// password was verified) plus the chosen tenant for a session token. Without a
+// valid, unexpired, unused proof covering the requested tenant and email, no
+// session is issued.
 func (u *AuthUseCase) LoginConfirm(req *domain.TenantSelectionRequest) (*domain.AuthResponse, error) {
-	fmt.Println("=== LOGIN CONFIRM USE CASE START ===")
-	fmt.Printf("LoginConfirm: Email: %s, TenantID: %d\n", req.Email, req.TenantID)
-
-	// Validate input
 	if req.Email == "" || req.TenantID == 0 {
-		fmt.Println("ERROR: Email or TenantID is empty")
 		return nil, errors.New("email and tenant_id are required")
 	}
+	if req.SelectionToken == "" {
+		return nil, errors.New("login verification required: please sign in again")
+	}
 
-	// Find user in the specific tenant
-	fmt.Printf("Finding user with email %s in tenant %d\n", req.Email, req.TenantID)
-	users, err := u.repo.FindUserByEmailAllTenants(req.Email)
+	proof, err := u.tokenService.ValidateSelectionToken(req.SelectionToken)
 	if err != nil {
-		fmt.Printf("ERROR: Failed to find users: %v\n", err)
+		return nil, errors.New("login verification expired or invalid: please sign in again")
+	}
+	if !strings.EqualFold(strings.TrimSpace(req.Email), proof.Email) || !proof.AllowsTenant(req.TenantID) {
+		return nil, errors.New("invalid email or tenant selection")
+	}
+	if u.confirmStore == nil {
+		return nil, errors.New("login is unavailable")
+	}
+
+	users, err := u.confirmStore.FindUserByEmailAllTenants(proof.Email)
+	if err != nil {
 		return nil, errors.New("invalid email or tenant selection")
 	}
 
-	// Find the user in the selected tenant
 	var selectedUser *domain.User
 	for i := range users {
 		if users[i].TenantID == req.TenantID {
@@ -225,31 +281,23 @@ func (u *AuthUseCase) LoginConfirm(req *domain.TenantSelectionRequest) (*domain.
 			break
 		}
 	}
-
 	if selectedUser == nil {
-		fmt.Printf("ERROR: User not found in tenant %d\n", req.TenantID)
 		return nil, errors.New("user not found in selected organization")
 	}
 
-	fmt.Printf("User found in tenant - ID: %d, TenantID: %d\n", selectedUser.ID, selectedUser.TenantID)
+	// Consume the proof only once the selection is known to be valid.
+	if !u.consumeSelection(proof.ID, proof.ExpiresAt.Time) {
+		return nil, errors.New("login verification already used: please sign in again")
+	}
 
-	// Update last login
-	fmt.Printf("Updating last login for user ID: %d\n", selectedUser.ID)
-	_ = u.repo.UpdateLastLogin(selectedUser.ID)
+	_ = u.confirmStore.UpdateLastLogin(selectedUser.ID)
 
-	// Generate JWT token for the selected tenant
-	fmt.Println("Generating JWT token for selected tenant...")
 	token, err := u.tokenService.GenerateToken(selectedUser.ID, selectedUser.TenantID, selectedUser.RestaurantID, selectedUser.Email, selectedUser.Role)
 	if err != nil {
-		fmt.Printf("ERROR: Failed to generate token: %v\n", err)
 		return nil, fmt.Errorf("failed to generate token: %w", err)
 	}
-	fmt.Printf("Token generated successfully (first 20 chars): %s...\n", token[:min(20, len(token))])
 
-	// Clear sensitive data
 	selectedUser.PasswordHash = ""
-
-	fmt.Println("=== LOGIN CONFIRM USE CASE END (SUCCESS) ===")
 	return &domain.AuthResponse{
 		User:  selectedUser,
 		Token: token,
