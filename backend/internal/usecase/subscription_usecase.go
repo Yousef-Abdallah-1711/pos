@@ -87,10 +87,12 @@ func (uc *SubscriptionUseCase) ExtendTrial(
 	// Log the action in audit log
 	_ = uc.auditRepo.LogAction(ctx, &domain.SuperAdminAuditLog{
 		SuperAdminID: performedBy,
-		Action:       "EXTEND_TENANT_TRIAL",
-		TargetType:   stringPtr("TENANT"),
-		TargetID:     &tenantID,
+		// The audit table constrains action names; details preserve the exact operation.
+		Action:     "UPDATE_SETTINGS",
+		TargetType: stringPtr("TENANT"),
+		TargetID:   &tenantID,
 		Details: map[string]interface{}{
+			"operation":  "EXTEND_TENANT_TRIAL",
 			"days_added": days,
 			"reason":     reason,
 		},
