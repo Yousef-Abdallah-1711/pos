@@ -2,8 +2,10 @@ package http
 
 import (
 	"log"
+	"net"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"pos-saas/internal/middleware"
 	"pos-saas/internal/usecase"
@@ -274,7 +276,7 @@ func (h *SubscriptionHandler) EnableTenant(w http.ResponseWriter, r *http.Reques
 	info, _ := h.useCase.GetTenantSubscription(r.Context(), tenantID)
 
 	response := map[string]interface{}{
-		"is_disabled":     info.IsDisabled,
+		"is_disabled":         info.IsDisabled,
 		"subscription_status": info.SubscriptionStatus,
 	}
 
@@ -388,16 +390,25 @@ func (h *SubscriptionHandler) GetSubscriptionHistory(w http.ResponseWriter, r *h
 
 // Helper function to get IP address from request
 func getIPAddress(r *http.Request) string {
-	// Try X-Forwarded-For header first (for proxied requests)
-	if xff := r.Header.Get("X-Forwarded-For"); xff != "" {
-		return xff
+	// Forwarding headers are used by the existing deployment proxy. Normalize
+	// their first address because PostgreSQL INET rejects lists and host:port.
+	for _, candidate := range []string{
+		strings.TrimSpace(strings.Split(r.Header.Get("X-Forwarded-For"), ",")[0]),
+		strings.TrimSpace(r.Header.Get("X-Real-IP")),
+	} {
+		if address := net.ParseIP(candidate); address != nil {
+			return address.String()
+		}
 	}
 
-	// Try X-Real-IP header
-	if xri := r.Header.Get("X-Real-IP"); xri != "" {
-		return xri
+	host, _, err := net.SplitHostPort(r.RemoteAddr)
+	if err == nil {
+		if address := net.ParseIP(host); address != nil {
+			return address.String()
+		}
 	}
-
-	// Fall back to RemoteAddr
-	return r.RemoteAddr
+	if address := net.ParseIP(r.RemoteAddr); address != nil {
+		return address.String()
+	}
+	return "0.0.0.0"
 }
