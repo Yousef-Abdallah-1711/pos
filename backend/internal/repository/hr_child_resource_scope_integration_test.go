@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"database/sql"
 	"fmt"
 	"testing"
 	"time"
@@ -10,13 +11,13 @@ import (
 
 func TestHRChildRepositoriesRejectForeignEmployeesOnCreateAndUpdate(t *testing.T) {
 	db, fixture := openDriverScopeFixture(t)
-	ownEmployeeID := insertHREmployee(t, db, fixture.tenantA, fixture.restaurantA1)
+	ownEmployeeID := insertHRChildResourceEmployee(t, db, fixture.tenantA, fixture.restaurantA1)
 	foreignEmployees := []struct {
 		name string
 		id   int
 	}{
-		{name: "sibling restaurant", id: insertHREmployee(t, db, fixture.tenantA, fixture.restaurantA2)},
-		{name: "foreign tenant", id: insertHREmployee(t, db, fixture.tenantB, fixture.restaurantB1)},
+		{name: "sibling restaurant", id: insertHRChildResourceEmployee(t, db, fixture.tenantA, fixture.restaurantA2)},
+		{name: "foreign tenant", id: insertHRChildResourceEmployee(t, db, fixture.tenantB, fixture.restaurantB1)},
 	}
 	unique := fmt.Sprintf("%d", time.Now().UnixNano())
 	now := time.Now().UTC()
@@ -126,4 +127,21 @@ func TestHRChildRepositoriesRejectForeignEmployeesOnCreateAndUpdate(t *testing.T
 			}
 		})
 	}
+}
+
+func insertHRChildResourceEmployee(t *testing.T, db *sql.DB, tenantID, restaurantID int) int {
+	t.Helper()
+	unique := fmt.Sprintf("%d", time.Now().UnixNano())
+	var employeeID int
+	err := db.QueryRow(`
+		INSERT INTO employees (
+			tenant_id, restaurant_id, employee_code, first_name, last_name, email,
+			hire_date, employment_type, employment_status, position, base_salary
+		) VALUES ($1, $2, $3, 'ChildScope', 'Test', $4, CURRENT_DATE, 'full_time', 'active', 'staff', 0)
+		RETURNING id
+	`, tenantID, restaurantID, "HR-CHILD-SCOPE-"+unique, "hr-child-scope-"+unique+"@example.test").Scan(&employeeID)
+	if err != nil {
+		t.Fatalf("insert child-resource scoped test employee: %v", err)
+	}
+	return employeeID
 }
