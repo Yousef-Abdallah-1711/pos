@@ -50,8 +50,8 @@ func TestDriverRepositoryPostgresCreateRequiresRestaurantTenantMatch(t *testing.
 	db, fixture := openDriverScopeFixture(t)
 	driver := &domain.Driver{
 		TenantID: fixture.tenantA, RestaurantID: fixture.restaurantB1,
-		FirstName: "Forged", LastName: "Scope", Email: "forged-scope@example.test",
-		PhoneNumber: "000", LicenseNumber: "FORGED-SCOPE", Status: "active", AvailabilityStatus: "available",
+		FirstName: "Forged", LastName: "Scope", Email: fmt.Sprintf("forged-scope-%d@example.test", fixture.tenantA),
+		PhoneNumber: "000", LicenseNumber: fmt.Sprintf("FORGED-SCOPE-%d", fixture.tenantA), Status: "active", AvailabilityStatus: "available",
 	}
 	if err := NewDriverRepository(db).Create(context.Background(), driver); err == nil {
 		t.Fatal("driver creation with a foreign restaurant unexpectedly succeeded")
@@ -90,8 +90,12 @@ func openDriverScopeFixture(t *testing.T) (*sql.DB, driverScopeFixture) {
 
 	fixture := seedDriverScopeFixture(t, ctx, db)
 	t.Cleanup(func() {
-		_, _ = db.Exec(`DELETE FROM tenants WHERE id IN ($1, $2)`, fixture.tenantA, fixture.tenantB)
-		_ = db.Close()
+		// Audit triggers reject tenant cascades after their parent row is removed.
+		// Fixtures therefore live only in this disposable database, whose tmpfs
+		// container is discarded after the integration run.
+		if err := db.Close(); err != nil {
+			t.Errorf("close disposable PostgreSQL connection: %v", err)
+		}
 	})
 	return db, fixture
 }
@@ -99,16 +103,17 @@ func openDriverScopeFixture(t *testing.T) (*sql.DB, driverScopeFixture) {
 func seedDriverScopeFixture(t *testing.T, ctx context.Context, db *sql.DB) driverScopeFixture {
 	t.Helper()
 	var fixture driverScopeFixture
-	fixture.tenantA = insertTenant(t, ctx, db, "closure-driver-tenant-a")
-	fixture.tenantB = insertTenant(t, ctx, db, "closure-driver-tenant-b")
-	fixture.restaurantA1 = insertRestaurant(t, ctx, db, fixture.tenantA, "closure-driver-a1")
-	fixture.restaurantA2 = insertRestaurant(t, ctx, db, fixture.tenantA, "closure-driver-a2")
-	fixture.restaurantB1 = insertRestaurant(t, ctx, db, fixture.tenantB, "closure-driver-b1")
-	fixture.restaurantB2 = insertRestaurant(t, ctx, db, fixture.tenantB, "closure-driver-b2")
-	insertDriver(t, ctx, db, fixture.tenantA, fixture.restaurantA1, "a1")
-	fixture.restaurantA2Driver = insertDriver(t, ctx, db, fixture.tenantA, fixture.restaurantA2, "a2")
-	fixture.tenantBDriver = insertDriver(t, ctx, db, fixture.tenantB, fixture.restaurantB1, "b1")
-	insertDriver(t, ctx, db, fixture.tenantB, fixture.restaurantB2, "b2")
+	runID := fmt.Sprintf("%d", time.Now().UnixNano())
+	fixture.tenantA = insertTenant(t, ctx, db, "closure-driver-tenant-a-"+runID)
+	fixture.tenantB = insertTenant(t, ctx, db, "closure-driver-tenant-b-"+runID)
+	fixture.restaurantA1 = insertRestaurant(t, ctx, db, fixture.tenantA, "closure-driver-a1-"+runID)
+	fixture.restaurantA2 = insertRestaurant(t, ctx, db, fixture.tenantA, "closure-driver-a2-"+runID)
+	fixture.restaurantB1 = insertRestaurant(t, ctx, db, fixture.tenantB, "closure-driver-b1-"+runID)
+	fixture.restaurantB2 = insertRestaurant(t, ctx, db, fixture.tenantB, "closure-driver-b2-"+runID)
+	insertDriver(t, ctx, db, fixture.tenantA, fixture.restaurantA1, runID+"-a1")
+	fixture.restaurantA2Driver = insertDriver(t, ctx, db, fixture.tenantA, fixture.restaurantA2, runID+"-a2")
+	fixture.tenantBDriver = insertDriver(t, ctx, db, fixture.tenantB, fixture.restaurantB1, runID+"-b1")
+	insertDriver(t, ctx, db, fixture.tenantB, fixture.restaurantB2, runID+"-b2")
 	return fixture
 }
 
