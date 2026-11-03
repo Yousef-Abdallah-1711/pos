@@ -93,11 +93,18 @@ func (r *InsuranceRepository) Create(item *domain.InsuranceTracking) (int, error
 			tenant_id, restaurant_id, employee_id, policy_type, provider_name, policy_number,
 			coverage_start, coverage_end, monthly_premium, status, notes, created_by
 		)
-		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
+		SELECT $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12
+		WHERE EXISTS (
+			SELECT 1 FROM employees e
+			WHERE e.id = $3 AND e.tenant_id = $1 AND e.restaurant_id = $2
+		)
 		RETURNING id
 	`, item.TenantID, item.RestaurantID, item.EmployeeID, item.PolicyType, item.ProviderName, item.PolicyNumber,
 		item.CoverageStart, item.CoverageEnd, item.MonthlyPremium, item.Status, item.Notes, item.CreatedBy,
 	).Scan(&id)
+	if errors.Is(err, sql.ErrNoRows) {
+		return 0, errors.New("employee is outside tenant and restaurant scope")
+	}
 	return id, err
 }
 
@@ -108,6 +115,10 @@ func (r *InsuranceRepository) Update(tenantID, restaurantID int, item *domain.In
 		    coverage_start = $5, coverage_end = $6, monthly_premium = $7, status = $8,
 		    notes = $9, updated_by = $10, updated_at = CURRENT_TIMESTAMP
 		WHERE id = $11 AND tenant_id = $12 AND restaurant_id = $13
+		  AND EXISTS (
+			SELECT 1 FROM employees e
+			WHERE e.id = $1 AND e.tenant_id = $12 AND e.restaurant_id = $13
+		  )
 	`, item.EmployeeID, item.PolicyType, item.ProviderName, item.PolicyNumber,
 		item.CoverageStart, item.CoverageEnd, item.MonthlyPremium, item.Status,
 		item.Notes, item.UpdatedBy, item.ID, tenantID, restaurantID,
