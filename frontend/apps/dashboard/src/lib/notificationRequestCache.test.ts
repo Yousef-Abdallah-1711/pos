@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 import {
   createNotificationCacheKey,
-  createNotificationScopeKey,
+  createAuthenticatedScopeKey,
   dedupeInFlightRequest,
 } from './notificationRequestCache'
 
@@ -18,7 +18,7 @@ describe('notification request cache keys', () => {
   })
 
   it('uses a stable scope key when optional identity fields are missing', () => {
-    expect(createNotificationScopeKey({ tenantId: null, restaurantId: undefined, userId: null }))
+    expect(createAuthenticatedScopeKey({ tenantId: null, restaurantId: undefined, userId: null }))
       .toBe('tenant:none:restaurant:none:user:none')
   })
 })

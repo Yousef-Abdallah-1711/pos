@@ -5,7 +5,7 @@ import { debugError } from '@/lib/debug'
 import { useAuthStore } from '@/stores/authStore'
 import {
   createNotificationCacheKey,
-  createNotificationScopeKey,
+  createAuthenticatedScopeKey,
   dedupeInFlightRequest,
 } from '@/lib/notificationRequestCache'
 
@@ -71,7 +71,7 @@ function getCurrentNotificationScope() {
 }
 
 function getCurrentNotificationScopeKey(): string {
-  return createNotificationScopeKey(getCurrentNotificationScope())
+  return createAuthenticatedScopeKey(getCurrentNotificationScope())
 }
 
 function getNotificationCacheKey(filters: NotificationFilters): string {
