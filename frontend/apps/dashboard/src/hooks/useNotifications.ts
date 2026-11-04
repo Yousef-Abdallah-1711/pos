@@ -78,6 +78,18 @@ function getNotificationCacheKey(filters: NotificationFilters): string {
   return createNotificationCacheKey(getCurrentNotificationScope(), filters)
 }
 
+export function fetchNotificationStats() {
+  return dedupeInFlightRequest(
+    `${getCurrentNotificationScopeKey()}:notifications:stats`,
+    async () => {
+      const response = await api.get<NotificationStats | { data: NotificationStats }>(
+        '/notifications/stats'
+      )
+      return 'data' in response.data ? response.data.data : response.data
+    }
+  )
+}
+
 export function useNotifications() {
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [unreadCount, setUnreadCount] = useState(0)
@@ -146,11 +158,7 @@ export function useNotifications() {
 
   const fetchStats = useCallback(async () => {
     try {
-      const data = await dedupeInFlightRequest(
-        `${getCurrentNotificationScopeKey()}:notifications:stats`,
-        async () => (await api.get<NotificationStats>('/notifications/stats')).data
-      )
-      setStats(data)
+      setStats(await fetchNotificationStats())
     } catch (err) {
       debugError('Failed to fetch notification stats:', err)
     }
