@@ -1,0 +1,77 @@
+# Phase 2A Final Session Handover
+
+**Updated:** 2026-11-04
+**Result:** Consolidation is partial; Phase 2A is incomplete; production release is NO-GO.
+
+## Executive summary
+
+The two source worktrees and all their changes remain preserved. A verified external backup matched 320/320 dirty-file snapshots. A clean topic worktree was created from the current `origin/main` SHA `5ab6dba62287ddd404ce00529f5fe99220ccdc19`. One narrow source/configuration correction was committed as `dcdcbe9` and pushed in PR #3. Its localhost guardrail passes; its URL/domain smoke check passed after the initial handover snapshot. No uncommitted source changes were transferred from either original worktree, and nothing has been merged to `main`.
+
+PR #1 remains open on `codex/ws02-final-security-closure` at `9cb9a288ff3538c68e11caa2be9f50dd79cf8ee2`; its last recorded required checks failed before PR #3. No branch-protection rule was returned by GitHub's API (HTTP 404), but the protected-main PR-only workflow remains in force. The source currently disables Super Admin tenant handoff: UI disabled, API returns 503, original Super Admin session retained, no tenant-owner session created.
+
+## Git baseline and preservation
+
+- Repository: `https://github.com/Yousef-Abdallah-1711/pos`
+- Latest fetched `origin/main`: `5ab6dba62287ddd404ce00529f5fe99220ccdc19`
+- Primary source: `H:\Projects\pos`, branch `codex/phase2a-continuation`, HEAD `ecadb5ab7665df3eb9f69886a9b186c710eff62d`, 260 dirty paths.
+- Security source: `H:\ws02`, branch `codex/ws02-final-security-closure`, HEAD `9cb9a288ff3538c68e11caa2be9f50dd79cf8ee2`, 60 dirty paths.
+- Five dirty-path overlaps: `backend/cmd/api/main.go`, `backend/internal/handler/http/product_handler.go`, `PHASE_2A_EXECUTION_TRACKER.md`, `PHASE_2A_REMAINING_BLOCKERS.md`, `WS02_TENANT_ISOLATION_REPORT.md`.
+- Backup: `C:\Users\yosea\.codex\backups\poos-phase2a-consolidation-20261104-213732`; prior checksum verification matched all 320 files with no errors. Keep it private and local.
+- Consolidation worktree: `H:\pos-phase2a-integration`, branch `codex/phase2a-final-consolidation`, based on the above main SHA.
+- PR #1: https://github.com/Yousef-Abdallah-1711/pos/pull/1 (open; WS02 security changes; last observed checks failed).
+- PR #3: https://github.com/Yousef-Abdallah-1711/pos/pull/3 (open; `dcdcbe9`; guardrail passed, URL/domain smoke pending at handover).
+- Unrelated Phase 2C worktree/branch remains preserved and excluded.
+
+The CSV reconciliation manifest contains all 320 dirty paths with their source worktree, branch/HEAD, provisional path-based classification, and explicit not-integrated disposition. It is not a per-hunk safety review; each selected file still needs ownership/dependency review. Do not interpret the provisional classifications as approval to publish.
+
+## Workstream closure matrix
+
+| Workstream | Implemented | Verified | Integrated into main | Remaining | Status |
+|---|---|---|---|---|---|
+| WS01 Database Security | Restricted DB-role foundation is present in main and prior report records it complete | Historical isolated restore/role evidence; not rerun in this consolidation | Existing main history | Reconfirm against current migrations/runtime before release | COMPLETE (per existing report) |
+| WS02 Tenant/Restaurant Isolation | Main has earlier baseline; topic branch/dirty work contains HR, Accounting, subscriptions and resource-scope work | PR #1 currently has failing hosted checks; this run's Go suite did not include its unmerged source | No new WS02 work merged | Review all 20 resource families, run isolated PostgreSQL + HTTP side-effect suite, resolve PR checks | PARTIAL |
+| WS03 Payments | Existing implementation only | Historical tests only; no new verification | Existing baseline only | Provider/local reconciliation remains open; scope deferred | DEFERRED |
+| WS04 Frontend Recovery | Earlier reports document four-app recovery; this run fixed Dashboard production missing-config behavior | Dashboard resolver 4/4 and Go suite passed on clean branch; no four-app regression rerun | Only historical baseline; current fix in PR #3 | Run full four-app regression on combined changes | PARTIAL |
+| WS05 Isolated E2E Infrastructure | Disposable stack and journeys exist in dirty worktree/earlier reports | Current execution did not rerun Playwright or reseed/teardown | No new WS05 changes merged | Verify repeatable full-stack fixture and all journeys after selecting changes | PARTIAL |
+| WS06 CI | CI expansion excluded; existing guardrail issue addressed in PR #3 | PR #3 guardrail passed; URL smoke pending at handover | No new changes merged | Wait for PR #3; do not broaden workflows | DEFERRED (targeted baseline fix in review) |
+| WS07 Backend Architecture | Existing route extraction work in dirty tree | No route parity run during this consolidation | No new extraction merged | Verify full route/middleware/authz parity | PARTIAL |
+| WS08 Frontend Architecture | Shared contract changes are in dirty tree | No combined frontend regression run | No new refactor merged | Review and test shared contracts | PARTIAL |
+| WS09 Engineering Foundations | Prior reports record partial typed errors/logging/cancellation/shutdown work | Consolidation Go build/vet/default tests passed on clean main plus config fix | No new WS09 implementation merged | Review dirty changes and verify HTTP/worker lifecycle behavior | PARTIAL |
+| WS10 Tenant Transactions | Existing pilot and repository changes are present in reports/dirty tree | Prior isolated pilot evidence exists; not rerun for this combined state | No new changes merged | Add module coverage, rollback, concurrency and pool-isolation tests | PARTIAL |
+
+## Implemented architecture and security limits
+
+The existing reports describe a restricted runtime PostgreSQL role, tenant-scoped repository work, cookie/session security and Redis consistency, audit logging, POS/inventory transaction work, route-manifest extraction, frontend architecture work, and disposable test fixtures. These are not all in the latest `main` and are not asserted as integrated here. The disabled Super Admin handoff is intentional; future support access must use actor-attributed, least-privilege sessions with auditable start/end events.
+
+## Verification evidence in this consolidation
+
+- `python scripts/check_runtime_localhost.py` on clean consolidation worktree: PASS.
+- Dashboard `vitest run --config vitest.config.unit.mts src/lib/config.test.ts`: 4/4 PASS.
+- URL/domain template smoke with guardrail/tests skipped: PASS for all local and production templates.
+- `go build ./...`, `go vet ./...`, and `go test -count=1 ./...`: PASS in disposable `golang:1.24` containers mounted to the clean consolidation worktree. Default package suite passed; no isolated PostgreSQL security matrix was run in that container.
+- PR #3 hosted `runtime-localhost-guardrail`: PASS. Hosted `url-domain-config-smoke`: PASS (completed 2026-11-04 19:56:36Z).
+- PR #1 hosted checks: last observed FAILURE for both checks before the PR #3 correction.
+- No browser E2E, four-app frontend regression, or WS02 PostgreSQL matrix was run on the consolidation branch.
+
+## Environment and safety boundary
+
+The Go verification containers used `--rm` and mounted only `H:\pos-phase2a-integration\backend`. Focused frontend tests used an ignored, worktree-local junction to already installed dashboard dependencies from `H:\Projects\pos`; neither original source worktree was edited. Do not stop or clean up unrelated Docker projects. For future PostgreSQL work, create a uniquely named disposable Compose project and isolated volume/database; never point tests at development or production URLs.
+
+## Remaining blockers and next priorities
+
+1. Wait for PR #3's URL/domain check. If it passes, merge only through the PR interface after reviewing its final diff and confirming all applicable checks; then record the resulting `origin/main` SHA.
+2. Continue reviewing PR #1 changes and its PostgreSQL integration tests. Rerun the failing hosted checks after the correction lands; merge only after they pass and the security diff is independently reviewable.
+3. Generate hunk-level reconciliation for the five overlaps and select only verified changes from the 320-file manifest. Keep unknown and generated artifacts out of publication.
+4. Run isolated PostgreSQL/Redis integration, the four-app test/typecheck/build gate, and the repeatable Playwright journeys on the consolidated commit.
+5. Close WS02 resource/side-effect gaps and complete route/authz parity and transaction coverage before claiming Phase 2A completion.
+
+### Deferred scope
+
+WS03 Payments and WS06 CI expansion are deferred. Phase 2B is not started. No deployment or real customer-data operation was performed.
+
+## Final decision
+
+- **Current session consolidation:** PARTIAL
+- **Main integration:** PARTIAL (only previously existing main baseline; no new consolidation merge confirmed)
+- **Phase 2A:** PARTIAL
+- **Production release:** NO-GO
