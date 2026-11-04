@@ -61,7 +61,7 @@ The historical recovery report records Redis tenant isolation checks across two 
   - `7dc13be` — `perf(orders): batch admin order item counts`
   - `0402afe` — `docs(perf): record Phase 2C final evidence and blockers`
 - PR: [#7](https://github.com/Yousef-Abdallah-1711/pos/pull/7), draft, targets `main`.
-- Hosted CI at initial PR check: `runtime-localhost-guardrail` passed; `url-domain-config-smoke` was still running. Checks must be re-read after the final report commit.
+- Hosted CI on the pushed report update: `runtime-localhost-guardrail` passed; `url-domain-config-smoke` passed.
 - Merge commit / verified post-merge SHA: none.
 - Source and evidence are committed and pushed; the worktree is clean before this report update.
 - No credentials, browser storage state, or raw customer data were added to the evidence files.
