@@ -64,9 +64,10 @@ The historical recovery report records Redis tenant isolation checks across two 
   - `9b9a682` — `docs(perf): record Phase 2C draft delivery status`
   - `82ea133` — `docs(perf): record passing hosted checks`
   - `2b66f02` — merge the verified Storefront `main` tip into the candidate branch.
+  - `53b0c0d` — record the Storefront main delivery and sync the candidate.
 - Independent Storefront PR: [#8](https://github.com/Yousef-Abdallah-1711/pos/pull/8), merged at `d84120559db36e8e9e7fdb73872a30cbc9d4e6e7`.
 - Candidate PR: [#7](https://github.com/Yousef-Abdallah-1711/pos/pull/7), draft, targets `main` and contains the Admin Orders candidate plus the full evidence report.
-- Hosted CI on the last checked PR #7 head (`82ea133`): `runtime-localhost-guardrail` passed; `url-domain-config-smoke` passed. The main-tip sync and this report update trigger a fresh check run.
+- Hosted CI on PR #7 head `53b0c0d`: `runtime-localhost-guardrail` passed; `url-domain-config-smoke` passed. A later report-only commit triggers another check run.
 - Final workstream merge SHA: none; the verified main SHA above contains the independent Storefront change only.
 - Source and evidence are committed and pushed; the worktree is clean before this report update.
 - No credentials, browser storage state, or raw customer data were added to the evidence files.
