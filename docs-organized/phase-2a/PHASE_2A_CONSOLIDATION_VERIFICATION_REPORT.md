@@ -2,7 +2,7 @@
 
 **Date:** 2026-11-04
 **Consolidation branch:** `codex/phase2a-final-consolidation`
-**Latest base:** `origin/main` `be245f76a3e41ce656d51189dc995e4f2b47699b` (latest fetched; test head synced through `1cfdb67`) (original test base: `5ab6dba62287ddd404ce00529f5fe99220ccdc19`)
+**Latest base:** `origin/main` `e400400b671437df275f686a84aa644e5b5a1811` (includes merged Phase 2C recovery report PR #6) (latest fetched; test head synced through `1cfdb67`) (original test base: `5ab6dba62287ddd404ce00529f5fe99220ccdc19`)
 **Head:** `1f3605363bbb290849d7f7199f1315d4336f82ef`; includes sync and documentation commits. Latest main contains the equivalent config correction in `5d32752`.
 **PR:** https://github.com/Yousef-Abdallah-1711/pos/pull/3
 
