@@ -3,7 +3,7 @@
 **Date:** 2026-11-04
 **Consolidation branch:** `codex/phase2a-final-consolidation`
 **Latest base:** `origin/main` `be245f76a3e41ce656d51189dc995e4f2b47699b` (latest fetched; test head synced through `1cfdb67`) (original test base: `5ab6dba62287ddd404ce00529f5fe99220ccdc19`)
-**Commits:** `dcdcbe9` source fix, `9e57120` handover; latest main contains equivalent config correction in `5d32752`
+**Head:** `1f3605363bbb290849d7f7199f1315d4336f82ef`; includes sync and documentation commits. Latest main contains the equivalent config correction in `5d32752`.
 **PR:** https://github.com/Yousef-Abdallah-1711/pos/pull/3
 
 ## Changes verified
@@ -34,4 +34,4 @@ No PostgreSQL/Redis WS02 matrix, four-app frontend regression, full builds, or P
 
 ## Decision
 
-This is a narrow reviewable baseline-fix PR, not the Phase 2A consolidation. The check suite passed on `1d303fb` after a main sync; the local branch then synced `be245f7`. Verify checks after the new push. The config fix is already on main through another merged PR.
+This is a narrow reviewable baseline-fix PR, not the Phase 2A consolidation. The check suite passed on head `1f36053` after syncing base `be245f7`. The config fix is already on main through another merged PR; PR #3 carries the explicit QA URL safeguard and handover docs.
