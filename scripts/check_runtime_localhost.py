@@ -40,6 +40,8 @@ ALLOWLIST_FILES = {
     Path("frontend/apps/landing/src/lib/config.ts"),
     Path("frontend/apps/super-admin/src/lib/config.ts"),
     Path("frontend/apps/dashboard/next.config.js"),
+    # This browser QA script supports a local default and accepts POS_QA_BASE_URL.
+    Path("frontend/apps/dashboard/scripts/verify-pos-phase4.mjs"),
     Path("frontend/apps/landing/next.config.js"),
     Path("frontend/apps/restaurant-website/next.config.js"),
 }
