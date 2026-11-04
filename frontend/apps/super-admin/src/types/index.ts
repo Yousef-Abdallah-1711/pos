@@ -99,7 +99,7 @@ export interface AuditLog {
   target_tenant_id: number | null;
   ip_address: string;
   user_agent: string;
-  details: Record<string, unknown>;
+  details?: Record<string, unknown> | null;
   created_at: string;
 }
 

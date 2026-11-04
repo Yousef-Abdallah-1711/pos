@@ -50,6 +50,7 @@ function warnMissingConfig(label: string, fallbackValue: string) {
 
 function resolveUrlValue(
   label: string,
+  environmentVariable: string,
   configuredValue: string | undefined,
   devFallback: string,
   options?: { allowCurrentOriginInProduction?: boolean }
@@ -75,7 +76,7 @@ function resolveUrlValue(
   }
 
   warnMissingConfig(label, devFallback)
-  return normalizeUrl(devFallback)
+  throw new Error(`Missing required production configuration: ${environmentVariable}`)
 }
 
 function resolveDomainValue(configuredValue: string | undefined) {
@@ -93,7 +94,7 @@ function resolveDomainValue(configuredValue: string | undefined) {
   }
 
   warnMissingConfig('restaurant domain', DEV_DEFAULTS.restaurantDomain)
-  return DEV_DEFAULTS.restaurantDomain
+  throw new Error('Missing required production configuration: NEXT_PUBLIC_RESTAURANT_DOMAIN')
 }
 
 export const getConfig = () => {
@@ -101,11 +102,11 @@ export const getConfig = () => {
 
   const config = {
     isDevelopment,
-    landingUrl: resolveUrlValue('Landing URL', process.env.NEXT_PUBLIC_LANDING_URL, DEV_DEFAULTS.landingUrl),
-    dashboardUrl: resolveUrlValue('Dashboard URL', process.env.NEXT_PUBLIC_DASHBOARD_URL, DEV_DEFAULTS.dashboardUrl, {
+    landingUrl: resolveUrlValue('Landing URL', 'NEXT_PUBLIC_LANDING_URL', process.env.NEXT_PUBLIC_LANDING_URL, DEV_DEFAULTS.landingUrl),
+    dashboardUrl: resolveUrlValue('Dashboard URL', 'NEXT_PUBLIC_DASHBOARD_URL', process.env.NEXT_PUBLIC_DASHBOARD_URL, DEV_DEFAULTS.dashboardUrl, {
       allowCurrentOriginInProduction: true,
     }),
-    apiUrl: resolveUrlValue('API URL', process.env.NEXT_PUBLIC_API_URL, DEV_DEFAULTS.apiUrl),
+    apiUrl: resolveUrlValue('API URL', 'NEXT_PUBLIC_API_URL', process.env.NEXT_PUBLIC_API_URL, DEV_DEFAULTS.apiUrl),
     restaurantDomain: resolveDomainValue(process.env.NEXT_PUBLIC_RESTAURANT_DOMAIN),
   }
 
