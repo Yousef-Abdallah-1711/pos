@@ -2,7 +2,8 @@
 
 import React, { useEffect, useState } from "react";
 import { superAdminAPI } from "@/lib/api";
-import type { AuditLog, PaginatedResponse } from "@/types";
+import type { AuditLog } from "@/types";
+import { getSafeAuditDetails } from "@/lib/audit-log-details";
 import { AlertCircle, Shield } from "lucide-react";
 import { toast } from "sonner";
 
@@ -103,7 +104,10 @@ export default function AuditLogsPage() {
       ) : (
         <>
           <div className="space-y-4">
-            {logs.map((log) => (
+            {logs.map((log) => {
+              const safeDetails = getSafeAuditDetails(log.details);
+
+              return (
               <div
                 key={log.id}
                 className="bg-white rounded-lg shadow p-6 border-l-4 border-blue-500"
@@ -159,19 +163,20 @@ export default function AuditLogsPage() {
                       </p>
                     </div>
                   )}
-                  {Object.keys(log.details).length > 0 && (
+                  {safeDetails && Object.keys(safeDetails).length > 0 && (
                     <div>
                       <p className="text-xs text-gray-600 font-medium uppercase">
                         Details
                       </p>
                       <p className="text-xs text-gray-900 mt-1 font-mono">
-                        {JSON.stringify(log.details)}
+                        {JSON.stringify(safeDetails)}
                       </p>
                     </div>
                   )}
                 </div>
               </div>
-            ))}
+              );
+            })}
           </div>
 
           {/* Pagination */}
