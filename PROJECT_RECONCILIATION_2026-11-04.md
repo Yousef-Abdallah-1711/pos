@@ -43,14 +43,21 @@ Seven reviewable commits were assembled on `codex/reconcile-completed`, based di
 | `C:\Users\yosea\.codex\worktrees\phase2c-performance\pos` | `codex/phase2c-notification-dedup` / `b62ffcaa9c49ad4e2f25720c9c05b8c3165405e3` at inventory | No configured upstream; 7 commits ahead, 0 behind. Contains Phase 2A ancestor commits as well as Phase 2C work. | Sidebar source/test were committed as `fc7f186` after inventory. Eleven untracked Playwright page snapshots and the `scripts/performance/` package remain in that source worktree; they were not deleted. No files staged at inventory. |
 | `C:\Users\yosea\.codex\worktrees\pos-reconciliation` | `codex/reconcile-completed` / based on fetched `origin/main` | Dedicated integration worktree. | Seven cherry-picked/reviewed commits plus this report. No source secrets, credentials, browser state, or raw runtime artifacts are intended for publication. |
 
+An additional worktree appeared during the reconciliation after the initial inventory checkpoint; it was read-only inspected and preserved:
+
+| Path | Branch / HEAD | PR relation | State |
+|---|---|---|---|
+| `H:\pos-phase2a-integration` | `codex/phase2a-final-consolidation` / `9e57120733728a9ac0266ee87cfb09248d172cbb` | PR #3 open, head based on `5ab6dba`; GitHub reports `DIRTY` / `CONFLICTING` with current main. | Clean working tree, no stash, two commits (`dcdcbe9` production URL config fix; `9e57120` consolidation handover/report). Its config changes overlap PR #2's already merged fix. It was not edited or merged. |
+
 There were no stashes in the three source worktrees. No staged source changes were present at the inventory checkpoint. All recorded origin references were fetched. `origin/main` was `5ab6dba`; remote `codex/ws02-final-security-closure` was `9cb9a28`. The remote-only `restaurant-ui-redesign` branch was `92d031d`, with 2 commits not in main, 4 main commits absent from it, and a 798-file diff (71,696 insertions / 52,909 deletions); it has no open PR and was excluded as an unsafe, unrelated integration.
 
 ### Existing PR and duplicate work
 
 - PR #1: [fix(hr): enforce employee child-resource scope](https://github.com/Yousef-Abdallah-1711/pos/pull/1), head `9cb9a288ff3538c68e11caa2be9f50dd79cf8ee2`, base `5ab6dba62287ddd404ce00529f5fe99220ccdc19`, open and mergeable but unstable. No review decision is recorded.
+- PR #3: [fix(config): fail closed for missing production URLs](https://github.com/Yousef-Abdallah-1711/pos/pull/3), head `9e57120733728a9ac0266ee87cfb09248d172cbb`, open with no checks reported and a merge conflict against main because its config fix overlaps the already merged PR #2. Its additional handover documentation and manifest remain preserved in `H:\pos-phase2a-integration`.
 - At inventory, `runtime-localhost-guardrail` failed on `frontend/apps/dashboard/scripts/verify-pos-phase4.mjs:3`; `url-domain-config-smoke` failed two Dashboard tests that expected missing production URLs to throw. The integration branch adds a narrow QA-script allowlist entry and makes production Dashboard configuration fail closed, with tests.
 - The local Phase 2A HR fixes `2183c61` / `ecadb5a` and WS02 HR fixes `97fbe95` / `0886963` have matching stable patch IDs. Do not cherry-pick duplicate patches.
-- The integration branch contains commits `e5829c5`, `cf42a3a`, `cdcef63`, `a0413b7`, `e1b59af`, `5d32752`, and `1378b39`. These represent the Audit Logs fix, three request coalescing changes, Sidebar recovery, production config guardrail repair, and reusable local measurement tooling. No commit has been pushed yet at this report checkpoint.
+- The integration branch contains commits `e5829c5`, `cf42a3a`, `cdcef63`, `a0413b7`, `e1b59af`, `5d32752`, and `1378b39`. These represent the Audit Logs fix, three request coalescing changes, Sidebar recovery, production config guardrail repair, and reusable local measurement tooling. They were pushed and integrated by PR #2.
 
 ## Verification completed on the integration branch
 
@@ -79,7 +86,7 @@ These are focused checks, not a full platform regression or production readiness
 | Branch protection | GitHub API reported `main` branch not protected |
 | Review decision | No review decision was recorded; no branch-protection review requirement was configured |
 | Merge commit | `435d23cb39cc71990a785908ee2ab4296d0490f3` |
-| Final fetched `origin/main` | `435d23cb39cc71990a785908ee2ab4296d0490f3`; matches the PR merge commit |
+| `origin/main` at PR #2 integration | `435d23cb39cc71990a785908ee2ab4296d0490f3`; matches the PR merge commit. The report-only PR #4 subsequently advanced main to `1cfdb679163393d12c4c7b18a0085a4fc66bfa88`. |
 
 PR #2 merged only after its hosted checks passed. No branch-protection rule or required review was reported by GitHub. PR #1 remains a separate open PR with failed checks at the time of this audit and was not merged. The final merge does not complete the remaining Phase 2A security, payment recovery, Admin Orders, or full-platform verification work.
 
