@@ -1,0 +1,6 @@
+[
+  {
+    "name": "api-health-readiness",
+    "path": "/api/v1/health"
+  }
+]

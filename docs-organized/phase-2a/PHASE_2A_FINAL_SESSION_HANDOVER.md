@@ -5,21 +5,21 @@
 
 ## Executive summary
 
-The two source worktrees and all their changes remain preserved. A verified external backup matched 320/320 dirty-file snapshots. A clean topic worktree was created from the current `origin/main` SHA `5ab6dba62287ddd404ce00529f5fe99220ccdc19`. One narrow source/configuration correction was committed as `dcdcbe9` and pushed in PR #3. Its localhost guardrail passes; its URL/domain smoke check passed after the initial handover snapshot. No uncommitted source changes were transferred from either original worktree, and nothing has been merged to `main`.
+The two source worktrees and all their changes remain preserved. A verified external backup matched 320/320 dirty-file snapshots. A clean topic worktree was created from `origin/main` SHA `5ab6dba62287ddd404ce00529f5fe99220ccdc19`, then merged the refreshed main at `1cfdb679163393d12c4c7b18a0085a4fc66bfa88`. Main now contains the missing-production-config correction (`5d32752`) from another merged PR. PR #3 contains overlapping copies of that correction plus the explicit `POS_QA_BASE_URL` requirement and handover docs; its checks passed before main advanced, then GitHub reported mergeability as conflicting/unknown. No uncommitted source changes were transferred from either original worktree. The Dashboard config correction is now integrated to main through a separate merged PR; no WS02 consolidation changes are confirmed merged.
 
 PR #1 remains open on `codex/ws02-final-security-closure` at `9cb9a288ff3538c68e11caa2be9f50dd79cf8ee2`; its last recorded required checks failed before PR #3. No branch-protection rule was returned by GitHub's API (HTTP 404), but the protected-main PR-only workflow remains in force. The source currently disables Super Admin tenant handoff: UI disabled, API returns 503, original Super Admin session retained, no tenant-owner session created.
 
 ## Git baseline and preservation
 
 - Repository: `https://github.com/Yousef-Abdallah-1711/pos`
-- Latest fetched `origin/main`: `5ab6dba62287ddd404ce00529f5fe99220ccdc19`
+- Latest fetched `origin/main`: `1cfdb679163393d12c4c7b18a0085a4fc66bfa88` (includes `5d32752` production config fix)
 - Primary source: `H:\Projects\pos`, branch `codex/phase2a-continuation`, HEAD `ecadb5ab7665df3eb9f69886a9b186c710eff62d`, 260 dirty paths.
 - Security source: `H:\ws02`, branch `codex/ws02-final-security-closure`, HEAD `9cb9a288ff3538c68e11caa2be9f50dd79cf8ee2`, 60 dirty paths.
 - Five dirty-path overlaps: `backend/cmd/api/main.go`, `backend/internal/handler/http/product_handler.go`, `PHASE_2A_EXECUTION_TRACKER.md`, `PHASE_2A_REMAINING_BLOCKERS.md`, `WS02_TENANT_ISOLATION_REPORT.md`.
 - Backup: `C:\Users\yosea\.codex\backups\poos-phase2a-consolidation-20261104-213732`; prior checksum verification matched all 320 files with no errors. Keep it private and local.
 - Consolidation worktree: `H:\pos-phase2a-integration`, branch `codex/phase2a-final-consolidation`, based on the above main SHA.
 - PR #1: https://github.com/Yousef-Abdallah-1711/pos/pull/1 (open; WS02 security changes; last observed checks failed).
-- PR #3: https://github.com/Yousef-Abdallah-1711/pos/pull/3 (open; `dcdcbe9`; guardrail passed, URL/domain smoke pending at handover).
+- PR #3: https://github.com/Yousef-Abdallah-1711/pos/pull/3 (open; contains `dcdcbe9` and `9e57120`; both checks passed before main advanced; afterward GitHub reported `CONFLICTING`/`UNKNOWN` and no checks).
 - Unrelated Phase 2C worktree/branch remains preserved and excluded.
 
 The CSV reconciliation manifest contains all 320 dirty paths with their source worktree, branch/HEAD, provisional path-based classification, and explicit not-integrated disposition. It is not a per-hunk safety review; each selected file still needs ownership/dependency review. Do not interpret the provisional classifications as approval to publish.
@@ -33,7 +33,7 @@ The CSV reconciliation manifest contains all 320 dirty paths with their source w
 | WS03 Payments | Existing implementation only | Historical tests only; no new verification | Existing baseline only | Provider/local reconciliation remains open; scope deferred | DEFERRED |
 | WS04 Frontend Recovery | Earlier reports document four-app recovery; this run fixed Dashboard production missing-config behavior | Dashboard resolver 4/4 and Go suite passed on clean branch; no four-app regression rerun | Only historical baseline; current fix in PR #3 | Run full four-app regression on combined changes | PARTIAL |
 | WS05 Isolated E2E Infrastructure | Disposable stack and journeys exist in dirty worktree/earlier reports | Current execution did not rerun Playwright or reseed/teardown | No new WS05 changes merged | Verify repeatable full-stack fixture and all journeys after selecting changes | PARTIAL |
-| WS06 CI | CI expansion excluded; existing guardrail issue addressed in PR #3 | PR #3 guardrail passed; URL smoke pending at handover | No new changes merged | Wait for PR #3; do not broaden workflows | DEFERRED (targeted baseline fix in review) |
+| WS06 CI | CI expansion excluded; existing guardrail issue addressed in PR #3 | PR #3 guardrail passed; URL smoke pending at handover | Targeted config/guardrail fixes are integrated in latest main (`5d32752`); CI expansion remains deferred | Do not broaden workflows | DEFERRED (targeted baseline fix in review) |
 | WS07 Backend Architecture | Existing route extraction work in dirty tree | No route parity run during this consolidation | No new extraction merged | Verify full route/middleware/authz parity | PARTIAL |
 | WS08 Frontend Architecture | Shared contract changes are in dirty tree | No combined frontend regression run | No new refactor merged | Review and test shared contracts | PARTIAL |
 | WS09 Engineering Foundations | Prior reports record partial typed errors/logging/cancellation/shutdown work | Consolidation Go build/vet/default tests passed on clean main plus config fix | No new WS09 implementation merged | Review dirty changes and verify HTTP/worker lifecycle behavior | PARTIAL |

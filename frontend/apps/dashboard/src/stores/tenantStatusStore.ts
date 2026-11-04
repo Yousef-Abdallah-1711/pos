@@ -4,6 +4,21 @@ import { create } from 'zustand'
 import { TenantStatusState, TenantStatusResponse, SubscriptionStatus } from '@/types/tenant-status'
 import { api } from '@/lib/api'
 import { debugLog, debugError, debugWarn } from '@/lib/debug'
+import { useAuthStore } from '@/stores/authStore'
+import { createAuthenticatedScopeKey, dedupeInFlightRequest } from '@/lib/notificationRequestCache'
+
+export function fetchTenantStatus() {
+  const user = useAuthStore.getState().user
+  const scopeKey = createAuthenticatedScopeKey({
+    tenantId: user?.tenant_id ?? user?.tenantId,
+    restaurantId: user?.restaurant_id ?? user?.restaurantId,
+    userId: user?.id,
+  })
+  return dedupeInFlightRequest(
+    `${scopeKey}:tenant-status`,
+    () => api.get<TenantStatusResponse>('/tenant/status')
+  )
+}
 
 interface TenantStatusStoreState extends TenantStatusState {
   setStatus: (status: Partial<TenantStatusState>) => void
@@ -44,7 +59,7 @@ export const useTenantStatusStore = create<TenantStatusStoreState>((set) => ({
     set({ isLoading: true, error: null })
     try {
       debugLog('[TenantStatusStore] Checking tenant status...')
-      const response = await api.get<TenantStatusResponse>('/tenant/status')
+      const response = await fetchTenantStatus()
 
       if (response.data.success) {
         const data = response.data.data
