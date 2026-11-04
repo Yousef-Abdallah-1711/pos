@@ -13,7 +13,7 @@ The post-fix Dashboard profile and a corrected populated Storefront profile are 
 
 The Admin Orders candidate remains isolated from Phase 2A’s active, uncommitted changes to the same handler, repository, and use-case files in `H:\ws02`. Its SQL-mock test and general Go suite pass, but the required before/after query-count and latency benchmark was not run, so no measured Admin Orders improvement is claimed. The safe next action is for the Phase 2A owner to release those paths or review and accept the candidate, followed by the required benchmark.
 
-No commit, push, pull request, or merge has been made yet. `origin/main` was fetched and remains at the base SHA above. The candidate is not declared complete or merged.
+The verified candidate has been committed and pushed for review in draft [PR #7](https://github.com/Yousef-Abdallah-1711/pos/pull/7). It is not merged. `origin/main` was fetched and remains at the base SHA above. The candidate is not declared complete or merged.
 
 ## Performance evidence
 
@@ -56,10 +56,14 @@ The historical recovery report records Redis tenant isolation checks across two 
 
 - Candidate branch: `codex/phase2c-final`, based on `e400400b671437df275f686a84aa644e5b5a1811`.
 - Current `origin/main`: `e400400b671437df275f686a84aa644e5b5a1811` at last fetch.
-- Candidate commits: none.
-- PR / hosted CI: none.
+- Candidate commits:
+  - `37e47c9` — `perf(storefront): coalesce concurrent theme reads`
+  - `7dc13be` — `perf(orders): batch admin order item counts`
+  - `0402afe` — `docs(perf): record Phase 2C final evidence and blockers`
+- PR: [#7](https://github.com/Yousef-Abdallah-1711/pos/pull/7), draft, targets `main`.
+- Hosted CI at initial PR check: `runtime-localhost-guardrail` passed; `url-domain-config-smoke` was still running. Checks must be re-read after the final report commit.
 - Merge commit / verified post-merge SHA: none.
-- Candidate source changes and final artifacts are still local and uncommitted.
+- Source and evidence are committed and pushed; the worktree is clean before this report update.
 - No credentials, browser storage state, or raw customer data were added to the evidence files.
 
 ## Outstanding work and ownership
