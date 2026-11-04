@@ -2,7 +2,7 @@
 
 **Date:** 2026-11-04
 **Consolidation branch:** `codex/phase2a-final-consolidation`
-**Latest base:** `origin/main` `1cfdb679163393d12c4c7b18a0085a4fc66bfa88` (original test base: `5ab6dba62287ddd404ce00529f5fe99220ccdc19`)
+**Latest base:** `origin/main` `be245f76a3e41ce656d51189dc995e4f2b47699b` (latest fetched; test head synced through `1cfdb67`) (original test base: `5ab6dba62287ddd404ce00529f5fe99220ccdc19`)
 **Commits:** `dcdcbe9` source fix, `9e57120` handover; latest main contains equivalent config correction in `5d32752`
 **PR:** https://github.com/Yousef-Abdallah-1711/pos/pull/3
 
@@ -34,4 +34,4 @@ No PostgreSQL/Redis WS02 matrix, four-app frontend regression, full builds, or P
 
 ## Decision
 
-This is a narrow reviewable baseline-fix PR, not the Phase 2A consolidation. The prior-base checks passed, but current PR #3 has not been reverified against the advanced base and is not merge-ready. The config fix is already on main through another merged PR.
+This is a narrow reviewable baseline-fix PR, not the Phase 2A consolidation. The check suite passed on `1d303fb` after a main sync; the local branch then synced `be245f7`. Verify checks after the new push. The config fix is already on main through another merged PR.

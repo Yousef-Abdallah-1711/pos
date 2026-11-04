@@ -5,14 +5,14 @@
 
 ## Executive summary
 
-The two source worktrees and all their changes remain preserved. A verified external backup matched 320/320 dirty-file snapshots. A clean topic worktree was created from `origin/main` SHA `5ab6dba62287ddd404ce00529f5fe99220ccdc19`, then merged the refreshed main at `1cfdb679163393d12c4c7b18a0085a4fc66bfa88`. Main now contains the missing-production-config correction (`5d32752`) from another merged PR. PR #3 contains overlapping copies of that correction plus the explicit `POS_QA_BASE_URL` requirement and handover docs; its checks passed before main advanced, then GitHub reported mergeability as conflicting/unknown. No uncommitted source changes were transferred from either original worktree. The Dashboard config correction is now integrated to main through a separate merged PR; no WS02 consolidation changes are confirmed merged.
+The two source worktrees and all their changes remain preserved. A verified external backup matched 320/320 dirty-file snapshots. A clean topic worktree was created from `origin/main` SHA `5ab6dba62287ddd404ce00529f5fe99220ccdc19`, then merged the refreshed main at `be245f76a3e41ce656d51189dc995e4f2b47699b`. Main now contains the missing-production-config correction (`5d32752`) from another merged PR. PR #3 contains overlapping copies of that correction plus the explicit `POS_QA_BASE_URL` requirement and handover docs; its checks passed before main advanced, after syncing the latest main, GitHub reported CLEAN/MERGEABLE with both checks passing; the source-tree config fix is already in main. No uncommitted source changes were transferred from either original worktree. The Dashboard config correction is now integrated to main through a separate merged PR; no WS02 consolidation changes are confirmed merged.
 
 PR #1 remains open on `codex/ws02-final-security-closure` at `9cb9a288ff3538c68e11caa2be9f50dd79cf8ee2`; its last recorded required checks failed before PR #3. No branch-protection rule was returned by GitHub's API (HTTP 404), but the protected-main PR-only workflow remains in force. The source currently disables Super Admin tenant handoff: UI disabled, API returns 503, original Super Admin session retained, no tenant-owner session created.
 
 ## Git baseline and preservation
 
 - Repository: `https://github.com/Yousef-Abdallah-1711/pos`
-- Latest fetched `origin/main`: `1cfdb679163393d12c4c7b18a0085a4fc66bfa88` (includes `5d32752` production config fix)
+- Latest fetched `origin/main`: `be245f76a3e41ce656d51189dc995e4f2b47699b` (includes `5d32752` production config fix)
 - Primary source: `H:\Projects\pos`, branch `codex/phase2a-continuation`, HEAD `ecadb5ab7665df3eb9f69886a9b186c710eff62d`, 260 dirty paths.
 - Security source: `H:\ws02`, branch `codex/ws02-final-security-closure`, HEAD `9cb9a288ff3538c68e11caa2be9f50dd79cf8ee2`, 60 dirty paths.
 - Five dirty-path overlaps: `backend/cmd/api/main.go`, `backend/internal/handler/http/product_handler.go`, `PHASE_2A_EXECUTION_TRACKER.md`, `PHASE_2A_REMAINING_BLOCKERS.md`, `WS02_TENANT_ISOLATION_REPORT.md`.
