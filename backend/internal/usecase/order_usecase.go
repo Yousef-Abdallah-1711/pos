@@ -304,6 +304,11 @@ func (uc *OrderUseCase) ListOrders(tenantID, restaurantID int64, filters *domain
 	return response, nil
 }
 
+// GetOrderItemCounts retrieves item counts for a page without loading each order separately.
+func (uc *OrderUseCase) GetOrderItemCounts(tenantID, restaurantID int64, orderIDs []int64) (map[int64]int, error) {
+	return uc.orderRepo.GetOrderItemCounts(tenantID, restaurantID, orderIDs)
+}
+
 // UpdateOrderStatus updates an order's status with validation
 func (uc *OrderUseCase) UpdateOrderStatus(
 	tenantID, restaurantID, orderID int64,

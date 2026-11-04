@@ -4,6 +4,7 @@ import (
 	"encoding/csv"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -178,39 +179,41 @@ func (h *AdminOrderHandler) ListOrders(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	orderIDs := make([]int64, 0, len(response.Orders))
+	for _, order := range response.Orders {
+		orderIDs = append(orderIDs, order.ID)
+	}
+	itemCounts, countErr := h.orderUC.GetOrderItemCounts(tenantID, restaurantID, orderIDs)
+	if countErr != nil {
+		// Match the previous per-order fallback: keep the list available with zero item counts.
+		log.Printf("[AdminOrders] failed to load item counts: tenant=%d restaurant=%d err=%v", tenantID, restaurantID, countErr)
+		itemCounts = map[int64]int{}
+	}
+
 	orders := make([]adminOrderSummary, 0, len(response.Orders))
 	for _, order := range response.Orders {
-		orderForResponse := &order
-		itemsCount := 0
-
-		fullOrder, err := h.orderUC.GetOrder(tenantID, restaurantID, order.ID)
-		if err == nil {
-			orderForResponse = fullOrder
-			itemsCount = len(fullOrder.Items)
-		}
-
 		orders = append(orders, adminOrderSummary{
-			ID:              orderForResponse.ID,
-			OrderNumber:     orderForResponse.OrderNumber,
-			OrderSource:     orderForResponse.OrderSource,
-			CustomerName:    orderForResponse.CustomerName,
-			CustomerEmail:   orderForResponse.CustomerEmail,
-			CustomerPhone:   orderForResponse.CustomerPhone,
-			DeliveryAddress: orderForResponse.DeliveryAddress,
-			TableID:         orderForResponse.TableID,
-			TableNumber:     orderForResponse.TableNumber,
-			TableName:       orderForResponse.TableName,
-			TableLocation:   orderForResponse.TableLocation,
-			Status:          orderForResponse.Status,
-			PaymentStatus:   orderForResponse.PaymentStatus,
-			PaymentMethod:   orderForResponse.PaymentMethod,
-			Subtotal:        orderForResponse.Subtotal,
-			Tax:             orderForResponse.TaxAmount,
-			DeliveryFee:     orderForResponse.DeliveryFee,
-			Discount:        orderForResponse.DiscountAmount,
-			Total:           orderForResponse.TotalAmount,
-			ItemsCount:      itemsCount,
-			CreatedAt:       orderForResponse.CreatedAt,
+			ID:              order.ID,
+			OrderNumber:     order.OrderNumber,
+			OrderSource:     order.OrderSource,
+			CustomerName:    order.CustomerName,
+			CustomerEmail:   order.CustomerEmail,
+			CustomerPhone:   order.CustomerPhone,
+			DeliveryAddress: order.DeliveryAddress,
+			TableID:         order.TableID,
+			TableNumber:     order.TableNumber,
+			TableName:       order.TableName,
+			TableLocation:   order.TableLocation,
+			Status:          order.Status,
+			PaymentStatus:   order.PaymentStatus,
+			PaymentMethod:   order.PaymentMethod,
+			Subtotal:        order.Subtotal,
+			Tax:             order.TaxAmount,
+			DeliveryFee:     order.DeliveryFee,
+			Discount:        order.DiscountAmount,
+			Total:           order.TotalAmount,
+			ItemsCount:      itemCounts[order.ID],
+			CreatedAt:       order.CreatedAt,
 		})
 	}
 

@@ -5,9 +5,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"pos-saas/internal/domain"
 	"strings"
 	"time"
+
+	"github.com/lib/pq"
+
+	"pos-saas/internal/domain"
 )
 
 // OrderRepository handles order data operations
@@ -270,8 +273,8 @@ func (r *OrderRepository) ListOrders(tenantID, restaurantID int64, filters *doma
 	query := `
 		SELECT DISTINCT
 			o.id, o.tenant_id, o.restaurant_id, o.order_number, o.customer_name, o.customer_email,
-			o.customer_phone, o.subtotal, o.tax_amount, o.discount_amount, o.delivery_fee,
-			o.total_amount, o.payment_status, o.status, o.order_source, o.table_id,
+			o.customer_phone, o.delivery_address, o.subtotal, o.tax_amount, o.discount_amount, o.delivery_fee,
+			o.total_amount, o.payment_method, o.payment_status, o.status, o.order_source, o.table_id,
 			t.table_number, COALESCE(t.name, ''), COALESCE(t.location, ''), t.capacity,
 			o.created_at, o.updated_at
 	` + baseQuery
@@ -397,7 +400,7 @@ func (r *OrderRepository) ListOrders(tenantID, restaurantID int64, filters *doma
 	orders := make([]domain.Order, 0)
 	for rows.Next() {
 		order := domain.Order{}
-		var customerEmail sql.NullString
+		var customerEmail, deliveryAddress, paymentMethod sql.NullString
 		var tableID sql.NullInt64
 		var tableNumber sql.NullInt32
 		var tableName sql.NullString
@@ -407,8 +410,8 @@ func (r *OrderRepository) ListOrders(tenantID, restaurantID int64, filters *doma
 		err := rows.Scan(
 			&order.ID, &order.TenantID, &order.RestaurantID, &order.OrderNumber,
 			&order.CustomerName, &customerEmail,
-			&order.CustomerPhone, &order.Subtotal, &order.TaxAmount, &order.DiscountAmount,
-			&order.DeliveryFee, &order.TotalAmount, &order.PaymentStatus, &order.Status,
+			&order.CustomerPhone, &deliveryAddress, &order.Subtotal, &order.TaxAmount, &order.DiscountAmount,
+			&order.DeliveryFee, &order.TotalAmount, &paymentMethod, &order.PaymentStatus, &order.Status,
 			&order.OrderSource, &tableID, &tableNumber, &tableName, &tableLocation, &tableCapacity,
 			&order.CreatedAt, &order.UpdatedAt,
 		)
@@ -419,6 +422,12 @@ func (r *OrderRepository) ListOrders(tenantID, restaurantID int64, filters *doma
 
 		if customerEmail.Valid {
 			order.CustomerEmail = customerEmail.String
+		}
+		if deliveryAddress.Valid {
+			order.DeliveryAddress = deliveryAddress.String
+		}
+		if paymentMethod.Valid {
+			order.PaymentMethod = paymentMethod.String
 		}
 		if tableID.Valid {
 			order.TableID = &tableID.Int64
@@ -465,6 +474,48 @@ func (r *OrderRepository) ListOrders(tenantID, restaurantID int64, filters *doma
 		Limit:  limit,
 		Pages:  pages,
 	}, nil
+}
+
+// GetOrderItemCounts returns item counts for a page of orders in one scoped query.
+func (r *OrderRepository) GetOrderItemCounts(tenantID, restaurantID int64, orderIDs []int64) (map[int64]int, error) {
+	counts := make(map[int64]int, len(orderIDs))
+	if len(orderIDs) == 0 {
+		return counts, nil
+	}
+
+	query := `
+		SELECT oi.order_id, COUNT(*)
+		FROM order_items oi
+		JOIN orders o
+		  ON o.id = oi.order_id
+		 AND o.tenant_id = oi.tenant_id
+		 AND o.restaurant_id = oi.restaurant_id
+		WHERE o.tenant_id = $1
+		  AND o.restaurant_id = $2
+		  AND oi.tenant_id = $1
+		  AND oi.restaurant_id = $2
+		  AND oi.order_id = ANY($3)
+		GROUP BY oi.order_id
+	`
+
+	rows, err := r.db.Query(query, tenantID, restaurantID, pq.Array(orderIDs))
+	if err != nil {
+		return nil, fmt.Errorf("failed to get order item counts: %w", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var orderID int64
+		var count int
+		if err := rows.Scan(&orderID, &count); err != nil {
+			return nil, fmt.Errorf("failed to scan order item count: %w", err)
+		}
+		counts[orderID] = count
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("failed to iterate order item counts: %w", err)
+	}
+	return counts, nil
 }
 
 // UpdateOrderStatus updates the status of an order
@@ -902,7 +953,6 @@ func (r *OrderRepository) DeleteOrder(tenantID, restaurantID, orderID int64) err
 	// We prefer to cancel orders rather than delete them for audit trail
 	return r.CancelOrder(tenantID, restaurantID, orderID, "Deleted by admin")
 }
-
 
 // SetPublicTokenHash stores the hash of the public tracking token for an order.
 func (r *OrderRepository) SetPublicTokenHash(tenantID, restaurantID, orderID int64, hash string) error {
