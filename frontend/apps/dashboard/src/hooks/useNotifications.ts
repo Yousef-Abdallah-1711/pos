@@ -2,6 +2,12 @@ import { useState, useEffect, useCallback } from 'react'
 import { api } from '@/lib/api'
 import { apiCache } from '@/lib/apiCache'
 import { debugError } from '@/lib/debug'
+import { useAuthStore } from '@/stores/authStore'
+import {
+  createNotificationCacheKey,
+  createNotificationScopeKey,
+  dedupeInFlightRequest,
+} from '@/lib/notificationRequestCache'
 
 export type NotificationType = 'low_stock' | 'order' | 'employee' | 'leave' | 'inventory' | 'attendance' | 'system'
 export type NotificationModule = 'products' | 'orders' | 'hr' | 'inventory' | 'system'
@@ -55,6 +61,23 @@ export interface NotificationFilters {
   order?: string
 }
 
+function getCurrentNotificationScope() {
+  const user = useAuthStore.getState().user
+  return {
+    tenantId: user?.tenant_id ?? user?.tenantId,
+    restaurantId: user?.restaurant_id ?? user?.restaurantId,
+    userId: user?.id,
+  }
+}
+
+function getCurrentNotificationScopeKey(): string {
+  return createNotificationScopeKey(getCurrentNotificationScope())
+}
+
+function getNotificationCacheKey(filters: NotificationFilters): string {
+  return createNotificationCacheKey(getCurrentNotificationScope(), filters)
+}
+
 export function useNotifications() {
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [unreadCount, setUnreadCount] = useState(0)
@@ -70,7 +93,8 @@ export function useNotifications() {
         setError(null)
 
         // Check cache first if not forcing refresh
-        const cacheKey = `notifications_${JSON.stringify(filters)}`
+        const scopeKey = getCurrentNotificationScopeKey()
+        const cacheKey = getNotificationCacheKey(filters)
         if (!forceRefresh) {
           const cached = apiCache.get(cacheKey)
           if (cached) {
@@ -94,13 +118,16 @@ export function useNotifications() {
         if (filters.order) params.append('order', filters.order)
 
         // Fetch from API
-        const response = await api.get<NotificationListResponse>(
-          `/notifications?${params.toString()}`
+        const data = await dedupeInFlightRequest(
+          `${scopeKey}:notifications:${JSON.stringify(filters)}`,
+          async () => {
+            const response = await api.get<NotificationListResponse>(
+              `/notifications?${params.toString()}`
+            )
+            apiCache.set(cacheKey, response.data, 300000)
+            return response.data
+          }
         )
-        const data = response.data
-
-        // Cache for 5 minutes (300000ms)
-        apiCache.set(cacheKey, data, 300000)
 
         setNotifications(data.notifications)
         setUnreadCount(data.unread)
@@ -119,8 +146,11 @@ export function useNotifications() {
 
   const fetchStats = useCallback(async () => {
     try {
-      const response = await api.get<NotificationStats>('/notifications/stats')
-      setStats(response.data)
+      const data = await dedupeInFlightRequest(
+        `${getCurrentNotificationScopeKey()}:notifications:stats`,
+        async () => (await api.get<NotificationStats>('/notifications/stats')).data
+      )
+      setStats(data)
     } catch (err) {
       debugError('Failed to fetch notification stats:', err)
     }
@@ -128,8 +158,11 @@ export function useNotifications() {
 
   const fetchUnreadCount = useCallback(async () => {
     try {
-      const response = await api.get<{ unread: number }>('/notifications/unread-count')
-      setUnreadCount(response.data.unread)
+      const data = await dedupeInFlightRequest(
+        `${getCurrentNotificationScopeKey()}:notifications:unread-count`,
+        async () => (await api.get<{ unread: number }>('/notifications/unread-count')).data
+      )
+      setUnreadCount(data.unread)
     } catch (err) {
       debugError('Failed to fetch unread count:', err)
     }
@@ -151,7 +184,7 @@ export function useNotifications() {
         setUnreadCount((prev) => Math.max(0, prev - 1))
 
         // Invalidate cache
-        apiCache.clear('notifications_{}')
+        apiCache.clear(getNotificationCacheKey({}))
 
         // Fetch fresh unread count
         await fetchUnreadCount()
@@ -178,7 +211,7 @@ export function useNotifications() {
         setUnreadCount((prev) => prev + 1)
 
         // Invalidate cache
-        apiCache.clear('notifications_{}')
+        apiCache.clear(getNotificationCacheKey({}))
 
         // Fetch fresh unread count
         await fetchUnreadCount()
@@ -202,7 +235,7 @@ export function useNotifications() {
       setUnreadCount(0)
 
       // Invalidate cache
-      apiCache.clear('notifications_{}')
+      apiCache.clear(getNotificationCacheKey({}))
 
       // Fetch fresh data
       await fetchStats()
@@ -241,7 +274,7 @@ export function useNotifications() {
   )
 
   const clearAllCaches = useCallback(() => {
-    apiCache.clear('notifications_{}')
+    apiCache.clear(getNotificationCacheKey({}))
   }, [])
 
   // Initial fetch on mount
