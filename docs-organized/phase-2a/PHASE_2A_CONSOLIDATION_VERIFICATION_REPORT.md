@@ -3,7 +3,7 @@
 **Date:** 2026-11-04
 **Consolidation branch:** `codex/phase2a-final-consolidation`
 **Latest base:** `origin/main` `e400400b671437df275f686a84aa644e5b5a1811` (includes merged Phase 2C recovery report PR #6) (latest fetched; test head synced through `1cfdb67`) (original test base: `5ab6dba62287ddd404ce00529f5fe99220ccdc19`)
-**Head:** `1f3605363bbb290849d7f7199f1315d4336f82ef`; includes sync and documentation commits. Latest main contains the equivalent config correction in `5d32752`.
+**Latest pushed head observed before this report update:** `f28ab9f8581b7b0f78572076ebf2293c27156d05`. Latest main contains the equivalent config correction in `5d32752`.
 **PR:** https://github.com/Yousef-Abdallah-1711/pos/pull/3
 
 ## Changes verified
@@ -24,14 +24,14 @@
 | `go test -count=1 ./...` in `golang:1.24` disposable container | PASS; all test-bearing packages shown passed |
 | `git diff --check` / staged diff check | PASS |
 | PR #3 hosted guardrail | PASS |
-| PR #3 hosted URL/domain smoke | PASS (completed 2026-11-04 19:56:36Z) |
+| PR #3 hosted URL/domain smoke | PASS on latest observed head |
 
 Go commands mounted only the clean consolidation worktree backend directory into disposable `--rm` containers. Default Go tests do not establish PostgreSQL integration coverage.
 
 ## Not verified
 
-No PostgreSQL/Redis WS02 matrix, four-app frontend regression, full builds, or Playwright E2E was run on this consolidated branch. The full URL/domain smoke was pending in GitHub; the local environment-template portion passed, but Go was unavailable on the host. PR #1 remains open and its latest observed hosted checks were failures prior to the PR #3 fix.
+No PostgreSQL/Redis WS02 matrix, four-app frontend regression, full builds, or Playwright E2E was run on this consolidated branch. PR #3 latest observed checks pass. PR #1 remains open with its last observed checks red and its base still reported as the older main SHA.
 
 ## Decision
 
-This is a narrow reviewable baseline-fix PR, not the Phase 2A consolidation. The check suite passed on head `1f36053` after syncing base `be245f7`. The config fix is already on main through another merged PR; PR #3 carries the explicit QA URL safeguard and handover docs.
+This is a narrow reviewable PR, not the Phase 2A consolidation. The check suite passed on head `f28ab9f` (base `be245f7` last reported by GitHub). Current `origin/main` was `e400400`. PR #3 carries the explicit QA URL safeguard and handover docs; the config fix is already on main. Repository coding standards require one approval, which was not recorded at handover.
