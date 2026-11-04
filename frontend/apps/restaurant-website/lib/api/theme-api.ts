@@ -23,7 +23,9 @@ export class ThemeApiError extends Error {
  * @returns Promise<ThemeData>
  * @throws {ThemeApiError} if fetch fails
  */
-export async function getThemeBySlug(slug: string): Promise<ThemeData> {
+const inFlightThemeRequests = new Map<string, Promise<ThemeData>>()
+
+async function fetchThemeBySlug(slug: string): Promise<ThemeData> {
   try {
     if (!slug) {
       throw new ThemeApiError('Theme slug is required', slug)
@@ -67,6 +69,30 @@ export async function getThemeBySlug(slug: string): Promise<ThemeData> {
       statusCode
     )
   }
+}
+
+/** Coalesce concurrent theme reads so multiple components share one request. */
+export function getThemeBySlug(slug: string): Promise<ThemeData> {
+  if (!slug) {
+    return Promise.reject(new ThemeApiError('Theme slug is required', slug))
+  }
+
+  const existingRequest = inFlightThemeRequests.get(slug)
+  if (existingRequest) {
+    return existingRequest
+  }
+
+  const request = fetchThemeBySlug(slug)
+  inFlightThemeRequests.set(slug, request)
+  void request.then(
+    () => {
+      if (inFlightThemeRequests.get(slug) === request) inFlightThemeRequests.delete(slug)
+    },
+    () => {
+      if (inFlightThemeRequests.get(slug) === request) inFlightThemeRequests.delete(slug)
+    }
+  )
+  return request
 }
 
 /**
