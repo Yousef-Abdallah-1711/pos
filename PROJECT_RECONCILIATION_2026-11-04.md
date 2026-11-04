@@ -4,7 +4,7 @@
 
 `origin/main` was `5ab6dba62287ddd404ce00529f5fe99220ccdc19` after fetch. The repository is **not production-ready**. Phase 2C has a separately verified Dashboard hook-order recovery, request coalescing, Audit Logs correction, and reusable local measurement scripts. Phase 2A security work remains in flight, and the current Super Admin authentication handoff is intentionally disabled pending a restricted support-session design. Admin Orders batch hydration is still blocked by overlapping Phase 2A ownership.
 
-Seven reviewable commits have been assembled on `codex/reconcile-completed`, based directly on `origin/main`. The branch includes the verified Phase 2C changes, Sidebar recovery, two narrow fixes for already failing CI guardrails, and safe performance tooling. It does not include the large dirty Phase 2A/WS02 working-tree diffs or the separate restaurant redesign branch. This report records the pre-integration GitHub state; update the PR and final remote SHA below after hosted CI completes.
+Seven reviewable commits were assembled on `codex/reconcile-completed`, based directly on `origin/main`, and merged through PR #2 after both hosted checks passed. The branch includes the verified Phase 2C changes, Sidebar recovery, two narrow fixes for already failing CI guardrails, and safe performance tooling. It does not include the large dirty Phase 2A/WS02 working-tree diffs or the separate restaurant redesign branch. The verified merge commit is `435d23cb39cc71990a785908ee2ab4296d0490f3`.
 
 **Release decision: NO-GO.** Two checks on existing PR #1 failed, the PR has no recorded approval, Phase 2A P0 authentication remains blocked, Go verification cannot run on this host, and a full platform regression was not performed.
 
@@ -74,12 +74,14 @@ These are focused checks, not a full platform regression or production readiness
 | Integration branch | `codex/reconcile-completed` |
 | Base | fetched `origin/main` `5ab6dba62287ddd404ce00529f5fe99220ccdc19` |
 | Local integration commits | `e5829c5`, `cf42a3a`, `cdcef63`, `a0413b7`, `e1b59af`, `5d32752`, `1378b39` |
-| Pull request | Pending push and creation |
-| Required hosted checks | Pending on this branch; existing PR #1 had two failures at inventory |
+| Pull request | [PR #2](https://github.com/Yousef-Abdallah-1711/pos/pull/2), merged |
+| Hosted checks | `runtime-localhost-guardrail` and `url-domain-config-smoke` passed |
 | Branch protection | GitHub API reported `main` branch not protected |
-| Merge commit / final `origin/main` | Not available; do not claim main is updated |
+| Review decision | No review decision was recorded; no branch-protection review requirement was configured |
+| Merge commit | `435d23cb39cc71990a785908ee2ab4296d0490f3` |
+| Final fetched `origin/main` | `435d23cb39cc71990a785908ee2ab4296d0490f3`; matches the PR merge commit |
 
-The safe next step is to push this review branch and open a PR, then wait for checks and review. Merge only after hosted checks pass and the required review gate is satisfied; do not bypass protection or merge the unrelated PR #1 while its checks fail.
+PR #2 merged only after its hosted checks passed. No branch-protection rule or required review was reported by GitHub. PR #1 remains a separate open PR with failed checks at the time of this audit and was not merged. The final merge does not complete the remaining Phase 2A security, payment recovery, Admin Orders, or full-platform verification work.
 
 ## Prioritized outstanding backlog
 
