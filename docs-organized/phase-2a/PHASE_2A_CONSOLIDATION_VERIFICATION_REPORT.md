@@ -48,4 +48,4 @@ The logout journey confirmed an HTTP 401 from `/auth/session` after logout and a
 
 ## Decision
 
-This is a narrow reviewable PR, not the Phase 2A consolidation. At the latest fetch, PR #3 head was `1bfabef` and current `origin/main` was `e400400`; its two hosted checks passed but no review approval was recorded. PR #3 carries the explicit QA URL safeguard and handover docs; the config fix is already on main. Repository coding standards require one approval. The focused authentication follow-up above is local evidence only and is not part of this PR.
+This is a narrow reviewable PR, not the Phase 2A consolidation. Before this docs-only follow-up, PR #3 head was `1bfabef` and current `origin/main` was `e400400`; both hosted checks passed but no review approval was recorded. The follow-up is now pushed to PR #3 and its checks have restarted. PR #3 carries the explicit QA URL safeguard and handover docs; the config fix is already on main. Repository coding standards require one approval. The focused authentication follow-up above is local evidence only and is not part of this PR.

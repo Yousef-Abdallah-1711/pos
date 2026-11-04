@@ -19,14 +19,14 @@ PR #1 remains open on `codex/ws02-final-security-closure` at `9cb9a288ff3538c68e
 - Backup: `C:\Users\yosea\.codex\backups\poos-phase2a-consolidation-20261104-213732`; prior checksum verification matched all 320 files with no errors. Keep it private and local.
 - Consolidation worktree: `H:\pos-phase2a-integration`, branch `codex/phase2a-final-consolidation`, based on the above main SHA.
 - PR #1: https://github.com/Yousef-Abdallah-1711/pos/pull/1 (open; WS02 security changes; last observed checks failed).
-- PR #3: https://github.com/Yousef-Abdallah-1711/pos/pull/3 (open; latest observed head `1bfabef`; both hosted checks passed; review approval is not recorded).
+- PR #3: https://github.com/Yousef-Abdallah-1711/pos/pull/3 (open; its pre-follow-up head `1bfabef` had both checks passing and no review approval; this handover update has since been pushed as a docs-only commit and its checks restarted).
 - Unrelated Phase 2C worktree/branch remains preserved and excluded.
 
 The CSV reconciliation manifest contains all 320 dirty paths with their source worktree, branch/HEAD, provisional path-based classification, and explicit not-integrated disposition. It is not a per-hunk safety review; each selected file still needs ownership/dependency review. Do not interpret the provisional classifications as approval to publish.
 
 ## Latest authentication verification — 2026-11-04
 
-- Refetched `origin/main`: `e400400b671437df275f686a84aa644e5b5a1811`. PR #3 remains open at `1bfabef1d83c55027250ae27e1ccaa2526f570d1`; its runtime guardrail and URL/domain smoke checks pass, but no independent review approval is recorded. The repository has no other collaborator available to request as reviewer; the PR author cannot approve their own PR.
+- Refetched `origin/main`: `e400400b671437df275f686a84aa644e5b5a1811`. Before the docs-only handover update was pushed, PR #3 was open at `1bfabef1d83c55027250ae27e1ccaa2526f570d1` with both checks passing and no independent review approval. The docs update restarted those checks. The repository has no other collaborator available to request as reviewer; the PR author cannot approve their own PR.
 - PR #1 remains open at `9cb9a288ff3538c68e11caa2be9f50dd79cf8ee2`. It belongs to the WS02 workstream and still shows failed hosted checks. Do not merge it or claim its changes.
 - In the dirty primary checkout only, the root-owned `DashboardLayout` logout handling was hardened to explicitly send the cross-origin cookie and to preserve the signed-in UI when the API returns a non-success status. It is not committed, pushed, or included in PR #3; the source file also contains other uncommitted changes, so it is not safe to stage as a whole-file change.
 - Against the labeled disposable `pos-p2a-ws05-e2e-20261103` stack (PostgreSQL tmpfs), the focused invalid-login journey passed and the logout/session-revocation/protected-route journey passed: **2/2**. The browser observed login/session success, then session 401 after logout, and redirected the next protected visit to Landing login. Both reruns used explicit Landing/Dashboard service routing from the Playwright container.
