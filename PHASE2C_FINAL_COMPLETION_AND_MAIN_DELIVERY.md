@@ -1,11 +1,12 @@
 # Phase 2C Final Completion and Main Delivery
 
-**Status: HANDOFF BLOCKED — independent Storefront work is verified and ready for review; Admin Orders integration and final merge remain blocked by active Phase 2A ownership and missing before/after benchmark evidence.**
+**Status: HANDOFF BLOCKED — independent Storefront optimization is merged; Admin Orders integration and measurement remain blocked by active Phase 2A ownership and missing before/after benchmark evidence.**
 
 Date: 2026-11-05
 Repository: `Yousef-Abdallah-1711/pos`
 Candidate branch: `codex/phase2c-final`
-Candidate base / current `origin/main` at last fetch: `e400400b671437df275f686a84aa644e5b5a1811`
+Candidate base: `e400400b671437df275f686a84aa644e5b5a1811`
+Current `origin/main` after the independent Storefront merge: `d84120559db36e8e9e7fdb73872a30cbc9d4e6e7`
 
 ## Executive summary
 
@@ -13,7 +14,7 @@ The post-fix Dashboard profile and a corrected populated Storefront profile are 
 
 The Admin Orders candidate remains isolated from Phase 2A’s active, uncommitted changes to the same handler, repository, and use-case files in `H:\ws02`. Its SQL-mock test and general Go suite pass, but the required before/after query-count and latency benchmark was not run, so no measured Admin Orders improvement is claimed. The safe next action is for the Phase 2A owner to release those paths or review and accept the candidate, followed by the required benchmark.
 
-The verified candidate has been committed and pushed for review in draft [PR #7](https://github.com/Yousef-Abdallah-1711/pos/pull/7). It is not merged. `origin/main` was fetched and remains at the base SHA above. The candidate is not declared complete or merged.
+The independent Storefront optimization was reviewed by hosted checks and merged in [PR #8](https://github.com/Yousef-Abdallah-1711/pos/pull/8). The broader candidate, including Admin Orders, is committed and pushed for review in draft [PR #7](https://github.com/Yousef-Abdallah-1711/pos/pull/7). PR #7 is not merged. The workstream is not declared complete.
 
 ## Performance evidence
 
@@ -55,14 +56,18 @@ The historical recovery report records Redis tenant isolation checks across two 
 ## Git delivery
 
 - Candidate branch: `codex/phase2c-final`, based on `e400400b671437df275f686a84aa644e5b5a1811`.
-- Current `origin/main`: `e400400b671437df275f686a84aa644e5b5a1811` at last fetch.
+- Current `origin/main`: `d84120559db36e8e9e7fdb73872a30cbc9d4e6e7`, verified after PR #8.
 - Candidate commits:
   - `37e47c9` — `perf(storefront): coalesce concurrent theme reads`
   - `7dc13be` — `perf(orders): batch admin order item counts`
   - `0402afe` — `docs(perf): record Phase 2C final evidence and blockers`
-- PR: [#7](https://github.com/Yousef-Abdallah-1711/pos/pull/7), draft, targets `main`.
-- Hosted CI on the pushed report update: `runtime-localhost-guardrail` passed; `url-domain-config-smoke` passed.
-- Merge commit / verified post-merge SHA: none.
+  - `9b9a682` — `docs(perf): record Phase 2C draft delivery status`
+  - `82ea133` — `docs(perf): record passing hosted checks`
+  - `2b66f02` — merge the verified Storefront `main` tip into the candidate branch.
+- Independent Storefront PR: [#8](https://github.com/Yousef-Abdallah-1711/pos/pull/8), merged at `d84120559db36e8e9e7fdb73872a30cbc9d4e6e7`.
+- Candidate PR: [#7](https://github.com/Yousef-Abdallah-1711/pos/pull/7), draft, targets `main` and contains the Admin Orders candidate plus the full evidence report.
+- Hosted CI on the last checked PR #7 head (`82ea133`): `runtime-localhost-guardrail` passed; `url-domain-config-smoke` passed. The main-tip sync and this report update trigger a fresh check run.
+- Final workstream merge SHA: none; the verified main SHA above contains the independent Storefront change only.
 - Source and evidence are committed and pushed; the worktree is clean before this report update.
 - No credentials, browser storage state, or raw customer data were added to the evidence files.
 
@@ -71,7 +76,7 @@ The historical recovery report records Redis tenant isolation checks across two 
 | Priority | Work | Owner / blocker | Required action |
 | --- | --- | --- | --- |
 | P1 | Integrate Admin Orders candidate | Phase 2A worktree `H:\ws02`, branch `codex/ws02-final-security-closure`, has uncommitted changes in the same `admin_order_handler.go`, `order_repo.go`, and `order_usecase.go` paths (and order integration-test paths). | Phase 2A owner releases those files or reviews/accepts the candidate. Reconcile on an isolated integration candidate, rerun focused tests, then run comparable 1/10/25/50 query-count, latency, payload, result-equality, tenant, and restaurant benchmarks. |
-| P1 | Commit, push, PR, hosted checks, and merge | Not started; Admin Orders candidate lacks required measurements and has active overlapping ownership. | After the P1 dependency is resolved and evidence is complete, commit focused changes, push, open PR, satisfy required CI/review, merge without bypass, then fetch and verify `origin/main`. |
+| P1 | Complete Admin Orders delivery | Candidate PR #7 is draft; its code is committed and pushed but lacks required measurements and has active overlapping ownership. | After the P1 ownership dependency is resolved, run the required benchmark/isolation checks, update PR #7, satisfy CI/review, merge without bypass, then fetch and verify `origin/main`. |
 | P2 | Remove remaining theme 404 in synthetic profile | Disposable database fixture lacks `warm-comfort`; application fallback works. | If another profile is needed, seed a valid synthetic theme in the disposable database, then re-run cart and checkout captures. No application change is implied by this fixture-only issue. |
 | P2 | Review Dashboard CLS / POS timing | Dashboard measurements show cold home CLS 0.380 and warm POS LCP 2.364 s. | Investigate these against the same authenticated production build before claiming broader performance closure. |
 
