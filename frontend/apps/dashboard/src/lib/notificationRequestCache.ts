@@ -6,7 +6,7 @@ export interface NotificationRequestScope {
 
 const inFlightRequests = new Map<string, Promise<unknown>>()
 
-export function createNotificationScopeKey(scope: NotificationRequestScope): string {
+export function createAuthenticatedScopeKey(scope: NotificationRequestScope): string {
   return `tenant:${scope.tenantId ?? 'none'}:restaurant:${scope.restaurantId ?? 'none'}:user:${scope.userId ?? 'none'}`
 }
 
@@ -14,7 +14,7 @@ export function createNotificationCacheKey(
   scope: NotificationRequestScope,
   filters: unknown
 ): string {
-  return `${createNotificationScopeKey(scope)}:notifications:${JSON.stringify(filters)}`
+  return `${createAuthenticatedScopeKey(scope)}:notifications:${JSON.stringify(filters)}`
 }
 
 export function dedupeInFlightRequest<T>(

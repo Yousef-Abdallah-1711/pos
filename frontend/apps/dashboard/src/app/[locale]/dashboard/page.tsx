@@ -30,6 +30,7 @@ import { createTranslator, getLocaleFromPath } from '@/lib/translations'
 import { useAuthStore } from '@/stores/authStore'
 import { useHasPermission } from '@/hooks/useRbac'
 import { fetchNotificationStats } from '@/hooks/useNotifications'
+import { fetchTenantStatus } from '@/stores/tenantStatusStore'
 import { MODULE_IDS, PERMISSION_LEVELS } from '@/lib/rbac'
 
 interface DashboardOrder {
@@ -298,7 +299,7 @@ export default function DashboardPage() {
         api.get('/hr/employees'),
         api.get('/admin/drivers'),
         fetchNotificationStats(),
-        api.get('/tenant/status'),
+        fetchTenantStatus(),
         shouldFetchTableStats ? api.get('/tables/stats') : Promise.resolve({ data: { data: null } }),
       ])
 
