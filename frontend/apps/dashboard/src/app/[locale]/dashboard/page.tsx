@@ -29,6 +29,7 @@ import { debugError } from '@/lib/debug'
 import { createTranslator, getLocaleFromPath } from '@/lib/translations'
 import { useAuthStore } from '@/stores/authStore'
 import { useHasPermission } from '@/hooks/useRbac'
+import { fetchNotificationStats } from '@/hooks/useNotifications'
 import { MODULE_IDS, PERMISSION_LEVELS } from '@/lib/rbac'
 
 interface DashboardOrder {
@@ -296,7 +297,7 @@ export default function DashboardPage() {
         api.get('/categories'),
         api.get('/hr/employees'),
         api.get('/admin/drivers'),
-        api.get('/notifications/stats'),
+        fetchNotificationStats(),
         api.get('/tenant/status'),
         shouldFetchTableStats ? api.get('/tables/stats') : Promise.resolve({ data: { data: null } }),
       ])
@@ -340,8 +341,14 @@ export default function DashboardPage() {
         : (unavailableSources.push('drivers'), { items: [] as any[] })
 
       const notificationsStats = notificationsResult.status === 'fulfilled'
-        ? (notificationsResult.value.data?.data ?? notificationsResult.value.data ?? {})
-        : (unavailableSources.push('notifications'), {})
+        ? notificationsResult.value
+        : (unavailableSources.push('notifications'), {
+          total: 0,
+          unread: 0,
+          read: 0,
+          by_module: {},
+          by_priority: {},
+        })
 
       const tenantStatus = tenantStatusResult.status === 'fulfilled'
         ? extractTenantStatus(tenantStatusResult.value.data)
