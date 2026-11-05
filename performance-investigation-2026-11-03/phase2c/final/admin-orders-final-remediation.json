@@ -1,0 +1,49 @@
+{
+  "commit": "f85a687",
+  "go_version": "go1.24.13",
+  "database": "PostgreSQL 15, disposable tmpfs, pg_stat_statements",
+  "synthetic_orders": 75,
+  "items_per_order": 2,
+  "pages": [
+    {
+      "page_size": 1,
+      "sql_statements": 3,
+      "query_execution_ms": 0.44652800000000004,
+      "http_median_ms": 3.718,
+      "http_p95_ms": 5.242,
+      "payload_bytes": 454,
+      "samples": 30,
+      "response_sha256": "e69053e87a481fb340ab5eabb55d2028ff92d632473cf6f9c22d721cab6fcf02"
+    },
+    {
+      "page_size": 10,
+      "sql_statements": 3,
+      "query_execution_ms": 0.523631,
+      "http_median_ms": 4.973,
+      "http_p95_ms": 9.014,
+      "payload_bytes": 4063,
+      "samples": 30,
+      "response_sha256": "da7118eb0614ca4f77b040a3112b343cf8447a90da0053bbdee2b100dad30ef2"
+    },
+    {
+      "page_size": 25,
+      "sql_statements": 3,
+      "query_execution_ms": 0.751144,
+      "http_median_ms": 5.505,
+      "http_p95_ms": 8.975,
+      "payload_bytes": 10078,
+      "samples": 30,
+      "response_sha256": "9a43af08ae7f094dc16c60bff7dfcd8c0a2ded6b5b6aff7fff7c3fb50027faa0"
+    },
+    {
+      "page_size": 50,
+      "sql_statements": 3,
+      "query_execution_ms": 1.123767,
+      "http_median_ms": 5.383,
+      "http_p95_ms": 7.888,
+      "payload_bytes": 20103,
+      "samples": 30,
+      "response_sha256": "139fe05b47d8823fcea38fcf77b0cc18c26901afd3a10140c5840851d1cbe20b"
+    }
+  ]
+}
