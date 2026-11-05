@@ -33,9 +33,9 @@ The subscription isolation test initially depended on untracked helper tests fro
 
 ## Publication and merge
 
-- Topic branch previously pushed: `codex/unified-phase2a-2c-closure`, PR #9 head `beb1f55532f043099e8d78691806f069716d7625`; verified local continuation through `e30ffe3` plus report changes are not yet pushed.
+- Topic branch pushed: `codex/unified-phase2a-2c-closure`, PR #9 head `ec23651ebc42a397b54244554635a0e281122d27`.
 - Replacement-scope PR #9 is open: https://github.com/Yousef-Abdallah-1711/pos/pull/9.
-- PR #9 hosted `runtime-localhost-guardrail` and `url-domain-config-smoke` passed at the prior pushed head; updated checks are pending publication.
+- PR #9 hosted `runtime-localhost-guardrail` and `url-domain-config-smoke` both pass at `ec23651`.
 - PR #9 review decision is empty; required human approval remains outstanding. No PR has been merged by this execution.
 - No direct main push, force-push, approval bypass, or review bypass was used.
 - PR reviewDecision is empty for #1, #3, and #7. Required human approval remains outstanding.
@@ -43,4 +43,4 @@ The subscription isolation test initially depended on untracked helper tests fro
 
 ## Decision
 
-**MAIN INTEGRATION PARTIAL.** Admin Orders is measured and locally verified, but the continuation is not pushed or reviewed. Dashboard has 107 failing frontend tests and test-source TypeScript errors; browser acceptance and broad auth/session and tenant side-effect coverage remain incomplete. Required PR approval is outstanding. Do not claim full closure or production readiness.
+**MAIN INTEGRATION PARTIAL.** Admin Orders is measured and pushed in PR #9, but independent review is outstanding. Dashboard has 107 failing frontend tests and test-source TypeScript errors; browser acceptance and broad auth/session and tenant side-effect coverage remain incomplete. Required PR approval is outstanding. Do not claim full closure or production readiness.

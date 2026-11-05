@@ -22,7 +22,7 @@ Initial clean-branch run:
 - `go vet ./...`: FAIL — `subscription_admin_isolation_integration_test.go` referenced `openProductHTTPTestDB`, `seedProductHTTPFixture`, and `insertSettingsHTTPUser`, which were untracked helper functions in the original WS02 worktree and absent from a clean checkout.
 - `go test -count=1 ./...`: FAIL at HTTP package compilation for the same missing helpers.
 
-Remediation: replace the hidden helper dependency with local disposable database and synthetic tenant/restaurant/user fixtures in the subscription integration test. This is a working-tree change, not yet committed. A subsequent fresh isolated run completed migrations, build, vet and full tests with exit code 0. The full test suite ran against isolated tmpfs PostgreSQL with `POS_TEST_DATABASE_URL` pointed only to `pos_test`.
+Remediation: replace the hidden helper dependency with local disposable database and synthetic tenant/restaurant/user fixtures in the subscription integration test. The repair is committed on the unified candidate. A subsequent fresh isolated run completed migrations, build, vet and full tests with exit code 0. The full test suite ran against isolated tmpfs PostgreSQL with `POS_TEST_DATABASE_URL` pointed only to `pos_test`.
 
 The rerun log has `MIGRATE_EXIT:0`, `BUILD_EXIT:0`, `VET_EXIT:0`, and `TEST_EXIT:0`. Explicitly selected Driver, HR child-resource, subscription admin, trial concurrency, tax-period, and recurring-template ownership tests all passed against the disposable PostgreSQL database. The unified Orders continuation also passed `go build ./...`, `go vet ./...`, and `go test -count=1 ./...` under Go 1.24.13 against the disposable PostgreSQL test database.
 
@@ -49,7 +49,7 @@ The rerun log has `MIGRATE_EXIT:0`, `BUILD_EXIT:0`, `VET_EXIT:0`, and `TEST_EXIT
 - PR #3 latest checks pass; no review approval.
 - PR #7 latest checks pass; draft; no review approval; benchmark still missing.
 - PR #8 is merged and its storefront optimization is in current main.
-- PR #9 had passing `runtime-localhost-guardrail` and `url-domain-config-smoke` at the previously pushed head. The local continuation adds Orders changes and requires a fresh push/hosted CI run. No review approval is recorded.
+- PR #9 head `ec23651ebc42a397b54244554635a0e281122d27`: `runtime-localhost-guardrail` PASS and `url-domain-config-smoke` PASS. No review approval is recorded.
 
 ## Final gate
 
