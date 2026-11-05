@@ -51,7 +51,9 @@ func TestAdminOrdersBenchmarkIntegration(t *testing.T) {
 	if _, err := db.Exec(`CREATE EXTENSION IF NOT EXISTS pg_stat_statements`); err != nil {
 		t.Fatalf("enable pg_stat_statements on the disposable database: %v", err)
 	}
+	cleanupAdminOrderBenchmarkData(t, db)
 	tenantID, restaurantID, foreignOrderIDs := seedAdminOrderBenchmarkData(t, db, 75)
+	defer cleanupAdminOrderBenchmarkData(t, db)
 	orderUC := usecase.NewOrderUseCase(repository.NewOrderRepository(db), nil)
 	handler := NewAdminOrderHandler(orderUC, nil, nil)
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -218,6 +220,23 @@ func seedAdminOrderBenchmarkData(t *testing.T, db *sql.DB, orderCount int) (int6
 		foreignOrderIDs = append(foreignOrderIDs, id)
 	}
 	return tenantID, restaurantID, foreignOrderIDs
+}
+
+func cleanupAdminOrderBenchmarkData(t *testing.T, db *sql.DB) {
+	t.Helper()
+	statements := []string{
+		`DELETE FROM order_items WHERE order_id IN (SELECT id FROM orders WHERE order_number LIKE 'admin-order-benchmark-%')`,
+		`DELETE FROM orders WHERE order_number LIKE 'admin-order-benchmark-%'`,
+		`DELETE FROM products WHERE restaurant_id IN (SELECT id FROM restaurants WHERE slug IN ('admin-order-benchmark', 'admin-order-benchmark-sibling', 'admin-order-benchmark-foreign'))`,
+		`DELETE FROM restaurants WHERE slug IN ('admin-order-benchmark', 'admin-order-benchmark-sibling', 'admin-order-benchmark-foreign')`,
+		`DELETE FROM tenants WHERE slug IN ('admin-order-benchmark', 'admin-order-benchmark-foreign')`,
+	}
+	for _, statement := range statements {
+		if _, err := db.Exec(statement); err != nil {
+			t.Errorf("clean benchmark fixture: %v", err)
+			return
+		}
+	}
 }
 
 func assertAdminOrderBenchmarkExcludesForeignOrders(t *testing.T, body []byte, foreignOrderIDs []int64) {
