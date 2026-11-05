@@ -22,8 +22,8 @@ func TestTenantTokenCannotExtendAnotherTenantsTrial(t *testing.T) {
 	if os.Getenv(testdb.EnvVar) == "" {
 		t.Skipf("set %s to an isolated disposable PostgreSQL database", testdb.EnvVar)
 	}
-	db := openProductHTTPTestDB(t)
-	fixture := seedProductHTTPFixture(t, db)
+	db := openSubscriptionAdminTestDB(t)
+	fixture := seedSubscriptionAdminFixture(t, db)
 	beforeA := readSubscriptionAdminSnapshot(t, db, fixture.tenantA)
 	beforeB := readSubscriptionAdminSnapshot(t, db, fixture.tenantB)
 	var auditBefore int
@@ -79,9 +79,12 @@ func TestSuperAdminTrialExtensionUpdatesOnlyTargetTenantAndAuditsActor(t *testin
 	if os.Getenv(testdb.EnvVar) == "" {
 		t.Skipf("set %s to an isolated disposable PostgreSQL database", testdb.EnvVar)
 	}
-	db := openProductHTTPTestDB(t)
-	fixture := seedProductHTTPFixture(t, db)
-	adminUserID := insertSettingsHTTPUser(t, db, fixture.tenantA, fixture.restaurantA1, "subscription-super-admin")
+	db := openSubscriptionAdminTestDB(t)
+	fixture := seedSubscriptionAdminFixture(t, db)
+	var adminUserID int64
+	if err := db.QueryRow(`INSERT INTO users (tenant_id, restaurant_id, email, password_hash, name, role, status) VALUES ($1, $2, $3, 'not-used-by-test', $3, 'owner', 'active') RETURNING id`, fixture.tenantA, fixture.restaurantA1, fmt.Sprintf("subscription-super-admin-%d@example.test", time.Now().UnixNano())).Scan(&adminUserID); err != nil {
+		t.Fatalf("insert super-admin user fixture: %v", err)
+	}
 	var superAdminID int64
 	if err := db.QueryRow(`INSERT INTO super_admins (user_id, is_active) VALUES ($1, TRUE) RETURNING id`, adminUserID).Scan(&superAdminID); err != nil {
 		t.Fatalf("insert super-admin fixture: %v", err)
@@ -159,6 +162,55 @@ type subscriptionAdminSnapshot struct {
 	status       string
 	trialDays    int
 	trialEndDate sql.NullTime
+}
+
+type subscriptionAdminFixture struct {
+	tenantA, tenantB           int
+	restaurantA1, restaurantB1 int
+}
+
+func openSubscriptionAdminTestDB(t *testing.T) *sql.DB {
+	t.Helper()
+	db, err := sql.Open("postgres", testdb.URL(t))
+	if err != nil {
+		t.Fatalf("open disposable PostgreSQL: %v", err)
+	}
+	if err := db.Ping(); err != nil {
+		_ = db.Close()
+		t.Fatalf("connect to disposable PostgreSQL: %v", err)
+	}
+	t.Cleanup(func() { _ = db.Close() })
+	return db
+}
+
+func seedSubscriptionAdminFixture(t *testing.T, db *sql.DB) subscriptionAdminFixture {
+	t.Helper()
+	suffix := fmt.Sprintf("%d", time.Now().UnixNano())
+	var fixture subscriptionAdminFixture
+	for _, target := range []struct {
+		name string
+		dst  *int
+	}{
+		{name: "subscription-admin-a-" + suffix, dst: &fixture.tenantA},
+		{name: "subscription-admin-b-" + suffix, dst: &fixture.tenantB},
+	} {
+		if err := db.QueryRow(`INSERT INTO tenants (name, slug, domain) VALUES ($1, $1, $2) RETURNING id`, target.name, target.name+".example.test").Scan(target.dst); err != nil {
+			t.Fatalf("insert synthetic tenant %s: %v", target.name, err)
+		}
+	}
+	for _, target := range []struct {
+		tenantID int
+		dst      *int
+		name     string
+	}{
+		{tenantID: fixture.tenantA, dst: &fixture.restaurantA1, name: "subscription-admin-a-" + suffix},
+		{tenantID: fixture.tenantB, dst: &fixture.restaurantB1, name: "subscription-admin-b-" + suffix},
+	} {
+		if err := db.QueryRow(`INSERT INTO restaurants (tenant_id, name, slug, address) VALUES ($1, $2, $2, 'synthetic') RETURNING id`, target.tenantID, target.name).Scan(target.dst); err != nil {
+			t.Fatalf("insert synthetic restaurant %s: %v", target.name, err)
+		}
+	}
+	return fixture
 }
 
 func readSubscriptionAdminSnapshot(t *testing.T, db *sql.DB, tenantID int) subscriptionAdminSnapshot {
