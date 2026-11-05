@@ -37,8 +37,10 @@ x-frontend: &frontend
     NEXT_PUBLIC_API_URL: http://localhost:18080/api/v1
     NEXT_PUBLIC_API_BASE_URL: http://localhost:18080/api/v1
     NEXT_PUBLIC_SUPER_ADMIN_API_URL: http://localhost:18080/api/v1/super-admin
-    NEXT_PUBLIC_LANDING_URL: http://localhost:13101
-    NEXT_PUBLIC_DASHBOARD_URL: http://localhost:13102
+    # Frontend containers and the Playwright runner share the API network
+    # namespace, so cross-app redirects must use container listener ports.
+    NEXT_PUBLIC_LANDING_URL: http://localhost:3001
+    NEXT_PUBLIC_DASHBOARD_URL: http://localhost:3002
     NEXT_PUBLIC_RESTAURANT_DOMAIN: localhost:13103
 
 services:

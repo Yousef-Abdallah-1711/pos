@@ -39,6 +39,7 @@ export default function DashboardLayout({
   const [isSidebarMobileOpen, setIsSidebarMobileOpen] = useState(false)
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
+  const isLoggingOut = useRef(false)
   const { isBlocked, blockReason } = useTenantStatus()
 
   const isLoggedIn = !!(user && token)
@@ -70,7 +71,7 @@ export default function DashboardLayout({
   }, [])
 
   useEffect(() => {
-    if (!isLoggedIn) {
+    if (!isLoggedIn && !isLoggingOut.current) {
       router.push(`/${locale}/auth/login`)
     }
   }, [isLoggedIn, router, locale])
@@ -125,11 +126,13 @@ export default function DashboardLayout({
   }, [settings, setTheme])
 
   const handleLogout = async () => {
+    isLoggingOut.current = true
     try {
       await api.post('/auth/logout')
       logout()
       window.location.replace(`${getConfig().landingUrl}/${locale}/auth/login`)
     } catch (error) {
+      isLoggingOut.current = false
       debugError('Dashboard logout failed:', error)
       toast.error(t('common.logoutFailed', 'Logout failed. Please try again.'))
     }
