@@ -44,6 +44,7 @@ describe('TableList', () => {
         onOpenQr={onOpenQr}
         onFreeTable={onFreeTable}
         onStatusChange={onStatusChange}
+        onOpenPOS={vi.fn()}
         t={t}
       />
     )
@@ -81,6 +82,7 @@ describe('TableList', () => {
         onOpenQr={vi.fn()}
         onFreeTable={vi.fn()}
         onStatusChange={vi.fn()}
+        onOpenPOS={vi.fn()}
         t={t}
       />
     )

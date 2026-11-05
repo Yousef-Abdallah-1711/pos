@@ -36,7 +36,7 @@ describe('ThemeSelector', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
-    ;(useThemeStore as any).mockImplementation((selector) => {
+    ;(useThemeStore as any).mockImplementation((selector: (state: Record<string, unknown>) => unknown) => {
       const store = {
         currentTheme: mockCurrentTheme,
         themes: mockThemes,
@@ -83,8 +83,7 @@ describe('ThemeSelector', () => {
 
     it('should show color swatches for presets', () => {
       const { container } = render(<ThemeSelector />)
-      const colorDivs = container.querySelectorAll('div[style*="backgroundColor"]')
-      expect(colorDivs.length).toBeGreaterThan(0)
+      expect(container.querySelectorAll('.preset-modern-color-0, .preset-modern-color-1, .preset-modern-color-2')).toHaveLength(3)
     })
 
     it('should apply preset theme on click', () => {
@@ -115,7 +114,7 @@ describe('ThemeSelector', () => {
 
   describe('Custom Themes', () => {
     it('should display custom theme count', () => {
-      ;(useThemeStore as any).mockImplementation((selector) => {
+      ;(useThemeStore as any).mockImplementation((selector: (state: Record<string, unknown>) => unknown) => {
         const store = {
           currentTheme: mockCurrentTheme,
           themes: [mockCurrentTheme, { ...mockCurrentTheme, id: '2' }],
@@ -129,7 +128,7 @@ describe('ThemeSelector', () => {
     })
 
     it('should show empty message when no custom themes', () => {
-      ;(useThemeStore as any).mockImplementation((selector) => {
+      ;(useThemeStore as any).mockImplementation((selector: (state: Record<string, unknown>) => unknown) => {
         const store = {
           currentTheme: null,
           themes: [],
@@ -246,9 +245,7 @@ describe('ThemeSelector', () => {
   describe('Color Display', () => {
     it('should show color swatches for each theme', () => {
       const { container } = render(<ThemeSelector />)
-      const colorBoxes = container.querySelectorAll('div[style*="backgroundColor"]')
-
-      expect(colorBoxes.length).toBeGreaterThan(0)
+      expect(container.querySelectorAll('.theme-1-color-0, .theme-1-color-1, .theme-1-color-2')).toHaveLength(3)
     })
 
     it('should render correct colors for preset', () => {
@@ -304,7 +301,7 @@ describe('ThemeSelector', () => {
 
   describe('Empty States', () => {
     it('should handle no themes gracefully', () => {
-      ;(useThemeStore as any).mockImplementation((selector) => {
+      ;(useThemeStore as any).mockImplementation((selector: (state: Record<string, unknown>) => unknown) => {
         const store = {
           currentTheme: null,
           themes: [],
@@ -322,7 +319,7 @@ describe('ThemeSelector', () => {
     it('should support multiple custom themes', () => {
       const theme2 = { ...mockCurrentTheme, id: '2', name: 'Theme 2' }
 
-      ;(useThemeStore as any).mockImplementation((selector) => {
+      ;(useThemeStore as any).mockImplementation((selector: (state: Record<string, unknown>) => unknown) => {
         const store = {
           currentTheme: mockCurrentTheme,
           themes: [mockCurrentTheme, theme2],

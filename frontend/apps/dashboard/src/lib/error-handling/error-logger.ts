@@ -34,6 +34,7 @@ export interface ErrorLog {
 interface ErrorLoggerConfig {
   maxLogs?: number
   enableLocalStorage?: boolean
+  storageKey?: string
   enableRemoteLogging?: boolean
   remoteEndpoint?: string
   environment?: 'development' | 'production' | 'staging'
@@ -48,6 +49,7 @@ export class ErrorLoggerService {
     this.config = {
       maxLogs: config.maxLogs || 100,
       enableLocalStorage: config.enableLocalStorage !== false,
+      storageKey: config.storageKey || 'errorLogs',
       enableRemoteLogging: config.enableRemoteLogging === true,
       remoteEndpoint: config.remoteEndpoint || '/api/v1/logs',
       environment: config.environment || 'development',
@@ -65,28 +67,31 @@ export class ErrorLoggerService {
     const lowerMessage = message.toLowerCase()
 
     if (
-      lowerMessage.includes('validation') ||
-      lowerMessage.includes('invalid') ||
-      lowerMessage.includes('required')
+      lowerMessage.includes('auth') ||
+      lowerMessage.includes('unauthorized') ||
+      lowerMessage.includes('token') ||
+      lowerMessage.includes('credential')
     ) {
-      return 'validation'
+      return 'authentication'
     }
 
     if (
       lowerMessage.includes('network') ||
       lowerMessage.includes('fetch') ||
       lowerMessage.includes('timeout') ||
-      lowerMessage.includes('connection')
+      lowerMessage.includes('connection') ||
+      lowerMessage.includes('econn') ||
+      lowerMessage.includes('cors')
     ) {
       return 'network'
     }
 
     if (
-      lowerMessage.includes('auth') ||
-      lowerMessage.includes('unauthorized') ||
-      lowerMessage.includes('token')
+      lowerMessage.includes('validation') ||
+      lowerMessage.includes('invalid') ||
+      lowerMessage.includes('required')
     ) {
-      return 'authentication'
+      return 'validation'
     }
 
     if (
@@ -137,25 +142,21 @@ export class ErrorLoggerService {
     }
 
     // High severity
-    if (
-      category === 'network' ||
-      category === 'storage' ||
-      lowerMessage.includes('error')
-    ) {
+    if (category === 'validation' || category === 'storage') {
       return 'high'
     }
 
-    // Medium severity
-    if (category === 'component' || category === 'state') {
+    // Network failures are often transient and recoverable; component/state errors need investigation.
+    if (category === 'network' || category === 'component' || category === 'state') {
       return 'medium'
     }
 
     // Low severity
-    if (category === 'validation') {
+    if (category === 'unknown') {
       return 'low'
     }
 
-    return 'medium'
+    return 'low'
   }
 
   /**
@@ -164,12 +165,20 @@ export class ErrorLoggerService {
   log(
     error: Error | string,
     context?: Record<string, any>,
-    metadata?: Record<string, any>
+    metadata?: Record<string, any>,
+    storageKey: string = this.config.storageKey,
+    userId?: string
   ): ErrorLog {
     const message = typeof error === 'string' ? error : error.message
     const stack = typeof error === 'string' ? undefined : error.stack
-    const category = this.categorizeError(error)
-    const severity = this.getSeverity(category, message)
+    const requestedCategory = context?.category
+    const category = this.isCategory(requestedCategory)
+      ? requestedCategory
+      : this.categorizeError(error)
+    const requestedSeverity = context?.severity
+    const severity = this.isSeverity(requestedSeverity)
+      ? requestedSeverity
+      : this.getSeverity(category, message)
 
     const errorLog: ErrorLog = {
       id: this.generateId(),
@@ -182,6 +191,7 @@ export class ErrorLoggerService {
       stack,
       context,
       metadata,
+      userId,
     }
 
     this.logs.push(errorLog)
@@ -193,7 +203,7 @@ export class ErrorLoggerService {
 
     // Save to local storage
     if (this.config.enableLocalStorage) {
-      this.saveToStorage()
+      this.saveToStorage(storageKey)
     }
 
     // Send to remote server if configured
@@ -221,10 +231,7 @@ export class ErrorLoggerService {
     message: string,
     context?: Record<string, any>
   ): ErrorLog {
-    return this.log(`Validation error: ${field} - ${message}`, {
-      field,
-      ...context,
-    })
+    return this.log(`Validation error: ${field} - ${message}`, context)
   }
 
   /**
@@ -251,7 +258,8 @@ export class ErrorLoggerService {
     error: Error,
     context?: Record<string, any>
   ): ErrorLog {
-    return this.log(error, {
+    return this.log(new Error(`${componentName}: ${error.message}`), {
+      category: 'component',
       component: componentName,
       ...context,
     })
@@ -348,9 +356,19 @@ export class ErrorLoggerService {
     return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
   }
 
-  private saveToStorage(): void {
+  private isSeverity(value: unknown): value is ErrorSeverity {
+    return value === 'low' || value === 'medium' || value === 'high' || value === 'critical'
+  }
+
+  private isCategory(value: unknown): value is ErrorCategory {
+    return value === 'validation' || value === 'network' || value === 'authentication' ||
+      value === 'permission' || value === 'component' || value === 'state' ||
+      value === 'storage' || value === 'unknown'
+  }
+
+  private saveToStorage(storageKey: string): void {
     try {
-      localStorage.setItem('errorLogs', JSON.stringify(this.logs))
+      localStorage.setItem(storageKey, JSON.stringify(this.logs))
     } catch (e) {
       debugWarn('Failed to save error logs to localStorage', e)
     }
@@ -358,7 +376,7 @@ export class ErrorLoggerService {
 
   private loadFromStorage(): void {
     try {
-      const stored = localStorage.getItem('errorLogs')
+      const stored = localStorage.getItem(this.config.storageKey)
       if (stored) {
         this.logs = JSON.parse(stored)
       }
@@ -369,7 +387,7 @@ export class ErrorLoggerService {
 
   private removeFromStorage(): void {
     try {
-      localStorage.removeItem('errorLogs')
+      localStorage.removeItem(this.config.storageKey)
     } catch (e) {
       debugWarn('Failed to remove error logs from localStorage', e)
     }
