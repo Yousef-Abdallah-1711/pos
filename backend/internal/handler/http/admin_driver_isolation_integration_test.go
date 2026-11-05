@@ -14,6 +14,7 @@ import (
 	"pos-saas/internal/middleware"
 	"pos-saas/internal/pkg/jwt"
 	"pos-saas/internal/repository"
+	"pos-saas/internal/usecase"
 	"pos-saas/tests/testdb"
 )
 
@@ -57,11 +58,13 @@ func TestAdminDriverHTTPRejectsForgedScopeWithoutSideEffects(t *testing.T) {
 type adminDriverIsolationTarget struct {
 	name, firstName, lastName, status string
 	driverID, tenantID, restaurantID  int
+	orderID                           int64
 }
 
 type adminDriverIsolationFixture struct {
-	tenantA, restaurantA1 int
-	foreignTargets        []adminDriverIsolationTarget
+	tenantA, restaurantA1, ownDriverID int
+	ownOrderID                         int64
+	foreignTargets                     []adminDriverIsolationTarget
 }
 
 func seedAdminDriverHTTPFixture(t *testing.T, db *sql.DB) adminDriverIsolationFixture {
@@ -74,6 +77,8 @@ func seedAdminDriverHTTPFixture(t *testing.T, db *sql.DB) adminDriverIsolationFi
 	fixture.restaurantA1 = insertDriverHTTPTestRestaurant(t, ctx, db, fixture.tenantA, "driver-http-a1-"+runID)
 	restaurantA2 := insertDriverHTTPTestRestaurant(t, ctx, db, fixture.tenantA, "driver-http-a2-"+runID)
 	restaurantB1 := insertDriverHTTPTestRestaurant(t, ctx, db, tenantB, "driver-http-b1-"+runID)
+	fixture.ownDriverID = seedAdminDriverHTTPTarget(t, ctx, db, "own restaurant", fixture.tenantA, fixture.restaurantA1, runID+"-a1-driver").driverID
+	fixture.ownOrderID = insertAdminDriverHTTPOrder(t, ctx, db, fixture.tenantA, fixture.restaurantA1, runID+"-a1-order")
 	fixture.foreignTargets = []adminDriverIsolationTarget{
 		seedAdminDriverHTTPTarget(t, ctx, db, "foreign tenant", tenantB, restaurantB1, runID+"-b1"),
 		seedAdminDriverHTTPTarget(t, ctx, db, "sibling restaurant", fixture.tenantA, restaurantA2, runID+"-a2"),
@@ -88,7 +93,84 @@ func seedAdminDriverHTTPTarget(t *testing.T, ctx context.Context, db *sql.DB, na
 	if err != nil {
 		t.Fatalf("insert %s test driver: %v", name, err)
 	}
+	target.orderID = insertAdminDriverHTTPOrder(t, ctx, db, tenantID, restaurantID, suffix)
 	return target
+}
+
+func TestAdminDriverAssignmentHTTPRejectsForeignScopeWithoutSideEffects(t *testing.T) {
+	if os.Getenv(testdb.EnvVar) == "" {
+		t.Skipf("set %s to an isolated disposable PostgreSQL database", testdb.EnvVar)
+	}
+	db := openProductHTTPTestDB(t)
+	fixture := seedAdminDriverHTTPFixture(t, db)
+	tokens, err := jwt.NewTokenService("driver-assignment-http-isolation-secret-32-bytes", "5m")
+	if err != nil {
+		t.Fatalf("create token service: %v", err)
+	}
+	restaurantA1 := fixture.restaurantA1
+	token, err := tokens.GenerateToken(1, fixture.tenantA, &restaurantA1, "owner@example.test", "owner")
+	if err != nil {
+		t.Fatalf("generate authenticated test token: %v", err)
+	}
+	driverRepo := repository.NewDriverRepository(db)
+	orderUC := usecase.NewOrderUseCase(repository.NewOrderRepository(db), repository.NewProductRepository(db))
+	handler := NewAdminDriverHandler(driverRepo, orderUC)
+	attempts := []struct {
+		name     string
+		orderID  int64
+		driverID int
+		target   adminDriverIsolationTarget
+	}{
+		{name: "foreign tenant order", orderID: fixture.foreignTargets[0].orderID, driverID: fixture.ownDriverID, target: fixture.foreignTargets[0]},
+		{name: "sibling restaurant order", orderID: fixture.foreignTargets[1].orderID, driverID: fixture.ownDriverID, target: fixture.foreignTargets[1]},
+		{name: "foreign tenant driver", orderID: fixture.ownOrderID, driverID: fixture.foreignTargets[0].driverID, target: fixture.foreignTargets[0]},
+		{name: "sibling restaurant driver", orderID: fixture.ownOrderID, driverID: fixture.foreignTargets[1].driverID, target: fixture.foreignTargets[1]},
+	}
+
+	for _, attempt := range attempts {
+		t.Run(attempt.name, func(t *testing.T) {
+			status := invokeAdminDriverAssignmentHTTP(db, tokens, token, handler, attempt.target, attempt.orderID, attempt.driverID)
+			if status != http.StatusNotFound {
+				t.Fatalf("foreign assignment status = %d, want %d", status, http.StatusNotFound)
+			}
+			var assignments, activeOrders int
+			var availability string
+			if err := db.QueryRow(`SELECT COUNT(*) FROM driver_assignments WHERE order_id = $1`, attempt.orderID).Scan(&assignments); err != nil {
+				t.Fatalf("count assignment side effects: %v", err)
+			}
+			if err := db.QueryRow(`SELECT active_orders_count, availability_status FROM drivers WHERE id = $1`, attempt.driverID).Scan(&activeOrders, &availability); err != nil {
+				t.Fatalf("read driver side effects: %v", err)
+			}
+			if assignments != 0 || activeOrders != 0 || availability != "available" {
+				t.Fatalf("denied assignment changed state: assignments=%d active_orders=%d availability=%q", assignments, activeOrders, availability)
+			}
+		})
+	}
+}
+
+func invokeAdminDriverAssignmentHTTP(db *sql.DB, tokens *jwt.TokenService, token string, handler *AdminDriverHandler, target adminDriverIsolationTarget, orderID int64, driverID int) int {
+	request := httptest.NewRequest(http.MethodPost, fmt.Sprintf("/api/v1/admin/orders/%d/assign", orderID), strings.NewReader(fmt.Sprintf(`{"driver_id":%d}`, driverID)))
+	request.SetPathValue("orderId", fmt.Sprint(orderID))
+	request.Header.Set("Authorization", "Bearer "+token)
+	request.Header.Set("X-Tenant-ID", fmt.Sprintf("%d", target.tenantID))
+	request.Header.Set("X-Restaurant-ID", fmt.Sprintf("%d", target.restaurantID))
+	secured := middleware.AuthMiddleware(tokens)(middleware.NewTenantContextMiddleware(
+		middleware.SQLRestaurantVerifier{DB: db},
+	)(http.HandlerFunc(handler.AssignOrderToDriver)))
+	response := httptest.NewRecorder()
+	secured.ServeHTTP(response, request)
+	return response.Code
+}
+
+func insertAdminDriverHTTPOrder(t *testing.T, ctx context.Context, db *sql.DB, tenantID, restaurantID int, suffix string) int64 {
+	t.Helper()
+	var orderID int64
+	orderNumber := "driver-http-" + suffix
+	err := db.QueryRowContext(ctx, `INSERT INTO orders (tenant_id, restaurant_id, order_number, customer_name, customer_phone, subtotal, total_amount) VALUES ($1,$2,$3,'Synthetic customer','000',10,10) RETURNING id`, tenantID, restaurantID, orderNumber).Scan(&orderID)
+	if err != nil {
+		t.Fatalf("insert synthetic order: %v", err)
+	}
+	return orderID
 }
 
 func invokeAdminDriverHTTP(db *sql.DB, tokens *jwt.TokenService, token string, handler *AdminDriverHandler, target adminDriverIsolationTarget, method, path, body string) int {
