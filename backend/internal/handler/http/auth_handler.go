@@ -1,22 +1,36 @@
 package http
 
 import (
+	"context"
 	"encoding/json"
-	"fmt"
+	"errors"
+	"log"
 	"net/http"
 	"strings"
+	"time"
 
+	"pos-saas/internal/config"
 	"pos-saas/internal/domain"
+	"pos-saas/internal/middleware"
+	"pos-saas/internal/service"
 	"pos-saas/internal/usecase"
 )
 
 type AuthHandler struct {
-	useCase *usecase.AuthUseCase
+	useCase  *usecase.AuthUseCase
+	sessions *service.AuthSessionStore
+	audit    authAuditLogger
 }
 
-func NewAuthHandler(useCase *usecase.AuthUseCase) *AuthHandler {
-	return &AuthHandler{useCase: useCase}
+type authAuditLogger interface {
+	RecordAuthEvent(context.Context, int64, int64, string, string, string, string) error
 }
+
+func NewAuthHandler(useCase *usecase.AuthUseCase, sessions *service.AuthSessionStore) *AuthHandler {
+	return &AuthHandler{useCase: useCase, sessions: sessions}
+}
+
+func (h *AuthHandler) SetAuditLogger(audit authAuditLogger) { h.audit = audit }
 
 // Register handles user registration
 func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
@@ -35,61 +49,193 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 		respondError(w, statusCode, err.Error())
 		return
 	}
-
-	respondJSON(w, http.StatusCreated, response)
+	if err := h.establishSession(w, r, response.Token); err != nil {
+		respondError(w, http.StatusInternalServerError, "Unable to establish session")
+		return
+	}
+	respondJSON(w, http.StatusCreated, map[string]interface{}{"user": response.User})
 }
 
 // Login handles user login
 func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("=== AUTH HANDLER: Login Request Received ===")
-	fmt.Printf("Request Method: %s\n", r.Method)
-	fmt.Printf("Request URL: %s\n", r.URL.String())
-	fmt.Printf("Content-Type: %s\n", r.Header.Get("Content-Type"))
-
 	var req domain.LoginRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		fmt.Printf("ERROR: Failed to decode request body: %v\n", err)
 		respondError(w, http.StatusBadRequest, "Invalid request body")
 		return
 	}
 
-	fmt.Printf("Request decoded - Email: %s, Password length: %d\n", req.Email, len(req.Password))
-
 	response, err := h.useCase.Login(&req)
 	if err != nil {
-		fmt.Printf("ERROR: Login failed: %v\n", err)
 		respondError(w, http.StatusUnauthorized, err.Error())
 		return
 	}
-
-	fmt.Println("SUCCESS: Login successful, sending response")
+	if authenticated, ok := response.(*domain.AuthResponse); ok {
+		if err := h.establishSession(w, r, authenticated.Token); err != nil {
+			respondError(w, http.StatusInternalServerError, "Unable to establish session")
+			return
+		}
+		h.recordAuthEvent(r, int64(authenticated.User.TenantID), int64(authenticated.User.ID), "login")
+		respondJSON(w, http.StatusOK, map[string]interface{}{"user": authenticated.User})
+		return
+	}
 	respondJSON(w, http.StatusOK, response)
 }
 
 // LoginConfirm handles tenant selection after multiple tenants are detected
 func (h *AuthHandler) LoginConfirm(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("=== AUTH HANDLER: LoginConfirm Request Received ===")
-	fmt.Printf("Request Method: %s\n", r.Method)
-	fmt.Printf("Request URL: %s\n", r.URL.String())
-
 	var req domain.TenantSelectionRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		fmt.Printf("ERROR: Failed to decode request body: %v\n", err)
 		respondError(w, http.StatusBadRequest, "Invalid request body")
 		return
 	}
 
-	fmt.Printf("Request decoded - Email: %s, TenantID: %d\n", req.Email, req.TenantID)
-
 	response, err := h.useCase.LoginConfirm(&req)
 	if err != nil {
-		fmt.Printf("ERROR: LoginConfirm failed: %v\n", err)
 		respondError(w, http.StatusUnauthorized, err.Error())
 		return
 	}
+	if err := h.establishSession(w, r, response.Token); err != nil {
+		respondError(w, http.StatusInternalServerError, "Unable to establish session")
+		return
+	}
+	h.recordAuthEvent(r, int64(response.User.TenantID), int64(response.User.ID), "login")
+	respondJSON(w, http.StatusOK, map[string]interface{}{"user": response.User})
+}
 
-	fmt.Println("SUCCESS: LoginConfirm successful, sending response")
-	respondJSON(w, http.StatusOK, response)
+func (h *AuthHandler) establishSession(w http.ResponseWriter, r *http.Request, credential string) error {
+	if h.sessions == nil || credential == "" {
+		return service.ErrSessionNotFound
+	}
+	var sessionID string
+	var err error
+	if previous, cookieErr := r.Cookie(service.AuthSessionCookieName); cookieErr == nil && previous.Value != "" {
+		sessionID, err = h.sessions.Rotate(r.Context(), previous.Value, credential)
+		if errors.Is(err, service.ErrSessionNotFound) {
+			// A stale cookie must not block a fresh login. Create generates a new
+			// unpredictable identifier; the stale identifier is never adopted.
+			sessionID, err = h.sessions.Create(r.Context(), credential)
+		}
+	} else {
+		sessionID, err = h.sessions.Create(r.Context(), credential)
+	}
+	if err != nil {
+		return err
+	}
+	secure := r.TLS != nil || config.IsProductionMode()
+	http.SetCookie(w, &http.Cookie{
+		Name:     service.AuthSessionCookieName,
+		Value:    sessionID,
+		Path:     "/",
+		HttpOnly: true,
+		Secure:   secure,
+		SameSite: http.SameSiteLaxMode,
+		MaxAge:   int(h.sessions.TTL().Seconds()),
+		Expires:  time.Now().Add(h.sessions.TTL()),
+	})
+	w.Header().Set("Cache-Control", "no-store")
+	w.Header().Set("Referrer-Policy", "no-referrer")
+	return nil
+}
+
+func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
+	var tenantID, userID int64
+	if cookie, err := r.Cookie(service.AuthSessionCookieName); err == nil && cookie.Value != "" && h.sessions != nil {
+		if credential, resolveErr := h.sessions.Resolve(r.Context(), cookie.Value); resolveErr == nil {
+			if claims, validateErr := h.useCase.ValidateCredential(credential); validateErr == nil {
+				tenantID, userID = int64(claims.TenantID), int64(claims.UserID)
+			}
+		}
+	}
+	for _, name := range []string{service.AuthSessionCookieName, service.ImpersonationSessionCookieName} {
+		if cookie, err := r.Cookie(name); err == nil && cookie.Value != "" {
+			if !middleware.IsTrustedOrigin(r.Header.Get("Origin")) {
+				respondError(w, http.StatusForbidden, "Invalid request origin")
+				return
+			}
+			if h.sessions == nil {
+				respondError(w, http.StatusInternalServerError, "Session service unavailable")
+				return
+			}
+			if err := h.sessions.Revoke(r.Context(), cookie.Value); err != nil {
+				respondError(w, http.StatusInternalServerError, "Unable to end session")
+				return
+			}
+		}
+	}
+	h.recordAuthEvent(r, tenantID, userID, "logout")
+	for _, name := range []string{service.AuthSessionCookieName, service.ImpersonationSessionCookieName} {
+		http.SetCookie(w, &http.Cookie{Name: name, Value: "", Path: "/", HttpOnly: true, Secure: r.TLS != nil || config.IsProductionMode(), SameSite: http.SameSiteLaxMode, MaxAge: -1, Expires: time.Unix(1, 0)})
+	}
+	w.Header().Set("Cache-Control", "no-store")
+	w.WriteHeader(http.StatusNoContent)
+}
+
+func (h *AuthHandler) recordAuthEvent(r *http.Request, tenantID, userID int64, action string) {
+	if h.audit == nil {
+		return
+	}
+	if err := h.audit.RecordAuthEvent(r.Context(), tenantID, userID, action, "success", middleware.GetClientIP(r), r.UserAgent()); err != nil {
+		log.Printf("auth audit write failed for %s: %v", action, err)
+	}
+}
+
+// Refresh rotates the opaque browser session ID and replaces its JWT. The
+// route must be wrapped in SessionAuthMiddleware so only an active session can
+// reach this handler; the route registration also requires a trusted Origin.
+func (h *AuthHandler) Refresh(w http.ResponseWriter, r *http.Request) {
+	cookie, err := r.Cookie(service.AuthSessionCookieName)
+	if err != nil || cookie.Value == "" || h.sessions == nil {
+		respondError(w, http.StatusUnauthorized, "Unauthorized")
+		return
+	}
+	claims := middleware.GetUserClaims(r)
+	credential, err := h.useCase.RefreshToken(claims)
+	if err != nil {
+		respondError(w, http.StatusUnauthorized, "Unauthorized")
+		return
+	}
+	sessionID, err := h.sessions.Rotate(r.Context(), cookie.Value, credential)
+	if err != nil {
+		if errors.Is(err, service.ErrSessionNotFound) {
+			respondError(w, http.StatusUnauthorized, "Session expired")
+			return
+		}
+		respondError(w, http.StatusInternalServerError, "Unable to refresh session")
+		return
+	}
+	h.setSessionCookie(w, r, sessionID)
+	h.recordAuthEvent(r, int64(claims.TenantID), int64(claims.UserID), "refresh")
+	w.WriteHeader(http.StatusNoContent)
+}
+
+func (h *AuthHandler) setSessionCookie(w http.ResponseWriter, r *http.Request, sessionID string) {
+	secure := r.TLS != nil || config.IsProductionMode()
+	http.SetCookie(w, &http.Cookie{
+		Name:     service.AuthSessionCookieName,
+		Value:    sessionID,
+		Path:     "/",
+		HttpOnly: true,
+		Secure:   secure,
+		SameSite: http.SameSiteLaxMode,
+		MaxAge:   int(h.sessions.TTL().Seconds()),
+		Expires:  time.Now().Add(h.sessions.TTL()),
+	})
+	w.Header().Set("Cache-Control", "no-store")
+	w.Header().Set("Referrer-Policy", "no-referrer")
+}
+
+func (h *AuthHandler) Session(w http.ResponseWriter, r *http.Request) {
+	claims := middleware.GetUserClaims(r)
+	if claims == nil {
+		respondError(w, http.StatusUnauthorized, "Unauthorized")
+		return
+	}
+	respondJSON(w, http.StatusOK, map[string]interface{}{
+		"id": claims.UserID, "user_id": claims.UserID, "email": claims.Email,
+		"name": claims.Email, "tenant_id": claims.TenantID,
+		"restaurant_id": claims.RestaurantID, "role": claims.Role,
+		"is_super_admin": false,
+	})
 }
 
 // CheckSubdomainAvailability checks if a subdomain is available
@@ -129,48 +275,10 @@ func (h *AuthHandler) ForgotPassword(w http.ResponseWriter, r *http.Request) {
 
 // TokenExchange exchanges a super admin one-time token for a regular JWT
 func (h *AuthHandler) TokenExchange(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("=== AUTH HANDLER: TokenExchange Request Received ===")
-
-	var req struct {
-		Token string `json:"token"`
-	}
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		fmt.Printf("ERROR: Failed to decode request body: %v\n", err)
-		respondError(w, http.StatusBadRequest, "Invalid request body")
-		return
-	}
-
-	if req.Token == "" {
-		respondError(w, http.StatusBadRequest, "Token is required")
-		return
-	}
-
-	fmt.Printf("Token exchange request for token: %s (first 16 chars)\n", req.Token[:min(16, len(req.Token))])
-
-	// For now, we'll accept the token and generate a temporary JWT
-	// In production, this would validate the token against the super admin's one-time token storage
-	// and get the actual user/tenant information
-	response, err := h.useCase.ExchangeSuperAdminToken(&req.Token)
-	if err != nil {
-		fmt.Printf("ERROR: Token exchange failed: %v\n", err)
-		respondError(w, http.StatusUnauthorized, err.Error())
-		return
-	}
-
-	fmt.Println("SUCCESS: Token exchange successful")
-	respondJSON(w, http.StatusOK, map[string]interface{}{
-		"success": true,
-		"data":    response,
-	})
+	respondError(w, http.StatusGone, "Browser token exchange is no longer supported")
 }
 
 // Helper functions
-func min(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
-}
 func respondJSON(w http.ResponseWriter, code int, payload interface{}) {
 	response, _ := json.Marshal(payload)
 	w.Header().Set("Content-Type", "application/json")

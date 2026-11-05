@@ -35,12 +35,17 @@ func (r *SuperAdminAuditRepository) LogAction(ctx context.Context, log_ *domain.
 			return fmt.Errorf("failed to marshal details: %w", err)
 		}
 	}
+	var detailsValue interface{}
+	if detailsJSON != nil {
+		// lib/pq treats []byte as bytea; JSONB parameters must be sent as JSON text.
+		detailsValue = string(detailsJSON)
+	}
 
 	_, err = r.db.ExecContext(ctx, `
 		INSERT INTO super_admin_audit_logs
 			(super_admin_id, action, target_type, target_id, details, ip_address, user_agent, created_at)
 		VALUES ($1, $2, $3, $4, $5, $6, $7, NOW())
-	`, log_.SuperAdminID, log_.Action, log_.TargetType, log_.TargetID, detailsJSON, log_.IPAddress, log_.UserAgent)
+	`, log_.SuperAdminID, log_.Action, log_.TargetType, log_.TargetID, detailsValue, log_.IPAddress, log_.UserAgent)
 
 	if err != nil {
 		log.Printf("[SuperAdminAuditRepository] ERROR: Failed to create audit log: %v\n", err)

@@ -123,12 +123,12 @@ export default function RegisterPage() {
         phone: data.phone,
       })
 
-      const { user, token } = response.data
-      setAuth(user, token)
+      const { user } = response.data
+      setAuth(user, '')
       toast.success(t.auth.register.accountCreated)
 
       const { dashboardUrl } = getConfig()
-      window.location.href = `${dashboardUrl}/auth/callback?token=${encodeURIComponent(token)}&user=${encodeURIComponent(JSON.stringify(user))}`
+      window.location.href = `${dashboardUrl}/${locale}/auth/callback`
     } catch (error: any) {
       let message = t.auth.register.registrationFailed
       if (error.response?.data?.error) {

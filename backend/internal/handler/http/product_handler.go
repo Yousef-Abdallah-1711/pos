@@ -2,6 +2,7 @@ package http
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -359,6 +360,10 @@ func (h *ProductHandler) DeleteProduct(w http.ResponseWriter, r *http.Request) {
 	fmt.Printf("DEBUG: Calling UseCase.DeleteProduct for ID: %d\n", productID)
 	if err := h.uc.DeleteProduct(claims.TenantID, claims.RestaurantID, productID, claims.UserID); err != nil {
 		fmt.Printf("ERROR: UseCase.DeleteProduct failed: %v\n", err)
+		if errors.Is(err, domain.ErrProductNotFound) {
+			respondError(w, http.StatusNotFound, "Product not found")
+			return
+		}
 		respondError(w, http.StatusInternalServerError, err.Error())
 		return
 	}

@@ -12,6 +12,7 @@ import type {
   PaginatedResponse,
   Tenant,
   User,
+  SuperAdminUser,
   AuditLog,
   ImpersonationToken,
 } from "@/types";
@@ -65,27 +66,13 @@ class SuperAdminAPI {
     this.client = axios.create({
       baseURL: resolvedBaseURL,
       timeout: API_TIMEOUT_MS,
+      withCredentials: true,
       headers: {
         "Content-Type": "application/json",
       },
     });
 
-    // Add token to requests
-    this.client.interceptors.request.use((config) => {
-      if (typeof window !== "undefined") {
-        const token = localStorage.getItem("super-admin-token");
-        if (token) {
-          config.headers.Authorization = `Bearer ${token}`;
-        }
-      }
-      if (process.env.NODE_ENV === "development") {
-        console.log(`[API] ${config.method?.toUpperCase()} ${config.url}`, {
-          baseURL: config.baseURL,
-          params: config.params,
-        });
-      }
-      return config;
-    });
+    this.client.interceptors.request.use((config) => config);
 
     // Handle errors
     this.client.interceptors.response.use(
@@ -114,7 +101,9 @@ class SuperAdminAPI {
           if (typeof window !== "undefined") {
             localStorage.removeItem("super-admin-token");
             localStorage.removeItem("super-admin-auth-store");
-            window.location.href = "/login";
+            if (window.location.pathname !== "/login") {
+              window.location.href = "/login";
+            }
           }
         }
         return Promise.reject(error);
@@ -135,6 +124,11 @@ class SuperAdminAPI {
 
   async logout(): Promise<void> {
     await this.client.post("/auth/logout");
+  }
+
+  async getSession(): Promise<{ super_admin: Omit<SuperAdminUser, "email">; email: string; is_super_admin: boolean }> {
+    const response = await this.client.get<ApiResponse<{ super_admin: Omit<SuperAdminUser, "email">; email: string; is_super_admin: boolean }>>("/auth/session");
+    return response.data.data!;
   }
 
   // Dashboard endpoints
@@ -315,12 +309,6 @@ class SuperAdminAPI {
       limit: meta.page_size || pageSize,
       pages: meta.total_pages || 1,
     };
-  }
-
-  // Dashboard Login endpoint
-  async generateDashboardLoginToken(tenantId: number): Promise<{ token: string; redirect_url: string; expires_in_seconds: number }> {
-    const response = await this.client.post<ApiResponse<{ token: string; dashboard_url: string; redirect_url: string; expires_in_seconds: number }>>(`/tenants/${tenantId}/dashboard-login`);
-    return response.data.data!;
   }
 
   // Settings endpoints

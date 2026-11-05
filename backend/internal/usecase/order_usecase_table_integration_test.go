@@ -120,6 +120,10 @@ func TestOrderUseCase_CreateOrderAutoOccupiesTable(t *testing.T) {
 			),
 		)
 
+	mock.ExpectExec("UPDATE orders SET public_token_hash").
+		WithArgs(sqlmock.AnyArg(), int64(501), int64(1), int64(2)).
+		WillReturnResult(sqlmock.NewResult(0, 1))
+
 	mock.ExpectExec("UPDATE restaurant_tables").
 		WithArgs("occupied", tableID, int64(1), int64(2)).
 		WillReturnResult(sqlmock.NewResult(0, 1))

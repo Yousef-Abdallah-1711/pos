@@ -280,7 +280,7 @@ func (h *UserSettingsHandler) ChangePassword(w http.ResponseWriter, r *http.Requ
 	}
 
 	// Get user to verify current password
-	user, err := h.userRepo.GetByID(r.Context(), int(userID))
+	user, err := h.userRepo.GetByID(r.Context(), int(userID), claims.TenantID, claims.RestaurantID)
 	if err != nil {
 		log.Printf("[ChangePassword] ERROR: User not found: %v", err)
 		respondError(w, http.StatusNotFound, "User not found")
@@ -303,7 +303,7 @@ func (h *UserSettingsHandler) ChangePassword(w http.ResponseWriter, r *http.Requ
 	}
 
 	// Update password in user repo
-	if err := h.userRepo.UpdatePassword(r.Context(), int(userID), hashedPassword); err != nil {
+	if err := h.userRepo.UpdatePassword(r.Context(), int(userID), claims.TenantID, claims.RestaurantID, hashedPassword); err != nil {
 		log.Printf("[ChangePassword] ERROR: Failed to update password: %v", err)
 		respondError(w, http.StatusInternalServerError, "Failed to update password")
 		return
@@ -344,7 +344,7 @@ func (h *UserSettingsHandler) GetUserProfile(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	user, err := h.userRepo.GetByID(r.Context(), int(userID))
+	user, err := h.userRepo.GetByID(r.Context(), int(userID), claims.TenantID, claims.RestaurantID)
 	if err != nil {
 		log.Printf("[GetUserProfile] ERROR: Failed to get user: %v", err)
 		respondError(w, http.StatusNotFound, "User not found")
@@ -410,13 +410,13 @@ func (h *UserSettingsHandler) UpdateProfile(w http.ResponseWriter, r *http.Reque
 	}
 
 	// Update profile
-	if err := h.userRepo.UpdateProfile(r.Context(), int(userID), req.Name, req.AvatarURL); err != nil {
+	if err := h.userRepo.UpdateProfile(r.Context(), int(userID), claims.TenantID, claims.RestaurantID, req.Name, req.AvatarURL); err != nil {
 		log.Printf("[UpdateProfile] ERROR: Failed to update profile: %v", err)
 		respondError(w, http.StatusInternalServerError, "Failed to update profile")
 		return
 	}
 
-	user, err := h.userRepo.GetByID(r.Context(), int(userID))
+	user, err := h.userRepo.GetByID(r.Context(), int(userID), claims.TenantID, claims.RestaurantID)
 	if err != nil {
 		log.Printf("[UpdateProfile] ERROR: Failed to get updated user: %v", err)
 		respondError(w, http.StatusInternalServerError, "Failed to retrieve updated profile")

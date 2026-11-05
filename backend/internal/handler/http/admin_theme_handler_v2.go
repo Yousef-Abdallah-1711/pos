@@ -92,6 +92,7 @@ func (h *AdminThemeHandlerV2) ListThemes(w http.ResponseWriter, r *http.Request)
 
 	// Extract tenant info from context
 	tenantID := middleware.GetTenantID(r)
+	restaurantID := middleware.GetRestaurantID(r)
 	if tenantID == 0 {
 		respondError(w, http.StatusUnauthorized, "missing authentication context")
 		return
@@ -114,7 +115,7 @@ func (h *AdminThemeHandlerV2) ListThemes(w http.ResponseWriter, r *http.Request)
 	}
 
 	// List themes via service
-	response, err := h.service.ListThemes(r.Context(), tenantID, page, pageSize)
+	response, err := h.service.ListThemes(r.Context(), tenantID, restaurantID, page, pageSize)
 	if err != nil {
 		respondError(w, http.StatusInternalServerError, err.Error())
 		return
@@ -168,7 +169,7 @@ func (h *AdminThemeHandlerV2) loadOwnedTheme(w http.ResponseWriter, r *http.Requ
 		return nil, false
 	}
 
-	theme, err := h.service.GetTheme(r.Context(), id)
+	theme, err := h.service.GetTheme(r.Context(), tenantID, restaurantID, id)
 	if err != nil {
 		if strings.Contains(err.Error(), "not found") {
 			respondError(w, http.StatusNotFound, "theme not found")
@@ -184,10 +185,9 @@ func (h *AdminThemeHandlerV2) loadOwnedTheme(w http.ResponseWriter, r *http.Requ
 	return theme, true
 }
 
-// themeBelongsToCaller reports whether the theme is owned by the caller's tenant
-// and (when the theme is restaurant-scoped) restaurant.
+// themeBelongsToCaller reports whether the theme is owned by both caller scopes.
 func themeBelongsToCaller(theme *domain.Theme, tenantID, restaurantID int64) bool {
-	return theme != nil && theme.TenantID == tenantID && (theme.RestaurantID == 0 || theme.RestaurantID == restaurantID)
+	return theme != nil && theme.TenantID == tenantID && theme.RestaurantID == restaurantID
 }
 
 // GetTheme handles GET /api/v1/admin/themes/{id}
@@ -351,7 +351,7 @@ func (h *AdminThemeHandlerV2) UpdateTheme(w http.ResponseWriter, r *http.Request
 	}
 
 	// Update theme via service
-	theme, err := h.service.UpdateTheme(r.Context(), id, &req, userID)
+	theme, err := h.service.UpdateTheme(r.Context(), middleware.GetTenantID(r), middleware.GetRestaurantID(r), id, &req, userID)
 	if err != nil {
 		if strings.Contains(err.Error(), "not found") {
 			respondError(w, http.StatusNotFound, err.Error())
@@ -389,7 +389,7 @@ func (h *AdminThemeHandlerV2) DeleteTheme(w http.ResponseWriter, r *http.Request
 	}
 
 	// Delete theme via service
-	err = h.service.DeleteTheme(r.Context(), id)
+	err = h.service.DeleteTheme(r.Context(), middleware.GetTenantID(r), middleware.GetRestaurantID(r), id)
 	if err != nil {
 		if strings.Contains(err.Error(), "not found") {
 			respondError(w, http.StatusNotFound, err.Error())
@@ -426,7 +426,7 @@ func (h *AdminThemeHandlerV2) ActivateTheme(w http.ResponseWriter, r *http.Reque
 	}
 
 	// Activate theme via service
-	err = h.service.ActivateTheme(r.Context(), id)
+	err = h.service.ActivateTheme(r.Context(), middleware.GetTenantID(r), middleware.GetRestaurantID(r), id)
 	if err != nil {
 		if strings.Contains(err.Error(), "not found") {
 			respondError(w, http.StatusNotFound, err.Error())
@@ -485,7 +485,7 @@ func (h *AdminThemeHandlerV2) DuplicateTheme(w http.ResponseWriter, r *http.Requ
 	}
 
 	// Get the source theme (could be from user themes or presets)
-	sourceTheme, err := h.service.GetTheme(r.Context(), id)
+	sourceTheme, err := h.service.GetTheme(r.Context(), tenantID, restaurantID, id)
 	if err == nil && !themeBelongsToCaller(sourceTheme, tenantID, restaurantID) {
 		// A theme owned by someone else is treated exactly like a missing one.
 		sourceTheme, err = nil, fmt.Errorf("theme not found")

@@ -360,7 +360,7 @@ func (uc *SuperAdminTenantUseCase) GenerateDashboardLoginToken(
 
 	// Log the action
 	targetType := domain.AuditTargetTenant
-	_ = uc.auditRepo.LogAction(ctx, &domain.SuperAdminAuditLog{
+	if err := uc.auditRepo.LogAction(ctx, &domain.SuperAdminAuditLog{
 		SuperAdminID: superAdminID,
 		Action:       domain.AuditActionAccessDashboard,
 		TargetType:   &targetType,
@@ -371,7 +371,9 @@ func (uc *SuperAdminTenantUseCase) GenerateDashboardLoginToken(
 		},
 		IPAddress: ip,
 		UserAgent: userAgent,
-	})
+	}); err != nil {
+		return "", fmt.Errorf("failed to record dashboard access audit event: %w", err)
+	}
 
 	log.Printf("[SuperAdminTenantUseCase] Dashboard login token generated for tenant: %d\n", tenantID)
 	return token, nil

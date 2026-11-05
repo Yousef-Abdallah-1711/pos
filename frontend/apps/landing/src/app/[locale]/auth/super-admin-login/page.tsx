@@ -26,37 +26,17 @@ export default function SuperAdminLoginPage() {
       hasExecuted.current = true;
 
       try {
-        const params = new URLSearchParams(window.location.search);
-        const token = params.get("token");
-
-        if (!token) {
-          setError(t.auth.superAdmin.noToken);
-          setIsLoading(false);
-          return;
-        }
-
-        const response = await api.post("/auth/token-exchange", { token });
-        const data = response.data;
-
-        const authData = data.data || data;
-        if (authData?.token && authData?.user) {
-          setAuth(authData.user, authData.token);
-
-          const userParam = encodeURIComponent(JSON.stringify(authData.user));
-          const tokenParam = encodeURIComponent(authData.token);
-          const dashboardBaseUrl = getConfig().dashboardUrl;
-          const dashboardUrl = `${dashboardBaseUrl}/en/dashboard?auth_token=${tokenParam}&auth_user=${userParam}`;
-
-          setSuccess(true);
-          setIsLoading(false);
-
-          setRedirecting(true);
-          setTimeout(() => {
-            window.location.href = dashboardUrl;
-          }, 1500);
-        } else {
-          throw new Error(t.auth.superAdmin.noJwt);
-        }
+        const response = await fetch(`${getConfig().apiUrl}/auth/session`, { credentials: 'include', cache: 'no-store' });
+        if (!response.ok) throw new Error(t.auth.superAdmin.noToken);
+        const sessionUser: unknown = await response.json();
+        setAuth(sessionUser as Parameters<typeof setAuth>[0], '');
+        window.history.replaceState({}, document.title, window.location.pathname);
+        setSuccess(true);
+        setIsLoading(false);
+        setRedirecting(true);
+        setTimeout(() => {
+          window.location.href = `${getConfig().dashboardUrl}/${locale}/dashboard`;
+        }, 500);
       } catch (err: unknown) {
         let errorMessage = t.auth.superAdmin.authError;
 
@@ -75,7 +55,7 @@ export default function SuperAdminLoginPage() {
     };
 
     exchangeToken();
-  }, [setAuth, t]);
+  }, [locale, setAuth, t]);
 
   return (
     <div dir={dir} className="min-h-screen flex items-center justify-center bg-gradient-to-br from-orange-50 to-red-50 dark:from-gray-900 dark:to-gray-800">
