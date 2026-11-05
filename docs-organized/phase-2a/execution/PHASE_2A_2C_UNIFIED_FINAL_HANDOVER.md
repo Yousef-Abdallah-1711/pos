@@ -27,7 +27,7 @@ Status: **PARTIAL — safe WS02 subset isolated; no integration PR merge or prod
 
 - Phase 2A: **PARTIAL**. Preserve disabled, fail-closed Super Admin handoff. Full authentication lifecycle and broad tenant/restaurant side-effect matrix remain unverified. WS05, WS07–WS10 have documented gaps. Payments (WS03) and CI expansion (WS06) remain deferred.
 - Phase 2C: **PARTIAL**. Storefront change is merged. Admin Orders optimization remains unmeasured and unreconciled against dirty WS02 Orders changes. Dashboard cold CLS and warm POS LCP observations remain open; storefront fixture evidence had an invalid `warm-comfort` theme.
-- Unified main integration: **PARTIAL**. No new integration commit has been pushed or merged.
+- Unified main integration: **PARTIAL**. Limited WS02 candidate is committed and pushed in PR #9; hosted checks pass, but approval and merge remain outstanding.
 - Production release: **NO-GO** until the combined security, browser, performance, CI and review gates pass.
 
 ## Remaining blockers

@@ -47,7 +47,7 @@ The rerun log has `MIGRATE_EXIT:0`, `BUILD_EXIT:0`, `VET_EXIT:0`, and `TEST_EXIT
 - PR #3 latest checks pass; no review approval.
 - PR #7 latest checks pass; draft; no review approval; benchmark still missing.
 - PR #8 is merged and its storefront optimization is in current main.
-- New rebased branch hosted checks: not run because it has not been pushed.
+- PR #9 head `1e31b9b8fd845149cec7d037f03f6bdd2550e47c`: `runtime-localhost-guardrail` PASS (7s); `url-domain-config-smoke` PASS (44s). No review approval is recorded.
 
 ## Final gate
 

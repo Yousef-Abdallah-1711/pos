@@ -33,8 +33,10 @@ The subscription isolation test initially depended on untracked helper tests fro
 
 ## Publication and merge
 
-- New integration commits are local only; no push or PR has been created from this branch.
-- No PR has been merged by this execution.
+- Topic branch pushed: `codex/unified-phase2a-2c-closure`, candidate head `1e31b9b8fd845149cec7d037f03f6bdd2550e47c`.
+- Replacement-scope PR #9 is open: https://github.com/Yousef-Abdallah-1711/pos/pull/9.
+- PR #9 hosted `runtime-localhost-guardrail` and `url-domain-config-smoke` both pass.
+- PR #9 review decision is empty; required human approval remains outstanding. No PR has been merged by this execution.
 - No direct main push, force-push, approval bypass, or review bypass was used.
 - PR reviewDecision is empty for #1, #3, and #7. Required human approval remains outstanding.
 - The current `origin/main` SHA remains `d84120559db36e8e9e7fdb73872a30cbc9d4e6e7`.
