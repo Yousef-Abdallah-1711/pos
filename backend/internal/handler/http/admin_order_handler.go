@@ -273,7 +273,7 @@ func (h *AdminOrderHandler) GetOrder(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	history, err := h.orderUC.GetOrderStatusHistory(tenantID, orderID)
+	history, err := h.orderUC.GetOrderStatusHistory(tenantID, restaurantID, orderID)
 	if err != nil {
 		respondError(w, http.StatusInternalServerError, "Failed to retrieve order history")
 		return
@@ -548,7 +548,7 @@ func (h *AdminOrderHandler) GetOrderHistory(w http.ResponseWriter, r *http.Reque
 		}
 	}
 
-	history, err := h.orderUC.GetOrderStatusHistory(tenantID, orderID)
+	history, err := h.orderUC.GetOrderStatusHistory(tenantID, restaurantID, orderID)
 	if err != nil {
 		respondError(w, http.StatusInternalServerError, "Failed to retrieve order history")
 		return
@@ -737,7 +737,7 @@ func (h *AdminOrderHandler) resolveDriverContext(r *http.Request, tenantID, rest
 		return nil, false, nil
 	}
 
-	roles, err := h.userRoleRepo.GetUserRoles(r.Context(), int64(claims.UserID), tenantID)
+	roles, err := h.userRoleRepo.GetUserRolesForRestaurant(r.Context(), int64(claims.UserID), tenantID, restaurantID)
 	if err != nil {
 		return nil, false, err
 	}

@@ -319,7 +319,7 @@ func (h *PublicOrderHandler) TrackOrder(w http.ResponseWriter, r *http.Request) 
 	}
 
 	// Get status history
-	history, err := h.orderUC.GetOrderStatusHistory(tenantID, orderID)
+	history, err := h.orderUC.GetOrderStatusHistory(tenantID, restaurantID, orderID)
 	if err != nil {
 		// History is optional, don't fail if it's not available
 		history = []domain.OrderStatusHistory{}

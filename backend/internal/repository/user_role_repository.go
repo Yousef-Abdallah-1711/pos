@@ -67,6 +67,39 @@ func (r *UserRoleRepository) GetUserRoles(ctx context.Context, userID int64, ten
 	return roles, nil
 }
 
+// GetUserRolesForRestaurant returns only roles that belong to the requested
+// tenant and restaurant. It also prevents a restaurant-bound user from using
+// a role assigned in a sibling restaurant.
+func (r *UserRoleRepository) GetUserRolesForRestaurant(ctx context.Context, userID, tenantID, restaurantID int64) ([]domain.Role, error) {
+	query := `
+		SELECT DISTINCT r.id, r.tenant_id, r.role_name, COALESCE(r.description, ''), r.role_code, r.is_system_role, r.created_at, r.updated_at
+		FROM user_roles ur
+		JOIN users u ON u.id = ur.user_id AND u.tenant_id = ur.tenant_id
+		JOIN roles r ON r.id = ur.role_id AND r.tenant_id = ur.tenant_id
+		WHERE ur.user_id = $1 AND ur.tenant_id = $2 AND r.restaurant_id = $3
+		  AND (u.restaurant_id IS NULL OR u.restaurant_id = $3) AND r.is_active = TRUE
+		ORDER BY r.is_system_role DESC, r.role_name ASC
+	`
+	rows, err := r.db.QueryContext(ctx, query, userID, tenantID, restaurantID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var roles []domain.Role
+	for rows.Next() {
+		role := domain.Role{}
+		if err := rows.Scan(&role.ID, &role.TenantID, &role.RoleName, &role.Description, &role.RoleCode, &role.IsSystemRole, &role.CreatedAt, &role.UpdatedAt); err != nil {
+			return nil, err
+		}
+		roles = append(roles, role)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return roles, nil
+}
+
 // GetRoleUsers retrieves all users assigned to a specific role
 func (r *UserRoleRepository) GetRoleUsers(ctx context.Context, roleID int64) ([]domain.User, error) {
 	query := `

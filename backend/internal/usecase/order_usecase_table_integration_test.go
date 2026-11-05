@@ -107,7 +107,7 @@ func TestOrderUseCase_CreateOrderAutoOccupiesTable(t *testing.T) {
 		)
 
 	mock.ExpectQuery("FROM order_items").
-		WithArgs(int64(501)).
+		WithArgs(int64(1), int64(2), int64(501)).
 		WillReturnRows(
 			sqlmock.NewRows([]string{
 				"id", "order_id", "product_id", "variant_id", "product_name", "variant_name",
