@@ -6,8 +6,8 @@ Continue the POOS unified engineering closure from the verified state below. Thi
 
 - Repository: `https://github.com/Yousef-Abdallah-1711/pos`
 - Last verified `origin/main`: `d84120559db36e8e9e7fdb73872a30cbc9d4e6e7`
-- Integration branch/worktree: `codex/unified-phase2a-2c-closure` at `H:\pos-unified-phase2a-2c`; pushed head `1e31b9b8fd845149cec7d037f03f6bdd2550e47c`.
-- PR #9 is open; hosted checks pass and human review approval remains outstanding.
+- Integration branch/worktree: `codex/unified-phase2a-2c-closure` at `H:\pos-unified-phase2a-2c`; PR #9 remote head is `beb1f55532f043099e8d78691806f069716d7625`; locally verified candidate commit is `e30ffe3`, not yet pushed.
+- PR #9 is open; previously pushed hosted checks pass, but new hosted checks and human review approval remain outstanding.
 - Read `H:\Projects\pos\CODING_STANDARDS.md` before code changes (mandatory project instruction).
 - Preserve dirty source worktrees `H:\Projects\pos` and `H:\ws02`; never reset, clean, overwrite or blind-stage their contents.
 - A private snapshot at `C:\Users\yosea\.codex\backups\poos-unified-closure-20261105-014347` was checksum-verified 220/220. Keep it private.
@@ -23,7 +23,7 @@ A disposable Go 1.24.13 run migrated an isolated tmpfs PostgreSQL database succe
 
 - PR #1 open; old head checks fail because stale QA verifier uses `http://localhost:3002` and two stale Dashboard production URL tests no longer match current main. Current main contains fixes; rebase candidate should be checked with hosted CI.
 - PR #3 open; checks pass, no approval. It is mostly handover/docs and requires deduplication against the new unified deliverables.
-- PR #7 open draft; checks pass, no approval. Admin Orders optimization replaces per-order detail hydration with one scoped item-count query, but required 1/10/25/50 before/after SQL counts, HTTP median/p95, payload, response equality and tenant/restaurant negative evidence is missing. It overlaps uncommitted WS02 Orders changes. Keep it out until fully reconciled and measured.
+- PR #7 open draft; checks pass, no approval. Its Admin Orders optimization is reconciled into the local unified candidate. Fresh isolated measurements at page sizes 1/10/25/50 show fixed three-query candidate behavior, matching canonical response hashes/payloads and exclusion of tenant/sibling-restaurant fixture orders. See the unified verification report for exact metrics.
 - PR #8 merged; Storefront coalescing is in `origin/main`. PRs #2, #4, #5, #6 merged; avoid duplicate patches.
 - Current remote main SHA at handover: `d84120559db36e8e9e7fdb73872a30cbc9d4e6e7`.
 
@@ -33,8 +33,9 @@ A disposable Go 1.24.13 run migrated an isolated tmpfs PostgreSQL database succe
 2. Update the verification report with exact current results. Re-run `git diff --check`, inspect every candidate hunk, secret scan, and migration consistency before commit.
 3. Review the remaining committed and dirty WS02 changes path-by-path; specifically Orders handler/repository/use-case and all tenant/restaurant database side effects. Preserve original trees.
 4. Benchmark Admin Orders with comparable synthetic data and build fingerprints at page sizes 1, 10, 25, 50. Record SQL/detail/item counts, query timing, HTTP median/p95, payload, response equality, cross-tenant and cross-restaurant negatives. If instrumentation/fixtures are insufficient, report blocked and do not claim improvement.
-5. Run current all-four-frontend unit/typecheck/build, backend full tests, isolated Redis/PostgreSQL checks, browser journeys, runtime URL/security scans, and applicable CI on the same combined integration commit.
-6. Commit coherent reviewed changes and push only a topic branch. Create/update PRs; never push to main directly or bypass checks/review. Obtain required human approval. Merge only if branch protection allows and all gates pass; fetch main and record its exact merge SHA.
+5. Dashboard has 107 failing tests out of 645 and test-source TypeScript errors. Its app typecheck and all four production builds pass; other frontend suites pass. Fix the Dashboard test failures and rerun all frontend gates.
+6. Run isolated Redis tests and browser login/logout, auth/session, tenant/restaurant, POS, inventory, storefront/cart, Super Admin and Admin Orders journeys against a clean candidate Docker stack. Do not use the existing `pos-dev` stack.
+7. Publish the verified Orders continuation on PR #9, wait for hosted checks, obtain required human approval and merge only if all gates pass. Never push to main directly or bypass checks/review. Fetch main and record its exact merge SHA.
 7. Maintain the five handover deliverables in `docs-organized/phase-2a/execution/`: final handover, verification report, reconciliation manifest, main integration report, next-session prompt. Clearly distinguish implemented, tested, committed, pushed, merged, deferred, blocked and production-ready.
 
 ## Known status and safety posture

@@ -24,7 +24,7 @@ Initial clean-branch run:
 
 Remediation: replace the hidden helper dependency with local disposable database and synthetic tenant/restaurant/user fixtures in the subscription integration test. This is a working-tree change, not yet committed. A subsequent fresh isolated run completed migrations, build, vet and full tests with exit code 0. The full test suite ran against isolated tmpfs PostgreSQL with `POS_TEST_DATABASE_URL` pointed only to `pos_test`.
 
-The rerun log has `MIGRATE_EXIT:0`, `BUILD_EXIT:0`, `VET_EXIT:0`, and `TEST_EXIT:0`. Explicitly selected Driver, HR child-resource, subscription admin, trial concurrency, tax-period, and recurring-template ownership tests all passed against the disposable PostgreSQL database.
+The rerun log has `MIGRATE_EXIT:0`, `BUILD_EXIT:0`, `VET_EXIT:0`, and `TEST_EXIT:0`. Explicitly selected Driver, HR child-resource, subscription admin, trial concurrency, tax-period, and recurring-template ownership tests all passed against the disposable PostgreSQL database. The unified Orders continuation also passed `go build ./...`, `go vet ./...`, and `go test -count=1 ./...` under Go 1.24.13 against the disposable PostgreSQL test database.
 
 ## Database/security evidence
 
@@ -35,9 +35,11 @@ The rerun log has `MIGRATE_EXIT:0`, `BUILD_EXIT:0`, `VET_EXIT:0`, and `TEST_EXIT
 
 ## Frontend/browser/performance
 
-- Current combined frontend unit/typecheck/build runs: NOT RUN.
-- Current combined browser login/logout, tenant, restaurant, POS, inventory, storefront cart, Super Admin denial, and Admin Orders journeys: NOT RUN.
-- Admin Orders page sizes 1/10/25/50 comparable benchmark: NOT RUN. Historical page-50 baseline only: 105 SQL statements, warm median 146.87 ms, p95 215.77 ms. These values are historical, not fresh.
+- Frontend source typechecks: PASS for all four apps. Test-source typechecks: PASS for Landing, Restaurant Website and Super Admin; Dashboard fails with existing test fixture and Playwright typing errors.
+- Unit tests on the unified candidate: Landing 35/35, Restaurant Website 66/66, Super Admin 16/16 pass. Dashboard: 538/645 pass, 107 fail across 14 files, with one unhandled error. The failures include stale theme/component expectations and timer/error-boundary tests; they remain open.
+- Production builds: PASS for all four apps with local example URL configuration. Existing warnings include a dynamic component-registry dependency in Dashboard, `<img>` in Landing, a missing effect dependency in Restaurant Website and missing effect dependencies in Super Admin.
+- Authenticated browser login/logout, session, tenant, POS, inventory, storefront cart, Super Admin denial and Admin Orders journeys: NOT RUN against a clean combined candidate stack.
+- Admin Orders benchmark: same Go 1.24.13 build, PostgreSQL 15 tmpfs, 75 deterministic synthetic orders with two items each, 30 HTTP samples per page size. Baseline `d841205` → candidate `e30ffe3`: page 1: 4→3 SQL, median 12.188→9.806 ms, p95 16.354→13.012 ms; page 10: 22→3, 57.844→10.692 ms, 79.494→14.647 ms; page 25: 52→3, 142.035→10.610 ms, 211.610→19.043 ms; page 50: 102→3, 291.768→11.784 ms, 504.784→23.033 ms. Payload byte counts and canonical response SHA-256 values match for each page size. Tenant and sibling-restaurant fixture orders are excluded. Full JSON evidence is in `ADMIN_ORDERS_BENCHMARK_BEFORE.json` and `ADMIN_ORDERS_BENCHMARK_AFTER.json`. Historical page-50 figures (105 SQL, 146.87 ms median, 215.77 ms p95) came from a different profile and are not directly comparable.
 - Existing PR #7 SQL-mock asserts tenant/restaurant predicates and batched order IDs. It does not establish HTTP behavior, before/after result equality or latency.
 - Historical Dashboard and Storefront profiles are in the Phase 2C source branch. Dashboard home cold CLS 0.380, warm POS LCP 2.364 s; Storefront sample had invalid synthetic theme `warm-comfort` 404s. No fresh combined-build profiles were run.
 
@@ -47,7 +49,7 @@ The rerun log has `MIGRATE_EXIT:0`, `BUILD_EXIT:0`, `VET_EXIT:0`, and `TEST_EXIT
 - PR #3 latest checks pass; no review approval.
 - PR #7 latest checks pass; draft; no review approval; benchmark still missing.
 - PR #8 is merged and its storefront optimization is in current main.
-- PR #9 head `1e31b9b8fd845149cec7d037f03f6bdd2550e47c`: `runtime-localhost-guardrail` PASS (7s); `url-domain-config-smoke` PASS (44s). No review approval is recorded.
+- PR #9 had passing `runtime-localhost-guardrail` and `url-domain-config-smoke` at the previously pushed head. The local continuation adds Orders changes and requires a fresh push/hosted CI run. No review approval is recorded.
 
 ## Final gate
 
