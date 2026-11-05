@@ -1,7 +1,9 @@
 package http
 
 import (
+	"database/sql"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -99,12 +101,16 @@ func (h *CategoryHandler) CreateCategory(w http.ResponseWriter, r *http.Request)
 	id, err := h.repo.CreateCategory(category)
 	if err != nil {
 		fmt.Printf("ERROR: CreateCategory repo failed: %v\n", err)
+		if errors.Is(err, sql.ErrNoRows) {
+			respondError(w, http.StatusBadRequest, "Invalid restaurant context")
+			return
+		}
 		errMsg := err.Error()
 		// Check for constraint violations
 		if strings.Contains(errMsg, "duplicate key") || strings.Contains(errMsg, "unique_") {
 			respondError(w, http.StatusBadRequest, "A category with this name already exists")
 		} else {
-			respondError(w, http.StatusInternalServerError, errMsg)
+			respondError(w, http.StatusInternalServerError, "Failed to create category")
 		}
 		return
 	}
@@ -162,13 +168,17 @@ func (h *CategoryHandler) UpdateCategory(w http.ResponseWriter, r *http.Request)
 	}
 
 	if err := h.repo.UpdateCategory(category); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			respondError(w, http.StatusNotFound, "Category not found")
+			return
+		}
 		fmt.Printf("ERROR: UpdateCategory repo failed: %v\n", err)
 		errMsg := err.Error()
 		// Check for constraint violations
 		if strings.Contains(errMsg, "duplicate key") || strings.Contains(errMsg, "unique_") {
 			respondError(w, http.StatusBadRequest, "A category with this name already exists")
 		} else {
-			respondError(w, http.StatusInternalServerError, errMsg)
+			respondError(w, http.StatusInternalServerError, "Failed to update category")
 		}
 		return
 	}
@@ -190,7 +200,12 @@ func (h *CategoryHandler) DeleteCategory(w http.ResponseWriter, r *http.Request)
 	}
 
 	if err := h.repo.DeleteCategory(claims.TenantID, claims.RestaurantID, id); err != nil {
-		respondError(w, http.StatusInternalServerError, err.Error())
+		if errors.Is(err, sql.ErrNoRows) {
+			respondError(w, http.StatusNotFound, "Category not found")
+			return
+		}
+		fmt.Printf("ERROR: DeleteCategory repo failed: %v\n", err)
+		respondError(w, http.StatusInternalServerError, "Failed to delete category")
 		return
 	}
 
