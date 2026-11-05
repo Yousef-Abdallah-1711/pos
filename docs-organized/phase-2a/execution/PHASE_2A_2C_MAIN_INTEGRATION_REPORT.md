@@ -19,7 +19,7 @@ The local branch was created cleanly from `origin/main` and received five indivi
 - `63c92cd fix(accounting): enforce tax period restaurant ownership`
 - `b249ac4 fix(accounting): scope recurring templates to restaurants`
 
-The subscription isolation test initially depended on untracked helper tests from the dirty WS02 worktree. The integration branch now contains a self-contained synthetic tenant/restaurant/user fixture. The clean-candidate Go 1.24.13 build, vet, full Go test suite and explicitly selected PostgreSQL ownership/admin/concurrency tests pass. The repair and the five unified handover deliverables are included in the local integration branch after final diff review.
+The subscription isolation test initially depended on untracked helper tests from the dirty WS02 worktree. The integration branch now contains a self-contained synthetic tenant/restaurant/user fixture. The clean-candidate Go 1.24.13 build, vet, full Go test suite and explicitly selected PostgreSQL ownership/admin/concurrency tests pass. The repair and five unified handover deliverables are committed in `f56f32e`.
 
 ## PR disposition
 

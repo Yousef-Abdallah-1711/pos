@@ -14,7 +14,7 @@ Continue the POOS unified engineering closure from the verified state below. Thi
 
 ## Current integration candidate
 
-Five committed WS02 PR #1 commits were cherry-picked to the clean branch: `7075011`, `a268f9b`, `1816970`, `63c92cd`, `b249ac4`. During clean checkout testing, a hidden dependency was found in `subscription_admin_isolation_integration_test.go`; its database and synthetic data fixture helpers existed only in the source WS02 untracked tests. The integration test has been changed to use self-contained fixtures. This correction is not yet committed.
+Five committed WS02 PR #1 commits were cherry-picked to the clean branch: `7075011`, `a268f9b`, `1816970`, `63c92cd`, `b249ac4`. During clean checkout testing, a hidden dependency was found in `subscription_admin_isolation_integration_test.go`; its database and synthetic data fixture helpers existed only in the source WS02 untracked tests. The integration test has been changed to use self-contained fixtures. This correction is committed at `f56f32e`.
 
 A disposable Go 1.24.13 run migrated an isolated tmpfs PostgreSQL database successfully and passed `go build ./...`. Vet/full test rerun is in `H:\pos-unified-verification\backend-isolated.log`; inspect exit markers and finish targeted integration tests before publishing.
 
