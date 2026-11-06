@@ -32,8 +32,8 @@ The rerun log has `MIGRATE_EXIT:0`, `BUILD_EXIT:0`, `VET_EXIT:0`, and `TEST_EXIT
 - Targeted Driver, HR child-resource, subscription trial concurrency/admin, tax period, and recurring-template ownership tests passed, including unchanged-row/side-effect assertions, against disposable PostgreSQL.
 - Authentication lifecycle, Redis session revocation, refresh-rotation races, CSRF negatives, audit failure behavior, and all resource-family side-effect checks were not run as one combined acceptance set.
 - Do not interpret a response denial alone as isolation proof; unauthorized side effects must remain asserted.
-- RLS remains an explicit Phase 2A completion gate: task C012 is still `IN_PROGRESS`, and the Phase 2A final report lists database-level tenant enforcement among unmet criteria. No application table has RLS enabled. The pilot proves only the policy mechanism; it is not live enforcement. A safe rollout still requires moving each table family's direct `*sql.DB` access into tenant-scoped transactions, classifying ownership, and testing with the restricted runtime role. Enabling policies before those paths are migrated can break legitimate operations, so this candidate does not claim RLS closure.
-- Follow-up on 2026-11-06: `user_auth_audit_logs` is now the first migration-backed RLS slice, tested with actual migrations 163/164 and restricted `pos_app` in an isolated schema (commit `fbb247b`). Production startup rejects superuser/BYPASSRLS and any runtime identity other than `pos_app`; fresh-volume role initialization and the full Go build/vet/test suite passed on disposable PostgreSQL 16 (commit `f8603b2`). Development and existing production databases have not been switched, and C012 remains partial.
+- RLS remains an explicit Phase 2A completion gate: task C012 is still `IN_PROGRESS`, and the Phase 2A final report lists database-level tenant enforcement among unmet criteria. No live database has had these RLS migrations applied. The candidate now includes pilots for auth-audit and user-settings/password-history table families; they prove policy behavior only in disposable databases, not live enforcement. A safe rollout still requires moving each table family's direct `*sql.DB` access into tenant-scoped transactions, classifying ownership, and testing with the restricted runtime role. Enabling policies before those paths are migrated can break legitimate operations, so this candidate does not claim RLS closure.
+- Follow-up on 2026-11-06: migrations 164 and 165 now cover auth-audit and user-settings/password-history table families. The restricted `pos_app` integration verified tenant isolation, fail-closed context, connection reuse, and rollback at `cfd84ab`. Production startup rejects superuser/BYPASSRLS and any runtime identity other than `pos_app`; fresh-volume role initialization and the full Go build/vet/test suite passed on disposable PostgreSQL 16 (commit `f8603b2`). Development and existing production databases have not been switched, and C012 remains partial.
 
 ## Frontend/browser/performance
 
@@ -51,7 +51,7 @@ The rerun log has `MIGRATE_EXIT:0`, `BUILD_EXIT:0`, `VET_EXIT:0`, and `TEST_EXIT
 - PR #3 latest checks pass; no review approval.
 - PR #7 latest checks pass; draft; no review approval; benchmark still missing.
 - PR #8 is merged and its storefront optimization is in current main.
-- PR #9 head `ec23651ebc42a397b54244554635a0e281122d27`: `runtime-localhost-guardrail` PASS and `url-domain-config-smoke` PASS. No review approval is recorded.
+- GitHub refresh on 2026-11-06: PR #9 head `acdd6ae7f45445eedcc1c23e568c4fdba7147de7`; `runtime-localhost-guardrail` and `url-domain-config-smoke` PASS; merge state is clean; no reviews or review requests are recorded. PR #1 still has the two stale Dashboard URL check failures, PR #3 checks pass, and PR #7 checks pass but it remains a draft. No eligible PR has the repository-required independent approval.
 
 ## Final gate
 
