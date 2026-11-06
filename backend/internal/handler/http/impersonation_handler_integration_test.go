@@ -18,6 +18,18 @@ import (
 	"pos-saas/tests/testdb"
 )
 
+type impersonationHTTPFlow struct {
+	db                *sql.DB
+	admin             http.Handler
+	handler           *ImpersonationHandler
+	token             string
+	targetUserID      int64
+	superAdminID      int64
+	store             *service.AuthSessionStore
+	impersonationRepo *repository.ImpersonationRepository
+	adminRepo         *repository.SuperAdminRepository
+}
+
 func TestImpersonationHTTPAuditSessionLifecycle(t *testing.T) {
 	t.Setenv("ENV", "development")
 	if os.Getenv(testdb.EnvVar) == "" {
@@ -49,15 +61,19 @@ func TestImpersonationHTTPAuditSessionLifecycle(t *testing.T) {
 	adminMux.HandleFunc("POST /api/v1/super-admin/impersonate/end", handler.EndImpersonation)
 	adminMux.HandleFunc("GET /api/v1/super-admin/impersonate/status", handler.GetImpersonationStatus)
 	securedAdminMux := middleware.SuperAdminAuthMiddleware(tokens)(middleware.RequireSuperAdmin(adminRepo)(adminMux))
-	assertImpersonationSessionFlow(t, db, securedAdminMux, handler, token, targetUserID, superAdminID)
+	assertImpersonationSessionFlow(t, impersonationHTTPFlow{
+		db: db, admin: securedAdminMux, handler: handler, token: token,
+		targetUserID: targetUserID, superAdminID: superAdminID, store: store,
+		impersonationRepo: impersonationRepo, adminRepo: adminRepo,
+	})
 	assertUnauditedImpersonationIsRevoked(t, db, securedAdminMux, targetUserID, adminUserID, superAdminID)
 }
 
-func assertImpersonationSessionFlow(t *testing.T, db *sql.DB, admin http.Handler, handler *ImpersonationHandler, token string, targetUserID, superAdminID int64) {
+func assertImpersonationSessionFlow(t *testing.T, flow impersonationHTTPFlow) {
 	t.Helper()
-	start := authenticatedImpersonationRequest(http.MethodPost, fmt.Sprintf("/api/v1/super-admin/impersonate/%d", targetUserID), token, nil)
+	start := authenticatedImpersonationRequest(http.MethodPost, fmt.Sprintf("/api/v1/super-admin/impersonate/%d", flow.targetUserID), flow.token, nil)
 	startRecorder := httptest.NewRecorder()
-	admin.ServeHTTP(startRecorder, start)
+	flow.admin.ServeHTTP(startRecorder, start)
 	if startRecorder.Code != http.StatusOK {
 		t.Fatalf("start impersonation returned %d: %s", startRecorder.Code, startRecorder.Body.String())
 	}
@@ -65,9 +81,32 @@ func assertImpersonationSessionFlow(t *testing.T, db *sql.DB, admin http.Handler
 	if !cookie.HttpOnly || cookie.SameSite != http.SameSiteLaxMode || cookie.Value == "" || strings.Contains(startRecorder.Body.String(), cookie.Value) {
 		t.Fatalf("start response did not isolate the impersonation credential in an HttpOnly cookie")
 	}
-	assertImpersonationStatus(t, admin, token, targetUserID)
-	assertImpersonationValidation(t, handler, cookie)
-	assertImpersonationEnd(t, db, handler, cookie, superAdminID)
+	assertImpersonatedUserCanReadOwnProfile(t, flow, cookie)
+	assertImpersonationStatus(t, flow.admin, flow.token, flow.targetUserID)
+	assertImpersonationValidation(t, flow.handler, cookie)
+	assertImpersonationEnd(t, flow.db, flow.handler, cookie, flow.superAdminID)
+}
+
+func assertImpersonatedUserCanReadOwnProfile(t *testing.T, flow impersonationHTTPFlow, cookie *http.Cookie) {
+	t.Helper()
+	tokens, err := jwt.NewTokenService("impersonation-tenant-action-secret-at-least-32-bytes", "5m")
+	if err != nil {
+		t.Fatalf("create tenant token service: %v", err)
+	}
+	profileHandler := NewUserSettingsHandler(repository.NewUserSettingsRepository(flow.db), repository.NewUserRepository(flow.db))
+	mux := http.NewServeMux()
+	mux.HandleFunc("GET /api/v1/users/{userId}/profile", profileHandler.GetUserProfile)
+	impersonationAuth := middleware.NewImpersonationAuthenticator(flow.impersonationRepo, flow.adminRepo)
+	secured := middleware.SessionAuthMiddleware(tokens, flow.store, impersonationAuth)(middleware.NewTenantContextMiddleware(
+		middleware.SQLRestaurantVerifier{DB: flow.db},
+	)(mux))
+	request := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/api/v1/users/%d/profile", flow.targetUserID), nil)
+	request.AddCookie(cookie)
+	recorder := httptest.NewRecorder()
+	secured.ServeHTTP(recorder, request)
+	if recorder.Code != http.StatusOK || !strings.Contains(recorder.Body.String(), "impersonation-target@example.test") {
+		t.Fatalf("impersonated user profile request returned %d: %s", recorder.Code, recorder.Body.String())
+	}
 }
 
 func assertImpersonationStatus(t *testing.T, admin http.Handler, token string, targetUserID int64) {
