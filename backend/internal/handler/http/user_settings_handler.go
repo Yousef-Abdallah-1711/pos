@@ -54,7 +54,7 @@ func (h *UserSettingsHandler) GetUserSettings(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	settings, err := h.settingsRepo.GetByUserID(r.Context(), userID)
+	settings, err := h.settingsRepo.GetByUserID(r.Context(), middleware.GetTenantID(r), userID)
 	if err != nil {
 		log.Printf("[GetUserSettings] ERROR: Failed to get settings: %v", err)
 		respondError(w, http.StatusInternalServerError, "Failed to fetch settings")
@@ -106,7 +106,8 @@ func (h *UserSettingsHandler) UpdateLanguage(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	settings, err := h.settingsRepo.UpdateLanguage(r.Context(), userID, req.Language)
+	tenantID := middleware.GetTenantID(r)
+	settings, err := h.settingsRepo.UpdateLanguage(r.Context(), tenantID, userID, req.Language)
 	if err != nil {
 		log.Printf("[UpdateLanguage] ERROR: Failed to update language: %v", err)
 		respondError(w, http.StatusInternalServerError, "Failed to update language")
@@ -114,7 +115,7 @@ func (h *UserSettingsHandler) UpdateLanguage(w http.ResponseWriter, r *http.Requ
 	}
 
 	// Log audit change
-	h.settingsRepo.LogAuditChange(r.Context(), userID, int64(claims.UserID), "language", nil, &req.Language, getClientIP(r))
+	h.settingsRepo.LogAuditChange(r.Context(), tenantID, userID, int64(claims.UserID), "language", nil, &req.Language, getClientIP(r))
 
 	log.Printf("[UpdateLanguage] Language updated for user %d to %s", userID, req.Language)
 	respondJSON(w, http.StatusOK, settings)
@@ -159,14 +160,15 @@ func (h *UserSettingsHandler) UpdateTheme(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	settings, err := h.settingsRepo.UpdateTheme(r.Context(), userID, req.Theme)
+	tenantID := middleware.GetTenantID(r)
+	settings, err := h.settingsRepo.UpdateTheme(r.Context(), tenantID, userID, req.Theme)
 	if err != nil {
 		log.Printf("[UpdateTheme] ERROR: Failed to update theme: %v", err)
 		respondError(w, http.StatusInternalServerError, "Failed to update theme")
 		return
 	}
 
-	h.settingsRepo.LogAuditChange(r.Context(), userID, int64(claims.UserID), "theme", nil, &req.Theme, getClientIP(r))
+	h.settingsRepo.LogAuditChange(r.Context(), tenantID, userID, int64(claims.UserID), "theme", nil, &req.Theme, getClientIP(r))
 
 	log.Printf("[UpdateTheme] Theme updated for user %d to %s", userID, req.Theme)
 	respondJSON(w, http.StatusOK, settings)
@@ -213,14 +215,15 @@ func (h *UserSettingsHandler) UpdateColors(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	settings, err := h.settingsRepo.UpdateColors(r.Context(), userID, req.PrimaryColor, req.SecondaryColor, req.AccentColor)
+	tenantID := middleware.GetTenantID(r)
+	settings, err := h.settingsRepo.UpdateColors(r.Context(), tenantID, userID, req.PrimaryColor, req.SecondaryColor, req.AccentColor)
 	if err != nil {
 		log.Printf("[UpdateColors] ERROR: Failed to update colors: %v", err)
 		respondError(w, http.StatusInternalServerError, "Failed to update colors")
 		return
 	}
 
-	h.settingsRepo.LogAuditChange(r.Context(), userID, int64(claims.UserID), "colors", nil,
+	h.settingsRepo.LogAuditChange(r.Context(), tenantID, userID, int64(claims.UserID), "colors", nil,
 		stringPtr(fmt.Sprintf("%s|%s|%s", req.PrimaryColor, req.SecondaryColor, req.AccentColor)), getClientIP(r))
 
 	log.Printf("[UpdateColors] Colors updated for user %d", userID)
@@ -310,7 +313,7 @@ func (h *UserSettingsHandler) ChangePassword(w http.ResponseWriter, r *http.Requ
 	}
 
 	// Record password change in history
-	if err := h.settingsRepo.RecordPasswordChange(r.Context(), userID, hashedPassword, getClientIP(r)); err != nil {
+	if err := h.settingsRepo.RecordPasswordChange(r.Context(), middleware.GetTenantID(r), userID, hashedPassword, getClientIP(r)); err != nil {
 		log.Printf("[ChangePassword] ERROR: Failed to record password change: %v", err)
 		// Don't fail the request, just log it
 	}

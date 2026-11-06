@@ -20,7 +20,7 @@ import (
 
 // Runs the real migrations in an isolated schema on a disposable database. The admin URL must
 // own the schema; the app URL must connect as pos_app with NOSUPERUSER and NOBYPASSRLS.
-func TestAuthAuditRLSWithRestrictedRuntimeRole(t *testing.T) {
+func TestAuthAuditAndUserSettingsRLSWithRestrictedRuntimeRole(t *testing.T) {
 	admin := openAuthAuditTestDB(t, "POS_RLS_ADMIN_URL")
 	appURL := os.Getenv("POS_RLS_APP_URL")
 	if appURL == "" {
@@ -45,7 +45,7 @@ func TestAuthAuditRLSWithRestrictedRuntimeRole(t *testing.T) {
 	}
 	createAuthAuditFixture(t, ctx, admin)
 	grantAuthAuditFixture(t, ctx, admin, schema)
-	applyAuthAuditMigrations(t, ctx, admin)
+	applyAuthAuditMigrations(t, ctx, admin, schema)
 
 	appURL = withSearchPath(t, appURL, schema)
 	app := openAuthAuditURL(t, appURL)
@@ -69,9 +69,12 @@ func TestAuthAuditRLSWithRestrictedRuntimeRole(t *testing.T) {
 	assertTenantCannotMutateOtherAuditRows(t, ctx, app)
 	assertTenantCannotInsertOtherTenantAuditRow(t, ctx, app)
 	assertInvalidAuditTenantFailsClosed(t, ctx, app)
+	assertUserSettingsRLS(t, ctx, app)
+	assertUnscopedSettingsAreEmpty(t, ctx, app)
 	if err := repository.RecordAuthEvent(ctx, 0, 0, "logout", "success", "", ""); err == nil {
 		t.Fatal("tenantless audit events must be rejected before reaching the database")
 	}
+	rollbackAuthAndSettingsRLS(t, ctx, admin)
 }
 
 func openAuthAuditTestDB(t *testing.T, env string) *sql.DB {
@@ -139,9 +142,9 @@ func grantAuthAuditFixture(t *testing.T, ctx context.Context, db *sql.DB, schema
 	}
 }
 
-func applyAuthAuditMigrations(t *testing.T, ctx context.Context, db *sql.DB) {
+func applyAuthAuditMigrations(t *testing.T, ctx context.Context, db *sql.DB, schema string) {
 	t.Helper()
-	for _, name := range []string{"163_add_user_auth_audit_logs.sql", "164_rls_user_auth_audit_logs.sql"} {
+	for _, name := range []string{"040_create_user_settings.sql", "163_add_user_auth_audit_logs.sql", "164_rls_user_auth_audit_logs.sql", "165_rls_user_settings.sql"} {
 		migration, err := os.ReadFile(filepath.Join("..", "..", "migrations", name))
 		if err != nil {
 			t.Fatalf("read migration %s: %v", name, err)
@@ -150,11 +153,11 @@ func applyAuthAuditMigrations(t *testing.T, ctx context.Context, db *sql.DB) {
 			t.Fatalf("apply migration %s: %v", name, err)
 		}
 	}
-	if _, err := db.ExecContext(ctx, `GRANT SELECT, INSERT, UPDATE, DELETE ON user_auth_audit_logs TO pos_app`); err != nil {
-		t.Fatalf("grant runtime audit access: %v", err)
+	if _, err := db.ExecContext(ctx, `GRANT SELECT, INSERT, UPDATE, DELETE ON user_auth_audit_logs, user_settings, user_settings_audit_log, password_change_history, email_change_requests TO pos_app`); err != nil {
+		t.Fatalf("grant runtime table access: %v", err)
 	}
-	if _, err := db.ExecContext(ctx, `GRANT USAGE, SELECT ON SEQUENCE user_auth_audit_logs_id_seq TO pos_app`); err != nil {
-		t.Fatalf("grant runtime audit sequence: %v", err)
+	if _, err := db.ExecContext(ctx, `GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA `+schema+` TO pos_app`); err != nil {
+		t.Fatalf("grant runtime sequences: %v", err)
 	}
 }
 
@@ -163,10 +166,134 @@ func seedAuthAuditFixture(t *testing.T, ctx context.Context, db *sql.DB) {
 	for _, statement := range []string{
 		`INSERT INTO tenants (id) VALUES (1), (2)`,
 		`INSERT INTO users (id, tenant_id) VALUES (101, 1), (202, 2)`,
+		`INSERT INTO user_settings (user_id) VALUES (101), (202)`,
 		`INSERT INTO user_auth_audit_logs (tenant_id, user_id, action, status, user_agent) VALUES (2, 202, 'login', 'success', 'tenant-b')`,
+		`INSERT INTO email_change_requests (user_id, new_email, verification_token) VALUES (101, 'a@example.test', 'tenant-a-token'), (202, 'b@example.test', 'tenant-b-token')`,
 	} {
 		if _, err := db.ExecContext(ctx, statement); err != nil {
 			t.Fatalf("seed auth audit fixture: %v", err)
+		}
+	}
+}
+
+func assertUserSettingsRLS(t *testing.T, ctx context.Context, db *sql.DB) {
+	t.Helper()
+	repository := NewUserSettingsRepository(db)
+	settings, err := repository.GetByUserID(ctx, 1, 101)
+	if err != nil || settings.UserID != 101 {
+		t.Fatalf("tenant A should read its settings: settings=%+v err=%v", settings, err)
+	}
+	if _, err := repository.UpdateLanguage(ctx, 1, 101, "ar"); err != nil {
+		t.Fatalf("tenant A should update its settings: %v", err)
+	}
+	if _, err := repository.UpdateLanguage(ctx, 1, 202, "ar"); err == nil {
+		t.Fatal("tenant A must not update tenant B settings")
+	}
+	err = database.WithTenantTx(ctx, db, 1, 0, func(tx *sql.Tx) error {
+		_, err := tx.ExecContext(ctx, `INSERT INTO user_settings (user_id) VALUES (202)`)
+		return err
+	})
+	if err == nil {
+		t.Fatal("tenant A must not insert settings for tenant B's user")
+	}
+	assertPasswordHistoryRLS(t, ctx, db, repository)
+	assertSettingsAuditRLS(t, ctx, db, repository)
+}
+
+func assertPasswordHistoryRLS(t *testing.T, ctx context.Context, db *sql.DB, repository *UserSettingsRepository) {
+	t.Helper()
+	if err := repository.RecordPasswordChange(ctx, 1, 101, "hash-a", "192.0.2.10"); err != nil {
+		t.Fatalf("tenant A should record its password history: %v", err)
+	}
+	if err := repository.RecordPasswordChange(ctx, 1, 202, "hash-b", "192.0.2.10"); err == nil {
+		t.Fatal("tenant A must not record password history for tenant B")
+	}
+	history, err := repository.GetPasswordChangeHistory(ctx, 1, 101, 10)
+	if err != nil || len(history) != 1 {
+		t.Fatalf("tenant A password history = %d rows, err=%v; want 1 row", len(history), err)
+	}
+	assertScopedRowCount(t, ctx, db, 2, `SELECT count(*) FROM password_change_history`, 0)
+}
+
+func assertSettingsAuditRLS(t *testing.T, ctx context.Context, db *sql.DB, repository *UserSettingsRepository) {
+	t.Helper()
+	if err := repository.LogAuditChange(ctx, 1, 101, 101, "language", nil, nil, "192.0.2.10"); err != nil {
+		t.Fatalf("tenant A should write its own settings audit event: %v", err)
+	}
+	if err := repository.LogAuditChange(ctx, 1, 101, 202, "language", nil, nil, "192.0.2.10"); err == nil {
+		t.Fatal("tenant A must not attribute a settings audit event to tenant B's user")
+	}
+	assertScopedRowCount(t, ctx, db, 1, `SELECT count(*) FROM user_settings`, 1)
+	assertScopedRowCount(t, ctx, db, 1, `SELECT count(*) FROM user_settings_audit_log`, 1)
+	assertScopedRowCount(t, ctx, db, 1, `SELECT count(*) FROM email_change_requests`, 1)
+	assertScopedRowCount(t, ctx, db, 2, `SELECT count(*) FROM user_settings`, 1)
+	assertScopedRowCount(t, ctx, db, 2, `SELECT count(*) FROM user_settings_audit_log`, 0)
+	assertScopedRowCount(t, ctx, db, 2, `SELECT count(*) FROM email_change_requests`, 1)
+	err := database.WithTenantTx(ctx, db, 1, 0, func(tx *sql.Tx) error {
+		result, err := tx.ExecContext(ctx, `DELETE FROM email_change_requests WHERE user_id = 202`)
+		if err != nil {
+			return err
+		}
+		deleted, err := result.RowsAffected()
+		if err != nil {
+			return err
+		}
+		if deleted != 0 {
+			return fmt.Errorf("tenant A deleted %d tenant B email-change requests", deleted)
+		}
+		return nil
+	})
+	if err != nil {
+		t.Fatalf("cross-tenant email-request delete must be isolated: %v", err)
+	}
+}
+
+func assertScopedRowCount(t *testing.T, ctx context.Context, db *sql.DB, tenantID int64, query string, want int) {
+	t.Helper()
+	var got int
+	err := database.WithTenantTx(ctx, db, tenantID, 0, func(tx *sql.Tx) error {
+		return tx.QueryRowContext(ctx, query).Scan(&got)
+	})
+	if err != nil || got != want {
+		t.Fatalf("tenant %d query %q returned %d rows, err=%v; want %d", tenantID, query, got, err, want)
+	}
+}
+
+func assertUnscopedSettingsAreEmpty(t *testing.T, ctx context.Context, db *sql.DB) {
+	t.Helper()
+	for _, table := range []string{"user_settings", "user_settings_audit_log", "password_change_history", "email_change_requests"} {
+		var count int
+		query := `SELECT count(*) FROM ` + table
+		if err := db.QueryRowContext(ctx, query).Scan(&count); err != nil {
+			t.Fatalf("unscoped read of %s should fail closed: %v", table, err)
+		}
+		if count != 0 {
+			t.Fatalf("unscoped pooled connection saw %d rows in %s", count, table)
+		}
+	}
+}
+
+func rollbackAuthAndSettingsRLS(t *testing.T, ctx context.Context, db *sql.DB) {
+	t.Helper()
+	statements := []string{
+		`DROP POLICY user_auth_audit_tenant_scope ON user_auth_audit_logs`,
+		`ALTER TABLE user_auth_audit_logs NO FORCE ROW LEVEL SECURITY`,
+		`ALTER TABLE user_auth_audit_logs DISABLE ROW LEVEL SECURITY`,
+	}
+	for _, table := range []string{"user_settings", "user_settings_audit_log", "password_change_history", "email_change_requests"} {
+		policy := table + `_tenant_scope`
+		if table == "user_settings_audit_log" {
+			policy = "user_settings_audit_tenant_scope"
+		}
+		statements = append(statements,
+			`DROP POLICY `+policy+` ON `+table,
+			`ALTER TABLE `+table+` NO FORCE ROW LEVEL SECURITY`,
+			`ALTER TABLE `+table+` DISABLE ROW LEVEL SECURITY`,
+		)
+	}
+	for _, statement := range statements {
+		if _, err := db.ExecContext(ctx, statement); err != nil {
+			t.Fatalf("apply RLS rollback %q: %v", statement, err)
 		}
 	}
 }
