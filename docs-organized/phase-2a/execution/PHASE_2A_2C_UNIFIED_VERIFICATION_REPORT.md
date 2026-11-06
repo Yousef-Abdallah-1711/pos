@@ -59,11 +59,8 @@ The rerun log has `MIGRATE_EXIT:0`, `BUILD_EXIT:0`, `VET_EXIT:0`, and `TEST_EXIT
 
 ## Hosted CI and review
 
-- PR #1 current head checks failed `runtime-localhost-guardrail` due to stale `frontend/apps/dashboard/scripts/verify-pos-phase4.mjs` localhost fallback and `url-domain-config-smoke` due two stale Dashboard production URL expectations. Failure logs inspected.
-- PR #3 latest checks pass; no review approval.
-- PR #7 latest checks pass; draft; no review approval; benchmark still missing.
-- PR #8 is merged and its storefront optimization is in current main.
-- GitHub refresh on 2026-11-06: PR #9 head `acdd6ae7f45445eedcc1c23e568c4fdba7147de7`; `runtime-localhost-guardrail` and `url-domain-config-smoke` PASS; merge state is clean; no reviews or review requests are recorded. PR #1 still has the two stale Dashboard URL check failures, PR #3 checks pass, and PR #7 checks pass but it remains a draft. No eligible PR has the repository-required independent approval.
+- Historical PR #1 checks failed on its then-current head because of a stale Dashboard localhost fallback and two stale production URL expectations. PR #3 and PR #7 checks passed on their then-current heads. PR #8 merged as `d84120559db36e8e9e7fdb73872a30cbc9d4e6e7`.
+- Current GitHub refresh on 2026-11-06: PRs #1, #3, and #7 are closed; PR #8 is merged; PR #9 remains open at `d68260737edeb3a8461e345b1b7e0d2aaf74a63c`. Both PR #9 checks (`runtime-localhost-guardrail`, `url-domain-config-smoke`) PASS and GitHub reports a clean merge state. No review or review request is recorded. GitHub's collaborator listing contains only `Yousef-Abdallah-1711`, so an independent reviewer is unavailable through the current collaborator set; self-approval is not a substitute.
 
 ## Final gate
 
