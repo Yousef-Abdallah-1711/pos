@@ -529,69 +529,7 @@ func (r *OrderRepository) UpdateOrderStatus(tenantID, restaurantID, orderID int6
 	if !domain.ValidStatus(newStatus) {
 		return errors.New("invalid order status")
 	}
-
-	// Get current status for validation
-	var currentStatus string
-	err := r.db.QueryRow(
-		"SELECT status FROM orders WHERE id = $1 AND tenant_id = $2 AND restaurant_id = $3",
-		orderID, tenantID, restaurantID,
-	).Scan(&currentStatus)
-
-	if err != nil {
-		if err == sql.ErrNoRows {
-			return errors.New("order not found")
-		}
-		return fmt.Errorf("failed to get order status: %w", err)
-	}
-
-	// Validate status transition
-	if !domain.CanTransitionStatus(currentStatus, newStatus) {
-		return fmt.Errorf("invalid status transition from %s to %s", currentStatus, newStatus)
-	}
-
-	// Update order status
-	query := `
-		UPDATE orders
-		SET status = $1, updated_at = CURRENT_TIMESTAMP
-		WHERE id = $2 AND tenant_id = $3 AND restaurant_id = $4
-	`
-
-	result, err := r.db.Exec(query, newStatus, orderID, tenantID, restaurantID)
-	if err != nil {
-		return fmt.Errorf("failed to update order status: %w", err)
-	}
-
-	rowsAffected, err := result.RowsAffected()
-	if err != nil {
-		return fmt.Errorf("failed to check rows affected: %w", err)
-	}
-
-	if rowsAffected == 0 {
-		return errors.New("order not found")
-	}
-
-	// Record status change in history
-	historyQuery := `
-		INSERT INTO order_status_history (order_id, old_status, new_status, changed_by, change_reason)
-		VALUES ($1, $2, $3, $4, $5)
-	`
-
-	var changedByValue interface{} = nil
-	if changedBy != nil {
-		changedByValue = *changedBy
-	}
-
-	var reasonValue interface{} = nil
-	if reason != "" {
-		reasonValue = reason
-	}
-
-	_, err = r.db.Exec(historyQuery, orderID, currentStatus, newStatus, changedByValue, reasonValue)
-	if err != nil {
-		return fmt.Errorf("failed to record status change: %w", err)
-	}
-
-	return nil
+	return r.transitionOrderStatus(tenantID, restaurantID, orderID, newStatus, changedBy, reason)
 }
 
 // UpdatePaymentStatus updates the payment status of an order
@@ -625,61 +563,60 @@ func (r *OrderRepository) UpdatePaymentStatus(tenantID, restaurantID, orderID in
 
 // CancelOrder cancels an order
 func (r *OrderRepository) CancelOrder(tenantID, restaurantID, orderID int64, reason string) error {
-	// Check if order can be cancelled
+	return r.transitionOrderStatus(tenantID, restaurantID, orderID, "cancelled", nil, reason)
+}
+
+// transitionOrderStatus serializes status changes and commits the status and its
+// audit row together so concurrent requests cannot validate against stale state.
+func (r *OrderRepository) transitionOrderStatus(tenantID, restaurantID, orderID int64, newStatus string, changedBy *int64, reason string) error {
+	tx, err := r.db.Begin()
+	if err != nil {
+		return fmt.Errorf("begin order status transition: %w", err)
+	}
+	defer tx.Rollback()
+
 	var currentStatus string
-	err := r.db.QueryRow(
-		"SELECT status FROM orders WHERE id = $1 AND tenant_id = $2 AND restaurant_id = $3",
+	err = tx.QueryRow(
+		`SELECT status FROM orders
+		 WHERE id = $1 AND tenant_id = $2 AND restaurant_id = $3
+		 FOR UPDATE`,
 		orderID, tenantID, restaurantID,
 	).Scan(&currentStatus)
-
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return errors.New("order not found")
 		}
-		return fmt.Errorf("failed to get order status: %w", err)
+		return fmt.Errorf("get order status: %w", err)
+	}
+	if !domain.CanTransitionStatus(currentStatus, newStatus) {
+		return fmt.Errorf("invalid status transition from %s to %s", currentStatus, newStatus)
 	}
 
-	// Orders that have been delivered or already cancelled cannot be cancelled
-	if currentStatus == "delivered" || currentStatus == "cancelled" {
-		return fmt.Errorf("cannot cancel order with status: %s", currentStatus)
+	if _, err := tx.Exec(
+		`UPDATE orders SET status = $1, updated_at = CURRENT_TIMESTAMP
+		 WHERE id = $2 AND tenant_id = $3 AND restaurant_id = $4`,
+		newStatus, orderID, tenantID, restaurantID,
+	); err != nil {
+		return fmt.Errorf("update order status: %w", err)
 	}
 
-	query := `
-		UPDATE orders
-		SET status = 'cancelled', updated_at = CURRENT_TIMESTAMP
-		WHERE id = $1 AND tenant_id = $2 AND restaurant_id = $3
-	`
-
-	result, err := r.db.Exec(query, orderID, tenantID, restaurantID)
-	if err != nil {
-		return fmt.Errorf("failed to cancel order: %w", err)
+	var changedByValue, reasonValue interface{}
+	if changedBy != nil {
+		changedByValue = *changedBy
 	}
-
-	rowsAffected, err := result.RowsAffected()
-	if err != nil {
-		return fmt.Errorf("failed to check rows affected: %w", err)
-	}
-
-	if rowsAffected == 0 {
-		return errors.New("order not found")
-	}
-
-	// Record cancellation in history
-	historyQuery := `
-		INSERT INTO order_status_history (order_id, old_status, new_status, change_reason)
-		VALUES ($1, $2, 'cancelled', $3)
-	`
-
-	var reasonValue interface{} = nil
 	if reason != "" {
 		reasonValue = reason
 	}
-
-	_, err = r.db.Exec(historyQuery, orderID, currentStatus, reasonValue)
-	if err != nil {
-		return fmt.Errorf("failed to record cancellation: %w", err)
+	if _, err := tx.Exec(
+		`INSERT INTO order_status_history (order_id, old_status, new_status, changed_by, change_reason)
+		 VALUES ($1, $2, $3, $4, $5)`,
+		orderID, currentStatus, newStatus, changedByValue, reasonValue,
+	); err != nil {
+		return fmt.Errorf("record order status change: %w", err)
 	}
-
+	if err := tx.Commit(); err != nil {
+		return fmt.Errorf("commit order status transition: %w", err)
+	}
 	return nil
 }
 

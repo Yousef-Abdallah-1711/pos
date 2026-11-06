@@ -2,6 +2,7 @@ package repository
 
 import (
 	"database/sql"
+	"sync"
 	"testing"
 
 	"pos-saas/internal/domain"
@@ -39,6 +40,73 @@ func TestOrderRepositoryPostgresScopeDeniesForeignReadsAndMutations(t *testing.T
 
 	if _, err := repo.GetOrderByID(int64(fixture.tenantA), int64(fixture.restaurantA1), orderA1); err != nil {
 		t.Fatalf("in-scope order read failed: %v", err)
+	}
+}
+
+func TestOrderStatusTransitionRollsBackWhenAuditInsertFails(t *testing.T) {
+	db, fixture := openProductScopeFixture(t)
+	orderID := insertScopeOrder(t, db, fixture.tenantA, fixture.restaurantA1, "status-rollback")
+	repo := NewOrderRepository(db)
+	invalidActorID := int64(9223372036854775807)
+
+	if err := repo.UpdateOrderStatus(int64(fixture.tenantA), int64(fixture.restaurantA1), orderID, "confirmed", &invalidActorID, "test rollback"); err == nil {
+		t.Fatal("status transition unexpectedly succeeded with a nonexistent audit actor")
+	}
+	assertScopeOrderState(t, db, orderID, fixture.tenantA, fixture.restaurantA1, "pending", "pending")
+	assertOrderHistoryCount(t, db, orderID, 0)
+}
+
+func TestConcurrentOrderStatusTransitionsSerializeOnCurrentStatus(t *testing.T) {
+	db, fixture := openProductScopeFixture(t)
+	orderID := insertScopeOrder(t, db, fixture.tenantA, fixture.restaurantA1, "status-concurrency")
+	repo := NewOrderRepository(db)
+	start := make(chan struct{})
+	results := make(chan error, 2)
+	var workers sync.WaitGroup
+
+	for _, status := range []string{"confirmed", "preparing"} {
+		workers.Add(1)
+		go func(nextStatus string) {
+			defer workers.Done()
+			<-start
+			results <- repo.UpdateOrderStatus(int64(fixture.tenantA), int64(fixture.restaurantA1), orderID, nextStatus, nil, "concurrent transition")
+		}(status)
+	}
+	close(start)
+	workers.Wait()
+	close(results)
+
+	successes := 0
+	failures := 0
+	for err := range results {
+		if err == nil {
+			successes++
+		} else {
+			failures++
+		}
+	}
+	if successes != 1 || failures != 1 {
+		t.Fatalf("got %d successful and %d failed transitions, want one of each", successes, failures)
+	}
+
+	var status string
+	if err := db.QueryRow(`SELECT status FROM orders WHERE id = $1 AND tenant_id = $2 AND restaurant_id = $3`, orderID, fixture.tenantA, fixture.restaurantA1).Scan(&status); err != nil {
+		t.Fatalf("read final order status: %v", err)
+	}
+	if status != "confirmed" {
+		t.Fatalf("final order status = %q, want confirmed", status)
+	}
+	assertOrderHistoryCount(t, db, orderID, 1)
+}
+
+func assertOrderHistoryCount(t *testing.T, db *sql.DB, orderID int64, want int) {
+	t.Helper()
+	var got int
+	if err := db.QueryRow(`SELECT COUNT(*) FROM order_status_history WHERE order_id = $1`, orderID).Scan(&got); err != nil {
+		t.Fatalf("count order status history: %v", err)
+	}
+	if got != want {
+		t.Fatalf("order history count = %d, want %d", got, want)
 	}
 }
 
