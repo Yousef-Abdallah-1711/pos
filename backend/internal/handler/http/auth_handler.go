@@ -162,7 +162,9 @@ func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 	}
-	h.recordAuthEvent(r, tenantID, userID, "logout")
+	if tenantID > 0 {
+		h.recordAuthEvent(r, tenantID, userID, "logout")
+	}
 	for _, name := range []string{service.AuthSessionCookieName, service.ImpersonationSessionCookieName} {
 		http.SetCookie(w, &http.Cookie{Name: name, Value: "", Path: "/", HttpOnly: true, Secure: r.TLS != nil || config.IsProductionMode(), SameSite: http.SameSiteLaxMode, MaxAge: -1, Expires: time.Unix(1, 0)})
 	}

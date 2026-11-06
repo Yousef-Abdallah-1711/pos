@@ -4,6 +4,8 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+
+	"pos-saas/internal/pkg/database"
 )
 
 // AuthAuditRepository writes successful browser authentication events.
@@ -25,13 +27,15 @@ func (r *AuthAuditRepository) RecordAuthEvent(ctx context.Context, tenantID, use
 	if status != "success" {
 		return errors.New("unsupported auth audit status")
 	}
-	_, err := r.db.ExecContext(ctx, `
-		INSERT INTO user_auth_audit_logs (tenant_id, user_id, action, status, ip_address, user_agent)
-		VALUES (NULLIF($1, 0), NULLIF($2, 0), $3, $4, NULLIF($5, ''), NULLIF($6, ''))`,
-		tenantID, userID, action, status, ipAddress, userAgent,
-	)
-	if err != nil {
-		return err
+	if tenantID <= 0 {
+		return errors.New("tenant id is required for auth audit events")
 	}
-	return nil
+	return database.WithTenantTx(ctx, r.db, tenantID, 0, func(tx *sql.Tx) error {
+		_, err := tx.ExecContext(ctx, `
+		INSERT INTO user_auth_audit_logs (tenant_id, user_id, action, status, ip_address, user_agent)
+		VALUES ($1, NULLIF($2, 0), $3, $4, NULLIF($5, ''), NULLIF($6, ''))`,
+			tenantID, userID, action, status, ipAddress, userAgent,
+		)
+		return err
+	})
 }
