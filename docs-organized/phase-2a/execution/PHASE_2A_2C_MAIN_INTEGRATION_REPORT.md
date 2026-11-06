@@ -1,6 +1,6 @@
 # POOS Unified Phase 2A + Phase 2C Main Integration Report
 
-Date: 2026-11-05 (Africa/Cairo)
+Date: 2026-11-06 (Africa/Cairo; follow-up to the initial reconciliation)
 
 ## Remote baseline
 
@@ -25,22 +25,23 @@ The subscription isolation test initially depended on untracked helper tests fro
 
 | PR | Current state | Decision |
 |---|---|---|
-| #1 | Open, checks failing, no review decision | Preserve. Candidate subset was rebased locally; fix CI in candidate and update/supersede only after passing verification. Do not close until all intended commits are integrated or safely retained. |
-| #3 | Open, checks passing, no review decision | Preserve; documentation/QA contents need reconciliation with unified reports and current main before integration. |
-| #7 | Open draft, checks passing, no review decision | Its Admin Orders batch-count implementation is reconciled into the unified candidate and now has matching benchmark responses; review/CI disposition remains pending. |
+| #1 | Closed 2026-11-06 | Superseded by PR #9; the required HR child-resource, trial administration and accounting scope changes are retained in the unified candidate. |
+| #3 | Closed 2026-11-06 | Superseded by PR #9; the explicit QA URL guardrail is retained, while its configuration fix is already on main. Remaining docs are historical. |
+| #7 | Closed 2026-11-06 | Superseded by PR #9; the newer tenant/restaurant-scoped Admin Orders implementation and final benchmark evidence are retained. Its older order implementation was not copied over the safer candidate code. |
 | #8 | Merged | Already included in current main at `d841205…`. |
 | #2, #4, #5, #6 | Merged | Already included in current main; do not duplicate. |
 
 ## Publication and merge
 
-- Topic branch pushed: `codex/unified-phase2a-2c-closure`, PR #9 head `ec23651ebc42a397b54244554635a0e281122d27`.
+- Topic branch pushed: `codex/unified-phase2a-2c-closure`, PR #9 head `27114fa62bbd1d717a462aa6f16ec8347b4a90ea`.
 - Replacement-scope PR #9 is open: https://github.com/Yousef-Abdallah-1711/pos/pull/9.
-- PR #9 hosted `runtime-localhost-guardrail` and `url-domain-config-smoke` both pass at `ec23651`.
-- PR #9 review decision is empty; required human approval remains outstanding. No PR has been merged by this execution.
+- PR #9 hosted `runtime-localhost-guardrail` and `url-domain-config-smoke` both pass at `27114fa`.
+- PR #9 review decision and review requests are empty. GitHub reports only the repository owner as a collaborator, so no independent reviewer is available to request in the current repository access list. The coding-standard approval gate remains unmet.
+- Focused C008 webhook tests passed at `0886c6c` after all migrations completed on isolated PostgreSQL 15; evidence is in `PHASE_2A_2C_UNIFIED_VERIFICATION_REPORT.md`. The docs-only follow-up commit `27114fa` records this evidence.
 - No direct main push, force-push, approval bypass, or review bypass was used.
-- PR reviewDecision is empty for #1, #3, and #7. Required human approval remains outstanding.
 - The current `origin/main` SHA remains `d84120559db36e8e9e7fdb73872a30cbc9d4e6e7`.
+- The existing POS Docker development stack and unrelated projects were left running and untouched. No fresh main-based delivery was possible before PR #9 is approved and merged; the current development images are not asserted to represent the candidate commit.
 
 ## Decision
 
-**MAIN INTEGRATION PARTIAL.** Admin Orders is measured and pushed in PR #9, but independent review is outstanding. Dashboard has 107 failing frontend tests and test-source TypeScript errors; browser acceptance and broad auth/session and tenant side-effect coverage remain incomplete. Required PR approval is outstanding. Do not claim full closure or production readiness.
+**MAIN INTEGRATION PARTIAL.** PR #9 is the only open integration PR, both hosted checks pass, and PRs #1, #3, and #7 are closed as superseded. Independent approval remains an external blocker because no independent collaborator is available. C006, C009, C012, broader frontend/browser acceptance, and production Docker delivery remain incomplete; C008 webhook integration verification is recorded as partial. `origin/main` remains at `d84120559db36e8e9e7fdb73872a30cbc9d4e6e7`. Do not claim full closure or production readiness.
