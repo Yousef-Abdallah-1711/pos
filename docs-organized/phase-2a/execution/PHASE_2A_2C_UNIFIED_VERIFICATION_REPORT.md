@@ -32,6 +32,7 @@ The rerun log has `MIGRATE_EXIT:0`, `BUILD_EXIT:0`, `VET_EXIT:0`, and `TEST_EXIT
 - Targeted Driver, HR child-resource, subscription trial concurrency/admin, tax period, and recurring-template ownership tests passed, including unchanged-row/side-effect assertions, against disposable PostgreSQL.
 - Authentication lifecycle, Redis session revocation, refresh-rotation races, CSRF negatives, audit failure behavior, and all resource-family side-effect checks were not run as one combined acceptance set.
 - Do not interpret a response denial alone as isolation proof; unauthorized side effects must remain asserted.
+- RLS remains an explicit Phase 2A completion gate: task C012 is still `IN_PROGRESS`, and the Phase 2A final report lists database-level tenant enforcement among unmet criteria. No application table has RLS enabled. The pilot proves only the policy mechanism; it is not live enforcement. A safe rollout still requires moving each table family's direct `*sql.DB` access into tenant-scoped transactions, classifying ownership, and testing with the restricted runtime role. Enabling policies before those paths are migrated can break legitimate operations, so this candidate does not claim RLS closure.
 
 ## Frontend/browser/performance
 
