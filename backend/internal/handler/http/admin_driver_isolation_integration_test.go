@@ -8,6 +8,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
@@ -145,6 +146,70 @@ func TestAdminDriverAssignmentHTTPRejectsForeignScopeWithoutSideEffects(t *testi
 				t.Fatalf("denied assignment changed state: assignments=%d active_orders=%d availability=%q", assignments, activeOrders, availability)
 			}
 		})
+	}
+}
+
+func TestAdminDriverAssignmentHTTPAllowsOneInScopeConcurrentAssignment(t *testing.T) {
+	if os.Getenv(testdb.EnvVar) == "" {
+		t.Skipf("set %s to an isolated disposable PostgreSQL database", testdb.EnvVar)
+	}
+	db := openProductHTTPTestDB(t)
+	fixture := seedAdminDriverHTTPFixture(t, db)
+	tokens, err := jwt.NewTokenService("driver-assignment-concurrency-secret-32-bytes", "5m")
+	if err != nil {
+		t.Fatalf("create token service: %v", err)
+	}
+	restaurantA1 := fixture.restaurantA1
+	token, err := tokens.GenerateToken(1, fixture.tenantA, &restaurantA1, "owner@example.test", "owner")
+	if err != nil {
+		t.Fatalf("generate authenticated test token: %v", err)
+	}
+	handler := NewAdminDriverHandler(
+		repository.NewDriverRepository(db),
+		usecase.NewOrderUseCase(repository.NewOrderRepository(db), repository.NewProductRepository(db)),
+	)
+	ownTarget := adminDriverIsolationTarget{tenantID: fixture.tenantA, restaurantID: fixture.restaurantA1}
+	start := make(chan struct{})
+	results := make(chan int, 2)
+	var workers sync.WaitGroup
+
+	for range 2 {
+		workers.Add(1)
+		go func() {
+			defer workers.Done()
+			<-start
+			results <- invokeAdminDriverAssignmentHTTP(db, tokens, token, handler, ownTarget, fixture.ownOrderID, fixture.ownDriverID)
+		}()
+	}
+	close(start)
+	workers.Wait()
+	close(results)
+
+	var successes, conflicts int
+	for status := range results {
+		switch status {
+		case http.StatusOK:
+			successes++
+		case http.StatusConflict:
+			conflicts++
+		default:
+			t.Errorf("in-scope assignment status = %d, want 200 or 409", status)
+		}
+	}
+	if successes != 1 || conflicts != 1 {
+		t.Fatalf("got %d successful assignments and %d conflicts, want one of each", successes, conflicts)
+	}
+
+	var assignments, activeOrders int
+	var availability string
+	if err := db.QueryRow(`SELECT COUNT(*) FROM driver_assignments WHERE order_id = $1`, fixture.ownOrderID).Scan(&assignments); err != nil {
+		t.Fatalf("count successful assignments: %v", err)
+	}
+	if err := db.QueryRow(`SELECT active_orders_count, availability_status FROM drivers WHERE id = $1`, fixture.ownDriverID).Scan(&activeOrders, &availability); err != nil {
+		t.Fatalf("read assigned driver state: %v", err)
+	}
+	if assignments != 1 || activeOrders != 1 || availability != "busy" {
+		t.Fatalf("assignment side effects = assignments:%d active_orders:%d availability:%q, want 1/1/busy", assignments, activeOrders, availability)
 	}
 }
 
