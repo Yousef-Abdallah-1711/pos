@@ -198,7 +198,7 @@ func TestUserSettingsHTTPRejectsCrossUserReadsAndAllMutations(t *testing.T) {
 		t.Fatalf("insert target settings: %v", err)
 	}
 	assertCrossUserSettingsRoutesDenied(t, db, fixture, actorID, targetID)
-	assertSettingsUserStateUnchanged(t, db, targetID)
+	assertSettingsUserStateUnchanged(t, db, targetID, "settings-matrix-target@example.test")
 }
 
 func assertCrossUserSettingsRoutesDenied(t *testing.T, db *sql.DB, fixture productHTTPFixture, actorID, targetID int64) {
@@ -250,7 +250,7 @@ func assertCrossUserSettingsRoutesDenied(t *testing.T, db *sql.DB, fixture produ
 	}
 }
 
-func assertSettingsUserStateUnchanged(t *testing.T, db *sql.DB, targetID int64) {
+func assertSettingsUserStateUnchanged(t *testing.T, db *sql.DB, targetID int64, expectedName string) {
 	t.Helper()
 	var name, passwordHash, language string
 	if err := db.QueryRow(`SELECT name, password_hash FROM users WHERE id = $1`, targetID).Scan(&name, &passwordHash); err != nil {
@@ -259,7 +259,7 @@ func assertSettingsUserStateUnchanged(t *testing.T, db *sql.DB, targetID int64) 
 	if err := db.QueryRow(`SELECT language FROM user_settings WHERE user_id = $1`, targetID).Scan(&language); err != nil {
 		t.Fatalf("read target settings after denied requests: %v", err)
 	}
-	if name != "settings-matrix-target@example.test" || passwordHash != "not-used-by-test" || language != "en" {
+	if name != expectedName || passwordHash != "not-used-by-test" || language != "en" {
 		t.Fatalf("denied requests mutated target state: name=%q password_hash=%q language=%q", name, passwordHash, language)
 	}
 	for _, auditTable := range []struct{ name, query string }{
