@@ -186,6 +186,96 @@ func TestUserSettingsHTTPRejectsCrossUserMutationWithoutDatabaseSideEffects(t *t
 	}
 }
 
+func TestUserSettingsHTTPRejectsCrossUserReadsAndAllMutations(t *testing.T) {
+	if os.Getenv(testdb.EnvVar) == "" {
+		t.Skipf("set %s to an isolated disposable PostgreSQL database", testdb.EnvVar)
+	}
+	db := openProductHTTPTestDB(t)
+	fixture := seedProductHTTPFixture(t, db)
+	actorID := insertSettingsHTTPUser(t, db, fixture.tenantA, fixture.restaurantA1, "settings-matrix-actor")
+	targetID := insertSettingsHTTPUser(t, db, fixture.tenantA, fixture.restaurantA1, "settings-matrix-target")
+	if _, err := db.Exec(`INSERT INTO user_settings (user_id, language) VALUES ($1, 'en')`, targetID); err != nil {
+		t.Fatalf("insert target settings: %v", err)
+	}
+	assertCrossUserSettingsRoutesDenied(t, db, fixture, actorID, targetID)
+	assertSettingsUserStateUnchanged(t, db, targetID)
+}
+
+func assertCrossUserSettingsRoutesDenied(t *testing.T, db *sql.DB, fixture productHTTPFixture, actorID, targetID int64) {
+	t.Helper()
+	tokens, err := jwt.NewTokenService("ws02-settings-matrix-secret-at-least-32-bytes", "5m")
+	if err != nil {
+		t.Fatalf("create token service: %v", err)
+	}
+	restaurantID := fixture.restaurantA1
+	token, err := tokens.GenerateToken(int(actorID), fixture.tenantA, &restaurantID, "settings-matrix-actor@example.test", "owner")
+	if err != nil {
+		t.Fatalf("generate settings actor token: %v", err)
+	}
+	settingsHandler := NewUserSettingsHandler(repository.NewUserSettingsRepository(db), repository.NewUserRepository(db))
+	mux := http.NewServeMux()
+	userPath := "/api/v1/users/{userId}"
+	mux.HandleFunc("GET "+userPath+"/settings", settingsHandler.GetUserSettings)
+	mux.HandleFunc("PUT "+userPath+"/settings/language", settingsHandler.UpdateLanguage)
+	mux.HandleFunc("PUT "+userPath+"/settings/theme", settingsHandler.UpdateTheme)
+	mux.HandleFunc("PUT "+userPath+"/settings/theme-colors", settingsHandler.UpdateColors)
+	mux.HandleFunc("POST "+userPath+"/settings/change-password", settingsHandler.ChangePassword)
+	mux.HandleFunc("GET "+userPath+"/profile", settingsHandler.GetUserProfile)
+	mux.HandleFunc("PUT "+userPath+"/profile", settingsHandler.UpdateProfile)
+	secured := middleware.AuthMiddleware(tokens)(middleware.NewTenantContextMiddleware(
+		middleware.SQLRestaurantVerifier{DB: db},
+	)(mux))
+	targetPath := fmt.Sprint(targetID)
+	requests := []struct {
+		name, method, path, body string
+	}{
+		{"read settings", http.MethodGet, "/settings", ""},
+		{"update language", http.MethodPut, "/settings/language", `{"language":"ar"}`},
+		{"update theme", http.MethodPut, "/settings/theme", `{"theme":"dark"}`},
+		{"update colors", http.MethodPut, "/settings/theme-colors", `{"primary_color":"#112233","secondary_color":"#445566","accent_color":"#778899"}`},
+		{"change password", http.MethodPost, "/settings/change-password", `{"current_password":"not-used-by-test","new_password":"new-password","confirm_password":"new-password"}`},
+		{"read profile", http.MethodGet, "/profile", ""},
+		{"update profile", http.MethodPut, "/profile", `{"name":"forged profile","avatar_url":"https://example.test/forged.png"}`},
+	}
+	for _, testCase := range requests {
+		t.Run(testCase.name, func(t *testing.T) {
+			request := httptest.NewRequest(testCase.method, "/api/v1/users/"+targetPath+testCase.path, strings.NewReader(testCase.body))
+			request.Header.Set("Authorization", "Bearer "+token)
+			recorder := httptest.NewRecorder()
+			secured.ServeHTTP(recorder, request)
+			if recorder.Code != http.StatusForbidden {
+				t.Fatalf("cross-user request returned %d, want %d: %s", recorder.Code, http.StatusForbidden, recorder.Body.String())
+			}
+		})
+	}
+}
+
+func assertSettingsUserStateUnchanged(t *testing.T, db *sql.DB, targetID int64) {
+	t.Helper()
+	var name, passwordHash, language string
+	if err := db.QueryRow(`SELECT name, password_hash FROM users WHERE id = $1`, targetID).Scan(&name, &passwordHash); err != nil {
+		t.Fatalf("read target user after denied requests: %v", err)
+	}
+	if err := db.QueryRow(`SELECT language FROM user_settings WHERE user_id = $1`, targetID).Scan(&language); err != nil {
+		t.Fatalf("read target settings after denied requests: %v", err)
+	}
+	if name != "settings-matrix-target@example.test" || passwordHash != "not-used-by-test" || language != "en" {
+		t.Fatalf("denied requests mutated target state: name=%q password_hash=%q language=%q", name, passwordHash, language)
+	}
+	for _, auditTable := range []struct{ name, query string }{
+		{"user_settings_audit_log", `SELECT COUNT(*) FROM user_settings_audit_log WHERE user_id = $1`},
+		{"password_change_history", `SELECT COUNT(*) FROM password_change_history WHERE user_id = $1`},
+	} {
+		var count int
+		if err := db.QueryRow(auditTable.query, targetID).Scan(&count); err != nil {
+			t.Fatalf("count target rows in %s: %v", auditTable.name, err)
+		}
+		if count != 0 {
+			t.Fatalf("denied requests created %d rows in %s", count, auditTable.name)
+		}
+	}
+}
+
 func TestKDSSettingsHTTPIgnoresForgedScopeHeadersAndMutatesOnlyJWTRestaurant(t *testing.T) {
 	if os.Getenv(testdb.EnvVar) == "" {
 		t.Skipf("set %s to an isolated disposable PostgreSQL database", testdb.EnvVar)
