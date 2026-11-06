@@ -52,6 +52,7 @@ func TestSessionAuthMiddlewareRequiresActiveCookieSession(t *testing.T) {
 }
 
 func TestSessionAuthMiddlewareRejectsCookieWritesWithoutTrustedOrigin(t *testing.T) {
+	t.Setenv("ENV", "development")
 	tokenService, err := jwt.NewTokenService(strings.Repeat("s", 32), "1h")
 	if err != nil {
 		t.Fatal(err)

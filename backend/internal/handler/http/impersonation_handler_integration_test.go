@@ -19,6 +19,7 @@ import (
 )
 
 func TestImpersonationHTTPAuditSessionLifecycle(t *testing.T) {
+	t.Setenv("ENV", "development")
 	if os.Getenv(testdb.EnvVar) == "" {
 		t.Skipf("set %s to an isolated disposable PostgreSQL database", testdb.EnvVar)
 	}
