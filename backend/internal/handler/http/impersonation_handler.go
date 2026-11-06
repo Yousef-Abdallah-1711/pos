@@ -1,6 +1,7 @@
 package http
 
 import (
+	"errors"
 	"log"
 	"net/http"
 	"strconv"
@@ -60,6 +61,10 @@ func (h *ImpersonationHandler) StartImpersonation(w http.ResponseWriter, r *http
 	response, err := h.impersonationUC.StartImpersonation(r.Context(), superAdminID, targetUserID, ip, userAgent)
 	if err != nil {
 		log.Printf("[ImpersonationHandler] StartImpersonation failed: %v\n", err)
+		if errors.Is(err, usecase.ErrImpersonationAudit) {
+			respondJSON(w, http.StatusInternalServerError, map[string]interface{}{"success": false, "error": "unable to establish audited impersonation"})
+			return
+		}
 		respondJSON(w, http.StatusBadRequest, map[string]interface{}{
 			"success": false,
 			"error":   err.Error(),
@@ -106,16 +111,23 @@ func (h *ImpersonationHandler) EndImpersonation(w http.ResponseWriter, r *http.R
 	err := h.impersonationUC.EndImpersonation(r.Context(), superAdminID, ip, userAgent)
 	if err != nil {
 		log.Printf("[ImpersonationHandler] EndImpersonation failed: %v\n", err)
+		if errors.Is(err, usecase.ErrImpersonationAudit) {
+			if revokeErr := h.clearImpersonationCookie(r, w); revokeErr != nil {
+				log.Printf("[ImpersonationHandler] Failed to revoke unaudited impersonation cookie: %v\n", revokeErr)
+			}
+			respondJSON(w, http.StatusInternalServerError, map[string]interface{}{"success": false, "error": "unable to audit impersonation end"})
+			return
+		}
 		respondJSON(w, http.StatusBadRequest, map[string]interface{}{
 			"success": false,
 			"error":   err.Error(),
 		})
 		return
 	}
-	if cookie, cookieErr := r.Cookie(service.ImpersonationSessionCookieName); cookieErr == nil && h.sessions != nil {
-		_ = h.sessions.Revoke(r.Context(), cookie.Value)
+	if err := h.clearImpersonationCookie(r, w); err != nil {
+		respondJSON(w, http.StatusInternalServerError, map[string]interface{}{"success": false, "error": "unable to revoke impersonation session"})
+		return
 	}
-	http.SetCookie(w, &http.Cookie{Name: service.ImpersonationSessionCookieName, Value: "", Path: "/", HttpOnly: true, Secure: r.TLS != nil || config.IsProductionMode(), SameSite: http.SameSiteLaxMode, MaxAge: -1, Expires: time.Unix(1, 0)})
 
 	respondJSON(w, http.StatusOK, map[string]interface{}{
 		"success": true,
@@ -148,22 +160,37 @@ func (h *ImpersonationHandler) EndImpersonationByToken(w http.ResponseWriter, r 
 	err = h.impersonationUC.EndImpersonationByToken(r.Context(), token, ip, userAgent)
 	if err != nil {
 		log.Printf("[ImpersonationHandler] EndImpersonationByToken failed: %v\n", err)
+		if errors.Is(err, usecase.ErrImpersonationAudit) {
+			if revokeErr := h.clearImpersonationCookie(r, w); revokeErr != nil {
+				log.Printf("[ImpersonationHandler] Failed to revoke unaudited impersonation cookie: %v\n", revokeErr)
+			}
+			respondJSON(w, http.StatusInternalServerError, map[string]interface{}{"success": false, "error": "unable to audit impersonation end"})
+			return
+		}
 		respondJSON(w, http.StatusBadRequest, map[string]interface{}{
 			"success": false,
 			"error":   err.Error(),
 		})
 		return
 	}
-	if err := h.sessions.Revoke(r.Context(), cookie.Value); err != nil {
+	if err := h.clearImpersonationCookie(r, w); err != nil {
 		respondJSON(w, http.StatusInternalServerError, map[string]interface{}{"success": false, "error": "unable to end impersonation session"})
 		return
 	}
-	http.SetCookie(w, &http.Cookie{Name: service.ImpersonationSessionCookieName, Value: "", Path: "/", HttpOnly: true, Secure: r.TLS != nil || config.IsProductionMode(), SameSite: http.SameSiteLaxMode, MaxAge: -1, Expires: time.Unix(1, 0)})
 
 	respondJSON(w, http.StatusOK, map[string]interface{}{
 		"success": true,
 		"message": "impersonation ended successfully",
 	})
+}
+
+func (h *ImpersonationHandler) clearImpersonationCookie(r *http.Request, w http.ResponseWriter) error {
+	var err error
+	if cookie, cookieErr := r.Cookie(service.ImpersonationSessionCookieName); cookieErr == nil && h.sessions != nil {
+		err = h.sessions.Revoke(r.Context(), cookie.Value)
+	}
+	http.SetCookie(w, &http.Cookie{Name: service.ImpersonationSessionCookieName, Value: "", Path: "/", HttpOnly: true, Secure: r.TLS != nil || config.IsProductionMode(), SameSite: http.SameSiteLaxMode, MaxAge: -1, Expires: time.Unix(1, 0)})
+	return err
 }
 
 // GetImpersonationStatus returns the current impersonation status

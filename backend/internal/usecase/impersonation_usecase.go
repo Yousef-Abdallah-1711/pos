@@ -19,6 +19,9 @@ type ImpersonationUseCase struct {
 	tokenExpiry       time.Duration
 }
 
+// ErrImpersonationAudit marks failures that must prevent an impersonation flow from reporting success.
+var ErrImpersonationAudit = errors.New("impersonation audit write failed")
+
 // NewImpersonationUseCase creates a new impersonation usecase
 func NewImpersonationUseCase(
 	impersonationRepo *repository.ImpersonationRepository,
@@ -95,7 +98,7 @@ func (uc *ImpersonationUseCase) StartImpersonation(
 	// Log the action
 	targetType := domain.AuditTargetImpersonation
 	targetID := targetUserID
-	_ = uc.auditRepo.LogAction(ctx, &domain.SuperAdminAuditLog{
+	if err := uc.auditRepo.LogAction(ctx, &domain.SuperAdminAuditLog{
 		SuperAdminID: superAdminID,
 		Action:       domain.AuditActionImpersonateStart,
 		TargetType:   &targetType,
@@ -108,7 +111,13 @@ func (uc *ImpersonationUseCase) StartImpersonation(
 		},
 		IPAddress: ip,
 		UserAgent: userAgent,
-	})
+	}); err != nil {
+		cleanupErr := uc.impersonationRepo.EndSession(ctx, createdSession.ID, domain.ImpersonationEndForced)
+		if cleanupErr != nil {
+			return nil, fmt.Errorf("%w: start audit: %v; failed to revoke unaudited session: %w", ErrImpersonationAudit, err, cleanupErr)
+		}
+		return nil, fmt.Errorf("%w: start audit: %v", ErrImpersonationAudit, err)
+	}
 
 	log.Printf("[ImpersonationUseCase] Impersonation started: sessionID=%d\n", createdSession.ID)
 
@@ -182,7 +191,7 @@ func (uc *ImpersonationUseCase) EndImpersonation(ctx context.Context, superAdmin
 	// Log the action
 	targetType := domain.AuditTargetImpersonation
 	sessionID := session.ID
-	_ = uc.auditRepo.LogAction(ctx, &domain.SuperAdminAuditLog{
+	if err := uc.auditRepo.LogAction(ctx, &domain.SuperAdminAuditLog{
 		SuperAdminID: superAdminID,
 		Action:       domain.AuditActionImpersonateEnd,
 		TargetType:   &targetType,
@@ -194,7 +203,9 @@ func (uc *ImpersonationUseCase) EndImpersonation(ctx context.Context, superAdmin
 		},
 		IPAddress: ip,
 		UserAgent: userAgent,
-	})
+	}); err != nil {
+		return fmt.Errorf("%w: end audit: %v", ErrImpersonationAudit, err)
+	}
 
 	log.Printf("[ImpersonationUseCase] Impersonation ended: sessionID=%d\n", session.ID)
 	return nil
@@ -220,7 +231,7 @@ func (uc *ImpersonationUseCase) EndImpersonationByToken(ctx context.Context, tok
 	// Log the action
 	targetType := domain.AuditTargetImpersonation
 	sessionID := session.ID
-	_ = uc.auditRepo.LogAction(ctx, &domain.SuperAdminAuditLog{
+	if err := uc.auditRepo.LogAction(ctx, &domain.SuperAdminAuditLog{
 		SuperAdminID: session.SuperAdminID,
 		Action:       domain.AuditActionImpersonateEnd,
 		TargetType:   &targetType,
@@ -233,7 +244,9 @@ func (uc *ImpersonationUseCase) EndImpersonationByToken(ctx context.Context, tok
 		},
 		IPAddress: ip,
 		UserAgent: userAgent,
-	})
+	}); err != nil {
+		return fmt.Errorf("%w: end audit: %v", ErrImpersonationAudit, err)
+	}
 
 	log.Printf("[ImpersonationUseCase] Impersonation ended by token: sessionID=%d\n", session.ID)
 	return nil
