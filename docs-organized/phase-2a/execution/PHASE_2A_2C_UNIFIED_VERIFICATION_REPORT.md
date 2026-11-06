@@ -33,6 +33,7 @@ The rerun log has `MIGRATE_EXIT:0`, `BUILD_EXIT:0`, `VET_EXIT:0`, and `TEST_EXIT
 - Authentication lifecycle, Redis session revocation, refresh-rotation races, CSRF negatives, audit failure behavior, and all resource-family side-effect checks were not run as one combined acceptance set.
 - Do not interpret a response denial alone as isolation proof; unauthorized side effects must remain asserted.
 - RLS remains an explicit Phase 2A completion gate: task C012 is still `IN_PROGRESS`, and the Phase 2A final report lists database-level tenant enforcement among unmet criteria. No application table has RLS enabled. The pilot proves only the policy mechanism; it is not live enforcement. A safe rollout still requires moving each table family's direct `*sql.DB` access into tenant-scoped transactions, classifying ownership, and testing with the restricted runtime role. Enabling policies before those paths are migrated can break legitimate operations, so this candidate does not claim RLS closure.
+- Follow-up on 2026-11-06: `user_auth_audit_logs` is now the first migration-backed RLS slice, tested with actual migrations 163/164 and restricted `pos_app` in an isolated schema (commit `fbb247b`). Production startup rejects superuser/BYPASSRLS and any runtime identity other than `pos_app`; fresh-volume role initialization and the full Go build/vet/test suite passed on disposable PostgreSQL 16 (commit `f8603b2`). Development and existing production databases have not been switched, and C012 remains partial.
 
 ## Frontend/browser/performance
 
