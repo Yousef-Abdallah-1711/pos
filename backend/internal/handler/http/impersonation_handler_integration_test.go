@@ -1,15 +1,18 @@
 package http
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
+	"pos-saas/internal/domain"
 	"pos-saas/internal/middleware"
 	"pos-saas/internal/pkg/jwt"
 	"pos-saas/internal/repository"
@@ -28,6 +31,11 @@ type impersonationHTTPFlow struct {
 	store             *service.AuthSessionStore
 	impersonationRepo *repository.ImpersonationRepository
 	adminRepo         *repository.SuperAdminRepository
+}
+
+type impersonationStartResult struct {
+	status  int
+	cookies []*http.Cookie
 }
 
 func TestImpersonationHTTPAuditSessionLifecycle(t *testing.T) {
@@ -85,6 +93,8 @@ func assertImpersonationSessionFlow(t *testing.T, flow impersonationHTTPFlow) {
 	assertImpersonationStatus(t, flow.admin, flow.token, flow.targetUserID)
 	assertImpersonationValidation(t, flow.handler, cookie)
 	assertImpersonationEnd(t, flow.db, flow.handler, cookie, flow.superAdminID)
+	assertConcurrentImpersonationStarts(t, flow)
+	assertExpiredImpersonationSessionCanBeReplaced(t, flow)
 }
 
 func assertImpersonatedUserCanReadOwnProfile(t *testing.T, flow impersonationHTTPFlow, cookie *http.Cookie) {
@@ -150,6 +160,143 @@ func assertImpersonationEnd(t *testing.T, db *sql.DB, handler *ImpersonationHand
 	}
 	if active != 0 || auditCount != 2 {
 		t.Fatalf("end did not revoke and audit session: active=%d audit_count=%d", active, auditCount)
+	}
+}
+
+func assertConcurrentImpersonationStarts(t *testing.T, flow impersonationHTTPFlow) {
+	t.Helper()
+	const concurrentRequests = 8
+	startsBefore := countImpersonationStarts(t, flow)
+	results := runConcurrentImpersonationStartRequests(flow, concurrentRequests)
+	winningCookie := assertConcurrentStartOutcomes(t, results, concurrentRequests)
+	var active int
+	if err := flow.db.QueryRow(`SELECT COUNT(*) FROM impersonation_sessions WHERE super_admin_id=$1 AND is_active`, flow.superAdminID).Scan(&active); err != nil {
+		t.Fatalf("count active sessions after concurrent starts: %v", err)
+	}
+	startsAfter := countImpersonationStarts(t, flow)
+	if active != 1 || startsAfter != startsBefore+1 {
+		t.Fatalf("concurrent starts left active=%d and added %d start audits", active, startsAfter-startsBefore)
+	}
+	endImpersonationCookie(t, flow.handler, winningCookie)
+}
+
+func runConcurrentImpersonationStartRequests(flow impersonationHTTPFlow, concurrency int) []impersonationStartResult {
+	startRequests := make(chan struct{})
+	results := make(chan impersonationStartResult, concurrency)
+	var workers sync.WaitGroup
+	workers.Add(concurrency)
+	for range concurrency {
+		go func() {
+			defer workers.Done()
+			<-startRequests
+			request := authenticatedImpersonationRequest(http.MethodPost, fmt.Sprintf("/api/v1/super-admin/impersonate/%d", flow.targetUserID), flow.token, nil)
+			recorder := httptest.NewRecorder()
+			flow.admin.ServeHTTP(recorder, request)
+			results <- impersonationStartResult{status: recorder.Code, cookies: recorder.Result().Cookies()}
+		}()
+	}
+	close(startRequests)
+	workers.Wait()
+	close(results)
+	collected := make([]impersonationStartResult, 0, concurrency)
+	for result := range results {
+		collected = append(collected, result)
+	}
+	return collected
+}
+
+func assertConcurrentStartOutcomes(t *testing.T, results []impersonationStartResult, expected int) *http.Cookie {
+	t.Helper()
+	var successes, conflicts int
+	var winningCookie *http.Cookie
+	for _, result := range results {
+		switch result.status {
+		case http.StatusOK:
+			successes++
+			winningCookie = findImpersonationCookie(t, result.cookies)
+		case http.StatusBadRequest:
+			conflicts++
+			if len(result.cookies) != 0 {
+				t.Fatalf("conflicting start unexpectedly issued cookies")
+			}
+		default:
+			t.Fatalf("concurrent impersonation start returned unexpected status %d", result.status)
+		}
+	}
+	if successes != 1 || conflicts != expected-1 {
+		t.Fatalf("concurrent starts returned %d successes and %d conflicts", successes, conflicts)
+	}
+	return winningCookie
+}
+
+func countImpersonationStarts(t *testing.T, flow impersonationHTTPFlow) int {
+	t.Helper()
+	var starts int
+	if err := flow.db.QueryRow(`SELECT COUNT(*) FROM super_admin_audit_logs WHERE super_admin_id=$1 AND action='IMPERSONATE_START'`, flow.superAdminID).Scan(&starts); err != nil {
+		t.Fatalf("count impersonation starts: %v", err)
+	}
+	return starts
+}
+
+func assertExpiredImpersonationSessionCanBeReplaced(t *testing.T, flow impersonationHTTPFlow) {
+	t.Helper()
+	var tenantID int64
+	if err := flow.db.QueryRow(`SELECT tenant_id FROM users WHERE id=$1`, flow.targetUserID).Scan(&tenantID); err != nil {
+		t.Fatalf("get target tenant for expired-session fixture: %v", err)
+	}
+	expiredToken := fmt.Sprintf("expired-impersonation-token-%d", time.Now().UnixNano())
+	expired, err := flow.impersonationRepo.CreateSession(context.Background(), &domain.ImpersonationSession{
+		SuperAdminID: flow.superAdminID, TargetUserID: flow.targetUserID,
+		TargetTenantID: tenantID, ImpersonationToken: expiredToken, IPAddress: "127.0.0.1",
+		UserAgent: "integration-test", ExpiresAt: time.Now().Add(-time.Minute),
+	})
+	if err != nil {
+		t.Fatalf("create expired impersonation session fixture: %v", err)
+	}
+
+	request := authenticatedImpersonationRequest(http.MethodPost, fmt.Sprintf("/api/v1/super-admin/impersonate/%d", flow.targetUserID), flow.token, nil)
+	recorder := httptest.NewRecorder()
+	flow.admin.ServeHTTP(recorder, request)
+	if recorder.Code != http.StatusOK {
+		t.Fatalf("start after expired impersonation session returned %d: %s", recorder.Code, recorder.Body.String())
+	}
+	var active bool
+	var endReason string
+	if err := flow.db.QueryRow(`SELECT is_active, end_reason FROM impersonation_sessions WHERE id=$1`, expired.ID).Scan(&active, &endReason); err != nil {
+		t.Fatalf("read expired impersonation fixture after replacement: %v", err)
+	}
+	if active || endReason != domain.ImpersonationEndExpired {
+		t.Fatalf("stale impersonation session state = active:%t reason:%q", active, endReason)
+	}
+	endImpersonationCookie(t, flow.handler, findImpersonationCookie(t, recorder.Result().Cookies()))
+	assertExpiredTokenIsRejected(t, flow, expiredToken)
+}
+
+func endImpersonationCookie(t *testing.T, handler *ImpersonationHandler, cookie *http.Cookie) {
+	t.Helper()
+	request := httptest.NewRequest(http.MethodPost, "/api/v1/impersonation/end", nil)
+	request.AddCookie(cookie)
+	request.Header.Set("Origin", "http://localhost:3002")
+	recorder := httptest.NewRecorder()
+	middleware.RequireTrustedOrigin(http.HandlerFunc(handler.EndImpersonationByToken)).ServeHTTP(recorder, request)
+	if recorder.Code != http.StatusOK {
+		t.Fatalf("end impersonation cookie returned %d: %s", recorder.Code, recorder.Body.String())
+	}
+	assertClearedImpersonationCookie(t, recorder.Result().Cookies())
+}
+
+func assertExpiredTokenIsRejected(t *testing.T, flow impersonationHTTPFlow, token string) {
+	t.Helper()
+	cookieID, err := flow.store.CreateImpersonation(context.Background(), token, time.Minute)
+	if err != nil {
+		t.Fatalf("create expired impersonation cookie fixture: %v", err)
+	}
+	request := httptest.NewRequest(http.MethodGet, "/api/v1/impersonation/validate", nil)
+	request.AddCookie(&http.Cookie{Name: service.ImpersonationSessionCookieName, Value: cookieID})
+	recorder := httptest.NewRecorder()
+	flow.handler.ValidateImpersonationToken(recorder, request)
+	if recorder.Code != http.StatusUnauthorized || !strings.Contains(recorder.Body.String(), `"valid":false`) {
+		t.Fatalf("expired impersonation token returned %d: %s", recorder.Code, recorder.Body.String())
 	}
 }
 

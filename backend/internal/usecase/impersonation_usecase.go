@@ -91,6 +91,9 @@ func (uc *ImpersonationUseCase) StartImpersonation(
 
 	createdSession, err := uc.impersonationRepo.CreateSession(ctx, session)
 	if err != nil {
+		if errors.Is(err, repository.ErrActiveImpersonationSession) {
+			return nil, errors.New("you already have an active impersonation session. Please end it first")
+		}
 		log.Printf("[ImpersonationUseCase] Failed to create session: %v\n", err)
 		return nil, fmt.Errorf("failed to create impersonation session: %w", err)
 	}
