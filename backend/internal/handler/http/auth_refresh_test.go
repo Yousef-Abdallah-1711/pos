@@ -24,7 +24,7 @@ func TestAuthRefreshRotatesCookieSessionExactlyOnceConcurrently(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	sessions := service.NewAuthSessionStore(service.NewInMemoryCache(), time.Minute)
+	sessions := newHTTPAuthSessionStore(t, time.Minute)
 	oldSessionID, err := sessions.Create(context.Background(), credential)
 	if err != nil {
 		t.Fatal(err)

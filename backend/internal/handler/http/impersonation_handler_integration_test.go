@@ -59,7 +59,7 @@ func TestImpersonationHTTPAuditSessionLifecycle(t *testing.T) {
 	if err != nil {
 		t.Fatalf("generate super-admin token: %v", err)
 	}
-	store := newImpersonationAuthSessionStore(t)
+	store := newHTTPAuthSessionStore(t, time.Hour)
 	impersonationRepo := repository.NewImpersonationRepository(db)
 	adminRepo := repository.NewSuperAdminRepository(db)
 	uc := usecase.NewImpersonationUseCase(impersonationRepo, adminRepo, repository.NewSuperAdminAuditRepository(db))
@@ -136,7 +136,7 @@ func assertRevokedImpersonationCookieCannotReadProfile(t *testing.T, flow impers
 	}
 }
 
-func newImpersonationAuthSessionStore(t *testing.T) *service.AuthSessionStore {
+func newHTTPAuthSessionStore(t *testing.T, ttl time.Duration) *service.AuthSessionStore {
 	t.Helper()
 	if redisURL := os.Getenv("POOS_SESSION_REDIS_URL"); redisURL != "" {
 		cache, err := service.NewRedisCache(redisURL)
@@ -148,9 +148,9 @@ func newImpersonationAuthSessionStore(t *testing.T) *service.AuthSessionStore {
 				t.Errorf("close disposable Redis client: %v", err)
 			}
 		})
-		return service.NewAuthSessionStore(cache, time.Hour)
+		return service.NewAuthSessionStore(cache, ttl)
 	}
-	return service.NewAuthSessionStore(service.NewInMemoryCache(), time.Hour)
+	return service.NewAuthSessionStore(service.NewInMemoryCache(), ttl)
 }
 
 func assertImpersonationStatus(t *testing.T, admin http.Handler, token string, targetUserID int64) {
