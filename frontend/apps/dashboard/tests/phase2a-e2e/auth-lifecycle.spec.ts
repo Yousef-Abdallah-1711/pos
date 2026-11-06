@@ -2,6 +2,7 @@ import { expect, test, type Page } from '@playwright/test'
 import { routeContainerApiToCandidate } from './api-routing'
 
 const landingUrl = (process.env.WS05_LANDING_URL || 'http://localhost:13101').replace(/\/$/, '')
+const landingRedirectUrl = (process.env.WS05_LANDING_REDIRECT_URL || 'http://localhost:13101').replace(/\/$/, '')
 const dashboardUrl = (process.env.WS05_DASHBOARD_URL || 'http://localhost:13102').replace(/\/$/, '')
 const ownerEmail = 'phase2a-owner-a@example.test'
 const ownerPassword = process.env.WS05_TEST_PASSWORD || 'WS05-Disposable-Only-2026!'
@@ -66,7 +67,7 @@ test('logout clears access and denies the next protected dashboard visit', async
 
   await page.getByRole('button', { name: /phase2a-owner-a@example\.test/i }).click()
   await page.getByRole('button', { name: /logout/i }).click()
-  await expect(page).toHaveURL(`${landingUrl}/en/auth/login`)
+  await expect(page).toHaveURL(`${landingRedirectUrl}/en/auth/login`)
   await expect(page.getByRole('textbox', { name: /email/i })).toBeVisible()
 
   await page.goto(`${dashboardUrl}/en/dashboard/inventory`, { waitUntil: 'domcontentloaded' })

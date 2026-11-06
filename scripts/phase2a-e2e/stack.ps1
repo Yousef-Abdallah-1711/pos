@@ -59,6 +59,7 @@ try {
             & docker run --rm --network "container:$apiContainer" --volumes-from $dashboardContainer -w /app/apps/dashboard `
                 -e WS05_DASHBOARD_URL=http://localhost:3002 `
                 -e WS05_LANDING_URL=http://localhost:3001 `
+                -e WS05_LANDING_REDIRECT_URL=http://localhost:13101 `
                 -e WS05_LANDING_SERVICE_URL=http://localhost:3001 `
                 -e WS05_API_URL=http://localhost:18080/api/v1 `
                 -e WS05_STOREFRONT_URL=http://phase2a-restaurant-a.localhost:3003 `
