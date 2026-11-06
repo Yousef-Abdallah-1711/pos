@@ -59,7 +59,7 @@ func TestImpersonationHTTPAuditSessionLifecycle(t *testing.T) {
 	if err != nil {
 		t.Fatalf("generate super-admin token: %v", err)
 	}
-	store := service.NewAuthSessionStore(service.NewInMemoryCache(), time.Hour)
+	store := newImpersonationAuthSessionStore(t)
 	impersonationRepo := repository.NewImpersonationRepository(db)
 	adminRepo := repository.NewSuperAdminRepository(db)
 	uc := usecase.NewImpersonationUseCase(impersonationRepo, adminRepo, repository.NewSuperAdminAuditRepository(db))
@@ -93,11 +93,23 @@ func assertImpersonationSessionFlow(t *testing.T, flow impersonationHTTPFlow) {
 	assertImpersonationStatus(t, flow.admin, flow.token, flow.targetUserID)
 	assertImpersonationValidation(t, flow.handler, cookie)
 	assertImpersonationEnd(t, flow.db, flow.handler, cookie, flow.superAdminID)
+	assertRevokedImpersonationCookieCannotReadProfile(t, flow, cookie)
 	assertConcurrentImpersonationStarts(t, flow)
 	assertExpiredImpersonationSessionCanBeReplaced(t, flow)
 }
 
 func assertImpersonatedUserCanReadOwnProfile(t *testing.T, flow impersonationHTTPFlow, cookie *http.Cookie) {
+	t.Helper()
+	request := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/api/v1/users/%d/profile", flow.targetUserID), nil)
+	request.AddCookie(cookie)
+	recorder := httptest.NewRecorder()
+	impersonatedProfileHandler(t, flow).ServeHTTP(recorder, request)
+	if recorder.Code != http.StatusOK || !strings.Contains(recorder.Body.String(), "impersonation-target@example.test") {
+		t.Fatalf("impersonated user profile request returned %d: %s", recorder.Code, recorder.Body.String())
+	}
+}
+
+func impersonatedProfileHandler(t *testing.T, flow impersonationHTTPFlow) http.Handler {
 	t.Helper()
 	tokens, err := jwt.NewTokenService("impersonation-tenant-action-secret-at-least-32-bytes", "5m")
 	if err != nil {
@@ -110,13 +122,35 @@ func assertImpersonatedUserCanReadOwnProfile(t *testing.T, flow impersonationHTT
 	secured := middleware.SessionAuthMiddleware(tokens, flow.store, impersonationAuth)(middleware.NewTenantContextMiddleware(
 		middleware.SQLRestaurantVerifier{DB: flow.db},
 	)(mux))
+	return secured
+}
+
+func assertRevokedImpersonationCookieCannotReadProfile(t *testing.T, flow impersonationHTTPFlow, cookie *http.Cookie) {
+	t.Helper()
 	request := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/api/v1/users/%d/profile", flow.targetUserID), nil)
 	request.AddCookie(cookie)
 	recorder := httptest.NewRecorder()
-	secured.ServeHTTP(recorder, request)
-	if recorder.Code != http.StatusOK || !strings.Contains(recorder.Body.String(), "impersonation-target@example.test") {
-		t.Fatalf("impersonated user profile request returned %d: %s", recorder.Code, recorder.Body.String())
+	impersonatedProfileHandler(t, flow).ServeHTTP(recorder, request)
+	if recorder.Code != http.StatusUnauthorized {
+		t.Fatalf("revoked impersonation cookie profile request returned %d: %s", recorder.Code, recorder.Body.String())
 	}
+}
+
+func newImpersonationAuthSessionStore(t *testing.T) *service.AuthSessionStore {
+	t.Helper()
+	if redisURL := os.Getenv("POOS_SESSION_REDIS_URL"); redisURL != "" {
+		cache, err := service.NewRedisCache(redisURL)
+		if err != nil {
+			t.Fatalf("connect to configured disposable Redis: %v", err)
+		}
+		t.Cleanup(func() {
+			if err := cache.Close(); err != nil {
+				t.Errorf("close disposable Redis client: %v", err)
+			}
+		})
+		return service.NewAuthSessionStore(cache, time.Hour)
+	}
+	return service.NewAuthSessionStore(service.NewInMemoryCache(), time.Hour)
 }
 
 func assertImpersonationStatus(t *testing.T, admin http.Handler, token string, targetUserID int64) {
