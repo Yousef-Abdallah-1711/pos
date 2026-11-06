@@ -175,7 +175,8 @@ func (h *AdminOrderHandler) ListOrders(w http.ResponseWriter, r *http.Request) {
 
 	response, err := h.orderUC.ListOrders(tenantID, restaurantID, filters)
 	if err != nil {
-		respondError(w, http.StatusInternalServerError, err.Error())
+		log.Printf("[AdminOrders] list failed: tenant=%d restaurant=%d err=%v", tenantID, restaurantID, err)
+		respondError(w, http.StatusInternalServerError, "Failed to list orders")
 		return
 	}
 
