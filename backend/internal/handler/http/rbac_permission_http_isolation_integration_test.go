@@ -32,6 +32,77 @@ func TestRBACPermissionHTTPScopesAssignmentAndEnforcesAdmin(t *testing.T) {
 	assertOwnerCanAssignAndRevokePermissions(t, db, owner, scope)
 }
 
+func TestRBACPermissionHTTPEnforcesRepositoryBackedLevelMatrix(t *testing.T) {
+	if os.Getenv(testdb.EnvVar) == "" {
+		t.Skipf("set %s to an isolated disposable PostgreSQL database", testdb.EnvVar)
+	}
+	db := openProductHTTPTestDB(t)
+	fixture := seedProductHTTPFixture(t, db)
+	roleID := insertRBACRoleHTTPFixture(t, db, fixture.tenantA, fixture.restaurantA1, "permission-matrix")
+	users := struct{ own, sibling, foreign int }{
+		own:     insertRBACUserHTTPFixture(t, db, fixture.tenantA, fixture.restaurantA1, "permission-matrix-own"),
+		sibling: insertRBACUserHTTPFixture(t, db, fixture.tenantA, fixture.restaurantA2, "permission-matrix-sibling"),
+		foreign: insertRBACUserHTTPFixture(t, db, fixture.tenantB, fixture.restaurantB1, "permission-matrix-foreign"),
+	}
+	userRoles := repository.NewUserRoleRepository(db)
+	if err := userRoles.Assign(t.Context(), int64(fixture.tenantA), int64(fixture.restaurantA1), int64(users.own), int64(roleID), int64(users.own)); err != nil {
+		t.Fatalf("assign permission-matrix role: %v", err)
+	}
+	moduleID := findRBACPermissionTestModule(t, db)
+	permissions := repository.NewRolePermissionRepository(db)
+	tokens, err := jwt.NewTokenService("rbac-permission-matrix-secret", "5m")
+	if err != nil {
+		t.Fatalf("create token service: %v", err)
+	}
+	evaluator := middleware.RepositoryPermissionEvaluator{UserRoles: userRoles, RolePermissions: permissions}
+	permissionGate := middleware.NewPermissionMiddleware(evaluator, middleware.PermissionModeEnforce)
+
+	levels := []string{domain.PermissionNone, domain.PermissionRead, domain.PermissionExport, domain.PermissionWrite, domain.PermissionDelete, domain.PermissionAdmin}
+	requirements := []string{domain.PermissionRead, domain.PermissionExport, domain.PermissionWrite, domain.PermissionDelete, domain.PermissionAdmin}
+	for _, have := range levels {
+		if err := permissions.Assign(t.Context(), int64(fixture.tenantA), int64(fixture.restaurantA1), int64(roleID), moduleID, have); err != nil {
+			t.Fatalf("assign %s permission: %v", have, err)
+		}
+		for _, need := range requirements {
+			for _, actor := range []struct {
+				name         string
+				userID       int
+				tenantID     int
+				restaurantID int
+				wantAccess   bool
+			}{
+				{name: "owner scope", userID: users.own, tenantID: fixture.tenantA, restaurantID: fixture.restaurantA1, wantAccess: domain.PermissionValues[have] >= domain.PermissionValues[need]},
+				{name: "sibling restaurant", userID: users.sibling, tenantID: fixture.tenantA, restaurantID: fixture.restaurantA2},
+				{name: "foreign tenant", userID: users.foreign, tenantID: fixture.tenantB, restaurantID: fixture.restaurantB1},
+			} {
+				t.Run(have+"_to_"+need+"/"+actor.name, func(t *testing.T) {
+					token, err := tokens.GenerateToken(actor.userID, actor.tenantID, &actor.restaurantID, "permission-matrix@example.test", "employee")
+					if err != nil {
+						t.Fatalf("generate %s JWT: %v", actor.name, err)
+					}
+					request := httptest.NewRequest(http.MethodGet, "/api/v1/rbac/roles", nil)
+					request.Header.Set("Authorization", "Bearer "+token)
+					runsHandler := false
+					handler := permissionGate(moduleID, need)(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+						runsHandler = true
+						w.WriteHeader(http.StatusNoContent)
+					}))
+					secured := middleware.AuthMiddleware(tokens)(handler)
+					response := httptest.NewRecorder()
+					secured.ServeHTTP(response, request)
+					wantStatus := http.StatusForbidden
+					if actor.wantAccess {
+						wantStatus = http.StatusNoContent
+					}
+					if response.Code != wantStatus || runsHandler != actor.wantAccess {
+						t.Fatalf("effective %s accessing %s in %s: status=%d handlerRan=%v, want status=%d handlerRan=%v", have, need, actor.name, response.Code, runsHandler, wantStatus, actor.wantAccess)
+					}
+				})
+			}
+		}
+	}
+}
+
 type rbacPermissionHTTPRoles struct {
 	own, sibling, foreign int
 }

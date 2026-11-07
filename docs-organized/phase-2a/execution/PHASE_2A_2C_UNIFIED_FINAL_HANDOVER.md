@@ -95,3 +95,9 @@ At candidate `3bec0c85b21a8de2250dfaf99afab4ebd792ec97`, PR #9 remains open and 
 - Against the isolated `pos-user-crud-e2e-20261107` project and fresh PostgreSQL 15 cluster: the new user CRUD journey passed; the full Phase 2A Playwright suite passed **12/12**. Dashboard `pnpm run typecheck:test` passed.
 - Fresh backend checks passed on the same source: `go build ./...`, `go vet ./...`, and `go test -json -p 1 -count=1 ./...` (**878 passed, 2 skipped, 0 failed**) against a separate fresh `pos_phase2a_test` database after migrations 1–165 and the legacy theme migration. The test fixture connection used the disposable cluster's postgres administrator; restricted-role RLS evidence remains the separate earlier pilot.
 - C006 user CRUD coverage is now implemented and tested, but role-permission route combinations and other families remain open; C006 is **PARTIAL**. C012 and Phase 2A/2C remain **PARTIAL**. The disposable stack, database volumes, and network were removed after verification.
+
+## RBAC permission-level matrix follow-up — 2026-11-07
+
+- Added `TestRBACPermissionHTTPEnforcesRepositoryBackedLevelMatrix`. It evaluates all 90 combinations of six effective levels, five required levels, and three actor scopes through the repository-backed evaluator and enforcing middleware. All 90 passed on disposable PostgreSQL 15.
+- Fresh full backend regression on the same candidate source passed `go build ./...`, `go vet ./...`, and `go test -json -p 1 -count=1 ./...`: **969 passed, 2 skipped, 0 failed**. Migrations 1–165 and `999_theme_migration_legacy.sql` were applied only to a new tmpfs PostgreSQL database. The disposable container was removed after the run.
+- This verifies permission hierarchy and tenant/restaurant scope at the RBAC gate boundary; active route×role combinations across product and business handlers remain open. C006, C012, and Phase 2A/2C remain **PARTIAL**. Production remains **NO-GO**.
