@@ -134,6 +134,53 @@ func TestAdminOrdersHTTPConcurrentStatusTransitionsAreAtomic(t *testing.T) {
 	}
 }
 
+func TestAdminOrdersHTTPUpdatesOwnedPaymentStatus(t *testing.T) {
+	if os.Getenv(testdb.EnvVar) == "" {
+		t.Skipf("set %s to an isolated disposable PostgreSQL database", testdb.EnvVar)
+	}
+	db := openProductHTTPTestDB(t)
+	cleanupAdminOrderBenchmarkData(t, db)
+	t.Cleanup(func() { cleanupAdminOrderBenchmarkData(t, db) })
+	tenantID, restaurantID, _ := seedAdminOrderBenchmarkData(t, db, 1)
+	var orderID int64
+	if err := db.QueryRow(`SELECT id FROM orders WHERE order_number = 'admin-order-benchmark-000'`).Scan(&orderID); err != nil {
+		t.Fatalf("get owned order fixture: %v", err)
+	}
+	tokens, err := jwt.NewTokenService("admin-order-payment-test-secret-32-bytes", "5m")
+	if err != nil {
+		t.Fatalf("create token service: %v", err)
+	}
+	restaurantClaim := int(restaurantID)
+	token, err := tokens.GenerateToken(1, int(tenantID), &restaurantClaim, "owner@example.test", "owner")
+	if err != nil {
+		t.Fatalf("generate authenticated token: %v", err)
+	}
+	handler := NewAdminOrderHandler(usecase.NewOrderUseCase(repository.NewOrderRepository(db), nil), nil, nil)
+
+	valid := invokeAdminOrderIsolationHTTP(db, tokens, token, handler, http.MethodPut, orderID, int(tenantID)+1, int(restaurantID)+1, `{"payment_status":"failed"}`)
+	if valid.Code != http.StatusOK {
+		t.Fatalf("valid payment status update = %d, want %d", valid.Code, http.StatusOK)
+	}
+	var paymentStatus string
+	if err := db.QueryRow(`SELECT payment_status FROM orders WHERE id = $1`, orderID).Scan(&paymentStatus); err != nil {
+		t.Fatalf("read updated payment status: %v", err)
+	}
+	if paymentStatus != "failed" {
+		t.Fatalf("persisted payment status = %q, want failed", paymentStatus)
+	}
+
+	invalid := invokeAdminOrderIsolationHTTP(db, tokens, token, handler, http.MethodPut, orderID, int(tenantID)+1, int(restaurantID)+1, `{"payment_status":"fraud"}`)
+	if invalid.Code != http.StatusBadRequest {
+		t.Fatalf("invalid payment status update = %d, want %d", invalid.Code, http.StatusBadRequest)
+	}
+	if err := db.QueryRow(`SELECT payment_status FROM orders WHERE id = $1`, orderID).Scan(&paymentStatus); err != nil {
+		t.Fatalf("read payment status after invalid update: %v", err)
+	}
+	if paymentStatus != "failed" {
+		t.Fatalf("invalid update changed persisted payment status to %q", paymentStatus)
+	}
+}
+
 func TestAdminOrdersHTTPScopesHistoryStatsAndExport(t *testing.T) {
 	if os.Getenv(testdb.EnvVar) == "" {
 		t.Skipf("set %s to an isolated disposable PostgreSQL database", testdb.EnvVar)

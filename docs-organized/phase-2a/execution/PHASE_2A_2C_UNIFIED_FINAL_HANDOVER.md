@@ -154,3 +154,9 @@ At candidate `3bec0c85b21a8de2250dfaf99afab4ebd792ec97`, PR #9 remains open and 
 - Tightened the concurrent status test so its repeated `pending` request is invalid regardless of whether it reaches the row lock before or after the valid `confirmed` transition. This removes an order-dependent assertion while preserving the check for one committed state change and one history row.
 - Fresh isolated PostgreSQL 15 verification applied migrations 1–165 and `999_theme_migration_legacy.sql`. Focused Admin Orders scope/concurrency/history/stats/export tests passed; `go build ./...`, `go vet ./...`, and full `go test -json -p 1 -count=1 ./...` passed (**977 passed, 2 skipped, 0 failed**). The disposable database container was removed; `pos-dev` was not touched.
 - These checks add evidence for three active Admin Orders reads, not complete route×role acceptance. Order items/bulk and broader C006 resource/permission matrices, C012 scoped transaction conversion/RLS policies/rollback rehearsal, independent PR review, and main-based Docker delivery remain open. C006, C012, and Phase 2A/2C remain **PARTIAL**; production remains **NO-GO**.
+
+## Admin Orders owned payment-status follow-up — 2026-11-07
+
+- Added authenticated HTTP coverage for the owned-order payment-status route. A valid `failed` update persists; an invalid status returns HTTP 400 and leaves the persisted value unchanged.
+- Against a fresh tmpfs PostgreSQL 15 database with migrations 1–165 and migration 999, the focused payment/concurrency/history/stats/export tests passed. `go build ./...`, `go vet ./...`, and full `go test -json -p 1 -count=1 ./...` passed (**978 passed, 2 skipped, 0 failed**). The disposable database container was removed.
+- Order item/bulk behavior and the remaining C006 route×role/persona matrix remain open. C006, C012, and Phase 2A/2C remain **PARTIAL**; independent review and main-based Docker delivery remain open; production remains **NO-GO**.
