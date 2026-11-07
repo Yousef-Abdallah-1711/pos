@@ -1,9 +1,12 @@
 package http
 
 import (
+	"bytes"
 	"context"
 	"database/sql"
+	"encoding/json"
 	"fmt"
+	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -18,6 +21,152 @@ import (
 	"pos-saas/internal/usecase"
 	"pos-saas/tests/testdb"
 )
+
+func TestProductHTTPRejectsForeignReadsAndUpdatesWithoutSideEffects(t *testing.T) {
+	if os.Getenv(testdb.EnvVar) == "" {
+		t.Skipf("set %s to an isolated disposable PostgreSQL database", testdb.EnvVar)
+	}
+	db := openProductHTTPTestDB(t)
+	fixture := seedProductHTTPFixture(t, db)
+	handler, tokens, token := newProductHTTPIsolationAuth(t, db, fixture)
+	list := invokeProductIsolationHTTP(db, tokens, token, handler, 0, fixture.tenantB, fixture.restaurantB1, http.MethodGet, &bytes.Buffer{}, "application/json")
+	if list.Code != http.StatusOK {
+		t.Fatalf("forged-scope product list status = %d, want %d", list.Code, http.StatusOK)
+	}
+	var listed struct {
+		Products []struct {
+			ID int `json:"id"`
+		} `json:"products"`
+	}
+	if err := json.NewDecoder(list.Body).Decode(&listed); err != nil {
+		t.Fatalf("decode scoped product list: %v", err)
+	}
+	if len(listed.Products) != 1 || listed.Products[0].ID != fixture.productA1 {
+		t.Fatalf("forged-scope product IDs = %v, want only own product %d", listed.Products, fixture.productA1)
+	}
+	for name, target := range map[string]struct{ productID, tenantID, restaurantID int }{
+		"foreign tenant":     {fixture.productB1, fixture.tenantB, fixture.restaurantB1},
+		"sibling restaurant": {fixture.productA2, fixture.tenantA, fixture.restaurantA2},
+	} {
+		t.Run(name, func(t *testing.T) {
+			for _, method := range []string{http.MethodGet, http.MethodPut} {
+				body, contentType := multipartProductBody(t, `{"name_en":"forged update","price":99}`)
+				response := invokeProductIsolationHTTP(db, tokens, token, handler, target.productID, target.tenantID, target.restaurantID, method, body, contentType)
+				if method == http.MethodGet && response.Code != http.StatusNotFound {
+					t.Fatalf("foreign product read status = %d, want %d", response.Code, http.StatusNotFound)
+				}
+				if method == http.MethodPut && (response.Code < 400 || response.Code >= 500) {
+					t.Fatalf("foreign product update status = %d, want a 4xx denial", response.Code)
+				}
+				assertHTTPProductUnchanged(t, db, target.productID, target.tenantID, target.restaurantID)
+			}
+		})
+	}
+}
+
+func TestProductHTTPCreateUsesJWTScopeDespiteForgedHeaders(t *testing.T) {
+	if os.Getenv(testdb.EnvVar) == "" {
+		t.Skipf("set %s to an isolated disposable PostgreSQL database", testdb.EnvVar)
+	}
+	db := openProductHTTPTestDB(t)
+	fixture := seedProductHTTPFixture(t, db)
+	handler, tokens, token := newProductHTTPIsolationAuth(t, db, fixture)
+	var ownCategoryID int
+	if err := db.QueryRow(`SELECT category_id FROM products WHERE id = $1`, fixture.productA1).Scan(&ownCategoryID); err != nil {
+		t.Fatalf("read owned category fixture: %v", err)
+	}
+	body, contentType := multipartProductBody(t, fmt.Sprintf(`{"category_id":%d,"name_en":"claim scoped create","price":19.5,"is_available":true}`, ownCategoryID))
+	response := invokeProductIsolationHTTP(db, tokens, token, handler, 0, fixture.tenantB, fixture.restaurantB1, http.MethodPost, body, contentType)
+	if response.Code != http.StatusCreated {
+		t.Fatalf("forged-scope product create status = %d, want %d: %s", response.Code, http.StatusCreated, response.Body.String())
+	}
+	var created struct{ ID int }
+	if err := json.NewDecoder(response.Body).Decode(&created); err != nil {
+		t.Fatalf("decode created product: %v", err)
+	}
+	var tenantID, restaurantID int
+	if err := db.QueryRow(`SELECT tenant_id, restaurant_id FROM products WHERE id = $1`, created.ID).Scan(&tenantID, &restaurantID); err != nil {
+		t.Fatalf("read created product scope: %v", err)
+	}
+	if tenantID != fixture.tenantA || restaurantID != fixture.restaurantA1 {
+		t.Fatalf("forged headers created product in %d/%d, want JWT scope %d/%d", tenantID, restaurantID, fixture.tenantA, fixture.restaurantA1)
+	}
+}
+
+func newProductHTTPIsolationAuth(t *testing.T, db *sql.DB, fixture productHTTPFixture) (*ProductHandler, *jwt.TokenService, string) {
+	t.Helper()
+	tokens, err := jwt.NewTokenService("ws02-http-test-secret-at-least-32-bytes", "5m")
+	if err != nil {
+		t.Fatalf("create token service: %v", err)
+	}
+	restaurantID := fixture.restaurantA1
+	token, err := tokens.GenerateToken(1, fixture.tenantA, &restaurantID, "owner@example.test", "owner")
+	if err != nil {
+		t.Fatalf("generate authenticated token: %v", err)
+	}
+	handler := NewProductHandler(usecase.NewProductUseCase(repository.NewProductRepository(db), nil, ""))
+	return handler, tokens, token
+}
+
+func invokeProductIsolationHTTP(db *sql.DB, tokens *jwt.TokenService, token string, handler *ProductHandler, productID, forgedTenant, forgedRestaurant int, method string, body *bytes.Buffer, contentType string) *httptest.ResponseRecorder {
+	path := "/api/v1/products"
+	if productID > 0 {
+		path += "/" + strconv.Itoa(productID)
+	}
+	request := httptest.NewRequest(method, path, body)
+	if productID > 0 {
+		request.SetPathValue("id", strconv.Itoa(productID))
+	}
+	request.Header.Set("Authorization", "Bearer "+token)
+	request.Header.Set("X-Tenant-ID", strconv.Itoa(forgedTenant))
+	request.Header.Set("X-Restaurant-ID", strconv.Itoa(forgedRestaurant))
+	request.Header.Set("Content-Type", contentType)
+	secured := middleware.AuthMiddleware(tokens)(middleware.NewTenantContextMiddleware(
+		middleware.SQLRestaurantVerifier{DB: db},
+	)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.Method {
+		case http.MethodGet:
+			if productID == 0 {
+				handler.ListProducts(w, r)
+			} else {
+				handler.GetProduct(w, r)
+			}
+		case http.MethodPut:
+			handler.UpdateProduct(w, r)
+		case http.MethodPost:
+			handler.CreateProduct(w, r)
+		}
+	})))
+	response := httptest.NewRecorder()
+	secured.ServeHTTP(response, request)
+	return response
+}
+
+func multipartProductBody(t *testing.T, data string) (*bytes.Buffer, string) {
+	t.Helper()
+	body := &bytes.Buffer{}
+	writer := multipart.NewWriter(body)
+	if err := writer.WriteField("data", data); err != nil {
+		t.Fatalf("write product form data: %v", err)
+	}
+	if err := writer.Close(); err != nil {
+		t.Fatalf("close product form data: %v", err)
+	}
+	return body, writer.FormDataContentType()
+}
+
+func assertHTTPProductUnchanged(t *testing.T, db *sql.DB, productID, tenantID, restaurantID int) {
+	t.Helper()
+	var name string
+	var price float64
+	var status string
+	if err := db.QueryRow(`SELECT name_en, price, status FROM products WHERE id = $1 AND tenant_id = $2 AND restaurant_id = $3`, productID, tenantID, restaurantID).Scan(&name, &price, &status); err != nil {
+		t.Fatalf("read product after denied HTTP operation: %v", err)
+	}
+	if name != "HTTP isolation product" || price != 10 || status != "active" {
+		t.Fatalf("denied HTTP operation changed product: name=%q price=%v status=%q", name, price, status)
+	}
+}
 
 func TestProductHTTPForgedScopeHeadersCannotDeleteForeignProducts(t *testing.T) {
 	if os.Getenv(testdb.EnvVar) == "" {
@@ -90,10 +239,10 @@ func deleteProductThroughAuthenticatedHTTP(t *testing.T, db *sql.DB, handler *Pr
 }
 
 type productHTTPFixture struct {
-	tenantA, tenantB           int
-	restaurantA1, restaurantA2 int
-	restaurantB1, restaurantB2 int
-	productA2, productB1       int
+	tenantA, tenantB                int
+	restaurantA1, restaurantA2      int
+	restaurantB1, restaurantB2      int
+	productA1, productA2, productB1 int
 }
 
 func seedProductHTTPFixture(t *testing.T, db *sql.DB) productHTTPFixture {
@@ -106,6 +255,7 @@ func seedProductHTTPFixture(t *testing.T, db *sql.DB) productHTTPFixture {
 	fixture.restaurantA2 = insertProductHTTPTestRestaurant(t, db, fixture.tenantA, runID+"-a2")
 	fixture.restaurantB1 = insertProductHTTPTestRestaurant(t, db, fixture.tenantB, runID+"-b1")
 	fixture.restaurantB2 = insertProductHTTPTestRestaurant(t, db, fixture.tenantB, runID+"-b2")
+	fixture.productA1 = insertProductHTTPTestProduct(t, db, fixture.tenantA, fixture.restaurantA1, runID+"-a1")
 	fixture.productA2 = insertProductHTTPTestProduct(t, db, fixture.tenantA, fixture.restaurantA2, runID+"-a2")
 	fixture.productB1 = insertProductHTTPTestProduct(t, db, fixture.tenantB, fixture.restaurantB1, runID+"-b1")
 	return fixture

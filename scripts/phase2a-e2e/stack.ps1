@@ -44,7 +44,7 @@ try {
             Invoke-Compose @('ps')
         }
         'Seed' {
-            & $seedFile
+            & $seedFile -ProjectName $project
             if ($LASTEXITCODE -ne 0) { throw 'Disposable fixture seed failed.' }
         }
         'Test' {

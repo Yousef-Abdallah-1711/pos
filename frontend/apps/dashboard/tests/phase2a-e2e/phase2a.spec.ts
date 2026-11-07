@@ -150,6 +150,51 @@ test('storefront order endpoint accepts a scoped public order', async ({ page })
   expect((await orderResponse.json()).data.order_number).toBeTruthy()
 })
 
+test('storefront menu cart and checkout complete an order in the browser', async ({ page }) => {
+  test.setTimeout(120_000)
+  let legacyThemeLookupCount = 0
+  page.on('request', (request) => {
+    if (new URL(request.url()).pathname.startsWith('/api/v1/public/themes/')) legacyThemeLookupCount += 1
+  })
+  const storefrontUrl = process.env.WS05_STOREFRONT_URL || 'http://phase2a-restaurant-a.localhost:3003'
+  const menuResponse = await page.request.get(`${api}/public/restaurants/phase2a-restaurant-a/menu`)
+  expect(menuResponse.ok()).toBeTruthy()
+  const menu = await menuResponse.json()
+  const fixtureProduct = menu.products.find((item: { name_en: string }) => item.name_en === 'WS05 E2E Burger A')
+  expect(fixtureProduct).toBeTruthy()
+
+  await page.goto(`${storefrontUrl}/en/menu`, { waitUntil: 'domcontentloaded', timeout: 90_000 })
+  const productTitle = page.getByRole('heading', { name: 'WS05 E2E Burger A' })
+  await expect(productTitle).toBeVisible({ timeout: 30_000 })
+  const productCard = productTitle.locator('xpath=../..')
+  await productCard.getByRole('button', { name: 'Add', exact: true }).click()
+
+  await page.goto(`${storefrontUrl}/en/cart`, { waitUntil: 'domcontentloaded' })
+  await expect(page.getByRole('heading', { name: 'WS05 E2E Burger A' })).toBeVisible()
+  await page.getByRole('link', { name: /proceed to checkout/i }).first().click()
+  await expect(page).toHaveURL(/\/en\/checkout$/, { timeout: 30_000 })
+  await page.locator('input[type="text"]').first().fill('WS05 Browser Checkout')
+  await page.locator('input[type="tel"]').fill('5550100399')
+  await page.locator('textarea').first().fill('42 Test Avenue')
+  await page.getByRole('button', { name: /place order/i }).click()
+
+  const orderNumber = page.locator('.checkout-success-order')
+  await expect(orderNumber).toBeVisible({ timeout: 30_000 })
+  const orderNumberText = (await orderNumber.textContent())?.trim()
+  expect(orderNumberText).toBeTruthy()
+  const lookup = await page.request.get(`${api}/public/orders/number/${orderNumberText}/lookup`, {
+    headers: {
+      'X-Tenant-ID': String(fixtureProduct.tenant_id),
+      'X-Restaurant-ID': String(fixtureProduct.restaurant_id),
+      'X-Customer-Phone': '5550100399',
+    },
+  })
+  expect(lookup.ok()).toBeTruthy()
+  const order = await lookup.json()
+  expect(order.data?.customer_name || order.data?.customerName).toBe('WS05 Browser Checkout')
+  expect(legacyThemeLookupCount).toBe(0)
+})
+
 test('super-admin login workflow is available in the isolated stack', async ({ page }) => {
   test.setTimeout(120_000)
   page.on('response', (response) => {

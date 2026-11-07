@@ -1,6 +1,10 @@
+param(
+    [string]$ProjectName = 'pos-p2a-ws05-e2e-20261103'
+)
+
 $ErrorActionPreference = 'Stop'
 
-$project = 'pos-p2a-ws05-e2e-20261103'
+$project = $ProjectName
 $api = 'http://localhost:18081/api/v1'
 $database = 'pos_phase2a_e2e'
 $container = "$project-postgres-1"

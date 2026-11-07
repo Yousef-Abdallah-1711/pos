@@ -3,6 +3,7 @@ import axios from 'axios'
 import { getConfig } from './config'
 import { debugError, debugLog, debugWarn } from '@/lib/debug'
 import { recordPerformanceMetric } from '@/lib/performance'
+import { buildDedupIdentityScope, buildScopedGetRequestDedupKey } from './apiRequestDedup'
 
 const API_URL = getConfig().apiUrl
 const DEFAULT_API_TIMEOUT_MS = 6000
@@ -46,20 +47,34 @@ export const api = axios.create({
   },
 })
 
-const buildDedupKey = (config: any) => {
-  const method = String(config?.method || 'get').toLowerCase()
-  if (method !== 'get') {
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return Boolean(value) && typeof value === 'object' && !Array.isArray(value)
+}
+
+function readDedupIdentityScope(): string | null {
+  if (typeof window === 'undefined') return null
+
+  try {
+    const authStorage = localStorage.getItem('auth-storage')
+    const legacyUser = localStorage.getItem('user')
+    let user: unknown = null
+    if (authStorage) {
+      const parsed: unknown = JSON.parse(authStorage)
+      if (!isRecord(parsed)) return null
+      const state = isRecord(parsed.state) ? parsed.state : parsed
+      user = state.user
+    }
+    if (!user && legacyUser) user = JSON.parse(legacyUser) as unknown
+    return buildDedupIdentityScope(user)
+  } catch (error) {
+    debugError('[API] Failed to read identity for request de-duplication:', error)
     return null
   }
-  const url = String(config?.url || '')
-  const params = config?.params ? JSON.stringify(config.params) : ''
-  const data = config?.data ? (typeof config.data === 'string' ? config.data : JSON.stringify(config.data)) : ''
-  return `${method}:${url}:${params}:${data}`
 }
 
 const originalRequest = api.request.bind(api)
 api.request = ((config: any) => {
-  const key = buildDedupKey(config)
+  const key = buildScopedGetRequestDedupKey(config, readDedupIdentityScope())
   if (!key) {
     return originalRequest(config)
   }
