@@ -46,6 +46,65 @@ func TestInventoryAdjustmentPostgresRollsBackWhenMovementInsertFails(t *testing.
 	assertInventoryRollbackState(t, db, productID, tenantID, restaurantID, marker)
 }
 
+func TestInventoryAdjustmentHTTPRejectsForeignProductsWithoutSideEffects(t *testing.T) {
+	db := openProductHTTPTestDB(t)
+	fixture := seedProductHTTPFixture(t, db)
+	for _, productID := range []int{fixture.productA2, fixture.productB1} {
+		if _, err := db.Exec(`UPDATE products SET track_inventory = TRUE, quantity_in_stock = 10 WHERE id = $1`, productID); err != nil {
+			t.Fatalf("prepare foreign inventory product %d: %v", productID, err)
+		}
+	}
+	_, tokens, token := newProductHTTPIsolationAuth(t, db, fixture)
+	inventoryHandler := NewInventoryAdjustmentHandler(db)
+	for name, target := range map[string]struct {
+		productID, tenantID, restaurantID int
+	}{
+		"sibling restaurant": {fixture.productA2, fixture.tenantA, fixture.restaurantA2},
+		"foreign tenant":     {fixture.productB1, fixture.tenantB, fixture.restaurantB1},
+	} {
+		t.Run(name, func(t *testing.T) {
+			marker := fmt.Sprintf("foreign-inventory-%d", time.Now().UnixNano())
+			body, err := json.Marshal(inventoryAdjustmentRequest{
+				ProductID: int64(target.productID), QuantityChange: 4, Reason: "adjustment", Notes: marker,
+			})
+			if err != nil {
+				t.Fatalf("encode inventory adjustment: %v", err)
+			}
+			request := httptest.NewRequest(http.MethodPost, "/api/v1/inventory/adjust", bytes.NewReader(body))
+			request.Header.Set("Authorization", "Bearer "+token)
+			request.Header.Set("X-Tenant-ID", strconv.Itoa(target.tenantID))
+			request.Header.Set("X-Restaurant-ID", strconv.Itoa(target.restaurantID))
+			secured := middleware.AuthMiddleware(tokens)(middleware.NewTenantContextMiddleware(
+				middleware.SQLRestaurantVerifier{DB: db},
+			)(http.HandlerFunc(inventoryHandler.Adjust)))
+			response := httptest.NewRecorder()
+			secured.ServeHTTP(response, request)
+			if response.Code != http.StatusNotFound {
+				t.Fatalf("foreign product adjustment status = %d, want %d: %s", response.Code, http.StatusNotFound, response.Body.String())
+			}
+			assertHTTPProductStockUnchanged(t, db, target.productID, target.tenantID, target.restaurantID, 10)
+			var movementCount int
+			if err := db.QueryRow(`SELECT COUNT(*) FROM inventory_movements WHERE product_id = $1 AND tenant_id = $2 AND restaurant_id = $3 AND notes = $4`, target.productID, target.tenantID, target.restaurantID, marker).Scan(&movementCount); err != nil {
+				t.Fatalf("count foreign inventory movements: %v", err)
+			}
+			if movementCount != 0 {
+				t.Fatalf("foreign adjustment created %d inventory movements, want none", movementCount)
+			}
+		})
+	}
+}
+
+func assertHTTPProductStockUnchanged(t *testing.T, db *sql.DB, productID, tenantID, restaurantID int, want int64) {
+	t.Helper()
+	var stock int64
+	if err := db.QueryRow(`SELECT quantity_in_stock FROM products WHERE id = $1 AND tenant_id = $2 AND restaurant_id = $3`, productID, tenantID, restaurantID).Scan(&stock); err != nil {
+		t.Fatalf("read stock after denied adjustment: %v", err)
+	}
+	if stock != want {
+		t.Fatalf("denied adjustment changed stock to %d, want %d", stock, want)
+	}
+}
+
 func openInventoryRollbackDB(t *testing.T) *sql.DB {
 	t.Helper()
 	if os.Getenv(testdb.EnvVar) == "" {
