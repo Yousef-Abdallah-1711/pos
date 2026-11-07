@@ -160,3 +160,9 @@ At candidate `3bec0c85b21a8de2250dfaf99afab4ebd792ec97`, PR #9 remains open and 
 - Added authenticated HTTP coverage for the owned-order payment-status route. A valid `failed` update persists; an invalid status returns HTTP 400 and leaves the persisted value unchanged.
 - Against a fresh tmpfs PostgreSQL 15 database with migrations 1–165 and migration 999, the focused payment/concurrency/history/stats/export tests passed. `go build ./...`, `go vet ./...`, and full `go test -json -p 1 -count=1 ./...` passed (**978 passed, 2 skipped, 0 failed**). The disposable database container was removed.
 - Order item/bulk behavior and the remaining C006 route×role/persona matrix remain open. C006, C012, and Phase 2A/2C remain **PARTIAL**; independent review and main-based Docker delivery remain open; production remains **NO-GO**.
+
+## Concurrent foreign Admin Orders mutation follow-up — 2026-11-07
+
+- Added `TestAdminOrdersHTTPConcurrentForeignMutationsAreDeniedWithoutSideEffects`. It concurrently submits status, payment-status, and cancellation mutations against both a sibling-restaurant order and a foreign-tenant order. All six requests return 404, and both orders retain their original status/payment state with no history rows.
+- Fresh disposable PostgreSQL 15 verification applied migrations 1–165 and migration 999. Focused order scope/concurrency/payment/history/stats/export tests passed; `go build ./...`, `go vet ./...`, and `go test -json -p 1 -count=1 ./...` passed (**979 passed, 2 skipped, 0 failed**). The disposable database container was removed.
+- This closes concurrent HTTP denial for these order mutation routes and the two tested foreign scopes. Order item/bulk routes, customer track-page UI, cross-scope public-token journeys and the remaining C006 route×role matrix remain open. C006, C012, and Phase 2A/2C remain **PARTIAL**; production remains **NO-GO**.

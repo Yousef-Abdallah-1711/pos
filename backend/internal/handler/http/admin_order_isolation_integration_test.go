@@ -62,6 +62,72 @@ func TestAdminOrdersHTTPRejectsForgedScopeWithoutSideEffects(t *testing.T) {
 	assertForeignAdminOrderRequestsHaveNoSideEffects(t, db, tokens, token, handler, foreignOrderIDs)
 }
 
+func TestAdminOrdersHTTPConcurrentForeignMutationsAreDeniedWithoutSideEffects(t *testing.T) {
+	if os.Getenv(testdb.EnvVar) == "" {
+		t.Skipf("set %s to an isolated disposable PostgreSQL database", testdb.EnvVar)
+	}
+	db := openProductHTTPTestDB(t)
+	cleanupAdminOrderBenchmarkData(t, db)
+	t.Cleanup(func() { cleanupAdminOrderBenchmarkData(t, db) })
+	tenantID, restaurantID, foreignOrderIDs := seedAdminOrderBenchmarkData(t, db, 1)
+	tokens, err := jwt.NewTokenService("admin-order-foreign-race-test-secret", "5m")
+	if err != nil {
+		t.Fatalf("create token service: %v", err)
+	}
+	restaurantClaim := int(restaurantID)
+	token, err := tokens.GenerateToken(1, int(tenantID), &restaurantClaim, "owner@example.test", "owner")
+	if err != nil {
+		t.Fatalf("generate authenticated token: %v", err)
+	}
+	handler := NewAdminOrderHandler(usecase.NewOrderUseCase(repository.NewOrderRepository(db), nil), nil, nil)
+	attempts := []struct {
+		method string
+		body   string
+	}{
+		{method: http.MethodPut, body: `{"status":"cancelled"}`},
+		{method: http.MethodPut, body: `{"payment_status":"paid"}`},
+		{method: http.MethodDelete, body: `{"reason":"forged concurrent scope"}`},
+	}
+	type result struct {
+		orderID int64
+		status  int
+	}
+	results := make(chan result, len(foreignOrderIDs)*len(attempts))
+	var requests sync.WaitGroup
+	for _, orderID := range foreignOrderIDs {
+		for _, attempt := range attempts {
+			orderID, attempt := orderID, attempt
+			requests.Add(1)
+			go func() {
+				defer requests.Done()
+				response := invokeAdminOrderIsolationHTTP(db, tokens, token, handler, attempt.method, orderID,
+					int(tenantID)+1, int(restaurantID)+1, attempt.body)
+				results <- result{orderID: orderID, status: response.Code}
+			}()
+		}
+	}
+	requests.Wait()
+	close(results)
+	for response := range results {
+		if response.status != http.StatusNotFound {
+			t.Errorf("concurrent foreign order %d mutation status = %d, want %d", response.orderID, response.status, http.StatusNotFound)
+		}
+	}
+	for _, orderID := range foreignOrderIDs {
+		var status, paymentStatus string
+		var historyCount int
+		if err := db.QueryRow(`SELECT status, payment_status FROM orders WHERE id = $1`, orderID).Scan(&status, &paymentStatus); err != nil {
+			t.Fatalf("read foreign order %d after concurrent denials: %v", orderID, err)
+		}
+		if err := db.QueryRow(`SELECT COUNT(*) FROM order_status_history WHERE order_id = $1`, orderID).Scan(&historyCount); err != nil {
+			t.Fatalf("count foreign order %d history after concurrent denials: %v", orderID, err)
+		}
+		if status != "pending" || paymentStatus != "pending" || historyCount != 0 {
+			t.Errorf("concurrent foreign mutations changed order %d: status=%q payment=%q history=%d", orderID, status, paymentStatus, historyCount)
+		}
+	}
+}
+
 func TestAdminOrdersHTTPConcurrentStatusTransitionsAreAtomic(t *testing.T) {
 	if os.Getenv(testdb.EnvVar) == "" {
 		t.Skipf("set %s to an isolated disposable PostgreSQL database", testdb.EnvVar)
