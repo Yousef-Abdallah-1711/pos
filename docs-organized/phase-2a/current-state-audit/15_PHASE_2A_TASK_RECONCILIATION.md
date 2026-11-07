@@ -9,7 +9,7 @@ The original Phase 2A plan contains 32 C-items (plus session 1 tasks), while thi
 | C005 public order authorization | Token/hash design and migration 161 | Selected unit + disposable smoke | Browser and real public order create/POS path | PARTIAL |
 | C006 resource isolation | Some theme/resource checks | Selected smoke | Complete cross-tenant and cross-restaurant tests | PARTIAL |
 | C007 unsafe auth defaults | Startup guards, rate limiting, metrics/internal token controls | Selected Go/security tests | Password reset, account lockout and distributed rate limiter review | PARTIAL |
-| C008 webhook security | HMAC/state checks | Eight unit tests in prior record | Transactional success, concurrency, callback order/retry integration | PARTIAL |
+| C008 webhook security | HMAC/state checks and transactional callback processing | Isolated worker test covers two concurrent claims, exactly-once delivery per fixture, persisted success and attempts | Backoff/recovery, provider/local-commit reconciliation, and broader provider acceptance | PARTIAL |
 | C009 impersonation integration | Middleware/usecase components | Middleware tests only | Full login→impersonate→expiry/revoke/audit flow | NOT STARTED |
 | C010 restricted DB role | SQL setup + isolated compose | Disposable role/security smoke | Dev and production rollout/rehearsal | PARTIAL |
 | C011 tenancy classification | 91-table generated inventory plus explicit review of `webhook_retry_queue` | Schema/FK review and worker query review | Per-family RLS policy selection remains in C012 | COMPLETE (classification only) |

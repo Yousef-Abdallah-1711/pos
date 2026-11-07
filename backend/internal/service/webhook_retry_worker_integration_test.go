@@ -1,0 +1,154 @@
+package service
+
+import (
+	"context"
+	"database/sql"
+	"encoding/json"
+	"fmt"
+	"net/http"
+	"net/http/httptest"
+	"os"
+	"sync"
+	"testing"
+	"time"
+
+	_ "github.com/lib/pq"
+	"pos-saas/tests/testdb"
+)
+
+func TestWebhookRetryWorkerPostgresClaimsAndCompletesEachCallbackOnce(t *testing.T) {
+	if os.Getenv(testdb.EnvVar) == "" {
+		t.Skipf("set %s to an isolated disposable PostgreSQL database", testdb.EnvVar)
+	}
+	db, err := sql.Open("postgres", testdb.URL(t))
+	if err != nil {
+		t.Fatalf("open disposable PostgreSQL: %v", err)
+	}
+	t.Cleanup(func() {
+		if err := db.Close(); err != nil {
+			t.Errorf("close disposable PostgreSQL: %v", err)
+		}
+	})
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+	if err := db.PingContext(ctx); err != nil {
+		t.Fatalf("connect to disposable PostgreSQL: %v", err)
+	}
+
+	runID := fmt.Sprintf("retry-worker-%d", time.Now().UnixNano())
+	var mu sync.Mutex
+	delivered := make(map[string]int)
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost || r.URL.Path != "/paymob" {
+			t.Errorf("retry request = %s %s, want POST /paymob", r.Method, r.URL.Path)
+		}
+		if r.Header.Get("X-Webhook-Retry-Attempt") != "true" {
+			t.Errorf("retry marker header = %q, want true", r.Header.Get("X-Webhook-Retry-Attempt"))
+		}
+		var payload struct {
+			RunID string `json:"run_id"`
+			Item  string `json:"item"`
+		}
+		if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
+			t.Errorf("decode retry payload: %v", err)
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+		if payload.RunID != runID {
+			t.Errorf("retry run id = %q, want %q", payload.RunID, runID)
+		}
+		mu.Lock()
+		delivered[payload.Item]++
+		mu.Unlock()
+		w.WriteHeader(http.StatusNoContent)
+	}))
+	defer server.Close()
+
+	queue := NewWebhookRetryQueue(db)
+	ids := make([]int64, 0, 2)
+	for _, item := range []string{"first", "second"} {
+		payload, _ := json.Marshal(map[string]string{"run_id": runID, "item": item})
+		id, err := queue.Enqueue(ctx, server.URL+"/paymob", payload, "initial provider timeout")
+		if err != nil {
+			t.Fatalf("enqueue %s callback: %v", item, err)
+		}
+		ids = append(ids, id)
+		fixtureID := id
+		t.Cleanup(func() {
+			if _, err := db.Exec(`DELETE FROM webhook_retry_queue WHERE id = $1`, fixtureID); err != nil {
+				t.Errorf("delete retry fixture %d: %v", fixtureID, err)
+			}
+		})
+		if _, err := db.ExecContext(ctx, `UPDATE webhook_retry_queue SET next_retry_at = NOW() WHERE id = $1`, id); err != nil {
+			t.Fatalf("make callback %d due: %v", id, err)
+		}
+	}
+
+	worker := NewWebhookRetryWorker(db, server.URL, NewPaymentWebhookMonitor(10), nil)
+	worker.httpClient = server.Client()
+	type claimResult struct {
+		record *retryQueueRecord
+		err    error
+	}
+	start := make(chan struct{})
+	claims := make(chan claimResult, 2)
+	var claimers sync.WaitGroup
+	for range 2 {
+		claimers.Add(1)
+		go func() {
+			defer claimers.Done()
+			<-start
+			record, err := worker.claimOne(ctx)
+			claims <- claimResult{record: record, err: err}
+		}()
+	}
+	close(start)
+	claimers.Wait()
+	close(claims)
+	records := make([]*retryQueueRecord, 0, 2)
+	claimed := make(map[int64]bool)
+	for result := range claims {
+		if result.err != nil {
+			t.Fatalf("claim callback: %v", result.err)
+		}
+		if result.record == nil || claimed[result.record.ID] {
+			t.Fatalf("workers claimed a nil or duplicate callback: %#v", result.record)
+		}
+		claimed[result.record.ID] = true
+		records = append(records, result.record)
+	}
+	if len(records) != 2 || !claimed[ids[0]] || !claimed[ids[1]] {
+		t.Fatalf("claimed IDs = %v, want distinct fixture IDs %v", claimed, ids)
+	}
+
+	var processors sync.WaitGroup
+	for _, record := range records {
+		record := record
+		processors.Add(1)
+		go func() {
+			defer processors.Done()
+			worker.processRecord(ctx, record)
+		}()
+	}
+	processors.Wait()
+
+	mu.Lock()
+	if len(delivered) != 2 || delivered["first"] != 1 || delivered["second"] != 1 {
+		t.Fatalf("callback deliveries = %v, want each fixture exactly once", delivered)
+	}
+	mu.Unlock()
+	for _, id := range ids {
+		var status string
+		var attempts int
+		var lastError sql.NullString
+		if err := db.QueryRowContext(ctx, `SELECT status, attempts, last_error FROM webhook_retry_queue WHERE id = $1`, id).Scan(&status, &attempts, &lastError); err != nil {
+			t.Fatalf("read completed retry row %d: %v", id, err)
+		}
+		if status != webhookRetryStatusSuccess || attempts != 1 || lastError.Valid {
+			t.Fatalf("retry row %d = status %q attempts %d error %v, want success/1/no error", id, status, attempts, lastError)
+		}
+	}
+	if _, err := worker.claimOne(ctx); err != sql.ErrNoRows {
+		t.Fatalf("claim after both callbacks completed = %v, want sql.ErrNoRows", err)
+	}
+}
