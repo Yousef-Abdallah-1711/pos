@@ -9,6 +9,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"sync"
 	"testing"
 
 	"pos-saas/internal/middleware"
@@ -59,6 +60,76 @@ func TestAdminOrdersHTTPRejectsForgedScopeWithoutSideEffects(t *testing.T) {
 	}
 
 	assertForeignAdminOrderRequestsHaveNoSideEffects(t, db, tokens, token, handler, foreignOrderIDs)
+}
+
+func TestAdminOrdersHTTPConcurrentStatusTransitionsAreAtomic(t *testing.T) {
+	if os.Getenv(testdb.EnvVar) == "" {
+		t.Skipf("set %s to an isolated disposable PostgreSQL database", testdb.EnvVar)
+	}
+	db := openProductHTTPTestDB(t)
+	cleanupAdminOrderBenchmarkData(t, db)
+	t.Cleanup(func() { cleanupAdminOrderBenchmarkData(t, db) })
+	tenantID, restaurantID, _ := seedAdminOrderBenchmarkData(t, db, 1)
+	var orderID int64
+	if err := db.QueryRow(`SELECT id FROM orders WHERE order_number = 'admin-order-benchmark-000'`).Scan(&orderID); err != nil {
+		t.Fatalf("get owned order fixture: %v", err)
+	}
+	var historyBefore int
+	if err := db.QueryRow(`SELECT COUNT(*) FROM order_status_history WHERE order_id = $1`, orderID).Scan(&historyBefore); err != nil {
+		t.Fatalf("count initial order history: %v", err)
+	}
+	tokens, err := jwt.NewTokenService("admin-order-concurrency-test-secret", "5m")
+	if err != nil {
+		t.Fatalf("create token service: %v", err)
+	}
+	restaurantClaim := int(restaurantID)
+	token, err := tokens.GenerateToken(1, int(tenantID), &restaurantClaim, "owner@example.test", "owner")
+	if err != nil {
+		t.Fatalf("generate authenticated token: %v", err)
+	}
+	handler := NewAdminOrderHandler(usecase.NewOrderUseCase(repository.NewOrderRepository(db), nil), nil, nil)
+	statuses := []string{"confirmed", "cancelled"}
+	responses := make(chan int, len(statuses))
+	var requests sync.WaitGroup
+	for _, status := range statuses {
+		status := status
+		requests.Add(1)
+		go func() {
+			defer requests.Done()
+			response := invokeAdminOrderIsolationHTTP(db, tokens, token, handler, http.MethodPut, orderID, int(tenantID), int(restaurantID), fmt.Sprintf(`{"status":%q}`, status))
+			responses <- response.Code
+		}()
+	}
+	requests.Wait()
+	close(responses)
+	var successCount, conflictCount int
+	for status := range responses {
+		switch status {
+		case http.StatusOK:
+			successCount++
+		case http.StatusBadRequest:
+			conflictCount++
+		default:
+			t.Fatalf("concurrent status response = %d, want one 200 and one 400", status)
+		}
+	}
+	if successCount != 1 || conflictCount != 1 {
+		t.Fatalf("concurrent status outcomes: success=%d conflict=%d, want 1 each", successCount, conflictCount)
+	}
+	var finalStatus string
+	if err := db.QueryRow(`SELECT status FROM orders WHERE id = $1`, orderID).Scan(&finalStatus); err != nil {
+		t.Fatalf("read final order status: %v", err)
+	}
+	if finalStatus != "confirmed" && finalStatus != "cancelled" {
+		t.Fatalf("final order status = %q, want one committed transition", finalStatus)
+	}
+	var historyAfter int
+	if err := db.QueryRow(`SELECT COUNT(*) FROM order_status_history WHERE order_id = $1`, orderID).Scan(&historyAfter); err != nil {
+		t.Fatalf("count final order history: %v", err)
+	}
+	if historyAfter != historyBefore+1 {
+		t.Fatalf("order history rows = %d, want exactly one committed transition from %d", historyAfter, historyBefore)
+	}
 }
 
 func assertForeignAdminOrderRequestsHaveNoSideEffects(t *testing.T, db *sql.DB, tokens *jwt.TokenService, token string, handler *AdminOrderHandler, orderIDs []int64) {
