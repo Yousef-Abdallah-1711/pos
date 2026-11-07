@@ -45,3 +45,14 @@ The subscription isolation test initially depended on untracked helper tests fro
 ## Decision
 
 **MAIN INTEGRATION PARTIAL.** PR #9 is the only open integration PR, both hosted checks pass, and PRs #1, #3, and #7 are closed as superseded. Independent approval remains an external blocker because no independent collaborator is available. C006, C009, C012, broader frontend/browser acceptance, and production Docker delivery remain incomplete; C008 webhook integration verification is recorded as partial. `origin/main` remains at `d84120559db36e8e9e7fdb73872a30cbc9d4e6e7`. Do not claim full closure or production readiness.
+
+## Current candidate refresh — 2026-11-07
+
+- Fetched `origin/main`: `d84120559db36e8e9e7fdb73872a30cbc9d4e6e7`.
+- PR #9 head: `58f967039079c8eba0cfa322735725bee1d267cc`; state OPEN. Both hosted checks pass on this exact head. There is no review request, review, or approval.
+- New candidate commits: `2e70c11 test(products): cover low-stock tenant isolation` (also removes product-handler debug prints) and `58f9670 test(inventory): reject foreign stock adjustments`.
+- On the isolated test stack, current-source `go build ./...`, `go vet ./...`, and `go test -p 1 -count=1 ./...` pass. HTTP handler package: 262 pass, one opt-in benchmark skip, no failures.
+- The candidate Sidebar component and test are byte-identical to the preserved Phase 2C source commit `fc7f186`; no duplicate cherry-pick was needed. The source worktree and its generated captures remain untouched.
+- Playwright passed 11/11 on this head after recreating the API and frontend services in the isolated disposable project. The first cold-start attempt failed two slow auth journeys while the apps compiled; the focused retry and complete warm rerun passed. Production builds remain from the previous source because frontend source did not change. The isolated candidate E2E stack is disposable and separate from `pos-dev`.
+- After regression work, only Compose project `pos-unified-phase2a2c-e2e-20261107` was torn down with its project volumes and network. Post-teardown inventory confirmed no containers or volumes remain for that project and `pos-dev` is still running.
+- Approval remains the owner-side action: invite an eligible independent reviewer with repository access and request review on PR #9. Do not merge or build the final main-based delivery until approval and all required checks pass.

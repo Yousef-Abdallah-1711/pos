@@ -41,3 +41,11 @@ A disposable Go 1.24.13 run migrated an isolated tmpfs PostgreSQL database succe
 ## Known status and safety posture
 
 Phase 2A PARTIAL; Phase 2C PARTIAL; Unified Git Integration PARTIAL; Production Release NO-GO. Super Admin support handoff must remain disabled/fail-closed. Payments (WS03) and broad CI expansion (WS06) remain deferred. Do not submit production orders/payments or run tests against development/customer databases. Do not close PRs before confirming their intended changes are merged or preserved.
+
+## Continuation update — 2026-11-07
+
+Start from PR #9 head `58f967039079c8eba0cfa322735725bee1d267cc` in `H:\pos-unified-phase2a-2c`. Fetched `origin/main` is still `d84120559db36e8e9e7fdb73872a30cbc9d4e6e7`. Both hosted checks pass, but no independent reviewer is requested or approved. The required owner action is to invite an eligible reviewer and request review; do not self-approve or bypass this gate.
+
+Fresh at this candidate: isolated `go build ./...`, `go vet ./...`, and full `go test -p 1 -count=1 ./...` pass; handler package reports 262 passes, one opt-in benchmark skip, and zero failures. New route coverage tests product low-stock alert scope and foreign inventory adjustment side effects. Playwright was rerun on this exact candidate and passed 11/11 on the isolated development stack. Four frontend production builds are from the preceding source because no frontend files changed in the last candidate commits.
+
+Continue C006 with order-item/public-token lifecycle, inventory movement routes, user/role CRUD, product/category role separation and remaining resource families. Continue C012 by inventorying direct DB access and converting only an explicitly bounded module to tenant transactions; do not enable further RLS policies without migrated access paths, restricted-role tests, and disposable forward/rollback rehearsal. Keep C012 partial until its gate passes. The prior disposable E2E project and its volumes/network have been removed after testing. Preserve `pos-dev`, dirty worktrees, the performance worktree, and `frontend/apps/dashboard/test-results/`.

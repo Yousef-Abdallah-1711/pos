@@ -39,3 +39,9 @@ Status: **PARTIAL — safe WS02 subset isolated; no integration PR merge or prod
 5. Obtain required human PR approval. PR #1/#3/#7/#9 have no approval decision. Never bypass branch protection.
 
 See `PHASE_2A_2C_UNIFIED_VERIFICATION_REPORT.md` and `PHASE_2A_2C_MAIN_INTEGRATION_REPORT.md` for the exact gate evidence. Continue with `PHASE_2A_2C_NEXT_SESSION_MASTER_PROMPT.md`.
+
+## Continuation update — 2026-11-07
+
+The current PR #9 head is `58f967039079c8eba0cfa322735725bee1d267cc`, based on `origin/main` `d84120559db36e8e9e7fdb73872a30cbc9d4e6e7`. Both hosted checks pass; the PR is open without an independent review request or approval. Current-source isolated backend build, vet and full Go tests pass; the HTTP handler package reports 262 passes and one opt-in benchmark skip. New tests cover forged-scope low-stock alerts and cross-scope inventory adjustments with unchanged-stock/no-movement assertions. Product-handler debug output was removed.
+
+Phase 2A and Phase 2C remain **PARTIAL**. C006 and C012 remain **PARTIAL**. Playwright was rerun at this HEAD and passed 11/11 on the isolated development stack; the four-app production builds predate this SHA. Only the disposable `pos-unified-phase2a2c-e2e-20261107` project, its volumes and network were removed after testing. Post-teardown inventory confirmed `pos-dev` is still running and unrelated projects remain preserved. The owner must invite an eligible independent reviewer and request review. No persistent DB migration, merge, or main-based Docker delivery occurred.
