@@ -21,8 +21,6 @@ func NewProductRepository(db *sql.DB) *ProductRepository {
 
 // CreateProduct inserts a new product into database
 func (r *ProductRepository) CreateProduct(product *domain.Product) (*domain.Product, error) {
-	fmt.Println("DEBUG: Repo.CreateProduct started")
-
 	query := `
 		INSERT INTO products (
 			tenant_id, restaurant_id, category_id, sku, barcode,
@@ -89,7 +87,6 @@ func (r *ProductRepository) CreateProduct(product *domain.Product) (*domain.Prod
 		descAr = sql.NullString{String: product.DescriptionAr, Valid: true}
 	}
 
-	fmt.Printf("DEBUG: Executing INSERT query for product: %s\n, user id %d", product.NameEn, product.CreatedBy)
 	err := r.db.QueryRow(query,
 		product.TenantID,
 		product.RestaurantID,
@@ -131,7 +128,6 @@ func (r *ProductRepository) CreateProduct(product *domain.Product) (*domain.Prod
 	).Scan(&product.ID, &product.CreatedAt, &product.UpdatedAt)
 
 	if err != nil {
-		fmt.Printf("ERROR: INSERT failed: %v\n", err)
 		if err == sql.ErrNoRows {
 			return nil, errors.New("restaurant or category not found in the requested scope")
 		}
@@ -141,7 +137,6 @@ func (r *ProductRepository) CreateProduct(product *domain.Product) (*domain.Prod
 		return nil, fmt.Errorf("failed to create product: %w", err)
 	}
 
-	fmt.Printf("DEBUG: Insert successful. ID: %d. Returning product.\n", product.ID)
 	return product, nil
 }
 
@@ -336,7 +331,6 @@ func (r *ProductRepository) ListProducts(tenantID, restaurantID int, filters *Pr
 
 // UpdateProduct updates an existing product
 func (r *ProductRepository) UpdateProduct(product *domain.Product) (*domain.Product, error) {
-	fmt.Printf("DEBUG: Repo.UpdateProduct started for ID: %d\n", product.ID)
 	var categoryID sql.NullInt64
 	if product.CategoryID > 0 {
 		categoryID = sql.NullInt64{Int64: int64(product.CategoryID), Valid: true}
@@ -375,7 +369,6 @@ func (r *ProductRepository) UpdateProduct(product *domain.Product) (*domain.Prod
 		RETURNING updated_at
 	`
 
-	fmt.Printf("DEBUG: Executing UPDATE query: %s\n", query)
 	err := r.db.QueryRow(
 		query,
 		categoryID,
@@ -405,7 +398,6 @@ func (r *ProductRepository) UpdateProduct(product *domain.Product) (*domain.Prod
 		return nil, errors.New("product not found")
 	}
 	if err != nil {
-		fmt.Printf("ERROR: Update failed: %v\n", err)
 		return nil, fmt.Errorf("failed to update product: %w", err)
 	}
 
@@ -414,7 +406,6 @@ func (r *ProductRepository) UpdateProduct(product *domain.Product) (*domain.Prod
 
 // DeleteProduct soft-deletes a product
 func (r *ProductRepository) DeleteProduct(tenantID, restaurantID, productID int, deletedBy int) error {
-	fmt.Printf("DEBUG: Repo.DeleteProduct started for ID: %d\n", productID)
 	query := `
 		UPDATE products
 		SET status = 'deleted', updated_by = $1, updated_at = CURRENT_TIMESTAMP
@@ -423,7 +414,6 @@ func (r *ProductRepository) DeleteProduct(tenantID, restaurantID, productID int,
 
 	result, err := r.db.Exec(query, deletedBy, productID, tenantID, restaurantID)
 	if err != nil {
-		fmt.Printf("ERROR: Delete failed: %v\n", err)
 		return fmt.Errorf("failed to delete product: %w", err)
 	}
 

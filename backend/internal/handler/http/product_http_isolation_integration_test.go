@@ -93,6 +93,32 @@ func TestProductHTTPCreateUsesJWTScopeDespiteForgedHeaders(t *testing.T) {
 	}
 }
 
+func TestProductHTTPCreateRejectsForeignCategoryWithoutSideEffects(t *testing.T) {
+	if os.Getenv(testdb.EnvVar) == "" {
+		t.Skipf("set %s to an isolated disposable PostgreSQL database", testdb.EnvVar)
+	}
+	db := openProductHTTPTestDB(t)
+	fixture := seedProductHTTPFixture(t, db)
+	handler, tokens, token := newProductHTTPIsolationAuth(t, db, fixture)
+	var foreignCategoryID int
+	if err := db.QueryRow(`SELECT category_id FROM products WHERE id = $1`, fixture.productB1).Scan(&foreignCategoryID); err != nil {
+		t.Fatalf("read foreign category fixture: %v", err)
+	}
+	sku := fmt.Sprintf("forged-category-%d", time.Now().UnixNano())
+	body, contentType := multipartProductBody(t, fmt.Sprintf(`{"category_id":%d,"sku":%q,"name_en":"forged category create","price":19.5,"is_available":true}`, foreignCategoryID, sku))
+	response := invokeProductIsolationHTTP(db, tokens, token, handler, 0, fixture.tenantA, fixture.restaurantA1, http.MethodPost, body, contentType)
+	if response.Code < http.StatusBadRequest || response.Code >= http.StatusInternalServerError {
+		t.Fatalf("foreign-category product create status = %d, want a 4xx denial: %s", response.Code, response.Body.String())
+	}
+	var count int
+	if err := db.QueryRow(`SELECT COUNT(*) FROM products WHERE tenant_id = $1 AND restaurant_id = $2 AND sku = $3`, fixture.tenantA, fixture.restaurantA1, sku).Scan(&count); err != nil {
+		t.Fatalf("count products after denied create: %v", err)
+	}
+	if count != 0 {
+		t.Fatalf("foreign-category create left %d product rows", count)
+	}
+}
+
 func newProductHTTPIsolationAuth(t *testing.T, db *sql.DB, fixture productHTTPFixture) (*ProductHandler, *jwt.TokenService, string) {
 	t.Helper()
 	tokens, err := jwt.NewTokenService("ws02-http-test-secret-at-least-32-bytes", "5m")

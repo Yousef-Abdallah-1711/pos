@@ -47,6 +47,9 @@ func TestInventoryAdjustmentPostgresRollsBackWhenMovementInsertFails(t *testing.
 }
 
 func TestInventoryAdjustmentHTTPRejectsForeignProductsWithoutSideEffects(t *testing.T) {
+	if os.Getenv(testdb.EnvVar) == "" {
+		t.Skipf("set %s to an isolated disposable PostgreSQL database", testdb.EnvVar)
+	}
 	db := openProductHTTPTestDB(t)
 	fixture := seedProductHTTPFixture(t, db)
 	for _, productID := range []int{fixture.productA2, fixture.productB1} {

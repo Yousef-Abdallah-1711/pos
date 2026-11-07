@@ -99,6 +99,10 @@ func (h *ProductHandler) CreateProduct(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		// Check for common validation errors
 		errMsg := err.Error()
+		if strings.Contains(errMsg, "not found in the requested scope") {
+			respondError(w, http.StatusNotFound, "Restaurant or category not found")
+			return
+		}
 		if strings.Contains(errMsg, "required") ||
 			strings.Contains(errMsg, "must be") ||
 			strings.Contains(errMsg, "invalid") ||
