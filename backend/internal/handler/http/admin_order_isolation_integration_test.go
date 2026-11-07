@@ -146,6 +146,9 @@ func TestAdminOrdersHTTPScopesHistoryStatsAndExport(t *testing.T) {
 	if err := db.QueryRow(`SELECT id FROM orders WHERE order_number = 'admin-order-benchmark-000'`).Scan(&ownOrderID); err != nil {
 		t.Fatalf("get owned order fixture: %v", err)
 	}
+	if _, err := db.Exec(`INSERT INTO order_status_history (order_id, old_status, new_status, change_reason) VALUES ($1, 'pending', 'confirmed', 'authorized history fixture')`, ownOrderID); err != nil {
+		t.Fatalf("seed owned order history: %v", err)
+	}
 	tokens, err := jwt.NewTokenService("admin-order-read-route-test-secret", "5m")
 	if err != nil {
 		t.Fatalf("create token service: %v", err)
@@ -156,6 +159,23 @@ func TestAdminOrdersHTTPScopesHistoryStatsAndExport(t *testing.T) {
 		t.Fatalf("generate authenticated token: %v", err)
 	}
 	handler := NewAdminOrderHandler(usecase.NewOrderUseCase(repository.NewOrderRepository(db), nil), nil, nil)
+	ownedHistory := invokeAdminOrderReadRouteHTTP(db, tokens, token, handler,
+		fmt.Sprintf("/api/v1/admin/orders/%d/history", ownOrderID), int(tenantID)+1, int(restaurantID)+1)
+	if ownedHistory.Code != http.StatusOK {
+		t.Fatalf("owned order history status = %d, want %d", ownedHistory.Code, http.StatusOK)
+	}
+	var ownedHistoryBody struct {
+		History []struct {
+			Status string `json:"status"`
+			Notes  string `json:"notes"`
+		} `json:"history"`
+	}
+	if err := json.NewDecoder(ownedHistory.Body).Decode(&ownedHistoryBody); err != nil {
+		t.Fatalf("decode owned order history: %v", err)
+	}
+	if len(ownedHistoryBody.History) != 1 || ownedHistoryBody.History[0].Status != "confirmed" || ownedHistoryBody.History[0].Notes != "authorized history fixture" {
+		t.Fatalf("owned order history = %+v, want the seeded confirmed transition", ownedHistoryBody.History)
+	}
 	for _, orderID := range foreignOrderIDs {
 		response := invokeAdminOrderReadRouteHTTP(db, tokens, token, handler,
 			fmt.Sprintf("/api/v1/admin/orders/%d/history", orderID), int(tenantID)+1, int(restaurantID)+1)
