@@ -118,7 +118,7 @@ At candidate `3bec0c85b21a8de2250dfaf99afab4ebd792ec97`, PR #9 remains open and 
 
 ## Concurrent Admin Orders HTTP follow-up — 2026-11-07
 
-- Added an authenticated PostgreSQL-backed concurrency regression that submits competing `confirmed` and `cancelled` transitions for one owned order. Exactly one request returns 200; the conflict returns 400; the final order state and its single history row match the winning transition.
+- Added an authenticated PostgreSQL-backed concurrency regression that races the valid `pending` → `confirmed` transition against a repeated `pending` status for one owned order. Exactly one request returns 200 and the other returns 400 in either lock ordering; the final order state is `confirmed` with exactly one new history row.
 - Fixed Admin Orders error mapping so the repository's lock-time `invalid status transition` conflict returns HTTP 400 instead of HTTP 500.
 - Fresh disposable PostgreSQL 15 verification applied migrations 1–165 and `999_theme_migration_legacy.sql`, then passed the focused order scope/concurrency tests, `go build ./...`, `go vet ./...`, and `go test -json -p 1 -count=1 ./...` (**974 passed, 2 skipped, 0 failed**). The tmpfs container was removed; `pos-dev` remained running.
 - This closes the competing owned-order status-transition HTTP case only. Public token lifecycle, order items/bulk, and foreign-scope concurrency remain open. C006, C012, Phase 2A/2C remain **PARTIAL**; production remains **NO-GO**.
@@ -147,3 +147,10 @@ At candidate `3bec0c85b21a8de2250dfaf99afab4ebd792ec97`, PR #9 remains open and 
 - Added `TestWebhookRetryWorkerPostgresPersistsBackoffAfterFailure`: a disposable local endpoint returns 503; the worker records one attempt and the failure reason, returns the row to `pending`, assigns a future retry time, and does not reclaim it before the backoff expires.
 - Both retry-worker integration tests passed against a fresh tmpfs PostgreSQL 15 database after migrations 1–165 and migration 999. Fresh `go build ./...`, `go vet ./...`, and full `go test -json -p 1 -count=1 ./...` passed (**976 passed, 2 skipped, 0 failed**). The disposable container was removed; `pos-dev` remained running.
 - Retry exhaustion after multiple attempts, provider/local-commit reconciliation, and broader Paymob acceptance remain open. C008, C012, and Phase 2A/2C remain **PARTIAL**; production remains **NO-GO**.
+
+## Admin Orders history, stats, and export isolation follow-up — 2026-11-07
+
+- Added authenticated HTTP coverage for the active order history, statistics, and CSV export routes. History requests for sibling-restaurant and foreign-tenant orders return no rows; forged tenant/restaurant headers do not broaden statistics or export, which include only the authenticated restaurant's order.
+- Tightened the concurrent status test so its repeated `pending` request is invalid regardless of whether it reaches the row lock before or after the valid `confirmed` transition. This removes an order-dependent assertion while preserving the check for one committed state change and one history row.
+- Fresh isolated PostgreSQL 15 verification applied migrations 1–165 and `999_theme_migration_legacy.sql`. Focused Admin Orders scope/concurrency/history/stats/export tests passed; `go build ./...`, `go vet ./...`, and full `go test -json -p 1 -count=1 ./...` passed (**977 passed, 2 skipped, 0 failed**). The disposable database container was removed; `pos-dev` was not touched.
+- These checks add evidence for three active Admin Orders reads, not complete route×role acceptance. Order items/bulk and broader C006 resource/permission matrices, C012 scoped transaction conversion/RLS policies/rollback rehearsal, independent PR review, and main-based Docker delivery remain open. C006, C012, and Phase 2A/2C remain **PARTIAL**; production remains **NO-GO**.

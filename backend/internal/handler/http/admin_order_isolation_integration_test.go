@@ -88,7 +88,9 @@ func TestAdminOrdersHTTPConcurrentStatusTransitionsAreAtomic(t *testing.T) {
 		t.Fatalf("generate authenticated token: %v", err)
 	}
 	handler := NewAdminOrderHandler(usecase.NewOrderUseCase(repository.NewOrderRepository(db), nil), nil, nil)
-	statuses := []string{"confirmed", "cancelled"}
+	// A repeated pending status is invalid whether it arrives before or after
+	// the valid pending-to-confirmed transition, so exactly one request can win.
+	statuses := []string{"confirmed", "pending"}
 	responses := make(chan int, len(statuses))
 	var requests sync.WaitGroup
 	for _, status := range statuses {
@@ -120,8 +122,8 @@ func TestAdminOrdersHTTPConcurrentStatusTransitionsAreAtomic(t *testing.T) {
 	if err := db.QueryRow(`SELECT status FROM orders WHERE id = $1`, orderID).Scan(&finalStatus); err != nil {
 		t.Fatalf("read final order status: %v", err)
 	}
-	if finalStatus != "confirmed" && finalStatus != "cancelled" {
-		t.Fatalf("final order status = %q, want one committed transition", finalStatus)
+	if finalStatus != "confirmed" {
+		t.Fatalf("final order status = %q, want the single committed transition", finalStatus)
 	}
 	var historyAfter int
 	if err := db.QueryRow(`SELECT COUNT(*) FROM order_status_history WHERE order_id = $1`, orderID).Scan(&historyAfter); err != nil {
@@ -130,6 +132,101 @@ func TestAdminOrdersHTTPConcurrentStatusTransitionsAreAtomic(t *testing.T) {
 	if historyAfter != historyBefore+1 {
 		t.Fatalf("order history rows = %d, want exactly one committed transition from %d", historyAfter, historyBefore)
 	}
+}
+
+func TestAdminOrdersHTTPScopesHistoryStatsAndExport(t *testing.T) {
+	if os.Getenv(testdb.EnvVar) == "" {
+		t.Skipf("set %s to an isolated disposable PostgreSQL database", testdb.EnvVar)
+	}
+	db := openProductHTTPTestDB(t)
+	cleanupAdminOrderBenchmarkData(t, db)
+	t.Cleanup(func() { cleanupAdminOrderBenchmarkData(t, db) })
+	tenantID, restaurantID, foreignOrderIDs := seedAdminOrderBenchmarkData(t, db, 1)
+	var ownOrderID int64
+	if err := db.QueryRow(`SELECT id FROM orders WHERE order_number = 'admin-order-benchmark-000'`).Scan(&ownOrderID); err != nil {
+		t.Fatalf("get owned order fixture: %v", err)
+	}
+	tokens, err := jwt.NewTokenService("admin-order-read-route-test-secret", "5m")
+	if err != nil {
+		t.Fatalf("create token service: %v", err)
+	}
+	restaurantClaim := int(restaurantID)
+	token, err := tokens.GenerateToken(1, int(tenantID), &restaurantClaim, "owner@example.test", "owner")
+	if err != nil {
+		t.Fatalf("generate authenticated token: %v", err)
+	}
+	handler := NewAdminOrderHandler(usecase.NewOrderUseCase(repository.NewOrderRepository(db), nil), nil, nil)
+	for _, orderID := range foreignOrderIDs {
+		response := invokeAdminOrderReadRouteHTTP(db, tokens, token, handler,
+			fmt.Sprintf("/api/v1/admin/orders/%d/history", orderID), int(tenantID)+1, int(restaurantID)+1)
+		if response.Code != http.StatusOK {
+			t.Fatalf("foreign order history status = %d, want %d", response.Code, http.StatusOK)
+		}
+		var body struct {
+			History []json.RawMessage `json:"history"`
+		}
+		if err := json.NewDecoder(response.Body).Decode(&body); err != nil {
+			t.Fatalf("decode foreign order history: %v", err)
+		}
+		if len(body.History) != 0 {
+			t.Fatalf("foreign order %d leaked %d history rows", orderID, len(body.History))
+		}
+	}
+	stats := invokeAdminOrderReadRouteHTTP(db, tokens, token, handler,
+		"/api/v1/admin/orders/stats?start_date=2000-01-01T00:00:00Z&end_date=2100-01-01T00:00:00Z", int(tenantID)+1, int(restaurantID)+1)
+	if stats.Code != http.StatusOK {
+		t.Fatalf("forged-scope stats status = %d, want %d", stats.Code, http.StatusOK)
+	}
+	var statsBody struct {
+		TotalOrders int64 `json:"total_orders"`
+	}
+	if err := json.NewDecoder(stats.Body).Decode(&statsBody); err != nil {
+		t.Fatalf("decode scoped stats: %v", err)
+	}
+	if statsBody.TotalOrders != 1 {
+		t.Fatalf("forged-scope stats total_orders=%d, want only own order", statsBody.TotalOrders)
+	}
+	export := invokeAdminOrderReadRouteHTTP(db, tokens, token, handler,
+		"/api/v1/admin/orders/export", int(tenantID)+1, int(restaurantID)+1)
+	if export.Code != http.StatusOK {
+		t.Fatalf("forged-scope export status = %d, want %d", export.Code, http.StatusOK)
+	}
+	exported := export.Body.String()
+	if !strings.Contains(exported, "admin-order-benchmark-000") ||
+		strings.Contains(exported, "admin-order-benchmark-sibling") || strings.Contains(exported, "admin-order-benchmark-foreign") {
+		t.Fatalf("forged-scope order export leaked or omitted rows: %s", exported)
+	}
+	if ownOrderID <= 0 {
+		t.Fatalf("invalid owned order fixture ID: %d", ownOrderID)
+	}
+}
+
+func invokeAdminOrderReadRouteHTTP(db *sql.DB, tokens *jwt.TokenService, token string, handler *AdminOrderHandler, path string, forgedTenant, forgedRestaurant int) *httptest.ResponseRecorder {
+	request := httptest.NewRequest(http.MethodGet, path, nil)
+	parts := strings.Split(strings.Trim(request.URL.Path, "/"), "/")
+	if len(parts) >= 6 && parts[4] != "stats" && parts[4] != "export" {
+		request.SetPathValue("id", parts[4])
+	}
+	request.Header.Set("Authorization", "Bearer "+token)
+	request.Header.Set("X-Tenant-ID", strconv.Itoa(forgedTenant))
+	request.Header.Set("X-Restaurant-ID", strconv.Itoa(forgedRestaurant))
+	secured := middleware.AuthMiddleware(tokens)(middleware.NewTenantContextMiddleware(
+		middleware.SQLRestaurantVerifier{DB: db},
+	)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch {
+		case strings.HasSuffix(r.URL.Path, "/history"):
+			handler.GetOrderHistory(w, r)
+		case strings.HasSuffix(r.URL.Path, "/stats"):
+			handler.GetOrderStats(w, r)
+		case strings.HasSuffix(r.URL.Path, "/export"):
+			handler.ExportOrders(w, r)
+		default:
+			http.NotFound(w, r)
+		}
+	})))
+	response := httptest.NewRecorder()
+	secured.ServeHTTP(response, request)
+	return response
 }
 
 func assertForeignAdminOrderRequestsHaveNoSideEffects(t *testing.T, db *sql.DB, tokens *jwt.TokenService, token string, handler *AdminOrderHandler, orderIDs []int64) {
