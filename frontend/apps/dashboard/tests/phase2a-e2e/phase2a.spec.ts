@@ -22,6 +22,7 @@ async function login(page: Page, tenant: 'a' | 'b' = 'a') {
 test('tenant A cannot see or mutate tenant B products', async ({ page }) => {
   const tenantA = await request.newContext()
   const tenantB = await request.newContext()
+  const employee = await request.newContext()
   try {
     await loginWithContext(tenantA, 'a')
     const tenantBUser = await loginWithContext(tenantB, 'b')
@@ -34,6 +35,46 @@ test('tenant A cannot see or mutate tenant B products', async ({ page }) => {
     })
     expect(listing.ok()).toBeTruthy()
     expect(await listing.text()).not.toContain('WS05 E2E Burger B')
+
+    const ownedBeforeResponse = await tenantA.get(`${api}/products`)
+    expect(ownedBeforeResponse.ok()).toBeTruthy()
+    const ownedBefore = await ownedBeforeResponse.json()
+    const ownedProduct = ownedBefore.products.find((product: { name_en: string }) => product.name_en === 'WS05 E2E Burger A')
+    expect(ownedProduct).toBeTruthy()
+    const employeeEmail = `ws05-product-employee-${Date.now()}@example.test`
+    const employeeCreate = await tenantA.post(`${api}/users`, {
+      headers: { Origin: 'http://localhost:13102' },
+      data: { name: 'WS05 Product Employee', email: employeeEmail, phone: '5550100403', password: 'WS05-Product-Employee-2026!' },
+    })
+    expect(employeeCreate.status()).toBe(200)
+    const employeeLogin = await employee.post(`${api}/auth/login`, {
+      headers: { Origin: 'http://localhost:13102' },
+      data: { email: employeeEmail, password: 'WS05-Product-Employee-2026!' },
+    })
+    expect(employeeLogin.ok()).toBeTruthy()
+
+    const employeeListing = await employee.get(`${api}/products`)
+    expect(employeeListing.ok()).toBeTruthy()
+    expect(await employeeListing.text()).toContain('WS05 E2E Burger A')
+    expect(await employeeListing.text()).not.toContain('WS05 E2E Burger B')
+    expect((await employee.get(`${api}/products/${ownedProduct.id}`)).status()).toBe(200)
+    expect((await employee.post(`${api}/products`, {
+      headers: { Origin: 'http://localhost:13102' },
+      data: { category_id: ownedProduct.category_id, name_en: 'WS05 Unauthorized Product', price: 1 },
+    })).status()).toBe(403)
+    expect((await employee.put(`${api}/products/${ownedProduct.id}`, {
+      headers: { Origin: 'http://localhost:13102' }, data: { name_en: 'WS05 Unauthorized Product Update' },
+    })).status()).toBe(403)
+    expect((await employee.delete(`${api}/products/${ownedProduct.id}`, {
+      headers: { Origin: 'http://localhost:13102' },
+    })).status()).toBe(403)
+    const ownedAfterResponse = await tenantA.get(`${api}/products`)
+    const ownedAfter = await ownedAfterResponse.json()
+    expect(ownedAfter.total).toBe(ownedBefore.total)
+    expect(ownedAfter.products.find((product: { id: number }) => product.id === ownedProduct.id)).toMatchObject({
+      name_en: 'WS05 E2E Burger A',
+      quantity_in_stock: ownedProduct.quantity_in_stock,
+    })
     const deletion = await tenantA.delete(`${api}/products/${tenantBProduct.id}`, {
       headers: { Origin: 'http://localhost:13102' },
     })
@@ -41,6 +82,7 @@ test('tenant A cannot see or mutate tenant B products', async ({ page }) => {
     const stillExists = await tenantB.get(`${api}/products`)
     expect(await stillExists.text()).toContain('WS05 E2E Burger B')
   } finally {
+    await employee.dispose()
     await tenantA.dispose()
     await tenantB.dispose()
   }
