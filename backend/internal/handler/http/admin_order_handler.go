@@ -486,6 +486,10 @@ func (h *AdminOrderHandler) UpdatePaymentStatus(w http.ResponseWriter, r *http.R
 	}
 
 	if err := h.orderUC.UpdatePaymentStatus(tenantID, restaurantID, orderID, req.PaymentStatus); err != nil {
+		if strings.Contains(err.Error(), "not found") {
+			respondError(w, http.StatusNotFound, "Order not found")
+			return
+		}
 		if strings.Contains(err.Error(), "invalid") {
 			respondError(w, http.StatusBadRequest, err.Error())
 			return

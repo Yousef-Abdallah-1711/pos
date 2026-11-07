@@ -71,16 +71,40 @@ func assertForeignAdminOrderRequestsHaveNoSideEffects(t *testing.T, db *sql.DB, 
 		}
 		attempts := []struct {
 			name, method, body string
-		}{{"read", http.MethodGet, ""}, {"status update", http.MethodPut, `{"status":"cancelled"}`}}
+		}{{"read", http.MethodGet, ""}, {"status update", http.MethodPut, `{"status":"cancelled"}`}, {"payment update", http.MethodPut, `{"payment_status":"paid"}`}, {"cancel", http.MethodDelete, `{"reason":"forged scope"}`}}
 		for _, attempt := range attempts {
 			t.Run(fmt.Sprintf("order_%d/%s", orderID, attempt.name), func(t *testing.T) {
+				var initialPaymentStatus string
+				var initialHistoryCount int
+				if err := db.QueryRow(`SELECT payment_status FROM orders WHERE id = $1`, orderID).Scan(&initialPaymentStatus); err != nil {
+					t.Fatalf("read foreign payment state: %v", err)
+				}
+				if err := db.QueryRow(`SELECT COUNT(*) FROM order_status_history WHERE order_id = $1`, orderID).Scan(&initialHistoryCount); err != nil {
+					t.Fatalf("count foreign order history: %v", err)
+				}
 				response := invokeAdminOrderIsolationHTTP(db, tokens, token, handler, attempt.method, orderID, tenantID, restaurantID, attempt.body)
 				if response.Code != http.StatusNotFound {
 					t.Fatalf("foreign order %s status = %d, want %d", attempt.name, response.Code, http.StatusNotFound)
 				}
 				assertOrderStatusUnchanged(t, db, orderID, initialStatus)
+				assertForeignOrderMutationStateUnchanged(t, db, orderID, initialPaymentStatus, initialHistoryCount)
 			})
 		}
+	}
+}
+
+func assertForeignOrderMutationStateUnchanged(t *testing.T, db *sql.DB, orderID int64, expectedPaymentStatus string, expectedHistoryCount int) {
+	t.Helper()
+	var paymentStatus string
+	var historyCount int
+	if err := db.QueryRow(`SELECT payment_status FROM orders WHERE id = $1`, orderID).Scan(&paymentStatus); err != nil {
+		t.Fatalf("verify foreign order payment state: %v", err)
+	}
+	if err := db.QueryRow(`SELECT COUNT(*) FROM order_status_history WHERE order_id = $1`, orderID).Scan(&historyCount); err != nil {
+		t.Fatalf("verify foreign order history: %v", err)
+	}
+	if paymentStatus != expectedPaymentStatus || historyCount != expectedHistoryCount {
+		t.Fatalf("foreign order mutation changed side effects: payment=%q history=%d, want payment=%q history=%d", paymentStatus, historyCount, expectedPaymentStatus, expectedHistoryCount)
 	}
 }
 
@@ -99,6 +123,10 @@ func invokeAdminOrderIsolationHTTP(db *sql.DB, tokens *jwt.TokenService, token s
 	path := "/api/v1/admin/orders"
 	if orderID > 0 && method == http.MethodGet {
 		path += "/" + strconv.FormatInt(orderID, 10)
+	} else if orderID > 0 && method == http.MethodDelete {
+		path += "/" + strconv.FormatInt(orderID, 10)
+	} else if orderID > 0 && strings.Contains(body, "payment_status") {
+		path += "/" + strconv.FormatInt(orderID, 10) + "/payment-status"
 	} else if orderID > 0 {
 		path += "/" + strconv.FormatInt(orderID, 10) + "/status"
 	}
@@ -118,7 +146,13 @@ func invokeAdminOrderIsolationHTTP(db *sql.DB, tokens *jwt.TokenService, token s
 		case r.Method == http.MethodGet:
 			handler.GetOrder(w, r)
 		case r.Method == http.MethodPut:
-			handler.UpdateOrderStatus(w, r)
+			if strings.Contains(r.URL.Path, "/payment-status") {
+				handler.UpdatePaymentStatus(w, r)
+			} else {
+				handler.UpdateOrderStatus(w, r)
+			}
+		case r.Method == http.MethodDelete:
+			handler.CancelOrder(w, r)
 		}
 	})))
 	response := httptest.NewRecorder()

@@ -101,3 +101,10 @@ At candidate `3bec0c85b21a8de2250dfaf99afab4ebd792ec97`, PR #9 remains open and 
 - Added `TestRBACPermissionHTTPEnforcesRepositoryBackedLevelMatrix`. It evaluates all 90 combinations of six effective levels, five required levels, and three actor scopes through the repository-backed evaluator and enforcing middleware. All 90 passed on disposable PostgreSQL 15.
 - Fresh full backend regression on the same candidate source passed `go build ./...`, `go vet ./...`, and `go test -json -p 1 -count=1 ./...`: **969 passed, 2 skipped, 0 failed**. Migrations 1–165 and `999_theme_migration_legacy.sql` were applied only to a new tmpfs PostgreSQL database. The disposable container was removed after the run.
 - This verifies permission hierarchy and tenant/restaurant scope at the RBAC gate boundary; active route×role combinations across product and business handlers remain open. C006, C012, and Phase 2A/2C remain **PARTIAL**. Production remains **NO-GO**.
+
+## Admin order mutation isolation follow-up — 2026-11-07
+
+- Extended authenticated order isolation to payment-status updates and cancellation for sibling-restaurant and foreign-tenant order IDs. Read/status/payment/cancel attempts all returned 404 and left order status, payment status, and history counts unchanged (8 denied operation/scope combinations).
+- Corrected payment-status missing-order handling to return 404 for out-of-scope orders.
+- Fresh PostgreSQL 15 verification passed the focused order isolation test and full `go test -json -p 1 -count=1 ./...` (**973 passed, 2 skipped, 0 failed**); `go build ./...` and `go vet ./...` also passed. The disposable database container was removed.
+- Remaining order acceptance still includes public token lifecycle, payment transitions for owned orders, and broader concurrent HTTP and permission combinations. C006, C012, and Phase 2A/2C remain **PARTIAL**; production remains **NO-GO**.
