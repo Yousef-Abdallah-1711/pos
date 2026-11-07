@@ -77,3 +77,13 @@ Phase 2A and Phase 2C remain **PARTIAL**. C006 and C012 remain **PARTIAL**. Play
 ## Latest hosted status — 2026-11-07
 
 At candidate `3bec0c85b21a8de2250dfaf99afab4ebd792ec97`, PR #9 remains open and both hosted checks (`runtime-localhost-guardrail`, `url-domain-config-smoke`) pass. GitHub has no review request or approval. The repository owner must invite an eligible independent reviewer and request that review; do not self-approve or bypass branch protection. `origin/main` remains `d84120559db36e8e9e7fdb73872a30cbc9d4e6e7`. No merge, persistent database migration, or main-based Docker delivery occurred.
+
+## Fresh frontend and browser continuation — 2026-11-07
+
+- Candidate base: `c8cb9180551f6e9c8d3c81a9ff505495ee77c0d8`; fetched `origin/main` remains `d84120559db36e8e9e7fdb73872a30cbc9d4e6e7`.
+- Frontend workspace fixes in the current candidate: deduplicate React/React DOM in Dashboard Vitest resolution; make React dependencies peers for `@pos-saas/ui-themes`; declare the Restaurant Website's direct `@pos-saas/ui` workspace dependency and refresh the frozen pnpm lockfile.
+- Fresh frontend checks on these source changes passed: Dashboard 648 tests, Landing 35, Restaurant Website 66, Super Admin 16; all four application and test-source TypeScript checks, production builds, and relevant lint checks passed. Build endpoint values were localhost-only test configuration.
+- Browser run used the unique disposable project `pos-unified-e2e-20261107`, with PostgreSQL 15, Redis, API, and all four web apps. The first cold run reported 9/11; logout and Super Admin login passed in a focused rerun (2/2), and the complete warmed rerun passed **11/11** in 46.9 seconds. The journeys covered login/logout/session refresh, POS order creation, inventory persistence and concurrent adjustments, scoped storefront order creation, browser cart/checkout, Super Admin login/tenant access, and fail-closed tenant dashboard access. Both initial failures passed on rerun without code changes.
+- The isolated project, its volumes, and its network were removed after verification. Existing untracked `frontend/apps/dashboard/test-results/` was preserved and excluded from the commit.
+- PR #9 remains OPEN at `c8cb9180551f6e9c8d3c81a9ff505495ee77c0d8` before this frontend commit, with both hosted checks successful and no independent review request/approval. No review, merge, persistent migration, or main-based Docker release occurred.
+- C006 and C012 remain **PARTIAL**. Phase 2A/2C remain **PARTIAL**; browser results are fresh evidence for these journeys, not full route-matrix or performance acceptance. Production remains **NO-GO**.
