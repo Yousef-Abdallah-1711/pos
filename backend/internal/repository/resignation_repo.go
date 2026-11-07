@@ -96,11 +96,18 @@ func (r *ResignationRepository) Create(item *domain.Resignation) (int, error) {
 			tenant_id, restaurant_id, employee_id, resignation_date, last_working_date, reason, status,
 			notice_period_days, pending_salary, unused_leave_balance, settlement_amount, created_by, updated_by
 		)
-		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)
+		SELECT $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13
+		WHERE EXISTS (
+			SELECT 1 FROM employees e
+			WHERE e.id = $3 AND e.tenant_id = $1 AND e.restaurant_id = $2
+		)
 		RETURNING id
 	`, item.TenantID, item.RestaurantID, item.EmployeeID, item.ResignationDate, item.LastWorkingDate, item.Reason, item.Status,
 		item.NoticePeriodDays, item.PendingSalary, item.UnusedLeaveBalance, item.SettlementAmount, item.CreatedBy, item.UpdatedBy,
 	).Scan(&id)
+	if errors.Is(err, sql.ErrNoRows) {
+		return 0, errors.New("employee is outside tenant and restaurant scope")
+	}
 	return id, err
 }
 
@@ -111,6 +118,10 @@ func (r *ResignationRepository) Update(tenantID, restaurantID int, item *domain.
 		    notice_period_days = $5, pending_salary = $6, unused_leave_balance = $7,
 		    settlement_amount = $8, updated_by = $9, updated_at = CURRENT_TIMESTAMP
 		WHERE id = $10 AND tenant_id = $11 AND restaurant_id = $12
+		  AND EXISTS (
+			SELECT 1 FROM employees e
+			WHERE e.id = $1 AND e.tenant_id = $11 AND e.restaurant_id = $12
+		  )
 	`, item.ResignationDate, item.LastWorkingDate, item.Reason, item.Status,
 		item.NoticePeriodDays, item.PendingSalary, item.UnusedLeaveBalance, item.SettlementAmount,
 		item.UpdatedBy, item.ID, tenantID, restaurantID,

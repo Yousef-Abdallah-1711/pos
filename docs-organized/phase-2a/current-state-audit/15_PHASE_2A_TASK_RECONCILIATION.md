@@ -9,10 +9,10 @@ The original Phase 2A plan contains 32 C-items (plus session 1 tasks), while thi
 | C005 public order authorization | Token/hash design and migration 161 | Selected unit + disposable smoke | Browser and real public order create/POS path | PARTIAL |
 | C006 resource isolation | Some theme/resource checks | Selected smoke | Complete cross-tenant and cross-restaurant tests | PARTIAL |
 | C007 unsafe auth defaults | Startup guards, rate limiting, metrics/internal token controls | Selected Go/security tests | Password reset, account lockout and distributed rate limiter review | PARTIAL |
-| C008 webhook security | HMAC/state checks | Eight unit tests in prior record | Transactional success, concurrency, callback order/retry integration | PARTIAL |
+| C008 webhook security | HMAC/state checks and transactional callback processing | Isolated PostgreSQL tests cover two concurrent claims, exactly-once delivery per fixture, persisted success, and 503 retry backoff/unclaimable-until-due state | Multi-attempt exhaustion, provider/local-commit reconciliation, and broader provider acceptance | PARTIAL |
 | C009 impersonation integration | Middleware/usecase components | Middleware tests only | Full login→impersonate→expiry/revoke/audit flow | NOT STARTED |
 | C010 restricted DB role | SQL setup + isolated compose | Disposable role/security smoke | Dev and production rollout/rehearsal | PARTIAL |
-| C011 tenancy classification | 91-table generated heuristic | Disposable DB inventory | Manual ownership review before policies | PARTIAL |
+| C011 tenancy classification | 91-table generated inventory plus explicit review of `webhook_retry_queue` | Schema/FK review and worker query review | Per-family RLS policy selection remains in C012 | COMPLETE (classification only) |
 | C012 staged RLS | transaction helper and pilot | Unit + isolated pilot | Move all module paths to scoped transactions; no live policies | PARTIAL |
 | C013 Go failure repair | Changes in Phase 2A code | 680 current-checkpoint tests passed | Maintain repeatable CI | VERIFIED COMPLETE (baseline) |
 | C014 Go build/static check | Build and vet | Passed at checkpoint | CI gate absent | PARTIAL |

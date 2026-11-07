@@ -25,9 +25,11 @@ type themeSvcStub struct {
 	updatedIDs []int64
 }
 
-func (s *themeSvcStub) GetTheme(_ context.Context, id int64) (*domain.Theme, error) {
+func (s *themeSvcStub) GetTheme(_ context.Context, tenantID, restaurantID, id int64) (*domain.Theme, error) {
 	if t, ok := s.themes[id]; ok {
-		return t, nil
+		if t.TenantID == tenantID && t.RestaurantID == restaurantID {
+			return t, nil
+		}
 	}
 	return nil, errors.New("theme not found")
 }
@@ -37,12 +39,16 @@ func (s *themeSvcStub) GetPreset(_ context.Context, id int64) (*domain.Theme, er
 	}
 	return nil, errors.New("preset not found")
 }
-func (s *themeSvcStub) DeleteTheme(_ context.Context, id int64) error {
-	s.deleted = append(s.deleted, id)
+func (s *themeSvcStub) DeleteTheme(_ context.Context, tenantID, restaurantID, id int64) error {
+	if t, ok := s.themes[id]; ok && t.TenantID == tenantID && t.RestaurantID == restaurantID {
+		s.deleted = append(s.deleted, id)
+	}
 	return nil
 }
-func (s *themeSvcStub) ActivateTheme(_ context.Context, id int64) error {
-	s.activated = append(s.activated, id)
+func (s *themeSvcStub) ActivateTheme(_ context.Context, tenantID, restaurantID, id int64) error {
+	if t, ok := s.themes[id]; ok && t.TenantID == tenantID && t.RestaurantID == restaurantID {
+		s.activated = append(s.activated, id)
+	}
 	return nil
 }
 

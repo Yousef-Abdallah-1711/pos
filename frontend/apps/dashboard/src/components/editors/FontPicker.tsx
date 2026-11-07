@@ -492,6 +492,7 @@ export function FontPicker({
             </label>
             <input
               type="range"
+              aria-label="Font Size"
               min="10"
               max="32"
               value={fontConfig.fontSize || 16}
@@ -507,6 +508,7 @@ export function FontPicker({
             </label>
             <input
               type="range"
+              aria-label="Line Height"
               min="1"
               max="2"
               step="0.1"

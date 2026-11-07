@@ -49,11 +49,11 @@ export function ImpersonationModal({
       setIsLoading(true);
       const response = await superAdminAPI.startImpersonation(user.id);
 
-      setImpersonationToken(response.token);
+      setImpersonationToken("cookie-session");
 
       // Construct dashboard URL - Dashboard runs on port 3002
       const dashboardBaseUrl = getDashboardBaseUrl();
-      const url = `${dashboardBaseUrl}/en/dashboard?impersonation_token=${response.token}`;
+      const url = `${dashboardBaseUrl}/en/dashboard`;
       setDashboardUrl(url);
 
       // Update impersonation state
@@ -151,13 +151,13 @@ export function ImpersonationModal({
             </button>
           ) : (
             <>
-              {/* Token Display */}
+              {/* Session link */}
               <div className="bg-gray-50 rounded-lg p-4">
                 <p className="text-sm text-gray-600 mb-2">
-                  Impersonation Token
+                  Dashboard session link
                 </p>
                 <div className="font-mono text-xs text-gray-900 break-all bg-white p-2 rounded border border-gray-200 mb-3">
-                  {impersonationToken}
+                  {dashboardUrl}
                 </div>
                 <button
                   onClick={handleCopyUrl}

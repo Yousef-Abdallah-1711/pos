@@ -294,9 +294,12 @@ func (r *AccountingAdvancedRepository) CreateRecurringJournalTemplate(item *doma
 		INSERT INTO recurring_journal_templates (
 			tenant_id, restaurant_id, template_code, template_name, description, frequency,
 			start_date, next_run_date, is_active, auto_post, lines_json, created_by, updated_by
-		) VALUES (
+		) SELECT
 			$1, $2, $3, $4, $5, $6,
 			$7, $8, $9, $10, $11, $12, $13
+		WHERE EXISTS (
+			SELECT 1 FROM restaurants
+			WHERE id = $2 AND tenant_id = $1
 		)
 		RETURNING id
 	`,

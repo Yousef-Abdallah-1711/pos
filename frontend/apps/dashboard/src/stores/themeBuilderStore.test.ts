@@ -412,12 +412,10 @@ describe('useThemeBuilderStore', () => {
     it('should mark as clean manually', () => {
       const { result } = renderHook(() => useThemeBuilderStore())
 
-      act(() => {
-        result.current.updateColors({ primary: '#ff0000' })
-        expect(result.current.isDirty).toBe(true)
+      act(() => result.current.updateColors({ primary: '#ff0000' }))
+      expect(result.current.isDirty).toBe(true)
 
-        result.current.markClean()
-      })
+      act(() => result.current.markClean())
 
       expect(result.current.isDirty).toBe(false)
     })

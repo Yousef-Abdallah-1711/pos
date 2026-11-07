@@ -190,6 +190,7 @@ export function ComponentBuilder() {
                 {/* Toggle Visibility */}
                 <button
                   onClick={(e) => handleToggleComponent(component.id, e)}
+                  aria-label={component.enabled ? 'Disable component' : 'Enable component'}
                   title={component.enabled ? 'Disable component' : 'Enable component'}
                   className={`flex-shrink-0 transition ${
                     component.enabled
@@ -206,6 +207,7 @@ export function ComponentBuilder() {
                     e.stopPropagation()
                     deleteComponent(component.id)
                   }}
+                  aria-label={`Delete ${component.title}`}
                   title="Delete component"
                   className="text-gray-400 hover:text-red-600 dark:hover:text-red-400 flex-shrink-0 transition"
                 >

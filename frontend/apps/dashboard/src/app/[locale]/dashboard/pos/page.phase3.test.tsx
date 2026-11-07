@@ -7,7 +7,11 @@ import { useAuthStore } from '@/stores/authStore'
 
 const mockCreateOrder = vi.fn()
 const mockUpdatePaymentStatus = vi.fn()
-const mockPrintReceipt = vi.fn(async () => true)
+const mockPrintReceipt = vi.fn(async (_receipt: {
+  orderNumber: string
+  paymentMethod: string
+  items: Array<{ name: string }>
+}) => true)
 const mockPlaySound = vi.fn(async () => true)
 
 vi.mock('next/navigation', () => ({

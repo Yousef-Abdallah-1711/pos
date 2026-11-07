@@ -46,12 +46,51 @@ func TestDriverRepositoryPostgresScopeDeniesForeignRestaurantWrites(t *testing.T
 	assertDriverState(t, db, fixture.restaurantA2Driver, fixture.tenantA, fixture.restaurantA2, "active")
 }
 
+func TestDriverRepositoryPostgresAssignmentRejectsForeignScopeWithoutSideEffects(t *testing.T) {
+	db, fixture := openDriverScopeFixture(t)
+	repo := NewDriverRepository(db)
+	ownOrder := insertScopeOrder(t, db, fixture.tenantA, fixture.restaurantA1, "driver-assign-own")
+	siblingOrder := insertScopeOrder(t, db, fixture.tenantA, fixture.restaurantA2, "driver-assign-sibling")
+	foreignOrder := insertScopeOrder(t, db, fixture.tenantB, fixture.restaurantB1, "driver-assign-foreign")
+
+	attempts := []struct {
+		name     string
+		orderID  int64
+		driverID int
+	}{
+		{name: "foreign tenant driver", orderID: ownOrder, driverID: fixture.tenantBDriver},
+		{name: "sibling restaurant driver", orderID: ownOrder, driverID: fixture.restaurantA2Driver},
+		{name: "foreign tenant order", orderID: foreignOrder, driverID: fixture.restaurantA1Driver},
+		{name: "sibling restaurant order", orderID: siblingOrder, driverID: fixture.restaurantA1Driver},
+	}
+
+	for _, attempt := range attempts {
+		t.Run(attempt.name, func(t *testing.T) {
+			assignment := &domain.DriverAssignment{OrderID: int(attempt.orderID), DriverID: attempt.driverID, Status: "pending"}
+			if err := repo.AssignOrder(context.Background(), assignment, fixture.tenantA, fixture.restaurantA1); err == nil {
+				t.Fatal("foreign assignment unexpectedly succeeded")
+			}
+			var assignmentCount, activeOrders int
+			var availability string
+			if err := db.QueryRow(`SELECT COUNT(*) FROM driver_assignments WHERE order_id = $1`, attempt.orderID).Scan(&assignmentCount); err != nil {
+				t.Fatalf("count assignment side effects: %v", err)
+			}
+			if err := db.QueryRow(`SELECT active_orders_count, availability_status FROM drivers WHERE id = $1`, attempt.driverID).Scan(&activeOrders, &availability); err != nil {
+				t.Fatalf("read driver state: %v", err)
+			}
+			if assignmentCount != 0 || activeOrders != 0 || availability != "available" {
+				t.Fatalf("rejected assignment changed state: assignments=%d active_orders=%d availability=%q", assignmentCount, activeOrders, availability)
+			}
+		})
+	}
+}
+
 func TestDriverRepositoryPostgresCreateRequiresRestaurantTenantMatch(t *testing.T) {
 	db, fixture := openDriverScopeFixture(t)
 	driver := &domain.Driver{
 		TenantID: fixture.tenantA, RestaurantID: fixture.restaurantB1,
-		FirstName: "Forged", LastName: "Scope", Email: "forged-scope@example.test",
-		PhoneNumber: "000", LicenseNumber: "FORGED-SCOPE", Status: "active", AvailabilityStatus: "available",
+		FirstName: "Forged", LastName: "Scope", Email: fmt.Sprintf("forged-scope-%d@example.test", fixture.tenantA),
+		PhoneNumber: "000", LicenseNumber: fmt.Sprintf("FORGED-SCOPE-%d", fixture.tenantA), Status: "active", AvailabilityStatus: "available",
 	}
 	if err := NewDriverRepository(db).Create(context.Background(), driver); err == nil {
 		t.Fatal("driver creation with a foreign restaurant unexpectedly succeeded")
@@ -66,10 +105,10 @@ func TestDriverRepositoryPostgresCreateRequiresRestaurantTenantMatch(t *testing.
 }
 
 type driverScopeFixture struct {
-	tenantA, tenantB                  int
-	restaurantA1, restaurantA2        int
-	restaurantB1, restaurantB2        int
-	tenantBDriver, restaurantA2Driver int
+	tenantA, tenantB                                      int
+	restaurantA1, restaurantA2                            int
+	restaurantB1, restaurantB2                            int
+	tenantBDriver, restaurantA2Driver, restaurantA1Driver int
 }
 
 func openDriverScopeFixture(t *testing.T) (*sql.DB, driverScopeFixture) {
@@ -90,8 +129,12 @@ func openDriverScopeFixture(t *testing.T) (*sql.DB, driverScopeFixture) {
 
 	fixture := seedDriverScopeFixture(t, ctx, db)
 	t.Cleanup(func() {
-		_, _ = db.Exec(`DELETE FROM tenants WHERE id IN ($1, $2)`, fixture.tenantA, fixture.tenantB)
-		_ = db.Close()
+		// Audit triggers reject tenant cascades after their parent row is removed.
+		// Fixtures therefore live only in this disposable database, whose tmpfs
+		// container is discarded after the integration run.
+		if err := db.Close(); err != nil {
+			t.Errorf("close disposable PostgreSQL connection: %v", err)
+		}
 	})
 	return db, fixture
 }
@@ -99,16 +142,17 @@ func openDriverScopeFixture(t *testing.T) (*sql.DB, driverScopeFixture) {
 func seedDriverScopeFixture(t *testing.T, ctx context.Context, db *sql.DB) driverScopeFixture {
 	t.Helper()
 	var fixture driverScopeFixture
-	fixture.tenantA = insertTenant(t, ctx, db, "closure-driver-tenant-a")
-	fixture.tenantB = insertTenant(t, ctx, db, "closure-driver-tenant-b")
-	fixture.restaurantA1 = insertRestaurant(t, ctx, db, fixture.tenantA, "closure-driver-a1")
-	fixture.restaurantA2 = insertRestaurant(t, ctx, db, fixture.tenantA, "closure-driver-a2")
-	fixture.restaurantB1 = insertRestaurant(t, ctx, db, fixture.tenantB, "closure-driver-b1")
-	fixture.restaurantB2 = insertRestaurant(t, ctx, db, fixture.tenantB, "closure-driver-b2")
-	insertDriver(t, ctx, db, fixture.tenantA, fixture.restaurantA1, "a1")
-	fixture.restaurantA2Driver = insertDriver(t, ctx, db, fixture.tenantA, fixture.restaurantA2, "a2")
-	fixture.tenantBDriver = insertDriver(t, ctx, db, fixture.tenantB, fixture.restaurantB1, "b1")
-	insertDriver(t, ctx, db, fixture.tenantB, fixture.restaurantB2, "b2")
+	runID := fmt.Sprintf("%d", time.Now().UnixNano())
+	fixture.tenantA = insertTenant(t, ctx, db, "closure-driver-tenant-a-"+runID)
+	fixture.tenantB = insertTenant(t, ctx, db, "closure-driver-tenant-b-"+runID)
+	fixture.restaurantA1 = insertRestaurant(t, ctx, db, fixture.tenantA, "closure-driver-a1-"+runID)
+	fixture.restaurantA2 = insertRestaurant(t, ctx, db, fixture.tenantA, "closure-driver-a2-"+runID)
+	fixture.restaurantB1 = insertRestaurant(t, ctx, db, fixture.tenantB, "closure-driver-b1-"+runID)
+	fixture.restaurantB2 = insertRestaurant(t, ctx, db, fixture.tenantB, "closure-driver-b2-"+runID)
+	fixture.restaurantA1Driver = insertDriver(t, ctx, db, fixture.tenantA, fixture.restaurantA1, runID+"-a1")
+	fixture.restaurantA2Driver = insertDriver(t, ctx, db, fixture.tenantA, fixture.restaurantA2, runID+"-a2")
+	fixture.tenantBDriver = insertDriver(t, ctx, db, fixture.tenantB, fixture.restaurantB1, runID+"-b1")
+	insertDriver(t, ctx, db, fixture.tenantB, fixture.restaurantB2, runID+"-b2")
 	return fixture
 }
 

@@ -4,14 +4,18 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"log"
+	"log/slog"
 	"net/http"
 	"os"
+	"os/signal"
 	"strconv"
 	"strings"
 	"sync"
+	"syscall"
 	"time"
 
 	"golang.org/x/crypto/bcrypt"
@@ -19,7 +23,6 @@ import (
 	handler "pos-saas/internal/handler/http"
 	kdsws "pos-saas/internal/handler/ws"
 	"pos-saas/internal/middleware"
-	"pos-saas/internal/observability"
 	"pos-saas/internal/pkg/database"
 	"pos-saas/internal/pkg/jwt"
 	"pos-saas/internal/repository"
@@ -72,6 +75,9 @@ func init() {
 
 func main() {
 	startedAt := time.Now()
+	slog.SetDefault(slog.New(slog.NewJSONHandler(os.Stderr, nil)))
+	rootCtx, stopSignals := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stopSignals()
 
 	// Load configuration
 	cfg, err := config.Load()
@@ -89,7 +95,7 @@ func main() {
 		log.Printf("⚠️ Warning: Failed to connect to database: %v. Continuing without database (stub mode).", err)
 		db = nil
 	} else {
-		startDBHealthMonitor(db, 15*time.Second)
+		startDBHealthMonitor(rootCtx, db, 15*time.Second)
 		defer db.Close()
 	}
 	if config.IsProductionMode() {
@@ -103,6 +109,28 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to create token service: %v", err)
 	}
+	sessionTTL, err := time.ParseDuration(cfg.JWT.Expiry)
+	if err != nil || sessionTTL <= 0 {
+		log.Fatalf("Invalid JWT expiry for browser session lifetime")
+	}
+	var sessionCache service.KVCache
+	if redisURL := strings.TrimSpace(os.Getenv("REDIS_URL")); redisURL != "" {
+		redisCache, redisErr := service.NewRedisCache(redisURL)
+		if redisErr != nil {
+			if config.IsProductionMode() {
+				log.Fatalf("Redis is required for revocable browser sessions: %v", redisErr)
+			}
+			log.Printf("[AuthSession] Redis unavailable; using process-local sessions in non-production: %v", redisErr)
+			sessionCache = service.NewInMemoryCache()
+		} else {
+			sessionCache = redisCache
+		}
+	} else if config.IsProductionMode() {
+		log.Fatal("REDIS_URL is required for revocable browser sessions")
+	} else {
+		sessionCache = service.NewInMemoryCache()
+	}
+	authSessionStore := service.NewAuthSessionStore(sessionCache, sessionTTL)
 
 	// KDS websocket hub (Phase 4)
 	kdsHub := kdsws.NewKDSHub()
@@ -319,8 +347,12 @@ func main() {
 	// Initialize handlers
 	restaurantRepo := repository.NewRestaurantRepository(db)
 
-	authHandler := handler.NewAuthHandler(authUseCase)
+	authHandler := handler.NewAuthHandler(authUseCase, authSessionStore)
+	if db != nil {
+		authHandler.SetAuditLogger(repository.NewAuthAuditRepository(db))
+	}
 	productHandler := handler.NewProductHandler(productUC)
+	inventoryAdjustmentHandler := handler.NewInventoryAdjustmentHandler(db)
 	categoryHandler := handler.NewCategoryHandler(categoryRepo)
 	publicMenuHandler := handler.NewPublicMenuHandler(productUC, restaurantRepo, categoryRepo)
 	userSettingsHandler := handler.NewUserSettingsHandler(userSettingsRepo, userRepo)
@@ -331,7 +363,7 @@ func main() {
 	adminOrderHandler := handler.NewAdminOrderHandler(orderUC, driverRepo, userRoleRepo)
 	tableHandler := handler.NewTableHandler(tableUC)
 	kdsHandler := handler.NewKDSHandler(kdsUC)
-	kdsWSHandler := kdsws.NewKDSWSHandler(kdsHub, tokenService)
+	kdsWSHandler := kdsws.NewKDSWSHandler(kdsHub, tokenService, authSessionStore)
 	reportHandler := handler.NewReportHandler(db)
 
 	// Driver Management handler
@@ -386,8 +418,8 @@ func main() {
 	var superAdminHandler *handler.SuperAdminHandler
 	var impersonationHandler *handler.ImpersonationHandler
 	if superAdminAuthUC != nil && superAdminTenantUC != nil && impersonationUC != nil {
-		superAdminHandler = handler.NewSuperAdminHandler(superAdminAuthUC, superAdminTenantUC)
-		impersonationHandler = handler.NewImpersonationHandler(impersonationUC)
+		superAdminHandler = handler.NewSuperAdminHandler(superAdminAuthUC, superAdminTenantUC, authSessionStore)
+		impersonationHandler = handler.NewImpersonationHandler(impersonationUC, authSessionStore)
 	}
 
 	// Subscription handler (Phase 1-8 - SaaS Trial/Subscription System)
@@ -424,13 +456,18 @@ func main() {
 			retryWorker := service.NewWebhookRetryWorker(db, baseURL, webhookMonitor, errorTracker)
 			retryWorker.Start(context.Background())
 
-			// Worker marks active paid subscriptions as expired once period end is reached.
-			expiryWorker := service.NewSubscriptionExpiryWorker(db)
-			expiryWorker.Start(context.Background())
 		}
 
 		paymentHandler = handler.NewPaymentHandler(paymentUC).WithObservability(webhookMonitor, webhookRetryQueue, errorTracker)
 		paymentMonitoringHandler = handler.NewPaymentMonitoringHandler(db, webhookMonitor, webhookRetryQueue)
+	}
+
+	// Subscription expiry is a non-payment maintenance worker and must run
+	// whenever the database is configured, independent of payment-provider setup.
+	// Tie its lifetime to the process signal context so shutdown stops its loop.
+	if db != nil {
+		expiryWorker := service.NewSubscriptionExpiryWorker(db)
+		expiryWorker.Start(rootCtx)
 	}
 
 	// Mock Paymob handler (Phase 4 - enabled only in mock mode)
@@ -448,10 +485,14 @@ func main() {
 	mux := http.NewServeMux()
 
 	// Public routes - Authentication
-	mux.Handle("POST /api/v1/auth/register", middleware.RateLimitByIP(10)(http.HandlerFunc(authHandler.Register)))
-	mux.Handle("POST /api/v1/auth/login", middleware.RateLimitByIP(20)(http.HandlerFunc(authHandler.Login)))
-	mux.Handle("POST /api/v1/auth/login/confirm", middleware.RateLimitByIP(20)(http.HandlerFunc(authHandler.LoginConfirm)))
-	mux.Handle("POST /api/v1/auth/token-exchange", middleware.RateLimitByIP(20)(http.HandlerFunc(authHandler.TokenExchange)))
+	mux.Handle("POST /api/v1/auth/register", middleware.RequireTrustedOrigin(middleware.RateLimitByIP(10)(http.HandlerFunc(authHandler.Register))))
+	mux.Handle("POST /api/v1/auth/login", middleware.RequireTrustedOrigin(middleware.RateLimitByIP(20)(http.HandlerFunc(authHandler.Login))))
+	mux.Handle("POST /api/v1/auth/login/confirm", middleware.RequireTrustedOrigin(middleware.RateLimitByIP(20)(http.HandlerFunc(authHandler.LoginConfirm))))
+	mux.Handle("GET /api/v1/auth/session", middleware.SessionAuthMiddleware(tokenService, authSessionStore)(http.HandlerFunc(authHandler.Session)))
+	mux.Handle("POST /api/v1/auth/refresh", middleware.RequireTrustedOrigin(middleware.RateLimitByIP(20)(middleware.SessionAuthMiddleware(tokenService, authSessionStore)(http.HandlerFunc(authHandler.Refresh)))))
+	mux.Handle("POST /api/v1/auth/logout", http.HandlerFunc(authHandler.Logout))
+	// Browser handoff is performed server-to-server by the authenticated Super Admin route;
+	// do not expose a bearer/code exchange endpoint to arbitrary browser clients.
 	mux.Handle("POST /api/v1/auth/forgot-password", middleware.RateLimitByIP(5)(http.HandlerFunc(authHandler.ForgotPassword)))
 	mux.HandleFunc("GET /api/v1/auth/check-subdomain", authHandler.CheckSubdomainAvailability)
 
@@ -501,11 +542,7 @@ func main() {
 	mux.Handle("DELETE /api/v1/public/orders/{id}", tenantContext(http.HandlerFunc(publicOrderHandler.CancelOrder)))
 
 	// Translation routes (public - no authentication required)
-	mux.HandleFunc("GET /api/v1/translations/health", translationHandler.HealthCheck)
-	mux.HandleFunc("GET /api/v1/translations/languages", translationHandler.GetSupportedLanguages)
-	mux.HandleFunc("GET /api/v1/translations/{language}", translationHandler.GetTranslations)
-	mux.HandleFunc("GET /api/v1/translations/{language}/{namespace}/{key}", translationHandler.GetTranslationKey)
-	mux.Handle("POST /api/v1/translations/{language}/upload", middleware.SuperAdminAuthMiddleware(superAdminTokenService)(http.HandlerFunc(translationHandler.UploadTranslations)))
+	registerTranslationRoutes(mux, translationHandler, superAdminTokenService)
 
 	// NOTE: Component library route commented out - using v2 library API
 	// Component library route (public - no authentication required)
@@ -525,49 +562,7 @@ func main() {
 		return true, "ok"
 	}
 
-	// Health check endpoints
-	mux.HandleFunc("GET /api/v1/health", func(w http.ResponseWriter, r *http.Request) {
-		dbHealthy, dbStatus := checkDBHealth(r.Context())
-		status := "ok"
-		if !dbHealthy {
-			status = "degraded"
-		}
-
-		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(map[string]interface{}{
-			"status":     status,
-			"uptime_sec": int64(time.Since(startedAt).Seconds()),
-			"db_healthy": dbHealthy,
-			"db_status":  dbStatus,
-		})
-	})
-
-	mux.HandleFunc("GET /api/v1/health/ready", func(w http.ResponseWriter, r *http.Request) {
-		dbHealthy, dbStatus := checkDBHealth(r.Context())
-		statusCode := http.StatusOK
-		status := "ready"
-		if !dbHealthy {
-			statusCode = http.StatusServiceUnavailable
-			status = "not_ready"
-		}
-
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(statusCode)
-		_ = json.NewEncoder(w).Encode(map[string]interface{}{
-			"status":     status,
-			"uptime_sec": int64(time.Since(startedAt).Seconds()),
-			"db_healthy": dbHealthy,
-			"db_status":  dbStatus,
-		})
-	})
-
-	mux.Handle("GET /api/v1/health/metrics", middleware.RequireInternalToken("METRICS_TOKEN", config.IsProductionMode())(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(map[string]interface{}{
-			"success": true,
-			"data":    observability.Snapshot(),
-		})
-	})))
+	registerHealthRoutes(mux, checkDBHealth, startedAt)
 
 	// Test route to verify routing
 	mux.Handle("GET /api/v1/public/test-routing/{slug}", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -613,11 +608,12 @@ func main() {
 	if auth := middleware.NewImpersonationAuthenticator(impersonationRepo, superAdminRepo); auth != nil {
 		impersonationAuthenticators = append(impersonationAuthenticators, auth)
 	}
+	authenticateRequest := middleware.SessionAuthMiddleware(tokenService, authSessionStore, impersonationAuthenticators...)
 
 	// Helper function to wrap handlers with auth only (no tenant middleware)
 	// Use this for RBAC endpoints that read claims.TenantID directly from JWT
 	wrapAuthOnly := func(next http.Handler) http.Handler {
-		return middleware.AuthMiddleware(tokenService, impersonationAuthenticators...)(next)
+		return authenticateRequest(next)
 	}
 
 	// Helper function to wrap handlers with auth and tenant middleware
@@ -627,8 +623,8 @@ func main() {
 		// Apply middleware in REVERSE order of execution
 		// Auth must execute FIRST to set claims in context, then Tenant can read them
 		// The last middleware applied is the outermost and executes first
-		wrapped := tenantContext(next)        // This will be innermost (execute 2nd)
-		wrapped = middleware.AuthMiddleware(tokenService, impersonationAuthenticators...)(wrapped) // This will be outermost (execute 1st)
+		wrapped := tenantContext(next)         // This will be innermost (execute 2nd)
+		wrapped = authenticateRequest(wrapped) // This will be outermost (execute 1st)
 		return wrapped
 	}
 
@@ -636,8 +632,8 @@ func main() {
 	wrapProtectedWithStatus := func(next http.Handler) http.Handler {
 		// Apply middleware in REVERSE order of execution
 		wrapped := middleware.TenantStatusMiddleware(subscriptionRepo)(next) // innermost (execute 3rd)
-		wrapped = tenantContext(wrapped)                // execute 2nd
-		wrapped = middleware.AuthMiddleware(tokenService, impersonationAuthenticators...)(wrapped)           // outermost (execute 1st)
+		wrapped = tenantContext(wrapped)                                     // execute 2nd
+		wrapped = authenticateRequest(wrapped)                               // outermost (execute 1st)
 		return wrapped
 	}
 
@@ -674,8 +670,8 @@ func main() {
 		wrapped := requirePermission(moduleID, permissionLevel)(next) // innermost
 		wrapped = statusGuard(wrapped)                                // blocked tenants stop here
 		// 		wrapped = middleware.PermissionMiddleware(permissionUC)(wrapped)                       // permission check
-		wrapped = tenantContext(wrapped)      // tenant context
-		wrapped = middleware.AuthMiddleware(tokenService, impersonationAuthenticators...)(wrapped) // outermost (auth first)
+		wrapped = tenantContext(wrapped)       // tenant context
+		wrapped = authenticateRequest(wrapped) // outermost (auth first)
 		return wrapped
 	}
 
@@ -683,7 +679,7 @@ func main() {
 	// endpoints that read claims.TenantID directly (the permission evaluator only needs the claims).
 	wrapAuthPermission := func(next http.Handler, moduleID int64, permissionLevel string) http.Handler {
 		wrapped := requirePermission(moduleID, permissionLevel)(next)
-		wrapped = middleware.AuthMiddleware(tokenService, impersonationAuthenticators...)(wrapped)
+		wrapped = authenticateRequest(wrapped)
 		return wrapped
 	}
 
@@ -697,7 +693,7 @@ func main() {
 		wrapped = requirePermission(13, permissionLevel)(wrapped)
 		wrapped = statusGuard(wrapped)
 		wrapped = tenantContext(wrapped)
-		wrapped = middleware.AuthMiddleware(tokenService, impersonationAuthenticators...)(wrapped)
+		wrapped = authenticateRequest(wrapped)
 		return wrapped
 	}
 
@@ -724,6 +720,7 @@ func main() {
 	mux.Handle("POST /api/v1/products", wrapWithPermission(http.HandlerFunc(productHandler.CreateProduct), 1, "WRITE"))
 	mux.Handle("GET /api/v1/products", wrapWithPermission(http.HandlerFunc(productHandler.ListProducts), 1, "READ"))
 	mux.Handle("GET /api/v1/products/alerts/low-stock", wrapWithPermission(http.HandlerFunc(productHandler.GetLowStockAlerts), 1, "READ"))
+	mux.Handle("POST /api/v1/inventory/adjust", wrapWithPermission(http.HandlerFunc(inventoryAdjustmentHandler.Adjust), 1, "WRITE"))
 	mux.Handle("GET /api/v1/products/{id}", wrapWithPermission(http.HandlerFunc(productHandler.GetProduct), 1, "READ"))
 	mux.Handle("PUT /api/v1/products/{id}", wrapWithPermission(http.HandlerFunc(productHandler.UpdateProduct), 1, "WRITE"))
 	mux.Handle("DELETE /api/v1/products/{id}", wrapWithPermission(http.HandlerFunc(productHandler.DeleteProduct), 1, "DELETE"))
@@ -1247,7 +1244,7 @@ func main() {
 			if rbacRoleRepo != nil && userRoleRepo != nil && roleRestaurantID > 0 {
 				role, err := rbacRoleRepo.GetByCode(r.Context(), tenantID, roleRestaurantID, "EMPLOYEE")
 				if err == nil && role != nil {
-					_ = userRoleRepo.Assign(r.Context(), tenantID, int64(user.ID), role.ID, assignedBy)
+					_ = userRoleRepo.Assign(r.Context(), tenantID, roleRestaurantID, int64(user.ID), role.ID, assignedBy)
 				}
 			}
 
@@ -1305,6 +1302,10 @@ func main() {
 
 			user, err := userRepo.UpdateUser(r.Context(), userID, tenantID, namePtr, phonePtr)
 			if err != nil {
+				if errors.Is(err, repository.ErrUserNotFound) {
+					http.Error(w, "User not found", http.StatusNotFound)
+					return
+				}
 				http.Error(w, fmt.Sprintf("Failed to update user: %v", err), http.StatusInternalServerError)
 				return
 			}
@@ -1339,6 +1340,10 @@ func main() {
 			// Delete user
 			err = userRepo.DeleteUser(r.Context(), userID, tenantID)
 			if err != nil {
+				if errors.Is(err, repository.ErrUserNotFound) {
+					http.Error(w, "User not found", http.StatusNotFound)
+					return
+				}
 				http.Error(w, fmt.Sprintf("Failed to delete user: %v", err), http.StatusInternalServerError)
 				return
 			}
@@ -1352,6 +1357,8 @@ func main() {
 
 	// Admin Order Management endpoints (require authentication)
 	// Module ID 10 = Orders (from migrations)
+	// POS order creation uses the verified server session for tenant scope.
+	mux.Handle("POST /api/v1/pos/orders", wrapProtectedNoStatus(http.HandlerFunc(publicOrderHandler.CreateOrder)))
 	mux.Handle("GET /api/v1/admin/orders/stats", wrapWithPermission(http.HandlerFunc(adminOrderHandler.GetOrderStats), 10, "READ"))
 	mux.Handle("GET /api/v1/admin/orders/export", wrapWithPermission(http.HandlerFunc(adminOrderHandler.ExportOrders), 10, "READ"))
 	mux.Handle("GET /api/v1/admin/orders/{id}/history", wrapWithPermission(http.HandlerFunc(adminOrderHandler.GetOrderHistory), 10, "READ"))
@@ -1822,13 +1829,14 @@ func main() {
 		wrapSuperAdmin := func(next http.Handler) http.Handler {
 			wrapped := middleware.RequireSuperAdmin(superAdminRepo)(next)
 			wrapped = middleware.ValidateIPWhitelist(superAdminRepo)(wrapped)
-			wrapped = middleware.SuperAdminAuthMiddleware(superAdminTokenService)(wrapped)
+			wrapped = middleware.SuperAdminAuthMiddleware(superAdminTokenService, authSessionStore)(wrapped)
 			wrapped = middleware.RateLimitSuperAdmin(30)(wrapped) // 30 requests per minute
 			return wrapped
 		}
 
 		// Super Admin Authentication (public - no auth required)
-		mux.Handle("POST /api/v1/super-admin/auth/login", middleware.RateLimitByIP(10)(http.HandlerFunc(superAdminHandler.Login)))
+		mux.Handle("POST /api/v1/super-admin/auth/login", middleware.RequireTrustedOrigin(middleware.RateLimitByIP(10)(http.HandlerFunc(superAdminHandler.Login))))
+		mux.Handle("GET /api/v1/super-admin/auth/session", wrapSuperAdmin(http.HandlerFunc(superAdminHandler.Session)))
 
 		// Super Admin Protected Routes
 		mux.Handle("POST /api/v1/super-admin/auth/logout", wrapSuperAdmin(http.HandlerFunc(superAdminHandler.Logout)))
@@ -1870,7 +1878,7 @@ func main() {
 
 		// Public endpoint for validating impersonation token (called from tenant dashboard)
 		mux.HandleFunc("GET /api/v1/impersonation/validate", impersonationHandler.ValidateImpersonationToken)
-		mux.HandleFunc("POST /api/v1/impersonation/end", impersonationHandler.EndImpersonationByToken)
+		mux.Handle("POST /api/v1/impersonation/end", middleware.RequireTrustedOrigin(http.HandlerFunc(impersonationHandler.EndImpersonationByToken)))
 		mux.HandleFunc("GET /api/v1/impersonation/check", impersonationHandler.CheckImpersonation)
 
 		log.Println("✅ Super Admin routes registered")
@@ -1885,7 +1893,7 @@ func main() {
 			// Apply middleware in REVERSE order of execution
 			wrapped := middleware.RequireSuperAdmin(superAdminRepo)(next)
 			wrapped = middleware.ValidateIPWhitelist(superAdminRepo)(wrapped)
-			wrapped = middleware.SuperAdminAuthMiddleware(superAdminTokenService)(wrapped)
+			wrapped = middleware.SuperAdminAuthMiddleware(superAdminTokenService, authSessionStore)(wrapped)
 			wrapped = middleware.RateLimitSuperAdmin(30)(wrapped) // 30 requests per minute
 			return wrapped
 		}
@@ -1906,21 +1914,47 @@ func main() {
 	compressedHandler := middleware.GzipMiddleware(corsHandler)
 	securedHandler := middleware.SecurityHeadersMiddleware(compressedHandler)
 	metricsHandler := middleware.RequestMetricsMiddleware(securedHandler)
+	recoveredHandler := middleware.RecoveryMiddleware(metricsHandler)
+	requestHandler := middleware.RequestIDMiddleware(recoveredHandler)
 
-	// Start server
+	// Bound slow clients and give in-flight requests a fixed window to finish on shutdown.
 	log.Printf("🚀 Server started on port %s", cfg.Server.Port)
 	if publicBaseURL, err := config.ResolveRuntimeURL([]string{"APP_BASE_URL"}, "http://localhost:"+cfg.Server.Port, "app base URL"); err == nil {
 		log.Printf("📍 API URL: %s/api/v1", publicBaseURL)
 	} else {
 		log.Printf("📍 API URL: /api/v1 (APP_BASE_URL not configured)")
 	}
-	if err := http.ListenAndServe(":"+cfg.Server.Port, metricsHandler); err != nil {
-		log.Printf("Failed to start server: %v", err)
-		return
+	server := &http.Server{
+		Addr:              ":" + cfg.Server.Port,
+		Handler:           requestHandler,
+		ReadHeaderTimeout: 5 * time.Second,
+		ReadTimeout:       30 * time.Second,
+		WriteTimeout:      60 * time.Second,
+		IdleTimeout:       90 * time.Second,
+	}
+	serverErrors := make(chan error, 1)
+	go func() {
+		serverErrors <- server.ListenAndServe()
+	}()
+
+	select {
+	case err := <-serverErrors:
+		if err != nil && err != http.ErrServerClosed {
+			log.Printf("HTTP server stopped unexpectedly: %v", err)
+		}
+	case <-rootCtx.Done():
+		shutdownCtx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+		defer cancel()
+		if err := server.Shutdown(shutdownCtx); err != nil {
+			log.Printf("HTTP graceful shutdown timed out: %v", err)
+			if closeErr := server.Close(); closeErr != nil {
+				log.Printf("HTTP forced close failed: %v", closeErr)
+			}
+		}
 	}
 }
 
-func startDBHealthMonitor(db *sql.DB, interval time.Duration) {
+func startDBHealthMonitor(ctx context.Context, db *sql.DB, interval time.Duration) {
 	if db == nil {
 		return
 	}
@@ -1948,8 +1982,13 @@ func startDBHealthMonitor(db *sql.DB, interval time.Duration) {
 		}
 
 		check()
-		for range ticker.C {
-			check()
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case <-ticker.C:
+				check()
+			}
 		}
 	}()
 }

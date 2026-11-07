@@ -60,7 +60,7 @@ func (h *RBACUserRoleHandler) AssignRoleToUser(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	user, err := h.userRepo.GetByID(r.Context(), int(userID))
+	user, err := h.userRepo.GetByID(r.Context(), int(userID), claims.TenantID, claims.RestaurantID)
 	if err != nil || user == nil {
 		respondError(w, http.StatusNotFound, "User not found")
 		return
@@ -80,7 +80,7 @@ func (h *RBACUserRoleHandler) AssignRoleToUser(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	if err := h.userRoleRepo.Assign(r.Context(), int64(claims.TenantID), userID, roleID, int64(claims.UserID)); err != nil {
+	if err := h.userRoleRepo.Assign(r.Context(), int64(claims.TenantID), int64(claims.RestaurantID), userID, roleID, int64(claims.UserID)); err != nil {
 		respondError(w, http.StatusInternalServerError, "Failed to assign role")
 		return
 	}
@@ -109,7 +109,7 @@ func (h *RBACUserRoleHandler) RemoveRoleFromUser(w http.ResponseWriter, r *http.
 		return
 	}
 
-	if err := h.userRoleRepo.Remove(r.Context(), int64(claims.TenantID), userID, roleID); err != nil {
+	if err := h.userRoleRepo.Remove(r.Context(), int64(claims.TenantID), int64(claims.RestaurantID), userID, roleID); err != nil {
 		respondError(w, http.StatusNotFound, err.Error())
 		return
 	}
@@ -132,7 +132,7 @@ func (h *RBACUserRoleHandler) GetUserRoles(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	roles, err := h.userRoleRepo.GetUserRoles(r.Context(), userID, int64(claims.TenantID))
+	roles, err := h.userRoleRepo.GetUserRoles(r.Context(), userID, int64(claims.TenantID), int64(claims.RestaurantID))
 	if err != nil {
 		respondError(w, http.StatusInternalServerError, err.Error())
 		return
@@ -150,7 +150,7 @@ func (h *RBACUserRoleHandler) GetMyRoles(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	roles, err := h.userRoleRepo.GetUserRoles(r.Context(), int64(claims.UserID), int64(claims.TenantID))
+	roles, err := h.userRoleRepo.GetUserRoles(r.Context(), int64(claims.UserID), int64(claims.TenantID), int64(claims.RestaurantID))
 	if err != nil {
 		respondError(w, http.StatusInternalServerError, err.Error())
 		return
@@ -210,7 +210,7 @@ func (h *RBACUserRoleHandler) AssignRoleToUserByEmail(w http.ResponseWriter, r *
 		return
 	}
 
-	if err := h.userRoleRepo.Assign(r.Context(), int64(claims.TenantID), int64(user.ID), roleID, int64(claims.UserID)); err != nil {
+	if err := h.userRoleRepo.Assign(r.Context(), int64(claims.TenantID), int64(claims.RestaurantID), int64(user.ID), roleID, int64(claims.UserID)); err != nil {
 		respondError(w, http.StatusInternalServerError, "Failed to assign role")
 		return
 	}
@@ -249,7 +249,7 @@ func (h *RBACUserRoleHandler) RemoveRoleFromUserByEmail(w http.ResponseWriter, r
 		return
 	}
 
-	if err := h.userRoleRepo.Remove(r.Context(), int64(claims.TenantID), int64(user.ID), roleID); err != nil {
+	if err := h.userRoleRepo.Remove(r.Context(), int64(claims.TenantID), int64(claims.RestaurantID), int64(user.ID), roleID); err != nil {
 		respondError(w, http.StatusNotFound, err.Error())
 		return
 	}
@@ -282,7 +282,7 @@ func (h *RBACUserRoleHandler) GetUserRolesByEmail(w http.ResponseWriter, r *http
 		return
 	}
 
-	roles, err := h.userRoleRepo.GetUserRoles(r.Context(), int64(user.ID), int64(claims.TenantID))
+	roles, err := h.userRoleRepo.GetUserRoles(r.Context(), int64(user.ID), int64(claims.TenantID), int64(claims.RestaurantID))
 	if err != nil {
 		respondError(w, http.StatusInternalServerError, err.Error())
 		return

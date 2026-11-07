@@ -42,6 +42,9 @@ ALLOWLIST_FILES = {
     Path("frontend/apps/dashboard/next.config.js"),
     # This browser QA script supports a local default and accepts POS_QA_BASE_URL.
     Path("frontend/apps/dashboard/scripts/verify-pos-phase4.mjs"),
+    # Phase 2A Playwright config and route adapter are isolated test-stack URLs only.
+    Path("frontend/apps/dashboard/playwright.phase2a.config.ts"),
+    Path("frontend/apps/dashboard/tests/phase2a-e2e/api-routing.ts"),
     Path("frontend/apps/landing/next.config.js"),
     Path("frontend/apps/restaurant-website/next.config.js"),
 }
