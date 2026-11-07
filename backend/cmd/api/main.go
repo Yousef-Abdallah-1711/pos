@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -1301,6 +1302,10 @@ func main() {
 
 			user, err := userRepo.UpdateUser(r.Context(), userID, tenantID, namePtr, phonePtr)
 			if err != nil {
+				if errors.Is(err, repository.ErrUserNotFound) {
+					http.Error(w, "User not found", http.StatusNotFound)
+					return
+				}
 				http.Error(w, fmt.Sprintf("Failed to update user: %v", err), http.StatusInternalServerError)
 				return
 			}
@@ -1335,6 +1340,10 @@ func main() {
 			// Delete user
 			err = userRepo.DeleteUser(r.Context(), userID, tenantID)
 			if err != nil {
+				if errors.Is(err, repository.ErrUserNotFound) {
+					http.Error(w, "User not found", http.StatusNotFound)
+					return
+				}
 				http.Error(w, fmt.Sprintf("Failed to delete user: %v", err), http.StatusInternalServerError)
 				return
 			}

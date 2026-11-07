@@ -46,6 +46,65 @@ test('tenant A cannot see or mutate tenant B products', async ({ page }) => {
   }
 })
 
+test('authenticated user CRUD is tenant-scoped and foreign IDs leave rows unchanged', async ({ page }) => {
+  const tenantA = await request.newContext()
+  const tenantB = await request.newContext()
+  try {
+    await loginWithContext(tenantA, 'a')
+    await loginWithContext(tenantB, 'b')
+
+    const foreignBeforeResponse = await tenantB.get(`${api}/users`)
+    expect(foreignBeforeResponse.ok()).toBeTruthy()
+    const foreignBefore = await foreignBeforeResponse.json() as Array<{ id: number; name: string; email: string }>
+    const foreignUser = foreignBefore.find((user) => user.email === 'phase2a-owner-b@example.test')
+    expect(foreignUser).toBeTruthy()
+    if (!foreignUser) throw new Error('Tenant B user fixture is missing')
+
+    const email = `ws05-user-crud-${Date.now()}@example.test`
+    const create = await tenantA.post(`${api}/users`, {
+      headers: { Origin: 'http://localhost:13102' },
+      data: { name: 'WS05 CRUD Original', email, phone: '5550100400', password: 'WS05-User-CRUD-2026!' },
+    })
+    expect(create.status()).toBe(200)
+    const createBody = await create.json() as { data: { id: number; email: string } }
+    expect(createBody.data.email).toBe(email)
+
+    const tenantAList = await tenantA.get(`${api}/users`)
+    expect(tenantAList.ok()).toBeTruthy()
+    const tenantAUsers = await tenantAList.json() as Array<{ id: number; name: string; email: string }>
+    const createdUser = tenantAUsers.find((user) => user.id === createBody.data.id)
+    expect(createdUser?.name).toBe('WS05 CRUD Original')
+    expect(tenantAUsers.some((user) => user.email === 'phase2a-owner-b@example.test')).toBe(false)
+
+    const foreignUpdate = await tenantA.put(`${api}/users/${foreignUser.id}`, {
+      headers: { Origin: 'http://localhost:13102' }, data: { name: 'Unauthorized Change', phone: '5550100499' },
+    })
+    expect(foreignUpdate.status()).toBe(404)
+    const foreignDelete = await tenantA.delete(`${api}/users/${foreignUser.id}`, { headers: { Origin: 'http://localhost:13102' } })
+    expect(foreignDelete.status()).toBe(404)
+    const foreignAfterResponse = await tenantB.get(`${api}/users`)
+    const foreignAfter = await foreignAfterResponse.json() as Array<{ id: number; name: string; email: string }>
+    expect(foreignAfter.find((user) => user.id === foreignUser.id)).toMatchObject({ name: foreignUser.name, email: foreignUser.email })
+
+    const update = await tenantA.put(`${api}/users/${createBody.data.id}`, {
+      headers: { Origin: 'http://localhost:13102' }, data: { name: 'WS05 CRUD Updated', phone: '5550100401' },
+    })
+    expect(update.status()).toBe(200)
+    const updatedList = await tenantA.get(`${api}/users`)
+    const updatedUsers = await updatedList.json() as Array<{ id: number; name: string; email: string }>
+    expect(updatedUsers.find((user) => user.id === createBody.data.id)?.name).toBe('WS05 CRUD Updated')
+
+    const deletion = await tenantA.delete(`${api}/users/${createBody.data.id}`, { headers: { Origin: 'http://localhost:13102' } })
+    expect(deletion.status()).toBe(200)
+    const finalList = await tenantA.get(`${api}/users`)
+    const finalUsers = await finalList.json() as Array<{ id: number }>
+    expect(finalUsers.some((user) => user.id === createBody.data.id)).toBe(false)
+  } finally {
+    await tenantA.dispose()
+    await tenantB.dispose()
+  }
+})
+
 async function loginWithContext(context: APIRequestContext, tenant: 'a' | 'b') {
   const response = await context.post(`${api}/auth/login`, {
     data: { email: `phase2a-owner-${tenant}@example.test`, password },

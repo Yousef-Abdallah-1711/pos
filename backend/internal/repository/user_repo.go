@@ -3,12 +3,16 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"log"
 
 	"golang.org/x/crypto/bcrypt"
 	"pos-saas/internal/domain"
 )
+
+// ErrUserNotFound indicates that a tenant-scoped user mutation found no matching user.
+var ErrUserNotFound = errors.New("user not found")
 
 // UserRepository handles user-related database operations
 type UserRepository struct {
@@ -410,7 +414,7 @@ func (r *UserRepository) UpdateUser(ctx context.Context, userID int64, tenantID 
 
 	if err == sql.ErrNoRows {
 		log.Printf("[UserRepository] ERROR: User not found: id=%d, tenant=%d\n", userID, tenantID)
-		return nil, fmt.Errorf("user not found")
+		return nil, ErrUserNotFound
 	}
 
 	if err != nil {
@@ -454,7 +458,7 @@ func (r *UserRepository) DeleteUser(ctx context.Context, userID int64, tenantID 
 
 	if rowsAffected == 0 {
 		log.Printf("[UserRepository] ERROR: User not found: id=%d, tenant=%d\n", userID, tenantID)
-		return fmt.Errorf("user not found")
+		return ErrUserNotFound
 	}
 
 	log.Printf("[UserRepository] User deleted successfully: id=%d\n", userID)

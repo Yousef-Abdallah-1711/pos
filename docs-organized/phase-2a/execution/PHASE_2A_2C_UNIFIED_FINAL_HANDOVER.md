@@ -87,3 +87,11 @@ At candidate `3bec0c85b21a8de2250dfaf99afab4ebd792ec97`, PR #9 remains open and 
 - The isolated project, its volumes, and its network were removed after verification. Existing untracked `frontend/apps/dashboard/test-results/` was preserved and excluded from the commit.
 - PR #9 remains OPEN at `c8cb9180551f6e9c8d3c81a9ff505495ee77c0d8` before this frontend commit, with both hosted checks successful and no independent review request/approval. No review, merge, persistent migration, or main-based Docker release occurred.
 - C006 and C012 remain **PARTIAL**. Phase 2A/2C remain **PARTIAL**; browser results are fresh evidence for these journeys, not full route-matrix or performance acceptance. Production remains **NO-GO**.
+
+## Authenticated user CRUD isolation follow-up — 2026-11-07
+
+- Active `/api/v1/users` create/list/update/delete behavior now has a two-tenant browser/API journey. Tenant A can create, list, update, and delete its user; its list excludes Tenant B's user. Tenant A's update and delete against Tenant B's user return 404, and Tenant B's row remains unchanged.
+- `UserRepository` now returns a typed `ErrUserNotFound` for scoped update/delete misses, and the active route handlers translate it to HTTP 404 instead of 500.
+- Against the isolated `pos-user-crud-e2e-20261107` project and fresh PostgreSQL 15 cluster: the new user CRUD journey passed; the full Phase 2A Playwright suite passed **12/12**. Dashboard `pnpm run typecheck:test` passed.
+- Fresh backend checks passed on the same source: `go build ./...`, `go vet ./...`, and `go test -json -p 1 -count=1 ./...` (**878 passed, 2 skipped, 0 failed**) against a separate fresh `pos_phase2a_test` database after migrations 1–165 and the legacy theme migration. The test fixture connection used the disposable cluster's postgres administrator; restricted-role RLS evidence remains the separate earlier pilot.
+- C006 user CRUD coverage is now implemented and tested, but role-permission route combinations and other families remain open; C006 is **PARTIAL**. C012 and Phase 2A/2C remain **PARTIAL**. The disposable stack, database volumes, and network were removed after verification.
