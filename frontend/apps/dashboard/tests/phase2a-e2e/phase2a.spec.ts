@@ -49,6 +49,7 @@ test('tenant A cannot see or mutate tenant B products', async ({ page }) => {
 test('authenticated user CRUD is tenant-scoped and foreign IDs leave rows unchanged', async ({ page }) => {
   const tenantA = await request.newContext()
   const tenantB = await request.newContext()
+  const employee = await request.newContext()
   try {
     await loginWithContext(tenantA, 'a')
     await loginWithContext(tenantB, 'b')
@@ -94,12 +95,36 @@ test('authenticated user CRUD is tenant-scoped and foreign IDs leave rows unchan
     const updatedUsers = await updatedList.json() as Array<{ id: number; name: string; email: string }>
     expect(updatedUsers.find((user) => user.id === createBody.data.id)?.name).toBe('WS05 CRUD Updated')
 
+    const employeeLogin = await employee.post(`${api}/auth/login`, {
+      headers: { Origin: 'http://localhost:13102' },
+      data: { email, password: 'WS05-User-CRUD-2026!' },
+    })
+    expect(employeeLogin.ok()).toBeTruthy()
+    const employeeAuth = await employeeLogin.json() as { user: { id: number } }
+    const employeeList = await employee.get(`${api}/users`)
+    expect(employeeList.status()).toBe(403)
+    const employeeCreate = await employee.post(`${api}/users`, {
+      headers: { Origin: 'http://localhost:13102' },
+      data: { name: 'Unauthorized Employee', email: `ws05-employee-forbidden-${Date.now()}@example.test`, phone: '5550100402', password: 'WS05-Forbidden-2026!' },
+    })
+    expect(employeeCreate.status()).toBe(403)
+    const employeeUpdate = await employee.put(`${api}/users/${employeeAuth.user.id}`, {
+      headers: { Origin: 'http://localhost:13102' }, data: { name: 'Unauthorized Employee Update', phone: '5550100498' },
+    })
+    expect(employeeUpdate.status()).toBe(403)
+    const employeeDelete = await employee.delete(`${api}/users/${employeeAuth.user.id}`, { headers: { Origin: 'http://localhost:13102' } })
+    expect(employeeDelete.status()).toBe(403)
+    const afterEmployeeAttempts = await tenantA.get(`${api}/users`)
+    const afterEmployeeUsers = await afterEmployeeAttempts.json() as Array<{ id: number; name: string; email: string }>
+    expect(afterEmployeeUsers.find((user) => user.id === employeeAuth.user.id)).toMatchObject({ name: 'WS05 CRUD Updated', email })
+
     const deletion = await tenantA.delete(`${api}/users/${createBody.data.id}`, { headers: { Origin: 'http://localhost:13102' } })
     expect(deletion.status()).toBe(200)
     const finalList = await tenantA.get(`${api}/users`)
     const finalUsers = await finalList.json() as Array<{ id: number }>
     expect(finalUsers.some((user) => user.id === createBody.data.id)).toBe(false)
   } finally {
+    await employee.dispose()
     await tenantA.dispose()
     await tenantB.dispose()
   }

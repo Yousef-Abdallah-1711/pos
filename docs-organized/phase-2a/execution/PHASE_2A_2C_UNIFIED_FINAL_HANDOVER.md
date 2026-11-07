@@ -108,3 +108,10 @@ At candidate `3bec0c85b21a8de2250dfaf99afab4ebd792ec97`, PR #9 remains open and 
 - Corrected payment-status missing-order handling to return 404 for out-of-scope orders.
 - Fresh PostgreSQL 15 verification passed the focused order isolation test and full `go test -json -p 1 -count=1 ./...` (**973 passed, 2 skipped, 0 failed**); `go build ./...` and `go vet ./...` also passed. The disposable database container was removed.
 - Remaining order acceptance still includes public token lifecycle, payment transitions for owned orders, and broader concurrent HTTP and permission combinations. C006, C012, and Phase 2A/2C remain **PARTIAL**; production remains **NO-GO**.
+
+## Enforced RBAC browser acceptance follow-up — 2026-11-07
+
+- The isolated four-frontend Compose stack now sets `RBAC_ENFORCEMENT=enforce` explicitly, and startup logs confirmed the API entered enforce mode.
+- Extended the authenticated user CRUD journey to authenticate the created employee and assert that employee list/create/update/delete requests all return 403 without changing the employee row. The existing owner CRUD and foreign-ID 404/no-side-effect assertions still pass.
+- Fresh isolated stack verification passed the focused user CRUD test and the complete Playwright suite (**12/12**) with enforcement enabled. Dashboard `pnpm run typecheck:test` also passed. Two first-run lifecycle failures passed both focused reruns and the subsequent complete run; no product code change was needed for them.
+- Only the `pos-rbac-enforced-e2e-20261107` disposable project, its volumes, and its external network are eligible for teardown. C004's test-stack enforcement requirement now has browser evidence; the application-wide default remains audit, so production enforcement is not claimed. C006, C012, Phase 2A/2C remain **PARTIAL**, and production remains **NO-GO**.

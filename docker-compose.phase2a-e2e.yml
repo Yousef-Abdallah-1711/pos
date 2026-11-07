@@ -113,6 +113,7 @@ services:
     environment:
       PORT: 18080
       ENV: phase2a-e2e
+      RBAC_ENFORCEMENT: enforce
       DB_HOST: postgres
       DB_PORT: 5432
       DB_USER: pos_app
