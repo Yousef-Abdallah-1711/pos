@@ -152,3 +152,73 @@ func TestWebhookRetryWorkerPostgresClaimsAndCompletesEachCallbackOnce(t *testing
 		t.Fatalf("claim after both callbacks completed = %v, want sql.ErrNoRows", err)
 	}
 }
+
+func TestWebhookRetryWorkerPostgresPersistsBackoffAfterFailure(t *testing.T) {
+	if os.Getenv(testdb.EnvVar) == "" {
+		t.Skipf("set %s to an isolated disposable PostgreSQL database", testdb.EnvVar)
+	}
+	db, err := sql.Open("postgres", testdb.URL(t))
+	if err != nil {
+		t.Fatalf("open disposable PostgreSQL: %v", err)
+	}
+	t.Cleanup(func() {
+		if err := db.Close(); err != nil {
+			t.Errorf("close disposable PostgreSQL: %v", err)
+		}
+	})
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+	if err := db.PingContext(ctx); err != nil {
+		t.Fatalf("connect to disposable PostgreSQL: %v", err)
+	}
+
+	var deliveryCount int
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		deliveryCount++
+		http.Error(w, "temporary provider failure", http.StatusServiceUnavailable)
+	}))
+	defer server.Close()
+
+	queue := NewWebhookRetryQueue(db)
+	id, err := queue.Enqueue(ctx, server.URL+"/paymob", []byte(`{"event":"retry-backoff-test"}`), "initial timeout")
+	if err != nil {
+		t.Fatalf("enqueue retry fixture: %v", err)
+	}
+	if _, err := db.ExecContext(ctx, `UPDATE webhook_retry_queue SET next_retry_at = NOW() WHERE id = $1`, id); err != nil {
+		t.Fatalf("make retry fixture due: %v", err)
+	}
+	t.Cleanup(func() {
+		if _, err := db.Exec(`DELETE FROM webhook_retry_queue WHERE id = $1`, id); err != nil {
+			t.Errorf("delete retry fixture %d: %v", id, err)
+		}
+	})
+	worker := NewWebhookRetryWorker(db, server.URL, NewPaymentWebhookMonitor(5), nil)
+	worker.httpClient = server.Client()
+	record, err := worker.claimOne(ctx)
+	if err != nil {
+		t.Fatalf("claim due retry: %v", err)
+	}
+	if record.ID != id {
+		t.Fatalf("claimed row id=%d, want fixture %d", record.ID, id)
+	}
+	worker.processRecord(ctx, record)
+
+	var status, lastError string
+	var attempts int
+	var backoffPending bool
+	if err := db.QueryRowContext(ctx, `
+		SELECT status, attempts, COALESCE(last_error, ''), next_retry_at > NOW()
+		FROM webhook_retry_queue WHERE id = $1
+	`, id).Scan(&status, &attempts, &lastError, &backoffPending); err != nil {
+		t.Fatalf("read retry after provider failure: %v", err)
+	}
+	if status != webhookRetryStatusPending || attempts != 1 || !backoffPending || lastError != "retry returned status 503" {
+		t.Fatalf("failed retry state = status %q attempts %d backoff=%v error=%q", status, attempts, backoffPending, lastError)
+	}
+	if deliveryCount != 1 {
+		t.Fatalf("failed callback deliveries=%d, want 1", deliveryCount)
+	}
+	if _, err := worker.claimOne(ctx); err != sql.ErrNoRows {
+		t.Fatalf("claim before backoff elapses = %v, want sql.ErrNoRows", err)
+	}
+}

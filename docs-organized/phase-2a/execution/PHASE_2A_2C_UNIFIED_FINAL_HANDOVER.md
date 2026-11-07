@@ -141,3 +141,9 @@ At candidate `3bec0c85b21a8de2250dfaf99afab4ebd792ec97`, PR #9 remains open and 
 - Added `TestWebhookRetryWorkerPostgresClaimsAndCompletesEachCallbackOnce` against disposable PostgreSQL. Two concurrent workers claim distinct global queue rows via `FOR UPDATE SKIP LOCKED`, each callback reaches the local test endpoint exactly once, and both rows persist `success`, one attempt, and a cleared error. A subsequent claim finds no completed rows.
 - Focused service integration passed. Fresh backend build, vet, and full regression passed after migrations 1–165 and `999_theme_migration_legacy.sql`: `go build ./...`, `go vet ./...`, and `go test -json -p 1 -count=1 ./...` (**975 passed, 2 skipped, 0 failed**). The tmpfs PostgreSQL container was removed; `pos-dev` remained running.
 - This improves C008 retry-worker claim/delivery evidence and is consistent with C011's `GLOBAL / SYSTEM_QUEUE` classification. Backoff/recovery, provider/local-commit reconciliation, and payment-provider acceptance remain open. C008, C012, Phase 2A/2C remain **PARTIAL**; production remains **NO-GO**.
+
+## Webhook retry backoff follow-up — 2026-11-07
+
+- Added `TestWebhookRetryWorkerPostgresPersistsBackoffAfterFailure`: a disposable local endpoint returns 503; the worker records one attempt and the failure reason, returns the row to `pending`, assigns a future retry time, and does not reclaim it before the backoff expires.
+- Both retry-worker integration tests passed against a fresh tmpfs PostgreSQL 15 database after migrations 1–165 and migration 999. Fresh `go build ./...`, `go vet ./...`, and full `go test -json -p 1 -count=1 ./...` passed (**976 passed, 2 skipped, 0 failed**). The disposable container was removed; `pos-dev` remained running.
+- Retry exhaustion after multiple attempts, provider/local-commit reconciliation, and broader Paymob acceptance remain open. C008, C012, and Phase 2A/2C remain **PARTIAL**; production remains **NO-GO**.
