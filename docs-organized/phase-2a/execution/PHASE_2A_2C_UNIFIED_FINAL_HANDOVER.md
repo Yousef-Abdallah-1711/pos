@@ -145,8 +145,9 @@ At candidate `3bec0c85b21a8de2250dfaf99afab4ebd792ec97`, PR #9 remains open and 
 ## Webhook retry backoff follow-up — 2026-11-07
 
 - Added `TestWebhookRetryWorkerPostgresPersistsBackoffAfterFailure`: a disposable local endpoint returns 503; the worker records one attempt and the failure reason, returns the row to `pending`, assigns a future retry time, and does not reclaim it before the backoff expires.
-- Both retry-worker integration tests passed against a fresh tmpfs PostgreSQL 15 database after migrations 1–165 and migration 999. Fresh `go build ./...`, `go vet ./...`, and full `go test -json -p 1 -count=1 ./...` passed (**976 passed, 2 skipped, 0 failed**). The disposable container was removed; `pos-dev` remained running.
-- Retry exhaustion after multiple attempts, provider/local-commit reconciliation, and broader Paymob acceptance remain open. C008, C012, and Phase 2A/2C remain **PARTIAL**; production remains **NO-GO**.
+- Added `TestWebhookRetryWorkerPostgresExhaustsConfiguredAttempts`: two consecutive 503 deliveries with a configured maximum of two attempts leave the row `failed` at attempt 2, and the worker cannot claim it again.
+- All three retry-worker integration tests passed against a fresh tmpfs PostgreSQL 15 database after migrations 1–165 and migration 999. Fresh `go build ./...`, `go vet ./...`, and full `go test -json -p 1 -count=1 ./...` passed (**980 passed, 2 skipped, 0 failed**). The disposable container was removed; `pos-dev` remained running.
+- Provider/local-commit reconciliation and broader Paymob acceptance remain open. C008, C012, and Phase 2A/2C remain **PARTIAL**; production remains **NO-GO**.
 
 ## Admin Orders history, stats, and export isolation follow-up — 2026-11-07
 
