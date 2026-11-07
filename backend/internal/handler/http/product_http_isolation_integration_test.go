@@ -203,6 +203,44 @@ func TestProductHTTPForgedScopeHeadersCannotDeleteForeignProducts(t *testing.T) 
 	}
 }
 
+func TestProductLowStockAlertsStayWithinJWTScope(t *testing.T) {
+	if os.Getenv(testdb.EnvVar) == "" {
+		t.Skipf("set %s to an isolated disposable PostgreSQL database", testdb.EnvVar)
+	}
+	db := openProductHTTPTestDB(t)
+	fixture := seedProductHTTPFixture(t, db)
+	for _, productID := range []int{fixture.productA1, fixture.productA2, fixture.productB1} {
+		if _, err := db.Exec(`UPDATE products SET track_inventory = true, quantity_in_stock = 1, low_stock_threshold = 5 WHERE id = $1`, productID); err != nil {
+			t.Fatalf("make product %d eligible for low-stock alert: %v", productID, err)
+		}
+	}
+	handler, tokens, token := newProductHTTPIsolationAuth(t, db, fixture)
+	request := httptest.NewRequest(http.MethodGet, "/api/v1/products/alerts/low-stock", nil)
+	request.Header.Set("Authorization", "Bearer "+token)
+	request.Header.Set("X-Tenant-ID", strconv.Itoa(fixture.tenantB))
+	request.Header.Set("X-Restaurant-ID", strconv.Itoa(fixture.restaurantB1))
+	secured := middleware.AuthMiddleware(tokens)(middleware.NewTenantContextMiddleware(
+		middleware.SQLRestaurantVerifier{DB: db},
+	)(http.HandlerFunc(handler.GetLowStockAlerts)))
+	response := httptest.NewRecorder()
+	secured.ServeHTTP(response, request)
+	if response.Code != http.StatusOK {
+		t.Fatalf("forged-scope low-stock alert status = %d, want %d: %s", response.Code, http.StatusOK, response.Body.String())
+	}
+	var result struct {
+		Count    int `json:"count"`
+		Products []struct {
+			ID int `json:"id"`
+		} `json:"products"`
+	}
+	if err := json.NewDecoder(response.Body).Decode(&result); err != nil {
+		t.Fatalf("decode low-stock alert response: %v", err)
+	}
+	if result.Count != 1 || len(result.Products) != 1 || result.Products[0].ID != fixture.productA1 {
+		t.Fatalf("low-stock alert product IDs = %v (count %d), want only JWT-scoped product %d", result.Products, result.Count, fixture.productA1)
+	}
+}
+
 func openProductHTTPTestDB(t *testing.T) *sql.DB {
 	t.Helper()
 	db, err := sql.Open("postgres", testdb.URL(t))
