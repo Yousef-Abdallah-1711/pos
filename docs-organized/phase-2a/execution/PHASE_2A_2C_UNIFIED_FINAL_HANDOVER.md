@@ -67,3 +67,9 @@ Phase 2A and Phase 2C remain **PARTIAL**. C006 and C012 remain **PARTIAL**. Play
 - Added authenticated HTTP coverage for active RBAC role list/get/update/delete handlers. The list returns only the JWT restaurant's role when headers forge a sibling restaurant and foreign tenant; foreign/sibling role IDs return 404 for reads and writes, and state assertions confirm no update or deactivation occurred.
 - Focused test and full Go suite passed against the disposable PostgreSQL database. The isolated stack was removed by project name; persistent development services remain running.
 - This does not close user CRUD, role permission assignment levels, all route×role combinations, or C006/C012. No change to the open review, merge, or main-based delivery gates.
+
+## RBAC user-role assignment isolation follow-up — 2026-11-07
+
+- Added authenticated tests for role assignment and removal with forged cross-scope IDs. Assigning to sibling/foreign users and assigning sibling/foreign roles are denied; removing seeded sibling/foreign assignments is denied and leaves all rows intact.
+- Focused tests and full `go test -p 1 -count=1 ./...` passed against fresh tmpfs PostgreSQL 15 after all migrations. The dedicated test stack and network were removed; existing development services remain running.
+- User CRUD and role-permission level/route permission matrices remain open. C006 and C012 remain partial; hosted checks and independent review need refresh on the next pushed head.

@@ -128,3 +128,9 @@ The fresh run supersedes the prior statement above that no browser journeys had 
 - Added `TestRBACRoleHTTPRejectsForeignIDsWithoutSideEffects` for authenticated list/get/update/delete on the active RBAC role handler. The forged-header list remained claim-scoped; sibling and foreign role IDs returned 404 with database state unchanged.
 - The focused case and full Go suite passed on the fresh disposable PostgreSQL 15 stack. The route tests exercise handler auth and tenant-context middleware; application route permission-level combinations remain a separate gap.
 - Users/roles C006 remains partial: user CRUD, role assignment/remove routes, role permission levels, and the broader route/persona matrix remain open.
+
+## RBAC user-role assignment HTTP isolation follow-up — 2026-11-07
+
+- Added `TestRBACUserRoleHTTPRejectsForeignReferencesWithoutSideEffects`: authenticated assignment to a sibling/foreign tenant user or sibling/foreign role returns 404; removing seeded foreign/sibling assignments is denied. The seeded assignments remain unchanged.
+- The focused test and full Go suite passed against a fresh tmpfs PostgreSQL 15 database after migrations 1–165 and the legacy migration. `go vet ./...` remains to be refreshed at the resulting candidate head.
+- This test uses auth and tenant-context middleware; it does not close role-level permission acceptance, user CRUD, or the complete registered-route × role matrix. C006 and C012 remain partial.
