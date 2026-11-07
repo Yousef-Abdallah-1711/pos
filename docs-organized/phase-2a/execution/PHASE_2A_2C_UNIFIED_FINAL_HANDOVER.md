@@ -122,3 +122,10 @@ At candidate `3bec0c85b21a8de2250dfaf99afab4ebd792ec97`, PR #9 remains open and 
 - Fixed Admin Orders error mapping so the repository's lock-time `invalid status transition` conflict returns HTTP 400 instead of HTTP 500.
 - Fresh disposable PostgreSQL 15 verification applied migrations 1–165 and `999_theme_migration_legacy.sql`, then passed the focused order scope/concurrency tests, `go build ./...`, `go vet ./...`, and `go test -json -p 1 -count=1 ./...` (**974 passed, 2 skipped, 0 failed**). The tmpfs container was removed; `pos-dev` remained running.
 - This closes the competing owned-order status-transition HTTP case only. Public token lifecycle, order items/bulk, and foreign-scope concurrency remain open. C006, C012, Phase 2A/2C remain **PARTIAL**; production remains **NO-GO**.
+
+## Public order token browser follow-up — 2026-11-07
+
+- Extended the isolated storefront checkout journey to verify the create-once tracking token is stored locally by order ID and number and never appears in the URL.
+- Missing and invalid tokens receive 404 for tracking and cancellation. The valid token permits tracking and cancellation; the final status is `cancelled`. The existing phone-protected order-number lookup still succeeds.
+- Dashboard test-source typecheck passed. The focused storefront checkout test passed, and the warmed full four-frontend Playwright suite passed **12/12** on the isolated `pos-public-token-e2e-20261107` stack. Two cold-run auth/Super Admin flakes passed on focused rerun and the final full rerun passed.
+- This improves C005 browser coverage but leaves the customer track-page UI, cross-tenant/sibling public token behavior, and rate-limit E2E checks open. C005 browser acceptance remains partial; C006, C012, Phase 2A/2C remain **PARTIAL**, and production remains **NO-GO**. The project's containers, volumes, and external network were removed; `pos-dev` remained running.

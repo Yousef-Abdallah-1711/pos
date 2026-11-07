@@ -266,6 +266,7 @@ test('storefront menu cart and checkout complete an order in the browser', async
   await expect(orderNumber).toBeVisible({ timeout: 30_000 })
   const orderNumberText = (await orderNumber.textContent())?.trim()
   expect(orderNumberText).toBeTruthy()
+  if (!orderNumberText) throw new Error('Checkout did not return an order number')
   const lookup = await page.request.get(`${api}/public/orders/number/${orderNumberText}/lookup`, {
     headers: {
       'X-Tenant-ID': String(fixtureProduct.tenant_id),
@@ -276,6 +277,47 @@ test('storefront menu cart and checkout complete an order in the browser', async
   expect(lookup.ok()).toBeTruthy()
   const order = await lookup.json()
   expect(order.data?.customer_name || order.data?.customerName).toBe('WS05 Browser Checkout')
+  const orderId = order.data?.id as number
+  expect(orderId).toBeTruthy()
+  const rememberedToken = await page.evaluate(({ number, id }) => {
+    const store = JSON.parse(localStorage.getItem('order-access-tokens') || '{}')
+    return { byId: store.byId?.[String(id)], byNumber: store.byNumber?.[number] }
+  }, { number: orderNumberText, id: orderId })
+  expect(rememberedToken.byNumber).toBeTruthy()
+  expect(rememberedToken.byId).toBe(rememberedToken.byNumber)
+  expect(page.url()).not.toContain(rememberedToken.byNumber)
+
+  const orderPath = `${api}/public/orders/${orderId}`
+  const scopedHeaders = {
+    'X-Tenant-ID': String(fixtureProduct.tenant_id),
+    'X-Restaurant-ID': String(fixtureProduct.restaurant_id),
+  }
+  const noTokenTrack = await page.request.get(`${orderPath}/track`, { headers: scopedHeaders })
+  expect(noTokenTrack.status()).toBe(404)
+  const wrongTokenTrack = await page.request.get(`${orderPath}/track`, {
+    headers: { ...scopedHeaders, 'X-Order-Token': 'incorrect-public-order-token' },
+  })
+  expect(wrongTokenTrack.status()).toBe(404)
+  const validTrack = await page.request.get(`${orderPath}/track`, {
+    headers: { ...scopedHeaders, 'X-Order-Token': rememberedToken.byNumber },
+  })
+  expect(validTrack.ok()).toBeTruthy()
+  expect((await validTrack.json()).data.order_number).toBe(orderNumberText)
+  const unauthorizedCancel = await page.request.delete(orderPath, {
+    headers: { ...scopedHeaders, 'X-Order-Token': 'incorrect-public-order-token' },
+    data: { reason: 'unauthorized token test' },
+  })
+  expect(unauthorizedCancel.status()).toBe(404)
+  const authorizedCancel = await page.request.delete(orderPath, {
+    headers: { ...scopedHeaders, 'X-Order-Token': rememberedToken.byNumber },
+    data: { reason: 'public order token lifecycle test' },
+  })
+  expect(authorizedCancel.ok()).toBeTruthy()
+  const cancelledStatus = await page.request.get(`${orderPath}/status`, {
+    headers: { ...scopedHeaders, 'X-Order-Token': rememberedToken.byNumber },
+  })
+  expect(cancelledStatus.ok()).toBeTruthy()
+  expect((await cancelledStatus.json()).data.status).toBe('cancelled')
   expect(legacyThemeLookupCount).toBe(0)
 })
 
