@@ -116,3 +116,9 @@ The fresh run supersedes the prior statement above that no browser journeys had 
 - `TestInventoryAdjustmentHTTPRejectsForeignProductsWithoutSideEffects` now requires explicit `POS_TEST_DATABASE_URL`; without it, the test skips instead of connecting to its localhost default.
 - Full Go verification passed: `go build ./...`, `go vet ./...`, and `go test -p 1 -count=1 ./...` using Go 1.24 and a fresh tmpfs PostgreSQL 15 database with migrations through 165 plus `999_theme_migration_legacy.sql`. The HTTP handler and repository packages passed in 1.665s and 1.369s respectively.
 - This update does not close C006 or C012. Product bulk/role coverage, other resource-family route gaps, complete transaction-aware RLS architecture, remaining policies, and rollback rehearsal remain open. Browser tests, four-app production builds, hosted CI, review, merge, and main-based Docker delivery were not refreshed by this change.
+
+## Inventory report isolation follow-up — 2026-11-07
+
+- Added `TestInventoryReportsStayWithinJWTScope` for both supported authenticated inventory report routes. Against disposable PostgreSQL, the turnover report and financial valuation report excluded sibling-restaurant and foreign-tenant products despite forged tenant/restaurant headers.
+- Full `go test -p 1 -count=1 ./...` passed with the new integration test and the same candidate source. A first no-database invocation skipped the guarded test as expected; the real acceptance run used the isolated tmpfs database.
+- There is no registered inventory movement read route in the supported API, so movement read coverage remains inapplicable until an approved route exists. Broader inventory role, resource-family, C006, and C012 closure remains outstanding.

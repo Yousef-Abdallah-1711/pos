@@ -54,3 +54,10 @@ Phase 2A and Phase 2C remain **PARTIAL**. C006 and C012 remain **PARTIAL**. Play
 - Fresh candidate verification: `go build ./...`, `go vet ./...`, and `go test -p 1 -count=1 ./...` passed against a new tmpfs PostgreSQL 15 database with migrations 1–165 and `999_theme_migration_legacy.sql`. Focused product, category-reference, and inventory no-side-effect tests passed. The test stack was torn down by its unique project name; `pos-backend`, `pos-postgres`, and `pos-redis` remain running.
 - PR #9 head is `689cf0ccdc33b30ecccfac765ee77780bd46409f`; hosted checks were still running at the last refresh. No independent review request or approval is recorded. `origin/main` remains `d84120559db36e8e9e7fdb73872a30cbc9d4e6e7`.
 - C006 and C012 remain partial. This follow-up does not add product bulk/role coverage, complete route-family coverage, scoped transaction conversion, RLS family policies, or rollback rehearsal. Frontend verification and 11/11 browser evidence predate this candidate. No persistent DB migration, merge, or main-based delivery occurred.
+
+## Inventory report isolation follow-up — 2026-11-07
+
+- Added authenticated scope coverage for the two registered inventory read routes: `/api/v1/reports/inventory` and `/api/v1/reports/financial/inventory-valuation`. Both return only the JWT restaurant's tracked product when request headers name a sibling restaurant and foreign tenant.
+- The inventory movement repository has no registered HTTP read route in the supported build; no route was invented for test coverage.
+- The focused test and full backend Go suite passed against a fresh disposable PostgreSQL 15 tmpfs database after migrations 1–165 and `999_theme_migration_legacy.sql`. The named test containers and network were removed; the existing `pos-backend`, `pos-postgres`, and `pos-redis` services remain running.
+- This adds evidence for two active inventory reads but does not close C006 or C012. Route-role, remaining resource-family, transaction/RLS policy, rollback, frontend/browser refresh, review, merge, and main-based Docker gates remain open.
