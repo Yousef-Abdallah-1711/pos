@@ -134,3 +134,5 @@ The fresh run supersedes the prior statement above that no browser journeys had 
 - Added `TestRBACUserRoleHTTPRejectsForeignReferencesWithoutSideEffects`: authenticated assignment to a sibling/foreign tenant user or sibling/foreign role returns 404; removing seeded foreign/sibling assignments is denied. The seeded assignments remain unchanged.
 - The focused test and full Go suite passed against a fresh tmpfs PostgreSQL 15 database after migrations 1–165 and the legacy migration. `go vet ./...` remains to be refreshed at the resulting candidate head.
 - This test uses auth and tenant-context middleware; it does not close role-level permission acceptance, user CRUD, or the complete registered-route × role matrix. C006 and C012 remain partial.
+
+At candidate `3bec0c85b21a8de2250dfaf99afab4ebd792ec97`, `go vet ./...` passed; the full Go suite passed against disposable PostgreSQL after all migrations; PR #9 hosted checks both pass. No frontend, browser, persistent-DB, reviewer, merge, or main-based Docker gate was refreshed by the RBAC follow-up.

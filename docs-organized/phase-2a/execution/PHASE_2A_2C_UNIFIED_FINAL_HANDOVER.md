@@ -73,3 +73,7 @@ Phase 2A and Phase 2C remain **PARTIAL**. C006 and C012 remain **PARTIAL**. Play
 - Added authenticated tests for role assignment and removal with forged cross-scope IDs. Assigning to sibling/foreign users and assigning sibling/foreign roles are denied; removing seeded sibling/foreign assignments is denied and leaves all rows intact.
 - Focused tests and full `go test -p 1 -count=1 ./...` passed against fresh tmpfs PostgreSQL 15 after all migrations. The dedicated test stack and network were removed; existing development services remain running.
 - User CRUD and role-permission level/route permission matrices remain open. C006 and C012 remain partial; hosted checks and independent review need refresh on the next pushed head.
+
+## Latest hosted status — 2026-11-07
+
+At candidate `3bec0c85b21a8de2250dfaf99afab4ebd792ec97`, PR #9 remains open and both hosted checks (`runtime-localhost-guardrail`, `url-domain-config-smoke`) pass. GitHub has no review request or approval. The repository owner must invite an eligible independent reviewer and request that review; do not self-approve or bypass branch protection. `origin/main` remains `d84120559db36e8e9e7fdb73872a30cbc9d4e6e7`. No merge, persistent database migration, or main-based Docker delivery occurred.
