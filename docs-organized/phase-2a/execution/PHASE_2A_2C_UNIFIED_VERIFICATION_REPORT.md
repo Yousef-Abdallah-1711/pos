@@ -122,3 +122,9 @@ The fresh run supersedes the prior statement above that no browser journeys had 
 - Added `TestInventoryReportsStayWithinJWTScope` for both supported authenticated inventory report routes. Against disposable PostgreSQL, the turnover report and financial valuation report excluded sibling-restaurant and foreign-tenant products despite forged tenant/restaurant headers.
 - Full `go test -p 1 -count=1 ./...` passed with the new integration test and the same candidate source. A first no-database invocation skipped the guarded test as expected; the real acceptance run used the isolated tmpfs database.
 - There is no registered inventory movement read route in the supported API, so movement read coverage remains inapplicable until an approved route exists. Broader inventory role, resource-family, C006, and C012 closure remains outstanding.
+
+## RBAC role HTTP isolation follow-up — 2026-11-07
+
+- Added `TestRBACRoleHTTPRejectsForeignIDsWithoutSideEffects` for authenticated list/get/update/delete on the active RBAC role handler. The forged-header list remained claim-scoped; sibling and foreign role IDs returned 404 with database state unchanged.
+- The focused case and full Go suite passed on the fresh disposable PostgreSQL 15 stack. The route tests exercise handler auth and tenant-context middleware; application route permission-level combinations remain a separate gap.
+- Users/roles C006 remains partial: user CRUD, role assignment/remove routes, role permission levels, and the broader route/persona matrix remain open.

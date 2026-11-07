@@ -61,3 +61,9 @@ Phase 2A and Phase 2C remain **PARTIAL**. C006 and C012 remain **PARTIAL**. Play
 - The inventory movement repository has no registered HTTP read route in the supported build; no route was invented for test coverage.
 - The focused test and full backend Go suite passed against a fresh disposable PostgreSQL 15 tmpfs database after migrations 1–165 and `999_theme_migration_legacy.sql`. The named test containers and network were removed; the existing `pos-backend`, `pos-postgres`, and `pos-redis` services remain running.
 - This adds evidence for two active inventory reads but does not close C006 or C012. Route-role, remaining resource-family, transaction/RLS policy, rollback, frontend/browser refresh, review, merge, and main-based Docker gates remain open.
+
+## RBAC role isolation follow-up — 2026-11-07
+
+- Added authenticated HTTP coverage for active RBAC role list/get/update/delete handlers. The list returns only the JWT restaurant's role when headers forge a sibling restaurant and foreign tenant; foreign/sibling role IDs return 404 for reads and writes, and state assertions confirm no update or deactivation occurred.
+- Focused test and full Go suite passed against the disposable PostgreSQL database. The isolated stack was removed by project name; persistent development services remain running.
+- This does not close user CRUD, role permission assignment levels, all route×role combinations, or C006/C012. No change to the open review, merge, or main-based delivery gates.
