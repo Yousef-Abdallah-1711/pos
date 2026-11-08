@@ -1313,7 +1313,7 @@ func (r *AccountingAdvancedRepository) GetHRCostAnalysis(tenantID, restaurantID 
 	}, nil
 }
 
-func (r *AccountingAdvancedRepository) CreateEInvoiceSubmission(item *domain.EInvoiceSubmission) (int, error) {
+func (r *AccountingAdvancedRepository) CreateEInvoiceSubmission(ctx context.Context, item *domain.EInvoiceSubmission) (int, error) {
 	if item == nil {
 		return 0, errors.New("e-invoice payload is required")
 	}
@@ -1321,75 +1321,79 @@ func (r *AccountingAdvancedRepository) CreateEInvoiceSubmission(item *domain.EIn
 		item.ResponsePayload = []byte("{}")
 	}
 	var id int
-	err := r.db.QueryRow(`
-		INSERT INTO e_invoice_submissions (
-			tenant_id, restaurant_id, invoice_type, invoice_id, eta_uuid,
-			status, submitted_at, response_payload, error_message, created_by
-		) VALUES (
-			$1, $2, $3, $4, $5,
-			$6, COALESCE($7, CURRENT_TIMESTAMP), $8, $9, $10
-		)
-		RETURNING id
-	`,
-		item.TenantID,
-		item.RestaurantID,
-		item.InvoiceType,
-		item.InvoiceID,
-		nullString(item.ETAUUID),
-		defaultString(item.Status, "pending"),
-		nullTime(item.SubmittedAt),
-		item.ResponsePayload,
-		nullString(item.ErrorMessage),
-		item.CreatedBy,
-	).Scan(&id)
+	err := database.WithTenantTx(ctx, r.db, int64(item.TenantID), int64(item.RestaurantID), func(tx *sql.Tx) error {
+		return tx.QueryRowContext(ctx, `
+			INSERT INTO e_invoice_submissions (
+				tenant_id, restaurant_id, invoice_type, invoice_id, eta_uuid,
+				status, submitted_at, response_payload, error_message, created_by
+			) VALUES (
+				$1, $2, $3, $4, $5,
+				$6, COALESCE($7, CURRENT_TIMESTAMP), $8, $9, $10
+			)
+			RETURNING id
+		`,
+			item.TenantID,
+			item.RestaurantID,
+			item.InvoiceType,
+			item.InvoiceID,
+			nullString(item.ETAUUID),
+			defaultString(item.Status, "pending"),
+			nullTime(item.SubmittedAt),
+			item.ResponsePayload,
+			nullString(item.ErrorMessage),
+			item.CreatedBy,
+		).Scan(&id)
+	})
 	if err != nil {
 		return 0, err
 	}
 	return id, nil
 }
 
-func (r *AccountingAdvancedRepository) ListEInvoiceSubmissions(tenantID, restaurantID int) ([]domain.EInvoiceSubmission, error) {
-	rows, err := r.db.Query(`
-		SELECT
-			id, tenant_id, restaurant_id, invoice_type, invoice_id, COALESCE(eta_uuid, ''),
-			status, submitted_at, response_payload, COALESCE(error_message, ''), created_by
-		FROM e_invoice_submissions
-		WHERE tenant_id = $1 AND restaurant_id = $2
-		ORDER BY submitted_at DESC, id DESC
-	`, tenantID, restaurantID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
+func (r *AccountingAdvancedRepository) ListEInvoiceSubmissions(ctx context.Context, tenantID, restaurantID int) ([]domain.EInvoiceSubmission, error) {
 	out := make([]domain.EInvoiceSubmission, 0)
-	for rows.Next() {
-		var (
-			item      domain.EInvoiceSubmission
-			createdBy sql.NullInt64
-		)
-		if err := rows.Scan(
-			&item.ID,
-			&item.TenantID,
-			&item.RestaurantID,
-			&item.InvoiceType,
-			&item.InvoiceID,
-			&item.ETAUUID,
-			&item.Status,
-			&item.SubmittedAt,
-			&item.ResponsePayload,
-			&item.ErrorMessage,
-			&createdBy,
-		); err != nil {
-			return nil, err
+	err := database.WithTenantTx(ctx, r.db, int64(tenantID), int64(restaurantID), func(tx *sql.Tx) error {
+		rows, err := tx.QueryContext(ctx, `
+			SELECT
+				id, tenant_id, restaurant_id, invoice_type, invoice_id, COALESCE(eta_uuid, ''),
+				status, submitted_at, response_payload, COALESCE(error_message, ''), created_by
+			FROM e_invoice_submissions
+			WHERE tenant_id = $1 AND restaurant_id = $2
+			ORDER BY submitted_at DESC, id DESC
+		`, tenantID, restaurantID)
+		if err != nil {
+			return err
 		}
-		if createdBy.Valid {
-			val := int(createdBy.Int64)
-			item.CreatedBy = &val
+		defer rows.Close()
+		for rows.Next() {
+			var (
+				item      domain.EInvoiceSubmission
+				createdBy sql.NullInt64
+			)
+			if err := rows.Scan(
+				&item.ID,
+				&item.TenantID,
+				&item.RestaurantID,
+				&item.InvoiceType,
+				&item.InvoiceID,
+				&item.ETAUUID,
+				&item.Status,
+				&item.SubmittedAt,
+				&item.ResponsePayload,
+				&item.ErrorMessage,
+				&createdBy,
+			); err != nil {
+				return err
+			}
+			if createdBy.Valid {
+				val := int(createdBy.Int64)
+				item.CreatedBy = &val
+			}
+			out = append(out, item)
 		}
-		out = append(out, item)
-	}
-	if err := rows.Err(); err != nil {
+		return rows.Err()
+	})
+	if err != nil {
 		return nil, err
 	}
 	return out, nil

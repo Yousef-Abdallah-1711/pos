@@ -12,6 +12,7 @@ import (
 	"time"
 
 	_ "github.com/lib/pq"
+	"pos-saas/internal/domain"
 	"pos-saas/internal/pkg/database"
 )
 
@@ -39,12 +40,13 @@ func TestAccountingAdvancedAuditExportRLSWithRestrictedRuntimeRole(t *testing.T)
 		t.Fatalf("set admin search path: %v", err)
 	}
 	createAuditExportFixture(t, ctx, admin)
-	if _, err := admin.ExecContext(ctx, `GRANT USAGE ON SCHEMA `+schema+` TO pos_app; GRANT SELECT ON tenants, restaurants, users, invoices_customer, permission_audit_logs TO pos_app; GRANT SELECT, INSERT, UPDATE, DELETE ON audit_export_logs, invoice_delivery_logs TO pos_app; GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA `+schema+` TO pos_app`); err != nil {
+	if _, err := admin.ExecContext(ctx, `GRANT USAGE ON SCHEMA `+schema+` TO pos_app; GRANT SELECT ON tenants, restaurants, users, invoices_customer, invoices_supplier, permission_audit_logs TO pos_app; GRANT SELECT, INSERT, UPDATE, DELETE ON audit_export_logs, invoice_delivery_logs, e_invoice_submissions TO pos_app; GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA `+schema+` TO pos_app`); err != nil {
 		t.Fatalf("grant runtime fixture access: %v", err)
 	}
 	applyAuditExportMigration(t, ctx, admin)
 	applyInvoiceDeliveryMigration(t, ctx, admin)
 	applyPermissionAuditMigration(t, ctx, admin)
+	applyEInvoiceMigration(t, ctx, admin)
 
 	appURL = withSearchPath(t, appURL, schema)
 	app := openAuthAuditURL(t, appURL)
@@ -56,6 +58,7 @@ func TestAccountingAdvancedAuditExportRLSWithRestrictedRuntimeRole(t *testing.T)
 	seedAuditExportFixture(t, ctx, admin)
 	repository := NewAccountingAdvancedRepository(app, nil)
 	assertPermissionAuditExportScope(t, ctx, app, repository)
+	assertEInvoiceSubmissionRLS(t, ctx, app, repository)
 	if err := repository.LogAuditExport(ctx, 1, 11, 101, "orders", "csv", map[string]interface{}{"range": "today"}, 3); err != nil {
 		t.Fatalf("same-restaurant actor should write export log: %v", err)
 	}
@@ -78,9 +81,11 @@ func TestAccountingAdvancedAuditExportRLSWithRestrictedRuntimeRole(t *testing.T)
 	rollbackAuditExportRLS(t, ctx, admin)
 	rollbackInvoiceDeliveryRLS(t, ctx, admin)
 	rollbackPermissionAuditRLS(t, ctx, admin)
+	rollbackEInvoiceRLS(t, ctx, admin)
 	assertAuditExportRollback(t, ctx, app)
 	assertInvoiceDeliveryRollback(t, ctx, app)
 	assertPermissionAuditRollback(t, ctx, app)
+	assertEInvoiceRollback(t, ctx, app)
 }
 
 func createAuditExportFixture(t *testing.T, ctx context.Context, db *sql.DB) {
@@ -91,13 +96,26 @@ func createAuditExportFixture(t *testing.T, ctx context.Context, db *sql.DB) {
 		`CREATE TABLE users (id INT PRIMARY KEY, tenant_id INT NOT NULL REFERENCES tenants(id), restaurant_id INT NULL REFERENCES restaurants(id))`,
 		`ALTER TABLE users ADD COLUMN name TEXT, ADD COLUMN email TEXT`,
 		`CREATE TABLE invoices_customer (id INT PRIMARY KEY, tenant_id INT NOT NULL REFERENCES tenants(id), restaurant_id INT NOT NULL REFERENCES restaurants(id))`,
+		`CREATE TABLE invoices_supplier (id INT PRIMARY KEY, tenant_id INT NOT NULL REFERENCES tenants(id), restaurant_id INT NOT NULL REFERENCES restaurants(id))`,
 		`CREATE TABLE audit_export_logs (id SERIAL PRIMARY KEY, tenant_id INT NOT NULL REFERENCES tenants(id), restaurant_id INT NOT NULL REFERENCES restaurants(id), export_type VARCHAR(40) NOT NULL, export_format VARCHAR(20) NOT NULL, params_json JSONB NOT NULL DEFAULT '{}'::jsonb, row_count INT NOT NULL DEFAULT 0, generated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, generated_by INT NULL REFERENCES users(id) ON DELETE SET NULL)`,
 		`CREATE TABLE invoice_delivery_logs (id SERIAL PRIMARY KEY, tenant_id INT NOT NULL REFERENCES tenants(id), restaurant_id INT NOT NULL REFERENCES restaurants(id), invoice_id INT NOT NULL REFERENCES invoices_customer(id), channel VARCHAR(20) NOT NULL DEFAULT 'email', recipient_email VARCHAR(255), status VARCHAR(20) NOT NULL DEFAULT 'sent', sent_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, payload JSONB NOT NULL DEFAULT '{}'::jsonb, created_by INT NULL REFERENCES users(id) ON DELETE SET NULL)`,
 		`CREATE TABLE permission_audit_logs (id BIGSERIAL PRIMARY KEY, tenant_id INT NOT NULL, admin_id INT NOT NULL, user_id INT NULL, role_id INT NULL, module_id INT NULL, action TEXT NOT NULL, details JSONB, ip_address INET, user_agent TEXT, created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP)`,
+		`CREATE TABLE e_invoice_submissions (id SERIAL PRIMARY KEY, tenant_id INT NOT NULL, restaurant_id INT NOT NULL, invoice_type VARCHAR(20) NOT NULL, invoice_id INT NOT NULL, eta_uuid VARCHAR(100), status VARCHAR(20) NOT NULL, submitted_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, response_payload JSONB NOT NULL DEFAULT '{}'::jsonb, error_message TEXT, created_by INT NULL)`,
 	} {
 		if _, err := db.ExecContext(ctx, statement); err != nil {
 			t.Fatalf("create audit export fixture: %v", err)
 		}
+	}
+}
+
+func applyEInvoiceMigration(t *testing.T, ctx context.Context, db *sql.DB) {
+	t.Helper()
+	contents, err := os.ReadFile("../../migrations/171_rls_e_invoice_submissions.sql")
+	if err != nil {
+		t.Fatalf("read e-invoice RLS migration: %v", err)
+	}
+	if _, err := db.ExecContext(ctx, string(contents)); err != nil {
+		t.Fatalf("apply e-invoice RLS migration: %v", err)
 	}
 }
 
@@ -141,9 +159,11 @@ func seedAuditExportFixture(t *testing.T, ctx context.Context, db *sql.DB) {
 		`INSERT INTO restaurants (id, tenant_id) VALUES (11, 1), (12, 1), (21, 2)`,
 		`INSERT INTO users (id, tenant_id, restaurant_id) VALUES (101, 1, 11), (103, 1, 12), (202, 2, 21)`,
 		`INSERT INTO invoices_customer (id, tenant_id, restaurant_id) VALUES (1001, 1, 11), (1002, 1, 12), (2001, 2, 21)`,
+		`INSERT INTO invoices_supplier (id, tenant_id, restaurant_id) VALUES (3001, 1, 11), (3002, 1, 12), (4001, 2, 21)`,
 		`INSERT INTO audit_export_logs (tenant_id, restaurant_id, export_type, export_format, row_count, generated_by) VALUES (2, 21, 'orders', 'csv', 4, 202)`,
 		`INSERT INTO invoice_delivery_logs (tenant_id, restaurant_id, invoice_id, created_by) VALUES (2, 21, 2001, 202)`,
 		`INSERT INTO permission_audit_logs (tenant_id, admin_id, action, details) VALUES (1, 101, 'UPDATE_ROLE', '{}'::jsonb), (2, 202, 'UPDATE_ROLE', '{}'::jsonb)`,
+		`INSERT INTO e_invoice_submissions (tenant_id, restaurant_id, invoice_type, invoice_id, status, created_by) VALUES (2, 21, 'customer', 2001, 'accepted', 202)`,
 	} {
 		if _, err := db.ExecContext(ctx, statement); err != nil {
 			t.Fatalf("seed audit export fixture: %v", err)
@@ -191,6 +211,92 @@ func assertPermissionAuditRollback(t *testing.T, ctx context.Context, db *sql.DB
 	var count int
 	if err := db.QueryRowContext(ctx, `SELECT count(*) FROM permission_audit_logs`).Scan(&count); err != nil || count != 2 {
 		t.Fatalf("expected two permission audit rows after rollback, got %d (err=%v)", count, err)
+	}
+}
+
+func assertEInvoiceSubmissionRLS(t *testing.T, ctx context.Context, db *sql.DB, repository *AccountingAdvancedRepository) {
+	t.Helper()
+	actorID := 101
+	createSubmission := func(tenantID, restaurantID, invoiceID int, invoiceType string, createdBy int) error {
+		userID := createdBy
+		_, err := repository.CreateEInvoiceSubmission(ctx, &domain.EInvoiceSubmission{
+			TenantID: tenantID, RestaurantID: restaurantID, InvoiceType: invoiceType, InvoiceID: invoiceID,
+			ETAUUID: "test-eta", Status: "accepted", ResponsePayload: []byte(`{"status":"accepted"}`), CreatedBy: &userID,
+		})
+		return err
+	}
+	if err := createSubmission(1, 11, 1001, "customer", actorID); err != nil {
+		t.Fatalf("same-restaurant customer invoice submission should succeed: %v", err)
+	}
+	if err := createSubmission(1, 11, 3001, "supplier", actorID); err != nil {
+		t.Fatalf("same-restaurant supplier invoice submission should succeed: %v", err)
+	}
+	for _, invalid := range []struct {
+		tenantID, restaurantID, invoiceID int
+		invoiceType                       string
+		createdBy                         int
+	}{
+		{tenantID: 1, restaurantID: 11, invoiceID: 1001, invoiceType: "customer", createdBy: 103},
+		{tenantID: 1, restaurantID: 11, invoiceID: 2001, invoiceType: "customer", createdBy: 202},
+		{tenantID: 1, restaurantID: 11, invoiceID: 1002, invoiceType: "customer", createdBy: 101},
+		{tenantID: 1, restaurantID: 11, invoiceID: 3002, invoiceType: "supplier", createdBy: 101},
+	} {
+		if err := createSubmission(invalid.tenantID, invalid.restaurantID, invalid.invoiceID, invalid.invoiceType, invalid.createdBy); err == nil {
+			t.Fatalf("expected e-invoice RLS to reject invoice_type=%s tenant=%d restaurant=%d invoice=%d actor=%d", invalid.invoiceType, invalid.tenantID, invalid.restaurantID, invalid.invoiceID, invalid.createdBy)
+		}
+	}
+	items, err := repository.ListEInvoiceSubmissions(ctx, 1, 11)
+	if err != nil || len(items) != 2 {
+		t.Fatalf("tenant A restaurant 11 should list two scoped submissions, got %d (err=%v)", len(items), err)
+	}
+	items, err = repository.ListEInvoiceSubmissions(ctx, 2, 21)
+	if err != nil || len(items) != 1 {
+		t.Fatalf("tenant B restaurant 21 should list its one submission, got %d (err=%v)", len(items), err)
+	}
+	var unscopedCount int
+	if err := db.QueryRowContext(ctx, `SELECT count(*) FROM e_invoice_submissions`).Scan(&unscopedCount); err != nil || unscopedCount != 0 {
+		t.Fatalf("unscoped runtime connection saw %d e-invoice submissions (err=%v)", unscopedCount, err)
+	}
+	for _, statement := range []string{
+		`UPDATE e_invoice_submissions SET status = 'failed' WHERE tenant_id = 2`,
+		`DELETE FROM e_invoice_submissions WHERE tenant_id = 2`,
+	} {
+		if err := database.WithTenantTx(ctx, db, 1, 11, func(tx *sql.Tx) error {
+			_, err := tx.ExecContext(ctx, statement)
+			return err
+		}); err != nil {
+			t.Fatalf("foreign e-invoice mutation should be filtered: %v", err)
+		}
+	}
+	items, err = repository.ListEInvoiceSubmissions(ctx, 2, 21)
+	if err != nil || len(items) != 1 || items[0].Status != "accepted" {
+		t.Fatalf("foreign e-invoice mutations changed tenant B submission: items=%+v err=%v", items, err)
+	}
+}
+
+func rollbackEInvoiceRLS(t *testing.T, ctx context.Context, db *sql.DB) {
+	t.Helper()
+	for _, statement := range []string{
+		`DROP POLICY e_invoice_submissions_tenant_restaurant_scope ON e_invoice_submissions`,
+		`ALTER TABLE e_invoice_submissions NO FORCE ROW LEVEL SECURITY`,
+		`ALTER TABLE e_invoice_submissions DISABLE ROW LEVEL SECURITY`,
+	} {
+		if _, err := db.ExecContext(ctx, statement); err != nil {
+			t.Fatalf("rollback e-invoice RLS: %v", err)
+		}
+	}
+}
+
+func assertEInvoiceRollback(t *testing.T, ctx context.Context, db *sql.DB) {
+	t.Helper()
+	var enabled, forced bool
+	err := db.QueryRowContext(ctx, `SELECT relrowsecurity, relforcerowsecurity FROM pg_class WHERE oid = 'e_invoice_submissions'::regclass`).Scan(&enabled, &forced)
+	if err != nil || enabled || forced {
+		t.Fatalf("e-invoice rollback left RLS enabled=%v forced=%v (err=%v)", enabled, forced, err)
+	}
+	var count int
+	if err := db.QueryRowContext(ctx, `SELECT count(*) FROM e_invoice_submissions`).Scan(&count); err != nil || count != 3 {
+		t.Fatalf("expected three e-invoice rows after rollback, got %d (err=%v)", count, err)
 	}
 }
 

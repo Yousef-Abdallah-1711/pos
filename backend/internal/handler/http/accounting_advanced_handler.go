@@ -877,7 +877,7 @@ func (h *AccountingAdvancedHandler) SubmitEInvoice(w http.ResponseWriter, r *htt
 		ResponsePayload: responsePayload,
 		CreatedBy:       &userID,
 	}
-	id, err := h.repo.CreateEInvoiceSubmission(submission)
+	id, err := h.repo.CreateEInvoiceSubmission(r.Context(), submission)
 	if err != nil {
 		writeJSON(w, http.StatusInternalServerError, map[string]interface{}{"success": false, "error": "Failed to submit e-invoice"})
 		return
@@ -897,7 +897,7 @@ func (h *AccountingAdvancedHandler) SubmitEInvoice(w http.ResponseWriter, r *htt
 func (h *AccountingAdvancedHandler) ListEInvoiceSubmissions(w http.ResponseWriter, r *http.Request) {
 	tenantID := int(middleware.GetTenantID(r))
 	restaurantID := int(middleware.GetRestaurantID(r))
-	items, err := h.repo.ListEInvoiceSubmissions(tenantID, restaurantID)
+	items, err := h.repo.ListEInvoiceSubmissions(r.Context(), tenantID, restaurantID)
 	if err != nil {
 		writeJSON(w, http.StatusInternalServerError, map[string]interface{}{"success": false, "error": "Failed to load e-invoice submissions"})
 		return
