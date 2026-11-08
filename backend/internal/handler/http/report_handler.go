@@ -18,6 +18,7 @@ import (
 	"time"
 
 	"pos-saas/internal/middleware"
+	"pos-saas/internal/pkg/database"
 
 	goarabic "github.com/01walid/goarabic"
 	"github.com/go-pdf/fpdf"
@@ -1022,24 +1023,27 @@ func (h *ReportHandler) logReportExportAudit(ctx context.Context, record reportE
 
 	execCtx, cancel := withReportDBTimeoutFrom(ctx)
 	defer cancel()
-	_, err = h.db.ExecContext(execCtx, `
-		INSERT INTO report_export_audit_logs (
-			tenant_id, restaurant_id, user_id, report_type, format, file_name,
-			exported_bytes, filters, request_path, user_agent, ip_address, created_at
-		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, NOW())
-	`,
-		record.TenantID,
-		record.RestaurantID,
-		record.UserID,
-		record.ReportType,
-		record.Format,
-		record.FileName,
-		record.ExportedBytes,
-		string(filtersJSON),
-		record.RequestPath,
-		record.UserAgent,
-		record.IPAddress,
-	)
+	err = database.WithTenantTx(execCtx, h.db, record.TenantID, record.RestaurantID, func(tx *sql.Tx) error {
+		_, err := tx.ExecContext(execCtx, `
+			INSERT INTO report_export_audit_logs (
+				tenant_id, restaurant_id, user_id, report_type, format, file_name,
+				exported_bytes, filters, request_path, user_agent, ip_address, created_at
+			) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, NOW())
+		`,
+			record.TenantID,
+			record.RestaurantID,
+			record.UserID,
+			record.ReportType,
+			record.Format,
+			record.FileName,
+			record.ExportedBytes,
+			string(filtersJSON),
+			record.RequestPath,
+			record.UserAgent,
+			record.IPAddress,
+		)
+		return err
+	})
 	if err != nil {
 		return fmt.Errorf("insert report export audit: %w", err)
 	}
