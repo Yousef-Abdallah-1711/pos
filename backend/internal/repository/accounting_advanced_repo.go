@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"database/sql"
 	"encoding/json"
 	"errors"
@@ -11,6 +12,7 @@ import (
 	"time"
 
 	"pos-saas/internal/domain"
+	"pos-saas/internal/pkg/database"
 )
 
 type AccountingAdvancedRepository struct {
@@ -1566,6 +1568,7 @@ func (r *AccountingAdvancedRepository) GetAuditExportRows(
 }
 
 func (r *AccountingAdvancedRepository) LogAuditExport(
+	ctx context.Context,
 	tenantID, restaurantID, generatedBy int,
 	exportType, exportFormat string,
 	params map[string]interface{},
@@ -1575,16 +1578,18 @@ func (r *AccountingAdvancedRepository) LogAuditExport(
 	if err != nil {
 		payload = []byte("{}")
 	}
-	_, err = r.db.Exec(`
-		INSERT INTO audit_export_logs (
-			tenant_id, restaurant_id, export_type, export_format,
-			params_json, row_count, generated_by
-		) VALUES (
-			$1, $2, $3, $4,
-			$5, $6, $7
-		)
-	`, tenantID, restaurantID, exportType, exportFormat, payload, rowCount, generatedBy)
-	return err
+	return database.WithTenantTx(ctx, r.db, int64(tenantID), int64(restaurantID), func(tx *sql.Tx) error {
+		_, err := tx.ExecContext(ctx, `
+			INSERT INTO audit_export_logs (
+				tenant_id, restaurant_id, export_type, export_format,
+				params_json, row_count, generated_by
+			) VALUES (
+				$1, $2, $3, $4,
+				$5, $6, $7
+			)
+		`, tenantID, restaurantID, exportType, exportFormat, payload, rowCount, generatedBy)
+		return err
+	})
 }
 
 func (r *AccountingAdvancedRepository) GetChartOfAccountsExcelRows(tenantID, restaurantID int) ([][]string, error) {

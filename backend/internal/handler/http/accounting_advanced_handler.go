@@ -966,7 +966,7 @@ func (h *AccountingAdvancedHandler) ExportAuditTrailCSV(w http.ResponseWriter, r
 			fmt.Sprintf("%v", row["actor"]),
 		})
 	}
-	_ = h.repo.LogAuditExport(tenantID, restaurantID, userID, defaultAccountingString(exportType, "all"), "csv", map[string]interface{}{
+	_ = h.repo.LogAuditExport(r.Context(), tenantID, restaurantID, userID, defaultAccountingString(exportType, "all"), "csv", map[string]interface{}{
 		"date_from": dateFrom.Format("2006-01-02"),
 		"date_to":   dateTo.Format("2006-01-02"),
 		"type":      defaultAccountingString(exportType, "all"),
