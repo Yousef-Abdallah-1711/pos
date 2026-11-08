@@ -41,6 +41,12 @@ test('tenant A cannot see or mutate tenant B products', async ({ page }) => {
     const ownedBefore = await ownedBeforeResponse.json()
     const ownedProduct = ownedBefore.products.find((product: { name_en: string }) => product.name_en === 'WS05 E2E Burger A')
     expect(ownedProduct).toBeTruthy()
+    const categoriesBeforeResponse = await tenantA.get(`${api}/categories`)
+    expect(categoriesBeforeResponse.ok()).toBeTruthy()
+    const categoriesBefore = await categoriesBeforeResponse.json() as Array<{ id: number; name: string; is_active: boolean }>
+    expect(categoriesBefore.length).toBeGreaterThan(0)
+    const ownedCategory = categoriesBefore.find((category) => category.id === ownedProduct.category_id)
+    expect(ownedCategory).toBeTruthy()
     const employeeEmail = `ws05-product-employee-${Date.now()}@example.test`
     const employeeCreate = await tenantA.post(`${api}/users`, {
       headers: { Origin: 'http://localhost:13102' },
@@ -58,6 +64,18 @@ test('tenant A cannot see or mutate tenant B products', async ({ page }) => {
     expect(await employeeListing.text()).toContain('WS05 E2E Burger A')
     expect(await employeeListing.text()).not.toContain('WS05 E2E Burger B')
     expect((await employee.get(`${api}/products/${ownedProduct.id}`)).status()).toBe(200)
+    const employeeCategoriesResponse = await employee.get(`${api}/categories`)
+    expect(employeeCategoriesResponse.ok()).toBeTruthy()
+    expect(await employeeCategoriesResponse.text()).toContain(ownedCategory.name)
+    expect((await employee.post(`${api}/categories`, {
+      headers: { Origin: 'http://localhost:13102' }, data: { name: 'WS05 Unauthorized Category', is_active: true },
+    })).status()).toBe(403)
+    expect((await employee.put(`${api}/categories/${ownedCategory.id}`, {
+      headers: { Origin: 'http://localhost:13102' }, data: { name: 'WS05 Unauthorized Category Update' },
+    })).status()).toBe(403)
+    expect((await employee.delete(`${api}/categories/${ownedCategory.id}`, {
+      headers: { Origin: 'http://localhost:13102' },
+    })).status()).toBe(403)
     expect((await employee.post(`${api}/products`, {
       headers: { Origin: 'http://localhost:13102' },
       data: { category_id: ownedProduct.category_id, name_en: 'WS05 Unauthorized Product', price: 1 },
@@ -75,6 +93,10 @@ test('tenant A cannot see or mutate tenant B products', async ({ page }) => {
       name_en: 'WS05 E2E Burger A',
       quantity_in_stock: ownedProduct.quantity_in_stock,
     })
+    const categoriesAfterResponse = await tenantA.get(`${api}/categories`)
+    expect(categoriesAfterResponse.ok()).toBeTruthy()
+    const categoriesAfter = await categoriesAfterResponse.json() as Array<{ id: number; name: string; is_active: boolean }>
+    expect(categoriesAfter).toEqual(categoriesBefore)
     const deletion = await tenantA.delete(`${api}/products/${tenantBProduct.id}`, {
       headers: { Origin: 'http://localhost:13102' },
     })
