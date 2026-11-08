@@ -150,3 +150,10 @@ At candidate `3bec0c85b21a8de2250dfaf99afab4ebd792ec97`, `go vet ./...` passed; 
 - Restricted-role integration passed for valid writes, sibling/foreign actor rejection, mismatched invoice rejection, scoped reads, filtered foreign mutations, and rollback. Migration 169 was applied by `cmd/migrate` as `pos_migrator` to disposable PostgreSQL 15 `pos_phase2a_full_test`.
 - `go test -p 1 -count=1 ./...`, `go build ./...`, `go vet ./...`, and integration-tagged database, HTTP handler, and repository packages passed. PR #9 checks both pass on head `a21b3bf12f5e8376739ffb6631a6acfb50caa02c`.
 - C012 remains partial: the active invoice write is only one additional migrated family. Broad transaction conversion, route coverage, final browser/performance acceptance, independent review, merge, and main-based Docker acceptance remain open.
+
+## 2026-11-08 follow-up: permission audit and e-invoice RLS
+
+- Candidate commits `2604374` and `35a787f` add migrations 170–171. Accounting permission-audit export reads and e-invoice create/list operations now run through `WithTenantTx`; RLS validates the tenant, actor, and customer/supplier invoice ownership.
+- `cmd/migrate` applied migrations 1–171 plus legacy migration 999 to fresh disposable PostgreSQL 15 `pos_phase2a_m171_test`. Using the database's disposable admin test identity, `go test -p 1 -count=1 ./...` passed. `go build ./...`, `go vet ./...`, and `go test -tags integration -p 1 -count=1 ./internal/pkg/database ./internal/handler/http ./internal/repository` passed; restricted-role integration used separate `postgres` admin and `pos_app` URLs.
+- PR #9 head `35a787fc501e690dee44588b45cbd84aeb0c0c5f` has both hosted checks passing, with no review request or approval. Only the PR author is listed as a repository collaborator.
+- C006, C012, Phase 2A, and Phase 2C remain partial. Broad route-role and transaction/RLS coverage, fresh final browser/performance acceptance, independent review, merge, and main-based Docker delivery remain open; production remains NO-GO.

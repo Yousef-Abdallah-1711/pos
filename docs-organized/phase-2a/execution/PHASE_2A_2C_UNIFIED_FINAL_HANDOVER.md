@@ -204,3 +204,10 @@ At candidate `3bec0c85b21a8de2250dfaf99afab4ebd792ec97`, PR #9 remains open and 
 - `cmd/migrate` applied migration 169 as `pos_migrator` to disposable PostgreSQL 15 `pos_phase2a_full_test`. Full backend tests, build, vet, and restricted-role integration packages for database, HTTP handlers, and repositories passed.
 - PR #9 head `a21b3bf12f5e8376739ffb6631a6acfb50caa02c` has both hosted checks passing. The PR is open with no review request; GitHub lists only the author as collaborator, so independent approval is still unavailable.
 - C006/C012 and Phase 2A/2C remain partial. No merge or main-based Docker verification occurred; production remains NO-GO.
+
+## E-invoice and permission-audit RLS follow-up — 2026-11-08
+
+- Commit `2604374` adds migration 170 and scopes accounting permission-audit export reads through `WithTenantTx`. Commit `35a787f` adds migration 171 and scopes e-invoice create/list operations through `WithTenantTx`, with policies for customer/supplier invoice parent and actor ownership.
+- The real migration runner applied all migrations 1–171 and legacy migration 999 to a new disposable PostgreSQL 15 database `pos_phase2a_m171_test` as `pos_migrator`. With `POS_TEST_DATABASE_URL` set to the disposable superuser test identity, the full `go test -p 1 -count=1 ./...` passed. `go build ./...`, `go vet ./...`, and integration-tagged `./internal/pkg/database ./internal/handler/http ./internal/repository` passed; the restricted-role tests used separate `postgres` admin and `pos_app` URLs.
+- PR #9 head `35a787fc501e690dee44588b45cbd84aeb0c0c5f` has both hosted checks passing. The PR remains open with no review request or approval. GitHub still lists only the author as a collaborator; independent review is unavailable until the owner adds an eligible reviewer.
+- C012 now covers several staged pilot families and selected active paths but remains partial. C006 and Phase 2A/2C remain partial, and production remains NO-GO. Main merge and final main-based Docker acceptance have not occurred.
