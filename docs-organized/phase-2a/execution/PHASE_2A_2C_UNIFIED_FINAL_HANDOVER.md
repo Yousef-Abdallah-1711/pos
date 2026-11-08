@@ -182,3 +182,9 @@ At candidate `3bec0c85b21a8de2250dfaf99afab4ebd792ec97`, PR #9 remains open and 
 - The focused Playwright journey `tenant A cannot see or mutate tenant B products` passed 1/1 against the uniquely named disposable Tenant A/B stack. The stack, volumes, and external network were removed; existing development services were not touched.
 - The active API route inventory has no registered product/category bulk route or order-item route, so those matrix phrases are no longer treated as actionable test targets. C006 remains partial for finer permission levels and other registered resource-family gaps; C012, Phase 2A/2C remain **PARTIAL**; production remains **NO-GO**.
 - Expanded `TestCategoryHTTPRejectsForgedScopeWithoutSideEffects` to update an owned category through authenticated HTTP and verify all six writable fields (`name`, `name_ar`, both descriptions, display order, active state) persisted. The focused Go integration test passed against the isolated `pos_test` PostgreSQL database in the disposable theme verification service.
+
+## Cross-tenant public order token browser acceptance — 2026-11-08
+
+- Extended the checkout browser journey to reuse the order's valid tracking token with Tenant B's verified tenant/restaurant headers. Both public tracking and cancellation return 404 under the foreign scope.
+- Focused Playwright checkout-to-tracking journey passed 1/1. Initial attempts raced frontend readiness and used host-published ports from inside the container network namespace; rerunning after the storefront server was ready and targeting its in-network port passed. The uniquely named disposable Compose project, volumes, and external network were removed.
+- C005 browser scope coverage now includes cross-tenant token denial; sibling-restaurant token scope and rate-limit browser behavior remain open. C005, C006, C012, Phase 2A/2C remain **PARTIAL**; production remains **NO-GO**.

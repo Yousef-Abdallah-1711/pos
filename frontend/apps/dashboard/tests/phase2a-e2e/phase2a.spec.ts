@@ -364,6 +364,23 @@ test('storefront menu cart and checkout complete an order in the browser', async
     'X-Tenant-ID': String(fixtureProduct.tenant_id),
     'X-Restaurant-ID': String(fixtureProduct.restaurant_id),
   }
+  const tenantBMenuResponse = await page.request.get(`${api}/public/restaurants/phase2a-restaurant-b/menu`)
+  expect(tenantBMenuResponse.ok()).toBeTruthy()
+  const tenantBMenu = await tenantBMenuResponse.json()
+  const tenantBProduct = tenantBMenu.products.find((item: { name_en: string }) => item.name_en === 'WS05 E2E Burger B')
+  expect(tenantBProduct).toBeTruthy()
+  const foreignScopeHeaders = {
+    'X-Tenant-ID': String(tenantBProduct.tenant_id),
+    'X-Restaurant-ID': String(tenantBProduct.restaurant_id),
+    'X-Order-Token': rememberedToken.byNumber,
+  }
+  const foreignScopeTrack = await page.request.get(`${orderPath}/track`, { headers: foreignScopeHeaders })
+  expect(foreignScopeTrack.status()).toBe(404)
+  const foreignScopeCancel = await page.request.delete(orderPath, {
+    headers: foreignScopeHeaders,
+    data: { reason: 'cross-tenant public token scope test' },
+  })
+  expect(foreignScopeCancel.status()).toBe(404)
   const noTokenTrack = await page.request.get(`${orderPath}/track`, { headers: scopedHeaders })
   expect(noTokenTrack.status()).toBe(404)
   const wrongTokenTrack = await page.request.get(`${orderPath}/track`, {
