@@ -16,6 +16,7 @@ import (
 
 	"pos-saas/internal/domain"
 	"pos-saas/internal/middleware"
+	"pos-saas/internal/pkg/database"
 	"pos-saas/internal/repository"
 
 	"github.com/go-pdf/fpdf"
@@ -723,13 +724,16 @@ func (h *AccountingAdvancedHandler) SendCustomerInvoiceEmail(w http.ResponseWrit
 		"pdf_size":    pdfSize,
 		"message_id":  messageID,
 	})
-	_, err = h.db.Exec(`
-		INSERT INTO invoice_delivery_logs (
-			tenant_id, restaurant_id, invoice_id, channel, recipient_email, status, payload, created_by
-		) VALUES (
-			$1, $2, $3, 'email', $4, 'sent', $5::jsonb, $6
-		)
-	`, tenantID, restaurantID, invoiceID, recipient, string(payload), userID)
+	err = database.WithTenantTx(r.Context(), h.db, int64(tenantID), int64(restaurantID), func(tx *sql.Tx) error {
+		_, err := tx.ExecContext(r.Context(), `
+			INSERT INTO invoice_delivery_logs (
+				tenant_id, restaurant_id, invoice_id, channel, recipient_email, status, payload, created_by
+			) VALUES (
+				$1, $2, $3, 'email', $4, 'sent', $5::jsonb, $6
+			)
+		`, tenantID, restaurantID, invoiceID, recipient, string(payload), userID)
+		return err
+	})
 	if err != nil {
 		writeJSON(w, http.StatusInternalServerError, map[string]interface{}{"success": false, "error": "Failed to log delivery"})
 		return
