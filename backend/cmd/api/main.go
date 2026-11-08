@@ -489,11 +489,19 @@ func main() {
 	// Setup routes
 	mux := http.NewServeMux()
 
+	// Impersonation tokens are accepted only when validated against server-side sessions.
+	// If the repositories are unavailable this slice is empty and the header is rejected.
+	var impersonationAuthenticators []middleware.ImpersonationAuthenticator
+	if auth := middleware.NewImpersonationAuthenticator(impersonationRepo, superAdminRepo); auth != nil {
+		impersonationAuthenticators = append(impersonationAuthenticators, auth)
+	}
+	authenticateRequest := middleware.SessionAuthMiddleware(tokenService, authSessionStore, impersonationAuthenticators...)
+
 	// Public routes - Authentication
 	mux.Handle("POST /api/v1/auth/register", middleware.RequireTrustedOrigin(middleware.RateLimitByIP(10)(http.HandlerFunc(authHandler.Register))))
 	mux.Handle("POST /api/v1/auth/login", middleware.RequireTrustedOrigin(middleware.RateLimitByIP(20)(http.HandlerFunc(authHandler.Login))))
 	mux.Handle("POST /api/v1/auth/login/confirm", middleware.RequireTrustedOrigin(middleware.RateLimitByIP(20)(http.HandlerFunc(authHandler.LoginConfirm))))
-	mux.Handle("GET /api/v1/auth/session", middleware.SessionAuthMiddleware(tokenService, authSessionStore)(http.HandlerFunc(authHandler.Session)))
+	mux.Handle("GET /api/v1/auth/session", authenticateRequest(http.HandlerFunc(authHandler.Session)))
 	mux.Handle("POST /api/v1/auth/refresh", middleware.RequireTrustedOrigin(middleware.RateLimitByIP(20)(middleware.SessionAuthMiddleware(tokenService, authSessionStore)(http.HandlerFunc(authHandler.Refresh)))))
 	mux.Handle("POST /api/v1/auth/logout", http.HandlerFunc(authHandler.Logout))
 	// Browser handoff is performed server-to-server by the authenticated Super Admin route;
@@ -606,14 +614,6 @@ func main() {
 
 	// NOTE: Protected routes are now registered individually with middleware wrapping below.
 	// This ensures proper execution order: Auth -> TenantContext -> Handler
-
-	// Impersonation tokens are accepted only when validated against server-side sessions.
-	// If the repositories are unavailable this slice is empty and the header is rejected.
-	var impersonationAuthenticators []middleware.ImpersonationAuthenticator
-	if auth := middleware.NewImpersonationAuthenticator(impersonationRepo, superAdminRepo); auth != nil {
-		impersonationAuthenticators = append(impersonationAuthenticators, auth)
-	}
-	authenticateRequest := middleware.SessionAuthMiddleware(tokenService, authSessionStore, impersonationAuthenticators...)
 
 	// Helper function to wrap handlers with auth only (no tenant middleware)
 	// Use this for RBAC endpoints that read claims.TenantID directly from JWT

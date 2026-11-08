@@ -567,6 +567,51 @@ test('super-admin login workflow is available in the isolated stack', async ({ p
   await expect(page.getByText(/phase2a-restaurant-b/)).toBeVisible()
 })
 
+test('super-admin browser impersonation opens the target tenant session', async ({ page }) => {
+  test.setTimeout(180_000)
+  const apiBase = process.env.WS05_API_URL || 'http://localhost:18082/api/v1'
+  const superAdminOrigin = process.env.WS05_SUPER_ADMIN_URL || 'http://localhost:13114'
+  const dashboardOrigin = process.env.WS05_DASHBOARD_URL || 'http://localhost:13112'
+  let impersonationStarted = false
+  try {
+    const loginResponse = await page.request.post(`${apiBase}/super-admin/auth/login`, {
+      headers: { Origin: superAdminOrigin },
+      data: {
+        email: process.env.E2E_SUPERADMIN_EMAIL || 'phase2a-superadmin@example.test',
+        password: process.env.E2E_SUPERADMIN_PASSWORD || 'WS05-SuperAdmin-Only-2026!',
+      },
+    })
+    expect(loginResponse.ok(), `super-admin fixture login failed: ${loginResponse.status()}`).toBeTruthy()
+
+    await page.goto(`${superAdminOrigin}/dashboard/tenants`, { waitUntil: 'domcontentloaded' })
+    const tenantRow = page.getByRole('row').filter({ hasText: 'phase2a-restaurant-a' })
+    await expect(tenantRow).toBeVisible()
+    await tenantRow.getByRole('link', { name: 'View' }).click()
+
+    const targetUserRow = page.getByRole('row').filter({ hasText: 'phase2a-owner-a@example.test' })
+    await expect(targetUserRow).toBeVisible()
+    await targetUserRow.getByRole('button', { name: /impersonate/i }).click()
+    await expect(page.getByRole('heading', { name: 'Impersonate User' })).toBeVisible()
+    await page.getByRole('button', { name: 'Start Impersonation' }).click()
+    await expect(page.getByText('Dashboard session link')).toBeVisible()
+    impersonationStarted = true
+
+    const dashboardUrl = (await page.locator('.font-mono').innerText()).trim()
+    expect(dashboardUrl).toMatch(/^http:\/\/localhost(?::\d+)?\/en\/dashboard$/)
+    await page.goto(dashboardUrl, { waitUntil: 'domcontentloaded' })
+    await expect(page).toHaveURL(/\/en\/dashboard(?:$|\?)/, { timeout: 60_000 })
+    await page.goto(`${dashboardOrigin}/en/dashboard/products`, { waitUntil: 'domcontentloaded' })
+    await expect(page.getByText('WS05 E2E Burger A', { exact: true })).toBeVisible({ timeout: 60_000 })
+    await expect(page.getByText('WS05 E2E Burger B', { exact: true })).toHaveCount(0)
+  } finally {
+    if (impersonationStarted) {
+      await page.request.post(`${apiBase}/impersonation/end`, {
+        headers: { Origin: dashboardOrigin },
+      })
+    }
+  }
+})
+
 test('super-admin tenant dashboard access fails closed until actor attribution is supported', async ({ page }) => {
   const apiBase = process.env.WS05_API_URL || 'http://localhost:18082/api/v1'
   const superAdminOrigin = process.env.WS05_SUPER_ADMIN_URL || 'http://localhost:13114'

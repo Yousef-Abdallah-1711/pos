@@ -92,6 +92,7 @@ func assertImpersonationSessionFlow(t *testing.T, flow impersonationHTTPFlow) {
 		t.Fatalf("start response did not isolate the impersonation credential in an HttpOnly cookie")
 	}
 	assertImpersonatedUserCanReadOwnProfile(t, flow, cookie)
+	assertImpersonatedSessionBootstrap(t, flow, cookie)
 	assertImpersonatedUserCanUseTenantProductRoute(t, flow, cookie)
 	assertImpersonationStatus(t, flow.admin, flow.token, flow.targetUserID)
 	assertImpersonationValidation(t, flow.handler, cookie)
@@ -120,14 +121,27 @@ func impersonatedTenantHandler(t *testing.T, flow impersonationHTTPFlow) http.Ha
 	}
 	profileHandler := NewUserSettingsHandler(repository.NewUserSettingsRepository(flow.db), repository.NewUserRepository(flow.db))
 	productHandler := NewProductHandler(usecase.NewProductUseCase(repository.NewProductRepository(flow.db), nil, ""))
+	authHandler := NewAuthHandler(usecase.NewAuthUseCase(repository.NewAuthRepository(flow.db), tokens), flow.store)
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /api/v1/users/{userId}/profile", profileHandler.GetUserProfile)
+	mux.HandleFunc("GET /api/v1/auth/session", authHandler.Session)
 	mux.HandleFunc("GET /api/v1/products", productHandler.ListProducts)
 	impersonationAuth := middleware.NewImpersonationAuthenticator(flow.impersonationRepo, flow.adminRepo)
 	secured := middleware.SessionAuthMiddleware(tokens, flow.store, impersonationAuth)(middleware.NewTenantContextMiddleware(
 		middleware.SQLRestaurantVerifier{DB: flow.db},
 	)(mux))
 	return secured
+}
+
+func assertImpersonatedSessionBootstrap(t *testing.T, flow impersonationHTTPFlow, cookie *http.Cookie) {
+	t.Helper()
+	request := httptest.NewRequest(http.MethodGet, "/api/v1/auth/session", nil)
+	request.AddCookie(cookie)
+	recorder := httptest.NewRecorder()
+	impersonatedTenantHandler(t, flow).ServeHTTP(recorder, request)
+	if recorder.Code != http.StatusOK || !strings.Contains(recorder.Body.String(), "impersonation-target@example.test") {
+		t.Fatalf("impersonated auth session bootstrap returned %d: %s", recorder.Code, recorder.Body.String())
+	}
 }
 
 func assertImpersonatedUserCanUseTenantProductRoute(t *testing.T, flow impersonationHTTPFlow, cookie *http.Cookie) {
