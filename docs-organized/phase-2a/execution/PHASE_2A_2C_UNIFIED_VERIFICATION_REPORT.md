@@ -143,3 +143,10 @@ At candidate `3bec0c85b21a8de2250dfaf99afab4ebd792ec97`, `go vet ./...` passed; 
 - On disposable PostgreSQL 15 `pos_phase2a_full_test`, `cmd/migrate` applied migration 168 as `pos_migrator`; `go test -p 1 -count=1 ./...`, `go build ./...`, `go vet ./...`, and the integration-tagged `internal/pkg/database`, `internal/handler/http`, and `internal/repository` packages passed.
 - PR #9 head `8258d18efde0912d4bd474711c315523656e8354` has both hosted checks passing. GitHub reports only the PR author as a collaborator; independent approval remains unavailable. No merge was attempted.
 - This adds two active audit-write families only. C012 broad path conversion and C006 route × role acceptance remain incomplete. Phase 2A/2C remain PARTIAL and production remains NO-GO; final main-based Docker acceptance is outstanding.
+
+## 2026-11-08 follow-up: invoice delivery RLS
+
+- Commit `a21b3bf` adds FORCE RLS migration 169 for `invoice_delivery_logs` and moves `SendCustomerInvoiceEmail` logging into `WithTenantTx`. The policy validates tenant/restaurant context, referenced invoice ownership, and creator ownership.
+- Restricted-role integration passed for valid writes, sibling/foreign actor rejection, mismatched invoice rejection, scoped reads, filtered foreign mutations, and rollback. Migration 169 was applied by `cmd/migrate` as `pos_migrator` to disposable PostgreSQL 15 `pos_phase2a_full_test`.
+- `go test -p 1 -count=1 ./...`, `go build ./...`, `go vet ./...`, and integration-tagged database, HTTP handler, and repository packages passed. PR #9 checks both pass on head `a21b3bf12f5e8376739ffb6631a6acfb50caa02c`.
+- C012 remains partial: the active invoice write is only one additional migrated family. Broad transaction conversion, route coverage, final browser/performance acceptance, independent review, merge, and main-based Docker acceptance remain open.

@@ -196,3 +196,11 @@ At candidate `3bec0c85b21a8de2250dfaf99afab4ebd792ec97`, PR #9 remains open and 
 - The migration runner applied migrations through 168 as `pos_migrator` to disposable PostgreSQL 15 `pos_phase2a_full_test`. `go test -p 1 -count=1 ./...`, `go build ./...`, `go vet ./...`, and `go test -tags integration -p 1 -count=1 ./internal/pkg/database ./internal/handler/http ./internal/repository` passed. No persistent development or production database was touched.
 - PR #9 head `8258d18efde0912d4bd474711c315523656e8354` is open with both hosted checks passing. GitHub lists only `Yousef-Abdallah-1711` as a collaborator; there is no eligible independent reviewer, no review request, and no approval. The merge gate remains external and must not be bypassed.
 - C005 remains verified for its current accepted criteria; C006, C012, Phase 2A, and Phase 2C remain partial. Full route × role coverage, broad transaction/RLS migration, fresh final browser/performance acceptance, authorized independent review, merge, and main-based seven-service Docker verification remain open. Production readiness remains NO-GO.
+
+## Invoice delivery RLS follow-up — 2026-11-08
+
+- Commit `a21b3bf` adds migration 169 for `invoice_delivery_logs`; `SendCustomerInvoiceEmail` now inserts through `WithTenantTx`.
+- `TestAccountingAdvancedAuditExportRLSWithRestrictedRuntimeRole` now also applies migration 169 in an isolated schema. Under `pos_app`, it verifies valid same-restaurant delivery logs, sibling/foreign actor denial, sibling invoice denial, scoped visibility, filtered cross-tenant update/delete, and post-rollback state.
+- `cmd/migrate` applied migration 169 as `pos_migrator` to disposable PostgreSQL 15 `pos_phase2a_full_test`. Full backend tests, build, vet, and restricted-role integration packages for database, HTTP handlers, and repositories passed.
+- PR #9 head `a21b3bf12f5e8376739ffb6631a6acfb50caa02c` has both hosted checks passing. The PR is open with no review request; GitHub lists only the author as collaborator, so independent approval is still unavailable.
+- C006/C012 and Phase 2A/2C remain partial. No merge or main-based Docker verification occurred; production remains NO-GO.
