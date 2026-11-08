@@ -1469,6 +1469,7 @@ func (r *AccountingAdvancedRepository) GetSocialInsuranceReportRows(tenantID, re
 }
 
 func (r *AccountingAdvancedRepository) GetAuditExportRows(
+	ctx context.Context,
 	tenantID, restaurantID int,
 	dateFrom, dateTo time.Time,
 	exportType string,
@@ -1527,38 +1528,39 @@ func (r *AccountingAdvancedRepository) GetAuditExportRows(
 	}
 
 	if normalized == "all" || normalized == "rbac" {
-		auditRows, err := r.db.Query(`
-			SELECT
-				pal.created_at,
-				COALESCE(pal.action, ''),
-				COALESCE(pal.details::text, ''),
-				0::numeric,
-				COALESCE(u.name, u.email, CONCAT('user#', pal.admin_id::text), 'system')
-			FROM permission_audit_logs pal
-			LEFT JOIN users u ON u.id = pal.admin_id
-			WHERE pal.tenant_id = $1
-			  AND pal.created_at >= $2
-			  AND pal.created_at < $3
-			ORDER BY pal.created_at ASC, pal.id ASC
-		`, tenantID, dateFrom, dateTo)
+		err := database.WithTenantTx(ctx, r.db, int64(tenantID), int64(restaurantID), func(tx *sql.Tx) error {
+			auditRows, err := tx.QueryContext(ctx, `
+				SELECT
+					pal.created_at,
+					COALESCE(pal.action, ''),
+					COALESCE(pal.details::text, ''),
+					0::numeric,
+					COALESCE(u.name, u.email, CONCAT('user#', pal.admin_id::text), 'system')
+				FROM permission_audit_logs pal
+				LEFT JOIN users u ON u.id = pal.admin_id
+				WHERE pal.tenant_id = $1
+				  AND pal.created_at >= $2
+				  AND pal.created_at < $3
+				ORDER BY pal.created_at ASC, pal.id ASC
+			`, tenantID, dateFrom, dateTo)
+			if err != nil {
+				return err
+			}
+			defer auditRows.Close()
+			for auditRows.Next() {
+				var ts time.Time
+				var reference, description, actor string
+				var amount float64
+				if err := auditRows.Scan(&ts, &reference, &description, &amount, &actor); err != nil {
+					return err
+				}
+				addRow("rbac_audit", ts, reference, description, amount, actor)
+			}
+			return auditRows.Err()
+		})
 		if err != nil {
 			return nil, err
 		}
-		for auditRows.Next() {
-			var ts time.Time
-			var reference, description, actor string
-			var amount float64
-			if err := auditRows.Scan(&ts, &reference, &description, &amount, &actor); err != nil {
-				auditRows.Close()
-				return nil, err
-			}
-			addRow("rbac_audit", ts, reference, description, amount, actor)
-		}
-		if err := auditRows.Err(); err != nil {
-			auditRows.Close()
-			return nil, err
-		}
-		auditRows.Close()
 	}
 
 	sort.Slice(rows, func(i, j int) bool {

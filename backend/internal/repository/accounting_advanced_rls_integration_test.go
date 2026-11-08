@@ -39,11 +39,12 @@ func TestAccountingAdvancedAuditExportRLSWithRestrictedRuntimeRole(t *testing.T)
 		t.Fatalf("set admin search path: %v", err)
 	}
 	createAuditExportFixture(t, ctx, admin)
-	if _, err := admin.ExecContext(ctx, `GRANT USAGE ON SCHEMA `+schema+` TO pos_app; GRANT SELECT ON tenants, restaurants, users, invoices_customer TO pos_app; GRANT SELECT, INSERT, UPDATE, DELETE ON audit_export_logs, invoice_delivery_logs TO pos_app; GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA `+schema+` TO pos_app`); err != nil {
+	if _, err := admin.ExecContext(ctx, `GRANT USAGE ON SCHEMA `+schema+` TO pos_app; GRANT SELECT ON tenants, restaurants, users, invoices_customer, permission_audit_logs TO pos_app; GRANT SELECT, INSERT, UPDATE, DELETE ON audit_export_logs, invoice_delivery_logs TO pos_app; GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA `+schema+` TO pos_app`); err != nil {
 		t.Fatalf("grant runtime fixture access: %v", err)
 	}
 	applyAuditExportMigration(t, ctx, admin)
 	applyInvoiceDeliveryMigration(t, ctx, admin)
+	applyPermissionAuditMigration(t, ctx, admin)
 
 	appURL = withSearchPath(t, appURL, schema)
 	app := openAuthAuditURL(t, appURL)
@@ -54,6 +55,7 @@ func TestAccountingAdvancedAuditExportRLSWithRestrictedRuntimeRole(t *testing.T)
 	assertRestrictedRuntimeRole(t, ctx, app)
 	seedAuditExportFixture(t, ctx, admin)
 	repository := NewAccountingAdvancedRepository(app, nil)
+	assertPermissionAuditExportScope(t, ctx, app, repository)
 	if err := repository.LogAuditExport(ctx, 1, 11, 101, "orders", "csv", map[string]interface{}{"range": "today"}, 3); err != nil {
 		t.Fatalf("same-restaurant actor should write export log: %v", err)
 	}
@@ -75,8 +77,10 @@ func TestAccountingAdvancedAuditExportRLSWithRestrictedRuntimeRole(t *testing.T)
 	assertInvoiceDeliveryRLS(t, ctx, app)
 	rollbackAuditExportRLS(t, ctx, admin)
 	rollbackInvoiceDeliveryRLS(t, ctx, admin)
+	rollbackPermissionAuditRLS(t, ctx, admin)
 	assertAuditExportRollback(t, ctx, app)
 	assertInvoiceDeliveryRollback(t, ctx, app)
+	assertPermissionAuditRollback(t, ctx, app)
 }
 
 func createAuditExportFixture(t *testing.T, ctx context.Context, db *sql.DB) {
@@ -85,13 +89,26 @@ func createAuditExportFixture(t *testing.T, ctx context.Context, db *sql.DB) {
 		`CREATE TABLE tenants (id INT PRIMARY KEY)`,
 		`CREATE TABLE restaurants (id INT PRIMARY KEY, tenant_id INT NOT NULL REFERENCES tenants(id))`,
 		`CREATE TABLE users (id INT PRIMARY KEY, tenant_id INT NOT NULL REFERENCES tenants(id), restaurant_id INT NULL REFERENCES restaurants(id))`,
+		`ALTER TABLE users ADD COLUMN name TEXT, ADD COLUMN email TEXT`,
 		`CREATE TABLE invoices_customer (id INT PRIMARY KEY, tenant_id INT NOT NULL REFERENCES tenants(id), restaurant_id INT NOT NULL REFERENCES restaurants(id))`,
 		`CREATE TABLE audit_export_logs (id SERIAL PRIMARY KEY, tenant_id INT NOT NULL REFERENCES tenants(id), restaurant_id INT NOT NULL REFERENCES restaurants(id), export_type VARCHAR(40) NOT NULL, export_format VARCHAR(20) NOT NULL, params_json JSONB NOT NULL DEFAULT '{}'::jsonb, row_count INT NOT NULL DEFAULT 0, generated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, generated_by INT NULL REFERENCES users(id) ON DELETE SET NULL)`,
 		`CREATE TABLE invoice_delivery_logs (id SERIAL PRIMARY KEY, tenant_id INT NOT NULL REFERENCES tenants(id), restaurant_id INT NOT NULL REFERENCES restaurants(id), invoice_id INT NOT NULL REFERENCES invoices_customer(id), channel VARCHAR(20) NOT NULL DEFAULT 'email', recipient_email VARCHAR(255), status VARCHAR(20) NOT NULL DEFAULT 'sent', sent_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, payload JSONB NOT NULL DEFAULT '{}'::jsonb, created_by INT NULL REFERENCES users(id) ON DELETE SET NULL)`,
+		`CREATE TABLE permission_audit_logs (id BIGSERIAL PRIMARY KEY, tenant_id INT NOT NULL, admin_id INT NOT NULL, user_id INT NULL, role_id INT NULL, module_id INT NULL, action TEXT NOT NULL, details JSONB, ip_address INET, user_agent TEXT, created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP)`,
 	} {
 		if _, err := db.ExecContext(ctx, statement); err != nil {
 			t.Fatalf("create audit export fixture: %v", err)
 		}
+	}
+}
+
+func applyPermissionAuditMigration(t *testing.T, ctx context.Context, db *sql.DB) {
+	t.Helper()
+	contents, err := os.ReadFile("../../migrations/170_rls_permission_audit_logs.sql")
+	if err != nil {
+		t.Fatalf("read permission audit RLS migration: %v", err)
+	}
+	if _, err := db.ExecContext(ctx, string(contents)); err != nil {
+		t.Fatalf("apply permission audit RLS migration: %v", err)
 	}
 }
 
@@ -126,10 +143,54 @@ func seedAuditExportFixture(t *testing.T, ctx context.Context, db *sql.DB) {
 		`INSERT INTO invoices_customer (id, tenant_id, restaurant_id) VALUES (1001, 1, 11), (1002, 1, 12), (2001, 2, 21)`,
 		`INSERT INTO audit_export_logs (tenant_id, restaurant_id, export_type, export_format, row_count, generated_by) VALUES (2, 21, 'orders', 'csv', 4, 202)`,
 		`INSERT INTO invoice_delivery_logs (tenant_id, restaurant_id, invoice_id, created_by) VALUES (2, 21, 2001, 202)`,
+		`INSERT INTO permission_audit_logs (tenant_id, admin_id, action, details) VALUES (1, 101, 'UPDATE_ROLE', '{}'::jsonb), (2, 202, 'UPDATE_ROLE', '{}'::jsonb)`,
 	} {
 		if _, err := db.ExecContext(ctx, statement); err != nil {
 			t.Fatalf("seed audit export fixture: %v", err)
 		}
+	}
+}
+
+func assertPermissionAuditExportScope(t *testing.T, ctx context.Context, db *sql.DB, repository *AccountingAdvancedRepository) {
+	t.Helper()
+	from := time.Now().Add(-time.Hour)
+	to := time.Now().Add(time.Hour)
+	rows, err := repository.GetAuditExportRows(ctx, 1, 11, from, to, "rbac")
+	if err != nil {
+		t.Fatalf("read scoped permission audit export rows: %v", err)
+	}
+	if len(rows) != 1 || rows[0]["entity_type"] != "rbac_audit" || rows[0]["reference"] != "UPDATE_ROLE" {
+		t.Fatalf("tenant A audit export returned unexpected rows: %#v", rows)
+	}
+	var unscopedCount int
+	if err := db.QueryRowContext(ctx, `SELECT count(*) FROM permission_audit_logs`).Scan(&unscopedCount); err != nil || unscopedCount != 0 {
+		t.Fatalf("unscoped runtime connection saw %d permission audit rows (err=%v)", unscopedCount, err)
+	}
+}
+
+func rollbackPermissionAuditRLS(t *testing.T, ctx context.Context, db *sql.DB) {
+	t.Helper()
+	for _, statement := range []string{
+		`DROP POLICY permission_audit_logs_tenant_scope ON permission_audit_logs`,
+		`ALTER TABLE permission_audit_logs NO FORCE ROW LEVEL SECURITY`,
+		`ALTER TABLE permission_audit_logs DISABLE ROW LEVEL SECURITY`,
+	} {
+		if _, err := db.ExecContext(ctx, statement); err != nil {
+			t.Fatalf("rollback permission audit RLS: %v", err)
+		}
+	}
+}
+
+func assertPermissionAuditRollback(t *testing.T, ctx context.Context, db *sql.DB) {
+	t.Helper()
+	var enabled, forced bool
+	err := db.QueryRowContext(ctx, `SELECT relrowsecurity, relforcerowsecurity FROM pg_class WHERE oid = 'permission_audit_logs'::regclass`).Scan(&enabled, &forced)
+	if err != nil || enabled || forced {
+		t.Fatalf("permission audit rollback left RLS enabled=%v forced=%v (err=%v)", enabled, forced, err)
+	}
+	var count int
+	if err := db.QueryRowContext(ctx, `SELECT count(*) FROM permission_audit_logs`).Scan(&count); err != nil || count != 2 {
+		t.Fatalf("expected two permission audit rows after rollback, got %d (err=%v)", count, err)
 	}
 }
 

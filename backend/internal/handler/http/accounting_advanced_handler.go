@@ -953,7 +953,7 @@ func (h *AccountingAdvancedHandler) ExportAuditTrailCSV(w http.ResponseWriter, r
 		writeJSON(w, http.StatusBadRequest, map[string]interface{}{"success": false, "error": err.Error()})
 		return
 	}
-	rows, err := h.repo.GetAuditExportRows(tenantID, restaurantID, dateFrom, dateTo, exportType)
+	rows, err := h.repo.GetAuditExportRows(r.Context(), tenantID, restaurantID, dateFrom, dateTo, exportType)
 	if err != nil {
 		writeJSON(w, http.StatusInternalServerError, map[string]interface{}{"success": false, "error": "Failed to export audit trail"})
 		return
