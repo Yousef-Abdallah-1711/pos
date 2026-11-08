@@ -3,6 +3,7 @@ package http
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -27,6 +28,7 @@ type impersonationHTTPFlow struct {
 	handler           *ImpersonationHandler
 	token             string
 	targetUserID      int64
+	targetProductID   int
 	superAdminID      int64
 	store             *service.AuthSessionStore
 	impersonationRepo *repository.ImpersonationRepository
@@ -71,7 +73,7 @@ func TestImpersonationHTTPAuditSessionLifecycle(t *testing.T) {
 	securedAdminMux := middleware.SuperAdminAuthMiddleware(tokens)(middleware.RequireSuperAdmin(adminRepo)(adminMux))
 	assertImpersonationSessionFlow(t, impersonationHTTPFlow{
 		db: db, admin: securedAdminMux, handler: handler, token: token,
-		targetUserID: targetUserID, superAdminID: superAdminID, store: store,
+		targetUserID: targetUserID, targetProductID: fixture.productA1, superAdminID: superAdminID, store: store,
 		impersonationRepo: impersonationRepo, adminRepo: adminRepo,
 	})
 	assertUnauditedImpersonationIsRevoked(t, db, securedAdminMux, targetUserID, adminUserID, superAdminID)
@@ -90,6 +92,7 @@ func assertImpersonationSessionFlow(t *testing.T, flow impersonationHTTPFlow) {
 		t.Fatalf("start response did not isolate the impersonation credential in an HttpOnly cookie")
 	}
 	assertImpersonatedUserCanReadOwnProfile(t, flow, cookie)
+	assertImpersonatedUserCanUseTenantProductRoute(t, flow, cookie)
 	assertImpersonationStatus(t, flow.admin, flow.token, flow.targetUserID)
 	assertImpersonationValidation(t, flow.handler, cookie)
 	assertImpersonationEnd(t, flow.db, flow.handler, cookie, flow.superAdminID)
@@ -103,21 +106,23 @@ func assertImpersonatedUserCanReadOwnProfile(t *testing.T, flow impersonationHTT
 	request := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/api/v1/users/%d/profile", flow.targetUserID), nil)
 	request.AddCookie(cookie)
 	recorder := httptest.NewRecorder()
-	impersonatedProfileHandler(t, flow).ServeHTTP(recorder, request)
+	impersonatedTenantHandler(t, flow).ServeHTTP(recorder, request)
 	if recorder.Code != http.StatusOK || !strings.Contains(recorder.Body.String(), "impersonation-target@example.test") {
 		t.Fatalf("impersonated user profile request returned %d: %s", recorder.Code, recorder.Body.String())
 	}
 }
 
-func impersonatedProfileHandler(t *testing.T, flow impersonationHTTPFlow) http.Handler {
+func impersonatedTenantHandler(t *testing.T, flow impersonationHTTPFlow) http.Handler {
 	t.Helper()
 	tokens, err := jwt.NewTokenService("impersonation-tenant-action-secret-at-least-32-bytes", "5m")
 	if err != nil {
 		t.Fatalf("create tenant token service: %v", err)
 	}
 	profileHandler := NewUserSettingsHandler(repository.NewUserSettingsRepository(flow.db), repository.NewUserRepository(flow.db))
+	productHandler := NewProductHandler(usecase.NewProductUseCase(repository.NewProductRepository(flow.db), nil, ""))
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /api/v1/users/{userId}/profile", profileHandler.GetUserProfile)
+	mux.HandleFunc("GET /api/v1/products", productHandler.ListProducts)
 	impersonationAuth := middleware.NewImpersonationAuthenticator(flow.impersonationRepo, flow.adminRepo)
 	secured := middleware.SessionAuthMiddleware(tokens, flow.store, impersonationAuth)(middleware.NewTenantContextMiddleware(
 		middleware.SQLRestaurantVerifier{DB: flow.db},
@@ -125,12 +130,34 @@ func impersonatedProfileHandler(t *testing.T, flow impersonationHTTPFlow) http.H
 	return secured
 }
 
+func assertImpersonatedUserCanUseTenantProductRoute(t *testing.T, flow impersonationHTTPFlow, cookie *http.Cookie) {
+	t.Helper()
+	request := httptest.NewRequest(http.MethodGet, "/api/v1/products", nil)
+	request.AddCookie(cookie)
+	recorder := httptest.NewRecorder()
+	impersonatedTenantHandler(t, flow).ServeHTTP(recorder, request)
+	if recorder.Code != http.StatusOK {
+		t.Fatalf("impersonated tenant product list returned %d: %s", recorder.Code, recorder.Body.String())
+	}
+	var response struct {
+		Products []struct {
+			ID int `json:"id"`
+		} `json:"products"`
+	}
+	if err := json.NewDecoder(recorder.Body).Decode(&response); err != nil {
+		t.Fatalf("decode impersonated tenant product list: %v", err)
+	}
+	if len(response.Products) != 1 || response.Products[0].ID != flow.targetProductID {
+		t.Fatalf("impersonated tenant product IDs = %v, want only target restaurant products", response.Products)
+	}
+}
+
 func assertRevokedImpersonationCookieCannotReadProfile(t *testing.T, flow impersonationHTTPFlow, cookie *http.Cookie) {
 	t.Helper()
 	request := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/api/v1/users/%d/profile", flow.targetUserID), nil)
 	request.AddCookie(cookie)
 	recorder := httptest.NewRecorder()
-	impersonatedProfileHandler(t, flow).ServeHTTP(recorder, request)
+	impersonatedTenantHandler(t, flow).ServeHTTP(recorder, request)
 	if recorder.Code != http.StatusUnauthorized {
 		t.Fatalf("revoked impersonation cookie profile request returned %d: %s", recorder.Code, recorder.Body.String())
 	}
