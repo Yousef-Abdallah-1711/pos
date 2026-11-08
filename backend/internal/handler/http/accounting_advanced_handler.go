@@ -879,6 +879,10 @@ func (h *AccountingAdvancedHandler) SubmitEInvoice(w http.ResponseWriter, r *htt
 	}
 	id, err := h.repo.CreateEInvoiceSubmission(r.Context(), submission)
 	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			writeJSON(w, http.StatusNotFound, map[string]interface{}{"success": false, "error": "Invoice not found"})
+			return
+		}
 		writeJSON(w, http.StatusInternalServerError, map[string]interface{}{"success": false, "error": "Failed to submit e-invoice"})
 		return
 	}

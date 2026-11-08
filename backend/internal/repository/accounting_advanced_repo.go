@@ -1322,6 +1322,24 @@ func (r *AccountingAdvancedRepository) CreateEInvoiceSubmission(ctx context.Cont
 	}
 	var id int
 	err := database.WithTenantTx(ctx, r.db, int64(item.TenantID), int64(item.RestaurantID), func(tx *sql.Tx) error {
+		invoiceTable := ""
+		switch strings.ToLower(strings.TrimSpace(item.InvoiceType)) {
+		case "customer":
+			invoiceTable = "invoices_customer"
+		case "supplier":
+			invoiceTable = "invoices_supplier"
+		default:
+			return fmt.Errorf("unsupported e-invoice type %q", item.InvoiceType)
+		}
+		var invoiceExists bool
+		if err := tx.QueryRowContext(ctx, `SELECT EXISTS (
+			SELECT 1 FROM `+invoiceTable+` WHERE id = $1 AND tenant_id = $2 AND restaurant_id = $3
+		)`, item.InvoiceID, item.TenantID, item.RestaurantID).Scan(&invoiceExists); err != nil {
+			return err
+		}
+		if !invoiceExists {
+			return sql.ErrNoRows
+		}
 		return tx.QueryRowContext(ctx, `
 			INSERT INTO e_invoice_submissions (
 				tenant_id, restaurant_id, invoice_type, invoice_id, eta_uuid,
