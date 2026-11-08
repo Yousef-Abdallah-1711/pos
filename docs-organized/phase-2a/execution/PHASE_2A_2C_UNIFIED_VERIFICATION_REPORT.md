@@ -136,3 +136,10 @@ The fresh run supersedes the prior statement above that no browser journeys had 
 - This test uses auth and tenant-context middleware; it does not close role-level permission acceptance, user CRUD, or the complete registered-route × role matrix. C006 and C012 remain partial.
 
 At candidate `3bec0c85b21a8de2250dfaf99afab4ebd792ec97`, `go vet ./...` passed; the full Go suite passed against disposable PostgreSQL after all migrations; PR #9 hosted checks both pass. No frontend, browser, persistent-DB, reviewer, merge, or main-based Docker gate was refreshed by the RBAC follow-up.
+
+## 2026-11-08 follow-up: active audit export RLS paths
+
+- Candidate commits `d158090` and `8258d18` add FORCE RLS migrations 167–168 and move the active audit export inserts for `audit_export_logs` and `report_export_audit_logs` into `WithTenantTx` transactions. Restricted-role tests prove actor tenant/restaurant ownership, scoped visibility, foreign mutation denial/filtering, missing-context reads, and rollback.
+- On disposable PostgreSQL 15 `pos_phase2a_full_test`, `cmd/migrate` applied migration 168 as `pos_migrator`; `go test -p 1 -count=1 ./...`, `go build ./...`, `go vet ./...`, and the integration-tagged `internal/pkg/database`, `internal/handler/http`, and `internal/repository` packages passed.
+- PR #9 head `8258d18efde0912d4bd474711c315523656e8354` has both hosted checks passing. GitHub reports only the PR author as a collaborator; independent approval remains unavailable. No merge was attempted.
+- This adds two active audit-write families only. C012 broad path conversion and C006 route × role acceptance remain incomplete. Phase 2A/2C remain PARTIAL and production remains NO-GO; final main-based Docker acceptance is outstanding.
