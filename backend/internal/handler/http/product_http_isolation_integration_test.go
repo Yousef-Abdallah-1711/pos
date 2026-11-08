@@ -119,6 +119,131 @@ func TestProductHTTPCreateRejectsForeignCategoryWithoutSideEffects(t *testing.T)
 	}
 }
 
+func TestProductHTTPReadRoleCannotCreateUpdateOrDelete(t *testing.T) {
+	if os.Getenv(testdb.EnvVar) == "" {
+		t.Skipf("set %s to an isolated disposable PostgreSQL database", testdb.EnvVar)
+	}
+	db := openProductHTTPTestDB(t)
+	fixture := seedProductHTTPFixture(t, db)
+	actorID := insertRBACUserHTTPFixture(t, db, fixture.tenantA, fixture.restaurantA1, fmt.Sprintf("product-read-role-%d", time.Now().UnixNano()))
+	roleID := insertRBACRoleHTTPFixture(t, db, fixture.tenantA, fixture.restaurantA1, fmt.Sprintf("pr-%d", time.Now().UnixNano()))
+	moduleID := findRBACPermissionTestModule(t, db)
+	userRoles := repository.NewUserRoleRepository(db)
+	rolePermissions := repository.NewRolePermissionRepository(db)
+	if err := userRoles.Assign(t.Context(), int64(fixture.tenantA), int64(fixture.restaurantA1), int64(actorID), int64(roleID), int64(actorID)); err != nil {
+		t.Fatalf("assign product READ role to actor: %v", err)
+	}
+	if err := rolePermissions.Assign(t.Context(), int64(fixture.tenantA), int64(fixture.restaurantA1), int64(roleID), moduleID, "READ"); err != nil {
+		t.Fatalf("grant product READ permission: %v", err)
+	}
+
+	tokens, err := jwt.NewTokenService("product-read-role-http-isolation-secret", "5m")
+	if err != nil {
+		t.Fatalf("create token service: %v", err)
+	}
+	restaurantID := fixture.restaurantA1
+	token, err := tokens.GenerateToken(actorID, fixture.tenantA, &restaurantID, "product-read-role@example.test", "employee")
+	if err != nil {
+		t.Fatalf("generate READ-role token: %v", err)
+	}
+	evaluator := middleware.RepositoryPermissionEvaluator{UserRoles: userRoles, RolePermissions: rolePermissions}
+	permission := middleware.NewPermissionMiddleware(evaluator, middleware.PermissionModeEnforce)
+	handler := NewProductHandler(usecase.NewProductUseCase(repository.NewProductRepository(db), nil, ""))
+	router := http.NewServeMux()
+	router.Handle("GET /api/v1/products", permission(moduleID, "READ")(http.HandlerFunc(handler.ListProducts)))
+	router.Handle("GET /api/v1/products/{id}", permission(moduleID, "READ")(http.HandlerFunc(handler.GetProduct)))
+	router.Handle("POST /api/v1/products", permission(moduleID, "WRITE")(http.HandlerFunc(handler.CreateProduct)))
+	router.Handle("PUT /api/v1/products/{id}", permission(moduleID, "WRITE")(http.HandlerFunc(handler.UpdateProduct)))
+	router.Handle("DELETE /api/v1/products/{id}", permission(moduleID, "DELETE")(http.HandlerFunc(handler.DeleteProduct)))
+	secured := middleware.AuthMiddleware(tokens)(middleware.NewTenantContextMiddleware(middleware.SQLRestaurantVerifier{DB: db})(router))
+
+	invoke := func(method, path string, body *bytes.Buffer, contentType string) *httptest.ResponseRecorder {
+		t.Helper()
+		request := httptest.NewRequest(method, path, body)
+		request.Header.Set("Authorization", "Bearer "+token)
+		request.Header.Set("X-Tenant-ID", strconv.Itoa(fixture.tenantB))
+		request.Header.Set("X-Restaurant-ID", strconv.Itoa(fixture.restaurantB1))
+		request.Header.Set("Content-Type", contentType)
+		response := httptest.NewRecorder()
+		secured.ServeHTTP(response, request)
+		return response
+	}
+
+	list := invoke(http.MethodGet, "/api/v1/products", &bytes.Buffer{}, "application/json")
+	if list.Code != http.StatusOK {
+		t.Fatalf("READ role product list status = %d, want 200: %s", list.Code, list.Body.String())
+	}
+	var listed struct {
+		Products []struct {
+			ID int `json:"id"`
+		} `json:"products"`
+	}
+	if err := json.NewDecoder(list.Body).Decode(&listed); err != nil {
+		t.Fatalf("decode READ-role product list: %v", err)
+	}
+	if len(listed.Products) != 1 || listed.Products[0].ID != fixture.productA1 {
+		t.Fatalf("READ role saw product rows outside its JWT scope: %+v", listed.Products)
+	}
+	ownedRead := invoke(http.MethodGet, fmt.Sprintf("/api/v1/products/%d", fixture.productA1), &bytes.Buffer{}, "application/json")
+	if ownedRead.Code != http.StatusOK {
+		t.Fatalf("READ role owned product get status = %d, want 200: %s", ownedRead.Code, ownedRead.Body.String())
+	}
+	for _, foreignID := range []int{fixture.productA2, fixture.productB1} {
+		foreignRead := invoke(http.MethodGet, fmt.Sprintf("/api/v1/products/%d", foreignID), &bytes.Buffer{}, "application/json")
+		if foreignRead.Code != http.StatusNotFound {
+			t.Errorf("READ role foreign product %d get status = %d, want 404", foreignID, foreignRead.Code)
+		}
+	}
+
+	before := struct {
+		name   string
+		price  float64
+		status string
+	}{}
+	if err := db.QueryRow(`SELECT name_en, price, status FROM products WHERE id = $1`, fixture.productA1).Scan(&before.name, &before.price, &before.status); err != nil {
+		t.Fatalf("read owned product before denied mutations: %v", err)
+	}
+	sku := fmt.Sprintf("read-role-denied-%d", time.Now().UnixNano())
+	createBody, contentType := multipartProductBody(t, fmt.Sprintf(`{"category_id":%d,"sku":%q,"name_en":"denied by READ role","price":25,"is_available":true}`, productCategoryID(t, db, fixture.productA1), sku))
+	if response := invoke(http.MethodPost, "/api/v1/products", createBody, contentType); response.Code != http.StatusForbidden {
+		t.Errorf("READ role product create status = %d, want 403: %s", response.Code, response.Body.String())
+	}
+	updateBody, contentType := multipartProductBody(t, `{"name_en":"denied READ-role update","price":999}`)
+	if response := invoke(http.MethodPut, fmt.Sprintf("/api/v1/products/%d", fixture.productA1), updateBody, contentType); response.Code != http.StatusForbidden {
+		t.Errorf("READ role product update status = %d, want 403: %s", response.Code, response.Body.String())
+	}
+	if response := invoke(http.MethodDelete, fmt.Sprintf("/api/v1/products/%d", fixture.productA1), &bytes.Buffer{}, "application/json"); response.Code != http.StatusForbidden {
+		t.Errorf("READ role product delete status = %d, want 403: %s", response.Code, response.Body.String())
+	}
+	var createdCount int
+	if err := db.QueryRow(`SELECT count(*) FROM products WHERE tenant_id = $1 AND restaurant_id = $2 AND sku = $3`, fixture.tenantA, fixture.restaurantA1, sku).Scan(&createdCount); err != nil {
+		t.Fatalf("check denied create side effects: %v", err)
+	}
+	if createdCount != 0 {
+		t.Fatalf("READ-role denied create inserted %d products", createdCount)
+	}
+	after := struct {
+		name   string
+		price  float64
+		status string
+	}{}
+	if err := db.QueryRow(`SELECT name_en, price, status FROM products WHERE id = $1`, fixture.productA1).Scan(&after.name, &after.price, &after.status); err != nil {
+		t.Fatalf("read owned product after denied mutations: %v", err)
+	}
+	if after != before {
+		t.Fatalf("READ-role denied mutation changed product: before=%+v after=%+v", before, after)
+	}
+}
+
+func productCategoryID(t *testing.T, db *sql.DB, productID int) int {
+	t.Helper()
+	var categoryID int
+	if err := db.QueryRow(`SELECT category_id FROM products WHERE id = $1`, productID).Scan(&categoryID); err != nil {
+		t.Fatalf("read product %d category: %v", productID, err)
+	}
+	return categoryID
+}
+
 func newProductHTTPIsolationAuth(t *testing.T, db *sql.DB, fixture productHTTPFixture) (*ProductHandler, *jwt.TokenService, string) {
 	t.Helper()
 	tokens, err := jwt.NewTokenService("ws02-http-test-secret-at-least-32-bytes", "5m")
