@@ -78,6 +78,24 @@ ON CONFLICT (tenant_id, slug) DO NOTHING;
 "@
 $null = Invoke-DisposableSql $siblingRestaurantsSql
 
+$siblingUserSql = @"
+INSERT INTO users (tenant_id, restaurant_id, email, password_hash, name, phone, role, status, is_super_admin, created_at, updated_at)
+SELECT r.tenant_id, r.id, 'phase2a-sibling-owner-a@example.test', u.password_hash,
+       'WS05 Tenant A Sibling Owner', '5550100211', 'owner', 'active', FALSE, NOW(), NOW()
+FROM restaurants r
+JOIN users u ON u.tenant_id = r.tenant_id AND u.email = 'phase2a-owner-a@example.test'
+WHERE r.slug = 'phase2a-restaurant-a2'
+ON CONFLICT (tenant_id, email) DO UPDATE SET
+    restaurant_id = EXCLUDED.restaurant_id,
+    password_hash = EXCLUDED.password_hash,
+    name = EXCLUDED.name,
+    role = EXCLUDED.role,
+    status = 'active',
+    is_super_admin = FALSE,
+    updated_at = NOW();
+"@
+$null = Invoke-DisposableSql $siblingUserSql
+
 $fixtureSql = @"
 BEGIN;
 INSERT INTO categories (tenant_id, restaurant_id, name, display_order, is_active, created_at, updated_at)

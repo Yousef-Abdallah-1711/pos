@@ -196,6 +196,67 @@ test('authenticated user CRUD is tenant-scoped and foreign IDs leave rows unchan
   }
 })
 
+test('sibling restaurant owner can manage tenant-wide users without seeing foreign tenants', async () => {
+  const tenantA = await request.newContext()
+  const siblingA = await request.newContext()
+  const tenantB = await request.newContext()
+  try {
+    const primaryAuth = await loginWithContext(tenantA, 'a')
+    await loginWithContext(tenantB, 'b')
+    const siblingLogin = await siblingA.post(`${api}/auth/login`, {
+      headers: { Origin: 'http://localhost:13112' },
+      data: { email: 'phase2a-sibling-owner-a@example.test', password },
+    })
+    expect(siblingLogin.ok()).toBeTruthy()
+    const siblingAuth = await siblingLogin.json() as { user: { tenant_id: number; restaurant_id: number } }
+    expect(siblingAuth.user.tenant_id).toBe(primaryAuth.tenant_id)
+    expect(siblingAuth.user.restaurant_id).not.toBe(primaryAuth.restaurant_id)
+
+    const foreignUsersResponse = await tenantB.get(`${api}/users`)
+    expect(foreignUsersResponse.ok()).toBeTruthy()
+    const foreignUsers = await foreignUsersResponse.json() as Array<{ id: number; email: string }>
+    const foreignOwner = foreignUsers.find((user) => user.email === 'phase2a-owner-b@example.test')
+    expect(foreignOwner).toBeTruthy()
+    if (!foreignOwner) throw new Error('Tenant B user fixture is missing')
+
+    const email = `ws05-sibling-user-crud-${Date.now()}@example.test`
+    const create = await tenantA.post(`${api}/users`, {
+      headers: { Origin: 'http://localhost:13112' },
+      data: { name: 'Primary Restaurant User', email, phone: '5550100410', password: 'WS05-Sibling-CRUD-2026!' },
+    })
+    expect(create.status()).toBe(200)
+    const created = await create.json() as { data: { id: number } }
+
+    const siblingListResponse = await siblingA.get(`${api}/users`)
+    expect(siblingListResponse.ok()).toBeTruthy()
+    const siblingList = await siblingListResponse.json() as Array<{ id: number; email: string; name: string }>
+    expect(siblingList.find((user) => user.id === created.data.id)?.email).toBe(email)
+    expect(siblingList.some((user) => user.id === foreignOwner.id)).toBe(false)
+
+    const update = await siblingA.put(`${api}/users/${created.data.id}`, {
+      headers: { Origin: 'http://localhost:13112' },
+      data: { name: 'Updated by Sibling Restaurant', phone: '5550100411' },
+    })
+    expect(update.status()).toBe(200)
+    const afterUpdate = await siblingA.get(`${api}/users`)
+    const updatedList = await afterUpdate.json() as Array<{ id: number; name: string }>
+    expect(updatedList.find((user) => user.id === created.data.id)?.name).toBe('Updated by Sibling Restaurant')
+
+    const deletion = await siblingA.delete(`${api}/users/${created.data.id}`, { headers: { Origin: 'http://localhost:13112' } })
+    expect(deletion.status()).toBe(200)
+    const primaryList = await tenantA.get(`${api}/users`)
+    const remainingUsers = await primaryList.json() as Array<{ id: number }>
+    expect(remainingUsers.some((user) => user.id === created.data.id)).toBe(false)
+    const foreignAfter = await tenantB.get(`${api}/users`)
+    const foreignAfterUsers = await foreignAfter.json() as Array<{ id: number; email: string }>
+    expect(foreignAfterUsers.find((user) => user.id === foreignOwner.id)?.email).toBe(foreignOwner.email)
+  } finally {
+    await tenantA.dispose()
+    await siblingA.dispose()
+    await tenantB.dispose()
+  }
+})
+
 async function loginWithContext(context: APIRequestContext, tenant: 'a' | 'b') {
   const response = await context.post(`${api}/auth/login`, {
     data: { email: `phase2a-owner-${tenant}@example.test`, password },

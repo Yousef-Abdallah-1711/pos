@@ -45,6 +45,51 @@ func TestUserRepositoryPostgresScopeDeniesForeignTenantAndRestaurantMutations(t 
 	assertScopedUserName(t, db, userA1, fixture.tenantA, fixture.restaurantA1, "Authorized profile")
 }
 
+func TestUserRepositoryPostgresCRUDIsTenantWideAcrossSiblingRestaurants(t *testing.T) {
+	db, fixture := openProductScopeFixture(t)
+	siblingUserID := insertScopeUser(t, db, fixture.tenantA, fixture.restaurantA2, "user-tenant-wide-sibling")
+	foreignUserID := insertScopeUser(t, db, fixture.tenantB, fixture.restaurantB1, "user-tenant-wide-foreign")
+	repo := NewUserRepository(db)
+	ctx := context.Background()
+
+	users, err := repo.ListByTenant(ctx, int64(fixture.tenantA))
+	if err != nil {
+		t.Fatalf("list tenant users: %v", err)
+	}
+	listedSibling := false
+	listedForeign := false
+	for _, user := range users {
+		listedSibling = listedSibling || user.ID == siblingUserID
+		listedForeign = listedForeign || user.ID == foreignUserID
+	}
+	if !listedSibling || listedForeign {
+		t.Fatalf("tenant-wide user list sibling=%v foreign=%v; want sibling visible and foreign hidden", listedSibling, listedForeign)
+	}
+
+	name, phone := "Updated by sibling restaurant", "555-0101"
+	updated, err := repo.UpdateUser(ctx, int64(siblingUserID), int64(fixture.tenantA), &name, &phone)
+	if err != nil {
+		t.Fatalf("tenant user update from sibling restaurant: %v", err)
+	}
+	if updated.Name != name || updated.Phone != phone {
+		t.Fatalf("updated sibling user = (%q, %q), want (%q, %q)", updated.Name, updated.Phone, name, phone)
+	}
+	assertScopedUserState(t, db, siblingUserID, fixture.tenantA, fixture.restaurantA2, "user-tenant-wide-sibling@example.test", "test-hash")
+	assertScopedUserName(t, db, siblingUserID, fixture.tenantA, fixture.restaurantA2, name)
+
+	if err := repo.DeleteUser(ctx, int64(siblingUserID), int64(fixture.tenantA)); err != nil {
+		t.Fatalf("tenant user delete from sibling restaurant: %v", err)
+	}
+	var remaining int
+	if err := db.QueryRow(`SELECT COUNT(*) FROM users WHERE id = $1`, siblingUserID).Scan(&remaining); err != nil {
+		t.Fatalf("check deleted sibling user: %v", err)
+	}
+	if remaining != 0 {
+		t.Fatalf("sibling user remains after tenant-authorized delete")
+	}
+	assertScopedUserState(t, db, foreignUserID, fixture.tenantB, fixture.restaurantB1, "user-tenant-wide-foreign@example.test", "test-hash")
+}
+
 func assertScopedUserState(t *testing.T, db *sql.DB, userID, tenantID, restaurantID int, email, passwordHash string) {
 	t.Helper()
 	var gotEmail, gotHash string
