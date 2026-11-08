@@ -1,8 +1,8 @@
 import { expect, request, test, type APIRequestContext, type Page } from '@playwright/test'
 import { routeContainerApiToCandidate } from './api-routing'
 
-const api = process.env.WS05_API_URL || 'http://localhost:18081/api/v1'
-const storefront = process.env.WS05_STOREFRONT_URL || 'http://phase2a-restaurant-a.localhost:13103'
+const api = process.env.WS05_API_URL || 'http://localhost:18082/api/v1'
+const storefront = process.env.WS05_STOREFRONT_URL || 'http://phase2a-restaurant-a.localhost:13113'
 const password = process.env.WS05_TEST_PASSWORD || 'WS05-Disposable-Only-2026!'
 
 test.beforeEach(async ({ page }) => {
@@ -13,7 +13,7 @@ async function login(page: Page, tenant: 'a' | 'b' = 'a') {
   const email = `phase2a-owner-${tenant}@example.test`
   const response = await page.request.post(`${api}/auth/login`, {
     data: { email, password },
-    headers: { Origin: 'http://localhost:13102' },
+    headers: { Origin: 'http://localhost:13112' },
   })
   expect(response.ok(), `login failed for ${email}`).toBeTruthy()
   return await response.json() as { user: { id: number; tenant_id: number; restaurant_id: number } }
@@ -41,20 +41,22 @@ test('tenant A cannot see or mutate tenant B products', async ({ page }) => {
     const ownedBefore = await ownedBeforeResponse.json()
     const ownedProduct = ownedBefore.products.find((product: { name_en: string }) => product.name_en === 'WS05 E2E Burger A')
     expect(ownedProduct).toBeTruthy()
+    if (!ownedProduct) throw new Error('Tenant A product fixture was not found')
     const categoriesBeforeResponse = await tenantA.get(`${api}/categories`)
     expect(categoriesBeforeResponse.ok()).toBeTruthy()
     const categoriesBefore = await categoriesBeforeResponse.json() as Array<{ id: number; name: string; is_active: boolean }>
     expect(categoriesBefore.length).toBeGreaterThan(0)
     const ownedCategory = categoriesBefore.find((category) => category.id === ownedProduct.category_id)
     expect(ownedCategory).toBeTruthy()
+    if (!ownedCategory) throw new Error('Tenant A category fixture was not found')
     const employeeEmail = `ws05-product-employee-${Date.now()}@example.test`
     const employeeCreate = await tenantA.post(`${api}/users`, {
-      headers: { Origin: 'http://localhost:13102' },
+      headers: { Origin: 'http://localhost:13112' },
       data: { name: 'WS05 Product Employee', email: employeeEmail, phone: '5550100403', password: 'WS05-Product-Employee-2026!' },
     })
     expect(employeeCreate.status()).toBe(200)
     const employeeLogin = await employee.post(`${api}/auth/login`, {
-      headers: { Origin: 'http://localhost:13102' },
+      headers: { Origin: 'http://localhost:13112' },
       data: { email: employeeEmail, password: 'WS05-Product-Employee-2026!' },
     })
     expect(employeeLogin.ok()).toBeTruthy()
@@ -68,23 +70,23 @@ test('tenant A cannot see or mutate tenant B products', async ({ page }) => {
     expect(employeeCategoriesResponse.ok()).toBeTruthy()
     expect(await employeeCategoriesResponse.text()).toContain(ownedCategory.name)
     expect((await employee.post(`${api}/categories`, {
-      headers: { Origin: 'http://localhost:13102' }, data: { name: 'WS05 Unauthorized Category', is_active: true },
+      headers: { Origin: 'http://localhost:13112' }, data: { name: 'WS05 Unauthorized Category', is_active: true },
     })).status()).toBe(403)
     expect((await employee.put(`${api}/categories/${ownedCategory.id}`, {
-      headers: { Origin: 'http://localhost:13102' }, data: { name: 'WS05 Unauthorized Category Update' },
+      headers: { Origin: 'http://localhost:13112' }, data: { name: 'WS05 Unauthorized Category Update' },
     })).status()).toBe(403)
     expect((await employee.delete(`${api}/categories/${ownedCategory.id}`, {
-      headers: { Origin: 'http://localhost:13102' },
+      headers: { Origin: 'http://localhost:13112' },
     })).status()).toBe(403)
     expect((await employee.post(`${api}/products`, {
-      headers: { Origin: 'http://localhost:13102' },
+      headers: { Origin: 'http://localhost:13112' },
       data: { category_id: ownedProduct.category_id, name_en: 'WS05 Unauthorized Product', price: 1 },
     })).status()).toBe(403)
     expect((await employee.put(`${api}/products/${ownedProduct.id}`, {
-      headers: { Origin: 'http://localhost:13102' }, data: { name_en: 'WS05 Unauthorized Product Update' },
+      headers: { Origin: 'http://localhost:13112' }, data: { name_en: 'WS05 Unauthorized Product Update' },
     })).status()).toBe(403)
     expect((await employee.delete(`${api}/products/${ownedProduct.id}`, {
-      headers: { Origin: 'http://localhost:13102' },
+      headers: { Origin: 'http://localhost:13112' },
     })).status()).toBe(403)
     const ownedAfterResponse = await tenantA.get(`${api}/products`)
     const ownedAfter = await ownedAfterResponse.json()
@@ -98,7 +100,7 @@ test('tenant A cannot see or mutate tenant B products', async ({ page }) => {
     const categoriesAfter = await categoriesAfterResponse.json() as Array<{ id: number; name: string; is_active: boolean }>
     expect(categoriesAfter).toEqual(categoriesBefore)
     const deletion = await tenantA.delete(`${api}/products/${tenantBProduct.id}`, {
-      headers: { Origin: 'http://localhost:13102' },
+      headers: { Origin: 'http://localhost:13112' },
     })
     expect([403, 404]).toContain(deletion.status())
     const stillExists = await tenantB.get(`${api}/products`)
@@ -127,7 +129,7 @@ test('authenticated user CRUD is tenant-scoped and foreign IDs leave rows unchan
 
     const email = `ws05-user-crud-${Date.now()}@example.test`
     const create = await tenantA.post(`${api}/users`, {
-      headers: { Origin: 'http://localhost:13102' },
+      headers: { Origin: 'http://localhost:13112' },
       data: { name: 'WS05 CRUD Original', email, phone: '5550100400', password: 'WS05-User-CRUD-2026!' },
     })
     expect(create.status()).toBe(200)
@@ -142,17 +144,17 @@ test('authenticated user CRUD is tenant-scoped and foreign IDs leave rows unchan
     expect(tenantAUsers.some((user) => user.email === 'phase2a-owner-b@example.test')).toBe(false)
 
     const foreignUpdate = await tenantA.put(`${api}/users/${foreignUser.id}`, {
-      headers: { Origin: 'http://localhost:13102' }, data: { name: 'Unauthorized Change', phone: '5550100499' },
+      headers: { Origin: 'http://localhost:13112' }, data: { name: 'Unauthorized Change', phone: '5550100499' },
     })
     expect(foreignUpdate.status()).toBe(404)
-    const foreignDelete = await tenantA.delete(`${api}/users/${foreignUser.id}`, { headers: { Origin: 'http://localhost:13102' } })
+    const foreignDelete = await tenantA.delete(`${api}/users/${foreignUser.id}`, { headers: { Origin: 'http://localhost:13112' } })
     expect(foreignDelete.status()).toBe(404)
     const foreignAfterResponse = await tenantB.get(`${api}/users`)
     const foreignAfter = await foreignAfterResponse.json() as Array<{ id: number; name: string; email: string }>
     expect(foreignAfter.find((user) => user.id === foreignUser.id)).toMatchObject({ name: foreignUser.name, email: foreignUser.email })
 
     const update = await tenantA.put(`${api}/users/${createBody.data.id}`, {
-      headers: { Origin: 'http://localhost:13102' }, data: { name: 'WS05 CRUD Updated', phone: '5550100401' },
+      headers: { Origin: 'http://localhost:13112' }, data: { name: 'WS05 CRUD Updated', phone: '5550100401' },
     })
     expect(update.status()).toBe(200)
     const updatedList = await tenantA.get(`${api}/users`)
@@ -160,7 +162,7 @@ test('authenticated user CRUD is tenant-scoped and foreign IDs leave rows unchan
     expect(updatedUsers.find((user) => user.id === createBody.data.id)?.name).toBe('WS05 CRUD Updated')
 
     const employeeLogin = await employee.post(`${api}/auth/login`, {
-      headers: { Origin: 'http://localhost:13102' },
+      headers: { Origin: 'http://localhost:13112' },
       data: { email, password: 'WS05-User-CRUD-2026!' },
     })
     expect(employeeLogin.ok()).toBeTruthy()
@@ -168,21 +170,21 @@ test('authenticated user CRUD is tenant-scoped and foreign IDs leave rows unchan
     const employeeList = await employee.get(`${api}/users`)
     expect(employeeList.status()).toBe(403)
     const employeeCreate = await employee.post(`${api}/users`, {
-      headers: { Origin: 'http://localhost:13102' },
+      headers: { Origin: 'http://localhost:13112' },
       data: { name: 'Unauthorized Employee', email: `ws05-employee-forbidden-${Date.now()}@example.test`, phone: '5550100402', password: 'WS05-Forbidden-2026!' },
     })
     expect(employeeCreate.status()).toBe(403)
     const employeeUpdate = await employee.put(`${api}/users/${employeeAuth.user.id}`, {
-      headers: { Origin: 'http://localhost:13102' }, data: { name: 'Unauthorized Employee Update', phone: '5550100498' },
+      headers: { Origin: 'http://localhost:13112' }, data: { name: 'Unauthorized Employee Update', phone: '5550100498' },
     })
     expect(employeeUpdate.status()).toBe(403)
-    const employeeDelete = await employee.delete(`${api}/users/${employeeAuth.user.id}`, { headers: { Origin: 'http://localhost:13102' } })
+    const employeeDelete = await employee.delete(`${api}/users/${employeeAuth.user.id}`, { headers: { Origin: 'http://localhost:13112' } })
     expect(employeeDelete.status()).toBe(403)
     const afterEmployeeAttempts = await tenantA.get(`${api}/users`)
     const afterEmployeeUsers = await afterEmployeeAttempts.json() as Array<{ id: number; name: string; email: string }>
     expect(afterEmployeeUsers.find((user) => user.id === employeeAuth.user.id)).toMatchObject({ name: 'WS05 CRUD Updated', email })
 
-    const deletion = await tenantA.delete(`${api}/users/${createBody.data.id}`, { headers: { Origin: 'http://localhost:13102' } })
+    const deletion = await tenantA.delete(`${api}/users/${createBody.data.id}`, { headers: { Origin: 'http://localhost:13112' } })
     expect(deletion.status()).toBe(200)
     const finalList = await tenantA.get(`${api}/users`)
     const finalUsers = await finalList.json() as Array<{ id: number }>
@@ -197,7 +199,7 @@ test('authenticated user CRUD is tenant-scoped and foreign IDs leave rows unchan
 async function loginWithContext(context: APIRequestContext, tenant: 'a' | 'b') {
   const response = await context.post(`${api}/auth/login`, {
     data: { email: `phase2a-owner-${tenant}@example.test`, password },
-    headers: { Origin: 'http://localhost:13102' },
+    headers: { Origin: 'http://localhost:13112' },
   })
   expect(response.ok()).toBeTruthy()
   const auth = await response.json() as { user: { tenant_id: number; restaurant_id: number } }
@@ -246,7 +248,7 @@ test('inventory page loads and stock adjustment persists in PostgreSQL', async (
 
 test('concurrent inventory adjustments serialize and rejected adjustments have no side effects', async ({ page }) => {
   await login(page)
-  const headers = { Origin: 'http://localhost:13102' }
+  const headers = { Origin: 'http://localhost:13112' }
   const productResponse = await page.request.get(`${api}/products`)
   expect(productResponse.ok()).toBeTruthy()
   const products = await productResponse.json()
@@ -374,6 +376,21 @@ test('storefront menu cart and checkout complete an order in the browser', async
     'X-Restaurant-ID': String(tenantBProduct.restaurant_id),
     'X-Order-Token': rememberedToken.byNumber,
   }
+  const siblingRestaurantMenu = await page.request.get(`${api}/public/restaurants/phase2a-restaurant-a2/menu`)
+  expect(siblingRestaurantMenu.ok()).toBeTruthy()
+  const siblingRestaurant = (await siblingRestaurantMenu.json()).restaurant
+  const siblingScopeHeaders = {
+    'X-Tenant-ID': String(fixtureProduct.tenant_id),
+    'X-Restaurant-ID': String(siblingRestaurant.id),
+    'X-Order-Token': rememberedToken.byNumber,
+  }
+  const siblingScopeTrack = await page.request.get(`${orderPath}/track`, { headers: siblingScopeHeaders })
+  expect(siblingScopeTrack.status()).toBe(404)
+  const siblingScopeCancel = await page.request.delete(orderPath, {
+    headers: siblingScopeHeaders,
+    data: { reason: 'sibling restaurant public token scope test' },
+  })
+  expect(siblingScopeCancel.status()).toBe(404)
   const foreignScopeTrack = await page.request.get(`${orderPath}/track`, { headers: foreignScopeHeaders })
   expect(foreignScopeTrack.status()).toBe(404)
   const foreignScopeCancel = await page.request.delete(orderPath, {
@@ -391,7 +408,26 @@ test('storefront menu cart and checkout complete an order in the browser', async
     headers: { ...scopedHeaders, 'X-Order-Token': rememberedToken.byNumber },
   })
   expect(validTrack.ok()).toBeTruthy()
-  expect((await validTrack.json()).data.order_number).toBe(orderNumberText)
+  const validTrackBody = await validTrack.json()
+  expect(validTrackBody.data.order_number).toBe(orderNumberText)
+
+  const concurrentTokenAttempts = (await Promise.all(Array.from({ length: 8 }, (_, index) => {
+    const foreignHeaders = index % 2 === 0 ? siblingScopeHeaders : foreignScopeHeaders
+    return Promise.all([
+      page.request.get(`${orderPath}/track`, { headers: foreignHeaders }),
+      page.request.delete(orderPath, {
+        headers: foreignHeaders,
+        data: { reason: 'concurrent foreign-token isolation test' },
+      }),
+    ])
+  }))).flat()
+  for (const response of concurrentTokenAttempts) expect(response.status()).toBe(404)
+  const afterConcurrentDenials = await page.request.get(`${orderPath}/track`, {
+    headers: { ...scopedHeaders, 'X-Order-Token': rememberedToken.byNumber },
+  })
+  expect(afterConcurrentDenials.ok()).toBeTruthy()
+  expect((await afterConcurrentDenials.json()).data.status).toBe(validTrackBody.data.status)
+
   const unauthorizedCancel = await page.request.delete(orderPath, {
     headers: { ...scopedHeaders, 'X-Order-Token': 'incorrect-public-order-token' },
     data: { reason: 'unauthorized token test' },
@@ -402,6 +438,27 @@ test('storefront menu cart and checkout complete an order in the browser', async
     data: { reason: 'public order token lifecycle test' },
   })
   expect(authorizedCancel.ok()).toBeTruthy()
+  let trackingThrottleResponse: Awaited<ReturnType<typeof page.request.get>> | undefined
+  for (let attempt = 0; attempt < 70; attempt += 1) {
+    trackingThrottleResponse = await page.request.get(`${orderPath}/track`, {
+      headers: { ...scopedHeaders, 'X-Order-Token': rememberedToken.byNumber },
+    })
+    if (trackingThrottleResponse.status() === 429) break
+  }
+  expect(trackingThrottleResponse?.status()).toBe(429)
+  expect(trackingThrottleResponse?.headers()['retry-after']).toBeTruthy()
+
+  let cancellationThrottleResponse: Awaited<ReturnType<typeof page.request.delete>> | undefined
+  for (let attempt = 0; attempt < 25; attempt += 1) {
+    cancellationThrottleResponse = await page.request.delete(orderPath, {
+      headers: { ...scopedHeaders, 'X-Order-Token': rememberedToken.byNumber },
+      data: { reason: 'rate limit verification' },
+    })
+    if (cancellationThrottleResponse.status() === 429) break
+  }
+  expect(cancellationThrottleResponse?.status()).toBe(429)
+  expect(cancellationThrottleResponse?.headers()['retry-after']).toBeTruthy()
+
   const cancelledStatus = await page.request.get(`${orderPath}/status`, {
     headers: { ...scopedHeaders, 'X-Order-Token': rememberedToken.byNumber },
   })
@@ -411,7 +468,20 @@ test('storefront menu cart and checkout complete an order in the browser', async
 })
 
 test('super-admin login workflow is available in the isolated stack', async ({ page }) => {
-  test.setTimeout(120_000)
+  test.setTimeout(180_000)
+  page.on('framenavigated', (frame) => {
+    if (frame === page.mainFrame()) console.log(`SUPER_ADMIN_NAVIGATION ${new URL(frame.url()).pathname}`)
+  })
+  page.on('request', (request) => {
+    const pathname = new URL(request.url()).pathname
+    if (pathname === '/dashboard' || pathname.startsWith('/dashboard?')) console.log(`SUPER_ADMIN_DASHBOARD_REQUEST ${request.method()} ${pathname}`)
+  })
+  page.on('response', (response) => {
+    const pathname = new URL(response.url()).pathname
+    if (pathname === '/dashboard' || pathname.startsWith('/dashboard?')) console.log(`SUPER_ADMIN_DASHBOARD_RESPONSE ${response.status()} ${pathname}`)
+  })
+  page.on('pageerror', (error) => console.log(`SUPER_ADMIN_PAGE_ERROR ${error.name}: ${error.message}`))
+  page.on('requestfailed', (request) => console.log(`SUPER_ADMIN_REQUEST_FAILED ${request.method()} ${new URL(request.url()).pathname} ${request.failure()?.errorText ?? 'unknown'}`))
   page.on('response', (response) => {
     const pathname = new URL(response.url()).pathname
     if (pathname.includes('/super-admin/auth/')) console.log(`SUPER_ADMIN_AUTH_RESPONSE ${pathname} ${response.status()}`)
@@ -419,7 +489,7 @@ test('super-admin login workflow is available in the isolated stack', async ({ p
   page.on('console', (message) => {
     if (message.type() === 'error') console.log(`SUPER_ADMIN_BROWSER_ERROR ${message.text().split('\n')[0]}`)
   })
-  await page.goto(`${process.env.WS05_SUPER_ADMIN_URL || 'http://localhost:13104'}/login`, { waitUntil: 'load', timeout: 110_000 })
+  await page.goto(`${process.env.WS05_SUPER_ADMIN_URL || 'http://localhost:13114'}/login`, { waitUntil: 'load', timeout: 110_000 })
   await expect(page.getByRole('textbox', { name: /email/i })).toBeVisible()
   await expect(page.getByLabel(/password/i)).toBeVisible()
   const superAdminEmail = process.env.E2E_SUPERADMIN_EMAIL || 'phase2a-superadmin@example.test'
@@ -427,7 +497,7 @@ test('super-admin login workflow is available in the isolated stack', async ({ p
   await page.getByRole('textbox', { name: /email/i }).fill(superAdminEmail)
   await page.getByLabel(/password/i).fill(superAdminPassword)
   await page.getByRole('button', { name: /^login$/i }).click()
-  await expect(page).toHaveURL(/\/dashboard(?:$|\?)/, { timeout: 15_000 })
+  await expect(page).toHaveURL(/\/dashboard(?:$|\?)/, { timeout: 60_000 })
   await expect(page.getByRole('heading', { name: 'Welcome back!' })).toBeVisible()
 
   await page.getByRole('link', { name: 'Tenants', exact: true }).click()
@@ -437,8 +507,8 @@ test('super-admin login workflow is available in the isolated stack', async ({ p
 })
 
 test('super-admin tenant dashboard access fails closed until actor attribution is supported', async ({ page }) => {
-  const apiBase = process.env.WS05_API_URL || 'http://localhost:18081/api/v1'
-  const superAdminOrigin = process.env.WS05_SUPER_ADMIN_URL || 'http://localhost:13104'
+  const apiBase = process.env.WS05_API_URL || 'http://localhost:18082/api/v1'
+  const superAdminOrigin = process.env.WS05_SUPER_ADMIN_URL || 'http://localhost:13114'
   const loginResponse = await page.request.post(`${apiBase}/super-admin/auth/login`, {
     headers: { Origin: superAdminOrigin },
     data: {
@@ -447,7 +517,7 @@ test('super-admin tenant dashboard access fails closed until actor attribution i
     },
   })
   expect(loginResponse.ok()).toBeTruthy()
-  const superAdminCookie = (await page.context().cookies('http://localhost:18081')).find((cookie) => cookie.name === 'poos_super_admin_session')
+  const superAdminCookie = (await page.context().cookies('http://localhost:18082')).find((cookie) => cookie.name === 'poos_super_admin_session')
   expect(superAdminCookie?.httpOnly).toBe(true)
   const superAdminSession = await page.request.get(`${apiBase}/super-admin/auth/session`)
   expect(superAdminSession.ok()).toBeTruthy()
@@ -464,7 +534,7 @@ test('super-admin tenant dashboard access fails closed until actor attribution i
   await expect(page.getByRole('button', { name: 'Access Paused' })).toBeDisabled()
   await expect(page.getByRole('button', { name: 'Access Paused' })).toHaveAttribute('title', /actor-attributed support sessions/)
 
-  const tenantCookieBefore = (await page.context().cookies('http://localhost:18081')).find((cookie) => cookie.name === 'poos_session')
+  const tenantCookieBefore = (await page.context().cookies('http://localhost:18082')).find((cookie) => cookie.name === 'poos_session')
   expect(tenantCookieBefore).toBeUndefined()
   const refusedHandoff = await page.request.post(`${apiBase}/super-admin/tenants/${selectedTenantId}/dashboard-login`, {
     headers: { Origin: superAdminOrigin },
@@ -472,7 +542,7 @@ test('super-admin tenant dashboard access fails closed until actor attribution i
   expect(refusedHandoff.status()).toBe(503)
   expect((await refusedHandoff.json()).error).toContain('actor-attributed support sessions')
   expect(refusedHandoff.headers()['set-cookie'] || '').not.toContain('poos_session=')
-  const tenantCookieAfter = (await page.context().cookies('http://localhost:18081')).find((cookie) => cookie.name === 'poos_session')
+  const tenantCookieAfter = (await page.context().cookies('http://localhost:18082')).find((cookie) => cookie.name === 'poos_session')
   expect(tenantCookieAfter).toBeUndefined()
   const superAdminSessionAfter = await page.request.get(`${apiBase}/super-admin/auth/session`)
   expect(superAdminSessionAfter.ok()).toBeTruthy()

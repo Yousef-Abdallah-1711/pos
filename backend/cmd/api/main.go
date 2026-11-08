@@ -30,6 +30,11 @@ import (
 	"pos-saas/internal/usecase"
 )
 
+const (
+	publicOrderReadRequestsPerMinute  = 60
+	publicOrderWriteRequestsPerMinute = 20
+)
+
 // In-memory storage for stub mode
 type Role struct {
 	ID               int       `json:"id"`
@@ -527,19 +532,19 @@ func main() {
 	// Public routes - Order API (minimal authentication required)
 	// These routes require X-Tenant-ID and X-Restaurant-ID headers from middleware context
 	// POST routes for order creation and validation
-	mux.Handle("POST /api/v1/public/orders", tenantContext(http.HandlerFunc(publicOrderHandler.CreateOrder)))
-	mux.Handle("POST /api/v1/public/orders/validate", tenantContext(http.HandlerFunc(publicOrderHandler.ValidateOrder)))
+	mux.Handle("POST /api/v1/public/orders", middleware.RateLimitByIP(publicOrderWriteRequestsPerMinute)(tenantContext(http.HandlerFunc(publicOrderHandler.CreateOrder))))
+	mux.Handle("POST /api/v1/public/orders/validate", middleware.RateLimitByIP(publicOrderReadRequestsPerMinute)(tenantContext(http.HandlerFunc(publicOrderHandler.ValidateOrder))))
 
-	mux.Handle("GET /api/v1/public/orders/number/{number}/lookup", tenantContext(http.HandlerFunc(publicOrderHandler.GetOrderByNumber)))
-	mux.Handle("GET /api/v1/public/orders/{id}/status", tenantContext(http.HandlerFunc(publicOrderHandler.GetOrderStatus)))
-	mux.Handle("GET /api/v1/public/orders/{id}/track", tenantContext(http.HandlerFunc(publicOrderHandler.TrackOrder)))
+	mux.Handle("GET /api/v1/public/orders/number/{number}/lookup", middleware.RateLimitByIP(publicOrderReadRequestsPerMinute)(tenantContext(http.HandlerFunc(publicOrderHandler.GetOrderByNumber))))
+	mux.Handle("GET /api/v1/public/orders/{id}/status", middleware.RateLimitByIP(publicOrderReadRequestsPerMinute)(tenantContext(http.HandlerFunc(publicOrderHandler.GetOrderStatus))))
+	mux.Handle("GET /api/v1/public/orders/{id}/track", middleware.RateLimitByIP(publicOrderReadRequestsPerMinute)(tenantContext(http.HandlerFunc(publicOrderHandler.TrackOrder))))
 
 	// GET route for order retrieval (supports both by ID and tracking)
 	// Handlers can use request context or query params to determine behavior
-	mux.Handle("GET /api/v1/public/orders/{id}", tenantContext(http.HandlerFunc(publicOrderHandler.GetOrder)))
+	mux.Handle("GET /api/v1/public/orders/{id}", middleware.RateLimitByIP(publicOrderReadRequestsPerMinute)(tenantContext(http.HandlerFunc(publicOrderHandler.GetOrder))))
 
 	// DELETE route for order cancellation
-	mux.Handle("DELETE /api/v1/public/orders/{id}", tenantContext(http.HandlerFunc(publicOrderHandler.CancelOrder)))
+	mux.Handle("DELETE /api/v1/public/orders/{id}", middleware.RateLimitByIP(publicOrderWriteRequestsPerMinute)(tenantContext(http.HandlerFunc(publicOrderHandler.CancelOrder))))
 
 	// Translation routes (public - no authentication required)
 	registerTranslationRoutes(mux, translationHandler, superAdminTokenService)

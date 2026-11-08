@@ -1,11 +1,11 @@
 param(
-    [string]$ProjectName = 'pos-p2a-ws05-e2e-20261103'
+    [string]$ProjectName = 'pos-p2a-ws05-e2e-20261108'
 )
 
 $ErrorActionPreference = 'Stop'
 
 $project = $ProjectName
-$api = 'http://localhost:18081/api/v1'
+$api = 'http://localhost:18082/api/v1'
 $database = 'pos_phase2a_e2e'
 $container = "$project-postgres-1"
 $password = 'WS05-Disposable-Only-2026!'
@@ -21,7 +21,7 @@ $databaseName = docker exec $container psql -U postgres -d $database -Atc 'SELEC
 if ($LASTEXITCODE -ne 0 -or $databaseName.Trim() -ne $database) {
     throw "Refusing to seed: expected disposable database '$database'."
 }
-$health = Invoke-RestMethod -Uri 'http://localhost:18081/api/v1/health' -TimeoutSec 10
+$health = Invoke-RestMethod -Uri 'http://localhost:18082/api/v1/health' -TimeoutSec 10
 if (-not $health) { throw 'The isolated API health check failed.' }
 
 function Invoke-DisposableSql([string]$sql) {
@@ -45,7 +45,7 @@ function Ensure-Tenant([string]$suffix, [string]$name) {
             phone = '5550100200'
         } | ConvertTo-Json
         try {
-            $null = Invoke-RestMethod -Method Post -Uri "$api/auth/register" -ContentType 'application/json' -Headers @{ Origin = 'http://localhost:13102' } -Body $registration -TimeoutSec 20
+            $null = Invoke-RestMethod -Method Post -Uri "$api/auth/register" -ContentType 'application/json' -Headers @{ Origin = 'http://localhost:13112' } -Body $registration -TimeoutSec 20
         } catch {
             throw "Could not create disposable WS05 $name tenant account: $($_.Exception.Message)"
         }
@@ -56,7 +56,7 @@ function Ensure-Tenant([string]$suffix, [string]$name) {
     if (-not $restaurantID -or -not $user) { throw "The disposable WS05 $name account fixture is incomplete." }
 
     $login = @{ email = $email; password = $password } | ConvertTo-Json
-    $auth = Invoke-WebRequest -Method Post -Uri "$api/auth/login" -ContentType 'application/json' -Headers @{ Origin = 'http://localhost:13102' } -Body $login -TimeoutSec 20
+    $auth = Invoke-WebRequest -Method Post -Uri "$api/auth/login" -ContentType 'application/json' -Headers @{ Origin = 'http://localhost:13112' } -Body $login -TimeoutSec 20
     if ($auth.StatusCode -ne 200 -or -not ($auth.Headers['Set-Cookie'] -match 'poos_session=')) {
         throw "Could not establish the disposable WS05 $name browser session."
     }
@@ -65,6 +65,18 @@ function Ensure-Tenant([string]$suffix, [string]$name) {
 
 $tenantA = Ensure-Tenant 'a' 'Tenant A'
 $tenantB = Ensure-Tenant 'b' 'Tenant B'
+
+$siblingRestaurantsSql = @"
+INSERT INTO restaurants (tenant_id, name, slug, address, status, created_at, updated_at)
+SELECT tenant_id, 'WS05 Tenant A Sibling Restaurant', 'phase2a-restaurant-a2', '43 Test Avenue', 'active', NOW(), NOW()
+FROM restaurants WHERE slug = 'phase2a-restaurant-a'
+ON CONFLICT (tenant_id, slug) DO NOTHING;
+INSERT INTO restaurants (tenant_id, name, slug, address, status, created_at, updated_at)
+SELECT tenant_id, 'WS05 Tenant B Sibling Restaurant', 'phase2a-restaurant-b2', '44 Test Avenue', 'active', NOW(), NOW()
+FROM restaurants WHERE slug = 'phase2a-restaurant-b'
+ON CONFLICT (tenant_id, slug) DO NOTHING;
+"@
+$null = Invoke-DisposableSql $siblingRestaurantsSql
 
 $fixtureSql = @"
 BEGIN;

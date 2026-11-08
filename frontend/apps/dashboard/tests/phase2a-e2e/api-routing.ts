@@ -1,17 +1,17 @@
 import type { Page } from '@playwright/test'
 
 const candidateApiOrigin = new URL(
-  process.env.WS05_API_URL || 'http://localhost:18081/api/v1',
+  process.env.WS05_API_URL || 'http://localhost:18082/api/v1',
 ).origin
 
 export async function routeContainerApiToCandidate(page: Page) {
   const loopbackServicePorts = new Map([
-    ['13101', '3001'],
-    ['13102', '3002'],
-    ['13103', '3003'],
-    ['13104', '3004'],
+    ['13111', '3001'],
+    ['13112', '3002'],
+    ['13113', '3003'],
+    ['13114', '3004'],
   ])
-  await page.route(/^http:\/\/localhost:(13101|13102|13103|13104)\//, async (route) => {
+  await page.route(/^http:\/\/localhost:(13111|13112|13113|13114)\//, async (route) => {
     const requestedURL = new URL(route.request().url())
     const servicePort = loopbackServicePorts.get(requestedURL.port)
     if (!servicePort) return route.continue()

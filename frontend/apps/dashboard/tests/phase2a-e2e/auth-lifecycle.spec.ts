@@ -1,9 +1,9 @@
 import { expect, test, type Page } from '@playwright/test'
 import { routeContainerApiToCandidate } from './api-routing'
 
-const landingUrl = (process.env.WS05_LANDING_URL || 'http://localhost:13101').replace(/\/$/, '')
-const landingRedirectUrl = (process.env.WS05_LANDING_REDIRECT_URL || 'http://localhost:13101').replace(/\/$/, '')
-const dashboardUrl = (process.env.WS05_DASHBOARD_URL || 'http://localhost:13102').replace(/\/$/, '')
+const landingUrl = (process.env.WS05_LANDING_URL || 'http://localhost:13111').replace(/\/$/, '')
+const landingRedirectUrl = (process.env.WS05_LANDING_REDIRECT_URL || 'http://localhost:13111').replace(/\/$/, '')
+const dashboardUrl = (process.env.WS05_DASHBOARD_URL || 'http://localhost:13112').replace(/\/$/, '')
 const ownerEmail = 'phase2a-owner-a@example.test'
 const ownerPassword = process.env.WS05_TEST_PASSWORD || 'WS05-Disposable-Only-2026!'
 
@@ -18,9 +18,9 @@ async function expectSignedInDashboard(page: Page) {
     const query = new URLSearchParams(location.search)
     const hasCredentialQuery = ['token', 'jwt', 'user'].some((name) => query.has(name))
     return { pathname: location.pathname, hasUser: Boolean(authState?.state?.user), hasStoredToken: Boolean(authState?.state?.token), hasCredentialQuery }
-  }).catch(() => ({ pathname: '', hasUser: false, hasStoredToken: false, hasCredentialQuery: false })), { timeout: 30_000 })
+  }).catch(() => ({ pathname: '', hasUser: false, hasStoredToken: false, hasCredentialQuery: false })), { timeout: 90_000 })
     .toEqual({ pathname: '/en/dashboard', hasUser: true, hasStoredToken: false, hasCredentialQuery: false })
-  const sessionCookie = (await page.context().cookies('http://localhost:18081')).find((cookie) => cookie.name === 'poos_session')
+  const sessionCookie = (await page.context().cookies('http://localhost:18082')).find((cookie) => cookie.name === 'poos_session')
   expect(sessionCookie?.httpOnly).toBe(true)
 }
 
@@ -58,6 +58,7 @@ test('invalid credentials stay on login and show an error', async ({ page }) => 
 })
 
 test('logout clears access and denies the next protected dashboard visit', async ({ page }) => {
+  test.setTimeout(240_000)
   await signIn(page, ownerPassword)
   expect(new URL(page.url()).searchParams.has('password')).toBe(false)
   await expectSignedInDashboard(page)

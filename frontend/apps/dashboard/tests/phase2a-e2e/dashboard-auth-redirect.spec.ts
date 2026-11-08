@@ -1,9 +1,9 @@
 import { expect, test } from '@playwright/test'
 import { routeContainerApiToCandidate } from './api-routing'
 
-const dashboardUrl = process.env.WS05_DASHBOARD_URL || 'http://localhost:13102'
-const landingUrl = process.env.WS05_LANDING_URL || 'http://localhost:13101'
-const landingRedirectUrl = process.env.WS05_LANDING_REDIRECT_URL || 'http://localhost:13101'
+const dashboardUrl = process.env.WS05_DASHBOARD_URL || 'http://localhost:13112'
+const landingUrl = process.env.WS05_LANDING_URL || 'http://localhost:13111'
+const landingRedirectUrl = process.env.WS05_LANDING_REDIRECT_URL || 'http://localhost:13111'
 
 test('unauthenticated dashboard visit reaches the working landing login page', async ({ page }) => {
   await routeContainerApiToCandidate(page)
