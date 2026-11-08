@@ -329,6 +329,14 @@ test('storefront menu cart and checkout complete an order in the browser', async
   expect(rememberedToken.byId).toBe(rememberedToken.byNumber)
   expect(page.url()).not.toContain(rememberedToken.byNumber)
 
+  await page.goto(`${storefrontUrl}/en/orders/track/${encodeURIComponent(orderNumberText)}`, {
+    waitUntil: 'domcontentloaded',
+    timeout: 90_000,
+  })
+  await expect(page.getByRole('heading', { name: 'Order Status' })).toBeVisible({ timeout: 30_000 })
+  await expect(page.getByRole('heading', { name: 'Order Details' })).toBeVisible()
+  await expect(page.getByText('WS05 E2E Burger A')).toBeVisible()
+
   const orderPath = `${api}/public/orders/${orderId}`
   const scopedHeaders = {
     'X-Tenant-ID': String(fixtureProduct.tenant_id),
