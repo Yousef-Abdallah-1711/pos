@@ -70,11 +70,13 @@ func TestAuthAuditAndUserSettingsRLSWithRestrictedRuntimeRole(t *testing.T) {
 	assertTenantCannotInsertOtherTenantAuditRow(t, ctx, app)
 	assertInvalidAuditTenantFailsClosed(t, ctx, app)
 	assertUserSettingsRLS(t, ctx, app)
+	assertNotificationPreferencesRLS(t, ctx, app)
 	assertUnscopedSettingsAreEmpty(t, ctx, app)
 	if err := repository.RecordAuthEvent(ctx, 0, 0, "logout", "success", "", ""); err == nil {
 		t.Fatal("tenantless audit events must be rejected before reaching the database")
 	}
 	rollbackAuthAndSettingsRLS(t, ctx, admin)
+	assertNotificationPreferencesRollback(t, ctx, app)
 }
 
 func openAuthAuditTestDB(t *testing.T, env string) *sql.DB {
@@ -123,6 +125,7 @@ func createAuthAuditFixture(t *testing.T, ctx context.Context, db *sql.DB) {
 	for _, statement := range []string{
 		`CREATE TABLE tenants (id BIGINT PRIMARY KEY)`,
 		`CREATE TABLE users (id BIGINT PRIMARY KEY, tenant_id BIGINT NOT NULL REFERENCES tenants(id))`,
+		`CREATE TABLE notification_preferences (id BIGSERIAL PRIMARY KEY, user_id BIGINT NOT NULL UNIQUE REFERENCES users(id), in_app_notifications BOOLEAN NOT NULL DEFAULT TRUE)`,
 	} {
 		if _, err := db.ExecContext(ctx, statement); err != nil {
 			t.Fatalf("create fixture: %v", err)
@@ -144,7 +147,7 @@ func grantAuthAuditFixture(t *testing.T, ctx context.Context, db *sql.DB, schema
 
 func applyAuthAuditMigrations(t *testing.T, ctx context.Context, db *sql.DB, schema string) {
 	t.Helper()
-	for _, name := range []string{"040_create_user_settings.sql", "163_add_user_auth_audit_logs.sql", "164_rls_user_auth_audit_logs.sql", "165_rls_user_settings.sql"} {
+	for _, name := range []string{"040_create_user_settings.sql", "163_add_user_auth_audit_logs.sql", "164_rls_user_auth_audit_logs.sql", "165_rls_user_settings.sql", "166_rls_notification_preferences.sql"} {
 		migration, err := os.ReadFile(filepath.Join("..", "..", "migrations", name))
 		if err != nil {
 			t.Fatalf("read migration %s: %v", name, err)
@@ -153,7 +156,7 @@ func applyAuthAuditMigrations(t *testing.T, ctx context.Context, db *sql.DB, sch
 			t.Fatalf("apply migration %s: %v", name, err)
 		}
 	}
-	if _, err := db.ExecContext(ctx, `GRANT SELECT, INSERT, UPDATE, DELETE ON user_auth_audit_logs, user_settings, user_settings_audit_log, password_change_history, email_change_requests TO pos_app`); err != nil {
+	if _, err := db.ExecContext(ctx, `GRANT SELECT, INSERT, UPDATE, DELETE ON user_auth_audit_logs, user_settings, user_settings_audit_log, password_change_history, email_change_requests, notification_preferences TO pos_app`); err != nil {
 		t.Fatalf("grant runtime table access: %v", err)
 	}
 	if _, err := db.ExecContext(ctx, `GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA `+schema+` TO pos_app`); err != nil {
@@ -166,6 +169,7 @@ func seedAuthAuditFixture(t *testing.T, ctx context.Context, db *sql.DB) {
 	for _, statement := range []string{
 		`INSERT INTO tenants (id) VALUES (1), (2)`,
 		`INSERT INTO users (id, tenant_id) VALUES (101, 1), (202, 2)`,
+		`INSERT INTO notification_preferences (user_id) VALUES (101), (202)`,
 		`INSERT INTO user_settings (user_id) VALUES (101), (202)`,
 		`INSERT INTO user_auth_audit_logs (tenant_id, user_id, action, status, user_agent) VALUES (2, 202, 'login', 'success', 'tenant-b')`,
 		`INSERT INTO email_change_requests (user_id, new_email, verification_token) VALUES (101, 'a@example.test', 'tenant-a-token'), (202, 'b@example.test', 'tenant-b-token')`,
@@ -173,6 +177,72 @@ func seedAuthAuditFixture(t *testing.T, ctx context.Context, db *sql.DB) {
 		if _, err := db.ExecContext(ctx, statement); err != nil {
 			t.Fatalf("seed auth audit fixture: %v", err)
 		}
+	}
+}
+
+func assertNotificationPreferencesRLS(t *testing.T, ctx context.Context, db *sql.DB) {
+	t.Helper()
+	readPreference := func(tenantID int64, userID int64) bool {
+		var enabled bool
+		err := database.WithTenantTx(ctx, db, tenantID, 0, func(tx *sql.Tx) error {
+			return tx.QueryRowContext(ctx, `SELECT in_app_notifications FROM notification_preferences WHERE user_id = $1`, userID).Scan(&enabled)
+		})
+		return err == nil && enabled
+	}
+	if !readPreference(1, 101) {
+		t.Fatal("tenant A should read its notification preferences")
+	}
+	if readPreference(1, 202) {
+		t.Fatal("tenant A must not read tenant B notification preferences")
+	}
+
+	err := database.WithTenantTx(ctx, db, 1, 0, func(tx *sql.Tx) error {
+		_, err := tx.ExecContext(ctx, `UPDATE notification_preferences SET in_app_notifications = FALSE WHERE user_id = 202`)
+		return err
+	})
+	if err != nil {
+		t.Fatalf("cross-tenant preference update should be filtered by RLS: %v", err)
+	}
+	assertScopedRowCount(t, ctx, db, 1, `SELECT count(*) FROM notification_preferences`, 1)
+	assertScopedRowCount(t, ctx, db, 2, `SELECT count(*) FROM notification_preferences`, 1)
+
+	err = database.WithTenantTx(ctx, db, 1, 0, func(tx *sql.Tx) error {
+		_, err := tx.ExecContext(ctx, `INSERT INTO notification_preferences (user_id) VALUES (202)`)
+		return err
+	})
+	if err == nil {
+		t.Fatal("tenant A must not insert notification preferences for tenant B's user")
+	}
+	err = database.WithTenantTx(ctx, db, 1, 0, func(tx *sql.Tx) error {
+		_, err := tx.ExecContext(ctx, `DELETE FROM notification_preferences WHERE user_id = 202`)
+		return err
+	})
+	if err != nil {
+		t.Fatalf("cross-tenant preference delete should be filtered by RLS: %v", err)
+	}
+	var tenantBPreference bool
+	if err := database.WithTenantTx(ctx, db, 2, 0, func(tx *sql.Tx) error {
+		return tx.QueryRowContext(ctx, `SELECT in_app_notifications FROM notification_preferences WHERE user_id = 202`).Scan(&tenantBPreference)
+	}); err != nil || !tenantBPreference {
+		t.Fatalf("denied cross-tenant update changed tenant B preference: enabled=%v err=%v", tenantBPreference, err)
+	}
+}
+
+func assertNotificationPreferencesRollback(t *testing.T, ctx context.Context, db *sql.DB) {
+	t.Helper()
+	var rlsEnabled, forceRLS bool
+	if err := db.QueryRowContext(ctx, `SELECT relrowsecurity, relforcerowsecurity FROM pg_class WHERE oid = 'notification_preferences'::regclass`).Scan(&rlsEnabled, &forceRLS); err != nil {
+		t.Fatalf("inspect notification preference rollback: %v", err)
+	}
+	if rlsEnabled || forceRLS {
+		t.Fatalf("notification preference rollback left RLS enabled=%v forced=%v", rlsEnabled, forceRLS)
+	}
+	var rowCount int
+	if err := db.QueryRowContext(ctx, `SELECT count(*) FROM notification_preferences`).Scan(&rowCount); err != nil {
+		t.Fatalf("read notification preferences after rollback: %v", err)
+	}
+	if rowCount != 2 {
+		t.Fatalf("notification preference rollback exposed %d rows, want both seeded rows", rowCount)
 	}
 }
 
@@ -261,7 +331,7 @@ func assertScopedRowCount(t *testing.T, ctx context.Context, db *sql.DB, tenantI
 
 func assertUnscopedSettingsAreEmpty(t *testing.T, ctx context.Context, db *sql.DB) {
 	t.Helper()
-	for _, table := range []string{"user_settings", "user_settings_audit_log", "password_change_history", "email_change_requests"} {
+	for _, table := range []string{"user_settings", "user_settings_audit_log", "password_change_history", "email_change_requests", "notification_preferences"} {
 		var count int
 		query := `SELECT count(*) FROM ` + table
 		if err := db.QueryRowContext(ctx, query).Scan(&count); err != nil {
@@ -280,7 +350,7 @@ func rollbackAuthAndSettingsRLS(t *testing.T, ctx context.Context, db *sql.DB) {
 		`ALTER TABLE user_auth_audit_logs NO FORCE ROW LEVEL SECURITY`,
 		`ALTER TABLE user_auth_audit_logs DISABLE ROW LEVEL SECURITY`,
 	}
-	for _, table := range []string{"user_settings", "user_settings_audit_log", "password_change_history", "email_change_requests"} {
+	for _, table := range []string{"user_settings", "user_settings_audit_log", "password_change_history", "email_change_requests", "notification_preferences"} {
 		policy := table + `_tenant_scope`
 		if table == "user_settings_audit_log" {
 			policy = "user_settings_audit_tenant_scope"
