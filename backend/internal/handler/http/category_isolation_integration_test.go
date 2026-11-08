@@ -75,6 +75,20 @@ func TestCategoryHTTPRejectsForgedScopeWithoutSideEffects(t *testing.T) {
 	if createdTenantID != fixture.tenantA || createdRestaurantID != fixture.restaurantA1 {
 		t.Fatalf("forged category create used tenant/restaurant %d/%d, want claim scope %d/%d", createdTenantID, createdRestaurantID, fixture.tenantA, fixture.restaurantA1)
 	}
+
+	updated := invokeCategoryHTTP(db, tokens, token, handler, fixture.ownCategory, http.MethodPut, "/api/v1/categories/%d", `{"name":"Updated Category","name_ar":"فئة محدثة","description":"Updated description","description_ar":"وصف محدث","display_order":17,"is_active":false}`)
+	if updated.Code != http.StatusOK {
+		t.Fatalf("owned category update status = %d, want %d: %s", updated.Code, http.StatusOK, updated.Body.String())
+	}
+	var name, nameAr, description, descriptionAr string
+	var displayOrder int
+	var isActive bool
+	if err := db.QueryRow(`SELECT name, name_ar, description, description_ar, display_order, is_active FROM categories WHERE id = $1 AND tenant_id = $2 AND restaurant_id = $3`, fixture.ownCategoryID, fixture.tenantA, fixture.restaurantA1).Scan(&name, &nameAr, &description, &descriptionAr, &displayOrder, &isActive); err != nil {
+		t.Fatalf("read updated category: %v", err)
+	}
+	if name != "Updated Category" || nameAr != "فئة محدثة" || description != "Updated description" || descriptionAr != "وصف محدث" || displayOrder != 17 || isActive {
+		t.Fatalf("owned category update fields = (%q,%q,%q,%q,%d,%v), want all submitted fields persisted", name, nameAr, description, descriptionAr, displayOrder, isActive)
+	}
 }
 
 type categoryIsolationTarget struct {
@@ -85,6 +99,7 @@ type categoryIsolationTarget struct {
 type categoryIsolationFixture struct {
 	tenantA, restaurantA1, ownCategoryID int
 	createCategoryName                   string
+	ownCategory                          categoryIsolationTarget
 	foreignTargets                       []categoryIsolationTarget
 }
 
@@ -103,6 +118,7 @@ func seedCategoryHTTPFixture(t *testing.T, db *sql.DB) categoryIsolationFixture 
 		restaurantA1:       restaurantA1,
 		ownCategoryID:      owned.categoryID,
 		createCategoryName: "created-from-claims-" + runID,
+		ownCategory:        owned,
 		foreignTargets: []categoryIsolationTarget{
 			insertCategoryHTTPFixture(t, ctx, db, "sibling restaurant", tenantA, restaurantA2, "sibling-"+runID),
 			insertCategoryHTTPFixture(t, ctx, db, "foreign tenant", tenantB, restaurantB1, "foreign-"+runID),
