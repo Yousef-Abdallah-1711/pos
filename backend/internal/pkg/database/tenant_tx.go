@@ -14,6 +14,7 @@ import (
 const (
 	TenantSetting     = "app.tenant_id"
 	RestaurantSetting = "app.restaurant_id"
+	UserSetting       = "app.user_id"
 )
 
 // WithTenantTx runs fn inside a transaction whose RLS context is the given tenant (and restaurant).
@@ -23,6 +24,18 @@ const (
 // This is the only supported way to touch RLS-protected tables. Policies compare against
 // current_setting('app.tenant_id', true), which is NULL (no rows, writes rejected) when it is unset.
 func WithTenantTx(ctx context.Context, db *sql.DB, tenantID, restaurantID int64, fn func(tx *sql.Tx) error) (err error) {
+	return withTenantContextTx(ctx, db, tenantID, restaurantID, 0, fn)
+}
+
+// WithTenantUserTx sets tenant, restaurant, and user context for user-owned RLS rows.
+func WithTenantUserTx(ctx context.Context, db *sql.DB, tenantID, restaurantID, userID int64, fn func(tx *sql.Tx) error) error {
+	if userID <= 0 {
+		return fmt.Errorf("invalid user id %d", userID)
+	}
+	return withTenantContextTx(ctx, db, tenantID, restaurantID, userID, fn)
+}
+
+func withTenantContextTx(ctx context.Context, db *sql.DB, tenantID, restaurantID, userID int64, fn func(tx *sql.Tx) error) (err error) {
 	if db == nil {
 		return errors.New("database is not initialized")
 	}
@@ -51,10 +64,12 @@ func WithTenantTx(ctx context.Context, db *sql.DB, tenantID, restaurantID int64,
 	if restaurantID > 0 {
 		restaurant = strconv.FormatInt(restaurantID, 10)
 	}
-	if _, err = tx.ExecContext(ctx,
-		`SELECT set_config($1, $2, true), set_config($3, $4, true)`,
-		TenantSetting, strconv.FormatInt(tenantID, 10), RestaurantSetting, restaurant,
-	); err != nil {
+	user := ""
+	if userID > 0 {
+		user = strconv.FormatInt(userID, 10)
+	}
+	if _, err = tx.ExecContext(ctx, `SELECT set_config($1, $2, true), set_config($3, $4, true), set_config($5, $6, true)`,
+		TenantSetting, strconv.FormatInt(tenantID, 10), RestaurantSetting, restaurant, UserSetting, user); err != nil {
 		return fmt.Errorf("set tenant context: %w", err)
 	}
 

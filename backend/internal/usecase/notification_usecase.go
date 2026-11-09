@@ -1,6 +1,7 @@
 package usecase
 
 import (
+	"context"
 	"fmt"
 	"pos-saas/internal/domain"
 	"pos-saas/internal/repository"
@@ -17,7 +18,7 @@ func NewNotificationUseCase(repo *repository.NotificationRepository) *Notificati
 }
 
 // CreateNotification creates a new notification
-func (uc *NotificationUseCase) CreateNotification(notification *domain.Notification) (*domain.Notification, error) {
+func (uc *NotificationUseCase) CreateNotification(ctx context.Context, notification *domain.Notification) (*domain.Notification, error) {
 	if notification.Title == "" {
 		return nil, fmt.Errorf("notification title is required")
 	}
@@ -26,16 +27,16 @@ func (uc *NotificationUseCase) CreateNotification(notification *domain.Notificat
 		return nil, fmt.Errorf("notification message is required")
 	}
 
-	return uc.repo.CreateNotification(notification)
+	return uc.repo.CreateNotification(ctx, notification)
 }
 
 // GetNotification retrieves a single notification
-func (uc *NotificationUseCase) GetNotification(userID, notificationID int) (*domain.Notification, error) {
-	return uc.repo.GetNotification(userID, notificationID)
+func (uc *NotificationUseCase) GetNotification(ctx context.Context, userID, tenantID, restaurantID, notificationID int) (*domain.Notification, error) {
+	return uc.repo.GetNotification(ctx, userID, tenantID, restaurantID, notificationID)
 }
 
 // ListNotifications retrieves notifications with filters
-func (uc *NotificationUseCase) ListNotifications(userID, tenantID, restaurantID int, filters *domain.NotificationFilters) (*domain.NotificationListResponse, error) {
+func (uc *NotificationUseCase) ListNotifications(ctx context.Context, userID, tenantID, restaurantID int, filters *domain.NotificationFilters) (*domain.NotificationListResponse, error) {
 	if filters.Page < 1 {
 		filters.Page = 1
 	}
@@ -53,35 +54,35 @@ func (uc *NotificationUseCase) ListNotifications(userID, tenantID, restaurantID 
 		filters.SortOrder = "DESC"
 	}
 
-	return uc.repo.ListNotifications(userID, tenantID, restaurantID, filters)
+	return uc.repo.ListNotifications(ctx, userID, tenantID, restaurantID, filters)
 }
 
 // MarkAsRead marks a notification as read
-func (uc *NotificationUseCase) MarkAsRead(userID, notificationID int) error {
-	return uc.repo.MarkAsRead(userID, notificationID)
+func (uc *NotificationUseCase) MarkAsRead(ctx context.Context, userID, tenantID, restaurantID, notificationID int) error {
+	return uc.repo.MarkAsRead(ctx, userID, tenantID, restaurantID, notificationID)
 }
 
 // MarkAsUnread marks a notification as unread
-func (uc *NotificationUseCase) MarkAsUnread(userID, notificationID int) error {
-	return uc.repo.MarkAsUnread(userID, notificationID)
+func (uc *NotificationUseCase) MarkAsUnread(ctx context.Context, userID, tenantID, restaurantID, notificationID int) error {
+	return uc.repo.MarkAsUnread(ctx, userID, tenantID, restaurantID, notificationID)
 }
 
 // MarkAllAsRead marks all unread notifications as read
-func (uc *NotificationUseCase) MarkAllAsRead(userID, tenantID, restaurantID int) error {
-	return uc.repo.MarkAllAsRead(userID, tenantID, restaurantID)
+func (uc *NotificationUseCase) MarkAllAsRead(ctx context.Context, userID, tenantID, restaurantID int) error {
+	return uc.repo.MarkAllAsRead(ctx, userID, tenantID, restaurantID)
 }
 
 // DeleteNotification deletes a notification
-func (uc *NotificationUseCase) DeleteNotification(userID, notificationID int) error {
-	return uc.repo.DeleteNotification(userID, notificationID)
+func (uc *NotificationUseCase) DeleteNotification(ctx context.Context, userID, tenantID, restaurantID, notificationID int) error {
+	return uc.repo.DeleteNotification(ctx, userID, tenantID, restaurantID, notificationID)
 }
 
 // GetUnreadCount gets count of unread notifications
-func (uc *NotificationUseCase) GetUnreadCount(userID, tenantID, restaurantID int) (int, error) {
-	return uc.repo.GetUnreadCount(userID, tenantID, restaurantID)
+func (uc *NotificationUseCase) GetUnreadCount(ctx context.Context, userID, tenantID, restaurantID int) (int, error) {
+	return uc.repo.GetUnreadCount(ctx, userID, tenantID, restaurantID)
 }
 
 // GetNotificationStats gets notification statistics
-func (uc *NotificationUseCase) GetNotificationStats(userID, tenantID, restaurantID int) (*domain.NotificationStats, error) {
-	return uc.repo.GetNotificationStats(userID, tenantID, restaurantID)
+func (uc *NotificationUseCase) GetNotificationStats(ctx context.Context, userID, tenantID, restaurantID int) (*domain.NotificationStats, error) {
+	return uc.repo.GetNotificationStats(ctx, userID, tenantID, restaurantID)
 }

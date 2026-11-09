@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"sync"
 	"time"
 
 	"pos-saas/internal/pkg/jwt"
@@ -180,27 +181,32 @@ func RateLimitSuperAdmin(requestsPerMinute int) func(http.Handler) http.Handler 
 		resetAt time.Time
 	}
 	clients := make(map[string]*clientInfo)
+	var clientsMu sync.Mutex
 
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			ip := GetClientIP(r)
 
-			// Get or create client info
+			// Serialize updates because this middleware handles concurrent HTTP requests.
+			clientsMu.Lock()
 			client, exists := clients[ip]
 			if !exists || time.Now().After(client.resetAt) {
-				clients[ip] = &clientInfo{
+				client = &clientInfo{
 					count:   1,
 					resetAt: time.Now().Add(time.Minute),
 				}
+				clients[ip] = client
 			} else {
 				client.count++
 				if client.count > requestsPerMinute {
+					clientsMu.Unlock()
 					log.Printf("[RateLimitSuperAdmin] Rate limit exceeded for IP: %s\n", ip)
 					w.Header().Set("Retry-After", "60")
 					respondError(w, http.StatusTooManyRequests, "rate limit exceeded")
 					return
 				}
 			}
+			clientsMu.Unlock()
 
 			next.ServeHTTP(w, r)
 		})

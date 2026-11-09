@@ -31,6 +31,7 @@ func NewProductUseCase(repo *repository.ProductRepository, notificationRepo *rep
 
 // CreateProduct handles product creation with image upload
 func (uc *ProductUseCase) CreateProduct(
+	ctx context.Context,
 	tenantID, restaurantID, userID int,
 	req *domain.CreateProductRequest,
 	imageFile *multipart.FileHeader,
@@ -106,7 +107,7 @@ func (uc *ProductUseCase) CreateProduct(
 			IconName:          &iconName,
 			Color:             &color,
 		}
-		if _, err := uc.notificationRepo.CreateNotification(notification); err != nil {
+		if _, err := uc.notificationRepo.CreateNotification(ctx, notification); err != nil {
 			log.Printf("[PRODUCT] failed to create low-stock notification: tenant=%d restaurant=%d product=%d err=%v", tenantID, restaurantID, product.ID, err)
 			// Don't fail the product creation if notification fails
 		}
@@ -131,6 +132,7 @@ func (uc *ProductUseCase) CreateProduct(
 
 // UpdateProduct updates an existing product
 func (uc *ProductUseCase) UpdateProduct(
+	ctx context.Context,
 	tenantID, restaurantID, productID, userID int,
 	req *domain.UpdateProductRequest,
 	imageFile *multipart.FileHeader,
@@ -223,7 +225,7 @@ func (uc *ProductUseCase) UpdateProduct(
 			IconName:          &iconName,
 			Color:             &color,
 		}
-		if _, err := uc.notificationRepo.CreateNotification(notification); err != nil {
+		if _, err := uc.notificationRepo.CreateNotification(ctx, notification); err != nil {
 			log.Printf("[PRODUCT] failed to create low-stock notification: tenant=%d restaurant=%d product=%d err=%v", tenantID, restaurantID, product.ID, err)
 			// Don't fail the product update if notification fails
 		}

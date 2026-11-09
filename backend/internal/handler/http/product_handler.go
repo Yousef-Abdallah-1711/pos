@@ -95,7 +95,7 @@ func (h *ProductHandler) CreateProduct(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Create product
-	product, err := h.uc.CreateProduct(claims.TenantID, claims.RestaurantID, claims.UserID, &req, fileHeader)
+	product, err := h.uc.CreateProduct(r.Context(), claims.TenantID, claims.RestaurantID, claims.UserID, &req, fileHeader)
 	if err != nil {
 		// Check for common validation errors
 		errMsg := err.Error()
@@ -290,7 +290,7 @@ func (h *ProductHandler) UpdateProduct(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Update product
-	product, err := h.uc.UpdateProduct(claims.TenantID, claims.RestaurantID, productID, claims.UserID, &req, fileHeader)
+	product, err := h.uc.UpdateProduct(r.Context(), claims.TenantID, claims.RestaurantID, productID, claims.UserID, &req, fileHeader)
 	if err != nil {
 		// Check for common validation/constraint errors
 		errMsg := err.Error()

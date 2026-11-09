@@ -20,8 +20,8 @@ func TestAuthAuditRepositoryPersistsLoginAndLogoutEvents(t *testing.T) {
 		VALUES ($1, NULLIF($2, 0), $3, $4, NULLIF($5, ''), NULLIF($6, ''))`)
 	for _, action := range []string{"login", "logout", "refresh"} {
 		mock.ExpectBegin()
-		mock.ExpectExec(`SELECT set_config\(\$1, \$2, true\), set_config\(\$3, \$4, true\)`).
-			WithArgs("app.tenant_id", "4", "app.restaurant_id", "").
+		mock.ExpectExec(`SELECT set_config`).
+			WithArgs("app.tenant_id", "4", "app.restaurant_id", "", "app.user_id", "").
 			WillReturnResult(sqlmock.NewResult(0, 0))
 		mock.ExpectExec(statement).
 			WithArgs(int64(4), int64(9), action, "success", "192.0.2.8", "test-agent").
