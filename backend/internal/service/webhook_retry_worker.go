@@ -20,6 +20,7 @@ const (
 	webhookRetryStatusProcessing = "processing"
 	webhookRetryStatusSuccess    = "success"
 	webhookRetryStatusFailed     = "failed"
+	webhookRetryProcessingLease  = 5 * time.Minute
 )
 
 // WebhookRetryStats describes queue volume by status.
@@ -219,12 +220,12 @@ func (w *WebhookRetryWorker) claimOne(ctx context.Context) (*retryQueueRecord, e
 	err = tx.QueryRowContext(ctx, `
 		SELECT id, endpoint, payload::text, attempts, max_attempts
 		FROM webhook_retry_queue
-		WHERE status = $1
-		  AND next_retry_at <= NOW()
+		WHERE (status = $1 AND next_retry_at <= NOW())
+		   OR (status = $2 AND updated_at <= NOW() - ($3 * INTERVAL '1 second'))
 		ORDER BY next_retry_at ASC, id ASC
 		LIMIT 1
 		FOR UPDATE SKIP LOCKED
-	`, webhookRetryStatusPending).Scan(
+	`, webhookRetryStatusPending, webhookRetryStatusProcessing, int(webhookRetryProcessingLease.Seconds())).Scan(
 		&record.ID,
 		&record.Endpoint,
 		&record.PayloadRaw,

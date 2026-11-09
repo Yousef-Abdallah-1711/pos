@@ -18,40 +18,16 @@ const API_ROOT = API_BASE_URL.endsWith('/api/v1') ? API_BASE_URL : `${API_BASE_U
 // Create axios instance with default config
 const apiClient = axios.create({
   baseURL: API_ROOT,
+  withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
   },
 })
 
 // ==============================================
-// 🔐 AUTH INTERCEPTOR: Get token from Zustand auth-storage
-// This reads the token from localStorage where Zustand persists it
-// Key: 'auth-storage' (contains entire auth state as JSON)
+// Authentication is carried by the API's HttpOnly session cookie.
 // ==============================================
 apiClient.interceptors.request.use((config) => {
-  try {
-    // Get the full auth state from localStorage
-    const authStorageRaw = localStorage.getItem('auth-storage')
-    if (!authStorageRaw) {
-      debugWarn('⚠️ [API Request] No auth-storage found in localStorage')
-      return config
-    }
-
-    // Parse the JSON to get the token
-    const authState = JSON.parse(authStorageRaw)
-    const token = authState?.state?.token
-
-    if (token) {
-      debugLog('✅ [API Request] Token found, adding to Authorization header')
-      config.headers.Authorization = `Bearer ${token}`
-    } else {
-      debugWarn('⚠️ [API Request] Token not found in auth-storage.state.token')
-      debugLog('📦 [API Request] Auth storage contents:', authState)
-    }
-  } catch (err) {
-    debugError('❌ [API Request] Error parsing auth-storage:', err)
-  }
-
   return config
 })
 

@@ -4,282 +4,159 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"log"
 
 	"pos-saas/internal/domain"
+	"pos-saas/internal/pkg/database"
 )
 
-// UserSettingsRepository handles user settings database operations
+const userSettingsColumns = `id, user_id, language, theme, primary_color, secondary_color, accent_color,
+	notifications_enabled, email_notifications, sms_notifications, created_at, updated_at`
+
+// UserSettingsRepository handles user settings database operations.
 type UserSettingsRepository struct {
 	db *sql.DB
 }
 
-// NewUserSettingsRepository creates new user settings repository
+// NewUserSettingsRepository creates new user settings repository.
 func NewUserSettingsRepository(db *sql.DB) *UserSettingsRepository {
 	return &UserSettingsRepository{db: db}
 }
 
-// GetByUserID retrieves settings for a user, creates defaults if not exists
-func (r *UserSettingsRepository) GetByUserID(ctx context.Context, userID int64) (*domain.UserSettings, error) {
-	query := `
-		SELECT id, user_id, language, theme, primary_color, secondary_color, accent_color,
-		       notifications_enabled, email_notifications, sms_notifications, created_at, updated_at
-		FROM user_settings
-		WHERE user_id = $1
-	`
-
+// GetByUserID retrieves settings for a tenant user and creates defaults if absent.
+func (r *UserSettingsRepository) GetByUserID(ctx context.Context, tenantID, userID int64) (*domain.UserSettings, error) {
 	var settings domain.UserSettings
-	err := r.db.QueryRowContext(ctx, query, userID).Scan(
-		&settings.ID, &settings.UserID, &settings.Language, &settings.Theme,
-		&settings.PrimaryColor, &settings.SecondaryColor, &settings.AccentColor,
-		&settings.NotificationsEnabled, &settings.EmailNotifications, &settings.SMSNotifications,
-		&settings.CreatedAt, &settings.UpdatedAt,
-	)
-
-	if err == sql.ErrNoRows {
-		log.Printf("[UserSettings] No settings found for user %d, creating defaults", userID)
-		return r.createDefaults(ctx, userID)
-	}
-
+	err := r.withUserTransaction(ctx, tenantID, userID, func(tx *sql.Tx) error {
+		_, err := tx.ExecContext(ctx, `
+			INSERT INTO user_settings (user_id)
+			VALUES ($1)
+			ON CONFLICT (user_id) DO NOTHING`, userID)
+		if err != nil {
+			return fmt.Errorf("create default settings: %w", err)
+		}
+		return scanUserSettings(tx.QueryRowContext(ctx, `SELECT `+userSettingsColumns+`
+			FROM user_settings WHERE user_id = $1`, userID), &settings)
+	})
 	if err != nil {
-		log.Printf("[UserSettings] ERROR fetching settings for user %d: %v", userID, err)
-		return nil, fmt.Errorf("failed to fetch user settings: %w", err)
+		return nil, fmt.Errorf("fetch user settings: %w", err)
 	}
-
 	return &settings, nil
 }
 
-// createDefaults creates default settings for a new user
-func (r *UserSettingsRepository) createDefaults(ctx context.Context, userID int64) (*domain.UserSettings, error) {
-	query := `
-		INSERT INTO user_settings (
-			user_id, language, theme, primary_color, secondary_color, accent_color,
-			notifications_enabled, email_notifications, sms_notifications
-		) VALUES ($1, 'en', 'light', '#3b82f6', '#6366f1', '#10b981', true, true, false)
-		RETURNING id, user_id, language, theme, primary_color, secondary_color, accent_color,
-		          notifications_enabled, email_notifications, sms_notifications, created_at, updated_at
-	`
-
-	var settings domain.UserSettings
-	err := r.db.QueryRowContext(ctx, query, userID).Scan(
-		&settings.ID, &settings.UserID, &settings.Language, &settings.Theme,
-		&settings.PrimaryColor, &settings.SecondaryColor, &settings.AccentColor,
-		&settings.NotificationsEnabled, &settings.EmailNotifications, &settings.SMSNotifications,
-		&settings.CreatedAt, &settings.UpdatedAt,
-	)
-
-	if err != nil {
-		log.Printf("[UserSettings] ERROR creating default settings for user %d: %v", userID, err)
-		return nil, fmt.Errorf("failed to create default settings: %w", err)
-	}
-
-	log.Printf("[UserSettings] Default settings created for user %d", userID)
-	return &settings, nil
-}
-
-// UpdateLanguage updates user's language preference
-func (r *UserSettingsRepository) UpdateLanguage(ctx context.Context, userID int64, language string) (*domain.UserSettings, error) {
-	// Validate language
+// UpdateLanguage updates a user's language preference.
+func (r *UserSettingsRepository) UpdateLanguage(ctx context.Context, tenantID, userID int64, language string) (*domain.UserSettings, error) {
 	if language != "en" && language != "ar" {
 		return nil, fmt.Errorf("invalid language: %s", language)
 	}
-
-	query := `
-		UPDATE user_settings
-		SET language = $1, updated_at = CURRENT_TIMESTAMP
-		WHERE user_id = $2
-		RETURNING id, user_id, language, theme, primary_color, secondary_color, accent_color,
-		          notifications_enabled, email_notifications, sms_notifications, created_at, updated_at
-	`
-
-	var settings domain.UserSettings
-	err := r.db.QueryRowContext(ctx, query, language, userID).Scan(
-		&settings.ID, &settings.UserID, &settings.Language, &settings.Theme,
-		&settings.PrimaryColor, &settings.SecondaryColor, &settings.AccentColor,
-		&settings.NotificationsEnabled, &settings.EmailNotifications, &settings.SMSNotifications,
-		&settings.CreatedAt, &settings.UpdatedAt,
-	)
-
-	if err != nil {
-		log.Printf("[UserSettings] ERROR updating language for user %d: %v", userID, err)
-		return nil, fmt.Errorf("failed to update language: %w", err)
-	}
-
-	log.Printf("[UserSettings] Language updated for user %d: %s", userID, language)
-	return &settings, nil
+	return r.updateSettings(ctx, tenantID, userID, "update language",
+		`UPDATE user_settings SET language = $1, updated_at = CURRENT_TIMESTAMP WHERE user_id = $2 RETURNING `+userSettingsColumns,
+		language, userID)
 }
 
-// UpdateTheme updates user's theme preference
-func (r *UserSettingsRepository) UpdateTheme(ctx context.Context, userID int64, theme string) (*domain.UserSettings, error) {
-	// Validate theme
+// UpdateTheme updates a user's theme preference.
+func (r *UserSettingsRepository) UpdateTheme(ctx context.Context, tenantID, userID int64, theme string) (*domain.UserSettings, error) {
 	if theme != "light" && theme != "dark" && theme != "system" {
 		return nil, fmt.Errorf("invalid theme: %s", theme)
 	}
-
-	query := `
-		UPDATE user_settings
-		SET theme = $1, updated_at = CURRENT_TIMESTAMP
-		WHERE user_id = $2
-		RETURNING id, user_id, language, theme, primary_color, secondary_color, accent_color,
-		          notifications_enabled, email_notifications, sms_notifications, created_at, updated_at
-	`
-
-	var settings domain.UserSettings
-	err := r.db.QueryRowContext(ctx, query, theme, userID).Scan(
-		&settings.ID, &settings.UserID, &settings.Language, &settings.Theme,
-		&settings.PrimaryColor, &settings.SecondaryColor, &settings.AccentColor,
-		&settings.NotificationsEnabled, &settings.EmailNotifications, &settings.SMSNotifications,
-		&settings.CreatedAt, &settings.UpdatedAt,
-	)
-
-	if err != nil {
-		log.Printf("[UserSettings] ERROR updating theme for user %d: %v", userID, err)
-		return nil, fmt.Errorf("failed to update theme: %w", err)
-	}
-
-	log.Printf("[UserSettings] Theme updated for user %d: %s", userID, theme)
-	return &settings, nil
+	return r.updateSettings(ctx, tenantID, userID, "update theme",
+		`UPDATE user_settings SET theme = $1, updated_at = CURRENT_TIMESTAMP WHERE user_id = $2 RETURNING `+userSettingsColumns,
+		theme, userID)
 }
 
-// UpdateColors updates dashboard color scheme
-func (r *UserSettingsRepository) UpdateColors(ctx context.Context, userID int64, primaryColor, secondaryColor, accentColor string) (*domain.UserSettings, error) {
-	// Validate hex colors format
+// UpdateColors updates a user's dashboard color scheme.
+func (r *UserSettingsRepository) UpdateColors(ctx context.Context, tenantID, userID int64, primaryColor, secondaryColor, accentColor string) (*domain.UserSettings, error) {
 	if !isValidHexColor(primaryColor) || !isValidHexColor(secondaryColor) || !isValidHexColor(accentColor) {
 		return nil, fmt.Errorf("invalid color format provided")
 	}
-
-	query := `
-		UPDATE user_settings
-		SET primary_color = $1, secondary_color = $2, accent_color = $3, updated_at = CURRENT_TIMESTAMP
-		WHERE user_id = $4
-		RETURNING id, user_id, language, theme, primary_color, secondary_color, accent_color,
-		          notifications_enabled, email_notifications, sms_notifications, created_at, updated_at
-	`
-
-	var settings domain.UserSettings
-	err := r.db.QueryRowContext(ctx, query, primaryColor, secondaryColor, accentColor, userID).Scan(
-		&settings.ID, &settings.UserID, &settings.Language, &settings.Theme,
-		&settings.PrimaryColor, &settings.SecondaryColor, &settings.AccentColor,
-		&settings.NotificationsEnabled, &settings.EmailNotifications, &settings.SMSNotifications,
-		&settings.CreatedAt, &settings.UpdatedAt,
-	)
-
-	if err != nil {
-		log.Printf("[UserSettings] ERROR updating colors for user %d: %v", userID, err)
-		return nil, fmt.Errorf("failed to update colors: %w", err)
-	}
-
-	log.Printf("[UserSettings] Colors updated for user %d", userID)
-	return &settings, nil
+	return r.updateSettings(ctx, tenantID, userID, "update colors",
+		`UPDATE user_settings SET primary_color = $1, secondary_color = $2, accent_color = $3,
+		updated_at = CURRENT_TIMESTAMP WHERE user_id = $4 RETURNING `+userSettingsColumns,
+		primaryColor, secondaryColor, accentColor, userID)
 }
 
-// UpdateNotifications updates notification preferences
-func (r *UserSettingsRepository) UpdateNotifications(ctx context.Context, userID int64, enabled, emailNotif, smsNotif bool) (*domain.UserSettings, error) {
-	query := `
-		UPDATE user_settings
-		SET notifications_enabled = $1, email_notifications = $2, sms_notifications = $3, updated_at = CURRENT_TIMESTAMP
-		WHERE user_id = $4
-		RETURNING id, user_id, language, theme, primary_color, secondary_color, accent_color,
-		          notifications_enabled, email_notifications, sms_notifications, created_at, updated_at
-	`
-
-	var settings domain.UserSettings
-	err := r.db.QueryRowContext(ctx, query, enabled, emailNotif, smsNotif, userID).Scan(
-		&settings.ID, &settings.UserID, &settings.Language, &settings.Theme,
-		&settings.PrimaryColor, &settings.SecondaryColor, &settings.AccentColor,
-		&settings.NotificationsEnabled, &settings.EmailNotifications, &settings.SMSNotifications,
-		&settings.CreatedAt, &settings.UpdatedAt,
-	)
-
-	if err != nil {
-		log.Printf("[UserSettings] ERROR updating notifications for user %d: %v", userID, err)
-		return nil, fmt.Errorf("failed to update notifications: %w", err)
-	}
-
-	log.Printf("[UserSettings] Notifications updated for user %d", userID)
-	return &settings, nil
+// UpdateNotifications updates a user's notification preferences.
+func (r *UserSettingsRepository) UpdateNotifications(ctx context.Context, tenantID, userID int64, enabled, emailNotif, smsNotif bool) (*domain.UserSettings, error) {
+	return r.updateSettings(ctx, tenantID, userID, "update notifications",
+		`UPDATE user_settings SET notifications_enabled = $1, email_notifications = $2,
+		sms_notifications = $3, updated_at = CURRENT_TIMESTAMP WHERE user_id = $4 RETURNING `+userSettingsColumns,
+		enabled, emailNotif, smsNotif, userID)
 }
 
-// LogAuditChange logs a settings change to audit log
-func (r *UserSettingsRepository) LogAuditChange(ctx context.Context, userID, changedBy int64, settingName string, oldValue, newValue *string, ipAddress string) error {
-	query := `
-		INSERT INTO user_settings_audit_log (user_id, setting_name, old_value, new_value, changed_by, ip_address)
-		VALUES ($1, $2, $3, $4, $5, $6)
-	`
-
-	_, err := r.db.ExecContext(ctx, query, userID, settingName, oldValue, newValue, changedBy, ipAddress)
-	if err != nil {
-		log.Printf("[UserSettings] ERROR logging audit change for user %d: %v", userID, err)
-		return fmt.Errorf("failed to log audit change: %w", err)
-	}
-
-	log.Printf("[UserSettings] Audit log recorded for user %d: %s", userID, settingName)
-	return nil
+// LogAuditChange logs a settings change inside the user's tenant transaction.
+func (r *UserSettingsRepository) LogAuditChange(ctx context.Context, tenantID, userID, changedBy int64, settingName string, oldValue, newValue *string, ipAddress string) error {
+	return r.withUserTransaction(ctx, tenantID, userID, func(tx *sql.Tx) error {
+		_, err := tx.ExecContext(ctx, `INSERT INTO user_settings_audit_log
+			(user_id, setting_name, old_value, new_value, changed_by, ip_address)
+			VALUES ($1, $2, $3, $4, $5, $6)`, userID, settingName, oldValue, newValue, changedBy, ipAddress)
+		return err
+	})
 }
 
-// RecordPasswordChange records a password change to history
-func (r *UserSettingsRepository) RecordPasswordChange(ctx context.Context, userID int64, passwordHash, ipAddress string) error {
-	query := `
-		INSERT INTO password_change_history (user_id, password_hash, ip_address)
-		VALUES ($1, $2, $3)
-	`
-
-	_, err := r.db.ExecContext(ctx, query, userID, passwordHash, ipAddress)
-	if err != nil {
-		log.Printf("[UserSettings] ERROR recording password change for user %d: %v", userID, err)
-		return fmt.Errorf("failed to record password change: %w", err)
-	}
-
-	log.Printf("[UserSettings] Password change recorded for user %d", userID)
-	return nil
+// RecordPasswordChange records a password change in the user's tenant transaction.
+func (r *UserSettingsRepository) RecordPasswordChange(ctx context.Context, tenantID, userID int64, passwordHash, ipAddress string) error {
+	return r.withUserTransaction(ctx, tenantID, userID, func(tx *sql.Tx) error {
+		_, err := tx.ExecContext(ctx, `INSERT INTO password_change_history (user_id, password_hash, ip_address)
+			VALUES ($1, $2, $3)`, userID, passwordHash, ipAddress)
+		return err
+	})
 }
 
-// GetPasswordChangeHistory retrieves password change history for a user
-func (r *UserSettingsRepository) GetPasswordChangeHistory(ctx context.Context, userID int64, limit int) ([]domain.PasswordChangeHistory, error) {
-	query := `
-		SELECT id, user_id, changed_at, ip_address
-		FROM password_change_history
-		WHERE user_id = $1
-		ORDER BY changed_at DESC
-		LIMIT $2
-	`
-
-	rows, err := r.db.QueryContext(ctx, query, userID, limit)
-	if err != nil {
-		log.Printf("[UserSettings] ERROR fetching password history for user %d: %v", userID, err)
-		return nil, fmt.Errorf("failed to fetch password history: %w", err)
-	}
-	defer rows.Close()
-
+// GetPasswordChangeHistory retrieves password change history for a tenant user.
+func (r *UserSettingsRepository) GetPasswordChangeHistory(ctx context.Context, tenantID, userID int64, limit int) ([]domain.PasswordChangeHistory, error) {
 	var history []domain.PasswordChangeHistory
-	for rows.Next() {
-		var record domain.PasswordChangeHistory
-		if err := rows.Scan(&record.ID, &record.UserID, &record.ChangedAt, &record.IPAddress); err != nil {
-			log.Printf("[UserSettings] ERROR scanning password history row: %v", err)
-			return nil, fmt.Errorf("failed to scan password history: %w", err)
+	err := r.withUserTransaction(ctx, tenantID, userID, func(tx *sql.Tx) error {
+		rows, err := tx.QueryContext(ctx, `SELECT id, user_id, changed_at, ip_address
+			FROM password_change_history WHERE user_id = $1 ORDER BY changed_at DESC LIMIT $2`, userID, limit)
+		if err != nil {
+			return err
 		}
-		history = append(history, record)
+		defer rows.Close()
+		for rows.Next() {
+			var record domain.PasswordChangeHistory
+			if err := rows.Scan(&record.ID, &record.UserID, &record.ChangedAt, &record.IPAddress); err != nil {
+				return fmt.Errorf("scan password history: %w", err)
+			}
+			history = append(history, record)
+		}
+		return rows.Err()
+	})
+	if err != nil {
+		return nil, fmt.Errorf("fetch password history: %w", err)
 	}
-
-	if err := rows.Err(); err != nil {
-		log.Printf("[UserSettings] ERROR iterating password history: %v", err)
-		return nil, fmt.Errorf("error iterating password history: %w", err)
-	}
-
 	return history, nil
 }
 
-// isValidHexColor validates hex color format
-func isValidHexColor(color string) bool {
-	if len(color) != 7 {
-		return false
+func (r *UserSettingsRepository) updateSettings(ctx context.Context, tenantID, userID int64, operation, query string, args ...any) (*domain.UserSettings, error) {
+	var settings domain.UserSettings
+	err := r.withUserTransaction(ctx, tenantID, userID, func(tx *sql.Tx) error {
+		return scanUserSettings(tx.QueryRowContext(ctx, query, args...), &settings)
+	})
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", operation, err)
 	}
-	if color[0] != '#' {
+	return &settings, nil
+}
+
+func (r *UserSettingsRepository) withUserTransaction(ctx context.Context, tenantID, userID int64, operation func(*sql.Tx) error) error {
+	if userID <= 0 {
+		return fmt.Errorf("invalid user id %d", userID)
+	}
+	return database.WithTenantTx(ctx, r.db, tenantID, 0, operation)
+}
+
+func scanUserSettings(row interface{ Scan(...any) error }, settings *domain.UserSettings) error {
+	return row.Scan(&settings.ID, &settings.UserID, &settings.Language, &settings.Theme,
+		&settings.PrimaryColor, &settings.SecondaryColor, &settings.AccentColor,
+		&settings.NotificationsEnabled, &settings.EmailNotifications, &settings.SMSNotifications,
+		&settings.CreatedAt, &settings.UpdatedAt)
+}
+
+// isValidHexColor validates hex color format.
+func isValidHexColor(color string) bool {
+	if len(color) != 7 || color[0] != '#' {
 		return false
 	}
 	for i := 1; i < len(color); i++ {
-		c := color[i]
-		if (c < '0' || c > '9') && (c < 'a' || c > 'f') && (c < 'A' || c > 'F') {
+		if (color[i] < '0' || color[i] > '9') && (color[i] < 'a' || color[i] > 'f') && (color[i] < 'A' || color[i] > 'F') {
 			return false
 		}
 	}

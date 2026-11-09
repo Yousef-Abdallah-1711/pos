@@ -110,7 +110,7 @@ func (h *RBACRoleHandler) GetRole(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	rolePermissions, err := h.rolePermissionRepo.GetByRoleAndTenant(r.Context(), int64(claims.TenantID), role.ID)
+	rolePermissions, err := h.rolePermissionRepo.GetByRoleAndTenant(r.Context(), int64(claims.TenantID), int64(claims.RestaurantID), role.ID)
 	if err != nil {
 		respondError(w, http.StatusInternalServerError, err.Error())
 		return
@@ -196,7 +196,7 @@ func (h *RBACRoleHandler) CreateRole(w http.ResponseWriter, r *http.Request) {
 	}
 
 	for _, perm := range permissions {
-		if err := h.rolePermissionRepo.Assign(r.Context(), int64(claims.TenantID), roleID, perm.ModuleID, perm.Level); err != nil {
+		if err := h.rolePermissionRepo.Assign(r.Context(), int64(claims.TenantID), int64(claims.RestaurantID), roleID, perm.ModuleID, perm.Level); err != nil {
 			respondError(w, http.StatusInternalServerError, "Failed to assign permissions")
 			return
 		}
@@ -275,13 +275,13 @@ func (h *RBACRoleHandler) UpdateRole(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		if err := h.rolePermissionRepo.RevokeAll(r.Context(), roleID); err != nil {
+		if err := h.rolePermissionRepo.RevokeAll(r.Context(), int64(claims.TenantID), int64(claims.RestaurantID), roleID); err != nil {
 			respondError(w, http.StatusInternalServerError, "Failed to update permissions")
 			return
 		}
 
 		for _, perm := range permissions {
-			if err := h.rolePermissionRepo.Assign(r.Context(), int64(claims.TenantID), roleID, perm.ModuleID, perm.Level); err != nil {
+			if err := h.rolePermissionRepo.Assign(r.Context(), int64(claims.TenantID), int64(claims.RestaurantID), roleID, perm.ModuleID, perm.Level); err != nil {
 				respondError(w, http.StatusInternalServerError, "Failed to assign permissions")
 				return
 			}
@@ -334,7 +334,7 @@ func (h *RBACRoleHandler) DeleteRole(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := h.rolePermissionRepo.RevokeAll(r.Context(), roleID); err != nil {
+	if err := h.rolePermissionRepo.RevokeAll(r.Context(), int64(claims.TenantID), int64(claims.RestaurantID), roleID); err != nil {
 		respondError(w, http.StatusInternalServerError, "Failed to remove permissions")
 		return
 	}

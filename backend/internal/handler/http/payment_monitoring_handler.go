@@ -42,28 +42,18 @@ func (h *PaymentMonitoringHandler) GetPaymentMetrics(w http.ResponseWriter, r *h
 	period := strings.ToLower(strings.TrimSpace(GetQueryParam(r, "period", "month")))
 	label, since := normalizeMetricsPeriod(period)
 
-	whereClause := ""
-	args := make([]interface{}, 0, 1)
-	if since != nil {
-		whereClause = "WHERE created_at >= $1"
-		args = append(args, *since)
-	}
-
-	query := fmt.Sprintf(`
-		SELECT
-			COUNT(*) AS total_payments,
-			COALESCE(SUM(CASE WHEN status = 'success' THEN 1 ELSE 0 END), 0) AS successful_payments,
-			COALESCE(SUM(CASE WHEN status = 'failed' THEN 1 ELSE 0 END), 0) AS failed_payments,
-			COALESCE(SUM(CASE WHEN status = 'success' THEN amount_cents ELSE 0 END), 0) AS total_revenue_cents
-		FROM payments
-		%s
-	`, whereClause)
+	query := `SELECT total_payments, successful_payments, failed_payments, total_revenue_cents
+		FROM get_payment_metrics($1)`
 
 	var total int64
 	var successful int64
 	var failed int64
 	var revenue int64
-	if err := h.db.QueryRowContext(r.Context(), query, args...).Scan(&total, &successful, &failed, &revenue); err != nil {
+	var sinceArg interface{}
+	if since != nil {
+		sinceArg = *since
+	}
+	if err := h.db.QueryRowContext(r.Context(), query, sinceArg).Scan(&total, &successful, &failed, &revenue); err != nil {
 		log.Printf("[PaymentMonitoring] GetPaymentMetrics query error: %v", err)
 		InternalErrorResponse(w, "failed to query payment metrics")
 		return

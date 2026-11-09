@@ -222,13 +222,14 @@ func (r *AuthRepository) CreateTenantWithUser(req *domain.RegisterRequest) (*dom
 func (r *AuthRepository) FindUserByEmail(email string) (*domain.User, error) {
 	var user domain.User
 	var avatarURL sql.NullString
+	var phone sql.NullString
 	err := r.db.QueryRow(`
 		SELECT id, tenant_id, restaurant_id, email, password_hash, name, phone, avatar_url, role, status, created_at, updated_at
 		FROM users
 		WHERE email = $1 AND status = 'active'
 	`, email).Scan(
 		&user.ID, &user.TenantID, &user.RestaurantID, &user.Email, &user.PasswordHash,
-		&user.Name, &user.Phone, &avatarURL, &user.Role, &user.Status,
+		&user.Name, &phone, &avatarURL, &user.Role, &user.Status,
 		&user.CreatedAt, &user.UpdatedAt,
 	)
 
@@ -242,6 +243,9 @@ func (r *AuthRepository) FindUserByEmail(email string) (*domain.User, error) {
 	// Handle NULL avatar_url
 	if avatarURL.Valid {
 		user.AvatarURL = avatarURL.String
+	}
+	if phone.Valid {
+		user.Phone = phone.String
 	}
 	return &user, nil
 }
@@ -285,9 +289,10 @@ func (r *AuthRepository) FindUserByEmailAllTenants(email string) ([]domain.User,
 	for rows.Next() {
 		var user domain.User
 		var avatarURL sql.NullString
+		var phone sql.NullString
 		err := rows.Scan(
 			&user.ID, &user.TenantID, &user.RestaurantID, &user.Email, &user.PasswordHash,
-			&user.Name, &user.Phone, &avatarURL, &user.Role, &user.Status,
+			&user.Name, &phone, &avatarURL, &user.Role, &user.Status,
 			&user.CreatedAt, &user.UpdatedAt,
 		)
 		if err != nil {
@@ -297,6 +302,9 @@ func (r *AuthRepository) FindUserByEmailAllTenants(email string) ([]domain.User,
 		// Handle NULL avatar_url
 		if avatarURL.Valid {
 			user.AvatarURL = avatarURL.String
+		}
+		if phone.Valid {
+			user.Phone = phone.String
 		}
 
 		users = append(users, user)

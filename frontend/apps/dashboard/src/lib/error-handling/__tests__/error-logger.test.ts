@@ -9,8 +9,8 @@ describe('ErrorLoggerService', () => {
   let logger: ErrorLoggerService
 
   beforeEach(() => {
-    logger = new ErrorLoggerService()
     localStorage.clear()
+    logger = new ErrorLoggerService()
   })
 
   describe('Initialization', () => {

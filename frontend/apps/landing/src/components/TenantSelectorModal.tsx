@@ -33,7 +33,7 @@ export function TenantSelectorModal({
 }: TenantSelectorModalProps) {
   const router = useRouter()
   const setAuth = useAuthStore((state) => state.setAuth)
-  const { t, dir } = useLanguage()
+  const { t, dir, language } = useLanguage()
   const [selectedTenantId, setSelectedTenantId] = useState<number | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -52,6 +52,7 @@ export function TenantSelectorModal({
         `${getConfig().apiUrl}/auth/login/confirm`,
         {
           method: 'POST',
+          credentials: 'include',
           headers: {
             'Content-Type': 'application/json',
           },
@@ -70,12 +71,12 @@ export function TenantSelectorModal({
 
       const data = await response.json()
 
-      if (data.user && data.token) {
-        setAuth(data.user, data.token)
+      if (data.user) {
+        setAuth(data.user, '')
         toast.success(t.auth.login.loginSuccess)
 
         const { dashboardUrl } = getConfig()
-        window.location.href = `${dashboardUrl}/auth/callback?token=${encodeURIComponent(data.token)}&user=${encodeURIComponent(JSON.stringify(data.user))}`
+        window.location.href = `${dashboardUrl}/${language}/auth/callback`
       }
 
       if (onTenantSelected) {

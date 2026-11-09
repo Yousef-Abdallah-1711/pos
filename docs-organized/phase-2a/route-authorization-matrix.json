@@ -24,9 +24,25 @@
   "class": "PUBLIC"
  },
  {
+  "method": "GET",
+  "path": "/api/v1/auth/session",
+  "wrapper": null,
+  "module": null,
+  "level": null,
+  "class": "PUBLIC"
+ },
+ {
   "method": "POST",
-  "path": "/api/v1/auth/token-exchange",
+  "path": "/api/v1/auth/refresh",
   "wrapper": "RateLimitByIP",
+  "module": null,
+  "level": null,
+  "class": "PUBLIC"
+ },
+ {
+  "method": "POST",
+  "path": "/api/v1/auth/logout",
+  "wrapper": null,
   "module": null,
   "level": null,
   "class": "PUBLIC"
@@ -146,7 +162,7 @@
  {
   "method": "POST",
   "path": "/api/v1/public/orders",
-  "wrapper": "tenantContext",
+  "wrapper": "RateLimitByIP",
   "module": null,
   "level": null,
   "class": "PUBLIC"
@@ -154,7 +170,7 @@
  {
   "method": "POST",
   "path": "/api/v1/public/orders/validate",
-  "wrapper": "tenantContext",
+  "wrapper": "RateLimitByIP",
   "module": null,
   "level": null,
   "class": "PUBLIC"
@@ -162,7 +178,7 @@
  {
   "method": "GET",
   "path": "/api/v1/public/orders/number/{number}/lookup",
-  "wrapper": "tenantContext",
+  "wrapper": "RateLimitByIP",
   "module": null,
   "level": null,
   "class": "PUBLIC"
@@ -170,7 +186,7 @@
  {
   "method": "GET",
   "path": "/api/v1/public/orders/{id}/status",
-  "wrapper": "tenantContext",
+  "wrapper": "RateLimitByIP",
   "module": null,
   "level": null,
   "class": "PUBLIC"
@@ -178,7 +194,7 @@
  {
   "method": "GET",
   "path": "/api/v1/public/orders/{id}/track",
-  "wrapper": "tenantContext",
+  "wrapper": "RateLimitByIP",
   "module": null,
   "level": null,
   "class": "PUBLIC"
@@ -186,7 +202,7 @@
  {
   "method": "GET",
   "path": "/api/v1/public/orders/{id}",
-  "wrapper": "tenantContext",
+  "wrapper": "RateLimitByIP",
   "module": null,
   "level": null,
   "class": "PUBLIC"
@@ -194,50 +210,10 @@
  {
   "method": "DELETE",
   "path": "/api/v1/public/orders/{id}",
-  "wrapper": "tenantContext",
+  "wrapper": "RateLimitByIP",
   "module": null,
   "level": null,
   "class": "PUBLIC"
- },
- {
-  "method": "GET",
-  "path": "/api/v1/translations/health",
-  "wrapper": null,
-  "module": null,
-  "level": null,
-  "class": "PUBLIC"
- },
- {
-  "method": "GET",
-  "path": "/api/v1/translations/languages",
-  "wrapper": null,
-  "module": null,
-  "level": null,
-  "class": "PUBLIC"
- },
- {
-  "method": "GET",
-  "path": "/api/v1/translations/{language}",
-  "wrapper": null,
-  "module": null,
-  "level": null,
-  "class": "PUBLIC"
- },
- {
-  "method": "GET",
-  "path": "/api/v1/translations/{language}/{namespace}/{key}",
-  "wrapper": null,
-  "module": null,
-  "level": null,
-  "class": "PUBLIC"
- },
- {
-  "method": "POST",
-  "path": "/api/v1/translations/{language}/upload",
-  "wrapper": "SuperAdminAuthMiddleware",
-  "module": null,
-  "level": null,
-  "class": "SUPER_ADMIN"
  },
  {
   "method": "GET",
@@ -246,30 +222,6 @@
   "module": null,
   "level": null,
   "class": "PUBLIC"
- },
- {
-  "method": "GET",
-  "path": "/api/v1/health",
-  "wrapper": null,
-  "module": null,
-  "level": null,
-  "class": "PUBLIC"
- },
- {
-  "method": "GET",
-  "path": "/api/v1/health/ready",
-  "wrapper": null,
-  "module": null,
-  "level": null,
-  "class": "PUBLIC"
- },
- {
-  "method": "GET",
-  "path": "/api/v1/health/metrics",
-  "wrapper": "RequireInternalToken",
-  "module": null,
-  "level": null,
-  "class": "SERVICE_INTERNAL"
  },
  {
   "method": "GET",
@@ -381,6 +333,14 @@
   "wrapper": "wrapWithPermission",
   "module": "1",
   "level": "READ",
+  "class": "TENANT_PERMISSION"
+ },
+ {
+  "method": "POST",
+  "path": "/api/v1/inventory/adjust",
+  "wrapper": "wrapWithPermission",
+  "module": "1",
+  "level": "WRITE",
   "class": "TENANT_PERMISSION"
  },
  {
@@ -1544,6 +1504,14 @@
   "class": "TENANT_PERMISSION"
  },
  {
+  "method": "POST",
+  "path": "/api/v1/pos/orders",
+  "wrapper": "wrapProtectedNoStatus",
+  "module": null,
+  "level": null,
+  "class": "AUTHENTICATED (self-service / billing / status)"
+ },
+ {
   "method": "GET",
   "path": "/api/v1/admin/orders/stats",
   "wrapper": "wrapWithPermission",
@@ -1690,65 +1658,65 @@
  {
   "method": "GET",
   "path": "/api/v1/kds/ws",
-  "wrapper": null,
-  "module": null,
-  "level": null,
-  "class": "PUBLIC"
+  "wrapper": "wrapKDSWithPermission",
+  "module": "13",
+  "level": "READ",
+  "class": "TENANT_PERMISSION"
  },
  {
   "method": "GET",
   "path": "/api/v1/kds/queue",
   "wrapper": "wrapKDSWithPermission",
-  "module": null,
-  "level": null,
+  "module": "13",
+  "level": "READ",
   "class": "TENANT_PERMISSION"
  },
  {
   "method": "PUT",
   "path": "/api/v1/kds/orders/{id}/bump",
   "wrapper": "wrapKDSWithPermission",
-  "module": null,
-  "level": null,
+  "module": "13",
+  "level": "WRITE",
   "class": "TENANT_PERMISSION"
  },
  {
   "method": "PUT",
   "path": "/api/v1/kds/orders/{id}/recall",
   "wrapper": "wrapKDSWithPermission",
-  "module": null,
-  "level": null,
+  "module": "13",
+  "level": "WRITE",
   "class": "TENANT_PERMISSION"
  },
  {
   "method": "GET",
   "path": "/api/v1/kds/stats",
   "wrapper": "wrapKDSWithPermission",
-  "module": null,
-  "level": null,
+  "module": "13",
+  "level": "READ",
   "class": "TENANT_PERMISSION"
  },
  {
   "method": "GET",
   "path": "/api/v1/kds/analytics",
   "wrapper": "wrapKDSWithPermission",
-  "module": null,
-  "level": null,
+  "module": "13",
+  "level": "ADMIN",
   "class": "TENANT_PERMISSION"
  },
  {
   "method": "GET",
   "path": "/api/v1/kds/settings",
   "wrapper": "wrapKDSWithPermission",
-  "module": null,
-  "level": null,
+  "module": "13",
+  "level": "READ",
   "class": "TENANT_PERMISSION"
  },
  {
   "method": "PUT",
   "path": "/api/v1/kds/settings",
   "wrapper": "wrapKDSWithPermission",
-  "module": null,
-  "level": null,
+  "module": "13",
+  "level": "ADMIN",
   "class": "TENANT_PERMISSION"
  },
  {
@@ -2683,6 +2651,14 @@
   "method": "POST",
   "path": "/api/v1/super-admin/auth/login",
   "wrapper": "RateLimitByIP",
+  "module": null,
+  "level": null,
+  "class": "SUPER_ADMIN"
+ },
+ {
+  "method": "GET",
+  "path": "/api/v1/super-admin/auth/session",
+  "wrapper": "wrapSuperAdmin",
   "module": null,
   "level": null,
   "class": "SUPER_ADMIN"

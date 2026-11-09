@@ -268,7 +268,7 @@ func NewMockRolePermissionRepository() *MockRolePermissionRepository {
 	}
 }
 
-func (m *MockRolePermissionRepository) GetByRoleAndModule(ctx context.Context, roleID int64, moduleID int64) (string, error) {
+func (m *MockRolePermissionRepository) GetByRoleAndModule(ctx context.Context, tenantID, restaurantID, roleID, moduleID int64) (string, error) {
 	key := generateKey(roleID, moduleID)
 	if perm, exists := m.permissions[key]; exists {
 		return perm.PermissionLevel, nil
@@ -276,7 +276,7 @@ func (m *MockRolePermissionRepository) GetByRoleAndModule(ctx context.Context, r
 	return domain.PermissionNone, nil
 }
 
-func (m *MockRolePermissionRepository) GetByRole(ctx context.Context, roleID int64) ([]domain.RolePermission, error) {
+func (m *MockRolePermissionRepository) GetByRole(ctx context.Context, tenantID, restaurantID, roleID int64) ([]domain.RolePermission, error) {
 	var perms []domain.RolePermission
 	for _, perm := range m.permissions {
 		if perm.RoleID == roleID {
@@ -286,7 +286,7 @@ func (m *MockRolePermissionRepository) GetByRole(ctx context.Context, roleID int
 	return perms, nil
 }
 
-func (m *MockRolePermissionRepository) GetByModule(ctx context.Context, moduleID int64) ([]domain.RolePermission, error) {
+func (m *MockRolePermissionRepository) GetByModule(ctx context.Context, tenantID, restaurantID, moduleID int64) ([]domain.RolePermission, error) {
 	var perms []domain.RolePermission
 	for _, perm := range m.permissions {
 		if perm.ModuleID == moduleID {
@@ -296,7 +296,7 @@ func (m *MockRolePermissionRepository) GetByModule(ctx context.Context, moduleID
 	return perms, nil
 }
 
-func (m *MockRolePermissionRepository) Assign(ctx context.Context, tenantID int64, roleID int64, moduleID int64, level string) error {
+func (m *MockRolePermissionRepository) Assign(ctx context.Context, tenantID, restaurantID, roleID, moduleID int64, level string) error {
 	key := generateKey(roleID, moduleID)
 	m.permissions[key] = &domain.RolePermission{
 		TenantID:        tenantID,
@@ -307,13 +307,13 @@ func (m *MockRolePermissionRepository) Assign(ctx context.Context, tenantID int6
 	return nil
 }
 
-func (m *MockRolePermissionRepository) Revoke(ctx context.Context, roleID int64, moduleID int64) error {
+func (m *MockRolePermissionRepository) Revoke(ctx context.Context, tenantID, restaurantID, roleID, moduleID int64) error {
 	key := generateKey(roleID, moduleID)
 	delete(m.permissions, key)
 	return nil
 }
 
-func (m *MockRolePermissionRepository) RevokeAll(ctx context.Context, roleID int64) error {
+func (m *MockRolePermissionRepository) RevokeAll(ctx context.Context, tenantID, restaurantID, roleID int64) error {
 	for key := range m.permissions {
 		if m.permissions[key].RoleID == roleID {
 			delete(m.permissions, key)
@@ -322,7 +322,7 @@ func (m *MockRolePermissionRepository) RevokeAll(ctx context.Context, roleID int
 	return nil
 }
 
-func (m *MockRolePermissionRepository) GetByRoleAndTenant(ctx context.Context, tenantID int64, roleID int64) ([]domain.RolePermission, error) {
+func (m *MockRolePermissionRepository) GetByRoleAndTenant(ctx context.Context, tenantID, restaurantID, roleID int64) ([]domain.RolePermission, error) {
 	var perms []domain.RolePermission
 	for _, perm := range m.permissions {
 		if perm.TenantID == tenantID && perm.RoleID == roleID {
@@ -342,7 +342,7 @@ func NewMockUserRoleRepository() *MockUserRoleRepository {
 	}
 }
 
-func (m *MockUserRoleRepository) GetUserRoles(ctx context.Context, userID int64, tenantID int64) ([]domain.Role, error) {
+func (m *MockUserRoleRepository) GetUserRoles(ctx context.Context, userID, tenantID, restaurantID int64) ([]domain.Role, error) {
 	var roles []domain.Role
 	for _, ur := range m.userRoles {
 		if ur.UserID == userID && ur.TenantID == tenantID {
@@ -352,7 +352,7 @@ func (m *MockUserRoleRepository) GetUserRoles(ctx context.Context, userID int64,
 	return roles, nil
 }
 
-func (m *MockUserRoleRepository) GetRoleUsers(ctx context.Context, roleID int64) ([]domain.User, error) {
+func (m *MockUserRoleRepository) GetRoleUsers(ctx context.Context, tenantID, restaurantID, roleID int64) ([]domain.User, error) {
 	var users []domain.User
 	for _, ur := range m.userRoles {
 		if ur.RoleID == roleID {
@@ -362,7 +362,7 @@ func (m *MockUserRoleRepository) GetRoleUsers(ctx context.Context, roleID int64)
 	return users, nil
 }
 
-func (m *MockUserRoleRepository) Assign(ctx context.Context, tenantID int64, userID int64, roleID int64, assignedBy int64) error {
+func (m *MockUserRoleRepository) Assign(ctx context.Context, tenantID, restaurantID, userID, roleID, assignedBy int64) error {
 	key := generateUserRoleKey(tenantID, userID, roleID)
 	m.userRoles[key] = &domain.UserRole{
 		TenantID: tenantID,
@@ -372,13 +372,13 @@ func (m *MockUserRoleRepository) Assign(ctx context.Context, tenantID int64, use
 	return nil
 }
 
-func (m *MockUserRoleRepository) Remove(ctx context.Context, tenantID int64, userID int64, roleID int64) error {
+func (m *MockUserRoleRepository) Remove(ctx context.Context, tenantID, restaurantID, userID, roleID int64) error {
 	key := generateUserRoleKey(tenantID, userID, roleID)
 	delete(m.userRoles, key)
 	return nil
 }
 
-func (m *MockUserRoleRepository) RemoveAll(ctx context.Context, tenantID int64, userID int64) error {
+func (m *MockUserRoleRepository) RemoveAll(ctx context.Context, tenantID, restaurantID, userID int64) error {
 	for key := range m.userRoles {
 		if m.userRoles[key].TenantID == tenantID && m.userRoles[key].UserID == userID {
 			delete(m.userRoles, key)
@@ -403,7 +403,7 @@ func (m *MockUserRoleRepository) CountUserRoles(ctx context.Context, tenantID in
 	return count, nil
 }
 
-func (m *MockUserRoleRepository) GetUsersWithRole(ctx context.Context, tenantID int64, roleID int64) ([]domain.User, error) {
+func (m *MockUserRoleRepository) GetUsersWithRole(ctx context.Context, tenantID, restaurantID, roleID int64) ([]domain.User, error) {
 	var users []domain.User
 	for _, ur := range m.userRoles {
 		if ur.TenantID == tenantID && ur.RoleID == roleID {

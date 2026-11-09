@@ -53,7 +53,7 @@ func TestOrderAutoPostingIntegration_OrderPaidCreatesSalesAndCOGS(t *testing.T) 
 		)
 
 	mock.ExpectQuery(`FROM order_items`).
-		WithArgs(orderID).
+		WithArgs(int64(1), int64(2), orderID).
 		WillReturnRows(
 			sqlmock.NewRows(orderItemColumnsForAccountingTests()).
 				AddRow(
@@ -94,4 +94,3 @@ func TestOrderAutoPostingIntegration_OrderPaidCreatesSalesAndCOGS(t *testing.T) 
 		t.Fatalf("unmet sqlmock expectations: %v", err)
 	}
 }
-

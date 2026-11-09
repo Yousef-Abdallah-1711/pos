@@ -19,6 +19,13 @@ type KVCache interface {
 	Delete(ctx context.Context, key string) error
 }
 
+// AtomicSessionCache rotates an existing session key into a new credential in
+// one store operation. It is optional because general-purpose caches do not
+// need session-specific atomicity.
+type AtomicSessionCache interface {
+	Rotate(ctx context.Context, oldKey, newKey, value string, ttl time.Duration) error
+}
+
 type memoryCacheItem struct {
 	value     string
 	expiresAt time.Time
@@ -77,6 +84,22 @@ func (c *InMemoryCache) Delete(_ context.Context, key string) error {
 	return nil
 }
 
+func (c *InMemoryCache) Rotate(_ context.Context, oldKey, newKey, value string, ttl time.Duration) error {
+	if ttl <= 0 {
+		ttl = 5 * time.Minute
+	}
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	item, ok := c.items[oldKey]
+	if !ok || (!item.expiresAt.IsZero() && time.Now().After(item.expiresAt)) {
+		delete(c.items, oldKey)
+		return ErrSessionNotFound
+	}
+	delete(c.items, oldKey)
+	c.items[newKey] = memoryCacheItem{value: value, expiresAt: time.Now().Add(ttl)}
+	return nil
+}
+
 // RedisCache stores values in Redis.
 type RedisCache struct {
 	client *redis.Client
@@ -130,6 +153,39 @@ func (c *RedisCache) Delete(ctx context.Context, key string) error {
 		return nil
 	}
 	return c.client.Del(ctx, key).Err()
+}
+
+var rotateSessionScript = redis.NewScript(`
+if redis.call("EXISTS", KEYS[1]) == 0 then
+	return 0
+end
+redis.call("SET", KEYS[2], ARGV[1], "PX", ARGV[2])
+redis.call("DEL", KEYS[1])
+return 1
+`)
+
+func (c *RedisCache) Rotate(ctx context.Context, oldKey, newKey, value string, ttl time.Duration) error {
+	if c == nil || c.client == nil {
+		return fmt.Errorf("redis session store is unavailable")
+	}
+	if ttl <= 0 {
+		ttl = 5 * time.Minute
+	}
+	rotated, err := rotateSessionScript.Run(ctx, c.client, []string{oldKey, newKey}, value, ttl.Milliseconds()).Int()
+	if err != nil {
+		return err
+	}
+	if rotated != 1 {
+		return ErrSessionNotFound
+	}
+	return nil
+}
+
+func (c *RedisCache) Close() error {
+	if c == nil || c.client == nil {
+		return nil
+	}
+	return c.client.Close()
 }
 
 // NewCacheFromEnv returns Redis cache when REDIS_URL is configured, otherwise in-memory cache.

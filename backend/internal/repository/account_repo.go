@@ -110,12 +110,18 @@ func (r *AccountRepository) CreateAccount(account *domain.Account) (int, error) 
 			description, description_ar, account_type, account_subtype, normal_balance,
 			parent_id, level, is_header, current_balance, currency, is_active,
 			is_system, is_reconcilable, tax_rate, created_by, updated_by
-		) VALUES (
+		)
+		SELECT
 			$1, $2, $3, $4, $5,
 			$6, $7, $8, $9, $10,
 			$11, $12, $13, $14, $15, $16,
 			$17, $18, $19, $20, $21
-		)
+		WHERE EXISTS (
+			SELECT 1 FROM restaurants r WHERE r.id = $2 AND r.tenant_id = $1
+		) AND ($11::integer IS NULL OR EXISTS (
+			SELECT 1 FROM chart_of_accounts parent
+			WHERE parent.id = $11 AND parent.tenant_id = $1 AND parent.restaurant_id = $2
+		))
 		RETURNING id
 	`
 
@@ -172,6 +178,10 @@ func (r *AccountRepository) UpdateAccount(account *domain.Account) error {
 			updated_by = $16,
 			updated_at = CURRENT_TIMESTAMP
 		WHERE id = $17 AND tenant_id = $18 AND restaurant_id = $19
+		  AND ($9 IS NULL OR EXISTS (
+			SELECT 1 FROM chart_of_accounts parent
+			WHERE parent.id = $9 AND parent.tenant_id = $18 AND parent.restaurant_id = $19
+		  ))
 	`,
 		account.AccountCode,
 		account.AccountName,

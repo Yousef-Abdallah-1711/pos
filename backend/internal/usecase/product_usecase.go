@@ -1,8 +1,10 @@
 package usecase
 
 import (
+	"context"
 	"fmt"
 	"io"
+	"log"
 	"mime/multipart"
 	"os"
 	"path/filepath"
@@ -29,14 +31,13 @@ func NewProductUseCase(repo *repository.ProductRepository, notificationRepo *rep
 
 // CreateProduct handles product creation with image upload
 func (uc *ProductUseCase) CreateProduct(
+	ctx context.Context,
 	tenantID, restaurantID, userID int,
 	req *domain.CreateProductRequest,
 	imageFile *multipart.FileHeader,
 ) (*domain.Product, error) {
-	fmt.Println("DEBUG: UseCase.CreateProduct started")
 	// Validate request
 	if err := validateProductRequest(req); err != nil {
-		fmt.Printf("ERROR: validateProductRequest failed: %v\n", err)
 		return nil, err
 	}
 
@@ -80,13 +81,10 @@ func (uc *ProductUseCase) CreateProduct(
 	}
 
 	// Save to database
-	fmt.Println("DEBUG: Calling repo.CreateProduct...")
 	product, err := uc.repo.CreateProduct(product)
 	if err != nil {
-		fmt.Printf("ERROR: repo.CreateProduct failed: %v\n", err)
 		return nil, err
 	}
-	fmt.Printf("DEBUG: Product saved to DB with ID: %d\n", product.ID)
 
 	// Create low stock notification if applicable
 	if product.TrackInventory && product.QuantityInStock < product.LowStockThreshold {
@@ -109,21 +107,19 @@ func (uc *ProductUseCase) CreateProduct(
 			IconName:          &iconName,
 			Color:             &color,
 		}
-		if _, err := uc.notificationRepo.CreateNotification(notification); err != nil {
-			fmt.Printf("ERROR: Failed to create low stock notification: %v\n", err)
+		if _, err := uc.notificationRepo.CreateNotification(ctx, notification); err != nil {
+			log.Printf("[PRODUCT] failed to create low-stock notification: tenant=%d restaurant=%d product=%d err=%v", tenantID, restaurantID, product.ID, err)
 			// Don't fail the product creation if notification fails
 		}
 	}
 
 	// Upload image if provided
 	if imageFile != nil {
-		fmt.Println("DEBUG: Uploading product image...")
 		imageURL, err := uc.uploadProductImage(product.ID, imageFile, tenantID)
 		if err != nil {
 			// Log error but don't fail - product was created
-			fmt.Printf("ERROR: Image upload failed: %v\n", err)
+			log.Printf("[PRODUCT] image upload failed: tenant=%d restaurant=%d product=%d err=%v", tenantID, restaurantID, product.ID, err)
 		} else {
-			fmt.Printf("DEBUG: Image uploaded to: %s\n", imageURL)
 			product.MainImageURL = imageURL
 			// Update the product with the image URL? The original code didn't save it back to DB!
 			// We found another bug! The image URL is set on the struct but not updated in DB after initial create.
@@ -136,6 +132,7 @@ func (uc *ProductUseCase) CreateProduct(
 
 // UpdateProduct updates an existing product
 func (uc *ProductUseCase) UpdateProduct(
+	ctx context.Context,
 	tenantID, restaurantID, productID, userID int,
 	req *domain.UpdateProductRequest,
 	imageFile *multipart.FileHeader,
@@ -228,8 +225,8 @@ func (uc *ProductUseCase) UpdateProduct(
 			IconName:          &iconName,
 			Color:             &color,
 		}
-		if _, err := uc.notificationRepo.CreateNotification(notification); err != nil {
-			fmt.Printf("ERROR: Failed to create low stock notification: %v\n", err)
+		if _, err := uc.notificationRepo.CreateNotification(ctx, notification); err != nil {
+			log.Printf("[PRODUCT] failed to create low-stock notification: tenant=%d restaurant=%d product=%d err=%v", tenantID, restaurantID, product.ID, err)
 			// Don't fail the product update if notification fails
 		}
 	}
@@ -238,7 +235,7 @@ func (uc *ProductUseCase) UpdateProduct(
 	if imageFile != nil {
 		imageURL, err := uc.uploadProductImage(product.ID, imageFile, tenantID)
 		if err != nil {
-			fmt.Printf("Image upload failed: %v\n", err)
+			log.Printf("[PRODUCT] image upload failed: tenant=%d restaurant=%d product=%d err=%v", tenantID, restaurantID, product.ID, err)
 		} else {
 			product.MainImageURL = imageURL
 		}
@@ -319,24 +316,23 @@ func (uc *ProductUseCase) uploadProductImage(productID int, fileHeader *multipar
 }
 
 // ListPublicMenu returns public menu
-func (uc *ProductUseCase) ListPublicMenu(ctx interface{}, restaurantID int, lang string) ([]domain.Product, error) {
-	// ctx ignored for now as repo doesn't use it, but good practice
-	return uc.repo.ListPublic(0, restaurantID, lang) // tenantID 0 as filtering by restaurantID is enough usually
+func (uc *ProductUseCase) ListPublicMenu(ctx context.Context, tenantID, restaurantID int, lang string) ([]domain.Product, error) {
+	return uc.repo.ListPublic(tenantID, restaurantID, lang)
 }
 
 // ListByCategoryPublic returns products for category
-func (uc *ProductUseCase) ListByCategoryPublic(ctx interface{}, restaurantID, categoryID int, lang string) ([]domain.Product, error) {
-	return uc.repo.ListByCategoryPublic(0, restaurantID, categoryID, lang)
+func (uc *ProductUseCase) ListByCategoryPublic(ctx context.Context, tenantID, restaurantID, categoryID int, lang string) ([]domain.Product, error) {
+	return uc.repo.ListByCategoryPublic(tenantID, restaurantID, categoryID, lang)
 }
 
 // SearchPublic searches products
-func (uc *ProductUseCase) SearchPublic(ctx interface{}, restaurantID int, query string, lang string) ([]domain.Product, error) {
-	return uc.repo.SearchPublic(0, restaurantID, query, lang)
+func (uc *ProductUseCase) SearchPublic(ctx context.Context, tenantID, restaurantID int, query string, lang string) ([]domain.Product, error) {
+	return uc.repo.SearchPublic(tenantID, restaurantID, query, lang)
 }
 
 // GetProductImages returns images
-func (uc *ProductUseCase) GetProductImages(ctx interface{}, productID int) ([]domain.ProductImage, error) {
-	return uc.repo.GetProductImages(productID)
+func (uc *ProductUseCase) GetProductImages(ctx context.Context, tenantID, restaurantID, productID int) ([]domain.ProductImage, error) {
+	return uc.repo.GetProductImages(tenantID, restaurantID, productID)
 }
 
 // GetLowStockAlerts retrieves products with low stock

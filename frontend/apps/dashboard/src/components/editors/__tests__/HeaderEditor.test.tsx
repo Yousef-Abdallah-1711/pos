@@ -132,31 +132,22 @@ describe('HeaderEditor', () => {
     it('should delete navigation item', async () => {
       render(<HeaderEditor {...defaultProps} />)
 
-      const deleteButtons = screen.getAllByText(/\u{1F5D1}/)  // Trash icon
-      if (deleteButtons.length > 0) {
-        fireEvent.click(deleteButtons[0])
-        expect(mockOnChange).toHaveBeenCalled()
-      }
+      fireEvent.click(screen.getByRole('button', { name: 'Delete Home' }))
+      expect(mockOnChange).toHaveBeenCalled()
     })
 
     it('should move navigation item up', async () => {
       render(<HeaderEditor {...defaultProps} />)
 
-      const upButtons = screen.getAllByLabelText(/up/i) || []
-      if (upButtons.length > 0) {
-        fireEvent.click(upButtons[0])
-        expect(mockOnChange).toHaveBeenCalled()
-      }
+      fireEvent.click(screen.getByRole('button', { name: 'Move About up' }))
+      expect(mockOnChange).toHaveBeenCalled()
     })
 
     it('should move navigation item down', async () => {
       render(<HeaderEditor {...defaultProps} />)
 
-      const downButtons = screen.getAllByLabelText(/down/i) || []
-      if (downButtons.length > 0) {
-        fireEvent.click(downButtons[0])
-        expect(mockOnChange).toHaveBeenCalled()
-      }
+      fireEvent.click(screen.getByRole('button', { name: 'Move Home down' }))
+      expect(mockOnChange).toHaveBeenCalled()
     })
 
     it('should change navigation position', async () => {
@@ -191,7 +182,7 @@ describe('HeaderEditor', () => {
 
     it('should have height slider', () => {
       render(<HeaderEditor {...defaultProps} />)
-      expect(screen.getByText(/Height:/)).toBeInTheDocument()
+      expect(screen.getByText(/^Height:/)).toBeInTheDocument()
     })
 
     it('should have padding slider', () => {

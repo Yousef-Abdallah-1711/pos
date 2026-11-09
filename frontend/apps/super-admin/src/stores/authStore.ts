@@ -70,9 +70,13 @@ export const useAuthStore = create<AuthState>()(
     {
       name: "super-admin-auth-store",
       partialize: (state) => ({
-        token: state.token,
         superAdmin: state.superAdmin,
         impersonation: state.impersonation,
+      }),
+      merge: (persisted, current) => ({
+        ...current,
+        ...(persisted as Partial<AuthState>),
+        token: null,
       }),
     }
   )

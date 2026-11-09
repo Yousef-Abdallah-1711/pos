@@ -1,0 +1,269 @@
+{
+  "route": "/en/dashboard",
+  "sample": "authenticated first navigation after login",
+  "totalCLS": 0.20013422987196178,
+  "events": [
+    {
+      "value": 0.13206495496961804,
+      "startTime": 1319.6000000014901,
+      "sources": [
+        {
+          "node": "DIV",
+          "id": "",
+          "className": "flex flex-col h-[calc(100%-65px)]",
+          "previousRect": {
+            "x": 0,
+            "y": 65,
+            "width": 255,
+            "height": 536,
+            "top": 65,
+            "right": 255,
+            "bottom": 601,
+            "left": 0
+          },
+          "currentRect": {
+            "x": 0,
+            "y": 89,
+            "width": 255,
+            "height": 631,
+            "top": 89,
+            "right": 255,
+            "bottom": 720,
+            "left": 0
+          }
+        },
+        {
+          "node": "DIV",
+          "id": "",
+          "className": "space-y-6",
+          "previousRect": {
+            "x": 285,
+            "y": 643,
+            "width": 310,
+            "height": 77,
+            "top": 643,
+            "right": 595,
+            "bottom": 720,
+            "left": 285
+          },
+          "currentRect": {
+            "x": 941,
+            "y": 643,
+            "width": 310,
+            "height": 77,
+            "top": 643,
+            "right": 1251,
+            "bottom": 720,
+            "left": 941
+          }
+        },
+        {
+          "node": "DIV",
+          "id": "",
+          "className": "rounded-2xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-gray-900",
+          "previousRect": {
+            "x": 285,
+            "y": 643,
+            "width": 310,
+            "height": 77,
+            "top": 643,
+            "right": 595,
+            "bottom": 720,
+            "left": 285
+          },
+          "currentRect": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "top": 0,
+            "right": 0,
+            "bottom": 0,
+            "left": 0
+          }
+        },
+        {
+          "node": null,
+          "id": "",
+          "className": "",
+          "previousRect": {
+            "x": 1059,
+            "y": 122,
+            "width": 156,
+            "height": 40,
+            "top": 122,
+            "right": 1215,
+            "bottom": 162,
+            "left": 1059
+          },
+          "currentRect": {
+            "x": 1059,
+            "y": 170,
+            "width": 156,
+            "height": 40,
+            "top": 170,
+            "right": 1215,
+            "bottom": 210,
+            "left": 1059
+          }
+        },
+        {
+          "node": "DIV",
+          "id": "",
+          "className": "text-xs text-gray-500 dark:text-gray-400",
+          "previousRect": {
+            "x": 895,
+            "y": 234,
+            "width": 320,
+            "height": 16,
+            "top": 234,
+            "right": 1215,
+            "bottom": 250,
+            "left": 895
+          },
+          "currentRect": {
+            "x": 895,
+            "y": 274,
+            "width": 320,
+            "height": 16,
+            "top": 274,
+            "right": 1215,
+            "bottom": 290,
+            "left": 895
+          }
+        }
+      ]
+    },
+    {
+      "value": 0.06806927490234375,
+      "startTime": 1367.1000000014901,
+      "sources": [
+        {
+          "node": "SECTION",
+          "id": "",
+          "className": "grid grid-cols-1 gap-6 xl:grid-cols-3",
+          "previousRect": {
+            "x": 285,
+            "y": 643,
+            "width": 966,
+            "height": 77,
+            "top": 643,
+            "right": 1251,
+            "bottom": 720,
+            "left": 285
+          },
+          "currentRect": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "top": 0,
+            "right": 0,
+            "bottom": 0,
+            "left": 0
+          }
+        },
+        {
+          "node": "DIV",
+          "id": "",
+          "className": "text-xs text-gray-500 dark:text-gray-400",
+          "previousRect": {
+            "x": 895,
+            "y": 274,
+            "width": 320,
+            "height": 16,
+            "top": 274,
+            "right": 1215,
+            "bottom": 290,
+            "left": 895
+          },
+          "currentRect": {
+            "x": 895,
+            "y": 322,
+            "width": 320,
+            "height": 32,
+            "top": 322,
+            "right": 1215,
+            "bottom": 354,
+            "left": 895
+          }
+        },
+        {
+          "node": "A",
+          "id": "",
+          "className": "",
+          "previousRect": {
+            "x": 1059,
+            "y": 122,
+            "width": 156,
+            "height": 40,
+            "top": 122,
+            "right": 1215,
+            "bottom": 162,
+            "left": 1059
+          },
+          "currentRect": {
+            "x": 895,
+            "y": 170,
+            "width": 156,
+            "height": 40,
+            "top": 170,
+            "right": 1051,
+            "bottom": 210,
+            "left": 895
+          }
+        },
+        {
+          "node": "A",
+          "id": "",
+          "className": "",
+          "previousRect": {
+            "x": 895,
+            "y": 170,
+            "width": 156,
+            "height": 40,
+            "top": 170,
+            "right": 1051,
+            "bottom": 210,
+            "left": 895
+          },
+          "currentRect": {
+            "x": 1059,
+            "y": 170,
+            "width": 156,
+            "height": 40,
+            "top": 170,
+            "right": 1215,
+            "bottom": 210,
+            "left": 1059
+          }
+        },
+        {
+          "node": "A",
+          "id": "",
+          "className": "",
+          "previousRect": {
+            "x": 895,
+            "y": 222,
+            "width": 156,
+            "height": 40,
+            "top": 222,
+            "right": 1051,
+            "bottom": 262,
+            "left": 895
+          },
+          "currentRect": {
+            "x": 1059,
+            "y": 270,
+            "width": 156,
+            "height": 40,
+            "top": 270,
+            "right": 1215,
+            "bottom": 310,
+            "left": 1059
+          }
+        }
+      ]
+    }
+  ]
+}

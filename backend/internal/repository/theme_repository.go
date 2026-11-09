@@ -16,25 +16,25 @@ type ThemeRepository interface {
 	Create(ctx context.Context, theme *domain.Theme) error
 
 	// GetByID retrieves a theme by its ID
-	GetByID(ctx context.Context, id int64) (*domain.Theme, error)
+	GetByID(ctx context.Context, tenantID, restaurantID, id int64) (*domain.Theme, error)
 
 	// GetBySlug retrieves a theme by tenant ID and slug
-	GetBySlug(ctx context.Context, tenantID int64, slug string) (*domain.Theme, error)
+	GetBySlug(ctx context.Context, tenantID, restaurantID int64, slug string) (*domain.Theme, error)
 
 	// List retrieves a paginated list of themes for a tenant
-	List(ctx context.Context, tenantID int64, offset, limit int) ([]*domain.Theme, int64, error)
+	List(ctx context.Context, tenantID, restaurantID int64, offset, limit int) ([]*domain.Theme, int64, error)
 
 	// Update updates an existing theme
 	Update(ctx context.Context, theme *domain.Theme) error
 
 	// Delete deletes a theme by ID
-	Delete(ctx context.Context, id int64) error
+	Delete(ctx context.Context, tenantID, restaurantID, id int64) error
 
 	// GetActive retrieves the active theme for a tenant
-	GetActive(ctx context.Context, tenantID int64) (*domain.Theme, error)
+	GetActive(ctx context.Context, tenantID, restaurantID int64) (*domain.Theme, error)
 
 	// SetActive activates a theme and deactivates others for the same tenant
-	SetActive(ctx context.Context, id int64) error
+	SetActive(ctx context.Context, tenantID, restaurantID, id int64) error
 
 	// ListPresets retrieves a paginated list of theme presets
 	ListPresets(ctx context.Context, offset, limit int) ([]*domain.Theme, int64, error)
@@ -70,9 +70,10 @@ func (r *themeRepositoryImpl) Create(ctx context.Context, theme *domain.Theme) e
 		INSERT INTO themes_v2 (
 			tenant_id, restaurant_id, name, slug, config, description,
 			is_active, is_published, version, created_by, created_at, updated_at
-		) VALUES (
-			$1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12
-		) RETURNING id, created_at, updated_at
+		) SELECT
+			$1::bigint, $2::bigint, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12
+		WHERE EXISTS (SELECT 1 FROM restaurants WHERE id = $2::bigint AND tenant_id = $1::bigint)
+		RETURNING id, created_at, updated_at
 	`
 
 	createdBy := sql.NullInt64{}
@@ -112,13 +113,13 @@ func (r *themeRepositoryImpl) Create(ctx context.Context, theme *domain.Theme) e
 }
 
 // GetByID retrieves a theme by its ID
-func (r *themeRepositoryImpl) GetByID(ctx context.Context, id int64) (*domain.Theme, error) {
+func (r *themeRepositoryImpl) GetByID(ctx context.Context, tenantID, restaurantID, id int64) (*domain.Theme, error) {
 	query := `
 		SELECT id, tenant_id, restaurant_id, name, slug, config, description,
 		       is_active, is_published, version, created_by, updated_by,
 		       created_at, updated_at, published_at
 		FROM themes_v2
-		WHERE id = $1
+		WHERE id = $1 AND tenant_id = $2 AND restaurant_id = $3
 	`
 
 	theme := &domain.Theme{}
@@ -126,7 +127,7 @@ func (r *themeRepositoryImpl) GetByID(ctx context.Context, id int64) (*domain.Th
 	updatedBy := sql.NullInt64{}
 	publishedAt := sql.NullTime{}
 
-	err := r.db.QueryRowContext(ctx, query, id).Scan(
+	err := r.db.QueryRowContext(ctx, query, id, tenantID, restaurantID).Scan(
 		&theme.ID,
 		&theme.TenantID,
 		&theme.RestaurantID,
@@ -166,13 +167,14 @@ func (r *themeRepositoryImpl) GetByID(ctx context.Context, id int64) (*domain.Th
 }
 
 // GetBySlug retrieves a theme by tenant ID and slug
-func (r *themeRepositoryImpl) GetBySlug(ctx context.Context, tenantID int64, slug string) (*domain.Theme, error) {
+func (r *themeRepositoryImpl) GetBySlug(ctx context.Context, tenantID, restaurantID int64, slug string) (*domain.Theme, error) {
 	query := `
 		SELECT id, tenant_id, restaurant_id, name, slug, config, description,
 		       is_active, is_published, version, created_by, updated_by,
 		       created_at, updated_at, published_at
 		FROM themes_v2
-		WHERE tenant_id = $1 AND slug = $2
+		WHERE tenant_id = $1 AND restaurant_id = $2 AND slug = $3
+		LIMIT 1
 	`
 
 	theme := &domain.Theme{}
@@ -180,7 +182,7 @@ func (r *themeRepositoryImpl) GetBySlug(ctx context.Context, tenantID int64, slu
 	updatedBy := sql.NullInt64{}
 	publishedAt := sql.NullTime{}
 
-	err := r.db.QueryRowContext(ctx, query, tenantID, slug).Scan(
+	err := r.db.QueryRowContext(ctx, query, tenantID, restaurantID, slug).Scan(
 		&theme.ID,
 		&theme.TenantID,
 		&theme.RestaurantID,
@@ -220,11 +222,11 @@ func (r *themeRepositoryImpl) GetBySlug(ctx context.Context, tenantID int64, slu
 }
 
 // List retrieves a paginated list of themes for a tenant
-func (r *themeRepositoryImpl) List(ctx context.Context, tenantID int64, offset, limit int) ([]*domain.Theme, int64, error) {
+func (r *themeRepositoryImpl) List(ctx context.Context, tenantID, restaurantID int64, offset, limit int) ([]*domain.Theme, int64, error) {
 	// Get total count
-	countQuery := `SELECT COUNT(*) FROM themes_v2 WHERE tenant_id = $1`
+	countQuery := `SELECT COUNT(*) FROM themes_v2 WHERE tenant_id = $1 AND restaurant_id = $2`
 	var total int64
-	err := r.db.QueryRowContext(ctx, countQuery, tenantID).Scan(&total)
+	err := r.db.QueryRowContext(ctx, countQuery, tenantID, restaurantID).Scan(&total)
 	if err != nil {
 		return nil, 0, fmt.Errorf("failed to count themes: %w", err)
 	}
@@ -235,12 +237,12 @@ func (r *themeRepositoryImpl) List(ctx context.Context, tenantID int64, offset, 
 		       is_active, is_published, version, created_by, updated_by,
 		       created_at, updated_at, published_at
 		FROM themes_v2
-		WHERE tenant_id = $1
+		WHERE tenant_id = $1 AND restaurant_id = $2
 		ORDER BY created_at DESC
-		OFFSET $2 LIMIT $3
+		OFFSET $3 LIMIT $4
 	`
 
-	rows, err := r.db.QueryContext(ctx, query, tenantID, offset, limit)
+	rows, err := r.db.QueryContext(ctx, query, tenantID, restaurantID, offset, limit)
 	if err != nil {
 		return nil, 0, fmt.Errorf("failed to list themes: %w", err)
 	}
@@ -320,7 +322,7 @@ func (r *themeRepositoryImpl) Update(ctx context.Context, theme *domain.Theme) e
 		UPDATE themes_v2
 		SET name = $1, slug = $2, config = $3, description = $4,
 		    is_active = $5, is_published = $6, version = $7, updated_by = $8, updated_at = $9
-		WHERE id = $10
+		WHERE id = $10 AND tenant_id = $11 AND restaurant_id = $12
 		RETURNING updated_at, version
 	`
 
@@ -335,6 +337,8 @@ func (r *themeRepositoryImpl) Update(ctx context.Context, theme *domain.Theme) e
 		updatedBy,
 		theme.UpdatedAt,
 		theme.ID,
+		theme.TenantID,
+		theme.RestaurantID,
 	)
 
 	err := row.Scan(&theme.UpdatedAt, &theme.Version)
@@ -352,13 +356,13 @@ func (r *themeRepositoryImpl) Update(ctx context.Context, theme *domain.Theme) e
 }
 
 // Delete deletes a theme by ID
-func (r *themeRepositoryImpl) Delete(ctx context.Context, id int64) error {
+func (r *themeRepositoryImpl) Delete(ctx context.Context, tenantID, restaurantID, id int64) error {
 	if id <= 0 {
 		return errors.New("invalid theme ID")
 	}
 
-	query := `DELETE FROM themes_v2 WHERE id = $1`
-	result, err := r.db.ExecContext(ctx, query, id)
+	query := `DELETE FROM themes_v2 WHERE id = $1 AND tenant_id = $2 AND restaurant_id = $3`
+	result, err := r.db.ExecContext(ctx, query, id, tenantID, restaurantID)
 	if err != nil {
 		return fmt.Errorf("failed to delete theme: %w", err)
 	}
@@ -376,13 +380,13 @@ func (r *themeRepositoryImpl) Delete(ctx context.Context, id int64) error {
 }
 
 // GetActive retrieves the active theme for a tenant
-func (r *themeRepositoryImpl) GetActive(ctx context.Context, tenantID int64) (*domain.Theme, error) {
+func (r *themeRepositoryImpl) GetActive(ctx context.Context, tenantID, restaurantID int64) (*domain.Theme, error) {
 	query := `
 		SELECT id, tenant_id, restaurant_id, name, slug, config, description,
 		       is_active, is_published, version, created_by, updated_by,
 		       created_at, updated_at, published_at
 		FROM themes_v2
-		WHERE tenant_id = $1 AND is_active = true
+		WHERE tenant_id = $1 AND restaurant_id = $2 AND is_active = true
 		LIMIT 1
 	`
 
@@ -391,7 +395,7 @@ func (r *themeRepositoryImpl) GetActive(ctx context.Context, tenantID int64) (*d
 	updatedBy := sql.NullInt64{}
 	publishedAt := sql.NullTime{}
 
-	err := r.db.QueryRowContext(ctx, query, tenantID).Scan(
+	err := r.db.QueryRowContext(ctx, query, tenantID, restaurantID).Scan(
 		&theme.ID,
 		&theme.TenantID,
 		&theme.RestaurantID,
@@ -431,7 +435,7 @@ func (r *themeRepositoryImpl) GetActive(ctx context.Context, tenantID int64) (*d
 }
 
 // SetActive activates a theme and deactivates others for the same tenant
-func (r *themeRepositoryImpl) SetActive(ctx context.Context, id int64) error {
+func (r *themeRepositoryImpl) SetActive(ctx context.Context, tenantID, restaurantID, id int64) error {
 	if id <= 0 {
 		return errors.New("invalid theme ID")
 	}
@@ -444,9 +448,10 @@ func (r *themeRepositoryImpl) SetActive(ctx context.Context, id int64) error {
 	defer tx.Rollback()
 
 	// First, get the tenant_id of the theme to be activated
-	var tenantID int64
-	query := `SELECT tenant_id FROM themes_v2 WHERE id = $1`
-	err = tx.QueryRowContext(ctx, query, id).Scan(&tenantID)
+	var owningTenantID int64
+	var themeRestaurantID int64
+	query := `SELECT tenant_id, restaurant_id FROM themes_v2 WHERE id = $1 AND tenant_id = $2 AND restaurant_id = $3 FOR UPDATE`
+	err = tx.QueryRowContext(ctx, query, id, tenantID, restaurantID).Scan(&owningTenantID, &themeRestaurantID)
 	if err == sql.ErrNoRows {
 		return errors.New("theme not found")
 	}
@@ -455,15 +460,15 @@ func (r *themeRepositoryImpl) SetActive(ctx context.Context, id int64) error {
 	}
 
 	// Deactivate all themes for this tenant
-	deactiveQuery := `UPDATE themes_v2 SET is_active = false WHERE tenant_id = $1`
-	_, err = tx.ExecContext(ctx, deactiveQuery, tenantID)
+	deactiveQuery := `UPDATE themes_v2 SET is_active = false WHERE tenant_id = $1 AND restaurant_id = $2`
+	_, err = tx.ExecContext(ctx, deactiveQuery, owningTenantID, themeRestaurantID)
 	if err != nil {
 		return fmt.Errorf("failed to deactivate other themes: %w", err)
 	}
 
 	// Activate the specified theme
-	activateQuery := `UPDATE themes_v2 SET is_active = true, updated_at = $1 WHERE id = $2`
-	result, err := tx.ExecContext(ctx, activateQuery, time.Now(), id)
+	activateQuery := `UPDATE themes_v2 SET is_active = true, updated_at = $1 WHERE id = $2 AND tenant_id = $3 AND restaurant_id = $4`
+	result, err := tx.ExecContext(ctx, activateQuery, time.Now(), id, owningTenantID, themeRestaurantID)
 	if err != nil {
 		return fmt.Errorf("failed to activate theme: %w", err)
 	}

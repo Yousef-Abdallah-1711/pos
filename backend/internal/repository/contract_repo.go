@@ -101,11 +101,18 @@ func (r *ContractRepository) Create(item *domain.EmploymentContract) (int, error
 			tenant_id, restaurant_id, employee_id, contract_type, contract_number, start_date, end_date,
 			salary_amount, currency, status, renewed_from_id, notes, created_by
 		)
-		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)
+		SELECT $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13
+		WHERE EXISTS (
+			SELECT 1 FROM employees e
+			WHERE e.id = $3 AND e.tenant_id = $1 AND e.restaurant_id = $2
+		)
 		RETURNING id
 	`, item.TenantID, item.RestaurantID, item.EmployeeID, item.ContractType, item.ContractNumber, item.StartDate, item.EndDate,
 		item.SalaryAmount, item.Currency, item.Status, item.RenewedFromID, item.Notes, item.CreatedBy,
 	).Scan(&id)
+	if errors.Is(err, sql.ErrNoRows) {
+		return 0, errors.New("employee is outside tenant and restaurant scope")
+	}
 	return id, err
 }
 
@@ -115,6 +122,10 @@ func (r *ContractRepository) Update(tenantID, restaurantID int, item *domain.Emp
 		SET employee_id = $1, contract_type = $2, contract_number = $3, start_date = $4, end_date = $5,
 		    salary_amount = $6, currency = $7, status = $8, notes = $9, updated_by = $10, updated_at = CURRENT_TIMESTAMP
 		WHERE id = $11 AND tenant_id = $12 AND restaurant_id = $13
+		  AND EXISTS (
+			SELECT 1 FROM employees e
+			WHERE e.id = $1 AND e.tenant_id = $12 AND e.restaurant_id = $13
+		  )
 	`, item.EmployeeID, item.ContractType, item.ContractNumber, item.StartDate, item.EndDate,
 		item.SalaryAmount, item.Currency, item.Status, item.Notes, item.UpdatedBy, item.ID, tenantID, restaurantID,
 	)

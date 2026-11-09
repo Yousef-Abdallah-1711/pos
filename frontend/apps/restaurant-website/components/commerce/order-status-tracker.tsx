@@ -1,7 +1,6 @@
 ﻿'use client'
 
 import { CheckCircle2, Clock, Truck, AlertCircle } from 'lucide-react'
-import { useThemeColors } from '@/lib/hooks/use-theme'
 
 export interface OrderStatus {
   status:
@@ -23,12 +22,6 @@ interface OrderStatusTrackerProps {
 
 export function OrderStatusTracker({ statuses, currentStatus, locale = 'en' }: OrderStatusTrackerProps) {
   const isRTL = locale === 'ar'
-  const themeColors = useThemeColors() as any
-
-  const bgColor = themeColors?.background || '#ffffff'
-  const textColor = themeColors?.text || '#1f2937'
-  const borderColor = themeColors?.border || '#e5e7eb'
-  const primaryColor = themeColors?.primary || '#f97316'
 
   const statusConfig = {
     pending: {
@@ -179,20 +172,20 @@ export function OrderStatusTracker({ statuses, currentStatus, locale = 'en' }: O
         }
 
         .tracker-cancelled-text {
-          color: hsl(var(--theme-text) / 0.6);
+          color: hsl(var(--theme-text, 221 39% 11%) / 0.6);
         }
 
         .tracker-circle-inactive {
-          background-color: hsl(var(--theme-background) / 0.5);
-          border-color: ${borderColor};
+          background-color: hsl(var(--theme-background, 0 0% 100%) / 0.5);
+          border-color: hsl(var(--theme-border, 0 0% 90%));
         }
 
         .tracker-icon-inactive {
-          color: hsl(var(--theme-text) / 0.3);
+          color: hsl(var(--theme-text, 221 39% 11%) / 0.3);
         }
 
         .tracker-connector-inactive {
-          background-color: hsl(var(--theme-text) / 0.1);
+          background-color: hsl(var(--theme-text, 221 39% 11%) / 0.1);
         }
 
         .tracker-label {
@@ -200,29 +193,29 @@ export function OrderStatusTracker({ statuses, currentStatus, locale = 'en' }: O
         }
 
         .tracker-label-active {
-          color: ${primaryColor};
+          color: hsl(var(--theme-primary, 24 95% 53%));
           font-weight: 700;
         }
 
         .tracker-label-complete {
-          color: ${textColor};
+          color: hsl(var(--theme-text, 221 39% 11%));
         }
 
         .tracker-label-pending,
         .tracker-time {
-          color: hsl(var(--theme-text) / 0.6);
+          color: hsl(var(--theme-text, 221 39% 11%) / 0.6);
         }
 
         .tracker-current-box {
-          border-color: ${borderColor};
+          border-color: hsl(var(--theme-border, 0 0% 90%));
         }
 
         .tracker-current-title {
-          color: ${textColor};
+          color: hsl(var(--theme-text, 221 39% 11%));
         }
 
         .tracker-current-text {
-          color: hsl(var(--theme-text) / 0.7);
+          color: hsl(var(--theme-text, 221 39% 11%) / 0.7);
         }
 
         .tracker-soft-pending {

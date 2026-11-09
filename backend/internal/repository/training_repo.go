@@ -94,11 +94,18 @@ func (r *TrainingRepository) Create(item *domain.TrainingRecord) (int, error) {
 			tenant_id, restaurant_id, employee_id, training_title, training_provider, training_type,
 			start_date, end_date, status, certificate_number, certificate_expiry, notes, created_by
 		)
-		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)
+		SELECT $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13
+		WHERE EXISTS (
+			SELECT 1 FROM employees e
+			WHERE e.id = $3 AND e.tenant_id = $1 AND e.restaurant_id = $2
+		)
 		RETURNING id
 	`, item.TenantID, item.RestaurantID, item.EmployeeID, item.TrainingTitle, item.TrainingProvider, item.TrainingType,
 		item.StartDate, item.EndDate, item.Status, item.CertificateNumber, item.CertificateExpiry, item.Notes, item.CreatedBy,
 	).Scan(&id)
+	if errors.Is(err, sql.ErrNoRows) {
+		return 0, errors.New("employee is outside tenant and restaurant scope")
+	}
 	return id, err
 }
 
@@ -109,6 +116,10 @@ func (r *TrainingRepository) Update(tenantID, restaurantID int, item *domain.Tra
 		    start_date = $5, end_date = $6, status = $7, certificate_number = $8,
 		    certificate_expiry = $9, notes = $10, updated_by = $11, updated_at = CURRENT_TIMESTAMP
 		WHERE id = $12 AND tenant_id = $13 AND restaurant_id = $14
+		  AND EXISTS (
+			SELECT 1 FROM employees e
+			WHERE e.id = $1 AND e.tenant_id = $13 AND e.restaurant_id = $14
+		  )
 	`, item.EmployeeID, item.TrainingTitle, item.TrainingProvider, item.TrainingType,
 		item.StartDate, item.EndDate, item.Status, item.CertificateNumber,
 		item.CertificateExpiry, item.Notes, item.UpdatedBy, item.ID, tenantID, restaurantID,

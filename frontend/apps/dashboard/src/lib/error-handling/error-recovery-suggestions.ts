@@ -121,7 +121,7 @@ function getNetworkSuggestions(context: ErrorRecoveryContext): RecoverySuggestio
       priority: 90,
     },
     {
-      title: 'Try Again Later',
+      title: 'Retry Later',
       description: 'The server may be temporarily unavailable. Please try again in a few moments.',
       action: {
         label: 'Wait and Retry',
@@ -149,7 +149,7 @@ function getNetworkSuggestions(context: ErrorRecoveryContext): RecoverySuggestio
 function getAuthenticationSuggestions(context: ErrorRecoveryContext): RecoverySuggestion[] {
   return [
     {
-      title: 'Session Expired',
+      title: 'Login Again',
       description: 'Your session may have expired. Please log in again.',
       action: {
         label: 'Log In',
@@ -181,7 +181,7 @@ function getAuthenticationSuggestions(context: ErrorRecoveryContext): RecoverySu
 function getPermissionSuggestions(context: ErrorRecoveryContext): RecoverySuggestion[] {
   return [
     {
-      title: 'Insufficient Permissions',
+      title: 'Contact Administrator',
       description: 'You do not have permission to perform this action. Please contact your administrator.',
       action: {
         label: 'Contact Administrator',
@@ -347,12 +347,12 @@ export function getErrorAdvice(category: ErrorCategory, severity: ErrorSeverity)
     validation: {
       low: 'Please check the form fields and correct any errors.',
       medium: 'Validation failed. Please review the required fields.',
-      high: 'Multiple validation errors. Please correct all issues before continuing.',
+      high: 'Please check the input fields and correct all validation errors before continuing.',
       critical: 'Critical validation error. Please refresh and try again.',
     },
     network: {
       low: 'Please check your internet connection and try again.',
-      medium: 'Network request failed. Please try again in a moment.',
+      medium: 'Network connection failed. Please try again in a moment.',
       high: 'Server is not responding. Please check your connection and try again.',
       critical: 'Network connection lost. Please restore your connection and refresh.',
     },

@@ -112,7 +112,9 @@ func (r *CategoryRepository) CreateCategory(category *domain.Category) (int, err
 		INSERT INTO categories (
 			tenant_id, restaurant_id, name, name_ar,
 			description, description_ar, display_order, is_active
-		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+		)
+		SELECT $1, $2, $3, $4, $5, $6, $7, $8
+		WHERE EXISTS (SELECT 1 FROM restaurants WHERE id = $2 AND tenant_id = $1)
 		RETURNING id
 	`
 
@@ -129,6 +131,9 @@ func (r *CategoryRepository) CreateCategory(category *domain.Category) (int, err
 		category.IsActive,
 	).Scan(&id)
 
+	if err == sql.ErrNoRows {
+		return 0, sql.ErrNoRows
+	}
 	if err != nil {
 		return 0, err
 	}
@@ -151,7 +156,7 @@ func (r *CategoryRepository) UpdateCategory(category *domain.Category) error {
 		WHERE id = $7 AND tenant_id = $8 AND restaurant_id = $9
 	`
 
-	_, err := r.db.Exec(
+	result, err := r.db.Exec(
 		query,
 		category.Name,
 		category.NameAr,
@@ -164,7 +169,17 @@ func (r *CategoryRepository) UpdateCategory(category *domain.Category) error {
 		category.RestaurantID,
 	)
 
-	return err
+	if err != nil {
+		return err
+	}
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rowsAffected == 0 {
+		return sql.ErrNoRows
+	}
+	return nil
 }
 
 // DeleteCategory deletes a category (soft delete by setting is_active to false)
@@ -175,23 +190,33 @@ func (r *CategoryRepository) DeleteCategory(tenantID, restaurantID, id int) erro
 		WHERE id = $1 AND tenant_id = $2 AND restaurant_id = $3
 	`
 
-	_, err := r.db.Exec(query, id, tenantID, restaurantID)
-	return err
+	result, err := r.db.Exec(query, id, tenantID, restaurantID)
+	if err != nil {
+		return err
+	}
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rowsAffected == 0 {
+		return sql.ErrNoRows
+	}
+	return nil
 }
 
 // ListPublic returns active categories for public menu
-func (r *CategoryRepository) ListPublic(restaurantID int, lang string) ([]domain.Category, error) {
+func (r *CategoryRepository) ListPublic(tenantID, restaurantID int, lang string) ([]domain.Category, error) {
 	query := `
 		SELECT
 			id, tenant_id, restaurant_id, name, name_ar,
 			description, description_ar, icon_url, display_order,
 			is_active, created_at, updated_at
 		FROM categories
-		WHERE restaurant_id = $1 AND is_active = true
+		WHERE tenant_id = $1 AND restaurant_id = $2 AND is_active = true
 		ORDER BY display_order ASC, name ASC
 	`
 
-	rows, err := r.db.Query(query, restaurantID)
+	rows, err := r.db.Query(query, tenantID, restaurantID)
 	if err != nil {
 		return nil, err
 	}

@@ -1,6 +1,9 @@
 import { chromium } from '@playwright/test'
 
-const BASE_URL = process.env.POS_QA_BASE_URL || 'http://localhost:3002'
+const BASE_URL = process.env.POS_QA_BASE_URL
+if (!BASE_URL) {
+  throw new Error('POS_QA_BASE_URL must be set to the dashboard URL under test')
+}
 const POS_PATH = '/en/dashboard/pos'
 const SW_SCOPE = '/en/dashboard/pos'
 const SW_URL = '/pos-sw.js'

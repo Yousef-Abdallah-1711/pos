@@ -14,10 +14,12 @@ import { NotificationCenter } from '@/components/notifications/NotificationCente
 import { createTranslator, getLocaleFromPath } from '@/lib/translations'
 import { debugError } from '@/lib/debug'
 import { getConfig } from '@/lib/config'
+import api from '@/lib/api'
 import { commonRoutes, preloadRoutes } from '@/lib/code-splitting'
 import { TrialWarningBanner } from '@/components/layout/TrialWarningBanner'
 import { useTenantStatus } from '@/hooks/useTenantStatus'
 import { BlockedOverlay } from '@/components/blocked/BlockedOverlay'
+import { toast } from 'sonner'
 
 export default function DashboardLayout({
   children,
@@ -37,6 +39,7 @@ export default function DashboardLayout({
   const [isSidebarMobileOpen, setIsSidebarMobileOpen] = useState(false)
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
+  const isLoggingOut = useRef(false)
   const { isBlocked, blockReason } = useTenantStatus()
 
   const isLoggedIn = !!(user && token)
@@ -68,7 +71,7 @@ export default function DashboardLayout({
   }, [])
 
   useEffect(() => {
-    if (!isLoggedIn) {
+    if (!isLoggedIn && !isLoggingOut.current) {
       router.push(`/${locale}/auth/login`)
     }
   }, [isLoggedIn, router, locale])
@@ -122,9 +125,17 @@ export default function DashboardLayout({
     }
   }, [settings, setTheme])
 
-  const handleLogout = () => {
-    logout()
-    router.push(`/${locale}/auth/login`)
+  const handleLogout = async () => {
+    isLoggingOut.current = true
+    try {
+      await api.post('/auth/logout')
+      logout()
+      window.location.replace(`${getConfig().landingUrl}/${locale}/auth/login`)
+    } catch (error) {
+      isLoggingOut.current = false
+      debugError('Dashboard logout failed:', error)
+      toast.error(t('common.logoutFailed', 'Logout failed. Please try again.'))
+    }
   }
 
   if (!isLoggedIn) {
