@@ -3,10 +3,12 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"net/url"
 	"os"
 	"strings"
 	"testing"
+	"time"
 
 	_ "github.com/lib/pq"
 	"pos-saas/internal/domain"
@@ -60,6 +62,13 @@ func TestRolePermissionRepositoryUsesTenantAndRestaurantRLS(t *testing.T) {
 	if err != nil || level != domain.PermissionWrite {
 		t.Fatalf("read in-scope permission = %q, %v; want WRITE", level, err)
 	}
+	roleCounts, err := NewRBACRoleRepository(runtimeDB).ListWithPermissionCounts(ctx, int64(fixture.tenantA), int64(fixture.restaurantA1))
+	if err != nil {
+		t.Fatalf("list permission counts through restricted runtime role: %v", err)
+	}
+	if len(roleCounts) != 1 || roleCounts[0].ID != int64(roleA1) || roleCounts[0].PermissionsCount != 1 {
+		t.Fatalf("restricted scoped permission counts = %#v, want role %d with one permission", roleCounts, roleA1)
+	}
 	if err := repo.Assign(ctx, int64(fixture.tenantA), int64(fixture.restaurantA1), int64(roleA2), moduleID, domain.PermissionAdmin); err == nil {
 		t.Fatal("assignment to sibling restaurant role unexpectedly succeeded")
 	}
@@ -96,6 +105,63 @@ func TestRolePermissionRepositoryUsesTenantAndRestaurantRLS(t *testing.T) {
 	}
 	if unscopedAssignments != 0 {
 		t.Fatalf("query without transaction-local tenant context returned %d role assignments", unscopedAssignments)
+	}
+}
+
+func TestTenantRegistrationSeedsRBACUnderRestrictedRuntimeRole(t *testing.T) {
+	adminURL := safeRLSDatabaseURL(t, "POS_RLS_ADMIN_URL")
+	appURL := safeRLSDatabaseURL(t, "POS_RLS_APP_URL")
+	adminTarget, _ := url.Parse(adminURL)
+	appTarget, _ := url.Parse(appURL)
+	if adminTarget.Host != appTarget.Host || adminTarget.Path != appTarget.Path {
+		t.Fatal("POS_RLS_ADMIN_URL and POS_RLS_APP_URL must point to the same disposable database")
+	}
+	adminDB := openRLSRolePermissionDB(t, adminURL)
+	appDB := openRLSRolePermissionDB(t, appURL)
+	appDB.SetMaxOpenConns(1)
+	suffix := fmt.Sprintf("%d", time.Now().UnixNano())
+	user, err := NewAuthRepository(appDB).CreateTenantWithUser(&domain.RegisterRequest{
+		Name: "RLS Registration", Email: "rls-registration-" + suffix + "@example.test",
+		Password: "Test-only-password-123!", RestaurantName: "RLS Registration " + suffix,
+		RestaurantSlug: "rls-registration-" + suffix, Phone: "+201000000000",
+	})
+	if err != nil {
+		t.Fatalf("register tenant through restricted runtime role: %v", err)
+	}
+	t.Cleanup(func() {
+		if _, err := adminDB.Exec(`DELETE FROM roles WHERE tenant_id = $1`, user.TenantID); err != nil {
+			t.Errorf("remove disposable registration roles: %v", err)
+		}
+		if _, err := adminDB.Exec(`DELETE FROM hr_audit_logs WHERE tenant_id = $1`, user.TenantID); err != nil {
+			t.Errorf("remove disposable registration audit rows: %v", err)
+		}
+		if _, err := adminDB.Exec(`DELETE FROM tenants WHERE id = $1`, user.TenantID); err != nil {
+			t.Errorf("remove disposable registration fixture: %v", err)
+		}
+	})
+	if user.RestaurantID == nil || *user.RestaurantID <= 0 {
+		t.Fatalf("registered user restaurant id = %v, want a positive id", user.RestaurantID)
+	}
+	roles, err := NewUserRoleRepository(appDB).GetUserRoles(context.Background(), int64(user.ID), int64(user.TenantID), int64(*user.RestaurantID))
+	if err != nil {
+		t.Fatalf("read registration role assignment through restricted runtime role: %v", err)
+	}
+	if len(roles) != 1 || roles[0].RoleName != "Administrator" {
+		t.Fatalf("registration roles = %#v, want the tenant ADMIN role", roles)
+	}
+	roleCounts, err := NewRBACRoleRepository(appDB).ListWithPermissionCounts(context.Background(), int64(user.TenantID), int64(*user.RestaurantID))
+	if err != nil {
+		t.Fatalf("read registration role permissions through restricted runtime role: %v", err)
+	}
+	adminGrantCount := 0
+	for _, role := range roleCounts {
+		if role.RoleCode == "ADMIN" {
+			adminGrantCount = role.PermissionsCount
+			break
+		}
+	}
+	if adminGrantCount == 0 {
+		t.Fatalf("registered RBAC role permission counts = %#v, want a seeded ADMIN grant set", roleCounts)
 	}
 }
 

@@ -1,6 +1,7 @@
 package http
 
 import (
+	"errors"
 	"net/http"
 	"strconv"
 	"strings"
@@ -181,7 +182,7 @@ func (h *RBACRoleHandler) CreateRole(w http.ResponseWriter, r *http.Request) {
 		IsActive:     true,
 	}
 
-	roleID, err := h.roleRepo.Create(r.Context(), role, int64(claims.UserID))
+	roleID, err := h.roleRepo.CreateWithPermissions(r.Context(), role, int64(claims.UserID), toRBACPermissionMutations(permissions))
 	if err != nil {
 		if strings.Contains(err.Error(), "unique_role_name_per_tenant") {
 			respondError(w, http.StatusBadRequest, "Role name already exists")
@@ -193,13 +194,6 @@ func (h *RBACRoleHandler) CreateRole(w http.ResponseWriter, r *http.Request) {
 		}
 		respondError(w, http.StatusInternalServerError, "Failed to create role")
 		return
-	}
-
-	for _, perm := range permissions {
-		if err := h.rolePermissionRepo.Assign(r.Context(), int64(claims.TenantID), int64(claims.RestaurantID), roleID, perm.ModuleID, perm.Level); err != nil {
-			respondError(w, http.StatusInternalServerError, "Failed to assign permissions")
-			return
-		}
 	}
 
 	role.ID = roleID
@@ -255,6 +249,16 @@ func (h *RBACRoleHandler) UpdateRole(w http.ResponseWriter, r *http.Request) {
 		description = existingRole.Description
 	}
 
+	permissionsRaw, replacePermissions := payload["permissions"]
+	var permissions []permissionInput
+	if replacePermissions {
+		permissions, err = parsePermissionInputs(permissionsRaw)
+		if err != nil {
+			respondError(w, http.StatusBadRequest, err.Error())
+			return
+		}
+	}
+
 	updateRole := &repository.RBACRole{
 		ID:           existingRole.ID,
 		TenantID:     existingRole.TenantID,
@@ -263,29 +267,17 @@ func (h *RBACRoleHandler) UpdateRole(w http.ResponseWriter, r *http.Request) {
 		Description:  description,
 	}
 
-	if err := h.roleRepo.Update(r.Context(), updateRole, int64(claims.UserID)); err != nil {
-		respondError(w, http.StatusInternalServerError, "Failed to update role")
-		return
-	}
-
-	if permissionsRaw, ok := payload["permissions"]; ok {
-		permissions, err := parsePermissionInputs(permissionsRaw)
-		if err != nil {
-			respondError(w, http.StatusBadRequest, err.Error())
-			return
-		}
-
-		if err := h.rolePermissionRepo.RevokeAll(r.Context(), int64(claims.TenantID), int64(claims.RestaurantID), roleID); err != nil {
-			respondError(w, http.StatusInternalServerError, "Failed to update permissions")
-			return
-		}
-
-		for _, perm := range permissions {
-			if err := h.rolePermissionRepo.Assign(r.Context(), int64(claims.TenantID), int64(claims.RestaurantID), roleID, perm.ModuleID, perm.Level); err != nil {
-				respondError(w, http.StatusInternalServerError, "Failed to assign permissions")
+	if err := h.roleRepo.UpdateWithPermissions(r.Context(), updateRole, int64(claims.UserID), toRBACPermissionMutations(permissions), replacePermissions); err != nil {
+		if errors.Is(err, repository.ErrRBACRoleNotFound) {
+			if existingRole.IsSystemRole {
+				respondError(w, http.StatusForbidden, "Cannot update system roles")
 				return
 			}
+			respondError(w, http.StatusNotFound, "Role not found")
+			return
 		}
+		respondError(w, http.StatusInternalServerError, "Failed to update role")
+		return
 	}
 
 	response := roleDetailResponse{
@@ -329,17 +321,24 @@ func (h *RBACRoleHandler) DeleteRole(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := h.roleRepo.Deactivate(r.Context(), int64(claims.TenantID), int64(claims.RestaurantID), roleID, int64(claims.UserID)); err != nil {
+	if err := h.roleRepo.DeactivateWithPermissions(r.Context(), int64(claims.TenantID), int64(claims.RestaurantID), roleID, int64(claims.UserID)); err != nil {
+		if errors.Is(err, repository.ErrRBACRoleNotFound) {
+			respondError(w, http.StatusNotFound, "Role not found")
+			return
+		}
 		respondError(w, http.StatusInternalServerError, "Failed to delete role")
 		return
 	}
 
-	if err := h.rolePermissionRepo.RevokeAll(r.Context(), int64(claims.TenantID), int64(claims.RestaurantID), roleID); err != nil {
-		respondError(w, http.StatusInternalServerError, "Failed to remove permissions")
-		return
-	}
-
 	respondJSON(w, http.StatusOK, map[string]string{"message": "Role deleted successfully"})
+}
+
+func toRBACPermissionMutations(permissions []permissionInput) []repository.RBACPermissionMutation {
+	mutations := make([]repository.RBACPermissionMutation, 0, len(permissions))
+	for _, permission := range permissions {
+		mutations = append(mutations, repository.RBACPermissionMutation{ModuleID: permission.ModuleID, Level: permission.Level})
+	}
+	return mutations
 }
 
 func buildRoleCode(name string) string {

@@ -5,7 +5,18 @@ import (
 	"database/sql"
 	"errors"
 	"time"
+
+	"pos-saas/internal/pkg/database"
 )
+
+var ErrRBACRoleNotFound = errors.New("role not found in requested scope")
+
+// RBACPermissionMutation describes a role permission replacement performed in
+// the same tenant-scoped transaction as its role mutation.
+type RBACPermissionMutation struct {
+	ModuleID int64
+	Level    string
+}
 
 // RBACRole represents the minimal role fields used by RBAC endpoints.
 type RBACRole struct {
@@ -51,42 +62,38 @@ func (r *RBACRoleRepository) ListWithPermissionCounts(ctx context.Context, tenan
 		ORDER BY r.is_system_role DESC, r.role_name ASC
 	`
 
-	rows, err := r.db.QueryContext(ctx, query, tenantID, restaurantID)
+	roles := make([]RBACRoleWithCount, 0)
+	err := database.WithTenantTx(ctx, r.db, tenantID, restaurantID, func(tx *sql.Tx) error {
+		rows, err := tx.QueryContext(ctx, query, tenantID, restaurantID)
+		if err != nil {
+			return err
+		}
+		defer rows.Close()
+
+		for rows.Next() {
+			role := RBACRoleWithCount{}
+			if err := rows.Scan(
+				&role.ID,
+				&role.TenantID,
+				&role.RestaurantID,
+				&role.RoleName,
+				&role.Description,
+				&role.RoleCode,
+				&role.IsSystemRole,
+				&role.IsActive,
+				&role.CreatedAt,
+				&role.UpdatedAt,
+				&role.PermissionsCount,
+			); err != nil {
+				return err
+			}
+			roles = append(roles, role)
+		}
+		return rows.Err()
+	})
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
-
-	var roles []RBACRoleWithCount
-	for rows.Next() {
-		role := RBACRoleWithCount{}
-		err := rows.Scan(
-			&role.ID,
-			&role.TenantID,
-			&role.RestaurantID,
-			&role.RoleName,
-			&role.Description,
-			&role.RoleCode,
-			&role.IsSystemRole,
-			&role.IsActive,
-			&role.CreatedAt,
-			&role.UpdatedAt,
-			&role.PermissionsCount,
-		)
-		if err != nil {
-			return nil, err
-		}
-		roles = append(roles, role)
-	}
-
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-
-	if roles == nil {
-		roles = []RBACRoleWithCount{}
-	}
-
 	return roles, nil
 }
 
@@ -194,6 +201,38 @@ func (r *RBACRoleRepository) Create(ctx context.Context, role *RBACRole, created
 	return id, nil
 }
 
+// CreateWithPermissions ensures a failed permission assignment cannot leave a
+// role with only a partial permission set.
+func (r *RBACRoleRepository) CreateWithPermissions(ctx context.Context, role *RBACRole, createdBy int64, permissions []RBACPermissionMutation) (int64, error) {
+	var id int64
+	err := database.WithTenantTx(ctx, r.db, role.TenantID, role.RestaurantID, func(tx *sql.Tx) error {
+		query := `
+			INSERT INTO roles (
+				tenant_id, restaurant_id, role_name, description, role_code,
+				is_system_role, is_active, created_by, created_at, updated_at
+			)
+			SELECT $1, $2, $3, $4, $5, FALSE, TRUE, $6, $7, $7
+			WHERE EXISTS (SELECT 1 FROM restaurants WHERE id = $2 AND tenant_id = $1)
+			  AND EXISTS (SELECT 1 FROM users WHERE id = $6 AND tenant_id = $1)
+			RETURNING id
+		`
+		now := time.Now()
+		if err := tx.QueryRowContext(ctx, query, role.TenantID, role.RestaurantID, role.RoleName, role.Description, role.RoleCode, createdBy, now).Scan(&id); err != nil {
+			if errors.Is(err, sql.ErrNoRows) {
+				return errors.New("restaurant or creator not found in the requested tenant")
+			}
+			return err
+		}
+		for _, permission := range permissions {
+			if err := insertRBACPermission(ctx, tx, role.TenantID, role.RestaurantID, id, permission, now); err != nil {
+				return err
+			}
+		}
+		return nil
+	})
+	return id, err
+}
+
 // Update updates role name/description for non-system roles.
 func (r *RBACRoleRepository) Update(ctx context.Context, role *RBACRole, updatedBy int64) error {
 	query := `
@@ -216,6 +255,40 @@ func (r *RBACRoleRepository) Update(ctx context.Context, role *RBACRole, updated
 	return err
 }
 
+// UpdateWithPermissions replaces role details and permissions atomically.
+func (r *RBACRoleRepository) UpdateWithPermissions(ctx context.Context, role *RBACRole, updatedBy int64, permissions []RBACPermissionMutation, replacePermissions bool) error {
+	return database.WithTenantTx(ctx, r.db, role.TenantID, role.RestaurantID, func(tx *sql.Tx) error {
+		query := `
+			UPDATE roles SET role_name = $1, description = $2, updated_by = $3, updated_at = $4
+			WHERE id = $5 AND tenant_id = $6 AND restaurant_id = $7 AND is_system_role = FALSE AND is_active = TRUE
+		`
+		now := time.Now()
+		result, err := tx.ExecContext(ctx, query, role.RoleName, role.Description, updatedBy, now, role.ID, role.TenantID, role.RestaurantID)
+		if err != nil {
+			return err
+		}
+		rows, err := result.RowsAffected()
+		if err != nil {
+			return err
+		}
+		if rows == 0 {
+			return ErrRBACRoleNotFound
+		}
+		if !replacePermissions {
+			return nil
+		}
+		if _, err := tx.ExecContext(ctx, `DELETE FROM role_permissions WHERE tenant_id = $1 AND role_id = $2`, role.TenantID, role.ID); err != nil {
+			return err
+		}
+		for _, permission := range permissions {
+			if err := insertRBACPermission(ctx, tx, role.TenantID, role.RestaurantID, role.ID, permission, now); err != nil {
+				return err
+			}
+		}
+		return nil
+	})
+}
+
 // Deactivate marks a role inactive (soft delete).
 func (r *RBACRoleRepository) Deactivate(ctx context.Context, tenantID, restaurantID, roleID int64, updatedBy int64) error {
 	query := `
@@ -226,4 +299,44 @@ func (r *RBACRoleRepository) Deactivate(ctx context.Context, tenantID, restauran
 
 	_, err := r.db.ExecContext(ctx, query, updatedBy, time.Now(), roleID, tenantID, restaurantID)
 	return err
+}
+
+// DeactivateWithPermissions atomically deactivates a custom role and removes
+// its permission grants.
+func (r *RBACRoleRepository) DeactivateWithPermissions(ctx context.Context, tenantID, restaurantID, roleID, updatedBy int64) error {
+	return database.WithTenantTx(ctx, r.db, tenantID, restaurantID, func(tx *sql.Tx) error {
+		result, err := tx.ExecContext(ctx, `UPDATE roles SET is_active = FALSE, updated_by = $1, updated_at = $2 WHERE id = $3 AND tenant_id = $4 AND restaurant_id = $5 AND is_system_role = FALSE AND is_active = TRUE`, updatedBy, time.Now(), roleID, tenantID, restaurantID)
+		if err != nil {
+			return err
+		}
+		rows, err := result.RowsAffected()
+		if err != nil {
+			return err
+		}
+		if rows == 0 {
+			return ErrRBACRoleNotFound
+		}
+		_, err = tx.ExecContext(ctx, `DELETE FROM role_permissions WHERE tenant_id = $1 AND role_id = $2`, tenantID, roleID)
+		return err
+	})
+}
+
+func insertRBACPermission(ctx context.Context, tx *sql.Tx, tenantID, restaurantID, roleID int64, permission RBACPermissionMutation, now time.Time) error {
+	result, err := tx.ExecContext(ctx, `
+		INSERT INTO role_permissions (tenant_id, role_id, module_id, permission_level, created_at, updated_at)
+		SELECT $1, $2, $3, $4, $5, $5
+		WHERE EXISTS (SELECT 1 FROM roles WHERE id = $2 AND tenant_id = $1 AND restaurant_id = $6 AND is_active = TRUE)
+		  AND EXISTS (SELECT 1 FROM modules WHERE id = $3)
+	`, tenantID, roleID, permission.ModuleID, permission.Level, now, restaurantID)
+	if err != nil {
+		return err
+	}
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rows == 0 {
+		return errors.New("role or module not found in the requested scope")
+	}
+	return nil
 }

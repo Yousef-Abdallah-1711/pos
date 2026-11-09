@@ -598,8 +598,7 @@ test('super-admin browser impersonation opens the target tenant session', async 
     await expect(tenantRow).toBeVisible()
     await tenantRow.getByRole('link', { name: 'View' }).click()
 
-    const userSection = page.getByRole('heading', { name: 'Users in this Tenant' })
-      .locator('xpath=ancestor::div[contains(@class, "bg-white")][1]')
+    const userSection = page.getByRole('heading', { name: 'Users in this Tenant' }).locator('..')
     const targetUserRow = userSection.getByRole('row').filter({ hasText: 'phase2a-owner-a@example.test' })
     for (let pageNumber = 1; pageNumber < 20 && !(await targetUserRow.isVisible().catch(() => false)); pageNumber += 1) {
       const nextPage = userSection.getByRole('button', { name: 'Next' })
