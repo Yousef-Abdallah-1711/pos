@@ -224,8 +224,7 @@
       "pending": "Pending",
       "paid": "Paid",
       "failed": "Failed",
-      "refunded": "Refunded",
-      "voided": "Voided"
+      "refunded": "Refunded"
     },
     "details": {
       "orderInfo": "Order Information",
@@ -570,6 +569,7 @@
       "tableDate": "Date",
       "tableAmount": "Amount",
       "tableStatus": "Status",
+      "voided": "Voided",
       "tableMethod": "Method",
       "tableCard": "Card",
       "tableReference": "Reference",
