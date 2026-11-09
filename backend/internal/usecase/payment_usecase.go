@@ -216,16 +216,6 @@ func (uc *PaymentUseCase) HandleWebhook(ctx context.Context, rawPayload []byte, 
 		return nil
 	}
 
-	// Provider voids are terminal for pending/failed payments. Persisting the state
-	// prevents a delayed success callback from activating the subscription.
-	if payload.Obj.IsVoided {
-		if uc.db == nil {
-			log.Printf("[PaymentUseCase] HandleWebhook void acknowledged without database - payment_id: %d\n", payment.ID)
-			return nil
-		}
-		return uc.applyVoidWebhook(ctx, payment, payload.Obj.Order.ID, payload.Obj.ID)
-	}
-
 	planID := strings.TrimSpace(payment.PlanID)
 	if planID == "" {
 		planID = "monthly"
@@ -275,6 +265,16 @@ func (uc *PaymentUseCase) HandleWebhook(ctx context.Context, rawPayload []byte, 
 			return fmt.Errorf("refund transaction mismatch for payment %d", payment.ID)
 		}
 		return uc.applyRefundWebhook(ctx, payment, txnIDPtr, cardLast4Ptr, cardBrandPtr)
+	}
+
+	// Validate the signed callback's order amount and currency before persisting
+	// this terminal state, so inconsistent provider data cannot void a payment.
+	if payload.Obj.IsVoided {
+		if uc.db == nil {
+			log.Printf("[PaymentUseCase] HandleWebhook void acknowledged without database - payment_id: %d\n", payment.ID)
+			return nil
+		}
+		return uc.applyVoidWebhook(ctx, payment, payload.Obj.Order.ID, payload.Obj.ID)
 	}
 
 	isSuccess := payload.Obj.Success && !payload.Obj.Pending && !payload.Obj.ErrorOccured
