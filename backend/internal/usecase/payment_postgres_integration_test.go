@@ -258,6 +258,19 @@ func TestPaymentPostgresProviderRefundRecoversAfterLocalCommitFailure(t *testing
 		t.Fatalf("provider refund calls = %d, want exactly one successful provider call", provider.refundCalls.Load())
 	}
 	assertPaymentAndTenantState(t, db, paymentID, tenantID, domain.PaymentStatusSuccess, domain.StatusActive)
+	var refundState string
+	if err := db.QueryRow(`SELECT refund_state FROM payments WHERE id = $1`, paymentID).Scan(&refundState); err != nil {
+		t.Fatalf("read durable refund state after local failure: %v", err)
+	}
+	if refundState != "pending" {
+		t.Fatalf("refund state = %q after provider success/local failure, want pending", refundState)
+	}
+	if _, err := uc.RefundPayment(context.Background(), paymentID, 77, nil, "", ""); err == nil {
+		t.Fatal("retry should not reissue provider refund while reconciliation is pending")
+	}
+	if provider.refundCalls.Load() != 1 {
+		t.Fatalf("provider refund retry was duplicated: calls=%d", provider.refundCalls.Load())
+	}
 	if _, err := db.Exec(`ALTER TABLE payments DROP CONSTRAINT ` + constraint); err != nil {
 		t.Fatalf("remove refund commit failure constraint: %v", err)
 	}
@@ -269,6 +282,7 @@ func TestPaymentPostgresProviderRefundRecoversAfterLocalCommitFailure(t *testing
 		t.Fatalf("reconcile provider refund callback after local commit failure: %v", err)
 	}
 	assertPaymentAndTenantState(t, db, paymentID, tenantID, domain.PaymentStatusRefunded, domain.StatusExpired)
+	assertPaymentRefundState(t, db, paymentID, "refunded")
 }
 
 func TestPaymentPostgresConcurrentRefundCallsProviderOnce(t *testing.T) {
@@ -308,6 +322,7 @@ func TestPaymentPostgresConcurrentRefundCallsProviderOnce(t *testing.T) {
 		t.Fatalf("delayed success after refund: %v", err)
 	}
 	assertPaymentAndTenantState(t, db, paymentID, tenantID, domain.PaymentStatusRefunded, domain.StatusExpired)
+	assertPaymentRefundState(t, db, paymentID, "refunded")
 }
 
 func openPaymentPostgresFixture(t *testing.T) (*sql.DB, *PaymentUseCase, int64, int64, int64, *testSubscriptionRepo) {
@@ -374,6 +389,17 @@ func assertPaymentAndTenantState(t *testing.T, db *sql.DB, paymentID, tenantID i
 	}
 	if actualPaymentStatus != paymentStatus || actualTenantStatus != tenantStatus {
 		t.Fatalf("unexpected payment/tenant state: payment=%q tenant=%q, want %q/%q", actualPaymentStatus, actualTenantStatus, paymentStatus, tenantStatus)
+	}
+}
+
+func assertPaymentRefundState(t *testing.T, db *sql.DB, paymentID int64, want string) {
+	t.Helper()
+	var actual string
+	if err := db.QueryRow(`SELECT refund_state FROM payments WHERE id = $1`, paymentID).Scan(&actual); err != nil {
+		t.Fatalf("read payment refund state: %v", err)
+	}
+	if actual != want {
+		t.Fatalf("payment refund state = %q, want %q", actual, want)
 	}
 }
 

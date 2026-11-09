@@ -594,40 +594,73 @@ func (uc *PaymentUseCase) RefundPayment(
 	if paidAt == nil {
 		paidAt = &refundedAt
 	}
-	err = database.WithTenantTx(ctx, uc.db, tenantID, 0, func(tx *sql.Tx) error {
-		if err := uc.lockRefundablePaymentTx(tx, ctx, payment.ID); err != nil {
-			return err
-		}
-		// Holding the row lock across the provider call prevents duplicate concurrent refunds.
-		if err := uc.paymobClient.RefundTransaction(authToken, *payment.PaymobTransactionID, payment.AmountCents); err != nil {
-			return fmt.Errorf("failed to refund paymob transaction: %w", err)
-		}
-		if err := uc.updatePaymentStatusTx(tx, ctx, payment.ID, domain.PaymentStatusRefunded, payment.PaymobTransactionID, payment.CardLastFour, payment.CardBrand, nil, paidAt); err != nil {
-			return fmt.Errorf("failed to update payment refund status: %w", err)
-		}
-		return uc.clearSubscriptionAfterRefundTx(tx, ctx, payment.TenantID, nextStatus)
-	})
+	claimed, err := uc.claimRefund(ctx, tenantID, payment.ID)
 	if err != nil {
-		return nil, fmt.Errorf("failed to commit payment refund transaction: %w", err)
+		return nil, err
+	}
+	if !claimed {
+		return nil, fmt.Errorf("payment refund is already pending reconciliation")
+	}
+	if err := uc.paymobClient.RefundTransaction(authToken, *payment.PaymobTransactionID, payment.AmountCents); err != nil {
+		if persistErr := uc.recordRefundProviderError(ctx, tenantID, payment.ID, err.Error()); persistErr != nil {
+			return nil, fmt.Errorf("failed to refund paymob transaction: %w; failed to persist reconciliation error: %v", err, persistErr)
+		}
+		return nil, fmt.Errorf("failed to refund paymob transaction; payment remains pending reconciliation: %w", err)
 	}
 
-	uc.writeSubscriptionHistory(ctx, &domain.CreateHistoryRecordParams{
-		TenantID:    payment.TenantID,
-		Action:      domain.ActionPaymentRefunded,
-		PerformedBy: optionalInt64Ptr(performedBy),
-		OldStatus:   stringValuePtr(domain.StatusActive),
-		NewStatus:   stringValuePtr(nextStatus),
-		Reason:      normalizeOptionalString(reason),
-		IPAddress:   normalizeOptionalString(optionalStringPtr(ipAddress)),
-		UserAgent:   normalizeOptionalString(optionalStringPtr(userAgent)),
-		Metadata: map[string]interface{}{
-			"payment_id":            payment.ID,
-			"paymob_transaction_id": *payment.PaymobTransactionID,
-			"amount_cents":          payment.AmountCents,
-			"currency":              payment.Currency,
-			"refunded_at":           refundedAt.Format(time.RFC3339),
-		},
+	var finalized bool
+	err = database.WithTenantTx(ctx, uc.db, tenantID, 0, func(tx *sql.Tx) error {
+		result, err := tx.ExecContext(ctx, `
+			UPDATE payments
+			SET status = 'refunded', refund_state = 'refunded', refund_error = NULL, updated_at = NOW()
+			WHERE id = $1 AND tenant_id = $2 AND status = 'success' AND refund_state = 'pending'
+		`, payment.ID, tenantID)
+		if err != nil {
+			return fmt.Errorf("failed to finalize provider refund: %w", err)
+		}
+		rowsAffected, err := result.RowsAffected()
+		if err != nil {
+			return fmt.Errorf("failed to read refund finalization result: %w", err)
+		}
+		if rowsAffected == 0 {
+			var status, refundState string
+			if err := tx.QueryRowContext(ctx, `SELECT status, refund_state FROM payments WHERE id = $1 AND tenant_id = $2`, payment.ID, tenantID).Scan(&status, &refundState); err != nil {
+				return fmt.Errorf("failed to inspect refund after provider success: %w", err)
+			}
+			if status == domain.PaymentStatusRefunded && refundState == "refunded" {
+				return errWebhookAlreadyProcessed
+			}
+			return fmt.Errorf("provider refund succeeded but local payment remains pending reconciliation")
+		}
+		if err := uc.clearSubscriptionAfterRefundTx(tx, ctx, payment.TenantID, nextStatus); err != nil {
+			return err
+		}
+		finalized = true
+		return nil
 	})
+	if errors.Is(err, errWebhookAlreadyProcessed) {
+		err = nil
+	}
+	if err != nil {
+		return nil, fmt.Errorf("provider refund succeeded but local reconciliation failed: %w", err)
+	}
+	if finalized {
+		uc.writeSubscriptionHistory(ctx, &domain.CreateHistoryRecordParams{
+			TenantID:    payment.TenantID,
+			Action:      domain.ActionPaymentRefunded,
+			PerformedBy: optionalInt64Ptr(performedBy),
+			OldStatus:   stringValuePtr(domain.StatusActive),
+			NewStatus:   stringValuePtr(nextStatus),
+			Reason:      normalizeOptionalString(reason),
+			IPAddress:   normalizeOptionalString(optionalStringPtr(ipAddress)),
+			UserAgent:   normalizeOptionalString(optionalStringPtr(userAgent)),
+			Metadata: map[string]interface{}{
+				"payment_id": payment.ID, "paymob_transaction_id": *payment.PaymobTransactionID,
+				"amount_cents": payment.AmountCents, "currency": payment.Currency,
+				"refunded_at": refundedAt.Format(time.RFC3339),
+			},
+		})
+	}
 
 	return &domain.RefundPaymentResponse{
 		PaymentID:          payment.ID,
@@ -640,19 +673,39 @@ func (uc *PaymentUseCase) RefundPayment(
 	}, nil
 }
 
-func (uc *PaymentUseCase) lockRefundablePaymentTx(tx *sql.Tx, ctx context.Context, paymentID int64) error {
-	var status string
-	err := tx.QueryRowContext(ctx, `SELECT status FROM payments WHERE id = $1 FOR UPDATE`, paymentID).Scan(&status)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			return fmt.Errorf("payment not found")
+func (uc *PaymentUseCase) claimRefund(ctx context.Context, tenantID, paymentID int64) (bool, error) {
+	var claimed bool
+	err := database.WithTenantTx(ctx, uc.db, tenantID, 0, func(tx *sql.Tx) error {
+		var status, refundState string
+		err := tx.QueryRowContext(ctx, `SELECT status, refund_state FROM payments WHERE id = $1 AND tenant_id = $2 FOR UPDATE`, paymentID, tenantID).Scan(&status, &refundState)
+		if err != nil {
+			if err == sql.ErrNoRows {
+				return fmt.Errorf("payment not found")
+			}
+			return fmt.Errorf("failed to lock payment for refund: %w", err)
 		}
-		return fmt.Errorf("failed to lock payment for refund: %w", err)
-	}
-	if status != domain.PaymentStatusSuccess {
-		return fmt.Errorf("payment is no longer refundable")
-	}
-	return nil
+		if status != domain.PaymentStatusSuccess || refundState != "none" {
+			return fmt.Errorf("payment is no longer refundable")
+		}
+		result, err := tx.ExecContext(ctx, `UPDATE payments SET refund_state = 'pending', refund_error = NULL, updated_at = NOW() WHERE id = $1 AND tenant_id = $2`, paymentID, tenantID)
+		if err != nil {
+			return fmt.Errorf("failed to persist pending refund: %w", err)
+		}
+		rowsAffected, err := result.RowsAffected()
+		if err != nil {
+			return fmt.Errorf("failed to read pending refund result: %w", err)
+		}
+		claimed = rowsAffected == 1
+		return nil
+	})
+	return claimed, err
+}
+
+func (uc *PaymentUseCase) recordRefundProviderError(ctx context.Context, tenantID, paymentID int64, message string) error {
+	return database.WithTenantTx(ctx, uc.db, tenantID, 0, func(tx *sql.Tx) error {
+		_, err := tx.ExecContext(ctx, `UPDATE payments SET refund_error = $1, updated_at = NOW() WHERE id = $2 AND tenant_id = $3 AND refund_state = 'pending'`, message, paymentID, tenantID)
+		return err
+	})
 }
 
 func (uc *PaymentUseCase) applyRefundWebhook(ctx context.Context, payment *domain.Payment, txnID *int64, cardLastFour, cardBrand *string) error {
@@ -666,9 +719,9 @@ func (uc *PaymentUseCase) applyRefundWebhook(ctx context.Context, payment *domai
 		paidAt = &refundedAt
 	}
 	nextStatus := resolveStatusAfterRefund(info.TrialEndDate)
-	var previousStatus string
+	var previousStatus, refundState string
 	err = database.WithTenantTx(ctx, uc.db, payment.TenantID, 0, func(tx *sql.Tx) error {
-		if err := tx.QueryRowContext(ctx, `SELECT status FROM payments WHERE id = $1 FOR UPDATE`, payment.ID).Scan(&previousStatus); err != nil {
+		if err := tx.QueryRowContext(ctx, `SELECT status, refund_state FROM payments WHERE id = $1 AND tenant_id = $2 FOR UPDATE`, payment.ID, payment.TenantID).Scan(&previousStatus, &refundState); err != nil {
 			return fmt.Errorf("failed to lock payment for refund callback: %w", err)
 		}
 		if previousStatus == domain.PaymentStatusRefunded {
@@ -821,7 +874,15 @@ func (uc *PaymentUseCase) updatePaymentStatusTx(
 	case domain.PaymentStatusSuccess:
 		query += ` AND status IN ('pending', 'failed')`
 	case domain.PaymentStatusRefunded:
-		query += ` AND status IN ('pending', 'failed', 'success')`
+		query = `
+			UPDATE payments
+			SET status = $1, refund_state = 'refunded', refund_error = NULL,
+				paymob_transaction_id = COALESCE($2, paymob_transaction_id),
+				card_last_four = COALESCE($3, card_last_four),
+				card_brand = COALESCE($4, card_brand), error_message = $5,
+				paid_at = $6, updated_at = NOW()
+			WHERE id = $7 AND status IN ('pending', 'failed', 'success')
+		`
 	default:
 		return fmt.Errorf("unsupported transactional payment status: %s", status)
 	}

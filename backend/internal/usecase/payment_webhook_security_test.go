@@ -234,9 +234,9 @@ func TestRefundPayment_WhenConcurrentRefundAlreadyCommitted_SkipsProviderCall(t 
 	mock.ExpectExec(`SELECT set_config\(\$1, \$2, true\), set_config\(\$3, \$4, true\), set_config\(\$5, \$6, true\)`).
 		WithArgs("app.tenant_id", "1", "app.restaurant_id", "", "app.user_id", "").
 		WillReturnResult(sqlmock.NewResult(0, 1))
-	mock.ExpectQuery(`SELECT status FROM payments WHERE id = \$1 FOR UPDATE`).
-		WithArgs(paymentID).
-		WillReturnRows(sqlmock.NewRows([]string{"status"}).AddRow(domain.PaymentStatusRefunded))
+	mock.ExpectQuery(`SELECT status, refund_state FROM payments WHERE id = \$1 AND tenant_id = \$2 FOR UPDATE`).
+		WithArgs(paymentID, int64(1)).
+		WillReturnRows(sqlmock.NewRows([]string{"status", "refund_state"}).AddRow(domain.PaymentStatusRefunded, "refunded"))
 	mock.ExpectRollback()
 
 	_, err = uc.RefundPayment(context.Background(), paymentID, 1, nil, "", "")
