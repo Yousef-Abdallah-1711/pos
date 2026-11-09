@@ -192,6 +192,7 @@ export function ComponentBuilder() {
                   onClick={(e) => handleToggleComponent(component.id, e)}
                   aria-label={component.enabled ? 'Disable component' : 'Enable component'}
                   title={component.enabled ? 'Disable component' : 'Enable component'}
+                  aria-label={`${component.enabled ? 'Disable' : 'Enable'} ${component.title}`}
                   className={`flex-shrink-0 transition ${
                     component.enabled
                       ? 'text-green-600 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300'
@@ -209,6 +210,7 @@ export function ComponentBuilder() {
                   }}
                   aria-label={`Delete ${component.title}`}
                   title="Delete component"
+                  aria-label={`Delete ${component.title}`}
                   className="text-gray-400 hover:text-red-600 dark:hover:text-red-400 flex-shrink-0 transition"
                 >
                   <Trash2 className="h-4 w-4" />

@@ -698,12 +698,6 @@ importers:
       lucide-react:
         specifier: ^0.460.0
         version: 0.460.0(react@18.3.1)
-      react:
-        specifier: ^18.3.1
-        version: 18.3.1
-      react-dom:
-        specifier: ^18.3.1
-        version: 18.3.1(react@18.3.1)
       tailwind-merge:
         specifier: ^2.5.4
         version: 2.6.0
@@ -723,6 +717,12 @@ importers:
       glob:
         specifier: ^10.3.10
         version: 10.5.0
+      react:
+        specifier: ^18.3.1
+        version: 18.3.1
+      react-dom:
+        specifier: ^18.3.1
+        version: 18.3.1(react@18.3.1)
       tsx:
         specifier: ^4.7.0
         version: 4.21.0
