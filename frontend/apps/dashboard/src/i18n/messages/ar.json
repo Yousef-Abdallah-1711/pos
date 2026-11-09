@@ -224,8 +224,7 @@
       "pending": "قيد الانتظار",
       "paid": "مدفوع",
       "failed": "فشل",
-      "refunded": "مسترد",
-      "voided": "ملغي"
+      "refunded": "مسترد"
     },
     "details": {
       "orderInfo": "معلومات الطلب",
@@ -412,6 +411,7 @@
       "tableDate": "التاريخ",
       "tableAmount": "المبلغ",
       "tableStatus": "الحالة",
+      "voided": "ملغي",
       "tableMethod": "طريقة الدفع",
       "tableCard": "البطاقة",
       "tableReference": "المرجع",
