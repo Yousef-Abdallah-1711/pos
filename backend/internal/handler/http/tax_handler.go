@@ -1,7 +1,6 @@
 package http
 
 import (
-	"encoding/json"
 	"net/http"
 	"strconv"
 	"time"
@@ -21,12 +20,23 @@ func NewTaxHandler(taxRepo *repository.TaxRepository) *TaxHandler {
 func (h *TaxHandler) ListTaxPeriods(w http.ResponseWriter, r *http.Request) {
 	tenantID := int(middleware.GetTenantID(r))
 	restaurantID := int(middleware.GetRestaurantID(r))
+	page, _ := parseIntQueryParam(r, "page", 1)
+	pageSize, _ := parseIntQueryParam(r, "page_size", 20)
+	if page < 1 {
+		page = 1
+	}
+	if pageSize < 1 {
+		pageSize = 20
+	}
+	if pageSize > 200 {
+		pageSize = 200
+	}
 	if tenantID == 0 || restaurantID == 0 {
 		respondError(w, http.StatusBadRequest, "Missing tenant context")
 		return
 	}
 
-	periods, err := h.taxRepo.ListTaxPeriods(tenantID, restaurantID)
+	periods, total, err := h.taxRepo.ListTaxPeriodsPaged(tenantID, restaurantID, page, pageSize)
 	if err != nil {
 		respondError(w, http.StatusInternalServerError, "Failed to load tax periods")
 		return
@@ -35,6 +45,12 @@ func (h *TaxHandler) ListTaxPeriods(w http.ResponseWriter, r *http.Request) {
 	respondJSON(w, http.StatusOK, map[string]interface{}{
 		"success": true,
 		"data":    periods,
+		"pagination": map[string]interface{}{
+			"page":       page,
+			"page_size":  pageSize,
+			"total":      total,
+			"totalPages": (total + pageSize - 1) / pageSize,
+		},
 	})
 }
 
@@ -193,7 +209,7 @@ func (h *TaxHandler) CloseTaxPeriod(w http.ResponseWriter, r *http.Request) {
 	var body struct {
 		Notes string `json:"notes"`
 	}
-	_ = json.NewDecoder(r.Body).Decode(&body)
+	_ = decodeJSONStrictAllowEmpty(r, &body)
 
 	if err := h.taxRepo.CloseTaxPeriod(tenantID, restaurantID, periodID, userID); err != nil {
 		respondError(w, http.StatusBadRequest, err.Error())
@@ -240,7 +256,7 @@ func parseTaxPeriodInput(r *http.Request) (repository.TaxPeriodInput, error) {
 		PeriodEnd   string `json:"period_end"`
 		Notes       string `json:"notes"`
 	}
-	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+	if err := decodeJSONStrict(r, &body); err != nil {
 		return repository.TaxPeriodInput{}, err
 	}
 	if body.PeriodName == "" || body.PeriodStart == "" || body.PeriodEnd == "" {

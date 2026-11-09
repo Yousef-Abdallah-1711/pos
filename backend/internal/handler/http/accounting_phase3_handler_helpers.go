@@ -1,9 +1,7 @@
 package http
 
 import (
-	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
 	"strings"
 	"time"
@@ -47,13 +45,7 @@ func mapAccountingInvoiceLines(inputs []domain.InvoiceLineInput) []domain.Invoic
 }
 
 func decodeAccountingActionBody(r *http.Request, dst interface{}) error {
-	if r.Body == nil {
-		return nil
-	}
-	if err := json.NewDecoder(r.Body).Decode(dst); err != nil && err != io.EOF {
-		return err
-	}
-	return nil
+	return decodeJSONStrictAllowEmpty(r, dst)
 }
 
 func writeAccountingMutationError(w http.ResponseWriter, err error) {

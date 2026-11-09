@@ -1,10 +1,11 @@
 package http
 
 import (
-	"encoding/json"
+	"context"
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 
 	"pos-saas/internal/domain"
 	"pos-saas/internal/middleware"
@@ -14,6 +15,8 @@ import (
 type AccountHandler struct {
 	accountingUC *usecase.AccountingUseCase
 }
+
+const accountListTimeout = 10 * time.Second
 
 func NewAccountHandler(accountingUC *usecase.AccountingUseCase) *AccountHandler {
 	return &AccountHandler{accountingUC: accountingUC}
@@ -37,7 +40,20 @@ func (h *AccountHandler) ListAccounts(w http.ResponseWriter, r *http.Request) {
 		pageSize = 200
 	}
 
-	accounts, err := h.accountingUC.ListAccounts(tenantID, restaurantID, tree, includeInactive)
+	ctx, cancel := context.WithTimeout(r.Context(), accountListTimeout)
+	defer cancel()
+
+	var (
+		accounts []domain.Account
+		total    int
+		err      error
+	)
+	if tree {
+		accounts, err = h.accountingUC.ListAccounts(tenantID, restaurantID, true, includeInactive)
+		total = len(accounts)
+	} else {
+		accounts, total, err = h.accountingUC.ListAccountsPaged(ctx, tenantID, restaurantID, includeInactive, page, pageSize)
+	}
 	if err != nil {
 		writeJSON(w, http.StatusInternalServerError, map[string]interface{}{
 			"success": false,
@@ -46,16 +62,18 @@ func (h *AccountHandler) ListAccounts(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	total := len(accounts)
-	offset := (page - 1) * pageSize
-	if offset > total {
-		offset = total
+	pagedAccounts := accounts
+	if tree {
+		offset := (page - 1) * pageSize
+		if offset > total {
+			offset = total
+		}
+		end := offset + pageSize
+		if end > total {
+			end = total
+		}
+		pagedAccounts = accounts[offset:end]
 	}
-	end := offset + pageSize
-	if end > total {
-		end = total
-	}
-	pagedAccounts := accounts[offset:end]
 
 	writeJSON(w, http.StatusOK, map[string]interface{}{
 		"success": true,
@@ -109,7 +127,7 @@ func (h *AccountHandler) CreateAccount(w http.ResponseWriter, r *http.Request) {
 	userID := int(middleware.GetUserID(r))
 
 	var req domain.CreateAccountRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+	if err := decodeJSONStrict(r, &req); err != nil {
 		writeJSON(w, http.StatusBadRequest, map[string]interface{}{
 			"success": false,
 			"error":   "Invalid request body",
@@ -198,7 +216,7 @@ func (h *AccountHandler) UpdateAccount(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var req domain.UpdateAccountRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+	if err := decodeJSONStrict(r, &req); err != nil {
 		writeJSON(w, http.StatusBadRequest, map[string]interface{}{
 			"success": false,
 			"error":   "Invalid request body",

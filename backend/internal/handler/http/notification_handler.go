@@ -1,7 +1,6 @@
 package http
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -49,7 +48,7 @@ func (h *NotificationHandler) CreateNotification(w http.ResponseWriter, r *http.
 	claims := middleware.GetUserClaims(r)
 
 	var req domain.CreateNotificationRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+	if err := decodeJSONStrict(r, &req); err != nil {
 		respondError(w, http.StatusBadRequest, "Invalid request body: "+err.Error())
 		return
 	}

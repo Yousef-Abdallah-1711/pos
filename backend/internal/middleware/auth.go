@@ -101,22 +101,29 @@ func AuthMiddleware(tokenService *jwt.TokenService, impersonation ...Impersonati
 			}
 
 			authHeader := r.Header.Get("Authorization")
+			headerToken := ""
+			if authHeader != "" {
+				// Extract token from "Bearer <token>"
+				parts := strings.SplitN(authHeader, " ", 2)
+				if len(parts) == 2 && strings.EqualFold(parts[0], "Bearer") {
+					headerToken = strings.TrimSpace(parts[1])
+				}
+			}
+			cookieToken := ""
+			if cookie, err := r.Cookie("auth_token"); err == nil {
+				cookieToken = strings.TrimSpace(cookie.Value)
+			}
 
-			if authHeader == "" {
-				http.Error(w, "Unauthorized - missing authorization header", http.StatusUnauthorized)
+			if headerToken == "" && cookieToken == "" {
+				http.Error(w, "Unauthorized - missing auth token", http.StatusUnauthorized)
 				return
 			}
 
-			// Extract token from "Bearer <token>"
-			parts := strings.SplitN(authHeader, " ", 2)
-			if len(parts) != 2 || !strings.EqualFold(parts[0], "Bearer") {
-				http.Error(w, "Invalid authorization header", http.StatusUnauthorized)
-				return
+			claims, err := tokenService.ValidateToken(headerToken)
+			if err != nil && cookieToken != "" && cookieToken != headerToken {
+				claims, err = tokenService.ValidateToken(cookieToken)
 			}
-
-			token := parts[1]
-			claims, err := tokenService.ValidateToken(token)
-			if err != nil {
+			if err != nil || claims == nil {
 				http.Error(w, "Unauthorized - invalid token", http.StatusUnauthorized)
 				return
 			}

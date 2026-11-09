@@ -1,7 +1,6 @@
 package http
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -23,8 +22,19 @@ func NewSupplierInvoiceHandler(invoiceRepo *repository.SupplierInvoiceRepository
 func (h *SupplierInvoiceHandler) ListInvoices(w http.ResponseWriter, r *http.Request) {
 	tenantID := int(middleware.GetTenantID(r))
 	restaurantID := int(middleware.GetRestaurantID(r))
+	page := GetQueryParamInt(r, "page", 1)
+	pageSize := GetQueryParamInt(r, "page_size", 20)
+	if page < 1 {
+		page = 1
+	}
+	if pageSize < 1 {
+		pageSize = 20
+	}
+	if pageSize > 200 {
+		pageSize = 200
+	}
 
-	invoices, err := h.invoiceRepo.ListInvoices(tenantID, restaurantID)
+	invoices, total, err := h.invoiceRepo.ListInvoicesPaged(tenantID, restaurantID, page, pageSize)
 	if err != nil {
 		writeJSON(w, http.StatusInternalServerError, map[string]interface{}{
 			"success": false,
@@ -36,6 +46,12 @@ func (h *SupplierInvoiceHandler) ListInvoices(w http.ResponseWriter, r *http.Req
 	writeJSON(w, http.StatusOK, map[string]interface{}{
 		"success": true,
 		"data":    invoices,
+		"pagination": map[string]interface{}{
+			"page":       page,
+			"page_size":  pageSize,
+			"total":      total,
+			"totalPages": (total + pageSize - 1) / pageSize,
+		},
 	})
 }
 
@@ -80,7 +96,7 @@ func (h *SupplierInvoiceHandler) CreateInvoice(w http.ResponseWriter, r *http.Re
 	userID := int(middleware.GetUserID(r))
 
 	var req domain.CreateSupplierInvoiceRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+	if err := decodeJSONStrict(r, &req); err != nil {
 		writeJSON(w, http.StatusBadRequest, map[string]interface{}{
 			"success": false,
 			"error":   "Invalid request body",
@@ -149,7 +165,7 @@ func (h *SupplierInvoiceHandler) UpdateInvoice(w http.ResponseWriter, r *http.Re
 	}
 
 	var req domain.UpdateSupplierInvoiceRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+	if err := decodeJSONStrict(r, &req); err != nil {
 		writeJSON(w, http.StatusBadRequest, map[string]interface{}{
 			"success": false,
 			"error":   "Invalid request body",

@@ -27,6 +27,8 @@ export function useTenantStatus(): UseTenantStatusReturn {
       switch (store.blockReason) {
         case 'trial_expired':
           return 'Your trial period has expired. Please contact support to subscribe and continue using the platform.'
+        case 'expired':
+          return 'Your subscription has expired. Update your billing plan to restore full dashboard access.'
         case 'tenant_disabled':
           return 'Your account has been temporarily disabled. Please contact support for assistance.'
         case 'tenant_not_found':

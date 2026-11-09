@@ -11,7 +11,6 @@ import (
 	"time"
 
 	"pos-saas/internal/domain"
-	"pos-saas/internal/service"
 )
 
 // TestNewAdminThemeHandlerV2 tests handler creation
