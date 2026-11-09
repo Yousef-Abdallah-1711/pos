@@ -378,7 +378,8 @@ func (h *PaymentHandler) RefundPayment(w http.ResponseWriter, r *http.Request) {
 		errMsg := strings.ToLower(strings.TrimSpace(err.Error()))
 		switch {
 		case strings.Contains(errMsg, "only successful payments"),
-			strings.Contains(errMsg, "already refunded"):
+			strings.Contains(errMsg, "already refunded"),
+			strings.Contains(errMsg, "no longer refundable"):
 			ConflictResponse(w, err.Error())
 		case strings.Contains(errMsg, "invalid payment id"),
 			strings.Contains(errMsg, "missing"),

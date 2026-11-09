@@ -29,7 +29,7 @@ func pendingPaymentWithOrder(t *testing.T, repo *testPaymentRepo, status string,
 	if err != nil {
 		t.Fatalf("CreatePayment: %v", err)
 	}
-	if err := repo.UpdatePaymentOrder(context.Background(), id, paymobOrderID, "auth"); err != nil {
+	if err := repo.UpdatePaymentOrder(context.Background(), 1, id, paymobOrderID, "auth"); err != nil {
 		t.Fatalf("UpdatePaymentOrder: %v", err)
 	}
 	return id
@@ -46,7 +46,7 @@ func TestWebhookSecurity_InvalidSignatureIsRejectedWithoutStateChange(t *testing
 	if err == nil || !strings.Contains(strings.ToLower(err.Error()), "invalid hmac signature") {
 		t.Fatalf("want invalid hmac signature, got %v", err)
 	}
-	p, _ := repo.GetPaymentByID(context.Background(), id)
+	p, _ := repo.GetPaymentByID(context.Background(), 1, id)
 	if p.Status != domain.PaymentStatusPending || repo.updateStatusCnt != 0 {
 		t.Fatalf("state must not change: status=%s updates=%d", p.Status, repo.updateStatusCnt)
 	}
@@ -96,7 +96,7 @@ func TestWebhookSecurity_FailureAfterSuccessDoesNotDowngrade(t *testing.T) {
 	if err := uc.HandleWebhook(context.Background(), raw, payload, "ok"); err != nil {
 		t.Fatalf("late failure for a succeeded payment should be a no-op, got %v", err)
 	}
-	p, _ := repo.GetPaymentByID(context.Background(), id)
+	p, _ := repo.GetPaymentByID(context.Background(), 1, id)
 	if p.Status != domain.PaymentStatusSuccess || repo.updateStatusCnt != 0 {
 		t.Fatalf("status must stay success: status=%s updates=%d", p.Status, repo.updateStatusCnt)
 	}
@@ -116,7 +116,7 @@ func TestWebhookSecurity_ReplayedSuccessForRefundedPaymentIsIgnored(t *testing.T
 			t.Fatalf("replay %d: want silent ignore, got %v", i, err)
 		}
 	}
-	p, _ := repo.GetPaymentByID(context.Background(), id)
+	p, _ := repo.GetPaymentByID(context.Background(), 1, id)
 	if p.Status != domain.PaymentStatusRefunded || repo.updateStatusCnt != 0 {
 		t.Fatalf("refunded payment must stay refunded: status=%s updates=%d", p.Status, repo.updateStatusCnt)
 	}
@@ -125,8 +125,7 @@ func TestWebhookSecurity_ReplayedSuccessForRefundedPaymentIsIgnored(t *testing.T
 // Refund / void callbacks are acknowledged without activating anything.
 func TestWebhookSecurity_RefundAndVoidCallbacksNeverActivate(t *testing.T) {
 	for name, mutate := range map[string]func(*domain.PaymobWebhookPayload){
-		"refunded": func(p *domain.PaymobWebhookPayload) { p.Obj.IsRefunded = true },
-		"voided":   func(p *domain.PaymobWebhookPayload) { p.Obj.IsVoided = true },
+		"voided": func(p *domain.PaymobWebhookPayload) { p.Obj.IsVoided = true },
 	} {
 		repo := newTestPaymentRepo()
 		uc := NewPaymentUseCase(repo, newTestSubscriptionRepo(), nil, &testPaymobClient{verifyHMAC: true}, nil)
@@ -138,7 +137,7 @@ func TestWebhookSecurity_RefundAndVoidCallbacksNeverActivate(t *testing.T) {
 		if err := uc.HandleWebhook(context.Background(), raw, payload, "ok"); err != nil {
 			t.Fatalf("%s: want acknowledged, got %v", name, err)
 		}
-		p, _ := repo.GetPaymentByID(context.Background(), id)
+		p, _ := repo.GetPaymentByID(context.Background(), 1, id)
 		if p.Status != domain.PaymentStatusPending || repo.updateStatusCnt != 0 {
 			t.Fatalf("%s must not change state: status=%s updates=%d", name, p.Status, repo.updateStatusCnt)
 		}
@@ -158,7 +157,7 @@ func TestWebhookSecurity_DuplicateFailedEventsStayFailed(t *testing.T) {
 			t.Fatalf("duplicate failed event %d: %v", i, err)
 		}
 	}
-	p, _ := repo.GetPaymentByID(context.Background(), id)
+	p, _ := repo.GetPaymentByID(context.Background(), 1, id)
 	if p.Status != domain.PaymentStatusFailed {
 		t.Fatalf("want failed, got %s", p.Status)
 	}
@@ -232,6 +231,9 @@ func TestRefundPayment_WhenConcurrentRefundAlreadyCommitted_SkipsProviderCall(t 
 	uc := NewPaymentUseCase(repo, subRepo, nil, paymob, db)
 
 	mock.ExpectBegin()
+	mock.ExpectExec(`SELECT set_config\(\$1, \$2, true\), set_config\(\$3, \$4, true\), set_config\(\$5, \$6, true\)`).
+		WithArgs("app.tenant_id", "1", "app.restaurant_id", "", "app.user_id", "").
+		WillReturnResult(sqlmock.NewResult(0, 1))
 	mock.ExpectQuery(`SELECT status FROM payments WHERE id = \$1 FOR UPDATE`).
 		WithArgs(paymentID).
 		WillReturnRows(sqlmock.NewRows([]string{"status"}).AddRow(domain.PaymentStatusRefunded))

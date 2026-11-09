@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"pos-saas/internal/domain"
+	"pos-saas/internal/pkg/database"
 	"pos-saas/internal/repository"
 	"pos-saas/internal/service"
 )
@@ -121,13 +122,13 @@ func (uc *PaymentUseCase) InitiatePayment(ctx context.Context, tenantID int64, u
 
 	authToken, err := uc.paymobClient.Authenticate()
 	if err != nil {
-		_ = uc.markPaymentFailed(ctx, paymentID, err.Error())
+		_ = uc.markPaymentFailed(ctx, tenantID, paymentID, err.Error())
 		return nil, fmt.Errorf("failed to authenticate with paymob: %w", err)
 	}
 
 	paymobOrderID, err := uc.paymobClient.CreateOrder(authToken, plan.PriceCents, plan.Currency, merchantOrderID)
 	if err != nil {
-		_ = uc.markPaymentFailed(ctx, paymentID, err.Error())
+		_ = uc.markPaymentFailed(ctx, tenantID, paymentID, err.Error())
 		return nil, fmt.Errorf("failed to create paymob order: %w", err)
 	}
 
@@ -141,12 +142,12 @@ func (uc *PaymentUseCase) InitiatePayment(ctx context.Context, tenantID int64, u
 		uc.paymentKeyExpirySecond,
 	)
 	if err != nil {
-		_ = uc.markPaymentFailed(ctx, paymentID, err.Error())
+		_ = uc.markPaymentFailed(ctx, tenantID, paymentID, err.Error())
 		return nil, fmt.Errorf("failed to get paymob payment key: %w", err)
 	}
 
-	if err := uc.paymentRepo.UpdatePaymentOrder(ctx, paymentID, paymobOrderID, authToken); err != nil {
-		_ = uc.markPaymentFailed(ctx, paymentID, err.Error())
+	if err := uc.paymentRepo.UpdatePaymentOrder(ctx, tenantID, paymentID, paymobOrderID, authToken); err != nil {
+		_ = uc.markPaymentFailed(ctx, tenantID, paymentID, err.Error())
 		return nil, fmt.Errorf("failed to update payment order details: %w", err)
 	}
 
@@ -194,13 +195,17 @@ func (uc *PaymentUseCase) HandleWebhook(ctx context.Context, rawPayload []byte, 
 		return err
 	}
 
-	payment, err := uc.paymentRepo.GetPaymentByPaymobOrderID(ctx, payload.Obj.Order.ID)
+	payment, err := uc.paymentRepo.GetPaymentByPaymobOrderID(ctx, payload.Obj.Order.ID, payload.Obj.Order.MerchantOrderID)
 	if err != nil {
 		return fmt.Errorf("payment not found for paymob order %d: %w", payload.Obj.Order.ID, err)
 	}
 
-	if payment.Status == domain.PaymentStatusSuccess {
+	if payment.Status == domain.PaymentStatusSuccess && !payload.Obj.IsRefunded {
 		log.Printf("[PaymentUseCase] HandleWebhook idempotent skip - payment_id: %d\n", payment.ID)
+		return nil
+	}
+	if payment.Status == domain.PaymentStatusRefunded && payload.Obj.IsRefunded {
+		log.Printf("[PaymentUseCase] HandleWebhook refund idempotent skip - payment_id: %d\n", payment.ID)
 		return nil
 	}
 
@@ -211,10 +216,9 @@ func (uc *PaymentUseCase) HandleWebhook(ctx context.Context, rawPayload []byte, 
 		return nil
 	}
 
-	// Refund and void callbacks are acknowledged but never activate or extend a subscription;
-	// they need manual reconciliation.
-	if payload.Obj.IsRefunded || payload.Obj.IsVoided {
-		log.Printf("[PaymentUseCase] HandleWebhook refund/void event acknowledged without state change - payment_id: %d\n", payment.ID)
+	// Voids do not represent a captured payment and must never activate a subscription.
+	if payload.Obj.IsVoided {
+		log.Printf("[PaymentUseCase] HandleWebhook void event acknowledged - payment_id: %d\n", payment.ID)
 		return nil
 	}
 
@@ -262,6 +266,12 @@ func (uc *PaymentUseCase) HandleWebhook(ctx context.Context, rawPayload []byte, 
 	if cardBrand != "" {
 		cardBrandPtr = &cardBrand
 	}
+	if payload.Obj.IsRefunded {
+		if payment.PaymobTransactionID != nil && *payment.PaymobTransactionID != payload.Obj.ID {
+			return fmt.Errorf("refund transaction mismatch for payment %d", payment.ID)
+		}
+		return uc.applyRefundWebhook(ctx, payment, txnIDPtr, cardLast4Ptr, cardBrandPtr)
+	}
 
 	isSuccess := payload.Obj.Success && !payload.Obj.Pending && !payload.Obj.ErrorOccured
 	if payload.Obj.Pending {
@@ -275,45 +285,21 @@ func (uc *PaymentUseCase) HandleWebhook(ctx context.Context, rawPayload []byte, 
 		}
 
 		paidAt := time.Now()
-		tx, err := uc.db.BeginTx(ctx, nil)
-		if err != nil {
-			return fmt.Errorf("failed to start transaction: %w", err)
-		}
-		defer tx.Rollback()
-
-		if err := uc.updatePaymentStatusTx(
-			tx,
-			ctx,
-			payment.ID,
-			domain.PaymentStatusSuccess,
-			txnIDPtr,
-			cardLast4Ptr,
-			cardBrandPtr,
-			nil,
-			&paidAt,
-		); err != nil {
-			if errors.Is(err, errWebhookAlreadyProcessed) {
-				log.Printf("[PaymentUseCase] HandleWebhook idempotent tx skip - payment_id: %d\n", payment.ID)
-				return nil
-			}
-			return fmt.Errorf("failed to mark payment success: %w", err)
-		}
-
 		expiresAt := paidAt.AddDate(0, periodMonthsFromPlan(plan), 0)
-		if err := uc.updateTenantSubscriptionTx(
-			tx,
-			ctx,
-			payment.TenantID,
-			domain.StatusActive,
-			expiresAt,
-			paidAt,
-			payment.AmountCents,
-			payment.Currency,
-			payment.PlanID,
-		); err != nil {
-			return fmt.Errorf("failed to update tenant subscription: %w", err)
+		err := database.WithTenantTx(ctx, uc.db, payment.TenantID, 0, func(tx *sql.Tx) error {
+			if err := uc.updatePaymentStatusTx(tx, ctx, payment.ID, domain.PaymentStatusSuccess, txnIDPtr, cardLast4Ptr, cardBrandPtr, nil, &paidAt); err != nil {
+				if errors.Is(err, errWebhookAlreadyProcessed) {
+					log.Printf("[PaymentUseCase] HandleWebhook idempotent tx skip - payment_id: %d\n", payment.ID)
+					return errWebhookAlreadyProcessed
+				}
+				return fmt.Errorf("failed to mark payment success: %w", err)
+			}
+			return uc.updateTenantSubscriptionTx(tx, ctx, payment.TenantID, domain.StatusActive, expiresAt, paidAt, payment.AmountCents, payment.Currency, payment.PlanID)
+		})
+		if errors.Is(err, errWebhookAlreadyProcessed) {
+			return nil
 		}
-		if err := tx.Commit(); err != nil {
+		if err != nil {
 			return fmt.Errorf("failed to commit payment success transaction: %w", err)
 		}
 
@@ -355,6 +341,7 @@ func (uc *PaymentUseCase) HandleWebhook(ctx context.Context, rawPayload []byte, 
 
 	if err := uc.paymentRepo.UpdatePaymentStatus(
 		ctx,
+		payment.TenantID,
 		payment.ID,
 		domain.PaymentStatusFailed,
 		txnIDPtr,
@@ -573,7 +560,11 @@ func (uc *PaymentUseCase) RefundPayment(
 		return nil, fmt.Errorf("invalid payment id")
 	}
 
-	payment, err := uc.paymentRepo.GetPaymentByID(ctx, paymentID)
+	tenantID, err := uc.paymentRepo.GetPaymentTenantID(ctx, paymentID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to resolve payment tenant: %w", err)
+	}
+	payment, err := uc.paymentRepo.GetPaymentByID(ctx, tenantID, paymentID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to load payment: %w", err)
 	}
@@ -599,44 +590,25 @@ func (uc *PaymentUseCase) RefundPayment(
 	nextStatus := resolveStatusAfterRefund(subscriptionInfo.TrialEndDate)
 
 	refundedAt := time.Now().UTC()
-	tx, err := uc.db.BeginTx(ctx, nil)
-	if err != nil {
-		return nil, fmt.Errorf("failed to start refund transaction: %w", err)
-	}
-	defer tx.Rollback()
-	if err := uc.lockRefundablePaymentTx(tx, ctx, payment.ID); err != nil {
-		return nil, err
-	}
-
-	// Keep the payment row locked until the provider result and local refund state commit.
-	// This prevents two concurrent refund requests from issuing duplicate provider calls.
-	if err := uc.paymobClient.RefundTransaction(authToken, *payment.PaymobTransactionID, payment.AmountCents); err != nil {
-		return nil, fmt.Errorf("failed to refund paymob transaction: %w", err)
-	}
-
 	paidAt := payment.PaidAt
 	if paidAt == nil {
 		paidAt = &refundedAt
 	}
-	if err := uc.updatePaymentStatusTx(
-		tx,
-		ctx,
-		payment.ID,
-		domain.PaymentStatusRefunded,
-		payment.PaymobTransactionID,
-		payment.CardLastFour,
-		payment.CardBrand,
-		nil,
-		paidAt,
-	); err != nil {
-		return nil, fmt.Errorf("failed to update payment refund status: %w", err)
-	}
-
-	if err := uc.clearSubscriptionAfterRefundTx(tx, ctx, payment.TenantID, nextStatus); err != nil {
-		return nil, err
-	}
-	if err := tx.Commit(); err != nil {
-		return nil, fmt.Errorf("failed to commit refund transaction: %w", err)
+	err = database.WithTenantTx(ctx, uc.db, tenantID, 0, func(tx *sql.Tx) error {
+		if err := uc.lockRefundablePaymentTx(tx, ctx, payment.ID); err != nil {
+			return err
+		}
+		// Holding the row lock across the provider call prevents duplicate concurrent refunds.
+		if err := uc.paymobClient.RefundTransaction(authToken, *payment.PaymobTransactionID, payment.AmountCents); err != nil {
+			return fmt.Errorf("failed to refund paymob transaction: %w", err)
+		}
+		if err := uc.updatePaymentStatusTx(tx, ctx, payment.ID, domain.PaymentStatusRefunded, payment.PaymobTransactionID, payment.CardLastFour, payment.CardBrand, nil, paidAt); err != nil {
+			return fmt.Errorf("failed to update payment refund status: %w", err)
+		}
+		return uc.clearSubscriptionAfterRefundTx(tx, ctx, payment.TenantID, nextStatus)
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to commit payment refund transaction: %w", err)
 	}
 
 	uc.writeSubscriptionHistory(ctx, &domain.CreateHistoryRecordParams{
@@ -680,6 +652,53 @@ func (uc *PaymentUseCase) lockRefundablePaymentTx(tx *sql.Tx, ctx context.Contex
 	if status != domain.PaymentStatusSuccess {
 		return fmt.Errorf("payment is no longer refundable")
 	}
+	return nil
+}
+
+func (uc *PaymentUseCase) applyRefundWebhook(ctx context.Context, payment *domain.Payment, txnID *int64, cardLastFour, cardBrand *string) error {
+	info, err := uc.subscriptionRepo.GetTenantSubscriptionInfo(ctx, payment.TenantID)
+	if err != nil {
+		return fmt.Errorf("failed to load subscription for refund callback: %w", err)
+	}
+	refundedAt := time.Now().UTC()
+	paidAt := payment.PaidAt
+	if paidAt == nil {
+		paidAt = &refundedAt
+	}
+	nextStatus := resolveStatusAfterRefund(info.TrialEndDate)
+	var previousStatus string
+	err = database.WithTenantTx(ctx, uc.db, payment.TenantID, 0, func(tx *sql.Tx) error {
+		if err := tx.QueryRowContext(ctx, `SELECT status FROM payments WHERE id = $1 FOR UPDATE`, payment.ID).Scan(&previousStatus); err != nil {
+			return fmt.Errorf("failed to lock payment for refund callback: %w", err)
+		}
+		if previousStatus == domain.PaymentStatusRefunded {
+			return errWebhookAlreadyProcessed
+		}
+		if previousStatus != domain.PaymentStatusSuccess && previousStatus != domain.PaymentStatusPending && previousStatus != domain.PaymentStatusFailed {
+			return fmt.Errorf("payment status %q cannot be reconciled as refunded", previousStatus)
+		}
+		if err := uc.updatePaymentStatusTx(tx, ctx, payment.ID, domain.PaymentStatusRefunded, txnID, cardLastFour, cardBrand, nil, paidAt); err != nil {
+			return err
+		}
+		if previousStatus != domain.PaymentStatusSuccess {
+			return nil
+		}
+		return uc.clearSubscriptionAfterRefundTx(tx, ctx, payment.TenantID, nextStatus)
+	})
+	if errors.Is(err, errWebhookAlreadyProcessed) {
+		return nil
+	}
+	if err != nil {
+		return fmt.Errorf("failed to reconcile refunded payment callback: %w", err)
+	}
+	if previousStatus != domain.PaymentStatusSuccess {
+		return nil
+	}
+	uc.writeSubscriptionHistory(ctx, &domain.CreateHistoryRecordParams{
+		TenantID: payment.TenantID, Action: domain.ActionPaymentRefunded, PerformedBy: payment.UserID,
+		OldStatus: stringValuePtr(domain.StatusActive), NewStatus: stringValuePtr(nextStatus),
+		Metadata: map[string]interface{}{"payment_id": payment.ID, "paymob_transaction_id": txnID, "refunded_at": refundedAt.Format(time.RFC3339)},
+	})
 	return nil
 }
 
@@ -752,7 +771,7 @@ func (uc *PaymentUseCase) defaultPlan() domain.SubscriptionPlan {
 	}
 }
 
-func (uc *PaymentUseCase) markPaymentFailed(ctx context.Context, paymentID int64, message string) error {
+func (uc *PaymentUseCase) markPaymentFailed(ctx context.Context, tenantID, paymentID int64, message string) error {
 	msg := strings.TrimSpace(message)
 	if msg == "" {
 		msg = "payment initiation failed"
@@ -760,7 +779,7 @@ func (uc *PaymentUseCase) markPaymentFailed(ctx context.Context, paymentID int64
 	if uc.paymentRepo == nil {
 		return fmt.Errorf("payment repository is not configured")
 	}
-	return uc.paymentRepo.UpdatePaymentStatus(ctx, paymentID, domain.PaymentStatusFailed, nil, nil, nil, &msg, nil)
+	return uc.paymentRepo.UpdatePaymentStatus(ctx, tenantID, paymentID, domain.PaymentStatusFailed, nil, nil, nil, &msg, nil)
 }
 
 func (uc *PaymentUseCase) requirePaymentInfra() error {
@@ -802,7 +821,7 @@ func (uc *PaymentUseCase) updatePaymentStatusTx(
 	case domain.PaymentStatusSuccess:
 		query += ` AND status IN ('pending', 'failed')`
 	case domain.PaymentStatusRefunded:
-		query += ` AND status = 'success'`
+		query += ` AND status IN ('pending', 'failed', 'success')`
 	default:
 		return fmt.Errorf("unsupported transactional payment status: %s", status)
 	}
@@ -817,6 +836,16 @@ func (uc *PaymentUseCase) updatePaymentStatusTx(
 	}
 	if rowsAffected == 0 {
 		if status == domain.PaymentStatusSuccess {
+			return errWebhookAlreadyProcessed
+		}
+		var currentStatus string
+		if err := tx.QueryRowContext(ctx, `SELECT status FROM payments WHERE id = $1`, id).Scan(&currentStatus); err != nil {
+			if errors.Is(err, sql.ErrNoRows) {
+				return fmt.Errorf("payment not found")
+			}
+			return fmt.Errorf("failed to read payment status after refund update: %w", err)
+		}
+		if currentStatus == domain.PaymentStatusRefunded {
 			return errWebhookAlreadyProcessed
 		}
 		return fmt.Errorf("payment is no longer refundable")

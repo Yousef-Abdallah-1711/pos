@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"strings"
 	"sync"
 	"sync/atomic"
 	"testing"
@@ -78,6 +79,82 @@ func TestPaymentPostgresPendingCallbackLeavesPaymentPendingUntilSuccess(t *testi
 	}
 }
 
+func TestPaymentRepositoryUsesForcedTenantRLSWithRuntimeRole(t *testing.T) {
+	runtimeURL := os.Getenv("POS_APP_DATABASE_URL")
+	if runtimeURL == "" {
+		t.Skip("set POS_APP_DATABASE_URL to the restricted pos_app role")
+	}
+	db, _, tenantID, paymentID, _, _ := openPaymentPostgresFixture(t)
+	runtimeDB, err := sql.Open("postgres", runtimeURL)
+	if err != nil {
+		t.Fatalf("open restricted runtime database: %v", err)
+	}
+	t.Cleanup(func() { _ = runtimeDB.Close() })
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	if err := runtimeDB.PingContext(ctx); err != nil {
+		t.Fatalf("connect restricted runtime database: %v", err)
+	}
+
+	var unscopedCount int
+	if err := runtimeDB.QueryRowContext(ctx, `SELECT COUNT(*) FROM payments`).Scan(&unscopedCount); err != nil {
+		t.Fatalf("unscoped runtime count should fail closed: %v", err)
+	}
+	if unscopedCount != 0 {
+		t.Fatalf("unscoped runtime query exposed %d payment rows", unscopedCount)
+	}
+	var aggregatePayments int64
+	if err := runtimeDB.QueryRowContext(ctx, `SELECT total_payments FROM get_payment_metrics(NULL)`).Scan(&aggregatePayments); err != nil {
+		t.Fatalf("restricted runtime aggregate payment metrics: %v", err)
+	}
+	if aggregatePayments < 1 {
+		t.Fatalf("aggregate payment metrics omitted seeded test payment: %d", aggregatePayments)
+	}
+	deleteTx, err := runtimeDB.BeginTx(ctx, nil)
+	if err != nil {
+		t.Fatalf("begin restricted runtime delete check: %v", err)
+	}
+	if _, err := deleteTx.ExecContext(ctx, `SELECT set_config('app.tenant_id', $1, true)`, fmt.Sprint(tenantID)); err != nil {
+		_ = deleteTx.Rollback()
+		t.Fatalf("set restricted runtime tenant context: %v", err)
+	}
+	if _, err := deleteTx.ExecContext(ctx, `DELETE FROM payments WHERE id = $1`, paymentID); err == nil {
+		_ = deleteTx.Rollback()
+		t.Fatal("restricted runtime role unexpectedly deleted a payment row")
+	}
+	_ = deleteTx.Rollback()
+
+	runtimeRepo := repository.NewPaymentRepository(runtimeDB)
+	payment, err := runtimeRepo.GetPaymentByID(ctx, tenantID, paymentID)
+	if err != nil || payment.ID != paymentID {
+		t.Fatalf("scoped runtime payment read: payment=%+v err=%v", payment, err)
+	}
+	if _, err := runtimeRepo.GetPaymentByID(ctx, tenantID+1000, paymentID); err == nil {
+		t.Fatal("foreign tenant read unexpectedly returned a payment")
+	}
+	if err := runtimeRepo.UpdatePaymentStatus(ctx, tenantID+1000, paymentID, domain.PaymentStatusFailed, nil, nil, nil, nil, nil); err == nil {
+		t.Fatal("foreign tenant update unexpectedly succeeded")
+	}
+
+	newPaymentID, err := runtimeRepo.CreatePayment(ctx, &domain.Payment{
+		TenantID: tenantID, AmountCents: 50000, Currency: "EGP", Status: domain.PaymentStatusPending,
+		PlanID: "monthly", MerchantOrderID: fmt.Sprintf("closure-payment-runtime-%d", time.Now().UnixNano()),
+	})
+	if err != nil {
+		t.Fatalf("scoped runtime insert: %v", err)
+	}
+	if err := runtimeRepo.UpdatePaymentOrder(ctx, tenantID, newPaymentID, 880099, "runtime-auth"); err != nil {
+		t.Fatalf("scoped runtime order update: %v", err)
+	}
+	var storedTenant int64
+	if err := db.QueryRowContext(ctx, `SELECT tenant_id FROM payments WHERE id = $1`, newPaymentID).Scan(&storedTenant); err != nil {
+		t.Fatalf("read runtime insert with admin role: %v", err)
+	}
+	if storedTenant != tenantID {
+		t.Fatalf("runtime insert tenant=%d, want %d", storedTenant, tenantID)
+	}
+}
+
 func TestPaymentPostgresInvalidSignatureDoesNotMutateState(t *testing.T) {
 	db, uc, tenantID, paymentID, orderID, _ := openPaymentPostgresFixture(t)
 	uc.paymobClient = &postgresRacePaymobClient{validHMAC: false}
@@ -101,6 +178,97 @@ func TestPaymentPostgresSuccessRollsBackWhenSubscriptionWriteFails(t *testing.T)
 		t.Fatal("success callback should fail when subscription update is rejected")
 	}
 	assertPaymentAndTenantState(t, db, paymentID, tenantID, domain.PaymentStatusPending, domain.StatusTrial)
+	if _, err := db.Exec(`ALTER TABLE tenants DROP CONSTRAINT ` + constraint); err != nil {
+		t.Fatalf("remove temporary failure condition: %v", err)
+	}
+	if err := handlePostgresWebhook(t, uc, webhookPayloadForTest(orderID, 50000, true, false, false)); err != nil {
+		t.Fatalf("retry provider-success callback after local recovery: %v", err)
+	}
+	assertPaymentAndTenantState(t, db, paymentID, tenantID, domain.PaymentStatusSuccess, domain.StatusActive)
+}
+
+func TestPaymentPostgresCallbackRecoversProviderOrderNotCommittedLocally(t *testing.T) {
+	db, uc, tenantID, paymentID, _, _ := openPaymentPostgresFixture(t)
+	if _, err := db.Exec(`UPDATE payments SET paymob_order_id = NULL, paymob_auth_token = NULL WHERE id = $1`, paymentID); err != nil {
+		t.Fatalf("simulate provider order not persisted locally: %v", err)
+	}
+	payload := webhookPayloadForTest(880021, 50000, true, false, false)
+	payload.Obj.Order.MerchantOrderID = "closure-payment-order"
+	if err := handlePostgresWebhook(t, uc, payload); err != nil {
+		t.Fatalf("provider-success callback should resolve by durable merchant order id: %v", err)
+	}
+	assertPaymentAndTenantState(t, db, paymentID, tenantID, domain.PaymentStatusSuccess, domain.StatusActive)
+}
+
+func TestPaymentPostgresRefundCallbackReconcilesAndReplaysIdempotently(t *testing.T) {
+	db, uc, tenantID, paymentID, orderID, subRepo := openPaymentPostgresFixture(t)
+	transactionID := int64(880012)
+	if _, err := db.Exec(`UPDATE payments SET status = 'success', paymob_transaction_id = $1 WHERE id = $2`, transactionID, paymentID); err != nil {
+		t.Fatalf("prepare successful payment: %v", err)
+	}
+	subRepo.infoByTenant[tenantID] = &domain.TenantSubscriptionInfo{SubscriptionStatus: domain.StatusActive}
+	payload := webhookPayloadForTest(orderID, 50000, true, false, false)
+	payload.Obj.ID = transactionID
+	payload.Obj.IsRefunded = true
+	for attempt := 0; attempt < 2; attempt++ {
+		if err := handlePostgresWebhook(t, uc, payload); err != nil {
+			t.Fatalf("refund callback replay %d: %v", attempt+1, err)
+		}
+	}
+	assertPaymentAndTenantState(t, db, paymentID, tenantID, domain.PaymentStatusRefunded, domain.StatusExpired)
+	if len(subRepo.history) != 1 {
+		t.Fatalf("refund callback replay should write history once, got %d entries", len(subRepo.history))
+	}
+}
+
+func TestPaymentPostgresRefundCallbackBeforeSuccessDoesNotActivateSubscription(t *testing.T) {
+	db, uc, tenantID, paymentID, orderID, subRepo := openPaymentPostgresFixture(t)
+	subRepo.infoByTenant[tenantID] = &domain.TenantSubscriptionInfo{SubscriptionStatus: domain.StatusTrial}
+	payload := webhookPayloadForTest(orderID, 50000, false, false, false)
+	payload.Obj.IsRefunded = true
+	if err := handlePostgresWebhook(t, uc, payload); err != nil {
+		t.Fatalf("refund callback for provider-refunded pending payment: %v", err)
+	}
+	assertPaymentAndTenantState(t, db, paymentID, tenantID, domain.PaymentStatusRefunded, domain.StatusTrial)
+}
+
+func TestPaymentPostgresProviderRefundRecoversAfterLocalCommitFailure(t *testing.T) {
+	db, uc, tenantID, paymentID, orderID, subRepo := openPaymentPostgresFixture(t)
+	transactionID := int64(880013)
+	if _, err := db.Exec(`UPDATE payments SET status = 'success', paymob_transaction_id = $1 WHERE id = $2`, transactionID, paymentID); err != nil {
+		t.Fatalf("prepare successful payment: %v", err)
+	}
+	subRepo.infoByTenant[tenantID] = &domain.TenantSubscriptionInfo{SubscriptionStatus: domain.StatusActive}
+	if _, err := db.Exec(`UPDATE tenants SET subscription_status = 'active' WHERE id = $1`, tenantID); err != nil {
+		t.Fatalf("activate tenant for refund recovery fixture: %v", err)
+	}
+	provider := &postgresRacePaymobClient{validHMAC: true}
+	uc.paymobClient = provider
+
+	constraint := fmt.Sprintf("closure_reject_refund_%d", tenantID)
+	if _, err := db.Exec(`ALTER TABLE payments ADD CONSTRAINT ` + constraint + ` CHECK (id <> ` + fmt.Sprint(paymentID) + ` OR status <> 'refunded')`); err != nil {
+		t.Fatalf("install refund commit failure constraint: %v", err)
+	}
+	t.Cleanup(func() { _, _ = db.Exec(`ALTER TABLE payments DROP CONSTRAINT IF EXISTS ` + constraint) })
+
+	if _, err := uc.RefundPayment(context.Background(), paymentID, 77, nil, "", ""); err == nil {
+		t.Fatal("refund request should surface the failed local commit")
+	}
+	if provider.refundCalls.Load() != 1 {
+		t.Fatalf("provider refund calls = %d, want exactly one successful provider call", provider.refundCalls.Load())
+	}
+	assertPaymentAndTenantState(t, db, paymentID, tenantID, domain.PaymentStatusSuccess, domain.StatusActive)
+	if _, err := db.Exec(`ALTER TABLE payments DROP CONSTRAINT ` + constraint); err != nil {
+		t.Fatalf("remove refund commit failure constraint: %v", err)
+	}
+
+	refundCallback := webhookPayloadForTest(orderID, 50000, true, false, false)
+	refundCallback.Obj.ID = transactionID
+	refundCallback.Obj.IsRefunded = true
+	if err := handlePostgresWebhook(t, uc, refundCallback); err != nil {
+		t.Fatalf("reconcile provider refund callback after local commit failure: %v", err)
+	}
+	assertPaymentAndTenantState(t, db, paymentID, tenantID, domain.PaymentStatusRefunded, domain.StatusExpired)
 }
 
 func TestPaymentPostgresConcurrentRefundCallsProviderOnce(t *testing.T) {
@@ -129,7 +297,7 @@ func TestPaymentPostgresConcurrentRefundCallsProviderOnce(t *testing.T) {
 	for err := range errs {
 		if err == nil {
 			successes++
-		} else if err.Error() != "payment is no longer refundable" {
+		} else if !strings.Contains(err.Error(), "payment is no longer refundable") {
 			t.Errorf("unexpected refund result: %v", err)
 		}
 	}
@@ -171,7 +339,7 @@ func openPaymentPostgresFixture(t *testing.T) (*sql.DB, *PaymentUseCase, int64, 
 		PlanID: "monthly", MerchantOrderID: "closure-payment-order",
 	})
 	if err == nil {
-		err = paymentRepo.UpdatePaymentOrder(ctx, paymentID, orderID, "synthetic-auth-token")
+		err = paymentRepo.UpdatePaymentOrder(ctx, tenantID, paymentID, orderID, "synthetic-auth-token")
 	}
 	if err != nil {
 		_, _ = db.Exec(`DELETE FROM tenants WHERE id = $1`, tenantID)
