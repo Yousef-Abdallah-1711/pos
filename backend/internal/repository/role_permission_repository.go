@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"pos-saas/internal/domain"
+	"pos-saas/internal/pkg/database"
 )
 
 // RolePermissionRepository handles database operations for role permissions
@@ -29,7 +30,9 @@ func (r *RolePermissionRepository) GetByRoleAndModule(ctx context.Context, tenan
 	`
 
 	var level string
-	err := r.db.QueryRowContext(ctx, query, tenantID, restaurantID, roleID, moduleID).Scan(&level)
+	err := database.WithTenantTx(ctx, r.db, tenantID, restaurantID, func(tx *sql.Tx) error {
+		return tx.QueryRowContext(ctx, query, tenantID, restaurantID, roleID, moduleID).Scan(&level)
+	})
 
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -51,35 +54,7 @@ func (r *RolePermissionRepository) GetByRole(ctx context.Context, tenantID, rest
 		ORDER BY rp.module_id ASC
 	`
 
-	rows, err := r.db.QueryContext(ctx, query, tenantID, restaurantID, roleID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	var permissions []domain.RolePermission
-	for rows.Next() {
-		perm := domain.RolePermission{}
-		err := rows.Scan(
-			&perm.ID,
-			&perm.TenantID,
-			&perm.RoleID,
-			&perm.ModuleID,
-			&perm.PermissionLevel,
-			&perm.CreatedAt,
-			&perm.UpdatedAt,
-		)
-		if err != nil {
-			return nil, err
-		}
-		permissions = append(permissions, perm)
-	}
-
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-
-	return permissions, nil
+	return r.listInTenantTx(ctx, tenantID, restaurantID, query, tenantID, restaurantID, roleID)
 }
 
 // GetByModule gets all permissions for a module (across all roles)
@@ -92,35 +67,7 @@ func (r *RolePermissionRepository) GetByModule(ctx context.Context, tenantID, re
 		ORDER BY rp.role_id ASC
 	`
 
-	rows, err := r.db.QueryContext(ctx, query, tenantID, restaurantID, moduleID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	var permissions []domain.RolePermission
-	for rows.Next() {
-		perm := domain.RolePermission{}
-		err := rows.Scan(
-			&perm.ID,
-			&perm.TenantID,
-			&perm.RoleID,
-			&perm.ModuleID,
-			&perm.PermissionLevel,
-			&perm.CreatedAt,
-			&perm.UpdatedAt,
-		)
-		if err != nil {
-			return nil, err
-		}
-		permissions = append(permissions, perm)
-	}
-
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-
-	return permissions, nil
+	return r.listInTenantTx(ctx, tenantID, restaurantID, query, tenantID, restaurantID, moduleID)
 }
 
 // Assign creates or updates a permission for a role on a module
@@ -137,18 +84,20 @@ func (r *RolePermissionRepository) Assign(ctx context.Context, tenantID, restaur
 	`
 
 	now := time.Now()
-	result, err := r.db.ExecContext(ctx, query, tenantID, restaurantID, roleID, moduleID, level, now)
-	if err != nil {
-		return err
-	}
-	rowsAffected, err := result.RowsAffected()
-	if err != nil {
-		return err
-	}
-	if rowsAffected == 0 {
-		return errors.New("role or module not found in the requested scope")
-	}
-	return nil
+	return database.WithTenantTx(ctx, r.db, tenantID, restaurantID, func(tx *sql.Tx) error {
+		result, err := tx.ExecContext(ctx, query, tenantID, restaurantID, roleID, moduleID, level, now)
+		if err != nil {
+			return err
+		}
+		rowsAffected, err := result.RowsAffected()
+		if err != nil {
+			return err
+		}
+		if rowsAffected == 0 {
+			return errors.New("role or module not found in the requested scope")
+		}
+		return nil
+	})
 }
 
 // Revoke removes a permission from a role for a specific module
@@ -160,21 +109,20 @@ func (r *RolePermissionRepository) Revoke(ctx context.Context, tenantID, restaur
 		  AND r.id = rp.role_id AND r.tenant_id = rp.tenant_id AND r.restaurant_id = $2
 	`
 
-	result, err := r.db.ExecContext(ctx, query, tenantID, restaurantID, roleID, moduleID)
-	if err != nil {
-		return err
-	}
-
-	rowsAffected, err := result.RowsAffected()
-	if err != nil {
-		return err
-	}
-
-	if rowsAffected == 0 {
-		return errors.New("permission not found")
-	}
-
-	return nil
+	return database.WithTenantTx(ctx, r.db, tenantID, restaurantID, func(tx *sql.Tx) error {
+		result, err := tx.ExecContext(ctx, query, tenantID, restaurantID, roleID, moduleID)
+		if err != nil {
+			return err
+		}
+		rowsAffected, err := result.RowsAffected()
+		if err != nil {
+			return err
+		}
+		if rowsAffected == 0 {
+			return errors.New("permission not found")
+		}
+		return nil
+	})
 }
 
 // RevokeAll removes all permissions from a role
@@ -186,8 +134,10 @@ func (r *RolePermissionRepository) RevokeAll(ctx context.Context, tenantID, rest
 		  AND r.id = rp.role_id AND r.tenant_id = rp.tenant_id AND r.restaurant_id = $2
 	`
 
-	_, err := r.db.ExecContext(ctx, query, tenantID, restaurantID, roleID)
-	return err
+	return database.WithTenantTx(ctx, r.db, tenantID, restaurantID, func(tx *sql.Tx) error {
+		_, err := tx.ExecContext(ctx, query, tenantID, restaurantID, roleID)
+		return err
+	})
 }
 
 // GetByRoleAndTenant gets all permissions for a role in a specific tenant
@@ -200,33 +150,30 @@ func (r *RolePermissionRepository) GetByRoleAndTenant(ctx context.Context, tenan
 		ORDER BY rp.module_id ASC
 	`
 
-	rows, err := r.db.QueryContext(ctx, query, tenantID, restaurantID, roleID)
+	return r.listInTenantTx(ctx, tenantID, restaurantID, query, tenantID, restaurantID, roleID)
+}
+
+func (r *RolePermissionRepository) listInTenantTx(ctx context.Context, tenantID, restaurantID int64, query string, args ...interface{}) ([]domain.RolePermission, error) {
+	permissions := make([]domain.RolePermission, 0)
+	err := database.WithTenantTx(ctx, r.db, tenantID, restaurantID, func(tx *sql.Tx) error {
+		rows, err := tx.QueryContext(ctx, query, args...)
+		if err != nil {
+			return err
+		}
+		defer rows.Close()
+
+		for rows.Next() {
+			permission := domain.RolePermission{}
+			if err := rows.Scan(&permission.ID, &permission.TenantID, &permission.RoleID,
+				&permission.ModuleID, &permission.PermissionLevel, &permission.CreatedAt, &permission.UpdatedAt); err != nil {
+				return err
+			}
+			permissions = append(permissions, permission)
+		}
+		return rows.Err()
+	})
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
-
-	var permissions []domain.RolePermission
-	for rows.Next() {
-		perm := domain.RolePermission{}
-		err := rows.Scan(
-			&perm.ID,
-			&perm.TenantID,
-			&perm.RoleID,
-			&perm.ModuleID,
-			&perm.PermissionLevel,
-			&perm.CreatedAt,
-			&perm.UpdatedAt,
-		)
-		if err != nil {
-			return nil, err
-		}
-		permissions = append(permissions, perm)
-	}
-
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-
 	return permissions, nil
 }

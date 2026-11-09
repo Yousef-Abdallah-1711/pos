@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
+	"pos-saas/internal/pkg/database"
 )
 
 func TestGetUserRolesForRestaurantScopesTenantRestaurantAndUser(t *testing.T) {
@@ -19,9 +20,14 @@ func TestGetUserRolesForRestaurantScopesTenantRestaurantAndUser(t *testing.T) {
 	if _, err := regexp.Compile(query); err != nil {
 		t.Fatalf("invalid SQL matcher: %v", err)
 	}
+	mock.ExpectBegin()
+	mock.ExpectExec(regexp.QuoteMeta(`SELECT set_config($1, $2, true), set_config($3, $4, true), set_config($5, $6, true)`)).
+		WithArgs(database.TenantSetting, "22", database.RestaurantSetting, "33", database.UserSetting, "").
+		WillReturnResult(sqlmock.NewResult(0, 1))
 	mock.ExpectQuery(query).
 		WithArgs(int64(11), int64(22), int64(33)).
 		WillReturnRows(sqlmock.NewRows([]string{"id", "tenant_id", "role_name", "description", "role_code", "is_system_role", "created_at", "updated_at"}))
+	mock.ExpectCommit()
 
 	roles, err := NewUserRoleRepository(db).GetUserRolesForRestaurant(context.Background(), 11, 22, 33)
 	if err != nil {
