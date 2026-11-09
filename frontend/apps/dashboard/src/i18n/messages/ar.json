@@ -224,7 +224,8 @@
       "pending": "قيد الانتظار",
       "paid": "مدفوع",
       "failed": "فشل",
-      "refunded": "مسترد"
+      "refunded": "مسترد",
+      "voided": "ملغي"
     },
     "details": {
       "orderInfo": "معلومات الطلب",

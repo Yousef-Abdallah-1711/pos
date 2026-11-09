@@ -224,7 +224,8 @@
       "pending": "Pending",
       "paid": "Paid",
       "failed": "Failed",
-      "refunded": "Refunded"
+      "refunded": "Refunded",
+      "voided": "Voided"
     },
     "details": {
       "orderInfo": "Order Information",

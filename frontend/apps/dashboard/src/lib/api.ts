@@ -327,7 +327,7 @@ export interface PaymentHistoryItem {
   id: number
   amount_cents: number
   currency: string
-  status: 'pending' | 'success' | 'failed' | 'refunded'
+  status: 'pending' | 'success' | 'failed' | 'refunded' | 'voided'
   payment_method?: string | null
   card_last_four?: string | null
   card_brand?: string | null

@@ -8,6 +8,7 @@ const (
 	PaymentStatusSuccess  = "success"
 	PaymentStatusFailed   = "failed"
 	PaymentStatusRefunded = "refunded"
+	PaymentStatusVoided   = "voided"
 )
 
 // Subscription history actions related to payments.
@@ -18,6 +19,7 @@ const (
 	ActionSubscriptionActivated = "SUBSCRIPTION_ACTIVATED"
 	ActionSubscriptionExpired   = "SUBSCRIPTION_EXPIRED"
 	ActionPaymentRefunded       = "PAYMENT_REFUNDED"
+	ActionPaymentVoided         = "PAYMENT_VOIDED"
 	ActionSubscriptionCancelled = "SUBSCRIPTION_CANCELLED"
 )
 

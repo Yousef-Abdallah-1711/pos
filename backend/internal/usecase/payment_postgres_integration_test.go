@@ -79,6 +79,68 @@ func TestPaymentPostgresPendingCallbackLeavesPaymentPendingUntilSuccess(t *testi
 	}
 }
 
+func TestPaymentPostgresVoidIsDurableAndRejectsDelayedSuccess(t *testing.T) {
+	db, uc, tenantID, paymentID, orderID, subRepo := openPaymentPostgresFixture(t)
+	void := webhookPayloadForTest(orderID, 50000, false, false, false)
+	void.Obj.IsVoided = true
+	if err := handlePostgresWebhook(t, uc, void); err != nil {
+		t.Fatalf("provider void callback: %v", err)
+	}
+	if err := handlePostgresWebhook(t, uc, void); err != nil {
+		t.Fatalf("duplicate provider void callback: %v", err)
+	}
+	if err := handlePostgresWebhook(t, uc, webhookPayloadForTest(orderID, 50000, true, false, false)); err != nil {
+		t.Fatalf("delayed success callback after void: %v", err)
+	}
+	assertPaymentAndTenantState(t, db, paymentID, tenantID, domain.PaymentStatusVoided, domain.StatusTrial)
+	if len(subRepo.history) != 1 || subRepo.history[0].Action != domain.ActionPaymentVoided {
+		t.Fatalf("void replay or delayed success wrote unexpected history: %+v", subRepo.history)
+	}
+}
+
+func TestPaymentPostgresConcurrentVoidAndSuccessHaveSingleWinner(t *testing.T) {
+	db, uc, tenantID, paymentID, orderID, subRepo := openPaymentPostgresFixture(t)
+	void := webhookPayloadForTest(orderID, 50000, false, false, false)
+	void.Obj.IsVoided = true
+	success := webhookPayloadForTest(orderID, 50000, true, false, false)
+	start := make(chan struct{})
+	errs := make(chan error, 2)
+	var group sync.WaitGroup
+	for _, callback := range []*domain.PaymobWebhookPayload{void, success} {
+		group.Add(1)
+		go func(payload *domain.PaymobWebhookPayload) {
+			defer group.Done()
+			<-start
+			errs <- handlePostgresWebhook(t, uc, payload)
+		}(callback)
+	}
+	close(start)
+	group.Wait()
+	close(errs)
+	for err := range errs {
+		if err != nil {
+			t.Errorf("concurrent callback returned error: %v", err)
+		}
+	}
+
+	var paymentStatus, tenantStatus string
+	if err := db.QueryRow(`SELECT p.status, t.subscription_status FROM payments p JOIN tenants t ON t.id = p.tenant_id WHERE p.id = $1 AND p.tenant_id = $2`, paymentID, tenantID).Scan(&paymentStatus, &tenantStatus); err != nil {
+		t.Fatalf("read concurrent callback result: %v", err)
+	}
+	switch {
+	case paymentStatus == domain.PaymentStatusVoided && tenantStatus == domain.StatusTrial:
+		if len(subRepo.history) != 1 || subRepo.history[0].Action != domain.ActionPaymentVoided {
+			t.Fatalf("void winner recorded inconsistent history: %+v", subRepo.history)
+		}
+	case paymentStatus == domain.PaymentStatusSuccess && tenantStatus == domain.StatusActive:
+		if len(subRepo.history) != 2 {
+			t.Fatalf("success winner should record activation exactly once: %+v", subRepo.history)
+		}
+	default:
+		t.Fatalf("void and success callbacks produced invalid mixed state payment=%q tenant=%q", paymentStatus, tenantStatus)
+	}
+}
+
 func TestPaymentRepositoryUsesForcedTenantRLSWithRuntimeRole(t *testing.T) {
 	runtimeURL := os.Getenv("POS_APP_DATABASE_URL")
 	if runtimeURL == "" {
