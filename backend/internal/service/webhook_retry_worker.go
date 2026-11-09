@@ -9,6 +9,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 	appconfig "pos-saas/internal/config"
 	"strings"
@@ -258,7 +259,11 @@ func (w *WebhookRetryWorker) processRecord(ctx context.Context, record *retryQue
 	}
 
 	startedAt := time.Now()
-	target := w.resolveEndpoint(record.Endpoint)
+	target, err := w.resolveEndpoint(record.Endpoint)
+	if err != nil {
+		w.failRecord(ctx, record, fmt.Sprintf("invalid retry endpoint: %v", err), time.Since(startedAt))
+		return
+	}
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, target, bytes.NewBufferString(record.PayloadRaw))
 	if err != nil {
@@ -369,18 +374,35 @@ func (w *WebhookRetryWorker) markSuccess(ctx context.Context, id int64, attempts
 	return nil
 }
 
-func (w *WebhookRetryWorker) resolveEndpoint(endpoint string) string {
-	target := strings.TrimSpace(endpoint)
-	if target == "" {
-		return w.baseURL + "/api/v1/webhook/paymob"
+func (w *WebhookRetryWorker) resolveEndpoint(endpoint string) (string, error) {
+	base, err := url.Parse(strings.TrimSpace(w.baseURL))
+	if err != nil || base.Host == "" || (base.Scheme != "http" && base.Scheme != "https") || base.User != nil {
+		return "", fmt.Errorf("configured retry base URL is invalid")
 	}
-	if strings.HasPrefix(target, "http://") || strings.HasPrefix(target, "https://") {
-		return target
+
+	value := strings.TrimSpace(endpoint)
+	if value == "" {
+		value = "/api/v1/webhook/paymob"
 	}
-	if strings.HasPrefix(target, "/") {
-		return w.baseURL + target
+	parsed, err := url.Parse(value)
+	if err != nil {
+		return "", fmt.Errorf("parse endpoint: %w", err)
 	}
-	return w.baseURL + "/" + target
+	if parsed.User != nil || parsed.Fragment != "" {
+		return "", fmt.Errorf("endpoint contains unsupported URL components")
+	}
+	if parsed.IsAbs() && (parsed.Host == "" || parsed.Scheme != base.Scheme || !strings.EqualFold(parsed.Host, base.Host)) {
+		return "", fmt.Errorf("endpoint must use the configured retry origin")
+	}
+	if !parsed.IsAbs() && parsed.Host != "" {
+		return "", fmt.Errorf("endpoint must be a relative URL")
+	}
+
+	resolved := base.ResolveReference(parsed)
+	if resolved.Scheme != base.Scheme || !strings.EqualFold(resolved.Host, base.Host) || resolved.User != nil {
+		return "", fmt.Errorf("endpoint must use the configured retry origin")
+	}
+	return resolved.String(), nil
 }
 
 func nextRetryBackoff(attempt int) time.Duration {
