@@ -194,12 +194,15 @@ func TestUpdatePaymentStatusTx_ConcurrentSuccessAlreadyProcessedIsIdempotent(t *
 		t.Fatalf("begin payment transaction: %v", err)
 	}
 	paidAt := time.Now()
-	mock.ExpectExec(`WHERE id = \$7\s+AND status IN \('pending', 'failed'\)`).
-		WithArgs(domain.PaymentStatusSuccess, nil, nil, nil, nil, &paidAt, int64(71)).
+	mock.ExpectExec(`WHERE id = \$7 AND tenant_id = \$8\s+AND status IN \('pending', 'failed'\)`).
+		WithArgs(domain.PaymentStatusSuccess, nil, nil, nil, nil, &paidAt, int64(71), int64(72)).
 		WillReturnResult(sqlmock.NewResult(0, 0))
+	mock.ExpectQuery(`SELECT status FROM payments WHERE id = \$1 AND tenant_id = \$2`).
+		WithArgs(int64(71), int64(72)).
+		WillReturnRows(sqlmock.NewRows([]string{"status"}).AddRow(domain.PaymentStatusSuccess))
 
 	uc := &PaymentUseCase{}
-	err = uc.updatePaymentStatusTx(tx, context.Background(), 71, domain.PaymentStatusSuccess, nil, nil, nil, nil, &paidAt)
+	err = uc.updatePaymentStatusTx(tx, context.Background(), 72, 71, domain.PaymentStatusSuccess, nil, nil, nil, nil, &paidAt)
 	if err != errWebhookAlreadyProcessed {
 		t.Fatalf("expected guarded duplicate success to be idempotent, got %v", err)
 	}
