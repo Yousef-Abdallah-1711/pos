@@ -81,6 +81,13 @@ func TestPaymentPostgresPendingCallbackLeavesPaymentPendingUntilSuccess(t *testi
 
 func TestPaymentPostgresVoidIsDurableAndRejectsDelayedSuccess(t *testing.T) {
 	db, uc, tenantID, paymentID, orderID, subRepo := openPaymentPostgresFixture(t)
+	invalidVoid := webhookPayloadForTest(orderID, 1, false, false, false)
+	invalidVoid.Obj.IsVoided = true
+	if err := handlePostgresWebhook(t, uc, invalidVoid); err == nil {
+		t.Fatal("void callback with mismatched amount should be rejected")
+	}
+	assertPaymentAndTenantState(t, db, paymentID, tenantID, domain.PaymentStatusPending, domain.StatusTrial)
+
 	void := webhookPayloadForTest(orderID, 50000, false, false, false)
 	void.Obj.IsVoided = true
 	if err := handlePostgresWebhook(t, uc, void); err != nil {
@@ -96,6 +103,31 @@ func TestPaymentPostgresVoidIsDurableAndRejectsDelayedSuccess(t *testing.T) {
 	if len(subRepo.history) != 1 || subRepo.history[0].Action != domain.ActionPaymentVoided {
 		t.Fatalf("void replay or delayed success wrote unexpected history: %+v", subRepo.history)
 	}
+}
+
+func TestPaymentPostgresVoidCallbackUsesRestrictedTenantTransaction(t *testing.T) {
+	runtimeURL := os.Getenv("POS_APP_DATABASE_URL")
+	if runtimeURL == "" {
+		t.Skip("set POS_APP_DATABASE_URL to the restricted pos_app role")
+	}
+	db, uc, tenantID, paymentID, orderID, _ := openPaymentPostgresFixture(t)
+	runtimeDB, err := sql.Open("postgres", runtimeURL)
+	if err != nil {
+		t.Fatalf("open restricted runtime database: %v", err)
+	}
+	t.Cleanup(func() { _ = runtimeDB.Close() })
+	if err := runtimeDB.PingContext(context.Background()); err != nil {
+		t.Fatalf("connect restricted runtime database: %v", err)
+	}
+	uc.db = runtimeDB
+	uc.paymentRepo = repository.NewPaymentRepository(runtimeDB)
+
+	void := webhookPayloadForTest(orderID, 50000, false, false, false)
+	void.Obj.IsVoided = true
+	if err := handlePostgresWebhook(t, uc, void); err != nil {
+		t.Fatalf("restricted-role provider void callback: %v", err)
+	}
+	assertPaymentAndTenantState(t, db, paymentID, tenantID, domain.PaymentStatusVoided, domain.StatusTrial)
 }
 
 func TestPaymentPostgresConcurrentVoidAndSuccessHaveSingleWinner(t *testing.T) {
