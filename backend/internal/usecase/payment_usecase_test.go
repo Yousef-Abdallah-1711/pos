@@ -450,6 +450,41 @@ func TestPaymentUseCaseHandleWebhookFailedPaymentMarksFailed(t *testing.T) {
 	}
 }
 
+func TestPaymentUseCaseHandleWebhookPendingPaymentDoesNotMutateState(t *testing.T) {
+	repo := newTestPaymentRepo()
+	subRepo := newTestSubscriptionRepo()
+	client := &testPaymobClient{verifyHMAC: true, orderID: 555}
+	uc := NewPaymentUseCase(repo, subRepo, nil, client, nil)
+
+	initResp, err := uc.InitiatePayment(context.Background(), 1, 1, "monthly", map[string]string{})
+	if err != nil {
+		t.Fatalf("InitiatePayment failed: %v", err)
+	}
+
+	payload := webhookPayloadForTest(initResp.PaymobOrderID, 50000, false, true, false)
+	raw, err := json.Marshal(payload)
+	if err != nil {
+		t.Fatalf("marshal pending webhook: %v", err)
+	}
+	if err := uc.HandleWebhook(context.Background(), raw, payload, "ok"); err != nil {
+		t.Fatalf("HandleWebhook pending event failed: %v", err)
+	}
+
+	payment, err := repo.GetPaymentByID(context.Background(), initResp.PaymentID)
+	if err != nil {
+		t.Fatalf("GetPaymentByID failed: %v", err)
+	}
+	if payment.Status != domain.PaymentStatusPending {
+		t.Fatalf("pending event changed payment status: got %q", payment.Status)
+	}
+	if repo.updateStatusCnt != 0 {
+		t.Fatalf("pending event attempted a status mutation %d times", repo.updateStatusCnt)
+	}
+	if len(subRepo.history) != 1 || subRepo.history[0].Action != domain.ActionPaymentInitiated {
+		t.Fatalf("pending event wrote unexpected subscription history: %+v", subRepo.history)
+	}
+}
+
 func TestPaymentUseCaseGetPlansIncludesMonthlyPlan(t *testing.T) {
 	uc := NewPaymentUseCase(newTestPaymentRepo(), newTestSubscriptionRepo(), nil, &testPaymobClient{verifyHMAC: true}, nil)
 

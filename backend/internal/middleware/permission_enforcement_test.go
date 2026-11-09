@@ -85,6 +85,30 @@ func TestPermission_UnauthenticatedIsRejected(t *testing.T) {
 	}
 }
 
+func TestKDSWebSocketReadPermissionIsRequired(t *testing.T) {
+	for _, tc := range []struct {
+		level string
+		want  int
+	}{
+		{domain.PermissionNone, http.StatusForbidden},
+		{domain.PermissionRead, http.StatusOK},
+		{domain.PermissionWrite, http.StatusOK},
+	} {
+		evaluator := &fakeEvaluator{level: tc.level}
+		middleware := NewPermissionMiddleware(evaluator, PermissionModeEnforce)(13, domain.PermissionRead)
+		code, ran, module, level := runPerm(t, middleware, testClaims)
+		if code != tc.want || ran != (tc.want == http.StatusOK) {
+			t.Errorf("KDS level=%s: want status %d, got %d (handler ran=%v)", tc.level, tc.want, code, ran)
+		}
+		if evaluator.gotModule != 13 {
+			t.Errorf("KDS permission context mismatch: evaluated module=%d, passed module=%d level=%q", evaluator.gotModule, module, level)
+		}
+		if tc.want == http.StatusOK && (module != 13 || level != domain.PermissionRead) {
+			t.Errorf("allowed KDS request had wrong permission context: passed module=%d level=%q", module, level)
+		}
+	}
+}
+
 func TestPermission_EvaluatorFailureFailsClosedWhenEnforcing(t *testing.T) {
 	ev := &fakeEvaluator{err: errors.New("db down")}
 	mw := NewPermissionMiddleware(ev, PermissionModeEnforce)(4, domain.PermissionRead)

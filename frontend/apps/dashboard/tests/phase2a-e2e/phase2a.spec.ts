@@ -65,6 +65,7 @@ test('tenant A cannot see or mutate tenant B products', async ({ page }) => {
     expect(employeeListing.ok()).toBeTruthy()
     expect(await employeeListing.text()).toContain('WS05 E2E Burger A')
     expect(await employeeListing.text()).not.toContain('WS05 E2E Burger B')
+    expect((await employee.get(`${api}/kds/ws`)).status()).toBe(403)
     expect((await employee.get(`${api}/products/${ownedProduct.id}`)).status()).toBe(200)
     const employeeCategoriesResponse = await employee.get(`${api}/categories`)
     expect(employeeCategoriesResponse.ok()).toBeTruthy()
@@ -550,13 +551,22 @@ test('super-admin login workflow is available in the isolated stack', async ({ p
   page.on('console', (message) => {
     if (message.type() === 'error') console.log(`SUPER_ADMIN_BROWSER_ERROR ${message.text().split('\n')[0]}`)
   })
+  const sessionBootstrap = page.waitForResponse((response) =>
+    new URL(response.url()).pathname === '/api/v1/super-admin/auth/session',
+  )
   await page.goto(`${process.env.WS05_SUPER_ADMIN_URL || 'http://localhost:13114'}/login`, { waitUntil: 'load', timeout: 110_000 })
+  // Wait for the client auth bootstrap so hydration cannot restore the default email after fill.
+  await sessionBootstrap
   await expect(page.getByRole('textbox', { name: /email/i })).toBeVisible()
   await expect(page.getByLabel(/password/i)).toBeVisible()
   const superAdminEmail = process.env.E2E_SUPERADMIN_EMAIL || 'phase2a-superadmin@example.test'
   const superAdminPassword = process.env.E2E_SUPERADMIN_PASSWORD || 'WS05-SuperAdmin-Only-2026!'
-  await page.getByRole('textbox', { name: /email/i }).fill(superAdminEmail)
-  await page.getByLabel(/password/i).fill(superAdminPassword)
+  const emailInput = page.getByRole('textbox', { name: /email/i })
+  const passwordInput = page.getByLabel(/password/i)
+  await emailInput.fill(superAdminEmail)
+  await expect(emailInput).toHaveValue(superAdminEmail)
+  await passwordInput.fill(superAdminPassword)
+  await expect(passwordInput).toHaveValue(superAdminPassword)
   await page.getByRole('button', { name: /^login$/i }).click()
   await expect(page).toHaveURL(/\/dashboard(?:$|\?)/, { timeout: 60_000 })
   await expect(page.getByRole('heading', { name: 'Welcome back!' })).toBeVisible()
@@ -588,7 +598,15 @@ test('super-admin browser impersonation opens the target tenant session', async 
     await expect(tenantRow).toBeVisible()
     await tenantRow.getByRole('link', { name: 'View' }).click()
 
-    const targetUserRow = page.getByRole('row').filter({ hasText: 'phase2a-owner-a@example.test' })
+    const userSection = page.getByRole('heading', { name: 'Users in this Tenant' })
+      .locator('xpath=ancestor::div[contains(@class, "bg-white")][1]')
+    const targetUserRow = userSection.getByRole('row').filter({ hasText: 'phase2a-owner-a@example.test' })
+    for (let pageNumber = 1; pageNumber < 20 && !(await targetUserRow.isVisible().catch(() => false)); pageNumber += 1) {
+      const nextPage = userSection.getByRole('button', { name: 'Next' })
+      if (!(await nextPage.isEnabled().catch(() => false))) break
+      await nextPage.click()
+      await expect(userSection.getByText(new RegExp(`Page ${pageNumber + 1} of \\d+`))).toBeVisible()
+    }
     await expect(targetUserRow).toBeVisible()
     await targetUserRow.getByRole('button', { name: /impersonate/i }).click()
     await expect(page.getByRole('heading', { name: 'Impersonate User' })).toBeVisible()

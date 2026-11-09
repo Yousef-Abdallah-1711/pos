@@ -59,6 +59,25 @@ func TestPaymentPostgresOutOfOrderFailureThenSuccessStaysSuccessful(t *testing.T
 	assertPaymentAndTenantState(t, db, paymentID, tenantID, domain.PaymentStatusSuccess, domain.StatusActive)
 }
 
+func TestPaymentPostgresPendingCallbackLeavesPaymentPendingUntilSuccess(t *testing.T) {
+	db, uc, tenantID, paymentID, orderID, subRepo := openPaymentPostgresFixture(t)
+	if err := handlePostgresWebhook(t, uc, webhookPayloadForTest(orderID, 50000, false, true, false)); err != nil {
+		t.Fatalf("pending callback: %v", err)
+	}
+	assertPaymentAndTenantState(t, db, paymentID, tenantID, domain.PaymentStatusPending, domain.StatusTrial)
+	if len(subRepo.history) != 0 {
+		t.Fatalf("pending callback wrote subscription history: %+v", subRepo.history)
+	}
+
+	if err := handlePostgresWebhook(t, uc, webhookPayloadForTest(orderID, 50000, true, false, false)); err != nil {
+		t.Fatalf("success callback after pending event: %v", err)
+	}
+	assertPaymentAndTenantState(t, db, paymentID, tenantID, domain.PaymentStatusSuccess, domain.StatusActive)
+	if len(subRepo.history) != 2 {
+		t.Fatalf("expected payment success and activation history, got %d entries", len(subRepo.history))
+	}
+}
+
 func TestPaymentPostgresInvalidSignatureDoesNotMutateState(t *testing.T) {
 	db, uc, tenantID, paymentID, orderID, _ := openPaymentPostgresFixture(t)
 	uc.paymobClient = &postgresRacePaymobClient{validHMAC: false}

@@ -264,6 +264,11 @@ func (uc *PaymentUseCase) HandleWebhook(ctx context.Context, rawPayload []byte, 
 	}
 
 	isSuccess := payload.Obj.Success && !payload.Obj.Pending && !payload.Obj.ErrorOccured
+	if payload.Obj.Pending {
+		log.Printf("[PaymentUseCase] HandleWebhook pending - payment_id: %d\n", payment.ID)
+		return nil
+	}
+
 	if isSuccess {
 		if uc.db == nil {
 			return fmt.Errorf("payment database is not configured")

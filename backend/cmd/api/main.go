@@ -1388,7 +1388,7 @@ func main() {
 
 	// KDS (Kitchen Display System) endpoints
 	// Module ID 13 = KDS (from migration 126_add_kds_rbac_module.sql)
-	mux.HandleFunc("GET /api/v1/kds/ws", kdsWSHandler.ServeWS)
+	mux.Handle("GET /api/v1/kds/ws", wrapKDSWithPermission(http.HandlerFunc(kdsWSHandler.ServeWS), "READ", false))
 	mux.Handle("GET /api/v1/kds/queue", wrapKDSWithPermission(http.HandlerFunc(kdsHandler.GetQueue), "READ", false))
 	mux.Handle("PUT /api/v1/kds/orders/{id}/bump", wrapKDSWithPermission(http.HandlerFunc(kdsHandler.BumpOrder), "WRITE", true))
 	mux.Handle("PUT /api/v1/kds/orders/{id}/recall", wrapKDSWithPermission(http.HandlerFunc(kdsHandler.RecallOrder), "WRITE", false))
