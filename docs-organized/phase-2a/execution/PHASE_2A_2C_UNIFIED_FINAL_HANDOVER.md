@@ -249,3 +249,11 @@ At candidate `3bec0c85b21a8de2250dfaf99afab4ebd792ec97`, PR #9 remains open and 
 - The profiling CSVs contain only browser timings and sanitized API paths/query fingerprints. Temporary synthetic authentication state and invalid unauthenticated profiling attempts were removed.
 - The API service was briefly restarted in the labeled disposable stack; Compose detached its network namespace and failed to recreate the shared network while PostgreSQL/Redis stayed attached. The API network and all four frontend containers were restored/restarted; the API, PostgreSQL and Redis are healthy and the full browser suite then passed. No persistent development or production database was modified; stack data was preserved.
 - C006, C008, C012, Phase 2A and Phase 2C remain **PARTIAL**. C012 still lacks broad production-path transaction/RLS conversion and acceptance. Cold-dashboard CLS exceeds the target; production-build performance and broader route×role gates remain open. Commit `89889b6` is pushed to PR #9 and both hosted checks pass. An eligible independent reviewer and approval are still absent. `main` is unchanged. No merge or main-based Docker delivery occurred. Production remains **NO-GO**.
+
+## Exact-candidate backend verification — 2026-11-09
+
+- Verified application source: `89889b6905c8861ca7267a1df1624fe8bc5ba5fa`; documentation-only PR head at verification start: `1dfd4ab97dc39236dc20dedbdf7659ebfcf43216`.
+- `go test -p 1 -count=1 ./...` passed with Go 1.24.13. `go build ./...` and `go vet ./...` passed.
+- Integration-tagged `go test -tags integration -count=1 ./internal/pkg/database ./internal/handler/http ./internal/repository` passed. The focused pending-callback PostgreSQL test also passed.
+- These runs used disposable PostgreSQL database `pos_c012_callback_test_20261109`, cloned from the running disposable E2E database `pos_phase2a_e2e` to satisfy the test harness's database-name guard. The original database and seven-service stack were left intact. No persistent development or production database was changed.
+- The hosted checks passed at `1dfd4ab`; a documentation-only refresh will trigger their next run. The 14/14 browser suite and focused KDS authorization journey are recorded above. C006, C008, C012, Phase 2A, and Phase 2C remain partial; independent review and all remaining acceptance gaps remain release blockers.
