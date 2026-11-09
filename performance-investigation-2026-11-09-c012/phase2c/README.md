@@ -23,3 +23,21 @@ An authenticated first-navigation attribution capture in `dashboard-cls-attribut
 - `dashboard-route.json`, `pos-route.json`, and `orders-route.json`
 
 The separately documented Admin Orders PostgreSQL benchmark at commit `e30ffe3` reports page-size 50 dropping from 102 to 3 SQL statements, with median execution 291.768 to 11.784 ms and p95 504.784 to 23.033 ms; canonical response and payload checks matched. This session did not rerun that benchmark, so it remains prior-candidate evidence.
+
+## Dashboard cold CLS follow-up — 2026-11-09
+
+After aligning the permission-loading sidebar header with its resolved 89px header, reserving the full nine-card metrics grid, matching metric card minimum height, and reserving the maximum quick-action area, five new authenticated hard-navigation samples passed the `<0.1` CLS target. The focused Playwright test is `frontend/apps/dashboard/tests/phase2a-e2e/dashboard-cls.spec.ts`.
+
+| Cold sample | CLS | Result |
+|---:|---:|---|
+| 1 | 0.0125 | pass |
+| 2 | 0.0091 | pass |
+| 3 | 0.0539 | pass |
+| 4 | 0.0471 | pass |
+| 5 | 0.0097 | pass |
+
+The final layout reserves the permission-loading sidebar's full 89px header, uses the same 2xl metric-grid breakpoint in loading and resolved states, reserves nine cards at their resolved minimum height, and keeps enough space for the maximum quick-action rows. These measurements ran against the disposable seven-service development stack with Dashboard source bind-mounted from candidate `cc05b28` plus these uncommitted layout changes. This confirms cold CLS below 0.1 on that stack; production-build browser CLS and post-commit source verification remain open.
+
+## Candidate-source CLS rerun — 2026-11-09
+
+After routing the browser to the Dashboard service (`http://localhost:13112`), five additional authenticated hard navigations passed: CLS **0.0313, 0.0582, 0.0488, 0.0505, and 0.0471**. The previous attempt targeted the Landing service and was redirected to its login page, so it is excluded from CLS measurements. This rerun confirms the candidate source change on the disposable development stack. Production-build CLS remains unverified because the production Dashboard build redirects authentication to the development Landing service.

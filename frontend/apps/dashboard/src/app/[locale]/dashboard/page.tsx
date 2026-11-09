@@ -656,7 +656,7 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          <div className="flex w-full flex-col gap-3 xl:w-auto xl:min-w-[320px]">
+          <div className="flex min-h-[212px] w-full flex-col gap-3 xl:w-auto xl:min-w-[320px]">
             <div className="grid grid-cols-2 gap-2">
               {quickActions.slice(0, 4).map((action) => (
                 <Link key={action.label} href={action.href}>
@@ -686,9 +686,9 @@ export default function DashboardPage() {
       </section>
 
       {isLoading && !overview.lastUpdatedAt ? (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
-          {Array.from({ length: 6 }).map((_, index) => (
-            <div key={index} className="h-32 animate-pulse rounded-xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900" />
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 2xl:grid-cols-3">
+          {Array.from({ length: 9 }).map((_, index) => (
+            <div key={index} className="min-h-[156px] animate-pulse rounded-xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900" />
           ))}
         </div>
       ) : (
@@ -697,7 +697,7 @@ export default function DashboardPage() {
             <Link
               key={card.key}
               href={card.href}
-              className="group rounded-xl border border-gray-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md dark:border-gray-800 dark:bg-gray-900"
+              className="group min-h-[156px] rounded-xl border border-gray-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md dark:border-gray-800 dark:bg-gray-900"
             >
               <div className="flex items-start justify-between gap-3">
                 <div>

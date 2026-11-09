@@ -223,6 +223,54 @@ func TestWebhookRetryWorkerPostgresPersistsBackoffAfterFailure(t *testing.T) {
 	}
 }
 
+func TestWebhookRetryWorkerReclaimsStaleProcessingLease(t *testing.T) {
+	db := openWebhookRetryTestDB(t)
+	runtimeDB := openWebhookRetryRuntimeDB(t, db)
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+
+	deliveries := 0
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		deliveries++
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer server.Close()
+
+	queue := NewWebhookRetryQueue(runtimeDB)
+	id, err := queue.Enqueue(ctx, server.URL+"/paymob", []byte(`{"event":"stale-processing-lease"}`), "worker stopped")
+	if err != nil {
+		t.Fatalf("enqueue stale processing fixture: %v", err)
+	}
+	t.Cleanup(func() {
+		if _, err := db.Exec(`DELETE FROM webhook_retry_queue WHERE id = $1`, id); err != nil {
+			t.Errorf("delete stale processing fixture %d: %v", id, err)
+		}
+	})
+	if _, err := db.ExecContext(ctx, `UPDATE webhook_retry_queue SET status = $1, updated_at = NOW() - INTERVAL '6 minutes' WHERE id = $2`, webhookRetryStatusProcessing, id); err != nil {
+		t.Fatalf("age processing lease: %v", err)
+	}
+
+	worker := NewWebhookRetryWorker(runtimeDB, server.URL, NewPaymentWebhookMonitor(5), nil)
+	worker.httpClient = server.Client()
+	record, err := worker.claimOne(ctx)
+	if err != nil {
+		t.Fatalf("claim stale processing callback: %v", err)
+	}
+	if record.ID != id {
+		t.Fatalf("claimed stale row id=%d, want fixture %d", record.ID, id)
+	}
+	worker.processRecord(ctx, record)
+
+	var status string
+	var attempts int
+	if err := db.QueryRowContext(ctx, `SELECT status, attempts FROM webhook_retry_queue WHERE id = $1`, id).Scan(&status, &attempts); err != nil {
+		t.Fatalf("read recovered callback state: %v", err)
+	}
+	if status != webhookRetryStatusSuccess || attempts != 1 || deliveries != 1 {
+		t.Fatalf("recovered callback status=%q attempts=%d deliveries=%d, want success/1/1", status, attempts, deliveries)
+	}
+}
+
 func TestWebhookRetryWorkerPostgresExhaustsConfiguredAttempts(t *testing.T) {
 	if os.Getenv(testdb.EnvVar) == "" {
 		t.Skipf("set %s to an isolated disposable PostgreSQL database", testdb.EnvVar)
@@ -295,4 +343,49 @@ func TestWebhookRetryWorkerPostgresExhaustsConfiguredAttempts(t *testing.T) {
 	if _, err := worker.claimOne(ctx); err != sql.ErrNoRows {
 		t.Fatalf("claim after retry exhaustion = %v, want sql.ErrNoRows", err)
 	}
+}
+
+func openWebhookRetryTestDB(t *testing.T) *sql.DB {
+	t.Helper()
+	if os.Getenv(testdb.EnvVar) == "" {
+		t.Skipf("set %s to an isolated disposable PostgreSQL database", testdb.EnvVar)
+	}
+	db, err := sql.Open("postgres", testdb.URL(t))
+	if err != nil {
+		t.Fatalf("open disposable PostgreSQL: %v", err)
+	}
+	t.Cleanup(func() {
+		if err := db.Close(); err != nil {
+			t.Errorf("close disposable PostgreSQL: %v", err)
+		}
+	})
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+	if err := db.PingContext(ctx); err != nil {
+		t.Fatalf("connect to disposable PostgreSQL: %v", err)
+	}
+	return db
+}
+
+func openWebhookRetryRuntimeDB(t *testing.T, adminDB *sql.DB) *sql.DB {
+	t.Helper()
+	runtimeURL := os.Getenv("POS_APP_DATABASE_URL")
+	if runtimeURL == "" {
+		return adminDB
+	}
+	runtimeDB, err := sql.Open("postgres", runtimeURL)
+	if err != nil {
+		t.Fatalf("open restricted runtime PostgreSQL: %v", err)
+	}
+	t.Cleanup(func() {
+		if err := runtimeDB.Close(); err != nil {
+			t.Errorf("close restricted runtime PostgreSQL: %v", err)
+		}
+	})
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+	if err := runtimeDB.PingContext(ctx); err != nil {
+		t.Fatalf("connect to restricted runtime PostgreSQL: %v", err)
+	}
+	return runtimeDB
 }
