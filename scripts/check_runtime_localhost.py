@@ -38,6 +38,8 @@ ALLOWLIST_FILES = {
     Path("frontend/apps/restaurant-website/middleware.ts"),
     Path("frontend/apps/dashboard/src/lib/config.ts"),
     Path("frontend/apps/landing/src/lib/config.ts"),
+    # SEO uses a localhost origin only when NODE_ENV is not production.
+    Path("frontend/apps/landing/src/lib/seo.ts"),
     Path("frontend/apps/super-admin/src/lib/config.ts"),
     Path("frontend/apps/dashboard/next.config.js"),
     # This browser QA script supports a local default and accepts POS_QA_BASE_URL.
@@ -48,6 +50,8 @@ ALLOWLIST_FILES = {
     # Registration Playwright defaults target only the disposable E2E stack.
     Path("frontend/apps/landing/playwright.registration.config.ts"),
     Path("frontend/apps/landing/tests/registration-e2e/fixtures.ts"),
+    # Landing visual QA runner defaults to a local production preview; CI can override POOS_ACCEPTANCE_URL.
+    Path("frontend/apps/landing/scripts/capture-landing-acceptance.mjs"),
     Path("frontend/apps/landing/next.config.js"),
     Path("frontend/apps/restaurant-website/next.config.js"),
 }
