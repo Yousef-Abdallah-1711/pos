@@ -190,7 +190,6 @@ export function ComponentBuilder() {
                 {/* Toggle Visibility */}
                 <button
                   onClick={(e) => handleToggleComponent(component.id, e)}
-                  aria-label={component.enabled ? 'Disable component' : 'Enable component'}
                   title={component.enabled ? 'Disable component' : 'Enable component'}
                   aria-label={`${component.enabled ? 'Disable' : 'Enable'} ${component.title}`}
                   className={`flex-shrink-0 transition ${
@@ -210,7 +209,6 @@ export function ComponentBuilder() {
                   }}
                   aria-label={`Delete ${component.title}`}
                   title="Delete component"
-                  aria-label={`Delete ${component.title}`}
                   className="text-gray-400 hover:text-red-600 dark:hover:text-red-400 flex-shrink-0 transition"
                 >
                   <Trash2 className="h-4 w-4" />

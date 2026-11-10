@@ -3,4 +3,4 @@
  */
 
 export * from './registry-types'
-export { componentRegistry, getComponentRegistry, useComponentRegistry } from './component-registry'
+export { componentRegistry, getComponentRegistry, registerEditorLoader, useComponentRegistry } from './component-registry'

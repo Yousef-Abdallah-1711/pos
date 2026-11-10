@@ -6,6 +6,9 @@ import { useThemeStore } from '@/hooks/useThemeStore'
 import { ComponentConfig, ComponentType } from '@/types/theme'
 import { componentRegistry } from '@pos-saas/ui-components/registry'
 import { debugWarn } from '@/lib/debug'
+import { registerDashboardThemeEditors } from '../register-editors'
+
+registerDashboardThemeEditors()
 
 // Helper function to extract label from translation objects
 function extractLabel(label: any): string {

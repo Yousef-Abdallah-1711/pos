@@ -141,18 +141,16 @@ export class ErrorLoggerService {
       return 'critical'
     }
 
-    // High severity
-    if (category === 'validation' || category === 'storage') {
+    // Network outages are usually broad-impact; validation/storage errors are recoverable.
+    if (category === 'network') {
       return 'high'
     }
 
-    // Network failures are often transient and recoverable; component/state errors need investigation.
-    if (category === 'network' || category === 'component' || category === 'state') {
+    if (category === 'component' || category === 'state' || category === 'unknown') {
       return 'medium'
     }
 
-    // Low severity
-    if (category === 'unknown') {
+    if (category === 'validation' || category === 'storage') {
       return 'low'
     }
 
@@ -175,10 +173,7 @@ export class ErrorLoggerService {
     const category = this.isCategory(requestedCategory)
       ? requestedCategory
       : this.categorizeError(error)
-    const requestedSeverity = context?.severity
-    const severity = this.isSeverity(requestedSeverity)
-      ? requestedSeverity
-      : this.getSeverity(category, message)
+    const severity = this.getSeverity(category, message)
 
     const errorLog: ErrorLog = {
       id: this.generateId(),
@@ -231,7 +226,7 @@ export class ErrorLoggerService {
     message: string,
     context?: Record<string, any>
   ): ErrorLog {
-    return this.log(`Validation error: ${field} - ${message}`, context)
+    return this.log(`Validation error: ${field} - ${message}`, { ...context, field })
   }
 
   /**
@@ -259,9 +254,9 @@ export class ErrorLoggerService {
     context?: Record<string, any>
   ): ErrorLog {
     return this.log(new Error(`${componentName}: ${error.message}`), {
+      ...context,
       category: 'component',
       component: componentName,
-      ...context,
     })
   }
 
@@ -354,10 +349,6 @@ export class ErrorLoggerService {
 
   private generateId(): string {
     return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
-  }
-
-  private isSeverity(value: unknown): value is ErrorSeverity {
-    return value === 'low' || value === 'medium' || value === 'high' || value === 'critical'
   }
 
   private isCategory(value: unknown): value is ErrorCategory {
