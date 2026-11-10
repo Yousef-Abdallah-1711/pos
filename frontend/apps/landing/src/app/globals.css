@@ -82,6 +82,8 @@ a { text-underline-offset: .2em; }
 
 .poos-brand { display: inline-flex; align-items: center; gap: .65rem; color: var(--poos-ink); font-size: 1.35rem; font-weight: 800; letter-spacing: -.03em; text-decoration: none; }
 .poos-brand__symbol { width: 2.5rem; height: 2.5rem; flex: none; color: var(--poos-violet); }
+.poos-brand--inverse { color: var(--poos-white); }
+.poos-brand--inverse .poos-brand__symbol { color: var(--poos-lavender); --poos-brand-node: var(--poos-white); }
 .poos-header {
   position: sticky; inset-block-start: 0; z-index: 40; border-bottom: 1px solid var(--poos-rule);
   background: var(--poos-paper); transition: box-shadow 180ms ease;
@@ -197,7 +199,6 @@ a { text-underline-offset: .2em; }
 .poos-footer { padding-block: 2rem 2.5rem; background: #171327; color: var(--poos-white); }
 .poos-footer__inner { display: grid; grid-template-columns: 1fr auto; gap: 1.5rem 3rem; align-items: center; }
 .poos-footer .poos-brand { color: var(--poos-white); }
-.poos-footer .poos-brand__symbol { color: var(--poos-lavender); }
 .poos-footer__inner > div p { max-width: 34rem; margin: .8rem 0 0; color: #e1dbea; line-height: 1.65; }
 .poos-footer__links { display: flex; flex-wrap: wrap; gap: .35rem 1.1rem; }
 .poos-footer__links a { display: inline-flex; min-height: 2.75rem; align-items: center; color: #f0ecf7; text-decoration: none; }

@@ -13,7 +13,7 @@ export function Footer() {
     <footer className="poos-footer" dir={dir}>
       <div className="poos-shell poos-footer__inner">
         <div>
-          <BrandMark href={`/${locale}`} label="POOS" />
+          <BrandMark href={`/${locale}`} label="POOS" inverse />
           <p className="poos-muted">{t.footer.tagline}</p>
         </div>
         <nav className="poos-footer__links" aria-label={t.nav.mainNavigation}>

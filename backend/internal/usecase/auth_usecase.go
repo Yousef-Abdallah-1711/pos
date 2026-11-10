@@ -73,13 +73,17 @@ func (u *AuthUseCase) SetSuperAdminRepo(repo *repository.SuperAdminRepository) {
 
 // Register creates a new tenant, restaurant, and admin user
 func (u *AuthUseCase) Register(req *domain.RegisterRequest) (*domain.AuthResponse, error) {
-	// Validate input
-	if req.Name == "" || req.Email == "" || req.Password == "" || req.RestaurantName == "" {
-		return nil, errors.New("all fields are required")
-	}
+	return u.RegisterContext(context.Background(), req)
+}
 
-	if len(req.Password) < 6 {
-		return nil, errors.New("password must be at least 6 characters")
+// RegisterContext validates user input before persistence and carries request
+// cancellation through the tenant onboarding transaction.
+func (u *AuthUseCase) RegisterContext(ctx context.Context, req *domain.RegisterRequest) (*domain.AuthResponse, error) {
+	if req == nil {
+		return nil, &domain.ValidationErrors{Fields: map[string]string{"form": "Registration details are required."}}
+	}
+	if err := req.NormalizeAndValidate(); err != nil {
+		return nil, err
 	}
 
 	validator := NewSubdomainValidator()
@@ -87,16 +91,16 @@ func (u *AuthUseCase) Register(req *domain.RegisterRequest) (*domain.AuthRespons
 	if slugProvided {
 		formattedSlug, err := validator.ValidateAndFormat(req.RestaurantSlug)
 		if err != nil {
-			return nil, err
+			return nil, &domain.ValidationErrors{Fields: map[string]string{"restaurant_slug": "Use a valid, unreserved website address."}}
 		}
 		req.RestaurantSlug = formattedSlug
 
 		exists, err := u.repo.CheckTenantSlugExists(req.RestaurantSlug)
 		if err != nil {
-			return nil, fmt.Errorf("failed to validate subdomain: %w", err)
+			return nil, fmt.Errorf("check tenant slug: %w", err)
 		}
 		if exists {
-			return nil, errors.New("subdomain already exists")
+			return nil, domain.ErrSubdomainAlreadyExists
 		}
 	} else {
 		req.RestaurantSlug = validator.ToSlug(req.RestaurantName)
@@ -108,20 +112,23 @@ func (u *AuthUseCase) Register(req *domain.RegisterRequest) (*domain.AuthRespons
 		return nil, fmt.Errorf("failed to check email: %w", err)
 	}
 	if exists {
-		return nil, errors.New("email already exists")
+		return nil, domain.ErrEmailAlreadyExists
 	}
 
 	// Create tenant with user
-	user, err := u.repo.CreateTenantWithUser(req)
+	user, err := u.repo.CreateTenantWithUserContext(ctx, req)
 	if err != nil {
+		if errors.Is(err, domain.ErrEmailAlreadyExists) {
+			return nil, domain.ErrEmailAlreadyExists
+		}
 		if errors.Is(err, repository.ErrTenantSlugExists) {
-			return nil, errors.New("subdomain already exists")
+			return nil, domain.ErrSubdomainAlreadyExists
 		}
 		if errors.Is(err, repository.ErrTenantNameExists) {
-			return nil, errors.New("restaurant name already exists")
+			return nil, domain.ErrRestaurantNameConflict
 		}
 		if errors.Is(err, repository.ErrTenantDomainExists) {
-			return nil, errors.New("restaurant domain already exists")
+			return nil, domain.ErrSubdomainAlreadyExists
 		}
 		return nil, fmt.Errorf("failed to register: %w", err)
 	}
@@ -129,7 +136,7 @@ func (u *AuthUseCase) Register(req *domain.RegisterRequest) (*domain.AuthRespons
 	// Generate JWT token
 	token, err := u.tokenService.GenerateToken(user.ID, user.TenantID, user.RestaurantID, user.Email, user.Role)
 	if err != nil {
-		return nil, fmt.Errorf("failed to generate token: %w", err)
+		return &domain.AuthResponse{User: user}, fmt.Errorf("registration committed but session token creation failed: %w", err)
 	}
 
 	// Clear sensitive data
@@ -143,15 +150,17 @@ func (u *AuthUseCase) Register(req *domain.RegisterRequest) (*domain.AuthRespons
 
 // Login authenticates a user and detects if they have multiple tenant accounts
 func (u *AuthUseCase) Login(req *domain.LoginRequest) (interface{}, error) {
-	// Validate input
-	if req.Email == "" || req.Password == "" {
-		return nil, errors.New("email and password are required")
+	if req == nil {
+		return nil, &domain.ValidationErrors{Fields: map[string]string{"email": "Email is required.", "password": "Password is required."}}
+	}
+	if err := req.NormalizeAndValidate(); err != nil {
+		return nil, err
 	}
 
 	// Find ALL users with this email across all tenants
 	users, err := u.repo.FindUserByEmailAllTenants(req.Email)
 	if err != nil {
-		return nil, errors.New("invalid email or password")
+		return nil, fmt.Errorf("%w: %v", domain.ErrAuthDependencyUnavailable, err)
 	}
 
 	if len(users) == 0 {
@@ -177,7 +186,7 @@ func (u *AuthUseCase) Login(req *domain.LoginRequest) (interface{}, error) {
 		// Generate JWT token
 		token, err := u.tokenService.GenerateToken(user.ID, user.TenantID, user.RestaurantID, user.Email, user.Role)
 		if err != nil {
-			return nil, fmt.Errorf("failed to generate token: %w", err)
+			return nil, fmt.Errorf("%w: %v", domain.ErrTokenGeneration, err)
 		}
 
 		// Clear sensitive data
@@ -211,7 +220,7 @@ func (u *AuthUseCase) Login(req *domain.LoginRequest) (interface{}, error) {
 	}
 	selectionToken, err := u.tokenService.GenerateSelectionToken(firstUser.Email, tenantIDs, selectionTokenTTL)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create selection token: %w", err)
+		return nil, fmt.Errorf("%w: %v", domain.ErrTokenGeneration, err)
 	}
 
 	return &domain.MultiTenantLoginResponse{
@@ -243,12 +252,12 @@ func (u *AuthUseCase) LoginConfirm(req *domain.TenantSelectionRequest) (*domain.
 		return nil, errors.New("invalid email or tenant selection")
 	}
 	if u.confirmStore == nil {
-		return nil, errors.New("login is unavailable")
+		return nil, domain.ErrAuthDependencyUnavailable
 	}
 
 	users, err := u.confirmStore.FindUserByEmailAllTenants(proof.Email)
 	if err != nil {
-		return nil, errors.New("invalid email or tenant selection")
+		return nil, fmt.Errorf("%w: %v", domain.ErrAuthDependencyUnavailable, err)
 	}
 
 	var selectedUser *domain.User
@@ -271,7 +280,7 @@ func (u *AuthUseCase) LoginConfirm(req *domain.TenantSelectionRequest) (*domain.
 
 	token, err := u.tokenService.GenerateToken(selectedUser.ID, selectedUser.TenantID, selectedUser.RestaurantID, selectedUser.Email, selectedUser.Role)
 	if err != nil {
-		return nil, fmt.Errorf("failed to generate token: %w", err)
+		return nil, fmt.Errorf("%w: %v", domain.ErrTokenGeneration, err)
 	}
 
 	selectedUser.PasswordHash = ""

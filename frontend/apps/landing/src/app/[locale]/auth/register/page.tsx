@@ -1,158 +1,77 @@
 'use client'
 
-import { useState, useCallback, useEffect, useRef } from 'react'
+import { useCallback } from 'react'
 import Link from 'next/link'
-import { isAxiosError } from 'axios'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import * as z from 'zod'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Eye, EyeOff, Loader2, Check, X } from 'lucide-react'
+import { AsyncAvailabilityField, FormErrorSummary, FormField, PasswordField, SubmitButton, applyApiFieldErrors, createRegisterSchema, isSubdomainFormatValid, parseApiError, useDebouncedAvailability, fieldAccessibility } from '@pos-saas/form-foundation'
 import api from '@/lib/api'
 import { useAuthStore } from '@/stores/authStore'
-import { toast } from 'sonner'
 import { getConfig } from '@/lib/config'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { Navbar } from '@/components/Navbar'
 
-type RegisterForm = {
-  name: string
-  email: string
-  password: string
-  confirmPassword: string
-  restaurantName: string
-  restaurantSlug: string
-  phone?: string
-}
+type RegisterForm = { name: string; email: string; password: string; confirmPassword: string; restaurantName: string; restaurantSlug: string; phone: string }
 
 export default function RegisterPage() {
   const setAuth = useAuthStore((state) => state.setAuth)
   const { t, dir, language } = useLanguage()
-  const locale = language
-  const [showPassword, setShowPassword] = useState(false)
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
-  const [subdomainStatus, setSubdomainStatus] = useState<'idle' | 'checking' | 'available' | 'unavailable'>('idle')
-  const [subdomainMessage, setSubdomainMessage] = useState('')
-  const checkSubdomainTimeout = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const currentSlug = useRef('')
-
-  useEffect(() => () => {
-    if (checkSubdomainTimeout.current) clearTimeout(checkSubdomainTimeout.current)
+  const text = t.auth.register
+  const messages = { required: t.auth.validation.required, nameMin: t.auth.validation.nameMin, nameMax: t.auth.validation.nameMax, invalidEmail: t.auth.validation.invalidEmail, emailMax: t.auth.validation.emailMax, passwordMin: t.auth.validation.passwordMin, passwordMax: t.auth.validation.passwordMax, passwordMismatch: t.auth.validation.passwordsMismatch, invalidSubdomain: t.auth.validation.invalidSubdomain, reservedSubdomain: t.auth.validation.reservedSubdomain, invalidPhone: t.auth.validation.invalidPhone }
+  const schema = createRegisterSchema(messages)
+  const { register, handleSubmit, watch, setError, clearErrors, setFocus, formState: { errors, isSubmitting, isSubmitted } } = useForm<RegisterForm>({ resolver: zodResolver(schema), mode: 'onTouched', reValidateMode: 'onChange', defaultValues: { phone: '' } })
+  const restaurantSlug = watch('restaurantSlug') ?? ''
+  const checkAvailability = useCallback(async (slug: string, signal: AbortSignal) => {
+    const response = await api.get('/auth/check-subdomain', { params: { slug }, signal, timeout: 8000 })
+    if (response.data.available) return true
+    return /reserved/i.test(String(response.data.message)) ? 'reserved' as const : false
   }, [])
-
-  const registerSchema = z.object({
-    name: z.string().min(2, t.auth.validation.nameMin),
-    email: z.string().email(t.auth.validation.invalidEmail),
-    password: z.string().min(6, t.auth.validation.passwordMin),
-    confirmPassword: z.string(),
-    restaurantName: z.string().min(2, t.auth.validation.restaurantNameMin),
-    restaurantSlug: z.string().min(2, t.auth.validation.subdomainMin).max(63, t.auth.validation.subdomainMax),
-    phone: z.string().optional(),
-  }).refine((data) => data.password === data.confirmPassword, {
-    message: t.auth.validation.passwordsMismatch,
-    path: ['confirmPassword'],
-  })
-
-  const {
-    register,
-    handleSubmit,
-    watch,
-    formState: { errors },
-  } = useForm<RegisterForm>({
-    resolver: zodResolver(registerSchema),
-  })
-
-  const restaurantSlug = watch('restaurantSlug')
-
-  const checkSubdomainAvailability = useCallback(async (slug: string) => {
-    if (!slug || slug.length < 2) {
-      setSubdomainStatus('idle')
-      return
-    }
-
-    setSubdomainStatus('checking')
-    try {
-      const response = await api.get('/auth/check-subdomain', {
-        params: { slug: slug.toLowerCase() },
-      })
-
-      if (currentSlug.current !== slug.toLowerCase()) return
-
-      if (response.data.available) {
-        setSubdomainStatus('available')
-        setSubdomainMessage(t.auth.register.subdomainAvailable)
-      } else {
-        setSubdomainStatus('unavailable')
-        setSubdomainMessage(response.data.message || t.auth.register.subdomainUnavailable)
-      }
-    } catch (error) {
-      if (currentSlug.current !== slug.toLowerCase()) return
-      setSubdomainStatus('unavailable')
-      setSubdomainMessage(t.auth.register.subdomainError)
-    }
-  }, [t])
-
-  const handleSubdomainChange = useCallback((slug: string) => {
-    if (checkSubdomainTimeout.current) clearTimeout(checkSubdomainTimeout.current)
-    currentSlug.current = slug.toLowerCase()
-
-    if (!slug || slug.length < 2) {
-      setSubdomainStatus('idle')
-      return
-    }
-
-    setSubdomainStatus('checking')
-    checkSubdomainTimeout.current = setTimeout(() => {
-      checkSubdomainAvailability(slug)
-    }, 500)
-  }, [checkSubdomainAvailability])
+  const availability = useDebouncedAvailability(restaurantSlug, isSubdomainFormatValid, checkAvailability, 500)
+  const fallback = language === 'ar'
+    ? { validation: 'يرجى مراجعة الحقول الموضحة.', invalidCredentials: 'البريد الإلكتروني أو كلمة المرور غير صحيحة.', rateLimited: 'محاولات كثيرة. انتظر قليلًا ثم حاول مجددًا.', unavailable: 'الخدمة غير متاحة مؤقتًا. حاول مرة أخرى.', network: 'تعذر الاتصال. تحقق من الاتصال ثم حاول مجددًا.', unexpected: 'تعذر إنشاء الحساب. حاول مرة أخرى.', conflict: 'هذا البريد الإلكتروني أو رابط الموقع مستخدم بالفعل.' }
+    : { validation: 'Please review the highlighted fields.', invalidCredentials: 'Email or password is incorrect.', rateLimited: 'Too many attempts. Wait a moment and try again.', unavailable: 'The service is temporarily unavailable. Please try again.', network: 'Unable to connect. Check your connection and try again.', unexpected: 'We could not create your account. Please try again.', conflict: 'That email or website address is already in use.' }
+  const messagesByState = language === 'ar'
+    ? { invalid: messages.invalidSubdomain, checking: 'جارٍ التحقق من التوفر…', available: text.subdomainAvailable, taken: text.subdomainUnavailable, reserved: 'رابط الموقع هذا محجوز.', error: 'تعذر التحقق من التوفر. تحقق من الاتصال ثم حاول مجددًا.' }
+    : { invalid: messages.invalidSubdomain, checking: 'Checking availability…', available: text.subdomainAvailable, taken: text.subdomainUnavailable, reserved: 'This website address is reserved.', error: 'Availability could not be checked. Check your connection and try again.' }
+  const focusField = (field: keyof RegisterForm) => window.requestAnimationFrame(() => setFocus(field))
 
   const onSubmit = async (data: RegisterForm) => {
-    setIsLoading(true)
+    if (availability.state !== 'available' || availability.checkedValue !== data.restaurantSlug.trim().toLowerCase()) {
+      setError('restaurantSlug', { type: 'validate', message: availability.state === 'error' ? messagesByState.error : text.subdomainRequired })
+      focusField('restaurantSlug')
+      return
+    }
+    clearErrors()
     try {
-      if (subdomainStatus !== 'available' || currentSlug.current !== data.restaurantSlug.toLowerCase()) {
-        toast.error(t.auth.register.subdomainRequired)
-        setIsLoading(false)
+      const response = await api.post('/auth/register', { name: data.name, email: data.email, password: data.password, restaurant_name: data.restaurantName, restaurant_slug: data.restaurantSlug, phone: data.phone || undefined })
+      const { user, session_established: sessionEstablished } = response.data
+      if (!sessionEstablished) {
+        window.location.href = `/${language}/auth/login?created=1`
         return
       }
-
-      const response = await api.post('/auth/register', {
-        name: data.name,
-        email: data.email,
-        password: data.password,
-        restaurant_name: data.restaurantName,
-        restaurant_slug: data.restaurantSlug.toLowerCase(),
-        phone: data.phone,
-      })
-
-      const { user } = response.data
       setAuth(user, '')
-      toast.success(t.auth.register.accountCreated)
-
-      const { dashboardUrl } = getConfig()
-      window.location.href = `${dashboardUrl}/${locale}/auth/callback`
-    } catch (error: unknown) {
-      let message = t.auth.register.registrationFailed
-      if (isAxiosError<{ error?: string }>(error)) {
-        if (typeof error.response?.data?.error === 'string') {
-          message = error.response.data.error
-        } else if (error.response?.status === 400) {
-          message = t.auth.register.invalidInput
-        } else if (error.code === 'ERR_NETWORK') {
-          message = t.auth.register.networkError
-        }
-      }
-      toast.error(message)
-    } finally {
-      setIsLoading(false)
+      window.location.href = `${getConfig().dashboardUrl}/${language}/auth/callback`
+    } catch (error) {
+      const parsed = parseApiError(error, fallback)
+      applyApiFieldErrors(parsed.fields, (field, message) => setError(field as keyof RegisterForm, { type: 'server', message }))
+      const firstField = Object.keys(parsed.fields)[0]
+      if (firstField) {
+        const fieldName = firstField === 'restaurant_slug' ? 'restaurantSlug' : firstField === 'restaurant_name' ? 'restaurantName' : firstField
+        focusField(fieldName as keyof RegisterForm)
+      } else setError('root.server', { type: parsed.code, message: parsed.message })
     }
   }
 
-  return (
-    <>
+  const onInvalid = (invalid: Record<string, unknown>) => {
+    const firstField = Object.keys(invalid)[0] as keyof RegisterForm | undefined
+    if (firstField) focusField(firstField)
+  }
+  const inputClass = 'poos-input'
+  const common = { disabled: isSubmitting, className: inputClass }
+  const fieldError = (key: keyof RegisterForm) => errors[key]?.message
+  const { restaurantDomain } = getConfig()
+
+  return <>
     <a className="poos-skip-link" href="#main-content">{t.nav.skipToContent}</a>
     <Navbar />
     <main id="main-content" dir={dir} className="auth-page">
@@ -164,160 +83,29 @@ export default function RegisterPage() {
           </div>
           <div className="auth-story__rule">{language === 'ar' ? 'منصة واحدة لفريق الخدمة والمطبخ.' : 'One platform for front- and back-of-house work.'}</div>
         </section>
-
         <section className="auth-form-panel" aria-labelledby="register-heading">
           <div className="auth-form">
-            <Link className="auth-form__back" href={`/${locale}`}>
-              {language === 'ar' ? 'العودة إلى POOS' : 'Back to POOS'}
-            </Link>
-            <h2 id="register-heading">{t.auth.register.title}</h2>
+            <Link className="auth-form__back" href={`/${language}`}>{language === 'ar' ? 'العودة إلى POOS' : 'Back to POOS'}</Link>
+            <h2 id="register-heading">{text.title}</h2>
             <p className="auth-form__intro">{language === 'ar' ? 'أدخل بياناتك وبيانات مطعمك لبدء إنشاء الحساب.' : 'Enter your details and restaurant information to create an account.'}</p>
-
-          <form onSubmit={handleSubmit(onSubmit)} className="auth-form__fields">
-            {/* Name */}
-            <div className="auth-field">
-              <Label htmlFor="name">{t.auth.register.fullName}</Label>
-              <Input id="name" className="poos-input" type="text" autoComplete="name" placeholder={t.auth.register.fullNamePlaceholder} aria-invalid={Boolean(errors.name)} aria-describedby={errors.name ? 'register-name-error' : undefined} {...register('name')} disabled={isLoading} />
-              {errors.name && <p id="register-name-error" className="poos-error" role="alert">{errors.name.message}</p>}
-            </div>
-
-            {/* Email */}
-            <div className="auth-field">
-              <Label htmlFor="email">{t.auth.register.email}</Label>
-              <Input id="email" className="poos-input" type="email" autoComplete="email" placeholder={t.auth.register.emailPlaceholder} aria-invalid={Boolean(errors.email)} aria-describedby={errors.email ? 'register-email-error' : undefined} {...register('email')} disabled={isLoading} />
-              {errors.email && <p id="register-email-error" className="poos-error" role="alert">{errors.email.message}</p>}
-            </div>
-
-            {/* Restaurant Name */}
-            <div className="auth-field">
-              <Label htmlFor="restaurantName">{t.auth.register.restaurantName}</Label>
-              <Input id="restaurantName" className="poos-input" type="text" autoComplete="organization" placeholder={t.auth.register.restaurantNamePlaceholder} aria-invalid={Boolean(errors.restaurantName)} aria-describedby={errors.restaurantName ? 'register-restaurant-error' : undefined} {...register('restaurantName')} disabled={isLoading} />
-              {errors.restaurantName && <p id="register-restaurant-error" className="poos-error" role="alert">{errors.restaurantName.message}</p>}
-            </div>
-
-            {/* Website Subdomain */}
-            <div className="auth-field">
-              <Label htmlFor="restaurantSlug">{t.auth.register.websiteSubdomain}</Label>
-              <div className="auth-field__password">
-                <Input
-                  id="restaurantSlug"
-                  className={`poos-input ${subdomainStatus === 'available' ? 'border-green-600' : subdomainStatus === 'unavailable' ? 'border-red-700' : ''}`}
-                  type="text"
-                  autoComplete="url"
-                  placeholder={t.auth.register.subdomainPlaceholder}
-                  aria-invalid={subdomainStatus === 'unavailable' || Boolean(errors.restaurantSlug)}
-                  aria-describedby="register-subdomain-status register-subdomain-hint"
-                  {...register('restaurantSlug', {
-                    onChange: (e) => handleSubdomainChange(e.target.value),
-                  })}
-                  disabled={isLoading}
-                />
-                <div className="auth-field__status-icon" aria-hidden="true">
-                  {subdomainStatus === 'checking' && <Loader2 size={19} className="animate-spin" />}
-                  {subdomainStatus === 'available' && <Check size={19} className="auth-status--available" />}
-                  {subdomainStatus === 'unavailable' && <X size={19} className="auth-status--unavailable" />}
-                </div>
-              </div>
-              {subdomainStatus !== 'idle' && (
-                <p id="register-subdomain-status" className={`auth-status ${subdomainStatus === 'available' ? 'auth-status--available' : subdomainStatus === 'unavailable' ? 'auth-status--unavailable' : 'poos-muted'}`} role="status" aria-live="polite">
-                  {subdomainStatus === 'checking' ? (language === 'ar' ? 'جارٍ التحقق من الرابط…' : 'Checking URL availability…') : subdomainMessage}
-                </p>
-              )}
-              {errors.restaurantSlug && <p id="register-subdomain-error" className="poos-error" role="alert">{errors.restaurantSlug.message}</p>}
-              <p id="register-subdomain-hint" className="auth-form__subdomain">
-                {t.auth.register.websiteAccessible}{' '}
-                <strong>{restaurantSlug ? restaurantSlug.toLowerCase() : 'your-subdomain'}.{getConfig().restaurantDomain}</strong>
-              </p>
-            </div>
-
-            {/* Phone */}
-            <div className="auth-field">
-              <Label htmlFor="phone">{t.auth.register.phone}</Label>
-              <Input id="phone" className="poos-input" type="tel" autoComplete="tel" placeholder={t.auth.register.phonePlaceholder} {...register('phone')} disabled={isLoading} />
-            </div>
-
-            {/* Password */}
-            <div className="auth-field">
-              <Label htmlFor="password">{t.auth.register.password}</Label>
-              <div className="auth-field__password">
-                <Input
-                  id="password"
-                  className="poos-input"
-                  type={showPassword ? 'text' : 'password'}
-                  autoComplete="new-password"
-                  placeholder={t.auth.register.passwordPlaceholder}
-                  aria-invalid={Boolean(errors.password)}
-                  aria-describedby={errors.password ? 'register-password-error' : undefined}
-                  {...register('password')}
-                  disabled={isLoading}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword((visible) => !visible)}
-                  aria-label={showPassword ? (language === 'ar' ? 'إخفاء كلمة المرور' : 'Hide password') : (language === 'ar' ? 'إظهار كلمة المرور' : 'Show password')}
-                  aria-pressed={showPassword}
-                >
-                  {showPassword ? <EyeOff aria-hidden="true" size={20} /> : <Eye aria-hidden="true" size={20} />}
-                </button>
-              </div>
-              {errors.password && <p id="register-password-error" className="poos-error" role="alert">{errors.password.message}</p>}
-            </div>
-
-            {/* Confirm Password */}
-            <div className="auth-field">
-              <Label htmlFor="confirmPassword">{t.auth.register.confirmPassword}</Label>
-              <div className="auth-field__password">
-                <Input
-                  id="confirmPassword"
-                  className="poos-input"
-                  type={showConfirmPassword ? 'text' : 'password'}
-                  autoComplete="new-password"
-                  placeholder={t.auth.register.confirmPasswordPlaceholder}
-                  aria-invalid={Boolean(errors.confirmPassword)}
-                  aria-describedby={errors.confirmPassword ? 'register-confirm-password-error' : undefined}
-                  {...register('confirmPassword')}
-                  disabled={isLoading}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowConfirmPassword((visible) => !visible)}
-                  aria-label={showConfirmPassword ? (language === 'ar' ? 'إخفاء تأكيد كلمة المرور' : 'Hide password confirmation') : (language === 'ar' ? 'إظهار تأكيد كلمة المرور' : 'Show password confirmation')}
-                  aria-pressed={showConfirmPassword}
-                >
-                  {showConfirmPassword ? <EyeOff aria-hidden="true" size={20} /> : <Eye aria-hidden="true" size={20} />}
-                </button>
-              </div>
-              {errors.confirmPassword && <p id="register-confirm-password-error" className="poos-error" role="alert">{errors.confirmPassword.message}</p>}
-            </div>
-
-            {/* Submit */}
-            <Button
-              type="submit"
-              className="poos-button auth-form__submit"
-              disabled={isLoading}
-              aria-live="polite"
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 aria-hidden="true" className="animate-spin" size={18} />
-                  {t.auth.register.creatingAccount}
-                </>
-              ) : (
-                t.auth.register.createAccount
-              )}
-            </Button>
-          </form>
-
-          <p className="auth-form__footer">
-            {t.auth.register.hasAccount}{' '}
-            <Link href={`/${locale}/auth/login`}>
-              {t.auth.register.signIn}
-            </Link>
-          </p>
+            <form method="post" noValidate onSubmit={handleSubmit(onSubmit, onInvalid)} className="auth-form__fields">
+              <FormErrorSummary title={fallback.validation} errors={isSubmitted ? Object.fromEntries(Object.entries(errors).filter(([key]) => key !== 'root').map(([key, value]) => [key, value?.message ?? 'Review this field'])) : {}} onFocusField={(key) => setFocus(key as keyof RegisterForm)} />
+              {errors.root?.server?.message && <p role="alert" className="poos-error">{errors.root.server.message}</p>}
+              <FormField id="name" label={text.fullName} required error={fieldError('name')}><input {...register('name')} {...fieldAccessibility('name', fieldError('name'))} autoComplete="name" maxLength={255} placeholder={text.fullNamePlaceholder} {...common} /></FormField>
+              <FormField id="email" label={text.email} required error={fieldError('email')}><input {...register('email')} {...fieldAccessibility('email', fieldError('email'))} type="email" autoComplete="email" maxLength={255} placeholder={text.emailPlaceholder} {...common} /></FormField>
+              <FormField id="restaurantName" label={text.restaurantName} required error={fieldError('restaurantName')}><input {...register('restaurantName')} {...fieldAccessibility('restaurantName', fieldError('restaurantName'))} autoComplete="organization" maxLength={255} placeholder={text.restaurantNamePlaceholder} {...common} /></FormField>
+              <FormField id="restaurantSlug" label={text.websiteSubdomain} required description={`${text.websiteAccessible} ${restaurantSlug || 'your-subdomain'}.${restaurantDomain}`} error={fieldError('restaurantSlug')}>
+                <input {...register('restaurantSlug')} {...fieldAccessibility('restaurantSlug', fieldError('restaurantSlug'))} autoCapitalize="none" autoCorrect="off" maxLength={63} placeholder={text.subdomainPlaceholder} {...common} />
+                <AsyncAvailabilityField state={availability.state} messages={messagesByState} />
+              </FormField>
+              <FormField id="phone" label={text.phone} optionalLabel={t.auth.validation.optional} error={fieldError('phone')}><input {...register('phone')} {...fieldAccessibility('phone', fieldError('phone'))} type="tel" autoComplete="tel" placeholder={text.phonePlaceholder} {...common} /></FormField>
+              <FormField id="password" label={text.password} required description={language === 'ar' ? '6 أحرف على الأقل، وبحد أقصى 72 بايتًا.' : 'At least 6 characters; maximum 72 UTF-8 bytes.'} error={fieldError('password')}><div className="auth-field__password"><PasswordField {...register('password')} {...fieldAccessibility('password', fieldError('password'))} autoComplete="new-password" placeholder={text.passwordPlaceholder} label={text.password} visibleLabel={language === 'ar' ? 'إظهار كلمة المرور' : 'Show password'} hiddenLabel={language === 'ar' ? 'إخفاء كلمة المرور' : 'Hide password'} {...common} /></div></FormField>
+              <FormField id="confirmPassword" label={text.confirmPassword} required error={fieldError('confirmPassword')}><div className="auth-field__password"><PasswordField {...register('confirmPassword')} {...fieldAccessibility('confirmPassword', fieldError('confirmPassword'))} autoComplete="new-password" placeholder={text.confirmPasswordPlaceholder} label={text.confirmPassword} visibleLabel={language === 'ar' ? 'إظهار كلمة المرور' : 'Show password'} hiddenLabel={language === 'ar' ? 'إخفاء كلمة المرور' : 'Hide password'} {...common} /></div></FormField>
+              <SubmitButton isSubmitting={isSubmitting} loadingLabel={text.creatingAccount} className="poos-button auth-form__submit">{text.createAccount}</SubmitButton>
+            </form>
           </div>
         </section>
       </div>
     </main>
-    </>
-  )
+  </>
 }

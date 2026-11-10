@@ -1,11 +1,12 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { Loader2, X } from 'lucide-react'
 import { useAuthStore } from '@/stores/authStore'
 import { getConfig } from '@/lib/config'
 import { toast } from 'sonner'
 import { useLanguage } from '@/contexts/LanguageContext'
+import { parseApiError } from '@pos-saas/form-foundation'
 
 interface Tenant {
   tenant_id: number
@@ -18,6 +19,7 @@ interface Tenant {
 interface TenantSelectorModalProps {
   isOpen: boolean
   email: string
+  /** Proof of password verification returned by POST /auth/login; required by /auth/login/confirm. */
   selectionToken: string
   tenants: Tenant[]
   onTenantSelected?: (tenantId: number) => void
@@ -52,7 +54,9 @@ export function TenantSelectorModal({
     }
   }, [isOpen])
 
-  if (!isOpen || !tenants.length) return null
+  if (!isOpen || !tenants || tenants.length === 0) {
+    return null
+  }
 
   const handleSelectTenant = async (tenantId: number) => {
     setSelectedTenantId(tenantId)
@@ -60,33 +64,57 @@ export function TenantSelectorModal({
     setError(null)
 
     try {
-      const response = await fetch(`${getConfig().apiUrl}/auth/login/confirm`, {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, tenant_id: tenantId, selection_token: selectionToken }),
-      })
+      const response = await fetch(
+        `${getConfig().apiUrl}/auth/login/confirm`,
+        {
+          method: 'POST',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            email,
+            tenant_id: tenantId,
+            selection_token: selectionToken,
+          }),
+        }
+      )
 
       if (!response.ok) {
-        const errorData: unknown = await response.json()
-        const apiMessage = typeof errorData === 'object' && errorData !== null && 'error' in errorData && typeof errorData.error === 'string'
-          ? errorData.error
-          : t.auth.tenantSelector.failedToSelect
-        throw new Error(apiMessage)
+        const errorData = await response.json().catch(() => ({}))
+        const parsed = parseApiError({ response: { status: response.status, data: errorData } }, {
+          validation: t.auth.tenantSelector.failedToSelect,
+          invalidCredentials: t.auth.login.invalidCredentials,
+          rateLimited: 'Too many attempts. Wait a moment and try again.',
+          unavailable: t.auth.tenantSelector.failedToSelect,
+          network: t.auth.tenantSelector.failedToSelect,
+          unexpected: t.auth.tenantSelector.failedToSelect,
+          conflict: t.auth.tenantSelector.failedToSelect,
+        })
+        throw new Error(parsed.message)
       }
 
-      const data: { user?: Parameters<typeof setAuth>[0] } = await response.json()
-      if (!data.user) throw new Error(t.auth.tenantSelector.failedToSelect)
+      const data = await response.json()
 
-      setAuth(data.user, '')
-      toast.success(t.auth.login.loginSuccess)
-      onTenantSelected?.(tenantId)
-      const { dashboardUrl } = getConfig()
-      window.location.href = `${dashboardUrl}/${language}/auth/callback`
-    } catch (requestError: unknown) {
-      const message = requestError instanceof Error ? requestError.message : t.auth.tenantSelector.anError
-      setError(message)
-      toast.error(message)
+      if (data.user) {
+        setAuth(data.user, '')
+        toast.success(t.auth.login.loginSuccess)
+
+        const { dashboardUrl } = getConfig()
+        window.location.href = `${dashboardUrl}/${language}/auth/callback`
+      }
+
+      if (onTenantSelected) {
+        onTenantSelected(tenantId)
+      }
+    } catch (err) {
+      const errorMsg = err instanceof TypeError
+        ? 'Unable to connect. Check your connection and try again.'
+        : err instanceof Error
+          ? err.message
+          : t.auth.tenantSelector.anError
+      setError(errorMsg)
+      toast.error(errorMsg)
       setIsLoading(false)
       setSelectedTenantId(null)
     }
@@ -104,9 +132,7 @@ export function TenantSelectorModal({
             <X aria-hidden="true" size={20} />
           </button>
         </header>
-
         {error && <p className="tenant-dialog__error" role="alert">{error}</p>}
-
         <div className="tenant-dialog__list" aria-label={t.auth.tenantSelector.title}>
           {tenants.map((tenant) => (
             <button
@@ -129,7 +155,6 @@ export function TenantSelectorModal({
             </button>
           ))}
         </div>
-
         <p className="tenant-dialog__account">{t.auth.tenantSelector.loggedInAs} <strong dir="ltr">{email}</strong></p>
       </div>
     </dialog>

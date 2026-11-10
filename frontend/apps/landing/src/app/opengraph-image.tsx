@@ -20,11 +20,10 @@ export default function OpenGraphImage() {
         border: '18px solid #6D28D9',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 18, color: '#6D28D9', fontSize: 38, fontWeight: 800 }}>
-          <div style={{ width: 48, height: 48, borderRadius: 13, background: '#6D28D9', color: '#fff', display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '0 12px', gap: 5 }}>
-            <div style={{ height: 2, width: 24, background: 'white' }} />
-            <div style={{ height: 2, width: 16, background: 'white' }} />
-            <div style={{ height: 2, width: 24, background: 'white' }} />
-          </div>
+          <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+            <path d="M11 39V9h14a10 10 0 0 1 0 20H11m14 0h12" stroke="#6D28D9" strokeWidth="7" strokeLinecap="round" strokeLinejoin="round" />
+            <circle cx="37" cy="29" r="3.5" fill="#8B5CF6" />
+          </svg>
           POOS
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', maxWidth: 960, borderTop: '2px solid #6D28D9', paddingTop: 32 }}>
