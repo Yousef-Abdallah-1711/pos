@@ -9,7 +9,7 @@
 
 ## Scope and source review
 
-The reviewed changes cover the POOS brand package, landing and shared authentication experience, registration validation, and disposable browser acceptance. The current workspace also has a merge in progress from `origin/main` at `e519f52eb0badfb80c283f79a52c51acc1c663c6`; it has not yet been committed. The latest fetched PR #12 head is `1a709a0aec0bee164085f6ea92d4a520116909bd`, so this workspace contains unpublished work beyond the hosted checks currently shown for the PR.
+The reviewed changes cover the POOS brand package, landing and shared authentication experience, registration validation, and disposable browser acceptance. The local branch was reconciled with `origin/main` at `e519f52eb0badfb80c283f79a52c51acc1c663c6`, then committed and pushed to the existing PR #12. At final remote verification, PR #12 points to the delivered branch head; GitHub reported no checks and no independent reviews for that new head yet.
 
 The requested external standards path `C:\Users\OPT\Desktop\POS\CODING_STANDARDS.md` is not present. The repository's `CODING_STANDARDS.md` was read and applied.
 
@@ -55,6 +55,7 @@ These tests use isolated local services and synthetic accounts. This run did not
 - Landing lint: **PASS**, with no ESLint warnings or errors. Next.js reports that `next lint` is deprecated for a future Next release.
 - Production build: **PASS** with deployment-style placeholder URLs (`https://landing.poos.example`, `https://dashboard.poos.example`, and `https://api.poos.example/api/v1`). Static English and Arabic landing, Login, Register, and Super Admin Login routes were generated, as were Open Graph, robots, and sitemap routes.
 - The build noted that its local `caniuse-lite`/Browserslist dataset is 11 months old; it did not block compilation.
+- Next reported First Load JS sizes of **120KB for landing**, **210KB for Login**, and **192KB for Register**. The generated landing CSS totals **47,116 bytes** and the page font files total **390,200 bytes**; the latest verified role screenshots are **87,122 bytes desktop** and **41,641 bytes mobile**. These are local build outputs, not network-compressed transfer measurements.
 
 One initial verification invocation ran typecheck concurrently with `next build`, which temporarily removed generated `.next/types`; that invocation failed with missing generated files. The checks were rerun sequentially, and both the build and typecheck passed. A build without deployment URL variables also failed as expected because production SEO configuration requires an HTTPS landing URL; the passing build supplied deployment-style values.
 
