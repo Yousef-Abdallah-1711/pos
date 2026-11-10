@@ -196,8 +196,8 @@ describe('TenantSelectorModal', () => {
         />
       )
 
+      const selectButton = screen.getByRole('button', { name: /company a/i })
       const buttons = screen.getAllByRole('button')
-      const selectButton = buttons[0]
 
       fireEvent.click(selectButton)
 
@@ -238,7 +238,7 @@ describe('TenantSelectorModal', () => {
 
       // Button should have visual indication of being selected
       await waitFor(() => {
-        expect(companyAButton).toHaveClass('border-blue-500')
+        expect(companyAButton).toHaveClass('is-selected')
       })
     })
 
@@ -256,7 +256,7 @@ describe('TenantSelectorModal', () => {
         />
       )
 
-      const companyAButton = screen.getAllByRole('button')[0]
+      const companyAButton = screen.getByRole('button', { name: /company a/i })
       fireEvent.click(companyAButton)
 
       // Check for spinner element

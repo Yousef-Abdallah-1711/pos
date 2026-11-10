@@ -1,25 +1,38 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { isAxiosError } from 'axios'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { ChefHat, Eye, EyeOff, Loader2 } from 'lucide-react'
+import { Eye, EyeOff, Loader2 } from 'lucide-react'
 import api from '@/lib/api'
 import { useAuthStore } from '@/stores/authStore'
 import { toast } from 'sonner'
 import { getConfig } from '@/lib/config'
 import { TenantSelectorModal } from '@/components/TenantSelectorModal'
 import { useLanguage } from '@/contexts/LanguageContext'
+import { BrandMark } from '@/components/BrandMark'
 
 type LoginForm = {
   email: string
   password: string
+}
+
+function readLoginError(error: unknown) {
+  if (typeof error !== 'object' || error === null || !('response' in error)) return null
+  const response = error.response
+  if (typeof response !== 'object' || response === null) return null
+  const status = 'status' in response && typeof response.status === 'number' ? response.status : undefined
+  const data = 'data' in response ? response.data : null
+  const message = typeof data === 'object' && data !== null && 'error' in data && typeof data.error === 'string'
+    ? data.error
+    : undefined
+  return { status, message }
 }
 
 interface Tenant {
@@ -31,7 +44,6 @@ interface Tenant {
 }
 
 export default function LoginPage() {
-  const router = useRouter()
   const setAuth = useAuthStore((state) => state.setAuth)
   const { t, dir, language } = useLanguage()
   const locale = language
@@ -76,13 +88,16 @@ export default function LoginPage() {
 
       const { dashboardUrl } = getConfig()
       window.location.href = `${dashboardUrl}/${locale}/auth/callback`
-    } catch (error: any) {
+    } catch (error: unknown) {
       let message = t.auth.login.loginFailed
-      if (error.response?.data?.error) {
-        message = error.response.data.error
-      } else if (error.response?.status === 401) {
+      const responseError = readLoginError(error)
+      if (responseError?.message) {
+        message = responseError.message
+      } else if (responseError?.status === 401) {
         message = t.auth.login.invalidCredentials
-      } else if (error.code === 'ERR_NETWORK') {
+      } else if (isAxiosError(error) && error.code === 'ERR_NETWORK') {
+        message = t.auth.login.networkError
+      } else if (error instanceof Error && 'code' in error && error.code === 'ERR_NETWORK') {
         message = t.auth.login.networkError
       }
       toast.error(message)
@@ -91,109 +106,88 @@ export default function LoginPage() {
     }
   }
 
-  const handleTenantSelected = (tenantId: number) => {
+  const handleTenantSelected = () => {
     setShowTenantSelector(false)
   }
 
   return (
     <>
-      <div dir={dir} className="min-h-screen flex items-center justify-center bg-gradient-to-br from-orange-50 to-red-50 dark:from-gray-900 dark:to-gray-800 px-4">
-        <div className="max-w-md w-full">
-          {/* Logo */}
-          <div className="text-center mb-8">
-            <Link href={`/${locale}`} className="inline-flex items-center gap-2.5 mb-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-red-600 rounded-xl flex items-center justify-center">
-                <ChefHat className="h-6 w-6 text-white" />
-              </div>
-              <span className="text-2xl font-extrabold text-gray-900 dark:text-white">
-                Restaurant<span className="text-orange-500">POS</span>
-              </span>
-            </Link>
-            <p className="text-gray-600 dark:text-gray-400">
-              {t.auth.login.title}
-            </p>
-          </div>
+      <a className="poos-skip-link" href="#main-content">{t.nav.skipToContent}</a>
+      <main id="main-content" className="auth-page" dir={dir}>
+        <div className="auth-layout">
+          <section className="auth-story" aria-label={language === 'ar' ? 'عن POOS' : 'About POOS'}>
+            <BrandMark href={`/${locale}`} label="POOS" />
+            <div>
+              <h1>{language === 'ar' ? 'إدارة مطعمك في صورة واحدة.' : 'Your restaurant, in one view.'}</h1>
+              <p>{t.footer.tagline}</p>
+            </div>
+            <div className="auth-story__rule">{language === 'ar' ? 'مساحة واحدة لفريق الخدمة والمطبخ.' : 'One platform for front- and back-of-house work.'}</div>
+          </section>
 
-          {/* Login Form */}
-          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700 p-8">
-            <form method="post" onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-              {/* Email */}
-              <div className="space-y-2">
-                <Label htmlFor="email">{t.auth.login.email}</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder={t.auth.login.emailPlaceholder}
-                  {...register('email')}
-                  disabled={isLoading}
-                />
-                {errors.email && (
-                  <p className="text-sm text-red-500">{errors.email.message}</p>
-                )}
-              </div>
+          <section className="auth-form-panel" aria-labelledby="login-heading">
+            <div className="auth-form">
+              <Link className="auth-form__back" href={`/${locale}`}>
+                {language === 'ar' ? 'العودة إلى POOS' : 'Back to POOS'}
+              </Link>
+              <h2 id="login-heading">{t.auth.login.title}</h2>
+              <p className="auth-form__intro">{language === 'ar' ? 'أدخل بيانات حسابك للمتابعة.' : 'Enter your account details to continue.'}</p>
 
-              {/* Password */}
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="password">{t.auth.login.password}</Label>
-                  <Link
-                    href={`/${locale}/auth/forgot-password`}
-                    className="text-sm text-orange-600 hover:underline dark:text-orange-400"
-                  >
-                    {t.auth.login.forgotPassword}
-                  </Link>
-                </div>
-                <div className="relative">
+              <form method="post" onSubmit={handleSubmit(onSubmit)} className="auth-form__fields">
+                <div className="auth-field">
+                  <Label htmlFor="email">{t.auth.login.email}</Label>
                   <Input
-                    id="password"
-                    type={showPassword ? 'text' : 'password'}
-                    placeholder={t.auth.login.passwordPlaceholder}
-                    {...register('password')}
+                    id="email"
+                    className="poos-input"
+                    type="email"
+                    autoComplete="username"
+                    placeholder={t.auth.login.emailPlaceholder}
+                    aria-invalid={Boolean(errors.email)}
+                    aria-describedby={errors.email ? 'login-email-error' : undefined}
+                    {...register('email')}
                     disabled={isLoading}
                   />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className={`absolute ${dir === 'rtl' ? 'left-3' : 'right-3'} top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200`}
-                  >
-                    {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-                  </button>
+                  {errors.email && <p id="login-email-error" className="poos-error" role="alert">{errors.email.message}</p>}
                 </div>
-                {errors.password && (
-                  <p className="text-sm text-red-500">{errors.password.message}</p>
-                )}
-              </div>
 
-              {/* Submit */}
-              <Button
-                type="submit"
-                className="w-full bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white border-0 h-11"
-                disabled={isLoading}
-              >
-                {isLoading ? (
-                  <>
-                    <Loader2 className={`${dir === 'rtl' ? 'ml-2' : 'mr-2'} h-4 w-4 animate-spin`} />
-                    {t.auth.login.signingIn}
-                  </>
-                ) : (
-                  t.auth.login.signIn
-                )}
-              </Button>
-            </form>
+                <div className="auth-field">
+                  <Label htmlFor="password">{t.auth.login.password}</Label>
+                  <div className="auth-field__password">
+                    <Input
+                      id="password"
+                      className="poos-input"
+                      type={showPassword ? 'text' : 'password'}
+                      autoComplete="current-password"
+                      placeholder={t.auth.login.passwordPlaceholder}
+                      aria-invalid={Boolean(errors.password)}
+                      aria-describedby={errors.password ? 'login-password-error' : undefined}
+                      {...register('password')}
+                      disabled={isLoading}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword((visible) => !visible)}
+                      aria-label={showPassword ? (language === 'ar' ? 'إخفاء كلمة المرور' : 'Hide password') : (language === 'ar' ? 'إظهار كلمة المرور' : 'Show password')}
+                      aria-pressed={showPassword}
+                    >
+                      {showPassword ? <EyeOff aria-hidden="true" size={20} /> : <Eye aria-hidden="true" size={20} />}
+                    </button>
+                  </div>
+                  {errors.password && <p id="login-password-error" className="poos-error" role="alert">{errors.password.message}</p>}
+                </div>
 
-            {/* Register Link */}
-            <p className="mt-6 text-center text-sm text-gray-600 dark:text-gray-400">
-              {t.auth.login.noAccount}{' '}
-              <Link
-                href={`/${locale}/auth/register`}
-                className="text-orange-600 font-medium hover:underline dark:text-orange-400"
-              >
-                {t.auth.login.createAccount}
-              </Link>
-            </p>
-          </div>
+                <Button type="submit" className="poos-button auth-form__submit" disabled={isLoading} aria-live="polite">
+                  {isLoading ? <><Loader2 aria-hidden="true" className="animate-spin" size={18} />{t.auth.login.signingIn}</> : t.auth.login.signIn}
+                </Button>
+              </form>
+
+              <p className="auth-form__footer">
+                {t.auth.login.noAccount}{' '}
+                <Link href={`/${locale}/auth/register`}>{t.auth.login.createAccount}</Link>
+              </p>
+            </div>
+          </section>
         </div>
-      </div>
+      </main>
 
       {/* Tenant Selector Modal */}
       <TenantSelectorModal
@@ -202,6 +196,7 @@ export default function LoginPage() {
         selectionToken={selectionToken}
         tenants={availableTenants}
         onTenantSelected={handleTenantSelected}
+        onCancel={() => setShowTenantSelector(false)}
       />
     </>
   )

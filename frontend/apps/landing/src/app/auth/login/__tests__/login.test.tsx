@@ -216,7 +216,7 @@ describe('LoginPage - Multi-Tenant Authentication Flow', () => {
       render(<LoginPage />)
 
       const passwordInput = screen.getByPlaceholderText('Enter your password') as HTMLInputElement
-      const toggleButton = screen.getByRole('button', { name: '' }) // Eye icon button
+      const toggleButton = screen.getByRole('button', { name: 'Show password' })
 
       expect(passwordInput.type).toBe('password')
 
@@ -226,7 +226,7 @@ describe('LoginPage - Multi-Tenant Authentication Flow', () => {
         expect(passwordInput.type).toBe('text')
       })
 
-      fireEvent.click(toggleButton)
+      fireEvent.click(screen.getByRole('button', { name: 'Hide password' }))
 
       await waitFor(() => {
         expect(passwordInput.type).toBe('password')
@@ -261,11 +261,10 @@ describe('LoginPage - Multi-Tenant Authentication Flow', () => {
       expect(registerLink).toHaveAttribute('href', '/en/auth/register')
     })
 
-    it('should have link to forgot password page', () => {
+    it('does not advertise password reset until the end-to-end flow is supported', () => {
       render(<LoginPage />)
 
-      const forgotLink = screen.getByRole('link', { name: /forgot password/i })
-      expect(forgotLink).toHaveAttribute('href', '/en/auth/forgot-password')
+      expect(screen.queryByRole('link', { name: /forgot password/i })).not.toBeInTheDocument()
     })
   })
 })
