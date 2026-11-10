@@ -16,7 +16,7 @@ import { toast } from 'sonner'
 import { getConfig } from '@/lib/config'
 import { TenantSelectorModal } from '@/components/TenantSelectorModal'
 import { useLanguage } from '@/contexts/LanguageContext'
-import { BrandMark } from '@/components/BrandMark'
+import { Navbar } from '@/components/Navbar'
 
 type LoginForm = {
   email: string
@@ -113,10 +113,10 @@ export default function LoginPage() {
   return (
     <>
       <a className="poos-skip-link" href="#main-content">{t.nav.skipToContent}</a>
+      <Navbar />
       <main id="main-content" className="auth-page" dir={dir}>
         <div className="auth-layout">
           <section className="auth-story" aria-label={language === 'ar' ? 'عن POOS' : 'About POOS'}>
-            <BrandMark href={`/${locale}`} label="POOS" />
             <div>
               <h1>{language === 'ar' ? 'إدارة مطعمك في صورة واحدة.' : 'Your restaurant, in one view.'}</h1>
               <p>{t.footer.tagline}</p>

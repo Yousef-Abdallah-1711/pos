@@ -1,6 +1,7 @@
 import { LanguageProvider } from '@/contexts/LanguageContext'
 import { Toaster } from 'sonner'
 import type { Metadata } from 'next'
+import { notFound } from 'next/navigation'
 
 type Locale = 'en' | 'ar'
 
@@ -15,6 +16,8 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: Pick<LocaleLayoutProps, 'params'>): Promise<Metadata> {
   const { locale } = await params
+  if (locale !== 'en' && locale !== 'ar') notFound()
+
   const isArabic = locale === 'ar'
   const title = isArabic ? 'POOS | إدارة متصلة لكل تفاصيل مطعمك' : 'POOS | Connected restaurant management'
   const description = isArabic
@@ -24,12 +27,17 @@ export async function generateMetadata({ params }: Pick<LocaleLayoutProps, 'para
   return {
     title,
     description,
+    alternates: {
+      canonical: `/${locale}`,
+      languages: { en: '/en', ar: '/ar' },
+    },
     openGraph: { title, description, siteName: 'POOS', type: 'website', locale: isArabic ? 'ar_EG' : 'en_US' },
   }
 }
 
 export default async function LocaleLayout({ children, params }: LocaleLayoutProps) {
   const { locale: rawLocale } = await params
+  if (rawLocale !== 'en' && rawLocale !== 'ar') notFound()
   const locale: Locale = rawLocale === 'ar' ? 'ar' : 'en'
 
   return (

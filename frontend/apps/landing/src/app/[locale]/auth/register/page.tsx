@@ -15,7 +15,7 @@ import { useAuthStore } from '@/stores/authStore'
 import { toast } from 'sonner'
 import { getConfig } from '@/lib/config'
 import { useLanguage } from '@/contexts/LanguageContext'
-import { BrandMark } from '@/components/BrandMark'
+import { Navbar } from '@/components/Navbar'
 
 type RegisterForm = {
   name: string
@@ -154,10 +154,10 @@ export default function RegisterPage() {
   return (
     <>
     <a className="poos-skip-link" href="#main-content">{t.nav.skipToContent}</a>
+    <Navbar />
     <main id="main-content" dir={dir} className="auth-page">
       <div className="auth-layout">
         <section className="auth-story" aria-label={language === 'ar' ? 'عن POOS' : 'About POOS'}>
-          <BrandMark href={`/${locale}`} label="POOS" />
           <div>
             <h1>{language === 'ar' ? 'ابدأ مساحة عمل مطعمك.' : 'Set up your restaurant workspace.'}</h1>
             <p>{t.footer.tagline}</p>

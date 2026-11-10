@@ -10,14 +10,12 @@ export function FAQ() {
         ['لمن صُمم POOS؟', 'لأصحاب المطاعم المستقلة ومشغلي مجموعات المطاعم متعددة المواقع.'],
         ['ما البيانات المطلوبة لإنشاء الحساب؟', 'الاسم والبريد الإلكتروني وكلمة المرور واسم المطعم ورابطه. رقم الهاتف اختياري.'],
         ['هل يدعم POOS العربية والإنجليزية؟', 'تدعم الواجهة العامة العربية باتجاه من اليمين إلى اليسار والإنجليزية باتجاه من اليسار إلى اليمين.'],
-        ['أين أجد الأسعار؟', 'لم تُنشر الأسعار والشروط التجارية على هذه الصفحة.'],
       ]
     : [
         ['What is POOS?', 'POOS is a restaurant management platform connecting work at the front of house with work behind it.'],
         ['Who is POOS for?', 'Independent restaurant owners and operators, and people managing multi-location restaurant groups.'],
         ['What do I need to create an account?', 'Your name, email, password, restaurant name, and restaurant URL. Phone is optional.'],
         ['Does POOS support Arabic and English?', 'The public interface supports Arabic with right-to-left layout and English with left-to-right layout.'],
-        ['Where can I find pricing?', 'Pricing and commercial terms are not published on this page.'],
       ]
 
   return (

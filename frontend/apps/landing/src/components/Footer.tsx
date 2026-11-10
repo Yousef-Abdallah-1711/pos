@@ -17,8 +17,9 @@ export function Footer() {
           <p className="poos-muted">{t.footer.tagline}</p>
         </div>
         <nav className="poos-footer__links" aria-label={t.nav.mainNavigation}>
-          <Link href="#features">{t.footer.features}</Link>
+          <Link href="#product">{t.footer.features}</Link>
           <Link href="#how-it-works">{t.nav.howItWorks}</Link>
+          <Link href="#audience">{t.nav.audience}</Link>
           <Link href="#faq">{t.nav.faq}</Link>
           <Link href={`/${locale}/auth/login`}>{t.nav.login}</Link>
           <Link href={`/${locale}/auth/register`}>{t.nav.getStarted}</Link>

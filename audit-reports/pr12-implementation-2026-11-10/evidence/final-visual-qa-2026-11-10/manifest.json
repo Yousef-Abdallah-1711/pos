@@ -1,0 +1,150 @@
+{
+  "capturedAt": "2026-11-10",
+  "environment": "Isolated local production preview at http://localhost:58620; screenshots represent the latest visual implementation. A subsequent nonvisual image-loading change was included in the final production build.",
+  "viewports": [
+    320,
+    375,
+    390,
+    430,
+    768,
+    820,
+    1024,
+    1280,
+    1440,
+    1920
+  ],
+  "routes": [
+    "/en",
+    "/ar",
+    "/en/auth/login",
+    "/ar/auth/login",
+    "/en/auth/register",
+    "/ar/auth/register"
+  ],
+  "checks": {
+    "horizontalOverflow": "None across all six locale/routes and all ten tested viewport widths",
+    "authHeader": "Visible on login and register in English and Arabic; mobile menu opened and closed with Escape",
+    "brokenImages": "None across all six routes and ten widths",
+    "consoleErrors": 0,
+    "consoleWarnings": 1,
+    "consoleWarningBeforeFix": "One unused desktop-image preload warning from the preview build",
+    "consoleWarningResolution": "Removed Next priority preload, retained eager high-priority loading; final generated HTML has no image preload",
+    "finalBuildBrowserRecheck": "Not run after the nonvisual loading-hint change; production build and typecheck passed, generated HTML inspected"
+  },
+  "before": [
+    {
+      "file": "landing-ar-1440.png",
+      "sha256": "D721FE6443CF5BAB14DA14C2A9CB50DF462EDC456B0AF5D0CF47A1C8411A558F"
+    },
+    {
+      "file": "landing-ar-390.png",
+      "sha256": "27D08EBC4BD560A351BBD6B1412D4734F4513483FDF6F58A8957C1835F191CB0"
+    },
+    {
+      "file": "landing-en-1024.png",
+      "sha256": "6AE74A6BD18231CEF8A19A8CBD552624D9CB2FAB77D45A61F49EC83D6399041C"
+    },
+    {
+      "file": "landing-en-1440.png",
+      "sha256": "20C04C27F0A3DA175114D3F47BD2A185C1F994B8BE3ABF375F6B19A8D67092DB"
+    },
+    {
+      "file": "landing-en-1920.png",
+      "sha256": "2A4C790A18FF04B0AE671951E9444693B1970703847258D16E83E821A79655A3"
+    },
+    {
+      "file": "landing-en-320.png",
+      "sha256": "1330EA149EA09BA6B123ADE311B8F3DB03E7032B0BCF2CF0C1666BA8718CB8B3"
+    },
+    {
+      "file": "landing-en-390.png",
+      "sha256": "56EE5D7258C85F9D29D02047B4220AA0296F288277DE123DB0F5C08E049E7FBF"
+    },
+    {
+      "file": "landing-en-768.png",
+      "sha256": "68CB810641058797026B1B87FB9AC609AB875233649FC31C8817E15D14FAB071"
+    },
+    {
+      "file": "login-ar-390.png",
+      "sha256": "832BFF4857ADA1C9CA0F3A607BF9A42D0D84E19AC87AB515005E79C01DF87C1A"
+    },
+    {
+      "file": "login-en-1440.png",
+      "sha256": "332E113D4F46826C9719D4E2D07C1F6BA2C35818FFEE2676A65C063F6087F15E"
+    },
+    {
+      "file": "login-en-390.png",
+      "sha256": "D9F1C5BDEB44AE1328D890EFCED145A8F465975B8FF41CDA4E29DD5A4E0188BE"
+    },
+    {
+      "file": "register-ar-390.png",
+      "sha256": "04F873487453867CF8761575016B265271421EB3B9924E15E96CC332A28B5ACD"
+    },
+    {
+      "file": "register-en-1440.png",
+      "sha256": "18D2CBC37D9C98F3CE5B7957397527031A401C38868F99559ACD2C6C00F41A2C"
+    },
+    {
+      "file": "register-en-390.png",
+      "sha256": "977F880A65E37F9B36B2ED2C8BC0E78AD4D56E615003A0E30C295A0D1534FD72"
+    }
+  ],
+  "after": [
+    {
+      "file": "landing-ar-1440.png",
+      "sha256": "383B7C02EA7D7A047D9A30AE6CF81117D53D279E715D63B2A41CE17C0A040316"
+    },
+    {
+      "file": "landing-ar-390.png",
+      "sha256": "E440E3D10AFC288603E770D9DF5C8073782594B5C1C88B57AD95B9CB885B7B49"
+    },
+    {
+      "file": "landing-ar-768.png",
+      "sha256": "69B517C611CC77DF590657D8069CE9712A5B26DFBCA6169C7958EB28189A6392"
+    },
+    {
+      "file": "landing-en-1440.png",
+      "sha256": "301FC31B1E2162F0B01F83671A80903AAC3CD32FFAA7380921607F0EB70B5DFA"
+    },
+    {
+      "file": "landing-en-320.png",
+      "sha256": "F26DE42A6BBFBECC1ABB3C28F3A452B183516C25C40CD82A4D7AA59B8A818DAA"
+    },
+    {
+      "file": "landing-en-768.png",
+      "sha256": "5DA6042597B16566F21C352E3AE0CB5128CB8AAE172840F0A9162A8FAD400C46"
+    },
+    {
+      "file": "login-ar-1440.png",
+      "sha256": "21413880C518B599DBC82E266C423191964959B76E64F66F74C60CD0CC1C570A"
+    },
+    {
+      "file": "login-ar-390.png",
+      "sha256": "4BF41AD4074B4A8FE033FB0AF79451264748D80DE1B2AADD59331D58F92CE1C9"
+    },
+    {
+      "file": "login-en-1440.png",
+      "sha256": "93847AA7652C740574B8F707717D48A9EB117C4BFA8F4F143265220050A70424"
+    },
+    {
+      "file": "login-en-390.png",
+      "sha256": "D4462181FA50133C39A520682361F4565699DAC9DD82C4806A8F60D57E3879EA"
+    },
+    {
+      "file": "register-ar-1440.png",
+      "sha256": "B89946764E7B0840EC0227056A6B7A7EF81264C6A4EACF3B0BEDE5CC25BEC0C8"
+    },
+    {
+      "file": "register-ar-390.png",
+      "sha256": "897EEADE30658D3F69618D849B9BB157060AE8D2EAEB175E507A3B322AC83EB7"
+    },
+    {
+      "file": "register-en-1440.png",
+      "sha256": "65CE5661968D569FC77C2E45088B56CE79DCED616F6ED046125293BACEF7B837"
+    },
+    {
+      "file": "register-en-390.png",
+      "sha256": "F53C337054C690461B88EF8F89188341954C64822D626FD1EAF0E700FA779037"
+    }
+  ]
+}

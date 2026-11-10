@@ -255,9 +255,11 @@ describe('LoginPage - Multi-Tenant Authentication Flow', () => {
 
   describe('Navigation', () => {
     it('should have link to register page', () => {
-      render(<LoginPage />)
+      const { container } = render(<LoginPage />)
 
-      const registerLink = screen.getByRole('link', { name: /create account/i })
+      expect(screen.getByRole('banner')).toBeInTheDocument()
+      expect(screen.getByRole('navigation', { name: /main navigation/i })).toBeInTheDocument()
+      const registerLink = container.querySelector('.auth-form__footer a')
       expect(registerLink).toHaveAttribute('href', '/en/auth/register')
     })
 

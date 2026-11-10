@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { Alexandria, IBM_Plex_Sans_Arabic, Inter } from 'next/font/google'
+import { Alexandria, IBM_Plex_Sans_Arabic, Manrope } from 'next/font/google'
 import './globals.css'
 import { ThemeProvider } from 'next-themes'
 
@@ -14,7 +14,7 @@ const plex = IBM_Plex_Sans_Arabic({
   display: 'swap',
   variable: '--font-plex',
 })
-const inter = Inter({ subsets: ['latin'], display: 'swap', variable: '--font-inter' })
+const manrope = Manrope({ subsets: ['latin'], display: 'swap', variable: '--font-manrope' })
 
 interface RootLayoutProps {
   children: React.ReactNode
@@ -43,7 +43,7 @@ export default async function RootLayout({ children, params }: RootLayoutProps) 
 
   return (
     <html lang={locale} dir={locale === 'ar' ? 'rtl' : 'ltr'} suppressHydrationWarning>
-      <body className={`${alexandria.variable} ${plex.variable} ${inter.variable}`}>
+      <body className={`${alexandria.variable} ${plex.variable} ${manrope.variable}`}>
         <ThemeProvider attribute="class" defaultTheme="light" forcedTheme="light">
           {children}
         </ThemeProvider>
