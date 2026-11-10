@@ -4,9 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"io"
 	"log"
 	"net/http"
-	"strings"
 	"time"
 
 	"pos-saas/internal/config"
@@ -22,6 +22,16 @@ type AuthHandler struct {
 	audit    authAuditLogger
 }
 
+const maxAuthRequestBytes = 16 << 10
+
+type authErrorResponse struct {
+	Error     string            `json:"error"`
+	Code      string            `json:"code"`
+	Message   string            `json:"message"`
+	Fields    map[string]string `json:"fields,omitempty"`
+	RequestID string            `json:"requestId,omitempty"`
+}
+
 type authAuditLogger interface {
 	RecordAuthEvent(context.Context, int64, int64, string, string, string, string) error
 }
@@ -35,43 +45,67 @@ func (h *AuthHandler) SetAuditLogger(audit authAuditLogger) { h.audit = audit }
 // Register handles user registration
 func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 	var req domain.RegisterRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		respondError(w, http.StatusBadRequest, "Invalid request body")
+	if err := decodeAuthJSON(w, r, &req); err != nil {
+		respondAuthDecodeError(w, r, err)
 		return
 	}
 
-	response, err := h.useCase.Register(&req)
+	response, err := h.useCase.RegisterContext(r.Context(), &req)
 	if err != nil {
-		statusCode := http.StatusBadRequest
-		if strings.Contains(err.Error(), "already exists") || strings.Contains(err.Error(), "already taken") {
-			statusCode = http.StatusConflict
+		if response != nil && response.User != nil {
+			log.Printf("registration committed without token request_id=%s error=%v", middleware.RequestIDFromContext(r.Context()), err)
+			respondJSON(w, http.StatusCreated, map[string]interface{}{
+				"user": response.User, "session_established": false,
+				"message": "Your account was created. Please sign in to continue.",
+			})
+			return
 		}
-		respondError(w, statusCode, err.Error())
+		respondRegistrationError(w, r, err)
 		return
 	}
 	if err := h.establishSession(w, r, response.Token); err != nil {
-		respondError(w, http.StatusInternalServerError, "Unable to establish session")
+		log.Printf("registration session creation failed request_id=%s error=%v", middleware.RequestIDFromContext(r.Context()), err)
+		respondJSON(w, http.StatusCreated, map[string]interface{}{
+			"user": response.User, "session_established": false,
+			"message": "Your account was created. Please sign in to continue.",
+		})
 		return
 	}
-	respondJSON(w, http.StatusCreated, map[string]interface{}{"user": response.User})
+	respondJSON(w, http.StatusCreated, map[string]interface{}{"user": response.User, "session_established": true})
 }
 
 // Login handles user login
 func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	var req domain.LoginRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		respondError(w, http.StatusBadRequest, "Invalid request body")
+	if err := decodeAuthJSON(w, r, &req); err != nil {
+		respondAuthDecodeError(w, r, err)
 		return
 	}
 
 	response, err := h.useCase.Login(&req)
 	if err != nil {
-		respondError(w, http.StatusUnauthorized, err.Error())
+		var validation *domain.ValidationErrors
+		if errors.As(err, &validation) {
+			writeAuthError(w, r, http.StatusUnprocessableEntity, "VALIDATION_ERROR", "Please review the highlighted fields.", validation.Fields)
+			return
+		}
+		if errors.Is(err, domain.ErrAuthDependencyUnavailable) {
+			log.Printf("login dependency unavailable request_id=%s error=%v", middleware.RequestIDFromContext(r.Context()), err)
+			writeAuthError(w, r, http.StatusServiceUnavailable, "SERVICE_UNAVAILABLE", "Sign in is temporarily unavailable. Please try again.", nil)
+			return
+		}
+		if errors.Is(err, domain.ErrTokenGeneration) {
+			log.Printf("login token creation failed request_id=%s error=%v", middleware.RequestIDFromContext(r.Context()), err)
+			writeAuthError(w, r, http.StatusInternalServerError, "INTERNAL_ERROR", "We could not sign you in. Please try again.", nil)
+			return
+		}
+		writeAuthError(w, r, http.StatusUnauthorized, "INVALID_CREDENTIALS", "Email or password is incorrect.", nil)
 		return
 	}
 	if authenticated, ok := response.(*domain.AuthResponse); ok {
 		if err := h.establishSession(w, r, authenticated.Token); err != nil {
-			respondError(w, http.StatusInternalServerError, "Unable to establish session")
+			log.Printf("login session creation failed request_id=%s error=%v", middleware.RequestIDFromContext(r.Context()), err)
+			writeAuthError(w, r, http.StatusServiceUnavailable, "SERVICE_UNAVAILABLE", "Sign in is temporarily unavailable. Please try again.", nil)
 			return
 		}
 		h.recordAuthEvent(r, int64(authenticated.User.TenantID), int64(authenticated.User.ID), "login")
@@ -84,22 +118,83 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 // LoginConfirm handles tenant selection after multiple tenants are detected
 func (h *AuthHandler) LoginConfirm(w http.ResponseWriter, r *http.Request) {
 	var req domain.TenantSelectionRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		respondError(w, http.StatusBadRequest, "Invalid request body")
+	if err := decodeAuthJSON(w, r, &req); err != nil {
+		respondAuthDecodeError(w, r, err)
 		return
 	}
 
 	response, err := h.useCase.LoginConfirm(&req)
 	if err != nil {
-		respondError(w, http.StatusUnauthorized, err.Error())
+		if errors.Is(err, domain.ErrAuthDependencyUnavailable) {
+			log.Printf("login-confirm dependency unavailable request_id=%s error=%v", middleware.RequestIDFromContext(r.Context()), err)
+			writeAuthError(w, r, http.StatusServiceUnavailable, "SERVICE_UNAVAILABLE", "Sign in is temporarily unavailable. Please try again.", nil)
+			return
+		}
+		if errors.Is(err, domain.ErrTokenGeneration) {
+			log.Printf("login-confirm token creation failed request_id=%s error=%v", middleware.RequestIDFromContext(r.Context()), err)
+			writeAuthError(w, r, http.StatusInternalServerError, "INTERNAL_ERROR", "We could not sign you in. Please try again.", nil)
+			return
+		}
+		writeAuthError(w, r, http.StatusUnauthorized, "INVALID_CREDENTIALS", "Please sign in again to choose this organization.", nil)
 		return
 	}
 	if err := h.establishSession(w, r, response.Token); err != nil {
-		respondError(w, http.StatusInternalServerError, "Unable to establish session")
+		log.Printf("login-confirm session creation failed request_id=%s error=%v", middleware.RequestIDFromContext(r.Context()), err)
+		writeAuthError(w, r, http.StatusServiceUnavailable, "SERVICE_UNAVAILABLE", "Sign in is temporarily unavailable. Please try again.", nil)
 		return
 	}
 	h.recordAuthEvent(r, int64(response.User.TenantID), int64(response.User.ID), "login")
 	respondJSON(w, http.StatusOK, map[string]interface{}{"user": response.User})
+}
+
+func decodeAuthJSON(w http.ResponseWriter, r *http.Request, target interface{}) error {
+	r.Body = http.MaxBytesReader(w, r.Body, maxAuthRequestBytes)
+	decoder := json.NewDecoder(r.Body)
+	decoder.DisallowUnknownFields()
+	if err := decoder.Decode(target); err != nil {
+		return err
+	}
+	if err := decoder.Decode(&struct{}{}); err != io.EOF {
+		if err == nil {
+			return errors.New("multiple JSON values")
+		}
+		return err
+	}
+	return nil
+}
+
+func respondAuthDecodeError(w http.ResponseWriter, r *http.Request, err error) {
+	var tooLarge *http.MaxBytesError
+	if errors.As(err, &tooLarge) {
+		writeAuthError(w, r, http.StatusRequestEntityTooLarge, "REQUEST_TOO_LARGE", "Request body is too large.", nil)
+		return
+	}
+	writeAuthError(w, r, http.StatusBadRequest, "INVALID_REQUEST", "Invalid request body.", nil)
+}
+
+func respondRegistrationError(w http.ResponseWriter, r *http.Request, err error) {
+	var validation *domain.ValidationErrors
+	if errors.As(err, &validation) {
+		writeAuthError(w, r, http.StatusUnprocessableEntity, "VALIDATION_ERROR", "Please review the highlighted fields.", validation.Fields)
+		return
+	}
+	switch {
+	case errors.Is(err, domain.ErrEmailAlreadyExists):
+		writeAuthError(w, r, http.StatusConflict, "EMAIL_ALREADY_EXISTS", "An account with this email already exists.", map[string]string{"email": "An account with this email already exists."})
+	case errors.Is(err, domain.ErrSubdomainAlreadyExists):
+		writeAuthError(w, r, http.StatusConflict, "SUBDOMAIN_TAKEN", "This website address is already in use.", map[string]string{"restaurant_slug": "This website address is already in use."})
+	case errors.Is(err, domain.ErrRestaurantNameConflict):
+		writeAuthError(w, r, http.StatusConflict, "RESTAURANT_NAME_CONFLICT", "A restaurant with this name already exists.", map[string]string{"restaurant_name": "A restaurant with this name already exists."})
+	default:
+		log.Printf("registration failed request_id=%s error=%v", middleware.RequestIDFromContext(r.Context()), err)
+		writeAuthError(w, r, http.StatusInternalServerError, "INTERNAL_ERROR", "We could not create your account. Please try again.", nil)
+	}
+}
+
+func writeAuthError(w http.ResponseWriter, r *http.Request, status int, code, message string, fields map[string]string) {
+	requestID := middleware.RequestIDFromContext(r.Context())
+	w.Header().Set("Cache-Control", "no-store")
+	respondJSON(w, status, authErrorResponse{Error: message, Code: code, Message: message, Fields: fields, RequestID: requestID})
 }
 
 func (h *AuthHandler) establishSession(w http.ResponseWriter, r *http.Request, credential string) error {

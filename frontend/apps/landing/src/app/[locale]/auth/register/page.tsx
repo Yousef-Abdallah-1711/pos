@@ -1,301 +1,92 @@
 'use client'
 
-import { useState, useCallback } from 'react'
-import { useRouter } from 'next/navigation'
+import { useCallback } from 'react'
 import Link from 'next/link'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import * as z from 'zod'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { ChefHat, Eye, EyeOff, Loader2, Check, X } from 'lucide-react'
+import { ChefHat } from 'lucide-react'
+import { AsyncAvailabilityField, FormErrorSummary, FormField, PasswordField, SubmitButton, applyApiFieldErrors, createRegisterSchema, isSubdomainFormatValid, parseApiError, useDebouncedAvailability, fieldAccessibility } from '@pos-saas/form-foundation'
 import api from '@/lib/api'
 import { useAuthStore } from '@/stores/authStore'
-import { toast } from 'sonner'
 import { getConfig } from '@/lib/config'
 import { useLanguage } from '@/contexts/LanguageContext'
 
-type RegisterForm = {
-  name: string
-  email: string
-  password: string
-  confirmPassword: string
-  restaurantName: string
-  restaurantSlug: string
-  phone?: string
-}
+type RegisterForm = { name: string; email: string; password: string; confirmPassword: string; restaurantName: string; restaurantSlug: string; phone: string }
 
 export default function RegisterPage() {
-  const router = useRouter()
   const setAuth = useAuthStore((state) => state.setAuth)
   const { t, dir, language } = useLanguage()
-  const locale = language
-  const [showPassword, setShowPassword] = useState(false)
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
-  const [subdomainStatus, setSubdomainStatus] = useState<'idle' | 'checking' | 'available' | 'unavailable'>('idle')
-  const [subdomainMessage, setSubdomainMessage] = useState('')
-  const [checkSubdomainTimeout, setCheckSubdomainTimeout] = useState<NodeJS.Timeout | null>(null)
-
-  const registerSchema = z.object({
-    name: z.string().min(2, t.auth.validation.nameMin),
-    email: z.string().email(t.auth.validation.invalidEmail),
-    password: z.string().min(6, t.auth.validation.passwordMin),
-    confirmPassword: z.string(),
-    restaurantName: z.string().min(2, t.auth.validation.restaurantNameMin),
-    restaurantSlug: z.string().min(2, t.auth.validation.subdomainMin).max(63, t.auth.validation.subdomainMax),
-    phone: z.string().optional(),
-  }).refine((data) => data.password === data.confirmPassword, {
-    message: t.auth.validation.passwordsMismatch,
-    path: ['confirmPassword'],
-  })
-
-  const {
-    register,
-    handleSubmit,
-    watch,
-    formState: { errors },
-  } = useForm<RegisterForm>({
-    resolver: zodResolver(registerSchema),
-  })
-
-  const restaurantSlug = watch('restaurantSlug')
-
-  const checkSubdomainAvailability = useCallback(async (slug: string) => {
-    if (!slug || slug.length < 2) {
-      setSubdomainStatus('idle')
-      return
-    }
-
-    setSubdomainStatus('checking')
-    try {
-      const response = await api.get('/auth/check-subdomain', {
-        params: { slug: slug.toLowerCase() },
-      })
-
-      if (response.data.available) {
-        setSubdomainStatus('available')
-        setSubdomainMessage(t.auth.register.subdomainAvailable)
-      } else {
-        setSubdomainStatus('unavailable')
-        setSubdomainMessage(response.data.message || t.auth.register.subdomainUnavailable)
-      }
-    } catch (error) {
-      setSubdomainStatus('unavailable')
-      setSubdomainMessage(t.auth.register.subdomainError)
-    }
-  }, [t])
-
-  const handleSubdomainChange = useCallback((slug: string) => {
-    if (checkSubdomainTimeout) {
-      clearTimeout(checkSubdomainTimeout)
-    }
-
-    if (!slug || slug.length < 2) {
-      setSubdomainStatus('idle')
-      return
-    }
-
-    setSubdomainStatus('checking')
-    const timeout = setTimeout(() => {
-      checkSubdomainAvailability(slug)
-    }, 500)
-
-    setCheckSubdomainTimeout(timeout)
-  }, [checkSubdomainTimeout, checkSubdomainAvailability])
+  const text = t.auth.register
+  const messages = { required: t.auth.validation.required, nameMin: t.auth.validation.nameMin, nameMax: t.auth.validation.nameMax, invalidEmail: t.auth.validation.invalidEmail, emailMax: t.auth.validation.emailMax, passwordMin: t.auth.validation.passwordMin, passwordMax: t.auth.validation.passwordMax, passwordMismatch: t.auth.validation.passwordsMismatch, invalidSubdomain: t.auth.validation.invalidSubdomain, reservedSubdomain: t.auth.validation.reservedSubdomain, invalidPhone: t.auth.validation.invalidPhone }
+  const schema = createRegisterSchema(messages)
+  const { register, handleSubmit, watch, setError, clearErrors, setFocus, formState: { errors, isSubmitting, isSubmitted } } = useForm<RegisterForm>({ resolver: zodResolver(schema), mode: 'onTouched', reValidateMode: 'onChange', defaultValues: { phone: '' } })
+  const restaurantSlug = watch('restaurantSlug') ?? ''
+  const checkAvailability = useCallback(async (slug: string, signal: AbortSignal) => {
+    const response = await api.get('/auth/check-subdomain', { params: { slug }, signal, timeout: 8000 })
+    if (response.data.available) return true
+    return /reserved/i.test(String(response.data.message)) ? 'reserved' as const : false
+  }, [])
+  const availability = useDebouncedAvailability(restaurantSlug, isSubdomainFormatValid, checkAvailability, 500)
+  const fallback = { validation: 'Please review the highlighted fields.', invalidCredentials: 'Email or password is incorrect.', rateLimited: 'Too many attempts. Wait a moment and try again.', unavailable: 'The service is temporarily unavailable. Please try again.', network: 'Unable to connect. Check your connection and try again.', unexpected: 'We could not create your account. Please try again.', conflict: 'That email or website address is already in use.' }
+  const messagesByState = { invalid: messages.invalidSubdomain, checking: 'Checking availability…', available: text.subdomainAvailable, taken: text.subdomainUnavailable, reserved: 'This website address is reserved.', error: 'Availability could not be checked. Check your connection and try again.' }
 
   const onSubmit = async (data: RegisterForm) => {
-    setIsLoading(true)
+    if (availability.state !== 'available' || availability.checkedValue !== data.restaurantSlug.trim().toLowerCase()) {
+      setError('restaurantSlug', { type: 'validate', message: availability.state === 'error' ? messagesByState.error : text.subdomainRequired })
+      setFocus('restaurantSlug')
+      return
+    }
+    clearErrors()
     try {
-      if (subdomainStatus !== 'available') {
-        toast.error(t.auth.register.subdomainRequired)
-        setIsLoading(false)
+      const response = await api.post('/auth/register', { name: data.name, email: data.email, password: data.password, restaurant_name: data.restaurantName, restaurant_slug: data.restaurantSlug, phone: data.phone || undefined })
+      const { user, session_established: sessionEstablished } = response.data
+      if (!sessionEstablished) {
+        window.location.href = `/${language}/auth/login?created=1`
         return
       }
-
-      const response = await api.post('/auth/register', {
-        name: data.name,
-        email: data.email,
-        password: data.password,
-        restaurant_name: data.restaurantName,
-        restaurant_slug: data.restaurantSlug.toLowerCase(),
-        phone: data.phone,
-      })
-
-      const { user } = response.data
       setAuth(user, '')
-      toast.success(t.auth.register.accountCreated)
-
-      const { dashboardUrl } = getConfig()
-      window.location.href = `${dashboardUrl}/${locale}/auth/callback`
-    } catch (error: any) {
-      let message = t.auth.register.registrationFailed
-      if (error.response?.data?.error) {
-        message = error.response.data.error
-      } else if (error.response?.status === 400) {
-        message = t.auth.register.invalidInput
-      } else if (error.code === 'ERR_NETWORK') {
-        message = t.auth.register.networkError
-      }
-      toast.error(message)
-    } finally {
-      setIsLoading(false)
+      window.location.href = `${getConfig().dashboardUrl}/${language}/auth/callback`
+    } catch (error) {
+      const parsed = parseApiError(error, fallback)
+      applyApiFieldErrors(parsed.fields, (field, message) => setError(field as keyof RegisterForm, { type: 'server', message }))
+      const firstField = Object.keys(parsed.fields)[0]
+      if (firstField) {
+        const fieldName = firstField === 'restaurant_slug' ? 'restaurantSlug' : firstField === 'restaurant_name' ? 'restaurantName' : firstField
+        setFocus(fieldName as keyof RegisterForm)
+      } else setError('root.server', { type: parsed.code, message: parsed.message })
     }
   }
 
-  return (
-    <div dir={dir} className="min-h-screen flex items-center justify-center bg-gradient-to-br from-orange-50 to-red-50 dark:from-gray-900 dark:to-gray-800 px-4 py-12">
-      <div className="max-w-md w-full">
-        {/* Logo */}
-        <div className="text-center mb-8">
-          <Link href={`/${locale}`} className="inline-flex items-center gap-2.5 mb-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-red-600 rounded-xl flex items-center justify-center">
-              <ChefHat className="h-6 w-6 text-white" />
-            </div>
-            <span className="text-2xl font-extrabold text-gray-900 dark:text-white">
-              Restaurant<span className="text-orange-500">POS</span>
-            </span>
-          </Link>
-          <p className="text-gray-600 dark:text-gray-400">
-            {t.auth.register.title}
-          </p>
-        </div>
+  const onInvalid = (invalid: Record<string, unknown>) => {
+    const firstField = Object.keys(invalid)[0] as keyof RegisterForm | undefined
+    if (firstField) setFocus(firstField)
+  }
+  const inputClass = 'h-11 w-full rounded-md border border-gray-300 bg-white px-3 text-gray-900 shadow-sm outline-none focus-visible:ring-2 focus-visible:ring-orange-600 disabled:opacity-60 dark:border-gray-600 dark:bg-gray-800 dark:text-white'
+  const common = { disabled: isSubmitting, className: inputClass }
+  const fieldError = (key: keyof RegisterForm) => errors[key]?.message
+  const { restaurantDomain } = getConfig()
 
-        {/* Register Form */}
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700 p-8">
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-            {/* Name */}
-            <div className="space-y-2">
-              <Label htmlFor="name">{t.auth.register.fullName}</Label>
-              <Input id="name" type="text" placeholder={t.auth.register.fullNamePlaceholder} {...register('name')} disabled={isLoading} />
-              {errors.name && <p className="text-sm text-red-500">{errors.name.message}</p>}
-            </div>
-
-            {/* Email */}
-            <div className="space-y-2">
-              <Label htmlFor="email">{t.auth.register.email}</Label>
-              <Input id="email" type="email" placeholder={t.auth.register.emailPlaceholder} {...register('email')} disabled={isLoading} />
-              {errors.email && <p className="text-sm text-red-500">{errors.email.message}</p>}
-            </div>
-
-            {/* Restaurant Name */}
-            <div className="space-y-2">
-              <Label htmlFor="restaurantName">{t.auth.register.restaurantName}</Label>
-              <Input id="restaurantName" type="text" placeholder={t.auth.register.restaurantNamePlaceholder} {...register('restaurantName')} disabled={isLoading} />
-              {errors.restaurantName && <p className="text-sm text-red-500">{errors.restaurantName.message}</p>}
-            </div>
-
-            {/* Website Subdomain */}
-            <div className="space-y-2">
-              <Label htmlFor="restaurantSlug">{t.auth.register.websiteSubdomain}</Label>
-              <div className="relative">
-                <Input
-                  id="restaurantSlug"
-                  type="text"
-                  placeholder={t.auth.register.subdomainPlaceholder}
-                  {...register('restaurantSlug', {
-                    onChange: (e) => handleSubdomainChange(e.target.value),
-                  })}
-                  disabled={isLoading}
-                  className={`${
-                    subdomainStatus === 'available' ? 'border-green-500' : subdomainStatus === 'unavailable' ? 'border-red-500' : ''
-                  }`}
-                />
-                <div className={`absolute ${dir === 'rtl' ? 'left-3' : 'right-3'} top-1/2 -translate-y-1/2`}>
-                  {subdomainStatus === 'checking' && <Loader2 className="h-5 w-5 text-yellow-500 animate-spin" />}
-                  {subdomainStatus === 'available' && <Check className="h-5 w-5 text-green-500" />}
-                  {subdomainStatus === 'unavailable' && <X className="h-5 w-5 text-red-500" />}
-                </div>
-              </div>
-              {subdomainStatus !== 'idle' && (
-                <p className={`text-sm ${subdomainStatus === 'available' ? 'text-green-600' : 'text-red-600'}`}>
-                  {subdomainMessage}
-                </p>
-              )}
-              {errors.restaurantSlug && <p className="text-sm text-red-500">{errors.restaurantSlug.message}</p>}
-              <p className="text-xs text-gray-500 dark:text-gray-400">
-                {t.auth.register.websiteAccessible}{' '}
-                <strong>{restaurantSlug ? restaurantSlug.toLowerCase() : 'your-subdomain'}.{getConfig().restaurantDomain}</strong>
-              </p>
-            </div>
-
-            {/* Phone */}
-            <div className="space-y-2">
-              <Label htmlFor="phone">{t.auth.register.phone}</Label>
-              <Input id="phone" type="tel" placeholder={t.auth.register.phonePlaceholder} {...register('phone')} disabled={isLoading} />
-            </div>
-
-            {/* Password */}
-            <div className="space-y-2">
-              <Label htmlFor="password">{t.auth.register.password}</Label>
-              <div className="relative">
-                <Input
-                  id="password"
-                  type={showPassword ? 'text' : 'password'}
-                  placeholder={t.auth.register.passwordPlaceholder}
-                  {...register('password')}
-                  disabled={isLoading}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className={`absolute ${dir === 'rtl' ? 'left-3' : 'right-3'} top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200`}
-                >
-                  {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-                </button>
-              </div>
-              {errors.password && <p className="text-sm text-red-500">{errors.password.message}</p>}
-            </div>
-
-            {/* Confirm Password */}
-            <div className="space-y-2">
-              <Label htmlFor="confirmPassword">{t.auth.register.confirmPassword}</Label>
-              <div className="relative">
-                <Input
-                  id="confirmPassword"
-                  type={showConfirmPassword ? 'text' : 'password'}
-                  placeholder={t.auth.register.confirmPasswordPlaceholder}
-                  {...register('confirmPassword')}
-                  disabled={isLoading}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className={`absolute ${dir === 'rtl' ? 'left-3' : 'right-3'} top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200`}
-                >
-                  {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-                </button>
-              </div>
-              {errors.confirmPassword && <p className="text-sm text-red-500">{errors.confirmPassword.message}</p>}
-            </div>
-
-            {/* Submit */}
-            <Button
-              type="submit"
-              className="w-full bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white border-0 h-11"
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 className={`${dir === 'rtl' ? 'ml-2' : 'mr-2'} h-4 w-4 animate-spin`} />
-                  {t.auth.register.creatingAccount}
-                </>
-              ) : (
-                t.auth.register.createAccount
-              )}
-            </Button>
-          </form>
-
-          {/* Login Link */}
-          <p className="mt-6 text-center text-sm text-gray-600 dark:text-gray-400">
-            {t.auth.register.hasAccount}{' '}
-            <Link href={`/${locale}/auth/login`} className="text-orange-600 font-medium hover:underline dark:text-orange-400">
-              {t.auth.register.signIn}
-            </Link>
-          </p>
-        </div>
-      </div>
+  return <main dir={dir} className="flex min-h-screen items-center justify-center bg-gradient-to-br from-orange-50 to-red-50 px-4 py-8 dark:from-gray-900 dark:to-gray-800">
+    <div className="w-full max-w-md min-w-0">
+      <header className="mb-6 text-center"><Link href={`/${language}`} className="mb-3 inline-flex items-center gap-2.5"><span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-orange-500 to-red-600"><ChefHat className="h-6 w-6 text-white" /></span><span className="text-2xl font-extrabold text-gray-900 dark:text-white">Restaurant<span className="text-orange-500">POS</span></span></Link><p className="text-gray-600 dark:text-gray-400">{text.title}</p></header>
+      <section className="rounded-2xl border border-gray-100 bg-white p-5 shadow-xl dark:border-gray-700 dark:bg-gray-800 sm:p-8">
+        <form noValidate onSubmit={handleSubmit(onSubmit, onInvalid)} className="space-y-4">
+          {isSubmitted && Object.keys(errors).length > 0 && <FormErrorSummary title={fallback.validation} errors={Object.fromEntries(Object.entries(errors).filter(([key]) => key !== 'root').map(([key, value]) => [key, value?.message ?? 'Review this field']))} onFocusField={(key) => setFocus(key as keyof RegisterForm)} />}
+          {errors.root?.server?.message && <p role="alert" className="rounded-md bg-red-50 p-3 text-sm text-red-800">{errors.root.server.message}</p>}
+          <FormField id="name" label={text.fullName} required error={fieldError('name')}><input {...register('name')} {...fieldAccessibility('name', fieldError('name'))} autoComplete="name" maxLength={255} placeholder={text.fullNamePlaceholder} {...common} /></FormField>
+          <FormField id="email" label={text.email} required error={fieldError('email')}><input {...register('email')} {...fieldAccessibility('email', fieldError('email'))} type="email" autoComplete="email" maxLength={255} placeholder={text.emailPlaceholder} {...common} /></FormField>
+          <FormField id="restaurantName" label={text.restaurantName} required error={fieldError('restaurantName')}><input {...register('restaurantName')} {...fieldAccessibility('restaurantName', fieldError('restaurantName'))} autoComplete="organization" maxLength={255} placeholder={text.restaurantNamePlaceholder} {...common} /></FormField>
+          <FormField id="restaurantSlug" label={text.websiteSubdomain} required description={`${text.websiteAccessible} ${restaurantSlug || 'your-subdomain'}.${restaurantDomain}`} error={fieldError('restaurantSlug')}>
+            <input {...register('restaurantSlug')} {...fieldAccessibility('restaurantSlug', fieldError('restaurantSlug'))} autoCapitalize="none" autoCorrect="off" maxLength={63} placeholder={text.subdomainPlaceholder} {...common} />
+            <AsyncAvailabilityField state={availability.state} messages={messagesByState} />
+          </FormField>
+          <FormField id="phone" label={text.phone} optionalLabel={t.auth.validation.optional} error={fieldError('phone')}><input {...register('phone')} {...fieldAccessibility('phone', fieldError('phone'))} type="tel" autoComplete="tel" placeholder={text.phonePlaceholder} {...common} /></FormField>
+          <FormField id="password" label={text.password} required description="At least 6 characters; maximum 72 UTF-8 bytes." error={fieldError('password')}><PasswordField {...register('password')} {...fieldAccessibility('password', fieldError('password'))} autoComplete="new-password" placeholder={text.passwordPlaceholder} label={text.password} {...common} /></FormField>
+          <FormField id="confirmPassword" label={text.confirmPassword} required error={fieldError('confirmPassword')}><PasswordField {...register('confirmPassword')} {...fieldAccessibility('confirmPassword', fieldError('confirmPassword'))} autoComplete="new-password" placeholder={text.confirmPasswordPlaceholder} label={text.confirmPassword} {...common} /></FormField>
+          <SubmitButton isSubmitting={isSubmitting} loadingLabel={text.creatingAccount} className="w-full rounded-md bg-gradient-to-r from-orange-500 to-red-600 px-4 text-white hover:from-orange-600 hover:to-red-700">{text.createAccount}</SubmitButton>
+        </form>
+        <p className="mt-6 text-center text-sm text-gray-600 dark:text-gray-400">{text.hasAccount} <Link href={`/${language}/auth/login`} className="font-medium text-orange-600 hover:underline dark:text-orange-400">{text.signIn}</Link></p>
+      </section>
     </div>
-  )
+  </main>
 }

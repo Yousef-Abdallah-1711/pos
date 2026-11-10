@@ -176,7 +176,7 @@ describe('TenantSelectorModal', () => {
       fireEvent.click(companyAButton)
 
       await waitFor(() => {
-        expect(screen.getByText('User not found in selected organization')).toBeInTheDocument()
+        expect(screen.getByText('Failed to select organization')).toBeInTheDocument()
       })
 
       expect(mockToast.error).toHaveBeenCalled()

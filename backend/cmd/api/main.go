@@ -507,7 +507,7 @@ func main() {
 	// Browser handoff is performed server-to-server by the authenticated Super Admin route;
 	// do not expose a bearer/code exchange endpoint to arbitrary browser clients.
 	mux.Handle("POST /api/v1/auth/forgot-password", middleware.RateLimitByIP(5)(http.HandlerFunc(authHandler.ForgotPassword)))
-	mux.HandleFunc("GET /api/v1/auth/check-subdomain", authHandler.CheckSubdomainAvailability)
+	mux.Handle("GET /api/v1/auth/check-subdomain", middleware.RateLimitByIP(60)(http.HandlerFunc(authHandler.CheckSubdomainAvailability)))
 
 	// Public routes - Menu API (no authentication required)
 	mux.HandleFunc("GET /api/v1/public/restaurants/{slug}/menu", publicMenuHandler.GetRestaurantMenu)
