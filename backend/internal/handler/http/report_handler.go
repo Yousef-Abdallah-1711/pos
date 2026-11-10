@@ -8,7 +8,6 @@ import (
 	"encoding/csv"
 	"encoding/json"
 	"fmt"
-	"io"
 	"log"
 	"net/http"
 	"net/netip"
@@ -923,7 +922,7 @@ func parseReportExportRequest(r *http.Request) (reportExportRequest, error) {
 	req := reportExportRequest{}
 	if r.Body != nil {
 		defer r.Body.Close()
-		if err := json.NewDecoder(r.Body).Decode(&req); err != nil && err != io.EOF {
+		if err := decodeJSONStrictAllowEmpty(r, &req); err != nil {
 			return req, fmt.Errorf("invalid request body")
 		}
 	}

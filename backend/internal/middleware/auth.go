@@ -101,7 +101,6 @@ func AuthMiddleware(tokenService *jwt.TokenService, impersonation ...Impersonati
 			}
 
 			authHeader := r.Header.Get("Authorization")
-
 			if authHeader == "" {
 				http.Error(w, "Unauthorized - missing authorization header", http.StatusUnauthorized)
 				return
@@ -114,8 +113,7 @@ func AuthMiddleware(tokenService *jwt.TokenService, impersonation ...Impersonati
 				return
 			}
 
-			token := parts[1]
-			claims, err := tokenService.ValidateToken(token)
+			claims, err := tokenService.ValidateToken(parts[1])
 			if err != nil {
 				http.Error(w, "Unauthorized - invalid token", http.StatusUnauthorized)
 				return

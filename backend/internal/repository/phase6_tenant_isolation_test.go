@@ -14,8 +14,11 @@ func TestPhase6TenantIsolation_AccountRepositoryListUsesTenantAndRestaurantScope
 	defer db.Close()
 
 	repo := NewAccountRepository(db)
-	mock.ExpectQuery(`FROM chart_of_accounts`).
+	mock.ExpectQuery(`SELECT COUNT\(\*\)\s+FROM chart_of_accounts`).
 		WithArgs(7, 11).
+		WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(0))
+	mock.ExpectQuery(`FROM chart_of_accounts`).
+		WithArgs(7, 11, 200, 0).
 		WillReturnRows(sqlmock.NewRows([]string{"id"}))
 
 	accounts, err := repo.ListAccounts(7, 11, false)
@@ -189,8 +192,11 @@ func TestPhase6TenantIsolation_CustomerInvoiceRepositoryListUsesTenantAndRestaur
 	defer db.Close()
 
 	repo := NewCustomerInvoiceRepository(db, nil, nil)
-	mock.ExpectQuery(`FROM invoices_customer`).
+	mock.ExpectQuery(`SELECT COUNT\(\*\)\s+FROM invoices_customer`).
 		WithArgs(7, 11).
+		WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(0))
+	mock.ExpectQuery(`FROM invoices_customer`).
+		WithArgs(7, 11, 200, 0).
 		WillReturnRows(sqlmock.NewRows([]string{"id"}))
 
 	records, err := repo.ListInvoices(7, 11)
@@ -214,8 +220,11 @@ func TestPhase6TenantIsolation_SupplierInvoiceRepositoryListUsesTenantAndRestaur
 	defer db.Close()
 
 	repo := NewSupplierInvoiceRepository(db, nil, nil)
-	mock.ExpectQuery(`FROM invoices_supplier`).
+	mock.ExpectQuery(`SELECT COUNT\(\*\)\s+FROM invoices_supplier`).
 		WithArgs(7, 11).
+		WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(0))
+	mock.ExpectQuery(`FROM invoices_supplier`).
+		WithArgs(7, 11, 200, 0).
 		WillReturnRows(sqlmock.NewRows([]string{"id"}))
 
 	records, err := repo.ListInvoices(7, 11)
@@ -240,8 +249,11 @@ func TestPhase6TenantIsolation_PaymentAccountingRepositoryListUsesTenantAndResta
 
 	repo := NewPaymentAccountingRepository(db, nil, nil, nil)
 
-	mock.ExpectQuery(`FROM payments_received`).
+	mock.ExpectQuery(`SELECT COUNT\(\*\)\s+FROM payments_received`).
 		WithArgs(7, 11).
+		WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(0))
+	mock.ExpectQuery(`FROM payments_received`).
+		WithArgs(7, 11, 200, 0).
 		WillReturnRows(sqlmock.NewRows([]string{"id"}))
 	received, err := repo.ListPaymentsReceived(7, 11)
 	if err != nil {
@@ -251,8 +263,11 @@ func TestPhase6TenantIsolation_PaymentAccountingRepositoryListUsesTenantAndResta
 		t.Fatalf("expected no records, got %d", len(received))
 	}
 
-	mock.ExpectQuery(`FROM payments_made`).
+	mock.ExpectQuery(`SELECT COUNT\(\*\)\s+FROM payments_made`).
 		WithArgs(7, 11).
+		WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(0))
+	mock.ExpectQuery(`FROM payments_made`).
+		WithArgs(7, 11, 200, 0).
 		WillReturnRows(sqlmock.NewRows([]string{"id"}))
 	made, err := repo.ListPaymentsMade(7, 11)
 	if err != nil {
@@ -329,8 +344,11 @@ func TestPhase6TenantIsolation_TaxRepositoryListUsesTenantAndRestaurantScope(t *
 	defer db.Close()
 
 	repo := NewTaxRepository(db)
-	mock.ExpectQuery(`FROM tax_periods`).
+	mock.ExpectQuery(`SELECT COUNT\(\*\)\s+FROM tax_periods`).
 		WithArgs(7, 11).
+		WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(0))
+	mock.ExpectQuery(`FROM tax_periods`).
+		WithArgs(7, 11, 200, 0).
 		WillReturnRows(sqlmock.NewRows([]string{"id"}))
 
 	records, err := repo.ListTaxPeriods(7, 11)

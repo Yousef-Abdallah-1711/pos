@@ -1,7 +1,6 @@
 package http
 
 import (
-	"encoding/json"
 	"net/http"
 	"strconv"
 	"time"
@@ -219,7 +218,7 @@ func decodePerformanceReviewPayload(r *http.Request) (domain.PerformanceReview, 
 		ActionPlan        string  `json:"action_plan"`
 		Status            string  `json:"status"`
 	}
-	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+	if err := decodeJSONStrict(r, &body); err != nil {
 		return domain.PerformanceReview{}, err
 	}
 	if body.EmployeeID <= 0 || body.ReviewerID <= 0 {

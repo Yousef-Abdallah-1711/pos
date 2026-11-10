@@ -105,7 +105,7 @@ func (h *RoleHandler) CreateRole(w http.ResponseWriter, r *http.Request) {
 	}
 
 	log.Println("[CreateRole] Decoding request body...")
-	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
+	if err := decodeJSONStrict(r, &input); err != nil {
 		log.Printf("[CreateRole] ERROR decoding body: %v\n", err)
 		respondError(w, http.StatusBadRequest, "Invalid request body")
 		return
@@ -208,7 +208,7 @@ func (h *RoleHandler) UpdateRole(w http.ResponseWriter, r *http.Request) {
 		IsActive           bool            `json:"is_active"`
 	}
 
-	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
+	if err := decodeJSONStrict(r, &input); err != nil {
 		respondError(w, http.StatusBadRequest, "Invalid request body")
 		return
 	}

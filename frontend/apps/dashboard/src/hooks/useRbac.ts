@@ -14,6 +14,7 @@ import {
   RolePermission,
   PermissionCheckResponse,
 } from '@/lib/rbac'
+import { useAuthStore } from '@/stores/authStore'
 
 const CURRENT_USER_PERMISSION_CACHE_KEY = 'current_user'
 const PRIVILEGED_KDS_ROLES = new Set(['owner', 'admin', 'manager', 'super_admin'])
@@ -103,36 +104,8 @@ const normalizePermissionsPayload = (payload: unknown): UserPermissions => {
 }
 
 const readCurrentUserRole = (): string | null => {
-  if (typeof window === 'undefined') {
-    return null
-  }
-
-  try {
-    const authStorage = window.localStorage.getItem('auth-storage')
-    if (authStorage) {
-      const parsed = JSON.parse(authStorage) as {
-        state?: { user?: { role?: string } }
-        user?: { role?: string }
-      }
-      const role = parsed.state?.user?.role || parsed.user?.role
-      if (role) {
-        return String(role).toLowerCase()
-      }
-    }
-  } catch {
-    // Ignore malformed local auth payloads.
-  }
-
-  try {
-    const userRaw = window.localStorage.getItem('user')
-    if (!userRaw) {
-      return null
-    }
-    const parsed = JSON.parse(userRaw) as { role?: string }
-    return parsed.role ? String(parsed.role).toLowerCase() : null
-  } catch {
-    return null
-  }
+  const role = useAuthStore.getState().user?.role
+  return role ? String(role).toLowerCase() : null
 }
 
 const canUseKDSRoleFallback = () => {

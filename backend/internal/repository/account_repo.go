@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 	"sort"
@@ -16,7 +17,31 @@ func NewAccountRepository(db *sql.DB) *AccountRepository {
 	return &AccountRepository{db: db}
 }
 
-func (r *AccountRepository) ListAccounts(tenantID, restaurantID int, includeInactive bool) ([]domain.Account, error) {
+func (r *AccountRepository) ListAccountsPaged(ctx context.Context, tenantID, restaurantID int, includeInactive bool, page, pageSize int) ([]domain.Account, int, error) {
+	if page <= 0 {
+		page = 1
+	}
+	if pageSize <= 0 {
+		pageSize = 50
+	}
+	if pageSize > 200 {
+		pageSize = 200
+	}
+	offset := (page - 1) * pageSize
+
+	countQuery := `
+		SELECT COUNT(*)
+		FROM chart_of_accounts
+		WHERE tenant_id = $1 AND restaurant_id = $2
+	`
+	if !includeInactive {
+		countQuery += ` AND is_active = TRUE`
+	}
+	var total int
+	if err := r.db.QueryRowContext(ctx, countQuery, tenantID, restaurantID).Scan(&total); err != nil {
+		return nil, 0, err
+	}
+
 	query := `
 		SELECT
 			id, tenant_id, restaurant_id, account_code, account_name,
@@ -32,27 +57,32 @@ func (r *AccountRepository) ListAccounts(tenantID, restaurantID int, includeInac
 	if !includeInactive {
 		query += ` AND is_active = TRUE`
 	}
-	query += ` ORDER BY account_code ASC`
+	query += ` ORDER BY account_code ASC LIMIT $3 OFFSET $4`
 
-	rows, err := r.db.Query(query, tenantID, restaurantID)
+	rows, err := r.db.QueryContext(ctx, query, tenantID, restaurantID, pageSize, offset)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 	defer rows.Close()
 
 	accounts := make([]domain.Account, 0)
 	for rows.Next() {
-		account, err := scanAccount(rows)
-		if err != nil {
-			return nil, err
+		account, scanErr := scanAccount(rows)
+		if scanErr != nil {
+			return nil, 0, scanErr
 		}
 		accounts = append(accounts, account)
 	}
 	if err := rows.Err(); err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
-	return accounts, nil
+	return accounts, total, nil
+}
+
+func (r *AccountRepository) ListAccounts(tenantID, restaurantID int, includeInactive bool) ([]domain.Account, error) {
+	accounts, _, err := r.ListAccountsPaged(context.Background(), tenantID, restaurantID, includeInactive, 1, 1000000)
+	return accounts, err
 }
 
 func (r *AccountRepository) GetAccountByID(tenantID, restaurantID, id int) (*domain.Account, error) {

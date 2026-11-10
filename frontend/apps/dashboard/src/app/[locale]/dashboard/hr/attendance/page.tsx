@@ -16,6 +16,7 @@ import { Plus, AlertCircle, Lock, Loader2 } from 'lucide-react'
 import { createTranslator, getLocaleFromPath } from '@/lib/translations'
 import { PageHeaderSkeleton, TableSkeleton } from '@/components/skeletons'
 import { MODULE_IDS, PERMISSION_LEVELS } from '@/lib/rbac'
+import { hasAuthenticatedSession } from '@/lib/authSession'
 
 interface Attendance {
   id: number
@@ -64,11 +65,13 @@ export default function AttendancePage() {
   )
   const [endDate, setEndDate] = useState(new Date().toISOString().split('T')[0])
 
+  const user = useAuthStore((state) => state.user)
   const token = useAuthStore((state) => state.token)
+  const hasSession = hasAuthenticatedSession(user, token)
 
   // Fetch employees - hook MUST be before early returns
   useEffect(() => {
-    if (!token || !canViewAttendance || permissionLoading) return
+    if (!hasSession || !canViewAttendance || permissionLoading) return
 
     const fetchEmployees = async () => {
       try {
@@ -81,11 +84,11 @@ export default function AttendancePage() {
     }
 
     fetchEmployees()
-  }, [token, canViewAttendance, permissionLoading])
+  }, [hasSession, canViewAttendance, permissionLoading])
 
   // Fetch attendance - hook MUST be before early returns
   useEffect(() => {
-    if (!token || !canViewAttendance || permissionLoading) return
+    if (!hasSession || !canViewAttendance || permissionLoading) return
 
     const fetchAttendance = async () => {
       setLoading(true)
@@ -126,7 +129,7 @@ export default function AttendancePage() {
     }
 
     fetchAttendance()
-  }, [token, startDate, endDate, employees, canViewAttendance, permissionLoading])
+  }, [hasSession, startDate, endDate, employees, canViewAttendance, permissionLoading])
 
   // Show permission denied if user can't view attendance
   if (permissionLoading) {
