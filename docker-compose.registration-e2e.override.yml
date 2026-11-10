@@ -1,0 +1,37 @@
+services:
+  postgres:
+    ports: !override
+      - "127.0.0.1:${REG_E2E_PG_PORT}:5432"
+  api:
+    ports: !override
+      - "127.0.0.1:${REG_E2E_API_PORT}:18080"
+      - "127.0.0.1:${REG_E2E_LANDING_PORT}:3001"
+      - "127.0.0.1:${REG_E2E_DASHBOARD_PORT}:3002"
+    environment:
+      CORS_ORIGINS: "http://localhost:${REG_E2E_LANDING_PORT},http://localhost:${REG_E2E_DASHBOARD_PORT}"
+      DASHBOARD_URL: "http://localhost:${REG_E2E_DASHBOARD_PORT}"
+      LANDING_URL: "http://localhost:${REG_E2E_LANDING_PORT}"
+      NEXT_PUBLIC_API_URL: "http://localhost:${REG_E2E_API_PORT}/api/v1"
+      NEXT_PUBLIC_API_BASE_URL: "http://localhost:${REG_E2E_API_PORT}/api/v1"
+      NEXT_PUBLIC_DASHBOARD_URL: "http://localhost:${REG_E2E_DASHBOARD_PORT}"
+      NEXT_PUBLIC_LANDING_URL: "http://localhost:${REG_E2E_LANDING_PORT}"
+      NEXT_PUBLIC_RESTAURANT_DOMAIN: "localhost:14213"
+  landing:
+    environment:
+      NEXT_PUBLIC_API_URL: "http://localhost:${REG_E2E_API_PORT}/api/v1"
+      NEXT_PUBLIC_API_BASE_URL: "http://localhost:${REG_E2E_API_PORT}/api/v1"
+      NEXT_PUBLIC_DASHBOARD_URL: "http://localhost:${REG_E2E_DASHBOARD_PORT}"
+      NEXT_PUBLIC_LANDING_URL: "http://localhost:${REG_E2E_LANDING_PORT}"
+      NEXT_PUBLIC_RESTAURANT_DOMAIN: "localhost:14213"
+  dashboard:
+    environment:
+      NEXT_PUBLIC_API_URL: "http://localhost:${REG_E2E_API_PORT}/api/v1"
+      NEXT_PUBLIC_API_BASE_URL: "http://localhost:${REG_E2E_API_PORT}/api/v1"
+      NEXT_PUBLIC_DASHBOARD_URL: "http://localhost:${REG_E2E_DASHBOARD_PORT}"
+      NEXT_PUBLIC_LANDING_URL: "http://localhost:${REG_E2E_LANDING_PORT}"
+
+networks:
+  default:
+    ipam:
+      config: !override
+        - subnet: 10.254.252.0/24

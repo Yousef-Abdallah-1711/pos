@@ -82,7 +82,7 @@ export default function LoginPage() {
       const parsed = parseApiError(error, { validation: 'Please review the highlighted fields.', invalidCredentials: t.auth.login.invalidCredentials, rateLimited: 'Too many attempts. Wait a moment and try again.', unavailable: 'Sign in is temporarily unavailable. Please try again.', network: t.auth.login.networkError, unexpected: t.auth.login.loginFailed, conflict: t.auth.login.loginFailed })
       applyApiFieldErrors(parsed.fields, (field, message) => setError(field as keyof LoginForm, { type: 'server', message }))
       const firstField = Object.keys(parsed.fields)[0]
-      if (firstField === 'email' || firstField === 'password') setFocus(firstField)
+      if (firstField === 'email' || firstField === 'password') window.requestAnimationFrame(() => setFocus(firstField))
       else if (!firstField) toast.error(parsed.message)
     } finally {
       setIsLoading(false)
@@ -114,8 +114,8 @@ export default function LoginPage() {
 
           {/* Login Form */}
           <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700 p-8">
-            <form noValidate onSubmit={handleSubmit(onSubmit, (invalid) => { const first = Object.keys(invalid)[0] as keyof LoginForm | undefined; if (first) setFocus(first) })} className="space-y-5">
-              {isSubmitted && Object.keys(errors).length > 0 && <FormErrorSummary title="Please review these fields" errors={Object.fromEntries(Object.entries(errors).map(([key, value]) => [key, value?.message ?? 'Review this field']))} onFocusField={(field) => setFocus(field as keyof LoginForm)} />}
+            <form method="post" noValidate onSubmit={handleSubmit(onSubmit, (invalid) => { const first = Object.keys(invalid)[0] as keyof LoginForm | undefined; if (first) window.requestAnimationFrame(() => setFocus(first)) })} className="space-y-5">
+              <FormErrorSummary title="Please review these fields" errors={isSubmitted ? Object.fromEntries(Object.entries(errors).map(([key, value]) => [key, value?.message ?? 'Review this field'])) : {}} onFocusField={(field) => setFocus(field as keyof LoginForm)} />
               {/* Email */}
               <FormField id="email" label={t.auth.login.email} required error={errors.email?.message}><input type="email" autoComplete="email" maxLength={255} placeholder={t.auth.login.emailPlaceholder} {...register('email')} {...fieldAccessibility('email', errors.email?.message)} disabled={isLoading} className="h-11 w-full rounded-md border border-gray-300 bg-white px-3 text-gray-900 outline-none focus-visible:ring-2 focus-visible:ring-orange-600 disabled:opacity-60 dark:border-gray-600 dark:bg-gray-800 dark:text-white" /></FormField>
 

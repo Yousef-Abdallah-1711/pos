@@ -34,8 +34,9 @@ describe('shared async availability validation', () => {
   })
 
   it('distinguishes unavailable and network failure states', async () => {
+    const firstCheck: (value: string, signal: AbortSignal) => Promise<boolean | 'reserved'> = async () => false
     const { result, rerender } = renderHook(({ value, check }: { value: string; check: (value: string, signal: AbortSignal) => Promise<boolean | 'reserved'> }) => useDebouncedAvailability(value, valid, check, 0), {
-      initialProps: { value: 'taken', check: async () => false },
+      initialProps: { value: 'taken', check: firstCheck },
     })
     await waitFor(() => expect(result.current.state).toBe('taken'))
     rerender({ value: 'reserved', check: async () => 'reserved' })

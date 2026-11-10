@@ -29,11 +29,12 @@ export default function RegisterPage() {
   const availability = useDebouncedAvailability(restaurantSlug, isSubdomainFormatValid, checkAvailability, 500)
   const fallback = { validation: 'Please review the highlighted fields.', invalidCredentials: 'Email or password is incorrect.', rateLimited: 'Too many attempts. Wait a moment and try again.', unavailable: 'The service is temporarily unavailable. Please try again.', network: 'Unable to connect. Check your connection and try again.', unexpected: 'We could not create your account. Please try again.', conflict: 'That email or website address is already in use.' }
   const messagesByState = { invalid: messages.invalidSubdomain, checking: 'Checking availability…', available: text.subdomainAvailable, taken: text.subdomainUnavailable, reserved: 'This website address is reserved.', error: 'Availability could not be checked. Check your connection and try again.' }
+  const focusField = (field: keyof RegisterForm) => window.requestAnimationFrame(() => setFocus(field))
 
   const onSubmit = async (data: RegisterForm) => {
     if (availability.state !== 'available' || availability.checkedValue !== data.restaurantSlug.trim().toLowerCase()) {
       setError('restaurantSlug', { type: 'validate', message: availability.state === 'error' ? messagesByState.error : text.subdomainRequired })
-      setFocus('restaurantSlug')
+      focusField('restaurantSlug')
       return
     }
     clearErrors()
@@ -52,14 +53,14 @@ export default function RegisterPage() {
       const firstField = Object.keys(parsed.fields)[0]
       if (firstField) {
         const fieldName = firstField === 'restaurant_slug' ? 'restaurantSlug' : firstField === 'restaurant_name' ? 'restaurantName' : firstField
-        setFocus(fieldName as keyof RegisterForm)
+        focusField(fieldName as keyof RegisterForm)
       } else setError('root.server', { type: parsed.code, message: parsed.message })
     }
   }
 
   const onInvalid = (invalid: Record<string, unknown>) => {
     const firstField = Object.keys(invalid)[0] as keyof RegisterForm | undefined
-    if (firstField) setFocus(firstField)
+    if (firstField) focusField(firstField)
   }
   const inputClass = 'h-11 w-full rounded-md border border-gray-300 bg-white px-3 text-gray-900 shadow-sm outline-none focus-visible:ring-2 focus-visible:ring-orange-600 disabled:opacity-60 dark:border-gray-600 dark:bg-gray-800 dark:text-white'
   const common = { disabled: isSubmitting, className: inputClass }
@@ -70,8 +71,8 @@ export default function RegisterPage() {
     <div className="w-full max-w-md min-w-0">
       <header className="mb-6 text-center"><Link href={`/${language}`} className="mb-3 inline-flex items-center gap-2.5"><span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-orange-500 to-red-600"><ChefHat className="h-6 w-6 text-white" /></span><span className="text-2xl font-extrabold text-gray-900 dark:text-white">Restaurant<span className="text-orange-500">POS</span></span></Link><p className="text-gray-600 dark:text-gray-400">{text.title}</p></header>
       <section className="rounded-2xl border border-gray-100 bg-white p-5 shadow-xl dark:border-gray-700 dark:bg-gray-800 sm:p-8">
-        <form noValidate onSubmit={handleSubmit(onSubmit, onInvalid)} className="space-y-4">
-          {isSubmitted && Object.keys(errors).length > 0 && <FormErrorSummary title={fallback.validation} errors={Object.fromEntries(Object.entries(errors).filter(([key]) => key !== 'root').map(([key, value]) => [key, value?.message ?? 'Review this field']))} onFocusField={(key) => setFocus(key as keyof RegisterForm)} />}
+        <form method="post" noValidate onSubmit={handleSubmit(onSubmit, onInvalid)} className="space-y-4">
+          <FormErrorSummary title={fallback.validation} errors={isSubmitted ? Object.fromEntries(Object.entries(errors).filter(([key]) => key !== 'root').map(([key, value]) => [key, value?.message ?? 'Review this field'])) : {}} onFocusField={(key) => setFocus(key as keyof RegisterForm)} />
           {errors.root?.server?.message && <p role="alert" className="rounded-md bg-red-50 p-3 text-sm text-red-800">{errors.root.server.message}</p>}
           <FormField id="name" label={text.fullName} required error={fieldError('name')}><input {...register('name')} {...fieldAccessibility('name', fieldError('name'))} autoComplete="name" maxLength={255} placeholder={text.fullNamePlaceholder} {...common} /></FormField>
           <FormField id="email" label={text.email} required error={fieldError('email')}><input {...register('email')} {...fieldAccessibility('email', fieldError('email'))} type="email" autoComplete="email" maxLength={255} placeholder={text.emailPlaceholder} {...common} /></FormField>

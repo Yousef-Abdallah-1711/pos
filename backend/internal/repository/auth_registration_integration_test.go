@@ -143,4 +143,47 @@ func TestCreateTenantWithUserRegistrationContract(t *testing.T) {
 	if matchingTenants != 1 {
 		t.Fatalf("concurrent duplicate email left %d tenants, want exactly one", matchingTenants)
 	}
+
+	// Concurrent registrations with different emails must also serialize on
+	// the unique restaurant slug and roll back the losing tenant transaction.
+	raceSlug := fmt.Sprintf("registration-slug-race-%d", stamp)
+	requests = []*domain.RegisterRequest{
+		{Name: "Slug Race Owner A", Email: fmt.Sprintf("registration-slug-a-%d@example.test", stamp), Password: "synthetic-password-123", RestaurantName: fmt.Sprintf("Slug Race Cafe A %d", stamp), RestaurantSlug: raceSlug},
+		{Name: "Slug Race Owner B", Email: fmt.Sprintf("registration-slug-b-%d@example.test", stamp), Password: "synthetic-password-123", RestaurantName: fmt.Sprintf("Slug Race Cafe B %d", stamp), RestaurantSlug: raceSlug},
+	}
+	start = make(chan struct{})
+	results = make(chan error, len(requests))
+	wait = sync.WaitGroup{}
+	for _, registration := range requests {
+		wait.Add(1)
+		go func(req *domain.RegisterRequest) {
+			defer wait.Done()
+			<-start
+			_, err := NewAuthRepository(db).CreateTenantWithUserContext(ctx, req)
+			results <- err
+		}(registration)
+	}
+	close(start)
+	wait.Wait()
+	close(results)
+	created, slugConflicts := 0, 0
+	for err := range results {
+		switch {
+		case err == nil:
+			created++
+		case errors.Is(err, ErrTenantSlugExists):
+			slugConflicts++
+		default:
+			t.Fatalf("unexpected concurrent slug registration error: %v", err)
+		}
+	}
+	if created != 1 || slugConflicts != 1 {
+		t.Fatalf("concurrent duplicate slug results: created=%d conflicts=%d", created, slugConflicts)
+	}
+	if err := db.QueryRow(`SELECT count(*) FROM tenants WHERE slug = $1`, raceSlug).Scan(&matchingTenants); err != nil {
+		t.Fatal(err)
+	}
+	if matchingTenants != 1 {
+		t.Fatalf("concurrent duplicate slug left %d tenants, want exactly one", matchingTenants)
+	}
 }
