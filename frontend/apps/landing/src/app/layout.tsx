@@ -22,7 +22,9 @@ interface RootLayoutProps {
 }
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_LANDING_URL || 'http://localhost:3001'),
+  metadataBase: process.env.NEXT_PUBLIC_LANDING_URL
+    ? new URL(process.env.NEXT_PUBLIC_LANDING_URL)
+    : undefined,
   title: 'POOS | إدارة متصلة لكل تفاصيل مطعمك',
   description: 'منصة واحدة لإدارة العمل في مطعمك من واجهة الخدمة إلى ما يدور خلفها.',
   applicationName: 'POOS',
