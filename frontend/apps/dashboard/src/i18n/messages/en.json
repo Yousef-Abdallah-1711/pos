@@ -569,6 +569,7 @@
       "tableDate": "Date",
       "tableAmount": "Amount",
       "tableStatus": "Status",
+      "voided": "Voided",
       "tableMethod": "Method",
       "tableCard": "Card",
       "tableReference": "Reference",

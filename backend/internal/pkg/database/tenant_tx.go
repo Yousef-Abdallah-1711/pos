@@ -45,7 +45,9 @@ func withTenantContextTx(ctx context.Context, db *sql.DB, tenantID, restaurantID
 	if restaurantID < 0 {
 		return fmt.Errorf("invalid restaurant id %d", restaurantID)
 	}
-
+	if userID < 0 {
+		return fmt.Errorf("invalid user id %d", userID)
+	}
 	tx, err := db.BeginTx(ctx, nil)
 	if err != nil {
 		return fmt.Errorf("begin tenant transaction: %w", err)
@@ -60,16 +62,7 @@ func withTenantContextTx(ctx context.Context, db *sql.DB, tenantID, restaurantID
 		}
 	}()
 
-	restaurant := ""
-	if restaurantID > 0 {
-		restaurant = strconv.FormatInt(restaurantID, 10)
-	}
-	user := ""
-	if userID > 0 {
-		user = strconv.FormatInt(userID, 10)
-	}
-	if _, err = tx.ExecContext(ctx, `SELECT set_config($1, $2, true), set_config($3, $4, true), set_config($5, $6, true)`,
-		TenantSetting, strconv.FormatInt(tenantID, 10), RestaurantSetting, restaurant, UserSetting, user); err != nil {
+	if err = SetTenantTxContext(ctx, tx, tenantID, restaurantID, userID); err != nil {
 		return fmt.Errorf("set tenant context: %w", err)
 	}
 
@@ -80,4 +73,32 @@ func withTenantContextTx(ctx context.Context, db *sql.DB, tenantID, restaurantID
 		return fmt.Errorf("commit tenant transaction: %w", err)
 	}
 	return nil
+}
+
+// SetTenantTxContext sets transaction-local scope on an existing transaction.
+// Call it after the transaction has established its tenant and restaurant IDs.
+func SetTenantTxContext(ctx context.Context, tx *sql.Tx, tenantID, restaurantID, userID int64) error {
+	if tx == nil {
+		return errors.New("transaction is not initialized")
+	}
+	if tenantID <= 0 {
+		return fmt.Errorf("invalid tenant id %d", tenantID)
+	}
+	if restaurantID < 0 {
+		return fmt.Errorf("invalid restaurant id %d", restaurantID)
+	}
+	if userID < 0 {
+		return fmt.Errorf("invalid user id %d", userID)
+	}
+	restaurant := ""
+	if restaurantID > 0 {
+		restaurant = strconv.FormatInt(restaurantID, 10)
+	}
+	user := ""
+	if userID > 0 {
+		user = strconv.FormatInt(userID, 10)
+	}
+	_, err := tx.ExecContext(ctx, `SELECT set_config($1, $2, true), set_config($3, $4, true), set_config($5, $6, true)`,
+		TenantSetting, strconv.FormatInt(tenantID, 10), RestaurantSetting, restaurant, UserSetting, user)
+	return err
 }

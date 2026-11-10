@@ -52,7 +52,7 @@ export function ThemeSelector() {
   const setCurrentTheme = useThemeStore((state) => state.setCurrentTheme)
 
   const [showActions, setShowActions] = useState<string | null>(null)
-  const getSafeThemeId = (id: string) => id.replace(/[^a-zA-Z0-9_-]/g, '-')
+  const getSafeThemeId = (id: unknown) => String(id ?? 'theme').replace(/[^a-zA-Z0-9_-]/g, '-')
 
   const handleApplyPreset = (preset: any) => {
     if (!currentTheme) return

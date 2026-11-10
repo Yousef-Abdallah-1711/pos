@@ -1,6 +1,6 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { apiClient } from '@/lib/api-client';
+import apiClient from '@/lib/api/themeApi';
 
 export interface Theme {
   id: number;
@@ -25,10 +25,10 @@ export interface ThemeSection {
   title: string;
   subtitle: string;
   description: string;
-  background_image: string;
+  background_image?: string;
   button_text: string;
   button_link: string;
-  content: Record<string, any>;
+  content: Record<string, string | number | string[] | undefined>;
   created_at: string;
   updated_at: string;
 }

@@ -5,6 +5,7 @@ import { usePathname, useRouter, useParams } from 'next/navigation'
 import Link from 'next/link'
 import { useAuthStore } from '@/stores/authStore'
 import { api } from '@/lib/api'
+import { hasAuthenticatedSession } from '@/lib/authSession'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
 import {
@@ -79,7 +80,9 @@ export default function EditDriverPage() {
   const [loading, setLoading] = useState(true)
   const [updating, setUpdating] = useState(false)
   const [errors, setErrors] = useState<FormErrors>({})
+  const user = useAuthStore((state) => state.user)
   const token = useAuthStore((state) => state.token)
+  const hasSession = hasAuthenticatedSession(user, token)
 
   const [formData, setFormData] = useState<FormData>({
     first_name: '',
@@ -98,8 +101,12 @@ export default function EditDriverPage() {
   })
 
   useEffect(() => {
+    if (!hasSession) {
+      setLoading(false)
+      return
+    }
     fetchDriver()
-  }, [driverId, token])
+  }, [driverId, hasSession])
 
   const fetchDriver = async () => {
     setLoading(true)
@@ -173,6 +180,11 @@ export default function EditDriverPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    if (!hasSession) {
+      toast.error('Please log in again')
+      return
+    }
 
     if (!validateForm()) {
       toast.error('Please fill in all required fields')

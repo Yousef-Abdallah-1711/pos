@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 	"fmt"
@@ -12,6 +13,7 @@ import (
 	"github.com/lib/pq"
 	"golang.org/x/crypto/bcrypt"
 	"pos-saas/internal/domain"
+	"pos-saas/internal/pkg/database"
 )
 
 type AuthRepository struct {
@@ -122,6 +124,9 @@ func (r *AuthRepository) CreateTenantWithUser(req *domain.RegisterRequest) (*dom
 	}
 
 	user.RestaurantID = &restaurantID
+	if err := database.SetTenantTxContext(context.Background(), tx, int64(tenantID), int64(restaurantID), int64(user.ID)); err != nil {
+		return nil, fmt.Errorf("failed to scope tenant registration transaction: %w", err)
+	}
 
 	// 6. Create a default theme for the restaurant using JSONB config
 	config := `{

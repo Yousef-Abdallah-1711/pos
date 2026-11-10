@@ -1,8 +1,6 @@
 package http
 
 import (
-	"encoding/json"
-	"io"
 	"net/http"
 	"strconv"
 	"strings"
@@ -127,7 +125,7 @@ func (h *JournalEntryHandler) CreateJournalEntry(w http.ResponseWriter, r *http.
 	userID := int(middleware.GetUserID(r))
 
 	var req domain.CreateJournalEntryRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+	if err := decodeJSONStrict(r, &req); err != nil {
 		writeJSON(w, http.StatusBadRequest, map[string]interface{}{
 			"success": false,
 			"error":   "Invalid request body",
@@ -216,7 +214,7 @@ func (h *JournalEntryHandler) UpdateJournalEntry(w http.ResponseWriter, r *http.
 	}
 
 	var req domain.UpdateJournalEntryRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+	if err := decodeJSONStrict(r, &req); err != nil {
 		writeJSON(w, http.StatusBadRequest, map[string]interface{}{
 			"success": false,
 			"error":   "Invalid request body",
@@ -335,7 +333,7 @@ func (h *JournalEntryHandler) VoidJournalEntry(w http.ResponseWriter, r *http.Re
 		Reason string `json:"reason"`
 	}
 	if r.Body != nil {
-		if err := json.NewDecoder(r.Body).Decode(&req); err != nil && err != io.EOF {
+		if err := decodeJSONStrictAllowEmpty(r, &req); err != nil {
 			writeJSON(w, http.StatusBadRequest, map[string]interface{}{
 				"success": false,
 				"error":   "Invalid request body",

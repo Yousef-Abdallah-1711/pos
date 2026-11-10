@@ -37,20 +37,8 @@ function normalizeUrl(value: string) {
   return value.replace(/\/+$/, '')
 }
 
-function warnMissingConfig(label: string, fallbackValue: string) {
-  if (process.env.NEXT_PUBLIC_STRICT_CONFIG_WARNINGS !== 'true') {
-    return
-  }
-  if (typeof console !== 'undefined') {
-    console.warn(
-      `[dashboard/config] Missing ${label} in production. Falling back to ${fallbackValue}.`
-    )
-  }
-}
-
 function resolveUrlValue(
   label: string,
-  environmentVariable: string,
   configuredValue: string | undefined,
   devFallback: string,
   options?: { allowCurrentOriginInProduction?: boolean }
@@ -75,8 +63,8 @@ function resolveUrlValue(
     }
   }
 
-  warnMissingConfig(label, devFallback)
-  throw new Error(`Missing required production configuration: ${environmentVariable}`)
+  const configKey = `NEXT_PUBLIC_${label.toUpperCase().replaceAll(' ', '_')}`
+  throw new Error(`[dashboard/config] Missing ${configKey} in production.`)
 }
 
 function resolveDomainValue(configuredValue: string | undefined) {
@@ -93,8 +81,7 @@ function resolveDomainValue(configuredValue: string | undefined) {
     return DEV_DEFAULTS.restaurantDomain
   }
 
-  warnMissingConfig('restaurant domain', DEV_DEFAULTS.restaurantDomain)
-  throw new Error('Missing required production configuration: NEXT_PUBLIC_RESTAURANT_DOMAIN')
+  throw new Error('[dashboard/config] Missing NEXT_PUBLIC_RESTAURANT_DOMAIN in production.')
 }
 
 export const getConfig = () => {
@@ -102,11 +89,11 @@ export const getConfig = () => {
 
   const config = {
     isDevelopment,
-    landingUrl: resolveUrlValue('Landing URL', 'NEXT_PUBLIC_LANDING_URL', process.env.NEXT_PUBLIC_LANDING_URL, DEV_DEFAULTS.landingUrl),
-    dashboardUrl: resolveUrlValue('Dashboard URL', 'NEXT_PUBLIC_DASHBOARD_URL', process.env.NEXT_PUBLIC_DASHBOARD_URL, DEV_DEFAULTS.dashboardUrl, {
+    landingUrl: resolveUrlValue('Landing URL', process.env.NEXT_PUBLIC_LANDING_URL, DEV_DEFAULTS.landingUrl),
+    dashboardUrl: resolveUrlValue('Dashboard URL', process.env.NEXT_PUBLIC_DASHBOARD_URL, DEV_DEFAULTS.dashboardUrl, {
       allowCurrentOriginInProduction: true,
     }),
-    apiUrl: resolveUrlValue('API URL', 'NEXT_PUBLIC_API_URL', process.env.NEXT_PUBLIC_API_URL, DEV_DEFAULTS.apiUrl),
+    apiUrl: resolveUrlValue('API URL', process.env.NEXT_PUBLIC_API_URL, DEV_DEFAULTS.apiUrl),
     restaurantDomain: resolveDomainValue(process.env.NEXT_PUBLIC_RESTAURANT_DOMAIN),
   }
 

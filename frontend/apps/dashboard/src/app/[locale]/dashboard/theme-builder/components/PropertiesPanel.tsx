@@ -7,6 +7,7 @@ import { ColorPicker } from './ColorPicker'
 
 const FONT_FAMILIES = [
   'Inter',
+  'Roboto',
   'Poppins',
   'Playfair Display',
   'Georgia',

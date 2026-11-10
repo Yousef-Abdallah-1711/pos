@@ -2,7 +2,6 @@ package http
 
 import (
 	"encoding/csv"
-	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -374,7 +373,7 @@ func (h *AdminOrderHandler) UpdateOrderStatus(w http.ResponseWriter, r *http.Req
 		Reason string `json:"reason"`
 		Notes  string `json:"notes"`
 	}
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+	if err := decodeJSONStrict(r, &req); err != nil {
 		respondError(w, http.StatusBadRequest, "Invalid request body")
 		return
 	}
@@ -431,7 +430,7 @@ func (h *AdminOrderHandler) CancelOrder(w http.ResponseWriter, r *http.Request) 
 		Reason string `json:"reason"`
 		Notes  string `json:"notes"`
 	}
-	_ = json.NewDecoder(r.Body).Decode(&req)
+	_ = decodeJSONStrictAllowEmpty(r, &req)
 
 	reason := strings.TrimSpace(req.Reason)
 	if reason == "" {
@@ -476,7 +475,7 @@ func (h *AdminOrderHandler) UpdatePaymentStatus(w http.ResponseWriter, r *http.R
 	var req struct {
 		PaymentStatus string `json:"payment_status"`
 	}
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+	if err := decodeJSONStrict(r, &req); err != nil {
 		respondError(w, http.StatusBadRequest, "Invalid request body")
 		return
 	}

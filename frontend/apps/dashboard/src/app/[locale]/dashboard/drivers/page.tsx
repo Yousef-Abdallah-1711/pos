@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { useAuthStore } from '@/stores/authStore'
 import { api } from '@/lib/api'
+import { hasAuthenticatedSession } from '@/lib/authSession'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
 import {
@@ -48,11 +49,17 @@ export default function DriversPage() {
   const [drivers, setDrivers] = useState<Driver[]>([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState<'all' | 'active' | 'available'>('all')
+  const user = useAuthStore((state) => state.user)
   const token = useAuthStore((state) => state.token)
+  const hasSession = hasAuthenticatedSession(user, token)
 
   useEffect(() => {
+    if (!hasSession) {
+      setLoading(false)
+      return
+    }
     fetchDrivers()
-  }, [token, filter])
+  }, [filter, hasSession])
 
   const fetchDrivers = async () => {
     setLoading(true)

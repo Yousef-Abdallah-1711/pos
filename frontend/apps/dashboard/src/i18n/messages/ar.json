@@ -411,6 +411,7 @@
       "tableDate": "التاريخ",
       "tableAmount": "المبلغ",
       "tableStatus": "الحالة",
+      "voided": "ملغي",
       "tableMethod": "طريقة الدفع",
       "tableCard": "البطاقة",
       "tableReference": "المرجع",

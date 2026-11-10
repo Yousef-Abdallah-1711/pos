@@ -190,8 +190,8 @@ export function ComponentBuilder() {
                 {/* Toggle Visibility */}
                 <button
                   onClick={(e) => handleToggleComponent(component.id, e)}
-                  aria-label={component.enabled ? 'Disable component' : 'Enable component'}
                   title={component.enabled ? 'Disable component' : 'Enable component'}
+                  aria-label={`${component.enabled ? 'Disable' : 'Enable'} ${component.title}`}
                   className={`flex-shrink-0 transition ${
                     component.enabled
                       ? 'text-green-600 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300'

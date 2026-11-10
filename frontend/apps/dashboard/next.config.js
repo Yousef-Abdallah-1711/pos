@@ -4,6 +4,12 @@ const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts')
 const isWindows = process.platform === 'win32'
 const enableCustomSplitChunks = process.env.NEXT_CUSTOM_SPLIT_CHUNKS === 'true'
 const isProd = process.env.NODE_ENV === 'production'
+const paymentFrameSrc = [
+  "'self'",
+  'http://localhost:8080',
+  'https://accept.paymob.com',
+  'https://*.paymob.com',
+].join(' ')
 
 const nextConfig = {
   reactStrictMode: true,
@@ -172,7 +178,7 @@ const nextConfig = {
           {
             key: 'Content-Security-Policy',
             value:
-              "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://va.vercel-scripts.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; connect-src 'self' https: http: ws: wss:; font-src 'self' data:; frame-ancestors 'none'; base-uri 'self'; form-action 'self'",
+              `default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://va.vercel-scripts.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; connect-src 'self' https: http: ws: wss:; font-src 'self' data:; frame-src ${paymentFrameSrc}; frame-ancestors 'none'; base-uri 'self'; form-action 'self'`,
           },
           ...(isProd
             ? [

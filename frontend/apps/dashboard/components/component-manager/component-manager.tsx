@@ -9,20 +9,20 @@ import { useTheme, useSectionContent, useSectionVisibility, useReorderSections }
 
 interface ComponentManagerProps {
   restaurantId: number;
-  primaryColor: string;
-  secondaryColor: string;
-  accentColor: string;
-  fontFamily: string;
-  logoUrl: string;
+  primaryColor?: string;
+  secondaryColor?: string;
+  accentColor?: string;
+  fontFamily?: string;
+  logoUrl?: string;
 }
 
 export function ComponentManager({
   restaurantId,
-  primaryColor,
-  secondaryColor,
-  accentColor,
-  fontFamily,
-  logoUrl,
+  primaryColor = '#3b82f6',
+  secondaryColor = '#10b981',
+  accentColor = '#f59e0b',
+  fontFamily = 'Inter',
+  logoUrl = '',
 }: ComponentManagerProps) {
   const [selectedSection, setSelectedSection] = useState<ThemeSection | null>(null);
   const [draggedSection, setDraggedSection] = useState<ThemeSection | null>(null);

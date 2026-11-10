@@ -4,8 +4,8 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Clock, CreditCard, Lock, Mail } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { getDashboardLoginUrl } from '@/lib/authSession'
 import { useAuthStore } from '@/stores/authStore'
-import { getConfig } from '@/lib/config'
 import { getLocaleFromPath } from '@/lib/translations'
 
 interface BlockedOverlayProps {
@@ -22,11 +22,14 @@ export function BlockedOverlay({ blockReason, supportEmail = 'support@pos-saas.c
   const getContent = () => {
     switch (blockReason) {
       case 'trial_expired':
+      case 'expired':
         return {
           icon: <Clock className="h-16 w-16 text-orange-500" />,
-          title: 'Your Trial Has Expired',
+          title: blockReason === 'expired' ? 'Your Subscription Has Expired' : 'Your Trial Has Expired',
           description:
-            'Your 15-day free trial has ended. Subscribe now to keep full access to your dashboard.',
+            blockReason === 'expired'
+              ? 'Your subscription has expired. Renew now to restore full access to your dashboard.'
+              : 'Your 15-day free trial has ended. Subscribe now to keep full access to your dashboard.',
           ctaNote: 'Continue with all features for just 500 EGP/month.',
         }
       case 'tenant_disabled':
@@ -51,8 +54,7 @@ export function BlockedOverlay({ blockReason, supportEmail = 'support@pos-saas.c
 
   const handleLogout = () => {
     logout()
-    const landingUrl = getConfig().landingUrl
-    window.location.href = `${landingUrl}/auth/login`
+    window.location.href = getDashboardLoginUrl(pathname)
   }
 
   return (
@@ -70,7 +72,7 @@ export function BlockedOverlay({ blockReason, supportEmail = 'support@pos-saas.c
           {/* Description */}
           <p className="text-center text-gray-600 dark:text-gray-300 mb-8">{content.description}</p>
 
-          {blockReason === 'trial_expired' ? (
+          {blockReason === 'trial_expired' || blockReason === 'expired' ? (
             <div className="space-y-3 mb-4">
               <Button asChild className="w-full bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600">
                 <Link href={billingHref}>

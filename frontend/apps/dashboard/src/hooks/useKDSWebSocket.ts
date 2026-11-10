@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
+import { hasUsableBearerToken } from '@/lib/authSession'
 import { getConfig } from '@/lib/config'
 import { debugError, debugLog } from '@/lib/debug'
 import { useAuthStore } from '@/stores/authStore'
@@ -59,7 +60,7 @@ export const useKDSWebSocket = ({ onOrderNew }: UseKDSWebSocketOptions = {}) => 
   }, [onOrderNew])
 
   useEffect(() => {
-    if (!token) {
+    if (!hasUsableBearerToken(token)) {
       setConnected(false)
       return
     }
