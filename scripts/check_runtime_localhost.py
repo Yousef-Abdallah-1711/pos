@@ -45,6 +45,9 @@ ALLOWLIST_FILES = {
     # Phase 2A Playwright config and route adapter are isolated test-stack URLs only.
     Path("frontend/apps/dashboard/playwright.phase2a.config.ts"),
     Path("frontend/apps/dashboard/tests/phase2a-e2e/api-routing.ts"),
+    # Registration Playwright defaults target only the disposable E2E stack.
+    Path("frontend/apps/landing/playwright.registration.config.ts"),
+    Path("frontend/apps/landing/tests/registration-e2e/fixtures.ts"),
     Path("frontend/apps/landing/next.config.js"),
     Path("frontend/apps/restaurant-website/next.config.js"),
 }

@@ -6,6 +6,7 @@ import { useAuthStore } from '@/stores/authStore'
 import { getConfig } from '@/lib/config'
 import { toast } from 'sonner'
 import { useLanguage } from '@/contexts/LanguageContext'
+import { parseApiError } from '@pos-saas/form-foundation'
 
 interface Tenant {
   tenant_id: number
@@ -65,8 +66,17 @@ export function TenantSelectorModal({
       )
 
       if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || t.auth.tenantSelector.failedToSelect)
+        const errorData = await response.json().catch(() => ({}))
+        const parsed = parseApiError({ response: { status: response.status, data: errorData } }, {
+          validation: t.auth.tenantSelector.failedToSelect,
+          invalidCredentials: t.auth.login.invalidCredentials,
+          rateLimited: 'Too many attempts. Wait a moment and try again.',
+          unavailable: t.auth.tenantSelector.failedToSelect,
+          network: t.auth.tenantSelector.failedToSelect,
+          unexpected: t.auth.tenantSelector.failedToSelect,
+          conflict: t.auth.tenantSelector.failedToSelect,
+        })
+        throw new Error(parsed.message)
       }
 
       const data = await response.json()
@@ -83,7 +93,11 @@ export function TenantSelectorModal({
         onTenantSelected(tenantId)
       }
     } catch (err) {
-      const errorMsg = err instanceof Error ? err.message : t.auth.tenantSelector.anError
+      const errorMsg = err instanceof TypeError
+        ? 'Unable to connect. Check your connection and try again.'
+        : err instanceof Error
+          ? err.message
+          : t.auth.tenantSelector.anError
       setError(errorMsg)
       toast.error(errorMsg)
       setIsLoading(false)

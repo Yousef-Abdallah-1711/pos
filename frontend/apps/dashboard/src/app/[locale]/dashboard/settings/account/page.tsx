@@ -8,6 +8,7 @@ import { createTranslator, getLocaleFromPath } from '@/lib/translations'
 import { usePathname } from 'next/navigation'
 import { getConfig } from '@/lib/config'
 import { authFetch } from '@/lib/authFetch'
+import { FormField, fieldAccessibility, parseApiError } from '@pos-saas/form-foundation'
 
 export default function AccountSettingsPage() {
   const pathname = usePathname()
@@ -24,6 +25,7 @@ export default function AccountSettingsPage() {
   // Status states
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'success' | 'error'>('idle')
   const [errorMessage, setErrorMessage] = useState('')
+  const [profileNameError, setProfileNameError] = useState('')
   const [isLoading, setIsLoading] = useState(true)
 
   // Initialize forms when user is loaded
@@ -36,6 +38,12 @@ export default function AccountSettingsPage() {
 
   const handleSaveProfile = async () => {
     if (!user?.id || !hasSession) return
+    if (Array.from(profileForm.name.trim()).length < 2 || Array.from(profileForm.name.trim()).length > 255) {
+      setProfileNameError('Enter a name between 2 and 255 characters.')
+      document.getElementById('profile-name')?.focus()
+      return
+    }
+    setProfileNameError('')
 
     setSaveStatus('saving')
     try {
@@ -55,12 +63,21 @@ export default function AccountSettingsPage() {
         setSaveStatus('success')
         setTimeout(() => setSaveStatus('idle'), 2000)
       } else {
-        const error = await response.json()
-        setErrorMessage(error.error || t('settings.updateProfile'))
+        const error = await response.json().catch(() => ({}))
+        const parsed = parseApiError({ response: { status: response.status, data: error } }, {
+          validation: 'Please review the highlighted fields.', invalidCredentials: 'Your session has expired.',
+          rateLimited: 'Too many attempts. Wait a moment and try again.', unavailable: 'The service is temporarily unavailable.',
+          network: 'Unable to connect. Check your connection and try again.', unexpected: 'Unable to update your profile. Please try again.', conflict: 'This value conflicts with another account.',
+        })
+        if (parsed.fields.name) setProfileNameError(parsed.fields.name)
+        else setErrorMessage(parsed.message)
         setSaveStatus('error')
       }
     } catch (error) {
-      setErrorMessage('Network error')
+      setErrorMessage(parseApiError({ code: 'ERR_NETWORK' }, {
+        validation: 'Please review the highlighted fields.', invalidCredentials: 'Your session has expired.', rateLimited: 'Too many attempts. Wait a moment and try again.',
+        unavailable: 'The service is temporarily unavailable.', network: 'Unable to connect. Check your connection and try again.', unexpected: 'Unable to update your profile. Please try again.', conflict: 'This value conflicts with another account.',
+      }).message)
       setSaveStatus('error')
     }
   }
@@ -141,17 +158,17 @@ export default function AccountSettingsPage() {
       <div>
         <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">{t('settings.profileTitle')}</h2>
         <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              {t('settings.name')}
-            </label>
+          <FormField id="profile-name" label={t('settings.name')} required error={profileNameError}>
             <input
               type="text"
               value={profileForm.name}
-              onChange={(e) => setProfileForm({ ...profileForm, name: e.target.value })}
+              onChange={(e) => { setProfileForm({ ...profileForm, name: e.target.value }); setProfileNameError('') }}
+              maxLength={255}
+              autoComplete="name"
+              {...fieldAccessibility('profile-name', profileNameError)}
               className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent"
             />
-          </div>
+          </FormField>
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               {t('settings.email')}

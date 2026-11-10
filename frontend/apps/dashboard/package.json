@@ -15,6 +15,7 @@
     "typecheck:test": "tsc --noEmit -p tsconfig.test.json"
   },
   "dependencies": {
+    "@pos-saas/form-foundation": "workspace:*",
     "@hookform/resolvers": "^3.9.1",
     "@pos-saas/ui-components": "workspace:*",
     "@pos-saas/ui-themes": "workspace:*",

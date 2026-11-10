@@ -224,7 +224,7 @@ describe('Multi-Tenant Login Integration Tests', () => {
 
       // Error message should be displayed
       await waitFor(() => {
-        expect(toast.error).toHaveBeenCalledWith('Invalid email or password')
+        expect(toast.error).toHaveBeenCalledWith('Invalid email or password. Please check your credentials.')
       })
 
       // Form should remain visible for retry
@@ -314,7 +314,7 @@ describe('Multi-Tenant Login Integration Tests', () => {
       // Error message should be shown
       await waitFor(() => {
         expect(
-          screen.getByText('User not found in selected organization')
+          screen.getByText('Failed to select organization')
         ).toBeInTheDocument()
       })
 

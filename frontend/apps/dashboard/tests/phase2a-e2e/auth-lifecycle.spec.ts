@@ -4,6 +4,7 @@ import { routeContainerApiToCandidate } from './api-routing'
 const landingUrl = (process.env.WS05_LANDING_URL || 'http://localhost:13111').replace(/\/$/, '')
 const landingRedirectUrl = (process.env.WS05_LANDING_REDIRECT_URL || 'http://localhost:13111').replace(/\/$/, '')
 const dashboardUrl = (process.env.WS05_DASHBOARD_URL || 'http://localhost:13112').replace(/\/$/, '')
+const apiOrigin = new URL(process.env.WS05_API_URL || 'http://localhost:18082/api/v1').origin
 const ownerEmail = 'phase2a-owner-a@example.test'
 const ownerPassword = process.env.WS05_TEST_PASSWORD || 'WS05-Disposable-Only-2026!'
 
@@ -20,7 +21,7 @@ async function expectSignedInDashboard(page: Page) {
     return { pathname: location.pathname, hasUser: Boolean(authState?.state?.user), hasStoredToken: Boolean(authState?.state?.token), hasCredentialQuery }
   }).catch(() => ({ pathname: '', hasUser: false, hasStoredToken: false, hasCredentialQuery: false })), { timeout: 90_000 })
     .toEqual({ pathname: '/en/dashboard', hasUser: true, hasStoredToken: false, hasCredentialQuery: false })
-  const sessionCookie = (await page.context().cookies('http://localhost:18082')).find((cookie) => cookie.name === 'poos_session')
+  const sessionCookie = (await page.context().cookies(apiOrigin)).find((cookie) => cookie.name === 'poos_session')
   expect(sessionCookie?.httpOnly).toBe(true)
 }
 

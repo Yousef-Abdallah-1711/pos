@@ -1,15 +1,12 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import * as z from 'zod'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { ChefHat, Eye, EyeOff, Loader2 } from 'lucide-react'
+import { ChefHat, Loader2 } from 'lucide-react'
+import { FormErrorSummary, FormField, PasswordField, applyApiFieldErrors, createLoginSchema, parseApiError, fieldAccessibility } from '@pos-saas/form-foundation'
 import api from '@/lib/api'
 import { useAuthStore } from '@/stores/authStore'
 import { toast } from 'sonner'
@@ -31,28 +28,33 @@ interface Tenant {
 }
 
 export default function LoginPage() {
-  const router = useRouter()
   const setAuth = useAuthStore((state) => state.setAuth)
   const { t, dir, language } = useLanguage()
   const locale = language
-  const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [showTenantSelector, setShowTenantSelector] = useState(false)
   const [selectedEmail, setSelectedEmail] = useState('')
   const [availableTenants, setAvailableTenants] = useState<Tenant[]>([])
   const [selectionToken, setSelectionToken] = useState('')
 
-  const loginSchema = z.object({
-    email: z.string().email(t.auth.validation.invalidEmail),
-    password: z.string().min(6, t.auth.validation.passwordMin),
-  })
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get('created') === '1') {
+      toast.success('Your account is ready. Sign in to continue.')
+    }
+  }, [])
+
+  const loginSchema = createLoginSchema({ required: t.auth.validation.required, invalidEmail: t.auth.validation.invalidEmail, emailMax: t.auth.validation.emailMax, passwordMin: t.auth.validation.passwordMin, passwordMax: t.auth.validation.passwordMax })
 
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    setError,
+    setFocus,
+    formState: { errors, isSubmitted },
   } = useForm<LoginForm>({
     resolver: zodResolver(loginSchema),
+    mode: 'onTouched',
+    reValidateMode: 'onChange',
   })
 
   const onSubmit = async (data: LoginForm) => {
@@ -76,16 +78,12 @@ export default function LoginPage() {
 
       const { dashboardUrl } = getConfig()
       window.location.href = `${dashboardUrl}/${locale}/auth/callback`
-    } catch (error: any) {
-      let message = t.auth.login.loginFailed
-      if (error.response?.data?.error) {
-        message = error.response.data.error
-      } else if (error.response?.status === 401) {
-        message = t.auth.login.invalidCredentials
-      } else if (error.code === 'ERR_NETWORK') {
-        message = t.auth.login.networkError
-      }
-      toast.error(message)
+    } catch (error) {
+      const parsed = parseApiError(error, { validation: 'Please review the highlighted fields.', invalidCredentials: t.auth.login.invalidCredentials, rateLimited: 'Too many attempts. Wait a moment and try again.', unavailable: 'Sign in is temporarily unavailable. Please try again.', network: t.auth.login.networkError, unexpected: t.auth.login.loginFailed, conflict: t.auth.login.loginFailed })
+      applyApiFieldErrors(parsed.fields, (field, message) => setError(field as keyof LoginForm, { type: 'server', message }))
+      const firstField = Object.keys(parsed.fields)[0]
+      if (firstField === 'email' || firstField === 'password') window.requestAnimationFrame(() => setFocus(firstField))
+      else if (!firstField) toast.error(parsed.message)
     } finally {
       setIsLoading(false)
     }
@@ -116,26 +114,14 @@ export default function LoginPage() {
 
           {/* Login Form */}
           <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700 p-8">
-            <form method="post" onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+            <form method="post" noValidate onSubmit={handleSubmit(onSubmit, (invalid) => { const first = Object.keys(invalid)[0] as keyof LoginForm | undefined; if (first) window.requestAnimationFrame(() => setFocus(first)) })} className="space-y-5">
+              <FormErrorSummary title="Please review these fields" errors={isSubmitted ? Object.fromEntries(Object.entries(errors).map(([key, value]) => [key, value?.message ?? 'Review this field'])) : {}} onFocusField={(field) => setFocus(field as keyof LoginForm)} />
               {/* Email */}
-              <div className="space-y-2">
-                <Label htmlFor="email">{t.auth.login.email}</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder={t.auth.login.emailPlaceholder}
-                  {...register('email')}
-                  disabled={isLoading}
-                />
-                {errors.email && (
-                  <p className="text-sm text-red-500">{errors.email.message}</p>
-                )}
-              </div>
+              <FormField id="email" label={t.auth.login.email} required error={errors.email?.message}><input type="email" autoComplete="email" maxLength={255} placeholder={t.auth.login.emailPlaceholder} {...register('email')} {...fieldAccessibility('email', errors.email?.message)} disabled={isLoading} className="h-11 w-full rounded-md border border-gray-300 bg-white px-3 text-gray-900 outline-none focus-visible:ring-2 focus-visible:ring-orange-600 disabled:opacity-60 dark:border-gray-600 dark:bg-gray-800 dark:text-white" /></FormField>
 
               {/* Password */}
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="password">{t.auth.login.password}</Label>
+              <FormField id="password" label={t.auth.login.password} required error={errors.password?.message}>
+                <div className="flex items-center justify-end">
                   <Link
                     href={`/${locale}/auth/forgot-password`}
                     className="text-sm text-orange-600 hover:underline dark:text-orange-400"
@@ -143,26 +129,8 @@ export default function LoginPage() {
                     {t.auth.login.forgotPassword}
                   </Link>
                 </div>
-                <div className="relative">
-                  <Input
-                    id="password"
-                    type={showPassword ? 'text' : 'password'}
-                    placeholder={t.auth.login.passwordPlaceholder}
-                    {...register('password')}
-                    disabled={isLoading}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className={`absolute ${dir === 'rtl' ? 'left-3' : 'right-3'} top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200`}
-                  >
-                    {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-                  </button>
-                </div>
-                {errors.password && (
-                  <p className="text-sm text-red-500">{errors.password.message}</p>
-                )}
-              </div>
+                <PasswordField label={t.auth.login.password} autoComplete="current-password" placeholder={t.auth.login.passwordPlaceholder} {...register('password')} {...fieldAccessibility('password', errors.password?.message)} disabled={isLoading} />
+              </FormField>
 
               {/* Submit */}
               <Button
