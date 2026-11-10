@@ -598,12 +598,17 @@ test('super-admin browser impersonation opens the target tenant session', async 
     await expect(tenantRow).toBeVisible()
     await tenantRow.getByRole('link', { name: 'View' }).click()
 
-    const targetUserRow = page.getByRole('row').filter({ hasText: 'phase2a-owner-a@example.test' })
+    const userHeading = page.getByRole('heading', { name: 'Users in this Tenant' })
+    await expect(userHeading).toBeVisible()
+    const userSection = page.locator('div.bg-white')
+      .filter({ has: userHeading })
+      .last()
+    const targetUserRow = userSection.getByRole('row').filter({ hasText: 'phase2a-owner-a@example.test' })
     for (let pageNumber = 1; pageNumber < 20 && !(await targetUserRow.isVisible().catch(() => false)); pageNumber += 1) {
-      const nextPage = page.getByRole('button', { name: 'Next' }).last()
-      if (await nextPage.count() === 0 || !(await nextPage.isEnabled())) break
+      const nextPage = userSection.getByRole('button', { name: 'Next' }).last()
+      if (await nextPage.count() === 0 || !(await nextPage.isEnabled().catch(() => false))) break
       await nextPage.click()
-      await expect(page.getByText(new RegExp(`Page ${pageNumber + 1} of \\d+`))).toBeVisible()
+      await expect(userSection.getByText(new RegExp(`Page ${pageNumber + 1} of \\d+`))).toBeVisible()
     }
     await expect(targetUserRow).toBeVisible()
     await targetUserRow.getByRole('button', { name: /impersonate/i }).click()
