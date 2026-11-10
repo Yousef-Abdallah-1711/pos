@@ -9,8 +9,20 @@ test('keeps registration responsive and labelled in English LTR and Arabic RTL',
     await expect(page.locator('main')).toHaveAttribute('dir', locale === 'ar' ? 'rtl' : 'ltr')
     for (const width of widths) {
       await page.setViewportSize({ width, height: 900 })
-      const dimensions = await page.evaluate(() => ({ viewport: document.documentElement.clientWidth, page: document.documentElement.scrollWidth }))
+      const dimensions = await page.evaluate(() => {
+        const viewport = document.documentElement.clientWidth
+        const controls = Array.from(document.querySelectorAll('input, button'))
+        return {
+          viewport,
+          page: document.documentElement.scrollWidth,
+          clippedControls: controls.filter((control) => {
+            const bounds = control.getBoundingClientRect()
+            return bounds.left < 0 || bounds.right > viewport
+          }).map((control) => control.id || control.textContent?.trim() || control.tagName),
+        }
+      })
       expect(dimensions.page, `${locale} page overflows at ${width}px`).toBeLessThanOrEqual(dimensions.viewport)
+      expect(dimensions.clippedControls, `${locale} fields or buttons are clipped at ${width}px`).toEqual([])
       await expect(page.locator('input')).toHaveCount(7)
       const allInputsHaveLabels = await page.locator('input').evaluateAll((inputs) => inputs.every((input) => (input as HTMLInputElement).labels?.length === 1))
       expect(allInputsHaveLabels).toBe(true)

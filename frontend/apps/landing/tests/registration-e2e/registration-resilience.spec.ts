@@ -42,7 +42,7 @@ test('prevents a second submission while the first registration request is pendi
   const submit = page.locator('form button[type="submit"]')
   await submit.click()
   await expect(submit).toHaveAttribute('aria-busy', 'true')
-  await expect(submit).toHaveText(/creating account/i)
+  await expect(submit.locator('[aria-live="polite"]')).toHaveText(/creating account/i)
   await submit.click({ force: true })
   expect(requests).toBe(1)
   releaseRequest?.()

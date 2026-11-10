@@ -93,5 +93,5 @@ export function SubmitButton({ children, loadingLabel, isSubmitting, disabled, c
   disabled?: boolean
   className?: string
 }) {
-  return <button type="submit" disabled={disabled || isSubmitting} aria-busy={isSubmitting} className={`inline-flex min-h-11 items-center justify-center gap-2 disabled:cursor-not-allowed disabled:opacity-60 ${className}`}>{isSubmitting && <LoaderCircle className="h-4 w-4 animate-spin" aria-hidden="true" />}{isSubmitting ? loadingLabel : children}</button>
+  return <button type="submit" disabled={disabled || isSubmitting} aria-busy={isSubmitting} className={`inline-flex min-h-11 items-center justify-center gap-2 disabled:cursor-not-allowed disabled:opacity-60 ${className}`}><span aria-live="polite">{isSubmitting ? loadingLabel : children}</span>{isSubmitting && <LoaderCircle className="h-4 w-4 animate-spin" aria-hidden="true" />}</button>
 }
