@@ -9,7 +9,7 @@
 
 ## Scope and source review
 
-The reviewed changes cover the POOS brand package, landing and shared authentication experience, registration validation, and disposable browser acceptance. The local branch was reconciled with `origin/main` at `e519f52eb0badfb80c283f79a52c51acc1c663c6`, then committed and pushed to the existing PR #12. At final remote verification, PR #12 points to the delivered branch head; GitHub reported no checks and no independent reviews for that new head yet.
+The reviewed changes cover the POOS brand package, landing and shared authentication experience, registration validation, and disposable browser acceptance. The local branch was reconciled with `origin/main` at `e519f52eb0badfb80c283f79a52c51acc1c663c6`, then committed and pushed to the existing PR #12. Implementation commit `c796cc8421134bfe8287d15f1828d18b451256c1` is present on the PR branch. Its two hosted checks passed: [Runtime Localhost Guardrail](https://github.com/Yousef-Abdallah-1711/pos/actions/runs/42917228186) and [URL/Domain Config Smoke](https://github.com/Yousef-Abdallah-1711/pos/actions/runs/42917228212). No independent review is recorded. These smoke checks do not replace the local regression evidence in this report.
 
 The requested external standards path `C:\Users\OPT\Desktop\POS\CODING_STANDARDS.md` is not present. The repository's `CODING_STANDARDS.md` was read and applied.
 
@@ -79,7 +79,6 @@ This pass verified responsive layout, page direction/language, visible shared he
 1. Only the Roles and permissions screen has current screenshot provenance. The other product areas listed in the screenshot manifest need verified, realistic disposable workflows and captures before the full product showcase can be accepted.
 2. Accessibility and performance checks above remain partial; there is no throttled mobile test or field data.
 3. PR #12 has no independent review recorded at the fetched remote head. Do not merge until an eligible reviewer approves the current pushed head and applicable checks pass.
-4. The current PR head on GitHub is behind this workspace. Intended changes and this evidence report must be reconciled, committed, pushed, and then rechecked on the updated PR before acceptance evidence is considered attached to its final head.
 
 **Production readiness: NO.** This report records passing local checks and the limits that prevent a full production-acceptance claim.
 
