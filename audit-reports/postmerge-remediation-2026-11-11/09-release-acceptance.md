@@ -3,6 +3,7 @@
 | Gate | Result | Evidence / blocker |
 |---|---|---|
 | Four Next.js production builds | PASS | Independent host builds with required production URL variables. |
+| Production Docker image builds | PASS (build only) | Go API and all four Next.js images built at candidate `ec0959d`; runtime stack was not started because placeholder `.invalid` URLs are build-only and live payment/database secrets were not used. |
 | API without manual port-forward | PASS (isolated) | Disposable API health and frontend/API communication passed on the published ports in the seven-service test stack. Production deployment wiring is not inferred. |
 | Authenticated E2E | PASS (bounded) | 16/16 Phase 2A tests and 12/12 registration Playwright tests passed; Phase 2A now includes live KDS WebSocket delivery. See report 06 for covered paths and exclusions. |
 | Dashboard responsive layout / CLS | PASS (bounded) | No overflow at 320/390/768/1440; latest authenticated dev-stack CLS was 0.031. Production Lighthouse remains unrun. |

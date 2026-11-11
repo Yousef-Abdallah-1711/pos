@@ -23,11 +23,12 @@
 - Restaurant website API config regression: PASS (5 tests); restaurant website TypeScript check: PASS; production build: PASS after adding the server-only API base URL.
 - Registration Playwright: PASS (12 passed, 0 failed) against the disposable API, database, and frontend services.
 - Dashboard application and test TypeScript checks: PASS after frozen-lockfile workspace installation; dashboard config and table-list unit tests: PASS (6 tests); dashboard production build: PASS after the mobile header change.
+- Production Docker image builds: PASS for the Go API and all four Next.js apps (`pos-remediation-*:ec0959d`). Frontend builds used reserved `.invalid` public URLs; no production containers were started and no production DB or live payment credentials were used.
 
 Blocked checks:
 
 - Full migration rollback across all migrations: NOT RUN; the repository has no complete set of executable down migrations. One documented payment-RLS rollback was exercised.
-- Production Docker images: NOT RUN. The disposable development stack and browser suite were verified; this is not production-image acceptance.
+- Production Docker runtime/stack: NOT RUN. The five application images build successfully, but their production configuration, live payment integration, and database behavior were not exercised. The separate seven-service disposable development stack remains running and healthy.
 - Full per-table RLS policy acceptance and route-by-role HTTP matrix: NOT RUN; see the bounded results and uncovered scope in report 05.
 - Performance acceptance (Lighthouse/Core Web Vitals/load testing) remains NOT RUN.
 
