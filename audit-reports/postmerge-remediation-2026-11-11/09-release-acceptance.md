@@ -5,8 +5,8 @@
 | Four Next.js production builds | PASS | Independent host builds with required production URL variables. |
 | Production Docker image builds | PASS (build only) | Go API and all four Next.js images built at candidate `ec0959d`; runtime stack was not started because placeholder `.invalid` URLs are build-only and live payment/database secrets were not used. |
 | API without manual port-forward | PASS (isolated) | Disposable API health and frontend/API communication passed on the published ports in the seven-service test stack. Production deployment wiring is not inferred. |
-| Authenticated E2E | PASS (bounded) | 16/16 Phase 2A tests and 12/12 registration Playwright tests passed; Phase 2A now includes live KDS WebSocket delivery. See report 06 for covered paths and exclusions. |
-| Dashboard responsive layout / CLS | PASS (bounded) | No overflow at 320/390/768/1440; latest authenticated dev-stack CLS was 0.031. Production Lighthouse remains unrun. |
+| Authenticated E2E | PASS (bounded) | 17/17 Phase 2A tests and 12/12 registration Playwright tests passed; Phase 2A includes live KDS WebSocket delivery and session refresh/replay checks. See report 06 for covered paths and exclusions. |
+| Dashboard responsive layout / CLS | PASS (bounded) | No overflow at 320/390/768/1440; latest authenticated dev-stack CLS was 0.047. Production Lighthouse remains unrun. |
 | Tenant isolation negative matrix | PARTIAL | 27 repository-level PostgreSQL tests plus restricted-role RLS and account/settings/payment coverage pass. Full table and HTTP role matrix remains incomplete; RLS is enabled/forced on 15 of 92 tables. |
 | POS/KDS end-to-end | PASS (bounded) | POS order creation was observed over the authenticated KDS tenant WebSocket; inventory flows also passed. Broader KDS lifecycle acceptance remains open. |
 | No unresolved P0 security defects | UNKNOWN | No confirmed exploit in prior bounded checks; full RLS and tenant matrix not run. |

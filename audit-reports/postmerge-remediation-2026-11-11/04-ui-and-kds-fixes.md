@@ -5,4 +5,4 @@
 - The KDS socket now treats the cookie-backed authenticated session as eligible to connect. It no longer requires a usable bearer token, since browser WebSockets use the API's httpOnly session cookie.
 - Regression coverage verifies that the cookie-session marker opens the KDS socket and unauthenticated state does not. Both tests pass.
 - The authenticated Phase 2A browser flow now opens the KDS page, verifies the live connection, creates a POS order, and confirms the matching order arrives over the tenant WebSocket.
-- The latest 16-test Phase 2A run passed, including live KDS delivery; latest authenticated dashboard CLS measurement was 0.031.
+- The latest 17-test Phase 2A run passed, including live KDS delivery and session refresh/replay coverage; authenticated dashboard CLS measured 0.047 in that run.

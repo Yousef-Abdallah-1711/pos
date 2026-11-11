@@ -273,6 +273,55 @@ async function loginWithContext(context: APIRequestContext, tenant: 'a' | 'b') {
   return auth.user
 }
 
+test('authenticated session refresh rotates cookies and rejects replay after logout', async () => {
+  const sessionContext = await request.newContext()
+  const replayContext = await request.newContext()
+  const postLogoutContext = await request.newContext()
+  const dashboardOrigin = 'http://localhost:13112'
+  try {
+    await loginWithContext(sessionContext, 'a')
+    const initialSession = await sessionContext.get(`${api}/auth/session`)
+    expect(initialSession.status()).toBe(200)
+
+    const initialCookie = (await sessionContext.storageState()).cookies.find((cookie) => cookie.name === 'poos_session')
+    expect(initialCookie).toBeTruthy()
+    if (!initialCookie) throw new Error('Login did not establish the expected session cookie')
+    expect(initialCookie.httpOnly).toBe(true)
+
+    const refresh = await sessionContext.post(`${api}/auth/refresh`, {
+      headers: { Origin: dashboardOrigin },
+    })
+    expect(refresh.status()).toBe(204)
+
+    const rotatedCookie = (await sessionContext.storageState()).cookies.find((cookie) => cookie.name === 'poos_session')
+    expect(rotatedCookie).toBeTruthy()
+    if (!rotatedCookie) throw new Error('Refresh did not return a session cookie')
+    expect(rotatedCookie.value).not.toBe(initialCookie.value)
+    expect((await sessionContext.get(`${api}/auth/session`)).status()).toBe(200)
+
+    await replayContext.addCookies([initialCookie])
+    const replay = await replayContext.post(`${api}/auth/refresh`, {
+      headers: { Origin: dashboardOrigin },
+    })
+    expect(replay.status()).toBe(401)
+
+    const logout = await sessionContext.post(`${api}/auth/logout`, {
+      headers: { Origin: dashboardOrigin },
+    })
+    expect(logout.status()).toBe(204)
+
+    await postLogoutContext.addCookies([rotatedCookie])
+    const refreshAfterLogout = await postLogoutContext.post(`${api}/auth/refresh`, {
+      headers: { Origin: dashboardOrigin },
+    })
+    expect(refreshAfterLogout.status()).toBe(401)
+  } finally {
+    await postLogoutContext.dispose()
+    await replayContext.dispose()
+    await sessionContext.dispose()
+  }
+})
+
 test('POS browser flow creates an order for the signed-in tenant', async ({ page }) => {
   test.setTimeout(120_000)
   page.on('response', (response) => {
