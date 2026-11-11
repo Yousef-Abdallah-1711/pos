@@ -64,7 +64,7 @@ export function Hero() {
 
         <nav className="ledger-index" aria-label={t.hero.productAreas}>
           {t.hero.areas.map((area: { label: string; href: string }, index: number) => (
-            <a href={area.href} key={area.href}>
+            <a href={area.href} key={`${area.href}-${area.label}-${index}`}>
               <span className="poos-primary" aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>
               <span>{area.label}</span>
             </a>

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { superAdminAPI } from "@/lib/api";
 import type { Tenant, User, PaginatedResponse, SubscriptionStatus } from "@/types";
@@ -65,10 +65,9 @@ export default function TenantDetailPage() {
   const limit = 10;
 
   // Fetch all data
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       setIsLoading(true);
-      console.log("[TenantDetailPage] Fetching tenant data for ID:", tenantId);
 
       const [tenantData, usersData, subData] = await Promise.all([
         superAdminAPI.getTenant(tenantId),
@@ -89,10 +88,10 @@ export default function TenantDetailPage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [tenantId, page]);
 
   // Fetch subscription history
-  const fetchSubscriptionHistory = async () => {
+  const fetchSubscriptionHistory = useCallback(async () => {
     try {
       const response = await superAdminAPI.getSubscriptionHistory(tenantId, 1, 20);
       if (response?.items) {
@@ -101,17 +100,17 @@ export default function TenantDetailPage() {
     } catch (error) {
       console.error("[TenantDetailPage] Error fetching subscription history:", error);
     }
-  };
+  }, [tenantId]);
 
   useEffect(() => {
     fetchData();
-  }, [tenantId, page]);
+  }, [fetchData]);
 
   useEffect(() => {
     if (subscriptionInfo) {
       fetchSubscriptionHistory();
     }
-  }, [subscriptionInfo]);
+  }, [subscriptionInfo, fetchSubscriptionHistory]);
 
   const lastRefundablePayment = useMemo(() => {
     for (const item of subscriptionHistory) {
