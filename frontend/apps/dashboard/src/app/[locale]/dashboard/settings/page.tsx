@@ -1,21 +1,12 @@
-'use client'
+import { redirect } from 'next/navigation'
 
-import { useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import { usePathname } from 'next/navigation'
+type SettingsPageProps = {
+  params: Promise<{ locale: string }>
+}
 
-export default function SettingsPage() {
-  const router = useRouter()
-  const pathname = usePathname()
+export default async function SettingsPage({ params }: SettingsPageProps) {
+  const { locale: requestedLocale } = await params
+  const locale = requestedLocale === 'ar' ? 'ar' : 'en'
 
-  useEffect(() => {
-    // Extract locale from pathname
-    const parts = pathname.split('/')
-    const locale = parts[1] || 'en'
-
-    // Redirect to account settings
-    router.push(`/${locale}/dashboard/settings/account`)
-  }, [pathname, router])
-
-  return null
+  redirect(`/${locale}/dashboard/settings/account`)
 }

@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
-import { hasUsableBearerToken } from '@/lib/authSession'
 import { getConfig } from '@/lib/config'
 import { debugError, debugLog } from '@/lib/debug'
 import { useAuthStore } from '@/stores/authStore'
@@ -44,7 +43,9 @@ const parseSocketMessage = (raw: string): KDSWebSocketMessage | null => {
 }
 
 export const useKDSWebSocket = ({ onOrderNew }: UseKDSWebSocketOptions = {}) => {
-  const token = useAuthStore((state) => state.token)
+  // Browser WebSockets authenticate with the API's httpOnly session cookie;
+  // the client store intentionally contains only a non-bearer session marker.
+  const hasAuthenticatedSession = useAuthStore((state) => !!(state.user && state.token))
   const setConnected = useKDSStore((state) => state.setConnected)
   const setOrders = useKDSStore((state) => state.setOrders)
   const upsertOrder = useKDSStore((state) => state.upsertOrder)
@@ -60,7 +61,7 @@ export const useKDSWebSocket = ({ onOrderNew }: UseKDSWebSocketOptions = {}) => 
   }, [onOrderNew])
 
   useEffect(() => {
-    if (!hasUsableBearerToken(token)) {
+    if (!hasAuthenticatedSession) {
       setConnected(false)
       return
     }
@@ -185,5 +186,5 @@ export const useKDSWebSocket = ({ onOrderNew }: UseKDSWebSocketOptions = {}) => 
         socketRef.current = null
       }
     }
-  }, [token, setConnected, setOrders, upsertOrder])
+  }, [hasAuthenticatedSession, setConnected, setOrders, upsertOrder])
 }
