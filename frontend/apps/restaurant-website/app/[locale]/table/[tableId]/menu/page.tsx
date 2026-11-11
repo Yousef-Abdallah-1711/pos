@@ -5,7 +5,7 @@ import { HeaderSSR } from '@/components/layout/header-ssr'
 import { FooterSSR } from '@/components/layout/footer-ssr'
 import { getThemeDataServer, getDefaultThemeData } from '@/lib/api/get-theme-server'
 import type { ServerThemeData } from '@/lib/api/get-theme-server'
-import { getApiBaseUrl } from '@/lib/config/api'
+import { getServerApiBaseUrl } from '@/lib/config/api'
 import { createTranslator } from '@/lib/translations'
 import { getTableStatusNotice } from '@/lib/table-ordering'
 import { MenuPageContent } from '../../../menu/menu-page-content'
@@ -32,7 +32,7 @@ interface TableInfoResponse {
 
 async function getPublicTableInfo(tableId: number): Promise<TablePublicInfo | null> {
   try {
-    const apiBase = getApiBaseUrl()
+    const apiBase = getServerApiBaseUrl()
     const response = await fetch(`${apiBase}/public/table/${tableId}/info`, {
       cache: 'no-store',
       headers: {

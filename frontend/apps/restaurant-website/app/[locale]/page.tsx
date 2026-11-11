@@ -3,7 +3,7 @@ import { DynamicHomePage } from '@/components/homepage/dynamic-home-page';
 import { HeaderSSR } from '@/components/layout/header-ssr';
 import { FooterSSR } from '@/components/layout/footer-ssr';
 import { extractThemeConfig, getDefaultThemeData } from '@/lib/api/get-theme-server';
-import { getApiBaseUrl } from '@/lib/config/api';
+import { getServerApiBaseUrl } from '@/lib/config/api';
 import { debugError } from '@/lib/debug';
 import { AlertCircle } from 'lucide-react';
 import type { Metadata } from 'next';
@@ -33,7 +33,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   try {
     // Fetch theme data for metadata (used for OG tags)
-    const apiUrl = getApiBaseUrl();
+    const apiUrl = getServerApiBaseUrl();
     const themeResponse = await fetch(
       `${apiUrl}/public/restaurants/${restaurantSlug}/theme`,
       {
@@ -143,7 +143,7 @@ export default async function HomePage({ params }: PageProps) {
 
   try {
     // Fetch all data in PARALLEL (not sequential!)
-    const apiUrl = getApiBaseUrl();
+    const apiUrl = getServerApiBaseUrl();
 
     const [homepageResponse, themeResponse, productsResponse] = await Promise.all([
       fetch(`${apiUrl}/public/restaurants/${restaurantSlug}/homepage`, {

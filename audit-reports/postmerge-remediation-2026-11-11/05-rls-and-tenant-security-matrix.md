@@ -1,25 +1,32 @@
 # PostgreSQL RLS and tenant security matrix
 
-## Evidence carried forward
+## Catalog evidence
 
-The read-only catalog result from the prior disposable database run found 92 public ordinary tables, with RLS enabled on 15 (16.3%). It specifically reported RLS disabled on these core tenant-bearing tables:
+Collected 2026-11-11 from the fresh, 126-migration PostgreSQL 17.7 disposable database `pos_remediation_20261111` at the tested source candidate. The catalog has 92 public ordinary tables. RLS is both enabled and forced on 15 tables; the other 77 tables do not have database RLS. `pos_app` and `pos_migrator` are both `NOSUPERUSER`, `NOCREATEDB`, `NOCREATEROLE`, and `NOBYPASSRLS`.
 
-| Table | Preliminary ownership | Tenant key | RLS evidence | Risk / next step |
-|---|---|---|---|---|
-| users | Tenant/user | `tenant_id` | Disabled in prior catalog | Test all user-scoped repository and handler paths under `pos_app`; design a scoped policy. |
-| tenants | Tenant root | Primary tenant identity | Disabled in prior catalog | Keep cross-tenant access limited to explicit platform administration. |
-| restaurants | Tenant-owned | `tenant_id` | Disabled in prior catalog | Verify restaurant/tenant relationship constraints and runtime scoping. |
-| orders | Tenant/restaurant-owned | `tenant_id`, `restaurant_id` | Disabled in prior catalog | Test reads, mutations, and nested items with cross-tenant IDs. |
-| order_items | Parent/order-owned | Parent order relationship | Disabled in prior catalog | Enforce ownership through the order relationship and test item IDs across tenants. |
-| products | Tenant/restaurant-owned | `tenant_id`, restaurant relationship | Disabled in prior catalog | Test parent-child category links and all CRUD operations. |
-| categories | Tenant/restaurant-owned | `tenant_id`, restaurant relationship | Disabled in prior catalog | Test product/category cross-tenant references and mutations. |
-| inventory | Tenant/restaurant-owned | `tenant_id`, restaurant relationship | Disabled in prior catalog | Test read/write isolation and order side effects. |
-| employees | Tenant/restaurant-owned | `tenant_id`, restaurant relationship | Disabled in prior catalog | Test role, salary, and employee references across tenants. |
+The complete per-table catalog extract is [05-table-security-matrix.csv](05-table-security-matrix.csv). It records table columns, direct scope signals, foreign-key parent paths, RLS and FORCE RLS state, policies, runtime role privileges, and a reminder that catalog evidence cannot certify API route/repository enforcement. Scope classes are schema-derived triage labels, not a claim that each table's business ownership or authorization has been fully reviewed.
 
-The source migrations contain 55 explicit `CREATE TABLE` statements, while the prior live catalog observed 92 public tables. Source-only parsing cannot reliably enumerate all deployed tables or their final columns, current policies, grants, views, dynamic SQL objects, or migration state.
+## RLS-protected tables
 
-## Status
+The 15 protected tables are `audit_export_logs`, `e_invoice_submissions`, `email_change_requests`, `invoice_delivery_logs`, `notification_preferences`, `notifications`, `password_change_history`, `payments`, `permission_audit_logs`, `report_export_audit_logs`, `role_permissions`, `user_auth_audit_logs`, `user_roles`, `user_settings`, and `user_settings_audit_log`.
 
-**INCOMPLETE / BLOCKED.** Docker Desktop and PostgreSQL services are unavailable in this environment. Therefore no current catalog query, table-by-table ownership classification, restricted-role negative test, tenant/RLS integration test, or forward/rollback migration acceptance was run. The prior API evidence included one cross-user settings denial (403), own-user settings access (200), and unauthenticated denials (401); it is not a complete tenant matrix.
+Existing policies use transaction-local `app.tenant_id`, `app.restaurant_id`, and in the notifications policy `app.user_id`; `user_roles` and `role_permissions` also have explicit `pos_migrator` policies. `permission_audit_logs` has a SELECT-only runtime policy. The table-level CSV captures the exact current policy definitions and the runtime grants.
 
-No RLS policies or database migrations were added. Do not enable RLS broadly until the full deployed schema, role behavior, policies, transaction-local tenant context, application query coverage, and rollback plan are verified on disposable PostgreSQL.
+## Restricted-role tests run
+
+On the disposable database, existing integration tests passed:
+
+- `TestRLSPilot_TenantIsolationWithRestrictedRole`: tenant A/B reads, cross-tenant insert rejection, update/delete filtering, no-context fail-closed behavior, connection reuse, and runtime-role attributes.
+- `TestAuthAuditAndUserSettingsRLSWithRestrictedRuntimeRole`: auth audit, user settings, notification preferences, tenant/user ownership checks, unscoped denial, mutation isolation, and notification-preference rollback.
+- Payment PostgreSQL integration tests: 14 tests passed, including restricted `pos_app` payment transactions, unscoped fail-closed reads, foreign-tenant denial, duplicate/out-of-order callbacks, concurrent void/success and refunds, invalid signatures, provider-success/local-commit recovery, durable refund recovery, and replay idempotency.
+- Repository PostgreSQL isolation tests: 27 tests passed across accounting parent references and atomic writes, categories, drivers, HR employee references, inventory movement references, orders/items, products, RBAC assignments, themes, and user scope.
+
+These are representative data-path tests, not proof of RLS or authorization for all 92 tables or every HTTP route.
+
+## Remaining security work
+
+RLS remains absent from core tables including `tenants`, `restaurants`, `users`, `orders`, `order_items`, `products`, `categories`, `inventory`, and `employees`. The repository contains table-scoped integration tests and API scoping, but a complete route-by-role/tenant matrix and comprehensive per-table runtime-role review have not been completed. The CSV includes rows marked for scope review, including child tables whose ownership must be inherited through parent references, global candidates, operations tables, and theme references with no declared FK.
+
+No new RLS policies or migrations were added. Do not enable RLS globally based on column names alone; a policy plan still needs application call-path review, parent/child integrity tests, runtime grant compatibility, and per-migration rollback evidence.
+
+**Status: PARTIAL.** Restricted-role RLS behavior passed for the exercised policies and repository scopes. Full tenant isolation/security acceptance remains open.

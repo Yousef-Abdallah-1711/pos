@@ -3,14 +3,14 @@
 | Gate | Result | Evidence / blocker |
 |---|---|---|
 | Four Next.js production builds | PASS | Independent host builds with required production URL variables. |
-| API without temporary port-forward | BLOCKED | Docker/API unavailable; config corrected and Compose validates. |
-| Authenticated E2E | BLOCKED | Disposable API/database stack unavailable. |
-| Tenant isolation negative matrix | BLOCKED | Current PostgreSQL catalog and integration access unavailable; prior evidence is narrow. |
-| POS/KDS end-to-end | PARTIAL | Prior bounded API checks passed; current KDS WebSocket path has unit coverage but no live handshake. |
+| API without manual port-forward | PASS (isolated) | Disposable API health and frontend/API communication passed on the published ports in the seven-service test stack. Production deployment wiring is not inferred. |
+| Authenticated E2E | PASS (bounded) | 15/15 Phase 2A tests and 12/12 registration Playwright tests passed; see report 06 for covered paths and exclusions. |
+| Tenant isolation negative matrix | PARTIAL | 27 repository-level PostgreSQL tests plus restricted-role RLS and account/settings/payment coverage pass. Full table and HTTP role matrix remains incomplete; RLS is enabled/forced on 15 of 92 tables. |
+| POS/KDS end-to-end | PARTIAL | POS order creation and inventory flows passed in Playwright. KDS status-hook unit tests pass, but live WebSocket events were not exercised. |
 | No unresolved P0 security defects | UNKNOWN | No confirmed exploit in prior bounded checks; full RLS and tenant matrix not run. |
 | No unresolved P1 release blockers | NO | API/E2E/security/performance acceptance remains incomplete. |
 | Hosted smoke checks | PASS | `runtime-localhost-guardrail` and `url-domain-config-smoke` passed on PR #14. These are not the full required regression suite. |
 | Independent review | PENDING | No review approval is recorded on PR #14. |
-| Full integrated CI | INCOMPLETE | Go tests/vet/build pass locally; PostgreSQL/RLS, authenticated Playwright, Docker image, and performance gates remain blocked or unrun. |
+| Full integrated CI | INCOMPLETE | Go tests/vet/build, four production builds (restaurant build rerun after its latest change), frontend suites, fresh migration, targeted rollback, payment, retry, repository DB suites, and bounded Playwright pass. Full RLS/route matrix, production Docker images, and performance gates remain unrun. |
 
 **Decision: NO-GO for production.** This remediation is limited to verified application defects and build/runtime configuration. Public branding remains POOS; ORDERLY is not included because commercial and trademark clearance is unverified.
