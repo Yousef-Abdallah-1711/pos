@@ -27,13 +27,14 @@ describe('dashboard URL config resolver', () => {
   })
 
   afterEach(() => {
+    vi.unstubAllEnvs()
     process.env = { ...ORIGINAL_ENV }
     vi.unstubAllGlobals()
     vi.resetModules()
   })
 
   it('uses localhost dev defaults outside production', async () => {
-    process.env.NODE_ENV = 'development'
+    vi.stubEnv('NODE_ENV', 'development')
     const { getConfig } = await loadConfigModule()
 
     expect(getConfig()).toMatchObject({
@@ -45,7 +46,7 @@ describe('dashboard URL config resolver', () => {
   })
 
   it('normalizes configured production URLs', async () => {
-    process.env.NODE_ENV = 'production'
+    vi.stubEnv('NODE_ENV', 'production')
     process.env.NEXT_PUBLIC_LANDING_URL = 'https://www.example.com///'
     process.env.NEXT_PUBLIC_DASHBOARD_URL = 'https://dashboard.example.com/'
     process.env.NEXT_PUBLIC_API_URL = 'https://api.example.com/api/v1/'
@@ -63,7 +64,7 @@ describe('dashboard URL config resolver', () => {
   })
 
   it('throws in production when API URL is missing', async () => {
-    process.env.NODE_ENV = 'production'
+    vi.stubEnv('NODE_ENV', 'production')
     vi.stubGlobal('window', {
       location: { hostname: 'dashboard.example.com', origin: 'https://dashboard.example.com' },
     })
@@ -76,7 +77,7 @@ describe('dashboard URL config resolver', () => {
   })
 
   it('throws in production when restaurant domain is missing', async () => {
-    process.env.NODE_ENV = 'production'
+    vi.stubEnv('NODE_ENV', 'production')
     vi.stubGlobal('window', {
       location: { hostname: 'dashboard.example.com', origin: 'https://dashboard.example.com' },
     })
