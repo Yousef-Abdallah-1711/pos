@@ -19,6 +19,11 @@ async function login(page: Page, tenant: 'a' | 'b' = 'a') {
   return await response.json() as { user: { id: number; tenant_id: number; restaurant_id: number } }
 }
 
+interface KDSWebSocketMessage {
+  type?: string
+  data?: { items?: Array<{ product_name?: string }> }
+}
+
 test('tenant A cannot see or mutate tenant B products', async ({ page }) => {
   const tenantA = await request.newContext()
   const tenantB = await request.newContext()
@@ -284,6 +289,36 @@ test('POS browser flow creates an order for the signed-in tenant', async ({ page
   await page.getByRole('button', { name: /WS05 E2E Burger A/ }).click()
   await page.getByRole('button', { name: /Place Order/ }).click()
   await expect(page.getByText(/Order placed!/)).toBeVisible({ timeout: 15_000 })
+})
+
+test('KDS receives a POS order over its authenticated tenant WebSocket', async ({ page }) => {
+  test.setTimeout(90_000)
+  const messages: KDSWebSocketMessage[] = []
+  page.on('websocket', (socket) => {
+    if (!new URL(socket.url()).pathname.endsWith('/kds/ws')) return
+    socket.on('framereceived', (frame) => {
+      try {
+        messages.push(JSON.parse(String(frame.payload)) as KDSWebSocketMessage)
+      } catch {
+        // Ignore non-JSON frames; the KDS protocol broadcasts JSON messages.
+      }
+    })
+  })
+
+  await login(page)
+  await page.goto('/en/dashboard/kds', { waitUntil: 'domcontentloaded', timeout: 90_000 })
+  await expect(page.getByText('Connected', { exact: true })).toBeVisible({ timeout: 30_000 })
+  await expect.poll(() => messages.some((message) => message.type === 'connected'), { timeout: 10_000 }).toBe(true)
+
+  const posPage = await page.context().newPage()
+  await posPage.goto('/en/dashboard/pos', { waitUntil: 'domcontentloaded', timeout: 90_000 })
+  await posPage.getByRole('button', { name: /WS05 E2E Burger A/ }).click()
+  await posPage.getByRole('button', { name: /Place Order/ }).click()
+  await expect(posPage.getByText(/Order placed!/)).toBeVisible({ timeout: 15_000 })
+  await expect.poll(() => messages.some((message) =>
+    message.type === 'order_new' && message.data?.items?.some((item) => item.product_name === 'WS05 E2E Burger A')
+  ), { timeout: 15_000 }).toBe(true)
+  await posPage.close()
 })
 
 test('inventory page loads and stock adjustment persists in PostgreSQL', async ({ page }) => {

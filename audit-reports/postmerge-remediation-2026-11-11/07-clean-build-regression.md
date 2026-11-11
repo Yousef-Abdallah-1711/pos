@@ -19,7 +19,7 @@
 - Repository PostgreSQL isolation integration: PASS (27 tests; accounting, category, driver, HR, inventory, order, product, RBAC, theme, and user scope).
 - Docker Compose configuration validation: PASS.
 - `git diff --check`: PASS.
-- Phase 2A Playwright: PASS (15 passed, 0 failed) on the isolated seven-service stack after configuring its host-published ports and tenant-subdomain CORS origin.
+- Phase 2A Playwright: PASS (16 passed, 0 failed) on the isolated seven-service stack after configuring its host-published ports and tenant-subdomain CORS origin. The final test verifies authenticated KDS WebSocket order delivery following POS order creation.
 - Restaurant website API config regression: PASS (5 tests); restaurant website TypeScript check: PASS; production build: PASS after adding the server-only API base URL.
 - Registration Playwright: PASS (12 passed, 0 failed) against the disposable API, database, and frontend services.
 - Dashboard application and test TypeScript checks: PASS after frozen-lockfile workspace installation; dashboard config and table-list unit tests: PASS (6 tests); dashboard production build: PASS after the mobile header change.
