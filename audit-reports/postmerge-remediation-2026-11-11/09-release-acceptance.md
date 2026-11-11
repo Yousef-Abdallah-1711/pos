@@ -11,6 +11,6 @@
 | No unresolved P1 release blockers | NO | API/E2E/security/performance acceptance remains incomplete. |
 | Hosted smoke checks | PASS | `runtime-localhost-guardrail` and `url-domain-config-smoke` passed on PR #14. These are not the full required regression suite. |
 | Independent review | PENDING | No review approval is recorded on PR #14. |
-| Full integrated CI | INCOMPLETE | Go, PostgreSQL/RLS, authenticated Playwright, Docker image, and performance gates remain blocked or unrun. |
+| Full integrated CI | INCOMPLETE | Go tests/vet/build pass locally; PostgreSQL/RLS, authenticated Playwright, Docker image, and performance gates remain blocked or unrun. |
 
 **Decision: NO-GO for production.** This remediation is limited to verified application defects and build/runtime configuration. Public branding remains POOS; ORDERLY is not included because commercial and trademark clearance is unverified.
