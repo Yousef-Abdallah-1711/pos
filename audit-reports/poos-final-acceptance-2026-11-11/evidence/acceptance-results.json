@@ -1,0 +1,2365 @@
+{
+  "baseURL": "http://localhost:38692",
+  "capturedAt": "2026-11-10T22:37:24.027Z",
+  "viewports": [
+    320,
+    375,
+    390,
+    430,
+    768,
+    820,
+    1024,
+    1280,
+    1440,
+    1920
+  ],
+  "routes": [
+    {
+      "route": "/en",
+      "locale": "en",
+      "width": 320,
+      "status": 200,
+      "overflow": false,
+      "headerVisible": true,
+      "authFormBelowHeader": true,
+      "failedImages": [],
+      "screenshot": "landing-en-320.png",
+      "viewportWidth": 320,
+      "documentWidth": 320,
+      "bodyWidth": 320,
+      "direction": "ltr",
+      "language": "en",
+      "images": [
+        {
+          "src": "http://localhost:38692/images/product/roles-mobile-430x700.png",
+          "loaded": true,
+          "width": 430,
+          "height": 700
+        }
+      ],
+      "performance": {
+        "ttfbMs": 96,
+        "fcpMs": 184,
+        "lcpMs": 184,
+        "cls": 0,
+        "resourceTransferBytes": 327035
+      },
+      "title": "POOS | Connected restaurant management",
+      "canonical": "https://landing.poos.example/en",
+      "alternates": [
+        {
+          "language": "en",
+          "href": "https://landing.poos.example/en"
+        },
+        {
+          "language": "ar",
+          "href": "https://landing.poos.example/ar"
+        }
+      ]
+    },
+    {
+      "route": "/en",
+      "locale": "en",
+      "width": 375,
+      "status": 200,
+      "overflow": false,
+      "headerVisible": true,
+      "authFormBelowHeader": true,
+      "failedImages": [],
+      "screenshot": "landing-en-375.png",
+      "viewportWidth": 375,
+      "documentWidth": 375,
+      "bodyWidth": 375,
+      "direction": "ltr",
+      "language": "en",
+      "images": [
+        {
+          "src": "http://localhost:38692/images/product/roles-mobile-430x700.png",
+          "loaded": true,
+          "width": 430,
+          "height": 700
+        }
+      ],
+      "performance": {
+        "ttfbMs": 4,
+        "fcpMs": 40,
+        "lcpMs": 40,
+        "cls": 0,
+        "resourceTransferBytes": 2923
+      },
+      "title": "POOS | Connected restaurant management",
+      "canonical": "https://landing.poos.example/en",
+      "alternates": [
+        {
+          "language": "en",
+          "href": "https://landing.poos.example/en"
+        },
+        {
+          "language": "ar",
+          "href": "https://landing.poos.example/ar"
+        }
+      ]
+    },
+    {
+      "route": "/en",
+      "locale": "en",
+      "width": 390,
+      "status": 200,
+      "overflow": false,
+      "headerVisible": true,
+      "authFormBelowHeader": true,
+      "failedImages": [],
+      "screenshot": "landing-en-390.png",
+      "viewportWidth": 390,
+      "documentWidth": 390,
+      "bodyWidth": 390,
+      "direction": "ltr",
+      "language": "en",
+      "images": [
+        {
+          "src": "http://localhost:38692/images/product/roles-mobile-430x700.png",
+          "loaded": true,
+          "width": 430,
+          "height": 700
+        }
+      ],
+      "performance": {
+        "ttfbMs": 3,
+        "fcpMs": 32,
+        "lcpMs": 32,
+        "cls": 0,
+        "resourceTransferBytes": 2923
+      },
+      "title": "POOS | Connected restaurant management",
+      "canonical": "https://landing.poos.example/en",
+      "alternates": [
+        {
+          "language": "en",
+          "href": "https://landing.poos.example/en"
+        },
+        {
+          "language": "ar",
+          "href": "https://landing.poos.example/ar"
+        }
+      ]
+    },
+    {
+      "route": "/en",
+      "locale": "en",
+      "width": 430,
+      "status": 200,
+      "overflow": false,
+      "headerVisible": true,
+      "authFormBelowHeader": true,
+      "failedImages": [],
+      "screenshot": "landing-en-430.png",
+      "viewportWidth": 430,
+      "documentWidth": 430,
+      "bodyWidth": 430,
+      "direction": "ltr",
+      "language": "en",
+      "images": [
+        {
+          "src": "http://localhost:38692/images/product/roles-mobile-430x700.png",
+          "loaded": true,
+          "width": 430,
+          "height": 700
+        }
+      ],
+      "performance": {
+        "ttfbMs": 3,
+        "fcpMs": 32,
+        "lcpMs": 32,
+        "cls": 0,
+        "resourceTransferBytes": 2923
+      },
+      "title": "POOS | Connected restaurant management",
+      "canonical": "https://landing.poos.example/en",
+      "alternates": [
+        {
+          "language": "en",
+          "href": "https://landing.poos.example/en"
+        },
+        {
+          "language": "ar",
+          "href": "https://landing.poos.example/ar"
+        }
+      ]
+    },
+    {
+      "route": "/en",
+      "locale": "en",
+      "width": 768,
+      "status": 200,
+      "overflow": false,
+      "headerVisible": true,
+      "authFormBelowHeader": true,
+      "failedImages": [],
+      "screenshot": "landing-en-768.png",
+      "viewportWidth": 768,
+      "documentWidth": 768,
+      "bodyWidth": 768,
+      "direction": "ltr",
+      "language": "en",
+      "images": [
+        {
+          "src": "http://localhost:38692/_next/image?url=%2Fimages%2Fproduct%2Froles-1440x900.png&w=640&q=75",
+          "loaded": true,
+          "width": 399,
+          "height": 249
+        }
+      ],
+      "performance": {
+        "ttfbMs": 20,
+        "fcpMs": 52,
+        "lcpMs": 52,
+        "cls": 0,
+        "resourceTransferBytes": 9197
+      },
+      "title": "POOS | Connected restaurant management",
+      "canonical": "https://landing.poos.example/en",
+      "alternates": [
+        {
+          "language": "en",
+          "href": "https://landing.poos.example/en"
+        },
+        {
+          "language": "ar",
+          "href": "https://landing.poos.example/ar"
+        }
+      ]
+    },
+    {
+      "route": "/en",
+      "locale": "en",
+      "width": 820,
+      "status": 200,
+      "overflow": false,
+      "headerVisible": true,
+      "authFormBelowHeader": true,
+      "failedImages": [],
+      "screenshot": "landing-en-820.png",
+      "viewportWidth": 820,
+      "documentWidth": 820,
+      "bodyWidth": 820,
+      "direction": "ltr",
+      "language": "en",
+      "images": [
+        {
+          "src": "http://localhost:38692/_next/image?url=%2Fimages%2Fproduct%2Froles-1440x900.png&w=640&q=75",
+          "loaded": true,
+          "width": 426,
+          "height": 266
+        }
+      ],
+      "performance": {
+        "ttfbMs": 3,
+        "fcpMs": 36,
+        "lcpMs": 36,
+        "cls": 0,
+        "resourceTransferBytes": 2623
+      },
+      "title": "POOS | Connected restaurant management",
+      "canonical": "https://landing.poos.example/en",
+      "alternates": [
+        {
+          "language": "en",
+          "href": "https://landing.poos.example/en"
+        },
+        {
+          "language": "ar",
+          "href": "https://landing.poos.example/ar"
+        }
+      ]
+    },
+    {
+      "route": "/en",
+      "locale": "en",
+      "width": 1024,
+      "status": 200,
+      "overflow": false,
+      "headerVisible": true,
+      "authFormBelowHeader": true,
+      "failedImages": [],
+      "screenshot": "landing-en-1024.png",
+      "viewportWidth": 1024,
+      "documentWidth": 1024,
+      "bodyWidth": 1024,
+      "direction": "ltr",
+      "language": "en",
+      "images": [
+        {
+          "src": "http://localhost:38692/_next/image?url=%2Fimages%2Fproduct%2Froles-1440x900.png&w=640&q=75",
+          "loaded": true,
+          "width": 532,
+          "height": 332
+        }
+      ],
+      "performance": {
+        "ttfbMs": 3,
+        "fcpMs": 40,
+        "lcpMs": 40,
+        "cls": 0,
+        "resourceTransferBytes": 2623
+      },
+      "title": "POOS | Connected restaurant management",
+      "canonical": "https://landing.poos.example/en",
+      "alternates": [
+        {
+          "language": "en",
+          "href": "https://landing.poos.example/en"
+        },
+        {
+          "language": "ar",
+          "href": "https://landing.poos.example/ar"
+        }
+      ]
+    },
+    {
+      "route": "/en",
+      "locale": "en",
+      "width": 1280,
+      "status": 200,
+      "overflow": false,
+      "headerVisible": true,
+      "authFormBelowHeader": true,
+      "failedImages": [],
+      "screenshot": "landing-en-1280.png",
+      "viewportWidth": 1280,
+      "documentWidth": 1280,
+      "bodyWidth": 1280,
+      "direction": "ltr",
+      "language": "en",
+      "images": [
+        {
+          "src": "http://localhost:38692/_next/image?url=%2Fimages%2Fproduct%2Froles-1440x900.png&w=750&q=75",
+          "loaded": true,
+          "width": 680,
+          "height": 425
+        }
+      ],
+      "performance": {
+        "ttfbMs": 8,
+        "fcpMs": 56,
+        "lcpMs": 56,
+        "cls": 0,
+        "resourceTransferBytes": 17657
+      },
+      "title": "POOS | Connected restaurant management",
+      "canonical": "https://landing.poos.example/en",
+      "alternates": [
+        {
+          "language": "en",
+          "href": "https://landing.poos.example/en"
+        },
+        {
+          "language": "ar",
+          "href": "https://landing.poos.example/ar"
+        }
+      ]
+    },
+    {
+      "route": "/en",
+      "locale": "en",
+      "width": 1440,
+      "status": 200,
+      "overflow": false,
+      "headerVisible": true,
+      "authFormBelowHeader": true,
+      "failedImages": [],
+      "screenshot": "landing-en-1440.png",
+      "viewportWidth": 1440,
+      "documentWidth": 1440,
+      "bodyWidth": 1440,
+      "direction": "ltr",
+      "language": "en",
+      "images": [
+        {
+          "src": "http://localhost:38692/_next/image?url=%2Fimages%2Fproduct%2Froles-1440x900.png&w=750&q=75",
+          "loaded": true,
+          "width": 680,
+          "height": 425
+        }
+      ],
+      "performance": {
+        "ttfbMs": 5,
+        "fcpMs": 52,
+        "lcpMs": 52,
+        "cls": 0,
+        "resourceTransferBytes": 5263
+      },
+      "title": "POOS | Connected restaurant management",
+      "canonical": "https://landing.poos.example/en",
+      "alternates": [
+        {
+          "language": "en",
+          "href": "https://landing.poos.example/en"
+        },
+        {
+          "language": "ar",
+          "href": "https://landing.poos.example/ar"
+        }
+      ]
+    },
+    {
+      "route": "/en",
+      "locale": "en",
+      "width": 1920,
+      "status": 200,
+      "overflow": false,
+      "headerVisible": true,
+      "authFormBelowHeader": true,
+      "failedImages": [],
+      "screenshot": "landing-en-1920.png",
+      "viewportWidth": 1920,
+      "documentWidth": 1920,
+      "bodyWidth": 1920,
+      "direction": "ltr",
+      "language": "en",
+      "images": [
+        {
+          "src": "http://localhost:38692/_next/image?url=%2Fimages%2Fproduct%2Froles-1440x900.png&w=750&q=75",
+          "loaded": true,
+          "width": 680,
+          "height": 425
+        }
+      ],
+      "performance": {
+        "ttfbMs": 3,
+        "fcpMs": 44,
+        "lcpMs": 44,
+        "cls": 0,
+        "resourceTransferBytes": 5263
+      },
+      "title": "POOS | Connected restaurant management",
+      "canonical": "https://landing.poos.example/en",
+      "alternates": [
+        {
+          "language": "en",
+          "href": "https://landing.poos.example/en"
+        },
+        {
+          "language": "ar",
+          "href": "https://landing.poos.example/ar"
+        }
+      ]
+    },
+    {
+      "route": "/en/auth/login",
+      "locale": "en",
+      "width": 320,
+      "status": 200,
+      "overflow": false,
+      "headerVisible": true,
+      "authFormBelowHeader": true,
+      "failedImages": [],
+      "screenshot": "login-en-320.png",
+      "viewportWidth": 320,
+      "documentWidth": 320,
+      "bodyWidth": 320,
+      "direction": "ltr",
+      "language": "en",
+      "images": [],
+      "performance": {
+        "ttfbMs": 6,
+        "fcpMs": 40,
+        "lcpMs": 40,
+        "cls": 0,
+        "resourceTransferBytes": 2613
+      },
+      "title": "POOS | Connected restaurant management",
+      "canonical": "https://landing.poos.example/en",
+      "alternates": [
+        {
+          "language": "en",
+          "href": "https://landing.poos.example/en"
+        },
+        {
+          "language": "ar",
+          "href": "https://landing.poos.example/ar"
+        }
+      ]
+    },
+    {
+      "route": "/en/auth/login",
+      "locale": "en",
+      "width": 375,
+      "status": 200,
+      "overflow": false,
+      "headerVisible": true,
+      "authFormBelowHeader": true,
+      "failedImages": [],
+      "screenshot": "login-en-375.png",
+      "viewportWidth": 375,
+      "documentWidth": 375,
+      "bodyWidth": 375,
+      "direction": "ltr",
+      "language": "en",
+      "images": [],
+      "performance": {
+        "ttfbMs": 3,
+        "fcpMs": 24,
+        "lcpMs": 24,
+        "cls": 0,
+        "resourceTransferBytes": 2613
+      },
+      "title": "POOS | Connected restaurant management",
+      "canonical": "https://landing.poos.example/en",
+      "alternates": [
+        {
+          "language": "en",
+          "href": "https://landing.poos.example/en"
+        },
+        {
+          "language": "ar",
+          "href": "https://landing.poos.example/ar"
+        }
+      ]
+    },
+    {
+      "route": "/en/auth/login",
+      "locale": "en",
+      "width": 390,
+      "status": 200,
+      "overflow": false,
+      "headerVisible": true,
+      "authFormBelowHeader": true,
+      "failedImages": [],
+      "screenshot": "login-en-390.png",
+      "viewportWidth": 390,
+      "documentWidth": 390,
+      "bodyWidth": 390,
+      "direction": "ltr",
+      "language": "en",
+      "images": [],
+      "performance": {
+        "ttfbMs": 2,
+        "fcpMs": 24,
+        "lcpMs": 24,
+        "cls": 0,
+        "resourceTransferBytes": 2613
+      },
+      "title": "POOS | Connected restaurant management",
+      "canonical": "https://landing.poos.example/en",
+      "alternates": [
+        {
+          "language": "en",
+          "href": "https://landing.poos.example/en"
+        },
+        {
+          "language": "ar",
+          "href": "https://landing.poos.example/ar"
+        }
+      ]
+    },
+    {
+      "route": "/en/auth/login",
+      "locale": "en",
+      "width": 430,
+      "status": 200,
+      "overflow": false,
+      "headerVisible": true,
+      "authFormBelowHeader": true,
+      "failedImages": [],
+      "screenshot": "login-en-430.png",
+      "viewportWidth": 430,
+      "documentWidth": 430,
+      "bodyWidth": 430,
+      "direction": "ltr",
+      "language": "en",
+      "images": [],
+      "performance": {
+        "ttfbMs": 2,
+        "fcpMs": 24,
+        "lcpMs": 24,
+        "cls": 0,
+        "resourceTransferBytes": 2613
+      },
+      "title": "POOS | Connected restaurant management",
+      "canonical": "https://landing.poos.example/en",
+      "alternates": [
+        {
+          "language": "en",
+          "href": "https://landing.poos.example/en"
+        },
+        {
+          "language": "ar",
+          "href": "https://landing.poos.example/ar"
+        }
+      ]
+    },
+    {
+      "route": "/en/auth/login",
+      "locale": "en",
+      "width": 768,
+      "status": 200,
+      "overflow": false,
+      "headerVisible": true,
+      "authFormBelowHeader": true,
+      "failedImages": [],
+      "screenshot": "login-en-768.png",
+      "viewportWidth": 768,
+      "documentWidth": 768,
+      "bodyWidth": 768,
+      "direction": "ltr",
+      "language": "en",
+      "images": [],
+      "performance": {
+        "ttfbMs": 3,
+        "fcpMs": 24,
+        "lcpMs": 24,
+        "cls": 0,
+        "resourceTransferBytes": 2613
+      },
+      "title": "POOS | Connected restaurant management",
+      "canonical": "https://landing.poos.example/en",
+      "alternates": [
+        {
+          "language": "en",
+          "href": "https://landing.poos.example/en"
+        },
+        {
+          "language": "ar",
+          "href": "https://landing.poos.example/ar"
+        }
+      ]
+    },
+    {
+      "route": "/en/auth/login",
+      "locale": "en",
+      "width": 820,
+      "status": 200,
+      "overflow": false,
+      "headerVisible": true,
+      "authFormBelowHeader": true,
+      "failedImages": [],
+      "screenshot": "login-en-820.png",
+      "viewportWidth": 820,
+      "documentWidth": 820,
+      "bodyWidth": 820,
+      "direction": "ltr",
+      "language": "en",
+      "images": [],
+      "performance": {
+        "ttfbMs": 3,
+        "fcpMs": 28,
+        "lcpMs": 28,
+        "cls": 0,
+        "resourceTransferBytes": 2613
+      },
+      "title": "POOS | Connected restaurant management",
+      "canonical": "https://landing.poos.example/en",
+      "alternates": [
+        {
+          "language": "en",
+          "href": "https://landing.poos.example/en"
+        },
+        {
+          "language": "ar",
+          "href": "https://landing.poos.example/ar"
+        }
+      ]
+    },
+    {
+      "route": "/en/auth/login",
+      "locale": "en",
+      "width": 1024,
+      "status": 200,
+      "overflow": false,
+      "headerVisible": true,
+      "authFormBelowHeader": true,
+      "failedImages": [],
+      "screenshot": "login-en-1024.png",
+      "viewportWidth": 1024,
+      "documentWidth": 1024,
+      "bodyWidth": 1024,
+      "direction": "ltr",
+      "language": "en",
+      "images": [],
+      "performance": {
+        "ttfbMs": 4,
+        "fcpMs": 28,
+        "lcpMs": 28,
+        "cls": 0,
+        "resourceTransferBytes": 2613
+      },
+      "title": "POOS | Connected restaurant management",
+      "canonical": "https://landing.poos.example/en",
+      "alternates": [
+        {
+          "language": "en",
+          "href": "https://landing.poos.example/en"
+        },
+        {
+          "language": "ar",
+          "href": "https://landing.poos.example/ar"
+        }
+      ]
+    },
+    {
+      "route": "/en/auth/login",
+      "locale": "en",
+      "width": 1280,
+      "status": 200,
+      "overflow": false,
+      "headerVisible": true,
+      "authFormBelowHeader": true,
+      "failedImages": [],
+      "screenshot": "login-en-1280.png",
+      "viewportWidth": 1280,
+      "documentWidth": 1280,
+      "bodyWidth": 1280,
+      "direction": "ltr",
+      "language": "en",
+      "images": [],
+      "performance": {
+        "ttfbMs": 3,
+        "fcpMs": 28,
+        "lcpMs": 28,
+        "cls": 0,
+        "resourceTransferBytes": 5236
+      },
+      "title": "POOS | Connected restaurant management",
+      "canonical": "https://landing.poos.example/en",
+      "alternates": [
+        {
+          "language": "en",
+          "href": "https://landing.poos.example/en"
+        },
+        {
+          "language": "ar",
+          "href": "https://landing.poos.example/ar"
+        }
+      ]
+    },
+    {
+      "route": "/en/auth/login",
+      "locale": "en",
+      "width": 1440,
+      "status": 200,
+      "overflow": false,
+      "headerVisible": true,
+      "authFormBelowHeader": true,
+      "failedImages": [],
+      "screenshot": "login-en-1440.png",
+      "viewportWidth": 1440,
+      "documentWidth": 1440,
+      "bodyWidth": 1440,
+      "direction": "ltr",
+      "language": "en",
+      "images": [],
+      "performance": {
+        "ttfbMs": 3,
+        "fcpMs": 28,
+        "lcpMs": 28,
+        "cls": 0,
+        "resourceTransferBytes": 5236
+      },
+      "title": "POOS | Connected restaurant management",
+      "canonical": "https://landing.poos.example/en",
+      "alternates": [
+        {
+          "language": "en",
+          "href": "https://landing.poos.example/en"
+        },
+        {
+          "language": "ar",
+          "href": "https://landing.poos.example/ar"
+        }
+      ]
+    },
+    {
+      "route": "/en/auth/login",
+      "locale": "en",
+      "width": 1920,
+      "status": 200,
+      "overflow": false,
+      "headerVisible": true,
+      "authFormBelowHeader": true,
+      "failedImages": [],
+      "screenshot": "login-en-1920.png",
+      "viewportWidth": 1920,
+      "documentWidth": 1920,
+      "bodyWidth": 1920,
+      "direction": "ltr",
+      "language": "en",
+      "images": [],
+      "performance": {
+        "ttfbMs": 3,
+        "fcpMs": 28,
+        "lcpMs": 28,
+        "cls": 0,
+        "resourceTransferBytes": 5236
+      },
+      "title": "POOS | Connected restaurant management",
+      "canonical": "https://landing.poos.example/en",
+      "alternates": [
+        {
+          "language": "en",
+          "href": "https://landing.poos.example/en"
+        },
+        {
+          "language": "ar",
+          "href": "https://landing.poos.example/ar"
+        }
+      ]
+    },
+    {
+      "route": "/en/auth/register",
+      "locale": "en",
+      "width": 320,
+      "status": 200,
+      "overflow": false,
+      "headerVisible": true,
+      "authFormBelowHeader": true,
+      "failedImages": [],
+      "screenshot": "register-en-320.png",
+      "viewportWidth": 320,
+      "documentWidth": 320,
+      "bodyWidth": 320,
+      "direction": "ltr",
+      "language": "en",
+      "images": [],
+      "performance": {
+        "ttfbMs": 3,
+        "fcpMs": 28,
+        "lcpMs": 28,
+        "cls": 0,
+        "resourceTransferBytes": 2613
+      },
+      "title": "POOS | Connected restaurant management",
+      "canonical": "https://landing.poos.example/en",
+      "alternates": [
+        {
+          "language": "en",
+          "href": "https://landing.poos.example/en"
+        },
+        {
+          "language": "ar",
+          "href": "https://landing.poos.example/ar"
+        }
+      ]
+    },
+    {
+      "route": "/en/auth/register",
+      "locale": "en",
+      "width": 375,
+      "status": 200,
+      "overflow": false,
+      "headerVisible": true,
+      "authFormBelowHeader": true,
+      "failedImages": [],
+      "screenshot": "register-en-375.png",
+      "viewportWidth": 375,
+      "documentWidth": 375,
+      "bodyWidth": 375,
+      "direction": "ltr",
+      "language": "en",
+      "images": [],
+      "performance": {
+        "ttfbMs": 3,
+        "fcpMs": 24,
+        "lcpMs": 24,
+        "cls": 0,
+        "resourceTransferBytes": 2613
+      },
+      "title": "POOS | Connected restaurant management",
+      "canonical": "https://landing.poos.example/en",
+      "alternates": [
+        {
+          "language": "en",
+          "href": "https://landing.poos.example/en"
+        },
+        {
+          "language": "ar",
+          "href": "https://landing.poos.example/ar"
+        }
+      ]
+    },
+    {
+      "route": "/en/auth/register",
+      "locale": "en",
+      "width": 390,
+      "status": 200,
+      "overflow": false,
+      "headerVisible": true,
+      "authFormBelowHeader": true,
+      "failedImages": [],
+      "screenshot": "register-en-390.png",
+      "viewportWidth": 390,
+      "documentWidth": 390,
+      "bodyWidth": 390,
+      "direction": "ltr",
+      "language": "en",
+      "images": [],
+      "performance": {
+        "ttfbMs": 2,
+        "fcpMs": 24,
+        "lcpMs": 24,
+        "cls": 0,
+        "resourceTransferBytes": 2613
+      },
+      "title": "POOS | Connected restaurant management",
+      "canonical": "https://landing.poos.example/en",
+      "alternates": [
+        {
+          "language": "en",
+          "href": "https://landing.poos.example/en"
+        },
+        {
+          "language": "ar",
+          "href": "https://landing.poos.example/ar"
+        }
+      ]
+    },
+    {
+      "route": "/en/auth/register",
+      "locale": "en",
+      "width": 430,
+      "status": 200,
+      "overflow": false,
+      "headerVisible": true,
+      "authFormBelowHeader": true,
+      "failedImages": [],
+      "screenshot": "register-en-430.png",
+      "viewportWidth": 430,
+      "documentWidth": 430,
+      "bodyWidth": 430,
+      "direction": "ltr",
+      "language": "en",
+      "images": [],
+      "performance": {
+        "ttfbMs": 3,
+        "fcpMs": 24,
+        "lcpMs": 24,
+        "cls": 0,
+        "resourceTransferBytes": 2613
+      },
+      "title": "POOS | Connected restaurant management",
+      "canonical": "https://landing.poos.example/en",
+      "alternates": [
+        {
+          "language": "en",
+          "href": "https://landing.poos.example/en"
+        },
+        {
+          "language": "ar",
+          "href": "https://landing.poos.example/ar"
+        }
+      ]
+    },
+    {
+      "route": "/en/auth/register",
+      "locale": "en",
+      "width": 768,
+      "status": 200,
+      "overflow": false,
+      "headerVisible": true,
+      "authFormBelowHeader": true,
+      "failedImages": [],
+      "screenshot": "register-en-768.png",
+      "viewportWidth": 768,
+      "documentWidth": 768,
+      "bodyWidth": 768,
+      "direction": "ltr",
+      "language": "en",
+      "images": [],
+      "performance": {
+        "ttfbMs": 7,
+        "fcpMs": 36,
+        "lcpMs": 36,
+        "cls": 0,
+        "resourceTransferBytes": 2613
+      },
+      "title": "POOS | Connected restaurant management",
+      "canonical": "https://landing.poos.example/en",
+      "alternates": [
+        {
+          "language": "en",
+          "href": "https://landing.poos.example/en"
+        },
+        {
+          "language": "ar",
+          "href": "https://landing.poos.example/ar"
+        }
+      ]
+    },
+    {
+      "route": "/en/auth/register",
+      "locale": "en",
+      "width": 820,
+      "status": 200,
+      "overflow": false,
+      "headerVisible": true,
+      "authFormBelowHeader": true,
+      "failedImages": [],
+      "screenshot": "register-en-820.png",
+      "viewportWidth": 820,
+      "documentWidth": 820,
+      "bodyWidth": 820,
+      "direction": "ltr",
+      "language": "en",
+      "images": [],
+      "performance": {
+        "ttfbMs": 3,
+        "fcpMs": 24,
+        "lcpMs": 24,
+        "cls": 0,
+        "resourceTransferBytes": 2613
+      },
+      "title": "POOS | Connected restaurant management",
+      "canonical": "https://landing.poos.example/en",
+      "alternates": [
+        {
+          "language": "en",
+          "href": "https://landing.poos.example/en"
+        },
+        {
+          "language": "ar",
+          "href": "https://landing.poos.example/ar"
+        }
+      ]
+    },
+    {
+      "route": "/en/auth/register",
+      "locale": "en",
+      "width": 1024,
+      "status": 200,
+      "overflow": false,
+      "headerVisible": true,
+      "authFormBelowHeader": true,
+      "failedImages": [],
+      "screenshot": "register-en-1024.png",
+      "viewportWidth": 1024,
+      "documentWidth": 1024,
+      "bodyWidth": 1024,
+      "direction": "ltr",
+      "language": "en",
+      "images": [],
+      "performance": {
+        "ttfbMs": 3,
+        "fcpMs": 32,
+        "lcpMs": 32,
+        "cls": 0,
+        "resourceTransferBytes": 2613
+      },
+      "title": "POOS | Connected restaurant management",
+      "canonical": "https://landing.poos.example/en",
+      "alternates": [
+        {
+          "language": "en",
+          "href": "https://landing.poos.example/en"
+        },
+        {
+          "language": "ar",
+          "href": "https://landing.poos.example/ar"
+        }
+      ]
+    },
+    {
+      "route": "/en/auth/register",
+      "locale": "en",
+      "width": 1280,
+      "status": 200,
+      "overflow": false,
+      "headerVisible": true,
+      "authFormBelowHeader": true,
+      "failedImages": [],
+      "screenshot": "register-en-1280.png",
+      "viewportWidth": 1280,
+      "documentWidth": 1280,
+      "bodyWidth": 1280,
+      "direction": "ltr",
+      "language": "en",
+      "images": [],
+      "performance": {
+        "ttfbMs": 3,
+        "fcpMs": 28,
+        "lcpMs": 28,
+        "cls": 0,
+        "resourceTransferBytes": 5253
+      },
+      "title": "POOS | Connected restaurant management",
+      "canonical": "https://landing.poos.example/en",
+      "alternates": [
+        {
+          "language": "en",
+          "href": "https://landing.poos.example/en"
+        },
+        {
+          "language": "ar",
+          "href": "https://landing.poos.example/ar"
+        }
+      ]
+    },
+    {
+      "route": "/en/auth/register",
+      "locale": "en",
+      "width": 1440,
+      "status": 200,
+      "overflow": false,
+      "headerVisible": true,
+      "authFormBelowHeader": true,
+      "failedImages": [],
+      "screenshot": "register-en-1440.png",
+      "viewportWidth": 1440,
+      "documentWidth": 1440,
+      "bodyWidth": 1440,
+      "direction": "ltr",
+      "language": "en",
+      "images": [],
+      "performance": {
+        "ttfbMs": 3,
+        "fcpMs": 28,
+        "lcpMs": 28,
+        "cls": 0,
+        "resourceTransferBytes": 5253
+      },
+      "title": "POOS | Connected restaurant management",
+      "canonical": "https://landing.poos.example/en",
+      "alternates": [
+        {
+          "language": "en",
+          "href": "https://landing.poos.example/en"
+        },
+        {
+          "language": "ar",
+          "href": "https://landing.poos.example/ar"
+        }
+      ]
+    },
+    {
+      "route": "/en/auth/register",
+      "locale": "en",
+      "width": 1920,
+      "status": 200,
+      "overflow": false,
+      "headerVisible": true,
+      "authFormBelowHeader": true,
+      "failedImages": [],
+      "screenshot": "register-en-1920.png",
+      "viewportWidth": 1920,
+      "documentWidth": 1920,
+      "bodyWidth": 1920,
+      "direction": "ltr",
+      "language": "en",
+      "images": [],
+      "performance": {
+        "ttfbMs": 4,
+        "fcpMs": 36,
+        "lcpMs": 36,
+        "cls": 0,
+        "resourceTransferBytes": 5253
+      },
+      "title": "POOS | Connected restaurant management",
+      "canonical": "https://landing.poos.example/en",
+      "alternates": [
+        {
+          "language": "en",
+          "href": "https://landing.poos.example/en"
+        },
+        {
+          "language": "ar",
+          "href": "https://landing.poos.example/ar"
+        }
+      ]
+    },
+    {
+      "route": "/ar",
+      "locale": "ar",
+      "width": 320,
+      "status": 200,
+      "overflow": false,
+      "headerVisible": true,
+      "authFormBelowHeader": true,
+      "failedImages": [],
+      "screenshot": "landing-ar-320.png",
+      "viewportWidth": 320,
+      "documentWidth": 320,
+      "bodyWidth": 320,
+      "direction": "rtl",
+      "language": "ar",
+      "images": [
+        {
+          "src": "http://localhost:38692/images/product/roles-mobile-430x700.png",
+          "loaded": true,
+          "width": 430,
+          "height": 700
+        }
+      ],
+      "performance": {
+        "ttfbMs": 6,
+        "fcpMs": 52,
+        "lcpMs": 52,
+        "cls": 0.0224,
+        "resourceTransferBytes": 182566
+      },
+      "title": "POOS | إدارة متصلة لكل تفاصيل مطعمك",
+      "canonical": "https://landing.poos.example/ar",
+      "alternates": [
+        {
+          "language": "en",
+          "href": "https://landing.poos.example/en"
+        },
+        {
+          "language": "ar",
+          "href": "https://landing.poos.example/ar"
+        }
+      ]
+    },
+    {
+      "route": "/ar",
+      "locale": "ar",
+      "width": 375,
+      "status": 200,
+      "overflow": false,
+      "headerVisible": true,
+      "authFormBelowHeader": true,
+      "failedImages": [],
+      "screenshot": "landing-ar-375.png",
+      "viewportWidth": 375,
+      "documentWidth": 375,
+      "bodyWidth": 375,
+      "direction": "rtl",
+      "language": "ar",
+      "images": [
+        {
+          "src": "http://localhost:38692/images/product/roles-mobile-430x700.png",
+          "loaded": true,
+          "width": 430,
+          "height": 700
+        }
+      ],
+      "performance": {
+        "ttfbMs": 4,
+        "fcpMs": 36,
+        "lcpMs": 36,
+        "cls": 0.0002,
+        "resourceTransferBytes": 3010
+      },
+      "title": "POOS | إدارة متصلة لكل تفاصيل مطعمك",
+      "canonical": "https://landing.poos.example/ar",
+      "alternates": [
+        {
+          "language": "en",
+          "href": "https://landing.poos.example/en"
+        },
+        {
+          "language": "ar",
+          "href": "https://landing.poos.example/ar"
+        }
+      ]
+    },
+    {
+      "route": "/ar",
+      "locale": "ar",
+      "width": 390,
+      "status": 200,
+      "overflow": false,
+      "headerVisible": true,
+      "authFormBelowHeader": true,
+      "failedImages": [],
+      "screenshot": "landing-ar-390.png",
+      "viewportWidth": 390,
+      "documentWidth": 390,
+      "bodyWidth": 390,
+      "direction": "rtl",
+      "language": "ar",
+      "images": [
+        {
+          "src": "http://localhost:38692/images/product/roles-mobile-430x700.png",
+          "loaded": true,
+          "width": 430,
+          "height": 700
+        }
+      ],
+      "performance": {
+        "ttfbMs": 2,
+        "fcpMs": 32,
+        "lcpMs": 32,
+        "cls": 0.0002,
+        "resourceTransferBytes": 3010
+      },
+      "title": "POOS | إدارة متصلة لكل تفاصيل مطعمك",
+      "canonical": "https://landing.poos.example/ar",
+      "alternates": [
+        {
+          "language": "en",
+          "href": "https://landing.poos.example/en"
+        },
+        {
+          "language": "ar",
+          "href": "https://landing.poos.example/ar"
+        }
+      ]
+    },
+    {
+      "route": "/ar",
+      "locale": "ar",
+      "width": 430,
+      "status": 200,
+      "overflow": false,
+      "headerVisible": true,
+      "authFormBelowHeader": true,
+      "failedImages": [],
+      "screenshot": "landing-ar-430.png",
+      "viewportWidth": 430,
+      "documentWidth": 430,
+      "bodyWidth": 430,
+      "direction": "rtl",
+      "language": "ar",
+      "images": [
+        {
+          "src": "http://localhost:38692/images/product/roles-mobile-430x700.png",
+          "loaded": true,
+          "width": 430,
+          "height": 700
+        }
+      ],
+      "performance": {
+        "ttfbMs": 3,
+        "fcpMs": 40,
+        "lcpMs": 40,
+        "cls": 0.0002,
+        "resourceTransferBytes": 3010
+      },
+      "title": "POOS | إدارة متصلة لكل تفاصيل مطعمك",
+      "canonical": "https://landing.poos.example/ar",
+      "alternates": [
+        {
+          "language": "en",
+          "href": "https://landing.poos.example/en"
+        },
+        {
+          "language": "ar",
+          "href": "https://landing.poos.example/ar"
+        }
+      ]
+    },
+    {
+      "route": "/ar",
+      "locale": "ar",
+      "width": 768,
+      "status": 200,
+      "overflow": false,
+      "headerVisible": true,
+      "authFormBelowHeader": true,
+      "failedImages": [],
+      "screenshot": "landing-ar-768.png",
+      "viewportWidth": 768,
+      "documentWidth": 768,
+      "bodyWidth": 768,
+      "direction": "rtl",
+      "language": "ar",
+      "images": [
+        {
+          "src": "http://localhost:38692/_next/image?url=%2Fimages%2Fproduct%2Froles-1440x900.png&w=640&q=75",
+          "loaded": true,
+          "width": 399,
+          "height": 249
+        }
+      ],
+      "performance": {
+        "ttfbMs": 3,
+        "fcpMs": 40,
+        "lcpMs": 40,
+        "cls": 0.0001,
+        "resourceTransferBytes": 2710
+      },
+      "title": "POOS | إدارة متصلة لكل تفاصيل مطعمك",
+      "canonical": "https://landing.poos.example/ar",
+      "alternates": [
+        {
+          "language": "en",
+          "href": "https://landing.poos.example/en"
+        },
+        {
+          "language": "ar",
+          "href": "https://landing.poos.example/ar"
+        }
+      ]
+    },
+    {
+      "route": "/ar",
+      "locale": "ar",
+      "width": 820,
+      "status": 200,
+      "overflow": false,
+      "headerVisible": true,
+      "authFormBelowHeader": true,
+      "failedImages": [],
+      "screenshot": "landing-ar-820.png",
+      "viewportWidth": 820,
+      "documentWidth": 820,
+      "bodyWidth": 820,
+      "direction": "rtl",
+      "language": "ar",
+      "images": [
+        {
+          "src": "http://localhost:38692/_next/image?url=%2Fimages%2Fproduct%2Froles-1440x900.png&w=640&q=75",
+          "loaded": true,
+          "width": 426,
+          "height": 266
+        }
+      ],
+      "performance": {
+        "ttfbMs": 3,
+        "fcpMs": 44,
+        "lcpMs": 44,
+        "cls": 0.0028,
+        "resourceTransferBytes": 2710
+      },
+      "title": "POOS | إدارة متصلة لكل تفاصيل مطعمك",
+      "canonical": "https://landing.poos.example/ar",
+      "alternates": [
+        {
+          "language": "en",
+          "href": "https://landing.poos.example/en"
+        },
+        {
+          "language": "ar",
+          "href": "https://landing.poos.example/ar"
+        }
+      ]
+    },
+    {
+      "route": "/ar",
+      "locale": "ar",
+      "width": 1024,
+      "status": 200,
+      "overflow": false,
+      "headerVisible": true,
+      "authFormBelowHeader": true,
+      "failedImages": [],
+      "screenshot": "landing-ar-1024.png",
+      "viewportWidth": 1024,
+      "documentWidth": 1024,
+      "bodyWidth": 1024,
+      "direction": "rtl",
+      "language": "ar",
+      "images": [
+        {
+          "src": "http://localhost:38692/_next/image?url=%2Fimages%2Fproduct%2Froles-1440x900.png&w=640&q=75",
+          "loaded": true,
+          "width": 532,
+          "height": 332
+        }
+      ],
+      "performance": {
+        "ttfbMs": 4,
+        "fcpMs": 44,
+        "lcpMs": 44,
+        "cls": 0.001,
+        "resourceTransferBytes": 2710
+      },
+      "title": "POOS | إدارة متصلة لكل تفاصيل مطعمك",
+      "canonical": "https://landing.poos.example/ar",
+      "alternates": [
+        {
+          "language": "en",
+          "href": "https://landing.poos.example/en"
+        },
+        {
+          "language": "ar",
+          "href": "https://landing.poos.example/ar"
+        }
+      ]
+    },
+    {
+      "route": "/ar",
+      "locale": "ar",
+      "width": 1280,
+      "status": 200,
+      "overflow": false,
+      "headerVisible": true,
+      "authFormBelowHeader": true,
+      "failedImages": [],
+      "screenshot": "landing-ar-1280.png",
+      "viewportWidth": 1280,
+      "documentWidth": 1280,
+      "bodyWidth": 1280,
+      "direction": "rtl",
+      "language": "ar",
+      "images": [
+        {
+          "src": "http://localhost:38692/_next/image?url=%2Fimages%2Fproduct%2Froles-1440x900.png&w=750&q=75",
+          "loaded": true,
+          "width": 680,
+          "height": 425
+        }
+      ],
+      "performance": {
+        "ttfbMs": 4,
+        "fcpMs": 52,
+        "lcpMs": 52,
+        "cls": 0.0015,
+        "resourceTransferBytes": 5442
+      },
+      "title": "POOS | إدارة متصلة لكل تفاصيل مطعمك",
+      "canonical": "https://landing.poos.example/ar",
+      "alternates": [
+        {
+          "language": "en",
+          "href": "https://landing.poos.example/en"
+        },
+        {
+          "language": "ar",
+          "href": "https://landing.poos.example/ar"
+        }
+      ]
+    },
+    {
+      "route": "/ar",
+      "locale": "ar",
+      "width": 1440,
+      "status": 200,
+      "overflow": false,
+      "headerVisible": true,
+      "authFormBelowHeader": true,
+      "failedImages": [],
+      "screenshot": "landing-ar-1440.png",
+      "viewportWidth": 1440,
+      "documentWidth": 1440,
+      "bodyWidth": 1440,
+      "direction": "rtl",
+      "language": "ar",
+      "images": [
+        {
+          "src": "http://localhost:38692/_next/image?url=%2Fimages%2Fproduct%2Froles-1440x900.png&w=750&q=75",
+          "loaded": true,
+          "width": 680,
+          "height": 425
+        }
+      ],
+      "performance": {
+        "ttfbMs": 3,
+        "fcpMs": 48,
+        "lcpMs": 48,
+        "cls": 0.0012,
+        "resourceTransferBytes": 5442
+      },
+      "title": "POOS | إدارة متصلة لكل تفاصيل مطعمك",
+      "canonical": "https://landing.poos.example/ar",
+      "alternates": [
+        {
+          "language": "en",
+          "href": "https://landing.poos.example/en"
+        },
+        {
+          "language": "ar",
+          "href": "https://landing.poos.example/ar"
+        }
+      ]
+    },
+    {
+      "route": "/ar",
+      "locale": "ar",
+      "width": 1920,
+      "status": 200,
+      "overflow": false,
+      "headerVisible": true,
+      "authFormBelowHeader": true,
+      "failedImages": [],
+      "screenshot": "landing-ar-1920.png",
+      "viewportWidth": 1920,
+      "documentWidth": 1920,
+      "bodyWidth": 1920,
+      "direction": "rtl",
+      "language": "ar",
+      "images": [
+        {
+          "src": "http://localhost:38692/_next/image?url=%2Fimages%2Fproduct%2Froles-1440x900.png&w=750&q=75",
+          "loaded": true,
+          "width": 680,
+          "height": 425
+        }
+      ],
+      "performance": {
+        "ttfbMs": 3,
+        "fcpMs": 44,
+        "lcpMs": 44,
+        "cls": 0.0007,
+        "resourceTransferBytes": 5442
+      },
+      "title": "POOS | إدارة متصلة لكل تفاصيل مطعمك",
+      "canonical": "https://landing.poos.example/ar",
+      "alternates": [
+        {
+          "language": "en",
+          "href": "https://landing.poos.example/en"
+        },
+        {
+          "language": "ar",
+          "href": "https://landing.poos.example/ar"
+        }
+      ]
+    },
+    {
+      "route": "/ar/auth/login",
+      "locale": "ar",
+      "width": 320,
+      "status": 200,
+      "overflow": false,
+      "headerVisible": true,
+      "authFormBelowHeader": true,
+      "failedImages": [],
+      "screenshot": "login-ar-320.png",
+      "viewportWidth": 320,
+      "documentWidth": 320,
+      "bodyWidth": 320,
+      "direction": "rtl",
+      "language": "ar",
+      "images": [],
+      "performance": {
+        "ttfbMs": 4,
+        "fcpMs": 32,
+        "lcpMs": 32,
+        "cls": 0.0002,
+        "resourceTransferBytes": 53980
+      },
+      "title": "POOS | إدارة متصلة لكل تفاصيل مطعمك",
+      "canonical": "https://landing.poos.example/ar",
+      "alternates": [
+        {
+          "language": "en",
+          "href": "https://landing.poos.example/en"
+        },
+        {
+          "language": "ar",
+          "href": "https://landing.poos.example/ar"
+        }
+      ]
+    },
+    {
+      "route": "/ar/auth/login",
+      "locale": "ar",
+      "width": 375,
+      "status": 200,
+      "overflow": false,
+      "headerVisible": true,
+      "authFormBelowHeader": true,
+      "failedImages": [],
+      "screenshot": "login-ar-375.png",
+      "viewportWidth": 375,
+      "documentWidth": 375,
+      "bodyWidth": 375,
+      "direction": "rtl",
+      "language": "ar",
+      "images": [],
+      "performance": {
+        "ttfbMs": 3,
+        "fcpMs": 24,
+        "lcpMs": 24,
+        "cls": 0.0001,
+        "resourceTransferBytes": 2704
+      },
+      "title": "POOS | إدارة متصلة لكل تفاصيل مطعمك",
+      "canonical": "https://landing.poos.example/ar",
+      "alternates": [
+        {
+          "language": "en",
+          "href": "https://landing.poos.example/en"
+        },
+        {
+          "language": "ar",
+          "href": "https://landing.poos.example/ar"
+        }
+      ]
+    },
+    {
+      "route": "/ar/auth/login",
+      "locale": "ar",
+      "width": 390,
+      "status": 200,
+      "overflow": false,
+      "headerVisible": true,
+      "authFormBelowHeader": true,
+      "failedImages": [],
+      "screenshot": "login-ar-390.png",
+      "viewportWidth": 390,
+      "documentWidth": 390,
+      "bodyWidth": 390,
+      "direction": "rtl",
+      "language": "ar",
+      "images": [],
+      "performance": {
+        "ttfbMs": 2,
+        "fcpMs": 24,
+        "lcpMs": 24,
+        "cls": 0.0001,
+        "resourceTransferBytes": 2704
+      },
+      "title": "POOS | إدارة متصلة لكل تفاصيل مطعمك",
+      "canonical": "https://landing.poos.example/ar",
+      "alternates": [
+        {
+          "language": "en",
+          "href": "https://landing.poos.example/en"
+        },
+        {
+          "language": "ar",
+          "href": "https://landing.poos.example/ar"
+        }
+      ]
+    },
+    {
+      "route": "/ar/auth/login",
+      "locale": "ar",
+      "width": 430,
+      "status": 200,
+      "overflow": false,
+      "headerVisible": true,
+      "authFormBelowHeader": true,
+      "failedImages": [],
+      "screenshot": "login-ar-430.png",
+      "viewportWidth": 430,
+      "documentWidth": 430,
+      "bodyWidth": 430,
+      "direction": "rtl",
+      "language": "ar",
+      "images": [],
+      "performance": {
+        "ttfbMs": 2,
+        "fcpMs": 24,
+        "lcpMs": 24,
+        "cls": 0.0001,
+        "resourceTransferBytes": 2704
+      },
+      "title": "POOS | إدارة متصلة لكل تفاصيل مطعمك",
+      "canonical": "https://landing.poos.example/ar",
+      "alternates": [
+        {
+          "language": "en",
+          "href": "https://landing.poos.example/en"
+        },
+        {
+          "language": "ar",
+          "href": "https://landing.poos.example/ar"
+        }
+      ]
+    },
+    {
+      "route": "/ar/auth/login",
+      "locale": "ar",
+      "width": 768,
+      "status": 200,
+      "overflow": false,
+      "headerVisible": true,
+      "authFormBelowHeader": true,
+      "failedImages": [],
+      "screenshot": "login-ar-768.png",
+      "viewportWidth": 768,
+      "documentWidth": 768,
+      "bodyWidth": 768,
+      "direction": "rtl",
+      "language": "ar",
+      "images": [],
+      "performance": {
+        "ttfbMs": 3,
+        "fcpMs": 24,
+        "lcpMs": 24,
+        "cls": 0.0001,
+        "resourceTransferBytes": 2704
+      },
+      "title": "POOS | إدارة متصلة لكل تفاصيل مطعمك",
+      "canonical": "https://landing.poos.example/ar",
+      "alternates": [
+        {
+          "language": "en",
+          "href": "https://landing.poos.example/en"
+        },
+        {
+          "language": "ar",
+          "href": "https://landing.poos.example/ar"
+        }
+      ]
+    },
+    {
+      "route": "/ar/auth/login",
+      "locale": "ar",
+      "width": 820,
+      "status": 200,
+      "overflow": false,
+      "headerVisible": true,
+      "authFormBelowHeader": true,
+      "failedImages": [],
+      "screenshot": "login-ar-820.png",
+      "viewportWidth": 820,
+      "documentWidth": 820,
+      "bodyWidth": 820,
+      "direction": "rtl",
+      "language": "ar",
+      "images": [],
+      "performance": {
+        "ttfbMs": 2,
+        "fcpMs": 24,
+        "lcpMs": 24,
+        "cls": 0,
+        "resourceTransferBytes": 2704
+      },
+      "title": "POOS | إدارة متصلة لكل تفاصيل مطعمك",
+      "canonical": "https://landing.poos.example/ar",
+      "alternates": [
+        {
+          "language": "en",
+          "href": "https://landing.poos.example/en"
+        },
+        {
+          "language": "ar",
+          "href": "https://landing.poos.example/ar"
+        }
+      ]
+    },
+    {
+      "route": "/ar/auth/login",
+      "locale": "ar",
+      "width": 1024,
+      "status": 200,
+      "overflow": false,
+      "headerVisible": true,
+      "authFormBelowHeader": true,
+      "failedImages": [],
+      "screenshot": "login-ar-1024.png",
+      "viewportWidth": 1024,
+      "documentWidth": 1024,
+      "bodyWidth": 1024,
+      "direction": "rtl",
+      "language": "ar",
+      "images": [],
+      "performance": {
+        "ttfbMs": 2,
+        "fcpMs": 28,
+        "lcpMs": 28,
+        "cls": 0,
+        "resourceTransferBytes": 2704
+      },
+      "title": "POOS | إدارة متصلة لكل تفاصيل مطعمك",
+      "canonical": "https://landing.poos.example/ar",
+      "alternates": [
+        {
+          "language": "en",
+          "href": "https://landing.poos.example/en"
+        },
+        {
+          "language": "ar",
+          "href": "https://landing.poos.example/ar"
+        }
+      ]
+    },
+    {
+      "route": "/ar/auth/login",
+      "locale": "ar",
+      "width": 1280,
+      "status": 200,
+      "overflow": false,
+      "headerVisible": true,
+      "authFormBelowHeader": true,
+      "failedImages": [],
+      "screenshot": "login-ar-1280.png",
+      "viewportWidth": 1280,
+      "documentWidth": 1280,
+      "bodyWidth": 1280,
+      "direction": "rtl",
+      "language": "ar",
+      "images": [],
+      "performance": {
+        "ttfbMs": 2,
+        "fcpMs": 28,
+        "lcpMs": 28,
+        "cls": 0.0008,
+        "resourceTransferBytes": 5414
+      },
+      "title": "POOS | إدارة متصلة لكل تفاصيل مطعمك",
+      "canonical": "https://landing.poos.example/ar",
+      "alternates": [
+        {
+          "language": "en",
+          "href": "https://landing.poos.example/en"
+        },
+        {
+          "language": "ar",
+          "href": "https://landing.poos.example/ar"
+        }
+      ]
+    },
+    {
+      "route": "/ar/auth/login",
+      "locale": "ar",
+      "width": 1440,
+      "status": 200,
+      "overflow": false,
+      "headerVisible": true,
+      "authFormBelowHeader": true,
+      "failedImages": [],
+      "screenshot": "login-ar-1440.png",
+      "viewportWidth": 1440,
+      "documentWidth": 1440,
+      "bodyWidth": 1440,
+      "direction": "rtl",
+      "language": "ar",
+      "images": [],
+      "performance": {
+        "ttfbMs": 4,
+        "fcpMs": 36,
+        "lcpMs": 36,
+        "cls": 0.0006,
+        "resourceTransferBytes": 5414
+      },
+      "title": "POOS | إدارة متصلة لكل تفاصيل مطعمك",
+      "canonical": "https://landing.poos.example/ar",
+      "alternates": [
+        {
+          "language": "en",
+          "href": "https://landing.poos.example/en"
+        },
+        {
+          "language": "ar",
+          "href": "https://landing.poos.example/ar"
+        }
+      ]
+    },
+    {
+      "route": "/ar/auth/login",
+      "locale": "ar",
+      "width": 1920,
+      "status": 200,
+      "overflow": false,
+      "headerVisible": true,
+      "authFormBelowHeader": true,
+      "failedImages": [],
+      "screenshot": "login-ar-1920.png",
+      "viewportWidth": 1920,
+      "documentWidth": 1920,
+      "bodyWidth": 1920,
+      "direction": "rtl",
+      "language": "ar",
+      "images": [],
+      "performance": {
+        "ttfbMs": 3,
+        "fcpMs": 28,
+        "lcpMs": 28,
+        "cls": 0.0003,
+        "resourceTransferBytes": 5414
+      },
+      "title": "POOS | إدارة متصلة لكل تفاصيل مطعمك",
+      "canonical": "https://landing.poos.example/ar",
+      "alternates": [
+        {
+          "language": "en",
+          "href": "https://landing.poos.example/en"
+        },
+        {
+          "language": "ar",
+          "href": "https://landing.poos.example/ar"
+        }
+      ]
+    },
+    {
+      "route": "/ar/auth/register",
+      "locale": "ar",
+      "width": 320,
+      "status": 200,
+      "overflow": false,
+      "headerVisible": true,
+      "authFormBelowHeader": true,
+      "failedImages": [],
+      "screenshot": "register-ar-320.png",
+      "viewportWidth": 320,
+      "documentWidth": 320,
+      "bodyWidth": 320,
+      "direction": "rtl",
+      "language": "ar",
+      "images": [],
+      "performance": {
+        "ttfbMs": 3,
+        "fcpMs": 36,
+        "lcpMs": 36,
+        "cls": 0.0096,
+        "resourceTransferBytes": 2704
+      },
+      "title": "POOS | إدارة متصلة لكل تفاصيل مطعمك",
+      "canonical": "https://landing.poos.example/ar",
+      "alternates": [
+        {
+          "language": "en",
+          "href": "https://landing.poos.example/en"
+        },
+        {
+          "language": "ar",
+          "href": "https://landing.poos.example/ar"
+        }
+      ]
+    },
+    {
+      "route": "/ar/auth/register",
+      "locale": "ar",
+      "width": 375,
+      "status": 200,
+      "overflow": false,
+      "headerVisible": true,
+      "authFormBelowHeader": true,
+      "failedImages": [],
+      "screenshot": "register-ar-375.png",
+      "viewportWidth": 375,
+      "documentWidth": 375,
+      "bodyWidth": 375,
+      "direction": "rtl",
+      "language": "ar",
+      "images": [],
+      "performance": {
+        "ttfbMs": 2,
+        "fcpMs": 24,
+        "lcpMs": 24,
+        "cls": 0.0014,
+        "resourceTransferBytes": 2704
+      },
+      "title": "POOS | إدارة متصلة لكل تفاصيل مطعمك",
+      "canonical": "https://landing.poos.example/ar",
+      "alternates": [
+        {
+          "language": "en",
+          "href": "https://landing.poos.example/en"
+        },
+        {
+          "language": "ar",
+          "href": "https://landing.poos.example/ar"
+        }
+      ]
+    },
+    {
+      "route": "/ar/auth/register",
+      "locale": "ar",
+      "width": 390,
+      "status": 200,
+      "overflow": false,
+      "headerVisible": true,
+      "authFormBelowHeader": true,
+      "failedImages": [],
+      "screenshot": "register-ar-390.png",
+      "viewportWidth": 390,
+      "documentWidth": 390,
+      "bodyWidth": 390,
+      "direction": "rtl",
+      "language": "ar",
+      "images": [],
+      "performance": {
+        "ttfbMs": 2,
+        "fcpMs": 24,
+        "lcpMs": 24,
+        "cls": 0.0014,
+        "resourceTransferBytes": 2704
+      },
+      "title": "POOS | إدارة متصلة لكل تفاصيل مطعمك",
+      "canonical": "https://landing.poos.example/ar",
+      "alternates": [
+        {
+          "language": "en",
+          "href": "https://landing.poos.example/en"
+        },
+        {
+          "language": "ar",
+          "href": "https://landing.poos.example/ar"
+        }
+      ]
+    },
+    {
+      "route": "/ar/auth/register",
+      "locale": "ar",
+      "width": 430,
+      "status": 200,
+      "overflow": false,
+      "headerVisible": true,
+      "authFormBelowHeader": true,
+      "failedImages": [],
+      "screenshot": "register-ar-430.png",
+      "viewportWidth": 430,
+      "documentWidth": 430,
+      "bodyWidth": 430,
+      "direction": "rtl",
+      "language": "ar",
+      "images": [],
+      "performance": {
+        "ttfbMs": 3,
+        "fcpMs": 28,
+        "lcpMs": 28,
+        "cls": 0.0014,
+        "resourceTransferBytes": 2704
+      },
+      "title": "POOS | إدارة متصلة لكل تفاصيل مطعمك",
+      "canonical": "https://landing.poos.example/ar",
+      "alternates": [
+        {
+          "language": "en",
+          "href": "https://landing.poos.example/en"
+        },
+        {
+          "language": "ar",
+          "href": "https://landing.poos.example/ar"
+        }
+      ]
+    },
+    {
+      "route": "/ar/auth/register",
+      "locale": "ar",
+      "width": 768,
+      "status": 200,
+      "overflow": false,
+      "headerVisible": true,
+      "authFormBelowHeader": true,
+      "failedImages": [],
+      "screenshot": "register-ar-768.png",
+      "viewportWidth": 768,
+      "documentWidth": 768,
+      "bodyWidth": 768,
+      "direction": "rtl",
+      "language": "ar",
+      "images": [],
+      "performance": {
+        "ttfbMs": 3,
+        "fcpMs": 28,
+        "lcpMs": 28,
+        "cls": 0.0015,
+        "resourceTransferBytes": 2704
+      },
+      "title": "POOS | إدارة متصلة لكل تفاصيل مطعمك",
+      "canonical": "https://landing.poos.example/ar",
+      "alternates": [
+        {
+          "language": "en",
+          "href": "https://landing.poos.example/en"
+        },
+        {
+          "language": "ar",
+          "href": "https://landing.poos.example/ar"
+        }
+      ]
+    },
+    {
+      "route": "/ar/auth/register",
+      "locale": "ar",
+      "width": 820,
+      "status": 200,
+      "overflow": false,
+      "headerVisible": true,
+      "authFormBelowHeader": true,
+      "failedImages": [],
+      "screenshot": "register-ar-820.png",
+      "viewportWidth": 820,
+      "documentWidth": 820,
+      "bodyWidth": 820,
+      "direction": "rtl",
+      "language": "ar",
+      "images": [],
+      "performance": {
+        "ttfbMs": 3,
+        "fcpMs": 28,
+        "lcpMs": 28,
+        "cls": 0.0066,
+        "resourceTransferBytes": 2704
+      },
+      "title": "POOS | إدارة متصلة لكل تفاصيل مطعمك",
+      "canonical": "https://landing.poos.example/ar",
+      "alternates": [
+        {
+          "language": "en",
+          "href": "https://landing.poos.example/en"
+        },
+        {
+          "language": "ar",
+          "href": "https://landing.poos.example/ar"
+        }
+      ]
+    },
+    {
+      "route": "/ar/auth/register",
+      "locale": "ar",
+      "width": 1024,
+      "status": 200,
+      "overflow": false,
+      "headerVisible": true,
+      "authFormBelowHeader": true,
+      "failedImages": [],
+      "screenshot": "register-ar-1024.png",
+      "viewportWidth": 1024,
+      "documentWidth": 1024,
+      "bodyWidth": 1024,
+      "direction": "rtl",
+      "language": "ar",
+      "images": [],
+      "performance": {
+        "ttfbMs": 2,
+        "fcpMs": 28,
+        "lcpMs": 28,
+        "cls": 0.0025,
+        "resourceTransferBytes": 2704
+      },
+      "title": "POOS | إدارة متصلة لكل تفاصيل مطعمك",
+      "canonical": "https://landing.poos.example/ar",
+      "alternates": [
+        {
+          "language": "en",
+          "href": "https://landing.poos.example/en"
+        },
+        {
+          "language": "ar",
+          "href": "https://landing.poos.example/ar"
+        }
+      ]
+    },
+    {
+      "route": "/ar/auth/register",
+      "locale": "ar",
+      "width": 1280,
+      "status": 200,
+      "overflow": false,
+      "headerVisible": true,
+      "authFormBelowHeader": true,
+      "failedImages": [],
+      "screenshot": "register-ar-1280.png",
+      "viewportWidth": 1280,
+      "documentWidth": 1280,
+      "bodyWidth": 1280,
+      "direction": "rtl",
+      "language": "ar",
+      "images": [],
+      "performance": {
+        "ttfbMs": 4,
+        "fcpMs": 32,
+        "lcpMs": 32,
+        "cls": 0.0018,
+        "resourceTransferBytes": 5436
+      },
+      "title": "POOS | إدارة متصلة لكل تفاصيل مطعمك",
+      "canonical": "https://landing.poos.example/ar",
+      "alternates": [
+        {
+          "language": "en",
+          "href": "https://landing.poos.example/en"
+        },
+        {
+          "language": "ar",
+          "href": "https://landing.poos.example/ar"
+        }
+      ]
+    },
+    {
+      "route": "/ar/auth/register",
+      "locale": "ar",
+      "width": 1440,
+      "status": 200,
+      "overflow": false,
+      "headerVisible": true,
+      "authFormBelowHeader": true,
+      "failedImages": [],
+      "screenshot": "register-ar-1440.png",
+      "viewportWidth": 1440,
+      "documentWidth": 1440,
+      "bodyWidth": 1440,
+      "direction": "rtl",
+      "language": "ar",
+      "images": [],
+      "performance": {
+        "ttfbMs": 3,
+        "fcpMs": 36,
+        "lcpMs": 36,
+        "cls": 0.0014,
+        "resourceTransferBytes": 5436
+      },
+      "title": "POOS | إدارة متصلة لكل تفاصيل مطعمك",
+      "canonical": "https://landing.poos.example/ar",
+      "alternates": [
+        {
+          "language": "en",
+          "href": "https://landing.poos.example/en"
+        },
+        {
+          "language": "ar",
+          "href": "https://landing.poos.example/ar"
+        }
+      ]
+    },
+    {
+      "route": "/ar/auth/register",
+      "locale": "ar",
+      "width": 1920,
+      "status": 200,
+      "overflow": false,
+      "headerVisible": true,
+      "authFormBelowHeader": true,
+      "failedImages": [],
+      "screenshot": "register-ar-1920.png",
+      "viewportWidth": 1920,
+      "documentWidth": 1920,
+      "bodyWidth": 1920,
+      "direction": "rtl",
+      "language": "ar",
+      "images": [],
+      "performance": {
+        "ttfbMs": 3,
+        "fcpMs": 32,
+        "lcpMs": 32,
+        "cls": 0.0008,
+        "resourceTransferBytes": 5436
+      },
+      "title": "POOS | إدارة متصلة لكل تفاصيل مطعمك",
+      "canonical": "https://landing.poos.example/ar",
+      "alternates": [
+        {
+          "language": "en",
+          "href": "https://landing.poos.example/en"
+        },
+        {
+          "language": "ar",
+          "href": "https://landing.poos.example/ar"
+        }
+      ]
+    },
+    {
+      "route": "/en",
+      "width": 320,
+      "interaction": "mobile menu open and Escape close",
+      "passed": true
+    },
+    {
+      "route": "/en",
+      "width": 390,
+      "interaction": "mobile menu open and Escape close",
+      "passed": true
+    },
+    {
+      "route": "/en",
+      "width": 768,
+      "interaction": "mobile menu open and Escape close",
+      "passed": true
+    },
+    {
+      "route": "/en",
+      "width": 1024,
+      "interaction": "mobile menu open and Escape close",
+      "passed": true
+    }
+  ],
+  "browserErrors": [],
+  "endpointChecks": [
+    {
+      "path": "/opengraph-image",
+      "status": 200,
+      "contentType": "image/png"
+    },
+    {
+      "path": "/robots.txt",
+      "status": 200,
+      "contentType": "text/plain"
+    },
+    {
+      "path": "/sitemap.xml",
+      "status": 200,
+      "contentType": "application/xml"
+    },
+    {
+      "path": "/en/route-that-does-not-exist",
+      "status": 404,
+      "contentType": "text/html; charset=utf-8"
+    }
+  ]
+}

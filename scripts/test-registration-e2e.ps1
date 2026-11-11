@@ -15,6 +15,26 @@ function Get-FreeTcpPort {
     finally { $listener.Stop() }
 }
 
+function Get-FreeDockerSubnet {
+    $usedSubnets = @{}
+    $networkIds = @(docker network ls -q)
+    if ($LASTEXITCODE -ne 0) { throw 'Could not inspect Docker networks before starting the disposable test stack.' }
+
+    foreach ($networkId in $networkIds) {
+        $network = docker network inspect $networkId | ConvertFrom-Json
+        foreach ($configuration in $network[0].IPAM.Config) {
+            if ($configuration.Subnet) { $usedSubnets[$configuration.Subnet] = $true }
+        }
+    }
+
+    foreach ($octet in 200..254) {
+        $candidate = "10.254.$octet.0/24"
+        if (-not $usedSubnets.ContainsKey($candidate)) { return $candidate }
+    }
+
+    throw 'No free disposable Docker subnet was found in 10.254.200.0/24–10.254.254.0/24.'
+}
+
 function Invoke-Compose([string[]]$Arguments) {
     & docker compose --project-name $projectName --file $baseCompose --file $overrideCompose @Arguments
     if ($LASTEXITCODE -ne 0) { throw "docker compose failed with exit code $LASTEXITCODE" }
@@ -25,6 +45,7 @@ try {
     $REG_E2E_API_PORT = Get-FreeTcpPort
     $REG_E2E_LANDING_PORT = Get-FreeTcpPort
     $REG_E2E_DASHBOARD_PORT = Get-FreeTcpPort
+    $env:REG_E2E_SUBNET = Get-FreeDockerSubnet
     $env:REG_E2E_PG_PORT = "$REG_E2E_PG_PORT"
     $env:REG_E2E_API_PORT = "$REG_E2E_API_PORT"
     $env:REG_E2E_LANDING_PORT = "$REG_E2E_LANDING_PORT"
@@ -34,6 +55,8 @@ try {
     $env:REG_E2E_DASHBOARD_URL = "http://localhost:$REG_E2E_DASHBOARD_PORT"
     $env:REG_E2E_FIXTURE_FILE = $fixturePath
     $env:REG_E2E_OUTPUT_DIR = $outputPath
+    $env:REG_E2E_ROLES_CAPTURE_PATH = Join-Path $repoRoot 'audit-reports/poos-final-acceptance-2026-11-11/evidence/roles-disposable-live-1440x900.png'
+    $env:REG_E2E_ROLES_MOBILE_CAPTURE_PATH = Join-Path $repoRoot 'audit-reports/poos-final-acceptance-2026-11-11/evidence/roles-disposable-live-430x700.png'
 
     $existingVolumes = @(docker volume ls --filter "label=com.docker.compose.project=$projectName" --format '{{.Name}}')
     if ($existingVolumes.Count -gt 0) { throw "Refusing to reuse existing project resources: $projectName" }

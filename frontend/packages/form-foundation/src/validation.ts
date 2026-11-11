@@ -9,6 +9,7 @@ export function normalizeInternationalPhone(value: string): string | undefined {
   // Match the backend's explicit international contract: only ASCII digits,
   // one leading plus, and common visual separators are accepted.
   if (!/^\+[0-9\s().-]+$/.test(trimmed)) return undefined
+  if ((trimmed.match(/[0-9]/g)?.length ?? 0) > 15) return undefined
   const parsed = parsePhoneNumberFromString(trimmed)
   return parsed?.isValid() && parsed.number.replace(/\D/g, '').length <= 15 ? parsed.number : undefined
 }

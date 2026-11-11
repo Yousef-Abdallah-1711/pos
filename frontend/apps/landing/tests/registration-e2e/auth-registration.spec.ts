@@ -36,7 +36,15 @@ test('registers a tenant owner, persists an HttpOnly session, logs out, denies a
   const logout = await page.request.post(`${apiURL}/auth/logout`, { headers: { Origin: landingURL } })
   expect(logout.status()).toBe(204)
   await expect.poll(async () => (await page.context().cookies(apiURL)).some((cookie) => cookie.name === 'poos_session')).toBe(false)
-  await page.goto(`${dashboardURL}/en/dashboard`, { waitUntil: 'domcontentloaded' })
+  try {
+    await page.goto(`${dashboardURL}/en/dashboard`, { waitUntil: 'domcontentloaded' })
+  } catch (error) {
+    // A protected-route redirect can abort the initial navigation before the
+    // browser reports DOMContentLoaded; the URL assertion below verifies the
+    // intended unauthenticated destination rather than treating that redirect
+    // as a transport failure.
+    if (!String(error).includes('net::ERR_ABORTED')) throw error
+  }
   await expect(page).toHaveURL(/\/en\/auth\/login/, { timeout: 30_000 })
 
   await page.goto(`${landingURL}/en/auth/login`)
@@ -45,6 +53,20 @@ test('registers a tenant owner, persists an HttpOnly session, logs out, denies a
   await page.getByRole('button', { name: /sign in/i }).click()
   await expect(page).toHaveURL(`${dashboardURL}/en/dashboard`, { timeout: 60_000 })
   expect((await page.context().cookies(apiURL)).find((cookie) => cookie.name === 'poos_session')?.httpOnly).toBe(true)
+
+  await page.setViewportSize({ width: 1440, height: 900 })
+  await page.goto(`${dashboardURL}/en/dashboard/rbac/roles`, { waitUntil: 'networkidle' })
+  await expect(page.getByRole('heading', { name: 'RBAC Role Management' })).toBeVisible()
+  await expect(page.locator('h3').filter({ hasText: 'Administrator' })).toBeVisible()
+  const rolesCapturePath = process.env.REG_E2E_ROLES_CAPTURE_PATH
+  if (rolesCapturePath) await page.screenshot({ path: rolesCapturePath, animations: 'disabled' })
+  const mobileRolesCapturePath = process.env.REG_E2E_ROLES_MOBILE_CAPTURE_PATH
+  if (mobileRolesCapturePath) {
+    await page.setViewportSize({ width: 430, height: 700 })
+    await page.reload({ waitUntil: 'networkidle' })
+    await expect(page.getByRole('heading', { name: 'RBAC Role Management' })).toBeVisible()
+    await page.screenshot({ path: mobileRolesCapturePath, animations: 'disabled' })
+  }
 })
 
 test('rejects duplicate email with a field error and preserves the form values', async ({ page }) => {

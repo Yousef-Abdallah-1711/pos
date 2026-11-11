@@ -34,4 +34,4 @@ networks:
   default:
     ipam:
       config: !override
-        - subnet: 10.254.252.0/24
+        - subnet: "${REG_E2E_SUBNET}"

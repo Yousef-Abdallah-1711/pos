@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "updatedAt": "2026-11-11",
+  "policy": "Only verified POOS application captures may be shown as product evidence. Synthetic tenant data must be labeled as sample workspace data.",
+  "verifiedProductEvidence": [
+    {
+      "feature": "Roles and permissions",
+      "route": "/en/dashboard/rbac/roles",
+      "implementationRoute": "frontend/apps/dashboard/src/app/[locale]/dashboard/rbac/roles/page.tsx",
+      "status": "verified against isolated live application and route",
+      "captureDate": "2026-11-11",
+      "environment": "disposable Docker registration E2E stack; synthetic tenant and owner account; no customer data",
+      "authenticatedRole": "owner",
+      "originalCaptureRetained": true,
+      "captureMethod": "Playwright authenticated owner session after registration, login, and navigation to the route; animations disabled; no crop or image transformation",
+      "sourceCapture": "audit-reports/poos-final-acceptance-2026-11-11/evidence/roles-disposable-live-1440x900.png",
+      "sourceCaptureSha256": "AFD0791724D47BA994EE926A49C7074095E332227EEFFCBC7EA2B63FAE6431EE",
+      "sourceNote": "Original full-page desktop and mobile captures are preserved in the acceptance evidence directory. Synthetic data represents a disposable workspace.",
+      "derivatives": [
+        {
+          "asset": "roles-1440x900.png",
+          "sha256": "AFD0791724D47BA994EE926A49C7074095E332227EEFFCBC7EA2B63FAE6431EE",
+          "viewport": "1440x900",
+          "integrated": true,
+          "transformation": "unmodified Playwright screenshot; source capture retained"
+        },
+        {
+          "asset": "roles-mobile-430x700.png",
+          "sha256": "13C93F596CE5501AE918F38565AD8E2EC3104EE2BBA0317C61D216C5333CFD23",
+          "viewport": "430x700",
+          "integrated": true,
+          "transformation": "unmodified Playwright screenshot; source capture retained"
+        }
+      ]
+    }
+  ],
+  "notCaptured": [
+    { "feature": "Dashboard overview", "route": "/en/dashboard", "status": "BLOCKED", "reason": "The isolated registration flow verifies auth but does not seed realistic dashboard metrics; no evidence capture was made." },
+    { "feature": "POS terminal", "route": "/en/dashboard/pos", "status": "BLOCKED", "reason": "No disposable catalog and cashier workflow were seeded and exercised for capture." },
+    { "feature": "Order management", "route": "/en/dashboard/orders", "status": "BLOCKED", "reason": "No disposable order workflow was seeded and verified for capture." },
+    { "feature": "Kitchen display", "route": "/en/dashboard/kds", "status": "BLOCKED", "reason": "No order-state transitions were exercised in an isolated kitchen workflow." },
+    { "feature": "Products and categories", "route": "/en/dashboard/products", "status": "BLOCKED", "reason": "No realistic disposable catalog was seeded and verified." },
+    { "feature": "Inventory and stock", "route": "/en/dashboard/inventory", "status": "BLOCKED", "reason": "No stock movements or inventory balances were seeded and verified." },
+    { "feature": "Employees and HR", "route": "/en/dashboard/hr/employees", "status": "BLOCKED", "reason": "No synthetic employee records or HR workflows were seeded and verified." },
+    { "feature": "Accounting", "route": "/en/dashboard/accounting/chart-of-accounts", "status": "BLOCKED", "reason": "No synthetic accounting entries were seeded and verified." },
+    { "feature": "Financial reports", "route": "/en/dashboard/reports/financial", "status": "BLOCKED", "reason": "Report calculations and example values were not exercised against disposable records." },
+    { "feature": "Sales analytics", "route": "/en/dashboard/reports/sales", "status": "BLOCKED", "reason": "No synthetic sales data was seeded and reconciled to the displayed report." },
+    { "feature": "Restaurant website and online ordering", "route": "public restaurant storefront route", "status": "BLOCKED", "reason": "A disposable restaurant theme, menu, cart, checkout, and order handoff were not verified in this run." },
+    { "feature": "Restaurant settings", "route": "/en/dashboard/settings/restaurant", "status": "BLOCKED", "reason": "Settings changes were not tested against a disposable tenant for this evidence pass." },
+    { "feature": "Multi-branch management", "route": "not established", "status": "NOT VERIFIED", "reason": "No verified route or multi-branch workflow was identified for inclusion." }
+  ]
+}

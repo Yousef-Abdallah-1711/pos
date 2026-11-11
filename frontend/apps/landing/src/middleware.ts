@@ -1,12 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-const SUPPORTED_LOCALES = ['en', 'ar']
+const SUPPORTED_LOCALES = new Set(['en', 'ar'])
 const DEFAULT_LOCALE = 'en'
+const ROOT_METADATA_ROUTES = ['/opengraph-image', '/robots.txt', '/sitemap.xml']
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
-  // Skip Next.js internals and static files
+  // Root metadata routes must remain at root so Next can serve their generated files.
+  if (ROOT_METADATA_ROUTES.includes(pathname)) return NextResponse.next()
+
+  // Skip Next.js internals and static assets.
   if (
     pathname.startsWith('/_next') ||
     pathname.startsWith('/api') ||
@@ -20,7 +24,7 @@ export function middleware(request: NextRequest) {
   const pathnameSegments = pathname.split('/')
   const firstSegment = pathnameSegments[1]
 
-  if (SUPPORTED_LOCALES.includes(firstSegment)) {
+  if (SUPPORTED_LOCALES.has(firstSegment)) {
     // Already has a valid locale — proceed
     return NextResponse.next()
   }

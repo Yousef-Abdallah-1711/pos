@@ -24,6 +24,7 @@ describe('shared registration contract', () => {
     expect(schema.safeParse({ ...valid, phone: '' }).success).toBe(true)
     expect(schema.safeParse({ ...valid, phone: '6505550123' }).success).toBe(false)
     expect(schema.safeParse({ ...valid, phone: '+999123' }).success).toBe(false)
+    expect(schema.safeParse({ ...valid, phone: '+1234567890123456' }).success).toBe(false)
   })
 
   it('validates Unicode code point boundaries and subdomain format', () => {

@@ -261,11 +261,10 @@ describe('LoginPage - Multi-Tenant Authentication Flow', () => {
       expect(registerLink).toHaveAttribute('href', '/en/auth/register')
     })
 
-    it('should have link to forgot password page', () => {
+    it('does not advertise password recovery before its public route is implemented', () => {
       render(<LoginPage />)
 
-      const forgotLink = screen.getByRole('link', { name: /forgot password/i })
-      expect(forgotLink).toHaveAttribute('href', '/en/auth/forgot-password')
+      expect(screen.queryByRole('link', { name: /forgot password/i })).not.toBeInTheDocument()
     })
   })
 })
