@@ -498,10 +498,10 @@ func (uc *OrderUseCase) AutoPostPaidOrder(order *domain.Order, postedBy *int) {
 	}
 
 	if err := uc.autoPosting.PostSalesEntry(order, postedBy); err != nil {
-		log.Printf("[AccountingAutoPost] sales posting failed tenant=%d restaurant=%d order=%d err=%v", order.TenantID, order.RestaurantID, order.ID, err)
+		logAccountingPostingFailure("paid_order", "sales_post", order.TenantID, order.RestaurantID, order.ID, err)
 	}
 	if err := uc.autoPosting.PostCOGSEntry(order, postedBy); err != nil {
-		log.Printf("[AccountingAutoPost] cogs posting failed tenant=%d restaurant=%d order=%d err=%v", order.TenantID, order.RestaurantID, order.ID, err)
+		logAccountingPostingFailure("paid_order", "cogs_post", order.TenantID, order.RestaurantID, order.ID, err)
 	}
 }
 
@@ -513,10 +513,21 @@ func (uc *OrderUseCase) AutoPostPaidOrderByID(tenantID, restaurantID, orderID in
 
 	order, err := uc.GetOrder(tenantID, restaurantID, orderID)
 	if err != nil {
-		log.Printf("[AccountingAutoPost] failed to reload order for posting tenant=%d restaurant=%d order=%d err=%v", tenantID, restaurantID, orderID, err)
+		logAccountingPostingFailure("paid_order", "order_reload", tenantID, restaurantID, orderID, err)
 		return
 	}
 	uc.AutoPostPaidOrder(order, postedBy)
+}
+
+func logAccountingPostingFailure(sourceEventType, operation string, tenantID, restaurantID, sourceEventID int64, err error) {
+	failureCategory := "posting_failure"
+	if operation == "order_reload" {
+		failureCategory = "order_reload_failure"
+	}
+	log.Printf(
+		"[AccountingAutoPost] source_event_type=%q operation=%q tenant_id=%d restaurant_id=%d source_event_id=%d failure_category=%s recovery_state=not_durable correlation_id=unavailable error_type=%T",
+		sourceEventType, operation, tenantID, restaurantID, sourceEventID, failureCategory, err,
+	)
 }
 
 // GetOrderStats retrieves order statistics
