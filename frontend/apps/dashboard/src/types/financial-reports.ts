@@ -58,6 +58,9 @@ export interface BalanceSheetReport {
   total_liabilities: number
   total_equity: number
   equation_balanced: boolean
+  integrity_status: 'RECONCILED' | 'UNRECONCILED' | 'NOT_VERIFIED'
+  equation_difference: number
+  integrity_check_basis: string
 }
 
 export interface CashFlowReport {
