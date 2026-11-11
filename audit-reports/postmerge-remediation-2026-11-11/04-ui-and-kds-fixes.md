@@ -1,7 +1,7 @@
 # UI and KDS fixes
 
 - Landing hero list keys now uniquely combine each stable destination and label. Browser navigation to `/en` returned no console errors; the prior duplicate-key error was not observed. Existing browser console history contains an LCP priority warning from the first pre-fix render; the hero image now declares `priority`.
-- Dashboard main flex content now has `min-w-0`, preventing the flex item from expanding to the width of oversized descendants. The authenticated dashboard now runs in the isolated stack and measured CLS is 0.047; exact-width mobile overflow remeasurement remains open.
+- Dashboard main flex content has `min-w-0`; a responsive check then exposed the language switcher text pushing the mobile header past the viewport. The switcher now uses an accessible globe-only control below the `sm` breakpoint. The authenticated browser assertion passes at CSS widths 320, 390, 768, and 1440 with no horizontal overflow; CLS measured 0.047 in the full run and 0.051 in the focused repeat, both below 0.1.
 - The KDS socket now treats the cookie-backed authenticated session as eligible to connect. It no longer requires a usable bearer token, since browser WebSockets use the API's httpOnly session cookie.
 - Regression coverage verifies that the cookie-session marker opens the KDS socket and unauthenticated state does not. Both tests pass.
 

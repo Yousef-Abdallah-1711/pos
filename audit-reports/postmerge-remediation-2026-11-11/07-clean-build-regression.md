@@ -22,6 +22,7 @@
 - Phase 2A Playwright: PASS (15 passed, 0 failed) on the isolated seven-service stack after configuring its host-published ports and tenant-subdomain CORS origin.
 - Restaurant website API config regression: PASS (5 tests); restaurant website TypeScript check: PASS; production build: PASS after adding the server-only API base URL.
 - Registration Playwright: PASS (12 passed, 0 failed) against the disposable API, database, and frontend services.
+- Dashboard application and test TypeScript checks: PASS after frozen-lockfile workspace installation; dashboard config and table-list unit tests: PASS (6 tests); dashboard production build: PASS after the mobile header change.
 
 Blocked checks:
 
