@@ -7,6 +7,7 @@ import { BalanceSheet } from '@/components/financial-reports/BalanceSheet'
 import { ReportExportButton } from '@/components/financial-reports/ReportExportButton'
 import { useFinancialReport } from '@/hooks/useFinancialReports'
 import { getBalanceSheetReport } from '@/lib/api/financialReportsApi'
+import { canExportBalanceSheet } from '@/lib/financial-integrity'
 import { getLocaleFromPath } from '@/lib/translations'
 
 export default function BalanceSheetPage() {
@@ -53,7 +54,7 @@ export default function BalanceSheetPage() {
           >
             {t('common.refresh')}
           </button>
-          {data ? (
+          {canExportBalanceSheet(data) ? (
             <ReportExportButton
               filename={`balance-sheet-${asOf}.pdf`}
               title={t('balanceSheetExportTitle')}
