@@ -71,7 +71,7 @@ jobs:
           ESLINT_USE_FLAT_CONFIG: "false"
       - run: pnpm --filter @pos-saas/dashboard typecheck && pnpm --filter @pos-saas/landing typecheck && pnpm --filter @pos-saas/restaurant-website typecheck && pnpm --filter @pos-saas/super-admin typecheck
         working-directory: frontend
-      - run: pnpm --filter @pos-saas/dashboard test:run && pnpm --filter @pos-saas/landing test:run && pnpm --filter @pos-saas/restaurant-website test -- --runInBand && pnpm --filter @pos-saas/super-admin test:run
+      - run: pnpm --filter @pos-saas/dashboard test:run && pnpm --filter @pos-saas/landing test:run && pnpm --filter @pos-saas/restaurant-website test --runInBand && pnpm --filter @pos-saas/super-admin test:run
         working-directory: frontend
       - name: Build production applications
         run: pnpm build
