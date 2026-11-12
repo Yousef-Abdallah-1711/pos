@@ -5,7 +5,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$project = 'pos-p2a-ws05-e2e-20261103'
+$project = 'pos-p2a-ws05-e2e-20261108'
 $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..\..')).Path
 $composeFile = Join-Path $repoRoot 'docker-compose.phase2a-e2e.yml'
 $seedFile = Join-Path $PSScriptRoot 'seed.ps1'
@@ -14,6 +14,33 @@ $composeFileFullPath = (Resolve-Path $composeFile).Path
 function Invoke-Compose([string[]]$Arguments) {
     & docker compose -p $project -f $composeFile @Arguments
     if ($LASTEXITCODE -ne 0) { throw "Docker Compose action failed: $($Arguments -join ' ')" }
+}
+
+function Wait-Frontend([string]$Name, [string]$Url) {
+    for ($attempt = 1; $attempt -le 60; $attempt++) {
+        try {
+            $response = Invoke-WebRequest -Uri $Url -TimeoutSec 5 -MaximumRedirection 5
+        } catch {
+            $response = $_.Exception.Response
+            if ($response) {
+                $statusCode = [int]$response.StatusCode
+                if ($statusCode -ge 500) {
+                    throw "$Name returned HTTP $statusCode on its first response at $Url."
+                }
+                Write-Host "$Name responded with HTTP ${statusCode}: $Url"
+                return
+            }
+            if ($attempt -eq 60) { throw "$Name did not become reachable at $($Url): $($_.Exception.Message)" }
+            Start-Sleep -Seconds 2
+            continue
+        }
+
+        if ($response.StatusCode -ge 500) {
+            throw "$Name returned HTTP $($response.StatusCode) on its first response at $Url."
+        }
+        Write-Host "$Name responded with HTTP $($response.StatusCode): $Url"
+        return
+    }
 }
 
 function Assert-DisposableProject {
@@ -40,11 +67,26 @@ Push-Location $repoRoot
 try {
     switch ($Action) {
         'Up' {
-            Invoke-Compose @('up', '-d', '--build')
+            Invoke-Compose @('build', 'api', 'frontend-install', 'landing', 'dashboard', 'restaurant-website', 'super-admin')
+            Invoke-Compose @('up', '-d', 'postgres', 'redis', 'api')
+            Invoke-Compose @('up', 'frontend-install')
+
+            Invoke-Compose @('up', '-d', 'landing')
+            Wait-Frontend 'landing' 'http://localhost:13111/en/auth/login'
+
+            Invoke-Compose @('up', '-d', 'dashboard')
+            Wait-Frontend 'dashboard' 'http://localhost:13112/en/auth/callback'
+
+            Invoke-Compose @('up', '-d', 'restaurant-website')
+            Wait-Frontend 'restaurant website' 'http://localhost:13113/en'
+
+            Invoke-Compose @('up', '-d', 'super-admin')
+            Wait-Frontend 'super-admin' 'http://localhost:13114/login'
+
             Invoke-Compose @('ps')
         }
         'Seed' {
-            & $seedFile
+            & $seedFile -ProjectName $project
             if ($LASTEXITCODE -ne 0) { throw 'Disposable fixture seed failed.' }
         }
         'Test' {
@@ -58,13 +100,14 @@ try {
             }
             & docker run --rm --network "container:$apiContainer" --volumes-from $dashboardContainer -w /app/apps/dashboard `
                 -e WS05_DASHBOARD_URL=http://localhost:3002 `
-                -e WS05_LANDING_URL=http://localhost:13101 `
+                -e WS05_LANDING_URL=http://localhost:3001 `
+                -e WS05_LANDING_REDIRECT_URL=http://localhost:13111 `
                 -e WS05_LANDING_SERVICE_URL=http://localhost:3001 `
                 -e WS05_API_URL=http://localhost:18080/api/v1 `
                 -e WS05_STOREFRONT_URL=http://phase2a-restaurant-a.localhost:3003 `
                 -e WS05_SUPER_ADMIN_URL=http://localhost:3004 `
                 -e WS05_MAP_LOCALHOST=127.0.0.1 `
-                mcr.microsoft.com/playwright:v1.64.1-noble sh -lc './node_modules/.bin/playwright test --config playwright.phase2a.config.ts'
+                mcr.microsoft.com/playwright:v1.64.1-noble sh -lc './node_modules/.bin/playwright test --config playwright.phase2a.config.ts --output /app/apps/dashboard/test-results-codex-20261108-final'
             if ($LASTEXITCODE -ne 0) { throw 'WS05 Playwright suite failed.' }
         }
         'Down' {
