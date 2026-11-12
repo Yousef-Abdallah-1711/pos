@@ -10,7 +10,13 @@ exec 9>/run/lock/rakmyat-pos-deploy.lock
 flock -n 9 || { echo "another release holds the deployment lock" >&2; exit 1; }
 export IMAGE_TAG="sha-$1"
 docker compose --project-name rakmyat-pos-production --env-file "$ENV_FILE" -f "$ROOT/docker-compose.prod.yml" pull
-docker compose --project-name rakmyat-pos-production --env-file "$ENV_FILE" -f "$ROOT/docker-compose.prod.yml" up -d --no-deps backend landing dashboard restaurant-website super-admin
+docker compose --project-name rakmyat-pos-production --env-file "$ENV_FILE" -f "$ROOT/docker-compose.prod.yml" up -d --no-deps backend
+for _ in $(seq 1 60); do
+  if curl --fail --silent --show-error --max-time 3 http://127.0.0.1:13405/api/v1/health >/dev/null 2>&1; then break; fi
+  sleep 2
+done
+curl --fail --silent --show-error --max-time 3 http://127.0.0.1:13405/api/v1/health >/dev/null
+docker compose --project-name rakmyat-pos-production --env-file "$ENV_FILE" -f "$ROOT/docker-compose.prod.yml" up -d --no-deps landing dashboard restaurant-website super-admin
 "$ROOT/scripts/production/healthcheck.sh"
 printf '%s\n' "$1" > /var/lib/rakmyat-pos/active-release
 echo "application release rolled back to $1; database was not changed"

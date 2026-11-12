@@ -15,7 +15,7 @@ This repository contains a prepared production runtime and release procedure. It
 2. Review and install the release wrapper as root at `/usr/local/sbin/rakmyat-pos-release-deploy`, the current source for which is `scripts/production/host-deploy.sh`. Keep `/etc/rakmyat-pos` root-owned mode 0700.
 3. Run `scripts/production/prepare-host-secrets.sh` as root once. It writes unique DB, Redis, JWT and backup encryption secrets to root-only files and leaves Paymob credentials blank. The Redis file is root-owned mode 0640 with a dedicated `rakmyat-pos-secrets` GID 19990 so only the two POS containers can read the mounted secret. It refuses to overwrite existing configuration or reuse an unrelated group ID. Copy the encrypted-backup key to a separately controlled recovery location.
 4. Set `IMAGE_TAG` to the reviewed full SHA (`sha-<40 lowercase hex>`). Set the four Paymob values only from owner-controlled credentials when payments are approved. Leave both readiness gates false until the acceptance evidence is signed off.
-5. Verify ports 13401–13405 are still free and `/etc/rakmyat-pos/redis-password` is mode 0600. `scripts/production/preflight.sh` checks the env file, resource thresholds, Docker, Compose and port availability.
+5. Verify ports 13401–13405 are still free and `/etc/rakmyat-pos/redis-password` is root-owned mode 0640 with GID 19990. `scripts/production/preflight.sh` checks the env file, resource thresholds, Docker, Compose, ports, DNS A records to the VPS, and hostname-verified TLS for every app/API host plus a restaurant wildcard sample.
 6. Add an SSH deploy user restricted to the root-owned wrapper and install a read-only GHCR credential on the host. Configure host-key pinning in GitHub Environment secrets. Grant that environment required human reviewers.
 
 ## DNS, CloudPanel and TLS
@@ -28,7 +28,7 @@ Keep existing mail records and unrelated vhosts unchanged. Confirm A/AAAA record
 
 ## Deployment and rollback
 
-`host-deploy.sh <sha>` fetches that exact public repository SHA into an immutable release directory and atomically updates `/opt/rakmyat-pos/current`, then invokes the release procedure. The deploy script checks readiness and backup gates, runs preflight, serializes releases with `flock`, takes an encrypted backup, pulls SHA-tagged images, starts DB/Redis, runs the one-shot migrator, starts the applications and checks public URLs. `rollback.sh <previous-sha>` only rolls application images back; it never drops or restores database data and requires explicit approval plus confirmation that migrations are backward-compatible. Do not use rollback to reverse schema changes.
+`host-deploy.sh <sha>` fetches that exact public repository SHA into an immutable release directory and atomically updates `/opt/rakmyat-pos/current`, then invokes the release procedure. The deploy script checks readiness and backup gates, runs preflight, serializes releases with `flock`, takes an encrypted backup, pulls SHA-tagged images, starts DB/Redis, runs the one-shot migrator, starts the API and waits for its loopback health check, then starts the frontends and checks public URLs. If a release fails and an earlier healthy release is recorded, it automatically restores the previous application images; on a failed first release it stops only the POS app containers. `rollback.sh <previous-sha>` provides an approved manual app rollback; neither path drops or restores database data, and both require explicit backward-compatible migration approval. Do not use rollback to reverse schema changes.
 
 ## CI and activation gates
 

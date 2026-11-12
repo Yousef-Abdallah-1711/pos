@@ -41,5 +41,9 @@ http {
     include $rendered;
 }
 EOF
-  nginx -t -p "$temp/" -c "$temp/nginx.conf"
+  if command -v sudo >/dev/null; then
+    sudo nginx -t -p "$temp/" -c "$temp/nginx.conf"
+  else
+    nginx -t -p "$temp/" -c "$temp/nginx.conf"
+  fi
 fi
