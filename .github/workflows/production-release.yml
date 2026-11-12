@@ -1,10 +1,9 @@
 name: Build immutable images and gated production release
 
 on:
-  workflow_run:
-    workflows: [Production readiness CI]
-    types: [completed]
-    branches: [main]
+  # Keep release execution explicitly operator initiated. Passing CI alone must
+  # never start a production deployment.
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -16,15 +15,15 @@ concurrency:
 
 jobs:
   build-and-push:
-    if: github.repository == 'Yousef-Abdallah-1711/pos' && github.event.workflow_run.conclusion == 'success'
+    if: github.repository == 'Yousef-Abdallah-1711/pos'
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
-          ref: ${{ github.event.workflow_run.head_sha }}
+          ref: ${{ github.sha }}
       - run: scripts/production/build-and-push-images.sh --push
         env:
-          GITHUB_SHA: ${{ github.event.workflow_run.head_sha }}
+          GITHUB_SHA: ${{ github.sha }}
           GHCR_USERNAME: ${{ github.actor }}
           GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -60,7 +59,7 @@ jobs:
           POS_PROD_USER: ${{ secrets.POS_PROD_USER }}
           POS_PROD_SSH_KEY: ${{ secrets.POS_PROD_SSH_KEY }}
           POS_PROD_SSH_KNOWN_HOSTS: ${{ secrets.POS_PROD_SSH_KNOWN_HOSTS }}
-          GITHUB_SHA: ${{ github.event.workflow_run.head_sha }}
+          GITHUB_SHA: ${{ github.sha }}
         run: |
           set -euo pipefail
           key_file="$(mktemp)"
