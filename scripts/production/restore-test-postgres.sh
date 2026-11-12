@@ -34,6 +34,8 @@ docker run --detach --rm --name "$name" --network none --read-only \
 container_created=true
 for _ in $(seq 1 60); do docker exec "$name" pg_isready -U postgres >/dev/null 2>&1 && break; sleep 2; done
 docker exec "$name" pg_isready -U postgres >/dev/null
+docker exec "$name" psql -v ON_ERROR_STOP=1 -U postgres -d pos_restore_test -c \
+  'CREATE ROLE pos_bootstrap; CREATE ROLE pos_migrator; CREATE ROLE pos_app'
 gpg --batch --quiet --pinentry-mode loopback --passphrase-file "$key" --decrypt "$backup" \
   | docker exec -i "$name" pg_restore --exit-on-error --no-owner -U postgres -d pos_restore_test
 docker exec "$name" psql -U postgres -d pos_restore_test -Atc \
