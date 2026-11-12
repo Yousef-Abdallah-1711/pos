@@ -73,7 +73,7 @@ A related PR #14 acceptance report records a separate prior candidate run with P
 
 ## PR and review
 
-- PR #15: open, targets `main`, mergeable according to GitHub; current hosted checks on the previous source head passed. The latest source/report commits must finish their new hosted checks after push.
+- PR #15: open and targets `main`. The latest completed hosted run passed both required checks. GitHub reruns them for each new head, so confirm the exact head status before merge.
 - PR #14: open against `main`; remains unmodified.
 - Independent review: pending. The repository collaborator listing currently contains only the PR author, so no eligible independent reviewer can be requested yet.
 - Merge readiness: **BLOCKED** by required independent review and incomplete authenticated/full-route acceptance.
