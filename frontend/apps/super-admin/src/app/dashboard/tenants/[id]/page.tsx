@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { superAdminAPI } from "@/lib/api";
 import type { Tenant, User, PaginatedResponse, SubscriptionStatus } from "@/types";
@@ -52,7 +52,6 @@ export default function TenantDetailPage() {
   const [subscriptionInfo, setSubscriptionInfo] = useState<SubscriptionInfo | null>(null);
   const [subscriptionHistory, setSubscriptionHistory] = useState<SubscriptionHistory[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isDashboardLoading, setIsDashboardLoading] = useState(false);
   const [isRefreshingSubscription, setIsRefreshingSubscription] = useState(false);
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
@@ -66,10 +65,9 @@ export default function TenantDetailPage() {
   const limit = 10;
 
   // Fetch all data
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       setIsLoading(true);
-      console.log("[TenantDetailPage] Fetching tenant data for ID:", tenantId);
 
       const [tenantData, usersData, subData] = await Promise.all([
         superAdminAPI.getTenant(tenantId),
@@ -90,10 +88,10 @@ export default function TenantDetailPage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [tenantId, page]);
 
   // Fetch subscription history
-  const fetchSubscriptionHistory = async () => {
+  const fetchSubscriptionHistory = useCallback(async () => {
     try {
       const response = await superAdminAPI.getSubscriptionHistory(tenantId, 1, 20);
       if (response?.items) {
@@ -102,17 +100,17 @@ export default function TenantDetailPage() {
     } catch (error) {
       console.error("[TenantDetailPage] Error fetching subscription history:", error);
     }
-  };
+  }, [tenantId]);
 
   useEffect(() => {
     fetchData();
-  }, [tenantId, page]);
+  }, [fetchData]);
 
   useEffect(() => {
     if (subscriptionInfo) {
       fetchSubscriptionHistory();
     }
-  }, [subscriptionInfo]);
+  }, [subscriptionInfo, fetchSubscriptionHistory]);
 
   const lastRefundablePayment = useMemo(() => {
     for (const item of subscriptionHistory) {
@@ -136,21 +134,6 @@ export default function TenantDetailPage() {
   }, [subscriptionHistory]);
 
   const totalPages = Math.ceil(total / limit);
-
-  const handleEnterDashboard = async () => {
-    try {
-      setIsDashboardLoading(true);
-      console.log("[TenantDetailPage] Generating dashboard login token for tenant:", tenantId);
-      const response = await superAdminAPI.generateDashboardLoginToken(tenantId);
-      window.open(response.redirect_url, "_blank");
-      toast.success("Opening tenant dashboard...");
-    } catch (error) {
-      console.error("[TenantDetailPage] Failed to generate dashboard login token:", error);
-      toast.error("Failed to generate dashboard access token");
-    } finally {
-      setIsDashboardLoading(false);
-    }
-  };
 
   const handleRefreshSubscription = async () => {
     setIsRefreshingSubscription(true);
@@ -256,13 +239,12 @@ export default function TenantDetailPage() {
               </span>
             )}
             <button
-              onClick={handleEnterDashboard}
-              disabled={isDashboardLoading || !users || users.length === 0}
-              title={!users || users.length === 0 ? "Cannot enter dashboard: No admin users" : "Enter tenant dashboard"}
+              disabled
+              title="Tenant dashboard access is paused until restricted, actor-attributed support sessions are available"
               className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               <LogIn size={18} />
-              {isDashboardLoading ? "Opening..." : "Enter Dashboard"}
+              Access Paused
             </button>
           </div>
         </div>

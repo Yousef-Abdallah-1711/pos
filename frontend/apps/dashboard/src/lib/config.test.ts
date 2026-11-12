@@ -28,6 +28,7 @@ describe('dashboard URL config resolver', () => {
 
   afterEach(() => {
     process.env = { ...ORIGINAL_ENV }
+    vi.unstubAllGlobals()
     vi.resetModules()
   })
 
@@ -63,6 +64,9 @@ describe('dashboard URL config resolver', () => {
 
   it('throws in production when API URL is missing', async () => {
     process.env.NODE_ENV = 'production'
+    vi.stubGlobal('window', {
+      location: { hostname: 'dashboard.example.com', origin: 'https://dashboard.example.com' },
+    })
     process.env.NEXT_PUBLIC_LANDING_URL = 'https://www.example.com'
     process.env.NEXT_PUBLIC_DASHBOARD_URL = 'https://dashboard.example.com'
     process.env.NEXT_PUBLIC_RESTAURANT_DOMAIN = 'example.com'
@@ -73,6 +77,9 @@ describe('dashboard URL config resolver', () => {
 
   it('throws in production when restaurant domain is missing', async () => {
     process.env.NODE_ENV = 'production'
+    vi.stubGlobal('window', {
+      location: { hostname: 'dashboard.example.com', origin: 'https://dashboard.example.com' },
+    })
     process.env.NEXT_PUBLIC_LANDING_URL = 'https://www.example.com'
     process.env.NEXT_PUBLIC_DASHBOARD_URL = 'https://dashboard.example.com'
     process.env.NEXT_PUBLIC_API_URL = 'https://api.example.com/api/v1'

@@ -40,6 +40,7 @@ export function CustomCSSEditor({
 
   const [previewMode, setPreviewMode] = useState(false)
   const [validationErrors, setValidationErrors] = useState<ValidationError[]>([])
+  const [hasValidated, setHasValidated] = useState(false)
   const [copySuccess, setCopySuccess] = useState(false)
 
   // Validate CSS
@@ -125,6 +126,7 @@ export function CustomCSSEditor({
     const css = cssConfig.customCss || ''
     const errors = validateCSS(css)
     setValidationErrors(errors)
+    setHasValidated(true)
   }, [cssConfig, validateCSS])
 
   const handleToggleValidation = useCallback(() => {
@@ -279,11 +281,13 @@ export function CustomCSSEditor({
 
       {/* CSS Editor */}
       <div className="space-y-2">
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+        <label htmlFor="custom-css-code" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
           CSS Code
           <span className="text-gray-500 dark:text-gray-500 ml-2">({css.length} characters)</span>
         </label>
         <textarea
+          id="custom-css-code"
+          aria-label="CSS Code"
           value={css}
           onChange={(e) => handleCssChange(e.target.value)}
           disabled={!cssConfig.enableCustomCss}
@@ -341,7 +345,7 @@ export function CustomCSSEditor({
         </div>
       )}
 
-      {errorCount === 0 && warningCount === 0 && validationErrors.length > 0 && (
+      {hasValidated && errorCount === 0 && warningCount === 0 && validationErrors.length === 0 && (
         <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4 flex items-center gap-2">
           <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400" />
           <p className="text-sm text-green-800 dark:text-green-200">CSS looks good! No errors found.</p>

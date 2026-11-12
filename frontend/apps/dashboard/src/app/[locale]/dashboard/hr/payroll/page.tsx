@@ -16,6 +16,7 @@ import { Plus, AlertCircle, Lock, Loader2 } from 'lucide-react'
 import { createTranslator, getLocaleFromPath } from '@/lib/translations'
 import { PageHeaderSkeleton, TableSkeleton } from '@/components/skeletons'
 import { MODULE_IDS, PERMISSION_LEVELS } from '@/lib/rbac'
+import { hasAuthenticatedSession } from '@/lib/authSession'
 
 interface Salary {
   id: number
@@ -62,11 +63,13 @@ export default function PayrollPage() {
   const [startDate, setStartDate] = useState(new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0])
   const [endDate, setEndDate] = useState(new Date().toISOString().split('T')[0])
 
+  const user = useAuthStore((state) => state.user)
   const token = useAuthStore((state) => state.token)
+  const hasSession = hasAuthenticatedSession(user, token)
 
   // Fetch employees - hook MUST be before early returns
   useEffect(() => {
-    if (!token || !canViewSalaries || permissionLoading) return
+    if (!hasSession || !canViewSalaries || permissionLoading) return
 
     const fetchEmployees = async () => {
       try {
@@ -78,11 +81,11 @@ export default function PayrollPage() {
       }
     }
     fetchEmployees()
-  }, [token, canViewSalaries, permissionLoading])
+  }, [hasSession, canViewSalaries, permissionLoading])
 
   // Fetch salaries - hook MUST be before early returns
   useEffect(() => {
-    if (!token || !canViewSalaries || permissionLoading) return
+    if (!hasSession || !canViewSalaries || permissionLoading) return
 
     const fetchSalaries = async () => {
       setLoading(true)
@@ -116,7 +119,7 @@ export default function PayrollPage() {
     }
 
     fetchSalaries()
-  }, [token, startDate, endDate, employees, canViewSalaries, permissionLoading])
+  }, [hasSession, startDate, endDate, employees, canViewSalaries, permissionLoading])
 
   // Show permission denied if user can't view salaries
   if (permissionLoading) {

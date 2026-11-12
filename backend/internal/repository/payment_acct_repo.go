@@ -319,6 +319,31 @@ func (r *PaymentAccountingRepository) CreatePaymentMade(payment *domain.PaymentM
 }
 
 func (r *PaymentAccountingRepository) ListPaymentsReceived(tenantID, restaurantID int) ([]domain.PaymentReceived, error) {
+	items, _, err := r.ListPaymentsReceivedPaged(tenantID, restaurantID, 1, 100000)
+	return items, err
+}
+
+func (r *PaymentAccountingRepository) ListPaymentsReceivedPaged(tenantID, restaurantID, page, pageSize int) ([]domain.PaymentReceived, int, error) {
+	if page < 1 {
+		page = 1
+	}
+	if pageSize < 1 {
+		pageSize = 20
+	}
+	if pageSize > 200 {
+		pageSize = 200
+	}
+	offset := (page - 1) * pageSize
+
+	var total int
+	if err := r.db.QueryRow(`
+		SELECT COUNT(*)
+		FROM payments_received pr
+		WHERE pr.tenant_id = $1 AND pr.restaurant_id = $2
+	`, tenantID, restaurantID).Scan(&total); err != nil {
+		return nil, 0, err
+	}
+
 	rows, err := r.db.Query(`
 		SELECT
 			pr.id, pr.tenant_id, pr.restaurant_id, pr.payment_number, pr.payment_date,
@@ -330,9 +355,10 @@ func (r *PaymentAccountingRepository) ListPaymentsReceived(tenantID, restaurantI
 		JOIN customers_accounting c ON c.id = pr.customer_id
 		WHERE pr.tenant_id = $1 AND pr.restaurant_id = $2
 		ORDER BY pr.payment_date DESC, pr.id DESC
-	`, tenantID, restaurantID)
+		LIMIT $3 OFFSET $4
+	`, tenantID, restaurantID, pageSize, offset)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 	defer rows.Close()
 
@@ -340,17 +366,42 @@ func (r *PaymentAccountingRepository) ListPaymentsReceived(tenantID, restaurantI
 	for rows.Next() {
 		item, err := scanPaymentReceived(rows)
 		if err != nil {
-			return nil, err
+			return nil, 0, err
 		}
 		items = append(items, item)
 	}
 	if err := rows.Err(); err != nil {
-		return nil, err
+		return nil, 0, err
 	}
-	return items, nil
+	return items, total, nil
 }
 
 func (r *PaymentAccountingRepository) ListPaymentsMade(tenantID, restaurantID int) ([]domain.PaymentMade, error) {
+	items, _, err := r.ListPaymentsMadePaged(tenantID, restaurantID, 1, 100000)
+	return items, err
+}
+
+func (r *PaymentAccountingRepository) ListPaymentsMadePaged(tenantID, restaurantID, page, pageSize int) ([]domain.PaymentMade, int, error) {
+	if page < 1 {
+		page = 1
+	}
+	if pageSize < 1 {
+		pageSize = 20
+	}
+	if pageSize > 200 {
+		pageSize = 200
+	}
+	offset := (page - 1) * pageSize
+
+	var total int
+	if err := r.db.QueryRow(`
+		SELECT COUNT(*)
+		FROM payments_made pm
+		WHERE pm.tenant_id = $1 AND pm.restaurant_id = $2
+	`, tenantID, restaurantID).Scan(&total); err != nil {
+		return nil, 0, err
+	}
+
 	rows, err := r.db.Query(`
 		SELECT
 			pm.id, pm.tenant_id, pm.restaurant_id, pm.payment_number, pm.payment_date,
@@ -362,9 +413,10 @@ func (r *PaymentAccountingRepository) ListPaymentsMade(tenantID, restaurantID in
 		JOIN suppliers s ON s.id = pm.supplier_id
 		WHERE pm.tenant_id = $1 AND pm.restaurant_id = $2
 		ORDER BY pm.payment_date DESC, pm.id DESC
-	`, tenantID, restaurantID)
+		LIMIT $3 OFFSET $4
+	`, tenantID, restaurantID, pageSize, offset)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 	defer rows.Close()
 
@@ -372,14 +424,14 @@ func (r *PaymentAccountingRepository) ListPaymentsMade(tenantID, restaurantID in
 	for rows.Next() {
 		item, err := scanPaymentMade(rows)
 		if err != nil {
-			return nil, err
+			return nil, 0, err
 		}
 		items = append(items, item)
 	}
 	if err := rows.Err(); err != nil {
-		return nil, err
+		return nil, 0, err
 	}
-	return items, nil
+	return items, total, nil
 }
 
 func (r *PaymentAccountingRepository) resolveCustomerPaymentContextTx(tx *sql.Tx, payment *domain.PaymentReceived) (int, int, *int, float64, error) {

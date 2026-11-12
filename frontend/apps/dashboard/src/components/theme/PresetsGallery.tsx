@@ -12,8 +12,8 @@ interface PresetsGalleryProps {
   isLoading?: boolean
 }
 
-function getSafePresetId(id: string): string {
-  return id.replace(/[^a-zA-Z0-9_-]/g, '-')
+function getSafePresetId(id: unknown): string {
+  return String(id ?? 'preset').replace(/[^a-zA-Z0-9_-]/g, '-')
 }
 
 // Helper function to extract colors from preset data
@@ -154,9 +154,13 @@ export function PresetsGallery({ presets, onSelectPreset, isLoading = false }: P
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
             {items.map((preset) => (
+              (() => {
+                const presetKey = String(preset.id ?? preset.name ?? 'preset')
+                const safePresetId = getSafePresetId(preset.id)
+                return (
               <div
-                key={preset.id}
-                onMouseEnter={() => setHoveredId(preset.id)}
+                key={presetKey}
+                onMouseEnter={() => setHoveredId(presetKey)}
                 onMouseLeave={() => setHoveredId(null)}
                 className="group cursor-pointer"
                 onClick={() => onSelectPreset(preset)}
@@ -176,7 +180,7 @@ export function PresetsGallery({ presets, onSelectPreset, isLoading = false }: P
                       ].map((color, idx) => (
                         <div
                           key={idx}
-                          className={`flex-1 rounded-md shadow-sm hover:shadow-md transition preset-color-${getSafePresetId(preset.id)}-${idx}`}
+                          className={`flex-1 rounded-md shadow-sm hover:shadow-md transition preset-color-${safePresetId}-${idx}`}
                           title={color || 'No color'}
                         />
                       ))
@@ -216,7 +220,7 @@ export function PresetsGallery({ presets, onSelectPreset, isLoading = false }: P
                   </div>
 
                   {/* Hover Overlay */}
-                  {hoveredId === preset.id && (
+                  {hoveredId === presetKey && (
                     <div className="absolute inset-0 bg-blue-600/10 dark:bg-blue-500/10 flex items-center justify-center backdrop-blur-sm">
                       <div className="flex items-center gap-1 text-blue-600 dark:text-blue-400 font-medium">
                         Use Template
@@ -226,6 +230,8 @@ export function PresetsGallery({ presets, onSelectPreset, isLoading = false }: P
                   )}
                 </div>
               </div>
+                )
+              })()
             ))}
           </div>
         </div>

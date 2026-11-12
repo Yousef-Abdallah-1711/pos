@@ -16,6 +16,7 @@ import (
 
 	"pos-saas/internal/domain"
 	"pos-saas/internal/middleware"
+	"pos-saas/internal/pkg/database"
 	"pos-saas/internal/repository"
 
 	"github.com/go-pdf/fpdf"
@@ -723,13 +724,16 @@ func (h *AccountingAdvancedHandler) SendCustomerInvoiceEmail(w http.ResponseWrit
 		"pdf_size":    pdfSize,
 		"message_id":  messageID,
 	})
-	_, err = h.db.Exec(`
-		INSERT INTO invoice_delivery_logs (
-			tenant_id, restaurant_id, invoice_id, channel, recipient_email, status, payload, created_by
-		) VALUES (
-			$1, $2, $3, 'email', $4, 'sent', $5::jsonb, $6
-		)
-	`, tenantID, restaurantID, invoiceID, recipient, string(payload), userID)
+	err = database.WithTenantTx(r.Context(), h.db, int64(tenantID), int64(restaurantID), func(tx *sql.Tx) error {
+		_, err := tx.ExecContext(r.Context(), `
+			INSERT INTO invoice_delivery_logs (
+				tenant_id, restaurant_id, invoice_id, channel, recipient_email, status, payload, created_by
+			) VALUES (
+				$1, $2, $3, 'email', $4, 'sent', $5::jsonb, $6
+			)
+		`, tenantID, restaurantID, invoiceID, recipient, string(payload), userID)
+		return err
+	})
 	if err != nil {
 		writeJSON(w, http.StatusInternalServerError, map[string]interface{}{"success": false, "error": "Failed to log delivery"})
 		return
@@ -873,8 +877,12 @@ func (h *AccountingAdvancedHandler) SubmitEInvoice(w http.ResponseWriter, r *htt
 		ResponsePayload: responsePayload,
 		CreatedBy:       &userID,
 	}
-	id, err := h.repo.CreateEInvoiceSubmission(submission)
+	id, err := h.repo.CreateEInvoiceSubmission(r.Context(), submission)
 	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			writeJSON(w, http.StatusNotFound, map[string]interface{}{"success": false, "error": "Invoice not found"})
+			return
+		}
 		writeJSON(w, http.StatusInternalServerError, map[string]interface{}{"success": false, "error": "Failed to submit e-invoice"})
 		return
 	}
@@ -893,7 +901,7 @@ func (h *AccountingAdvancedHandler) SubmitEInvoice(w http.ResponseWriter, r *htt
 func (h *AccountingAdvancedHandler) ListEInvoiceSubmissions(w http.ResponseWriter, r *http.Request) {
 	tenantID := int(middleware.GetTenantID(r))
 	restaurantID := int(middleware.GetRestaurantID(r))
-	items, err := h.repo.ListEInvoiceSubmissions(tenantID, restaurantID)
+	items, err := h.repo.ListEInvoiceSubmissions(r.Context(), tenantID, restaurantID)
 	if err != nil {
 		writeJSON(w, http.StatusInternalServerError, map[string]interface{}{"success": false, "error": "Failed to load e-invoice submissions"})
 		return
@@ -949,7 +957,7 @@ func (h *AccountingAdvancedHandler) ExportAuditTrailCSV(w http.ResponseWriter, r
 		writeJSON(w, http.StatusBadRequest, map[string]interface{}{"success": false, "error": err.Error()})
 		return
 	}
-	rows, err := h.repo.GetAuditExportRows(tenantID, restaurantID, dateFrom, dateTo, exportType)
+	rows, err := h.repo.GetAuditExportRows(r.Context(), tenantID, restaurantID, dateFrom, dateTo, exportType)
 	if err != nil {
 		writeJSON(w, http.StatusInternalServerError, map[string]interface{}{"success": false, "error": "Failed to export audit trail"})
 		return
@@ -966,7 +974,7 @@ func (h *AccountingAdvancedHandler) ExportAuditTrailCSV(w http.ResponseWriter, r
 			fmt.Sprintf("%v", row["actor"]),
 		})
 	}
-	_ = h.repo.LogAuditExport(tenantID, restaurantID, userID, defaultAccountingString(exportType, "all"), "csv", map[string]interface{}{
+	_ = h.repo.LogAuditExport(r.Context(), tenantID, restaurantID, userID, defaultAccountingString(exportType, "all"), "csv", map[string]interface{}{
 		"date_from": dateFrom.Format("2006-01-02"),
 		"date_to":   dateTo.Format("2006-01-02"),
 		"type":      defaultAccountingString(exportType, "all"),

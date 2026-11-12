@@ -2,8 +2,8 @@
 
 import { Clock, Mail, LogOut } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { getDashboardLoginUrl } from '@/lib/authSession'
 import { useAuthStore } from '@/stores/authStore'
-import { getConfig } from '@/lib/config'
 
 interface TrialExpiredScreenProps {
   trialEndDate?: string | null
@@ -22,8 +22,7 @@ export function TrialExpiredScreen({
 
   const handleLogout = () => {
     logout()
-    const landingUrl = getConfig().landingUrl
-    window.location.href = `${landingUrl}/auth/login`
+    window.location.href = getDashboardLoginUrl()
   }
 
   return (

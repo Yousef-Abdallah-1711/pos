@@ -84,4 +84,3 @@ func TestSalaryAutoPostingIntegration_MarkPaidCreatesPayrollEntry(t *testing.T) 
 		t.Fatalf("unmet sqlmock expectations: %v", err)
 	}
 }
-

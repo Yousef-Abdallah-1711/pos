@@ -11,6 +11,7 @@ import { type ThemeData } from '@/types/theme'
 import { createTranslator, getLocaleFromPath } from '@/lib/translations'
 import { ThemeBuilderSubTabs } from '../components/ThemeBuilderSubTabs'
 import { WebsiteQRStudio } from '../components/WebsiteQRStudio'
+import { hasAuthenticatedSession } from '@/lib/authSession'
 
 function normalizeDomain(value: string) {
   return value.trim().replace(/^https?:\/\//, '').replace(/\/+$/, '')
@@ -23,6 +24,7 @@ export default function ThemeBuilderQrPage() {
   const isRTL = locale === 'ar'
   const user = useAuthStore((state) => state.user)
   const token = useAuthStore((state) => state.token)
+  const hasSession = hasAuthenticatedSession(user, token)
   const [themes, setThemes] = useState<ThemeData[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -30,7 +32,7 @@ export default function ThemeBuilderQrPage() {
     let cancelled = false
 
     const loadThemes = async () => {
-      if (!token) {
+      if (!hasSession) {
         setLoading(false)
         return
       }
@@ -55,7 +57,7 @@ export default function ThemeBuilderQrPage() {
     return () => {
       cancelled = true
     }
-  }, [token])
+  }, [hasSession])
 
   const websiteHost = useMemo(() => {
     const activeTheme = themes.find((theme) => theme.isActive)

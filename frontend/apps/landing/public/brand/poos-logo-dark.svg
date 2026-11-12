@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 176 48" fill="none">
+  <path d="M11 39V9h14a10 10 0 0 1 0 20H11m14 0h12" stroke="#C4B5FD" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="37" cy="29" r="3.5" fill="#FFFFFF"/>
+  <text x="56" y="35" fill="#FFFFFF" font-family="Manrope,Arial,sans-serif" font-size="34" font-weight="800" letter-spacing="-1.5">POOS</text>
+</svg>

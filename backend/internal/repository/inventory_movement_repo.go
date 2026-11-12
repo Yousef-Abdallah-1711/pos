@@ -21,10 +21,22 @@ func (r *InventoryMovementRepository) CreateMovement(movement *domain.InventoryM
 		INSERT INTO inventory_movements (
 			tenant_id, restaurant_id, product_id, order_id, reference_type, reference_id,
 			movement_type, quantity, unit_cost, total_cost, notes, created_by
-		) VALUES (
-			$1, $2, $3, $4, $5, $6,
-			$7, $8, $9, $10, $11, $12
+		) SELECT
+			$1::integer, $2::integer, $3::integer, $4::bigint, $5, $6,
+			$7, $8, $9, $10, $11, $12::integer
+		WHERE EXISTS (
+			SELECT 1 FROM products
+			WHERE id = $3::integer AND tenant_id = $1::integer AND restaurant_id = $2::integer
 		)
+		AND ($4::bigint IS NULL OR EXISTS (
+			SELECT 1 FROM orders
+			WHERE id = $4::bigint AND tenant_id = $1::integer AND restaurant_id = $2::integer
+		))
+		AND ($12::integer IS NULL OR EXISTS (
+			SELECT 1 FROM users
+			WHERE id = $12::integer AND tenant_id = $1::integer
+			  AND (restaurant_id = $2::integer OR restaurant_id IS NULL)
+		))
 		RETURNING id
 	`,
 		movement.TenantID,
@@ -130,10 +142,10 @@ type inventoryMovementScanner interface {
 
 func scanInventoryMovement(scanner inventoryMovementScanner) (domain.InventoryMovement, error) {
 	var (
-		movement      domain.InventoryMovement
-		orderID       sql.NullInt64
-		referenceID   sql.NullInt64
-		createdBy     sql.NullInt64
+		movement    domain.InventoryMovement
+		orderID     sql.NullInt64
+		referenceID sql.NullInt64
+		createdBy   sql.NullInt64
 	)
 
 	err := scanner.Scan(

@@ -1,0 +1,521 @@
+[
+  {
+    "related": [],
+    "affected_paths": [
+      "backend/internal/usecase/financial_report_usecase.go"
+    ],
+    "root_cause": "Report sums asset/liability/equity balances but excludes current-period earnings or retained earnings.",
+    "severity": "P1",
+    "evidence": [
+      "forensic:08-financial-report-validation.md",
+      "forensic:07-accounting-correctness.md",
+      "backend/internal/usecase/financial_report_usecase.go:261-336"
+    ],
+    "status": "Runtime verified in historical forensic audit",
+    "policy_dependencies": [
+      "Current/prior earnings and close policy"
+    ],
+    "phase": "Phase 01 policy-dependent reporting",
+    "id": "CFR-001",
+    "impact": "Balance Sheet equation is misleading by net profit in independently dated fixtures.",
+    "source_titles": [
+      "Balance Sheet equation fails after balanced revenue posting"
+    ],
+    "title": "Balance Sheet omits current-period earnings/equity",
+    "aliases": [
+      "FORENSIC:FIN-001"
+    ],
+    "acceptance_tests": [
+      "Balance Sheet/P&L/trial balance reconcile across period boundaries",
+      "Independent profit fixtures preserve balance equation"
+    ]
+  },
+  {
+    "related": [
+      "CFR-014"
+    ],
+    "affected_paths": [
+      "frontend/apps/dashboard/src/components/accounting/JournalEntryForm.tsx",
+      "frontend/apps/dashboard/src/lib/api/accountingApi.ts",
+      "backend/internal/handler/http/journal_entry_handler.go",
+      "backend/internal/repository/journal_entry_repo.go"
+    ],
+    "root_cause": "Missing attachments reaches JSONB insert as nil instead of valid empty JSON.",
+    "severity": "P2",
+    "evidence": [
+      "Playwright request 736",
+      "evidence/snapshots/new-journal-entry-form.yml",
+      "backend/internal/repository/journal_entry_repo.go:211-236"
+    ],
+    "status": "Runtime verified",
+    "policy_dependencies": [],
+    "phase": "Phase 01 ledger hardening",
+    "id": "CFR-002",
+    "impact": "Default manual journal submission fails.",
+    "source_titles": [
+      "Manual journal UI omits JSONB attachments and API rejects request"
+    ],
+    "title": "Manual journal form omits valid JSONB attachments",
+    "aliases": [
+      "FORENSIC:FIN-002"
+    ],
+    "acceptance_tests": [
+      "Omitted attachments produce valid JSON []",
+      "Malformed attachments fail with controlled validation"
+    ]
+  },
+  {
+    "related": [],
+    "affected_paths": [
+      "backend/internal/usecase/auto_posting_engine.go",
+      "backend/internal/repository/journal_entry_repo.go"
+    ],
+    "root_cause": "normalizeBalancedLines adjusts final revenue/debit line for any rounded difference instead of rejecting material difference.",
+    "severity": "P1",
+    "evidence": [
+      "forensic:evidence/scripts/audit_closure_probe_test.go",
+      "backend/internal/usecase/auto_posting_engine.go:633-660"
+    ],
+    "status": "Runtime verified; exact duplicate across source registers",
+    "policy_dependencies": [
+      "Approved rounding account and maximum tolerance for non-material differences"
+    ],
+    "phase": "Phase 01 immediate safety",
+    "id": "CFR-003",
+    "impact": "Source calculation error can be hidden and wrong account attribution posted.",
+    "source_titles": [
+      "Auto-posting normalizer absorbs material imbalance into final line",
+      "Auto-posting silently plugs any journal imbalance into the last line"
+    ],
+    "title": "Automatic posting normalizes material imbalance into last business line",
+    "aliases": [
+      "FORENSIC:FIN-003",
+      "DISCOVERY:FIN-001"
+    ],
+    "acceptance_tests": [
+      "Dr 100/Cr 90 rejected before persistence",
+      "Permitted rounding bounded and separately posted to approved account",
+      "No business line silently altered"
+    ]
+  },
+  {
+    "related": [
+      "CFR-010",
+      "CFR-014"
+    ],
+    "affected_paths": [
+      "backend/internal/usecase/auto_posting_engine.go",
+      "backend/internal/repository/journal_entry_repo.go",
+      "backend/internal/repository/general_ledger_repo.go"
+    ],
+    "root_cause": "Draft creation and posting occur in separate transactions; posting and ledger writes appear atomic in inspected path.",
+    "severity": "P2",
+    "evidence": [
+      "backend/internal/usecase/auto_posting_engine.go:522-565",
+      "backend/internal/repository/journal_entry_repo.go:339 onward",
+      "backend/internal/repository/general_ledger_repo.go:34 onward"
+    ],
+    "status": "Inferred; failure injection not run",
+    "policy_dependencies": [],
+    "phase": "Phase 01 recovery",
+    "id": "CFR-004",
+    "impact": "A failed automatic event may leave stale draft without clear retry ownership.",
+    "source_titles": [
+      "Failed auto-post may leave a draft journal requiring review"
+    ],
+    "title": "Automatic posting failure can leave a draft requiring review",
+    "aliases": [
+      "FORENSIC:FIN-004"
+    ],
+    "acceptance_tests": [
+      "Inject failure after draft creation",
+      "Draft discoverable and retry is idempotent",
+      "No posted status without ledger rows"
+    ]
+  },
+  {
+    "related": [
+      "CFR-011"
+    ],
+    "affected_paths": [
+      "backend/internal/usecase/order_usecase.go"
+    ],
+    "root_cause": "Order calculation embeds a fixed 10 percent tax rate.",
+    "severity": "P2",
+    "evidence": [
+      "backend/internal/usecase/order_usecase.go:173"
+    ],
+    "status": "Static source verified; jurisdiction unknown",
+    "policy_dependencies": [
+      "Jurisdiction, tax rules, inclusive/exclusive model, discount base and rounding"
+    ],
+    "phase": "Policy-dependent Phase 01",
+    "id": "CFR-005",
+    "impact": "Tax may be wrong for jurisdiction, category, exemptions, or effective date.",
+    "source_titles": [
+      "Order tax rate is hard-coded"
+    ],
+    "title": "Order tax rate is hard-coded",
+    "aliases": [
+      "FORENSIC:FIN-005"
+    ],
+    "acceptance_tests": [
+      "Approved tax rule and version persisted",
+      "Tax fixtures reconcile to ledger",
+      "Exempt and boundary cases tested"
+    ]
+  },
+  {
+    "related": [],
+    "affected_paths": [
+      "frontend/apps/dashboard/src"
+    ],
+    "root_cause": "Duplicate requests observed; route latency confounded by development compilation and origin unresolved.",
+    "severity": "P2",
+    "evidence": [
+      "forensic:09-performance-forensics.md",
+      "Playwright network request capture"
+    ],
+    "status": "Symptoms verified; root cause unverified",
+    "policy_dependencies": [],
+    "phase": "Separate performance investigation",
+    "id": "CFR-006",
+    "impact": "Potential slow navigation; production impact not established.",
+    "source_titles": [
+      "Development dashboard shows duplicate requests and slow one-shot loads"
+    ],
+    "title": "Dashboard duplicate requests and slow development loads observed",
+    "aliases": [
+      "FORENSIC:FIN-006"
+    ],
+    "acceptance_tests": [
+      "At least 10 repeated dev/prod route samples",
+      "Request origin identified",
+      "Before/after traces for changes"
+    ]
+  },
+  {
+    "related": [
+      "CFR-003",
+      "CFR-008",
+      "CFR-009"
+    ],
+    "affected_paths": [
+      "backend/migrations/137_create_journal_entries.sql",
+      "backend/internal/repository/journal_entry_repo.go"
+    ],
+    "root_cause": "Validation is largely application-side; DB trigger does not raise for unbalanced posted totals and no immutability trigger was found.",
+    "severity": "P2",
+    "evidence": [
+      "discovery:FINANCIAL-AND-HR-CORRECTNESS.md",
+      "backend/migrations/137_create_journal_entries.sql:79-108",
+      "backend/internal/repository/journal_entry_repo.go:393,730"
+    ],
+    "status": "Source inspection; not runtime-probed",
+    "policy_dependencies": [
+      "Exact monetary representation and approved rounding policy"
+    ],
+    "phase": "Phase 01 ledger constraints",
+    "id": "CFR-007",
+    "impact": "Direct SQL or bypassed app path may violate posted ledger invariants.",
+    "source_titles": [
+      "No database-level debit=credit enforcement; balance trigger only recomputes totals; float tolerance"
+    ],
+    "title": "Database does not enforce balanced posted journals or posted-line immutability",
+    "aliases": [
+      "DISCOVERY:FIN-002"
+    ],
+    "acceptance_tests": [
+      "Unbalanced posted journal rejected at DB commit",
+      "Posted journal/lines cannot be updated/deleted",
+      "Valid reversal remains linked and immutable"
+    ]
+  },
+  {
+    "related": [
+      "CFR-007"
+    ],
+    "affected_paths": [
+      "backend/internal/repository/journal_entry_repo.go",
+      "backend/internal/repository/payment_acct_repo.go",
+      "backend/internal/repository/invoice_customer_repo.go"
+    ],
+    "root_cause": "Read-modify-write and MAX()+1 paths inspected without row locking/sequence protection.",
+    "severity": "P1",
+    "evidence": [
+      "backend/internal/repository/journal_entry_repo.go:363-375,544-596,784-798",
+      "backend/internal/repository/payment_acct_repo.go:563-575"
+    ],
+    "status": "Source inspection; concurrent runtime tests absent",
+    "policy_dependencies": [],
+    "phase": "Phase 01 concurrency",
+    "id": "CFR-008",
+    "impact": "Duplicate posting, stale running balances, or number collisions under concurrency.",
+    "source_titles": [
+      "No row locking: concurrent post/void, running-balance updates and number generation race"
+    ],
+    "title": "Concurrent posting, void, balance and numbering operations can race",
+    "aliases": [
+      "DISCOVERY:FIN-003"
+    ],
+    "acceptance_tests": [
+      "Concurrent double-post yields one effect",
+      "Balances equal ledger sum after concurrent posts",
+      "Concurrent numbers unique"
+    ]
+  },
+  {
+    "related": [
+      "CFR-003",
+      "CFR-007"
+    ],
+    "affected_paths": [
+      "backend/internal/domain/accounting.go",
+      "backend/internal/domain/order.go",
+      "backend/internal/usecase/order_usecase.go",
+      "backend/internal/handler/http/hr_salary_handler.go"
+    ],
+    "root_cause": "Monetary values represented as binary floating point across Go domains/use cases.",
+    "severity": "P2",
+    "evidence": [
+      "discovery:FINANCIAL-AND-HR-CORRECTNESS.md",
+      "backend/internal/domain/accounting.go",
+      "backend/internal/usecase/order_usecase.go:142-182"
+    ],
+    "status": "Source inventory verified",
+    "policy_dependencies": [
+      "Currencies, scale, rounding mode, historical conversion/backfill"
+    ],
+    "phase": "Policy-dependent precision migration",
+    "id": "CFR-009",
+    "impact": "Rounding drift and DB/application disagreement can occur.",
+    "source_titles": [
+      "float64 used for money in Go while DB uses NUMERIC/DECIMAL"
+    ],
+    "title": "Go uses float64 for money with NUMERIC/DECIMAL database columns",
+    "aliases": [
+      "DISCOVERY:FIN-004"
+    ],
+    "acceptance_tests": [
+      "Property tests exact decimal arithmetic",
+      "API/db round trip preserves currency precision",
+      "Overflow/negative/boundary cases defined"
+    ]
+  },
+  {
+    "related": [
+      "CFR-004",
+      "CFR-014"
+    ],
+    "affected_paths": [
+      "backend/internal/usecase/order_usecase.go",
+      "backend/internal/handler/http/admin_order_handler.go",
+      "backend/internal/usecase/auto_posting_engine.go"
+    ],
+    "root_cause": "Posting occurs as best-effort side effect; failures are logged; refund/cancel reversal path was not found in inspected use case.",
+    "severity": "P1",
+    "evidence": [
+      "discovery:FINANCIAL-AND-HR-CORRECTNESS.md",
+      "backend/internal/usecase/order_usecase.go:459-520",
+      "backend/internal/handler/http/admin_order_handler.go:482-507",
+      "backend/internal/usecase/auto_posting_engine.go:522-566"
+    ],
+    "status": "Source verified; runtime failure injection not run",
+    "policy_dependencies": [
+      "Revenue recognition date",
+      "Refund/chargeback reversal period and fee treatment"
+    ],
+    "phase": "Phase 01 reliability and refund lifecycle",
+    "id": "CFR-010",
+    "impact": "Paid orders may lack sales/COGS entries; refund or cancellation may leave recognized amounts unreversed.",
+    "source_titles": [
+      "Order accounting not reversed on refund/cancel; posting failures only logged; create and post not atomic",
+      "Paid-order auto-post errors are logged and suppressed"
+    ],
+    "title": "Paid-order accounting errors can be suppressed and refunds/cancellations lack demonstrated reversals",
+    "aliases": [
+      "DISCOVERY:FIN-005",
+      "FORENSIC:FIN-010"
+    ],
+    "acceptance_tests": [
+      "Inject posting failure and prove durable retry/alert",
+      "Paid-to-refunded creates linked reversal",
+      "Duplicate callback does not duplicate GL",
+      "Orders and GL reconcile by period"
+    ]
+  },
+  {
+    "related": [
+      "CFR-005"
+    ],
+    "affected_paths": [
+      "backend/migrations/141_create_invoices_customer.sql"
+    ],
+    "root_cause": "Invoice trigger calculates tax before discount and discount rate is unused in line-total calculation.",
+    "severity": "P2",
+    "evidence": [
+      "backend/migrations/141_create_invoices_customer.sql:78-131",
+      "discovery:FINANCIAL-AND-HR-CORRECTNESS.md"
+    ],
+    "status": "Source inspection",
+    "policy_dependencies": [
+      "Jurisdiction, discount treatment, inclusive/exclusive tax, exemptions"
+    ],
+    "phase": "Policy-dependent Phase 01",
+    "id": "CFR-011",
+    "impact": "Tax amount and invoice totals may be overstated or misclassified.",
+    "source_titles": [
+      "Tax/discount calculation defects: hardcoded 10% order tax; invoice tax ignores discounts"
+    ],
+    "title": "Invoice tax base ignores discounts",
+    "aliases": [
+      "DISCOVERY:FIN-006"
+    ],
+    "acceptance_tests": [
+      "Invoice discount tax base fixture",
+      "Tax rate/jurisdiction fixture",
+      "Independent recomputation matches invoice and journal"
+    ]
+  },
+  {
+    "related": [
+      "CFR-010"
+    ],
+    "affected_paths": [
+      "backend/internal/handler/http/hr_salary_handler.go",
+      "backend/internal/repository/salary_repo.go",
+      "backend/migrations/024_create_salaries_table.sql"
+    ],
+    "root_cause": "CRUD handlers lack lifecycle guard; deduction fields are client-supplied.",
+    "severity": "P2",
+    "evidence": [
+      "backend/internal/handler/http/hr_salary_handler.go:122-141,250-380",
+      "backend/internal/repository/salary_repo.go:216-227",
+      "backend/migrations/024_create_salaries_table.sql:129-148"
+    ],
+    "status": "Source inspection",
+    "policy_dependencies": [
+      "Payroll statutes, deductions, approval, correction rules"
+    ],
+    "phase": "Policy-dependent HR lifecycle",
+    "id": "CFR-012",
+    "impact": "Paid accounting may be orphaned or changed without reversal; statutory calculation may be incorrect.",
+    "source_titles": [
+      "Payroll records editable/deletable after payment and posting; tax/insurance are manual inputs"
+    ],
+    "title": "Paid payroll can be edited/deleted and statutory deductions are manual inputs",
+    "aliases": [
+      "DISCOVERY:FIN-007"
+    ],
+    "acceptance_tests": [
+      "Paid salary update/delete rejected",
+      "Correction uses reversal",
+      "Pay-once idempotent",
+      "Net calculation independently matches"
+    ]
+  },
+  {
+    "related": [
+      "CFR-007",
+      "CFR-008"
+    ],
+    "affected_paths": [
+      "backend/internal/repository/journal_entry_repo.go",
+      "backend/internal/repository/account_repo.go"
+    ],
+    "root_cause": "Void reversal uses current date without inspected closed-period check; account hard delete behavior with ledger references unresolved.",
+    "severity": "P3",
+    "evidence": [
+      "backend/internal/repository/journal_entry_repo.go:437-504",
+      "backend/internal/repository/account_repo.go:212",
+      "discovery:FINANCIAL-AND-HR-CORRECTNESS.md"
+    ],
+    "status": "Source inspection; FK behavior unverified",
+    "policy_dependencies": [
+      "Period correction/reopen rules"
+    ],
+    "phase": "Phase 01 controls",
+    "id": "CFR-013",
+    "impact": "Correction may land in wrong fiscal period or account lifecycle may break historical reporting.",
+    "source_titles": [
+      "Void and account deletion edge cases"
+    ],
+    "title": "Void period and chart-of-account deletion edge cases",
+    "aliases": [
+      "DISCOVERY:FIN-008"
+    ],
+    "acceptance_tests": [
+      "Closed-period void rejected or approved linked reversal in open period",
+      "Used account deletion blocked"
+    ]
+  },
+  {
+    "related": [
+      "CFR-002",
+      "CFR-010",
+      "CFR-015"
+    ],
+    "affected_paths": [
+      "backend/internal/usecase/auto_posting_engine.go",
+      "backend/internal/repository/journal_entry_repo.go",
+      "backend/migrations/137_create_journal_entries.sql"
+    ],
+    "root_cause": "Automatic entry builder leaves attachments raw JSON nil and repository inserts it directly.",
+    "severity": "P2",
+    "evidence": [
+      "forensic:evidence/scripts/audit_closure_probe_test.go",
+      "backend/internal/usecase/auto_posting_engine.go:472-485",
+      "backend/internal/repository/journal_entry_repo.go:162 onward"
+    ],
+    "status": "Disposable database runtime verified",
+    "policy_dependencies": [],
+    "phase": "Phase 01 ledger hardening",
+    "id": "CFR-014",
+    "impact": "Automatic sales, payroll, supplier, or depreciation postings may fail before journal persistence.",
+    "source_titles": [
+      "Automatic journals fail insertion because JSONB attachments are nil"
+    ],
+    "title": "Automatic journals fail because JSONB attachments are nil",
+    "aliases": [
+      "FORENSIC:FIN-008"
+    ],
+    "acceptance_tests": [
+      "Every auto-post type persists valid empty attachments",
+      "Posting failures observable and recoverable"
+    ]
+  },
+  {
+    "related": [
+      "CFR-014"
+    ],
+    "affected_paths": [
+      "backend/internal/domain/auto_posting.go",
+      "backend/migrations/137_create_journal_entries.sql",
+      "backend/internal/usecase/auto_posting_engine.go"
+    ],
+    "root_cause": "auto_supplier_invoice domain value exceeds VARCHAR(20) entry_type limit.",
+    "severity": "P2",
+    "evidence": [
+      "forensic:evidence/scripts/audit_closure_probe_test.go",
+      "backend/internal/domain/auto_posting.go:19",
+      "backend/migrations/137_create_journal_entries.sql:19"
+    ],
+    "status": "Disposable database schema rejection verified",
+    "policy_dependencies": [],
+    "phase": "Phase 01 reviewed schema change",
+    "id": "CFR-015",
+    "impact": "Supplier invoice automatic entry cannot persist even if JSON attachments are corrected.",
+    "source_titles": [
+      "Supplier automatic entry type exceeds journal schema width"
+    ],
+    "title": "Supplier automatic entry type exceeds journal schema width",
+    "aliases": [
+      "FORENSIC:FIN-009"
+    ],
+    "acceptance_tests": [
+      "All declared entry types fit schema",
+      "Migration rehearsed from prior schema",
+      "Supplier invoice reconciles to payable and expense/inventory accounts"
+    ]
+  }
+]

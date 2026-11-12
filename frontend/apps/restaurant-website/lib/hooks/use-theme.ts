@@ -71,22 +71,27 @@ export interface ThemeColorsData {
  * Caching is handled internally by the store (memory cache -> localStorage -> API)
  */
 export function useTheme(defaultSlug: string = 'warm-comfort') {
-  const store = useThemeStore()
+  const currentTheme = useThemeStore((state) => state.currentTheme)
+  const isLoading = useThemeStore((state) => state.isLoading)
+  const error = useThemeStore((state) => state.error)
+  const loadTheme = useThemeStore((state) => state.loadTheme)
+  const setTheme = useThemeStore((state) => state.setTheme)
+  const clearError = useThemeStore((state) => state.clearError)
 
   useEffect(() => {
-    if (store.currentTheme) {
+    if (currentTheme) {
       return
     }
-    store.loadTheme(defaultSlug)
-  }, [defaultSlug, store])
+    void loadTheme(defaultSlug)
+  }, [currentTheme, defaultSlug, loadTheme])
 
   return {
-    currentTheme: store.currentTheme,
-    isLoading: store.isLoading,
-    error: store.error,
-    loadTheme: store.loadTheme,
-    setTheme: store.setTheme,
-    clearError: store.clearError,
+    currentTheme,
+    isLoading,
+    error,
+    loadTheme,
+    setTheme,
+    clearError,
   }
 }
 

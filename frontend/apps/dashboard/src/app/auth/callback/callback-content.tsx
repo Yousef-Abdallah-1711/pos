@@ -1,54 +1,35 @@
 'use client'
 
 import { useEffect } from 'react'
-import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 import { useAuthStore } from '@/stores/authStore'
-import { warmupCurrentUserPermissions } from '@/hooks/useRbac'
 import { getConfig } from '@/lib/config'
-import { debugLog, debugError } from '@/lib/debug'
 
 export default function AuthCallbackContent() {
-  const router = useRouter()
-  const pathname = usePathname()
-  const searchParams = useSearchParams()
   const setAuth = useAuthStore((state) => state.setAuth)
 
   useEffect(() => {
-    const token = searchParams.get('token')
-    const userParam = searchParams.get('user')
+    let active = true
+    fetch(`${getConfig().apiUrl}/auth/session`, { credentials: 'include', cache: 'no-store' })
+      .then(async (response) => {
+        if (!response.ok) throw new Error('Session unavailable')
+        return response.json()
+      })
+      .then((user: unknown) => {
+        if (!active) return
+        setAuth(user as Parameters<typeof setAuth>[0], '')
+        window.history.replaceState({}, document.title, '/auth/callback')
+        window.location.replace('/en/dashboard')
+      })
+      .catch(() => {
+        if (active) window.location.replace(`${getConfig().landingUrl}/en/auth/login`)
+      })
 
-    debugLog('=== CALLBACK: Processing auth ===')
-    debugLog('Token:', !!token, 'User:', !!userParam)
-
-    if (token && userParam) {
-      try {
-        const user = JSON.parse(decodeURIComponent(userParam))
-        debugLog('Saving auth for user:', user.email)
-
-        // Save auth to store
-        setAuth(user, token)
-        void warmupCurrentUserPermissions()
-
-        // Extract locale from pathname or use default
-        const pathSegments = pathname.split('/')
-        const locale = ['en', 'ar'].includes(pathSegments[1]) ? pathSegments[1] : 'en'
-
-        debugLog('Redirecting to dashboard for locale:', locale)
-        // Redirect to dashboard with proper locale prefix
-        window.location.href = `${getConfig().dashboardUrl}/${locale}/dashboard`
-      } catch (error) {
-        debugError('Auth callback error:', error)
-        window.location.href = `${getConfig().landingUrl}/auth/login`
-      }
-    } else {
-      debugLog('No auth data, redirecting to login')
-      window.location.href = `${getConfig().landingUrl}/auth/login`
-    }
-  }, [searchParams, setAuth, router, pathname])
+    return () => { active = false }
+  }, [setAuth])
 
   return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+    <div className="min-h-screen flex items-center justify-center" aria-live="polite">
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600" />
     </div>
   )
 }

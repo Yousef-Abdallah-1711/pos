@@ -503,6 +503,7 @@ export function HeaderEditor({
                   <div className="flex items-center gap-1">
                     <button
                       onClick={() => moveNavItem(item.id, 'up')}
+                      aria-label={`Move ${item.label} up`}
                       disabled={index === 0}
                       className="p-1 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded disabled:opacity-50 transition"
                     >
@@ -510,6 +511,7 @@ export function HeaderEditor({
                     </button>
                     <button
                       onClick={() => moveNavItem(item.id, 'down')}
+                      aria-label={`Move ${item.label} down`}
                       disabled={index === (headerConfig.navigationItems?.length || 0) - 1}
                       className="p-1 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded disabled:opacity-50 transition"
                     >
@@ -517,6 +519,7 @@ export function HeaderEditor({
                     </button>
                     <button
                       onClick={() => deleteNavItem(item.id)}
+                      aria-label={`Delete ${item.label}`}
                       className="p-1 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition"
                     >
                       <Trash2 className="h-4 w-4" />

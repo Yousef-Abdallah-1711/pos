@@ -22,13 +22,13 @@ Statuses: TODO, IN_PROGRESS, VERIFIED_COMPLETE, PARTIAL, BLOCKED, FAILED.
 | SEC-014 | Implement bulk-operation isolation tests | TODO | No verified bulk mutation matrix. |
 | SEC-015 | Verify unauthorized side effects | PARTIAL | Driver base rows checked unchanged after denied writes; related side effects, forged HTTP context, background work and other resource families remain open. |
 | SEC-016 | Remediate confirmed vulnerabilities | VERIFIED_COMPLETE | Existing scoped driver/assignment changes retained. Fixed PostgreSQL refund tenant-update type defect exposed by real refund race. |
-| SEC-017 | Run WS02 security regression | PARTIAL | Three driver repository PostgreSQL tests pass repeated; full resource/RBAC/HTTP matrix remains open. |
+| SEC-017 | Run WS02 security regression | PARTIAL | Driver repository PostgreSQL tests pass repeated; `TestKDSWebSocketReadPermissionIsRequired` confirms module 13 READ enforcement, and the 2026-11-09 isolated browser journey confirms an employee without KDS READ receives 403. Full resource/RBAC/HTTP matrix remains open. |
 | SEC-018 | Map payment callback state machine | VERIFIED_COMPLETE | State transitions and code boundaries recorded in `WS03_PAYMENT_INTEGRITY_REPORT.md`; refund/void callbacks still require reconciliation. |
 | SEC-019 | Inspect PostgreSQL transaction boundaries | VERIFIED_COMPLETE | Success updates payment+tenant in one transaction; refund locks payment, calls mock provider, then commits payment+tenant; history writes remain post-commit. |
 | SEC-020 | Implement callback integration fixtures | VERIFIED_COMPLETE | Synthetic tenant/payment/order fixture backed by migrated isolated PostgreSQL; no dev data or provider credentials. |
 | SEC-021 | Test duplicate callbacks | VERIFIED_COMPLETE | Twelve concurrent duplicate success callbacks; exactly one DB transition and two expected in-memory history entries. |
 | SEC-022 | Test concurrent callbacks | VERIFIED_COMPLETE | Success callback race exercised against real PostgreSQL; repeated targeted run passed. |
-| SEC-023 | Test out-of-order callbacks | PARTIAL | Failure→success→delayed failure and refund→delayed success verified; cancellation→delayed-success remains open. |
+| SEC-023 | Test out-of-order callbacks | PARTIAL | Failure→success→delayed failure and refund→delayed success remain covered; pending Paymob callbacks now return without payment/subscription writes, verified by `TestPaymentUseCaseHandleWebhookPendingPaymentDoesNotMutateState` and `TestPaymentPostgresPendingCallbackLeavesPaymentPendingUntilSuccess`. Cancellation→delayed-success remains open. |
 | SEC-024 | Test refund and void races | PARTIAL | Two concurrent refund requests with mock provider yield one call and one commit; void/refund webhook reconciliation remains open. |
 | SEC-025 | Test transaction rollback | VERIFIED_COMPLETE | Controlled tenant constraint failure after payment update leaves payment pending and tenant trial. |
 | SEC-026 | Test provider/local reconciliation | BLOCKED | No durable reconciliation/outbox exists. Provider success before local commit cannot be made atomic; provider idempotency semantics remain unverified. |

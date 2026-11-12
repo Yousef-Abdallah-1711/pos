@@ -1,16 +1,16 @@
 package http
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 	"strconv"
 
-	"golang.org/x/crypto/bcrypt"
 	"pos-saas/internal/domain"
 	"pos-saas/internal/middleware"
 	"pos-saas/internal/repository"
+
+	"golang.org/x/crypto/bcrypt"
 )
 
 // UserSettingsHandler handles HTTP requests for user settings
@@ -54,7 +54,7 @@ func (h *UserSettingsHandler) GetUserSettings(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	settings, err := h.settingsRepo.GetByUserID(r.Context(), userID)
+	settings, err := h.settingsRepo.GetByUserID(r.Context(), middleware.GetTenantID(r), userID)
 	if err != nil {
 		log.Printf("[GetUserSettings] ERROR: Failed to get settings: %v", err)
 		respondError(w, http.StatusInternalServerError, "Failed to fetch settings")
@@ -93,7 +93,7 @@ func (h *UserSettingsHandler) UpdateLanguage(w http.ResponseWriter, r *http.Requ
 		Language string `json:"language"`
 	}
 
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+	if err := decodeJSONStrict(r, &req); err != nil {
 		log.Printf("[UpdateLanguage] ERROR: Failed to decode request: %v", err)
 		respondError(w, http.StatusBadRequest, "Invalid request body")
 		return
@@ -106,7 +106,8 @@ func (h *UserSettingsHandler) UpdateLanguage(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	settings, err := h.settingsRepo.UpdateLanguage(r.Context(), userID, req.Language)
+	tenantID := middleware.GetTenantID(r)
+	settings, err := h.settingsRepo.UpdateLanguage(r.Context(), tenantID, userID, req.Language)
 	if err != nil {
 		log.Printf("[UpdateLanguage] ERROR: Failed to update language: %v", err)
 		respondError(w, http.StatusInternalServerError, "Failed to update language")
@@ -114,7 +115,7 @@ func (h *UserSettingsHandler) UpdateLanguage(w http.ResponseWriter, r *http.Requ
 	}
 
 	// Log audit change
-	h.settingsRepo.LogAuditChange(r.Context(), userID, int64(claims.UserID), "language", nil, &req.Language, getClientIP(r))
+	h.settingsRepo.LogAuditChange(r.Context(), tenantID, userID, int64(claims.UserID), "language", nil, &req.Language, getClientIP(r))
 
 	log.Printf("[UpdateLanguage] Language updated for user %d to %s", userID, req.Language)
 	respondJSON(w, http.StatusOK, settings)
@@ -147,7 +148,7 @@ func (h *UserSettingsHandler) UpdateTheme(w http.ResponseWriter, r *http.Request
 		Theme string `json:"theme"`
 	}
 
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+	if err := decodeJSONStrict(r, &req); err != nil {
 		log.Printf("[UpdateTheme] ERROR: Failed to decode request: %v", err)
 		respondError(w, http.StatusBadRequest, "Invalid request body")
 		return
@@ -159,14 +160,15 @@ func (h *UserSettingsHandler) UpdateTheme(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	settings, err := h.settingsRepo.UpdateTheme(r.Context(), userID, req.Theme)
+	tenantID := middleware.GetTenantID(r)
+	settings, err := h.settingsRepo.UpdateTheme(r.Context(), tenantID, userID, req.Theme)
 	if err != nil {
 		log.Printf("[UpdateTheme] ERROR: Failed to update theme: %v", err)
 		respondError(w, http.StatusInternalServerError, "Failed to update theme")
 		return
 	}
 
-	h.settingsRepo.LogAuditChange(r.Context(), userID, int64(claims.UserID), "theme", nil, &req.Theme, getClientIP(r))
+	h.settingsRepo.LogAuditChange(r.Context(), tenantID, userID, int64(claims.UserID), "theme", nil, &req.Theme, getClientIP(r))
 
 	log.Printf("[UpdateTheme] Theme updated for user %d to %s", userID, req.Theme)
 	respondJSON(w, http.StatusOK, settings)
@@ -201,7 +203,7 @@ func (h *UserSettingsHandler) UpdateColors(w http.ResponseWriter, r *http.Reques
 		AccentColor    string `json:"accent_color"`
 	}
 
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+	if err := decodeJSONStrict(r, &req); err != nil {
 		log.Printf("[UpdateColors] ERROR: Failed to decode request: %v", err)
 		respondError(w, http.StatusBadRequest, "Invalid request body")
 		return
@@ -213,14 +215,15 @@ func (h *UserSettingsHandler) UpdateColors(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	settings, err := h.settingsRepo.UpdateColors(r.Context(), userID, req.PrimaryColor, req.SecondaryColor, req.AccentColor)
+	tenantID := middleware.GetTenantID(r)
+	settings, err := h.settingsRepo.UpdateColors(r.Context(), tenantID, userID, req.PrimaryColor, req.SecondaryColor, req.AccentColor)
 	if err != nil {
 		log.Printf("[UpdateColors] ERROR: Failed to update colors: %v", err)
 		respondError(w, http.StatusInternalServerError, "Failed to update colors")
 		return
 	}
 
-	h.settingsRepo.LogAuditChange(r.Context(), userID, int64(claims.UserID), "colors", nil,
+	h.settingsRepo.LogAuditChange(r.Context(), tenantID, userID, int64(claims.UserID), "colors", nil,
 		stringPtr(fmt.Sprintf("%s|%s|%s", req.PrimaryColor, req.SecondaryColor, req.AccentColor)), getClientIP(r))
 
 	log.Printf("[UpdateColors] Colors updated for user %d", userID)
@@ -256,7 +259,7 @@ func (h *UserSettingsHandler) ChangePassword(w http.ResponseWriter, r *http.Requ
 		ConfirmPassword string `json:"confirm_password"`
 	}
 
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+	if err := decodeJSONStrict(r, &req); err != nil {
 		log.Printf("[ChangePassword] ERROR: Failed to decode request: %v", err)
 		respondError(w, http.StatusBadRequest, "Invalid request body")
 		return
@@ -280,7 +283,7 @@ func (h *UserSettingsHandler) ChangePassword(w http.ResponseWriter, r *http.Requ
 	}
 
 	// Get user to verify current password
-	user, err := h.userRepo.GetByID(r.Context(), int(userID))
+	user, err := h.userRepo.GetByID(r.Context(), int(userID), claims.TenantID, claims.RestaurantID)
 	if err != nil {
 		log.Printf("[ChangePassword] ERROR: User not found: %v", err)
 		respondError(w, http.StatusNotFound, "User not found")
@@ -303,14 +306,14 @@ func (h *UserSettingsHandler) ChangePassword(w http.ResponseWriter, r *http.Requ
 	}
 
 	// Update password in user repo
-	if err := h.userRepo.UpdatePassword(r.Context(), int(userID), hashedPassword); err != nil {
+	if err := h.userRepo.UpdatePassword(r.Context(), int(userID), claims.TenantID, claims.RestaurantID, hashedPassword); err != nil {
 		log.Printf("[ChangePassword] ERROR: Failed to update password: %v", err)
 		respondError(w, http.StatusInternalServerError, "Failed to update password")
 		return
 	}
 
 	// Record password change in history
-	if err := h.settingsRepo.RecordPasswordChange(r.Context(), userID, hashedPassword, getClientIP(r)); err != nil {
+	if err := h.settingsRepo.RecordPasswordChange(r.Context(), middleware.GetTenantID(r), userID, hashedPassword, getClientIP(r)); err != nil {
 		log.Printf("[ChangePassword] ERROR: Failed to record password change: %v", err)
 		// Don't fail the request, just log it
 	}
@@ -344,7 +347,7 @@ func (h *UserSettingsHandler) GetUserProfile(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	user, err := h.userRepo.GetByID(r.Context(), int(userID))
+	user, err := h.userRepo.GetByID(r.Context(), int(userID), claims.TenantID, claims.RestaurantID)
 	if err != nil {
 		log.Printf("[GetUserProfile] ERROR: Failed to get user: %v", err)
 		respondError(w, http.StatusNotFound, "User not found")
@@ -403,20 +406,20 @@ func (h *UserSettingsHandler) UpdateProfile(w http.ResponseWriter, r *http.Reque
 		AvatarURL *string `json:"avatar_url"`
 	}
 
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+	if err := decodeJSONStrict(r, &req); err != nil {
 		log.Printf("[UpdateProfile] ERROR: Failed to decode request: %v", err)
 		respondError(w, http.StatusBadRequest, "Invalid request body")
 		return
 	}
 
 	// Update profile
-	if err := h.userRepo.UpdateProfile(r.Context(), int(userID), req.Name, req.AvatarURL); err != nil {
+	if err := h.userRepo.UpdateProfile(r.Context(), int(userID), claims.TenantID, claims.RestaurantID, req.Name, req.AvatarURL); err != nil {
 		log.Printf("[UpdateProfile] ERROR: Failed to update profile: %v", err)
 		respondError(w, http.StatusInternalServerError, "Failed to update profile")
 		return
 	}
 
-	user, err := h.userRepo.GetByID(r.Context(), int(userID))
+	user, err := h.userRepo.GetByID(r.Context(), int(userID), claims.TenantID, claims.RestaurantID)
 	if err != nil {
 		log.Printf("[UpdateProfile] ERROR: Failed to get updated user: %v", err)
 		respondError(w, http.StatusInternalServerError, "Failed to retrieve updated profile")

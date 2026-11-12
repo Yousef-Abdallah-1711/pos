@@ -4,7 +4,7 @@
  */
 
 import React from 'react'
-import { render, screen, waitFor } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { ComponentEditorRouter } from '../ComponentEditorRouter'
 import { EditorErrorBoundary } from '../EditorErrorBoundary'
 import { describe, it, expect, beforeEach, vi } from 'vitest'
@@ -35,7 +35,7 @@ describe('ComponentEditorRouter', () => {
         config: {},
       }
       render(<ComponentEditorRouter {...defaultProps} component={component} />)
-      expect(screen.getByText('Hero Settings')).toBeInTheDocument()
+      expect(screen.getByText('Background')).toBeInTheDocument()
     })
 
     it('should render ProductGridEditor for products type', () => {
@@ -48,7 +48,7 @@ describe('ComponentEditorRouter', () => {
         config: {},
       }
       render(<ComponentEditorRouter {...defaultProps} component={component} />)
-      expect(screen.getByText('Product Settings')).toBeInTheDocument()
+      expect(screen.getByText('Grid Layout')).toBeInTheDocument()
     })
 
     it('should render WhyUsEditor for why_us type', () => {
@@ -61,8 +61,7 @@ describe('ComponentEditorRouter', () => {
         config: {},
       }
       render(<ComponentEditorRouter {...defaultProps} component={component} />)
-      // WhyUsEditor should render some content
-      expect(screen.getByText(/Why Us/i) || true).toBeTruthy()
+      expect(screen.getByText('Layout')).toBeInTheDocument()
     })
 
     it('should render ContactEditor for contact type', () => {
@@ -102,7 +101,7 @@ describe('ComponentEditorRouter', () => {
         config: {},
       }
       render(<ComponentEditorRouter {...defaultProps} component={component} />)
-      expect(screen.getByText(/Call to Action/i) || true).toBeTruthy()
+      expect(screen.getByText('Primary Button')).toBeInTheDocument()
     })
 
     it('should render GenericEditor for custom type', () => {
@@ -128,8 +127,9 @@ describe('ComponentEditorRouter', () => {
         config: {},
       }
       render(<ComponentEditorRouter {...defaultProps} component={component} />)
-      // Component should render editor
-      expect(screen.getByText(/Hero Settings/i)).toBeInTheDocument()
+      const imageUrl = screen.getByPlaceholderText('https://example.com/hero-image.jpg')
+      fireEvent.change(imageUrl, { target: { value: 'https://example.com/updated.jpg' } })
+      expect(mockOnChange).toHaveBeenCalledWith(expect.objectContaining({ id: '1', title: 'Test Hero' }))
     })
 
     it('should pass onChange to editor', () => {

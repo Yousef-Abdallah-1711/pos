@@ -8,10 +8,12 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"sync"
 	"time"
 
 	"pos-saas/internal/pkg/jwt"
 	"pos-saas/internal/repository"
+	"pos-saas/internal/service"
 )
 
 // SuperAdminContextKey is the context key for super admin data
@@ -32,47 +34,54 @@ type SuperAdminTokenValidator interface {
 }
 
 // SuperAdminAuthMiddleware validates super admin JWT tokens
-func SuperAdminAuthMiddleware(validator SuperAdminTokenValidator) func(http.Handler) http.Handler {
+func SuperAdminAuthMiddleware(validator SuperAdminTokenValidator, sessions ...authSessionResolver) func(http.Handler) http.Handler {
+	var sessionResolver authSessionResolver
+	if len(sessions) > 0 {
+		sessionResolver = sessions[0]
+	}
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			log.Printf("[SuperAdminAuthMiddleware] Processing request: %s %s\n", r.Method, r.URL.Path)
-
-			// Extract token from Authorization header
+			// Cookie sessions are resolved server-side; bearer auth remains for non-browser integrations.
 			authHeader := r.Header.Get("Authorization")
-			if authHeader == "" {
-				log.Printf("[SuperAdminAuthMiddleware] No Authorization header\n")
-				respondError(w, http.StatusUnauthorized, "missing authorization header")
+			token := ""
+			if cookie, err := r.Cookie(service.SuperAdminSessionCookieName); err == nil && cookie.Value != "" && sessionResolver != nil {
+				if isUnsafeMethod(r.Method) && !IsTrustedOrigin(r.Header.Get("Origin")) {
+					respondError(w, http.StatusForbidden, "invalid request origin")
+					return
+				}
+				credential, resolveErr := sessionResolver.Resolve(r.Context(), cookie.Value)
+				if resolveErr != nil {
+					respondError(w, http.StatusUnauthorized, "invalid or expired session")
+					return
+				}
+				token = credential
+			} else if authHeader != "" {
+				parts := strings.SplitN(authHeader, " ", 2)
+				if len(parts) != 2 || strings.ToLower(parts[0]) != "bearer" {
+					respondError(w, http.StatusUnauthorized, "invalid authorization header format")
+					return
+				}
+				token = parts[1]
+			} else {
+				respondError(w, http.StatusUnauthorized, "missing authorization")
 				return
 			}
-
-			// Check Bearer prefix
-			parts := strings.SplitN(authHeader, " ", 2)
-			if len(parts) != 2 || strings.ToLower(parts[0]) != "bearer" {
-				log.Printf("[SuperAdminAuthMiddleware] Invalid Authorization header format\n")
-				respondError(w, http.StatusUnauthorized, "invalid authorization header format")
-				return
-			}
-
-			token := parts[1]
 
 			// Validate token
 			claims, err := validator.ValidateSuperAdminToken(token)
 			if err != nil {
-				log.Printf("[SuperAdminAuthMiddleware] Token validation failed: %v\n", err)
 				respondError(w, http.StatusUnauthorized, "invalid or expired token")
 				return
 			}
 
 			// Check if token is expired
-			if claims.ExpiresAt > 0 && time.Now().Unix() > claims.ExpiresAt {
-				log.Printf("[SuperAdminAuthMiddleware] Token expired\n")
+			if claims.ExpiresAtUnix > 0 && time.Now().Unix() > claims.ExpiresAtUnix {
 				respondError(w, http.StatusUnauthorized, "token expired")
 				return
 			}
 
 			// Check if this is a super admin token
 			if !claims.IsSuperAdmin {
-				log.Printf("[SuperAdminAuthMiddleware] Token is not for super admin\n")
 				respondError(w, http.StatusForbidden, "access denied")
 				return
 			}
@@ -80,8 +89,6 @@ func SuperAdminAuthMiddleware(validator SuperAdminTokenValidator) func(http.Hand
 			// Add claims to context
 			ctx := context.WithValue(r.Context(), SuperAdminContextKey, claims)
 			ctx = context.WithValue(ctx, SuperAdminIDContextKey, claims.SuperAdminID)
-
-			log.Printf("[SuperAdminAuthMiddleware] Authenticated super admin: %d\n", claims.SuperAdminID)
 
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})
@@ -174,27 +181,32 @@ func RateLimitSuperAdmin(requestsPerMinute int) func(http.Handler) http.Handler 
 		resetAt time.Time
 	}
 	clients := make(map[string]*clientInfo)
+	var clientsMu sync.Mutex
 
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			ip := GetClientIP(r)
 
-			// Get or create client info
+			// Serialize updates because this middleware handles concurrent HTTP requests.
+			clientsMu.Lock()
 			client, exists := clients[ip]
 			if !exists || time.Now().After(client.resetAt) {
-				clients[ip] = &clientInfo{
+				client = &clientInfo{
 					count:   1,
 					resetAt: time.Now().Add(time.Minute),
 				}
+				clients[ip] = client
 			} else {
 				client.count++
 				if client.count > requestsPerMinute {
+					clientsMu.Unlock()
 					log.Printf("[RateLimitSuperAdmin] Rate limit exceeded for IP: %s\n", ip)
 					w.Header().Set("Retry-After", "60")
 					respondError(w, http.StatusTooManyRequests, "rate limit exceeded")
 					return
 				}
 			}
+			clientsMu.Unlock()
 
 			next.ServeHTTP(w, r)
 		})

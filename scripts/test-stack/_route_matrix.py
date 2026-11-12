@@ -24,6 +24,13 @@ for i, m in enumerate(starts):
         found = re.findall(r'(\d+),\s*"(READ|WRITE|DELETE|ADMIN|EXPORT)"\)\)', chunk)
         if found:
             module, level = found[-1]
+    elif wrapper == "wrapKDSWithPermission":
+        # The KDS wrapper owns module 13 internally, so it is not an argument
+        # at each registration site like the generic permission wrappers.
+        module = "13"
+        found = re.findall(r'"(READ|WRITE|DELETE|ADMIN|EXPORT)"', chunk)
+        if found:
+            level = found[-1]
     rows.append(dict(method=method, path=path, wrapper=wrapper, module=module, level=level))
 
 

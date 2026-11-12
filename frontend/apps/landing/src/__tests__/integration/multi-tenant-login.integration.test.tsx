@@ -64,7 +64,7 @@ describe('Multi-Tenant Login Integration Tests', () => {
 
       // Step 4: System authenticates and auto-logs in
       await waitFor(() => {
-        expect(mockSetAuth).toHaveBeenCalledWith(loginResponse.data.user, loginResponse.data.token)
+        expect(mockSetAuth).toHaveBeenCalledWith(loginResponse.data.user, '')
       })
 
       // Step 5: System redirects to dashboard (done by TenantSelectorModal not being shown)
@@ -133,7 +133,6 @@ describe('Multi-Tenant Login Integration Tests', () => {
             role: 'manager',
             tenant_id: 2,
           },
-          token: 'eyJhbGcS0...',
         }),
       }
       ;(global.fetch as Mock).mockResolvedValueOnce(confirmResponse)
@@ -177,15 +176,15 @@ describe('Multi-Tenant Login Integration Tests', () => {
         )
       })
 
-      // Step 9: Backend returns JWT token for selected tenant
-      // Step 10: System stores auth and redirects to dashboard
+      // Step 9: Backend sets an HttpOnly cookie for the selected tenant.
+      // Step 10: The UI keeps only the non-secret user profile in memory.
       await waitFor(() => {
         expect(mockSetAuth).toHaveBeenCalledWith(
           expect.objectContaining({
             tenant_id: 2,
             email: 'multi@example.com',
           }),
-          expect.any(String)
+          ''
         )
       })
     })
@@ -225,7 +224,7 @@ describe('Multi-Tenant Login Integration Tests', () => {
 
       // Error message should be displayed
       await waitFor(() => {
-        expect(toast.error).toHaveBeenCalledWith('Invalid email or password')
+        expect(toast.error).toHaveBeenCalledWith('Invalid email or password. Please check your credentials.')
       })
 
       // Form should remain visible for retry
@@ -315,7 +314,7 @@ describe('Multi-Tenant Login Integration Tests', () => {
       // Error message should be shown
       await waitFor(() => {
         expect(
-          screen.getByText('User not found in selected organization')
+          screen.getByText('Failed to select organization')
         ).toBeInTheDocument()
       })
 

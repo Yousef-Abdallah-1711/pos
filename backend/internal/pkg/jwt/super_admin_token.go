@@ -10,11 +10,11 @@ import (
 // SuperAdminClaims represents the claims in a super admin JWT
 // This is the canonical definition - middleware should import this
 type SuperAdminClaims struct {
-	UserID       int64  `json:"user_id"`
-	Email        string `json:"email"`
-	SuperAdminID int64  `json:"super_admin_id"`
-	IsSuperAdmin bool   `json:"is_super_admin"`
-	ExpiresAt    int64  `json:"exp"`
+	UserID        int64  `json:"user_id"`
+	Email         string `json:"email"`
+	SuperAdminID  int64  `json:"super_admin_id"`
+	IsSuperAdmin  bool   `json:"is_super_admin"`
+	ExpiresAtUnix int64  `json:"-"`
 	jwt.RegisteredClaims
 }
 
@@ -90,7 +90,7 @@ func (s *SuperAdminTokenService) ValidateSuperAdminToken(tokenString string) (*S
 
 		// Set ExpiresAt from RegisteredClaims
 		if claims.RegisteredClaims.ExpiresAt != nil {
-			claims.ExpiresAt = claims.RegisteredClaims.ExpiresAt.Unix()
+			claims.ExpiresAtUnix = claims.RegisteredClaims.ExpiresAt.Unix()
 		}
 
 		return claims, nil

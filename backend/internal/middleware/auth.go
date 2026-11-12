@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"pos-saas/internal/pkg/jwt"
+	"pos-saas/internal/service"
 )
 
 type contextKey string
@@ -17,6 +18,52 @@ const UserContextKey contextKey = "user"
 // A nil error means the token is genuine, active and unexpired.
 type ImpersonationAuthenticator interface {
 	AuthenticateImpersonation(ctx context.Context, token string) (*jwt.Claims, *ImpersonationInfo, error)
+}
+
+type authSessionResolver interface {
+	Resolve(context.Context, string) (string, error)
+}
+
+// SessionAuthMiddleware resolves the host-only HttpOnly session cookie through
+// shared server-side storage, then validates the stored JWT with the existing
+// authorization middleware. State-changing cookie requests require a trusted
+// Origin to prevent cross-site request forgery.
+func SessionAuthMiddleware(tokenService *jwt.TokenService, sessions authSessionResolver, impersonation ...ImpersonationAuthenticator) func(http.Handler) http.Handler {
+	legacyAuth := AuthMiddleware(tokenService, impersonation...)
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			cookie, err := r.Cookie(service.ImpersonationSessionCookieName)
+			isImpersonation := err == nil && cookie.Value != ""
+			if !isImpersonation {
+				cookie, err = r.Cookie(service.AuthSessionCookieName)
+			}
+			if err != nil || cookie.Value == "" {
+				legacyAuth(next).ServeHTTP(w, r)
+				return
+			}
+			if isUnsafeMethod(r.Method) && !IsTrustedOrigin(r.Header.Get("Origin")) {
+				http.Error(w, "Forbidden - invalid request origin", http.StatusForbidden)
+				return
+			}
+			credential, err := sessions.Resolve(r.Context(), cookie.Value)
+			if err != nil {
+				http.Error(w, "Unauthorized", http.StatusUnauthorized)
+				return
+			}
+			request := r.Clone(r.Context())
+			request.Header = r.Header.Clone()
+			if isImpersonation && service.IsImpersonationCredential(credential) {
+				request.Header.Set("X-Impersonation-Token", service.UnwrapImpersonationCredential(credential))
+			} else {
+				request.Header.Set("Authorization", "Bearer "+credential)
+			}
+			legacyAuth(next).ServeHTTP(w, request)
+		})
+	}
+}
+
+func isUnsafeMethod(method string) bool {
+	return method != http.MethodGet && method != http.MethodHead && method != http.MethodOptions
 }
 
 // AuthMiddleware authenticates requests with a bearer JWT. When an
@@ -54,7 +101,6 @@ func AuthMiddleware(tokenService *jwt.TokenService, impersonation ...Impersonati
 			}
 
 			authHeader := r.Header.Get("Authorization")
-
 			if authHeader == "" {
 				http.Error(w, "Unauthorized - missing authorization header", http.StatusUnauthorized)
 				return
@@ -67,8 +113,7 @@ func AuthMiddleware(tokenService *jwt.TokenService, impersonation ...Impersonati
 				return
 			}
 
-			token := parts[1]
-			claims, err := tokenService.ValidateToken(token)
+			claims, err := tokenService.ValidateToken(parts[1])
 			if err != nil {
 				http.Error(w, "Unauthorized - invalid token", http.StatusUnauthorized)
 				return

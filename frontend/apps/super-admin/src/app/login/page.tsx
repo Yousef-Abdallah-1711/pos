@@ -1,13 +1,11 @@
 "use client";
 
 import React, { useState } from "react";
-import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/stores/authStore";
 import { superAdminAPI } from "@/lib/api";
 import { toast } from "sonner";
 
 export default function LoginPage() {
-  const router = useRouter();
   const { setToken, setSuperAdmin, setError: setAuthError, setLoading } =
     useAuthStore();
   const [email, setEmail] = useState("superadmin@pos-saas.com");
@@ -32,17 +30,13 @@ export default function LoginPage() {
         password,
       });
 
-      // Store token in localStorage
-      localStorage.setItem("super-admin-token", response.token);
-
-      // Update auth store
-      setToken(response.token);
+      setToken("cookie-session");
       setSuperAdmin(response.super_admin);
 
       toast.success("Login successful!");
 
-      // Redirect to dashboard
-      router.push("/dashboard");
+      // Start a new app document after establishing the cookie-backed session.
+      window.location.assign("/dashboard");
     } catch (err: unknown) {
       const errorMessage =
         (err as any)?.response?.data?.error ||

@@ -1,0 +1,42 @@
+{
+  "fixture": {
+    "tenant_id": 2,
+    "restaurant_id": 2,
+    "tenant_slug": "p2c-f6102100eff14f32",
+    "categories": 6,
+    "published_products": 62,
+    "products_set_in_stock": 3
+  },
+  "rows": [
+    {"route":"/en","sample":1,"cache_sample":"cold","status":200,"readiness_status":"ready","meaningful_content_ms":1560,"ttfb_ms":41.8,"fcp_ms":476,"lcp_ms":476,"cls":0,"long_tasks":0,"request_count":36,"transferred_bytes":386931,"main_text_chars":50,"final_path":"/en","api_request_count":1,"console_errors":0,"javascript_errors":0,"failed_requests":0,"synthetic_product_present":false,"add_clicked":false},
+    {"route":"/en","sample":2,"cache_sample":"warm","status":200,"readiness_status":"ready","meaningful_content_ms":1160,"ttfb_ms":39.3,"fcp_ms":164,"lcp_ms":164,"cls":0,"long_tasks":0,"request_count":36,"transferred_bytes":386931,"main_text_chars":50,"final_path":"/en","api_request_count":1,"console_errors":0,"javascript_errors":0,"failed_requests":0,"synthetic_product_present":false,"add_clicked":false},
+    {"route":"/en/menu","sample":1,"cache_sample":"cold","status":200,"readiness_status":"ready","meaningful_content_ms":1086,"ttfb_ms":26.4,"fcp_ms":124,"lcp_ms":208,"cls":0.041847072555138226,"long_tasks":0,"request_count":36,"transferred_bytes":377599,"main_text_chars":3222,"final_path":"/en/menu","api_request_count":2,"console_errors":0,"javascript_errors":0,"failed_requests":0,"synthetic_product_present":true,"add_clicked":true},
+    {"route":"/en/menu","sample":2,"cache_sample":"warm","status":200,"readiness_status":"ready","meaningful_content_ms":1119,"ttfb_ms":28,"fcp_ms":144,"lcp_ms":224,"cls":0.041847072555138226,"long_tasks":0,"request_count":36,"transferred_bytes":377599,"main_text_chars":3222,"final_path":"/en/menu","api_request_count":2,"console_errors":0,"javascript_errors":0,"failed_requests":0,"synthetic_product_present":true,"add_clicked":false},
+    {"route":"/en/cart","sample":1,"cache_sample":"cold","status":200,"readiness_status":"ready","meaningful_content_ms":1212,"ttfb_ms":43.5,"fcp_ms":192,"lcp_ms":276,"cls":0.059153410379426105,"long_tasks":0,"request_count":38,"transferred_bytes":385351,"main_text_chars":335,"final_path":"/en/cart","api_request_count":2,"console_errors":1,"javascript_errors":0,"failed_requests":2,"synthetic_product_present":true,"add_clicked":false},
+    {"route":"/en/cart","sample":2,"cache_sample":"warm","status":200,"readiness_status":"ready","meaningful_content_ms":1286,"ttfb_ms":51.2,"fcp_ms":208,"lcp_ms":292,"cls":0.059153410379426105,"long_tasks":0,"request_count":39,"transferred_bytes":385351,"main_text_chars":335,"final_path":"/en/cart","api_request_count":3,"console_errors":2,"javascript_errors":0,"failed_requests":3,"synthetic_product_present":true,"add_clicked":false},
+    {"route":"/en/checkout","sample":1,"cache_sample":"cold","status":200,"readiness_status":"ready","meaningful_content_ms":1174,"ttfb_ms":31.4,"fcp_ms":144,"lcp_ms":260,"cls":0.03974535117300571,"long_tasks":0,"request_count":36,"transferred_bytes":404061,"main_text_chars":361,"final_path":"/en/checkout","api_request_count":2,"console_errors":1,"javascript_errors":0,"failed_requests":0,"synthetic_product_present":true,"add_clicked":false},
+    {"route":"/en/checkout","sample":2,"cache_sample":"warm","status":200,"readiness_status":"ready","meaningful_content_ms":1104,"ttfb_ms":29.1,"fcp_ms":120,"lcp_ms":188,"cls":0.03974535117300571,"long_tasks":0,"request_count":35,"transferred_bytes":404061,"main_text_chars":361,"final_path":"/en/checkout","api_request_count":1,"console_errors":0,"javascript_errors":0,"failed_requests":0,"synthetic_product_present":true,"add_clicked":false}
+  ],
+  "waterfall": [
+    {"route":"/en","sample":1,"path":"/api/v1/public/restaurants/p2c-f6102100eff14f32/info","method":"GET","status":200,"content_length_bytes":603},
+    {"route":"/en","sample":2,"path":"/api/v1/public/restaurants/p2c-f6102100eff14f32/info","method":"GET","status":200,"content_length_bytes":603},
+    {"route":"/en/menu","sample":1,"path":"/api/v1/public/restaurants/p2c-f6102100eff14f32/info","method":"GET","status":200,"content_length_bytes":603},
+    {"route":"/en/menu","sample":1,"path":"/api/v1/public/restaurants/p2c-f6102100eff14f32/products?lang=en","method":"GET","status":200,"content_length_bytes":1408},
+    {"route":"/en/menu","sample":2,"path":"/api/v1/public/restaurants/p2c-f6102100eff14f32/info","method":"GET","status":200,"content_length_bytes":603},
+    {"route":"/en/menu","sample":2,"path":"/api/v1/public/restaurants/p2c-f6102100eff14f32/products?lang=en","method":"GET","status":200,"content_length_bytes":1408},
+    {"route":"/en/cart","sample":1,"path":"/api/v1/public/restaurants/p2c-f6102100eff14f32/info","method":"GET","status":200,"content_length_bytes":603},
+    {"route":"/en/cart","sample":1,"path":"/api/v1/public/themes/warm-comfort","method":"GET","status":404,"content_length_bytes":19},
+    {"route":"/en/cart","sample":2,"path":"/api/v1/public/restaurants/p2c-f6102100eff14f32/info","method":"GET","status":200,"content_length_bytes":603},
+    {"route":"/en/cart","sample":2,"path":"/api/v1/public/themes/warm-comfort","method":"GET","status":404,"content_length_bytes":19},
+    {"route":"/en/cart","sample":2,"path":"/api/v1/public/themes/warm-comfort","method":"GET","status":404,"content_length_bytes":19},
+    {"route":"/en/checkout","sample":1,"path":"/api/v1/public/themes/warm-comfort","method":"GET","status":404,"content_length_bytes":19},
+    {"route":"/en/checkout","sample":1,"path":"/api/v1/public/restaurants/p2c-f6102100eff14f32/info","method":"GET","status":200,"content_length_bytes":603},
+    {"route":"/en/checkout","sample":2,"path":"/api/v1/public/restaurants/p2c-f6102100eff14f32/info","method":"GET","status":200,"content_length_bytes":603}
+  ],
+  "product_detail_supported": false,
+  "non_read_only_api_requests": [],
+  "source_commit": "e400400b671437df275f686a84aa644e5b5a1811 + uncommitted Phase 2C candidate changes",
+  "profile_setup": "Production Storefront candidate container on disposable Phase 2C network. Browser API requests were routed to the host-published disposable API port so the browser and server-rendered app could both reach it.",
+  "known_fixture_issue": "The public warm-comfort theme endpoint returned 404 in cart/checkout samples; the Storefront fell back and rendered, but this produced console errors and request failures in cart samples.",
+  "generated_at": "2026-11-04T21:56:48.314Z"
+}

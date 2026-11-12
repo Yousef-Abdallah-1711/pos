@@ -1,8 +1,10 @@
 package http
 
 import (
+	"database/sql"
 	"encoding/json"
-	"fmt"
+	"errors"
+	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -29,7 +31,8 @@ func (h *CategoryHandler) ListCategories(w http.ResponseWriter, r *http.Request)
 
 	categories, err := h.repo.ListCategories(claims.TenantID, claims.RestaurantID)
 	if err != nil {
-		respondError(w, http.StatusInternalServerError, err.Error())
+		log.Printf("category list failed: %v", err)
+		respondError(w, http.StatusInternalServerError, "Failed to list categories")
 		return
 	}
 
@@ -50,7 +53,12 @@ func (h *CategoryHandler) GetCategory(w http.ResponseWriter, r *http.Request) {
 
 	category, err := h.repo.GetCategoryByID(claims.TenantID, claims.RestaurantID, id)
 	if err != nil {
-		respondError(w, http.StatusNotFound, "Category not found")
+		if errors.Is(err, sql.ErrNoRows) {
+			respondError(w, http.StatusNotFound, "Category not found")
+			return
+		}
+		log.Printf("category read failed: %v", err)
+		respondError(w, http.StatusInternalServerError, "Failed to get category")
 		return
 	}
 
@@ -72,15 +80,11 @@ func (h *CategoryHandler) CreateCategory(w http.ResponseWriter, r *http.Request)
 	}
 
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
-		fmt.Printf("ERROR: CreateCategory JSON decode failed: %v\n", err)
 		respondError(w, http.StatusBadRequest, "Invalid request body")
 		return
 	}
 
-	fmt.Printf("DEBUG: CreateCategory received - Name: '%s', NameAr: '%s'\n", input.Name, input.NameAr)
-
 	if input.Name == "" {
-		fmt.Println("ERROR: CreateCategory - Name is empty")
 		respondError(w, http.StatusBadRequest, "Name is required")
 		return
 	}
@@ -98,18 +102,20 @@ func (h *CategoryHandler) CreateCategory(w http.ResponseWriter, r *http.Request)
 
 	id, err := h.repo.CreateCategory(category)
 	if err != nil {
-		fmt.Printf("ERROR: CreateCategory repo failed: %v\n", err)
+		if errors.Is(err, sql.ErrNoRows) {
+			respondError(w, http.StatusBadRequest, "Invalid restaurant context")
+			return
+		}
+		log.Printf("category create failed: %v", err)
 		errMsg := err.Error()
 		// Check for constraint violations
 		if strings.Contains(errMsg, "duplicate key") || strings.Contains(errMsg, "unique_") {
 			respondError(w, http.StatusBadRequest, "A category with this name already exists")
 		} else {
-			respondError(w, http.StatusInternalServerError, errMsg)
+			respondError(w, http.StatusInternalServerError, "Failed to create category")
 		}
 		return
 	}
-
-	fmt.Printf("DEBUG: Category created successfully with ID: %d\n", id)
 	category.ID = id
 	respondJSON(w, http.StatusCreated, category)
 }
@@ -136,15 +142,11 @@ func (h *CategoryHandler) UpdateCategory(w http.ResponseWriter, r *http.Request)
 	}
 
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
-		fmt.Printf("ERROR: UpdateCategory JSON decode failed: %v\n", err)
 		respondError(w, http.StatusBadRequest, "Invalid request body")
 		return
 	}
 
-	fmt.Printf("DEBUG: UpdateCategory for ID %d - Name: '%s'\n", id, input.Name)
-
 	if input.Name == "" {
-		fmt.Println("ERROR: UpdateCategory - Name is empty")
 		respondError(w, http.StatusBadRequest, "Name is required")
 		return
 	}
@@ -162,18 +164,20 @@ func (h *CategoryHandler) UpdateCategory(w http.ResponseWriter, r *http.Request)
 	}
 
 	if err := h.repo.UpdateCategory(category); err != nil {
-		fmt.Printf("ERROR: UpdateCategory repo failed: %v\n", err)
+		if errors.Is(err, sql.ErrNoRows) {
+			respondError(w, http.StatusNotFound, "Category not found")
+			return
+		}
+		log.Printf("category update failed: %v", err)
 		errMsg := err.Error()
 		// Check for constraint violations
 		if strings.Contains(errMsg, "duplicate key") || strings.Contains(errMsg, "unique_") {
 			respondError(w, http.StatusBadRequest, "A category with this name already exists")
 		} else {
-			respondError(w, http.StatusInternalServerError, errMsg)
+			respondError(w, http.StatusInternalServerError, "Failed to update category")
 		}
 		return
 	}
-
-	fmt.Printf("DEBUG: Category updated successfully - ID: %d\n", id)
 	respondJSON(w, http.StatusOK, category)
 }
 
@@ -190,7 +194,12 @@ func (h *CategoryHandler) DeleteCategory(w http.ResponseWriter, r *http.Request)
 	}
 
 	if err := h.repo.DeleteCategory(claims.TenantID, claims.RestaurantID, id); err != nil {
-		respondError(w, http.StatusInternalServerError, err.Error())
+		if errors.Is(err, sql.ErrNoRows) {
+			respondError(w, http.StatusNotFound, "Category not found")
+			return
+		}
+		log.Printf("category delete failed: %v", err)
+		respondError(w, http.StatusInternalServerError, "Failed to delete category")
 		return
 	}
 

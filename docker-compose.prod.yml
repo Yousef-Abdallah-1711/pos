@@ -26,11 +26,17 @@ services:
     container_name: pos-postgres-prod
     command: ["postgres", "-c", "max_connections=200"]
     environment:
-      POSTGRES_USER: ${DB_USER:-postgres}
-      POSTGRES_PASSWORD: ${DB_PASSWORD:?set DB_PASSWORD}
+      # Bootstrap identity is only for PostgreSQL initialization/admin tasks. The API and
+      # migration process use separate, least-privilege roles below.
+      POSTGRES_USER: ${DB_BOOTSTRAP_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_BOOTSTRAP_PASSWORD:?set DB_BOOTSTRAP_PASSWORD}
       POSTGRES_DB: ${DB_NAME:-pos_saas}
+      POS_MIGRATOR_PASSWORD: ${MIGRATE_DB_PASSWORD:?set MIGRATE_DB_PASSWORD}
+      POS_APP_PASSWORD: ${DB_PASSWORD:?set DB_PASSWORD}
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./backend/scripts/db/create_runtime_roles.sql:/pos/create_runtime_roles.sql:ro
+      - ./backend/scripts/db/init-runtime-roles.sh:/docker-entrypoint-initdb.d/10-init-runtime-roles.sh:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
       interval: 10s
@@ -57,10 +63,12 @@ services:
       ENV: production
       DB_HOST: postgres
       DB_PORT: 5432
-      DB_USER: ${DB_USER:-postgres}
+      DB_USER: ${DB_USER:?set DB_USER=pos_app}
       DB_PASSWORD: ${DB_PASSWORD}
       DB_NAME: ${DB_NAME:-pos_saas}
       DB_SSLMODE: ${DB_SSLMODE:-disable}
+      MIGRATE_DB_USER: ${MIGRATE_DB_USER:?set MIGRATE_DB_USER=pos_migrator}
+      MIGRATE_DB_PASSWORD: ${MIGRATE_DB_PASSWORD:?set MIGRATE_DB_PASSWORD}
       JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET}
       JWT_EXPIRY: ${JWT_EXPIRY:-24h}
       LOG_LEVEL: ${LOG_LEVEL:-info}

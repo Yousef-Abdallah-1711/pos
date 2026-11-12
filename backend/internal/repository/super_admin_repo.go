@@ -622,7 +622,7 @@ func (r *SuperAdminRepository) GetUserByID(ctx context.Context, userID int64) (*
 
 // GenerateDashboardLoginToken generates a one-time token for dashboard access
 func (r *SuperAdminRepository) GenerateDashboardLoginToken(ctx context.Context, superAdminID, tenantID int64) (string, error) {
-	log.Printf("[SuperAdminRepository] GenerateDashboardLoginToken: superAdminID=%d, tenantID=%d\n", superAdminID, tenantID)
+	log.Printf("[SuperAdminRepository] Generating a one-time dashboard session for tenant %d\n", tenantID)
 
 	// Generate a random token
 	tokenBytes := make([]byte, 32)
@@ -644,15 +644,11 @@ func (r *SuperAdminRepository) GenerateDashboardLoginToken(ctx context.Context, 
 	}
 	dashboardTokenStore.Unlock()
 
-	log.Printf("[SuperAdminRepository] Dashboard login token stored: %s (first 16 chars) for tenant %d\n", token[:16], tenantID)
-
 	return token, nil
 }
 
 // ValidateDashboardLoginToken validates a one-time token and returns the tenant ID
 func (r *SuperAdminRepository) ValidateDashboardLoginToken(ctx context.Context, token string) (*DashboardLoginToken, error) {
-	log.Printf("[SuperAdminRepository] ValidateDashboardLoginToken: token=%s (first 16 chars)\n", token[:min(16, len(token))])
-
 	dashboardTokenStore.Lock()
 	defer dashboardTokenStore.Unlock()
 

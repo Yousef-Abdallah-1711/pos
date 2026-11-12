@@ -4,12 +4,18 @@ const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts')
 const isWindows = process.platform === 'win32'
 const enableCustomSplitChunks = process.env.NEXT_CUSTOM_SPLIT_CHUNKS === 'true'
 const isProd = process.env.NODE_ENV === 'production'
+const paymentFrameSrc = [
+  "'self'",
+  'http://localhost:8080',
+  'https://accept.paymob.com',
+  'https://*.paymob.com',
+].join(' ')
 
 const nextConfig = {
   reactStrictMode: true,
   // The dashboard currently has pre-existing type errors; Docker prod builds can opt out of the type gate.
   typescript: { ignoreBuildErrors: process.env.NEXT_IGNORE_BUILD_ERRORS === 'true' },
-  transpilePackages: ['@pos-saas/ui', '@pos-saas/types'],
+  transpilePackages: ['@pos-saas/ui', '@pos-saas/types', '@pos-saas/form-foundation'],
   images: {
     domains: ['localhost', 'images.unsplash.com'],
     // Enable AVIF for better compression (25-30% smaller than WebP)
@@ -172,7 +178,7 @@ const nextConfig = {
           {
             key: 'Content-Security-Policy',
             value:
-              "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://va.vercel-scripts.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; connect-src 'self' https: http: ws: wss:; font-src 'self' data:; frame-ancestors 'none'; base-uri 'self'; form-action 'self'",
+              `default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://va.vercel-scripts.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; connect-src 'self' https: http: ws: wss:; font-src 'self' data:; frame-src ${paymentFrameSrc}; frame-ancestors 'none'; base-uri 'self'; form-action 'self'`,
           },
           ...(isProd
             ? [

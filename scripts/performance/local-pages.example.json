@@ -1,0 +1,6 @@
+[
+  {
+    "path": "/dashboard/audit-logs",
+    "readySelector": "h1"
+  }
+]

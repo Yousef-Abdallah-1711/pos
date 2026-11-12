@@ -111,18 +111,26 @@ func (r *testPaymentRepo) CreatePayment(ctx context.Context, payment *domain.Pay
 	return id, nil
 }
 
-func (r *testPaymentRepo) GetPaymentByID(ctx context.Context, id int64) (*domain.Payment, error) {
+func (r *testPaymentRepo) GetPaymentByID(ctx context.Context, tenantID, id int64) (*domain.Payment, error) {
 	p, ok := r.payments[id]
-	if !ok {
+	if !ok || p.TenantID != tenantID {
 		return nil, fmt.Errorf("payment not found")
 	}
 	clone := *p
 	return &clone, nil
 }
 
-func (r *testPaymentRepo) GetPaymentByMerchantOrderID(ctx context.Context, merchantOrderID string) (*domain.Payment, error) {
+func (r *testPaymentRepo) GetPaymentTenantID(ctx context.Context, id int64) (int64, error) {
+	p, ok := r.payments[id]
+	if !ok {
+		return 0, fmt.Errorf("payment not found")
+	}
+	return p.TenantID, nil
+}
+
+func (r *testPaymentRepo) GetPaymentByMerchantOrderID(ctx context.Context, tenantID int64, merchantOrderID string) (*domain.Payment, error) {
 	for _, p := range r.payments {
-		if p.MerchantOrderID == merchantOrderID {
+		if p.TenantID == tenantID && p.MerchantOrderID == merchantOrderID {
 			clone := *p
 			return &clone, nil
 		}
@@ -130,8 +138,17 @@ func (r *testPaymentRepo) GetPaymentByMerchantOrderID(ctx context.Context, merch
 	return nil, fmt.Errorf("payment not found")
 }
 
-func (r *testPaymentRepo) GetPaymentByPaymobOrderID(ctx context.Context, paymobOrderID int64) (*domain.Payment, error) {
+func (r *testPaymentRepo) GetPaymentByPaymobOrderID(ctx context.Context, paymobOrderID int64, merchantOrderID string) (*domain.Payment, error) {
 	id, ok := r.orderToPayment[paymobOrderID]
+	if !ok && merchantOrderID != "" {
+		for paymentID, payment := range r.payments {
+			if payment.MerchantOrderID == merchantOrderID {
+				id = paymentID
+				ok = true
+				break
+			}
+		}
+	}
 	if !ok {
 		return nil, fmt.Errorf("payment not found")
 	}
@@ -143,9 +160,9 @@ func (r *testPaymentRepo) GetPaymentByPaymobOrderID(ctx context.Context, paymobO
 	return &clone, nil
 }
 
-func (r *testPaymentRepo) UpdatePaymentOrder(ctx context.Context, id int64, paymobOrderID int64, authToken string) error {
+func (r *testPaymentRepo) UpdatePaymentOrder(ctx context.Context, tenantID, id int64, paymobOrderID int64, authToken string) error {
 	p, ok := r.payments[id]
-	if !ok {
+	if !ok || p.TenantID != tenantID {
 		return fmt.Errorf("payment not found")
 	}
 	p.PaymobOrderID = &paymobOrderID
@@ -153,9 +170,9 @@ func (r *testPaymentRepo) UpdatePaymentOrder(ctx context.Context, id int64, paym
 	return nil
 }
 
-func (r *testPaymentRepo) UpdatePaymentStatus(ctx context.Context, id int64, status string, txnID *int64, cardLastFour *string, cardBrand *string, errorMsg *string, paidAt *time.Time) error {
+func (r *testPaymentRepo) UpdatePaymentStatus(ctx context.Context, tenantID, id int64, status string, txnID *int64, cardLastFour *string, cardBrand *string, errorMsg *string, paidAt *time.Time) error {
 	p, ok := r.payments[id]
-	if !ok {
+	if !ok || p.TenantID != tenantID {
 		return fmt.Errorf("payment not found")
 	}
 	r.updateStatusCnt++
@@ -344,7 +361,7 @@ func TestPaymentUseCaseInitiatePaymentCreatesPendingRecord(t *testing.T) {
 		t.Fatalf("expected iframe URL to contain payment key, got %s", resp.IframeURL)
 	}
 
-	created, err := repo.GetPaymentByID(context.Background(), resp.PaymentID)
+	created, err := repo.GetPaymentByID(context.Background(), 1, resp.PaymentID)
 	if err != nil {
 		t.Fatalf("failed to load created payment: %v", err)
 	}
@@ -387,7 +404,7 @@ func TestPaymentUseCaseHandleWebhookDuplicateSuccessIsIdempotent(t *testing.T) {
 	if err != nil {
 		t.Fatalf("CreatePayment failed: %v", err)
 	}
-	if err := repo.UpdatePaymentOrder(context.Background(), paymentID, 12345, "auth"); err != nil {
+	if err := repo.UpdatePaymentOrder(context.Background(), 1, paymentID, 12345, "auth"); err != nil {
 		t.Fatalf("UpdatePaymentOrder failed: %v", err)
 	}
 
@@ -438,7 +455,7 @@ func TestPaymentUseCaseHandleWebhookFailedPaymentMarksFailed(t *testing.T) {
 		t.Fatalf("HandleWebhook failed payload returned error: %v", err)
 	}
 
-	p, err := repo.GetPaymentByID(context.Background(), initResp.PaymentID)
+	p, err := repo.GetPaymentByID(context.Background(), 1, initResp.PaymentID)
 	if err != nil {
 		t.Fatalf("GetPaymentByID failed: %v", err)
 	}
@@ -447,6 +464,41 @@ func TestPaymentUseCaseHandleWebhookFailedPaymentMarksFailed(t *testing.T) {
 	}
 	if repo.updateStatusCnt == 0 {
 		t.Fatal("expected UpdatePaymentStatus to be called")
+	}
+}
+
+func TestPaymentUseCaseHandleWebhookPendingPaymentDoesNotMutateState(t *testing.T) {
+	repo := newTestPaymentRepo()
+	subRepo := newTestSubscriptionRepo()
+	client := &testPaymobClient{verifyHMAC: true, orderID: 555}
+	uc := NewPaymentUseCase(repo, subRepo, nil, client, nil)
+
+	initResp, err := uc.InitiatePayment(context.Background(), 1, 1, "monthly", map[string]string{})
+	if err != nil {
+		t.Fatalf("InitiatePayment failed: %v", err)
+	}
+
+	payload := webhookPayloadForTest(initResp.PaymobOrderID, 50000, false, true, false)
+	raw, err := json.Marshal(payload)
+	if err != nil {
+		t.Fatalf("marshal pending webhook: %v", err)
+	}
+	if err := uc.HandleWebhook(context.Background(), raw, payload, "ok"); err != nil {
+		t.Fatalf("HandleWebhook pending event failed: %v", err)
+	}
+
+	payment, err := repo.GetPaymentByID(context.Background(), 1, initResp.PaymentID)
+	if err != nil {
+		t.Fatalf("GetPaymentByID failed: %v", err)
+	}
+	if payment.Status != domain.PaymentStatusPending {
+		t.Fatalf("pending event changed payment status: got %q", payment.Status)
+	}
+	if repo.updateStatusCnt != 0 {
+		t.Fatalf("pending event attempted a status mutation %d times", repo.updateStatusCnt)
+	}
+	if len(subRepo.history) != 1 || subRepo.history[0].Action != domain.ActionPaymentInitiated {
+		t.Fatalf("pending event wrote unexpected subscription history: %+v", subRepo.history)
 	}
 }
 

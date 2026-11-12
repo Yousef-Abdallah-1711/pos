@@ -80,18 +80,26 @@ func (r *handlerTestPaymentRepo) CreatePayment(ctx context.Context, payment *dom
 	return id, nil
 }
 
-func (r *handlerTestPaymentRepo) GetPaymentByID(ctx context.Context, id int64) (*domain.Payment, error) {
+func (r *handlerTestPaymentRepo) GetPaymentByID(ctx context.Context, tenantID, id int64) (*domain.Payment, error) {
 	p, ok := r.payments[id]
-	if !ok {
+	if !ok || p.TenantID != tenantID {
 		return nil, fmt.Errorf("payment not found")
 	}
 	clone := *p
 	return &clone, nil
 }
 
-func (r *handlerTestPaymentRepo) GetPaymentByMerchantOrderID(ctx context.Context, merchantOrderID string) (*domain.Payment, error) {
+func (r *handlerTestPaymentRepo) GetPaymentTenantID(ctx context.Context, id int64) (int64, error) {
+	p, ok := r.payments[id]
+	if !ok {
+		return 0, fmt.Errorf("payment not found")
+	}
+	return p.TenantID, nil
+}
+
+func (r *handlerTestPaymentRepo) GetPaymentByMerchantOrderID(ctx context.Context, tenantID int64, merchantOrderID string) (*domain.Payment, error) {
 	for _, p := range r.payments {
-		if p.MerchantOrderID == merchantOrderID {
+		if p.TenantID == tenantID && p.MerchantOrderID == merchantOrderID {
 			clone := *p
 			return &clone, nil
 		}
@@ -112,9 +120,9 @@ func (r *handlerTestPaymentRepo) GetPaymentByPaymobOrderID(ctx context.Context, 
 	return &clone, nil
 }
 
-func (r *handlerTestPaymentRepo) UpdatePaymentOrder(ctx context.Context, id int64, paymobOrderID int64, authToken string) error {
+func (r *handlerTestPaymentRepo) UpdatePaymentOrder(ctx context.Context, tenantID, id int64, paymobOrderID int64, authToken string) error {
 	p, ok := r.payments[id]
-	if !ok {
+	if !ok || p.TenantID != tenantID {
 		return fmt.Errorf("payment not found")
 	}
 	p.PaymobOrderID = &paymobOrderID
@@ -122,9 +130,9 @@ func (r *handlerTestPaymentRepo) UpdatePaymentOrder(ctx context.Context, id int6
 	return nil
 }
 
-func (r *handlerTestPaymentRepo) UpdatePaymentStatus(ctx context.Context, id int64, status string, txnID *int64, cardLastFour *string, cardBrand *string, errorMsg *string, paidAt *time.Time) error {
+func (r *handlerTestPaymentRepo) UpdatePaymentStatus(ctx context.Context, tenantID, id int64, status string, txnID *int64, cardLastFour *string, cardBrand *string, errorMsg *string, paidAt *time.Time) error {
 	p, ok := r.payments[id]
-	if !ok {
+	if !ok || p.TenantID != tenantID {
 		return fmt.Errorf("payment not found")
 	}
 	p.Status = status

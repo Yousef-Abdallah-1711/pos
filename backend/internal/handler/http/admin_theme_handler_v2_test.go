@@ -11,7 +11,6 @@ import (
 	"time"
 
 	"pos-saas/internal/domain"
-	"pos-saas/internal/service"
 )
 
 // TestNewAdminThemeHandlerV2 tests handler creation
@@ -356,15 +355,20 @@ func (m *mockThemeService) CreateTheme(ctx context.Context, req *domain.ThemeCre
 	return theme, nil
 }
 
-func (m *mockThemeService) GetTheme(ctx context.Context, id int64) (*domain.Theme, error) {
+func (m *mockThemeService) GetTheme(ctx context.Context, tenantID, restaurantID, id int64) (*domain.Theme, error) {
 	if theme, ok := m.themes[id]; ok {
-		return theme, nil
+		if theme.TenantID == tenantID && theme.RestaurantID == restaurantID {
+			return theme, nil
+		}
 	}
 	return nil, nil
 }
 
-func (m *mockThemeService) UpdateTheme(ctx context.Context, id int64, req *domain.ThemeUpdateRequest, updatedBy int64) (*domain.Theme, error) {
+func (m *mockThemeService) UpdateTheme(ctx context.Context, tenantID, restaurantID, id int64, req *domain.ThemeUpdateRequest, updatedBy int64) (*domain.Theme, error) {
 	if theme, ok := m.themes[id]; ok {
+		if theme.TenantID != tenantID || theme.RestaurantID != restaurantID {
+			return nil, nil
+		}
 		if req.Name != "" {
 			theme.Name = req.Name
 		}
@@ -374,15 +378,17 @@ func (m *mockThemeService) UpdateTheme(ctx context.Context, id int64, req *domai
 	return nil, nil
 }
 
-func (m *mockThemeService) DeleteTheme(ctx context.Context, id int64) error {
-	delete(m.themes, id)
+func (m *mockThemeService) DeleteTheme(ctx context.Context, tenantID, restaurantID, id int64) error {
+	if theme, ok := m.themes[id]; ok && theme.TenantID == tenantID && theme.RestaurantID == restaurantID {
+		delete(m.themes, id)
+	}
 	return nil
 }
 
-func (m *mockThemeService) ListThemes(ctx context.Context, tenantID int64, page, pageSize int) (*domain.ThemeListResponse, error) {
+func (m *mockThemeService) ListThemes(ctx context.Context, tenantID, restaurantID int64, page, pageSize int) (*domain.ThemeListResponse, error) {
 	var themes []*domain.Theme
 	for _, theme := range m.themes {
-		if theme.TenantID == tenantID {
+		if theme.TenantID == tenantID && theme.RestaurantID == restaurantID {
 			themes = append(themes, theme)
 		}
 	}
@@ -395,9 +401,11 @@ func (m *mockThemeService) ListThemes(ctx context.Context, tenantID int64, page,
 	}, nil
 }
 
-func (m *mockThemeService) ActivateTheme(ctx context.Context, id int64) error {
+func (m *mockThemeService) ActivateTheme(ctx context.Context, tenantID, restaurantID, id int64) error {
 	if theme, ok := m.themes[id]; ok {
-		theme.IsActive = true
+		if theme.TenantID == tenantID && theme.RestaurantID == restaurantID {
+			theme.IsActive = true
+		}
 		return nil
 	}
 	return nil

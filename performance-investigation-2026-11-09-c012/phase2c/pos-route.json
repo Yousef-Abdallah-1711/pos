@@ -1,0 +1,6 @@
+[
+  {
+    "path": "/en/dashboard/pos",
+    "readySelector": "#pos-product-search"
+  }
+]

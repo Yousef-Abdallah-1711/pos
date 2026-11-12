@@ -17,8 +17,8 @@ func TestWithTenantTx_SetsTransactionLocalContextThenCommits(t *testing.T) {
 	defer db.Close()
 
 	mock.ExpectBegin()
-	mock.ExpectExec(`SELECT set_config\(\$1, \$2, true\), set_config\(\$3, \$4, true\)`).
-		WithArgs(TenantSetting, "7", RestaurantSetting, "11").
+	mock.ExpectExec(`SELECT set_config`).
+		WithArgs(TenantSetting, "7", RestaurantSetting, "11", UserSetting, "").
 		WillReturnResult(sqlmock.NewResult(0, 0))
 	mock.ExpectCommit()
 
@@ -41,9 +41,26 @@ func TestWithTenantTx_TenantWideWorkHasEmptyRestaurant(t *testing.T) {
 	db, mock, _ := sqlmock.New()
 	defer db.Close()
 	mock.ExpectBegin()
-	mock.ExpectExec(`set_config`).WithArgs(TenantSetting, "7", RestaurantSetting, "").WillReturnResult(sqlmock.NewResult(0, 0))
+	mock.ExpectExec(`set_config`).WithArgs(TenantSetting, "7", RestaurantSetting, "", UserSetting, "").WillReturnResult(sqlmock.NewResult(0, 0))
 	mock.ExpectCommit()
 	if err := WithTenantTx(context.Background(), db, 7, 0, func(*sql.Tx) error { return nil }); err != nil {
+		t.Fatal(err)
+	}
+	if err := mock.ExpectationsWereMet(); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestWithTenantUserTxSetsUserContextTransactionLocally(t *testing.T) {
+	db, mock, err := sqlmock.New()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer db.Close()
+	mock.ExpectBegin()
+	mock.ExpectExec(`set_config`).WithArgs(TenantSetting, "7", RestaurantSetting, "11", UserSetting, "23").WillReturnResult(sqlmock.NewResult(0, 0))
+	mock.ExpectCommit()
+	if err := WithTenantUserTx(context.Background(), db, 7, 11, 23, func(*sql.Tx) error { return nil }); err != nil {
 		t.Fatal(err)
 	}
 	if err := mock.ExpectationsWereMet(); err != nil {
@@ -111,6 +128,9 @@ func TestWithTenantTx_RejectsInvalidIdentityWithoutTouchingTheDatabase(t *testin
 		if err := WithTenantTx(context.Background(), db, c[0], c[1], func(*sql.Tx) error { return nil }); err == nil {
 			t.Errorf("tenant=%d restaurant=%d must be rejected", c[0], c[1])
 		}
+	}
+	if err := WithTenantUserTx(context.Background(), db, 1, 1, 0, func(*sql.Tx) error { return nil }); err == nil {
+		t.Error("user id must be positive")
 	}
 	if err := WithTenantTx(context.Background(), nil, 1, 1, func(*sql.Tx) error { return nil }); err == nil {
 		t.Error("nil db must be rejected")

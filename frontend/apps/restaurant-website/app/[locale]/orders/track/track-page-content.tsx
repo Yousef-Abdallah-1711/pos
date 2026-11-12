@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { OrderStatusTracker, type OrderStatus } from '@/components/commerce/order-status-tracker';
 import { Button } from '@pos-saas/ui';
@@ -100,7 +100,7 @@ export default function TrackPageContent({ initialOrderNumber }: TrackPageConten
   const pathname = usePathname();
   const locale = getLocaleFromPath(pathname);
   const isRTL = locale === 'ar';
-  const t = createTranslator(locale);
+  const t = useMemo(() => createTranslator(locale), [locale]);
 
   const [orderNumber, setOrderNumber] = useState('');
   // Phone used at checkout: proves ownership when the order was placed from another device
@@ -111,7 +111,7 @@ export default function TrackPageContent({ initialOrderNumber }: TrackPageConten
   const [trackedOrder, setTrackedOrder] = useState<TrackedOrder | null>(null);
   const [statusTimeline, setStatusTimeline] = useState<OrderStatus[]>([]);
 
-  const fetchOrder = async (numberValue: string) => {
+  const fetchOrder = useCallback(async (numberValue: string) => {
     const trimmed = numberValue.trim();
     if (!trimmed) return;
 
@@ -155,7 +155,7 @@ export default function TrackPageContent({ initialOrderNumber }: TrackPageConten
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [phone, t]);
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -178,7 +178,7 @@ export default function TrackPageContent({ initialOrderNumber }: TrackPageConten
     setOrderNumber(initialOrderNumber);
     setSearchSubmitted(true);
     fetchOrder(initialOrderNumber);
-  }, [initialOrderNumber]);
+  }, [fetchOrder, initialOrderNumber]);
 
   const getEstimatedTime = () => {
     if (!trackedOrder?.estimatedDelivery) {

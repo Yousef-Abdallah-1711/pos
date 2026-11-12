@@ -1,155 +1,113 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { useTheme } from 'next-themes'
-import { useLanguage } from '@/contexts/LanguageContext'
-import { Button } from '@/components/ui/button'
-import { Moon, Sun, Menu, X, ChefHat, Globe } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
+import { ArrowLeft, ArrowRight, Globe2, Menu, X } from 'lucide-react'
+import { useLanguage } from '@/contexts/LanguageContext'
+import { BrandMark } from '@/components/BrandMark'
 
 export function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const [scrolled, setScrolled] = useState(false)
-  const [mounted, setMounted] = useState(false)
-  const { resolvedTheme, setTheme } = useTheme()
   const { language, setLanguage, t, dir } = useLanguage()
-
-  useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 20)
-    window.addEventListener('scroll', handleScroll)
-    return () => window.removeEventListener('scroll', handleScroll)
-  }, [])
-
-  useEffect(() => {
-    setMounted(true)
-  }, [])
-
-  const isDarkTheme = mounted && resolvedTheme === 'dark'
-
+  const pathname = usePathname() ?? ''
   const locale = language
   const otherLocale = locale === 'en' ? 'ar' : 'en'
-  const otherLocaleLabel = locale === 'en' ? 'العربية' : 'English'
-
-  const navLinks = [
-    { href: '#features', label: t.nav.features },
-    { href: '#pricing', label: t.nav.pricing },
-    { href: '#about', label: t.nav.about },
-    { href: '#contact', label: t.nav.contact },
+  const DirectionArrow = dir === 'rtl' ? ArrowLeft : ArrowRight
+  const isLoginPage = pathname.endsWith('/auth/login')
+  const isRegisterPage = pathname.endsWith('/auth/register')
+  const isLandingPage = pathname === '/en' || pathname === '/ar'
+  const menuButtonRef = useRef<HTMLButtonElement>(null)
+  const mobileNavRef = useRef<HTMLDivElement>(null)
+  const sectionHref = (sectionId: string) => isLandingPage ? `#${sectionId}` : `/${locale}#${sectionId}`
+  const links = [
+    { href: sectionHref('product'), label: t.nav.features },
+    { href: sectionHref('how-it-works'), label: t.nav.howItWorks },
+    { href: sectionHref('audience'), label: t.nav.audience },
+    { href: sectionHref('faq'), label: t.nav.faq },
   ]
 
+  const closeMenu = () => setMobileMenuOpen(false)
+
+  useEffect(() => {
+    if (!mobileMenuOpen) return
+
+    const previousOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    mobileNavRef.current?.querySelector<HTMLAnchorElement>('a')?.focus()
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape') return
+      setMobileMenuOpen(false)
+      menuButtonRef.current?.focus()
+    }
+
+    document.addEventListener('keydown', handleKeyDown)
+    return () => {
+      document.body.style.overflow = previousOverflow
+      document.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [mobileMenuOpen])
+
   return (
-    <nav
-      dir={dir}
-      className={`fixed top-0 w-full z-50 transition-all duration-300 ${
-        scrolled
-          ? 'bg-white/95 dark:bg-gray-900/95 backdrop-blur-md shadow-sm border-b border-gray-200/50 dark:border-gray-800/50'
-          : 'bg-transparent'
-      }`}
-    >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          {/* Logo */}
-          <Link href={`/${locale}`} className="flex items-center gap-2.5 font-bold text-xl group">
-            <div className="w-9 h-9 bg-gradient-to-br from-orange-500 to-red-600 rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-orange-200 dark:group-hover:shadow-orange-900 transition-shadow">
-              <ChefHat className="h-5 w-5 text-white" />
-            </div>
-            <span className="hidden sm:inline text-gray-900 dark:text-white font-extrabold tracking-tight">
-              Restaurant<span className="text-orange-500">POS</span>
-            </span>
-          </Link>
+    <header className="poos-header" dir={dir}>
+      <nav className="poos-header__inner poos-shell" aria-label={t.nav.mainNavigation}>
+        <BrandMark href={`/${locale}`} label="POOS" />
 
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-1">
-            {navLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className="px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100/80 dark:hover:bg-gray-800/80 rounded-lg transition-all"
-              >
-                {link.label}
-              </Link>
-            ))}
-          </div>
-
-          {/* Actions */}
-          <div className="flex items-center gap-1.5">
-            {/* Theme Toggle */}
-            <button
-              onClick={() => setTheme(isDarkTheme ? 'light' : 'dark')}
-              className="p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
-              aria-label="Toggle theme"
-            >
-              {mounted ? (
-                isDarkTheme ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />
-              ) : (
-                <Moon className="h-5 w-5" />
-              )}
-            </button>
-
-            {/* Language Toggle */}
-            <button
-              onClick={() => setLanguage(otherLocale as 'en' | 'ar')}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
-              aria-label="Switch language"
-            >
-              <Globe className="h-4 w-4" />
-              <span>{otherLocaleLabel}</span>
-            </button>
-
-            {/* Desktop Buttons */}
-            <div className="hidden md:flex items-center gap-2 ms-2">
-              <Button variant="ghost" size="sm" asChild>
-                <Link href={`/${locale}/auth/login`}>{t.nav.login}</Link>
-              </Button>
-              <Button
-                size="sm"
-                asChild
-                className="bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white shadow-md hover:shadow-orange-200 dark:hover:shadow-orange-900 border-0 transition-all"
-              >
-                <Link href={`/${locale}/auth/register`}>{t.nav.getStarted}</Link>
-              </Button>
-            </div>
-
-            {/* Mobile Menu Button */}
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden p-2 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
-              aria-label="Toggle menu"
-            >
-              {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-            </button>
-          </div>
+        <div className="poos-header__links">
+          {links.map((link) => (
+            <a key={link.href} href={link.href} onClick={closeMenu}>{link.label}</a>
+          ))}
         </div>
-      </div>
 
-      {/* Mobile Menu */}
+        <div className="poos-header__actions">
+          <button
+            type="button"
+            className="poos-language"
+            onClick={() => setLanguage(otherLocale)}
+            aria-label={t.nav.switchLanguage}
+          >
+            <Globe2 aria-hidden="true" size={18} />
+            <span>{otherLocale === 'ar' ? 'العربية' : 'English'}</span>
+          </button>
+          {!isLoginPage && <Link className="poos-header__login" href={`/${locale}/auth/login`}>{t.nav.login}</Link>}
+          {!isRegisterPage && (
+            <Link className="poos-button poos-header__start" href={`/${locale}/auth/register`}>
+              {t.nav.getStarted}
+              <DirectionArrow aria-hidden="true" size={17} />
+            </Link>
+          )}
+          <button
+            type="button"
+            className="poos-menu-toggle"
+            ref={menuButtonRef}
+            onClick={() => setMobileMenuOpen((open) => !open)}
+            aria-label={mobileMenuOpen ? t.nav.closeMenu : t.nav.openMenu}
+            aria-expanded={mobileMenuOpen}
+            aria-controls="poos-mobile-navigation"
+          >
+            {mobileMenuOpen ? <X aria-hidden="true" size={23} /> : <Menu aria-hidden="true" size={23} />}
+          </button>
+        </div>
+      </nav>
+
       {mobileMenuOpen && (
-        <div className="md:hidden border-t border-gray-200 dark:border-gray-800 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md">
-          <div className="px-4 py-4 space-y-1">
-            {navLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className="block px-3 py-2.5 text-base font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-all"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                {link.label}
-              </Link>
+        <div id="poos-mobile-navigation" ref={mobileNavRef} className="poos-mobile-nav" dir={dir}>
+          <div className="poos-shell">
+            {links.map((link) => (
+              <a key={link.href} href={link.href} onClick={closeMenu}>{link.label}</a>
             ))}
-            <div className="pt-4 mt-4 border-t border-gray-200 dark:border-gray-800 space-y-2">
-              <Button variant="outline" className="w-full" asChild>
-                <Link href={`/${locale}/auth/login`}>{t.nav.login}</Link>
-              </Button>
-              <Button
-                className="w-full bg-gradient-to-r from-orange-500 to-red-600 text-white border-0"
-                asChild
-              >
-                <Link href={`/${locale}/auth/register`}>{t.nav.getStarted}</Link>
-              </Button>
+            <div className="poos-mobile-nav__actions">
+              <button type="button" className="poos-language" onClick={() => { setLanguage(otherLocale); closeMenu() }} aria-label={t.nav.switchLanguage}>
+                <Globe2 aria-hidden="true" size={18} />
+                <span>{otherLocale === 'ar' ? 'العربية' : 'English'}</span>
+              </button>
+              {!isLoginPage && <Link className="poos-button poos-button-secondary" href={`/${locale}/auth/login`} onClick={closeMenu}>{t.nav.login}</Link>}
+              {!isRegisterPage && <Link className="poos-button" href={`/${locale}/auth/register`} onClick={closeMenu}>{t.nav.getStarted}</Link>}
             </div>
           </div>
         </div>
       )}
-    </nav>
+    </header>
   )
 }

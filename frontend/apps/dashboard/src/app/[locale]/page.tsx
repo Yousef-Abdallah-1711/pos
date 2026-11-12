@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
+import { getDashboardLoginUrl } from '@/lib/authSession'
 import { useAuthStore } from '@/stores/authStore'
 import { getConfig } from '@/lib/config'
 
@@ -9,7 +10,6 @@ export default function LocaleHomePage() {
   const router = useRouter()
   const pathname = usePathname()
   const user = useAuthStore((state) => state.user)
-  const token = useAuthStore((state) => state.token)
 
   // Extract locale from pathname (e.g., /en -> 'en')
   const pathParts = pathname.split('/').filter(Boolean)
@@ -18,8 +18,8 @@ export default function LocaleHomePage() {
   // Check if this is a valid locale (simple check - just lowercase letters)
   const isValidLocale = /^[a-z]{2}$/.test(locale)
 
-  // Check if authenticated by checking if user and token exist
-  const isAuthenticated = !!(user && token)
+  // Cookie-backed auth: user presence indicates authenticated dashboard state.
+  const isAuthenticated = !!user
 
   useEffect(() => {
     // Don't redirect if locale is invalid (e.g., /dashboard was interpreted as locale)
@@ -40,7 +40,7 @@ export default function LocaleHomePage() {
     if (isAuthenticated) {
       router.replace(`/${locale}/dashboard`)
     } else {
-      window.location.href = `${getConfig().landingUrl}/auth/login`
+      window.location.href = getDashboardLoginUrl(pathname)
     }
   }, [isAuthenticated, user, router, locale, isValidLocale])
 

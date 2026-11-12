@@ -4,7 +4,7 @@ import { FloorPlanErrorBoundary } from './FloorPlanErrorBoundary'
 
 const t = (path: string, fallback?: string) => fallback ?? path
 
-function CrashComponent() {
+function CrashComponent(): React.ReactNode {
   throw new Error('floor plan crash')
 }
 

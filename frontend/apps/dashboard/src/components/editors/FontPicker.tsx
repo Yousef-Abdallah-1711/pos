@@ -487,11 +487,13 @@ export function FontPicker({
 
           {/* Font Size */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <label htmlFor="font-size" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               {tx('Font Size', 'ÃƒËœÃ‚Â­ÃƒËœÃ‚Â¬Ãƒâ„¢Ã¢â‚¬Â¦ ÃƒËœÃ‚Â§Ãƒâ„¢Ã¢â‚¬Å¾ÃƒËœÃ‚Â®ÃƒËœÃ‚Â·')}: {fontConfig.fontSize || 16}px
             </label>
             <input
+              id="font-size"
               type="range"
+              aria-label="Font Size"
               min="10"
               max="32"
               value={fontConfig.fontSize || 16}
@@ -507,6 +509,7 @@ export function FontPicker({
             </label>
             <input
               type="range"
+              aria-label="Line Height"
               min="1"
               max="2"
               step="0.1"
