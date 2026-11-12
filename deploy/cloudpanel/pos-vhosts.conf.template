@@ -9,8 +9,7 @@ server {
 }
 
 server {
-    listen 443 ssl;
-    http2 on;
+    listen 443 ssl http2;
     server_name pos.rakmyat.online;
     # CloudPanel-managed certificate paths must replace these placeholders.
     ssl_certificate {{POS_APEX_CERT}};
@@ -30,8 +29,7 @@ server {
 }
 
 server {
-    listen 443 ssl;
-    http2 on;
+    listen 443 ssl http2;
     server_name pos.app.rakmyat.online;
     ssl_certificate {{POS_DASHBOARD_CERT}};
     ssl_certificate_key {{POS_DASHBOARD_KEY}};
@@ -48,8 +46,7 @@ server {
 }
 
 server {
-    listen 443 ssl;
-    http2 on;
+    listen 443 ssl http2;
     server_name admin.pos.rakmyat.online;
     ssl_certificate {{POS_ADMIN_CERT}};
     ssl_certificate_key {{POS_ADMIN_KEY}};
@@ -66,8 +63,7 @@ server {
 }
 
 server {
-    listen 443 ssl;
-    http2 on;
+    listen 443 ssl http2;
     server_name api.pos.rakmyat.online;
     ssl_certificate {{POS_API_CERT}};
     ssl_certificate_key {{POS_API_KEY}};
@@ -96,8 +92,7 @@ server {
 }
 
 server {
-    listen 443 ssl;
-    http2 on;
+    listen 443 ssl http2;
     server_name *.restaurants.pos.rakmyat.online;
     ssl_certificate {{POS_RESTAURANT_WILDCARD_CERT}};
     ssl_certificate_key {{POS_RESTAURANT_WILDCARD_KEY}};
