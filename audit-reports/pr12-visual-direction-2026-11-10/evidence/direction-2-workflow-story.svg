@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1000" viewBox="0 0 1600 1000" role="img" aria-labelledby="title desc">
+  <title id="title">Direction 2 — Interactive restaurant workflow concept</title>
+  <desc id="desc">A dark workflow-led landing-page wireframe. Product-state labels and real captures are explicitly pending verification; this is not an application screenshot.</desc>
+  <rect width="1600" height="1000" fill="#171327"/>
+  <text x="72" y="64" fill="#C4B5FD" font-family="Arial,sans-serif" font-size="17" font-weight="700" letter-spacing="3">POOS / VISUAL AUDIT / CONCEPT 02</text>
+  <text x="72" y="116" fill="#FFFFFF" font-family="Arial,sans-serif" font-size="36" font-weight="700">Interactive restaurant workflow</text>
+  <text x="72" y="151" fill="#D9D1EB" font-family="Arial,sans-serif" font-size="18">Make connected work the story; use only verified states and transitions.</text>
+  <path d="M72 191H1528" stroke="#6D28D9" stroke-width="2"/>
+  <rect x="72" y="220" width="1456" height="120" rx="22" fill="#211B36" stroke="#51416F"/>
+  <rect x="98" y="247" width="36" height="36" rx="10" fill="#6D28D9"/>
+  <path d="M107 257h16m-16 7h11m-11 7h16" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+  <text x="151" y="272" fill="#fff" font-family="Arial,sans-serif" font-size="20" font-weight="700">POOS</text>
+  <text x="662" y="273" fill="#D9D1EB" font-family="Arial,sans-serif" font-size="16">المنتج</text>
+  <text x="760" y="273" fill="#D9D1EB" font-family="Arial,sans-serif" font-size="16">رحلة الطلب</text>
+  <text x="891" y="273" fill="#D9D1EB" font-family="Arial,sans-serif" font-size="16">الأسئلة</text>
+  <text x="1134" y="273" fill="#FFFFFF" font-family="Arial,sans-serif" font-size="16">English</text>
+  <text x="1270" y="273" fill="#FFFFFF" font-family="Arial,sans-serif" font-size="16">دخول</text>
+  <rect x="1370" y="242" width="132" height="48" rx="13" fill="#6D28D9"/>
+  <text x="1392" y="272" fill="#fff" font-family="Arial,sans-serif" font-size="15" font-weight="700">ابدأ مع POOS</text>
+  <text x="1110" y="405" fill="#C4B5FD" font-family="Arial,sans-serif" font-size="14" font-weight="700" letter-spacing="2">منظومة مطعم واحدة</text>
+  <text x="1110" y="465" fill="#FFFFFF" font-family="Arial,sans-serif" font-size="40" font-weight="700">اعرض اتصال العمل</text>
+  <text x="1110" y="516" fill="#FFFFFF" font-family="Arial,sans-serif" font-size="40" font-weight="700">من أول شاشة إلى التالية.</text>
+  <text x="1110" y="564" fill="#D9D1EB" font-family="Arial,sans-serif" font-size="18">تفاعل يشرح رحلة حقيقية بعد التحقق من</text>
+  <text x="1110" y="591" fill="#D9D1EB" font-family="Arial,sans-serif" font-size="18">تسميات الحالات وانتقالاتها في المنتج.</text>
+  <rect x="1332" y="619" width="170" height="48" rx="13" fill="#6D28D9"/>
+  <text x="1351" y="649" fill="#fff" font-family="Arial,sans-serif" font-size="15" font-weight="700">أنشئ مساحة مطعمك</text>
+  <rect x="72" y="382" width="968" height="282" rx="24" fill="#211B36" stroke="#51416F"/>
+  <text x="104" y="420" fill="#C4B5FD" font-family="Arial,sans-serif" font-size="14" font-weight="700" letter-spacing="2">PRODUCT PROOF / AUTHENTIC CAPTURE REQUIRED</text>
+  <rect x="105" y="447" width="902" height="180" rx="12" fill="#171327" stroke="#806AA9" stroke-dasharray="9 7"/>
+  <text x="357" y="520" fill="#FFFFFF" font-family="Arial,sans-serif" font-size="20" font-weight="700">POS SCREEN → KDS SCREEN</text>
+  <text x="337" y="553" fill="#C4B5FD" font-family="Arial,sans-serif" font-size="15">Conceptual relationship only; verify the real event model first.</text>
+  <path d="M110 738H1490" stroke="#51416F" stroke-width="2"/>
+  <circle cx="210" cy="738" r="16" fill="#6D28D9"/><circle cx="595" cy="738" r="16" fill="#6D28D9"/><circle cx="980" cy="738" r="16" fill="#6D28D9"/><circle cx="1365" cy="738" r="16" fill="#6D28D9"/>
+  <text x="130" y="786" fill="#fff" font-family="Arial,sans-serif" font-size="15" font-weight="700">STATE LABEL</text>
+  <text x="515" y="786" fill="#fff" font-family="Arial,sans-serif" font-size="15" font-weight="700">STATE LABEL</text>
+  <text x="900" y="786" fill="#fff" font-family="Arial,sans-serif" font-size="15" font-weight="700">STATE LABEL</text>
+  <text x="1285" y="786" fill="#fff" font-family="Arial,sans-serif" font-size="15" font-weight="700">STATE LABEL</text>
+  <text x="130" y="813" fill="#BDB4CF" font-family="Arial,sans-serif" font-size="12">replace only with backend-verified wording</text>
+  <text x="515" y="813" fill="#BDB4CF" font-family="Arial,sans-serif" font-size="12">replace only with backend-verified wording</text>
+  <text x="900" y="813" fill="#BDB4CF" font-family="Arial,sans-serif" font-size="12">replace only with backend-verified wording</text>
+  <text x="1285" y="813" fill="#BDB4CF" font-family="Arial,sans-serif" font-size="12">replace only with backend-verified wording</text>
+  <rect x="72" y="858" width="1456" height="83" rx="18" fill="#211B36" stroke="#51416F"/>
+  <text x="99" y="892" fill="#C4B5FD" font-family="Arial,sans-serif" font-size="13" font-weight="700">MOBILE</text>
+  <text x="99" y="918" fill="#FFFFFF" font-family="Arial,sans-serif" font-size="15">Stack the same verified stages into a vertical timeline; keep details tappable and motion optional.</text>
+  <path d="M1282 877v48" stroke="#6D28D9" stroke-width="3"/><circle cx="1282" cy="885" r="7" fill="#C4B5FD"/><circle cx="1282" cy="902" r="7" fill="#C4B5FD"/><circle cx="1282" cy="920" r="7" fill="#C4B5FD"/>
+  <text x="72" y="976" fill="#BDB4CF" font-family="Arial,sans-serif" font-size="13">CONCEPT BOARD • state labels, screenshots, and transitions are deliberately placeholders pending verification</text>
+</svg>
