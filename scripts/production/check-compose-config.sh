@@ -65,6 +65,12 @@ for name, service in services.items():
 for name in ("postgres", "redis"):
     if not services[name].get("volumes"):
         raise SystemExit(f"{name} must use persistent storage")
+for name in ("redis", "backend"):
+    groups = {str(group) for group in services[name].get("group_add", [])}
+    secrets = services[name].get("secrets", [])
+    secret_names = {secret if isinstance(secret, str) else secret.get("source") for secret in secrets}
+    if "19990" not in groups or "redis_password" not in secret_names:
+        raise SystemExit(f"{name} must receive the protected Redis secret group and mount")
 for name in required:
     if name in {"postgres", "redis"}:
         continue
