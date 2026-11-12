@@ -59,10 +59,11 @@ export function LanguageSwitcher() {
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+        aria-label={locale === 'ar' ? 'تغيير اللغة' : 'Change language'}
+        className="flex items-center gap-2 p-2 sm:px-3 sm:py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
       >
         <Globe className="w-4 h-4" />
-        <span className="text-sm font-medium">{LANGUAGE_NAMES[locale]}</span>
+        <span className="hidden text-sm font-medium sm:inline">{LANGUAGE_NAMES[locale]}</span>
       </button>
 
       {isOpen && (

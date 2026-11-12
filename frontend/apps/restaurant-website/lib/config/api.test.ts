@@ -2,6 +2,7 @@ const ENV_KEYS = [
   'NODE_ENV',
   'NEXT_PUBLIC_API_BASE_URL',
   'NEXT_PUBLIC_API_URL',
+  'API_INTERNAL_URL',
   'NEXT_PUBLIC_API_TIMEOUT',
   'NEXT_PUBLIC_DEBUG_LOGS',
   'DEBUG_LOGS',
@@ -38,6 +39,16 @@ describe('restaurant API config resolver', () => {
     const { getApiBaseUrl } = loadApiModule()
 
     expect(getApiBaseUrl()).toBe('https://api.example.com/api/v1')
+  })
+
+  it('prefers the internal API URL for server rendering when configured', () => {
+    Object.assign(process.env, { NODE_ENV: 'production' })
+    process.env.API_INTERNAL_URL = 'http://api:18080/api/v1///'
+    process.env.NEXT_PUBLIC_API_BASE_URL = 'https://api.example.com/api/v1/'
+
+    const { getServerApiBaseUrl } = loadApiModule()
+
+    expect(getServerApiBaseUrl()).toBe('http://api:18080/api/v1')
   })
 
   it('uses development fallback when env is missing outside production', () => {

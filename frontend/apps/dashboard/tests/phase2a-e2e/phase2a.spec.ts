@@ -19,6 +19,11 @@ async function login(page: Page, tenant: 'a' | 'b' = 'a') {
   return await response.json() as { user: { id: number; tenant_id: number; restaurant_id: number } }
 }
 
+interface KDSWebSocketMessage {
+  type?: string
+  data?: { items?: Array<{ product_name?: string }> }
+}
+
 test('tenant A cannot see or mutate tenant B products', async ({ page }) => {
   const tenantA = await request.newContext()
   const tenantB = await request.newContext()
@@ -268,6 +273,55 @@ async function loginWithContext(context: APIRequestContext, tenant: 'a' | 'b') {
   return auth.user
 }
 
+test('authenticated session refresh rotates cookies and rejects replay after logout', async () => {
+  const sessionContext = await request.newContext()
+  const replayContext = await request.newContext()
+  const postLogoutContext = await request.newContext()
+  const dashboardOrigin = 'http://localhost:13112'
+  try {
+    await loginWithContext(sessionContext, 'a')
+    const initialSession = await sessionContext.get(`${api}/auth/session`)
+    expect(initialSession.status()).toBe(200)
+
+    const initialCookie = (await sessionContext.storageState()).cookies.find((cookie) => cookie.name === 'poos_session')
+    expect(initialCookie).toBeTruthy()
+    if (!initialCookie) throw new Error('Login did not establish the expected session cookie')
+    expect(initialCookie.httpOnly).toBe(true)
+
+    const refresh = await sessionContext.post(`${api}/auth/refresh`, {
+      headers: { Origin: dashboardOrigin },
+    })
+    expect(refresh.status()).toBe(204)
+
+    const rotatedCookie = (await sessionContext.storageState()).cookies.find((cookie) => cookie.name === 'poos_session')
+    expect(rotatedCookie).toBeTruthy()
+    if (!rotatedCookie) throw new Error('Refresh did not return a session cookie')
+    expect(rotatedCookie.value).not.toBe(initialCookie.value)
+    expect((await sessionContext.get(`${api}/auth/session`)).status()).toBe(200)
+
+    await replayContext.addCookies([initialCookie])
+    const replay = await replayContext.post(`${api}/auth/refresh`, {
+      headers: { Origin: dashboardOrigin },
+    })
+    expect(replay.status()).toBe(401)
+
+    const logout = await sessionContext.post(`${api}/auth/logout`, {
+      headers: { Origin: dashboardOrigin },
+    })
+    expect(logout.status()).toBe(204)
+
+    await postLogoutContext.addCookies([rotatedCookie])
+    const refreshAfterLogout = await postLogoutContext.post(`${api}/auth/refresh`, {
+      headers: { Origin: dashboardOrigin },
+    })
+    expect(refreshAfterLogout.status()).toBe(401)
+  } finally {
+    await postLogoutContext.dispose()
+    await replayContext.dispose()
+    await sessionContext.dispose()
+  }
+})
+
 test('POS browser flow creates an order for the signed-in tenant', async ({ page }) => {
   test.setTimeout(120_000)
   page.on('response', (response) => {
@@ -284,6 +338,36 @@ test('POS browser flow creates an order for the signed-in tenant', async ({ page
   await page.getByRole('button', { name: /WS05 E2E Burger A/ }).click()
   await page.getByRole('button', { name: /Place Order/ }).click()
   await expect(page.getByText(/Order placed!/)).toBeVisible({ timeout: 15_000 })
+})
+
+test('KDS receives a POS order over its authenticated tenant WebSocket', async ({ page }) => {
+  test.setTimeout(90_000)
+  const messages: KDSWebSocketMessage[] = []
+  page.on('websocket', (socket) => {
+    if (!new URL(socket.url()).pathname.endsWith('/kds/ws')) return
+    socket.on('framereceived', (frame) => {
+      try {
+        messages.push(JSON.parse(String(frame.payload)) as KDSWebSocketMessage)
+      } catch {
+        // Ignore non-JSON frames; the KDS protocol broadcasts JSON messages.
+      }
+    })
+  })
+
+  await login(page)
+  await page.goto('/en/dashboard/kds', { waitUntil: 'domcontentloaded', timeout: 90_000 })
+  await expect(page.getByText('Connected', { exact: true })).toBeVisible({ timeout: 30_000 })
+  await expect.poll(() => messages.some((message) => message.type === 'connected'), { timeout: 10_000 }).toBe(true)
+
+  const posPage = await page.context().newPage()
+  await posPage.goto('/en/dashboard/pos', { waitUntil: 'domcontentloaded', timeout: 90_000 })
+  await posPage.getByRole('button', { name: /WS05 E2E Burger A/ }).click()
+  await posPage.getByRole('button', { name: /Place Order/ }).click()
+  await expect(posPage.getByText(/Order placed!/)).toBeVisible({ timeout: 15_000 })
+  await expect.poll(() => messages.some((message) =>
+    message.type === 'order_new' && message.data?.items?.some((item) => item.product_name === 'WS05 E2E Burger A')
+  ), { timeout: 15_000 }).toBe(true)
+  await posPage.close()
 })
 
 test('inventory page loads and stock adjustment persists in PostgreSQL', async ({ page }) => {
