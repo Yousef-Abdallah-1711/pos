@@ -1,0 +1,116 @@
+{
+  "repository": "Yousef-Abdallah-1711/pos",
+  "verified_at": "2026-11-11",
+  "main_sha": "a6a2c6700a5fe883256deb1e5a3893108bd9865c",
+  "pr12": {
+    "status": "MERGED",
+    "previous_head_ancestor": true,
+    "independent_review": false,
+    "hosted_checks_observed": [
+      "runtime-localhost-guardrail: PASS",
+      "url-domain-config-smoke: PASS"
+    ],
+    "full_ci": "BLOCKED"
+  },
+  "worktree": {
+    "path": "H:\\pos-postmerge-verification",
+    "state": "detached at main SHA",
+    "source_changes": 0,
+    "reports_committed": false
+  },
+  "infrastructure": {
+    "services": {
+      "postgres": "PASS",
+      "redis": "PASS",
+      "api": "PASS",
+      "landing": "PASS",
+      "dashboard": "PASS",
+      "restaurant_website": "PASS",
+      "super_admin": "PASS"
+    },
+    "database_tmpfs": true,
+    "migration_ledger_latest": "999_theme_migration_legacy.sql",
+    "app_role_non_superuser": true,
+    "migrator_role_non_superuser": true,
+    "frontend_api_expected_port": 18080,
+    "api_host_port": 18082,
+    "temporary_forward_used_and_stopped": true
+  },
+  "checks": {
+    "go_test": "PASS",
+    "go_vet": "PASS",
+    "go_build": "PASS",
+    "frontend_typecheck": "PASS",
+    "frontend_unit_tests": {
+      "landing": "PASS: 53",
+      "dashboard": "PASS: 653",
+      "super_admin": "PASS: 16",
+      "restaurant_website": "NOT RUN: no test script"
+    },
+    "production_builds": {
+      "landing": "FAIL: Html imported outside pages/_document during /404 prerender",
+      "dashboard": "FAIL: same /404 error plus null useContext at /ar/dashboard/settings",
+      "restaurant_website": "FAIL: Html imported outside pages/_document during /404 prerender",
+      "super_admin": "FAIL: Html imported outside pages/_document during /404 prerender"
+    },
+    "lint": {
+      "landing": "PASS",
+      "dashboard": "PASS",
+      "restaurant_website": "WARN: missing fetchOrder dependency",
+      "super_admin": "WARN: missing fetchData, fetchSubscriptionHistory, fetchHistory dependencies"
+    }
+  },
+  "runtime_tests": {
+    "signup": "PASS: 201",
+    "logout": "PASS: 204",
+    "valid_login": "PASS: 200",
+    "invalid_login": "PASS: 401",
+    "unauthenticated_reads": "PASS: 401",
+    "cross_user_settings": "PASS: 403",
+    "own_user_settings": "PASS: 200",
+    "category_create": "PASS: 201",
+    "product_create": "PASS: 201",
+    "pos_order_create": "PASS: 201",
+    "pos_payment_status_update": "PASS: 200",
+    "kds_order_transition": "PASS: New to In Progress",
+    "kds_realtime_connection": "BLOCKED: UI reports Disconnected",
+    "restaurant_storefront": "BLOCKED: tenant served maintenance page",
+    "super_admin_login": "BLOCKED: session request to localhost:18080 refused after temporary proxy stopped"
+  },
+  "database_security": {
+    "public_tables": 92,
+    "tables_with_rls": 15,
+    "rls_percentage": 16.3,
+    "core_tenant_tables_rls_disabled": [
+      "users",
+      "tenants",
+      "restaurants",
+      "orders",
+      "order_items",
+      "products",
+      "categories",
+      "inventory",
+      "employees"
+    ]
+  },
+  "ui": {
+    "landing_console_duplicate_key": "FAIL: #product",
+    "login_register_header": "PASS",
+    "dashboard_mobile_overflow": "FAIL",
+    "screenshots": [
+      "evidence/landing-en-1440.png",
+      "evidence/landing-ar-390.png",
+      "evidence/login-en-1440.png",
+      "evidence/login-en-390.png",
+      "evidence/dashboard-authenticated-en-1440.png",
+      "evidence/dashboard-authenticated-en-mobile.png"
+    ]
+  },
+  "orderly": {
+    "current_runtime_brand": "POOS",
+    "rebrand_status": "BLOCKED PENDING CLEARANCE",
+    "legal_clearance": "NOT VERIFIED"
+  },
+  "release_verdict": "NO-GO",
+  "source_remediation": "NONE: required CODING_STANDARDS.md missing"
+}
