@@ -1,0 +1,86 @@
+[
+  {
+    "id": "FIN-001",
+    "title": "Balance Sheet earnings omission",
+    "severity": "P1",
+    "evidence_status": "Historical runtime verified",
+    "tasks": [
+      "FIN-T00-01",
+      "FIN-T06-01"
+    ]
+  },
+  {
+    "id": "FIN-002",
+    "title": "Manual journal attachments",
+    "severity": "P2",
+    "evidence_status": "Historical runtime verified",
+    "tasks": [
+      "FIN-T02-01"
+    ]
+  },
+  {
+    "id": "FIN-003",
+    "title": "Auto-normalizer mutates line",
+    "severity": "P1",
+    "evidence_status": "Historical runtime verified",
+    "tasks": [
+      "FIN-T01-02",
+      "FIN-T02-02"
+    ]
+  },
+  {
+    "id": "FIN-004",
+    "title": "Potential orphan draft",
+    "severity": "P2",
+    "evidence_status": "Inferred; failure not injected",
+    "tasks": [
+      "FIN-T03-01"
+    ]
+  },
+  {
+    "id": "FIN-005",
+    "title": "Hard-coded 10% tax",
+    "severity": "P2",
+    "evidence_status": "Source verified; jurisdiction unknown",
+    "tasks": [
+      "FIN-T01-01",
+      "FIN-T04-01"
+    ]
+  },
+  {
+    "id": "FIN-006",
+    "title": "Dev duplicate/slow requests",
+    "severity": "P2",
+    "evidence_status": "Symptoms observed; root cause unknown",
+    "tasks": [
+      "FIN-T09-01"
+    ]
+  },
+  {
+    "id": "FIN-008",
+    "title": "Auto journal nil JSONB",
+    "severity": "P2",
+    "evidence_status": "Historical runtime verified",
+    "tasks": [
+      "FIN-T02-03"
+    ]
+  },
+  {
+    "id": "FIN-009",
+    "title": "Supplier type exceeds width",
+    "severity": "P2",
+    "evidence_status": "Historical runtime verified",
+    "tasks": [
+      "FIN-T02-04"
+    ]
+  },
+  {
+    "id": "FIN-010",
+    "title": "Paid order errors suppressed",
+    "severity": "P2",
+    "evidence_status": "Source verified; runtime not tested",
+    "tasks": [
+      "FIN-T03-02"
+    ]
+  }
+]
