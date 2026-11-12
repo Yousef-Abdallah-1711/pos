@@ -36,6 +36,7 @@ pid $temp/nginx.pid;
 error_log stderr;
 events {}
 http {
+    access_log off;
     include /etc/nginx/mime.types;
     include $rendered;
 }
