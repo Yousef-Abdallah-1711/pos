@@ -71,6 +71,28 @@ func isOriginAllowed(origin string) bool {
 	if _, ok := corsOrigins[origin]; ok {
 		return true
 	}
+	parsedOrigin, err := url.Parse(origin)
+	if err != nil || parsedOrigin.Host == "" || parsedOrigin.User != nil || parsedOrigin.Path != "" || parsedOrigin.RawQuery != "" || parsedOrigin.Fragment != "" {
+		return false
+	}
+	originHost := strings.ToLower(parsedOrigin.Hostname())
+	for configuredOrigin := range corsOrigins {
+		pattern, err := url.Parse(configuredOrigin)
+		if err != nil || !strings.HasPrefix(pattern.Hostname(), "*.") {
+			continue
+		}
+		if parsedOrigin.Scheme != pattern.Scheme || parsedOrigin.Port() != pattern.Port() {
+			continue
+		}
+		suffix := strings.TrimPrefix(strings.ToLower(pattern.Hostname()), "*")
+		if !strings.HasSuffix(originHost, suffix) {
+			continue
+		}
+		subdomain := strings.TrimSuffix(originHost, suffix)
+		if subdomain != "" && !strings.Contains(subdomain, ".") {
+			return true
+		}
+	}
 	// Keep local development flexible for alternate ports only outside production.
 	return config.IsDevelopmentMode() && isLocalhostOrigin(origin)
 }
