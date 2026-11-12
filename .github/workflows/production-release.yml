@@ -15,7 +15,7 @@ concurrency:
 
 jobs:
   build-and-push:
-    if: github.repository == 'Yousef-Abdallah-1711/pos'
+    if: github.repository == 'Yousef-Abdallah-1711/pos' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
@@ -31,6 +31,7 @@ jobs:
     needs: build-and-push
     if: >-
       github.repository == 'Yousef-Abdallah-1711/pos' &&
+      github.ref == 'refs/heads/main' &&
       vars.POS_PRODUCTION_DEPLOY_ENABLED == 'true' &&
       vars.POS_PRODUCTION_READINESS_APPROVED == 'true' &&
       vars.POS_PRODUCTION_BACKUP_RESTORE_VERIFIED == 'true'
