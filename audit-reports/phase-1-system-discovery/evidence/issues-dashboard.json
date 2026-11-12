@@ -1,0 +1,522 @@
+[
+ {
+  "issue_id": "FE-DASH-001",
+  "severity": "P1",
+  "category": "contract/orphan-endpoint",
+  "title": "Inventory stock adjustment calls an endpoint that does not exist",
+  "source_files": [
+   "frontend/apps/dashboard/src/app/[locale]/dashboard/inventory/page.tsx:107"
+  ],
+  "evidence": "api.post('/inventory/adjust', ...) at inventory/page.tsx:107; backend/cmd/api/main.go registers no /api/v1/inventory/* route (363 routes extracted; none match). Page also has no MODULE_IDS gate.",
+  "suspected_root_cause": "UI built ahead of backend; backend only has GET /products/alerts/low-stock and reports/inventory",
+  "recommended_fix": "Implement POST adjust endpoint with RBAC and movement audit trail (inventoryMovementRepo exists, main.go:136) or hide the dialog",
+  "required_tests": [
+   "contract test: adjust returns 2xx and writes a movement",
+   "UI e2e: adjust stock then product quantity changes"
+  ],
+  "status": "OPEN"
+ },
+ {
+  "issue_id": "FE-DASH-002",
+  "severity": "P1",
+  "category": "pos/offline-integrity",
+  "title": "POS offline replay and cash auto-pay can duplicate orders or leave cash orders unpaid silently",
+  "source_files": [
+   "frontend/apps/dashboard/src/hooks/usePOSOffline.ts:171-190",
+   "frontend/apps/dashboard/src/app/[locale]/dashboard/pos/page.tsx:303-311"
+  ],
+  "evidence": "usePOSOffline.ts:174-177 calls posApi.createOrder then updateOrderPaymentStatus inside one try; if the second call fails the catch increments retryCount and keeps the already-created order queued, so the next replay creates it again. No idempotency key in the payload (posApi.ts:188-213). Online path pos/page.tsx:304-311 swallows the payment-mark failure (debugError only), then shows success and prints the receipt.",
+  "suspected_root_cause": "Two non-atomic calls orchestrated on the client; no client request id",
+  "recommended_fix": "Send paid state in the create call or use a server idempotency key (client UUID stored in queue item); record create-succeeded state in the queue; surface payment-mark failure to the cashier",
+  "required_tests": [
+   "unit: replay with failing payment-status does not re-create order",
+   "e2e: offline cash order syncs exactly once"
+  ],
+  "status": "OPEN"
+ },
+ {
+  "issue_id": "FE-DASH-003",
+  "severity": "P1",
+  "category": "pos/offline-sw",
+  "title": "pos-sw.js background sync posts to the wrong origin without auth or tenant headers",
+  "source_files": [
+   "frontend/apps/dashboard/public/pos-sw.js:154-160",
+   "frontend/apps/dashboard/next.config.js",
+   "frontend/apps/dashboard/src/lib/config.ts:15"
+  ],
+  "evidence": "pos-sw.js:154 fetch(API_PREFIX + 'public/orders') with API_PREFIX='/api/v1/' is relative to the dashboard origin (:3002) while config.ts:15 apiUrl is http://localhost:8080/api/v1. Request has credentials:'include' but no Authorization/X-Tenant-ID/X-Restaurant-ID (token is in localStorage, unreachable from SW). next.config.js defines no rewrites. SW also never marks cash orders paid and throws on first failure.",
+  "suspected_root_cause": "SW written assuming a same-origin API proxy that does not exist",
+  "recommended_fix": "Remove SW sync and rely on in-page replay, or have SW read token/tenant from IndexedDB and use absolute API URL; keep a single replay owner to avoid double submit",
+  "required_tests": [
+   "SW integration test offline->online",
+   "assert queued POST hits API origin with auth headers"
+  ],
+  "status": "OPEN"
+ },
+ {
+  "issue_id": "FE-DASH-004",
+  "severity": "P2",
+  "category": "privacy/offline-cache",
+  "title": "pos-sw.js caches authenticated API GET responses keyed by URL only and never purges on logout",
+  "source_files": [
+   "frontend/apps/dashboard/public/pos-sw.js:62-77",
+   "frontend/apps/dashboard/public/pos-sw.js:215-218"
+  ],
+  "evidence": "networkFirst() stores every OK GET whose pathname starts with /api/v1/ (cross-origin :8080 matches too) in 'pos-cache-v1'; key ignores Authorization/tenant. Cache is deleted only when CACHE_NAME changes (activate handler).",
+  "suspected_root_cause": "Generic caching without user/tenant partitioning",
+  "recommended_fix": "Do not cache API responses in the SW, or key by tenant+user and clear on logout via postMessage",
+  "required_tests": [
+   "logout clears caches test",
+   "two-tenant offline cache isolation test"
+  ],
+  "status": "OPEN"
+ },
+ {
+  "issue_id": "FE-DASH-005",
+  "severity": "P2",
+  "category": "auth/logout",
+  "title": "Logout is incomplete and routes to a non-existent page",
+  "source_files": [
+   "frontend/apps/dashboard/src/components/layout/DashboardLayout.tsx:70-73",
+   "frontend/apps/dashboard/src/components/layout/DashboardLayout.tsx:125-128",
+   "frontend/apps/dashboard/src/stores/authStore.ts:34-36",
+   "frontend/apps/dashboard/src/lib/rbac.ts:419-424"
+  ],
+  "evidence": "handleLogout() calls logout() (sets user/token null) then router.push('/{locale}/auth/login'); the dashboard app has no auth/login route (only auth/callback and auth/super-admin-login); effect at :70-73 does the same. Not cleared: permissionCache ('current_user'), 'pos-storage' (cart, held orders, customer name/phone), 'kds-bootstrap-snapshot-v1', theme-builder-storage, preferences-storage, sessionStorage impersonation_token, IndexedDB pos-offline-db and kds-offline-db, SW caches. (Blocked-screen logouts redirect to landing; only the sidebar/avatar path is affected.)",
+  "suspected_root_cause": "Logout implemented as store reset only",
+  "recommended_fix": "Central logout(): clear all app storage keys, IndexedDB and SW caches, end impersonation, redirect to landing login",
+  "required_tests": [
+   "logout e2e asserts storage empty",
+   "second user login sees no previous cart/permissions"
+  ],
+  "status": "OPEN"
+ },
+ {
+  "issue_id": "FE-DASH-006",
+  "severity": "P2",
+  "category": "security/token-in-url",
+  "title": "Access tokens and user JSON are passed in URL query strings and logged",
+  "source_files": [
+   "frontend/apps/dashboard/src/components/providers/DashboardAuthProvider.tsx:38-40",
+   "frontend/apps/dashboard/src/app/auth/callback/callback-content.tsx:17-18",
+   "frontend/apps/dashboard/src/app/[locale]/auth/super-admin-login/page.tsx:34",
+   "frontend/apps/dashboard/src/hooks/useKDSWebSocket.ts:131-132",
+   "frontend/apps/dashboard/src/stores/authStore.ts:65"
+  ],
+  "evidence": "auth_token/auth_user/impersonation_token/token/user are read from window.location.search; super-admin one-time token is in the query. KDS WS URL = base + '?token=' + JWT and debugLog prints the full URL (:132). JWT persisted in localStorage 'auth-storage'. test-url page echoes query values.",
+  "suspected_root_cause": "Cross-app SSO via redirect query params",
+  "recommended_fix": "Use one-time code exchange + HttpOnly cookie or URL fragment; WS short-lived ticket; never log URLs containing tokens",
+  "required_tests": [
+   "no token in access logs/referrer test",
+   "debug log redaction test"
+  ],
+  "status": "OPEN"
+ },
+ {
+  "issue_id": "FE-DASH-007",
+  "severity": "P2",
+  "category": "auth/impersonation",
+  "title": "Impersonation uses a dummy bearer 'impersonated'; many call sites ignore the impersonation header",
+  "source_files": [
+   "frontend/apps/dashboard/src/components/providers/DashboardAuthProvider.tsx:90-95",
+   "frontend/apps/dashboard/src/lib/api.ts:164-167",
+   "frontend/apps/dashboard/src/lib/api.ts:259-277",
+   "frontend/apps/dashboard/src/app/[locale]/dashboard/settings/users/page.tsx:81-95",
+   "frontend/apps/dashboard/src/lib/api/themeApi.ts:31-52",
+   "frontend/apps/dashboard/src/hooks/useKDSWebSocket.ts:131"
+  ],
+  "evidence": "setAuth(user,'impersonated') stores a fake bearer. Only the lib/api.ts interceptor swaps in X-Impersonation-Token. Raw-fetch pages (users, roles, account, appearance, DashboardLayout prefs), themeApi's own axios client and the KDS WS all send 'Bearer impersonated'. 401 under impersonation never logs out; sessionStorage impersonation_token is never removed (no removeItem in src).",
+  "suspected_root_cause": "Impersonation bolted onto one interceptor",
+  "recommended_fix": "Single shared HTTP client; end-impersonation action calling /impersonation/end and clearing state; visible banner",
+  "required_tests": [
+   "impersonated session loads users/roles/theme/KDS",
+   "end impersonation clears sessionStorage"
+  ],
+  "status": "OPEN"
+ },
+ {
+  "issue_id": "FE-DASH-008",
+  "severity": "P2",
+  "category": "architecture/http-clients",
+  "title": "Three HTTP access paths with inconsistent auth, 401 handling and error shapes",
+  "source_files": [
+   "frontend/apps/dashboard/src/lib/api.ts",
+   "frontend/apps/dashboard/src/lib/api/themeApi.ts:19-80",
+   "frontend/apps/dashboard/src/app/[locale]/dashboard/settings/users/page.tsx",
+   "frontend/apps/dashboard/src/hooks/useCache.ts:231",
+   "frontend/apps/dashboard/src/lib/apiCache.ts:104"
+  ],
+  "evidence": "axios 'api' (6s timeout, GET de-dupe, tenant headers, 401 redirect); a second axios instance in themeApi.ts (no tenant/impersonation headers, 401 only removes auth-storage); about 21 raw fetch() sites (settings/users 9, roles 5, account 2, appearance 2, DashboardLayout, auth provider, TenantSelectorModal) with no timeout/401 handling and hand-parsed response shapes (data | data.data | data.users). No error normalizer; pages read error.response?.data?.error ad hoc.",
+  "suspected_root_cause": "Organic growth",
+  "recommended_fix": "One client plus typed error normalizer (code/message/fieldErrors); replace raw fetch; one 401 policy",
+  "required_tests": [
+   "interceptor unit tests",
+   "lint rule forbidding raw fetch to API"
+  ],
+  "status": "OPEN"
+ },
+ {
+  "issue_id": "FE-DASH-009",
+  "severity": "P1",
+  "category": "build/typecheck",
+  "title": "next build fails the type gate; static causes found (unresolved imports, undeclared deps, stray dirs inside tsconfig scope)",
+  "source_files": [
+   "frontend/apps/dashboard/tsconfig.json:32",
+   "frontend/apps/dashboard/next.config.js:11",
+   "frontend/apps/dashboard/lib/hooks/use-theme.ts:3",
+   "frontend/apps/dashboard/src/components/TenantSelectorModal.tsx:5",
+   "frontend/apps/dashboard/src/hooks/usePreloadRoute.ts:5",
+   "frontend/apps/dashboard/src/components/ui/tabs.tsx:4",
+   "frontend/apps/dashboard/src/app/[locale]/dashboard/tables/page.tsx:15"
+  ],
+  "evidence": "tsc could not be run (no typescript binary installed in the checkout), so the ~705 count is UNVERIFIED here. Statically verified: unresolved '@/lib/api-client' (lib/hooks/use-theme.ts:3), '@/hooks/useAuth' (TenantSelectorModal.tsx:5), '@/pages/heavy-route' (usePreloadRoute.ts:5); '@radix-ui/react-tabs' imported (ui/tabs.tsx:4) but not in package.json; 'qrcode' imported (tables/page.tsx:15) with no @types/qrcode; @playwright/test imported from tests/ (inside tsconfig include) but not declared; typescript.ignoreBuildErrors is enabled only via NEXT_IGNORE_BUILD_ERRORS=true (next.config.js:11), i.e. Docker prod builds bypass the gate.",
+  "suspected_root_cause": "Type gate bypassed by env flag; tsconfig include '**/*.ts(x)' sweeps stray root dirs, tests and dead files",
+  "recommended_fix": "Fix error categories (see DASHBOARD-COMPLETE-AUDIT.md section 4); narrow tsconfig include/exclude; run tsc --noEmit in CI; remove env bypass",
+  "required_tests": [
+   "tsc --noEmit clean in CI",
+   "next build without NEXT_IGNORE_BUILD_ERRORS"
+  ],
+  "status": "OPEN"
+ },
+ {
+  "issue_id": "FE-DASH-010",
+  "severity": "P2",
+  "category": "structure/duplicates",
+  "title": "Stray app-root dirs duplicate src/ and are type-checked but largely unreferenced",
+  "source_files": [
+   "frontend/apps/dashboard/components/theme-editor/theme-editor.tsx:19",
+   "frontend/apps/dashboard/components/component-manager/section-editor.tsx:194",
+   "frontend/apps/dashboard/lib/hooks/use-theme.ts",
+   "frontend/apps/dashboard/i18n/request.ts"
+  ],
+  "evidence": "components/ (14 files), lib/hooks/use-theme.ts and i18n/request.ts (re-export of ../src/i18n/request) sit beside src/. No file in src imports components/theme-editor or components/component-manager (heuristic import scan). section-editor.tsx:194-195 uses formData.background_image which is not in ThemeSection (component-sidebar.tsx:7-19); theme-editor.tsx:19,61 destructures updateTheme from the broken lib/hooks/use-theme.ts.",
+  "suspected_root_cause": "Abandoned earlier theme editor implementation",
+  "recommended_fix": "Delete, or move into src/ and fix; exclude tests/ from the app tsconfig",
+  "required_tests": [
+   "tsc clean"
+  ],
+  "status": "OPEN"
+ },
+ {
+  "issue_id": "FE-DASH-011",
+  "severity": "P2",
+  "category": "build/workspace",
+  "title": "Workspace package wiring is inconsistent (ui, ui-themes, types, constants)",
+  "source_files": [
+   "frontend/apps/dashboard/package.json",
+   "frontend/apps/dashboard/tsconfig.json:21-29",
+   "frontend/apps/dashboard/next.config.js:12",
+   "frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/components/LivePreview.tsx:6"
+  ],
+  "evidence": "Code imports '@pos-saas/ui' (4 files in app-root components/) and '@pos-saas/ui-themes' (LivePreview.tsx:6, EditorPreview.tsx:6) but package.json declares ui-components and ui-themes, not ui. tsconfig paths map ui, ui-components, theme, types, constants but not ui-themes; frontend/packages has only theme, ui, ui-components (no types/constants); @pos-saas/ui-themes lives in frontend/layers/ui-themes. transpilePackages lists only '@pos-saas/ui' and '@pos-saas/types'.",
+  "suspected_root_cause": "Package renames/moves not propagated",
+  "recommended_fix": "Align package.json deps, tsconfig paths and transpilePackages with actual workspace packages",
+  "required_tests": [
+   "clean install + build in CI"
+  ],
+  "status": "OPEN"
+ },
+ {
+  "issue_id": "FE-DASH-012",
+  "severity": "P2",
+  "category": "theme-builder/stub",
+  "title": "Theme version rollback shows success but does nothing",
+  "source_files": [
+   "frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/editor/components/ThemeHistory.tsx:65-82"
+  ],
+  "evidence": "handleRollback: the API call is commented out ('When backend history endpoint is ready...') and then toast.success('Version restored successfully') runs. Backend has only GET /admin/themes/{id}/history (main.go:1469), no rollback route.",
+  "suspected_root_cause": "Placeholder left in production code",
+  "recommended_fix": "Implement backend rollback and client call, or disable the button; never show false success",
+  "required_tests": [
+   "e2e: restore version changes the active theme"
+  ],
+  "status": "OPEN"
+ },
+ {
+  "issue_id": "FE-DASH-013",
+  "severity": "P3",
+  "category": "contract/orphan-endpoint",
+  "title": "themeApi defines functions for unregistered backend routes (not called by UI)",
+  "source_files": [
+   "frontend/apps/dashboard/src/lib/api/themeApi.ts:623-770",
+   "frontend/apps/dashboard/backend/internal/routes/theme_routes_v2.go:1-3"
+  ],
+  "evidence": "export (POST /admin/themes/{id}/export), import (POST /admin/themes/import -> only GET/PUT/DELETE {id} exist, method mismatch), components CRUD and reorder (/admin/themes/{id}/components...), GET /public/component-library: none registered in main.go; their handlers sit in theme_routes_v2.go behind //go:build legacy. No UI caller found by grep; theme-builder import page uses createTheme instead.",
+  "suspected_root_cause": "Dead API surface from legacy v2 design",
+  "recommended_fix": "Delete the dead functions or implement the endpoints",
+  "required_tests": [
+   "contract list reconciled in CI"
+  ],
+  "status": "OPEN"
+ },
+ {
+  "issue_id": "FE-DASH-014",
+  "severity": "P2",
+  "category": "rbac/authorization",
+  "title": "Many dashboard pages have no page-level permission gate; backend for several modules is auth-only",
+  "source_files": [
+   "frontend/apps/dashboard/src/app/[locale]/dashboard/drivers",
+   "frontend/apps/dashboard/src/app/[locale]/dashboard/categories",
+   "frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder",
+   "frontend/apps/dashboard/src/app/[locale]/dashboard/reports/financial",
+   "frontend/apps/dashboard/src/components/layout/Sidebar.tsx:44-62"
+  ],
+  "evidence": "Pages without useHasPermission/MODULE_IDS: drivers (3), categories (3), inventory, theme-builder (5), rbac/roles, settings/billing, accounting/advanced, hr contracts/insurance/performance/resignations/training (5), reports/financial/* (9). Sidebar hides links via checkPermission only (drivers use ORDERS). Backend (main.go:671-675, 1397-1407, 1462-1469): /admin/drivers, /categories, /admin/themes, /users use wrapProtected (authentication only). No Next middleware exists (no src/middleware*), so gating is client-side.",
+  "suspected_root_cause": "Authorization added incrementally per module",
+  "recommended_fix": "Server-side module permission on all mutating routes; shared RequirePermission wrapper for pages",
+  "required_tests": [
+   "role matrix e2e: cashier cannot CRUD drivers/categories/themes"
+  ],
+  "status": "OPEN"
+ },
+ {
+  "issue_id": "FE-DASH-015",
+  "severity": "P2",
+  "category": "rbac/cache",
+  "title": "Permission cache is not per-user, persists, is never cleared; each hook fetches separately; client role fallback grants KDS ADMIN",
+  "source_files": [
+   "frontend/apps/dashboard/src/hooks/useRbac.ts:18",
+   "frontend/apps/dashboard/src/hooks/useRbac.ts:100-157",
+   "frontend/apps/dashboard/src/hooks/useRbac.ts:166-215",
+   "frontend/apps/dashboard/src/lib/rbac.ts:380-424"
+  ],
+  "evidence": "CURRENT_USER_PERMISSION_CACHE_KEY='current_user' (useRbac.ts:18) stored via PermissionCache (memory + storage); no clear() call outside tests (grep). useHasPermission seeds state from the cache (stale after user switch). Each useHasPermission instance calls rbacApi.checkPermission (one request per hook per page). applyKDSRoleFallback grants KDS=ADMIN for privileged roles read from localStorage (UI only).",
+  "suspected_root_cause": "Convenience caching",
+  "recommended_fix": "Key by user+tenant; clear on logout; single permissions fetch in a context provider",
+  "required_tests": [
+   "user switch test",
+   "request count per page"
+  ],
+  "status": "OPEN"
+ },
+ {
+  "issue_id": "FE-DASH-016",
+  "severity": "P2",
+  "category": "i18n",
+  "title": "Two parallel i18n systems, missing keys, RTL scoped to an inner div",
+  "source_files": [
+   "frontend/apps/dashboard/src/lib/translations.ts",
+   "frontend/apps/dashboard/src/app/[locale]/layout.tsx:49-63",
+   "frontend/apps/dashboard/src/app/layout.tsx:25",
+   "frontend/apps/dashboard/src/stores/preferencesStore.ts:66-70",
+   "frontend/apps/dashboard/src/i18n/messages/en.json"
+  ],
+  "evidence": "next-intl useTranslations in 14 pages (hr advanced 5, reports/financial 8, reports/hr) vs custom createTranslator with inline English fallbacks in most other pages. en.json and ar.json each 1719 keys (parity OK, no mojibake-looking values) but 36 literal keys used in code are absent from en.json (pos.settings* 21 in pos/settings/page.tsx, bankAccountMessages.* 8, kds.* 3, Sidebar 3, DashboardLayout 1) so Arabic users see hard-coded English; 101 ar values equal en. Root html lang='en' is hard-coded and dir/lang are set on an inner div (layout.tsx:49-63), so Radix portals (Dialog/Select render into body) likely stay LTR in Arabic [needs runtime confirmation]; preferencesStore also writes documentElement.dir from saved user language, a second source of truth beside the URL locale. No middleware: '/' always redirects to '/en'. 109 files still use physical ml-/mr-/pl-/pr-/text-left/right classes.",
+  "suspected_root_cause": "Incremental i18n adoption",
+  "recommended_fix": "Use next-intl only; set html lang/dir from locale in root layout; add missing keys; logical CSS (ms-/me-)",
+  "required_tests": [
+   "ar locale visual regression incl. dialogs",
+   "key coverage CI check"
+  ],
+  "status": "OPEN"
+ },
+ {
+  "issue_id": "FE-DASH-017",
+  "severity": "P2",
+  "category": "pos/business-logic",
+  "title": "POS tax rate hard-coded 14% client-side; payment model minimal; product list capped",
+  "source_files": [
+   "frontend/apps/dashboard/src/stores/posStore.ts:106",
+   "frontend/apps/dashboard/src/stores/posStore.ts:595-600",
+   "frontend/apps/dashboard/src/lib/api/posApi.ts:68-70",
+   "frontend/apps/dashboard/src/lib/api/posApi.ts:188-213",
+   "frontend/apps/dashboard/src/app/[locale]/dashboard/pos/page.tsx:303-311"
+  ],
+  "evidence": "TAX_RATE=0.14 drives displayed subtotal/tax/total and the receipt (buildReceiptData). The create payload carries no prices (good, server prices) but the receipt total can diverge from the server total. VALID_PAYMENT_METHODS lacks 'online' though the API type allows it. No cash-tendered/change/split payment; cash is always auto-marked paid. getProducts requests page_size 500 (silent truncation for larger menus). Cart and held orders persist in localStorage 'pos-storage'.",
+  "suspected_root_cause": "Display-side tax estimate",
+  "recommended_fix": "Use server totals for the receipt; tenant-configurable tax; tender/change; pagination",
+  "required_tests": [
+   "receipt total equals server total test"
+  ],
+  "status": "OPEN"
+ },
+ {
+  "issue_id": "FE-DASH-018",
+  "severity": "P2",
+  "category": "finance/client-side-calc",
+  "title": "Financial amounts computed and sent from the client; revenue tile from one page of orders; mixed currency symbols",
+  "source_files": [
+   "frontend/apps/dashboard/src/components/accounting/InvoiceForm.tsx:601-650",
+   "frontend/apps/dashboard/src/components/accounting/JournalEntryForm.tsx:53-62",
+   "frontend/apps/dashboard/src/app/[locale]/dashboard/page.tsx:366-368",
+   "frontend/apps/dashboard/src/app/[locale]/dashboard/orders/page.tsx:503",
+   "frontend/apps/dashboard/src/lib/pdf-export.ts:56-100"
+  ],
+  "evidence": "InvoiceForm computes tax_amount/discount_amount/line_total with unrounded floats and posts them (mapLineToPayload:636-650); JournalEntryForm balance check uses float epsilon 0.001; dashboard recentPaidRevenue sums totals of one recent-orders page, not a server aggregate; orders pages format '$' (orders/page.tsx:503, orders/[id]/page.tsx:372-392) while accounting/reports use EGP; financial report PDFs are rasterized with html2canvas+jspdf.",
+  "suspected_root_cause": "No shared money utility; server trust",
+  "recommended_fix": "Server recomputes and rejects mismatches; integer minor units; server-side aggregates; one currency formatter from tenant settings",
+  "required_tests": [
+   "invoice rounding tests",
+   "server rejects tampered totals"
+  ],
+  "status": "OPEN"
+ },
+ {
+  "issue_id": "FE-DASH-019",
+  "severity": "P2",
+  "category": "kds/realtime",
+  "title": "KDS WebSocket has no client resync or stale detection and no server RBAC; client-side auto-bump; snapshot persists order data",
+  "source_files": [
+   "frontend/apps/dashboard/src/hooks/useKDSWebSocket.ts:128-173",
+   "frontend/apps/dashboard/src/hooks/useKDS.ts:446-480",
+   "frontend/apps/dashboard/src/app/[locale]/dashboard/kds/page.tsx:100-150",
+   "frontend/apps/dashboard/src/hooks/useKDS.ts:58",
+   "frontend/apps/dashboard/src/hooks/useKDS.ts:166-190"
+  ],
+  "evidence": "Server pings every 54s (backend/internal/handler/ws/kds_hub.go:18) but the client has no stale-connection detection; cross-ref: kds_ws_handler.go validates JWT from ?token= but has no KDS permission/role check (grep for permission/role = none) and CheckOrigin returns true (:83-86). Reconnect backoff 1s..10s without jitter; on reconnect no REST refetch (poll runs only while !isConnected after POLL_FALLBACK_DELAY). Auto-bump timer (kds/page.tsx:126-147) bumps from the browser every 15s when auto_bump_minutes>0: several stations double-act, stops when the tab closes. KDS snapshot with orders stored in localStorage 'kds-bootstrap-snapshot-v1' (not cleared on logout). Unknown message types ignored silently.",
+  "suspected_root_cause": "Client-driven realtime",
+  "recommended_fix": "Server-side auto-bump; client resync-on-open and stale detection; KDS permission check and origin allowlist on WS; clear snapshot on logout",
+  "required_tests": [
+   "WS reconnect e2e recovers missed order",
+   "two-station auto-bump test"
+  ],
+  "status": "OPEN"
+ },
+ {
+  "issue_id": "FE-DASH-020",
+  "severity": "P3",
+  "category": "security/headers",
+  "title": "Authenticated app HTML cached publicly for 1h; CSP permissive",
+  "source_files": [
+   "frontend/apps/dashboard/next.config.js:154",
+   "frontend/apps/dashboard/next.config.js:175"
+  ],
+  "evidence": "'/:path*' gets Cache-Control public,max-age=3600,s-maxage=3600; CSP has 'unsafe-inline' 'unsafe-eval' and connect-src https: http: ws: wss:. Pages are client-rendered shells (no SSR user data verified) so exposure is limited.",
+  "suspected_root_cause": "Blanket headers",
+  "recommended_fix": "private/no-store for dashboard routes; tighten CSP to the API origin",
+  "required_tests": [
+   "header assertion test"
+  ],
+  "status": "OPEN"
+ },
+ {
+  "issue_id": "FE-DASH-021",
+  "severity": "P3",
+  "category": "hygiene/debug",
+  "title": "Debug/test artifacts and duplicate routes shipped",
+  "source_files": [
+   "frontend/apps/dashboard/src/app/[locale]/test-url/page.tsx",
+   "frontend/apps/dashboard/src/app/[locale]/page.tsx:36-41",
+   "frontend/apps/dashboard/src/app/auth/callback/page.tsx",
+   "frontend/apps/dashboard/src/app/[locale]/auth/callback/page.tsx",
+   "frontend/apps/dashboard/src/i18n/messages/ar.json.bak-mojibake"
+  ],
+  "evidence": "/{locale}/test-url is routable outside DashboardAuthProvider; '?debug=true' branch in the locale home page; two differing auth callback pages (/auth/callback and /{locale}/auth/callback); ar.json.bak-mojibake kept inside src.",
+  "suspected_root_cause": "Debug leftovers",
+  "recommended_fix": "Remove from production build",
+  "required_tests": [
+   "route inventory test"
+  ],
+  "status": "OPEN"
+ },
+ {
+  "issue_id": "FE-DASH-022",
+  "severity": "P3",
+  "category": "dead-code",
+  "title": "About 39 files appear unreferenced, including ServiceWorkerProvider/public/sw.js (never registered) and NotificationBell",
+  "source_files": [
+   "frontend/apps/dashboard/src/components/providers/ServiceWorkerProvider.tsx",
+   "frontend/apps/dashboard/public/sw.js:20-35",
+   "frontend/apps/dashboard/src/components/notifications/NotificationBell.tsx",
+   "frontend/apps/dashboard/src/components/products/ProductForm.tsx"
+  ],
+  "evidence": "Heuristic import scan (approximate). ServiceWorkerProvider is never mounted; if it were, sw.js install precaches '/layout.js' and '/styles.css' (not present) so cache.addAll would reject. TenantStatusProvider unused; tenant status is checked once at mount (DashboardAuthProvider).",
+  "suspected_root_cause": "Abandoned features",
+  "recommended_fix": "Delete or wire; add knip/ts-prune to CI",
+  "required_tests": [
+   "dead-code CI check"
+  ],
+  "status": "OPEN"
+ },
+ {
+  "issue_id": "FE-DASH-023",
+  "severity": "P3",
+  "category": "http/timeouts",
+  "title": "Global 6s axios timeout applies to reports/exports; 100ms GET de-dupe shares promises",
+  "source_files": [
+   "frontend/apps/dashboard/src/lib/api.ts:8",
+   "frontend/apps/dashboard/src/lib/api.ts:59-77"
+  ],
+  "evidence": "DEFAULT_API_TIMEOUT_MS=6000 unless NEXT_PUBLIC_API_TIMEOUT_MS is set; blob export calls (accountingAdvancedApi.ts:201, reportsApi export) inherit it unless overridden (not verified per call). De-dupe key ignores headers.",
+  "suspected_root_cause": "Perf tuning for POS",
+  "recommended_fix": "Per-call timeouts for exports",
+  "required_tests": [
+   "large report export test"
+  ],
+  "status": "OPEN"
+ },
+ {
+  "issue_id": "FE-DASH-024",
+  "severity": "P1",
+  "category": "cross-ref/backend-security",
+  "title": "POS creates orders via an unauthenticated public route that trusts caller-supplied tenant headers",
+  "source_files": [
+   "frontend/apps/dashboard/src/lib/api/posApi.ts:228",
+   "frontend/apps/dashboard/backend/cmd/api/main.go:472",
+   "frontend/apps/dashboard/backend/internal/middleware/tenant.go:38-66"
+  ],
+  "evidence": "posApi.createOrder -> POST /public/orders (order_source:'pos'). main.go:472 wraps only TenantContextMiddleware; tenant.go:38-66 falls back to X-Tenant-ID/X-Restaurant-ID headers when no JWT claims exist. The dashboard interceptor itself sends these headers (api.ts:169-190). No server-side ORDERS WRITE check for POS creation was found. Handler-level validation not read; needs backend auditor confirmation.",
+  "suspected_root_cause": "POS reused the public ordering endpoint",
+  "recommended_fix": "Authenticated staff order endpoint with RBAC; public endpoint resolves tenant from slug/signed table token",
+  "required_tests": [
+   "unauthenticated POST with arbitrary X-Tenant-ID is rejected for order_source pos"
+  ],
+  "status": "OPEN"
+ },
+ {
+  "issue_id": "FE-DASH-025",
+  "severity": "P2",
+  "category": "tables/qr",
+  "title": "Table QR URLs use one global restaurant domain and sequential table ids",
+  "source_files": [
+   "frontend/apps/dashboard/src/lib/table-qr.ts:19-40",
+   "frontend/apps/dashboard/src/lib/config.ts:16",
+   "frontend/apps/dashboard/src/lib/config.ts:109",
+   "frontend/apps/dashboard/backend/cmd/api/main.go:465"
+  ],
+  "evidence": "buildTableMenuUrl => NEXT_PUBLIC_RESTAURANT_DOMAIN + '/{locale}/table/{tableID}/menu' (deploy-time single domain, not tenant slug/subdomain); table id is the DB integer; public GET /public/table/{id}/info (IP rate limit only) takes the bare id. Wrong-tenant QR or cross-tenant guessing in multi-tenant deployments.",
+  "suspected_root_cause": "Single-tenant assumption",
+  "recommended_fix": "Per-tenant domain/slug in URL; unguessable table token",
+  "required_tests": [
+   "QR URL per-tenant test"
+  ],
+  "status": "OPEN"
+ },
+ {
+  "issue_id": "FE-DASH-026",
+  "severity": "P3",
+  "category": "error-handling",
+  "title": "No global error normalization; pages surface raw backend error strings",
+  "source_files": [
+   "frontend/apps/dashboard/src/app/[locale]/dashboard/inventory/page.tsx:116-118",
+   "frontend/apps/dashboard/src/app/[locale]/dashboard/settings/users/page.tsx:131"
+  ],
+  "evidence": "Pages toast error.response?.data?.error directly (inventory:116) or concatenate 'Failed to load users: ' + err.message; backend itself returns raw err.Error() (see QA-002 in issues-quality.json).",
+  "suspected_root_cause": "No shared mapper",
+  "recommended_fix": "Central error mapper with i18n codes",
+  "required_tests": [
+   "unit tests"
+  ],
+  "status": "OPEN"
+ },
+ {
+  "issue_id": "FE-DASH-027",
+  "severity": "P2",
+  "category": "security/xss-export",
+  "title": "Order PDF export injects unescaped customer-supplied text into DOM; CSV export has no quote/formula escaping",
+  "source_files": [
+   "frontend/apps/dashboard/src/lib/pdf-export.ts:67",
+   "frontend/apps/dashboard/src/lib/pdf-export.ts:172-186",
+   "frontend/apps/dashboard/src/lib/pdf-export.ts:372-392",
+   "frontend/apps/dashboard/src/app/[locale]/dashboard/orders/[id]/page.tsx:238"
+  ],
+  "evidence": "generateOrderHTML interpolates item.product_name and item.special_instructions (customer-entered on public orders) into a template string that is assigned to tempDiv.innerHTML (pdf-export.ts:67) inside the authenticated dashboard origin; JWT is in localStorage so script execution would expose it. By contrast POS receipt escapes (usePOSPrint.ts:197). CSV rows wrap fields in quotes without escaping embedded quotes or leading = + - @ (pdf-export.ts:179-182) and only export the current page of orders.",
+  "suspected_root_cause": "Ad hoc HTML templates",
+  "recommended_fix": "Escape all interpolated values (or build DOM with textContent); CSV-escape and neutralize formula prefixes; use server export",
+  "required_tests": [
+   "unit test: product_name with <img onerror> is inert in PDF HTML",
+   "CSV injection test"
+  ],
+  "status": "OPEN"
+ }
+]
