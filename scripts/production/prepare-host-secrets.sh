@@ -7,6 +7,13 @@ DEST="${POS_CONFIG_DIR:-/etc/rakmyat-pos}"
   echo "protected POS configuration already exists; refusing to overwrite" >&2; exit 1;
 }
 install -d -o root -g root -m 0700 "$DEST"
+if getent group 19990 >/dev/null; then
+  [[ "$(getent group 19990 | cut -d: -f1)" == rakmyat-pos-secrets ]] || {
+    echo "GID 19990 is already assigned; refusing to reuse an unrelated group" >&2; exit 1;
+  }
+else
+  groupadd --system --gid 19990 rakmyat-pos-secrets
+fi
 umask 077
 python3 - "$ROOT/.env.prod.example" "$DEST/production.env" "$DEST/redis-password" <<'PY'
 from pathlib import Path
@@ -33,4 +40,6 @@ redis_file.write_text(values["REDIS_PASSWORD"] + "\n")
 PY
 openssl rand -hex 48 >"$DEST/backup.gpg.key"
 chmod 600 "$DEST/production.env" "$DEST/redis-password" "$DEST/backup.gpg.key"
+chown root:19990 "$DEST/redis-password"
+chmod 640 "$DEST/redis-password"
 echo "generated distinct local secrets and a protected environment template; payment credentials and release gates remain unset"

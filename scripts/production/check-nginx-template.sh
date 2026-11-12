@@ -6,7 +6,7 @@ python3 - "$TEMPLATE" <<'PY'
 from pathlib import Path
 import re, sys
 data = Path(sys.argv[1]).read_text()
-servers = re.findall(r'listen 443 ssl;\s*http2 on;.*?server_name\s+([^;]+);', data, re.S)
+servers = re.findall(r'listen 443 ssl http2;.*?server_name\s+([^;]+);', data, re.S)
 expected = {
     'pos.rakmyat.online', 'pos.app.rakmyat.online', 'admin.pos.rakmyat.online',
     'api.pos.rakmyat.online', '*.restaurants.pos.rakmyat.online',

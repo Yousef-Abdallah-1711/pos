@@ -105,6 +105,8 @@ services:
       - 'umask 077; printf "requirepass %s\nappendonly yes\nappendfsync everysec\nsave 60 1000\nmaxmemory 256mb\nmaxmemory-policy noeviction\n" "$$(cat /run/secrets/redis_password)" > /tmp/redis.conf; exec redis-server /tmp/redis.conf'
     secrets:
       - redis_password
+    group_add:
+      - "19990"
     tmpfs:
       - /tmp:rw,noexec,nosuid,size=16m
     volumes:
@@ -164,6 +166,8 @@ services:
     command: ["api"]
     secrets:
       - redis_password
+    group_add:
+      - "19990"
     environment:
       <<: *backend-environment
       DB_USER: pos_app
