@@ -5,6 +5,7 @@ import { usePathname, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useAuthStore } from '@/stores/authStore'
 import { api } from '@/lib/api'
+import { hasAuthenticatedSession } from '@/lib/authSession'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
 import { ArrowLeft, Loader } from 'lucide-react'
@@ -40,7 +41,9 @@ export default function AddDriverPage() {
 
   const [loading, setLoading] = useState(false)
   const [errors, setErrors] = useState<FormErrors>({})
+  const user = useAuthStore((state) => state.user)
   const token = useAuthStore((state) => state.token)
+  const hasSession = hasAuthenticatedSession(user, token)
 
   const [formData, setFormData] = useState<FormData>({
     first_name: '',
@@ -108,6 +111,11 @@ export default function AddDriverPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    if (!hasSession) {
+      toast.error('Please log in again')
+      return
+    }
 
     if (!validateForm()) {
       toast.error('Please fill in all required fields')

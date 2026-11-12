@@ -7,11 +7,12 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	sqlmock "github.com/DATA-DOG/go-sqlmock"
 	"pos-saas/internal/middleware"
 	"pos-saas/internal/pkg/jwt"
 	"pos-saas/internal/repository"
 	"pos-saas/internal/usecase"
+
+	sqlmock "github.com/DATA-DOG/go-sqlmock"
 )
 
 func withFixedKDSContext(next http.Handler) http.Handler {

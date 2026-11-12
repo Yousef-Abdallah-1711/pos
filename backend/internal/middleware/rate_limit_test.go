@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 	"net/http/httptest"
+	"sync"
 	"testing"
 	"time"
 
@@ -71,5 +72,34 @@ func TestRateLimitByUserWindowFallsBackToIP(t *testing.T) {
 	}
 	if code := doRequest("10.1.1.2:5555"); code != http.StatusOK {
 		t.Fatalf("different IP should not be rate-limited, got %d", code)
+	}
+}
+
+func TestRateLimitSuperAdminConcurrentRequests(t *testing.T) {
+	t.Parallel()
+
+	const requestCount = 64
+	wrapped := RateLimitSuperAdmin(requestCount)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	}))
+	var wait sync.WaitGroup
+	statuses := make(chan int, requestCount)
+	for range requestCount {
+		wait.Add(1)
+		go func() {
+			defer wait.Done()
+			req := httptest.NewRequest(http.MethodGet, "/super-admin/tenants", nil)
+			req.RemoteAddr = "127.0.0.1:3000"
+			response := httptest.NewRecorder()
+			wrapped.ServeHTTP(response, req)
+			statuses <- response.Code
+		}()
+	}
+	wait.Wait()
+	close(statuses)
+	for status := range statuses {
+		if status != http.StatusOK {
+			t.Fatalf("request below configured limit returned %d", status)
+		}
 	}
 }

@@ -3,23 +3,29 @@
 import { ChefHat, CreditCard, Lock, LogOut } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
+import { getDashboardLoginUrl } from '@/lib/authSession'
 import { useAuthStore } from '@/stores/authStore'
-import { getConfig } from '@/lib/config'
 import { usePathname } from 'next/navigation'
 import { getLocaleFromPath } from '@/lib/translations'
+import { useTenantStatus } from '@/hooks/useTenantStatus'
 
 export function BlockedSidebar() {
   const pathname = usePathname()
   const locale = getLocaleFromPath(pathname)
   const logout = useAuthStore((state) => state.logout)
+  const { blockReason } = useTenantStatus()
   const isRTL = locale === 'ar'
   const billingHref = `/${locale}/dashboard/settings/billing`
   const isBillingPage = pathname.includes('/dashboard/settings/billing')
 
+  const blockedDescription =
+    blockReason === 'expired'
+      ? 'Your subscription has expired. Update billing to restore dashboard access.'
+      : 'Your account access is temporarily restricted. Please contact support.'
+
   const handleLogout = () => {
     logout()
-    const landingUrl = getConfig().landingUrl
-    window.location.href = `${landingUrl}/auth/login`
+    window.location.href = getDashboardLoginUrl(pathname)
   }
 
   return (
@@ -43,7 +49,7 @@ export function BlockedSidebar() {
           <div>
             <p className="text-sm font-semibold text-red-900 dark:text-red-300">Access Restricted</p>
             <p className="text-xs text-red-800 dark:text-red-400 mt-1">
-              Your account access is temporarily restricted. Please contact support.
+              {blockedDescription}
             </p>
           </div>
         </div>

@@ -1,248 +1,92 @@
 'use client'
 
-import { ReactNode, useEffect, useState, useRef } from 'react';
-import { useAuthStore } from '@/stores/authStore';
-import { useTenantStatusStore } from '@/stores/tenantStatusStore';
-import { getConfig } from '@/lib/config';
-import { debugLog, debugError } from '@/lib/debug';
+import { ReactNode, useEffect, useState } from 'react'
+import { useAuthStore } from '@/stores/authStore'
+import { useTenantStatusStore } from '@/stores/tenantStatusStore'
+import { getConfig } from '@/lib/config'
+
+interface SessionUser {
+  id: number
+  user_id: number
+  email: string
+  name: string
+  tenant_id: number
+  restaurant_id: number
+  role: string
+  is_super_admin: boolean
+}
+
+function isSessionUser(value: unknown): value is SessionUser {
+  if (!value || typeof value !== 'object') return false
+  const candidate = value as Partial<SessionUser>
+  return typeof candidate.id === 'number'
+    && typeof candidate.email === 'string'
+    && typeof candidate.tenant_id === 'number'
+    && typeof candidate.role === 'string'
+}
 
 const DashboardAuthProvider = ({ children }: { children: ReactNode }) => {
-  const user = useAuthStore((state) => state.user)
-  const token = useAuthStore((state) => state.token)
   const setAuth = useAuthStore((state) => state.setAuth)
-  const canAccess = useTenantStatusStore((state) => state.canAccess)
-  const blockReason = useTenantStatusStore((state) => state.blockReason)
+  const user = useAuthStore((state) => state.user)
   const checkStatus = useTenantStatusStore((state) => state.checkStatus)
-  const [isHydrated, setIsHydrated] = useState(false)
-  const [urlAuthProcessed, setUrlAuthProcessed] = useState(false)
-  const urlAuthApplied = useRef(false) // Track if URL auth was applied this session
-  const impersonationSuccess = useRef(false) // Track if impersonation was successful
+  const [isReady, setIsReady] = useState(false)
 
-  // Check if authenticated by checking if user and token exist
-  const isAuthenticated = !!(user && token)
-
-  debugLog('[DashboardAuthProvider] Render - user:', !!user, 'token:', !!token, 'isAuthenticated:', isAuthenticated, 'isHydrated:', isHydrated, 'urlAuthProcessed:', urlAuthProcessed)
-
-  // Wait for Zustand to hydrate from localStorage on mount
   useEffect(() => {
-    // Check if we're in the browser
-    if (typeof window === 'undefined') {
-      return
-    }
-
-    debugLog('[DashboardAuthProvider] First useEffect running')
-
-    const processAuth = async () => {
-      // First, try to initialize from URL parameters (for super admin login redirect)
-      const params = new URLSearchParams(window.location.search)
-      const authToken = params.get('auth_token')
-      const authUserStr = params.get('auth_user')
-      const impersonationToken = params.get('impersonation_token')
-
-      debugLog('[DashboardAuthProvider] URL params - authToken:', !!authToken, 'impersonationToken:', !!impersonationToken)
-
-      // Handle regular auth token + user
-      if (authToken && authUserStr) {
-        try {
-          const authUser = JSON.parse(decodeURIComponent(authUserStr))
-          debugLog('[DashboardAuthProvider] Processing regular auth token')
-
-          // Mark that we applied URL auth this session
-          urlAuthApplied.current = true
-
-          // Call setAuth to update the Zustand store
-          // The persist middleware will automatically save to localStorage
-          setAuth(authUser, authToken)
-
-          // Wait a moment for Zustand to save to localStorage, then clean URL
-          await new Promise(resolve => setTimeout(resolve, 100))
-          const cleanUrl = window.location.pathname
-          window.history.replaceState({}, document.title, cleanUrl)
-          debugLog('[DashboardAuthProvider] Regular auth token processed successfully')
-        } catch (error) {
-          // Error parsing auth params - continue with normal flow
-          debugError('[DashboardAuthProvider] Failed to process auth token:', error)
-        }
+    let active = true
+    const locale = window.location.pathname.split('/')[1] === 'ar' ? 'ar' : 'en'
+    const originalFetch = window.fetch.bind(window)
+    const apiOrigin = new URL(getConfig().apiUrl).origin
+    window.localStorage.removeItem('token')
+    window.localStorage.removeItem('auth-storage')
+    window.sessionStorage.removeItem('impersonation_token')
+    window.fetch = (input, init) => {
+      const requestURL = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url
+      const parsedURL = new URL(requestURL, window.location.href)
+      const isApiRequest = parsedURL.origin === apiOrigin || parsedURL.pathname.startsWith('/api/v1/')
+      if (isApiRequest) {
+        const headers = new Headers(init?.headers ?? (input instanceof Request ? input.headers : undefined))
+        // Browser auth is cookie-backed. Never forward legacy JWTs from persisted UI state.
+        headers.delete('Authorization')
+        return originalFetch(input, { ...init, headers, credentials: 'include' })
       }
-      // Handle impersonation token
-      else if (impersonationToken) {
-        debugLog('[DashboardAuthProvider] Processing impersonation token...')
-        try {
-          const apiUrl = getConfig().apiUrl
-          debugLog('[DashboardAuthProvider] Validating token at:', `${apiUrl}/impersonation/validate`)
-          const response = await fetch(`${apiUrl}/impersonation/validate?token=${encodeURIComponent(impersonationToken)}`)
-
-          debugLog('[DashboardAuthProvider] Validation response status:', response.status)
-
-          if (response.ok) {
-            const result = await response.json()
-            debugLog('[DashboardAuthProvider] Validation result:', result)
-
-            if (result.success && result.data) {
-              const { user: impersonatedUser } = result.data
-              debugLog('[DashboardAuthProvider] Impersonated user:', impersonatedUser.email)
-
-              // Mark that we applied URL auth this session
-              urlAuthApplied.current = true
-              impersonationSuccess.current = true
-
-              // Store impersonation token in sessionStorage for API requests
-              sessionStorage.setItem('impersonation_token', impersonationToken)
-              debugLog('[DashboardAuthProvider] Stored impersonation token in sessionStorage')
-
-              // Create a dummy token for auth store (needed for UI to show logged in)
-              // The actual auth will happen via the impersonation token header
-              setAuth(impersonatedUser, 'impersonated')
-              debugLog('[DashboardAuthProvider] Called setAuth with impersonated user')
-
-              // Clean URL
-              await new Promise(resolve => setTimeout(resolve, 100))
-              const cleanUrl = window.location.pathname
-              window.history.replaceState({}, document.title, cleanUrl)
-              debugLog('[DashboardAuthProvider] URL cleaned, impersonation complete')
-            } else {
-              debugError('[DashboardAuthProvider] Validation result missing success or data:', result)
-            }
-          } else {
-            debugError('[DashboardAuthProvider] Token validation failed with status:', response.status)
-            const errorText = await response.text()
-            debugError('[DashboardAuthProvider] Error response:', errorText)
-          }
-        } catch (error) {
-          debugError('[DashboardAuthProvider] Failed to validate impersonation token:', error)
-          // Continue with normal flow
-        }
-      } else {
-        debugLog('[DashboardAuthProvider] No URL auth params found')
-      }
+      return originalFetch(input, init)
     }
 
-    const initAuth = async () => {
-      debugLog('[DashboardAuthProvider] initAuth starting')
-      // Process URL auth params if any
-      await processAuth()
-
-      // Wait longer for Zustand persist middleware to write to localStorage
-      // This is crucial for the API interceptor to pick up the token
-      debugLog('[DashboardAuthProvider] Waiting 200ms for Zustand to persist...')
-      await new Promise(resolve => setTimeout(resolve, 200))
-
-      // Then mark as processed - this will trigger the second useEffect
-      debugLog('[DashboardAuthProvider] Setting urlAuthProcessed = true')
-      setUrlAuthProcessed(true)
-
-      // Wait for hydration state to update
-      await new Promise(resolve => setTimeout(resolve, 100))
-      debugLog('[DashboardAuthProvider] Setting isHydrated = true')
-      setIsHydrated(true)
-
-      debugLog('[DashboardAuthProvider] initAuth complete - urlAuthApplied:', urlAuthApplied.current, 'impersonationSuccess:', impersonationSuccess.current)
-    }
-
-    initAuth()
+    originalFetch(`${getConfig().apiUrl}/auth/session`, { credentials: 'include', cache: 'no-store' })
+      .then(async (response) => {
+        if (!response.ok) throw new Error('Session unavailable')
+        const result: unknown = await response.json()
+        if (!isSessionUser(result)) throw new Error('Invalid session response')
+        return result
+      })
+      .then((sessionUser) => {
+        if (!active) return
+        setAuth(sessionUser, '')
+        setIsReady(true)
+      })
+      .catch(() => {
+        if (active) window.location.replace(`${getConfig().landingUrl}/${locale}/auth/login`)
+      })
 
     return () => {
-      // Cleanup if needed
+      active = false
+      window.fetch = originalFetch
     }
   }, [setAuth])
 
   useEffect(() => {
-    debugLog('[DashboardAuthProvider] Second useEffect - isHydrated:', isHydrated, 'urlAuthProcessed:', urlAuthProcessed)
+    if (isReady && user) checkStatus()
+  }, [checkStatus, isReady, user])
 
-    // Only run regular auth check after hydration and URL params processed
-    if (!isHydrated || !urlAuthProcessed) {
-      debugLog('[DashboardAuthProvider] Not ready yet, skipping auth check')
-      return
-    }
-
-    debugLog('[DashboardAuthProvider] Auth check - urlAuthApplied:', urlAuthApplied.current, 'impersonationSuccess:', impersonationSuccess.current, 'user:', !!user, 'token:', token)
-
-    // Check tenant status after successful auth
-    if (user && token) {
-      debugLog('[DashboardAuthProvider] Authenticated, checking tenant status')
-      checkStatus()
-    }
-
-    // If impersonation was successful, don't redirect
-    if (impersonationSuccess.current) {
-      debugLog('[DashboardAuthProvider] Impersonation was successful, staying authenticated')
-      return
-    }
-
-    // If URL auth was just applied this session AND we have auth in Zustand state, we're good
-    // This avoids checking localStorage which might not have been written yet
-    if (urlAuthApplied.current) {
-      if (user && token) {
-        // Auth from URL params was successfully applied - stay authenticated
-        debugLog('[DashboardAuthProvider] URL auth applied and have user/token, staying authenticated')
-        return
-      } else {
-        // URL auth was applied but failed - redirect to login
-        debugLog('[DashboardAuthProvider] URL auth applied but NO user/token, redirecting to login')
-        const landingUrl = getConfig().landingUrl
-        const redirectUrl = `${landingUrl}/auth/login`
-        window.location.href = redirectUrl
-        return
-      }
-    }
-
-    // If no URL auth was applied, check localStorage for existing session
-    const savedAuth = localStorage.getItem('auth-storage')
-    debugLog('[DashboardAuthProvider] Checking localStorage, savedAuth exists:', !!savedAuth)
-
-    let localStorageAuth = null
-    if (savedAuth) {
-      try {
-        const parsed = JSON.parse(savedAuth)
-        const hasUser = !!parsed.state?.user
-        const hasToken = !!parsed.state?.token
-        debugLog('[DashboardAuthProvider] localStorage parsed - hasUser:', hasUser, 'hasToken:', hasToken)
-
-        // If localStorage has auth, use that as source of truth
-        if (hasUser && hasToken) {
-          localStorageAuth = parsed.state
-        }
-      } catch (e) {
-        debugError('[DashboardAuthProvider] Error parsing localStorage:', e)
-      }
-    }
-
-    // Determine final authentication state
-    // Use Zustand state if available, otherwise use localStorage
-    const finalUser = user || localStorageAuth?.user
-    const finalToken = token || localStorageAuth?.token
-    const finalIsAuthenticated = !!(finalUser && finalToken)
-
-    debugLog('[DashboardAuthProvider] Final auth check - finalUser:', !!finalUser, 'finalToken:', !!finalToken, 'finalIsAuthenticated:', finalIsAuthenticated)
-
-    if (!finalIsAuthenticated) {
-      debugLog('[DashboardAuthProvider] NOT authenticated, redirecting to login')
-      const landingUrl = getConfig().landingUrl
-      const redirectUrl = `${landingUrl}/auth/login`
-      window.location.href = redirectUrl
-    } else {
-      debugLog('[DashboardAuthProvider] Authenticated, staying on dashboard')
-    }
-  }, [isHydrated, urlAuthProcessed, user, token, checkStatus])
-
-  // If not hydrated or not authenticated, show loading while redirecting
-  // But if impersonation was successful, we should be authenticated
-  const shouldShowLoading = !isHydrated || !urlAuthProcessed || (!isAuthenticated && !impersonationSuccess.current)
-
-  debugLog('[DashboardAuthProvider] Render check - shouldShowLoading:', shouldShowLoading, 'isHydrated:', isHydrated, 'urlAuthProcessed:', urlAuthProcessed, 'isAuthenticated:', isAuthenticated, 'impersonationSuccess:', impersonationSuccess.current)
-
-  if (shouldShowLoading) {
+  if (!isReady) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+      <div className="min-h-screen flex items-center justify-center" aria-live="polite">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600" />
       </div>
     )
   }
 
-  // User is authenticated and hydrated, show dashboard
-  // Note: blocked state is handled inside DashboardLayout (shows disabled sidebar + blocked content)
-  debugLog('[DashboardAuthProvider] Showing dashboard content')
   return <>{children}</>
-};
+}
 
-export default DashboardAuthProvider;
+export default DashboardAuthProvider

@@ -1,7 +1,6 @@
 package http
 
 import (
-	"encoding/json"
 	"net/http"
 	"strconv"
 	"strings"
@@ -49,8 +48,21 @@ func (h *PublicOrderHandler) CreateOrder(w http.ResponseWriter, r *http.Request)
 
 	// Parse request body
 	var req domain.CreateOrderRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+	if err := decodeJSONStrict(r, &req); err != nil {
 		respondError(w, http.StatusBadRequest, "Invalid request body")
+		return
+	}
+	if err := validateStringLengths(
+		stringLengthRule{Name: "customer_name", Value: req.CustomerName, Max: 120},
+		stringLengthRule{Name: "customer_phone", Value: req.CustomerPhone, Max: 32},
+		stringLengthRule{Name: "customer_email", Value: req.CustomerEmail, Max: 254},
+		stringLengthRule{Name: "delivery_address", Value: req.DeliveryAddress, Max: 255},
+		stringLengthRule{Name: "payment_method", Value: req.PaymentMethod, Max: 50},
+		stringLengthRule{Name: "order_source", Value: req.OrderSource, Max: 50},
+		stringLengthRule{Name: "notes", Value: req.Notes, Max: 2000},
+		stringLengthRule{Name: "delivery_instructions", Value: req.DeliveryInstructions, Max: 2000},
+	); err != nil {
+		respondError(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -319,7 +331,7 @@ func (h *PublicOrderHandler) TrackOrder(w http.ResponseWriter, r *http.Request) 
 	}
 
 	// Get status history
-	history, err := h.orderUC.GetOrderStatusHistory(tenantID, orderID)
+	history, err := h.orderUC.GetOrderStatusHistory(tenantID, restaurantID, orderID)
 	if err != nil {
 		// History is optional, don't fail if it's not available
 		history = []domain.OrderStatusHistory{}
@@ -349,8 +361,19 @@ func (h *PublicOrderHandler) TrackOrder(w http.ResponseWriter, r *http.Request) 
 func (h *PublicOrderHandler) ValidateOrder(w http.ResponseWriter, r *http.Request) {
 	// Parse request body
 	var req domain.CreateOrderRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+	if err := decodeJSONStrict(r, &req); err != nil {
 		respondError(w, http.StatusBadRequest, "Invalid request body")
+		return
+	}
+	if err := validateStringLengths(
+		stringLengthRule{Name: "customer_name", Value: req.CustomerName, Max: 120},
+		stringLengthRule{Name: "customer_phone", Value: req.CustomerPhone, Max: 32},
+		stringLengthRule{Name: "customer_email", Value: req.CustomerEmail, Max: 254},
+		stringLengthRule{Name: "delivery_address", Value: req.DeliveryAddress, Max: 255},
+		stringLengthRule{Name: "payment_method", Value: req.PaymentMethod, Max: 50},
+		stringLengthRule{Name: "order_source", Value: req.OrderSource, Max: 50},
+	); err != nil {
+		respondError(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -439,7 +462,13 @@ func (h *PublicOrderHandler) CancelOrder(w http.ResponseWriter, r *http.Request)
 	var req struct {
 		Reason string `json:"reason"`
 	}
-	_ = json.NewDecoder(r.Body).Decode(&req)
+	_ = decodeJSONStrictAllowEmpty(r, &req)
+	if err := validateStringLengths(
+		stringLengthRule{Name: "reason", Value: req.Reason, Max: 500},
+	); err != nil {
+		respondError(w, http.StatusBadRequest, err.Error())
+		return
+	}
 
 	// Cancel order via usecase
 	err = h.orderUC.CancelOrder(tenantID, restaurantID, orderID, req.Reason)

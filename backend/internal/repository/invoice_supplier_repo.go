@@ -26,6 +26,31 @@ func NewSupplierInvoiceRepository(db *sql.DB, journalRepo *JournalEntryRepositor
 }
 
 func (r *SupplierInvoiceRepository) ListInvoices(tenantID, restaurantID int) ([]domain.SupplierInvoice, error) {
+	invoices, _, err := r.ListInvoicesPaged(tenantID, restaurantID, 1, 100000)
+	return invoices, err
+}
+
+func (r *SupplierInvoiceRepository) ListInvoicesPaged(tenantID, restaurantID, page, pageSize int) ([]domain.SupplierInvoice, int, error) {
+	if page < 1 {
+		page = 1
+	}
+	if pageSize < 1 {
+		pageSize = 20
+	}
+	if pageSize > 200 {
+		pageSize = 200
+	}
+	offset := (page - 1) * pageSize
+
+	var total int
+	if err := r.db.QueryRow(`
+		SELECT COUNT(*)
+		FROM invoices_supplier inv
+		WHERE inv.tenant_id = $1 AND inv.restaurant_id = $2
+	`, tenantID, restaurantID).Scan(&total); err != nil {
+		return nil, 0, err
+	}
+
 	rows, err := r.db.Query(`
 		SELECT
 			inv.id, inv.tenant_id, inv.restaurant_id, inv.invoice_number,
@@ -42,11 +67,13 @@ func (r *SupplierInvoiceRepository) ListInvoices(tenantID, restaurantID int) ([]
 			inv.journal_entry_id, inv.created_at, inv.updated_at, inv.created_by, inv.updated_by
 		FROM invoices_supplier inv
 		JOIN suppliers s ON s.id = inv.supplier_id
+		 AND s.tenant_id = inv.tenant_id AND s.restaurant_id = inv.restaurant_id
 		WHERE inv.tenant_id = $1 AND inv.restaurant_id = $2
 		ORDER BY inv.invoice_date DESC, inv.id DESC
-	`, tenantID, restaurantID)
+		LIMIT $3 OFFSET $4
+	`, tenantID, restaurantID, pageSize, offset)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 	defer rows.Close()
 
@@ -54,15 +81,15 @@ func (r *SupplierInvoiceRepository) ListInvoices(tenantID, restaurantID int) ([]
 	for rows.Next() {
 		invoice, err := scanSupplierInvoice(rows)
 		if err != nil {
-			return nil, err
+			return nil, 0, err
 		}
 		invoices = append(invoices, invoice)
 	}
 	if err := rows.Err(); err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
-	return invoices, nil
+	return invoices, total, nil
 }
 
 func (r *SupplierInvoiceRepository) GetInvoiceByID(tenantID, restaurantID, id int) (*domain.SupplierInvoice, error) {
@@ -82,6 +109,7 @@ func (r *SupplierInvoiceRepository) GetInvoiceByID(tenantID, restaurantID, id in
 			inv.journal_entry_id, inv.created_at, inv.updated_at, inv.created_by, inv.updated_by
 		FROM invoices_supplier inv
 		JOIN suppliers s ON s.id = inv.supplier_id
+		 AND s.tenant_id = inv.tenant_id AND s.restaurant_id = inv.restaurant_id
 		WHERE inv.tenant_id = $1 AND inv.restaurant_id = $2 AND inv.id = $3
 	`, tenantID, restaurantID, id))
 	if err != nil {
@@ -136,10 +164,13 @@ func (r *SupplierInvoiceRepository) CreateInvoice(invoice *domain.SupplierInvoic
 			tenant_id, restaurant_id, invoice_number, supplier_ref, invoice_date,
 			due_date, supplier_id, currency, status, notes, internal_notes,
 			created_by, updated_by
-		) VALUES (
+		) SELECT
 			$1, $2, $3, $4, $5,
 			$6, $7, $8, $9, $10, $11,
 			$12, $13
+		WHERE EXISTS (
+			SELECT 1 FROM suppliers s
+			WHERE s.id = $7 AND s.tenant_id = $1 AND s.restaurant_id = $2
 		)
 		RETURNING id
 	`,
@@ -161,7 +192,7 @@ func (r *SupplierInvoiceRepository) CreateInvoice(invoice *domain.SupplierInvoic
 		return 0, err
 	}
 
-	if err := r.insertSupplierInvoiceLinesTx(tx, id, invoice.TenantID, invoice.Lines); err != nil {
+	if err := r.insertSupplierInvoiceLinesTx(tx, id, invoice.TenantID, invoice.RestaurantID, invoice.Lines); err != nil {
 		return 0, err
 	}
 
@@ -209,7 +240,7 @@ func (r *SupplierInvoiceRepository) UpdateInvoice(invoice *domain.SupplierInvoic
 		invoice.Status = existing.Status
 	}
 
-	_, err = tx.Exec(`
+	result, err := tx.Exec(`
 		UPDATE invoices_supplier
 		SET supplier_ref = $1,
 			invoice_date = $2,
@@ -222,6 +253,10 @@ func (r *SupplierInvoiceRepository) UpdateInvoice(invoice *domain.SupplierInvoic
 			updated_by = $9,
 			updated_at = CURRENT_TIMESTAMP
 		WHERE id = $10 AND tenant_id = $11 AND restaurant_id = $12
+		  AND EXISTS (
+			SELECT 1 FROM suppliers s
+			WHERE s.id = $4 AND s.tenant_id = $11 AND s.restaurant_id = $12
+		  )
 	`,
 		nullString(invoice.SupplierRef),
 		invoice.InvoiceDate,
@@ -239,11 +274,18 @@ func (r *SupplierInvoiceRepository) UpdateInvoice(invoice *domain.SupplierInvoic
 	if err != nil {
 		return err
 	}
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rowsAffected == 0 {
+		return errors.New("supplier invoice not found or supplier is outside scope")
+	}
 
 	if _, err := tx.Exec(`DELETE FROM invoice_supplier_lines WHERE invoice_id = $1`, invoice.ID); err != nil {
 		return err
 	}
-	if err := r.insertSupplierInvoiceLinesTx(tx, invoice.ID, invoice.TenantID, invoice.Lines); err != nil {
+	if err := r.insertSupplierInvoiceLinesTx(tx, invoice.ID, invoice.TenantID, invoice.RestaurantID, invoice.Lines); err != nil {
 		return err
 	}
 
@@ -371,6 +413,7 @@ func (r *SupplierInvoiceRepository) getInvoiceByIDTx(tx *sql.Tx, tenantID, resta
 			inv.journal_entry_id, inv.created_at, inv.updated_at, inv.created_by, inv.updated_by
 		FROM invoices_supplier inv
 		JOIN suppliers s ON s.id = inv.supplier_id
+		 AND s.tenant_id = inv.tenant_id AND s.restaurant_id = inv.restaurant_id
 		WHERE inv.tenant_id = $1 AND inv.restaurant_id = $2 AND inv.id = $3
 	`, tenantID, restaurantID, id))
 	if err != nil {
@@ -403,21 +446,24 @@ func (r *SupplierInvoiceRepository) getInvoiceByIDTx(tx *sql.Tx, tenantID, resta
 	return &invoice, nil
 }
 
-func (r *SupplierInvoiceRepository) insertSupplierInvoiceLinesTx(tx *sql.Tx, invoiceID, tenantID int, lines []domain.InvoiceLine) error {
+func (r *SupplierInvoiceRepository) insertSupplierInvoiceLinesTx(tx *sql.Tx, invoiceID, tenantID, restaurantID int, lines []domain.InvoiceLine) error {
 	for index, line := range lines {
 		lineOrder := line.LineOrder
 		if lineOrder <= 0 {
 			lineOrder = index + 1
 		}
-		if _, err := tx.Exec(`
+		result, err := tx.Exec(`
 			INSERT INTO invoice_supplier_lines (
 				invoice_id, tenant_id, description, description_ar, quantity,
 				unit_price, tax_rate, tax_amount, discount_rate, discount_amount,
 				line_total, account_id, line_order
-			) VALUES (
+			) SELECT
 				$1, $2, $3, $4, $5,
 				$6, $7, $8, $9, $10,
 				$11, $12, $13
+			WHERE $12::integer IS NULL OR EXISTS (
+				SELECT 1 FROM chart_of_accounts a
+				WHERE a.id = $12 AND a.tenant_id = $2 AND a.restaurant_id = $14
 			)
 		`,
 			invoiceID,
@@ -433,8 +479,17 @@ func (r *SupplierInvoiceRepository) insertSupplierInvoiceLinesTx(tx *sql.Tx, inv
 			line.LineTotal,
 			line.AccountID,
 			lineOrder,
-		); err != nil {
+			restaurantID,
+		)
+		if err != nil {
 			return err
+		}
+		rowsAffected, affectedErr := result.RowsAffected()
+		if affectedErr != nil {
+			return affectedErr
+		}
+		if rowsAffected == 0 {
+			return errors.New("supplier invoice line account is outside scope")
 		}
 	}
 	return nil

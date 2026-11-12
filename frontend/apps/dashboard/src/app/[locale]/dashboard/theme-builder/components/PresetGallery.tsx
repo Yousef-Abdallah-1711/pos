@@ -136,7 +136,7 @@ const PRESET_TEMPLATES: ThemePreset[] = [
 export function PresetGallery({ isOpen, onClose, onSelectPreset }: PresetGalleryProps) {
   if (!isOpen) return null
 
-  const getSafePresetId = (id: string) => id.replace(/[^a-zA-Z0-9_-]/g, '-')
+  const getSafePresetId = (id: unknown) => String(id ?? 'preset').replace(/[^a-zA-Z0-9_-]/g, '-')
   const presetColorRules = PRESET_TEMPLATES.map((preset) => {
     const safeId = getSafePresetId(preset.id)
     return Object.values(preset.colors)

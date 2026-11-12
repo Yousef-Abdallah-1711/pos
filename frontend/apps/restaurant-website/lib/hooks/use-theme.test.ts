@@ -10,13 +10,24 @@ import {
   useThemeError,
 } from "./use-theme";
 import { useThemeStore } from "@/lib/store/theme-store";
+import type { ThemeData } from "@/lib/store/theme-store";
 import { getDefaultTheme } from "@/lib/utils/default-theme";
 
 // Mock the theme store
 jest.mock("@/lib/store/theme-store");
 
 // Helper to create a complete mock store
-const createMockStore = (overrides = {}) => ({
+type MockThemeStore = {
+  currentTheme: ThemeData | null;
+  isLoading: boolean;
+  error: string | null;
+  loadTheme: jest.Mock;
+  setTheme: jest.Mock;
+  setError: jest.Mock;
+  clearError: jest.Mock;
+};
+
+const createMockStore = (overrides: Partial<MockThemeStore> = {}): MockThemeStore => ({
   currentTheme: null,
   isLoading: false,
   error: null,
@@ -27,17 +38,22 @@ const createMockStore = (overrides = {}) => ({
   ...overrides,
 });
 
+let mockStoreState: MockThemeStore = createMockStore();
+const mockUseThemeStore = useThemeStore as unknown as jest.Mock;
+
 describe("Theme Hooks", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    // Set up default mock store for all tests
-    (useThemeStore as unknown as jest.Mock).mockReturnValue(createMockStore());
+    mockStoreState = createMockStore();
+    mockUseThemeStore.mockImplementation((selector?: (state: MockThemeStore) => unknown) =>
+      selector ? selector(mockStoreState) : mockStoreState
+    );
   });
 
   describe("useTheme", () => {
     it("should return theme data from store", () => {
       const theme = getDefaultTheme();
-      (useThemeStore as unknown as jest.Mock).mockReturnValue(createMockStore({ currentTheme: theme }));
+      mockStoreState = createMockStore({ currentTheme: theme });
 
       const { result } = renderHook(() => useTheme());
 
@@ -47,7 +63,7 @@ describe("Theme Hooks", () => {
     });
 
     it("should indicate loading state", () => {
-      (useThemeStore as unknown as jest.Mock).mockReturnValue(createMockStore({ isLoading: true }));
+      mockStoreState = createMockStore({ isLoading: true });
 
       const { result } = renderHook(() => useTheme());
 
@@ -55,9 +71,7 @@ describe("Theme Hooks", () => {
     });
 
     it("should return error state", () => {
-      (useThemeStore as unknown as jest.Mock).mockReturnValue(
-        createMockStore({ error: "Failed to load theme" })
-      );
+      mockStoreState = createMockStore({ error: "Failed to load theme" });
 
       const { result } = renderHook(() => useTheme());
 
@@ -68,9 +82,7 @@ describe("Theme Hooks", () => {
   describe("useThemeColors", () => {
     it("should return color palette from theme", () => {
       const theme = getDefaultTheme();
-      (useThemeStore as unknown as jest.Mock).mockReturnValue(
-        createMockStore({ currentTheme: theme })
-      );
+      mockStoreState = createMockStore({ currentTheme: theme });
 
       const { result } = renderHook(() => useThemeColors());
 
@@ -81,7 +93,7 @@ describe("Theme Hooks", () => {
     });
 
   it("should return fallback colors and a loading flag if theme not loaded", () => {
-      (useThemeStore as unknown as jest.Mock).mockReturnValue(createMockStore());
+      mockStoreState = createMockStore();
 
       const { result } = renderHook(() => useThemeColors());
 
@@ -96,7 +108,7 @@ describe("Theme Hooks", () => {
   describe("useThemeHeader", () => {
     it("should return header configuration from theme", () => {
       const theme = getDefaultTheme();
-      (useThemeStore as unknown as jest.Mock).mockReturnValue(createMockStore({ currentTheme: theme }));
+      mockStoreState = createMockStore({ currentTheme: theme });
 
       const { result } = renderHook(() => useThemeHeader());
 
@@ -109,7 +121,7 @@ describe("Theme Hooks", () => {
   describe("useThemeFooter", () => {
     it("should return footer configuration from theme", () => {
       const theme = getDefaultTheme();
-      (useThemeStore as unknown as jest.Mock).mockReturnValue(createMockStore({ currentTheme: theme }));
+      mockStoreState = createMockStore({ currentTheme: theme });
 
       const { result } = renderHook(() => useThemeFooter());
 
@@ -121,7 +133,7 @@ describe("Theme Hooks", () => {
   describe("useThemeIdentity", () => {
     it("should return brand identity from theme", () => {
       const theme = getDefaultTheme();
-      (useThemeStore as unknown as jest.Mock).mockReturnValue(createMockStore({ currentTheme: theme }));
+      mockStoreState = createMockStore({ currentTheme: theme });
 
       const { result } = renderHook(() => useThemeIdentity());
 
@@ -133,7 +145,7 @@ describe("Theme Hooks", () => {
   describe("useThemeTypography", () => {
     it("should return typography settings from theme", () => {
       const theme = getDefaultTheme();
-      (useThemeStore as unknown as jest.Mock).mockReturnValue(createMockStore({ currentTheme: theme }));
+      mockStoreState = createMockStore({ currentTheme: theme });
 
       const { result } = renderHook(() => useThemeTypography());
 
@@ -145,7 +157,7 @@ describe("Theme Hooks", () => {
 
   describe("useThemeLoading", () => {
     it("should return loading state", () => {
-      (useThemeStore as unknown as jest.Mock).mockReturnValue(createMockStore({ isLoading: true }));
+      mockStoreState = createMockStore({ isLoading: true });
 
       const { result } = renderHook(() => useThemeLoading());
 
@@ -153,7 +165,7 @@ describe("Theme Hooks", () => {
     });
 
     it("should return false when not loading", () => {
-      (useThemeStore as unknown as jest.Mock).mockReturnValue(createMockStore({ isLoading: false }));
+      mockStoreState = createMockStore({ isLoading: false });
 
       const { result } = renderHook(() => useThemeLoading());
 
@@ -163,7 +175,7 @@ describe("Theme Hooks", () => {
 
   describe("useThemeError", () => {
     it("should return error message", () => {
-      (useThemeStore as unknown as jest.Mock).mockReturnValue(createMockStore({ error: "Theme not found" }));
+      mockStoreState = createMockStore({ error: "Theme not found" });
 
       const { result } = renderHook(() => useThemeError());
 
@@ -171,7 +183,7 @@ describe("Theme Hooks", () => {
     });
 
     it("should return null when no error", () => {
-      (useThemeStore as unknown as jest.Mock).mockReturnValue(createMockStore({ error: null }));
+      mockStoreState = createMockStore({ error: null });
 
       const { result } = renderHook(() => useThemeError());
 
@@ -192,7 +204,7 @@ describe("Theme Hooks", () => {
         clearError: jest.fn(),
       };
 
-      (useThemeStore as unknown as jest.Mock).mockReturnValue(mockStore);
+      mockStoreState = mockStore;
 
       const { result, rerender } = renderHook(() => useTheme());
 
@@ -200,11 +212,26 @@ describe("Theme Hooks", () => {
 
       // Simulate theme change
       mockStore.currentTheme = { ...theme1, name: "Updated Theme" };
-      (useThemeStore as unknown as jest.Mock).mockReturnValue(mockStore);
+      mockStoreState = mockStore;
 
       rerender();
 
       expect(result.current.currentTheme?.name).toBe("Updated Theme");
+    });
+
+    it("does not reload when unrelated store state changes", async () => {
+      const store = createMockStore();
+      mockStoreState = store;
+
+      const { rerender } = renderHook(() => useTheme());
+      await waitFor(() => expect(store.loadTheme).toHaveBeenCalledTimes(1));
+
+      mockStoreState = { ...store, isLoading: true };
+      rerender();
+      mockStoreState = { ...store, isLoading: false, error: "Theme unavailable" };
+      rerender();
+
+      expect(store.loadTheme).toHaveBeenCalledTimes(1);
     });
   });
 });

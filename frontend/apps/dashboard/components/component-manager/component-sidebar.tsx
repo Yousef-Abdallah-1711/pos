@@ -3,20 +3,9 @@
 import React, { useState } from 'react';
 import { Eye, EyeOff, Edit2, Trash2, GripVertical, ChevronDown } from 'lucide-react';
 import { Button } from '@pos-saas/ui';
+import type { ThemeSection } from '@/lib/hooks/use-theme';
 
-export interface ThemeSection {
-  id: number;
-  theme_id: number;
-  section_type: string;
-  order: number;
-  is_visible: boolean;
-  title: string;
-  subtitle: string;
-  description: string;
-  content: Record<string, any>;
-  created_at: string;
-  updated_at: string;
-}
+export type { ThemeSection } from '@/lib/hooks/use-theme';
 
 export interface ComponentSidebarProps {
   sections: ThemeSection[];

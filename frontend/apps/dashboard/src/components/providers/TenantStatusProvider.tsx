@@ -18,18 +18,53 @@ export function TenantStatusProvider({
   // Check status on mount and periodically
   useEffect(() => {
     debugLog('[TenantStatusProvider] Mounting - checking tenant status')
+    let intervalId: ReturnType<typeof setInterval> | null = null
 
-    // Initial check
-    checkStatus()
+    const clearPolling = () => {
+      if (intervalId) {
+        clearInterval(intervalId)
+        intervalId = null
+      }
+    }
 
-    // Set up periodic checks
-    const intervalId = setInterval(() => {
-      debugLog('[TenantStatusProvider] Periodic check - checking tenant status')
-      checkStatus()
-    }, checkInterval)
+    const runCheck = () => {
+      debugLog('[TenantStatusProvider] Checking tenant status')
+      void checkStatus()
+    }
+
+    const startPolling = () => {
+      clearPolling()
+      if (document.visibilityState !== 'visible') {
+        return
+      }
+
+      intervalId = setInterval(() => {
+        if (document.visibilityState !== 'visible') {
+          return
+        }
+        debugLog('[TenantStatusProvider] Periodic check - checking tenant status')
+        void checkStatus()
+      }, checkInterval)
+    }
+
+    runCheck()
+    startPolling()
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        runCheck()
+        startPolling()
+        return
+      }
+
+      clearPolling()
+    }
+
+    document.addEventListener('visibilitychange', handleVisibilityChange)
 
     return () => {
-      clearInterval(intervalId)
+      clearPolling()
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
     }
   }, [checkStatus, checkInterval])
 

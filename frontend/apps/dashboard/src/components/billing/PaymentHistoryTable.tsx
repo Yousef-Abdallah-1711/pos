@@ -18,6 +18,7 @@ interface PaymentHistoryTableProps {
     date?: string
     amount?: string
     status?: string
+    voided?: string
     method?: string
     card?: string
     reference?: string
@@ -111,7 +112,9 @@ export function PaymentHistoryTable({
                   <span
                     className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ${getStatusPill(payment.status)}`}
                   >
-                    {payment.status.toUpperCase()}
+                    {payment.status === 'voided'
+                      ? labels?.voided || (locale === 'ar' ? 'ملغي' : 'Voided')
+                      : payment.status.toUpperCase()}
                   </span>
                 </TableCell>
                 <TableCell>{payment.payment_method || '-'}</TableCell>

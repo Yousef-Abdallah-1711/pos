@@ -12,7 +12,6 @@ import (
 	"pos-saas/internal/repository"
 )
 
-
 // Cache provides a simple in-memory cache implementation (can be replaced with Redis)
 type Cache interface {
 	Get(key string) (interface{}, bool)
@@ -104,16 +103,16 @@ type ThemeService interface {
 	CreateTheme(ctx context.Context, req *domain.ThemeCreateRequest, tenantID, restaurantID, createdBy int64) (*domain.Theme, error)
 
 	// GetTheme retrieves a theme by ID with caching
-	GetTheme(ctx context.Context, id int64) (*domain.Theme, error)
+	GetTheme(ctx context.Context, tenantID, restaurantID, id int64) (*domain.Theme, error)
 
 	// UpdateTheme updates an existing theme
-	UpdateTheme(ctx context.Context, id int64, req *domain.ThemeUpdateRequest, updatedBy int64) (*domain.Theme, error)
+	UpdateTheme(ctx context.Context, tenantID, restaurantID, id int64, req *domain.ThemeUpdateRequest, updatedBy int64) (*domain.Theme, error)
 
 	// DeleteTheme deletes a theme
-	DeleteTheme(ctx context.Context, id int64) error
+	DeleteTheme(ctx context.Context, tenantID, restaurantID, id int64) error
 
 	// ListThemes retrieves a paginated list of themes
-	ListThemes(ctx context.Context, tenantID int64, page, pageSize int) (*domain.ThemeListResponse, error)
+	ListThemes(ctx context.Context, tenantID, restaurantID int64, page, pageSize int) (*domain.ThemeListResponse, error)
 
 	// ListThemePresets retrieves pre-built theme templates
 	ListThemePresets(ctx context.Context, page, pageSize int) (map[string]interface{}, error)
@@ -122,7 +121,7 @@ type ThemeService interface {
 	GetPreset(ctx context.Context, id int64) (*domain.Theme, error)
 
 	// ActivateTheme activates a theme for a tenant
-	ActivateTheme(ctx context.Context, id int64) error
+	ActivateTheme(ctx context.Context, tenantID, restaurantID, id int64) error
 }
 
 // themeServiceImpl implements ThemeService
@@ -189,15 +188,15 @@ func (s *themeServiceImpl) CreateTheme(ctx context.Context, req *domain.ThemeCre
 	}
 
 	// Invalidate list caches
-	s.invalidateListCaches(tenantID)
+	s.invalidateListCaches(tenantID, restaurantID)
 
 	log.Printf("[ThemeService] Theme created successfully: ID=%d", theme.ID)
 	return theme, nil
 }
 
 // GetTheme retrieves a theme by ID with caching
-func (s *themeServiceImpl) GetTheme(ctx context.Context, id int64) (*domain.Theme, error) {
-	cacheKey := fmt.Sprintf("theme:%d", id)
+func (s *themeServiceImpl) GetTheme(ctx context.Context, tenantID, restaurantID, id int64) (*domain.Theme, error) {
+	cacheKey := fmt.Sprintf("theme:%d:%d:%d", tenantID, restaurantID, id)
 
 	// Check cache first
 	if cached, found := s.cache.Get(cacheKey); found {
@@ -208,7 +207,7 @@ func (s *themeServiceImpl) GetTheme(ctx context.Context, id int64) (*domain.Them
 	log.Printf("[ThemeService] Cache MISS for theme: %d, fetching from database", id)
 
 	// Fetch from database
-	theme, err := s.repo.GetByID(ctx, id)
+	theme, err := s.repo.GetByID(ctx, tenantID, restaurantID, id)
 	if err != nil {
 		log.Printf("[ThemeService] Error fetching theme: %v", err)
 		return nil, err
@@ -221,11 +220,11 @@ func (s *themeServiceImpl) GetTheme(ctx context.Context, id int64) (*domain.Them
 }
 
 // UpdateTheme updates an existing theme
-func (s *themeServiceImpl) UpdateTheme(ctx context.Context, id int64, req *domain.ThemeUpdateRequest, updatedBy int64) (*domain.Theme, error) {
+func (s *themeServiceImpl) UpdateTheme(ctx context.Context, tenantID, restaurantID, id int64, req *domain.ThemeUpdateRequest, updatedBy int64) (*domain.Theme, error) {
 	log.Printf("[ThemeService] Updating theme: %d", id)
 
 	// Fetch current theme
-	theme, err := s.repo.GetByID(ctx, id)
+	theme, err := s.repo.GetByID(ctx, tenantID, restaurantID, id)
 	if err != nil {
 		log.Printf("[ThemeService] Error fetching theme for update: %v", err)
 		return nil, err
@@ -263,48 +262,46 @@ func (s *themeServiceImpl) UpdateTheme(ctx context.Context, id int64, req *domai
 	}
 
 	// Invalidate caches
-	cacheKey := fmt.Sprintf("theme:%d", id)
+	cacheKey := fmt.Sprintf("theme:%d:%d:%d", tenantID, restaurantID, id)
 	s.cache.Delete(cacheKey)
-	cacheKeyActive := fmt.Sprintf("theme:active:%d", theme.TenantID)
+	cacheKeyActive := fmt.Sprintf("theme:active:%d:%d", tenantID, restaurantID)
 	s.cache.Delete(cacheKeyActive)
-	s.invalidateListCaches(theme.TenantID)
+	s.invalidateListCaches(tenantID, restaurantID)
 
 	log.Printf("[ThemeService] Theme updated successfully: ID=%d, version=%d", id, theme.Version)
 	return theme, nil
 }
 
 // DeleteTheme deletes a theme
-func (s *themeServiceImpl) DeleteTheme(ctx context.Context, id int64) error {
+func (s *themeServiceImpl) DeleteTheme(ctx context.Context, tenantID, restaurantID, id int64) error {
 	log.Printf("[ThemeService] Deleting theme: %d", id)
 
 	// Fetch theme to get tenant_id before deletion
-	theme, err := s.repo.GetByID(ctx, id)
+	_, err := s.repo.GetByID(ctx, tenantID, restaurantID, id)
 	if err != nil {
 		log.Printf("[ThemeService] Error fetching theme for deletion: %v", err)
 		return err
 	}
 
-	tenantID := theme.TenantID
-
 	// Delete from database
-	if err := s.repo.Delete(ctx, id); err != nil {
+	if err := s.repo.Delete(ctx, tenantID, restaurantID, id); err != nil {
 		log.Printf("[ThemeService] Error deleting theme: %v", err)
 		return err
 	}
 
 	// Invalidate caches
-	cacheKey := fmt.Sprintf("theme:%d", id)
+	cacheKey := fmt.Sprintf("theme:%d:%d:%d", tenantID, restaurantID, id)
 	s.cache.Delete(cacheKey)
-	cacheKeyActive := fmt.Sprintf("theme:active:%d", tenantID)
+	cacheKeyActive := fmt.Sprintf("theme:active:%d:%d", tenantID, restaurantID)
 	s.cache.Delete(cacheKeyActive)
-	s.invalidateListCaches(tenantID)
+	s.invalidateListCaches(tenantID, restaurantID)
 
 	log.Printf("[ThemeService] Theme deleted successfully: ID=%d", id)
 	return nil
 }
 
 // ListThemes retrieves a paginated list of themes
-func (s *themeServiceImpl) ListThemes(ctx context.Context, tenantID int64, page, pageSize int) (*domain.ThemeListResponse, error) {
+func (s *themeServiceImpl) ListThemes(ctx context.Context, tenantID, restaurantID int64, page, pageSize int) (*domain.ThemeListResponse, error) {
 	log.Printf("[ThemeService] Listing themes for tenant: %d, page: %d, pageSize: %d", tenantID, page, pageSize)
 
 	// Validate pagination parameters
@@ -315,7 +312,7 @@ func (s *themeServiceImpl) ListThemes(ctx context.Context, tenantID int64, page,
 		pageSize = 10
 	}
 
-	cacheKey := fmt.Sprintf("theme:list:%d:%d:%d", tenantID, page, pageSize)
+	cacheKey := fmt.Sprintf("theme:list:%d:%d:%d:%d", tenantID, restaurantID, page, pageSize)
 
 	// Check cache first
 	if cached, found := s.cache.Get(cacheKey); found {
@@ -329,7 +326,7 @@ func (s *themeServiceImpl) ListThemes(ctx context.Context, tenantID int64, page,
 	offset := (page - 1) * pageSize
 
 	// Fetch from database
-	themes, total, err := s.repo.List(ctx, tenantID, offset, pageSize)
+	themes, total, err := s.repo.List(ctx, tenantID, restaurantID, offset, pageSize)
 	if err != nil {
 		log.Printf("[ThemeService] Error listing themes: %v", err)
 		return nil, err
@@ -431,35 +428,33 @@ func (s *themeServiceImpl) GetPreset(ctx context.Context, id int64) (*domain.The
 }
 
 // ActivateTheme activates a theme for a tenant
-func (s *themeServiceImpl) ActivateTheme(ctx context.Context, id int64) error {
+func (s *themeServiceImpl) ActivateTheme(ctx context.Context, tenantID, restaurantID, id int64) error {
 	log.Printf("[ThemeService] Activating theme: %d", id)
 
 	// Fetch theme to get tenant_id
-	theme, err := s.repo.GetByID(ctx, id)
+	_, err := s.repo.GetByID(ctx, tenantID, restaurantID, id)
 	if err != nil {
 		log.Printf("[ThemeService] Error fetching theme for activation: %v", err)
 		return err
 	}
 
-	tenantID := theme.TenantID
-
-	// Activate in database (also deactivates others for this tenant)
-	if err := s.repo.SetActive(ctx, id); err != nil {
+	// Activation is isolated to the selected restaurant or tenant-wide theme.
+	if err := s.repo.SetActive(ctx, tenantID, restaurantID, id); err != nil {
 		log.Printf("[ThemeService] Error activating theme: %v", err)
 		return err
 	}
 
 	// Invalidate caches
-	cacheKeyActive := fmt.Sprintf("theme:active:%d", tenantID)
+	cacheKeyActive := fmt.Sprintf("theme:active:%d:%d", tenantID, restaurantID)
 	s.cache.Delete(cacheKeyActive)
-	s.invalidateListCaches(tenantID)
+	s.invalidateListCaches(tenantID, restaurantID)
 
 	log.Printf("[ThemeService] Theme activated successfully: ID=%d", id)
 	return nil
 }
 
 // invalidateListCaches removes all cached list entries for a tenant
-func (s *themeServiceImpl) invalidateListCaches(tenantID int64) {
+func (s *themeServiceImpl) invalidateListCaches(tenantID, restaurantID int64) {
 	// Clear all list cache entries for this tenant
 	// We need to invalidate all pagination variations
 	log.Printf("[ThemeService] Invalidating list caches for tenant: %d", tenantID)
@@ -470,13 +465,13 @@ func (s *themeServiceImpl) invalidateListCaches(tenantID int64) {
 	pageSizes := []int{10, 20, 50, 100}
 	for page := 1; page <= 10; page++ {
 		for _, pageSize := range pageSizes {
-			cacheKey := fmt.Sprintf("theme:list:%d:%d:%d", tenantID, page, pageSize)
+			cacheKey := fmt.Sprintf("theme:list:%d:%d:%d:%d", tenantID, restaurantID, page, pageSize)
 			s.cache.Delete(cacheKey)
 		}
 	}
 
 	// Also delete any cached active theme for this tenant
-	cacheKeyActive := fmt.Sprintf("theme:active:%d", tenantID)
+	cacheKeyActive := fmt.Sprintf("theme:active:%d:%d", tenantID, restaurantID)
 	s.cache.Delete(cacheKeyActive)
 
 	// For production, consider:

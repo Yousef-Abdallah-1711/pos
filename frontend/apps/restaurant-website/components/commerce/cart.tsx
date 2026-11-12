@@ -5,17 +5,22 @@ import { Button } from '@pos-saas/ui'
 import { Minus, Plus, Trash2, ShoppingCart } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { useThemeColors } from '@/lib/hooks/use-theme'
 
 interface CartProps {
   locale?: 'en' | 'ar'
+  themeColors?: Partial<{
+    background: string
+    text: string
+    border: string
+    primary: string
+  }>
 }
 
 /**
  * Shopping cart component
  * Uses theme CSS variables for colors
  */
-export function Cart({ locale = 'en' }: CartProps) {
+export function Cart({ locale = 'en', themeColors = {} }: CartProps) {
   const items = useCartStore((state) => state.items)
   const removeItem = useCartStore((state) => state.removeItem)
   const updateQuantity = useCartStore((state) => state.updateQuantity)
@@ -23,16 +28,14 @@ export function Cart({ locale = 'en' }: CartProps) {
   const getTotal = useCartStore((state) => state.getTotal)
   const getTotalItems = useCartStore((state) => state.getTotalItems)
   const clearCart = useCartStore((state) => state.clearCart)
-  const themeColors = useThemeColors() as any
-
   const isRTL = locale === 'ar'
   const total = getTotal()
   const itemCount = getTotalItems()
 
-  const bgColor = (themeColors as any)?.background || '#ffffff'
-  const textColor = (themeColors as any)?.text || '#1f2937'
-  const borderColor = (themeColors as any)?.border || '#e5e7eb'
-  const primaryColor = (themeColors as any)?.primary || '#f97316'
+  const bgColor = themeColors.background || '#ffffff'
+  const textColor = themeColors.text || '#1f2937'
+  const borderColor = themeColors.border || '#e5e7eb'
+  const primaryColor = themeColors.primary || '#f97316'
 
   if (items.length === 0) {
     return (
@@ -159,16 +162,16 @@ export function Cart({ locale = 'en' }: CartProps) {
           </div>
 
           <div className="space-y-3">
-            <Link href={`/${locale}/checkout`}>
-              <Button className="w-full" size="lg">
+            <Button asChild className="w-full" size="lg">
+              <Link href={`/${locale}/checkout`}>
                 {locale === 'en' ? 'Proceed to Checkout' : 'Ù…ØªØ§Ø¨Ø¹Ø© Ø§Ù„Ø¯ÙØ¹'}
-              </Button>
-            </Link>
-            <Link href={`/${locale}/menu`}>
-              <Button variant="outline" className="w-full" size="lg">
+              </Link>
+            </Button>
+            <Button asChild variant="outline" className="w-full" size="lg">
+              <Link href={`/${locale}/menu`}>
                 {locale === 'en' ? 'Continue Shopping' : 'Ù…ØªØ§Ø¨Ø¹Ø© Ø§Ù„ØªØ³ÙˆÙ‚'}
-              </Button>
-            </Link>
+              </Link>
+            </Button>
           </div>
         </div>
 

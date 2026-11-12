@@ -1,0 +1,11 @@
+commit 5528c6f4bac5c6575c3a185a45ad81eaffa36e6e
+Author:     Youssef Abdallah <yousef.abdallah197@gmail.com>
+AuthorDate: Wed Nov 11 22:42:08 2026 +0200
+Commit:     Youssef Abdallah <yousef.abdallah197@gmail.com>
+CommitDate: Wed Nov 11 22:42:08 2026 +0200
+
+    test(dashboard): repair baseline test typecheck failures
+
+ .../app/[locale]/dashboard/tables/components/TableList.test.tsx  | 2 --
+ frontend/apps/dashboard/src/lib/config.test.ts                   | 9 +++++----
+ 2 files changed, 5 insertions(+), 6 deletions(-)

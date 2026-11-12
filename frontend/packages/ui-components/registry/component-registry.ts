@@ -14,6 +14,35 @@ import {
   IndustryType,
 } from './registry-types'
 
+type ComponentLoader = () => Promise<Record<string, unknown>>
+
+const componentLoaders: Record<string, ComponentLoader> = {
+  'hero-section': () => import('../organisms/HeroSection'),
+}
+
+const editorLoaders: Record<string, ComponentLoader> = {}
+
+export const registerEditorLoader = (name: string, loader: ComponentLoader) => {
+  editorLoaders[name] = loader
+}
+
+const resolveModuleExport = (module: Record<string, unknown>, exportName?: string) => {
+  if (exportName && typeof module[exportName] === 'function') {
+    return module[exportName] as React.ComponentType<any>
+  }
+
+  if (typeof module.default === 'function') {
+    return module.default as React.ComponentType<any>
+  }
+
+  const firstExport = Object.values(module).find((value) => typeof value === 'function')
+  if (typeof firstExport === 'function') {
+    return firstExport as React.ComponentType<any>
+  }
+
+  return null
+}
+
 /**
  * Registry Manager Class
  *
@@ -97,14 +126,17 @@ class ComponentRegistryManager {
       throw new Error(`Component not found: ${componentId}`)
     }
 
+    const loader = componentLoaders[componentId]
+    if (!loader) {
+      throw new Error(`No static component loader registered for ${componentId}`)
+    }
+
     try {
-      // Dynamic import using the component path from registry
-      const metadata = entry as unknown as any
-      const module = await import(/* @vite-ignore */ metadata.componentPath)
-      const Component = module.default || Object.values(module)[0]
+      const module = await loader()
+      const Component = resolveModuleExport(module)
 
       if (!Component) {
-        throw new Error(`No default export found in ${metadata.componentPath}`)
+        throw new Error(`No component export found for ${componentId}`)
       }
 
       this.loadedComponents.set(componentId, Component)
@@ -134,11 +166,15 @@ class ComponentRegistryManager {
       return null
     }
 
+    const loader = editorLoaders[metadata.editorComponent]
+    if (!loader) {
+      console.warn(`No static editor loader registered for ${metadata.editorComponent}`)
+      return null
+    }
+
     try {
-      // Dynamic import from editors directory
-      const editorPath = `@/components/editors/${metadata.editorComponent}`
-      const module = await import(/* @vite-ignore */ editorPath)
-      const Editor = module.default || module[metadata.editorComponent]
+      const module = await loader()
+      const Editor = resolveModuleExport(module, metadata.editorComponent)
 
       if (!Editor) {
         console.warn(`No editor found for ${componentId}`)

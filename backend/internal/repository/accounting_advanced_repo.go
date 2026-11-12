@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"database/sql"
 	"encoding/json"
 	"errors"
@@ -11,6 +12,7 @@ import (
 	"time"
 
 	"pos-saas/internal/domain"
+	"pos-saas/internal/pkg/database"
 )
 
 type AccountingAdvancedRepository struct {
@@ -294,9 +296,12 @@ func (r *AccountingAdvancedRepository) CreateRecurringJournalTemplate(item *doma
 		INSERT INTO recurring_journal_templates (
 			tenant_id, restaurant_id, template_code, template_name, description, frequency,
 			start_date, next_run_date, is_active, auto_post, lines_json, created_by, updated_by
-		) VALUES (
+		) SELECT
 			$1, $2, $3, $4, $5, $6,
 			$7, $8, $9, $10, $11, $12, $13
+		WHERE EXISTS (
+			SELECT 1 FROM restaurants
+			WHERE id = $2 AND tenant_id = $1
 		)
 		RETURNING id
 	`,
@@ -1308,7 +1313,7 @@ func (r *AccountingAdvancedRepository) GetHRCostAnalysis(tenantID, restaurantID 
 	}, nil
 }
 
-func (r *AccountingAdvancedRepository) CreateEInvoiceSubmission(item *domain.EInvoiceSubmission) (int, error) {
+func (r *AccountingAdvancedRepository) CreateEInvoiceSubmission(ctx context.Context, item *domain.EInvoiceSubmission) (int, error) {
 	if item == nil {
 		return 0, errors.New("e-invoice payload is required")
 	}
@@ -1316,75 +1321,97 @@ func (r *AccountingAdvancedRepository) CreateEInvoiceSubmission(item *domain.EIn
 		item.ResponsePayload = []byte("{}")
 	}
 	var id int
-	err := r.db.QueryRow(`
-		INSERT INTO e_invoice_submissions (
-			tenant_id, restaurant_id, invoice_type, invoice_id, eta_uuid,
-			status, submitted_at, response_payload, error_message, created_by
-		) VALUES (
-			$1, $2, $3, $4, $5,
-			$6, COALESCE($7, CURRENT_TIMESTAMP), $8, $9, $10
-		)
-		RETURNING id
-	`,
-		item.TenantID,
-		item.RestaurantID,
-		item.InvoiceType,
-		item.InvoiceID,
-		nullString(item.ETAUUID),
-		defaultString(item.Status, "pending"),
-		nullTime(item.SubmittedAt),
-		item.ResponsePayload,
-		nullString(item.ErrorMessage),
-		item.CreatedBy,
-	).Scan(&id)
+	err := database.WithTenantTx(ctx, r.db, int64(item.TenantID), int64(item.RestaurantID), func(tx *sql.Tx) error {
+		invoiceTable := ""
+		switch strings.ToLower(strings.TrimSpace(item.InvoiceType)) {
+		case "customer":
+			invoiceTable = "invoices_customer"
+		case "supplier":
+			invoiceTable = "invoices_supplier"
+		default:
+			return fmt.Errorf("unsupported e-invoice type %q", item.InvoiceType)
+		}
+		var invoiceExists bool
+		if err := tx.QueryRowContext(ctx, `SELECT EXISTS (
+			SELECT 1 FROM `+invoiceTable+` WHERE id = $1 AND tenant_id = $2 AND restaurant_id = $3
+		)`, item.InvoiceID, item.TenantID, item.RestaurantID).Scan(&invoiceExists); err != nil {
+			return err
+		}
+		if !invoiceExists {
+			return sql.ErrNoRows
+		}
+		return tx.QueryRowContext(ctx, `
+			INSERT INTO e_invoice_submissions (
+				tenant_id, restaurant_id, invoice_type, invoice_id, eta_uuid,
+				status, submitted_at, response_payload, error_message, created_by
+			) VALUES (
+				$1, $2, $3, $4, $5,
+				$6, COALESCE($7, CURRENT_TIMESTAMP), $8, $9, $10
+			)
+			RETURNING id
+		`,
+			item.TenantID,
+			item.RestaurantID,
+			item.InvoiceType,
+			item.InvoiceID,
+			nullString(item.ETAUUID),
+			defaultString(item.Status, "pending"),
+			nullTime(item.SubmittedAt),
+			item.ResponsePayload,
+			nullString(item.ErrorMessage),
+			item.CreatedBy,
+		).Scan(&id)
+	})
 	if err != nil {
 		return 0, err
 	}
 	return id, nil
 }
 
-func (r *AccountingAdvancedRepository) ListEInvoiceSubmissions(tenantID, restaurantID int) ([]domain.EInvoiceSubmission, error) {
-	rows, err := r.db.Query(`
-		SELECT
-			id, tenant_id, restaurant_id, invoice_type, invoice_id, COALESCE(eta_uuid, ''),
-			status, submitted_at, response_payload, COALESCE(error_message, ''), created_by
-		FROM e_invoice_submissions
-		WHERE tenant_id = $1 AND restaurant_id = $2
-		ORDER BY submitted_at DESC, id DESC
-	`, tenantID, restaurantID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
+func (r *AccountingAdvancedRepository) ListEInvoiceSubmissions(ctx context.Context, tenantID, restaurantID int) ([]domain.EInvoiceSubmission, error) {
 	out := make([]domain.EInvoiceSubmission, 0)
-	for rows.Next() {
-		var (
-			item      domain.EInvoiceSubmission
-			createdBy sql.NullInt64
-		)
-		if err := rows.Scan(
-			&item.ID,
-			&item.TenantID,
-			&item.RestaurantID,
-			&item.InvoiceType,
-			&item.InvoiceID,
-			&item.ETAUUID,
-			&item.Status,
-			&item.SubmittedAt,
-			&item.ResponsePayload,
-			&item.ErrorMessage,
-			&createdBy,
-		); err != nil {
-			return nil, err
+	err := database.WithTenantTx(ctx, r.db, int64(tenantID), int64(restaurantID), func(tx *sql.Tx) error {
+		rows, err := tx.QueryContext(ctx, `
+			SELECT
+				id, tenant_id, restaurant_id, invoice_type, invoice_id, COALESCE(eta_uuid, ''),
+				status, submitted_at, response_payload, COALESCE(error_message, ''), created_by
+			FROM e_invoice_submissions
+			WHERE tenant_id = $1 AND restaurant_id = $2
+			ORDER BY submitted_at DESC, id DESC
+		`, tenantID, restaurantID)
+		if err != nil {
+			return err
 		}
-		if createdBy.Valid {
-			val := int(createdBy.Int64)
-			item.CreatedBy = &val
+		defer rows.Close()
+		for rows.Next() {
+			var (
+				item      domain.EInvoiceSubmission
+				createdBy sql.NullInt64
+			)
+			if err := rows.Scan(
+				&item.ID,
+				&item.TenantID,
+				&item.RestaurantID,
+				&item.InvoiceType,
+				&item.InvoiceID,
+				&item.ETAUUID,
+				&item.Status,
+				&item.SubmittedAt,
+				&item.ResponsePayload,
+				&item.ErrorMessage,
+				&createdBy,
+			); err != nil {
+				return err
+			}
+			if createdBy.Valid {
+				val := int(createdBy.Int64)
+				item.CreatedBy = &val
+			}
+			out = append(out, item)
 		}
-		out = append(out, item)
-	}
-	if err := rows.Err(); err != nil {
+		return rows.Err()
+	})
+	if err != nil {
 		return nil, err
 	}
 	return out, nil
@@ -1464,6 +1491,7 @@ func (r *AccountingAdvancedRepository) GetSocialInsuranceReportRows(tenantID, re
 }
 
 func (r *AccountingAdvancedRepository) GetAuditExportRows(
+	ctx context.Context,
 	tenantID, restaurantID int,
 	dateFrom, dateTo time.Time,
 	exportType string,
@@ -1522,38 +1550,39 @@ func (r *AccountingAdvancedRepository) GetAuditExportRows(
 	}
 
 	if normalized == "all" || normalized == "rbac" {
-		auditRows, err := r.db.Query(`
-			SELECT
-				pal.created_at,
-				COALESCE(pal.action, ''),
-				COALESCE(pal.details::text, ''),
-				0::numeric,
-				COALESCE(u.name, u.email, CONCAT('user#', pal.admin_id::text), 'system')
-			FROM permission_audit_logs pal
-			LEFT JOIN users u ON u.id = pal.admin_id
-			WHERE pal.tenant_id = $1
-			  AND pal.created_at >= $2
-			  AND pal.created_at < $3
-			ORDER BY pal.created_at ASC, pal.id ASC
-		`, tenantID, dateFrom, dateTo)
+		err := database.WithTenantTx(ctx, r.db, int64(tenantID), int64(restaurantID), func(tx *sql.Tx) error {
+			auditRows, err := tx.QueryContext(ctx, `
+				SELECT
+					pal.created_at,
+					COALESCE(pal.action, ''),
+					COALESCE(pal.details::text, ''),
+					0::numeric,
+					COALESCE(u.name, u.email, CONCAT('user#', pal.admin_id::text), 'system')
+				FROM permission_audit_logs pal
+				LEFT JOIN users u ON u.id = pal.admin_id
+				WHERE pal.tenant_id = $1
+				  AND pal.created_at >= $2
+				  AND pal.created_at < $3
+				ORDER BY pal.created_at ASC, pal.id ASC
+			`, tenantID, dateFrom, dateTo)
+			if err != nil {
+				return err
+			}
+			defer auditRows.Close()
+			for auditRows.Next() {
+				var ts time.Time
+				var reference, description, actor string
+				var amount float64
+				if err := auditRows.Scan(&ts, &reference, &description, &amount, &actor); err != nil {
+					return err
+				}
+				addRow("rbac_audit", ts, reference, description, amount, actor)
+			}
+			return auditRows.Err()
+		})
 		if err != nil {
 			return nil, err
 		}
-		for auditRows.Next() {
-			var ts time.Time
-			var reference, description, actor string
-			var amount float64
-			if err := auditRows.Scan(&ts, &reference, &description, &amount, &actor); err != nil {
-				auditRows.Close()
-				return nil, err
-			}
-			addRow("rbac_audit", ts, reference, description, amount, actor)
-		}
-		if err := auditRows.Err(); err != nil {
-			auditRows.Close()
-			return nil, err
-		}
-		auditRows.Close()
 	}
 
 	sort.Slice(rows, func(i, j int) bool {
@@ -1563,6 +1592,7 @@ func (r *AccountingAdvancedRepository) GetAuditExportRows(
 }
 
 func (r *AccountingAdvancedRepository) LogAuditExport(
+	ctx context.Context,
 	tenantID, restaurantID, generatedBy int,
 	exportType, exportFormat string,
 	params map[string]interface{},
@@ -1572,16 +1602,18 @@ func (r *AccountingAdvancedRepository) LogAuditExport(
 	if err != nil {
 		payload = []byte("{}")
 	}
-	_, err = r.db.Exec(`
-		INSERT INTO audit_export_logs (
-			tenant_id, restaurant_id, export_type, export_format,
-			params_json, row_count, generated_by
-		) VALUES (
-			$1, $2, $3, $4,
-			$5, $6, $7
-		)
-	`, tenantID, restaurantID, exportType, exportFormat, payload, rowCount, generatedBy)
-	return err
+	return database.WithTenantTx(ctx, r.db, int64(tenantID), int64(restaurantID), func(tx *sql.Tx) error {
+		_, err := tx.ExecContext(ctx, `
+			INSERT INTO audit_export_logs (
+				tenant_id, restaurant_id, export_type, export_format,
+				params_json, row_count, generated_by
+			) VALUES (
+				$1, $2, $3, $4,
+				$5, $6, $7
+			)
+		`, tenantID, restaurantID, exportType, exportFormat, payload, rowCount, generatedBy)
+		return err
+	})
 }
 
 func (r *AccountingAdvancedRepository) GetChartOfAccountsExcelRows(tenantID, restaurantID int) ([][]string, error) {

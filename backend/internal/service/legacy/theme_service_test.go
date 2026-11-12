@@ -151,8 +151,8 @@ func TestServiceMethodSignatures(t *testing.T) {
 // TestCacheKeyGeneration tests cache key formats
 func TestCacheKeyGeneration(t *testing.T) {
 	tests := []struct {
-		name    string
-		themeID int64
+		name     string
+		themeID  int64
 		expected string
 	}{
 		{"theme 1", 1, "theme:1"},
@@ -177,9 +177,9 @@ func TestPaginationValidation(t *testing.T) {
 	svc := service.(*themeServiceImpl)
 
 	tests := []struct {
-		name     string
-		page     int
-		pageSize int
+		name          string
+		page          int
+		pageSize      int
 		correctedPage int
 		correctedSize int
 	}{
@@ -267,26 +267,28 @@ func (m *mockThemeRepository) Create(ctx context.Context, theme *domain.Theme) e
 	return nil
 }
 
-func (m *mockThemeRepository) GetByID(ctx context.Context, id int64) (*domain.Theme, error) {
+func (m *mockThemeRepository) GetByID(ctx context.Context, tenantID, restaurantID, id int64) (*domain.Theme, error) {
 	if theme, ok := m.themes[id]; ok {
-		return theme, nil
+		if theme.TenantID == tenantID && theme.RestaurantID == restaurantID {
+			return theme, nil
+		}
 	}
 	return nil, nil // In real implementation would return error
 }
 
-func (m *mockThemeRepository) GetBySlug(ctx context.Context, tenantID int64, slug string) (*domain.Theme, error) {
+func (m *mockThemeRepository) GetBySlug(ctx context.Context, tenantID, restaurantID int64, slug string) (*domain.Theme, error) {
 	for _, theme := range m.themes {
-		if theme.TenantID == tenantID && theme.Slug == slug {
+		if theme.TenantID == tenantID && theme.RestaurantID == restaurantID && theme.Slug == slug {
 			return theme, nil
 		}
 	}
 	return nil, nil
 }
 
-func (m *mockThemeRepository) List(ctx context.Context, tenantID int64, offset, limit int) ([]*domain.Theme, int64, error) {
+func (m *mockThemeRepository) List(ctx context.Context, tenantID, restaurantID int64, offset, limit int) ([]*domain.Theme, int64, error) {
 	var themes []*domain.Theme
 	for _, theme := range m.themes {
-		if theme.TenantID == tenantID {
+		if theme.TenantID == tenantID && theme.RestaurantID == restaurantID {
 			themes = append(themes, theme)
 		}
 	}
@@ -300,28 +302,28 @@ func (m *mockThemeRepository) Update(ctx context.Context, theme *domain.Theme) e
 	return nil
 }
 
-func (m *mockThemeRepository) Delete(ctx context.Context, id int64) error {
-	if m.themes != nil {
+func (m *mockThemeRepository) Delete(ctx context.Context, tenantID, restaurantID, id int64) error {
+	if theme, ok := m.themes[id]; ok && theme.TenantID == tenantID && theme.RestaurantID == restaurantID {
 		delete(m.themes, id)
 	}
 	return nil
 }
 
-func (m *mockThemeRepository) GetActive(ctx context.Context, tenantID int64) (*domain.Theme, error) {
+func (m *mockThemeRepository) GetActive(ctx context.Context, tenantID, restaurantID int64) (*domain.Theme, error) {
 	for _, theme := range m.themes {
-		if theme.TenantID == tenantID && theme.IsActive {
+		if theme.TenantID == tenantID && theme.RestaurantID == restaurantID && theme.IsActive {
 			return theme, nil
 		}
 	}
 	return nil, nil
 }
 
-func (m *mockThemeRepository) SetActive(ctx context.Context, id int64) error {
-	if m.themes != nil && m.themes[id] != nil {
-		// Deactivate all for this tenant
-		tenantID := m.themes[id].TenantID
+func (m *mockThemeRepository) SetActive(ctx context.Context, tenantID, restaurantID, id int64) error {
+	if m.themes != nil && m.themes[id] != nil && m.themes[id].TenantID == tenantID && m.themes[id].RestaurantID == restaurantID {
+		// Deactivate only themes in the same ownership scope.
+		themeRestaurantID := m.themes[id].RestaurantID
 		for _, theme := range m.themes {
-			if theme.TenantID == tenantID {
+			if theme.TenantID == tenantID && theme.RestaurantID == themeRestaurantID {
 				theme.IsActive = false
 			}
 		}

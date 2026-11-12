@@ -14,6 +14,7 @@ import (
 const (
 	TenantSetting     = "app.tenant_id"
 	RestaurantSetting = "app.restaurant_id"
+	UserSetting       = "app.user_id"
 )
 
 // WithTenantTx runs fn inside a transaction whose RLS context is the given tenant (and restaurant).
@@ -23,6 +24,18 @@ const (
 // This is the only supported way to touch RLS-protected tables. Policies compare against
 // current_setting('app.tenant_id', true), which is NULL (no rows, writes rejected) when it is unset.
 func WithTenantTx(ctx context.Context, db *sql.DB, tenantID, restaurantID int64, fn func(tx *sql.Tx) error) (err error) {
+	return withTenantContextTx(ctx, db, tenantID, restaurantID, 0, fn)
+}
+
+// WithTenantUserTx sets tenant, restaurant, and user context for user-owned RLS rows.
+func WithTenantUserTx(ctx context.Context, db *sql.DB, tenantID, restaurantID, userID int64, fn func(tx *sql.Tx) error) error {
+	if userID <= 0 {
+		return fmt.Errorf("invalid user id %d", userID)
+	}
+	return withTenantContextTx(ctx, db, tenantID, restaurantID, userID, fn)
+}
+
+func withTenantContextTx(ctx context.Context, db *sql.DB, tenantID, restaurantID, userID int64, fn func(tx *sql.Tx) error) (err error) {
 	if db == nil {
 		return errors.New("database is not initialized")
 	}
@@ -32,7 +45,9 @@ func WithTenantTx(ctx context.Context, db *sql.DB, tenantID, restaurantID int64,
 	if restaurantID < 0 {
 		return fmt.Errorf("invalid restaurant id %d", restaurantID)
 	}
-
+	if userID < 0 {
+		return fmt.Errorf("invalid user id %d", userID)
+	}
 	tx, err := db.BeginTx(ctx, nil)
 	if err != nil {
 		return fmt.Errorf("begin tenant transaction: %w", err)
@@ -47,14 +62,7 @@ func WithTenantTx(ctx context.Context, db *sql.DB, tenantID, restaurantID int64,
 		}
 	}()
 
-	restaurant := ""
-	if restaurantID > 0 {
-		restaurant = strconv.FormatInt(restaurantID, 10)
-	}
-	if _, err = tx.ExecContext(ctx,
-		`SELECT set_config($1, $2, true), set_config($3, $4, true)`,
-		TenantSetting, strconv.FormatInt(tenantID, 10), RestaurantSetting, restaurant,
-	); err != nil {
+	if err = SetTenantTxContext(ctx, tx, tenantID, restaurantID, userID); err != nil {
 		return fmt.Errorf("set tenant context: %w", err)
 	}
 
@@ -65,4 +73,32 @@ func WithTenantTx(ctx context.Context, db *sql.DB, tenantID, restaurantID int64,
 		return fmt.Errorf("commit tenant transaction: %w", err)
 	}
 	return nil
+}
+
+// SetTenantTxContext sets transaction-local scope on an existing transaction.
+// Call it after the transaction has established its tenant and restaurant IDs.
+func SetTenantTxContext(ctx context.Context, tx *sql.Tx, tenantID, restaurantID, userID int64) error {
+	if tx == nil {
+		return errors.New("transaction is not initialized")
+	}
+	if tenantID <= 0 {
+		return fmt.Errorf("invalid tenant id %d", tenantID)
+	}
+	if restaurantID < 0 {
+		return fmt.Errorf("invalid restaurant id %d", restaurantID)
+	}
+	if userID < 0 {
+		return fmt.Errorf("invalid user id %d", userID)
+	}
+	restaurant := ""
+	if restaurantID > 0 {
+		restaurant = strconv.FormatInt(restaurantID, 10)
+	}
+	user := ""
+	if userID > 0 {
+		user = strconv.FormatInt(userID, 10)
+	}
+	_, err := tx.ExecContext(ctx, `SELECT set_config($1, $2, true), set_config($3, $4, true), set_config($5, $6, true)`,
+		TenantSetting, strconv.FormatInt(tenantID, 10), RestaurantSetting, restaurant, UserSetting, user)
+	return err
 }

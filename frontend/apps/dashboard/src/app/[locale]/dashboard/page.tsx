@@ -29,6 +29,8 @@ import { debugError } from '@/lib/debug'
 import { createTranslator, getLocaleFromPath } from '@/lib/translations'
 import { useAuthStore } from '@/stores/authStore'
 import { useHasPermission } from '@/hooks/useRbac'
+import { fetchNotificationStats } from '@/hooks/useNotifications'
+import { fetchTenantStatus } from '@/stores/tenantStatusStore'
 import { MODULE_IDS, PERMISSION_LEVELS } from '@/lib/rbac'
 
 interface DashboardOrder {
@@ -296,8 +298,8 @@ export default function DashboardPage() {
         api.get('/categories'),
         api.get('/hr/employees'),
         api.get('/admin/drivers'),
-        api.get('/notifications/stats'),
-        api.get('/tenant/status'),
+        fetchNotificationStats(),
+        fetchTenantStatus(),
         shouldFetchTableStats ? api.get('/tables/stats') : Promise.resolve({ data: { data: null } }),
       ])
 
@@ -340,8 +342,14 @@ export default function DashboardPage() {
         : (unavailableSources.push('drivers'), { items: [] as any[] })
 
       const notificationsStats = notificationsResult.status === 'fulfilled'
-        ? (notificationsResult.value.data?.data ?? notificationsResult.value.data ?? {})
-        : (unavailableSources.push('notifications'), {})
+        ? notificationsResult.value
+        : (unavailableSources.push('notifications'), {
+          total: 0,
+          unread: 0,
+          read: 0,
+          by_module: {},
+          by_priority: {},
+        })
 
       const tenantStatus = tenantStatusResult.status === 'fulfilled'
         ? extractTenantStatus(tenantStatusResult.value.data)
@@ -648,7 +656,7 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          <div className="flex w-full flex-col gap-3 xl:w-auto xl:min-w-[320px]">
+          <div className="flex min-h-[212px] w-full flex-col gap-3 xl:w-auto xl:min-w-[320px]">
             <div className="grid grid-cols-2 gap-2">
               {quickActions.slice(0, 4).map((action) => (
                 <Link key={action.label} href={action.href}>
@@ -678,9 +686,9 @@ export default function DashboardPage() {
       </section>
 
       {isLoading && !overview.lastUpdatedAt ? (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
-          {Array.from({ length: 6 }).map((_, index) => (
-            <div key={index} className="h-32 animate-pulse rounded-xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900" />
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 2xl:grid-cols-3">
+          {Array.from({ length: 9 }).map((_, index) => (
+            <div key={index} className="min-h-[156px] animate-pulse rounded-xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900" />
           ))}
         </div>
       ) : (
@@ -689,7 +697,7 @@ export default function DashboardPage() {
             <Link
               key={card.key}
               href={card.href}
-              className="group rounded-xl border border-gray-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md dark:border-gray-800 dark:bg-gray-900"
+              className="group min-h-[156px] rounded-xl border border-gray-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md dark:border-gray-800 dark:bg-gray-900"
             >
               <div className="flex items-start justify-between gap-3">
                 <div>

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { hasAuthenticatedSession } from '@/lib/authSession'
 import { useAuthStore } from '@/stores/authStore'
 import { usePreferencesStore } from '@/stores/preferencesStore'
 import { Save, Loader2, Check } from 'lucide-react'
@@ -8,6 +9,7 @@ import { createTranslator, getLocaleFromPath } from '@/lib/translations'
 import { usePathname } from 'next/navigation'
 import * as themeApi from '@/lib/api/themeApi'
 import { getConfig } from '@/lib/config'
+import { authFetch } from '@/lib/authFetch'
 
 export default function AppearanceSettingsPage() {
   const pathname = usePathname()
@@ -15,6 +17,7 @@ export default function AppearanceSettingsPage() {
   const t = createTranslator(locale)
   const user = useAuthStore((state) => state.user)
   const token = useAuthStore((state) => state.token)
+  const hasSession = hasAuthenticatedSession(user, token)
   const { settings, setSettings, setLoading, isLoading } = usePreferencesStore()
 
   const [appearanceForm, setAppearanceForm] = useState({
@@ -100,15 +103,14 @@ export default function AppearanceSettingsPage() {
   }, [settings])
 
   const handleSaveTheme = async () => {
-    if (!user?.id || !token) return
+    if (!user?.id || !hasSession) return
 
     setSaveStatus('saving')
     try {
-      const response = await fetch(`${getConfig().apiUrl}/users/${user.id}/settings/theme`, {
+      const response = await authFetch(`${getConfig().apiUrl}/users/${user.id}/settings/theme`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({ theme: appearanceForm.theme }),
       })
@@ -133,15 +135,14 @@ export default function AppearanceSettingsPage() {
   }
 
   const handleSaveColors = async () => {
-    if (!user?.id || !token) return
+    if (!user?.id || !hasSession) return
 
     setSaveStatus('saving')
     try {
-      const response = await fetch(`${getConfig().apiUrl}/users/${user.id}/settings/theme-colors`, {
+      const response = await authFetch(`${getConfig().apiUrl}/users/${user.id}/settings/theme-colors`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           primary_color: appearanceForm.primaryColor,

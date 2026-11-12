@@ -29,7 +29,7 @@ func pendingPaymentWithOrder(t *testing.T, repo *testPaymentRepo, status string,
 	if err != nil {
 		t.Fatalf("CreatePayment: %v", err)
 	}
-	if err := repo.UpdatePaymentOrder(context.Background(), id, paymobOrderID, "auth"); err != nil {
+	if err := repo.UpdatePaymentOrder(context.Background(), 1, id, paymobOrderID, "auth"); err != nil {
 		t.Fatalf("UpdatePaymentOrder: %v", err)
 	}
 	return id
@@ -46,7 +46,7 @@ func TestWebhookSecurity_InvalidSignatureIsRejectedWithoutStateChange(t *testing
 	if err == nil || !strings.Contains(strings.ToLower(err.Error()), "invalid hmac signature") {
 		t.Fatalf("want invalid hmac signature, got %v", err)
 	}
-	p, _ := repo.GetPaymentByID(context.Background(), id)
+	p, _ := repo.GetPaymentByID(context.Background(), 1, id)
 	if p.Status != domain.PaymentStatusPending || repo.updateStatusCnt != 0 {
 		t.Fatalf("state must not change: status=%s updates=%d", p.Status, repo.updateStatusCnt)
 	}
@@ -96,7 +96,7 @@ func TestWebhookSecurity_FailureAfterSuccessDoesNotDowngrade(t *testing.T) {
 	if err := uc.HandleWebhook(context.Background(), raw, payload, "ok"); err != nil {
 		t.Fatalf("late failure for a succeeded payment should be a no-op, got %v", err)
 	}
-	p, _ := repo.GetPaymentByID(context.Background(), id)
+	p, _ := repo.GetPaymentByID(context.Background(), 1, id)
 	if p.Status != domain.PaymentStatusSuccess || repo.updateStatusCnt != 0 {
 		t.Fatalf("status must stay success: status=%s updates=%d", p.Status, repo.updateStatusCnt)
 	}
@@ -116,7 +116,7 @@ func TestWebhookSecurity_ReplayedSuccessForRefundedPaymentIsIgnored(t *testing.T
 			t.Fatalf("replay %d: want silent ignore, got %v", i, err)
 		}
 	}
-	p, _ := repo.GetPaymentByID(context.Background(), id)
+	p, _ := repo.GetPaymentByID(context.Background(), 1, id)
 	if p.Status != domain.PaymentStatusRefunded || repo.updateStatusCnt != 0 {
 		t.Fatalf("refunded payment must stay refunded: status=%s updates=%d", p.Status, repo.updateStatusCnt)
 	}
@@ -125,8 +125,7 @@ func TestWebhookSecurity_ReplayedSuccessForRefundedPaymentIsIgnored(t *testing.T
 // Refund / void callbacks are acknowledged without activating anything.
 func TestWebhookSecurity_RefundAndVoidCallbacksNeverActivate(t *testing.T) {
 	for name, mutate := range map[string]func(*domain.PaymobWebhookPayload){
-		"refunded": func(p *domain.PaymobWebhookPayload) { p.Obj.IsRefunded = true },
-		"voided":   func(p *domain.PaymobWebhookPayload) { p.Obj.IsVoided = true },
+		"voided": func(p *domain.PaymobWebhookPayload) { p.Obj.IsVoided = true },
 	} {
 		repo := newTestPaymentRepo()
 		uc := NewPaymentUseCase(repo, newTestSubscriptionRepo(), nil, &testPaymobClient{verifyHMAC: true}, nil)
@@ -138,7 +137,7 @@ func TestWebhookSecurity_RefundAndVoidCallbacksNeverActivate(t *testing.T) {
 		if err := uc.HandleWebhook(context.Background(), raw, payload, "ok"); err != nil {
 			t.Fatalf("%s: want acknowledged, got %v", name, err)
 		}
-		p, _ := repo.GetPaymentByID(context.Background(), id)
+		p, _ := repo.GetPaymentByID(context.Background(), 1, id)
 		if p.Status != domain.PaymentStatusPending || repo.updateStatusCnt != 0 {
 			t.Fatalf("%s must not change state: status=%s updates=%d", name, p.Status, repo.updateStatusCnt)
 		}
@@ -158,7 +157,7 @@ func TestWebhookSecurity_DuplicateFailedEventsStayFailed(t *testing.T) {
 			t.Fatalf("duplicate failed event %d: %v", i, err)
 		}
 	}
-	p, _ := repo.GetPaymentByID(context.Background(), id)
+	p, _ := repo.GetPaymentByID(context.Background(), 1, id)
 	if p.Status != domain.PaymentStatusFailed {
 		t.Fatalf("want failed, got %s", p.Status)
 	}
@@ -195,12 +194,15 @@ func TestUpdatePaymentStatusTx_ConcurrentSuccessAlreadyProcessedIsIdempotent(t *
 		t.Fatalf("begin payment transaction: %v", err)
 	}
 	paidAt := time.Now()
-	mock.ExpectExec(`WHERE id = \$7\s+AND status IN \('pending', 'failed'\)`).
-		WithArgs(domain.PaymentStatusSuccess, nil, nil, nil, nil, &paidAt, int64(71)).
+	mock.ExpectExec(`WHERE id = \$7 AND tenant_id = \$8\s+AND status IN \('pending', 'failed'\)`).
+		WithArgs(domain.PaymentStatusSuccess, nil, nil, nil, nil, &paidAt, int64(71), int64(72)).
 		WillReturnResult(sqlmock.NewResult(0, 0))
+	mock.ExpectQuery(`SELECT status FROM payments WHERE id = \$1 AND tenant_id = \$2`).
+		WithArgs(int64(71), int64(72)).
+		WillReturnRows(sqlmock.NewRows([]string{"status"}).AddRow(domain.PaymentStatusSuccess))
 
 	uc := &PaymentUseCase{}
-	err = uc.updatePaymentStatusTx(tx, context.Background(), 71, domain.PaymentStatusSuccess, nil, nil, nil, nil, &paidAt)
+	err = uc.updatePaymentStatusTx(tx, context.Background(), 72, 71, domain.PaymentStatusSuccess, nil, nil, nil, nil, &paidAt)
 	if err != errWebhookAlreadyProcessed {
 		t.Fatalf("expected guarded duplicate success to be idempotent, got %v", err)
 	}
@@ -232,9 +234,12 @@ func TestRefundPayment_WhenConcurrentRefundAlreadyCommitted_SkipsProviderCall(t 
 	uc := NewPaymentUseCase(repo, subRepo, nil, paymob, db)
 
 	mock.ExpectBegin()
-	mock.ExpectQuery(`SELECT status FROM payments WHERE id = \$1 FOR UPDATE`).
-		WithArgs(paymentID).
-		WillReturnRows(sqlmock.NewRows([]string{"status"}).AddRow(domain.PaymentStatusRefunded))
+	mock.ExpectExec(`SELECT set_config\(\$1, \$2, true\), set_config\(\$3, \$4, true\), set_config\(\$5, \$6, true\)`).
+		WithArgs("app.tenant_id", "1", "app.restaurant_id", "", "app.user_id", "").
+		WillReturnResult(sqlmock.NewResult(0, 1))
+	mock.ExpectQuery(`SELECT status, refund_state FROM payments WHERE id = \$1 AND tenant_id = \$2 FOR UPDATE`).
+		WithArgs(paymentID, int64(1)).
+		WillReturnRows(sqlmock.NewRows([]string{"status", "refund_state"}).AddRow(domain.PaymentStatusRefunded, "refunded"))
 	mock.ExpectRollback()
 
 	_, err = uc.RefundPayment(context.Background(), paymentID, 1, nil, "", "")

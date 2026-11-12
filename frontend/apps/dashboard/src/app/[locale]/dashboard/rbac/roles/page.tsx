@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { usePathname } from 'next/navigation'
 import { useAuthStore } from '@/stores/authStore'
+import { hasAuthenticatedSession } from '@/lib/authSession'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { useRoles } from '@/hooks/useRbac'
@@ -38,14 +39,15 @@ export default function RBACRolesPage() {
 
   const token = useAuthStore((state) => state.token)
   const user = useAuthStore((state) => state.user)
-  const tenantId = user?.tenant_id || 1
+  const hasSession = hasAuthenticatedSession(user, token)
+  const tenantId = user?.tenant_id || user?.tenantId || null
 
   // Fetch roles on mount
   useEffect(() => {
-    if (token && tenantId) {
+    if (hasSession && tenantId) {
       fetchRoles(tenantId)
     }
-  }, [token, tenantId])
+  }, [fetchRoles, hasSession, tenantId])
 
   // Update display roles when roles change
   useEffect(() => {

@@ -1,6 +1,7 @@
 package usecase
 
 import (
+	"context"
 	"errors"
 	"strings"
 
@@ -21,6 +22,15 @@ func (uc *AccountingUseCase) ListAccounts(tenantID, restaurantID int, tree bool,
 		return uc.accountRepo.GetAccountTree(tenantID, restaurantID, includeInactive)
 	}
 	return uc.accountRepo.ListAccounts(tenantID, restaurantID, includeInactive)
+}
+
+func (uc *AccountingUseCase) ListAccountsPaged(
+	ctx context.Context,
+	tenantID, restaurantID int,
+	includeInactive bool,
+	page, pageSize int,
+) ([]domain.Account, int, error) {
+	return uc.accountRepo.ListAccountsPaged(ctx, tenantID, restaurantID, includeInactive, page, pageSize)
 }
 
 func (uc *AccountingUseCase) GetAccountByID(tenantID, restaurantID, id int) (*domain.Account, error) {

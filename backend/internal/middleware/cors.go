@@ -75,6 +75,25 @@ func isOriginAllowed(origin string) bool {
 	return config.IsDevelopmentMode() && isLocalhostOrigin(origin)
 }
 
+// IsTrustedOrigin reports whether an exact configured browser origin is allowed.
+// Cookie-authenticated writes use it as an additional CSRF check.
+func IsTrustedOrigin(origin string) bool {
+	corsOriginsOnce.Do(loadAllowedOrigins)
+	return isOriginAllowed(normalizeOrigin(origin))
+}
+
+// RequireTrustedOrigin protects browser endpoints that create or rotate sessions.
+// Browsers include Origin on these POST requests; reject missing or unlisted origins.
+func RequireTrustedOrigin(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if !IsTrustedOrigin(r.Header.Get("Origin")) {
+			http.Error(w, "Forbidden - invalid request origin", http.StatusForbidden)
+			return
+		}
+		next.ServeHTTP(w, r)
+	})
+}
+
 func isLocalhostOrigin(origin string) bool {
 	parsed, err := url.Parse(origin)
 	if err != nil {

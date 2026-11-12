@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"pos-saas/internal/domain"
+	"pos-saas/internal/pkg/database"
 )
 
 // PaymentRepositoryImpl implements PaymentRepository.
@@ -33,7 +34,8 @@ func (r *PaymentRepositoryImpl) CreatePayment(ctx context.Context, payment *doma
 	}
 
 	var id int64
-	err := r.db.QueryRowContext(ctx, `
+	err := database.WithTenantTx(ctx, r.db, payment.TenantID, 0, func(tx *sql.Tx) error {
+		return tx.QueryRowContext(ctx, `
 		INSERT INTO payments (
 			tenant_id, user_id, amount_cents, currency, status,
 			paymob_order_id, paymob_auth_token,
@@ -54,27 +56,28 @@ func (r *PaymentRepositoryImpl) CreatePayment(ctx context.Context, payment *doma
 		)
 		RETURNING id
 	`,
-		payment.TenantID,
-		payment.UserID,
-		payment.AmountCents,
-		payment.Currency,
-		payment.Status,
-		payment.PaymobOrderID,
-		nil,
-		payment.PaymentMethod,
-		payment.CardLastFour,
-		payment.CardBrand,
-		payment.BillingName,
-		payment.BillingEmail,
-		payment.BillingPhone,
-		payment.PlanID,
-		payment.PlanPeriodStart,
-		payment.PlanPeriodEnd,
-		payment.ErrorMessage,
-		payment.ErrorCode,
-		payment.MerchantOrderID,
-		metadataJSON,
-	).Scan(&id)
+			payment.TenantID,
+			payment.UserID,
+			payment.AmountCents,
+			payment.Currency,
+			payment.Status,
+			payment.PaymobOrderID,
+			nil,
+			payment.PaymentMethod,
+			payment.CardLastFour,
+			payment.CardBrand,
+			payment.BillingName,
+			payment.BillingEmail,
+			payment.BillingPhone,
+			payment.PlanID,
+			payment.PlanPeriodStart,
+			payment.PlanPeriodEnd,
+			payment.ErrorMessage,
+			payment.ErrorCode,
+			payment.MerchantOrderID,
+			metadataJSON,
+		).Scan(&id)
+	})
 	if err != nil {
 		return 0, fmt.Errorf("failed to create payment: %w", err)
 	}
@@ -83,53 +86,73 @@ func (r *PaymentRepositoryImpl) CreatePayment(ctx context.Context, payment *doma
 }
 
 // GetPaymentByID returns payment by internal ID.
-func (r *PaymentRepositoryImpl) GetPaymentByID(ctx context.Context, id int64) (*domain.Payment, error) {
-	row := r.db.QueryRowContext(ctx, selectPaymentQuery+` WHERE id = $1`, id)
-	payment, err := scanPayment(row)
-	if err != nil {
-		return nil, err
-	}
-	return payment, nil
+func (r *PaymentRepositoryImpl) GetPaymentByID(ctx context.Context, tenantID, id int64) (*domain.Payment, error) {
+	var payment *domain.Payment
+	err := database.WithTenantTx(ctx, r.db, tenantID, 0, func(tx *sql.Tx) error {
+		var err error
+		payment, err = scanPayment(tx.QueryRowContext(ctx, selectPaymentQuery+` WHERE id = $1 AND tenant_id = $2`, id, tenantID))
+		return err
+	})
+	return payment, err
 }
 
-// GetPaymentByMerchantOrderID returns payment by merchant order ID.
-func (r *PaymentRepositoryImpl) GetPaymentByMerchantOrderID(ctx context.Context, merchantOrderID string) (*domain.Payment, error) {
-	row := r.db.QueryRowContext(ctx, selectPaymentQuery+` WHERE merchant_order_id = $1`, merchantOrderID)
-	payment, err := scanPayment(row)
+// GetPaymentTenantID resolves only the tenant key needed by the super-admin refund flow.
+func (r *PaymentRepositoryImpl) GetPaymentTenantID(ctx context.Context, id int64) (int64, error) {
+	var tenantID int64
+	err := r.db.QueryRowContext(ctx, `SELECT resolve_payment_tenant_by_id($1)`, id).Scan(&tenantID)
 	if err != nil {
-		return nil, err
+		return 0, fmt.Errorf("failed to resolve payment tenant: %w", err)
 	}
-	return payment, nil
+	return tenantID, nil
+}
+
+// GetPaymentByMerchantOrderID returns payment by merchant order ID within one tenant.
+func (r *PaymentRepositoryImpl) GetPaymentByMerchantOrderID(ctx context.Context, tenantID int64, merchantOrderID string) (*domain.Payment, error) {
+	return r.getPaymentScoped(ctx, tenantID, `merchant_order_id = $1`, merchantOrderID)
 }
 
 // GetPaymentByPaymobOrderID returns payment by Paymob order ID.
-func (r *PaymentRepositoryImpl) GetPaymentByPaymobOrderID(ctx context.Context, paymobOrderID int64) (*domain.Payment, error) {
-	row := r.db.QueryRowContext(ctx, selectPaymentQuery+` WHERE paymob_order_id = $1 ORDER BY created_at DESC LIMIT 1`, paymobOrderID)
-	payment, err := scanPayment(row)
+func (r *PaymentRepositoryImpl) GetPaymentByPaymobOrderID(ctx context.Context, paymobOrderID int64, merchantOrderID string) (*domain.Payment, error) {
+	var paymentID, tenantID int64
+	err := r.db.QueryRowContext(ctx, `SELECT payment_id, tenant_id FROM resolve_payment_tenant_by_paymob_order($1, $2)`, paymobOrderID, merchantOrderID).Scan(&paymentID, &tenantID)
 	if err != nil {
 		return nil, err
 	}
-	return payment, nil
+	return r.GetPaymentByID(ctx, tenantID, paymentID)
+}
+
+func (r *PaymentRepositoryImpl) getPaymentScoped(ctx context.Context, tenantID int64, predicate string, value any) (*domain.Payment, error) {
+	var payment *domain.Payment
+	err := database.WithTenantTx(ctx, r.db, tenantID, 0, func(tx *sql.Tx) error {
+		query := selectPaymentQuery + ` WHERE tenant_id = $2 AND ` + predicate
+		var scanErr error
+		payment, scanErr = scanPayment(tx.QueryRowContext(ctx, query, value, tenantID))
+		return scanErr
+	})
+	return payment, err
 }
 
 // UpdatePaymentOrder stores Paymob order/auth refs after initiation.
-func (r *PaymentRepositoryImpl) UpdatePaymentOrder(ctx context.Context, id int64, paymobOrderID int64, authToken string) error {
+func (r *PaymentRepositoryImpl) UpdatePaymentOrder(ctx context.Context, tenantID, id int64, paymobOrderID int64, authToken string) error {
 	log.Printf("[PaymentRepo] UpdatePaymentOrder - payment_id: %d, paymob_order_id: %d\n", id, paymobOrderID)
 
-	result, err := r.db.ExecContext(ctx, `
+	var rowsAffected int64
+	err := database.WithTenantTx(ctx, r.db, tenantID, 0, func(tx *sql.Tx) error {
+		result, err := tx.ExecContext(ctx, `
 		UPDATE payments
 		SET paymob_order_id = $1,
 			paymob_auth_token = $2,
 			updated_at = NOW()
-		WHERE id = $3
-	`, paymobOrderID, authToken, id)
+		WHERE id = $3 AND tenant_id = $4
+		`, paymobOrderID, authToken, id, tenantID)
+		if err != nil {
+			return fmt.Errorf("failed to update payment order details: %w", err)
+		}
+		rowsAffected, err = result.RowsAffected()
+		return err
+	})
 	if err != nil {
 		return fmt.Errorf("failed to update payment order details: %w", err)
-	}
-
-	rowsAffected, err := result.RowsAffected()
-	if err != nil {
-		return fmt.Errorf("failed to read affected rows: %w", err)
 	}
 	if rowsAffected == 0 {
 		return fmt.Errorf("payment not found")
@@ -139,7 +162,7 @@ func (r *PaymentRepositoryImpl) UpdatePaymentOrder(ctx context.Context, id int64
 }
 
 // UpdatePaymentStatus updates payment status and transaction details.
-func (r *PaymentRepositoryImpl) UpdatePaymentStatus(ctx context.Context, id int64, status string, txnID *int64, cardLastFour *string, cardBrand *string, errorMsg *string, paidAt *time.Time) error {
+func (r *PaymentRepositoryImpl) UpdatePaymentStatus(ctx context.Context, tenantID, id int64, status string, txnID *int64, cardLastFour *string, cardBrand *string, errorMsg *string, paidAt *time.Time) error {
 	log.Printf("[PaymentRepo] UpdatePaymentStatus - payment_id: %d, status: %s\n", id, status)
 
 	query := `
@@ -156,30 +179,32 @@ func (r *PaymentRepositoryImpl) UpdatePaymentStatus(ctx context.Context, id int6
 	if status == domain.PaymentStatusFailed {
 		query += ` AND status = 'pending'`
 	}
-	result, err := r.db.ExecContext(ctx, query, status, txnID, cardLastFour, cardBrand, errorMsg, paidAt, id)
-	if err != nil {
-		return fmt.Errorf("failed to update payment status: %w", err)
-	}
+	return database.WithTenantTx(ctx, r.db, tenantID, 0, func(tx *sql.Tx) error {
+		result, err := tx.ExecContext(ctx, query+` AND tenant_id = $8`, status, txnID, cardLastFour, cardBrand, errorMsg, paidAt, id, tenantID)
+		if err != nil {
+			return fmt.Errorf("failed to update payment status: %w", err)
+		}
 
-	rowsAffected, err := result.RowsAffected()
-	if err != nil {
-		return fmt.Errorf("failed to read affected rows: %w", err)
-	}
-	if rowsAffected == 0 {
-		var currentStatus string
-		if err := r.db.QueryRowContext(ctx, `SELECT status FROM payments WHERE id = $1`, id).Scan(&currentStatus); err != nil {
-			if err == sql.ErrNoRows {
-				return fmt.Errorf("payment not found")
+		rowsAffected, err := result.RowsAffected()
+		if err != nil {
+			return fmt.Errorf("failed to read affected rows: %w", err)
+		}
+		if rowsAffected == 0 {
+			var currentStatus string
+			if err := tx.QueryRowContext(ctx, `SELECT status FROM payments WHERE id = $1 AND tenant_id = $2`, id, tenantID).Scan(&currentStatus); err != nil {
+				if err == sql.ErrNoRows {
+					return fmt.Errorf("payment not found")
+				}
+				return fmt.Errorf("failed to read current payment status: %w", err)
 			}
-			return fmt.Errorf("failed to read current payment status: %w", err)
+			if status == domain.PaymentStatusFailed && (currentStatus == domain.PaymentStatusFailed || currentStatus == domain.PaymentStatusSuccess || currentStatus == domain.PaymentStatusRefunded) {
+				return nil
+			}
+			return fmt.Errorf("payment status changed before update")
 		}
-		if status == domain.PaymentStatusFailed && (currentStatus == domain.PaymentStatusFailed || currentStatus == domain.PaymentStatusSuccess || currentStatus == domain.PaymentStatusRefunded) {
-			return nil
-		}
-		return fmt.Errorf("payment status changed before update")
-	}
 
-	return nil
+		return nil
+	})
 }
 
 // GetPaymentsByTenantID returns paginated payments and total count.
@@ -192,15 +217,17 @@ func (r *PaymentRepositoryImpl) GetPaymentsByTenantID(ctx context.Context, tenan
 	}
 
 	var total int
-	if err := r.db.QueryRowContext(ctx, `
+	var payments []domain.Payment
+	err := database.WithTenantTx(ctx, r.db, tenantID, 0, func(tx *sql.Tx) error {
+		if err := tx.QueryRowContext(ctx, `
 		SELECT COUNT(*)
 		FROM payments
 		WHERE tenant_id = $1
 	`, tenantID).Scan(&total); err != nil {
-		return nil, 0, fmt.Errorf("failed to count payments: %w", err)
-	}
+			return fmt.Errorf("failed to count payments: %w", err)
+		}
 
-	rows, err := r.db.QueryContext(ctx, `
+		rows, err := tx.QueryContext(ctx, `
 		SELECT
 		`+selectPaymentColumns+`
 		FROM payments
@@ -208,23 +235,27 @@ func (r *PaymentRepositoryImpl) GetPaymentsByTenantID(ctx context.Context, tenan
 		ORDER BY created_at DESC
 		LIMIT $2 OFFSET $3
 	`, tenantID, limit, offset)
-	if err != nil {
-		return nil, 0, fmt.Errorf("failed to query payments: %w", err)
-	}
-	defer rows.Close()
-
-	payments := make([]domain.Payment, 0, limit)
-	for rows.Next() {
-		payment, err := scanPayment(rows)
 		if err != nil {
-			return nil, 0, err
+			return fmt.Errorf("failed to query payments: %w", err)
 		}
-		payments = append(payments, *payment)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, 0, fmt.Errorf("failed to iterate payments: %w", err)
-	}
+		defer rows.Close()
 
+		payments = make([]domain.Payment, 0, limit)
+		for rows.Next() {
+			payment, err := scanPayment(rows)
+			if err != nil {
+				return err
+			}
+			payments = append(payments, *payment)
+		}
+		if err := rows.Err(); err != nil {
+			return fmt.Errorf("failed to iterate payments: %w", err)
+		}
+		return nil
+	})
+	if err != nil {
+		return nil, 0, err
+	}
 	return payments, total, nil
 }
 
@@ -237,7 +268,9 @@ func (r *PaymentRepositoryImpl) GetPaymentsByTenantCursor(ctx context.Context, t
 		cursorID = 0
 	}
 
-	rows, err := r.db.QueryContext(ctx, `
+	var payments []domain.Payment
+	err := database.WithTenantTx(ctx, r.db, tenantID, 0, func(tx *sql.Tx) error {
+		rows, err := tx.QueryContext(ctx, `
 		SELECT
 		`+selectPaymentColumns+`
 		FROM payments
@@ -246,21 +279,26 @@ func (r *PaymentRepositoryImpl) GetPaymentsByTenantCursor(ctx context.Context, t
 		ORDER BY id DESC
 		LIMIT $3
 	`, tenantID, cursorID, limit+1)
-	if err != nil {
-		return nil, nil, fmt.Errorf("failed to query payments by cursor: %w", err)
-	}
-	defer rows.Close()
-
-	payments := make([]domain.Payment, 0, limit+1)
-	for rows.Next() {
-		payment, err := scanPayment(rows)
 		if err != nil {
-			return nil, nil, err
+			return fmt.Errorf("failed to query payments by cursor: %w", err)
 		}
-		payments = append(payments, *payment)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, nil, fmt.Errorf("failed to iterate payments by cursor: %w", err)
+		defer rows.Close()
+
+		payments = make([]domain.Payment, 0, limit+1)
+		for rows.Next() {
+			payment, err := scanPayment(rows)
+			if err != nil {
+				return err
+			}
+			payments = append(payments, *payment)
+		}
+		if err := rows.Err(); err != nil {
+			return fmt.Errorf("failed to iterate payments by cursor: %w", err)
+		}
+		return nil
+	})
+	if err != nil {
+		return nil, nil, err
 	}
 
 	var nextCursor *int64

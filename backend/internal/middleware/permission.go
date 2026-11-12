@@ -127,13 +127,13 @@ func (e RepositoryPermissionEvaluator) EffectiveLevel(ctx context.Context, claim
 	if e.UserRoles == nil || e.RolePermissions == nil {
 		return domain.PermissionNone, fmt.Errorf("rbac repositories unavailable")
 	}
-	roles, err := e.UserRoles.GetUserRoles(ctx, int64(claims.UserID), int64(claims.TenantID))
+	roles, err := e.UserRoles.GetUserRoles(ctx, int64(claims.UserID), int64(claims.TenantID), int64(claims.RestaurantID))
 	if err != nil {
 		return domain.PermissionNone, err
 	}
 	highest := domain.PermissionNone
 	for _, role := range roles {
-		level, err := e.RolePermissions.GetByRoleAndModule(ctx, int64(role.ID), moduleID)
+		level, err := e.RolePermissions.GetByRoleAndModule(ctx, int64(claims.TenantID), int64(claims.RestaurantID), int64(role.ID), moduleID)
 		if err != nil {
 			return domain.PermissionNone, err
 		}

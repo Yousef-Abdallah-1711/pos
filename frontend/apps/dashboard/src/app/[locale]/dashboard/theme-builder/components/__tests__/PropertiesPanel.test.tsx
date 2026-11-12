@@ -51,7 +51,7 @@ describe('PropertiesPanel', () => {
   }
 
   const mockStoreActions = {
-    updateColors: vi.fn(),
+    updateThemeColors: vi.fn(),
     updateTypography: vi.fn(),
     updateIdentity: vi.fn(),
     updateComponent: vi.fn(),
@@ -59,7 +59,7 @@ describe('PropertiesPanel', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
-    ;(useThemeStore as any).mockImplementation((selector) => {
+    ;(useThemeStore as any).mockImplementation((selector: (state: Record<string, unknown>) => unknown) => {
       const store = {
         currentTheme: mockTheme,
         selectedComponentId: '1',
@@ -76,7 +76,7 @@ describe('PropertiesPanel', () => {
     })
 
     it('should show empty state when no theme selected', () => {
-      ;(useThemeStore as any).mockImplementation((selector) => {
+      ;(useThemeStore as any).mockImplementation((selector: (state: Record<string, unknown>) => unknown) => {
         const store = {
           currentTheme: null,
           selectedComponentId: null,
@@ -102,7 +102,7 @@ describe('PropertiesPanel', () => {
     })
 
     it('should not render component tab when no component is selected', () => {
-      ;(useThemeStore as any).mockImplementation((selector) => {
+      ;(useThemeStore as any).mockImplementation((selector: (state: Record<string, unknown>) => unknown) => {
         const store = {
           currentTheme: mockTheme,
           selectedComponentId: null,
@@ -150,7 +150,7 @@ describe('PropertiesPanel', () => {
       const inputs = screen.getAllByPlaceholderText('#000000')
       fireEvent.change(inputs[0], { target: { value: '#ff0000' } })
 
-      expect(mockStoreActions.updateColors).toHaveBeenCalled()
+      expect(mockStoreActions.updateThemeColors).toHaveBeenCalled()
     })
 
     it('should render color descriptions', () => {
@@ -203,12 +203,10 @@ describe('PropertiesPanel', () => {
 
       fireEvent.click(typographyTab)
 
-      await waitFor(() => {
-        const fontSelect = screen.getByDisplayValue('Inter') as HTMLSelectElement
-        fireEvent.change(fontSelect, { target: { value: 'Roboto' } })
+      const fontSelect = screen.getByDisplayValue('Inter') as HTMLSelectElement
+      await userEvent.selectOptions(fontSelect, 'Poppins')
 
-        expect(mockStoreActions.updateTypography).toHaveBeenCalledWith({ fontFamily: 'Roboto' })
-      })
+      expect(mockStoreActions.updateTypography).toHaveBeenCalledWith({ fontFamily: 'Poppins' })
     })
 
     it('should display base font size with range input', async () => {
@@ -403,7 +401,8 @@ describe('PropertiesPanel', () => {
       fireEvent.click(componentTab)
 
       await waitFor(() => {
-        expect(screen.getByText(/Type: hero/)).toBeInTheDocument()
+        const typeLabel = screen.getByText('Type:')
+        expect(typeLabel.parentElement).toHaveTextContent('hero')
       })
     })
 
@@ -414,7 +413,8 @@ describe('PropertiesPanel', () => {
       fireEvent.click(componentTab)
 
       await waitFor(() => {
-        expect(screen.getByText(/Title: Hero Section/)).toBeInTheDocument()
+        const titleLabel = screen.getByText('Title:')
+        expect(titleLabel.parentElement).toHaveTextContent('Hero Section')
       })
     })
   })
@@ -507,7 +507,7 @@ describe('PropertiesPanel', () => {
 
   describe('Empty States', () => {
     it('should handle theme with empty component list', () => {
-      ;(useThemeStore as any).mockImplementation((selector) => {
+      ;(useThemeStore as any).mockImplementation((selector: (state: Record<string, unknown>) => unknown) => {
         const store = {
           currentTheme: {
             ...mockTheme,
@@ -524,7 +524,7 @@ describe('PropertiesPanel', () => {
     })
 
     it('should handle missing optional identity fields', () => {
-      ;(useThemeStore as any).mockImplementation((selector) => {
+      ;(useThemeStore as any).mockImplementation((selector: (state: Record<string, unknown>) => unknown) => {
         const store = {
           currentTheme: {
             ...mockTheme,
@@ -579,7 +579,7 @@ describe('PropertiesPanel', () => {
     it('should reflect theme changes from store', () => {
       const { rerender } = render(<PropertiesPanel />)
 
-      ;(useThemeStore as any).mockImplementation((selector) => {
+      ;(useThemeStore as any).mockImplementation((selector: (state: Record<string, unknown>) => unknown) => {
         const store = {
           currentTheme: {
             ...mockTheme,

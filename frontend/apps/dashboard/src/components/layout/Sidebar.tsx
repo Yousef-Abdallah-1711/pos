@@ -61,31 +61,6 @@ export function Sidebar({ isMobileOpen, onMobileToggle, isCollapsed, onCollapsed
   const canViewTraining = checkPermission(MODULE_IDS.TRAINING, PERMISSION_LEVELS.READ)
   const canViewContracts = checkPermission(MODULE_IDS.CONTRACTS, PERMISSION_LEVELS.READ)
 
-  // Show blocked sidebar if tenant is blocked
-  if (isBlocked) {
-    return <BlockedSidebar />
-  }
-
-  if (permissionsLoading) {
-    return (
-      <aside
-        className={`fixed inset-y-0 ${locale === 'ar' ? 'right-0' : 'left-0'} z-40 ${isCollapsed ? 'w-20' : 'w-64'} bg-white dark:bg-gray-800 ${locale === 'ar' ? 'border-l' : 'border-r'} border-gray-200 dark:border-gray-700 transform ${isMobileOpen ? 'translate-x-0' : locale === 'ar' ? 'translate-x-full' : '-translate-x-full'} md:translate-x-0 transition-all duration-300 ease-in-out`}
-      >
-        <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-          <div className={`h-8 rounded bg-gray-200 dark:bg-gray-700 animate-pulse ${isCollapsed ? 'w-10 mx-auto' : 'w-40'}`} />
-        </div>
-        <div className={`p-3 ${isCollapsed ? 'px-2' : 'px-4'} space-y-2`}>
-          {Array.from({ length: 10 }).map((_, i) => (
-            <div
-              key={i}
-              className={`rounded-lg bg-gray-200 dark:bg-gray-700 animate-pulse ${isCollapsed ? 'h-11 w-11 mx-auto' : 'h-11 w-full'}`}
-            />
-          ))}
-        </div>
-      </aside>
-    )
-  }
-
   const allSidebarItems: SidebarItem[] = [
     {
       label: t('navigation.dashboard'),
@@ -344,6 +319,34 @@ export function Sidebar({ isMobileOpen, onMobileToggle, isCollapsed, onCollapsed
       .filter((item) => !item.children || item.children.length > 0)
   }, [canViewReports, canViewOrders, canWriteOrders, canViewProducts, canViewCategories, canViewHR, canViewLeaves, canViewThemes, canViewKDS, canManageSalaries, canViewTables, canViewAccounting, canViewSuppliers, canViewFinancialReports, canViewPerformance, canViewTraining, canViewContracts])
 
+  // Keep hooks above conditional returns so loading/status changes preserve hook order.
+  if (isBlocked) {
+    return <BlockedSidebar />
+  }
+
+  if (permissionsLoading) {
+    return (
+      <aside
+        className={`fixed inset-y-0 ${locale === 'ar' ? 'right-0' : 'left-0'} z-40 ${isCollapsed ? 'w-20' : 'w-64'} bg-white dark:bg-gray-800 ${locale === 'ar' ? 'border-l' : 'border-r'} border-gray-200 dark:border-gray-700 transform ${isMobileOpen ? 'translate-x-0' : locale === 'ar' ? 'translate-x-full' : '-translate-x-full'} md:translate-x-0 transition-all duration-300 ease-in-out`}
+      >
+        <div className={`flex h-[89px] items-center border-b border-gray-200 p-4 dark:border-gray-700 ${isCollapsed ? 'justify-center' : 'justify-between'}`}>
+          <div className={`h-8 rounded bg-gray-200 dark:bg-gray-700 animate-pulse ${isCollapsed ? 'w-10' : 'w-40'}`} />
+          {!isCollapsed && <div className="h-8 w-8 rounded bg-gray-200 dark:bg-gray-700 animate-pulse" />}
+        </div>
+        <div className={`flex h-[calc(100%-89px)] flex-col p-3 ${isCollapsed ? 'px-2' : 'px-4'}`}>
+          <div className="space-y-2">
+          {Array.from({ length: 10 }).map((_, i) => (
+            <div
+              key={i}
+              className={`rounded-lg bg-gray-200 dark:bg-gray-700 animate-pulse ${isCollapsed ? 'h-11 w-11 mx-auto' : 'h-11 w-full'}`}
+            />
+          ))}
+          </div>
+        </div>
+      </aside>
+    )
+  }
+
   const toggleExpanded = (label: string) => {
     if (isCollapsed) return
     setExpandedItems((prev) =>
@@ -373,7 +376,7 @@ export function Sidebar({ isMobileOpen, onMobileToggle, isCollapsed, onCollapsed
       <aside
         className={`fixed inset-y-0 ${isRTL ? 'right-0' : 'left-0'} z-40 ${isCollapsed ? 'w-20' : 'w-64'} bg-white dark:bg-gray-800 ${isRTL ? 'border-l' : 'border-r'} border-gray-200 dark:border-gray-700 transform ${isMobileOpen ? 'translate-x-0' : isRTL ? 'translate-x-full' : '-translate-x-full'} md:translate-x-0 transition-all duration-300 ease-in-out`}
       >
-        <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'justify-between'} p-4 border-b border-gray-200 dark:border-gray-700`}>
+        <div className={`flex h-[89px] items-center ${isCollapsed ? 'justify-center' : 'justify-between'} p-4 border-b border-gray-200 dark:border-gray-700`}>
           <Link
             href={`/${locale}/dashboard`}
             className={`flex items-center ${isCollapsed ? 'justify-center' : 'gap-2'} hover:opacity-80 transition ${isRTL && !isCollapsed ? 'flex-row-reverse' : ''}`}
@@ -394,7 +397,7 @@ export function Sidebar({ isMobileOpen, onMobileToggle, isCollapsed, onCollapsed
           </button>
         </div>
 
-        <div className="flex flex-col h-[calc(100%-65px)]">
+        <div className="flex flex-col h-[calc(100%-89px)]">
         <nav className={`p-3 flex-1 overflow-y-auto ${isCollapsed ? 'px-2' : 'px-4'}`}>
           <ul className="space-y-2">
             {sidebarItems.map((item) => (

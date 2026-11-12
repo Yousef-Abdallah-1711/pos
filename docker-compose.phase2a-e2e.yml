@@ -37,9 +37,11 @@ x-frontend: &frontend
     NEXT_PUBLIC_API_URL: http://localhost:18080/api/v1
     NEXT_PUBLIC_API_BASE_URL: http://localhost:18080/api/v1
     NEXT_PUBLIC_SUPER_ADMIN_API_URL: http://localhost:18080/api/v1/super-admin
-    NEXT_PUBLIC_LANDING_URL: http://localhost:13101
-    NEXT_PUBLIC_DASHBOARD_URL: http://localhost:13102
-    NEXT_PUBLIC_RESTAURANT_DOMAIN: localhost:13103
+    # Cross-app redirects are browser navigations and must use host-published
+    # loopback ports. Service-to-service API requests use their own routing.
+    NEXT_PUBLIC_LANDING_URL: http://localhost:13111
+    NEXT_PUBLIC_DASHBOARD_URL: http://localhost:13112
+    NEXT_PUBLIC_RESTAURANT_DOMAIN: localhost:13113
 
 services:
   postgres:
@@ -52,7 +54,7 @@ services:
       POSTGRES_PASSWORD: ws05-local-only-postgres
       POSTGRES_DB: pos_phase2a_e2e
     ports:
-      - "127.0.0.1:15435:5432"
+      - "127.0.0.1:15437:5432"
     tmpfs:
       - /var/lib/postgresql/data
     healthcheck:
@@ -84,7 +86,7 @@ services:
       - ./backend/scripts/db/create_runtime_roles.sql:/fixture/create_runtime_roles.sql:ro
     entrypoint:
       - sh
-      - -lc
+      - -c
       - >-
         exec psql -h postgres -U postgres -d postgres -v ON_ERROR_STOP=1
         -v dbname=pos_phase2a_e2e
@@ -99,9 +101,19 @@ services:
     labels:
       com.pos.disposable: "true"
       com.pos.workstream: "WS05"
+    entrypoint: ["/bin/sh"]
+    command:
+      - -c
+      - >-
+        set -e;
+        until pg_isready -h "$$DB_HOST" -p "$$DB_PORT" -U "$$DB_USER"; do sleep 2; done;
+        DB_USER="$$MIGRATE_DB_USER" DB_PASSWORD="$$MIGRATE_DB_PASSWORD" go run ./cmd/migrate;
+        PGPASSWORD="$$MIGRATE_DB_PASSWORD" psql -h "$$DB_HOST" -p "$$DB_PORT" -U "$$MIGRATE_DB_USER" -d "$$DB_NAME" -v ON_ERROR_STOP=1 -c "REVOKE ALL ON TABLE schema_migrations FROM \"$$DB_USER\"" >/dev/null;
+        exec go run ./cmd/api
     environment:
       PORT: 18080
       ENV: phase2a-e2e
+      RBAC_ENFORCEMENT: enforce
       DB_HOST: postgres
       DB_PORT: 5432
       DB_USER: pos_app
@@ -115,20 +127,22 @@ services:
       JWT_SECRET: ws05-test-only-jwt-secret-value-minimum-32-characters
       JWT_EXPIRY: 24h
       REDIS_URL: redis://redis:6379/0
-      CORS_ORIGINS: http://localhost:13101,http://localhost:13102,http://localhost:13103,http://localhost:13104
-      APP_BASE_URL: http://localhost:18080
-      DASHBOARD_URL: http://localhost:13102
-      LANDING_URL: http://localhost:13101
-      RESTAURANT_DOMAIN: localhost:13103
-      UPLOAD_BASE_URL: http://localhost:18080/uploads
-      WEBHOOK_BASE_URL: http://localhost:18080
+      # Host-published ports support local browser use; container ports support
+      # Playwright runners sharing the disposable API network namespace.
+      CORS_ORIGINS: http://localhost:13111,http://localhost:13112,http://localhost:13113,http://localhost:13114,http://localhost:3001,http://localhost:3002,http://localhost:3003,http://localhost:3004
+      APP_BASE_URL: http://localhost:18082
+      DASHBOARD_URL: http://localhost:13112
+      LANDING_URL: http://localhost:13111
+      RESTAURANT_DOMAIN: localhost:13113
+      UPLOAD_BASE_URL: http://localhost:18082/uploads
+      WEBHOOK_BASE_URL: http://localhost:18082
       POS_TEST_SEED: "true"
     ports:
-      - "127.0.0.1:18080:18080"
-      - "127.0.0.1:13101:3001"
-      - "127.0.0.1:13102:3002"
-      - "127.0.0.1:13103:3003"
-      - "127.0.0.1:13104:3004"
+      - "127.0.0.1:18082:18080"
+      - "127.0.0.1:13111:3001"
+      - "127.0.0.1:13112:3002"
+      - "127.0.0.1:13113:3003"
+      - "127.0.0.1:13114:3004"
     volumes:
       - ./backend:/app
       - p2a_go_mod_cache:/go/pkg/mod
@@ -189,3 +203,9 @@ volumes:
   p2a_next_landing:
   p2a_next_restaurant:
   p2a_next_super_admin:
+
+networks:
+  default:
+    ipam:
+      config:
+        - subnet: 10.253.255.0/24

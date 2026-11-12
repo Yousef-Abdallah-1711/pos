@@ -2,8 +2,10 @@ package main
 
 import (
 	"context"
+	"database/sql"
 	"testing"
 
+	"github.com/DATA-DOG/go-sqlmock"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -29,5 +31,53 @@ func TestIsSeededDefaultPassword(t *testing.T) {
 func TestProductionStartupGuards_NoDatabaseIsRejected(t *testing.T) {
 	if err := productionStartupGuards(context.Background(), nil); err == nil {
 		t.Fatal("production without a database (stub mode) must be refused")
+	}
+}
+
+func TestProductionStartupGuards_RejectsUnsafeRuntimeRoles(t *testing.T) {
+	tests := []struct {
+		name      string
+		role      string
+		superuser bool
+		bypass    bool
+	}{
+		{name: "superuser", role: "pos_app", superuser: true},
+		{name: "bypass RLS", role: "pos_app", bypass: true},
+		{name: "unexpected role", role: "postgres"},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			db, mock, err := sqlmock.New()
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer db.Close()
+			mock.ExpectQuery(`SELECT rolname, rolsuper, rolbypassrls FROM pg_roles WHERE rolname = current_user`).
+				WillReturnRows(sqlmock.NewRows([]string{"rolname", "rolsuper", "rolbypassrls"}).AddRow(test.role, test.superuser, test.bypass))
+			if err := productionStartupGuards(context.Background(), db); err == nil {
+				t.Fatal("unsafe runtime role must prevent production startup")
+			}
+			if err := mock.ExpectationsWereMet(); err != nil {
+				t.Fatal(err)
+			}
+		})
+	}
+}
+
+func TestProductionStartupGuards_AcceptsRestrictedRuntimeRole(t *testing.T) {
+	db, mock, err := sqlmock.New()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer db.Close()
+	mock.ExpectQuery(`SELECT rolname, rolsuper, rolbypassrls FROM pg_roles WHERE rolname = current_user`).
+		WillReturnRows(sqlmock.NewRows([]string{"rolname", "rolsuper", "rolbypassrls"}).AddRow("pos_app", false, false))
+	mock.ExpectQuery(`SELECT password_hash FROM users WHERE email = \$1`).
+		WithArgs(seededSuperAdminEmail).WillReturnError(sql.ErrNoRows)
+	if err := productionStartupGuards(context.Background(), db); err != nil {
+		t.Fatalf("restricted runtime role should pass startup guard: %v", err)
+	}
+	if err := mock.ExpectationsWereMet(); err != nil {
+		t.Fatal(err)
 	}
 }

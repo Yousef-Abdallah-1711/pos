@@ -6,7 +6,7 @@ Read-only SQL against `pos-postgres`, database `pos_saas`, on 2026-11-02 reporte
 
 ## Ownership model
 
-The checked-in matrix classifies 91 tables heuristically: 45 restaurant-owned; 8 tenant-owned; 12 tenant-owned through foreign keys; 4 restaurant-owned audit, 7 tenant-owned derived audit, 2 tenant-owned audit, 3 integration-flavoured, 3 platform-admin, 5 reference, one global tenant registry, and one table (`webhook_retry_queue`) needing manual review. The matrix is useful inventory, not a verified policy map. See `docs-organized/phase-2a/DATABASE_TENANCY_MATRIX.md` for table-level keys and parent FK paths.
+The checked-in matrix classifies 91 tables heuristically: 45 restaurant-owned; 8 tenant-owned; 12 tenant-owned through foreign keys; 4 restaurant-owned audit, 7 tenant-owned derived audit, 2 tenant-owned audit, 3 integration-flavoured, 3 platform-admin, 5 reference, one global tenant registry, and one global system queue (`webhook_retry_queue`). The retry queue is deliberately cross-tenant worker state: its schema has no tenant/restaurant key or ownership FK, and the retry worker claims callbacks across tenants. Do not add tenant RLS without first changing the queue contract to persist and enforce ownership. Keep tenant application handlers away from queue reads, and review stored provider-payload retention and access. The matrix remains an inventory rather than a complete verified policy map. See `docs-organized/phase-2a/DATABASE_TENANCY_MATRIX.md` for table-level keys and parent FK paths.
 
 | Area | Current state | Risk |
 |---|---|---|

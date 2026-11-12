@@ -26,6 +26,31 @@ func NewCustomerInvoiceRepository(db *sql.DB, journalRepo *JournalEntryRepositor
 }
 
 func (r *CustomerInvoiceRepository) ListInvoices(tenantID, restaurantID int) ([]domain.CustomerInvoice, error) {
+	invoices, _, err := r.ListInvoicesPaged(tenantID, restaurantID, 1, 100000)
+	return invoices, err
+}
+
+func (r *CustomerInvoiceRepository) ListInvoicesPaged(tenantID, restaurantID, page, pageSize int) ([]domain.CustomerInvoice, int, error) {
+	if page < 1 {
+		page = 1
+	}
+	if pageSize < 1 {
+		pageSize = 20
+	}
+	if pageSize > 200 {
+		pageSize = 200
+	}
+	offset := (page - 1) * pageSize
+
+	var total int
+	if err := r.db.QueryRow(`
+		SELECT COUNT(*)
+		FROM invoices_customer ic
+		WHERE ic.tenant_id = $1 AND ic.restaurant_id = $2
+	`, tenantID, restaurantID).Scan(&total); err != nil {
+		return nil, 0, err
+	}
+
 	rows, err := r.db.Query(`
 		SELECT
 			ic.id, ic.tenant_id, ic.restaurant_id, ic.invoice_number,
@@ -41,11 +66,13 @@ func (r *CustomerInvoiceRepository) ListInvoices(tenantID, restaurantID int) ([]
 			ic.journal_entry_id, ic.created_at, ic.updated_at, ic.created_by, ic.updated_by
 		FROM invoices_customer ic
 		JOIN customers_accounting c ON c.id = ic.customer_id
+		 AND c.tenant_id = ic.tenant_id AND c.restaurant_id = ic.restaurant_id
 		WHERE ic.tenant_id = $1 AND ic.restaurant_id = $2
 		ORDER BY ic.invoice_date DESC, ic.id DESC
-	`, tenantID, restaurantID)
+		LIMIT $3 OFFSET $4
+	`, tenantID, restaurantID, pageSize, offset)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 	defer rows.Close()
 
@@ -53,15 +80,15 @@ func (r *CustomerInvoiceRepository) ListInvoices(tenantID, restaurantID int) ([]
 	for rows.Next() {
 		invoice, err := scanCustomerInvoice(rows)
 		if err != nil {
-			return nil, err
+			return nil, 0, err
 		}
 		invoices = append(invoices, invoice)
 	}
 	if err := rows.Err(); err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
-	return invoices, nil
+	return invoices, total, nil
 }
 
 func (r *CustomerInvoiceRepository) GetInvoiceByID(tenantID, restaurantID, id int) (*domain.CustomerInvoice, error) {
@@ -80,6 +107,7 @@ func (r *CustomerInvoiceRepository) GetInvoiceByID(tenantID, restaurantID, id in
 			ic.journal_entry_id, ic.created_at, ic.updated_at, ic.created_by, ic.updated_by
 		FROM invoices_customer ic
 		JOIN customers_accounting c ON c.id = ic.customer_id
+		 AND c.tenant_id = ic.tenant_id AND c.restaurant_id = ic.restaurant_id
 		WHERE ic.tenant_id = $1 AND ic.restaurant_id = $2 AND ic.id = $3
 	`, tenantID, restaurantID, id))
 	if err != nil {
@@ -160,7 +188,7 @@ func (r *CustomerInvoiceRepository) UpdateInvoice(invoice *domain.CustomerInvoic
 		invoice.Status = existing.Status
 	}
 
-	_, err = tx.Exec(`
+	result, err := tx.Exec(`
 		UPDATE invoices_customer
 		SET invoice_date = $1,
 			due_date = $2,
@@ -174,6 +202,14 @@ func (r *CustomerInvoiceRepository) UpdateInvoice(invoice *domain.CustomerInvoic
 			updated_by = $10,
 			updated_at = CURRENT_TIMESTAMP
 		WHERE id = $11 AND tenant_id = $12 AND restaurant_id = $13
+		  AND EXISTS (
+			SELECT 1 FROM customers_accounting c
+			WHERE c.id = $3 AND c.tenant_id = $12 AND c.restaurant_id = $13
+		  )
+		  AND ($4::integer IS NULL OR EXISTS (
+			SELECT 1 FROM orders o
+			WHERE o.id = $4 AND o.tenant_id = $12 AND o.restaurant_id = $13
+		  ))
 	`,
 		invoice.InvoiceDate,
 		invoice.DueDate,
@@ -192,11 +228,18 @@ func (r *CustomerInvoiceRepository) UpdateInvoice(invoice *domain.CustomerInvoic
 	if err != nil {
 		return err
 	}
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rowsAffected == 0 {
+		return errors.New("customer invoice references are outside scope")
+	}
 
 	if _, err := tx.Exec(`DELETE FROM invoice_customer_lines WHERE invoice_id = $1`, invoice.ID); err != nil {
 		return err
 	}
-	if err := r.insertCustomerInvoiceLinesTx(tx, invoice.ID, invoice.TenantID, invoice.Lines); err != nil {
+	if err := r.insertCustomerInvoiceLinesTx(tx, invoice.ID, invoice.TenantID, invoice.RestaurantID, invoice.Lines); err != nil {
 		return err
 	}
 
@@ -296,6 +339,35 @@ func (r *CustomerInvoiceRepository) VoidInvoice(tenantID, restaurantID, id int, 
 }
 
 func (r *CustomerInvoiceRepository) GetOverdueInvoices(tenantID, restaurantID int) ([]domain.CustomerInvoice, error) {
+	invoices, _, err := r.GetOverdueInvoicesPaged(tenantID, restaurantID, 1, 100000)
+	return invoices, err
+}
+
+func (r *CustomerInvoiceRepository) GetOverdueInvoicesPaged(tenantID, restaurantID, page, pageSize int) ([]domain.CustomerInvoice, int, error) {
+	if page < 1 {
+		page = 1
+	}
+	if pageSize < 1 {
+		pageSize = 20
+	}
+	if pageSize > 200 {
+		pageSize = 200
+	}
+	offset := (page - 1) * pageSize
+
+	var total int
+	if err := r.db.QueryRow(`
+		SELECT COUNT(*)
+		FROM invoices_customer ic
+		WHERE ic.tenant_id = $1
+		  AND ic.restaurant_id = $2
+		  AND ic.status NOT IN ('paid', 'void', 'draft')
+		  AND ic.balance_due > 0
+		  AND ic.due_date < CURRENT_DATE
+	`, tenantID, restaurantID).Scan(&total); err != nil {
+		return nil, 0, err
+	}
+
 	rows, err := r.db.Query(`
 		SELECT
 			ic.id, ic.tenant_id, ic.restaurant_id, ic.invoice_number,
@@ -307,15 +379,17 @@ func (r *CustomerInvoiceRepository) GetOverdueInvoices(tenantID, restaurantID in
 			ic.journal_entry_id, ic.created_at, ic.updated_at, ic.created_by, ic.updated_by
 		FROM invoices_customer ic
 		JOIN customers_accounting c ON c.id = ic.customer_id
+		 AND c.tenant_id = ic.tenant_id AND c.restaurant_id = ic.restaurant_id
 		WHERE ic.tenant_id = $1
 		  AND ic.restaurant_id = $2
 		  AND ic.status NOT IN ('paid', 'void', 'draft')
 		  AND ic.balance_due > 0
 		  AND ic.due_date < CURRENT_DATE
 		ORDER BY ic.due_date ASC
-	`, tenantID, restaurantID)
+		LIMIT $3 OFFSET $4
+	`, tenantID, restaurantID, pageSize, offset)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 	defer rows.Close()
 
@@ -323,14 +397,14 @@ func (r *CustomerInvoiceRepository) GetOverdueInvoices(tenantID, restaurantID in
 	for rows.Next() {
 		invoice, err := scanCustomerInvoice(rows)
 		if err != nil {
-			return nil, err
+			return nil, 0, err
 		}
 		invoices = append(invoices, invoice)
 	}
 	if err := rows.Err(); err != nil {
-		return nil, err
+		return nil, 0, err
 	}
-	return invoices, nil
+	return invoices, total, nil
 }
 
 func (r *CustomerInvoiceRepository) createInvoiceTx(tx *sql.Tx, invoice *domain.CustomerInvoice) (int, error) {
@@ -358,11 +432,18 @@ func (r *CustomerInvoiceRepository) createInvoiceTx(tx *sql.Tx, invoice *domain.
 			tenant_id, restaurant_id, invoice_number, invoice_date, due_date,
 			customer_id, order_id, currency, status, notes, terms, internal_notes,
 			created_by, updated_by
-		) VALUES (
+		) SELECT
 			$1, $2, $3, $4, $5,
 			$6, $7, $8, $9, $10, $11, $12,
 			$13, $14
+		WHERE EXISTS (
+			SELECT 1 FROM customers_accounting c
+			WHERE c.id = $6 AND c.tenant_id = $1 AND c.restaurant_id = $2
 		)
+		  AND ($7::integer IS NULL OR EXISTS (
+			SELECT 1 FROM orders o
+			WHERE o.id = $7 AND o.tenant_id = $1 AND o.restaurant_id = $2
+		  ))
 		RETURNING id
 	`,
 		invoice.TenantID,
@@ -384,7 +465,7 @@ func (r *CustomerInvoiceRepository) createInvoiceTx(tx *sql.Tx, invoice *domain.
 		return 0, err
 	}
 
-	if err := r.insertCustomerInvoiceLinesTx(tx, id, invoice.TenantID, invoice.Lines); err != nil {
+	if err := r.insertCustomerInvoiceLinesTx(tx, id, invoice.TenantID, invoice.RestaurantID, invoice.Lines); err != nil {
 		return 0, err
 	}
 
@@ -565,6 +646,7 @@ func (r *CustomerInvoiceRepository) getInvoiceByIDTx(tx *sql.Tx, tenantID, resta
 			ic.created_by, ic.updated_by
 		FROM invoices_customer ic
 		JOIN customers_accounting c ON c.id = ic.customer_id
+		 AND c.tenant_id = ic.tenant_id AND c.restaurant_id = ic.restaurant_id
 		WHERE ic.tenant_id = $1 AND ic.restaurant_id = $2 AND ic.id = $3
 	`, tenantID, restaurantID, id))
 	if err != nil {
@@ -597,21 +679,24 @@ func (r *CustomerInvoiceRepository) getInvoiceByIDTx(tx *sql.Tx, tenantID, resta
 	return &invoice, nil
 }
 
-func (r *CustomerInvoiceRepository) insertCustomerInvoiceLinesTx(tx *sql.Tx, invoiceID, tenantID int, lines []domain.InvoiceLine) error {
+func (r *CustomerInvoiceRepository) insertCustomerInvoiceLinesTx(tx *sql.Tx, invoiceID, tenantID, restaurantID int, lines []domain.InvoiceLine) error {
 	for index, line := range lines {
 		lineOrder := line.LineOrder
 		if lineOrder <= 0 {
 			lineOrder = index + 1
 		}
-		if _, err := tx.Exec(`
+		result, err := tx.Exec(`
 			INSERT INTO invoice_customer_lines (
 				invoice_id, tenant_id, description, description_ar, quantity,
 				unit_price, tax_rate, tax_amount, discount_rate, discount_amount,
 				line_total, account_id, line_order
-			) VALUES (
+			) SELECT
 				$1, $2, $3, $4, $5,
 				$6, $7, $8, $9, $10,
 				$11, $12, $13
+			WHERE $12::integer IS NULL OR EXISTS (
+				SELECT 1 FROM chart_of_accounts a
+				WHERE a.id = $12 AND a.tenant_id = $2 AND a.restaurant_id = $14
 			)
 		`,
 			invoiceID,
@@ -627,8 +712,17 @@ func (r *CustomerInvoiceRepository) insertCustomerInvoiceLinesTx(tx *sql.Tx, inv
 			line.LineTotal,
 			line.AccountID,
 			lineOrder,
-		); err != nil {
+			restaurantID,
+		)
+		if err != nil {
 			return err
+		}
+		rowsAffected, affectedErr := result.RowsAffected()
+		if affectedErr != nil {
+			return affectedErr
+		}
+		if rowsAffected == 0 {
+			return errors.New("customer invoice line account is outside scope")
 		}
 	}
 	return nil

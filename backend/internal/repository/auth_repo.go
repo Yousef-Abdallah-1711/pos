@@ -1,7 +1,9 @@
 package repository
 
 import (
+	"context"
 	"database/sql"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
@@ -12,6 +14,7 @@ import (
 	"github.com/lib/pq"
 	"golang.org/x/crypto/bcrypt"
 	"pos-saas/internal/domain"
+	"pos-saas/internal/pkg/database"
 )
 
 type AuthRepository struct {
@@ -30,11 +33,29 @@ func NewAuthRepository(db *sql.DB) *AuthRepository {
 
 // CreateTenantWithUser creates a new tenant, restaurant, and admin user in a transaction
 func (r *AuthRepository) CreateTenantWithUser(req *domain.RegisterRequest) (*domain.User, error) {
-	tx, err := r.db.Begin()
+	return r.CreateTenantWithUserContext(context.Background(), req)
+}
+
+func (r *AuthRepository) CreateTenantWithUserContext(ctx context.Context, req *domain.RegisterRequest) (*domain.User, error) {
+	tx, err := r.db.BeginTx(ctx, nil)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("begin tenant registration: %w", err)
 	}
 	defer tx.Rollback()
+
+	// Serialize signup attempts for the same normalized email. The existing
+	// public contract rejects duplicate emails across tenants, while users.email
+	// remains tenant-scoped to preserve the established authentication schema.
+	if _, err := tx.ExecContext(ctx, `SELECT pg_advisory_xact_lock(hashtext($1))`, req.Email); err != nil {
+		return nil, fmt.Errorf("lock registration email: %w", err)
+	}
+	var emailExists bool
+	if err := tx.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM users WHERE lower(email) = $1)`, req.Email).Scan(&emailExists); err != nil {
+		return nil, fmt.Errorf("check registration email in transaction: %w", err)
+	}
+	if emailExists {
+		return nil, domain.ErrEmailAlreadyExists
+	}
 
 	// Use provided subdomain slug, or generate from restaurant name if not provided
 	slug := req.RestaurantSlug
@@ -58,9 +79,9 @@ func (r *AuthRepository) CreateTenantWithUser(req *domain.RegisterRequest) (*dom
 
 	var tenantID int
 	for attempt := 0; attempt < 20; attempt++ {
-		err = tx.QueryRow(`
+		err = tx.QueryRowContext(ctx, `
 			INSERT INTO tenants (name, slug, domain, email, phone, subscription_plan, max_restaurants, max_users, is_active)
-			VALUES ($1, $2, $3, $4, $5, 'free', 1, 5, true)
+			VALUES ($1, $2, $3, $4, NULLIF($5, ''), 'free', 1, 5, true)
 			RETURNING id
 		`, req.RestaurantName, slug, slug+"."+restaurantDomain, req.Email, req.Phone).Scan(&tenantID)
 		if err == nil {
@@ -90,10 +111,10 @@ func (r *AuthRepository) CreateTenantWithUser(req *domain.RegisterRequest) (*dom
 
 	// 3. Create User (Owner role)
 	var user domain.User
-	err = tx.QueryRow(`
+	err = tx.QueryRowContext(ctx, `
 		INSERT INTO users (tenant_id, email, password_hash, name, phone, role, status)
-		VALUES ($1, $2, $3, $4, $5, 'owner', 'active')
-		RETURNING id, tenant_id, email, name, phone, role, status, created_at, updated_at
+		VALUES ($1, $2, $3, $4, NULLIF($5, ''), 'owner', 'active')
+		RETURNING id, tenant_id, email, name, COALESCE(phone, ''), role, status, created_at, updated_at
 	`, tenantID, req.Email, string(hashedPassword), req.Name, req.Phone).Scan(
 		&user.ID, &user.TenantID, &user.Email, &user.Name, &user.Phone,
 		&user.Role, &user.Status, &user.CreatedAt, &user.UpdatedAt,
@@ -105,7 +126,7 @@ func (r *AuthRepository) CreateTenantWithUser(req *domain.RegisterRequest) (*dom
 
 	// 4. Create Restaurant
 	var restaurantID int
-	err = tx.QueryRow(`
+	err = tx.QueryRowContext(ctx, `
 		INSERT INTO restaurants (tenant_id, name, slug, description, address, theme, status)
 		VALUES ($1, $2, $3, $4, $5, 'modern-default', 'active')
 		RETURNING id
@@ -116,76 +137,41 @@ func (r *AuthRepository) CreateTenantWithUser(req *domain.RegisterRequest) (*dom
 	}
 
 	// 5. Update user with restaurant_id
-	_, err = tx.Exec(`UPDATE users SET restaurant_id = $1 WHERE id = $2`, restaurantID, user.ID)
+	_, err = tx.ExecContext(ctx, `UPDATE users SET restaurant_id = $1 WHERE id = $2`, restaurantID, user.ID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to update user restaurant: %w", err)
 	}
 
 	user.RestaurantID = &restaurantID
+	if err := database.SetTenantTxContext(ctx, tx, int64(tenantID), int64(restaurantID), int64(user.ID)); err != nil {
+		return nil, fmt.Errorf("failed to scope tenant registration transaction: %w", err)
+	}
 
-	// 6. Create a default theme for the restaurant using JSONB config
-	config := `{
-		"identity": {
-			"siteTitle": "` + req.RestaurantName + `",
-			"logoUrl": "",
-			"faviconUrl": "",
-			"domain": "` + slug + `.` + restaurantDomain + `"
-		},
-		"colors": {
-			"primary": "#3b82f6",
-			"secondary": "#1e40af",
-			"accent": "#0ea5e9",
-			"background": "#ffffff",
-			"text": "#1f2937",
-			"border": "#e5e7eb",
-			"shadow": "#000000"
-		},
-		"typography": {
-			"fontSans": "Inter, Arial, sans-serif",
-			"fontSerif": "Georgia, serif",
-			"fontMono": "Courier, monospace",
-			"baseSize": 16,
-			"lineHeight": 1.5,
-			"borderRadius": 8
-		},
-		"header": {
-			"logoUrl": "",
-			"navBg": "#ffffff",
-			"navText": "#1f2937",
-			"navHeight": 80,
-			"sticky": true
-		},
-		"footer": {
-			"text": "© 2025 ` + req.RestaurantName + `. All rights reserved.",
-			"bgColor": "#1f2937",
-			"textColor": "#f3f4f6",
-			"links": []
-		},
-		"components": [],
-		"homepage": {
-			"sections": []
-		},
-		"darkMode": {
-			"enabled": false,
-			"primaryDark": "#1e40af",
-			"secondaryDark": "#1e3a8a",
-			"backgroundDark": "#111827",
-			"textDark": "#f3f4f6"
-		},
-		"rtl": {
-			"enabled": false
-		},
-		"custom": {}
-	}`
+	// 6. Serialize user-provided names as JSON instead of interpolating them into JSON text.
+	config, err := json.Marshal(map[string]interface{}{
+		"identity":   map[string]interface{}{"siteTitle": req.RestaurantName, "logoUrl": "", "faviconUrl": "", "domain": slug + "." + restaurantDomain},
+		"colors":     map[string]string{"primary": "#3b82f6", "secondary": "#1e40af", "accent": "#0ea5e9", "background": "#ffffff", "text": "#1f2937", "border": "#e5e7eb", "shadow": "#000000"},
+		"typography": map[string]interface{}{"fontSans": "Inter, Arial, sans-serif", "fontSerif": "Georgia, serif", "fontMono": "Courier, monospace", "baseSize": 16, "lineHeight": 1.5, "borderRadius": 8},
+		"header":     map[string]interface{}{"logoUrl": "", "navBg": "#ffffff", "navText": "#1f2937", "navHeight": 80, "sticky": true},
+		"footer":     map[string]interface{}{"text": "© 2025 " + req.RestaurantName + ". All rights reserved.", "bgColor": "#1f2937", "textColor": "#f3f4f6", "links": []interface{}{}},
+		"components": []interface{}{},
+		"homepage":   map[string]interface{}{"sections": []interface{}{}},
+		"darkMode":   map[string]interface{}{"enabled": false, "primaryDark": "#1e40af", "secondaryDark": "#1e3a8a", "backgroundDark": "#111827", "textDark": "#f3f4f6"},
+		"rtl":        map[string]bool{"enabled": false},
+		"custom":     map[string]interface{}{},
+	})
+	if err != nil {
+		return nil, fmt.Errorf("serialize default theme: %w", err)
+	}
 
-	_, err = tx.Exec(`
+	_, err = tx.ExecContext(ctx, `
 		INSERT INTO themes_v2 (
 			tenant_id, restaurant_id, name, slug, config, description,
 			is_active, is_published, version, created_by, created_at, updated_at
 		) VALUES (
 			$1, $2, $3, $4, $5::jsonb, $6, $7, $8, $9, $10, $11, $12
 		)
-	`, tenantID, restaurantID, "Default Theme", "default-theme", config,
+	`, tenantID, restaurantID, "Default Theme", "default-theme", string(config),
 		"Default theme for "+req.RestaurantName, true, true, 1, user.ID, time.Now(), time.Now())
 
 	if err != nil {
@@ -200,7 +186,7 @@ func (r *AuthRepository) CreateTenantWithUser(req *domain.RegisterRequest) (*dom
 
 	// 8. Assign ADMIN role to the new user
 	if adminRoleID, ok := roleIDs["ADMIN"]; ok {
-		_, err = tx.Exec(`
+		_, err = tx.ExecContext(ctx, `
 			INSERT INTO user_roles (tenant_id, user_id, role_id, assigned_by)
 			VALUES ($1, $2, $3, $4)
 			ON CONFLICT (tenant_id, user_id, role_id) DO NOTHING
@@ -222,13 +208,14 @@ func (r *AuthRepository) CreateTenantWithUser(req *domain.RegisterRequest) (*dom
 func (r *AuthRepository) FindUserByEmail(email string) (*domain.User, error) {
 	var user domain.User
 	var avatarURL sql.NullString
+	var phone sql.NullString
 	err := r.db.QueryRow(`
 		SELECT id, tenant_id, restaurant_id, email, password_hash, name, phone, avatar_url, role, status, created_at, updated_at
 		FROM users
-		WHERE email = $1 AND status = 'active'
+		WHERE lower(email) = lower($1) AND status = 'active'
 	`, email).Scan(
 		&user.ID, &user.TenantID, &user.RestaurantID, &user.Email, &user.PasswordHash,
-		&user.Name, &user.Phone, &avatarURL, &user.Role, &user.Status,
+		&user.Name, &phone, &avatarURL, &user.Role, &user.Status,
 		&user.CreatedAt, &user.UpdatedAt,
 	)
 
@@ -242,6 +229,9 @@ func (r *AuthRepository) FindUserByEmail(email string) (*domain.User, error) {
 	// Handle NULL avatar_url
 	if avatarURL.Valid {
 		user.AvatarURL = avatarURL.String
+	}
+	if phone.Valid {
+		user.Phone = phone.String
 	}
 	return &user, nil
 }
@@ -272,7 +262,7 @@ func (r *AuthRepository) FindUserByEmailAllTenants(email string) ([]domain.User,
 	rows, err := r.db.Query(`
 		SELECT id, tenant_id, restaurant_id, email, password_hash, name, phone, avatar_url, role, status, created_at, updated_at
 		FROM users
-		WHERE email = $1 AND status = 'active'
+		WHERE lower(email) = lower($1) AND status = 'active'
 		ORDER BY tenant_id ASC
 	`, email)
 
@@ -285,9 +275,10 @@ func (r *AuthRepository) FindUserByEmailAllTenants(email string) ([]domain.User,
 	for rows.Next() {
 		var user domain.User
 		var avatarURL sql.NullString
+		var phone sql.NullString
 		err := rows.Scan(
 			&user.ID, &user.TenantID, &user.RestaurantID, &user.Email, &user.PasswordHash,
-			&user.Name, &user.Phone, &avatarURL, &user.Role, &user.Status,
+			&user.Name, &phone, &avatarURL, &user.Role, &user.Status,
 			&user.CreatedAt, &user.UpdatedAt,
 		)
 		if err != nil {
@@ -297,6 +288,9 @@ func (r *AuthRepository) FindUserByEmailAllTenants(email string) ([]domain.User,
 		// Handle NULL avatar_url
 		if avatarURL.Valid {
 			user.AvatarURL = avatarURL.String
+		}
+		if phone.Valid {
+			user.Phone = phone.String
 		}
 
 		users = append(users, user)
@@ -325,7 +319,7 @@ func (r *AuthRepository) CheckEmailExists(email string) (bool, error) {
 		return false, nil
 	}
 	var exists bool
-	err := r.db.QueryRow(`SELECT EXISTS(SELECT 1 FROM users WHERE email = $1)`, email).Scan(&exists)
+	err := r.db.QueryRow(`SELECT EXISTS(SELECT 1 FROM users WHERE lower(email) = lower($1))`, email).Scan(&exists)
 	return exists, err
 }
 
