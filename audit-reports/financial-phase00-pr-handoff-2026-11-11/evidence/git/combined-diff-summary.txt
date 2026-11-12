@@ -1,0 +1,18 @@
+ .../FINANCIAL-SAFETY-RUNBOOK.md                    | 16 ++++
+ .../financial_report_integrity_handler_test.go     | 55 +++++++++++++
+ .../usecase/accounting_posting_diagnostic_test.go  | 50 +++++++++++
+ .../financial_report_postgres_integration_test.go  | 96 ++++++++++++++++++++++
+ .../internal/usecase/financial_report_usecase.go   | 28 +++++--
+ .../usecase/financial_report_usecase_test.go       | 69 ++++++++++++++++
+ backend/internal/usecase/order_usecase.go          | 17 +++-
+ .../reports/financial/balance-sheet/page.tsx       |  3 +-
+ .../dashboard/tables/components/TableList.test.tsx |  2 -
+ .../financial-reports/BalanceSheet.test.tsx        | 34 ++++++++
+ .../components/financial-reports/BalanceSheet.tsx  | 10 +++
+ frontend/apps/dashboard/src/i18n/messages/ar.json  |  5 ++
+ frontend/apps/dashboard/src/i18n/messages/en.json  |  5 ++
+ frontend/apps/dashboard/src/lib/config.test.ts     |  9 +-
+ .../dashboard/src/lib/financial-integrity.test.ts  | 14 ++++
+ .../apps/dashboard/src/lib/financial-integrity.ts  |  7 ++
+ .../apps/dashboard/src/types/financial-reports.ts  |  3 +
+ 17 files changed, 405 insertions(+), 18 deletions(-)

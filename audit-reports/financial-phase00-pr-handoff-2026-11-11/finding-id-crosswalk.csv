@@ -1,0 +1,19 @@
+alias,source_register,source_finding_id,canonical_id,source_title,relation
+FORENSIC:FIN-001,financial-forensic-audit-2026-11-10,FIN-001,CFR-001,"Balance Sheet equation fails after balanced revenue posting",unique
+FORENSIC:FIN-002,financial-forensic-audit-2026-11-10,FIN-002,CFR-002,"Manual journal UI omits JSONB attachments and API rejects request",unique
+FORENSIC:FIN-003,financial-forensic-audit-2026-11-10,FIN-003,CFR-003,"Auto-posting normalizer absorbs material imbalance into final line",exact duplicate with DISCOVERY:FIN-001
+FORENSIC:FIN-004,financial-forensic-audit-2026-11-10,FIN-004,CFR-004,"Failed auto-post may leave a draft journal requiring review",related but distinct
+FORENSIC:FIN-005,financial-forensic-audit-2026-11-10,FIN-005,CFR-005,"Order tax rate is hard-coded",partial overlap with DISCOVERY:FIN-006
+FORENSIC:FIN-006,financial-forensic-audit-2026-11-10,FIN-006,CFR-006,"Development dashboard shows duplicate requests and slow one-shot loads",unique; root cause unverified
+FORENSIC:FIN-008,financial-forensic-audit-2026-11-10,FIN-008,CFR-014,"Automatic journals fail insertion because JSONB attachments are nil",unique
+FORENSIC:FIN-009,financial-forensic-audit-2026-11-10,FIN-009,CFR-015,"Supplier automatic entry type exceeds journal schema width",unique
+FORENSIC:FIN-010,financial-forensic-audit-2026-11-10,FIN-010,CFR-010,"Paid-order auto-post errors are logged and suppressed",partial overlap with DISCOVERY:FIN-005
+DISCOVERY:FIN-001,phase-1-system-discovery,FIN-001,CFR-003,"Auto-posting silently plugs any journal imbalance into the last line",exact duplicate with FORENSIC:FIN-003
+DISCOVERY:FIN-002,phase-1-system-discovery,FIN-002,CFR-007,"No database-level debit=credit enforcement; balance trigger only recomputes totals; float tolerance",unique
+DISCOVERY:FIN-003,phase-1-system-discovery,FIN-003,CFR-008,"No row locking: concurrent post/void, running-balance updates and number generation race",unique
+DISCOVERY:FIN-004,phase-1-system-discovery,FIN-004,CFR-009,"float64 used for money in Go while DB uses NUMERIC/DECIMAL",unique
+DISCOVERY:FIN-005,phase-1-system-discovery,FIN-005,CFR-010,"Order accounting not reversed on refund/cancel; posting failures only logged; create and post not atomic",broader finding; forensic overlap partial
+DISCOVERY:FIN-006,phase-1-system-discovery,FIN-006,CFR-005,"Tax/discount calculation defects: hardcoded 10% order tax; invoice tax ignores discounts",split; partial overlap with FORENSIC:FIN-005
+DISCOVERY:FIN-006,phase-1-system-discovery,FIN-006,CFR-011,"Tax/discount calculation defects: hardcoded 10% order tax; invoice tax ignores discounts",split; invoice discount tax defect
+DISCOVERY:FIN-007,phase-1-system-discovery,FIN-007,CFR-012,"Payroll records editable/deletable after payment and posting; tax/insurance are manual inputs",unique
+DISCOVERY:FIN-008,phase-1-system-discovery,FIN-008,CFR-013,"Void and account deletion edge cases",unique
