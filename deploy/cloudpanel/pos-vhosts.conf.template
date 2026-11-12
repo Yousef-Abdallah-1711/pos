@@ -1,0 +1,114 @@
+# Review this template with the CloudPanel operator. Do not copy directly into
+# an active vhost: CloudPanel owns the live site configuration and certificates.
+# Provision one CloudPanel site/certificate per server_name before enabling.
+
+server {
+    listen 80;
+    server_name pos.rakmyat.online pos.app.rakmyat.online admin.pos.rakmyat.online api.pos.rakmyat.online *.restaurants.pos.rakmyat.online;
+    return 301 https://$host$request_uri;
+}
+
+server {
+    listen 443 ssl;
+    http2 on;
+    server_name pos.rakmyat.online;
+    # CloudPanel-managed certificate paths must replace these placeholders.
+    ssl_certificate {{POS_APEX_CERT}};
+    ssl_certificate_key {{POS_APEX_KEY}};
+    client_max_body_size 10m;
+    add_header X-Content-Type-Options nosniff always;
+    add_header Referrer-Policy strict-origin-when-cross-origin always;
+    location / {
+        proxy_pass http://127.0.0.1:13401;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto https;
+        proxy_read_timeout 60s;
+    }
+}
+
+server {
+    listen 443 ssl;
+    http2 on;
+    server_name pos.app.rakmyat.online;
+    ssl_certificate {{POS_DASHBOARD_CERT}};
+    ssl_certificate_key {{POS_DASHBOARD_KEY}};
+    add_header X-Content-Type-Options nosniff always;
+    location / {
+        proxy_pass http://127.0.0.1:13402;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto https;
+        proxy_read_timeout 60s;
+    }
+}
+
+server {
+    listen 443 ssl;
+    http2 on;
+    server_name admin.pos.rakmyat.online;
+    ssl_certificate {{POS_ADMIN_CERT}};
+    ssl_certificate_key {{POS_ADMIN_KEY}};
+    add_header X-Content-Type-Options nosniff always;
+    location / {
+        proxy_pass http://127.0.0.1:13404;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto https;
+        proxy_read_timeout 60s;
+    }
+}
+
+server {
+    listen 443 ssl;
+    http2 on;
+    server_name api.pos.rakmyat.online;
+    ssl_certificate {{POS_API_CERT}};
+    ssl_certificate_key {{POS_API_KEY}};
+    client_max_body_size 10m;
+    add_header X-Content-Type-Options nosniff always;
+    location = /api/v1/kds/ws {
+        proxy_pass http://127.0.0.1:13405;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto https;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_read_timeout 1h;
+    }
+    location / {
+        proxy_pass http://127.0.0.1:13405;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto https;
+        proxy_read_timeout 60s;
+    }
+}
+
+server {
+    listen 443 ssl;
+    http2 on;
+    server_name *.restaurants.pos.rakmyat.online;
+    ssl_certificate {{POS_RESTAURANT_WILDCARD_CERT}};
+    ssl_certificate_key {{POS_RESTAURANT_WILDCARD_KEY}};
+    add_header X-Content-Type-Options nosniff always;
+    location / {
+        proxy_pass http://127.0.0.1:13403;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto https;
+        proxy_read_timeout 60s;
+    }
+}

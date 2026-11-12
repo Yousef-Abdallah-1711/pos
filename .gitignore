@@ -66,3 +66,7 @@ newman-*.xml
 
 # Production compose env
 .env.prod
+
+# Python cache
+__pycache__/
+*.py[cod]
