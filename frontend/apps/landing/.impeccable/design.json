@@ -1,0 +1,430 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-10T21:49:50Z",
+  "title": "Design System: POOS Landing and Authentication",
+  "extensions": {
+    "colorMeta": {
+      "violet": {
+        "role": "primary",
+        "displayName": "POOS Violet",
+        "canonical": "#6D28D9",
+        "tonalRamp": [
+          "#DFD0F7",
+          "#C8ADF1",
+          "#AD87EA",
+          "#905CE2",
+          "#6D28D9",
+          "#5921B2",
+          "#441987",
+          "#2E115B"
+        ]
+      },
+      "violet-deep": {
+        "role": "primary",
+        "displayName": "Deep Violet",
+        "canonical": "#4C1D95",
+        "tonalRamp": [
+          "#D8CDE8",
+          "#BBA9D7",
+          "#9B80C4",
+          "#7753AE",
+          "#4C1D95",
+          "#3E187A",
+          "#2F125C",
+          "#200C3F"
+        ]
+      },
+      "purple": {
+        "role": "primary",
+        "displayName": "Bright Purple",
+        "canonical": "#8B5CF6",
+        "tonalRamp": [
+          "#E5DBFD",
+          "#D3C1FC",
+          "#BEA4FA",
+          "#A783F8",
+          "#8B5CF6",
+          "#724BCA",
+          "#563999",
+          "#3A2767"
+        ]
+      },
+      "lavender": {
+        "role": "secondary",
+        "displayName": "Soft Lavender",
+        "canonical": "#C4B5FD",
+        "tonalRamp": [
+          "#F2EFFF",
+          "#E9E3FE",
+          "#DED6FE",
+          "#D2C7FD",
+          "#C4B5FD",
+          "#A194CF",
+          "#7A709D",
+          "#524C6A"
+        ]
+      },
+      "paper": {
+        "role": "neutral",
+        "displayName": "Violet Paper",
+        "canonical": "#F7F5FF",
+        "tonalRamp": [
+          "#FDFDFF",
+          "#FCFBFF",
+          "#FBF9FF",
+          "#F9F7FF",
+          "#F7F5FF",
+          "#CBC9D1",
+          "#99989E",
+          "#68676B"
+        ]
+      },
+      "surface": {
+        "role": "neutral",
+        "displayName": "Soft Surface",
+        "canonical": "#F0ECF8",
+        "tonalRamp": [
+          "#FCFBFD",
+          "#F9F8FC",
+          "#F7F4FB",
+          "#F4F1FA",
+          "#F0ECF8",
+          "#C5C2CB",
+          "#95929A",
+          "#656368"
+        ]
+      },
+      "surface-raised": {
+        "role": "neutral",
+        "displayName": "Raised White",
+        "canonical": "#FFFFFF",
+        "tonalRamp": [
+          "#FFFFFF",
+          "#FFFFFF",
+          "#FFFFFF",
+          "#FFFFFF",
+          "#FFFFFF",
+          "#D1D1D1",
+          "#9E9E9E",
+          "#6B6B6B"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Dark Ink",
+        "canonical": "#171327",
+        "tonalRamp": [
+          "#CCCBCF",
+          "#A7A5AD",
+          "#7D7B86",
+          "#4F4C5B",
+          "#171327",
+          "#131020",
+          "#0E0C18",
+          "#0A0810"
+        ]
+      },
+      "ink-soft": {
+        "role": "neutral",
+        "displayName": "Soft Ink",
+        "canonical": "#373147",
+        "tonalRamp": [
+          "#D3D2D7",
+          "#B3B1B9",
+          "#8F8C98",
+          "#676273",
+          "#373147",
+          "#2D283A",
+          "#221E2C",
+          "#17151E"
+        ]
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "Muted Ink",
+        "canonical": "#575066",
+        "tonalRamp": [
+          "#DAD9DD",
+          "#BFBDC5",
+          "#A19DA9",
+          "#7F7A8B",
+          "#575066",
+          "#474254",
+          "#36323F",
+          "#25222B"
+        ]
+      },
+      "dark": {
+        "role": "neutral",
+        "displayName": "Deep Aubergine",
+        "canonical": "#211833",
+        "tonalRamp": [
+          "#CECCD2",
+          "#ABA7B1",
+          "#837E8D",
+          "#564F64",
+          "#211833",
+          "#1B142A",
+          "#140F20",
+          "#0E0A15"
+        ]
+      },
+      "dark-soft": {
+        "role": "neutral",
+        "displayName": "Aubergine Surface",
+        "canonical": "#302447",
+        "tonalRamp": [
+          "#D1CFD7",
+          "#B0ACB9",
+          "#8B8498",
+          "#625973",
+          "#302447",
+          "#271E3A",
+          "#1E162C",
+          "#140F1E"
+        ]
+      },
+      "rule": {
+        "role": "neutral",
+        "displayName": "Ledger Rule",
+        "canonical": "#D9D1EB",
+        "tonalRamp": [
+          "#F7F5FB",
+          "#F1EEF7",
+          "#EAE5F4",
+          "#E2DCF0",
+          "#D9D1EB",
+          "#B2ABC1",
+          "#878292",
+          "#5B5863"
+        ]
+      },
+      "success": {
+        "role": "tertiary",
+        "displayName": "Success Green",
+        "canonical": "#17643B",
+        "tonalRamp": [
+          "#CCDDD4",
+          "#A7C4B5",
+          "#7DA891",
+          "#4F896A",
+          "#17643B",
+          "#135230",
+          "#0E3E25",
+          "#0A2A19"
+        ]
+      },
+      "warning": {
+        "role": "tertiary",
+        "displayName": "Warning Amber",
+        "canonical": "#8A5100",
+        "tonalRamp": [
+          "#E5D9C7",
+          "#D3BD9E",
+          "#BD9E70",
+          "#A67B3D",
+          "#8A5100",
+          "#714200",
+          "#563200",
+          "#3A2200"
+        ]
+      },
+      "danger": {
+        "role": "tertiary",
+        "displayName": "Danger Red",
+        "canonical": "#A3233D",
+        "tonalRamp": [
+          "#EBCFD4",
+          "#DCABB5",
+          "#CB8492",
+          "#B9586C",
+          "#A3233D",
+          "#861D32",
+          "#651626",
+          "#440F1A"
+        ]
+      },
+      "focus": {
+        "role": "primary",
+        "displayName": "Focus Violet",
+        "canonical": "#6D28D9",
+        "tonalRamp": [
+          "#DFD0F7",
+          "#C8ADF1",
+          "#AD87EA",
+          "#905CE2",
+          "#6D28D9",
+          "#5921B2",
+          "#441987",
+          "#2E115B"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Alexandria Display",
+        "purpose": "Arabic-first page and section headings; source also applies it to English headings."
+      },
+      "headline": {
+        "displayName": "Alexandria Headline",
+        "purpose": "Major ledger section headlines."
+      },
+      "title": {
+        "displayName": "Alexandria Title",
+        "purpose": "Compact headings and ledger entry titles."
+      },
+      "body": {
+        "displayName": "Arabic Interface / English Body",
+        "purpose": "IBM Plex Sans Arabic for Arabic interface and body copy; Manrope for English body copy."
+      },
+      "label": {
+        "displayName": "Interface Label",
+        "purpose": "IBM Plex Sans Arabic for Arabic labels and Manrope for English labels."
+      }
+    },
+    "shadows": [
+      {
+        "name": "card",
+        "value": "0 22px 58px rgb(35 23 61 / 12%)",
+        "purpose": "Lift the evidence frame and desktop auth frame."
+      },
+      {
+        "name": "nav",
+        "value": "0 8px 24px rgb(35 23 61 / 7%)",
+        "purpose": "Subtle sticky-header separation."
+      },
+      {
+        "name": "tenant-dialog",
+        "value": "0 1.5rem 4rem rgb(23 19 39 / 24%)",
+        "purpose": "Separate tenant selection from its dimmed backdrop."
+      }
+    ],
+    "motion": [
+      {
+        "name": "control-state",
+        "value": "160ms ease",
+        "purpose": "Button and control color/press feedback."
+      },
+      {
+        "name": "hero-arrive",
+        "value": "720ms cubic-bezier(.16, 1, .3, 1)",
+        "purpose": "Landing evidence arrival; reduced-motion preference disables the motion."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "mobile-nav",
+        "value": "68rem"
+      },
+      {
+        "name": "phone-layout",
+        "value": "48rem"
+      },
+      {
+        "name": "compact-phone",
+        "value": "22rem"
+      },
+      {
+        "name": "tall-capture",
+        "value": "40rem"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The clear violet action for registration and key next steps.",
+      "html": "<button class=\"ds-btn-primary\" type=\"button\" lang=\"ar\" dir=\"rtl\">أنشئ حساب مطعمك</button>",
+      "css": ".ds-btn-primary{display:inline-flex;min-height:3.25rem;align-items:center;justify-content:center;gap:.65rem;border:1px solid var(--poos-violet);border-radius:var(--poos-radius-control);padding:.8rem 1.2rem;background:var(--poos-violet);color:var(--poos-white);font:700 .875rem/1.4 var(--font-plex),var(--font-manrope),sans-serif;text-decoration:none;transition:background-color 160ms ease,border-color 160ms ease,transform 160ms ease}.ds-btn-primary:hover{border-color:var(--poos-violet-deep);background:var(--poos-violet-deep)}.ds-btn-primary:focus-visible{outline:3px solid var(--poos-focus);outline-offset:3px}.ds-btn-primary:active{transform:translateY(1px)}"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "A lower-emphasis white action alongside the primary account action.",
+      "html": "<button class=\"ds-btn-secondary\" type=\"button\" lang=\"ar\" dir=\"rtl\">اعرف كيف تعمل</button>",
+      "css": ".ds-btn-secondary{display:inline-flex;min-height:3.25rem;align-items:center;justify-content:center;border:1px solid var(--poos-rule);border-radius:var(--poos-radius-control);padding:.8rem 1.2rem;background:var(--poos-white);color:var(--poos-ink);font:700 .875rem/1.4 var(--font-plex),var(--font-manrope),sans-serif;text-decoration:none;transition:background-color 160ms ease,border-color 160ms ease,color 160ms ease}.ds-btn-secondary:hover{border-color:var(--poos-violet);background:#f1ecfc;color:var(--poos-violet-deep)}.ds-btn-secondary:focus-visible{outline:3px solid var(--poos-focus);outline-offset:3px}"
+    },
+    {
+      "name": "Text Input",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "A full-width paper field used in login and restaurant registration.",
+      "html": "<label class=\"ds-field\" lang=\"ar\" dir=\"rtl\"><span>البريد الإلكتروني</span><input class=\"ds-input\" type=\"email\" placeholder=\"name@example.com\"></label>",
+      "css": ".ds-field{display:grid;gap:.45rem;color:var(--poos-ink);font:700 .95rem/1.4 var(--font-plex),var(--font-manrope),sans-serif}.ds-input{width:100%;min-height:3rem;border:1px solid #8e849f;border-radius:.625rem;padding:.75rem .875rem;background:var(--poos-white);color:var(--poos-ink);font:400 1rem/1.5 var(--font-plex),var(--font-manrope),sans-serif}.ds-input::placeholder{color:var(--poos-muted);opacity:1}.ds-input:focus-visible{outline:3px solid var(--poos-focus);outline-offset:3px}.ds-input[aria-invalid=true]{border-color:var(--poos-danger)}"
+    },
+    {
+      "name": "Sticky Navigation",
+      "kind": "nav",
+      "description": "Paper navigation with a fine rule, locale control, and account action.",
+      "html": "<header class=\"ds-nav\" lang=\"ar\" dir=\"rtl\"><a class=\"ds-brand\" href=\"#\">POOS</a><nav><a href=\"#\">المنصة</a><a href=\"#\">كيف تعمل</a><button class=\"ds-nav-start\">ابدأ الآن</button></nav></header>",
+      "css": ".ds-nav{display:flex;min-height:5rem;align-items:center;justify-content:space-between;gap:1rem;border-bottom:1px solid var(--poos-rule);padding:0 1rem;background:var(--poos-paper);font-family:var(--font-plex),var(--font-manrope),sans-serif}.ds-nav nav{display:flex;align-items:center;gap:.35rem}.ds-brand{color:var(--poos-ink);font-size:1.35rem;font-weight:800;text-decoration:none}.ds-nav nav a{display:inline-flex;min-height:3rem;align-items:center;border-radius:.625rem;padding:.65rem .8rem;color:var(--poos-ink);font-size:.9375rem;font-weight:600;text-decoration:none}.ds-nav nav a:hover{background:#eee8fb;color:var(--poos-violet-deep)}.ds-nav-start{min-height:3rem;border:1px solid var(--poos-violet);border-radius:var(--poos-radius-control);padding:.7rem 1rem;background:var(--poos-violet);color:var(--poos-white);font-family:inherit;font-size:.875rem;font-weight:700;line-height:1.4}.ds-nav-start:hover{background:var(--poos-violet-deep)}.ds-nav a:focus-visible,.ds-nav button:focus-visible{outline:3px solid var(--poos-focus);outline-offset:3px}"
+    },
+    {
+      "name": "Product Evidence Frame",
+      "kind": "card",
+      "refersTo": "ledger-proof",
+      "description": "A white, lightly lifted frame for a real POOS interface capture and its caption.",
+      "html": "<figure class=\"ds-evidence\" lang=\"ar\" dir=\"rtl\"><div class=\"ds-evidence-head\">لقطة حقيقية من POOS</div><div class=\"ds-evidence-body\">واجهة POOS</div><figcaption>شاشة موثقة من المنتج</figcaption></figure>",
+      "css": ".ds-evidence{overflow:hidden;margin:0;border:1px solid #cfc5df;border-radius:var(--poos-radius-panel);background:var(--poos-white);box-shadow:var(--poos-shadow-card);font-family:var(--font-plex),var(--font-manrope),sans-serif}.ds-evidence-head{min-height:3.25rem;border-bottom:1px solid var(--poos-rule);padding:.75rem 1rem;color:var(--poos-ink-soft);font-size:.875rem;font-weight:700}.ds-evidence-body{display:grid;min-height:9rem;place-items:center;margin:.65rem;background:#f5f3f8;color:var(--poos-violet-deep)}.ds-evidence figcaption{border-top:1px solid var(--poos-rule);padding:.8rem 1rem;color:var(--poos-muted);font-size:.8125rem;line-height:1.4}"
+    },
+    {
+      "name": "Ledger Entry",
+      "kind": "custom",
+      "description": "A rule-bound operational entry that pairs work areas across the shared shift.",
+      "html": "<article class=\"ds-ledger-entry\" lang=\"ar\" dir=\"rtl\"><p>واجهة الخدمة</p><h3>الطلبات والمبيعات</h3><span>متصلة بما يجري في المطبخ</span></article>",
+      "css": ".ds-ledger-entry{display:flex;min-height:12rem;flex-direction:column;justify-content:space-between;border-block-start:1px solid var(--poos-rule);padding:1.4rem 1.5rem 1.8rem;color:var(--poos-ink);font-family:var(--font-plex),var(--font-manrope),sans-serif}.ds-ledger-entry p{margin:0;color:var(--poos-violet-deep);font-size:.75rem;font-weight:800;letter-spacing:.12em}.ds-ledger-entry h3{max-width:12ch;margin:1.5rem 0;font:700 clamp(1.9rem,3.5vw,3.25rem)/1.16 var(--font-alexandria),var(--font-plex),sans-serif;letter-spacing:-.03em}.ds-ledger-entry span{color:var(--poos-muted);font-size:.95rem;line-height:1.65}"
+    },
+    {
+      "name": "Tenant Choice",
+      "kind": "custom",
+      "description": "A selectable tenant row inside the native multi-tenant login dialog.",
+      "html": "<button class=\"ds-tenant\" type=\"button\" aria-pressed=\"false\" lang=\"ar\" dir=\"rtl\"><span><strong>مطعم المدينة</strong><small>مدير · مشرف</small></span><span>اختيار</span></button>",
+      "css": ".ds-tenant{display:flex;width:100%;min-height:4.5rem;align-items:center;justify-content:space-between;gap:1rem;border:1px solid var(--poos-rule);border-radius:.75rem;padding:.9rem 1rem;background:var(--poos-white);color:var(--poos-ink);font:400 1rem/1.5 var(--font-plex),var(--font-manrope),sans-serif;text-align:start;cursor:pointer;transition:border-color 160ms ease,background-color 160ms ease}.ds-tenant>span:first-child{display:grid;gap:.4rem}.ds-tenant small{color:var(--poos-muted);font-size:.875rem}.ds-tenant:hover,.ds-tenant[aria-pressed=true]{border-color:var(--poos-violet);background:#f3efff}.ds-tenant:focus-visible{outline:3px solid var(--poos-focus);outline-offset:3px}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Shared Shift Ledger",
+    "overview": "POOS turns the restaurant close-out record into a digital visual language: aligned entries, fine rules, and a continuous line joining the counter to the kitchen and close-out work. Violet marks action and continuity on soft violet paper, while dark ink keeps the experience grounded and businesslike. The result is a premium product presentation with clear working structure rather than a generic SaaS hero followed by repeated feature cards.\n\nThe landing page moves from a genuine POOS product capture and account-creation action into connected front- and back-of-house entries, onboarding steps, and practical answers. Authentication keeps the same visual notation while giving forms a calm, readable paper surface. The public experience is Arabic-first; locale controls both language and reading direction, and English remains a fully supported presentation. Public product claims stay within verified behavior and approved evidence.",
+    "keyCharacteristics": [
+      "Ledger rules and aligned entries connect operational areas and steps.",
+      "Violet and lavender accents sit on paper, white, and deep ink surfaces.",
+      "Product evidence is a real POOS screen, not a fabricated dashboard.",
+      "Arabic-first RTL and English LTR layouts use logical spacing and direction-aware alignment."
+    ],
+    "rules": [
+      {
+        "name": "The One Ledger Rule",
+        "body": "Use violet lines and aligned entries to connect related restaurant work; do not replace the page's organizing idea with a repeated feature-card grid.",
+        "section": "colors"
+      },
+      {
+        "name": "The Locale Pairing Rule",
+        "body": "Arabic body and interface text use IBM Plex Sans Arabic with Alexandria headings; English body and interface text use Manrope. Keep the route locale reflected in `lang` and `dir`.",
+        "section": "typography"
+      },
+      {
+        "name": "The Paper First Rule",
+        "body": "Use surface contrast and fine rules for ordinary grouping; reserve stronger shadows for overlays and prominent product/authentication surfaces.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do keep the Shared Shift Ledger as the organizing visual idea, using aligned entries and fine violet rules to connect work.",
+      "Do use real POOS interface captures with their documented source; never present mock data as a live account.",
+      "Do preserve Arabic-first RTL and English LTR through locale-aware `lang`, `dir`, and logical CSS properties.",
+      "Do use the English and Arabic font pairing and color tokens defined above.",
+      "Do honor visible keyboard focus and reduced-motion preferences.",
+      "Do keep public claims within verified capabilities and approved evidence."
+    ],
+    "donts": [
+      "Don't turn the landing into a centered generic SaaS hero followed by repeated feature cards.",
+      "Don't invent customer counts, testimonials, customer logos, prices, trial terms, or performance claims.",
+      "Don't use fabricated dashboard data as product proof.",
+      "Don't hard-code left/right layout assumptions where a logical property supports both locales.",
+      "Don't use the unused Tailwind blue scale as POOS brand color guidance."
+    ]
+  }
+}

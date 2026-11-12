@@ -1,0 +1,11 @@
+# Dev image for all Next.js apps (landing, dashboard, restaurant-website, super-admin).
+# Source is bind-mounted by docker-compose.yml; this image only provides node + pnpm.
+FROM node:20-alpine
+RUN apk add --no-cache libc6-compat \
+ && corepack enable \
+ && corepack prepare pnpm@9.0.0 --activate
+WORKDIR /app
+ENV NEXT_TELEMETRY_DISABLED=1 \
+    POS_SKIP_DEV_PREFLIGHT=1 \
+    WATCHPACK_POLLING=true \
+    CHOKIDAR_USEPOLLING=true

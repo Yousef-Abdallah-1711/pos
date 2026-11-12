@@ -99,6 +99,8 @@ func (h *PublicOrderHandler) CreateOrder(w http.ResponseWriter, r *http.Request)
 			"total_amount":  order.TotalAmount,
 			"status":        order.Status,
 			"created_at":    order.CreatedAt,
+			// Returned once; required (header X-Order-Token) to read or cancel this order publicly.
+			"tracking_token": order.TrackingToken,
 		},
 	})
 }
@@ -153,6 +155,10 @@ func (h *PublicOrderHandler) GetOrder(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if !h.requirePublicOrderAccess(w, r, tenantID, restaurantID, orderID, true) {
+		return
+	}
+
 	// Get order from usecase
 	order, err := h.orderUC.GetOrder(tenantID, restaurantID, orderID)
 	if err != nil {
@@ -169,6 +175,26 @@ func (h *PublicOrderHandler) GetOrder(w http.ResponseWriter, r *http.Request) {
 		"success": true,
 		"data":    order,
 	})
+}
+
+// publicOrderProof extracts the caller's proof of ownership. The tracking token travels in a
+// header (never the URL) so it does not end up in access logs or browser history.
+func publicOrderProof(r *http.Request) (token, phone string) {
+	return strings.TrimSpace(r.Header.Get("X-Order-Token")), strings.TrimSpace(r.Header.Get("X-Customer-Phone"))
+}
+
+// requirePublicOrderAccess answers an identical 404 for missing orders and for orders the caller
+// cannot prove ownership of, so order ids and numbers cannot be enumerated.
+func (h *PublicOrderHandler) requirePublicOrderAccess(w http.ResponseWriter, r *http.Request, tenantID, restaurantID, orderID int64, allowPhone bool) bool {
+	token, phone := publicOrderProof(r)
+	if !allowPhone {
+		phone = ""
+	}
+	if !h.orderUC.AuthorizePublicOrderAccess(tenantID, restaurantID, orderID, token, phone) {
+		respondError(w, http.StatusNotFound, "Order not found")
+		return false
+	}
+	return true
 }
 
 // GetOrderByNumber retrieves order details by order number
@@ -206,6 +232,9 @@ func (h *PublicOrderHandler) GetOrderByNumber(w http.ResponseWriter, r *http.Req
 		respondError(w, http.StatusInternalServerError, "Failed to retrieve order")
 		return
 	}
+	if !h.requirePublicOrderAccess(w, r, tenantID, restaurantID, order.ID, true) {
+		return
+	}
 
 	// Return order with items
 	respondJSON(w, http.StatusOK, map[string]interface{}{
@@ -237,6 +266,10 @@ func (h *PublicOrderHandler) GetOrderStatus(w http.ResponseWriter, r *http.Reque
 	orderID, err := strconv.ParseInt(orderIDStr, 10, 64)
 	if err != nil {
 		respondError(w, http.StatusBadRequest, "Invalid order ID")
+		return
+	}
+
+	if !h.requirePublicOrderAccess(w, r, tenantID, restaurantID, orderID, true) {
 		return
 	}
 
@@ -291,6 +324,10 @@ func (h *PublicOrderHandler) TrackOrder(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
+	if !h.requirePublicOrderAccess(w, r, tenantID, restaurantID, orderID, true) {
+		return
+	}
+
 	// Get order from usecase
 	order, err := h.orderUC.GetOrder(tenantID, restaurantID, orderID)
 	if err != nil {
@@ -303,7 +340,7 @@ func (h *PublicOrderHandler) TrackOrder(w http.ResponseWriter, r *http.Request) 
 	}
 
 	// Get status history
-	history, err := h.orderUC.GetOrderStatusHistory(tenantID, orderID)
+	history, err := h.orderUC.GetOrderStatusHistory(tenantID, restaurantID, orderID)
 	if err != nil {
 		// History is optional, don't fail if it's not available
 		history = []domain.OrderStatusHistory{}
@@ -425,6 +462,10 @@ func (h *PublicOrderHandler) CancelOrder(w http.ResponseWriter, r *http.Request)
 	orderID, err := strconv.ParseInt(orderIDStr, 10, 64)
 	if err != nil {
 		respondError(w, http.StatusBadRequest, "Invalid order ID")
+		return
+	}
+
+	if !h.requirePublicOrderAccess(w, r, tenantID, restaurantID, orderID, false) {
 		return
 	}
 

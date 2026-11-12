@@ -1,0 +1,211 @@
+name: pos-p2a-ws05-e2e
+
+# Disposable Phase 2A E2E topology. Run only with the exact project name shown above.
+# PostgreSQL is tmpfs-only and the stack publishes only loopback ports distinct from pos-dev.
+x-frontend: &frontend
+  build:
+    context: ./frontend
+    dockerfile: Dockerfile.dev
+  working_dir: /app
+  network_mode: "service:api"
+  depends_on:
+    frontend-install:
+      condition: service_completed_successfully
+    api:
+      condition: service_healthy
+  volumes: &frontend-volumes
+    - ./frontend:/app
+    - p2a_pnpm_store:/pnpm-store
+    - p2a_node_modules_root:/app/node_modules
+    - p2a_node_modules_dashboard:/app/apps/dashboard/node_modules
+    - p2a_node_modules_landing:/app/apps/landing/node_modules
+    - p2a_node_modules_restaurant:/app/apps/restaurant-website/node_modules
+    - p2a_node_modules_super_admin:/app/apps/super-admin/node_modules
+    - p2a_node_modules_pkg_theme:/app/packages/theme/node_modules
+    - p2a_node_modules_pkg_ui:/app/packages/ui/node_modules
+    - p2a_node_modules_pkg_ui_components:/app/packages/ui-components/node_modules
+    - p2a_node_modules_layer_shared:/app/layers/shared-components/node_modules
+    - p2a_node_modules_layer_themes:/app/layers/ui-themes/node_modules
+    - p2a_next_dashboard:/app/apps/dashboard/.next
+    - p2a_next_landing:/app/apps/landing/.next
+    - p2a_next_restaurant:/app/apps/restaurant-website/.next
+    - p2a_next_super_admin:/app/apps/super-admin/.next
+  environment: &frontend-env
+    CI: "true"
+    NODE_ENV: development
+    NEXT_TELEMETRY_DISABLED: "1"
+    NEXT_PUBLIC_API_URL: http://localhost:18080/api/v1
+    NEXT_PUBLIC_API_BASE_URL: http://localhost:18080/api/v1
+    NEXT_PUBLIC_SUPER_ADMIN_API_URL: http://localhost:18080/api/v1/super-admin
+    # Cross-app redirects are browser navigations and must use host-published
+    # loopback ports. Service-to-service API requests use their own routing.
+    NEXT_PUBLIC_LANDING_URL: http://localhost:13111
+    NEXT_PUBLIC_DASHBOARD_URL: http://localhost:13112
+    NEXT_PUBLIC_RESTAURANT_DOMAIN: localhost:13113
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    labels:
+      com.pos.disposable: "true"
+      com.pos.workstream: "WS05"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ws05-local-only-postgres
+      POSTGRES_DB: pos_phase2a_e2e
+    ports:
+      - "127.0.0.1:15437:5432"
+    tmpfs:
+      - /var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d pos_phase2a_e2e"]
+      interval: 3s
+      timeout: 3s
+      retries: 30
+
+  redis:
+    image: redis:7-alpine
+    labels:
+      com.pos.disposable: "true"
+      com.pos.workstream: "WS05"
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  init-roles:
+    image: postgres:15-alpine
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      PGPASSWORD: ws05-local-only-postgres
+    volumes:
+      - ./backend/scripts/db/create_runtime_roles.sql:/fixture/create_runtime_roles.sql:ro
+    entrypoint:
+      - sh
+      - -c
+      - >-
+        exec psql -h postgres -U postgres -d postgres -v ON_ERROR_STOP=1
+        -v dbname=pos_phase2a_e2e
+        -v migrator_pw=ws05-local-only-migrator
+        -v app_pw=ws05-local-only-app
+        -f /fixture/create_runtime_roles.sql
+
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    labels:
+      com.pos.disposable: "true"
+      com.pos.workstream: "WS05"
+    entrypoint: ["/bin/sh"]
+    command:
+      - -c
+      - >-
+        set -e;
+        until pg_isready -h "$$DB_HOST" -p "$$DB_PORT" -U "$$DB_USER"; do sleep 2; done;
+        DB_USER="$$MIGRATE_DB_USER" DB_PASSWORD="$$MIGRATE_DB_PASSWORD" go run ./cmd/migrate;
+        PGPASSWORD="$$MIGRATE_DB_PASSWORD" psql -h "$$DB_HOST" -p "$$DB_PORT" -U "$$MIGRATE_DB_USER" -d "$$DB_NAME" -v ON_ERROR_STOP=1 -c "REVOKE ALL ON TABLE schema_migrations FROM \"$$DB_USER\"" >/dev/null;
+        exec go run ./cmd/api
+    environment:
+      PORT: 18080
+      ENV: phase2a-e2e
+      RBAC_ENFORCEMENT: enforce
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: pos_app
+      DB_PASSWORD: ws05-local-only-app
+      DB_NAME: pos_phase2a_e2e
+      DB_SSLMODE: disable
+      DB_MAX_OPEN_CONNS: 15
+      DB_MAX_IDLE_CONNS: 5
+      MIGRATE_DB_USER: pos_migrator
+      MIGRATE_DB_PASSWORD: ws05-local-only-migrator
+      JWT_SECRET: ws05-test-only-jwt-secret-value-minimum-32-characters
+      JWT_EXPIRY: 24h
+      REDIS_URL: redis://redis:6379/0
+      # Host-published ports support local browser use; container ports support
+      # Playwright runners sharing the disposable API network namespace.
+      CORS_ORIGINS: http://localhost:13111,http://localhost:13112,http://localhost:13113,http://localhost:13114,http://localhost:3001,http://localhost:3002,http://localhost:3003,http://localhost:3004
+      APP_BASE_URL: http://localhost:18082
+      DASHBOARD_URL: http://localhost:13112
+      LANDING_URL: http://localhost:13111
+      RESTAURANT_DOMAIN: localhost:13113
+      UPLOAD_BASE_URL: http://localhost:18082/uploads
+      WEBHOOK_BASE_URL: http://localhost:18082
+      POS_TEST_SEED: "true"
+    ports:
+      - "127.0.0.1:18082:18080"
+      - "127.0.0.1:13111:3001"
+      - "127.0.0.1:13112:3002"
+      - "127.0.0.1:13113:3003"
+      - "127.0.0.1:13114:3004"
+    volumes:
+      - ./backend:/app
+      - p2a_go_mod_cache:/go/pkg/mod
+      - p2a_go_build_cache:/root/.cache/go-build
+    depends_on:
+      init-roles:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:18080/api/v1/health >/dev/null"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+      start_period: 90s
+
+  frontend-install:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    working_dir: /app
+    command: ["sh", "-lc", "pnpm config set store-dir /pnpm-store && pnpm install --frozen-lockfile"]
+    volumes: *frontend-volumes
+    environment:
+      CI: "true"
+
+  landing:
+    <<: *frontend
+    command: ["pnpm", "--filter", "@pos-saas/landing", "dev"]
+
+  dashboard:
+    <<: *frontend
+    command: ["pnpm", "--filter", "@pos-saas/dashboard", "dev"]
+
+  restaurant-website:
+    <<: *frontend
+    command: ["pnpm", "--filter", "@pos-saas/restaurant-website", "dev"]
+
+  super-admin:
+    <<: *frontend
+    command: ["pnpm", "--filter", "@pos-saas/super-admin", "dev"]
+
+volumes:
+  p2a_go_mod_cache:
+  p2a_go_build_cache:
+  p2a_pnpm_store:
+  p2a_node_modules_root:
+  p2a_node_modules_dashboard:
+  p2a_node_modules_landing:
+  p2a_node_modules_restaurant:
+  p2a_node_modules_super_admin:
+  p2a_node_modules_pkg_theme:
+  p2a_node_modules_pkg_ui:
+  p2a_node_modules_pkg_ui_components:
+  p2a_node_modules_layer_shared:
+  p2a_node_modules_layer_themes:
+  p2a_next_dashboard:
+  p2a_next_landing:
+  p2a_next_restaurant:
+  p2a_next_super_admin:
+
+networks:
+  default:
+    ipam:
+      config:
+        - subnet: 10.253.255.0/24

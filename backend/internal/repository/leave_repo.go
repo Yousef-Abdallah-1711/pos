@@ -172,9 +172,10 @@ func (r *LeaveRepository) CreateLeave(leave *domain.Leave) (int, error) {
 			total_days, is_half_day, half_day_period, leave_type, leave_category,
 			reason, contact_number, contact_address, emergency_contact,
 			status, created_by
-		) VALUES (
-			$1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16
 		)
+		SELECT $1, $2, e.id, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16
+		FROM employees e
+		WHERE e.id = $3 AND e.tenant_id = $1 AND e.restaurant_id = $2
 		RETURNING id
 	`
 

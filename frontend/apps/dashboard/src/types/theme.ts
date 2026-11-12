@@ -66,13 +66,14 @@ export interface FooterConfig {
   showLegal?: boolean
   showBackToTop?: boolean
   columns?: number
-  layout?: 'expanded' | 'compact'
+  layout?: 'expanded' | 'compact' | 'minimal'
 }
 
 export interface ComponentConfig {
   id: string
   type: ComponentType
   title: string
+  subtitle?: string | { en?: string; ar?: string }
   displayOrder: number
   enabled: boolean
   config?: Record<string, any>

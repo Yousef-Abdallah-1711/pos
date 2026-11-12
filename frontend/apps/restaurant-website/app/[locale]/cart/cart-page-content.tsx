@@ -64,7 +64,7 @@ export function CartPageContent({ locale, themeData }: CartPageContentProps) {
 
         <div className={`grid grid-cols-1 lg:grid-cols-3 gap-8 ${isRTL ? 'lg:grid-flow-col-dense' : ''}`}>
           <div className={`lg:col-span-2 ${isRTL ? 'lg:order-2' : ''}`}>
-            <Cart locale={locale} />
+            <Cart locale={locale} themeColors={themeData?.colors} />
           </div>
 
           <div className={`lg:col-span-1 ${isRTL ? 'lg:order-1' : ''}`}>
@@ -97,15 +97,15 @@ export function CartPageContent({ locale, themeData }: CartPageContentProps) {
                 </div>
               </div>
 
-              <Link href={`/${locale}/checkout`} className="block w-full mb-3">
-                <Button className="cart-checkout-button w-full py-3 text-lg">{t('cart.proceedToCheckout')}</Button>
-              </Link>
+              <Button asChild className="cart-checkout-button w-full py-3 text-lg">
+                <Link href={`/${locale}/checkout`} className="block w-full mb-3">{t('cart.proceedToCheckout')}</Link>
+              </Button>
 
-              <Link href={`/${locale}/menu`}>
-                <Button variant="outline" className="w-full py-3">
+              <Button asChild variant="outline" className="w-full py-3">
+                <Link href={`/${locale}/menu`}>
                   {t('cart.continueShopping')}
-                </Button>
-              </Link>
+                </Link>
+              </Button>
             </div>
           </div>
         </div>

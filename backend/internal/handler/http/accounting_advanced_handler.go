@@ -16,6 +16,7 @@ import (
 
 	"pos-saas/internal/domain"
 	"pos-saas/internal/middleware"
+	"pos-saas/internal/pkg/database"
 	"pos-saas/internal/repository"
 
 	"github.com/go-pdf/fpdf"
@@ -42,19 +43,8 @@ func NewAccountingAdvancedHandler(
 func (h *AccountingAdvancedHandler) ListBankReconciliationSessions(w http.ResponseWriter, r *http.Request) {
 	tenantID := int(middleware.GetTenantID(r))
 	restaurantID := int(middleware.GetRestaurantID(r))
-	page, _ := parseIntQueryParam(r, "page", 1)
-	pageSize, _ := parseIntQueryParam(r, "page_size", 20)
-	if page < 1 {
-		page = 1
-	}
-	if pageSize < 1 {
-		pageSize = 20
-	}
-	if pageSize > 200 {
-		pageSize = 200
-	}
 
-	items, total, err := h.repo.ListBankReconciliationSessionsPaged(tenantID, restaurantID, page, pageSize)
+	items, err := h.repo.ListBankReconciliationSessions(tenantID, restaurantID)
 	if err != nil {
 		writeJSON(w, http.StatusInternalServerError, map[string]interface{}{
 			"success": false,
@@ -62,16 +52,7 @@ func (h *AccountingAdvancedHandler) ListBankReconciliationSessions(w http.Respon
 		})
 		return
 	}
-	writeJSON(w, http.StatusOK, map[string]interface{}{
-		"success": true,
-		"data":    items,
-		"pagination": map[string]interface{}{
-			"page":       page,
-			"page_size":  pageSize,
-			"total":      total,
-			"totalPages": (total + pageSize - 1) / pageSize,
-		},
-	})
+	writeJSON(w, http.StatusOK, map[string]interface{}{"success": true, "data": items})
 }
 
 func (h *AccountingAdvancedHandler) CreateBankReconciliationSession(w http.ResponseWriter, r *http.Request) {
@@ -86,7 +67,7 @@ func (h *AccountingAdvancedHandler) CreateBankReconciliationSession(w http.Respo
 		BookBalance      float64 `json:"book_balance"`
 		Notes            string  `json:"notes"`
 	}
-	if err := decodeJSONStrict(r, &req); err != nil {
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		writeJSON(w, http.StatusBadRequest, map[string]interface{}{"success": false, "error": "Invalid request body"})
 		return
 	}
@@ -143,7 +124,7 @@ func (h *AccountingAdvancedHandler) AddBankReconciliationLine(w http.ResponseWri
 		BookAmount      float64 `json:"book_amount"`
 		MatchStatus     string  `json:"match_status"`
 	}
-	if err := decodeJSONStrict(r, &req); err != nil {
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		writeJSON(w, http.StatusBadRequest, map[string]interface{}{"success": false, "error": "Invalid request body"})
 		return
 	}
@@ -192,32 +173,12 @@ func (h *AccountingAdvancedHandler) CompleteBankReconciliationSession(w http.Res
 func (h *AccountingAdvancedHandler) ListRecurringJournalTemplates(w http.ResponseWriter, r *http.Request) {
 	tenantID := int(middleware.GetTenantID(r))
 	restaurantID := int(middleware.GetRestaurantID(r))
-	page, _ := parseIntQueryParam(r, "page", 1)
-	pageSize, _ := parseIntQueryParam(r, "page_size", 20)
-	if page < 1 {
-		page = 1
-	}
-	if pageSize < 1 {
-		pageSize = 20
-	}
-	if pageSize > 200 {
-		pageSize = 200
-	}
-	items, total, err := h.repo.ListRecurringJournalTemplatesPaged(tenantID, restaurantID, page, pageSize)
+	items, err := h.repo.ListRecurringJournalTemplates(tenantID, restaurantID)
 	if err != nil {
 		writeJSON(w, http.StatusInternalServerError, map[string]interface{}{"success": false, "error": "Failed to load recurring templates"})
 		return
 	}
-	writeJSON(w, http.StatusOK, map[string]interface{}{
-		"success": true,
-		"data":    items,
-		"pagination": map[string]interface{}{
-			"page":       page,
-			"page_size":  pageSize,
-			"total":      total,
-			"totalPages": (total + pageSize - 1) / pageSize,
-		},
-	})
+	writeJSON(w, http.StatusOK, map[string]interface{}{"success": true, "data": items})
 }
 
 func (h *AccountingAdvancedHandler) CreateRecurringJournalTemplate(w http.ResponseWriter, r *http.Request) {
@@ -236,7 +197,7 @@ func (h *AccountingAdvancedHandler) CreateRecurringJournalTemplate(w http.Respon
 		IsActive     *bool                          `json:"is_active"`
 		Lines        []domain.JournalEntryLineInput `json:"lines"`
 	}
-	if err := decodeJSONStrict(r, &req); err != nil {
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		writeJSON(w, http.StatusBadRequest, map[string]interface{}{"success": false, "error": "Invalid request body"})
 		return
 	}
@@ -327,7 +288,7 @@ func (h *AccountingAdvancedHandler) UpdateRecurringJournalTemplate(w http.Respon
 		IsActive     *bool                          `json:"is_active"`
 		Lines        []domain.JournalEntryLineInput `json:"lines"`
 	}
-	if err := decodeJSONStrict(r, &req); err != nil {
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		writeJSON(w, http.StatusBadRequest, map[string]interface{}{"success": false, "error": "Invalid request body"})
 		return
 	}
@@ -443,32 +404,12 @@ func (h *AccountingAdvancedHandler) ListBudgets(w http.ResponseWriter, r *http.R
 	tenantID := int(middleware.GetTenantID(r))
 	restaurantID := int(middleware.GetRestaurantID(r))
 	fiscalYear, _ := parseIntQueryParam(r, "fiscal_year", 0)
-	page, _ := parseIntQueryParam(r, "page", 1)
-	pageSize, _ := parseIntQueryParam(r, "page_size", 20)
-	if page < 1 {
-		page = 1
-	}
-	if pageSize < 1 {
-		pageSize = 20
-	}
-	if pageSize > 200 {
-		pageSize = 200
-	}
-	items, total, err := h.repo.ListBudgetVariancePaged(tenantID, restaurantID, fiscalYear, page, pageSize)
+	items, err := h.repo.ListBudgetVariance(tenantID, restaurantID, fiscalYear)
 	if err != nil {
 		writeJSON(w, http.StatusInternalServerError, map[string]interface{}{"success": false, "error": "Failed to load budgets"})
 		return
 	}
-	writeJSON(w, http.StatusOK, map[string]interface{}{
-		"success": true,
-		"data":    items,
-		"pagination": map[string]interface{}{
-			"page":       page,
-			"page_size":  pageSize,
-			"total":      total,
-			"totalPages": (total + pageSize - 1) / pageSize,
-		},
-	})
+	writeJSON(w, http.StatusOK, map[string]interface{}{"success": true, "data": items})
 }
 
 func (h *AccountingAdvancedHandler) UpsertBudget(w http.ResponseWriter, r *http.Request) {
@@ -483,7 +424,7 @@ func (h *AccountingAdvancedHandler) UpsertBudget(w http.ResponseWriter, r *http.
 		Currency     string  `json:"currency"`
 		Notes        string  `json:"notes"`
 	}
-	if err := decodeJSONStrict(r, &req); err != nil {
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		writeJSON(w, http.StatusBadRequest, map[string]interface{}{"success": false, "error": "Invalid request body"})
 		return
 	}
@@ -513,32 +454,12 @@ func (h *AccountingAdvancedHandler) ListExchangeRates(w http.ResponseWriter, r *
 	restaurantID := int(middleware.GetRestaurantID(r))
 	baseCurrency := strings.TrimSpace(r.URL.Query().Get("base_currency"))
 	quoteCurrency := strings.TrimSpace(r.URL.Query().Get("quote_currency"))
-	page, _ := parseIntQueryParam(r, "page", 1)
-	pageSize, _ := parseIntQueryParam(r, "page_size", 20)
-	if page < 1 {
-		page = 1
-	}
-	if pageSize < 1 {
-		pageSize = 20
-	}
-	if pageSize > 200 {
-		pageSize = 200
-	}
-	items, total, err := h.repo.ListExchangeRatesPaged(tenantID, restaurantID, baseCurrency, quoteCurrency, page, pageSize)
+	items, err := h.repo.ListExchangeRates(tenantID, restaurantID, baseCurrency, quoteCurrency)
 	if err != nil {
 		writeJSON(w, http.StatusInternalServerError, map[string]interface{}{"success": false, "error": "Failed to load exchange rates"})
 		return
 	}
-	writeJSON(w, http.StatusOK, map[string]interface{}{
-		"success": true,
-		"data":    items,
-		"pagination": map[string]interface{}{
-			"page":       page,
-			"page_size":  pageSize,
-			"total":      total,
-			"totalPages": (total + pageSize - 1) / pageSize,
-		},
-	})
+	writeJSON(w, http.StatusOK, map[string]interface{}{"success": true, "data": items})
 }
 
 func (h *AccountingAdvancedHandler) UpsertExchangeRate(w http.ResponseWriter, r *http.Request) {
@@ -552,7 +473,7 @@ func (h *AccountingAdvancedHandler) UpsertExchangeRate(w http.ResponseWriter, r 
 		Source        string  `json:"source"`
 		IsActive      *bool   `json:"is_active"`
 	}
-	if err := decodeJSONStrict(r, &req); err != nil {
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		writeJSON(w, http.StatusBadRequest, map[string]interface{}{"success": false, "error": "Invalid request body"})
 		return
 	}
@@ -622,32 +543,12 @@ func (h *AccountingAdvancedHandler) ConvertCurrency(w http.ResponseWriter, r *ht
 func (h *AccountingAdvancedHandler) ListSupplierPaymentSchedules(w http.ResponseWriter, r *http.Request) {
 	tenantID := int(middleware.GetTenantID(r))
 	restaurantID := int(middleware.GetRestaurantID(r))
-	page, _ := parseIntQueryParam(r, "page", 1)
-	pageSize, _ := parseIntQueryParam(r, "page_size", 20)
-	if page < 1 {
-		page = 1
-	}
-	if pageSize < 1 {
-		pageSize = 20
-	}
-	if pageSize > 200 {
-		pageSize = 200
-	}
-	items, total, err := h.repo.ListSupplierPaymentSchedulesPaged(tenantID, restaurantID, page, pageSize)
+	items, err := h.repo.ListSupplierPaymentSchedules(tenantID, restaurantID)
 	if err != nil {
 		writeJSON(w, http.StatusInternalServerError, map[string]interface{}{"success": false, "error": "Failed to load supplier payment schedules"})
 		return
 	}
-	writeJSON(w, http.StatusOK, map[string]interface{}{
-		"success": true,
-		"data":    items,
-		"pagination": map[string]interface{}{
-			"page":       page,
-			"page_size":  pageSize,
-			"total":      total,
-			"totalPages": (total + pageSize - 1) / pageSize,
-		},
-	})
+	writeJSON(w, http.StatusOK, map[string]interface{}{"success": true, "data": items})
 }
 
 func (h *AccountingAdvancedHandler) CreateSupplierPaymentSchedule(w http.ResponseWriter, r *http.Request) {
@@ -663,7 +564,7 @@ func (h *AccountingAdvancedHandler) CreateSupplierPaymentSchedule(w http.Respons
 		ReminderDays      int     `json:"reminder_days"`
 		Notes             string  `json:"notes"`
 	}
-	if err := decodeJSONStrict(r, &req); err != nil {
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		writeJSON(w, http.StatusBadRequest, map[string]interface{}{"success": false, "error": "Invalid request body"})
 		return
 	}
@@ -702,32 +603,12 @@ func (h *AccountingAdvancedHandler) ListSupplierPaymentReminders(w http.Response
 	tenantID := int(middleware.GetTenantID(r))
 	restaurantID := int(middleware.GetRestaurantID(r))
 	dueWithinDays, _ := parseIntQueryParam(r, "due_days", 7)
-	page, _ := parseIntQueryParam(r, "page", 1)
-	pageSize, _ := parseIntQueryParam(r, "page_size", 20)
-	if page < 1 {
-		page = 1
-	}
-	if pageSize < 1 {
-		pageSize = 20
-	}
-	if pageSize > 200 {
-		pageSize = 200
-	}
-	items, total, err := h.repo.ListSupplierPaymentRemindersPaged(tenantID, restaurantID, dueWithinDays, page, pageSize)
+	items, err := h.repo.ListSupplierPaymentReminders(tenantID, restaurantID, dueWithinDays)
 	if err != nil {
 		writeJSON(w, http.StatusInternalServerError, map[string]interface{}{"success": false, "error": "Failed to load reminders"})
 		return
 	}
-	writeJSON(w, http.StatusOK, map[string]interface{}{
-		"success": true,
-		"data":    items,
-		"pagination": map[string]interface{}{
-			"page":       page,
-			"page_size":  pageSize,
-			"total":      total,
-			"totalPages": (total + pageSize - 1) / pageSize,
-		},
-	})
+	writeJSON(w, http.StatusOK, map[string]interface{}{"success": true, "data": items})
 }
 
 func (h *AccountingAdvancedHandler) TriggerSupplierPaymentReminder(w http.ResponseWriter, r *http.Request) {
@@ -843,13 +724,16 @@ func (h *AccountingAdvancedHandler) SendCustomerInvoiceEmail(w http.ResponseWrit
 		"pdf_size":    pdfSize,
 		"message_id":  messageID,
 	})
-	_, err = h.db.Exec(`
-		INSERT INTO invoice_delivery_logs (
-			tenant_id, restaurant_id, invoice_id, channel, recipient_email, status, payload, created_by
-		) VALUES (
-			$1, $2, $3, 'email', $4, 'sent', $5::jsonb, $6
-		)
-	`, tenantID, restaurantID, invoiceID, recipient, string(payload), userID)
+	err = database.WithTenantTx(r.Context(), h.db, int64(tenantID), int64(restaurantID), func(tx *sql.Tx) error {
+		_, err := tx.ExecContext(r.Context(), `
+			INSERT INTO invoice_delivery_logs (
+				tenant_id, restaurant_id, invoice_id, channel, recipient_email, status, payload, created_by
+			) VALUES (
+				$1, $2, $3, 'email', $4, 'sent', $5::jsonb, $6
+			)
+		`, tenantID, restaurantID, invoiceID, recipient, string(payload), userID)
+		return err
+	})
 	if err != nil {
 		writeJSON(w, http.StatusInternalServerError, map[string]interface{}{"success": false, "error": "Failed to log delivery"})
 		return
@@ -993,8 +877,12 @@ func (h *AccountingAdvancedHandler) SubmitEInvoice(w http.ResponseWriter, r *htt
 		ResponsePayload: responsePayload,
 		CreatedBy:       &userID,
 	}
-	id, err := h.repo.CreateEInvoiceSubmission(submission)
+	id, err := h.repo.CreateEInvoiceSubmission(r.Context(), submission)
 	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			writeJSON(w, http.StatusNotFound, map[string]interface{}{"success": false, "error": "Invoice not found"})
+			return
+		}
 		writeJSON(w, http.StatusInternalServerError, map[string]interface{}{"success": false, "error": "Failed to submit e-invoice"})
 		return
 	}
@@ -1013,32 +901,12 @@ func (h *AccountingAdvancedHandler) SubmitEInvoice(w http.ResponseWriter, r *htt
 func (h *AccountingAdvancedHandler) ListEInvoiceSubmissions(w http.ResponseWriter, r *http.Request) {
 	tenantID := int(middleware.GetTenantID(r))
 	restaurantID := int(middleware.GetRestaurantID(r))
-	page, _ := parseIntQueryParam(r, "page", 1)
-	pageSize, _ := parseIntQueryParam(r, "page_size", 20)
-	if page < 1 {
-		page = 1
-	}
-	if pageSize < 1 {
-		pageSize = 20
-	}
-	if pageSize > 200 {
-		pageSize = 200
-	}
-	items, total, err := h.repo.ListEInvoiceSubmissionsPaged(tenantID, restaurantID, page, pageSize)
+	items, err := h.repo.ListEInvoiceSubmissions(r.Context(), tenantID, restaurantID)
 	if err != nil {
 		writeJSON(w, http.StatusInternalServerError, map[string]interface{}{"success": false, "error": "Failed to load e-invoice submissions"})
 		return
 	}
-	writeJSON(w, http.StatusOK, map[string]interface{}{
-		"success": true,
-		"data":    items,
-		"pagination": map[string]interface{}{
-			"page":       page,
-			"page_size":  pageSize,
-			"total":      total,
-			"totalPages": (total + pageSize - 1) / pageSize,
-		},
-	})
+	writeJSON(w, http.StatusOK, map[string]interface{}{"success": true, "data": items})
 }
 
 func (h *AccountingAdvancedHandler) ExportSocialInsuranceCSV(w http.ResponseWriter, r *http.Request) {
@@ -1089,7 +957,7 @@ func (h *AccountingAdvancedHandler) ExportAuditTrailCSV(w http.ResponseWriter, r
 		writeJSON(w, http.StatusBadRequest, map[string]interface{}{"success": false, "error": err.Error()})
 		return
 	}
-	rows, err := h.repo.GetAuditExportRows(tenantID, restaurantID, dateFrom, dateTo, exportType)
+	rows, err := h.repo.GetAuditExportRows(r.Context(), tenantID, restaurantID, dateFrom, dateTo, exportType)
 	if err != nil {
 		writeJSON(w, http.StatusInternalServerError, map[string]interface{}{"success": false, "error": "Failed to export audit trail"})
 		return
@@ -1106,7 +974,7 @@ func (h *AccountingAdvancedHandler) ExportAuditTrailCSV(w http.ResponseWriter, r
 			fmt.Sprintf("%v", row["actor"]),
 		})
 	}
-	_ = h.repo.LogAuditExport(tenantID, restaurantID, userID, defaultAccountingString(exportType, "all"), "csv", map[string]interface{}{
+	_ = h.repo.LogAuditExport(r.Context(), tenantID, restaurantID, userID, defaultAccountingString(exportType, "all"), "csv", map[string]interface{}{
 		"date_from": dateFrom.Format("2006-01-02"),
 		"date_to":   dateTo.Format("2006-01-02"),
 		"type":      defaultAccountingString(exportType, "all"),

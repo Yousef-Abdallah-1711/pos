@@ -230,6 +230,7 @@ func (r *SubscriptionRepositoryImpl) ExtendTrial(ctx context.Context, params *do
 		SELECT trial_end_date, subscription_status
 		FROM tenants
 		WHERE id = $1
+		FOR UPDATE
 	`, params.TenantID).Scan(&oldTrialEndDate, &currentStatus)
 
 	if err == sql.ErrNoRows {

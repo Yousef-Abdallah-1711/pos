@@ -173,7 +173,11 @@ func (r *TaxRepository) CreateTaxPeriod(tenantID, restaurantID int, input TaxPer
 			tenant_id, restaurant_id, period_name, period_start, period_end,
 			output_vat, input_vat, net_vat, status, notes
 		)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'open', $9)
+		SELECT $1, $2, $3, $4, $5, $6, $7, $8, 'open', $9
+		WHERE EXISTS (
+			SELECT 1 FROM restaurants
+			WHERE id = $2 AND tenant_id = $1
+		)
 		RETURNING id, tenant_id, restaurant_id, period_name, period_start, period_end,
 		          output_vat, input_vat, net_vat, status, closed_at, closed_by, notes,
 				  created_at, updated_at

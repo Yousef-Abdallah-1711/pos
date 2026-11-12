@@ -2,6 +2,7 @@ package http
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -50,8 +51,6 @@ func (h *ProductHandler) checkProductPermission(
 // POST /api/v1/products
 // Requires: WRITE permission on PRODUCTS module
 func (h *ProductHandler) CreateProduct(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("=== HANDLER: CreateProduct Request Received ===")
-
 	// Step 1: Validate tenant context and permissions
 	tenantID, err := h.checkProductPermission(r, "WRITE")
 	if err != nil {
@@ -61,8 +60,6 @@ func (h *ProductHandler) CreateProduct(w http.ResponseWriter, r *http.Request) {
 	}
 
 	claims := middleware.GetUserClaims(r)
-	fmt.Printf("DEBUG: User Claims - TenantID: %d, RestaurantID: %d, UserID: %d\n", claims.TenantID, claims.RestaurantID, claims.UserID)
-
 	// Step 2: Verify tenant consistency
 	if int64(claims.TenantID) != tenantID {
 		log.Printf("[PRODUCT HANDLER] Cross-tenant access attempt: claims=%d, context=%d",
@@ -73,7 +70,6 @@ func (h *ProductHandler) CreateProduct(w http.ResponseWriter, r *http.Request) {
 
 	// Parse multipart form (for image upload)
 	if err := r.ParseMultipartForm(10 << 20); err != nil { // 10 MB max
-		fmt.Printf("ERROR: ParseMultipartForm failed: %v\n", err)
 		respondError(w, http.StatusBadRequest, "Failed to parse form data")
 		return
 	}
@@ -81,40 +77,32 @@ func (h *ProductHandler) CreateProduct(w http.ResponseWriter, r *http.Request) {
 	// Parse JSON from form data
 	var req domain.CreateProductRequest
 	if jsonData := r.FormValue("data"); jsonData != "" {
-		fmt.Printf("DEBUG: Received JSON data: %s\n", jsonData)
 		if err := json.Unmarshal([]byte(jsonData), &req); err != nil {
-			fmt.Printf("ERROR: JSON Unmarshal failed: %v\n", err)
 			respondError(w, http.StatusBadRequest, "Invalid request body: "+err.Error())
 			return
 		}
 	} else {
-		fmt.Println("DEBUG: No 'data' field found, trying body decode")
-		if err := decodeJSONStrict(r, &req); err != nil {
-			fmt.Printf("ERROR: JSON Body Decode failed: %v\n", err)
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 			respondError(w, http.StatusBadRequest, "Invalid request body: "+err.Error())
 			return
 		}
 	}
 
 	// Get file if uploaded
-	file, fileHeader, err := r.FormFile("image")
-	if err != nil && err != http.ErrMissingFile {
-		fmt.Printf("ERROR: FromFile failed (non-critical): %v\n", err)
-	}
+	file, fileHeader, _ := r.FormFile("image")
 	if file != nil {
-		fmt.Printf("DEBUG: Image file received: %s (Size: %d)\n", fileHeader.Filename, fileHeader.Size)
 		defer file.Close()
-	} else {
-		fmt.Println("DEBUG: No image file received")
 	}
 
 	// Create product
-	fmt.Println("DEBUG: Calling UseCase.CreateProduct...")
-	product, err := h.uc.CreateProduct(claims.TenantID, claims.RestaurantID, claims.UserID, &req, fileHeader)
+	product, err := h.uc.CreateProduct(r.Context(), claims.TenantID, claims.RestaurantID, claims.UserID, &req, fileHeader)
 	if err != nil {
-		fmt.Printf("ERROR: UseCase.CreateProduct failed: %v\n", err)
 		// Check for common validation errors
 		errMsg := err.Error()
+		if strings.Contains(errMsg, "not found in the requested scope") {
+			respondError(w, http.StatusNotFound, "Restaurant or category not found")
+			return
+		}
 		if strings.Contains(errMsg, "required") ||
 			strings.Contains(errMsg, "must be") ||
 			strings.Contains(errMsg, "invalid") ||
@@ -125,8 +113,6 @@ func (h *ProductHandler) CreateProduct(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
-
-	fmt.Printf("SUCCESS: Product created with ID: %d\n", product.ID)
 	respondJSON(w, http.StatusCreated, product)
 }
 
@@ -278,7 +264,6 @@ func (h *ProductHandler) UpdateProduct(w http.ResponseWriter, r *http.Request) {
 
 	// Parse multipart form
 	if err := r.ParseMultipartForm(10 << 20); err != nil {
-		fmt.Printf("ERROR: Failed to parse multipart form: %v\n", err)
 		respondError(w, http.StatusBadRequest, "Failed to parse form data")
 		return
 	}
@@ -286,17 +271,13 @@ func (h *ProductHandler) UpdateProduct(w http.ResponseWriter, r *http.Request) {
 	// Parse JSON from form data
 	var req domain.UpdateProductRequest
 	if jsonData := r.FormValue("data"); jsonData != "" {
-		fmt.Printf("DEBUG: UpdateProduct receiving JSON data: %s\n", jsonData)
 		if err := json.Unmarshal([]byte(jsonData), &req); err != nil {
-			fmt.Printf("ERROR: Failed to unmarshal JSON: %v\n", err)
 			respondError(w, http.StatusBadRequest, "Invalid request body")
 			return
 		}
 	} else {
 		// Try to parse from JSON body directly
-		fmt.Println("DEBUG: No 'data' form field, executing JSON decode from body")
-		if err := decodeJSONStrict(r, &req); err != nil {
-			fmt.Printf("ERROR: Failed to decode request body: %v\n", err)
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 			respondError(w, http.StatusBadRequest, "Invalid request body")
 			return
 		}
@@ -305,15 +286,12 @@ func (h *ProductHandler) UpdateProduct(w http.ResponseWriter, r *http.Request) {
 	// Get file if uploaded
 	file, fileHeader, _ := r.FormFile("image")
 	if file != nil {
-		fmt.Printf("DEBUG: UpdateProduct received image file: %s\n", fileHeader.Filename)
 		defer file.Close()
 	}
 
 	// Update product
-	fmt.Printf("DEBUG: Calling UseCase.UpdateProduct for ID: %d\n", productID)
-	product, err := h.uc.UpdateProduct(claims.TenantID, claims.RestaurantID, productID, claims.UserID, &req, fileHeader)
+	product, err := h.uc.UpdateProduct(r.Context(), claims.TenantID, claims.RestaurantID, productID, claims.UserID, &req, fileHeader)
 	if err != nil {
-		fmt.Printf("ERROR: UseCase.UpdateProduct failed: %v\n", err)
 		// Check for common validation/constraint errors
 		errMsg := err.Error()
 		if strings.Contains(errMsg, "not found") ||
@@ -355,10 +333,11 @@ func (h *ProductHandler) DeleteProduct(w http.ResponseWriter, r *http.Request) {
 		respondError(w, http.StatusBadRequest, "Invalid product ID")
 		return
 	}
-
-	fmt.Printf("DEBUG: Calling UseCase.DeleteProduct for ID: %d\n", productID)
 	if err := h.uc.DeleteProduct(claims.TenantID, claims.RestaurantID, productID, claims.UserID); err != nil {
-		fmt.Printf("ERROR: UseCase.DeleteProduct failed: %v\n", err)
+		if errors.Is(err, domain.ErrProductNotFound) {
+			respondError(w, http.StatusNotFound, "Product not found")
+			return
+		}
 		respondError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -385,12 +364,8 @@ func (h *ProductHandler) GetLowStockAlerts(w http.ResponseWriter, r *http.Reques
 		respondError(w, http.StatusForbidden, "Tenant mismatch")
 		return
 	}
-
-	fmt.Printf("DEBUG: GetLowStockAlerts called for TenantID: %d, RestaurantID: %d\n", claims.TenantID, claims.RestaurantID)
-
 	products, err := h.uc.GetLowStockAlerts(claims.TenantID, claims.RestaurantID)
 	if err != nil {
-		fmt.Printf("ERROR: GetLowStockAlerts failed: %v\n", err)
 		respondError(w, http.StatusInternalServerError, "Failed to retrieve low stock alerts")
 		return
 	}

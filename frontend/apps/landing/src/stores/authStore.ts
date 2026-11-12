@@ -1,5 +1,4 @@
 import { create } from 'zustand'
-import { persist, createJSONStorage } from 'zustand/middleware'
 
 interface User {
   id: number
@@ -22,25 +21,11 @@ interface AuthState {
 }
 
 export const useAuthStore = create<AuthState>()(
-  persist(
-    (set) => ({
-      user: null,
-      token: null,
-      isAuthenticated: false,
-      setAuth: (user, token) => {
-        localStorage.setItem('token', token)
-        localStorage.setItem('user', JSON.stringify(user))
-        set({ user, token, isAuthenticated: true })
-      },
-      logout: () => {
-        localStorage.removeItem('token')
-        localStorage.removeItem('user')
-        set({ user: null, token: null, isAuthenticated: false })
-      },
-    }),
-    {
-      name: 'auth-storage',
-      storage: createJSONStorage(() => localStorage),
-    }
-  )
+  (set) => ({
+    user: null,
+    token: null,
+    isAuthenticated: false,
+    setAuth: (user) => set({ user, token: null, isAuthenticated: true }),
+    logout: () => set({ user: null, token: null, isAuthenticated: false }),
+  })
 )

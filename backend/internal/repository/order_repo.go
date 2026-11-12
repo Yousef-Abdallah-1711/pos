@@ -5,9 +5,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"pos-saas/internal/domain"
 	"strings"
 	"time"
+
+	"github.com/lib/pq"
+
+	"pos-saas/internal/domain"
 )
 
 // OrderRepository handles order data operations
@@ -30,10 +33,16 @@ func (r *OrderRepository) CreateOrder(order *domain.Order) (*domain.Order, error
 			delivery_instructions, subtotal, tax_amount, discount_amount,
 			delivery_fee, total_amount, payment_method, payment_status,
 			status, estimated_delivery_time, notes, order_source, table_id
-		) VALUES (
-			$1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15,
-			$16, $17, $18, $19, $20, $21, $22, $23, $24, $25
+		) SELECT
+			$1::bigint, $2::bigint, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15,
+			$16, $17, $18, $19, $20, $21, $22, $23, $24, $25::bigint
+		WHERE EXISTS (
+			SELECT 1 FROM restaurants WHERE id = $2::bigint AND tenant_id = $1::bigint
 		)
+		AND ($25::bigint IS NULL OR EXISTS (
+			SELECT 1 FROM restaurant_tables
+			WHERE id = $25::bigint AND tenant_id = $1::bigint AND restaurant_id = $2::bigint
+		))
 		RETURNING id, created_at, updated_at
 	`
 
@@ -222,7 +231,7 @@ func (r *OrderRepository) GetOrderByID(tenantID, restaurantID, orderID int64) (*
 	}
 
 	// Get order items
-	items, err := r.GetOrderItems(tenantID, orderID)
+	items, err := r.GetOrderItems(tenantID, restaurantID, orderID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get order items: %w", err)
 	}
@@ -270,8 +279,8 @@ func (r *OrderRepository) ListOrders(tenantID, restaurantID int64, filters *doma
 	query := `
 		SELECT DISTINCT
 			o.id, o.tenant_id, o.restaurant_id, o.order_number, o.customer_name, o.customer_email,
-			o.customer_phone, o.subtotal, o.tax_amount, o.discount_amount, o.delivery_fee,
-			o.total_amount, o.payment_status, o.status, o.order_source, o.table_id,
+			o.customer_phone, o.delivery_address, o.subtotal, o.tax_amount, o.discount_amount, o.delivery_fee,
+			o.total_amount, o.payment_method, o.payment_status, o.status, o.order_source, o.table_id,
 			t.table_number, COALESCE(t.name, ''), COALESCE(t.location, ''), t.capacity,
 			o.created_at, o.updated_at
 	` + baseQuery
@@ -397,7 +406,7 @@ func (r *OrderRepository) ListOrders(tenantID, restaurantID int64, filters *doma
 	orders := make([]domain.Order, 0)
 	for rows.Next() {
 		order := domain.Order{}
-		var customerEmail sql.NullString
+		var customerEmail, deliveryAddress, paymentMethod sql.NullString
 		var tableID sql.NullInt64
 		var tableNumber sql.NullInt32
 		var tableName sql.NullString
@@ -407,8 +416,8 @@ func (r *OrderRepository) ListOrders(tenantID, restaurantID int64, filters *doma
 		err := rows.Scan(
 			&order.ID, &order.TenantID, &order.RestaurantID, &order.OrderNumber,
 			&order.CustomerName, &customerEmail,
-			&order.CustomerPhone, &order.Subtotal, &order.TaxAmount, &order.DiscountAmount,
-			&order.DeliveryFee, &order.TotalAmount, &order.PaymentStatus, &order.Status,
+			&order.CustomerPhone, &deliveryAddress, &order.Subtotal, &order.TaxAmount, &order.DiscountAmount,
+			&order.DeliveryFee, &order.TotalAmount, &paymentMethod, &order.PaymentStatus, &order.Status,
 			&order.OrderSource, &tableID, &tableNumber, &tableName, &tableLocation, &tableCapacity,
 			&order.CreatedAt, &order.UpdatedAt,
 		)
@@ -419,6 +428,12 @@ func (r *OrderRepository) ListOrders(tenantID, restaurantID int64, filters *doma
 
 		if customerEmail.Valid {
 			order.CustomerEmail = customerEmail.String
+		}
+		if deliveryAddress.Valid {
+			order.DeliveryAddress = deliveryAddress.String
+		}
+		if paymentMethod.Valid {
+			order.PaymentMethod = paymentMethod.String
 		}
 		if tableID.Valid {
 			order.TableID = &tableID.Int64
@@ -467,74 +482,54 @@ func (r *OrderRepository) ListOrders(tenantID, restaurantID int64, filters *doma
 	}, nil
 }
 
+// GetOrderItemCounts returns item counts for a page of orders in one scoped query.
+func (r *OrderRepository) GetOrderItemCounts(tenantID, restaurantID int64, orderIDs []int64) (map[int64]int, error) {
+	counts := make(map[int64]int, len(orderIDs))
+	if len(orderIDs) == 0 {
+		return counts, nil
+	}
+
+	query := `
+		SELECT oi.order_id, COUNT(*)
+		FROM order_items oi
+		JOIN orders o
+		  ON o.id = oi.order_id
+		 AND o.tenant_id = oi.tenant_id
+		 AND o.restaurant_id = oi.restaurant_id
+		WHERE o.tenant_id = $1
+		  AND o.restaurant_id = $2
+		  AND oi.tenant_id = $1
+		  AND oi.restaurant_id = $2
+		  AND oi.order_id = ANY($3)
+		GROUP BY oi.order_id
+	`
+
+	rows, err := r.db.Query(query, tenantID, restaurantID, pq.Array(orderIDs))
+	if err != nil {
+		return nil, fmt.Errorf("failed to get order item counts: %w", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var orderID int64
+		var count int
+		if err := rows.Scan(&orderID, &count); err != nil {
+			return nil, fmt.Errorf("failed to scan order item count: %w", err)
+		}
+		counts[orderID] = count
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("failed to iterate order item counts: %w", err)
+	}
+	return counts, nil
+}
+
 // UpdateOrderStatus updates the status of an order
 func (r *OrderRepository) UpdateOrderStatus(tenantID, restaurantID, orderID int64, newStatus string, changedBy *int64, reason string) error {
 	if !domain.ValidStatus(newStatus) {
 		return errors.New("invalid order status")
 	}
-
-	// Get current status for validation
-	var currentStatus string
-	err := r.db.QueryRow(
-		"SELECT status FROM orders WHERE id = $1 AND tenant_id = $2 AND restaurant_id = $3",
-		orderID, tenantID, restaurantID,
-	).Scan(&currentStatus)
-
-	if err != nil {
-		if err == sql.ErrNoRows {
-			return errors.New("order not found")
-		}
-		return fmt.Errorf("failed to get order status: %w", err)
-	}
-
-	// Validate status transition
-	if !domain.CanTransitionStatus(currentStatus, newStatus) {
-		return fmt.Errorf("invalid status transition from %s to %s", currentStatus, newStatus)
-	}
-
-	// Update order status
-	query := `
-		UPDATE orders
-		SET status = $1, updated_at = CURRENT_TIMESTAMP
-		WHERE id = $2 AND tenant_id = $3 AND restaurant_id = $4
-	`
-
-	result, err := r.db.Exec(query, newStatus, orderID, tenantID, restaurantID)
-	if err != nil {
-		return fmt.Errorf("failed to update order status: %w", err)
-	}
-
-	rowsAffected, err := result.RowsAffected()
-	if err != nil {
-		return fmt.Errorf("failed to check rows affected: %w", err)
-	}
-
-	if rowsAffected == 0 {
-		return errors.New("order not found")
-	}
-
-	// Record status change in history
-	historyQuery := `
-		INSERT INTO order_status_history (order_id, old_status, new_status, changed_by, change_reason)
-		VALUES ($1, $2, $3, $4, $5)
-	`
-
-	var changedByValue interface{} = nil
-	if changedBy != nil {
-		changedByValue = *changedBy
-	}
-
-	var reasonValue interface{} = nil
-	if reason != "" {
-		reasonValue = reason
-	}
-
-	_, err = r.db.Exec(historyQuery, orderID, currentStatus, newStatus, changedByValue, reasonValue)
-	if err != nil {
-		return fmt.Errorf("failed to record status change: %w", err)
-	}
-
-	return nil
+	return r.transitionOrderStatus(tenantID, restaurantID, orderID, newStatus, changedBy, reason)
 }
 
 // UpdatePaymentStatus updates the payment status of an order
@@ -568,61 +563,60 @@ func (r *OrderRepository) UpdatePaymentStatus(tenantID, restaurantID, orderID in
 
 // CancelOrder cancels an order
 func (r *OrderRepository) CancelOrder(tenantID, restaurantID, orderID int64, reason string) error {
-	// Check if order can be cancelled
+	return r.transitionOrderStatus(tenantID, restaurantID, orderID, "cancelled", nil, reason)
+}
+
+// transitionOrderStatus serializes status changes and commits the status and its
+// audit row together so concurrent requests cannot validate against stale state.
+func (r *OrderRepository) transitionOrderStatus(tenantID, restaurantID, orderID int64, newStatus string, changedBy *int64, reason string) error {
+	tx, err := r.db.Begin()
+	if err != nil {
+		return fmt.Errorf("begin order status transition: %w", err)
+	}
+	defer tx.Rollback()
+
 	var currentStatus string
-	err := r.db.QueryRow(
-		"SELECT status FROM orders WHERE id = $1 AND tenant_id = $2 AND restaurant_id = $3",
+	err = tx.QueryRow(
+		`SELECT status FROM orders
+		 WHERE id = $1 AND tenant_id = $2 AND restaurant_id = $3
+		 FOR UPDATE`,
 		orderID, tenantID, restaurantID,
 	).Scan(&currentStatus)
-
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return errors.New("order not found")
 		}
-		return fmt.Errorf("failed to get order status: %w", err)
+		return fmt.Errorf("get order status: %w", err)
+	}
+	if !domain.CanTransitionStatus(currentStatus, newStatus) {
+		return fmt.Errorf("invalid status transition from %s to %s", currentStatus, newStatus)
 	}
 
-	// Orders that have been delivered or already cancelled cannot be cancelled
-	if currentStatus == "delivered" || currentStatus == "cancelled" {
-		return fmt.Errorf("cannot cancel order with status: %s", currentStatus)
+	if _, err := tx.Exec(
+		`UPDATE orders SET status = $1, updated_at = CURRENT_TIMESTAMP
+		 WHERE id = $2 AND tenant_id = $3 AND restaurant_id = $4`,
+		newStatus, orderID, tenantID, restaurantID,
+	); err != nil {
+		return fmt.Errorf("update order status: %w", err)
 	}
 
-	query := `
-		UPDATE orders
-		SET status = 'cancelled', updated_at = CURRENT_TIMESTAMP
-		WHERE id = $1 AND tenant_id = $2 AND restaurant_id = $3
-	`
-
-	result, err := r.db.Exec(query, orderID, tenantID, restaurantID)
-	if err != nil {
-		return fmt.Errorf("failed to cancel order: %w", err)
+	var changedByValue, reasonValue interface{}
+	if changedBy != nil {
+		changedByValue = *changedBy
 	}
-
-	rowsAffected, err := result.RowsAffected()
-	if err != nil {
-		return fmt.Errorf("failed to check rows affected: %w", err)
-	}
-
-	if rowsAffected == 0 {
-		return errors.New("order not found")
-	}
-
-	// Record cancellation in history
-	historyQuery := `
-		INSERT INTO order_status_history (order_id, old_status, new_status, change_reason)
-		VALUES ($1, $2, 'cancelled', $3)
-	`
-
-	var reasonValue interface{} = nil
 	if reason != "" {
 		reasonValue = reason
 	}
-
-	_, err = r.db.Exec(historyQuery, orderID, currentStatus, reasonValue)
-	if err != nil {
-		return fmt.Errorf("failed to record cancellation: %w", err)
+	if _, err := tx.Exec(
+		`INSERT INTO order_status_history (order_id, old_status, new_status, changed_by, change_reason)
+		 VALUES ($1, $2, $3, $4, $5)`,
+		orderID, currentStatus, newStatus, changedByValue, reasonValue,
+	); err != nil {
+		return fmt.Errorf("record order status change: %w", err)
 	}
-
+	if err := tx.Commit(); err != nil {
+		return fmt.Errorf("commit order status transition: %w", err)
+	}
 	return nil
 }
 
@@ -634,8 +628,14 @@ func (r *OrderRepository) CreateOrderItem(tenantID, restaurantID int64, item *do
 			product_id, variant_id, product_name, variant_name,
 			quantity, unit_price, discount_amount, total_price,
 			special_instructions, addons
-		) VALUES (
-			$1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13
+		) SELECT
+			$1::bigint, $2::bigint, $3::bigint, $4::bigint, $5::bigint, $6, $7,
+			$8, $9, $10, $11, $12, $13
+		WHERE EXISTS (
+			SELECT 1 FROM orders WHERE id = $1::bigint AND tenant_id = $2::bigint AND restaurant_id = $3::bigint
+		)
+		AND EXISTS (
+			SELECT 1 FROM products WHERE id = $4::bigint AND tenant_id = $2::bigint AND restaurant_id = $3::bigint
 		)
 		RETURNING id, created_at, updated_at
 	`
@@ -690,18 +690,18 @@ func (r *OrderRepository) CreateOrderItem(tenantID, restaurantID int64, item *do
 }
 
 // GetOrderItems retrieves all items for an order
-func (r *OrderRepository) GetOrderItems(tenantID, orderID int64) ([]domain.OrderItem, error) {
+func (r *OrderRepository) GetOrderItems(tenantID, restaurantID, orderID int64) ([]domain.OrderItem, error) {
 	query := `
 		SELECT
 			id, order_id, product_id, variant_id, product_name, variant_name,
 			quantity, unit_price, discount_amount, total_price,
 			special_instructions, addons, created_at, updated_at
 		FROM order_items
-		WHERE order_id = $1
+		WHERE tenant_id = $1 AND restaurant_id = $2 AND order_id = $3
 		ORDER BY created_at ASC
 	`
 
-	rows, err := r.db.Query(query, orderID)
+	rows, err := r.db.Query(query, tenantID, restaurantID, orderID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get order items: %w", err)
 	}
@@ -753,17 +753,18 @@ func (r *OrderRepository) GetOrderItems(tenantID, orderID int64) ([]domain.Order
 }
 
 // GetOrderStatusHistory retrieves the status change history for an order
-func (r *OrderRepository) GetOrderStatusHistory(tenantID, orderID int64) ([]domain.OrderStatusHistory, error) {
+func (r *OrderRepository) GetOrderStatusHistory(tenantID, restaurantID, orderID int64) ([]domain.OrderStatusHistory, error) {
 	query := `
 		SELECT
-			id, order_id, old_status, new_status, changed_by,
-			change_reason, created_at
-		FROM order_status_history
-		WHERE order_id = $1
-		ORDER BY created_at DESC
+			h.id, h.order_id, h.old_status, h.new_status, h.changed_by,
+			h.change_reason, h.created_at
+		FROM order_status_history h
+		JOIN orders o ON o.id = h.order_id
+		WHERE o.tenant_id = $1 AND o.restaurant_id = $2 AND h.order_id = $3
+		ORDER BY h.created_at DESC
 	`
 
-	rows, err := r.db.Query(query, orderID)
+	rows, err := r.db.Query(query, tenantID, restaurantID, orderID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get order status history: %w", err)
 	}
@@ -901,4 +902,36 @@ func (r *OrderRepository) GetOrderStats(tenantID, restaurantID int64, startDate,
 func (r *OrderRepository) DeleteOrder(tenantID, restaurantID, orderID int64) error {
 	// We prefer to cancel orders rather than delete them for audit trail
 	return r.CancelOrder(tenantID, restaurantID, orderID, "Deleted by admin")
+}
+
+// SetPublicTokenHash stores the hash of the public tracking token for an order.
+func (r *OrderRepository) SetPublicTokenHash(tenantID, restaurantID, orderID int64, hash string) error {
+	res, err := r.db.Exec(
+		`UPDATE orders SET public_token_hash = $1 WHERE id = $2 AND tenant_id = $3 AND restaurant_id = $4`,
+		hash, orderID, tenantID, restaurantID,
+	)
+	if err != nil {
+		return fmt.Errorf("failed to store public token: %w", err)
+	}
+	if n, _ := res.RowsAffected(); n == 0 {
+		return errors.New("order not found")
+	}
+	return nil
+}
+
+// GetPublicAccessInfo returns the stored public token hash (empty for legacy orders) and the
+// customer phone of an order, scoped to tenant and restaurant.
+func (r *OrderRepository) GetPublicAccessInfo(tenantID, restaurantID, orderID int64) (hash string, phone string, err error) {
+	var h sql.NullString
+	err = r.db.QueryRow(
+		`SELECT public_token_hash, customer_phone FROM orders WHERE id = $1 AND tenant_id = $2 AND restaurant_id = $3`,
+		orderID, tenantID, restaurantID,
+	).Scan(&h, &phone)
+	if err == sql.ErrNoRows {
+		return "", "", errors.New("order not found")
+	}
+	if err != nil {
+		return "", "", fmt.Errorf("failed to read order access info: %w", err)
+	}
+	return h.String, phone, nil
 }

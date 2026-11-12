@@ -7,6 +7,7 @@
 
 import React, { useState, useCallback } from 'react'
 import type { ThemeComponent } from '@/types/theme'
+import { previewText } from '@/lib/previewText'
 
 interface ProductGridEditorProps {
   component: ThemeComponent
@@ -526,7 +527,7 @@ export function ProductGridEditor({
       {previewMode && (
         <div className="product-grid-preview-shell rounded-lg border border-gray-200 dark:border-gray-700 p-8">
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
-            {component.title?.en || 'Our Products'}
+            {previewText(component.title, 'Our Products')}
           </h2>
 
           <div className="product-grid-preview-layout">

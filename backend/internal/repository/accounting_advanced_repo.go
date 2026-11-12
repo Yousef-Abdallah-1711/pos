@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"database/sql"
 	"encoding/json"
 	"errors"
@@ -11,6 +12,7 @@ import (
 	"time"
 
 	"pos-saas/internal/domain"
+	"pos-saas/internal/pkg/database"
 )
 
 type AccountingAdvancedRepository struct {
@@ -26,31 +28,6 @@ func NewAccountingAdvancedRepository(db *sql.DB, journalRepo *JournalEntryReposi
 }
 
 func (r *AccountingAdvancedRepository) ListBankReconciliationSessions(tenantID, restaurantID int) ([]domain.BankReconciliationSession, error) {
-	items, _, err := r.ListBankReconciliationSessionsPaged(tenantID, restaurantID, 1, 100000)
-	return items, err
-}
-
-func (r *AccountingAdvancedRepository) ListBankReconciliationSessionsPaged(tenantID, restaurantID, page, pageSize int) ([]domain.BankReconciliationSession, int, error) {
-	if page < 1 {
-		page = 1
-	}
-	if pageSize < 1 {
-		pageSize = 20
-	}
-	if pageSize > 200 {
-		pageSize = 200
-	}
-	offset := (page - 1) * pageSize
-
-	var total int
-	if err := r.db.QueryRow(`
-		SELECT COUNT(*)
-		FROM bank_reconciliation_sessions
-		WHERE tenant_id = $1 AND restaurant_id = $2
-	`, tenantID, restaurantID).Scan(&total); err != nil {
-		return nil, 0, err
-	}
-
 	rows, err := r.db.Query(`
 		SELECT
 			id, tenant_id, restaurant_id, bank_account_id, statement_date, statement_balance,
@@ -59,10 +36,9 @@ func (r *AccountingAdvancedRepository) ListBankReconciliationSessionsPaged(tenan
 		FROM bank_reconciliation_sessions
 		WHERE tenant_id = $1 AND restaurant_id = $2
 		ORDER BY statement_date DESC, id DESC
-		LIMIT $3 OFFSET $4
-	`, tenantID, restaurantID, pageSize, offset)
+	`, tenantID, restaurantID)
 	if err != nil {
-		return nil, 0, err
+		return nil, err
 	}
 	defer rows.Close()
 
@@ -70,14 +46,14 @@ func (r *AccountingAdvancedRepository) ListBankReconciliationSessionsPaged(tenan
 	for rows.Next() {
 		item, err := scanBankReconciliationSession(rows)
 		if err != nil {
-			return nil, 0, err
+			return nil, err
 		}
 		out = append(out, item)
 	}
 	if err := rows.Err(); err != nil {
-		return nil, 0, err
+		return nil, err
 	}
-	return out, total, nil
+	return out, nil
 }
 
 func (r *AccountingAdvancedRepository) GetBankReconciliationSessionByID(tenantID, restaurantID, id int) (*domain.BankReconciliationSession, error) {
@@ -258,31 +234,6 @@ func (r *AccountingAdvancedRepository) CompleteBankReconciliationSession(tenantI
 }
 
 func (r *AccountingAdvancedRepository) ListRecurringJournalTemplates(tenantID, restaurantID int) ([]domain.RecurringJournalTemplate, error) {
-	items, _, err := r.ListRecurringJournalTemplatesPaged(tenantID, restaurantID, 1, 100000)
-	return items, err
-}
-
-func (r *AccountingAdvancedRepository) ListRecurringJournalTemplatesPaged(tenantID, restaurantID, page, pageSize int) ([]domain.RecurringJournalTemplate, int, error) {
-	if page < 1 {
-		page = 1
-	}
-	if pageSize < 1 {
-		pageSize = 20
-	}
-	if pageSize > 200 {
-		pageSize = 200
-	}
-	offset := (page - 1) * pageSize
-
-	var total int
-	if err := r.db.QueryRow(`
-		SELECT COUNT(*)
-		FROM recurring_journal_templates
-		WHERE tenant_id = $1 AND restaurant_id = $2
-	`, tenantID, restaurantID).Scan(&total); err != nil {
-		return nil, 0, err
-	}
-
 	rows, err := r.db.Query(`
 		SELECT
 			id, tenant_id, restaurant_id, template_code, template_name, COALESCE(description, ''),
@@ -291,10 +242,9 @@ func (r *AccountingAdvancedRepository) ListRecurringJournalTemplatesPaged(tenant
 		FROM recurring_journal_templates
 		WHERE tenant_id = $1 AND restaurant_id = $2
 		ORDER BY next_run_date ASC, id DESC
-		LIMIT $3 OFFSET $4
-	`, tenantID, restaurantID, pageSize, offset)
+	`, tenantID, restaurantID)
 	if err != nil {
-		return nil, 0, err
+		return nil, err
 	}
 	defer rows.Close()
 
@@ -302,14 +252,14 @@ func (r *AccountingAdvancedRepository) ListRecurringJournalTemplatesPaged(tenant
 	for rows.Next() {
 		item, err := scanRecurringTemplate(rows)
 		if err != nil {
-			return nil, 0, err
+			return nil, err
 		}
 		out = append(out, item)
 	}
 	if err := rows.Err(); err != nil {
-		return nil, 0, err
+		return nil, err
 	}
-	return out, total, nil
+	return out, nil
 }
 
 func (r *AccountingAdvancedRepository) GetRecurringJournalTemplateByID(tenantID, restaurantID, id int) (*domain.RecurringJournalTemplate, error) {
@@ -346,9 +296,12 @@ func (r *AccountingAdvancedRepository) CreateRecurringJournalTemplate(item *doma
 		INSERT INTO recurring_journal_templates (
 			tenant_id, restaurant_id, template_code, template_name, description, frequency,
 			start_date, next_run_date, is_active, auto_post, lines_json, created_by, updated_by
-		) VALUES (
+		) SELECT
 			$1, $2, $3, $4, $5, $6,
 			$7, $8, $9, $10, $11, $12, $13
+		WHERE EXISTS (
+			SELECT 1 FROM restaurants
+			WHERE id = $2 AND tenant_id = $1
 		)
 		RETURNING id
 	`,
@@ -569,33 +522,6 @@ func (r *AccountingAdvancedRepository) UpsertBudget(
 }
 
 func (r *AccountingAdvancedRepository) ListBudgetVariance(tenantID, restaurantID, fiscalYear int) ([]domain.BudgetEntry, error) {
-	items, _, err := r.ListBudgetVariancePaged(tenantID, restaurantID, fiscalYear, 1, 100000)
-	return items, err
-}
-
-func (r *AccountingAdvancedRepository) ListBudgetVariancePaged(tenantID, restaurantID, fiscalYear, page, pageSize int) ([]domain.BudgetEntry, int, error) {
-	if page < 1 {
-		page = 1
-	}
-	if pageSize < 1 {
-		pageSize = 20
-	}
-	if pageSize > 200 {
-		pageSize = 200
-	}
-	offset := (page - 1) * pageSize
-
-	var total int
-	if err := r.db.QueryRow(`
-		SELECT COUNT(*)
-		FROM account_budgets b
-		WHERE b.tenant_id = $1
-		  AND b.restaurant_id = $2
-		  AND ($3 = 0 OR b.fiscal_year = $3)
-	`, tenantID, restaurantID, fiscalYear).Scan(&total); err != nil {
-		return nil, 0, err
-	}
-
 	rows, err := r.db.Query(`
 		SELECT
 			b.id, b.tenant_id, b.restaurant_id, b.account_id,
@@ -620,10 +546,9 @@ func (r *AccountingAdvancedRepository) ListBudgetVariancePaged(tenantID, restaur
 		  AND b.restaurant_id = $2
 		  AND ($3 = 0 OR b.fiscal_year = $3)
 		ORDER BY b.fiscal_year DESC, b.period_month ASC, a.account_code ASC
-		LIMIT $4 OFFSET $5
-	`, tenantID, restaurantID, fiscalYear, pageSize, offset)
+	`, tenantID, restaurantID, fiscalYear)
 	if err != nil {
-		return nil, 0, err
+		return nil, err
 	}
 	defer rows.Close()
 
@@ -646,7 +571,7 @@ func (r *AccountingAdvancedRepository) ListBudgetVariancePaged(tenantID, restaur
 			&item.CreatedAt,
 			&item.UpdatedAt,
 		); err != nil {
-			return nil, 0, err
+			return nil, err
 		}
 		item.VarianceAmount = item.ActualAmount - item.BudgetAmount
 		if math.Abs(item.BudgetAmount) > 0.0001 {
@@ -655,9 +580,9 @@ func (r *AccountingAdvancedRepository) ListBudgetVariancePaged(tenantID, restaur
 		items = append(items, item)
 	}
 	if err := rows.Err(); err != nil {
-		return nil, 0, err
+		return nil, err
 	}
-	return items, total, nil
+	return items, nil
 }
 
 func (r *AccountingAdvancedRepository) UpsertExchangeRate(rate *domain.ExchangeRate) (int, error) {
@@ -697,36 +622,8 @@ func (r *AccountingAdvancedRepository) UpsertExchangeRate(rate *domain.ExchangeR
 }
 
 func (r *AccountingAdvancedRepository) ListExchangeRates(tenantID, restaurantID int, baseCurrency, quoteCurrency string) ([]domain.ExchangeRate, error) {
-	items, _, err := r.ListExchangeRatesPaged(tenantID, restaurantID, baseCurrency, quoteCurrency, 1, 100000)
-	return items, err
-}
-
-func (r *AccountingAdvancedRepository) ListExchangeRatesPaged(tenantID, restaurantID int, baseCurrency, quoteCurrency string, page, pageSize int) ([]domain.ExchangeRate, int, error) {
 	baseCurrency = strings.ToUpper(strings.TrimSpace(baseCurrency))
 	quoteCurrency = strings.ToUpper(strings.TrimSpace(quoteCurrency))
-	if page < 1 {
-		page = 1
-	}
-	if pageSize < 1 {
-		pageSize = 20
-	}
-	if pageSize > 200 {
-		pageSize = 200
-	}
-	offset := (page - 1) * pageSize
-
-	var total int
-	if err := r.db.QueryRow(`
-		SELECT COUNT(*)
-		FROM exchange_rates
-		WHERE tenant_id = $1
-		  AND restaurant_id = $2
-		  AND ($3 = '' OR base_currency = $3)
-		  AND ($4 = '' OR quote_currency = $4)
-	`, tenantID, restaurantID, baseCurrency, quoteCurrency).Scan(&total); err != nil {
-		return nil, 0, err
-	}
-
 	rows, err := r.db.Query(`
 		SELECT
 			id, tenant_id, restaurant_id, base_currency, quote_currency, rate,
@@ -737,10 +634,9 @@ func (r *AccountingAdvancedRepository) ListExchangeRatesPaged(tenantID, restaura
 		  AND ($3 = '' OR base_currency = $3)
 		  AND ($4 = '' OR quote_currency = $4)
 		ORDER BY effective_date DESC, id DESC
-		LIMIT $5 OFFSET $6
-	`, tenantID, restaurantID, baseCurrency, quoteCurrency, pageSize, offset)
+	`, tenantID, restaurantID, baseCurrency, quoteCurrency)
 	if err != nil {
-		return nil, 0, err
+		return nil, err
 	}
 	defer rows.Close()
 
@@ -760,14 +656,14 @@ func (r *AccountingAdvancedRepository) ListExchangeRatesPaged(tenantID, restaura
 			&item.CreatedAt,
 			&item.UpdatedAt,
 		); err != nil {
-			return nil, 0, err
+			return nil, err
 		}
 		out = append(out, item)
 	}
 	if err := rows.Err(); err != nil {
-		return nil, 0, err
+		return nil, err
 	}
-	return out, total, nil
+	return out, nil
 }
 
 func (r *AccountingAdvancedRepository) ConvertAmount(
@@ -844,31 +740,6 @@ func (r *AccountingAdvancedRepository) CreateSupplierPaymentSchedule(item *domai
 }
 
 func (r *AccountingAdvancedRepository) ListSupplierPaymentSchedules(tenantID, restaurantID int) ([]domain.SupplierPaymentSchedule, error) {
-	items, _, err := r.ListSupplierPaymentSchedulesPaged(tenantID, restaurantID, 1, 100000)
-	return items, err
-}
-
-func (r *AccountingAdvancedRepository) ListSupplierPaymentSchedulesPaged(tenantID, restaurantID, page, pageSize int) ([]domain.SupplierPaymentSchedule, int, error) {
-	if page < 1 {
-		page = 1
-	}
-	if pageSize < 1 {
-		pageSize = 20
-	}
-	if pageSize > 200 {
-		pageSize = 200
-	}
-	offset := (page - 1) * pageSize
-
-	var total int
-	if err := r.db.QueryRow(`
-		SELECT COUNT(*)
-		FROM supplier_payment_schedules s
-		WHERE s.tenant_id = $1 AND s.restaurant_id = $2
-	`, tenantID, restaurantID).Scan(&total); err != nil {
-		return nil, 0, err
-	}
-
 	rows, err := r.db.Query(`
 		SELECT
 			s.id, s.tenant_id, s.restaurant_id, s.supplier_invoice_id, s.supplier_id,
@@ -881,10 +752,9 @@ func (r *AccountingAdvancedRepository) ListSupplierPaymentSchedulesPaged(tenantI
 		 AND sp.restaurant_id = s.restaurant_id
 		WHERE s.tenant_id = $1 AND s.restaurant_id = $2
 		ORDER BY s.scheduled_date ASC, s.id DESC
-		LIMIT $3 OFFSET $4
-	`, tenantID, restaurantID, pageSize, offset)
+	`, tenantID, restaurantID)
 	if err != nil {
-		return nil, 0, err
+		return nil, err
 	}
 	defer rows.Close()
 
@@ -892,49 +762,20 @@ func (r *AccountingAdvancedRepository) ListSupplierPaymentSchedulesPaged(tenantI
 	for rows.Next() {
 		item, err := scanSupplierPaymentSchedule(rows)
 		if err != nil {
-			return nil, 0, err
+			return nil, err
 		}
 		out = append(out, item)
 	}
 	if err := rows.Err(); err != nil {
-		return nil, 0, err
+		return nil, err
 	}
-	return out, total, nil
+	return out, nil
 }
 
 func (r *AccountingAdvancedRepository) ListSupplierPaymentReminders(tenantID, restaurantID, dueWithinDays int) ([]domain.SupplierPaymentSchedule, error) {
-	items, _, err := r.ListSupplierPaymentRemindersPaged(tenantID, restaurantID, dueWithinDays, 1, 100000)
-	return items, err
-}
-
-func (r *AccountingAdvancedRepository) ListSupplierPaymentRemindersPaged(tenantID, restaurantID, dueWithinDays, page, pageSize int) ([]domain.SupplierPaymentSchedule, int, error) {
 	if dueWithinDays <= 0 {
 		dueWithinDays = 7
 	}
-	if page < 1 {
-		page = 1
-	}
-	if pageSize < 1 {
-		pageSize = 20
-	}
-	if pageSize > 200 {
-		pageSize = 200
-	}
-	offset := (page - 1) * pageSize
-
-	var total int
-	if err := r.db.QueryRow(`
-		SELECT COUNT(*)
-		FROM supplier_payment_schedules s
-		WHERE s.tenant_id = $1
-		  AND s.restaurant_id = $2
-		  AND s.status IN ('scheduled', 'reminded')
-		  AND s.scheduled_date <= (CURRENT_DATE + ($3 * INTERVAL '1 day'))
-		  AND (s.reminder_sent_at IS NULL OR s.reminder_sent_at::date < CURRENT_DATE)
-	`, tenantID, restaurantID, dueWithinDays).Scan(&total); err != nil {
-		return nil, 0, err
-	}
-
 	rows, err := r.db.Query(`
 		SELECT
 			s.id, s.tenant_id, s.restaurant_id, s.supplier_invoice_id, s.supplier_id,
@@ -951,10 +792,9 @@ func (r *AccountingAdvancedRepository) ListSupplierPaymentRemindersPaged(tenantI
 		  AND s.scheduled_date <= (CURRENT_DATE + ($3 * INTERVAL '1 day'))
 		  AND (s.reminder_sent_at IS NULL OR s.reminder_sent_at::date < CURRENT_DATE)
 		ORDER BY s.scheduled_date ASC
-		LIMIT $4 OFFSET $5
-	`, tenantID, restaurantID, dueWithinDays, pageSize, offset)
+	`, tenantID, restaurantID, dueWithinDays)
 	if err != nil {
-		return nil, 0, err
+		return nil, err
 	}
 	defer rows.Close()
 
@@ -962,14 +802,14 @@ func (r *AccountingAdvancedRepository) ListSupplierPaymentRemindersPaged(tenantI
 	for rows.Next() {
 		item, err := scanSupplierPaymentSchedule(rows)
 		if err != nil {
-			return nil, 0, err
+			return nil, err
 		}
 		out = append(out, item)
 	}
 	if err := rows.Err(); err != nil {
-		return nil, 0, err
+		return nil, err
 	}
-	return out, total, nil
+	return out, nil
 }
 
 func (r *AccountingAdvancedRepository) MarkSupplierPaymentReminderSent(tenantID, restaurantID, scheduleID int) error {
@@ -1473,7 +1313,7 @@ func (r *AccountingAdvancedRepository) GetHRCostAnalysis(tenantID, restaurantID 
 	}, nil
 }
 
-func (r *AccountingAdvancedRepository) CreateEInvoiceSubmission(item *domain.EInvoiceSubmission) (int, error) {
+func (r *AccountingAdvancedRepository) CreateEInvoiceSubmission(ctx context.Context, item *domain.EInvoiceSubmission) (int, error) {
 	if item == nil {
 		return 0, errors.New("e-invoice payload is required")
 	}
@@ -1481,104 +1321,100 @@ func (r *AccountingAdvancedRepository) CreateEInvoiceSubmission(item *domain.EIn
 		item.ResponsePayload = []byte("{}")
 	}
 	var id int
-	err := r.db.QueryRow(`
-		INSERT INTO e_invoice_submissions (
-			tenant_id, restaurant_id, invoice_type, invoice_id, eta_uuid,
-			status, submitted_at, response_payload, error_message, created_by
-		) VALUES (
-			$1, $2, $3, $4, $5,
-			$6, COALESCE($7, CURRENT_TIMESTAMP), $8, $9, $10
-		)
-		RETURNING id
-	`,
-		item.TenantID,
-		item.RestaurantID,
-		item.InvoiceType,
-		item.InvoiceID,
-		nullString(item.ETAUUID),
-		defaultString(item.Status, "pending"),
-		nullTime(item.SubmittedAt),
-		item.ResponsePayload,
-		nullString(item.ErrorMessage),
-		item.CreatedBy,
-	).Scan(&id)
+	err := database.WithTenantTx(ctx, r.db, int64(item.TenantID), int64(item.RestaurantID), func(tx *sql.Tx) error {
+		invoiceTable := ""
+		switch strings.ToLower(strings.TrimSpace(item.InvoiceType)) {
+		case "customer":
+			invoiceTable = "invoices_customer"
+		case "supplier":
+			invoiceTable = "invoices_supplier"
+		default:
+			return fmt.Errorf("unsupported e-invoice type %q", item.InvoiceType)
+		}
+		var invoiceExists bool
+		if err := tx.QueryRowContext(ctx, `SELECT EXISTS (
+			SELECT 1 FROM `+invoiceTable+` WHERE id = $1 AND tenant_id = $2 AND restaurant_id = $3
+		)`, item.InvoiceID, item.TenantID, item.RestaurantID).Scan(&invoiceExists); err != nil {
+			return err
+		}
+		if !invoiceExists {
+			return sql.ErrNoRows
+		}
+		return tx.QueryRowContext(ctx, `
+			INSERT INTO e_invoice_submissions (
+				tenant_id, restaurant_id, invoice_type, invoice_id, eta_uuid,
+				status, submitted_at, response_payload, error_message, created_by
+			) VALUES (
+				$1, $2, $3, $4, $5,
+				$6, COALESCE($7, CURRENT_TIMESTAMP), $8, $9, $10
+			)
+			RETURNING id
+		`,
+			item.TenantID,
+			item.RestaurantID,
+			item.InvoiceType,
+			item.InvoiceID,
+			nullString(item.ETAUUID),
+			defaultString(item.Status, "pending"),
+			nullTime(item.SubmittedAt),
+			item.ResponsePayload,
+			nullString(item.ErrorMessage),
+			item.CreatedBy,
+		).Scan(&id)
+	})
 	if err != nil {
 		return 0, err
 	}
 	return id, nil
 }
 
-func (r *AccountingAdvancedRepository) ListEInvoiceSubmissions(tenantID, restaurantID int) ([]domain.EInvoiceSubmission, error) {
-	items, _, err := r.ListEInvoiceSubmissionsPaged(tenantID, restaurantID, 1, 100000)
-	return items, err
-}
-
-func (r *AccountingAdvancedRepository) ListEInvoiceSubmissionsPaged(tenantID, restaurantID, page, pageSize int) ([]domain.EInvoiceSubmission, int, error) {
-	if page < 1 {
-		page = 1
-	}
-	if pageSize < 1 {
-		pageSize = 20
-	}
-	if pageSize > 200 {
-		pageSize = 200
-	}
-	offset := (page - 1) * pageSize
-
-	var total int
-	if err := r.db.QueryRow(`
-		SELECT COUNT(*)
-		FROM e_invoice_submissions
-		WHERE tenant_id = $1 AND restaurant_id = $2
-	`, tenantID, restaurantID).Scan(&total); err != nil {
-		return nil, 0, err
-	}
-
-	rows, err := r.db.Query(`
-		SELECT
-			id, tenant_id, restaurant_id, invoice_type, invoice_id, COALESCE(eta_uuid, ''),
-			status, submitted_at, response_payload, COALESCE(error_message, ''), created_by
-		FROM e_invoice_submissions
-		WHERE tenant_id = $1 AND restaurant_id = $2
-		ORDER BY submitted_at DESC, id DESC
-		LIMIT $3 OFFSET $4
-	`, tenantID, restaurantID, pageSize, offset)
-	if err != nil {
-		return nil, 0, err
-	}
-	defer rows.Close()
-
+func (r *AccountingAdvancedRepository) ListEInvoiceSubmissions(ctx context.Context, tenantID, restaurantID int) ([]domain.EInvoiceSubmission, error) {
 	out := make([]domain.EInvoiceSubmission, 0)
-	for rows.Next() {
-		var (
-			item      domain.EInvoiceSubmission
-			createdBy sql.NullInt64
-		)
-		if err := rows.Scan(
-			&item.ID,
-			&item.TenantID,
-			&item.RestaurantID,
-			&item.InvoiceType,
-			&item.InvoiceID,
-			&item.ETAUUID,
-			&item.Status,
-			&item.SubmittedAt,
-			&item.ResponsePayload,
-			&item.ErrorMessage,
-			&createdBy,
-		); err != nil {
-			return nil, 0, err
+	err := database.WithTenantTx(ctx, r.db, int64(tenantID), int64(restaurantID), func(tx *sql.Tx) error {
+		rows, err := tx.QueryContext(ctx, `
+			SELECT
+				id, tenant_id, restaurant_id, invoice_type, invoice_id, COALESCE(eta_uuid, ''),
+				status, submitted_at, response_payload, COALESCE(error_message, ''), created_by
+			FROM e_invoice_submissions
+			WHERE tenant_id = $1 AND restaurant_id = $2
+			ORDER BY submitted_at DESC, id DESC
+		`, tenantID, restaurantID)
+		if err != nil {
+			return err
 		}
-		if createdBy.Valid {
-			val := int(createdBy.Int64)
-			item.CreatedBy = &val
+		defer rows.Close()
+		for rows.Next() {
+			var (
+				item      domain.EInvoiceSubmission
+				createdBy sql.NullInt64
+			)
+			if err := rows.Scan(
+				&item.ID,
+				&item.TenantID,
+				&item.RestaurantID,
+				&item.InvoiceType,
+				&item.InvoiceID,
+				&item.ETAUUID,
+				&item.Status,
+				&item.SubmittedAt,
+				&item.ResponsePayload,
+				&item.ErrorMessage,
+				&createdBy,
+			); err != nil {
+				return err
+			}
+			if createdBy.Valid {
+				val := int(createdBy.Int64)
+				item.CreatedBy = &val
+			}
+			out = append(out, item)
 		}
-		out = append(out, item)
+		return rows.Err()
+	})
+	if err != nil {
+		return nil, err
 	}
-	if err := rows.Err(); err != nil {
-		return nil, 0, err
-	}
-	return out, total, nil
+	return out, nil
 }
 
 func (r *AccountingAdvancedRepository) GetSocialInsuranceReportRows(tenantID, restaurantID, year, month int) ([]map[string]interface{}, error) {
@@ -1655,6 +1491,7 @@ func (r *AccountingAdvancedRepository) GetSocialInsuranceReportRows(tenantID, re
 }
 
 func (r *AccountingAdvancedRepository) GetAuditExportRows(
+	ctx context.Context,
 	tenantID, restaurantID int,
 	dateFrom, dateTo time.Time,
 	exportType string,
@@ -1713,38 +1550,39 @@ func (r *AccountingAdvancedRepository) GetAuditExportRows(
 	}
 
 	if normalized == "all" || normalized == "rbac" {
-		auditRows, err := r.db.Query(`
-			SELECT
-				pal.created_at,
-				COALESCE(pal.action, ''),
-				COALESCE(pal.details::text, ''),
-				0::numeric,
-				COALESCE(u.name, u.email, CONCAT('user#', pal.admin_id::text), 'system')
-			FROM permission_audit_logs pal
-			LEFT JOIN users u ON u.id = pal.admin_id
-			WHERE pal.tenant_id = $1
-			  AND pal.created_at >= $2
-			  AND pal.created_at < $3
-			ORDER BY pal.created_at ASC, pal.id ASC
-		`, tenantID, dateFrom, dateTo)
+		err := database.WithTenantTx(ctx, r.db, int64(tenantID), int64(restaurantID), func(tx *sql.Tx) error {
+			auditRows, err := tx.QueryContext(ctx, `
+				SELECT
+					pal.created_at,
+					COALESCE(pal.action, ''),
+					COALESCE(pal.details::text, ''),
+					0::numeric,
+					COALESCE(u.name, u.email, CONCAT('user#', pal.admin_id::text), 'system')
+				FROM permission_audit_logs pal
+				LEFT JOIN users u ON u.id = pal.admin_id
+				WHERE pal.tenant_id = $1
+				  AND pal.created_at >= $2
+				  AND pal.created_at < $3
+				ORDER BY pal.created_at ASC, pal.id ASC
+			`, tenantID, dateFrom, dateTo)
+			if err != nil {
+				return err
+			}
+			defer auditRows.Close()
+			for auditRows.Next() {
+				var ts time.Time
+				var reference, description, actor string
+				var amount float64
+				if err := auditRows.Scan(&ts, &reference, &description, &amount, &actor); err != nil {
+					return err
+				}
+				addRow("rbac_audit", ts, reference, description, amount, actor)
+			}
+			return auditRows.Err()
+		})
 		if err != nil {
 			return nil, err
 		}
-		for auditRows.Next() {
-			var ts time.Time
-			var reference, description, actor string
-			var amount float64
-			if err := auditRows.Scan(&ts, &reference, &description, &amount, &actor); err != nil {
-				auditRows.Close()
-				return nil, err
-			}
-			addRow("rbac_audit", ts, reference, description, amount, actor)
-		}
-		if err := auditRows.Err(); err != nil {
-			auditRows.Close()
-			return nil, err
-		}
-		auditRows.Close()
 	}
 
 	sort.Slice(rows, func(i, j int) bool {
@@ -1754,6 +1592,7 @@ func (r *AccountingAdvancedRepository) GetAuditExportRows(
 }
 
 func (r *AccountingAdvancedRepository) LogAuditExport(
+	ctx context.Context,
 	tenantID, restaurantID, generatedBy int,
 	exportType, exportFormat string,
 	params map[string]interface{},
@@ -1763,16 +1602,18 @@ func (r *AccountingAdvancedRepository) LogAuditExport(
 	if err != nil {
 		payload = []byte("{}")
 	}
-	_, err = r.db.Exec(`
-		INSERT INTO audit_export_logs (
-			tenant_id, restaurant_id, export_type, export_format,
-			params_json, row_count, generated_by
-		) VALUES (
-			$1, $2, $3, $4,
-			$5, $6, $7
-		)
-	`, tenantID, restaurantID, exportType, exportFormat, payload, rowCount, generatedBy)
-	return err
+	return database.WithTenantTx(ctx, r.db, int64(tenantID), int64(restaurantID), func(tx *sql.Tx) error {
+		_, err := tx.ExecContext(ctx, `
+			INSERT INTO audit_export_logs (
+				tenant_id, restaurant_id, export_type, export_format,
+				params_json, row_count, generated_by
+			) VALUES (
+				$1, $2, $3, $4,
+				$5, $6, $7
+			)
+		`, tenantID, restaurantID, exportType, exportFormat, payload, rowCount, generatedBy)
+		return err
+	})
 }
 
 func (r *AccountingAdvancedRepository) GetChartOfAccountsExcelRows(tenantID, restaurantID int) ([][]string, error) {

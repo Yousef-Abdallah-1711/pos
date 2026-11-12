@@ -1,6 +1,7 @@
 package security
 
 import (
+	"strings"
 	"context"
 	"fmt"
 	"net/http"
@@ -74,7 +75,7 @@ func TestCrossTenantAccessPrevention(t *testing.T) {
 			if tt.expectError {
 				if err == nil {
 					t.Errorf("Expected error but got none")
-				} else if tt.errorMsg != "" && err.Error() != tt.errorMsg {
+				} else if tt.errorMsg != "" && !strings.Contains(err.Error(), tt.errorMsg) {
 					t.Errorf("Expected error '%s', got '%s'", tt.errorMsg, err.Error())
 				}
 			} else {
@@ -355,8 +356,8 @@ func BenchmarkCrossTenantCheck(b *testing.B) {
 	}
 }
 
-// ExampleUsageInHandler demonstrates how handlers should use TenantValidator
-func ExampleUsageInHandler() {
+// Example_usageInHandler demonstrates how handlers should use TenantValidator
+func Example_usageInHandler() {
 	fmt.Println(`
 // Example: Product Handler with Tenant Validation
 

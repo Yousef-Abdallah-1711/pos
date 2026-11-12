@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"log"
 	"time"
@@ -15,6 +16,8 @@ type ImpersonationRepository struct {
 	db *sql.DB
 }
 
+var ErrActiveImpersonationSession = errors.New("super admin already has an active impersonation session")
+
 // NewImpersonationRepository creates a new impersonation repository
 func NewImpersonationRepository(db *sql.DB) *ImpersonationRepository {
 	return &ImpersonationRepository{db: db}
@@ -23,12 +26,20 @@ func NewImpersonationRepository(db *sql.DB) *ImpersonationRepository {
 // CreateSession creates a new impersonation session
 func (r *ImpersonationRepository) CreateSession(ctx context.Context, session *domain.ImpersonationSession) (*domain.ImpersonationSession, error) {
 	log.Printf("[ImpersonationRepository] CreateSession: superAdminID=%d, targetUserID=%d\n", session.SuperAdminID, session.TargetUserID)
+	tx, err := r.db.BeginTx(ctx, nil)
+	if err != nil {
+		return nil, fmt.Errorf("begin impersonation session transaction: %w", err)
+	}
+	defer tx.Rollback()
+	if err := lockAndCheckImpersonationSlot(ctx, tx, session.SuperAdminID); err != nil {
+		return nil, err
+	}
 
 	// Hash the token for storage
 	tokenHash := domain.HashToken(session.ImpersonationToken)
 
 	var result domain.ImpersonationSession
-	err := r.db.QueryRowContext(ctx, `
+	err = tx.QueryRowContext(ctx, `
 		INSERT INTO impersonation_sessions
 			(super_admin_id, target_user_id, target_tenant_id, impersonation_token, token_hash,
 			 ip_address, user_agent, started_at, expires_at, is_active)
@@ -48,12 +59,48 @@ func (r *ImpersonationRepository) CreateSession(ctx context.Context, session *do
 		log.Printf("[ImpersonationRepository] ERROR: Failed to create session: %v\n", err)
 		return nil, fmt.Errorf("failed to create impersonation session: %w", err)
 	}
+	if err := tx.Commit(); err != nil {
+		return nil, fmt.Errorf("commit impersonation session: %w", err)
+	}
 
 	// Copy the original token (not stored in DB, but needed for response)
 	result.ImpersonationToken = session.ImpersonationToken
 
 	log.Printf("[ImpersonationRepository] Session created: id=%d\n", result.ID)
 	return &result, nil
+}
+
+func lockAndCheckImpersonationSlot(ctx context.Context, tx *sql.Tx, superAdminID int64) error {
+	// Lock the parent row so concurrent starts for one administrator serialize.
+	var lockedSuperAdminID int64
+	if err := tx.QueryRowContext(ctx, `
+		SELECT id FROM super_admins WHERE id = $1 AND is_active = true FOR UPDATE
+	`, superAdminID).Scan(&lockedSuperAdminID); err != nil {
+		return fmt.Errorf("lock active super admin: %w", err)
+	}
+
+	_, err := tx.ExecContext(ctx, `
+		UPDATE impersonation_sessions
+		SET is_active = false, ended_at = NOW(), end_reason = $1
+		WHERE super_admin_id = $2 AND is_active = true AND expires_at <= NOW()
+	`, domain.ImpersonationEndExpired, superAdminID)
+	if err != nil {
+		return fmt.Errorf("expire stale impersonation sessions: %w", err)
+	}
+
+	var activeSessionID int64
+	err = tx.QueryRowContext(ctx, `
+		SELECT id FROM impersonation_sessions
+		WHERE super_admin_id = $1 AND is_active = true AND expires_at > NOW()
+		LIMIT 1
+	`, superAdminID).Scan(&activeSessionID)
+	if err == nil {
+		return ErrActiveImpersonationSession
+	}
+	if !errors.Is(err, sql.ErrNoRows) {
+		return fmt.Errorf("check active impersonation session: %w", err)
+	}
+	return nil
 }
 
 // GetActiveSession retrieves the active impersonation session for a super admin

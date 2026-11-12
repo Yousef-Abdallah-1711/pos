@@ -1,21 +1,19 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import * as z from 'zod'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { ChefHat, Eye, EyeOff, Loader2 } from 'lucide-react'
+import { Loader2 } from 'lucide-react'
+import { FormErrorSummary, FormField, PasswordField, applyApiFieldErrors, createLoginSchema, parseApiError, fieldAccessibility } from '@pos-saas/form-foundation'
 import api from '@/lib/api'
 import { useAuthStore } from '@/stores/authStore'
 import { toast } from 'sonner'
 import { getConfig } from '@/lib/config'
 import { TenantSelectorModal } from '@/components/TenantSelectorModal'
 import { useLanguage } from '@/contexts/LanguageContext'
+import { Navbar } from '@/components/Navbar'
 
 type LoginForm = {
   email: string
@@ -31,27 +29,36 @@ interface Tenant {
 }
 
 export default function LoginPage() {
-  const router = useRouter()
   const setAuth = useAuthStore((state) => state.setAuth)
   const { t, dir, language } = useLanguage()
   const locale = language
-  const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [showTenantSelector, setShowTenantSelector] = useState(false)
   const [selectedEmail, setSelectedEmail] = useState('')
   const [availableTenants, setAvailableTenants] = useState<Tenant[]>([])
+  const [selectionToken, setSelectionToken] = useState('')
 
-  const loginSchema = z.object({
-    email: z.string().email(t.auth.validation.invalidEmail),
-    password: z.string().min(6, t.auth.validation.passwordMin),
-  })
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get('created') === '1') {
+      toast.success('Your account is ready. Sign in to continue.')
+    }
+  }, [])
+
+  const loginSchema = createLoginSchema({ required: t.auth.validation.required, invalidEmail: t.auth.validation.invalidEmail, emailMax: t.auth.validation.emailMax, passwordMin: t.auth.validation.passwordMin, passwordMax: t.auth.validation.passwordMax })
+  const errorFallback = language === 'ar'
+    ? { validation: 'يرجى مراجعة الحقول الموضحة.', invalidCredentials: t.auth.login.invalidCredentials, rateLimited: 'محاولات كثيرة. انتظر قليلًا ثم حاول مجددًا.', unavailable: 'تسجيل الدخول غير متاح مؤقتًا. حاول مرة أخرى.', network: t.auth.login.networkError, unexpected: t.auth.login.loginFailed, conflict: t.auth.login.loginFailed }
+    : { validation: 'Please review the highlighted fields.', invalidCredentials: t.auth.login.invalidCredentials, rateLimited: 'Too many attempts. Wait a moment and try again.', unavailable: 'Sign in is temporarily unavailable. Please try again.', network: t.auth.login.networkError, unexpected: t.auth.login.loginFailed, conflict: t.auth.login.loginFailed }
 
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    setError,
+    setFocus,
+    formState: { errors, isSubmitted },
   } = useForm<LoginForm>({
     resolver: zodResolver(loginSchema),
+    mode: 'onTouched',
+    reValidateMode: 'onChange',
   })
 
   const onSubmit = async (data: LoginForm) => {
@@ -62,28 +69,25 @@ export default function LoginPage() {
       if (response.data.multiple_tenants && response.data.tenants && response.data.tenants.length > 1) {
         setSelectedEmail(data.email)
         setAvailableTenants(response.data.tenants)
+        setSelectionToken(response.data.selection_token ?? '')
         setShowTenantSelector(true)
         toast.info(t.auth.login.multipleTenants)
         setIsLoading(false)
         return
       }
 
-      const { user, token } = response.data
-      setAuth(user, token)
+      const { user } = response.data
+      setAuth(user, '')
       toast.success(t.auth.login.loginSuccess)
 
       const { dashboardUrl } = getConfig()
-      window.location.href = `${dashboardUrl}/auth/callback?token=${encodeURIComponent(token)}&user=${encodeURIComponent(JSON.stringify(user))}`
-    } catch (error: any) {
-      let message = t.auth.login.loginFailed
-      if (error.response?.data?.error) {
-        message = error.response.data.error
-      } else if (error.response?.status === 401) {
-        message = t.auth.login.invalidCredentials
-      } else if (error.code === 'ERR_NETWORK') {
-        message = t.auth.login.networkError
-      }
-      toast.error(message)
+      window.location.href = `${dashboardUrl}/${locale}/auth/callback`
+    } catch (error) {
+      const parsed = parseApiError(error, errorFallback)
+      applyApiFieldErrors(parsed.fields, (field, message) => setError(field as keyof LoginForm, { type: 'server', message }))
+      const firstField = Object.keys(parsed.fields)[0]
+      if (firstField === 'email' || firstField === 'password') window.requestAnimationFrame(() => setFocus(firstField))
+      else if (!firstField) toast.error(parsed.message)
     } finally {
       setIsLoading(false)
     }
@@ -95,110 +99,47 @@ export default function LoginPage() {
 
   return (
     <>
-      <div dir={dir} className="min-h-screen flex items-center justify-center bg-gradient-to-br from-orange-50 to-red-50 dark:from-gray-900 dark:to-gray-800 px-4">
-        <div className="max-w-md w-full">
-          {/* Logo */}
-          <div className="text-center mb-8">
-            <Link href={`/${locale}`} className="inline-flex items-center gap-2.5 mb-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-red-600 rounded-xl flex items-center justify-center">
-                <ChefHat className="h-6 w-6 text-white" />
-              </div>
-              <span className="text-2xl font-extrabold text-gray-900 dark:text-white">
-                Restaurant<span className="text-orange-500">POS</span>
-              </span>
-            </Link>
-            <p className="text-gray-600 dark:text-gray-400">
-              {t.auth.login.title}
-            </p>
-          </div>
-
-          {/* Login Form */}
-          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700 p-8">
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-              {/* Email */}
-              <div className="space-y-2">
-                <Label htmlFor="email">{t.auth.login.email}</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder={t.auth.login.emailPlaceholder}
-                  {...register('email')}
-                  disabled={isLoading}
-                />
-                {errors.email && (
-                  <p className="text-sm text-red-500">{errors.email.message}</p>
-                )}
-              </div>
-
-              {/* Password */}
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="password">{t.auth.login.password}</Label>
-                  <Link
-                    href={`/${locale}/auth/forgot-password`}
-                    className="text-sm text-orange-600 hover:underline dark:text-orange-400"
-                  >
-                    {t.auth.login.forgotPassword}
-                  </Link>
-                </div>
-                <div className="relative">
-                  <Input
-                    id="password"
-                    type={showPassword ? 'text' : 'password'}
-                    placeholder={t.auth.login.passwordPlaceholder}
-                    {...register('password')}
-                    disabled={isLoading}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className={`absolute ${dir === 'rtl' ? 'left-3' : 'right-3'} top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200`}
-                  >
-                    {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-                  </button>
-                </div>
-                {errors.password && (
-                  <p className="text-sm text-red-500">{errors.password.message}</p>
-                )}
-              </div>
-
-              {/* Submit */}
-              <Button
-                type="submit"
-                className="w-full bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white border-0 h-11"
-                disabled={isLoading}
-              >
-                {isLoading ? (
-                  <>
-                    <Loader2 className={`${dir === 'rtl' ? 'ml-2' : 'mr-2'} h-4 w-4 animate-spin`} />
-                    {t.auth.login.signingIn}
-                  </>
-                ) : (
-                  t.auth.login.signIn
-                )}
-              </Button>
-            </form>
-
-            {/* Register Link */}
-            <p className="mt-6 text-center text-sm text-gray-600 dark:text-gray-400">
-              {t.auth.login.noAccount}{' '}
-              <Link
-                href={`/${locale}/auth/register`}
-                className="text-orange-600 font-medium hover:underline dark:text-orange-400"
-              >
-                {t.auth.login.createAccount}
-              </Link>
-            </p>
-          </div>
+      <a className="poos-skip-link" href="#main-content">{t.nav.skipToContent}</a>
+      <Navbar />
+      <main id="main-content" className="auth-page" dir={dir}>
+        <div className="auth-layout">
+          <section className="auth-story" aria-label={language === 'ar' ? 'عن POOS' : 'About POOS'}>
+            <div>
+              <h1>{language === 'ar' ? 'إدارة مطعمك في صورة واحدة.' : 'Your restaurant, in one view.'}</h1>
+              <p>{t.footer.tagline}</p>
+            </div>
+            <div className="auth-story__rule">{language === 'ar' ? 'مساحة واحدة لفريق الخدمة والمطبخ.' : 'One platform for front- and back-of-house work.'}</div>
+          </section>
+          <section className="auth-form-panel" aria-labelledby="login-heading">
+            <div className="auth-form">
+              <Link className="auth-form__back" href={`/${locale}`}>{language === 'ar' ? 'العودة إلى POOS' : 'Back to POOS'}</Link>
+              <h2 id="login-heading">{t.auth.login.title}</h2>
+              <p className="auth-form__intro">{language === 'ar' ? 'أدخل بيانات حسابك للمتابعة.' : 'Enter your account details to continue.'}</p>
+              <form method="post" noValidate onSubmit={handleSubmit(onSubmit, (invalid) => { const first = Object.keys(invalid)[0] as keyof LoginForm | undefined; if (first) window.requestAnimationFrame(() => setFocus(first)) })} className="auth-form__fields">
+                <FormErrorSummary title={errorFallback.validation} errors={isSubmitted ? Object.fromEntries(Object.entries(errors).map(([key, value]) => [key, value?.message ?? errorFallback.validation])) : {}} onFocusField={(field) => setFocus(field as keyof LoginForm)} />
+                <FormField id="email" label={t.auth.login.email} required error={errors.email?.message}>
+                  <input type="email" autoComplete="email" maxLength={255} placeholder={t.auth.login.emailPlaceholder} {...register('email')} {...fieldAccessibility('email', errors.email?.message)} disabled={isLoading} className="poos-input" />
+                </FormField>
+                <FormField id="password" label={t.auth.login.password} required error={errors.password?.message}>
+                  <div className="auth-field__password"><PasswordField label={t.auth.login.password} autoComplete="current-password" placeholder={t.auth.login.passwordPlaceholder} {...register('password')} {...fieldAccessibility('password', errors.password?.message)} disabled={isLoading} className="poos-input" visibleLabel={language === 'ar' ? 'إظهار كلمة المرور' : 'Show password'} hiddenLabel={language === 'ar' ? 'إخفاء كلمة المرور' : 'Hide password'} /></div>
+                </FormField>
+                <Button type="submit" className="poos-button auth-form__submit" disabled={isLoading} aria-live="polite">
+                  {isLoading ? <><Loader2 aria-hidden="true" className="animate-spin" size={18} />{t.auth.login.signingIn}</> : t.auth.login.signIn}
+                </Button>
+              </form>
+            </div>
+          </section>
         </div>
-      </div>
+      </main>
 
       {/* Tenant Selector Modal */}
       <TenantSelectorModal
         isOpen={showTenantSelector}
         email={selectedEmail}
+        selectionToken={selectionToken}
         tenants={availableTenants}
         onTenantSelected={handleTenantSelected}
+        onCancel={() => setShowTenantSelector(false)}
       />
     </>
   )

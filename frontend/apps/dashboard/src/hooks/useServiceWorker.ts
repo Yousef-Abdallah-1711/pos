@@ -236,7 +236,7 @@ export function useBackgroundSync(tag: string) {
 
     try {
       const registration = await navigator.serviceWorker.ready
-      await registration.sync.register(tag)
+      await (registration as ServiceWorkerRegistration & { sync?: { register(tag: string): Promise<void> } }).sync?.register(tag)
       debugLog('[BG-SYNC] Registered:', tag)
       setIsRegistered(true)
     } catch (error) {

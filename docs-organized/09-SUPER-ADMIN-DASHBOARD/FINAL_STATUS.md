@@ -28,7 +28,7 @@ The Super Admin Dashboard has been **fully implemented** with comprehensive back
 ```
 URL: http://localhost:3004
 Email: superadmin@pos-saas.com
-Password: SuperAdmin@123
+Password: Set locally using the development seed script.
 ```
 
 ### Start the Server:
@@ -308,7 +308,7 @@ http://localhost:3004
 ### 3. Login
 ```
 Email: superadmin@pos-saas.com
-Password: SuperAdmin@123
+Password: Set locally using the development seed script.
 ```
 
 ### 4. Test Features

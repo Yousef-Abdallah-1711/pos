@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter, usePathname, useParams } from 'next/navigation'
 import { useAuthStore } from '@/stores/authStore'
-import { useUserPermissions } from '@/hooks/useRbac'
+import { useHasPermission } from '@/hooks/useRbac'
 import { api } from '@/lib/api'
 import { apiCache } from '@/lib/apiCache'
 import { toast } from 'sonner'
@@ -14,19 +14,7 @@ import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbSeparator, Breadc
 import { FormSkeleton } from '@/components/skeletons'
 import { Lock } from 'lucide-react'
 import { debugError } from '@/lib/debug'
-import { hasAuthenticatedSession } from '@/lib/authSession'
-
-interface Product {
-  id: number
-  name: string
-  [key: string]: any
-}
-
-interface Category {
-  id: number
-  name: string
-  [key: string]: any
-}
+import type { ProductDetails as Product, ProductCategory as Category } from '@/components/products/product-types'
 
 export default function EditProductPage() {
   const router = useRouter()
@@ -36,16 +24,17 @@ export default function EditProductPage() {
   const t = createTranslator(locale)
 
   // Check RBAC permissions for Products module
-  const { checkPermission, loading: permissionLoading } = useUserPermissions()
-  const canUpdateProducts = checkPermission(MODULE_IDS.PRODUCTS, PERMISSION_LEVELS.WRITE)
+  const canUpdateProductsPermission = useHasPermission(
+    MODULE_IDS.PRODUCTS,
+    PERMISSION_LEVELS.WRITE,
+  )
+  const canUpdateProducts = canUpdateProductsPermission.loading || canUpdateProductsPermission.hasPermission
 
   const productId = params.id as string
   const [product, setProduct] = useState<Product | null>(null)
   const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(true)
-  const user = useAuthStore((state) => state.user)
   const token = useAuthStore((state) => state.token)
-  const hasSession = hasAuthenticatedSession(user, token)
 
   // Fetch product and categories with caching
   useEffect(() => {
@@ -75,15 +64,10 @@ export default function EditProductPage() {
       }
     }
 
-    if (hasSession && productId && canUpdateProducts && !permissionLoading) {
+    if (token && productId) {
       fetchData()
-      return
     }
-
-    if (!permissionLoading) {
-      setLoading(false)
-    }
-  }, [hasSession, productId, locale, router, canUpdateProducts, permissionLoading])
+  }, [token, productId, locale, router])
 
   const handleUpdateProduct = async (formData: any) => {
     try {
@@ -110,14 +94,6 @@ export default function EditProductPage() {
     { href: `/${locale}/dashboard/products/${productId}`, label: product?.name_en || 'Product' },
     { label: t('products.editProduct') }
   ]
-
-  if (permissionLoading) {
-    return (
-      <div className="space-y-6">
-        <FormSkeleton />
-      </div>
-    )
-  }
 
   // Show permission denied if user can't update products
   if (!canUpdateProducts) {

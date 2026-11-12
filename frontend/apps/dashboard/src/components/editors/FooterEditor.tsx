@@ -34,9 +34,29 @@ interface FooterSection {
   order: number
 }
 
-interface FooterConfig extends ThemeFooterConfig {
+interface FooterConfig extends Omit<ThemeFooterConfig, 'footerSections' | 'socialLinks'> {
+  footerSections?: FooterSection[]
+  socialLinks: SocialLink[]
   layout?: 'compact' | 'expanded' | 'minimal'
   legalLinks?: LinkItem[]
+}
+
+/** Sections and social links saved without ids cannot be edited (lookups are by id): give them stable ones. */
+function withFooterIds(config: ThemeFooterConfig): Omit<ThemeFooterConfig, 'footerSections' | 'socialLinks'> & { footerSections: FooterSection[]; socialLinks: SocialLink[] } {
+  return {
+    ...config,
+    footerSections: (config.footerSections ?? []).map((section, index) => ({
+      ...section,
+      id: section.id ?? `section-${index + 1}`,
+      order: section.order ?? index + 1,
+    })),
+    socialLinks: (config.socialLinks ?? []).map((link, index) => ({
+      ...link,
+      id: link.id ?? `social-${index + 1}`,
+      order: link.order ?? index + 1,
+      platform: link.platform as SocialLink['platform'],
+    })),
+  }
 }
 
 const SOCIAL_PLATFORMS = ['facebook', 'twitter', 'instagram', 'linkedin', 'youtube'] as const
@@ -64,7 +84,7 @@ export function FooterEditor({
   const initialFooterConfig: FooterConfig = useMemo(() => {
     if (useStore && storeFooter) {
       return {
-        ...storeFooter,
+        ...withFooterIds(storeFooter),
         layout: 'expanded',
         legalLinks: [
           { label: 'Privacy Policy', href: '/privacy' },
@@ -72,7 +92,12 @@ export function FooterEditor({
         ],
       }
     }
-    return (component?.config as unknown as FooterConfig) || {
+    if (component?.config) {
+      return withFooterIds(component.config as unknown as ThemeFooterConfig) as FooterConfig
+    }
+    return {
+      companyName: '',
+      showLinks: true,
       footerSections: [],
       socialLinks: [],
       backgroundColor: '#1f2937',
@@ -95,6 +120,14 @@ export function FooterEditor({
 
   const [previewMode, setPreviewMode] = useState(false)
   const [editingSection, setEditingSection] = useState<string | null>(null)
+
+  const notifyConfigChange = useCallback((nextConfig: FooterConfig) => {
+    if (useStore || !component || !onChange) return
+
+    const updated: ThemeComponent = { ...component, config: nextConfig }
+    onChange(updated)
+    onPreview?.(updated)
+  }, [component, onChange, onPreview, useStore])
 
   const handleConfigChange = useCallback(
     (key: keyof FooterConfig, value: any) => {
@@ -134,11 +167,12 @@ export function FooterEditor({
       ...footerConfig,
       footerSections: updatedSections,
     })
+    notifyConfigChange({ ...footerConfig, footerSections: updatedSections })
 
     if (useStore) {
       updateFooter({ footerSections: updatedSections })
     }
-  }, [footerConfig, useStore, updateFooter])
+  }, [footerConfig, useStore, updateFooter, notifyConfigChange])
 
   const deleteSection = useCallback(
     (id: string) => {
@@ -147,12 +181,13 @@ export function FooterEditor({
         ...footerConfig,
         footerSections: updatedSections,
       })
+      notifyConfigChange({ ...footerConfig, footerSections: updatedSections })
 
       if (useStore) {
         updateFooter({ footerSections: updatedSections })
       }
     },
-    [footerConfig, useStore, updateFooter]
+    [footerConfig, useStore, updateFooter, notifyConfigChange]
   )
 
   const updateSection = useCallback(
@@ -164,12 +199,13 @@ export function FooterEditor({
         ...footerConfig,
         footerSections: updatedSections,
       })
+      notifyConfigChange({ ...footerConfig, footerSections: updatedSections })
 
       if (useStore) {
         updateFooter({ footerSections: updatedSections })
       }
     },
-    [footerConfig, useStore, updateFooter]
+    [footerConfig, useStore, updateFooter, notifyConfigChange]
   )
 
   const addSocialLink = useCallback(() => {
@@ -185,11 +221,12 @@ export function FooterEditor({
       ...footerConfig,
       socialLinks: updatedLinks,
     })
+    notifyConfigChange({ ...footerConfig, socialLinks: updatedLinks })
 
     if (useStore) {
       updateFooter({ socialLinks: updatedLinks })
     }
-  }, [footerConfig, useStore, updateFooter])
+  }, [footerConfig, useStore, updateFooter, notifyConfigChange])
 
   const deleteSocialLink = useCallback(
     (id: string) => {
@@ -198,12 +235,13 @@ export function FooterEditor({
         ...footerConfig,
         socialLinks: updatedLinks,
       })
+      notifyConfigChange({ ...footerConfig, socialLinks: updatedLinks })
 
       if (useStore) {
         updateFooter({ socialLinks: updatedLinks })
       }
     },
-    [footerConfig, useStore, updateFooter]
+    [footerConfig, useStore, updateFooter, notifyConfigChange]
   )
 
   const updateSocialLink = useCallback(
@@ -215,12 +253,13 @@ export function FooterEditor({
         ...footerConfig,
         socialLinks: updatedLinks,
       })
+      notifyConfigChange({ ...footerConfig, socialLinks: updatedLinks })
 
       if (useStore) {
         updateFooter({ socialLinks: updatedLinks })
       }
     },
-    [footerConfig, useStore, updateFooter]
+    [footerConfig, useStore, updateFooter, notifyConfigChange]
   )
 
   if (previewMode) {
@@ -458,6 +497,7 @@ export function FooterEditor({
                   </div>
                   <button
                     onClick={() => deleteSection(section.id)}
+                    aria-label={`Delete footer section ${section.title}`}
                     className="p-1 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition"
                   >
                     <Trash2 className="h-4 w-4" />
@@ -487,6 +527,7 @@ export function FooterEditor({
             <div key={link.id} className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-3 flex gap-2">
               <select
                 value={link.platform}
+                aria-label="Social platform"
                 onChange={(e) => updateSocialLink(link.id, e.target.value, link.url)}
                 className="px-2 py-1 border border-gray-200 dark:border-gray-600 rounded dark:bg-gray-700 dark:text-white text-sm"
               >
@@ -501,10 +542,12 @@ export function FooterEditor({
                 value={link.url}
                 onChange={(e) => updateSocialLink(link.id, link.platform, e.target.value)}
                 placeholder="https://..."
+                aria-label={`${link.platform} URL`}
                 className="flex-1 px-2 py-1 border border-gray-200 dark:border-gray-600 rounded dark:bg-gray-700 dark:text-white text-sm"
               />
               <button
                 onClick={() => deleteSocialLink(link.id)}
+                aria-label={`Delete ${link.platform} link`}
                 className="p-1 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition"
               >
                 <Trash2 className="h-4 w-4" />

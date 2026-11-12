@@ -1,10 +1,9 @@
 'use client'
 import axios from 'axios'
-import { getDashboardLoginUrl, hasUsableBearerToken } from '@/lib/authSession'
 import { getConfig } from './config'
 import { debugError, debugLog, debugWarn } from '@/lib/debug'
 import { recordPerformanceMetric } from '@/lib/performance'
-import { useAuthStore } from '@/stores/authStore'
+import { buildDedupIdentityScope, buildScopedGetRequestDedupKey } from './apiRequestDedup'
 
 const API_URL = getConfig().apiUrl
 const DEFAULT_API_TIMEOUT_MS = 6000
@@ -41,27 +40,41 @@ const buildApiMetricKey = (url?: string) => {
 
 export const api = axios.create({
   baseURL: API_URL,
-  withCredentials: true,
   timeout: API_TIMEOUT_MS,
+  withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
   },
 })
 
-const buildDedupKey = (config: any) => {
-  const method = String(config?.method || 'get').toLowerCase()
-  if (method !== 'get') {
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return Boolean(value) && typeof value === 'object' && !Array.isArray(value)
+}
+
+function readDedupIdentityScope(): string | null {
+  if (typeof window === 'undefined') return null
+
+  try {
+    const authStorage = localStorage.getItem('auth-storage')
+    const legacyUser = localStorage.getItem('user')
+    let user: unknown = null
+    if (authStorage) {
+      const parsed: unknown = JSON.parse(authStorage)
+      if (!isRecord(parsed)) return null
+      const state = isRecord(parsed.state) ? parsed.state : parsed
+      user = state.user
+    }
+    if (!user && legacyUser) user = JSON.parse(legacyUser) as unknown
+    return buildDedupIdentityScope(user)
+  } catch (error) {
+    debugError('[API] Failed to read identity for request de-duplication:', error)
     return null
   }
-  const url = String(config?.url || '')
-  const params = config?.params ? JSON.stringify(config.params) : ''
-  const data = config?.data ? (typeof config.data === 'string' ? config.data : JSON.stringify(config.data)) : ''
-  return `${method}:${url}:${params}:${data}`
 }
 
 const originalRequest = api.request.bind(api)
 api.request = ((config: any) => {
-  const key = buildDedupKey(config)
+  const key = buildScopedGetRequestDedupKey(config, readDedupIdentityScope())
   if (!key) {
     return originalRequest(config)
   }
@@ -91,13 +104,28 @@ function readAuthContext(): AuthContextSnapshot {
   let restaurantId: number | null = null
 
   try {
-    const authState = useAuthStore.getState()
-    token = authState.token
-    user = authState.user
-    tenantId = user?.tenant_id || user?.tenantId || null
-    restaurantId = user?.restaurant_id || user?.restaurantId || null
+    const authStorage = localStorage.getItem('auth-storage')
+    if (authStorage) {
+      const parsed = JSON.parse(authStorage)
+      user = parsed.state?.user || parsed.user
+      tenantId = user?.tenant_id || user?.tenantId || null
+      restaurantId = user?.restaurant_id || user?.restaurantId || null
+    }
   } catch (e) {
-    debugError('[API] Failed to read auth store:', e)
+    debugError('[API] Failed to parse auth-storage:', e)
+  }
+
+  if (!user) {
+    try {
+      const userStr = localStorage.getItem('user')
+      if (userStr) {
+        user = JSON.parse(userStr)
+        tenantId = user?.tenant_id || user?.tenantId
+        restaurantId = user?.restaurant_id || user?.restaurantId
+      }
+    } catch (e) {
+      debugError('[API] Failed to parse user from localStorage:', e)
+    }
   }
 
   authContextCache = {
@@ -108,19 +136,6 @@ function readAuthContext(): AuthContextSnapshot {
     cachedAt: now,
   }
   return authContextCache
-}
-
-const readCookie = (name: string): string | null => {
-  if (typeof document === 'undefined') {
-    return null
-  }
-  const parts = document.cookie.split(';').map((p) => p.trim())
-  for (const part of parts) {
-    if (part.startsWith(`${name}=`)) {
-      return decodeURIComponent(part.slice(name.length + 1))
-    }
-  }
-  return null
 }
 
 // Add token and tenant context to requests
@@ -143,40 +158,13 @@ api.interceptors.request.use((config) => {
   }
 
   const { token, tenantId, restaurantId } = readAuthContext()
-  const method = String(config.method || 'get').toLowerCase()
-  if (!['get', 'head', 'options'].includes(method)) {
-    const csrfToken = readCookie('csrf_token')
-    if (csrfToken) {
-      config.headers['X-CSRF-Token'] = csrfToken
-    }
-  }
 
   // Don't add token to auth endpoints (like login, register)
   const isAuthEndpoint = config.url?.includes('/auth/')
 
-  // Check for impersonation token
-  let impersonationToken = null
-  try {
-    impersonationToken = sessionStorage.getItem('impersonation_token')
-  } catch (e) {
-    // sessionStorage might not be available in some contexts
-  }
+  debugLog('[API] Request interceptor - url:', config.url, 'token:', !!token)
 
-  debugLog('[API] Request interceptor - url:', config.url, 'impersonationToken:', !!impersonationToken, 'token:', !!token)
-
-  if (impersonationToken && !isAuthEndpoint) {
-    // If using impersonation token, add it as a custom header
-    config.headers['X-Impersonation-Token'] = impersonationToken
-    debugLog('[API] Added X-Impersonation-Token header')
-
-    // Also add tenant context from user if available
-    if (tenantId) {
-      config.headers['X-Tenant-ID'] = tenantId.toString()
-    }
-    if (restaurantId) {
-      config.headers['X-Restaurant-ID'] = restaurantId.toString()
-    }
-  } else if (hasUsableBearerToken(token) && !isAuthEndpoint) {
+  if (token && !isAuthEndpoint && token !== 'cookie-session') {
     config.headers.Authorization = `Bearer ${token}`
     debugLog('[API] Added Authorization header')
 
@@ -250,21 +238,25 @@ api.interceptors.response.use(
 
     // Only logout on actual authentication failures, not tenant context errors
     // Also don't logout if using impersonation - let the provider handle it
-    let isUsingImpersonation = false
-    try {
-      isUsingImpersonation = !!sessionStorage.getItem('impersonation_token')
-    } catch (e) {
-      // sessionStorage might not be available
-    }
+    const isUsingImpersonation = false
 
     debugLog('[API] Error handler - status:', error.response?.status, 'isTenantContextError:', isTenantContextError, 'isUsingImpersonation:', isUsingImpersonation)
 
     if (error.response?.status === 401 && !isTenantContextError && !isUsingImpersonation) {
       debugWarn('[API] 401 auth error - logging out')
       debugLog('[API] Logging out due to 401')
-      useAuthStore.getState().logout()
+      localStorage.removeItem('user')
+      localStorage.removeItem('auth-storage')
       authContextCache = null
-      window.location.href = getDashboardLoginUrl()
+      // Redirect to landing app login
+      import('./config')
+        .then(({ getConfig }) => {
+          const { landingUrl } = getConfig()
+          window.location.href = `${landingUrl}/auth/login`
+        })
+        .catch(() => {
+          window.location.href = '/auth/login'
+        })
     } else if (error.response?.status === 401 && isUsingImpersonation) {
       debugLog('[API] Got 401 while impersonating - NOT logging out, backend should handle impersonation token')
     }
@@ -335,7 +327,7 @@ export interface PaymentHistoryItem {
   id: number
   amount_cents: number
   currency: string
-  status: 'pending' | 'success' | 'failed' | 'refunded'
+  status: 'pending' | 'success' | 'failed' | 'refunded' | 'voided'
   payment_method?: string | null
   card_last_four?: string | null
   card_brand?: string | null

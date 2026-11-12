@@ -3,12 +3,16 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"log"
 
 	"golang.org/x/crypto/bcrypt"
 	"pos-saas/internal/domain"
 )
+
+// ErrUserNotFound indicates that a tenant-scoped user mutation found no matching user.
+var ErrUserNotFound = errors.New("user not found")
 
 // UserRepository handles user-related database operations
 type UserRepository struct {
@@ -21,19 +25,21 @@ func NewUserRepository(db *sql.DB) *UserRepository {
 }
 
 // GetByID retrieves a user by their ID
-func (r *UserRepository) GetByID(ctx context.Context, userID int) (*domain.User, error) {
-	log.Printf("[UserRepository] GetByID: %d\n", userID)
+func (r *UserRepository) GetByID(ctx context.Context, userID, tenantID, restaurantID int) (*domain.User, error) {
+	log.Printf("[UserRepository] GetByID: %d (tenant %d, restaurant %d)\n", userID, tenantID, restaurantID)
 
 	var user domain.User
 	var avatarURL sql.NullString
+	var phone sql.NullString
 
 	err := r.db.QueryRowContext(ctx, `
 		SELECT id, tenant_id, restaurant_id, email, password_hash, name, phone, avatar_url, role, status, created_at, updated_at
 		FROM users
-		WHERE id = $1
-	`, userID).Scan(
+		WHERE id = $1 AND tenant_id = $2
+		  AND (restaurant_id = $3 OR restaurant_id IS NULL)
+	`, userID, tenantID, restaurantID).Scan(
 		&user.ID, &user.TenantID, &user.RestaurantID, &user.Email, &user.PasswordHash,
-		&user.Name, &user.Phone, &avatarURL, &user.Role, &user.Status,
+		&user.Name, &phone, &avatarURL, &user.Role, &user.Status,
 		&user.CreatedAt, &user.UpdatedAt,
 	)
 
@@ -51,19 +57,56 @@ func (r *UserRepository) GetByID(ctx context.Context, userID int) (*domain.User,
 	if avatarURL.Valid {
 		user.AvatarURL = avatarURL.String
 	}
+	if phone.Valid {
+		user.Phone = phone.String
+	}
 
 	return &user, nil
 }
 
+// GetByIDForSuperAdmin returns the account explicitly linked to a platform admin.
+// This is restricted to a verified super-admin row because platform users do not
+// have a tenant/restaurant scope for the regular GetByID method.
+func (r *UserRepository) GetByIDForSuperAdmin(ctx context.Context, userID int, superAdminID int64) (*domain.User, error) {
+	var user domain.User
+	var avatarURL sql.NullString
+	var phone sql.NullString
+	err := r.db.QueryRowContext(ctx, `
+		SELECT u.id, u.tenant_id, u.restaurant_id, u.email, u.password_hash, u.name,
+		       u.phone, u.avatar_url, u.role, u.status, u.created_at, u.updated_at
+		FROM users u
+		JOIN super_admins sa ON sa.user_id = u.id
+		WHERE u.id = $1 AND sa.id = $2
+	`, userID, superAdminID).Scan(
+		&user.ID, &user.TenantID, &user.RestaurantID, &user.Email, &user.PasswordHash,
+		&user.Name, &phone, &avatarURL, &user.Role, &user.Status,
+		&user.CreatedAt, &user.UpdatedAt,
+	)
+	if err == sql.ErrNoRows {
+		return nil, fmt.Errorf("super-admin user not found")
+	}
+	if err != nil {
+		return nil, fmt.Errorf("get super-admin user: %w", err)
+	}
+	if avatarURL.Valid {
+		user.AvatarURL = avatarURL.String
+	}
+	if phone.Valid {
+		user.Phone = phone.String
+	}
+	return &user, nil
+}
+
 // UpdatePassword updates a user's password hash
-func (r *UserRepository) UpdatePassword(ctx context.Context, userID int, hashedPassword string) error {
-	log.Printf("[UserRepository] UpdatePassword for user %d\n", userID)
+func (r *UserRepository) UpdatePassword(ctx context.Context, userID, tenantID, restaurantID int, hashedPassword string) error {
+	log.Printf("[UserRepository] UpdatePassword for user %d in tenant %d\n", userID, tenantID)
 
 	result, err := r.db.ExecContext(ctx, `
 		UPDATE users
 		SET password_hash = $1, updated_at = NOW()
-		WHERE id = $2
-	`, hashedPassword, userID)
+		WHERE id = $2 AND tenant_id = $3
+		  AND (restaurant_id = $4 OR restaurant_id IS NULL)
+	`, hashedPassword, userID, tenantID, restaurantID)
 
 	if err != nil {
 		log.Printf("[UserRepository] ERROR: Failed to update password: %v\n", err)
@@ -86,18 +129,18 @@ func (r *UserRepository) UpdatePassword(ctx context.Context, userID int, hashedP
 }
 
 // UpdateProfile updates a user's profile information (name and avatar_url)
-func (r *UserRepository) UpdateProfile(ctx context.Context, userID int, name string, avatarURL *string) error {
-	log.Printf("[UserRepository] UpdateProfile for user %d\n", userID)
+func (r *UserRepository) UpdateProfile(ctx context.Context, userID, tenantID, restaurantID int, name string, avatarURL *string) error {
+	log.Printf("[UserRepository] UpdateProfile for user %d in tenant %d\n", userID, tenantID)
 
 	var query string
 	var args []interface{}
 
 	if avatarURL != nil {
-		query = `UPDATE users SET name = $1, avatar_url = $2, updated_at = NOW() WHERE id = $3`
-		args = []interface{}{name, *avatarURL, userID}
+		query = `UPDATE users SET name = $1, avatar_url = $2, updated_at = NOW() WHERE id = $3 AND tenant_id = $4 AND (restaurant_id = $5 OR restaurant_id IS NULL)`
+		args = []interface{}{name, *avatarURL, userID, tenantID, restaurantID}
 	} else {
-		query = `UPDATE users SET name = $1, updated_at = NOW() WHERE id = $2`
-		args = []interface{}{name, userID}
+		query = `UPDATE users SET name = $1, updated_at = NOW() WHERE id = $2 AND tenant_id = $3 AND (restaurant_id = $4 OR restaurant_id IS NULL)`
+		args = []interface{}{name, userID, tenantID, restaurantID}
 	}
 
 	result, err := r.db.ExecContext(ctx, query, args...)
@@ -129,6 +172,7 @@ func (r *UserRepository) GetByEmail(ctx context.Context, email string) (*domain.
 	var user domain.User
 	var avatarURL sql.NullString
 	var isSuperAdmin sql.NullBool
+	var phone sql.NullString
 
 	err := r.db.QueryRowContext(ctx, `
 		SELECT id, tenant_id, restaurant_id, email, password_hash, name, phone, avatar_url, role, status, is_super_admin, created_at, updated_at
@@ -136,7 +180,7 @@ func (r *UserRepository) GetByEmail(ctx context.Context, email string) (*domain.
 		WHERE email = $1
 	`, email).Scan(
 		&user.ID, &user.TenantID, &user.RestaurantID, &user.Email, &user.PasswordHash,
-		&user.Name, &user.Phone, &avatarURL, &user.Role, &user.Status, &isSuperAdmin,
+		&user.Name, &phone, &avatarURL, &user.Role, &user.Status, &isSuperAdmin,
 		&user.CreatedAt, &user.UpdatedAt,
 	)
 
@@ -153,6 +197,9 @@ func (r *UserRepository) GetByEmail(ctx context.Context, email string) (*domain.
 	// Handle NULL avatar_url
 	if avatarURL.Valid {
 		user.AvatarURL = avatarURL.String
+	}
+	if phone.Valid {
+		user.Phone = phone.String
 	}
 
 	// Handle NULL is_super_admin
@@ -207,10 +254,11 @@ func (r *UserRepository) ListByTenant(ctx context.Context, tenantID int64) ([]do
 	for rows.Next() {
 		var user domain.User
 		var avatarURL sql.NullString
+		var phone sql.NullString
 
 		err := rows.Scan(
 			&user.ID, &user.TenantID, &user.RestaurantID, &user.Email, &user.PasswordHash,
-			&user.Name, &user.Phone, &avatarURL, &user.Role, &user.Status,
+			&user.Name, &phone, &avatarURL, &user.Role, &user.Status,
 			&user.CreatedAt, &user.UpdatedAt,
 		)
 		if err != nil {
@@ -220,6 +268,9 @@ func (r *UserRepository) ListByTenant(ctx context.Context, tenantID int64) ([]do
 
 		if avatarURL.Valid {
 			user.AvatarURL = avatarURL.String
+		}
+		if phone.Valid {
+			user.Phone = phone.String
 		}
 
 		users = append(users, user)
@@ -256,10 +307,11 @@ func (r *UserRepository) FindByEmailAllTenants(ctx context.Context, email string
 		var user domain.User
 		var avatarURL sql.NullString
 		var restaurantID sql.NullInt32
+		var phone sql.NullString
 
 		err := rows.Scan(
 			&user.ID, &user.TenantID, &restaurantID, &user.Email, &user.PasswordHash,
-			&user.Name, &user.Phone, &avatarURL, &user.Role, &user.Status,
+			&user.Name, &phone, &avatarURL, &user.Role, &user.Status,
 			&user.CreatedAt, &user.UpdatedAt,
 		)
 		if err != nil {
@@ -269,6 +321,9 @@ func (r *UserRepository) FindByEmailAllTenants(ctx context.Context, email string
 
 		if avatarURL.Valid {
 			user.AvatarURL = avatarURL.String
+		}
+		if phone.Valid {
+			user.Phone = phone.String
 		}
 		if restaurantID.Valid {
 			rid := int(restaurantID.Int32)
@@ -294,6 +349,7 @@ func (r *UserRepository) CreateUserInTenant(ctx context.Context, tenantID int64,
 	var user domain.User
 	var avatarURL sql.NullString
 	var restaurantIDResult sql.NullInt32
+	var phoneResult sql.NullString
 
 	err := r.db.QueryRowContext(ctx, `
 		INSERT INTO users (tenant_id, restaurant_id, email, password_hash, name, phone, role, status, created_at, updated_at)
@@ -301,7 +357,7 @@ func (r *UserRepository) CreateUserInTenant(ctx context.Context, tenantID int64,
 		RETURNING id, tenant_id, restaurant_id, email, password_hash, name, phone, avatar_url, role, status, created_at, updated_at
 	`, tenantID, restaurantID, email, hashedPassword, name, phone).Scan(
 		&user.ID, &user.TenantID, &restaurantIDResult, &user.Email, &user.PasswordHash,
-		&user.Name, &user.Phone, &avatarURL, &user.Role, &user.Status,
+		&user.Name, &phoneResult, &avatarURL, &user.Role, &user.Status,
 		&user.CreatedAt, &user.UpdatedAt,
 	)
 
@@ -312,6 +368,9 @@ func (r *UserRepository) CreateUserInTenant(ctx context.Context, tenantID int64,
 
 	if avatarURL.Valid {
 		user.AvatarURL = avatarURL.String
+	}
+	if phoneResult.Valid {
+		user.Phone = phoneResult.String
 	}
 	if restaurantIDResult.Valid {
 		rid := int(restaurantIDResult.Int32)
@@ -345,16 +404,17 @@ func (r *UserRepository) UpdateUser(ctx context.Context, userID int64, tenantID 
 	var user domain.User
 	var avatarURL sql.NullString
 	var restaurantIDResult sql.NullInt32
+	var phoneResult sql.NullString
 
 	err := r.db.QueryRowContext(ctx, query, args...).Scan(
 		&user.ID, &user.TenantID, &restaurantIDResult, &user.Email, &user.PasswordHash,
-		&user.Name, &user.Phone, &avatarURL, &user.Role, &user.Status,
+		&user.Name, &phoneResult, &avatarURL, &user.Role, &user.Status,
 		&user.CreatedAt, &user.UpdatedAt,
 	)
 
 	if err == sql.ErrNoRows {
 		log.Printf("[UserRepository] ERROR: User not found: id=%d, tenant=%d\n", userID, tenantID)
-		return nil, fmt.Errorf("user not found")
+		return nil, ErrUserNotFound
 	}
 
 	if err != nil {
@@ -364,6 +424,9 @@ func (r *UserRepository) UpdateUser(ctx context.Context, userID int64, tenantID 
 
 	if avatarURL.Valid {
 		user.AvatarURL = avatarURL.String
+	}
+	if phoneResult.Valid {
+		user.Phone = phoneResult.String
 	}
 	if restaurantIDResult.Valid {
 		rid := int(restaurantIDResult.Int32)
@@ -395,7 +458,7 @@ func (r *UserRepository) DeleteUser(ctx context.Context, userID int64, tenantID 
 
 	if rowsAffected == 0 {
 		log.Printf("[UserRepository] ERROR: User not found: id=%d, tenant=%d\n", userID, tenantID)
-		return fmt.Errorf("user not found")
+		return ErrUserNotFound
 	}
 
 	log.Printf("[UserRepository] User deleted successfully: id=%d\n", userID)

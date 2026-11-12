@@ -13,7 +13,7 @@ export interface SuperAdminLoginRequest {
 }
 
 export interface SuperAdminLoginResponse {
-  token: string;
+  token?: string;
   expires_at: string;
   super_admin: SuperAdminUser;
 }
@@ -22,12 +22,12 @@ export interface SuperAdminUser {
   id: number;
   user_id: number;
   email: string;
-  secret_key: string;
+  secret_key?: string;
   ip_whitelist: string[];
   is_active: boolean;
-  last_login_at: string | null;
+  last_login_at?: string | null;
   failed_login_attempts: number;
-  locked_until: string | null;
+  locked_until?: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -77,10 +77,11 @@ export interface ImpersonationSession {
 }
 
 export interface ImpersonationToken {
-  token: string;
+  token?: string;
   expires_at: string;
   target_user: User;
-  target_tenant: Tenant;
+  target_tenant?: Tenant;
+  target_tenant_id?: number;
 }
 
 export interface ImpersonationStatus {
@@ -99,7 +100,7 @@ export interface AuditLog {
   target_tenant_id: number | null;
   ip_address: string;
   user_agent: string;
-  details: Record<string, unknown>;
+  details?: Record<string, unknown> | null;
   created_at: string;
 }
 

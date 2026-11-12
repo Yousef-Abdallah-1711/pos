@@ -126,6 +126,7 @@ export function getReportsOverviewLabels(locale: Locale) {
     topItem: t('reports.overview.topItem'),
     topSalesItem: t('reports.overview.topSalesItem'),
     avgTurnover: t('reports.inventory.avgTurnover'),
+    slowMoving: t('reports.inventory.slowMoving'),
     slowItem: t('reports.overview.slowItem'),
     viewDetails: t('reports.common.viewDetails'),
     generatedAt: t('reports.common.generatedAt'),

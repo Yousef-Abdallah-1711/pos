@@ -3,7 +3,6 @@ package http
 import (
 	"net/http"
 	"strconv"
-	"strings"
 
 	"pos-saas/internal/domain"
 	"pos-saas/internal/middleware"
@@ -82,7 +81,7 @@ func (h *RBACPermissionHandler) AssignPermission(w http.ResponseWriter, r *http.
 		return
 	}
 
-	if err := h.rolePermissionRepo.Assign(r.Context(), int64(claims.TenantID), roleID, moduleID, level); err != nil {
+	if err := h.rolePermissionRepo.Assign(r.Context(), int64(claims.TenantID), int64(claims.RestaurantID), roleID, moduleID, level); err != nil {
 		respondError(w, http.StatusInternalServerError, "Failed to assign permission")
 		return
 	}
@@ -111,7 +110,7 @@ func (h *RBACPermissionHandler) RevokePermission(w http.ResponseWriter, r *http.
 		return
 	}
 
-	if err := h.rolePermissionRepo.Revoke(r.Context(), roleID, moduleID); err != nil {
+	if err := h.rolePermissionRepo.Revoke(r.Context(), int64(claims.TenantID), int64(claims.RestaurantID), roleID, moduleID); err != nil {
 		respondError(w, http.StatusNotFound, err.Error())
 		return
 	}
@@ -134,7 +133,7 @@ func (h *RBACPermissionHandler) GetRolePermissions(w http.ResponseWriter, r *htt
 		return
 	}
 
-	perms, err := h.rolePermissionRepo.GetByRoleAndTenant(r.Context(), int64(claims.TenantID), roleID)
+	perms, err := h.rolePermissionRepo.GetByRoleAndTenant(r.Context(), int64(claims.TenantID), int64(claims.RestaurantID), roleID)
 	if err != nil {
 		respondError(w, http.StatusInternalServerError, err.Error())
 		return
@@ -180,7 +179,7 @@ func (h *RBACPermissionHandler) CheckPermission(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	userRoles, err := h.userRoleRepo.GetUserRoles(r.Context(), int64(claims.UserID), int64(claims.TenantID))
+	userRoles, err := h.userRoleRepo.GetUserRoles(r.Context(), int64(claims.UserID), int64(claims.TenantID), int64(claims.RestaurantID))
 	if err != nil {
 		respondError(w, http.StatusInternalServerError, "Failed to check permissions")
 		return
@@ -188,7 +187,7 @@ func (h *RBACPermissionHandler) CheckPermission(w http.ResponseWriter, r *http.R
 
 	highest := domain.PermissionNone
 	for _, role := range userRoles {
-		roleLevel, err := h.rolePermissionRepo.GetByRoleAndModule(r.Context(), int64(role.ID), moduleID)
+		roleLevel, err := h.rolePermissionRepo.GetByRoleAndModule(r.Context(), int64(claims.TenantID), int64(claims.RestaurantID), int64(role.ID), moduleID)
 		if err != nil {
 			respondError(w, http.StatusInternalServerError, "Failed to check permissions")
 			return
@@ -216,7 +215,7 @@ func (h *RBACPermissionHandler) GetUserPermissions(w http.ResponseWriter, r *htt
 		return
 	}
 
-	userRoles, err := h.userRoleRepo.GetUserRoles(r.Context(), int64(claims.UserID), int64(claims.TenantID))
+	userRoles, err := h.userRoleRepo.GetUserRoles(r.Context(), int64(claims.UserID), int64(claims.TenantID), int64(claims.RestaurantID))
 	if err != nil {
 		respondError(w, http.StatusInternalServerError, "Failed to load permissions")
 		return
@@ -224,7 +223,7 @@ func (h *RBACPermissionHandler) GetUserPermissions(w http.ResponseWriter, r *htt
 
 	permissions := map[int64]string{}
 	for _, role := range userRoles {
-		rolePerms, err := h.rolePermissionRepo.GetByRoleAndTenant(r.Context(), int64(claims.TenantID), int64(role.ID))
+		rolePerms, err := h.rolePermissionRepo.GetByRoleAndTenant(r.Context(), int64(claims.TenantID), int64(claims.RestaurantID), int64(role.ID))
 		if err != nil {
 			respondError(w, http.StatusInternalServerError, "Failed to load permissions")
 			return
@@ -264,50 +263,9 @@ func (h *RBACPermissionHandler) GetUserPermissions(w http.ResponseWriter, r *htt
 }
 
 func maxPermissionLevel(current string, candidate string) string {
-	current = strings.ToUpper(strings.TrimSpace(current))
-	candidate = strings.ToUpper(strings.TrimSpace(candidate))
-	if current == "" {
-		current = domain.PermissionNone
-	}
-	if candidate == "" {
-		candidate = domain.PermissionNone
-	}
-	if domain.PermissionValues[candidate] > domain.PermissionValues[current] {
-		return candidate
-	}
-	return current
+	return domain.MaxPermissionLevel(current, candidate)
 }
 
 func fallbackPermissionLevelForRole(role domain.Role, moduleID int64) string {
-	code := strings.ToUpper(strings.TrimSpace(role.RoleCode))
-	if code == "" {
-		code = strings.ToUpper(strings.TrimSpace(role.RoleName))
-	}
-
-	switch moduleID {
-	case 13: // KDS
-		switch code {
-		case "ADMIN", "ADMINISTRATOR", "OWNER", "MANAGER":
-			return domain.PermissionAdmin
-		case "KITCHEN_STAFF", "KITCHEN_LEAD", "CHEF", "EMPLOYEE":
-			return domain.PermissionWrite
-		case "KITCHEN_VIEWER":
-			return domain.PermissionRead
-		default:
-			return domain.PermissionNone
-		}
-	case 14: // TABLES
-		switch code {
-		case "ADMIN", "ADMINISTRATOR", "OWNER":
-			return domain.PermissionAdmin
-		case "MANAGER":
-			return domain.PermissionWrite
-		case "KITCHEN_STAFF", "KITCHEN_LEAD", "CHEF", "KITCHEN_VIEWER", "EMPLOYEE", "WAITER", "HOST", "CASHIER":
-			return domain.PermissionRead
-		default:
-			return domain.PermissionNone
-		}
-	default:
-		return domain.PermissionNone
-	}
+	return domain.FallbackPermissionLevel(role, moduleID)
 }

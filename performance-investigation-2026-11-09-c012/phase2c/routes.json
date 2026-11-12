@@ -1,0 +1,10 @@
+[
+  {
+    "path": "/en/dashboard",
+    "readySelector": "main h1"
+  },
+  {
+    "path": "/en/dashboard/pos",
+    "readySelector": "#pos-product-search"
+  }
+]

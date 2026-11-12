@@ -7,6 +7,7 @@
 
 import React, { useState, useCallback } from 'react'
 import type { ThemeComponent } from '@/types/theme'
+import { previewText } from '@/lib/previewText'
 
 interface CTAConfig {
   primaryButtonText?: string
@@ -553,12 +554,12 @@ export function CTAEditor({
         <div className="cta-preview-shell rounded-lg border border-gray-200 dark:border-gray-700">
           <div className="max-w-2xl">
             <h2 className="text-4xl font-bold text-gray-900 dark:text-white text-center mb-4">
-              {component.title?.en || 'Ready to Get Started?'}
+              {previewText(component.title, 'Ready to Get Started?')}
             </h2>
 
             {component.subtitle && (
               <p className="cta-preview-description text-lg text-center mb-8">
-                {component.subtitle.en}
+                {previewText(component.subtitle)}
               </p>
             )}
 

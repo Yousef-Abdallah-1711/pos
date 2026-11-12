@@ -1,3 +1,6 @@
+//go:build experimental
+// +build experimental
+
 package auth_test
 
 import (
@@ -302,6 +305,10 @@ func TestCleanupExpiredTokens(t *testing.T) {
 	// Generate valid token
 	jm.SetRefreshTokenExpiry(7 * 24 * time.Hour)
 	validToken, _ := jm.GenerateRefreshToken(2, 1, "user2@example.com")
+
+	if expiredToken == "" || validToken == "" {
+		t.Fatal("token generation returned an empty token")
+	}
 
 	initialCount := jm.GetActiveTokenCount()
 

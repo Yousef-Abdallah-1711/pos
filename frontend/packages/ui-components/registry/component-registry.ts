@@ -20,19 +20,10 @@ const componentLoaders: Record<string, ComponentLoader> = {
   'hero-section': () => import('../organisms/HeroSection'),
 }
 
-const editorLoaders: Record<string, ComponentLoader> = {
-  HeroEditor: () =>
-    import('../../../apps/dashboard/src/app/[locale]/dashboard/theme-builder/editor/components/HeroEditor'),
-  ProductsEditor: () =>
-    import('../../../apps/dashboard/src/app/[locale]/dashboard/theme-builder/editor/components/ProductsEditor'),
-  WhyChooseUsEditor: () =>
-    import('../../../apps/dashboard/src/app/[locale]/dashboard/theme-builder/editor/components/WhyChooseUsEditor'),
-  ContactEditor: () =>
-    import('../../../apps/dashboard/src/app/[locale]/dashboard/theme-builder/editor/components/ContactEditor'),
-  TestimonialsEditor: () =>
-    import('../../../apps/dashboard/src/app/[locale]/dashboard/theme-builder/editor/components/TestimonialsEditor'),
-  CTAEditor: () =>
-    import('../../../apps/dashboard/src/app/[locale]/dashboard/theme-builder/editor/components/CTAEditor'),
+const editorLoaders: Record<string, ComponentLoader> = {}
+
+export const registerEditorLoader = (name: string, loader: ComponentLoader) => {
+  editorLoaders[name] = loader
 }
 
 const resolveModuleExport = (module: Record<string, unknown>, exportName?: string) => {

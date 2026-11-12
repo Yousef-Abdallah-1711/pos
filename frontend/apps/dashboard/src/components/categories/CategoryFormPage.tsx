@@ -8,14 +8,16 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Checkbox } from '@/components/ui/checkbox'
 import { useState } from 'react'
+import { errorText } from '@/lib/form-errors'
+import type { CategoryFormPageProps, CategoryFormValues } from './category-types'
 
-export function CategoryFormPage({ category, onSubmit, onCancel }) {
+export function CategoryFormPage({ category, onSubmit, onCancel }: CategoryFormPageProps) {
   const pathname = usePathname()
   const locale = getLocaleFromPath(pathname)
   const t = createTranslator(locale)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const { control, handleSubmit, reset, formState: { errors, isValid } } = useForm({
+  const { control, handleSubmit, reset, formState: { errors, isValid } } = useForm<CategoryFormValues>({
     mode: 'onChange',
     defaultValues: {
       name: category?.name || '',
@@ -27,7 +29,7 @@ export function CategoryFormPage({ category, onSubmit, onCancel }) {
     },
   })
 
-  const onFormSubmit = async (data: any) => {
+  const onFormSubmit = async (data: CategoryFormValues) => {
     setIsSubmitting(true)
     try {
       await onSubmit(data)
@@ -60,7 +62,7 @@ export function CategoryFormPage({ category, onSubmit, onCancel }) {
                 />
               )}
             />
-            {errors.name && <span className="text-red-500 text-sm">{errors.name.message}</span>}
+            {errors.name && <span className="text-red-500 text-sm">{errorText(errors.name)}</span>}
           </div>
 
           <div className="space-y-2">

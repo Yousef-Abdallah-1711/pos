@@ -11,6 +11,7 @@ import { debugLog as debugLogFn, debugError } from '@/lib/debug'
 import { AlertCircle, Loader } from 'lucide-react'
 import { api } from '@/lib/api'
 import { createTranslator, getLocaleFromPath } from '@/lib/translations'
+import { errorText } from '@/lib/form-errors'
 
 interface AttendanceFormProps {
   attendance?: any
@@ -144,7 +145,7 @@ export function AttendanceForm({ attendance, employees = [], onSubmit, onCancel 
           {errors.employee_id && (
             <span className="text-red-500 text-sm flex items-center gap-1">
               <AlertCircle className="h-4 w-4" />
-              {errors.employee_id.message}
+              {errorText(errors.employee_id)}
             </span>
           )}
         </div>

@@ -5,6 +5,8 @@ const withNextIntl = createNextIntlPlugin('./i18n/request.ts');
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  // Windows local builds can fail with EPERM on standalone symlink tracing.
+  output: process.platform === 'win32' ? undefined : 'standalone',
   outputFileTracingRoot: path.join(__dirname, '../..'),
   experimental: {
     optimizePackageImports: [

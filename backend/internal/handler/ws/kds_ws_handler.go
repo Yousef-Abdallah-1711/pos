@@ -1,15 +1,17 @@
 package ws
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"strconv"
-	"strings"
 	"sync"
 	"time"
 
 	"github.com/gorilla/websocket"
+	"pos-saas/internal/middleware"
 	"pos-saas/internal/pkg/jwt"
+	"pos-saas/internal/service"
 )
 
 const kdsMaxConnectionsPerRoom = 10
@@ -68,37 +70,64 @@ func (l *kdsConnectionLimiter) Release(tenantID, restaurantID int64) {
 type KDSWSHandler struct {
 	hub          *KDSHub
 	tokenService *jwt.TokenService
-	limiter      *kdsConnectionLimiter
-	upgrader     websocket.Upgrader
+	sessions     interface {
+		Resolve(context.Context, string) (string, error)
+	}
+	limiter  *kdsConnectionLimiter
+	upgrader websocket.Upgrader
 }
 
-func NewKDSWSHandler(hub *KDSHub, tokenService *jwt.TokenService) *KDSWSHandler {
+func NewKDSWSHandler(hub *KDSHub, tokenService *jwt.TokenService, sessions ...interface {
+	Resolve(context.Context, string) (string, error)
+}) *KDSWSHandler {
+	var sessionResolver interface {
+		Resolve(context.Context, string) (string, error)
+	}
+	if len(sessions) > 0 {
+		sessionResolver = sessions[0]
+	}
 	return &KDSWSHandler{
 		hub:          hub,
 		tokenService: tokenService,
+		sessions:     sessionResolver,
 		limiter:      newKDSConnectionLimiter(kdsMaxConnectionsPerRoom),
 		upgrader: websocket.Upgrader{
 			ReadBufferSize:  1024,
 			WriteBufferSize: 1024,
 			CheckOrigin: func(r *http.Request) bool {
-				// TODO: tighten allowed origins per deployment environment.
-				return true
+				return middleware.IsTrustedOrigin(r.Header.Get("Origin"))
 			},
 		},
 	}
 }
 
-// ServeWS handles GET /api/v1/kds/ws?token=JWT
+// ServeWS accepts only an API-origin browser session cookie. Credentials are never read from URLs.
 func (h *KDSWSHandler) ServeWS(w http.ResponseWriter, r *http.Request) {
 	if h.hub == nil || h.tokenService == nil {
 		respondJSONError(w, http.StatusServiceUnavailable, "KDS websocket is unavailable")
 		return
 	}
 
-	token := strings.TrimSpace(r.URL.Query().Get("token"))
-	if token == "" {
-		respondJSONError(w, http.StatusUnauthorized, "missing websocket token")
+	cookie, err := r.Cookie(service.ImpersonationSessionCookieName)
+	isImpersonation := err == nil && cookie.Value != ""
+	if !isImpersonation {
+		cookie, err = r.Cookie(service.AuthSessionCookieName)
+	}
+	if err != nil || cookie.Value == "" || h.sessions == nil {
+		respondJSONError(w, http.StatusUnauthorized, "missing websocket session")
 		return
+	}
+	if !middleware.IsTrustedOrigin(r.Header.Get("Origin")) {
+		respondJSONError(w, http.StatusForbidden, "invalid websocket origin")
+		return
+	}
+	token, err := h.sessions.Resolve(r.Context(), cookie.Value)
+	if err != nil || token == "" {
+		respondJSONError(w, http.StatusUnauthorized, "invalid websocket session")
+		return
+	}
+	if isImpersonation && service.IsImpersonationCredential(token) {
+		token = service.UnwrapImpersonationCredential(token)
 	}
 
 	claims, err := h.tokenService.ValidateToken(token)

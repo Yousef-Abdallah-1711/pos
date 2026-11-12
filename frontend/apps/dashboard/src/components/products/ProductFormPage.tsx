@@ -12,32 +12,33 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox'
 import { toast } from 'sonner'
 import { debugLog, debugError } from '@/lib/debug'
-import { canRenderDashboardProductImage } from '@/lib/productImages'
+import { errorText } from '@/lib/form-errors'
+import type { ProductFormProps, ProductFormValues } from './product-types'
 
-export function ProductFormPage({ product, categories, onSubmit, onCancel }) {
+export function ProductFormPage({ product, categories, onSubmit, onCancel }: ProductFormProps) {
   const pathname = usePathname()
   const locale = getLocaleFromPath(pathname)
   const t = createTranslator(locale)
   const isRTL = locale === 'ar'
-  const [imageFile, setImageFile] = useState(null)
+  const [imageFile, setImageFile] = useState<File | null>(null)
   const [imagePreview, setImagePreview] = useState(product?.main_image_url || '')
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const toNumber = (value, fallback = 0) => {
+  const toNumber = (value: unknown, fallback = 0) => {
     const parsed = Number(value)
     return Number.isFinite(parsed) ? parsed : fallback
   }
-  const toOptionalNumber = (value) => {
+  const toOptionalNumber = (value: unknown) => {
     if (value === '' || value === null || value === undefined) {
       return undefined
     }
     const parsed = Number(value)
     return Number.isFinite(parsed) ? parsed : undefined
   }
-  const toInt = (value, fallback = 0) => {
+  const toInt = (value: unknown, fallback = 0) => {
     const parsed = Number.parseInt(String(value), 10)
     return Number.isNaN(parsed) ? fallback : parsed
   }
-  const toOptionalInt = (value) => {
+  const toOptionalInt = (value: unknown) => {
     if (value === '' || value === null || value === undefined) {
       return undefined
     }
@@ -45,7 +46,7 @@ export function ProductFormPage({ product, categories, onSubmit, onCancel }) {
     return Number.isNaN(parsed) ? undefined : parsed
   }
 
-  const { control, handleSubmit, formState: { errors }, watch } = useForm({
+  const { control, handleSubmit, formState: { errors }, watch } = useForm<ProductFormValues>({
     defaultValues: {
       name_en: product?.name_en || '',
       name_ar: product?.name_ar || '',
@@ -67,19 +68,19 @@ export function ProductFormPage({ product, categories, onSubmit, onCancel }) {
     },
   })
 
-  const handleImageChange = (e) => {
-    const file = e.target.files[0]
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
     if (file) {
       setImageFile(file)
       const reader = new FileReader()
       reader.onloadend = () => {
-        setImagePreview(reader.result)
+        setImagePreview(typeof reader.result === 'string' ? reader.result : '')
       }
       reader.readAsDataURL(file)
     }
   }
 
-  const onFormSubmit = async (data) => {
+  const onFormSubmit = async (data: ProductFormValues) => {
     setIsSubmitting(true)
     try {
       const formData = new FormData()
@@ -141,7 +142,7 @@ export function ProductFormPage({ product, categories, onSubmit, onCancel }) {
             onChange={handleImageChange}
             className="w-full"
           />
-          {imagePreview && canRenderDashboardProductImage(imagePreview) && (
+          {imagePreview && (
             <div className="relative w-40 h-40 mt-2">
               <Image
                 src={imagePreview}
@@ -163,7 +164,7 @@ export function ProductFormPage({ product, categories, onSubmit, onCancel }) {
               rules={{ required: t('products.nameEnglishRequiredError', 'English name is required') }}
               render={({ field }) => <Input {...field} placeholder={t('products.nameEnglishPlaceholder', 'e.g., Grilled Chicken')} />}
             />
-            {errors.name_en && <span className="text-red-500 text-sm">{errors.name_en.message}</span>}
+            {errors.name_en && <span className="text-red-500 text-sm">{errorText(errors.name_en)}</span>}
           </div>
 
           <div className="space-y-2">
@@ -173,7 +174,7 @@ export function ProductFormPage({ product, categories, onSubmit, onCancel }) {
               control={control}
               render={({ field }) => <Input {...field} placeholder={t('products.productNameArPlaceholder')} dir="rtl" />}
             />
-            {errors.name_ar && <span className="text-red-500 text-sm">{errors.name_ar.message}</span>}
+            {errors.name_ar && <span className="text-red-500 text-sm">{errorText(errors.name_ar)}</span>}
           </div>
         </div>
 
@@ -199,7 +200,7 @@ export function ProductFormPage({ product, categories, onSubmit, onCancel }) {
             )}
           />
           {errors.category_id && (
-            <span className="text-red-500 text-sm">{errors.category_id.message}</span>
+            <span className="text-red-500 text-sm">{errorText(errors.category_id)}</span>
           )}
         </div>
 
@@ -276,7 +277,7 @@ export function ProductFormPage({ product, categories, onSubmit, onCancel }) {
               rules={{ required: t('products.priceRequired', 'Price is required'), min: { value: 0.01, message: t('products.priceMinError', 'Price must be greater than 0') } }}
               render={({ field }) => <Input {...field} type="number" step="0.01" placeholder="0.00" />}
             />
-            {errors.price && <span className="text-red-500 text-sm">{errors.price.message}</span>}
+            {errors.price && <span className="text-red-500 text-sm">{errorText(errors.price)}</span>}
           </div>
 
           <div className="space-y-2">

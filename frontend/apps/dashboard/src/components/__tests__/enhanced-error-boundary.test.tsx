@@ -4,37 +4,38 @@
  */
 
 import React, { ReactNode } from 'react'
+import { vi } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { EnhancedErrorBoundary } from '../enhanced-error-boundary'
 import { getErrorLogger } from '@/lib/error-handling/error-logger'
 import { getRecoverySuggestions, getErrorAdvice } from '@/lib/error-handling/error-recovery-suggestions'
 
 // Mock the error logger
-jest.mock('@/lib/error-handling/error-logger', () => ({
-  getErrorLogger: jest.fn(() => ({
-    logComponentError: jest.fn(),
-    log: jest.fn(),
-    getAllLogs: jest.fn(() => []),
+vi.mock('@/lib/error-handling/error-logger', () => ({
+  getErrorLogger: vi.fn(() => ({
+    logComponentError: vi.fn(),
+    log: vi.fn(),
+    getAllLogs: vi.fn(() => []),
   })),
 }))
 
 // Mock the recovery suggestions
-jest.mock('@/lib/error-handling/error-recovery-suggestions', () => ({
-  getRecoverySuggestions: jest.fn(() => [
+vi.mock('@/lib/error-handling/error-recovery-suggestions', () => ({
+  getRecoverySuggestions: vi.fn(() => [
     {
       title: 'Try Again',
       description: 'Attempt to reload the component',
-      action: { label: 'Retry', onClick: jest.fn() },
+      action: { label: 'Retry', onClick: vi.fn() },
       priority: 1,
     },
     {
       title: 'Go to Dashboard',
       description: 'Return to the main dashboard',
-      action: { label: 'Dashboard', onClick: jest.fn() },
+      action: { label: 'Dashboard', onClick: vi.fn() },
       priority: 2,
     },
   ]),
-  getErrorAdvice: jest.fn(() => 'An unexpected error occurred. Please try again or contact support.'),
+  getErrorAdvice: vi.fn(() => 'An unexpected error occurred. Please try again or contact support.'),
 }))
 
 // Component that throws an error
@@ -68,18 +69,28 @@ const ClickErrorComponent: React.FC = () => {
   )
 }
 
+// These tests make components throw on purpose. React reports a boundary-caught error to window 'error' as
+// well; Vitest's jsdom environment turns that into an "Uncaught" failure unless a listener is registered
+// (Jest ignored it). Registering one keeps the expected throws from failing unrelated assertions.
+const swallowExpectedWindowErrors = (event: ErrorEvent) => {
+  event.preventDefault()
+}
+beforeEach(() => window.addEventListener('error', swallowExpectedWindowErrors))
+afterEach(() => window.removeEventListener('error', swallowExpectedWindowErrors))
+
 describe('EnhancedErrorBoundary', () => {
   // Suppress console.error for error boundary tests
   beforeAll(() => {
-    jest.spyOn(console, 'error').mockImplementation(() => {})
+    vi.spyOn(console, 'error').mockImplementation(() => {})
   })
 
   afterAll(() => {
-    jest.restoreAllMocks()
+    vi.restoreAllMocks()
   })
 
   afterEach(() => {
-    jest.clearAllMocks()
+    vi.unstubAllGlobals()
+    vi.clearAllMocks()
     localStorage.clear()
     sessionStorage.clear()
   })
@@ -119,7 +130,7 @@ describe('EnhancedErrorBoundary', () => {
       )
 
       expect(screen.getByText(/Something Went Wrong/i)).toBeInTheDocument()
-      expect(screen.getByText(/Test error message/i)).toBeInTheDocument()
+      expect(screen.getByText('Test error message')).toBeInTheDocument()
     })
 
     it('should display different error messages for different errors', () => {
@@ -129,7 +140,7 @@ describe('EnhancedErrorBoundary', () => {
         </EnhancedErrorBoundary>
       )
 
-      expect(screen.getByText(/Custom error/i)).toBeInTheDocument()
+      expect(screen.getByText('Custom error', { selector: 'p' })).toBeInTheDocument()
     })
 
     it('should display error in red box with proper styling', () => {
@@ -147,11 +158,11 @@ describe('EnhancedErrorBoundary', () => {
   describe('Error Logging Integration', () => {
     it('should call error logger when error occurs', () => {
       const mockLogger = {
-        logComponentError: jest.fn(),
-        log: jest.fn(),
-        getAllLogs: jest.fn(() => []),
+        logComponentError: vi.fn(),
+        log: vi.fn(),
+        getAllLogs: vi.fn(() => []),
       }
-      ;(getErrorLogger as jest.Mock).mockReturnValue(mockLogger)
+      vi.mocked(getErrorLogger).mockReturnValue(mockLogger as unknown as ReturnType<typeof getErrorLogger>)
 
       render(
         <EnhancedErrorBoundary>
@@ -170,11 +181,11 @@ describe('EnhancedErrorBoundary', () => {
 
     it('should pass context to error logger', () => {
       const mockLogger = {
-        logComponentError: jest.fn(),
-        log: jest.fn(),
-        getAllLogs: jest.fn(() => []),
+        logComponentError: vi.fn(),
+        log: vi.fn(),
+        getAllLogs: vi.fn(() => []),
       }
-      ;(getErrorLogger as jest.Mock).mockReturnValue(mockLogger)
+      vi.mocked(getErrorLogger).mockReturnValue(mockLogger as unknown as ReturnType<typeof getErrorLogger>)
 
       const testContext = { userId: '123', theme: 'dark' }
 
@@ -192,7 +203,7 @@ describe('EnhancedErrorBoundary', () => {
     })
 
     it('should call optional onError callback', () => {
-      const onError = jest.fn()
+      const onError = vi.fn()
 
       render(
         <EnhancedErrorBoundary onError={onError}>
@@ -244,8 +255,8 @@ describe('EnhancedErrorBoundary', () => {
         </EnhancedErrorBoundary>
       )
 
-      expect(screen.getByText('Try Again')).toBeInTheDocument()
-      expect(screen.getByText('Go to Dashboard')).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /Retry rendering the page/i })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /Navigate to dashboard/i })).toBeInTheDocument()
     })
 
     it('should display suggestion descriptions', () => {
@@ -260,7 +271,7 @@ describe('EnhancedErrorBoundary', () => {
     })
 
     it('should not display suggestions when empty array returned', () => {
-      ;(getRecoverySuggestions as jest.Mock).mockReturnValueOnce([])
+      vi.mocked(getRecoverySuggestions).mockReturnValue([])
 
       render(
         <EnhancedErrorBoundary>
@@ -269,6 +280,10 @@ describe('EnhancedErrorBoundary', () => {
       )
 
       expect(screen.queryByText(/Try one of these/i)).not.toBeInTheDocument()
+      vi.mocked(getRecoverySuggestions).mockReturnValue([
+        { title: 'Try Again', description: 'Attempt to reload the component', action: { label: 'Retry', onClick: vi.fn() }, priority: 1 },
+        { title: 'Go to Dashboard', description: 'Return to the main dashboard', action: { label: 'Dashboard', onClick: vi.fn() }, priority: 2 },
+      ])
     })
   })
 
@@ -316,24 +331,30 @@ describe('EnhancedErrorBoundary', () => {
         </EnhancedErrorBoundary>
       )
 
-      const retryButton = screen.getByRole('button', { name: /Try Again/i })
+      const retryButton = screen.getByRole('button', { name: /Retry rendering the page/i })
       expect(retryButton).toBeInTheDocument()
     })
 
     it('should reset error state on retry', () => {
-      const { rerender } = render(
+      let shouldThrow = true
+      const RecoverableComponent = () => {
+        if (shouldThrow) throw new Error('Recoverable failure')
+        return <div>Recovered content</div>
+      }
+      render(
         <EnhancedErrorBoundary>
-          <ErrorThrowingComponent shouldThrow={true} />
+          <RecoverableComponent />
         </EnhancedErrorBoundary>
       )
 
       expect(screen.getByText(/Something Went Wrong/i)).toBeInTheDocument()
 
-      const retryButton = screen.getByRole('button', { name: /Try Again/i })
+      const retryButton = screen.getByRole('button', { name: /Retry rendering the page/i })
+      shouldThrow = false
       fireEvent.click(retryButton)
 
       // After retry, error should be cleared
-      expect(screen.queryByText(/Something Went Wrong/i)).not.toBeInTheDocument()
+      expect(screen.getByText('Recovered content')).toBeInTheDocument()
     })
 
     it('should display retry count', () => {
@@ -343,33 +364,34 @@ describe('EnhancedErrorBoundary', () => {
         </EnhancedErrorBoundary>
       )
 
-      const retryButton = screen.getByRole('button', { name: /Try Again/i })
+      const retryButton = screen.getByRole('button', { name: /Retry rendering the page/i })
       fireEvent.click(retryButton)
-      fireEvent.click(retryButton)
+      fireEvent.click(screen.getByRole('button', { name: /Retry rendering the page/i }))
 
       // After 2 retries, should show (2/3)
       expect(screen.getByText(/\(2\/3\)/)).toBeInTheDocument()
     })
 
     it('should disable retry button after max retries', () => {
+      vi.spyOn(window, 'alert').mockImplementation(() => undefined)
       render(
         <EnhancedErrorBoundary>
           <ErrorThrowingComponent shouldThrow={true} />
         </EnhancedErrorBoundary>
       )
 
-      const retryButton = screen.getByRole('button', { name: /Try Again/i })
+      const retryButton = screen.getByRole('button', { name: /Retry rendering the page/i })
 
       // Click 3 times (max retries)
       fireEvent.click(retryButton)
-      fireEvent.click(retryButton)
-      fireEvent.click(retryButton)
+      fireEvent.click(screen.getByRole('button', { name: /Retry rendering the page/i }))
+      fireEvent.click(screen.getByRole('button', { name: /Retry rendering the page/i }))
 
-      expect(retryButton).toBeDisabled()
+      expect(screen.getByRole('button', { name: /Retry rendering the page/i })).toBeDisabled()
     })
 
     it('should show alert when max retries exceeded', () => {
-      const alertSpy = jest.spyOn(window, 'alert').mockImplementation()
+      const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => undefined)
 
       render(
         <EnhancedErrorBoundary>
@@ -377,13 +399,12 @@ describe('EnhancedErrorBoundary', () => {
         </EnhancedErrorBoundary>
       )
 
-      const retryButton = screen.getByRole('button', { name: /Try Again/i })
+      const retryButton = screen.getByRole('button', { name: /Retry rendering the page/i })
 
-      // Click 4 times (exceeding max retries)
+      // The third attempt exhausts retries and announces the recovery limit.
       fireEvent.click(retryButton)
-      fireEvent.click(retryButton)
-      fireEvent.click(retryButton)
-      fireEvent.click(retryButton)
+      fireEvent.click(screen.getByRole('button', { name: /Retry rendering the page/i }))
+      fireEvent.click(screen.getByRole('button', { name: /Retry rendering the page/i }))
 
       expect(alertSpy).toHaveBeenCalledWith(
         expect.stringContaining('Maximum retry attempts reached')
@@ -401,7 +422,7 @@ describe('EnhancedErrorBoundary', () => {
         </EnhancedErrorBoundary>
       )
 
-      const dashboardButton = screen.getByRole('button', { name: /Go to Dashboard/i })
+      const dashboardButton = screen.getByRole('button', { name: /Navigate to dashboard/i })
       expect(dashboardButton).toBeInTheDocument()
     })
 
@@ -417,9 +438,8 @@ describe('EnhancedErrorBoundary', () => {
     })
 
     it('should navigate to dashboard on button click', () => {
-      const originalHref = window.location.href
-      delete (window.location as any).href
-      window.location.href = 'http://localhost'
+      const navigate = vi.fn()
+      vi.stubGlobal('location', { assign: navigate })
 
       render(
         <EnhancedErrorBoundary>
@@ -427,15 +447,17 @@ describe('EnhancedErrorBoundary', () => {
         </EnhancedErrorBoundary>
       )
 
-      const dashboardButton = screen.getByRole('button', { name: /Go to Dashboard/i })
+      const dashboardButton = screen.getByRole('button', { name: /Navigate to dashboard/i })
       fireEvent.click(dashboardButton)
 
-      expect(window.location.href).toContain('/en/dashboard')
+      expect(navigate).toHaveBeenCalledWith('/en/dashboard')
+      vi.unstubAllGlobals()
     })
 
     it('should clear auth data on logout', () => {
-      const setItemSpy = jest.spyOn(Storage.prototype, 'setItem')
-      const removeItemSpy = jest.spyOn(Storage.prototype, 'removeItem')
+      const navigate = vi.fn()
+      vi.stubGlobal('location', { assign: navigate })
+      const removeItemSpy = vi.spyOn(Storage.prototype, 'removeItem')
 
       render(
         <EnhancedErrorBoundary>
@@ -443,27 +465,19 @@ describe('EnhancedErrorBoundary', () => {
         </EnhancedErrorBoundary>
       )
 
-      const logoutButton = screen.getByRole('button', { name: /Log Out/i })
+      const logoutButton = screen.getByRole('button', { name: /Log out/i })
       fireEvent.click(logoutButton)
 
       expect(removeItemSpy).toHaveBeenCalledWith('authToken')
-      expect(setItemSpy).toHaveBeenCalled() // sessionStorage.clear() internally
+      expect(navigate).toHaveBeenCalledWith('/login')
 
-      setItemSpy.mockRestore()
       removeItemSpy.mockRestore()
     })
   })
 
   describe('Error Details (Development Mode)', () => {
-    const originalEnv = process.env.NODE_ENV
-
-    beforeEach(() => {
-      process.env.NODE_ENV = 'development'
-    })
-
-    afterEach(() => {
-      process.env.NODE_ENV = originalEnv
-    })
+    beforeEach(() => vi.stubEnv('NODE_ENV', 'development'))
+    afterEach(() => vi.unstubAllEnvs())
 
     it('should show error details button in development', () => {
       render(
@@ -542,17 +556,17 @@ describe('EnhancedErrorBoundary', () => {
         </EnhancedErrorBoundary>
       )
 
-      const refId1 = screen.getByText(/Error Reference ID/i).textContent
+      const refId1 = screen.getByText(/Error Reference ID/i).parentElement?.querySelector('code')?.textContent
 
-      jest.clearAllMocks()
+      vi.clearAllMocks()
 
       rerender(
-        <EnhancedErrorBoundary>
+        <EnhancedErrorBoundary key="second-error">
           <ErrorThrowingComponent shouldThrow={true} errorMessage="Error 2" />
         </EnhancedErrorBoundary>
       )
 
-      const refId2 = screen.getByText(/Error Reference ID/i).textContent
+      const refId2 = screen.getByText(/Error Reference ID/i).parentElement?.querySelector('code')?.textContent
 
       expect(refId1).not.toBe(refId2)
     })
@@ -599,7 +613,7 @@ describe('EnhancedErrorBoundary', () => {
       )
 
       expect(screen.getByText(/Custom Error UI/i)).toBeInTheDocument()
-      expect(screen.getByText(/Custom error/i)).toBeInTheDocument()
+      expect(screen.getByText('Custom error', { selector: 'p' })).toBeInTheDocument()
       expect(screen.getByRole('button', { name: /Custom Retry/i })).toBeInTheDocument()
     })
 
@@ -654,8 +668,10 @@ describe('EnhancedErrorBoundary', () => {
     })
 
     it('should recover from errors with async operations', async () => {
+      let shouldThrow = true
       const AsyncErrorComponent = () => {
-        throw new Error('Async error')
+        if (shouldThrow) throw new Error('Async error')
+        return <div>Recovered after retry</div>
       }
 
       render(
@@ -664,14 +680,15 @@ describe('EnhancedErrorBoundary', () => {
         </EnhancedErrorBoundary>
       )
 
-      expect(screen.getByText(/Async error/i)).toBeInTheDocument()
+      expect(screen.getByText('Async error', { selector: 'p.text-red-900' })).toBeInTheDocument()
 
-      const retryButton = screen.getByRole('button', { name: /Try Again/i })
+      const retryButton = screen.getByRole('button', { name: /Retry rendering the page/i })
+      shouldThrow = false
       fireEvent.click(retryButton)
 
       // Error should be cleared after retry
       await waitFor(() => {
-        expect(screen.queryByText(/Async error/i)).not.toBeInTheDocument()
+        expect(screen.getByText('Recovered after retry')).toBeInTheDocument()
       })
     })
 
@@ -686,7 +703,7 @@ describe('EnhancedErrorBoundary', () => {
         </EnhancedErrorBoundary>
       )
 
-      expect(screen.getByText(/Quick error/i)).toBeInTheDocument()
+      expect(screen.getByText('Quick error')).toBeInTheDocument()
 
       // Rapid rerender with different error
       rerender(
@@ -695,8 +712,8 @@ describe('EnhancedErrorBoundary', () => {
         </EnhancedErrorBoundary>
       )
 
-      // Should show latest error
-      expect(screen.getByText(/Another error/i)).toBeInTheDocument()
+      // A boundary keeps the first failure visible until its retry action resets it.
+      expect(screen.getByText('Quick error')).toBeInTheDocument()
     })
   })
 
@@ -719,21 +736,21 @@ describe('EnhancedErrorBoundary', () => {
         </EnhancedErrorBoundary>
       )
 
-      expect(screen.getByRole('button', { name: /Try Again/i })).toBeInTheDocument()
-      expect(screen.getByRole('button', { name: /Go to Dashboard/i })).toBeInTheDocument()
-      expect(screen.getByRole('button', { name: /Log Out/i })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /Retry rendering the page/i })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /Navigate to dashboard/i })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /Log out/i })).toBeInTheDocument()
     })
 
     it('should provide alt text for icons', () => {
-      render(
+      const { container } = render(
         <EnhancedErrorBoundary>
           <ErrorThrowingComponent shouldThrow={true} />
         </EnhancedErrorBoundary>
       )
 
       // Alert icons should have semantic meaning
-      const alertTriangle = screen.getByRole('heading')
-      expect(alertTriangle).toBeInTheDocument()
+      const alertTriangle = container.querySelector('svg.lucide-triangle-alert')
+      expect(alertTriangle).toHaveAttribute('aria-hidden', 'true')
     })
   })
 })

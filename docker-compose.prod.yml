@@ -1,0 +1,181 @@
+name: pos-prod
+
+# PRODUCTION stack: Postgres + Go API + the four Next.js apps as optimized standalone builds.
+#   cp .env.prod.example .env.prod   # fill in real values
+#   docker compose --env-file .env.prod -f docker-compose.prod.yml up -d --build
+# Put a TLS reverse proxy (nginx/Caddy/Traefik) in front; only the proxy should be public.
+# NEXT_PUBLIC_* values are baked into the frontend bundles at build time: rebuild after changing them.
+# Development stack: docker-compose.yml.
+
+x-frontend-build: &frontend-build
+  context: ./frontend
+  dockerfile: Dockerfile.prod
+  args: &frontend-args
+    # All four apps typecheck and build with the type gate on (verified in Phase 2A); keep it off the bypass.
+    NEXT_IGNORE_BUILD_ERRORS: "false"
+    NEXT_PUBLIC_API_URL: ${PUBLIC_API_URL:?set PUBLIC_API_URL}/api/v1
+    NEXT_PUBLIC_API_BASE_URL: ${PUBLIC_API_URL}/api/v1
+    NEXT_PUBLIC_SUPER_ADMIN_API_URL: ${PUBLIC_API_URL}/api/v1/super-admin
+    NEXT_PUBLIC_LANDING_URL: ${LANDING_URL:?set LANDING_URL}
+    NEXT_PUBLIC_DASHBOARD_URL: ${DASHBOARD_URL:?set DASHBOARD_URL}
+    NEXT_PUBLIC_RESTAURANT_DOMAIN: ${RESTAURANT_DOMAIN:?set RESTAURANT_DOMAIN}
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: pos-postgres-prod
+    command: ["postgres", "-c", "max_connections=200"]
+    environment:
+      # Bootstrap identity is only for PostgreSQL initialization/admin tasks. The API and
+      # migration process use separate, least-privilege roles below.
+      POSTGRES_USER: ${DB_BOOTSTRAP_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_BOOTSTRAP_PASSWORD:?set DB_BOOTSTRAP_PASSWORD}
+      POSTGRES_DB: ${DB_NAME:-pos_saas}
+      POS_MIGRATOR_PASSWORD: ${MIGRATE_DB_PASSWORD:?set MIGRATE_DB_PASSWORD}
+      POS_APP_PASSWORD: ${DB_PASSWORD:?set DB_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backend/scripts/db/create_runtime_roles.sql:/pos/create_runtime_roles.sql:ro
+      - ./backend/scripts/db/init-runtime-roles.sh:/docker-entrypoint-initdb.d/10-init-runtime-roles.sh:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - pos-network
+    restart: always
+    logging: &logging
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    image: pos-backend:prod
+    container_name: pos-backend-prod
+    environment:
+      PORT: 8080
+      ENV: production
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: ${DB_USER:?set DB_USER=pos_app}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME:-pos_saas}
+      DB_SSLMODE: ${DB_SSLMODE:-disable}
+      MIGRATE_DB_USER: ${MIGRATE_DB_USER:?set MIGRATE_DB_USER=pos_migrator}
+      MIGRATE_DB_PASSWORD: ${MIGRATE_DB_PASSWORD:?set MIGRATE_DB_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET}
+      JWT_EXPIRY: ${JWT_EXPIRY:-24h}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      CORS_ORIGINS: ${CORS_ORIGINS:?set CORS_ORIGINS}
+      APP_BASE_URL: ${PUBLIC_API_URL}
+      DASHBOARD_URL: ${DASHBOARD_URL}
+      LANDING_URL: ${LANDING_URL}
+      RESTAURANT_DOMAIN: ${RESTAURANT_DOMAIN}
+      UPLOAD_BASE_URL: ${PUBLIC_API_URL}/uploads
+      WEBHOOK_BASE_URL: ${PUBLIC_API_URL}
+      # Production must run the live Paymob client; the API refuses to start otherwise.
+      PAYMOB_MODE: ${PAYMOB_MODE:?set PAYMOB_MODE=live}
+      PAYMOB_API_KEY: ${PAYMOB_API_KEY:?set PAYMOB_API_KEY}
+      PAYMOB_INTEGRATION_ID: ${PAYMOB_INTEGRATION_ID:-}
+      PAYMOB_IFRAME_ID: ${PAYMOB_IFRAME_ID:?set PAYMOB_IFRAME_ID}
+      PAYMOB_HMAC_SECRET: ${PAYMOB_HMAC_SECRET:?set PAYMOB_HMAC_SECRET}
+      PAYMOB_BASE_URL: ${PAYMOB_BASE_URL:-}
+    ports:
+      - "${BACKEND_PORT:-8080}:8080"
+    volumes:
+      - uploads_data:/root/uploads
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/v1/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - pos-network
+    restart: always
+    logging: *logging
+
+  landing:
+    build:
+      <<: *frontend-build
+      args:
+        <<: *frontend-args
+        APP: landing
+    image: pos-landing:prod
+    container_name: pos-landing-prod
+    ports:
+      - "${LANDING_PORT:-3001}:3000"
+    depends_on:
+      - backend
+    networks:
+      - pos-network
+    restart: always
+    logging: *logging
+
+  dashboard:
+    build:
+      <<: *frontend-build
+      args:
+        <<: *frontend-args
+        APP: dashboard
+    image: pos-dashboard:prod
+    container_name: pos-dashboard-prod
+    ports:
+      - "${DASHBOARD_PORT:-3002}:3000"
+    depends_on:
+      - backend
+    networks:
+      - pos-network
+    restart: always
+    logging: *logging
+
+  restaurant-website:
+    build:
+      <<: *frontend-build
+      args:
+        <<: *frontend-args
+        APP: restaurant-website
+    image: pos-restaurant-website:prod
+    container_name: pos-restaurant-website-prod
+    ports:
+      - "${RESTAURANT_PORT:-3003}:3000"
+    depends_on:
+      - backend
+    networks:
+      - pos-network
+    restart: always
+    logging: *logging
+
+  super-admin:
+    build:
+      <<: *frontend-build
+      args:
+        <<: *frontend-args
+        APP: super-admin
+    image: pos-super-admin:prod
+    container_name: pos-super-admin-prod
+    ports:
+      - "${SUPER_ADMIN_PORT:-3004}:3000"
+    depends_on:
+      - backend
+    networks:
+      - pos-network
+    restart: always
+    logging: *logging
+
+networks:
+  pos-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  uploads_data:

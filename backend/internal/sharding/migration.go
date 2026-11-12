@@ -171,7 +171,7 @@ func (m *ShardMigration) Start(ctx context.Context) error {
 	m.state = MigrationStateCompleted
 	m.progress.State = MigrationStateCompleted
 	log.Printf("[MIGRATION] Migration completed successfully")
-	log.Printf("[MIGRATION] Migrated %d records in %d seconds",
+	log.Printf("[MIGRATION] Migrated %d records in %.0f seconds",
 		m.progress.MigratedRecords,
 		time.Since(m.progress.StartTime).Seconds())
 

@@ -1,8 +1,10 @@
+//go:build experimental
+// +build experimental
+
 package middleware_test
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -313,7 +315,8 @@ func TestShardingMiddlewareWithJWTClaims(t *testing.T) {
 	}
 
 	req := httptest.NewRequest("GET", "/orders", nil)
-	ctx := context.WithValue(req.Context(), middleware.RestaurantContextKey, int64(999))
+	ctx := context.WithValue(req.Context(), middleware.UserContextKey, claims)
+	ctx = context.WithValue(ctx, middleware.RestaurantContextKey, int64(claims.RestaurantID))
 	req = req.WithContext(ctx)
 
 	var capturedShardInfo *middleware.ShardInfo

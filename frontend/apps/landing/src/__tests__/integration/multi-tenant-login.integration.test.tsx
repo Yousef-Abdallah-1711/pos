@@ -4,31 +4,28 @@
  */
 
 import React from 'react'
+import { vi, type Mock } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { useRouter } from 'next/navigation'
 import { useAuthStore } from '@/stores/authStore'
-import LoginPage from '@/app/auth/login/page'
+import LoginPage from '@/app/[locale]/auth/login/page'
+import api from '@/lib/api'
+import { toast } from 'sonner'
 
-jest.mock('next/navigation')
-jest.mock('@/stores/authStore')
-jest.mock('sonner')
-
-global.fetch = jest.fn()
+global.fetch = vi.fn()
 
 describe('Multi-Tenant Login Integration Tests', () => {
   const mockRouter = {
-    push: jest.fn(),
+    push: vi.fn(),
   }
-  const mockSetAuth = jest.fn()
+  const mockSetAuth = vi.fn()
 
   beforeEach(() => {
-    jest.clearAllMocks()
-    ;(useRouter as jest.Mock).mockReturnValue(mockRouter)
-    ;(useAuthStore as jest.Mock).mockReturnValue({
-      setAuth: mockSetAuth,
-    })
-    ;(global.fetch as jest.Mock).mockClear()
+    vi.clearAllMocks()
+    ;(useRouter as Mock).mockReturnValue(mockRouter)
+    ;(useAuthStore as unknown as Mock).mockImplementation(() => mockSetAuth)
+    ;(global.fetch as Mock).mockReset()
   })
 
   describe('Scenario 1: User with Single Tenant Account', () => {
@@ -49,12 +46,8 @@ describe('Multi-Tenant Login Integration Tests', () => {
         },
       }
 
-      const mockApiPost = jest.fn().mockResolvedValue(loginResponse)
-      jest.mock('@/lib/api', () => ({
-        default: {
-          post: mockApiPost,
-        },
-      }))
+      const mockApiPost = vi.fn().mockResolvedValue(loginResponse)
+      api.post = mockApiPost
 
       render(<LoginPage />)
 
@@ -71,7 +64,7 @@ describe('Multi-Tenant Login Integration Tests', () => {
 
       // Step 4: System authenticates and auto-logs in
       await waitFor(() => {
-        expect(mockSetAuth).toHaveBeenCalledWith(loginResponse.data.user, loginResponse.data.token)
+        expect(mockSetAuth).toHaveBeenCalledWith(loginResponse.data.user, '')
       })
 
       // Step 5: System redirects to dashboard (done by TenantSelectorModal not being shown)
@@ -103,6 +96,7 @@ describe('Multi-Tenant Login Integration Tests', () => {
         data: {
           success: true,
           multiple_tenants: true,
+          selection_token: 'proof-token',
           tenants: [
             {
               tenant_id: 1,
@@ -126,12 +120,22 @@ describe('Multi-Tenant Login Integration Tests', () => {
         },
       }
 
-      const mockApiPost = jest.fn().mockResolvedValue(loginMultiResponse)
-      jest.mock('@/lib/api', () => ({
-        default: {
-          post: mockApiPost,
-        },
-      }))
+      const mockApiPost = vi.fn().mockResolvedValue(loginMultiResponse)
+      api.post = mockApiPost
+
+      const confirmResponse = {
+        ok: true,
+        json: vi.fn().mockResolvedValue({
+          user: {
+            id: 202,
+            email: 'multi@example.com',
+            name: 'Multi User',
+            role: 'manager',
+            tenant_id: 2,
+          },
+        }),
+      }
+      ;(global.fetch as Mock).mockResolvedValueOnce(confirmResponse)
 
       fireEvent.click(submitButton)
 
@@ -166,36 +170,21 @@ describe('Multi-Tenant Login Integration Tests', () => {
             body: JSON.stringify({
               email: 'multi@example.com',
               tenant_id: 2,
+              selection_token: 'proof-token',
             }),
           })
         )
       })
 
-      // Step 9: Backend returns JWT token for selected tenant
-      const confirmResponse = {
-        ok: true,
-        json: jest.fn().mockResolvedValue({
-          user: {
-            id: 202,
-            email: 'multi@example.com',
-            name: 'Multi User',
-            role: 'manager',
-            tenant_id: 2,
-          },
-          token: 'eyJhbGcS0...',
-        }),
-      }
-
-      ;(global.fetch as jest.Mock).mockResolvedValueOnce(confirmResponse)
-
-      // Step 10: System stores auth and redirects to dashboard
+      // Step 9: Backend sets an HttpOnly cookie for the selected tenant.
+      // Step 10: The UI keeps only the non-secret user profile in memory.
       await waitFor(() => {
         expect(mockSetAuth).toHaveBeenCalledWith(
           expect.objectContaining({
             tenant_id: 2,
             email: 'multi@example.com',
           }),
-          expect.any(String)
+          ''
         )
       })
     })
@@ -217,15 +206,11 @@ describe('Multi-Tenant Login Integration Tests', () => {
         },
       }
 
-      const mockApiPost = jest.fn().mockRejectedValue({
+      const mockApiPost = vi.fn().mockRejectedValue({
         response: errorResponse,
       })
 
-      jest.mock('@/lib/api', () => ({
-        default: {
-          post: mockApiPost,
-        },
-      }))
+      api.post = mockApiPost
 
       render(<LoginPage />)
 
@@ -239,7 +224,7 @@ describe('Multi-Tenant Login Integration Tests', () => {
 
       // Error message should be displayed
       await waitFor(() => {
-        expect(screen.getByText('Invalid email or password')).toBeInTheDocument()
+        expect(toast.error).toHaveBeenCalledWith('Invalid email or password. Please check your credentials.')
       })
 
       // Form should remain visible for retry
@@ -247,15 +232,13 @@ describe('Multi-Tenant Login Integration Tests', () => {
     })
 
     it('should handle network errors', async () => {
-      const networkError = new Error('Network request failed')
+      const networkError = Object.assign(new Error('Network request failed'), {
+        code: 'ERR_NETWORK',
+      })
 
-      const mockApiPost = jest.fn().mockRejectedValue(networkError)
+      const mockApiPost = vi.fn().mockRejectedValue(networkError)
 
-      jest.mock('@/lib/api', () => ({
-        default: {
-          post: mockApiPost,
-        },
-      }))
+      api.post = mockApiPost
 
       render(<LoginPage />)
 
@@ -269,9 +252,7 @@ describe('Multi-Tenant Login Integration Tests', () => {
 
       // Network error message should be shown
       await waitFor(() => {
-        expect(
-          screen.getByText(/Network error. Please check your connection/i)
-        ).toBeInTheDocument()
+        expect(toast.error).toHaveBeenCalledWith('Network error. Please check your connection and try again.')
       })
     })
 
@@ -289,16 +270,18 @@ describe('Multi-Tenant Login Integration Tests', () => {
               user_id: 101,
               roles: ['owner'],
             },
+            {
+              tenant_id: 2,
+              tenant_name: 'Org B',
+              user_id: 102,
+              roles: ['manager'],
+            },
           ],
         },
       }
 
-      const mockApiPost = jest.fn().mockResolvedValue(loginResponse)
-      jest.mock('@/lib/api', () => ({
-        default: {
-          post: mockApiPost,
-        },
-      }))
+      const mockApiPost = vi.fn().mockResolvedValue(loginResponse)
+      api.post = mockApiPost
 
       render(<LoginPage />)
 
@@ -318,12 +301,12 @@ describe('Multi-Tenant Login Integration Tests', () => {
       // Now tenant selection fails
       const tenantError = {
         ok: false,
-        json: jest.fn().mockResolvedValue({
+        json: vi.fn().mockResolvedValue({
           error: 'User not found in selected organization',
         }),
       }
 
-      ;(global.fetch as jest.Mock).mockResolvedValueOnce(tenantError)
+      ;(global.fetch as Mock).mockResolvedValueOnce(tenantError)
 
       const orgButton = screen.getByRole('button', { name: /org a/i })
       fireEvent.click(orgButton)
@@ -331,7 +314,7 @@ describe('Multi-Tenant Login Integration Tests', () => {
       // Error message should be shown
       await waitFor(() => {
         expect(
-          screen.getByText('User not found in selected organization')
+          screen.getByText('Failed to select organization')
         ).toBeInTheDocument()
       })
 
@@ -342,8 +325,8 @@ describe('Multi-Tenant Login Integration Tests', () => {
 
   describe('Scenario 4: Security Considerations', () => {
     it('should not expose password in logs or errors', async () => {
-      const consoleLogSpy = jest.spyOn(console, 'log').mockImplementation()
-      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation()
+      const consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
+      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
 
       render(<LoginPage />)
 

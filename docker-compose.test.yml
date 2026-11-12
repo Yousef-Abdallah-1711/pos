@@ -50,8 +50,11 @@ services:
   # Frontend Dashboard for E2E Testing
   dashboard:
     build:
-      context: .
-      dockerfile: Dockerfile.dashboard
+      context: ./frontend
+      dockerfile: Dockerfile.prod
+      args:
+        APP: dashboard
+        NEXT_PUBLIC_API_URL: http://localhost:8080/api/v1
     container_name: pos-dashboard-test
     environment:
       NEXT_PUBLIC_API_URL: http://localhost:8080/api/v1

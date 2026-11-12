@@ -63,7 +63,7 @@ export function ComponentBuilder() {
       id: `component-${Date.now()}`,
       type,
       title: `${COMPONENT_TYPES.find((c) => c.type === type)?.label || type}`,
-      order: theme.components.length,
+      displayOrder: theme.components.length, // was `order`, a field ComponentConfig does not have
       enabled: true,
       settings: {},
     }
@@ -191,6 +191,7 @@ export function ComponentBuilder() {
                 <button
                   onClick={(e) => handleToggleComponent(component.id, e)}
                   title={component.enabled ? 'Disable component' : 'Enable component'}
+                  aria-label={`${component.enabled ? 'Disable' : 'Enable'} ${component.title}`}
                   className={`flex-shrink-0 transition ${
                     component.enabled
                       ? 'text-green-600 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300'
@@ -206,6 +207,7 @@ export function ComponentBuilder() {
                     e.stopPropagation()
                     deleteComponent(component.id)
                   }}
+                  aria-label={`Delete ${component.title}`}
                   title="Delete component"
                   className="text-gray-400 hover:text-red-600 dark:hover:text-red-400 flex-shrink-0 transition"
                 >

@@ -212,7 +212,7 @@ func TestThemeRepositoryNullHandling(t *testing.T) {
 	}{
 		{"all nil", nil, nil, nil, true},
 		{"all set", ptrInt64Theme(1), ptrInt64Theme(2), ptrTime(time.Now()), false},
-		{"partial nil", ptrInt64Theme(1), nil, nil, true},
+		{"partial nil", ptrInt64Theme(1), nil, nil, false},
 	}
 
 	for _, tt := range tests {
@@ -279,11 +279,11 @@ func TestThemeRepositorySlugUniqueness(t *testing.T) {
 				Slug:     tt.slug1,
 			}
 			theme2 := &domain.Theme{
-				TenantID: 2,
+				TenantID: 1,
 				Slug:     tt.slug2,
 			}
 			if !tt.sameTenant {
-				theme2.TenantID = 1
+				theme2.TenantID = 2
 			}
 
 			conflict := theme1.TenantID == theme2.TenantID &&

@@ -31,7 +31,7 @@ describe('restaurant API config resolver', () => {
   })
 
   it('prefers NEXT_PUBLIC_API_BASE_URL and normalizes trailing slashes', () => {
-    process.env.NODE_ENV = 'production'
+    Object.assign(process.env, { NODE_ENV: 'production' })
     process.env.NEXT_PUBLIC_API_BASE_URL = 'https://api.example.com/api/v1///'
     process.env.NEXT_PUBLIC_API_URL = 'https://legacy.example.com/api/v1/'
 
@@ -41,7 +41,7 @@ describe('restaurant API config resolver', () => {
   })
 
   it('uses development fallback when env is missing outside production', () => {
-    process.env.NODE_ENV = 'development'
+    Object.assign(process.env, { NODE_ENV: 'development' })
 
     const { getApiBaseUrl } = loadApiModule()
 
@@ -49,7 +49,7 @@ describe('restaurant API config resolver', () => {
   })
 
   it('throws in production when API URL env is missing', () => {
-    process.env.NODE_ENV = 'production'
+    Object.assign(process.env, { NODE_ENV: 'production' })
 
     const { getApiBaseUrl, validateApiConfig } = loadApiModule()
 
@@ -58,7 +58,7 @@ describe('restaurant API config resolver', () => {
   })
 
   it('builds endpoint URLs using resolved base URL', () => {
-    process.env.NODE_ENV = 'production'
+    Object.assign(process.env, { NODE_ENV: 'production' })
     process.env.NEXT_PUBLIC_API_BASE_URL = 'https://api.example.com/api/v1/'
 
     const { buildApiUrl } = loadApiModule()

@@ -1,0 +1,23 @@
+ M .gitignore
+D  Dockerfile.dashboard
+D  Dockerfile.landing
+ M README.md
+ M backend/docker-entrypoint.sh
+ M docker-compose.test.yml
+ M docker-compose.yml
+D  frontend/apps/dashboard/Dockerfile
+ M frontend/apps/dashboard/next.config.js
+D  frontend/apps/landing/Dockerfile
+ M frontend/apps/landing/next.config.js
+ M frontend/apps/restaurant-website/next.config.js
+ M frontend/apps/super-admin/next.config.js
+?? .env.prod.example
+?? .gitattributes
+?? audit-reports/
+?? backend/Dockerfile.dev
+?? backend/docker-entrypoint.dev.sh
+?? docker-compose.prod.yml
+?? docs-organized/phase-2a/
+?? frontend/.dockerignore
+?? frontend/Dockerfile.dev
+?? frontend/Dockerfile.prod

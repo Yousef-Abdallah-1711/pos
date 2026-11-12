@@ -4,7 +4,7 @@
  */
 
 import React from 'react'
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { act, render, screen, fireEvent, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { ColorPicker } from '../ColorPicker'
 import { describe, it, expect, beforeEach, vi } from 'vitest'
@@ -273,22 +273,17 @@ describe('ColorPicker', () => {
 
     it('should revert to copy button after 2 seconds', async () => {
       vi.useFakeTimers()
-      render(<ColorPicker {...defaultProps} />)
-      const copyButton = screen.getByRole('button')
-
-      fireEvent.click(copyButton)
-
-      await waitFor(() => {
+      try {
+        render(<ColorPicker {...defaultProps} />)
+        fireEvent.click(screen.getByRole('button'))
         expect(screen.getByText('Copied')).toBeInTheDocument()
-      })
 
-      vi.advanceTimersByTime(2000)
+        act(() => vi.advanceTimersByTime(2000))
 
-      await waitFor(() => {
         expect(screen.getByText('Copy')).toBeInTheDocument()
-      })
-
-      vi.useRealTimers()
+      } finally {
+        vi.useRealTimers()
+      }
     })
 
     it('should copy current color value', async () => {

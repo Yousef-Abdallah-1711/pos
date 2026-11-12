@@ -150,6 +150,7 @@ func TestKDSHandlerBumpOrderSuccess(t *testing.T) {
 				"restaurant_id",
 				"order_id",
 				"order_number",
+				"order_source",
 				"customer_name",
 				"status",
 				"priority",
@@ -166,7 +167,7 @@ func TestKDSHandlerBumpOrderSuccess(t *testing.T) {
 				"table_number",
 				"table_name",
 			}).AddRow(
-				int64(77), int64(1), int64(2), int64(501), "ORD-501", "Alice", "in_progress", 0, "expo",
+				int64(77), int64(1), int64(2), int64(501), "ORD-501", "website", "Alice", "in_progress", 0, "expo",
 				[]byte("[]"), "", receivedAt, startedAt, nil, int64(9), receivedAt, startedAt, int64(31), int32(4), "Window",
 			),
 		)

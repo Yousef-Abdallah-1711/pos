@@ -51,14 +51,14 @@ func (h *PublicMenuHandler) GetRestaurantMenu(w http.ResponseWriter, r *http.Req
 	}
 
 	// 2. Get categories
-	categories, err := h.categoryRepo.ListPublic(restaurant.ID, language)
+	categories, err := h.categoryRepo.ListPublic(restaurant.TenantID, restaurant.ID, language)
 	if err != nil {
 		respondError(w, http.StatusInternalServerError, "Failed to load categories")
 		return
 	}
 
 	// 3. Get products
-	products, err := h.productUC.ListPublicMenu(r.Context(), restaurant.ID, language)
+	products, err := h.productUC.ListPublicMenu(r.Context(), restaurant.TenantID, restaurant.ID, language)
 	if err != nil {
 		respondError(w, http.StatusInternalServerError, "Failed to load products")
 		return
@@ -98,7 +98,7 @@ func (h *PublicMenuHandler) GetCategoryProducts(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	products, err := h.productUC.ListByCategoryPublic(r.Context(), restaurant.ID, categoryID, language)
+	products, err := h.productUC.ListByCategoryPublic(r.Context(), restaurant.TenantID, restaurant.ID, categoryID, language)
 	if err != nil {
 		respondError(w, http.StatusInternalServerError, "Failed to load products")
 		return
@@ -141,7 +141,7 @@ func (h *PublicMenuHandler) GetProductDetails(w http.ResponseWriter, r *http.Req
 	}
 
 	// Get images
-	images, err := h.productUC.GetProductImages(r.Context(), productID)
+	images, err := h.productUC.GetProductImages(r.Context(), restaurant.TenantID, restaurant.ID, productID)
 	if err != nil {
 		// ignore error
 	}
@@ -176,7 +176,7 @@ func (h *PublicMenuHandler) SearchProducts(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	products, err := h.productUC.SearchPublic(r.Context(), restaurant.ID, query, language)
+	products, err := h.productUC.SearchPublic(r.Context(), restaurant.TenantID, restaurant.ID, query, language)
 	if err != nil {
 		respondError(w, http.StatusInternalServerError, "Search failed")
 		return
@@ -205,7 +205,7 @@ func (h *PublicMenuHandler) GetRestaurantProducts(w http.ResponseWriter, r *http
 		return
 	}
 
-	products, err := h.productUC.ListPublicMenu(r.Context(), restaurant.ID, language)
+	products, err := h.productUC.ListPublicMenu(r.Context(), restaurant.TenantID, restaurant.ID, language)
 	if err != nil {
 		respondError(w, http.StatusInternalServerError, "Failed to load products")
 		return
@@ -232,7 +232,7 @@ func (h *PublicMenuHandler) GetRestaurantCategories(w http.ResponseWriter, r *ht
 		return
 	}
 
-	categories, err := h.categoryRepo.ListPublic(restaurant.ID, language)
+	categories, err := h.categoryRepo.ListPublic(restaurant.TenantID, restaurant.ID, language)
 	if err != nil {
 		respondError(w, http.StatusInternalServerError, "Failed to load categories")
 		return

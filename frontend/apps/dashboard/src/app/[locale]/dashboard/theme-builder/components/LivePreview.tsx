@@ -2,7 +2,7 @@
 
 import { useThemeStore } from '@/hooks/useThemeStore'
 import { Smartphone, Monitor } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { useMemo, useState, type ComponentProps } from 'react'
 import { ThemeProvider, SectionRenderer } from '@pos-saas/ui-themes'
 
 /**
@@ -132,7 +132,8 @@ export function LivePreview() {
                       .map((component) => (
                         <SectionRenderer
                           key={component.id}
-                          component={component}
+                          // ComponentConfig (string id) vs ThemeComponent (numeric id): two parallel theme models, see PHASE_2B_HANDOFF.md
+                          component={component as unknown as ComponentProps<typeof SectionRenderer>['component']}
                           isArabic={false}
                         />
                       ))}

@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { useAuthStore } from '@/stores/authStore'
-import { useUserPermissions } from '@/hooks/useRbac'
+import { useHasPermission } from '@/hooks/useRbac'
 import { ProductList } from '@/components/products/ProductList'
 import { Button } from '@/components/ui/button'
 import { api } from '@/lib/api'
@@ -14,31 +14,11 @@ import { createTranslator, getLocaleFromPath } from '@/lib/translations'
 import { PageHeaderSkeleton, TableSkeleton } from '@/components/skeletons'
 import { MODULE_IDS, PERMISSION_LEVELS } from '@/lib/rbac'
 import { debugError } from '@/lib/debug'
-import { hasAuthenticatedSession } from '@/lib/authSession'
-
-interface Product {
-  id: number
-  name: string
-  description?: string
-  price: number
-  category_id?: number
-  [key: string]: any
-}
-
-interface Category {
-  id: number
-  name: string
-  [key: string]: any
-}
-
-interface Filters {
-  page: number
-  pageSize: number
-  categoryId: number | null
-  searchText: string
-  sortBy: string
-  sortOrder: string
-}
+import type {
+  ProductSummary as Product,
+  ProductCategory as Category,
+  ProductListFilters as Filters,
+} from '@/components/products/product-types'
 
 export default function ProductsPage() {
   const pathname = usePathname()
@@ -57,23 +37,26 @@ export default function ProductsPage() {
     sortOrder: 'DESC',
   })
 
-  const user = useAuthStore((state) => state.user)
   const token = useAuthStore((state) => state.token)
-  const hasSession = hasAuthenticatedSession(user, token)
 
   // Check RBAC permissions for Products module
-  const { checkPermission, loading: permissionLoading } = useUserPermissions()
-  const canViewProducts = checkPermission(MODULE_IDS.PRODUCTS, PERMISSION_LEVELS.READ)
-  const canCreateProducts = checkPermission(MODULE_IDS.PRODUCTS, PERMISSION_LEVELS.WRITE)
-  const canDeleteProducts = checkPermission(MODULE_IDS.PRODUCTS, PERMISSION_LEVELS.DELETE)
+  const canViewProductsPermission = useHasPermission(
+    MODULE_IDS.PRODUCTS,
+    PERMISSION_LEVELS.READ,
+  )
+  const canViewProducts = canViewProductsPermission.loading || canViewProductsPermission.hasPermission
+  const canCreateProducts = useHasPermission(
+    MODULE_IDS.PRODUCTS,
+    PERMISSION_LEVELS.WRITE,
+  ).hasPermission
+  const canDeleteProducts = useHasPermission(
+    MODULE_IDS.PRODUCTS,
+    PERMISSION_LEVELS.DELETE,
+  ).hasPermission
 
   // Fetch products
   useEffect(() => {
     const fetchProducts = async () => {
-      if (!hasSession || permissionLoading || !canViewProducts) {
-        setLoading(false)
-        return
-      }
       setLoading(true)
       try {
         const params: any = {
@@ -98,14 +81,11 @@ export default function ProductsPage() {
     }
 
     fetchProducts()
-  }, [filters, hasSession, permissionLoading, canViewProducts])
+  }, [filters, token])
 
   // Fetch categories
   useEffect(() => {
     const fetchCategories = async () => {
-      if (!hasSession || permissionLoading || !canViewProducts) {
-        return
-      }
       try {
         const response = await api.get('/categories')
         setCategories(response.data || [])
@@ -115,7 +95,7 @@ export default function ProductsPage() {
     }
 
     fetchCategories()
-  }, [hasSession, permissionLoading, canViewProducts])
+  }, [token])
 
 
   const handleDeleteProduct = async (productId: number) => {
@@ -140,15 +120,6 @@ export default function ProductsPage() {
     }
   }
 
-
-  if (permissionLoading) {
-    return (
-      <div className="space-y-6">
-        <PageHeaderSkeleton />
-        <TableSkeleton rows={8} />
-      </div>
-    )
-  }
 
   // Show permission denied if user can't view products
   if (!canViewProducts) {

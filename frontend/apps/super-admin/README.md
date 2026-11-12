@@ -134,7 +134,7 @@ pnpm --filter @pos-saas/super-admin test:run
 
 For development/testing:
 - Email: `superadmin@pos-saas.com`
-- Password: `SuperAdmin@123`
+- Password: Set locally using the development seed script.
 
 ## Further Reading
 

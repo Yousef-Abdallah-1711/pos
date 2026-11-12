@@ -63,3 +63,6 @@ nul
 
 # Test artifacts
 newman-*.xml
+
+# Production compose env
+.env.prod

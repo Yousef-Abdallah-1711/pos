@@ -99,7 +99,7 @@ export default function AttendancePage() {
         })
         debugLog('[ATTENDANCE_PAGE] Response:', response.data)
 
-        const attendanceList = Array.isArray(response.data) ? response.data : (response.data?.data || response.data?.attendance || [])
+        const attendanceList: any[] = Array.isArray(response.data) ? response.data : (response.data?.data || response.data?.attendance || [])
 
         // Enrich with employee names
         const enrichedAttendance = attendanceList.map(record => ({

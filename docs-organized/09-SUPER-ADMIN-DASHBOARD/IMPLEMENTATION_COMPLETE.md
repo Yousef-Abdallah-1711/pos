@@ -30,7 +30,7 @@ All backend components have been successfully implemented and tested:
 - **File**: `backend/migrations/109_seed_super_admin.sql`
   - Pre-seeded super admin account with test credentials
   - Email: `superadmin@pos-saas.com`
-  - Password: `SuperAdmin@123`
+  - Password: Set locally using the development seed script.
 
 #### Domain Models
 - **File**: `backend/internal/domain/super_admin.go` (467 lines)
@@ -468,7 +468,7 @@ Dashboard available at `http://localhost:3001`
 | Field | Value |
 |-------|-------|
 | Email | superadmin@pos-saas.com |
-| Password | SuperAdmin@123 |
+| Password | Set locally|
 
 ⚠️ **Important**: Change these credentials in production!
 

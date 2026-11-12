@@ -9,9 +9,13 @@
     "start": "next start -p 3002",
     "lint": "next lint",
     "test": "vitest",
-    "test:run": "vitest run"
+    "test:run": "vitest run",
+    "test:e2e:phase2a": "playwright test --config playwright.phase2a.config.ts",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "typecheck:test": "tsc --noEmit -p tsconfig.test.json"
   },
   "dependencies": {
+    "@pos-saas/form-foundation": "workspace:*",
     "@hookform/resolvers": "^3.9.1",
     "@pos-saas/ui-components": "workspace:*",
     "@pos-saas/ui-themes": "workspace:*",
@@ -48,6 +52,7 @@
     "zustand": "^4.5.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.51.1",
     "@testing-library/react": "^16.3.1",
     "@testing-library/user-event": "^14.6.1",
     "@types/node": "^22.10.2",

@@ -115,13 +115,17 @@ func (r *SupplierRepository) CreateSupplier(supplier *domain.Supplier) (int, err
 			city, state, postal_code, country, tax_number, payment_terms,
 			credit_limit, current_balance, currency, payable_account_id, category,
 			bank_name, bank_account, iban, notes, is_active, created_by, updated_by
-		) VALUES (
+		) SELECT
 			$1, $2, $3, $4, $5,
 			$6, $7, $8, $9, $10, $11, $12,
 			$13, $14, $15, $16, $17, $18,
 			$19, $20, $21, $22, $23,
 			$24, $25, $26, $27, $28, $29, $30
-		)
+		WHERE EXISTS (SELECT 1 FROM restaurants r WHERE r.id = $2 AND r.tenant_id = $1)
+		  AND ($22::integer IS NULL OR EXISTS (
+			SELECT 1 FROM chart_of_accounts a
+			WHERE a.id = $22 AND a.tenant_id = $1 AND a.restaurant_id = $2
+		  ))
 		RETURNING id
 	`,
 		supplier.TenantID,
@@ -194,6 +198,10 @@ func (r *SupplierRepository) UpdateSupplier(supplier *domain.Supplier) error {
 			updated_by = $26,
 			updated_at = CURRENT_TIMESTAMP
 		WHERE id = $27 AND tenant_id = $28 AND restaurant_id = $29
+		  AND ($19::integer IS NULL OR EXISTS (
+			SELECT 1 FROM chart_of_accounts a
+			WHERE a.id = $19 AND a.tenant_id = $28 AND a.restaurant_id = $29
+		  ))
 	`,
 		supplier.CompanyName,
 		supplier.CompanyNameAr,

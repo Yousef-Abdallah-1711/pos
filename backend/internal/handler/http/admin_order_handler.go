@@ -3,6 +3,7 @@ package http
 import (
 	"encoding/csv"
 	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -173,43 +174,46 @@ func (h *AdminOrderHandler) ListOrders(w http.ResponseWriter, r *http.Request) {
 
 	response, err := h.orderUC.ListOrders(tenantID, restaurantID, filters)
 	if err != nil {
-		respondError(w, http.StatusInternalServerError, err.Error())
+		log.Printf("[AdminOrders] list failed: tenant=%d restaurant=%d err=%v", tenantID, restaurantID, err)
+		respondError(w, http.StatusInternalServerError, "Failed to list orders")
 		return
+	}
+
+	orderIDs := make([]int64, 0, len(response.Orders))
+	for _, order := range response.Orders {
+		orderIDs = append(orderIDs, order.ID)
+	}
+	itemCounts, countErr := h.orderUC.GetOrderItemCounts(tenantID, restaurantID, orderIDs)
+	if countErr != nil {
+		// Match the previous per-order fallback: keep the list available with zero item counts.
+		log.Printf("[AdminOrders] failed to load item counts: tenant=%d restaurant=%d err=%v", tenantID, restaurantID, countErr)
+		itemCounts = map[int64]int{}
 	}
 
 	orders := make([]adminOrderSummary, 0, len(response.Orders))
 	for _, order := range response.Orders {
-		orderForResponse := &order
-		itemsCount := 0
-
-		fullOrder, err := h.orderUC.GetOrder(tenantID, restaurantID, order.ID)
-		if err == nil {
-			orderForResponse = fullOrder
-			itemsCount = len(fullOrder.Items)
-		}
-
 		orders = append(orders, adminOrderSummary{
-			ID:              orderForResponse.ID,
-			OrderNumber:     orderForResponse.OrderNumber,
-			OrderSource:     orderForResponse.OrderSource,
-			CustomerName:    orderForResponse.CustomerName,
-			CustomerEmail:   orderForResponse.CustomerEmail,
-			CustomerPhone:   orderForResponse.CustomerPhone,
-			DeliveryAddress: orderForResponse.DeliveryAddress,
-			TableID:         orderForResponse.TableID,
-			TableNumber:     orderForResponse.TableNumber,
-			TableName:       orderForResponse.TableName,
-			TableLocation:   orderForResponse.TableLocation,
-			Status:          orderForResponse.Status,
-			PaymentStatus:   orderForResponse.PaymentStatus,
-			PaymentMethod:   orderForResponse.PaymentMethod,
-			Subtotal:        orderForResponse.Subtotal,
-			Tax:             orderForResponse.TaxAmount,
-			DeliveryFee:     orderForResponse.DeliveryFee,
-			Discount:        orderForResponse.DiscountAmount,
-			Total:           orderForResponse.TotalAmount,
-			ItemsCount:      itemsCount,
-			CreatedAt:       orderForResponse.CreatedAt,
+			ID:              order.ID,
+			OrderNumber:     order.OrderNumber,
+			OrderSource:     order.OrderSource,
+			CustomerName:    order.CustomerName,
+			CustomerEmail:   order.CustomerEmail,
+			CustomerPhone:   order.CustomerPhone,
+			DeliveryAddress: order.DeliveryAddress,
+			TableID:         order.TableID,
+			TableNumber:     order.TableNumber,
+			TableName:       order.TableName,
+			TableLocation:   order.TableLocation,
+			Status:          order.Status,
+			PaymentStatus:   order.PaymentStatus,
+			PaymentMethod:   order.PaymentMethod,
+			Subtotal:        order.Subtotal,
+			Tax:             order.TaxAmount,
+			DeliveryFee:     order.DeliveryFee,
+			Discount:        order.DiscountAmount,
+			Total:           order.TotalAmount,
+			ItemsCount:      itemCounts[order.ID],
+			CreatedAt:       order.CreatedAt,
 		})
 	}
 
@@ -248,7 +252,7 @@ func (h *AdminOrderHandler) GetOrder(w http.ResponseWriter, r *http.Request) {
 			respondError(w, http.StatusNotFound, "Order not found")
 			return
 		}
-		assignment, err := h.driverRepo.GetAssignmentByOrderID(r.Context(), int(orderID))
+		assignment, err := h.driverRepo.GetAssignmentByOrderID(r.Context(), int(orderID), int(tenantID), int(restaurantID))
 		if err != nil {
 			respondError(w, http.StatusInternalServerError, "Failed to verify order assignment")
 			return
@@ -269,7 +273,7 @@ func (h *AdminOrderHandler) GetOrder(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	history, err := h.orderUC.GetOrderStatusHistory(tenantID, orderID)
+	history, err := h.orderUC.GetOrderStatusHistory(tenantID, restaurantID, orderID)
 	if err != nil {
 		respondError(w, http.StatusInternalServerError, "Failed to retrieve order history")
 		return
@@ -393,7 +397,7 @@ func (h *AdminOrderHandler) UpdateOrderStatus(w http.ResponseWriter, r *http.Req
 			respondError(w, http.StatusNotFound, "Order not found")
 			return
 		}
-		if strings.Contains(errMsg, "invalid order status") || strings.Contains(errMsg, "cannot transition") {
+		if strings.Contains(errMsg, "invalid order status") || strings.Contains(errMsg, "cannot transition") || strings.Contains(errMsg, "invalid status transition") {
 			respondError(w, http.StatusBadRequest, errMsg)
 			return
 		}
@@ -481,6 +485,10 @@ func (h *AdminOrderHandler) UpdatePaymentStatus(w http.ResponseWriter, r *http.R
 	}
 
 	if err := h.orderUC.UpdatePaymentStatus(tenantID, restaurantID, orderID, req.PaymentStatus); err != nil {
+		if strings.Contains(err.Error(), "not found") {
+			respondError(w, http.StatusNotFound, "Order not found")
+			return
+		}
 		if strings.Contains(err.Error(), "invalid") {
 			respondError(w, http.StatusBadRequest, err.Error())
 			return
@@ -533,7 +541,7 @@ func (h *AdminOrderHandler) GetOrderHistory(w http.ResponseWriter, r *http.Reque
 			respondError(w, http.StatusNotFound, "Order not found")
 			return
 		}
-		assignment, err := h.driverRepo.GetAssignmentByOrderID(r.Context(), int(orderID))
+		assignment, err := h.driverRepo.GetAssignmentByOrderID(r.Context(), int(orderID), int(tenantID), int(restaurantID))
 		if err != nil {
 			respondError(w, http.StatusInternalServerError, "Failed to verify order assignment")
 			return
@@ -544,7 +552,7 @@ func (h *AdminOrderHandler) GetOrderHistory(w http.ResponseWriter, r *http.Reque
 		}
 	}
 
-	history, err := h.orderUC.GetOrderStatusHistory(tenantID, orderID)
+	history, err := h.orderUC.GetOrderStatusHistory(tenantID, restaurantID, orderID)
 	if err != nil {
 		respondError(w, http.StatusInternalServerError, "Failed to retrieve order history")
 		return
@@ -733,7 +741,7 @@ func (h *AdminOrderHandler) resolveDriverContext(r *http.Request, tenantID, rest
 		return nil, false, nil
 	}
 
-	roles, err := h.userRoleRepo.GetUserRoles(r.Context(), int64(claims.UserID), tenantID)
+	roles, err := h.userRoleRepo.GetUserRolesForRestaurant(r.Context(), int64(claims.UserID), tenantID, restaurantID)
 	if err != nil {
 		return nil, false, err
 	}
@@ -746,14 +754,10 @@ func (h *AdminOrderHandler) resolveDriverContext(r *http.Request, tenantID, rest
 		return nil, true, nil
 	}
 
-	driver, err := h.driverRepo.GetByEmail(r.Context(), email)
+	driver, err := h.driverRepo.GetByEmail(r.Context(), email, int(tenantID), int(restaurantID))
 	if err != nil {
 		return nil, true, nil
 	}
-	if driver.TenantID != int(tenantID) || driver.RestaurantID != int(restaurantID) {
-		return nil, true, nil
-	}
-
 	return driver, true, nil
 }
 

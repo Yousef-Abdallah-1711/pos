@@ -1,0 +1,2983 @@
+[
+ {
+  "file": "frontend/apps/dashboard/src/app/auth/callback/page.tsx",
+  "kind": "page",
+  "route": "/auth/callback",
+  "module": "auth",
+  "client_component": true,
+  "lines": 20,
+  "permission_gate": null,
+  "direct_api_calls": [],
+  "data_hooks_or_api_modules": [],
+  "raw_fetch": 0,
+  "direct_axios_import": false,
+  "i18n": {
+   "next_intl": false,
+   "custom_createTranslator": false,
+   "getLocaleFromPath": false
+  },
+  "rtl_refs": 0,
+  "counts_approx": {
+   "forms": 0,
+   "buttons": 0,
+   "tables": 0,
+   "dialogs": 0,
+   "inputs": 0
+  },
+  "business_logic": false
+ },
+ {
+  "file": "frontend/apps/dashboard/src/app/layout.tsx",
+  "kind": "layout",
+  "route": "/layout.tsx",
+  "module": "shell",
+  "client_component": false,
+  "lines": 28,
+  "permission_gate": null,
+  "direct_api_calls": [],
+  "data_hooks_or_api_modules": [],
+  "raw_fetch": 0,
+  "direct_axios_import": false,
+  "i18n": {
+   "next_intl": false,
+   "custom_createTranslator": false,
+   "getLocaleFromPath": false
+  },
+  "rtl_refs": 1,
+  "counts_approx": {
+   "forms": 0,
+   "buttons": 0,
+   "tables": 0,
+   "dialogs": 0,
+   "inputs": 0
+  },
+  "business_logic": false
+ },
+ {
+  "file": "frontend/apps/dashboard/src/app/page.tsx",
+  "kind": "page",
+  "route": "/page.tsx",
+  "module": "shell",
+  "client_component": false,
+  "lines": 7,
+  "permission_gate": null,
+  "direct_api_calls": [],
+  "data_hooks_or_api_modules": [],
+  "raw_fetch": 0,
+  "direct_axios_import": false,
+  "i18n": {
+   "next_intl": false,
+   "custom_createTranslator": false,
+   "getLocaleFromPath": false
+  },
+  "rtl_refs": 0,
+  "counts_approx": {
+   "forms": 0,
+   "buttons": 0,
+   "tables": 0,
+   "dialogs": 0,
+   "inputs": 0
+  },
+  "business_logic": false
+ },
+ {
+  "file": "frontend/apps/dashboard/src/app/[locale]/layout.tsx",
+  "kind": "layout",
+  "route": "/{locale}",
+  "module": "shell",
+  "client_component": false,
+  "lines": 67,
+  "permission_gate": null,
+  "direct_api_calls": [],
+  "data_hooks_or_api_modules": [],
+  "raw_fetch": 0,
+  "direct_axios_import": false,
+  "i18n": {
+   "next_intl": false,
+   "custom_createTranslator": false,
+   "getLocaleFromPath": false
+  },
+  "rtl_refs": 7,
+  "counts_approx": {
+   "forms": 0,
+   "buttons": 0,
+   "tables": 0,
+   "dialogs": 0,
+   "inputs": 0
+  },
+  "business_logic": false
+ },
+ {
+  "file": "frontend/apps/dashboard/src/app/[locale]/page.tsx",
+  "kind": "page",
+  "route": "/{locale}",
+  "module": "shell",
+  "client_component": true,
+  "lines": 53,
+  "permission_gate": null,
+  "direct_api_calls": [],
+  "data_hooks_or_api_modules": [],
+  "raw_fetch": 0,
+  "direct_axios_import": false,
+  "i18n": {
+   "next_intl": false,
+   "custom_createTranslator": false,
+   "getLocaleFromPath": false
+  },
+  "rtl_refs": 0,
+  "counts_approx": {
+   "forms": 0,
+   "buttons": 0,
+   "tables": 0,
+   "dialogs": 0,
+   "inputs": 0
+  },
+  "business_logic": false
+ },
+ {
+  "file": "frontend/apps/dashboard/src/app/[locale]/auth/callback/page.tsx",
+  "kind": "page",
+  "route": "/{locale}/auth/callback",
+  "module": "auth",
+  "client_component": true,
+  "lines": 21,
+  "permission_gate": null,
+  "direct_api_calls": [],
+  "data_hooks_or_api_modules": [],
+  "raw_fetch": 0,
+  "direct_axios_import": false,
+  "i18n": {
+   "next_intl": false,
+   "custom_createTranslator": false,
+   "getLocaleFromPath": false
+  },
+  "rtl_refs": 0,
+  "counts_approx": {
+   "forms": 0,
+   "buttons": 0,
+   "tables": 0,
+   "dialogs": 0,
+   "inputs": 0
+  },
+  "business_logic": false
+ },
+ {
+  "file": "frontend/apps/dashboard/src/app/[locale]/auth/super-admin-login/page.tsx",
+  "kind": "page",
+  "route": "/{locale}/auth/super-admin-login",
+  "module": "auth",
+  "client_component": false,
+  "lines": 133,
+  "permission_gate": null,
+  "direct_api_calls": [
+   "POST /auth/token-exchange"
+  ],
+  "data_hooks_or_api_modules": [],
+  "raw_fetch": 0,
+  "direct_axios_import": false,
+  "i18n": {
+   "next_intl": false,
+   "custom_createTranslator": false,
+   "getLocaleFromPath": false
+  },
+  "rtl_refs": 0,
+  "counts_approx": {
+   "forms": 0,
+   "buttons": 1,
+   "tables": 0,
+   "dialogs": 0,
+   "inputs": 0
+  },
+  "business_logic": false
+ },
+ {
+  "file": "frontend/apps/dashboard/src/app/[locale]/dashboard/layout.tsx",
+  "kind": "layout",
+  "route": "/{locale}/dashboard",
+  "module": "shell",
+  "client_component": true,
+  "lines": 19,
+  "permission_gate": null,
+  "direct_api_calls": [],
+  "data_hooks_or_api_modules": [],
+  "raw_fetch": 0,
+  "direct_axios_import": false,
+  "i18n": {
+   "next_intl": false,
+   "custom_createTranslator": false,
+   "getLocaleFromPath": false
+  },
+  "rtl_refs": 0,
+  "counts_approx": {
+   "forms": 0,
+   "buttons": 0,
+   "tables": 0,
+   "dialogs": 0,
+   "inputs": 0
+  },
+  "business_logic": false
+ },
+ {
+  "file": "frontend/apps/dashboard/src/app/[locale]/dashboard/page.tsx",
+  "kind": "page",
+  "route": "/{locale}/dashboard",
+  "module": "overview",
+  "client_component": true,
+  "lines": 890,
+  "permission_gate": {
+   "modules": [
+    "CATEGORIES",
+    "HR",
+    "KDS",
+    "ORDERS",
+    "PRODUCTS",
+    "REPORTS",
+    "TABLES"
+   ],
+   "levels": [
+    "READ",
+    "WRITE"
+   ]
+  },
+  "direct_api_calls": [
+   "GET /admin/orders",
+   "GET /admin/orders",
+   "GET /products",
+   "GET /categories",
+   "GET /hr/employees",
+   "GET /admin/drivers",
+   "GET /notifications/stats",
+   "GET /tenant/status",
+   "GET /tables/stats"
+  ],
+  "data_hooks_or_api_modules": [
+   "useRbac"
+  ],
+  "raw_fetch": 0,
+  "direct_axios_import": false,
+  "i18n": {
+   "next_intl": false,
+   "custom_createTranslator": true,
+   "getLocaleFromPath": true
+  },
+  "rtl_refs": 0,
+  "counts_approx": {
+   "forms": 0,
+   "buttons": 6,
+   "tables": 0,
+   "dialogs": 0,
+   "inputs": 0
+  },
+  "business_logic": true
+ },
+ {
+  "file": "frontend/apps/dashboard/src/app/[locale]/dashboard/accounting/advanced/page.tsx",
+  "kind": "page",
+  "route": "/{locale}/dashboard/accounting/advanced",
+  "module": "accounting",
+  "client_component": true,
+  "lines": 299,
+  "permission_gate": null,
+  "direct_api_calls": [],
+  "data_hooks_or_api_modules": [
+   "accountingAdvancedApi"
+  ],
+  "raw_fetch": 0,
+  "direct_axios_import": false,
+  "i18n": {
+   "next_intl": false,
+   "custom_createTranslator": false,
+   "getLocaleFromPath": false
+  },
+  "rtl_refs": 0,
+  "counts_approx": {
+   "forms": 0,
+   "buttons": 11,
+   "tables": 0,
+   "dialogs": 0,
+   "inputs": 21
+  },
+  "business_logic": false
+ },
+ {
+  "file": "frontend/apps/dashboard/src/app/[locale]/dashboard/accounting/bank-accounts/page.tsx",
+  "kind": "page",
+  "route": "/{locale}/dashboard/accounting/bank-accounts",
+  "module": "accounting",
+  "client_component": true,
+  "lines": 387,
+  "permission_gate": {
+   "modules": [
+    "ACCOUNTING"
+   ],
+   "levels": [
+    "DELETE",
+    "READ",
+    "WRITE"
+   ]
+  },
+  "direct_api_calls": [],
+  "data_hooks_or_api_modules": [
+   "accountingApi",
+   "bankApi",
+   "useRbac"
+  ],
+  "raw_fetch": 0,
+  "direct_axios_import": false,
+  "i18n": {
+   "next_intl": false,
+   "custom_createTranslator": true,
+   "getLocaleFromPath": true
+  },
+  "rtl_refs": 0,
+  "counts_approx": {
+   "forms": 0,
+   "buttons": 5,
+   "tables": 0,
+   "dialogs": 1,
+   "inputs": 0
+  },
+  "business_logic": false
+ },
+ {
+  "file": "frontend/apps/dashboard/src/app/[locale]/dashboard/accounting/chart-of-accounts/page.tsx",
+  "kind": "page",
+  "route": "/{locale}/dashboard/accounting/chart-of-accounts",
+  "module": "accounting",
+  "client_component": true,
+  "lines": 249,
+  "permission_gate": {
+   "modules": [
+    "ACCOUNTING"
+   ],
+   "levels": [
+    "DELETE",
+    "READ",
+    "WRITE"
+   ]
+  },
+  "direct_api_calls": [],
+  "data_hooks_or_api_modules": [
+   "accountingApi",
+   "useRbac"
+  ],
+  "raw_fetch": 0,
+  "direct_axios_import": false,
+  "i18n": {
+   "next_intl": false,
+   "custom_createTranslator": true,
+   "getLocaleFromPath": true
+  },
+  "rtl_refs": 0,
+  "counts_approx": {
+   "forms": 0,
+   "buttons": 2,
+   "tables": 0,
+   "dialogs": 1,
+   "inputs": 0
+  },
+  "business_logic": false
+ },
+ {
+  "file": "frontend/apps/dashboard/src/app/[locale]/dashboard/accounting/customer-invoices/page.tsx",
+  "kind": "page",
+  "route": "/{locale}/dashboard/accounting/customer-invoices",
+  "module": "accounting",
+  "client_component": true,
+  "lines": 540,
+  "permission_gate": {
+   "modules": [
+    "ACCOUNTING"
+   ],
+   "levels": [
+    "READ",
+    "WRITE"
+   ]
+  },
+  "direct_api_calls": [],
+  "data_hooks_or_api_modules": [
+   "accountingApi",
+   "bankApi",
+   "customersApi",
+   "useRbac"
+  ],
+  "raw_fetch": 0,
+  "direct_axios_import": false,
+  "i18n": {
+   "next_intl": false,
+   "custom_createTranslator": true,
+   "getLocaleFromPath": true
+  },
+  "rtl_refs": 0,
+  "counts_approx": {
+   "forms": 0,
+   "buttons": 3,
+   "tables": 1,
+   "dialogs": 2,
+   "inputs": 0
+  },
+  "business_logic": true
+ },
+ {
+  "file": "frontend/apps/dashboard/src/app/[locale]/dashboard/accounting/customers/page.tsx",
+  "kind": "page",
+  "route": "/{locale}/dashboard/accounting/customers",
+  "module": "accounting",
+  "client_component": true,
+  "lines": 382,
+  "permission_gate": {
+   "modules": [
+    "ACCOUNTING"
+   ],
+   "levels": [
+    "DELETE",
+    "READ",
+    "WRITE"
+   ]
+  },
+  "direct_api_calls": [],
+  "data_hooks_or_api_modules": [
+   "accountingApi",
+   "customersApi",
+   "useRbac"
+  ],
+  "raw_fetch": 0,
+  "direct_axios_import": false,
+  "i18n": {
+   "next_intl": false,
+   "custom_createTranslator": true,
+   "getLocaleFromPath": true
+  },
+  "rtl_refs": 0,
+  "counts_approx": {
+   "forms": 0,
+   "buttons": 3,
+   "tables": 1,
+   "dialogs": 2,
+   "inputs": 0
+  },
+  "business_logic": false
+ },
+ {
+  "file": "frontend/apps/dashboard/src/app/[locale]/dashboard/accounting/general-ledger/page.tsx",
+  "kind": "page",
+  "route": "/{locale}/dashboard/accounting/general-ledger",
+  "module": "accounting",
+  "client_component": true,
+  "lines": 123,
+  "permission_gate": {
+   "modules": [
+    "ACCOUNTING"
+   ],
+   "levels": [
+    "READ"
+   ]
+  },
+  "direct_api_calls": [],
+  "data_hooks_or_api_modules": [
+   "accountingApi",
+   "useRbac"
+  ],
+  "raw_fetch": 0,
+  "direct_axios_import": false,
+  "i18n": {
+   "next_intl": false,
+   "custom_createTranslator": true,
+   "getLocaleFromPath": true
+  },
+  "rtl_refs": 0,
+  "counts_approx": {
+   "forms": 0,
+   "buttons": 0,
+   "tables": 0,
+   "dialogs": 0,
+   "inputs": 0
+  },
+  "business_logic": false
+ },
+ {
+  "file": "frontend/apps/dashboard/src/app/[locale]/dashboard/accounting/journal-entries/page.tsx",
+  "kind": "page",
+  "route": "/{locale}/dashboard/accounting/journal-entries",
+  "module": "accounting",
+  "client_component": true,
+  "lines": 213,
+  "permission_gate": {
+   "modules": [
+    "ACCOUNTING"
+   ],
+   "levels": [
+    "READ",
+    "WRITE"
+   ]
+  },
+  "direct_api_calls": [],
+  "data_hooks_or_api_modules": [
+   "accountingApi",
+   "useRbac"
+  ],
+  "raw_fetch": 0,
+  "direct_axios_import": false,
+  "i18n": {
+   "next_intl": false,
+   "custom_createTranslator": true,
+   "getLocaleFromPath": true
+  },
+  "rtl_refs": 0,
+  "counts_approx": {
+   "forms": 0,
+   "buttons": 2,
+   "tables": 0,
+   "dialogs": 1,
+   "inputs": 0
+  },
+  "business_logic": false
+ },
+ {
+  "file": "frontend/apps/dashboard/src/app/[locale]/dashboard/accounting/journal-entries/[id]/page.tsx",
+  "kind": "page",
+  "route": "/{locale}/dashboard/accounting/journal-entries/[id]",
+  "module": "accounting",
+  "client_component": true,
+  "lines": 392,
+  "permission_gate": {
+   "modules": [
+    "ACCOUNTING"
+   ],
+   "levels": [
+    "READ",
+    "WRITE"
+   ]
+  },
+  "direct_api_calls": [],
+  "data_hooks_or_api_modules": [
+   "accountingApi",
+   "useRbac"
+  ],
+  "raw_fetch": 0,
+  "direct_axios_import": false,
+  "i18n": {
+   "next_intl": false,
+   "custom_createTranslator": true,
+   "getLocaleFromPath": true
+  },
+  "rtl_refs": 0,
+  "counts_approx": {
+   "forms": 0,
+   "buttons": 3,
+   "tables": 1,
+   "dialogs": 1,
+   "inputs": 0
+  },
+  "business_logic": false
+ },
+ {
+  "file": "frontend/apps/dashboard/src/app/[locale]/dashboard/accounting/supplier-invoices/page.tsx",
+  "kind": "page",
+  "route": "/{locale}/dashboard/accounting/supplier-invoices",
+  "module": "accounting",
+  "client_component": true,
+  "lines": 507,
+  "permission_gate": {
+   "modules": [
+    "ACCOUNTING"
+   ],
+   "levels": [
+    "READ",
+    "WRITE"
+   ]
+  },
+  "direct_api_calls": [],
+  "data_hooks_or_api_modules": [
+   "accountingApi",
+   "bankApi",
+   "suppliersApi",
+   "useRbac"
+  ],
+  "raw_fetch": 0,
+  "direct_axios_import": false,
+  "i18n": {
+   "next_intl": false,
+   "custom_createTranslator": true,
+   "getLocaleFromPath": true
+  },
+  "rtl_refs": 0,
+  "counts_approx": {
+   "forms": 0,
+   "buttons": 3,
+   "tables": 1,
+   "dialogs": 2,
+   "inputs": 0
+  },
+  "business_logic": true
+ },
+ {
+  "file": "frontend/apps/dashboard/src/app/[locale]/dashboard/accounting/suppliers/page.tsx",
+  "kind": "page",
+  "route": "/{locale}/dashboard/accounting/suppliers",
+  "module": "accounting",
+  "client_component": true,
+  "lines": 289,
+  "permission_gate": {
+   "modules": [
+    "SUPPLIERS"
+   ],
+   "levels": [
+    "DELETE",
+    "READ",
+    "WRITE"
+   ]
+  },
+  "direct_api_calls": [],
+  "data_hooks_or_api_modules": [
+   "accountingApi",
+   "suppliersApi",
+   "useRbac"
+  ],
+  "raw_fetch": 0,
+  "direct_axios_import": false,
+  "i18n": {
+   "next_intl": false,
+   "custom_createTranslator": true,
+   "getLocaleFromPath": true
+  },
+  "rtl_refs": 0,
+  "counts_approx": {
+   "forms": 0,
+   "buttons": 4,
+   "tables": 0,
+   "dialogs": 1,
+   "inputs": 0
+  },
+  "business_logic": false
+ },
+ {
+  "file": "frontend/apps/dashboard/src/app/[locale]/dashboard/categories/page.tsx",
+  "kind": "page",
+  "route": "/{locale}/dashboard/categories",
+  "module": "categories",
+  "client_component": true,
+  "lines": 175,
+  "permission_gate": null,
+  "direct_api_calls": [
+   "GET /categories",
+   "DELETE /categories/{}"
+  ],
+  "data_hooks_or_api_modules": [],
+  "raw_fetch": 0,
+  "direct_axios_import": false,
+  "i18n": {
+   "next_intl": false,
+   "custom_createTranslator": true,
+   "getLocaleFromPath": true
+  },
+  "rtl_refs": 0,
+  "counts_approx": {
+   "forms": 0,
+   "buttons": 3,
+   "tables": 1,
+   "dialogs": 0,
+   "inputs": 0
+  },
+  "business_logic": false
+ },
+ {
+  "file": "frontend/apps/dashboard/src/app/[locale]/dashboard/categories/[id]/edit/page.tsx",
+  "kind": "page",
+  "route": "/{locale}/dashboard/categories/[id]/edit",
+  "module": "categories",
+  "client_component": true,
+  "lines": 122,
+  "permission_gate": null,
+  "direct_api_calls": [
+   "GET /categories/{}",
+   "PUT /categories/{}"
+  ],
+  "data_hooks_or_api_modules": [],
+  "raw_fetch": 0,
+  "direct_axios_import": false,
+  "i18n": {
+   "next_intl": false,
+   "custom_createTranslator": true,
+   "getLocaleFromPath": true
+  },
+  "rtl_refs": 0,
+  "counts_approx": {
+   "forms": 0,
+   "buttons": 0,
+   "tables": 0,
+   "dialogs": 0,
+   "inputs": 0
+  },
+  "business_logic": false
+ },
+ {
+  "file": "frontend/apps/dashboard/src/app/[locale]/dashboard/categories/new/page.tsx",
+  "kind": "page",
+  "route": "/{locale}/dashboard/categories/new",
+  "module": "categories",
+  "client_component": true,
+  "lines": 79,
+  "permission_gate": null,
+  "direct_api_calls": [
+   "POST /categories"
+  ],
+  "data_hooks_or_api_modules": [],
+  "raw_fetch": 0,
+  "direct_axios_import": false,
+  "i18n": {
+   "next_intl": false,
+   "custom_createTranslator": true,
+   "getLocaleFromPath": true
+  },
+  "rtl_refs": 0,
+  "counts_approx": {
+   "forms": 0,
+   "buttons": 0,
+   "tables": 0,
+   "dialogs": 0,
+   "inputs": 0
+  },
+  "business_logic": false
+ },
+ {
+  "file": "frontend/apps/dashboard/src/app/[locale]/dashboard/drivers/page.tsx",
+  "kind": "page",
+  "route": "/{locale}/dashboard/drivers",
+  "module": "drivers",
+  "client_component": true,
+  "lines": 324,
+  "permission_gate": null,
+  "direct_api_calls": [
+   "GET /admin/drivers",
+   "PUT /admin/drivers/{}/status",
+   "DELETE /admin/drivers/{}"
+  ],
+  "data_hooks_or_api_modules": [],
+  "raw_fetch": 0,
+  "direct_axios_import": false,
+  "i18n": {
+   "next_intl": false,
+   "custom_createTranslator": true,
+   "getLocaleFromPath": true
+  },
+  "rtl_refs": 17,
+  "counts_approx": {
+   "forms": 0,
+   "buttons": 5,
+   "tables": 1,
+   "dialogs": 0,
+   "inputs": 0
+  },
+  "business_logic": true
+ },
+ {
+  "file": "frontend/apps/dashboard/src/app/[locale]/dashboard/drivers/[id]/page.tsx",
+  "kind": "page",
+  "route": "/{locale}/dashboard/drivers/[id]",
+  "module": "drivers",
+  "client_component": true,
+  "lines": 626,
+  "permission_gate": null,
+  "direct_api_calls": [
+   "GET /admin/drivers/{}",
+   "PUT /admin/drivers/{}"
+  ],
+  "data_hooks_or_api_modules": [],
+  "raw_fetch": 0,
+  "direct_axios_import": false,
+  "i18n": {
+   "next_intl": false,
+   "custom_createTranslator": true,
+   "getLocaleFromPath": true
+  },
+  "rtl_refs": 8,
+  "counts_approx": {
+   "forms": 1,
+   "buttons": 3,
+   "tables": 0,
+   "dialogs": 0,
+   "inputs": 13
+  },
+  "business_logic": true
+ },
+ {
+  "file": "frontend/apps/dashboard/src/app/[locale]/dashboard/drivers/new/page.tsx",
+  "kind": "page",
+  "route": "/{locale}/dashboard/drivers/new",
+  "module": "drivers",
+  "client_component": true,
+  "lines": 366,
+  "permission_gate": null,
+  "direct_api_calls": [
+   "POST /admin/drivers"
+  ],
+  "data_hooks_or_api_modules": [],
+  "raw_fetch": 0,
+  "direct_axios_import": false,
+  "i18n": {
+   "next_intl": false,
+   "custom_createTranslator": true,
+   "getLocaleFromPath": true
+  },
+  "rtl_refs": 6,
+  "counts_approx": {
+   "forms": 1,
+   "buttons": 3,
+   "tables": 0,
+   "dialogs": 0,
+   "inputs": 4
+  },
+  "business_logic": false
+ },
+ {
+  "file": "frontend/apps/dashboard/src/app/[locale]/dashboard/hr/attendance/page.tsx",
+  "kind": "page",
+  "route": "/{locale}/dashboard/hr/attendance",
+  "module": "hr",
+  "client_component": true,
+  "lines": 337,
+  "permission_gate": {
+   "modules": [
+    "HR"
+   ],
+   "levels": [
+    "READ",
+    "WRITE"
+   ]
+  },
+  "direct_api_calls": [
+   "GET /hr/employees",
+   "GET /hr/attendance",
+   "POST /hr/attendance/clock-in",
+   "PUT /hr/attendance/{}",
+   "DELETE /hr/attendance/{}"
+  ],
+  "data_hooks_or_api_modules": [
+   "useRbac"
+  ],
+  "raw_fetch": 0,
+  "direct_axios_import": false,
+  "i18n": {
+   "next_intl": false,
+   "custom_createTranslator": true,
+   "getLocaleFromPath": true
+  },
+  "rtl_refs": 0,
+  "counts_approx": {
+   "forms": 0,
+   "buttons": 3,
+   "tables": 0,
+   "dialogs": 1,
+   "inputs": 2
+  },
+  "business_logic": true
+ },
+ {
+  "file": "frontend/apps/dashboard/src/app/[locale]/dashboard/hr/contracts/page.tsx",
+  "kind": "page",
+  "route": "/{locale}/dashboard/hr/contracts",
+  "module": "hr",
+  "client_component": true,
+  "lines": 76,
+  "permission_gate": null,
+  "direct_api_calls": [],
+  "data_hooks_or_api_modules": [
+   "useContracts"
+  ],
+  "raw_fetch": 0,
+  "direct_axios_import": false,
+  "i18n": {
+   "next_intl": true,
+   "custom_createTranslator": false,
+   "getLocaleFromPath": false
+  },
+  "rtl_refs": 0,
+  "counts_approx": {
+   "forms": 0,
+   "buttons": 1,
+   "tables": 0,
+   "dialogs": 1,
+   "inputs": 0
+  },
+  "business_logic": false
+ },
+ {
+  "file": "frontend/apps/dashboard/src/app/[locale]/dashboard/hr/employees/page.tsx",
+  "kind": "page",
+  "route": "/{locale}/dashboard/hr/employees",
+  "module": "hr",
+  "client_component": true,
+  "lines": 282,
+  "permission_gate": {
+   "modules": [
+    "HR"
+   ],
+   "levels": [
+    "DELETE",
+    "READ",
+    "WRITE"
+   ]
+  },
+  "direct_api_calls": [
+   "GET /hr/employees",
+   "POST /hr/employees",
+   "PUT /hr/employees/{}",
+   "DELETE /hr/employees/{}"
+  ],
+  "data_hooks_or_api_modules": [
+   "useRbac"
+  ],
+  "raw_fetch": 0,
+  "direct_axios_import": false,
+  "i18n": {
+   "next_intl": false,
+   "custom_createTranslator": true,
+   "getLocaleFromPath": true
+  },
+  "rtl_refs": 0,
+  "counts_approx": {
+   "forms": 0,
+   "buttons": 3,
+   "tables": 0,
+   "dialogs": 1,
+   "inputs": 0
+  },
+  "business_logic": false
+ },
+ {
+  "file": "frontend/apps/dashboard/src/app/[locale]/dashboard/hr/insurance/page.tsx",
+  "kind": "page",
+  "route": "/{locale}/dashboard/hr/insurance",
+  "module": "hr",
+  "client_component": true,
+  "lines": 69,
+  "permission_gate": null,
+  "direct_api_calls": [],
+  "data_hooks_or_api_modules": [
+   "useInsurance"
+  ],
+  "raw_fetch": 0,
+  "direct_axios_import": false,
+  "i18n": {
+   "next_intl": true,
+   "custom_createTranslator": false,
+   "getLocaleFromPath": false
+  },
+  "rtl_refs": 0,
+  "counts_approx": {
+   "forms": 0,
+   "buttons": 1,
+   "tables": 0,
+   "dialogs": 1,
+   "inputs": 0
+  },
+  "business_logic": false
+ },
+ {
+  "file": "frontend/apps/dashboard/src/app/[locale]/dashboard/hr/leaves/page.tsx",
+  "kind": "page",
+  "route": "/{locale}/dashboard/hr/leaves",
+  "module": "hr",
+  "client_component": true,
+  "lines": 443,
+  "permission_gate": {
+   "modules": [
+    "LEAVES"
+   ],
+   "levels": [
+    "READ",
+    "WRITE"
+   ]
+  },
+  "direct_api_calls": [
+   "GET /hr/employees",
+   "GET /hr/leaves",
+   "POST /hr/leaves",
+   "PUT /hr/leaves/{}",
+   "DELETE /hr/leaves/{}",
+   "POST /hr/leaves/{}/approve",
+   "POST /hr/leaves/{}/reject"
+  ],
+  "data_hooks_or_api_modules": [
+   "useRbac"
+  ],
+  "raw_fetch": 0,
+  "direct_axios_import": false,
+  "i18n": {
+   "next_intl": false,
+   "custom_createTranslator": true,
+   "getLocaleFromPath": true
+  },
+  "rtl_refs": 0,
+  "counts_approx": {
+   "forms": 0,
+   "buttons": 5,
+   "tables": 0,
+   "dialogs": 2,
+   "inputs": 3
+  },
+  "business_logic": true
+ },
+ {
+  "file": "frontend/apps/dashboard/src/app/[locale]/dashboard/hr/payroll/page.tsx",
+  "kind": "page",
+  "route": "/{locale}/dashboard/hr/payroll",
+  "module": "hr",
+  "client_component": true,
+  "lines": 302,
+  "permission_gate": {
+   "modules": [
+    "SALARIES"
+   ],
+   "levels": [
+    "READ",
+    "WRITE"
+   ]
+  },
+  "direct_api_calls": [
+   "GET /hr/employees",
+   "GET /hr/salaries",
+   "POST /hr/salaries",
+   "PUT /hr/salaries/{}",
+   "DELETE /hr/salaries/{}",
+   "POST /hr/salaries/{}/mark-paid"
+  ],
+  "data_hooks_or_api_modules": [
+   "useRbac"
+  ],
+  "raw_fetch": 0,
+  "direct_axios_import": false,
+  "i18n": {
+   "next_intl": false,
+   "custom_createTranslator": true,
+   "getLocaleFromPath": true
+  },
+  "rtl_refs": 0,
+  "counts_approx": {
+   "forms": 0,
+   "buttons": 3,
+   "tables": 0,
+   "dialogs": 1,
+   "inputs": 2
+  },
+  "business_logic": true
+ },
+ {
+  "file": "frontend/apps/dashboard/src/app/[locale]/dashboard/hr/performance/page.tsx",
+  "kind": "page",
+  "route": "/{locale}/dashboard/hr/performance",
+  "module": "hr",
+  "client_component": true,
+  "lines": 74,
+  "permission_gate": null,
+  "direct_api_calls": [],
+  "data_hooks_or_api_modules": [
+   "usePerformanceReviews"
+  ],
+  "raw_fetch": 0,
+  "direct_axios_import": false,
+  "i18n": {
+   "next_intl": true,
+   "custom_createTranslator": false,
+   "getLocaleFromPath": false
+  },
+  "rtl_refs": 0,
+  "counts_approx": {
+   "forms": 0,
+   "buttons": 1,
+   "tables": 0,
+   "dialogs": 1,
+   "inputs": 0
+  },
+  "business_logic": false
+ },
+ {
+  "file": "frontend/apps/dashboard/src/app/[locale]/dashboard/hr/resignations/page.tsx",
+  "kind": "page",
+  "route": "/{locale}/dashboard/hr/resignations",
+  "module": "hr",
+  "client_component": true,
+  "lines": 90,
+  "permission_gate": null,
+  "direct_api_calls": [],
+  "data_hooks_or_api_modules": [
+   "useResignations"
+  ],
+  "raw_fetch": 0,
+  "direct_axios_import": false,
+  "i18n": {
+   "next_intl": true,
+   "custom_createTranslator": false,
+   "getLocaleFromPath": false
+  },
+  "rtl_refs": 0,
+  "counts_approx": {
+   "forms": 0,
+   "buttons": 3,
+   "tables": 0,
+   "dialogs": 1,
+   "inputs": 0
+  },
+  "business_logic": false
+ },
+ {
+  "file": "frontend/apps/dashboard/src/app/[locale]/dashboard/hr/training/page.tsx",
+  "kind": "page",
+  "route": "/{locale}/dashboard/hr/training",
+  "module": "hr",
+  "client_component": true,
+  "lines": 69,
+  "permission_gate": null,
+  "direct_api_calls": [],
+  "data_hooks_or_api_modules": [
+   "useTraining"
+  ],
+  "raw_fetch": 0,
+  "direct_axios_import": false,
+  "i18n": {
+   "next_intl": true,
+   "custom_createTranslator": false,
+   "getLocaleFromPath": false
+  },
+  "rtl_refs": 0,
+  "counts_approx": {
+   "forms": 0,
+   "buttons": 1,
+   "tables": 0,
+   "dialogs": 1,
+   "inputs": 0
+  },
+  "business_logic": false
+ },
+ {
+  "file": "frontend/apps/dashboard/src/app/[locale]/dashboard/inventory/page.tsx",
+  "kind": "page",
+  "route": "/{locale}/dashboard/inventory",
+  "module": "inventory",
+  "client_component": true,
+  "lines": 315,
+  "permission_gate": null,
+  "direct_api_calls": [
+   "GET /products",
+   "POST /inventory/adjust"
+  ],
+  "data_hooks_or_api_modules": [],
+  "raw_fetch": 0,
+  "direct_axios_import": false,
+  "i18n": {
+   "next_intl": false,
+   "custom_createTranslator": true,
+   "getLocaleFromPath": true
+  },
+  "rtl_refs": 0,
+  "counts_approx": {
+   "forms": 2,
+   "buttons": 3,
+   "tables": 1,
+   "dialogs": 1,
+   "inputs": 2
+  },
+  "business_logic": false
+ },
+ {
+  "file": "frontend/apps/dashboard/src/app/[locale]/dashboard/kds/layout.tsx",
+  "kind": "layout",
+  "route": "/{locale}/dashboard/kds",
+  "module": "kds",
+  "client_component": false,
+  "lines": 19,
+  "permission_gate": null,
+  "direct_api_calls": [],
+  "data_hooks_or_api_modules": [],
+  "raw_fetch": 0,
+  "direct_axios_import": false,
+  "i18n": {
+   "next_intl": false,
+   "custom_createTranslator": false,
+   "getLocaleFromPath": false
+  },
+  "rtl_refs": 0,
+  "counts_approx": {
+   "forms": 0,
+   "buttons": 0,
+   "tables": 0,
+   "dialogs": 0,
+   "inputs": 0
+  },
+  "business_logic": false
+ },
+ {
+  "file": "frontend/apps/dashboard/src/app/[locale]/dashboard/kds/page.tsx",
+  "kind": "page",
+  "route": "/{locale}/dashboard/kds",
+  "module": "kds",
+  "client_component": true,
+  "lines": 316,
+  "permission_gate": {
+   "modules": [
+    "KDS"
+   ],
+   "levels": [
+    "ADMIN",
+    "DELETE",
+    "READ",
+    "WRITE"
+   ]
+  },
+  "direct_api_calls": [],
+  "data_hooks_or_api_modules": [
+   "useKDS",
+   "useKDSAnalytics",
+   "useKDSAudio",
+   "useKDSWebSocket",
+   "useRbac"
+  ],
+  "raw_fetch": 0,
+  "direct_axios_import": false,
+  "i18n": {
+   "next_intl": false,
+   "custom_createTranslator": true,
+   "getLocaleFromPath": true
+  },
+  "rtl_refs": 10,
+  "counts_approx": {
+   "forms": 0,
+   "buttons": 2,
+   "tables": 0,
+   "dialogs": 0,
+   "inputs": 0
+  },
+  "business_logic": false
+ },
+ {
+  "file": "frontend/apps/dashboard/src/app/[locale]/dashboard/kds/settings/page.tsx",
+  "kind": "page",
+  "route": "/{locale}/dashboard/kds/settings",
+  "module": "kds",
+  "client_component": true,
+  "lines": 496,
+  "permission_gate": {
+   "modules": [
+    "KDS"
+   ],
+   "levels": [
+    "ADMIN"
+   ]
+  },
+  "direct_api_calls": [
+   "GET /kds/settings",
+   "PUT /kds/settings",
+   "PUT /kds/settings"
+  ],
+  "data_hooks_or_api_modules": [
+   "useKDS",
+   "useRbac"
+  ],
+  "raw_fetch": 0,
+  "direct_axios_import": true,
+  "i18n": {
+   "next_intl": false,
+   "custom_createTranslator": true,
+   "getLocaleFromPath": true
+  },
+  "rtl_refs": 14,
+  "counts_approx": {
+   "forms": 0,
+   "buttons": 2,
+   "tables": 0,
+   "dialogs": 0,
+   "inputs": 6
+  },
+  "business_logic": false
+ },
+ {
+  "file": "frontend/apps/dashboard/src/app/[locale]/dashboard/notifications/page.tsx",
+  "kind": "page",
+  "route": "/{locale}/dashboard/notifications",
+  "module": "notifications",
+  "client_component": true,
+  "lines": 403,
+  "permission_gate": {
+   "modules": [
+    "NOTIFICATIONS"
+   ],
+   "levels": [
+    "DELETE",
+    "READ"
+   ]
+  },
+  "direct_api_calls": [],
+  "data_hooks_or_api_modules": [
+   "useNotifications",
+   "useRbac"
+  ],
+  "raw_fetch": 0,
+  "direct_axios_import": false,
+  "i18n": {
+   "next_intl": false,
+   "custom_createTranslator": true,
+   "getLocaleFromPath": true
+  },
+  "rtl_refs": 5,
+  "counts_approx": {
+   "forms": 0,
+   "buttons": 3,
+   "tables": 0,
+   "dialogs": 0,
+   "inputs": 4
+  },
+  "business_logic": true
+ },
+ {
+  "file": "frontend/apps/dashboard/src/app/[locale]/dashboard/orders/page.tsx",
+  "kind": "page",
+  "route": "/{locale}/dashboard/orders",
+  "module": "orders",
+  "client_component": true,
+  "lines": 628,
+  "permission_gate": {
+   "modules": [
+    "ORDERS"
+   ],
+   "levels": [
+    "DELETE",
+    "READ"
+   ]
+  },
+  "direct_api_calls": [
+   "GET /admin/orders",
+   "DELETE /admin/orders/{}"
+  ],
+  "data_hooks_or_api_modules": [
+   "useRbac"
+  ],
+  "raw_fetch": 0,
+  "direct_axios_import": false,
+  "i18n": {
+   "next_intl": false,
+   "custom_createTranslator": true,
+   "getLocaleFromPath": true
+  },
+  "rtl_refs": 14,
+  "counts_approx": {
+   "forms": 0,
+   "buttons": 7,
+   "tables": 1,
+   "dialogs": 0,
+   "inputs": 4
+  },
+  "business_logic": true
+ },
+ {
+  "file": "frontend/apps/dashboard/src/app/[locale]/dashboard/orders/[id]/page.tsx",
+  "kind": "page",
+  "route": "/{locale}/dashboard/orders/[id]",
+  "module": "orders",
+  "client_component": true,
+  "lines": 644,
+  "permission_gate": {
+   "modules": [
+    "ORDERS"
+   ],
+   "levels": [
+    "READ",
+    "WRITE"
+   ]
+  },
+  "direct_api_calls": [
+   "GET /admin/orders/{}",
+   "PUT /admin/orders/{}/status"
+  ],
+  "data_hooks_or_api_modules": [
+   "useRbac"
+  ],
+  "raw_fetch": 0,
+  "direct_axios_import": false,
+  "i18n": {
+   "next_intl": false,
+   "custom_createTranslator": true,
+   "getLocaleFromPath": true
+  },
+  "rtl_refs": 0,
+  "counts_approx": {
+   "forms": 0,
+   "buttons": 6,
+   "tables": 0,
+   "dialogs": 0,
+   "inputs": 1
+  },
+  "business_logic": true
+ },
+ {
+  "file": "frontend/apps/dashboard/src/app/[locale]/dashboard/pos/layout.tsx",
+  "kind": "layout",
+  "route": "/{locale}/dashboard/pos",
+  "module": "pos",
+  "client_component": false,
+  "lines": 19,
+  "permission_gate": null,
+  "direct_api_calls": [],
+  "data_hooks_or_api_modules": [],
+  "raw_fetch": 0,
+  "direct_axios_import": false,
+  "i18n": {
+   "next_intl": false,
+   "custom_createTranslator": false,
+   "getLocaleFromPath": false
+  },
+  "rtl_refs": 0,
+  "counts_approx": {
+   "forms": 0,
+   "buttons": 0,
+   "tables": 0,
+   "dialogs": 0,
+   "inputs": 0
+  },
+  "business_logic": false
+ },
+ {
+  "file": "frontend/apps/dashboard/src/app/[locale]/dashboard/pos/page.tsx",
+  "kind": "page",
+  "route": "/{locale}/dashboard/pos",
+  "module": "pos",
+  "client_component": true,
+  "lines": 525,
+  "permission_gate": {
+   "modules": [
+    "ORDERS"
+   ],
+   "levels": [
+    "WRITE"
+   ]
+  },
+  "direct_api_calls": [],
+  "data_hooks_or_api_modules": [
+   "posApi",
+   "usePOSAudio",
+   "usePOSBackgroundSync",
+   "usePOSBarcodeScanner",
+   "usePOSData",
+   "usePOSKeyboard",
+   "usePOSOffline",
+   "usePOSPerformance",
+   "usePOSPrint",
+   "usePOSProductIndex",
+   "useRbac"
+  ],
+  "raw_fetch": 0,
+  "direct_axios_import": false,
+  "i18n": {
+   "next_intl": false,
+   "custom_createTranslator": true,
+   "getLocaleFromPath": true
+  },
+  "rtl_refs": 0,
+  "counts_approx": {
+   "forms": 0,
+   "buttons": 0,
+   "tables": 0,
+   "dialogs": 0,
+   "inputs": 0
+  },
+  "business_logic": false
+ },
+ {
+  "file": "frontend/apps/dashboard/src/app/[locale]/dashboard/pos/settings/page.tsx",
+  "kind": "page",
+  "route": "/{locale}/dashboard/pos/settings",
+  "module": "pos",
+  "client_component": true,
+  "lines": 317,
+  "permission_gate": {
+   "modules": [
+    "ORDERS"
+   ],
+   "levels": [
+    "WRITE"
+   ]
+  },
+  "direct_api_calls": [],
+  "data_hooks_or_api_modules": [
+   "useRbac"
+  ],
+  "raw_fetch": 0,
+  "direct_axios_import": false,
+  "i18n": {
+   "next_intl": false,
+   "custom_createTranslator": true,
+   "getLocaleFromPath": true
+  },
+  "rtl_refs": 14,
+  "counts_approx": {
+   "forms": 0,
+   "buttons": 5,
+   "tables": 0,
+   "dialogs": 0,
+   "inputs": 4
+  },
+  "business_logic": false
+ },
+ {
+  "file": "frontend/apps/dashboard/src/app/[locale]/dashboard/products/page.tsx",
+  "kind": "page",
+  "route": "/{locale}/dashboard/products",
+  "module": "products",
+  "client_component": true,
+  "lines": 210,
+  "permission_gate": {
+   "modules": [
+    "PRODUCTS"
+   ],
+   "levels": [
+    "DELETE",
+    "READ",
+    "WRITE"
+   ]
+  },
+  "direct_api_calls": [
+   "GET /products",
+   "GET /categories",
+   "DELETE /products/{}"
+  ],
+  "data_hooks_or_api_modules": [
+   "useRbac"
+  ],
+  "raw_fetch": 0,
+  "direct_axios_import": false,
+  "i18n": {
+   "next_intl": false,
+   "custom_createTranslator": true,
+   "getLocaleFromPath": true
+  },
+  "rtl_refs": 0,
+  "counts_approx": {
+   "forms": 0,
+   "buttons": 2,
+   "tables": 0,
+   "dialogs": 0,
+   "inputs": 0
+  },
+  "business_logic": false
+ },
+ {
+  "file": "frontend/apps/dashboard/src/app/[locale]/dashboard/products/[id]/edit/page.tsx",
+  "kind": "page",
+  "route": "/{locale}/dashboard/products/[id]/edit",
+  "module": "products",
+  "client_component": true,
+  "lines": 190,
+  "permission_gate": {
+   "modules": [
+    "PRODUCTS"
+   ],
+   "levels": [
+    "WRITE"
+   ]
+  },
+  "direct_api_calls": [
+   "GET /categories",
+   "GET /products/{}",
+   "PUT /products/{}"
+  ],
+  "data_hooks_or_api_modules": [
+   "useRbac"
+  ],
+  "raw_fetch": 0,
+  "direct_axios_import": false,
+  "i18n": {
+   "next_intl": false,
+   "custom_createTranslator": true,
+   "getLocaleFromPath": true
+  },
+  "rtl_refs": 0,
+  "counts_approx": {
+   "forms": 0,
+   "buttons": 0,
+   "tables": 0,
+   "dialogs": 0,
+   "inputs": 0
+  },
+  "business_logic": false
+ },
+ {
+  "file": "frontend/apps/dashboard/src/app/[locale]/dashboard/products/new/page.tsx",
+  "kind": "page",
+  "route": "/{locale}/dashboard/products/new",
+  "module": "products",
+  "client_component": true,
+  "lines": 175,
+  "permission_gate": {
+   "modules": [
+    "PRODUCTS"
+   ],
+   "levels": [
+    "WRITE"
+   ]
+  },
+  "direct_api_calls": [
+   "GET /categories",
+   "POST /products"
+  ],
+  "data_hooks_or_api_modules": [
+   "useRbac"
+  ],
+  "raw_fetch": 0,
+  "direct_axios_import": false,
+  "i18n": {
+   "next_intl": false,
+   "custom_createTranslator": true,
+   "getLocaleFromPath": true
+  },
+  "rtl_refs": 0,
+  "counts_approx": {
+   "forms": 0,
+   "buttons": 0,
+   "tables": 0,
+   "dialogs": 0,
+   "inputs": 0
+  },
+  "business_logic": false
+ },
+ {
+  "file": "frontend/apps/dashboard/src/app/[locale]/dashboard/rbac/roles/page.tsx",
+  "kind": "page",
+  "route": "/{locale}/dashboard/rbac/roles",
+  "module": "rbac",
+  "client_component": true,
+  "lines": 352,
+  "permission_gate": null,
+  "direct_api_calls": [],
+  "data_hooks_or_api_modules": [
+   "useRbac"
+  ],
+  "raw_fetch": 0,
+  "direct_axios_import": false,
+  "i18n": {
+   "next_intl": false,
+   "custom_createTranslator": true,
+   "getLocaleFromPath": true
+  },
+  "rtl_refs": 0,
+  "counts_approx": {
+   "forms": 1,
+   "buttons": 6,
+   "tables": 0,
+   "dialogs": 1,
+   "inputs": 2
+  },
+  "business_logic": false
+ },
+ {
+  "file": "frontend/apps/dashboard/src/app/[locale]/dashboard/reports/page.tsx",
+  "kind": "page",
+  "route": "/{locale}/dashboard/reports",
+  "module": "reports",
+  "client_component": false,
+  "lines": 71,
+  "permission_gate": null,
+  "direct_api_calls": [],
+  "data_hooks_or_api_modules": [],
+  "raw_fetch": 0,
+  "direct_axios_import": false,
+  "i18n": {
+   "next_intl": false,
+   "custom_createTranslator": false,
+   "getLocaleFromPath": false
+  },
+  "rtl_refs": 0,
+  "counts_approx": {
+   "forms": 0,
+   "buttons": 0,
+   "tables": 0,
+   "dialogs": 0,
+   "inputs": 0
+  },
+  "business_logic": false
+ },
+ {
+  "file": "frontend/apps/dashboard/src/app/[locale]/dashboard/reports/financial/page.tsx",
+  "kind": "page",
+  "route": "/{locale}/dashboard/reports/financial",
+  "module": "reports",
+  "client_component": true,
+  "lines": 174,
+  "permission_gate": null,
+  "direct_api_calls": [],
+  "data_hooks_or_api_modules": [
+   "financialReportsApi",
+   "useFinancialReports"
+  ],
+  "raw_fetch": 0,
+  "direct_axios_import": false,
+  "i18n": {
+   "next_intl": true,
+   "custom_createTranslator": false,
+   "getLocaleFromPath": true
+  },
+  "rtl_refs": 0,
+  "counts_approx": {
+   "forms": 0,
+   "buttons": 0,
+   "tables": 0,
+   "dialogs": 0,
+   "inputs": 0
+  },
+  "business_logic": false
+ },
+ {
+  "file": "frontend/apps/dashboard/src/app/[locale]/dashboard/reports/financial/advanced/page.tsx",
+  "kind": "page",
+  "route": "/{locale}/dashboard/reports/financial/advanced",
+  "module": "reports",
+  "client_component": true,
+  "lines": 195,
+  "permission_gate": null,
+  "direct_api_calls": [],
+  "data_hooks_or_api_modules": [
+   "accountingAdvancedApi"
+  ],
+  "raw_fetch": 0,
+  "direct_axios_import": false,
+  "i18n": {
+   "next_intl": false,
+   "custom_createTranslator": false,
+   "getLocaleFromPath": true
+  },
+  "rtl_refs": 5,
+  "counts_approx": {
+   "forms": 0,
+   "buttons": 3,
+   "tables": 0,
+   "dialogs": 0,
+   "inputs": 2
+  },
+  "business_logic": false
+ },
+ {
+  "file": "frontend/apps/dashboard/src/app/[locale]/dashboard/reports/financial/balance-sheet/page.tsx",
+  "kind": "page",
+  "route": "/{locale}/dashboard/reports/financial/balance-sheet",
+  "module": "reports",
+  "client_component": true,
+  "lines": 87,
+  "permission_gate": null,
+  "direct_api_calls": [],
+  "data_hooks_or_api_modules": [
+   "financialReportsApi",
+   "useFinancialReports"
+  ],
+  "raw_fetch": 0,
+  "direct_axios_import": false,
+  "i18n": {
+   "next_intl": true,
+   "custom_createTranslator": false,
+   "getLocaleFromPath": true
+  },
+  "rtl_refs": 0,
+  "counts_approx": {
+   "forms": 0,
+   "buttons": 1,
+   "tables": 0,
+   "dialogs": 0,
+   "inputs": 1
+  },
+  "business_logic": false
+ },
+ {
+  "file": "frontend/apps/dashboard/src/app/[locale]/dashboard/reports/financial/cash-flow/page.tsx",
+  "kind": "page",
+  "route": "/{locale}/dashboard/reports/financial/cash-flow",
+  "module": "reports",
+  "client_component": true,
+  "lines": 100,
+  "permission_gate": null,
+  "direct_api_calls": [],
+  "data_hooks_or_api_modules": [
+   "financialReportsApi",
+   "useFinancialReports"
+  ],
+  "raw_fetch": 0,
+  "direct_axios_import": false,
+  "i18n": {
+   "next_intl": true,
+   "custom_createTranslator": false,
+   "getLocaleFromPath": true
+  },
+  "rtl_refs": 0,
+  "counts_approx": {
+   "forms": 0,
+   "buttons": 1,
+   "tables": 0,
+   "dialogs": 0,
+   "inputs": 2
+  },
+  "business_logic": false
+ },
+ {
+  "file": "frontend/apps/dashboard/src/app/[locale]/dashboard/reports/financial/inventory-valuation/page.tsx",
+  "kind": "page",
+  "route": "/{locale}/dashboard/reports/financial/inventory-valuation",
+  "module": "reports",
+  "client_component": true,
+  "lines": 87,
+  "permission_gate": null,
+  "direct_api_calls": [],
+  "data_hooks_or_api_modules": [
+   "financialReportsApi",
+   "useFinancialReports"
+  ],
+  "raw_fetch": 0,
+  "direct_axios_import": false,
+  "i18n": {
+   "next_intl": true,
+   "custom_createTranslator": false,
+   "getLocaleFromPath": true
+  },
+  "rtl_refs": 0,
+  "counts_approx": {
+   "forms": 0,
+   "buttons": 1,
+   "tables": 0,
+   "dialogs": 0,
+   "inputs": 1
+  },
+  "business_logic": false
+ },
+ {
+  "file": "frontend/apps/dashboard/src/app/[locale]/dashboard/reports/financial/payables-aging/page.tsx",
+  "kind": "page",
+  "route": "/{locale}/dashboard/reports/financial/payables-aging",
+  "module": "reports",
+  "client_component": true,
+  "lines": 90,
+  "permission_gate": null,
+  "direct_api_calls": [],
+  "data_hooks_or_api_modules": [
+   "financialReportsApi",
+   "useFinancialReports"
+  ],
+  "raw_fetch": 0,
+  "direct_axios_import": false,
+  "i18n": {
+   "next_intl": true,
+   "custom_createTranslator": false,
+   "getLocaleFromPath": true
+  },
+  "rtl_refs": 0,
+  "counts_approx": {
+   "forms": 0,
+   "buttons": 1,
+   "tables": 0,
+   "dialogs": 0,
+   "inputs": 1
+  },
+  "business_logic": false
+ },
+ {
+  "file": "frontend/apps/dashboard/src/app/[locale]/dashboard/reports/financial/profit-loss/page.tsx",
+  "kind": "page",
+  "route": "/{locale}/dashboard/reports/financial/profit-loss",
+  "module": "reports",
+  "client_component": true,
+  "lines": 131,
+  "permission_gate": null,
+  "direct_api_calls": [],
+  "data_hooks_or_api_modules": [
+   "financialReportsApi",
+   "useFinancialReports"
+  ],
+  "raw_fetch": 0,
+  "direct_axios_import": false,
+  "i18n": {
+   "next_intl": true,
+   "custom_createTranslator": false,
+   "getLocaleFromPath": true
+  },
+  "rtl_refs": 0,
+  "counts_approx": {
+   "forms": 0,
+   "buttons": 1,
+   "tables": 0,
+   "dialogs": 0,
+   "inputs": 4
+  },
+  "business_logic": false
+ },
+ {
+  "file": "frontend/apps/dashboard/src/app/[locale]/dashboard/reports/financial/receivables-aging/page.tsx",
+  "kind": "page",
+  "route": "/{locale}/dashboard/reports/financial/receivables-aging",
+  "module": "reports",
+  "client_component": true,
+  "lines": 90,
+  "permission_gate": null,
+  "direct_api_calls": [],
+  "data_hooks_or_api_modules": [
+   "financialReportsApi",
+   "useFinancialReports"
+  ],
+  "raw_fetch": 0,
+  "direct_axios_import": false,
+  "i18n": {
+   "next_intl": true,
+   "custom_createTranslator": false,
+   "getLocaleFromPath": true
+  },
+  "rtl_refs": 0,
+  "counts_approx": {
+   "forms": 0,
+   "buttons": 1,
+   "tables": 0,
+   "dialogs": 0,
+   "inputs": 1
+  },
+  "business_logic": false
+ },
+ {
+  "file": "frontend/apps/dashboard/src/app/[locale]/dashboard/reports/financial/vat/page.tsx",
+  "kind": "page",
+  "route": "/{locale}/dashboard/reports/financial/vat",
+  "module": "reports",
+  "client_component": true,
+  "lines": 100,
+  "permission_gate": null,
+  "direct_api_calls": [],
+  "data_hooks_or_api_modules": [
+   "financialReportsApi",
+   "useFinancialReports"
+  ],
+  "raw_fetch": 0,
+  "direct_axios_import": false,
+  "i18n": {
+   "next_intl": true,
+   "custom_createTranslator": false,
+   "getLocaleFromPath": true
+  },
+  "rtl_refs": 0,
+  "counts_approx": {
+   "forms": 0,
+   "buttons": 1,
+   "tables": 0,
+   "dialogs": 0,
+   "inputs": 2
+  },
+  "business_logic": false
+ },
+ {
+  "file": "frontend/apps/dashboard/src/app/[locale]/dashboard/reports/hr/page.tsx",
+  "kind": "page",
+  "route": "/{locale}/dashboard/reports/hr",
+  "module": "reports",
+  "client_component": true,
+  "lines": 260,
+  "permission_gate": {
+   "modules": [
+    "REPORTS"
+   ],
+   "levels": [
+    "READ"
+   ]
+  },
+  "direct_api_calls": [],
+  "data_hooks_or_api_modules": [
+   "useHRReports",
+   "useRbac"
+  ],
+  "raw_fetch": 0,
+  "direct_axios_import": false,
+  "i18n": {
+   "next_intl": true,
+   "custom_createTranslator": false,
+   "getLocaleFromPath": true
+  },
+  "rtl_refs": 5,
+  "counts_approx": {
+   "forms": 0,
+   "buttons": 1,
+   "tables": 1,
+   "dialogs": 0,
+   "inputs": 3
+  },
+  "business_logic": false
+ },
+ {
+  "file": "frontend/apps/dashboard/src/app/[locale]/dashboard/reports/inventory/page.tsx",
+  "kind": "page",
+  "route": "/{locale}/dashboard/reports/inventory",
+  "module": "reports",
+  "client_component": true,
+  "lines": 250,
+  "permission_gate": {
+   "modules": [
+    "REPORTS"
+   ],
+   "levels": [
+    "READ"
+   ]
+  },
+  "direct_api_calls": [],
+  "data_hooks_or_api_modules": [
+   "reportsApi",
+   "useRbac",
+   "useReports"
+  ],
+  "raw_fetch": 0,
+  "direct_axios_import": false,
+  "i18n": {
+   "next_intl": false,
+   "custom_createTranslator": false,
+   "getLocaleFromPath": true
+  },
+  "rtl_refs": 7,
+  "counts_approx": {
+   "forms": 0,
+   "buttons": 1,
+   "tables": 0,
+   "dialogs": 0,
+   "inputs": 2
+  },
+  "business_logic": true
+ },
+ {
+  "file": "frontend/apps/dashboard/src/app/[locale]/dashboard/reports/overview/page.tsx",
+  "kind": "page",
+  "route": "/{locale}/dashboard/reports/overview",
+  "module": "reports",
+  "client_component": true,
+  "lines": 255,
+  "permission_gate": {
+   "modules": [
+    "REPORTS"
+   ],
+   "levels": [
+    "READ"
+   ]
+  },
+  "direct_api_calls": [],
+  "data_hooks_or_api_modules": [
+   "reportsApi",
+   "useRbac",
+   "useReports"
+  ],
+  "raw_fetch": 0,
+  "direct_axios_import": false,
+  "i18n": {
+   "next_intl": false,
+   "custom_createTranslator": false,
+   "getLocaleFromPath": true
+  },
+  "rtl_refs": 5,
+  "counts_approx": {
+   "forms": 0,
+   "buttons": 1,
+   "tables": 0,
+   "dialogs": 0,
+   "inputs": 2
+  },
+  "business_logic": true
+ },
+ {
+  "file": "frontend/apps/dashboard/src/app/[locale]/dashboard/reports/profitability/page.tsx",
+  "kind": "page",
+  "route": "/{locale}/dashboard/reports/profitability",
+  "module": "reports",
+  "client_component": true,
+  "lines": 283,
+  "permission_gate": {
+   "modules": [
+    "REPORTS"
+   ],
+   "levels": [
+    "READ"
+   ]
+  },
+  "direct_api_calls": [],
+  "data_hooks_or_api_modules": [
+   "reportsApi",
+   "useRbac",
+   "useReports"
+  ],
+  "raw_fetch": 0,
+  "direct_axios_import": false,
+  "i18n": {
+   "next_intl": false,
+   "custom_createTranslator": false,
+   "getLocaleFromPath": true
+  },
+  "rtl_refs": 7,
+  "counts_approx": {
+   "forms": 0,
+   "buttons": 1,
+   "tables": 0,
+   "dialogs": 0,
+   "inputs": 2
+  },
+  "business_logic": true
+ },
+ {
+  "file": "frontend/apps/dashboard/src/app/[locale]/dashboard/reports/sales/page.tsx",
+  "kind": "page",
+  "route": "/{locale}/dashboard/reports/sales",
+  "module": "reports",
+  "client_component": true,
+  "lines": 407,
+  "permission_gate": {
+   "modules": [
+    "REPORTS"
+   ],
+   "levels": [
+    "READ"
+   ]
+  },
+  "direct_api_calls": [],
+  "data_hooks_or_api_modules": [
+   "reportsApi",
+   "useRbac",
+   "useReports"
+  ],
+  "raw_fetch": 0,
+  "direct_axios_import": false,
+  "i18n": {
+   "next_intl": false,
+   "custom_createTranslator": false,
+   "getLocaleFromPath": true
+  },
+  "rtl_refs": 7,
+  "counts_approx": {
+   "forms": 0,
+   "buttons": 1,
+   "tables": 0,
+   "dialogs": 0,
+   "inputs": 3
+  },
+  "business_logic": true
+ },
+ {
+  "file": "frontend/apps/dashboard/src/app/[locale]/dashboard/settings/layout.tsx",
+  "kind": "layout",
+  "route": "/{locale}/dashboard/settings",
+  "module": "settings",
+  "client_component": true,
+  "lines": 50,
+  "permission_gate": null,
+  "direct_api_calls": [],
+  "data_hooks_or_api_modules": [],
+  "raw_fetch": 0,
+  "direct_axios_import": false,
+  "i18n": {
+   "next_intl": false,
+   "custom_createTranslator": true,
+   "getLocaleFromPath": false
+  },
+  "rtl_refs": 2,
+  "counts_approx": {
+   "forms": 0,
+   "buttons": 0,
+   "tables": 0,
+   "dialogs": 0,
+   "inputs": 0
+  },
+  "business_logic": false
+ },
+ {
+  "file": "frontend/apps/dashboard/src/app/[locale]/dashboard/settings/page.tsx",
+  "kind": "page",
+  "route": "/{locale}/dashboard/settings",
+  "module": "settings",
+  "client_component": true,
+  "lines": 22,
+  "permission_gate": null,
+  "direct_api_calls": [],
+  "data_hooks_or_api_modules": [],
+  "raw_fetch": 0,
+  "direct_axios_import": false,
+  "i18n": {
+   "next_intl": false,
+   "custom_createTranslator": false,
+   "getLocaleFromPath": false
+  },
+  "rtl_refs": 0,
+  "counts_approx": {
+   "forms": 0,
+   "buttons": 0,
+   "tables": 0,
+   "dialogs": 0,
+   "inputs": 0
+  },
+  "business_logic": false
+ },
+ {
+  "file": "frontend/apps/dashboard/src/app/[locale]/dashboard/settings/access-control/page.tsx",
+  "kind": "page",
+  "route": "/{locale}/dashboard/settings/access-control",
+  "module": "settings",
+  "client_component": true,
+  "lines": 42,
+  "permission_gate": null,
+  "direct_api_calls": [],
+  "data_hooks_or_api_modules": [],
+  "raw_fetch": 0,
+  "direct_axios_import": false,
+  "i18n": {
+   "next_intl": false,
+   "custom_createTranslator": true,
+   "getLocaleFromPath": true
+  },
+  "rtl_refs": 0,
+  "counts_approx": {
+   "forms": 0,
+   "buttons": 0,
+   "tables": 0,
+   "dialogs": 0,
+   "inputs": 0
+  },
+  "business_logic": false
+ },
+ {
+  "file": "frontend/apps/dashboard/src/app/[locale]/dashboard/settings/account/page.tsx",
+  "kind": "page",
+  "route": "/{locale}/dashboard/settings/account",
+  "module": "settings",
+  "client_component": true,
+  "lines": 239,
+  "permission_gate": null,
+  "direct_api_calls": [
+   "FETCH /users/{}/profile",
+   "FETCH /users/{}/settings/change-password"
+  ],
+  "data_hooks_or_api_modules": [],
+  "raw_fetch": 2,
+  "direct_axios_import": false,
+  "i18n": {
+   "next_intl": false,
+   "custom_createTranslator": true,
+   "getLocaleFromPath": true
+  },
+  "rtl_refs": 0,
+  "counts_approx": {
+   "forms": 0,
+   "buttons": 1,
+   "tables": 0,
+   "dialogs": 0,
+   "inputs": 6
+  },
+  "business_logic": false
+ },
+ {
+  "file": "frontend/apps/dashboard/src/app/[locale]/dashboard/settings/appearance/page.tsx",
+  "kind": "page",
+  "route": "/{locale}/dashboard/settings/appearance",
+  "module": "settings",
+  "client_component": true,
+  "lines": 329,
+  "permission_gate": null,
+  "direct_api_calls": [
+   "FETCH /users/{}/settings/theme",
+   "FETCH /users/{}/settings/theme-colors"
+  ],
+  "data_hooks_or_api_modules": [
+   "themeApi"
+  ],
+  "raw_fetch": 2,
+  "direct_axios_import": false,
+  "i18n": {
+   "next_intl": false,
+   "custom_createTranslator": true,
+   "getLocaleFromPath": true
+  },
+  "rtl_refs": 0,
+  "counts_approx": {
+   "forms": 0,
+   "buttons": 5,
+   "tables": 0,
+   "dialogs": 0,
+   "inputs": 6
+  },
+  "business_logic": false
+ },
+ {
+  "file": "frontend/apps/dashboard/src/app/[locale]/dashboard/settings/billing/page.tsx",
+  "kind": "page",
+  "route": "/{locale}/dashboard/settings/billing",
+  "module": "settings",
+  "client_component": true,
+  "lines": 455,
+  "permission_gate": null,
+  "direct_api_calls": [],
+  "data_hooks_or_api_modules": [
+   "usePayment"
+  ],
+  "raw_fetch": 0,
+  "direct_axios_import": false,
+  "i18n": {
+   "next_intl": false,
+   "custom_createTranslator": true,
+   "getLocaleFromPath": true
+  },
+  "rtl_refs": 4,
+  "counts_approx": {
+   "forms": 0,
+   "buttons": 4,
+   "tables": 0,
+   "dialogs": 1,
+   "inputs": 0
+  },
+  "business_logic": false
+ },
+ {
+  "file": "frontend/apps/dashboard/src/app/[locale]/dashboard/settings/restaurant/page.tsx",
+  "kind": "page",
+  "route": "/{locale}/dashboard/settings/restaurant",
+  "module": "settings",
+  "client_component": true,
+  "lines": 171,
+  "permission_gate": null,
+  "direct_api_calls": [
+   "GET /tenant/contact-info",
+   "PUT /tenant/contact-info"
+  ],
+  "data_hooks_or_api_modules": [],
+  "raw_fetch": 0,
+  "direct_axios_import": false,
+  "i18n": {
+   "next_intl": false,
+   "custom_createTranslator": true,
+   "getLocaleFromPath": true
+  },
+  "rtl_refs": 12,
+  "counts_approx": {
+   "forms": 0,
+   "buttons": 1,
+   "tables": 0,
+   "dialogs": 0,
+   "inputs": 3
+  },
+  "business_logic": false
+ },
+ {
+  "file": "frontend/apps/dashboard/src/app/[locale]/dashboard/settings/roles/page.tsx",
+  "kind": "page",
+  "route": "/{locale}/dashboard/settings/roles",
+  "module": "settings",
+  "client_component": true,
+  "lines": 231,
+  "permission_gate": {
+   "modules": [
+    "SETTINGS"
+   ],
+   "levels": [
+    "WRITE"
+   ]
+  },
+  "direct_api_calls": [
+   "FETCH /rbac/roles",
+   "FETCH /rbac/roles/{}"
+  ],
+  "data_hooks_or_api_modules": [
+   "useRbac"
+  ],
+  "raw_fetch": 2,
+  "direct_axios_import": false,
+  "i18n": {
+   "next_intl": false,
+   "custom_createTranslator": false,
+   "getLocaleFromPath": false
+  },
+  "rtl_refs": 0,
+  "counts_approx": {
+   "forms": 0,
+   "buttons": 3,
+   "tables": 1,
+   "dialogs": 0,
+   "inputs": 0
+  },
+  "business_logic": false
+ },
+ {
+  "file": "frontend/apps/dashboard/src/app/[locale]/dashboard/settings/roles/[id]/edit/page.tsx",
+  "kind": "page",
+  "route": "/{locale}/dashboard/settings/roles/[id]/edit",
+  "module": "settings",
+  "client_component": true,
+  "lines": 436,
+  "permission_gate": {
+   "modules": [
+    "ACCOUNTING",
+    "CATEGORIES",
+    "CONTRACTS",
+    "FINANCIAL_REPORTS",
+    "HR",
+    "KDS",
+    "LEAVES",
+    "NOTIFICATIONS",
+    "ORDERS",
+    "PERFORMANCE",
+    "PRODUCTS",
+    "REPORTS",
+    "ROLES",
+    "SALARIES",
+    "SETTINGS",
+    "SUPPLIERS",
+    "TABLES",
+    "THEMES",
+    "TRAINING",
+    "USERS"
+   ],
+   "levels": [
+    "ADMIN",
+    "DELETE",
+    "READ",
+    "WRITE"
+   ]
+  },
+  "direct_api_calls": [
+   "FETCH /rbac/roles/{}",
+   "FETCH /rbac/roles/{}"
+  ],
+  "data_hooks_or_api_modules": [
+   "useRbac"
+  ],
+  "raw_fetch": 2,
+  "direct_axios_import": false,
+  "i18n": {
+   "next_intl": false,
+   "custom_createTranslator": false,
+   "getLocaleFromPath": false
+  },
+  "rtl_refs": 0,
+  "counts_approx": {
+   "forms": 1,
+   "buttons": 2,
+   "tables": 0,
+   "dialogs": 0,
+   "inputs": 2
+  },
+  "business_logic": false
+ },
+ {
+  "file": "frontend/apps/dashboard/src/app/[locale]/dashboard/settings/roles/new/page.tsx",
+  "kind": "page",
+  "route": "/{locale}/dashboard/settings/roles/new",
+  "module": "settings",
+  "client_component": true,
+  "lines": 358,
+  "permission_gate": {
+   "modules": [
+    "ACCOUNTING",
+    "CATEGORIES",
+    "CONTRACTS",
+    "FINANCIAL_REPORTS",
+    "HR",
+    "KDS",
+    "LEAVES",
+    "NOTIFICATIONS",
+    "ORDERS",
+    "PERFORMANCE",
+    "PRODUCTS",
+    "REPORTS",
+    "ROLES",
+    "SALARIES",
+    "SETTINGS",
+    "SUPPLIERS",
+    "TABLES",
+    "THEMES",
+    "TRAINING",
+    "USERS"
+   ],
+   "levels": [
+    "ADMIN",
+    "DELETE",
+    "READ",
+    "WRITE"
+   ]
+  },
+  "direct_api_calls": [
+   "FETCH /rbac/roles"
+  ],
+  "data_hooks_or_api_modules": [
+   "useRbac"
+  ],
+  "raw_fetch": 1,
+  "direct_axios_import": false,
+  "i18n": {
+   "next_intl": false,
+   "custom_createTranslator": false,
+   "getLocaleFromPath": false
+  },
+  "rtl_refs": 0,
+  "counts_approx": {
+   "forms": 1,
+   "buttons": 2,
+   "tables": 0,
+   "dialogs": 0,
+   "inputs": 2
+  },
+  "business_logic": false
+ },
+ {
+  "file": "frontend/apps/dashboard/src/app/[locale]/dashboard/settings/users/page.tsx",
+  "kind": "page",
+  "route": "/{locale}/dashboard/settings/users",
+  "module": "settings",
+  "client_component": true,
+  "lines": 754,
+  "permission_gate": {
+   "modules": [
+    "SETTINGS"
+   ],
+   "levels": [
+    "WRITE"
+   ]
+  },
+  "direct_api_calls": [
+   "FETCH /users",
+   "FETCH /rbac/roles",
+   "FETCH /rbac/users/{}/roles",
+   "FETCH /users",
+   "FETCH /users/{}",
+   "FETCH /users/{}",
+   "FETCH /rbac/users/{}/roles",
+   "FETCH /rbac/users/{}/roles/{}",
+   "FETCH /rbac/users/{}/roles"
+  ],
+  "data_hooks_or_api_modules": [
+   "useRbac"
+  ],
+  "raw_fetch": 9,
+  "direct_axios_import": false,
+  "i18n": {
+   "next_intl": false,
+   "custom_createTranslator": false,
+   "getLocaleFromPath": false
+  },
+  "rtl_refs": 0,
+  "counts_approx": {
+   "forms": 2,
+   "buttons": 19,
+   "tables": 1,
+   "dialogs": 1,
+   "inputs": 9
+  },
+  "business_logic": false
+ },
+ {
+  "file": "frontend/apps/dashboard/src/app/[locale]/dashboard/tables/page.tsx",
+  "kind": "page",
+  "route": "/{locale}/dashboard/tables",
+  "module": "tables",
+  "client_component": true,
+  "lines": 460,
+  "permission_gate": {
+   "modules": [
+    "TABLES"
+   ],
+   "levels": [
+    "DELETE",
+    "READ",
+    "WRITE"
+   ]
+  },
+  "direct_api_calls": [],
+  "data_hooks_or_api_modules": [
+   "tablesApi",
+   "useRbac",
+   "useTables"
+  ],
+  "raw_fetch": 0,
+  "direct_axios_import": false,
+  "i18n": {
+   "next_intl": false,
+   "custom_createTranslator": true,
+   "getLocaleFromPath": true
+  },
+  "rtl_refs": 10,
+  "counts_approx": {
+   "forms": 0,
+   "buttons": 6,
+   "tables": 0,
+   "dialogs": 0,
+   "inputs": 0
+  },
+  "business_logic": false
+ },
+ {
+  "file": "frontend/apps/dashboard/src/app/[locale]/dashboard/tables/[id]/page.tsx",
+  "kind": "page",
+  "route": "/{locale}/dashboard/tables/[id]",
+  "module": "tables",
+  "client_component": true,
+  "lines": 264,
+  "permission_gate": {
+   "modules": [
+    "TABLES"
+   ],
+   "levels": [
+    "READ",
+    "WRITE"
+   ]
+  },
+  "direct_api_calls": [],
+  "data_hooks_or_api_modules": [
+   "tablesApi",
+   "useRbac"
+  ],
+  "raw_fetch": 0,
+  "direct_axios_import": false,
+  "i18n": {
+   "next_intl": false,
+   "custom_createTranslator": true,
+   "getLocaleFromPath": true
+  },
+  "rtl_refs": 4,
+  "counts_approx": {
+   "forms": 0,
+   "buttons": 5,
+   "tables": 0,
+   "dialogs": 0,
+   "inputs": 0
+  },
+  "business_logic": false
+ },
+ {
+  "file": "frontend/apps/dashboard/src/app/[locale]/dashboard/tables/[id]/edit/page.tsx",
+  "kind": "page",
+  "route": "/{locale}/dashboard/tables/[id]/edit",
+  "module": "tables",
+  "client_component": true,
+  "lines": 169,
+  "permission_gate": {
+   "modules": [
+    "TABLES"
+   ],
+   "levels": [
+    "READ",
+    "WRITE"
+   ]
+  },
+  "direct_api_calls": [],
+  "data_hooks_or_api_modules": [
+   "tablesApi",
+   "useRbac"
+  ],
+  "raw_fetch": 0,
+  "direct_axios_import": false,
+  "i18n": {
+   "next_intl": false,
+   "custom_createTranslator": true,
+   "getLocaleFromPath": true
+  },
+  "rtl_refs": 4,
+  "counts_approx": {
+   "forms": 0,
+   "buttons": 1,
+   "tables": 0,
+   "dialogs": 0,
+   "inputs": 0
+  },
+  "business_logic": false
+ },
+ {
+  "file": "frontend/apps/dashboard/src/app/[locale]/dashboard/tables/[id]/qr/page.tsx",
+  "kind": "page",
+  "route": "/{locale}/dashboard/tables/[id]/qr",
+  "module": "tables",
+  "client_component": true,
+  "lines": 112,
+  "permission_gate": {
+   "modules": [
+    "TABLES"
+   ],
+   "levels": [
+    "READ"
+   ]
+  },
+  "direct_api_calls": [],
+  "data_hooks_or_api_modules": [
+   "tablesApi",
+   "useRbac"
+  ],
+  "raw_fetch": 0,
+  "direct_axios_import": false,
+  "i18n": {
+   "next_intl": false,
+   "custom_createTranslator": true,
+   "getLocaleFromPath": true
+  },
+  "rtl_refs": 3,
+  "counts_approx": {
+   "forms": 0,
+   "buttons": 0,
+   "tables": 0,
+   "dialogs": 0,
+   "inputs": 0
+  },
+  "business_logic": false
+ },
+ {
+  "file": "frontend/apps/dashboard/src/app/[locale]/dashboard/tables/layout/page.tsx",
+  "kind": "page",
+  "route": "/{locale}/dashboard/tables/layout",
+  "module": "tables",
+  "client_component": true,
+  "lines": 462,
+  "permission_gate": {
+   "modules": [
+    "TABLES"
+   ],
+   "levels": [
+    "READ",
+    "WRITE"
+   ]
+  },
+  "direct_api_calls": [],
+  "data_hooks_or_api_modules": [
+   "tablesApi",
+   "useRbac",
+   "useTables"
+  ],
+  "raw_fetch": 0,
+  "direct_axios_import": false,
+  "i18n": {
+   "next_intl": false,
+   "custom_createTranslator": true,
+   "getLocaleFromPath": true
+  },
+  "rtl_refs": 6,
+  "counts_approx": {
+   "forms": 1,
+   "buttons": 5,
+   "tables": 0,
+   "dialogs": 1,
+   "inputs": 4
+  },
+  "business_logic": false
+ },
+ {
+  "file": "frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/layout.tsx",
+  "kind": "layout",
+  "route": "/{locale}/dashboard/theme-builder",
+  "module": "theme-builder",
+  "client_component": false,
+  "lines": 8,
+  "permission_gate": null,
+  "direct_api_calls": [],
+  "data_hooks_or_api_modules": [],
+  "raw_fetch": 0,
+  "direct_axios_import": false,
+  "i18n": {
+   "next_intl": false,
+   "custom_createTranslator": false,
+   "getLocaleFromPath": false
+  },
+  "rtl_refs": 0,
+  "counts_approx": {
+   "forms": 0,
+   "buttons": 0,
+   "tables": 0,
+   "dialogs": 0,
+   "inputs": 0
+  },
+  "business_logic": false
+ },
+ {
+  "file": "frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/page.tsx",
+  "kind": "page",
+  "route": "/{locale}/dashboard/theme-builder",
+  "module": "theme-builder",
+  "client_component": true,
+  "lines": 672,
+  "permission_gate": null,
+  "direct_api_calls": [],
+  "data_hooks_or_api_modules": [
+   "themeApi"
+  ],
+  "raw_fetch": 0,
+  "direct_axios_import": false,
+  "i18n": {
+   "next_intl": false,
+   "custom_createTranslator": true,
+   "getLocaleFromPath": true
+  },
+  "rtl_refs": 1,
+  "counts_approx": {
+   "forms": 0,
+   "buttons": 11,
+   "tables": 0,
+   "dialogs": 0,
+   "inputs": 3
+  },
+  "business_logic": false
+ },
+ {
+  "file": "frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/editor/layout.tsx",
+  "kind": "layout",
+  "route": "/{locale}/dashboard/theme-builder/editor",
+  "module": "theme-builder",
+  "client_component": false,
+  "lines": 8,
+  "permission_gate": null,
+  "direct_api_calls": [],
+  "data_hooks_or_api_modules": [],
+  "raw_fetch": 0,
+  "direct_axios_import": false,
+  "i18n": {
+   "next_intl": false,
+   "custom_createTranslator": false,
+   "getLocaleFromPath": false
+  },
+  "rtl_refs": 0,
+  "counts_approx": {
+   "forms": 0,
+   "buttons": 0,
+   "tables": 0,
+   "dialogs": 0,
+   "inputs": 0
+  },
+  "business_logic": false
+ },
+ {
+  "file": "frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/editor/[id]/page.tsx",
+  "kind": "page",
+  "route": "/{locale}/dashboard/theme-builder/editor/[id]",
+  "module": "theme-builder",
+  "client_component": true,
+  "lines": 606,
+  "permission_gate": null,
+  "direct_api_calls": [],
+  "data_hooks_or_api_modules": [
+   "themeApi",
+   "useThemeStore"
+  ],
+  "raw_fetch": 0,
+  "direct_axios_import": false,
+  "i18n": {
+   "next_intl": false,
+   "custom_createTranslator": true,
+   "getLocaleFromPath": true
+  },
+  "rtl_refs": 9,
+  "counts_approx": {
+   "forms": 0,
+   "buttons": 5,
+   "tables": 0,
+   "dialogs": 0,
+   "inputs": 0
+  },
+  "business_logic": false
+ },
+ {
+  "file": "frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/import/page.tsx",
+  "kind": "page",
+  "route": "/{locale}/dashboard/theme-builder/import",
+  "module": "theme-builder",
+  "client_component": true,
+  "lines": 270,
+  "permission_gate": null,
+  "direct_api_calls": [],
+  "data_hooks_or_api_modules": [
+   "themeApi"
+  ],
+  "raw_fetch": 0,
+  "direct_axios_import": false,
+  "i18n": {
+   "next_intl": false,
+   "custom_createTranslator": false,
+   "getLocaleFromPath": true
+  },
+  "rtl_refs": 0,
+  "counts_approx": {
+   "forms": 0,
+   "buttons": 4,
+   "tables": 0,
+   "dialogs": 0,
+   "inputs": 2
+  },
+  "business_logic": false
+ },
+ {
+  "file": "frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/presets/page.tsx",
+  "kind": "page",
+  "route": "/{locale}/dashboard/theme-builder/presets",
+  "module": "theme-builder",
+  "client_component": true,
+  "lines": 116,
+  "permission_gate": null,
+  "direct_api_calls": [],
+  "data_hooks_or_api_modules": [
+   "themeApi"
+  ],
+  "raw_fetch": 0,
+  "direct_axios_import": false,
+  "i18n": {
+   "next_intl": false,
+   "custom_createTranslator": false,
+   "getLocaleFromPath": true
+  },
+  "rtl_refs": 0,
+  "counts_approx": {
+   "forms": 0,
+   "buttons": 1,
+   "tables": 0,
+   "dialogs": 0,
+   "inputs": 0
+  },
+  "business_logic": false
+ },
+ {
+  "file": "frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/qr/page.tsx",
+  "kind": "page",
+  "route": "/{locale}/dashboard/theme-builder/qr",
+  "module": "theme-builder",
+  "client_component": true,
+  "lines": 99,
+  "permission_gate": null,
+  "direct_api_calls": [],
+  "data_hooks_or_api_modules": [
+   "themeApi"
+  ],
+  "raw_fetch": 0,
+  "direct_axios_import": false,
+  "i18n": {
+   "next_intl": false,
+   "custom_createTranslator": true,
+   "getLocaleFromPath": true
+  },
+  "rtl_refs": 3,
+  "counts_approx": {
+   "forms": 0,
+   "buttons": 0,
+   "tables": 0,
+   "dialogs": 0,
+   "inputs": 0
+  },
+  "business_logic": false
+ },
+ {
+  "file": "frontend/apps/dashboard/src/app/[locale]/test-url/page.tsx",
+  "kind": "page",
+  "route": "/{locale}/test-url",
+  "module": "shell",
+  "client_component": true,
+  "lines": 60,
+  "permission_gate": null,
+  "direct_api_calls": [],
+  "data_hooks_or_api_modules": [],
+  "raw_fetch": 0,
+  "direct_axios_import": false,
+  "i18n": {
+   "next_intl": false,
+   "custom_createTranslator": false,
+   "getLocaleFromPath": false
+  },
+  "rtl_refs": 0,
+  "counts_approx": {
+   "forms": 0,
+   "buttons": 0,
+   "tables": 0,
+   "dialogs": 0,
+   "inputs": 0
+  },
+  "business_logic": false
+ }
+]

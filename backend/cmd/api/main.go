@@ -4,14 +4,18 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"log"
+	"log/slog"
 	"net/http"
 	"os"
+	"os/signal"
 	"strconv"
 	"strings"
 	"sync"
+	"syscall"
 	"time"
 
 	"golang.org/x/crypto/bcrypt"
@@ -19,12 +23,16 @@ import (
 	handler "pos-saas/internal/handler/http"
 	kdsws "pos-saas/internal/handler/ws"
 	"pos-saas/internal/middleware"
-	"pos-saas/internal/observability"
 	"pos-saas/internal/pkg/database"
 	"pos-saas/internal/pkg/jwt"
 	"pos-saas/internal/repository"
 	"pos-saas/internal/service"
 	"pos-saas/internal/usecase"
+)
+
+const (
+	publicOrderReadRequestsPerMinute  = 60
+	publicOrderWriteRequestsPerMinute = 20
 )
 
 // In-memory storage for stub mode
@@ -72,6 +80,9 @@ func init() {
 
 func main() {
 	startedAt := time.Now()
+	slog.SetDefault(slog.New(slog.NewJSONHandler(os.Stderr, nil)))
+	rootCtx, stopSignals := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stopSignals()
 
 	// Load configuration
 	cfg, err := config.Load()
@@ -89,8 +100,13 @@ func main() {
 		log.Printf("⚠️ Warning: Failed to connect to database: %v. Continuing without database (stub mode).", err)
 		db = nil
 	} else {
-		startDBHealthMonitor(db, 15*time.Second)
+		startDBHealthMonitor(rootCtx, db, 15*time.Second)
 		defer db.Close()
+	}
+	if config.IsProductionMode() {
+		if err := productionStartupGuards(context.Background(), db); err != nil {
+			log.Fatalf("Unsafe production configuration: %v", err)
+		}
 	}
 
 	// Initialize JWT service
@@ -98,6 +114,28 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to create token service: %v", err)
 	}
+	sessionTTL, err := time.ParseDuration(cfg.JWT.Expiry)
+	if err != nil || sessionTTL <= 0 {
+		log.Fatalf("Invalid JWT expiry for browser session lifetime")
+	}
+	var sessionCache service.KVCache
+	if redisURL := strings.TrimSpace(os.Getenv("REDIS_URL")); redisURL != "" {
+		redisCache, redisErr := service.NewRedisCache(redisURL)
+		if redisErr != nil {
+			if config.IsProductionMode() {
+				log.Fatalf("Redis is required for revocable browser sessions: %v", redisErr)
+			}
+			log.Printf("[AuthSession] Redis unavailable; using process-local sessions in non-production: %v", redisErr)
+			sessionCache = service.NewInMemoryCache()
+		} else {
+			sessionCache = redisCache
+		}
+	} else if config.IsProductionMode() {
+		log.Fatal("REDIS_URL is required for revocable browser sessions")
+	} else {
+		sessionCache = service.NewInMemoryCache()
+	}
+	authSessionStore := service.NewAuthSessionStore(sessionCache, sessionTTL)
 
 	// KDS websocket hub (Phase 4)
 	kdsHub := kdsws.NewKDSHub()
@@ -193,10 +231,14 @@ func main() {
 		planRepo = repository.NewPlanRepository(db)
 	}
 
-	// Paymob client mode selection (mock by default).
-	paymobMode := strings.ToLower(strings.TrimSpace(os.Getenv("PAYMOB_MODE")))
+	// Paymob client mode selection. Production must be explicitly "live"; unsafe
+	// or incomplete configuration aborts startup (see config.ResolvePaymobMode).
+	paymobMode, err := config.ResolvePaymobMode()
+	if err != nil {
+		log.Fatalf("Invalid payment configuration: %v", err)
+	}
 	var paymobClient service.PaymobClient
-	if paymobMode == "live" {
+	if paymobMode == config.PaymobModeLive {
 		iframeID, _ := strconv.Atoi(strings.TrimSpace(os.Getenv("PAYMOB_IFRAME_ID")))
 		paymobClient = service.NewRealPaymobClient(
 			strings.TrimSpace(os.Getenv("PAYMOB_API_KEY")),
@@ -310,8 +352,12 @@ func main() {
 	// Initialize handlers
 	restaurantRepo := repository.NewRestaurantRepository(db)
 
-	authHandler := handler.NewAuthHandler(authUseCase)
+	authHandler := handler.NewAuthHandler(authUseCase, authSessionStore)
+	if db != nil {
+		authHandler.SetAuditLogger(repository.NewAuthAuditRepository(db))
+	}
 	productHandler := handler.NewProductHandler(productUC)
+	inventoryAdjustmentHandler := handler.NewInventoryAdjustmentHandler(db)
 	categoryHandler := handler.NewCategoryHandler(categoryRepo)
 	publicMenuHandler := handler.NewPublicMenuHandler(productUC, restaurantRepo, categoryRepo)
 	userSettingsHandler := handler.NewUserSettingsHandler(userSettingsRepo, userRepo)
@@ -322,7 +368,7 @@ func main() {
 	adminOrderHandler := handler.NewAdminOrderHandler(orderUC, driverRepo, userRoleRepo)
 	tableHandler := handler.NewTableHandler(tableUC)
 	kdsHandler := handler.NewKDSHandler(kdsUC)
-	kdsWSHandler := kdsws.NewKDSWSHandler(kdsHub, tokenService)
+	kdsWSHandler := kdsws.NewKDSWSHandler(kdsHub, tokenService, authSessionStore)
 	reportHandler := handler.NewReportHandler(db)
 
 	// Driver Management handler
@@ -377,8 +423,8 @@ func main() {
 	var superAdminHandler *handler.SuperAdminHandler
 	var impersonationHandler *handler.ImpersonationHandler
 	if superAdminAuthUC != nil && superAdminTenantUC != nil && impersonationUC != nil {
-		superAdminHandler = handler.NewSuperAdminHandler(superAdminAuthUC, superAdminTenantUC)
-		impersonationHandler = handler.NewImpersonationHandler(impersonationUC)
+		superAdminHandler = handler.NewSuperAdminHandler(superAdminAuthUC, superAdminTenantUC, authSessionStore)
+		impersonationHandler = handler.NewImpersonationHandler(impersonationUC, authSessionStore)
 	}
 
 	// Subscription handler (Phase 1-8 - SaaS Trial/Subscription System)
@@ -415,18 +461,23 @@ func main() {
 			retryWorker := service.NewWebhookRetryWorker(db, baseURL, webhookMonitor, errorTracker)
 			retryWorker.Start(context.Background())
 
-			// Worker marks active paid subscriptions as expired once period end is reached.
-			expiryWorker := service.NewSubscriptionExpiryWorker(db)
-			expiryWorker.Start(context.Background())
 		}
 
 		paymentHandler = handler.NewPaymentHandler(paymentUC).WithObservability(webhookMonitor, webhookRetryQueue, errorTracker)
 		paymentMonitoringHandler = handler.NewPaymentMonitoringHandler(db, webhookMonitor, webhookRetryQueue)
 	}
 
+	// Subscription expiry is a non-payment maintenance worker and must run
+	// whenever the database is configured, independent of payment-provider setup.
+	// Tie its lifetime to the process signal context so shutdown stops its loop.
+	if db != nil {
+		expiryWorker := service.NewSubscriptionExpiryWorker(db)
+		expiryWorker.Start(rootCtx)
+	}
+
 	// Mock Paymob handler (Phase 4 - enabled only in mock mode)
 	var mockPaymobHandler *handler.MockPaymobHandler
-	if paymobMode == "" || paymobMode == "mock" {
+	if paymobMode == config.PaymobModeMock {
 		mockPaymobHandler = handler.NewMockPaymobHandler()
 	}
 
@@ -438,23 +489,25 @@ func main() {
 	// Setup routes
 	mux := http.NewServeMux()
 
+	// Impersonation tokens are accepted only when validated against server-side sessions.
+	// If the repositories are unavailable this slice is empty and the header is rejected.
+	var impersonationAuthenticators []middleware.ImpersonationAuthenticator
+	if auth := middleware.NewImpersonationAuthenticator(impersonationRepo, superAdminRepo); auth != nil {
+		impersonationAuthenticators = append(impersonationAuthenticators, auth)
+	}
+	authenticateRequest := middleware.SessionAuthMiddleware(tokenService, authSessionStore, impersonationAuthenticators...)
+
 	// Public routes - Authentication
-	mux.Handle("POST /api/v1/auth/register", middleware.MaxBodyBytesMiddleware(1<<20)(http.HandlerFunc(authHandler.Register)))
-	mux.Handle(
-		"POST /api/v1/auth/login",
-		middleware.RateLimitByIP(5)(
-			middleware.MaxBodyBytesMiddleware(1<<20)(http.HandlerFunc(authHandler.Login)),
-		),
-	)
-	mux.HandleFunc("POST /api/v1/auth/login/confirm", authHandler.LoginConfirm)
-	mux.HandleFunc("POST /api/v1/auth/token-exchange", authHandler.TokenExchange)
-	mux.Handle(
-		"POST /api/v1/auth/forgot-password",
-		middleware.RateLimitByIP(3)(
-			middleware.MaxBodyBytesMiddleware(1<<20)(http.HandlerFunc(authHandler.ForgotPassword)),
-		),
-	)
-	mux.HandleFunc("GET /api/v1/auth/check-subdomain", authHandler.CheckSubdomainAvailability)
+	mux.Handle("POST /api/v1/auth/register", middleware.RequireTrustedOrigin(middleware.RateLimitByIP(10)(http.HandlerFunc(authHandler.Register))))
+	mux.Handle("POST /api/v1/auth/login", middleware.RequireTrustedOrigin(middleware.RateLimitByIP(20)(http.HandlerFunc(authHandler.Login))))
+	mux.Handle("POST /api/v1/auth/login/confirm", middleware.RequireTrustedOrigin(middleware.RateLimitByIP(20)(http.HandlerFunc(authHandler.LoginConfirm))))
+	mux.Handle("GET /api/v1/auth/session", authenticateRequest(http.HandlerFunc(authHandler.Session)))
+	mux.Handle("POST /api/v1/auth/refresh", middleware.RequireTrustedOrigin(middleware.RateLimitByIP(20)(middleware.SessionAuthMiddleware(tokenService, authSessionStore)(http.HandlerFunc(authHandler.Refresh)))))
+	mux.Handle("POST /api/v1/auth/logout", http.HandlerFunc(authHandler.Logout))
+	// Browser handoff is performed server-to-server by the authenticated Super Admin route;
+	// do not expose a bearer/code exchange endpoint to arbitrary browser clients.
+	mux.Handle("POST /api/v1/auth/forgot-password", middleware.RateLimitByIP(5)(http.HandlerFunc(authHandler.ForgotPassword)))
+	mux.Handle("GET /api/v1/auth/check-subdomain", middleware.RateLimitByIP(60)(http.HandlerFunc(authHandler.CheckSubdomainAvailability)))
 
 	// Public routes - Menu API (no authentication required)
 	mux.HandleFunc("GET /api/v1/public/restaurants/{slug}/menu", publicMenuHandler.GetRestaurantMenu)
@@ -476,29 +529,33 @@ func main() {
 		middleware.RateLimitByIP(120)(http.HandlerFunc(tableHandler.GetPublicTableInfo)),
 	)
 
+	// Tenant context: JWT claims are authoritative; client headers are honoured only when the
+	// restaurant is verified to belong to the tenant (see middleware.NewTenantContextMiddleware).
+	var restaurantVerifier middleware.RestaurantVerifier
+	if db != nil {
+		restaurantVerifier = middleware.SQLRestaurantVerifier{DB: db}
+	}
+	tenantContext := middleware.NewTenantContextMiddleware(restaurantVerifier)
+
 	// Public routes - Order API (minimal authentication required)
 	// These routes require X-Tenant-ID and X-Restaurant-ID headers from middleware context
 	// POST routes for order creation and validation
-	mux.Handle("POST /api/v1/public/orders", middleware.TenantContextMiddleware(http.HandlerFunc(publicOrderHandler.CreateOrder)))
-	mux.Handle("POST /api/v1/public/orders/validate", middleware.TenantContextMiddleware(http.HandlerFunc(publicOrderHandler.ValidateOrder)))
+	mux.Handle("POST /api/v1/public/orders", middleware.RateLimitByIP(publicOrderWriteRequestsPerMinute)(tenantContext(http.HandlerFunc(publicOrderHandler.CreateOrder))))
+	mux.Handle("POST /api/v1/public/orders/validate", middleware.RateLimitByIP(publicOrderReadRequestsPerMinute)(tenantContext(http.HandlerFunc(publicOrderHandler.ValidateOrder))))
 
-	mux.Handle("GET /api/v1/public/orders/number/{number}/lookup", middleware.TenantContextMiddleware(http.HandlerFunc(publicOrderHandler.GetOrderByNumber)))
-	mux.Handle("GET /api/v1/public/orders/{id}/status", middleware.TenantContextMiddleware(http.HandlerFunc(publicOrderHandler.GetOrderStatus)))
-	mux.Handle("GET /api/v1/public/orders/{id}/track", middleware.TenantContextMiddleware(http.HandlerFunc(publicOrderHandler.TrackOrder)))
+	mux.Handle("GET /api/v1/public/orders/number/{number}/lookup", middleware.RateLimitByIP(publicOrderReadRequestsPerMinute)(tenantContext(http.HandlerFunc(publicOrderHandler.GetOrderByNumber))))
+	mux.Handle("GET /api/v1/public/orders/{id}/status", middleware.RateLimitByIP(publicOrderReadRequestsPerMinute)(tenantContext(http.HandlerFunc(publicOrderHandler.GetOrderStatus))))
+	mux.Handle("GET /api/v1/public/orders/{id}/track", middleware.RateLimitByIP(publicOrderReadRequestsPerMinute)(tenantContext(http.HandlerFunc(publicOrderHandler.TrackOrder))))
 
 	// GET route for order retrieval (supports both by ID and tracking)
 	// Handlers can use request context or query params to determine behavior
-	mux.Handle("GET /api/v1/public/orders/{id}", middleware.TenantContextMiddleware(http.HandlerFunc(publicOrderHandler.GetOrder)))
+	mux.Handle("GET /api/v1/public/orders/{id}", middleware.RateLimitByIP(publicOrderReadRequestsPerMinute)(tenantContext(http.HandlerFunc(publicOrderHandler.GetOrder))))
 
 	// DELETE route for order cancellation
-	mux.Handle("DELETE /api/v1/public/orders/{id}", middleware.TenantContextMiddleware(http.HandlerFunc(publicOrderHandler.CancelOrder)))
+	mux.Handle("DELETE /api/v1/public/orders/{id}", middleware.RateLimitByIP(publicOrderWriteRequestsPerMinute)(tenantContext(http.HandlerFunc(publicOrderHandler.CancelOrder))))
 
 	// Translation routes (public - no authentication required)
-	mux.HandleFunc("GET /api/v1/translations/health", translationHandler.HealthCheck)
-	mux.HandleFunc("GET /api/v1/translations/languages", translationHandler.GetSupportedLanguages)
-	mux.HandleFunc("GET /api/v1/translations/{language}", translationHandler.GetTranslations)
-	mux.HandleFunc("GET /api/v1/translations/{language}/{namespace}/{key}", translationHandler.GetTranslationKey)
-	mux.HandleFunc("POST /api/v1/translations/{language}/upload", translationHandler.UploadTranslations)
+	registerTranslationRoutes(mux, translationHandler, superAdminTokenService)
 
 	// NOTE: Component library route commented out - using v2 library API
 	// Component library route (public - no authentication required)
@@ -518,55 +575,7 @@ func main() {
 		return true, "ok"
 	}
 
-	// Health check endpoints
-	mux.HandleFunc("GET /api/v1/health", func(w http.ResponseWriter, r *http.Request) {
-		dbHealthy, dbStatus := checkDBHealth(r.Context())
-		status := "ok"
-		if !dbHealthy {
-			status = "degraded"
-		}
-
-		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(map[string]interface{}{
-			"status":     status,
-			"uptime_sec": int64(time.Since(startedAt).Seconds()),
-			"db_healthy": dbHealthy,
-			"db_status":  dbStatus,
-		})
-	})
-	mux.HandleFunc("GET /health", func(w http.ResponseWriter, r *http.Request) {
-		http.Redirect(w, r, "/api/v1/health", http.StatusTemporaryRedirect)
-	})
-
-	mux.HandleFunc("GET /api/v1/health/ready", func(w http.ResponseWriter, r *http.Request) {
-		dbHealthy, dbStatus := checkDBHealth(r.Context())
-		statusCode := http.StatusOK
-		status := "ready"
-		if !dbHealthy {
-			statusCode = http.StatusServiceUnavailable
-			status = "not_ready"
-		}
-
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(statusCode)
-		_ = json.NewEncoder(w).Encode(map[string]interface{}{
-			"status":     status,
-			"uptime_sec": int64(time.Since(startedAt).Seconds()),
-			"db_healthy": dbHealthy,
-			"db_status":  dbStatus,
-		})
-	})
-	mux.HandleFunc("GET /ready", func(w http.ResponseWriter, r *http.Request) {
-		http.Redirect(w, r, "/api/v1/health/ready", http.StatusTemporaryRedirect)
-	})
-
-	mux.HandleFunc("GET /api/v1/health/metrics", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(map[string]interface{}{
-			"success": true,
-			"data":    observability.Snapshot(),
-		})
-	})
+	registerHealthRoutes(mux, checkDBHealth, startedAt)
 
 	// Test route to verify routing
 	mux.Handle("GET /api/v1/public/test-routing/{slug}", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -609,30 +618,53 @@ func main() {
 	// Helper function to wrap handlers with auth only (no tenant middleware)
 	// Use this for RBAC endpoints that read claims.TenantID directly from JWT
 	wrapAuthOnly := func(next http.Handler) http.Handler {
-		wrapped := middleware.CSRFMiddleware(next)
-		wrapped = middleware.AuthMiddleware(tokenService)(wrapped)
-		return wrapped
+		return authenticateRequest(next)
 	}
 
 	// Helper function to wrap handlers with auth and tenant middleware
-	wrapProtected := func(next http.Handler) http.Handler {
+	// wrapProtectedNoStatus: auth + tenant only. Use ONLY for routes a blocked (expired/disabled)
+	// tenant must still reach: billing, /me and read-only permission lookups.
+	wrapProtectedNoStatus := func(next http.Handler) http.Handler {
 		// Apply middleware in REVERSE order of execution
 		// Auth must execute FIRST to set claims in context, then Tenant can read them
 		// The last middleware applied is the outermost and executes first
-		wrapped := middleware.CSRFMiddleware(next)
-		wrapped = middleware.TenantContextMiddleware(wrapped)      // This will be innermost (execute 2nd)
-		wrapped = middleware.AuthMiddleware(tokenService)(wrapped) // This will be outermost (execute 1st)
+		wrapped := tenantContext(next)         // This will be innermost (execute 2nd)
+		wrapped = authenticateRequest(wrapped) // This will be outermost (execute 1st)
 		return wrapped
 	}
 
 	// Helper function to wrap handlers with auth, tenant, and subscription status middleware
 	wrapProtectedWithStatus := func(next http.Handler) http.Handler {
 		// Apply middleware in REVERSE order of execution
-		wrapped := middleware.CSRFMiddleware(next)
-		wrapped = middleware.TenantStatusMiddleware(subscriptionRepo)(wrapped) // innermost (execute 3rd)
-		wrapped = middleware.TenantContextMiddleware(wrapped)                  // execute 2nd
-		wrapped = middleware.AuthMiddleware(tokenService)(wrapped)             // outermost (execute 1st)
+		wrapped := middleware.TenantStatusMiddleware(subscriptionRepo)(next) // innermost (execute 3rd)
+		wrapped = tenantContext(wrapped)                                     // execute 2nd
+		wrapped = authenticateRequest(wrapped)                               // outermost (execute 1st)
 		return wrapped
+	}
+
+	// RBAC: permission levels declared on routes are enforced here. In non-production the
+	// default is "audit" (log would-deny decisions) until route->module mappings are verified;
+	// production always enforces. Override with RBAC_ENFORCEMENT=enforce|audit.
+	permissionMode, err := middleware.ParsePermissionMode(os.Getenv("RBAC_ENFORCEMENT"), config.IsProductionMode())
+	if err != nil {
+		log.Fatalf("Invalid RBAC configuration: %v", err)
+	}
+	var permissionEvaluator middleware.PermissionEvaluator
+	if rolePermissionRepo != nil && userRoleRepo != nil {
+		permissionEvaluator = middleware.RepositoryPermissionEvaluator{UserRoles: userRoleRepo, RolePermissions: rolePermissionRepo}
+	}
+	requirePermission := middleware.NewPermissionMiddleware(permissionEvaluator, permissionMode)
+	log.Printf("[RBAC] permission mode: %s", permissionMode)
+
+	// wrapProtected: auth + tenant + subscription status. Blocked tenants get 403 TENANT_ACCESS_BLOCKED.
+	wrapProtected := wrapProtectedWithStatus
+
+	// statusGuard applies the tenant status check when the subscription repository is available.
+	statusGuard := func(next http.Handler) http.Handler {
+		if subscriptionRepo == nil {
+			return next
+		}
+		return middleware.TenantStatusMiddleware(subscriptionRepo)(next)
 	}
 
 	// Helper function to wrap handlers with auth, tenant, and permission middleware
@@ -640,40 +672,49 @@ func main() {
 	// Common module IDs: Products=1, HR=2, Notifications=3, Orders=4, etc.
 	wrapWithPermission := func(next http.Handler, moduleID int64, permissionLevel string) http.Handler {
 		// Apply middleware in REVERSE order of execution
-		wrapped := middleware.CSRFMiddleware(next)
-		wrapped = middleware.WithRequiredPermission(moduleID, permissionLevel)(wrapped) // innermost
+		wrapped := requirePermission(moduleID, permissionLevel)(next) // innermost
+		wrapped = statusGuard(wrapped)                                // blocked tenants stop here
 		// 		wrapped = middleware.PermissionMiddleware(permissionUC)(wrapped)                       // permission check
-		wrapped = middleware.TenantContextMiddleware(wrapped)      // tenant context
-		wrapped = middleware.AuthMiddleware(tokenService)(wrapped) // outermost (auth first)
+		wrapped = tenantContext(wrapped)       // tenant context
+		wrapped = authenticateRequest(wrapped) // outermost (auth first)
+		return wrapped
+	}
+
+	// wrapAuthPermission: auth + permission check WITHOUT tenant-context middleware, for the RBAC
+	// endpoints that read claims.TenantID directly (the permission evaluator only needs the claims).
+	wrapAuthPermission := func(next http.Handler, moduleID int64, permissionLevel string) http.Handler {
+		wrapped := requirePermission(moduleID, permissionLevel)(next)
+		wrapped = authenticateRequest(wrapped)
 		return wrapped
 	}
 
 	// KDS-specific wrapper adds per-user rate limits for Phase 8 hardening.
 	wrapKDSWithPermission := func(next http.Handler, permissionLevel string, includeBumpLimit bool) http.Handler {
-		wrapped := middleware.CSRFMiddleware(next)
+		wrapped := next
 		if includeBumpLimit {
 			wrapped = middleware.RateLimitByUserWindow(5, time.Second)(wrapped)
 		}
 		wrapped = middleware.RateLimitByUser(60)(wrapped)
-		wrapped = middleware.WithRequiredPermission(13, permissionLevel)(wrapped)
-		wrapped = middleware.TenantContextMiddleware(wrapped)
-		wrapped = middleware.AuthMiddleware(tokenService)(wrapped)
+		wrapped = requirePermission(13, permissionLevel)(wrapped)
+		wrapped = statusGuard(wrapped)
+		wrapped = tenantContext(wrapped)
+		wrapped = authenticateRequest(wrapped)
 		return wrapped
 	}
 
 	// Payment routes: auth required, but no tenant status middleware (blocked tenants must still pay).
 	if paymentHandler != nil {
-		mux.Handle("POST /api/v1/subscription/initiate", wrapProtected(http.HandlerFunc(paymentHandler.InitiatePayment)))
-		mux.Handle("GET /api/v1/subscription/payments", wrapProtected(http.HandlerFunc(paymentHandler.GetPaymentHistory)))
-		mux.Handle("GET /api/v1/subscription/current", wrapProtected(http.HandlerFunc(paymentHandler.GetCurrentSubscription)))
-		mux.Handle("POST /api/v1/subscription/cancel", wrapProtected(http.HandlerFunc(paymentHandler.CancelSubscription)))
+		mux.Handle("POST /api/v1/subscription/initiate", wrapProtectedNoStatus(http.HandlerFunc(paymentHandler.InitiatePayment)))
+		mux.Handle("GET /api/v1/subscription/payments", wrapProtectedNoStatus(http.HandlerFunc(paymentHandler.GetPaymentHistory)))
+		mux.Handle("GET /api/v1/subscription/current", wrapProtectedNoStatus(http.HandlerFunc(paymentHandler.GetCurrentSubscription)))
+		mux.Handle("POST /api/v1/subscription/cancel", wrapProtectedNoStatus(http.HandlerFunc(paymentHandler.CancelSubscription)))
 	}
 
 	// Register all protected routes with middleware wrapping
 	// Each route handler is individually wrapped with auth + tenant middleware
 
 	// User info endpoint
-	mux.Handle("GET /api/v1/me", wrapProtected(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	mux.Handle("GET /api/v1/me", wrapProtectedNoStatus(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		claims := middleware.GetUserClaims(r)
 		w.Header().Set("Content-Type", "application/json")
 		w.Write([]byte(fmt.Sprintf(`{"user_id":%d,"email":"%s"}`, claims.UserID, claims.Email)))
@@ -684,16 +725,17 @@ func main() {
 	mux.Handle("POST /api/v1/products", wrapWithPermission(http.HandlerFunc(productHandler.CreateProduct), 1, "WRITE"))
 	mux.Handle("GET /api/v1/products", wrapWithPermission(http.HandlerFunc(productHandler.ListProducts), 1, "READ"))
 	mux.Handle("GET /api/v1/products/alerts/low-stock", wrapWithPermission(http.HandlerFunc(productHandler.GetLowStockAlerts), 1, "READ"))
+	mux.Handle("POST /api/v1/inventory/adjust", wrapWithPermission(http.HandlerFunc(inventoryAdjustmentHandler.Adjust), 1, "WRITE"))
 	mux.Handle("GET /api/v1/products/{id}", wrapWithPermission(http.HandlerFunc(productHandler.GetProduct), 1, "READ"))
 	mux.Handle("PUT /api/v1/products/{id}", wrapWithPermission(http.HandlerFunc(productHandler.UpdateProduct), 1, "WRITE"))
 	mux.Handle("DELETE /api/v1/products/{id}", wrapWithPermission(http.HandlerFunc(productHandler.DeleteProduct), 1, "DELETE"))
 
 	// Category management endpoints (require authentication)
-	mux.Handle("GET /api/v1/categories", wrapProtected(http.HandlerFunc(categoryHandler.ListCategories)))
-	mux.Handle("GET /api/v1/categories/{id}", wrapProtected(http.HandlerFunc(categoryHandler.GetCategory)))
-	mux.Handle("POST /api/v1/categories", wrapProtected(http.HandlerFunc(categoryHandler.CreateCategory)))
-	mux.Handle("PUT /api/v1/categories/{id}", wrapProtected(http.HandlerFunc(categoryHandler.UpdateCategory)))
-	mux.Handle("DELETE /api/v1/categories/{id}", wrapProtected(http.HandlerFunc(categoryHandler.DeleteCategory)))
+	mux.Handle("GET /api/v1/categories", wrapWithPermission(http.HandlerFunc(categoryHandler.ListCategories), 2, "READ"))
+	mux.Handle("GET /api/v1/categories/{id}", wrapWithPermission(http.HandlerFunc(categoryHandler.GetCategory), 2, "READ"))
+	mux.Handle("POST /api/v1/categories", wrapWithPermission(http.HandlerFunc(categoryHandler.CreateCategory), 2, "WRITE"))
+	mux.Handle("PUT /api/v1/categories/{id}", wrapWithPermission(http.HandlerFunc(categoryHandler.UpdateCategory), 2, "WRITE"))
+	mux.Handle("DELETE /api/v1/categories/{id}", wrapWithPermission(http.HandlerFunc(categoryHandler.DeleteCategory), 2, "DELETE"))
 
 	// Subscription endpoints (Phase 1-8 - SaaS Trial/Subscription System)
 	// Tenant status check (requires authentication)
@@ -702,7 +744,7 @@ func main() {
 		mux.Handle("GET /api/v1/tenant/status", wrapProtectedWithStatus(http.HandlerFunc(subscriptionHandler.GetTenantStatus)))
 	} else {
 		// Compatibility fallback in environments where subscription module is disabled.
-		mux.Handle("GET /api/v1/tenant/status", wrapProtected(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		mux.Handle("GET /api/v1/tenant/status", wrapProtectedNoStatus(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusOK)
 			_ = json.NewEncoder(w).Encode(map[string]interface{}{
@@ -720,7 +762,7 @@ func main() {
 	}
 
 	// Tenant contact info endpoints (for maintenance page contact details)
-	mux.Handle("GET /api/v1/tenant/contact-info", wrapProtected(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	mux.Handle("GET /api/v1/tenant/contact-info", wrapWithPermission(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		tenantID := middleware.GetTenantID(r)
 		if tenantID == 0 {
 			http.Error(w, `{"error":"tenant context not found"}`, http.StatusBadRequest)
@@ -741,9 +783,9 @@ func main() {
 				"phone": phone,
 			},
 		})
-	})))
+	}), 5, "READ"))
 
-	mux.Handle("PUT /api/v1/tenant/contact-info", wrapProtected(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	mux.Handle("PUT /api/v1/tenant/contact-info", wrapWithPermission(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		tenantID := middleware.GetTenantID(r)
 		if tenantID == 0 {
 			http.Error(w, `{"error":"tenant context not found"}`, http.StatusBadRequest)
@@ -771,15 +813,15 @@ func main() {
 				"phone": req.Phone,
 			},
 		})
-	})))
+	}), 5, "WRITE"))
 
 	// HR Module - Employee management endpoints (require authentication + RBAC permission)
 	// Module ID 2 = HR (from migrations)
-	mux.Handle("GET /api/v1/hr/employees", wrapWithPermission(http.HandlerFunc(hrEmployeeHandler.ListEmployees), 2, "READ"))
-	mux.Handle("GET /api/v1/hr/employees/{id}", wrapWithPermission(http.HandlerFunc(hrEmployeeHandler.GetEmployee), 2, "READ"))
-	mux.Handle("POST /api/v1/hr/employees", wrapWithPermission(http.HandlerFunc(hrEmployeeHandler.CreateEmployee), 2, "WRITE"))
-	mux.Handle("PUT /api/v1/hr/employees/{id}", wrapWithPermission(http.HandlerFunc(hrEmployeeHandler.UpdateEmployee), 2, "WRITE"))
-	mux.Handle("DELETE /api/v1/hr/employees/{id}", wrapWithPermission(http.HandlerFunc(hrEmployeeHandler.DeleteEmployee), 2, "DELETE"))
+	mux.Handle("GET /api/v1/hr/employees", wrapWithPermission(http.HandlerFunc(hrEmployeeHandler.ListEmployees), 3, "READ"))
+	mux.Handle("GET /api/v1/hr/employees/{id}", wrapWithPermission(http.HandlerFunc(hrEmployeeHandler.GetEmployee), 3, "READ"))
+	mux.Handle("POST /api/v1/hr/employees", wrapWithPermission(http.HandlerFunc(hrEmployeeHandler.CreateEmployee), 3, "WRITE"))
+	mux.Handle("PUT /api/v1/hr/employees/{id}", wrapWithPermission(http.HandlerFunc(hrEmployeeHandler.UpdateEmployee), 3, "WRITE"))
+	mux.Handle("DELETE /api/v1/hr/employees/{id}", wrapWithPermission(http.HandlerFunc(hrEmployeeHandler.DeleteEmployee), 3, "DELETE"))
 
 	// HR Module - Roles management endpoints (inline handlers using roles table)
 	// Module ID 2 = HR (from migrations)
@@ -823,7 +865,7 @@ func main() {
 		}
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(map[string]interface{}{"success": true, "data": roles})
-	}), 2, "READ"))
+	}), 3, "READ"))
 
 	mux.Handle("POST /api/v1/hr/roles", wrapWithPermission(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		tenantID := middleware.GetTenantID(r)
@@ -874,7 +916,7 @@ func main() {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(201)
 		json.NewEncoder(w).Encode(map[string]interface{}{"success": true, "data": map[string]interface{}{"id": id, "role_name": req.RoleName, "role_code": req.RoleCode}})
-	}), 2, "WRITE"))
+	}), 3, "WRITE"))
 
 	mux.Handle("PUT /api/v1/hr/roles/{id}", wrapWithPermission(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		tenantID := middleware.GetTenantID(r)
@@ -915,7 +957,7 @@ func main() {
 		}
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(map[string]interface{}{"success": true})
-	}), 2, "WRITE"))
+	}), 3, "WRITE"))
 
 	mux.Handle("DELETE /api/v1/hr/roles/{id}", wrapWithPermission(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		tenantID := middleware.GetTenantID(r)
@@ -939,62 +981,62 @@ func main() {
 		}
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(map[string]interface{}{"success": true})
-	}), 2, "DELETE"))
+	}), 3, "DELETE"))
 
 	// RBAC endpoints - use wrapAuthOnly because RBAC handlers read claims.TenantID
 	// directly from JWT, they don't need TenantContextMiddleware (which requires restaurant_id)
 	if rbacRoleHandler != nil && rbacPermissionHandler != nil && rbacUserRoleHandler != nil {
 		// Role management
-		mux.Handle("GET /api/v1/rbac/roles", wrapAuthOnly(http.HandlerFunc(rbacRoleHandler.ListRoles)))
-		mux.Handle("GET /api/v1/rbac/roles/{id}", wrapAuthOnly(http.HandlerFunc(rbacRoleHandler.GetRole)))
-		mux.Handle("POST /api/v1/rbac/roles", wrapAuthOnly(http.HandlerFunc(rbacRoleHandler.CreateRole)))
-		mux.Handle("PUT /api/v1/rbac/roles/{id}", wrapAuthOnly(http.HandlerFunc(rbacRoleHandler.UpdateRole)))
-		mux.Handle("DELETE /api/v1/rbac/roles/{id}", wrapAuthOnly(http.HandlerFunc(rbacRoleHandler.DeleteRole)))
+		mux.Handle("GET /api/v1/rbac/roles", wrapAuthPermission(http.HandlerFunc(rbacRoleHandler.ListRoles), 7, "READ"))
+		mux.Handle("GET /api/v1/rbac/roles/{id}", wrapAuthPermission(http.HandlerFunc(rbacRoleHandler.GetRole), 7, "READ"))
+		mux.Handle("POST /api/v1/rbac/roles", wrapAuthPermission(http.HandlerFunc(rbacRoleHandler.CreateRole), 7, "WRITE"))
+		mux.Handle("PUT /api/v1/rbac/roles/{id}", wrapAuthPermission(http.HandlerFunc(rbacRoleHandler.UpdateRole), 7, "WRITE"))
+		mux.Handle("DELETE /api/v1/rbac/roles/{id}", wrapAuthPermission(http.HandlerFunc(rbacRoleHandler.DeleteRole), 7, "DELETE"))
 
 		// Permission management
-		mux.Handle("POST /api/v1/rbac/permissions/assign", wrapAuthOnly(http.HandlerFunc(rbacPermissionHandler.AssignPermission)))
-		mux.Handle("DELETE /api/v1/rbac/permissions/{roleId}/{moduleId}", wrapAuthOnly(http.HandlerFunc(rbacPermissionHandler.RevokePermission)))
-		mux.Handle("GET /api/v1/rbac/roles/{roleId}/permissions", wrapAuthOnly(http.HandlerFunc(rbacPermissionHandler.GetRolePermissions)))
+		mux.Handle("POST /api/v1/rbac/permissions/assign", wrapAuthPermission(http.HandlerFunc(rbacPermissionHandler.AssignPermission), 7, "ADMIN"))
+		mux.Handle("DELETE /api/v1/rbac/permissions/{roleId}/{moduleId}", wrapAuthPermission(http.HandlerFunc(rbacPermissionHandler.RevokePermission), 7, "ADMIN"))
+		mux.Handle("GET /api/v1/rbac/roles/{roleId}/permissions", wrapAuthPermission(http.HandlerFunc(rbacPermissionHandler.GetRolePermissions), 7, "READ"))
 		mux.Handle("GET /api/v1/rbac/check-permission", wrapAuthOnly(http.HandlerFunc(rbacPermissionHandler.CheckPermission)))
 		mux.Handle("GET /api/v1/rbac/me/permissions", wrapAuthOnly(http.HandlerFunc(rbacPermissionHandler.GetUserPermissions)))
 
 		// User-role assignment
-		mux.Handle("POST /api/v1/rbac/users/{userId}/roles", wrapAuthOnly(http.HandlerFunc(rbacUserRoleHandler.AssignRoleToUser)))
-		mux.Handle("DELETE /api/v1/rbac/users/{userId}/roles/{roleId}", wrapAuthOnly(http.HandlerFunc(rbacUserRoleHandler.RemoveRoleFromUser)))
-		mux.Handle("GET /api/v1/rbac/users/{userId}/roles", wrapAuthOnly(http.HandlerFunc(rbacUserRoleHandler.GetUserRoles)))
+		mux.Handle("POST /api/v1/rbac/users/{userId}/roles", wrapAuthPermission(http.HandlerFunc(rbacUserRoleHandler.AssignRoleToUser), 7, "ADMIN"))
+		mux.Handle("DELETE /api/v1/rbac/users/{userId}/roles/{roleId}", wrapAuthPermission(http.HandlerFunc(rbacUserRoleHandler.RemoveRoleFromUser), 7, "ADMIN"))
+		mux.Handle("GET /api/v1/rbac/users/{userId}/roles", wrapAuthPermission(http.HandlerFunc(rbacUserRoleHandler.GetUserRoles), 7, "READ"))
 		mux.Handle("GET /api/v1/rbac/me/roles", wrapAuthOnly(http.HandlerFunc(rbacUserRoleHandler.GetMyRoles)))
-		mux.Handle("POST /api/v1/rbac/users-by-email/{email}/roles", wrapAuthOnly(http.HandlerFunc(rbacUserRoleHandler.AssignRoleToUserByEmail)))
-		mux.Handle("DELETE /api/v1/rbac/users-by-email/{email}/roles/{roleId}", wrapAuthOnly(http.HandlerFunc(rbacUserRoleHandler.RemoveRoleFromUserByEmail)))
-		mux.Handle("GET /api/v1/rbac/users-by-email/{email}/roles", wrapAuthOnly(http.HandlerFunc(rbacUserRoleHandler.GetUserRolesByEmail)))
+		mux.Handle("POST /api/v1/rbac/users-by-email/{email}/roles", wrapAuthPermission(http.HandlerFunc(rbacUserRoleHandler.AssignRoleToUserByEmail), 7, "ADMIN"))
+		mux.Handle("DELETE /api/v1/rbac/users-by-email/{email}/roles/{roleId}", wrapAuthPermission(http.HandlerFunc(rbacUserRoleHandler.RemoveRoleFromUserByEmail), 7, "ADMIN"))
+		mux.Handle("GET /api/v1/rbac/users-by-email/{email}/roles", wrapAuthPermission(http.HandlerFunc(rbacUserRoleHandler.GetUserRolesByEmail), 7, "READ"))
 	}
 
 	// HR Module - Attendance management endpoints (require authentication + RBAC permission)
 	// Module ID 2 = HR (from migrations)
-	mux.Handle("GET /api/v1/hr/attendance", wrapWithPermission(http.HandlerFunc(hrAttendanceHandler.ListAttendance), 2, "READ"))
-	mux.Handle("GET /api/v1/hr/attendance/{id}", wrapWithPermission(http.HandlerFunc(hrAttendanceHandler.GetAttendance), 2, "READ"))
-	mux.Handle("POST /api/v1/hr/attendance", wrapWithPermission(http.HandlerFunc(hrAttendanceHandler.CreateAttendance), 2, "WRITE"))
-	mux.Handle("POST /api/v1/hr/attendance/clock-in", wrapWithPermission(http.HandlerFunc(hrAttendanceHandler.ClockIn), 2, "WRITE"))
-	mux.Handle("PUT /api/v1/hr/attendance/{id}", wrapWithPermission(http.HandlerFunc(hrAttendanceHandler.UpdateAttendance), 2, "WRITE"))
-	mux.Handle("DELETE /api/v1/hr/attendance/{id}", wrapWithPermission(http.HandlerFunc(hrAttendanceHandler.DeleteAttendance), 2, "DELETE"))
+	mux.Handle("GET /api/v1/hr/attendance", wrapWithPermission(http.HandlerFunc(hrAttendanceHandler.ListAttendance), 3, "READ"))
+	mux.Handle("GET /api/v1/hr/attendance/{id}", wrapWithPermission(http.HandlerFunc(hrAttendanceHandler.GetAttendance), 3, "READ"))
+	mux.Handle("POST /api/v1/hr/attendance", wrapWithPermission(http.HandlerFunc(hrAttendanceHandler.CreateAttendance), 3, "WRITE"))
+	mux.Handle("POST /api/v1/hr/attendance/clock-in", wrapWithPermission(http.HandlerFunc(hrAttendanceHandler.ClockIn), 3, "WRITE"))
+	mux.Handle("PUT /api/v1/hr/attendance/{id}", wrapWithPermission(http.HandlerFunc(hrAttendanceHandler.UpdateAttendance), 3, "WRITE"))
+	mux.Handle("DELETE /api/v1/hr/attendance/{id}", wrapWithPermission(http.HandlerFunc(hrAttendanceHandler.DeleteAttendance), 3, "DELETE"))
 
 	// HR Module - Leave management endpoints (require authentication + RBAC permission)
 	// Module ID 2 = HR (from migrations)
-	mux.Handle("GET /api/v1/hr/leaves", wrapWithPermission(http.HandlerFunc(hrLeaveHandler.ListLeaves), 2, "READ"))
-	mux.Handle("GET /api/v1/hr/leaves/{id}", wrapWithPermission(http.HandlerFunc(hrLeaveHandler.GetLeave), 2, "READ"))
-	mux.Handle("POST /api/v1/hr/leaves", wrapWithPermission(http.HandlerFunc(hrLeaveHandler.CreateLeave), 2, "WRITE"))
-	mux.Handle("PUT /api/v1/hr/leaves/{id}", wrapWithPermission(http.HandlerFunc(hrLeaveHandler.UpdateLeave), 2, "WRITE"))
-	mux.Handle("DELETE /api/v1/hr/leaves/{id}", wrapWithPermission(http.HandlerFunc(hrLeaveHandler.DeleteLeave), 2, "DELETE"))
-	mux.Handle("POST /api/v1/hr/leaves/{id}/approve", wrapWithPermission(http.HandlerFunc(hrLeaveHandler.ApproveLeave), 2, "WRITE"))
-	mux.Handle("POST /api/v1/hr/leaves/{id}/reject", wrapWithPermission(http.HandlerFunc(hrLeaveHandler.RejectLeave), 2, "WRITE"))
+	mux.Handle("GET /api/v1/hr/leaves", wrapWithPermission(http.HandlerFunc(hrLeaveHandler.ListLeaves), 11, "READ"))
+	mux.Handle("GET /api/v1/hr/leaves/{id}", wrapWithPermission(http.HandlerFunc(hrLeaveHandler.GetLeave), 11, "READ"))
+	mux.Handle("POST /api/v1/hr/leaves", wrapWithPermission(http.HandlerFunc(hrLeaveHandler.CreateLeave), 11, "WRITE"))
+	mux.Handle("PUT /api/v1/hr/leaves/{id}", wrapWithPermission(http.HandlerFunc(hrLeaveHandler.UpdateLeave), 11, "WRITE"))
+	mux.Handle("DELETE /api/v1/hr/leaves/{id}", wrapWithPermission(http.HandlerFunc(hrLeaveHandler.DeleteLeave), 11, "DELETE"))
+	mux.Handle("POST /api/v1/hr/leaves/{id}/approve", wrapWithPermission(http.HandlerFunc(hrLeaveHandler.ApproveLeave), 11, "WRITE"))
+	mux.Handle("POST /api/v1/hr/leaves/{id}/reject", wrapWithPermission(http.HandlerFunc(hrLeaveHandler.RejectLeave), 11, "WRITE"))
 
 	// HR Module - Salary/Payroll management endpoints (require authentication + RBAC permission)
 	// Module ID 2 = HR (from migrations)
-	mux.Handle("GET /api/v1/hr/salaries", wrapWithPermission(http.HandlerFunc(hrSalaryHandler.ListSalaries), 2, "READ"))
-	mux.Handle("GET /api/v1/hr/salaries/{id}", wrapWithPermission(http.HandlerFunc(hrSalaryHandler.GetSalary), 2, "READ"))
-	mux.Handle("POST /api/v1/hr/salaries", wrapWithPermission(http.HandlerFunc(hrSalaryHandler.CreateSalary), 2, "WRITE"))
-	mux.Handle("PUT /api/v1/hr/salaries/{id}", wrapWithPermission(http.HandlerFunc(hrSalaryHandler.UpdateSalary), 2, "WRITE"))
-	mux.Handle("DELETE /api/v1/hr/salaries/{id}", wrapWithPermission(http.HandlerFunc(hrSalaryHandler.DeleteSalary), 2, "DELETE"))
-	mux.Handle("POST /api/v1/hr/salaries/{id}/mark-paid", wrapWithPermission(http.HandlerFunc(hrSalaryHandler.MarkAsPaid), 2, "WRITE"))
+	mux.Handle("GET /api/v1/hr/salaries", wrapWithPermission(http.HandlerFunc(hrSalaryHandler.ListSalaries), 12, "READ"))
+	mux.Handle("GET /api/v1/hr/salaries/{id}", wrapWithPermission(http.HandlerFunc(hrSalaryHandler.GetSalary), 12, "READ"))
+	mux.Handle("POST /api/v1/hr/salaries", wrapWithPermission(http.HandlerFunc(hrSalaryHandler.CreateSalary), 12, "WRITE"))
+	mux.Handle("PUT /api/v1/hr/salaries/{id}", wrapWithPermission(http.HandlerFunc(hrSalaryHandler.UpdateSalary), 12, "WRITE"))
+	mux.Handle("DELETE /api/v1/hr/salaries/{id}", wrapWithPermission(http.HandlerFunc(hrSalaryHandler.DeleteSalary), 12, "DELETE"))
+	mux.Handle("POST /api/v1/hr/salaries/{id}/mark-paid", wrapWithPermission(http.HandlerFunc(hrSalaryHandler.MarkAsPaid), 12, "WRITE"))
 
 	log.Println("✅ HR Module routes registered (employees, attendance, leaves, salaries, roles)")
 
@@ -1080,12 +1122,12 @@ func main() {
 	// User Settings Management endpoints (require authentication)
 	// Use stub handlers when db is nil
 	if db == nil {
-		mux.Handle("GET /api/v1/users", wrapProtected(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		mux.Handle("GET /api/v1/users", wrapWithPermission(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Content-Type", "application/json")
 			w.Write([]byte(`{"success":true,"data":[{"id":7,"email":"yoseabdallah866@gmail.com","name":"Admin User","role":"owner","created_at":"2024-01-01T00:00:00Z"}]}`))
-		})))
+		}), 6, "READ"))
 	} else {
-		mux.Handle("GET /api/v1/users", wrapProtected(http.HandlerFunc(userSettingsHandler.ListUsers)))
+		mux.Handle("GET /api/v1/users", wrapWithPermission(http.HandlerFunc(userSettingsHandler.ListUsers), 6, "READ"))
 	}
 	mux.Handle("GET /api/v1/users/{userId}/settings", wrapProtected(http.HandlerFunc(userSettingsHandler.GetUserSettings)))
 	mux.Handle("PUT /api/v1/users/{userId}/settings/language", wrapProtected(http.HandlerFunc(userSettingsHandler.UpdateLanguage)))
@@ -1098,7 +1140,7 @@ func main() {
 	// User Management endpoints (create, update, delete users in tenant)
 	if db == nil {
 		// Stub handlers for user management when db is nil
-		mux.Handle("POST /api/v1/users", wrapProtected(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		mux.Handle("POST /api/v1/users", wrapWithPermission(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			body, _ := io.ReadAll(r.Body)
 			var req struct {
 				Name     string `json:"name"`
@@ -1120,9 +1162,9 @@ func main() {
 					"created_at": time.Now(),
 				},
 			})
-		})))
+		}), 6, "WRITE"))
 
-		mux.Handle("PUT /api/v1/users/{id}", wrapProtected(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		mux.Handle("PUT /api/v1/users/{id}", wrapWithPermission(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			id := r.PathValue("id")
 			body, _ := io.ReadAll(r.Body)
 			var req struct {
@@ -1141,17 +1183,17 @@ func main() {
 					"updated_at": time.Now(),
 				},
 			})
-		})))
+		}), 6, "WRITE"))
 
-		mux.Handle("DELETE /api/v1/users/{id}", wrapProtected(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		mux.Handle("DELETE /api/v1/users/{id}", wrapWithPermission(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Content-Type", "application/json")
 			json.NewEncoder(w).Encode(map[string]interface{}{
 				"success": true,
 			})
-		})))
+		}), 6, "DELETE"))
 	} else {
 		// Real database handlers for user management
-		mux.Handle("POST /api/v1/users", wrapProtected(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		mux.Handle("POST /api/v1/users", wrapWithPermission(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			tenantID := middleware.GetTenantID(r)
 			restaurantID := middleware.GetRestaurantID(r)
 			assignedBy := middleware.GetUserID(r)
@@ -1207,7 +1249,7 @@ func main() {
 			if rbacRoleRepo != nil && userRoleRepo != nil && roleRestaurantID > 0 {
 				role, err := rbacRoleRepo.GetByCode(r.Context(), tenantID, roleRestaurantID, "EMPLOYEE")
 				if err == nil && role != nil {
-					_ = userRoleRepo.Assign(r.Context(), tenantID, int64(user.ID), role.ID, assignedBy)
+					_ = userRoleRepo.Assign(r.Context(), tenantID, roleRestaurantID, int64(user.ID), role.ID, assignedBy)
 				}
 			}
 
@@ -1223,9 +1265,9 @@ func main() {
 					"created_at": user.CreatedAt,
 				},
 			})
-		})))
+		}), 6, "WRITE"))
 
-		mux.Handle("PUT /api/v1/users/{id}", wrapProtected(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		mux.Handle("PUT /api/v1/users/{id}", wrapWithPermission(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			tenantID := middleware.GetTenantID(r)
 			if tenantID == 0 {
 				http.Error(w, "Missing tenant context", http.StatusBadRequest)
@@ -1265,6 +1307,10 @@ func main() {
 
 			user, err := userRepo.UpdateUser(r.Context(), userID, tenantID, namePtr, phonePtr)
 			if err != nil {
+				if errors.Is(err, repository.ErrUserNotFound) {
+					http.Error(w, "User not found", http.StatusNotFound)
+					return
+				}
 				http.Error(w, fmt.Sprintf("Failed to update user: %v", err), http.StatusInternalServerError)
 				return
 			}
@@ -1280,9 +1326,9 @@ func main() {
 					"updated_at": user.UpdatedAt,
 				},
 			})
-		})))
+		}), 6, "WRITE"))
 
-		mux.Handle("DELETE /api/v1/users/{id}", wrapProtected(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		mux.Handle("DELETE /api/v1/users/{id}", wrapWithPermission(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			tenantID := middleware.GetTenantID(r)
 			if tenantID == 0 {
 				http.Error(w, "Missing tenant context", http.StatusBadRequest)
@@ -1299,6 +1345,10 @@ func main() {
 			// Delete user
 			err = userRepo.DeleteUser(r.Context(), userID, tenantID)
 			if err != nil {
+				if errors.Is(err, repository.ErrUserNotFound) {
+					http.Error(w, "User not found", http.StatusNotFound)
+					return
+				}
 				http.Error(w, fmt.Sprintf("Failed to delete user: %v", err), http.StatusInternalServerError)
 				return
 			}
@@ -1307,11 +1357,13 @@ func main() {
 			json.NewEncoder(w).Encode(map[string]interface{}{
 				"success": true,
 			})
-		})))
+		}), 6, "DELETE"))
 	}
 
 	// Admin Order Management endpoints (require authentication)
 	// Module ID 10 = Orders (from migrations)
+	// POS order creation uses the verified server session for tenant scope.
+	mux.Handle("POST /api/v1/pos/orders", wrapProtectedNoStatus(http.HandlerFunc(publicOrderHandler.CreateOrder)))
 	mux.Handle("GET /api/v1/admin/orders/stats", wrapWithPermission(http.HandlerFunc(adminOrderHandler.GetOrderStats), 10, "READ"))
 	mux.Handle("GET /api/v1/admin/orders/export", wrapWithPermission(http.HandlerFunc(adminOrderHandler.ExportOrders), 10, "READ"))
 	mux.Handle("GET /api/v1/admin/orders/{id}/history", wrapWithPermission(http.HandlerFunc(adminOrderHandler.GetOrderHistory), 10, "READ"))
@@ -1336,7 +1388,7 @@ func main() {
 
 	// KDS (Kitchen Display System) endpoints
 	// Module ID 13 = KDS (from migration 126_add_kds_rbac_module.sql)
-	mux.HandleFunc("GET /api/v1/kds/ws", kdsWSHandler.ServeWS)
+	mux.Handle("GET /api/v1/kds/ws", wrapKDSWithPermission(http.HandlerFunc(kdsWSHandler.ServeWS), "READ", false))
 	mux.Handle("GET /api/v1/kds/queue", wrapKDSWithPermission(http.HandlerFunc(kdsHandler.GetQueue), "READ", false))
 	mux.Handle("PUT /api/v1/kds/orders/{id}/bump", wrapKDSWithPermission(http.HandlerFunc(kdsHandler.BumpOrder), "WRITE", true))
 	mux.Handle("PUT /api/v1/kds/orders/{id}/recall", wrapKDSWithPermission(http.HandlerFunc(kdsHandler.RecallOrder), "WRITE", false))
@@ -1415,86 +1467,86 @@ func main() {
 	mux.Handle("GET /api/v1/hr/resignations/{id}/settlement", wrapWithPermission(http.HandlerFunc(resignationHandler.CalculateSettlement), 20, "READ"))
 
 	// Admin Driver Management endpoints (require authentication)
-	mux.Handle("POST /api/v1/admin/drivers", wrapProtected(http.HandlerFunc(adminDriverHandler.CreateDriver)))
-	mux.Handle("GET /api/v1/admin/drivers", wrapProtected(http.HandlerFunc(adminDriverHandler.ListDrivers)))
-	mux.Handle("GET /api/v1/admin/drivers/available", wrapProtected(http.HandlerFunc(adminDriverHandler.GetAvailableDrivers)))
-	mux.Handle("GET /api/v1/admin/drivers/{id}", wrapProtected(http.HandlerFunc(adminDriverHandler.GetDriver)))
-	mux.Handle("PUT /api/v1/admin/drivers/{id}", wrapProtected(http.HandlerFunc(adminDriverHandler.UpdateDriver)))
-	mux.Handle("DELETE /api/v1/admin/drivers/{id}", wrapProtected(http.HandlerFunc(adminDriverHandler.DeleteDriver)))
-	mux.Handle("PUT /api/v1/admin/drivers/{id}/status", wrapProtected(http.HandlerFunc(adminDriverHandler.UpdateDriverStatus)))
+	mux.Handle("POST /api/v1/admin/drivers", wrapWithPermission(http.HandlerFunc(adminDriverHandler.CreateDriver), 10, "WRITE"))
+	mux.Handle("GET /api/v1/admin/drivers", wrapWithPermission(http.HandlerFunc(adminDriverHandler.ListDrivers), 10, "READ"))
+	mux.Handle("GET /api/v1/admin/drivers/available", wrapWithPermission(http.HandlerFunc(adminDriverHandler.GetAvailableDrivers), 10, "READ"))
+	mux.Handle("GET /api/v1/admin/drivers/{id}", wrapWithPermission(http.HandlerFunc(adminDriverHandler.GetDriver), 10, "READ"))
+	mux.Handle("PUT /api/v1/admin/drivers/{id}", wrapWithPermission(http.HandlerFunc(adminDriverHandler.UpdateDriver), 10, "WRITE"))
+	mux.Handle("DELETE /api/v1/admin/drivers/{id}", wrapWithPermission(http.HandlerFunc(adminDriverHandler.DeleteDriver), 10, "DELETE"))
+	mux.Handle("PUT /api/v1/admin/drivers/{id}/status", wrapWithPermission(http.HandlerFunc(adminDriverHandler.UpdateDriverStatus), 10, "WRITE"))
 	mux.Handle("POST /api/v1/admin/orders/{orderId}/assign", wrapWithPermission(http.HandlerFunc(adminDriverHandler.AssignOrderToDriver), 10, "WRITE"))
-	// 	mux.Handle("GET /api/v1/admin/drivers/{id}/stats", wrapProtected(http.HandlerFunc(adminDriverHandler.GetDriverStats)))
-	// 	mux.Handle("POST /api/v1/admin/drivers/{id}/location", wrapProtected(http.HandlerFunc(adminDriverHandler.UpdateDriverLocation)))
-	// 	mux.Handle("GET /api/v1/admin/drivers/{id}/location", wrapProtected(http.HandlerFunc(adminDriverHandler.GetDriverLocation)))
+	// 	mux.Handle("GET /api/v1/admin/drivers/{id}/stats", wrapWithPermission(http.HandlerFunc(adminDriverHandler.GetDriverStats), 10, "READ"))
+	// 	mux.Handle("POST /api/v1/admin/drivers/{id}/location", wrapWithPermission(http.HandlerFunc(adminDriverHandler.UpdateDriverLocation), 10, "READ"))
+	// 	mux.Handle("GET /api/v1/admin/drivers/{id}/location", wrapWithPermission(http.HandlerFunc(adminDriverHandler.GetDriverLocation), 10, "READ"))
 
 	// Notification management endpoints (require authentication)
 	// Register specific routes BEFORE {id} pattern routes to avoid conflicts
 	// Use stub handlers when db is nil
 	if db == nil {
-		mux.Handle("GET /api/v1/notifications", wrapProtected(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		mux.Handle("GET /api/v1/notifications", wrapWithPermission(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Content-Type", "application/json")
 			w.Write([]byte(`{"success":true,"data":[],"total":0}`))
-		})))
-		mux.Handle("GET /api/v1/notifications/stats", wrapProtected(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		}), 4, "READ"))
+		mux.Handle("GET /api/v1/notifications/stats", wrapWithPermission(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Content-Type", "application/json")
 			w.Write([]byte(`{"success":true,"data":{"total":0,"unread":0,"read":0}}`))
-		})))
-		mux.Handle("GET /api/v1/notifications/unread-count", wrapProtected(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		}), 4, "READ"))
+		mux.Handle("GET /api/v1/notifications/unread-count", wrapWithPermission(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Content-Type", "application/json")
 			w.Write([]byte(`{"success":true,"count":0}`))
-		})))
-		mux.Handle("POST /api/v1/notifications", wrapProtected(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		}), 4, "READ"))
+		mux.Handle("POST /api/v1/notifications", wrapWithPermission(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Content-Type", "application/json")
 			w.Write([]byte(`{"success":true,"data":{"id":1}}`))
-		})))
-		mux.Handle("POST /api/v1/notifications/mark-all-read", wrapProtected(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		}), 4, "WRITE"))
+		mux.Handle("POST /api/v1/notifications/mark-all-read", wrapWithPermission(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Content-Type", "application/json")
 			w.Write([]byte(`{"success":true}`))
-		})))
-		mux.Handle("POST /api/v1/notifications/{id}/read", wrapProtected(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		}), 4, "READ"))
+		mux.Handle("POST /api/v1/notifications/{id}/read", wrapWithPermission(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Content-Type", "application/json")
 			w.Write([]byte(`{"success":true}`))
-		})))
-		mux.Handle("POST /api/v1/notifications/{id}/unread", wrapProtected(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		}), 4, "READ"))
+		mux.Handle("POST /api/v1/notifications/{id}/unread", wrapWithPermission(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Content-Type", "application/json")
 			w.Write([]byte(`{"success":true}`))
-		})))
-		mux.Handle("GET /api/v1/notifications/{id}", wrapProtected(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		}), 4, "READ"))
+		mux.Handle("GET /api/v1/notifications/{id}", wrapWithPermission(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Content-Type", "application/json")
 			w.Write([]byte(`{"success":true,"data":null}`))
-		})))
-		mux.Handle("DELETE /api/v1/notifications/{id}", wrapProtected(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		}), 4, "READ"))
+		mux.Handle("DELETE /api/v1/notifications/{id}", wrapWithPermission(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Content-Type", "application/json")
 			w.Write([]byte(`{"success":true}`))
-		})))
+		}), 4, "DELETE"))
 	} else {
-		mux.Handle("GET /api/v1/notifications", wrapProtected(http.HandlerFunc(notificationHandler.ListNotifications)))
-		mux.Handle("GET /api/v1/notifications/stats", wrapProtected(http.HandlerFunc(notificationHandler.GetStats)))
-		mux.Handle("GET /api/v1/notifications/unread-count", wrapProtected(http.HandlerFunc(notificationHandler.GetUnreadCount)))
-		mux.Handle("POST /api/v1/notifications", wrapProtected(http.HandlerFunc(notificationHandler.CreateNotification)))
-		mux.Handle("POST /api/v1/notifications/mark-all-read", wrapProtected(http.HandlerFunc(notificationHandler.MarkAllAsRead)))
-		mux.Handle("POST /api/v1/notifications/{id}/read", wrapProtected(http.HandlerFunc(notificationHandler.MarkAsRead)))
-		mux.Handle("POST /api/v1/notifications/{id}/unread", wrapProtected(http.HandlerFunc(notificationHandler.MarkAsUnread)))
-		mux.Handle("GET /api/v1/notifications/{id}", wrapProtected(http.HandlerFunc(notificationHandler.GetNotification)))
-		mux.Handle("DELETE /api/v1/notifications/{id}", wrapProtected(http.HandlerFunc(notificationHandler.DeleteNotification)))
+		mux.Handle("GET /api/v1/notifications", wrapWithPermission(http.HandlerFunc(notificationHandler.ListNotifications), 4, "READ"))
+		mux.Handle("GET /api/v1/notifications/stats", wrapWithPermission(http.HandlerFunc(notificationHandler.GetStats), 4, "READ"))
+		mux.Handle("GET /api/v1/notifications/unread-count", wrapWithPermission(http.HandlerFunc(notificationHandler.GetUnreadCount), 4, "READ"))
+		mux.Handle("POST /api/v1/notifications", wrapWithPermission(http.HandlerFunc(notificationHandler.CreateNotification), 4, "WRITE"))
+		mux.Handle("POST /api/v1/notifications/mark-all-read", wrapWithPermission(http.HandlerFunc(notificationHandler.MarkAllAsRead), 4, "READ"))
+		mux.Handle("POST /api/v1/notifications/{id}/read", wrapWithPermission(http.HandlerFunc(notificationHandler.MarkAsRead), 4, "READ"))
+		mux.Handle("POST /api/v1/notifications/{id}/unread", wrapWithPermission(http.HandlerFunc(notificationHandler.MarkAsUnread), 4, "READ"))
+		mux.Handle("GET /api/v1/notifications/{id}", wrapWithPermission(http.HandlerFunc(notificationHandler.GetNotification), 4, "READ"))
+		mux.Handle("DELETE /api/v1/notifications/{id}", wrapWithPermission(http.HandlerFunc(notificationHandler.DeleteNotification), 4, "DELETE"))
 	}
 
 	// Theme management endpoints (require authentication)
-	mux.Handle("GET /api/v1/admin/themes", wrapProtected(http.HandlerFunc(themeHandler.ListThemes)))
-	mux.Handle("POST /api/v1/admin/themes", wrapProtected(http.HandlerFunc(themeHandler.CreateTheme)))
-	mux.Handle("GET /api/v1/admin/themes/{id}", wrapProtected(http.HandlerFunc(themeHandler.GetTheme)))
-	mux.Handle("PUT /api/v1/admin/themes/{id}", wrapProtected(http.HandlerFunc(themeHandler.UpdateTheme)))
-	mux.Handle("DELETE /api/v1/admin/themes/{id}", wrapProtected(http.HandlerFunc(themeHandler.DeleteTheme)))
-	mux.Handle("POST /api/v1/admin/themes/{id}/activate", wrapProtected(http.HandlerFunc(themeHandler.ActivateTheme)))
-	mux.Handle("POST /api/v1/admin/themes/{id}/duplicate", wrapProtected(http.HandlerFunc(themeHandler.DuplicateTheme)))
-	mux.Handle("GET /api/v1/admin/themes/{id}/history", wrapProtected(http.HandlerFunc(themeHandler.GetThemeHistory)))
+	mux.Handle("GET /api/v1/admin/themes", wrapWithPermission(http.HandlerFunc(themeHandler.ListThemes), 9, "READ"))
+	mux.Handle("POST /api/v1/admin/themes", wrapWithPermission(http.HandlerFunc(themeHandler.CreateTheme), 9, "WRITE"))
+	mux.Handle("GET /api/v1/admin/themes/{id}", wrapWithPermission(http.HandlerFunc(themeHandler.GetTheme), 9, "READ"))
+	mux.Handle("PUT /api/v1/admin/themes/{id}", wrapWithPermission(http.HandlerFunc(themeHandler.UpdateTheme), 9, "WRITE"))
+	mux.Handle("DELETE /api/v1/admin/themes/{id}", wrapWithPermission(http.HandlerFunc(themeHandler.DeleteTheme), 9, "DELETE"))
+	mux.Handle("POST /api/v1/admin/themes/{id}/activate", wrapWithPermission(http.HandlerFunc(themeHandler.ActivateTheme), 9, "WRITE"))
+	mux.Handle("POST /api/v1/admin/themes/{id}/duplicate", wrapWithPermission(http.HandlerFunc(themeHandler.DuplicateTheme), 9, "WRITE"))
+	mux.Handle("GET /api/v1/admin/themes/{id}/history", wrapWithPermission(http.HandlerFunc(themeHandler.GetThemeHistory), 9, "READ"))
 
 	// Theme presets endpoints (V2 - with database support)
-	mux.Handle("GET /api/v1/admin/theme-presets", wrapProtected(http.HandlerFunc(themeHandlerV2.ListThemePresets)))
+	mux.Handle("GET /api/v1/admin/theme-presets", wrapWithPermission(http.HandlerFunc(themeHandlerV2.ListThemePresets), 9, "READ"))
 
 	// RBAC stub endpoints (returns mock data for development)
 	if db == nil {
-		mux.Handle("GET /api/v1/rbac/roles", wrapProtected(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		mux.Handle("GET /api/v1/rbac/roles", wrapWithPermission(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			rbacStorage.mu.RLock()
 			defer rbacStorage.mu.RUnlock()
 
@@ -1508,8 +1560,8 @@ func main() {
 				"success": true,
 				"data":    roles,
 			})
-		})))
-		mux.Handle("POST /api/v1/rbac/roles", wrapProtected(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		}), 7, "READ"))
+		mux.Handle("POST /api/v1/rbac/roles", wrapWithPermission(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			body, err := io.ReadAll(r.Body)
 			if err != nil {
 				http.Error(w, "Failed to read request body", http.StatusBadRequest)
@@ -1547,8 +1599,8 @@ func main() {
 				"success": true,
 				"data":    newRole,
 			})
-		})))
-		mux.Handle("GET /api/v1/rbac/roles/{id}", wrapProtected(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		}), 7, "WRITE"))
+		mux.Handle("GET /api/v1/rbac/roles/{id}", wrapWithPermission(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			idStr := r.PathValue("id")
 			id, err := strconv.Atoi(idStr)
 			if err != nil {
@@ -1570,8 +1622,8 @@ func main() {
 				"success": true,
 				"data":    role,
 			})
-		})))
-		mux.Handle("PUT /api/v1/rbac/roles/{id}", wrapProtected(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		}), 7, "READ"))
+		mux.Handle("PUT /api/v1/rbac/roles/{id}", wrapWithPermission(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			idStr := r.PathValue("id")
 			id, err := strconv.Atoi(idStr)
 			if err != nil {
@@ -1619,8 +1671,8 @@ func main() {
 				"success": true,
 				"data":    role,
 			})
-		})))
-		mux.Handle("DELETE /api/v1/rbac/roles/{id}", wrapProtected(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		}), 7, "WRITE"))
+		mux.Handle("DELETE /api/v1/rbac/roles/{id}", wrapWithPermission(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			idStr := r.PathValue("id")
 			id, err := strconv.Atoi(idStr)
 			if err != nil {
@@ -1649,13 +1701,13 @@ func main() {
 			json.NewEncoder(w).Encode(map[string]interface{}{
 				"success": true,
 			})
-		})))
-		mux.Handle("GET /api/v1/rbac/me/roles", wrapProtected(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		}), 7, "DELETE"))
+		mux.Handle("GET /api/v1/rbac/me/roles", wrapProtectedNoStatus(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Content-Type", "application/json")
 			// Mock admin role for current user
 			w.Write([]byte(`{"success":true,"data":[{"id":1,"tenant_id":1,"role_name":"Admin","description":"System administrator with full access","is_system":true,"created_at":"2024-01-01T00:00:00Z","updated_at":"2024-01-01T00:00:00Z"}]}`))
 		})))
-		mux.Handle("GET /api/v1/rbac/users/{userId}/roles", wrapProtected(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		mux.Handle("GET /api/v1/rbac/users/{userId}/roles", wrapWithPermission(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			userIdStr := r.PathValue("userId")
 			userId, err := strconv.Atoi(userIdStr)
 			if err != nil {
@@ -1679,8 +1731,8 @@ func main() {
 				"success": true,
 				"data":    roles,
 			})
-		})))
-		mux.Handle("POST /api/v1/rbac/users/{userId}/roles", wrapProtected(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		}), 7, "READ"))
+		mux.Handle("POST /api/v1/rbac/users/{userId}/roles", wrapWithPermission(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			userIdStr := r.PathValue("userId")
 			userId, err := strconv.Atoi(userIdStr)
 			if err != nil {
@@ -1729,8 +1781,8 @@ func main() {
 			json.NewEncoder(w).Encode(map[string]interface{}{
 				"success": true,
 			})
-		})))
-		mux.Handle("DELETE /api/v1/rbac/users/{userId}/roles/{roleId}", wrapProtected(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		}), 7, "ADMIN"))
+		mux.Handle("DELETE /api/v1/rbac/users/{userId}/roles/{roleId}", wrapWithPermission(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			userIdStr := r.PathValue("userId")
 			userId, err := strconv.Atoi(userIdStr)
 			if err != nil {
@@ -1761,8 +1813,8 @@ func main() {
 			json.NewEncoder(w).Encode(map[string]interface{}{
 				"success": true,
 			})
-		})))
-		mux.Handle("GET /api/v1/rbac/me/permissions", wrapProtected(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		}), 7, "ADMIN"))
+		mux.Handle("GET /api/v1/rbac/me/permissions", wrapProtectedNoStatus(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Content-Type", "application/json")
 			// Mock admin permissions for all modules
 			w.Write([]byte(`{"success":true,"data":{"1":"ADMIN","2":"ADMIN","3":"ADMIN","4":"ADMIN","5":"ADMIN","6":"ADMIN"}}`))
@@ -1782,13 +1834,14 @@ func main() {
 		wrapSuperAdmin := func(next http.Handler) http.Handler {
 			wrapped := middleware.RequireSuperAdmin(superAdminRepo)(next)
 			wrapped = middleware.ValidateIPWhitelist(superAdminRepo)(wrapped)
-			wrapped = middleware.SuperAdminAuthMiddleware(superAdminTokenService)(wrapped)
+			wrapped = middleware.SuperAdminAuthMiddleware(superAdminTokenService, authSessionStore)(wrapped)
 			wrapped = middleware.RateLimitSuperAdmin(30)(wrapped) // 30 requests per minute
 			return wrapped
 		}
 
 		// Super Admin Authentication (public - no auth required)
-		mux.HandleFunc("POST /api/v1/super-admin/auth/login", superAdminHandler.Login)
+		mux.Handle("POST /api/v1/super-admin/auth/login", middleware.RequireTrustedOrigin(middleware.RateLimitByIP(10)(http.HandlerFunc(superAdminHandler.Login))))
+		mux.Handle("GET /api/v1/super-admin/auth/session", wrapSuperAdmin(http.HandlerFunc(superAdminHandler.Session)))
 
 		// Super Admin Protected Routes
 		mux.Handle("POST /api/v1/super-admin/auth/logout", wrapSuperAdmin(http.HandlerFunc(superAdminHandler.Logout)))
@@ -1830,7 +1883,7 @@ func main() {
 
 		// Public endpoint for validating impersonation token (called from tenant dashboard)
 		mux.HandleFunc("GET /api/v1/impersonation/validate", impersonationHandler.ValidateImpersonationToken)
-		mux.HandleFunc("POST /api/v1/impersonation/end", impersonationHandler.EndImpersonationByToken)
+		mux.Handle("POST /api/v1/impersonation/end", middleware.RequireTrustedOrigin(http.HandlerFunc(impersonationHandler.EndImpersonationByToken)))
 		mux.HandleFunc("GET /api/v1/impersonation/check", impersonationHandler.CheckImpersonation)
 
 		log.Println("✅ Super Admin routes registered")
@@ -1845,7 +1898,7 @@ func main() {
 			// Apply middleware in REVERSE order of execution
 			wrapped := middleware.RequireSuperAdmin(superAdminRepo)(next)
 			wrapped = middleware.ValidateIPWhitelist(superAdminRepo)(wrapped)
-			wrapped = middleware.SuperAdminAuthMiddleware(superAdminTokenService)(wrapped)
+			wrapped = middleware.SuperAdminAuthMiddleware(superAdminTokenService, authSessionStore)(wrapped)
 			wrapped = middleware.RateLimitSuperAdmin(30)(wrapped) // 30 requests per minute
 			return wrapped
 		}
@@ -1862,27 +1915,51 @@ func main() {
 	}
 
 	// Apply global middleware
-	jsonBodyLimitHandler := middleware.MaxJSONBodyBytesMiddleware(1 << 20)(mux)
-	timeoutHandler := middleware.TimeoutMiddleware(30 * time.Second)(jsonBodyLimitHandler)
-	corsHandler := middleware.CORSMiddleware(timeoutHandler)
+	corsHandler := middleware.CORSMiddleware(mux)
 	compressedHandler := middleware.GzipMiddleware(corsHandler)
 	securedHandler := middleware.SecurityHeadersMiddleware(compressedHandler)
 	metricsHandler := middleware.RequestMetricsMiddleware(securedHandler)
+	recoveredHandler := middleware.RecoveryMiddleware(metricsHandler)
+	requestHandler := middleware.RequestIDMiddleware(recoveredHandler)
 
-	// Start server
+	// Bound slow clients and give in-flight requests a fixed window to finish on shutdown.
 	log.Printf("🚀 Server started on port %s", cfg.Server.Port)
 	if publicBaseURL, err := config.ResolveRuntimeURL([]string{"APP_BASE_URL"}, "http://localhost:"+cfg.Server.Port, "app base URL"); err == nil {
 		log.Printf("📍 API URL: %s/api/v1", publicBaseURL)
 	} else {
 		log.Printf("📍 API URL: /api/v1 (APP_BASE_URL not configured)")
 	}
-	if err := http.ListenAndServe(":"+cfg.Server.Port, metricsHandler); err != nil {
-		log.Printf("Failed to start server: %v", err)
-		return
+	server := &http.Server{
+		Addr:              ":" + cfg.Server.Port,
+		Handler:           requestHandler,
+		ReadHeaderTimeout: 5 * time.Second,
+		ReadTimeout:       30 * time.Second,
+		WriteTimeout:      60 * time.Second,
+		IdleTimeout:       90 * time.Second,
+	}
+	serverErrors := make(chan error, 1)
+	go func() {
+		serverErrors <- server.ListenAndServe()
+	}()
+
+	select {
+	case err := <-serverErrors:
+		if err != nil && err != http.ErrServerClosed {
+			log.Printf("HTTP server stopped unexpectedly: %v", err)
+		}
+	case <-rootCtx.Done():
+		shutdownCtx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+		defer cancel()
+		if err := server.Shutdown(shutdownCtx); err != nil {
+			log.Printf("HTTP graceful shutdown timed out: %v", err)
+			if closeErr := server.Close(); closeErr != nil {
+				log.Printf("HTTP forced close failed: %v", closeErr)
+			}
+		}
 	}
 }
 
-func startDBHealthMonitor(db *sql.DB, interval time.Duration) {
+func startDBHealthMonitor(ctx context.Context, db *sql.DB, interval time.Duration) {
 	if db == nil {
 		return
 	}
@@ -1910,8 +1987,13 @@ func startDBHealthMonitor(db *sql.DB, interval time.Duration) {
 		}
 
 		check()
-		for range ticker.C {
-			check()
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case <-ticker.C:
+				check()
+			}
 		}
 	}()
 }

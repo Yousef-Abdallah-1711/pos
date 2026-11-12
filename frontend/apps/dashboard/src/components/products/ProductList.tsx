@@ -31,7 +31,7 @@ import {
   PaginationPrevious,
 } from '@/components/ui/pagination'
 import { Skeleton } from '@/components/ui/skeleton'
-import { canRenderDashboardProductImage } from '@/lib/productImages'
+import type { ProductListProps } from './product-types'
 
 export function ProductList({
   products,
@@ -42,14 +42,14 @@ export function ProductList({
   onEdit,
   onDelete,
   canDelete = false,
-}) {
+}: ProductListProps) {
   const pathname = usePathname()
   const locale = getLocaleFromPath(pathname)
-  const handleSearchChange = (value) => {
+  const handleSearchChange = (value: string) => {
     onFilterChange({ ...filters, searchText: value, page: 1 })
   }
 
-  const handleCategoryChange = (value) => {
+  const handleCategoryChange = (value: string) => {
     onFilterChange({
       ...filters,
       categoryId: value && value !== 'all' ? parseInt(value) : null,
@@ -57,7 +57,7 @@ export function ProductList({
     })
   }
 
-  const handleSortChange = (field) => {
+  const handleSortChange = (field: string) => {
     const newOrder =
       filters.sortBy === field && filters.sortOrder === 'ASC' ? 'DESC' : 'ASC'
     onFilterChange({
@@ -68,7 +68,7 @@ export function ProductList({
     })
   }
 
-  const handlePageChange = (page) => {
+  const handlePageChange = (page: number) => {
     onFilterChange({ ...filters, page })
   }
 
@@ -146,23 +146,19 @@ export function ProductList({
               return (
                 <TableRow key={product.id}>
                   <TableCell>
-                    {canRenderDashboardProductImage(product.main_image_url) ? (
+                    {product.main_image_url && (
                       <Image
                         src={product.main_image_url}
-                        alt={product.name_en || 'Product image'}
+                        alt={product.name_en ?? product.name ?? ''}
                         width={40}
                         height={40}
                         className="object-cover rounded"
                       />
-                    ) : (
-                      <div className="flex h-10 w-10 items-center justify-center rounded bg-gray-100 text-sm font-medium text-gray-500 dark:bg-gray-800 dark:text-gray-300">
-                        {getProductPlaceholder(product.name_en)}
-                      </div>
                     )}
                   </TableCell>
                   <TableCell className="font-medium">{product.name_en}</TableCell>
                   <TableCell>{category?.name || 'N/A'}</TableCell>
-                  <TableCell>{product.price.toFixed(2)} EGP</TableCell>
+                  <TableCell>{(product.price ?? 0).toFixed(2)} EGP</TableCell>
                   <TableCell>{product.quantity_in_stock}</TableCell>
                   <TableCell>
                     <span
@@ -188,7 +184,7 @@ export function ProductList({
                         <Button
                           size="sm"
                           variant="destructive"
-                          onClick={() => onDelete(product.id)}
+                          onClick={() => onDelete?.(product.id)}
                         >
                           Delete
                         </Button>
@@ -220,7 +216,8 @@ export function ProductList({
                 onClick={() =>
                   handlePageChange(Math.max(1, filters.page - 1))
                 }
-                disabled={filters.page === 1}
+                aria-disabled={filters.page === 1}
+                className={filters.page === 1 ? 'pointer-events-none opacity-50' : undefined}
               />
             </PaginationItem>
 
@@ -256,7 +253,3 @@ export function ProductList({
     </div>
   )
 }
-  const getProductPlaceholder = (name) => {
-    const normalizedName = String(name || '').trim()
-    return normalizedName ? normalizedName.charAt(0).toUpperCase() : '?'
-  }

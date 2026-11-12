@@ -41,9 +41,11 @@ describe('TableList', () => {
         onEdit={vi.fn()}
         onDelete={vi.fn()}
         onView={onView}
+        onOpenPOS={vi.fn()}
         onOpenQr={onOpenQr}
         onFreeTable={onFreeTable}
         onStatusChange={onStatusChange}
+        onOpenPOS={vi.fn()}
         t={t}
       />
     )
@@ -78,9 +80,11 @@ describe('TableList', () => {
         onEdit={vi.fn()}
         onDelete={vi.fn()}
         onView={vi.fn()}
+        onOpenPOS={vi.fn()}
         onOpenQr={vi.fn()}
         onFreeTable={vi.fn()}
         onStatusChange={vi.fn()}
+        onOpenPOS={vi.fn()}
         t={t}
       />
     )

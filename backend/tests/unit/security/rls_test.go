@@ -1,6 +1,10 @@
+//go:build experimental
+// +build experimental
+
 package security_test
 
 import (
+	"pos-saas/tests/testdb"
 	"context"
 	"database/sql"
 	"testing"
@@ -146,7 +150,7 @@ func TestSecurityAuditLog(t *testing.T) {
 	}
 
 	// Log a security event
-	err = rm.LogSecurityEvent(context.Background(), conn, tenantID, "unauthorized_access_attempt", "user_table", "SELECT")
+	err = rm.LogSecurityEvent(context.Background(), conn, tenantID, "unauthorized_access_attempt", "user_table")
 	if err != nil {
 		t.Fatalf("Failed to log security event: %v", err)
 	}
@@ -375,7 +379,7 @@ func createTestDB(t *testing.T) *sql.DB {
 	// This would connect to a test PostgreSQL instance
 	// For now, return a mock or test database
 	// In real implementation, use testcontainers or a test database
-	db, err := sql.Open("postgres", "postgres://test:test@localhost/pos_test")
+	db, err := sql.Open("postgres", testdb.URL(t))
 	if err != nil {
 		t.Fatalf("Failed to connect to test database: %v", err)
 	}

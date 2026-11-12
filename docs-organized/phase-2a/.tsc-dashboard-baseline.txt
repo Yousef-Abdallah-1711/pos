@@ -1,0 +1,805 @@
+ Container pos-dev-frontend-install-run-22cf271e8419 Creating 
+ Container pos-dev-frontend-install-run-22cf271e8419 Created 
+components/component-manager/component-manager.test.tsx(6,15): error TS2459: Module '"@/lib/hooks/use-theme"' declares 'Theme' locally, but it is not exported.
+components/component-manager/component-manager.test.tsx(114,15): error TS2739: Type '{ restaurantId: number; }' is missing the following properties from type 'ComponentManagerProps': primaryColor, secondaryColor, accentColor, fontFamily, logoUrl
+components/component-manager/component-manager.test.tsx(116,44): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+components/component-manager/component-manager.test.tsx(128,15): error TS2739: Type '{ restaurantId: number; }' is missing the following properties from type 'ComponentManagerProps': primaryColor, secondaryColor, accentColor, fontFamily, logoUrl
+components/component-manager/component-manager.test.tsx(130,57): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+components/component-manager/component-manager.test.tsx(142,15): error TS2739: Type '{ restaurantId: number; }' is missing the following properties from type 'ComponentManagerProps': primaryColor, secondaryColor, accentColor, fontFamily, logoUrl
+components/component-manager/component-manager.test.tsx(144,54): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+components/component-manager/component-manager.test.tsx(145,44): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+components/component-manager/component-manager.test.tsx(146,45): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+components/component-manager/component-manager.test.tsx(158,37): error TS2739: Type '{ restaurantId: number; }' is missing the following properties from type 'ComponentManagerProps': primaryColor, secondaryColor, accentColor, fontFamily, logoUrl
+components/component-manager/component-manager.test.tsx(175,15): error TS2739: Type '{ restaurantId: number; }' is missing the following properties from type 'ComponentManagerProps': primaryColor, secondaryColor, accentColor, fontFamily, logoUrl
+components/component-manager/component-manager.test.tsx(177,43): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+components/component-manager/component-manager.test.tsx(178,44): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+components/component-manager/component-manager.test.tsx(191,36): error TS2739: Type '{ restaurantId: number; }' is missing the following properties from type 'ComponentManagerProps': primaryColor, secondaryColor, accentColor, fontFamily, logoUrl
+components/component-manager/component-manager.test.tsx(197,56): error TS2339: Property 'toHaveClass' does not exist on type 'Assertion<Element | null>'.
+components/component-manager/component-manager.test.tsx(210,15): error TS2739: Type '{ restaurantId: number; }' is missing the following properties from type 'ComponentManagerProps': primaryColor, secondaryColor, accentColor, fontFamily, logoUrl
+components/component-manager/component-manager.test.tsx(218,21): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement | null>'.
+components/component-manager/component-manager.test.tsx(239,15): error TS2739: Type '{ restaurantId: number; }' is missing the following properties from type 'ComponentManagerProps': primaryColor, secondaryColor, accentColor, fontFamily, logoUrl
+components/component-manager/component-manager.test.tsx(274,36): error TS2739: Type '{ restaurantId: number; }' is missing the following properties from type 'ComponentManagerProps': primaryColor, secondaryColor, accentColor, fontFamily, logoUrl
+components/component-manager/component-manager.test.tsx(277,17): error TS2739: Type '{ restaurantId: number; }' is missing the following properties from type 'ComponentManagerProps': primaryColor, secondaryColor, accentColor, fontFamily, logoUrl
+components/component-manager/component-manager.test.tsx(280,43): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+components/component-manager/component-manager.test.tsx(295,15): error TS2739: Type '{ restaurantId: number; }' is missing the following properties from type 'ComponentManagerProps': primaryColor, secondaryColor, accentColor, fontFamily, logoUrl
+components/component-manager/component-manager.test.tsx(302,21): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement | null>'.
+components/component-manager/component-manager.test.tsx(321,15): error TS2739: Type '{ restaurantId: number; }' is missing the following properties from type 'ComponentManagerProps': primaryColor, secondaryColor, accentColor, fontFamily, logoUrl
+components/component-manager/component-manager.test.tsx(356,15): error TS2739: Type '{ restaurantId: number; }' is missing the following properties from type 'ComponentManagerProps': primaryColor, secondaryColor, accentColor, fontFamily, logoUrl
+components/component-manager/component-manager.test.tsx(365,44): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+components/component-manager/component-manager.test.tsx(380,15): error TS2739: Type '{ restaurantId: number; }' is missing the following properties from type 'ComponentManagerProps': primaryColor, secondaryColor, accentColor, fontFamily, logoUrl
+components/component-manager/component-manager.test.tsx(385,34): error TS2339: Property 'toHaveAttribute' does not exist on type 'Assertion<Element>'.
+components/component-manager/component-manager.test.tsx(404,15): error TS2739: Type '{ restaurantId: number; }' is missing the following properties from type 'ComponentManagerProps': primaryColor, secondaryColor, accentColor, fontFamily, logoUrl
+components/component-manager/component-manager.test.tsx(435,15): error TS2739: Type '{ restaurantId: number; }' is missing the following properties from type 'ComponentManagerProps': primaryColor, secondaryColor, accentColor, fontFamily, logoUrl
+components/component-manager/component-manager.test.tsx(464,15): error TS2739: Type '{ restaurantId: number; }' is missing the following properties from type 'ComponentManagerProps': primaryColor, secondaryColor, accentColor, fontFamily, logoUrl
+components/component-manager/component-manager.test.tsx(475,26): error TS2339: Property 'toHaveClass' does not exist on type 'Assertion<Element | null>'.
+components/component-manager/component-manager.test.tsx(488,15): error TS2739: Type '{ restaurantId: number; }' is missing the following properties from type 'ComponentManagerProps': primaryColor, secondaryColor, accentColor, fontFamily, logoUrl
+components/component-manager/component-manager.test.tsx(498,30): error TS2339: Property 'toHaveClass' does not exist on type 'Assertion<Element | null>'.
+components/component-manager/component-manager.test.tsx(513,15): error TS2739: Type '{ restaurantId: number; }' is missing the following properties from type 'ComponentManagerProps': primaryColor, secondaryColor, accentColor, fontFamily, logoUrl
+components/component-manager/component-manager.test.tsx(537,15): error TS2739: Type '{ restaurantId: number; }' is missing the following properties from type 'ComponentManagerProps': primaryColor, secondaryColor, accentColor, fontFamily, logoUrl
+components/component-manager/component-manager.test.tsx(540,43): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+components/component-manager/component-manager.test.tsx(560,15): error TS2739: Type '{ restaurantId: number; }' is missing the following properties from type 'ComponentManagerProps': primaryColor, secondaryColor, accentColor, fontFamily, logoUrl
+components/component-manager/component-manager.test.tsx(578,15): error TS2739: Type '{ restaurantId: number; }' is missing the following properties from type 'ComponentManagerProps': primaryColor, secondaryColor, accentColor, fontFamily, logoUrl
+components/component-manager/component-manager.test.tsx(580,50): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+components/component-manager/component-manager.test.tsx(593,15): error TS2739: Type '{ restaurantId: number; }' is missing the following properties from type 'ComponentManagerProps': primaryColor, secondaryColor, accentColor, fontFamily, logoUrl
+components/component-manager/component-manager.test.tsx(598,56): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement | null>'.
+components/component-manager/component-manager.test.tsx(612,15): error TS2739: Type '{ restaurantId: number; }' is missing the following properties from type 'ComponentManagerProps': primaryColor, secondaryColor, accentColor, fontFamily, logoUrl
+components/component-manager/component-manager.test.tsx(614,54): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+components/component-manager/component-manager.test.tsx(627,15): error TS2739: Type '{ restaurantId: number; }' is missing the following properties from type 'ComponentManagerProps': primaryColor, secondaryColor, accentColor, fontFamily, logoUrl
+components/component-manager/component-manager.test.tsx(632,26): error TS2339: Property 'toHaveFocus' does not exist on type 'Assertion<HTMLElement>'.
+components/component-manager/component-sidebar.test.tsx(6,15): error TS2305: Module '"@/lib/hooks/use-theme"' has no exported member 'ThemeSection'.
+components/component-manager/component-sidebar.test.tsx(86,51): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+components/component-manager/component-sidebar.test.tsx(87,50): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+components/component-manager/component-sidebar.test.tsx(88,49): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+components/component-manager/component-sidebar.test.tsx(104,44): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+components/component-manager/component-sidebar.test.tsx(120,48): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+components/component-manager/component-sidebar.test.tsx(137,31): error TS2339: Property 'toHaveClass' does not exist on type 'Assertion<Element | null>'.
+components/component-manager/component-sidebar.test.tsx(153,41): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+components/component-manager/component-sidebar.test.tsx(154,51): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+components/component-manager/component-sidebar.test.tsx(202,30): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLDivElement | null>'.
+components/component-manager/component-sidebar.test.tsx(220,27): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+components/component-manager/component-sidebar.test.tsx(275,31): error TS2339: Property 'toHaveClass' does not exist on type 'Assertion<Element | null>'.
+components/component-manager/component-sidebar.test.tsx(348,27): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<Element | null>'.
+components/component-manager/component-sidebar.test.tsx(387,37): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+components/component-manager/component-sidebar.test.tsx(388,37): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+components/component-manager/component-sidebar.test.tsx(407,23): error TS2339: Property 'toHaveAttribute' does not exist on type 'Assertion<HTMLElement>'.
+components/component-manager/component-sidebar.test.tsx(427,26): error TS2339: Property 'toHaveFocus' does not exist on type 'Assertion<HTMLElement>'.
+components/component-manager/manager-preview.test.tsx(17,5): error TS2353: Object literal may only specify known properties, and 'background_image' does not exist in type 'ThemeSection'.
+components/component-manager/manager-preview.test.tsx(33,5): error TS2353: Object literal may only specify known properties, and 'background_image' does not exist in type 'ThemeSection'.
+components/component-manager/manager-preview.test.tsx(49,5): error TS2353: Object literal may only specify known properties, and 'background_image' does not exist in type 'ThemeSection'.
+components/component-manager/manager-preview.test.tsx(65,5): error TS2353: Object literal may only specify known properties, and 'background_image' does not exist in type 'ThemeSection'.
+components/component-manager/manager-preview.test.tsx(81,5): error TS2353: Object literal may only specify known properties, and 'background_image' does not exist in type 'ThemeSection'.
+components/component-manager/manager-preview.test.tsx(97,5): error TS2353: Object literal may only specify known properties, and 'background_image' does not exist in type 'ThemeSection'.
+components/component-manager/manager-preview.test.tsx(120,46): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+components/component-manager/manager-preview.test.tsx(132,20): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+components/component-manager/manager-preview.test.tsx(133,20): error TS2339: Property 'toHaveAttribute' does not exist on type 'Assertion<HTMLElement>'.
+components/component-manager/manager-preview.test.tsx(139,40): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+components/component-manager/manager-preview.test.tsx(140,42): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+components/component-manager/manager-preview.test.tsx(146,79): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+components/component-manager/manager-preview.test.tsx(157,56): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+components/component-manager/manager-preview.test.tsx(165,61): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+components/component-manager/manager-preview.test.tsx(166,77): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+components/component-manager/manager-preview.test.tsx(173,27): error TS2339: Property 'toHaveStyle' does not exist on type 'Assertion<Element | null>'.
+components/component-manager/manager-preview.test.tsx(182,22): error TS2339: Property 'toHaveStyle' does not exist on type 'Assertion<HTMLElement>'.
+components/component-manager/manager-preview.test.tsx(191,45): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+components/component-manager/manager-preview.test.tsx(199,50): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+components/component-manager/manager-preview.test.tsx(228,49): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+components/component-manager/manager-preview.test.tsx(234,43): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+components/component-manager/manager-preview.test.tsx(235,49): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+components/component-manager/manager-preview.test.tsx(236,48): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+components/component-manager/manager-preview.test.tsx(237,48): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+components/component-manager/manager-preview.test.tsx(243,37): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+components/component-manager/manager-preview.test.tsx(244,37): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+components/component-manager/manager-preview.test.tsx(245,38): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+components/component-manager/manager-preview.test.tsx(246,38): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+components/component-manager/manager-preview.test.tsx(254,28): error TS2339: Property 'toHaveStyle' does not exist on type 'Assertion<HTMLElement | null>'.
+components/component-manager/manager-preview.test.tsx(262,55): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+components/component-manager/manager-preview.test.tsx(268,41): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+components/component-manager/manager-preview.test.tsx(269,44): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+components/component-manager/manager-preview.test.tsx(270,41): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+components/component-manager/manager-preview.test.tsx(276,56): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+components/component-manager/manager-preview.test.tsx(277,51): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+components/component-manager/manager-preview.test.tsx(278,53): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+components/component-manager/manager-preview.test.tsx(296,56): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+components/component-manager/manager-preview.test.tsx(304,51): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+components/component-manager/manager-preview.test.tsx(313,26): error TS2339: Property 'toHaveStyle' does not exist on type 'Assertion<HTMLDivElement | undefined>'.
+components/component-manager/manager-preview.test.tsx(322,25): error TS2339: Property 'toHaveStyle' does not exist on type 'Assertion<HTMLElement>'.
+components/component-manager/manager-preview.test.tsx(331,71): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+components/component-manager/manager-preview.test.tsx(339,52): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+components/component-manager/manager-preview.test.tsx(359,56): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+components/component-manager/manager-preview.test.tsx(377,61): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+components/component-manager/manager-preview.test.tsx(378,50): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+components/component-manager/manager-preview.test.tsx(379,55): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement | null>'.
+components/component-manager/manager-preview.test.tsx(410,23): error TS2339: Property 'toHaveStyle' does not exist on type 'Assertion<ChildNode | null>'.
+components/component-manager/manager-preview.test.tsx(443,22): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<Element | null>'.
+components/component-manager/manager-preview.test.tsx(482,18): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+components/component-manager/manager-preview.test.tsx(497,20): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+components/component-manager/manager-preview.test.tsx(517,56): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+components/component-manager/manager-preview.test.tsx(533,56): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+components/component-manager/manager-preview.test.tsx(544,46): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+components/component-manager/manager-preview.test.tsx(555,61): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+components/component-manager/manager-preview.test.tsx(583,26): error TS2339: Property 'toHaveStyle' does not exist on type 'Assertion<HTMLDivElement | undefined>'.
+components/component-manager/manager-preview.test.tsx(598,24): error TS2339: Property 'toHaveStyle' does not exist on type 'Assertion<HTMLElement>'.
+components/component-manager/section-editor.test.tsx(6,15): error TS2305: Module '"@/lib/hooks/use-theme"' has no exported member 'ThemeSection'.
+components/component-manager/section-editor.test.tsx(64,69): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+components/component-manager/section-editor.test.tsx(78,36): error TS2339: Property 'toBeEmptyDOMElement' does not exist on type 'Assertion<ChildNode | null>'.
+components/component-manager/section-editor.test.tsx(93,21): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+components/component-manager/section-editor.test.tsx(107,47): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+components/component-manager/section-editor.test.tsx(121,44): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+components/component-manager/section-editor.test.tsx(138,26): error TS2339: Property 'toHaveAttribute' does not exist on type 'Assertion<HTMLElement>'.
+components/component-manager/section-editor.test.tsx(153,29): error TS2339: Property 'toHaveAttribute' does not exist on type 'Assertion<HTMLElement>'.
+components/component-manager/section-editor.test.tsx(168,32): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+components/component-manager/section-editor.test.tsx(183,34): error TS2339: Property 'toBeChecked' does not exist on type 'Assertion<HTMLElement>'.
+components/component-manager/section-editor.test.tsx(233,26): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+components/component-manager/section-editor.test.tsx(236,44): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+components/component-manager/section-editor.test.tsx(252,29): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+components/component-manager/section-editor.test.tsx(255,44): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+components/component-manager/section-editor.test.tsx(277,23): error TS2339: Property 'toHaveClass' does not exist on type 'Assertion<HTMLElement>'.
+components/component-manager/section-editor.test.tsx(300,52): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+components/component-manager/section-editor.test.tsx(344,49): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+components/component-manager/section-editor.test.tsx(388,26): error TS2339: Property 'toBeDisabled' does not exist on type 'Assertion<HTMLElement>'.
+components/component-manager/section-editor.test.tsx(404,34): error TS2339: Property 'toBeChecked' does not exist on type 'Assertion<HTMLElement>'.
+components/component-manager/section-editor.test.tsx(407,38): error TS2339: Property 'toBeChecked' does not exist on type 'Assertion<HTMLElement>'.
+components/component-manager/section-editor.test.tsx(434,44): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+components/component-manager/section-editor.test.tsx(525,58): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+components/component-manager/section-editor.test.tsx(542,21): error TS2339: Property 'toHaveAttribute' does not exist on type 'Assertion<HTMLElement>'.
+components/component-manager/section-editor.test.tsx(560,26): error TS2339: Property 'toHaveFocus' does not exist on type 'Assertion<HTMLElement>'.
+components/component-manager/section-editor.test.tsx(584,28): error TS2339: Property 'toHaveAttribute' does not exist on type 'Assertion<HTMLElement>'.
+components/component-manager/section-editor.tsx(194,37): error TS2339: Property 'background_image' does not exist on type 'Partial<ThemeSection>'.
+components/component-manager/section-editor.tsx(195,51): error TS2345: Argument of type '"background_image"' is not assignable to parameter of type 'keyof ThemeSection'.
+components/theme-editor/theme-editor.tsx(19,29): error TS2339: Property 'updateTheme' does not exist on type '{ theme: Theme | null; isLoading: boolean; error: null; }'.
+components/theme-editor/theme-editor.tsx(19,42): error TS2339: Property 'isSaving' does not exist on type '{ theme: Theme | null; isLoading: boolean; error: null; }'.
+lib/hooks/use-theme.ts(3,27): error TS2307: Cannot find module '@/lib/api-client' or its corresponding type declarations.
+src/app/[locale]/dashboard/accounting/customer-invoices/page.tsx(457,13): error TS2322: Type '(payload: CustomerInvoiceFormInput) => Promise<void>' is not assignable to type '(payload: CustomerInvoiceFormInput | SupplierInvoiceFormInput) => void | Promise<void>'.
+  Types of parameters 'payload' and 'payload' are incompatible.
+    Type 'CustomerInvoiceFormInput | SupplierInvoiceFormInput' is not assignable to type 'CustomerInvoiceFormInput'.
+      Property 'customer_id' is missing in type 'SupplierInvoiceFormInput' but required in type 'CustomerInvoiceFormInput'.
+src/app/[locale]/dashboard/accounting/customer-invoices/page.tsx(477,13): error TS2322: Type '(payload: PaymentReceivedFormInput) => Promise<void>' is not assignable to type '(payload: PaymentReceivedFormInput | PaymentMadeFormInput) => void | Promise<void>'.
+  Types of parameters 'payload' and 'payload' are incompatible.
+    Type 'PaymentReceivedFormInput | PaymentMadeFormInput' is not assignable to type 'PaymentReceivedFormInput'.
+      Property 'customer_id' is missing in type 'PaymentMadeFormInput' but required in type 'PaymentReceivedFormInput'.
+src/app/[locale]/dashboard/accounting/supplier-invoices/page.tsx(424,13): error TS2322: Type '(payload: SupplierInvoiceFormInput) => Promise<void>' is not assignable to type '(payload: CustomerInvoiceFormInput | SupplierInvoiceFormInput) => void | Promise<void>'.
+  Types of parameters 'payload' and 'payload' are incompatible.
+    Type 'CustomerInvoiceFormInput | SupplierInvoiceFormInput' is not assignable to type 'SupplierInvoiceFormInput'.
+      Property 'supplier_id' is missing in type 'CustomerInvoiceFormInput' but required in type 'SupplierInvoiceFormInput'.
+src/app/[locale]/dashboard/accounting/supplier-invoices/page.tsx(444,13): error TS2322: Type '(payload: PaymentMadeFormInput) => Promise<void>' is not assignable to type '(payload: PaymentReceivedFormInput | PaymentMadeFormInput) => void | Promise<void>'.
+  Types of parameters 'payload' and 'payload' are incompatible.
+    Type 'PaymentReceivedFormInput | PaymentMadeFormInput' is not assignable to type 'PaymentMadeFormInput'.
+      Property 'supplier_id' is missing in type 'PaymentReceivedFormInput' but required in type 'PaymentMadeFormInput'.
+src/app/[locale]/dashboard/hr/attendance/page.tsx(108,55): error TS7006: Parameter 'record' implicitly has an 'any' type.
+src/app/[locale]/dashboard/hr/leaves/page.tsx(122,47): error TS7006: Parameter 'leave' implicitly has an 'any' type.
+src/app/[locale]/dashboard/hr/payroll/page.tsx(98,51): error TS7006: Parameter 's' implicitly has an 'any' type.
+src/app/[locale]/dashboard/kds/page.tsx(68,21): error TS2322: Type '() => Promise<boolean>' is not assignable to type '() => void | Promise<void>'.
+  Type 'Promise<boolean>' is not assignable to type 'void | Promise<void>'.
+    Type 'Promise<boolean>' is not assignable to type 'Promise<void>'.
+      Type 'boolean' is not assignable to type 'void'.
+src/app/[locale]/dashboard/pos/page.phase3.test.tsx(214,57): error TS2493: Tuple type '[]' of length '0' has no element at index '0'.
+src/app/[locale]/dashboard/pos/page.phase3.test.tsx(215,12): error TS18048: 'receiptArg' is possibly 'undefined'.
+src/app/[locale]/dashboard/pos/page.phase3.test.tsx(216,12): error TS18048: 'receiptArg' is possibly 'undefined'.
+src/app/[locale]/dashboard/pos/page.phase3.test.tsx(217,26): error TS18048: 'receiptArg' is possibly 'undefined'.
+src/app/[locale]/dashboard/pos/page.phase3.test.tsx(218,12): error TS18048: 'receiptArg' is possibly 'undefined'.
+src/app/[locale]/dashboard/products/page.tsx(203,13): error TS2322: Type '{ hasPermission: boolean; loading: boolean; error: Error | null; }' is not assignable to type 'boolean | undefined'.
+src/app/[locale]/dashboard/reports/overview/page.tsx(180,39): error TS2339: Property 'slowMoving' does not exist on type '{ title: string; subtitle: string; dateFrom: string; dateTo: string; refresh: string; sales: string; profitability: string; inventory: string; revenue: string; orders: string; grossMargin: string; ... 14 more ...; inventoryValue: string; }'.
+src/app/[locale]/dashboard/reports/sales/page.tsx(299,21): error TS2322: Type '(value: number, name: string) => [string, string]' is not assignable to type 'Formatter<ValueType, NameType> & ((value: ValueType, name: NameType, item: Payload<ValueType, NameType>, index: number, payload: Payload<...>[]) => ReactNode | [...])'.
+  Type '(value: number, name: string) => [string, string]' is not assignable to type 'Formatter<ValueType, NameType>'.
+    Types of parameters 'value' and 'value' are incompatible.
+      Type 'ValueType | undefined' is not assignable to type 'number'.
+        Type 'undefined' is not assignable to type 'number'.
+src/app/[locale]/dashboard/reports/sales/page.tsx(320,30): error TS2322: Type '(value: number) => string' is not assignable to type 'Formatter<ValueType, NameType> & ((value: ValueType, name: NameType, item: Payload<ValueType, NameType>, index: number, payload: Payload<...>[]) => ReactNode | [...])'.
+  Type '(value: number) => string' is not assignable to type 'Formatter<ValueType, NameType>'.
+    Types of parameters 'value' and 'value' are incompatible.
+      Type 'ValueType | undefined' is not assignable to type 'number'.
+        Type 'undefined' is not assignable to type 'number'.
+src/app/[locale]/dashboard/reports/sales/page.tsx(350,19): error TS2322: Type '(value: number, name: string) => [string, string]' is not assignable to type 'Formatter<ValueType, NameType> & ((value: ValueType, name: NameType, item: Payload<ValueType, NameType>, index: number, payload: Payload<...>[]) => ReactNode | [...])'.
+  Type '(value: number, name: string) => [string, string]' is not assignable to type 'Formatter<ValueType, NameType>'.
+    Types of parameters 'value' and 'value' are incompatible.
+      Type 'ValueType | undefined' is not assignable to type 'number'.
+        Type 'undefined' is not assignable to type 'number'.
+src/app/[locale]/dashboard/tables/components/FloorPlanErrorBoundary.test.tsx(15,10): error TS2786: 'CrashComponent' cannot be used as a JSX component.
+  Its type '() => void' is not a valid JSX element type.
+    Type '() => void' is not assignable to type '(props: any, deprecatedLegacyContext?: any) => ReactNode'.
+      Type 'void' is not assignable to type 'ReactNode'.
+src/app/[locale]/dashboard/tables/components/TableList.test.tsx(35,8): error TS2741: Property 'onOpenPOS' is missing in type '{ tables: RestaurantTable[]; loading: false; canManageTables: true; canDeleteTables: false; canViewTables: true; onEdit: Mock<Procedure>; onDelete: Mock<Procedure>; ... 4 more ...; t: (path: string, fallback?: string | undefined) => string; }' but required in type 'TableListProps'.
+src/app/[locale]/dashboard/tables/components/TableList.test.tsx(72,8): error TS2741: Property 'onOpenPOS' is missing in type '{ tables: never[]; loading: false; canManageTables: false; canDeleteTables: false; canViewTables: false; onEdit: Mock<Procedure>; onDelete: Mock<Procedure>; ... 4 more ...; t: (path: string, fallback?: string | undefined) => string; }' but required in type 'TableListProps'.
+src/app/[locale]/dashboard/tables/page.tsx(15,20): error TS7016: Could not find a declaration file for module 'qrcode'. '/app/node_modules/.pnpm/qrcode@1.5.4/node_modules/qrcode/lib/index.js' implicitly has an 'any' type.
+  Try `npm i --save-dev @types/qrcode` if it exists or add a new declaration (.d.ts) file containing `declare module 'qrcode';`
+src/app/[locale]/dashboard/theme-builder/components/ComponentBuilder.tsx(66,7): error TS2353: Object literal may only specify known properties, and 'order' does not exist in type 'ComponentConfig'.
+src/app/[locale]/dashboard/theme-builder/components/LivePreview.tsx(135,27): error TS2322: Type 'ComponentConfig' is not assignable to type 'ThemeComponent'.
+  Types of property 'id' are incompatible.
+    Type 'string' is not assignable to type 'number'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/ColorPicker.test.tsx(26,49): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/ColorPicker.test.tsx(32,23): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<Element | null>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/ColorPicker.test.tsx(38,21): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/ColorPicker.test.tsx(49,42): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/ColorPicker.test.tsx(59,61): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/ColorPicker.test.tsx(253,40): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/ColorPicker.test.tsx(258,44): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/ColorPicker.test.tsx(270,27): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<SVGSVGElement | null>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/ColorPicker.test.tsx(282,44): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/ColorPicker.test.tsx(288,42): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/ColorPicker.test.tsx(318,23): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/ColorPicker.test.tsx(385,49): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/ColorPicker.test.tsx(394,51): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/ColorPicker.test.tsx(395,55): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement | null>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/ColorPicker.test.tsx(441,21): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/ColorPicker.test.tsx(447,21): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/ColorPicker.test.tsx(461,26): error TS2339: Property 'toHaveAttribute' does not exist on type 'Assertion<HTMLInputElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/ColorPicker.test.tsx(467,22): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/ColorPicker.test.tsx(563,23): error TS2339: Property 'toHaveClass' does not exist on type 'Assertion<Element | null>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/ColorPicker.test.tsx(570,21): error TS2339: Property 'toHaveClass' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/ColorPicker.test.tsx(577,23): error TS2339: Property 'toHaveClass' does not exist on type 'Assertion<Element | null>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/ComponentBuilder.test.tsx(55,49): error TS7006: Parameter 'selector' implicitly has an 'any' type.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/ComponentBuilder.test.tsx(68,46): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/ComponentBuilder.test.tsx(72,51): error TS7006: Parameter 'selector' implicitly has an 'any' type.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/ComponentBuilder.test.tsx(82,68): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/ComponentBuilder.test.tsx(87,48): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/ComponentBuilder.test.tsx(91,51): error TS7006: Parameter 'selector' implicitly has an 'any' type.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/ComponentBuilder.test.tsx(101,59): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/ComponentBuilder.test.tsx(106,60): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/ComponentBuilder.test.tsx(113,48): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/ComponentBuilder.test.tsx(114,53): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/ComponentBuilder.test.tsx(119,40): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/ComponentBuilder.test.tsx(120,44): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/ComponentBuilder.test.tsx(146,50): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/ComponentBuilder.test.tsx(147,64): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/ComponentBuilder.test.tsx(156,55): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/ComponentBuilder.test.tsx(157,51): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/ComponentBuilder.test.tsx(158,53): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/ComponentBuilder.test.tsx(159,50): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/ComponentBuilder.test.tsx(160,52): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/ComponentBuilder.test.tsx(161,49): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/ComponentBuilder.test.tsx(170,54): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/ComponentBuilder.test.tsx(171,59): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/ComponentBuilder.test.tsx(246,51): error TS7006: Parameter 'selector' implicitly has an 'any' type.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/ComponentBuilder.test.tsx(259,48): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/ComponentBuilder.test.tsx(274,51): error TS7006: Parameter 'selector' implicitly has an 'any' type.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/ComponentBuilder.test.tsx(286,24): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<Element | null>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/ComponentBuilder.test.tsx(295,22): error TS2339: Property 'toHaveClass' does not exist on type 'Assertion<Element>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/ComponentBuilder.test.tsx(341,29): error TS2339: Property 'toHaveClass' does not exist on type 'Assertion<Element | null>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/ComponentBuilder.test.tsx(361,51): error TS7006: Parameter 'selector' implicitly has an 'any' type.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/ComponentBuilder.test.tsx(371,59): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/ComponentBuilder.test.tsx(372,65): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/ComponentBuilder.test.tsx(376,51): error TS7006: Parameter 'selector' implicitly has an 'any' type.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/ComponentBuilder.test.tsx(386,48): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/ComponentBuilder.test.tsx(394,25): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/ComponentBuilder.test.tsx(399,48): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/ComponentBuilder.test.tsx(404,46): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/ComponentBuilder.test.tsx(420,29): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<Element | null>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/ComponentBuilder.test.tsx(425,46): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/ComponentBuilder.test.tsx(426,60): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/ComponentBuilder.test.tsx(447,42): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/ComponentBuilder.test.tsx(457,29): error TS2339: Property 'toHaveTextContent' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/ComponentBuilder.test.tsx(458,29): error TS2339: Property 'toHaveTextContent' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/ComponentBuilder.test.tsx(464,30): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/ComponentBuilder.test.tsx(470,51): error TS7006: Parameter 'selector' implicitly has an 'any' type.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/ComponentBuilder.test.tsx(485,48): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/ComponentBuilder.test.tsx(500,51): error TS7006: Parameter 'selector' implicitly has an 'any' type.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/ComponentBuilder.test.tsx(510,49): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/FormValidation.integration.test.tsx(21,45): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/FormValidation.integration.test.tsx(71,41): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/FormValidation.integration.test.tsx(76,43): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/FormValidation.integration.test.tsx(102,41): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/FormValidation.integration.test.tsx(108,43): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/FormValidation.integration.test.tsx(148,26): error TS2339: Property 'toHaveValue' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/FormValidation.integration.test.tsx(176,41): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/FormValidation.integration.test.tsx(201,49): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/FormValidation.integration.test.tsx(228,43): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/FormValidation.integration.test.tsx(255,22): error TS2339: Property 'toHaveValue' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/FormValidation.integration.test.tsx(313,21): error TS2339: Property 'toHaveValue' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/FormValidation.integration.test.tsx(363,27): error TS2339: Property 'email' does not exist on type 'UseFormValidationReturn'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/FormValidation.integration.test.tsx(377,21): error TS2339: Property 'toHaveValue' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/FormValidation.integration.test.tsx(403,21): error TS2339: Property 'toHaveValue' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/FormValidation.integration.test.tsx(435,45): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/FormValidation.integration.test.tsx(461,43): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/FormValidation.integration.test.tsx(488,59): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/LivePreview.test.tsx(52,49): error TS7006: Parameter 'selector' implicitly has an 'any' type.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/LivePreview.test.tsx(68,51): error TS7006: Parameter 'selector' implicitly has an 'any' type.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/LivePreview.test.tsx(116,51): error TS7006: Parameter 'selector' implicitly has an 'any' type.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/LivePreview.test.tsx(134,51): error TS7006: Parameter 'selector' implicitly has an 'any' type.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/LivePreview.test.tsx(154,51): error TS7006: Parameter 'selector' implicitly has an 'any' type.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/LivePreview.test.tsx(197,51): error TS7006: Parameter 'selector' implicitly has an 'any' type.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/LivePreview.test.tsx(229,53): error TS7006: Parameter 'selector' implicitly has an 'any' type.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/LivePreview.test.tsx(257,51): error TS7006: Parameter 'selector' implicitly has an 'any' type.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/LivePreview.test.tsx(299,51): error TS7006: Parameter 'selector' implicitly has an 'any' type.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/LivePreview.test.tsx(312,51): error TS7006: Parameter 'selector' implicitly has an 'any' type.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/PropertiesPanel.test.tsx(62,49): error TS7006: Parameter 'selector' implicitly has an 'any' type.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/PropertiesPanel.test.tsx(75,49): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/PropertiesPanel.test.tsx(79,51): error TS7006: Parameter 'selector' implicitly has an 'any' type.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/PropertiesPanel.test.tsx(89,69): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/PropertiesPanel.test.tsx(94,42): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/PropertiesPanel.test.tsx(95,40): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/PropertiesPanel.test.tsx(96,44): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/PropertiesPanel.test.tsx(101,45): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/PropertiesPanel.test.tsx(105,51): error TS7006: Parameter 'selector' implicitly has an 'any' type.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/PropertiesPanel.test.tsx(115,51): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement | null>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/PropertiesPanel.test.tsx(122,49): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/PropertiesPanel.test.tsx(127,43): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/PropertiesPanel.test.tsx(128,45): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/PropertiesPanel.test.tsx(129,42): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/PropertiesPanel.test.tsx(130,46): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/PropertiesPanel.test.tsx(131,40): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/PropertiesPanel.test.tsx(132,42): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/PropertiesPanel.test.tsx(133,42): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/PropertiesPanel.test.tsx(158,73): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/PropertiesPanel.test.tsx(159,61): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/PropertiesPanel.test.tsx(171,48): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/PropertiesPanel.test.tsx(183,28): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/PropertiesPanel.test.tsx(194,45): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/PropertiesPanel.test.tsx(195,54): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/PropertiesPanel.test.tsx(196,45): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/PropertiesPanel.test.tsx(221,58): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/PropertiesPanel.test.tsx(250,56): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/PropertiesPanel.test.tsx(261,54): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/PropertiesPanel.test.tsx(272,49): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/PropertiesPanel.test.tsx(283,48): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/PropertiesPanel.test.tsx(294,47): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/PropertiesPanel.test.tsx(307,54): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/PropertiesPanel.test.tsx(319,27): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/PropertiesPanel.test.tsx(347,27): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/PropertiesPanel.test.tsx(359,30): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/PropertiesPanel.test.tsx(371,29): error TS2339: Property 'toBeDisabled' does not exist on type 'Assertion<HTMLInputElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/PropertiesPanel.test.tsx(382,53): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/PropertiesPanel.test.tsx(395,56): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/PropertiesPanel.test.tsx(406,48): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/PropertiesPanel.test.tsx(417,57): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/PropertiesPanel.test.tsx(427,49): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/PropertiesPanel.test.tsx(432,48): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/PropertiesPanel.test.tsx(438,54): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/PropertiesPanel.test.tsx(444,51): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/PropertiesPanel.test.tsx(452,25): error TS2339: Property 'toHaveClass' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/PropertiesPanel.test.tsx(460,25): error TS2339: Property 'toHaveClass' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/PropertiesPanel.test.tsx(461,33): error TS2339: Property 'toHaveClass' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/PropertiesPanel.test.tsx(466,31): error TS2339: Property 'toHaveClass' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/PropertiesPanel.test.tsx(467,31): error TS2339: Property 'toHaveClass' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/PropertiesPanel.test.tsx(475,43): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/PropertiesPanel.test.tsx(476,45): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/PropertiesPanel.test.tsx(484,49): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/PropertiesPanel.test.tsx(493,48): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/PropertiesPanel.test.tsx(494,46): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/PropertiesPanel.test.tsx(510,51): error TS7006: Parameter 'selector' implicitly has an 'any' type.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/PropertiesPanel.test.tsx(523,51): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement | null>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/PropertiesPanel.test.tsx(527,51): error TS7006: Parameter 'selector' implicitly has an 'any' type.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/PropertiesPanel.test.tsx(547,44): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/PropertiesPanel.test.tsx(560,25): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/PropertiesPanel.test.tsx(568,23): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<Element | null>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/PropertiesPanel.test.tsx(574,20): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<Element | null>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/PropertiesPanel.test.tsx(582,51): error TS7006: Parameter 'selector' implicitly has an 'any' type.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/ThemeSelector.test.tsx(39,49): error TS7006: Parameter 'selector' implicitly has an 'any' type.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/ThemeSelector.test.tsx(52,42): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/ThemeSelector.test.tsx(57,66): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/ThemeSelector.test.tsx(62,43): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/ThemeSelector.test.tsx(67,49): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/ThemeSelector.test.tsx(72,63): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/ThemeSelector.test.tsx(79,42): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/ThemeSelector.test.tsx(80,40): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/ThemeSelector.test.tsx(81,41): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/ThemeSelector.test.tsx(118,51): error TS7006: Parameter 'selector' implicitly has an 'any' type.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/ThemeSelector.test.tsx(128,55): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/ThemeSelector.test.tsx(132,51): error TS7006: Parameter 'selector' implicitly has an 'any' type.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/ThemeSelector.test.tsx(142,56): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/ThemeSelector.test.tsx(147,44): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/ThemeSelector.test.tsx(169,24): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<Element | null>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/ThemeSelector.test.tsx(180,45): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/ThemeSelector.test.tsx(181,42): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/ThemeSelector.test.tsx(182,42): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/ThemeSelector.test.tsx(190,45): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/ThemeSelector.test.tsx(195,53): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement | null>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/ThemeSelector.test.tsx(214,45): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/ThemeSelector.test.tsx(223,42): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/ThemeSelector.test.tsx(232,42): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/ThemeSelector.test.tsx(242,28): error TS2339: Property 'toHaveClass' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/ThemeSelector.test.tsx(267,42): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/ThemeSelector.test.tsx(273,30): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/ThemeSelector.test.tsx(279,28): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/ThemeSelector.test.tsx(295,26): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<Element | null>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/ThemeSelector.test.tsx(300,43): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/ThemeSelector.test.tsx(301,49): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/ThemeSelector.test.tsx(307,51): error TS7006: Parameter 'selector' implicitly has an 'any' type.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/ThemeSelector.test.tsx(317,56): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/ThemeSelector.test.tsx(325,51): error TS7006: Parameter 'selector' implicitly has an 'any' type.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/ThemeSelector.test.tsx(335,44): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/components/__tests__/ThemeSelector.test.tsx(336,43): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/app/[locale]/dashboard/theme-builder/editor/[id]/page.tsx(177,7): error TS1117: An object literal cannot have multiple properties with the same name.
+src/app/[locale]/dashboard/theme-builder/editor/[id]/page.tsx(178,7): error TS1117: An object literal cannot have multiple properties with the same name.
+src/app/[locale]/dashboard/theme-builder/editor/[id]/page.tsx(179,7): error TS1117: An object literal cannot have multiple properties with the same name.
+src/app/[locale]/dashboard/theme-builder/editor/[id]/page.tsx(180,7): error TS1117: An object literal cannot have multiple properties with the same name.
+src/app/[locale]/dashboard/theme-builder/editor/[id]/page.tsx(181,7): error TS1117: An object literal cannot have multiple properties with the same name.
+src/app/[locale]/dashboard/theme-builder/editor/[id]/page.tsx(182,7): error TS1117: An object literal cannot have multiple properties with the same name.
+src/app/[locale]/dashboard/theme-builder/editor/[id]/page.tsx(183,7): error TS1117: An object literal cannot have multiple properties with the same name.
+src/app/[locale]/dashboard/theme-builder/editor/[id]/page.tsx(184,7): error TS1117: An object literal cannot have multiple properties with the same name.
+src/app/[locale]/dashboard/theme-builder/editor/[id]/page.tsx(210,7): error TS1117: An object literal cannot have multiple properties with the same name.
+src/app/[locale]/dashboard/theme-builder/editor/[id]/page.tsx(211,7): error TS1117: An object literal cannot have multiple properties with the same name.
+src/app/[locale]/dashboard/theme-builder/editor/[id]/page.tsx(212,7): error TS1117: An object literal cannot have multiple properties with the same name.
+src/app/[locale]/dashboard/theme-builder/editor/[id]/page.tsx(213,7): error TS1117: An object literal cannot have multiple properties with the same name.
+src/app/[locale]/dashboard/theme-builder/editor/[id]/page.tsx(214,7): error TS1117: An object literal cannot have multiple properties with the same name.
+src/app/[locale]/dashboard/theme-builder/editor/[id]/page.tsx(215,7): error TS1117: An object literal cannot have multiple properties with the same name.
+src/app/[locale]/dashboard/theme-builder/editor/[id]/page.tsx(216,7): error TS1117: An object literal cannot have multiple properties with the same name.
+src/app/[locale]/dashboard/theme-builder/editor/[id]/page.tsx(217,7): error TS1117: An object literal cannot have multiple properties with the same name.
+src/app/[locale]/dashboard/theme-builder/editor/[id]/page.tsx(222,7): error TS1117: An object literal cannot have multiple properties with the same name.
+src/app/[locale]/dashboard/theme-builder/editor/[id]/page.tsx(227,7): error TS1117: An object literal cannot have multiple properties with the same name.
+src/app/[locale]/dashboard/theme-builder/editor/[id]/page.tsx(228,7): error TS1117: An object literal cannot have multiple properties with the same name.
+src/app/[locale]/dashboard/theme-builder/editor/[id]/page.tsx(246,7): error TS1117: An object literal cannot have multiple properties with the same name.
+src/app/[locale]/dashboard/theme-builder/editor/[id]/page.tsx(247,7): error TS1117: An object literal cannot have multiple properties with the same name.
+src/app/[locale]/dashboard/theme-builder/editor/[id]/page.tsx(248,7): error TS1117: An object literal cannot have multiple properties with the same name.
+src/app/[locale]/dashboard/theme-builder/editor/[id]/page.tsx(249,7): error TS1117: An object literal cannot have multiple properties with the same name.
+src/app/[locale]/dashboard/theme-builder/editor/components/EditorPreview.tsx(179,35): error TS2339: Property 'infoCards' does not exist on type '{ hero: { title: { en: string; ar: string; }; subtitle: { en: string; ar: string; }; description: { en: string; ar: string; }; buttonText: { en: string; ar: string; }; ctaText: { en: string; ar: string; }; backgroundImage: string; }; ... 5 more ...; footer: { ...; }; }'.
+src/app/[locale]/dashboard/theme-builder/import/page.tsx(80,9): error TS2322: Type 'GlobalColors | undefined' is not assignable to type 'GlobalColors'.
+  Type 'undefined' is not assignable to type 'GlobalColors'.
+src/app/[locale]/dashboard/theme-builder/import/page.tsx(81,9): error TS2322: Type 'TypographySettings | undefined' is not assignable to type 'TypographySettings'.
+  Type 'undefined' is not assignable to type 'TypographySettings'.
+src/components/TenantSelectorModal.tsx(5,25): error TS2307: Cannot find module '@/hooks/useAuth' or its corresponding type declarations.
+src/components/__tests__/enhanced-error-boundary.test.tsx(95,48): error TS2339: Property 'toBeInTheDocument' does not exist on type 'JestMatchers<HTMLElement>'.
+src/components/__tests__/enhanced-error-boundary.test.tsx(107,41): error TS2339: Property 'toBeInTheDocument' does not exist on type 'JestMatchers<HTMLElement>'.
+src/components/__tests__/enhanced-error-boundary.test.tsx(108,47): error TS2339: Property 'toBeInTheDocument' does not exist on type 'JestMatchers<HTMLElement>'.
+src/components/__tests__/enhanced-error-boundary.test.tsx(109,42): error TS2339: Property 'toBeInTheDocument' does not exist on type 'JestMatchers<HTMLElement>'.
+src/components/__tests__/enhanced-error-boundary.test.tsx(121,57): error TS2339: Property 'toBeInTheDocument' does not exist on type 'JestMatchers<HTMLElement>'.
+src/components/__tests__/enhanced-error-boundary.test.tsx(122,55): error TS2339: Property 'toBeInTheDocument' does not exist on type 'JestMatchers<HTMLElement>'.
+src/components/__tests__/enhanced-error-boundary.test.tsx(132,49): error TS2339: Property 'toBeInTheDocument' does not exist on type 'JestMatchers<HTMLElement>'.
+src/components/__tests__/enhanced-error-boundary.test.tsx(143,24): error TS2339: Property 'toBeInTheDocument' does not exist on type 'JestMatchers<Element | null>'.
+src/components/__tests__/enhanced-error-boundary.test.tsx(220,53): error TS2339: Property 'toBeInTheDocument' does not exist on type 'JestMatchers<HTMLElement>'.
+src/components/__tests__/enhanced-error-boundary.test.tsx(247,45): error TS2339: Property 'toBeInTheDocument' does not exist on type 'JestMatchers<HTMLElement>'.
+src/components/__tests__/enhanced-error-boundary.test.tsx(248,51): error TS2339: Property 'toBeInTheDocument' does not exist on type 'JestMatchers<HTMLElement>'.
+src/components/__tests__/enhanced-error-boundary.test.tsx(258,68): error TS2339: Property 'toBeInTheDocument' does not exist on type 'JestMatchers<HTMLElement>'.
+src/components/__tests__/enhanced-error-boundary.test.tsx(259,65): error TS2339: Property 'toBeInTheDocument' does not exist on type 'JestMatchers<HTMLElement>'.
+src/components/__tests__/enhanced-error-boundary.test.tsx(271,59): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Matchers<void, HTMLElement | null>'.
+src/components/__tests__/enhanced-error-boundary.test.tsx(283,50): error TS2339: Property 'toBeInTheDocument' does not exist on type 'JestMatchers<HTMLElement>'.
+src/components/__tests__/enhanced-error-boundary.test.tsx(286,9): error TS2339: Property 'toBeInTheDocument' does not exist on type 'JestMatchers<HTMLElement>'.
+src/components/__tests__/enhanced-error-boundary.test.tsx(307,25): error TS2339: Property 'toBeInTheDocument' does not exist on type 'JestMatchers<Element | null>'.
+src/components/__tests__/enhanced-error-boundary.test.tsx(320,27): error TS2339: Property 'toBeInTheDocument' does not exist on type 'JestMatchers<HTMLElement>'.
+src/components/__tests__/enhanced-error-boundary.test.tsx(330,57): error TS2339: Property 'toBeInTheDocument' does not exist on type 'JestMatchers<HTMLElement>'.
+src/components/__tests__/enhanced-error-boundary.test.tsx(336,63): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Matchers<void, HTMLElement | null>'.
+src/components/__tests__/enhanced-error-boundary.test.tsx(351,44): error TS2339: Property 'toBeInTheDocument' does not exist on type 'JestMatchers<HTMLElement>'.
+src/components/__tests__/enhanced-error-boundary.test.tsx(368,27): error TS2339: Property 'toBeDisabled' does not exist on type 'JestMatchers<HTMLElement>'.
+src/components/__tests__/enhanced-error-boundary.test.tsx(405,31): error TS2339: Property 'toBeInTheDocument' does not exist on type 'JestMatchers<HTMLElement>'.
+src/components/__tests__/enhanced-error-boundary.test.tsx(416,28): error TS2339: Property 'toBeInTheDocument' does not exist on type 'JestMatchers<HTMLElement>'.
+src/components/__tests__/enhanced-error-boundary.test.tsx(461,19): error TS2540: Cannot assign to 'NODE_ENV' because it is a read-only property.
+src/components/__tests__/enhanced-error-boundary.test.tsx(465,19): error TS2540: Cannot assign to 'NODE_ENV' because it is a read-only property.
+src/components/__tests__/enhanced-error-boundary.test.tsx(476,29): error TS2339: Property 'toBeInTheDocument' does not exist on type 'JestMatchers<HTMLElement>'.
+src/components/__tests__/enhanced-error-boundary.test.tsx(489,54): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Matchers<void, HTMLElement | null>'.
+src/components/__tests__/enhanced-error-boundary.test.tsx(493,48): error TS2339: Property 'toBeInTheDocument' does not exist on type 'JestMatchers<HTMLElement>'.
+src/components/__tests__/enhanced-error-boundary.test.tsx(497,54): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Matchers<void, HTMLElement | null>'.
+src/components/__tests__/enhanced-error-boundary.test.tsx(510,48): error TS2339: Property 'toBeInTheDocument' does not exist on type 'JestMatchers<HTMLElement>'.
+src/components/__tests__/enhanced-error-boundary.test.tsx(523,52): error TS2339: Property 'toBeInTheDocument' does not exist on type 'JestMatchers<HTMLElement>'.
+src/components/__tests__/enhanced-error-boundary.test.tsx(535,55): error TS2339: Property 'toBeInTheDocument' does not exist on type 'JestMatchers<HTMLElement>'.
+src/components/__tests__/enhanced-error-boundary.test.tsx(570,27): error TS2339: Property 'toBeInTheDocument' does not exist on type 'JestMatchers<HTMLElement>'.
+src/components/__tests__/enhanced-error-boundary.test.tsx(571,27): error TS2339: Property 'toHaveAttribute' does not exist on type 'JestMatchers<HTMLElement>'.
+src/components/__tests__/enhanced-error-boundary.test.tsx(581,68): error TS2339: Property 'toBeInTheDocument' does not exist on type 'JestMatchers<HTMLElement>'.
+src/components/__tests__/enhanced-error-boundary.test.tsx(601,52): error TS2339: Property 'toBeInTheDocument' does not exist on type 'JestMatchers<HTMLElement>'.
+src/components/__tests__/enhanced-error-boundary.test.tsx(602,49): error TS2339: Property 'toBeInTheDocument' does not exist on type 'JestMatchers<HTMLElement>'.
+src/components/__tests__/enhanced-error-boundary.test.tsx(603,69): error TS2339: Property 'toBeInTheDocument' does not exist on type 'JestMatchers<HTMLElement>'.
+src/components/__tests__/enhanced-error-boundary.test.tsx(613,57): error TS2339: Property 'toBeInTheDocument' does not exist on type 'JestMatchers<HTMLElement>'.
+src/components/__tests__/enhanced-error-boundary.test.tsx(627,25): error TS2339: Property 'toBeInTheDocument' does not exist on type 'JestMatchers<Element | null>'.
+src/components/__tests__/enhanced-error-boundary.test.tsx(643,57): error TS2339: Property 'toBeInTheDocument' does not exist on type 'JestMatchers<HTMLElement>'.
+src/components/__tests__/enhanced-error-boundary.test.tsx(653,49): error TS2339: Property 'toBeInTheDocument' does not exist on type 'JestMatchers<HTMLElement>'.
+src/components/__tests__/enhanced-error-boundary.test.tsx(667,48): error TS2339: Property 'toBeInTheDocument' does not exist on type 'JestMatchers<HTMLElement>'.
+src/components/__tests__/enhanced-error-boundary.test.tsx(674,56): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Matchers<void, HTMLElement | null>'.
+src/components/__tests__/enhanced-error-boundary.test.tsx(689,48): error TS2339: Property 'toBeInTheDocument' does not exist on type 'JestMatchers<HTMLElement>'.
+src/components/__tests__/enhanced-error-boundary.test.tsx(699,50): error TS2339: Property 'toBeInTheDocument' does not exist on type 'JestMatchers<HTMLElement>'.
+src/components/__tests__/enhanced-error-boundary.test.tsx(712,23): error TS2339: Property 'toHaveClass' does not exist on type 'JestMatchers<HTMLElement>'.
+src/components/__tests__/enhanced-error-boundary.test.tsx(722,66): error TS2339: Property 'toBeInTheDocument' does not exist on type 'JestMatchers<HTMLElement>'.
+src/components/__tests__/enhanced-error-boundary.test.tsx(723,72): error TS2339: Property 'toBeInTheDocument' does not exist on type 'JestMatchers<HTMLElement>'.
+src/components/__tests__/enhanced-error-boundary.test.tsx(724,64): error TS2339: Property 'toBeInTheDocument' does not exist on type 'JestMatchers<HTMLElement>'.
+src/components/__tests__/enhanced-error-boundary.test.tsx(736,29): error TS2339: Property 'toBeInTheDocument' does not exist on type 'JestMatchers<HTMLElement>'.
+src/components/accounting/AccountTree.tsx(314,3): error TS2322: Type '({ children: Account[]; id: number; tenant_id: number; restaurant_id: number; account_code: string; account_name: string; account_name_ar?: string | undefined; description?: string | undefined; ... 14 more ...; updated_at?: string | undefined; } | null)[]' is not assignable to type 'Account[]'.
+  Type '{ children: Account[]; id: number; tenant_id: number; restaurant_id: number; account_code: string; account_name: string; account_name_ar?: string | undefined; description?: string | undefined; ... 14 more ...; updated_at?: string | undefined; } | null' is not assignable to type 'Account'.
+    Type 'null' is not assignable to type 'Account'.
+src/components/accounting/AccountTree.tsx(335,35): error TS2677: A type predicate's type must be assignable to its parameter's type.
+  Type 'Account' is not assignable to type '{ children: Account[]; id: number; tenant_id: number; restaurant_id: number; account_code: string; account_name: string; account_name_ar?: string; description?: string; description_ar?: string; ... 13 more ...; updated_at?: string; }'.
+    Types of property 'children' are incompatible.
+      Type 'Account[] | undefined' is not assignable to type 'Account[]'.
+        Type 'undefined' is not assignable to type 'Account[]'.
+src/components/accounting/LedgerView.tsx(35,44): error TS2345: Argument of type 'string' is not assignable to parameter of type 'Locale'.
+src/components/accounting/TrialBalanceTable.tsx(28,44): error TS2345: Argument of type 'string' is not assignable to parameter of type 'Locale'.
+src/components/categories/CategoryFormPage.tsx(12,36): error TS7031: Binding element 'category' implicitly has an 'any' type.
+src/components/categories/CategoryFormPage.tsx(12,46): error TS7031: Binding element 'onSubmit' implicitly has an 'any' type.
+src/components/categories/CategoryFormPage.tsx(12,56): error TS7031: Binding element 'onCancel' implicitly has an 'any' type.
+src/components/categories/CategoryFormPage.tsx(63,68): error TS2322: Type 'string | FieldError | Merge<FieldError, FieldErrorsImpl<any>> | undefined' is not assignable to type 'ReactNode'.
+  Type 'FieldError' is not assignable to type 'ReactNode'.
+    Type 'FieldError' is missing the following properties from type 'ReactPortal': children, props, key
+src/components/editors/CTAEditor.tsx(556,33): error TS2339: Property 'en' does not exist on type 'string'.
+src/components/editors/CTAEditor.tsx(559,24): error TS2339: Property 'subtitle' does not exist on type 'ComponentConfig'.
+src/components/editors/CTAEditor.tsx(561,28): error TS2339: Property 'subtitle' does not exist on type 'ComponentConfig'.
+src/components/editors/FooterEditor.tsx(37,11): error TS2430: Interface 'FooterConfig' incorrectly extends interface 'import("/app/apps/dashboard/src/types/theme").FooterConfig'.
+  Types of property 'layout' are incompatible.
+    Type '"expanded" | "compact" | "minimal" | undefined' is not assignable to type '"expanded" | "compact" | undefined'.
+      Type '"minimal"' is not assignable to type '"expanded" | "compact" | undefined'.
+src/components/editors/FooterEditor.tsx(440,52): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+src/components/editors/FooterEditor.tsx(454,54): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'SetStateAction<string | null>'.
+  Type 'undefined' is not assignable to type 'SetStateAction<string | null>'.
+src/components/editors/FooterEditor.tsx(460,50): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+src/components/editors/FooterEditor.tsx(490,51): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+src/components/editors/FooterEditor.tsx(502,51): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+src/components/editors/FooterEditor.tsx(507,49): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+src/components/editors/HeaderEditor.tsx(290,40): error TS2339: Property 'shadow' does not exist on type 'HeaderConfig'.
+src/components/editors/HeaderEditor.tsx(455,39): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+src/components/editors/HeaderEditor.tsx(475,40): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'SetStateAction<string | null>'.
+  Type 'undefined' is not assignable to type 'SetStateAction<string | null>'.
+src/components/editors/HeaderEditor.tsx(486,50): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+src/components/editors/HeaderEditor.tsx(493,50): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+src/components/editors/HeaderEditor.tsx(500,52): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+src/components/editors/HeaderEditor.tsx(588,37): error TS2339: Property 'shadow' does not exist on type 'HeaderConfig'.
+src/components/editors/HeaderEditor.tsx(589,51): error TS2345: Argument of type '"shadow"' is not assignable to parameter of type 'keyof HeaderConfig'.
+src/components/editors/HeroEditor.tsx(466,73): error TS2339: Property 'en' does not exist on type 'string'.
+src/components/editors/HeroEditor.tsx(467,64): error TS2339: Property 'subtitle' does not exist on type 'ComponentConfig'.
+src/components/editors/ProductGridEditor.tsx(529,31): error TS2339: Property 'en' does not exist on type 'string'.
+src/components/editors/TestimonialsEditor.tsx(634,33): error TS2339: Property 'en' does not exist on type 'string'.
+src/components/editors/WhyUsEditor.tsx(539,31): error TS2339: Property 'en' does not exist on type 'string'.
+src/components/editors/__tests__/ComponentEditorRouter.integration.test.tsx(38,49): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/components/editors/__tests__/ComponentEditorRouter.integration.test.tsx(51,52): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/components/editors/__tests__/ComponentEditorRouter.integration.test.tsx(118,48): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/components/editors/__tests__/ComponentEditorRouter.integration.test.tsx(132,50): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/components/editors/__tests__/ComponentEditorRouter.integration.test.tsx(224,49): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/components/editors/__tests__/ComponentEditorRouter.integration.test.tsx(233,46): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/components/editors/__tests__/ComponentEditorRouter.integration.test.tsx(243,47): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/components/editors/__tests__/ComponentEditorRouter.integration.test.tsx(261,49): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/components/editors/__tests__/CustomCSSEditor.test.tsx(44,53): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/components/editors/__tests__/CustomCSSEditor.test.tsx(50,24): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/components/editors/__tests__/CustomCSSEditor.test.tsx(56,24): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/components/editors/__tests__/CustomCSSEditor.test.tsx(61,44): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/components/editors/__tests__/CustomCSSEditor.test.tsx(62,41): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/components/editors/__tests__/CustomCSSEditor.test.tsx(63,41): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/components/editors/__tests__/CustomCSSEditor.test.tsx(68,47): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/components/editors/__tests__/CustomCSSEditor.test.tsx(84,70): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/components/editors/__tests__/CustomCSSEditor.test.tsx(103,70): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/components/editors/__tests__/CustomCSSEditor.test.tsx(122,58): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/components/editors/__tests__/CustomCSSEditor.test.tsx(141,53): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/components/editors/__tests__/CustomCSSEditor.test.tsx(165,24): error TS2339: Property 'toBeDisabled' does not exist on type 'Assertion<HTMLTextAreaElement>'.
+src/components/editors/__tests__/CustomCSSEditor.test.tsx(176,28): error TS2339: Property 'toBeDisabled' does not exist on type 'Assertion<HTMLTextAreaElement>'.
+src/components/editors/__tests__/CustomCSSEditor.test.tsx(240,45): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/components/editors/__tests__/CustomCSSEditor.test.tsx(290,54): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/components/editors/__tests__/CustomCSSEditor.test.tsx(305,62): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/components/editors/__tests__/CustomCSSEditor.test.tsx(320,53): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/components/editors/__tests__/CustomCSSEditor.test.tsx(334,61): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/components/editors/__tests__/CustomCSSEditor.test.tsx(347,49): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/components/editors/__tests__/CustomCSSEditor.test.tsx(357,50): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/components/editors/__tests__/FontPicker.test.tsx(49,47): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/components/editors/__tests__/FontPicker.test.tsx(54,62): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/components/editors/__tests__/FontPicker.test.tsx(59,39): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/components/editors/__tests__/FontPicker.test.tsx(60,46): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/components/editors/__tests__/FontPicker.test.tsx(61,41): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/components/editors/__tests__/FontPicker.test.tsx(62,45): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/components/editors/__tests__/FontPicker.test.tsx(73,48): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/components/editors/__tests__/FontPicker.test.tsx(85,44): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/components/editors/__tests__/FontPicker.test.tsx(96,53): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/components/editors/__tests__/FontPicker.test.tsx(107,44): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/components/editors/__tests__/FontPicker.test.tsx(113,59): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement | null>'.
+src/components/editors/__tests__/FontPicker.test.tsx(189,28): error TS2339: Property 'toHaveClass' does not exist on type 'Assertion<HTMLButtonElement | null>'.
+src/components/editors/__tests__/FontPicker.test.tsx(212,44): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/components/editors/__tests__/FontPicker.test.tsx(226,50): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/components/editors/__tests__/FontPicker.test.tsx(253,28): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/components/editors/__tests__/FontPicker.test.tsx(265,53): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/components/editors/__tests__/FontPicker.test.tsx(277,54): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/components/editors/__tests__/FontPicker.test.tsx(291,50): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/components/editors/__tests__/FontPicker.test.tsx(309,54): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/components/editors/__tests__/FontPicker.test.tsx(324,44): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/components/editors/__tests__/FontPicker.test.tsx(339,50): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/components/editors/__tests__/FontPicker.test.tsx(358,47): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/components/editors/__tests__/FontPicker.test.tsx(370,55): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/components/editors/__tests__/FontPicker.test.tsx(380,51): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/components/editors/__tests__/FooterEditor.test.tsx(61,56): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/components/editors/__tests__/FooterEditor.test.tsx(66,55): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/components/editors/__tests__/FooterEditor.test.tsx(71,51): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/components/editors/__tests__/FooterEditor.test.tsx(76,54): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/components/editors/__tests__/FooterEditor.test.tsx(81,53): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/components/editors/__tests__/FooterEditor.test.tsx(86,43): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/components/editors/__tests__/FooterEditor.test.tsx(133,47): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/components/editors/__tests__/FooterEditor.test.tsx(154,44): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/components/editors/__tests__/FooterEditor.test.tsx(161,43): error TS2339: Property 'length' does not exist on type 'HTMLElement'.
+src/components/editors/__tests__/FooterEditor.test.tsx(180,52): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/components/editors/__tests__/FooterEditor.test.tsx(221,50): error TS1538: Unicode escape sequences are only available when the Unicode (u) flag or the Unicode Sets (v) flag is set.
+src/components/editors/__tests__/FooterEditor.test.tsx(233,21): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLInputElement>'.
+src/components/editors/__tests__/FooterEditor.test.tsx(255,46): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/components/editors/__tests__/FooterEditor.test.tsx(266,46): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/components/editors/__tests__/FooterEditor.test.tsx(271,44): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/components/editors/__tests__/FooterEditor.test.tsx(290,54): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/components/editors/__tests__/FooterEditor.test.tsx(301,51): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/components/editors/__tests__/FooterEditor.test.tsx(302,48): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/components/editors/__tests__/FooterEditor.test.tsx(313,58): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/components/editors/__tests__/FooterEditor.test.tsx(328,56): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/components/editors/__tests__/HeaderEditor.test.tsx(53,56): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/components/editors/__tests__/HeaderEditor.test.tsx(58,49): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/components/editors/__tests__/HeaderEditor.test.tsx(63,52): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/components/editors/__tests__/HeaderEditor.test.tsx(68,43): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/components/editors/__tests__/HeaderEditor.test.tsx(73,50): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/components/editors/__tests__/HeaderEditor.test.tsx(88,75): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/components/editors/__tests__/HeaderEditor.test.tsx(94,81): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement | null>'.
+src/components/editors/__tests__/HeaderEditor.test.tsx(112,48): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/components/editors/__tests__/HeaderEditor.test.tsx(119,40): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/components/editors/__tests__/HeaderEditor.test.tsx(120,41): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/components/editors/__tests__/HeaderEditor.test.tsx(135,50): error TS1538: Unicode escape sequences are only available when the Unicode (u) flag or the Unicode Sets (v) flag is set.
+src/components/editors/__tests__/HeaderEditor.test.tsx(184,52): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/components/editors/__tests__/HeaderEditor.test.tsx(189,46): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/components/editors/__tests__/HeaderEditor.test.tsx(194,43): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/components/editors/__tests__/HeaderEditor.test.tsx(199,44): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/components/editors/__tests__/HeaderEditor.test.tsx(225,54): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/components/editors/__tests__/HeaderEditor.test.tsx(236,53): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/components/editors/__tests__/HeaderEditor.test.tsx(247,52): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/components/editors/__tests__/HeaderEditor.test.tsx(258,42): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/components/editors/__tests__/HeaderEditor.test.tsx(259,43): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/components/editors/__tests__/HeaderEditor.test.tsx(274,56): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/components/hr/AttendanceForm.tsx(147,15): error TS2322: Type 'string | FieldError | Merge<FieldError, FieldErrorsImpl<any>> | undefined' is not assignable to type 'ReactNode'.
+  Type 'FieldError' is not assignable to type 'ReactNode'.
+    Type 'FieldError' is missing the following properties from type 'ReactPortal': children, props, key
+src/components/hr/EmployeeForm.tsx(148,19): error TS2322: Type 'string | FieldError | Merge<FieldError, FieldErrorsImpl<any>> | undefined' is not assignable to type 'ReactNode'.
+  Type 'FieldError' is not assignable to type 'ReactNode'.
+    Type 'FieldError' is missing the following properties from type 'ReactPortal': children, props, key
+src/components/hr/EmployeeForm.tsx(220,19): error TS2322: Type 'string | FieldError | Merge<FieldError, FieldErrorsImpl<any>> | undefined' is not assignable to type 'ReactNode'.
+  Type 'FieldError' is not assignable to type 'ReactNode'.
+    Type 'FieldError' is missing the following properties from type 'ReactPortal': children, props, key
+src/components/hr/EmployeeList.tsx(84,13): error TS2722: Cannot invoke an object which is possibly 'undefined'.
+src/components/hr/LeaveForm.tsx(172,15): error TS2322: Type 'string | FieldError | Merge<FieldError, FieldErrorsImpl<any>> | undefined' is not assignable to type 'ReactNode'.
+  Type 'FieldError' is not assignable to type 'ReactNode'.
+    Type 'FieldError' is missing the following properties from type 'ReactPortal': children, props, key
+src/components/hr/LeaveForm.tsx(210,15): error TS2322: Type 'string | FieldError | Merge<FieldError, FieldErrorsImpl<any>> | undefined' is not assignable to type 'ReactNode'.
+  Type 'FieldError' is not assignable to type 'ReactNode'.
+    Type 'FieldError' is missing the following properties from type 'ReactPortal': children, props, key
+src/components/hr/LeaveForm.tsx(228,15): error TS2322: Type 'string | FieldError | Merge<FieldError, FieldErrorsImpl<any>> | undefined' is not assignable to type 'ReactNode'.
+  Type 'FieldError' is not assignable to type 'ReactNode'.
+    Type 'FieldError' is missing the following properties from type 'ReactPortal': children, props, key
+src/components/hr/LeaveForm.tsx(270,13): error TS2322: Type 'string | FieldError | Merge<FieldError, FieldErrorsImpl<any>> | undefined' is not assignable to type 'ReactNode'.
+  Type 'FieldError' is not assignable to type 'ReactNode'.
+    Type 'FieldError' is missing the following properties from type 'ReactPortal': children, props, key
+src/components/monitoring/PerformanceMonitor.tsx(403,22): error TS2339: Property 'gray' does not exist on type '{ green: string; yellow: string; red: string; }'.
+src/components/notifications/NotificationBell.tsx(6,28): error TS2305: Module '"@/hooks/useNotifications"' has no exported member 'LowStockProduct'.
+src/components/notifications/NotificationBell.tsx(11,26): error TS2339: Property 'count' does not exist on type '{ notifications: Notification[]; unreadCount: number; totalCount: number; loading: boolean; error: string | null; stats: NotificationStats | null; fetchNotifications: (filters?: NotificationFilters, forceRefresh?: boolean) => Promise<...>; ... 7 more ...; clearAllCaches: () => void; }'.
+src/components/notifications/NotificationBell.tsx(25,26): error TS2559: Type 'true' has no properties in common with type 'NotificationFilters'.
+src/components/notifications/NotificationBell.tsx(31,28): error TS2559: Type 'true' has no properties in common with type 'NotificationFilters'.
+src/components/products/ProductForm.tsx(17,31): error TS7031: Binding element 'product' implicitly has an 'any' type.
+src/components/products/ProductForm.tsx(17,40): error TS7031: Binding element 'categories' implicitly has an 'any' type.
+src/components/products/ProductForm.tsx(17,52): error TS7031: Binding element 'onSubmit' implicitly has an 'any' type.
+src/components/products/ProductForm.tsx(17,62): error TS7031: Binding element 'onCancel' implicitly has an 'any' type.
+src/components/products/ProductForm.tsx(24,21): error TS7006: Parameter 'value' implicitly has an 'any' type.
+src/components/products/ProductForm.tsx(28,29): error TS7006: Parameter 'value' implicitly has an 'any' type.
+src/components/products/ProductForm.tsx(35,18): error TS7006: Parameter 'value' implicitly has an 'any' type.
+src/components/products/ProductForm.tsx(39,26): error TS7006: Parameter 'value' implicitly has an 'any' type.
+src/components/products/ProductForm.tsx(69,30): error TS7006: Parameter 'e' implicitly has an 'any' type.
+src/components/products/ProductForm.tsx(81,31): error TS7006: Parameter 'data' implicitly has an 'any' type.
+src/components/products/ProductForm.tsx(167,73): error TS2322: Type 'string | FieldError | Merge<FieldError, FieldErrorsImpl<any>> | undefined' is not assignable to type 'ReactNode'.
+  Type 'FieldError' is not assignable to type 'ReactNode'.
+    Type 'FieldError' is missing the following properties from type 'ReactPortal': children, props, key
+src/components/products/ProductForm.tsx(177,73): error TS2322: Type 'string | FieldError | Merge<FieldError, FieldErrorsImpl<any>> | undefined' is not assignable to type 'ReactNode'.
+  Type 'FieldError' is not assignable to type 'ReactNode'.
+    Type 'FieldError' is missing the following properties from type 'ReactPortal': children, props, key
+src/components/products/ProductForm.tsx(193,38): error TS7006: Parameter 'cat' implicitly has an 'any' type.
+src/components/products/ProductForm.tsx(203,54): error TS2322: Type 'string | FieldError | Merge<FieldError, FieldErrorsImpl<any>> | undefined' is not assignable to type 'ReactNode'.
+  Type 'FieldError' is not assignable to type 'ReactNode'.
+    Type 'FieldError' is missing the following properties from type 'ReactPortal': children, props, key
+src/components/products/ProductForm.tsx(265,71): error TS2322: Type 'string | FieldError | Merge<FieldError, FieldErrorsImpl<any>> | undefined' is not assignable to type 'ReactNode'.
+  Type 'FieldError' is not assignable to type 'ReactNode'.
+    Type 'FieldError' is missing the following properties from type 'ReactPortal': children, props, key
+src/components/products/ProductFormPage.tsx(16,35): error TS7031: Binding element 'product' implicitly has an 'any' type.
+src/components/products/ProductFormPage.tsx(16,44): error TS7031: Binding element 'categories' implicitly has an 'any' type.
+src/components/products/ProductFormPage.tsx(16,56): error TS7031: Binding element 'onSubmit' implicitly has an 'any' type.
+src/components/products/ProductFormPage.tsx(16,66): error TS7031: Binding element 'onCancel' implicitly has an 'any' type.
+src/components/products/ProductFormPage.tsx(24,21): error TS7006: Parameter 'value' implicitly has an 'any' type.
+src/components/products/ProductFormPage.tsx(28,29): error TS7006: Parameter 'value' implicitly has an 'any' type.
+src/components/products/ProductFormPage.tsx(35,18): error TS7006: Parameter 'value' implicitly has an 'any' type.
+src/components/products/ProductFormPage.tsx(39,26): error TS7006: Parameter 'value' implicitly has an 'any' type.
+src/components/products/ProductFormPage.tsx(69,30): error TS7006: Parameter 'e' implicitly has an 'any' type.
+src/components/products/ProductFormPage.tsx(81,31): error TS7006: Parameter 'data' implicitly has an 'any' type.
+src/components/products/ProductFormPage.tsx(165,71): error TS2322: Type 'string | FieldError | Merge<FieldError, FieldErrorsImpl<any>> | undefined' is not assignable to type 'ReactNode'.
+  Type 'FieldError' is not assignable to type 'ReactNode'.
+    Type 'FieldError' is missing the following properties from type 'ReactPortal': children, props, key
+src/components/products/ProductFormPage.tsx(175,71): error TS2322: Type 'string | FieldError | Merge<FieldError, FieldErrorsImpl<any>> | undefined' is not assignable to type 'ReactNode'.
+  Type 'FieldError' is not assignable to type 'ReactNode'.
+    Type 'FieldError' is missing the following properties from type 'ReactPortal': children, props, key
+src/components/products/ProductFormPage.tsx(191,36): error TS7006: Parameter 'cat' implicitly has an 'any' type.
+src/components/products/ProductFormPage.tsx(201,52): error TS2322: Type 'string | FieldError | Merge<FieldError, FieldErrorsImpl<any>> | undefined' is not assignable to type 'ReactNode'.
+  Type 'FieldError' is not assignable to type 'ReactNode'.
+    Type 'FieldError' is missing the following properties from type 'ReactPortal': children, props, key
+src/components/products/ProductFormPage.tsx(278,69): error TS2322: Type 'string | FieldError | Merge<FieldError, FieldErrorsImpl<any>> | undefined' is not assignable to type 'ReactNode'.
+  Type 'FieldError' is not assignable to type 'ReactNode'.
+    Type 'FieldError' is missing the following properties from type 'ReactPortal': children, props, key
+src/components/products/ProductList.tsx(36,3): error TS7031: Binding element 'products' implicitly has an 'any' type.
+src/components/products/ProductList.tsx(37,3): error TS7031: Binding element 'categories' implicitly has an 'any' type.
+src/components/products/ProductList.tsx(38,3): error TS7031: Binding element 'loading' implicitly has an 'any' type.
+src/components/products/ProductList.tsx(39,3): error TS7031: Binding element 'filters' implicitly has an 'any' type.
+src/components/products/ProductList.tsx(40,3): error TS7031: Binding element 'onFilterChange' implicitly has an 'any' type.
+src/components/products/ProductList.tsx(41,3): error TS7031: Binding element 'onEdit' implicitly has an 'any' type.
+src/components/products/ProductList.tsx(42,3): error TS7031: Binding element 'onDelete' implicitly has an 'any' type.
+src/components/products/ProductList.tsx(47,31): error TS7006: Parameter 'value' implicitly has an 'any' type.
+src/components/products/ProductList.tsx(51,33): error TS7006: Parameter 'value' implicitly has an 'any' type.
+src/components/products/ProductList.tsx(59,29): error TS7006: Parameter 'field' implicitly has an 'any' type.
+src/components/products/ProductList.tsx(70,29): error TS7006: Parameter 'page' implicitly has an 'any' type.
+src/components/products/ProductList.tsx(108,32): error TS7006: Parameter 'cat' implicitly has an 'any' type.
+src/components/products/ProductList.tsx(143,28): error TS7006: Parameter 'product' implicitly has an 'any' type.
+src/components/products/ProductList.tsx(144,49): error TS7006: Parameter 'c' implicitly has an 'any' type.
+src/components/products/ProductList.tsx(218,17): error TS2322: Type '{ onClick: () => void; disabled: boolean; }' is not assignable to type 'IntrinsicAttributes & { isActive?: boolean | undefined; } & Pick<ButtonProps, "size"> & ClassAttributes<HTMLAnchorElement> & AnchorHTMLAttributes<...>'.
+  Property 'disabled' does not exist on type 'IntrinsicAttributes & { isActive?: boolean | undefined; } & Pick<ButtonProps, "size"> & ClassAttributes<HTMLAnchorElement> & AnchorHTMLAttributes<...>'.
+src/hooks/useCache.ts(64,20): error TS2347: Untyped function calls may not accept type arguments.
+src/hooks/useCache.ts(134,14): error TS2347: Untyped function calls may not accept type arguments.
+src/hooks/useNotifications.ts(154,18): error TS2339: Property 'remove' does not exist on type 'APICache'.
+src/hooks/useNotifications.ts(181,18): error TS2339: Property 'remove' does not exist on type 'APICache'.
+src/hooks/useNotifications.ts(205,16): error TS2339: Property 'remove' does not exist on type 'APICache'.
+src/hooks/useNotifications.ts(228,16): error TS2339: Property 'remove' does not exist on type 'APICache'.
+src/hooks/useNotifications.ts(237,16): error TS2339: Property 'remove' does not exist on type 'APICache'.
+src/hooks/useNotifications.ts(244,14): error TS2339: Property 'remove' does not exist on type 'APICache'.
+src/hooks/usePOSBackgroundSync.ts(105,13): error TS18048: 'registration.sync' is possibly 'undefined'.
+src/hooks/useRbac.ts(36,26): error TS2345: Argument of type 'string' is not assignable to parameter of type '"NONE" | "READ" | "EXPORT" | "WRITE" | "DELETE" | "ADMIN"'.
+src/hooks/useServiceWorker.ts(239,26): error TS2339: Property 'sync' does not exist on type 'ServiceWorkerRegistration'.
+src/lib/config.test.ts(35,17): error TS2540: Cannot assign to 'NODE_ENV' because it is a read-only property.
+src/lib/config.test.ts(47,17): error TS2540: Cannot assign to 'NODE_ENV' because it is a read-only property.
+src/lib/config.test.ts(65,17): error TS2540: Cannot assign to 'NODE_ENV' because it is a read-only property.
+src/lib/config.test.ts(75,17): error TS2540: Cannot assign to 'NODE_ENV' because it is a read-only property.
+src/lib/error-handling/__tests__/error-logger.test.ts(6,10): error TS2614: Module '"../error-logger"' has no exported member 'ErrorLoggerService'. Did you mean to use 'import ErrorLoggerService from "../error-logger"' instead?
+src/lib/rbac.ts(112,39): error TS2345: Argument of type 'string' is not assignable to parameter of type '"NONE" | "READ" | "EXPORT" | "WRITE" | "DELETE" | "ADMIN"'.
+src/lib/rbac.ts(128,39): error TS2345: Argument of type 'string' is not assignable to parameter of type '"NONE" | "READ" | "EXPORT" | "WRITE" | "DELETE" | "ADMIN"'.
+src/lib/utils/themeAdvancedUtils.ts(25,5): error TS2322: Type '{ id: number; type: ComponentType; title: string; displayOrder: number; enabled: boolean; config?: Record<string, any> | undefined; settings?: Record<string, any> | undefined; styles?: Record<...> | undefined; createdAt?: string | undefined; updatedAt?: string | undefined; }[]' is not assignable to type 'ComponentConfig[]'.
+  Type '{ id: number; type: ComponentType; title: string; displayOrder: number; enabled: boolean; config?: Record<string, any>; settings?: Record<string, any>; styles?: Record<string, any>; createdAt?: string; updatedAt?: string; }' is not assignable to type 'ComponentConfig'.
+    Types of property 'id' are incompatible.
+      Type 'number' is not assignable to type 'string'.
+src/lib/web-vitals.ts(99,26): error TS2339: Property 'renderTime' does not exist on type 'PerformanceEntry'.
+src/lib/web-vitals.ts(99,50): error TS2339: Property 'loadTime' does not exist on type 'PerformanceEntry'.
+src/lib/web-vitals.ts(100,44): error TS2339: Property 'renderTime' does not exist on type 'PerformanceEntry'.
+src/lib/web-vitals.ts(100,68): error TS2339: Property 'loadTime' does not exist on type 'PerformanceEntry'.
+src/lib/web-vitals.ts(352,66): error TS2339: Property 'domLoading' does not exist on type 'PerformanceNavigationTiming'.
+src/stores/index.ts(3,15): error TS2459: Module '"./authStore"' declares 'AuthState' locally, but it is not exported.
+src/stores/themeBuilderStore.ts(264,7): error TS2322: Type '() => boolean | ""' is not assignable to type '() => boolean'.
+  Type 'string | boolean' is not assignable to type 'boolean'.
+    Type 'string' is not assignable to type 'boolean'.
+src/stores/themeBuilderStore.ts(282,7): error TS2322: Type '() => boolean | ""' is not assignable to type '() => boolean'.
+  Type 'string | boolean' is not assignable to type 'boolean'.
+    Type 'string' is not assignable to type 'boolean'.
+src/stores/themeBuilderStore.ts(309,7): error TS2322: Type '() => boolean | ""' is not assignable to type '() => boolean'.
+  Type 'string | boolean' is not assignable to type 'boolean'.
+    Type 'string' is not assignable to type 'boolean'.
+src/stores/themeBuilderUtils.ts(399,16): error TS2304: Cannot find name 'hexToHex'.
+src/stores/themeBuilderUtils.ts(400,13): error TS2304: Cannot find name 'hexToHex'.
+src/types/version-history.ts(6,15): error TS2305: Module '"./theme"' has no exported member 'Theme'.
+tests/visual-regression/visual-regression.spec.ts(12,30): error TS2307: Cannot find module '@playwright/test' or its corresponding type declarations.
+tests/visual-regression/visual-regression.spec.ts(19,59): error TS7031: Binding element 'page' implicitly has an 'any' type.
+tests/visual-regression/visual-regression.spec.ts(24,53): error TS7006: Parameter 'el' implicitly has an 'any' type.
+tests/visual-regression/visual-regression.spec.ts(30,60): error TS7031: Binding element 'page' implicitly has an 'any' type.
+tests/visual-regression/visual-regression.spec.ts(34,53): error TS7006: Parameter 'el' implicitly has an 'any' type.
+tests/visual-regression/visual-regression.spec.ts(40,64): error TS7031: Binding element 'page' implicitly has an 'any' type.
+tests/visual-regression/visual-regression.spec.ts(44,50): error TS7006: Parameter 'el' implicitly has an 'any' type.
+tests/visual-regression/visual-regression.spec.ts(55,56): error TS7031: Binding element 'page' implicitly has an 'any' type.
+tests/visual-regression/visual-regression.spec.ts(66,61): error TS7031: Binding element 'page' implicitly has an 'any' type.
+tests/visual-regression/visual-regression.spec.ts(70,44): error TS7006: Parameter 'el' implicitly has an 'any' type.
+tests/visual-regression/visual-regression.spec.ts(76,63): error TS7031: Binding element 'page' implicitly has an 'any' type.
+tests/visual-regression/visual-regression.spec.ts(80,49): error TS7006: Parameter 'el' implicitly has an 'any' type.
+tests/visual-regression/visual-regression.spec.ts(86,58): error TS7031: Binding element 'page' implicitly has an 'any' type.
+tests/visual-regression/visual-regression.spec.ts(100,58): error TS7031: Binding element 'page' implicitly has an 'any' type.
+tests/visual-regression/visual-regression.spec.ts(104,41): error TS7006: Parameter 'el' implicitly has an 'any' type.
+tests/visual-regression/visual-regression.spec.ts(110,48): error TS7031: Binding element 'page' implicitly has an 'any' type.
+tests/visual-regression/visual-regression.spec.ts(114,45): error TS7006: Parameter 'el' implicitly has an 'any' type.
+tests/visual-regression/visual-regression.spec.ts(122,53): error TS7031: Binding element 'page' implicitly has an 'any' type.
+tests/visual-regression/visual-regression.spec.ts(126,52): error TS7006: Parameter 'el' implicitly has an 'any' type.
+tests/visual-regression/visual-regression.spec.ts(137,60): error TS7031: Binding element 'page' implicitly has an 'any' type.
+tests/visual-regression/visual-regression.spec.ts(142,54): error TS7006: Parameter 'el' implicitly has an 'any' type.
+tests/visual-regression/visual-regression.spec.ts(148,51): error TS7031: Binding element 'page' implicitly has an 'any' type.
+tests/visual-regression/visual-regression.spec.ts(152,46): error TS7006: Parameter 'el' implicitly has an 'any' type.
+tests/visual-regression/visual-regression.spec.ts(158,66): error TS7031: Binding element 'page' implicitly has an 'any' type.
+tests/visual-regression/visual-regression.spec.ts(162,49): error TS7006: Parameter 'el' implicitly has an 'any' type.
+tests/visual-regression/visual-regression.spec.ts(163,51): error TS7006: Parameter 'el' implicitly has an 'any' type.
+tests/visual-regression/visual-regression.spec.ts(175,59): error TS7031: Binding element 'page' implicitly has an 'any' type.
+tests/visual-regression/visual-regression.spec.ts(179,46): error TS7006: Parameter 'el' implicitly has an 'any' type.
+tests/visual-regression/visual-regression.spec.ts(184,48): error TS7031: Binding element 'page' implicitly has an 'any' type.
+tests/visual-regression/visual-regression.spec.ts(188,49): error TS7006: Parameter 'el' implicitly has an 'any' type.
+tests/visual-regression/visual-regression.spec.ts(193,60): error TS7031: Binding element 'page' implicitly has an 'any' type.
+tests/visual-regression/visual-regression.spec.ts(197,49): error TS7006: Parameter 'el' implicitly has an 'any' type.
+tests/visual-regression/visual-regression.spec.ts(207,62): error TS7031: Binding element 'page' implicitly has an 'any' type.
+tests/visual-regression/visual-regression.spec.ts(217,55): error TS7031: Binding element 'page' implicitly has an 'any' type.
+tests/visual-regression/visual-regression.spec.ts(222,56): error TS7006: Parameter 'el' implicitly has an 'any' type.
+tests/visual-regression/visual-regression.spec.ts(233,56): error TS7031: Binding element 'page' implicitly has an 'any' type.
+tests/visual-regression/visual-regression.spec.ts(244,47): error TS7031: Binding element 'page' implicitly has an 'any' type.
+tests/visual-regression/visual-regression.spec.ts(255,47): error TS7031: Binding element 'page' implicitly has an 'any' type.
+tests/visual-regression/visual-regression.spec.ts(272,51): error TS7031: Binding element 'page' implicitly has an 'any' type.
+tests/visual-regression/visual-regression.spec.ts(282,51): error TS7031: Binding element 'page' implicitly has an 'any' type.
+tests/visual-regression/visual-regression.spec.ts(289,45): error TS7006: Parameter 'el' implicitly has an 'any' type.
+tests/visual-regression/visual-regression.spec.ts(293,58): error TS7031: Binding element 'page' implicitly has an 'any' type.
+tests/visual-regression/visual-regression.spec.ts(310,65): error TS7031: Binding element 'page' implicitly has an 'any' type.
+tests/visual-regression/visual-regression.spec.ts(320,60): error TS7031: Binding element 'page' implicitly has an 'any' type.
+tests/visual-regression/visual-regression.spec.ts(335,56): error TS7031: Binding element 'page' implicitly has an 'any' type.
+tests/visual-regression/visual-regression.spec.ts(345,57): error TS7031: Binding element 'page' implicitly has an 'any' type.
+tests/visual-regression/visual-regression.spec.ts(354,56): error TS7031: Binding element 'page' implicitly has an 'any' type.
+tests/visual-regression/visual-regression.spec.ts(360,49): error TS7006: Parameter 'el' implicitly has an 'any' type.
+

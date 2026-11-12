@@ -1,0 +1,6 @@
+[
+  {
+    "path": "/en/dashboard/orders",
+    "readySelector": "main h1"
+  }
+]

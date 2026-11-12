@@ -8,29 +8,37 @@ import (
 
 	"pos-saas/internal/domain"
 	"pos-saas/internal/middleware"
+	"pos-saas/internal/service"
 	"pos-saas/internal/usecase"
+	"time"
 )
 
 // SuperAdminHandler handles super admin HTTP requests
 type SuperAdminHandler struct {
 	authUC   *usecase.SuperAdminAuthUseCase
 	tenantUC *usecase.SuperAdminTenantUseCase
+	sessions *service.AuthSessionStore
 }
 
 // NewSuperAdminHandler creates a new super admin handler
 func NewSuperAdminHandler(
 	authUC *usecase.SuperAdminAuthUseCase,
 	tenantUC *usecase.SuperAdminTenantUseCase,
+	sessions *service.AuthSessionStore,
 ) *SuperAdminHandler {
 	return &SuperAdminHandler{
 		authUC:   authUC,
 		tenantUC: tenantUC,
+		sessions: sessions,
 	}
 }
 
 // Login handles super admin login
 func (h *SuperAdminHandler) Login(w http.ResponseWriter, r *http.Request) {
-	log.Printf("[SuperAdminHandler] Login request\n")
+	if !middleware.IsTrustedOrigin(r.Header.Get("Origin")) {
+		respondJSON(w, http.StatusForbidden, map[string]interface{}{"success": false, "error": "invalid request origin"})
+		return
+	}
 
 	var req domain.SuperAdminLoginRequest
 	if err := decodeJSONStrict(r, &req); err != nil {
@@ -54,9 +62,50 @@ func (h *SuperAdminHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if h.sessions == nil || response.Token == "" {
+		respondJSON(w, http.StatusInternalServerError, map[string]interface{}{"success": false, "error": "session service unavailable"})
+		return
+	}
+	if previous, cookieErr := r.Cookie(service.SuperAdminSessionCookieName); cookieErr == nil && previous.Value != "" {
+		if revokeErr := h.sessions.Revoke(r.Context(), previous.Value); revokeErr != nil {
+			respondJSON(w, http.StatusInternalServerError, map[string]interface{}{"success": false, "error": "unable to rotate session"})
+			return
+		}
+	}
+	sessionID, err := h.sessions.Create(r.Context(), response.Token)
+	if err != nil {
+		respondJSON(w, http.StatusInternalServerError, map[string]interface{}{"success": false, "error": "unable to establish session"})
+		return
+	}
+	secure := r.TLS != nil || appconfig.IsProductionMode()
+	http.SetCookie(w, &http.Cookie{Name: service.SuperAdminSessionCookieName, Value: sessionID, Path: "/", HttpOnly: true, Secure: secure, SameSite: http.SameSiteLaxMode, MaxAge: int(h.sessions.TTL().Seconds()), Expires: time.Now().Add(h.sessions.TTL())})
+	w.Header().Set("Cache-Control", "no-store")
+	w.Header().Set("Referrer-Policy", "no-referrer")
 	respondJSON(w, http.StatusOK, map[string]interface{}{
 		"success": true,
-		"data":    response,
+		"data":    map[string]interface{}{"super_admin": response.SuperAdmin, "user": response.User, "expires_at": response.ExpiresAt},
+	})
+}
+
+// Session returns the authenticated super-admin identity without exposing its credential.
+func (h *SuperAdminHandler) Session(w http.ResponseWriter, r *http.Request) {
+	claims := middleware.GetSuperAdminClaims(r)
+	if claims == nil {
+		respondJSON(w, http.StatusUnauthorized, map[string]interface{}{"success": false, "error": "unauthorized"})
+		return
+	}
+	superAdmin, err := h.authUC.ValidateSession(r.Context(), claims.SuperAdminID, middleware.GetClientIP(r))
+	if err != nil {
+		respondJSON(w, http.StatusUnauthorized, map[string]interface{}{"success": false, "error": "unauthorized"})
+		return
+	}
+	respondJSON(w, http.StatusOK, map[string]interface{}{
+		"success": true,
+		"data": map[string]interface{}{
+			"super_admin":    superAdmin,
+			"email":          claims.Email,
+			"is_super_admin": claims.IsSuperAdmin,
+		},
 	})
 }
 
@@ -86,6 +135,14 @@ func (h *SuperAdminHandler) Logout(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if cookie, err := r.Cookie(service.SuperAdminSessionCookieName); err == nil && h.sessions != nil {
+		if err := h.sessions.Revoke(r.Context(), cookie.Value); err != nil {
+			respondJSON(w, http.StatusInternalServerError, map[string]interface{}{"success": false, "error": "unable to end session"})
+			return
+		}
+	}
+	http.SetCookie(w, &http.Cookie{Name: service.SuperAdminSessionCookieName, Value: "", Path: "/", HttpOnly: true, Secure: r.TLS != nil || appconfig.IsProductionMode(), SameSite: http.SameSiteLaxMode, MaxAge: -1, Expires: time.Unix(1, 0)})
+	w.Header().Set("Cache-Control", "no-store")
 	respondJSON(w, http.StatusOK, map[string]interface{}{
 		"success": true,
 		"message": "logged out successfully",
@@ -259,66 +316,13 @@ func (h *SuperAdminHandler) GetTenantUsers(w http.ResponseWriter, r *http.Reques
 	})
 }
 
-// GenerateDashboardLoginToken generates a one-time token for accessing tenant dashboard
+// GenerateDashboardLoginToken fails closed because the legacy exchange creates a tenant-owner session
+// without retaining the Super Admin as a distinct, restricted actor.
 func (h *SuperAdminHandler) GenerateDashboardLoginToken(w http.ResponseWriter, r *http.Request) {
-	log.Printf("[SuperAdminHandler] GenerateDashboardLoginToken request\n")
-
-	superAdminID := middleware.GetSuperAdminID(r)
-	if superAdminID == 0 {
-		respondJSON(w, http.StatusUnauthorized, map[string]interface{}{
-			"success": false,
-			"error":   "unauthorized",
-		})
-		return
-	}
-
-	// Get tenant ID from path
-	tenantIDStr := r.PathValue("id")
-	tenantID, err := strconv.ParseInt(tenantIDStr, 10, 64)
-	if err != nil {
-		respondJSON(w, http.StatusBadRequest, map[string]interface{}{
-			"success": false,
-			"error":   "invalid tenant ID",
-		})
-		return
-	}
-
-	ip := middleware.GetClientIP(r)
-	userAgent := r.UserAgent()
-
-	token, err := h.tenantUC.GenerateDashboardLoginToken(r.Context(), superAdminID, tenantID, ip, userAgent)
-	if err != nil {
-		log.Printf("[SuperAdminHandler] GenerateDashboardLoginToken failed: %v\n", err)
-		respondJSON(w, http.StatusInternalServerError, map[string]interface{}{
-			"success": false,
-			"error":   err.Error(),
-		})
-		return
-	}
-
-	dashboardURL, resolveErr := appconfig.ResolveRuntimeURL(
-		[]string{"DASHBOARD_URL", "NEXT_PUBLIC_DASHBOARD_URL"},
-		"http://localhost:3001",
-		"dashboard URL",
-	)
-	if resolveErr != nil {
-		log.Printf("[SuperAdminHandler] Dashboard URL configuration error: %v\n", resolveErr)
-		respondJSON(w, http.StatusInternalServerError, map[string]interface{}{
-			"success": false,
-			"error":   "dashboard URL is not configured",
-		})
-		return
-	}
-	loginPath := dashboardURL + "/auth/super-admin-login"
-
-	respondJSON(w, http.StatusOK, map[string]interface{}{
-		"success": true,
-		"data": map[string]interface{}{
-			"token":              token,
-			"dashboard_url":      loginPath,
-			"redirect_url":       loginPath + "?token=" + token,
-			"expires_in_seconds": 30,
-		},
+	w.Header().Set("Cache-Control", "no-store")
+	respondJSON(w, http.StatusServiceUnavailable, map[string]interface{}{
+		"success": false,
+		"error":   "tenant dashboard access is paused until restricted, actor-attributed support sessions are available",
 	})
 }
 

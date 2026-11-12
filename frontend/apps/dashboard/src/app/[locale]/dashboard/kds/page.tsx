@@ -65,7 +65,7 @@ export default function KDSPage() {
   } = useKDSAnalytics(canManageKDSSettings && !canManageSettingsLoading && settings.show_analytics_panel && !loading)
   const canViewAnalytics = canManageKDSSettings && !canManageSettingsLoading && settings.show_analytics_panel
   const { playNewOrderAlert } = useKDSAudio()
-  useKDSWebSocket({ onOrderNew: playNewOrderAlert })
+  useKDSWebSocket({ onOrderNew: () => { void playNewOrderAlert() } })
   const autoBumpRunningRef = useRef(false)
   const showShellLoading = loading && filteredOrders.length === 0
 

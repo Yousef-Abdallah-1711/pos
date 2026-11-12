@@ -1,17 +1,15 @@
 "use client";
 
 import React, { useState } from "react";
-import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/stores/authStore";
 import { superAdminAPI } from "@/lib/api";
 import { toast } from "sonner";
 
 export default function LoginPage() {
-  const router = useRouter();
   const { setToken, setSuperAdmin, setError: setAuthError, setLoading } =
     useAuthStore();
   const [email, setEmail] = useState("superadmin@pos-saas.com");
-  const [password, setPassword] = useState("SuperAdmin@123");
+  const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -32,17 +30,13 @@ export default function LoginPage() {
         password,
       });
 
-      // Store token in localStorage
-      localStorage.setItem("super-admin-token", response.token);
-
-      // Update auth store
-      setToken(response.token);
+      setToken("cookie-session");
       setSuperAdmin(response.super_admin);
 
       toast.success("Login successful!");
 
-      // Redirect to dashboard
-      router.push("/dashboard");
+      // Start a new app document after establishing the cookie-backed session.
+      window.location.assign("/dashboard");
     } catch (err: unknown) {
       const errorMessage =
         (err as any)?.response?.data?.error ||
@@ -124,18 +118,6 @@ export default function LoginPage() {
             </button>
           </form>
 
-          {/* Info Box */}
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <p className="text-sm text-blue-700">
-              <strong>Demo Credentials:</strong>
-            </p>
-            <p className="text-sm text-blue-600 mt-1">
-              Email: superadmin@pos-saas.com
-            </p>
-            <p className="text-sm text-blue-600">
-              Password: SuperAdmin@123
-            </p>
-          </div>
         </div>
 
         {/* Footer */}

@@ -1,0 +1,579 @@
+diff --git a/audit-reports/financial-remediation-execution-2026-11-11/FINANCIAL-SAFETY-RUNBOOK.md b/audit-reports/financial-remediation-execution-2026-11-11/FINANCIAL-SAFETY-RUNBOOK.md
+new file mode 100644
+index 0000000..a9db226
+--- /dev/null
++++ b/audit-reports/financial-remediation-execution-2026-11-11/FINANCIAL-SAFETY-RUNBOOK.md
+@@ -0,0 +1,16 @@
++# Financial safety runbook — Balance Sheet integrity (Phase 00)
++
++## Detect
++Open Dashboard → Reports → Financial → Balance Sheet and select the relevant as-of date. The API response includes the legacy equation flag, explicit integrity_status, equation_difference and integrity_check_basis. A red accessible warning means UNRECONCILED or unrecognized/unverified status. Figures stay visible for investigation. The warning does not fix the accounting.
++
++## Operational treatment
++Do not treat an unreconciled or unverified Balance Sheet as final, approved or suitable for external filing. PDF export is withheld when status is not explicitly RECONCILED and the legacy equation flag is false. Do not alter or delete journal/GL rows to clear the warning. Other financial functions are unchanged; any external use remains subject to finance-owner controls.
++
++## Investigate and preserve
++Record tenant/restaurant, as-of date, request timestamp, response status and equation difference. Use read-only journal, Trial Balance and GL views for the same scope/date. Compare source journals and ledger rows; note current status only indicates equation arithmetic, not correct attribution, complete posting or accountant approval. Preserve screenshots and relevant log correlation IDs without copying credentials, tokens or sensitive payment data.
++
++## Escalate
++Route discrepancy and affected date range to finance owner and qualified accountant; include engineering for query/source diagnosis. If automatic posting failure is suspected, capture operation/source IDs from logs. Logs are not a durable recovery queue. Do not replay provider operations or post manual balancing entries without separately approved procedure.
++
++## Recovery after an approved fix
++Re-run independent dated fixtures and reports against isolated test DB; verify no source history was rewritten. Production correction/backfill requires separate authorization, approved accountant policy, a reviewed migration/repair plan and verified backup. This runbook grants no production-data write authority.
+\ No newline at end of file
+diff --git a/backend/internal/handler/http/financial_report_integrity_handler_test.go b/backend/internal/handler/http/financial_report_integrity_handler_test.go
+new file mode 100644
+index 0000000..96d277f
+--- /dev/null
++++ b/backend/internal/handler/http/financial_report_integrity_handler_test.go
+@@ -0,0 +1,55 @@
++package http
++
++import (
++	"encoding/json"
++	"net/http"
++	"net/http/httptest"
++	"testing"
++	"time"
++
++	sqlmock "github.com/DATA-DOG/go-sqlmock"
++
++	"pos-saas/internal/service"
++	"pos-saas/internal/usecase"
++)
++
++func TestFinancialReportHandler_BalanceSheetAddsIntegrityFieldsWithoutChangingLegacyContract(t *testing.T) {
++	db, mock, err := sqlmock.New()
++	if err != nil {
++		t.Fatalf("sqlmock.New failed: %v", err)
++	}
++	defer db.Close()
++
++	asOf := time.Date(2026, time.November, 10, 0, 0, 0, 0, time.UTC)
++	mock.ExpectQuery(`WITH latest AS`).WithArgs(1, 2, asOf).WillReturnRows(
++		sqlmock.NewRows([]string{"account_code", "account_name", "account_type", "normal_balance", "running_balance"}).
++			AddRow("1110", "Cash", "asset", "debit", 100.0).
++			AddRow("2101", "Payables", "liability", "credit", 0.0),
++	)
++	handler := NewFinancialReportHandlerWithCache(usecase.NewFinancialReportUseCase(db, nil), service.NewInMemoryCache(), time.Minute)
++	request := httptest.NewRequest(http.MethodGet, "/api/v1/reports/financial/balance-sheet?as_of=2026-11-10", nil)
++	request = withAccountingAuthContext(request, 1, 2, 9)
++	response := httptest.NewRecorder()
++	handler.GetBalanceSheet(response, request)
++	if response.Code != http.StatusOK {
++		t.Fatalf("status = %d, want %d: %s", response.Code, http.StatusOK, response.Body.String())
++	}
++	var payload struct {
++		Data map[string]interface{} `json:"data"`
++	}
++	if err := json.Unmarshal(response.Body.Bytes(), &payload); err != nil {
++		t.Fatalf("decode report response: %v", err)
++	}
++	if payload.Data["total_assets"] != float64(100) || payload.Data["total_liabilities"] != float64(0) || payload.Data["total_equity"] != float64(0) {
++		t.Fatalf("legacy report figures changed: %#v", payload.Data)
++	}
++	if payload.Data["equation_balanced"] != false || payload.Data["integrity_status"] != "UNRECONCILED" {
++		t.Fatalf("unexpected integrity response: %#v", payload.Data)
++	}
++	if payload.Data["equation_difference"] != float64(100) || payload.Data["integrity_check_basis"] != "existing_round2_equation_check" {
++		t.Fatalf("missing integrity diagnostics: %#v", payload.Data)
++	}
++	if err := mock.ExpectationsWereMet(); err != nil {
++		t.Fatalf("unmet sqlmock expectations: %v", err)
++	}
++}
+diff --git a/backend/internal/usecase/accounting_posting_diagnostic_test.go b/backend/internal/usecase/accounting_posting_diagnostic_test.go
+new file mode 100644
+index 0000000..3d92dcd
+--- /dev/null
++++ b/backend/internal/usecase/accounting_posting_diagnostic_test.go
+@@ -0,0 +1,50 @@
++package usecase
++
++import (
++	"bytes"
++	"errors"
++	"log"
++	"strings"
++	"testing"
++)
++
++func TestLogAccountingPostingFailureIncludesScopeWithoutErrorPayload(t *testing.T) {
++	var output bytes.Buffer
++	previousWriter := log.Writer()
++	previousFlags := log.Flags()
++	previousPrefix := log.Prefix()
++	log.SetOutput(&output)
++	log.SetFlags(0)
++	t.Cleanup(func() {
++		log.SetOutput(previousWriter)
++		log.SetFlags(previousFlags)
++		log.SetPrefix(previousPrefix)
++	})
++
++	tests := []struct {
++		operation       string
++		failureCategory string
++	}{
++		{operation: "sales_post", failureCategory: "posting_failure"},
++		{operation: "order_reload", failureCategory: "order_reload_failure"},
++	}
++	for _, test := range tests {
++		t.Run(test.operation, func(t *testing.T) {
++			output.Reset()
++			logAccountingPostingFailure("paid_order", test.operation, 12, 34, 56, errors.New("provider token=must-not-appear"))
++			message := output.String()
++			for _, field := range []string{
++				"source_event_type=\"paid_order\"", "operation=\"" + test.operation + "\"", "tenant_id=12",
++				"restaurant_id=34", "source_event_id=56", "failure_category=" + test.failureCategory,
++				"recovery_state=not_durable", "correlation_id=unavailable", "error_type=*errors.errorString",
++			} {
++				if !strings.Contains(message, field) {
++					t.Errorf("diagnostic missing %q: %s", field, message)
++				}
++			}
++			if strings.Contains(message, "must-not-appear") || strings.Contains(message, "provider token") {
++				t.Fatalf("diagnostic exposed error payload: %s", message)
++			}
++		})
++	}
++}
+diff --git a/backend/internal/usecase/financial_report_postgres_integration_test.go b/backend/internal/usecase/financial_report_postgres_integration_test.go
+new file mode 100644
+index 0000000..60bd34f
+--- /dev/null
++++ b/backend/internal/usecase/financial_report_postgres_integration_test.go
+@@ -0,0 +1,96 @@
++//go:build integration
++
++package usecase
++
++import (
++	"context"
++	"database/sql"
++	"fmt"
++	"testing"
++	"time"
++
++	_ "github.com/lib/pq"
++	"pos-saas/tests/testdb"
++)
++
++func TestGenerateBalanceSheetPostgresIntegrityStatus(t *testing.T) {
++	db, err := sql.Open("postgres", testdb.URL(t))
++	if err != nil {
++		t.Fatalf("open disposable PostgreSQL: %v", err)
++	}
++	defer db.Close()
++
++	asOf := time.Date(2026, time.November, 10, 0, 0, 0, 0, time.UTC)
++	journalID := insertBalanceSheetFixture(t, db, asOf)
++	defer deleteBalanceSheetFixture(t, db, journalID)
++	report, err := NewFinancialReportUseCase(db, nil).GenerateBalanceSheet(1, 1, asOf)
++	if err != nil {
++		t.Fatalf("GenerateBalanceSheet returned error: %v", err)
++	}
++	if report.IntegrityStatus != "UNRECONCILED" || report.EquationBalanced {
++		t.Fatalf("status/balanced = %s/%t, want UNRECONCILED/false", report.IntegrityStatus, report.EquationBalanced)
++	}
++	if report.TotalAssets != 100 || report.TotalEquity != 0 || report.EquationDifference != 100 {
++		t.Fatalf("report changed source figures: assets=%v equity=%v difference=%v", report.TotalAssets, report.TotalEquity, report.EquationDifference)
++	}
++}
++
++func insertBalanceSheetFixture(t *testing.T, db *sql.DB, entryDate time.Time) int64 {
++	t.Helper()
++	ctx := context.Background()
++	entryNumber := fmt.Sprintf("P00-%d", time.Now().UnixNano()%1_000_000_000_000)
++	tx, err := db.BeginTx(ctx, nil)
++	if err != nil {
++		t.Fatalf("begin fixture transaction: %v", err)
++	}
++	defer func() { _ = tx.Rollback() }()
++	var journalID int64
++	err = tx.QueryRowContext(ctx, `
++		INSERT INTO journal_entries (tenant_id, restaurant_id, entry_number, entry_date, description, entry_type, status, posted_at)
++		VALUES (1, 1, $1, $2, 'Phase 00 integrity fixture', 'manual', 'posted', NOW()) RETURNING id
++	`, entryNumber, entryDate).Scan(&journalID)
++	if err != nil {
++		t.Fatalf("insert fixture journal: %v", err)
++	}
++	fixtureLines := []struct {
++		code, description      string
++		debit, credit, balance float64
++	}{
++		{code: "1110", description: "Cash on Hand", debit: 100, balance: 100},
++		{code: "4100", description: "Food Sales", credit: 100, balance: -100},
++	}
++	for index, fixtureLine := range fixtureLines {
++		var accountID, lineID int64
++		if err := tx.QueryRowContext(ctx, `SELECT id FROM chart_of_accounts WHERE tenant_id = $1 AND restaurant_id = $2 AND account_code = $3`, 1, 1, fixtureLine.code).Scan(&accountID); err != nil {
++			t.Fatalf("find seeded account %s: %v", fixtureLine.code, err)
++		}
++		err = tx.QueryRowContext(ctx, `
++			INSERT INTO journal_entry_lines (journal_entry_id, tenant_id, account_id, account_code, debit_amount, credit_amount, description, line_order)
++			VALUES ($1, 1, $2, $3, $4, $5, $6, $7) RETURNING id
++		`, journalID, accountID, fixtureLine.code, fixtureLine.debit, fixtureLine.credit, fixtureLine.description, index+1).Scan(&lineID)
++		if err != nil {
++			t.Fatalf("insert fixture journal line %s: %v", fixtureLine.code, err)
++		}
++		_, err = tx.ExecContext(ctx, `
++			INSERT INTO general_ledger (tenant_id, restaurant_id, account_id, journal_entry_id, journal_line_id, entry_date, fiscal_period, debit_amount, credit_amount, running_balance)
++			VALUES (1, 1, $1, $2, $3, $4, '2026-11', $5, $6, $7)
++		`, accountID, journalID, lineID, entryDate, fixtureLine.debit, fixtureLine.credit, fixtureLine.balance)
++		if err != nil {
++			t.Fatalf("insert fixture ledger row %s: %v", fixtureLine.code, err)
++		}
++	}
++	if err := tx.Commit(); err != nil {
++		t.Fatalf("commit fixture: %v", err)
++	}
++	return journalID
++}
++
++func deleteBalanceSheetFixture(t *testing.T, db *sql.DB, journalID int64) {
++	t.Helper()
++	if _, err := db.Exec(`DELETE FROM general_ledger WHERE journal_entry_id = $1`, journalID); err != nil {
++		t.Fatalf("delete fixture ledger row: %v", err)
++	}
++	if _, err := db.Exec(`DELETE FROM journal_entries WHERE id = $1`, journalID); err != nil {
++		t.Fatalf("delete fixture journal: %v", err)
++	}
++}
+diff --git a/backend/internal/usecase/financial_report_usecase.go b/backend/internal/usecase/financial_report_usecase.go
+index a403974..fda7467 100644
+--- a/backend/internal/usecase/financial_report_usecase.go
++++ b/backend/internal/usecase/financial_report_usecase.go
+@@ -33,14 +33,17 @@ type ProfitLossReport struct {
+ }
+ 
+ type BalanceSheetReport struct {
+-	AsOfDate         string                `json:"as_of_date"`
+-	Assets           []FinancialReportLine `json:"assets"`
+-	Liabilities      []FinancialReportLine `json:"liabilities"`
+-	Equity           []FinancialReportLine `json:"equity"`
+-	TotalAssets      float64               `json:"total_assets"`
+-	TotalLiabilities float64               `json:"total_liabilities"`
+-	TotalEquity      float64               `json:"total_equity"`
+-	EquationBalanced bool                  `json:"equation_balanced"`
++	AsOfDate            string                `json:"as_of_date"`
++	Assets              []FinancialReportLine `json:"assets"`
++	Liabilities         []FinancialReportLine `json:"liabilities"`
++	Equity              []FinancialReportLine `json:"equity"`
++	TotalAssets         float64               `json:"total_assets"`
++	TotalLiabilities    float64               `json:"total_liabilities"`
++	TotalEquity         float64               `json:"total_equity"`
++	EquationBalanced    bool                  `json:"equation_balanced"`
++	IntegrityStatus     string                `json:"integrity_status"`
++	EquationDifference  float64               `json:"equation_difference"`
++	IntegrityCheckBasis string                `json:"integrity_check_basis"`
+ }
+ 
+ type CashFlowReport struct {
+@@ -333,7 +336,16 @@ func (uc *FinancialReportUseCase) GenerateBalanceSheet(tenantID, restaurantID in
+ 		return report, err
+ 	}
+ 
++	// Keep the existing equation rule during Phase 00. This surfaces its result without
++	// changing report totals or introducing a new rounding/accounting policy.
+ 	report.EquationBalanced = round2(report.TotalAssets) == round2(report.TotalLiabilities+report.TotalEquity)
++	report.EquationDifference = report.TotalAssets - report.TotalLiabilities - report.TotalEquity
++	report.IntegrityCheckBasis = "existing_round2_equation_check"
++	if report.EquationBalanced {
++		report.IntegrityStatus = "RECONCILED"
++	} else {
++		report.IntegrityStatus = "UNRECONCILED"
++	}
+ 	return report, nil
+ }
+ 
+diff --git a/backend/internal/usecase/financial_report_usecase_test.go b/backend/internal/usecase/financial_report_usecase_test.go
+index bc8f1db..a4c811c 100644
+--- a/backend/internal/usecase/financial_report_usecase_test.go
++++ b/backend/internal/usecase/financial_report_usecase_test.go
+@@ -1,6 +1,7 @@
+ package usecase
+ 
+ import (
++	"database/sql/driver"
+ 	"math"
+ 	"testing"
+ 	"time"
+@@ -141,6 +142,74 @@ func TestFinancialReportUseCase_GenerateTrialBalance_ManualCalculationMatches(t
+ 	}
+ }
+ 
++func TestFinancialReportUseCase_GenerateBalanceSheetIntegrityStatus(t *testing.T) {
++	tests := []struct {
++		name              string
++		rows              [][]driver.Value
++		wantStatus        string
++		wantBalanced      bool
++		wantAssets        float64
++		wantLiabilities   float64
++		wantEquity        float64
++		wantEquationDelta float64
++	}{
++		{
++			name: "unreconciled statement preserves figures",
++			rows: [][]driver.Value{
++				{"1110", "Cash on Hand", "asset", "debit", 100.0},
++				{"2101", "Accounts Payable", "liability", "credit", 0.0},
++				{"3300", "Current Year Earnings", "equity", "credit", 0.0},
++			},
++			wantStatus: "UNRECONCILED", wantBalanced: false,
++			wantAssets: 100, wantLiabilities: 0, wantEquity: 0, wantEquationDelta: 100,
++		},
++		{
++			name: "balanced equation is explicitly identified",
++			rows: [][]driver.Value{
++				{"1110", "Cash on Hand", "asset", "debit", 100.0},
++				{"2101", "Accounts Payable", "liability", "credit", 0.0},
++				{"3300", "Current Year Earnings", "equity", "credit", -100.0},
++			},
++			wantStatus: "RECONCILED", wantBalanced: true,
++			wantAssets: 100, wantLiabilities: 0, wantEquity: 100, wantEquationDelta: 0,
++		},
++	}
++
++	for _, tt := range tests {
++		t.Run(tt.name, func(t *testing.T) {
++			db, mock, err := sqlmock.New()
++			if err != nil {
++				t.Fatalf("sqlmock.New failed: %v", err)
++			}
++			defer db.Close()
++
++			asOf := time.Date(2026, time.November, 10, 0, 0, 0, 0, time.UTC)
++			rows := sqlmock.NewRows([]string{"account_code", "account_name", "account_type", "normal_balance", "running_balance"})
++			for _, row := range tt.rows {
++				rows.AddRow(row...)
++			}
++			mock.ExpectQuery(`WITH latest AS`).WithArgs(1, 2, asOf).WillReturnRows(rows)
++
++			report, err := NewFinancialReportUseCase(db, nil).GenerateBalanceSheet(1, 2, asOf)
++			if err != nil {
++				t.Fatalf("GenerateBalanceSheet returned error: %v", err)
++			}
++			if report.IntegrityStatus != tt.wantStatus || report.EquationBalanced != tt.wantBalanced {
++				t.Fatalf("integrity status/balanced = %s/%t, want %s/%t", report.IntegrityStatus, report.EquationBalanced, tt.wantStatus, tt.wantBalanced)
++			}
++			if report.TotalAssets != tt.wantAssets || report.TotalLiabilities != tt.wantLiabilities || report.TotalEquity != tt.wantEquity {
++				t.Fatalf("report totals were altered: assets/liabilities/equity = %v/%v/%v", report.TotalAssets, report.TotalLiabilities, report.TotalEquity)
++			}
++			if report.EquationDifference != tt.wantEquationDelta || report.IntegrityCheckBasis != "existing_round2_equation_check" {
++				t.Fatalf("integrity diagnostics = %v/%q", report.EquationDifference, report.IntegrityCheckBasis)
++			}
++			if err := mock.ExpectationsWereMet(); err != nil {
++				t.Fatalf("unmet sqlmock expectations: %v", err)
++			}
++		})
++	}
++}
++
+ func almostEqual(a, b float64) bool {
+ 	return math.Abs(a-b) < 0.0001
+ }
+diff --git a/backend/internal/usecase/order_usecase.go b/backend/internal/usecase/order_usecase.go
+index 4d3e218..0b3763e 100644
+--- a/backend/internal/usecase/order_usecase.go
++++ b/backend/internal/usecase/order_usecase.go
+@@ -498,10 +498,10 @@ func (uc *OrderUseCase) AutoPostPaidOrder(order *domain.Order, postedBy *int) {
+ 	}
+ 
+ 	if err := uc.autoPosting.PostSalesEntry(order, postedBy); err != nil {
+-		log.Printf("[AccountingAutoPost] sales posting failed tenant=%d restaurant=%d order=%d err=%v", order.TenantID, order.RestaurantID, order.ID, err)
++		logAccountingPostingFailure("paid_order", "sales_post", order.TenantID, order.RestaurantID, order.ID, err)
+ 	}
+ 	if err := uc.autoPosting.PostCOGSEntry(order, postedBy); err != nil {
+-		log.Printf("[AccountingAutoPost] cogs posting failed tenant=%d restaurant=%d order=%d err=%v", order.TenantID, order.RestaurantID, order.ID, err)
++		logAccountingPostingFailure("paid_order", "cogs_post", order.TenantID, order.RestaurantID, order.ID, err)
+ 	}
+ }
+ 
+@@ -513,12 +513,23 @@ func (uc *OrderUseCase) AutoPostPaidOrderByID(tenantID, restaurantID, orderID in
+ 
+ 	order, err := uc.GetOrder(tenantID, restaurantID, orderID)
+ 	if err != nil {
+-		log.Printf("[AccountingAutoPost] failed to reload order for posting tenant=%d restaurant=%d order=%d err=%v", tenantID, restaurantID, orderID, err)
++		logAccountingPostingFailure("paid_order", "order_reload", tenantID, restaurantID, orderID, err)
+ 		return
+ 	}
+ 	uc.AutoPostPaidOrder(order, postedBy)
+ }
+ 
++func logAccountingPostingFailure(sourceEventType, operation string, tenantID, restaurantID, sourceEventID int64, err error) {
++	failureCategory := "posting_failure"
++	if operation == "order_reload" {
++		failureCategory = "order_reload_failure"
++	}
++	log.Printf(
++		"[AccountingAutoPost] source_event_type=%q operation=%q tenant_id=%d restaurant_id=%d source_event_id=%d failure_category=%s recovery_state=not_durable correlation_id=unavailable error_type=%T",
++		sourceEventType, operation, tenantID, restaurantID, sourceEventID, failureCategory, err,
++	)
++}
++
+ // GetOrderStats retrieves order statistics
+ func (uc *OrderUseCase) GetOrderStats(tenantID, restaurantID int64, startDate, endDate time.Time) (*domain.OrderStats, error) {
+ 	// Validate date range
+diff --git a/frontend/apps/dashboard/src/app/[locale]/dashboard/reports/financial/balance-sheet/page.tsx b/frontend/apps/dashboard/src/app/[locale]/dashboard/reports/financial/balance-sheet/page.tsx
+index 1c0090d..3d0d3bb 100644
+--- a/frontend/apps/dashboard/src/app/[locale]/dashboard/reports/financial/balance-sheet/page.tsx
++++ b/frontend/apps/dashboard/src/app/[locale]/dashboard/reports/financial/balance-sheet/page.tsx
+@@ -7,6 +7,7 @@ import { BalanceSheet } from '@/components/financial-reports/BalanceSheet'
+ import { ReportExportButton } from '@/components/financial-reports/ReportExportButton'
+ import { useFinancialReport } from '@/hooks/useFinancialReports'
+ import { getBalanceSheetReport } from '@/lib/api/financialReportsApi'
++import { canExportBalanceSheet } from '@/lib/financial-integrity'
+ import { getLocaleFromPath } from '@/lib/translations'
+ 
+ export default function BalanceSheetPage() {
+@@ -53,7 +54,7 @@ export default function BalanceSheetPage() {
+           >
+             {t('common.refresh')}
+           </button>
+-          {data ? (
++          {canExportBalanceSheet(data) ? (
+             <ReportExportButton
+               filename={`balance-sheet-${asOf}.pdf`}
+               title={t('balanceSheetExportTitle')}
+diff --git a/frontend/apps/dashboard/src/components/financial-reports/BalanceSheet.test.tsx b/frontend/apps/dashboard/src/components/financial-reports/BalanceSheet.test.tsx
+new file mode 100644
+index 0000000..bdf1154
+--- /dev/null
++++ b/frontend/apps/dashboard/src/components/financial-reports/BalanceSheet.test.tsx
+@@ -0,0 +1,34 @@
++import { render, screen } from '@testing-library/react'
++import { vi } from 'vitest'
++import { BalanceSheet } from './BalanceSheet'
++
++vi.mock('next-intl', () => ({
++  useTranslations: () => (key: string) => key,
++}))
++
++describe('BalanceSheet integrity messaging', () => {
++  it('keeps unreconciled figures visible and exposes the warning to assistive technology', () => {
++    render(
++      <BalanceSheet
++        locale="en"
++        report={{
++          as_of_date: '2026-11-10',
++          assets: [{ account_code: '1110', account_name: 'Cash', amount: 100 }],
++          liabilities: [],
++          equity: [],
++          total_assets: 100,
++          total_liabilities: 0,
++          total_equity: 0,
++          equation_balanced: false,
++          integrity_status: 'UNRECONCILED',
++          equation_difference: 100,
++          integrity_check_basis: 'existing_round2_equation_check',
++        }}
++      />
++    )
++
++    expect(screen.getByRole('alert')).toHaveTextContent('integrity.unreconciledTitle')
++    expect(screen.getByText('metrics.totalAssets')).toBeInTheDocument()
++    expect(screen.getAllByText(/100\.00/).length).toBeGreaterThan(0)
++  })
++})
+diff --git a/frontend/apps/dashboard/src/components/financial-reports/BalanceSheet.tsx b/frontend/apps/dashboard/src/components/financial-reports/BalanceSheet.tsx
+index 05f6b36..eb16731 100644
+--- a/frontend/apps/dashboard/src/components/financial-reports/BalanceSheet.tsx
++++ b/frontend/apps/dashboard/src/components/financial-reports/BalanceSheet.tsx
+@@ -23,6 +23,16 @@ export function BalanceSheet({ report, locale }: BalanceSheetProps) {
+ 
+   return (
+     <div className="space-y-6">
++      {report.integrity_status === 'RECONCILED' && report.equation_balanced ? (
++        <div role="status" aria-live="polite" className="rounded-xl border border-amber-300 bg-amber-50 p-4 text-amber-950 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-100">
++          {t('integrity.reconciledCaveat')}
++        </div>
++      ) : (
++        <div role="alert" aria-live="assertive" aria-atomic="true" className="rounded-xl border border-red-300 bg-red-50 p-4 text-red-900 dark:border-red-800 dark:bg-red-950/30 dark:text-red-100">
++          <p className="font-semibold">{t('integrity.unreconciledTitle')}</p>
++          <p className="mt-1">{t('integrity.unreconciledDescription')}</p>
++        </div>
++      )}
+       <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
+         <Metric label={t('metrics.totalAssets')} value={formatter.format(report.total_assets)} />
+         <Metric label={t('metrics.totalLiabilities')} value={formatter.format(report.total_liabilities)} />
+diff --git a/frontend/apps/dashboard/src/i18n/messages/ar.json b/frontend/apps/dashboard/src/i18n/messages/ar.json
+index 91975aa..273fe65 100644
+--- a/frontend/apps/dashboard/src/i18n/messages/ar.json
++++ b/frontend/apps/dashboard/src/i18n/messages/ar.json
+@@ -1209,6 +1209,11 @@
+       "profitLossExportTitle": "تقرير الأرباح والخسائر",
+       "balanceSheetSubtitle": "الأصول والالتزامات وحقوق الملكية حتى تاريخ محدد.",
+       "balanceSheetExportTitle": "تقرير الميزانية العمومية",
++      "integrity": {
++        "unreconciledTitle": "هذه الميزانية غير متطابقة",
++        "unreconciledDescription": "معادلة المحاسبة غير متوازنة. تظل الأرقام ظاهرة للمراجعة، لكن لا يجوز اعتبار التقرير نهائياً. تم إيقاف تصدير PDF حتى يجتاز التقرير فحص المعادلة.",
++        "reconciledCaveat": "تجتاز الميزانية فحص المعادلة الحالي في التطبيق. لا يُعد هذا اعتماداً من محاسب أو تصديقاً على القوائم المالية."
++      },
+       "cashFlowStatement": "قائمة التدفق النقدي",
+       "cashFlowSubtitle": "حركة النقد مجمعة حسب الأنشطة التشغيلية والاستثمارية والتمويلية.",
+       "cashFlowExportTitle": "تقرير التدفق النقدي",
+diff --git a/frontend/apps/dashboard/src/i18n/messages/en.json b/frontend/apps/dashboard/src/i18n/messages/en.json
+index 947fb9d..067beed 100644
+--- a/frontend/apps/dashboard/src/i18n/messages/en.json
++++ b/frontend/apps/dashboard/src/i18n/messages/en.json
+@@ -1324,6 +1324,11 @@
+       "profitLossExportTitle": "Profit & Loss Report",
+       "balanceSheetSubtitle": "Assets, liabilities, and equity as of a specific date.",
+       "balanceSheetExportTitle": "Balance Sheet Report",
++      "integrity": {
++        "unreconciledTitle": "This balance sheet is unreconciled",
++        "unreconciledDescription": "The accounting equation does not balance. The figures remain visible for investigation, but this report must not be treated as final. PDF export is unavailable until the report passes the equation check.",
++        "reconciledCaveat": "The balance sheet passes the current application equation check. This status is not an accountant's approval or a certification of financial statements."
++      },
+       "cashFlowStatement": "Cash Flow Statement",
+       "cashFlowSubtitle": "Cash movement grouped by operating, investing, and financing activity.",
+       "cashFlowExportTitle": "Cash Flow Report",
+diff --git a/frontend/apps/dashboard/src/lib/financial-integrity.test.ts b/frontend/apps/dashboard/src/lib/financial-integrity.test.ts
+new file mode 100644
+index 0000000..6987052
+--- /dev/null
++++ b/frontend/apps/dashboard/src/lib/financial-integrity.test.ts
+@@ -0,0 +1,14 @@
++import { describe, expect, it } from 'vitest'
++import { canExportBalanceSheet } from './financial-integrity'
++
++describe('canExportBalanceSheet', () => {
++  it('allows export only when the explicit status and equation both reconcile', () => {
++    expect(canExportBalanceSheet({ integrity_status: 'RECONCILED', equation_balanced: true })).toBe(true)
++  })
++
++  it('blocks unreconciled, inconsistent, and older unverified responses', () => {
++    expect(canExportBalanceSheet({ integrity_status: 'UNRECONCILED', equation_balanced: false })).toBe(false)
++    expect(canExportBalanceSheet({ integrity_status: 'RECONCILED', equation_balanced: false })).toBe(false)
++    expect(canExportBalanceSheet(undefined)).toBe(false)
++  })
++})
+diff --git a/frontend/apps/dashboard/src/lib/financial-integrity.ts b/frontend/apps/dashboard/src/lib/financial-integrity.ts
+new file mode 100644
+index 0000000..348f092
+--- /dev/null
++++ b/frontend/apps/dashboard/src/lib/financial-integrity.ts
+@@ -0,0 +1,7 @@
++import type { BalanceSheetReport } from '@/types/financial-reports'
++
++export function canExportBalanceSheet(
++  report: Pick<BalanceSheetReport, 'integrity_status' | 'equation_balanced'> | null | undefined
++): boolean {
++  return report?.integrity_status === 'RECONCILED' && report.equation_balanced === true
++}
+diff --git a/frontend/apps/dashboard/src/types/financial-reports.ts b/frontend/apps/dashboard/src/types/financial-reports.ts
+index 49d1be0..bafaf2d 100644
+--- a/frontend/apps/dashboard/src/types/financial-reports.ts
++++ b/frontend/apps/dashboard/src/types/financial-reports.ts
+@@ -58,6 +58,9 @@ export interface BalanceSheetReport {
+   total_liabilities: number
+   total_equity: number
+   equation_balanced: boolean
++  integrity_status: 'RECONCILED' | 'UNRECONCILED' | 'NOT_VERIFIED'
++  equation_difference: number
++  integrity_check_basis: string
+ }
+ 
+ export interface CashFlowReport {

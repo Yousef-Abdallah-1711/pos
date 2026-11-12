@@ -34,7 +34,7 @@ const normalizePermissionLevelString = (value: unknown): string | null => {
     PERMISSION_LEVELS.ADMIN,
   ])
 
-  return validLevels.has(normalized) ? normalized : null
+  return (validLevels as ReadonlySet<string>).has(normalized) ? normalized : null
 }
 
 const extractPermissionLevel = (value: unknown): string | null => {

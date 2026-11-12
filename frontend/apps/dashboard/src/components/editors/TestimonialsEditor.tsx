@@ -7,6 +7,7 @@
 
 import React, { useState, useCallback } from 'react'
 import type { ThemeComponent } from '@/types/theme'
+import { previewText } from '@/lib/previewText'
 
 interface TestimonialItem {
   id: string
@@ -631,7 +632,7 @@ export function TestimonialsEditor({
         <div className="rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden bg-gray-50 dark:bg-gray-900 p-8">
           <div className="max-w-6xl mx-auto testimonials-preview">
             <h2 className="text-3xl font-bold text-gray-900 dark:text-white text-center mb-12">
-              {component.title?.en || 'What Customers Say'}
+              {previewText(component.title, 'What Customers Say')}
             </h2>
 
             {config.layout === 'carousel' ? (

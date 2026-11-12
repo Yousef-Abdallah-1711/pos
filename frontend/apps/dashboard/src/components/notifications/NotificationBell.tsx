@@ -3,12 +3,24 @@
 import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import { Bell, AlertTriangle } from 'lucide-react'
-import { useNotifications, LowStockProduct } from '@/hooks/useNotifications'
+import { useNotifications } from '@/hooks/useNotifications'
 import { usePathname } from 'next/navigation'
 import { getLocaleFromPath, createTranslator } from '@/lib/translations'
 
+// Legacy shape: this bell predates the generic notifications model and renders low-stock products.
+// It is not imported anywhere; kept compiling until the owner decides whether to delete it.
+interface LowStockProduct {
+  id: number
+  name_en: string
+  name_ar?: string
+  quantity_in_stock: number
+  low_stock_threshold: number
+  created_at: string
+}
+
 export function NotificationBell() {
-  const { notifications, count, fetchNotifications } = useNotifications()
+  const { notifications: rawNotifications, unreadCount: count, fetchNotifications } = useNotifications()
+  const notifications = rawNotifications as unknown as LowStockProduct[]
   const [isOpen, setIsOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
   const pathname = usePathname()
@@ -22,13 +34,13 @@ export function NotificationBell() {
 
     // Auto-refresh every 5 minutes (300000ms)
     const refreshInterval = setInterval(() => {
-      fetchNotifications(true)
+      fetchNotifications({}, true)
     }, 300000)
 
     // Refresh when page becomes visible (e.g., user returns from another tab)
     const handleVisibilityChange = () => {
       if (!document.hidden) {
-        fetchNotifications(true)
+        fetchNotifications({}, true)
       }
     }
 

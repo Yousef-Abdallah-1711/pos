@@ -7,6 +7,7 @@
 
 import React, { useState, useCallback } from 'react'
 import type { ThemeComponent } from '@/types/theme'
+import { previewText } from '@/lib/previewText'
 
 interface WhyUsEditorProps {
   component: ThemeComponent
@@ -536,7 +537,7 @@ export function WhyUsEditor({
       {previewMode && (
         <div className="whyus-preview-shell rounded-lg border border-gray-200 dark:border-gray-700 p-8">
           <h2 className="whyus-preview-title text-2xl font-bold mb-8">
-            {component.title?.en || 'Why Choose Us'}
+            {previewText(component.title, 'Why Choose Us')}
           </h2>
 
           <div className="whyus-preview-layout">

@@ -1,0 +1,65 @@
+ Container pos-dev-frontend-install-run-484b085d7438 Creating 
+ Container pos-dev-frontend-install-run-484b085d7438 Created 
+src/app/[locale]/dashboard/theme-builder/components/ComponentBuilder.tsx(66,7): error TS2353: Object literal may only specify known properties, and 'order' does not exist in type 'ComponentConfig'.
+src/app/[locale]/dashboard/theme-builder/components/LivePreview.tsx(135,27): error TS2322: Type 'ComponentConfig' is not assignable to type 'ThemeComponent'.
+  Types of property 'id' are incompatible.
+    Type 'string' is not assignable to type 'number'.
+src/app/[locale]/dashboard/theme-builder/editor/components/EditorPreview.tsx(179,35): error TS2339: Property 'infoCards' does not exist on type '{ hero: { title: { en: string; ar: string; }; subtitle: { en: string; ar: string; }; description: { en: string; ar: string; }; buttonText: { en: string; ar: string; }; ctaText: { en: string; ar: string; }; backgroundImage: string; }; ... 5 more ...; footer: { ...; }; }'.
+src/app/[locale]/dashboard/theme-builder/import/page.tsx(80,9): error TS2322: Type 'GlobalColors | undefined' is not assignable to type 'GlobalColors'.
+  Type 'undefined' is not assignable to type 'GlobalColors'.
+src/app/[locale]/dashboard/theme-builder/import/page.tsx(81,9): error TS2322: Type 'TypographySettings | undefined' is not assignable to type 'TypographySettings'.
+  Type 'undefined' is not assignable to type 'TypographySettings'.
+src/components/TenantSelectorModal.tsx(5,25): error TS2307: Cannot find module '@/hooks/useAuth' or its corresponding type declarations.
+src/components/editors/CTAEditor.tsx(556,33): error TS2339: Property 'en' does not exist on type 'string'.
+src/components/editors/CTAEditor.tsx(559,24): error TS2339: Property 'subtitle' does not exist on type 'ComponentConfig'.
+src/components/editors/CTAEditor.tsx(561,28): error TS2339: Property 'subtitle' does not exist on type 'ComponentConfig'.
+src/components/editors/FooterEditor.tsx(37,11): error TS2430: Interface 'FooterConfig' incorrectly extends interface 'import("/app/apps/dashboard/src/types/theme").FooterConfig'.
+  Types of property 'layout' are incompatible.
+    Type '"expanded" | "compact" | "minimal" | undefined' is not assignable to type '"expanded" | "compact" | undefined'.
+      Type '"minimal"' is not assignable to type '"expanded" | "compact" | undefined'.
+src/components/editors/FooterEditor.tsx(440,52): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+src/components/editors/FooterEditor.tsx(454,54): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'SetStateAction<string | null>'.
+  Type 'undefined' is not assignable to type 'SetStateAction<string | null>'.
+src/components/editors/FooterEditor.tsx(460,50): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+src/components/editors/FooterEditor.tsx(490,51): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+src/components/editors/FooterEditor.tsx(502,51): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+src/components/editors/FooterEditor.tsx(507,49): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+src/components/editors/HeaderEditor.tsx(290,40): error TS2339: Property 'shadow' does not exist on type 'HeaderConfig'.
+src/components/editors/HeaderEditor.tsx(455,39): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+src/components/editors/HeaderEditor.tsx(475,40): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'SetStateAction<string | null>'.
+  Type 'undefined' is not assignable to type 'SetStateAction<string | null>'.
+src/components/editors/HeaderEditor.tsx(486,50): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+src/components/editors/HeaderEditor.tsx(493,50): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+src/components/editors/HeaderEditor.tsx(500,52): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+src/components/editors/HeaderEditor.tsx(588,37): error TS2339: Property 'shadow' does not exist on type 'HeaderConfig'.
+src/components/editors/HeaderEditor.tsx(589,51): error TS2345: Argument of type '"shadow"' is not assignable to parameter of type 'keyof HeaderConfig'.
+src/components/editors/HeroEditor.tsx(466,73): error TS2339: Property 'en' does not exist on type 'string'.
+src/components/editors/HeroEditor.tsx(467,64): error TS2339: Property 'subtitle' does not exist on type 'ComponentConfig'.
+src/components/editors/ProductGridEditor.tsx(529,31): error TS2339: Property 'en' does not exist on type 'string'.
+src/components/editors/TestimonialsEditor.tsx(634,33): error TS2339: Property 'en' does not exist on type 'string'.
+src/components/editors/WhyUsEditor.tsx(539,31): error TS2339: Property 'en' does not exist on type 'string'.
+src/components/notifications/NotificationBell.tsx(6,28): error TS2305: Module '"@/hooks/useNotifications"' has no exported member 'LowStockProduct'.
+src/components/notifications/NotificationBell.tsx(11,26): error TS2339: Property 'count' does not exist on type '{ notifications: Notification[]; unreadCount: number; totalCount: number; loading: boolean; error: string | null; stats: NotificationStats | null; fetchNotifications: (filters?: NotificationFilters, forceRefresh?: boolean) => Promise<...>; ... 7 more ...; clearAllCaches: () => void; }'.
+src/components/notifications/NotificationBell.tsx(25,26): error TS2559: Type 'true' has no properties in common with type 'NotificationFilters'.
+src/components/notifications/NotificationBell.tsx(31,28): error TS2559: Type 'true' has no properties in common with type 'NotificationFilters'.
+src/hooks/useNotifications.ts(154,18): error TS2339: Property 'remove' does not exist on type 'APICache'.
+src/hooks/useNotifications.ts(181,18): error TS2339: Property 'remove' does not exist on type 'APICache'.
+src/hooks/useNotifications.ts(205,16): error TS2339: Property 'remove' does not exist on type 'APICache'.
+src/hooks/useNotifications.ts(228,16): error TS2339: Property 'remove' does not exist on type 'APICache'.
+src/hooks/useNotifications.ts(237,16): error TS2339: Property 'remove' does not exist on type 'APICache'.
+src/hooks/useNotifications.ts(244,14): error TS2339: Property 'remove' does not exist on type 'APICache'.
+src/lib/utils/themeAdvancedUtils.ts(25,5): error TS2322: Type '{ id: number; type: ComponentType; title: string; displayOrder: number; enabled: boolean; config?: Record<string, any> | undefined; settings?: Record<string, any> | undefined; styles?: Record<...> | undefined; createdAt?: string | undefined; updatedAt?: string | undefined; }[]' is not assignable to type 'ComponentConfig[]'.
+  Type '{ id: number; type: ComponentType; title: string; displayOrder: number; enabled: boolean; config?: Record<string, any>; settings?: Record<string, any>; styles?: Record<string, any>; createdAt?: string; updatedAt?: string; }' is not assignable to type 'ComponentConfig'.
+    Types of property 'id' are incompatible.
+      Type 'number' is not assignable to type 'string'.
+src/types/version-history.ts(6,15): error TS2305: Module '"./theme"' has no exported member 'Theme'.
+

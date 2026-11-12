@@ -1,0 +1,243 @@
+go: downloading github.com/DATA-DOG/go-sqlmock v1.5.2
+# pos-saas/internal/sharding
+internal/sharding/migration.go:174:2: log.Printf format %d has arg time.Since(m.progress.StartTime).Seconds() of wrong type float64
+ok  	pos-saas/cmd/api	0.021s
+?   	pos-saas/cmd/hash	[no test files]
+?   	pos-saas/cmd/migrate	[no test files]
+?   	pos-saas/cmd/migrate-shard	[no test files]
+?   	pos-saas/cmd/seed-themes	[no test files]
+?   	pos-saas/internal/auth	[no test files]
+ok  	pos-saas/internal/config	0.008s
+--- FAIL: TestSlugValidation (0.00s)
+    --- FAIL: TestSlugValidation/single_char (0.00s)
+        theme_test.go:143: isValidSlug("a") = false, want true
+FAIL
+FAIL	pos-saas/internal/domain	0.014s
+2026/11/01 21:11:38 [HR-Salary] MarkAsPaid: tenantID=1, restaurantID=2, id=44, paidBy=88
+2026/11/01 21:11:38 [HR-Salary] MarkAsPaid SUCCESS: id=44
+--- FAIL: TestKDSFlowDisplayBumpAndStatusUpdate (0.00s)
+    kds_flow_e2e_test.go:150: queue step failed: 500 body={"error":"Failed to fetch KDS queue"}
+    kds_flow_e2e_test.go:22: unmet sql expectations: there is a remaining expectation which was not matched: ExpectedBegin => expecting database transaction Begin
+2026/11/01 21:11:38 [KDS] bump failed: tenant=1 restaurant=2 queue=77 user=9 err=failed to scan kds order: sql: expected 20 destination arguments in Scan, not 21
+--- FAIL: TestKDSHandlerBumpOrderSuccess (0.00s)
+    kds_handler_test.go:181: expected 200, got 500 body={"error":"Failed to bump KDS order"}
+2026/11/01 21:11:38 [ReportHandler] WARN: failed to audit report export: context deadline exceeded
+2026/11/01 21:11:38 [TENANT MIDDLEWARE] Missing tenant context for POST /api/v1/reports/export
+2026/11/01 21:11:38 [HR-Salary] MarkAsPaid: tenantID=1, restaurantID=2, id=55, paidBy=108
+2026/11/01 21:11:38 [HR-Salary] MarkAsPaid SUCCESS: id=55
+FAIL
+FAIL	pos-saas/internal/handler/http	0.063s
+# pos-saas/internal/validation [pos-saas/internal/validation.test]
+internal/validation/theme_validator_test.go:9:7: undefined: NewThemeValidator
+internal/validation/theme_validator_test.go:13:13: undefined: models
+internal/validation/theme_validator_test.go:20:10: undefined: models
+internal/validation/theme_validator_test.go:22:13: undefined: models
+internal/validation/theme_validator_test.go:31:17: undefined: models
+internal/validation/theme_validator_test.go:37:15: undefined: models
+internal/validation/theme_validator_test.go:53:10: undefined: models
+internal/validation/theme_validator_test.go:55:13: undefined: models
+internal/validation/theme_validator_test.go:64:17: undefined: models
+internal/validation/theme_validator_test.go:70:15: undefined: models
+internal/validation/theme_validator_test.go:70:15: too many errors
+# pos-saas/tests/integration_test [pos-saas/tests/integration.test]
+tests/integration/sharding_integration_test.go:64:41: not enough arguments in call to tokenService.GenerateToken
+	have (*"pos-saas/internal/pkg/jwt".Claims)
+	want (int, int, *int, string, string)
+tests/integration/sharding_integration_test.go:142:42: not enough arguments in call to tokenService.GenerateToken
+	have (*"pos-saas/internal/pkg/jwt".Claims)
+	want (int, int, *int, string, string)
+tests/integration/sharding_integration_test.go:337:9: too many return values
+	have (*"pos-saas/internal/pkg/jwt".TokenService, error)
+	want (*"pos-saas/internal/pkg/jwt".TokenService)
+tests/integration/sharding_integration_test.go:337:29: not enough arguments in call to jwt.NewTokenService
+	have (string)
+	want (string, string)
+# pos-saas/tests/security
+# [pos-saas/tests/security]
+tests/security/tenant_isolation_test.go:359:1: ExampleUsageInHandler refers to unknown identifier: UsageInHandler
+# pos-saas/tests/unit/auth_test [pos-saas/tests/unit/auth.test]
+tests/unit/auth/jwt_test.go:300:2: declared and not used: expiredToken
+tests/unit/auth/jwt_test.go:304:2: declared and not used: validToken
+# pos-saas/tests/unit/middleware_test [pos-saas/tests/unit/middleware.test]
+tests/unit/middleware/sharding_test.go:5:2: "database/sql" imported and not used
+tests/unit/middleware/sharding_test.go:307:2: declared and not used: claims
+# pos-saas/tests/unit/security_test [pos-saas/tests/unit/security.test]
+tests/unit/security/rls_test.go:149:111: too many arguments in call to rm.LogSecurityEvent
+	have (context.Context, *sql.Conn, int64, string, string, string)
+	want (context.Context, *sql.Conn, int64, string, string)
+# pos-saas/tests/unit/sharding_test [pos-saas/tests/unit/sharding.test]
+tests/unit/sharding/health_test.go:12:12: undefined: createTestShardRouter
+tests/unit/sharding/health_test.go:26:12: undefined: createTestShardRouter
+tests/unit/sharding/health_test.go:49:12: undefined: createTestShardRouter
+tests/unit/sharding/health_test.go:70:12: undefined: createTestShardRouter
+tests/unit/sharding/health_test.go:96:12: undefined: createTestShardRouter
+tests/unit/sharding/health_test.go:124:12: undefined: createTestShardRouter
+tests/unit/sharding/health_test.go:148:12: undefined: createTestShardRouter
+tests/unit/sharding/health_test.go:163:2: declared and not used: expectedRate
+tests/unit/sharding/health_test.go:173:12: undefined: createTestShardRouter
+tests/unit/sharding/health_test.go:195:12: undefined: createTestShardRouter
+tests/unit/sharding/health_test.go:195:12: too many errors
+# pos-saas/tests/unit/scaling_test [pos-saas/tests/unit/scaling.test]
+tests/unit/scaling/autoscaler_test.go:30:15: too many arguments in call to as.CreateScalingPolicy
+	have (string, string, number, number, number, number, number, number, number, number)
+	want (string, string, int, int, int, int, int, int, time.Duration)
+tests/unit/scaling/autoscaler_test.go:68:15: too many arguments in call to as.CreateScalingPolicy
+	have (string, string, number, number, number, number, number, number, number, number)
+	want (string, string, int, int, int, int, int, int, time.Duration)
+tests/unit/scaling/autoscaler_test.go:92:15: too many arguments in call to as.CreateScalingPolicy
+	have (string, string, number, number, number, number, number, number, number, number)
+	want (string, string, int, int, int, int, int, int, time.Duration)
+tests/unit/scaling/autoscaler_test.go:100:3: too many arguments in call to as.UpdateScalingPolicy
+	have (string, *int, nil, nil, nil, nil)
+	want (string, int, int)
+tests/unit/scaling/autoscaler_test.go:109:19: updatedPolicy.ScaleUpThreshold undefined (type error has no field or method ScaleUpThreshold)
+tests/unit/scaling/autoscaler_test.go:110:68: updatedPolicy.ScaleUpThreshold undefined (type error has no field or method ScaleUpThreshold)
+tests/unit/scaling/autoscaler_test.go:124:15: too many arguments in call to as.CreateScalingPolicy
+	have (string, string, number, number, number, number, number, number, number, number)
+	want (string, string, int, int, int, int, int, int, time.Duration)
+tests/unit/scaling/autoscaler_test.go:148:15: too many arguments in call to as.CreateScalingPolicy
+	have (string, string, number, number, number, number, number, number, number, number)
+	want (string, string, int, int, int, int, int, int, time.Duration)
+tests/unit/scaling/autoscaler_test.go:151:2: not enough arguments in call to as.Start
+	have ()
+	want (context.Context)
+tests/unit/scaling/autoscaler_test.go:157:9: as.IsRunning undefined (type *scaling.AutoScaler has no field or method IsRunning, but does have unexported field isRunning)
+tests/unit/scaling/autoscaler_test.go:157:9: too many errors
+--- FAIL: TestKDSHubBroadcastRoutesMessageToMatchingRoom (2.00s)
+    kds_hub_test.go:46: timed out waiting for matching-room broadcast payload
+FAIL
+FAIL	pos-saas/internal/handler/ws	2.017s
+ok  	pos-saas/internal/middleware	0.010s
+?   	pos-saas/internal/observability	[no test files]
+?   	pos-saas/internal/pkg/database	[no test files]
+?   	pos-saas/internal/pkg/jwt	[no test files]
+--- FAIL: TestGetQueueAppliesStatusFilter (0.00s)
+    kds_repo_test.go:237: GetQueue returned error: failed to fetch kds queue: Query: could not match actual sql: "SELECT k.id, k.tenant_id, k.restaurant_id, k.order_id, k.order_number, COALESCE(o.order_source, ''), k.customer_name, k.status, k.priority, k.station_id, k.items, k.notes, k.received_at, k.started_at, k.completed_at, k.bumped_by, k.created_at, k.updated_at, o.table_id, t.table_number, COALESCE(t.name, '') FROM kds_queue k LEFT JOIN orders o ON o.id = k.order_id AND o.tenant_id = k.tenant_id AND o.restaurant_id = k.restaurant_id LEFT JOIN restaurant_tables t ON t.id = o.table_id AND t.tenant_id = o.tenant_id AND t.restaurant_id = o.restaurant_id WHERE k.tenant_id = $1 AND k.restaurant_id = $2 AND k.status IN ($3,$4) ORDER BY k.priority DESC, k.received_at ASC" with expected regexp "FROM kds_queue\s+WHERE tenant_id = \$1 AND restaurant_id = \$2\s+AND status IN \(\$3,\$4\)\s+ORDER BY priority DESC, received_at ASC"
+    kds_repo_test.go:48: unmet sql expectations: there is a remaining expectation which was not matched: ExpectedQuery => expecting Query, QueryContext or QueryRow which:
+          - matches sql: 'FROM kds_queue\s+WHERE tenant_id = \$1 AND restaurant_id = \$2\s+AND status IN \(\$3,\$4\)\s+ORDER BY priority DESC, received_at ASC'
+          - is with arguments:
+            0 - 10
+            1 - 20
+            2 - new
+            3 - ready
+          - should return rows:
+            row 0 - [5 10 20 50 ORD-2001 website Bob ready 0 expo [91 93]  2026-11-01 21:09:38.375437848 +0000 UTC <nil> <nil> <nil> 2026-11-01 21:09:38.375437848 +0000 UTC 2026-11-01 21:09:38.375437848 +0000 UTC <nil> <nil> <nil>]
+--- FAIL: TestPhase6SQLInjection_ListJournalEntriesTreatsInjectedFiltersAsParameters (0.00s)
+    phase6_sql_injection_test.go:37: ListJournalEntries returned error: sql: no rows in result set
+--- FAIL: TestPhase6TenantIsolation_PerformanceReviewRepositoryListUsesTenantAndRestaurantScope (0.00s)
+    phase6_tenant_isolation_test.go:284: List returned error: sql: no rows in result set
+--- FAIL: TestThemeRepositoryNullHandling (0.00s)
+    --- FAIL: TestThemeRepositoryNullHandling/partial_nil (0.00s)
+        theme_repository_test.go:228: NULL handling: got allNil=false, want true
+--- FAIL: TestThemeRepositorySlugUniqueness (0.00s)
+    --- FAIL: TestThemeRepositorySlugUniqueness/same_slug_same_tenant (0.00s)
+        theme_repository_test.go:292: Slug conflict: got false, want true
+    --- FAIL: TestThemeRepositorySlugUniqueness/same_slug_different_tenant (0.00s)
+        theme_repository_test.go:292: Slug conflict: got true, want false
+FAIL
+FAIL	pos-saas/internal/repository	0.018s
+?   	pos-saas/internal/scaling	[no test files]
+?   	pos-saas/internal/security	[no test files]
+ok  	pos-saas/internal/service	0.007s
+FAIL	pos-saas/internal/sharding [build failed]
+2026/11/01 21:11:39 [AccountingAutoPost] posted code=ORDER_PAID entry_type=auto_sales ref=order:501 tenant=10 restaurant=20 journal_id=7001
+2026/11/01 21:11:39 [AccountingAutoPost] posted code=SALARY_PAID entry_type=auto_payroll ref=salary:88 tenant=10 restaurant=20 journal_id=7002
+--- FAIL: TestKDSUseCaseGetQueueAppliesDefaultStatuses (0.00s)
+    kds_usecase_test.go:94: GetQueue returned error: failed to scan kds order: sql: expected 20 destination arguments in Scan, not 21
+--- FAIL: TestKDSUseCaseBumpOrderBroadcastsUpdates (0.00s)
+    kds_usecase_test.go:179: BumpOrder returned error: failed to scan kds order: sql: expected 20 destination arguments in Scan, not 21
+--- FAIL: TestKDSUseCaseRecallOrderBroadcastsUpdates (0.00s)
+    kds_usecase_test.go:239: RecallOrder returned error: failed to scan kds order: sql: expected 20 destination arguments in Scan, not 21
+2026/11/01 21:11:39 [PaymentUseCase] InitiatePayment - tenant_id: 1, plan_id: monthly
+2026/11/01 21:11:39 [PaymentUseCase] InitiatePayment - tenant_id: 1, plan_id: invalid-plan
+2026/11/01 21:11:39 [PaymentUseCase] HandleWebhook idempotent skip - payment_id: 1
+2026/11/01 21:11:39 [PaymentUseCase] InitiatePayment - tenant_id: 1, plan_id: monthly
+2026/11/01 21:11:39 [PaymentUseCase] InitiatePayment - tenant_id: 1, plan_id: monthly
+2026/11/01 21:11:39 [AccountingAutoPost] posted code=ORDER_PAID entry_type=auto_sales ref=order:701 tenant=10 restaurant=20 journal_id=9101
+2026/11/01 21:11:39 [AccountingAutoPost] posted code=SALARY_PAID entry_type=auto_payroll ref=salary:801 tenant=10 restaurant=20 journal_id=9102
+2026/11/01 21:11:39 [AccountingAutoPost] posted code=ORDER_PAID entry_type=auto_sales ref=order:3001 tenant=10 restaurant=20 journal_id=10001
+2026/11/01 21:11:39 [AccountingAutoPost] posted code=ORDER_PAID entry_type=auto_sales ref=order:3002 tenant=10 restaurant=20 journal_id=10002
+2026/11/01 21:11:39 [AccountingAutoPost] posted code=ORDER_PAID entry_type=auto_sales ref=order:3003 tenant=10 restaurant=20 journal_id=10003
+2026/11/01 21:11:39 [AccountingAutoPost] posted code=ORDER_PAID entry_type=auto_sales ref=order:3004 tenant=10 restaurant=20 journal_id=10004
+2026/11/01 21:11:39 [AccountingAutoPost] posted code=ORDER_PAID entry_type=auto_sales ref=order:3005 tenant=10 restaurant=20 journal_id=10005
+2026/11/01 21:11:39 [AccountingAutoPost] posted code=ORDER_PAID entry_type=auto_sales ref=order:3006 tenant=10 restaurant=20 journal_id=10006
+2026/11/01 21:11:39 [AccountingAutoPost] posted code=ORDER_PAID entry_type=auto_sales ref=order:3007 tenant=10 restaurant=20 journal_id=10007
+2026/11/01 21:11:39 [AccountingAutoPost] posted code=ORDER_PAID entry_type=auto_sales ref=order:3008 tenant=10 restaurant=20 journal_id=10008
+2026/11/01 21:11:39 [AccountingAutoPost] posted code=ORDER_PAID entry_type=auto_sales ref=order:3009 tenant=10 restaurant=20 journal_id=10009
+2026/11/01 21:11:39 [AccountingAutoPost] posted code=ORDER_PAID entry_type=auto_sales ref=order:3010 tenant=10 restaurant=20 journal_id=10010
+2026/11/01 21:11:39 [AccountingAutoPost] posted code=ORDER_PAID entry_type=auto_sales ref=order:3011 tenant=10 restaurant=20 journal_id=10011
+2026/11/01 21:11:39 [AccountingAutoPost] posted code=ORDER_PAID entry_type=auto_sales ref=order:3012 tenant=10 restaurant=20 journal_id=10012
+2026/11/01 21:11:39 [AccountingAutoPost] posted code=ORDER_PAID entry_type=auto_sales ref=order:3013 tenant=10 restaurant=20 journal_id=10013
+2026/11/01 21:11:39 [AccountingAutoPost] posted code=ORDER_PAID entry_type=auto_sales ref=order:3014 tenant=10 restaurant=20 journal_id=10014
+2026/11/01 21:11:39 [AccountingAutoPost] posted code=ORDER_PAID entry_type=auto_sales ref=order:3015 tenant=10 restaurant=20 journal_id=10015
+2026/11/01 21:11:39 [AccountingAutoPost] posted code=ORDER_PAID entry_type=auto_sales ref=order:3016 tenant=10 restaurant=20 journal_id=10016
+2026/11/01 21:11:39 [AccountingAutoPost] posted code=ORDER_PAID entry_type=auto_sales ref=order:3017 tenant=10 restaurant=20 journal_id=10017
+2026/11/01 21:11:39 [AccountingAutoPost] posted code=ORDER_PAID entry_type=auto_sales ref=order:3018 tenant=10 restaurant=20 journal_id=10018
+2026/11/01 21:11:39 [AccountingAutoPost] posted code=ORDER_PAID entry_type=auto_sales ref=order:3019 tenant=10 restaurant=20 journal_id=10019
+2026/11/01 21:11:39 [AccountingAutoPost] posted code=ORDER_PAID entry_type=auto_sales ref=order:3020 tenant=10 restaurant=20 journal_id=10020
+2026/11/01 21:11:39 [AccountingAutoPost] posted code=ORDER_PAID entry_type=auto_sales ref=order:3021 tenant=10 restaurant=20 journal_id=10021
+2026/11/01 21:11:39 [AccountingAutoPost] posted code=ORDER_PAID entry_type=auto_sales ref=order:3022 tenant=10 restaurant=20 journal_id=10022
+2026/11/01 21:11:39 [AccountingAutoPost] posted code=ORDER_PAID entry_type=auto_sales ref=order:3023 tenant=10 restaurant=20 journal_id=10023
+2026/11/01 21:11:39 [AccountingAutoPost] posted code=ORDER_PAID entry_type=auto_sales ref=order:3024 tenant=10 restaurant=20 journal_id=10024
+2026/11/01 21:11:39 [AccountingAutoPost] posted code=ORDER_PAID entry_type=auto_sales ref=order:3025 tenant=10 restaurant=20 journal_id=10025
+2026/11/01 21:11:39 [AccountingAutoPost] posted code=ORDER_PAID entry_type=auto_sales ref=order:3026 tenant=10 restaurant=20 journal_id=10026
+2026/11/01 21:11:39 [AccountingAutoPost] posted code=ORDER_PAID entry_type=auto_sales ref=order:3027 tenant=10 restaurant=20 journal_id=10027
+2026/11/01 21:11:39 [AccountingAutoPost] posted code=ORDER_PAID entry_type=auto_sales ref=order:3028 tenant=10 restaurant=20 journal_id=10028
+2026/11/01 21:11:39 [AccountingAutoPost] posted code=ORDER_PAID entry_type=auto_sales ref=order:3029 tenant=10 restaurant=20 journal_id=10029
+2026/11/01 21:11:39 [AccountingAutoPost] posted code=ORDER_PAID entry_type=auto_sales ref=order:3030 tenant=10 restaurant=20 journal_id=10030
+2026/11/01 21:11:39 [AccountingAutoPost] posted code=ORDER_PAID entry_type=auto_sales ref=order:3031 tenant=10 restaurant=20 journal_id=10031
+2026/11/01 21:11:39 [AccountingAutoPost] posted code=ORDER_PAID entry_type=auto_sales ref=order:3032 tenant=10 restaurant=20 journal_id=10032
+2026/11/01 21:11:39 [AccountingAutoPost] posted code=ORDER_PAID entry_type=auto_sales ref=order:3033 tenant=10 restaurant=20 journal_id=10033
+2026/11/01 21:11:39 [AccountingAutoPost] posted code=ORDER_PAID entry_type=auto_sales ref=order:3034 tenant=10 restaurant=20 journal_id=10034
+2026/11/01 21:11:39 [AccountingAutoPost] posted code=ORDER_PAID entry_type=auto_sales ref=order:3035 tenant=10 restaurant=20 journal_id=10035
+2026/11/01 21:11:39 [AccountingAutoPost] posted code=ORDER_PAID entry_type=auto_sales ref=order:3036 tenant=10 restaurant=20 journal_id=10036
+2026/11/01 21:11:39 [AccountingAutoPost] posted code=ORDER_PAID entry_type=auto_sales ref=order:3037 tenant=10 restaurant=20 journal_id=10037
+2026/11/01 21:11:39 [AccountingAutoPost] posted code=ORDER_PAID entry_type=auto_sales ref=order:3038 tenant=10 restaurant=20 journal_id=10038
+2026/11/01 21:11:39 [AccountingAutoPost] posted code=ORDER_PAID entry_type=auto_sales ref=order:3039 tenant=10 restaurant=20 journal_id=10039
+2026/11/01 21:11:39 [AccountingAutoPost] posted code=ORDER_PAID entry_type=auto_sales ref=order:3040 tenant=10 restaurant=20 journal_id=10040
+2026/11/01 21:11:39 [AccountingAutoPost] posted code=ORDER_PAID entry_type=auto_sales ref=order:3041 tenant=10 restaurant=20 journal_id=10041
+2026/11/01 21:11:39 [AccountingAutoPost] posted code=ORDER_PAID entry_type=auto_sales ref=order:3042 tenant=10 restaurant=20 journal_id=10042
+2026/11/01 21:11:39 [AccountingAutoPost] posted code=ORDER_PAID entry_type=auto_sales ref=order:3043 tenant=10 restaurant=20 journal_id=10043
+2026/11/01 21:11:39 [AccountingAutoPost] posted code=ORDER_PAID entry_type=auto_sales ref=order:3044 tenant=10 restaurant=20 journal_id=10044
+2026/11/01 21:11:39 [AccountingAutoPost] posted code=ORDER_PAID entry_type=auto_sales ref=order:3045 tenant=10 restaurant=20 journal_id=10045
+2026/11/01 21:11:39 [AccountingAutoPost] posted code=ORDER_PAID entry_type=auto_sales ref=order:3046 tenant=10 restaurant=20 journal_id=10046
+2026/11/01 21:11:39 [AccountingAutoPost] posted code=ORDER_PAID entry_type=auto_sales ref=order:3047 tenant=10 restaurant=20 journal_id=10047
+2026/11/01 21:11:39 [AccountingAutoPost] posted code=ORDER_PAID entry_type=auto_sales ref=order:3048 tenant=10 restaurant=20 journal_id=10048
+2026/11/01 21:11:39 [AccountingAutoPost] posted code=ORDER_PAID entry_type=auto_sales ref=order:3049 tenant=10 restaurant=20 journal_id=10049
+2026/11/01 21:11:39 [AccountingAutoPost] posted code=ORDER_PAID entry_type=auto_sales ref=order:3050 tenant=10 restaurant=20 journal_id=10050
+2026/11/01 21:11:39 [AccountingAutoPost] posted code=SALARY_PAID entry_type=auto_payroll ref=salary:4001 tenant=10 restaurant=20 journal_id=20001
+2026/11/01 21:11:39 [AccountingAutoPost] posted code=SALARY_PAID entry_type=auto_payroll ref=salary:4002 tenant=10 restaurant=20 journal_id=20002
+2026/11/01 21:11:39 [AccountingAutoPost] posted code=SALARY_PAID entry_type=auto_payroll ref=salary:4003 tenant=10 restaurant=20 journal_id=20003
+2026/11/01 21:11:39 [AccountingAutoPost] posted code=SALARY_PAID entry_type=auto_payroll ref=salary:4004 tenant=10 restaurant=20 journal_id=20004
+2026/11/01 21:11:39 [AccountingAutoPost] posted code=SALARY_PAID entry_type=auto_payroll ref=salary:4005 tenant=10 restaurant=20 journal_id=20005
+2026/11/01 21:11:39 [AccountingAutoPost] posted code=SALARY_PAID entry_type=auto_payroll ref=salary:4006 tenant=10 restaurant=20 journal_id=20006
+2026/11/01 21:11:39 [AccountingAutoPost] posted code=SALARY_PAID entry_type=auto_payroll ref=salary:4007 tenant=10 restaurant=20 journal_id=20007
+2026/11/01 21:11:39 [AccountingAutoPost] posted code=SALARY_PAID entry_type=auto_payroll ref=salary:4008 tenant=10 restaurant=20 journal_id=20008
+2026/11/01 21:11:39 [AccountingAutoPost] posted code=SALARY_PAID entry_type=auto_payroll ref=salary:4009 tenant=10 restaurant=20 journal_id=20009
+2026/11/01 21:11:39 [AccountingAutoPost] posted code=SALARY_PAID entry_type=auto_payroll ref=salary:4010 tenant=10 restaurant=20 journal_id=20010
+2026/11/01 21:11:39 [AccountingAutoPost] posted code=SALARY_PAID entry_type=auto_payroll ref=salary:4011 tenant=10 restaurant=20 journal_id=20011
+2026/11/01 21:11:39 [AccountingAutoPost] posted code=SALARY_PAID entry_type=auto_payroll ref=salary:4012 tenant=10 restaurant=20 journal_id=20012
+2026/11/01 21:11:39 [AccountingAutoPost] posted code=SALARY_PAID entry_type=auto_payroll ref=salary:4013 tenant=10 restaurant=20 journal_id=20013
+2026/11/01 21:11:39 [AccountingAutoPost] posted code=SALARY_PAID entry_type=auto_payroll ref=salary:4014 tenant=10 restaurant=20 journal_id=20014
+2026/11/01 21:11:39 [AccountingAutoPost] posted code=SALARY_PAID entry_type=auto_payroll ref=salary:4015 tenant=10 restaurant=20 journal_id=20015
+2026/11/01 21:11:39 [AccountingAutoPost] posted code=SALARY_PAID entry_type=auto_payroll ref=salary:4016 tenant=10 restaurant=20 journal_id=20016
+2026/11/01 21:11:39 [AccountingAutoPost] posted code=SALARY_PAID entry_type=auto_payroll ref=salary:4017 tenant=10 restaurant=20 journal_id=20017
+2026/11/01 21:11:39 [AccountingAutoPost] posted code=SALARY_PAID entry_type=auto_payroll ref=salary:4018 tenant=10 restaurant=20 journal_id=20018
+2026/11/01 21:11:39 [AccountingAutoPost] posted code=SALARY_PAID entry_type=auto_payroll ref=salary:4019 tenant=10 restaurant=20 journal_id=20019
+2026/11/01 21:11:39 [AccountingAutoPost] posted code=SALARY_PAID entry_type=auto_payroll ref=salary:4020 tenant=10 restaurant=20 journal_id=20020
+2026/11/01 21:11:39 [AccountingAutoPost] posted code=ORDER_PAID entry_type=auto_sales ref=order:9901 tenant=10 restaurant=20 journal_id=9301
+2026/11/01 21:11:39 [AccountingAutoPost] posted code=SALARY_PAID entry_type=auto_payroll ref=salary:9902 tenant=10 restaurant=20 journal_id=9302
+2026/11/01 21:11:39 [AccountingAutoPost] posted code=SUPPLIER_INVOICE entry_type=auto_supplier_invoice ref=supplier_invoice:9903 tenant=10 restaurant=20 journal_id=9303
+2026/11/01 21:11:39 [AccountingAutoPost] posted code=SUPPLIER_PAYMENT entry_type=auto_supplier_payment ref=supplier_payment:9904 tenant=10 restaurant=20 journal_id=9304
+FAIL
+FAIL	pos-saas/internal/usecase	0.159s
+?   	pos-saas/internal/util	[no test files]
+FAIL	pos-saas/internal/validation [build failed]
+FAIL	pos-saas/tests/integration [build failed]
+FAIL	pos-saas/tests/security [build failed]
+FAIL	pos-saas/tests/unit/auth [build failed]
+FAIL	pos-saas/tests/unit/middleware [build failed]
+FAIL	pos-saas/tests/unit/scaling [build failed]
+FAIL	pos-saas/tests/unit/security [build failed]
+FAIL	pos-saas/tests/unit/sharding [build failed]
+FAIL

@@ -383,6 +383,7 @@ export default function BillingSettingsPage() {
             date: t('settings.billingPage.tableDate', 'Date'),
             amount: t('settings.billingPage.tableAmount', 'Amount'),
             status: t('settings.billingPage.tableStatus', 'Status'),
+            voided: t('settings.billingPage.voided', 'Voided'),
             method: t('settings.billingPage.tableMethod', 'Method'),
             card: t('settings.billingPage.tableCard', 'Card'),
             reference: t('settings.billingPage.tableReference', 'Reference'),

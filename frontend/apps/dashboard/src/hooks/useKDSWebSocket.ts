@@ -129,7 +129,7 @@ export const useKDSWebSocket = ({ onOrderNew }: UseKDSWebSocketOptions = {}) => 
     const connect = () => {
       clearReconnectTimer()
 
-      const wsURL = `${baseURL}?token=${encodeURIComponent(token)}`
+      const wsURL = baseURL
       debugLog('[KDS WS] Connecting:', wsURL)
 
       const socket = new WebSocket(wsURL)

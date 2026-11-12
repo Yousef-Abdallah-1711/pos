@@ -2,14 +2,14 @@
 
 import { getConfig } from '@/lib/config'
 import { getLocaleFromPath } from '@/lib/translations'
-import { COOKIE_SESSION_TOKEN } from '@/stores/authStore'
+import { COOKIE_SESSION_MARKER } from '@/stores/authStore'
 
 export const hasAuthenticatedSession = (user: unknown, token: string | null | undefined) => {
   return !!user || !!token
 }
 
 export const hasUsableBearerToken = (token: string | null | undefined) => {
-  return !!token && token !== COOKIE_SESSION_TOKEN
+  return !!token && token !== COOKIE_SESSION_MARKER
 }
 
 export const getDashboardLoginUrl = (pathname?: string) => {

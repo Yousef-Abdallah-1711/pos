@@ -1,0 +1,66 @@
+package main
+
+import (
+	"context"
+	"database/sql"
+	"errors"
+	"fmt"
+	"time"
+)
+
+const (
+	seededSuperAdminEmail      = "superadmin@pos-saas.com"
+	seededSuperAdminLegacyHash = "$2a$10$6tgEoGE0dusUMtJ0RUd4VO3IACTDD2vb0676WfMyPvbVQU9oo2p06"
+)
+
+// isSeededDefaultPassword detects an account that still carries migration 109's legacy hash.
+func isSeededDefaultPassword(hash string) bool {
+	if hash == "" {
+		return false
+	}
+	return hash == seededSuperAdminLegacyHash
+}
+
+// productionStartupGuards refuses to start a production API that is unsafe by default:
+// no database (stub-mode authentication) or the seeded super-admin password still in place.
+func productionStartupGuards(ctx context.Context, db *sql.DB) error {
+	if db == nil {
+		return errors.New("production requires a database connection; stub mode is not allowed")
+	}
+	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
+	defer cancel()
+	if err := requireRestrictedRuntimeRole(ctx, db); err != nil {
+		return fmt.Errorf("unsafe production database role: %w", err)
+	}
+
+	var hash string
+	err := db.QueryRowContext(ctx, `SELECT password_hash FROM users WHERE email = $1`, seededSuperAdminEmail).Scan(&hash)
+	switch {
+	case errors.Is(err, sql.ErrNoRows):
+		return nil
+	case err != nil:
+		return fmt.Errorf("cannot verify seeded super-admin credentials: %w", err)
+	}
+	if isSeededDefaultPassword(hash) {
+		return fmt.Errorf("the seeded super-admin account %q still uses its documented default password; rotate it before starting in production (UPDATE users SET password_hash = <bcrypt hash> WHERE email = '%s')", seededSuperAdminEmail, seededSuperAdminEmail)
+	}
+	return nil
+}
+
+func requireRestrictedRuntimeRole(ctx context.Context, db *sql.DB) error {
+	var role string
+	var isSuperuser, bypassesRLS bool
+	err := db.QueryRowContext(ctx,
+		`SELECT rolname, rolsuper, rolbypassrls FROM pg_roles WHERE rolname = current_user`,
+	).Scan(&role, &isSuperuser, &bypassesRLS)
+	if err != nil {
+		return fmt.Errorf("inspect runtime database role: %w", err)
+	}
+	if role != "pos_app" {
+		return fmt.Errorf("runtime database role must be pos_app, got %q", role)
+	}
+	if isSuperuser || bypassesRLS {
+		return fmt.Errorf("runtime database role %q must not be superuser or BYPASSRLS", role)
+	}
+	return nil
+}

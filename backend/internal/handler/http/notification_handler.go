@@ -71,7 +71,7 @@ func (h *NotificationHandler) CreateNotification(w http.ResponseWriter, r *http.
 		Color:             req.Color,
 	}
 
-	created, err := h.uc.CreateNotification(notification)
+	created, err := h.uc.CreateNotification(r.Context(), notification)
 	if err != nil {
 		fmt.Printf("ERROR: CreateNotification failed: %v\n", err)
 		respondError(w, http.StatusInternalServerError, "Failed to create notification")
@@ -126,7 +126,7 @@ func (h *NotificationHandler) ListNotifications(w http.ResponseWriter, r *http.R
 		SortOrder: sortOrder,
 	}
 
-	response, err := h.uc.ListNotifications(claims.UserID, claims.TenantID, claims.RestaurantID, filters)
+	response, err := h.uc.ListNotifications(r.Context(), claims.UserID, claims.TenantID, claims.RestaurantID, filters)
 	if err != nil {
 		fmt.Printf("ERROR: ListNotifications failed: %v\n", err)
 		respondError(w, http.StatusInternalServerError, "Failed to retrieve notifications")
@@ -147,7 +147,7 @@ func (h *NotificationHandler) GetNotification(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	notification, err := h.uc.GetNotification(claims.UserID, notificationID)
+	notification, err := h.uc.GetNotification(r.Context(), claims.UserID, claims.TenantID, claims.RestaurantID, notificationID)
 	if err != nil {
 		if strings.Contains(err.Error(), "not found") {
 			respondError(w, http.StatusNotFound, "Notification not found")
@@ -171,7 +171,7 @@ func (h *NotificationHandler) MarkAsRead(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	if err := h.uc.MarkAsRead(claims.UserID, notificationID); err != nil {
+	if err := h.uc.MarkAsRead(r.Context(), claims.UserID, claims.TenantID, claims.RestaurantID, notificationID); err != nil {
 		if strings.Contains(err.Error(), "not found") {
 			respondError(w, http.StatusNotFound, "Notification not found")
 		} else {
@@ -194,7 +194,7 @@ func (h *NotificationHandler) MarkAsUnread(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	if err := h.uc.MarkAsUnread(claims.UserID, notificationID); err != nil {
+	if err := h.uc.MarkAsUnread(r.Context(), claims.UserID, claims.TenantID, claims.RestaurantID, notificationID); err != nil {
 		if strings.Contains(err.Error(), "not found") {
 			respondError(w, http.StatusNotFound, "Notification not found")
 		} else {
@@ -211,7 +211,7 @@ func (h *NotificationHandler) MarkAsUnread(w http.ResponseWriter, r *http.Reques
 func (h *NotificationHandler) MarkAllAsRead(w http.ResponseWriter, r *http.Request) {
 	claims := middleware.GetUserClaims(r)
 
-	if err := h.uc.MarkAllAsRead(claims.UserID, claims.TenantID, claims.RestaurantID); err != nil {
+	if err := h.uc.MarkAllAsRead(r.Context(), claims.UserID, claims.TenantID, claims.RestaurantID); err != nil {
 		fmt.Printf("ERROR: MarkAllAsRead failed: %v\n", err)
 		respondError(w, http.StatusInternalServerError, "Failed to mark notifications as read")
 		return
@@ -231,7 +231,7 @@ func (h *NotificationHandler) DeleteNotification(w http.ResponseWriter, r *http.
 		return
 	}
 
-	if err := h.uc.DeleteNotification(claims.UserID, notificationID); err != nil {
+	if err := h.uc.DeleteNotification(r.Context(), claims.UserID, claims.TenantID, claims.RestaurantID, notificationID); err != nil {
 		if strings.Contains(err.Error(), "not found") {
 			respondError(w, http.StatusNotFound, "Notification not found")
 		} else {
@@ -248,7 +248,7 @@ func (h *NotificationHandler) DeleteNotification(w http.ResponseWriter, r *http.
 func (h *NotificationHandler) GetStats(w http.ResponseWriter, r *http.Request) {
 	claims := middleware.GetUserClaims(r)
 
-	stats, err := h.uc.GetNotificationStats(claims.UserID, claims.TenantID, claims.RestaurantID)
+	stats, err := h.uc.GetNotificationStats(r.Context(), claims.UserID, claims.TenantID, claims.RestaurantID)
 	if err != nil {
 		fmt.Printf("ERROR: GetStats failed: %v\n", err)
 		respondError(w, http.StatusInternalServerError, "Failed to retrieve notification stats")
@@ -263,7 +263,7 @@ func (h *NotificationHandler) GetStats(w http.ResponseWriter, r *http.Request) {
 func (h *NotificationHandler) GetUnreadCount(w http.ResponseWriter, r *http.Request) {
 	claims := middleware.GetUserClaims(r)
 
-	count, err := h.uc.GetUnreadCount(claims.UserID, claims.TenantID, claims.RestaurantID)
+	count, err := h.uc.GetUnreadCount(r.Context(), claims.UserID, claims.TenantID, claims.RestaurantID)
 	if err != nil {
 		fmt.Printf("ERROR: GetUnreadCount failed: %v\n", err)
 		respondError(w, http.StatusInternalServerError, "Failed to retrieve unread count")

@@ -2,7 +2,6 @@
 
 import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { getConfig } from '@/lib/config'
 import { useAuthStore } from '@/stores/authStore'
 
 interface Tenant {
@@ -16,6 +15,8 @@ interface Tenant {
 interface TenantSelectorModalProps {
   isOpen: boolean
   email: string
+  /** Proof of password verification returned by POST /auth/login; required by /auth/login/confirm. */
+  selectionToken: string
   tenants: Tenant[]
   onTenantSelected?: (tenantId: number) => void
 }
@@ -23,6 +24,7 @@ interface TenantSelectorModalProps {
 export function TenantSelectorModal({
   isOpen,
   email,
+  selectionToken,
   tenants,
   onTenantSelected,
 }: TenantSelectorModalProps) {
@@ -42,7 +44,7 @@ export function TenantSelectorModal({
     setError(null)
 
     try {
-      const response = await fetch(`${getConfig().apiUrl}/auth/login/confirm`, {
+      const response = await fetch('/api/v1/auth/login/confirm', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -50,6 +52,7 @@ export function TenantSelectorModal({
         body: JSON.stringify({
           email,
           tenant_id: tenantId,
+          selection_token: selectionToken,
         }),
       })
 
@@ -60,8 +63,9 @@ export function TenantSelectorModal({
 
       const data = await response.json()
 
-      if (data.user) {
-        setAuth(data.user, data.token ?? null)
+      // Store token and user in the auth store (it persists them)
+      if (data.token && data.user) {
+        setAuth(data.user, data.token)
       }
 
       // Call callback if provided

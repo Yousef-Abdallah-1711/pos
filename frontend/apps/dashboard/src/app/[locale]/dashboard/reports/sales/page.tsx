@@ -294,7 +294,7 @@ export default function SalesReportsPage() {
                   <XAxis dataKey="bucket" tick={{ fontSize: 12 }} />
                   <YAxis tickFormatter={(value) => compactCurrency(value)} tick={{ fontSize: 12 }} />
                   <Tooltip
-                    formatter={(value: number, name: string) => [
+                    formatter={(value, name) => [
                       name === 'revenue' ? currencyFormatter.format(Number(value)) : numberFormatter.format(Number(value)),
                       name === 'revenue' ? labels.revenue : labels.orders,
                     ]}
@@ -315,7 +315,7 @@ export default function SalesReportsPage() {
                         <Cell key={`cell-${index}`} fill={CATEGORY_COLORS[index % CATEGORY_COLORS.length]} />
                       ))}
                     </Pie>
-                    <Tooltip formatter={(value: number) => currencyFormatter.format(Number(value))} />
+                    <Tooltip formatter={(value) => currencyFormatter.format(Number(value))} />
                   </PieChart>
                 </ResponsiveContainer>
               </div>
@@ -345,7 +345,7 @@ export default function SalesReportsPage() {
                 <YAxis tickFormatter={(value) => compactCurrency(value)} tick={{ fontSize: 12 }} />
                 <Tooltip
                   labelFormatter={(label) => `${label}:00`}
-                  formatter={(value: number, name: string) => [
+                  formatter={(value, name) => [
                     name === 'revenue' ? currencyFormatter.format(Number(value)) : numberFormatter.format(Number(value)),
                     name === 'revenue' ? labels.revenue : labels.orders,
                   ]}

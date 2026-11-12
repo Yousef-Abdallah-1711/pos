@@ -1,0 +1,36 @@
+date: 2026-11-01T22:29:56+02:00
+branch: master
+HEAD: 899dce68f81e4a1f8efc3b77e5a6957b3e96c3ba
+--- status
+ M .gitignore
+D  Dockerfile.dashboard
+D  Dockerfile.landing
+ M README.md
+ M backend/docker-entrypoint.sh
+ M docker-compose.test.yml
+ M docker-compose.yml
+D  frontend/apps/dashboard/Dockerfile
+ M frontend/apps/dashboard/next.config.js
+D  frontend/apps/landing/Dockerfile
+ M frontend/apps/landing/next.config.js
+ M frontend/apps/restaurant-website/next.config.js
+ M frontend/apps/super-admin/next.config.js
+?? .env.prod.example
+?? .gitattributes
+?? audit-reports/
+?? backend/Dockerfile.dev
+?? backend/docker-entrypoint.dev.sh
+?? docker-compose.prod.yml
+?? frontend/.dockerignore
+?? frontend/Dockerfile.dev
+?? frontend/Dockerfile.prod
+--- diff stat
+ .gitignore                                      |   3 +
+ README.md                                       |   5 +
+ docker-compose.test.yml                         |   7 +-
+ docker-compose.yml                              | 186 ++++++++++++++----------
+ frontend/apps/dashboard/next.config.js          |   2 +
+ frontend/apps/landing/next.config.js            |   1 +
+ frontend/apps/restaurant-website/next.config.js |   2 +
+ frontend/apps/super-admin/next.config.js        |   5 +
+ 8 files changed, 135 insertions(+), 76 deletions(-)

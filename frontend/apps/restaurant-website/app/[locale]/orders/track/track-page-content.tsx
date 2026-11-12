@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { OrderStatusTracker, type OrderStatus } from '@/components/commerce/order-status-tracker';
 import { Button } from '@pos-saas/ui';
@@ -100,16 +100,18 @@ export default function TrackPageContent({ initialOrderNumber }: TrackPageConten
   const pathname = usePathname();
   const locale = getLocaleFromPath(pathname);
   const isRTL = locale === 'ar';
-  const t = createTranslator(locale);
+  const t = useMemo(() => createTranslator(locale), [locale]);
 
   const [orderNumber, setOrderNumber] = useState('');
+  // Phone used at checkout: proves ownership when the order was placed from another device
+  const [phone, setPhone] = useState('');
   const [searchSubmitted, setSearchSubmitted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [trackedOrder, setTrackedOrder] = useState<TrackedOrder | null>(null);
   const [statusTimeline, setStatusTimeline] = useState<OrderStatus[]>([]);
 
-  const fetchOrder = async (numberValue: string) => {
+  const fetchOrder = useCallback(async (numberValue: string) => {
     const trimmed = numberValue.trim();
     if (!trimmed) return;
 
@@ -117,8 +119,10 @@ export default function TrackPageContent({ initialOrderNumber }: TrackPageConten
     setError(null);
 
     try {
+      const proofHeaders = phone.trim() ? { 'X-Customer-Phone': phone.trim() } : undefined;
       const orderResponse = await apiClient.get<any>(
         `/public/orders/number/${encodeURIComponent(trimmed)}/lookup`,
+        proofHeaders ? { headers: proofHeaders } : undefined,
       );
       const orderData = orderResponse?.data ?? orderResponse;
       const normalizedOrder = normalizeOrder(orderData);
@@ -130,7 +134,10 @@ export default function TrackPageContent({ initialOrderNumber }: TrackPageConten
       setTrackedOrder(normalizedOrder);
 
       if (orderData?.id) {
-        const trackResponse = await apiClient.get<any>(`/public/orders/${orderData.id}/track`);
+        const trackResponse = await apiClient.get<any>(
+          `/public/orders/${orderData.id}/track`,
+          proofHeaders ? { headers: proofHeaders } : undefined,
+        );
         const trackData = trackResponse?.data ?? trackResponse;
         const history = Array.isArray(trackData?.status_history) ? trackData.status_history : [];
         setStatusTimeline(buildTimeline(history));
@@ -148,7 +155,7 @@ export default function TrackPageContent({ initialOrderNumber }: TrackPageConten
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [phone, t]);
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -171,7 +178,7 @@ export default function TrackPageContent({ initialOrderNumber }: TrackPageConten
     setOrderNumber(initialOrderNumber);
     setSearchSubmitted(true);
     fetchOrder(initialOrderNumber);
-  }, [initialOrderNumber]);
+  }, [fetchOrder, initialOrderNumber]);
 
   const getEstimatedTime = () => {
     if (!trackedOrder?.estimatedDelivery) {
@@ -210,6 +217,16 @@ export default function TrackPageContent({ initialOrderNumber }: TrackPageConten
                 placeholder={t('orderTracking.searchPlaceholder')}
                 value={orderNumber}
                 onChange={(e) => setOrderNumber(e.target.value)}
+                className={`flex-1 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary dark:bg-gray-700 dark:text-white ${isRTL ? 'text-right' : ''}`}
+              />
+              <input
+                type="tel"
+                inputMode="tel"
+                autoComplete="tel"
+                aria-label={isRTL ? 'رقم الهاتف المستخدم في الطلب' : 'Phone number used for the order'}
+                placeholder={isRTL ? 'رقم الهاتف (مطلوب من جهاز آخر)' : 'Phone used at checkout (needed on another device)'}
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
                 className={`flex-1 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary dark:bg-gray-700 dark:text-white ${isRTL ? 'text-right' : ''}`}
               />
               <Button type="submit" disabled={isLoading} className={`px-6 py-3 ${isRTL ? 'flex-row-reverse' : ''}`}>

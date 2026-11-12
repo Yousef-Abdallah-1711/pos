@@ -1,7 +1,7 @@
 'use client'
 
 import { Suspense, useEffect, useState, useRef } from 'react'
-import { usePathname } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { useAuthStore } from '@/stores/authStore'
 import { usePreferencesStore } from '@/stores/preferencesStore'
@@ -12,14 +12,14 @@ import { Sidebar } from '@/components/layout/Sidebar'
 import { LanguageSwitcher } from '@/components/layout/LanguageSwitcher'
 import { NotificationCenter } from '@/components/notifications/NotificationCenter'
 import { createTranslator, getLocaleFromPath } from '@/lib/translations'
-import { getDashboardLoginUrl } from '@/lib/authSession'
 import { debugError } from '@/lib/debug'
 import { getConfig } from '@/lib/config'
+import api from '@/lib/api'
 import { commonRoutes, preloadRoutes } from '@/lib/code-splitting'
 import { TrialWarningBanner } from '@/components/layout/TrialWarningBanner'
 import { useTenantStatus } from '@/hooks/useTenantStatus'
 import { BlockedOverlay } from '@/components/blocked/BlockedOverlay'
-import { authFetch } from '@/lib/authFetch'
+import { toast } from 'sonner'
 
 export default function DashboardLayout({
   children,
@@ -29,7 +29,9 @@ export default function DashboardLayout({
   const pathname = usePathname()
   const locale = getLocaleFromPath(pathname)
   const t = createTranslator(locale)
+  const router = useRouter()
   const user = useAuthStore((state) => state.user)
+  const token = useAuthStore((state) => state.token)
   const logout = useAuthStore((state) => state.logout)
   const { settings, setSettings, setLoading, updateTheme } = usePreferencesStore()
   const { resolvedTheme, setTheme } = useTheme()
@@ -37,9 +39,10 @@ export default function DashboardLayout({
   const [isSidebarMobileOpen, setIsSidebarMobileOpen] = useState(false)
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
+  const isLoggingOut = useRef(false)
   const { isBlocked, blockReason } = useTenantStatus()
 
-  const isLoggedIn = !!user
+  const isLoggedIn = !!(user && token)
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -68,15 +71,15 @@ export default function DashboardLayout({
   }, [])
 
   useEffect(() => {
-    if (!isLoggedIn) {
-      window.location.href = getDashboardLoginUrl(pathname)
+    if (!isLoggedIn && !isLoggingOut.current) {
+      router.push(`/${locale}/auth/login`)
     }
-  }, [isLoggedIn, pathname])
+  }, [isLoggedIn, router, locale])
 
   // Load user preferences on mount
   useEffect(() => {
     const loadPreferences = async () => {
-      if (!user?.id) return
+      if (!user?.id || !token) return
 
       // Skip if settings already loaded
       if (settings && settings.userId === user.id) return
@@ -84,7 +87,9 @@ export default function DashboardLayout({
       setLoading(true)
       try {
         const { apiUrl } = getConfig()
-        const response = await authFetch(`${apiUrl}/users/${user.id}/settings`)
+        const response = await fetch(`${apiUrl}/users/${user.id}/settings`, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
 
         if (response.ok) {
           const data = await response.json()
@@ -109,7 +114,7 @@ export default function DashboardLayout({
     }
 
     loadPreferences()
-  }, [user?.id, settings, setLoading, setSettings])
+  }, [user?.id, token, settings, setLoading, setSettings])
 
   // Sync theme and colors globally when settings change
   useEffect(() => {
@@ -120,9 +125,17 @@ export default function DashboardLayout({
     }
   }, [settings, setTheme])
 
-  const handleLogout = () => {
-    logout()
-    window.location.href = getDashboardLoginUrl(pathname)
+  const handleLogout = async () => {
+    isLoggingOut.current = true
+    try {
+      await api.post('/auth/logout')
+      logout()
+      window.location.replace(`${getConfig().landingUrl}/${locale}/auth/login`)
+    } catch (error) {
+      isLoggingOut.current = false
+      debugError('Dashboard logout failed:', error)
+      toast.error(t('common.logoutFailed', 'Logout failed. Please try again.'))
+    }
   }
 
   if (!isLoggedIn) {

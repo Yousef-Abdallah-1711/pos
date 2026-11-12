@@ -113,7 +113,7 @@ export default function LeavesPage() {
         })
         debugLog('[LEAVES_PAGE] Response:', response.data)
 
-        const leavesList = Array.isArray(response.data) ? response.data : (response.data?.data || response.data?.leaves || [])
+        const leavesList: any[] = Array.isArray(response.data) ? response.data : (response.data?.data || response.data?.leaves || [])
 
         // Enrich with employee names
         const enrichedLeaves = leavesList.map(leave => ({

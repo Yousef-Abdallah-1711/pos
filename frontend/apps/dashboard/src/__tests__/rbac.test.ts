@@ -12,6 +12,7 @@ import {
   MODULE_IDS,
   getModuleName,
   getPermissionDescription,
+  permissionCache,
 } from '@/lib/rbac'
 
 describe('RBAC Permission Functions', () => {
@@ -58,7 +59,9 @@ describe('RBAC Permission Functions', () => {
   describe('getNextPermissionLevel', () => {
     it('should return next level in hierarchy', () => {
       expect(getNextPermissionLevel(PERMISSION_LEVELS.NONE)).toBe(PERMISSION_LEVELS.READ)
-      expect(getNextPermissionLevel(PERMISSION_LEVELS.READ)).toBe(PERMISSION_LEVELS.WRITE)
+      // EXPORT sits between READ and WRITE (same 6-level hierarchy as the backend)
+      expect(getNextPermissionLevel(PERMISSION_LEVELS.READ)).toBe(PERMISSION_LEVELS.EXPORT)
+      expect(getNextPermissionLevel(PERMISSION_LEVELS.EXPORT)).toBe(PERMISSION_LEVELS.WRITE)
       expect(getNextPermissionLevel(PERMISSION_LEVELS.WRITE)).toBe(PERMISSION_LEVELS.DELETE)
       expect(getNextPermissionLevel(PERMISSION_LEVELS.DELETE)).toBe(PERMISSION_LEVELS.ADMIN)
     })
@@ -71,7 +74,8 @@ describe('RBAC Permission Functions', () => {
   describe('getPreviousPermissionLevel', () => {
     it('should return previous level in hierarchy', () => {
       expect(getPreviousPermissionLevel(PERMISSION_LEVELS.READ)).toBe(PERMISSION_LEVELS.NONE)
-      expect(getPreviousPermissionLevel(PERMISSION_LEVELS.WRITE)).toBe(PERMISSION_LEVELS.READ)
+      expect(getPreviousPermissionLevel(PERMISSION_LEVELS.EXPORT)).toBe(PERMISSION_LEVELS.READ)
+      expect(getPreviousPermissionLevel(PERMISSION_LEVELS.WRITE)).toBe(PERMISSION_LEVELS.EXPORT)
       expect(getPreviousPermissionLevel(PERMISSION_LEVELS.DELETE)).toBe(PERMISSION_LEVELS.WRITE)
       expect(getPreviousPermissionLevel(PERMISSION_LEVELS.ADMIN)).toBe(PERMISSION_LEVELS.DELETE)
     })
@@ -173,7 +177,6 @@ describe('RBAC Permission Functions', () => {
 
 describe('Permission Cache', () => {
   it('should be importable', () => {
-    const { permissionCache } = require('@/lib/rbac')
     expect(permissionCache).toBeDefined()
     expect(permissionCache.set).toBeDefined()
     expect(permissionCache.get).toBeDefined()

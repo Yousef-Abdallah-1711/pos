@@ -50,13 +50,45 @@ pnpm dev:landing            # Port 3001
 pnpm dev:restaurant         # Port 3003
 pnpm dev:super-admin        # Port 3004
 
-# Docker (Backend + PostgreSQL)
-docker-compose up -d
+# Docker development stack (uses the local-only ports and mock payment mode)
+docker compose -f docker-compose.yml -f docker-compose.local.yml --env-file .env.local up -d --build
+
+# Production: fill in real values first; never use the local development credentials below
+cp .env.prod.example .env.prod                              # PROD: fill in real values first
+docker compose --env-file .env.prod -f docker-compose.prod.yml up -d --build
 ```
 
-### Default Credentials
-- **Super Admin:** Created via migration `109_seed_super_admin.sql`
-- **Regular Users:** Register via Landing app (Port 3001) at `/en/auth/register`
+### Local Docker URLs
+
+The local Compose override binds services to loopback and remaps frontend ports to avoid clashes with other projects:
+
+| App | URL |
+|---|---|
+| Landing and login | <http://localhost:13001/en> and <http://localhost:13001/en/auth/login> |
+| Dashboard | <http://localhost:13002/en> |
+| Restaurant storefront | <http://restaurant-1.localhost:13003/en> |
+| Super Admin | <http://localhost:13004/login> |
+| API health | <http://localhost:8080/api/v1/health> |
+
+If `restaurant-1.localhost` does not resolve in your browser, open <http://localhost:13003/en>.
+
+### Local Test Accounts
+
+Run the repeatable, development-only seed from the repository root after starting Docker:
+
+```powershell
+.\backend\scripts\seed-local-test-accounts.ps1
+```
+
+| Account | Email | Use |
+|---|---|---|
+| Platform Super Admin | `superadmin@pos-saas.com` | Super Admin app at <http://localhost:13004/login> |
+| Restaurant owner | `owner@pos-demo.local` | Landing login at <http://localhost:13001/en/auth/login>; full tenant access |
+| Cashier/staff | `cashier@pos-demo.local` | Landing login at <http://localhost:13001/en/auth/login>; employee permissions |
+
+The seed prompts securely for a locally chosen password for each account and stores only bcrypt hashes. Use unique passwords of at least 16 characters. Passwords are not stored in this repository or shared between developers. The seed refuses to run unless it detects this repository's `pos-dev` Compose PostgreSQL container and the `pos_saas` database. Never use these local accounts in staging or production. Re-run the seed to set new local passwords.
+
+Check local services with `docker compose -f docker-compose.yml -f docker-compose.local.yml --env-file .env.local ps`. Stop the development stack with the same Compose arguments followed by `stop`; this keeps its database volume intact.
 
 ---
 
@@ -557,11 +589,13 @@ Tenant registers â†’ trial (30 days) â†’ [extend trial / subscribe]
 PORT=8080
 DB_HOST=localhost
 DB_PORT=5432
-DB_USER=postgres
-DB_PASSWORD=postgres
+DB_USER=pos_app
+DB_PASSWORD=replace-with-a-local-secret
+MIGRATE_DB_USER=pos_migrator
+MIGRATE_DB_PASSWORD=replace-with-a-separate-local-secret
 DB_NAME=pos_saas
 DB_SSLMODE=disable
-JWT_SECRET=your-secret-key
+JWT_SECRET=replace-with-a-random-local-secret
 JWT_EXPIRY=24h
 CORS_ALLOWED_ORIGINS=http://localhost:3001,http://localhost:3002,http://localhost:3003,http://localhost:3004
 ```

@@ -59,7 +59,7 @@ func NewKDSRepository(db *sql.DB) *KDSRepository {
 // EnqueueOrder inserts/refreshes a KDS queue entry for an order.
 func (r *KDSRepository) EnqueueOrder(ctx context.Context, tenantID, restaurantID, orderID int64) (*domain.KDSOrder, error) {
 	startedAt := time.Now()
-	defer observability.RecordDB("kds.enqueue_order", time.Since(startedAt))
+	defer func() { observability.RecordDB("kds.enqueue_order", time.Since(startedAt)) }()
 
 	if r.db == nil {
 		return nil, errors.New("database is not initialized")
@@ -116,7 +116,7 @@ func (r *KDSRepository) EnqueueOrder(ctx context.Context, tenantID, restaurantID
 // GetQueue returns KDS queue entries filtered by status.
 func (r *KDSRepository) GetQueue(ctx context.Context, tenantID, restaurantID int64, statuses []string) ([]domain.KDSOrder, error) {
 	startedAt := time.Now()
-	defer observability.RecordDB("kds.get_queue", time.Since(startedAt))
+	defer func() { observability.RecordDB("kds.get_queue", time.Since(startedAt)) }()
 
 	if r.db == nil {
 		return nil, errors.New("database is not initialized")
@@ -190,7 +190,7 @@ func (r *KDSRepository) GetQueue(ctx context.Context, tenantID, restaurantID int
 // BumpOrder advances a KDS order through the kitchen statuses.
 func (r *KDSRepository) BumpOrder(ctx context.Context, tenantID, restaurantID, queueID, userID int64) (*domain.KDSOrder, error) {
 	startedAt := time.Now()
-	defer observability.RecordDB("kds.bump_order", time.Since(startedAt))
+	defer func() { observability.RecordDB("kds.bump_order", time.Since(startedAt)) }()
 
 	if r.db == nil {
 		return nil, errors.New("database is not initialized")
@@ -266,7 +266,7 @@ func (r *KDSRepository) BumpOrder(ctx context.Context, tenantID, restaurantID, q
 // RecallOrder moves a completed KDS order back to ready.
 func (r *KDSRepository) RecallOrder(ctx context.Context, tenantID, restaurantID, queueID int64) (*domain.KDSOrder, error) {
 	startedAt := time.Now()
-	defer observability.RecordDB("kds.recall_order", time.Since(startedAt))
+	defer func() { observability.RecordDB("kds.recall_order", time.Since(startedAt)) }()
 
 	if r.db == nil {
 		return nil, errors.New("database is not initialized")
@@ -300,7 +300,7 @@ func (r *KDSRepository) RecallOrder(ctx context.Context, tenantID, restaurantID,
 // GetStats returns aggregate KDS queue statistics.
 func (r *KDSRepository) GetStats(ctx context.Context, tenantID, restaurantID int64) (*domain.KDSStats, error) {
 	startedAt := time.Now()
-	defer observability.RecordDB("kds.get_stats", time.Since(startedAt))
+	defer func() { observability.RecordDB("kds.get_stats", time.Since(startedAt)) }()
 
 	if r.db == nil {
 		return nil, errors.New("database is not initialized")
@@ -340,7 +340,7 @@ func (r *KDSRepository) GetStats(ctx context.Context, tenantID, restaurantID int
 // GetAnalytics returns KDS preparation analytics for operational insights.
 func (r *KDSRepository) GetAnalytics(ctx context.Context, tenantID, restaurantID int64) (*domain.KDSAnalytics, error) {
 	startedAt := time.Now()
-	defer observability.RecordDB("kds.get_analytics", time.Since(startedAt))
+	defer func() { observability.RecordDB("kds.get_analytics", time.Since(startedAt)) }()
 
 	if r.db == nil {
 		return nil, errors.New("database is not initialized")
@@ -455,7 +455,7 @@ func (r *KDSRepository) GetAnalytics(ctx context.Context, tenantID, restaurantID
 // GetSettings returns KDS settings for the current tenant/restaurant.
 func (r *KDSRepository) GetSettings(ctx context.Context, tenantID, restaurantID int64) (*domain.KDSSettings, error) {
 	startedAt := time.Now()
-	defer observability.RecordDB("kds.get_settings", time.Since(startedAt))
+	defer func() { observability.RecordDB("kds.get_settings", time.Since(startedAt)) }()
 
 	if r.db == nil {
 		return nil, errors.New("database is not initialized")
@@ -532,7 +532,7 @@ func (r *KDSRepository) GetSettings(ctx context.Context, tenantID, restaurantID 
 // UpdateSettings upserts KDS settings.
 func (r *KDSRepository) UpdateSettings(ctx context.Context, settings *domain.KDSSettings) error {
 	startedAt := time.Now()
-	defer observability.RecordDB("kds.update_settings", time.Since(startedAt))
+	defer func() { observability.RecordDB("kds.update_settings", time.Since(startedAt)) }()
 
 	if r.db == nil {
 		return errors.New("database is not initialized")

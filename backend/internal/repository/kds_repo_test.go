@@ -228,7 +228,7 @@ func TestGetQueueAppliesStatusFilter(t *testing.T) {
 		nil,
 	)
 
-	mock.ExpectQuery("FROM kds_queue\\s+WHERE tenant_id = \\$1 AND restaurant_id = \\$2\\s+AND status IN \\(\\$3,\\$4\\)\\s+ORDER BY priority DESC, received_at ASC").
+	mock.ExpectQuery("(?s)FROM kds_queue\\s+k.*WHERE k\\.tenant_id = \\$1 AND k\\.restaurant_id = \\$2\\s+AND k\\.status IN \\(\\$3,\\$4\\)\\s+ORDER BY k\\.priority DESC, k\\.received_at ASC").
 		WithArgs(int64(10), int64(20), "new", "ready").
 		WillReturnRows(rows)
 

@@ -1,0 +1,3155 @@
+[
+ {
+  "issue_id": "BE-001",
+  "severity": "P0",
+  "category": "auth",
+  "title": "Authentication bypass via X-Impersonation-Token header",
+  "source_files": [
+   "backend/internal/middleware/auth.go",
+   "backend/internal/middleware/tenant.go",
+   "backend/internal/middleware/cors.go"
+  ],
+  "evidence": "auth.go:18-31; tenant.go:39-63; cors.go:25 :: auth.go:19-31 (\"If impersonation token is present, allow the request ... Temporary value\"); tenant.go:39-63 header fallback when claims lack tenant+restaurant; cmd/api/main.go:595-646 every wrapper starts with middleware.AuthMiddleware. The real impersonation validator (middleware.ImpersonationMiddleware, impersonation.go:33) is defined but never wired (grep: no caller). Static reading only; not exercised at runtime.",
+  "suspected_root_cause": "Shortcut left in middleware to make the impersonation frontend work (\"frontend already validated it\").",
+  "recommended_fix": "Delete the bypass branch; wire ImpersonationMiddleware (or a JWT-based equivalent) that validates the token via ImpersonationRepository and sets tenant/user from the session.",
+  "required_tests": "Request with only X-Impersonation-Token + X-Tenant-ID/X-Restaurant-ID returns 401 on every protected route; valid impersonation token yields claims of the target user with an impersonation flag; audit-log entry created.",
+  "status": "OPEN",
+  "_source": "backend"
+ },
+ {
+  "issue_id": "BE-002",
+  "severity": "P0",
+  "category": "rbac",
+  "title": "RBAC \"wrapWithPermission(module, level)\" is decorative: permission is never checked",
+  "source_files": [
+   "backend/internal/middleware/permission.go",
+   "backend/cmd/api/main.go",
+   "backend/internal/handler/http/product_handler.go",
+   "backend/internal/handler/http/notification_handler.go",
+   "backend/cmd/api/main_phase6_rbac_routes_test.go"
+  ],
+  "evidence": "permission.go:16-24; main.go:621-629,631-640; product_handler.go:33-48; notification_handler.go:32-45 :: grep for RequiredModuleContextKey|RequiredPermissionContextKey: only permission.go:11-20 hits; product_handler.go:44-48 empty step 2; internal/auth/rbac_manager.go (HasPermission, line 312) is not referenced from cmd/api. The only RBAC test (cmd/api/main_phase6_rbac_routes_test.go:22) regex-matches main.go text and never issues a request.",
+  "suspected_root_cause": "Middleware was scaffolded to carry intent (comments reference a PermissionMiddleware(permissionUC) that was commented out, main.go:624) but the check was never implemented.",
+  "recommended_fix": "Implement enforcement middleware using RolePermissionRepository/UserRoleRepository (already in main.go), run in log-only mode, then enforce.",
+  "required_tests": "For each of the 200 wrapped routes: token without permission -> 403, with READ only on a WRITE route -> 403, owner -> 200; cross-tenant role must not grant access.",
+  "status": "OPEN",
+  "_source": "backend"
+ },
+ {
+  "issue_id": "BE-003",
+  "severity": "P0",
+  "category": "rbac",
+  "title": "RBAC administration endpoints have no caller-authorization: any tenant user can grant themselves permissions/roles",
+  "source_files": [
+   "backend/cmd/api/main.go",
+   "backend/internal/handler/http/rbac_permission_handler.go",
+   "backend/internal/handler/http/rbac_user_role_handler.go",
+   "backend/internal/handler/http/rbac_role_handler.go"
+  ],
+  "evidence": "main.go:924-947; rbac_permission_handler.go:35-92; rbac_user_role_handler.go:34-55; rbac_role_handler.go:144,220 :: rbac_permission_handler.go:36-91 (claims nil check then rolePermissionRepo.Assign); rbac_user_role_handler.go:35-50 (tenant match then userRoleRepo.Assign). No occurrence of an admin/owner check in rbac_user_role_handler.go (grep \"admin|owner\" returns nothing); rbac_role_handler.go matches are only IsSystemRole fields.",
+  "suspected_root_cause": "Handlers were written assuming a middleware gate (see BE-002).",
+  "recommended_fix": "Add owner/admin check in handlers or a RequirePermission(rbac_module, ADMIN) wrapper once BE-002 exists.",
+  "required_tests": "Non-admin token -> 403 on every /rbac write route; admin cannot remove last owner; self-assignment of higher role -> 403; audit row written.",
+  "status": "OPEN",
+  "_source": "backend"
+ },
+ {
+  "issue_id": "BE-004",
+  "severity": "P1",
+  "category": "rbac",
+  "title": "Sensitive mutations protected only by login (no RBAC wrapper): users, drivers, themes, categories, notifications, tenant contact info",
+  "source_files": [
+   "backend/cmd/api/main.go"
+  ],
+  "evidence": "main.go:702-756 (contact-info), 1062-1290 (users), 1341-1352 and surrounding driver/theme/category routes (see inventory flag NO-RBAC) :: main.go:1133-1204 POST /users inline; 1264-1291 DELETE inline; 07-COMPLETE-API-INVENTORY.md rows flagged NO-RBAC(BE-004).",
+  "suspected_root_cause": "Routes added incrementally with wrapProtected as the default wrapper.",
+  "recommended_fix": "Add module IDs for users/drivers/themes/categories and enforce.",
+  "required_tests": "Per-route negative tests (non-privileged token -> 403); delete-last-owner and delete-self guards.",
+  "status": "OPEN",
+  "_source": "backend"
+ },
+ {
+  "issue_id": "BE-005",
+  "severity": "P1",
+  "category": "tenancy",
+  "title": "Tenant/restaurant can be taken from request headers even on authenticated routes",
+  "source_files": [
+   "backend/internal/middleware/tenant.go",
+   "backend/internal/pkg/jwt/token.go"
+  ],
+  "evidence": "tenant.go:24-63 :: tenant.go:31 (&&), 39-63; README says \"Extracts tenant_id + restaurant_id from JWT claims\" (README.md TenantContextMiddleware row). Whether production JWTs with restaurant_id=0 exist was not verified (needs DB/data).",
+  "suspected_root_cause": "Backward-compat fallback (\"for backward compatibility\").",
+  "recommended_fix": "Remove header fallback on authenticated chains; reject mismatches.",
+  "required_tests": "JWT(tenant A, restaurant 0) + X-Tenant-ID: B -> 403/ignored; JWT(A,R1) + X-Restaurant-ID: R2 -> 403.",
+  "status": "OPEN",
+  "_source": "backend"
+ },
+ {
+  "issue_id": "BE-006",
+  "severity": "P1",
+  "category": "public-api",
+  "title": "Unauthenticated order endpoints trust client-supplied tenant/restaurant headers and expose full orders by sequential id (IDOR) incl. cancel",
+  "source_files": [
+   "backend/cmd/api/main.go",
+   "backend/internal/handler/http/public_order_handler.go",
+   "backend/internal/usecase/order_usecase.go"
+  ],
+  "evidence": "main.go:455-482; public_order_handler.go:37-111,115-157,370-420; order_usecase.go:218-230 :: main.go:469-482; public_order_handler.go:116-157 returns `\"data\": order`; :385-420 CancelOrder; order_usecase.go:218-229 auto-confirm for pos source.",
+  "suspected_root_cause": "Public API designed on top of internal tenant middleware.",
+  "recommended_fix": "Introduce tracking token + slug-based resolution; restrict fields.",
+  "required_tests": "Anonymous GET of another customer order -> 404/403; create with order_source=pos -> forced to website; cancel requires token; rate limit returns 429.",
+  "status": "OPEN",
+  "_source": "backend"
+ },
+ {
+  "issue_id": "BE-007",
+  "severity": "P1",
+  "category": "payments",
+  "title": "Paymob webhook signature check is a no-op unless PAYMOB_MODE=live; production compose defaults to mock",
+  "source_files": [
+   "backend/internal/service/paymob_client_mock.go",
+   "backend/cmd/api/main.go",
+   "docker-compose.prod.yml",
+   ".env.prod.example",
+   "backend/internal/handler/http/mock_paymob_handler.go"
+  ],
+  "evidence": "paymob_client_mock.go:51-54; main.go:197-210,425-432; docker-compose.prod.yml:74; .env.prod.example:24; mock_paymob_handler.go:243-252 :: See cited lines. HandleWebhook (payment_usecase.go:176-188) relies solely on VerifyHMAC for authenticity; it then checks stored amount == plan price, so an attacker needs a valid paymob_order_id (integer) of a pending payment and no signature.",
+  "suspected_root_cause": "Mock-by-default convenience for local dev leaked into prod templates.",
+  "recommended_fix": "Fail fast in production for non-live mode.",
+  "required_tests": "Production-mode boot test: PAYMOB_MODE empty -> process exits; webhook with bad hmac -> 401 in every mode other than explicit dev mock.",
+  "status": "OPEN",
+  "_source": "backend"
+ },
+ {
+  "issue_id": "BE-008",
+  "severity": "P1",
+  "category": "subscription",
+  "title": "Tenant subscription/suspension status is enforced on exactly one route",
+  "source_files": [
+   "backend/cmd/api/main.go",
+   "backend/internal/middleware/tenant_status.go"
+  ],
+  "evidence": "main.go:610-618,681; tenant_status.go:36-60 :: grep wrapProtectedWithStatus in main.go: lines 610 (definition) and 681 (only use). tenant_status.go itself has a cache and skip-list, i.e. it was designed to be global.",
+  "suspected_root_cause": "Middleware added but not rolled into the shared wrappers.",
+  "recommended_fix": "Fold TenantStatusMiddleware into wrapProtected/wrapWithPermission with skip list.",
+  "required_tests": "Disabled tenant -> 403 on /products etc.; allowed on /subscription/*; expired trial boundary tests.",
+  "status": "OPEN",
+  "_source": "backend"
+ },
+ {
+  "issue_id": "BE-009",
+  "severity": "P1",
+  "category": "reliability",
+  "title": "HTTP server has no timeouts, no body-size limits, no graceful shutdown; workers use context.Background()",
+  "source_files": [
+   "backend/cmd/api/main.go"
+  ],
+  "evidence": "main.go:416,420,1856 :: main.go:1856; grep MaxBytesReader = 0 hits outside legacy; main.go:416,420; grep -c \"json.NewDecoder(r.Body)|io.ReadAll(r.Body)\" = 95.",
+  "suspected_root_cause": "Prototype main.go grew without server hardening.",
+  "recommended_fix": "Implement as described.",
+  "required_tests": "Shutdown test (in-flight request completes); oversized body -> 413; slow-header client closed.",
+  "status": "OPEN",
+  "_source": "backend"
+ },
+ {
+  "issue_id": "BE-010",
+  "severity": "P1",
+  "category": "data-integrity",
+  "title": "Order creation is non-atomic and order numbers are globally unique but derived from the clock",
+  "source_files": [
+   "backend/internal/usecase/order_usecase.go",
+   "backend/internal/repository/order_repo.go",
+   "backend/internal/domain/order.go",
+   "backend/migrations/060_create_orders_table.sql"
+  ],
+  "evidence": "order_usecase.go:64,190-203; order_repo.go:24,630; domain/order.go:240-244; 060_create_orders_table.sql:11 :: order_usecase.go:64 `GenerateOrderNumber(tenantID, time.Now().Unix()%1000000)`; domain/order.go:242-243 ignores tenantID; migration 060 line 11 `order_number VARCHAR(50) NOT NULL UNIQUE`.",
+  "suspected_root_cause": "Early-phase usecase never refactored to use transactions.",
+  "recommended_fix": "Wrap in repo-level CreateOrderWithItems(tx); sequence-based numbering.",
+  "required_tests": "Concurrent create test (N goroutines same second) -> no duplicate/500; failure injection on item insert -> no order row; tax per restaurant.",
+  "status": "OPEN",
+  "_source": "backend"
+ },
+ {
+  "issue_id": "BE-011",
+  "severity": "P2",
+  "category": "data-integrity",
+  "title": "Accounting auto-posting runs outside the business transaction and swallows failures",
+  "source_files": [
+   "backend/internal/usecase/order_usecase.go",
+   "backend/internal/handler/http/public_order_handler.go"
+  ],
+  "evidence": "order_usecase.go:460-474; public_order_handler.go:69-72 :: order_usecase.go:468-473.",
+  "suspected_root_cause": "Posting engine bolted on after order flow.",
+  "recommended_fix": "Outbox + idempotency key per order.",
+  "required_tests": "Failure injection in PostSalesEntry -> retried and eventually consistent; idempotency on re-post.",
+  "status": "OPEN",
+  "_source": "backend"
+ },
+ {
+  "issue_id": "BE-012",
+  "severity": "P2",
+  "category": "architecture",
+  "title": "README claims Handler->UseCase->Repository; reality is mixed, with SQL in handlers, usecases and main.go",
+  "source_files": [
+   "README.md",
+   "backend/cmd/api/main.go",
+   "backend/internal/handler/http/*.go"
+  ],
+  "evidence": "README.md:96,206; main.go:702-1291 (inline SQL handlers) :: See 07 inventory \"Layering\" table; grep of handler/http/*.go for .Query|.Exec|.QueryRow gives the 29 files listed in the architecture section.",
+  "suspected_root_cause": "Organic growth; phases added repos+handlers directly.",
+  "recommended_fix": "Introduce usecases module by module.",
+  "required_tests": "Characterization tests per endpoint before moving code.",
+  "status": "OPEN",
+  "_source": "backend"
+ },
+ {
+  "issue_id": "BE-013",
+  "severity": "P2",
+  "category": "maintainability",
+  "title": "God files",
+  "source_files": [
+   "backend/internal/handler/http/report_handler.go",
+   "backend/internal/repository/accounting_advanced_repo.go",
+   "backend/cmd/api/main.go",
+   "backend/internal/handler/http/accounting_advanced_handler.go",
+   "backend/internal/usecase/payment_usecase.go"
+  ],
+  "evidence": "see table :: wc -l output on backend/**/*.go excluding _test.",
+  "suspected_root_cause": "Growth without module boundaries.",
+  "recommended_fix": "Split mechanically after characterization tests.",
+  "required_tests": "Existing route-table test generalised.",
+  "status": "OPEN",
+  "_source": "backend"
+ },
+ {
+  "issue_id": "BE-014",
+  "severity": "P2",
+  "category": "dead-code",
+  "title": "~33% of non-test Go lines are legacy/disabled; auth, RLS, scaling and sharding packages are not wired",
+  "source_files": [
+   "backend/internal/auth",
+   "backend/internal/security",
+   "backend/internal/scaling",
+   "backend/internal/sharding",
+   "backend/internal/handlers",
+   "backend/internal/handler",
+   "backend/internal/service/legacy",
+   "backend/internal/repository/legacy",
+   "backend/internal/models.disabled",
+   "backend/internal/routes",
+   "backend/.gitignore"
+  ],
+  "evidence": "n/a :: grep \"go:build legacy\" (80 files); grep NewJWTManager/NewRBACManager/NewAPIKeyManager outside internal/auth = only tests/unit; `git ls-files backend` lists binaries.",
+  "suspected_root_cause": "Experiments kept in-tree.",
+  "recommended_fix": "Remove; document what was dropped.",
+  "required_tests": "Build default + `-tags legacy` removed; go vet clean.",
+  "status": "OPEN",
+  "_source": "backend"
+ },
+ {
+  "issue_id": "BE-015",
+  "severity": "P2",
+  "category": "reliability",
+  "title": "Server boots in \"stub mode\" when the DB is unreachable and serves fake successful responses; inline handlers dereference nil db",
+  "source_files": [
+   "backend/cmd/api/main.go"
+  ],
+  "evidence": "main.go:41-68,84-93,1060-1131,1470-1560 :: main.go:89 \"Continuing without database (stub mode)\"; 1062-1066 hard-coded email; 41-68 rbacStorage seeded in init().",
+  "suspected_root_cause": "Local-dev convenience.",
+  "recommended_fix": "Remove stub mode from production path.",
+  "required_tests": "Boot with bad DSN in production mode -> exit non-zero.",
+  "status": "OPEN",
+  "_source": "backend"
+ },
+ {
+  "issue_id": "BE-016",
+  "severity": "P2",
+  "category": "reliability",
+  "title": "Database calls mostly ignore request cancellation",
+  "source_files": [
+   "backend/internal/repository",
+   "backend/internal/usecase",
+   "backend/internal/handler/http"
+  ],
+  "evidence": "repo-wide :: grep counts; order_usecase.go:53-57 signature.",
+  "suspected_root_cause": "Early code written pre-context.",
+  "recommended_fix": "Incremental signature migration.",
+  "required_tests": "Race/timeout tests with cancelled contexts.",
+  "status": "OPEN",
+  "_source": "backend"
+ },
+ {
+  "issue_id": "BE-017",
+  "severity": "P2",
+  "category": "security",
+  "title": "In-memory rate limiter: unbounded map, per-instance, proxy-IP dependent; almost no routes use it",
+  "source_files": [
+   "backend/internal/middleware/rate_limit.go",
+   "backend/internal/middleware/super_admin_auth.go",
+   "backend/cmd/api/main.go"
+  ],
+  "evidence": "rate_limit.go:46-100; super_admin_auth.go:205-270; main.go:466,577,634-636 :: cited lines.",
+  "suspected_root_cause": "Quick implementation.",
+  "recommended_fix": "Add eviction + config.",
+  "required_tests": "Limiter unit tests with clock injection; proxy header tests.",
+  "status": "OPEN",
+  "_source": "backend"
+ },
+ {
+  "issue_id": "BE-018",
+  "severity": "P2",
+  "category": "observability",
+  "title": "Error handling and logging are decentralised; internal errors and secrets reach clients/logs",
+  "source_files": [
+   "backend/internal/handler/http",
+   "backend/cmd/api/main.go",
+   "backend/internal/usecase/auth_usecase.go",
+   "backend/internal/handler/http/auth_handler.go"
+  ],
+  "evidence": "auth_usecase.go:309-380; auth_handler.go:131-166; utils.go; main.go:1140-1290 :: grep counts; auth_usecase.go:321-324,364-380.",
+  "suspected_root_cause": "Per-phase copy/paste.",
+  "recommended_fix": "Centralise.",
+  "required_tests": "Contract tests for error envelope.",
+  "status": "OPEN",
+  "_source": "backend"
+ },
+ {
+  "issue_id": "BE-019",
+  "severity": "P2",
+  "category": "validation",
+  "title": "No real validation layer; struct validate tags are inert and validation is duplicated",
+  "source_files": [
+   "backend/internal/domain/order.go",
+   "backend/go.mod",
+   "backend/internal/validation/theme_validator.go"
+  ],
+  "evidence": "order.go:107-136; go.mod:32 :: grep imports; main.go:1146-1171.",
+  "suspected_root_cause": "n/a",
+  "recommended_fix": "Introduce validator + shared binder.",
+  "required_tests": "Table-driven invalid payload tests per endpoint.",
+  "status": "OPEN",
+  "_source": "backend"
+ },
+ {
+  "issue_id": "BE-020",
+  "severity": "P2",
+  "category": "security",
+  "title": "No rate limiting on authentication and public mutation endpoints",
+  "source_files": [
+   "backend/cmd/api/main.go"
+  ],
+  "evidence": "main.go:441-447,470-482 :: main.go:441-447 plain mux.HandleFunc.",
+  "suspected_root_cause": "n/a",
+  "recommended_fix": "Add limiter.",
+  "required_tests": "429 behavior tests.",
+  "status": "OPEN",
+  "_source": "backend"
+ },
+ {
+  "issue_id": "BE-021",
+  "severity": "P3",
+  "category": "functional",
+  "title": "Forgot-password is a stub that reports success",
+  "source_files": [
+   "backend/internal/usecase/auth_usecase.go",
+   "backend/internal/handler/http/auth_handler.go"
+  ],
+  "evidence": "auth_usecase.go:289-306; auth_handler.go:112-128 :: cited lines.",
+  "suspected_root_cause": "Unfinished feature.",
+  "recommended_fix": "Implement or return 501.",
+  "required_tests": "E2E reset flow test.",
+  "status": "OPEN",
+  "_source": "backend"
+ },
+ {
+  "issue_id": "BE-022",
+  "severity": "P1",
+  "category": "public-api",
+  "title": "Unauthenticated endpoint mutates global translations for all tenants",
+  "source_files": [
+   "backend/internal/handler/http/translation_handler.go",
+   "backend/cmd/api/main.go"
+  ],
+  "evidence": "translation_handler.go:163-207; main.go:491 :: translation_handler.go:196-204 `h.translations[language] = translations`; main.go:491 registered with plain HandleFunc.",
+  "suspected_root_cause": "Dev tool exposed.",
+  "recommended_fix": "Delete/guard.",
+  "required_tests": "Unauthenticated POST -> 401; concurrent GET/POST race test.",
+  "status": "OPEN",
+  "_source": "backend"
+ },
+ {
+  "issue_id": "BE-023",
+  "severity": "P3",
+  "category": "security",
+  "title": "KDS WebSocket: origin check disabled, JWT in query string, no permission check",
+  "source_files": [
+   "backend/internal/handler/ws/kds_ws_handler.go"
+  ],
+  "evidence": "kds_ws_handler.go:83-86,98-106 :: cited lines.",
+  "suspected_root_cause": "TODO left.",
+  "recommended_fix": "Harden.",
+  "required_tests": "Ws tests with bad origin.",
+  "status": "OPEN",
+  "_source": "backend"
+ },
+ {
+  "issue_id": "BE-024",
+  "severity": "P3",
+  "category": "tenancy",
+  "title": "Some repositories are not tenant-scoped in SQL and rely on handler pre-checks",
+  "source_files": [
+   "backend/internal/repository/driver_repo.go",
+   "backend/internal/repository/homepage_section_repository.go"
+  ],
+  "evidence": "driver_repo.go:89,228,249,256,307,314; homepage_section_repository.go:91 :: cited lines.",
+  "suspected_root_cause": "n/a",
+  "recommended_fix": "Add tenant params.",
+  "required_tests": "Cross-tenant repo tests.",
+  "status": "OPEN",
+  "_source": "backend"
+ },
+ {
+  "issue_id": "BE-025",
+  "severity": "P3",
+  "category": "maintainability",
+  "title": "Duplicated auth/JWT/response utilities",
+  "source_files": [
+   "backend/internal/auth",
+   "backend/internal/pkg/jwt",
+   "backend/internal/middleware/super_admin_auth.go",
+   "backend/internal/handler/http/auth_handler.go"
+  ],
+  "evidence": "n/a :: cited files.",
+  "suspected_root_cause": "n/a",
+  "recommended_fix": "Consolidate.",
+  "required_tests": "n/a",
+  "status": "OPEN",
+  "_source": "backend"
+ },
+ {
+  "issue_id": "BE-026",
+  "severity": "P3",
+  "category": "auth",
+  "title": "Super-admin token secret is derived from the tenant JWT secret; public impersonation endpoints take tokens in query strings; duplicate disable/enable routes",
+  "source_files": [
+   "backend/cmd/api/main.go",
+   "backend/internal/handler/http/impersonation_handler.go"
+  ],
+  "evidence": "main.go:273,1792-1793,1811-1813,1835-1836; impersonation_handler.go:198-240 :: cited lines.",
+  "suspected_root_cause": "n/a",
+  "recommended_fix": "Separate secrets.",
+  "required_tests": "n/a",
+  "status": "OPEN",
+  "_source": "backend"
+ },
+ {
+  "issue_id": "BE-027",
+  "severity": "P3",
+  "category": "security",
+  "title": "Public diagnostics: health returns raw DB errors, metrics snapshot, debug route",
+  "source_files": [
+   "backend/cmd/api/main.go"
+  ],
+  "evidence": "main.go:512-556 :: cited lines.",
+  "suspected_root_cause": "n/a",
+  "recommended_fix": "Trim.",
+  "required_tests": "n/a",
+  "status": "OPEN",
+  "_source": "backend"
+ },
+ {
+  "issue_id": "FE-DASH-001",
+  "severity": "P1",
+  "category": "contract/orphan-endpoint",
+  "title": "Inventory stock adjustment calls an endpoint that does not exist",
+  "source_files": [
+   "frontend/apps/dashboard/src/app/[locale]/dashboard/inventory/page.tsx:107"
+  ],
+  "evidence": "api.post('/inventory/adjust', ...) at inventory/page.tsx:107; backend/cmd/api/main.go registers no /api/v1/inventory/* route (363 routes extracted; none match). Page also has no MODULE_IDS gate.",
+  "suspected_root_cause": "UI built ahead of backend; backend only has GET /products/alerts/low-stock and reports/inventory",
+  "recommended_fix": "Implement POST adjust endpoint with RBAC and movement audit trail (inventoryMovementRepo exists, main.go:136) or hide the dialog",
+  "required_tests": [
+   "contract test: adjust returns 2xx and writes a movement",
+   "UI e2e: adjust stock then product quantity changes"
+  ],
+  "status": "OPEN",
+  "_source": "dashboard"
+ },
+ {
+  "issue_id": "FE-DASH-002",
+  "severity": "P1",
+  "category": "pos/offline-integrity",
+  "title": "POS offline replay and cash auto-pay can duplicate orders or leave cash orders unpaid silently",
+  "source_files": [
+   "frontend/apps/dashboard/src/hooks/usePOSOffline.ts:171-190",
+   "frontend/apps/dashboard/src/app/[locale]/dashboard/pos/page.tsx:303-311"
+  ],
+  "evidence": "usePOSOffline.ts:174-177 calls posApi.createOrder then updateOrderPaymentStatus inside one try; if the second call fails the catch increments retryCount and keeps the already-created order queued, so the next replay creates it again. No idempotency key in the payload (posApi.ts:188-213). Online path pos/page.tsx:304-311 swallows the payment-mark failure (debugError only), then shows success and prints the receipt.",
+  "suspected_root_cause": "Two non-atomic calls orchestrated on the client; no client request id",
+  "recommended_fix": "Send paid state in the create call or use a server idempotency key (client UUID stored in queue item); record create-succeeded state in the queue; surface payment-mark failure to the cashier",
+  "required_tests": [
+   "unit: replay with failing payment-status does not re-create order",
+   "e2e: offline cash order syncs exactly once"
+  ],
+  "status": "OPEN",
+  "_source": "dashboard"
+ },
+ {
+  "issue_id": "FE-DASH-003",
+  "severity": "P1",
+  "category": "pos/offline-sw",
+  "title": "pos-sw.js background sync posts to the wrong origin without auth or tenant headers",
+  "source_files": [
+   "frontend/apps/dashboard/public/pos-sw.js:154-160",
+   "frontend/apps/dashboard/next.config.js",
+   "frontend/apps/dashboard/src/lib/config.ts:15"
+  ],
+  "evidence": "pos-sw.js:154 fetch(API_PREFIX + 'public/orders') with API_PREFIX='/api/v1/' is relative to the dashboard origin (:3002) while config.ts:15 apiUrl is http://localhost:8080/api/v1. Request has credentials:'include' but no Authorization/X-Tenant-ID/X-Restaurant-ID (token is in localStorage, unreachable from SW). next.config.js defines no rewrites. SW also never marks cash orders paid and throws on first failure.",
+  "suspected_root_cause": "SW written assuming a same-origin API proxy that does not exist",
+  "recommended_fix": "Remove SW sync and rely on in-page replay, or have SW read token/tenant from IndexedDB and use absolute API URL; keep a single replay owner to avoid double submit",
+  "required_tests": [
+   "SW integration test offline->online",
+   "assert queued POST hits API origin with auth headers"
+  ],
+  "status": "OPEN",
+  "_source": "dashboard"
+ },
+ {
+  "issue_id": "FE-DASH-004",
+  "severity": "P2",
+  "category": "privacy/offline-cache",
+  "title": "pos-sw.js caches authenticated API GET responses keyed by URL only and never purges on logout",
+  "source_files": [
+   "frontend/apps/dashboard/public/pos-sw.js:62-77",
+   "frontend/apps/dashboard/public/pos-sw.js:215-218"
+  ],
+  "evidence": "networkFirst() stores every OK GET whose pathname starts with /api/v1/ (cross-origin :8080 matches too) in 'pos-cache-v1'; key ignores Authorization/tenant. Cache is deleted only when CACHE_NAME changes (activate handler).",
+  "suspected_root_cause": "Generic caching without user/tenant partitioning",
+  "recommended_fix": "Do not cache API responses in the SW, or key by tenant+user and clear on logout via postMessage",
+  "required_tests": [
+   "logout clears caches test",
+   "two-tenant offline cache isolation test"
+  ],
+  "status": "OPEN",
+  "_source": "dashboard"
+ },
+ {
+  "issue_id": "FE-DASH-005",
+  "severity": "P2",
+  "category": "auth/logout",
+  "title": "Logout is incomplete and routes to a non-existent page",
+  "source_files": [
+   "frontend/apps/dashboard/src/components/layout/DashboardLayout.tsx:70-73",
+   "frontend/apps/dashboard/src/components/layout/DashboardLayout.tsx:125-128",
+   "frontend/apps/dashboard/src/stores/authStore.ts:34-36",
+   "frontend/apps/dashboard/src/lib/rbac.ts:419-424"
+  ],
+  "evidence": "handleLogout() calls logout() (sets user/token null) then router.push('/{locale}/auth/login'); the dashboard app has no auth/login route (only auth/callback and auth/super-admin-login); effect at :70-73 does the same. Not cleared: permissionCache ('current_user'), 'pos-storage' (cart, held orders, customer name/phone), 'kds-bootstrap-snapshot-v1', theme-builder-storage, preferences-storage, sessionStorage impersonation_token, IndexedDB pos-offline-db and kds-offline-db, SW caches. (Blocked-screen logouts redirect to landing; only the sidebar/avatar path is affected.)",
+  "suspected_root_cause": "Logout implemented as store reset only",
+  "recommended_fix": "Central logout(): clear all app storage keys, IndexedDB and SW caches, end impersonation, redirect to landing login",
+  "required_tests": [
+   "logout e2e asserts storage empty",
+   "second user login sees no previous cart/permissions"
+  ],
+  "status": "OPEN",
+  "_source": "dashboard"
+ },
+ {
+  "issue_id": "FE-DASH-006",
+  "severity": "P2",
+  "category": "security/token-in-url",
+  "title": "Access tokens and user JSON are passed in URL query strings and logged",
+  "source_files": [
+   "frontend/apps/dashboard/src/components/providers/DashboardAuthProvider.tsx:38-40",
+   "frontend/apps/dashboard/src/app/auth/callback/callback-content.tsx:17-18",
+   "frontend/apps/dashboard/src/app/[locale]/auth/super-admin-login/page.tsx:34",
+   "frontend/apps/dashboard/src/hooks/useKDSWebSocket.ts:131-132",
+   "frontend/apps/dashboard/src/stores/authStore.ts:65"
+  ],
+  "evidence": "auth_token/auth_user/impersonation_token/token/user are read from window.location.search; super-admin one-time token is in the query. KDS WS URL = base + '?token=' + JWT and debugLog prints the full URL (:132). JWT persisted in localStorage 'auth-storage'. test-url page echoes query values.",
+  "suspected_root_cause": "Cross-app SSO via redirect query params",
+  "recommended_fix": "Use one-time code exchange + HttpOnly cookie or URL fragment; WS short-lived ticket; never log URLs containing tokens",
+  "required_tests": [
+   "no token in access logs/referrer test",
+   "debug log redaction test"
+  ],
+  "status": "OPEN",
+  "_source": "dashboard"
+ },
+ {
+  "issue_id": "FE-DASH-007",
+  "severity": "P2",
+  "category": "auth/impersonation",
+  "title": "Impersonation uses a dummy bearer 'impersonated'; many call sites ignore the impersonation header",
+  "source_files": [
+   "frontend/apps/dashboard/src/components/providers/DashboardAuthProvider.tsx:90-95",
+   "frontend/apps/dashboard/src/lib/api.ts:164-167",
+   "frontend/apps/dashboard/src/lib/api.ts:259-277",
+   "frontend/apps/dashboard/src/app/[locale]/dashboard/settings/users/page.tsx:81-95",
+   "frontend/apps/dashboard/src/lib/api/themeApi.ts:31-52",
+   "frontend/apps/dashboard/src/hooks/useKDSWebSocket.ts:131"
+  ],
+  "evidence": "setAuth(user,'impersonated') stores a fake bearer. Only the lib/api.ts interceptor swaps in X-Impersonation-Token. Raw-fetch pages (users, roles, account, appearance, DashboardLayout prefs), themeApi's own axios client and the KDS WS all send 'Bearer impersonated'. 401 under impersonation never logs out; sessionStorage impersonation_token is never removed (no removeItem in src).",
+  "suspected_root_cause": "Impersonation bolted onto one interceptor",
+  "recommended_fix": "Single shared HTTP client; end-impersonation action calling /impersonation/end and clearing state; visible banner",
+  "required_tests": [
+   "impersonated session loads users/roles/theme/KDS",
+   "end impersonation clears sessionStorage"
+  ],
+  "status": "OPEN",
+  "_source": "dashboard"
+ },
+ {
+  "issue_id": "FE-DASH-008",
+  "severity": "P2",
+  "category": "architecture/http-clients",
+  "title": "Three HTTP access paths with inconsistent auth, 401 handling and error shapes",
+  "source_files": [
+   "frontend/apps/dashboard/src/lib/api.ts",
+   "frontend/apps/dashboard/src/lib/api/themeApi.ts:19-80",
+   "frontend/apps/dashboard/src/app/[locale]/dashboard/settings/users/page.tsx",
+   "frontend/apps/dashboard/src/hooks/useCache.ts:231",
+   "frontend/apps/dashboard/src/lib/apiCache.ts:104"
+  ],
+  "evidence": "axios 'api' (6s timeout, GET de-dupe, tenant headers, 401 redirect); a second axios instance in themeApi.ts (no tenant/impersonation headers, 401 only removes auth-storage); about 21 raw fetch() sites (settings/users 9, roles 5, account 2, appearance 2, DashboardLayout, auth provider, TenantSelectorModal) with no timeout/401 handling and hand-parsed response shapes (data | data.data | data.users). No error normalizer; pages read error.response?.data?.error ad hoc.",
+  "suspected_root_cause": "Organic growth",
+  "recommended_fix": "One client plus typed error normalizer (code/message/fieldErrors); replace raw fetch; one 401 policy",
+  "required_tests": [
+   "interceptor unit tests",
+   "lint rule forbidding raw fetch to API"
+  ],
+  "status": "OPEN",
+  "_source": "dashboard"
+ },
+ {
+  "issue_id": "FE-DASH-009",
+  "severity": "P1",
+  "category": "build/typecheck",
+  "title": "next build fails the type gate; static causes found (unresolved imports, undeclared deps, stray dirs inside tsconfig scope)",
+  "source_files": [
+   "frontend/apps/dashboard/tsconfig.json:32",
+   "frontend/apps/dashboard/next.config.js:11",
+   "frontend/apps/dashboard/lib/hooks/use-theme.ts:3",
+   "frontend/apps/dashboard/src/components/TenantSelectorModal.tsx:5",
+   "frontend/apps/dashboard/src/hooks/usePreloadRoute.ts:5",
+   "frontend/apps/dashboard/src/components/ui/tabs.tsx:4",
+   "frontend/apps/dashboard/src/app/[locale]/dashboard/tables/page.tsx:15"
+  ],
+  "evidence": "tsc could not be run (no typescript binary installed in the checkout), so the ~705 count is UNVERIFIED here. Statically verified: unresolved '@/lib/api-client' (lib/hooks/use-theme.ts:3), '@/hooks/useAuth' (TenantSelectorModal.tsx:5), '@/pages/heavy-route' (usePreloadRoute.ts:5); '@radix-ui/react-tabs' imported (ui/tabs.tsx:4) but not in package.json; 'qrcode' imported (tables/page.tsx:15) with no @types/qrcode; @playwright/test imported from tests/ (inside tsconfig include) but not declared; typescript.ignoreBuildErrors is enabled only via NEXT_IGNORE_BUILD_ERRORS=true (next.config.js:11), i.e. Docker prod builds bypass the gate.",
+  "suspected_root_cause": "Type gate bypassed by env flag; tsconfig include '**/*.ts(x)' sweeps stray root dirs, tests and dead files",
+  "recommended_fix": "Fix error categories (see DASHBOARD-COMPLETE-AUDIT.md section 4); narrow tsconfig include/exclude; run tsc --noEmit in CI; remove env bypass",
+  "required_tests": [
+   "tsc --noEmit clean in CI",
+   "next build without NEXT_IGNORE_BUILD_ERRORS"
+  ],
+  "status": "OPEN",
+  "_source": "dashboard"
+ },
+ {
+  "issue_id": "FE-DASH-010",
+  "severity": "P2",
+  "category": "structure/duplicates",
+  "title": "Stray app-root dirs duplicate src/ and are type-checked but largely unreferenced",
+  "source_files": [
+   "frontend/apps/dashboard/components/theme-editor/theme-editor.tsx:19",
+   "frontend/apps/dashboard/components/component-manager/section-editor.tsx:194",
+   "frontend/apps/dashboard/lib/hooks/use-theme.ts",
+   "frontend/apps/dashboard/i18n/request.ts"
+  ],
+  "evidence": "components/ (14 files), lib/hooks/use-theme.ts and i18n/request.ts (re-export of ../src/i18n/request) sit beside src/. No file in src imports components/theme-editor or components/component-manager (heuristic import scan). section-editor.tsx:194-195 uses formData.background_image which is not in ThemeSection (component-sidebar.tsx:7-19); theme-editor.tsx:19,61 destructures updateTheme from the broken lib/hooks/use-theme.ts.",
+  "suspected_root_cause": "Abandoned earlier theme editor implementation",
+  "recommended_fix": "Delete, or move into src/ and fix; exclude tests/ from the app tsconfig",
+  "required_tests": [
+   "tsc clean"
+  ],
+  "status": "OPEN",
+  "_source": "dashboard"
+ },
+ {
+  "issue_id": "FE-DASH-011",
+  "severity": "P2",
+  "category": "build/workspace",
+  "title": "Workspace package wiring is inconsistent (ui, ui-themes, types, constants)",
+  "source_files": [
+   "frontend/apps/dashboard/package.json",
+   "frontend/apps/dashboard/tsconfig.json:21-29",
+   "frontend/apps/dashboard/next.config.js:12",
+   "frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/components/LivePreview.tsx:6"
+  ],
+  "evidence": "Code imports '@pos-saas/ui' (4 files in app-root components/) and '@pos-saas/ui-themes' (LivePreview.tsx:6, EditorPreview.tsx:6) but package.json declares ui-components and ui-themes, not ui. tsconfig paths map ui, ui-components, theme, types, constants but not ui-themes; frontend/packages has only theme, ui, ui-components (no types/constants); @pos-saas/ui-themes lives in frontend/layers/ui-themes. transpilePackages lists only '@pos-saas/ui' and '@pos-saas/types'.",
+  "suspected_root_cause": "Package renames/moves not propagated",
+  "recommended_fix": "Align package.json deps, tsconfig paths and transpilePackages with actual workspace packages",
+  "required_tests": [
+   "clean install + build in CI"
+  ],
+  "status": "OPEN",
+  "_source": "dashboard"
+ },
+ {
+  "issue_id": "FE-DASH-012",
+  "severity": "P2",
+  "category": "theme-builder/stub",
+  "title": "Theme version rollback shows success but does nothing",
+  "source_files": [
+   "frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/editor/components/ThemeHistory.tsx:65-82"
+  ],
+  "evidence": "handleRollback: the API call is commented out ('When backend history endpoint is ready...') and then toast.success('Version restored successfully') runs. Backend has only GET /admin/themes/{id}/history (main.go:1469), no rollback route.",
+  "suspected_root_cause": "Placeholder left in production code",
+  "recommended_fix": "Implement backend rollback and client call, or disable the button; never show false success",
+  "required_tests": [
+   "e2e: restore version changes the active theme"
+  ],
+  "status": "OPEN",
+  "_source": "dashboard"
+ },
+ {
+  "issue_id": "FE-DASH-013",
+  "severity": "P3",
+  "category": "contract/orphan-endpoint",
+  "title": "themeApi defines functions for unregistered backend routes (not called by UI)",
+  "source_files": [
+   "frontend/apps/dashboard/src/lib/api/themeApi.ts:623-770",
+   "frontend/apps/dashboard/backend/internal/routes/theme_routes_v2.go:1-3"
+  ],
+  "evidence": "export (POST /admin/themes/{id}/export), import (POST /admin/themes/import -> only GET/PUT/DELETE {id} exist, method mismatch), components CRUD and reorder (/admin/themes/{id}/components...), GET /public/component-library: none registered in main.go; their handlers sit in theme_routes_v2.go behind //go:build legacy. No UI caller found by grep; theme-builder import page uses createTheme instead.",
+  "suspected_root_cause": "Dead API surface from legacy v2 design",
+  "recommended_fix": "Delete the dead functions or implement the endpoints",
+  "required_tests": [
+   "contract list reconciled in CI"
+  ],
+  "status": "OPEN",
+  "_source": "dashboard"
+ },
+ {
+  "issue_id": "FE-DASH-014",
+  "severity": "P2",
+  "category": "rbac/authorization",
+  "title": "Many dashboard pages have no page-level permission gate; backend for several modules is auth-only",
+  "source_files": [
+   "frontend/apps/dashboard/src/app/[locale]/dashboard/drivers",
+   "frontend/apps/dashboard/src/app/[locale]/dashboard/categories",
+   "frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder",
+   "frontend/apps/dashboard/src/app/[locale]/dashboard/reports/financial",
+   "frontend/apps/dashboard/src/components/layout/Sidebar.tsx:44-62"
+  ],
+  "evidence": "Pages without useHasPermission/MODULE_IDS: drivers (3), categories (3), inventory, theme-builder (5), rbac/roles, settings/billing, accounting/advanced, hr contracts/insurance/performance/resignations/training (5), reports/financial/* (9). Sidebar hides links via checkPermission only (drivers use ORDERS). Backend (main.go:671-675, 1397-1407, 1462-1469): /admin/drivers, /categories, /admin/themes, /users use wrapProtected (authentication only). No Next middleware exists (no src/middleware*), so gating is client-side.",
+  "suspected_root_cause": "Authorization added incrementally per module",
+  "recommended_fix": "Server-side module permission on all mutating routes; shared RequirePermission wrapper for pages",
+  "required_tests": [
+   "role matrix e2e: cashier cannot CRUD drivers/categories/themes"
+  ],
+  "status": "OPEN",
+  "_source": "dashboard"
+ },
+ {
+  "issue_id": "FE-DASH-015",
+  "severity": "P2",
+  "category": "rbac/cache",
+  "title": "Permission cache is not per-user, persists, is never cleared; each hook fetches separately; client role fallback grants KDS ADMIN",
+  "source_files": [
+   "frontend/apps/dashboard/src/hooks/useRbac.ts:18",
+   "frontend/apps/dashboard/src/hooks/useRbac.ts:100-157",
+   "frontend/apps/dashboard/src/hooks/useRbac.ts:166-215",
+   "frontend/apps/dashboard/src/lib/rbac.ts:380-424"
+  ],
+  "evidence": "CURRENT_USER_PERMISSION_CACHE_KEY='current_user' (useRbac.ts:18) stored via PermissionCache (memory + storage); no clear() call outside tests (grep). useHasPermission seeds state from the cache (stale after user switch). Each useHasPermission instance calls rbacApi.checkPermission (one request per hook per page). applyKDSRoleFallback grants KDS=ADMIN for privileged roles read from localStorage (UI only).",
+  "suspected_root_cause": "Convenience caching",
+  "recommended_fix": "Key by user+tenant; clear on logout; single permissions fetch in a context provider",
+  "required_tests": [
+   "user switch test",
+   "request count per page"
+  ],
+  "status": "OPEN",
+  "_source": "dashboard"
+ },
+ {
+  "issue_id": "FE-DASH-016",
+  "severity": "P2",
+  "category": "i18n",
+  "title": "Two parallel i18n systems, missing keys, RTL scoped to an inner div",
+  "source_files": [
+   "frontend/apps/dashboard/src/lib/translations.ts",
+   "frontend/apps/dashboard/src/app/[locale]/layout.tsx:49-63",
+   "frontend/apps/dashboard/src/app/layout.tsx:25",
+   "frontend/apps/dashboard/src/stores/preferencesStore.ts:66-70",
+   "frontend/apps/dashboard/src/i18n/messages/en.json"
+  ],
+  "evidence": "next-intl useTranslations in 14 pages (hr advanced 5, reports/financial 8, reports/hr) vs custom createTranslator with inline English fallbacks in most other pages. en.json and ar.json each 1719 keys (parity OK, no mojibake-looking values) but 36 literal keys used in code are absent from en.json (pos.settings* 21 in pos/settings/page.tsx, bankAccountMessages.* 8, kds.* 3, Sidebar 3, DashboardLayout 1) so Arabic users see hard-coded English; 101 ar values equal en. Root html lang='en' is hard-coded and dir/lang are set on an inner div (layout.tsx:49-63), so Radix portals (Dialog/Select render into body) likely stay LTR in Arabic [needs runtime confirmation]; preferencesStore also writes documentElement.dir from saved user language, a second source of truth beside the URL locale. No middleware: '/' always redirects to '/en'. 109 files still use physical ml-/mr-/pl-/pr-/text-left/right classes.",
+  "suspected_root_cause": "Incremental i18n adoption",
+  "recommended_fix": "Use next-intl only; set html lang/dir from locale in root layout; add missing keys; logical CSS (ms-/me-)",
+  "required_tests": [
+   "ar locale visual regression incl. dialogs",
+   "key coverage CI check"
+  ],
+  "status": "OPEN",
+  "_source": "dashboard"
+ },
+ {
+  "issue_id": "FE-DASH-017",
+  "severity": "P2",
+  "category": "pos/business-logic",
+  "title": "POS tax rate hard-coded 14% client-side; payment model minimal; product list capped",
+  "source_files": [
+   "frontend/apps/dashboard/src/stores/posStore.ts:106",
+   "frontend/apps/dashboard/src/stores/posStore.ts:595-600",
+   "frontend/apps/dashboard/src/lib/api/posApi.ts:68-70",
+   "frontend/apps/dashboard/src/lib/api/posApi.ts:188-213",
+   "frontend/apps/dashboard/src/app/[locale]/dashboard/pos/page.tsx:303-311"
+  ],
+  "evidence": "TAX_RATE=0.14 drives displayed subtotal/tax/total and the receipt (buildReceiptData). The create payload carries no prices (good, server prices) but the receipt total can diverge from the server total. VALID_PAYMENT_METHODS lacks 'online' though the API type allows it. No cash-tendered/change/split payment; cash is always auto-marked paid. getProducts requests page_size 500 (silent truncation for larger menus). Cart and held orders persist in localStorage 'pos-storage'.",
+  "suspected_root_cause": "Display-side tax estimate",
+  "recommended_fix": "Use server totals for the receipt; tenant-configurable tax; tender/change; pagination",
+  "required_tests": [
+   "receipt total equals server total test"
+  ],
+  "status": "OPEN",
+  "_source": "dashboard"
+ },
+ {
+  "issue_id": "FE-DASH-018",
+  "severity": "P2",
+  "category": "finance/client-side-calc",
+  "title": "Financial amounts computed and sent from the client; revenue tile from one page of orders; mixed currency symbols",
+  "source_files": [
+   "frontend/apps/dashboard/src/components/accounting/InvoiceForm.tsx:601-650",
+   "frontend/apps/dashboard/src/components/accounting/JournalEntryForm.tsx:53-62",
+   "frontend/apps/dashboard/src/app/[locale]/dashboard/page.tsx:366-368",
+   "frontend/apps/dashboard/src/app/[locale]/dashboard/orders/page.tsx:503",
+   "frontend/apps/dashboard/src/lib/pdf-export.ts:56-100"
+  ],
+  "evidence": "InvoiceForm computes tax_amount/discount_amount/line_total with unrounded floats and posts them (mapLineToPayload:636-650); JournalEntryForm balance check uses float epsilon 0.001; dashboard recentPaidRevenue sums totals of one recent-orders page, not a server aggregate; orders pages format '$' (orders/page.tsx:503, orders/[id]/page.tsx:372-392) while accounting/reports use EGP; financial report PDFs are rasterized with html2canvas+jspdf.",
+  "suspected_root_cause": "No shared money utility; server trust",
+  "recommended_fix": "Server recomputes and rejects mismatches; integer minor units; server-side aggregates; one currency formatter from tenant settings",
+  "required_tests": [
+   "invoice rounding tests",
+   "server rejects tampered totals"
+  ],
+  "status": "OPEN",
+  "_source": "dashboard"
+ },
+ {
+  "issue_id": "FE-DASH-019",
+  "severity": "P2",
+  "category": "kds/realtime",
+  "title": "KDS WebSocket has no client resync or stale detection and no server RBAC; client-side auto-bump; snapshot persists order data",
+  "source_files": [
+   "frontend/apps/dashboard/src/hooks/useKDSWebSocket.ts:128-173",
+   "frontend/apps/dashboard/src/hooks/useKDS.ts:446-480",
+   "frontend/apps/dashboard/src/app/[locale]/dashboard/kds/page.tsx:100-150",
+   "frontend/apps/dashboard/src/hooks/useKDS.ts:58",
+   "frontend/apps/dashboard/src/hooks/useKDS.ts:166-190"
+  ],
+  "evidence": "Server pings every 54s (backend/internal/handler/ws/kds_hub.go:18) but the client has no stale-connection detection; cross-ref: kds_ws_handler.go validates JWT from ?token= but has no KDS permission/role check (grep for permission/role = none) and CheckOrigin returns true (:83-86). Reconnect backoff 1s..10s without jitter; on reconnect no REST refetch (poll runs only while !isConnected after POLL_FALLBACK_DELAY). Auto-bump timer (kds/page.tsx:126-147) bumps from the browser every 15s when auto_bump_minutes>0: several stations double-act, stops when the tab closes. KDS snapshot with orders stored in localStorage 'kds-bootstrap-snapshot-v1' (not cleared on logout). Unknown message types ignored silently.",
+  "suspected_root_cause": "Client-driven realtime",
+  "recommended_fix": "Server-side auto-bump; client resync-on-open and stale detection; KDS permission check and origin allowlist on WS; clear snapshot on logout",
+  "required_tests": [
+   "WS reconnect e2e recovers missed order",
+   "two-station auto-bump test"
+  ],
+  "status": "OPEN",
+  "_source": "dashboard"
+ },
+ {
+  "issue_id": "FE-DASH-020",
+  "severity": "P3",
+  "category": "security/headers",
+  "title": "Authenticated app HTML cached publicly for 1h; CSP permissive",
+  "source_files": [
+   "frontend/apps/dashboard/next.config.js:154",
+   "frontend/apps/dashboard/next.config.js:175"
+  ],
+  "evidence": "'/:path*' gets Cache-Control public,max-age=3600,s-maxage=3600; CSP has 'unsafe-inline' 'unsafe-eval' and connect-src https: http: ws: wss:. Pages are client-rendered shells (no SSR user data verified) so exposure is limited.",
+  "suspected_root_cause": "Blanket headers",
+  "recommended_fix": "private/no-store for dashboard routes; tighten CSP to the API origin",
+  "required_tests": [
+   "header assertion test"
+  ],
+  "status": "OPEN",
+  "_source": "dashboard"
+ },
+ {
+  "issue_id": "FE-DASH-021",
+  "severity": "P3",
+  "category": "hygiene/debug",
+  "title": "Debug/test artifacts and duplicate routes shipped",
+  "source_files": [
+   "frontend/apps/dashboard/src/app/[locale]/test-url/page.tsx",
+   "frontend/apps/dashboard/src/app/[locale]/page.tsx:36-41",
+   "frontend/apps/dashboard/src/app/auth/callback/page.tsx",
+   "frontend/apps/dashboard/src/app/[locale]/auth/callback/page.tsx",
+   "frontend/apps/dashboard/src/i18n/messages/ar.json.bak-mojibake"
+  ],
+  "evidence": "/{locale}/test-url is routable outside DashboardAuthProvider; '?debug=true' branch in the locale home page; two differing auth callback pages (/auth/callback and /{locale}/auth/callback); ar.json.bak-mojibake kept inside src.",
+  "suspected_root_cause": "Debug leftovers",
+  "recommended_fix": "Remove from production build",
+  "required_tests": [
+   "route inventory test"
+  ],
+  "status": "OPEN",
+  "_source": "dashboard"
+ },
+ {
+  "issue_id": "FE-DASH-022",
+  "severity": "P3",
+  "category": "dead-code",
+  "title": "About 39 files appear unreferenced, including ServiceWorkerProvider/public/sw.js (never registered) and NotificationBell",
+  "source_files": [
+   "frontend/apps/dashboard/src/components/providers/ServiceWorkerProvider.tsx",
+   "frontend/apps/dashboard/public/sw.js:20-35",
+   "frontend/apps/dashboard/src/components/notifications/NotificationBell.tsx",
+   "frontend/apps/dashboard/src/components/products/ProductForm.tsx"
+  ],
+  "evidence": "Heuristic import scan (approximate). ServiceWorkerProvider is never mounted; if it were, sw.js install precaches '/layout.js' and '/styles.css' (not present) so cache.addAll would reject. TenantStatusProvider unused; tenant status is checked once at mount (DashboardAuthProvider).",
+  "suspected_root_cause": "Abandoned features",
+  "recommended_fix": "Delete or wire; add knip/ts-prune to CI",
+  "required_tests": [
+   "dead-code CI check"
+  ],
+  "status": "OPEN",
+  "_source": "dashboard"
+ },
+ {
+  "issue_id": "FE-DASH-023",
+  "severity": "P3",
+  "category": "http/timeouts",
+  "title": "Global 6s axios timeout applies to reports/exports; 100ms GET de-dupe shares promises",
+  "source_files": [
+   "frontend/apps/dashboard/src/lib/api.ts:8",
+   "frontend/apps/dashboard/src/lib/api.ts:59-77"
+  ],
+  "evidence": "DEFAULT_API_TIMEOUT_MS=6000 unless NEXT_PUBLIC_API_TIMEOUT_MS is set; blob export calls (accountingAdvancedApi.ts:201, reportsApi export) inherit it unless overridden (not verified per call). De-dupe key ignores headers.",
+  "suspected_root_cause": "Perf tuning for POS",
+  "recommended_fix": "Per-call timeouts for exports",
+  "required_tests": [
+   "large report export test"
+  ],
+  "status": "OPEN",
+  "_source": "dashboard"
+ },
+ {
+  "issue_id": "FE-DASH-024",
+  "severity": "P1",
+  "category": "cross-ref/backend-security",
+  "title": "POS creates orders via an unauthenticated public route that trusts caller-supplied tenant headers",
+  "source_files": [
+   "frontend/apps/dashboard/src/lib/api/posApi.ts:228",
+   "frontend/apps/dashboard/backend/cmd/api/main.go:472",
+   "frontend/apps/dashboard/backend/internal/middleware/tenant.go:38-66"
+  ],
+  "evidence": "posApi.createOrder -> POST /public/orders (order_source:'pos'). main.go:472 wraps only TenantContextMiddleware; tenant.go:38-66 falls back to X-Tenant-ID/X-Restaurant-ID headers when no JWT claims exist. The dashboard interceptor itself sends these headers (api.ts:169-190). No server-side ORDERS WRITE check for POS creation was found. Handler-level validation not read; needs backend auditor confirmation.",
+  "suspected_root_cause": "POS reused the public ordering endpoint",
+  "recommended_fix": "Authenticated staff order endpoint with RBAC; public endpoint resolves tenant from slug/signed table token",
+  "required_tests": [
+   "unauthenticated POST with arbitrary X-Tenant-ID is rejected for order_source pos"
+  ],
+  "status": "OPEN",
+  "_source": "dashboard"
+ },
+ {
+  "issue_id": "FE-DASH-025",
+  "severity": "P2",
+  "category": "tables/qr",
+  "title": "Table QR URLs use one global restaurant domain and sequential table ids",
+  "source_files": [
+   "frontend/apps/dashboard/src/lib/table-qr.ts:19-40",
+   "frontend/apps/dashboard/src/lib/config.ts:16",
+   "frontend/apps/dashboard/src/lib/config.ts:109",
+   "frontend/apps/dashboard/backend/cmd/api/main.go:465"
+  ],
+  "evidence": "buildTableMenuUrl => NEXT_PUBLIC_RESTAURANT_DOMAIN + '/{locale}/table/{tableID}/menu' (deploy-time single domain, not tenant slug/subdomain); table id is the DB integer; public GET /public/table/{id}/info (IP rate limit only) takes the bare id. Wrong-tenant QR or cross-tenant guessing in multi-tenant deployments.",
+  "suspected_root_cause": "Single-tenant assumption",
+  "recommended_fix": "Per-tenant domain/slug in URL; unguessable table token",
+  "required_tests": [
+   "QR URL per-tenant test"
+  ],
+  "status": "OPEN",
+  "_source": "dashboard"
+ },
+ {
+  "issue_id": "FE-DASH-026",
+  "severity": "P3",
+  "category": "error-handling",
+  "title": "No global error normalization; pages surface raw backend error strings",
+  "source_files": [
+   "frontend/apps/dashboard/src/app/[locale]/dashboard/inventory/page.tsx:116-118",
+   "frontend/apps/dashboard/src/app/[locale]/dashboard/settings/users/page.tsx:131"
+  ],
+  "evidence": "Pages toast error.response?.data?.error directly (inventory:116) or concatenate 'Failed to load users: ' + err.message; backend itself returns raw err.Error() (see QA-002 in issues-quality.json).",
+  "suspected_root_cause": "No shared mapper",
+  "recommended_fix": "Central error mapper with i18n codes",
+  "required_tests": [
+   "unit tests"
+  ],
+  "status": "OPEN",
+  "_source": "dashboard"
+ },
+ {
+  "issue_id": "FE-DASH-027",
+  "severity": "P2",
+  "category": "security/xss-export",
+  "title": "Order PDF export injects unescaped customer-supplied text into DOM; CSV export has no quote/formula escaping",
+  "source_files": [
+   "frontend/apps/dashboard/src/lib/pdf-export.ts:67",
+   "frontend/apps/dashboard/src/lib/pdf-export.ts:172-186",
+   "frontend/apps/dashboard/src/lib/pdf-export.ts:372-392",
+   "frontend/apps/dashboard/src/app/[locale]/dashboard/orders/[id]/page.tsx:238"
+  ],
+  "evidence": "generateOrderHTML interpolates item.product_name and item.special_instructions (customer-entered on public orders) into a template string that is assigned to tempDiv.innerHTML (pdf-export.ts:67) inside the authenticated dashboard origin; JWT is in localStorage so script execution would expose it. By contrast POS receipt escapes (usePOSPrint.ts:197). CSV rows wrap fields in quotes without escaping embedded quotes or leading = + - @ (pdf-export.ts:179-182) and only export the current page of orders.",
+  "suspected_root_cause": "Ad hoc HTML templates",
+  "recommended_fix": "Escape all interpolated values (or build DOM with textContent); CSV-escape and neutralize formula prefixes; use server export",
+  "required_tests": [
+   "unit test: product_name with <img onerror> is inert in PDF HTML",
+   "CSV injection test"
+  ],
+  "status": "OPEN",
+  "_source": "dashboard"
+ },
+ {
+  "issue_id": "DB-001",
+  "severity": "P0",
+  "category": "multi-tenancy",
+  "title": "Request headers X-Tenant-ID / X-Restaurant-ID override JWT tenant when JWT restaurant_id is 0",
+  "source_files": [
+   "backend/internal/middleware/tenant.go",
+   "backend/internal/pkg/jwt/token.go",
+   "backend/internal/repository/auth_repo.go"
+  ],
+  "evidence": "tenant.go:26-37 uses JWT claims only if tenantID>0 AND restaurantID>0; otherwise tenant.go:39-63 falls through to headers and trusts them for BOTH tenant and restaurant, even when a valid JWT is present. token.go:14 has RestaurantID int omitempty, and users.restaurant_id is nullable (003_create_users.sql:7, ON DELETE SET NULL; auth_repo.go:230 scans *int), so any user with NULL restaurant_id (e.g. the seeded super admin, migration 109 inserts no restaurant_id) gets restaurant_id 0 in the token and therefore full header control of tenant+restaurant on every wrapProtected / wrapWithPermission route (main.go:604-639). Static analysis; not exercised dynamically.",
+  "suspected_root_cause": "Backward-compat header fallback applied to authenticated requests; \"claims present but incomplete\" is treated like \"no claims\".",
+  "recommended_fix": "If claims != nil, ALWAYS use claims.TenantID; reject (403) when restaurant_id is 0 unless the route is explicitly tenant-level, and never read headers on authenticated routes. Restrict header fallback to a separate explicit public middleware that resolves tenant/restaurant from the slug server-side (see DB-002).",
+  "required_tests": [
+   "Authenticated user with JWT restaurant_id=0 sends X-Tenant-ID of another tenant -> 403, no data",
+   "JWT tenant A + header tenant B -> always tenant A",
+   "Table-driven test across every wrapProtected route group"
+  ],
+  "status": "OPEN",
+  "_source": "database"
+ },
+ {
+  "issue_id": "DB-002",
+  "severity": "P0",
+  "category": "multi-tenancy",
+  "title": "Unauthenticated public order endpoints trust client-supplied tenant/restaurant headers; sequential IDs allow order PII enumeration and cancellation",
+  "source_files": [
+   "backend/cmd/api/main.go",
+   "backend/internal/handler/http/public_order_handler.go",
+   "backend/internal/middleware/tenant.go"
+  ],
+  "evidence": "main.go:472-484 register POST/GET/DELETE /api/v1/public/orders*, wrapped only in TenantContextMiddleware (no auth; no rate limiter on these lines). With no JWT, tenant.go:40-63 takes tenant/restaurant from headers. public_order_handler.go:117-139 GetOrder(tenantID,restaurantID,orderID) and :376-404 CancelOrder use that header-derived scope; orders.id is BIGSERIAL (060_create_orders_table.sql:7) and order_number is predictable (DB-010). Restaurant IDs are discoverable via public slug endpoints (main.go:449-457). I found no proof-of-ownership (customer phone/token) check in these handlers. Orders hold name/email/phone/address (060:13-22). Not exercised dynamically.",
+  "suspected_root_cause": "Public endpoints reuse the internal header-based tenant middleware; orders identified by guessable sequential ids/numbers with no per-order secret.",
+  "recommended_fix": "Resolve restaurant from slug server-side; require an unguessable per-order tracking token for status/track/cancel; redact PII in public responses; add rate limiting; remove header trust.",
+  "required_tests": [
+   "Unauthenticated GET /public/orders/{id} with correct tenant/restaurant headers but no tracking token -> 401/404",
+   "Cancel without token rejected",
+   "Enumeration over ids returns no PII",
+   "Rate-limit test"
+  ],
+  "status": "OPEN",
+  "_source": "database"
+ },
+ {
+  "issue_id": "DB-003",
+  "severity": "P0",
+  "category": "multi-tenancy",
+  "title": "Theme v2 get/update/delete/activate have no tenant check (cross-tenant IDOR, any authenticated role)",
+  "source_files": [
+   "backend/internal/handler/http/admin_theme_handler_v2.go",
+   "backend/internal/service/theme_service.go",
+   "backend/internal/repository/theme_repository.go",
+   "backend/cmd/api/main.go"
+  ],
+  "evidence": "Routes main.go:1462-1469 use wrapProtected only (no RBAC permission). admin_theme_handler_v2.go:322 UpdateTheme and :356 DeleteTheme pass only the path id to the service; theme_service.go:224-300 does repo.GetByID(ctx,id) then Update/Delete with no comparison of theme.TenantID to the caller tenant (theme.TenantID is read only for cache invalidation, :268,:298). theme_repository.go:300-330 UPDATE themes_v2 ... WHERE id=$10 and :355-360 DELETE FROM themes_v2 WHERE id=$1 carry no tenant_id. Cache key theme:%d (theme_service.go:200) is tenant-agnostic. Static analysis; not exercised dynamically.",
+  "suspected_root_cause": "Handler/service signatures omit tenant context; repository methods keyed by id only.",
+  "recommended_fix": "Pass tenantID/restaurantID from context into service+repo; add AND tenant_id=$ AND restaurant_id=$ to every themes_v2 statement; add RBAC permission to theme routes; tenant-scope cache keys.",
+  "required_tests": [
+   "Tenant B PUT/DELETE/activate/GET on tenant A theme id -> 404",
+   "Cache does not serve tenant A theme to tenant B",
+   "Cashier role cannot delete theme"
+  ],
+  "status": "OPEN",
+  "_source": "database"
+ },
+ {
+  "issue_id": "DB-004",
+  "severity": "P1",
+  "category": "multi-tenancy",
+  "title": "RBAC RevokePermission deletes role permissions by role_id without tenant check; RBAC admin routes have no authorization-level gate",
+  "source_files": [
+   "backend/internal/handler/http/rbac_permission_handler.go",
+   "backend/internal/repository/role_permission_repository.go",
+   "backend/cmd/api/main.go"
+  ],
+  "evidence": "rbac_permission_handler.go:94-117 reads roleId/moduleId from the path and calls role_permission_repository.go:139-145 DELETE FROM role_permissions WHERE role_id=$1 AND module_id=$2 (no tenant_id, no role ownership lookup), unlike AssignPermission (:72-84) which verifies the role via roleRepo.GetByID(tenant,restaurant,role). Routes main.go:925-936 use wrapAuthOnly: any authenticated user reaches role/permission/user-role management; handlers check tenant membership but grep for admin/role checks in rbac_*_handler.go found only the system-role delete guard (rbac_role_handler.go:328). Privilege-escalation reachability is for the auth auditor to confirm.",
+  "suspected_root_cause": "Repository method omitted tenant param; RBAC handlers rely on authentication only.",
+  "recommended_fix": "Add tenant_id to Revoke/RevokeAll/GetByRoleAndModule; verify role ownership in handler; gate all /rbac mutations behind an explicit admin permission.",
+  "required_tests": [
+   "Tenant B revoke on tenant A role -> 404",
+   "Cashier JWT cannot assign permissions/roles",
+   "Regression for RevokeAll"
+  ],
+  "status": "OPEN",
+  "_source": "database"
+ },
+ {
+  "issue_id": "DB-005",
+  "severity": "P1",
+  "category": "database",
+  "title": "Row-Level Security does not exist in the deployed schema; RLS script and manager are dead code; documentation claims RLS",
+  "source_files": [
+   "backend/internal/security/rls_policies.sql",
+   "backend/internal/security/rls.go",
+   "backend/migrations",
+   "backend/tests/integration/security_rls_integration_test.go",
+   "docs-organized/05-INFRASTRUCTURE/MULTI_TENANCY/TENANT_ISOLATION_SECURITY.md"
+  ],
+  "evidence": "grep for \"ENABLE ROW LEVEL|CREATE POLICY\" across backend/migrations returns 0 hits (DB was down; static). The only RLS SQL is internal/security/rls_policies.sql (340 lines; policies for restaurants/orders/customers/payments/order_items, :57-61), not in migrations/, not run by cmd/migrate, and it references a customers table that no migration creates (accounting uses customers_accounting). grep shows NewRLSManager/SetTenantContext are not used outside internal/security and tests. App connects as DB_USER=postgres (docker-compose.yml:86, config.go:54, .env.prod.example:13), a superuser that bypasses RLS even if enabled. TENANT_ISOLATION_SECURITY.md:10,18-38 presents RLS as implemented.",
+  "suspected_root_cause": "RLS designed in a later phase but never integrated into migrations or the request path; docs written ahead of implementation.",
+  "recommended_fix": "Either implement properly (migration enabling RLS+FORCE on all tenant tables, non-superuser app role, per-request SET LOCAL app.current_tenant_id in a transaction) or remove claims from docs. Treat app-layer scoping as the only control until then.",
+  "required_tests": [
+   "Integration test with non-superuser role: SELECT without tenant GUC returns 0 rows",
+   "Cross-tenant SELECT/UPDATE blocked at DB",
+   "CI check that every table with tenant_id has RLS enabled"
+  ],
+  "status": "OPEN",
+  "_source": "database"
+ },
+ {
+  "issue_id": "DB-006",
+  "severity": "P2",
+  "category": "sharding",
+  "title": "Shard router jump-hash ignores the key: every restaurant maps to the same shard",
+  "source_files": [
+   "backend/internal/sharding/router.go"
+  ],
+  "evidence": "router.go:67-83: the loop mutates hashValue (line 77) but never uses it; bucket depends only on numShards. Computed loop result (python reproduction of lines 71-80): numShards 2->1, 3->2, 4->3, 5->3, 8->5, 16->12 for ALL keys, then % numShards (line 59). Real jump hash needs (b+1)*2^31/((key>>33)+1). tests/unit/middleware/sharding_test.go:125 claims distribution across 4 shards; not run (needs live shards). Not wired into the main API (DB-008), so no production impact today.",
+  "suspected_root_cause": "Incorrect port of the Lamping-Veach jump consistent hash; no key-distribution unit test without live DB.",
+  "recommended_fix": "Replace with a correct jump hash or a persisted tenant->shard directory table; add a pure unit test asserting uniform distribution over 100k keys and minimal movement when adding a shard.",
+  "required_tests": [
+   "Distribution chi-square test over 100k keys, N=4",
+   "Consistency test: adding shard N+1 moves ~1/(N+1) keys",
+   "Determinism test"
+  ],
+  "status": "OPEN",
+  "_source": "database"
+ },
+ {
+  "issue_id": "DB-007",
+  "severity": "P1",
+  "category": "sharding",
+  "title": "Shard migration tool would copy entire tables (not one restaurant), uses invalid SQL, and rollback deletes ALL target data",
+  "source_files": [
+   "backend/internal/sharding/migration.go",
+   "backend/cmd/migrate-shard/main.go",
+   "backend/internal/handlers/shard_migration_api.go"
+  ],
+  "evidence": "migration.go:223-245: SELECT * FROM <table> ORDER BY id LIMIT/OFFSET with no restaurant/tenant filter; tables hardcoded [\"orders\",\"order_items\",\"payments\",\"customers\",\"restaurants\"] (:200) - omits products, journal_entries, employees etc.; \"customers\" does not exist. Offset carried across tables (:217). rows.Close deferred inside a loop (:244). Column list formatted with fmt.Sprintf(\"%s\", columns) (:307, :437) which renders \"[a b c]\" - invalid SQL. Rollback (:373-389) runs DELETE FROM <table> on the TARGET shard with no WHERE; cmd/migrate-shard defaults --rollback-on-error=true (main.go:36), so any error wipes the target shard. Dual-write follower write is fire-and-forget (:455-461) with unsynchronised errorCount. Never executed (no shards available); CLI defaults to user postgres.",
+  "suspected_root_cause": "Prototype written without a real schema; no tests with live data.",
+  "recommended_fix": "Do not use against real data. Rewrite as a per-tenant scoped, FK-ordered, transactional copy with checksum verification and a safe rollback (delete only rows tagged with the migration).",
+  "required_tests": [
+   "Migrate one tenant between two throwaway shards; row counts + checksums per table equal",
+   "Other tenants on target untouched after rollback",
+   "Failure injection mid-copy"
+  ],
+  "status": "OPEN",
+  "_source": "database"
+ },
+ {
+  "issue_id": "DB-008",
+  "severity": "P2",
+  "category": "sharding",
+  "title": "Sharding and scaling packages are not wired into the API (experimental); documentation claims production-ready",
+  "source_files": [
+   "backend/cmd/api/main.go",
+   "backend/internal/sharding",
+   "backend/internal/scaling",
+   "backend/internal/handlers/scaling_api.go",
+   "docs-organized/05-INFRASTRUCTURE/MULTI_TENANCY/IMPLEMENTATION_SUMMARY.md"
+  ],
+  "evidence": "cmd/api/main.go imports (top ~60 lines) include no internal/sharding, internal/scaling or internal/handlers. grep: ShardingMiddleware/NewShardRouter appear only in internal/sharding, internal/middleware/sharding.go, internal/handlers/sharding_example.go and tests. Repositories take a single *sql.DB. scaling/autoscaler.go:226,267 \"In production, call cloud provider API\" (no-op), failover_manager.go:250 stub, load_balancer.go:239 stub GeoIP. scaling_api.go:34-35 registers \"servers/:id/metrics\" (not Go 1.22 pattern syntax) and has no auth. IMPLEMENTATION_SUMMARY.md:3,422 says COMPLETED / production-ready; DATABASE_SHARDING.md:3 says In Progress. ~3,970 lines unused.",
+  "suspected_root_cause": "Scaffolding committed as \"complete\" without integration.",
+  "recommended_fix": "Mark packages experimental in docs, move behind a build tag or delete; do not advertise horizontal scalability.",
+  "required_tests": [
+   "CI check that unused packages are excluded",
+   "If revived: end-to-end test routing two tenants to two shards through the real API"
+  ],
+  "status": "OPEN",
+  "_source": "database"
+ },
+ {
+  "issue_id": "DB-009",
+  "severity": "P2",
+  "category": "sharding",
+  "title": "Shard key is restaurant_id but accounting/RBAC/subscription data is tenant-scoped; cross-shard transactions undefined",
+  "source_files": [
+   "backend/internal/middleware/sharding.go",
+   "backend/internal/sharding/router.go"
+  ],
+  "evidence": "middleware/sharding.go:35-49 routes by RestaurantID only; users, tenants, roles, role_permissions, subscriptions and payments (115_create_payments_table.sql: tenant_id only) are tenant-level and several repos query across a tenant (subscription_repo_impl.go). No code coordinates 2PC/saga. GetAllConnections (router.go:134-160) opens unmanaged pools and leaks them on error. Global UNIQUEs (orders.order_number 060:10, tenants.slug) cannot be enforced across shards. DSN hardcodes sslmode=disable (router.go:81).",
+  "suspected_root_cause": "Shard key chosen without data-model analysis.",
+  "recommended_fix": "Shard by tenant_id (all restaurants of a tenant co-located); keep a global control-plane DB for tenants/users/plans; replace global uniques with (tenant_id, ...) uniques.",
+  "required_tests": [
+   "Tenant-level report across its restaurants runs on a single shard",
+   "Global uniqueness test for control-plane tables"
+  ],
+  "status": "OPEN",
+  "_source": "database"
+ },
+ {
+  "issue_id": "DB-010",
+  "severity": "P1",
+  "category": "data-integrity",
+  "title": "Order numbers collide and are globally unique; generator ignores tenant and uses unix-time modulo",
+  "source_files": [
+   "backend/internal/domain/order.go",
+   "backend/internal/usecase/order_usecase.go",
+   "backend/migrations/060_create_orders_table.sql"
+  ],
+  "evidence": "order_usecase.go:64 GenerateOrderNumber(tenantID, time.Now().Unix()%1000000); domain/order.go:242-244 ignores tenantID and returns \"ORD-<year>-%06d\". The value repeats every 1,000,000 s (~11.6 days) and two orders in the same second (any tenant) collide. orders.order_number VARCHAR(50) NOT NULL UNIQUE is GLOBAL (060:10): collisions across tenants cause a unique violation (500) on order creation, and numbers are guessable (see DB-002). Not reproduced dynamically.",
+  "suspected_root_cause": "Placeholder comment at order_usecase.go:62 \"In production, this should query the current order count\".",
+  "recommended_fix": "Per-restaurant counter (sequence table with row lock) and UNIQUE(tenant_id, restaurant_id, order_number); add a random component for public tracking.",
+  "required_tests": [
+   "Concurrent 100 order creates in the same second: no 500s, all unique",
+   "Two tenants can hold the same order_number",
+   "Number does not repeat after 11 days (clock mock)"
+  ],
+  "status": "OPEN",
+  "_source": "database"
+ },
+ {
+  "issue_id": "DB-011",
+  "severity": "P1",
+  "category": "data-integrity",
+  "title": "Order creation is not transactional; inventory is checked but never decremented; totals computed in float64 with hardcoded 10% tax",
+  "source_files": [
+   "backend/internal/usecase/order_usecase.go",
+   "backend/internal/repository/order_repo.go"
+  ],
+  "evidence": "order_usecase.go:178-189 CreateOrder inserts the order, then loops CreateOrderItem as separate statements; order_repo.go has no tx in the create path, so a failure leaves an order with missing items. Inventory: order_usecase.go:130-132 only checks product.QuantityInStock < qty; grep shows quantity_in_stock is written only by UpdateProduct (product_repo.go:364): no decrement on sale, and check-then-act is racy. subtotal := 0.0 float64 (:70), TaxAmount = subtotal*0.10 (:174); discount never validated (:176-178). DB: no CHECK that order_items.total_price = qty*unit_price or orders.total = subtotal+tax-discount+fee (060:46-52 only >=0).",
+  "suspected_root_cause": "Business logic prototyped in the usecase; no DB-level invariants.",
+  "recommended_fix": "Wrap order+items+inventory decrement in one tx with SELECT ... FOR UPDATE on stock; compute money with integer minor units or decimal; add CHECK constraints; per-restaurant tax rate.",
+  "required_tests": [
+   "Fault-injection: item insert failure leaves no order row",
+   "Concurrent orders for the last unit: exactly one succeeds",
+   "Total-consistency CHECK rejects tampered rows"
+  ],
+  "status": "OPEN",
+  "_source": "database"
+ },
+ {
+  "issue_id": "DB-012",
+  "severity": "P1",
+  "category": "data-integrity",
+  "title": "Journal entry balance is not enforced by the database; trigger named validate_journal_balance only sums; posted lines are mutable",
+  "source_files": [
+   "backend/migrations/137_create_journal_entries.sql",
+   "backend/internal/repository/journal_entry_repo.go"
+  ],
+  "evidence": "137:76-114 function validate_journal_balance() computes SUM(debit),SUM(credit) and UPDATEs journal_entries.total_*; it never raises when they differ. No CHECK/constraint trigger on journal_entries(total_debit=total_credit) in 137 or later migrations (grep total_debit in 153-160 returns nothing). Balance is verified only in app code at post time: journal_entry_repo.go:393-395 math.Abs(totalDebit-totalCredit) > 0.009 on float64 (tolerates almost one cent). No trigger prevents UPDATE/DELETE of journal_entry_lines for posted/void entries (only repo-level draft check :272-274 before delete :329). journal_entry_lines.tenant_id (137:56) is not an FK and lines carry no restaurant_id. Row-level trigger recomputes totals per row (O(n^2)).",
+  "suspected_root_cause": "Balance rule implemented only in Go; misleading trigger name.",
+  "recommended_fix": "Add a DEFERRABLE INITIALLY DEFERRED constraint trigger raising when a posted entry is unbalanced; block writes to lines of posted/void entries; composite FK (journal_entry_id,tenant_id); use decimal in Go and exact equality.",
+  "required_tests": [
+   "Direct SQL insert of unbalanced posted entry rejected",
+   "UPDATE line on posted entry rejected",
+   "Cross-tenant line insert rejected"
+  ],
+  "status": "OPEN",
+  "_source": "database"
+ },
+ {
+  "issue_id": "DB-013",
+  "severity": "P1",
+  "category": "security",
+  "title": "Migration 109 seeds a super admin with a super-admin with a legacy hash and fixed email into every environment; 099 seeds a test tenant/restaurant",
+  "source_files": [
+   "backend/migrations/109_seed_super_admin.sql",
+   "backend/migrations/099_add_test_restaurant.sql"
+  ],
+  "evidence": "109_seed_super_admin.sql:5-8 password comment \"[legacy default removed]\" with bcrypt hash, email superadmin@pos-saas.com, ip_whitelist NULL = all IPs (:26), is_super_admin true, attached to tenant 1. docker-entrypoint.sh:11 runs ./migrate at every container start including production (docker-compose.prod.yml uses the same image). 099_add_test_restaurant.sql:6-34 inserts \"Test Tenant\"/\"restaurant-1\" and a theme in any environment.",
+  "suspected_root_cause": "Seed data placed in schema migrations.",
+  "recommended_fix": "Remove seeds from migrations; create the super admin via a one-time CLI with an env-provided password; rotate/disable this account on any deployed DB; require IP allowlist/MFA for super admin.",
+  "required_tests": [
+   "Fresh prod-profile migrate leaves users table empty",
+   "Login with the documented default credential fails"
+  ],
+  "status": "OPEN",
+  "_source": "database"
+ },
+ {
+  "issue_id": "DB-014",
+  "severity": "P2",
+  "category": "migrations",
+  "title": "Migration runner lacks locking, checksums, explicit transaction control and rollbacks; runs at every container start",
+  "source_files": [
+   "backend/cmd/migrate/main.go",
+   "backend/docker-entrypoint.sh"
+  ],
+  "evidence": "cmd/migrate/main.go:48-95 sorts filenames lexically (sort.Strings), tracks only the filename in schema_migrations(version), executes each file with one db.Exec and inserts the version row in a separate statement (:85-90): a crash in between re-runs a non-idempotent file. No pg_advisory_lock while docker-entrypoint.sh:11 runs ./migrate on every start, so replicas race. No checksum; no down migrations (7 *.down.sql.disabled never run). Duplicate numeric prefixes: 067,070,071,072,075,076,078,079,080,099,104,105,106 (evidence/database-evidence/duplicate-migration-prefixes.txt); active duplicates: 067x2, 070x2, 071x2, 072x2, 078 (seed + disabled), 099, 104x2 (permission_audit_logs + role_permissions), 105, 106; order relies on lexical tie-break (067_create_themes_table < 067_theme_migrations_placeholder). 123 files, 107 active .sql, 16 .disabled; many numeric gaps (006-011, 018-019, 028-039, 041-049, 051-059, 081-089, 091-098).",
+  "suspected_root_cause": "Home-grown runner; accretive numbering across branches.",
+  "recommended_fix": "Adopt golang-migrate/goose or add advisory lock + transaction per file + checksum; unique numeric versions; run migrations as a separate job, not in the app entrypoint.",
+  "required_tests": [
+   "Two concurrent migrate processes: one waits, schema applied once",
+   "CI fails on duplicate version numbers",
+   "Clean DB to head then compare against baseline schema dump"
+  ],
+  "status": "OPEN",
+  "_source": "database"
+ },
+ {
+  "issue_id": "DB-015",
+  "severity": "P3",
+  "category": "migrations",
+  "title": "Dead/misleading and non-idempotent migrations; three coexisting theme models",
+  "source_files": [
+   "backend/migrations/147_create_performance_reviews.sql",
+   "backend/migrations/026_create_performance_reviews_table.sql",
+   "backend/migrations/067_create_themes_table.sql",
+   "backend/migrations/999_theme_migration_legacy.sql"
+  ],
+  "evidence": "147 is CREATE TABLE IF NOT EXISTS performance_reviews with a different column set than 026 (areas_to_improve vs areas_for_improvement; no review_type); once 026 has run it is a silent no-op, and the repository matches 026 (performance_review_repo.go:163-170, columns areas_for_improvement/reviewer_comments), so 147 is dead but misleading (domain/hr_advanced.go:20 uses AreasToImprove). Files without IF NOT EXISTS / ON CONFLICT: 065, 067_placeholder, 073, 078_seed, 105, 106, 112, 120, 122, 126, 127, 132, 134, 135, 155, 156, 159 (DML backfills/seeds mixed into schema migrations). Theme models themes (067), themes_v2 (070) and restaurant_themes (999) coexist; 075-080 theme versions are disabled.",
+  "suspected_root_cause": "Parallel feature branches re-created tables.",
+  "recommended_fix": "Delete dead 147, consolidate theme models, make backfills idempotent.",
+  "required_tests": [
+   "Schema snapshot test after full migrate matches committed expected schema"
+  ],
+  "status": "OPEN",
+  "_source": "database"
+ },
+ {
+  "issue_id": "DB-016",
+  "severity": "P2",
+  "category": "migrations",
+  "title": "Hardcoded role grant and destructive/incomplete rollback script",
+  "source_files": [
+   "backend/migrations/050_create_notifications_system.sql",
+   "backend/scripts/rollback_phase6_accounting_hr.sql"
+  ],
+  "evidence": "050_create_notifications_system.sql:150-151 GRANT EXECUTE ON FUNCTION ... TO postgres fails if that role does not exist and grants nothing to a least-privilege app role. scripts/rollback_phase6_accounting_hr.sql drops performance_reviews CASCADE (also the table from migration 026, an earlier phase) and does not delete schema_migrations rows, so migrate will skip recreating dropped tables. Forward migrations contain no DROP TABLE/COLUMN/TRUNCATE/DELETE (grep) - good.",
+  "suspected_root_cause": "Rollback written by phase, not by migration.",
+  "recommended_fix": "Replace with versioned down migrations; remove or parameterise role grants; delete schema_migrations rows in rollback.",
+  "required_tests": [
+   "Up/down/up cycle on clean DB succeeds",
+   "Migration run as a non-postgres role succeeds"
+  ],
+  "status": "OPEN",
+  "_source": "database"
+ },
+ {
+  "issue_id": "DB-017",
+  "severity": "P2",
+  "category": "multi-tenancy",
+  "title": "Repository methods without tenant/restaurant predicates (defence-in-depth gaps); GetOrderItems/GetOrderStatusHistory ignore tenant",
+  "source_files": [
+   "backend/internal/repository/driver_repo.go",
+   "backend/internal/repository/order_repo.go",
+   "backend/internal/repository/homepage_section_repository.go",
+   "backend/internal/repository/restaurant_theme_repo.go",
+   "backend/internal/repository/theme_repository.go",
+   "backend/internal/repository/payment_repo_impl.go",
+   "backend/internal/repository/user_repo.go"
+  ],
+  "evidence": "See table in 06 and evidence/database-evidence/repository-tenant-scan.txt. driver_repo.go: Update (:198 WHERE id=$16), Delete (:228), UpdateStatus (:249), UpdateAvailability, UpdateLocation, assignments, stats are by id only; safety depends on handler pre-checks comparing driver.TenantID (admin_driver_handler.go:263,292,359,...). Drivers routes use wrapProtected only (main.go:1397-1403, no RBAC). order_repo.go:693-700 GetOrderItems and :756-762 GetOrderStatusHistory accept tenantID but query WHERE order_id=$1 only (callers check the order first, e.g. public_order_handler.go:285). homepage_section DeleteSection/website_settings are restaurant-scoped but not tenant-scoped; restaurant_theme_repo UpdateSection/DeleteSection by theme_id only; payment_repo_impl.go UpdatePaymentOrder/UpdatePaymentStatus WHERE id=$n only; user_repo.go UpdatePassword/UpdateProfile by user id (callers not individually traced).",
+  "suspected_root_cause": "Authorization done in handlers instead of enforced in the data layer.",
+  "recommended_fix": "Make tenant_id (and restaurant_id where applicable) mandatory parameters of every repository method and part of WHERE; CI lint scanning repo SQL for tenant predicates.",
+  "required_tests": [
+   "Per-repository cross-tenant matrix test (tenant B cannot read/update/delete tenant A row by id)",
+   "Static SQL-lint test in CI"
+  ],
+  "status": "OPEN",
+  "_source": "database"
+ },
+ {
+  "issue_id": "DB-018",
+  "severity": "P2",
+  "category": "data-integrity",
+  "title": "Tenant/restaurant consistency not enforced by composite FKs; denormalised tenant_id can drift; slug uniqueness only per tenant",
+  "source_files": [
+   "backend/migrations/065_add_restaurant_id_to_order_items.sql",
+   "backend/migrations/137_create_journal_entries.sql",
+   "backend/migrations/002_create_restaurants.sql",
+   "backend/internal/repository/restaurant_repo.go"
+  ],
+  "evidence": "order_items.tenant_id/restaurant_id are separate FKs (065:24-26) with nothing tying them to orders; same pattern in journal_entry_lines.tenant_id (no FK at all, 137:56), invoice_*_lines, bank_reconciliation_lines. Tables with no tenant_id column (script over migrations): order_status_history, product_images, inventory, low_stock_alerts, driver_assignments, driver_location_history, theme_sections, theme_history, user_settings, etc. Four tenant-bearing tables lack a leading tenant/restaurant index: bank_reconciliation_lines, invoice_customer_lines, invoice_supplier_lines, journal_entry_lines (indexed by parent id). restaurants UNIQUE(tenant_id,slug) (002:30) while public lookup is slug-only (restaurant_repo.go:20-33 WHERE slug=$1, no LIMIT/ORDER): global uniqueness currently comes only from tenants.slug UNIQUE at registration (auth_repo.go:337) - tenants.max_restaurants is app-only.",
+  "suspected_root_cause": "tenant_id added as a denormalised column without UNIQUE(id,tenant_id) parent keys.",
+  "recommended_fix": "Add UNIQUE(id,tenant_id[,restaurant_id]) on parents and composite FKs on children; enforce global slug uniqueness or make lookup tenant-aware.",
+  "required_tests": [
+   "INSERT child with mismatched tenant rejected by DB",
+   "Duplicate restaurant slug across tenants rejected or disambiguated"
+  ],
+  "status": "OPEN",
+  "_source": "database"
+ },
+ {
+  "issue_id": "DB-019",
+  "severity": "P2",
+  "category": "data-integrity",
+  "title": "Money types: DB numeric is sound but Go uses float64; id types mixed; ON DELETE CASCADE on orders",
+  "source_files": [
+   "backend/internal/usecase/order_usecase.go",
+   "backend/internal/repository/journal_entry_repo.go",
+   "backend/migrations/060_create_orders_table.sql",
+   "backend/migrations/115_create_payments_table.sql"
+  ],
+  "evidence": "Money columns across migrations (grep): 54 NUMERIC, 24 DECIMAL, 5 INTEGER (payments.amount_cents INTEGER, 115:7) and no FLOAT/REAL/MONEY columns - sound; precision differs (orders DECIMAL(10,2) vs accounting NUMERIC(15,2)). Go uses float64 for subtotal/tax (order_usecase.go:70,174) and ledger deltas (journal_entry_repo.go:777). orders/order_items cascade-delete from restaurants/tenants (060:44-45), so deleting a restaurant erases sales history, whereas accounting tables use plain REFERENCES. Ids: orders BIGSERIAL, accounting SERIAL (INT) - e.g. journal_entries.reference_id INT -> orders.id BIGINT.",
+  "suspected_root_cause": "No money-type convention.",
+  "recommended_fix": "Use decimal or minor units end to end; BIGINT everywhere; soft-delete tenants/restaurants and RESTRICT FKs on financial records.",
+  "required_tests": [
+   "Round-trip decimal tests on totals",
+   "FK RESTRICT test: cannot delete a restaurant that has orders"
+  ],
+  "status": "OPEN",
+  "_source": "database"
+ },
+ {
+  "issue_id": "DB-020",
+  "severity": "P3",
+  "category": "security",
+  "title": "Payment provider auth token stored in plaintext; DB defaults to superuser and sslmode=disable",
+  "source_files": [
+   "backend/migrations/115_create_payments_table.sql",
+   "backend/internal/config/config.go",
+   "docker-compose.prod.yml",
+   ".env.prod.example"
+  ],
+  "evidence": "115:23 paymob_auth_token TEXT stored as received; only card_last_four/brand are kept (no PAN - good). Positive: partial UNIQUE idx_payments_paymob_order_success (115:48-50) prevents duplicate success per Paymob order; merchant_order_id UNIQUE (:35). docker-compose.prod.yml:63 and .env.prod.example:16 default DB_SSLMODE=disable; DB_USER defaults to the postgres superuser (config.go:54).",
+  "suspected_root_cause": "Defaults optimised for local dev.",
+  "recommended_fix": "Do not persist short-lived auth tokens (or encrypt); require sslmode=require/verify-full in prod; create a least-privilege app role.",
+  "required_tests": [
+   "Prod config validation rejects sslmode=disable and superuser"
+  ],
+  "status": "OPEN",
+  "_source": "database"
+ },
+ {
+  "issue_id": "DB-021",
+  "severity": "P3",
+  "category": "multi-tenancy",
+  "title": "KDS websocket is JWT-scoped (good) but CheckOrigin always true and token in query string; upload serving unverified",
+  "source_files": [
+   "backend/internal/handler/ws/kds_ws_handler.go",
+   "backend/internal/handler/ws/kds_hub.go",
+   "backend/internal/usecase/product_usecase.go"
+  ],
+  "evidence": "kds_ws_handler.go:98-114 validates the JWT from ?token= and derives tenantID/restaurantID from claims (not headers); room key tenant:%d:restaurant:%d (kds_hub.go:171) - SCOPED. CheckOrigin returns true (:83-87, TODO) enabling cross-site websocket hijack if a token is obtainable; token in URL leaks to logs. Uploads: product images are stored under ./uploads/products/<tenant>/<product>/ (product_usecase.go:299-304) but I found no route serving /uploads in cmd/api/main.go; serving (nginx/static) and ACLs not verified.",
+  "suspected_root_cause": "Dev shortcuts.",
+  "recommended_fix": "Whitelist origins; use first-message auth or short-lived ws ticket; verify upload serving path/ACL.",
+  "required_tests": [
+   "WS from disallowed Origin rejected",
+   "Tenant A token cannot receive tenant B room messages"
+  ],
+  "status": "OPEN",
+  "_source": "database"
+ },
+ {
+  "issue_id": "DB-022",
+  "severity": "P3",
+  "category": "database",
+  "title": "Duplicate indexes and weak state-transition protection",
+  "source_files": [
+   "backend/migrations/003_create_users.sql",
+   "backend/migrations/066_add_restaurant_id_indexes.sql",
+   "backend/migrations/060_create_orders_table.sql"
+  ],
+  "evidence": "Same-name duplicates (second is a no-op IF NOT EXISTS in 066): idx_users_restaurant, idx_categories_restaurant, idx_products_restaurant, idx_orders_restaurant_created, idx_order_items_restaurant(+_created); distinct-name duplicates: idx_performance_reviews_tenant vs _tenant_restaurant, idx_attendance_date vs _date_range, theme_history created_at indexes. Order status/payment_status only have value CHECKs (060:46-47); no trigger enforces legal transitions or that payment_status=paid has a payments row; transitions are app-only (order_repo.go:471-540). Positives: tenants.subscription_status CHECK (110:29); salaries trigger computes net_salary and CHECKs amounts (024:93-97,148). tenants.is_active coexists with subscription_status (auth_repo.go:63) as a second source of truth.",
+  "suspected_root_cause": "Incremental migrations.",
+  "recommended_fix": "Drop duplicates; add a transition trigger or state-machine table; unify tenant active flag.",
+  "required_tests": [
+   "Illegal status transition via SQL rejected",
+   "Tenant disabled flag consistent with subscription_status"
+  ],
+  "status": "OPEN",
+  "_source": "database"
+ },
+ {
+  "issue_id": "FE-OTH-001",
+  "severity": "P0",
+  "category": "security/auth",
+  "title": "POST /auth/login/confirm issues a tenant JWT with only email + tenant_id (no password / no proof of prior login)",
+  "source_files": [
+   "backend/internal/usecase/auth_usecase.go:202-250",
+   "backend/internal/domain/user.go:73-76",
+   "backend/cmd/api/main.go:444",
+   "frontend/apps/landing/src/components/TenantSelectorModal.tsx:46-60"
+  ],
+  "evidence": "TenantSelectionRequest has only Email and TenantID. LoginConfirm calls FindUserByEmailAllTenants, picks the user with matching TenantID and calls tokenService.GenerateToken. No password, no short-lived selection token. The route at main.go:444 is public (no middleware). The landing modal sends exactly {email, tenant_id}.",
+  "suspected_root_cause": "Two-step multi-tenant login implemented without binding step 2 to step 1 (password verified only in Login, nothing carried forward).",
+  "recommended_fix": "Have Login return a signed, short-lived, single-use selection token (bound to email + allowed tenant ids); require it in LoginConfirm; add rate limiting.",
+  "required_tests": [
+   "Backend: LoginConfirm without valid selection token returns 401",
+   "Backend: selection token cannot be replayed or used for a tenant not in its list",
+   "Landing integration: multi-tenant login still completes end to end"
+  ],
+  "status": "OPEN",
+  "_source": "frontend-others"
+ },
+ {
+  "issue_id": "FE-OTH-002",
+  "severity": "P0",
+  "category": "security/multi-tenancy",
+  "title": "Public order endpoints trust client-supplied X-Tenant-ID / X-Restaurant-ID and allow unauthenticated GET/DELETE by sequential order id",
+  "source_files": [
+   "backend/cmd/api/main.go:472-484",
+   "backend/internal/middleware/tenant.go:39-63",
+   "backend/internal/handler/http/public_order_handler.go:375-427",
+   "frontend/apps/restaurant-website/lib/api-client.ts:42-50",
+   "frontend/apps/restaurant-website/lib/subdomain-context.tsx:48-58"
+  ],
+  "evidence": "Public order routes are wrapped only in TenantContextMiddleware, which (when no JWT claims exist) falls back to X-Tenant-ID/X-Restaurant-ID headers. CancelOrder (DELETE /public/orders/{id}) cancels using tenantID/restaurantID from those headers and an integer id; no phone, token or order-number secret is required and no rate limit is applied to these routes (compare RateLimitByIP on the table route at main.go:466). GET /public/orders/{id}, /status, /track use the same wrapper. Response contents of GetOrder were not inspected.",
+  "suspected_root_cause": "Public ordering reuses internal tenant middleware designed for 'backward compatibility' headers; ownership of an order is not proven by the caller.",
+  "recommended_fix": "Resolve tenant from slug server-side for public routes; require an unguessable per-order token (or order number + phone) for read/cancel; rate-limit; use non-sequential public ids.",
+  "required_tests": [
+   "Backend: DELETE /public/orders/{id} without ownership proof returns 401/403",
+   "Backend: cross-tenant header spoof cannot read another tenant order",
+   "Rate-limit test on public order routes"
+  ],
+  "status": "OPEN",
+  "_source": "frontend-others"
+ },
+ {
+  "issue_id": "FE-OTH-003",
+  "severity": "P1",
+  "category": "subscription/business-logic",
+  "title": "Newly registered tenants never get trial_start_date/trial_end_date, so access check never expires their trial",
+  "source_files": [
+   "backend/internal/repository/auth_repo.go:60-64",
+   "backend/migrations/110_add_tenant_subscription_fields.sql:4-7",
+   "backend/migrations/112_seed_existing_tenants_trial.sql:12-13",
+   "backend/internal/repository/subscription_repo_impl.go:795-830",
+   "backend/internal/repository/subscription_repo_impl.go:697-706"
+  ],
+  "evidence": "CreateTenantWithUser INSERT lists name, slug, domain, email, phone, subscription_plan, max_restaurants, max_users, is_active - no trial_* columns. Migration 110 gives subscription_status default 'trial' and trial_days default 15 but trial_start/end columns have no default. Migration 112 seeds dates only for rows existing at migration time. CheckTenantAccess blocks only when status=='trial' && trialEndDate.Valid && now>trialEnd, so NULL means unlimited access. GetExpiredTrials exists in the repo but grep found no caller (no expiry job). No trigger found in migrations (grep for trial_end_date outside 110-114).",
+  "suspected_root_cause": "Registration path was not updated when the trial system (migrations 110-114) was added; no scheduled expiry.",
+  "recommended_fix": "Set trial_start_date=NOW(), trial_end_date=NOW()+trial_days in the registration INSERT (single configurable constant); backfill NULL rows; add expiry job that flips status to expired.",
+  "required_tests": [
+   "Register tenant then assert trial_end_date = start + configured days",
+   "Tenant with trial_end in past is blocked by TenantStatusMiddleware",
+   "Backfill migration test for NULL trial rows"
+  ],
+  "status": "OPEN",
+  "_source": "frontend-others"
+ },
+ {
+  "issue_id": "FE-OTH-004",
+  "severity": "P2",
+  "category": "consistency/docs",
+  "title": "Trial length inconsistent: 30 days (landing, README feature section) vs 15 days (DB defaults, migrations, README line 297, dashboard blocked screens)",
+  "source_files": [
+   "frontend/apps/landing/src/lib/translations.ts:12,63,78-79,102,119,228,279,294-295,318,335",
+   "README.md:297",
+   "README.md:415-418",
+   "README.md:522-529",
+   "backend/migrations/110_add_tenant_subscription_fields.sql:7,35",
+   "backend/migrations/112_seed_existing_tenants_trial.sql:12-13",
+   "frontend/apps/dashboard/src/components/blocked/BlockedOverlay.tsx:29",
+   "frontend/apps/dashboard/src/components/blocked/TrialExpiredScreen.tsx:44"
+  ],
+  "evidence": "Landing EN+AR copy says 30-day trial in 8+ places; DB default trial_days=15, seed uses '15 days'; README says both 'trial 15 days' (297) and '30 days' (415-418, 522, 529); dashboard hardcodes '15-day'.",
+  "suspected_root_cause": "No single source of truth for trial length; copy is hardcoded in four places.",
+  "recommended_fix": "Decide one value, expose via public config endpoint (e.g. /subscription/plans) and read it in landing + dashboard; fix README.",
+  "required_tests": [
+   "Contract test: landing copy value equals backend default trial_days"
+  ],
+  "status": "OPEN",
+  "_source": "frontend-others"
+ },
+ {
+  "issue_id": "FE-OTH-005",
+  "severity": "P1",
+  "category": "security/token-handling",
+  "title": "Bearer JWT and full user object are passed in URL query strings across apps (landing->dashboard, super-admin->dashboard impersonation, dashboard-login)",
+  "source_files": [
+   "frontend/apps/landing/src/app/[locale]/auth/login/page.tsx:76",
+   "frontend/apps/landing/src/app/[locale]/auth/register/page.tsx:131",
+   "frontend/apps/landing/src/components/TenantSelectorModal.tsx:74",
+   "frontend/apps/landing/src/app/[locale]/auth/super-admin-login/page.tsx:46-55",
+   "frontend/apps/super-admin/src/components/impersonation/ImpersonationModal.tsx:56",
+   "backend/internal/handler/http/super_admin_handler.go:320"
+  ],
+  "evidence": "Landing redirects to `${dashboardUrl}/auth/callback?token=<JWT>&user=<json>`; super-admin builds `/en/dashboard?impersonation_token=...`; backend returns redirect_url with ?token=. Tokens land in browser history, server/proxy access logs and Referer. The dashboard-login token is documented as 30 s one-time (store deletes on validate, super_admin_repo.go:673-674) but user JWTs are long-lived.",
+  "suspected_root_cause": "Cross-origin handoff between landing and dashboard implemented via query string instead of POST/fragment/code exchange.",
+  "recommended_fix": "Use a one-time auth code exchanged server-side, or URL fragment + immediate history.replaceState; add Referrer-Policy: no-referrer on callback pages; scrub from logs.",
+  "required_tests": [
+   "E2E: callback page strips token from URL after consumption",
+   "Access-log check that tokens are not logged"
+  ],
+  "status": "OPEN",
+  "_source": "frontend-others"
+ },
+ {
+  "issue_id": "FE-OTH-006",
+  "severity": "P1",
+  "category": "reliability/concurrency",
+  "title": "RateLimitSuperAdmin uses an unsynchronized map and a new limiter instance per route",
+  "source_files": [
+   "backend/internal/middleware/super_admin_auth.go:168-200",
+   "backend/cmd/api/main.go:1761-1766",
+   "backend/cmd/api/main.go:1823-1829"
+  ],
+  "evidence": "`clients := make(map[string]*clientInfo)` is read/written in the handler with no mutex (grep for Mutex/sync in file returns nothing). wrapSuperAdmin calls RateLimitSuperAdmin(30) each time a route is wrapped, so every route has its own map and its own 30/min budget; entries are never evicted.",
+  "suspected_root_cause": "Placeholder limiter ('In production, use Redis').",
+  "recommended_fix": "Create one limiter outside wrapSuperAdmin with sync.Mutex (or use existing RateLimitByIP implementation / Redis) and add eviction.",
+  "required_tests": [
+   "go test -race with concurrent requests through wrapSuperAdmin",
+   "Limit is shared across routes"
+  ],
+  "status": "OPEN",
+  "_source": "frontend-others"
+ },
+ {
+  "issue_id": "FE-OTH-007",
+  "severity": "P1",
+  "category": "security/logging",
+  "title": "Backend Login logs prefix of submitted password and of stored bcrypt hash",
+  "source_files": [
+   "backend/internal/usecase/auth_usecase.go:133",
+   "backend/internal/usecase/auth_usecase.go:137",
+   "backend/internal/handler/http/auth_handler.go:43-60"
+  ],
+  "evidence": "fmt.Printf(\"Password hash from DB (first 30 chars)...\") and fmt.Printf(\"Input password (first 3 chars): %s***\"). Handler also prints email and password length. Also `PasswordHash[:30]` can panic on a short/empty hash.",
+  "suspected_root_cause": "Debug prints left in production path.",
+  "recommended_fix": "Remove; use structured logger with no credentials; guard slice.",
+  "required_tests": [
+   "Log-capture test asserting no password/hash material in output"
+  ],
+  "status": "OPEN",
+  "_source": "frontend-others"
+ },
+ {
+  "issue_id": "FE-OTH-008",
+  "severity": "P2",
+  "category": "feature-gap",
+  "title": "Forgot-password is not implemented end to end",
+  "source_files": [
+   "backend/internal/usecase/auth_usecase.go (ForgotPassword, 'TODO: Generate reset token and send email')",
+   "backend/cmd/api/main.go:446",
+   "frontend/apps/landing/src/app/[locale]/auth/login/page.tsx:138",
+   "frontend/apps/landing/src/app/auth/login/__tests__/login.test.tsx:274"
+  ],
+  "evidence": "Backend returns 'Password reset email sent' without generating a token or sending mail. Landing login links to /{locale}/auth/forgot-password which has no page (pages list). Stale test expects href '/auth/forgot-password'.",
+  "suspected_root_cause": "UI link and API stub added ahead of implementation.",
+  "recommended_fix": "Implement reset flow (token table, email, reset page) or hide link and return 501.",
+  "required_tests": [
+   "Reset token lifecycle tests",
+   "Landing route exists test"
+  ],
+  "status": "OPEN",
+  "_source": "frontend-others"
+ },
+ {
+  "issue_id": "FE-OTH-009",
+  "severity": "P3",
+  "category": "routing",
+  "title": "Landing /login and /register shortcuts are broken by middleware (redirect to non-existent /en/login, /en/register); non-locale auth pages are dead code",
+  "source_files": [
+   "frontend/apps/landing/src/middleware.ts:19-35",
+   "frontend/apps/landing/src/app/login/page.tsx",
+   "frontend/apps/landing/src/app/register/page.tsx",
+   "frontend/apps/landing/src/app/auth/login/page.tsx",
+   "frontend/apps/landing/src/app/auth/register/page.tsx",
+   "frontend/apps/landing/src/app/page.tsx"
+  ],
+  "evidence": "Middleware prefixes any path lacking en|ar with /en, so /login -> /en/login; only [locale]/auth/{login,register,super-admin-login} exist, hence 404. /auth/login and /auth/register work, but only because the middleware redirects first; the page.tsx redirect stubs under app/auth, app/page.tsx never execute.",
+  "suspected_root_cause": "Locale middleware added after the redirect stubs.",
+  "recommended_fix": "Delete app/login, app/register, app/auth/*, app/page.tsx stubs; add explicit middleware rewrite for /login and /register if the shortcuts are wanted (backend super-admin redirect URLs and 401 interceptor use /auth/login).",
+  "required_tests": [
+   "E2E: /login, /register, /auth/login resolve to localized pages"
+  ],
+  "status": "OPEN",
+  "_source": "frontend-others"
+ },
+ {
+  "issue_id": "FE-OTH-010",
+  "severity": "P2",
+  "category": "marketing-vs-implementation",
+  "title": "Landing marketing claims not backed by implementation or data",
+  "source_files": [
+   "frontend/apps/landing/src/lib/translations.ts:52-55,81-102,18,107-113",
+   "frontend/apps/landing/src/components/Footer.tsx:35-67",
+   "backend/internal/repository/auth_repo.go:62-63",
+   "backend/migrations/118_create_subscription_plans_table.sql"
+  ],
+  "evidence": "(a) 'Mobile Apps (iOS & Android)': no mobile project in repo (top-level search). (b) 'Unlimited Restaurants/Staff' while registration inserts max_restaurants=1, max_users=5; no enforcement code found by grep but values exist. (c) '500+ restaurants' and testimonial/'revenue +30%' copy are static strings. (d) Price 500 EGP matches DB seed (50000 cents) and env default, but landing hardcodes it instead of reading public /subscription/plans; backend also seeds an annual plan (500000 cents) not shown. (e) Footer links /demo /about /blog /help /docs /api /privacy /terms and #about #contact have no target. (f) 'No credit card' is consistent with trial flow.",
+  "suspected_root_cause": "Marketing copy hardcoded and decoupled from product/billing.",
+  "recommended_fix": "Remove or qualify unsupported claims; fetch plans from API; add or remove dead links; legal pages are required before launch.",
+  "required_tests": [
+   "Link checker on landing",
+   "Copy/price contract test against /subscription/plans"
+  ],
+  "status": "OPEN",
+  "_source": "frontend-others"
+ },
+ {
+  "issue_id": "FE-OTH-011",
+  "severity": "P2",
+  "category": "bug/middleware",
+  "title": "Restaurant-website middleware treats 'localhost:3003' as a real subdomain, so bare localhost redirects to /maintenance",
+  "source_files": [
+   "frontend/apps/restaurant-website/middleware.ts:30-31,60-61,66-100",
+   "frontend/apps/restaurant-website/lib/subdomain.ts:33"
+  ],
+  "evidence": "restaurantSlug = host.split('.')[0]; for 'localhost:3003' this is 'localhost:3003', which is !== 'localhost', so isRealSubdomain=true; backend GetTenantStatusBySlug returns 404 for unknown slug (subscription_handler.go:48-70) and the middleware redirects to /maintenance on 404. parseSubdomain (lib/subdomain.ts) strips the port correctly, so the two disagree. Runtime not executed (read-only audit).",
+  "suspected_root_cause": "Duplicate, inconsistent subdomain parsing.",
+  "recommended_fix": "Reuse parseSubdomain in middleware; validate slug with isValidRestaurantSlug; skip checks for IP/localhost.",
+  "required_tests": [
+   "Unit: middleware host matrix (localhost:3003, slug.localhost:3003, slug.domain.com, www.domain.com, IP)"
+  ],
+  "status": "OPEN",
+  "_source": "frontend-others"
+ },
+ {
+  "issue_id": "FE-OTH-012",
+  "severity": "P2",
+  "category": "resilience/performance",
+  "title": "Tenant-status check in middleware fails open and is uncached (one backend call per request)",
+  "source_files": [
+   "frontend/apps/restaurant-website/middleware.ts:66-100,106-110",
+   "frontend/apps/restaurant-website/lib/checkTenantStatus.ts (unused)"
+  ],
+  "evidence": "fetch to /public/tenant-status/{slug} on every matched request (matcher excludes only _next/static, _next/image, favicon, public); catch{} lets request through when API unreachable; non-200/non-404 responses (e.g. 500) also pass. lib/checkTenantStatus.ts has a 30 s cache and encodeURIComponent but grep finds no importer. Backend caches status 30 s (tenant_status.go:16) but the public by-slug handler does not use that cache.",
+  "suspected_root_cause": "Helper written but middleware inlined its own version.",
+  "recommended_fix": "Use the cached helper (or edge cache); decide fail-open vs fail-closed deliberately; encode slug.",
+  "required_tests": [
+   "Middleware test with mocked fetch: blocked, 404, 500, timeout"
+  ],
+  "status": "OPEN",
+  "_source": "frontend-others"
+ },
+ {
+  "issue_id": "FE-OTH-013",
+  "severity": "P3",
+  "category": "security/input-validation",
+  "title": "Slug derived from Host header is unvalidated and interpolated unencoded into backend URLs; custom domains map to wrong slug",
+  "source_files": [
+   "frontend/apps/restaurant-website/middleware.ts:30,67-70",
+   "frontend/apps/restaurant-website/app/[locale]/page.tsx:38,149-155",
+   "frontend/apps/restaurant-website/lib/api/get-theme-server.ts:111-112",
+   "frontend/apps/restaurant-website/app/[locale]/menu/page.tsx:24"
+  ],
+  "evidence": "requestHeaders.set('x-restaurant-slug', restaurantSlug) correctly overwrites any client-sent header on locale routes (no header-injection pass-through), but the value is the raw first Host label, used unencoded in fetch paths. 'menu.example.com' or 'www' variants yield wrong slugs; menu page falls back to slug 'demo' when header is missing. Early-return paths (/maintenance, legacy table redirect) do not set the header.",
+  "suspected_root_cause": "No slug validation / custom-domain lookup.",
+  "recommended_fix": "Validate with isValidRestaurantSlug, encodeURIComponent, remove 'demo' fallback in production, add domain->slug lookup for custom domains.",
+  "required_tests": [
+   "Unit: hostile Host values (../, %2f, long labels) rejected"
+  ],
+  "status": "OPEN",
+  "_source": "frontend-others"
+ },
+ {
+  "issue_id": "FE-OTH-014",
+  "severity": "P2",
+  "category": "i18n/rtl",
+  "title": "Restaurant-website root <html> is always lang='en' dir='ltr' (locale param unavailable in root layout); landing sets dir only client-side",
+  "source_files": [
+   "frontend/apps/restaurant-website/app/layout.tsx:46-60",
+   "frontend/apps/restaurant-website/app/[locale]/layout.tsx:46-60",
+   "frontend/apps/landing/src/app/layout.tsx:19",
+   "frontend/apps/landing/src/contexts/LanguageContext.tsx:27-30"
+  ],
+  "evidence": "Root layout reads params.locale but sits above the [locale] segment so it is undefined -> 'en'/'ltr'. RTL is applied only on an inner <div dir>. Landing root has lang='en' and mutates document.documentElement in useEffect (flash of LTR, SSR/hydration mismatch). Super-admin is English only (lang='en').",
+  "suspected_root_cause": "Locale segment nested below root layout.",
+  "recommended_fix": "Move <html> into app/[locale]/layout.tsx (or use headers x-restaurant-locale) and set lang/dir server-side.",
+  "required_tests": [
+   "SSR HTML for /ar contains <html lang=ar dir=rtl>",
+   "Visual RTL regression"
+  ],
+  "status": "OPEN",
+  "_source": "frontend-others"
+ },
+ {
+  "issue_id": "FE-OTH-015",
+  "severity": "P2",
+  "category": "api-contract",
+  "title": "Restaurant-website calls endpoints that are not registered in main.go",
+  "source_files": [
+   "frontend/apps/restaurant-website/lib/hooks/use-api-queries.ts:184",
+   "frontend/apps/restaurant-website/app/[locale]/orders/orders-page-content.tsx:23",
+   "frontend/apps/restaurant-website/lib/api/theme-api.ts:33,80",
+   "frontend/apps/restaurant-website/lib/config/api.ts:74,77-79,83",
+   "backend/cmd/api/main.go:472-484"
+  ],
+  "evidence": "GET /public/orders (list, used by useOrders on /orders) - only POST /public/orders is registered. GET /public/themes/{slug} and /public/themes (theme-api, called from theme-store dynamic import) - not registered. API_ENDPOINTS constants (/orders/create, /orders/{id}, /themes, /products/search) match no route and appear unused.",
+  "suspected_root_cause": "Frontend written against a planned API; dead constants kept.",
+  "recommended_fix": "Remove My Orders list or implement it safely (phone/token scoped); point theme-api at /public/restaurants/{slug}/theme; delete dead constants.",
+  "required_tests": [
+   "Contract test enumerating frontend endpoints vs mux patterns"
+  ],
+  "status": "OPEN",
+  "_source": "frontend-others"
+ },
+ {
+  "issue_id": "FE-OTH-016",
+  "severity": "P3",
+  "category": "architecture",
+  "title": "Two API clients in restaurant-website; tenant/restaurant ids come from localStorage populated asynchronously",
+  "source_files": [
+   "frontend/apps/restaurant-website/lib/api-client.ts:28-50",
+   "frontend/apps/restaurant-website/lib/api/api-client.ts",
+   "frontend/apps/restaurant-website/lib/subdomain-context.tsx:34-75"
+  ],
+  "evidence": "lib/api-client.ts (axios instance, adds auth-token + X-Tenant-ID/X-Restaurant-ID from localStorage) and lib/api/api-client.ts (plain axios wrapper, no headers) coexist. IDs are written after an async /info fetch in a useEffect, so early order calls can lack headers (backend then 400 'Missing tenant context'); stale IDs persist across slugs on the same browser origin (localhost). Cookies 'restaurant-slug'/'is-restaurant-site' are read but never set by middleware.",
+  "suspected_root_cause": "Organic growth; tenant context passed client side.",
+  "recommended_fix": "Single client; send slug (path/header) and resolve server-side; drop cookie fallback.",
+  "required_tests": [
+   "Checkout test with cold localStorage",
+   "Slug switch test"
+  ],
+  "status": "OPEN",
+  "_source": "frontend-others"
+ },
+ {
+  "issue_id": "FE-OTH-017",
+  "severity": "P2",
+  "category": "business-logic/currency",
+  "title": "Checkout hardcodes USD '$', client-side delivery fee (5.99, free over 50) and cash-only payment while product is priced in EGP",
+  "source_files": [
+   "frontend/apps/restaurant-website/app/[locale]/checkout/checkout-page-content.tsx:26,70-71,364,378,384",
+   "frontend/apps/restaurant-website/app/[locale]/checkout/checkout-page-content.tsx:150-170"
+  ],
+  "evidence": "paymentMethod: z.literal('cash'); totals rendered with `$`; deliveryFee computed in browser. Order payload sends only product_id/quantity (prices computed server-side - good), so displayed total may differ from billed total.",
+  "suspected_root_cause": "Prototype constants; no tenant currency/fee settings.",
+  "recommended_fix": "Read currency and delivery fee from /settings or /info; get totals from /public/orders/validate.",
+  "required_tests": [
+   "Checkout renders tenant currency",
+   "Displayed total equals server total"
+  ],
+  "status": "OPEN",
+  "_source": "frontend-others"
+ },
+ {
+  "issue_id": "FE-OTH-018",
+  "severity": "P3",
+  "category": "security/content-spoofing",
+  "title": "/maintenance renders tenant name and contact details from query string (anyone can craft a convincing page); mailto/tel built from params",
+  "source_files": [
+   "frontend/apps/restaurant-website/app/maintenance/page.tsx:17-28",
+   "frontend/apps/restaurant-website/components/system/MaintenancePage.tsx:105,116",
+   "frontend/apps/restaurant-website/middleware.ts:77-81"
+  ],
+  "evidence": "name, email, phone come from searchParams; mailto:${contactEmail} and tel: links rendered. Page is served on any tenant subdomain without verifying a block actually exists.",
+  "suspected_root_cause": "Contact info passed through redirect URL.",
+  "recommended_fix": "Server-side lookup by slug in the page; ignore query params.",
+  "required_tests": [
+   "Maintenance page ignores spoofed params"
+  ],
+  "status": "OPEN",
+  "_source": "frontend-others"
+ },
+ {
+  "issue_id": "FE-OTH-019",
+  "severity": "P3",
+  "category": "security/dos",
+  "title": "Unauthenticated POST /api/metrics stores arbitrary JSON in an in-memory buffer (entry count capped, size not)",
+  "source_files": [
+   "frontend/apps/restaurant-website/app/api/metrics/route.ts:21-48"
+  ],
+  "evidence": "metricsBuffer.push({...metric}) with no body-size or schema validation; GET/DELETE are dev-only, POST is not.",
+  "suspected_root_cause": "Dev stub shipped.",
+  "recommended_fix": "Validate schema/size, rate limit, or forward to analytics.",
+  "required_tests": [
+   "Oversized payload rejected"
+  ],
+  "status": "OPEN",
+  "_source": "frontend-others"
+ },
+ {
+  "issue_id": "FE-OTH-020",
+  "severity": "P3",
+  "category": "multi-tenancy",
+  "title": "Table QR menu resolves restaurant from global table id, overriding the host slug",
+  "source_files": [
+   "frontend/apps/restaurant-website/app/[locale]/table/[tableId]/menu/page.tsx:36,113-128",
+   "backend/cmd/api/main.go:464-467",
+   "backend/internal/handler/http/table_handler.go:284-301"
+  ],
+  "evidence": "GET /public/table/{id}/info takes only a numeric id (rate-limited 120/min/IP) and returns restaurant_slug; the page uses tableInfo.restaurant_slug over x-restaurant-slug, so a QR/URL for tenant B's table opened on tenant A's host renders B's menu while API headers (localStorage ids) may still be A's. Table ids are enumerable.",
+  "suspected_root_cause": "Table lookup not scoped to the requesting tenant.",
+  "recommended_fix": "Reject when table's slug != host slug; use opaque QR tokens.",
+  "required_tests": [
+   "Mismatched table/host returns invalid table"
+  ],
+  "status": "OPEN",
+  "_source": "frontend-others"
+ },
+ {
+  "issue_id": "FE-OTH-021",
+  "severity": "P2",
+  "category": "security/session",
+  "title": "Super-admin JWT kept in localStorage in two places; Logout never calls POST /super-admin/auth/logout",
+  "source_files": [
+   "frontend/apps/super-admin/src/app/login/page.tsx:36-39",
+   "frontend/apps/super-admin/src/stores/authStore.ts:74-82",
+   "frontend/apps/super-admin/src/components/layout/DashboardNav.tsx:88-93",
+   "frontend/apps/super-admin/src/lib/api.ts:76,113-117",
+   "frontend/apps/super-admin/src/lib/api.ts:140-148"
+  ],
+  "evidence": "Token stored under 'super-admin-token' and inside persisted zustand store 'super-admin-auth-store'. Nav logout only removes both keys and sets location; api.logout() exists but is never invoked. Token is therefore not revoked server-side (whether Logout revokes was not verified).",
+  "suspected_root_cause": "Client-only session handling.",
+  "recommended_fix": "httpOnly secure cookie or in-memory token with short TTL + refresh; call backend logout; add CSP.",
+  "required_tests": [
+   "Logout invalidates token server-side",
+   "XSS hardening headers test"
+  ],
+  "status": "OPEN",
+  "_source": "frontend-others"
+ },
+ {
+  "issue_id": "FE-OTH-022",
+  "severity": "P3",
+  "category": "auth/guard",
+  "title": "Super-admin has no Next middleware; route guard is client-side only and dashboard shell can hang on 'Loading dashboard...'",
+  "source_files": [
+   "frontend/apps/super-admin/src/components/providers/SuperAdminAuthProvider.tsx:14-45",
+   "frontend/apps/super-admin/src/app/dashboard/layout.tsx:12-20"
+  ],
+  "evidence": "No middleware.ts in the app. Provider restores only the token from 'super-admin-token'; dashboard layout renders a spinner whenever superAdmin is null even if a token exists (e.g. store cleared but token key present). API still enforces auth, so this is UX/defence-in-depth.",
+  "suspected_root_cause": "SPA-style guard in an App Router app.",
+  "recommended_fix": "Add middleware using an httpOnly cookie; refetch profile when token exists.",
+  "required_tests": [
+   "Direct navigation to /dashboard without session redirects server-side"
+  ],
+  "status": "OPEN",
+  "_source": "frontend-others"
+ },
+ {
+  "issue_id": "FE-OTH-023",
+  "severity": "P3",
+  "category": "dead-links",
+  "title": "Super-admin links to /dashboard/users/{id} which has no page; ImpersonationBanner and validateImpersonationToken are unused",
+  "source_files": [
+   "frontend/apps/super-admin/src/app/dashboard/users/page.tsx:130",
+   "frontend/apps/super-admin/src/components/impersonation/ImpersonationBanner.tsx",
+   "frontend/apps/super-admin/src/lib/api.ts:268-276"
+  ],
+  "evidence": "Only users/page.tsx exists under dashboard/users. api.validateImpersonationToken POSTs /super-admin/impersonate/validate, which would match the {userID} route (userID='validate') rather than the real public GET /api/v1/impersonation/validate; no caller. Banner imported nowhere.",
+  "suspected_root_cause": "Incomplete feature wiring.",
+  "recommended_fix": "Add users/[id] page or remove link; delete dead code or wire impersonation status.",
+  "required_tests": [
+   "Link-check test for super-admin"
+  ],
+  "status": "OPEN",
+  "_source": "frontend-others"
+ },
+ {
+  "issue_id": "FE-OTH-024",
+  "severity": "P3",
+  "category": "duplication",
+  "title": "Duplicate tenant disable/enable endpoints and implementations (PUT via SuperAdminHandler, POST via SubscriptionHandler); one-time dashboard-login tokens live in process memory",
+  "source_files": [
+   "backend/cmd/api/main.go:1792-1793,1835-1836",
+   "backend/internal/repository/super_admin_repo.go:656-678"
+  ],
+  "evidence": "Frontend uses only POST variants. PUT variants remain registered. dashboardTokenStore is a package-level in-memory map: lost on restart and not shared across replicas (token TTL 30 s limits impact).",
+  "suspected_root_cause": "Subscription phase added parallel handlers.",
+  "recommended_fix": "Remove one pair; store tokens in Redis/DB if >1 replica.",
+  "required_tests": [
+   "Multi-replica token exchange test"
+  ],
+  "status": "OPEN",
+  "_source": "frontend-others"
+ },
+ {
+  "issue_id": "FE-OTH-025",
+  "severity": "P3",
+  "category": "security/config",
+  "title": "Super-admin IP whitelist is allow-all when empty and settings UI has no validation/lockout guard",
+  "source_files": [
+   "backend/internal/domain/super_admin.go:38-41",
+   "frontend/apps/super-admin/src/app/dashboard/settings/page.tsx:12-45"
+  ],
+  "evidence": "IsIPAllowed returns true when IPWhitelist is empty. UI accepts any string, no CIDR/IP validation, no warning about locking out current IP. X-Forwarded-For is honored only from TRUSTED_PROXY_CIDRS (good).",
+  "suspected_root_cause": "Convenience defaults.",
+  "recommended_fix": "Validate on client and server; confirm current IP is included; require non-empty list in production.",
+  "required_tests": [
+   "Invalid IP rejected",
+   "Self-lockout prevented"
+  ],
+  "status": "OPEN",
+  "_source": "frontend-others"
+ },
+ {
+  "issue_id": "FE-OTH-026",
+  "severity": "P3",
+  "category": "build/deps",
+  "title": "Workspace dependency declarations do not match usage",
+  "source_files": [
+   "frontend/apps/restaurant-website/package.json",
+   "frontend/apps/dashboard/package.json",
+   "frontend/apps/super-admin/package.json",
+   "frontend/apps/landing/package.json",
+   "frontend/tsconfig.json:23-28",
+   "frontend/apps/landing/next.config.js:6",
+   "frontend/apps/dashboard/next.config.js:12",
+   "frontend/packages/ui-components/package.json"
+  ],
+  "evidence": "@pos-saas/ui is imported by dashboard (4 files) and restaurant-website (9) but declared by neither; resolved only via tsconfig paths. super-admin declares ui-components and ui-themes and transpiles them but imports neither. tsconfig paths and transpilePackages reference @pos-saas/types and @pos-saas/constants which do not exist under packages/. landing declares none yet lists @pos-saas/ui in transpilePackages and keeps local copies of button/input/label. ui-components exports only ./dist (no dist present) while dashboard imports ./registry through a tsconfig path to source. layers/shared-components (@pos/shared-components) is imported by no app; packages/theme is imported by no app.",
+  "suspected_root_cause": "Packages evolved without dependency hygiene.",
+  "recommended_fix": "Declare workspace deps where imported; remove unused ones and phantom paths; delete or archive unused packages.",
+  "required_tests": [
+   "CI: depcheck / pnpm why validation; clean install build of each app"
+  ],
+  "status": "OPEN",
+  "_source": "frontend-others"
+ },
+ {
+  "issue_id": "FE-OTH-027",
+  "severity": "P3",
+  "category": "duplication",
+  "title": "Three parallel section/component libraries (ui-components organisms, shared-components, ui-themes sections) for Hero/CTA/Testimonials/Contact",
+  "source_files": [
+   "frontend/packages/ui-components/organisms",
+   "frontend/layers/shared-components/components",
+   "frontend/layers/ui-themes/src/sections"
+  ],
+  "evidence": "Each defines Hero, CTA, Testimonials, Contact(+Products/WhyUs). Only ui-themes is used at runtime (restaurant-website, dashboard); ui-components registry used by dashboard theme-builder; shared-components unused.",
+  "suspected_root_cause": "Iterative redesign without removal.",
+  "recommended_fix": "Pick ui-themes as canonical; migrate registry; remove others.",
+  "required_tests": [
+   "Visual regression for theme sections after consolidation"
+  ],
+  "status": "OPEN",
+  "_source": "frontend-others"
+ },
+ {
+  "issue_id": "FE-OTH-028",
+  "severity": "P3",
+  "category": "architecture/contract",
+  "title": "UI packages contain network/analytics logic calling endpoints absent from main.go and using CRA env vars",
+  "source_files": [
+   "frontend/layers/ui-themes/src/hooks/useABTest.ts:43,68,118",
+   "frontend/layers/ui-themes/src/hooks/useAssetUrl.ts:36,76",
+   "frontend/layers/ui-themes/src/services/analyticsSDK.ts:366",
+   "frontend/packages/theme/theme-provider.tsx:36-41,108"
+  ],
+  "evidence": "useABTest -> /v1/admin/ab-tests/{id}/assign; useAssetUrl -> /v1/admin/assets/{id}; analyticsSDK -> /v1/events; base URL from process.env.REACT_APP_API_BASE_URL (not exposed by Next) defaulting to '/api'. grep of main.go finds none of these routes. grep finds no app importing these hooks.",
+  "suspected_root_cause": "Speculative features in shared layer.",
+  "recommended_fix": "Remove or move behind app-level adapters with real endpoints.",
+  "required_tests": [
+   "Unused-export check"
+  ],
+  "status": "OPEN",
+  "_source": "frontend-others"
+ },
+ {
+  "issue_id": "FE-OTH-029",
+  "severity": "P3",
+  "category": "testing",
+  "title": "Thin automated test coverage for the three apps and mixed runners",
+  "source_files": [
+   "frontend/apps/landing (vitest, 4 test files)",
+   "frontend/apps/restaurant-website (jest, 8 test files)",
+   "frontend/apps/super-admin (vitest, 1 test: src/lib/config.test.ts)",
+   "frontend/turbo.json"
+  ],
+  "evidence": "Find of *.test.* excluding node_modules. turbo 'test' task exists but root package.json has no test script. Landing login test asserts a forgot-password href that does not match the localized route. Middleware, checkout totals, tenant actions, impersonation are untested.",
+  "suspected_root_cause": "Tests added ad hoc.",
+  "recommended_fix": "Add middleware, checkout, super-admin action and contract tests; wire into CI.",
+  "required_tests": [
+   "As listed"
+  ],
+  "status": "OPEN",
+  "_source": "frontend-others"
+ },
+ {
+  "issue_id": "FE-OTH-030",
+  "severity": "P4",
+  "category": "config",
+  "title": "Placeholder/localhost image hosts and doc drift in app configs",
+  "source_files": [
+   "frontend/apps/restaurant-website/next.config.js:16-27",
+   "frontend/apps/landing/next.config.js:7-9",
+   "frontend/apps/super-admin/next.config.js:12-17",
+   "frontend/apps/super-admin/README.md:91-92"
+  ],
+  "evidence": "restaurant-website allows cdn.example.com and http://localhost images; landing uses deprecated images.domains with localhost; super-admin allows api.placeholder.com. Super-admin README lists NEXT_PUBLIC_API_URL while code reads only NEXT_PUBLIC_SUPER_ADMIN_API_URL. Landing has a duplicate super-admin-login page while backend redirect_url targets the dashboard's page.",
+  "suspected_root_cause": "Template leftovers.",
+  "recommended_fix": "Make hosts env-driven; fix docs; remove duplicate page.",
+  "required_tests": [
+   "Build with prod env"
+  ],
+  "status": "OPEN",
+  "_source": "frontend-others"
+ },
+ {
+  "issue_id": "FE-OTH-031",
+  "severity": "P0",
+  "category": "subscription/access-control",
+  "title": "Subscription/disable enforcement is not applied to business API routes (TenantStatusMiddleware wired only to the self-skipping GET /tenant/status); access rules also duplicated",
+  "source_files": [
+   "backend/cmd/api/main.go:599-616 (wrapProtected has no status check)",
+   "backend/cmd/api/main.go:681 (only use of wrapProtectedWithStatus)",
+   "backend/internal/middleware/tenant_status.go:111-125 (path is in skip list)",
+   "backend/internal/repository/subscription_repo_impl.go:795-830 (CheckTenantAccess)",
+   "backend/internal/repository/subscription_repo_impl.go:~100-125 (GetTenantSubscription CanAccess)",
+   "backend/internal/service/subscription_expiry_worker.go:68-80"
+  ],
+  "evidence": "grep for TenantStatusMiddleware in main.go returns the definition at :612 (wrapProtectedWithStatus) and a comment; wrapProtectedWithStatus is used once, for GET /api/v1/tenant/status, a path the middleware itself skips (shouldSkipStatusCheck). All other protected routes use wrapProtected (Auth + TenantContext) or wrapWithPermission, so trial_expired / tenant_disabled / expired are enforced only by frontends (dashboard overlay, restaurant-website middleware redirect) and not by the API; a disabled or expired tenant can keep calling the API with a valid JWT (grep finds no is_disabled check in middleware, auth_usecase.go or auth_repo.go, so login also does not block disabled tenants). Additionally CheckTenantAccess ignores status=expired/suspended/cancelled while GetTenantSubscription blocks expired, so the two evaluators disagree. wrapWithPermission (main.go:621-628) is Auth + TenantContext + RequiredPermission only.",
+  "suspected_root_cause": "Access rules duplicated in two places and not kept in sync.",
+  "recommended_fix": "Apply a single AccessPolicy via TenantStatusMiddleware inside wrapProtected/wrapWithPermission (exempting /tenant/status, subscription/*, auth); reject login for disabled tenants; unify evaluators.",
+  "required_tests": [
+   "Integration: disabled tenant JWT gets 403 on /api/v1/admin/* and POS routes",
+   "Integration: expired trial and expired paid tenants blocked, subscription/initiate still allowed",
+   "Table test: status x dates x disabled -> can_access identical across all evaluators"
+  ],
+  "status": "OPEN",
+  "_source": "frontend-others"
+ },
+ {
+  "issue_id": "QA-001",
+  "severity": "P1",
+  "category": "observability/security",
+  "title": "Unauthenticated /api/v1/health/metrics and leftover test route",
+  "source_files": [
+   "backend/cmd/api/main.go:547",
+   "backend/cmd/api/main.go:556"
+  ],
+  "evidence": "mux.HandleFunc without wrapProtected/wrapSuperAdmin returns observability.Snapshot(); public test-routing route echoes slug via fmt.Sprintf into JSON string",
+  "suspected_root_cause": "debug endpoints never gated",
+  "recommended_fix": "protect or remove metrics; remove test route; JSON-encode output",
+  "required_tests": [
+   "unauthenticated request to metrics returns 401/403"
+  ],
+  "status": "OPEN",
+  "_source": "quality"
+ },
+ {
+  "issue_id": "QA-002",
+  "severity": "P1",
+  "category": "error-handling",
+  "title": "Raw internal/DB error text returned to clients",
+  "source_files": [
+   "backend/internal/handler/http/admin_order_handler.go:177",
+   "backend/internal/handler/http/admin_theme_handler_v2.go:80",
+   "backend/internal/handler/http/account_handler.go:150",
+   "backend/internal/repository/order_repo.go:113"
+  ],
+  "evidence": "29 sites send err.Error() with 500; repo errors wrap driver messages with %w; 254 err.Error() uses in handler/http",
+  "suspected_root_cause": "no central error mapper",
+  "recommended_fix": "typed domain errors + one mapper returning stable codes; log detail server-side",
+  "required_tests": [
+   "handler returns generic message on injected DB error"
+  ],
+  "status": "OPEN",
+  "_source": "quality"
+ },
+ {
+  "issue_id": "QA-003",
+  "severity": "P1",
+  "category": "ci",
+  "title": "CI runs no build, lint or tests",
+  "source_files": [
+   ".github/workflows/runtime-localhost-guardrail.yml",
+   ".github/workflows/url-domain-config-smoke.yml"
+  ],
+  "evidence": "only two python smoke checks; no go test/vitest/jest/tsc/next build",
+  "suspected_root_cause": "CI added for URL guardrail only",
+  "recommended_fix": "add go vet/test, frontend lint/type-check/test/build, govulncheck, pnpm audit",
+  "required_tests": [
+   "CI fails on broken build"
+  ],
+  "status": "OPEN",
+  "_source": "quality"
+ },
+ {
+  "issue_id": "QA-004",
+  "severity": "P1",
+  "category": "ops",
+  "title": "No backup/restore procedure in repo",
+  "source_files": [
+   "docker-compose.prod.yml",
+   "backend/scripts/"
+  ],
+  "evidence": "no pg_dump/backup service or script; only rollback_phase6_accounting_hr.sql",
+  "suspected_root_cause": "not implemented",
+  "recommended_fix": "scheduled pg_dump/WAL archiving, documented restore drill",
+  "required_tests": [
+   "restore drill into scratch DB"
+  ],
+  "status": "OPEN",
+  "_source": "quality"
+ },
+ {
+  "issue_id": "QA-005",
+  "severity": "P2",
+  "category": "repo-hygiene",
+  "title": "~150 MB binaries and junk tracked in git",
+  "source_files": [
+   "backend/api.exe",
+   "backend/api-local.exe",
+   "backend/pos-api.exe",
+   "backend/api",
+   "backend/main",
+   "backend/pos-api",
+   "backend/pos-backend",
+   "backend/app",
+   "backend/tmpclaude-0d2f-cwd",
+   ".playwright-mcp/ORD-2026-957363.pdf",
+   "ActivateLicense-B73L9oSM.js",
+   "obd_app.js",
+   "tmp-beep.mp3"
+  ],
+  "evidence": "git ls-files; sizes 10-26 MB each",
+  "suspected_root_cause": "gitignore gaps",
+  "recommended_fix": "git rm --cached, extend .gitignore, consider history purge",
+  "required_tests": [
+   "fresh clone size check"
+  ],
+  "status": "OPEN",
+  "_source": "quality"
+ },
+ {
+  "issue_id": "QA-006",
+  "severity": "P2",
+  "category": "server",
+  "title": "HTTP server has no timeouts, graceful shutdown or panic recovery",
+  "source_files": [
+   "backend/cmd/api/main.go:1887"
+  ],
+  "evidence": "http.ListenAndServe(':'+port, metricsHandler); no recover middleware found",
+  "suspected_root_cause": "minimal bootstrap",
+  "recommended_fix": "http.Server with Read/Write/Idle timeouts, signal shutdown, recover middleware",
+  "required_tests": [
+   "slowloris/timeout test",
+   "panic returns 500 JSON"
+  ],
+  "status": "OPEN",
+  "_source": "quality"
+ },
+ {
+  "issue_id": "QA-007",
+  "severity": "P2",
+  "category": "observability",
+  "title": "Unstructured logs, no request IDs, no redaction",
+  "source_files": [
+   "backend/internal/middleware/request_metrics.go"
+  ],
+  "evidence": "1325 log.Printf, 0 structured logger, no X-Request-ID",
+  "suspected_root_cause": "not designed",
+  "recommended_fix": "slog JSON, request-id middleware, redaction",
+  "required_tests": [
+   "request id propagates to logs"
+  ],
+  "status": "OPEN",
+  "_source": "quality"
+ },
+ {
+  "issue_id": "QA-008",
+  "severity": "P2",
+  "category": "testing",
+  "title": "Playwright config points at nonexistent e2e dir and wrong ports/commands",
+  "source_files": [
+   "playwright.config.ts"
+  ],
+  "evidence": "testDir ./e2e/tests missing; baseURL :3000; npm --workspace commands with no workspaces",
+  "suspected_root_cause": "stale scaffold",
+  "recommended_fix": "rewrite config for apps on 3001-3004 and docker compose; add specs",
+  "required_tests": [
+   "login-to-order smoke E2E"
+  ],
+  "status": "OPEN",
+  "_source": "quality"
+ },
+ {
+  "issue_id": "QA-009",
+  "severity": "P2",
+  "category": "testing",
+  "title": "Large accounting/HR/report code untested; 8 Go test files build-tagged out",
+  "source_files": [
+   "backend/internal/repository/accounting_advanced_repo.go",
+   "backend/internal/handler/http/report_handler.go",
+   "backend/internal/handler/http/payment_handler_test.go"
+  ],
+  "evidence": "see TEST-COVERAGE-MATRIX.md; //go:build tags on payment/employee/rbac/role/theme tests",
+  "suspected_root_cause": "tests tied to tags/legacy",
+  "recommended_fix": "untag or CI-run with tags; add accounting/subscription tests",
+  "required_tests": [
+   "tenant_status middleware tests"
+  ],
+  "status": "OPEN",
+  "_source": "quality"
+ },
+ {
+  "issue_id": "QA-010",
+  "severity": "P2",
+  "category": "auth",
+  "title": "Dashboard 401 handling skips logout when message contains 'tenant'; duplicated handlers",
+  "source_files": [
+   "frontend/apps/dashboard/src/lib/api.ts:259",
+   "frontend/apps/dashboard/src/lib/api/themeApi.ts:76"
+  ],
+  "evidence": "isTenantContextError = message.includes('tenant') suppresses logout; two interceptors",
+  "suspected_root_cause": "heuristic string matching",
+  "recommended_fix": "use error codes; single shared client",
+  "required_tests": [
+   "401 with tenant text logs out when token invalid"
+  ],
+  "status": "OPEN",
+  "_source": "quality"
+ },
+ {
+  "issue_id": "QA-011",
+  "severity": "P3",
+  "category": "docs",
+  "title": "Docs inconsistent with implementation",
+  "source_files": [
+   "README.md",
+   "AGENTS.md",
+   "PROJECT_KNOWLEDGE_BASE.md"
+  ],
+  "evidence": "Go 1.18+ vs go 1.24.0; 157 vs 123 migrations; trial 15 vs 30 days; AGENTS.md C:/Users/OPT path; 'Production Ready'",
+  "suspected_root_cause": "drift",
+  "recommended_fix": "update docs; fix README encoding",
+  "required_tests": [
+   "docs-check"
+  ],
+  "status": "OPEN",
+  "_source": "quality"
+ },
+ {
+  "issue_id": "QA-012",
+  "severity": "P3",
+  "category": "dependencies",
+  "title": "Dependency hygiene: dual JWT libs, wrong indirect markers, split test runners, 4 lockfiles, pnpm 9.0.0 pinned",
+  "source_files": [
+   "backend/go.mod",
+   "frontend/package.json",
+   "frontend/apps/restaurant-website/pnpm-lock.yaml",
+   "frontend/packages/ui-components/pnpm-lock.yaml",
+   "frontend/layers/shared-components/package-lock.json"
+  ],
+  "evidence": "see DEPENDENCY-AUDIT.md",
+  "suspected_root_cause": "organic growth",
+  "recommended_fix": "go mod tidy, single JWT lib, remove nested lockfiles, align versions",
+  "required_tests": [
+   "CI frozen-lockfile install"
+  ],
+  "status": "OPEN",
+  "_source": "quality"
+ },
+ {
+  "issue_id": "QA-013",
+  "severity": "P3",
+  "category": "config",
+  "title": "Insecure defaults: DB password postgres, sslmode disable, JWT default secret outside production",
+  "source_files": [
+   "backend/internal/config/config.go:56-70",
+   "docker-compose.yml:58"
+  ],
+  "evidence": "getEnv defaults; guard only for JWT when Env==production",
+  "suspected_root_cause": "dev convenience",
+  "recommended_fix": "fail-fast for DB creds/sslmode in production",
+  "required_tests": [
+   "config load test for production env"
+  ],
+  "status": "OPEN",
+  "_source": "quality"
+ },
+ {
+  "issue_id": "QA-014",
+  "severity": "P3",
+  "category": "code-quality",
+  "title": "Dead gin-based handlers and oversized files",
+  "source_files": [
+   "backend/internal/handler/*.go",
+   "backend/internal/handlers/",
+   "backend/cmd/api/main.go"
+  ],
+  "evidence": "not imported by main.go; main.go 1894 lines; report_handler.go 2630",
+  "suspected_root_cause": "abandoned features",
+  "recommended_fix": "delete or isolate; split main routes",
+  "required_tests": [
+   "route table snapshot test"
+  ],
+  "status": "OPEN",
+  "_source": "quality"
+ },
+ {
+  "issue_id": "QA-015",
+  "severity": "P4",
+  "category": "migrations",
+  "title": "Duplicate migration number prefixes and gaps",
+  "source_files": [
+   "backend/migrations/"
+  ],
+  "evidence": "duplicated prefixes 067,070-072,075,076,078-080,099,123; 123 files for numbers up to 160",
+  "suspected_root_cause": "parallel work",
+  "recommended_fix": "adopt tool with unique versions, document ordering",
+  "required_tests": [
+   "migrate up on empty DB in CI"
+  ],
+  "status": "OPEN",
+  "_source": "quality"
+ },
+ {
+  "issue_id": "SEC-001",
+  "severity": "P0",
+  "category": "auth",
+  "title": "Any non-empty X-Impersonation-Token header bypasses authentication; tenant then chosen by request headers",
+  "source_files": [
+   "backend/internal/middleware/auth.go",
+   "backend/internal/middleware/tenant.go",
+   "backend/cmd/api/main.go"
+  ],
+  "evidence": [
+   "middleware/auth.go:18-31 accepts header and sets claims{UserID:1} without validation (comment says frontend validated it)",
+   "middleware/tenant.go:39-63 falls back to X-Tenant-ID/X-Restaurant-ID when claims lack tenant/restaurant",
+   "main.go:600-628,631-641 wrap all protected routes with AuthMiddleware; middleware.ImpersonationMiddleware (impersonation.go:167) is never mounted"
+  ],
+  "suspected_root_cause": "Impersonation was implemented as a frontend-validated flow; backend middleware stub trusts header and legacy header-based tenant selection was kept for backward compatibility.",
+  "recommended_fix": "Remove the header shortcut. Validate impersonation tokens server side (hash lookup via ImpersonationRepository.ValidateToken), derive tenant/user from the session, mount ImpersonationMiddleware before TenantContext, restrict header tenant fallback to public routes only, audit-log impersonated mutations.",
+  "required_tests": [
+   "Garbage X-Impersonation-Token + X-Tenant-ID returns 401 on every protected route (route-table test)",
+   "Valid session token yields only its target tenant/user",
+   "Expired/ended session rejected",
+   "Token without restaurant_id cannot select tenant via headers"
+  ],
+  "status": "OPEN",
+  "_source": "security"
+ },
+ {
+  "issue_id": "SEC-002",
+  "severity": "P0",
+  "category": "auth",
+  "title": "POST /auth/login/confirm issues a JWT with only email + tenant_id (no password or proof of prior login)",
+  "source_files": [
+   "backend/internal/usecase/auth_usecase.go",
+   "backend/internal/handler/http/auth_handler.go",
+   "backend/cmd/api/main.go"
+  ],
+  "evidence": [
+   "auth_usecase.go:202-257 looks up user by email and tenant and calls GenerateToken without credential check",
+   "main.go:444 route is public",
+   "Login verifies password only against users[0] (auth_usecase.go:131-143)"
+  ],
+  "suspected_root_cause": "Two-step multi-tenant login was split without carrying proof of authentication between steps.",
+  "recommended_fix": "Make /login return a short-lived signed selection token (or session id) bound to email and the verified user ids; require it in /login/confirm; verify password per selected user; rate limit both endpoints.",
+  "required_tests": [
+   "login/confirm without prior login returns 401",
+   "selection token for tenant A cannot select tenant B not in its list",
+   "expired selection token rejected",
+   "per-tenant password differences handled"
+  ],
+  "status": "OPEN",
+  "_source": "security"
+ },
+ {
+  "issue_id": "SEC-003",
+  "severity": "P0",
+  "category": "rbac",
+  "title": "Backend never enforces module permissions: WithRequiredPermission only annotates context",
+  "source_files": [
+   "backend/internal/middleware/permission.go",
+   "backend/cmd/api/main.go",
+   "backend/internal/auth/rbac_manager.go"
+  ],
+  "evidence": [
+   "permission.go:15-22 sets required_module_id/required_permission_level; grep finds no reader",
+   "main.go:624 permission check commented out",
+   "193 wrapWithPermission usages in main.go all effectively auth-only",
+   "internal/auth/rbac_manager.go HasPermission not wired"
+  ],
+  "suspected_root_cause": "Permission middleware was never completed (Phase 2 use cases commented out) while routes were annotated.",
+  "recommended_fix": "Implement PermissionMiddleware reading role_permissions for claims user (cached per tenant/user, invalidate on role change), compare with ordered level map, return 403; fix module IDs (SEC-019); deny by default for unannotated tenant routes.",
+  "required_tests": [
+   "Table-driven: each seeded role x each route expects 200/403 per matrix",
+   "EMPLOYEE cannot POST /accounting/journal-entries",
+   "DRIVER cannot GET /hr/salaries",
+   "EXTERNAL_ACCOUNTANT cannot write",
+   "Cache invalidation after permission change"
+  ],
+  "status": "OPEN",
+  "_source": "security"
+ },
+ {
+  "issue_id": "SEC-004",
+  "severity": "P0",
+  "category": "payments",
+  "title": "Mock Paymob mode is the default; mock VerifyHMAC always true and webhook is public, allowing forged payments to activate subscriptions",
+  "source_files": [
+   "backend/cmd/api/main.go",
+   "backend/internal/service/paymob_client_mock.go",
+   "backend/internal/handler/http/payment_handler.go",
+   "docker-compose.prod.yml",
+   ".env.prod.example"
+  ],
+  "evidence": [
+   "main.go:197-211 any PAYMOB_MODE except 'live' selects mock; 427-431,583-588 register mock endpoints",
+   "paymob_client_mock.go:51-54 VerifyHMAC returns true",
+   "docker-compose.prod.yml:74 PAYMOB_MODE defaults to empty; .env.prod.example:24 empty",
+   "payment_usecase.go:185-232 only checks amount/currency vs public plan price; initiate returns paymob_order_id to the caller"
+  ],
+  "suspected_root_cause": "Fail-open default and no production guard; mock client shares production wiring.",
+  "recommended_fix": "Fail startup when ENV=production and PAYMOB_MODE!=live or any of API key/HMAC secret/iframe/integration id missing; never register mock routes in production; make mock verify check a configured test secret; default mode must be 'disabled'.",
+  "required_tests": [
+   "Startup test: production + mock aborts",
+   "Forged webhook in live mode returns 401",
+   "Mock routes 404 when ENV=production",
+   "Missing PAYMOB_HMAC_SECRET aborts live startup"
+  ],
+  "status": "OPEN",
+  "_source": "security"
+ },
+ {
+  "issue_id": "SEC-005",
+  "severity": "P1",
+  "category": "rbac",
+  "title": "RBAC administration endpoints lack authorization; revoke is cross-tenant",
+  "source_files": [
+   "backend/internal/handler/http/rbac_permission_handler.go",
+   "backend/internal/handler/http/rbac_user_role_handler.go",
+   "backend/internal/handler/http/rbac_role_handler.go",
+   "backend/internal/repository/role_permission_repository.go",
+   "backend/cmd/api/main.go"
+  ],
+  "evidence": [
+   "main.go:925-947 all /rbac/* use wrapAuthOnly",
+   "rbac_permission_handler.go:31-96 AssignPermission only requires claims; any user may grant ADMIN to any role",
+   "rbac_user_role_handler.go:34-89 any user may assign any role to any user in tenant including self",
+   "rbac_permission_handler.go:107-130 + role_permission_repository.go:139-145 Revoke deletes by role_id,module_id with no tenant filter"
+  ],
+  "suspected_root_cause": "Authorization was deferred to the (missing) permission middleware.",
+  "recommended_fix": "Require ROLES module ADMIN (and prevent self-escalation / last-admin removal); add tenant_id to Revoke query and verify role ownership; audit log changes (permission_audit_logs table exists, migration 104).",
+  "required_tests": [
+   "EMPLOYEE gets 403 on assign/revoke/create role",
+   "Cross-tenant revoke returns 404 and row survives",
+   "User cannot grant a level above own",
+   "Audit log row written"
+  ],
+  "status": "OPEN",
+  "_source": "security"
+ },
+ {
+  "issue_id": "SEC-006",
+  "severity": "P1",
+  "category": "tenant-isolation",
+  "title": "Unauthenticated order lookup/cancel by sequential id using caller-chosen tenant headers (IDOR, PII exposure)",
+  "source_files": [
+   "backend/internal/handler/http/public_order_handler.go",
+   "backend/cmd/api/main.go",
+   "backend/internal/middleware/tenant.go"
+  ],
+  "evidence": [
+   "main.go:472-484 public order routes need only TenantContextMiddleware (headers)",
+   "public_order_handler.go:116-157 GetOrder returns full order incl. customer fields by numeric id",
+   "public_order_handler.go:375-430 DELETE cancels any pending order by id without ownership proof",
+   "order numbers use unix-time modulo (order_usecase.go:63)"
+  ],
+  "suspected_root_cause": "Public tracking designed around guessable identifiers without a per-order secret.",
+  "recommended_fix": "Issue an unguessable tracking token at order creation; require token (or phone+order number) for lookup/cancel; return a reduced public DTO; resolve tenant from slug/host not headers; rate limit.",
+  "required_tests": [
+   "Order id enumeration without token returns 404",
+   "Cancel requires token and allowed status",
+   "Public DTO excludes email/phone/address",
+   "Rate limit enforced"
+  ],
+  "status": "OPEN",
+  "_source": "security"
+ },
+ {
+  "issue_id": "SEC-007",
+  "severity": "P1",
+  "category": "integrity",
+  "title": "Unauthenticated POST /translations/{language}/upload overwrites global in-memory translations; unsynchronized map write",
+  "source_files": [
+   "backend/internal/handler/http/translation_handler.go",
+   "backend/cmd/api/main.go"
+  ],
+  "evidence": [
+   "main.go:491 public route",
+   "translation_handler.go:170-205 reads upload with no auth, no size limit, writes h.translations[language] without mutex"
+  ],
+  "suspected_root_cause": "Admin utility exposed on public router.",
+  "recommended_fix": "Remove from public router or require super-admin auth; add mutex and request size limit; validate schema; prefer static files.",
+  "required_tests": [
+   "Unauthenticated upload returns 401",
+   "Concurrent upload/read race test (-race)",
+   "Oversize body rejected"
+  ],
+  "status": "OPEN",
+  "_source": "security"
+ },
+ {
+  "issue_id": "SEC-008",
+  "severity": "P1",
+  "category": "billing",
+  "title": "Subscription/disabled status is not enforced server side on data routes",
+  "source_files": [
+   "backend/cmd/api/main.go",
+   "backend/internal/middleware/tenant_status.go",
+   "backend/internal/middleware/status_check_config.go"
+  ],
+  "evidence": [
+   "main.go:610-616 wrapProtectedWithStatus defined; only use at main.go:681 (GET /tenant/status)",
+   "frontend blocks via TenantStatusProvider only"
+  ],
+  "suspected_root_cause": "Status middleware built but not composed into wrapProtected/wrapWithPermission.",
+  "recommended_fix": "Compose TenantStatusMiddleware into all tenant wrappers except payment/status/auth paths per DefaultStatusCheckConfig; keep 30 s cache but invalidate on webhook/disable.",
+  "required_tests": [
+   "Expired tenant gets 403 on /products",
+   "Expired tenant can still call /subscription/initiate and /tenant/status",
+   "Webhook activation unblocks within cache TTL or immediately"
+  ],
+  "status": "OPEN",
+  "_source": "security"
+ },
+ {
+  "issue_id": "SEC-009",
+  "severity": "P1",
+  "category": "auth",
+  "title": "No rate limiting or lockout on tenant login, login/confirm, register, forgot-password, token-exchange",
+  "source_files": [
+   "backend/cmd/api/main.go",
+   "backend/internal/middleware/rate_limit.go"
+  ],
+  "evidence": [
+   "main.go:441-447 plain HandleFunc; RateLimitByIP used only at 464-467 and 575-578",
+   "auth_usecase.go:40 min password length 6; bcrypt DefaultCost"
+  ],
+  "suspected_root_cause": "Limiter exists but not applied to auth routes; limiter is per-process in memory.",
+  "recommended_fix": "Apply per-IP and per-email limits with backoff/lockout (shared store when scaled), raise min length to 8-10, consider bcrypt cost 12, uniform error timing.",
+  "required_tests": [
+   "N failed logins trigger 429",
+   "Limiter keyed by email+IP",
+   "Register throttled"
+  ],
+  "status": "OPEN",
+  "_source": "security"
+ },
+ {
+  "issue_id": "SEC-010",
+  "severity": "P1",
+  "category": "secrets",
+  "title": "Seed migration creates a platform super admin with a seeded super admin with a known legacy hash and no IP whitelist",
+  "source_files": [
+   "backend/migrations/109_seed_super_admin.sql"
+  ],
+  "evidence": [
+   "migration 109 originally contained a known bcrypt hash; 109:22-28 ip_whitelist NULL means all IPs allowed; email superadmin@pos-saas.com"
+  ],
+  "suspected_root_cause": "Convenience seed intended for setup shipped as a migration that runs in all environments.",
+  "recommended_fix": "Remove seeded credential; provision via one-time CLI with random password forced to change; require IP whitelist/2FA for super admin; rotate if any environment used it.",
+  "required_tests": [
+   "Fresh DB has no super admin until provisioned",
+   "Login with documented password fails",
+   "Super admin without whitelist rejected in production"
+  ],
+  "status": "OPEN",
+  "_source": "security"
+ },
+ {
+  "issue_id": "SEC-011",
+  "severity": "P2",
+  "category": "auth",
+  "title": "JWT secret handling: insecure default, narrow production check, super-admin secret derived from tenant secret",
+  "source_files": [
+   "backend/internal/config/config.go",
+   "backend/internal/config/runtime_env.go",
+   "backend/cmd/api/main.go",
+   "docker-compose.yml"
+  ],
+  "evidence": [
+   "config.go:64 default 'your-secret-key-change-this'",
+   "config.go:69-73 enforces only when ENV == 'production' (runtime_env.go:20-23 also treats 'prod')",
+   "main.go:273 super admin secret = JWT_SECRET + '_super_admin'",
+   "pkg/jwt/token.go: no iss/aud; algorithm family check accepts HS384/512",
+   "docker-compose.yml:90 dev secret committed (development file)"
+  ],
+  "suspected_root_cause": "Single-secret design with defaults.",
+  "recommended_fix": "Require JWT_SECRET (>=32 bytes random) and independent SUPER_ADMIN_JWT_SECRET in every non-test env; use IsProductionMode(); pin HS256 explicitly via WithValidMethods; add iss/aud/jti; support key rotation.",
+  "required_tests": [
+   "Startup fails with default/short/equal secrets (prod and staging)",
+   "HS512-signed token rejected",
+   "Tenant token never validates on super-admin routes and vice versa"
+  ],
+  "status": "OPEN",
+  "_source": "security"
+ },
+ {
+  "issue_id": "SEC-012",
+  "severity": "P1",
+  "category": "auth",
+  "title": "DB-down stub mode in production: server stays up and login accepts any email with a fixed test password as tenant owner",
+  "source_files": [
+   "backend/cmd/api/main.go",
+   "backend/internal/repository/auth_repo.go"
+  ],
+  "evidence": [
+   "main.go:86-94 continues without DB; main.go:43-71,1061-1068,1476+ stub RBAC/users",
+   "auth_repo.go:250-268 synthetic owner user tenant 1 id 7 with test password"
+  ],
+  "suspected_root_cause": "Development convenience retained in production binary.",
+  "recommended_fix": "Fatal on DB failure when ENV=production; compile stub mode behind a build tag or ENV=development guard; remove synthetic user.",
+  "required_tests": [
+   "Production start without DB exits non-zero",
+   "Stub login unavailable unless ENV=development"
+  ],
+  "status": "OPEN",
+  "_source": "security"
+ },
+ {
+  "issue_id": "SEC-013",
+  "severity": "P2",
+  "category": "logging",
+  "title": "Credentials and token fragments written to logs",
+  "source_files": [
+   "backend/internal/usecase/auth_usecase.go",
+   "backend/internal/handler/http/auth_handler.go",
+   "backend/internal/repository/super_admin_repo.go"
+  ],
+  "evidence": [
+   "auth_usecase.go:107,133,137 password length, first 30 chars of bcrypt hash, first 3 chars of password",
+   "auth_usecase.go:161,247,317,337-357 token prefixes and user details",
+   "super_admin_repo.go:654,675 first 16 chars of one-time token",
+   "jwt_manager.go logs claims (dead code)"
+  ],
+  "suspected_root_cause": "Debug prints left in production paths (fmt.Println).",
+  "recommended_fix": "Remove debug prints; structured logger with redaction; never log secrets or token material.",
+  "required_tests": [
+   "Log-capture test asserting no password/hash/token substrings"
+  ],
+  "status": "OPEN",
+  "_source": "security"
+ },
+ {
+  "issue_id": "SEC-014",
+  "severity": "P2",
+  "category": "session",
+  "title": "No tenant session lifecycle: 24h non-revocable JWT, no refresh/logout, forgot-password is a stub, tokens in localStorage",
+  "source_files": [
+   "backend/internal/usecase/auth_usecase.go",
+   "backend/internal/config/config.go",
+   "frontend/apps/dashboard/src/components/TenantSelectorModal.tsx",
+   "frontend/apps/landing/src/stores/authStore.ts"
+  ],
+  "evidence": [
+   "config.go:65 default expiry 24h",
+   "auth_usecase.go:288-305 ForgotPassword does nothing but responds 'Password reset email sent' (auth_handler.go:125)",
+   "internal/auth/jwt_manager.go and internal/handlers/auth_api.go (refresh/logout) not wired",
+   "TenantSelectorModal.tsx:65, landing authStore.ts:31 localStorage; dashboard authStore.ts:43 non-HttpOnly cookie",
+   "password change does not invalidate existing tokens (user_settings_handler.go:306-316)"
+  ],
+  "suspected_root_cause": "Auth subsystem partially implemented; legacy managers left unwired.",
+  "recommended_fix": "Short access token (15m) + rotating refresh (HttpOnly Secure SameSite cookie), server-side revocation list or token version in users table, real reset flow with single-use hashed tokens and email, invalidate on password change.",
+  "required_tests": [
+   "Logout invalidates token",
+   "Password change revokes old tokens",
+   "Reset token single use/expiry",
+   "Refresh rotation reuse detection"
+  ],
+  "status": "OPEN",
+  "_source": "security"
+ },
+ {
+  "issue_id": "SEC-015",
+  "severity": "P1",
+  "category": "payments",
+  "title": "Webhook replay/refund-callback can re-activate a refunded subscription; transaction type/flags ignored",
+  "source_files": [
+   "backend/internal/usecase/payment_usecase.go"
+  ],
+  "evidence": [
+   "payment_usecase.go:202-205 idempotent skip only for status 'success'",
+   "189-252 no use of is_refunded, is_voided, is_capture, has_parent_transaction, type, integration_id",
+   "updatePaymentStatusTx (750-760) updates by id with no status precondition"
+  ],
+  "suspected_root_cause": "State machine lacks terminal-state guard; webhook treated as success when success flag true.",
+  "recommended_fix": "Reject payloads with is_refunded/is_voided/has_parent_transaction; verify integration_id and transaction type; make refunded/success terminal (UPDATE ... WHERE status IN allowed); store paymob transaction id UNIQUE and dedupe on it; handle refund callbacks explicitly.",
+  "required_tests": [
+   "Replay of success webhook after refund leaves tenant unchanged",
+   "Refund callback payload does not activate",
+   "Concurrent duplicate webhooks activate once",
+   "Wrong integration_id rejected"
+  ],
+  "status": "OPEN",
+  "_source": "security"
+ },
+ {
+  "issue_id": "SEC-016",
+  "severity": "P2",
+  "category": "data-protection",
+  "title": "Paymob auth token and billing/card metadata stored in plaintext; raw webhook bodies queued",
+  "source_files": [
+   "backend/migrations/115_create_payments_table.sql",
+   "backend/internal/repository/payment_repo_impl.go",
+   "backend/migrations/117_create_webhook_retry_queue.sql"
+  ],
+  "evidence": [
+   "115:16 paymob_auth_token TEXT; payment_repo_impl.go:39,122",
+   "retry queue persists raw body incl. source_data.pan masked value and HMAC"
+  ],
+  "suspected_root_cause": "Convenience persistence of provider token.",
+  "recommended_fix": "Do not persist auth token (short-lived, re-authenticate on demand); define retention for queue payloads; encrypt sensitive columns if kept.",
+  "required_tests": [
+   "Schema test: no auth token column populated",
+   "Retention job purges processed queue rows"
+  ],
+  "status": "OPEN",
+  "_source": "security"
+ },
+ {
+  "issue_id": "SEC-017",
+  "severity": "P3",
+  "category": "billing",
+  "title": "Subscription period/refund consistency issues",
+  "source_files": [
+   "backend/internal/usecase/payment_usecase.go"
+  ],
+  "evidence": [
+   "283 expires_at = paidAt + period (early renewal loses remaining time)",
+   "571-615 Paymob refund executed before DB transaction",
+   "301-325 history rows written after commit, errors ignored",
+   "99 order item name fixed to 'Monthly' for annual plan (paymob_client_live.go:99)"
+  ],
+  "suspected_root_cause": "Simplified billing logic.",
+  "recommended_fix": "Extend from max(now, current expiry); persist refund intent first (saga/outbox); write history inside the transaction; use plan name in order item.",
+  "required_tests": [
+   "Renew 10 days early extends from expiry",
+   "Refund DB failure reconciles",
+   "History row atomic with payment update"
+  ],
+  "status": "OPEN",
+  "_source": "security"
+ },
+ {
+  "issue_id": "SEC-018",
+  "severity": "P2",
+  "category": "rbac",
+  "title": "Tenant-impacting routes with no permission annotation (users, categories, drivers, notifications, themes, contact info, subscription actions)",
+  "source_files": [
+   "backend/cmd/api/main.go"
+  ],
+  "evidence": [
+   "main.go:671-675,725-753,1062-1289,1397-1403,1413-1458,1462-1472,645-648 use wrapProtected only",
+   "POST/DELETE /users lets any user create/delete users; POST /subscription/cancel any user cancels"
+  ],
+  "suspected_root_cause": "Coverage gaps in route registration.",
+  "recommended_fix": "Assign modules (USERS=6, CATEGORIES=2, THEMES=9, SETTINGS=5, NOTIFICATIONS=4, new BILLING/DRIVERS module) and enforce; owner-only for billing.",
+  "required_tests": [
+   "Route inventory test: every non-public tenant route has a permission annotation"
+  ],
+  "status": "OPEN",
+  "_source": "security"
+ },
+ {
+  "issue_id": "SEC-019",
+  "severity": "P2",
+  "category": "rbac",
+  "title": "Module ID mismatch between routes and migrations (HR/leaves/salaries)",
+  "source_files": [
+   "backend/cmd/api/main.go",
+   "backend/migrations/100_create_modules_table.sql",
+   "backend/migrations/105_add_rbac_modules.sql",
+   "frontend/apps/dashboard/src/lib/rbac.ts"
+  ],
+  "evidence": [
+   "main.go:757-976 HR routes use module 2 (comment 'HR'); migration 100 insert order gives 2=CATEGORIES, 3=HR; LEAVES=11, SALARIES=12 unused",
+   "rbac.ts:23 HR=3"
+  ],
+  "suspected_root_cause": "Hard-coded numeric IDs duplicated in three places.",
+  "recommended_fix": "Reference modules by name constants resolved at startup from the modules table; add contract test.",
+  "required_tests": [
+   "Test that route module ids equal modules.id for the named module",
+   "Payroll routes require SALARIES grant"
+  ],
+  "status": "OPEN",
+  "_source": "security"
+ },
+ {
+  "issue_id": "SEC-020",
+  "severity": "P2",
+  "category": "xss",
+  "title": "Unsanitized dangerouslySetInnerHTML for tenant-authored custom section HTML on public sites",
+  "source_files": [
+   "frontend/layers/ui-themes/src/sections/custom/CustomSection.tsx",
+   "frontend/apps/dashboard/src/app/[locale]/dashboard/pos/components/POSReceipt.tsx"
+  ],
+  "evidence": [
+   "CustomSection.tsx:33 renders html_content/content raw",
+   "POSReceipt.tsx:12-46 custom DOM sanitizer (blocklist) over markup whose fields are escaped upstream (usePOSPrint.ts:197,244-247)"
+  ],
+  "suspected_root_cause": "Page-builder content treated as trusted.",
+  "recommended_fix": "Sanitize with DOMPurify (allowlist) on save and render; consider CSP without unsafe-inline for the site; replace blocklist sanitizer with allowlist.",
+  "required_tests": [
+   "Script/onerror payload stripped",
+   "Snapshot tests for allowed markup"
+  ],
+  "status": "OPEN",
+  "_source": "security"
+ },
+ {
+  "issue_id": "SEC-021",
+  "severity": "P3",
+  "category": "upload",
+  "title": "Image upload trusts client Content-Type; no magic-byte/extension validation; serving origin unverified",
+  "source_files": [
+   "backend/internal/usecase/product_usecase.go",
+   "backend/internal/handler/http/product_handler.go"
+  ],
+  "evidence": [
+   "product_usecase.go:275-312 allowlist on header Content-Type, filename used in stored path (stdlib mime/multipart applies filepath.Base so traversal is mitigated)",
+   "no http.DetectContentType, no extension allowlist, no per-tenant quota",
+   "no FileServer in Go code; /uploads served elsewhere (unverified)"
+  ],
+  "suspected_root_cause": "Header-only validation.",
+  "recommended_fix": "Sniff content, generate server-side filenames/extensions, re-encode images, serve from separate cookieless origin with nosniff and Content-Disposition.",
+  "required_tests": [
+   "HTML file with image/png header rejected",
+   "Path-like filename sanitized",
+   "Size limit enforced"
+  ],
+  "status": "OPEN",
+  "_source": "security"
+ },
+ {
+  "issue_id": "SEC-022",
+  "severity": "P3",
+  "category": "headers",
+  "title": "CSP permits unsafe-inline/unsafe-eval; HSTS conditional on r.TLS; health/metrics and test route public",
+  "source_files": [
+   "backend/internal/middleware/cache.go",
+   "backend/cmd/api/main.go"
+  ],
+  "evidence": [
+   "cache.go:228-231 CSP, 238-240 HSTS only if r.TLS != nil",
+   "main.go:547-560 /health/metrics and /public/test-routing/{slug} unauthenticated"
+  ],
+  "suspected_root_cause": "API headers copied from web defaults.",
+  "recommended_fix": "Set HSTS at proxy or honor X-Forwarded-Proto from trusted proxy; API CSP default-src 'none'; remove test route; restrict metrics.",
+  "required_tests": [
+   "Header snapshot test",
+   "Metrics requires auth or internal network"
+  ],
+  "status": "OPEN",
+  "_source": "security"
+ },
+ {
+  "issue_id": "SEC-023",
+  "severity": "P3",
+  "category": "availability",
+  "title": "In-memory rate limiter and unbounded client map; mock handler builds callback URL from Host header",
+  "source_files": [
+   "backend/internal/middleware/rate_limit.go",
+   "backend/internal/handler/http/mock_paymob_handler.go"
+  ],
+  "evidence": [
+   "rate_limit.go:253-304 map never pruned, per process",
+   "mock_paymob_handler.go:243-251 uses r.Host"
+  ],
+  "suspected_root_cause": "Simple implementation.",
+  "recommended_fix": "Use shared limiter (Redis) with expiry sweep; use configured base URL in mock handler.",
+  "required_tests": [
+   "Limiter memory bounded test",
+   "Host header spoof does not redirect callback"
+  ],
+  "status": "OPEN",
+  "_source": "security"
+ },
+ {
+  "issue_id": "SEC-026",
+  "severity": "P1",
+  "category": "tenant-isolation",
+  "title": "Authenticated tokens lacking restaurant_id can override tenant and restaurant through request headers",
+  "source_files": [
+   "backend/internal/middleware/tenant.go",
+   "backend/internal/pkg/jwt/token.go"
+  ],
+  "evidence": [
+   "tenant.go:31 requires tenantID>0 && restaurantID>0 from claims, else falls through to headers at 40-63",
+   "token.go:14 restaurant_id omitempty; users created without restaurant get 0 (main.go:1167-1172)"
+  ],
+  "suspected_root_cause": "Backward-compatibility header fallback not restricted to unauthenticated public flows.",
+  "recommended_fix": "When claims exist, always use claim tenant; reject header mismatch; resolve default restaurant server-side.",
+  "required_tests": [
+   "Token with tenant A and restaurant 0 plus X-Tenant-ID B returns 403/ignored header"
+  ],
+  "status": "OPEN",
+  "_source": "security"
+ },
+ {
+  "issue_id": "FIN-001",
+  "severity": "P1",
+  "category": "accounting",
+  "title": "Auto-posting silently plugs any journal imbalance into the last line",
+  "source_files": [
+   "backend/internal/usecase/auto_posting_engine.go"
+  ],
+  "evidence": [
+   "auto_posting_engine.go:633-663 normalizeBalancedLines adds diff to last credit/debit when |diff|>0.009 regardless of size",
+   "used by createAndPostEntry (522-566) for sales, COGS, payroll, supplier, depreciation"
+  ],
+  "suspected_root_cause": "Defensive rounding fix grew into unconditional balancing.",
+  "recommended_fix": "Only absorb rounding diffs up to a few cents with explicit rounding account; otherwise return error and surface failed posting.",
+  "required_tests": [
+   "Order with tax inconsistent by 5.00 fails posting and alerts",
+   "Rounding diff <=0.02 posts to rounding account"
+  ],
+  "status": "OPEN",
+  "_source": "security"
+ },
+ {
+  "issue_id": "FIN-002",
+  "severity": "P2",
+  "category": "accounting",
+  "title": "No database-level debit=credit enforcement; balance trigger only recomputes totals; float tolerance",
+  "source_files": [
+   "backend/migrations/137_create_journal_entries.sql",
+   "backend/internal/repository/journal_entry_repo.go"
+  ],
+  "evidence": [
+   "137:79-108 validate_journal_balance() does not RAISE; no CHECK total_debit=total_credit; no immutability trigger for posted lines",
+   "journal_entry_repo.go:393,730 float64 tolerance 0.009 per entry"
+  ],
+  "suspected_root_cause": "Integrity rules live only in Go.",
+  "recommended_fix": "Add deferred constraint trigger (sum debit = sum credit on commit for posted/post transition), block UPDATE/DELETE of posted lines and entries, use NUMERIC/decimal in Go and exact compare.",
+  "required_tests": [
+   "Direct SQL insert of unbalanced posted entry fails",
+   "UPDATE of posted line fails",
+   "Imbalance of 0.005 rejected"
+  ],
+  "status": "OPEN",
+  "_source": "security"
+ },
+ {
+  "issue_id": "FIN-003",
+  "severity": "P1",
+  "category": "accounting",
+  "title": "No row locking: concurrent post/void, running-balance updates and number generation race",
+  "source_files": [
+   "backend/internal/repository/journal_entry_repo.go",
+   "backend/internal/repository/payment_acct_repo.go",
+   "backend/internal/repository/invoice_customer_repo.go"
+  ],
+  "evidence": [
+   "journal_entry_repo.go:363-375 status read without FOR UPDATE; 544-596 running_balance read-modify-write per account; 784-798 MAX()+1 numbering; payment_acct_repo.go:563-575 same; grep shows no FOR UPDATE in repositories"
+  ],
+  "suspected_root_cause": "Optimistic code paths assume single writer.",
+  "recommended_fix": "SELECT ... FOR UPDATE on entry and account rows (ordered), or compute balances from SUM; use sequences/counter rows per tenant-year; unique constraint retry.",
+  "required_tests": [
+   "Parallel double-post yields one GL set",
+   "Parallel posts keep running_balance equal to SUM",
+   "Parallel create yields distinct numbers"
+  ],
+  "status": "OPEN",
+  "_source": "security"
+ },
+ {
+  "issue_id": "FIN-004",
+  "severity": "P2",
+  "category": "accounting",
+  "title": "float64 used for money in Go while DB uses NUMERIC/DECIMAL",
+  "source_files": [
+   "backend/internal/domain/accounting.go",
+   "backend/internal/domain/order.go",
+   "backend/internal/usecase/order_usecase.go",
+   "backend/internal/handler/http/hr_salary_handler.go"
+  ],
+  "evidence": [
+   "~100 float64 fields in accounting/hr domains; order_usecase.go:142-182 float arithmetic; hr_salary_handler.go:122-141",
+   "migrations use NUMERIC(15,2) / DECIMAL(10,2)"
+  ],
+  "suspected_root_cause": "Convenience typing.",
+  "recommended_fix": "Adopt shopspring/decimal or integer minor units at boundaries; round half-even at defined points.",
+  "required_tests": [
+   "Property test: sum of 0.1 x 3 lines equals exact total",
+   "Totals match SQL recomputation"
+  ],
+  "status": "OPEN",
+  "_source": "security"
+ },
+ {
+  "issue_id": "FIN-005",
+  "severity": "P1",
+  "category": "accounting",
+  "title": "Order accounting not reversed on refund/cancel; posting failures only logged; create and post not atomic",
+  "source_files": [
+   "backend/internal/usecase/order_usecase.go",
+   "backend/internal/handler/http/admin_order_handler.go",
+   "backend/internal/usecase/auto_posting_engine.go"
+  ],
+  "evidence": [
+   "order_usecase.go:459-474 errors only log.Printf",
+   "admin_order_handler.go:482-499 posts when paid; no reverse on paid->refunded/cancelled (no reversal code in order_usecase)",
+   "auto_posting_engine.go:522-566 CreateJournalEntry commits, then AppendEntry separately",
+   "entry_date = order.CreatedAt (auto_posting_engine.go:149) not payment date; closed period would fail silently"
+  ],
+  "suspected_root_cause": "Accounting integration added as best effort side effect.",
+  "recommended_fix": "Single transaction for order status + posting (or outbox with retry/alert), reversing entry on refund/cancel, post at payment date, reconcile report of paid orders without journal.",
+  "required_tests": [
+   "Paid then refunded order nets to zero in GL",
+   "Posting failure surfaces and retries",
+   "Orders-paid total equals sales GL total for period"
+  ],
+  "status": "OPEN",
+  "_source": "security"
+ },
+ {
+  "issue_id": "FIN-006",
+  "severity": "P2",
+  "category": "accounting",
+  "title": "Tax/discount calculation defects: hardcoded 10% order tax; invoice tax ignores discounts",
+  "source_files": [
+   "backend/internal/usecase/order_usecase.go",
+   "backend/migrations/141_create_invoices_customer.sql"
+  ],
+  "evidence": [
+   "order_usecase.go:174-175 TaxAmount = subtotal*0.10, DiscountAmount never set",
+   "141:80-82 tax = qty*price*rate before discount_amount; discount_rate unused in line_total"
+  ],
+  "suspected_root_cause": "Placeholder logic retained.",
+  "recommended_fix": "Per-tenant tax config (rate, inclusive/exclusive); tax on net-of-discount base; support discount_rate; document rounding.",
+  "required_tests": [
+   "Invoice with discount computes tax on discounted base",
+   "Tenant with 14% VAT gets 14% on orders"
+  ],
+  "status": "OPEN",
+  "_source": "security"
+ },
+ {
+  "issue_id": "FIN-007",
+  "severity": "P2",
+  "category": "hr",
+  "title": "Payroll records editable/deletable after payment and posting; tax/insurance are manual inputs",
+  "source_files": [
+   "backend/internal/handler/http/hr_salary_handler.go",
+   "backend/internal/repository/salary_repo.go",
+   "backend/migrations/024_create_salaries_table.sql"
+  ],
+  "evidence": [
+   "hr_salary_handler.go:250-354 UpdateSalary no status guard (can change status/amounts after paid)",
+   "356-380 DeleteSalary hard DELETE, journal entry orphaned",
+   "salary_repo.go:216-227 MarkAsPaid no precondition",
+   "req fields tax, social_insurance etc. are client-supplied (122-141); gross/net computed by DB trigger (024:129-148)"
+  ],
+  "suspected_root_cause": "CRUD handler without lifecycle rules.",
+  "recommended_fix": "Lock paid records; reversal journal on correction; soft-delete only for unpaid; compute statutory deductions from configurable rules; require approval workflow.",
+  "required_tests": [
+   "PUT on paid salary returns 409",
+   "Delete paid salary blocked",
+   "Mark paid twice posts once",
+   "Net = gross - deductions matches SQL"
+  ],
+  "status": "OPEN",
+  "_source": "security"
+ },
+ {
+  "issue_id": "FIN-008",
+  "severity": "P3",
+  "category": "accounting",
+  "title": "Void and account deletion edge cases",
+  "source_files": [
+   "backend/internal/repository/journal_entry_repo.go",
+   "backend/internal/repository/account_repo.go"
+  ],
+  "evidence": [
+   "journal_entry_repo.go:437-504 void of posted entry reverses in GL dated today with no closed-period check",
+   "account_repo.go:212 hard DELETE of chart_of_accounts (FK behaviour unverified)",
+   "order number time%1e6 (order_usecase.go:63) collision-prone"
+  ],
+  "suspected_root_cause": "Edge cases not covered.",
+  "recommended_fix": "Create explicit reversing journal entry linked to original, respect fiscal period, restrict account delete to unused accounts.",
+  "required_tests": [
+   "Void in closed period blocked or posts to open period with link",
+   "Delete account with GL rows rejected"
+  ],
+  "status": "OPEN",
+  "_source": "security"
+ }
+]

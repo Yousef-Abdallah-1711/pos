@@ -25,7 +25,7 @@ export function createThemeClone(
     components: originalTheme.components
       ? originalTheme.components.map((comp) => ({
           ...comp,
-          id: Date.now() + Math.random(), // Generate new ID
+          id: `component-${Date.now()}-${Math.floor(Math.random() * 1_000_000)}`, // new string id (ComponentConfig.id is a string)
         }))
       : [],
     isActive: false,

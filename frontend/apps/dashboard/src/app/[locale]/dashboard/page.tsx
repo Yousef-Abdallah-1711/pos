@@ -24,11 +24,13 @@ import {
 
 import { Button } from '@/components/ui/button'
 import { api } from '@/lib/api'
-import { getDashboardLoginUrl, hasAuthenticatedSession } from '@/lib/authSession'
+import { getConfig } from '@/lib/config'
 import { debugError } from '@/lib/debug'
 import { createTranslator, getLocaleFromPath } from '@/lib/translations'
 import { useAuthStore } from '@/stores/authStore'
-import { useUserPermissions } from '@/hooks/useRbac'
+import { useHasPermission } from '@/hooks/useRbac'
+import { fetchNotificationStats } from '@/hooks/useNotifications'
+import { fetchTenantStatus } from '@/stores/tenantStatusStore'
 import { MODULE_IDS, PERMISSION_LEVELS } from '@/lib/rbac'
 
 interface DashboardOrder {
@@ -246,15 +248,14 @@ export default function DashboardPage() {
   const token = useAuthStore((state) => state.token)
 
   // Permission checks for each module
-  const { checkPermission, loading: permissionsLoading } = useUserPermissions()
-  const canViewReports = checkPermission(MODULE_IDS.REPORTS, PERMISSION_LEVELS.READ)
-  const canViewOrders = checkPermission(MODULE_IDS.ORDERS, PERMISSION_LEVELS.READ)
-  const canViewProducts = checkPermission(MODULE_IDS.PRODUCTS, PERMISSION_LEVELS.READ)
-  const canViewCategories = checkPermission(MODULE_IDS.CATEGORIES, PERMISSION_LEVELS.READ)
-  const canViewHR = checkPermission(MODULE_IDS.HR, PERMISSION_LEVELS.READ)
-  const canViewTables = checkPermission(MODULE_IDS.TABLES, PERMISSION_LEVELS.READ)
-  const canViewKDS = checkPermission(MODULE_IDS.KDS, PERMISSION_LEVELS.READ)
-  const canUsePOS = checkPermission(MODULE_IDS.ORDERS, PERMISSION_LEVELS.WRITE)
+  const { hasPermission: canViewReports } = useHasPermission(MODULE_IDS.REPORTS, PERMISSION_LEVELS.READ)
+  const { hasPermission: canViewOrders } = useHasPermission(MODULE_IDS.ORDERS, PERMISSION_LEVELS.READ)
+  const { hasPermission: canViewProducts } = useHasPermission(MODULE_IDS.PRODUCTS, PERMISSION_LEVELS.READ)
+  const { hasPermission: canViewCategories } = useHasPermission(MODULE_IDS.CATEGORIES, PERMISSION_LEVELS.READ)
+  const { hasPermission: canViewHR } = useHasPermission(MODULE_IDS.HR, PERMISSION_LEVELS.READ)
+  const { hasPermission: canViewTables } = useHasPermission(MODULE_IDS.TABLES, PERMISSION_LEVELS.READ)
+  const { hasPermission: canViewKDS } = useHasPermission(MODULE_IDS.KDS, PERMISSION_LEVELS.READ)
+  const { hasPermission: canUsePOS } = useHasPermission(MODULE_IDS.ORDERS, PERMISSION_LEVELS.WRITE)
 
   const [overview, setOverview] = useState<DashboardOverviewData>(EMPTY_OVERVIEW)
   const [isLoading, setIsLoading] = useState(true)
@@ -262,7 +263,7 @@ export default function DashboardPage() {
   const [overviewError, setOverviewError] = useState<string | null>(null)
   const hasLoadedOverviewRef = useRef(false)
 
-  const isAuthenticated = hasAuthenticatedSession(user, token)
+  const isAuthenticated = !!(user && token)
   const debugMode = typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('debug') === 'true'
 
   const dashboardRoute = (path: string) => `/${locale}${path}`
@@ -270,14 +271,11 @@ export default function DashboardPage() {
   useEffect(() => {
     if (debugMode) return
     if (!isAuthenticated) {
-      window.location.href = getDashboardLoginUrl(pathname)
+      window.location.href = `${getConfig().landingUrl}/${locale}/auth/login`
     }
-  }, [debugMode, isAuthenticated, pathname])
+  }, [debugMode, isAuthenticated, locale])
 
   useEffect(() => {
-    if (permissionsLoading) {
-      return
-    }
     if (!isAuthenticated && !debugMode) return
 
     let cancelled = false
@@ -300,8 +298,8 @@ export default function DashboardPage() {
         api.get('/categories'),
         api.get('/hr/employees'),
         api.get('/admin/drivers'),
-        api.get('/notifications/stats'),
-        api.get('/tenant/status'),
+        fetchNotificationStats(),
+        fetchTenantStatus(),
         shouldFetchTableStats ? api.get('/tables/stats') : Promise.resolve({ data: { data: null } }),
       ])
 
@@ -344,8 +342,14 @@ export default function DashboardPage() {
         : (unavailableSources.push('drivers'), { items: [] as any[] })
 
       const notificationsStats = notificationsResult.status === 'fulfilled'
-        ? (notificationsResult.value.data?.data ?? notificationsResult.value.data ?? {})
-        : (unavailableSources.push('notifications'), {})
+        ? notificationsResult.value
+        : (unavailableSources.push('notifications'), {
+          total: 0,
+          unread: 0,
+          read: 0,
+          by_module: {},
+          by_priority: {},
+        })
 
       const tenantStatus = tenantStatusResult.status === 'fulfilled'
         ? extractTenantStatus(tenantStatusResult.value.data)
@@ -419,7 +423,7 @@ export default function DashboardPage() {
     return () => {
       cancelled = true
     }
-  }, [debugMode, isAuthenticated, token, user?.restaurant_id, canViewTables, permissionsLoading])
+  }, [debugMode, isAuthenticated, token, user?.restaurant_id, canViewTables])
 
   const setupTasks = useMemo(() => {
     const items = [
@@ -599,16 +603,6 @@ export default function DashboardPage() {
       </div>
     )
   }
-  if (permissionsLoading) {
-    return (
-      <div className="min-h-[40vh] flex items-center justify-center">
-        <div className="flex items-center gap-3 text-gray-600 dark:text-gray-300">
-          <Loader2 className="h-5 w-5 animate-spin" />
-          <span>{t('common.loading', 'Loading...')}</span>
-        </div>
-      </div>
-    )
-  }
 
   const userDisplayName = user?.name || user?.email || 'User'
 
@@ -662,7 +656,7 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          <div className="flex w-full flex-col gap-3 xl:w-auto xl:min-w-[320px]">
+          <div className="flex min-h-[212px] w-full flex-col gap-3 xl:w-auto xl:min-w-[320px]">
             <div className="grid grid-cols-2 gap-2">
               {quickActions.slice(0, 4).map((action) => (
                 <Link key={action.label} href={action.href}>
@@ -692,9 +686,9 @@ export default function DashboardPage() {
       </section>
 
       {isLoading && !overview.lastUpdatedAt ? (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
-          {Array.from({ length: 6 }).map((_, index) => (
-            <div key={index} className="h-32 animate-pulse rounded-xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900" />
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 2xl:grid-cols-3">
+          {Array.from({ length: 9 }).map((_, index) => (
+            <div key={index} className="min-h-[156px] animate-pulse rounded-xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900" />
           ))}
         </div>
       ) : (
@@ -703,7 +697,7 @@ export default function DashboardPage() {
             <Link
               key={card.key}
               href={card.href}
-              className="group rounded-xl border border-gray-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md dark:border-gray-800 dark:bg-gray-900"
+              className="group min-h-[156px] rounded-xl border border-gray-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md dark:border-gray-800 dark:bg-gray-900"
             >
               <div className="flex items-start justify-between gap-3">
                 <div>

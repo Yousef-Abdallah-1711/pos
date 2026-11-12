@@ -20,27 +20,6 @@ type AdminThemeHandlerV2 struct {
 	service service.ThemeService
 }
 
-type themeWritePayload struct {
-	Name            string          `json:"name"`
-	Description     string          `json:"description"`
-	Slug            string          `json:"slug"`
-	Colors          interface{}     `json:"colors"`
-	DarkMode        interface{}     `json:"dark_mode"`
-	Typography      interface{}     `json:"typography"`
-	Identity        interface{}     `json:"identity"`
-	HeaderConfig    interface{}     `json:"header_config"`
-	FooterConfig    interface{}     `json:"footer_config"`
-	Components      interface{}     `json:"components"`
-	TemplateID      interface{}     `json:"template_id"`
-	HeaderVariant   interface{}     `json:"header_variant"`
-	FooterVariant   interface{}     `json:"footer_variant"`
-	HeroVariant     interface{}     `json:"hero_variant"`
-	ProductsVariant interface{}     `json:"products_variant"`
-	Config          json.RawMessage `json:"config"`
-	IsActive        *bool           `json:"is_active"`
-	IsPublished     *bool           `json:"is_published"`
-}
-
 // NewAdminThemeHandlerV2 creates a new theme handler
 func NewAdminThemeHandlerV2(svc service.ThemeService) *AdminThemeHandlerV2 {
 	return &AdminThemeHandlerV2{
@@ -51,7 +30,6 @@ func NewAdminThemeHandlerV2(svc service.ThemeService) *AdminThemeHandlerV2 {
 // CreateTheme handles POST /api/v1/admin/themes
 // Creates a new theme for the authenticated user's restaurant/tenant
 func (h *AdminThemeHandlerV2) CreateTheme(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Cache-Control", "no-cache, private")
 	log.Printf("[ThemeHandler] CreateTheme: %s %s", r.Method, r.URL.Path)
 
 	// Extract user info from context (set by JWT middleware)
@@ -72,30 +50,16 @@ func (h *AdminThemeHandlerV2) CreateTheme(w http.ResponseWriter, r *http.Request
 	}
 
 	// Parse request body
-	var payload themeWritePayload
+	var req domain.ThemeCreateRequest
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		respondError(w, http.StatusBadRequest, "failed to read request body")
 		return
 	}
 
-	if len(body) > 0 {
-		if err := json.Unmarshal(body, &payload); err != nil {
-			respondError(w, http.StatusBadRequest, "invalid JSON format: "+err.Error())
-			return
-		}
-	}
-
-	req := domain.ThemeCreateRequest{
-		Name:        payload.Name,
-		Slug:        payload.Slug,
-		Description: payload.Description,
-	}
-
-	if len(payload.Config) > 0 {
-		req.Config = payload.Config
-	} else if builtConfig, ok := buildThemeConfigFromPayload(payload); ok {
-		req.Config = builtConfig
+	if err := json.Unmarshal(body, &req); err != nil {
+		respondError(w, http.StatusBadRequest, "invalid JSON format: "+err.Error())
+		return
 	}
 
 	// Validate required fields
@@ -118,18 +82,17 @@ func (h *AdminThemeHandlerV2) CreateTheme(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	invalidatePublicThemeCacheByRestaurant(restaurantID)
 	respondJSON(w, http.StatusCreated, theme)
 }
 
 // ListThemes handles GET /api/v1/admin/themes
 // Lists themes for the authenticated user's tenant with pagination
 func (h *AdminThemeHandlerV2) ListThemes(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Cache-Control", "no-cache, private")
 	log.Printf("[ThemeHandler] ListThemes: %s %s", r.Method, r.URL.Path)
 
 	// Extract tenant info from context
 	tenantID := middleware.GetTenantID(r)
+	restaurantID := middleware.GetRestaurantID(r)
 	if tenantID == 0 {
 		respondError(w, http.StatusUnauthorized, "missing authentication context")
 		return
@@ -152,7 +115,7 @@ func (h *AdminThemeHandlerV2) ListThemes(w http.ResponseWriter, r *http.Request)
 	}
 
 	// List themes via service
-	response, err := h.service.ListThemes(r.Context(), tenantID, page, pageSize)
+	response, err := h.service.ListThemes(r.Context(), tenantID, restaurantID, page, pageSize)
 	if err != nil {
 		respondError(w, http.StatusInternalServerError, err.Error())
 		return
@@ -164,7 +127,6 @@ func (h *AdminThemeHandlerV2) ListThemes(w http.ResponseWriter, r *http.Request)
 // ListThemePresets handles GET /api/v1/admin/theme-presets
 // Returns pre-built theme templates available for selection
 func (h *AdminThemeHandlerV2) ListThemePresets(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Cache-Control", "no-cache, private")
 	log.Printf("[ThemeHandler] ListThemePresets: %s %s", r.Method, r.URL.Path)
 
 	// Parse pagination parameters
@@ -196,10 +158,41 @@ func (h *AdminThemeHandlerV2) ListThemePresets(w http.ResponseWriter, r *http.Re
 	respondJSON(w, http.StatusOK, response)
 }
 
+// loadOwnedTheme loads a theme by ID and verifies it belongs to the caller's
+// tenant and restaurant. Foreign or missing themes are indistinguishable (404),
+// so theme IDs of other tenants are never confirmed to exist.
+func (h *AdminThemeHandlerV2) loadOwnedTheme(w http.ResponseWriter, r *http.Request, id int64) (*domain.Theme, bool) {
+	tenantID := middleware.GetTenantID(r)
+	restaurantID := middleware.GetRestaurantID(r)
+	if tenantID <= 0 {
+		respondError(w, http.StatusUnauthorized, "missing authentication context")
+		return nil, false
+	}
+
+	theme, err := h.service.GetTheme(r.Context(), tenantID, restaurantID, id)
+	if err != nil {
+		if strings.Contains(err.Error(), "not found") {
+			respondError(w, http.StatusNotFound, "theme not found")
+		} else {
+			respondError(w, http.StatusInternalServerError, "failed to load theme")
+		}
+		return nil, false
+	}
+	if !themeBelongsToCaller(theme, tenantID, restaurantID) {
+		respondError(w, http.StatusNotFound, "theme not found")
+		return nil, false
+	}
+	return theme, true
+}
+
+// themeBelongsToCaller reports whether the theme is owned by both caller scopes.
+func themeBelongsToCaller(theme *domain.Theme, tenantID, restaurantID int64) bool {
+	return theme != nil && theme.TenantID == tenantID && theme.RestaurantID == restaurantID
+}
+
 // GetTheme handles GET /api/v1/admin/themes/{id}
 // Retrieves a specific theme by ID
 func (h *AdminThemeHandlerV2) GetTheme(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Cache-Control", "no-cache, private")
 	log.Printf("[ThemeHandler] GetTheme: %s %s", r.Method, r.URL.Path)
 
 	// Extract theme ID from URL path parameter (Go 1.22 routing)
@@ -215,14 +208,9 @@ func (h *AdminThemeHandlerV2) GetTheme(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Get theme via service
-	theme, err := h.service.GetTheme(r.Context(), id)
-	if err != nil {
-		if strings.Contains(err.Error(), "not found") {
-			respondError(w, http.StatusNotFound, err.Error())
-		} else {
-			respondError(w, http.StatusInternalServerError, err.Error())
-		}
+	// Get theme via service (tenant/restaurant ownership enforced)
+	theme, ok := h.loadOwnedTheme(w, r, id)
+	if !ok {
 		return
 	}
 
@@ -256,7 +244,6 @@ func (h *AdminThemeHandlerV2) GetTheme(w http.ResponseWriter, r *http.Request) {
 		// Also keep the raw config
 		responseMap["config"] = json.RawMessage(theme.Config)
 	}
-	ensureThemeDefaults(responseMap)
 
 	respondJSON(w, http.StatusOK, responseMap)
 }
@@ -264,7 +251,6 @@ func (h *AdminThemeHandlerV2) GetTheme(w http.ResponseWriter, r *http.Request) {
 // UpdateTheme handles PUT /api/v1/admin/themes/{id}
 // Updates an existing theme
 func (h *AdminThemeHandlerV2) UpdateTheme(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Cache-Control", "no-cache, private")
 	log.Printf("[ThemeHandler] UpdateTheme: %s %s", r.Method, r.URL.Path)
 
 	// Extract user info from context
@@ -287,13 +273,34 @@ func (h *AdminThemeHandlerV2) UpdateTheme(w http.ResponseWriter, r *http.Request
 		return
 	}
 
+	if _, ok := h.loadOwnedTheme(w, r, id); !ok {
+		return
+	}
+
+	// Parse request body
+	// Accept both flat config and individual fields
+	type UpdateThemePayload struct {
+		Name         string          `json:"name"`
+		Description  string          `json:"description"`
+		Slug         string          `json:"slug"`
+		Colors       interface{}     `json:"colors"`
+		Typography   interface{}     `json:"typography"`
+		Identity     interface{}     `json:"identity"`
+		HeaderConfig interface{}     `json:"header_config"`
+		FooterConfig interface{}     `json:"footer_config"`
+		Components   interface{}     `json:"components"`
+		Config       json.RawMessage `json:"config"`
+		IsActive     *bool           `json:"is_active"`
+		IsPublished  *bool           `json:"is_published"`
+	}
+
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		respondError(w, http.StatusBadRequest, "failed to read request body")
 		return
 	}
 
-	var payload themeWritePayload
+	var payload UpdateThemePayload
 	if len(body) > 0 {
 		if err := json.Unmarshal(body, &payload); err != nil {
 			respondError(w, http.StatusBadRequest, "invalid JSON format: "+err.Error())
@@ -313,12 +320,38 @@ func (h *AdminThemeHandlerV2) UpdateTheme(w http.ResponseWriter, r *http.Request
 	// If we have a raw config, use it. Otherwise, combine individual fields
 	if len(payload.Config) > 0 {
 		req.Config = payload.Config
-	} else if builtConfig, ok := buildThemeConfigFromPayload(payload); ok {
-		req.Config = builtConfig
+	} else if payload.Colors != nil || payload.Typography != nil || payload.Components != nil {
+		// Build config from individual fields
+		configMap := make(map[string]interface{})
+
+		// Add all provided fields to the config
+		if payload.Colors != nil {
+			configMap["colors"] = payload.Colors
+		}
+		if payload.Typography != nil {
+			configMap["typography"] = payload.Typography
+		}
+		if payload.Identity != nil {
+			configMap["identity"] = payload.Identity
+		}
+		if payload.HeaderConfig != nil {
+			configMap["header"] = payload.HeaderConfig
+		}
+		if payload.FooterConfig != nil {
+			configMap["footer"] = payload.FooterConfig
+		}
+		if payload.Components != nil {
+			configMap["components"] = payload.Components
+		}
+
+		// Marshal the config map to JSON
+		if configBytes, err := json.Marshal(configMap); err == nil {
+			req.Config = configBytes
+		}
 	}
 
 	// Update theme via service
-	theme, err := h.service.UpdateTheme(r.Context(), id, &req, userID)
+	theme, err := h.service.UpdateTheme(r.Context(), middleware.GetTenantID(r), middleware.GetRestaurantID(r), id, &req, userID)
 	if err != nil {
 		if strings.Contains(err.Error(), "not found") {
 			respondError(w, http.StatusNotFound, err.Error())
@@ -330,14 +363,12 @@ func (h *AdminThemeHandlerV2) UpdateTheme(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	invalidatePublicThemeCacheByRestaurant(theme.RestaurantID)
 	respondJSON(w, http.StatusOK, theme)
 }
 
 // DeleteTheme handles DELETE /api/v1/admin/themes/{id}
 // Deletes a theme
 func (h *AdminThemeHandlerV2) DeleteTheme(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Cache-Control", "no-cache, private")
 	log.Printf("[ThemeHandler] DeleteTheme: %s %s", r.Method, r.URL.Path)
 
 	// Extract theme ID from URL path parameter (Go 1.22 routing)
@@ -353,18 +384,12 @@ func (h *AdminThemeHandlerV2) DeleteTheme(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	theme, fetchErr := h.service.GetTheme(r.Context(), id)
-	if fetchErr != nil {
-		if strings.Contains(fetchErr.Error(), "not found") {
-			respondError(w, http.StatusNotFound, fetchErr.Error())
-		} else {
-			respondError(w, http.StatusInternalServerError, fetchErr.Error())
-		}
+	if _, ok := h.loadOwnedTheme(w, r, id); !ok {
 		return
 	}
 
 	// Delete theme via service
-	err = h.service.DeleteTheme(r.Context(), id)
+	err = h.service.DeleteTheme(r.Context(), middleware.GetTenantID(r), middleware.GetRestaurantID(r), id)
 	if err != nil {
 		if strings.Contains(err.Error(), "not found") {
 			respondError(w, http.StatusNotFound, err.Error())
@@ -374,7 +399,6 @@ func (h *AdminThemeHandlerV2) DeleteTheme(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	invalidatePublicThemeCacheByRestaurant(theme.RestaurantID)
 	// Return 204 No Content
 	w.WriteHeader(http.StatusNoContent)
 }
@@ -382,7 +406,6 @@ func (h *AdminThemeHandlerV2) DeleteTheme(w http.ResponseWriter, r *http.Request
 // ActivateTheme handles POST /api/v1/admin/themes/{id}/activate
 // Activates a theme for the tenant
 func (h *AdminThemeHandlerV2) ActivateTheme(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Cache-Control", "no-cache, private")
 	log.Printf("[ThemeHandler] ActivateTheme: %s %s", r.Method, r.URL.Path)
 
 	// Extract theme ID from URL path parameter (Go 1.22 routing)
@@ -398,18 +421,12 @@ func (h *AdminThemeHandlerV2) ActivateTheme(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	theme, fetchErr := h.service.GetTheme(r.Context(), id)
-	if fetchErr != nil {
-		if strings.Contains(fetchErr.Error(), "not found") {
-			respondError(w, http.StatusNotFound, fetchErr.Error())
-		} else {
-			respondError(w, http.StatusInternalServerError, fetchErr.Error())
-		}
+	if _, ok := h.loadOwnedTheme(w, r, id); !ok {
 		return
 	}
 
 	// Activate theme via service
-	err = h.service.ActivateTheme(r.Context(), id)
+	err = h.service.ActivateTheme(r.Context(), middleware.GetTenantID(r), middleware.GetRestaurantID(r), id)
 	if err != nil {
 		if strings.Contains(err.Error(), "not found") {
 			respondError(w, http.StatusNotFound, err.Error())
@@ -419,7 +436,6 @@ func (h *AdminThemeHandlerV2) ActivateTheme(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	invalidatePublicThemeCacheByRestaurant(theme.RestaurantID)
 	// Return success response
 	respondJSON(w, http.StatusOK, map[string]string{
 		"message": "theme activated successfully",
@@ -429,7 +445,6 @@ func (h *AdminThemeHandlerV2) ActivateTheme(w http.ResponseWriter, r *http.Reque
 // DuplicateTheme handles POST /api/v1/admin/themes/{id}/duplicate
 // Duplicates an existing theme (creates a copy with a new slug)
 func (h *AdminThemeHandlerV2) DuplicateTheme(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Cache-Control", "no-cache, private")
 	log.Printf("[ThemeHandler] DuplicateTheme: %s %s", r.Method, r.URL.Path)
 
 	// Extract user info from context
@@ -470,7 +485,11 @@ func (h *AdminThemeHandlerV2) DuplicateTheme(w http.ResponseWriter, r *http.Requ
 	}
 
 	// Get the source theme (could be from user themes or presets)
-	sourceTheme, err := h.service.GetTheme(r.Context(), id)
+	sourceTheme, err := h.service.GetTheme(r.Context(), tenantID, restaurantID, id)
+	if err == nil && !themeBelongsToCaller(sourceTheme, tenantID, restaurantID) {
+		// A theme owned by someone else is treated exactly like a missing one.
+		sourceTheme, err = nil, fmt.Errorf("theme not found")
+	}
 	if err != nil {
 		// If not found in user themes, try to get it as a preset
 		log.Printf("[ThemeHandler] Theme %d not found in user themes, trying presets", id)
@@ -513,74 +532,7 @@ func (h *AdminThemeHandlerV2) DuplicateTheme(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	invalidatePublicThemeCacheByRestaurant(restaurantID)
 	respondJSON(w, http.StatusCreated, duplicatedTheme)
-}
-
-func buildThemeConfigFromPayload(payload themeWritePayload) (json.RawMessage, bool) {
-	configMap := make(map[string]interface{})
-
-	if payload.Colors != nil {
-		configMap["colors"] = payload.Colors
-	}
-	if payload.Typography != nil {
-		configMap["typography"] = payload.Typography
-	}
-	if payload.Identity != nil {
-		configMap["identity"] = payload.Identity
-	}
-	if payload.HeaderConfig != nil {
-		configMap["header"] = payload.HeaderConfig
-	}
-	if payload.FooterConfig != nil {
-		configMap["footer"] = payload.FooterConfig
-	}
-	if payload.Components != nil {
-		configMap["components"] = payload.Components
-	}
-	if payload.DarkMode != nil {
-		configMap["dark_mode"] = payload.DarkMode
-	}
-	if payload.TemplateID != nil {
-		configMap["template_id"] = payload.TemplateID
-	}
-	if payload.HeaderVariant != nil {
-		configMap["header_variant"] = payload.HeaderVariant
-	}
-	if payload.FooterVariant != nil {
-		configMap["footer_variant"] = payload.FooterVariant
-	}
-	if payload.HeroVariant != nil {
-		configMap["hero_variant"] = payload.HeroVariant
-	}
-	if payload.ProductsVariant != nil {
-		configMap["products_variant"] = payload.ProductsVariant
-	}
-
-	if len(configMap) == 0 {
-		return nil, false
-	}
-
-	configBytes, err := json.Marshal(configMap)
-	if err != nil {
-		return nil, false
-	}
-	return configBytes, true
-}
-
-func ensureThemeDefaults(response map[string]interface{}) {
-	defaults := map[string]interface{}{
-		"template_id":      "template-01",
-		"header_variant":   "solid",
-		"footer_variant":   "expanded",
-		"hero_variant":     "gradient",
-		"products_variant": "carousel",
-	}
-	for key, value := range defaults {
-		if _, ok := response[key]; !ok {
-			response[key] = value
-		}
-	}
 }
 
 // RegisterRoutes registers all theme routes with the provided mux

@@ -404,7 +404,7 @@ function MetricCard({ title, value, suffix = '', color, target }: MetricCardProp
     green: 'text-green-600',
     yellow: 'text-yellow-600',
     red: 'text-red-600',
-  }[color || 'gray']
+  }[color ?? 'green' as const] ?? 'text-gray-600'
 
   return (
     <div>

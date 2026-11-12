@@ -1,6 +1,7 @@
 package domain
 
 import (
+	"strings"
 	"errors"
 	"time"
 )
@@ -248,4 +249,57 @@ func (ur *UserRole) Validate() error {
 	}
 
 	return nil
+}
+
+
+// MaxPermissionLevel returns the higher of two permission level names.
+func MaxPermissionLevel(current, candidate string) string {
+	current = strings.ToUpper(strings.TrimSpace(current))
+	candidate = strings.ToUpper(strings.TrimSpace(candidate))
+	if current == "" {
+		current = PermissionNone
+	}
+	if candidate == "" {
+		candidate = PermissionNone
+	}
+	if PermissionValues[candidate] > PermissionValues[current] {
+		return candidate
+	}
+	return current
+}
+
+// FallbackPermissionLevel is the built-in permission for modules whose grants are
+// not stored per role (KDS=13, TABLES=14), derived from the role code/name.
+func FallbackPermissionLevel(role Role, moduleID int64) string {
+	code := strings.ToUpper(strings.TrimSpace(role.RoleCode))
+	if code == "" {
+		code = strings.ToUpper(strings.TrimSpace(role.RoleName))
+	}
+
+	switch moduleID {
+	case 13: // KDS
+		switch code {
+		case "ADMIN", "ADMINISTRATOR", "OWNER", "MANAGER":
+			return PermissionAdmin
+		case "KITCHEN_STAFF", "KITCHEN_LEAD", "CHEF", "EMPLOYEE":
+			return PermissionWrite
+		case "KITCHEN_VIEWER":
+			return PermissionRead
+		default:
+			return PermissionNone
+		}
+	case 14: // TABLES
+		switch code {
+		case "ADMIN", "ADMINISTRATOR", "OWNER":
+			return PermissionAdmin
+		case "MANAGER":
+			return PermissionWrite
+		case "KITCHEN_STAFF", "KITCHEN_LEAD", "CHEF", "KITCHEN_VIEWER", "EMPLOYEE", "WAITER", "HOST", "CASHIER":
+			return PermissionRead
+		default:
+			return PermissionNone
+		}
+	default:
+		return PermissionNone
+	}
 }

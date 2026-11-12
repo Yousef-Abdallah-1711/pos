@@ -2,12 +2,12 @@
 -- Purpose: Creates the first super admin user for the SaaS platform
 
 -- First, create a super admin user (if not exists)
--- Password: SuperAdmin@123 (bcrypt hash)
+-- The account is intentionally unusable until an operator provisions a password.
 INSERT INTO users (tenant_id, email, password_hash, name, phone, role, status, is_super_admin, created_at, updated_at)
 SELECT
     1, -- Default to tenant 1 (or create a system tenant)
     'superadmin@pos-saas.com',
-    '$2a$10$6tgEoGE0dusUMtJ0RUd4VO3IACTDD2vb0676WfMyPvbVQU9oo2p06', -- SuperAdmin@123
+    '!seed-required',
     'Super Admin',
     '+1234567890',
     'super_admin',

@@ -23,9 +23,25 @@ interface NavItem {
   isActive?: boolean
 }
 
-interface HeaderConfig extends ThemeHeaderConfig {
+interface HeaderConfig extends Omit<ThemeHeaderConfig, 'navigationItems'> {
+  navigationItems: NavItem[]
+  shadow?: boolean
   transparentBackground?: boolean
   mobileMenuStyle?: 'hamburger' | 'drawer' | 'collapse'
+}
+
+/**
+ * Items saved without ids cannot be edited (the editor looks them up by id), so give them stable ones.
+ */
+function withNavIds(config: ThemeHeaderConfig): Omit<ThemeHeaderConfig, 'navigationItems'> & { navigationItems: NavItem[] } {
+  return {
+    ...config,
+    navigationItems: (config.navigationItems ?? []).map((item, index) => ({
+      ...item,
+      id: item.id ?? `nav-${index + 1}`,
+      order: item.order ?? index + 1,
+    })),
+  }
 }
 
 /**
@@ -54,12 +70,15 @@ export function HeaderEditor({
   const initialHeaderConfig: HeaderConfig = useMemo(() => {
     if (useStore && storeHeader) {
       return {
-        ...storeHeader,
+        ...withNavIds(storeHeader),
         transparentBackground: false,
         mobileMenuStyle: 'hamburger',
       }
     }
-    return (component?.config as unknown as HeaderConfig) || {
+    if (component?.config) {
+      return withNavIds(component.config as unknown as ThemeHeaderConfig) as HeaderConfig
+    }
+    return {
       navigationItems: [],
       navPosition: 'right',
       navAlignment: 'horizontal',
@@ -484,6 +503,7 @@ export function HeaderEditor({
                   <div className="flex items-center gap-1">
                     <button
                       onClick={() => moveNavItem(item.id, 'up')}
+                      aria-label={`Move ${item.label} up`}
                       disabled={index === 0}
                       className="p-1 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded disabled:opacity-50 transition"
                     >
@@ -491,6 +511,7 @@ export function HeaderEditor({
                     </button>
                     <button
                       onClick={() => moveNavItem(item.id, 'down')}
+                      aria-label={`Move ${item.label} down`}
                       disabled={index === (headerConfig.navigationItems?.length || 0) - 1}
                       className="p-1 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded disabled:opacity-50 transition"
                     >
@@ -498,6 +519,7 @@ export function HeaderEditor({
                     </button>
                     <button
                       onClick={() => deleteNavItem(item.id)}
+                      aria-label={`Delete ${item.label}`}
                       className="p-1 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition"
                     >
                       <Trash2 className="h-4 w-4" />

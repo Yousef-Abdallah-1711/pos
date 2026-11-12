@@ -36,7 +36,10 @@ interface EnhancedErrorBoundaryState {
   errorInfo: ErrorInfo | null
   showDetails: boolean
   retryCount: number
+  errorReferenceId: string | null
 }
+
+let nextErrorReferenceId = 0
 
 /**
  * Enhanced Error Boundary Component
@@ -62,11 +65,12 @@ export class EnhancedErrorBoundary extends React.Component<
       errorInfo: null,
       showDetails: false,
       retryCount: 0,
+      errorReferenceId: null,
     }
   }
 
   static getDerivedStateFromError(error: Error): Partial<EnhancedErrorBoundaryState> {
-    return { hasError: true }
+    return { hasError: true, error }
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
@@ -80,7 +84,8 @@ export class EnhancedErrorBoundary extends React.Component<
     this.setState({
       error,
       errorInfo,
-      showDetails: process.env.NODE_ENV === 'development',
+      showDetails: false,
+      errorReferenceId: `${Date.now()}-${++nextErrorReferenceId}`,
     })
 
     // Call optional error callback
@@ -89,7 +94,7 @@ export class EnhancedErrorBoundary extends React.Component<
     }
 
     // Log to console in development
-    if (process.env.NODE_ENV === 'development') {
+    if (process.env.NODE_ENV !== 'production') {
       debugError('🔴 [ErrorBoundary] Caught error:', error)
       debugError('🔴 [ErrorBoundary] Error info:', errorInfo)
     }
@@ -99,6 +104,7 @@ export class EnhancedErrorBoundary extends React.Component<
     const newRetryCount = this.state.retryCount + 1
 
     if (newRetryCount >= this.MAX_RETRIES) {
+      this.setState({ retryCount: this.MAX_RETRIES })
       alert(
         'Maximum retry attempts reached. Please refresh the page or contact support.'
       )
@@ -111,6 +117,7 @@ export class EnhancedErrorBoundary extends React.Component<
       errorInfo: null,
       showDetails: false,
       retryCount: newRetryCount,
+      errorReferenceId: null,
     })
   }
 
@@ -124,7 +131,7 @@ export class EnhancedErrorBoundary extends React.Component<
     // Clear session/auth data
     localStorage.removeItem('authToken')
     sessionStorage.clear()
-    window.location.href = '/login'
+    location.assign('/login')
   }
 
   render() {
@@ -153,7 +160,7 @@ export class EnhancedErrorBoundary extends React.Component<
               {/* Header */}
               <div className="bg-gradient-to-r from-red-500 to-red-600 dark:from-red-600 dark:to-red-700 px-6 py-4">
                 <div className="flex items-start gap-3">
-                  <AlertTriangle className="h-6 w-6 text-white flex-shrink-0 mt-0.5" />
+                  <AlertTriangle aria-hidden="true" className="h-6 w-6 text-white flex-shrink-0 mt-0.5" />
                   <div>
                     <h1 className="text-2xl font-bold text-white">
                       Something Went Wrong
@@ -177,7 +184,7 @@ export class EnhancedErrorBoundary extends React.Component<
                 {/* Advice */}
                 <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
                   <div className="flex gap-3">
-                    <Brain className="h-5 w-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
+                    <Brain aria-hidden="true" className="h-5 w-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
                     <div>
                       <p className="text-sm font-medium text-blue-900 dark:text-blue-100">
                         What happened?
@@ -222,13 +229,14 @@ export class EnhancedErrorBoundary extends React.Component<
                 )}
 
                 {/* Error Details (Development Only) */}
-                {process.env.NODE_ENV === 'development' && this.state.errorInfo && (
+                {process.env.NODE_ENV !== 'production' && this.state.errorInfo && (
                   <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
                     <button
                       onClick={this.handleShowDetails}
                       className="flex items-center gap-2 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition"
                     >
                       <ChevronDown
+                        aria-hidden="true"
                         className={`h-4 w-4 transition-transform ${
                           this.state.showDetails ? 'rotate-180' : ''
                         }`}
@@ -265,9 +273,10 @@ export class EnhancedErrorBoundary extends React.Component<
                   <button
                     onClick={this.handleRetry}
                     disabled={this.state.retryCount >= this.MAX_RETRIES}
+                    aria-label="Retry rendering the page"
                     className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-primary-600 hover:bg-primary-700 disabled:bg-gray-300 disabled:cursor-not-allowed dark:bg-primary-500 dark:hover:bg-primary-600 text-white rounded-lg font-medium transition"
                   >
-                    <RotateCcw className="h-4 w-4" />
+                    <RotateCcw aria-hidden="true" className="h-4 w-4" />
                     Try Again
                     {this.state.retryCount > 0 && (
                       <span className="text-xs">({this.state.retryCount}/{this.MAX_RETRIES})</span>
@@ -275,7 +284,8 @@ export class EnhancedErrorBoundary extends React.Component<
                   </button>
 
                   <button
-                    onClick={() => (window.location.href = '/en/dashboard')}
+                    onClick={() => location.assign('/en/dashboard')}
+                    aria-label="Navigate to dashboard"
                     className="flex-1 px-4 py-2 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-900 dark:text-white rounded-lg font-medium transition"
                   >
                     Go to Dashboard
@@ -283,9 +293,10 @@ export class EnhancedErrorBoundary extends React.Component<
 
                   <button
                     onClick={this.handleLogOut}
+                    aria-label="Log out"
                     className="px-4 py-2 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-900 dark:text-white rounded-lg font-medium transition flex items-center gap-2"
                   >
-                    <LogOut className="h-4 w-4" />
+                    <LogOut aria-hidden="true" className="h-4 w-4" />
                     Log Out
                   </button>
                 </div>
@@ -311,7 +322,7 @@ export class EnhancedErrorBoundary extends React.Component<
               <p className="text-xs text-gray-600 dark:text-gray-400">
                 <span className="font-medium">Error Reference ID:</span>{' '}
                 <code className="text-gray-500 dark:text-gray-500">
-                  {Date.now()}
+                  {this.state.errorReferenceId}
                 </code>
               </p>
             </div>

@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import { COOKIE_SESSION_TOKEN } from '@/stores/authStore'
+import { COOKIE_SESSION_MARKER } from '@/stores/authStore'
 
 describe('auth session helpers', () => {
   afterEach(() => {
@@ -12,7 +12,7 @@ describe('auth session helpers', () => {
     const { hasAuthenticatedSession } = await import('@/lib/authSession')
 
     expect(hasAuthenticatedSession({ id: 1 }, null)).toBe(true)
-    expect(hasAuthenticatedSession(null, COOKIE_SESSION_TOKEN)).toBe(true)
+    expect(hasAuthenticatedSession(null, COOKIE_SESSION_MARKER)).toBe(true)
     expect(hasAuthenticatedSession(null, null)).toBe(false)
   })
 
@@ -20,7 +20,7 @@ describe('auth session helpers', () => {
     const { hasUsableBearerToken } = await import('@/lib/authSession')
 
     expect(hasUsableBearerToken('real-token')).toBe(true)
-    expect(hasUsableBearerToken(COOKIE_SESSION_TOKEN)).toBe(false)
+    expect(hasUsableBearerToken(COOKIE_SESSION_MARKER)).toBe(false)
     expect(hasUsableBearerToken(null)).toBe(false)
   })
 

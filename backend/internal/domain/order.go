@@ -22,6 +22,9 @@ type Order struct {
 	CustomerName  string `json:"customer_name"`
 	CustomerEmail string `json:"customer_email,omitempty"`
 	CustomerPhone string `json:"customer_phone"`
+	// TrackingToken is the raw public access token. It is only populated on the response of
+	// order creation (the database stores its hash) and is never loaded from the database.
+	TrackingToken string `json:"tracking_token,omitempty"`
 
 	// Delivery Information
 	DeliveryAddress      string  `json:"delivery_address,omitempty"`

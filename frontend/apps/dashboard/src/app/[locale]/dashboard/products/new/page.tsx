@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { useAuthStore } from '@/stores/authStore'
-import { useUserPermissions } from '@/hooks/useRbac'
+import { useHasPermission } from '@/hooks/useRbac'
 import { api } from '@/lib/api'
 import { apiCache } from '@/lib/apiCache'
 import { toast } from 'sonner'
@@ -14,13 +14,7 @@ import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbSeparator, Breadc
 import { FormSkeleton } from '@/components/skeletons'
 import { Lock } from 'lucide-react'
 import { debugError } from '@/lib/debug'
-import { hasAuthenticatedSession } from '@/lib/authSession'
-
-interface Category {
-  id: number
-  name: string
-  [key: string]: any
-}
+import type { ProductCategory as Category } from '@/components/products/product-types'
 
 export default function CreateProductPage() {
   const router = useRouter()
@@ -29,14 +23,15 @@ export default function CreateProductPage() {
   const t = createTranslator(locale)
 
   // Check RBAC permissions for Products module
-  const { checkPermission, loading: permissionLoading } = useUserPermissions()
-  const canCreateProducts = checkPermission(MODULE_IDS.PRODUCTS, PERMISSION_LEVELS.WRITE)
+  const canCreateProductsPermission = useHasPermission(
+    MODULE_IDS.PRODUCTS,
+    PERMISSION_LEVELS.WRITE,
+  )
+  const canCreateProducts = canCreateProductsPermission.loading || canCreateProductsPermission.hasPermission
 
   const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(true)
-  const user = useAuthStore((state) => state.user)
   const token = useAuthStore((state) => state.token)
-  const hasSession = hasAuthenticatedSession(user, token)
 
   // Fetch categories with caching
   useEffect(() => {
@@ -65,15 +60,10 @@ export default function CreateProductPage() {
       }
     }
 
-    if (hasSession && canCreateProducts && !permissionLoading) {
+    if (token) {
       fetchCategories()
-      return
     }
-
-    if (!permissionLoading) {
-      setLoading(false)
-    }
-  }, [hasSession, canCreateProducts, permissionLoading])
+  }, [token])
 
   const handleCreateProduct = async (formData: any) => {
     try {
@@ -99,14 +89,6 @@ export default function CreateProductPage() {
     { href: `/${locale}/dashboard/products`, label: t('products.title') },
     { label: t('products.createNewProduct') }
   ]
-
-  if (permissionLoading) {
-    return (
-      <div className="space-y-6">
-        <FormSkeleton />
-      </div>
-    )
-  }
 
   // Show permission denied if user can't create products
   if (!canCreateProducts) {

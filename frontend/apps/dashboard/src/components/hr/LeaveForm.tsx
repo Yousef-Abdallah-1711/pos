@@ -11,6 +11,7 @@ import { debugLog as debugLogFn, debugError } from '@/lib/debug'
 import { AlertCircle, Loader } from 'lucide-react'
 import { api } from '@/lib/api'
 import { createTranslator, getLocaleFromPath } from '@/lib/translations'
+import { errorText } from '@/lib/form-errors'
 
 interface LeaveFormProps {
   leave?: any
@@ -169,7 +170,7 @@ export function LeaveForm({ leave, employees = [], onSubmit, onCancel }: LeaveFo
           {errors.employee_id && (
             <span className="text-red-500 text-sm flex items-center gap-1">
               <AlertCircle className="h-4 w-4" />
-              {errors.employee_id.message}
+              {errorText(errors.employee_id)}
             </span>
           )}
         </div>
@@ -207,7 +208,7 @@ export function LeaveForm({ leave, employees = [], onSubmit, onCancel }: LeaveFo
           {errors.start_date && (
             <span className="text-red-500 text-sm flex items-center gap-1">
               <AlertCircle className="h-4 w-4" />
-              {errors.start_date.message}
+              {errorText(errors.start_date)}
             </span>
           )}
         </div>
@@ -225,7 +226,7 @@ export function LeaveForm({ leave, employees = [], onSubmit, onCancel }: LeaveFo
           {errors.end_date && (
             <span className="text-red-500 text-sm flex items-center gap-1">
               <AlertCircle className="h-4 w-4" />
-              {errors.end_date.message}
+              {errorText(errors.end_date)}
             </span>
           )}
         </div>
@@ -267,7 +268,7 @@ export function LeaveForm({ leave, employees = [], onSubmit, onCancel }: LeaveFo
         {errors.reason && (
           <span className="text-red-500 text-sm flex items-center gap-1">
             <AlertCircle className="h-4 w-4" />
-            {errors.reason.message}
+            {errorText(errors.reason)}
           </span>
         )}
       </div>
