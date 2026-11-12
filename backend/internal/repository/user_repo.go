@@ -21,8 +21,8 @@ func NewUserRepository(db *sql.DB) *UserRepository {
 }
 
 // GetByID retrieves a user by their ID
-func (r *UserRepository) GetByID(ctx context.Context, userID int) (*domain.User, error) {
-	log.Printf("[UserRepository] GetByID: %d\n", userID)
+func (r *UserRepository) GetByID(ctx context.Context, userID, tenantID, restaurantID int) (*domain.User, error) {
+	log.Printf("[UserRepository] GetByID: %d (tenant %d, restaurant %d)\n", userID, tenantID, restaurantID)
 
 	var user domain.User
 	var avatarURL sql.NullString
@@ -30,8 +30,9 @@ func (r *UserRepository) GetByID(ctx context.Context, userID int) (*domain.User,
 	err := r.db.QueryRowContext(ctx, `
 		SELECT id, tenant_id, restaurant_id, email, password_hash, name, phone, avatar_url, role, status, created_at, updated_at
 		FROM users
-		WHERE id = $1
-	`, userID).Scan(
+		WHERE id = $1 AND tenant_id = $2
+		  AND (restaurant_id = $3 OR restaurant_id IS NULL)
+	`, userID, tenantID, restaurantID).Scan(
 		&user.ID, &user.TenantID, &user.RestaurantID, &user.Email, &user.PasswordHash,
 		&user.Name, &user.Phone, &avatarURL, &user.Role, &user.Status,
 		&user.CreatedAt, &user.UpdatedAt,
@@ -56,14 +57,15 @@ func (r *UserRepository) GetByID(ctx context.Context, userID int) (*domain.User,
 }
 
 // UpdatePassword updates a user's password hash
-func (r *UserRepository) UpdatePassword(ctx context.Context, userID int, hashedPassword string) error {
-	log.Printf("[UserRepository] UpdatePassword for user %d\n", userID)
+func (r *UserRepository) UpdatePassword(ctx context.Context, userID, tenantID, restaurantID int, hashedPassword string) error {
+	log.Printf("[UserRepository] UpdatePassword for user %d in tenant %d\n", userID, tenantID)
 
 	result, err := r.db.ExecContext(ctx, `
 		UPDATE users
 		SET password_hash = $1, updated_at = NOW()
-		WHERE id = $2
-	`, hashedPassword, userID)
+		WHERE id = $2 AND tenant_id = $3
+		  AND (restaurant_id = $4 OR restaurant_id IS NULL)
+	`, hashedPassword, userID, tenantID, restaurantID)
 
 	if err != nil {
 		log.Printf("[UserRepository] ERROR: Failed to update password: %v\n", err)
@@ -86,18 +88,18 @@ func (r *UserRepository) UpdatePassword(ctx context.Context, userID int, hashedP
 }
 
 // UpdateProfile updates a user's profile information (name and avatar_url)
-func (r *UserRepository) UpdateProfile(ctx context.Context, userID int, name string, avatarURL *string) error {
-	log.Printf("[UserRepository] UpdateProfile for user %d\n", userID)
+func (r *UserRepository) UpdateProfile(ctx context.Context, userID, tenantID, restaurantID int, name string, avatarURL *string) error {
+	log.Printf("[UserRepository] UpdateProfile for user %d in tenant %d\n", userID, tenantID)
 
 	var query string
 	var args []interface{}
 
 	if avatarURL != nil {
-		query = `UPDATE users SET name = $1, avatar_url = $2, updated_at = NOW() WHERE id = $3`
-		args = []interface{}{name, *avatarURL, userID}
+		query = `UPDATE users SET name = $1, avatar_url = $2, updated_at = NOW() WHERE id = $3 AND tenant_id = $4 AND (restaurant_id = $5 OR restaurant_id IS NULL)`
+		args = []interface{}{name, *avatarURL, userID, tenantID, restaurantID}
 	} else {
-		query = `UPDATE users SET name = $1, updated_at = NOW() WHERE id = $2`
-		args = []interface{}{name, userID}
+		query = `UPDATE users SET name = $1, updated_at = NOW() WHERE id = $2 AND tenant_id = $3 AND (restaurant_id = $4 OR restaurant_id IS NULL)`
+		args = []interface{}{name, userID, tenantID, restaurantID}
 	}
 
 	result, err := r.db.ExecContext(ctx, query, args...)

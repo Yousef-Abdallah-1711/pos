@@ -1,6 +1,7 @@
 package usecase
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"mime/multipart"
@@ -319,24 +320,23 @@ func (uc *ProductUseCase) uploadProductImage(productID int, fileHeader *multipar
 }
 
 // ListPublicMenu returns public menu
-func (uc *ProductUseCase) ListPublicMenu(ctx interface{}, restaurantID int, lang string) ([]domain.Product, error) {
-	// ctx ignored for now as repo doesn't use it, but good practice
-	return uc.repo.ListPublic(0, restaurantID, lang) // tenantID 0 as filtering by restaurantID is enough usually
+func (uc *ProductUseCase) ListPublicMenu(ctx context.Context, tenantID, restaurantID int, lang string) ([]domain.Product, error) {
+	return uc.repo.ListPublic(tenantID, restaurantID, lang)
 }
 
 // ListByCategoryPublic returns products for category
-func (uc *ProductUseCase) ListByCategoryPublic(ctx interface{}, restaurantID, categoryID int, lang string) ([]domain.Product, error) {
-	return uc.repo.ListByCategoryPublic(0, restaurantID, categoryID, lang)
+func (uc *ProductUseCase) ListByCategoryPublic(ctx context.Context, tenantID, restaurantID, categoryID int, lang string) ([]domain.Product, error) {
+	return uc.repo.ListByCategoryPublic(tenantID, restaurantID, categoryID, lang)
 }
 
 // SearchPublic searches products
-func (uc *ProductUseCase) SearchPublic(ctx interface{}, restaurantID int, query string, lang string) ([]domain.Product, error) {
-	return uc.repo.SearchPublic(0, restaurantID, query, lang)
+func (uc *ProductUseCase) SearchPublic(ctx context.Context, tenantID, restaurantID int, query string, lang string) ([]domain.Product, error) {
+	return uc.repo.SearchPublic(tenantID, restaurantID, query, lang)
 }
 
 // GetProductImages returns images
-func (uc *ProductUseCase) GetProductImages(ctx interface{}, productID int) ([]domain.ProductImage, error) {
-	return uc.repo.GetProductImages(productID)
+func (uc *ProductUseCase) GetProductImages(ctx context.Context, tenantID, restaurantID, productID int) ([]domain.ProductImage, error) {
+	return uc.repo.GetProductImages(tenantID, restaurantID, productID)
 }
 
 // GetLowStockAlerts retrieves products with low stock

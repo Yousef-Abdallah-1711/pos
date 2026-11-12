@@ -627,7 +627,7 @@ func main() {
 		// Apply middleware in REVERSE order of execution
 		// Auth must execute FIRST to set claims in context, then Tenant can read them
 		// The last middleware applied is the outermost and executes first
-		wrapped := tenantContext(next)        // This will be innermost (execute 2nd)
+		wrapped := tenantContext(next)                                                             // This will be innermost (execute 2nd)
 		wrapped = middleware.AuthMiddleware(tokenService, impersonationAuthenticators...)(wrapped) // This will be outermost (execute 1st)
 		return wrapped
 	}
@@ -635,9 +635,9 @@ func main() {
 	// Helper function to wrap handlers with auth, tenant, and subscription status middleware
 	wrapProtectedWithStatus := func(next http.Handler) http.Handler {
 		// Apply middleware in REVERSE order of execution
-		wrapped := middleware.TenantStatusMiddleware(subscriptionRepo)(next) // innermost (execute 3rd)
-		wrapped = tenantContext(wrapped)                // execute 2nd
-		wrapped = middleware.AuthMiddleware(tokenService, impersonationAuthenticators...)(wrapped)           // outermost (execute 1st)
+		wrapped := middleware.TenantStatusMiddleware(subscriptionRepo)(next)                       // innermost (execute 3rd)
+		wrapped = tenantContext(wrapped)                                                           // execute 2nd
+		wrapped = middleware.AuthMiddleware(tokenService, impersonationAuthenticators...)(wrapped) // outermost (execute 1st)
 		return wrapped
 	}
 
@@ -674,7 +674,7 @@ func main() {
 		wrapped := requirePermission(moduleID, permissionLevel)(next) // innermost
 		wrapped = statusGuard(wrapped)                                // blocked tenants stop here
 		// 		wrapped = middleware.PermissionMiddleware(permissionUC)(wrapped)                       // permission check
-		wrapped = tenantContext(wrapped)      // tenant context
+		wrapped = tenantContext(wrapped)                                                           // tenant context
 		wrapped = middleware.AuthMiddleware(tokenService, impersonationAuthenticators...)(wrapped) // outermost (auth first)
 		return wrapped
 	}
@@ -1247,7 +1247,7 @@ func main() {
 			if rbacRoleRepo != nil && userRoleRepo != nil && roleRestaurantID > 0 {
 				role, err := rbacRoleRepo.GetByCode(r.Context(), tenantID, roleRestaurantID, "EMPLOYEE")
 				if err == nil && role != nil {
-					_ = userRoleRepo.Assign(r.Context(), tenantID, int64(user.ID), role.ID, assignedBy)
+					_ = userRoleRepo.Assign(r.Context(), tenantID, roleRestaurantID, int64(user.ID), role.ID, assignedBy)
 				}
 			}
 

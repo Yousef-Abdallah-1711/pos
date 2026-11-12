@@ -81,7 +81,7 @@ func (h *RBACPermissionHandler) AssignPermission(w http.ResponseWriter, r *http.
 		return
 	}
 
-	if err := h.rolePermissionRepo.Assign(r.Context(), int64(claims.TenantID), roleID, moduleID, level); err != nil {
+	if err := h.rolePermissionRepo.Assign(r.Context(), int64(claims.TenantID), int64(claims.RestaurantID), roleID, moduleID, level); err != nil {
 		respondError(w, http.StatusInternalServerError, "Failed to assign permission")
 		return
 	}
@@ -110,7 +110,7 @@ func (h *RBACPermissionHandler) RevokePermission(w http.ResponseWriter, r *http.
 		return
 	}
 
-	if err := h.rolePermissionRepo.Revoke(r.Context(), roleID, moduleID); err != nil {
+	if err := h.rolePermissionRepo.Revoke(r.Context(), int64(claims.TenantID), int64(claims.RestaurantID), roleID, moduleID); err != nil {
 		respondError(w, http.StatusNotFound, err.Error())
 		return
 	}
@@ -133,7 +133,7 @@ func (h *RBACPermissionHandler) GetRolePermissions(w http.ResponseWriter, r *htt
 		return
 	}
 
-	perms, err := h.rolePermissionRepo.GetByRoleAndTenant(r.Context(), int64(claims.TenantID), roleID)
+	perms, err := h.rolePermissionRepo.GetByRoleAndTenant(r.Context(), int64(claims.TenantID), int64(claims.RestaurantID), roleID)
 	if err != nil {
 		respondError(w, http.StatusInternalServerError, err.Error())
 		return
@@ -179,7 +179,7 @@ func (h *RBACPermissionHandler) CheckPermission(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	userRoles, err := h.userRoleRepo.GetUserRoles(r.Context(), int64(claims.UserID), int64(claims.TenantID))
+	userRoles, err := h.userRoleRepo.GetUserRoles(r.Context(), int64(claims.UserID), int64(claims.TenantID), int64(claims.RestaurantID))
 	if err != nil {
 		respondError(w, http.StatusInternalServerError, "Failed to check permissions")
 		return
@@ -187,7 +187,7 @@ func (h *RBACPermissionHandler) CheckPermission(w http.ResponseWriter, r *http.R
 
 	highest := domain.PermissionNone
 	for _, role := range userRoles {
-		roleLevel, err := h.rolePermissionRepo.GetByRoleAndModule(r.Context(), int64(role.ID), moduleID)
+		roleLevel, err := h.rolePermissionRepo.GetByRoleAndModule(r.Context(), int64(claims.TenantID), int64(claims.RestaurantID), int64(role.ID), moduleID)
 		if err != nil {
 			respondError(w, http.StatusInternalServerError, "Failed to check permissions")
 			return
@@ -215,7 +215,7 @@ func (h *RBACPermissionHandler) GetUserPermissions(w http.ResponseWriter, r *htt
 		return
 	}
 
-	userRoles, err := h.userRoleRepo.GetUserRoles(r.Context(), int64(claims.UserID), int64(claims.TenantID))
+	userRoles, err := h.userRoleRepo.GetUserRoles(r.Context(), int64(claims.UserID), int64(claims.TenantID), int64(claims.RestaurantID))
 	if err != nil {
 		respondError(w, http.StatusInternalServerError, "Failed to load permissions")
 		return
@@ -223,7 +223,7 @@ func (h *RBACPermissionHandler) GetUserPermissions(w http.ResponseWriter, r *htt
 
 	permissions := map[int64]string{}
 	for _, role := range userRoles {
-		rolePerms, err := h.rolePermissionRepo.GetByRoleAndTenant(r.Context(), int64(claims.TenantID), int64(role.ID))
+		rolePerms, err := h.rolePermissionRepo.GetByRoleAndTenant(r.Context(), int64(claims.TenantID), int64(claims.RestaurantID), int64(role.ID))
 		if err != nil {
 			respondError(w, http.StatusInternalServerError, "Failed to load permissions")
 			return

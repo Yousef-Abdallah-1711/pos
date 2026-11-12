@@ -85,7 +85,7 @@ func TestAdminOrderHandler_UpdatePaymentStatusPaidTriggersAccountingAutoPosting(
 		)
 
 	mock.ExpectQuery(`FROM order_items`).
-		WithArgs(orderID).
+		WithArgs(int64(1), int64(2), orderID).
 		WillReturnRows(
 			sqlmock.NewRows(orderItemColumnsForAccountingTests()).
 				AddRow(

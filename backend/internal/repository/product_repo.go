@@ -34,12 +34,15 @@ func (r *ProductRepository) CreateProduct(product *domain.Product) (*domain.Prod
 			track_inventory, quantity_in_stock, low_stock_threshold, reorder_quantity,
 			display_order, featured, main_image_url, status, created_by,
 			name
-		) VALUES (
+		)
+		SELECT
 			$1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15,
 			$16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28,
-			$29, $30, $31, $32, $33, $34, $35, $36,
-			$37
-		)
+			$29, $30, $31, $32, $33, $34, $35, $36, $37
+		WHERE EXISTS (SELECT 1 FROM restaurants WHERE id = $2 AND tenant_id = $1)
+		  AND ($3::integer IS NULL OR EXISTS (
+			SELECT 1 FROM categories WHERE id = $3 AND tenant_id = $1 AND restaurant_id = $2
+		  ))
 		RETURNING id, created_at, updated_at
 	`
 
@@ -129,6 +132,9 @@ func (r *ProductRepository) CreateProduct(product *domain.Product) (*domain.Prod
 
 	if err != nil {
 		fmt.Printf("ERROR: INSERT failed: %v\n", err)
+		if err == sql.ErrNoRows {
+			return nil, errors.New("restaurant or category not found in the requested scope")
+		}
 		if strings.Contains(err.Error(), "duplicate key") {
 			return nil, errors.New("product with this SKU already exists")
 		}
@@ -180,16 +186,8 @@ func (r *ProductRepository) GetProductByID(tenantID, restaurantID, productID int
 	}
 
 	if err == sql.ErrNoRows {
-		// DIAGNOSTIC START
-		var realTenant, realRestaurant int
-		diagErr := r.db.QueryRow("SELECT tenant_id, restaurant_id FROM products WHERE id = $1", productID).Scan(&realTenant, &realRestaurant)
-		if diagErr == nil {
-			fmt.Printf("DEBUG: Product %d FOUND but scope mismatch. DB has Tenant=%d, Rest=%d. Requested Tenant=%d, Rest=%d\n",
-				productID, realTenant, realRestaurant, tenantID, restaurantID)
-		} else {
-			fmt.Printf("DEBUG: Product %d NOT FOUND at all in DB (or scan failed: %v)\n", productID, diagErr)
-		}
-		// DIAGNOSTIC END
+		// Do not follow a scoped miss with an ID-only lookup: it would reveal
+		// whether another tenant owns the requested product.
 		return nil, errors.New("product not found")
 	}
 	if err != nil {
@@ -370,7 +368,10 @@ func (r *ProductRepository) UpdateProduct(product *domain.Product) (*domain.Prod
 			is_gluten_free = $17,
 			updated_by = $18,
 			updated_at = CURRENT_TIMESTAMP
-		WHERE id = $19 AND tenant_id = $20
+		WHERE id = $19 AND tenant_id = $20 AND restaurant_id = $21
+		  AND ($22::integer IS NULL OR EXISTS (
+			SELECT 1 FROM categories WHERE id = $22 AND tenant_id = $20 AND restaurant_id = $21
+		  ))
 		RETURNING updated_at
 	`
 
@@ -397,6 +398,8 @@ func (r *ProductRepository) UpdateProduct(product *domain.Product) (*domain.Prod
 		product.UpdatedBy,
 		product.ID,
 		product.TenantID,
+		product.RestaurantID,
+		categoryID,
 	).Scan(&product.UpdatedAt)
 	if err == sql.ErrNoRows {
 		return nil, errors.New("product not found")
@@ -450,13 +453,13 @@ func (r *ProductRepository) ListPublic(tenantID, restaurantID int, lang string) 
 			main_image_url, featured, status,
 			created_at
 		FROM products
-		WHERE restaurant_id = $1
+		WHERE tenant_id = $1 AND restaurant_id = $2
 		  AND status = 'active'
 		  AND is_available = true
 		ORDER BY display_order ASC, featured DESC, created_at DESC
 	`
 
-	rows, err := r.db.Query(query, restaurantID)
+	rows, err := r.db.Query(query, tenantID, restaurantID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to list public products: %w", err)
 	}
@@ -506,13 +509,13 @@ func (r *ProductRepository) ListByCategoryPublic(tenantID, restaurantID, categor
 			main_image_url, featured, status,
 			created_at
 		FROM products
-		WHERE restaurant_id = $1 AND category_id = $2
+		WHERE tenant_id = $1 AND restaurant_id = $2 AND category_id = $3
 		  AND status = 'active'
 		  AND is_available = true
 		ORDER BY display_order ASC
 	`
 
-	rows, err := r.db.Query(query, restaurantID, categoryID)
+	rows, err := r.db.Query(query, tenantID, restaurantID, categoryID)
 	if err != nil {
 		return nil, err
 	}
@@ -561,13 +564,13 @@ func (r *ProductRepository) SearchPublic(tenantID, restaurantID int, queryStr st
 			main_image_url, featured, status,
 			created_at
 		FROM products
-		WHERE restaurant_id = $1
+		WHERE tenant_id = $1 AND restaurant_id = $2
 		  AND status = 'active'
 		  AND is_available = true
-          AND (name_en ILIKE $2 OR name_ar ILIKE $2 OR description_en ILIKE $2)
+		  AND (name_en ILIKE $3 OR name_ar ILIKE $3 OR description_en ILIKE $3)
 		ORDER BY display_order ASC
 	`
-	rows, err := r.db.Query(query, restaurantID, searchTerm)
+	rows, err := r.db.Query(query, tenantID, restaurantID, searchTerm)
 	if err != nil {
 		return nil, err
 	}
@@ -602,9 +605,13 @@ func (r *ProductRepository) SearchPublic(tenantID, restaurantID int, queryStr st
 }
 
 // GetProductImages returns images
-func (r *ProductRepository) GetProductImages(productID int) ([]domain.ProductImage, error) {
-	query := `SELECT id, product_id, image_url, alt_text_en, alt_text_ar, is_primary, display_order FROM product_images WHERE product_id = $1 ORDER BY display_order`
-	rows, err := r.db.Query(query, productID)
+func (r *ProductRepository) GetProductImages(tenantID, restaurantID, productID int) ([]domain.ProductImage, error) {
+	query := `SELECT pi.id, pi.product_id, pi.image_url, pi.alt_text_en, pi.alt_text_ar, pi.is_primary, pi.display_order
+		FROM product_images pi
+		JOIN products p ON p.id = pi.product_id
+		WHERE pi.product_id = $1 AND p.tenant_id = $2 AND p.restaurant_id = $3
+		ORDER BY pi.display_order`
+	rows, err := r.db.Query(query, productID, tenantID, restaurantID)
 	if err != nil {
 		return nil, err
 	}

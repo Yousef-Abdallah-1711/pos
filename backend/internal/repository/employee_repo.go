@@ -2,6 +2,7 @@ package repository
 
 import (
 	"database/sql"
+	"errors"
 	"log"
 	"pos-saas/internal/domain"
 )
@@ -225,11 +226,15 @@ func (r *EmployeeRepository) CreateEmployee(employee *domain.Employee) (int, err
 			working_hours_per_week, shift_type, emergency_contact_name,
 			emergency_contact_phone, emergency_contact_relationship,
 			profile_image_url, documents, notes, is_active, created_by
-		) VALUES (
+		) SELECT
 			$1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15,
 			$16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28,
 			$29, $30, $31, $32, $33, $34, $35, $36
-		)
+		WHERE EXISTS (SELECT 1 FROM restaurants r WHERE r.id = $2 AND r.tenant_id = $1)
+		  AND ($23::integer IS NULL OR EXISTS (
+			SELECT 1 FROM employees manager
+			WHERE manager.id = $23 AND manager.tenant_id = $1 AND manager.restaurant_id = $2
+		  ))
 		RETURNING id
 	`
 
@@ -297,9 +302,13 @@ func (r *EmployeeRepository) UpdateEmployee(employee *domain.Employee) error {
 			documents = $29, notes = $30, is_active = $31, updated_by = $32,
 			updated_at = CURRENT_TIMESTAMP
 		WHERE id = $33 AND tenant_id = $34 AND restaurant_id = $35
+		  AND ($19::integer IS NULL OR EXISTS (
+			SELECT 1 FROM employees manager
+			WHERE manager.id = $19 AND manager.tenant_id = $34 AND manager.restaurant_id = $35
+		  ))
 	`
 
-	_, err := r.db.Exec(
+	result, err := r.db.Exec(
 		query,
 		employee.FirstName, employee.LastName, employee.FirstNameAr, employee.LastNameAr,
 		employee.Email, employee.Phone, employee.DateOfBirth, employee.Gender, employee.NationalID,
@@ -313,7 +322,17 @@ func (r *EmployeeRepository) UpdateEmployee(employee *domain.Employee) error {
 		employee.ID, employee.TenantID, employee.RestaurantID,
 	)
 
-	return err
+	if err != nil {
+		return err
+	}
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rowsAffected == 0 {
+		return errors.New("employee not found or manager is outside scope")
+	}
+	return nil
 }
 
 // DeleteEmployee soft deletes an employee

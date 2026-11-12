@@ -30,10 +30,16 @@ func (r *OrderRepository) CreateOrder(order *domain.Order) (*domain.Order, error
 			delivery_instructions, subtotal, tax_amount, discount_amount,
 			delivery_fee, total_amount, payment_method, payment_status,
 			status, estimated_delivery_time, notes, order_source, table_id
-		) VALUES (
-			$1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15,
-			$16, $17, $18, $19, $20, $21, $22, $23, $24, $25
+		) SELECT
+			$1::bigint, $2::bigint, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15,
+			$16, $17, $18, $19, $20, $21, $22, $23, $24, $25::bigint
+		WHERE EXISTS (
+			SELECT 1 FROM restaurants WHERE id = $2::bigint AND tenant_id = $1::bigint
 		)
+		AND ($25::bigint IS NULL OR EXISTS (
+			SELECT 1 FROM restaurant_tables
+			WHERE id = $25::bigint AND tenant_id = $1::bigint AND restaurant_id = $2::bigint
+		))
 		RETURNING id, created_at, updated_at
 	`
 
@@ -222,7 +228,7 @@ func (r *OrderRepository) GetOrderByID(tenantID, restaurantID, orderID int64) (*
 	}
 
 	// Get order items
-	items, err := r.GetOrderItems(tenantID, orderID)
+	items, err := r.GetOrderItems(tenantID, restaurantID, orderID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get order items: %w", err)
 	}
@@ -634,8 +640,14 @@ func (r *OrderRepository) CreateOrderItem(tenantID, restaurantID int64, item *do
 			product_id, variant_id, product_name, variant_name,
 			quantity, unit_price, discount_amount, total_price,
 			special_instructions, addons
-		) VALUES (
-			$1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13
+		) SELECT
+			$1::bigint, $2::bigint, $3::bigint, $4::bigint, $5::bigint, $6, $7,
+			$8, $9, $10, $11, $12, $13
+		WHERE EXISTS (
+			SELECT 1 FROM orders WHERE id = $1::bigint AND tenant_id = $2::bigint AND restaurant_id = $3::bigint
+		)
+		AND EXISTS (
+			SELECT 1 FROM products WHERE id = $4::bigint AND tenant_id = $2::bigint AND restaurant_id = $3::bigint
 		)
 		RETURNING id, created_at, updated_at
 	`
@@ -690,18 +702,18 @@ func (r *OrderRepository) CreateOrderItem(tenantID, restaurantID int64, item *do
 }
 
 // GetOrderItems retrieves all items for an order
-func (r *OrderRepository) GetOrderItems(tenantID, orderID int64) ([]domain.OrderItem, error) {
+func (r *OrderRepository) GetOrderItems(tenantID, restaurantID, orderID int64) ([]domain.OrderItem, error) {
 	query := `
 		SELECT
 			id, order_id, product_id, variant_id, product_name, variant_name,
 			quantity, unit_price, discount_amount, total_price,
 			special_instructions, addons, created_at, updated_at
 		FROM order_items
-		WHERE order_id = $1
+		WHERE tenant_id = $1 AND restaurant_id = $2 AND order_id = $3
 		ORDER BY created_at ASC
 	`
 
-	rows, err := r.db.Query(query, orderID)
+	rows, err := r.db.Query(query, tenantID, restaurantID, orderID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get order items: %w", err)
 	}
@@ -753,17 +765,18 @@ func (r *OrderRepository) GetOrderItems(tenantID, orderID int64) ([]domain.Order
 }
 
 // GetOrderStatusHistory retrieves the status change history for an order
-func (r *OrderRepository) GetOrderStatusHistory(tenantID, orderID int64) ([]domain.OrderStatusHistory, error) {
+func (r *OrderRepository) GetOrderStatusHistory(tenantID, restaurantID, orderID int64) ([]domain.OrderStatusHistory, error) {
 	query := `
 		SELECT
-			id, order_id, old_status, new_status, changed_by,
-			change_reason, created_at
-		FROM order_status_history
-		WHERE order_id = $1
-		ORDER BY created_at DESC
+			h.id, h.order_id, h.old_status, h.new_status, h.changed_by,
+			h.change_reason, h.created_at
+		FROM order_status_history h
+		JOIN orders o ON o.id = h.order_id
+		WHERE o.tenant_id = $1 AND o.restaurant_id = $2 AND h.order_id = $3
+		ORDER BY h.created_at DESC
 	`
 
-	rows, err := r.db.Query(query, orderID)
+	rows, err := r.db.Query(query, tenantID, restaurantID, orderID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get order status history: %w", err)
 	}
@@ -902,7 +915,6 @@ func (r *OrderRepository) DeleteOrder(tenantID, restaurantID, orderID int64) err
 	// We prefer to cancel orders rather than delete them for audit trail
 	return r.CancelOrder(tenantID, restaurantID, orderID, "Deleted by admin")
 }
-
 
 // SetPublicTokenHash stores the hash of the public tracking token for an order.
 func (r *OrderRepository) SetPublicTokenHash(tenantID, restaurantID, orderID int64, hash string) error {

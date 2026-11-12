@@ -89,12 +89,16 @@ func (r *CustomerAccountRepository) CreateCustomer(customer *domain.CustomerAcco
 			customer_type, contact_person, email, phone, mobile, address, address_ar,
 			city, country, tax_number, payment_terms, credit_limit, current_balance,
 			currency, receivable_account_id, notes, is_active, created_by, updated_by
-		) VALUES (
+		) SELECT
 			$1, $2, $3, $4, $5,
 			$6, $7, $8, $9, $10, $11, $12,
 			$13, $14, $15, $16, $17, $18,
 			$19, $20, $21, $22, $23, $24
-		)
+		WHERE EXISTS (SELECT 1 FROM restaurants r WHERE r.id = $2 AND r.tenant_id = $1)
+		  AND ($20::integer IS NULL OR EXISTS (
+			SELECT 1 FROM chart_of_accounts a
+			WHERE a.id = $20 AND a.tenant_id = $1 AND a.restaurant_id = $2
+		  ))
 		RETURNING id
 	`,
 		customer.TenantID,
@@ -155,6 +159,10 @@ func (r *CustomerAccountRepository) UpdateCustomer(customer *domain.CustomerAcco
 			updated_by = $20,
 			updated_at = CURRENT_TIMESTAMP
 		WHERE id = $21 AND tenant_id = $22 AND restaurant_id = $23
+		  AND ($17::integer IS NULL OR EXISTS (
+			SELECT 1 FROM chart_of_accounts a
+			WHERE a.id = $17 AND a.tenant_id = $22 AND a.restaurant_id = $23
+		  ))
 	`,
 		customer.CustomerName,
 		customer.CustomerNameAr,
