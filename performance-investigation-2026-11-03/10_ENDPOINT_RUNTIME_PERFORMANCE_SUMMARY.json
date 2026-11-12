@@ -1,0 +1,15 @@
+{
+  "environment": "pos-p2a-ws05-e2e-20261103",
+  "endpoint": "GET /api/v1/health",
+  "n": 25,
+  "status": "200 (25/25)",
+  "response_bytes": 69,
+  "min_ms": 1.64,
+  "median_ms": 2.18,
+  "p75_ms": 2.46,
+  "p95_ms": 4.94,
+  "max_ms": 126.93,
+  "db_query_count": "not observable",
+  "redis_latency": "not applicable to handler",
+  "sensitive_body_stored": false
+}

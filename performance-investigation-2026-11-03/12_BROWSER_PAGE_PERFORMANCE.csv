@@ -1,0 +1,4 @@
+"application","route","scenario","sample","status","response_start_ms","dom_content_loaded_ms","load_ms","resource_count","resource_transfer_bytes","api_resource_count","cls","lcp","inp","environment","notes"
+"Landing","/en","first isolated-context navigation","1","COMPLETE","10259.4","11279.4","12100","12","2271411","0","0","not captured","not valid","development; WS05 E2E","Initial browser visit; not production-representative"
+"Landing","/en","repeat navigation","2","COMPLETE","2277.3","2377.9","3074.7","12","2222676","0","0","not captured","not valid","development; WS05 E2E","Same isolated context, repeated direct navigation"
+"Dashboard","/en/dashboard","direct anonymous navigation","1","BLOCKED","","","","","","","","not captured","not valid","development; WS05 E2E","Playwright tool timed out at 60s waiting for DOMContentLoaded; later URL was Landing /en/auth/login; no page timing retained"

@@ -1,0 +1,105 @@
+- generic [box=0,0,1583,1112]:
+  - generic [aria-hidden] [box=0,0,1583,1112]:
+    - generic [box=0,0,1583,1112]:
+      - complementary [box=0,0,256,1111]:
+        - generic [box=0,0,255,89]:
+          - link [box=16,16,187,56]:
+            - /url: /en/dashboard
+            - generic [box=55,16,148,56]: POS Dashboard
+          - button [box=207,28,32,32]
+        - generic [box=0,89,255,1022]:
+          - navigation [box=0,89,255,1022]:
+            - list [box=16,101,223,712]:
+              - listitem [box=16,101,223,48]
+              - listitem [box=16,157,223,48]
+              - listitem [box=16,213,223,48]
+              - listitem [box=16,269,223,48]
+              - listitem [box=16,325,223,48]
+              - listitem [box=16,381,223,72]
+              - listitem [box=16,461,223,48]
+              - listitem [box=16,517,223,48]
+              - listitem [box=16,573,223,72]
+              - listitem [box=16,653,223,48]
+              - listitem [box=16,709,223,48]
+              - listitem [box=16,765,223,48]
+      - generic [box=256,0,1327,1112]:
+        - banner [box=256,0,1327,65]:
+          - generic [box=280,0,1280,64]:
+            - generic [box=311,0,1216,64]:
+              - generic [box=961,6,567,52]
+        - main [box=256,65,1327,1047]:
+          - generic [box=280,65,1280,462]:
+            - generic [box=311,89,1216,414]:
+              - generic [box=311,89,1216,60]
+              - generic [box=311,173,1216,330]
+  - region "Notifications alt+T" [box=0,1112,1583,0]
+  - button "Open Next.js Dev Tools" [ref=f22e173] [cursor=pointer] [box=22,1057,32,32]
+  - alert [box=-1,1111,1,1]
+  - dialog "Create account" [ref=f22e178] [box=352,63,896,985]:
+    - heading "Create account" [level=2] [ref=f22e180] [box=377,88,847,18]
+    - generic [ref=f22e181] [box=377,122,847,902]:
+      - generic [ref=f22e182] [box=377,122,847,424]:
+        - generic [ref=f22e183] [box=377,122,415,72]:
+          - text: Account code
+          - textbox "e.g. 1100" [active] [ref=f22e184] [box=377,154,415,40]
+        - generic [ref=f22e185] [box=808,122,415,72]:
+          - text: Currency
+          - textbox "EGP" [ref=f22e186] [box=808,154,415,40]
+        - generic [ref=f22e187] [box=377,210,415,72]:
+          - text: Account name
+          - textbox "Cash on Hand" [ref=f22e188] [box=377,242,415,40]
+        - generic [ref=f22e189] [box=808,210,415,72]:
+          - text: Arabic name
+          - textbox "النقدية بالصندوق" [ref=f22e190] [box=808,242,415,40]
+        - generic [ref=f22e191] [box=377,298,415,72]:
+          - text: Account type
+          - combobox [ref=f22e192] [box=377,329,415,40]:
+            - option "Asset" [selected] [box=0,0,0,0]
+            - option "Liability" [box=0,0,0,0]
+            - option "Equity" [box=0,0,0,0]
+            - option "Revenue" [box=0,0,0,0]
+            - option "Expense" [box=0,0,0,0]
+        - generic [ref=f22e193] [box=808,298,415,72]:
+          - text: Subtype
+          - textbox "Current asset" [ref=f22e194] [box=808,329,415,40]
+        - generic [ref=f22e195] [box=377,385,415,72]:
+          - text: Normal balance
+          - combobox [ref=f22e196] [box=377,417,415,40]:
+            - option "Debit" [selected] [box=0,0,0,0]
+            - option "Credit" [box=0,0,0,0]
+        - generic [ref=f22e197] [box=808,385,415,72]:
+          - text: Parent account
+          - combobox [ref=f22e198] [box=808,417,415,40]:
+            - option "No parent" [selected] [box=0,0,0,0]
+        - generic [ref=f22e199] [box=377,473,415,72]:
+          - text: Tax rate (%)
+          - spinbutton "14" [ref=f22e200] [box=377,505,415,40]
+      - generic [ref=f22e201] [box=377,569,847,112]:
+        - text: Description
+        - textbox "Used for till cash, petty cash, or bank float." [ref=f22e202] [box=377,601,847,80]
+      - generic [ref=f22e203] [box=377,705,847,112]:
+        - text: Arabic description
+        - textbox "يستخدم للنقدية أو العهدة أو رصيد الصندوق." [ref=f22e204] [box=377,737,847,80]
+      - generic [ref=f22e205] [box=377,841,847,101]:
+        - generic [ref=f22e207] [box=393,858,238,68]:
+          - checkbox [ref=f22e208] [cursor=pointer] [box=393,862,16,16]
+          - checkbox [aria-hidden] [box=377,858,16,16]
+          - generic [ref=f22e209] [box=421,858,210,68]:
+            - generic [ref=f22e210] [box=421,858,210,24]: Header account
+            - paragraph [ref=f22e211] [box=421,886,210,40]: Use this account as a grouping node for child accounts.
+        - generic [ref=f22e213] [box=681,858,238,68]:
+          - checkbox [ref=f22e214] [cursor=pointer] [box=681,862,16,16]
+          - checkbox [aria-hidden] [box=665,858,16,16]
+          - generic [ref=f22e215] [box=709,858,210,68]:
+            - generic [ref=f22e216] [box=709,858,210,24]: Reconcilable
+            - paragraph [ref=f22e217] [box=709,886,210,40]: Mark this account for statement or balance reconciliation.
+        - generic [ref=f22e219] [box=968,858,238,68]:
+          - checkbox [checked] [ref=f22e220] [cursor=pointer] [box=968,862,16,16]
+          - checkbox [checked] [aria-hidden] [box=953,858,16,16]
+          - generic [ref=f22e221] [box=996,858,210,68]:
+            - generic [ref=f22e222] [box=996,858,210,24]: Active
+            - paragraph [ref=f22e223] [box=996,886,210,40]: Inactive accounts stay visible in history but cannot be used.
+      - generic [ref=f22e224] [box=377,967,847,57]:
+        - button "Cancel" [ref=f22e225] [cursor=pointer] [box=1009,984,75,40]
+        - button "Create account" [ref=f22e226] [cursor=pointer] [box=1096,984,127,40]
+    - button "Close" [ref=f22e227] [cursor=pointer] [box=1215,80,16,16]

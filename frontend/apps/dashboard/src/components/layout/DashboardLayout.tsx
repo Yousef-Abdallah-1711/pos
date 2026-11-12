@@ -1,7 +1,7 @@
 'use client'
 
 import { Suspense, useEffect, useState, useRef } from 'react'
-import { useRouter, usePathname } from 'next/navigation'
+import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { useAuthStore } from '@/stores/authStore'
 import { usePreferencesStore } from '@/stores/preferencesStore'
@@ -19,6 +19,10 @@ import { TrialWarningBanner } from '@/components/layout/TrialWarningBanner'
 import { useTenantStatus } from '@/hooks/useTenantStatus'
 import { BlockedOverlay } from '@/components/blocked/BlockedOverlay'
 
+function getLandingLoginUrl(locale: string) {
+  return `${getConfig().landingUrl}/${locale}/auth/login`
+}
+
 export default function DashboardLayout({
   children,
 }: {
@@ -27,7 +31,6 @@ export default function DashboardLayout({
   const pathname = usePathname()
   const locale = getLocaleFromPath(pathname)
   const t = createTranslator(locale)
-  const router = useRouter()
   const user = useAuthStore((state) => state.user)
   const token = useAuthStore((state) => state.token)
   const logout = useAuthStore((state) => state.logout)
@@ -69,9 +72,9 @@ export default function DashboardLayout({
 
   useEffect(() => {
     if (!isLoggedIn) {
-      router.push(`/${locale}/auth/login`)
+      window.location.replace(getLandingLoginUrl(locale))
     }
-  }, [isLoggedIn, router, locale])
+  }, [isLoggedIn, locale])
 
   // Load user preferences on mount
   useEffect(() => {
@@ -85,7 +88,7 @@ export default function DashboardLayout({
       try {
         const { apiUrl } = getConfig()
         const response = await fetch(`${apiUrl}/users/${user.id}/settings`, {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: {  },
         })
 
         if (response.ok) {
@@ -122,9 +125,21 @@ export default function DashboardLayout({
     }
   }, [settings, setTheme])
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      const response = await fetch(`${getConfig().apiUrl}/auth/logout`, {
+        method: 'POST',
+        credentials: 'include',
+      })
+      if (!response.ok) {
+        throw new Error(`Server logout failed with status ${response.status}`)
+      }
+    } catch (error) {
+      debugError('[DashboardLayout] Server logout failed', error)
+      return
+    }
     logout()
-    router.push(`/${locale}/auth/login`)
+    window.location.assign(getLandingLoginUrl(locale))
   }
 
   if (!isLoggedIn) {

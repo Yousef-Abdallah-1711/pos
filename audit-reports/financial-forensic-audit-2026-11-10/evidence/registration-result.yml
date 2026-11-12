@@ -1,0 +1,54 @@
+- generic [ref=e1]:
+  - main [ref=e2]:
+    - generic [ref=e3]:
+      - generic [ref=e4]:
+        - link "RestaurantPOS" [ref=e5] [cursor=pointer]:
+          - /url: /en
+        - paragraph [ref=e10]: Create your account and start managing your restaurant
+      - generic [ref=e11]:
+        - generic [ref=e12]:
+          - alert [ref=e61]:
+            - heading "Please review the highlighted fields." [level=2] [ref=e62]
+            - list [ref=e63]
+          - generic [ref=e13]:
+            - generic [ref=e14]: Full Name*
+            - textbox "Full Name" [ref=e15]:
+              - /placeholder: John Doe
+              - text: Forensic Audit Owner
+          - generic [ref=e16]:
+            - generic [ref=e17]: Email*
+            - textbox "Email" [ref=e18]:
+              - /placeholder: your@email.com
+              - text: audit-owner-20261110@example.invalid
+          - generic [ref=e19]:
+            - generic [ref=e20]: Restaurant Name*
+            - textbox "Restaurant Name" [ref=e21]:
+              - /placeholder: My Restaurant
+              - text: Forensic Audit Kitchen 20261110
+          - generic [ref=e22]:
+            - generic [ref=e23]: Website Subdomain*
+            - textbox "Website Subdomain" [active] [invalid] [ref=e24]:
+              - /placeholder: my-restaurant
+              - text: forensic-audit-kitchen-20261110
+            - alert [ref=e66]: Availability could not be checked. Check your connection and try again.
+            - paragraph [ref=e25]: "Your website will be accessible at: forensic-audit-kitchen-20261110.localhost:13113"
+            - alert [ref=e71]: Availability could not be checked. Check your connection and try again.
+          - generic [ref=e26]:
+            - generic [ref=e27]
+            - textbox "Phone(Optional)" [ref=e29]:
+              - /placeholder: "+1234567890"
+          - generic [ref=e30]:
+            - generic [ref=e31]: Password*
+            - generic [ref=e32]
+            - paragraph [ref=e38]: At least 6 characters; maximum 72 UTF-8 bytes.
+          - generic [ref=e39]:
+            - generic [ref=e40]: Confirm Password*
+            - generic [ref=e41]
+          - button "Create account" [ref=e47] [cursor=pointer]
+        - paragraph [ref=e49]:
+          - text: Already have an account?
+          - link "Sign in" [ref=e50] [cursor=pointer]:
+            - /url: /en/auth/login
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=e57] [cursor=pointer]
+  - alert [ref=e51]

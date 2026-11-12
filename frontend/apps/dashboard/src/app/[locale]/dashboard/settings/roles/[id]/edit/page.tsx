@@ -198,7 +198,7 @@ export default function EditRolePage({ params: paramsPromise }: EditRolePageProp
       const response = await fetch(
         `${apiUrl}/rbac/roles/${id}`,
         {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: {  },
         }
       )
 
@@ -264,7 +264,7 @@ export default function EditRolePage({ params: paramsPromise }: EditRolePageProp
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
+            
           },
           body: JSON.stringify(roleData),
         }

@@ -1,0 +1,9 @@
+application,page_or_route,endpoint_family_or_path,observed_calls,status,notes
+Dashboard,/en/dashboard,/api/v1/rbac/check-permission,8,200,Repeated permission-check family; exact initiation order unavailable
+Dashboard,/en/dashboard,orders,2,200,Family attribution retained; exact URI omitted in aggregate
+Dashboard,/en/dashboard,notifications,2,200,Family attribution retained
+Dashboard,/en/dashboard,notification statistics,2,200,Family attribution retained
+Dashboard,/en/dashboard,tenant status,2,200,Family attribution retained
+Dashboard,/en/dashboard,other API calls,7,200,Not attributed to endpoint family in retained aggregate
+Restaurant Website,/en/menu,menu and tenant requests,2,200,21 synthetic products rendered
+Super Admin,/dashboard/audit-logs,/api/v1/super-admin/audit-logs?page=1&page_size=50,1,200,9 rows; two null details trigger client error

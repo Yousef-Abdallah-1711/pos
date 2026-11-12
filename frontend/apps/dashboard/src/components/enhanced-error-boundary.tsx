@@ -36,6 +36,7 @@ interface EnhancedErrorBoundaryState {
   errorInfo: ErrorInfo | null
   showDetails: boolean
   retryCount: number
+  errorReferenceId: string | null
 }
 
 /**
@@ -51,6 +52,7 @@ export class EnhancedErrorBoundary extends React.Component<
   EnhancedErrorBoundaryProps,
   EnhancedErrorBoundaryState
 > {
+  private static errorReferenceSequence = 0
   private errorLogger = getErrorLogger()
   private readonly MAX_RETRIES = 3
 
@@ -62,11 +64,29 @@ export class EnhancedErrorBoundary extends React.Component<
       errorInfo: null,
       showDetails: false,
       retryCount: 0,
+      errorReferenceId: null,
     }
   }
 
   static getDerivedStateFromError(error: Error): Partial<EnhancedErrorBoundaryState> {
-    return { hasError: true }
+    return {
+      hasError: true,
+      error,
+      errorReferenceId: `${Date.now()}-${++EnhancedErrorBoundary.errorReferenceSequence}`,
+    }
+  }
+
+  componentDidUpdate(previousProps: EnhancedErrorBoundaryProps) {
+    if (previousProps.children !== this.props.children && this.state.hasError) {
+      this.setState({
+        hasError: false,
+        error: null,
+        errorInfo: null,
+        showDetails: false,
+        retryCount: 0,
+        errorReferenceId: null,
+      })
+    }
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
@@ -80,7 +100,7 @@ export class EnhancedErrorBoundary extends React.Component<
     this.setState({
       error,
       errorInfo,
-      showDetails: process.env.NODE_ENV === 'development',
+      showDetails: false,
     })
 
     // Call optional error callback
@@ -98,10 +118,7 @@ export class EnhancedErrorBoundary extends React.Component<
   handleRetry = () => {
     const newRetryCount = this.state.retryCount + 1
 
-    if (newRetryCount >= this.MAX_RETRIES) {
-      alert(
-        'Maximum retry attempts reached. Please refresh the page or contact support.'
-      )
+    if (this.state.retryCount >= this.MAX_RETRIES) {
       return
     }
 
@@ -111,6 +128,7 @@ export class EnhancedErrorBoundary extends React.Component<
       errorInfo: null,
       showDetails: false,
       retryCount: newRetryCount,
+      errorReferenceId: null,
     })
   }
 
@@ -222,7 +240,7 @@ export class EnhancedErrorBoundary extends React.Component<
                 )}
 
                 {/* Error Details (Development Only) */}
-                {process.env.NODE_ENV === 'development' && this.state.errorInfo && (
+                {process.env.NODE_ENV !== 'production' && this.state.errorInfo && (
                   <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
                     <button
                       onClick={this.handleShowDetails}
@@ -274,12 +292,12 @@ export class EnhancedErrorBoundary extends React.Component<
                     )}
                   </button>
 
-                  <button
-                    onClick={() => (window.location.href = '/en/dashboard')}
+                  <a
+                    href="/en/dashboard"
                     className="flex-1 px-4 py-2 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-900 dark:text-white rounded-lg font-medium transition"
                   >
                     Go to Dashboard
-                  </button>
+                  </a>
 
                   <button
                     onClick={this.handleLogOut}
@@ -311,7 +329,7 @@ export class EnhancedErrorBoundary extends React.Component<
               <p className="text-xs text-gray-600 dark:text-gray-400">
                 <span className="font-medium">Error Reference ID:</span>{' '}
                 <code className="text-gray-500 dark:text-gray-500">
-                  {Date.now()}
+                  {this.state.errorReferenceId}
                 </code>
               </p>
             </div>

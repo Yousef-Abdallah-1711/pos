@@ -174,6 +174,12 @@ func (uc *SuperAdminAuthUseCase) ValidateSession(ctx context.Context, superAdmin
 	if !superAdmin.IsIPAllowed(ip) {
 		return nil, errors.New("access denied from this IP address")
 	}
+	user, err := uc.userRepo.GetByID(ctx, int(superAdmin.UserID))
+	if err != nil {
+		return nil, errors.New("session user is unavailable")
+	}
+	user.PasswordHash = ""
+	superAdmin.User = user
 
 	return superAdmin, nil
 }

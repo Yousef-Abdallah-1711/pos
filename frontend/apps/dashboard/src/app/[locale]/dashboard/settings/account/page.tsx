@@ -41,7 +41,7 @@ export default function AccountSettingsPage() {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
+          
         },
         body: JSON.stringify({
           name: profileForm.name,
@@ -85,7 +85,7 @@ export default function AccountSettingsPage() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
+          
         },
         body: JSON.stringify({
           current_password: passwordForm.currentPassword,

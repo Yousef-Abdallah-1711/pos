@@ -1,0 +1,10 @@
+{
+  "branch": "codex/phase2a-continuation",
+  "head": "ecadb5ab7665df3eb9f69886a9b186c710eff62d",
+  "ws02_head": "fa842873a0e3cd8183028363c4b0d5b7b7b62d41",
+  "source_file_count": 1346,
+  "e2e_commit": "ecadb5ab7665df3eb9f69886a9b186c710eff62d",
+  "source_fingerprint": "F3F900C12166DB38AAA9179E37FFD7B6DD2AC98BD413D1A30377BC3389FA1EA3",
+  "ws02_branch": "codex/ws02-final-security-closure",
+  "e2e_project": "pos-p2a-ws05-e2e-20261103"
+}

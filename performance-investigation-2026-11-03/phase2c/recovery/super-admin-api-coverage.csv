@@ -1,0 +1,4 @@
+method,route,role,tenant_id,restaurant_id,source_commit,source_fingerprint,samples,status_counts,errors,response_bytes,records,first_sample_ms,warm_p50_ms,warm_p75_ms,warm_p95_ms,warm_p99_ms
+GET,super-admin-dashboard,super-admin,,,9e3614b605b4d1691835c37c0a088636ccf6abe2,phase2c-recovery-9e3614b,25,200:26,0,213,,33.01,5.33,5.69,6.28,7.65
+GET,super-admin-tenants,super-admin,,,9e3614b605b4d1691835c37c0a088636ccf6abe2,phase2c-recovery-9e3614b,25,200:26,0,1121,2,24.70,14.00,17.05,31.95,52.46
+GET,super-admin-audit-logs,super-admin,,,9e3614b605b4d1691835c37c0a088636ccf6abe2,phase2c-recovery-9e3614b,25,200:26,0,3985,20,10.93,8.05,9.28,11.36,13.17

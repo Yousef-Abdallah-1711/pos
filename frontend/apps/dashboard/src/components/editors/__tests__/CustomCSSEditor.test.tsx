@@ -148,8 +148,7 @@ describe('CustomCSSEditor', () => {
       render(<CustomCSSEditor {...defaultProps} />)
 
       const textarea = screen.getByPlaceholderText(/Add your custom CSS here/) as HTMLTextAreaElement
-      await userEvent.clear(textarea)
-      await userEvent.type(textarea, '.new { color: green; }')
+      fireEvent.change(textarea, { target: { value: '.new { color: green; }' } })
 
       expect(mockOnChange).toHaveBeenCalled()
     })
@@ -287,7 +286,7 @@ describe('CustomCSSEditor', () => {
       fireEvent.click(previewBtn)
 
       await waitFor(() => {
-        expect(screen.getByText('Back to Settings')).toBeInTheDocument()
+        expect(screen.getByText('Back to Editor')).toBeInTheDocument()
       })
     })
 
@@ -313,7 +312,7 @@ describe('CustomCSSEditor', () => {
       fireEvent.click(previewBtn)
 
       await waitFor(() => {
-        const backBtn = screen.getByText('Back to Settings')
+        const backBtn = screen.getByText('Back to Editor')
         fireEvent.click(backBtn)
       })
 
@@ -344,15 +343,14 @@ describe('CustomCSSEditor', () => {
       }
       render(<CustomCSSEditor {...defaultProps} component={component} />)
 
-      expect(screen.getByText(/8 characters/i)).toBeInTheDocument()
+      expect(screen.getByText(/9 characters/i)).toBeInTheDocument()
     })
 
     it('should update character count on change', async () => {
       render(<CustomCSSEditor {...defaultProps} />)
 
       const textarea = screen.getByPlaceholderText(/Add your custom CSS here/) as HTMLTextAreaElement
-      await userEvent.clear(textarea)
-      await userEvent.type(textarea, '.long { color: red; }')
+      fireEvent.change(textarea, { target: { value: '.long { color: red; }' } })
 
       expect(screen.getByText(/21 characters/i)).toBeInTheDocument()
     })

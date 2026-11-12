@@ -52,7 +52,7 @@ export default function RolesPage() {
       const response = await fetch(
         `${apiUrl}/rbac/roles`,
         {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: {  },
         }
       )
 
@@ -80,7 +80,7 @@ export default function RolesPage() {
         `${apiUrl}/rbac/roles/${roleId}`,
         {
           method: 'DELETE',
-          headers: { Authorization: `Bearer ${token}` },
+          headers: {  },
         }
       )
 

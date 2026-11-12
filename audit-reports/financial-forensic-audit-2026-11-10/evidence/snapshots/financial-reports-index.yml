@@ -1,0 +1,76 @@
+- generic [active] [ref=f11e1]:
+  - generic [ref=f11e6]:
+    - complementary [ref=f11e7]:
+      - generic [ref=f11e8]:
+        - link "POS Dashboard" [ref=f11e9] [cursor=pointer]:
+          - /url: /en/dashboard
+        - button "Collapse sidebar" [ref=f11e13] [cursor=pointer]
+      - navigation [ref=f11e18]:
+        - list [ref=f11e19]:
+          - listitem [ref=f11e20]:
+            - link "Dashboard" [ref=f11e21] [cursor=pointer]:
+              - /url: /en/dashboard
+          - listitem [ref=f11e25]:
+            - link "Cashier POS" [ref=f11e26] [cursor=pointer]:
+              - /url: /en/dashboard/pos
+          - listitem [ref=f11e30]:
+            - link "Kitchen Display" [ref=f11e31] [cursor=pointer]:
+              - /url: /en/dashboard/kds
+          - listitem [ref=f11e35]:
+            - button "Orders" [ref=f11e36] [cursor=pointer]
+          - listitem [ref=f11e46]:
+            - button "Products" [ref=f11e47] [cursor=pointer]
+          - listitem [ref=f11e56]:
+            - button "Human Resources" [ref=f11e57] [cursor=pointer]
+          - listitem [ref=f11e67]:
+            - button "Accounting" [ref=f11e68] [cursor=pointer]
+          - listitem [ref=f11e75]:
+            - button "Suppliers" [ref=f11e76] [cursor=pointer]
+          - listitem [ref=f11e85]:
+            - button "Financial Reports" [ref=f11e86] [cursor=pointer]
+          - listitem [ref=f11e93]:
+            - button "Reports" [ref=f11e94] [cursor=pointer]
+          - listitem [ref=f11e101]:
+            - link "Theme Builder" [ref=f11e102] [cursor=pointer]:
+              - /url: /en/dashboard/theme-builder
+          - listitem [ref=f11e110]:
+            - link "Settings" [ref=f11e111] [cursor=pointer]:
+              - /url: /en/dashboard/settings
+    - generic [ref=f11e116]:
+      - banner [ref=f11e117]:
+        - generic [ref=f11e120]:
+          - button "All Notifications" [ref=f11e122] [cursor=pointer]
+          - button "English" [ref=f11e127] [cursor=pointer]
+          - button "Dark Mode" [ref=f11e132] [cursor=pointer]
+          - button "A audit-owner-20261110@example.invalid owner" [ref=f11e136] [cursor=pointer]:
+            - generic [ref=f11e137]: A
+            - generic [ref=f11e138]
+      - main [ref=f11e143]:
+        - generic [ref=f11e145]:
+          - generic [ref=f11e146]:
+            - heading "Financial Reports" [level=1] [ref=f11e147]
+            - paragraph [ref=f11e148]: Profit and loss, balance sheet, cash flow, VAT, aging, and inventory valuation.
+          - generic [ref=f11e149]:
+            - generic [ref=f11e150]
+            - generic [ref=f11e158]
+            - generic [ref=f11e165]
+          - generic [ref=f11e173]:
+            - link "Profit & Loss Revenue, expense, and net profit by date range." [ref=f11e174] [cursor=pointer]:
+              - /url: /en/dashboard/reports/financial/profit-loss
+            - link "Balance Sheet Assets, liabilities, and equity as-of a selected date." [ref=f11e181] [cursor=pointer]:
+              - /url: /en/dashboard/reports/financial/balance-sheet
+            - link "Cash Flow Operating, investing, and financing cash movement." [ref=f11e187] [cursor=pointer]:
+              - /url: /en/dashboard/reports/financial/cash-flow
+            - link "VAT Report Output VAT, input VAT, and net payable amount." [ref=f11e193] [cursor=pointer]:
+              - /url: /en/dashboard/reports/financial/vat
+            - link "Receivables Aging Outstanding customer balances by aging buckets." [ref=f11e200] [cursor=pointer]:
+              - /url: /en/dashboard/reports/financial/receivables-aging
+            - link "Payables Aging Outstanding supplier balances by aging buckets." [ref=f11e207] [cursor=pointer]:
+              - /url: /en/dashboard/reports/financial/payables-aging
+            - link "Inventory Valuation Quantity and cost-based stock valuation." [ref=f11e214] [cursor=pointer]:
+              - /url: /en/dashboard/reports/financial/inventory-valuation
+            - link "Advanced Insights KPI dashboard, break-even, predictive cash flow, and labor cost analytics." [ref=f11e222] [cursor=pointer]:
+              - /url: /en/dashboard/reports/financial/advanced
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=f11e233] [cursor=pointer]
+  - alert [ref=f11e5]

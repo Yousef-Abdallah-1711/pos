@@ -1,0 +1,7 @@
+"method","path","role","tenant_restaurant_context","parameters","status","response_bytes","records","sample_count","warm_median_ms","warm_p75_ms","warm_p95_ms","warm_p99_ms","first_sample_ms","query_count","redis_time_ms","handler_time_ms","notes"
+"GET","/api/v1/admin/orders","Admin","synthetic tenant/restaurant","page_size=1","200","417","1","25","12.9","","15.1","","349.9","unmeasured","unmeasured","unmeasured","Count/list plus per-order GetOrder candidate"
+"GET","/api/v1/admin/orders","Admin","synthetic tenant/restaurant","page_size=5","200","1859","5","25","20.2","","24.2","","","unmeasured","unmeasured","unmeasured","Warm sample aggregate"
+"GET","/api/v1/admin/orders","Admin","synthetic tenant/restaurant","page_size=25","200","9055","25","25","50.1","","61.2","","","unmeasured","unmeasured","unmeasured","Warm sample aggregate"
+"GET","/api/v1/admin/orders","Admin","synthetic tenant/restaurant","page_size=50","200","18055","50","25","91.2","","117.4","","","unmeasured","unmeasured","unmeasured","Warm sample aggregate"
+"GET","/api/v1/super-admin/audit-logs","Super Admin","synthetic fixture","page=1&page_size=50","200","","9","1","","","","","","","","","Two rows have null details; route fails client-side"
+"GET","public storefront menu API","Public","synthetic tenant","menu page","200","","21","1","","","","","","","","","Two API requests observed; endpoint size and latency not retained"

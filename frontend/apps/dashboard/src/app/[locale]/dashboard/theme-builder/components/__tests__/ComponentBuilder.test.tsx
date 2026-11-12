@@ -52,7 +52,7 @@ describe('ComponentBuilder', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
-    ;(useThemeStore as any).mockImplementation((selector) => {
+    ;(useThemeStore as any).mockImplementation((selector: (state: unknown) => unknown) => {
       const store = {
         currentTheme: mockTheme,
         selectedComponentId: null,
@@ -69,7 +69,7 @@ describe('ComponentBuilder', () => {
     })
 
     it('should show empty state when no theme selected', () => {
-      ;(useThemeStore as any).mockImplementation((selector) => {
+      ;(useThemeStore as any).mockImplementation((selector: (state: unknown) => unknown) => {
         const store = {
           currentTheme: null,
           selectedComponentId: null,
@@ -88,7 +88,7 @@ describe('ComponentBuilder', () => {
     })
 
     it('should show empty state when no components', () => {
-      ;(useThemeStore as any).mockImplementation((selector) => {
+      ;(useThemeStore as any).mockImplementation((selector: (state: unknown) => unknown) => {
         const store = {
           currentTheme: { ...mockTheme, components: [] },
           selectedComponentId: null,
@@ -122,15 +122,13 @@ describe('ComponentBuilder', () => {
 
     it('should have grip handle for drag', () => {
       const { container } = render(<ComponentBuilder />)
-      const gripIcons = container.querySelectorAll('[class*="GripVertical"]')
+      const gripIcons = container.querySelectorAll('svg.lucide-grip-vertical')
       expect(gripIcons.length).toBeGreaterThan(0)
     })
 
     it('should display delete button for each component', () => {
       render(<ComponentBuilder />)
-      const deleteButtons = screen.getAllByRole('button').filter((btn) =>
-        btn.querySelector('[class*="Trash"]')
-      )
+      const deleteButtons = screen.getAllByRole('button', { name: /^Delete / })
       expect(deleteButtons.length).toBe(2)
     })
   })
@@ -143,7 +141,7 @@ describe('ComponentBuilder', () => {
       fireEvent.click(addButton)
 
       await waitFor(() => {
-        expect(screen.getByText('Hero Section')).toBeInTheDocument()
+        expect(screen.getByRole('button', { name: /Hero Section.*Large banner with headline/ })).toBeInTheDocument()
         expect(screen.getByText('Large banner with headline')).toBeInTheDocument()
       })
     })
@@ -153,12 +151,12 @@ describe('ComponentBuilder', () => {
       fireEvent.click(screen.getByRole('button', { name: /Add/i }))
 
       await waitFor(() => {
-        expect(screen.getByText('Featured Products')).toBeInTheDocument()
-        expect(screen.getByText('Why Choose Us')).toBeInTheDocument()
-        expect(screen.getByText('Contact Section')).toBeInTheDocument()
-        expect(screen.getByText('Testimonials')).toBeInTheDocument()
-        expect(screen.getByText('Call to Action')).toBeInTheDocument()
-        expect(screen.getByText('Custom HTML')).toBeInTheDocument()
+        expect(screen.getByRole('button', { name: /Featured Products.*Product showcase/ })).toBeInTheDocument()
+        expect(screen.getByRole('button', { name: /Why Choose Us.*Key features section/ })).toBeInTheDocument()
+        expect(screen.getByRole('button', { name: /Contact Section.*Contact form and info/ })).toBeInTheDocument()
+        expect(screen.getByRole('button', { name: /Testimonials.*Customer reviews/ })).toBeInTheDocument()
+        expect(screen.getByRole('button', { name: /Call to Action.*Action button section/ })).toBeInTheDocument()
+        expect(screen.getByRole('button', { name: /Custom HTML.*Custom content block/ })).toBeInTheDocument()
       })
     })
 
@@ -177,8 +175,7 @@ describe('ComponentBuilder', () => {
       fireEvent.click(screen.getByRole('button', { name: /Add/i }))
 
       await waitFor(() => {
-        const heroOption = screen.getAllByText('Hero Section')[0]
-        fireEvent.click(heroOption)
+        fireEvent.click(screen.getByRole('button', { name: /Hero Section.*Large banner with headline/ }))
 
         expect(mockStoreActions.addComponent).toHaveBeenCalledWith(
           expect.objectContaining({
@@ -195,8 +192,7 @@ describe('ComponentBuilder', () => {
       const addButton = screen.getByRole('button', { name: /Add/i })
 
       fireEvent.click(addButton)
-      const heroOption = screen.getAllByText('Hero Section')[0]
-      fireEvent.click(heroOption)
+      fireEvent.click(screen.getByRole('button', { name: /Hero Section.*Large banner with headline/ }))
 
       await waitFor(() => {
         // Menu should be closed (only one Hero Section visible - from the list)
@@ -209,7 +205,7 @@ describe('ComponentBuilder', () => {
       render(<ComponentBuilder />)
 
       fireEvent.click(screen.getByRole('button', { name: /Add/i }))
-      fireEvent.click(screen.getAllByText('Hero Section')[0])
+      fireEvent.click(screen.getByRole('button', { name: /Hero Section.*Large banner with headline/ }))
 
       expect(mockStoreActions.addComponent).toHaveBeenCalled()
     })
@@ -218,11 +214,7 @@ describe('ComponentBuilder', () => {
   describe('Delete Component', () => {
     it('should delete component on button click', () => {
       render(<ComponentBuilder />)
-      const deleteButtons = screen.getAllByRole('button').filter((btn) =>
-        btn.querySelector('[class*="Trash"]')
-      )
-
-      fireEvent.click(deleteButtons[0])
+      fireEvent.click(screen.getByRole('button', { name: 'Delete Hero Section' }))
 
       expect(mockStoreActions.deleteComponent).toHaveBeenCalledWith('comp-1')
     })
@@ -243,7 +235,7 @@ describe('ComponentBuilder', () => {
     })
 
     it('should show single item text for 1 component', () => {
-      ;(useThemeStore as any).mockImplementation((selector) => {
+      ;(useThemeStore as any).mockImplementation((selector: (state: unknown) => unknown) => {
         const store = {
           currentTheme: {
             ...mockTheme,
@@ -271,7 +263,7 @@ describe('ComponentBuilder', () => {
     })
 
     it('should highlight selected component', () => {
-      ;(useThemeStore as any).mockImplementation((selector) => {
+      ;(useThemeStore as any).mockImplementation((selector: (state: unknown) => unknown) => {
         const store = {
           currentTheme: mockTheme,
           selectedComponentId: 'comp-1',
@@ -302,19 +294,19 @@ describe('ComponentBuilder', () => {
       const { container } = render(<ComponentBuilder />)
       const firstComponent = container.querySelector('[draggable="true"]')
 
-      const dragEvent = new DragEvent('dragstart', { bubbles: true })
-      firstComponent?.dispatchEvent(dragEvent)
+      fireEvent.dragStart(firstComponent!)
+      expect(firstComponent).toHaveClass('opacity-50')
     })
 
     it('should allow drag over', () => {
       const { container } = render(<ComponentBuilder />)
       const component = container.querySelector('[draggable="true"]')
 
-      const dragOverEvent = new DragEvent('dragover', { bubbles: true })
-      dragOverEvent.preventDefault = vi.fn()
-      component?.dispatchEvent(dragOverEvent)
+      const dragOverEvent = new Event('dragover', { bubbles: true, cancelable: true })
+      const shouldContinue = component?.dispatchEvent(dragOverEvent)
 
-      expect(dragOverEvent.preventDefault).toHaveBeenCalled()
+      expect(shouldContinue).toBe(false)
+      expect(dragOverEvent.defaultPrevented).toBe(true)
     })
 
     it('should handle drop for reordering', () => {
@@ -323,11 +315,8 @@ describe('ComponentBuilder', () => {
 
       if (components.length >= 2) {
         // Simulate drag from first to second
-        const dragStartEvent = new DragEvent('dragstart', { bubbles: true })
-        components[0].dispatchEvent(dragStartEvent)
-
-        const dropEvent = new DragEvent('drop', { bubbles: true })
-        components[1].dispatchEvent(dropEvent)
+        fireEvent.dragStart(components[0])
+        fireEvent.drop(components[1])
 
         expect(mockStoreActions.reorderComponents).toHaveBeenCalled()
       }
@@ -345,20 +334,18 @@ describe('ComponentBuilder', () => {
       const { container } = render(<ComponentBuilder />)
       const component = container.querySelector('[draggable="true"]')
 
-      const dragStartEvent = new DragEvent('dragstart', { bubbles: true })
-      component?.dispatchEvent(dragStartEvent)
+      fireEvent.dragStart(component!)
 
       // Drop on same element
-      const dropEvent = new DragEvent('drop', { bubbles: true })
-      component?.dispatchEvent(dropEvent)
+      fireEvent.drop(component!)
 
-      // reorderComponents should not be called with same component
+      expect(mockStoreActions.reorderComponents).not.toHaveBeenCalled()
     })
   })
 
   describe('Empty State', () => {
     it('should show empty message when no components', () => {
-      ;(useThemeStore as any).mockImplementation((selector) => {
+      ;(useThemeStore as any).mockImplementation((selector: (state: unknown) => unknown) => {
         const store = {
           currentTheme: { ...mockTheme, components: [] },
           selectedComponentId: null,
@@ -373,7 +360,7 @@ describe('ComponentBuilder', () => {
     })
 
     it('should show empty state count', () => {
-      ;(useThemeStore as any).mockImplementation((selector) => {
+      ;(useThemeStore as any).mockImplementation((selector: (state: unknown) => unknown) => {
         const store = {
           currentTheme: { ...mockTheme, components: [] },
           selectedComponentId: null,
@@ -443,9 +430,7 @@ describe('ComponentBuilder', () => {
       ]
 
       for (const type of types) {
-        await waitFor(() => {
-          expect(screen.getByText(type)).toBeInTheDocument()
-        })
+        await waitFor(() => expect(screen.getAllByText(type).length).toBeGreaterThan(0))
       }
     })
   })
@@ -467,7 +452,7 @@ describe('ComponentBuilder', () => {
 
   describe('Component Context', () => {
     it('should maintain component context across operations', () => {
-      ;(useThemeStore as any).mockImplementation((selector) => {
+      ;(useThemeStore as any).mockImplementation((selector: (state: unknown) => unknown) => {
         const store = {
           currentTheme: mockTheme,
           selectedComponentId: 'comp-1',
@@ -497,7 +482,7 @@ describe('ComponentBuilder', () => {
         settings: {},
       }))
 
-      ;(useThemeStore as any).mockImplementation((selector) => {
+      ;(useThemeStore as any).mockImplementation((selector: (state: unknown) => unknown) => {
         const store = {
           currentTheme: { ...mockTheme, components: largeComponentList },
           selectedComponentId: null,

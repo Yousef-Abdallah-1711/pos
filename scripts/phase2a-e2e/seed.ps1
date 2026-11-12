@@ -5,6 +5,9 @@ $api = 'http://localhost:18080/api/v1'
 $database = 'pos_phase2a_e2e'
 $container = "$project-postgres-1"
 $password = 'WS05-Disposable-Only-2026!'
+$superAdminEmail = 'phase2a-superadmin@example.test'
+$superAdminPassword = 'WS05-SuperAdmin-Only-2026!'
+$superAdminPasswordHash = '$2a$10$cZ6RYwpViOspI8u.NYyXkeCD1IOXHF0xussswOrgijec47mn2OVEe'
 
 $labels = docker inspect --format '{{json .Config.Labels}}' $container | ConvertFrom-Json
 if ($LASTEXITCODE -ne 0 -or $labels.'com.docker.compose.project' -ne $project -or $labels.'com.docker.compose.service' -ne 'postgres' -or $labels.'com.pos.disposable' -ne 'true') {
@@ -74,6 +77,27 @@ SELECT $($tenantB.TenantID), $($tenantB.RestaurantID), c.id, 'WS05 E2E Burger B'
 FROM categories c WHERE c.tenant_id = $($tenantB.TenantID) AND c.restaurant_id = $($tenantB.RestaurantID) AND c.name = 'WS05 E2E Menu'
 AND NOT EXISTS (SELECT 1 FROM products p WHERE p.tenant_id = $($tenantB.TenantID) AND p.restaurant_id = $($tenantB.RestaurantID) AND p.name = 'WS05 E2E Burger B');
 UPDATE products SET name_en = COALESCE(name_en, name), name_ar = COALESCE(name_ar, name), quantity_in_stock = 20, track_inventory = TRUE, low_stock_threshold = 3 WHERE tenant_id IN ($($tenantA.TenantID), $($tenantB.TenantID)) AND name IN ('WS05 E2E Burger A', 'WS05 E2E Burger B');
+WITH fixture_super_admin AS (
+    INSERT INTO users (tenant_id, restaurant_id, email, password_hash, name, phone, role, status, is_super_admin, created_at, updated_at)
+    VALUES ($($tenantA.TenantID), NULL, '$superAdminEmail', '$superAdminPasswordHash', 'WS05 Disposable Super Admin', '5550100299', 'super_admin', 'active', TRUE, NOW(), NOW())
+    ON CONFLICT (tenant_id, email) DO UPDATE SET
+        restaurant_id = NULL,
+        password_hash = EXCLUDED.password_hash,
+        name = EXCLUDED.name,
+        role = EXCLUDED.role,
+        status = 'active',
+        is_super_admin = TRUE,
+        updated_at = NOW()
+    RETURNING id
+)
+INSERT INTO super_admins (user_id, ip_whitelist, is_active, failed_login_attempts, locked_until, created_at, updated_at)
+SELECT id, NULL, TRUE, 0, NULL, NOW(), NOW() FROM fixture_super_admin
+ON CONFLICT (user_id) DO UPDATE SET
+    ip_whitelist = NULL,
+    is_active = TRUE,
+    failed_login_attempts = 0,
+    locked_until = NULL,
+    updated_at = NOW();
 COMMIT;
 "@
 $null = Invoke-DisposableSql $fixtureSql
@@ -81,3 +105,5 @@ $null = Invoke-DisposableSql $fixtureSql
 Write-Output "Seeded isolated WS05 fixtures: Tenant A $($tenantA.TenantID), Tenant B $($tenantB.TenantID)."
 Write-Output "Test-only account for both tenants: phase2a-owner-a@example.test / phase2a-owner-b@example.test"
 Write-Output "Test-only password: $password"
+Write-Output "Test-only super-admin account: $superAdminEmail"
+Write-Output "Test-only super-admin password: $superAdminPassword"

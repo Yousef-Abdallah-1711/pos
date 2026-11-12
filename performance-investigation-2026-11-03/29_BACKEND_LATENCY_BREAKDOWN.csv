@@ -1,0 +1,3 @@
+"endpoint","samples","status","total_median_ms","total_p75_ms","total_p95_ms","max_ms","middleware_ms","auth_ms","handler_ms","db_acquisition_ms","db_exec_ms","redis_ms","serialization_ms","source","environment"
+"GET /api/v1/health","25","200","2.18","2.46","4.94","126.93","not isolated","n/a","not isolated","not measured","not measured","n/a","not isolated","10_ENDPOINT_RUNTIME_PERFORMANCE.csv","isolated development E2E"
+"All other 334 unique route patterns","0","NOT_EXERCISED","","","","","","","","","","","","static route manifest only","runtime blocked/not authorized for mutation or missing approved synthetic role scenarios"

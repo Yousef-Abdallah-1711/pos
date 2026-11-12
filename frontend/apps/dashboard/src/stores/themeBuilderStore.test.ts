@@ -414,8 +414,10 @@ describe('useThemeBuilderStore', () => {
 
       act(() => {
         result.current.updateColors({ primary: '#ff0000' })
-        expect(result.current.isDirty).toBe(true)
+      })
+      expect(result.current.isDirty).toBe(true)
 
+      act(() => {
         result.current.markClean()
       })
 

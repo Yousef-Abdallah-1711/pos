@@ -1,0 +1,38 @@
+- generic [active] [ref=f14e1]:
+  - generic [ref=f14e2]:
+    - complementary [ref=f14e3]:
+      - generic [ref=f14e4]:
+        - heading "POS SaaS" [level=1] [ref=f14e5]
+        - paragraph [ref=f14e6]: Super Admin
+      - navigation [ref=f14e7]:
+        - link "Dashboard" [ref=f14e8] [cursor=pointer]:
+          - /url: /dashboard
+        - link "Tenants" [ref=f14e15] [cursor=pointer]:
+          - /url: /dashboard/tenants
+        - link "Users" [ref=f14e21] [cursor=pointer]:
+          - /url: /dashboard/users
+        - link "Audit Logs" [ref=f14e28] [cursor=pointer]:
+          - /url: /dashboard/audit-logs
+        - link "Payments" [ref=f14e33] [cursor=pointer]:
+          - /url: /dashboard/payments
+        - link "Settings" [ref=f14e39] [cursor=pointer]:
+          - /url: /dashboard/settings
+      - link "Logout" [ref=f14e45] [cursor=pointer]:
+        - /url: /login
+    - generic [ref=f14e50]:
+      - banner [ref=f14e51]:
+        - generic [ref=f14e53]:
+          - heading "Super Admin Dashboard" [level=2] [ref=f14e54]
+          - paragraph [ref=f14e55]: "Logged in as:"
+      - main [ref=f14e56]:
+        - generic [ref=f14e57]:
+          - generic [ref=f14e58]:
+            - heading "Audit Logs" [level=1] [ref=f14e59]
+            - paragraph [ref=f14e60]: Complete activity log of all super admin actions
+          - generic [ref=f14e62]:
+            - generic [ref=f14e63]: "Filter by Action:"
+            - combobox [ref=f14e64]:
+              - option "All Actions" [selected]
+          - paragraph [ref=f14e68]: Loading audit logs...
+  - region "Notifications alt+T"
+  - alert [ref=f14e69]

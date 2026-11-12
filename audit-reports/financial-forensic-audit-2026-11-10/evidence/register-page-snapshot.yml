@@ -1,0 +1,24 @@
+- generic [active] [ref=e1] [box=0,0,1225,961]:
+  - main [ref=e2] [box=0,0,1225,961]:
+    - generic [ref=e3] [box=389,32,448,897]:
+      - generic [ref=e4] [box=389,32,448,76]:
+        - link "RestaurantPOS" [ref=e5] [cursor=pointer] [box=497,32,231,40]:
+          - /url: /en
+        - paragraph [ref=e10] [box=389,84,448,24]: Create your account and start managing your restaurant
+      - generic [ref=e11] [box=389,132,448,797]:
+        - generic [ref=e12] [box=421,165,383,688]:
+          - generic [ref=e13] [box=421,165,383,72]
+          - generic [ref=e16] [box=421,253,383,72]
+          - generic [ref=e19] [box=421,341,383,72]
+          - generic [ref=e22] [box=421,429,383,96]
+          - generic [ref=e26] [box=421,541,383,72]
+          - generic [ref=e30] [box=421,629,383,96]
+          - generic [ref=e39] [box=421,741,383,72]
+          - button "Create account" [ref=e47] [cursor=pointer] [box=421,829,383,24]
+        - paragraph [ref=e49] [box=421,877,383,20]:
+          - text: Already have an account?
+          - link "Sign in" [ref=e50] [cursor=pointer] [box=677,878,45,17]:
+            - /url: /en/auth/login
+  - region "Notifications alt+T" [box=0,961,1225,0]
+  - button "Open Next.js Dev Tools" [ref=e57] [cursor=pointer] [box=22,845,32,32]
+  - alert [ref=e51] [box=-1,960,1,1]

@@ -1,0 +1,173 @@
+name: pos-p2b-perf-20261103
+
+# Isolated production-build measurement stack. Start only with P2B_* secrets set in the invoking process.
+x-frontend-args: &frontend-args
+  NEXT_IGNORE_BUILD_ERRORS: "false"
+  NEXT_PUBLIC_API_URL: http://localhost:18280/api/v1
+  NEXT_PUBLIC_API_BASE_URL: http://localhost:18280/api/v1
+  NEXT_PUBLIC_SUPER_ADMIN_API_URL: http://localhost:18280/api/v1/super-admin
+  NEXT_PUBLIC_LANDING_URL: http://localhost:13201
+  NEXT_PUBLIC_DASHBOARD_URL: http://localhost:13202
+  NEXT_PUBLIC_RESTAURANT_DOMAIN: localhost:13203
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: pos-p2b-perf-postgres-20261103
+    labels:
+      com.pos.disposable: "true"
+      com.pos.purpose: phase2b-performance
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${P2B_DB_PASSWORD:?set P2B_DB_PASSWORD in process environment}
+      POSTGRES_DB: pos_phase2b_perf
+    tmpfs:
+      - /var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d pos_phase2b_perf"]
+      interval: 3s
+      timeout: 3s
+      retries: 30
+
+  redis:
+    image: redis:7-alpine
+    container_name: pos-p2b-perf-redis-20261103
+    labels:
+      com.pos.disposable: "true"
+      com.pos.purpose: phase2b-performance
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    image: pos-p2b-perf-api:20261103
+    container_name: pos-p2b-perf-api-20261103
+    labels:
+      com.pos.disposable: "true"
+      com.pos.purpose: phase2b-performance
+    environment:
+      PORT: 18280
+      ENV: phase2b-test
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASSWORD: ${P2B_DB_PASSWORD:?set P2B_DB_PASSWORD in process environment}
+      DB_NAME: pos_phase2b_perf
+      DB_SSLMODE: disable
+      MIGRATE_DB_USER: postgres
+      MIGRATE_DB_PASSWORD: ${P2B_DB_PASSWORD:?set P2B_DB_PASSWORD in process environment}
+      JWT_SECRET: ${P2B_JWT_SECRET:?set P2B_JWT_SECRET in process environment}
+      JWT_EXPIRY: 24h
+      REDIS_URL: redis://redis:6379/0
+      PAYMOB_MODE: mock
+      CORS_ORIGINS: http://localhost:13201,http://localhost:13202,http://localhost:13203,http://localhost:13204,http://phase2b-restaurant-a.localhost:13203,http://phase2b-restaurant-b.localhost:13203
+      APP_BASE_URL: http://localhost:18280
+      DASHBOARD_URL: http://localhost:13202
+      LANDING_URL: http://localhost:13201
+      RESTAURANT_DOMAIN: localhost:13203
+      UPLOAD_BASE_URL: http://localhost:18280/uploads
+      WEBHOOK_BASE_URL: http://localhost:18280
+    ports:
+      - "127.0.0.1:18280:18280"
+      - "127.0.0.1:13201:3001"
+      - "127.0.0.1:13202:3002"
+      - "127.0.0.1:13203:3003"
+      - "127.0.0.1:13204:3004"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:18280/api/v1/health >/dev/null"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+      start_period: 90s
+
+  landing:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.prod
+      args:
+        <<: *frontend-args
+        APP: landing
+    image: pos-p2b-perf-landing:20261103
+    container_name: pos-p2b-perf-landing-20261103
+    labels:
+      com.pos.disposable: "true"
+      com.pos.purpose: phase2b-performance
+    network_mode: service:api
+    depends_on:
+      api:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+
+  dashboard:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.prod
+      args:
+        <<: *frontend-args
+        APP: dashboard
+    image: pos-p2b-perf-dashboard:20261103
+    container_name: pos-p2b-perf-dashboard-20261103
+    labels:
+      com.pos.disposable: "true"
+      com.pos.purpose: phase2b-performance
+    network_mode: service:api
+    depends_on:
+      api:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 3002
+
+  restaurant-website:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.prod
+      args:
+        <<: *frontend-args
+        APP: restaurant-website
+    image: pos-p2b-perf-restaurant-website:20261103
+    container_name: pos-p2b-perf-restaurant-website-20261103
+    labels:
+      com.pos.disposable: "true"
+      com.pos.purpose: phase2b-performance
+    network_mode: service:api
+    depends_on:
+      api:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 3003
+
+  super-admin:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.prod
+      args:
+        <<: *frontend-args
+        APP: super-admin
+    image: pos-p2b-perf-super-admin:20261103
+    container_name: pos-p2b-perf-super-admin-20261103
+    labels:
+      com.pos.disposable: "true"
+      com.pos.purpose: phase2b-performance
+    network_mode: service:api
+    depends_on:
+      api:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 3004
+

@@ -115,7 +115,9 @@ services:
       JWT_SECRET: ws05-test-only-jwt-secret-value-minimum-32-characters
       JWT_EXPIRY: 24h
       REDIS_URL: redis://redis:6379/0
-      CORS_ORIGINS: http://localhost:13101,http://localhost:13102,http://localhost:13103,http://localhost:13104
+      # Host-published ports support local browser use; container ports support
+      # Playwright runners sharing the disposable API network namespace.
+      CORS_ORIGINS: http://localhost:13101,http://localhost:13102,http://localhost:13103,http://localhost:13104,http://localhost:3001,http://localhost:3002,http://localhost:3003,http://localhost:3004
       APP_BASE_URL: http://localhost:18080
       DASHBOARD_URL: http://localhost:13102
       LANDING_URL: http://localhost:13101

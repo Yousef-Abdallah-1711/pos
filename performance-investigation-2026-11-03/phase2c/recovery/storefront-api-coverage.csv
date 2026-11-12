@@ -1,0 +1,3 @@
+method,route,role,tenant_id,restaurant_id,source_commit,source_fingerprint,samples,status_counts,errors,response_bytes,records,first_sample_ms,warm_p50_ms,warm_p75_ms,warm_p95_ms,warm_p99_ms
+GET,storefront-menu,public-synthetic,,,9e3614b605b4d1691835c37c0a088636ccf6abe2,phase2c-recovery-9e3614b,25,200:26,0,32240,62,37.13,7.33,8.25,10.38,10.65
+GET,storefront-homepage,public-synthetic,,,9e3614b605b4d1691835c37c0a088636ccf6abe2,phase2c-recovery-9e3614b,25,200:26,0,2069,,8.51,5.26,5.95,8.86,9.62

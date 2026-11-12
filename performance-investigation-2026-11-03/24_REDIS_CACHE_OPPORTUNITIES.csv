@@ -1,0 +1,7 @@
+"opportunity","scope","expected_benefit","risk","priority","status"
+"Instrument cache hits/misses per consumer","tenant status, financial reports","visibility; no latency claim","metric cardinality; never tag tenant IDs","P1","PROPOSED"
+"Define redis-outage behavior and bounded fallback","all CacheService users","predictable latency/availability","inconsistent multi-instance fallback","P1","PROPOSED"
+"Normalize financial report query keys","financial report cache","reduce duplicate cache entries","normalization must preserve semantic filters","P2","PROPOSED"
+"Add explicit invalidation only for measured stale paths","financial cache and theme cache","freshness after relevant writes","fanout/invalidations; scope safety","P2","PROPOSED"
+"Add per-key TTL and memory policy audit","Redis","bound memory and key lifetime","premature expiry / stampede","P2","PROPOSED"
+"Verify tenant/user scope of every cache key","all shared caches","prevent cross-tenant or cross-user reuse","over-scoping reduces hit rate","P0","PROPOSED"

@@ -1,0 +1,22 @@
+Page rows=110; counts D79 L10 R12 S9; source-path misses=0; duplicate app+route=0
+Page API mapping rows=110; skeleton matrix rows=110
+Backend registration occurrence rows=360; unique method/path=335
+CSV 02_COMPLETE_FRONTEND_PAGE_INVENTORY.csv: rows=110, columns=6
+CSV 05_PAGE_TO_API_DEPENDENCY_MATRIX.csv: rows=110, columns=11
+CSV 08_COMPLETE_BACKEND_ENDPOINT_INVENTORY.csv: rows=360, columns=25
+CSV 10_ENDPOINT_RUNTIME_PERFORMANCE.csv: rows=25, columns=8
+CSV 12_BROWSER_PAGE_PERFORMANCE.csv: rows=3, columns=16
+CSV 18_FRONTEND_PERFORMANCE_OPPORTUNITIES.csv: rows=10, columns=11
+CSV 19_SKELETON_AND_PERCEIVED_PERFORMANCE_MATRIX.csv: rows=110, columns=9
+CSV 22_CACHE_KEY_AND_INVALIDATION_MATRIX.csv: rows=7, columns=12
+CSV 24_REDIS_CACHE_OPPORTUNITIES.csv: rows=6, columns=6
+CSV 25_POSTGRESQL_QUERY_INVENTORY.csv: rows=3, columns=9
+CSV 27_DATABASE_PERFORMANCE_OPPORTUNITIES.csv: rows=4, columns=8
+CSV 29_BACKEND_LATENCY_BREAKDOWN.csv: rows=2, columns=16
+CSV 31_PERFORMANCE_ROOT_CAUSE_REGISTER.csv: rows=9, columns=10
+Sensitive marker 'ws05-local-only-postgres': not found
+Sensitive marker 'ws05-local-only-app': not found
+Sensitive marker 'ws05-local-only-migrator': not found
+Sensitive marker 'ws05-test-only-jwt-secret-value-minimum-32-characters': not found
+Sensitive marker 'POS_DEV_APP_PASSWORD': not found
+Sensitive marker 'owner@pos-demo.local': not found

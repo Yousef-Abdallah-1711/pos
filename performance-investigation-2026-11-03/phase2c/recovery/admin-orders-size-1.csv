@@ -1,0 +1,2 @@
+method,route,role,tenant_id,restaurant_id,source_commit,source_fingerprint,samples,status_counts,errors,response_bytes,records,first_sample_ms,warm_p50_ms,warm_p75_ms,warm_p95_ms,warm_p99_ms
+GET,admin-orders-page-size-1,tenant-owner,2,2,9e3614b605b4d1691835c37c0a088636ccf6abe2,phase2c-recovery-9e3614b,25,200:26,0,553,1,69.67,14.88,15.35,17.19,17.50

@@ -74,7 +74,7 @@ describe('Error Recovery Suggestions', () => {
       it('should include retry suggestion', () => {
         const suggestions = getRecoverySuggestions(networkContext)
 
-        expect(suggestions.some((s) => s.title.toLowerCase().includes('retry'))).toBe(true)
+        expect(suggestions.some((s) => s.action.label.toLowerCase().includes('retry'))).toBe(true)
       })
 
       it('should include support suggestion', () => {
@@ -94,7 +94,7 @@ describe('Error Recovery Suggestions', () => {
       it('should include login suggestion', () => {
         const suggestions = getRecoverySuggestions(authContext)
 
-        expect(suggestions.some((s) => s.title.toLowerCase().includes('login'))).toBe(true)
+        expect(suggestions.some((s) => s.action.label.toLowerCase() === 'log in')).toBe(true)
       })
 
       it('should include clear cache suggestion', () => {
@@ -114,7 +114,7 @@ describe('Error Recovery Suggestions', () => {
       it('should include contact admin suggestion', () => {
         const suggestions = getRecoverySuggestions(permContext)
 
-        expect(suggestions.some((s) => s.title.toLowerCase().includes('admin'))).toBe(true)
+        expect(suggestions.some((s) => s.action.label.toLowerCase().includes('administrator'))).toBe(true)
       })
 
       it('should include go back suggestion', () => {
@@ -355,13 +355,13 @@ describe('Error Recovery Suggestions', () => {
     it('should provide validation advice', () => {
       const advice = getErrorAdvice('validation', 'high')
 
-      expect(advice.toLowerCase()).toContain('input')
+      expect(advice.toLowerCase()).toContain('validation errors')
     })
 
     it('should provide network advice', () => {
       const advice = getErrorAdvice('network', 'medium')
 
-      expect(advice.toLowerCase()).toContain('connection')
+      expect(advice.toLowerCase()).toContain('try again in a moment')
     })
 
     it('should provide authentication advice', () => {

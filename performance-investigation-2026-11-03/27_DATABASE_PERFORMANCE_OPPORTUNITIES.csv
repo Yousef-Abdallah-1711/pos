@@ -1,0 +1,5 @@
+"finding","scope","root_cause","expected_benefit","implementation_effort","risk","priority","verification"
+"Query plan capture","all query families","pg_stat_statements absent; source-only query map","rank DB effort with real plans","M","avoid production EXPLAIN ANALYZE load","P1","safe SELECT EXPLAIN on realistic disposable synthetic fixtures"
+"Admin order list N+1","GET /api/v1/admin/orders, export","handler calls GetOrder for every list result","fewer database round trips, unquantified","M","preserve ordering, item shape, tenancy","P1","query counts + response equivalence benchmark"
+"Order list cap and pagination","admin orders","page size not evidently hard-capped; OFFSET","bound work and memory","S","client compatibility and large-page semantics","P1","boundary tests and SQL plans"
+"Repository timeout/cancellation","repositories","plain Query calls outnumber context-aware variants in static grep","bounded request work; unquantified","L","transaction/request context wiring","P2","cancelled request and pool timing traces"

@@ -1,0 +1,60 @@
+- generic [active] [ref=f12e1]:
+  - generic [ref=f12e6]:
+    - complementary [ref=f12e7]:
+      - generic [ref=f12e8]:
+        - link "POS Dashboard" [ref=f12e9] [cursor=pointer]:
+          - /url: /en/dashboard
+        - button "Collapse sidebar" [ref=f12e13] [cursor=pointer]
+      - navigation [ref=f12e18]:
+        - list [ref=f12e19]:
+          - listitem [ref=f12e20]:
+            - link "Dashboard" [ref=f12e21] [cursor=pointer]:
+              - /url: /en/dashboard
+          - listitem [ref=f12e25]:
+            - link "Cashier POS" [ref=f12e26] [cursor=pointer]:
+              - /url: /en/dashboard/pos
+          - listitem [ref=f12e30]:
+            - link "Kitchen Display" [ref=f12e31] [cursor=pointer]:
+              - /url: /en/dashboard/kds
+          - listitem [ref=f12e35]:
+            - button "Orders" [ref=f12e36] [cursor=pointer]
+          - listitem [ref=f12e46]:
+            - button "Products" [ref=f12e47] [cursor=pointer]
+          - listitem [ref=f12e56]:
+            - button "Human Resources" [ref=f12e57] [cursor=pointer]
+          - listitem [ref=f12e67]:
+            - button "Accounting" [ref=f12e68] [cursor=pointer]
+          - listitem [ref=f12e75]:
+            - button "Suppliers" [ref=f12e76] [cursor=pointer]
+          - listitem [ref=f12e85]:
+            - button "Financial Reports" [ref=f12e86] [cursor=pointer]
+          - listitem [ref=f12e93]:
+            - button "Reports" [ref=f12e94] [cursor=pointer]
+          - listitem [ref=f12e101]:
+            - link "Theme Builder" [ref=f12e102] [cursor=pointer]:
+              - /url: /en/dashboard/theme-builder
+          - listitem [ref=f12e110]:
+            - link "Settings" [ref=f12e111] [cursor=pointer]:
+              - /url: /en/dashboard/settings
+    - generic [ref=f12e116]:
+      - banner [ref=f12e117]:
+        - generic [ref=f12e120]:
+          - button "All Notifications" [ref=f12e122] [cursor=pointer]
+          - button "English" [ref=f12e127] [cursor=pointer]
+          - button "Dark Mode" [ref=f12e132] [cursor=pointer]
+          - button "A audit-owner-20261110@example.invalid owner" [ref=f12e136] [cursor=pointer]:
+            - generic [ref=f12e137]: A
+            - generic [ref=f12e138]
+      - main [ref=f12e143]:
+        - generic [ref=f12e145]:
+          - generic [ref=f12e146]:
+            - generic [ref=f12e147]
+            - generic [ref=f12e150]
+          - generic [ref=f12e153]:
+            - textbox [ref=f12e154]: 2026-10-12
+            - textbox [ref=f12e155]: 2026-11-10
+            - button "Refresh" [ref=f12e156] [cursor=pointer]
+          - generic [ref=f12e162]: Click refresh to load the advanced reports.
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=f12e168] [cursor=pointer]
+  - alert [ref=f12e5]

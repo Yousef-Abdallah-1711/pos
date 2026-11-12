@@ -1,0 +1,21 @@
+{
+  "generated_at": "2026-11-04",
+  "worktree": "C:\\Users\\yosea\\.codex\\worktrees\\phase2c-performance\\pos",
+  "head": "ecadb5ab7665df3eb9f69886a9b186c710eff62d",
+  "branch": "DETACHED",
+  "source_change_set_fingerprint": "18682E746A416D8D499306ABD46DACBE3111273ECC1DA65F0FF784E24CD6D03B",
+  "fingerprint_method": "SHA-256 over HEAD plus sorted status/path/SHA-256 entries for every modified or untracked file in the isolated worktree; ignored build outputs excluded.",
+  "status_entries": 11,
+  "phase2a_order_path_overlaps": [
+    " M backend/internal/handler/http/admin_order_handler.go",
+    " M backend/internal/handler/http/order_auto_posting_test.go",
+    " M backend/internal/repository/order_repo.go",
+    " M backend/internal/usecase/order_usecase.go"
+  ],
+  "phase2a_original_checkout_head": "ecadb5ab7665df3eb9f69886a9b186c710eff62d",
+  "phase2a_original_checkout_status_entries": 187,
+  "ws02_head": "9cb9a288ff3538c68e11caa2be9f50dd79cf8ee2",
+  "ws02_status_entries": 60,
+  "page_coverage_rows": 110,
+  "endpoint_unique_rows": 335
+}

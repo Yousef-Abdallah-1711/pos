@@ -79,7 +79,7 @@ export default function UsersPage() {
     try {
       // Fetch users
       const usersRes = await fetch(`${apiUrl}/users`, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: {  },
       })
       if (usersRes.ok) {
         const data = await usersRes.json()
@@ -91,7 +91,7 @@ export default function UsersPage() {
 
       // Fetch roles
       const rolesRes = await fetch(`${apiUrl}/rbac/roles`, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: {  },
       })
       if (rolesRes.ok) {
         const data = await rolesRes.json()
@@ -135,7 +135,7 @@ export default function UsersPage() {
     try {
       const { apiUrl } = getConfig()
       const res = await fetch(`${apiUrl}/rbac/users/${u.id}/roles`, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: {  },
       })
       if (res.ok) {
         const data = await res.json()
@@ -169,7 +169,7 @@ export default function UsersPage() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
+          
         },
         body: JSON.stringify({
           name: formData.name,
@@ -213,7 +213,7 @@ export default function UsersPage() {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
+          
         },
         body: JSON.stringify({
           name: formData.name,
@@ -247,7 +247,7 @@ export default function UsersPage() {
       const { apiUrl } = getConfig()
       const res = await fetch(`${apiUrl}/users/${selectedUser.id}`, {
         method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` },
+        headers: {  },
       })
 
       if (!res.ok) {
@@ -282,7 +282,7 @@ export default function UsersPage() {
       // Fetch current roles
       const { apiUrl } = getConfig()
       const currentRes = await fetch(`${apiUrl}/rbac/users/${selectedUser.id}/roles`, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: {  },
       })
       const currentRoles = currentRes.ok ? (await currentRes.json())?.data || [] : []
       const currentRoleIds = currentRoles.map((r: Role) => r.id)
@@ -292,7 +292,7 @@ export default function UsersPage() {
         if (!selectedRoles.includes(roleId)) {
           await fetch(
             `${apiUrl}/rbac/users/${selectedUser.id}/roles/${roleId}`,
-            { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } }
+            { method: 'DELETE', headers: {  } }
           )
         }
       }
@@ -304,7 +304,7 @@ export default function UsersPage() {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
-              Authorization: `Bearer ${token}`,
+              
             },
             body: JSON.stringify({ roleId }),
           })

@@ -7,7 +7,11 @@ import { useAuthStore } from '@/stores/authStore'
 
 const mockCreateOrder = vi.fn()
 const mockUpdatePaymentStatus = vi.fn()
-const mockPrintReceipt = vi.fn(async () => true)
+const mockPrintReceipt = vi.fn(async (receipt: {
+  orderNumber: string
+  paymentMethod: string
+  items: Array<{ name: string }>
+}) => Boolean(receipt.orderNumber))
 const mockPlaySound = vi.fn(async () => true)
 
 vi.mock('next/navigation', () => ({
@@ -212,9 +216,10 @@ describe('POS page Phase 3 auto-print integration', () => {
     })
 
     const receiptArg = mockPrintReceipt.mock.calls[0]?.[0]
+    if (!receiptArg) throw new Error('Receipt printer did not receive an order')
     expect(receiptArg.orderNumber).toBe('ORD-900')
     expect(receiptArg.paymentMethod).toBe('cash')
     expect(Array.isArray(receiptArg.items)).toBe(true)
-    expect(receiptArg.items[0].name).toBe('Burger')
+    expect(receiptArg.items[0]?.name).toBe('Burger')
   })
 })

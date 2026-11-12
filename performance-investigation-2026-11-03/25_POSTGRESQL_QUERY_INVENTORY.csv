@@ -1,0 +1,4 @@
+"query_family","table_scope","tenant_restaurant_scope","pagination","plan","exec_time_ms","rows","candidate","confidence"
+"GET /api/v1/admin/orders","orders + order items (handler hydration)","source trace required for every called repo method","OFFSET; page size lacks apparent max","NOT_COLLECTED","","","batch hydrate / JOIN after query-plan validation","HIGH static N+1; runtime impact unmeasured"
+"GET /api/v1/products","products, categories/related fields","tenant + restaurant predicates in sample","COUNT + LIMIT/OFFSET; default 20, max 100","NOT_COLLECTED","","","validate sort allowlist; inspect composite covering index","MEDIUM static"
+"KDS reads","orders and KDS-related tables","endpoint specific","not established","NOT_COLLECTED","selected DB metrics only, no plan","","correlate KDS repo timing with request IDs","LOW to MEDIUM"

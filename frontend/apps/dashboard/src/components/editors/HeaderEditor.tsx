@@ -504,6 +504,7 @@ export function HeaderEditor({
                     <button
                       onClick={() => moveNavItem(item.id, 'up')}
                       disabled={index === 0}
+                      aria-label={`Move ${item.label} up`}
                       className="p-1 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded disabled:opacity-50 transition"
                     >
                       <ChevronUp className="h-4 w-4" />
@@ -511,12 +512,14 @@ export function HeaderEditor({
                     <button
                       onClick={() => moveNavItem(item.id, 'down')}
                       disabled={index === (headerConfig.navigationItems?.length || 0) - 1}
+                      aria-label={`Move ${item.label} down`}
                       className="p-1 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded disabled:opacity-50 transition"
                     >
                       <ChevronDown className="h-4 w-4" />
                     </button>
                     <button
                       onClick={() => deleteNavItem(item.id)}
+                      aria-label={`Delete ${item.label}`}
                       className="p-1 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition"
                     >
                       <Trash2 className="h-4 w-4" />

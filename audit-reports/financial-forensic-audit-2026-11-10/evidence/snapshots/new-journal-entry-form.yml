@@ -1,0 +1,132 @@
+- generic [box=0,0,1583,1112]:
+  - generic [aria-hidden] [box=0,0,1583,1112]:
+    - generic [box=0,0,1583,1112]:
+      - complementary [box=0,0,256,1111]:
+        - generic [box=0,0,255,89]:
+          - link [box=16,16,187,56]:
+            - /url: /en/dashboard
+            - generic [box=55,16,148,56]: POS Dashboard
+          - button [box=207,28,32,32]
+        - generic [box=0,89,255,1022]:
+          - navigation [box=0,89,255,1022]:
+            - list [box=16,101,223,712]:
+              - listitem [box=16,101,223,48]:
+                - link [box=16,101,223,48]:
+                  - /url: /en/dashboard
+              - listitem [box=16,157,223,48]:
+                - link [box=16,157,223,48]:
+                  - /url: /en/dashboard/pos
+              - listitem [box=16,213,223,48]:
+                - link [box=16,213,223,48]:
+                  - /url: /en/dashboard/kds
+              - listitem [box=16,269,223,48]:
+                - button [box=16,269,223,48]
+              - listitem [box=16,325,223,48]:
+                - button [box=16,325,223,48]
+              - listitem [box=16,381,223,72]:
+                - button [box=16,381,223,72]
+              - listitem [box=16,461,223,48]:
+                - button [box=16,461,223,48]
+              - listitem [box=16,517,223,48]:
+                - button [box=16,517,223,48]
+              - listitem [box=16,573,223,72]:
+                - button [box=16,573,223,72]
+              - listitem [box=16,653,223,48]:
+                - button [box=16,653,223,48]
+              - listitem [box=16,709,223,48]:
+                - link [box=16,709,223,48]:
+                  - /url: /en/dashboard/theme-builder
+              - listitem [box=16,765,223,48]:
+                - link [box=16,765,223,48]:
+                  - /url: /en/dashboard/settings
+      - generic [box=256,0,1327,1112]:
+        - banner [box=256,0,1327,65]:
+          - generic [box=280,0,1280,64]:
+            - generic [box=311,0,1216,64]:
+              - generic [box=961,6,567,52]:
+                - generic [box=961,14,36,36]
+                - generic [box=1009,14,97,36]
+                - button [box=1117,14,36,36]
+                - generic [box=1165,6,362,52]
+        - main [box=256,65,1327,1047]:
+          - generic [box=280,65,1280,403]:
+            - generic [box=311,89,1216,355]:
+              - generic [box=311,89,1216,60]:
+                - generic [box=311,89,392,60]
+                - button [box=1353,89,175,40]: New journal entry
+              - generic [box=311,173,1216,271]:
+                - generic [box=311,173,1216,73]
+                - generic [box=311,262,1216,181]
+  - region "Notifications alt+T" [box=0,1112,1583,0]
+  - button "Open Next.js Dev Tools" [ref=f23e168] [cursor=pointer] [box=22,1057,32,32]
+  - alert [box=-1,1111,1,1]
+  - dialog "Create journal entry" [ref=f23e173] [box=224,107,1152,896]:
+    - heading "Create journal entry" [level=2] [ref=f23e175] [box=249,132,1103,18]
+    - generic [ref=f23e176] [box=249,166,1103,813]:
+      - generic [ref=f23e177] [box=249,166,1103,248]:
+        - generic [ref=f23e178] [box=249,166,543,72]:
+          - text: Entry date
+          - textbox [ref=f23e179] [box=249,198,543,40]: 2026-11-10
+        - generic [ref=f23e180] [box=808,166,543,72]:
+          - text: Entry type
+          - textbox "manual" [ref=f23e181] [box=808,198,543,40]
+        - generic [ref=f23e182] [box=249,254,543,72]:
+          - text: Description
+          - textbox "Record petty cash replenishment" [ref=f23e183] [box=249,286,543,40]
+        - generic [ref=f23e184] [box=808,254,543,72]:
+          - text: Arabic description
+          - textbox "قيد تغذية عهدة المصروفات" [ref=f23e185] [box=808,286,543,40]
+        - generic [ref=f23e186] [box=249,342,543,72]:
+          - text: Reference type
+          - textbox "expense_claim" [ref=f23e187] [box=249,374,543,40]
+        - generic [ref=f23e188] [box=808,342,543,72]:
+          - text: Reference number
+          - textbox "EXP-2026-0012" [ref=f23e189] [box=808,374,543,40]
+      - generic [ref=f23e190] [box=249,438,1103,112]:
+        - text: Notes
+        - textbox "Optional notes for approvers or auditors." [ref=f23e191] [box=249,470,1103,80]
+      - generic [ref=f23e192] [box=249,574,1103,324]:
+        - generic [ref=f23e193] [box=249,575,1101,77]:
+          - generic [ref=f23e194] [box=265,591,310,44]:
+            - heading "Journal lines" [level=3] [ref=f23e195] [box=265,591,310,24]
+            - paragraph [ref=f23e196] [box=265,615,310,20]: Add debit and credit lines until the entry balances.
+          - generic [ref=f23e197] [box=957,594,378,37]:
+            - generic [ref=f23e198] [box=957,594,120,37]: "Debit: EGP 0.00"
+            - generic [ref=f23e199] [box=1088,594,124,37]: "Credit: EGP 0.00"
+            - generic [ref=f23e200] [box=1224,594,111,37]: Not balanced
+        - table [ref=f23e202] [box=249,651,1101,173]:
+          - rowgroup [ref=f23e203] [box=249,651,1101,44]:
+            - row [ref=f23e204] [box=249,651,1101,44]:
+              - columnheader "Account" [ref=f23e205] [box=249,651,334,44]
+              - columnheader "Description" [ref=f23e206] [box=584,651,230,44]
+              - columnheader "Debit" [ref=f23e207] [box=814,651,230,44]
+              - columnheader "Credit" [ref=f23e208] [box=1044,651,230,44]
+              - columnheader "Action" [ref=f23e209] [box=1274,651,77,44]
+          - rowgroup [ref=f23e210] [box=249,696,1101,129]:
+            - row [ref=f23e211] [box=249,696,1101,65]:
+              - cell "Select account" [ref=f23e212] [box=249,696,334,65]:
+                - combobox [ref=f23e213] [box=265,708,288,40]
+              - cell [ref=f23e214] [box=584,696,230,65]:
+                - textbox "Optional line memo" [ref=f23e215] [box=600,708,198,40]
+              - cell [ref=f23e216] [box=814,696,230,65]:
+                - spinbutton "0.00" [ref=f23e217] [box=830,708,198,40]
+              - cell [ref=f23e218] [box=1044,696,230,65]:
+                - spinbutton "0.00" [ref=f23e219] [box=1060,708,198,40]
+              - cell [ref=f23e220] [box=1274,696,77,65]:
+                - button [disabled] [box=1293,708,41,36]
+            - row [ref=f23e221] [box=249,761,1101,64]:
+              - cell "Select account" [ref=f23e222] [box=249,761,334,64]:
+                - combobox [ref=f23e223] [box=265,773,288,40]
+              - cell [ref=f23e224] [box=584,761,230,64]:
+                - textbox "Optional line memo" [ref=f23e225] [box=600,773,198,40]
+              - cell [ref=f23e226] [box=814,761,230,64]:
+                - spinbutton "0.00" [ref=f23e227] [box=830,773,198,40]
+              - cell [ref=f23e228] [box=1044,761,230,64]:
+                - spinbutton "0.00" [ref=f23e229] [box=1060,773,198,40]
+              - cell [ref=f23e230] [box=1274,761,77,64]:
+                - button [disabled] [box=1293,773,41,36]
+        - button "Add line" [ref=f23e232] [cursor=pointer] [box=265,842,118,40]
+      - generic [ref=f23e234] [box=249,922,1103,57]:
+        - button "Cancel" [ref=f23e235] [cursor=pointer] [box=1117,939,75,40]
+        - button "Save journal entry" [ref=f23e236] [cursor=pointer] [box=1204,939,147,40]
+    - button "Close" [active] [ref=f23e237] [cursor=pointer] [box=1343,124,16,16]

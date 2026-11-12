@@ -1,0 +1,1 @@
+Evidence folder contents are sanitized browser snapshots and browser console records from the isolated unauthenticated Landing navigation / timed-out anonymous dashboard attempt. They are not Playwright trace archives or HAR files. Request bodies, response bodies, headers/cookies and credentials were not saved.

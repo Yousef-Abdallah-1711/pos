@@ -1,24 +1,32 @@
 package http
 
 import (
-	"encoding/json"
 	"log"
 	"net/http"
 	"strconv"
+	"time"
 
+	"pos-saas/internal/config"
 	"pos-saas/internal/middleware"
+	"pos-saas/internal/service"
 	"pos-saas/internal/usecase"
 )
 
 // ImpersonationHandler handles impersonation HTTP requests
 type ImpersonationHandler struct {
 	impersonationUC *usecase.ImpersonationUseCase
+	sessions        *service.AuthSessionStore
 }
 
 // NewImpersonationHandler creates a new impersonation handler
-func NewImpersonationHandler(impersonationUC *usecase.ImpersonationUseCase) *ImpersonationHandler {
+func NewImpersonationHandler(impersonationUC *usecase.ImpersonationUseCase, sessions ...*service.AuthSessionStore) *ImpersonationHandler {
+	var sessionStore *service.AuthSessionStore
+	if len(sessions) > 0 {
+		sessionStore = sessions[0]
+	}
 	return &ImpersonationHandler{
 		impersonationUC: impersonationUC,
+		sessions:        sessionStore,
 	}
 }
 
@@ -58,10 +66,24 @@ func (h *ImpersonationHandler) StartImpersonation(w http.ResponseWriter, r *http
 		})
 		return
 	}
+	if h.sessions == nil {
+		respondJSON(w, http.StatusInternalServerError, map[string]interface{}{"success": false, "error": "session service unavailable"})
+		return
+	}
+	ttl := time.Until(response.ExpiresAt)
+	sessionID, err := h.sessions.CreateImpersonation(r.Context(), response.Token, ttl)
+	if err != nil {
+		respondJSON(w, http.StatusInternalServerError, map[string]interface{}{"success": false, "error": "unable to establish impersonation session"})
+		return
+	}
+	secure := r.TLS != nil || config.IsProductionMode()
+	http.SetCookie(w, &http.Cookie{Name: service.ImpersonationSessionCookieName, Value: sessionID, Path: "/", HttpOnly: true, Secure: secure, SameSite: http.SameSiteLaxMode, MaxAge: int(ttl.Seconds()), Expires: response.ExpiresAt})
+	w.Header().Set("Cache-Control", "no-store")
+	w.Header().Set("Referrer-Policy", "no-referrer")
 
 	respondJSON(w, http.StatusOK, map[string]interface{}{
 		"success": true,
-		"data":    response,
+		"data":    map[string]interface{}{"expires_at": response.ExpiresAt, "target_user": response.TargetUser, "target_tenant_id": response.TargetTenantID},
 	})
 }
 
@@ -90,6 +112,10 @@ func (h *ImpersonationHandler) EndImpersonation(w http.ResponseWriter, r *http.R
 		})
 		return
 	}
+	if cookie, cookieErr := r.Cookie(service.ImpersonationSessionCookieName); cookieErr == nil && h.sessions != nil {
+		_ = h.sessions.Revoke(r.Context(), cookie.Value)
+	}
+	http.SetCookie(w, &http.Cookie{Name: service.ImpersonationSessionCookieName, Value: "", Path: "/", HttpOnly: true, Secure: r.TLS != nil || config.IsProductionMode(), SameSite: http.SameSiteLaxMode, MaxAge: -1, Expires: time.Unix(1, 0)})
 
 	respondJSON(w, http.StatusOK, map[string]interface{}{
 		"success": true,
@@ -101,39 +127,25 @@ func (h *ImpersonationHandler) EndImpersonation(w http.ResponseWriter, r *http.R
 func (h *ImpersonationHandler) EndImpersonationByToken(w http.ResponseWriter, r *http.Request) {
 	log.Printf("[ImpersonationHandler] EndImpersonationByToken request\n")
 
-	// Get token from body or header
-	var token string
-
-	// Try to get from body
-	var body struct {
-		Token string `json:"token"`
-	}
-	if err := json.NewDecoder(r.Body).Decode(&body); err == nil && body.Token != "" {
-		token = body.Token
-	}
-
-	// Try header
-	if token == "" {
-		token = r.Header.Get("X-Impersonation-Token")
-	}
-
-	// Try query parameter
-	if token == "" {
-		token = r.URL.Query().Get("token")
-	}
-
-	if token == "" {
+	cookie, cookieErr := r.Cookie(service.ImpersonationSessionCookieName)
+	if cookieErr != nil || cookie.Value == "" || h.sessions == nil {
 		respondJSON(w, http.StatusBadRequest, map[string]interface{}{
 			"success": false,
-			"error":   "impersonation token required",
+			"error":   "impersonation session required",
 		})
 		return
 	}
+	credential, err := h.sessions.Resolve(r.Context(), cookie.Value)
+	if err != nil || !service.IsImpersonationCredential(credential) {
+		respondJSON(w, http.StatusUnauthorized, map[string]interface{}{"success": false, "error": "invalid impersonation session"})
+		return
+	}
+	token := service.UnwrapImpersonationCredential(credential)
 
 	ip := middleware.GetClientIP(r)
 	userAgent := r.UserAgent()
 
-	err := h.impersonationUC.EndImpersonationByToken(r.Context(), token, ip, userAgent)
+	err = h.impersonationUC.EndImpersonationByToken(r.Context(), token, ip, userAgent)
 	if err != nil {
 		log.Printf("[ImpersonationHandler] EndImpersonationByToken failed: %v\n", err)
 		respondJSON(w, http.StatusBadRequest, map[string]interface{}{
@@ -142,6 +154,11 @@ func (h *ImpersonationHandler) EndImpersonationByToken(w http.ResponseWriter, r 
 		})
 		return
 	}
+	if err := h.sessions.Revoke(r.Context(), cookie.Value); err != nil {
+		respondJSON(w, http.StatusInternalServerError, map[string]interface{}{"success": false, "error": "unable to end impersonation session"})
+		return
+	}
+	http.SetCookie(w, &http.Cookie{Name: service.ImpersonationSessionCookieName, Value: "", Path: "/", HttpOnly: true, Secure: r.TLS != nil || config.IsProductionMode(), SameSite: http.SameSiteLaxMode, MaxAge: -1, Expires: time.Unix(1, 0)})
 
 	respondJSON(w, http.StatusOK, map[string]interface{}{
 		"success": true,
@@ -198,19 +215,20 @@ func (h *ImpersonationHandler) GetImpersonationStatus(w http.ResponseWriter, r *
 func (h *ImpersonationHandler) ValidateImpersonationToken(w http.ResponseWriter, r *http.Request) {
 	log.Printf("[ImpersonationHandler] ValidateImpersonationToken request\n")
 
-	// Get token from query or header
-	token := r.URL.Query().Get("token")
-	if token == "" {
-		token = r.Header.Get("X-Impersonation-Token")
-	}
-
-	if token == "" {
+	cookie, cookieErr := r.Cookie(service.ImpersonationSessionCookieName)
+	if cookieErr != nil || cookie.Value == "" || h.sessions == nil {
 		respondJSON(w, http.StatusBadRequest, map[string]interface{}{
 			"success": false,
-			"error":   "token required",
+			"error":   "impersonation session required",
 		})
 		return
 	}
+	credential, err := h.sessions.Resolve(r.Context(), cookie.Value)
+	if err != nil || !service.IsImpersonationCredential(credential) {
+		respondJSON(w, http.StatusUnauthorized, map[string]interface{}{"success": false, "valid": false, "error": "invalid impersonation session"})
+		return
+	}
+	token := service.UnwrapImpersonationCredential(credential)
 
 	session, user, err := h.impersonationUC.ValidateImpersonation(r.Context(), token)
 	if err != nil {

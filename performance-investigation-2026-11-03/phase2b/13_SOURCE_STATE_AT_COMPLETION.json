@@ -1,0 +1,11 @@
+{
+  "head": "ecadb5ab7665df3eb9f69886a9b186c710eff62d",
+  "source_file_count": 1346,
+  "changed_or_missing_since_build": 2,
+  "changed_paths": [
+    "backend/cmd/api/main.go",
+    "frontend/apps/landing/src/app/[locale]/auth/login/page.tsx"
+  ],
+  "build_source_fingerprint": "A00BD5F7ED5E0B239291B6412A58439088098E31DC4C8E90787D0CD5F20259AC",
+  "finalized_utc": "2026-11-03T21:23:10.1718280Z"
+}

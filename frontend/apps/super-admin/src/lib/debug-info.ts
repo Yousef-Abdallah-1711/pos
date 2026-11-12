@@ -7,13 +7,9 @@ export function logDebugInfo() {
   console.log("- API URL:", process.env.NEXT_PUBLIC_SUPER_ADMIN_API_URL);
   console.log("- App Name:", process.env.NEXT_PUBLIC_APP_NAME);
 
-  console.log("\nLocalStorage:");
+  console.log("\nBrowser authentication:");
   if (typeof window !== "undefined") {
-    const token = localStorage.getItem("super-admin-token");
-    const authStore = localStorage.getItem("super-admin-auth-store");
-    console.log("- Token exists:", !!token);
-    console.log("- Token length:", token?.length);
-    console.log("- Auth store exists:", !!authStore);
+    console.log("- Authentication uses an HttpOnly server session cookie");
   }
 
   console.log("\nAPI Endpoints that will be used:");

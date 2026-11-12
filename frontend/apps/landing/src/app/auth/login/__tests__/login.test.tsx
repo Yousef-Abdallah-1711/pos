@@ -59,7 +59,7 @@ describe('LoginPage - Multi-Tenant Authentication Flow', () => {
       })
 
       await waitFor(() => {
-        expect(mockSetAuth).toHaveBeenCalledWith(mockResponse.data.user, mockResponse.data.token)
+        expect(mockSetAuth).toHaveBeenCalledWith(mockResponse.data.user, '')
       })
     })
   })

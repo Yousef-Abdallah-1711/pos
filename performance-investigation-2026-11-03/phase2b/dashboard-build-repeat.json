@@ -1,0 +1,8 @@
+{
+  "start": "2026-11-03T22:33:23.6709993+02:00",
+  "finish": "2026-11-03T22:39:32.2878303+02:00",
+  "elapsed_seconds": 368.62,
+  "source_fingerprint_before": "A00BD5F7ED5E0B239291B6412A58439088098E31DC4C8E90787D0CD5F20259AC",
+  "build": "dashboard production image",
+  "status": "success"
+}

@@ -205,7 +205,7 @@ export const useThemeBuilderStore = create<ThemeBuilderState>()(
           currentTheme: theme,
           colors: theme.colors || defaultColors,
           typography: theme.typography || defaultTypography,
-          identity: theme.identity || theme.websiteIdentity || defaultIdentity,
+          identity: theme.websiteIdentity || theme.identity || defaultIdentity,
           header: theme.header || defaultHeader,
           footer: theme.footer || defaultFooter,
           components: theme.components || [],

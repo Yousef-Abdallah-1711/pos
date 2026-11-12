@@ -245,7 +245,7 @@ export const posApi = {
   async createOrder(payload: CreatePOSOrderPayload): Promise<POSOrderResponse> {
     try {
       const sanitizedPayload = sanitizeCreateOrderPayload(payload)
-      const response = await api.post('/public/orders', sanitizedPayload)
+      const response = await api.post('/pos/orders', sanitizedPayload)
       return extractOrderResponse(response.data)
     } catch (error) {
       debugError('[posApi] Failed to create POS order:', error)

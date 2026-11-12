@@ -1,0 +1,243 @@
+- generic [active] [ref=f1e1]:
+  - main [ref=f1e2]:
+    - navigation [ref=f1e3]:
+      - generic [ref=f1e5]:
+        - link "RestaurantPOS" [ref=f1e6] [cursor=pointer]:
+          - /url: /en
+        - generic [ref=f1e11]:
+          - link "Features" [ref=f1e12] [cursor=pointer]:
+            - /url: "#features"
+          - link "Pricing" [ref=f1e13] [cursor=pointer]:
+            - /url: "#pricing"
+          - link "About" [ref=f1e14] [cursor=pointer]:
+            - /url: "#about"
+          - link "Contact" [ref=f1e15] [cursor=pointer]:
+            - /url: "#contact"
+        - generic [ref=f1e16]:
+          - button "Toggle theme" [ref=f1e17] [cursor=pointer]
+          - button "Switch language" [ref=f1e20] [cursor=pointer]:
+            - generic [ref=f1e24]: العربية
+          - generic [ref=f1e25]:
+            - link "Login" [ref=f1e26] [cursor=pointer]:
+              - /url: /en/auth/login
+            - link "Start Free Trial" [ref=f1e27] [cursor=pointer]:
+              - /url: /en/auth/register
+    - generic [ref=f1e35]:
+      - generic [ref=f1e36]:
+        - generic [ref=f1e37]: 30-Day Free Trial — No Credit Card Required
+        - heading "Transform Your Restaurant with Smart POS Technology" [level=1] [ref=f1e40]: Transform Your Restaurant withSmart POS Technology
+        - paragraph [ref=f1e41]: All-in-one cloud-based platform with POS, Kitchen Display, Online Ordering, Analytics, and Multi-Restaurant Management — everything you need to grow.
+        - generic [ref=f1e42]:
+          - link "Start Free Trial" [ref=f1e43] [cursor=pointer]:
+            - /url: /en/auth/register
+          - link "Watch Demo" [ref=f1e46] [cursor=pointer]:
+            - /url: "#demo"
+        - generic [ref=f1e49]: Trusted by 500+ restaurants
+        - generic [ref=f1e54]:
+          - generic [ref=f1e55]:
+            - generic [ref=f1e56]: 500+
+            - generic [ref=f1e57]: Restaurants
+          - generic [ref=f1e58]:
+            - generic [ref=f1e59]: 10K+
+            - generic [ref=f1e60]: Orders/Day
+          - generic [ref=f1e61]:
+            - generic [ref=f1e62]: 99.9%
+            - generic [ref=f1e63]: Uptime
+      - generic [ref=f1e65]:
+        - generic [ref=f1e66]:
+          - generic [ref=f1e67]: Restaurant POS Dashboard
+          - generic [ref=f1e73]:
+            - generic [ref=f1e74]:
+              - generic [ref=f1e75]:
+                - generic [ref=f1e76]: 12,450 EGP
+                - generic [ref=f1e77]: Revenue
+              - generic [ref=f1e78]:
+                - generic [ref=f1e79]: "84"
+                - generic [ref=f1e80]: Orders
+              - generic [ref=f1e81]:
+                - generic [ref=f1e82]: 148 EGP
+                - generic [ref=f1e83]: Avg. Order
+            - generic [ref=f1e84]:
+              - generic [ref=f1e85]: Recent Orders
+              - generic [ref=f1e86]:
+                - generic [ref=f1e87]: "#2341"
+                - generic [ref=f1e88]: Table 5
+                - generic [ref=f1e89]: 3 items
+                - generic [ref=f1e90]: Ready
+              - generic [ref=f1e91]:
+                - generic [ref=f1e92]: "#2340"
+                - generic [ref=f1e93]: Table 12
+                - generic [ref=f1e94]: 2 items
+                - generic [ref=f1e95]: Cooking
+              - generic [ref=f1e96]:
+                - generic [ref=f1e97]: "#2339"
+                - generic [ref=f1e98]: Takeaway
+                - generic [ref=f1e99]: 5 items
+                - generic [ref=f1e100]: Done
+            - generic [ref=f1e101]: Weekly Sales
+        - generic [ref=f1e110]:
+          - generic [ref=f1e111]: Order Completed
+          - generic [ref=f1e112]: Table 12 • Paid
+        - generic [ref=f1e118]:
+          - generic [ref=f1e119]: 12,450 EGP
+          - generic [ref=f1e120]: Today's Sales
+    - generic [ref=f1e122]:
+      - generic [ref=f1e123]:
+        - generic [ref=f1e124]: Features
+        - heading "Everything Your Restaurant Needs" [level=2] [ref=f1e125]
+        - paragraph [ref=f1e126]: Powerful features designed for modern restaurants — from a single café to a restaurant chain
+      - generic [ref=f1e127]:
+        - generic [ref=f1e128]:
+          - heading "POS System" [level=3] [ref=f1e133]
+          - paragraph [ref=f1e134]: Fast, touch-optimized order entry with payment processing and receipt printing
+        - generic [ref=f1e136]:
+          - heading "Kitchen Display" [level=3] [ref=f1e141]
+          - paragraph [ref=f1e142]: Real-time order queue with status updates and chef notifications
+        - generic [ref=f1e144]:
+          - heading "Online Ordering" [level=3] [ref=f1e150]
+          - paragraph [ref=f1e151]: Customizable restaurant website with online ordering and delivery
+        - generic [ref=f1e153]:
+          - heading "Analytics & Reports" [level=3] [ref=f1e158]
+          - paragraph [ref=f1e159]: Comprehensive insights into sales, inventory, and staff performance
+        - generic [ref=f1e161]:
+          - heading "Multi-Restaurant" [level=3] [ref=f1e169]
+          - paragraph [ref=f1e170]: Manage multiple locations from a single dashboard
+        - generic [ref=f1e172]:
+          - heading "Mobile Apps" [level=3] [ref=f1e177]
+          - paragraph [ref=f1e178]: iOS and Android apps for staff and customers
+    - generic [ref=f1e181]:
+      - generic [ref=f1e182]:
+        - generic [ref=f1e183]: How It Works
+        - heading "Up and Running in Minutes" [level=2] [ref=f1e184]
+        - paragraph [ref=f1e185]: Getting started is simple — no technical expertise required
+      - generic [ref=f1e186]:
+        - generic [ref=f1e187]:
+          - generic [ref=f1e188]: "01"
+          - heading "Sign Up Free" [level=3] [ref=f1e195]
+          - paragraph [ref=f1e196]: Create your account in under 2 minutes. No credit card required to start your 30-day trial.
+        - generic [ref=f1e197]:
+          - generic [ref=f1e198]: "02"
+          - heading "Set Up Your Restaurant" [level=3] [ref=f1e205]
+          - paragraph [ref=f1e206]: Add your menu, configure your staff roles, and customize your restaurant settings.
+        - generic [ref=f1e207]:
+          - generic [ref=f1e208]: "03"
+          - heading "Start Selling" [level=3] [ref=f1e215]
+          - paragraph [ref=f1e216]: Begin taking orders immediately. Accept payments, manage your kitchen, and grow your business.
+    - generic [ref=f1e218]:
+      - generic [ref=f1e219]:
+        - generic [ref=f1e220]: Pricing
+        - heading "Simple, Transparent Pricing" [level=2] [ref=f1e221]
+        - paragraph [ref=f1e222]: One plan, all features included. Start free for 30 days.
+      - generic [ref=f1e223]:
+        - generic [ref=f1e224]:
+          - generic [ref=f1e225]: 30-Day Free Trial
+          - paragraph [ref=f1e230]: No credit card required to start
+        - generic [ref=f1e231]:
+          - generic [ref=f1e232]:
+            - generic [ref=f1e233]: After your free trial
+            - generic [ref=f1e237]:
+              - generic [ref=f1e238]: "500"
+              - generic [ref=f1e239]:
+                - generic [ref=f1e240]: EGP
+                - generic [ref=f1e241]: /month
+            - generic [ref=f1e242]: Everything Included
+          - generic [ref=f1e245]:
+            - generic [ref=f1e246]: Unlimited Restaurants
+            - generic [ref=f1e251]: Unlimited Staff Members
+            - generic [ref=f1e256]: Full POS System
+            - generic [ref=f1e261]: Kitchen Display System
+            - generic [ref=f1e266]: Online Ordering Website
+            - generic [ref=f1e271]: Analytics & Reports Dashboard
+            - generic [ref=f1e276]: Multi-Restaurant Management
+            - generic [ref=f1e281]: Mobile Apps (iOS & Android)
+            - generic [ref=f1e286]: Priority Customer Support
+            - generic [ref=f1e291]: Free Updates & New Features
+          - link "Start Free Trial" [ref=f1e296] [cursor=pointer]:
+            - /url: /en/auth/register
+          - generic [ref=f1e297]:
+            - generic [ref=f1e298]: No credit card required
+            - generic [ref=f1e301]: Cancel anytime
+        - paragraph [ref=f1e304]: After 30 days, only 500 EGP/month
+    - generic [ref=f1e306]:
+      - generic [ref=f1e307]:
+        - generic [ref=f1e308]: Testimonials
+        - heading "Loved by Restaurant Owners" [level=2] [ref=f1e309]
+        - paragraph [ref=f1e310]: See what our customers say about us
+      - generic [ref=f1e311]:
+        - generic [ref=f1e312]:
+          - paragraph [ref=f1e328]: “This system transformed how we manage our restaurant. Orders are faster, staff love it, and our revenue increased by 30% in just 3 months.”
+          - generic [ref=f1e329]:
+            - img "Ahmed Hassan" [ref=f1e330]
+            - generic [ref=f1e331]:
+              - generic [ref=f1e332]: Ahmed Hassan
+              - generic [ref=f1e333]: Owner, Cairo Grill
+        - generic [ref=f1e334]:
+          - paragraph [ref=f1e350]: “The kitchen display alone was worth the subscription. No more lost tickets, no more miscommunication. Service has never been smoother.”
+          - generic [ref=f1e351]:
+            - img "Sara Mohamed" [ref=f1e352]
+            - generic [ref=f1e353]:
+              - generic [ref=f1e354]: Sara Mohamed
+              - generic [ref=f1e355]: Manager, Nile View Restaurant
+        - generic [ref=f1e356]:
+          - paragraph [ref=f1e372]: “Managing 3 locations used to be a nightmare. Now I can see everything from one dashboard. The analytics help me make smarter decisions every day.”
+          - generic [ref=f1e373]:
+            - img "Omar Khalil" [ref=f1e374]
+            - generic [ref=f1e375]:
+              - generic [ref=f1e376]: Omar Khalil
+              - generic [ref=f1e377]: CEO, Al-Sham Restaurant Group
+    - generic [ref=f1e384]:
+      - heading "Ready to Transform Your Restaurant?" [level=2] [ref=f1e385]
+      - paragraph [ref=f1e386]: Start your free 30-day trial today. Join 500+ restaurants already using our platform.
+      - link "Start Free Trial" [ref=f1e387] [cursor=pointer]:
+        - /url: /en/auth/register
+      - generic [ref=f1e390]: No credit card required • Cancel anytime
+    - generic [ref=f1e396]:
+      - generic [ref=f1e397]:
+        - generic [ref=f1e398]:
+          - link "RestaurantPOS" [ref=f1e399] [cursor=pointer]:
+            - /url: /en
+          - paragraph [ref=f1e404]: Complete restaurant management solution for modern businesses.
+        - generic [ref=f1e405]:
+          - heading "Product" [level=3] [ref=f1e406]
+          - list [ref=f1e407]:
+            - listitem [ref=f1e408]:
+              - link "Features" [ref=f1e409] [cursor=pointer]:
+                - /url: "#features"
+            - listitem [ref=f1e410]:
+              - link "Pricing" [ref=f1e411] [cursor=pointer]:
+                - /url: "#pricing"
+            - listitem [ref=f1e412]:
+              - link "Demo" [ref=f1e413] [cursor=pointer]:
+                - /url: /en/demo
+        - generic [ref=f1e414]:
+          - heading "Company" [level=3] [ref=f1e415]
+          - list [ref=f1e416]:
+            - listitem [ref=f1e417]:
+              - link "About" [ref=f1e418] [cursor=pointer]:
+                - /url: /en/about
+            - listitem [ref=f1e419]:
+              - link "Blog" [ref=f1e420] [cursor=pointer]:
+                - /url: /en/blog
+            - listitem [ref=f1e421]:
+              - link "Contact" [ref=f1e422] [cursor=pointer]:
+                - /url: "#contact"
+        - generic [ref=f1e423]:
+          - heading "Support" [level=3] [ref=f1e424]
+          - list [ref=f1e425]:
+            - listitem [ref=f1e426]:
+              - link "Help Center" [ref=f1e427] [cursor=pointer]:
+                - /url: /en/help
+            - listitem [ref=f1e428]:
+              - link "Documentation" [ref=f1e429] [cursor=pointer]:
+                - /url: /en/docs
+            - listitem [ref=f1e430]:
+              - link "API" [ref=f1e431] [cursor=pointer]:
+                - /url: /en/api
+      - generic [ref=f1e432]:
+        - paragraph [ref=f1e433]: © 2026 Restaurant POS SaaS. All rights reserved.
+        - generic [ref=f1e434]:
+          - link "Privacy" [ref=f1e435] [cursor=pointer]:
+            - /url: /en/privacy
+          - link "Terms" [ref=f1e436] [cursor=pointer]:
+            - /url: /en/terms
+  - region "Notifications alt+T"

@@ -1,0 +1,14 @@
+{
+  "before_file_count": 1346,
+  "after_file_count": 1346,
+  "changed_source_file_count": 4,
+  "changed_source_files": [
+    "frontend/apps/dashboard/test-results/phase2a-unauthenticated-br-5923f--protected-dashboard-routes/error-context.md",
+    "frontend/apps/dashboard/playwright.phase2a.config.ts",
+    "frontend/apps/dashboard/tests/phase2a-e2e/phase2a.spec.ts",
+    "ADDED frontend/apps/dashboard/tests/phase2a-e2e/dashboard-auth-redirect.spec.ts"
+  ],
+  "before_fingerprint": "F3F900C12166DB38AAA9179E37FFD7B6DD2AC98BD413D1A30377BC3389FA1EA3",
+  "after_fingerprint": "A00BD5F7ED5E0B239291B6412A58439088098E31DC4C8E90787D0CD5F20259AC",
+  "fingerprint_stable": false
+}

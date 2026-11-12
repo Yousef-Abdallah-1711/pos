@@ -1,0 +1,2 @@
+method,route,role,tenant_id,restaurant_id,source_commit,source_fingerprint,samples,status_counts,errors,response_bytes,records,first_sample_ms,warm_p50_ms,warm_p75_ms,warm_p95_ms,warm_p99_ms
+GET,tenant-scoped-products,tenant-owner,2,2,b62ffcaa9c49ad4e2f25720c9c05b8c3165405e3,1fb1789712416e89abd211047f3ee4b9a99bde62,3,200:4,0,9664,20,48.22,11.07,11.50,11.50,11.50

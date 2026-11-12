@@ -32,11 +32,7 @@ export default function LoginPage() {
         password,
       });
 
-      // Store token in localStorage
-      localStorage.setItem("super-admin-token", response.token);
-
-      // Update auth store
-      setToken(response.token);
+      setToken("cookie-session");
       setSuperAdmin(response.super_admin);
 
       toast.success("Login successful!");

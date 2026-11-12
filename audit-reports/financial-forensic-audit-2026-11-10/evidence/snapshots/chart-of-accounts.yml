@@ -1,0 +1,58 @@
+- generic [active] [ref=f3e1] [box=0,0,1583,1112]:
+  - generic [ref=f3e6] [box=0,0,1583,1112]:
+    - complementary [ref=f3e7] [box=0,0,256,1111]:
+      - generic [ref=f3e8] [box=0,0,255,89]:
+        - link "POS Dashboard" [ref=f3e9] [cursor=pointer] [box=16,16,187,56]:
+          - /url: /en/dashboard
+        - button "Collapse sidebar" [ref=f3e13] [cursor=pointer] [box=207,28,32,32]
+      - navigation [ref=f3e18] [box=0,89,255,1022]:
+        - list [ref=f3e19] [box=16,101,223,712]:
+          - listitem [ref=f3e20] [box=16,101,223,48]:
+            - link "Dashboard" [ref=f3e21] [cursor=pointer] [box=16,101,223,48]:
+              - /url: /en/dashboard
+          - listitem [ref=f3e25] [box=16,157,223,48]:
+            - link "Cashier POS" [ref=f3e26] [cursor=pointer] [box=16,157,223,48]:
+              - /url: /en/dashboard/pos
+          - listitem [ref=f3e30] [box=16,213,223,48]:
+            - link "Kitchen Display" [ref=f3e31] [cursor=pointer] [box=16,213,223,48]:
+              - /url: /en/dashboard/kds
+          - listitem [ref=f3e35] [box=16,269,223,48]:
+            - button "Orders" [ref=f3e36] [cursor=pointer] [box=16,269,223,48]
+          - listitem [ref=f3e46] [box=16,325,223,48]:
+            - button "Products" [ref=f3e47] [cursor=pointer] [box=16,325,223,48]
+          - listitem [ref=f3e56] [box=16,381,223,72]:
+            - button "Human Resources" [ref=f3e57] [cursor=pointer] [box=16,381,223,72]
+          - listitem [ref=f3e67] [box=16,461,223,48]:
+            - button "Accounting" [ref=f3e68] [cursor=pointer] [box=16,461,223,48]
+          - listitem [ref=f3e75] [box=16,517,223,48]:
+            - button "Suppliers" [ref=f3e76] [cursor=pointer] [box=16,517,223,48]
+          - listitem [ref=f3e85] [box=16,573,223,72]:
+            - button "Financial Reports" [ref=f3e86] [cursor=pointer] [box=16,573,223,72]
+          - listitem [ref=f3e93] [box=16,653,223,48]:
+            - button "Reports" [ref=f3e94] [cursor=pointer] [box=16,653,223,48]
+          - listitem [ref=f3e101] [box=16,709,223,48]:
+            - link "Theme Builder" [ref=f3e102] [cursor=pointer] [box=16,709,223,48]:
+              - /url: /en/dashboard/theme-builder
+          - listitem [ref=f3e110] [box=16,765,223,48]:
+            - link "Settings" [ref=f3e111] [cursor=pointer] [box=16,765,223,48]:
+              - /url: /en/dashboard/settings
+    - generic [ref=f3e116] [box=256,0,1327,1112]:
+      - banner [ref=f3e117] [box=256,0,1327,65]:
+        - generic [ref=f3e120] [box=961,6,567,52]:
+          - button "All Notifications" [ref=f3e122] [cursor=pointer] [box=961,14,36,36]
+          - button "English" [ref=f3e127] [cursor=pointer] [box=1009,14,97,36]
+          - button "Dark Mode" [ref=f3e132] [cursor=pointer] [box=1117,14,36,36]
+          - button "A audit-owner-20261110@example.invalid owner" [ref=f3e136] [cursor=pointer] [box=1165,6,362,52]:
+            - generic [ref=f3e137] [box=1177,16,32,32]: A
+            - generic [ref=f3e138] [box=1221,14,266,36]
+      - main [ref=f3e143] [box=256,65,1327,1047]:
+        - generic [ref=f3e145] [box=311,89,1216,414]:
+          - generic [ref=f3e146] [box=311,89,1216,60]:
+            - generic [ref=f3e147] [box=311,89,492,60]
+            - button "New account" [ref=f3e150] [cursor=pointer] [box=1383,89,144,40]
+          - generic [ref=f3e152] [box=311,173,1216,330]:
+            - generic [ref=f3e154] [box=328,189,1183,40]
+            - generic [ref=f3e165] [box=740,386,359,52]
+  - region "Notifications alt+T" [box=0,1112,1583,0]
+  - button "Open Next.js Dev Tools" [ref=f3e173] [cursor=pointer] [box=22,1057,32,32]
+  - alert [ref=f3e5] [box=-1,1111,1,1]

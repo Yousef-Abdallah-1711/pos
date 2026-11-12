@@ -1,0 +1,5 @@
+route,sample,request_path,method,status,start_offset_ms,duration_ms,content_length_bytes,failure
+/dashboard,1,/api/v1/super-admin/dashboard/stats,GET,200,218.92089999999985,57.87,213,
+/dashboard,2,/api/v1/super-admin/dashboard/stats,GET,200,71.96619999999984,9.90,213,
+/dashboard/audit-logs,1,/api/v1/super-admin/audit-logs,GET,200,189.50660000000016,39.95,766,
+/dashboard/audit-logs,2,/api/v1/super-admin/audit-logs,GET,200,82.06880000000001,18.38,898,

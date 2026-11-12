@@ -1,0 +1,36 @@
+- generic [active] [ref=f21e1]:
+  - generic [ref=f21e6]:
+    - complementary [ref=f21e7]:
+      - generic [ref=f21e8]:
+        - link "POS Dashboard" [ref=f21e9] [cursor=pointer]:
+          - /url: /en/dashboard
+        - button "Collapse sidebar" [ref=f21e13] [cursor=pointer]
+      - navigation [ref=f21e18]:
+        - list [ref=f21e19]:
+          - listitem [ref=f21e20]
+          - listitem [ref=f21e25]
+          - listitem [ref=f21e30]
+          - listitem [ref=f21e35]
+          - listitem [ref=f21e46]
+          - listitem [ref=f21e56]
+          - listitem [ref=f21e67]
+          - listitem [ref=f21e75]
+          - listitem [ref=f21e85]
+          - listitem [ref=f21e93]
+          - listitem [ref=f21e101]
+          - listitem [ref=f21e110]
+    - generic [ref=f21e116]:
+      - banner [ref=f21e117]:
+        - generic [ref=f21e120]:
+          - button "All Notifications" [ref=f21e122] [cursor=pointer]
+          - button "English" [ref=f21e127] [cursor=pointer]
+          - button "Dark Mode" [ref=f21e132] [cursor=pointer]
+          - button "A audit-owner-20261110@example.invalid owner" [ref=f21e136] [cursor=pointer]
+      - main [ref=f21e143]:
+        - generic [ref=f21e145]:
+          - generic [ref=f21e146]
+          - generic [ref=f21e157]
+          - generic [ref=f21e183]
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=f21e208] [cursor=pointer]
+  - alert [ref=f21e5]
