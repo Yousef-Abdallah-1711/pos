@@ -42,8 +42,11 @@ func TestPhase6TenantIsolation_TrainingRepositoryListUsesTenantAndRestaurantScop
 	defer db.Close()
 
 	repo := NewTrainingRepository(db)
-	mock.ExpectQuery(`FROM training_records`).
+	mock.ExpectQuery(`SELECT COUNT\(1\) FROM training_records`).
 		WithArgs(7, 11).
+		WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(0))
+	mock.ExpectQuery(`FROM training_records`).
+		WithArgs(7, 11, 1000000, 0).
 		WillReturnRows(sqlmock.NewRows([]string{"id"}))
 
 	records, err := repo.List(7, 11)
@@ -67,8 +70,11 @@ func TestPhase6TenantIsolation_ContractRepositoryListUsesTenantAndRestaurantScop
 	defer db.Close()
 
 	repo := NewContractRepository(db)
-	mock.ExpectQuery(`FROM employment_contracts`).
+	mock.ExpectQuery(`SELECT COUNT\(1\) FROM employment_contracts`).
 		WithArgs(7, 11).
+		WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(0))
+	mock.ExpectQuery(`FROM employment_contracts`).
+		WithArgs(7, 11, 1000000, 0).
 		WillReturnRows(sqlmock.NewRows([]string{"id"}))
 
 	records, err := repo.List(7, 11)
@@ -92,8 +98,11 @@ func TestPhase6TenantIsolation_ResignationRepositoryListUsesTenantAndRestaurantS
 	defer db.Close()
 
 	repo := NewResignationRepository(db)
-	mock.ExpectQuery(`FROM resignations`).
+	mock.ExpectQuery(`SELECT COUNT\(1\) FROM resignations`).
 		WithArgs(7, 11).
+		WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(0))
+	mock.ExpectQuery(`FROM resignations`).
+		WithArgs(7, 11, 1000000, 0).
 		WillReturnRows(sqlmock.NewRows([]string{"id"}))
 
 	records, err := repo.List(7, 11)
@@ -117,8 +126,11 @@ func TestPhase6TenantIsolation_SupplierRepositoryListUsesTenantAndRestaurantScop
 	defer db.Close()
 
 	repo := NewSupplierRepository(db)
-	mock.ExpectQuery(`FROM suppliers`).
+	mock.ExpectQuery(`SELECT COUNT\(1\) FROM suppliers`).
 		WithArgs(7, 11).
+		WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(0))
+	mock.ExpectQuery(`FROM suppliers`).
+		WithArgs(7, 11, 1000000, 0).
 		WillReturnRows(sqlmock.NewRows([]string{"id"}))
 
 	records, err := repo.ListSuppliers(7, 11)
@@ -142,8 +154,11 @@ func TestPhase6TenantIsolation_CustomerAccountRepositoryListUsesTenantAndRestaur
 	defer db.Close()
 
 	repo := NewCustomerAccountRepository(db)
-	mock.ExpectQuery(`FROM customers_accounting`).
+	mock.ExpectQuery(`SELECT COUNT\(1\) FROM customers_accounting`).
 		WithArgs(7, 11).
+		WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(0))
+	mock.ExpectQuery(`FROM customers_accounting`).
+		WithArgs(7, 11, 1000000, 0).
 		WillReturnRows(sqlmock.NewRows([]string{"id"}))
 
 	records, err := repo.ListCustomers(7, 11)
@@ -167,8 +182,11 @@ func TestPhase6TenantIsolation_BankAccountRepositoryListUsesTenantAndRestaurantS
 	defer db.Close()
 
 	repo := NewBankAccountRepository(db)
-	mock.ExpectQuery(`FROM bank_accounts_ledger`).
+	mock.ExpectQuery(`SELECT COUNT\(1\) FROM bank_accounts_ledger`).
 		WithArgs(7, 11).
+		WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(0))
+	mock.ExpectQuery(`FROM bank_accounts_ledger`).
+		WithArgs(7, 11, 1000000, 0).
 		WillReturnRows(sqlmock.NewRows([]string{"id"}))
 
 	records, err := repo.ListBankAccounts(7, 11)
@@ -319,8 +337,11 @@ func TestPhase6TenantIsolation_InsuranceRepositoryListUsesTenantAndRestaurantSco
 	defer db.Close()
 
 	repo := NewInsuranceRepository(db)
-	mock.ExpectQuery(`FROM insurance_tracking`).
+	mock.ExpectQuery(`SELECT COUNT\(1\) FROM insurance_tracking`).
 		WithArgs(7, 11).
+		WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(0))
+	mock.ExpectQuery(`FROM insurance_tracking`).
+		WithArgs(7, 11, 1000000, 0).
 		WillReturnRows(sqlmock.NewRows([]string{"id"}))
 
 	records, err := repo.List(7, 11)
