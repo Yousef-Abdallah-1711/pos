@@ -3,6 +3,7 @@
 import React, { useEffect, ReactNode } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useAuthStore } from "@/stores/authStore";
+import { superAdminAPI } from "@/lib/api";
 
 interface SuperAdminAuthProviderProps {
   children: ReactNode;
@@ -18,33 +19,31 @@ export function SuperAdminAuthProvider({ children }: SuperAdminAuthProviderProps
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated());
 
   useEffect(() => {
+    let active = true;
     setLoading(true);
+    localStorage.removeItem("super-admin-token");
 
-    // Check if we have a stored token
-    const storedToken = localStorage.getItem("super-admin-token");
-
-    if (storedToken && !token) {
-      // Token in storage but not in state - restore it
-      useAuthStore.setState({ token: storedToken });
-    }
-
-    // Determine if route protection is needed
-    const isPublicRoute = PUBLIC_ROUTES.includes(pathname);
-    const isProtectedRoute = PROTECTED_ROUTES.some((route) =>
-      pathname.startsWith(route)
-    );
-
-    if (isProtectedRoute && !isAuthenticated && !storedToken) {
-      // Trying to access protected route without auth
-      router.push("/login");
-    } else if (isPublicRoute && isAuthenticated) {
-      // Already authenticated, redirect from login to dashboard
-      if (pathname === "/login") {
-        router.push("/dashboard");
+    superAdminAPI.getSession().then((session) => {
+      if (active) {
+        useAuthStore.setState({
+          token: "cookie-session",
+          superAdmin: { ...session.super_admin, email: session.email },
+        });
       }
-    }
+    }).catch(() => {
+      if (active) useAuthStore.setState({ token: null });
+    }).finally(() => {
+      if (!active) return;
+      const hasSession = useAuthStore.getState().isAuthenticated();
+      const isPublicRoute = PUBLIC_ROUTES.includes(pathname);
+      const isProtectedRoute = PROTECTED_ROUTES.some((route) => pathname.startsWith(route));
 
-    setLoading(false);
+      if (isProtectedRoute && !hasSession) router.push("/login");
+      else if (isPublicRoute && hasSession && pathname === "/login") router.push("/dashboard");
+      setLoading(false);
+    });
+
+    return () => { active = false; };
   }, [pathname, token, isAuthenticated, router, setLoading]);
 
   if (isLoading) {

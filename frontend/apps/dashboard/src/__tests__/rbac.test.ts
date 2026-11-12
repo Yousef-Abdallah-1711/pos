@@ -12,6 +12,7 @@ import {
   MODULE_IDS,
   getModuleName,
   getPermissionDescription,
+  permissionCache,
 } from '@/lib/rbac'
 
 describe('RBAC Permission Functions', () => {
@@ -176,7 +177,6 @@ describe('RBAC Permission Functions', () => {
 
 describe('Permission Cache', () => {
   it('should be importable', () => {
-    const { permissionCache } = require('@/lib/rbac')
     expect(permissionCache).toBeDefined()
     expect(permissionCache.set).toBeDefined()
     expect(permissionCache.get).toBeDefined()

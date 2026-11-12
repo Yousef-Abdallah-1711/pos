@@ -59,10 +59,11 @@ describe('PropertiesPanel', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
-    ;(useThemeStore as any).mockImplementation((selector) => {
+    ;(useThemeStore as any).mockImplementation((selector: (state: unknown) => unknown) => {
       const store = {
         currentTheme: mockTheme,
         selectedComponentId: '1',
+        updateThemeColors: mockStoreActions.updateColors,
         ...mockStoreActions,
       }
       return selector(store)
@@ -76,10 +77,11 @@ describe('PropertiesPanel', () => {
     })
 
     it('should show empty state when no theme selected', () => {
-      ;(useThemeStore as any).mockImplementation((selector) => {
+      ;(useThemeStore as any).mockImplementation((selector: (state: unknown) => unknown) => {
         const store = {
           currentTheme: null,
           selectedComponentId: null,
+          updateThemeColors: mockStoreActions.updateColors,
           ...mockStoreActions,
         }
         return selector(store)
@@ -102,10 +104,11 @@ describe('PropertiesPanel', () => {
     })
 
     it('should not render component tab when no component is selected', () => {
-      ;(useThemeStore as any).mockImplementation((selector) => {
+      ;(useThemeStore as any).mockImplementation((selector: (state: unknown) => unknown) => {
         const store = {
           currentTheme: mockTheme,
           selectedComponentId: null,
+          updateThemeColors: mockStoreActions.updateColors,
           ...mockStoreActions,
         }
         return selector(store)
@@ -403,7 +406,7 @@ describe('PropertiesPanel', () => {
       fireEvent.click(componentTab)
 
       await waitFor(() => {
-        expect(screen.getByText(/Type: hero/)).toBeInTheDocument()
+        expect(screen.getByText('hero')).toBeInTheDocument()
       })
     })
 
@@ -414,7 +417,7 @@ describe('PropertiesPanel', () => {
       fireEvent.click(componentTab)
 
       await waitFor(() => {
-        expect(screen.getByText(/Title: Hero Section/)).toBeInTheDocument()
+        expect(screen.getByText('Hero Section')).toBeInTheDocument()
       })
     })
   })
@@ -507,7 +510,7 @@ describe('PropertiesPanel', () => {
 
   describe('Empty States', () => {
     it('should handle theme with empty component list', () => {
-      ;(useThemeStore as any).mockImplementation((selector) => {
+      ;(useThemeStore as any).mockImplementation((selector: (state: unknown) => unknown) => {
         const store = {
           currentTheme: {
             ...mockTheme,
@@ -524,7 +527,7 @@ describe('PropertiesPanel', () => {
     })
 
     it('should handle missing optional identity fields', () => {
-      ;(useThemeStore as any).mockImplementation((selector) => {
+      ;(useThemeStore as any).mockImplementation((selector: (state: unknown) => unknown) => {
         const store = {
           currentTheme: {
             ...mockTheme,
@@ -579,7 +582,7 @@ describe('PropertiesPanel', () => {
     it('should reflect theme changes from store', () => {
       const { rerender } = render(<PropertiesPanel />)
 
-      ;(useThemeStore as any).mockImplementation((selector) => {
+      ;(useThemeStore as any).mockImplementation((selector: (state: unknown) => unknown) => {
         const store = {
           currentTheme: {
             ...mockTheme,

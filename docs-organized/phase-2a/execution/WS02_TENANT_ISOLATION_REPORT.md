@@ -92,3 +92,15 @@ Current source has **24** interface methods and 24 concrete methods: 16 driver, 
 ### Current closure decision
 
 WS02 remains **PARTIAL**. The concrete driver repository boundary now has PostgreSQL side-effect evidence, but there is no full synthetic account/resource fixture, HTTP forgery matrix, bulk mutation matrix, background-job coverage, or cross-resource ownership matrix. The WS02 exit gate is not met.
+
+## Cross-user settings HTTP side-effect test — 2026-11-03
+
+Added `TestUserSettingsHTTPRejectsCrossUserMutationWithoutDatabaseSideEffects`. It authenticates a Tenant A user, sends a valid language update to a different same-tenant user's settings path, and verifies the response is 403, the target language remains unchanged in PostgreSQL, and no target audit row was created. The test passed against the isolated `pos-ws02-closure-20261103` PostgreSQL database.
+
+The focused WS02 packages (`internal/repository`, `internal/handler/http`, `internal/usecase`, and `internal/service`) passed against that database. A subsequent full Go 1.24 regression also passed: `go build ./...`, `go vet ./...`, and `go test -count=1 ./...`. The full test command used only the isolated WS02 `closure_test` database identity. Remaining matrix gaps are still open; this test closes only the user-settings HTTP mutation case.
+
+### HR test fixture packaging correction — 2026-11-03
+
+- Made the new HR child-resource ownership test self-contained so it does not depend on helper code in another uncommitted test file.
+- The focused PostgreSQL test passed after the correction. The full Go 1.24.13 build/vet/test gate then passed in the separate Projects checkout after safely integrating the two verified HR commits; the WS02 closure database was the only test database used.
+- PR #1 now contains both verified HR commits. WS02 remains partial for the matrix's other listed cases.

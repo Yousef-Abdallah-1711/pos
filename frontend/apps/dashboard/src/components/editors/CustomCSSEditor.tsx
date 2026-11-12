@@ -40,6 +40,7 @@ export function CustomCSSEditor({
 
   const [previewMode, setPreviewMode] = useState(false)
   const [validationErrors, setValidationErrors] = useState<ValidationError[]>([])
+  const [hasValidated, setHasValidated] = useState(false)
   const [copySuccess, setCopySuccess] = useState(false)
 
   // Validate CSS
@@ -103,10 +104,14 @@ export function CustomCSSEditor({
       }
 
       setCssConfig(newConfig)
+      setHasValidated(false)
 
       // Validate if enabled
       if (newConfig.cssValidationEnabled) {
         setValidationErrors(validateCSS(newCss))
+        setHasValidated(true)
+      } else {
+        setValidationErrors([])
       }
 
       // Update component
@@ -125,6 +130,7 @@ export function CustomCSSEditor({
     const css = cssConfig.customCss || ''
     const errors = validateCSS(css)
     setValidationErrors(errors)
+    setHasValidated(true)
   }, [cssConfig, validateCSS])
 
   const handleToggleValidation = useCallback(() => {
@@ -341,7 +347,7 @@ export function CustomCSSEditor({
         </div>
       )}
 
-      {errorCount === 0 && warningCount === 0 && validationErrors.length > 0 && (
+      {hasValidated && errorCount === 0 && warningCount === 0 && (
         <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4 flex items-center gap-2">
           <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400" />
           <p className="text-sm text-green-800 dark:text-green-200">CSS looks good! No errors found.</p>

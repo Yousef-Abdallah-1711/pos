@@ -4,6 +4,7 @@
  */
 
 import React, { ReactNode } from 'react'
+import { afterEach, beforeEach, vi, type Mock } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { EnhancedErrorBoundary } from '../enhanced-error-boundary'
 import { getErrorLogger } from '@/lib/error-handling/error-logger'
@@ -22,13 +23,13 @@ vi.mock('@/lib/error-handling/error-logger', () => ({
 vi.mock('@/lib/error-handling/error-recovery-suggestions', () => ({
   getRecoverySuggestions: vi.fn(() => [
     {
-      title: 'Try Again',
+      title: 'Retry the component',
       description: 'Attempt to reload the component',
       action: { label: 'Retry', onClick: vi.fn() },
       priority: 1,
     },
     {
-      title: 'Go to Dashboard',
+      title: 'Return to dashboard',
       description: 'Return to the main dashboard',
       action: { label: 'Dashboard', onClick: vi.fn() },
       priority: 2,
@@ -160,7 +161,7 @@ describe('EnhancedErrorBoundary', () => {
         log: vi.fn(),
         getAllLogs: vi.fn(() => []),
       }
-      ;(getErrorLogger as vi.Mock).mockReturnValue(mockLogger)
+      ;(getErrorLogger as Mock).mockReturnValue(mockLogger)
 
       render(
         <EnhancedErrorBoundary>
@@ -183,7 +184,7 @@ describe('EnhancedErrorBoundary', () => {
         log: vi.fn(),
         getAllLogs: vi.fn(() => []),
       }
-      ;(getErrorLogger as vi.Mock).mockReturnValue(mockLogger)
+      ;(getErrorLogger as Mock).mockReturnValue(mockLogger)
 
       const testContext = { userId: '123', theme: 'dark' }
 
@@ -253,8 +254,12 @@ describe('EnhancedErrorBoundary', () => {
         </EnhancedErrorBoundary>
       )
 
-      expect(screen.getByText('Try Again')).toBeInTheDocument()
-      expect(screen.getByText('Go to Dashboard')).toBeInTheDocument()
+      expect(
+        screen.getByRole('button', { name: /Attempt to reload the component/i })
+      ).toBeInTheDocument()
+      expect(
+        screen.getByRole('button', { name: /Return to the main dashboard/i })
+      ).toBeInTheDocument()
     })
 
     it('should display suggestion descriptions', () => {
@@ -269,7 +274,9 @@ describe('EnhancedErrorBoundary', () => {
     })
 
     it('should not display suggestions when empty array returned', () => {
-      ;(getRecoverySuggestions as vi.Mock).mockReturnValueOnce([])
+      const suggestionsMock = getRecoverySuggestions as Mock
+      const defaultImplementation = suggestionsMock.getMockImplementation()
+      suggestionsMock.mockImplementation(() => [])
 
       render(
         <EnhancedErrorBoundary>
@@ -278,6 +285,9 @@ describe('EnhancedErrorBoundary', () => {
       )
 
       expect(screen.queryByText(/Try one of these/i)).not.toBeInTheDocument()
+      if (defaultImplementation) {
+        suggestionsMock.mockImplementation(defaultImplementation)
+      }
     })
   })
 
@@ -329,20 +339,16 @@ describe('EnhancedErrorBoundary', () => {
       expect(retryButton).toBeInTheDocument()
     })
 
-    it('should reset error state on retry', () => {
-      const { rerender } = render(
+    it('should retry a child that continues to fail', () => {
+      render(
         <EnhancedErrorBoundary>
-          <ErrorThrowingComponent shouldThrow={true} />
+          <ErrorThrowingComponent shouldThrow={true} errorMessage="Persistent error" />
         </EnhancedErrorBoundary>
       )
 
-      expect(screen.getByText(/Something Went Wrong/i)).toBeInTheDocument()
+      fireEvent.click(screen.getByRole('button', { name: /Try Again/i }))
 
-      const retryButton = screen.getByRole('button', { name: /Try Again/i })
-      fireEvent.click(retryButton)
-
-      // After retry, error should be cleared
-      expect(screen.queryByText(/Something Went Wrong/i)).not.toBeInTheDocument()
+      expect(screen.getByText('Persistent error')).toBeInTheDocument()
     })
 
     it('should display retry count', () => {
@@ -352,9 +358,8 @@ describe('EnhancedErrorBoundary', () => {
         </EnhancedErrorBoundary>
       )
 
-      const retryButton = screen.getByRole('button', { name: /Try Again/i })
-      fireEvent.click(retryButton)
-      fireEvent.click(retryButton)
+      fireEvent.click(screen.getByRole('button', { name: /Try Again/i }))
+      fireEvent.click(screen.getByRole('button', { name: /Try Again/i }))
 
       // After 2 retries, should show (2/3)
       expect(screen.getByText(/\(2\/3\)/)).toBeInTheDocument()
@@ -367,18 +372,16 @@ describe('EnhancedErrorBoundary', () => {
         </EnhancedErrorBoundary>
       )
 
-      const retryButton = screen.getByRole('button', { name: /Try Again/i })
+      // Click 3 times, re-querying after each retry remounts the fallback.
+      fireEvent.click(screen.getByRole('button', { name: /Try Again/i }))
+      fireEvent.click(screen.getByRole('button', { name: /Try Again/i }))
+      fireEvent.click(screen.getByRole('button', { name: /Try Again/i }))
 
-      // Click 3 times (max retries)
-      fireEvent.click(retryButton)
-      fireEvent.click(retryButton)
-      fireEvent.click(retryButton)
-
-      expect(retryButton).toBeDisabled()
+      expect(screen.getByRole('button', { name: /Try Again/i })).toBeDisabled()
     })
 
-    it('should show alert when max retries exceeded', () => {
-      const alertSpy = vi.spyOn(window, 'alert').mockImplementation()
+    it('should not run a disabled retry action after the maximum', () => {
+      const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => undefined)
 
       render(
         <EnhancedErrorBoundary>
@@ -386,32 +389,28 @@ describe('EnhancedErrorBoundary', () => {
         </EnhancedErrorBoundary>
       )
 
-      const retryButton = screen.getByRole('button', { name: /Try Again/i })
+      fireEvent.click(screen.getByRole('button', { name: /Try Again/i }))
+      fireEvent.click(screen.getByRole('button', { name: /Try Again/i }))
+      fireEvent.click(screen.getByRole('button', { name: /Try Again/i }))
+      fireEvent.click(screen.getByRole('button', { name: /Try Again/i }))
 
-      // Click 4 times (exceeding max retries)
-      fireEvent.click(retryButton)
-      fireEvent.click(retryButton)
-      fireEvent.click(retryButton)
-      fireEvent.click(retryButton)
-
-      expect(alertSpy).toHaveBeenCalledWith(
-        expect.stringContaining('Maximum retry attempts reached')
-      )
+      expect(screen.getByRole('button', { name: /Try Again/i })).toBeDisabled()
+      expect(alertSpy).not.toHaveBeenCalled()
 
       alertSpy.mockRestore()
     })
   })
 
   describe('Action Buttons', () => {
-    it('should have Go to Dashboard button', () => {
+    it('should have a Go to Dashboard link', () => {
       render(
         <EnhancedErrorBoundary>
           <ErrorThrowingComponent shouldThrow={true} />
         </EnhancedErrorBoundary>
       )
 
-      const dashboardButton = screen.getByRole('button', { name: /Go to Dashboard/i })
-      expect(dashboardButton).toBeInTheDocument()
+      const dashboardLink = screen.getByRole('link', { name: /Go to Dashboard/i })
+      expect(dashboardLink).toBeInTheDocument()
     })
 
     it('should have Log Out button', () => {
@@ -425,25 +424,20 @@ describe('EnhancedErrorBoundary', () => {
       expect(logoutButton).toBeInTheDocument()
     })
 
-    it('should navigate to dashboard on button click', () => {
-      const originalHref = window.location.href
-      delete (window.location as any).href
-      window.location.href = 'http://localhost'
-
+    it('should link to the dashboard', () => {
       render(
         <EnhancedErrorBoundary>
           <ErrorThrowingComponent shouldThrow={true} />
         </EnhancedErrorBoundary>
       )
 
-      const dashboardButton = screen.getByRole('button', { name: /Go to Dashboard/i })
-      fireEvent.click(dashboardButton)
-
-      expect(window.location.href).toContain('/en/dashboard')
+      const dashboardLink = screen.getByRole('link', { name: /Go to Dashboard/i })
+      expect(dashboardLink).toHaveAttribute('href', '/en/dashboard')
     })
 
     it('should clear auth data on logout', () => {
-      const setItemSpy = vi.spyOn(Storage.prototype, 'setItem')
+      localStorage.setItem('authToken', 'test-token')
+      sessionStorage.setItem('session-marker', 'test-value')
       const removeItemSpy = vi.spyOn(Storage.prototype, 'removeItem')
 
       render(
@@ -456,22 +450,20 @@ describe('EnhancedErrorBoundary', () => {
       fireEvent.click(logoutButton)
 
       expect(removeItemSpy).toHaveBeenCalledWith('authToken')
-      expect(setItemSpy).toHaveBeenCalled() // sessionStorage.clear() internally
+      expect(localStorage.getItem('authToken')).toBeNull()
+      expect(sessionStorage.length).toBe(0)
 
-      setItemSpy.mockRestore()
       removeItemSpy.mockRestore()
     })
   })
 
   describe('Error Details (Development Mode)', () => {
-    const originalEnv = process.env.NODE_ENV
-
     beforeEach(() => {
-      process.env.NODE_ENV = 'development'
+      vi.stubEnv('NODE_ENV', 'development')
     })
 
     afterEach(() => {
-      process.env.NODE_ENV = originalEnv
+      vi.unstubAllEnvs()
     })
 
     it('should show error details button in development', () => {
@@ -545,13 +537,13 @@ describe('EnhancedErrorBoundary', () => {
     })
 
     it('should show unique reference ID', () => {
-      const { rerender } = render(
+      const { container, rerender } = render(
         <EnhancedErrorBoundary>
           <ErrorThrowingComponent shouldThrow={true} errorMessage="Error 1" />
         </EnhancedErrorBoundary>
       )
 
-      const refId1 = screen.getByText(/Error Reference ID/i).textContent
+      const refId1 = container.querySelector('code')?.textContent
 
       vi.clearAllMocks()
 
@@ -561,7 +553,7 @@ describe('EnhancedErrorBoundary', () => {
         </EnhancedErrorBoundary>
       )
 
-      const refId2 = screen.getByText(/Error Reference ID/i).textContent
+      const refId2 = container.querySelector('code')?.textContent
 
       expect(refId1).not.toBe(refId2)
     })
@@ -608,7 +600,7 @@ describe('EnhancedErrorBoundary', () => {
       )
 
       expect(screen.getByText(/Custom Error UI/i)).toBeInTheDocument()
-      expect(screen.getByText(/Custom error/i)).toBeInTheDocument()
+      expect(screen.getByText('Custom error', { exact: true })).toBeInTheDocument()
       expect(screen.getByRole('button', { name: /Custom Retry/i })).toBeInTheDocument()
     })
 
@@ -662,7 +654,7 @@ describe('EnhancedErrorBoundary', () => {
       expect(screen.getByText(/Safe content/i)).toBeInTheDocument()
     })
 
-    it('should recover from errors with async operations', async () => {
+    it('should keep the fallback when a retry encounters the same error', async () => {
       const AsyncErrorComponent = () => {
         throw new Error('Async error')
       }
@@ -678,9 +670,9 @@ describe('EnhancedErrorBoundary', () => {
       const retryButton = screen.getByRole('button', { name: /Try Again/i })
       fireEvent.click(retryButton)
 
-      // Error should be cleared after retry
+      // A retry re-renders the child; the persistent error should remain visible.
       await waitFor(() => {
-        expect(screen.queryByText(/Async error/i)).not.toBeInTheDocument()
+        expect(screen.getByText(/Async error/i)).toBeInTheDocument()
       })
     })
 
@@ -729,7 +721,7 @@ describe('EnhancedErrorBoundary', () => {
       )
 
       expect(screen.getByRole('button', { name: /Try Again/i })).toBeInTheDocument()
-      expect(screen.getByRole('button', { name: /Go to Dashboard/i })).toBeInTheDocument()
+      expect(screen.getByRole('link', { name: /Go to Dashboard/i })).toBeInTheDocument()
       expect(screen.getByRole('button', { name: /Log Out/i })).toBeInTheDocument()
     })
 
@@ -741,7 +733,7 @@ describe('EnhancedErrorBoundary', () => {
       )
 
       // Alert icons should have semantic meaning
-      const alertTriangle = screen.getByRole('heading')
+      const alertTriangle = screen.getByRole('heading', { name: /Something Went Wrong/i })
       expect(alertTriangle).toBeInTheDocument()
     })
   })

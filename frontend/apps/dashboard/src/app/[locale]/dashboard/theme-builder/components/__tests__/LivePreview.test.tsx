@@ -49,7 +49,7 @@ describe('LivePreview', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
-    ;(useThemeStore as any).mockImplementation((selector) => {
+    ;(useThemeStore as any).mockImplementation((selector: (state: unknown) => unknown) => {
       const store = {
         currentTheme: mockTheme,
         ...mockStoreActions,
@@ -65,7 +65,7 @@ describe('LivePreview', () => {
     })
 
     it('should show empty state when no theme', () => {
-      ;(useThemeStore as any).mockImplementation((selector) => {
+      ;(useThemeStore as any).mockImplementation((selector: (state: unknown) => unknown) => {
         const store = {
           currentTheme: null,
           ...mockStoreActions,
@@ -113,7 +113,7 @@ describe('LivePreview', () => {
     it('should update preview on theme change', () => {
       const { rerender } = render(<LivePreview />)
 
-      ;(useThemeStore as any).mockImplementation((selector) => {
+      ;(useThemeStore as any).mockImplementation((selector: (state: unknown) => unknown) => {
         const store = {
           currentTheme: {
             ...mockTheme,
@@ -131,7 +131,7 @@ describe('LivePreview', () => {
     it('should update typography in real-time', () => {
       const { rerender } = render(<LivePreview />)
 
-      ;(useThemeStore as any).mockImplementation((selector) => {
+      ;(useThemeStore as any).mockImplementation((selector: (state: unknown) => unknown) => {
         const store = {
           currentTheme: {
             ...mockTheme,
@@ -151,7 +151,7 @@ describe('LivePreview', () => {
     it('should update components list in real-time', () => {
       const { rerender } = render(<LivePreview />)
 
-      ;(useThemeStore as any).mockImplementation((selector) => {
+      ;(useThemeStore as any).mockImplementation((selector: (state: unknown) => unknown) => {
         const store = {
           currentTheme: {
             ...mockTheme,
@@ -194,7 +194,7 @@ describe('LivePreview', () => {
         ],
       }
 
-      ;(useThemeStore as any).mockImplementation((selector) => {
+      ;(useThemeStore as any).mockImplementation((selector: (state: unknown) => unknown) => {
         const store = {
           currentTheme: themeWithDisabledComponent,
           ...mockStoreActions,
@@ -226,7 +226,7 @@ describe('LivePreview', () => {
       const { rerender } = render(<LivePreview />)
 
       for (let i = 0; i < 10; i++) {
-        ;(useThemeStore as any).mockImplementation((selector) => {
+        ;(useThemeStore as any).mockImplementation((selector: (state: unknown) => unknown) => {
           const store = {
             currentTheme: {
               ...mockTheme,
@@ -254,7 +254,7 @@ describe('LivePreview', () => {
         settings: {},
       }))
 
-      ;(useThemeStore as any).mockImplementation((selector) => {
+      ;(useThemeStore as any).mockImplementation((selector: (state: unknown) => unknown) => {
         const store = {
           currentTheme: { ...mockTheme, components: largeComponentList },
           ...mockStoreActions,
@@ -296,7 +296,7 @@ describe('LivePreview', () => {
 
   describe('Empty States', () => {
     it('should show message when no theme selected', () => {
-      ;(useThemeStore as any).mockImplementation((selector) => {
+      ;(useThemeStore as any).mockImplementation((selector: (state: unknown) => unknown) => {
         const store = {
           currentTheme: null,
           ...mockStoreActions,
@@ -309,7 +309,7 @@ describe('LivePreview', () => {
     })
 
     it('should show placeholder when no components', () => {
-      ;(useThemeStore as any).mockImplementation((selector) => {
+      ;(useThemeStore as any).mockImplementation((selector: (state: unknown) => unknown) => {
         const store = {
           currentTheme: { ...mockTheme, components: [] },
           ...mockStoreActions,

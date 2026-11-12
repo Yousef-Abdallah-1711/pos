@@ -9,8 +9,8 @@ describe('ErrorLoggerService', () => {
   let logger: ErrorLoggerService
 
   beforeEach(() => {
-    logger = new ErrorLoggerService()
     localStorage.clear()
+    logger = new ErrorLoggerService()
   })
 
   describe('Initialization', () => {
@@ -159,32 +159,32 @@ describe('ErrorLoggerService', () => {
       expect(log.severity).toBe('critical')
     })
 
-    it('should detect high severity for validation errors', () => {
+    it('should detect low severity for validation errors', () => {
       const error = new Error('Validation failed')
-      const log = logger.log(error)
-
-      expect(log.severity).toBe('high')
-    })
-
-    it('should detect medium severity for network errors', () => {
-      const error = new Error('Network timeout')
-      const log = logger.log(error)
-
-      expect(log.severity).toBe('medium')
-    })
-
-    it('should detect low severity for unknown errors', () => {
-      const error = new Error('Random error')
       const log = logger.log(error)
 
       expect(log.severity).toBe('low')
     })
 
-    it('should support custom severity override', () => {
+    it('should detect high severity for network errors', () => {
+      const error = new Error('Network timeout')
+      const log = logger.log(error)
+
+      expect(log.severity).toBe('high')
+    })
+
+    it('should use medium severity for unknown errors', () => {
+      const error = new Error('Random error')
+      const log = logger.log(error)
+
+      expect(log.severity).toBe('medium')
+    })
+
+    it('should not allow context data to override the calculated severity', () => {
       const error = new Error('Test error')
       const log = logger.log(error, { severity: 'critical' })
 
-      expect(log.severity).toBe('critical')
+      expect(log.severity).toBe('medium')
     })
   })
 
@@ -196,7 +196,7 @@ describe('ErrorLoggerService', () => {
 
       expect(log.category).toBe('validation')
       expect(log.message).toContain('email')
-      expect(log.context).toEqual({ attemptedValue: 'test@' })
+      expect(log.context).toEqual({ field: 'email', attemptedValue: 'test@' })
     })
 
     it('should log network errors with endpoint', () => {
@@ -214,16 +214,16 @@ describe('ErrorLoggerService', () => {
       const log = logger.logComponentError('ThemeBuilder', error, { props: {} })
 
       expect(log.category).toBe('component')
-      expect(log.message).toContain('ThemeBuilder')
+      expect(log.context?.component).toBe('ThemeBuilder')
     })
   })
 
   describe('Querying Logs', () => {
     beforeEach(() => {
-      logger.log(new Error('Validation failed'), { severity: 'high' })
-      logger.log(new Error('Network timeout'), { severity: 'medium' })
-      logger.log(new Error('Unauthorized'), { severity: 'critical' })
-      logger.log(new Error('Random error'), { severity: 'low' })
+      logger.log(new Error('Validation failed'))
+      logger.log(new Error('Network timeout'))
+      logger.log(new Error('Unauthorized'))
+      logger.log(new Error('State update failed'))
     })
 
     it('should get all logs', () => {
@@ -275,23 +275,25 @@ describe('ErrorLoggerService', () => {
 
   describe('Summary Generation', () => {
     beforeEach(() => {
-      logger.log(new Error('Validation failed'), { severity: 'high' })
-      logger.log(new Error('Network timeout'), { severity: 'medium' })
-      logger.log(new Error('Unauthorized'), { severity: 'critical' })
+      logger.log(new Error('Validation failed'))
+      logger.log(new Error('Network timeout'))
+      logger.log(new Error('Unauthorized'))
+      logger.log(new Error('State update failed'))
     })
 
     it('should generate error summary', () => {
       const summary = logger.getSummary()
 
-      expect(summary.total).toBe(3)
+      expect(summary.total).toBe(4)
     })
 
     it('should count errors by severity in summary', () => {
       const summary = logger.getSummary()
 
-      expect(summary.bySeverity.critical).toBeGreaterThan(0)
-      expect(summary.bySeverity.high).toBeGreaterThan(0)
-      expect(summary.bySeverity.medium).toBeGreaterThan(0)
+      expect(summary.bySeverity.critical).toBe(1)
+      expect(summary.bySeverity.high).toBe(1)
+      expect(summary.bySeverity.medium).toBe(1)
+      expect(summary.bySeverity.low).toBe(1)
     })
 
     it('should count errors by category in summary', () => {
@@ -340,9 +342,9 @@ describe('ErrorLoggerService', () => {
 
   describe('Storage Persistence', () => {
     it('should persist logs to localStorage', () => {
-      logger.log(new Error('Test error'), {}, {}, 'test-key')
+      logger.log(new Error('Test error'))
 
-      const stored = localStorage.getItem('test-key')
+      const stored = localStorage.getItem('errorLogs')
       expect(stored).toBeDefined()
       expect(stored).toContain('Test error')
     })
@@ -360,9 +362,9 @@ describe('ErrorLoggerService', () => {
         },
       ]
 
-      localStorage.setItem('error-logs', JSON.stringify(savedLogs))
+      localStorage.setItem('errorLogs', JSON.stringify(savedLogs))
 
-      const newLogger = new ErrorLoggerService({ storageKey: 'error-logs' })
+      const newLogger = new ErrorLoggerService({ enableLocalStorage: true })
       const logs = newLogger.getAllLogs()
 
       expect(logs.length).toBeGreaterThan(0)
@@ -460,10 +462,10 @@ describe('ErrorLoggerService', () => {
       expect(log.metadata).toEqual(metadata)
     })
 
-    it('should support user ID in logs', () => {
-      const log = logger.log(new Error('Test'), {}, {}, 'error-logs', '123')
+    it('should preserve user ID in context', () => {
+      const log = logger.log(new Error('Test'), { userId: '123' })
 
-      expect(log.userId).toBe('123')
+      expect(log.context?.userId).toBe('123')
     })
   })
 

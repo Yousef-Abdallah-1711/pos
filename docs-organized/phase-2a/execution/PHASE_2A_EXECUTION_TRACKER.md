@@ -9,7 +9,7 @@ Statuses: TODO, IN_PROGRESS, IMPLEMENTED_UNVERIFIED, VERIFIED_COMPLETE, FAILED, 
 | WS01 | Database least privilege | VERIFIED_COMPLETE | Isolated backup restore; 108 migration records and representative data preserved; migration/app-role probes passed; `go build`, `go vet`, `go test -count=1 ./...`; disposable security smoke 73/73; live dev roles and API health verified | No known blocker; see WS01 report for exact scope and rollback |
 | WS02 | Tenant and restaurant isolation | PARTIAL | Recounted 24 driver repository methods; PostgreSQL fixture with two tenants/four restaurants; real cross-tenant and cross-restaurant driver read/update/delete denials, insert ownership check and unchanged-row assertions pass; full backend build/vet/tests pass | Full 20-family route→handler→usecase→repository→table matrix, HTTP forged-context tests, bulk/background side-effect tests and role/account/resource fixtures remain open |
 | WS03 | Payment callback integrity | PARTIAL | Real PostgreSQL duplicate/concurrent success callbacks, failure→success→late-failure, forced rollback and concurrent refund tests pass; refund race passes 10 repetitions; fixed refund tenant update type defect; full backend build/vet/tests pass | Refund/void callback reconciliation and durable recovery when provider succeeds but local commit fails remain open; no live Paymob calls (prohibited) |
-| WS04 | Frontend test recovery | IMPLEMENTED_UNVERIFIED | Landing 35/35, Restaurant Website 64/64, Super Admin 3/3; all four app typechecks/builds pass | Dashboard 109 test failures and test-source typecheck errors remain; hosted/browser checks not run |
+| WS04 | Frontend test recovery | VERIFIED_COMPLETE | Dashboard 639/639, Landing 35/35, Restaurant Website 64/64, Super Admin 3/3; all app and test-source typechecks/builds pass | Full isolated browser E2E remains part of WS05; hosted CI is explicitly excluded. |
 | WS05 | Full isolated test infrastructure | PARTIAL | Added a separate tmpfs PostgreSQL 15 Compose project for WS02/03 integration runs; no development database used | Full isolated Redis/four-app topology and browser journeys remain open |
 | WS06 | CI quality gates | PARTIAL | Two current-main GitHub workflows observed; both failures reproduced on baseline `1815273` (see WS06 report) | Repair Dashboard localhost guardrail and resolver baseline; required gate set and branch protection remain unverified |
 | WS07 | Backend architecture | TODO | Current-state architecture report and route matrix exist | Must preserve all route contracts and WS01/02 safeguards |
@@ -60,7 +60,7 @@ Statuses: TODO, IN_PROGRESS, IMPLEMENTED_UNVERIFIED, VERIFIED_COMPLETE, FAILED, 
 |---|---|---|
 | Landing test configuration and recovery | IMPLEMENTED_UNVERIFIED | Added alias/setup/jsdom/React plugin and fixed stale locale-route login mocks; 4 files / 35 tests pass; test-source typecheck passes. |
 | Restaurant Website test recovery | IMPLEMENTED_UNVERIFIED | Declared Jest/jsdom/testing-library dependencies; theme/color fixes verified; 8 suites / 64 tests pass; test-source typecheck passes. |
-| Dashboard failure triage | IN_PROGRESS | Current run: 41 suites, 530 passing and 109 failing (639 total); test-source typecheck has broad fixture and Playwright typing errors. No tests skipped. |
+| Dashboard failure triage | VERIFIED_COMPLETE | Latest run: 41 files, 639 passing, 0 failing; app and test-source typechecks pass with zero diagnostics; production build generated 139 pages. No tests skipped. |
 | Super Admin regression | VERIFIED_COMPLETE | 1 suite / 3 tests pass; app and test-source typechecks pass. |
 | App typechecks and production builds | VERIFIED_COMPLETE | Four app typechecks and four Next.js builds passed with local-only endpoint values; no bypass flags. |
 
@@ -78,3 +78,41 @@ Statuses: TODO, IN_PROGRESS, IMPLEMENTED_UNVERIFIED, VERIFIED_COMPLETE, FAILED, 
 ## Change-safety baseline
 
 At start: tracked modifications `README.md`, `frontend/apps/super-admin/src/app/login/page.tsx`; untracked `backend/scripts/seed-local-test-accounts.ps1`, `backend/scripts/seed-local-test-accounts.sql`, `docs-organized/migration/`, and `docs-organized/phase-2a/current-state-audit/`. These are pre-existing user work. Do not amend or stage them. No commit/push/branch change is authorized.
+
+## Remaining engineering execution — 2026-11-02
+
+The latest authorized run began from a clean `main` worktree at `5ab6dba62287ddd404ce00529f5fe99220ccdc19` (matching `origin/main` at inspection). This is separate from the historical baseline recorded above. The referenced external standards path `C:\Users\OPT\Desktop\POS\CODING_STANDARDS.md` is absent on this host; the complete repository copy `CODING_STANDARDS.md` was read before work began.
+
+| Workstream | Current status | Current evidence / blocker |
+|---|---|---|
+| WS01 | VERIFIED_COMPLETE (preserved) | No implementation changed. Historical isolated evidence remains in the WS01 report; Go/Docker could not be rerun on this host. |
+| WS02 | PARTIAL | Existing driver ownership hardening/test fixture only. Broader resource, HTTP forgery, bulk/background and side-effect matrices still require a disposable PostgreSQL run. |
+| WS03 | DEFERRED | Explicitly excluded. No payment files, provider calls, or payment tests changed/run. |
+| WS04 | PARTIAL | Latest Dashboard Vitest: 536 passed, 103 failed of 639. Dashboard test-source `tsc`: 84 diagnostics. Landing 35/35, Restaurant Website 64/64, Super Admin 3/3 pass. All four app typechecks, all four test-source typechecks except Dashboard, and all four production builds pass. |
+| WS05 | BLOCKED | Docker Linux engine unavailable; full-stack isolated services, seed fixture, DB integration and browser E2E were not run. |
+| WS06 | DEFERRED | Explicitly excluded. No workflow or remote CI change. |
+| WS07 | TODO | No backend route extraction; host has no Go toolchain and Docker test runner is unavailable. |
+| WS08 | PARTIAL | Dashboard test ownership now declares Playwright types; shared API/theme/auth contracts remain open. |
+| WS09 | TODO | No backend lifecycle/logging/error refactor without Go compiler/tests. |
+| WS10 | PARTIAL | Existing transaction-local helper and RLS pilot are present; selected application adoption and current PostgreSQL verification remain open. |
+
+Changes and detailed verification are in `PHASE_2A_NON_PAYMENT_ENGINEERING_CLOSURE.md`. No commit or push was made because Dashboard regression remains red and the mandatory backend/security/integration gates could not run.
+
+## Current execution correction — 2026-11-02
+
+The historical rows above describe the earlier checkpoint. Since then, Docker and Go were recovered; backend build/vet/default tests passed; the disposable PostgreSQL RLS/tenant-transaction pilot and driver ownership integration tests passed; and the Dashboard baseline improved to 540/639 passing after a focused theme-editor fix. The full current state and publication hold are in `PHASE_2A_ENGINEERING_CLOSURE_FINAL.md`.
+
+### Earlier local continuation — superseded — 2026-11-02
+
+At this earlier checkpoint the Dashboard suite was **513 passed / 126 failed of 639**. App and test-source typechecks and production build passed; the test count and failure groups were documented in `WS04_FRONTEND_TEST_RECOVERY_REPORT.md`. The later Dashboard completion and current publication status are recorded below.
+
+### Dashboard recovery completion — 2026-11-02
+
+The latest Dashboard run passes **639/639 tests across 41 files**. App typecheck and test-source typecheck both pass with zero diagnostics; production build generated 139 static pages. Earlier test counts above are historical. WS02, WS05, WS07, WS08, WS09 and WS10 remain open, so the full publication gate is still unmet.
+
+### Fresh four-app regression and backend foundation update — 2026-11-03
+
+- Current frontend regression: 741/741 unit tests pass; all four apps and test-source TypeScript checks pass; all four production builds pass. Dashboard tests ran using Vitest threads after the default fork pool encountered Windows `spawn EPERM`.
+- Go 1.24.13 container build, vet, and full default tests pass. WS09 has a tested partial implementation for request IDs, redacted panic recovery, HTTP timeouts, signal-aware HTTP shutdown, and database health-monitor cancellation; its report records the runtime HTTP/SIGTERM smoke.
+- The restricted-role tenant/RLS pilot passed on a separate PostgreSQL tmpfs Compose project, which was removed by exact project name. `pos-dev` stayed running and was not changed.
+- WS02/WS05 remain partial, WS07 remains TODO, WS08/WS09/WS10 remain partial. WS03 and WS06 remain deferred. No commit or publication was made because mandatory gates remain unmet.

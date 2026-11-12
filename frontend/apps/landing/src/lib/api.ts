@@ -5,6 +5,7 @@ const API_URL = getConfig().apiUrl
 
 export const api = axios.create({
   baseURL: API_URL,
+  withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -12,13 +13,6 @@ export const api = axios.create({
 
 // Add token to requests (but not for auth endpoints)
 api.interceptors.request.use((config) => {
-  // Don't add token to auth endpoints (like login, register)
-  const isAuthEndpoint = config.url?.includes('/auth/')
-  const token = localStorage.getItem('token')
-
-  if (token && !isAuthEndpoint) {
-    config.headers.Authorization = `Bearer ${token}`
-  }
   return config
 })
 
@@ -30,8 +24,6 @@ api.interceptors.response.use(
       // Don't redirect on auth endpoints to allow proper error handling
       const url = error.config?.url || '';
       if (!url.includes('/auth/')) {
-        localStorage.removeItem('token')
-        localStorage.removeItem('user')
         // Redirect to the login page for non-auth requests
         import('./config').then(({ getConfig }) => {
           const { landingUrl } = getConfig()

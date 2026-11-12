@@ -360,7 +360,7 @@ describe('Form Validation Integration', () => {
           <div>
             <input
               type="email"
-              value={form.email}
+              value={form.values.email}
               onChange={(e) => form.setValue('email', e.target.value)}
             />
             {form.errors.email && <p>{form.errors.email}</p>}

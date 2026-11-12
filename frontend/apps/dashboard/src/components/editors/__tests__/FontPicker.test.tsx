@@ -57,7 +57,7 @@ describe('FontPicker', () => {
     it('should render category tabs', () => {
       render(<FontPicker {...defaultProps} />)
       expect(screen.getByText('All')).toBeInTheDocument()
-      expect(screen.getByText('Sans-serif')).toBeInTheDocument()
+      expect(screen.getByText('Sans Serif')).toBeInTheDocument()
       expect(screen.getByText('Serif')).toBeInTheDocument()
       expect(screen.getByText('Monospace')).toBeInTheDocument()
     })
@@ -119,7 +119,7 @@ describe('FontPicker', () => {
     it('should filter by Sans-serif category', async () => {
       render(<FontPicker {...defaultProps} />)
 
-      const sansSerifTab = screen.getByText('Sans-serif')
+      const sansSerifTab = screen.getByText('Sans Serif')
       fireEvent.click(sansSerifTab)
 
       await waitFor(() => {

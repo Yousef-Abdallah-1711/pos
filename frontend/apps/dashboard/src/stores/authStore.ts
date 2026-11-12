@@ -20,16 +20,17 @@ export interface AuthState {
   setAuth: (user: User, token: string) => void
   logout: () => void
   isAuthenticated: () => boolean
-  initializeFromCookie: () => void
 }
+
+export const COOKIE_SESSION_MARKER = 'cookie-session'
 
 export const useAuthStore = create<AuthState>()(
   persist(
     (set, get) => ({
       user: null,
       token: null,
-      setAuth: (user, token) => {
-        set({ user, token })
+      setAuth: (user) => {
+        set({ user, token: COOKIE_SESSION_MARKER })
       },
       logout: () => {
         set({ user: null, token: null })
@@ -38,31 +39,15 @@ export const useAuthStore = create<AuthState>()(
         const state = get()
         return !!(state.user && state.token)
       },
-      initializeFromCookie: () => {
-        try {
-          const cookieString = document.cookie
-          const cookies = cookieString.split('; ').reduce((acc, cookie) => {
-            const [key, value] = cookie.split('=')
-            if (key && value) {
-              acc[key] = decodeURIComponent(value)
-            }
-            return acc
-          }, {} as Record<string, string>)
-
-          const token = cookies['auth_token']
-          const userStr = cookies['auth_user']
-
-          if (token && userStr) {
-            const user = JSON.parse(userStr)
-            set({ user, token })
-          }
-        } catch (error) {
-          // Silent fail - cookie initialization is optional
-        }
-      },
     }),
     {
       name: 'auth-storage',
+      partialize: (state) => ({ user: state.user }),
+      merge: (persisted, current) => {
+        const legacy = persisted as Partial<AuthState>
+        const user = legacy.user ?? null
+        return { ...current, user, token: user ? COOKIE_SESSION_MARKER : null }
+      },
     }
   )
 )

@@ -24,49 +24,13 @@ export default function SuperAdminLoginPage() {
       hasExecuted.current = true;
 
       try {
-        // Get token from URL query parameters using window.location
-        const params = new URLSearchParams(window.location.search);
-        const token = params.get("token");
-        debugLog("[SuperAdminLogin] Component mounted, token from URL:", token ? "present" : "missing");
-
-        if (!token) {
-          debugError("[SuperAdminLogin] No token provided");
-          setError("No token provided. Invalid access link.");
-          setIsLoading(false);
-          return;
-        }
-
-        // Exchange the one-time token for a regular JWT
-        debugLog("[SuperAdminLogin] Exchanging token for JWT...");
-        const response = await api.post("/auth/token-exchange", { token });
-
-        debugLog("[SuperAdminLogin] Token exchange response:", response.status);
-        const data = response.data;
-        debugLog("[SuperAdminLogin] Token exchange successful", data);
-
-        // Store the JWT token and user
-        const authData = data.data || data;
-        if (authData?.token && authData?.user) {
-          debugLog("[SuperAdminLogin] Setting auth with user:", authData.user.email);
-          setAuth(authData.user, authData.token);
-          void warmupCurrentUserPermissions();
-
-          // Store in localStorage for persistence
-          localStorage.setItem('token', authData.token)
-          localStorage.setItem('user', JSON.stringify(authData.user))
-          debugLog("[SuperAdminLogin] ✅ Auth stored in localStorage");
-
-          setSuccess(true);
-
-          // Redirect to dashboard after 2 seconds
-          setTimeout(() => {
-            debugLog("[SuperAdminLogin] Redirecting to dashboard...");
-            router.replace("/en/dashboard");
-          }, 2000);
-        } else {
-          debugError("[SuperAdminLogin] Missing token or user in response:", authData);
-          throw new Error("No JWT token or user received");
-        }
+        const response = await api.get('/auth/session');
+        const sessionUser: unknown = response.data;
+        setAuth(sessionUser as Parameters<typeof setAuth>[0], '');
+        void warmupCurrentUserPermissions();
+        window.history.replaceState({}, document.title, window.location.pathname);
+        setSuccess(true);
+        setTimeout(() => router.replace('/en/dashboard'), 500);
       } catch (err) {
         debugError("[SuperAdminLogin] Error:", err);
         setError(err instanceof Error ? err.message : "An error occurred");

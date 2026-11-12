@@ -108,7 +108,7 @@ export default function AppearanceSettingsPage() {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
+          
         },
         body: JSON.stringify({ theme: appearanceForm.theme }),
       })
@@ -141,7 +141,7 @@ export default function AppearanceSettingsPage() {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
+          
         },
         body: JSON.stringify({
           primary_color: appearanceForm.primaryColor,

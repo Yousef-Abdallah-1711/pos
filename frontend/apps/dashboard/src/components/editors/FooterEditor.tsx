@@ -121,29 +121,31 @@ export function FooterEditor({
   const [previewMode, setPreviewMode] = useState(false)
   const [editingSection, setEditingSection] = useState<string | null>(null)
 
+  const persistFooterConfig = useCallback(
+    (newConfig: FooterConfig, storePatch: Partial<ThemeFooterConfig> = newConfig) => {
+      setFooterConfig(newConfig)
+
+      if (useStore) {
+        updateFooter(storePatch)
+      } else if (component && onChange) {
+        const updated: ThemeComponent = { ...component, config: newConfig }
+        onChange(updated)
+        onPreview?.(updated)
+      }
+    },
+    [component, onChange, onPreview, updateFooter, useStore]
+  )
+
   const handleConfigChange = useCallback(
-    (key: keyof FooterConfig, value: any) => {
+    <K extends keyof FooterConfig>(key: K, value: FooterConfig[K]) => {
       const newConfig: FooterConfig = {
         ...footerConfig,
         [key]: value,
       }
 
-      setFooterConfig(newConfig)
-
-      if (useStore) {
-        updateFooter({
-          [key]: value,
-        } as Partial<ThemeFooterConfig>)
-      } else if (component && onChange) {
-        const updated: ThemeComponent = {
-          ...component,
-          config: newConfig,
-        }
-        onChange(updated)
-        onPreview?.(updated)
-      }
+      persistFooterConfig(newConfig, { [key]: value } as Partial<ThemeFooterConfig>)
     },
-    [footerConfig, component, onChange, onPreview, useStore, updateFooter]
+    [footerConfig, persistFooterConfig]
   )
 
   const addSection = useCallback(() => {
@@ -155,29 +157,21 @@ export function FooterEditor({
     }
 
     const updatedSections = [...(footerConfig.footerSections || []), newSection]
-    setFooterConfig({
+    persistFooterConfig({
       ...footerConfig,
       footerSections: updatedSections,
-    })
-
-    if (useStore) {
-      updateFooter({ footerSections: updatedSections })
-    }
-  }, [footerConfig, useStore, updateFooter])
+    }, { footerSections: updatedSections })
+  }, [footerConfig, persistFooterConfig])
 
   const deleteSection = useCallback(
     (id: string) => {
       const updatedSections = (footerConfig.footerSections || []).filter((s) => s.id !== id)
-      setFooterConfig({
+      persistFooterConfig({
         ...footerConfig,
         footerSections: updatedSections,
-      })
-
-      if (useStore) {
-        updateFooter({ footerSections: updatedSections })
-      }
+      }, { footerSections: updatedSections })
     },
-    [footerConfig, useStore, updateFooter]
+    [footerConfig, persistFooterConfig]
   )
 
   const updateSection = useCallback(
@@ -185,16 +179,12 @@ export function FooterEditor({
       const updatedSections = (footerConfig.footerSections || []).map((s) =>
         s.id === id ? { ...s, title, links } : s
       )
-      setFooterConfig({
+      persistFooterConfig({
         ...footerConfig,
         footerSections: updatedSections,
-      })
-
-      if (useStore) {
-        updateFooter({ footerSections: updatedSections })
-      }
+      }, { footerSections: updatedSections })
     },
-    [footerConfig, useStore, updateFooter]
+    [footerConfig, persistFooterConfig]
   )
 
   const addSocialLink = useCallback(() => {
@@ -206,46 +196,34 @@ export function FooterEditor({
     }
 
     const updatedLinks = [...(footerConfig.socialLinks || []), newLink]
-    setFooterConfig({
+    persistFooterConfig({
       ...footerConfig,
       socialLinks: updatedLinks,
-    })
-
-    if (useStore) {
-      updateFooter({ socialLinks: updatedLinks })
-    }
-  }, [footerConfig, useStore, updateFooter])
+    }, { socialLinks: updatedLinks })
+  }, [footerConfig, persistFooterConfig])
 
   const deleteSocialLink = useCallback(
     (id: string) => {
       const updatedLinks = (footerConfig.socialLinks || []).filter((link) => link.id !== id)
-      setFooterConfig({
+      persistFooterConfig({
         ...footerConfig,
         socialLinks: updatedLinks,
-      })
-
-      if (useStore) {
-        updateFooter({ socialLinks: updatedLinks })
-      }
+      }, { socialLinks: updatedLinks })
     },
-    [footerConfig, useStore, updateFooter]
+    [footerConfig, persistFooterConfig]
   )
 
   const updateSocialLink = useCallback(
-    (id: string, platform: string, url: string) => {
+    (id: string, platform: SocialLink['platform'], url: string) => {
       const updatedLinks = (footerConfig.socialLinks || []).map((link) =>
-        link.id === id ? { ...link, platform: platform as any, url } : link
+        link.id === id ? { ...link, platform, url } : link
       )
-      setFooterConfig({
+      persistFooterConfig({
         ...footerConfig,
         socialLinks: updatedLinks,
-      })
-
-      if (useStore) {
-        updateFooter({ socialLinks: updatedLinks })
-      }
+      }, { socialLinks: updatedLinks })
     },
-    [footerConfig, useStore, updateFooter]
+    [footerConfig, persistFooterConfig]
   )
 
   if (previewMode) {
@@ -483,6 +461,7 @@ export function FooterEditor({
                   </div>
                   <button
                     onClick={() => deleteSection(section.id)}
+                    aria-label={`Delete ${section.title}`}
                     className="p-1 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition"
                   >
                     <Trash2 className="h-4 w-4" />
@@ -512,7 +491,10 @@ export function FooterEditor({
             <div key={link.id} className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-3 flex gap-2">
               <select
                 value={link.platform}
-                onChange={(e) => updateSocialLink(link.id, e.target.value, link.url)}
+                onChange={(e) => {
+                  const platform = SOCIAL_PLATFORMS.find((candidate) => candidate === e.target.value)
+                  if (platform) updateSocialLink(link.id, platform, link.url)
+                }}
                 className="px-2 py-1 border border-gray-200 dark:border-gray-600 rounded dark:bg-gray-700 dark:text-white text-sm"
               >
                 {SOCIAL_PLATFORMS.map((p) => (
@@ -530,6 +512,7 @@ export function FooterEditor({
               />
               <button
                 onClick={() => deleteSocialLink(link.id)}
+                aria-label={`Delete ${link.platform} social link`}
                 className="p-1 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition"
               >
                 <Trash2 className="h-4 w-4" />

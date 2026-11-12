@@ -70,12 +70,12 @@ export default function LoginPage() {
         return
       }
 
-      const { user, token } = response.data
-      setAuth(user, token)
+      const { user } = response.data
+      setAuth(user, '')
       toast.success(t.auth.login.loginSuccess)
 
       const { dashboardUrl } = getConfig()
-      window.location.href = `${dashboardUrl}/auth/callback?token=${encodeURIComponent(token)}&user=${encodeURIComponent(JSON.stringify(user))}`
+      window.location.href = `${dashboardUrl}/${locale}/auth/callback`
     } catch (error: any) {
       let message = t.auth.login.loginFailed
       if (error.response?.data?.error) {
@@ -116,7 +116,7 @@ export default function LoginPage() {
 
           {/* Login Form */}
           <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700 p-8">
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+            <form method="post" onSubmit={handleSubmit(onSubmit)} className="space-y-5">
               {/* Email */}
               <div className="space-y-2">
                 <Label htmlFor="email">{t.auth.login.email}</Label>

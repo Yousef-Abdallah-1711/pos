@@ -35,7 +35,7 @@ describe('ComponentEditorRouter', () => {
         config: {},
       }
       render(<ComponentEditorRouter {...defaultProps} component={component} />)
-      expect(screen.getByText('Hero Settings')).toBeInTheDocument()
+      expect(screen.getByRole('heading', { name: 'Background' })).toBeInTheDocument()
     })
 
     it('should render ProductGridEditor for products type', () => {
@@ -48,7 +48,7 @@ describe('ComponentEditorRouter', () => {
         config: {},
       }
       render(<ComponentEditorRouter {...defaultProps} component={component} />)
-      expect(screen.getByText('Product Settings')).toBeInTheDocument()
+      expect(screen.getByRole('heading', { name: 'Grid Layout' })).toBeInTheDocument()
     })
 
     it('should render WhyUsEditor for why_us type', () => {
@@ -62,7 +62,7 @@ describe('ComponentEditorRouter', () => {
       }
       render(<ComponentEditorRouter {...defaultProps} component={component} />)
       // WhyUsEditor should render some content
-      expect(screen.getByText(/Why Us/i) || true).toBeTruthy()
+      expect(screen.getByRole('heading', { name: 'Layout' })).toBeInTheDocument()
     })
 
     it('should render ContactEditor for contact type', () => {
@@ -102,7 +102,7 @@ describe('ComponentEditorRouter', () => {
         config: {},
       }
       render(<ComponentEditorRouter {...defaultProps} component={component} />)
-      expect(screen.getByText(/Call to Action/i) || true).toBeTruthy()
+      expect(screen.getByRole('heading', { name: 'Primary Button' })).toBeInTheDocument()
     })
 
     it('should render GenericEditor for custom type', () => {
@@ -129,7 +129,7 @@ describe('ComponentEditorRouter', () => {
       }
       render(<ComponentEditorRouter {...defaultProps} component={component} />)
       // Component should render editor
-      expect(screen.getByText(/Hero Settings/i)).toBeInTheDocument()
+      expect(screen.getByRole('heading', { name: 'Background' })).toBeInTheDocument()
     })
 
     it('should pass onChange to editor', () => {

@@ -65,6 +65,15 @@ export class ErrorLoggerService {
     const lowerMessage = message.toLowerCase()
 
     if (
+      lowerMessage.includes('auth') ||
+      lowerMessage.includes('unauthorized') ||
+      lowerMessage.includes('token') ||
+      lowerMessage.includes('invalid credential')
+    ) {
+      return 'authentication'
+    }
+
+    if (
       lowerMessage.includes('validation') ||
       lowerMessage.includes('invalid') ||
       lowerMessage.includes('required')
@@ -76,17 +85,10 @@ export class ErrorLoggerService {
       lowerMessage.includes('network') ||
       lowerMessage.includes('fetch') ||
       lowerMessage.includes('timeout') ||
-      lowerMessage.includes('connection')
+      lowerMessage.includes('connection') ||
+      lowerMessage.includes('cors')
     ) {
       return 'network'
-    }
-
-    if (
-      lowerMessage.includes('auth') ||
-      lowerMessage.includes('unauthorized') ||
-      lowerMessage.includes('token')
-    ) {
-      return 'authentication'
     }
 
     if (
@@ -140,7 +142,7 @@ export class ErrorLoggerService {
     if (
       category === 'network' ||
       category === 'storage' ||
-      lowerMessage.includes('error')
+      lowerMessage.includes('severe')
     ) {
       return 'high'
     }
@@ -166,9 +168,18 @@ export class ErrorLoggerService {
     context?: Record<string, any>,
     metadata?: Record<string, any>
   ): ErrorLog {
+    return this.writeLog(error, context, metadata)
+  }
+
+  private writeLog(
+    error: Error | string,
+    context?: Record<string, any>,
+    metadata?: Record<string, any>,
+    categoryOverride?: ErrorCategory
+  ): ErrorLog {
     const message = typeof error === 'string' ? error : error.message
     const stack = typeof error === 'string' ? undefined : error.stack
-    const category = this.categorizeError(error)
+    const category = categoryOverride ?? this.categorizeError(error)
     const severity = this.getSeverity(category, message)
 
     const errorLog: ErrorLog = {
@@ -251,10 +262,12 @@ export class ErrorLoggerService {
     error: Error,
     context?: Record<string, any>
   ): ErrorLog {
-    return this.log(error, {
-      component: componentName,
-      ...context,
-    })
+    return this.writeLog(
+      error,
+      { ...context, component: componentName },
+      undefined,
+      'component'
+    )
   }
 
   /**

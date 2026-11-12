@@ -64,7 +64,7 @@ describe('Multi-Tenant Login Integration Tests', () => {
 
       // Step 4: System authenticates and auto-logs in
       await waitFor(() => {
-        expect(mockSetAuth).toHaveBeenCalledWith(loginResponse.data.user, loginResponse.data.token)
+        expect(mockSetAuth).toHaveBeenCalledWith(loginResponse.data.user, '')
       })
 
       // Step 5: System redirects to dashboard (done by TenantSelectorModal not being shown)
@@ -133,7 +133,6 @@ describe('Multi-Tenant Login Integration Tests', () => {
             role: 'manager',
             tenant_id: 2,
           },
-          token: 'eyJhbGcS0...',
         }),
       }
       ;(global.fetch as Mock).mockResolvedValueOnce(confirmResponse)

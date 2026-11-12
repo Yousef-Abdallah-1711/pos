@@ -158,13 +158,12 @@ describe('FooterEditor', () => {
   describe('Social Links', () => {
     it('should display add social link button', () => {
       render(<FooterEditor {...defaultProps} />)
-      expect(screen.getByText(/Add Link/).length).toBeGreaterThan(0)
+      expect(screen.getByText(/Add Link/)).toBeInTheDocument()
     })
 
     it('should add new social link', async () => {
       render(<FooterEditor {...defaultProps} />)
-      const addBtns = screen.getAllByText(/Add Link/)
-      fireEvent.click(addBtns[1]) // Second "Add" button is for social links
+      fireEvent.click(screen.getByRole('button', { name: /Add Link/ }))
       expect(mockOnChange).toHaveBeenCalled()
     })
 
@@ -177,7 +176,7 @@ describe('FooterEditor', () => {
         },
       }
       render(<FooterEditor {...defaultProps} component={component} />)
-      expect(screen.getByDisplayValue('facebook')).toBeInTheDocument()
+      expect(screen.getByRole('combobox')).toHaveValue('facebook')
     })
 
     it('should change social platform', async () => {
@@ -189,7 +188,7 @@ describe('FooterEditor', () => {
         },
       }
       render(<FooterEditor {...defaultProps} component={component} />)
-      const select = screen.getByDisplayValue('facebook') as HTMLSelectElement
+      const select = screen.getByRole('combobox') as HTMLSelectElement
       fireEvent.change(select, { target: { value: 'twitter' } })
       expect(mockOnChange).toHaveBeenCalled()
     })
@@ -218,11 +217,8 @@ describe('FooterEditor', () => {
         },
       }
       render(<FooterEditor {...defaultProps} component={component} />)
-      const deleteButtons = screen.getAllByText(/\u{1F5D1}/)  // Trash icon
-      if (deleteButtons.length > 0) {
-        fireEvent.click(deleteButtons[0])
-        expect(mockOnChange).toHaveBeenCalled()
-      }
+      fireEvent.click(screen.getByRole('button', { name: 'Delete facebook social link' }))
+      expect(mockOnChange).toHaveBeenCalled()
     })
   })
 
