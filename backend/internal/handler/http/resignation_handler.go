@@ -1,7 +1,7 @@
 package http
 
 import (
-	"encoding/json"
+	"context"
 	"net/http"
 	"strconv"
 	"time"
@@ -14,6 +14,8 @@ import (
 type ResignationHandler struct {
 	repo *repository.ResignationRepository
 }
+
+const resignationHandlerTimeout = 10 * time.Second
 
 func NewResignationHandler(repo *repository.ResignationRepository) *ResignationHandler {
 	return &ResignationHandler{repo: repo}
@@ -33,23 +35,16 @@ func (h *ResignationHandler) List(w http.ResponseWriter, r *http.Request) {
 	if pageSize > 100 {
 		pageSize = 100
 	}
-	data, err := h.repo.List(tenantID, restaurantID)
+	ctx, cancel := context.WithTimeout(r.Context(), resignationHandlerTimeout)
+	defer cancel()
+	data, total, err := h.repo.ListPaged(ctx, tenantID, restaurantID, page, pageSize)
 	if err != nil {
 		respondError(w, http.StatusInternalServerError, "Failed to load resignations")
 		return
 	}
-	total := len(data)
-	offset := (page - 1) * pageSize
-	if offset > total {
-		offset = total
-	}
-	end := offset + pageSize
-	if end > total {
-		end = total
-	}
 	respondJSON(w, http.StatusOK, map[string]interface{}{
 		"success": true,
-		"data":    data[offset:end],
+		"data":    data,
 		"pagination": map[string]interface{}{
 			"page":      page,
 			"page_size": pageSize,
@@ -225,7 +220,7 @@ func decodeResignationPayload(r *http.Request) (domain.Resignation, error) {
 		UnusedLeaveBalance float64 `json:"unused_leave_balance"`
 		SettlementAmount   float64 `json:"settlement_amount"`
 	}
-	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+	if err := decodeJSONStrict(r, &body); err != nil {
 		return domain.Resignation{}, err
 	}
 	if body.EmployeeID <= 0 || body.ResignationDate == "" || body.LastWorkingDate == "" || body.Reason == "" {

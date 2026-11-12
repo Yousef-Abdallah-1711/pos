@@ -1,6 +1,7 @@
 package http
 
 import (
+	"context"
 	"database/sql"
 	"encoding/json"
 	"errors"
@@ -23,6 +24,8 @@ type HRSalaryHandler struct {
 	autoPosting usecase.AutoPostingService
 }
 
+const hrSalaryListTimeout = 10 * time.Second
+
 // NewHRSalaryHandler creates a new HR salary handler
 func NewHRSalaryHandler(salaryRepo *repository.SalaryRepository, db *sql.DB) *HRSalaryHandler {
 	return &HRSalaryHandler{salaryRepo: salaryRepo, db: db}
@@ -37,6 +40,23 @@ func (h *HRSalaryHandler) SetAutoPostingEngine(engine usecase.AutoPostingService
 func (h *HRSalaryHandler) ListSalaries(w http.ResponseWriter, r *http.Request) {
 	tenantID := int(middleware.GetTenantID(r))
 	restaurantID := int(middleware.GetRestaurantID(r))
+	page, err := parseIntQueryParam(r, "page", 1)
+	if err != nil {
+		writeJSON(w, http.StatusBadRequest, map[string]interface{}{
+			"success": false, "error": "Invalid page value",
+		})
+		return
+	}
+	pageSize, err := parseIntQueryParam(r, "page_size", 20)
+	if err != nil {
+		writeJSON(w, http.StatusBadRequest, map[string]interface{}{
+			"success": false, "error": "Invalid page_size value",
+		})
+		return
+	}
+	if pageSize > 200 {
+		pageSize = 200
+	}
 
 	startDateStr := r.URL.Query().Get("start_date")
 	endDateStr := r.URL.Query().Get("end_date")
@@ -60,7 +80,9 @@ func (h *HRSalaryHandler) ListSalaries(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	salaries, err := h.salaryRepo.ListSalaries(tenantID, restaurantID, startDate, endDate)
+	ctx, cancel := context.WithTimeout(r.Context(), hrSalaryListTimeout)
+	defer cancel()
+	salaries, total, err := h.salaryRepo.ListSalariesPaged(ctx, tenantID, restaurantID, startDate, endDate, page, pageSize)
 	if err != nil {
 		log.Printf("[HR-Salary] ListSalaries ERROR: %v\n", err)
 		writeJSON(w, http.StatusInternalServerError, map[string]interface{}{
@@ -72,6 +94,12 @@ func (h *HRSalaryHandler) ListSalaries(w http.ResponseWriter, r *http.Request) {
 	log.Printf("[HR-Salary] ListSalaries: found %d records\n", len(salaries))
 	writeJSON(w, http.StatusOK, map[string]interface{}{
 		"success": true, "data": salaries,
+		"pagination": map[string]interface{}{
+			"page":        page,
+			"page_size":   pageSize,
+			"total":       total,
+			"total_pages": (total + pageSize - 1) / pageSize,
+		},
 	})
 }
 
@@ -146,6 +174,16 @@ func (h *HRSalaryHandler) CreateSalary(w http.ResponseWriter, r *http.Request) {
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		writeJSON(w, http.StatusBadRequest, map[string]interface{}{
 			"success": false, "error": "Invalid request body",
+		})
+		return
+	}
+	if err := validateStringLengths(
+		stringLengthRule{Name: "currency", Value: req.Currency, Max: 16},
+		stringLengthRule{Name: "payment_method", Value: req.PaymentMethod, Max: 50},
+		stringLengthRule{Name: "status", Value: req.Status, Max: 32},
+	); err != nil {
+		writeJSON(w, http.StatusBadRequest, map[string]interface{}{
+			"success": false, "error": err.Error(),
 		})
 		return
 	}
@@ -269,6 +307,14 @@ func (h *HRSalaryHandler) UpdateSalary(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, http.StatusBadRequest, map[string]interface{}{
 			"success": false, "error": "Invalid request body",
 		})
+		return
+	}
+	if v, ok := req["payment_method"].(string); ok && len(v) > 50 {
+		writeJSON(w, http.StatusBadRequest, map[string]interface{}{"success": false, "error": "payment_method exceeds maximum length of 50"})
+		return
+	}
+	if v, ok := req["status"].(string); ok && len(v) > 32 {
+		writeJSON(w, http.StatusBadRequest, map[string]interface{}{"success": false, "error": "status exceeds maximum length of 32"})
 		return
 	}
 
@@ -405,6 +451,14 @@ func (h *HRSalaryHandler) MarkAsPaid(w http.ResponseWriter, r *http.Request) {
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil && !errors.Is(err, io.EOF) {
 		writeJSON(w, http.StatusBadRequest, map[string]interface{}{
 			"success": false, "error": "Invalid request body",
+		})
+		return
+	}
+	if err := validateStringLengths(
+		stringLengthRule{Name: "payment_reference", Value: req.PaymentReference, Max: 120},
+	); err != nil {
+		writeJSON(w, http.StatusBadRequest, map[string]interface{}{
+			"success": false, "error": err.Error(),
 		})
 		return
 	}

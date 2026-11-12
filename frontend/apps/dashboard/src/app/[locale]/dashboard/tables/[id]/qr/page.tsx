@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useParams, usePathname, useRouter } from 'next/navigation'
 import { Loader2, Lock } from 'lucide-react'
 import { toast } from 'sonner'
-import { useHasPermission } from '@/hooks/useRbac'
+import { useUserPermissions } from '@/hooks/useRbac'
 import { type RestaurantTable, tablesApi } from '@/lib/api/tablesApi'
 import { MODULE_IDS, PERMISSION_LEVELS } from '@/lib/rbac'
 import { createTranslator, getLocaleFromPath } from '@/lib/translations'
@@ -20,8 +20,8 @@ export default function TableQrStudioPage() {
   const isRTL = locale === 'ar'
   const tableID = Number.parseInt(String(params.id || ''), 10)
 
-  const { hasPermission: canViewTables, loading: canViewLoading } =
-    useHasPermission(MODULE_IDS.TABLES, PERMISSION_LEVELS.READ)
+  const { checkPermission, loading: permissionLoading } = useUserPermissions()
+  const canViewTables = checkPermission(MODULE_IDS.TABLES, PERMISSION_LEVELS.READ)
 
   const [table, setTable] = useState<RestaurantTable | null>(null)
   const [loading, setLoading] = useState(true)
@@ -45,12 +45,12 @@ export default function TableQrStudioPage() {
       }
     }
 
-    if (!canViewLoading && canViewTables) {
+    if (!permissionLoading && canViewTables) {
       void fetchTable()
     }
-  }, [canViewLoading, canViewTables, tableID, t])
+  }, [permissionLoading, canViewTables, tableID, t])
 
-  if (canViewLoading || loading) {
+  if (permissionLoading || loading) {
     return (
       <div className="flex h-80 items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -108,4 +108,3 @@ export default function TableQrStudioPage() {
     />
   )
 }
-

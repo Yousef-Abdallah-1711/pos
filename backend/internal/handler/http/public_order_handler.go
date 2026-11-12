@@ -11,6 +11,10 @@ import (
 	"pos-saas/internal/usecase"
 )
 
+func setPublicOrderNoCacheHeaders(w http.ResponseWriter) {
+	w.Header().Set("Cache-Control", "no-cache, no-store, private")
+}
+
 // PublicOrderHandler handles public-facing order API requests (minimal authentication)
 type PublicOrderHandler struct {
 	orderUC        *usecase.OrderUseCase
@@ -33,6 +37,7 @@ func NewPublicOrderHandler(
 // Request body: CreateOrderRequest
 // Returns: Created Order with ID
 func (h *PublicOrderHandler) CreateOrder(w http.ResponseWriter, r *http.Request) {
+	setPublicOrderNoCacheHeaders(w)
 	// Get tenant and restaurant from context
 	tenantID := middleware.GetTenantID(r)
 	if tenantID == 0 {
@@ -128,6 +133,7 @@ func classifyCreateOrderError(err error) (statusCode int, message string) {
 // GET /api/v1/public/orders/{id}
 // Returns: Full Order with items
 func (h *PublicOrderHandler) GetOrder(w http.ResponseWriter, r *http.Request) {
+	setPublicOrderNoCacheHeaders(w)
 	// Get tenant and restaurant from context
 	tenantID := middleware.GetTenantID(r)
 	if tenantID == 0 {
@@ -195,6 +201,7 @@ func (h *PublicOrderHandler) requirePublicOrderAccess(w http.ResponseWriter, r *
 // GET /api/v1/public/orders/number/{order_number}/lookup
 // Returns: Full Order with items
 func (h *PublicOrderHandler) GetOrderByNumber(w http.ResponseWriter, r *http.Request) {
+	setPublicOrderNoCacheHeaders(w)
 	// Get tenant and restaurant from context
 	tenantID := middleware.GetTenantID(r)
 	if tenantID == 0 {
@@ -240,6 +247,7 @@ func (h *PublicOrderHandler) GetOrderByNumber(w http.ResponseWriter, r *http.Req
 // GET /api/v1/public/orders/{id}/status
 // Returns: Order number, status, and payment status
 func (h *PublicOrderHandler) GetOrderStatus(w http.ResponseWriter, r *http.Request) {
+	setPublicOrderNoCacheHeaders(w)
 	// Get tenant and restaurant from context
 	tenantID := middleware.GetTenantID(r)
 	if tenantID == 0 {
@@ -294,6 +302,7 @@ func (h *PublicOrderHandler) GetOrderStatus(w http.ResponseWriter, r *http.Reque
 // GET /api/v1/public/orders/{id}/track
 // Returns: Order with status history
 func (h *PublicOrderHandler) TrackOrder(w http.ResponseWriter, r *http.Request) {
+	setPublicOrderNoCacheHeaders(w)
 	// Get tenant and restaurant from context
 	tenantID := middleware.GetTenantID(r)
 	if tenantID == 0 {
@@ -359,6 +368,7 @@ func (h *PublicOrderHandler) TrackOrder(w http.ResponseWriter, r *http.Request) 
 // Request body: CreateOrderRequest
 // Returns: Validation result with calculated totals
 func (h *PublicOrderHandler) ValidateOrder(w http.ResponseWriter, r *http.Request) {
+	setPublicOrderNoCacheHeaders(w)
 	// Parse request body
 	var req domain.CreateOrderRequest
 	if err := decodeJSONStrict(r, &req); err != nil {
@@ -433,6 +443,7 @@ func (h *PublicOrderHandler) ValidateOrder(w http.ResponseWriter, r *http.Reques
 // DELETE /api/v1/public/orders/{id}
 // Returns: Cancellation confirmation
 func (h *PublicOrderHandler) CancelOrder(w http.ResponseWriter, r *http.Request) {
+	setPublicOrderNoCacheHeaders(w)
 	// Get tenant and restaurant from context
 	tenantID := middleware.GetTenantID(r)
 	if tenantID == 0 {

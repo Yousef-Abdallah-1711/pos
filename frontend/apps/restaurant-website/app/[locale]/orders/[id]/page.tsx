@@ -1,25 +1,9 @@
-import { HeaderSSR } from '@/components/layout/header-ssr';
-import { FooterSSR } from '@/components/layout/footer-ssr';
-import { getThemeDataServer, getDefaultThemeData } from '@/lib/api/get-theme-server';
-import OrderDetailContent from './order-detail-content';
+import OrderDetailContent from './order-detail-content'
 
-interface PageProps {
-  params: Promise<{ locale: 'en' | 'ar'; id: string }>;
-}
-
-export default async function OrderDetailsPage({ params }: PageProps) {
-  const { locale } = await params;
-
-  // Fetch theme server-side
-  const themeData = (await getThemeDataServer()) ?? getDefaultThemeData();
-
+export default function OrderDetailsPage() {
   return (
-    <>
-      <HeaderSSR themeData={themeData} cartItemsCount={0} locale={locale} />
-      <main>
-        <OrderDetailContent />
-      </main>
-      <FooterSSR themeData={themeData} locale={locale} />
-    </>
-  );
+    <main className="min-h-screen w-full">
+      <OrderDetailContent />
+    </main>
+  )
 }

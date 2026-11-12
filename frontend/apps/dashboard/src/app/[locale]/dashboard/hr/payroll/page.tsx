@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { usePathname } from 'next/navigation'
 import { useAuthStore } from '@/stores/authStore'
-import { useHasPermission } from '@/hooks/useRbac'
+import { useUserPermissions } from '@/hooks/useRbac'
 import { SalaryList } from '@/components/hr/SalaryList'
 import { SalaryForm } from '@/components/hr/SalaryForm'
 import { Button } from '@/components/ui/button'
@@ -41,15 +41,9 @@ export default function PayrollPage() {
   const t = useMemo(() => createTranslator(locale), [locale])
 
   // Check RBAC permissions for Salaries module
-  const { hasPermission: canViewSalaries, loading: canViewLoading } = useHasPermission(
-    MODULE_IDS.SALARIES,
-    PERMISSION_LEVELS.READ,
-  )
-  const { hasPermission: canCreateSalaries, loading: canCreateLoading } = useHasPermission(
-    MODULE_IDS.SALARIES,
-    PERMISSION_LEVELS.WRITE,
-  )
-  const permissionLoading = canViewLoading || canCreateLoading
+  const { checkPermission, loading: permissionLoading } = useUserPermissions()
+  const canViewSalaries = checkPermission(MODULE_IDS.SALARIES, PERMISSION_LEVELS.READ)
+  const canCreateSalaries = checkPermission(MODULE_IDS.SALARIES, PERMISSION_LEVELS.WRITE)
 
   // ALL hooks MUST be before early returns to avoid Hook order violation
   const [salaries, setSalaries] = useState<Salary[]>([])

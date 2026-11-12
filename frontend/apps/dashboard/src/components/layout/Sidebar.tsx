@@ -357,6 +357,31 @@ export function Sidebar({ isMobileOpen, onMobileToggle, isCollapsed, onCollapsed
   const isRTL = locale === 'ar'
   const currentTab = searchParams.get('tab') || ''
 
+  // Show blocked sidebar if tenant is blocked
+  if (isBlocked) {
+    return <BlockedSidebar />
+  }
+
+  if (permissionsLoading) {
+    return (
+      <aside
+        className={`fixed inset-y-0 ${locale === 'ar' ? 'right-0' : 'left-0'} z-40 ${isCollapsed ? 'w-20' : 'w-64'} bg-white dark:bg-gray-800 ${locale === 'ar' ? 'border-l' : 'border-r'} border-gray-200 dark:border-gray-700 transform ${isMobileOpen ? 'translate-x-0' : locale === 'ar' ? 'translate-x-full' : '-translate-x-full'} md:translate-x-0 transition-all duration-300 ease-in-out`}
+      >
+        <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+          <div className={`h-8 rounded bg-gray-200 dark:bg-gray-700 animate-pulse ${isCollapsed ? 'w-10 mx-auto' : 'w-40'}`} />
+        </div>
+        <div className={`p-3 ${isCollapsed ? 'px-2' : 'px-4'} space-y-2`}>
+          {Array.from({ length: 10 }).map((_, i) => (
+            <div
+              key={i}
+              className={`rounded-lg bg-gray-200 dark:bg-gray-700 animate-pulse ${isCollapsed ? 'h-11 w-11 mx-auto' : 'h-11 w-full'}`}
+            />
+          ))}
+        </div>
+      </aside>
+    )
+  }
+
   const isChildActive = (childHref: string) => {
     const [basePath, queryString] = childHref.split('?')
     if (pathname !== `/${locale}${basePath}`) {

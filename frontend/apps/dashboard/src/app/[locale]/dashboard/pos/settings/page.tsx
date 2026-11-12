@@ -6,7 +6,7 @@ import { useMemo, useState } from 'react'
 import { toast } from 'sonner'
 import { ArrowLeft, Loader2, Lock, Moon, Save, Sun } from 'lucide-react'
 import { useTheme } from 'next-themes'
-import { useHasPermission } from '@/hooks/useRbac'
+import { useUserPermissions } from '@/hooks/useRbac'
 import { MODULE_IDS, PERMISSION_LEVELS } from '@/lib/rbac'
 import { createTranslator, getLocaleFromPath } from '@/lib/translations'
 import { usePreferencesStore } from '@/stores/preferencesStore'
@@ -27,10 +27,8 @@ export default function POSSettingsPage() {
   const { resolvedTheme, setTheme } = useTheme()
   const updateTheme = usePreferencesStore((state) => state.updateTheme)
 
-  const { hasPermission: canManagePOS, loading: permissionLoading } = useHasPermission(
-    MODULE_IDS.ORDERS,
-    PERMISSION_LEVELS.WRITE
-  )
+  const { checkPermission, loading: permissionLoading } = useUserPermissions()
+  const canManagePOS = checkPermission(MODULE_IDS.ORDERS, PERMISSION_LEVELS.WRITE)
 
   const soundEnabled = usePOSStore(selectPOSSoundEnabled)
   const autoPrintEnabled = usePOSStore(selectPOSAutoPrintEnabled)

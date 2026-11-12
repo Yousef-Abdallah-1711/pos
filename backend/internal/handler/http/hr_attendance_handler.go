@@ -1,6 +1,7 @@
 package http
 
 import (
+	"context"
 	"database/sql"
 	"encoding/json"
 	"log"
@@ -19,6 +20,8 @@ type HRAttendanceHandler struct {
 	db             *sql.DB
 }
 
+const hrAttendanceListTimeout = 10 * time.Second
+
 // NewHRAttendanceHandler creates a new HR attendance handler
 func NewHRAttendanceHandler(attendanceRepo *repository.AttendanceRepository, db *sql.DB) *HRAttendanceHandler {
 	return &HRAttendanceHandler{attendanceRepo: attendanceRepo, db: db}
@@ -28,6 +31,23 @@ func NewHRAttendanceHandler(attendanceRepo *repository.AttendanceRepository, db 
 func (h *HRAttendanceHandler) ListAttendance(w http.ResponseWriter, r *http.Request) {
 	tenantID := int(middleware.GetTenantID(r))
 	restaurantID := int(middleware.GetRestaurantID(r))
+	page, err := parseIntQueryParam(r, "page", 1)
+	if err != nil {
+		writeJSON(w, http.StatusBadRequest, map[string]interface{}{
+			"success": false, "error": "Invalid page value",
+		})
+		return
+	}
+	pageSize, err := parseIntQueryParam(r, "page_size", 20)
+	if err != nil {
+		writeJSON(w, http.StatusBadRequest, map[string]interface{}{
+			"success": false, "error": "Invalid page_size value",
+		})
+		return
+	}
+	if pageSize > 200 {
+		pageSize = 200
+	}
 
 	startDateStr := r.URL.Query().Get("start_date")
 	endDateStr := r.URL.Query().Get("end_date")
@@ -51,7 +71,9 @@ func (h *HRAttendanceHandler) ListAttendance(w http.ResponseWriter, r *http.Requ
 		}
 	}
 
-	records, err := h.attendanceRepo.ListAttendance(tenantID, restaurantID, startDate, endDate)
+	ctx, cancel := context.WithTimeout(r.Context(), hrAttendanceListTimeout)
+	defer cancel()
+	records, total, err := h.attendanceRepo.ListAttendancePaged(ctx, tenantID, restaurantID, startDate, endDate, page, pageSize)
 	if err != nil {
 		log.Printf("[HR-Attendance] ListAttendance ERROR: %v\n", err)
 		writeJSON(w, http.StatusInternalServerError, map[string]interface{}{
@@ -63,6 +85,12 @@ func (h *HRAttendanceHandler) ListAttendance(w http.ResponseWriter, r *http.Requ
 	log.Printf("[HR-Attendance] ListAttendance: found %d records\n", len(records))
 	writeJSON(w, http.StatusOK, map[string]interface{}{
 		"success": true, "data": records,
+		"pagination": map[string]interface{}{
+			"page":        page,
+			"page_size":   pageSize,
+			"total":       total,
+			"total_pages": (total + pageSize - 1) / pageSize,
+		},
 	})
 }
 
@@ -116,6 +144,14 @@ func (h *HRAttendanceHandler) ClockIn(w http.ResponseWriter, r *http.Request) {
 		})
 		return
 	}
+	if err := validateStringLengths(
+		stringLengthRule{Name: "notes", Value: req.Notes, Max: 1000},
+	); err != nil {
+		writeJSON(w, http.StatusBadRequest, map[string]interface{}{
+			"success": false, "error": err.Error(),
+		})
+		return
+	}
 
 	if req.EmployeeID == 0 {
 		writeJSON(w, http.StatusBadRequest, map[string]interface{}{
@@ -166,6 +202,15 @@ func (h *HRAttendanceHandler) CreateAttendance(w http.ResponseWriter, r *http.Re
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		writeJSON(w, http.StatusBadRequest, map[string]interface{}{
 			"success": false, "error": "Invalid request body",
+		})
+		return
+	}
+	if err := validateStringLengths(
+		stringLengthRule{Name: "status", Value: req.Status, Max: 32},
+		stringLengthRule{Name: "notes", Value: req.Notes, Max: 1000},
+	); err != nil {
+		writeJSON(w, http.StatusBadRequest, map[string]interface{}{
+			"success": false, "error": err.Error(),
 		})
 		return
 	}
@@ -272,6 +317,16 @@ func (h *HRAttendanceHandler) UpdateAttendance(w http.ResponseWriter, r *http.Re
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		writeJSON(w, http.StatusBadRequest, map[string]interface{}{
 			"success": false, "error": "Invalid request body",
+		})
+		return
+	}
+	if err := validateStringLengths(
+		stringLengthRule{Name: "status", Value: req.Status, Max: 32},
+		stringLengthRule{Name: "notes", Value: req.Notes, Max: 1000},
+		stringLengthRule{Name: "admin_notes", Value: req.AdminNotes, Max: 1000},
+	); err != nil {
+		writeJSON(w, http.StatusBadRequest, map[string]interface{}{
+			"success": false, "error": err.Error(),
 		})
 		return
 	}

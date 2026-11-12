@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 	"fmt"
@@ -16,8 +17,22 @@ func NewCustomerAccountRepository(db *sql.DB) *CustomerAccountRepository {
 	return &CustomerAccountRepository{db: db}
 }
 
-func (r *CustomerAccountRepository) ListCustomers(tenantID, restaurantID int) ([]domain.CustomerAccount, error) {
-	rows, err := r.db.Query(`
+func (r *CustomerAccountRepository) ListCustomersPaged(ctx context.Context, tenantID, restaurantID, page, pageSize int) ([]domain.CustomerAccount, int, error) {
+	var total int
+	if err := r.db.QueryRowContext(
+		ctx,
+		`SELECT COUNT(1) FROM customers_accounting WHERE tenant_id = $1 AND restaurant_id = $2`,
+		tenantID,
+		restaurantID,
+	).Scan(&total); err != nil {
+		return nil, 0, err
+	}
+
+	offset := (page - 1) * pageSize
+	if offset < 0 {
+		offset = 0
+	}
+	rows, err := r.db.QueryContext(ctx, `
 		SELECT
 			id, tenant_id, restaurant_id, customer_code, customer_name,
 			COALESCE(customer_name_ar, ''), COALESCE(customer_type, 'individual'),
@@ -31,25 +46,31 @@ func (r *CustomerAccountRepository) ListCustomers(tenantID, restaurantID int) ([
 		FROM customers_accounting
 		WHERE tenant_id = $1 AND restaurant_id = $2
 		ORDER BY customer_name ASC
-	`, tenantID, restaurantID)
+		LIMIT $3 OFFSET $4
+	`, tenantID, restaurantID, pageSize, offset)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 	defer rows.Close()
 
-	customers := make([]domain.CustomerAccount, 0)
+	customers := make([]domain.CustomerAccount, 0, pageSize)
 	for rows.Next() {
 		customer, err := scanCustomerAccount(rows)
 		if err != nil {
-			return nil, err
+			return nil, 0, err
 		}
 		customers = append(customers, customer)
 	}
 	if err := rows.Err(); err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
-	return customers, nil
+	return customers, total, nil
+}
+
+func (r *CustomerAccountRepository) ListCustomers(tenantID, restaurantID int) ([]domain.CustomerAccount, error) {
+	customers, _, err := r.ListCustomersPaged(context.Background(), tenantID, restaurantID, 1, 1000000)
+	return customers, err
 }
 
 func (r *CustomerAccountRepository) GetCustomerByID(tenantID, restaurantID, id int) (*domain.CustomerAccount, error) {

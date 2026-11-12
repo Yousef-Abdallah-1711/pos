@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"database/sql"
 	"time"
 
@@ -17,8 +18,30 @@ func NewAttendanceRepository(db *sql.DB) *AttendanceRepository {
 	return &AttendanceRepository{db: db}
 }
 
-// ListAttendance retrieves attendance records for a date range
-func (r *AttendanceRepository) ListAttendance(tenantID, restaurantID int, startDate, endDate time.Time) ([]domain.Attendance, error) {
+// ListAttendancePaged retrieves attendance records for a date range using DB pagination.
+func (r *AttendanceRepository) ListAttendancePaged(ctx context.Context, tenantID, restaurantID int, startDate, endDate time.Time, page, pageSize int) ([]domain.Attendance, int, error) {
+	if page <= 0 {
+		page = 1
+	}
+	if pageSize <= 0 {
+		pageSize = 20
+	}
+	if pageSize > 200 {
+		pageSize = 200
+	}
+	offset := (page - 1) * pageSize
+
+	const countQuery = `
+		SELECT COUNT(*)
+		FROM attendance
+		WHERE tenant_id = $1 AND restaurant_id = $2
+		  AND attendance_date BETWEEN $3 AND $4
+	`
+	var total int
+	if err := r.db.QueryRowContext(ctx, countQuery, tenantID, restaurantID, startDate, endDate).Scan(&total); err != nil {
+		return nil, 0, err
+	}
+
 	query := `
 		SELECT
 			id, tenant_id, restaurant_id, employee_id, attendance_date,
@@ -31,11 +54,12 @@ func (r *AttendanceRepository) ListAttendance(tenantID, restaurantID int, startD
 		WHERE tenant_id = $1 AND restaurant_id = $2
 		  AND attendance_date BETWEEN $3 AND $4
 		ORDER BY attendance_date DESC, employee_id ASC
+		LIMIT $5 OFFSET $6
 	`
 
-	rows, err := r.db.Query(query, tenantID, restaurantID, startDate, endDate)
+	rows, err := r.db.QueryContext(ctx, query, tenantID, restaurantID, startDate, endDate, pageSize, offset)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 	defer rows.Close()
 
@@ -57,7 +81,7 @@ func (r *AttendanceRepository) ListAttendance(tenantID, restaurantID int, startD
 			&notes, &att.CreatedAt, &att.UpdatedAt,
 		)
 		if err != nil {
-			return nil, err
+			return nil, 0, err
 		}
 
 		if clockIn.Valid {
@@ -90,7 +114,13 @@ func (r *AttendanceRepository) ListAttendance(tenantID, restaurantID int, startD
 		attendances = []domain.Attendance{}
 	}
 
-	return attendances, nil
+	return attendances, total, nil
+}
+
+// ListAttendance retrieves attendance records for a date range.
+func (r *AttendanceRepository) ListAttendance(tenantID, restaurantID int, startDate, endDate time.Time) ([]domain.Attendance, error) {
+	out, _, err := r.ListAttendancePaged(context.Background(), tenantID, restaurantID, startDate, endDate, 1, 1000000)
+	return out, err
 }
 
 // GetAttendanceByID retrieves a single attendance record by ID

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { usePathname } from 'next/navigation'
-import { useHasPermission } from '@/hooks/useRbac'
+import { useUserPermissions } from '@/hooks/useRbac'
 import { useNotifications, Notification, NotificationModule, NotificationPriority } from '@/hooks/useNotifications'
 import { createTranslator, getLocaleFromPath } from '@/lib/translations'
 import { Button } from '@/components/ui/button'
@@ -39,15 +39,9 @@ export default function NotificationsPage() {
   const isRTL = locale === 'ar'
 
   // Check RBAC permissions for Notifications module
-  const { hasPermission: canViewNotifications, loading: canViewLoading } = useHasPermission(
-    MODULE_IDS.NOTIFICATIONS,
-    PERMISSION_LEVELS.READ,
-  )
-  const { hasPermission: canDeleteNotifications, loading: canDeleteLoading } = useHasPermission(
-    MODULE_IDS.NOTIFICATIONS,
-    PERMISSION_LEVELS.DELETE,
-  )
-  const permissionLoading = canViewLoading || canDeleteLoading
+  const { checkPermission, loading: permissionLoading } = useUserPermissions()
+  const canViewNotifications = checkPermission(MODULE_IDS.NOTIFICATIONS, PERMISSION_LEVELS.READ)
+  const canDeleteNotifications = checkPermission(MODULE_IDS.NOTIFICATIONS, PERMISSION_LEVELS.DELETE)
 
   const {
     notifications,

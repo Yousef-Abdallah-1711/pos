@@ -1,6 +1,7 @@
 package http
 
 import (
+	"context"
 	"encoding/json"
 	"log"
 	"net/http"
@@ -17,6 +18,8 @@ type HREmployeeHandler struct {
 	employeeRepo *repository.EmployeeRepository
 }
 
+const hrEmployeeListTimeout = 10 * time.Second
+
 // NewHREmployeeHandler creates a new HR employee handler
 func NewHREmployeeHandler(employeeRepo *repository.EmployeeRepository) *HREmployeeHandler {
 	return &HREmployeeHandler{employeeRepo: employeeRepo}
@@ -26,10 +29,29 @@ func NewHREmployeeHandler(employeeRepo *repository.EmployeeRepository) *HREmploy
 func (h *HREmployeeHandler) ListEmployees(w http.ResponseWriter, r *http.Request) {
 	tenantID := int(middleware.GetTenantID(r))
 	restaurantID := int(middleware.GetRestaurantID(r))
+	page, err := parseIntQueryParam(r, "page", 1)
+	if err != nil {
+		writeJSON(w, http.StatusBadRequest, map[string]interface{}{
+			"success": false, "error": "Invalid page value",
+		})
+		return
+	}
+	pageSize, err := parseIntQueryParam(r, "page_size", 20)
+	if err != nil {
+		writeJSON(w, http.StatusBadRequest, map[string]interface{}{
+			"success": false, "error": "Invalid page_size value",
+		})
+		return
+	}
+	if pageSize > 200 {
+		pageSize = 200
+	}
 
-	log.Printf("[HR-Employee] ListEmployees: tenantID=%d, restaurantID=%d\n", tenantID, restaurantID)
+	log.Printf("[HR-Employee] ListEmployees: tenantID=%d, restaurantID=%d, page=%d, page_size=%d\n", tenantID, restaurantID, page, pageSize)
 
-	employees, err := h.employeeRepo.ListEmployees(tenantID, restaurantID)
+	ctx, cancel := context.WithTimeout(r.Context(), hrEmployeeListTimeout)
+	defer cancel()
+	employees, total, err := h.employeeRepo.ListEmployeesPaged(ctx, tenantID, restaurantID, page, pageSize)
 	if err != nil {
 		log.Printf("[HR-Employee] ListEmployees ERROR: %v\n", err)
 		writeJSON(w, http.StatusInternalServerError, map[string]interface{}{
@@ -40,7 +62,14 @@ func (h *HREmployeeHandler) ListEmployees(w http.ResponseWriter, r *http.Request
 
 	log.Printf("[HR-Employee] ListEmployees: found %d employees\n", len(employees))
 	writeJSON(w, http.StatusOK, map[string]interface{}{
-		"success": true, "data": employees,
+		"success": true,
+		"data":    employees,
+		"pagination": map[string]interface{}{
+			"page":        page,
+			"page_size":   pageSize,
+			"total":       total,
+			"total_pages": (total + pageSize - 1) / pageSize,
+		},
 	})
 }
 
@@ -85,40 +114,66 @@ func (h *HREmployeeHandler) CreateEmployee(w http.ResponseWriter, r *http.Reques
 	userID := int(middleware.GetUserID(r))
 
 	var req struct {
-		EmployeeCode    string  `json:"employee_code"`
-		FirstName       string  `json:"first_name"`
-		LastName        string  `json:"last_name"`
-		FirstNameAr     string  `json:"first_name_ar"`
-		LastNameAr      string  `json:"last_name_ar"`
-		Email           string  `json:"email"`
-		Phone           string  `json:"phone"`
-		Gender          string  `json:"gender"`
-		NationalID      string  `json:"national_id"`
-		DateOfBirth     string  `json:"date_of_birth"`
-		Address         string  `json:"address"`
-		City            string  `json:"city"`
-		State           string  `json:"state"`
-		PostalCode      string  `json:"postal_code"`
-		Country         string  `json:"country"`
-		HireDate        string  `json:"hire_date"`
-		EmploymentType  string  `json:"employment_type"`
-		Position        string  `json:"position"`
-		Department      string  `json:"department"`
-		BaseSalary      float64 `json:"base_salary"`
-		SalaryCurrency  string  `json:"salary_currency"`
-		PaymentFrequency string `json:"payment_frequency"`
-		WorkingHoursPerWeek float64 `json:"working_hours_per_week"`
-		ShiftType       string  `json:"shift_type"`
-		EmergencyContactName  string `json:"emergency_contact_name"`
-		EmergencyContactPhone string `json:"emergency_contact_phone"`
-		EmergencyContactRelationship string `json:"emergency_contact_relationship"`
-		Notes           string  `json:"notes"`
+		EmployeeCode                 string  `json:"employee_code"`
+		FirstName                    string  `json:"first_name"`
+		LastName                     string  `json:"last_name"`
+		FirstNameAr                  string  `json:"first_name_ar"`
+		LastNameAr                   string  `json:"last_name_ar"`
+		Email                        string  `json:"email"`
+		Phone                        string  `json:"phone"`
+		Gender                       string  `json:"gender"`
+		NationalID                   string  `json:"national_id"`
+		DateOfBirth                  string  `json:"date_of_birth"`
+		Address                      string  `json:"address"`
+		City                         string  `json:"city"`
+		State                        string  `json:"state"`
+		PostalCode                   string  `json:"postal_code"`
+		Country                      string  `json:"country"`
+		HireDate                     string  `json:"hire_date"`
+		EmploymentType               string  `json:"employment_type"`
+		Position                     string  `json:"position"`
+		Department                   string  `json:"department"`
+		BaseSalary                   float64 `json:"base_salary"`
+		SalaryCurrency               string  `json:"salary_currency"`
+		PaymentFrequency             string  `json:"payment_frequency"`
+		WorkingHoursPerWeek          float64 `json:"working_hours_per_week"`
+		ShiftType                    string  `json:"shift_type"`
+		EmergencyContactName         string  `json:"emergency_contact_name"`
+		EmergencyContactPhone        string  `json:"emergency_contact_phone"`
+		EmergencyContactRelationship string  `json:"emergency_contact_relationship"`
+		Notes                        string  `json:"notes"`
 	}
 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		log.Printf("[HR-Employee] CreateEmployee: invalid request body: %v\n", err)
 		writeJSON(w, http.StatusBadRequest, map[string]interface{}{
 			"success": false, "error": "Invalid request body",
+		})
+		return
+	}
+	if err := validateStringLengths(
+		stringLengthRule{Name: "employee_code", Value: req.EmployeeCode, Max: 64},
+		stringLengthRule{Name: "first_name", Value: req.FirstName, Max: 100},
+		stringLengthRule{Name: "last_name", Value: req.LastName, Max: 100},
+		stringLengthRule{Name: "first_name_ar", Value: req.FirstNameAr, Max: 100},
+		stringLengthRule{Name: "last_name_ar", Value: req.LastNameAr, Max: 100},
+		stringLengthRule{Name: "email", Value: req.Email, Max: 254},
+		stringLengthRule{Name: "phone", Value: req.Phone, Max: 32},
+		stringLengthRule{Name: "position", Value: req.Position, Max: 120},
+		stringLengthRule{Name: "department", Value: req.Department, Max: 120},
+		stringLengthRule{Name: "national_id", Value: req.NationalID, Max: 32},
+		stringLengthRule{Name: "address", Value: req.Address, Max: 255},
+		stringLengthRule{Name: "city", Value: req.City, Max: 120},
+		stringLengthRule{Name: "state", Value: req.State, Max: 120},
+		stringLengthRule{Name: "postal_code", Value: req.PostalCode, Max: 32},
+		stringLengthRule{Name: "country", Value: req.Country, Max: 120},
+		stringLengthRule{Name: "emergency_contact_name", Value: req.EmergencyContactName, Max: 120},
+		stringLengthRule{Name: "emergency_contact_phone", Value: req.EmergencyContactPhone, Max: 32},
+		stringLengthRule{Name: "emergency_contact_relationship", Value: req.EmergencyContactRelationship, Max: 120},
+		stringLengthRule{Name: "notes", Value: req.Notes, Max: 2000},
+	); err != nil {
+		writeJSON(w, http.StatusBadRequest, map[string]interface{}{
+			"success": false, "error": err.Error(),
 		})
 		return
 	}
@@ -182,39 +237,39 @@ func (h *HREmployeeHandler) CreateEmployee(w http.ResponseWriter, r *http.Reques
 	}
 
 	employee := &domain.Employee{
-		TenantID:            tenantID,
-		RestaurantID:        restaurantID,
-		EmployeeCode:        req.EmployeeCode,
-		FirstName:           req.FirstName,
-		LastName:            req.LastName,
-		FirstNameAr:         req.FirstNameAr,
-		LastNameAr:          req.LastNameAr,
-		Email:               req.Email,
-		Phone:               req.Phone,
-		DateOfBirth:         dateOfBirth,
-		Gender:              req.Gender,
-		NationalID:          req.NationalID,
-		Address:             req.Address,
-		City:                req.City,
-		State:               req.State,
-		PostalCode:          req.PostalCode,
-		Country:             req.Country,
-		HireDate:            hireDate,
-		EmploymentType:      req.EmploymentType,
-		EmploymentStatus:    "active",
-		Position:            req.Position,
-		Department:          req.Department,
-		BaseSalary:          req.BaseSalary,
-		SalaryCurrency:      req.SalaryCurrency,
-		PaymentFrequency:    req.PaymentFrequency,
-		WorkingHoursPerWeek: req.WorkingHoursPerWeek,
-		ShiftType:           req.ShiftType,
+		TenantID:                     tenantID,
+		RestaurantID:                 restaurantID,
+		EmployeeCode:                 req.EmployeeCode,
+		FirstName:                    req.FirstName,
+		LastName:                     req.LastName,
+		FirstNameAr:                  req.FirstNameAr,
+		LastNameAr:                   req.LastNameAr,
+		Email:                        req.Email,
+		Phone:                        req.Phone,
+		DateOfBirth:                  dateOfBirth,
+		Gender:                       req.Gender,
+		NationalID:                   req.NationalID,
+		Address:                      req.Address,
+		City:                         req.City,
+		State:                        req.State,
+		PostalCode:                   req.PostalCode,
+		Country:                      req.Country,
+		HireDate:                     hireDate,
+		EmploymentType:               req.EmploymentType,
+		EmploymentStatus:             "active",
+		Position:                     req.Position,
+		Department:                   req.Department,
+		BaseSalary:                   req.BaseSalary,
+		SalaryCurrency:               req.SalaryCurrency,
+		PaymentFrequency:             req.PaymentFrequency,
+		WorkingHoursPerWeek:          req.WorkingHoursPerWeek,
+		ShiftType:                    req.ShiftType,
 		EmergencyContactName:         req.EmergencyContactName,
 		EmergencyContactPhone:        req.EmergencyContactPhone,
 		EmergencyContactRelationship: req.EmergencyContactRelationship,
-		Notes:               req.Notes,
-		IsActive:            true,
-		CreatedBy:           &userID,
+		Notes:                        req.Notes,
+		IsActive:                     true,
+		CreatedBy:                    &userID,
 	}
 
 	id, err := h.employeeRepo.CreateEmployee(employee)
@@ -270,6 +325,22 @@ func (h *HREmployeeHandler) UpdateEmployee(w http.ResponseWriter, r *http.Reques
 		writeJSON(w, http.StatusBadRequest, map[string]interface{}{
 			"success": false, "error": "Invalid request body",
 		})
+		return
+	}
+	if v, ok := req["first_name"].(string); ok && len(v) > 100 {
+		writeJSON(w, http.StatusBadRequest, map[string]interface{}{"success": false, "error": "first_name exceeds maximum length of 100"})
+		return
+	}
+	if v, ok := req["last_name"].(string); ok && len(v) > 100 {
+		writeJSON(w, http.StatusBadRequest, map[string]interface{}{"success": false, "error": "last_name exceeds maximum length of 100"})
+		return
+	}
+	if v, ok := req["email"].(string); ok && len(v) > 254 {
+		writeJSON(w, http.StatusBadRequest, map[string]interface{}{"success": false, "error": "email exceeds maximum length of 254"})
+		return
+	}
+	if v, ok := req["notes"].(string); ok && len(v) > 2000 {
+		writeJSON(w, http.StatusBadRequest, map[string]interface{}{"success": false, "error": "notes exceeds maximum length of 2000"})
 		return
 	}
 

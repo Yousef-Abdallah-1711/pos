@@ -1,6 +1,7 @@
 package http
 
 import (
+	"context"
 	"database/sql"
 	"encoding/json"
 	"log"
@@ -19,6 +20,8 @@ type HRLeaveHandler struct {
 	db        *sql.DB
 }
 
+const hrLeaveListTimeout = 10 * time.Second
+
 // NewHRLeaveHandler creates a new HR leave handler
 func NewHRLeaveHandler(leaveRepo *repository.LeaveRepository, db *sql.DB) *HRLeaveHandler {
 	return &HRLeaveHandler{leaveRepo: leaveRepo, db: db}
@@ -28,6 +31,23 @@ func NewHRLeaveHandler(leaveRepo *repository.LeaveRepository, db *sql.DB) *HRLea
 func (h *HRLeaveHandler) ListLeaves(w http.ResponseWriter, r *http.Request) {
 	tenantID := int(middleware.GetTenantID(r))
 	restaurantID := int(middleware.GetRestaurantID(r))
+	page, err := parseIntQueryParam(r, "page", 1)
+	if err != nil {
+		writeJSON(w, http.StatusBadRequest, map[string]interface{}{
+			"success": false, "error": "Invalid page value",
+		})
+		return
+	}
+	pageSize, err := parseIntQueryParam(r, "page_size", 20)
+	if err != nil {
+		writeJSON(w, http.StatusBadRequest, map[string]interface{}{
+			"success": false, "error": "Invalid page_size value",
+		})
+		return
+	}
+	if pageSize > 200 {
+		pageSize = 200
+	}
 
 	startDateStr := r.URL.Query().Get("start_date")
 	endDateStr := r.URL.Query().Get("end_date")
@@ -51,7 +71,9 @@ func (h *HRLeaveHandler) ListLeaves(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	leaves, err := h.leaveRepo.ListLeaves(tenantID, restaurantID, startDate, endDate)
+	ctx, cancel := context.WithTimeout(r.Context(), hrLeaveListTimeout)
+	defer cancel()
+	leaves, total, err := h.leaveRepo.ListLeavesPaged(ctx, tenantID, restaurantID, startDate, endDate, page, pageSize)
 	if err != nil {
 		log.Printf("[HR-Leave] ListLeaves ERROR: %v\n", err)
 		writeJSON(w, http.StatusInternalServerError, map[string]interface{}{
@@ -63,6 +85,12 @@ func (h *HRLeaveHandler) ListLeaves(w http.ResponseWriter, r *http.Request) {
 	log.Printf("[HR-Leave] ListLeaves: found %d records\n", len(leaves))
 	writeJSON(w, http.StatusOK, map[string]interface{}{
 		"success": true, "data": leaves,
+		"pagination": map[string]interface{}{
+			"page":        page,
+			"page_size":   pageSize,
+			"total":       total,
+			"total_pages": (total + pageSize - 1) / pageSize,
+		},
 	})
 }
 
@@ -124,6 +152,20 @@ func (h *HRLeaveHandler) CreateLeave(w http.ResponseWriter, r *http.Request) {
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		writeJSON(w, http.StatusBadRequest, map[string]interface{}{
 			"success": false, "error": "Invalid request body",
+		})
+		return
+	}
+	if err := validateStringLengths(
+		stringLengthRule{Name: "leave_type", Value: req.LeaveType, Max: 50},
+		stringLengthRule{Name: "leave_category", Value: req.LeaveCategory, Max: 50},
+		stringLengthRule{Name: "half_day_period", Value: req.HalfDayPeriod, Max: 20},
+		stringLengthRule{Name: "reason", Value: req.Reason, Max: 1000},
+		stringLengthRule{Name: "contact_number", Value: req.ContactNumber, Max: 32},
+		stringLengthRule{Name: "contact_address", Value: req.ContactAddress, Max: 255},
+		stringLengthRule{Name: "emergency_contact", Value: req.EmergencyContact, Max: 120},
+	); err != nil {
+		writeJSON(w, http.StatusBadRequest, map[string]interface{}{
+			"success": false, "error": err.Error(),
 		})
 		return
 	}
@@ -253,6 +295,21 @@ func (h *HRLeaveHandler) UpdateLeave(w http.ResponseWriter, r *http.Request) {
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		writeJSON(w, http.StatusBadRequest, map[string]interface{}{
 			"success": false, "error": "Invalid request body",
+		})
+		return
+	}
+	if err := validateStringLengths(
+		stringLengthRule{Name: "leave_type", Value: req.LeaveType, Max: 50},
+		stringLengthRule{Name: "leave_category", Value: req.LeaveCategory, Max: 50},
+		stringLengthRule{Name: "half_day_period", Value: req.HalfDayPeriod, Max: 20},
+		stringLengthRule{Name: "reason", Value: req.Reason, Max: 1000},
+		stringLengthRule{Name: "contact_number", Value: req.ContactNumber, Max: 32},
+		stringLengthRule{Name: "contact_address", Value: req.ContactAddress, Max: 255},
+		stringLengthRule{Name: "emergency_contact", Value: req.EmergencyContact, Max: 120},
+		stringLengthRule{Name: "status", Value: req.Status, Max: 32},
+	); err != nil {
+		writeJSON(w, http.StatusBadRequest, map[string]interface{}{
+			"success": false, "error": err.Error(),
 		})
 		return
 	}

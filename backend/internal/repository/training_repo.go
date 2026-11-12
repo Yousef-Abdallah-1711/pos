@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 	"time"
@@ -16,8 +17,22 @@ func NewTrainingRepository(db *sql.DB) *TrainingRepository {
 	return &TrainingRepository{db: db}
 }
 
-func (r *TrainingRepository) List(tenantID, restaurantID int) ([]domain.TrainingRecord, error) {
-	rows, err := r.db.Query(`
+func (r *TrainingRepository) ListPaged(ctx context.Context, tenantID, restaurantID, page, pageSize int) ([]domain.TrainingRecord, int, error) {
+	var total int
+	if err := r.db.QueryRowContext(
+		ctx,
+		`SELECT COUNT(1) FROM training_records WHERE tenant_id = $1 AND restaurant_id = $2`,
+		tenantID,
+		restaurantID,
+	).Scan(&total); err != nil {
+		return nil, 0, err
+	}
+
+	offset := (page - 1) * pageSize
+	if offset < 0 {
+		offset = 0
+	}
+	rows, err := r.db.QueryContext(ctx, `
 		SELECT
 			id, tenant_id, restaurant_id, employee_id, training_title, training_provider, training_type,
 			start_date, end_date, status, certificate_number, certificate_expiry, notes,
@@ -25,13 +40,14 @@ func (r *TrainingRepository) List(tenantID, restaurantID int) ([]domain.Training
 		FROM training_records
 		WHERE tenant_id = $1 AND restaurant_id = $2
 		ORDER BY start_date DESC, id DESC
-	`, tenantID, restaurantID)
+		LIMIT $3 OFFSET $4
+	`, tenantID, restaurantID, pageSize, offset)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 	defer rows.Close()
 
-	out := make([]domain.TrainingRecord, 0)
+	out := make([]domain.TrainingRecord, 0, pageSize)
 	for rows.Next() {
 		var item domain.TrainingRecord
 		var createdBy, updatedBy sql.NullInt64
@@ -40,7 +56,7 @@ func (r *TrainingRepository) List(tenantID, restaurantID int) ([]domain.Training
 			&item.StartDate, &item.EndDate, &item.Status, &item.CertificateNumber, &item.CertificateExpiry, &item.Notes,
 			&item.CreatedAt, &item.UpdatedAt, &createdBy, &updatedBy,
 		); err != nil {
-			return nil, err
+			return nil, 0, err
 		}
 		if createdBy.Valid {
 			v := int(createdBy.Int64)
@@ -52,7 +68,12 @@ func (r *TrainingRepository) List(tenantID, restaurantID int) ([]domain.Training
 		}
 		out = append(out, item)
 	}
-	return out, rows.Err()
+	return out, total, rows.Err()
+}
+
+func (r *TrainingRepository) List(tenantID, restaurantID int) ([]domain.TrainingRecord, error) {
+	out, _, err := r.ListPaged(context.Background(), tenantID, restaurantID, 1, 1000000)
+	return out, err
 }
 
 func (r *TrainingRepository) GetByID(tenantID, restaurantID, id int) (*domain.TrainingRecord, error) {

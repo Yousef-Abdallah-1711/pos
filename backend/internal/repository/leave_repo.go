@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"database/sql"
 	"time"
 
@@ -17,8 +18,30 @@ func NewLeaveRepository(db *sql.DB) *LeaveRepository {
 	return &LeaveRepository{db: db}
 }
 
-// ListLeaves retrieves leave records for a date range
-func (r *LeaveRepository) ListLeaves(tenantID, restaurantID int, startDate, endDate time.Time) ([]domain.Leave, error) {
+// ListLeavesPaged retrieves leave records for a date range using DB pagination.
+func (r *LeaveRepository) ListLeavesPaged(ctx context.Context, tenantID, restaurantID int, startDate, endDate time.Time, page, pageSize int) ([]domain.Leave, int, error) {
+	if page <= 0 {
+		page = 1
+	}
+	if pageSize <= 0 {
+		pageSize = 20
+	}
+	if pageSize > 200 {
+		pageSize = 200
+	}
+	offset := (page - 1) * pageSize
+
+	const countQuery = `
+		SELECT COUNT(*)
+		FROM leaves
+		WHERE tenant_id = $1 AND restaurant_id = $2
+		  AND start_date >= $3 AND end_date <= $4
+	`
+	var total int
+	if err := r.db.QueryRowContext(ctx, countQuery, tenantID, restaurantID, startDate, endDate).Scan(&total); err != nil {
+		return nil, 0, err
+	}
+
 	query := `
 		SELECT
 			id, tenant_id, restaurant_id, employee_id, start_date, end_date,
@@ -28,11 +51,12 @@ func (r *LeaveRepository) ListLeaves(tenantID, restaurantID int, startDate, endD
 		WHERE tenant_id = $1 AND restaurant_id = $2
 		  AND start_date >= $3 AND end_date <= $4
 		ORDER BY start_date DESC
+		LIMIT $5 OFFSET $6
 	`
 
-	rows, err := r.db.Query(query, tenantID, restaurantID, startDate, endDate)
+	rows, err := r.db.QueryContext(ctx, query, tenantID, restaurantID, startDate, endDate, pageSize, offset)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 	defer rows.Close()
 
@@ -48,7 +72,7 @@ func (r *LeaveRepository) ListLeaves(tenantID, restaurantID int, startDate, endD
 			&leave.Status, &leave.IsApproved, &leave.CreatedAt, &leave.UpdatedAt,
 		)
 		if err != nil {
-			return nil, err
+			return nil, 0, err
 		}
 
 		leave.HalfDayPeriod = halfDayPeriod.String
@@ -59,7 +83,13 @@ func (r *LeaveRepository) ListLeaves(tenantID, restaurantID int, startDate, endD
 		leaves = []domain.Leave{}
 	}
 
-	return leaves, nil
+	return leaves, total, nil
+}
+
+// ListLeaves retrieves leave records for a date range.
+func (r *LeaveRepository) ListLeaves(tenantID, restaurantID int, startDate, endDate time.Time) ([]domain.Leave, error) {
+	out, _, err := r.ListLeavesPaged(context.Background(), tenantID, restaurantID, startDate, endDate, 1, 1000000)
+	return out, err
 }
 
 // GetLeaveByID retrieves a single leave record by ID

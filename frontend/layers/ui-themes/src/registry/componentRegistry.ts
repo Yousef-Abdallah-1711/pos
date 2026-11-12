@@ -77,6 +77,8 @@ class ComponentRegistryManager {
       const componentMap: Record<string, () => Promise<any>> = {
         hero: () => import('../sections/marketing/HeroSection').then(m => ({ default: m.HeroSection })),
         products: () => import('../sections/commerce/ProductsSection').then(m => ({ default: m.ProductsSection })),
+        categories: () => import('../sections/commerce/ProductsSection').then(m => ({ default: m.ProductsSection })),
+        gallery: () => import('../sections/commerce/ProductsSection').then(m => ({ default: m.ProductsSection })),
         why_us: () => import('../sections/content/WhyChooseUsSection').then(m => ({ default: m.WhyChooseUsSection })),
         contact: () => import('../sections/forms/ContactSection').then(m => ({ default: m.ContactSection })),
         testimonials: () => import('../sections/marketing/TestimonialsSection').then(m => ({ default: m.TestimonialsSection })),
@@ -126,10 +128,39 @@ class ComponentRegistryManager {
     this.registerComponent({
       id: 'products',
       name: 'Products Section',
-      aliases: ['products-section', 'products_section', 'featured_products', 'product_grid'],
+      aliases: [
+        'products-section',
+        'products_section',
+        'featured_products',
+        'product_grid',
+        'categories',
+        'categories-section',
+        'browse_menu',
+        'gallery',
+        'gallery-section',
+        'food_gallery',
+      ],
       version: '1.0.0',
       component: lazy(() => import('../sections/commerce/ProductsSection').then(m => ({ default: m.ProductsSection }))),
       description: 'Display products in grid or list layout',
+    })
+
+    this.registerComponent({
+      id: 'categories',
+      name: 'Categories Section',
+      aliases: ['categories-section', 'categories_section', 'browse_menu'],
+      version: '1.0.0',
+      component: lazy(() => import('../sections/commerce/ProductsSection').then(m => ({ default: m.ProductsSection }))),
+      description: 'Compatibility mapping for categories sections',
+    })
+
+    this.registerComponent({
+      id: 'gallery',
+      name: 'Gallery Section',
+      aliases: ['gallery-section', 'gallery_section', 'food_gallery'],
+      version: '1.0.0',
+      component: lazy(() => import('../sections/commerce/ProductsSection').then(m => ({ default: m.ProductsSection }))),
+      description: 'Compatibility mapping for gallery sections',
     })
 
     this.registerComponent({

@@ -1,10 +1,12 @@
 package http
 
 import (
+	"context"
 	"database/sql"
 	"net/http"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"pos-saas/internal/middleware"
@@ -13,6 +15,8 @@ import (
 type HRReportHandler struct {
 	db *sql.DB
 }
+
+const hrReportHandlerTimeout = 10 * time.Second
 
 func NewHRReportHandler(db *sql.DB) *HRReportHandler {
 	return &HRReportHandler{db: db}
@@ -30,6 +34,8 @@ func (h *HRReportHandler) GetHeadcountReport(w http.ResponseWriter, r *http.Requ
 		respondError(w, http.StatusBadRequest, "Missing tenant context")
 		return
 	}
+	ctx, cancel := context.WithTimeout(r.Context(), hrReportHandlerTimeout)
+	defer cancel()
 
 	department := strings.TrimSpace(r.URL.Query().Get("department"))
 	status := strings.TrimSpace(r.URL.Query().Get("status"))
@@ -73,98 +79,147 @@ func (h *HRReportHandler) GetHeadcountReport(w http.ResponseWriter, r *http.Requ
 
 	where := strings.Join(conditions, " AND ")
 
-	var total int64
-	if err := h.db.QueryRow("SELECT COUNT(*) FROM employees WHERE "+where, args...).Scan(&total); err != nil {
-		respondError(w, http.StatusInternalServerError, "Failed to generate headcount report")
-		return
+	var (
+		total        int64
+		byDepartment []map[string]interface{}
+		byStatus     []map[string]interface{}
+		byType       []map[string]interface{}
+		queryErr     error
+		mu           sync.Mutex
+		wg           sync.WaitGroup
+	)
+	setErr := func(err error) {
+		if err == nil {
+			return
+		}
+		mu.Lock()
+		if queryErr == nil {
+			queryErr = err
+		}
+		mu.Unlock()
 	}
 
-	byDepartment := make([]map[string]interface{}, 0)
-	rows, err := h.db.Query(`
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		if err := h.db.QueryRowContext(ctx, "SELECT COUNT(*) FROM employees WHERE "+where, args...).Scan(&total); err != nil {
+			setErr(err)
+		}
+	}()
+
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		rows, err := h.db.QueryContext(ctx, `
 		SELECT COALESCE(NULLIF(TRIM(department), ''), 'Unassigned') AS department, COUNT(*) AS count
 		FROM employees
 		WHERE `+where+`
 		GROUP BY 1
 		ORDER BY 2 DESC, 1 ASC
 	`, args...)
-	if err != nil {
-		respondError(w, http.StatusInternalServerError, "Failed to generate headcount report")
-		return
-	}
-	for rows.Next() {
-		var dept string
-		var count int64
-		if scanErr := rows.Scan(&dept, &count); scanErr != nil {
-			rows.Close()
-			respondError(w, http.StatusInternalServerError, "Failed to generate headcount report")
+		if err != nil {
+			setErr(err)
 			return
 		}
-		byDepartment = append(byDepartment, map[string]interface{}{
-			"department": dept,
-			"count":      count,
-		})
-	}
-	if closeErr := rows.Close(); closeErr != nil {
-		respondError(w, http.StatusInternalServerError, "Failed to generate headcount report")
-		return
-	}
+		defer rows.Close()
+		local := make([]map[string]interface{}, 0)
+		for rows.Next() {
+			var dept string
+			var count int64
+			if scanErr := rows.Scan(&dept, &count); scanErr != nil {
+				setErr(scanErr)
+				return
+			}
+			local = append(local, map[string]interface{}{
+				"department": dept,
+				"count":      count,
+			})
+		}
+		if err := rows.Err(); err != nil {
+			setErr(err)
+			return
+		}
+		mu.Lock()
+		byDepartment = local
+		mu.Unlock()
+	}()
 
-	byStatus := make([]map[string]interface{}, 0)
-	rows, err = h.db.Query(`
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		rows, err := h.db.QueryContext(ctx, `
 		SELECT employment_status, COUNT(*) AS count
 		FROM employees
 		WHERE `+where+`
 		GROUP BY 1
 		ORDER BY 2 DESC, 1 ASC
 	`, args...)
-	if err != nil {
-		respondError(w, http.StatusInternalServerError, "Failed to generate headcount report")
-		return
-	}
-	for rows.Next() {
-		var itemStatus string
-		var count int64
-		if scanErr := rows.Scan(&itemStatus, &count); scanErr != nil {
-			rows.Close()
-			respondError(w, http.StatusInternalServerError, "Failed to generate headcount report")
+		if err != nil {
+			setErr(err)
 			return
 		}
-		byStatus = append(byStatus, map[string]interface{}{
-			"status": itemStatus,
-			"count":  count,
-		})
-	}
-	if closeErr := rows.Close(); closeErr != nil {
-		respondError(w, http.StatusInternalServerError, "Failed to generate headcount report")
-		return
-	}
+		defer rows.Close()
+		local := make([]map[string]interface{}, 0)
+		for rows.Next() {
+			var itemStatus string
+			var count int64
+			if scanErr := rows.Scan(&itemStatus, &count); scanErr != nil {
+				setErr(scanErr)
+				return
+			}
+			local = append(local, map[string]interface{}{
+				"status": itemStatus,
+				"count":  count,
+			})
+		}
+		if err := rows.Err(); err != nil {
+			setErr(err)
+			return
+		}
+		mu.Lock()
+		byStatus = local
+		mu.Unlock()
+	}()
 
-	byType := make([]map[string]interface{}, 0)
-	rows, err = h.db.Query(`
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		rows, err := h.db.QueryContext(ctx, `
 		SELECT employment_type, COUNT(*) AS count
 		FROM employees
 		WHERE `+where+`
 		GROUP BY 1
 		ORDER BY 2 DESC, 1 ASC
 	`, args...)
-	if err != nil {
-		respondError(w, http.StatusInternalServerError, "Failed to generate headcount report")
-		return
-	}
-	for rows.Next() {
-		var itemType string
-		var count int64
-		if scanErr := rows.Scan(&itemType, &count); scanErr != nil {
-			rows.Close()
-			respondError(w, http.StatusInternalServerError, "Failed to generate headcount report")
+		if err != nil {
+			setErr(err)
 			return
 		}
-		byType = append(byType, map[string]interface{}{
-			"employment_type": itemType,
-			"count":           count,
-		})
-	}
-	if closeErr := rows.Close(); closeErr != nil {
+		defer rows.Close()
+		local := make([]map[string]interface{}, 0)
+		for rows.Next() {
+			var itemType string
+			var count int64
+			if scanErr := rows.Scan(&itemType, &count); scanErr != nil {
+				setErr(scanErr)
+				return
+			}
+			local = append(local, map[string]interface{}{
+				"employment_type": itemType,
+				"count":           count,
+			})
+		}
+		if err := rows.Err(); err != nil {
+			setErr(err)
+			return
+		}
+		mu.Lock()
+		byType = local
+		mu.Unlock()
+	}()
+
+	wg.Wait()
+	if queryErr != nil {
 		respondError(w, http.StatusInternalServerError, "Failed to generate headcount report")
 		return
 	}
@@ -200,6 +255,8 @@ func (h *HRReportHandler) GetTurnoverReport(w http.ResponseWriter, r *http.Reque
 		respondError(w, http.StatusBadRequest, "Missing tenant context")
 		return
 	}
+	ctx, cancel := context.WithTimeout(r.Context(), hrReportHandlerTimeout)
+	defer cancel()
 
 	from, to, err := parseHRDateRange(r.URL.Query().Get("date_from"), r.URL.Query().Get("date_to"), 365)
 	if err != nil {
@@ -208,7 +265,7 @@ func (h *HRReportHandler) GetTurnoverReport(w http.ResponseWriter, r *http.Reque
 	}
 
 	var hires, departures int64
-	if err = h.db.QueryRow(`
+	if err = h.db.QueryRowContext(ctx, `
 		SELECT COUNT(*)
 		FROM employees
 		WHERE tenant_id = $1
@@ -218,7 +275,7 @@ func (h *HRReportHandler) GetTurnoverReport(w http.ResponseWriter, r *http.Reque
 		respondError(w, http.StatusInternalServerError, "Failed to generate turnover report")
 		return
 	}
-	if err = h.db.QueryRow(`
+	if err = h.db.QueryRowContext(ctx, `
 		SELECT COUNT(*)
 		FROM employees
 		WHERE tenant_id = $1
@@ -231,7 +288,7 @@ func (h *HRReportHandler) GetTurnoverReport(w http.ResponseWriter, r *http.Reque
 	}
 
 	var headcountStart, headcountEnd int64
-	if err = h.db.QueryRow(`
+	if err = h.db.QueryRowContext(ctx, `
 		SELECT COUNT(*)
 		FROM employees
 		WHERE tenant_id = $1
@@ -242,7 +299,7 @@ func (h *HRReportHandler) GetTurnoverReport(w http.ResponseWriter, r *http.Reque
 		respondError(w, http.StatusInternalServerError, "Failed to generate turnover report")
 		return
 	}
-	if err = h.db.QueryRow(`
+	if err = h.db.QueryRowContext(ctx, `
 		SELECT COUNT(*)
 		FROM employees
 		WHERE tenant_id = $1
@@ -261,7 +318,7 @@ func (h *HRReportHandler) GetTurnoverReport(w http.ResponseWriter, r *http.Reque
 	}
 
 	monthly := make([]map[string]interface{}, 0)
-	rows, err := h.db.Query(`
+	rows, err := h.db.QueryContext(ctx, `
 		WITH months AS (
 			SELECT generate_series(
 				date_trunc('month', $3::date),
@@ -349,6 +406,8 @@ func (h *HRReportHandler) GetAbsenteeismReport(w http.ResponseWriter, r *http.Re
 		respondError(w, http.StatusBadRequest, "Missing tenant context")
 		return
 	}
+	ctx, cancel := context.WithTimeout(r.Context(), hrReportHandlerTimeout)
+	defer cancel()
 
 	from, to, err := parseHRDateRange(r.URL.Query().Get("date_from"), r.URL.Query().Get("date_to"), 30)
 	if err != nil {
@@ -356,18 +415,40 @@ func (h *HRReportHandler) GetAbsenteeismReport(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	var totalRecords, absentRecords int64
-	if err = h.db.QueryRow(`
+	var (
+		totalRecords  int64
+		absentRecords int64
+	)
+	var wg sync.WaitGroup
+	var mu sync.Mutex
+	var queryErr error
+	setErr := func(err error) {
+		if err == nil {
+			return
+		}
+		mu.Lock()
+		if queryErr == nil {
+			queryErr = err
+		}
+		mu.Unlock()
+	}
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		if err := h.db.QueryRowContext(ctx, `
 		SELECT COUNT(*)
 		FROM attendance
 		WHERE tenant_id = $1
 		  AND restaurant_id = $2
 		  AND attendance_date BETWEEN $3 AND $4
 	`, tenantID, restaurantID, from, to).Scan(&totalRecords); err != nil {
-		respondError(w, http.StatusInternalServerError, "Failed to generate absenteeism report")
-		return
-	}
-	if err = h.db.QueryRow(`
+			setErr(err)
+		}
+	}()
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		if err := h.db.QueryRowContext(ctx, `
 		SELECT COUNT(*)
 		FROM attendance
 		WHERE tenant_id = $1
@@ -375,6 +456,11 @@ func (h *HRReportHandler) GetAbsenteeismReport(w http.ResponseWriter, r *http.Re
 		  AND attendance_date BETWEEN $3 AND $4
 		  AND status = 'absent'
 	`, tenantID, restaurantID, from, to).Scan(&absentRecords); err != nil {
+			setErr(err)
+		}
+	}()
+	wg.Wait()
+	if queryErr != nil {
 		respondError(w, http.StatusInternalServerError, "Failed to generate absenteeism report")
 		return
 	}
@@ -385,7 +471,7 @@ func (h *HRReportHandler) GetAbsenteeismReport(w http.ResponseWriter, r *http.Re
 	}
 
 	patterns := make([]map[string]interface{}, 0)
-	rows, err := h.db.Query(`
+	rows, err := h.db.QueryContext(ctx, `
 		SELECT
 			EXTRACT(DOW FROM attendance_date)::INT AS day_of_week,
 			COUNT(*) AS absent_days
@@ -421,7 +507,7 @@ func (h *HRReportHandler) GetAbsenteeismReport(w http.ResponseWriter, r *http.Re
 	}
 
 	topAbsentees := make([]map[string]interface{}, 0)
-	rows, err = h.db.Query(`
+	rows, err = h.db.QueryContext(ctx, `
 		SELECT
 			a.employee_id,
 			TRIM(COALESCE(e.first_name, '') || ' ' || COALESCE(e.last_name, '')) AS employee_name,
@@ -494,6 +580,8 @@ func (h *HRReportHandler) GetOvertimeReport(w http.ResponseWriter, r *http.Reque
 		respondError(w, http.StatusBadRequest, "Missing tenant context")
 		return
 	}
+	ctx, cancel := context.WithTimeout(r.Context(), hrReportHandlerTimeout)
+	defer cancel()
 
 	from, to, err := parseHRDateRange(r.URL.Query().Get("date_from"), r.URL.Query().Get("date_to"), 30)
 	if err != nil {
@@ -505,7 +593,7 @@ func (h *HRReportHandler) GetOvertimeReport(w http.ResponseWriter, r *http.Reque
 
 	var totalHours sql.NullFloat64
 	var employeesWithOvertime int64
-	if err = h.db.QueryRow(`
+	if err = h.db.QueryRowContext(ctx, `
 		SELECT COALESCE(SUM(overtime_hours), 0), COUNT(DISTINCT employee_id)
 		FROM attendance
 		WHERE tenant_id = $1
@@ -523,7 +611,7 @@ func (h *HRReportHandler) GetOvertimeReport(w http.ResponseWriter, r *http.Reque
 	}
 
 	items := make([]map[string]interface{}, 0)
-	rows, err := h.db.Query(`
+	rows, err := h.db.QueryContext(ctx, `
 		SELECT
 			a.employee_id,
 			TRIM(COALESCE(e.first_name, '') || ' ' || COALESCE(e.last_name, '')) AS employee_name,
@@ -615,6 +703,8 @@ func (h *HRReportHandler) GetLeaveBalancesReport(w http.ResponseWriter, r *http.
 		respondError(w, http.StatusBadRequest, "Missing tenant context")
 		return
 	}
+	ctx, cancel := context.WithTimeout(r.Context(), hrReportHandlerTimeout)
+	defer cancel()
 
 	year := time.Now().UTC().Year()
 	if yearRaw := strings.TrimSpace(r.URL.Query().Get("year")); yearRaw != "" {
@@ -630,7 +720,7 @@ func (h *HRReportHandler) GetLeaveBalancesReport(w http.ResponseWriter, r *http.
 
 	const annualAllowance = 21.0
 	items := make([]map[string]interface{}, 0)
-	rows, err := h.db.Query(`
+	rows, err := h.db.QueryContext(ctx, `
 		SELECT
 			e.id AS employee_id,
 			TRIM(COALESCE(e.first_name, '') || ' ' || COALESCE(e.last_name, '')) AS employee_name,
@@ -720,11 +810,32 @@ func (h *HRReportHandler) GetTrainingComplianceReport(w http.ResponseWriter, r *
 		respondError(w, http.StatusBadRequest, "Missing tenant context")
 		return
 	}
+	ctx, cancel := context.WithTimeout(r.Context(), hrReportHandlerTimeout)
+	defer cancel()
 
 	today := time.Now().UTC().Format("2006-01-02")
 
-	var activeEmployees, certifiedEmployees int64
-	if err := h.db.QueryRow(`
+	var (
+		activeEmployees    int64
+		certifiedEmployees int64
+		wg                 sync.WaitGroup
+		mu                 sync.Mutex
+		queryErr           error
+	)
+	setErr := func(err error) {
+		if err == nil {
+			return
+		}
+		mu.Lock()
+		if queryErr == nil {
+			queryErr = err
+		}
+		mu.Unlock()
+	}
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		if err := h.db.QueryRowContext(ctx, `
 		SELECT COUNT(*)
 		FROM employees
 		WHERE tenant_id = $1
@@ -732,11 +843,13 @@ func (h *HRReportHandler) GetTrainingComplianceReport(w http.ResponseWriter, r *
 		  AND is_active = true
 		  AND employment_status = 'active'
 	`, tenantID, restaurantID).Scan(&activeEmployees); err != nil {
-		respondError(w, http.StatusInternalServerError, "Failed to generate training compliance report")
-		return
-	}
-
-	if err := h.db.QueryRow(`
+			setErr(err)
+		}
+	}()
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		if err := h.db.QueryRowContext(ctx, `
 		SELECT COUNT(DISTINCT tr.employee_id)
 		FROM training_records tr
 		JOIN employees e
@@ -750,6 +863,11 @@ func (h *HRReportHandler) GetTrainingComplianceReport(w http.ResponseWriter, r *
 		  AND tr.status IN ('completed', 'certified')
 		  AND (tr.certificate_expiry IS NULL OR tr.certificate_expiry >= $3::date)
 	`, tenantID, restaurantID, today).Scan(&certifiedEmployees); err != nil {
+			setErr(err)
+		}
+	}()
+	wg.Wait()
+	if queryErr != nil {
 		respondError(w, http.StatusInternalServerError, "Failed to generate training compliance report")
 		return
 	}
@@ -759,8 +877,17 @@ func (h *HRReportHandler) GetTrainingComplianceReport(w http.ResponseWriter, r *
 		complianceRate = (float64(certifiedEmployees) / float64(activeEmployees)) * 100
 	}
 
-	byDepartment := make([]map[string]interface{}, 0)
-	rows, err := h.db.Query(`
+	var (
+		byDepartment []map[string]interface{}
+		byType       []map[string]interface{}
+	)
+	wg = sync.WaitGroup{}
+	mu = sync.Mutex{}
+	queryErr = nil
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		rows, err := h.db.QueryContext(ctx, `
 		WITH active_employees AS (
 			SELECT id, COALESCE(NULLIF(TRIM(department), ''), 'Unassigned') AS department
 			FROM employees
@@ -786,38 +913,45 @@ func (h *HRReportHandler) GetTrainingComplianceReport(w http.ResponseWriter, r *
 		GROUP BY ae.department
 		ORDER BY ae.department ASC
 	`, tenantID, restaurantID, today)
-	if err != nil {
-		respondError(w, http.StatusInternalServerError, "Failed to generate training compliance report")
-		return
-	}
-	for rows.Next() {
-		var department string
-		var totalEmployeesByDept, certifiedByDept int64
-		if scanErr := rows.Scan(&department, &totalEmployeesByDept, &certifiedByDept); scanErr != nil {
-			rows.Close()
-			respondError(w, http.StatusInternalServerError, "Failed to generate training compliance report")
+		if err != nil {
+			setErr(err)
 			return
 		}
+		defer rows.Close()
+		local := make([]map[string]interface{}, 0)
+		for rows.Next() {
+			var department string
+			var totalEmployeesByDept, certifiedByDept int64
+			if scanErr := rows.Scan(&department, &totalEmployeesByDept, &certifiedByDept); scanErr != nil {
+				setErr(scanErr)
+				return
+			}
 
-		deptRate := 0.0
-		if totalEmployeesByDept > 0 {
-			deptRate = (float64(certifiedByDept) / float64(totalEmployeesByDept)) * 100
+			deptRate := 0.0
+			if totalEmployeesByDept > 0 {
+				deptRate = (float64(certifiedByDept) / float64(totalEmployeesByDept)) * 100
+			}
+
+			local = append(local, map[string]interface{}{
+				"department":          department,
+				"total_employees":     totalEmployeesByDept,
+				"certified_employees": certifiedByDept,
+				"compliance_rate":     deptRate,
+			})
 		}
+		if err := rows.Err(); err != nil {
+			setErr(err)
+			return
+		}
+		mu.Lock()
+		byDepartment = local
+		mu.Unlock()
+	}()
 
-		byDepartment = append(byDepartment, map[string]interface{}{
-			"department":          department,
-			"total_employees":     totalEmployeesByDept,
-			"certified_employees": certifiedByDept,
-			"compliance_rate":     deptRate,
-		})
-	}
-	if closeErr := rows.Close(); closeErr != nil {
-		respondError(w, http.StatusInternalServerError, "Failed to generate training compliance report")
-		return
-	}
-
-	byType := make([]map[string]interface{}, 0)
-	rows, err = h.db.Query(`
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		rows, err := h.db.QueryContext(ctx, `
 		SELECT
 			COALESCE(NULLIF(TRIM(training_type), ''), 'Unspecified') AS training_type,
 			COUNT(*) AS total_records,
@@ -828,30 +962,41 @@ func (h *HRReportHandler) GetTrainingComplianceReport(w http.ResponseWriter, r *
 		GROUP BY 1
 		ORDER BY total_records DESC, training_type ASC
 	`, tenantID, restaurantID)
-	if err != nil {
-		respondError(w, http.StatusInternalServerError, "Failed to generate training compliance report")
-		return
-	}
-	for rows.Next() {
-		var trainingType string
-		var totalRecords, completedRecords int64
-		if scanErr := rows.Scan(&trainingType, &totalRecords, &completedRecords); scanErr != nil {
-			rows.Close()
-			respondError(w, http.StatusInternalServerError, "Failed to generate training compliance report")
+		if err != nil {
+			setErr(err)
 			return
 		}
-		completionRate := 0.0
-		if totalRecords > 0 {
-			completionRate = (float64(completedRecords) / float64(totalRecords)) * 100
+		defer rows.Close()
+		local := make([]map[string]interface{}, 0)
+		for rows.Next() {
+			var trainingType string
+			var totalRecords, completedRecords int64
+			if scanErr := rows.Scan(&trainingType, &totalRecords, &completedRecords); scanErr != nil {
+				setErr(scanErr)
+				return
+			}
+			completionRate := 0.0
+			if totalRecords > 0 {
+				completionRate = (float64(completedRecords) / float64(totalRecords)) * 100
+			}
+			local = append(local, map[string]interface{}{
+				"training_type":     trainingType,
+				"total_records":     totalRecords,
+				"completed_records": completedRecords,
+				"completion_rate":   completionRate,
+			})
 		}
-		byType = append(byType, map[string]interface{}{
-			"training_type":     trainingType,
-			"total_records":     totalRecords,
-			"completed_records": completedRecords,
-			"completion_rate":   completionRate,
-		})
-	}
-	if closeErr := rows.Close(); closeErr != nil {
+		if err := rows.Err(); err != nil {
+			setErr(err)
+			return
+		}
+		mu.Lock()
+		byType = local
+		mu.Unlock()
+	}()
+
+	wg.Wait()
+	if queryErr != nil {
 		respondError(w, http.StatusInternalServerError, "Failed to generate training compliance report")
 		return
 	}

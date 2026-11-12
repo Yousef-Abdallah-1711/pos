@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { usePathname } from 'next/navigation'
 import { useAuthStore } from '@/stores/authStore'
-import { useHasPermission } from '@/hooks/useRbac'
+import { useUserPermissions } from '@/hooks/useRbac'
 import { AttendanceList } from '@/components/hr/AttendanceList'
 import { AttendanceForm } from '@/components/hr/AttendanceForm'
 import { Button } from '@/components/ui/button'
@@ -41,15 +41,9 @@ export default function AttendancePage() {
   const t = useMemo(() => createTranslator(locale), [locale])
 
   // Check RBAC permissions for Attendance module (using HR module for attendance)
-  const { hasPermission: canViewAttendance, loading: canViewLoading } = useHasPermission(
-    MODULE_IDS.HR,
-    PERMISSION_LEVELS.READ,
-  )
-  const { hasPermission: canCreateAttendance, loading: canCreateLoading } = useHasPermission(
-    MODULE_IDS.HR,
-    PERMISSION_LEVELS.WRITE,
-  )
-  const permissionLoading = canViewLoading || canCreateLoading
+  const { checkPermission, loading: permissionLoading } = useUserPermissions()
+  const canViewAttendance = checkPermission(MODULE_IDS.HR, PERMISSION_LEVELS.READ)
+  const canCreateAttendance = checkPermission(MODULE_IDS.HR, PERMISSION_LEVELS.WRITE)
 
   // ALL hooks MUST be before early returns to avoid Hook order violation
   const [attendance, setAttendance] = useState<Attendance[]>([])

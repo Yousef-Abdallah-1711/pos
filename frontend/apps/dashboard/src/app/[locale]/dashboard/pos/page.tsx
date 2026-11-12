@@ -15,7 +15,7 @@ import { usePOSOffline } from '@/hooks/usePOSOffline'
 import { usePOSPerformance } from '@/hooks/usePOSPerformance'
 import { usePOSProductIndex } from '@/hooks/usePOSProductIndex'
 import { type POSReceiptData, usePOSPrint } from '@/hooks/usePOSPrint'
-import { useHasPermission } from '@/hooks/useRbac'
+import { useUserPermissions } from '@/hooks/useRbac'
 import { createTranslator, getLocaleFromPath } from '@/lib/translations'
 import { MODULE_IDS, PERMISSION_LEVELS } from '@/lib/rbac'
 import { debugError } from '@/lib/debug'
@@ -73,10 +73,8 @@ export default function POSPage() {
   const locale = getLocaleFromPath(pathname)
   const t = createTranslator(locale)
 
-  const { hasPermission: canUsePOS, loading: permissionLoading } = useHasPermission(
-    MODULE_IDS.ORDERS,
-    PERMISSION_LEVELS.WRITE
-  )
+  const { checkPermission, loading: permissionLoading } = useUserPermissions()
+  const canUsePOS = checkPermission(MODULE_IDS.ORDERS, PERMISSION_LEVELS.WRITE)
 
   const {
     products,

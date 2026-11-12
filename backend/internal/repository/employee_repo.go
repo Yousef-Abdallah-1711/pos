@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 	"log"
@@ -17,8 +18,30 @@ func NewEmployeeRepository(db *sql.DB) *EmployeeRepository {
 	return &EmployeeRepository{db: db}
 }
 
-// ListEmployees retrieves all active employees for a restaurant
-func (r *EmployeeRepository) ListEmployees(tenantID, restaurantID int) ([]domain.Employee, error) {
+// ListEmployeesPaged retrieves active employees with database pagination.
+func (r *EmployeeRepository) ListEmployeesPaged(ctx context.Context, tenantID, restaurantID, page, pageSize int) ([]domain.Employee, int, error) {
+	if page <= 0 {
+		page = 1
+	}
+	if pageSize <= 0 {
+		pageSize = 20
+	}
+	if pageSize > 200 {
+		pageSize = 200
+	}
+	offset := (page - 1) * pageSize
+
+	const countQuery = `
+		SELECT COUNT(*)
+		FROM employees
+		WHERE tenant_id = $1 AND restaurant_id = $2 AND is_active = true
+	`
+
+	var total int
+	if err := r.db.QueryRowContext(ctx, countQuery, tenantID, restaurantID).Scan(&total); err != nil {
+		return nil, 0, err
+	}
+
 	query := `
 		SELECT
 			id, tenant_id, restaurant_id, employee_code, first_name, last_name,
@@ -33,11 +56,12 @@ func (r *EmployeeRepository) ListEmployees(tenantID, restaurantID int) ([]domain
 		FROM employees
 		WHERE tenant_id = $1 AND restaurant_id = $2 AND is_active = true
 		ORDER BY first_name ASC, last_name ASC
+		LIMIT $3 OFFSET $4
 	`
 
-	rows, err := r.db.Query(query, tenantID, restaurantID)
+	rows, err := r.db.QueryContext(ctx, query, tenantID, restaurantID, pageSize, offset)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 	defer rows.Close()
 
@@ -66,7 +90,7 @@ func (r *EmployeeRepository) ListEmployees(tenantID, restaurantID int) ([]domain
 			&emp.CreatedAt, &emp.UpdatedAt, &createdBy, &updatedBy,
 		)
 		if err != nil {
-			return nil, err
+			return nil, 0, err
 		}
 
 		// Handle nullable fields
@@ -113,7 +137,7 @@ func (r *EmployeeRepository) ListEmployees(tenantID, restaurantID int) ([]domain
 	}
 
 	if err = rows.Err(); err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
 	// Return empty array instead of nil if no employees found
@@ -121,7 +145,13 @@ func (r *EmployeeRepository) ListEmployees(tenantID, restaurantID int) ([]domain
 		employees = []domain.Employee{}
 	}
 
-	return employees, nil
+	return employees, total, nil
+}
+
+// ListEmployees retrieves all active employees for a restaurant.
+func (r *EmployeeRepository) ListEmployees(tenantID, restaurantID int) ([]domain.Employee, error) {
+	employees, _, err := r.ListEmployeesPaged(context.Background(), tenantID, restaurantID, 1, 1000000)
+	return employees, err
 }
 
 // GetEmployeeByID retrieves a single employee by ID

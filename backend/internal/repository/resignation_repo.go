@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 	"time"
@@ -16,8 +17,22 @@ func NewResignationRepository(db *sql.DB) *ResignationRepository {
 	return &ResignationRepository{db: db}
 }
 
-func (r *ResignationRepository) List(tenantID, restaurantID int) ([]domain.Resignation, error) {
-	rows, err := r.db.Query(`
+func (r *ResignationRepository) ListPaged(ctx context.Context, tenantID, restaurantID, page, pageSize int) ([]domain.Resignation, int, error) {
+	var total int
+	if err := r.db.QueryRowContext(
+		ctx,
+		`SELECT COUNT(1) FROM resignations WHERE tenant_id = $1 AND restaurant_id = $2`,
+		tenantID,
+		restaurantID,
+	).Scan(&total); err != nil {
+		return nil, 0, err
+	}
+
+	offset := (page - 1) * pageSize
+	if offset < 0 {
+		offset = 0
+	}
+	rows, err := r.db.QueryContext(ctx, `
 		SELECT
 			id, tenant_id, restaurant_id, employee_id, resignation_date, last_working_date,
 			reason, status, notice_period_days, pending_salary, unused_leave_balance, settlement_amount,
@@ -25,12 +40,13 @@ func (r *ResignationRepository) List(tenantID, restaurantID int) ([]domain.Resig
 		FROM resignations
 		WHERE tenant_id = $1 AND restaurant_id = $2
 		ORDER BY resignation_date DESC, id DESC
-	`, tenantID, restaurantID)
+		LIMIT $3 OFFSET $4
+	`, tenantID, restaurantID, pageSize, offset)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 	defer rows.Close()
-	out := make([]domain.Resignation, 0)
+	out := make([]domain.Resignation, 0, pageSize)
 	for rows.Next() {
 		var item domain.Resignation
 		var createdBy, updatedBy sql.NullInt64
@@ -39,7 +55,7 @@ func (r *ResignationRepository) List(tenantID, restaurantID int) ([]domain.Resig
 			&item.Reason, &item.Status, &item.NoticePeriodDays, &item.PendingSalary, &item.UnusedLeaveBalance, &item.SettlementAmount,
 			&item.AcknowledgedAt, &item.CompletedAt, &item.CreatedAt, &item.UpdatedAt, &createdBy, &updatedBy,
 		); err != nil {
-			return nil, err
+			return nil, 0, err
 		}
 		if createdBy.Valid {
 			v := int(createdBy.Int64)
@@ -51,7 +67,12 @@ func (r *ResignationRepository) List(tenantID, restaurantID int) ([]domain.Resig
 		}
 		out = append(out, item)
 	}
-	return out, rows.Err()
+	return out, total, rows.Err()
+}
+
+func (r *ResignationRepository) List(tenantID, restaurantID int) ([]domain.Resignation, error) {
+	out, _, err := r.ListPaged(context.Background(), tenantID, restaurantID, 1, 1000000)
+	return out, err
 }
 
 func (r *ResignationRepository) GetByID(tenantID, restaurantID, id int) (*domain.Resignation, error) {

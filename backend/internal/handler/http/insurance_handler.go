@@ -1,7 +1,7 @@
 package http
 
 import (
-	"encoding/json"
+	"context"
 	"net/http"
 	"strconv"
 	"time"
@@ -14,6 +14,8 @@ import (
 type InsuranceHandler struct {
 	repo *repository.InsuranceRepository
 }
+
+const insuranceHandlerTimeout = 10 * time.Second
 
 func NewInsuranceHandler(repo *repository.InsuranceRepository) *InsuranceHandler {
 	return &InsuranceHandler{repo: repo}
@@ -33,23 +35,16 @@ func (h *InsuranceHandler) List(w http.ResponseWriter, r *http.Request) {
 	if pageSize > 100 {
 		pageSize = 100
 	}
-	data, err := h.repo.List(tenantID, restaurantID)
+	ctx, cancel := context.WithTimeout(r.Context(), insuranceHandlerTimeout)
+	defer cancel()
+	data, total, err := h.repo.ListPaged(ctx, tenantID, restaurantID, page, pageSize)
 	if err != nil {
 		respondError(w, http.StatusInternalServerError, "Failed to load insurance records")
 		return
 	}
-	total := len(data)
-	offset := (page - 1) * pageSize
-	if offset > total {
-		offset = total
-	}
-	end := offset + pageSize
-	if end > total {
-		end = total
-	}
 	respondJSON(w, http.StatusOK, map[string]interface{}{
 		"success": true,
-		"data":    data[offset:end],
+		"data":    data,
 		"pagination": map[string]interface{}{
 			"page":      page,
 			"page_size": pageSize,
@@ -166,7 +161,7 @@ func decodeInsurancePayload(r *http.Request) (domain.InsuranceTracking, error) {
 		Status         string  `json:"status"`
 		Notes          string  `json:"notes"`
 	}
-	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+	if err := decodeJSONStrict(r, &body); err != nil {
 		return domain.InsuranceTracking{}, err
 	}
 	if body.EmployeeID <= 0 || body.PolicyType == "" || body.ProviderName == "" || body.PolicyNumber == "" || body.CoverageStart == "" || body.CoverageEnd == "" {

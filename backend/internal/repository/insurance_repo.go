@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 	"time"
@@ -16,8 +17,22 @@ func NewInsuranceRepository(db *sql.DB) *InsuranceRepository {
 	return &InsuranceRepository{db: db}
 }
 
-func (r *InsuranceRepository) List(tenantID, restaurantID int) ([]domain.InsuranceTracking, error) {
-	rows, err := r.db.Query(`
+func (r *InsuranceRepository) ListPaged(ctx context.Context, tenantID, restaurantID, page, pageSize int) ([]domain.InsuranceTracking, int, error) {
+	var total int
+	if err := r.db.QueryRowContext(
+		ctx,
+		`SELECT COUNT(1) FROM insurance_tracking WHERE tenant_id = $1 AND restaurant_id = $2`,
+		tenantID,
+		restaurantID,
+	).Scan(&total); err != nil {
+		return nil, 0, err
+	}
+
+	offset := (page - 1) * pageSize
+	if offset < 0 {
+		offset = 0
+	}
+	rows, err := r.db.QueryContext(ctx, `
 		SELECT
 			id, tenant_id, restaurant_id, employee_id, policy_type, provider_name, policy_number,
 			coverage_start, coverage_end, monthly_premium, status, notes,
@@ -25,12 +40,13 @@ func (r *InsuranceRepository) List(tenantID, restaurantID int) ([]domain.Insuran
 		FROM insurance_tracking
 		WHERE tenant_id = $1 AND restaurant_id = $2
 		ORDER BY coverage_end ASC, id DESC
-	`, tenantID, restaurantID)
+		LIMIT $3 OFFSET $4
+	`, tenantID, restaurantID, pageSize, offset)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 	defer rows.Close()
-	out := make([]domain.InsuranceTracking, 0)
+	out := make([]domain.InsuranceTracking, 0, pageSize)
 	for rows.Next() {
 		var item domain.InsuranceTracking
 		var createdBy, updatedBy sql.NullInt64
@@ -39,7 +55,7 @@ func (r *InsuranceRepository) List(tenantID, restaurantID int) ([]domain.Insuran
 			&item.CoverageStart, &item.CoverageEnd, &item.MonthlyPremium, &item.Status, &item.Notes,
 			&item.CreatedAt, &item.UpdatedAt, &createdBy, &updatedBy,
 		); err != nil {
-			return nil, err
+			return nil, 0, err
 		}
 		if createdBy.Valid {
 			v := int(createdBy.Int64)
@@ -51,7 +67,12 @@ func (r *InsuranceRepository) List(tenantID, restaurantID int) ([]domain.Insuran
 		}
 		out = append(out, item)
 	}
-	return out, rows.Err()
+	return out, total, rows.Err()
+}
+
+func (r *InsuranceRepository) List(tenantID, restaurantID int) ([]domain.InsuranceTracking, error) {
+	out, _, err := r.ListPaged(context.Background(), tenantID, restaurantID, 1, 1000000)
+	return out, err
 }
 
 func (r *InsuranceRepository) GetByID(tenantID, restaurantID, id int) (*domain.InsuranceTracking, error) {

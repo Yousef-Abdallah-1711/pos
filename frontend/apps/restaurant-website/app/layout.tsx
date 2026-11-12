@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Poppins } from "next/font/google";
+import { Cairo, Inter } from "next/font/google";
 import { QueryProvider } from "@/components/providers/core/query-provider";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { SubdomainProvider } from "@/lib/subdomain-context";
@@ -11,14 +11,15 @@ import "../styles/theme-variables.css";
 // Primary font with optimized configuration
 const inter = Inter({
   subsets: ["latin", "latin-ext"],
-  display: "swap", // Use system font while loading
+  variable: "--font-inter",
+  display: "swap",
   preload: true,
 });
 
-// Secondary font for headlines (optional)
-const poppins = Poppins({
-  weight: ["400", "500", "600", "700"],
-  subsets: ["latin"],
+// Arabic UI font
+const cairo = Cairo({
+  subsets: ["arabic", "latin"],
+  variable: "--font-cairo",
   display: "swap",
   preload: true,
 });
@@ -59,8 +60,8 @@ export default async function RootLayout({
   const dir = locale === 'ar' ? 'rtl' : 'ltr';
 
   return (
-    <html lang={locale} dir={dir}>
-      <body className={inter.className}>
+    <html lang={locale} dir={dir} suppressHydrationWarning>
+      <body className={`${inter.variable} ${cairo.variable} font-sans`}>
         <WebVitalsProvider />
         <SubdomainProvider>
           <ThemeProvider>

@@ -3,7 +3,7 @@
 import { useEffect, useState, use } from 'react'
 import { hasAuthenticatedSession } from '@/lib/authSession'
 import { useAuthStore } from '@/stores/authStore'
-import { useHasPermission } from '@/hooks/useRbac'
+import { useUserPermissions } from '@/hooks/useRbac'
 import { MODULE_IDS, PERMISSION_LEVELS, getPermissionDescription } from '@/lib/rbac'
 import { useRouter, usePathname } from 'next/navigation'
 import { Loader2, Lock, ArrowLeft } from 'lucide-react'
@@ -174,7 +174,8 @@ export default function EditRolePage({ params: paramsPromise }: EditRolePageProp
   const locale = pathname.split('/')[1] || 'en'
 
   // Check admin permission
-  const { hasPermission: isAdmin, loading: permissionLoading } = useHasPermission(MODULE_IDS.SETTINGS, PERMISSION_LEVELS.WRITE)
+  const { checkPermission, loading: permissionLoading } = useUserPermissions()
+  const isAdmin = checkPermission(MODULE_IDS.SETTINGS, PERMISSION_LEVELS.WRITE)
 
   const [formData, setFormData] = useState<RoleData | null>(null)
   const [selectedPermissions, setSelectedPermissions] = useState<Record<number, string>>({})

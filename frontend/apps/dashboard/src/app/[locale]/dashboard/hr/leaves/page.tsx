@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { usePathname } from 'next/navigation'
 import { useAuthStore } from '@/stores/authStore'
-import { useHasPermission } from '@/hooks/useRbac'
+import { useUserPermissions } from '@/hooks/useRbac'
 import { LeaveList } from '@/components/hr/LeaveList'
 import { LeaveForm } from '@/components/hr/LeaveForm'
 import { Button } from '@/components/ui/button'
@@ -42,15 +42,9 @@ export default function LeavesPage() {
   const t = useMemo(() => createTranslator(locale), [locale])
 
   // Check RBAC permissions - properly destructure the hook return
-  const { hasPermission: canViewLeaves, loading: canViewLoading } = useHasPermission(
-    MODULE_IDS.LEAVES,
-    PERMISSION_LEVELS.READ,
-  )
-  const { hasPermission: canCreateLeaves, loading: canCreateLoading } = useHasPermission(
-    MODULE_IDS.LEAVES,
-    PERMISSION_LEVELS.WRITE,
-  )
-  const permissionLoading = canViewLoading || canCreateLoading
+  const { checkPermission, loading: permissionLoading } = useUserPermissions()
+  const canViewLeaves = checkPermission(MODULE_IDS.LEAVES, PERMISSION_LEVELS.READ)
+  const canCreateLeaves = checkPermission(MODULE_IDS.LEAVES, PERMISSION_LEVELS.WRITE)
 
   // ALL hooks MUST be before early returns to avoid Hook order violation
   const [leaves, setLeaves] = useState<Leave[]>([])

@@ -15,7 +15,7 @@ import { useReports } from '@/hooks/useReports'
 import { getLocaleFromPath } from '@/lib/translations'
 import { getInventoryReportLabels } from '@/lib/reportsTranslations'
 import { MODULE_IDS, PERMISSION_LEVELS } from '@/lib/rbac'
-import { useHasPermission } from '@/hooks/useRbac'
+import { useUserPermissions } from '@/hooks/useRbac'
 import { exportReportFile, getInventoryReport } from '@/lib/api/reportsApi'
 import { debugError } from '@/lib/debug'
 import type { InventoryReportData, SalesGranularity } from '@/types/reports'
@@ -53,7 +53,8 @@ export default function InventoryReportsPage() {
 
   const labels = useMemo(() => getInventoryReportLabels(locale), [locale])
 
-  const { hasPermission: canViewReports, loading: permissionLoading } = useHasPermission(MODULE_IDS.REPORTS, PERMISSION_LEVELS.READ)
+  const { checkPermission, loading: permissionLoading } = useUserPermissions()
+  const canViewReports = checkPermission(MODULE_IDS.REPORTS, PERMISSION_LEVELS.READ)
   const [filters, setFilters] = useState<FiltersState>(() => defaultFilters())
 
   const currencyFormatter = useMemo(

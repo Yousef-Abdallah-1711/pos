@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { usePathname } from 'next/navigation'
 import { useAuthStore } from '@/stores/authStore'
-import { useHasPermission } from '@/hooks/useRbac'
+import { useUserPermissions } from '@/hooks/useRbac'
 import { EmployeeList } from '@/components/hr/EmployeeList'
 import { EmployeeForm } from '@/components/hr/EmployeeForm'
 import { Button } from '@/components/ui/button'
@@ -41,19 +41,10 @@ export default function EmployeesPage() {
   const t = useMemo(() => createTranslator(locale), [locale])
 
   // Check RBAC permissions for HR module - properly destructure the hook return
-  const { hasPermission: canViewEmployees, loading: canViewLoading } = useHasPermission(
-    MODULE_IDS.HR,
-    PERMISSION_LEVELS.READ,
-  )
-  const { hasPermission: canCreateEmployees, loading: canCreateLoading } = useHasPermission(
-    MODULE_IDS.HR,
-    PERMISSION_LEVELS.WRITE,
-  )
-  const { hasPermission: canDeleteEmployees, loading: canDeleteLoading } = useHasPermission(
-    MODULE_IDS.HR,
-    PERMISSION_LEVELS.DELETE,
-  )
-  const permissionLoading = canViewLoading || canCreateLoading || canDeleteLoading
+  const { checkPermission, loading: permissionLoading } = useUserPermissions()
+  const canViewEmployees = checkPermission(MODULE_IDS.HR, PERMISSION_LEVELS.READ)
+  const canCreateEmployees = checkPermission(MODULE_IDS.HR, PERMISSION_LEVELS.WRITE)
+  const canDeleteEmployees = checkPermission(MODULE_IDS.HR, PERMISSION_LEVELS.DELETE)
 
   const [employees, setEmployees] = useState<Employee[]>([])
   const [loading, setLoading] = useState(false)

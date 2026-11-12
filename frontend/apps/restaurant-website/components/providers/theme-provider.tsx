@@ -1,8 +1,9 @@
 'use client'
 
 import { useEffect, ReactNode, useMemo } from 'react'
+import { ThemeProvider as NextThemesProvider, useTheme as useNextTheme } from 'next-themes'
 import { useThemeStore } from '@/lib/store/theme-store'
-import { hexToHsl } from '@/lib/utils/theme-colors'
+import { memoHexToHSL } from '@/lib/utils/hex-to-hsl'
 import { applyTypographyVariables } from '@/lib/utils/theme-typography'
 
 /**
@@ -10,53 +11,80 @@ import { applyTypographyVariables } from '@/lib/utils/theme-typography'
  * Injects CSS variables when theme loads
  * Watches store for theme changes and updates DOM
  */
-export function ThemeProvider({ children }: { children: ReactNode }) {
-  const { currentTheme, isLoading, error } = useThemeStore()
+function ThemeCSSInjector() {
+  const { currentTheme } = useThemeStore()
+  const { resolvedTheme } = useNextTheme()
+  const isDark = resolvedTheme === 'dark'
 
-  // Memoize color conversions to avoid recalculating expensive HSL conversions
-  const colorVariables = useMemo(
-    () => ({
-      '--theme-primary': hexToHsl(currentTheme?.colors.primary || '#000000'),
-      '--theme-secondary': hexToHsl(currentTheme?.colors.secondary || '#000000'),
-      '--theme-accent': hexToHsl(currentTheme?.colors.accent || '#000000'),
-      '--theme-background': hexToHsl(currentTheme?.colors.background || '#ffffff'),
-      '--theme-text': hexToHsl(currentTheme?.colors.text || '#000000'),
-      '--theme-border': hexToHsl(currentTheme?.colors.border || '#e5e7eb'),
-      '--theme-shadow': hexToHsl(currentTheme?.colors.shadow || '#000000'),
-    }),
-    [currentTheme]
-  )
+  const colorVariables = useMemo(() => {
+    const colors = (currentTheme?.colors ?? {}) as Record<string, string | undefined>
+    const primary = isDark ? colors.primary_dark ?? colors.primary : colors.primary
+    const secondary = isDark ? colors.secondary_dark ?? colors.secondary : colors.secondary
+    const accent = isDark ? colors.accent_dark ?? colors.accent : colors.accent
+    const background = isDark ? colors.background_dark ?? colors.background : colors.background
+    const surface = isDark ? colors.surface_dark ?? colors.surface_color ?? colors.background : colors.surface_color ?? colors.background
+    const text = isDark ? colors.text_dark ?? colors.text : colors.text
+    const border = isDark ? colors.border_dark ?? colors.border : colors.border
+    const shadow = isDark ? colors.shadow_dark ?? colors.shadow : colors.shadow
+    const headerBg = isDark ? colors.header_bg_dark ?? colors.background_dark ?? colors.header_bg : colors.header_bg ?? colors.primary
+    const headerText = isDark
+      ? colors.header_text_dark ?? colors.text_dark ?? colors.header_text ?? '#ffffff'
+      : colors.header_text ?? '#ffffff'
+    const footerBg = isDark ? colors.footer_bg_dark ?? colors.background_dark ?? colors.footer_bg : colors.footer_bg ?? colors.text
+    const footerText = isDark
+      ? colors.footer_text_dark ?? colors.text_dark ?? colors.footer_text ?? '#ffffff'
+      : colors.footer_text ?? '#ffffff'
+
+    return {
+      '--theme-primary': memoHexToHSL(primary ?? '#3b82f6'),
+      '--theme-secondary': memoHexToHSL(secondary ?? '#1e40af'),
+      '--theme-accent': memoHexToHSL(accent ?? '#f59e0b'),
+      '--theme-bg': memoHexToHSL(background ?? '#ffffff'),
+      '--theme-background': memoHexToHSL(background ?? '#ffffff'),
+      '--theme-surface': memoHexToHSL(surface ?? '#f8fafc'),
+      '--theme-surface-elevated': memoHexToHSL(surface ?? '#ffffff'),
+      '--theme-text': memoHexToHSL(text ?? '#111827'),
+      '--theme-text-muted': memoHexToHSL(text ?? '#6b7280'),
+      '--theme-border': memoHexToHSL(border ?? '#e5e7eb'),
+      '--theme-shadow': memoHexToHSL(shadow ?? '#111827'),
+      '--theme-header-bg': memoHexToHSL(headerBg ?? '#111827'),
+      '--theme-header-text': memoHexToHSL(headerText),
+      '--theme-footer-bg': memoHexToHSL(footerBg ?? '#111827'),
+      '--theme-footer-text': memoHexToHSL(footerText),
+    }
+  }, [currentTheme?.slug, (currentTheme as { version?: number } | null)?.version, isDark])
 
   /**
    * Apply theme colors and typography to DOM
-   * Uses requestAnimationFrame to batch updates and avoid layout thrashing
-   * Color conversions are memoized, so they only recalculate when theme changes
+   * Uses requestAnimationFrame to batch updates and avoid layout thrashing.
    */
   useEffect(() => {
     if (!currentTheme || typeof document === 'undefined') return
 
-    // Inject color variables
     requestAnimationFrame(() => {
       const root = document.documentElement
-
-      // Build cssText for all variables at once (single update instead of 7 setProperty calls)
-      const cssVariables = Object.entries(colorVariables)
-        .map(([key, value]) => `${key}: ${value}`)
-        .join('; ')
-
-      // Apply all at once using cssText (batch update = better performance)
-      root.style.cssText = root.style.cssText
-        .split(';')
-        .filter(prop => !colorVariables.hasOwnProperty(prop.split(':')[0]?.trim()))
-        .concat([cssVariables])
-        .join('; ')
-
-      // Apply typography variables (handles font, sizes, etc.)
+      for (const [key, value] of Object.entries(colorVariables)) {
+        root.style.setProperty(key, value)
+      }
       applyTypographyVariables(currentTheme.typography)
     })
   }, [currentTheme, colorVariables])
 
-  return <>{children}</>
+  return null
+}
+
+export function ThemeProvider({ children }: { children: ReactNode }) {
+  return (
+    <NextThemesProvider
+      attribute="class"
+      defaultTheme="system"
+      enableSystem
+      disableTransitionOnChange
+    >
+      <ThemeCSSInjector />
+      {children}
+    </NextThemesProvider>
+  )
 }
 
 /**

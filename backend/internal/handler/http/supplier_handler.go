@@ -1,10 +1,11 @@
 package http
 
 import (
-	"encoding/json"
+	"context"
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 
 	"pos-saas/internal/domain"
 	"pos-saas/internal/middleware"
@@ -14,6 +15,8 @@ import (
 type SupplierHandler struct {
 	supplierRepo *repository.SupplierRepository
 }
+
+const supplierHandlerTimeout = 10 * time.Second
 
 func NewSupplierHandler(supplierRepo *repository.SupplierRepository) *SupplierHandler {
 	return &SupplierHandler{supplierRepo: supplierRepo}
@@ -34,7 +37,9 @@ func (h *SupplierHandler) ListSuppliers(w http.ResponseWriter, r *http.Request) 
 		pageSize = 100
 	}
 
-	suppliers, err := h.supplierRepo.ListSuppliers(tenantID, restaurantID)
+	ctx, cancel := context.WithTimeout(r.Context(), supplierHandlerTimeout)
+	defer cancel()
+	suppliers, total, err := h.supplierRepo.ListSuppliersPaged(ctx, tenantID, restaurantID, page, pageSize)
 	if err != nil {
 		writeJSON(w, http.StatusInternalServerError, map[string]interface{}{
 			"success": false,
@@ -43,19 +48,9 @@ func (h *SupplierHandler) ListSuppliers(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	total := len(suppliers)
-	offset := (page - 1) * pageSize
-	if offset > total {
-		offset = total
-	}
-	end := offset + pageSize
-	if end > total {
-		end = total
-	}
-
 	writeJSON(w, http.StatusOK, map[string]interface{}{
 		"success": true,
-		"data":    suppliers[offset:end],
+		"data":    suppliers,
 		"pagination": map[string]interface{}{
 			"page":      page,
 			"page_size": pageSize,
@@ -105,7 +100,7 @@ func (h *SupplierHandler) CreateSupplier(w http.ResponseWriter, r *http.Request)
 	userID := int(middleware.GetUserID(r))
 
 	var req domain.CreateSupplierRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+	if err := decodeJSONStrict(r, &req); err != nil {
 		writeJSON(w, http.StatusBadRequest, map[string]interface{}{
 			"success": false,
 			"error":   "Invalid request body",
@@ -211,7 +206,7 @@ func (h *SupplierHandler) UpdateSupplier(w http.ResponseWriter, r *http.Request)
 	}
 
 	var req domain.UpdateSupplierRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+	if err := decodeJSONStrict(r, &req); err != nil {
 		writeJSON(w, http.StatusBadRequest, map[string]interface{}{
 			"success": false,
 			"error":   "Invalid request body",

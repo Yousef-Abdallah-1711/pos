@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { hasAuthenticatedSession } from '@/lib/authSession'
 import { useAuthStore } from '@/stores/authStore'
-import { useHasPermission } from '@/hooks/useRbac'
+import { useUserPermissions } from '@/hooks/useRbac'
 import { MODULE_IDS, PERMISSION_LEVELS } from '@/lib/rbac'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -28,7 +28,8 @@ export default function RolesPage() {
   const locale = pathname.split('/')[1] || 'en'
 
   // Check admin permission
-  const { hasPermission: isAdmin, loading: permissionLoading } = useHasPermission(MODULE_IDS.SETTINGS, PERMISSION_LEVELS.WRITE)
+  const { checkPermission, loading: permissionLoading } = useUserPermissions()
+  const isAdmin = checkPermission(MODULE_IDS.SETTINGS, PERMISSION_LEVELS.WRITE)
 
   const [roles, setRoles] = useState<Role[]>([])
   const [isLoading, setIsLoading] = useState(true)

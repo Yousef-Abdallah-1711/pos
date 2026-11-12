@@ -10,6 +10,7 @@ import { getApiBaseUrl } from './lib/config/api';
  */
 export async function middleware(request: NextRequest) {
   const host = request.headers.get('host') || '';
+  const hostWithoutPort = host.split(':')[0] || '';
   const pathname = request.nextUrl.pathname;
 
   const legacyTableRouteMatch = pathname.match(/^\/table\/(\d+)\/(en|ar)\/menu\/?$/i);
@@ -26,7 +27,7 @@ export async function middleware(request: NextRequest) {
   }
 
   // Extract restaurant slug from subdomain
-  const restaurantSlug = host.split('.')[0];
+  const restaurantSlug = hostWithoutPort.split('.')[0] || '';
   const supportedLocales = ['en', 'ar'];
 
   // Redirect root path `/` to `/en` (default locale)
