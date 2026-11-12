@@ -25,9 +25,11 @@ if command -v nginx >/dev/null; then
   temp="$(mktemp -d)"
   trap 'rm -rf "$temp"' EXIT
   rendered="$temp/pos-vhosts.conf"
+  openssl req -x509 -nodes -newkey rsa:2048 -days 1 \
+    -keyout "$temp/test.key" -out "$temp/test.crt" -subj /CN=localhost >/dev/null 2>&1
   cp "$TEMPLATE" "$rendered"
   for name in POS_APEX POS_DASHBOARD POS_ADMIN POS_API POS_RESTAURANT_WILDCARD; do
-    sed -i "s|{{${name}_CERT}}|/etc/ssl/certs/ssl-cert-snakeoil.pem|g; s|{{${name}_KEY}}|/etc/ssl/private/ssl-cert-snakeoil.key|g" "$rendered"
+    sed -i "s|{{${name}_CERT}}|$temp/test.crt|g; s|{{${name}_KEY}}|$temp/test.key|g" "$rendered"
   done
   cat >"$temp/nginx.conf" <<EOF
 pid $temp/nginx.pid;

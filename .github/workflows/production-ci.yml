@@ -32,6 +32,10 @@ jobs:
         with:
           go-version-file: backend/go.mod
           cache-dependency-path: backend/go.sum
+      - run: psql -h 127.0.0.1 -U postgres -d postgres -v ON_ERROR_STOP=1 -v dbname=pos_test -v migrator_pw=test -v app_pw=test -f scripts/db/create_runtime_roles.sql
+        working-directory: backend
+        env:
+          PGPASSWORD: test
       - run: go run ./cmd/migrate
         working-directory: backend
         env:
@@ -61,8 +65,10 @@ jobs:
       - run: corepack enable && corepack prepare pnpm@9.0.0 --activate
       - run: pnpm install --frozen-lockfile
         working-directory: frontend
-      - run: pnpm lint
+      - run: pnpm --filter @pos-saas/dashboard lint && pnpm --filter @pos-saas/landing lint && pnpm --filter @pos-saas/restaurant-website lint && pnpm --filter @pos-saas/super-admin lint
         working-directory: frontend
+        env:
+          ESLINT_USE_FLAT_CONFIG: "false"
       - run: pnpm --filter @pos-saas/dashboard typecheck && pnpm --filter @pos-saas/landing typecheck && pnpm --filter @pos-saas/restaurant-website typecheck && pnpm --filter @pos-saas/super-admin typecheck
         working-directory: frontend
       - run: pnpm --filter @pos-saas/dashboard test:run && pnpm --filter @pos-saas/landing test:run && pnpm --filter @pos-saas/restaurant-website test -- --runInBand && pnpm --filter @pos-saas/super-admin test:run
