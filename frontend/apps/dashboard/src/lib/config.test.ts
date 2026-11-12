@@ -27,6 +27,7 @@ describe('dashboard URL config resolver', () => {
   })
 
   afterEach(() => {
+    vi.unstubAllEnvs()
     process.env = { ...ORIGINAL_ENV }
     vi.unstubAllGlobals()
     vi.unstubAllEnvs()
