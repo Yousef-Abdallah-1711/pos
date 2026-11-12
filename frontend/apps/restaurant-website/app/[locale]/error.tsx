@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
+import { usePathname } from 'next/navigation';
 import { AlertCircle, RotateCcw, Home } from 'lucide-react';
 import { debugError } from '@/lib/debug';
 import Link from 'next/link';
@@ -8,13 +9,11 @@ import Link from 'next/link';
 interface ErrorProps {
   error: Error & { digest?: string };
   reset: () => void;
-  params?: {
-    locale: 'en' | 'ar';
-  };
 }
 
-export default function Error({ error, reset, params }: ErrorProps) {
-  const locale = params?.locale || 'en';
+export default function Error({ error, reset }: ErrorProps) {
+  const pathname = usePathname() ?? '';
+  const locale = pathname.split('/')[1] === 'ar' ? 'ar' : 'en';
   const isRTL = locale === 'ar';
 
   // Log error to console for debugging
@@ -27,7 +26,8 @@ export default function Error({ error, reset, params }: ErrorProps) {
 
   return (
     <div
-      className="flex items-center justify-center min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800"
+      role="alert"
+      className="flex min-h-screen items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800"
       dir={isRTL ? 'rtl' : 'ltr'}
     >
       <div className="max-w-md w-full mx-auto px-4 text-center">
@@ -73,7 +73,8 @@ export default function Error({ error, reset, params }: ErrorProps) {
         <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
           <button
             onClick={() => reset()}
-            className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
+            className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg bg-blue-600 px-6 py-3 font-medium text-white transition-colors hover:bg-blue-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+            type="button"
           >
             <RotateCcw className="h-5 w-5" />
             {locale === 'en' ? 'Try Again' : 'حاول مرة أخرى'}
@@ -81,7 +82,7 @@ export default function Error({ error, reset, params }: ErrorProps) {
 
           <Link
             href={homeUrl}
-            className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-gray-200 text-gray-900 font-medium rounded-lg hover:bg-gray-300 transition-colors dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600"
+            className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg bg-gray-200 px-6 py-3 font-medium text-gray-900 transition-colors hover:bg-gray-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600"
           >
             <Home className="h-5 w-5" />
             {locale === 'en' ? 'Go Home' : 'اذهب للرئيسية'}

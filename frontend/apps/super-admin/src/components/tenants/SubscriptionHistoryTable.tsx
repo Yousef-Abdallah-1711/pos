@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import type { SubscriptionHistoryItem } from '@/types'
 
 interface SubscriptionHistoryTableProps {
@@ -20,11 +20,7 @@ export function SubscriptionHistoryTable({
 
   const pageSize = 10
 
-  useEffect(() => {
-    fetchHistory()
-  }, [tenantId, page])
-
-  const fetchHistory = async () => {
+  const fetchHistory = useCallback(async () => {
     setIsLoading(true)
     setError(null)
 
@@ -45,7 +41,11 @@ export function SubscriptionHistoryTable({
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [tenantId, page])
+
+  useEffect(() => {
+    void fetchHistory()
+  }, [fetchHistory])
 
   const getActionIcon = (action: string): string => {
     switch (action) {

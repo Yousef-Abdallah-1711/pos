@@ -44,6 +44,7 @@ export function Hero() {
                   alt={t.hero.captureAlt}
                   width={1440}
                   height={900}
+                  priority
                   loading="eager"
                   fetchPriority="high"
                   sizes="(max-width: 640px) 100vw, (max-width: 1200px) 52vw, 680px"
@@ -64,7 +65,7 @@ export function Hero() {
 
         <nav className="ledger-index" aria-label={t.hero.productAreas}>
           {t.hero.areas.map((area: { label: string; href: string }, index: number) => (
-            <a href={area.href} key={area.href}>
+            <a href={area.href} key={`${area.href}:${area.label}`}>
               <span className="poos-primary" aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>
               <span>{area.label}</span>
             </a>
