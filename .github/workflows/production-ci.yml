@@ -109,5 +109,6 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - run: scripts/production/check-compose-config.sh
       - run: scripts/production/check-nginx-template.sh
+      - run: bash -n scripts/production/*.sh
       - run: python3 -m py_compile scripts/production/validate-env.py
       - run: git diff --check

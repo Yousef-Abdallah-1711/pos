@@ -22,4 +22,16 @@ for port in 13401 13402 13403 13404 13405; do
     exit 1
   fi
 done
+EXPECTED_IPV4="${POS_EXPECTED_IPV4:-187.127.229.66}"
+for host in pos.rakmyat.online pos.app.rakmyat.online admin.pos.rakmyat.online api.pos.rakmyat.online healthcheck.restaurants.pos.rakmyat.online; do
+  if ! getent ahostsv4 "$host" | awk '{print $1}' | grep -Fxq "$EXPECTED_IPV4"; then
+    echo "DNS for $host does not resolve to the configured VPS address" >&2
+    exit 1
+  fi
+  tls="$(timeout 12 openssl s_client -connect "$host:443" -servername "$host" \
+    -verify 5 -verify_hostname "$host" -verify_return_error -brief </dev/null 2>&1)" || {
+    echo "valid HTTPS certificate check failed for $host" >&2; exit 1;
+  }
+  grep -q 'Verification: OK' <<<"$tls" || { echo "certificate verification failed for $host" >&2; exit 1; }
+done
 echo "host preflight passed"
