@@ -52,6 +52,12 @@ BEGIN
             EXECUTE format('REVOKE INSERT,UPDATE,DELETE,TRUNCATE,REFERENCES,TRIGGER ON TABLE public.%I FROM pos_app',protected_table);
         END IF;
     END LOOP;
+    IF to_regclass('public.accounting_event_outbox') IS NOT NULL THEN
+        REVOKE DELETE,TRUNCATE,REFERENCES,TRIGGER ON accounting_event_outbox FROM pos_app;
+    END IF;
+    IF to_regclass('public.accounting_inventory_movement_events') IS NOT NULL THEN
+        REVOKE UPDATE,DELETE,TRUNCATE,REFERENCES,TRIGGER ON accounting_inventory_movement_events FROM pos_app;
+    END IF;
     IF to_regclass('public.schema_migrations') IS NOT NULL THEN
         REVOKE ALL ON schema_migrations FROM pos_app;
         IF EXISTS (SELECT 1 FROM schema_migrations WHERE version='182_accounting_runtime_roles.sql') THEN

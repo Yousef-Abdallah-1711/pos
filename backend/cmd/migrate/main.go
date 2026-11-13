@@ -132,7 +132,7 @@ func runMigrationsOnConn(ctx context.Context, conn *sql.Conn, migrationsDir stri
 // applyMigration commits schema changes and their receipt atomically. Reviewed
 // files with explicit wrappers are normalized without rewriting migration history.
 func applyMigration(ctx context.Context, conn *sql.Conn, filename, content string) error {
-	if filename == "122_add_export_permission_level.sql" || filename == "180_enforce_journal_integrity.sql" {
+	if filename == "122_add_export_permission_level.sql" || filename == "180_enforce_journal_integrity.sql" || filename == "181_durable_accounting_event_outbox.sql" {
 		content = strings.Replace(content, "\nBEGIN;", "\n", 1)
 		content = strings.Replace(content, "\nCOMMIT;", "\n", 1)
 	}

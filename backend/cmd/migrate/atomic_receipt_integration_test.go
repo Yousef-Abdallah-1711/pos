@@ -11,6 +11,15 @@ import (
 )
 
 func TestExplicitWrapperReceiptFailureRollsBackSchemaAndKeepsConnection(t *testing.T) {
+	testWrappedMigrationReceipt(t, "180_enforce_journal_integrity.sql")
+}
+
+func TestOutboxWrapperReceiptFailureRollsBackSchemaAndKeepsConnection(t *testing.T) {
+	testWrappedMigrationReceipt(t, "181_durable_accounting_event_outbox.sql")
+}
+
+func testWrappedMigrationReceipt(t *testing.T, filename string) {
+	t.Helper()
 	if os.Getenv(testdb.EnvVar) == "" {
 		t.Skipf("set %s to an isolated disposable PostgreSQL database", testdb.EnvVar)
 	}
@@ -30,7 +39,6 @@ func TestExplicitWrapperReceiptFailureRollsBackSchemaAndKeepsConnection(t *testi
 	if _, err = conn.ExecContext(ctx, `CREATE TEMP TABLE schema_migrations(version TEXT PRIMARY KEY)`); err != nil {
 		t.Fatal(err)
 	}
-	filename := "180_enforce_journal_integrity.sql"
 	if _, err = conn.ExecContext(ctx, `INSERT INTO schema_migrations(version) VALUES($1)`, filename); err != nil {
 		t.Fatal(err)
 	}

@@ -51,7 +51,7 @@ func TestAccountingWriterCannotMutateCoreOrBypassJournalGuards(t *testing.T) {
 	if err := writer.QueryRow(`SELECT rolsuper OR rolcreatedb OR rolcreaterole OR rolbypassrls FROM pg_roles WHERE rolname=current_user`).Scan(&privileged); err != nil || privileged {
 		t.Fatalf("privileged accounting identity: %v", err)
 	}
-	for _, table := range []string{"users", "tenants", "restaurants", "products", "orders", "schema_migrations", "order_stock_reservations"} {
+	for _, table := range []string{"users", "tenants", "restaurants", "products", "orders", "schema_migrations", "order_stock_reservations", "accounting_event_outbox", "accounting_inventory_movement_events"} {
 		for _, operation := range []string{"INSERT", "UPDATE", "DELETE"} {
 			var granted bool
 			if err := writer.QueryRow(`SELECT has_table_privilege(current_user,$1,$2)`, table, operation).Scan(&granted); err != nil || granted {
