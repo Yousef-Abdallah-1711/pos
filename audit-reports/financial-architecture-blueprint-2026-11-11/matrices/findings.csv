@@ -1,0 +1,10 @@
+finding,title,severity,evidence_status,proposed_task
+FIN-001,Balance Sheet earnings omission,P1,Historical runtime verified,FIN-T00-01; FIN-T06-01
+FIN-002,Manual journal attachments,P2,Historical runtime verified,FIN-T02-01
+FIN-003,Auto-normalizer mutates line,P1,Historical runtime verified,FIN-T01-02; FIN-T02-02
+FIN-004,Potential orphan draft,P2,Inferred; failure not injected,FIN-T03-01
+FIN-005,Hard-coded 10% tax,P2,Source verified; jurisdiction unknown,FIN-T01-01; FIN-T04-01
+FIN-006,Dev duplicate/slow requests,P2,Symptoms observed; root cause unknown,FIN-T09-01
+FIN-008,Auto journal nil JSONB,P2,Historical runtime verified,FIN-T02-03
+FIN-009,Supplier type exceeds width,P2,Historical runtime verified,FIN-T02-04
+FIN-010,Paid order errors suppressed,P2,Source verified; runtime not tested,FIN-T03-02
