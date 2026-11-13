@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+	"strings"
 	"time"
 
 	_ "github.com/lib/pq"
@@ -118,18 +119,36 @@ func runMigrationsOnConn(ctx context.Context, conn *sql.Conn, migrationsDir stri
 			return fmt.Errorf("failed to read migration file %s: %w", filename, err)
 		}
 
-		if _, err := conn.ExecContext(ctx, string(content)); err != nil {
-			return fmt.Errorf("failed to execute migration %s: %w", filename, err)
-		}
-
-		// Mark migration as applied
-		_, err = conn.ExecContext(ctx, "INSERT INTO schema_migrations (version) VALUES ($1)", filename)
-		if err != nil {
-			return fmt.Errorf("failed to record migration %s: %w", filename, err)
+		if err := applyMigration(ctx, conn, filename, string(content)); err != nil {
+			return err
 		}
 
 		log.Printf("✅ Completed: %s", filename)
 	}
 
+	return nil
+}
+
+// applyMigration commits schema changes and their receipt atomically. The one legacy
+// file with an explicit transaction wrapper is normalized without editing an applied migration.
+func applyMigration(ctx context.Context, conn *sql.Conn, filename, content string) error {
+	if filename == "122_add_export_permission_level.sql" {
+		content = strings.Replace(content, "\nBEGIN;", "\n", 1)
+		content = strings.Replace(content, "\nCOMMIT;", "\n", 1)
+	}
+	tx, err := conn.BeginTx(ctx, nil)
+	if err != nil {
+		return fmt.Errorf("begin migration %s: %w", filename, err)
+	}
+	defer tx.Rollback()
+	if _, err := tx.ExecContext(ctx, content); err != nil {
+		return fmt.Errorf("failed to execute migration %s: %w", filename, err)
+	}
+	if _, err := tx.ExecContext(ctx, "INSERT INTO schema_migrations (version) VALUES ($1)", filename); err != nil {
+		return fmt.Errorf("failed to record migration %s: %w", filename, err)
+	}
+	if err := tx.Commit(); err != nil {
+		return fmt.Errorf("commit migration %s: %w", filename, err)
+	}
 	return nil
 }

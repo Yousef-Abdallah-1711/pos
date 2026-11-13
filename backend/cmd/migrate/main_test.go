@@ -27,9 +27,11 @@ func TestRunMigrationsFromDirLocksAndReleasesConnection(t *testing.T) {
 	mock.ExpectExec("CREATE TABLE IF NOT EXISTS schema_migrations").WillReturnResult(sqlmock.NewResult(0, 0))
 	mock.ExpectQuery(regexp.QuoteMeta("SELECT COUNT(*) FROM schema_migrations WHERE version = $1")).
 		WithArgs("001_test.sql").WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(0))
+	mock.ExpectBegin()
 	mock.ExpectExec(regexp.QuoteMeta("SELECT 1;")).WillReturnResult(sqlmock.NewResult(0, 0))
 	mock.ExpectExec(regexp.QuoteMeta("INSERT INTO schema_migrations (version) VALUES ($1)")).
 		WithArgs("001_test.sql").WillReturnResult(sqlmock.NewResult(0, 1))
+	mock.ExpectCommit()
 	mock.ExpectQuery(regexp.QuoteMeta("SELECT pg_advisory_unlock($1)")).
 		WithArgs(migrationAdvisoryLockID).WillReturnRows(sqlmock.NewRows([]string{"pg_advisory_unlock"}).AddRow(true))
 
@@ -57,7 +59,9 @@ func TestRunMigrationsFromDirReleasesLockAfterMigrationFailure(t *testing.T) {
 	mock.ExpectExec("CREATE TABLE IF NOT EXISTS schema_migrations").WillReturnResult(sqlmock.NewResult(0, 0))
 	mock.ExpectQuery(regexp.QuoteMeta("SELECT COUNT(*) FROM schema_migrations WHERE version = $1")).
 		WithArgs("001_test.sql").WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(0))
+	mock.ExpectBegin()
 	mock.ExpectExec(regexp.QuoteMeta("SELECT broken;")).WillReturnError(errors.New("migration failed"))
+	mock.ExpectRollback()
 	mock.ExpectQuery(regexp.QuoteMeta("SELECT pg_advisory_unlock($1)")).
 		WithArgs(migrationAdvisoryLockID).WillReturnRows(sqlmock.NewRows([]string{"pg_advisory_unlock"}).AddRow(true))
 
