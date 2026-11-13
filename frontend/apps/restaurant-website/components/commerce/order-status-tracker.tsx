@@ -25,38 +25,38 @@ export function OrderStatusTracker({ statuses, currentStatus, locale = 'en' }: O
 
   const statusConfig = {
     pending: {
-      label: locale === 'en' ? 'Pending' : 'Ù‚ÙŠØ¯ Ø§Ù„Ø§Ù†ØªØ¸Ø§Ø±',
+      label: locale === 'en' ? 'Pending' : 'قيد الانتظار',
       icon: Clock,
     },
     confirmed: {
-      label: locale === 'en' ? 'Confirmed' : 'ØªÙ… Ø§Ù„ØªØ£ÙƒÙŠØ¯',
+      label: locale === 'en' ? 'Confirmed' : 'تم التأكيد',
       icon: CheckCircle2,
     },
     preparing: {
-      label: locale === 'en' ? 'Preparing' : 'Ø¬Ø§Ø±ÙŠ Ø§Ù„ØªØ­Ø¶ÙŠØ±',
+      label: locale === 'en' ? 'Preparing' : 'جاري التحضير',
       icon: Clock,
     },
     ready: {
-      label: locale === 'en' ? 'Ready' : 'Ø¬Ø§Ù‡Ø²',
+      label: locale === 'en' ? 'Ready' : 'جاهز',
       icon: CheckCircle2,
     },
     out_for_delivery: {
-      label: locale === 'en' ? 'Out for Delivery' : 'ÙÙŠ Ø§Ù„Ø·Ø±ÙŠÙ‚',
+      label: locale === 'en' ? 'Out for Delivery' : 'في الطريق',
       icon: Truck,
     },
     delivered: {
-      label: locale === 'en' ? 'Delivered' : 'ØªÙ… Ø§Ù„ØªØ³Ù„ÙŠÙ…',
+      label: locale === 'en' ? 'Delivered' : 'تم التسليم',
       icon: CheckCircle2,
     },
     cancelled: {
-      label: locale === 'en' ? 'Cancelled' : 'Ù…Ù„ØºÙŠ',
+      label: locale === 'en' ? 'Cancelled' : 'ملغي',
       icon: AlertCircle,
     },
   }
 
   const timeline = ['pending', 'confirmed', 'preparing', 'ready', 'out_for_delivery', 'delivered'] as const
 
-  const getStatusIndex = (status: string) => timeline.indexOf(status as any)
+  const getStatusIndex = (status: OrderStatus['status']) => timeline.findIndex(value => value === status)
   const currentIndex = getStatusIndex(currentStatus)
   const isCancelled = currentStatus === 'cancelled'
 
@@ -69,14 +69,14 @@ export function OrderStatusTracker({ statuses, currentStatus, locale = 'en' }: O
             <div>
               <h3 className="tracker-cancelled-title font-semibold text-lg">{statusConfig.cancelled.label}</h3>
               <p className="tracker-cancelled-text text-sm">
-                {locale === 'en' ? 'This order has been cancelled' : 'ØªÙ… Ø¥Ù„ØºØ§Ø¡ Ù‡Ø°Ø§ Ø§Ù„Ø·Ù„Ø¨'}
+                {locale === 'en' ? 'This order has been cancelled' : 'تم إلغاء هذا الطلب'}
               </p>
             </div>
           </div>
         </div>
       ) : (
         <div className={`${isRTL ? 'flex-row-reverse' : ''}`}>
-          <div className={`flex items-start ${isRTL ? 'flex-row-reverse' : ''}`}>
+          <div className="grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-3 lg:grid-cols-6">
             {timeline.map((status, index) => {
               const config = statusConfig[status as keyof typeof statusConfig]
               const Icon = config.icon
@@ -84,7 +84,7 @@ export function OrderStatusTracker({ statuses, currentStatus, locale = 'en' }: O
               const isActive = index === currentIndex
 
               return (
-                <div key={status} className={`flex-1 relative ${isRTL ? 'text-right' : ''}`}>
+                <div key={status} className={`min-w-0 relative ${isRTL ? 'text-right' : ''}`}>
                   <div
                     className={`tracker-circle h-12 w-12 rounded-full flex items-center justify-center mb-3 transition-all border-2 ${
                       isCompleted || isActive ? `tracker-soft-${status}` : 'tracker-circle-inactive'
@@ -99,14 +99,14 @@ export function OrderStatusTracker({ statuses, currentStatus, locale = 'en' }: O
 
                   {index < timeline.length - 1 && (
                     <div
-                      className={`tracker-connector absolute top-6 h-1 w-full ${
+                      className={`tracker-connector hidden lg:block absolute top-6 h-1 w-full ${
                         isRTL ? 'right-full pr-3' : 'left-full pl-3'
                       } ${isCompleted ? `tracker-line-${status}` : 'tracker-connector-inactive'}`}
                     />
                   )}
 
                   <p
-                    className={`tracker-label text-sm ${
+                    className={`tracker-label break-words text-sm ${
                       isActive
                         ? 'tracker-label-active'
                         : isCompleted
@@ -133,25 +133,25 @@ export function OrderStatusTracker({ statuses, currentStatus, locale = 'en' }: O
               {currentStatus === 'pending' &&
                 (locale === 'en'
                   ? 'Your order is waiting to be confirmed'
-                  : 'Ø·Ù„Ø¨Ùƒ Ù‚ÙŠØ¯ Ø§Ù„Ø§Ù†ØªØ¸Ø§Ø± Ù„Ù„ØªØ£ÙƒÙŠØ¯')}
+                  : 'طلبك قيد الانتظار للتأكيد')}
               {currentStatus === 'confirmed' &&
                 (locale === 'en'
                   ? 'Your order has been confirmed and will be prepared shortly'
-                  : 'ØªÙ… ØªØ£ÙƒÙŠØ¯ Ø·Ù„Ø¨Ùƒ ÙˆØ³ÙŠØªÙ… ØªØ­Ø¶ÙŠØ±Ù‡ Ù‚Ø±ÙŠØ¨Ø§Ù‹')}
+                  : 'تم تأكيد طلبك وسيتم تحضيره قريباً')}
               {currentStatus === 'preparing' &&
                 (locale === 'en'
                   ? 'Our team is preparing your delicious food'
-                  : 'ÙØ±ÙŠÙ‚Ù†Ø§ ÙŠÙ‚ÙˆÙ… Ø¨ØªØ­Ø¶ÙŠØ± Ø·Ø¹Ø§Ù…Ùƒ Ø§Ù„Ù„Ø°ÙŠØ°')}
+                  : 'فريقنا يقوم بتحضير طعامك اللذيذ')}
               {currentStatus === 'ready' &&
                 (locale === 'en'
                   ? 'Your order is ready for pickup or out for delivery'
-                  : 'Ø·Ù„Ø¨Ùƒ Ø¬Ø§Ù‡Ø² Ù„Ù„Ø§Ù„ØªÙ‚Ø§Ø· Ø£Ùˆ Ù„Ù„ØªØ³Ù„ÙŠÙ…')}
+                  : 'طلبك جاهز للالتقاط أو للتسليم')}
               {currentStatus === 'out_for_delivery' &&
-                (locale === 'en' ? 'Your order is on its way to you' : 'Ø·Ù„Ø¨Ùƒ ÙÙŠ Ø§Ù„Ø·Ø±ÙŠÙ‚ Ø¥Ù„ÙŠÙƒ')}
+                (locale === 'en' ? 'Your order is on its way to you' : 'طلبك في الطريق إليك')}
               {currentStatus === 'delivered' &&
                 (locale === 'en'
                   ? 'Your order has been delivered. Thank you for your order!'
-                  : 'ØªÙ… ØªØ³Ù„ÙŠÙ… Ø·Ù„Ø¨Ùƒ. Ø´ÙƒØ±Ø§Ù‹ Ù„Ø·Ù„Ø¨Ùƒ!')}
+                  : 'تم تسليم طلبك. شكراً لطلبك!')}
             </p>
           </div>
         </div>

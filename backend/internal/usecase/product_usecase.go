@@ -85,7 +85,7 @@ func (uc *ProductUseCase) CreateProduct(
 	}
 	// Save to database
 	preparedImageURL := product.MainImageURL
-	product, err := uc.repo.CreateProduct(product)
+	product, err := uc.repo.CreateProductContext(ctx, product)
 	if err != nil {
 		if imageFile != nil {
 			uc.discardPreparedImage(preparedImageURL)
@@ -130,6 +130,9 @@ func (uc *ProductUseCase) UpdateProduct(
 	req *domain.UpdateProductRequest,
 	imageFile *multipart.FileHeader,
 ) (*domain.Product, error) {
+	if req.QuantityInStock != nil && *req.QuantityInStock < 0 {
+		return nil, fmt.Errorf("quantity_in_stock must be non-negative")
+	}
 	// Get existing product
 	product, err := uc.repo.GetProductByID(tenantID, restaurantID, productID)
 	if err != nil {

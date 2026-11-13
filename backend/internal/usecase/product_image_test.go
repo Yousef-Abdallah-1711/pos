@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"bytes"
+	"context"
 	"encoding/base64"
 	"mime/multipart"
 	"net/http/httptest"
@@ -9,6 +10,8 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"pos-saas/internal/domain"
 )
 
 func imageHeader(t *testing.T, content []byte) *multipart.FileHeader {
@@ -73,5 +76,22 @@ func TestProductImageRejectsDisguisedExecutableAndOversize(t *testing.T) {
 	header.Size = maxProductImageSize + 1
 	if _, err := uc.uploadProductImage(2, header, 1); err == nil {
 		t.Fatal("oversized image was accepted")
+	}
+}
+
+func TestInvalidImageCannotCreateProduct(t *testing.T) {
+	uc := NewProductUseCase(nil, nil, "https://api.example.test/uploads")
+	_, err := uc.CreateProduct(context.Background(), 1, 2, 3, &domain.CreateProductRequest{NameEn: "Synthetic", Price: 1, CategoryID: 1}, imageHeader(t, []byte("<script>invalid()</script>")))
+	if err == nil || !strings.Contains(err.Error(), "invalid image content") {
+		t.Fatalf("expected image content rejection before persistence: %v", err)
+	}
+}
+
+func TestNegativeStockCannotReachProductPersistence(t *testing.T) {
+	quantity := -1
+	uc := NewProductUseCase(nil, nil, "https://api.example.test/uploads")
+	_, err := uc.UpdateProduct(context.Background(), 1, 2, 3, 4, &domain.UpdateProductRequest{QuantityInStock: &quantity}, nil)
+	if err == nil {
+		t.Fatal("negative stock reached product persistence")
 	}
 }

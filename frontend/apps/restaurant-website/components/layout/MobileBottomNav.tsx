@@ -4,19 +4,21 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Home, Menu, Receipt, Settings, ShoppingCart } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { createTranslator } from '@/lib/translations'
 import { useCartStore } from '@/lib/store/cart-store'
 
 const items = [
-  { key: 'home', href: '', icon: Home, label: 'Home' },
-  { key: 'menu', href: '/menu', icon: Menu, label: 'Menu' },
-  { key: 'cart', href: '/cart', icon: ShoppingCart, label: 'Cart' },
-  { key: 'orders', href: '/orders', icon: Receipt, label: 'Orders' },
-  { key: 'settings', href: '/settings', icon: Settings, label: 'Settings' },
+  { key: 'home', href: '', icon: Home },
+  { key: 'menu', href: '/menu', icon: Menu },
+  { key: 'cart', href: '/cart', icon: ShoppingCart },
+  { key: 'orders', href: '/orders', icon: Receipt },
+  { key: 'settings', href: '/settings', icon: Settings },
 ] as const
 
 export function MobileBottomNav() {
   const pathname = usePathname()
   const locale = pathname?.startsWith('/ar') ? 'ar' : 'en'
+  const t = createTranslator(locale)
   const count = useCartStore((state) => state.getTotalItems())
 
   return (
@@ -43,7 +45,7 @@ export function MobileBottomNav() {
                     </span>
                   ) : null}
                 </div>
-                <span>{item.label}</span>
+                <span>{t(`common.${item.key}`)}</span>
                 {active ? <span className="absolute bottom-1 h-1 w-1 rounded-full bg-[hsl(var(--theme-primary))]" /> : null}
               </Link>
             </li>

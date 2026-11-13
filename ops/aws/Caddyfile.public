@@ -17,6 +17,8 @@
   @payments path /api/v1/mock/* /api/v1/webhook/* /api/v1/subscription/initiate /api/v1/subscription/cancel /api/v1/super-admin/payments/*
   respond @payments "Payment operations are unavailable on this staging deployment" 503
   reverse_proxy backend:8080 {
+    # The common edge policy supplies one authoritative nosniff value.
+    header_down -X-Content-Type-Options
     header_down Set-Cookie "(.*)" "$1; Secure"
     transport http {
       dial_timeout 5s

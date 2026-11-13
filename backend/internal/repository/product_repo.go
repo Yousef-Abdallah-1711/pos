@@ -23,7 +23,11 @@ func NewProductRepository(db *sql.DB) *ProductRepository {
 
 // CreateProduct inserts a new product into database
 func (r *ProductRepository) CreateProduct(product *domain.Product) (*domain.Product, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	return r.CreateProductContext(context.Background(), product)
+}
+
+func (r *ProductRepository) CreateProductContext(parent context.Context, product *domain.Product) (*domain.Product, error) {
+	ctx, cancel := context.WithTimeout(parent, 5*time.Second)
 	defer cancel()
 	tx, err := r.db.BeginTx(ctx, nil)
 	if err != nil {
