@@ -1,12 +1,13 @@
 "use client";
 
 import React, { useState } from "react";
+import { isAxiosError } from "axios";
 import { useAuthStore } from "@/stores/authStore";
 import { superAdminAPI } from "@/lib/api";
 import { toast } from "sonner";
 
 export default function LoginPage() {
-  const { setToken, setSuperAdmin, setError: setAuthError, setLoading } =
+  const { setToken, setSuperAdmin, setError: setAuthError } =
     useAuthStore();
   const [email, setEmail] = useState("superadmin@pos-saas.com");
   const [password, setPassword] = useState("");
@@ -17,7 +18,6 @@ export default function LoginPage() {
     e.preventDefault();
     setError(null);
     setIsLoading(true);
-    setLoading(true);
 
     try {
       if (!email || !password) {
@@ -38,15 +38,17 @@ export default function LoginPage() {
       // Start a new app document after establishing the cookie-backed session.
       window.location.assign("/dashboard");
     } catch (err: unknown) {
-      const errorMessage =
-        (err as any)?.response?.data?.error ||
-        "Failed to login. Please check your credentials.";
+      const serverError = isAxiosError<{ error?: unknown }>(err)
+        ? err.response?.data?.error
+        : undefined;
+      const errorMessage = typeof serverError === "string"
+        ? serverError
+        : "Failed to login. Please check your credentials.";
       setError(String(errorMessage));
       setAuthError(String(errorMessage));
       toast.error(String(errorMessage));
     } finally {
       setIsLoading(false);
-      setLoading(false);
     }
   };
 

@@ -219,6 +219,7 @@ def acceptance(destination):
     commands.append(['/usr/local/lib/servio/browser/node',str(destination/'ops/aws/browser-storefront-flow.cjs')])
     commands.append(['/usr/local/lib/servio/browser/node',str(destination/'ops/aws/browser-upload.cjs')])
     commands.append(['/usr/local/lib/servio/browser/node',str(destination/'ops/aws/journal-api-acceptance.cjs')])
+    commands.append(['/usr/local/lib/servio/browser/node',str(destination/'ops/aws/browser-auth-validation.cjs')])
     for command in commands:
         checked(['runuser','-u','ubuntu','--','env','DOCKER_CONFIG='+str(evidence/'.docker'),'NODE_PATH=/usr/local/lib/servio/browser/node_modules','PLAYWRIGHT_BROWSERS_PATH=/usr/local/lib/servio/browser/browsers',*command])
 

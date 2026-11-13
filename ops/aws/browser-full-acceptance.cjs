@@ -44,7 +44,9 @@ async function inspect(page,app,route,width){
  try{
   await page.setViewportSize({width,height:900});
   const result=await page.goto(hosts[app]+route,{waitUntil:'domcontentloaded',timeout:45000});
-  await page.waitForTimeout(1200);
+  // Full-document admin reloads bootstrap sessions; respect the 30/minute quota,
+  // including redirect bootstraps, while retaining every 429/network assertion.
+  await page.waitForTimeout(app==='super-admin'?4000:1200);
   row.http=result.status();row.finalURL=safeURL(page.url());
   row.layout=await page.evaluate(()=>({lang:document.documentElement.lang,dir:document.documentElement.dir,overflow:document.documentElement.scrollWidth>innerWidth+2,bodyLength:document.body.innerText.trim().length,applicationError:/Application error|Internal Server Error|Something went wrong|حدث خطأ غير متوقع/.test(document.body.innerText),brokenImages:[...document.images].filter(i=>i.complete&&i.currentSrc&&i.naturalWidth===0).map(i=>({alt:i.alt,src:new URL(i.currentSrc).pathname})),forms:[...document.forms].map(f=>({fields:f.elements.length,invalid:f.querySelectorAll(':invalid').length})),unlabelledFields:[...document.querySelectorAll('input:not([type=hidden]),select,textarea')].filter(i=>!i.labels?.length&&!i.getAttribute('aria-label')&&!i.getAttribute('aria-labelledby')).map(i=>({type:i.type,name:i.name})),headings:document.querySelectorAll('h1').length}));
   await page.keyboard.press('Tab');
