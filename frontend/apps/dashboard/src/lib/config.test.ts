@@ -30,7 +30,6 @@ describe('dashboard URL config resolver', () => {
     vi.unstubAllEnvs()
     process.env = { ...ORIGINAL_ENV }
     vi.unstubAllGlobals()
-    vi.unstubAllEnvs()
     vi.resetModules()
   })
 

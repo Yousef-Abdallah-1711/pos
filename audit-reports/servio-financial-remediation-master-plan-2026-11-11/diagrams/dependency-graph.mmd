@@ -1,0 +1,18 @@
+flowchart TD
+ A[Owner and accountant decisions] --> B[Money and ledger contract]
+ C[FIN-001 containment] --> D[Balance Sheet correction]
+ B --> E[Automatic journal correctness]
+ E --> F[Durable idempotent recovery]
+ F --> G[Orders payments and refunds]
+ F --> H[Inventory and AR/AP]
+ G --> I[Reports and period close]
+ H --> I
+ J[Tenant authorization gates in every PR] -.-> E
+ J -.-> F
+ J -.-> G
+ J -.-> I
+ I --> K[Exports]
+ I --> L[Measured performance]
+ K --> M[Release evidence]
+ L --> M
+ A --> I

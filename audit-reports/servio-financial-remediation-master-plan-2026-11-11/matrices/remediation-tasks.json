@@ -1,0 +1,329 @@
+[
+  {
+    "id": "FIN-T00-01",
+    "phase": "00",
+    "finding": "FIN-001",
+    "title": "Contain unreconciled Balance Sheet reliance",
+    "files": [
+      "backend/internal/usecase/financial_report_usecase.go",
+      "DISCOVERY REQUIRED: report handlers/UI"
+    ],
+    "tests": [
+      "dated Balance Sheet/P&L/Trial Balance fixture",
+      "warning/availability authorization E2E"
+    ],
+    "depends": [],
+    "risk": "high",
+    "acceptance": "Known failing periods are clearly controlled and reconciled; no false balanced status."
+  },
+  {
+    "id": "FIN-T01-01",
+    "phase": "01",
+    "finding": "POLICY",
+    "title": "Approve currency, scale, rounding and recognition contract",
+    "files": [
+      "DISCOVERY REQUIRED: money/domain/API/database boundaries"
+    ],
+    "tests": [
+      "precision boundary/property suite",
+      "JSON Go/JS serialization parity"
+    ],
+    "depends": [],
+    "risk": "high",
+    "acceptance": "Named accountant/owner signs versioned currency, tax, rounding and recognition rules."
+  },
+  {
+    "id": "FIN-T01-02",
+    "phase": "01",
+    "finding": "FIN-003",
+    "title": "Define journal and immutable posting invariants",
+    "files": [
+      "backend/internal/domain/auto_posting.go",
+      "backend/internal/repository/journal_entry_repo.go"
+    ],
+    "tests": [
+      "balanced/one-sided line unit suite",
+      "posted immutability and closed-period integration"
+    ],
+    "depends": [
+      "FIN-T01-01"
+    ],
+    "risk": "high",
+    "acceptance": "Policy and schema reject unbalanced/ineligible/duplicate posting with no partial effects."
+  },
+  {
+    "id": "FIN-T02-01",
+    "phase": "02",
+    "finding": "FIN-002",
+    "title": "Default journal attachments to valid JSON",
+    "files": [
+      "frontend/apps/dashboard/src/components/accounting/JournalEntryForm.tsx",
+      "frontend/apps/dashboard/src/lib/api/accountingApi.ts",
+      "backend/internal/handler/http/journal_entry_handler.go",
+      "backend/internal/repository/journal_entry_repo.go"
+    ],
+    "tests": [
+      "browser omitted attachments",
+      "PostgreSQL [] and malformed JSON"
+    ],
+    "depends": [
+      "FIN-T01-02"
+    ],
+    "risk": "medium",
+    "acceptance": "Default draft persists valid JSONB and invalid payload is controlled."
+  },
+  {
+    "id": "FIN-T02-02",
+    "phase": "02",
+    "finding": "FIN-003",
+    "title": "Reject material auto-post imbalance",
+    "files": [
+      "backend/internal/usecase/auto_posting_engine.go"
+    ],
+    "tests": [
+      "Dr100/Cr90 rejects",
+      "reverse imbalance rejects",
+      "approved rounding attribution fixture"
+    ],
+    "depends": [
+      "FIN-T01-01",
+      "FIN-T01-02"
+    ],
+    "risk": "high",
+    "acceptance": "No material difference changes a business line; approved rounding explicit only."
+  },
+  {
+    "id": "FIN-T02-03",
+    "phase": "02",
+    "finding": "FIN-008",
+    "title": "Initialize auto-post JSONB attachments",
+    "files": [
+      "backend/internal/usecase/auto_posting_engine.go",
+      "backend/internal/domain/auto_posting.go"
+    ],
+    "tests": [
+      "every auto-post event inserts attachments []",
+      "failure visible"
+    ],
+    "depends": [
+      "FIN-T01-02"
+    ],
+    "risk": "medium",
+    "acceptance": "Automatic journal inserts valid JSON and posting outcomes remain visible."
+  },
+  {
+    "id": "FIN-T02-04",
+    "phase": "02",
+    "finding": "FIN-009",
+    "title": "Align auto-post entry types with schema",
+    "files": [
+      "backend/internal/domain/auto_posting.go",
+      "backend/migrations/137_create_journal_entries.sql",
+      "DISCOVERY REQUIRED: forward migration"
+    ],
+    "tests": [
+      "all declared types against PostgreSQL schema",
+      "forward migration from prior schema"
+    ],
+    "depends": [
+      "FIN-T01-02"
+    ],
+    "risk": "high",
+    "acceptance": "All supported values fit enforced contract; historical rows preserved."
+  },
+  {
+    "id": "FIN-T03-01",
+    "phase": "03",
+    "finding": "FIN-004",
+    "title": "Make posting intent durable and recoverable",
+    "files": [
+      "DISCOVERY REQUIRED: source transaction, outbox/inbox, worker, migrations"
+    ],
+    "tests": [
+      "crash at commit/publish/ack boundaries",
+      "duplicate event/concurrent worker"
+    ],
+    "depends": [
+      "FIN-T01-02",
+      "FIN-T02-02",
+      "FIN-T02-03",
+      "FIN-T02-04"
+    ],
+    "risk": "high",
+    "acceptance": "At-least-once delivery yields one journal effect and visible retry/terminal state."
+  },
+  {
+    "id": "FIN-T03-02",
+    "phase": "03",
+    "finding": "FIN-010",
+    "title": "Expose and reconcile paid-order posting outcome",
+    "files": [
+      "backend/internal/usecase/order_usecase.go",
+      "backend/internal/handler/http/admin_order_handler.go",
+      "backend/internal/handler/http/public_order_handler.go",
+      "DISCOVERY REQUIRED: outbox integration"
+    ],
+    "tests": [
+      "inject sales/COGS failures",
+      "paid event retry idempotency"
+    ],
+    "depends": [
+      "FIN-T03-01"
+    ],
+    "risk": "high",
+    "acceptance": "A paid order cannot silently appear financially complete without sales/COGS disposition."
+  },
+  {
+    "id": "FIN-T04-01",
+    "phase": "04",
+    "finding": "WORKFLOW",
+    "title": "Prove all order/tender/refund channels",
+    "files": [
+      "DISCOVERY REQUIRED: current POS/web/admin payment paths"
+    ],
+    "tests": [
+      "cash/card/web/split/failure/cancel/refund/duplicate/settlement E2E"
+    ],
+    "depends": [
+      "FIN-T03-01",
+      "FIN-T03-02",
+      "FIN-T01-01"
+    ],
+    "risk": "high",
+    "acceptance": "Every scenario reconciles source/payment/journal/GL independently."
+  },
+  {
+    "id": "FIN-T05-01",
+    "phase": "05",
+    "finding": "WORKFLOW",
+    "title": "Reconcile inventory, supplier and AR/AP subledgers",
+    "files": [
+      "DISCOVERY REQUIRED: inventory and invoice integrations"
+    ],
+    "tests": [
+      "receipt/COGS/waste and control-account fixtures",
+      "aging reconciliation"
+    ],
+    "depends": [
+      "FIN-T01-01",
+      "FIN-T03-01",
+      "FIN-T02-04"
+    ],
+    "risk": "high",
+    "acceptance": "Quantity/value and invoice subledgers reconcile to their GL controls."
+  },
+  {
+    "id": "FIN-T06-01",
+    "phase": "06",
+    "finding": "FIN-001",
+    "title": "Repair earnings and Balance Sheet equation",
+    "files": [
+      "backend/internal/usecase/financial_report_usecase.go"
+    ],
+    "tests": [
+      "four historical dated fixtures",
+      "earnings close/cutoff and TB bridge"
+    ],
+    "depends": [
+      "FIN-T00-01",
+      "FIN-T01-01",
+      "FIN-T01-02"
+    ],
+    "risk": "high",
+    "acceptance": "Assets=liabilities+equity at all approved cutoffs, including current-period earnings."
+  },
+  {
+    "id": "FIN-T06-02",
+    "phase": "06",
+    "finding": "REPORTS",
+    "title": "Reconcile all financial reports to ledger watermark",
+    "files": [
+      "DISCOVERY REQUIRED: report usecases/queries"
+    ],
+    "tests": [
+      "P&L, cash flow, aging, VAT, inventory and consolidation independent fixtures"
+    ],
+    "depends": [
+      "FIN-T06-01",
+      "FIN-T04-01",
+      "FIN-T05-01"
+    ],
+    "risk": "high",
+    "acceptance": "All statements agree to posted ledger and documented policy."
+  },
+  {
+    "id": "FIN-T07-01",
+    "phase": "07",
+    "finding": "SECURITY",
+    "title": "Prove tenant/RBAC isolation for finance",
+    "files": [
+      "DISCOVERY REQUIRED: current middleware/routes/repositories/jobs"
+    ],
+    "tests": [
+      "two-tenant BOLA/BFLA role matrix",
+      "cache/job scope cases"
+    ],
+    "depends": [
+      "FIN-T02-01",
+      "FIN-T03-01"
+    ],
+    "risk": "high",
+    "acceptance": "All unauthorized object and export attempts deny with no data leakage."
+  },
+  {
+    "id": "FIN-T08-01",
+    "phase": "08",
+    "finding": "EXPORT",
+    "title": "Prove export format, parity and safety",
+    "files": [
+      "DISCOVERY REQUIRED: report export handlers/UI"
+    ],
+    "tests": [
+      "CSV/PDF/native XLSX reader tests",
+      "formula injection and large streaming"
+    ],
+    "depends": [
+      "FIN-T06-02",
+      "FIN-T07-01"
+    ],
+    "risk": "medium",
+    "acceptance": "Export format is real, authorized and reconciles exactly to screen/watermark."
+  },
+  {
+    "id": "FIN-T09-01",
+    "phase": "09",
+    "finding": "PERFORMANCE",
+    "title": "Measure financial workload and capacity",
+    "files": [
+      "No optimization until profiling; exact files DISCOVERY REQUIRED"
+    ],
+    "tests": [
+      "production-mode repeated traces/query plans/load"
+    ],
+    "depends": [
+      "FIN-T04-01",
+      "FIN-T06-02",
+      "FIN-T07-01"
+    ],
+    "risk": "medium",
+    "acceptance": "Owner-approved SLOs met under representative measured workload."
+  },
+  {
+    "id": "FIN-T10-01",
+    "phase": "10",
+    "finding": "RELEASE",
+    "title": "Run commercial financial release evidence suite",
+    "files": [
+      "CI/test/release config DISCOVERY REQUIRED"
+    ],
+    "tests": [
+      "full reconciliation/security/failure/load/restore suite"
+    ],
+    "depends": [
+      "FIN-T08-01",
+      "FIN-T09-01"
+    ],
+    "risk": "high",
+    "acceptance": "Authorized GO decision with no financial/security NO-GO condition."
+  }
+]

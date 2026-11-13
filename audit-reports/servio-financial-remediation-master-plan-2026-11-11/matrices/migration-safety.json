@@ -1,0 +1,38 @@
+[
+  {
+    "task": "FIN-T02-04",
+    "area": "journal_entries.entry_type compatibility",
+    "preconditions": "Inventory deployed type/width and all values; confirm migration 137 lineage and backups.",
+    "backup": "Restorable DB snapshot plus rehearsal; preserve journal rows and values.",
+    "forward": "Reviewed additive/compatible width or constrained enum change; exact SQL DISCOVERY REQUIRED.",
+    "backfill": "No history rewrite expected; verify every existing entry_type fits and classify unexpected values.",
+    "validation": "Insert every domain type in isolated DB; compare row counts and journal/GL totals.",
+    "locking": "Measure table lock and deployment compatibility.",
+    "rollback": "Rollback may be unsafe after longer values are written; document rollback window and avoid truncation.",
+    "forward_correction": "Keep widened schema and correct domain validation; never shorten/truncate posted history."
+  },
+  {
+    "task": "FIN-T03-01",
+    "area": "durable outbox/inbox and idempotency identity",
+    "preconditions": "Map source transaction boundaries; inspect deployed schema, duplicates and event-volume estimate.",
+    "backup": "Restorable snapshot and restore test before adding tables/indexes.",
+    "forward": "Add tables/indexes additively; exact schema DISCOVERY REQUIRED and ADR approval.",
+    "backfill": "Backfill only source references that can be proven; unresolved events enter exception register, no guessed identities.",
+    "validation": "Counts, uniqueness, sample event-to-journal reconciliation and dual-run parity before switch.",
+    "locking": "Online/concurrent index strategy review and bounded batch backfill.",
+    "rollback": "Do not drop event history after writes; disable dispatch only with durable queue preserved.",
+    "forward_correction": "Replay idempotently or compensate; preserve source and posted journals."
+  },
+  {
+    "task": "FIN-T01-01",
+    "area": "monetary precision/schema representation",
+    "preconditions": "Accountant approves currencies, exponents, max values and rounding; inventory all columns/API formats.",
+    "backup": "Snapshot and restore rehearsal; representative min/max and historical amount export.",
+    "forward": "Expand precision or add canonical fields only after compatibility proof; exact tables/columns DISCOVERY REQUIRED.",
+    "backfill": "Lossless conversion only; report rows that exceed scale/range and block cutover.",
+    "validation": "Independent row sums, min/max, null counts and report/journal reconciliation by tenant/period.",
+    "locking": "Benchmark rewrite and locks; use staged column/backfill if table rewrite is unsafe.",
+    "rollback": "Legacy conversion may be irreversible if new-scale values are written; feature-gate and preserve old representation.",
+    "forward_correction": "Keep precise representation and resolve exceptions with approved adjustment, never round-trip truncate."
+  }
+]

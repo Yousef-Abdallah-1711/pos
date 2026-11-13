@@ -1,0 +1,64 @@
+{
+  "FIN-T00-01": [
+    "backend/internal/usecase/financial_report_usecase.go",
+    "DISCOVERY REQUIRED: report handlers/UI"
+  ],
+  "FIN-T01-01": [
+    "DISCOVERY REQUIRED: money/domain/API/database boundaries"
+  ],
+  "FIN-T01-02": [
+    "backend/internal/domain/auto_posting.go",
+    "backend/internal/repository/journal_entry_repo.go"
+  ],
+  "FIN-T02-01": [
+    "frontend/apps/dashboard/src/components/accounting/JournalEntryForm.tsx",
+    "frontend/apps/dashboard/src/lib/api/accountingApi.ts",
+    "backend/internal/handler/http/journal_entry_handler.go",
+    "backend/internal/repository/journal_entry_repo.go"
+  ],
+  "FIN-T02-02": [
+    "backend/internal/usecase/auto_posting_engine.go"
+  ],
+  "FIN-T02-03": [
+    "backend/internal/usecase/auto_posting_engine.go",
+    "backend/internal/domain/auto_posting.go"
+  ],
+  "FIN-T02-04": [
+    "backend/internal/domain/auto_posting.go",
+    "backend/migrations/137_create_journal_entries.sql",
+    "DISCOVERY REQUIRED: forward migration"
+  ],
+  "FIN-T03-01": [
+    "DISCOVERY REQUIRED: source transaction, outbox/inbox, worker, migrations"
+  ],
+  "FIN-T03-02": [
+    "backend/internal/usecase/order_usecase.go",
+    "backend/internal/handler/http/admin_order_handler.go",
+    "backend/internal/handler/http/public_order_handler.go",
+    "DISCOVERY REQUIRED: outbox integration"
+  ],
+  "FIN-T04-01": [
+    "DISCOVERY REQUIRED: current POS/web/admin payment paths"
+  ],
+  "FIN-T05-01": [
+    "DISCOVERY REQUIRED: inventory and invoice integrations"
+  ],
+  "FIN-T06-01": [
+    "backend/internal/usecase/financial_report_usecase.go"
+  ],
+  "FIN-T06-02": [
+    "DISCOVERY REQUIRED: report usecases/queries"
+  ],
+  "FIN-T07-01": [
+    "DISCOVERY REQUIRED: current middleware/routes/repositories/jobs"
+  ],
+  "FIN-T08-01": [
+    "DISCOVERY REQUIRED: report export handlers/UI"
+  ],
+  "FIN-T09-01": [
+    "No optimization until profiling; exact files DISCOVERY REQUIRED"
+  ],
+  "FIN-T10-01": [
+    "CI/test/release config DISCOVERY REQUIRED"
+  ]
+}

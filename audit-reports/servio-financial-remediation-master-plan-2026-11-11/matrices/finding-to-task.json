@@ -1,0 +1,47 @@
+{
+  "FIN-001": [
+    "FIN-T00-01",
+    "FIN-T06-01"
+  ],
+  "POLICY": [
+    "FIN-T01-01"
+  ],
+  "FIN-003": [
+    "FIN-T01-02",
+    "FIN-T02-02"
+  ],
+  "FIN-002": [
+    "FIN-T02-01"
+  ],
+  "FIN-008": [
+    "FIN-T02-03"
+  ],
+  "FIN-009": [
+    "FIN-T02-04"
+  ],
+  "FIN-004": [
+    "FIN-T03-01"
+  ],
+  "FIN-010": [
+    "FIN-T03-02"
+  ],
+  "WORKFLOW": [
+    "FIN-T04-01",
+    "FIN-T05-01"
+  ],
+  "REPORTS": [
+    "FIN-T06-02"
+  ],
+  "SECURITY": [
+    "FIN-T07-01"
+  ],
+  "EXPORT": [
+    "FIN-T08-01"
+  ],
+  "PERFORMANCE": [
+    "FIN-T09-01"
+  ],
+  "RELEASE": [
+    "FIN-T10-01"
+  ]
+}

@@ -1,0 +1,11 @@
+decision_id,topic,category,owner,options,provisional_default,blocks
+DEC-01,Jurisdiction and framework,ACCOUNTANT/LEGAL,Owner + qualified accountant,local statutory or IFRS-based or other,unset,financial statements and tax
+DEC-02,Accounting basis and revenue recognition,ACCOUNTANT,Qualified accountant, cash or accrual and recognition trigger,accrual proposal only,order ledger timing
+DEC-03,Tax jurisdiction/rates/categories,ACCOUNTANT/LEGAL,Qualified accountant/legal reviewer,approved jurisdiction-specific rules,no rate assumed,order totals and VAT
+DEC-04,Inventory costing and COGS timing,ACCOUNTANT/OWNER,Qualified accountant + owner,FIFO weighted average other,unset,inventory and margin
+DEC-05,Fiscal calendar and close/reopen,OWNER/ACCOUNTANT,Owner + accountant,calendar/fiscal and lock rules,unset,FIN-001 treatment
+DEC-06,Currencies/FX source and rounding,OWNER/ACCOUNTANT,Owner + accountant,single/multi currency and rate source,unset,money schema and reports
+DEC-07,Tips/deposits/gift cards,ACCOUNTANT/LEGAL,Accountant/legal,liability and recognition options,liability pending approval,balances
+DEC-08,Refund/chargeback/marketplace treatment,ACCOUNTANT/PAYMENTS,Accountant + payment owner,linked original allocations,unset,refund journals
+DEC-09,Financial roles and retention,OWNER/SECURITY/LEGAL,Owner + security/legal,roles and retention period,least privilege proposal,authorization/audit
+DEC-10,Performance and recovery objectives,OWNER/SRE,Owner + SRE,latency/backlog/RPO/RTO,unset,scale/release

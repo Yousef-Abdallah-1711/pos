@@ -1,0 +1,69 @@
+[
+  {
+    "id": "FIN-PR-001",
+    "depends": []
+  },
+  {
+    "id": "FIN-PR-002",
+    "depends": []
+  },
+  {
+    "id": "FIN-PR-003",
+    "depends": [
+      "FIN-PR-002"
+    ]
+  },
+  {
+    "id": "FIN-PR-004",
+    "depends": [
+      "FIN-PR-002"
+    ]
+  },
+  {
+    "id": "FIN-PR-005",
+    "depends": [
+      "FIN-PR-003",
+      "FIN-PR-004"
+    ]
+  },
+  {
+    "id": "FIN-PR-006",
+    "depends": [
+      "FIN-PR-005"
+    ]
+  },
+  {
+    "id": "FIN-PR-007",
+    "depends": [
+      "FIN-PR-003",
+      "FIN-PR-005"
+    ]
+  },
+  {
+    "id": "FIN-PR-008",
+    "depends": [
+      "FIN-PR-001",
+      "FIN-PR-006",
+      "FIN-PR-007"
+    ]
+  },
+  {
+    "id": "FIN-PR-009",
+    "depends": [
+      "FIN-PR-005"
+    ]
+  },
+  {
+    "id": "FIN-PR-010",
+    "depends": [
+      "FIN-PR-008",
+      "FIN-PR-009"
+    ]
+  },
+  {
+    "id": "FIN-PR-011",
+    "depends": [
+      "FIN-PR-010"
+    ]
+  }
+]

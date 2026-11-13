@@ -1,0 +1,67 @@
+{
+  "FIN-T00-01": [
+    "dated Balance Sheet/P&L/Trial Balance fixture",
+    "warning/availability authorization E2E"
+  ],
+  "FIN-T01-01": [
+    "precision boundary/property suite",
+    "JSON Go/JS serialization parity"
+  ],
+  "FIN-T01-02": [
+    "balanced/one-sided line unit suite",
+    "posted immutability and closed-period integration"
+  ],
+  "FIN-T02-01": [
+    "browser omitted attachments",
+    "PostgreSQL [] and malformed JSON"
+  ],
+  "FIN-T02-02": [
+    "Dr100/Cr90 rejects",
+    "reverse imbalance rejects",
+    "approved rounding attribution fixture"
+  ],
+  "FIN-T02-03": [
+    "every auto-post event inserts attachments []",
+    "failure visible"
+  ],
+  "FIN-T02-04": [
+    "all declared types against PostgreSQL schema",
+    "forward migration from prior schema"
+  ],
+  "FIN-T03-01": [
+    "crash at commit/publish/ack boundaries",
+    "duplicate event/concurrent worker"
+  ],
+  "FIN-T03-02": [
+    "inject sales/COGS failures",
+    "paid event retry idempotency"
+  ],
+  "FIN-T04-01": [
+    "cash/card/web/split/failure/cancel/refund/duplicate/settlement E2E"
+  ],
+  "FIN-T05-01": [
+    "receipt/COGS/waste and control-account fixtures",
+    "aging reconciliation"
+  ],
+  "FIN-T06-01": [
+    "four historical dated fixtures",
+    "earnings close/cutoff and TB bridge"
+  ],
+  "FIN-T06-02": [
+    "P&L, cash flow, aging, VAT, inventory and consolidation independent fixtures"
+  ],
+  "FIN-T07-01": [
+    "two-tenant BOLA/BFLA role matrix",
+    "cache/job scope cases"
+  ],
+  "FIN-T08-01": [
+    "CSV/PDF/native XLSX reader tests",
+    "formula injection and large streaming"
+  ],
+  "FIN-T09-01": [
+    "production-mode repeated traces/query plans/load"
+  ],
+  "FIN-T10-01": [
+    "full reconciliation/security/failure/load/restore suite"
+  ]
+}

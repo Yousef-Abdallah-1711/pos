@@ -1,0 +1,14 @@
+risk_id,risk,probability,impact,detection,mitigation,owner,evidence,release_impact
+R-01,Financial statements materially wrong,unknown,critical,independent BS equation and TB/P&L comparison,FIN-001 containment and approved earnings bridge,Finance owner/accountant,FIN-001 historical runtime verified,NO-GO
+R-02,Missing automatic ledger posting,unknown,critical,source-to-ledger completeness monitor and failure injection,durable posting disposition/retry/reconciliation,Engineering + finance,FIN-008 verified; FIN-010 source verified,NO-GO
+R-03,Duplicate journal effects,unknown,high,duplicate source key and ledger reconciliation,unique event identity and idempotent transaction,Engineering,not tested,NO-GO
+R-04,Wrong account attribution from forced balancing,observed mechanism,critical,compare source lines and posted lines,reject material variance; explicit rounding account,Accounting + engineering,FIN-003 verified,NO-GO
+R-05,Provider/payment state diverges from ledger,unknown,critical,provider settlement reconciliation,provider idempotency and compensating workflow,Payments owner + engineering,workflows not tested,NO-GO
+R-06,Migration damages history,unknown,critical,backup restore and row/value reconciliation,expand/validate/forward-correct; preserve posted rows,DB owner,live schema unknown,NO-GO
+R-07,Cross-tenant exposure,unknown,critical,two-tenant adversarial matrix,object scope/RBAC/cache/job tests,Security owner,not tested,NO-GO
+R-08,Unauthorized export or formula execution,unknown,high,permission and spreadsheet-reader tests,scope downloads and sanitize cells,Security + frontend,CSV/XLSX not tested,NO-GO
+R-09,Precision drift,unknown,high,currency boundary/property tests,decimal contract and exact serialization,Finance + engineering,policy unset,NO-GO
+R-10,Historical data fails reconciliation,unknown,critical,period-by-period source/control reconciliation,exception register and approved adjustments,Accountant,coverage partial,NO-GO
+R-11,Worker backlog/recovery failure,unknown,high,queue age and restart test,backpressure, DLQ ownership and runbooks,SRE,not tested,NO-GO
+R-12,Capacity target unmet,unknown,high,representative measured load,profile before optimize and approve SLO,Performance/SRE,production baseline absent,release target conditional
+R-13,Unapproved accounting policy,known unresolved blocker,critical,decision-register completeness gate,qualified accountant and owner approval,Owner/accountant,decisions absent,NO-GO

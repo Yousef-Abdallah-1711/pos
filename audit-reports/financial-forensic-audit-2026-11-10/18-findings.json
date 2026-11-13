@@ -1,0 +1,323 @@
+[
+  {
+    "id": "FIN-001",
+    "title": "Balance Sheet equation fails after balanced revenue posting",
+    "severity": "P1",
+    "status": "VERIFIED",
+    "module": "Financial reporting",
+    "description": "Posted balanced journal debiting cash 100 and crediting revenue 100 yields assets 100, liabilities 0, equity 0 and equation_balanced false while P&L reports net profit 100.",
+    "evidence": [
+      "08-financial-report-validation.md",
+      "07-accounting-correctness.md",
+      "19-coverage-matrix.md"
+    ],
+    "reproduction": [
+      "In the isolated tenant, post balanced earnings and later liability, asset and equity activity over four dates",
+      "Request P&L and Balance Sheet for each same date",
+      "Compare assets against liabilities plus equity and P&L net profit"
+    ],
+    "financial_impact": "Reported assets do not equal liabilities plus equity; statement is misleading for the tested periods by EGP 100 initially and EGP 60 thereafter.",
+    "root_cause": "Confirmed at backend/internal/usecase/financial_report_usecase.go:261-336: query includes only active non-header asset/liability/equity accounts and sums latest ledger running balances; it does not compute current-period earnings or retained earnings. Four independently dated balanced fixtures failed by amounts equal to net profit (100, then 60).",
+    "recommended_remediation": "Implement approved current-period earnings/retained-earnings treatment and reconcile report totals to the trial balance across close boundaries.",
+    "acceptance_criteria": [
+      "Equation holds for current-period profit fixtures",
+      "Totals reconcile to ledger under approved close policy",
+      "Fixtures cover prior-period retained earnings and cutoff dates"
+    ],
+    "verification_status": "Runtime verified across four independent fixture dates; source root cause confirmed",
+    "exact_source_location": "backend/internal/usecase/financial_report_usecase.go:261-336",
+    "required_regression_tests": [
+      "Four dated earnings/liability/asset/equity fixtures reconcile Balance Sheet, P&L, and trial balance",
+      "Test current and prior-period retained earnings and cutoff"
+    ],
+    "proposed_remediation": "Implement approved current-period earnings/retained-earnings treatment and reconcile report totals to the trial balance across close boundaries.",
+    "observed_result": "Posted balanced journal debiting cash 100 and crediting revenue 100 yields assets 100, liabilities 0, equity 0 and equation_balanced false while P&L reports net profit 100."
+  },
+  {
+    "id": "FIN-002",
+    "title": "Manual journal UI omits JSONB attachments and API rejects request",
+    "severity": "P2",
+    "status": "VERIFIED",
+    "module": "Journal Entries",
+    "description": "UI sent valid balanced entry without attachments; PostgreSQL returned HTTP 400 invalid input syntax for type json. Same authenticated request with attachments: [] returned 201.",
+    "evidence": [
+      "Playwright request 736 and response body",
+      "evidence/snapshots/new-journal-entry-form.yml"
+    ],
+    "reproduction": [
+      "Open journal form",
+      "Enter description and balanced lines",
+      "Save with default attachments"
+    ],
+    "financial_impact": "Default manual journal workflow is blocked.",
+    "root_cause": "Nil JSON raw message reaches JSONB insert; form sends no attachments property.",
+    "recommended_remediation": "Default attachments to valid empty JSON and regression-test browser submission.",
+    "acceptance_criteria": [
+      "Default UI can create a draft without manual JSON edits",
+      "Valid attachments persist and post",
+      "Malformed JSON receives controlled validation"
+    ],
+    "verification_status": "Tested",
+    "exact_source_location": "frontend/apps/dashboard/src/components/accounting/JournalEntryForm.tsx: form payload; frontend/apps/dashboard/src/lib/api/accountingApi.ts:68-72; backend/internal/handler/http/journal_entry_handler.go:156; backend/internal/repository/journal_entry_repo.go:211-236",
+    "required_regression_tests": [
+      "Submit browser form with omitted attachments and verify valid JSON default",
+      "Submit explicit [] and verify persisted JSONB",
+      "Keep malformed attachment JSON rejected"
+    ],
+    "proposed_remediation": "Default attachments to valid empty JSON and regression-test browser submission.",
+    "reproduction_status": "Tested",
+    "observed_result": "UI sent valid balanced entry without attachments; PostgreSQL returned HTTP 400 invalid input syntax for type json. Same authenticated request with attachments: [] returned 201."
+  },
+  {
+    "id": "FIN-003",
+    "title": "Auto-posting normalizer absorbs material imbalance into final line",
+    "severity": "P1",
+    "status": "VERIFIED",
+    "module": "Auto-posting",
+    "description": "Runtime probe confirmed Dr 100 / Cr 90 is normalized by increasing the final revenue credit 90→100 (EGP 10). With valid JSON and schema-valid manual entry type, the normalized lines persisted via the journal/ledger repository as a posted 100/100 journal with two ledger rows. Actual PostSupplierInvoiceEntry did not persist because nil JSONB attachments fail first; reverse Dr 100 / Cr 110 is rejected by line validation. No configured materiality cap exists; downstream line/NUMERIC constraints bound what reaches persistence. Callers include payroll and sales, COGS, supplier invoice/payment, payroll, and depreciation paths.",
+    "evidence": [
+      "evidence/scripts/audit_closure_probe_test.go",
+      "evidence/scripts/overlay.json",
+      "05-database-ledger-analysis.md",
+      "07-accounting-correctness.md"
+    ],
+    "reproduction": [
+      "Run the isolated overlay test with supplier event lines Dr 100 / Cr 90",
+      "Observe the actual supplier method fail on nil JSONB attachments before insert",
+      "Call normalizer and observe final revenue credit change 90→100",
+      "Persist normalized lines via repository with attachments [] and entry_type manual; observe posted journal and two ledger rows",
+      "Try reverse Dr 100 / Cr 110; observe repository validation rejection"
+    ],
+    "financial_impact": "Source calculation error is hidden by changing the last account amount; conditional repository proof shows wrong account attribution can reach posted ledger records. The production automatic supplier method is independently blocked before persistence by FIN-008, so that exact method was not shown posting the altered entry.",
+    "root_cause": "normalizeBalancedLines at backend/internal/usecase/auto_posting_engine.go:633-660 changes final line for every rounded difference above 0.009 instead of rejecting material imbalance.",
+    "recommended_remediation": "Reject material imbalances. Permit only explicitly recorded, bounded rounding to an approved rounding account under documented policy.",
+    "acceptance_criteria": [
+      "Material imbalance fails before journal persistence",
+      "Only approved bounded rounding is allowed and separately auditable",
+      "Positive and reverse imbalance tests preserve one-sided line constraints and cannot silently alter business accounts"
+    ],
+    "verification_status": "Behavior and conditional repository persistence verified in disposable DB; actual automatic supplier-method persistence blocked by FIN-008",
+    "exact_source_location": "backend/internal/usecase/auto_posting_engine.go:467,522-559,633-660; repository persistence: backend/internal/repository/journal_entry_repo.go",
+    "required_regression_tests": [
+      "Dr100/Cr90 must fail automatic posting or be recorded as explicit approved rounding",
+      "Dr100/Cr110 must fail without a two-sided line",
+      "Verify no material difference changes a business account silently"
+    ],
+    "proposed_remediation": "Reject material imbalances. Permit only explicitly recorded, bounded rounding to an approved rounding account under documented policy.",
+    "observed_result": "Runtime probe confirmed Dr 100 / Cr 90 is normalized by increasing the final revenue credit 90→100 (EGP 10). With valid JSON and schema-valid manual entry type, the normalized lines persisted via the journal/ledger repository as a posted 100/100 journal with two ledger rows. Actual PostSupplierInvoiceEntry did not persist because nil JSONB attachments fail first; reverse Dr 100 / Cr 110 is rejected by line validation."
+  },
+  {
+    "id": "FIN-004",
+    "title": "Failed auto-post may leave a draft journal requiring review",
+    "severity": "P2",
+    "status": "INFERRED",
+    "module": "Ledger posting",
+    "description": "Auto-posting creates a draft in CreateJournalEntry, then AppendEntry starts the posting transaction. A failure before posting commit can leave a draft. Ledger insertion and posted status are in the same PostEntryTx transaction in the inspected path.",
+    "evidence": [
+      "backend/internal/usecase/auto_posting_engine.go:522-...",
+      "backend/internal/repository/general_ledger_repo.go:34",
+      "backend/internal/repository/journal_entry_repo.go:339-..."
+    ],
+    "reproduction": [
+      "Failure injection not run"
+    ],
+    "financial_impact": "A draft may require reconciliation/retry; no posted-without-ledger case was shown in the inspected path.",
+    "root_cause": "Draft creation and posting are distinct transactions, while ledger insertion and posted status are atomic together.",
+    "recommended_remediation": "Define a retry/alert policy for drafts that remain after automatic-posting errors; retain idempotency and reconciliation.",
+    "acceptance_criteria": [
+      "Failures leave a detectable state",
+      "Retry/reconciliation is idempotent",
+      "Posted status and ledger rows are atomic"
+    ],
+    "verification_status": "Code inspected; failure not reproduced",
+    "exact_source_location": "backend/internal/usecase/auto_posting_engine.go:522-565; backend/internal/repository/journal_entry_repo.go:339 onward; backend/internal/repository/general_ledger_repo.go:34 onward",
+    "required_regression_tests": [
+      "Inject failure after draft creation and before posting commit",
+      "Verify draft is discoverable/recoverable",
+      "Retry and assert no duplicate ledger rows"
+    ],
+    "proposed_remediation": "Define a retry/alert policy for drafts that remain after automatic-posting errors; retain idempotency and reconciliation.",
+    "reproduction_status": "Code inspected; failure not reproduced",
+    "observed_result": "Auto-posting creates a draft in CreateJournalEntry, then AppendEntry starts the posting transaction. A failure before posting commit can leave a draft. Ledger insertion and posted status are in the same PostEntryTx transaction in the inspected path."
+  },
+  {
+    "id": "FIN-005",
+    "title": "Order tax rate is hard-coded",
+    "severity": "P2",
+    "status": "VERIFIED",
+    "module": "Orders / tax",
+    "description": "Order use case computes tax as subtotal multiplied by 0.10.",
+    "evidence": [
+      "backend/internal/usecase/order_usecase.go:173"
+    ],
+    "reproduction": [
+      "Static inspection"
+    ],
+    "financial_impact": "Rate may be wrong for jurisdiction, category or exemption.",
+    "root_cause": "Fixed rate embedded in order calculation.",
+    "recommended_remediation": "Use approved jurisdictional tax configuration and persist applied rule for audit.",
+    "acceptance_criteria": [
+      "Tax rules are owner-approved and configurable",
+      "Applied rule and rate are auditable",
+      "Fixtures reconcile to ledger"
+    ],
+    "verification_status": "Static source verified; jurisdiction unknown",
+    "exact_source_location": "backend/internal/usecase/order_usecase.go:173",
+    "required_regression_tests": [
+      "Test configured rates, exemption, jurisdiction/category rules",
+      "Test tax rounding and persisted rule version",
+      "Reconcile calculated order tax to accounting journal"
+    ],
+    "proposed_remediation": "Use approved jurisdictional tax configuration and persist applied rule for audit.",
+    "reproduction_status": "Static source verified; jurisdiction unknown",
+    "observed_result": "Order use case computes tax as subtotal multiplied by 0.10."
+  },
+  {
+    "id": "FIN-006",
+    "title": "Development dashboard shows duplicate requests and slow one-shot loads",
+    "severity": "P2",
+    "status": "VERIFIED",
+    "module": "Dashboard performance",
+    "description": "Network observations show duplicate permission/report GETs; one route timing pass was about 2.7–10.6 seconds in NODE_ENV development.",
+    "evidence": [
+      "Playwright network request capture",
+      "reports/09-performance-forensics.md"
+    ],
+    "reproduction": [
+      "Navigate financial routes and inspect network list"
+    ],
+    "financial_impact": "Navigation can be slow; development compilation confounds production impact.",
+    "root_cause": "Duplicate requests observed; root cause of full latency unknown.",
+    "recommended_remediation": "Compare dev/prod with repeated traces and investigate duplicate fetch sources.",
+    "acceptance_criteria": [
+      "p50/p95 separated by build mode",
+      "Duplicate fetch origin identified or intentional",
+      "Any optimization has before/after evidence"
+    ],
+    "verification_status": "Symptoms observed; root cause unverified",
+    "exact_source_location": "frontend/apps/dashboard/src (duplicate request origins unresolved); reports/09-performance-forensics.md",
+    "required_regression_tests": [
+      "At least 10 equivalent route samples in dev and production",
+      "Capture browser trace and network waterfall",
+      "Profile API/database plans and React render origins"
+    ],
+    "proposed_remediation": "Compare dev/prod with repeated traces and investigate duplicate fetch sources.",
+    "reproduction_status": "Symptoms observed; root cause unverified",
+    "observed_result": "Network observations show duplicate permission/report GETs; one route timing pass was about 2.7–10.6 seconds in NODE_ENV development."
+  },
+  {
+    "exact_source_location": "backend/internal/usecase/auto_posting_engine.go:522-559; backend/internal/repository/journal_entry_repo.go:162 onward; backend/migrations/137_create_journal_entries.sql",
+    "reproduction": [
+      "In disposable DB execute the overlay probe invoking PostSupplierInvoiceEntry with valid tenant and Dr 100 / Cr 90 lines",
+      "Observe PostgreSQL invalid JSON error on insert",
+      "Query journal_entries by probe reference number and confirm zero rows"
+    ],
+    "verification": "Tested",
+    "module": "Automatic posting / journal persistence",
+    "required_regression_tests": [
+      "Exercise every automatic posting event type with omitted attachments",
+      "Verify valid empty attachments persist as JSON []",
+      "Inject insert/post failures and assert caller-visible or durable recoverable status"
+    ],
+    "severity": "P2",
+    "status": "VERIFIED",
+    "recommended_remediation": "Default JSONB attachments and implement observable recovery.",
+    "evidence": [
+      "evidence/scripts/audit_closure_probe_test.go",
+      "evidence/scripts/overlay.json",
+      "05-database-ledger-analysis.md"
+    ],
+    "reproduction_status": "Executed in disposable database",
+    "description": "Actual PostSupplierInvoiceEntry probe fails before persistence with PostgreSQL invalid input syntax for type json; reference query found zero journal rows. createAndPostEntry constructs JournalEntry without Attachments.",
+    "verification_status": "Runtime verified against isolated disposable database",
+    "id": "FIN-008",
+    "financial_impact": "Automatic sales/payroll/supplier/depreciation posting paths that share createAndPostEntry can fail to create required journals; order handlers may separately suppress some posting errors.",
+    "financial_impact_summary": "Automatic ledger posting can be absent even when source events proceed.",
+    "title": "Automatic journals fail insertion because JSONB attachments are nil",
+    "observed_result": "Automatic method returns error before journal persistence because nil JSON raw message reaches JSONB insert.",
+    "proposed_remediation": "Initialize attachments to valid [] JSON in the domain/repository boundary and return/record posting failure durably.",
+    "acceptance_criteria": [
+      "Automatic events insert with valid JSON defaults",
+      "Failed posting is surfaced or durably queued and alertable",
+      "No orphan untracked source event without reconciliation signal"
+    ],
+    "root_cause": "Automatic entry builder leaves the JSONB attachments field nil; repository inserts that raw value without normalizing it to valid empty JSON."
+  },
+  {
+    "exact_source_location": "backend/internal/domain/auto_posting.go:19; backend/migrations/137_create_journal_entries.sql:19; backend/internal/usecase/auto_posting_engine.go:472-485",
+    "reproduction": [
+      "In disposable database construct supplier auto journal with entry_type auto_supplier_invoice and valid attachments []",
+      "Insert through journal repository",
+      "Observe value-too-long-for-type-character-varying(20)"
+    ],
+    "verification": "Tested",
+    "module": "Automatic posting / schema compatibility",
+    "required_regression_tests": [
+      "Schema integration test inserts every declared auto-post entry type",
+      "Migration forward/rollback tests",
+      "Supplier purchase event reaches posted journal and ledger"
+    ],
+    "severity": "P2",
+    "status": "VERIFIED",
+    "recommended_remediation": "Align domain type and migration width with regression coverage.",
+    "evidence": [
+      "evidence/scripts/audit_closure_probe_test.go",
+      "backend/internal/domain/auto_posting.go",
+      "backend/migrations/137_create_journal_entries.sql"
+    ],
+    "reproduction_status": "Executed with valid attachments",
+    "description": "auto_supplier_invoice is 21 characters but journal_entries.entry_type is VARCHAR(20). With valid attachments, repository insertion rejects the automatic supplier invoice type.",
+    "verification_status": "Runtime schema rejection verified in isolated DB",
+    "id": "FIN-009",
+    "financial_impact": "Supplier invoice auto-posting remains unavailable for this event type; payable/expense accounting may be missing through this path.",
+    "financial_impact_summary": "Supplier invoice auto entry blocked.",
+    "title": "Supplier automatic entry type exceeds journal schema width",
+    "observed_result": "The automatic supplier invoice entry cannot be inserted even after correcting the independent nil-attachments defect.",
+    "proposed_remediation": "Align the approved enum and schema width using a reviewed migration and constrain values at the domain boundary.",
+    "acceptance_criteria": [
+      "All declared entry types fit database contract",
+      "Migration succeeds on isolated prior schema",
+      "Supplier event reconciles to payable and expense/inventory accounts"
+    ],
+    "root_cause": "Domain constant length exceeds the database column limit."
+  },
+  {
+    "exact_source_location": "backend/internal/usecase/order_usecase.go:492-520; backend/internal/handler/http/admin_order_handler.go:500-507; backend/internal/handler/http/public_order_handler.go:82-84",
+    "reproduction": [
+      "Static trace admin payment-status update to paid invokes AutoPostPaidOrderByID",
+      "Trace sales and COGS error branches: each log and continue/return without caller error",
+      "Trace handler response: successful status response does not depend on accounting result"
+    ],
+    "verification": "Static source verified",
+    "module": "Order/payment accounting integration",
+    "required_regression_tests": [
+      "Inject sales and COGS post failures after a synthetic paid order",
+      "Assert durable pending/error state, alert and idempotent retry",
+      "Verify payment state and source event reconcile to exactly required journals and ledger rows"
+    ],
+    "severity": "P2",
+    "status": "SOURCE_VERIFIED",
+    "recommended_remediation": "Durable accounting job state, retry and reconciliation.",
+    "evidence": [
+      "backend/internal/usecase/order_usecase.go",
+      "backend/internal/handler/http/admin_order_handler.go",
+      "backend/internal/handler/http/public_order_handler.go",
+      "06-financial-event-traceability.md"
+    ],
+    "reproduction_status": "Static call-path inspection only",
+    "description": "AutoPostPaidOrder separately invokes sales and COGS posting, logs failures, and returns no error. AutoPostPaidOrderByID also logs reload errors and returns; handlers return order/payment success independently. No paid-order runtime test was executed.",
+    "verification_status": "Source behavior verified; runtime scenario NOT TESTED",
+    "id": "FIN-010",
+    "financial_impact": "Payment/order may appear successful while required sales or COGS journals are missing; financial completeness requires reconciliation.",
+    "financial_impact_summary": "Potential missing accounting effect with no user-visible failure.",
+    "title": "Paid-order auto-post errors are logged and suppressed",
+    "observed_result": "Source proves posting errors are not propagated to the handler or represented as a failed payment/order response; runtime paid-order success with missing ledger was not tested.",
+    "proposed_remediation": "Persist accounting outcome in a durable outbox/retry/reconciliation flow and surface pending/failed posting status to operators.",
+    "acceptance_criteria": [
+      "No paid order is silently considered financially complete without required posting",
+      "Failures are observable and recoverable",
+      "Retries do not duplicate ledger effects"
+    ],
+    "root_cause": "Auto-post API is fire-and-forget with log-only error handling; accounting outcome is not coupled to or durably queued with source event."
+  }
+]

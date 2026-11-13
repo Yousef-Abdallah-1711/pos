@@ -1,0 +1,32 @@
+[
+  {
+    "id": "GATE-01",
+    "name": "policy approval",
+    "status": "BLOCKED",
+    "owner": "owner/accountant"
+  },
+  {
+    "id": "GATE-02",
+    "name": "FIN-001 reconciliation",
+    "status": "BLOCKED",
+    "owner": "finance/engineering"
+  },
+  {
+    "id": "GATE-03",
+    "name": "source event recovery",
+    "status": "BLOCKED",
+    "owner": "engineering/SRE"
+  },
+  {
+    "id": "GATE-04",
+    "name": "tenant isolation",
+    "status": "NOT TESTED",
+    "owner": "security"
+  },
+  {
+    "id": "GATE-05",
+    "name": "commercial release",
+    "status": "NO-GO",
+    "owner": "authorized release approvers"
+  }
+]

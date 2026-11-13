@@ -1,0 +1,13 @@
+sequenceDiagram
+ participant Source
+ participant DB
+ participant Outbox
+ participant Worker
+ participant Ledger
+ participant Report
+ Source->>DB: accept immutable source transition
+ DB->>Outbox: commit event atomically (target)
+ Outbox->>Worker: at-least-once delivery
+ Worker->>Ledger: idempotent journal + GL transaction
+ Ledger->>Report: posting watermark
+ Report->>Report: reconcile source, payment and ledger
