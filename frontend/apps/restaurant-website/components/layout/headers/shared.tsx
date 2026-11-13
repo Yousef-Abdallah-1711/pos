@@ -84,7 +84,7 @@ export function HeaderVariantShell({
           innerClassName
         )}
       >
-        <div className={cn('flex items-center gap-2', locale === 'ar' && 'flex-row-reverse')}>
+        <div className={cn('flex min-w-0 items-center gap-2', locale === 'ar' && 'flex-row-reverse')}>
           <Sheet>
             <SheetTrigger asChild>
               <Button type="button" variant="ghost" size="icon" className="h-12 w-12 md:hidden">
@@ -96,7 +96,7 @@ export function HeaderVariantShell({
               <NavLinks config={config} locale={locale} mobile />
             </SheetContent>
           </Sheet>
-          <Link href={`/${locale}`} className="text-base font-semibold sm:text-lg">
+          <Link href={`/${locale}`} className="min-w-0 truncate text-base font-semibold sm:text-lg">
             {safeLogoText}
           </Link>
         </div>
@@ -105,7 +105,7 @@ export function HeaderVariantShell({
           <NavLinks config={config} locale={locale} />
         </div>
 
-        <div className={cn('flex items-center gap-1', locale === 'ar' && 'flex-row-reverse')}>
+        <div className={cn('flex shrink-0 items-center gap-1', locale === 'ar' && 'flex-row-reverse')}>
           <SearchBar />
           <LanguageToggle />
           <DarkModeToggle />

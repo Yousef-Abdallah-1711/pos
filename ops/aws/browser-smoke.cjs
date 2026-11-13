@@ -29,7 +29,7 @@ async function snapshot(page,label,width,url) {
  page.off('pageerror',onError);
 }
 async function loginJourney(browser,admin=false) {
- const context=await browser.newContext({viewport:{width:1440,height:900}});
+ const context=await browser.newContext({ignoreHTTPSErrors:process.env.SERVIO_DISPOSABLE_BROWSER==='1',viewport:{width:1440,height:900}});
  await protect(context);
  const page=await context.newPage();const label=admin?'admin-browser-login':'tenant-browser-login';
  const fixture=JSON.parse(fs.readFileSync(admin?'/fixtures/admin.json':'/fixtures/users.json','utf8'));
@@ -60,7 +60,7 @@ async function loginJourney(browser,admin=false) {
 (async()=>{
  const browser=await chromium.launch({headless:true,args:['--disable-dev-shm-usage']});
  for(const width of [1440,390]) {
-  const context=await browser.newContext({viewport:{width,height:900}});const page=await context.newPage();
+  const context=await browser.newContext({ignoreHTTPSErrors:process.env.SERVIO_DISPOSABLE_BROWSER==='1',viewport:{width,height:900}});const page=await context.newPage();
   await protect(context);
   for(const [label,url] of anonymous) await snapshot(page,label,width,url);
   await context.close();
