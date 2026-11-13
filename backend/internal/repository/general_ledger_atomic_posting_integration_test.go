@@ -269,20 +269,7 @@ func cleanupAtomicPostingFixture(t *testing.T, db *sql.DB, fixture *atomicPostin
 
 func cleanupAtomicPostingFixtureRows(t *testing.T, db *sql.DB, fixture *atomicPostingFixture) {
 	t.Helper()
-	if fixture.tenantID != 0 {
-		cleanupStatements := []string{
-			`DELETE FROM general_ledger WHERE tenant_id = $1`,
-			`DELETE FROM journal_entry_lines WHERE tenant_id = $1`,
-			`DELETE FROM journal_entries WHERE tenant_id = $1`,
-			`DELETE FROM chart_of_accounts WHERE tenant_id = $1`,
-			`DELETE FROM restaurants WHERE tenant_id = $1`,
-			`DELETE FROM tenants WHERE id = $1`,
-		}
-		for _, statement := range cleanupStatements {
-			if _, err := db.Exec(statement, fixture.tenantID); err != nil {
-				t.Errorf("clean isolated CFR-004 fixtures: %v", err)
-				break
-			}
-		}
-	}
+	// Financial integration fixtures live only in a dedicated disposable database.
+	// CFR-002 makes ledger history immutable, so deleting test postings would weaken
+	// the behavior under test; discard the entire database after the suite instead.
 }
