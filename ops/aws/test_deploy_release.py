@@ -68,7 +68,7 @@ class RollbackSafetyTests(unittest.TestCase):
                 target=destination/'ops/aws';target.mkdir(parents=True)
                 (target/'compose.json').write_text(__import__('json').dumps(old))
             def compose(path,*args,**kwargs):calls.append((path,args))
-            patches=[patch.object(deploy,'ROOT',root),patch.object(deploy,'OPS',ops),patch.object(deploy,'STATE',ops/'state.json'),patch.object(deploy,'verify_manifest',return_value=SHA),patch.object(deploy,'verify_artifacts'),patch.object(deploy,'extract_source',side_effect=extract),patch.object(deploy,'load_verified_images'),patch.object(deploy,'backup'),patch.object(deploy,'compose',side_effect=compose),patch.object(deploy,'public_checks',side_effect=RuntimeError('simulated readiness failure')),patch.object(deploy.shutil,'disk_usage',return_value=SimpleNamespace(free=20*1024**3))]
+            patches=[patch.object(deploy,'ROOT',root),patch.object(deploy,'OPS',ops),patch.object(deploy,'STATE',ops/'state.json'),patch.object(deploy,'verify_manifest',return_value=SHA),patch.object(deploy,'verify_artifacts'),patch.object(deploy,'extract_source',side_effect=extract),patch.object(deploy,'load_verified_images',return_value=manifest['image_ids']),patch.object(deploy,'verify_migrations'),patch.object(deploy,'backup'),patch.object(deploy,'compose',side_effect=compose),patch.object(deploy,'public_checks',side_effect=RuntimeError('simulated readiness failure')),patch.object(deploy.shutil,'disk_usage',return_value=SimpleNamespace(free=20*1024**3))]
             with __import__('contextlib').ExitStack() as stack:
                 for mocked in patches:stack.enter_context(mocked)
                 with self.assertRaisesRegex(RuntimeError,'simulated'):deploy.deploy(manifest,SHA,root)
@@ -113,7 +113,7 @@ class MetadataAtomicityTests(unittest.TestCase):
                 if file==status and not failed:
                     failed=True;raise OSError('simulated metadata write failure')
                 original(file,raw,mode,owner)
-            manifest={'images':{},'image_ids':{},'ci_run_id':123}
+            manifest={'images':{},'image_ids':{},'runtime_image_ids':{},'ci_run_id':123}
             with patch.object(deploy,'STATE',state),patch.object(deploy,'PUBLIC_STATUS',status),patch.object(deploy,'checked'),patch.object(deploy,'replace_metadata',side_effect=replace):
                 with self.assertRaisesRegex(OSError,'metadata write'):
                     deploy.record_release(manifest,SHA,Path('/release.json'),{})

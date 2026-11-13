@@ -14,6 +14,8 @@ sudo install -o root -g root -m 0755 ops/aws/pull-agent.py /usr/local/sbin/servi
 sudo install -o root -g root -m 0644 ops/aws/deploy-release.py /usr/local/lib/servio/deploy_release.py
 sudo install -o root -g root -m 0644 ops/aws/servio-deploy.service /etc/systemd/system/servio-deploy.service
 sudo install -o root -g root -m 0644 ops/aws/servio-deploy.timer /etc/systemd/system/servio-deploy.timer
+sudo install -o root -g root -m 0755 ops/aws/stage-candidate.py /usr/local/sbin/servio-stage-candidate
+sudo install -o root -g root -m 0755 ops/aws/activate-pull-agent.py /usr/local/sbin/servio-activate-pull-agent
 sudo systemctl daemon-reload
 sudo systemd-analyze verify /etc/systemd/system/servio-deploy.service /etc/systemd/system/servio-deploy.timer
 printf '%s\n' 'Verifier installed. Timer state preserved; new activation remains acceptance-gated.'

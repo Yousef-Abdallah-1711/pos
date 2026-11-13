@@ -134,7 +134,7 @@ def poll(check_only=False):
         if deployed.get('sha')==sha and deployed.get('image_ids')==manifest.get('image_ids') and not deployed.get('candidate',False):
             for name in SERVICES:
                 actual=subprocess.check_output(['docker','inspect','--format','{{.Image}}','servio-staging-'+name+'-1'],text=True).strip()
-                if actual!=manifest['image_ids'][name]:raise RuntimeError('Runtime image drift: '+name)
+                if actual!=deployed.get('runtime_image_ids',{}).get(name):raise RuntimeError('Runtime image drift: '+name)
             print('PASS already deployed and immutable identities match '+sha); return
     attempts[sha]={'count':attempts.get(sha,{}).get('count',0)+1,'started_utc':time.strftime('%Y-%m-%dT%H:%M:%SZ',time.gmtime())}
     atomic_json(attempts_path,attempts)

@@ -27,9 +27,12 @@ def extract_verified(archive,artifact,destination):
         entries=source.infolist()
         if {entry.filename for entry in entries}!=names or len(entries)!=len(names):
             raise RuntimeError('Unexpected candidate artifact members')
-        if any(entry.file_size>2*1024**3 for entry in entries) or sum(entry.file_size for entry in entries)>3*1024**3:
+        limits={'release-manifest.json':65536,'source.tar.gz':150*1024**2}
+        if any(entry.file_size>limits.get(entry.filename,2*1024**3) for entry in entries) or sum(entry.file_size for entry in entries)>3*1024**3:
             raise RuntimeError('Candidate artifact exceeds extraction bounds')
-        destination.mkdir(mode=0o700,parents=True)
+        destination.mkdir(mode=0o700,parents=True,exist_ok=True)
+        if any(p.name not in names or not p.is_file() or p.is_symlink() for p in destination.iterdir()):
+            raise RuntimeError('Unexpected existing candidate cache member')
         source.extractall(destination)
 
 def main(run_id,archive):

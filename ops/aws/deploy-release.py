@@ -74,6 +74,11 @@ def extract_source(sha, destination, artifacts):
                 continue
             member.name = str(relative)
             source.extract(member, destination, filter='data')
+    # Python's data filter intentionally ignores directory modes. Restore public
+    # source traversal under the root agent's restrictive umask, before secrets exist.
+    for file in destination.rglob('*'):
+        if file.is_symlink():continue
+        file.chmod(0o755 if file.is_dir() or file.stat().st_mode&0o111 else 0o644)
 
 def verify_artifacts(manifest, artifacts):
     source=artifacts/'source.tar.gz'
@@ -91,12 +96,64 @@ def verify_artifacts(manifest, artifacts):
         if not re.fullmatch('sha256:[0-9a-f]{64}',manifest['image_ids'][name]):
             raise RuntimeError('Missing immutable image content identity')
 
-def load_verified_images(manifest, artifacts):
+def verify_migrations(destination, previous_path):
+    policy=Path('/etc/servio/approved-migrations.json')
+    approved=json.loads(policy.read_text()) if policy.exists() else {}
+    result=compose(previous_path,'exec','-T','postgres','psql','-U','postgres','-d','servio_staging','-At','-v','ON_ERROR_STOP=1','-c','SELECT version FROM schema_migrations ORDER BY version',stdout=subprocess.PIPE,text=True)
+    applied=set(result.stdout.splitlines())
+    for file in sorted((destination/'backend/migrations').glob('*.sql')):
+        if file.name in applied:continue
+        observed=hashlib.sha256(file.read_bytes()).hexdigest()
+        if approved.get(file.name)!=observed:
+            raise RuntimeError('Migration requires operator compatibility review: '+file.name)
+
+
+def archive_member(source,name,limit=2*1024**2):
+    stream=source.extractfile(name)
+    if stream is None:raise RuntimeError('Missing image metadata')
+    raw=stream.read(limit+1)
+    if len(raw)>limit:raise RuntimeError('Image metadata exceeds size bound')
+    return raw
+
+def archive_identities(path,config_id):
+    # Classic Docker identifies configs; the containerd store identifies manifests.
+    # Both identities must be derived from the already checksum-verified archive.
+    with tarfile.open(path) as source:
+        entries=json.loads(archive_member(source,'manifest.json'))
+        if len(entries)!=1:raise RuntimeError('Expected one immutable archived image')
+        config=archive_member(source,entries[0]['Config'])
+        if 'sha256:'+hashlib.sha256(config).hexdigest()!=config_id:
+            raise RuntimeError('Archived config digest mismatch')
+        identities={config_id}
+        if 'index.json' in source.getnames():
+            index=json.loads(archive_member(source,'index.json'))
+            if len(index['manifests'])!=1:raise RuntimeError('Expected one OCI image manifest')
+            descriptor=index['manifests'][0];digest=descriptor['digest']
+            if not re.fullmatch('sha256:[0-9a-f]{64}',digest):raise RuntimeError('Invalid OCI identity')
+            raw=archive_member(source,'blobs/sha256/'+digest.removeprefix('sha256:'))
+            if 'sha256:'+hashlib.sha256(raw).hexdigest()!=digest or json.loads(raw)['config']['digest']!=config_id:
+                raise RuntimeError('OCI manifest/config integrity mismatch')
+            identities.add(digest)
+        return identities
+
+def load_verified_images(manifest,artifacts):
+    runtime={}
     for name in SERVICES:
-        checked(['docker','load','-i',str(artifacts/manifest['archives'][name]['file'])],stdout=subprocess.DEVNULL)
-        metadata=json.loads(subprocess.check_output(['docker','image','inspect',manifest['image_ids'][name]]))[0]
-        if metadata['Id']!=manifest['image_ids'][name] or metadata['Config'].get('Labels',{}).get('org.opencontainers.image.revision')!=manifest['sha']:
+        archive=artifacts/manifest['archives'][name]['file']
+        identities=archive_identities(archive,manifest['image_ids'][name])
+        checked(['docker','load','-i',str(archive)],stdout=subprocess.DEVNULL)
+        tag=manifest['images'][name].split('@')[0]+':sha-'+manifest['sha']
+        metadata=json.loads(subprocess.check_output(['docker','image','inspect',tag]))[0]
+        if metadata['Id'] not in identities or metadata['Config'].get('Labels',{}).get('org.opencontainers.image.revision')!=manifest['sha']:
             raise RuntimeError('Loaded image identity mismatch: '+name)
+        runtime[name]=metadata['Id']
+    return runtime
+
+def configure_runtime_images(path,runtime):
+    config=json.loads(path.read_text())
+    for name in SERVICES+['migrate']:
+        config['services'][name]['image']=runtime['backend' if name=='migrate' else name]
+    path.write_text(json.dumps(config,indent=2)+'\n')
 
 
 def compose(path, *arguments, **kwargs):
@@ -155,7 +212,7 @@ def replace_metadata(path, raw, mode, owner=False):
     temporary.replace(path)
 
 def record_release(manifest,sha,path,previous,candidate=False):
-    state={'candidate':candidate,'sha':sha,'compose':str(path),'images':manifest['images'],'image_ids':manifest['image_ids'],'ci_run_id':manifest['ci_run_id'],'previous':{key:previous[key] for key in ['sha','compose','images','image_ids'] if key in previous},'deployed_utc':time.strftime('%Y-%m-%dT%H:%M:%SZ',time.gmtime())}
+    state={'candidate':candidate,'sha':sha,'compose':str(path),'images':manifest['images'],'image_ids':manifest['image_ids'],'runtime_image_ids':manifest['runtime_image_ids'],'ci_run_id':manifest['ci_run_id'],'previous':{key:previous[key] for key in ['sha','compose','images','image_ids','runtime_image_ids'] if key in previous},'deployed_utc':time.strftime('%Y-%m-%dT%H:%M:%SZ',time.gmtime())}
     status=PUBLIC_STATUS
     receipt={'sha':sha,'status':'candidate' if candidate else 'verified','environment':'staging','ci_run_id':manifest['ci_run_id']}
     snapshots={file:file.read_bytes() if file.exists() else None for file in [STATE,status]}
@@ -169,49 +226,56 @@ def record_release(manifest,sha,path,previous,candidate=False):
         raise
 
 
-def deploy(manifest, requested, artifacts, candidate=False):
-    sha = verify_manifest(manifest, requested, candidate=candidate)
-    verify_artifacts(manifest, artifacts)
-    if shutil.disk_usage(ROOT).free < 4 * 1024**3:
-        raise RuntimeError('Less than 4 GiB disk headroom; refusing image load')
-    destination = ROOT / 'releases' / sha
+def prepare_release(manifest,sha,artifacts,previous):
+    destination=ROOT/'releases'/sha
     if destination.exists():
-        raise RuntimeError('Release directory already exists; inspect prior attempt before retry')
-    destination.mkdir(parents=True, mode=0o755)
-    (ROOT / 'releases').chmod(0o755)
-    destination.chmod(0o755)
-    extract_source(sha, destination, artifacts)
-    path = destination / 'ops/aws/compose.json'
-    config = json.loads(path.read_text())
-    previous = json.loads(STATE.read_text()) if STATE.exists() else {'compose': str(OPS / 'compose.json')}
-    previous_path = Path(previous['compose'])
-    previous_config = json.loads(previous_path.read_text())
-    for name in ['postgres', 'redis', 'proxy']:
-        if config['services'][name]['image'] != previous_config['services'][name]['image']:
+        if Path(previous['compose']).is_relative_to(destination):
+            raise RuntimeError('Refusing to overwrite an active release')
+        # Failed attempt source/evidence is retained, never deleted or overwritten.
+        destination.rename(destination.with_name(sha+'-failed-'+str(time.time_ns())))
+    destination.mkdir(parents=True,mode=0o755)
+    destination.parent.chmod(0o755);destination.chmod(0o755)
+    extract_source(sha,destination,artifacts)
+    path=destination/'ops/aws/compose.json'
+    config=json.loads(path.read_text())
+    previous_config=json.loads(Path(previous['compose']).read_text())
+    for name in ['postgres','redis','proxy']:
+        if config['services'][name]['image']!=previous_config['services'][name]['image']:
             raise RuntimeError('Infrastructure image changes require a separate reviewed operation')
-    for name in SERVICES + ['migrate']:
-        service = config['services'][name]
-        service['image'] = manifest['image_ids']['backend' if name == 'migrate' else name]
-        service['pull_policy']='never'
-        service.pop('build', None)
-    config['services']['proxy']['environment'] = {}
-    config['services']['proxy']['volumes'].append('/var/lib/servio-deployer/public:/srv/servio-release:ro')
-    config['services']['proxy']['volumes'] = [v.replace('./Caddyfile:', './Caddyfile.public:') for v in config['services']['proxy']['volumes']]
-    path.write_text(json.dumps(config, indent=2) + '\n')
-    compose(path, 'config', '-q')
-    load_verified_images(manifest, artifacts)
+    for name in SERVICES+['migrate']:
+        service=config['services'][name]
+        service['image']=manifest['image_ids']['backend' if name=='migrate' else name]
+        service['pull_policy']='never';service.pop('build',None)
+    proxy=config['services']['proxy'];proxy['environment']={}
+    proxy['volumes'].append('/var/lib/servio-deployer/public:/srv/servio-release:ro')
+    proxy['volumes']=[v.replace('./Caddyfile:','./Caddyfile.public:') for v in proxy['volumes']]
+    path.write_text(json.dumps(config,indent=2)+'\n')
+    compose(path,'config','-q')
+    return destination,path
+
+def deploy(manifest,requested,artifacts,candidate=False):
+    sha=verify_manifest(manifest,requested,candidate=candidate)
+    verify_artifacts(manifest,artifacts)
+    if shutil.disk_usage(ROOT).free<4*1024**3:
+        raise RuntimeError('Less than 4 GiB disk headroom; refusing image load')
+    previous=json.loads(STATE.read_text()) if STATE.exists() else {'compose':str(OPS/'compose.json')}
+    previous_path=Path(previous['compose'])
+    destination,path=prepare_release(manifest,sha,artifacts,previous)
+    verify_migrations(destination,previous_path)
+    runtime=load_verified_images(manifest,artifacts)
+    configure_runtime_images(path,runtime)
     backup(previous_path)
-    # Never reverse SQL automatically. Recheck main immediately before promotion.
-    compose(path, 'run', '--rm', '--no-deps', 'migrate')
-    verify_manifest(manifest, requested, candidate=candidate)
+    # Never reverse SQL automatically. Recheck provenance before promotion.
+    compose(path,'run','--rm','--no-deps','migrate')
+    verify_manifest(manifest,requested,candidate=candidate)
     try:
-        for name in SERVICES + ['proxy']:
-            compose(path, 'up', '-d', '--no-deps', '--wait', '--wait-timeout', '150', name)
+        for name in SERVICES+['proxy']:
+            compose(path,'up','-d','--no-deps','--wait','--wait-timeout','150',name)
         public_checks()
         acceptance(destination)
-        record_release(manifest,sha,path,previous,candidate=candidate)
+        record_release(dict(manifest,runtime_image_ids=runtime),sha,path,previous,candidate=candidate)
     except Exception:
-        print('Deployment failed; restoring prior application configuration. SQL/volumes are preserved.', file=sys.stderr)
+        print('Deployment failed; restoring prior application configuration. SQL/volumes are preserved.',file=sys.stderr)
         rollback_apps(previous_path)
         raise
     print('PASS deployed immutable '+('staging candidate ' if candidate else 'main ')+sha)

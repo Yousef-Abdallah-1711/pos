@@ -70,3 +70,6 @@ newman-*.xml
 # Python cache
 __pycache__/
 *.py[cod]
+
+# Root-managed release copies contain private acceptance fixtures and deployment state.
+/releases/

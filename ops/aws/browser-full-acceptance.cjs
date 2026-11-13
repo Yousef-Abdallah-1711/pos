@@ -6,6 +6,7 @@ const root=path.resolve(__dirname,'../..');
 const evidence=path.join(root,'ops/aws/evidence/full-browser');
 fs.mkdirSync(evidence,{recursive:true,mode:0o700});
 const rows=[];
+const run={started_utc:new Date().toISOString(),sha:process.env.SERVIO_RELEASE_SHA||null};
 const hosts={landing:'https://pos.rakmyat.online',dashboard:'https://pos.app.rakmyat.online','super-admin':'https://admin.pos.rakmyat.online','restaurant-website':'https://restaurant-1.pos.rakmyat.online'};
 function discover(directory){
  return fs.readdirSync(directory,{withFileTypes:true}).flatMap(entry=>entry.isDirectory()?discover(path.join(directory,entry.name)):entry.name==='page.tsx'?[path.join(directory,entry.name)]:[]);
@@ -45,20 +46,32 @@ async function login(context,admin=false){
  const file=admin?'browser-admin.json':'browser-fixtures.json';
  const fixture=JSON.parse(fs.readFileSync(path.join(root,'ops/aws/evidence',file)));
  const user=admin?fixture:fixture[0];const page=await context.newPage();
+ try {
  await page.goto(admin?hosts['super-admin']+'/login':hosts.landing+'/en/auth/login');
  await page.waitForFunction(()=>{const i=document.querySelector('input[type=email]');return i&&Object.keys(i).some(k=>k.startsWith('__reactProps')&&typeof i[k]?.onChange==='function');});
  await page.locator('input[type=email]').fill(user.email);await page.locator('input[type=password]').fill(user.password);
  await Promise.all([page.waitForURL(admin?'**/dashboard':'**/en/dashboard**'),page.locator('button[type=submit]').click()]);
- await page.close();
+ }catch(error){throw new Error(String(error.message).replaceAll(user.password,'[redacted]'));}
+ finally{await page.close();}
 }
 async function verifyLogout(context,admin){
  const prefix=admin?'/super-admin':'';
  const result=await context.request.post('https://api.pos.rakmyat.online/api/v1'+prefix+'/auth/logout',{headers:{Origin:hosts[admin?'super-admin':'landing']},data:{}});
- const session=await context.request.get('https://api.pos.rakmyat.online/api/v1'+prefix+'/auth/session');
- rows.push({app:admin?'super-admin':'dashboard',route:'logout and revoked session',http:result.status(),session:session.status(),status:result.ok()&&session.status()===401?'PASS':'FAIL'});
+ let session;let rateLimitRetries=0;
+ for(let attempt=0;attempt<3;attempt++){
+  session=await context.request.get('https://api.pos.rakmyat.online/api/v1'+prefix+'/auth/session');
+  if(session.status()!==429)break;
+  rateLimitRetries++;const delay=Math.max(1,Math.min(60,Number(session.headers()['retry-after'])||60));
+  await new Promise(resolve=>setTimeout(resolve,delay*1000));
+ }
+ rows.push({app:admin?'super-admin':'dashboard',route:'logout and revoked session',http:result.status(),session:session.status(),rateLimitRetries,status:result.ok()&&session.status()===401?'PASS':'FAIL'});
 }
 (async()=>{
  const browser=await chromium.launch({headless:true});
+ const proof=await (await browser.newContext()).request.get('https://api.pos.rakmyat.online/_ops/release');
+ run.observed_sha=(await proof.json()).sha;
+ if(!run.sha||run.sha!==run.observed_sha)throw new Error('Full acceptance requires the exact deployed SHA');
+ fs.writeFileSync(path.join(evidence,'run.json'),JSON.stringify(run,null,2));
  const inventory=Object.fromEntries(Object.keys(hosts).map(app=>[app,routes(app)]));
  fs.writeFileSync(path.join(evidence,'discovered-routes.json'),JSON.stringify(inventory,null,2));
  for(const app of Object.keys(hosts)){
@@ -79,5 +92,7 @@ async function verifyLogout(context,admin){
  }
  await browser.close();
  fs.writeFileSync(path.join(evidence,'results.json'),JSON.stringify(rows,null,2));
- process.exitCode=rows.some(row=>row.status==='FAIL')?1:0;
+ run.completed_utc=new Date().toISOString();run.passed=rows.filter(r=>r.status==='PASS').length;run.failed=rows.filter(r=>r.status==='FAIL').length;run.not_tested=rows.filter(r=>r.status==='NOT_TESTED').length;
+ fs.writeFileSync(path.join(evidence,'run.json'),JSON.stringify(run,null,2));
+ process.exitCode=run.failed?1:0;
 })().catch(error=>{console.error(error.message);process.exitCode=1;});

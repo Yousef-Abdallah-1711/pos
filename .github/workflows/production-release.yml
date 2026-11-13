@@ -31,11 +31,15 @@ jobs:
                   with urllib.request.urlopen('https://api.pos.rakmyat.online/_ops/release',timeout=15) as response:
                       observed=json.load(response)
                   if observed.get('sha')==expected and observed.get('status')=='verified' and observed.get('environment')=='staging':
+                      for host,path in {'pos.rakmyat.online':'/en','api.pos.rakmyat.online':'/api/v1/health','pos.app.rakmyat.online':'/en/dashboard','admin.pos.rakmyat.online':'/login','restaurant-1.pos.rakmyat.online':'/en'}.items():
+                          with urllib.request.urlopen('https://'+host+path,timeout=20) as check:
+                              assert check.status==200 and not check.headers.get('WWW-Authenticate'),host
+                              if host.startswith('api.'):assert json.load(check).get('db_healthy') is True
                       print('PASS outbound agent deployed verified main '+expected)
                       break
               except Exception:
                   pass
               time.sleep(15)
           else:
-              raise SystemExit('BLOCKED: exact-main staging deployment was not verified before the bounded deadline; inspect the systemd agent journal')
+              raise SystemExit('BLOCKED: exact-main staging deployment was not verified before the bounded deadline; inspect /var/log/servio-deploy/agent.log')
           PY
