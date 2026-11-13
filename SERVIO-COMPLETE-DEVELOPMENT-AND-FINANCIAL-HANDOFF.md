@@ -264,3 +264,27 @@ The financial tracker and decision-grade financial assessment are safely preserv
 This does not establish that every file in every workstation directory is published to GitHub. The current worktree snapshot covers selected non-generated source/tests/docs; local caches, raw captures, ignored files and the excluded seed script stay local. Treat each WIP branch as preservation storage, then review its diff against current main before implementation or PR creation.
 
 **The next authorized engineering step is a new clean worktree from current main for Phase 0/CFR-001.** The current session did not begin that implementation.
+
+## 11. Repository-wide preservation update (2026-11-13)
+
+This section supersedes earlier Git-state and preservation statements in this handoff where they differ.
+
+- Verified `origin/main`: `bda157715ecf46440ae97e0f9db5806b0c86dee9` (merge of PR #23 at the time of this reconciliation).
+- PRs #18, #22, #23, #27, #28, #29 and #30 are merged. PRs #19, #20 and #21 remain open drafts; #21 has a merge conflict. PR #7 is closed without merge.
+- PR #30 only reconciles tracker wording; PR #29 contains the CFR-001 auto-posting imbalance rejection and regression tests. The authoritative 21-finding tracker correctly leaves CFR-001 PARTIAL pending disposable PostgreSQL evidence and approved currency/rounding policy. CFR-010 is also PARTIAL: warning/export guardrails are present, but current-period earnings and the accounting equation remain unresolved.
+- Performance evidence: PR #6 is a recovery-measurement report, not an implementation patch. PR #8 request coalescing is present in the storefront theme API. The admin-order item-count N+1 path was independently replaced by a tenant/restaurant-scoped batch query in main (`7b16d56`, `7edaed7`); subsequent status-transition code uses a transaction and row lock (`47d11e2`).
+- PR #7's actual base-to-head patch adds the batched item-count query and summary fields. It does not remove tenant filters or status-transition transaction/locking in that patch. The useful batching behavior is already implemented on main; the closed candidate was not restored or merged.
+
+Additional local work was preserved without opening merge-ready PRs:
+
+| Remote WIP branch | Commit | Contents / status |
+|---|---|---|
+| `codex/wip-ws02-local-updates-2026-11-13` | `113c80a4643d64cfba2e588aaa262cc9bb7491b7` | Snapshot of 59 backend/security, test and Phase 2A documentation files from the dirty WS02 worktree. Unverified; do not merge. |
+| `codex/wip-phase2c-performance-tools-2026-11-13` | `c4b62218f869a002b0f72496d18e5cbb8a43fef4` | Four local performance-harness documentation/config files. The README references sampler scripts absent from this snapshot; incomplete and unverified. |
+| `codex/wip-financial-worktree-preservation-2026-11-13` | `49a2903d0154418da93d2ab987db2b2079ba6bcc` | Historical forensic and Phase 00 planning/evidence documents plus local financial UI translations/test updates. Historical and unverified; includes a probe test that references the removed `normalizeBalancedLines` helper, so it is preservation-only and not merge-ready. |
+
+Existing WIP refs remain separate from main: PR #19 preserves the WS02 snapshot; PR #20 preserves gated deployment work; PR #21 preserves Phase 2A continuation; PR #18 and #22 are now merged preservation records, with their relevant production code already consolidated through later PRs.
+
+Local-only items after these snapshots: 19 naming/brand research documents remain in the consolidation worktree as owner-facing decision material outside the requested engineering workstream; one Phase 2A E2E seed script contains hard-coded test credentials and was intentionally not uploaded. Raw browser captures, screenshots, PDFs, test-result payloads, package stores and build artifacts remain local because they are generated evidence/caches and may expose environment or fixture data. No original worktree was reset, deleted or overwritten. No credentials or customer records were uploaded.
+
+No PR was merged and no deployment was made during this reconciliation. The financial tracker remains the source of truth: continue only one finding at a time, with disposable database fixtures and required owner/accountant decisions; the financial module is not production-ready.
