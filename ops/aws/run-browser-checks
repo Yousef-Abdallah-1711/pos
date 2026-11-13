@@ -3,6 +3,20 @@ set -eu
 cd "$(dirname "$0")/../.."
 mkdir -p ops/aws/evidence/browser
 chmod 700 ops/aws/evidence/browser
+# The same pinned Playwright version can run locally without the multi-browser
+# Docker image on this 30 GiB host. The runtime is root-owned and read-only.
+if [ -x /usr/local/lib/servio/browser/node ]; then
+  fixtures_dir=$(mktemp -d)
+  trap 'rm -rf "$fixtures_dir"' 0 INT TERM
+  cp ops/aws/evidence/browser-fixtures.json "$fixtures_dir/users.json"
+  cp ops/aws/evidence/browser-admin.json "$fixtures_dir/admin.json"
+  export SERVIO_BROWSER_FIXTURES="$fixtures_dir"
+  export SERVIO_BROWSER_EVIDENCE="$PWD/ops/aws/evidence/browser"
+  export PLAYWRIGHT_BROWSERS_PATH=/usr/local/lib/servio/browser/browsers
+  export NODE_PATH=/usr/local/lib/servio/browser/node_modules
+  /usr/local/lib/servio/browser/node ops/aws/browser-smoke.cjs
+  exit
+fi
 if docker version --format '{{.Server.Version}}' >/dev/null 2>&1; then
   docker_command=docker
 else

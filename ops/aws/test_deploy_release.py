@@ -89,4 +89,35 @@ class RollbackContinuationTests(unittest.TestCase):
                 deploy.rollback_apps(Path('/previous.json'))
         self.assertEqual(calls,deploy.SERVICES+['proxy'])
 
+class CandidateTrustTests(unittest.TestCase):
+    def test_operator_candidate_requires_successful_owner_workflow_and_current_main(self):
+        run={'head_sha':SHA,'event':'workflow_dispatch','conclusion':'success','path':'.github/workflows/production-ci.yml','status':'completed','actor':{'login':'Yousef-Abdallah-1711'},'workflow_id':415727583,'head_branch':'candidate'}
+        with patch.object(deploy,'github',side_effect=[{'object':{'sha':SHA}},{'status':'ahead'}]):
+            deploy.verify_candidate(run,SHA,'b'*40)
+        for key,value in [('event','pull_request'),('conclusion','failure'),('actor',{'login':'foreign'}),('workflow_id',99)]:
+            with self.subTest(key=key),self.assertRaises(RuntimeError):
+                deploy.verify_candidate(dict(run,**{key:value}),SHA,'b'*40)
+        with patch.object(deploy,'github',side_effect=[{'object':{'sha':SHA}},{'status':'diverged'}]):
+            with self.assertRaisesRegex(RuntimeError,'include current main'):
+                deploy.verify_candidate(run,SHA,'b'*40)
+
+class MetadataAtomicityTests(unittest.TestCase):
+    def test_failed_public_receipt_restores_previous_deployment_identity(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as directory:
+            state=Path(directory)/'state.json';status=Path(directory)/'release.json'
+            state.write_bytes(b'previous private state');status.write_bytes(b'previous public receipt')
+            original=deploy.replace_metadata;failed=False
+            def replace(file,raw,mode,owner=False):
+                nonlocal failed
+                if file==status and not failed:
+                    failed=True;raise OSError('simulated metadata write failure')
+                original(file,raw,mode,owner)
+            manifest={'images':{},'image_ids':{},'ci_run_id':123}
+            with patch.object(deploy,'STATE',state),patch.object(deploy,'PUBLIC_STATUS',status),patch.object(deploy,'checked'),patch.object(deploy,'replace_metadata',side_effect=replace):
+                with self.assertRaisesRegex(OSError,'metadata write'):
+                    deploy.record_release(manifest,SHA,Path('/release.json'),{})
+            self.assertEqual(state.read_bytes(),b'previous private state')
+            self.assertEqual(status.read_bytes(),b'previous public receipt')
+
 if __name__ == '__main__':unittest.main()

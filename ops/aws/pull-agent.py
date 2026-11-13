@@ -138,7 +138,7 @@ def poll(check_only=False):
             print('PASS already deployed and immutable identities match '+sha); return
     attempts[sha]={'count':attempts.get(sha,{}).get('count',0)+1,'started_utc':time.strftime('%Y-%m-%dT%H:%M:%SZ',time.gmtime())}
     atomic_json(attempts_path,attempts)
-    required=sum(asset['size'] for asset in manifest['archives'].values())+6*1024**3
+    required=sum(asset['size'] for asset in manifest['archives'].values())+4*1024**3
     if shutil.disk_usage(BASE).free<required: raise RuntimeError('Insufficient disk headroom for verified download and deployment')
     fetch_artifacts(release,manifest,directory)
     module=deployer()

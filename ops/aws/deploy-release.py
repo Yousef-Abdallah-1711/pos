@@ -19,6 +19,7 @@ OPS = ROOT / 'ops/aws'
 REPO = 'Yousef-Abdallah-1711/pos'
 SERVICES = ['backend', 'landing', 'dashboard', 'restaurant-website', 'super-admin']
 STATE = OPS / 'evidence/deployed-release.json'
+PUBLIC_STATUS=Path('/var/lib/servio-deployer/public/release.json')
 
 def github(path):
     request = urllib.request.Request('https://api.github.com/repos/' + REPO + '/' + path, headers={'User-Agent': 'servio-staging-deployer', 'Accept': 'application/vnd.github+json'})
@@ -29,17 +30,20 @@ def checked(command, **kwargs):
     kwargs.setdefault("timeout",900)
     return subprocess.run(command, check=True, **kwargs)
 
-def verify_manifest(manifest, requested):
+def verify_manifest(manifest, requested, candidate=False):
     sha = manifest.get('sha', '')
     if not re.fullmatch('[0-9a-f]{40}', sha) or sha != requested:
         raise RuntimeError('Immutable release identity mismatch')
-    if github('git/ref/heads/main')['object']['sha'] != sha:
+    main=github('git/ref/heads/main')['object']['sha']
+    if not candidate and main != sha:
         raise RuntimeError('Release is not the current main commit')
     run_id = manifest.get('ci_run_id')
     if not isinstance(run_id, int) or run_id <= 0:
         raise RuntimeError('Missing CI run identity')
     run = github('actions/runs/' + str(run_id))
-    if (run['head_sha'], run['head_branch'], run['event'], run['conclusion'], run['path']) != (sha, 'main', 'push', 'success', '.github/workflows/production-ci.yml'):
+    if candidate:
+        verify_candidate(run,sha,main)
+    elif (run['head_sha'], run['head_branch'], run['event'], run['conclusion'], run['path']) != (sha, 'main', 'push', 'success', '.github/workflows/production-ci.yml'):
         raise RuntimeError('Exact main CI acceptance is missing')
     if set(manifest.get('images', {})) != set(SERVICES):
         raise RuntimeError('Incomplete application image set')
@@ -47,6 +51,19 @@ def verify_manifest(manifest, requested):
         if not re.fullmatch('ghcr.io/yousef-abdallah-1711/pos/' + re.escape(name) + '@sha256:[0-9a-f]{64}', image):
             raise RuntimeError('Unapproved registry or mutable image reference')
     return sha
+
+def verify_candidate(run,sha,main):
+    expected=(sha,'workflow_dispatch','success','.github/workflows/production-ci.yml','completed')
+    if tuple(run.get(k) for k in ['head_sha','event','conclusion','path','status'])!=expected:
+        raise RuntimeError('Candidate requires completed successful owner CI')
+    if run.get('actor',{}).get('login')!='Yousef-Abdallah-1711' or run.get('workflow_id')!=415727583:
+        raise RuntimeError('Unapproved candidate workflow identity')
+    branch=run['head_branch']
+    if github('git/ref/heads/'+branch)['object']['sha']!=sha:
+        raise RuntimeError('Candidate branch has advanced')
+    comparison=github('compare/'+main+'...'+sha)
+    if comparison.get('status') not in ['ahead','identical']:
+        raise RuntimeError('Candidate does not include current main')
 
 def extract_source(sha, destination, artifacts):
     archive = artifacts / 'source.tar.gz'
@@ -137,10 +154,10 @@ def replace_metadata(path, raw, mode, owner=False):
     if owner:checked(['chown','ubuntu:ubuntu',str(temporary)])
     temporary.replace(path)
 
-def record_release(manifest,sha,path,previous):
-    state={'sha':sha,'compose':str(path),'images':manifest['images'],'image_ids':manifest['image_ids'],'ci_run_id':manifest['ci_run_id'],'previous':{key:previous[key] for key in ['sha','compose','images','image_ids'] if key in previous},'deployed_utc':time.strftime('%Y-%m-%dT%H:%M:%SZ',time.gmtime())}
-    status=Path('/var/lib/servio-deployer/public/release.json')
-    receipt={'sha':sha,'status':'verified','environment':'staging','ci_run_id':manifest['ci_run_id']}
+def record_release(manifest,sha,path,previous,candidate=False):
+    state={'candidate':candidate,'sha':sha,'compose':str(path),'images':manifest['images'],'image_ids':manifest['image_ids'],'ci_run_id':manifest['ci_run_id'],'previous':{key:previous[key] for key in ['sha','compose','images','image_ids'] if key in previous},'deployed_utc':time.strftime('%Y-%m-%dT%H:%M:%SZ',time.gmtime())}
+    status=PUBLIC_STATUS
+    receipt={'sha':sha,'status':'candidate' if candidate else 'verified','environment':'staging','ci_run_id':manifest['ci_run_id']}
     snapshots={file:file.read_bytes() if file.exists() else None for file in [STATE,status]}
     try:
         replace_metadata(STATE,(json.dumps(state,indent=2)+'\n').encode(),0o600,True)
@@ -152,11 +169,11 @@ def record_release(manifest,sha,path,previous):
         raise
 
 
-def deploy(manifest, requested, artifacts):
-    sha = verify_manifest(manifest, requested)
+def deploy(manifest, requested, artifacts, candidate=False):
+    sha = verify_manifest(manifest, requested, candidate=candidate)
     verify_artifacts(manifest, artifacts)
-    if shutil.disk_usage(ROOT).free < 6 * 1024**3:
-        raise RuntimeError('Less than 6 GiB disk headroom; refusing image pull')
+    if shutil.disk_usage(ROOT).free < 4 * 1024**3:
+        raise RuntimeError('Less than 4 GiB disk headroom; refusing image load')
     destination = ROOT / 'releases' / sha
     if destination.exists():
         raise RuntimeError('Release directory already exists; inspect prior attempt before retry')
@@ -186,18 +203,18 @@ def deploy(manifest, requested, artifacts):
     backup(previous_path)
     # Never reverse SQL automatically. Recheck main immediately before promotion.
     compose(path, 'run', '--rm', '--no-deps', 'migrate')
-    verify_manifest(manifest, requested)
+    verify_manifest(manifest, requested, candidate=candidate)
     try:
         for name in SERVICES + ['proxy']:
             compose(path, 'up', '-d', '--no-deps', '--wait', '--wait-timeout', '150', name)
         public_checks()
         acceptance(destination)
-        record_release(manifest,sha,path,previous)
+        record_release(manifest,sha,path,previous,candidate=candidate)
     except Exception:
         print('Deployment failed; restoring prior application configuration. SQL/volumes are preserved.', file=sys.stderr)
         rollback_apps(previous_path)
         raise
-    print('PASS deployed immutable main ' + sha)
+    print('PASS deployed immutable '+('staging candidate ' if candidate else 'main ')+sha)
 
 if __name__ == '__main__':
     os.umask(0o077)
