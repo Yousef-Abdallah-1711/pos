@@ -1,0 +1,560 @@
+{
+  "name": "servio-staging",
+  "services": {
+    "postgres": {
+      "image": "postgres@sha256:fc41cfa8a90c09e84dd723ee764be4b2f59ba6c98b1e5b3fca540adddf68a5ba",
+      "mem_limit": "256m",
+      "memswap_limit": "256m",
+      "restart": "unless-stopped",
+      "stop_grace_period": "30s",
+      "logging": {
+        "driver": "json-file",
+        "options": {
+          "max-size": "10m",
+          "max-file": "3"
+        }
+      },
+      "security_opt": [
+        "no-new-privileges:true"
+      ],
+      "networks": [
+        "private"
+      ],
+      "command": [
+        "postgres",
+        "-c",
+        "max_connections=40",
+        "-c",
+        "shared_buffers=64MB",
+        "-c",
+        "work_mem=2MB"
+      ],
+      "environment": {
+        "POSTGRES_USER": "postgres",
+        "POSTGRES_PASSWORD": "${DB_BOOTSTRAP_PASSWORD:?required}",
+        "POSTGRES_DB": "servio_staging",
+        "POS_MIGRATOR_PASSWORD": "${MIGRATE_DB_PASSWORD:?required}",
+        "POS_APP_PASSWORD": "${DB_PASSWORD:?required}"
+      },
+      "volumes": [
+        "postgres_data:/var/lib/postgresql/data",
+        "../../backend/scripts/db/create_runtime_roles.sql:/pos/create_runtime_roles.sql:ro",
+        "../../backend/scripts/db/init-runtime-roles.sh:/docker-entrypoint-initdb.d/10-init-runtime-roles.sh:ro"
+      ],
+      "healthcheck": {
+        "test": [
+          "CMD-SHELL",
+          "pg_isready -U postgres -d servio_staging"
+        ],
+        "interval": "10s",
+        "timeout": "5s",
+        "retries": 6
+      },
+      "pids_limit": 128
+    },
+    "redis": {
+      "image": "redis@sha256:7f7d30b7fdd09467bac58198a1f166dd69789d348d4fe859cccb20e0cf287fbe",
+      "mem_limit": "96m",
+      "memswap_limit": "96m",
+      "restart": "unless-stopped",
+      "stop_grace_period": "30s",
+      "logging": {
+        "driver": "json-file",
+        "options": {
+          "max-size": "10m",
+          "max-file": "3"
+        }
+      },
+      "security_opt": [
+        "no-new-privileges:true"
+      ],
+      "networks": [
+        "private"
+      ],
+      "command": [
+        "exec redis-server --appendonly yes --appendfsync everysec --maxmemory 48mb --maxmemory-policy noeviction --requirepass \"$$REDIS_PASSWORD\""
+      ],
+      "volumes": [
+        "redis_data:/data"
+      ],
+      "healthcheck": {
+        "test": [
+          "CMD-SHELL",
+          "REDISCLI_AUTH=\"$$REDIS_PASSWORD\" redis-cli ping | grep -q PONG"
+        ],
+        "interval": "10s",
+        "timeout": "3s",
+        "retries": 6
+      },
+      "environment": {
+        "REDIS_PASSWORD": "${REDIS_PASSWORD:?required}"
+      },
+      "entrypoint": [
+        "/bin/sh",
+        "-ec"
+      ],
+      "user": "redis",
+      "cap_drop": [
+        "ALL"
+      ],
+      "pids_limit": 128
+    },
+    "backend": {
+      "image": "servio-backend:208bcae-aws2",
+      "mem_limit": "256m",
+      "memswap_limit": "256m",
+      "restart": "unless-stopped",
+      "stop_grace_period": "30s",
+      "logging": {
+        "driver": "json-file",
+        "options": {
+          "max-size": "10m",
+          "max-file": "3"
+        }
+      },
+      "security_opt": [
+        "no-new-privileges:true"
+      ],
+      "networks": [
+        "private",
+        "app"
+      ],
+      "build": {
+        "context": "../../backend",
+        "dockerfile": "../ops/aws/Dockerfile.backend"
+      },
+      "environment": {
+        "PORT": "8080",
+        "ENV": "staging",
+        "DB_HOST": "postgres",
+        "DB_PORT": "5432",
+        "DB_USER": "pos_app",
+        "DB_PASSWORD": "${DB_PASSWORD:?required}",
+        "DB_NAME": "servio_staging",
+        "DB_SSLMODE": "disable",
+        "DB_MAX_OPEN_CONNS": "15",
+        "DB_MAX_IDLE_CONNS": "5",
+        "JWT_SECRET": "${JWT_SECRET:?required}",
+        "JWT_EXPIRY": "2h",
+        "REDIS_URL": "redis://:${REDIS_PASSWORD:?required}@redis:6379/0",
+        "RBAC_ENFORCEMENT": "enforce",
+        "PAYMOB_MODE": "mock",
+        "APP_BASE_URL": "https://api.pos.rakmyat.online",
+        "DASHBOARD_URL": "https://pos.app.rakmyat.online",
+        "LANDING_URL": "https://pos.rakmyat.online",
+        "RESTAURANT_DOMAIN": "pos.rakmyat.online",
+        "UPLOAD_BASE_URL": "https://api.pos.rakmyat.online/uploads",
+        "WEBHOOK_BASE_URL": "https://api.pos.rakmyat.online",
+        "CORS_ORIGINS": "https://pos.rakmyat.online,https://pos.app.rakmyat.online,https://admin.pos.rakmyat.online,https://restaurant-1.pos.rakmyat.online",
+        "REDIS_PASSWORD": "${REDIS_PASSWORD:?required}"
+      },
+      "volumes": [
+        "uploads_data:/app/uploads"
+      ],
+      "depends_on": {
+        "postgres": {
+          "condition": "service_healthy"
+        },
+        "redis": {
+          "condition": "service_healthy"
+        },
+        "migrate": {
+          "condition": "service_completed_successfully"
+        }
+      },
+      "healthcheck": {
+        "test": [
+          "CMD",
+          "curl",
+          "-fsS",
+          "http://localhost:8080/api/v1/health"
+        ],
+        "interval": "15s",
+        "timeout": "5s",
+        "retries": 3,
+        "start_period": "60s"
+      },
+      "entrypoint": [
+        "/bin/sh",
+        "-ec"
+      ],
+      "cap_drop": [
+        "ALL"
+      ],
+      "init": true,
+      "pids_limit": 128,
+      "command": [
+        "attempt=0; until PGCONNECT_TIMEOUT=2 PGPASSWORD=\"$$DB_PASSWORD\" psql -h \"$$DB_HOST\" -p \"$$DB_PORT\" -U \"$$DB_USER\" -d \"$$DB_NAME\" -Atqc \"SELECT 1\" >/dev/null 2>&1 && REDISCLI_AUTH=\"$$REDIS_PASSWORD\" redis-cli -h redis -p 6379 ping 2>/dev/null | grep -q PONG; do attempt=$$((attempt + 1)); if [ \"$$attempt\" -ge 30 ]; then echo \"Required database/cache dependencies unavailable\" >&2; exit 1; fi; sleep 2; done; exec /app/api"
+      ]
+    },
+    "landing": {
+      "image": "servio-landing:208bcae-aws1",
+      "mem_limit": "224m",
+      "memswap_limit": "224m",
+      "restart": "unless-stopped",
+      "stop_grace_period": "30s",
+      "logging": {
+        "driver": "json-file",
+        "options": {
+          "max-size": "10m",
+          "max-file": "3"
+        }
+      },
+      "security_opt": [
+        "no-new-privileges:true"
+      ],
+      "networks": [
+        "app"
+      ],
+      "build": {
+        "context": "../../frontend",
+        "dockerfile": "Dockerfile.prod",
+        "args": {
+          "APP": "landing",
+          "NEXT_IGNORE_BUILD_ERRORS": "false",
+          "NEXT_PUBLIC_API_URL": "https://api.pos.rakmyat.online/api/v1",
+          "NEXT_PUBLIC_API_BASE_URL": "https://api.pos.rakmyat.online/api/v1",
+          "NEXT_PUBLIC_SUPER_ADMIN_API_URL": "https://api.pos.rakmyat.online/api/v1/super-admin",
+          "NEXT_PUBLIC_LANDING_URL": "https://pos.rakmyat.online",
+          "NEXT_PUBLIC_DASHBOARD_URL": "https://pos.app.rakmyat.online",
+          "NEXT_PUBLIC_RESTAURANT_DOMAIN": "pos.rakmyat.online",
+          "NODE_VERSION": "20-alpine@sha256:fb4cd12c85ee03686f6af5362a0b0d56d50c58a04632e6c0fb8363f609372293"
+        }
+      },
+      "environment": {
+        "NODE_OPTIONS": "--max-old-space-size=160"
+      },
+      "depends_on": {
+        "backend": {
+          "condition": "service_healthy"
+        }
+      },
+      "healthcheck": {
+        "test": [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:3000/').then(r=>process.exit(r.status<500?0:1)).catch(()=>process.exit(1))"
+        ],
+        "interval": "30s",
+        "timeout": "10s",
+        "retries": 3,
+        "start_period": "30s"
+      },
+      "cap_drop": [
+        "ALL"
+      ],
+      "command": [
+        "node",
+        "apps/landing/server.js"
+      ],
+      "init": true,
+      "pids_limit": 128
+    },
+    "dashboard": {
+      "image": "servio-dashboard:208bcae-aws1",
+      "mem_limit": "224m",
+      "memswap_limit": "224m",
+      "restart": "unless-stopped",
+      "stop_grace_period": "30s",
+      "logging": {
+        "driver": "json-file",
+        "options": {
+          "max-size": "10m",
+          "max-file": "3"
+        }
+      },
+      "security_opt": [
+        "no-new-privileges:true"
+      ],
+      "networks": [
+        "app"
+      ],
+      "build": {
+        "context": "../../frontend",
+        "dockerfile": "Dockerfile.prod",
+        "args": {
+          "APP": "dashboard",
+          "NEXT_IGNORE_BUILD_ERRORS": "false",
+          "NEXT_PUBLIC_API_URL": "https://api.pos.rakmyat.online/api/v1",
+          "NEXT_PUBLIC_API_BASE_URL": "https://api.pos.rakmyat.online/api/v1",
+          "NEXT_PUBLIC_SUPER_ADMIN_API_URL": "https://api.pos.rakmyat.online/api/v1/super-admin",
+          "NEXT_PUBLIC_LANDING_URL": "https://pos.rakmyat.online",
+          "NEXT_PUBLIC_DASHBOARD_URL": "https://pos.app.rakmyat.online",
+          "NEXT_PUBLIC_RESTAURANT_DOMAIN": "pos.rakmyat.online",
+          "NODE_VERSION": "20-alpine@sha256:fb4cd12c85ee03686f6af5362a0b0d56d50c58a04632e6c0fb8363f609372293"
+        }
+      },
+      "environment": {
+        "NODE_OPTIONS": "--max-old-space-size=160"
+      },
+      "depends_on": {
+        "backend": {
+          "condition": "service_healthy"
+        }
+      },
+      "healthcheck": {
+        "test": [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:3000/').then(r=>process.exit(r.status<500?0:1)).catch(()=>process.exit(1))"
+        ],
+        "interval": "30s",
+        "timeout": "10s",
+        "retries": 3,
+        "start_period": "30s"
+      },
+      "cap_drop": [
+        "ALL"
+      ],
+      "command": [
+        "node",
+        "apps/dashboard/server.js"
+      ],
+      "init": true,
+      "pids_limit": 128
+    },
+    "restaurant-website": {
+      "image": "servio-restaurant-website:208bcae-aws1",
+      "mem_limit": "224m",
+      "memswap_limit": "224m",
+      "restart": "unless-stopped",
+      "stop_grace_period": "30s",
+      "logging": {
+        "driver": "json-file",
+        "options": {
+          "max-size": "10m",
+          "max-file": "3"
+        }
+      },
+      "security_opt": [
+        "no-new-privileges:true"
+      ],
+      "networks": [
+        "app",
+        "edge"
+      ],
+      "build": {
+        "context": "../../frontend",
+        "dockerfile": "Dockerfile.prod",
+        "args": {
+          "APP": "restaurant-website",
+          "NEXT_IGNORE_BUILD_ERRORS": "false",
+          "NEXT_PUBLIC_API_URL": "https://api.pos.rakmyat.online/api/v1",
+          "NEXT_PUBLIC_API_BASE_URL": "https://api.pos.rakmyat.online/api/v1",
+          "NEXT_PUBLIC_SUPER_ADMIN_API_URL": "https://api.pos.rakmyat.online/api/v1/super-admin",
+          "NEXT_PUBLIC_LANDING_URL": "https://pos.rakmyat.online",
+          "NEXT_PUBLIC_DASHBOARD_URL": "https://pos.app.rakmyat.online",
+          "NEXT_PUBLIC_RESTAURANT_DOMAIN": "pos.rakmyat.online",
+          "NODE_VERSION": "20-alpine@sha256:fb4cd12c85ee03686f6af5362a0b0d56d50c58a04632e6c0fb8363f609372293"
+        }
+      },
+      "ports": [
+        "127.0.0.1:13003:3000"
+      ],
+      "environment": {
+        "NODE_OPTIONS": "--max-old-space-size=160"
+      },
+      "depends_on": {
+        "backend": {
+          "condition": "service_healthy"
+        }
+      },
+      "healthcheck": {
+        "test": [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:3000/').then(r=>process.exit(r.status<500?0:1)).catch(()=>process.exit(1))"
+        ],
+        "interval": "30s",
+        "timeout": "10s",
+        "retries": 3,
+        "start_period": "30s"
+      },
+      "cap_drop": [
+        "ALL"
+      ],
+      "command": [
+        "node",
+        "apps/restaurant-website/server.js"
+      ],
+      "init": true,
+      "pids_limit": 128
+    },
+    "super-admin": {
+      "image": "servio-super-admin:208bcae-aws1",
+      "mem_limit": "224m",
+      "memswap_limit": "224m",
+      "restart": "unless-stopped",
+      "stop_grace_period": "30s",
+      "logging": {
+        "driver": "json-file",
+        "options": {
+          "max-size": "10m",
+          "max-file": "3"
+        }
+      },
+      "security_opt": [
+        "no-new-privileges:true"
+      ],
+      "networks": [
+        "app"
+      ],
+      "build": {
+        "context": "../../frontend",
+        "dockerfile": "Dockerfile.prod",
+        "args": {
+          "APP": "super-admin",
+          "NEXT_IGNORE_BUILD_ERRORS": "false",
+          "NEXT_PUBLIC_API_URL": "https://api.pos.rakmyat.online/api/v1",
+          "NEXT_PUBLIC_API_BASE_URL": "https://api.pos.rakmyat.online/api/v1",
+          "NEXT_PUBLIC_SUPER_ADMIN_API_URL": "https://api.pos.rakmyat.online/api/v1/super-admin",
+          "NEXT_PUBLIC_LANDING_URL": "https://pos.rakmyat.online",
+          "NEXT_PUBLIC_DASHBOARD_URL": "https://pos.app.rakmyat.online",
+          "NEXT_PUBLIC_RESTAURANT_DOMAIN": "pos.rakmyat.online",
+          "NODE_VERSION": "20-alpine@sha256:fb4cd12c85ee03686f6af5362a0b0d56d50c58a04632e6c0fb8363f609372293"
+        }
+      },
+      "environment": {
+        "NODE_OPTIONS": "--max-old-space-size=160"
+      },
+      "depends_on": {
+        "backend": {
+          "condition": "service_healthy"
+        }
+      },
+      "healthcheck": {
+        "test": [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:3000/').then(r=>process.exit(r.status<500?0:1)).catch(()=>process.exit(1))"
+        ],
+        "interval": "30s",
+        "timeout": "10s",
+        "retries": 3,
+        "start_period": "30s"
+      },
+      "cap_drop": [
+        "ALL"
+      ],
+      "command": [
+        "node",
+        "apps/super-admin/server.js"
+      ],
+      "init": true,
+      "pids_limit": 128
+    },
+    "proxy": {
+      "image": "caddy@sha256:78bd35025c7ba85961dd149ae670315129954e77abe2383ac47c89106b35ade9",
+      "mem_limit": "96m",
+      "memswap_limit": "96m",
+      "restart": "unless-stopped",
+      "stop_grace_period": "30s",
+      "logging": {
+        "driver": "json-file",
+        "options": {
+          "max-size": "10m",
+          "max-file": "3"
+        }
+      },
+      "security_opt": [
+        "no-new-privileges:true"
+      ],
+      "networks": {
+        "app": {
+          "aliases": [
+            "api.pos.rakmyat.online"
+          ]
+        },
+        "edge": {}
+      },
+      "ports": [
+        "80:80",
+        "443:443"
+      ],
+      "volumes": [
+        "./Caddyfile:/etc/caddy/Caddyfile:ro",
+        "caddy_data:/data",
+        "caddy_config:/config"
+      ],
+      "healthcheck": {
+        "test": [
+          "CMD",
+          "wget",
+          "-q",
+          "-O",
+          "/dev/null",
+          "http://127.0.0.1:2019/config/"
+        ],
+        "interval": "30s",
+        "timeout": "5s",
+        "retries": 3
+      },
+      "pids_limit": 128,
+      "environment": {
+        "STAGING_GATEWAY_PASSWORD_HASH": "${STAGING_GATEWAY_PASSWORD_HASH:?provision staging gateway}"
+      }
+    },
+    "migrate": {
+      "image": "servio-backend:208bcae-aws2",
+      "entrypoint": [
+        "/bin/sh",
+        "-ec"
+      ],
+      "environment": {
+        "ENV": "staging",
+        "DB_HOST": "postgres",
+        "DB_PORT": "5432",
+        "DB_USER": "pos_migrator",
+        "DB_PASSWORD": "${MIGRATE_DB_PASSWORD:?required}",
+        "DB_NAME": "servio_staging",
+        "DB_SSLMODE": "disable",
+        "DB_MAX_OPEN_CONNS": "15",
+        "DB_MAX_IDLE_CONNS": "5"
+      },
+      "networks": [
+        "private"
+      ],
+      "depends_on": {
+        "postgres": {
+          "condition": "service_healthy"
+        }
+      },
+      "restart": "no",
+      "mem_limit": "256m",
+      "logging": {
+        "driver": "json-file",
+        "options": {
+          "max-size": "10m",
+          "max-file": "3"
+        }
+      },
+      "command": [
+        "./migrate && PGPASSWORD=\"$$DB_PASSWORD\" psql -h \"$$DB_HOST\" -U \"$$DB_USER\" -d \"$$DB_NAME\" -v ON_ERROR_STOP=1 -c \"REVOKE ALL ON TABLE schema_migrations FROM pos_app\""
+      ],
+      "cap_drop": [
+        "ALL"
+      ],
+      "pids_limit": 128
+    }
+  },
+  "networks": {
+    "private": {
+      "internal": true
+    },
+    "edge": {},
+    "app": {
+      "internal": true
+    }
+  },
+  "volumes": {
+    "postgres_data": {},
+    "redis_data": {},
+    "uploads_data": {},
+    "caddy_data": {},
+    "caddy_config": {}
+  }
+}

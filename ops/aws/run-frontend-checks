@@ -1,0 +1,15 @@
+#!/bin/sh
+set -u
+cd /opt/servio
+result=0
+: > ops/aws/evidence/frontend-check-results.txt
+targets="${*:-lint checks audit}"
+for target in $targets; do
+  if sudo docker buildx build --builder servio-builder --target "$target" -f ops/aws/Dockerfile.frontend-check frontend > "ops/aws/evidence/frontend-$target.log" 2>&1; then
+    printf 'PASS frontend %s\n' "$target" | tee -a ops/aws/evidence/frontend-check-results.txt
+  else
+    printf 'FAIL frontend %s\n' "$target" | tee -a ops/aws/evidence/frontend-check-results.txt
+    result=1
+  fi
+done
+exit "$result"

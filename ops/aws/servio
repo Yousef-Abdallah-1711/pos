@@ -1,0 +1,4 @@
+#!/bin/sh
+set -eu
+cd /opt/servio
+exec sudo docker compose --env-file ops/aws/.env -f ops/aws/compose.json "$@"

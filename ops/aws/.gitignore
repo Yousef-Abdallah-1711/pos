@@ -1,0 +1,5 @@
+.env
+evidence/
+backups/
+__pycache__/
+*.tar.gz

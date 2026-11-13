@@ -1,0 +1,10 @@
+#!/bin/sh
+set -eu
+cd /opt/servio
+umask 077
+stamp=$(date -u +%Y%m%dT%H%M%SZ)
+path="ops/aws/backups/servio-staging-$stamp.dump"
+ops/aws/servio exec -T postgres pg_dump -U postgres -d servio_staging -Fc > "$path"
+ops/aws/servio exec -T postgres pg_restore --list < "$path" >/dev/null
+sha256sum "$path" > "$path.sha256"
+printf '%s\n' "$path"

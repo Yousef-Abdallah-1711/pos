@@ -1,0 +1,10 @@
+#!/bin/sh
+set -eu
+cd /opt/servio
+snapshot=$(sudo docker inspect --format '{{.Name}} {{if .State.Health}}{{.State.Health.Status}}{{else}}{{.State.Status}}{{end}} {{.State.OOMKilled}} {{.RestartCount}}' \
+  servio-staging-postgres-1 servio-staging-redis-1 servio-staging-backend-1 \
+  servio-staging-landing-1 servio-staging-dashboard-1 servio-staging-restaurant-website-1 \
+  servio-staging-super-admin-1 servio-staging-proxy-1)
+printf '%s\n' "$snapshot"
+printf '%s\n' "$snapshot" | awk '$2 != "healthy" || $3 != "false" {bad=1} END {exit bad}'
+curl -fsS --max-time 10 https://api.pos.rakmyat.online/api/v1/health | jq -e '.status == "ok" and .db_healthy == true' >/dev/null

@@ -1,0 +1,13 @@
+#!/bin/sh
+set -eu
+cd /opt/servio
+mkdir -p ops/aws/evidence/browser
+chmod 700 ops/aws/evidence/browser
+exec sudo docker run --rm --user 1000:1000 -e NPM_CONFIG_CACHE=/tmp/servio-npm-cache --memory 768m --memory-swap 1024m --cpus 1 --pids-limit 128 --shm-size 128m --ulimit core=0 --security-opt no-new-privileges:true --cap-drop ALL --network servio-staging_edge \
+  -v /opt/servio/ops/aws/browser-smoke.cjs:/work/browser-smoke.cjs:ro \
+  -v /opt/servio/ops/aws/evidence/browser-fixtures.json:/fixtures/users.json:ro \
+  -v /opt/servio/ops/aws/evidence/browser-admin.json:/fixtures/admin.json:ro \
+  -v /opt/servio/ops/aws/evidence/staging-gateway.json:/fixtures/gateway.json:ro \
+  -v /opt/servio/ops/aws/evidence/browser:/evidence \
+  mcr.microsoft.com/playwright@sha256:ee15712262f017b8157421b212b12099146645f44b1bc5c0514cbbe6a229b1d0 \
+  sh -c 'npm install --prefix /tmp/servio-browser --ignore-scripts --no-audit --no-fund playwright@1.64.1 >/tmp/servio-browser-install.log 2>&1 || { cat /tmp/servio-browser-install.log; exit 1; }; NODE_PATH=/tmp/servio-browser/node_modules node /work/browser-smoke.cjs'
