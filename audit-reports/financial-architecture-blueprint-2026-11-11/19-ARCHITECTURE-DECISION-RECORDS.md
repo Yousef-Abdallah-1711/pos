@@ -1,0 +1,3 @@
+# 19 — Proposed ADR register
+
+All PROPOSED, none ACCEPTED. Individual ADRs cover source of truth, monetary representation, immutability, posting atomicity, idempotency, reversals, outbox/inbox, CoA, period close, report consistency, tenant isolation, audit logs, exports and scaling. Shared proposal: immutable source evidence, posted journal authority, exact decimal contract, balanced effects, linked corrections, source+outbox atomic commit, at-least-once idempotent processing, versioned report watermark, tenant defense-in-depth and measured scale. Tax, recognition, inventory, retention, roles and SLO require named approvers.

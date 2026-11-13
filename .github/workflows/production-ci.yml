@@ -1,0 +1,114 @@
+name: Production readiness CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pos-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    runs-on: ubuntu-24.04
+    services:
+      postgres:
+        image: postgres:15.19-alpine3.24@sha256:eab009ce9447a891d9482702d370bbf132c18563bb87cfdcc2b815c6d3b0372f
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: pos_test
+        ports: [5432:5432]
+        options: >-
+          --health-cmd "pg_isready -U postgres -d pos_test"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e
+        id: setup-go
+        with:
+          go-version-file: backend/go.mod
+          cache-dependency-path: backend/go.sum
+      - run: psql -h 127.0.0.1 -U postgres -d postgres -v ON_ERROR_STOP=1 -v dbname=pos_test -v migrator_pw=test -v app_pw=test -f scripts/db/create_runtime_roles.sql
+        working-directory: backend
+        env:
+          PGPASSWORD: test
+      - run: go run ./cmd/migrate
+        working-directory: backend
+        env:
+          ENV: development
+          DB_HOST: 127.0.0.1
+          DB_PORT: "5432"
+          DB_NAME: pos_test
+          DB_USER: postgres
+          DB_PASSWORD: test
+          DB_SSLMODE: disable
+      - run: go test -p 1 ./...
+        working-directory: backend
+        env:
+          POS_TEST_DATABASE_URL: postgres://postgres:test@127.0.0.1:5432/pos_test?sslmode=disable
+      - run: go vet ./...
+        if: ${{ always() && steps.setup-go.outcome == 'success' }}
+        working-directory: backend
+      - run: go test -race ./internal/middleware ./cmd/migrate
+        if: ${{ always() && steps.setup-go.outcome == 'success' }}
+        working-directory: backend
+
+  frontend:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: 20.20.2
+      - run: corepack enable && corepack prepare pnpm@9.0.0 --activate
+      - run: pnpm install --frozen-lockfile
+        id: install
+        working-directory: frontend
+      - run: pnpm --filter @pos-saas/dashboard lint && pnpm --filter @pos-saas/landing lint && pnpm --filter @pos-saas/restaurant-website lint && pnpm --filter @pos-saas/super-admin lint
+        if: ${{ always() && steps.install.outcome == 'success' }}
+        working-directory: frontend
+        env:
+          ESLINT_USE_FLAT_CONFIG: "false"
+      - run: pnpm --filter @pos-saas/dashboard typecheck && pnpm --filter @pos-saas/landing typecheck && pnpm --filter @pos-saas/restaurant-website typecheck && pnpm --filter @pos-saas/super-admin typecheck
+        if: ${{ always() && steps.install.outcome == 'success' }}
+        working-directory: frontend
+      - name: Run frontend tests
+        if: ${{ always() && steps.install.outcome == 'success' }}
+        working-directory: frontend
+        shell: bash
+        run: |
+          set +e
+          pnpm --filter @pos-saas/dashboard test:run; status=$?
+          pnpm --filter @pos-saas/landing test:run; code=$?; (( status == 0 )) && status=$code
+          pnpm --filter @pos-saas/restaurant-website exec jest --runInBand; code=$?; (( status == 0 )) && status=$code
+          pnpm --filter @pos-saas/super-admin test:run; code=$?; (( status == 0 )) && status=$code
+          exit "$status"
+      - name: Build production applications
+        if: ${{ always() && steps.install.outcome == 'success' }}
+        run: pnpm build
+        working-directory: frontend
+        env:
+          NEXT_PUBLIC_API_URL: https://api.pos.rakmyat.online/api/v1
+          NEXT_PUBLIC_API_BASE_URL: https://api.pos.rakmyat.online/api/v1
+          NEXT_PUBLIC_SUPER_ADMIN_API_URL: https://api.pos.rakmyat.online/api/v1/super-admin
+          NEXT_PUBLIC_LANDING_URL: https://pos.rakmyat.online
+          NEXT_PUBLIC_DASHBOARD_URL: https://pos.app.rakmyat.online
+          NEXT_PUBLIC_RESTAURANT_DOMAIN: restaurants.pos.rakmyat.online
+          NEXT_PUBLIC_SITE_URL: https://pos.rakmyat.online
+          NEXT_PUBLIC_DEBUG_LOGS: "false"
+          NEXT_PUBLIC_DEBUG: "false"
+
+  compose-and-security-config:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - run: scripts/production/check-compose-config.sh
+      - run: scripts/production/check-nginx-template.sh
+      - run: bash -n scripts/production/*.sh
+      - run: python3 -m py_compile scripts/production/validate-env.py
+      - run: git diff --check

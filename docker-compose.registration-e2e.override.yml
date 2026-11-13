@@ -8,7 +8,7 @@ services:
       - "127.0.0.1:${REG_E2E_LANDING_PORT}:3001"
       - "127.0.0.1:${REG_E2E_DASHBOARD_PORT}:3002"
     environment:
-      CORS_ORIGINS: "http://localhost:${REG_E2E_LANDING_PORT},http://localhost:${REG_E2E_DASHBOARD_PORT}"
+      CORS_ORIGINS: "http://localhost:${REG_E2E_LANDING_PORT},http://localhost:${REG_E2E_DASHBOARD_PORT},http://phase2a-restaurant-a.localhost:${REG_E2E_RESTAURANT_PORT:-13113}"
       DASHBOARD_URL: "http://localhost:${REG_E2E_DASHBOARD_PORT}"
       LANDING_URL: "http://localhost:${REG_E2E_LANDING_PORT}"
       NEXT_PUBLIC_API_URL: "http://localhost:${REG_E2E_API_PORT}/api/v1"

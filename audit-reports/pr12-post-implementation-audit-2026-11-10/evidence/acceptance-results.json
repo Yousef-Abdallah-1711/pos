@@ -1,0 +1,83 @@
+{
+  "auditDate": "2026-11-10",
+  "repository": "Yousef-Abdallah-1711/pos",
+  "pullRequest": {
+    "number": 12,
+    "url": "https://github.com/Yousef-Abdallah-1711/pos/pull/12",
+    "state": "OPEN",
+    "head": "1a709a0aec0bee164085f6ea92d4a520116909bd",
+    "base": "92b03e03c631aaea10d625da491527ff09bdb7e5",
+    "mergeState": "CLEAN",
+    "reviewDecision": "",
+    "reviews": [],
+    "checks": {
+      "runtime-localhost-guardrail": "SUCCESS",
+      "url-domain-config-smoke": "SUCCESS"
+    }
+  },
+  "localChecks": {
+    "typecheck": "PASS",
+    "vitest": { "status": "PASS", "files": 4, "tests": 35 },
+    "lint": "PASS: no warnings or errors; next lint deprecation notice",
+    "buildWithoutProductionUrls": "FAILS_PRERENDER_AS_CONFIGURED: missing NEXT_PUBLIC_LANDING_URL",
+    "buildWithDisposableLocalProductionUrls": "PASS",
+    "buildWarnings": [
+      "Browserslist data is 11 months old",
+      "Google font fetch retried before success",
+      "next.config.js images.domains is deprecated; use images.remotePatterns"
+    ]
+  },
+  "productionBuildRoutes": {
+    "/": "static redirect",
+    "/[locale]": "SSG: /en, /ar",
+    "/[locale]/auth/login": "SSG shell with client auth form",
+    "/[locale]/auth/register": "SSG shell with client registration form",
+    "/opengraph-image": "listed as static route but unreachable through middleware as configured"
+  },
+  "browser": {
+    "target": "isolated local Next production server on localhost:3011; no backend",
+    "consoleErrors": 0,
+    "viewportWidthsCssPx": [390, 767, 1024, 1440, 1920],
+    "horizontalOverflow": false,
+    "english": { "lang": "en", "dir": "ltr" },
+    "arabic": { "lang": "ar", "dir": "rtl" },
+    "mobileNavigation": "toggle and links verified",
+    "loginUiValidation": "empty-form errors linked to fields; password toggle verified",
+    "authAgainstApi": "BLOCKED: no API listener / disposable auth infrastructure"
+  },
+  "labPerformance": {
+    "nextBuildReportedFirstLoadJsKb": { "landing": 120, "login": 177, "shared": 102 },
+    "cssDecodedBytes": 40018,
+    "cssObservedTransferBytes": 8237,
+    "optimizedProductImageObservedTransferBytes": 19980,
+    "twoObservedFontTransferBytes": [48732, 30428],
+    "observedPageResourceTotalBytes": 337216,
+    "oneLocalObserverSample": { "fcpMs": 156, "lcpMs": 156, "earlyLayoutShiftSumBeforeInput": 0.0158 },
+    "limitations": "single unthrottled local workstation run; no Lighthouse, cold-network repeatability, mobile throttling, or field data"
+  },
+  "http": {
+    "localizedHtml": { "status": 200, "cacheControl": "s-maxage=31536000", "etag": "present", "ifNoneMatch": 304 },
+    "hashedCss": { "status": 200, "cacheControl": "public, max-age=31536000, immutable" },
+    "opengraphImage": { "rootRedirect": 307, "localizedRoute": 404, "finding": "middleware redirects generated metadata route" },
+    "robotsTxt": { "status": 200, "contentType": "text/html; charset=utf-8", "finding": "returns localized landing HTML" },
+    "sitemapXml": { "status": 200, "contentType": "text/html; charset=utf-8", "finding": "returns localized landing HTML" },
+    "localApiHealth": "BLOCKED: localhost:8080 did not respond within 2 seconds"
+  },
+  "securityHeadersObservedOnLocalNext": [
+    "Content-Security-Policy: absent",
+    "X-Frame-Options: absent",
+    "X-Content-Type-Options: absent",
+    "Referrer-Policy: absent",
+    "Strict-Transport-Security: absent on local HTTP"
+  ],
+  "findings": [
+    { "id": "F-01", "classification": "VERIFIED", "severity": "high", "summary": "Open Graph image URL is routed through locale middleware and resolves to 404." },
+    { "id": "F-02", "classification": "VERIFIED", "severity": "medium", "summary": "robots.txt and sitemap.xml resolve to landing HTML with status 200; no SEO file routes found." },
+    { "id": "F-03", "classification": "VERIFIED", "severity": "medium", "summary": "No canonical or hreflang links are emitted." },
+    { "id": "F-04", "classification": "BLOCKED", "severity": "high", "summary": "Live auth, registration, CORS, cookies, session, and CSRF acceptance could not run without isolated API infrastructure." },
+    { "id": "F-05", "classification": "UNVERIFIED", "severity": "medium", "summary": "Production edge security headers and CDN behavior were not available; local Next emitted no common security headers." },
+    { "id": "F-06", "classification": "UNVERIFIED", "severity": "low", "summary": "Screenshot provenance source is not retained for independent reconstruction." }
+  ],
+  "sourceModified": false,
+  "prMerged": false
+}

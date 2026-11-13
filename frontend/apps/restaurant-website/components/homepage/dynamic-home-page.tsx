@@ -11,6 +11,7 @@ import { GallerySection } from '@/components/sections/GallerySection'
 import { TestimonialsSection } from '@/components/sections/TestimonialsSection'
 import { CTASection } from '@/components/sections/CTASection'
 import { ContactSection } from '@/components/sections/ContactSection'
+import { readLocalized } from '@/components/sections/section-utils'
 
 interface CategoryLike {
   id?: number | string
@@ -68,6 +69,33 @@ export function DynamicHomePage({
 }: DynamicHomePageProps) {
   const sections = getEnabledSections(themeConfig)
   const templateId = themeConfig.templateId ?? 'template-01'
+  const identity = themeConfig.identity ?? {}
+  const defaultHeadline = readLocalized(
+    identity.siteTitle ?? identity.site_title ?? identity.name,
+    locale,
+    locale === 'ar' ? 'مرحباً بكم' : 'Welcome'
+  )
+
+  if (sections.length === 0) {
+    return (
+      <main data-template-id={templateId}>
+        <div data-section-type="default-hero" data-section-order={1}>
+          <HeroSection
+            config={{
+              id: 'default-home-hero',
+              type: 'hero',
+              enabled: true,
+              order: 0,
+              settings: { headline: defaultHeadline },
+            }}
+            locale={locale}
+            themeConfig={themeConfig}
+            restaurantSlug={restaurantSlug}
+          />
+        </div>
+      </main>
+    )
+  }
 
   return (
     <main data-template-id={templateId}>

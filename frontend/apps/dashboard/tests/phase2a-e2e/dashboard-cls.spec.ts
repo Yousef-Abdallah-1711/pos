@@ -46,6 +46,18 @@ test('measure cold authenticated dashboard CLS', async ({ page }) => {
     previousStart = shift.startTime
     cls = Math.max(cls, windowValue)
   }
+  const layouts: Array<{ viewport: number; document: number }> = []
+  for (const width of [320, 390, 768, 1440]) {
+    await page.setViewportSize({ width, height: 900 })
+    await page.waitForTimeout(400)
+    if (width === 320) {
+      await expect(page.getByRole('button', { name: 'Change language' })).toBeVisible()
+    }
+    const documentWidth = await page.evaluate(() => document.documentElement.scrollWidth)
+    layouts.push({ viewport: width, document: documentWidth })
+    expect(documentWidth, `dashboard overflows at ${width}px`).toBeLessThanOrEqual(width)
+  }
   console.log(`DASHBOARD_CLS_RESULT ${JSON.stringify({ ...result, cls })}`)
+  console.log(`DASHBOARD_RESPONSIVE_RESULT ${JSON.stringify(layouts)}`)
   expect(cls).toBeLessThan(0.1)
 })

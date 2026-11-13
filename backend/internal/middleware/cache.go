@@ -2,11 +2,60 @@ package middleware
 
 import (
 	"net/http"
+	"net/url"
+	"os"
 	"strings"
+
+	"pos-saas/internal/config"
 )
 
-const embeddedCheckoutFrameAncestors = "http://localhost:3002 http://127.0.0.1:3002"
+const mockCheckoutFrameAncestorsEnv = "MOCK_CHECKOUT_FRAME_ANCESTORS"
 
+// frameAncestorsFromConfig only permits exact origins. HTTP is accepted only for
+// explicitly configured loopback origins in development; missing or invalid
+// configuration disables framing entirely.
+func frameAncestorsFromConfig(raw string, development bool) string {
+	if strings.TrimSpace(raw) == "" || len(raw) > 2048 {
+		return "'none'"
+	}
+
+	candidates := strings.Split(raw, ",")
+	if len(candidates) > 20 {
+		return "'none'"
+	}
+
+	validated := make([]string, 0, len(candidates))
+	seen := make(map[string]struct{}, len(candidates))
+	for _, candidate := range candidates {
+		origin, ok := validateFrameAncestorOrigin(strings.TrimSpace(candidate), development)
+		if !ok {
+			return "'none'"
+		}
+		if _, exists := seen[origin]; exists {
+			continue
+		}
+		seen[origin] = struct{}{}
+		validated = append(validated, origin)
+	}
+
+	if len(validated) == 0 {
+		return "'none'"
+	}
+	return strings.Join(validated, " ")
+}
+
+func validateFrameAncestorOrigin(candidate string, development bool) (string, bool) {
+	parsed, err := url.Parse(candidate)
+	if err != nil || !parsed.IsAbs() || parsed.Host == "" || parsed.Hostname() == "" || parsed.User != nil || parsed.Opaque != "" || parsed.RawQuery != "" || parsed.ForceQuery || parsed.Fragment != "" || parsed.RawFragment != "" || strings.Contains(parsed.Hostname(), "*") || (parsed.Path != "" && parsed.Path != "/") {
+		return "", false
+	}
+
+	scheme := strings.ToLower(parsed.Scheme)
+	if scheme != "https" && !(scheme == "http" && development && isLocalhostOrigin(candidate)) {
+		return "", false
+	}
+	return scheme + "://" + strings.ToLower(parsed.Host), true
+}
 func allowsEmbeddedCheckout(path string) bool {
 	switch path {
 	case "/api/v1/mock/paymob/iframe", "/api/v1/mock/paymob/process":
@@ -231,8 +280,15 @@ func SecurityHeadersMiddleware(next http.Handler) http.Handler {
 		// Prevent MIME type sniffing
 		w.Header().Set("X-Content-Type-Options", "nosniff")
 
-		// Clickjacking protection
+		frameAncestors := "'none'"
 		if allowEmbeddedCheckout {
+			frameAncestors = frameAncestorsFromConfig(os.Getenv(mockCheckoutFrameAncestorsEnv), config.IsDevelopmentMode())
+		}
+
+		// Keep defense in depth when embedding is disabled. When configured exact
+		// ancestors are allowed, CSP takes over because X-Frame-Options cannot
+		// express an origin allowlist consistently across browsers.
+		if allowEmbeddedCheckout && frameAncestors != "'none'" {
 			w.Header().Del("X-Frame-Options")
 		} else {
 			w.Header().Set("X-Frame-Options", "DENY")
@@ -244,7 +300,7 @@ func SecurityHeadersMiddleware(next http.Handler) http.Handler {
 		// Content Security Policy
 		cspValue := "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https:; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
 		if allowEmbeddedCheckout {
-			cspValue = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https:; frame-ancestors " + embeddedCheckoutFrameAncestors + "; base-uri 'self'; form-action 'self'"
+			cspValue = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https:; frame-ancestors " + frameAncestors + "; base-uri 'self'; form-action 'self'"
 		}
 		w.Header().Set("Content-Security-Policy", cspValue)
 

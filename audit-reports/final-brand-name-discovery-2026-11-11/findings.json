@@ -1,0 +1,49 @@
+{
+  "research_date": "2026-11-11",
+  "status": "PARTIAL",
+  "generated_count": 32,
+  "screened_count": 32,
+  "commercial_signals_count": 29,
+  "inconclusive_candidates": ["Ularo", "Cendro", "Flarivo"],
+  "direct_restaurant_software_conflict": ["Qoriva"],
+  "top_three": [
+    {"name":"Ularo","arabic":"أولارو","status":"INCONCLUSIVE","com_domain":"Registered; RDAP object returned","official_trademark_search":"Not completed","social_check":"Not completed"},
+    {"name":"Cendro","arabic":"سيندرو","status":"INCONCLUSIVE","com_domain":"Registered; RDAP object returned","official_trademark_search":"Not completed","social_check":"Not completed"},
+    {"name":"Flarivo","arabic":"فلاريفو","status":"INCONCLUSIVE","com_domain":"Registered; RDAP object returned","official_trademark_search":"Not completed","social_check":"Not completed"}
+  ],
+  "owner_approval_required": true,
+  "rebrand_started": false,
+  "legal_clearance": false,
+  "limitations": ["No formal legal clearance opinion", "Candidate-level official trademark searches incomplete", "Social handle checks not completed", "Domain checks beyond .com are registry-object checks only and .com.eg was not checked", "Search-engine non-results do not prove non-use", "No customer/pronunciation testing"],
+  "follow_up": {
+    "date": "2026-11-11",
+    "status": "PARTIAL",
+    "reports": [
+      "12-deep-verification-followup.md",
+      "13-official-registry-evidence.md",
+      "14-final-owner-shortlist.md"
+    ],
+    "evidence": [
+      "evidence/rdap-observations.md",
+      "IP Australia exact-word search results for CENDRO, ULARO and FLARIVO documented in 13-official-registry-evidence.md",
+      "New commercial sources linked in 12-deep-verification-followup.md"
+    ],
+    "candidate_status": {
+      "Ularo": "INCONCLUSIVE",
+      "Cendro": "CONFLICT FLAGGED",
+      "Flarivo": "INCONCLUSIVE"
+    },
+    "preliminary_pass_count": 0,
+    "best_recommendation": null,
+    "updated_observations": {
+      "Ularo": ["Exact-name Polish company reported; activity appears unrelated to restaurant software and primary registry confirmation remains outstanding", "Discontinued construction-services app surfaced", "com registered", "app registered", "Official mark and social searches incomplete"],
+      "Cendro": ["Active exact-name Cendro Archive/Cloud software-as-a-service product verified", "IP Australia official word-mark application 2702587 filed 2026-10-05; published awaiting examination; classes 9, 35, 42; owner Southwest Onsite Data Backup Management Pty. Ltd.", "com and app registered", "No restaurant POS product found in focused search", "Egypt/Saudi/UAE/WIPO/EU/US marks and social checks incomplete"],
+      "Flarivo": ["Exact-name Hong Kong media company reported; primary company-registry verification and actual trading scope outstanding", "com registered", "No direct restaurant software product found in focused search", "Official mark and social searches incomplete"]
+    },
+    "official_registry_candidate_queries_completed": "partial — exact English terms searched in Australia only: CENDRO application 2702587; zero exact-word results for ULARO and FLARIVO. Variants and other jurisdictions not completed",
+    "social_handle_queries_completed": false,
+    "com_eg_checked": false,
+    "owner_approval_required": true,
+    "rebrand_started": false
+  }
+}

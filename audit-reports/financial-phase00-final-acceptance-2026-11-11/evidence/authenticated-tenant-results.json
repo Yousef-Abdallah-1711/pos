@@ -1,0 +1,131 @@
+{
+  "run_id": "d8435106",
+  "executed_at_utc": "2026-11-11T16:59:47.3569226Z",
+  "api_base": "http://127.0.0.1:18081",
+  "database": "pos_final_integration_test (disposable tmpfs PostgreSQL 15; no credentials or tokens recorded)",
+  "api_mode": "real HTTP; actual cookie-session auth; RBAC_ENFORCEMENT=enforce",
+  "fixture_setup": "BEGIN\r\nINSERT 0 4\r\nledger_fixture_rows=4\r\nINSERT 0 2\r\nCOMMIT",
+  "results": [
+    {
+      "name": "Owner A actual login and session",
+      "status": 200,
+      "expected": "owner session established",
+      "result": "PASS",
+      "details": {
+        "role": "owner",
+        "tenant_id": 2,
+        "restaurant_id": 2
+      }
+    },
+    {
+      "name": "Owner B actual login and session",
+      "status": 200,
+      "expected": "owner session established",
+      "result": "PASS",
+      "details": {
+        "role": "owner",
+        "tenant_id": 3,
+        "restaurant_id": 3
+      }
+    },
+    {
+      "name": "Owner A reads own report",
+      "status": 200,
+      "expected": "200; assets/equity=110; no B account marker",
+      "result": "PASS",
+      "details": {
+        "total_assets": 110,
+        "tenant_id": 2,
+        "total_equity": 110
+      }
+    },
+    {
+      "name": "Owner B reads own report",
+      "status": 200,
+      "expected": "200; assets/equity=220; no A account marker",
+      "result": "PASS",
+      "details": {
+        "total_assets": 220,
+        "tenant_id": 3,
+        "total_equity": 220
+      }
+    },
+    {
+      "name": "Owner A cross-tenant/report/restaurant forgery",
+      "status": 200,
+      "expected": "200 scoped to A only; no B amounts or account marker",
+      "result": "PASS",
+      "details": {
+        "returned_total_assets": 110,
+        "attempted_tenant_id": 3,
+        "attempted_restaurant_id": 3
+      }
+    },
+    {
+      "name": "Owner B cross-tenant/report/restaurant forgery",
+      "status": 200,
+      "expected": "200 scoped to B only; no A amounts or account marker",
+      "result": "PASS",
+      "details": {
+        "returned_total_assets": 220,
+        "attempted_tenant_id": 2,
+        "attempted_restaurant_id": 2
+      }
+    },
+    {
+      "name": "Missing authentication",
+      "status": 401,
+      "expected": "401",
+      "result": "PASS",
+      "details": {}
+    },
+    {
+      "name": "Invalid authentication session",
+      "status": 401,
+      "expected": "401",
+      "result": "PASS",
+      "details": {}
+    },
+    {
+      "name": "Lower-privilege cashier financial report",
+      "status": 403,
+      "expected": "403",
+      "result": "PASS",
+      "details": {
+        "role": "cashier",
+        "tenant_id": 4
+      }
+    },
+    {
+      "name": "Owner A export with Tenant B headers",
+      "status": 200,
+      "expected": "200 CSV scoped to A; contains 123.45 and not 987.65",
+      "result": "PASS",
+      "details": {
+        "attempted_tenant_id": 3,
+        "contains_B_total": false,
+        "tenant_id": 2,
+        "contains_A_total": true
+      }
+    },
+    {
+      "name": "Lower-privilege cashier export",
+      "status": 403,
+      "expected": "403",
+      "result": "PASS",
+      "details": {
+        "role": "cashier"
+      }
+    },
+    {
+      "name": "Database fixture and export-audit assertions",
+      "status": 200,
+      "expected": "balanced A/B journals; two scoped ledger rows each; export audited under A; cashier role persisted",
+      "result": "PASS",
+      "details": {
+        "assertions": "journal_ledger_balance=true\r\ntenant_a_ledger_rows=2;tenant_a_cash=110.00\r\ntenant_b_ledger_rows=2;tenant_b_cash=220.00\r\nexport_audit=2:2:2:sales\r\ncashier_report_fixture_role=cashier"
+      }
+    }
+  ],
+  "overall": "PASS"
+}

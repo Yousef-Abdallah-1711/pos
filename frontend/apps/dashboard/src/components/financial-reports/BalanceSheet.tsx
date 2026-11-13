@@ -23,6 +23,16 @@ export function BalanceSheet({ report, locale }: BalanceSheetProps) {
 
   return (
     <div className="space-y-6">
+      {report.integrity_status === 'RECONCILED' && report.equation_balanced ? (
+        <div role="status" aria-live="polite" className="rounded-xl border border-amber-300 bg-amber-50 p-4 text-amber-950 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-100">
+          {t('integrity.reconciledCaveat')}
+        </div>
+      ) : (
+        <div role="alert" aria-live="assertive" aria-atomic="true" className="rounded-xl border border-red-300 bg-red-50 p-4 text-red-900 dark:border-red-800 dark:bg-red-950/30 dark:text-red-100">
+          <p className="font-semibold">{t('integrity.unreconciledTitle')}</p>
+          <p className="mt-1">{t('integrity.unreconciledDescription')}</p>
+        </div>
+      )}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
         <Metric label={t('metrics.totalAssets')} value={formatter.format(report.total_assets)} />
         <Metric label={t('metrics.totalLiabilities')} value={formatter.format(report.total_liabilities)} />

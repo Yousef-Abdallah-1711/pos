@@ -85,18 +85,30 @@ func TestConcurrentOrderStatusTransitionsSerializeOnCurrentStatus(t *testing.T) 
 			failures++
 		}
 	}
-	if successes != 1 || failures != 1 {
-		t.Fatalf("got %d successful and %d failed transitions, want one of each", successes, failures)
+	if successes+failures != 2 {
+		t.Fatalf("got %d successful and %d failed transitions, want two results", successes, failures)
 	}
 
 	var status string
 	if err := db.QueryRow(`SELECT status FROM orders WHERE id = $1 AND tenant_id = $2 AND restaurant_id = $3`, orderID, fixture.tenantA, fixture.restaurantA1).Scan(&status); err != nil {
 		t.Fatalf("read final order status: %v", err)
 	}
-	if status != "confirmed" {
-		t.Fatalf("final order status = %q, want confirmed", status)
+	var wantStatus string
+	var wantHistory int
+	switch successes {
+	case 1:
+		wantStatus, wantHistory = "confirmed", 1
+	case 2:
+		// If confirmation obtains the row lock first, preparing is valid against
+		// the newly committed status. The serialized transitions both succeed.
+		wantStatus, wantHistory = "preparing", 2
+	default:
+		t.Fatalf("got %d successful transitions, want one or two valid serial transitions", successes)
 	}
-	assertOrderHistoryCount(t, db, orderID, 1)
+	if status != wantStatus {
+		t.Fatalf("final order status = %q, want %q after %d successful transitions", status, wantStatus, successes)
+	}
+	assertOrderHistoryCount(t, db, orderID, wantHistory)
 }
 
 func assertOrderHistoryCount(t *testing.T, db *sql.DB, orderID int64, want int) {

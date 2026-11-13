@@ -1,0 +1,74 @@
+name: Build immutable images and gated production release
+
+on:
+  # Keep release execution explicitly operator initiated. Passing CI alone must
+  # never start a production deployment.
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: pos-production-release
+  cancel-in-progress: false
+
+jobs:
+  build-and-push:
+    if: github.repository == 'Yousef-Abdallah-1711/pos' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.sha }}
+      - run: scripts/production/build-and-push-images.sh --push
+        env:
+          GITHUB_SHA: ${{ github.sha }}
+          GHCR_USERNAME: ${{ github.actor }}
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  deploy-production:
+    needs: build-and-push
+    if: >-
+      github.repository == 'Yousef-Abdallah-1711/pos' &&
+      github.ref == 'refs/heads/main' &&
+      vars.POS_PRODUCTION_DEPLOY_ENABLED == 'true' &&
+      vars.POS_PRODUCTION_READINESS_APPROVED == 'true' &&
+      vars.POS_PRODUCTION_BACKUP_RESTORE_VERIFIED == 'true'
+    environment: production
+    runs-on: ubuntu-24.04
+    concurrency:
+      group: pos-production-host
+      cancel-in-progress: false
+    steps:
+      - name: Require protected host access settings
+        shell: bash
+        run: |
+          test -n "$POS_PROD_HOST"
+          test -n "$POS_PROD_USER"
+          test -n "$POS_PROD_SSH_KEY"
+          test -n "$POS_PROD_SSH_KNOWN_HOSTS"
+        env:
+          POS_PROD_HOST: ${{ secrets.POS_PROD_HOST }}
+          POS_PROD_USER: ${{ secrets.POS_PROD_USER }}
+          POS_PROD_SSH_KEY: ${{ secrets.POS_PROD_SSH_KEY }}
+          POS_PROD_SSH_KNOWN_HOSTS: ${{ secrets.POS_PROD_SSH_KNOWN_HOSTS }}
+      - name: Deploy approved immutable release
+        shell: bash
+        env:
+          POS_PROD_HOST: ${{ secrets.POS_PROD_HOST }}
+          POS_PROD_USER: ${{ secrets.POS_PROD_USER }}
+          POS_PROD_SSH_KEY: ${{ secrets.POS_PROD_SSH_KEY }}
+          POS_PROD_SSH_KNOWN_HOSTS: ${{ secrets.POS_PROD_SSH_KNOWN_HOSTS }}
+          GITHUB_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          key_file="$(mktemp)"
+          known_hosts="$(mktemp)"
+          trap 'rm -f "$key_file" "$known_hosts"' EXIT
+          chmod 600 "$key_file" "$known_hosts"
+          printf '%s\n' "$POS_PROD_SSH_KEY" > "$key_file"
+          printf '%s\n' "$POS_PROD_SSH_KNOWN_HOSTS" > "$known_hosts"
+          ssh_opts=(-i "$key_file" -o UserKnownHostsFile="$known_hosts" -o StrictHostKeyChecking=yes -o BatchMode=yes)
+          ssh "${ssh_opts[@]}" "$POS_PROD_USER@$POS_PROD_HOST" \
+            'POS_PRODUCTION_READINESS_APPROVED=true POS_BACKUP_RESTORE_VERIFIED=true /usr/local/sbin/rakmyat-pos-release-deploy '"$GITHUB_SHA"

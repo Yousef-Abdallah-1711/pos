@@ -1,0 +1,7 @@
+flowchart LR
+ Source[Order/payment/invoice transaction] -->|atomic commit| Outbox[Durable outbox]
+ Outbox --> Worker[Idempotent worker]
+ Worker -->|one DB transaction| Ledger[Journal + lines + GL]
+ Ledger --> Reports[Watermarked report projections]
+ Reports --> Reconcile[Operational reconciliation]
+ Provider[Provider/bank evidence] --> Reconcile
