@@ -21,7 +21,6 @@ type AutoPostingService interface {
 type AutoPostingEngine struct {
 	autoPostingRepo       *repository.AutoPostingRepository
 	accountRepo           *repository.AccountRepository
-	journalRepo           *repository.JournalEntryRepository
 	inventoryMovementRepo *repository.InventoryMovementRepository
 	generalLedgerRepo     *repository.GeneralLedgerRepository
 	productRepo           *repository.ProductRepository
@@ -30,7 +29,6 @@ type AutoPostingEngine struct {
 func NewAutoPostingEngine(
 	autoPostingRepo *repository.AutoPostingRepository,
 	accountRepo *repository.AccountRepository,
-	journalRepo *repository.JournalEntryRepository,
 	inventoryMovementRepo *repository.InventoryMovementRepository,
 	generalLedgerRepo *repository.GeneralLedgerRepository,
 	productRepo *repository.ProductRepository,
@@ -38,7 +36,6 @@ func NewAutoPostingEngine(
 	return &AutoPostingEngine{
 		autoPostingRepo:       autoPostingRepo,
 		accountRepo:           accountRepo,
-		journalRepo:           journalRepo,
 		inventoryMovementRepo: inventoryMovementRepo,
 		generalLedgerRepo:     generalLedgerRepo,
 		productRepo:           productRepo,
@@ -56,20 +53,6 @@ func (e *AutoPostingEngine) PostSalesEntry(order *domain.Order, postedBy *int) e
 	accounts, enabled, err := e.ruleAccounts(int(order.TenantID), int(order.RestaurantID), domain.AutoPostingEventOrderPaid)
 	if err != nil || !enabled {
 		return err
-	}
-
-	existingID, err := e.autoPostingRepo.FindJournalEntryByReference(
-		int(order.TenantID),
-		int(order.RestaurantID),
-		domain.AutoPostingReferenceTypeOrder,
-		domain.AutoPostingEntryTypeSales,
-		int(order.ID),
-	)
-	if err != nil {
-		return err
-	}
-	if existingID != nil {
-		return nil
 	}
 
 	collectionAccount, err := e.resolvePaymentAccount(int(order.TenantID), int(order.RestaurantID), strings.ToLower(strings.TrimSpace(order.PaymentMethod)), accounts)
@@ -163,20 +146,6 @@ func (e *AutoPostingEngine) PostCOGSEntry(order *domain.Order, postedBy *int) er
 	accounts, enabled, err := e.ruleAccounts(int(order.TenantID), int(order.RestaurantID), domain.AutoPostingEventOrderCOGS)
 	if err != nil || !enabled {
 		return err
-	}
-
-	existingID, err := e.autoPostingRepo.FindJournalEntryByReference(
-		int(order.TenantID),
-		int(order.RestaurantID),
-		domain.AutoPostingReferenceTypeOrder,
-		domain.AutoPostingEntryTypeCOGS,
-		int(order.ID),
-	)
-	if err != nil {
-		return err
-	}
-	if existingID != nil {
-		return nil
 	}
 
 	cogsAccount, err := e.resolveAccount(int(order.TenantID), int(order.RestaurantID), accounts["food_cogs"], "5110")
@@ -287,20 +256,6 @@ func (e *AutoPostingEngine) PostPayrollEntry(salary *domain.Salary, postedBy *in
 	accounts, enabled, err := e.ruleAccounts(salary.TenantID, salary.RestaurantID, domain.AutoPostingEventSalaryPaid)
 	if err != nil || !enabled {
 		return err
-	}
-
-	existingID, err := e.autoPostingRepo.FindJournalEntryByReference(
-		salary.TenantID,
-		salary.RestaurantID,
-		domain.AutoPostingReferenceTypeSalary,
-		domain.AutoPostingEntryTypePayroll,
-		salary.ID,
-	)
-	if err != nil {
-		return err
-	}
-	if existingID != nil {
-		return nil
 	}
 
 	paymentKey := "bank"
@@ -499,7 +454,10 @@ func (e *AutoPostingEngine) PostSupplierPaymentEntry(event *domain.PostingEvent,
 	return err
 }
 
-func (e *AutoPostingEngine) PostDepreciationEntries(entryDate time.Time, tenantID, restaurantID int, description string, postedBy *int, lines []domain.JournalEntryLine) error {
+func (e *AutoPostingEngine) PostDepreciationEntries(entryDate time.Time, tenantID, restaurantID, assetID int, description string, postedBy *int, lines []domain.JournalEntryLine) error {
+	if assetID <= 0 {
+		return errors.New("asset ID is required for idempotent depreciation posting")
+	}
 	if strings.TrimSpace(description) == "" {
 		description = "Auto-posted depreciation"
 	}
@@ -510,6 +468,7 @@ func (e *AutoPostingEngine) PostDepreciationEntries(entryDate time.Time, tenantI
 			Code:          domain.AutoPostingEventDepreciation,
 			EntryType:     domain.AutoPostingEntryTypeDepreciation,
 			ReferenceType: domain.AutoPostingReferenceTypeAsset,
+			ReferenceID:   assetID,
 			Description:   description,
 			PostedBy:      postedBy,
 		},
@@ -535,6 +494,9 @@ func (e *AutoPostingEngine) createAndPostEntry(
 	if err != nil {
 		return 0, err
 	}
+	if event.ReferenceID <= 0 || strings.TrimSpace(event.ReferenceType) == "" {
+		return 0, errors.New("auto-posting requires a stable source reference")
+	}
 
 	if entryDate.IsZero() {
 		entryDate = time.Now()
@@ -556,16 +518,12 @@ func (e *AutoPostingEngine) createAndPostEntry(
 		Lines:           validatedLines,
 	}
 
-	id, err := e.journalRepo.CreateJournalEntry(&entry)
-	if err != nil {
-		return 0, err
-	}
-
 	postedBy := 0
 	if event.PostedBy != nil {
 		postedBy = *event.PostedBy
 	}
-	if err := e.generalLedgerRepo.AppendEntry(tenantID, restaurantID, id, postedBy); err != nil {
+	id, err := e.generalLedgerRepo.CreateAndPostAutoEntry(&entry, postedBy)
+	if err != nil {
 		return id, err
 	}
 

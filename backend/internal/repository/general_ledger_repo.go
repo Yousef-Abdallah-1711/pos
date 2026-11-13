@@ -31,6 +31,101 @@ func NewGeneralLedgerRepository(db *sql.DB, journalRepo *JournalEntryRepository)
 	}
 }
 
+// CreateAndPostAutoEntry creates an auto-posting journal and its ledger rows in
+// one transaction. A transaction-scoped advisory lock serializes retries for
+// the same source event so only one posting can be created for that identity.
+func (r *GeneralLedgerRepository) CreateAndPostAutoEntry(entry *domain.JournalEntry, postedBy int) (int, error) {
+	if r.db == nil || r.journalRepo == nil {
+		return 0, errors.New("general ledger and journal repositories are required")
+	}
+	if entry == nil {
+		return 0, errors.New("journal entry is required")
+	}
+	if entry.TenantID <= 0 || entry.RestaurantID <= 0 {
+		return 0, errors.New("tenant and restaurant are required")
+	}
+	if entry.ReferenceID == nil || *entry.ReferenceID <= 0 || strings.TrimSpace(entry.ReferenceType) == "" || strings.TrimSpace(entry.EntryType) == "" {
+		return 0, errors.New("auto-posting requires a stable source reference and entry type")
+	}
+
+	tx, err := r.db.Begin()
+	if err != nil {
+		return 0, err
+	}
+	defer tx.Rollback()
+
+	lockKey := fmt.Sprintf("auto-posting:%d:%d:%s:%d:%s", entry.TenantID, entry.RestaurantID, entry.ReferenceType, *entry.ReferenceID, entry.EntryType)
+	var lockAcquired int
+	if err := tx.QueryRow(`SELECT 1 FROM (SELECT pg_advisory_xact_lock(hashtextextended($1, 0))) AS source_lock`, lockKey).Scan(&lockAcquired); err != nil {
+		return 0, fmt.Errorf("failed to lock auto-posting source event: %w", err)
+	}
+
+	rows, err := tx.Query(`
+		SELECT id, status
+		FROM journal_entries
+		WHERE tenant_id = $1
+		  AND restaurant_id = $2
+		  AND reference_type = $3
+		  AND reference_id = $4
+		  AND entry_type = $5
+		ORDER BY id
+		FOR UPDATE
+	`, entry.TenantID, entry.RestaurantID, entry.ReferenceType, *entry.ReferenceID, entry.EntryType)
+	if err != nil {
+		return 0, fmt.Errorf("failed to inspect existing auto-posting entries: %w", err)
+	}
+	type existingPosting struct {
+		id     int
+		status string
+	}
+	existing := make([]existingPosting, 0, 1)
+	for rows.Next() {
+		var posting existingPosting
+		if err := rows.Scan(&posting.id, &posting.status); err != nil {
+			rows.Close()
+			return 0, err
+		}
+		existing = append(existing, posting)
+	}
+	if err := rows.Err(); err != nil {
+		rows.Close()
+		return 0, err
+	}
+	if err := rows.Close(); err != nil {
+		return 0, err
+	}
+	if len(existing) > 1 {
+		return 0, fmt.Errorf("multiple auto-posting entries already exist for source %s:%d", entry.ReferenceType, *entry.ReferenceID)
+	}
+	if len(existing) == 1 {
+		switch existing[0].status {
+		case domain.JournalStatusPosted:
+			if err := tx.Commit(); err != nil {
+				return 0, err
+			}
+			return existing[0].id, nil
+		case domain.JournalStatusDraft:
+			return 0, fmt.Errorf("auto-posting draft %d already exists and requires recovery", existing[0].id)
+		case domain.JournalStatusVoid:
+			return 0, fmt.Errorf("auto-posting entry %d is void; a new source event is required", existing[0].id)
+		default:
+			return 0, fmt.Errorf("auto-posting entry %d has unsupported status %q", existing[0].id, existing[0].status)
+		}
+	}
+
+	id, err := r.journalRepo.CreateJournalEntryTx(tx, entry)
+	if err != nil {
+		return 0, fmt.Errorf("failed to create auto-posting journal: %w", err)
+	}
+	if err := r.journalRepo.PostEntryTx(tx, entry.TenantID, entry.RestaurantID, id, postedBy); err != nil {
+		return 0, fmt.Errorf("failed to post auto-posting journal %d: %w", id, err)
+	}
+	if err := tx.Commit(); err != nil {
+		return 0, fmt.Errorf("failed to commit auto-posting journal %d: %w", id, err)
+	}
+	return id, nil
+}
+
 func (r *GeneralLedgerRepository) AppendEntry(tenantID, restaurantID, journalEntryID, postedBy int) error {
 	if r.journalRepo == nil {
 		return errors.New("journal repository not configured")

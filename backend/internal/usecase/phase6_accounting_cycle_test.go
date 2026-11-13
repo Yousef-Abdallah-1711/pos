@@ -40,7 +40,7 @@ func TestPhase6FullAccountingCycle_OrderSalaryAndTrialBalanceBalanced(t *testing
 		CreatedAt:     orderDate,
 	}
 
-	mockAutoPostingDefaults(mock, domain.AutoPostingEventOrderPaid, int(order.ID))
+	mockAutoPostingDefaults(mock, domain.AutoPostingEventOrderPaid)
 	mockAccountByCode(mock, tenantID, restaurantID, "1110", 1101, "1110", "Cash on Hand", domain.NormalBalanceDebit)
 	mockAccountByCode(mock, tenantID, restaurantID, "4100", 4100, "4100", "Food Sales", domain.NormalBalanceCredit)
 	mockAccountByCode(mock, tenantID, restaurantID, "2120", 2120, "2120", "VAT Payable", domain.NormalBalanceCredit)
@@ -74,7 +74,7 @@ func TestPhase6FullAccountingCycle_OrderSalaryAndTrialBalanceBalanced(t *testing
 		PaymentDate:     &paymentDate,
 	}
 
-	mockAutoPostingDefaults(mock, domain.AutoPostingEventSalaryPaid, salary.ID)
+	mockAutoPostingDefaults(mock, domain.AutoPostingEventSalaryPaid)
 	mockAccountByCode(mock, tenantID, restaurantID, "1111", 1111, "1111", "Main Bank Account", domain.NormalBalanceDebit)
 	mockAccountByCode(mock, tenantID, restaurantID, "5210", 5210, "5210", "Salaries Expense", domain.NormalBalanceDebit)
 	mockAccountByCode(mock, tenantID, restaurantID, "2110", 2110, "2110", "Accrued Expenses", domain.NormalBalanceCredit)
@@ -160,7 +160,7 @@ func TestPhase6AutoPostingAccuracy_HighVolumeOrdersAndSalaries(t *testing.T) {
 			CreatedAt:     entryDate,
 		}
 
-		mockAutoPostingDefaults(mock, domain.AutoPostingEventOrderPaid, int(orderID))
+		mockAutoPostingDefaults(mock, domain.AutoPostingEventOrderPaid)
 		mockAccountByCode(mock, 10, 20, "1110", 1101, "1110", "Cash on Hand", domain.NormalBalanceDebit)
 		mockAccountByCode(mock, 10, 20, "4100", 4100, "4100", "Food Sales", domain.NormalBalanceCredit)
 		mockAccountByCode(mock, 10, 20, "2120", 2120, "2120", "VAT Payable", domain.NormalBalanceCredit)
@@ -210,7 +210,7 @@ func TestPhase6AutoPostingAccuracy_HighVolumeOrdersAndSalaries(t *testing.T) {
 			PaymentDate:     &paymentDate,
 		}
 
-		mockAutoPostingDefaults(mock, domain.AutoPostingEventSalaryPaid, salaryID)
+		mockAutoPostingDefaults(mock, domain.AutoPostingEventSalaryPaid)
 		mockAccountByCode(mock, 10, 20, "1111", 1111, "1111", "Main Bank Account", domain.NormalBalanceDebit)
 		mockAccountByCode(mock, 10, 20, "5210", 5210, "5210", "Salaries Expense", domain.NormalBalanceDebit)
 		mockAccountByCode(mock, 10, 20, "2110", 2110, "2110", "Accrued Expenses", domain.NormalBalanceCredit)
@@ -275,7 +275,7 @@ func TestPhase6FullAccountingCycleE2E_OrderSalarySupplierFlowAndProfitLoss(t *te
 		PaymentStatus: "paid",
 		CreatedAt:     orderDate,
 	}
-	mockAutoPostingDefaults(mock, domain.AutoPostingEventOrderPaid, int(order.ID))
+	mockAutoPostingDefaults(mock, domain.AutoPostingEventOrderPaid)
 	mockAccountByCode(mock, tenantID, restaurantID, "1110", 1101, "1110", "Cash on Hand", domain.NormalBalanceDebit)
 	mockAccountByCode(mock, tenantID, restaurantID, "4100", 4100, "4100", "Food Sales", domain.NormalBalanceCredit)
 	mockAccountByCode(mock, tenantID, restaurantID, "2120", 2120, "2120", "VAT Payable", domain.NormalBalanceCredit)
@@ -308,7 +308,7 @@ func TestPhase6FullAccountingCycleE2E_OrderSalarySupplierFlowAndProfitLoss(t *te
 		IsPaid:          true,
 		PaymentDate:     &paymentDate,
 	}
-	mockAutoPostingDefaults(mock, domain.AutoPostingEventSalaryPaid, salary.ID)
+	mockAutoPostingDefaults(mock, domain.AutoPostingEventSalaryPaid)
 	mockAccountByCode(mock, tenantID, restaurantID, "1111", 1111, "1111", "Main Bank Account", domain.NormalBalanceDebit)
 	mockAccountByCode(mock, tenantID, restaurantID, "5210", 5210, "5210", "Salaries Expense", domain.NormalBalanceDebit)
 	mockAccountByCode(mock, tenantID, restaurantID, "2110", 2110, "2110", "Accrued Expenses", domain.NormalBalanceCredit)
