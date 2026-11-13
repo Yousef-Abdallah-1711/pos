@@ -239,6 +239,10 @@ func mockPostJournalEntry(mock sqlmock.Sqlmock, journalEntryID int, entryDate ti
 		WithArgs(journalEntryID).
 		WillReturnRows(rows)
 
+	mock.ExpectExec(`UPDATE journal_entries`).
+		WithArgs(domain.JournalStatusPosted, postedBy, journalEntryID, 10, 20).
+		WillReturnResult(sqlmock.NewResult(1, 1))
+
 	for _, line := range lines {
 		mock.ExpectQuery(`FROM general_ledger`).
 			WithArgs(10, 20, line.accountID).
@@ -254,8 +258,5 @@ func mockPostJournalEntry(mock sqlmock.Sqlmock, journalEntryID int, entryDate ti
 			WillReturnResult(sqlmock.NewResult(1, 1))
 	}
 
-	mock.ExpectExec(`UPDATE journal_entries`).
-		WithArgs(domain.JournalStatusPosted, postedBy, journalEntryID, 10, 20).
-		WillReturnResult(sqlmock.NewResult(1, 1))
 	mock.ExpectCommit()
 }
