@@ -159,6 +159,7 @@ func (e *AutoPostingEngine) PostCOGSEntry(order *domain.Order, postedBy *int) er
 
 	totalCost := 0.0
 	movements := make([]domain.InventoryMovement, 0)
+	movementIndexByProduct := make(map[int64]int)
 	for _, item := range order.Items {
 		product, err := e.productRepo.GetProductByID(int(order.TenantID), int(order.RestaurantID), int(item.ProductID))
 		if err != nil {
@@ -183,7 +184,7 @@ func (e *AutoPostingEngine) PostCOGSEntry(order *domain.Order, postedBy *int) er
 
 		totalCost += itemCost
 		refID := int(order.ID)
-		movements = append(movements, domain.InventoryMovement{
+		movement := domain.InventoryMovement{
 			TenantID:      int(order.TenantID),
 			RestaurantID:  int(order.RestaurantID),
 			ProductID:     item.ProductID,
@@ -196,7 +197,14 @@ func (e *AutoPostingEngine) PostCOGSEntry(order *domain.Order, postedBy *int) er
 			TotalCost:     itemCost,
 			Notes:         fmt.Sprintf("Auto-posted sale movement for order %s", order.OrderNumber),
 			CreatedBy:     postedBy,
-		})
+		}
+		if index, exists := movementIndexByProduct[item.ProductID]; exists {
+			movements[index].Quantity += movement.Quantity
+			movements[index].TotalCost = roundedAmount(movements[index].TotalCost + movement.TotalCost)
+		} else {
+			movementIndexByProduct[item.ProductID] = len(movements)
+			movements = append(movements, movement)
+		}
 	}
 
 	totalCost = roundedAmount(totalCost)
@@ -237,7 +245,7 @@ func (e *AutoPostingEngine) PostCOGSEntry(order *domain.Order, postedBy *int) er
 	}
 
 	for _, movement := range movements {
-		if _, err := e.inventoryMovementRepo.CreateMovement(&movement); err != nil {
+		if _, err := e.inventoryMovementRepo.CreateOrderSaleMovementIfAbsent(&movement); err != nil {
 			return err
 		}
 	}

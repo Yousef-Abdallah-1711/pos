@@ -311,6 +311,9 @@ func main() {
 		productRepo,
 	)
 	orderUC.SetAutoPostingEngine(autoPostingEngine)
+	if db != nil {
+		orderUC.SetAccountingEventRepository(repository.NewAccountingEventRepository(db))
+	}
 	financialReportUC := usecase.NewFinancialReportUseCase(db, generalLedgerRepo)
 
 	// RBAC use cases (Phase 2 - commented out, not used in current phase)
@@ -488,6 +491,8 @@ func main() {
 	// whenever the database is configured, independent of payment-provider setup.
 	// Tie its lifetime to the process signal context so shutdown stops its loop.
 	if db != nil {
+		accountingWorker := service.NewAccountingEventWorker(orderUC)
+		accountingWorker.Start(rootCtx)
 		expiryWorker := service.NewSubscriptionExpiryWorker(db)
 		expiryWorker.Start(rootCtx)
 	}

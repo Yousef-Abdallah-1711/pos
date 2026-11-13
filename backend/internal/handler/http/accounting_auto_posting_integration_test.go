@@ -45,98 +45,47 @@ func (s *recordingAutoPostingService) PostPayrollEntry(salary *domain.Salary, po
 	return nil
 }
 
-func TestAdminOrderHandler_UpdatePaymentStatusPaidTriggersAccountingAutoPosting(t *testing.T) {
+func TestAdminOrderHandler_UpdatePaymentStatusPersistsDurableAccountingIntent(t *testing.T) {
 	db, mock, err := sqlmock.New()
 	if err != nil {
-		t.Fatalf("failed to create sqlmock: %v", err)
+		t.Fatalf("create sqlmock: %v", err)
 	}
 	defer db.Close()
 
-	orderRepo := repository.NewOrderRepository(db)
-	productRepo := repository.NewProductRepository(db)
-	orderUC := usecase.NewOrderUseCase(orderRepo, productRepo)
+	orderUC := usecase.NewOrderUseCase(repository.NewOrderRepository(db), repository.NewProductRepository(db))
 	autoPosting := &recordingAutoPostingService{}
 	orderUC.SetAutoPostingEngine(autoPosting)
-
 	handler := NewAdminOrderHandler(orderUC, nil, nil)
 
-	now := time.Date(2026, time.February, 28, 10, 30, 0, 0, time.UTC)
-	orderID := int64(501)
-	userID := 77
+	mock.ExpectBegin()
+	mock.ExpectExec(`UPDATE orders`).WithArgs("paid", int64(501), int64(1), int64(2)).WillReturnResult(sqlmock.NewResult(0, 1))
+	mock.ExpectExec(`INSERT INTO accounting_event_outbox`).WithArgs("paid-order:1:2:501", int64(1), int64(2), int64(501), 77).WillReturnResult(sqlmock.NewResult(1, 1))
+	mock.ExpectCommit()
 
-	mock.ExpectExec(`UPDATE orders`).
-		WithArgs("paid", orderID, int64(1), int64(2)).
-		WillReturnResult(sqlmock.NewResult(0, 1))
-
-	mock.ExpectQuery(`FROM orders o`).
-		WithArgs(orderID, int64(1), int64(2)).
-		WillReturnRows(
-			sqlmock.NewRows(orderDetailColumnsForAccountingTests()).
-				AddRow(
-					orderID, int64(1), int64(2), "ORD-2026-000501", "Walk-in Guest", nil,
-					"01000000000", nil, nil, nil,
-					nil, nil, nil,
-					nil, 100.0, 5.0, 0.0,
-					0.0, 105.0, "cash", "paid",
-					"confirmed", nil, nil, "", "pos",
-					nil, nil, "", "", nil,
-					now, now,
-				),
-		)
-
-	mock.ExpectQuery(`FROM order_items`).
-		WithArgs(int64(1), int64(2), orderID).
-		WillReturnRows(
-			sqlmock.NewRows(orderItemColumnsForAccountingTests()).
-				AddRow(
-					int64(1), orderID, int64(101), nil, "Burger", nil,
-					2, 50.0, 0.0, 100.0,
-					"", []byte(`[]`), now, now,
-				),
-		)
-
-	body, err := json.Marshal(map[string]string{"payment_status": "paid"})
-	if err != nil {
-		t.Fatalf("failed to marshal request body: %v", err)
-	}
-
-	req := httptest.NewRequest(stdhttp.MethodPut, "/api/v1/admin/orders/501/payment-status", bytes.NewReader(body))
+	body := bytes.NewBufferString(`{"payment_status":"paid"}`)
+	req := httptest.NewRequest(stdhttp.MethodPut, "/api/v1/admin/orders/501/payment-status", body)
 	req.SetPathValue("id", "501")
-	req = withAccountingAuthContext(req, 1, 2, userID)
-
+	req = withAccountingAuthContext(req, 1, 2, 77)
 	rec := httptest.NewRecorder()
 	handler.UpdatePaymentStatus(rec, req)
-
 	if rec.Code != stdhttp.StatusOK {
-		t.Fatalf("expected status 200, got %d body=%s", rec.Code, rec.Body.String())
+		t.Fatalf("status=%d body=%s", rec.Code, rec.Body.String())
 	}
 
-	assertJSONSuccess(t, rec)
-
-	if len(autoPosting.salesOrders) != 1 {
-		t.Fatalf("expected 1 sales auto-post, got %d", len(autoPosting.salesOrders))
+	var response map[string]any
+	if err := json.Unmarshal(rec.Body.Bytes(), &response); err != nil {
+		t.Fatalf("decode response: %v", err)
 	}
-	if len(autoPosting.cogsOrders) != 1 {
-		t.Fatalf("expected 1 COGS auto-post, got %d", len(autoPosting.cogsOrders))
+	if response["accounting_intent"] != "persisted" {
+		t.Fatalf("accounting_intent=%v, want persisted", response["accounting_intent"])
 	}
-	if autoPosting.salesOrders[0].ID != orderID {
-		t.Fatalf("expected sales order id %d, got %d", orderID, autoPosting.salesOrders[0].ID)
+	if len(autoPosting.salesOrders) != 0 || len(autoPosting.cogsOrders) != 0 {
+		t.Fatal("handler must leave posting to durable worker")
 	}
-	if autoPosting.cogsOrders[0].ID != orderID {
-		t.Fatalf("expected COGS order id %d, got %d", orderID, autoPosting.cogsOrders[0].ID)
-	}
-	if autoPosting.salesOrders[0].PaymentStatus != "paid" {
-		t.Fatalf("expected sales order payment status paid, got %s", autoPosting.salesOrders[0].PaymentStatus)
-	}
-	if autoPosting.salesPostedBy[0] != userID || autoPosting.cogsPostedBy[0] != userID {
-		t.Fatalf("expected posted_by=%d for both journal types, got sales=%d cogs=%d", userID, autoPosting.salesPostedBy[0], autoPosting.cogsPostedBy[0])
-	}
-
 	if err := mock.ExpectationsWereMet(); err != nil {
-		t.Fatalf("unmet sqlmock expectations: %v", err)
+		t.Fatalf("unmet expectations: %v", err)
 	}
 }
-
 func TestHRSalaryHandler_MarkAsPaidTriggersPayrollAutoPosting(t *testing.T) {
 	db, mock, err := sqlmock.New()
 	if err != nil {
