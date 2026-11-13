@@ -68,7 +68,9 @@ def backup(path):
         compose(path, 'exec', '-T', 'postgres', 'pg_dump', '-U', 'postgres', '-d', 'servio_staging', '-Fc', stdout=output)
     with target.open('rb') as source:
         compose(path, 'exec', '-T', 'postgres', 'pg_restore', '--list', stdin=source, stdout=subprocess.DEVNULL)
-    target.with_suffix('.dump.sha256').write_text(hashlib.sha256(target.read_bytes()).hexdigest() + '  ' + target.name + '\n')
+    sidecar = target.with_suffix('.dump.sha256')
+    sidecar.write_text(hashlib.sha256(target.read_bytes()).hexdigest() + '  ' + target.name + '\n')
+    checked(['chown', 'ubuntu:ubuntu', str(target), str(sidecar)])
 
 def public_checks():
     paths = {'pos.rakmyat.online': '/en', 'api.pos.rakmyat.online': '/api/v1/health', 'pos.app.rakmyat.online': '/en/dashboard', 'admin.pos.rakmyat.online': '/login', 'restaurant-1.pos.rakmyat.online': '/en'}
@@ -99,6 +101,8 @@ def deploy(manifest, requested):
     if destination.exists():
         raise RuntimeError('Release directory already exists; inspect prior attempt before retry')
     destination.mkdir(parents=True, mode=0o755)
+    (ROOT / 'releases').chmod(0o755)
+    destination.chmod(0o755)
     extract_source(sha, destination)
     path = destination / 'ops/aws/compose.json'
     config = json.loads(path.read_text())
@@ -140,6 +144,7 @@ def deploy(manifest, requested):
     state = {'sha': sha, 'compose': str(path), 'images': manifest['images'], 'ci_run_id': manifest['ci_run_id'], 'previous': previous, 'deployed_utc': time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime())}
     STATE.write_text(json.dumps(state, indent=2) + '\n')
     STATE.chmod(0o600)
+    checked(['chown', 'ubuntu:ubuntu', str(STATE)])
     print('PASS deployed immutable main ' + sha)
 
 if __name__ == '__main__':

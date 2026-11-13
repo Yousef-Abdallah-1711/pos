@@ -6,6 +6,7 @@ from pathlib import Path
 import subprocess
 import sys
 import time
+import shutil
 
 ROOT = Path(__file__).resolve().parents[2]
 EVIDENCE = ROOT / 'ops/aws/evidence'
@@ -46,7 +47,12 @@ env['POOS_SESSION_REDIS_URL'] = f"redis://:{values['TEST_REDIS_PASSWORD']}@{addr
 env.update(DB_HOST=host, DB_PORT='5432', DB_NAME=db_name, DB_USER='pos_migrator', DB_PASSWORD=values['TEST_MIGRATOR_PASSWORD'], DB_SSLMODE='disable')
 
 def run(command, filename):
-    with (EVIDENCE / filename).open('w') as output:
+    previous = EVIDENCE / filename
+    if previous.exists():
+        history = EVIDENCE / 'history' / str(time.time_ns())
+        history.mkdir(parents=True,mode=0o700)
+        shutil.copy2(previous,history / filename)
+    with previous.open('w') as output:
         process = subprocess.Popen(command, cwd=ROOT / 'backend', env=env, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, errors='replace')
         for line in process.stdout:
             for value in values.values():

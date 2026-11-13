@@ -324,7 +324,7 @@ func (uc *OrderUseCase) UpdateOrderStatus(
 	}
 
 	// Update status with optional user ID (nil for system updates)
-	err = uc.orderRepo.UpdateOrderStatus(tenantID, restaurantID, orderID, req.Status, nil, req.Reason)
+	err = uc.orderRepo.UpdateOrderStatus(tenantID, restaurantID, orderID, req.Status, req.ChangedBy, req.Reason)
 	if err != nil {
 		return fmt.Errorf("failed to update order status: %w", err)
 	}

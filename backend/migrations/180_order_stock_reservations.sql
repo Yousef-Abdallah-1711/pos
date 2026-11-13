@@ -7,6 +7,7 @@ CREATE TABLE order_stock_reservations (
     product_id BIGINT NOT NULL REFERENCES products(id),
     quantity BIGINT NOT NULL CHECK (quantity > 0),
     released BOOLEAN NOT NULL DEFAULT false,
+    released_quantity BIGINT NOT NULL DEFAULT 0 CHECK (released_quantity >= 0 AND released_quantity <= quantity),
     reserved_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     released_at TIMESTAMPTZ,
     PRIMARY KEY (order_id, product_id)
@@ -27,6 +28,9 @@ BEGIN
         END IF;
         RETURN OLD;
     END IF;
+    IF OLD.status = 'delivered' AND NEW.status = 'cancelled' THEN
+        RAISE EXCEPTION 'Delivered stock requires an explicit physical return adjustment' USING ERRCODE = '23514';
+    END IF;
     IF NEW.tenant_id <> OLD.tenant_id OR NEW.restaurant_id <> OLD.restaurant_id THEN
         RAISE EXCEPTION 'Order scope is immutable' USING ERRCODE = '23514';
     END IF;
@@ -42,13 +46,15 @@ BEGIN
             WHERE p.tenant_id = OLD.tenant_id AND p.restaurant_id = OLD.restaurant_id AND p.track_inventory
             ORDER BY p.id FOR UPDATE OF p
         LOOP
-            IF item.quantity <= 0 OR item.quantity_in_stock < item.quantity THEN
+            IF item.quantity_in_stock IS NULL OR item.quantity <= 0 OR item.quantity_in_stock < item.quantity THEN
                 RAISE EXCEPTION 'Insufficient inventory for product %', item.id USING ERRCODE = '23514';
             END IF;
             INSERT INTO public.order_stock_reservations(order_id, tenant_id, restaurant_id, product_id, quantity)
             VALUES (OLD.id, OLD.tenant_id, OLD.restaurant_id, item.id, item.quantity);
             UPDATE public.products SET quantity_in_stock = quantity_in_stock - item.quantity, updated_at = CURRENT_TIMESTAMP
             WHERE id = item.id AND tenant_id = OLD.tenant_id AND restaurant_id = OLD.restaurant_id;
+            INSERT INTO public.inventory_movements(tenant_id,restaurant_id,product_id,order_id,reference_type,movement_type,quantity,notes)
+            VALUES(OLD.tenant_id,OLD.restaurant_id,item.id,OLD.id,'order_stock','reservation',-item.quantity,'Stock reserved at order confirmation');
         END LOOP;
     ELSIF NEW.status = 'cancelled' AND OLD.status <> 'cancelled' THEN
         FOR item IN
@@ -59,6 +65,8 @@ BEGIN
         LOOP
             UPDATE public.products SET quantity_in_stock = quantity_in_stock + item.quantity, updated_at = CURRENT_TIMESTAMP
             WHERE id = item.id AND tenant_id = OLD.tenant_id AND restaurant_id = OLD.restaurant_id;
+            INSERT INTO public.inventory_movements(tenant_id,restaurant_id,product_id,order_id,reference_type,movement_type,quantity,notes)
+            VALUES(OLD.tenant_id,OLD.restaurant_id,item.id,OLD.id,'order_stock','reservation_release',item.quantity,'Unfulfilled order cancellation');
             UPDATE public.order_stock_reservations SET released = true, released_at = CURRENT_TIMESTAMP
             WHERE order_id = OLD.id AND product_id = item.id AND tenant_id = OLD.tenant_id AND restaurant_id = OLD.restaurant_id;
         END LOOP;

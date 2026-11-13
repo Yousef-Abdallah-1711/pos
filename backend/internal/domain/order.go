@@ -146,8 +146,9 @@ type OrderAddOnRequest struct {
 
 // UpdateOrderStatusRequest is the request for updating order status
 type UpdateOrderStatusRequest struct {
-	Status string `json:"status" validate:"required,oneof=pending confirmed preparing ready out_for_delivery delivered cancelled"`
-	Reason string `json:"reason"`
+	ChangedBy *int64 `json:"-"`
+	Status    string `json:"status" validate:"required,oneof=pending confirmed preparing ready out_for_delivery delivered cancelled"`
+	Reason    string `json:"reason"`
 }
 
 // OrderListFilters for filtering orders in list queries
