@@ -11,13 +11,13 @@ import (
 
 // Region represents a geographic region with servers
 type Region struct {
-	Name         string
-	Continent    string
-	Latitude     float64
-	Longitude    float64
-	Servers      []*Server
-	Priority     int    // Lower number = higher priority
-	IsActive     bool
+	Name      string
+	Continent string
+	Latitude  float64
+	Longitude float64
+	Servers   []*Server
+	Priority  int // Lower number = higher priority
+	IsActive  bool
 }
 
 // Server represents a single application server
@@ -26,9 +26,9 @@ type Server struct {
 	Region          *Region
 	Endpoint        string // hostname or IP
 	Port            int
-	Weight          int    // 1-100 for weighted round-robin
-	Capacity        int    // Max requests per second
-	CurrentLoad     int    // Current requests per second
+	Weight          int // 1-100 for weighted round-robin
+	Capacity        int // Max requests per second
+	CurrentLoad     int // Current requests per second
 	IsHealthy       bool
 	ResponseTime    time.Duration
 	ErrorRate       float64 // 0-1
@@ -40,16 +40,16 @@ type Server struct {
 
 // LoadBalancer implements global load balancing
 type LoadBalancer struct {
-	regions           map[string]*Region
-	servers           map[string]*Server
-	strategyName      string // "round-robin", "least-loaded", "fastest", "geo"
-	currentIndex      int    // For round-robin
-	mu                sync.RWMutex
-	preferredRegion   string // User's closest region
-	sessionAffinity   bool   // Keep user on same server
-	sessions          map[string]string // session_id -> server_id
-	sessionTTL        time.Duration
-	lastCleanup       time.Time
+	regions         map[string]*Region
+	servers         map[string]*Server
+	strategyName    string // "round-robin", "least-loaded", "fastest", "geo"
+	currentIndex    int    // For round-robin
+	mu              sync.RWMutex
+	preferredRegion string            // User's closest region
+	sessionAffinity bool              // Keep user on same server
+	sessions        map[string]string // session_id -> server_id
+	sessionTTL      time.Duration
+	lastCleanup     time.Time
 }
 
 // LoadBalancingStrategy defines how requests are routed
@@ -90,13 +90,13 @@ func (lb *LoadBalancer) RegisterRegion(
 	defer lb.mu.Unlock()
 
 	region := &Region{
-		Name:       name,
-		Continent:  continent,
-		Latitude:   latitude,
-		Longitude:  longitude,
-		Priority:   priority,
-		IsActive:   true,
-		Servers:    make([]*Server, 0),
+		Name:      name,
+		Continent: continent,
+		Latitude:  latitude,
+		Longitude: longitude,
+		Priority:  priority,
+		IsActive:  true,
+		Servers:   make([]*Server, 0),
 	}
 
 	lb.regions[name] = region
@@ -124,14 +124,14 @@ func (lb *LoadBalancer) RegisterServer(
 	}
 
 	server := &Server{
-		ID:          serverID,
-		Region:      region,
-		Endpoint:    endpoint,
-		Port:        port,
-		Weight:      weight,
-		Capacity:    capacity,
-		IsHealthy:   true,
-		CreatedAt:   time.Now(),
+		ID:              serverID,
+		Region:          region,
+		Endpoint:        endpoint,
+		Port:            port,
+		Weight:          weight,
+		Capacity:        capacity,
+		IsHealthy:       true,
+		CreatedAt:       time.Now(),
 		LastHealthCheck: time.Now(),
 	}
 
@@ -385,20 +385,20 @@ func (lb *LoadBalancer) GetServerStats(serverID string) map[string]interface{} {
 	}
 
 	return map[string]interface{}{
-		"id":                 server.ID,
-		"region":             server.Region.Name,
-		"endpoint":           server.Endpoint,
-		"port":               server.Port,
-		"is_healthy":         server.IsHealthy,
-		"current_load":       server.CurrentLoad,
-		"capacity":           server.Capacity,
-		"utilization":        utilization,
-		"response_time_ms":   server.ResponseTime.Milliseconds(),
-		"error_rate":         fmt.Sprintf("%.2f%%", server.ErrorRate*100),
-		"cpu_usage":          fmt.Sprintf("%.1f%%", server.CPUUsage),
-		"memory_usage":       fmt.Sprintf("%.1f%%", server.MemoryUsage),
-		"last_health_check":  server.LastHealthCheck,
-		"created_at":         server.CreatedAt,
+		"id":                server.ID,
+		"region":            server.Region.Name,
+		"endpoint":          server.Endpoint,
+		"port":              server.Port,
+		"is_healthy":        server.IsHealthy,
+		"current_load":      server.CurrentLoad,
+		"capacity":          server.Capacity,
+		"utilization":       utilization,
+		"response_time_ms":  server.ResponseTime.Milliseconds(),
+		"error_rate":        fmt.Sprintf("%.2f%%", server.ErrorRate*100),
+		"cpu_usage":         fmt.Sprintf("%.1f%%", server.CPUUsage),
+		"memory_usage":      fmt.Sprintf("%.1f%%", server.MemoryUsage),
+		"last_health_check": server.LastHealthCheck,
+		"created_at":        server.CreatedAt,
 	}
 }
 
@@ -477,16 +477,16 @@ func (lb *LoadBalancer) GetGlobalStats() map[string]interface{} {
 	}
 
 	return map[string]interface{}{
-		"strategy":           lb.strategyName,
-		"total_regions":      len(lb.regions),
-		"total_servers":      len(lb.servers),
-		"healthy_servers":    healthyServers,
-		"total_load":         totalLoad,
-		"total_capacity":     totalCapacity,
-		"utilization":        utilization,
-		"avg_response_ms":    avgResponseTime.Milliseconds(),
-		"active_sessions":    len(lb.sessions),
-		"session_affinity":   lb.sessionAffinity,
+		"strategy":         lb.strategyName,
+		"total_regions":    len(lb.regions),
+		"total_servers":    len(lb.servers),
+		"healthy_servers":  healthyServers,
+		"total_load":       totalLoad,
+		"total_capacity":   totalCapacity,
+		"utilization":      utilization,
+		"avg_response_ms":  avgResponseTime.Milliseconds(),
+		"active_sessions":  len(lb.sessions),
+		"session_affinity": lb.sessionAffinity,
 	}
 }
 

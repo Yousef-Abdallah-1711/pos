@@ -25,6 +25,10 @@ func NewOrderRepository(db *sql.DB) *OrderRepository {
 
 // CreateOrder inserts a new order into database
 func (r *OrderRepository) CreateOrder(order *domain.Order) (*domain.Order, error) {
+	return r.insertOrder(r.db, order)
+}
+
+func (r *OrderRepository) insertOrder(writer orderRowWriter, order *domain.Order) (*domain.Order, error) {
 	query := `
 		INSERT INTO orders (
 			tenant_id, restaurant_id, order_number, customer_name, customer_email,
@@ -87,7 +91,7 @@ func (r *OrderRepository) CreateOrder(order *domain.Order) (*domain.Order, error
 		tableID = sql.NullInt64{Int64: *order.TableID, Valid: true}
 	}
 
-	err := r.db.QueryRow(query,
+	err := writer.QueryRow(query,
 		order.TenantID,
 		order.RestaurantID,
 		order.OrderNumber,
@@ -622,6 +626,10 @@ func (r *OrderRepository) transitionOrderStatus(tenantID, restaurantID, orderID 
 
 // CreateOrderItem inserts an order item
 func (r *OrderRepository) CreateOrderItem(tenantID, restaurantID int64, item *domain.OrderItem) (*domain.OrderItem, error) {
+	return r.insertOrderItem(r.db, tenantID, restaurantID, item)
+}
+
+func (r *OrderRepository) insertOrderItem(writer orderRowWriter, tenantID, restaurantID int64, item *domain.OrderItem) (*domain.OrderItem, error) {
 	query := `
 		INSERT INTO order_items (
 			order_id, tenant_id, restaurant_id,
@@ -666,7 +674,7 @@ func (r *OrderRepository) CreateOrderItem(tenantID, restaurantID int64, item *do
 		specialInstructions = sql.NullString{String: item.SpecialInstructions, Valid: true}
 	}
 
-	err := r.db.QueryRow(query,
+	err := writer.QueryRow(query,
 		item.OrderID,
 		tenantID,
 		restaurantID,
@@ -694,7 +702,7 @@ func (r *OrderRepository) GetOrderItems(tenantID, restaurantID, orderID int64) (
 	query := `
 		SELECT
 			id, order_id, product_id, variant_id, product_name, variant_name,
-			quantity, unit_price, discount_amount, total_price,
+			quantity - cancelled_quantity AS quantity, unit_price, discount_amount, total_price,
 			special_instructions, addons, created_at, updated_at
 		FROM order_items
 		WHERE tenant_id = $1 AND restaurant_id = $2 AND order_id = $3

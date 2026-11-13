@@ -13,12 +13,12 @@ type ScalingPolicy struct {
 	ID                   int64
 	RegionName           string
 	Name                 string
-	ScaleUpThreshold     int     // CPU/Memory % threshold to scale up
-	ScaleDownThreshold   int     // CPU/Memory % threshold to scale down
-	ScaleUpQuantity      int     // Number of instances to add
-	ScaleDownQuantity    int     // Number of instances to remove
-	MinInstances         int     // Minimum instances to maintain
-	MaxInstances         int     // Maximum instances allowed
+	ScaleUpThreshold     int // CPU/Memory % threshold to scale up
+	ScaleDownThreshold   int // CPU/Memory % threshold to scale down
+	ScaleUpQuantity      int // Number of instances to add
+	ScaleDownQuantity    int // Number of instances to remove
+	MinInstances         int // Minimum instances to maintain
+	MaxInstances         int // Maximum instances allowed
 	CooldownPeriod       time.Duration
 	MetricsCheckInterval time.Duration
 	IsActive             bool
@@ -40,13 +40,13 @@ type ScalingEvent struct {
 
 // AutoScaler manages automatic scaling based on metrics
 type AutoScaler struct {
-	loadBalancer      *LoadBalancer
-	policies          map[string]*ScalingPolicy
-	scalingEvents     []ScalingEvent
-	lastScalingTime   map[string]time.Time
-	mu                sync.RWMutex
-	stopChannel       chan bool
-	isRunning         bool
+	loadBalancer    *LoadBalancer
+	policies        map[string]*ScalingPolicy
+	scalingEvents   []ScalingEvent
+	lastScalingTime map[string]time.Time
+	mu              sync.RWMutex
+	stopChannel     chan bool
+	isRunning       bool
 }
 
 // NewAutoScaler creates a new auto-scaler
@@ -212,13 +212,13 @@ func (as *AutoScaler) performScaleUp(
 
 	// Record scaling event
 	event := ScalingEvent{
-		RegionName:  policy.RegionName,
-		Timestamp:   time.Now(),
-		Action:      "scale-up",
-		FromCount:   currentCount,
-		ToCount:     newCount,
-		Reason:      fmt.Sprintf("High utilization (%d%%) exceeded threshold (%d%%)", utilization, policy.ScaleUpThreshold),
-		CPUUsage:    float64(utilization),
+		RegionName: policy.RegionName,
+		Timestamp:  time.Now(),
+		Action:     "scale-up",
+		FromCount:  currentCount,
+		ToCount:    newCount,
+		Reason:     fmt.Sprintf("High utilization (%d%%) exceeded threshold (%d%%)", utilization, policy.ScaleUpThreshold),
+		CPUUsage:   float64(utilization),
 	}
 
 	as.recordScalingEvent(event)
@@ -253,13 +253,13 @@ func (as *AutoScaler) performScaleDown(
 
 	// Record scaling event
 	event := ScalingEvent{
-		RegionName:  policy.RegionName,
-		Timestamp:   time.Now(),
-		Action:      "scale-down",
-		FromCount:   currentCount,
-		ToCount:     newCount,
-		Reason:      fmt.Sprintf("Low utilization (%d%%) below threshold (%d%%)", utilization, policy.ScaleDownThreshold),
-		CPUUsage:    float64(utilization),
+		RegionName: policy.RegionName,
+		Timestamp:  time.Now(),
+		Action:     "scale-down",
+		FromCount:  currentCount,
+		ToCount:    newCount,
+		Reason:     fmt.Sprintf("Low utilization (%d%%) below threshold (%d%%)", utilization, policy.ScaleDownThreshold),
+		CPUUsage:   float64(utilization),
 	}
 
 	as.recordScalingEvent(event)
@@ -392,16 +392,16 @@ func (as *AutoScaler) GetRegionScalingMetrics(regionName string) map[string]inte
 	}
 
 	return map[string]interface{}{
-		"region":             regionName,
-		"policy_name":        policy.Name,
-		"is_active":          policy.IsActive,
-		"scale_up_threshold": policy.ScaleUpThreshold,
+		"region":               regionName,
+		"policy_name":          policy.Name,
+		"is_active":            policy.IsActive,
+		"scale_up_threshold":   policy.ScaleUpThreshold,
 		"scale_down_threshold": policy.ScaleDownThreshold,
-		"min_instances":      policy.MinInstances,
-		"max_instances":      policy.MaxInstances,
-		"scale_up_count":     scaleUpCount,
-		"scale_down_count":   scaleDownCount,
-		"last_scaling":       lastScaling,
-		"recent_events":      len(regionEvents),
+		"min_instances":        policy.MinInstances,
+		"max_instances":        policy.MaxInstances,
+		"scale_up_count":       scaleUpCount,
+		"scale_down_count":     scaleDownCount,
+		"last_scaling":         lastScaling,
+		"recent_events":        len(regionEvents),
 	}
 }

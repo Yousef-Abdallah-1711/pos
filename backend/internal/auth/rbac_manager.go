@@ -20,10 +20,10 @@ type Resource struct {
 
 // Permission represents a permission to perform an action on a resource
 type Permission struct {
-	ID        int64
-	Name      string // "read", "write", "delete", "admin"
-	Resource  string // "orders", "customers", "payments", "all"
-	Scope     string // "own", "tenant", "global"
+	ID       int64
+	Name     string // "read", "write", "delete", "admin"
+	Resource string // "orders", "customers", "payments", "all"
+	Scope    string // "own", "tenant", "global"
 }
 
 // Role represents a user role
@@ -49,14 +49,14 @@ type RoleAssignment struct {
 
 // RBACManager manages role-based access control
 type RBACManager struct {
-	db                *sql.DB
-	roleCache         map[string]*Role        // role_id -> Role
-	permissionCache   map[string]*Permission  // permission_id -> Permission
-	userRolesCache    map[int64][]int64       // user_id -> role_ids
-	resourceOwners    map[string]int64        // resource_id -> owner_id
-	mu                sync.RWMutex
-	cacheTTL          time.Duration
-	lastCacheRefresh  time.Time
+	db               *sql.DB
+	roleCache        map[string]*Role       // role_id -> Role
+	permissionCache  map[string]*Permission // permission_id -> Permission
+	userRolesCache   map[int64][]int64      // user_id -> role_ids
+	resourceOwners   map[string]int64       // resource_id -> owner_id
+	mu               sync.RWMutex
+	cacheTTL         time.Duration
+	lastCacheRefresh time.Time
 }
 
 // NewRBACManager creates a new RBAC manager

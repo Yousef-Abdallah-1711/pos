@@ -12,9 +12,9 @@ import (
 type GDPRComplianceLevel string
 
 const (
-	ComplianceLevelFull     GDPRComplianceLevel = "full"      // Full GDPR compliance
-	ComplianceLevelPartial  GDPRComplianceLevel = "partial"   // Partial compliance
-	ComplianceLevelMinimal  GDPRComplianceLevel = "minimal"   // Minimal compliance
+	ComplianceLevelFull    GDPRComplianceLevel = "full"    // Full GDPR compliance
+	ComplianceLevelPartial GDPRComplianceLevel = "partial" // Partial compliance
+	ComplianceLevelMinimal GDPRComplianceLevel = "minimal" // Minimal compliance
 )
 
 // DataDeletionReason defines why data is being deleted
@@ -22,20 +22,20 @@ type DataDeletionReason string
 
 const (
 	ReasonRightToBeForotten DataDeletionReason = "right_to_be_forgotten"
-	ReasonRetentionExpired   DataDeletionReason = "retention_expired"
-	ReasonAccountClosure     DataDeletionReason = "account_closure"
-	ReasonBreachResponse     DataDeletionReason = "breach_response"
+	ReasonRetentionExpired  DataDeletionReason = "retention_expired"
+	ReasonAccountClosure    DataDeletionReason = "account_closure"
+	ReasonBreachResponse    DataDeletionReason = "breach_response"
 )
 
 // GDPRComplianceManager manages GDPR compliance operations
 type GDPRComplianceManager struct {
-	db                      *sql.DB
-	auditLogManager         *AuditLogManager
-	encryptionManager       *EncryptionManager
-	complianceLevel         GDPRComplianceLevel
-	dataRetentionDays       int // Default 365 days
-	consentRequired         bool
-	anonymizationEnabled    bool
+	db                   *sql.DB
+	auditLogManager      *AuditLogManager
+	encryptionManager    *EncryptionManager
+	complianceLevel      GDPRComplianceLevel
+	dataRetentionDays    int // Default 365 days
+	consentRequired      bool
+	anonymizationEnabled bool
 }
 
 // NewGDPRComplianceManager creates a new GDPR compliance manager
@@ -57,26 +57,26 @@ func NewGDPRComplianceManager(
 
 // UserConsentRecord represents user consent for data processing
 type UserConsentRecord struct {
-	ID            int64
-	TenantID      int64
-	UserID        int64
-	ConsentType   string
-	Granted       bool
-	GrantedAt     time.Time
-	ExpiresAt     time.Time
-	Version       string
-	LastUpdated   time.Time
+	ID          int64
+	TenantID    int64
+	UserID      int64
+	ConsentType string
+	Granted     bool
+	GrantedAt   time.Time
+	ExpiresAt   time.Time
+	Version     string
+	LastUpdated time.Time
 }
 
 // DataDeletionRecord represents a data deletion request
 type DataDeletionRecord struct {
-	ID              int64
-	TenantID        int64
-	UserID          int64
-	RequestedAt     time.Time
-	CompletedAt     *time.Time
-	Status          string
-	Reason          DataDeletionReason
+	ID               int64
+	TenantID         int64
+	UserID           int64
+	RequestedAt      time.Time
+	CompletedAt      *time.Time
+	Status           string
+	Reason           DataDeletionReason
 	DataTypesDeleted []string
 	VerificationCode string
 }
@@ -385,11 +385,11 @@ func (gcm *GDPRComplianceManager) ExportUserData(
 			err := orderRows.Scan(&id, &restaurantID, &totalAmount, &status, &createdAt)
 			if err == nil {
 				orders = append(orders, map[string]interface{}{
-					"id":             id,
-					"restaurant_id":  restaurantID,
-					"total_amount":   totalAmount,
-					"status":         status,
-					"created_at":     createdAt,
+					"id":            id,
+					"restaurant_id": restaurantID,
+					"total_amount":  totalAmount,
+					"status":        status,
+					"created_at":    createdAt,
 				})
 			}
 		}

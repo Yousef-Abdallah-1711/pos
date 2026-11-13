@@ -15,8 +15,8 @@ import (
 type BackupType string
 
 const (
-	BackupTypeFull     BackupType = "full"       // Full database backup
-	BackupTypeIncremental BackupType = "incremental" // Incremental backup
+	BackupTypeFull         BackupType = "full"         // Full database backup
+	BackupTypeIncremental  BackupType = "incremental"  // Incremental backup
 	BackupTypeDifferential BackupType = "differential" // Differential backup
 )
 

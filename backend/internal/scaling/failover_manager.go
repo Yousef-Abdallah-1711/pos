@@ -10,55 +10,55 @@ import (
 
 // FailoverPolicy defines failover behavior
 type FailoverPolicy struct {
-	ID                     int64
-	Name                   string
-	PrimaryRegion          string
-	SecondaryRegion        string
-	HealthCheckThreshold   int // % threshold to trigger failover
-	FailoverTimeout        time.Duration
-	AutomaticFailover      bool
-	DataReplicationLag     time.Duration // Max acceptable lag
-	IsActive               bool
-	CreatedAt              time.Time
+	ID                   int64
+	Name                 string
+	PrimaryRegion        string
+	SecondaryRegion      string
+	HealthCheckThreshold int // % threshold to trigger failover
+	FailoverTimeout      time.Duration
+	AutomaticFailover    bool
+	DataReplicationLag   time.Duration // Max acceptable lag
+	IsActive             bool
+	CreatedAt            time.Time
 }
 
 // FailoverEvent represents a failover action
 type FailoverEvent struct {
-	ID               int64
-	Timestamp        time.Time
-	FromRegion       string
-	ToRegion         string
-	Reason           string
-	IsAutomatic      bool
-	DataLagMs        int64
-	Status           string // "initiated", "in_progress", "completed", "failed"
-	ErrorMessage     string
+	ID           int64
+	Timestamp    time.Time
+	FromRegion   string
+	ToRegion     string
+	Reason       string
+	IsAutomatic  bool
+	DataLagMs    int64
+	Status       string // "initiated", "in_progress", "completed", "failed"
+	ErrorMessage string
 }
 
 // DisasterRecoveryPlan defines disaster recovery procedures
 type DisasterRecoveryPlan struct {
-	ID                      int64
-	Name                    string
-	RecoveryTimeObjective   time.Duration // RTO: how fast to recover
-	RecoveryPointObjective  time.Duration // RPO: how much data loss acceptable
-	BackupFrequency         time.Duration // How often to backup
-	BackupRetention         time.Duration // How long to keep backups
-	ReplicationEnabled      bool
-	ReplicationTargets      []string
-	IsActive                bool
-	CreatedAt               time.Time
+	ID                     int64
+	Name                   string
+	RecoveryTimeObjective  time.Duration // RTO: how fast to recover
+	RecoveryPointObjective time.Duration // RPO: how much data loss acceptable
+	BackupFrequency        time.Duration // How often to backup
+	BackupRetention        time.Duration // How long to keep backups
+	ReplicationEnabled     bool
+	ReplicationTargets     []string
+	IsActive               bool
+	CreatedAt              time.Time
 }
 
 // FailoverManager handles failover and disaster recovery
 type FailoverManager struct {
-	loadBalancer       *LoadBalancer
-	healthChecker      *HealthChecker
-	failoverPolicies   map[string]*FailoverPolicy
-	disasterPlans      map[string]*DisasterRecoveryPlan
-	failoverEvents     []FailoverEvent
-	currentPrimary     map[string]string // region_pair -> current primary
-	replicationStatus  map[string]float64 // region -> replication_lag_ms
-	mu                 sync.RWMutex
+	loadBalancer      *LoadBalancer
+	healthChecker     *HealthChecker
+	failoverPolicies  map[string]*FailoverPolicy
+	disasterPlans     map[string]*DisasterRecoveryPlan
+	failoverEvents    []FailoverEvent
+	currentPrimary    map[string]string  // region_pair -> current primary
+	replicationStatus map[string]float64 // region -> replication_lag_ms
+	mu                sync.RWMutex
 }
 
 // NewFailoverManager creates a new failover manager
@@ -89,15 +89,15 @@ func (fm *FailoverManager) CreateFailoverPolicy(
 	log.Printf("[FAILOVER] Creating policy: %s (%s -> %s)", name, primaryRegion, secondaryRegion)
 
 	policy := &FailoverPolicy{
-		Name:                  name,
-		PrimaryRegion:         primaryRegion,
-		SecondaryRegion:       secondaryRegion,
-		HealthCheckThreshold:  healthThreshold,
-		FailoverTimeout:       failoverTimeout,
-		AutomaticFailover:     autoFailover,
-		DataReplicationLag:    5 * time.Second,
-		IsActive:              true,
-		CreatedAt:             time.Now(),
+		Name:                 name,
+		PrimaryRegion:        primaryRegion,
+		SecondaryRegion:      secondaryRegion,
+		HealthCheckThreshold: healthThreshold,
+		FailoverTimeout:      failoverTimeout,
+		AutomaticFailover:    autoFailover,
+		DataReplicationLag:   5 * time.Second,
+		IsActive:             true,
+		CreatedAt:            time.Now(),
 	}
 
 	policyKey := fmt.Sprintf("%s-%s", primaryRegion, secondaryRegion)
@@ -392,14 +392,14 @@ func (fm *FailoverManager) GetFailoverStatus(policyKey string) map[string]interf
 	}
 
 	return map[string]interface{}{
-		"policy_name":       policy.Name,
-		"primary_region":    policy.PrimaryRegion,
-		"secondary_region":  policy.SecondaryRegion,
-		"current_primary":   currentPrimary,
-		"is_failed_over":    currentPrimary != policy.PrimaryRegion,
-		"auto_failover":     policy.AutomaticFailover,
-		"health_threshold":  policy.HealthCheckThreshold,
-		"is_active":         policy.IsActive,
+		"policy_name":      policy.Name,
+		"primary_region":   policy.PrimaryRegion,
+		"secondary_region": policy.SecondaryRegion,
+		"current_primary":  currentPrimary,
+		"is_failed_over":   currentPrimary != policy.PrimaryRegion,
+		"auto_failover":    policy.AutomaticFailover,
+		"health_threshold": policy.HealthCheckThreshold,
+		"is_active":        policy.IsActive,
 	}
 }
 
@@ -429,14 +429,14 @@ func (fm *FailoverManager) GetDisasterRecoveryStatus(planName string) map[string
 	}
 
 	return map[string]interface{}{
-		"name":                  plan.Name,
-		"rto":                   plan.RecoveryTimeObjective.String(),
-		"rpo":                   plan.RecoveryPointObjective.String(),
-		"backup_frequency":      plan.BackupFrequency.String(),
-		"backup_retention":      plan.BackupRetention.String(),
-		"replication_enabled":   plan.ReplicationEnabled,
-		"replication_targets":   plan.ReplicationTargets,
-		"is_active":             plan.IsActive,
-		"created_at":            plan.CreatedAt,
+		"name":                plan.Name,
+		"rto":                 plan.RecoveryTimeObjective.String(),
+		"rpo":                 plan.RecoveryPointObjective.String(),
+		"backup_frequency":    plan.BackupFrequency.String(),
+		"backup_retention":    plan.BackupRetention.String(),
+		"replication_enabled": plan.ReplicationEnabled,
+		"replication_targets": plan.ReplicationTargets,
+		"is_active":           plan.IsActive,
+		"created_at":          plan.CreatedAt,
 	}
 }

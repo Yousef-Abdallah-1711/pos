@@ -4,7 +4,7 @@ import "testing"
 
 func TestIsOriginAllowedSupportsSingleRestaurantSubdomain(t *testing.T) {
 	corsOrigins = map[string]struct{}{
-		"https://pos.rakmyat.online":                      {},
+		"https://pos.rakmyat.online":               {},
 		"https://*.restaurants.pos.rakmyat.online": {},
 	}
 	tests := []struct {

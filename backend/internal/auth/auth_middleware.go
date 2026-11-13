@@ -12,26 +12,26 @@ import (
 
 // AuthContext represents the authentication context for a request
 type AuthContext struct {
-	UserID       int64
-	TenantID     int64
-	Email        string
-	Username     string
-	Roles        []string
-	Permissions  []string
-	IsAPIKey     bool
-	SessionID    string
-	IPAddress    string
-	UserAgent    string
-	Timestamp    time.Time
+	UserID      int64
+	TenantID    int64
+	Email       string
+	Username    string
+	Roles       []string
+	Permissions []string
+	IsAPIKey    bool
+	SessionID   string
+	IPAddress   string
+	UserAgent   string
+	Timestamp   time.Time
 }
 
 // AuthMiddleware handles JWT and API key authentication
 type AuthMiddleware struct {
-	jwtManager       *JWTManager
-	apiKeyManager    *APIKeyManager
-	rbacManager      *RBACManager
-	db               *sql.DB
-	auditLogger      AuditLogger
+	jwtManager    *JWTManager
+	apiKeyManager *APIKeyManager
+	rbacManager   *RBACManager
+	db            *sql.DB
+	auditLogger   AuditLogger
 }
 
 // NewAuthMiddleware creates a new auth middleware

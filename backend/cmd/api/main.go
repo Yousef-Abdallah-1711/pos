@@ -1367,6 +1367,7 @@ func main() {
 	mux.Handle("GET /api/v1/admin/orders/stats", wrapWithPermission(http.HandlerFunc(adminOrderHandler.GetOrderStats), 10, "READ"))
 	mux.Handle("GET /api/v1/admin/orders/export", wrapWithPermission(http.HandlerFunc(adminOrderHandler.ExportOrders), 10, "READ"))
 	mux.Handle("GET /api/v1/admin/orders/{id}/history", wrapWithPermission(http.HandlerFunc(adminOrderHandler.GetOrderHistory), 10, "READ"))
+	mux.Handle("POST /api/v1/admin/orders/{id}/items/{item_id}/cancel", wrapWithPermission(http.HandlerFunc(adminOrderHandler.CancelOrderItem), 10, "WRITE"))
 	mux.Handle("PUT /api/v1/admin/orders/{id}/status", wrapWithPermission(http.HandlerFunc(adminOrderHandler.UpdateOrderStatus), 10, "WRITE"))
 	mux.Handle("PUT /api/v1/admin/orders/{id}/payment-status", wrapWithPermission(http.HandlerFunc(adminOrderHandler.UpdatePaymentStatus), 10, "WRITE"))
 	mux.Handle("DELETE /api/v1/admin/orders/{id}", wrapWithPermission(http.HandlerFunc(adminOrderHandler.CancelOrder), 10, "DELETE"))

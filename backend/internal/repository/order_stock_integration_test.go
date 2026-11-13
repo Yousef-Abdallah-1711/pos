@@ -177,3 +177,19 @@ func TestOrderStockRejectsItemEditsAfterConfirmation(t *testing.T) {
 	}
 	f.assertStock(t, 18)
 }
+
+func TestOrderCreationRollsBackAllItemsWhenAnyItemIsInvalid(t *testing.T) {
+	f := newStockFixture(t, 20)
+	order := &domain.Order{TenantID: int64(f.tenant), RestaurantID: int64(f.restaurant), OrderNumber: "invalid-items-transaction", CustomerName: "Synthetic", CustomerPhone: "000", PaymentMethod: "cash", PaymentStatus: "pending", Status: "pending", Items: []domain.OrderItem{{ProductID: int64(f.product), ProductName: "Valid", Quantity: 1, UnitPrice: 10, TotalPrice: 10}, {ProductID: 9223372036854775807, ProductName: "Invalid", Quantity: 1, UnitPrice: 10, TotalPrice: 10}}}
+	if _, err := f.repo.CreateOrderWithItems(order); err == nil {
+		t.Fatal("invalid child item accepted")
+	}
+	var count int
+	if err := f.db.QueryRow(`SELECT count(*) FROM orders WHERE tenant_id=$1 AND restaurant_id=$2`, f.tenant, f.restaurant).Scan(&count); err != nil {
+		t.Fatal(err)
+	}
+	if count != 0 {
+		t.Fatalf("partial order committed; count=%d", count)
+	}
+	f.assertStock(t, 20)
+}

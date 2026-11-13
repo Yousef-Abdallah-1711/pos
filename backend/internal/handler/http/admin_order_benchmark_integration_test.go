@@ -225,7 +225,6 @@ func seedAdminOrderBenchmarkData(t *testing.T, db *sql.DB, orderCount int) (int6
 func cleanupAdminOrderBenchmarkData(t *testing.T, db *sql.DB) {
 	t.Helper()
 	statements := []string{
-		`DELETE FROM order_items WHERE order_id IN (SELECT id FROM orders WHERE order_number LIKE 'admin-order-benchmark-%')`,
 		`DELETE FROM orders WHERE order_number LIKE 'admin-order-benchmark-%'`,
 		`DELETE FROM products WHERE restaurant_id IN (SELECT id FROM restaurants WHERE slug IN ('admin-order-benchmark', 'admin-order-benchmark-sibling', 'admin-order-benchmark-foreign'))`,
 		`DELETE FROM restaurants WHERE slug IN ('admin-order-benchmark', 'admin-order-benchmark-sibling', 'admin-order-benchmark-foreign')`,

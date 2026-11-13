@@ -191,23 +191,23 @@ func (e *PrometheusMetricsExporter) ExportMetricsJSON() map[string]interface{} {
 	shards := make([]map[string]interface{}, 0)
 	for _, health := range allHealth {
 		shard := map[string]interface{}{
-			"shard_id":       health.ShardID,
-			"status":         health.Status,
-			"response_time":  health.ResponseTime.String(),
-			"error_rate":     health.ErrorRate,
-			"qps":            health.QueriesPerSecond,
-			"database_size":  health.DatabaseSize,
-			"record_count":   health.RecordCount,
-			"is_reachable":   health.IsReachable,
-			"message":        health.Message,
+			"shard_id":      health.ShardID,
+			"status":        health.Status,
+			"response_time": health.ResponseTime.String(),
+			"error_rate":    health.ErrorRate,
+			"qps":           health.QueriesPerSecond,
+			"database_size": health.DatabaseSize,
+			"record_count":  health.RecordCount,
+			"is_reachable":  health.IsReachable,
+			"message":       health.Message,
 		}
 		shards = append(shards, shard)
 	}
 
 	return map[string]interface{}{
-		"timestamp":   time.Now(),
-		"system":      summary,
-		"shards":      shards,
+		"timestamp": time.Now(),
+		"system":    summary,
+		"shards":    shards,
 	}
 }
 

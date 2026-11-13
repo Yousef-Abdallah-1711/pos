@@ -1,8 +1,8 @@
 package domain
 
 import (
-	"strings"
 	"errors"
+	"strings"
 	"time"
 )
 
@@ -250,7 +250,6 @@ func (ur *UserRole) Validate() error {
 
 	return nil
 }
-
 
 // MaxPermissionLevel returns the higher of two permission level names.
 func MaxPermissionLevel(current, candidate string) string {

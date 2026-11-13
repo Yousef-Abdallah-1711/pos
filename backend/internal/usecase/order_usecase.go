@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/google/uuid"
 	"log"
 	"pos-saas/internal/domain"
 	"pos-saas/internal/repository"
@@ -61,7 +62,7 @@ func (uc *OrderUseCase) CreateOrder(
 
 	// Generate unique order number
 	// In production, this should query the current order count for the restaurant
-	orderNumber := domain.GenerateOrderNumber(tenantID, time.Now().Unix()%1000000)
+	orderNumber := "ORD-" + time.Now().Format("2006") + "-" + uuid.NewString()
 
 	// Calculate totals from items
 	subtotal := 0.0
@@ -187,18 +188,9 @@ func (uc *OrderUseCase) CreateOrder(
 	}
 
 	// Create order in repository
-	createdOrder, err := uc.orderRepo.CreateOrder(order)
+	createdOrder, err := uc.orderRepo.CreateOrderWithItems(order)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create order: %w", err)
-	}
-
-	// Create order items
-	for _, item := range items {
-		item.OrderID = createdOrder.ID
-		_, err := uc.orderRepo.CreateOrderItem(tenantID, restaurantID, &item)
-		if err != nil {
-			return nil, fmt.Errorf("failed to create order item: %w", err)
-		}
 	}
 
 	// Reload order with items
@@ -232,8 +224,9 @@ func (uc *OrderUseCase) CreateOrder(
 			Reason: "Auto-confirmed POS order",
 		}
 		if confirmErr := uc.UpdateOrderStatus(tenantID, restaurantID, finalOrder.ID, confirmReq); confirmErr != nil {
-			// Keep order creation successful even when status transition/KDS enqueue fails.
-			log.Printf("[KDS] failed to auto-confirm POS order: tenant=%d restaurant=%d order=%d err=%v", tenantID, restaurantID, finalOrder.ID, confirmErr)
+			// The complete draft is preserved for audit, but a POS sale must never be
+			// reported successful when its atomic reservation could not be made.
+			return nil, fmt.Errorf("POS confirmation failed: %w", confirmErr)
 		} else {
 			updatedOrder, reloadErr := uc.orderRepo.GetOrderByID(tenantID, restaurantID, finalOrder.ID)
 			if reloadErr != nil {

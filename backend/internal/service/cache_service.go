@@ -10,36 +10,36 @@ import (
 
 // CacheService provides multi-layer caching strategies
 type CacheService struct {
-	memoryCache    map[string]*CacheEntry
-	invalidations  map[string]time.Time
-	metrics        *CacheMetrics
-	mu             sync.RWMutex
-	ttlTicker      *time.Ticker
-	maxSize        int
+	memoryCache     map[string]*CacheEntry
+	invalidations   map[string]time.Time
+	metrics         *CacheMetrics
+	mu              sync.RWMutex
+	ttlTicker       *time.Ticker
+	maxSize         int
 	cleanupInterval time.Duration
 }
 
 // CacheEntry represents a cached item
 type CacheEntry struct {
-	Key        string
-	Value      interface{}
-	ExpiresAt  time.Time
-	CreatedAt  time.Time
-	Hits       int64
-	Size       int64
-	Tags       []string
-	Priority   int // Higher = keep longer
-	Version    string
+	Key       string
+	Value     interface{}
+	ExpiresAt time.Time
+	CreatedAt time.Time
+	Hits      int64
+	Size      int64
+	Tags      []string
+	Priority  int // Higher = keep longer
+	Version   string
 }
 
 // CacheMetrics tracks cache performance
 type CacheMetrics struct {
-	Hits         int64
-	Misses       int64
-	Evictions    int64
-	Size         int64
-	ItemCount    int64
-	LastUpdated  time.Time
+	Hits        int64
+	Misses      int64
+	Evictions   int64
+	Size        int64
+	ItemCount   int64
+	LastUpdated time.Time
 }
 
 // CacheInvalidationRule defines when cache should be invalidated

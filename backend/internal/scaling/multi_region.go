@@ -9,33 +9,33 @@ import (
 
 // DataCenter represents a physical data center
 type DataCenter struct {
-	ID            string
-	Name          string
-	Location      string // City, Country
-	Provider      string // AWS, GCP, Azure, etc.
-	Region        string // us-east-1, eu-west-1, etc.
-	Latitude      float64
-	Longitude     float64
-	Capacity      int    // Max servers
-	CurrentCount  int    // Current server count
-	IsActive      bool
-	IsPrimary     bool   // Primary for data residency
-	Tier          string // "premium", "standard", "budget"
-	CreatedAt     time.Time
+	ID           string
+	Name         string
+	Location     string // City, Country
+	Provider     string // AWS, GCP, Azure, etc.
+	Region       string // us-east-1, eu-west-1, etc.
+	Latitude     float64
+	Longitude    float64
+	Capacity     int // Max servers
+	CurrentCount int // Current server count
+	IsActive     bool
+	IsPrimary    bool   // Primary for data residency
+	Tier         string // "premium", "standard", "budget"
+	CreatedAt    time.Time
 }
 
 // MultiRegionConfig defines multi-region deployment strategy
 type MultiRegionConfig struct {
-	Name                    string
-	ActiveRegions           []string
-	DataResidencyRegion     string // Required region for data residency
-	DisasterRecoveryRegion  string
-	FailoverStrategy        string // "active-active", "active-passive", "active-warm"
-	CostOptimization        bool
-	LatencyTarget           int    // Target P99 latency in ms
-	DataReplicationMode     string // "sync", "async"
-	IsActive                bool
-	CreatedAt               time.Time
+	Name                   string
+	ActiveRegions          []string
+	DataResidencyRegion    string // Required region for data residency
+	DisasterRecoveryRegion string
+	FailoverStrategy       string // "active-active", "active-passive", "active-warm"
+	CostOptimization       bool
+	LatencyTarget          int    // Target P99 latency in ms
+	DataReplicationMode    string // "sync", "async"
+	IsActive               bool
+	CreatedAt              time.Time
 }
 
 // MultiRegionDeployment manages multi-region deployment
@@ -43,9 +43,9 @@ type MultiRegionDeployment struct {
 	loadBalancer        *LoadBalancer
 	dataCenters         map[string]*DataCenter
 	deploymentConfigs   map[string]*MultiRegionConfig
-	regionLatencies     map[string]map[string]int // region -> region -> latency_ms
+	regionLatencies     map[string]map[string]int     // region -> region -> latency_ms
 	regionDistances     map[string]map[string]float64 // region -> region -> km
-	trafficDistribution map[string]float64 // region -> traffic_percentage
+	trafficDistribution map[string]float64            // region -> traffic_percentage
 	mu                  sync.RWMutex
 }
 
@@ -318,18 +318,18 @@ func (mrd *MultiRegionDeployment) GetDataCenterStatus(dcID string) map[string]in
 	}
 
 	return map[string]interface{}{
-		"id":                 dc.ID,
-		"name":               dc.Name,
-		"location":           dc.Location,
-		"provider":           dc.Provider,
-		"region":             dc.Region,
-		"tier":               dc.Tier,
-		"is_primary":         dc.IsPrimary,
-		"is_active":          dc.IsActive,
-		"capacity":           dc.Capacity,
-		"current_servers":    dc.CurrentCount,
-		"utilization":        fmt.Sprintf("%d%%", utilizationPercent),
-		"created_at":         dc.CreatedAt,
+		"id":              dc.ID,
+		"name":            dc.Name,
+		"location":        dc.Location,
+		"provider":        dc.Provider,
+		"region":          dc.Region,
+		"tier":            dc.Tier,
+		"is_primary":      dc.IsPrimary,
+		"is_active":       dc.IsActive,
+		"capacity":        dc.Capacity,
+		"current_servers": dc.CurrentCount,
+		"utilization":     fmt.Sprintf("%d%%", utilizationPercent),
+		"created_at":      dc.CreatedAt,
 	}
 }
 
@@ -340,31 +340,31 @@ func (mrd *MultiRegionDeployment) GetDeploymentComparison() map[string]interface
 
 	strategies := map[string]map[string]string{
 		"active-active": {
-			"redundancy":    "Very High",
-			"cost":          "Very High",
-			"complexity":    "Very High",
-			"rto":           "Seconds",
-			"benefits":      "Perfect load distribution, high availability",
+			"redundancy": "Very High",
+			"cost":       "Very High",
+			"complexity": "Very High",
+			"rto":        "Seconds",
+			"benefits":   "Perfect load distribution, high availability",
 		},
 		"active-passive": {
-			"redundancy":    "High",
-			"cost":          "Medium",
-			"complexity":    "Medium",
-			"rto":           "Minutes",
-			"benefits":      "Cost efficient, simpler to manage",
+			"redundancy": "High",
+			"cost":       "Medium",
+			"complexity": "Medium",
+			"rto":        "Minutes",
+			"benefits":   "Cost efficient, simpler to manage",
 		},
 		"active-warm": {
-			"redundancy":    "High",
-			"cost":          "Medium-High",
-			"complexity":    "Medium",
-			"rto":           "Seconds-Minutes",
-			"benefits":      "Balance between cost and availability",
+			"redundancy": "High",
+			"cost":       "Medium-High",
+			"complexity": "Medium",
+			"rto":        "Seconds-Minutes",
+			"benefits":   "Balance between cost and availability",
 		},
 	}
 
 	return map[string]interface{}{
-		"strategies": strategies,
-		"total_configs": len(mrd.deploymentConfigs),
+		"strategies":         strategies,
+		"total_configs":      len(mrd.deploymentConfigs),
 		"total_data_centers": len(mrd.dataCenters),
 	}
 }
@@ -397,7 +397,7 @@ func (mrd *MultiRegionDeployment) CalculateGeometricDistance(
 
 	a := sin(dLat/2)*sin(dLat/2) +
 		cos(toRadians(lat1))*cos(toRadians(lat2))*
-		sin(dLon/2)*sin(dLon/2)
+			sin(dLon/2)*sin(dLon/2)
 
 	c := 2.0 * atan2(sqrt(a), sqrt(1-a))
 	distance := earthRadiusKm * c

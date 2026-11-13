@@ -1,11 +1,11 @@
 package security
 
 import (
-	"strings"
 	"context"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"pos-saas/internal/auth"
@@ -16,11 +16,11 @@ import (
 // TestCrossTenantAccessPrevention ensures users cannot access other tenant's data
 func TestCrossTenantAccessPrevention(t *testing.T) {
 	tests := []struct {
-		name         string
-		userTenantID int
+		name             string
+		userTenantID     int
 		resourceTenantID int64
-		expectError  bool
-		errorMsg     string
+		expectError      bool
+		errorMsg         string
 	}{
 		{
 			name:             "Same tenant - should allow",
@@ -152,10 +152,10 @@ func TestMissingTenantContext(t *testing.T) {
 // TestTenantIDManipulationAttempts ensures users cannot bypass tenant checks
 func TestTenantIDManipulationAttempts(t *testing.T) {
 	tests := []struct {
-		name           string
-		userTenantID   int
+		name            string
+		userTenantID    int
 		requestTenantID int
-		expectError    bool
+		expectError     bool
 	}{
 		{
 			name:            "User tries to change their tenant in context",
@@ -260,32 +260,32 @@ func TestBatchResourceValidation(t *testing.T) {
 // TestRestaurantAccessWithinTenant ensures restaurant-level isolation
 func TestRestaurantAccessWithinTenant(t *testing.T) {
 	tests := []struct {
-		name               string
-		userTenantID       int
-		userRestaurantID   int64
+		name                 string
+		userTenantID         int
+		userRestaurantID     int64
 		resourceRestaurantID int64
-		expectError        bool
+		expectError          bool
 	}{
 		{
-			name:                "Same restaurant",
-			userTenantID:        1,
-			userRestaurantID:    10,
+			name:                 "Same restaurant",
+			userTenantID:         1,
+			userRestaurantID:     10,
 			resourceRestaurantID: 10,
-			expectError:         false,
+			expectError:          false,
 		},
 		{
-			name:                "Different restaurant in same tenant",
-			userTenantID:        1,
-			userRestaurantID:    10,
+			name:                 "Different restaurant in same tenant",
+			userTenantID:         1,
+			userRestaurantID:     10,
 			resourceRestaurantID: 20,
-			expectError:         true,
+			expectError:          true,
 		},
 		{
-			name:                "Zero restaurant ID",
-			userTenantID:        1,
-			userRestaurantID:    10,
+			name:                 "Zero restaurant ID",
+			userTenantID:         1,
+			userRestaurantID:     10,
 			resourceRestaurantID: 0,
-			expectError:         false, // 0 is treated as "no restaurant restriction"
+			expectError:          false, // 0 is treated as "no restaurant restriction"
 		},
 	}
 
