@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1000" viewBox="0 0 1600 1000" role="img" aria-labelledby="title desc">
+  <title id="title">Direction 3 — Modern SaaS editorial concept</title>
+  <desc id="desc">A high-contrast editorial bento landing-page wireframe with varied authentic screenshot placeholders and an RTL-aware mobile layout. It is not product UI.</desc>
+  <rect width="1600" height="1000" fill="#FFFFFF"/>
+  <rect x="0" y="0" width="1600" height="12" fill="#6D28D9"/>
+  <text x="72" y="64" fill="#6D28D9" font-family="Arial,sans-serif" font-size="17" font-weight="700" letter-spacing="3">POOS / VISUAL AUDIT / CONCEPT 03</text>
+  <text x="72" y="116" fill="#171327" font-family="Arial,sans-serif" font-size="36" font-weight="700">Modern SaaS editorial</text>
+  <text x="72" y="151" fill="#5C566F" font-family="Arial,sans-serif" font-size="18">A varied reading rhythm, anchored by real screens instead of claims.</text>
+  <rect x="72" y="184" width="1456" height="64" rx="13" fill="#F7F5FF"/>
+  <rect x="96" y="199" width="34" height="34" rx="9" fill="#6D28D9"/>
+  <path d="M105 208h16m-16 7h11m-11 7h16" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+  <text x="143" y="225" fill="#171327" font-family="Arial,sans-serif" font-size="20" font-weight="700">POOS</text>
+  <text x="655" y="224" fill="#171327" font-family="Arial,sans-serif" font-size="16">المنصة</text>
+  <text x="759" y="224" fill="#171327" font-family="Arial,sans-serif" font-size="16">العمل اليومي</text>
+  <text x="901" y="224" fill="#171327" font-family="Arial,sans-serif" font-size="16">الأسئلة</text>
+  <text x="1146" y="224" fill="#171327" font-family="Arial,sans-serif" font-size="15">English</text>
+  <text x="1271" y="224" fill="#171327" font-family="Arial,sans-serif" font-size="15">دخول</text>
+  <rect x="1366" y="195" width="136" height="43" rx="11" fill="#171327"/>
+  <text x="1388" y="223" fill="#fff" font-family="Arial,sans-serif" font-size="15" font-weight="700">ابدأ الآن</text>
+  <text x="72" y="319" fill="#171327" font-family="Arial,sans-serif" font-size="50" font-weight="700">ما يجري أمام الضيف</text>
+  <text x="72" y="378" fill="#171327" font-family="Arial,sans-serif" font-size="50" font-weight="700">وخلفه، في مكان واحد.</text>
+  <text x="72" y="422" fill="#5C566F" font-family="Arial,sans-serif" font-size="18">واجهة تحريرية عربية أولًا، مع إثبات بصري لكل موضوع بعد التقاط الشاشة الحقيقية.</text>
+  <rect x="1230" y="288" width="272" height="58" rx="14" fill="#6D28D9"/>
+  <text x="1260" y="323" fill="#fff" font-family="Arial,sans-serif" font-size="17" font-weight="700">أنشئ مساحة مطعمك</text>
+  <rect x="72" y="465" width="850" height="288" rx="22" fill="#171327"/>
+  <text x="105" y="505" fill="#C4B5FD" font-family="Arial,sans-serif" font-size="14" font-weight="700" letter-spacing="2">DASHBOARD OVERVIEW / CAPTURE NEEDED</text>
+  <rect x="105" y="528" width="784" height="191" rx="10" fill="#F7F5FF" stroke="#C4B5FD" stroke-dasharray="8 7"/>
+  <text x="319" y="612" fill="#6D28D9" font-family="Arial,sans-serif" font-size="19" font-weight="700">AUTHENTIC DASHBOARD CAPTURE</text>
+  <text x="355" y="642" fill="#5C566F" font-family="Arial,sans-serif" font-size="14">no fabricated metrics or sample activity in the shipped page</text>
+  <rect x="948" y="465" width="258" height="288" rx="22" fill="#F7F5FF" stroke="#D9D1EB"/>
+  <text x="974" y="506" fill="#6D28D9" font-family="Arial,sans-serif" font-size="13" font-weight="700">WORKFLOW</text>
+  <text x="974" y="548" fill="#171327" font-family="Arial,sans-serif" font-size="20" font-weight="700">الطلبات</text>
+  <text x="974" y="579" fill="#5C566F" font-family="Arial,sans-serif" font-size="14">capture after route and state review</text>
+  <rect x="974" y="603" width="204" height="117" rx="10" fill="#FFFFFF" stroke="#C4B5FD" stroke-dasharray="7 6"/>
+  <text x="1000" y="664" fill="#6D28D9" font-family="Arial,sans-serif" font-size="12" font-weight="700">REAL SCREEN SLOT</text>
+  <rect x="1230" y="465" width="298" height="288" rx="22" fill="#6D28D9"/>
+  <text x="1257" y="506" fill="#E9DFFF" font-family="Arial,sans-serif" font-size="13" font-weight="700">MOBILE STORY</text>
+  <rect x="1318" y="526" width="124" height="198" rx="20" fill="#171327"/>
+  <rect x="1328" y="540" width="104" height="170" rx="11" fill="#F7F5FF"/>
+  <rect x="1340" y="560" width="80" height="44" rx="7" fill="#FFFFFF" stroke="#B8A5E5" stroke-dasharray="4 4"/>
+  <rect x="1340" y="614" width="80" height="8" rx="4" fill="#C4B5FD"/>
+  <rect x="1340" y="632" width="68" height="8" rx="4" fill="#D9D1EB"/>
+  <rect x="1340" y="659" width="80" height="31" rx="8" fill="#6D28D9"/>
+  <text x="72" y="802" fill="#6D28D9" font-family="Arial,sans-serif" font-size="14" font-weight="700" letter-spacing="2">MOBILE COMPOSITION</text>
+  <rect x="72" y="823" width="1456" height="112" rx="20" fill="#F7F5FF"/>
+  <text x="101" y="864" fill="#171327" font-family="Arial,sans-serif" font-size="18" font-weight="700">Not a desktop stack:</text>
+  <text x="101" y="895" fill="#5C566F" font-family="Arial,sans-serif" font-size="16">short RTL headline → one readable full-width product crop → CTA → alternating feature evidence.</text>
+  <path d="M1120 852h340" stroke="#C4B5FD" stroke-width="2"/><circle cx="1120" cy="852" r="8" fill="#6D28D9"/><circle cx="1290" cy="852" r="8" fill="#6D28D9"/><circle cx="1460" cy="852" r="8" fill="#6D28D9"/>
+  <text x="72" y="976" fill="#5C566F" font-family="Arial,sans-serif" font-size="13">CONCEPT BOARD • wireframe slots only; all real product visuals must be captured and reviewed before use</text>
+</svg>
