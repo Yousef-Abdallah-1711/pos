@@ -1,0 +1,28 @@
+[Unit]
+Description=Verify and pull accepted SERVIO staging releases (outbound only)
+After=network-online.target docker.service
+Wants=network-online.target
+Requires=docker.service
+ConditionPathExists=/etc/servio/staging-agent.accepted
+
+[Service]
+Type=oneshot
+User=root
+WorkingDirectory=/opt/servio
+ExecStart=/usr/local/sbin/servio-pull-agent
+TimeoutStartSec=25min
+TimeoutStopSec=180
+KillMode=mixed
+Restart=no
+UMask=0077
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectHome=yes
+ReadWritePaths=/opt/servio /var/lib/servio-deployer /run/lock
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+MemoryHigh=512M
+MemoryMax=768M
+StandardOutput=append:/var/log/servio-deploy/agent.log
+StandardError=append:/var/log/servio-deploy/agent.log
+SyslogIdentifier=servio-deploy

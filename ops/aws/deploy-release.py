@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Root-installed, SHA/CI-verified staging deployer. Manifest and registry token arrive on stdin."""
+"""Root-installed staging deployer for integrity-verified, immutable image archives."""
 import fcntl
 import hashlib
 import json
@@ -26,6 +26,7 @@ def github(path):
         return json.load(response)
 
 def checked(command, **kwargs):
+    kwargs.setdefault("timeout",900)
     return subprocess.run(command, check=True, **kwargs)
 
 def verify_manifest(manifest, requested):
@@ -47,9 +48,8 @@ def verify_manifest(manifest, requested):
             raise RuntimeError('Unapproved registry or mutable image reference')
     return sha
 
-def extract_source(sha, destination):
-    archive = destination.parent / (sha + '.tar.gz')
-    urllib.request.urlretrieve('https://api.github.com/repos/' + REPO + '/tarball/' + sha, archive)
+def extract_source(sha, destination, artifacts):
+    archive = artifacts / 'source.tar.gz'
     with tarfile.open(archive) as source:
         for member in source.getmembers():
             relative = Path(*Path(member.name).parts[1:])
@@ -57,6 +57,30 @@ def extract_source(sha, destination):
                 continue
             member.name = str(relative)
             source.extract(member, destination, filter='data')
+
+def verify_artifacts(manifest, artifacts):
+    source=artifacts/'source.tar.gz'
+    with source.open('rb') as stream:
+        if hashlib.file_digest(stream,'sha256').hexdigest()!=manifest['source_sha256']:
+            raise RuntimeError('Source artifact integrity failure')
+    for name in SERVICES:
+        asset=manifest['archives'][name]
+        if asset['file']!=name+'.docker.tar.gz' or not isinstance(asset['size'],int) or not 0<asset['size']<=2*1024**3:
+            raise RuntimeError('Unapproved image artifact')
+        path=artifacts/asset['file']
+        with path.open('rb') as stream:
+            if path.stat().st_size!=asset['size'] or hashlib.file_digest(stream,'sha256').hexdigest()!=asset['sha256']:
+                raise RuntimeError('Image archive integrity failure: '+name)
+        if not re.fullmatch('sha256:[0-9a-f]{64}',manifest['image_ids'][name]):
+            raise RuntimeError('Missing immutable image content identity')
+
+def load_verified_images(manifest, artifacts):
+    for name in SERVICES:
+        checked(['docker','load','-i',str(artifacts/manifest['archives'][name]['file'])],stdout=subprocess.DEVNULL)
+        metadata=json.loads(subprocess.check_output(['docker','image','inspect',manifest['image_ids'][name]]))[0]
+        if metadata['Id']!=manifest['image_ids'][name] or metadata['Config'].get('Labels',{}).get('org.opencontainers.image.revision')!=manifest['sha']:
+            raise RuntimeError('Loaded image identity mismatch: '+name)
+
 
 def compose(path, *arguments, **kwargs):
     return checked(['docker', 'compose', '-p', 'servio-staging', '--env-file', str(OPS / '.env'), '-f', str(path), *arguments], **kwargs)
@@ -69,7 +93,8 @@ def backup(path):
     with target.open('rb') as source:
         compose(path, 'exec', '-T', 'postgres', 'pg_restore', '--list', stdin=source, stdout=subprocess.DEVNULL)
     sidecar = target.with_suffix('.dump.sha256')
-    sidecar.write_text(hashlib.sha256(target.read_bytes()).hexdigest() + '  ' + target.name + '\n')
+    with target.open('rb') as stream:
+        sidecar.write_text(hashlib.file_digest(stream,'sha256').hexdigest() + '  ' + target.name + '\n')
     checked(['chown', 'ubuntu:ubuntu', str(target), str(sidecar)])
 
 def public_checks():
@@ -87,14 +112,41 @@ def acceptance(destination):
     shutil.copyfile(OPS / 'evidence/browser-admin.json', evidence / 'browser-admin.json')
     # Synthetic acceptance admin only; never use the owner's interactive account.
     for file in evidence.iterdir(): file.chmod(0o600)
+    (evidence/'.docker').mkdir(mode=0o700)
     checked(['chown', '-R', 'ubuntu:ubuntu', str(evidence)])
     commands = [['python3', str(destination / 'ops/aws' / name)] for name in ['smoke-api.py', 'smoke-refresh.py', 'smoke-admin.py', 'smoke-pos-kds.py', 'check-completed-sale.py']]
     commands.append([str(destination / 'ops/aws/run-browser-checks')])
     for command in commands:
-        checked(['sudo', '-n', '-u', 'ubuntu', '--', *command])
+        checked(['runuser','-u','ubuntu','--','env','DOCKER_CONFIG='+str(evidence/'.docker'),*command])
 
-def deploy(manifest, requested):
+def rollback_apps(previous_path):
+    failures=[]
+    for name in SERVICES+['proxy']:
+        try:
+            compose(previous_path,'up','-d','--no-deps','--wait','--wait-timeout','150',name)
+        except Exception:
+            failures.append(name)
+    if failures:
+        raise RuntimeError('Application rollback incomplete: '+', '.join(failures))
+
+def record_release(manifest,sha,path,previous):
+    state = {'sha': sha, 'compose': str(path), 'images': manifest['images'], 'image_ids':manifest['image_ids'], 'ci_run_id': manifest['ci_run_id'], 'previous':{key:previous[key] for key in ['sha','compose','images','image_ids'] if key in previous}, 'deployed_utc': time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime())}
+    temporary_state=STATE.with_suffix('.tmp')
+    temporary_state.write_text(json.dumps(state,indent=2)+'\n')
+    temporary_state.chmod(0o600)
+    checked(['chown','ubuntu:ubuntu',str(temporary_state)])
+    temporary_state.replace(STATE)
+    status=Path('/var/lib/servio-deployer/public/release.json')
+    status.parent.mkdir(parents=True,exist_ok=True)
+    temporary=status.with_suffix('.tmp')
+    temporary.write_text(json.dumps({'sha':sha,'status':'verified','environment':'staging','ci_run_id':manifest['ci_run_id']})+'\n')
+    temporary.chmod(0o644)
+    temporary.replace(status)
+
+
+def deploy(manifest, requested, artifacts):
     sha = verify_manifest(manifest, requested)
+    verify_artifacts(manifest, artifacts)
     if shutil.disk_usage(ROOT).free < 6 * 1024**3:
         raise RuntimeError('Less than 6 GiB disk headroom; refusing image pull')
     destination = ROOT / 'releases' / sha
@@ -103,7 +155,7 @@ def deploy(manifest, requested):
     destination.mkdir(parents=True, mode=0o755)
     (ROOT / 'releases').chmod(0o755)
     destination.chmod(0o755)
-    extract_source(sha, destination)
+    extract_source(sha, destination, artifacts)
     path = destination / 'ops/aws/compose.json'
     config = json.loads(path.read_text())
     previous = json.loads(STATE.read_text()) if STATE.exists() else {'compose': str(OPS / 'compose.json')}
@@ -114,42 +166,34 @@ def deploy(manifest, requested):
             raise RuntimeError('Infrastructure image changes require a separate reviewed operation')
     for name in SERVICES + ['migrate']:
         service = config['services'][name]
-        service['image'] = manifest['images']['backend' if name == 'migrate' else name]
+        service['image'] = manifest['image_ids']['backend' if name == 'migrate' else name]
+        service['pull_policy']='never'
         service.pop('build', None)
     config['services']['proxy']['environment'] = {}
+    config['services']['proxy']['volumes'].append('/var/lib/servio-deployer/public:/srv/servio-release:ro')
     config['services']['proxy']['volumes'] = [v.replace('./Caddyfile:', './Caddyfile.public:') for v in config['services']['proxy']['volumes']]
     path.write_text(json.dumps(config, indent=2) + '\n')
-    with tempfile.TemporaryDirectory(prefix='servio-registry-') as credentials:
-        os.environ['DOCKER_CONFIG'] = credentials
-        checked(['docker', 'login', 'ghcr.io', '-u', manifest['registry_user'], '--password-stdin'], input=manifest['registry_token'], text=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        compose(path, 'config', '-q')
-        compose(path, 'pull', *SERVICES, 'migrate')
-        for name, image in manifest['images'].items():
-            metadata = json.loads(subprocess.check_output(['docker', 'image', 'inspect', image]))[0]
-            if metadata['Config'].get('Labels', {}).get('org.opencontainers.image.revision') != sha:
-                raise RuntimeError('Image revision label mismatch: ' + name)
-        backup(previous_path)
-        # The reviewed migrations are forward-only. Never reverse SQL automatically.
-        compose(path, 'run', '--rm', '--no-deps', 'migrate')
-        try:
-            for name in SERVICES + ['proxy']:
-                compose(path, 'up', '-d', '--no-deps', '--wait', '--wait-timeout', '150', name)
-            public_checks()
-            acceptance(destination)
-        except Exception:
-            print('Deployment failed; restoring prior application configuration. SQL/volumes are preserved.', file=sys.stderr)
-            for name in SERVICES + ['proxy']:
-                compose(previous_path, 'up', '-d', '--no-deps', '--wait', '--wait-timeout', '150', name)
-            raise
-    state = {'sha': sha, 'compose': str(path), 'images': manifest['images'], 'ci_run_id': manifest['ci_run_id'], 'previous': previous, 'deployed_utc': time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime())}
-    STATE.write_text(json.dumps(state, indent=2) + '\n')
-    STATE.chmod(0o600)
-    checked(['chown', 'ubuntu:ubuntu', str(STATE)])
+    compose(path, 'config', '-q')
+    load_verified_images(manifest, artifacts)
+    backup(previous_path)
+    # Never reverse SQL automatically. Recheck main immediately before promotion.
+    compose(path, 'run', '--rm', '--no-deps', 'migrate')
+    verify_manifest(manifest, requested)
+    try:
+        for name in SERVICES + ['proxy']:
+            compose(path, 'up', '-d', '--no-deps', '--wait', '--wait-timeout', '150', name)
+        public_checks()
+        acceptance(destination)
+        record_release(manifest,sha,path,previous)
+    except Exception:
+        print('Deployment failed; restoring prior application configuration. SQL/volumes are preserved.', file=sys.stderr)
+        rollback_apps(previous_path)
+        raise
     print('PASS deployed immutable main ' + sha)
 
 if __name__ == '__main__':
     os.umask(0o077)
-    if os.geteuid() != 0 or len(sys.argv) != 2 or not re.fullmatch('[0-9a-f]{40}', sys.argv[1]):
+    if os.geteuid() != 0 or len(sys.argv) != 3 or not re.fullmatch('[0-9a-f]{40}', sys.argv[1]):
         raise SystemExit('Use the installed restricted staging entrypoint with a full main SHA')
     lock = open('/run/lock/servio-staging-release.lock', 'w')
     fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
@@ -157,7 +201,7 @@ if __name__ == '__main__':
     if len(raw) > 65536:
         raise SystemExit('Release manifest exceeds limit')
     try:
-        deploy(json.loads(raw), sys.argv[1])
+        deploy(json.loads(raw), sys.argv[1], Path(sys.argv[2]))
     except Exception as error:
         # Exception class only: never reflect credential-bearing input or subprocess arguments.
         message = str(error)

@@ -1,0 +1,11 @@
+/var/log/servio-deploy/agent.log {
+    daily
+    maxsize 10M
+    rotate 7
+    compress
+    delaycompress
+    missingok
+    notifempty
+    copytruncate
+    su root root
+}

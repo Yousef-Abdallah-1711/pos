@@ -161,8 +161,8 @@ jobs:
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: success() && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
         with:
-          name: release-manifest
-          path: release-manifest.json
+          name: release-bundle
+          path: release-bundle/
           if-no-files-found: error
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always()
@@ -180,3 +180,26 @@ jobs:
         env:
           RESULTS: ${{ toJSON(needs) }}
         run: python3 -c 'import json,os; jobs=json.loads(os.environ["RESULTS"]); assert all(j["result"] == "success" for j in jobs.values()), jobs'
+
+  publish-main-release:
+    needs: [required]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && github.repository == 'Yousef-Abdallah-1711/pos'
+    environment: staging
+    permissions:
+      contents: write
+      actions: read
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: release-bundle
+          path: release-bundle
+      - name: Sign and publish accepted main artifacts
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SERVIO_RELEASE_SIGNING_KEY: ${{ secrets.SERVIO_RELEASE_SIGNING_KEY }}
+        run: python3 ops/aws/sign-publish-release.py

@@ -1,25 +1,15 @@
-name: SERVIO automatic staging deployment
+name: SERVIO staging deployment verification
 on:
-  workflow_dispatch:
   workflow_run:
     workflows: [SERVIO verified CI]
     types: [completed]
 permissions:
   contents: read
-  actions: read
-  packages: read
 concurrency:
   group: servio-staging-deployment
   cancel-in-progress: false
 jobs:
-  probe-staging-network:
-    if: github.event_name == 'workflow_dispatch'
-    runs-on: ubuntu-24.04
-    timeout-minutes: 3
-    steps:
-      - name: Check staging SSH reachability from the hosted runner
-        run: python3 -c 'import socket; connection=socket.create_connection(("16.192.159.205",22),10); connection.close(); print("PASS hosted-runner SSH connectivity")'
-  deploy-staging:
+  verify-outbound-deployment:
     if: >-
       github.repository == 'Yousef-Abdallah-1711/pos' &&
       github.event.workflow_run.conclusion == 'success' &&
@@ -27,42 +17,25 @@ jobs:
       github.event.workflow_run.event == 'push'
     environment: staging
     runs-on: ubuntu-24.04
-    timeout-minutes: 25
+    timeout-minutes: 30
     steps:
-      - name: Verify current main and accepted CI identity
+      - name: Verify the outbound agent deployed this exact accepted main release
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           RELEASE_SHA: ${{ github.event.workflow_run.head_sha }}
-          REPOSITORY: ${{ github.repository }}
         run: |
-          set -euo pipefail
-          [[ "$RELEASE_SHA" =~ ^[0-9a-f]{40}$ ]]
-          test "$(gh api "repos/$REPOSITORY/git/ref/heads/main" --jq .object.sha)" = "$RELEASE_SHA"
-      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
-        with:
-          name: release-manifest
-          run-id: ${{ github.event.workflow_run.id }}
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-      - name: Deploy immutable staging release over verified SSH
-        env:
-          SERVIO_HOST: ${{ secrets.SERVIO_STAGING_HOST }}
-          SERVIO_USER: ${{ secrets.SERVIO_STAGING_USER }}
-          SERVIO_SSH_KEY: ${{ secrets.SERVIO_STAGING_SSH_KEY }}
-          SERVIO_KNOWN_HOSTS: ${{ secrets.SERVIO_STAGING_KNOWN_HOSTS }}
-          RELEASE_SHA: ${{ github.event.workflow_run.head_sha }}
-          REGISTRY_USER: ${{ github.actor }}
-          REGISTRY_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          test -n "$SERVIO_HOST" && test -n "$SERVIO_USER"
-          test -n "$SERVIO_SSH_KEY" && test -n "$SERVIO_KNOWN_HOSTS"
-          private_dir="$(mktemp -d)"
-          trap 'rm -rf "$private_dir"' EXIT
-          chmod 700 "$private_dir"
-          printf '%s\n' "$SERVIO_SSH_KEY" > "$private_dir/key"
-          printf '%s\n' "$SERVIO_KNOWN_HOSTS" > "$private_dir/known_hosts"
-          chmod 600 "$private_dir/key" "$private_dir/known_hosts"
-          python3 -c 'import json,os; d=json.load(open("release-manifest.json")); assert d["sha"] == os.environ["RELEASE_SHA"]; d.update(registry_user=os.environ["REGISTRY_USER"],registry_token=os.environ["REGISTRY_TOKEN"]); print(json.dumps(d))' |
-            ssh -i "$private_dir/key" -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$private_dir/known_hosts" -o BatchMode=yes \
-              "$SERVIO_USER@$SERVIO_HOST" "servio-deploy $RELEASE_SHA"
+          python3 - <<'PY'
+          import json,os,time,urllib.request
+          expected=os.environ['RELEASE_SHA']
+          for attempt in range(100):
+              try:
+                  with urllib.request.urlopen('https://api.pos.rakmyat.online/_ops/release',timeout=15) as response:
+                      observed=json.load(response)
+                  if observed.get('sha')==expected and observed.get('status')=='verified' and observed.get('environment')=='staging':
+                      print('PASS outbound agent deployed verified main '+expected)
+                      break
+              except Exception:
+                  pass
+              time.sleep(15)
+          else:
+              raise SystemExit('BLOCKED: exact-main staging deployment was not verified before the bounded deadline; inspect the systemd agent journal')
+          PY

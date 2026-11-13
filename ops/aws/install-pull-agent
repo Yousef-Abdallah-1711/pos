@@ -1,0 +1,19 @@
+#!/bin/sh
+# Install reviewed verifier code without enabling recurring deployment.
+set -eu
+cd "$(dirname "$0")/../.."
+test -r /etc/servio/release-signing.pub.pem
+sudo install -d -o root -g root -m 0755 /usr/local/lib/servio
+sudo install -d -o root -g root -m 0700 /var/lib/servio-deployer
+sudo install -d -o root -g root -m 0700 /var/log/servio-deploy
+sudo touch /var/log/servio-deploy/agent.log
+sudo chmod 0600 /var/log/servio-deploy/agent.log
+sudo install -o root -g root -m 0644 ops/aws/servio-deploy.logrotate /etc/logrotate.d/servio-deploy
+sudo install -d -o root -g root -m 0755 /var/lib/servio-deployer/public
+sudo install -o root -g root -m 0755 ops/aws/pull-agent.py /usr/local/sbin/servio-pull-agent
+sudo install -o root -g root -m 0644 ops/aws/deploy-release.py /usr/local/lib/servio/deploy_release.py
+sudo install -o root -g root -m 0644 ops/aws/servio-deploy.service /etc/systemd/system/servio-deploy.service
+sudo install -o root -g root -m 0644 ops/aws/servio-deploy.timer /etc/systemd/system/servio-deploy.timer
+sudo systemctl daemon-reload
+sudo systemd-analyze verify /etc/systemd/system/servio-deploy.service /etc/systemd/system/servio-deploy.timer
+printf '%s\n' 'Verifier installed. Timer state preserved; new activation remains acceptance-gated.'

@@ -53,5 +53,40 @@ class ReleaseTrustTests(unittest.TestCase):
                 deploy.verify_manifest(self.manifest, 'd' * 40)
             network.assert_not_called()
 
-if __name__ == '__main__':
-    unittest.main()
+class RollbackSafetyTests(unittest.TestCase):
+    def test_failed_post_deployment_check_restores_apps_without_reversing_sql(self):
+        import tempfile
+        from types import SimpleNamespace
+        with tempfile.TemporaryDirectory() as temporary:
+            root=Path(temporary);ops=root/'ops/aws';ops.mkdir(parents=True)
+            services={name:{'image':'old-'+name,'volumes':[]} for name in deploy.SERVICES+['postgres','redis','proxy','migrate']}
+            old={'services':services}
+            previous=ops/'compose.json';previous.write_text(__import__('json').dumps(old))
+            manifest={'sha':SHA,'ci_run_id':123,'images':{},'image_ids':{name:'sha256:'+'b'*64 for name in deploy.SERVICES}}
+            calls=[]
+            def extract(sha,destination,artifacts):
+                target=destination/'ops/aws';target.mkdir(parents=True)
+                (target/'compose.json').write_text(__import__('json').dumps(old))
+            def compose(path,*args,**kwargs):calls.append((path,args))
+            patches=[patch.object(deploy,'ROOT',root),patch.object(deploy,'OPS',ops),patch.object(deploy,'STATE',ops/'state.json'),patch.object(deploy,'verify_manifest',return_value=SHA),patch.object(deploy,'verify_artifacts'),patch.object(deploy,'extract_source',side_effect=extract),patch.object(deploy,'load_verified_images'),patch.object(deploy,'backup'),patch.object(deploy,'compose',side_effect=compose),patch.object(deploy,'public_checks',side_effect=RuntimeError('simulated readiness failure')),patch.object(deploy.shutil,'disk_usage',return_value=SimpleNamespace(free=20*1024**3))]
+            with __import__('contextlib').ExitStack() as stack:
+                for mocked in patches:stack.enter_context(mocked)
+                with self.assertRaisesRegex(RuntimeError,'simulated'):deploy.deploy(manifest,SHA,root)
+            rollback=[args[-1] for path,args in calls if path==previous]
+            self.assertEqual(rollback,deploy.SERVICES+['proxy'])
+            self.assertEqual(sum(args[:1]==('run',) for _,args in calls),1)
+            self.assertFalse(any('down' in args for _,args in calls))
+            self.assertEqual(__import__('json').loads(previous.read_text()),old)
+
+class RollbackContinuationTests(unittest.TestCase):
+    def test_one_failed_restore_does_not_prevent_other_services_restoring(self):
+        calls=[]
+        def restore(path,*args):
+            calls.append(args[-1])
+            if args[-1]=='backend':raise RuntimeError('unhealthy')
+        with patch.object(deploy,'compose',side_effect=restore):
+            with self.assertRaisesRegex(RuntimeError,'rollback incomplete: backend'):
+                deploy.rollback_apps(Path('/previous.json'))
+        self.assertEqual(calls,deploy.SERVICES+['proxy'])
+
+if __name__ == '__main__':unittest.main()

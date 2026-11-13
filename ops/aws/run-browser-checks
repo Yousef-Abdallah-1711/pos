@@ -3,7 +3,12 @@ set -eu
 cd "$(dirname "$0")/../.."
 mkdir -p ops/aws/evidence/browser
 chmod 700 ops/aws/evidence/browser
-exec sudo docker run --rm --user 1000:1000 -e NPM_CONFIG_CACHE=/tmp/servio-npm-cache --memory 768m --memory-swap 1024m --cpus 1 --pids-limit 128 --shm-size 128m --ulimit core=0 --security-opt no-new-privileges:true --cap-drop ALL --network servio-staging_edge \
+if docker version --format '{{.Server.Version}}' >/dev/null 2>&1; then
+  docker_command=docker
+else
+  docker_command='sudo -n docker'
+fi
+exec $docker_command run --rm --user 1000:1000 -e NPM_CONFIG_CACHE=/tmp/servio-npm-cache --memory 768m --memory-swap 1024m --cpus 1 --pids-limit 128 --shm-size 128m --ulimit core=0 --security-opt no-new-privileges:true --cap-drop ALL --network servio-staging_edge \
   -v "$PWD"/ops/aws/browser-smoke.cjs:/work/browser-smoke.cjs:ro \
   -v "$PWD"/ops/aws/evidence/browser-fixtures.json:/fixtures/users.json:ro \
   -v "$PWD"/ops/aws/evidence/browser-admin.json:/fixtures/admin.json:ro \

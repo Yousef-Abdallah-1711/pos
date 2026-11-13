@@ -33,8 +33,9 @@ type DatabaseConfig struct {
 }
 
 type JWTConfig struct {
-	Secret string
-	Expiry string
+	SuperAdminSecret string
+	Secret           string
+	Expiry           string
 }
 
 func Load() (*Config, error) {
@@ -61,8 +62,9 @@ func Load() (*Config, error) {
 			ConnMaxLifetime: getEnv("DB_CONN_MAX_LIFETIME", "5m"),
 		},
 		JWT: JWTConfig{
-			Secret: getEnv("JWT_SECRET", "your-secret-key-change-this"),
-			Expiry: getEnv("JWT_EXPIRY", "24h"),
+			Secret:           getEnv("JWT_SECRET", "your-secret-key-change-this"),
+			SuperAdminSecret: getEnv("SUPER_ADMIN_JWT_SECRET", ""),
+			Expiry:           getEnv("JWT_EXPIRY", "24h"),
 		},
 	}
 

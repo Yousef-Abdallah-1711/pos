@@ -8,6 +8,7 @@ from pathlib import Path
 import re
 import secrets
 import ssl
+import socket
 import subprocess
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -57,10 +58,16 @@ compose = ['docker', 'compose', '--env-file', str(OPS / '.env'), '-f', str(path)
 def sql(text):
     subprocess.run(compose + ['exec', '-T', 'postgres', 'psql', '-U', 'postgres', '-d', 'servio_ci_test', '-v', 'ON_ERROR_STOP=1'], input=text, text=True, stdout=subprocess.DEVNULL, check=True)
 
+class LoopbackTLS(http.client.HTTPSConnection):
+    def connect(self):
+        # Connect only to this disposable runner while sending the correct TLS SNI.
+        raw=socket.create_connection(('127.0.0.1',443),timeout=self.timeout)
+        self.sock=self._context.wrap_socket(raw,server_hostname='api.pos.rakmyat.online')
+
 def register(suffix):
     user = {'name': 'CI synthetic ' + suffix, 'email': 'ci-' + suffix + '@example.invalid', 'password': secrets.token_urlsafe(32), 'restaurant_name': 'CI ' + suffix, 'restaurant_slug': 'ci-' + suffix, 'phone': ''}
     # Fixed loopback destination: no production DNS lookup or live registration.
-    connection = http.client.HTTPSConnection('127.0.0.1', 443, context=ssl._create_unverified_context(), timeout=30)
+    connection = LoopbackTLS('127.0.0.1', 443, context=ssl._create_unverified_context(), timeout=30)
     connection.request('POST', '/api/v1/auth/register', json.dumps(user), {'Host': 'api.pos.rakmyat.online', 'Origin': 'https://pos.rakmyat.online', 'Content-Type': 'application/json'})
     response = connection.getresponse()
     response.read()

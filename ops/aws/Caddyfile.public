@@ -25,6 +25,16 @@
   }
 }
 api.pos.rakmyat.online {
+  @release_status {
+    method GET
+    path /_ops/release
+  }
+  handle @release_status {
+    root * /srv/servio-release
+    rewrite * /release.json
+    header Cache-Control "no-store"
+    file_server
+  }
   import common
   import api
 }

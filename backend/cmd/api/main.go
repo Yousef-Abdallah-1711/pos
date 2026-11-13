@@ -89,6 +89,9 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to load config: %v", err)
 	}
+	if err := validateAPISigningSecrets(cfg); err != nil {
+		log.Fatal(err)
+	}
 	if err := config.ValidateProductionURLConfig(); err != nil {
 		log.Fatalf("Invalid production URL configuration: %v", err)
 	}
@@ -312,7 +315,14 @@ func main() {
 	themeService := service.NewThemeService(themeRepo)
 
 	// Super Admin token service (uses separate secret for extra security)
-	superAdminTokenService, err := jwt.NewSuperAdminTokenService(cfg.JWT.Secret+"_super_admin", "15m")
+	superAdminSecret := cfg.JWT.SuperAdminSecret
+	if superAdminSecret == "" {
+		// Compatibility for isolated development/test stacks only; staged and
+		// production APIs fail validation before database initialization.
+		superAdminSecret = cfg.JWT.Secret + "_super_admin"
+	}
+
+	superAdminTokenService, err := jwt.NewSuperAdminTokenService(superAdminSecret, "15m")
 	if err != nil {
 		log.Printf("Warning: Failed to create super admin token service: %v", err)
 	}
