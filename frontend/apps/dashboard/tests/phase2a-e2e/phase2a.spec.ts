@@ -446,6 +446,14 @@ test('storefront order endpoint accepts a scoped public order', async ({ page })
   expect((await orderResponse.json()).data.order_number).toBeTruthy()
 })
 
+test('Arabic storefront exposes RTL language and direction on the document', async ({ page }) => {
+  await page.goto(`${storefront}/ar`, { waitUntil: 'domcontentloaded', timeout: 90_000 })
+
+  await expect(page.locator('html')).toHaveAttribute('lang', 'ar')
+  await expect(page.locator('html')).toHaveAttribute('dir', 'rtl')
+  await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
+})
+
 test('storefront menu cart and checkout complete an order in the browser', async ({ page }) => {
   test.setTimeout(120_000)
   let legacyThemeLookupCount = 0

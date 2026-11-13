@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { headers } from "next/headers";
 import { Cairo, Inter } from "next/font/google";
 import { QueryProvider } from "@/components/providers/core/query-provider";
 import { ThemeProvider } from "@/components/providers/theme-provider";
@@ -48,15 +49,9 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function RootLayout({
-  children,
-  params,
-}: {
-  children: React.ReactNode;
-  params: Promise<{ locale?: string }>;
-}) {
-  const resolvedParams = await params;
-  const locale = resolvedParams?.locale === 'ar' ? 'ar' : 'en';
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const requestHeaders = await headers();
+  const locale = requestHeaders.get('x-restaurant-locale') === 'ar' ? 'ar' : 'en';
   const dir = locale === 'ar' ? 'rtl' : 'ltr';
 
   return (
