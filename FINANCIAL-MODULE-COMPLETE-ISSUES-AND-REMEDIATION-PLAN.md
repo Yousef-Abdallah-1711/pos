@@ -73,21 +73,22 @@ Expected chain is **business event → operational persistence → payment state
 
 ## 4. Issue register — canonical CFR-001 through CFR-015
 
-Statuses mean: **SOURCE-CONFIRMED** = code/schema establishes the defect or gap; **REPRODUCED** = executed test demonstrated it; **VERIFIED** = independently verified behavior (none marked verified-fixed here); **SUSPECTED** = evidence incomplete; **BLOCKED** = reproduction needs unavailable safe fixture/runtime. None are FIXED.
+Statuses mean: **SOURCE-CONFIRMED** = code/schema establishes the defect or gap; **REPRODUCED** = executed test demonstrated it; **IMPLEMENTED / PARTIAL** = a correction is present but one or more acceptance gates remain unverified; **VERIFIED** = independently verified behavior; **SUSPECTED** = evidence incomplete; **BLOCKED** = reproduction needs unavailable safe fixture/runtime. No issue is marked VERIFIED FIXED by this session.
 
 ### CFR-001 — Auto-posting silently forces unbalanced lines to balance
 
-- **Severity/status:** P1 — SOURCE-CONFIRMED (source behavior); defect was not re-executed through an order-posting regression this session.
+- **Severity/status:** P1 — IMPLEMENTED / PARTIAL. The safe rejection path and regression tests are present on `fix/financial-cfr001-reject-unbalanced-posting`; Go verification passes on the latest fetched main, while PostgreSQL integration remains unverified. Do not mark VERIFIED FIXED yet.
 - **Problem / impact:** A material tax, discount, quantity or mapping error can be concealed by changing the final accounting line; this can misstate revenue, VAT, expense or cash while producing a balanced journal.
-- **Current / expected:** `AutoPostingEngine.createAndPostEntry` passes input through `normalizeBalancedLines`; the latter adds any imbalance over 0.009 to the last line. Expected: reject material differences; only a policy-approved immaterial residual may go to an explicit rounding account within a defined currency tolerance.
-- **Root cause:** `backend/internal/usecase/auto_posting_engine.go:522-553,633-663`.
-- **Reproduction/evidence:** Source-confirmed by `math.Abs(diff) <= 0.009` early return followed by unconditional last-line mutation. Test evidence this session: related auto-post unit tests are included in the 33 passing Go cases, but none asserts rejection of a material imbalance; therefore no runtime reproduction claim.
-- **Baseline scope:** Present on `origin/main`; no financial source delta on current branch. Local Phase 00 diagnostics/guardrails do not establish root-cause correction.
-- **Recommended solution / components:** Replace implicit plug with explicit validation and an approved rounding-account policy; preserve source business amounts and expose posting failure/alert. Use shared money type and currency precision (FIN-007). Components: order, payroll, supplier, depreciation posting use cases; journal repository; monitoring.
+- **Current / expected:** Before this correction, `AutoPostingEngine.createAndPostEntry` passed lines through `normalizeBalancedLines`, which changed the last line to force equal totals. It now validates copied lines before journal creation, rejects any debit/credit total mismatch, and passes unchanged monetary amounts to the repository. It adds no tolerance and no balancing account.
+- **Implementation:** `backend/internal/usecase/auto_posting_validation.go` validates finite, non-negative amounts, one-sided nonzero journal lines, the existing two-decimal `NUMERIC(15,2)` storage range, and exact equality using integer cents. Sub-cent values are rejected rather than rounded. `createAndPostEntry` runs this validation before journal or GL repository calls, and the payroll path no longer normalizes independently.
+- **Root cause:** `backend/internal/usecase/auto_posting_engine.go` previously called `normalizeBalancedLines` before journal creation; that helper was removed.
+- **Reproduction/evidence:** On the final branch based on `origin/main` SHA `c79bc5e7c3f0b8f32d90c583d31d318c971314ba`, `go test ./internal/usecase -run 'Test(ValidateAutoPostingLines|AutoPostingRejectsUnbalanced)' -count=1`, `go test ./internal/usecase -count=1`, and the full `go test ./...` passed. `go vet ./...`, `go build ./...`, and `git diff --check` passed. An earlier full run on the first fetched base (SHA `208bcaebc48d201ea5f84ac41a12bbc5ce48265a`) exposed duplicate validator declarations and seven repository-test failures; main later advanced, those conflicts were resolved, and the branch was rebased before the successful final run. Disposable PostgreSQL integration was not run because the Docker daemon is unavailable; no existing database or Docker service was started or changed.
+- **Baseline scope:** The defect was present on fetched `origin/main` SHA `208bcaebc48d201ea5f84ac41a12bbc5ce48265a`. The implementation branch now contains one focused commit on latest fetched `origin/main` SHA `c79bc5e7c3f0b8f32d90c583d31d318c971314ba`.
+- **Recommended solution / components:** Keep validation as the shared gate for order, payroll, supplier, COGS and depreciation auto-posting. Preserve source business amounts and surface validation errors to the caller. Any explicit rounding-account policy remains separate and requires approval.
 - **Migration:** Only if adding controlled rounding-account mapping/config; no migration until accountant approves policy. Do not add a balancing plug.
-- **Dependencies/policy:** Currency, permitted residual maximum, rounding mode and account require owner/accountant approval.
-- **Acceptance:** 5.00 mismatch rejected and no journal/GL row persists; debit-heavy and credit-heavy cases; approved one-minor-unit case posts to explicit rounding account; currency-specific boundary/property tests; failure visible and retryable.
-- **Checklist:** OPEN.
+- **Dependencies/policy:** The validator follows the current journal schema's two-decimal storage contract as a conservative rejection boundary. Supported currencies, currency precision, rounding mode, and any permitted residual/account remain unapproved. Do not broaden accepted precision or introduce a residual tolerance until the owner/accountant approves policy.
+- **Acceptance:** Execute focused regression tests; verify 100/90 and 90/100 rejection before journal/GL writes, 100/100 success, unchanged values, error propagation and valid sales/payroll flows; run relevant backend tests, `go vet`, build, and disposable PostgreSQL integration. Currency-specific behavior remains policy-dependent.
+- **Checklist:** PARTIAL — implementation and Go tests pass; disposable PostgreSQL integration and owner/accountant currency/rounding policy evidence remain pending.
 
 ### CFR-002 — Journal integrity relies too heavily on application checks
 
@@ -536,7 +537,7 @@ Run one issue per implementation session unless prerequisites couple it. “VERI
 
 ### P1 — implement in this order
 
-- [ ] **OPEN CFR-001** Reject material journal imbalance; add approved explicit rounding handling only after policy approval. Gate: no auto-plug; tests for positive/negative imbalance and rounding account.
+- [ ] **PARTIAL CFR-001** Reject unbalanced auto-posting before persistence. Focused, package, and full Go suites plus vet/build pass; disposable-PostgreSQL acceptance remains pending. Any currency-specific rounding behavior requires owner/accountant policy approval.
 - [ ] **OPEN CFR-004** Make journal+GL posting atomic or durably replayable. Gate: failure injection/restart/replay leaves no invisible partial result.
 - [ ] **OPEN CFR-005** Surface paid-order posting failures and implement linked refund/cancel reversal events. Gate: order/payment/refund totals reconcile to GL.
 - [ ] **OPEN CFR-002** Enforce balanced posted entries and immutability in PostgreSQL. Gate: direct SQL negative tests and safe migration/backfill.
