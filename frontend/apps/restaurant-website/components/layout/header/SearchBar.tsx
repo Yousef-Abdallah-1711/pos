@@ -89,9 +89,9 @@ export function SearchBar({ maxResults = 5 }: SearchBarProps) {
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button type="button" variant="outline" className="h-12 min-w-12 gap-2 px-3 md:min-w-56">
+        <Button type="button" variant="outline" aria-label={locale === 'ar' ? 'البحث عن المنتجات' : 'Search products'} className="h-12 min-w-12 gap-2 px-3 md:min-w-56">
           <Search className="h-4 w-4" />
-          <span className="hidden md:inline">{query || 'Search products...'}</span>
+          <span className="hidden md:inline">{query || (locale === 'ar' ? 'البحث عن المنتجات...' : 'Search products...')}</span>
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[22rem] p-0" align="start">
@@ -99,12 +99,12 @@ export function SearchBar({ maxResults = 5 }: SearchBarProps) {
           <CommandInput
             value={query}
             onValueChange={setQuery}
-            placeholder="Search products or categories"
+            placeholder={locale === 'ar' ? 'البحث عن المنتجات أو الفئات' : 'Search products or categories'}
           />
           <CommandList>
-            <CommandEmpty>No cached results. Open Menu first.</CommandEmpty>
+            <CommandEmpty>{locale === 'ar' ? 'لا توجد نتائج محفوظة. افتح القائمة أولاً.' : 'No cached results. Open Menu first.'}</CommandEmpty>
             {filteredProducts.length > 0 ? (
-              <CommandGroup heading="Products">
+              <CommandGroup heading={locale === 'ar' ? 'المنتجات' : 'Products'}>
                 {filteredProducts.map((product) => (
                   <CommandItem
                     key={`p-${product.id}`}
@@ -119,7 +119,7 @@ export function SearchBar({ maxResults = 5 }: SearchBarProps) {
               </CommandGroup>
             ) : null}
             {filteredCategories.length > 0 ? (
-              <CommandGroup heading="Categories">
+              <CommandGroup heading={locale === 'ar' ? 'الفئات' : 'Categories'}>
                 {filteredCategories.map((category) => (
                   <CommandItem
                     key={`c-${category.id}`}

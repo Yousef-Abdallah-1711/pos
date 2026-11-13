@@ -5,6 +5,21 @@ const fixture=JSON.parse(fs.readFileSync(process.env.SERVIO_STORE_FIXTURE||path.
 if(!fixture.synthetic||fixture.tenant_id!==1||fixture.restaurant_id!==1)throw new Error('Guarded synthetic storefront fixture required');
 const checks=[];const errors=[];let created=null;let submitted=0;
 function record(check,actual,expected){checks.push({check,actual,expected,status:actual===expected?'PASS':'FAIL'});}
+async function controlContrast(locator){
+ return locator.evaluate(element=>{
+  const style=getComputedStyle(element);const canvas=document.createElement('canvas');
+  canvas.width=canvas.height=1;const context=canvas.getContext('2d');
+  const luminance=color=>{
+   context.clearRect(0,0,1,1);context.fillStyle=color;context.fillRect(0,0,1,1);
+   const pixel=context.getImageData(0,0,1,1).data;
+   const values=[...pixel].slice(0,3).map(value=>{const s=value/255;return s<=0.04045?s/12.92:((s+0.055)/1.055)**2.4;});
+   return values[0]*0.2126+values[1]*0.7152+values[2]*0.0722;
+  };
+  const foreground=luminance(style.color);const background=luminance(style.backgroundColor);
+  return (Math.max(foreground,background)+0.05)/(Math.min(foreground,background)+0.05);
+ });
+}
+
 (async()=>{
  const browser=await chromium.launch();const context=await browser.newContext({ignoreHTTPSErrors:process.env.SERVIO_DISPOSABLE_BROWSER==='1',viewport:{width:390,height:900}});const page=await context.newPage();
  page.on('pageerror',e=>errors.push(e.message.slice(0,200)));
@@ -15,6 +30,7 @@ function record(check,actual,expected){checks.push({check,actual,expected,status
   if((statusBody.data||statusBody).tenant_name!=='Test Tenant')throw new Error('Refusing checkout outside the exact synthetic demo tenant');
   await page.goto('https://restaurant-1.pos.rakmyat.online/en/menu');
   await page.getByText('SERVIO staging QA item',{exact:true}).waitFor();
+  for(const label of ['Search products','Change language'])record(label+' has visible contrast',await controlContrast(page.getByRole('button',{name:label,exact:true}))>=4.5,true);
   record('Synthetic product and inline details visible',await page.getByText('Synthetic staging acceptance. No real sale.',{exact:true}).isVisible(),true);
   await page.getByRole('button',{name:'Add',exact:true}).click();
   await page.goto('https://restaurant-1.pos.rakmyat.online/en/cart');

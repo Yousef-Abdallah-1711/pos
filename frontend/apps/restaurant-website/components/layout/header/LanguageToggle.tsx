@@ -37,7 +37,7 @@ export function LanguageToggle() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button type="button" variant="outline" aria-label="Change language" className="h-12 w-12 gap-2 px-2 sm:w-auto sm:min-w-20 sm:px-3">
+        <Button type="button" variant="outline" aria-label={currentLocale === 'ar' ? 'تغيير اللغة' : 'Change language'} className="h-12 w-12 gap-2 px-2 sm:w-auto sm:min-w-20 sm:px-3">
           <Languages className="h-4 w-4" />
           <span className="hidden text-xs font-semibold uppercase sm:inline">{currentLocale}</span>
         </Button>

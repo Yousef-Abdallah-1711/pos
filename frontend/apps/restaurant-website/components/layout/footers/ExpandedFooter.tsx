@@ -12,20 +12,13 @@ export function ExpandedFooter({ config, locale }: FooterVariantProps) {
           <p className="mt-3 text-sm opacity-90">{config.companyDescription || ''}</p>
           <div className="mt-4"><FooterSocial config={config} /></div>
         </div>
+        <FooterLinkList title={locale === 'ar' ? 'روابط سريعة' : 'Quick Links'} links={(config.legalLinks || []).slice(0, 4)} locale={locale} />
         <div>
-          <h3 className="mb-3 text-sm font-semibold">Quick Links</h3>
-          <ul className="space-y-2 text-sm opacity-90">
-            {(config.legalLinks || []).slice(0, 4).map((link) => (
-              <li key={`${link.href}-${link.label}`}>{link.label}</li>
-            ))}
-          </ul>
+          <h3 className="mb-3 text-sm font-semibold">{locale === 'ar' ? 'ساعات العمل' : 'Hours'}</h3>
+          <p className="text-sm opacity-90">{locale === 'ar' ? 'يرجى التواصل مع المطعم لمعرفة ساعات العمل' : 'Contact the restaurant for opening hours'}</p>
         </div>
         <div>
-          <h3 className="mb-3 text-sm font-semibold">Hours</h3>
-          <p className="text-sm opacity-90">Daily 10:00 AM - 12:00 AM</p>
-        </div>
-        <div>
-          <h3 className="mb-3 text-sm font-semibold">Contact</h3>
+          <h3 className="mb-3 text-sm font-semibold">{locale === 'ar' ? 'تواصل معنا' : 'Contact'}</h3>
           <p className="text-sm opacity-90">{config.phone || ''}</p>
           <p className="text-sm opacity-90">{config.email || ''}</p>
           <p className="text-sm opacity-90">{config.address || ''}</p>
@@ -44,7 +37,7 @@ export function ExpandedFooter({ config, locale }: FooterVariantProps) {
         <p className="text-xs opacity-90">{config.copyrightText}</p>
         <div className="flex items-center gap-4">
           <FooterLegal config={config} locale={locale} />
-          <BackToTop />
+          <BackToTop locale={locale} />
         </div>
       </div>
     </FooterShell>
