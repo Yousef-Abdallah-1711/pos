@@ -25,12 +25,13 @@ type Category struct {
 
 // Product represents a menu item
 type Product struct {
-	ID           int    `json:"id"`
-	TenantID     int    `json:"tenant_id"`
-	RestaurantID int    `json:"restaurant_id"`
-	CategoryID   int    `json:"category_id"`
-	SKU          string `json:"sku,omitempty"`
-	Barcode      string `json:"barcode,omitempty"`
+	StockAdjustmentRequested bool   `json:"-"`
+	ID                       int    `json:"id"`
+	TenantID                 int    `json:"tenant_id"`
+	RestaurantID             int    `json:"restaurant_id"`
+	CategoryID               int    `json:"category_id"`
+	SKU                      string `json:"sku,omitempty"`
+	Barcode                  string `json:"barcode,omitempty"`
 
 	// Multilingual
 	NameEn        string `json:"name_en"`

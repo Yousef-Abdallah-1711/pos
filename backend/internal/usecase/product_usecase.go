@@ -3,14 +3,10 @@ package usecase
 import (
 	"context"
 	"fmt"
-	"io"
 	"log"
 	"mime/multipart"
-	"os"
-	"path/filepath"
 	"pos-saas/internal/domain"
 	"pos-saas/internal/repository"
-	"time"
 )
 
 // ProductUseCase handles product business logic
@@ -80,9 +76,20 @@ func (uc *ProductUseCase) CreateProduct(
 		CreatedBy:          userID,
 	}
 
+	if imageFile != nil {
+		imageURL, uploadErr := uc.uploadProductImage(restaurantID, imageFile, tenantID)
+		if uploadErr != nil {
+			return nil, uploadErr
+		}
+		product.MainImageURL = imageURL
+	}
 	// Save to database
+	preparedImageURL := product.MainImageURL
 	product, err := uc.repo.CreateProduct(product)
 	if err != nil {
+		if imageFile != nil {
+			uc.discardPreparedImage(preparedImageURL)
+		}
 		return nil, err
 	}
 
@@ -110,20 +117,6 @@ func (uc *ProductUseCase) CreateProduct(
 		if _, err := uc.notificationRepo.CreateNotification(ctx, notification); err != nil {
 			log.Printf("[PRODUCT] failed to create low-stock notification: tenant=%d restaurant=%d product=%d err=%v", tenantID, restaurantID, product.ID, err)
 			// Don't fail the product creation if notification fails
-		}
-	}
-
-	// Upload image if provided
-	if imageFile != nil {
-		imageURL, err := uc.uploadProductImage(product.ID, imageFile, tenantID)
-		if err != nil {
-			// Log error but don't fail - product was created
-			log.Printf("[PRODUCT] image upload failed: tenant=%d restaurant=%d product=%d err=%v", tenantID, restaurantID, product.ID, err)
-		} else {
-			product.MainImageURL = imageURL
-			// Update the product with the image URL? The original code didn't save it back to DB!
-			// We found another bug! The image URL is set on the struct but not updated in DB after initial create.
-			// But that's not the 500 error.
 		}
 	}
 
@@ -175,6 +168,7 @@ func (uc *ProductUseCase) UpdateProduct(
 		product.TrackInventory = *req.TrackInventory
 	}
 	if req.QuantityInStock != nil {
+		product.StockAdjustmentRequested = *req.QuantityInStock != product.QuantityInStock
 		product.QuantityInStock = *req.QuantityInStock
 	}
 	if req.LowStockThreshold != nil {
@@ -198,9 +192,20 @@ func (uc *ProductUseCase) UpdateProduct(
 
 	product.UpdatedBy = &userID
 
+	if imageFile != nil {
+		imageURL, uploadErr := uc.uploadProductImage(restaurantID, imageFile, tenantID)
+		if uploadErr != nil {
+			return nil, uploadErr
+		}
+		product.MainImageURL = imageURL
+	}
 	// Save changes
-	product, err = uc.repo.UpdateProduct(product)
+	preparedImageURL := product.MainImageURL
+	product, err = uc.repo.UpdateProductContext(ctx, product)
 	if err != nil {
+		if imageFile != nil {
+			uc.discardPreparedImage(preparedImageURL)
+		}
 		return nil, err
 	}
 
@@ -231,16 +236,6 @@ func (uc *ProductUseCase) UpdateProduct(
 		}
 	}
 
-	// Upload new image if provided
-	if imageFile != nil {
-		imageURL, err := uc.uploadProductImage(product.ID, imageFile, tenantID)
-		if err != nil {
-			log.Printf("[PRODUCT] image upload failed: tenant=%d restaurant=%d product=%d err=%v", tenantID, restaurantID, product.ID, err)
-		} else {
-			product.MainImageURL = imageURL
-		}
-	}
-
 	return product, nil
 }
 
@@ -267,54 +262,6 @@ func (uc *ProductUseCase) DeleteProduct(tenantID, restaurantID, productID, userI
 }
 
 // uploadProductImage saves image to storage
-func (uc *ProductUseCase) uploadProductImage(productID int, fileHeader *multipart.FileHeader, tenantID int) (string, error) {
-	// Validate file
-	allowedTypes := map[string]bool{
-		"image/jpeg": true,
-		"image/png":  true,
-		"image/gif":  true,
-		"image/webp": true,
-	}
-
-	if !allowedTypes[fileHeader.Header.Get("Content-Type")] {
-		return "", fmt.Errorf("invalid file type. allowed: jpeg, png, gif, webp")
-	}
-
-	const maxFileSize = 10 * 1024 * 1024 // 10MB
-	if fileHeader.Size > maxFileSize {
-		return "", fmt.Errorf("file size exceeds 10MB limit")
-	}
-
-	// Open file
-	file, err := fileHeader.Open()
-	if err != nil {
-		return "", fmt.Errorf("failed to open file: %w", err)
-	}
-	defer file.Close()
-
-	// Generate unique filename
-	timestamp := time.Now().Unix()
-	filename := fmt.Sprintf("products/%d/%d/%d_%s", tenantID, productID, timestamp, fileHeader.Filename)
-
-	// Save to local storage (or S3 depending on config)
-	imagePath := filepath.Join("./uploads", filename)
-	os.MkdirAll(filepath.Dir(imagePath), 0755)
-
-	out, err := os.Create(imagePath)
-	if err != nil {
-		return "", fmt.Errorf("failed to save file: %w", err)
-	}
-	defer out.Close()
-
-	if _, err := io.Copy(out, file); err != nil {
-		return "", fmt.Errorf("failed to write file: %w", err)
-	}
-
-	// Return image URL
-	imageURL := fmt.Sprintf("%s/%s", uc.storageURL, filename)
-	return imageURL, nil
-}
-
 // ListPublicMenu returns public menu
 func (uc *ProductUseCase) ListPublicMenu(ctx context.Context, tenantID, restaurantID int, lang string) ([]domain.Product, error) {
 	return uc.repo.ListPublic(tenantID, restaurantID, lang)

@@ -196,6 +196,7 @@ def acceptance(destination):
     commands = [['python3', str(destination / 'ops/aws' / name)] for name in ['smoke-api.py', 'smoke-refresh.py', 'smoke-admin.py', 'smoke-pos-kds.py', 'check-completed-sale.py']]
     commands.append([str(destination / 'ops/aws/run-browser-checks')])
     commands.append(['/usr/local/lib/servio/browser/node',str(destination/'ops/aws/browser-storefront-flow.cjs')])
+    commands.append(['/usr/local/lib/servio/browser/node',str(destination/'ops/aws/browser-upload.cjs')])
     for command in commands:
         checked(['runuser','-u','ubuntu','--','env','DOCKER_CONFIG='+str(evidence/'.docker'),'NODE_PATH=/usr/local/lib/servio/browser/node_modules','PLAYWRIGHT_BROWSERS_PATH=/usr/local/lib/servio/browser/browsers',*command])
 

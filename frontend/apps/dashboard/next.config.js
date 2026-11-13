@@ -11,13 +11,14 @@ const paymentFrameSrc = [
   'https://*.paymob.com',
 ].join(' ')
 
+const apiImageURL = new URL(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api/v1')
+
 const nextConfig = {
   reactStrictMode: true,
-  // The dashboard currently has pre-existing type errors; Docker prod builds can opt out of the type gate.
-  typescript: { ignoreBuildErrors: process.env.NEXT_IGNORE_BUILD_ERRORS === 'true' },
+  typescript: { ignoreBuildErrors: false },
   transpilePackages: ['@pos-saas/ui', '@pos-saas/types', '@pos-saas/form-foundation'],
   images: {
-    domains: ['localhost', 'images.unsplash.com'],
+    remotePatterns: [{ protocol: apiImageURL.protocol.slice(0, -1), hostname: apiImageURL.hostname, port: apiImageURL.port, pathname: '/uploads/products/**' }, { protocol: 'https', hostname: 'images.unsplash.com' }],
     // Enable AVIF for better compression (25-30% smaller than WebP)
     formats: ['image/avif', 'image/webp'],
     // Image optimization settings

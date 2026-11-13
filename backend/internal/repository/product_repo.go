@@ -1,12 +1,14 @@
 package repository
 
 import (
+	"context"
 	"database/sql"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"pos-saas/internal/domain"
 	"strings"
+	"time"
 )
 
 // ProductRepository handles product data operations
@@ -21,6 +23,13 @@ func NewProductRepository(db *sql.DB) *ProductRepository {
 
 // CreateProduct inserts a new product into database
 func (r *ProductRepository) CreateProduct(product *domain.Product) (*domain.Product, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	tx, err := r.db.BeginTx(ctx, nil)
+	if err != nil {
+		return nil, err
+	}
+	defer tx.Rollback()
 	query := `
 		INSERT INTO products (
 			tenant_id, restaurant_id, category_id, sku, barcode,
@@ -87,7 +96,7 @@ func (r *ProductRepository) CreateProduct(product *domain.Product) (*domain.Prod
 		descAr = sql.NullString{String: product.DescriptionAr, Valid: true}
 	}
 
-	err := r.db.QueryRow(query,
+	err = tx.QueryRowContext(ctx, query,
 		product.TenantID,
 		product.RestaurantID,
 		categoryID,
@@ -135,6 +144,15 @@ func (r *ProductRepository) CreateProduct(product *domain.Product) (*domain.Prod
 			return nil, errors.New("product with this SKU already exists")
 		}
 		return nil, fmt.Errorf("failed to create product: %w", err)
+	}
+
+	if product.QuantityInStock != 0 {
+		if err = recordProductStockMovement(ctx, tx, productStockMovement{Product: product, Delta: product.QuantityInStock, Reason: "Initial product stock"}); err != nil {
+			return nil, err
+		}
+	}
+	if err = tx.Commit(); err != nil {
+		return nil, err
 	}
 
 	return product, nil
@@ -330,80 +348,6 @@ func (r *ProductRepository) ListProducts(tenantID, restaurantID int, filters *Pr
 }
 
 // UpdateProduct updates an existing product
-func (r *ProductRepository) UpdateProduct(product *domain.Product) (*domain.Product, error) {
-	var categoryID sql.NullInt64
-	if product.CategoryID > 0 {
-		categoryID = sql.NullInt64{Int64: int64(product.CategoryID), Valid: true}
-	}
-
-	nameAr := sql.NullString{String: product.NameAr, Valid: product.NameAr != ""}
-	descEn := sql.NullString{String: product.DescriptionEn, Valid: product.DescriptionEn != ""}
-	descAr := sql.NullString{String: product.DescriptionAr, Valid: product.DescriptionAr != ""}
-
-	query := `
-		UPDATE products
-		SET
-			category_id = $1,
-			name_en = $2,
-			name_ar = $3,
-			description_en = $4,
-			description_ar = $5,
-			price = $6,
-			cost = $7,
-			discount_price = $8,
-			is_available = $9,
-			track_inventory = $10,
-			quantity_in_stock = $11,
-			low_stock_threshold = $12,
-			featured = $13,
-			is_vegetarian = $14,
-			is_vegan = $15,
-			is_spicy = $16,
-			is_gluten_free = $17,
-			updated_by = $18,
-			updated_at = CURRENT_TIMESTAMP
-		WHERE id = $19 AND tenant_id = $20 AND restaurant_id = $21
-		  AND ($22::integer IS NULL OR EXISTS (
-			SELECT 1 FROM categories WHERE id = $22 AND tenant_id = $20 AND restaurant_id = $21
-		  ))
-		RETURNING updated_at
-	`
-
-	err := r.db.QueryRow(
-		query,
-		categoryID,
-		product.NameEn,
-		nameAr,
-		descEn,
-		descAr,
-		product.Price,
-		product.Cost,
-		product.DiscountPrice,
-		product.IsAvailable,
-		product.TrackInventory,
-		product.QuantityInStock,
-		product.LowStockThreshold,
-		product.Featured,
-		product.IsVegetarian,
-		product.IsVegan,
-		product.IsSpicy,
-		product.IsGlutenFree,
-		product.UpdatedBy,
-		product.ID,
-		product.TenantID,
-		product.RestaurantID,
-		categoryID,
-	).Scan(&product.UpdatedAt)
-	if err == sql.ErrNoRows {
-		return nil, errors.New("product not found")
-	}
-	if err != nil {
-		return nil, fmt.Errorf("failed to update product: %w", err)
-	}
-
-	return product, nil
-}
-
 // DeleteProduct soft-deletes a product
 func (r *ProductRepository) DeleteProduct(tenantID, restaurantID, productID int, deletedBy int) error {
 	query := `

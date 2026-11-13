@@ -38,8 +38,8 @@ func (r *SubscriptionRepositoryImpl) GetTenantSubscriptionInfo(ctx context.Conte
 			slug,
 			subscription_status,
 			subscription_plan,
-			trial_start_date,
-			trial_end_date,
+			COALESCE(trial_start_date, created_at),
+			COALESCE(trial_end_date, created_at + trial_days * INTERVAL '1 day'),
 			subscription_expires_at,
 			last_payment_at,
 			trial_days,
@@ -797,7 +797,8 @@ func (r *SubscriptionRepositoryImpl) CheckTenantAccess(ctx context.Context, tena
 	var state domain.TenantAccessState
 	var trialEnd, subscriptionEnd sql.NullTime
 	err := r.db.QueryRowContext(ctx, `
- SELECT is_active, is_disabled, subscription_status, trial_end_date, subscription_expires_at
+ SELECT is_active, is_disabled, subscription_status,
+ COALESCE(trial_end_date, created_at + trial_days * INTERVAL '1 day'), subscription_expires_at
  FROM tenants WHERE id = $1
  `, tenantID).Scan(&state.Active, &state.Disabled, &state.Status, &trialEnd, &subscriptionEnd)
 	if err == sql.ErrNoRows {

@@ -171,6 +171,7 @@ jobs:
           path: |
             ops/aws/evidence/browser/results.json
             ops/aws/evidence/browser/storefront-browser-flow.json
+            ops/aws/evidence/browser/upload-browser.json
           if-no-files-found: ignore
 
   required:

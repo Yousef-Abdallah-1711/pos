@@ -50,3 +50,27 @@ func TestSuspensionPreservesPaidAndExpiredEntitlement(t *testing.T) {
 		})
 	}
 }
+
+func TestLegacyMissingTrialDatesRemainAnchoredToCreation(t *testing.T) {
+	db, fixture := openDriverScopeFixture(t)
+	for _, age := range []int{1, 16} {
+		if _, err := db.Exec(`UPDATE tenants SET is_active=true,is_disabled=false,subscription_status='trial',trial_days=15,trial_start_date=NULL,trial_end_date=NULL,created_at=NOW()-$1*INTERVAL '1 day' WHERE id=$2`, age, fixture.tenantA); err != nil {
+			t.Fatal(err)
+		}
+		repo := NewSubscriptionRepository(db)
+		allowed, reason, err := repo.CheckTenantAccess(context.Background(), int64(fixture.tenantA))
+		if err != nil || allowed != (age == 1) {
+			t.Fatalf("age=%d allowed=%v reason=%s err=%v", age, allowed, reason, err)
+		}
+		info, err := repo.GetTenantSubscriptionInfo(context.Background(), int64(fixture.tenantA))
+		if err != nil {
+			t.Fatal(err)
+		}
+		if info.CanAccess != allowed || info.TrialStartDate == nil || info.TrialEndDate == nil {
+			t.Fatal("public status and business entitlement disagree")
+		}
+		if !info.TrialEndDate.Equal(info.TrialStartDate.AddDate(0, 0, 15)) {
+			t.Fatal("legacy trial was extended from now")
+		}
+	}
+}

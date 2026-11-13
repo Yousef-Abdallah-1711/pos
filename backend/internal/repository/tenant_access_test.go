@@ -29,7 +29,7 @@ func TestTenantAccessUsesActivationAndEntitlement(t *testing.T) {
 				t.Fatal(err)
 			}
 			defer db.Close()
-			mock.ExpectQuery("SELECT is_active, is_disabled, subscription_status, trial_end_date, subscription_expires_at").WithArgs(int64(42)).WillReturnRows(sqlmock.NewRows([]string{"is_active", "is_disabled", "subscription_status", "trial_end_date", "subscription_expires_at"}).AddRow(tc.active, false, tc.status, tc.end, nil))
+			mock.ExpectQuery("SELECT is_active, is_disabled, subscription_status,").WithArgs(int64(42)).WillReturnRows(sqlmock.NewRows([]string{"is_active", "is_disabled", "subscription_status", "trial_end_date", "subscription_expires_at"}).AddRow(tc.active, false, tc.status, tc.end, nil))
 			allowed, reason, err := NewSubscriptionRepository(db).CheckTenantAccess(context.Background(), 42)
 			if err != nil || reason != tc.reason || allowed != (tc.reason == "") {
 				t.Fatalf("allowed=%v reason=%q err=%v", allowed, reason, err)

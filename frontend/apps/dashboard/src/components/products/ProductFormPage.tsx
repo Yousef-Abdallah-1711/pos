@@ -94,7 +94,8 @@ export function ProductFormPage({ product, categories, onSubmit, onCancel }: Pro
         cost: toOptionalNumber(data.cost),
         discount_price: toOptionalNumber(data.discount_price),
         discount_percentage: toOptionalNumber(data.discount_percentage),
-        quantity_in_stock: toInt(data.quantity_in_stock, 0),
+        quantity_in_stock: product && toInt(data.quantity_in_stock, 0) === product.quantity_in_stock
+          ? undefined : toInt(data.quantity_in_stock, 0),
         low_stock_threshold: toInt(data.low_stock_threshold, 0),
         display_order: toInt(data.display_order, 0),
         calories: toOptionalInt(data.calories),
@@ -146,6 +147,7 @@ export function ProductFormPage({ product, categories, onSubmit, onCancel }: Pro
             <div className="relative w-40 h-40 mt-2">
               <Image
                 src={imagePreview}
+                unoptimized
                 alt={t('products.imagePreviewAlt', 'Preview')}
                 fill
                 className="object-cover rounded"

@@ -66,6 +66,11 @@ func (t *Tenant) CanAccess() bool {
 
 // GetBlockReason applies the shared tenant entitlement policy.
 func (t *Tenant) GetBlockReason() string {
+	end := t.TrialEndDate
+	if end == nil && !t.CreatedAt.IsZero() && t.TrialDays > 0 {
+		anchoredEnd := t.CreatedAt.AddDate(0, 0, t.TrialDays)
+		end = &anchoredEnd
+	}
 	return (TenantAccessState{Active: t.IsActive, Disabled: t.IsDisabled,
-		Status: t.SubscriptionStatus, TrialEnd: t.TrialEndDate}).BlockReason(time.Now())
+		Status: t.SubscriptionStatus, TrialEnd: end}).BlockReason(time.Now())
 }

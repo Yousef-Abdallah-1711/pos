@@ -497,6 +497,11 @@ func main() {
 
 	// Setup routes
 	mux := http.NewServeMux()
+	productImages, imageErr := handler.NewProductImageHandler("./uploads")
+	if imageErr != nil {
+		log.Fatalf("Product image storage unavailable: %v", imageErr)
+	}
+	mux.Handle("GET /uploads/{path...}", productImages)
 
 	// Impersonation tokens are accepted only when validated against server-side sessions.
 	// If the repositories are unavailable this slice is empty and the header is rejected.

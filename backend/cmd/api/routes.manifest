@@ -217,6 +217,7 @@ GET /api/v1/users
 GET /api/v1/users
 GET /api/v1/users/{userId}/profile
 GET /api/v1/users/{userId}/settings
+GET /uploads/{path...}
 POST /api/v1/accounting/accounts
 POST /api/v1/accounting/bank-accounts
 POST /api/v1/accounting/bank-reconciliation/sessions
