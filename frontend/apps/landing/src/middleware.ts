@@ -20,6 +20,14 @@ export function middleware(request: NextRequest) {
     return NextResponse.next()
   }
 
+  // Legacy shortcuts must resolve before locale-prefix handling.
+  const shortcut = pathname.match(/^\/(?:(en|ar)\/)?(login|register)\/?$/)
+  if (shortcut) {
+    const url = request.nextUrl.clone()
+    url.pathname = `/${shortcut[1] || DEFAULT_LOCALE}/auth/${shortcut[2]}`
+    return NextResponse.redirect(url)
+  }
+
   // Check if the path already has a valid locale prefix
   const pathnameSegments = pathname.split('/')
   const firstSegment = pathnameSegments[1]

@@ -21,3 +21,14 @@ describe('locale middleware', () => {
     expect(response.headers.get('location')).toBeNull()
   })
 })
+
+describe('authentication shortcuts', () => {
+  it.each([
+    ['/login', '/en/auth/login'], ['/register', '/en/auth/register'],
+    ['/en/login', '/en/auth/login'], ['/ar/login', '/ar/auth/login'],
+    ['/en/register', '/en/auth/register'], ['/ar/register', '/ar/auth/register'],
+  ])('routes %s to the actual localized authentication page', (pathname, target) => {
+    const response = middleware(new NextRequest(`https://pos.rakmyat.online${pathname}?next=dashboard`))
+    expect(response.headers.get('location')).toBe(`https://pos.rakmyat.online${target}?next=dashboard`)
+  })
+})

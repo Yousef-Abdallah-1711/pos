@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "../api-client";
+import { loadRememberedOrders } from "../order-history";
 
 // Types
 export interface Category {
@@ -180,10 +181,7 @@ export function useSearchProducts(query: string, restaurantSlug: string) {
 export function useOrders() {
   return useQuery({
     queryKey: queryKeys.orders(),
-    queryFn: async () => {
-      const response = await apiClient.get<OrderListResponse>("/public/orders");
-      return response;
-    },
+    queryFn: loadRememberedOrders,
     staleTime: 1 * 60 * 1000,
     gcTime: 10 * 60 * 1000,
     retry: 1,

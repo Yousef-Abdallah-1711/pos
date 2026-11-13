@@ -352,7 +352,7 @@ export default function OrdersPage() {
         </div>
 
         {/* Status and Payment/Table Filters */}
-        <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+        <div className="flex flex-wrap gap-4 items-start sm:items-center">
           <div className="flex items-center gap-2">
             <Filter className="h-5 w-5 text-gray-400" />
             <select

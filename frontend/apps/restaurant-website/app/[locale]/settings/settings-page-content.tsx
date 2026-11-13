@@ -113,7 +113,7 @@ export function SettingsPageContent({ locale, themeData }: SettingsPageContentPr
                   }`}
                 >
                   <div className="flex items-center justify-between">
-                    <span className="font-semibold">{loc === 'en' ? 'English' : 'Ø§Ù„Ø¹Ø±Ø¨ÙŠØ©'}</span>
+                    <span className="font-semibold">{loc === 'en' ? 'English' : 'العربية'}</span>
                     {locale === loc && <Check className="settings-check-icon h-5 w-5" />}
                   </div>
                 </button>
@@ -182,13 +182,13 @@ export function SettingsPageContent({ locale, themeData }: SettingsPageContentPr
                       type="color"
                       value={primaryColor}
                       onChange={(e) => setPrimaryColor(e.target.value)}
-                      className="h-12 w-16 rounded cursor-pointer border border-gray-300 dark:border-gray-600"
+                      className="h-12 w-16 shrink-0 rounded cursor-pointer border border-gray-300 dark:border-gray-600"
                     />
                     <input
                       type="text"
                       value={primaryColor}
                       onChange={(e) => setPrimaryColor(e.target.value)}
-                      className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
+                      className="min-w-0 flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
                       placeholder="#3b82f6"
                     />
                   </div>
@@ -201,13 +201,13 @@ export function SettingsPageContent({ locale, themeData }: SettingsPageContentPr
                       type="color"
                       value={secondaryColor}
                       onChange={(e) => setSecondaryColor(e.target.value)}
-                      className="h-12 w-16 rounded cursor-pointer border border-gray-300 dark:border-gray-600"
+                      className="h-12 w-16 shrink-0 rounded cursor-pointer border border-gray-300 dark:border-gray-600"
                     />
                     <input
                       type="text"
                       value={secondaryColor}
                       onChange={(e) => setSecondaryColor(e.target.value)}
-                      className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
+                      className="min-w-0 flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
                       placeholder="#10b981"
                     />
                   </div>
@@ -220,13 +220,13 @@ export function SettingsPageContent({ locale, themeData }: SettingsPageContentPr
                       type="color"
                       value={accentColor}
                       onChange={(e) => setAccentColor(e.target.value)}
-                      className="h-12 w-16 rounded cursor-pointer border border-gray-300 dark:border-gray-600"
+                      className="h-12 w-16 shrink-0 rounded cursor-pointer border border-gray-300 dark:border-gray-600"
                     />
                     <input
                       type="text"
                       value={accentColor}
                       onChange={(e) => setAccentColor(e.target.value)}
-                      className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
+                      className="min-w-0 flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
                       placeholder="#f59e0b"
                     />
                   </div>

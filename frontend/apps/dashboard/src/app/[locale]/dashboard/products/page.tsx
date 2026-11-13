@@ -28,6 +28,7 @@ export default function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([])
   const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(false)
+  const [totalPages, setTotalPages] = useState(1)
   const [filters, setFilters] = useState<Filters>({
     page: 1,
     pageSize: 20,
@@ -72,6 +73,7 @@ export default function ProductsPage() {
         const response = await api.get('/products', { params })
 
         setProducts(response.data.products || [])
+        setTotalPages(Math.max(1, response.data.pagination?.total_pages ?? 1))
       } catch (error) {
         toast.error(t('products.loadFailed', 'Failed to load products'))
         debugError(error)
@@ -177,6 +179,7 @@ export default function ProductsPage() {
 
           <ProductList
             products={products}
+            totalPages={totalPages}
             categories={categories}
             loading={loading}
             filters={filters}

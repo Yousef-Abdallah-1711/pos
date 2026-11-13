@@ -81,7 +81,7 @@ export default function TenantsPage() {
         </div>
       ) : (
         <>
-          <div className="bg-white rounded-lg shadow overflow-hidden">
+          <div className="bg-white rounded-lg shadow overflow-x-auto">
             <table className="w-full">
               <thead>
                 <tr className="bg-gray-50 border-b border-gray-200">
@@ -131,7 +131,7 @@ export default function TenantsPage() {
 
           {/* Pagination */}
           {totalPages > 1 && (
-            <div className="flex items-center justify-between bg-white rounded-lg shadow p-4">
+            <div className="flex flex-wrap items-center justify-between gap-3 bg-white rounded-lg shadow p-4">
               <p className="text-sm text-gray-600">
                 Showing {(page - 1) * limit + 1} to{" "}
                 {Math.min(page * limit, total)} of {total} tenants

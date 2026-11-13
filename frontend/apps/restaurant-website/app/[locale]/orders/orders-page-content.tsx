@@ -20,8 +20,8 @@ export function OrdersPageContent({ locale, themeData }: OrdersPageContentProps)
   const primaryColor = themeData?.colors?.primary || '#f97316'
   const secondaryColor = themeData?.colors?.secondary || '#0ea5e9'
 
-  const { data: ordersResponse, isLoading, refetch, isFetching } = useOrders()
-  const orders = (ordersResponse as any)?.data || ordersResponse || []
+  const { data: ordersResponse, isLoading, isError, refetch, isFetching } = useOrders()
+  const orders = ordersResponse?.data ?? []
 
   return (
     <>
@@ -51,6 +51,7 @@ export function OrdersPageContent({ locale, themeData }: OrdersPageContentProps)
           </Link>
         </div>
 
+        {isError && <p role="alert" className="mb-4 text-red-700 dark:text-red-300">{locale === 'ar' ? 'تعذر تحميل الطلبات المحفوظة. يرجى المحاولة مرة أخرى.' : 'Unable to load saved orders. Please retry.'}</p>}
         {isLoading ? (
           <div className="flex items-center justify-center py-12">
             <Loader className="orders-loader h-8 w-8 animate-spin mr-2" />

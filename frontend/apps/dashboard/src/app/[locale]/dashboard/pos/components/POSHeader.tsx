@@ -121,11 +121,11 @@ export function POSHeader({
   }
 
   return (
-    <header className="flex items-center justify-between gap-3 rounded-lg bg-gray-900 px-4 py-3 text-white">
+    <header className="flex flex-wrap items-center justify-between gap-3 rounded-lg bg-gray-900 px-4 py-3 text-white">
       <div className={`flex items-center gap-4 ${isRTL ? 'flex-row-reverse text-right' : ''}`}>
-        <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+        <div className={`flex flex-wrap items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
           <Clock3 className="h-4 w-4 text-gray-300" />
-          <span className="text-sm font-semibold tabular-nums">{formatClock(now, locale)}</span>
+          <span className="whitespace-nowrap text-sm font-semibold tabular-nums">{formatClock(now, locale)}</span>
         </div>
         <div className={`hidden items-center gap-2 text-xs text-gray-300 sm:flex ${isRTL ? 'flex-row-reverse' : ''}`}>
           <span>{t('pos.cashier', 'Cashier')}:</span>
@@ -133,7 +133,7 @@ export function POSHeader({
         </div>
       </div>
 
-      <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+      <div className={`flex flex-wrap items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
         <div
           className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-semibold ${
             isOffline
@@ -160,7 +160,7 @@ export function POSHeader({
         <button
           type="button"
           onClick={toggleSound}
-          className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-gray-700 bg-gray-800 transition hover:bg-gray-700"
+          className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-md border border-gray-700 bg-gray-800 transition hover:bg-gray-700"
           title={soundEnabled ? t('pos.soundOn', 'Sound on') : t('pos.soundOff', 'Sound off')}
         >
           {soundEnabled ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
@@ -169,7 +169,7 @@ export function POSHeader({
         <button
           type="button"
           onClick={onToggleAutoPrint}
-          className={`inline-flex h-9 w-9 items-center justify-center rounded-md border transition ${
+          className={`inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-md border transition ${
             autoPrintEnabled
               ? 'border-emerald-500/70 bg-emerald-500/20 text-emerald-100 hover:bg-emerald-500/30'
               : 'border-gray-700 bg-gray-800 hover:bg-gray-700'
@@ -188,7 +188,7 @@ export function POSHeader({
           onClick={() => {
             void handleFullscreenToggle()
           }}
-          className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-gray-700 bg-gray-800 transition hover:bg-gray-700"
+          className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-md border border-gray-700 bg-gray-800 transition hover:bg-gray-700"
           title={isFullscreen ? t('pos.exitFullscreen', 'Exit fullscreen') : t('pos.fullscreen', 'Fullscreen')}
         >
           {isFullscreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
@@ -197,7 +197,7 @@ export function POSHeader({
         <button
           type="button"
           onClick={handleThemeToggle}
-          className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-gray-700 bg-gray-800 transition hover:bg-gray-700"
+          className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-md border border-gray-700 bg-gray-800 transition hover:bg-gray-700"
           title={isDarkMode ? t('common.lightMode', 'Switch to light mode') : t('common.darkMode', 'Switch to dark mode')}
         >
           {isDarkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
@@ -206,7 +206,7 @@ export function POSHeader({
         <button
           type="button"
           onClick={toggleFocusMode}
-          className={`inline-flex h-9 w-9 items-center justify-center rounded-md border transition ${
+          className={`inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-md border transition ${
             focusModeEnabled
               ? 'border-primary-500/70 bg-primary-500/20 text-primary-100 hover:bg-primary-500/30'
               : 'border-gray-700 bg-gray-800 hover:bg-gray-700'
@@ -222,7 +222,7 @@ export function POSHeader({
 
         <Link
           href={`/${locale}/dashboard/pos/settings`}
-          className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-gray-700 bg-gray-800 transition hover:bg-gray-700"
+          className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-md border border-gray-700 bg-gray-800 transition hover:bg-gray-700"
           title={t('pos.settings', 'POS settings')}
         >
           <Settings2 className="h-4 w-4" />
@@ -233,7 +233,7 @@ export function POSHeader({
           onClick={() => {
             router.push(`/${locale}/dashboard`)
           }}
-          className="inline-flex h-9 items-center gap-2 rounded-md border border-gray-700 bg-gray-800 px-3 text-xs font-semibold transition hover:bg-gray-700"
+          className="inline-flex h-12 shrink-0 items-center gap-2 rounded-md border border-gray-700 bg-gray-800 px-3 text-xs font-semibold transition hover:bg-gray-700"
         >
           <LogOut className="h-4 w-4" />
           <span className="hidden sm:inline">{t('pos.exitPOS', 'Exit POS')}</span>

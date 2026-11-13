@@ -39,7 +39,7 @@ export default function VATReportPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+      <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t('vat')}</h1>
           <p className="mt-1 text-gray-500 dark:text-gray-400">

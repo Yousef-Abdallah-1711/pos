@@ -179,7 +179,7 @@ export default function AdvancedAccountingToolsPage() {
             Phase 7 operations + Phase 9 integration/import/export utilities.
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <Button variant="outline" onClick={exportCoa}>Export COA CSV</Button>
           <Button variant="outline" onClick={exportJournals}>Export Journals CSV</Button>
           <Button onClick={loadAll} disabled={loading}>

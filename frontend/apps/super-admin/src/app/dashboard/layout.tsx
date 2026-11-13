@@ -21,17 +21,17 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   }
 
   return (
-    <div className="flex h-screen bg-gray-100">
+    <div className="flex min-h-screen flex-col bg-gray-100 md:h-screen md:flex-row md:overflow-hidden">
       {/* Sidebar Navigation */}
       <DashboardNav />
 
       {/* Main Content */}
-      <div className="flex-1 overflow-auto">
+      <div className="min-w-0 flex-1 md:overflow-auto">
         {/* Header */}
         <DashboardHeader />
 
         {/* Content */}
-        <main className="p-6">
+        <main className="p-4 md:p-6">
           {children}
         </main>
       </div>

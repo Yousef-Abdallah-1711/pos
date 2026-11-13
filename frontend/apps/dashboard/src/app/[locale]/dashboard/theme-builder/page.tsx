@@ -452,14 +452,14 @@ export default function ThemeBuilderPage() {
 
         {/* Website Subdomain Card */}
         {user?.restaurant_id && (
-          <div className="bg-gradient-to-r from-blue-50 to-blue-100 border border-blue-200 rounded-lg p-4 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="h-10 w-10 bg-blue-600 rounded-lg flex items-center justify-center">
+          <div className="bg-gradient-to-r from-blue-50 to-blue-100 border border-blue-200 rounded-lg p-4 flex flex-wrap items-center justify-between gap-4">
+            <div className="flex min-w-0 items-center gap-3">
+              <div className="h-10 w-10 shrink-0 bg-blue-600 rounded-lg flex items-center justify-center">
                 <Eye className="h-5 w-5 text-white" />
               </div>
               <div>
                 <p className="text-sm font-medium text-blue-900">{tb('yourWebsite', 'Your Website')}</p>
-                <p className="text-sm text-blue-700 font-mono">
+                <p className="break-all text-sm text-blue-700 font-mono">
                   {websiteHost}
                 </p>
               </div>
@@ -480,9 +480,9 @@ export default function ThemeBuilderPage() {
       {/* Existing Themes */}
       {themes.length > 0 && (
         <div className="mb-12">
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
             <h2 className="text-xl font-bold text-gray-900">{tb('yourThemes', 'Your Themes')} ({filteredAndSortedThemes.length})</h2>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               <button
                 onClick={() => router.push(`/${locale}/dashboard/theme-builder/presets`)}
                 className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium transition flex items-center gap-2"
@@ -523,7 +523,7 @@ export default function ThemeBuilderPage() {
           {/* Search and Filters */}
           <div className="bg-white border border-gray-200 rounded-lg p-4 mb-6 space-y-4">
             <div className="flex gap-4 flex-wrap">
-              <div className="flex-1 min-w-xs">
+              <div className="min-w-0 flex-1 basis-64">
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                   <input
@@ -536,7 +536,7 @@ export default function ThemeBuilderPage() {
                 </div>
               </div>
 
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
                 <select
                   value={filterStatus}
                   onChange={(e) => setFilterStatus(e.target.value as any)}
