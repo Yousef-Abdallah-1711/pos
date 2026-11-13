@@ -164,9 +164,10 @@ func (r *AttendanceRepository) CreateAttendance(attendance *domain.Attendance) (
 			tenant_id, restaurant_id, employee_id, attendance_date,
 			clock_in, clock_out, scheduled_clock_in, scheduled_clock_out,
 			status, notes, created_by
-		) VALUES (
-			$1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11
 		)
+		SELECT $1, $2, e.id, $4, $5, $6, $7, $8, $9, $10, $11
+		FROM employees e
+		WHERE e.id = $3 AND e.tenant_id = $1 AND e.restaurant_id = $2
 		RETURNING id
 	`
 
@@ -216,11 +217,14 @@ func (r *AttendanceRepository) ClockIn(tenantID, restaurantID, employeeID int) (
 		INSERT INTO attendance (
 			tenant_id, restaurant_id, employee_id, attendance_date,
 			clock_in, status
-		) VALUES (
-			$1, $2, $3, CURRENT_DATE, CURRENT_TIMESTAMP, 'present'
 		)
+		SELECT $1, $2, e.id, CURRENT_DATE, CURRENT_TIMESTAMP, 'present'
+		FROM employees e
+		WHERE e.id = $3 AND e.tenant_id = $1 AND e.restaurant_id = $2
 		ON CONFLICT (employee_id, attendance_date)
 		DO UPDATE SET clock_in = CURRENT_TIMESTAMP
+		WHERE attendance.tenant_id = EXCLUDED.tenant_id
+		  AND attendance.restaurant_id = EXCLUDED.restaurant_id
 		RETURNING id
 	`
 

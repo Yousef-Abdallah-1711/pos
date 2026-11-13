@@ -538,8 +538,8 @@ func (uc *OrderUseCase) GetOrderStats(tenantID, restaurantID int64, startDate, e
 }
 
 // GetOrderStatusHistory retrieves status change history
-func (uc *OrderUseCase) GetOrderStatusHistory(tenantID, orderID int64) ([]domain.OrderStatusHistory, error) {
-	history, err := uc.orderRepo.GetOrderStatusHistory(tenantID, orderID)
+func (uc *OrderUseCase) GetOrderStatusHistory(tenantID, restaurantID, orderID int64) ([]domain.OrderStatusHistory, error) {
+	history, err := uc.orderRepo.GetOrderStatusHistory(tenantID, restaurantID, orderID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get order history: %w", err)
 	}

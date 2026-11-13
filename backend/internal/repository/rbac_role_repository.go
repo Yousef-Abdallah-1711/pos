@@ -162,9 +162,10 @@ func (r *RBACRoleRepository) Create(ctx context.Context, role *RBACRole, created
 		INSERT INTO roles (
 			tenant_id, restaurant_id, role_name, description, role_code,
 			is_system_role, is_active, created_by, created_at, updated_at
-		) VALUES (
-			$1, $2, $3, $4, $5, $6, TRUE, $7, $8, $9
 		)
+		SELECT $1, $2, $3, $4, $5, $6, TRUE, $7, $8, $9
+		WHERE EXISTS (SELECT 1 FROM restaurants WHERE id = $2 AND tenant_id = $1)
+		  AND EXISTS (SELECT 1 FROM users WHERE id = $7 AND tenant_id = $1)
 		RETURNING id
 	`
 
@@ -184,6 +185,9 @@ func (r *RBACRoleRepository) Create(ctx context.Context, role *RBACRole, created
 		now,
 	).Scan(&id)
 	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return 0, errors.New("restaurant or creator not found in the requested tenant")
+		}
 		return 0, err
 	}
 
