@@ -2,7 +2,7 @@
 import http.cookiejar,json,urllib.request,urllib.error
 from pathlib import Path
 jar=http.cookiejar.CookieJar();op=urllib.request.build_opener(urllib.request.HTTPCookieProcessor(jar));rows=[]
-fixture=json.loads(Path('/opt/servio/ops/aws/evidence/browser-admin.json').read_text())
+fixture=json.loads((Path(__file__).resolve().parents[2]/'ops/aws/evidence/browser-admin.json').read_text())
 for label,method,path,data,expected in [
  ('Super-admin login','POST','/auth/login',fixture,200),
  ('Super-admin session','GET','/auth/session',None,200),
@@ -17,6 +17,6 @@ for label,method,path,data,expected in [
     except urllib.error.HTTPError as e:response=e
     response.read();code=response.status
     rows.append(dict(check=label,actual=code,expected=expected,status='PASS' if code==expected else 'FAIL'))
-Path('/opt/servio/ops/aws/evidence/admin-smoke.json').write_text(json.dumps(rows,indent=2)+'\n')
+(Path(__file__).resolve().parents[2]/'ops/aws/evidence/admin-smoke.json').write_text(json.dumps(rows,indent=2)+'\n')
 for row in rows:print(row['status']+' '+row['check'])
 raise SystemExit(any(r['status']=='FAIL' for r in rows))

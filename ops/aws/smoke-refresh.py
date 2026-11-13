@@ -9,7 +9,7 @@ def request(client,method,path,payload=None):
     r.read();return r.status
 
 def check(name,actual,expected):rows.append(dict(check=name,actual=actual,expected=expected,status='PASS' if actual==expected else 'FAIL'))
-user=json.loads(Path('/opt/servio/ops/aws/evidence/browser-fixtures.json').read_text())[1]
+user=json.loads((Path(__file__).resolve().parents[2]/'ops/aws/evidence/browser-fixtures.json').read_text())[1]
 check('Refresh fixture login',request(op,'POST','/auth/login',{'email':user['email'],'password':user['password']}),200)
 old_jar=http.cookiejar.CookieJar()
 for cookie in jar:old_jar.set_cookie(copy.copy(cookie))
@@ -20,6 +20,6 @@ check('Session identifier rotated',[c.value for c in jar]!=old_values,True)
 check('Refreshed session accepted',request(op,'GET','/auth/session'),200)
 check('Previous session revoked',request(old_op,'GET','/auth/session'),401)
 check('Refreshed session logout',request(op,'POST','/auth/logout',{}),204)
-Path('/opt/servio/ops/aws/evidence/refresh-smoke.json').write_text(json.dumps(rows,indent=2)+'\n')
+(Path(__file__).resolve().parents[2]/'ops/aws/evidence/refresh-smoke.json').write_text(json.dumps(rows,indent=2)+'\n')
 for row in rows:print(row['status']+' '+row['check'])
 raise SystemExit(any(r['status']=='FAIL' for r in rows))

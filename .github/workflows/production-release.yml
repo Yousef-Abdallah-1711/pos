@@ -1,74 +1,68 @@
-name: Build immutable images and gated production release
-
+name: SERVIO automatic staging deployment
 on:
-  # Keep release execution explicitly operator initiated. Passing CI alone must
-  # never start a production deployment.
   workflow_dispatch:
-
+  workflow_run:
+    workflows: [SERVIO verified CI]
+    types: [completed]
 permissions:
   contents: read
-  packages: write
-
+  actions: read
+  packages: read
 concurrency:
-  group: pos-production-release
+  group: servio-staging-deployment
   cancel-in-progress: false
-
 jobs:
-  build-and-push:
-    if: github.repository == 'Yousef-Abdallah-1711/pos' && github.ref == 'refs/heads/main'
+  probe-staging-network:
+    if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-24.04
+    timeout-minutes: 3
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
-        with:
-          ref: ${{ github.sha }}
-      - run: scripts/production/build-and-push-images.sh --push
-        env:
-          GITHUB_SHA: ${{ github.sha }}
-          GHCR_USERNAME: ${{ github.actor }}
-          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-  deploy-production:
-    needs: build-and-push
+      - name: Check staging SSH reachability from the hosted runner
+        run: python3 -c 'import socket; connection=socket.create_connection(("16.192.159.205",22),10); connection.close(); print("PASS hosted-runner SSH connectivity")'
+  deploy-staging:
     if: >-
       github.repository == 'Yousef-Abdallah-1711/pos' &&
-      github.ref == 'refs/heads/main' &&
-      vars.POS_PRODUCTION_DEPLOY_ENABLED == 'true' &&
-      vars.POS_PRODUCTION_READINESS_APPROVED == 'true' &&
-      vars.POS_PRODUCTION_BACKUP_RESTORE_VERIFIED == 'true'
-    environment: production
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.head_branch == 'main' &&
+      github.event.workflow_run.event == 'push'
+    environment: staging
     runs-on: ubuntu-24.04
-    concurrency:
-      group: pos-production-host
-      cancel-in-progress: false
+    timeout-minutes: 25
     steps:
-      - name: Require protected host access settings
-        shell: bash
-        run: |
-          test -n "$POS_PROD_HOST"
-          test -n "$POS_PROD_USER"
-          test -n "$POS_PROD_SSH_KEY"
-          test -n "$POS_PROD_SSH_KNOWN_HOSTS"
+      - name: Verify current main and accepted CI identity
         env:
-          POS_PROD_HOST: ${{ secrets.POS_PROD_HOST }}
-          POS_PROD_USER: ${{ secrets.POS_PROD_USER }}
-          POS_PROD_SSH_KEY: ${{ secrets.POS_PROD_SSH_KEY }}
-          POS_PROD_SSH_KNOWN_HOSTS: ${{ secrets.POS_PROD_SSH_KNOWN_HOSTS }}
-      - name: Deploy approved immutable release
-        shell: bash
-        env:
-          POS_PROD_HOST: ${{ secrets.POS_PROD_HOST }}
-          POS_PROD_USER: ${{ secrets.POS_PROD_USER }}
-          POS_PROD_SSH_KEY: ${{ secrets.POS_PROD_SSH_KEY }}
-          POS_PROD_SSH_KNOWN_HOSTS: ${{ secrets.POS_PROD_SSH_KNOWN_HOSTS }}
-          GITHUB_SHA: ${{ github.sha }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_SHA: ${{ github.event.workflow_run.head_sha }}
+          REPOSITORY: ${{ github.repository }}
         run: |
           set -euo pipefail
-          key_file="$(mktemp)"
-          known_hosts="$(mktemp)"
-          trap 'rm -f "$key_file" "$known_hosts"' EXIT
-          chmod 600 "$key_file" "$known_hosts"
-          printf '%s\n' "$POS_PROD_SSH_KEY" > "$key_file"
-          printf '%s\n' "$POS_PROD_SSH_KNOWN_HOSTS" > "$known_hosts"
-          ssh_opts=(-i "$key_file" -o UserKnownHostsFile="$known_hosts" -o StrictHostKeyChecking=yes -o BatchMode=yes)
-          ssh "${ssh_opts[@]}" "$POS_PROD_USER@$POS_PROD_HOST" \
-            'POS_PRODUCTION_READINESS_APPROVED=true POS_BACKUP_RESTORE_VERIFIED=true /usr/local/sbin/rakmyat-pos-release-deploy '"$GITHUB_SHA"
+          [[ "$RELEASE_SHA" =~ ^[0-9a-f]{40}$ ]]
+          test "$(gh api "repos/$REPOSITORY/git/ref/heads/main" --jq .object.sha)" = "$RELEASE_SHA"
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: release-manifest
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Deploy immutable staging release over verified SSH
+        env:
+          SERVIO_HOST: ${{ secrets.SERVIO_STAGING_HOST }}
+          SERVIO_USER: ${{ secrets.SERVIO_STAGING_USER }}
+          SERVIO_SSH_KEY: ${{ secrets.SERVIO_STAGING_SSH_KEY }}
+          SERVIO_KNOWN_HOSTS: ${{ secrets.SERVIO_STAGING_KNOWN_HOSTS }}
+          RELEASE_SHA: ${{ github.event.workflow_run.head_sha }}
+          REGISTRY_USER: ${{ github.actor }}
+          REGISTRY_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$SERVIO_HOST" && test -n "$SERVIO_USER"
+          test -n "$SERVIO_SSH_KEY" && test -n "$SERVIO_KNOWN_HOSTS"
+          private_dir="$(mktemp -d)"
+          trap 'rm -rf "$private_dir"' EXIT
+          chmod 700 "$private_dir"
+          printf '%s\n' "$SERVIO_SSH_KEY" > "$private_dir/key"
+          printf '%s\n' "$SERVIO_KNOWN_HOSTS" > "$private_dir/known_hosts"
+          chmod 600 "$private_dir/key" "$private_dir/known_hosts"
+          python3 -c 'import json,os; d=json.load(open("release-manifest.json")); assert d["sha"] == os.environ["RELEASE_SHA"]; d.update(registry_user=os.environ["REGISTRY_USER"],registry_token=os.environ["REGISTRY_TOKEN"]); print(json.dumps(d))' |
+            ssh -i "$private_dir/key" -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$private_dir/known_hosts" -o BatchMode=yes \
+              "$SERVIO_USER@$SERVIO_HOST" "servio-deploy $RELEASE_SHA"

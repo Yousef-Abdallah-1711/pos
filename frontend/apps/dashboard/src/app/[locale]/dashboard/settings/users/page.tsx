@@ -334,7 +334,7 @@ export default function UsersPage() {
         <Lock className="w-16 h-16 text-gray-400 mb-4" />
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Access Denied</h2>
         <p className="text-gray-600 dark:text-gray-400 text-center">
-          You don't have permission to manage users. Please contact your administrator.
+          You don&apos;t have permission to manage users. Please contact your administrator.
         </p>
       </div>
     )

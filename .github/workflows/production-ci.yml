@@ -52,7 +52,7 @@ jobs:
         run: psql -h 127.0.0.1 -U postgres -d postgres -v ON_ERROR_STOP=1 -v dbname=servio_test -v migrator_pw=disposable-migrator-only -v app_pw=disposable-app-only -f scripts/db/create_runtime_roles.sql
       - run: go mod verify
         working-directory: backend
-      - run: test -z "$(gofmt -l $(git ls-files '*.go'))"
+      - run: go fmt ./... && git diff --exit-code
         working-directory: backend
       - run: go run ./cmd/migrate
         working-directory: backend
@@ -89,6 +89,13 @@ jobs:
         with:
           node-version: 24.22.3
       - run: corepack enable && corepack prepare pnpm@10.34.9 --activate
+      - name: Locate pnpm content-addressed store
+        id: store
+        run: echo "path=$(pnpm store path --silent)" >> "$GITHUB_OUTPUT"
+      - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830
+        with:
+          path: ${{ steps.store.outputs.path }}
+          key: ${{ runner.os }}-node24-pnpm10-${{ hashFiles('frontend/pnpm-lock.yaml') }}
       - run: pnpm install --frozen-lockfile
         working-directory: frontend
       - run: pnpm --filter "./apps/${{ matrix.app }}" lint
@@ -127,9 +134,13 @@ jobs:
       - run: scripts/production/check-nginx-template.sh
       - run: bash -n scripts/production/*.sh
       - run: python3 -m py_compile ops/aws/*.py
+      - run: python3 -m unittest discover -s ops/aws -p 'test_*.py'
       - run: git diff --check
 
   application-images:
+    permissions:
+      contents: read
+      packages: write
     needs: [backend, frontend, security-and-config]
     runs-on: ubuntu-24.04
     timeout-minutes: 60
@@ -139,6 +150,26 @@ jobs:
         run: python3 ops/aws/build-ci-images.py
       - name: Chromium smoke against built frontend images
         run: ops/aws/ci-browser-smoke
+      - name: Publish verified immutable images for trusted releases
+        if: >-
+          github.repository == 'Yousef-Abdallah-1711/pos' &&
+          ((github.event_name == 'push' && github.ref == 'refs/heads/main') ||
+           (github.event_name == 'workflow_dispatch' && github.actor == 'Yousef-Abdallah-1711'))
+        env:
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python3 ops/aws/publish-ci-images.py
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: success() && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+        with:
+          name: release-manifest
+          path: release-manifest.json
+          if-no-files-found: error
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: chromium-smoke-results
+          path: ops/aws/evidence/browser/results.json
+          if-no-files-found: ignore
 
   required:
     if: always()

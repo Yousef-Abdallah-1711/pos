@@ -47,7 +47,7 @@ for name, service in config['services'].items():
         volumes.append(':'.join([source, *rest]))
     service['volumes'] = volumes
 # CI uses its own local CA only; this does not modify or relax public HTTPS.
-caddy = (OPS / 'Caddyfile').read_text()
+caddy = (OPS / 'Caddyfile.public').read_text()
 caddy = re.sub(r'\s*@staging_frontend\s*\{[^}]*\}\s*basic_auth @staging_frontend\s*\{[^\n]*\n\s*staging [^\n]*\n\s*\}', '', caddy)
 (PRIVATE / 'ci-Caddyfile').write_text('{\n local_certs\n}\n' + caddy)
 path = PRIVATE / 'ci-compose.json'
@@ -87,6 +87,6 @@ try:
     output = PRIVATE / 'browser'
     output.mkdir(exist_ok=True)
     image = 'mcr.microsoft.com/playwright@sha256:ee15712262f017b8157421b212b12099146645f44b1bc5c0514cbbe6a229b1d0'
-    subprocess.run(['docker', 'run', '--rm', '--network', 'servio-ci_edge', '--memory', '1500m', '--shm-size', '256m', '-e', 'SERVIO_DISPOSABLE_BROWSER=1', '-v', str(OPS / 'browser-smoke.cjs') + ':/work/browser-smoke.cjs:ro', '-v', str(PRIVATE / 'browser-fixtures.json') + ':/fixtures/users.json:ro', '-v', str(PRIVATE / 'browser-admin.json') + ':/fixtures/admin.json:ro', '-v', str(PRIVATE / 'staging-gateway.json') + ':/fixtures/gateway.json:ro', '-v', str(output) + ':/evidence', image, 'sh', '-c', 'npm install --prefix /tmp/browser --ignore-scripts --no-audit --no-fund playwright@1.64.1 >/tmp/install.log 2>&1 && NODE_PATH=/tmp/browser/node_modules node /work/browser-smoke.cjs'], check=True)
+    subprocess.run(['docker', 'run', '--rm', '--network', 'servio-ci_edge', '--memory', '1500m', '--shm-size', '256m', '-e', 'SERVIO_DISPOSABLE_BROWSER=1', '-v', str(OPS / 'browser-smoke.cjs') + ':/work/browser-smoke.cjs:ro', '-v', str(PRIVATE / 'browser-fixtures.json') + ':/fixtures/users.json:ro', '-v', str(PRIVATE / 'browser-admin.json') + ':/fixtures/admin.json:ro', '-v', str(output) + ':/evidence', image, 'sh', '-c', 'npm install --prefix /tmp/browser --ignore-scripts --no-audit --no-fund playwright@1.64.1 >/tmp/install.log 2>&1 && NODE_PATH=/tmp/browser/node_modules node /work/browser-smoke.cjs'], check=True)
 finally:
     subprocess.run(compose + ['stop'], check=True)

@@ -71,9 +71,9 @@ try:
     run()
 except Exception as exc:
     results.append({'check':'smoke execution','status':'FAIL','error':str(exc)})
-fixture_path=Path('/opt/servio/ops/aws/evidence/browser-fixtures.json')
+fixture_path=(Path(__file__).resolve().parents[2]/'ops/aws/evidence/browser-fixtures.json')
 fixture_path.write_text(json.dumps(fixtures))
 fixture_path.chmod(0o600)
-Path('/opt/servio/ops/aws/evidence/api-smoke.json').write_text(json.dumps(results,indent=2)+'\n')
+(Path(__file__).resolve().parents[2]/'ops/aws/evidence/api-smoke.json').write_text(json.dumps(results,indent=2)+'\n')
 for row in results:print(row['status']+' '+row['check'])
 raise SystemExit(any(r['status']=='FAIL' for r in results))

@@ -585,7 +585,7 @@ export default function OrderDetailsPage() {
             {!canUpdateOrders ? (
               <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
                 <p className="text-sm text-yellow-800 dark:text-yellow-200">
-                  You don't have permission to update order status. Contact your administrator to enable this feature.
+                  You don&apos;t have permission to update order status. Contact your administrator to enable this feature.
                 </p>
               </div>
             ) : (

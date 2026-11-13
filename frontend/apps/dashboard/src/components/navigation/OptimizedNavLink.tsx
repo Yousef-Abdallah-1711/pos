@@ -40,13 +40,12 @@ export function OptimizedNavLink({
     return () => Promise.resolve()
   }
 
-  const { onMouseEnter, onFocus } = preload
-    ? usePreloadRoute(getImportFn(), { delay: preloadDelay })
-    : { onMouseEnter: undefined, onFocus: undefined }
+  const handlers = usePreloadRoute(getImportFn(), { delay: preloadDelay })
+  const onMouseEnter = preload ? handlers.onMouseEnter : undefined
+  const onFocus = preload ? handlers.onFocus : undefined
 
   return (
-    <Link href={href}>
-      <a
+    <Link href={href}
         className={`
           flex items-center gap-3 px-4 py-2 rounded-lg transition-colors
           ${active
@@ -65,7 +64,6 @@ export function OptimizedNavLink({
             {badge}
           </span>
         )}
-      </a>
     </Link>
   )
 }

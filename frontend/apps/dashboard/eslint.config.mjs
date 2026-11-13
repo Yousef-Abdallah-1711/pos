@@ -8,6 +8,9 @@ export default defineConfig([
     'react-hooks/set-state-in-effect': 'warn',
     'react-hooks/preserve-manual-memoization': 'warn',
     'react-hooks/error-boundaries': 'warn',
+    'react-hooks/immutability': 'warn',
+    'react-hooks/purity': 'warn',
+    'react-hooks/refs': 'warn',
   } },
   globalIgnores(['.next/**', 'node_modules/**', 'next-env.d.ts']),
 ]);

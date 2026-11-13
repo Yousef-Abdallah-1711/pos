@@ -8,7 +8,7 @@ def call(method,path,data=None):
     except urllib.error.HTTPError as e:r=e
     raw=r.read();body=json.loads(raw) if raw else {};return r.status,body.get('data',body)
 def record(name,actual,expected):rows.append(dict(check=name,actual=actual,expected=expected,status='PASS' if actual==expected else 'FAIL'))
-fixture=json.loads(Path('/opt/servio/ops/aws/evidence/browser-fixtures.json').read_text())[0]
+fixture=json.loads((Path(__file__).resolve().parents[2]/'ops/aws/evidence/browser-fixtures.json').read_text())[0]
 code,_=call('POST','/auth/login',{'email':fixture['email'],'password':fixture['password']});assert code==200
 code,body=call('GET','/admin/orders?limit=20');assert code==200
 order=next(o for o in body['orders'] if o['customer_name']=='AWS Disposable Test')
@@ -25,6 +25,6 @@ for status in statuses[statuses.index(current)+1:]:
 code,detail=call('GET',path);record('Completed order status',detail.get('status'),'delivered')
 code,product=call('GET','/products/'+str(product_id));record('Tracked inventory after paid completed sale',product.get('quantity_in_stock'),18)
 call('POST','/auth/logout',{})
-Path('/opt/servio/ops/aws/evidence/completed-sale-inventory.json').write_text(json.dumps({'order_id':order_id,'product_id':product_id,'checks':rows},indent=2)+'\n')
+(Path(__file__).resolve().parents[2]/'ops/aws/evidence/completed-sale-inventory.json').write_text(json.dumps({'order_id':order_id,'product_id':product_id,'checks':rows},indent=2)+'\n')
 for row in rows:print(row['status']+' '+row['check'])
 raise SystemExit(any(row['status']=='FAIL' for row in rows))

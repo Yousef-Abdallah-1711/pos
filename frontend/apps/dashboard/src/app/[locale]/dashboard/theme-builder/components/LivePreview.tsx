@@ -2,7 +2,7 @@
 
 import { useThemeStore } from '@/hooks/useThemeStore'
 import { Smartphone, Monitor } from 'lucide-react'
-import { useMemo, useState, type ComponentProps } from 'react'
+import { useState, type ComponentProps } from 'react'
 import { ThemeProvider, SectionRenderer } from '@pos-saas/ui-themes'
 
 /**
@@ -35,9 +35,7 @@ export function LivePreview() {
     { name: 'Border', color: theme.colors.border },
   ]
 
-  const paletteRules = useMemo(
-    () =>
-      paletteItems
+  const paletteRules = paletteItems
         .map(
           (item, index) => `
             .palette-item-${index} .palette-swatch {
@@ -46,9 +44,7 @@ export function LivePreview() {
             }
           `
         )
-        .join('\n'),
-    [paletteItems, theme.colors.border]
-  )
+        .join('\n')
 
   return (
     <div className="live-preview-themed h-full flex flex-col bg-gray-100 dark:bg-gray-900">

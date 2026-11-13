@@ -244,7 +244,7 @@ export function PresetsGallery({ presets, onSelectPreset, isLoading = false }: P
       <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg">
         <p className="text-sm text-blue-700 dark:text-blue-300">
           💡 <strong>Tip:</strong> Click on any template to start creating a new theme based on it.
-          You can then customize all colors, fonts, and content to match your restaurant's brand.
+          You can then customize all colors, fonts, and content to match your restaurant&apos;s brand.
         </p>
       </div>
     </div>

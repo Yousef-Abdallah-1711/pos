@@ -46,7 +46,7 @@ def ws_event(ws):
     except ValueError:return None
 
 def run():
-    fixture=json.loads(Path('/opt/servio/ops/aws/evidence/browser-fixtures.json').read_text())[0]
+    fixture=json.loads((Path(__file__).resolve().parents[2]/'ops/aws/evidence/browser-fixtures.json').read_text())[0]
     jar=http.cookiejar.CookieJar();op=urllib.request.build_opener(urllib.request.HTTPCookieProcessor(jar))
     code,_=req(op,'POST','/auth/login',{'email':fixture['email'],'password':fixture['password']});check('Flow login',code,200)
     stamp=str(int(time.time()))
@@ -75,6 +75,6 @@ def run():
     code,_=req(op,'POST','/auth/logout',{});check('Flow logout',code,[200,204])
 try:run()
 except Exception as e:rows.append(dict(check='POS/KDS flow execution',status='FAIL',error=str(e)))
-Path('/opt/servio/ops/aws/evidence/pos-kds-smoke.json').write_text(json.dumps(rows,indent=2)+'\n')
+(Path(__file__).resolve().parents[2]/'ops/aws/evidence/pos-kds-smoke.json').write_text(json.dumps(rows,indent=2)+'\n')
 for row in rows:print(row['status']+' '+row['check'])
 raise SystemExit(any(r['status']=='FAIL' for r in rows))

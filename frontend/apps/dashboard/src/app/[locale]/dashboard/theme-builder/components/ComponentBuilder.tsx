@@ -142,7 +142,7 @@ export function ComponentBuilder() {
         {theme.components.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-gray-500 text-center">
             <p className="text-sm">No components added yet</p>
-            <p className="text-xs mt-2">Click "Add" to start building</p>
+            <p className="text-xs mt-2">Click &quot;Add&quot; to start building</p>
           </div>
         ) : (
           theme.components.map((component, index) => (
