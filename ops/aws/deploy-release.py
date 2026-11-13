@@ -237,7 +237,7 @@ def replace_metadata(path, raw, mode, owner=False):
 
 def record_release(manifest,path,previous,candidate=False):
     sha=manifest['sha']
-    state={'candidate':candidate,'sha':sha,'compose':str(path),'images':manifest['images'],'image_ids':manifest['image_ids'],'runtime_image_ids':manifest['runtime_image_ids'],'ci_run_id':manifest['ci_run_id'],'previous':{key:previous[key] for key in ['sha','compose','images','image_ids','runtime_image_ids'] if key in previous},'deployed_utc':time.strftime('%Y-%m-%dT%H:%M:%SZ',time.gmtime())}
+    state={'candidate':candidate,'sha':sha,'compose':str(path),'images':manifest['images'],'image_ids':manifest['image_ids'],'runtime_image_ids':manifest['runtime_image_ids'],'ci_run_id':manifest['ci_run_id'],'previous':{key:previous[key] for key in ['sha','compose','images','image_ids','runtime_image_ids','recovery_required','attempted_sha','application_shas'] if key in previous},'deployed_utc':time.strftime('%Y-%m-%dT%H:%M:%SZ',time.gmtime())}
     status=PUBLIC_STATUS
     receipt={'sha':sha,'status':'candidate' if candidate else 'verified','environment':'staging','ci_run_id':manifest['ci_run_id']}
     snapshots={file:file.read_bytes() if file.exists() else None for file in [STATE,status]}
