@@ -33,10 +33,14 @@ x-frontend: &frontend
   environment: &frontend-env
     CI: "true"
     NODE_ENV: development
+    # Server-rendered storefront fetches share the API container network namespace.
+    API_INTERNAL_URL: http://localhost:18080/api/v1
     NEXT_TELEMETRY_DISABLED: "1"
-    NEXT_PUBLIC_API_URL: http://localhost:18080/api/v1
-    NEXT_PUBLIC_API_BASE_URL: http://localhost:18080/api/v1
-    NEXT_PUBLIC_SUPER_ADMIN_API_URL: http://localhost:18080/api/v1/super-admin
+    # Browser requests leave the host-published API at 18082. The internal
+    # container port (18080) is only for health checks and service-local calls.
+    NEXT_PUBLIC_API_URL: http://localhost:${P2A_API_HOST_PORT:-18082}/api/v1
+    NEXT_PUBLIC_API_BASE_URL: http://localhost:${P2A_API_HOST_PORT:-18082}/api/v1
+    NEXT_PUBLIC_SUPER_ADMIN_API_URL: http://localhost:${P2A_API_HOST_PORT:-18082}/api/v1/super-admin
     # Cross-app redirects are browser navigations and must use host-published
     # loopback ports. Service-to-service API requests use their own routing.
     NEXT_PUBLIC_LANDING_URL: http://localhost:13111
@@ -130,15 +134,15 @@ services:
       # Host-published ports support local browser use; container ports support
       # Playwright runners sharing the disposable API network namespace.
       CORS_ORIGINS: http://localhost:13111,http://localhost:13112,http://localhost:13113,http://localhost:13114,http://localhost:3001,http://localhost:3002,http://localhost:3003,http://localhost:3004
-      APP_BASE_URL: http://localhost:18082
+      APP_BASE_URL: http://localhost:${P2A_API_HOST_PORT:-18082}
       DASHBOARD_URL: http://localhost:13112
       LANDING_URL: http://localhost:13111
       RESTAURANT_DOMAIN: localhost:13113
-      UPLOAD_BASE_URL: http://localhost:18082/uploads
-      WEBHOOK_BASE_URL: http://localhost:18082
+      UPLOAD_BASE_URL: http://localhost:${P2A_API_HOST_PORT:-18082}/uploads
+      WEBHOOK_BASE_URL: http://localhost:${P2A_API_HOST_PORT:-18082}
       POS_TEST_SEED: "true"
     ports:
-      - "127.0.0.1:18082:18080"
+      - "127.0.0.1:${P2A_API_HOST_PORT:-18082}:18080"
       - "127.0.0.1:13111:3001"
       - "127.0.0.1:13112:3002"
       - "127.0.0.1:13113:3003"

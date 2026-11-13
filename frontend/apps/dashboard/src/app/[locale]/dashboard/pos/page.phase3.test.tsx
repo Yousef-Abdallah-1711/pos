@@ -127,6 +127,10 @@ vi.mock('@/hooks/useRbac', () => ({
     hasPermission: true,
     loading: false,
   }),
+  useUserPermissions: () => ({
+    checkPermission: () => true,
+    loading: false,
+  }),
 }))
 
 vi.mock('@/lib/translations', () => ({

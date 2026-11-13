@@ -24,6 +24,11 @@ vi.mock('sonner', () => ({
 
 vi.mock('@/hooks/useRbac', () => ({
   useHasPermission: (...args: any[]) => mockUseHasPermission(...args),
+  useUserPermissions: (...args: any[]) => ({
+    checkPermission: (...permissionArgs: any[]) =>
+      mockUseHasPermission(...args, ...permissionArgs).hasPermission,
+    loading: false,
+  }),
 }))
 
 vi.mock('@/hooks/useReports', () => ({

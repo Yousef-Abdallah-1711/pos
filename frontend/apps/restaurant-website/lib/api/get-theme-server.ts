@@ -1,5 +1,5 @@
 import { headers } from 'next/headers';
-import { getApiBaseUrl } from '../config/api';
+import { getServerApiBaseUrl } from '../config/api';
 import { debugError, debugWarn } from '../debug';
 
 /**
@@ -107,7 +107,7 @@ export async function getThemeDataServer(
     }
 
     // Fetch theme data from API
-    const apiUrl = getApiBaseUrl();
+    const apiUrl = getServerApiBaseUrl();
     const response = await fetch(
       `${apiUrl}/public/restaurants/${slug}/theme`,
       {

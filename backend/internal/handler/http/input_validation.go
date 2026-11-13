@@ -2,7 +2,7 @@ package http
 
 import (
 	"fmt"
-	"strings"
+	"unicode/utf8"
 )
 
 type stringLengthRule struct {
@@ -14,10 +14,10 @@ type stringLengthRule struct {
 func validateStringLengths(rules ...stringLengthRule) error {
 	for _, rule := range rules {
 		if rule.Max <= 0 {
-			continue
+			return fmt.Errorf("invalid maximum length for %s", rule.Name)
 		}
-		if len([]rune(strings.TrimSpace(rule.Value))) > rule.Max {
-			return fmt.Errorf("%s exceeds maximum length of %d", rule.Name, rule.Max)
+		if utf8.RuneCountInString(rule.Value) > rule.Max {
+			return fmt.Errorf("%s exceeds the maximum length of %d characters", rule.Name, rule.Max)
 		}
 	}
 	return nil

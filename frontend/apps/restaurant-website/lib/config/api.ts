@@ -26,6 +26,12 @@ function getConfiguredApiBaseUrl(): string | null {
   return normalizeBaseUrl(trimmed);
 }
 
+/** Resolve an optional server-only URL for Server Components and route handlers. */
+export function getServerApiBaseUrl(): string {
+  const internalUrl = process.env.API_INTERNAL_URL?.trim();
+  return internalUrl ? normalizeBaseUrl(internalUrl) : getApiBaseUrl();
+}
+
 export function isProductionRuntime(): boolean {
   return process.env.NODE_ENV === 'production';
 }

@@ -42,7 +42,7 @@ function Ensure-Tenant([string]$suffix, [string]$name) {
             password = $password
             restaurant_name = "WS05 $name Restaurant"
             restaurant_slug = $restaurantSlug
-            phone = '5550100200'
+            phone = '+201000000000'
         } | ConvertTo-Json
         try {
             $null = Invoke-RestMethod -Method Post -Uri "$api/auth/register" -ContentType 'application/json' -Headers @{ Origin = 'http://localhost:13112' } -Body $registration -TimeoutSec 20

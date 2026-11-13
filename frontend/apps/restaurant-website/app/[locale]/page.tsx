@@ -3,7 +3,7 @@ import { headers } from 'next/headers'
 import { AlertCircle } from 'lucide-react'
 import { DynamicHomePage } from '@/components/homepage/dynamic-home-page'
 import { extractThemeConfig } from '@/lib/api/get-theme-server'
-import { getApiBaseUrl } from '@/lib/config/api'
+import { getServerApiBaseUrl } from '@/lib/config/api'
 import { normalizeThemeConfig } from '@/lib/utils/theme-normalizer'
 import type { Product } from '@/components/commerce/product-card'
 import { TEMPLATE_REGISTRY } from '@/lib/utils/theme-templates'
@@ -70,7 +70,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 
   try {
-    const apiUrl = getApiBaseUrl()
+    const apiUrl = getServerApiBaseUrl()
     const themePayload = await fetchJson(
       `${apiUrl}/public/restaurants/${restaurantSlug}/theme`,
       3600
@@ -126,7 +126,7 @@ export default async function HomePage({ params, searchParams }: PageProps) {
     const resolvedSearchParams = (await searchParams) || {}
     const requestedTemplate = typeof resolvedSearchParams.template === 'string' ? resolvedSearchParams.template : ''
     const templateOverride = TEMPLATE_REGISTRY[requestedTemplate]
-    const apiUrl = getApiBaseUrl()
+    const apiUrl = getServerApiBaseUrl()
     const [themePayload, homepagePayload, productsPayload, categoriesPayload] = await Promise.all([
       fetchJson(`${apiUrl}/public/restaurants/${restaurantSlug}/theme`, 3600),
       fetchJson(`${apiUrl}/public/restaurants/${restaurantSlug}/homepage`, 300),

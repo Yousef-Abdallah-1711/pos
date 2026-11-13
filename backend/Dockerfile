@@ -1,11 +1,5 @@
 # Build stage
-FROM golang:1.24-alpine AS builder
-
-# Install build dependencies with retry logic for package mirrors
-RUN apk update && \
-    apk add --no-cache git make || \
-    (apk update && apk add --no-cache git make) || \
-    (sleep 5 && apk update && apk add --no-cache git make)
+FROM golang:1.24.13-alpine3.23@sha256:8bee1901f1e530bfb4a7850aa7a479d17ae3a18beb6e09064ed54cfd245b7191 AS builder
 
 WORKDIR /app
 
@@ -21,27 +15,27 @@ RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o /app/migrate ./cm
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o /app/api ./cmd/api
 
 # Runtime stage
-FROM alpine:3.20
+FROM alpine:3.23@sha256:469c9ea410b9215eaee7976ba6c0639039b444be8e5d638f7abbada189971eb2 AS runtime
+RUN apk add --no-cache ca-certificates postgresql-client curl \
+ && addgroup -S -g 10001 pos \
+ && adduser -S -D -H -u 10001 -G pos pos \
+ && mkdir -p /app/uploads \
+ && chown -R pos:pos /app
 
-# Install runtime dependencies with retry logic for package mirrors
-RUN apk update && \
-    apk add --no-cache ca-certificates postgresql-client curl || \
-    (apk update && apk add --no-cache ca-certificates postgresql-client curl) || \
-    (sleep 5 && apk update && apk add --no-cache ca-certificates postgresql-client curl)
-
-WORKDIR /root/
+WORKDIR /app
 
 # Copy binaries from builder
-COPY --from=builder /app/migrate .
-COPY --from=builder /app/api .
+COPY --from=builder --chown=pos:pos /app/migrate ./migrate
+COPY --from=builder --chown=pos:pos /app/api ./api
 
 # Copy migrations
-COPY --from=builder /app/migrations ./migrations
+COPY --from=builder --chown=pos:pos /app/migrations ./migrations
 
 # Copy startup script
-COPY docker-entrypoint.sh .
-RUN chmod +x docker-entrypoint.sh
+COPY --chown=pos:pos docker-entrypoint.sh ./docker-entrypoint.sh
+RUN chmod 0555 ./docker-entrypoint.sh
 
+USER 10001:10001
 EXPOSE 8080
 
-ENTRYPOINT ["./docker-entrypoint.sh"]
+ENTRYPOINT ["/app/docker-entrypoint.sh"]

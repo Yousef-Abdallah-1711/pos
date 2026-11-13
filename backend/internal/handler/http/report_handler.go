@@ -1289,56 +1289,56 @@ func reportExportTexts(locale string) reportExportTextSet {
 	// CSV and PDF labels are locale-aware (Arabic and English) for report exports.
 	if normalizeReportLocale(locale) == "ar" {
 		return reportExportTextSet{
-			CSVSection:              "Ø§Ù„Ù‚Ø³Ù…",
-			CSVLabel1:               "Ø§Ù„ØªØ³Ù…ÙŠØ©_1",
-			CSVLabel2:               "Ø§Ù„ØªØ³Ù…ÙŠØ©_2",
-			CSVRevenue:              "Ø§Ù„Ø¥ÙŠØ±Ø§Ø¯",
-			CSVOrders:               "Ø§Ù„Ø·Ù„Ø¨Ø§Øª",
-			CSVQuantity:             "Ø§Ù„ÙƒÙ…ÙŠØ©",
-			CSVProduct:              "Ø§Ù„Ù…Ù†ØªØ¬",
-			CSVCategory:             "Ø§Ù„ÙØ¦Ø©",
-			CSVCOGS:                 "ØªÙƒÙ„ÙØ©_Ø§Ù„Ø¨Ø¶Ø§Ø¹Ø©_Ø§Ù„Ù…Ø¨Ø§Ø¹Ø©",
-			CSVGrossProfit:          "Ø§Ù„Ø±Ø¨Ø­_Ø§Ù„Ø¥Ø¬Ù…Ø§Ù„ÙŠ",
-			CSVGrossMarginPct:       "Ù†Ø³Ø¨Ø©_Ø§Ù„Ù‡Ø§Ù…Ø´_Ø§Ù„Ø¥Ø¬Ù…Ø§Ù„ÙŠ",
-			CSVFoodCostPct:          "Ù†Ø³Ø¨Ø©_ØªÙƒÙ„ÙØ©_Ø§Ù„Ø·Ø¹Ø§Ù…",
-			CSVMissingCostData:      "Ø¨ÙŠØ§Ù†Ø§Øª_ØªÙƒÙ„ÙØ©_Ù…ÙÙ‚ÙˆØ¯Ø©",
-			CSVCurrentStockQty:      "ÙƒÙ…ÙŠØ©_Ø§Ù„Ù…Ø®Ø²ÙˆÙ†_Ø§Ù„Ø­Ø§Ù„ÙŠ",
-			CSVSoldQty:              "Ø§Ù„ÙƒÙ…ÙŠØ©_Ø§Ù„Ù…Ø¨Ø§Ø¹Ø©",
-			CSVWasteQty:             "ÙƒÙ…ÙŠØ©_Ø§Ù„Ù‡Ø¯Ø±",
-			CSVAvgInventoryValue:    "Ù…ØªÙˆØ³Ø·_Ù‚ÙŠÙ…Ø©_Ø§Ù„Ù…Ø®Ø²ÙˆÙ†",
-			CSVEstimatedCOGS:        "ØªÙƒÙ„ÙØ©_ØªÙ‚Ø¯ÙŠØ±ÙŠØ©_Ù„Ù„Ø¨Ø¶Ø§Ø¹Ø©_Ø§Ù„Ù…Ø¨Ø§Ø¹Ø©",
-			CSVMonthlyTurnoverRatio: "Ù…Ø¹Ø¯Ù„_Ø§Ù„Ø¯ÙˆØ±Ø§Ù†_Ø§Ù„Ø´Ù‡Ø±ÙŠ",
-			CSVIsSlowMoving:         "Ø¨Ø·ÙŠØ¡_Ø§Ù„Ø­Ø±ÙƒØ©",
-			CSVHour:                 "Ø§Ù„Ø³Ø§Ø¹Ø©",
-			CSVTotal:                "Ø§Ù„Ø¥Ø¬Ù…Ø§Ù„ÙŠ",
+			CSVSection:              "القسم",
+			CSVLabel1:               "التسمية_1",
+			CSVLabel2:               "التسمية_2",
+			CSVRevenue:              "الإيراد",
+			CSVOrders:               "الطلبات",
+			CSVQuantity:             "الكمية",
+			CSVProduct:              "المنتج",
+			CSVCategory:             "الفئة",
+			CSVCOGS:                 "تكلفة_البضاعة_المباعة",
+			CSVGrossProfit:          "الربح_الإجمالي",
+			CSVGrossMarginPct:       "نسبة_الهامش_الإجمالي",
+			CSVFoodCostPct:          "نسبة_تكلفة_الطعام",
+			CSVMissingCostData:      "بيانات_تكلفة_مفقودة",
+			CSVCurrentStockQty:      "كمية_المخزون_الحالي",
+			CSVSoldQty:              "الكمية_المباعة",
+			CSVWasteQty:             "كمية_الهدر",
+			CSVAvgInventoryValue:    "متوسط_قيمة_المخزون",
+			CSVEstimatedCOGS:        "تكلفة_تقديرية_للبضاعة_المباعة",
+			CSVMonthlyTurnoverRatio: "معدل_الدوران_الشهري",
+			CSVIsSlowMoving:         "بطيء_الحركة",
+			CSVHour:                 "الساعة",
+			CSVTotal:                "الإجمالي",
 
-			SectionSummary:           "Ù…Ù„Ø®Øµ",
-			SectionTrend:             "Ø§Ù„Ø§ØªØ¬Ø§Ù‡",
-			SectionHourly:            "Ø¨Ø§Ù„Ø³Ø§Ø¹Ø©",
-			SectionTopItems:          "Ø£ÙØ¶Ù„_Ø§Ù„Ù…Ù†ØªØ¬Ø§Øª",
-			SectionTopCategories:     "Ø£ÙØ¶Ù„_Ø§Ù„ÙØ¦Ø§Øª",
-			SectionLowestMarginItems: "Ø£Ù‚Ù„_Ù‡Ø§Ù…Ø´_Ø±Ø¨Ø­",
-			SectionItems:             "Ø§Ù„Ø¹Ù†Ø§ØµØ±",
+			SectionSummary:           "ملخص",
+			SectionTrend:             "الاتجاه",
+			SectionHourly:            "بالساعة",
+			SectionTopItems:          "أفضل_المنتجات",
+			SectionTopCategories:     "أفضل_الفئات",
+			SectionLowestMarginItems: "أقل_هامش_ربح",
+			SectionItems:             "العناصر",
 
-			LabelTotalRevenue: "Ø¥Ø¬Ù…Ø§Ù„ÙŠ Ø§Ù„Ø¥ÙŠØ±Ø§Ø¯",
-			LabelTotalOrders:  "Ø¥Ø¬Ù…Ø§Ù„ÙŠ Ø§Ù„Ø·Ù„Ø¨Ø§Øª",
-			LabelAvgTicket:    "Ù…ØªÙˆØ³Ø· Ù‚ÙŠÙ…Ø© Ø§Ù„Ø·Ù„Ø¨",
+			LabelTotalRevenue: "إجمالي الإيراد",
+			LabelTotalOrders:  "إجمالي الطلبات",
+			LabelAvgTicket:    "متوسط قيمة الطلب",
 
-			PDFSalesTitle:         "Ù…Ù„Ø®Øµ ØªØ­Ù„ÙŠÙ„Ø§Øª Ø§Ù„Ù…Ø¨ÙŠØ¹Ø§Øª",
-			PDFTopItems:           "Ø£ÙØ¶Ù„ Ø§Ù„Ù…Ù†ØªØ¬Ø§Øª",
-			PDFTopCategories:      "Ø£ÙØ¶Ù„ Ø§Ù„ÙØ¦Ø§Øª",
-			PDFPeakHours:          "Ø³Ø§Ø¹Ø§Øª Ø§Ù„Ø°Ø±ÙˆØ© (Ø£Ø¹Ù„Ù‰ Ø¥ÙŠØ±Ø§Ø¯)",
-			PDFProfitabilityTitle: "Ù…Ù„Ø®Øµ Ø§Ù„Ø±Ø¨Ø­ÙŠØ©",
-			PDFMissingCostNotice:  "ØªØ­Ø°ÙŠØ±: ÙˆØ­Ø¯Ø§Øª Ø¨Ø¯ÙˆÙ† Ø¨ÙŠØ§Ù†Ø§Øª ØªÙƒÙ„ÙØ© (products.cost)",
-			PDFTopProfitableItems: "Ø£Ø¹Ù„Ù‰ Ø§Ù„Ù…Ù†ØªØ¬Ø§Øª Ø±Ø¨Ø­ÙŠØ©",
-			PDFLowestMarginItems:  "Ø£Ù‚Ù„ Ø§Ù„Ù…Ù†ØªØ¬Ø§Øª Ù‡Ø§Ù…Ø´Ù‹Ø§",
-			PDFInventoryTitle:     "Ù…Ù„Ø®Øµ Ø¯ÙˆØ±Ø§Ù† Ø§Ù„Ù…Ø®Ø²ÙˆÙ†",
-			PDFTrackedProducts:    "Ø§Ù„Ù…Ù†ØªØ¬Ø§Øª Ø§Ù„Ù…ØªØªØ¨Ø¹Ø©",
-			PDFInventoryValue:     "Ù‚ÙŠÙ…Ø© Ø§Ù„Ù…Ø®Ø²ÙˆÙ†",
-			PDFAvgMonthlyTurnover: "Ù…ØªÙˆØ³Ø· Ø§Ù„Ø¯ÙˆØ±Ø§Ù† Ø§Ù„Ø´Ù‡Ø±ÙŠ",
-			PDFSlowMovers:         "Ø¨Ø·ÙŠØ¦Ø© Ø§Ù„Ø­Ø±ÙƒØ©",
-			PDFTopTurnover:        "Ø£Ø¹Ù„Ù‰ Ø¯ÙˆØ±Ø§Ù†",
-			PDFSlowMovingItems:    "Ø§Ù„Ù…Ù†ØªØ¬Ø§Øª Ø¨Ø·ÙŠØ¦Ø© Ø§Ù„Ø­Ø±ÙƒØ©",
+			PDFSalesTitle:         "ملخص تحليلات المبيعات",
+			PDFTopItems:           "أفضل المنتجات",
+			PDFTopCategories:      "أفضل الفئات",
+			PDFPeakHours:          "ساعات الذروة (أعلى إيراد)",
+			PDFProfitabilityTitle: "ملخص الربحية",
+			PDFMissingCostNotice:  "تحذير: وحدات بدون بيانات تكلفة (products.cost)",
+			PDFTopProfitableItems: "أعلى المنتجات ربحية",
+			PDFLowestMarginItems:  "أقل المنتجات هامشًا",
+			PDFInventoryTitle:     "ملخص دوران المخزون",
+			PDFTrackedProducts:    "المنتجات المتتبعة",
+			PDFInventoryValue:     "قيمة المخزون",
+			PDFAvgMonthlyTurnover: "متوسط الدوران الشهري",
+			PDFSlowMovers:         "بطيئة الحركة",
+			PDFTopTurnover:        "أعلى دوران",
+			PDFSlowMovingItems:    "المنتجات بطيئة الحركة",
 		}
 	}
 
@@ -1399,9 +1399,9 @@ func reportExportTexts(locale string) reportExportTextSet {
 func reportExportBool(value bool, locale string) string {
 	if normalizeReportLocale(locale) == "ar" {
 		if value {
-			return "Ù†Ø¹Ù…"
+			return "نعم"
 		}
-		return "Ù„Ø§"
+		return "لا"
 	}
 	if value {
 		return "true"
@@ -1411,7 +1411,7 @@ func reportExportBool(value bool, locale string) string {
 
 func formatReportCurrency(amount float64, locale string) string {
 	if normalizeReportLocale(locale) == "ar" {
-		return fmt.Sprintf("%.2f Ø¬.Ù…", amount)
+		return fmt.Sprintf("%.2f ج.م", amount)
 	}
 	return fmt.Sprintf("EGP %.2f", amount)
 }
@@ -1747,11 +1747,11 @@ func newReportPDF(title string, filters map[string]interface{}, generatedAt stri
 	if isArabic {
 		headerAlign = "R"
 		footerAlign = "L"
-		dateRangeLabel = asciiSafe("Ø§Ù„ÙØªØ±Ø©")
-		granularityLabel = asciiSafe("Ø§Ù„ØªØ¬Ù…ÙŠØ¹")
-		topLimitLabel = asciiSafe("Ø§Ù„Ø­Ø¯ Ø§Ù„Ø£Ø¹Ù„Ù‰")
-		generatedAtLabel = asciiSafe("ÙˆÙ‚Øª Ø§Ù„ØªÙˆÙ„ÙŠØ¯")
-		pageLabel = "ØµÙØ­Ø©"
+		dateRangeLabel = asciiSafe("الفترة")
+		granularityLabel = asciiSafe("التجميع")
+		topLimitLabel = asciiSafe("الحد الأعلى")
+		generatedAtLabel = asciiSafe("وقت التوليد")
+		pageLabel = "صفحة"
 	}
 	pdf.SetHeaderFuncMode(func() {
 		pdf.SetFillColor(31, 41, 55)
@@ -1766,7 +1766,7 @@ func newReportPDF(title string, filters map[string]interface{}, generatedAt stri
 		if to, ok := filters["date_to"]; ok {
 			toValue := formatPDFHeaderValue(fmt.Sprint(to), isArabic)
 			if isArabic {
-				rangeLine += fmt.Sprintf(" %s %s", asciiSafe("Ø¥Ù„Ù‰"), toValue)
+				rangeLine += fmt.Sprintf(" %s %s", asciiSafe("إلى"), toValue)
 			} else {
 				rangeLine += fmt.Sprintf(" to %s", toValue)
 			}
@@ -2049,7 +2049,7 @@ func fitPDFText(pdf *fpdf.Fpdf, text string, width float64) string {
 
 func pdfNoDataText(locale string) string {
 	if normalizeReportLocale(locale) == "ar" {
-		return "Ù„Ø§ ØªÙˆØ¬Ø¯ Ø¨ÙŠØ§Ù†Ø§Øª Ù…ØªØ§Ø­Ø©"
+		return "لا توجد بيانات متاحة"
 	}
 	return "No data available"
 }
@@ -2090,11 +2090,11 @@ func localizePDFGranularity(value string, isArabic bool) string {
 	}
 	switch strings.ToLower(strings.TrimSpace(value)) {
 	case "day":
-		return asciiSafe("ÙŠÙˆÙ…ÙŠ")
+		return asciiSafe("يومي")
 	case "week":
-		return asciiSafe("Ø£Ø³Ø¨ÙˆØ¹ÙŠ")
+		return asciiSafe("أسبوعي")
 	case "month":
-		return asciiSafe("Ø´Ù‡Ø±ÙŠ")
+		return asciiSafe("شهري")
 	default:
 		return value
 	}

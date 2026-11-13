@@ -33,14 +33,17 @@ type ProfitLossReport struct {
 }
 
 type BalanceSheetReport struct {
-	AsOfDate         string                `json:"as_of_date"`
-	Assets           []FinancialReportLine `json:"assets"`
-	Liabilities      []FinancialReportLine `json:"liabilities"`
-	Equity           []FinancialReportLine `json:"equity"`
-	TotalAssets      float64               `json:"total_assets"`
-	TotalLiabilities float64               `json:"total_liabilities"`
-	TotalEquity      float64               `json:"total_equity"`
-	EquationBalanced bool                  `json:"equation_balanced"`
+	AsOfDate            string                `json:"as_of_date"`
+	Assets              []FinancialReportLine `json:"assets"`
+	Liabilities         []FinancialReportLine `json:"liabilities"`
+	Equity              []FinancialReportLine `json:"equity"`
+	TotalAssets         float64               `json:"total_assets"`
+	TotalLiabilities    float64               `json:"total_liabilities"`
+	TotalEquity         float64               `json:"total_equity"`
+	EquationBalanced    bool                  `json:"equation_balanced"`
+	IntegrityStatus     string                `json:"integrity_status"`
+	EquationDifference  float64               `json:"equation_difference"`
+	IntegrityCheckBasis string                `json:"integrity_check_basis"`
 }
 
 type CashFlowReport struct {
@@ -333,7 +336,16 @@ func (uc *FinancialReportUseCase) GenerateBalanceSheet(tenantID, restaurantID in
 		return report, err
 	}
 
+	// Keep the existing equation rule during Phase 00. This surfaces its result without
+	// changing report totals or introducing a new rounding/accounting policy.
 	report.EquationBalanced = round2(report.TotalAssets) == round2(report.TotalLiabilities+report.TotalEquity)
+	report.EquationDifference = report.TotalAssets - report.TotalLiabilities - report.TotalEquity
+	report.IntegrityCheckBasis = "existing_round2_equation_check"
+	if report.EquationBalanced {
+		report.IntegrityStatus = "RECONCILED"
+	} else {
+		report.IntegrityStatus = "UNRECONCILED"
+	}
 	return report, nil
 }
 

@@ -1327,6 +1327,11 @@
       "profitLossExportTitle": "Profit & Loss Report",
       "balanceSheetSubtitle": "Assets, liabilities, and equity as of a specific date.",
       "balanceSheetExportTitle": "Balance Sheet Report",
+      "integrity": {
+        "unreconciledTitle": "This balance sheet is unreconciled",
+        "unreconciledDescription": "The accounting equation does not balance. The figures remain visible for investigation, but this report must not be treated as final. PDF export is unavailable until the report passes the equation check.",
+        "reconciledCaveat": "The balance sheet passes the current application equation check. This status is not an accountant's approval or a certification of financial statements."
+      },
       "cashFlowStatement": "Cash Flow Statement",
       "cashFlowSubtitle": "Cash movement grouped by operating, investing, and financing activity.",
       "cashFlowExportTitle": "Cash Flow Report",
