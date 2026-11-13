@@ -11,6 +11,7 @@ sudo chmod 0600 /var/log/servio-deploy/agent.log
 sudo install -o root -g root -m 0644 ops/aws/servio-deploy.logrotate /etc/logrotate.d/servio-deploy
 sudo install -d -o root -g root -m 0755 /var/lib/servio-deployer/public
 sudo install -o root -g root -m 0755 ops/aws/pull-agent.py /usr/local/sbin/servio-pull-agent
+sudo install -o root -g root -m 0644 ops/aws/deployment_recovery.py /usr/local/lib/servio/deployment_recovery.py
 sudo install -o root -g root -m 0644 ops/aws/deploy-release.py /usr/local/lib/servio/deploy_release.py
 sudo install -o root -g root -m 0644 ops/aws/servio-deploy.service /etc/systemd/system/servio-deploy.service
 sudo install -o root -g root -m 0644 ops/aws/servio-deploy.timer /etc/systemd/system/servio-deploy.timer

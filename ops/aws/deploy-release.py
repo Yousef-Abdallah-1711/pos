@@ -14,6 +14,9 @@ import tempfile
 import time
 import urllib.request
 
+sys.path.insert(0,str(Path(__file__).resolve().parent))
+from deployment_recovery import compatible_recovery, requires_compatible_backend
+
 ROOT = Path('/opt/servio')
 OPS = ROOT / 'ops/aws'
 REPO = 'Yousef-Abdallah-1711/pos'
@@ -100,12 +103,14 @@ def verify_migrations(destination, previous_path):
     policy=Path('/etc/servio/approved-migrations.json')
     approved=json.loads(policy.read_text()) if policy.exists() else {}
     result=compose(previous_path,'exec','-T','postgres','psql','-U','postgres','-d','servio_staging','-At','-v','ON_ERROR_STOP=1','-c','SELECT version FROM schema_migrations ORDER BY version',stdout=subprocess.PIPE,text=True)
-    applied=set(result.stdout.splitlines())
+    applied=set(result.stdout.splitlines());pending=[]
     for file in sorted((destination/'backend/migrations').glob('*.sql')):
         if file.name in applied:continue
+        pending.append(file.name)
         observed=hashlib.sha256(file.read_bytes()).hexdigest()
         if approved.get(file.name)!=observed:
             raise RuntimeError('Migration requires operator compatibility review: '+file.name)
+    return pending
 
 
 def archive_member(source,name,limit=2*1024**2):
@@ -210,6 +215,18 @@ def rollback_apps(previous_path):
     if failures:
         raise RuntimeError('Application rollback incomplete: '+', '.join(failures))
 
+def recover_failed_deployment(previous,attempt,preserve_backend):
+    if not preserve_backend:return rollback_apps(Path(previous['compose']))
+    state,fallback=compatible_recovery(previous,attempt)
+    receipt={'sha':None,'status':'recovery_required','environment':'staging','attempted_sha':attempt['manifest']['sha']}
+    try:
+        # Never advertise a complete SHA while retaining a compatible new backend.
+        replace_metadata(PUBLIC_STATUS,(json.dumps(receipt)+'\n').encode(),0o644)
+        replace_metadata(STATE,(json.dumps(state,indent=2)+'\n').encode(),0o600,True)
+    finally:
+        rollback_apps(fallback)
+    print('RECOVERY REQUIRED: compatible backend retained; previous frontends restored; SQL unchanged.',file=sys.stderr)
+
 def replace_metadata(path, raw, mode, owner=False):
     path.parent.mkdir(parents=True,exist_ok=True)
     temporary=path.with_suffix('.tmp')
@@ -269,15 +286,22 @@ def deploy(manifest,requested,artifacts,candidate=False):
     previous=json.loads(STATE.read_text()) if STATE.exists() else {'compose':str(OPS/'compose.json')}
     previous_path=Path(previous['compose'])
     destination,path=prepare_release(manifest,sha,artifacts,previous)
-    verify_migrations(destination,previous_path)
+    pending=verify_migrations(destination,previous_path)
+    forward_backend=requires_compatible_backend(pending,previous)
+    backend_ready=False
     runtime=load_verified_images(manifest,artifacts)
     configure_runtime_images(path,runtime)
     backup(previous_path)
-    # Never reverse SQL automatically. Recheck provenance before promotion.
-    compose(path,'run','--rm','--no-deps','migrate')
-    verify_manifest(manifest,requested,candidate=candidate)
+    # A reviewed contract migration may need the new writer before installing guards.
     try:
+        verify_manifest(manifest,requested,candidate=candidate)
+        if forward_backend:
+            compose(path,'up','-d','--no-deps','--wait','--wait-timeout','150','backend')
+            backend_ready=True
+        compose(path,'run','--rm','--no-deps','migrate')
+        verify_manifest(manifest,requested,candidate=candidate)
         for name in SERVICES+['proxy']:
+            if name=='backend' and backend_ready:continue
             compose(path,'up','-d','--no-deps','--wait','--wait-timeout','150',name)
         public_checks()
         acceptance(destination)
@@ -285,7 +309,8 @@ def deploy(manifest,requested,artifacts,candidate=False):
         record_release(dict(manifest,runtime_image_ids=runtime),path,previous,candidate=candidate)
     except Exception:
         print('Deployment failed; restoring prior application configuration. SQL/volumes are preserved.',file=sys.stderr)
-        rollback_apps(previous_path)
+        attempt={'manifest':manifest,'runtime':runtime,'backend_ready':backend_ready}
+        recover_failed_deployment(previous,attempt,forward_backend and (backend_ready or previous.get('recovery_required',False)))
         raise
     print('PASS deployed immutable '+('staging candidate ' if candidate else 'main ')+sha)
 
