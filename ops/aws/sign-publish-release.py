@@ -7,9 +7,12 @@ from pathlib import Path
 import subprocess
 import tempfile
 
+from release_checks import wait_checks
+
 sha=os.environ['GITHUB_SHA']
 if os.environ.get('GITHUB_ACTIONS')!='true' or os.environ.get('GITHUB_REF')!='refs/heads/main' or os.environ.get('GITHUB_EVENT_NAME')!='push':
     raise SystemExit('Protected main push context required')
+wait_checks(sha,int(os.environ['GITHUB_RUN_ID']))
 root=Path('release-bundle')
 manifest=json.loads((root/'release-manifest.json').read_text())
 if manifest['sha']!=sha or manifest['ci_run_id']!=int(os.environ['GITHUB_RUN_ID']):
