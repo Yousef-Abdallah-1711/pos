@@ -594,7 +594,7 @@ This section supersedes §12's earlier Git/test snapshot where they differ. It r
 | CFR-001 | MERGED TO MAIN — PR #29 | PARTIALLY IMPLEMENTED | Add disposable-PostgreSQL acceptance; do not invent rounding policy. |
 | CFR-002 | MERGED TO MAIN — PR #34 | IMPLEMENTED — ACCEPTANCE PENDING | Confirm complete finding-level release gate; PR checks passed. |
 | CFR-003 | NOT STARTED | BLOCKED BY ENVIRONMENT | Reproduce numbering/balance races in disposable PostgreSQL. |
-| CFR-004 | PR #33 MERGED; durable-recovery delta IN PROGRESS | IMPLEMENTED — ACCEPTANCE PENDING | Finish PR review, CI, independent approval and operational review. |
+| CFR-004 | PR #33 MERGED; PR #35 OPEN (draft) | IMPLEMENTED — ACCEPTANCE PENDING | Finish PR checks, independent approval and operational review. |
 | CFR-005 | NOT STARTED | OPEN | Define payment/refund policy and linked reversal workflow after CFR-004. |
 | CFR-006 | NOT STARTED | BLOCKED BY ENVIRONMENT | Build realistic disposable report-performance fixture and measure. |
 | CFR-007 | NOT STARTED | OPEN | Obtain money precision/representation decisions before migration. |
@@ -615,7 +615,7 @@ This section supersedes §12's earlier Git/test snapshot where they differ. It r
 
 ### CFR-004 durable recovery continuation
 
-- **Engineering delivery:** IN PROGRESS on `fix/cfr004-durable-accounting-recovery` in `H:\Projects\pos-cfr004-durable-recovery`, based directly on the current main SHA above. No new PR or commit exists at this snapshot; record its identifiers here after opening it.
+- **Engineering delivery:** PR OPEN (draft) on `fix/cfr004-durable-accounting-recovery` in `H:\Projects\pos-cfr004-durable-recovery`, based directly on the current main SHA above. PR [#35](https://github.com/Yousef-Abdallah-1711/pos/pull/35), implementation commit `34dd55a9d274003ac0f5880f5e5009a695fb7ac9`.
 - **Financial acceptance:** IMPLEMENTED — ACCEPTANCE PENDING. Do not mark VERIFIED FIXED until PR checks, independent approval, migration review and remaining operational limits are accepted.
 - **Source and migration changes:** transactional paid-status plus outbox enqueue in `OrderRepository`; scoped admin handler now reports `accounting_intent`; durable repository supports stable event identity, deduplicated enqueue, `SKIP LOCKED` claim, lease expiry/generation fencing, retryable and terminal failure states, bounded exponential backoff and paid-order reconciliation; worker starts with API lifecycle and logs processing/reconciliation failures. `AutoPostingEngine` now writes order/product inventory sale movements through stable idempotency keys and recognizes legacy movements before backfill replay. Migration 181 adds/backfills the outbox, 182 indexes paid-order recovery scans, 183 fences stale worker claims, and 184 protects replayed order-sale inventory movements.
 - **Acceptance tests:** On isolated disposable PostgreSQL 16 with database timezone `Africa/Cairo`, migration 184 applied through the repository migration runner. Focused tests passed for paid-status/outbox rollback, duplicate delivery and exactly-once sales journal/GL after retry, concurrent claims, expired lease recovery, stale-lease fencing, missing-intent reconciliation, bounded terminal failure, tenant/restaurant scope, legacy movement recognition, injected movement failure rollback and concurrent movement replay. Full `go test -tags=integration ./... -count=1`, ordinary `go test ./...`, `go vet ./...`, `go build ./...`, and `git diff --check` passed on the implementation before the final tracker/PR-reference-only edits. The full tagged run passed with the disposable database in `Africa/Cairo`; the known session/expiry timezone tests therefore passed in the required environment. No production or existing development database was used.
@@ -623,6 +623,7 @@ This section supersedes §12's earlier Git/test snapshot where they differ. It r
 - **PR #29:** merged 2026-11-13; merge commit `57c57373ddd1f0b335369ab65717a036695bddcb`.
 - **PR #33:** merged 2026-11-13; merge commit `c6f320a19ec5a19f6a9ec59e0fe1cf8059a71a8c`.
 - **PR #34:** merged 2026-11-13; merge commit/current main `fc8647d6a0b802c3abf7bc3e93dc0b69e1ca9e8d`.
+- **PR #35:** open as draft; head `34dd55a9d274003ac0f5880f5e5009a695fb7ac9`; merge pending CI and independent approval.
 - **Worktree boundary:** the original protected checkout `H:\Projects\pos` was not changed; implementation is isolated in the dedicated continuation worktree. No merge or deployment occurred in this continuation.
 
 **Single source-of-truth path:** `H:\Projects\pos\FINANCIAL-MODULE-COMPLETE-ISSUES-AND-REMEDIATION-PLAN.md`.
