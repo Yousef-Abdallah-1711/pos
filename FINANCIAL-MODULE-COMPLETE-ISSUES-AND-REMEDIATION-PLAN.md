@@ -202,19 +202,19 @@ Statuses mean: **SOURCE-CONFIRMED** = code/schema establishes the defect or gap;
 - **Acceptance:** Update/delete paid returns conflict; duplicate concurrent mark-paid produces one payment/journal; correction preserves original and nets correctly; payroll report equals GL.
 - **Checklist:** OPEN.
 
-### CFR-010 — Balance Sheet omits current-period income from equity; mainline has no reliable warning/export gate
+### CFR-010 — Balance Sheet omits current-period earnings; guardrails do not repair the equation
 
-- **Severity/status:** P1 — SOURCE-CONFIRMED.
+- **Severity/status:** P1 — IMPLEMENTED / PARTIAL. Main now reports the equation status and blocks Balance Sheet export when unreconciled; the missing current-period earnings calculation and accounting policy remain unresolved.
 - **Problem / impact:** Balance Sheet can fail Assets = Liabilities + Equity whenever period earnings are not closed into retained earnings; report/export may still appear usable.
-- **Current / expected:** Main query selects balance-sheet account types only; it does not derive current earnings from revenue less expenses. `EquationBalanced` is calculated, but main has no Phase 00 warning/export guard. Expected: include correctly derived current earnings or use a completed close/retained earnings model and block misleading exports.
+- **Current / expected:** The report query still selects balance-sheet account types only and does not derive current earnings from revenue less expenses. Main now returns `integrity_status`, `equation_difference`, and `integrity_check_basis`; the dashboard warns on unreconciled reports and blocks Balance Sheet export unless the equation passes. This is a visibility/export safeguard, not a calculation of missing equity or proof that a balanced equation is correct. Expected: include correctly derived current earnings or use a completed close/retained earnings model, and keep misleading exports blocked.
 - **Root cause:** `backend/internal/usecase/financial_report_usecase.go:261-336`, especially account filter at 288-293 and equation at 336. Mainline is checked at fetched SHA.
-- **Reproduction/evidence:** Query and equation source confirms omission path. The prior local Phase 00 candidate's warning/export guard is not on origin/main; no current DB fixture demonstrated a numeric imbalance.
-- **Baseline scope:** Defect and absence of guard on origin/main and current branch. A local-only Phase 00 candidate/dirty artifacts have limited guardrails but are not this branch's fetched main behavior and do not calculate missing equity.
+- **Reproduction/evidence:** The source query confirms the earnings omission. Phase 00 report integrity fields, warning, export guard, and corresponding unit/integration test files are present on current `main` after PR #27 (merge commit `c79bc5e7c3f0b8f32d90c583d31d318c971314ba`). The recorded Phase 00 disposable-PostgreSQL fixture expects a 100.00 asset / 0.00 equity report to remain unchanged and be marked `UNRECONCILED`; a fresh isolated PostgreSQL run on this current base was not available in this session. No accountant-approved current-earnings/retained-earnings calculation has been implemented.
+- **Baseline scope:** At the assessment baseline, the report guard was missing. Current `main` includes the warning/export safeguard through PR #27, while the accounting equation gap remains. The preserved PR #18 contains a WIP copy of earlier evidence; its relevant source and test changes are already present on main. Do not merge the stale preservation branch wholesale.
 - **Recommended solution / components:** Compute as-of net income from posted revenue/expense balances respecting close dates, or enforce close journal and report closed/available state. Preserve equity account presentation and expose equation residual.
 - **Migration:** Possible close/retained-earnings fields only if lifecycle design requires them.
 - **Dependencies/policy:** Accounting basis, close schedule, prior-period adjustment and report cut-off require accountant approval.
-- **Acceptance:** Independent fixtures prove Assets = Liabilities + Equity for open and closed periods; reports/export refuse invalid state; P&L, TB and GL agree.
-- **Checklist:** OPEN.
+- **Acceptance:** Independent fixtures prove Assets = Liabilities + Equity for open and closed periods; reports/export refuse invalid state; P&L, TB and GL agree. Current evidence covers the guard only, not the corrected equation or report-to-ledger reconciliation.
+- **Checklist:** PARTIAL — warning/export gate and tests are on main; current-period earnings and independent reconciliation remain open.
 
 ### CFR-011 — Automatic supplier entry type exceeds journal schema width
 
@@ -542,7 +542,7 @@ Run one issue per implementation session unless prerequisites couple it. “VERI
 - [ ] **OPEN CFR-005** Surface paid-order posting failures and implement linked refund/cancel reversal events. Gate: order/payment/refund totals reconcile to GL.
 - [ ] **OPEN CFR-002** Enforce balanced posted entries and immutability in PostgreSQL. Gate: direct SQL negative tests and safe migration/backfill.
 - [ ] **OPEN CFR-003** Serialize journal state/number/balance writes and prevent duplicate GL effects. Gate: concurrent PG tests.
-- [ ] **OPEN CFR-010** Correct Balance Sheet current earnings/close equation and prevent misleading export. Gate: independent statement fixtures satisfy equation.
+- [ ] **PARTIAL CFR-010** Warning/export gate is on main; derive current earnings or implement approved close/retained earnings and pass independent statement fixtures before closure.
 - [ ] **OPEN CFR-009** Lock paid payroll and correct through reversals. Gate: update/delete/duplicate mark-paid tests and payroll-to-GL reconciliation.
 
 ### P2 — policy dependencies first where marked
