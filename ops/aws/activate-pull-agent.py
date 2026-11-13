@@ -16,11 +16,11 @@ def activate():
     release=ROOT/'releases'/sha
     if Path(state['compose'])!=release/'ops/aws/compose.json':raise RuntimeError('Unexpected deployment directory')
     evidence=release/'ops/aws/evidence'
-    for name in ['api-smoke.json','refresh-smoke.json','admin-smoke.json','pos-kds-smoke.json','completed-sale-inventory.json','browser/results.json']:
+    for name in ['api-smoke.json','refresh-smoke.json','admin-smoke.json','pos-kds-smoke.json','completed-sale-inventory.json','browser/results.json','storefront-browser-flow.json']:
         data=json.loads((evidence/name).read_text());rows=data['checks'] if isinstance(data,dict) else data
         if not rows or any(row.get('status')!='PASS' for row in rows):raise RuntimeError('Acceptance failed: '+name)
     full=json.loads((ROOT/'ops/aws/evidence/full-browser/run.json').read_text())
-    if full.get('sha')!=sha or full.get('observed_sha')!=sha or not full.get('completed_utc') or full.get('failed')!=0 or full.get('passed',0)<1:
+    if full.get('sha')!=sha or full.get('observed_sha')!=sha or not full.get('completed_utc') or full.get('failed')!=0 or full.get('passed',0)<1 or full.get('not_tested')!=0:
         raise RuntimeError('Complete successful browser traversal of this main SHA is required')
     # Normal polling also rechecks pinned signature, current successful main CI and
     # every runtime image identity. It cannot accept a feature-branch candidate.

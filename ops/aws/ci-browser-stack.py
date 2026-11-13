@@ -10,6 +10,7 @@ import secrets
 import ssl
 import socket
 import subprocess
+import runpy
 
 ROOT = Path(__file__).resolve().parents[2]
 OPS = ROOT / 'ops/aws'
@@ -56,7 +57,7 @@ path.write_text(json.dumps(config, indent=2))
 compose = ['docker', 'compose', '--env-file', str(OPS / '.env'), '-f', str(path)]
 
 def sql(text):
-    subprocess.run(compose + ['exec', '-T', 'postgres', 'psql', '-U', 'postgres', '-d', 'servio_ci_test', '-v', 'ON_ERROR_STOP=1'], input=text, text=True, stdout=subprocess.DEVNULL, check=True)
+    return subprocess.run(compose + ['exec', '-T', 'postgres', 'psql', '-U', 'postgres', '-d', 'servio_ci_test', '-qAt', '-v', 'ON_ERROR_STOP=1'], input=text, text=True, stdout=subprocess.PIPE, check=True).stdout
 
 class LoopbackTLS(http.client.HTTPSConnection):
     def connect(self):
@@ -87,6 +88,9 @@ try:
     hashed = crypt.crypt(admin['password'], crypt.mksalt(crypt.METHOD_BLOWFISH))
     sql("UPDATE users SET password_hash = '" + hashed + "' WHERE email = 'superadmin@pos-saas.com' AND password_hash = '!seed-required';")
     sql((OPS / 'align-seeded-storefront.sql').read_text())
+    fixture=sql(runpy.run_path(str(OPS/'seed-storefront-qa.py'))['SQL'])
+    (PRIVATE/'storefront-qa-fixture.json').write_text(fixture)
+    (PRIVATE/'storefront-qa-fixture.json').chmod(0o600)
     (PRIVATE / 'browser-admin.json').write_text(json.dumps(admin))
     (PRIVATE / 'staging-gateway.json').write_text(json.dumps({'username': 'unused-ci', 'password': secrets.token_urlsafe(32)}))
     for p in ['browser-fixtures.json', 'browser-admin.json', 'staging-gateway.json']:
@@ -94,6 +98,6 @@ try:
     output = PRIVATE / 'browser'
     output.mkdir(exist_ok=True)
     image = 'mcr.microsoft.com/playwright@sha256:ee15712262f017b8157421b212b12099146645f44b1bc5c0514cbbe6a229b1d0'
-    subprocess.run(['docker', 'run', '--rm', '--network', 'servio-ci_edge', '--memory', '1500m', '--shm-size', '256m', '-e', 'SERVIO_DISPOSABLE_BROWSER=1', '-v', str(OPS / 'browser-smoke.cjs') + ':/work/browser-smoke.cjs:ro', '-v', str(PRIVATE / 'browser-fixtures.json') + ':/fixtures/users.json:ro', '-v', str(PRIVATE / 'browser-admin.json') + ':/fixtures/admin.json:ro', '-v', str(output) + ':/evidence', image, 'sh', '-c', 'npm install --prefix /tmp/browser --ignore-scripts --no-audit --no-fund playwright@1.64.1 >/tmp/install.log 2>&1 && NODE_PATH=/tmp/browser/node_modules node /work/browser-smoke.cjs'], check=True)
+    subprocess.run(['docker', 'run', '--rm','--user',str(os.getuid())+':'+str(os.getgid()),'--security-opt','no-new-privileges:true','--cap-drop','ALL','-e','NPM_CONFIG_CACHE=/tmp/servio-npm-cache', '--network', 'servio-ci_edge', '--memory', '1500m', '--shm-size', '256m', '-e', 'SERVIO_DISPOSABLE_BROWSER=1', '-e','SERVIO_BROWSER_EVIDENCE=/evidence','-e','SERVIO_STORE_FIXTURE=/fixtures/storefront.json','-v',str(OPS/'browser-storefront-flow.cjs')+':/work/storefront-flow.cjs:ro','-v',str(PRIVATE/'storefront-qa-fixture.json')+':/fixtures/storefront.json:ro', '-v', str(OPS / 'browser-smoke.cjs') + ':/work/browser-smoke.cjs:ro', '-v', str(PRIVATE / 'browser-fixtures.json') + ':/fixtures/users.json:ro', '-v', str(PRIVATE / 'browser-admin.json') + ':/fixtures/admin.json:ro', '-v', str(output) + ':/evidence', image, 'sh', '-c', 'npm install --prefix /tmp/browser --ignore-scripts --no-audit --no-fund playwright@1.64.1 >/tmp/install.log 2>&1 && NODE_PATH=/tmp/browser/node_modules node /work/browser-smoke.cjs && NODE_PATH=/tmp/browser/node_modules node /work/storefront-flow.cjs'], check=True)
 finally:
     subprocess.run(compose + ['stop'], check=True)

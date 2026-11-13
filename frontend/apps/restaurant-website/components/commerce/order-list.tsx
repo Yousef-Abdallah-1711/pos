@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { formatPrice } from "@/lib/utils/format";
 import { Button } from "@pos-saas/ui";
 import { Eye, RefreshCw, AlertCircle } from "lucide-react";
 
@@ -130,7 +131,7 @@ export function OrderList({
                   <p className="text-sm text-gray-600 dark:text-gray-400">
                     {locale === "en" ? "Order #" : "الطلب #"}
                   </p>
-                  <p className="text-lg font-bold text-primary">
+                  <p className="break-all text-lg font-bold text-primary">
                     {order.orderNumber}
                   </p>
                 </div>
@@ -141,7 +142,7 @@ export function OrderList({
                     {locale === "en" ? "Total Amount" : "المبلغ الإجمالي"}
                   </p>
                   <p className="text-lg font-bold">
-                    ${order.totalAmount.toFixed(2)}
+                    {formatPrice(order.totalAmount, locale)}
                   </p>
                 </div>
 

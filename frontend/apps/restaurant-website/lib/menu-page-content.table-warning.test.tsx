@@ -1,3 +1,4 @@
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { render, screen, waitFor } from '@testing-library/react'
 import { MenuPageContent } from '@/app/[locale]/menu/menu-page-content'
 import { useCartStore } from '@/lib/store/cart-store'
@@ -26,6 +27,7 @@ describe('MenuPageContent table warning flow', () => {
 
   it('shows occupied warning and persists table context from QR landing data', async () => {
     render(
+      <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
       <SubdomainProvider>
         <MenuPageContent
           locale="en"
@@ -44,6 +46,7 @@ describe('MenuPageContent table warning flow', () => {
           }}
         />
       </SubdomainProvider>
+      </QueryClientProvider>
     )
 
     expect(screen.getByText('Dine-in Order - Table #8')).toBeInTheDocument()

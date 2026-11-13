@@ -292,6 +292,7 @@ POST /api/v1/notifications/{id}/unread
 POST /api/v1/pos/orders
 POST /api/v1/products
 POST /api/v1/public/orders
+POST /api/v1/public/orders/quote
 POST /api/v1/public/orders/validate
 POST /api/v1/rbac/permissions/assign
 POST /api/v1/rbac/roles

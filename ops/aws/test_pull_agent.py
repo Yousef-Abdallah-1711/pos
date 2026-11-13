@@ -65,14 +65,14 @@ class PullAgentTrustTests(unittest.TestCase):
         target=self.root/'backend.docker.tar.gz'
         with patch.object(agent.urllib.request,'urlopen',return_value=io.BytesIO(b'ac')):
             with self.assertRaisesRegex(RuntimeError,'checksum'):
-                agent.download(release,'backend.docker.tar.gz',target,2,hashlib.sha256(b'ab').hexdigest())
+                agent.download(release,'backend.docker.tar.gz',target,(2,hashlib.sha256(b'ab').hexdigest()))
         self.assertFalse(target.exists())
 
     def test_bounded_download_refuses_extra_bytes(self):
         release={'tag_name':'staging-sha-'+SHA,'assets':[{'name':'backend.docker.tar.gz','browser_download_url':'https://github.com/'+agent.REPO+'/releases/download/staging-sha-'+SHA+'/backend.docker.tar.gz'}]}
         with patch.object(agent.urllib.request,'urlopen',return_value=io.BytesIO(b'abc')):
             with self.assertRaisesRegex(RuntimeError,'exceeds'):
-                agent.download(release,'backend.docker.tar.gz',self.root/'archive',2,hashlib.sha256(b'ab').hexdigest())
+                agent.download(release,'backend.docker.tar.gz',self.root/'archive',(2,hashlib.sha256(b'ab').hexdigest()))
 
     def test_release_cannot_redirect_to_another_artifact_origin(self):
         self.release['assets'][0]['browser_download_url']='https://attacker.example/manifest'
@@ -82,8 +82,14 @@ class PullAgentTrustTests(unittest.TestCase):
     def test_retry_limit_stops_additional_deployment_attempts(self):
         agent.BASE.mkdir()
         (agent.BASE/'attempts.json').write_text(json.dumps({SHA:{'count':3}}))
-        with patch.object(agent,'github',return_value=[self.release]),patch.object(agent,'verify_release') as verify:
+        with patch.object(agent,'github',side_effect=[[self.release],{'object':{'sha':SHA}}]),patch.object(agent,'verify_release') as verify:
             with self.assertRaisesRegex(RuntimeError,'Retry limit'):agent.poll()
             verify.assert_not_called()
+
+    def test_out_of_order_stale_release_does_not_hide_current_main_release(self):
+        stale=dict(self.release,tag_name='staging-sha-'+'b'*40)
+        with patch.object(agent,'github',side_effect=[[stale,self.release],{'object':{'sha':SHA}}]),patch.object(agent,'verify_release',return_value=(self.manifest,self.root)) as verify:
+            agent.poll(check_only=True)
+            verify.assert_called_once_with(self.release)
 
 if __name__=='__main__':unittest.main()

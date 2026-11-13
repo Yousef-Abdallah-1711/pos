@@ -52,7 +52,8 @@ def asset_url(release, name):
         raise RuntimeError('Missing or untrusted release asset: '+name)
     return asset['browser_download_url']
 
-def download(release, name, target, expected_size, expected_digest):
+def download(release, name, target, expected):
+    expected_size,expected_digest=expected
     if target.exists() and target.stat().st_size==expected_size and digest(target)==expected_digest: return
     temporary=target.with_suffix(target.suffix+'.part')
     count=0
@@ -100,11 +101,11 @@ def fetch_artifacts(release, manifest, directory):
         asset=manifest['archives'][name]
         if asset['file']!=name+'.docker.tar.gz' or not isinstance(asset['size'],int) or not 0<asset['size']<=2*1024**3 or not re.fullmatch('[0-9a-f]{64}',asset['sha256']):
             raise RuntimeError('Invalid bounded archive metadata')
-        download(release,asset['file'],directory/asset['file'],asset['size'],asset['sha256'])
+        download(release,asset['file'],directory/asset['file'],(asset['size'],asset['sha256']))
     source=next(a for a in release['assets'] if a['name']=='source.tar.gz')
     if not 0<source['size']<=150*1024**2 or not re.fullmatch('[0-9a-f]{64}',manifest['source_sha256']):
         raise RuntimeError('Invalid source artifact metadata')
-    download(release,'source.tar.gz',directory/'source.tar.gz',source['size'],manifest['source_sha256'])
+    download(release,'source.tar.gz',directory/'source.tar.gz',(source['size'],manifest['source_sha256']))
 
 def deployer():
     spec=importlib.util.spec_from_file_location('servio_installed_deployer','/usr/local/lib/servio/deploy_release.py')
@@ -114,7 +115,8 @@ def deployer():
 
 def poll(check_only=False):
     releases=github('releases?per_page=10')
-    release=next((r for r in releases if re.fullmatch(r'staging-sha-[0-9a-f]{40}',r['tag_name']) and not r['draft']),None)
+    current=github('git/ref/heads/main')['object']['sha']
+    release=next((r for r in releases if r['tag_name']=='staging-sha-'+current and not r['draft']),None)
     if not release: print('NOT READY: no published staging release'); return
     sha=release['tag_name'].removeprefix('staging-sha-')
     attempts_path=BASE/'attempts.json'

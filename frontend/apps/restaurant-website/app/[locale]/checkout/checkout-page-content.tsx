@@ -1,6 +1,10 @@
 ﻿'use client'
 
 import { useState } from 'react'
+import axios from 'axios'
+import { useOrderQuote } from '@/lib/hooks/use-order-quote'
+import { OrderQuoteSummary } from '@/components/commerce/OrderQuoteSummary'
+import { formatPrice } from '@/lib/utils/format'
 import { debugLog } from '@/lib/debug'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -41,7 +45,7 @@ export function CheckoutPageContent({ locale, themeData }: CheckoutPageContentPr
   const secondaryColor = themeData?.colors?.secondary || '#0ea5e9'
 
   const cartItems = useCartStore((state) => state.items)
-  const cartTotal = useCartStore((state) => state.getTotal())
+  const quote = useOrderQuote(cartItems)
   const clearCart = useCartStore((state) => state.clearCart)
   const tableId = useCartStore((state) => state.tableId)
   const tableName = useCartStore((state) => state.tableName)
@@ -67,8 +71,6 @@ export function CheckoutPageContent({ locale, themeData }: CheckoutPageContentPr
     },
   })
 
-  const deliveryFee = isDineIn ? 0 : cartTotal > 50 ? 0 : 5.99
-  const grandTotal = cartTotal + deliveryFee
   const menuPath = isDineIn && tableId ? `/${locale}/table/${tableId}/menu` : `/${locale}/menu`
 
   if (successOrderNumber) {
@@ -114,6 +116,10 @@ export function CheckoutPageContent({ locale, themeData }: CheckoutPageContentPr
 
   const onSubmit = (data: CheckoutFormData) => {
     setError(null)
+    if (!quote.data || quote.isFetching || quote.isError) {
+      setError(locale === 'ar' ? 'يرجى تأكيد الإجمالي أولاً.' : 'Please confirm the total before placing the order.')
+      return
+    }
 
     const customerName = data.customerName?.trim() || ''
     const customerEmail = data.customerEmail?.trim() || ''
@@ -160,6 +166,7 @@ export function CheckoutPageContent({ locale, themeData }: CheckoutPageContentPr
 
     createOrder(
       {
+        expected_total: quote.data.total_amount,
         customer_name: customerName || tableName || `Table #${tableId}`,
         customer_email: customerEmail,
         customer_phone: customerPhone,
@@ -171,17 +178,15 @@ export function CheckoutPageContent({ locale, themeData }: CheckoutPageContentPr
         order_source: isDineIn ? 'dine_in' : 'website',
       },
       {
-        onSuccess: (response) => {
-          const responseData = (response?.data as any) || (response as any)
-          const orderNumber = responseData?.orderNumber || responseData?.order_number
-          if (orderNumber) {
-            setSuccessOrderNumber(orderNumber)
-          }
+        onSuccess: (order) => {
+          setSuccessOrderNumber(order.orderNumber)
           clearCart()
           reset()
         },
-        onError: (err: any) => {
-          const rawMessage = err.response?.data?.error || err.response?.data?.message
+        onError: (err) => {
+          void quote.refetch()
+          const body = axios.isAxiosError<{ error?: string; message?: string }>(err) ? err.response?.data : undefined
+          const rawMessage = body?.error || body?.message
           const message =
             typeof rawMessage === 'string' && rawMessage.trim().length > 0
               ? rawMessage
@@ -323,7 +328,7 @@ export function CheckoutPageContent({ locale, themeData }: CheckoutPageContentPr
                   <div className="checkout-payment-card p-4 border-2 rounded-lg bg-green-50 dark:bg-green-900/20">
                     <input {...register('paymentMethod')} type="hidden" value="cash" />
                     <span className="font-semibold text-green-700 dark:text-green-400">
-                      ðŸ’µ {t('checkout.cash')} {isDineIn ? `(${t('tableOrdering.payAtTable')})` : '(Cash on Delivery)'}
+                      💵 {t('checkout.cash')} {isDineIn ? `(${t('tableOrdering.payAtTable')})` : '(Cash on Delivery)'}
                     </span>
                     <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                       {isDineIn ? t('tableOrdering.payAtTableHint') : 'Pay when your order arrives'}
@@ -331,7 +336,7 @@ export function CheckoutPageContent({ locale, themeData }: CheckoutPageContentPr
                   </div>
                 </div>
 
-                <Button type="submit" disabled={isLoading} className="checkout-submit-button w-full py-3 text-lg">
+                <Button type="submit" disabled={isLoading || !quote.data || quote.isFetching || quote.isError} className="checkout-submit-button w-full py-3 text-lg">
                   {isLoading ? (
                     <>
                       <Loader className="h-5 w-5 mr-2 animate-spin" />
@@ -361,28 +366,13 @@ export function CheckoutPageContent({ locale, themeData }: CheckoutPageContentPr
                       <p className="font-medium">{item.name}</p>
                       <p className="text-sm text-gray-600 dark:text-gray-400">x {item.quantity}</p>
                     </div>
-                    <p className="font-semibold">${(item.total || item.price * item.quantity).toFixed(2)}</p>
+                    <p className="font-semibold">{formatPrice(quote.data?.items.find(line => line.product_id === item.productId)?.total_price ?? item.total ?? item.price * item.quantity, locale)}</p>
                   </div>
                 ))}
               </div>
 
-              <div className="space-y-3 border-t border-gray-200 dark:border-gray-700 pt-4">
-                <div className={`flex justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
-                  <span className="text-gray-600 dark:text-gray-400">{t('common.subtotal')}</span>
-                  <span className="font-semibold">${cartTotal.toFixed(2)}</span>
-                </div>
-
-                <div className={`flex justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
-                  <span className="text-gray-600 dark:text-gray-400">{t('cart.deliveryFee')}</span>
-                  <span className="font-semibold">
-                    {deliveryFee === 0 ? <span className="text-green-600">{t('common.free')}</span> : `$${deliveryFee.toFixed(2)}`}
-                  </span>
-                </div>
-
-                <div className={`flex justify-between text-lg border-t border-gray-200 dark:border-gray-700 pt-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                  <span className="font-bold">{t('common.grandTotal')}</span>
-                  <span className="checkout-grand-total text-2xl font-bold">${grandTotal.toFixed(2)}</span>
-                </div>
+              <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
+                <OrderQuoteSummary state={quote} locale={locale} totalClassName="checkout-grand-total text-2xl font-bold" />
               </div>
 
               <Link href={`/${locale}/cart`} className="checkout-back-link hover:underline text-sm mt-4 block">

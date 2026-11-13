@@ -144,7 +144,7 @@ def load_verified_images(manifest,artifacts):
         checked(['docker','load','-i',str(archive)],stdout=subprocess.DEVNULL)
         tag=manifest['images'][name].split('@')[0]+':sha-'+manifest['sha']
         metadata=json.loads(subprocess.check_output(['docker','image','inspect',tag]))[0]
-        if metadata['Id'] not in identities or metadata['Config'].get('Labels',{}).get('org.opencontainers.image.revision')!=manifest['sha']:
+        if metadata.get('Os')!='linux' or metadata.get('Architecture')!='amd64' or metadata['Id'] not in identities or metadata['Config'].get('Labels',{}).get('org.opencontainers.image.revision')!=manifest['sha']:
             raise RuntimeError('Loaded image identity mismatch: '+name)
         runtime[name]=metadata['Id']
     return runtime
@@ -183,15 +183,21 @@ def public_checks():
 def acceptance(destination):
     evidence = destination / 'ops/aws/evidence'
     evidence.mkdir(mode=0o700)
+    admin=json.loads((OPS/'evidence/browser-admin.json').read_text())
+    if not admin.get('email','').endswith('@example.invalid'):raise RuntimeError('Synthetic acceptance admin required')
+    storefront=json.loads((OPS/'evidence/storefront-qa-fixture.json').read_text())
+    if not storefront.get('synthetic') or storefront.get('tenant_id')!=1 or storefront.get('restaurant_id')!=1:raise RuntimeError('Guarded storefront fixture required')
     shutil.copyfile(OPS / 'evidence/browser-admin.json', evidence / 'browser-admin.json')
+    shutil.copyfile(OPS/'evidence/storefront-qa-fixture.json',evidence/'storefront-qa-fixture.json')
     # Synthetic acceptance admin only; never use the owner's interactive account.
     for file in evidence.iterdir(): file.chmod(0o600)
     (evidence/'.docker').mkdir(mode=0o700)
     checked(['chown', '-R', 'ubuntu:ubuntu', str(evidence)])
     commands = [['python3', str(destination / 'ops/aws' / name)] for name in ['smoke-api.py', 'smoke-refresh.py', 'smoke-admin.py', 'smoke-pos-kds.py', 'check-completed-sale.py']]
     commands.append([str(destination / 'ops/aws/run-browser-checks')])
+    commands.append(['/usr/local/lib/servio/browser/node',str(destination/'ops/aws/browser-storefront-flow.cjs')])
     for command in commands:
-        checked(['runuser','-u','ubuntu','--','env','DOCKER_CONFIG='+str(evidence/'.docker'),*command])
+        checked(['runuser','-u','ubuntu','--','env','DOCKER_CONFIG='+str(evidence/'.docker'),'NODE_PATH=/usr/local/lib/servio/browser/node_modules','PLAYWRIGHT_BROWSERS_PATH=/usr/local/lib/servio/browser/browsers',*command])
 
 def rollback_apps(previous_path):
     failures=[]
@@ -211,7 +217,8 @@ def replace_metadata(path, raw, mode, owner=False):
     if owner:checked(['chown','ubuntu:ubuntu',str(temporary)])
     temporary.replace(path)
 
-def record_release(manifest,sha,path,previous,candidate=False):
+def record_release(manifest,path,previous,candidate=False):
+    sha=manifest['sha']
     state={'candidate':candidate,'sha':sha,'compose':str(path),'images':manifest['images'],'image_ids':manifest['image_ids'],'runtime_image_ids':manifest['runtime_image_ids'],'ci_run_id':manifest['ci_run_id'],'previous':{key:previous[key] for key in ['sha','compose','images','image_ids','runtime_image_ids'] if key in previous},'deployed_utc':time.strftime('%Y-%m-%dT%H:%M:%SZ',time.gmtime())}
     status=PUBLIC_STATUS
     receipt={'sha':sha,'status':'candidate' if candidate else 'verified','environment':'staging','ci_run_id':manifest['ci_run_id']}
@@ -273,7 +280,8 @@ def deploy(manifest,requested,artifacts,candidate=False):
             compose(path,'up','-d','--no-deps','--wait','--wait-timeout','150',name)
         public_checks()
         acceptance(destination)
-        record_release(dict(manifest,runtime_image_ids=runtime),sha,path,previous,candidate=candidate)
+        verify_manifest(manifest,requested,candidate=candidate)
+        record_release(dict(manifest,runtime_image_ids=runtime),path,previous,candidate=candidate)
     except Exception:
         print('Deployment failed; restoring prior application configuration. SQL/volumes are preserved.',file=sys.stderr)
         rollback_apps(previous_path)

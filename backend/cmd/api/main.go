@@ -550,6 +550,7 @@ func main() {
 	// These routes require X-Tenant-ID and X-Restaurant-ID headers from middleware context
 	// POST routes for order creation and validation
 	mux.Handle("POST /api/v1/public/orders", middleware.RateLimitByIP(publicOrderWriteRequestsPerMinute)(tenantContext(http.HandlerFunc(publicOrderHandler.CreateOrder))))
+	mux.Handle("POST /api/v1/public/orders/quote", middleware.RateLimitByIP(publicOrderReadRequestsPerMinute)(tenantContext(http.HandlerFunc(publicOrderHandler.QuoteOrder))))
 	mux.Handle("POST /api/v1/public/orders/validate", middleware.RateLimitByIP(publicOrderReadRequestsPerMinute)(tenantContext(http.HandlerFunc(publicOrderHandler.ValidateOrder))))
 
 	mux.Handle("GET /api/v1/public/orders/number/{number}/lookup", middleware.RateLimitByIP(publicOrderReadRequestsPerMinute)(tenantContext(http.HandlerFunc(publicOrderHandler.GetOrderByNumber))))

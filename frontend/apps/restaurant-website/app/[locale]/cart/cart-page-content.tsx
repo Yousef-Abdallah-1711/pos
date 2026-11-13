@@ -1,6 +1,8 @@
 'use client'
 
 import Link from 'next/link'
+import { useOrderQuote } from '@/lib/hooks/use-order-quote'
+import { OrderQuoteSummary } from '@/components/commerce/OrderQuoteSummary'
 import { useCart } from '@/lib/hooks/use-cart'
 import { Cart } from '@/components/commerce/cart'
 import { createTranslator } from '@/lib/translations'
@@ -20,10 +22,9 @@ export function CartPageContent({ locale, themeData }: CartPageContentProps) {
   const primaryColor = themeData?.colors?.primary || '#f97316'
   const secondaryColor = themeData?.colors?.secondary || '#0ea5e9'
 
-  const { items: cartItems, totalItems: cartItemsCount, totalPrice: orderSubtotal, tableId, tableName } = useCart()
+  const { items: cartItems, totalItems: cartItemsCount, tableId, tableName } = useCart()
   const isDineIn = tableId !== null
-  const deliveryFee = isDineIn ? 0 : orderSubtotal > 50 ? 0 : 5.99
-  const grandTotal = orderSubtotal + deliveryFee
+  const quote = useOrderQuote(cartItems)
 
   if (cartItems.length === 0) {
     return (
@@ -78,24 +79,7 @@ export function CartPageContent({ locale, themeData }: CartPageContentProps) {
                 </div>
               </div>
 
-              <div className={`space-y-3 mb-6 ${isRTL ? 'text-right' : ''}`}>
-                <div className={`flex justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
-                  <span className="text-gray-600 dark:text-gray-400">{t('common.subtotal')}</span>
-                  <span className="font-semibold">${orderSubtotal.toFixed(2)}</span>
-                </div>
-
-                <div className={`flex justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
-                  <span className="text-gray-600 dark:text-gray-400">{t('cart.deliveryFee')}</span>
-                  <span className="text-sm text-green-600">
-                    {deliveryFee === 0 ? t('common.free') : `$${deliveryFee.toFixed(2)}`}
-                  </span>
-                </div>
-
-                <div className={`flex justify-between text-lg border-t border-gray-200 dark:border-gray-700 pt-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                  <span className="font-bold">{t('common.total')}</span>
-                  <span className="cart-total-value text-2xl font-bold">${grandTotal.toFixed(2)}</span>
-                </div>
-              </div>
+              <div className="mb-6"><OrderQuoteSummary state={quote} locale={locale} totalClassName="cart-total-value text-2xl font-bold" /></div>
 
               <Button asChild className="cart-checkout-button w-full py-3 text-lg">
                 <Link href={`/${locale}/checkout`} className="block w-full mb-3">{t('cart.proceedToCheckout')}</Link>
