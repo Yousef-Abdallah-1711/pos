@@ -92,7 +92,7 @@ Statuses mean: **SOURCE-CONFIRMED** = code/schema establishes the defect or gap;
 
 ### CFR-002 — Journal integrity relies too heavily on application checks
 
-- **Severity/status:** P1 — IMPLEMENTED; PR/CI/review acceptance pending. Do not mark VERIFIED FIXED before required CI and at least one independent approval.
+- **Severity/status:** P1 — MERGED TO MAIN via PR #34; financial acceptance remains IMPLEMENTED — ACCEPTANCE PENDING until all §10 acceptance gates are freshly confirmed.
 - **Problem / impact:** Alternate writers, maintenance SQL or races could persist posted unbalanced entries or modify posted details because the database did not enforce journal/ledger integrity.
 - **Current implementation:** New migration `backend/migrations/180_enforce_journal_integrity.sql` rejects inconsistent historical data before applying guards; requires new journals to start as draft; permits only draft→posted/void and audited posted→void transitions; validates exact debit/credit/header equality and matching line-to-GL effects at transaction commit; locks journal rows during repository post/void and transitions to posted before GL inserts within the same transaction; prevents posted journal/line and GL mutation, duplicate GL effects, account/restaurant scope reassignment, and cross-tenant/restaurant journal lines. The existing void workflow remains an audited inverse GL effect on the original journal. No history is rewritten.
 - **Source/test files:** `backend/migrations/180_enforce_journal_integrity.sql`; read-only `backend/scripts/preflight_180_journal_integrity.sql`; emergency downgrade `backend/scripts/rollback_180_journal_integrity.sql`; `backend/internal/repository/journal_entry_repo.go`; new direct-SQL `backend/internal/repository/journal_integrity_postgres_integration_test.go`; adapted CFR-004 atomic-posting and financial-report integration fixtures; updated posting SQL-mock expectations.
@@ -100,7 +100,7 @@ Statuses mean: **SOURCE-CONFIRMED** = code/schema establishes the defect or gap;
 - **PostgreSQL acceptance evidence (2026-11-13):** Direct SQL balanced three-line posting succeeded. Debit-heavy, credit-heavy, and zero-line posting were rejected. Direct UPDATE/DELETE/INSERT against posted lines, posted header amount/status changes, GL UPDATE/DELETE, duplicate GL insertion, cross-tenant account use, and account/restaurant scope moves were rejected. The restricted `pos_app` role has no direct INSERT/UPDATE/DELETE privileges on journal, line, or GL tables. Six concurrent posting attempts against one draft yielded exactly one successful posting and one GL effect per line; audited void then produced exactly two (original+inverse) effects per line, and duplicate void failed. CFR-004 injected line/GL/status failures rolled back. `go test -tags=integration ./... -p 1 -count=1` passed on the disposable PostgreSQL database after setting its timezone to Africa/Cairo; `go test ./... -p 1 -count=1`, `go vet ./...`, `go build ./...`, and `git diff --check` passed. The two unrelated expiry/session integration tests fail with the disposable database timezone set to UTC and pass with Africa/Cairo; their source is unchanged by this PR. No production or development database was used.
 - **Historical-data result:** Existing valid rows were unchanged; preflight is read-only. Migration fails closed on invalid posted balance or missing/duplicate ledger history. No automatic correction, balancing plug, or rounding rule was introduced.
 - **Remaining limitations:** CFR-002 preserves the existing reversal representation; closed-period reversal eligibility/policy remains under CFR-005/CFR-013. Database superusers/table owners can disable triggers, so production database ownership and migration credentials must remain restricted. The migration does not implement durable paid-business-event intent/recovery, which remains the CFR-004 gap.
-- **PR / commit:** PR [#34](https://github.com/Yousef-Abdallah-1711/pos/pull/34); implementation commit `37d77d56dae15ee52fd916755f294b3a7b04ccac`. Keep status acceptance-pending until final CI and independent review gates are satisfied.
+- **PR / commit:** PR [#34](https://github.com/Yousef-Abdallah-1711/pos/pull/34) merged 2026-11-13; implementation commit `37d77d56dae15ee52fd916755f294b3a7b04ccac`. Merge and successful CI establish delivery; the acceptance status above remains conservative pending the complete finding-level release gate.
 - **Checklist:** IMPLEMENTED — ACCEPTANCE PENDING.
 
 ### CFR-003 — Concurrent journal posting, balance update and numbering races
@@ -119,7 +119,7 @@ Statuses mean: **SOURCE-CONFIRMED** = code/schema establishes the defect or gap;
 
 ### CFR-004 — Journal draft creation and GL posting have a recoverable partial-failure window
 
-- **Severity/status:** P1 — PARTIALLY IMPLEMENTED. Local journal creation and GL posting now share one PostgreSQL transaction; business-event durability/recovery remains open.
+- **Severity/status at PR #33 baseline:** P1 — PARTIALLY IMPLEMENTED. Local journal creation and GL posting share one PostgreSQL transaction; the continuation update in §13 records the subsequent durable recovery work.
 - **Problem / impact:** Previously, a draft could commit before GL posting failed. Separately persisted order/payment state can still exist without durable accounting intent after a process failure.
 - **Current implementation:** `CreateAndPostAutoEntry` obtains a transaction-scoped advisory lock keyed by tenant, restaurant, source type/ID, and entry type; checks existing entries within both tenant and restaurant scope; returns an existing posted entry on retry; rejects historical duplicate, draft, void, or unsupported states; creates journal, lines, GL rows, and posted status using the same transaction. No migration was needed. The repository now writes absent JSONB attachments as SQL NULL so a nil attachment payload is valid PostgreSQL input.
 - **Source files changed:** `backend/internal/repository/general_ledger_repo.go`, `backend/internal/repository/journal_entry_repo.go`, `backend/internal/usecase/auto_posting_engine.go`, `backend/cmd/api/main.go`, `backend/internal/usecase/auto_posting_engine_test.go`, `backend/internal/usecase/phase6_accounting_cycle_test.go`, and new `backend/internal/repository/general_ledger_atomic_posting_integration_test.go`.
@@ -127,8 +127,8 @@ Statuses mean: **SOURCE-CONFIRMED** = code/schema establishes the defect or gap;
 - **Remaining acceptance gaps:** Paid-order persistence and auto-posting are not one shared transaction; `OrderUseCase` currently logs/swallows auto-posting errors. No durable event/outbox or crash/restart recovery is included. There is no automatic recovery for a pre-existing draft or void entry; those cases fail closed for manual reconciliation. Do not claim end-to-end paid-event recovery or VERIFIED FIXED.
 - **Required owner/accountant decisions:** Confirm canonical accounting trigger/source identity across payment/order channels and acceptable synchronous posting behavior. Define operational handling for historical orphan drafts/voided sources. No tax, rounding, refund, or reversal policy is changed in this PR.
 - **PR / commit / merge:** PR [#33](https://github.com/Yousef-Abdallah-1711/pos/pull/33) merged 2026-11-13 at `c6f320a19ec5a19f6a9ec59e0fe1cf8059a71a8c`; implementation commit `9c6beb8bd60ba848230c3efa2ccee8cea8e91493`.
-- **Acceptance still required:** The atomic transaction, duplicate replay, isolation, rollback, CFR-001 imbalance regression, handler/usecase tests, standard Go suite, `go vet`, and build are verified. Keep CFR-004 PARTIALLY IMPLEMENTED until durable paid-business-event intent/recovery and failure surfacing are implemented and accepted; do not interpret PR #33’s merge as end-to-end accounting recovery.
-- **Next action:** Continue the separately scoped durable business-event recovery lifecycle after CFR-002 acceptance, preserving the CFR-004 partial status until that work and its restart/replay tests pass.
+- **Acceptance still required at PR #33 baseline:** The atomic transaction, duplicate replay, isolation, rollback, CFR-001 imbalance regression, handler/usecase tests, standard Go suite, `go vet`, and build were verified. PR #33 alone did not include durable paid-business-event intent/recovery; §13 records the continuation and current acceptance gaps.
+- **Next action at PR #33 baseline:** Continue the separately scoped durable business-event recovery lifecycle after CFR-002 acceptance. This action is now in progress as recorded in §13.
 
 ### CFR-005 — Paid orders can suppress posting failures and have no proven cancellation/refund reversal
 
@@ -536,9 +536,9 @@ Run one issue per implementation session unless prerequisites couple it. “VERI
 ### P1 — implement in this order
 
 - [ ] **PARTIAL CFR-001** Reject unbalanced auto-posting before persistence. Focused, package, and full Go suites plus vet/build pass; disposable-PostgreSQL acceptance remains pending. Any currency-specific rounding behavior requires owner/accountant policy approval.
-- [ ] **PARTIALLY IMPLEMENTED CFR-004** Journal+GL are atomic and duplicate source retries are serialized; business-event persistence/recovery and order error surfacing remain open. See the evidence and acceptance gaps above.
+- [ ] **PARTIALLY IMPLEMENTED CFR-004** Main contains the atomic journal/GL transaction from PR #33. Durable recovery is in progress in the continuation worktree; see §12 for current evidence and PR state.
 - [ ] **OPEN CFR-005** Surface paid-order posting failures and implement linked refund/cancel reversal events. Gate: order/payment/refund totals reconcile to GL.
-- [ ] **OPEN CFR-002** Enforce balanced posted entries and immutability in PostgreSQL. Gate: direct SQL negative tests and safe migration/backfill.
+- [ ] **IMPLEMENTED — ACCEPTANCE PENDING CFR-002** PR #34 and migration 180 are merged. PostgreSQL invariants and CI evidence are recorded above; retain the acceptance-pending label until the remaining §10 release gates are confirmed.
 - [ ] **OPEN CFR-003** Serialize journal state/number/balance writes and prevent duplicate GL effects. Gate: concurrent PG tests.
 - [ ] **PARTIAL CFR-010** Warning/export gate is on main; derive current earnings or implement approved close/retained earnings and pass independent statement fixtures before closure.
 - [ ] **OPEN CFR-009** Lock paid payroll and correct through reversals. Gate: update/delete/duplicate mark-paid tests and payroll-to-GL reconciliation.
@@ -582,5 +582,48 @@ Run one issue per implementation session unless prerequisites couple it. “VERI
 - **Unverified limitations:** No rollback/downgrade test, concurrent posting/load test, transaction failure injection, end-to-end refund/cancel, supplier invoice/payment accounting, inventory/COGS valuation, payroll mutation, bank reconciliation, independent financial statement equation fixture, complete tenant/API/export/background negative matrix, or real backend-authenticated browser financial workflow was run. The RLS result covers one repository integration test only. Browser API/auth were mocked. The disposable Docker-backed DB became unavailable; Docker was not restarted. Historical 2026-11-10 screenshots and audit snapshots are not current test results. No financial correctness, production-readiness, IFRS, tax or scale guarantee is made.
 
 **Immediate blocker to further DB testing:** Docker CLI reported it could not connect to `npipe:////./pipe/dockerDesktopLinuxEngine` because the daemon was unavailable. The full disposable migration/test setup had already succeeded; restarting Docker was intentionally avoided because it may affect unrelated containers/services. Resume PostgreSQL-only suites in a newly authorized disposable environment that does not reuse any existing DB or service.
+
+## 13. Current continuation status — 2026-11-13
+
+This section supersedes §12's earlier Git/test snapshot where they differ. It records the current continuation from fetched `origin/main` `fc8647d6a0b802c3abf7bc3e93dc0b69e1ca9e8d`. Engineering delivery and financial acceptance are separate: merged code is not automatically financially accepted. Findings not changed in this continuation retain their issue-specific evidence and next actions in §§4–5.
+
+### Current 21-finding status snapshot
+
+| Finding | Engineering delivery | Financial acceptance | Next action |
+|---|---|---|---|
+| CFR-001 | MERGED TO MAIN — PR #29 | PARTIALLY IMPLEMENTED | Add disposable-PostgreSQL acceptance; do not invent rounding policy. |
+| CFR-002 | MERGED TO MAIN — PR #34 | IMPLEMENTED — ACCEPTANCE PENDING | Confirm complete finding-level release gate; PR checks passed. |
+| CFR-003 | NOT STARTED | BLOCKED BY ENVIRONMENT | Reproduce numbering/balance races in disposable PostgreSQL. |
+| CFR-004 | PR #33 MERGED; PR #35 OPEN (ready for review) | IMPLEMENTED — ACCEPTANCE PENDING | Obtain independent approval and operational review. |
+| CFR-005 | NOT STARTED | OPEN | Define payment/refund policy and linked reversal workflow after CFR-004. |
+| CFR-006 | NOT STARTED | BLOCKED BY ENVIRONMENT | Build realistic disposable report-performance fixture and measure. |
+| CFR-007 | NOT STARTED | OPEN | Obtain money precision/representation decisions before migration. |
+| CFR-008 | NOT STARTED | BLOCKED BY POLICY | Obtain jurisdictional tax and discount rules before changing calculations. |
+| CFR-009 | NOT STARTED | OPEN | Add paid-payroll mutation and duplicate-marked integration coverage. |
+| CFR-010 | MERGED TO MAIN — existing report guard | PARTIALLY IMPLEMENTED | Implement or approve current-earnings/close treatment and independent statements. |
+| CFR-011 | NOT STARTED | BLOCKED BY ENVIRONMENT | Correct schema compatibility and prove supplier posting in PostgreSQL. |
+| CFR-012 | NOT STARTED | OPEN | Define cash movement method and reconcile a cash-flow fixture. |
+| CFR-013 | NOT STARTED | OPEN | Define closed-period correction and linked reversal behavior. |
+| CFR-014 | NOT STARTED | BLOCKED BY POLICY | Obtain inventory costing/COGS timing policy and test end-to-end. |
+| CFR-015 | NOT STARTED | BLOCKED BY ENVIRONMENT | Run financial RBAC/RLS tenant and restaurant negative matrix. |
+| FIN-016 | NOT STARTED | BLOCKED BY POLICY | Confirm gift-card/deposit scope and liability treatment. |
+| FIN-017 | NOT STARTED | BLOCKED BY ENVIRONMENT | Run fixed-asset lifecycle fixtures in isolated PostgreSQL. |
+| FIN-018 | NOT STARTED | OPEN | Obtain close/retained-earnings policy and implement the lifecycle. |
+| FIN-019 | NOT STARTED | BLOCKED BY ENVIRONMENT | Compare CSV/PDF/XLSX outputs and exercise safety/size cases. |
+| FIN-020 | NOT STARTED | BLOCKED BY POLICY | Confirm currencies, consolidation scope and FX policy. |
+| FIN-021 | NOT STARTED | OPEN | Set root language/direction from locale and verify browser behavior. |
+
+### CFR-004 durable recovery continuation
+
+- **Engineering delivery:** PR OPEN (draft) on `fix/cfr004-durable-accounting-recovery` in `H:\Projects\pos-cfr004-durable-recovery`, based directly on the current main SHA above. PR [#35](https://github.com/Yousef-Abdallah-1711/pos/pull/35), implementation commit `34dd55a9d274003ac0f5880f5e5009a695fb7ac9`.
+- **Financial acceptance:** IMPLEMENTED — ACCEPTANCE PENDING. PR checks pass; do not mark VERIFIED FIXED until independent approval, migration review and remaining operational limits are accepted.
+- **Source and migration changes:** transactional paid-status plus outbox enqueue in `OrderRepository`; scoped admin handler now reports `accounting_intent`; durable repository supports stable event identity, deduplicated enqueue, `SKIP LOCKED` claim, lease expiry/generation fencing, retryable and terminal failure states, bounded exponential backoff and paid-order reconciliation; worker starts with API lifecycle and logs processing/reconciliation failures. `AutoPostingEngine` now writes order/product inventory sale movements through stable idempotency keys and recognizes legacy movements before backfill replay. Migration 181 adds/backfills the outbox, 182 indexes paid-order recovery scans, 183 fences stale worker claims, and 184 protects replayed order-sale inventory movements.
+- **Acceptance tests:** On isolated disposable PostgreSQL 16 with database timezone `Africa/Cairo`, migration 184 applied through the repository migration runner. Focused tests passed for paid-status/outbox rollback, duplicate delivery and exactly-once sales journal/GL after retry, concurrent claims, expired lease recovery, stale-lease fencing, missing-intent reconciliation, bounded terminal failure, tenant/restaurant scope, legacy movement recognition, injected movement failure rollback and concurrent movement replay. Full `go test -tags=integration ./... -count=1`, ordinary `go test ./...`, `go vet ./...`, `go build ./...`, and `git diff --check` passed on the implementation before the final tracker/PR-reference-only edits. The full tagged run passed with the disposable database in `Africa/Cairo`; the known session/expiry timezone tests therefore passed in the required environment. No production or existing development database was used.
+- **Remaining limits:** The work is not merged or independently reviewed. Migration 184 forward-applied successfully, and the repository's full migration runner passed in GitHub backend CI against its fresh PostgreSQL service; its rollback script was not separately exercised. Provider-side settlement/webhooks are not coupled to this order outbox. Failed events require operational inspection/redrive; no administrative remediation UI or alert integration is included. Refund/reversal policy remains CFR-005, and no tax, inventory valuation, recognition, or rounding policy was added.
+- **PR #29:** merged 2026-11-13; merge commit `57c57373ddd1f0b335369ab65717a036695bddcb`.
+- **PR #33:** merged 2026-11-13; merge commit `c6f320a19ec5a19f6a9ec59e0fe1cf8059a71a8c`.
+- **PR #34:** merged 2026-11-13; merge commit/current main `fc8647d6a0b802c3abf7bc3e93dc0b69e1ca9e8d`.
+- **PR #35:** open and ready for review; implementation commit `34dd55a9d274003ac0f5880f5e5009a695fb7ac9`; all GitHub checks pass at the last verified head. No independent review is present; merge pending approval. GitHub reports `main` is not branch-protected.
+- **Worktree boundary:** the original protected checkout `H:\Projects\pos` was not changed; implementation is isolated in the dedicated continuation worktree. No merge or deployment occurred in this continuation.
 
 **Single source-of-truth path:** `H:\Projects\pos\FINANCIAL-MODULE-COMPLETE-ISSUES-AND-REMEDIATION-PLAN.md`.

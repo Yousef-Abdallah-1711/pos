@@ -484,7 +484,11 @@ func (h *AdminOrderHandler) UpdatePaymentStatus(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	if err := h.orderUC.UpdatePaymentStatus(tenantID, restaurantID, orderID, req.PaymentStatus); err != nil {
+	var postedBy *int
+	if userID > 0 {
+		postedBy = &userID
+	}
+	if err := h.orderUC.UpdatePaymentStatusAs(tenantID, restaurantID, orderID, req.PaymentStatus, postedBy); err != nil {
 		if strings.Contains(err.Error(), "not found") {
 			respondError(w, http.StatusNotFound, "Order not found")
 			return
@@ -497,16 +501,13 @@ func (h *AdminOrderHandler) UpdatePaymentStatus(w http.ResponseWriter, r *http.R
 		return
 	}
 
+	accountingIntent := "not_applicable"
 	if strings.EqualFold(strings.TrimSpace(req.PaymentStatus), "paid") {
-		var postedBy *int
-		if userID > 0 {
-			postedBy = &userID
-		}
-		h.orderUC.AutoPostPaidOrderByID(tenantID, restaurantID, orderID, postedBy)
+		accountingIntent = "persisted"
 	}
-
 	respondJSON(w, http.StatusOK, map[string]interface{}{
-		"success": true,
+		"success":           true,
+		"accounting_intent": accountingIntent,
 	})
 }
 

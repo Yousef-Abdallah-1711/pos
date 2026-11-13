@@ -13,12 +13,13 @@ import (
 
 // OrderUseCase handles order business logic
 type OrderUseCase struct {
-	orderRepo      *repository.OrderRepository
-	productRepo    *repository.ProductRepository
-	tableRepo      *repository.TableRepository
-	kdsRepo        *repository.KDSRepository
-	kdsBroadcaster KDSBroadcaster
-	autoPosting    AutoPostingService
+	orderRepo        *repository.OrderRepository
+	productRepo      *repository.ProductRepository
+	tableRepo        *repository.TableRepository
+	kdsRepo          *repository.KDSRepository
+	kdsBroadcaster   KDSBroadcaster
+	autoPosting      AutoPostingService
+	accountingEvents *repository.AccountingEventRepository
 }
 
 // NewOrderUseCase creates new order use case
@@ -42,6 +43,11 @@ func (uc *OrderUseCase) SetKDSBroadcaster(broadcaster KDSBroadcaster) {
 // SetAutoPostingEngine links accounting auto-posting to paid order flows.
 func (uc *OrderUseCase) SetAutoPostingEngine(engine AutoPostingService) {
 	uc.autoPosting = engine
+}
+
+// SetAccountingEventRepository connects durable paid-order accounting recovery.
+func (uc *OrderUseCase) SetAccountingEventRepository(events *repository.AccountingEventRepository) {
+	uc.accountingEvents = events
 }
 
 // SetTableRepository links table integration to order creation flow.
@@ -476,11 +482,15 @@ func (uc *OrderUseCase) CompleteDelivery(tenantID, restaurantID, orderID int64) 
 
 // UpdatePaymentStatus updates payment status
 func (uc *OrderUseCase) UpdatePaymentStatus(tenantID, restaurantID, orderID int64, paymentStatus string) error {
+	return uc.UpdatePaymentStatusAs(tenantID, restaurantID, orderID, paymentStatus, nil)
+}
+
+func (uc *OrderUseCase) UpdatePaymentStatusAs(tenantID, restaurantID, orderID int64, paymentStatus string, postedBy *int) error {
 	if !domain.ValidPaymentStatus(paymentStatus) {
 		return errors.New("invalid payment status")
 	}
 
-	err := uc.orderRepo.UpdatePaymentStatus(tenantID, restaurantID, orderID, paymentStatus)
+	err := uc.orderRepo.UpdatePaymentStatusAs(tenantID, restaurantID, orderID, paymentStatus, postedBy)
 	if err != nil {
 		return fmt.Errorf("failed to update payment status: %w", err)
 	}
@@ -489,45 +499,80 @@ func (uc *OrderUseCase) UpdatePaymentStatus(tenantID, restaurantID, orderID int6
 }
 
 // AutoPostPaidOrder creates the sales and COGS journal entries for a paid order.
-func (uc *OrderUseCase) AutoPostPaidOrder(order *domain.Order, postedBy *int) {
+func (uc *OrderUseCase) AutoPostPaidOrder(order *domain.Order, postedBy *int) error {
 	if uc.autoPosting == nil || order == nil {
-		return
+		return errors.New("paid-order accounting is not configured")
 	}
 	if !strings.EqualFold(strings.TrimSpace(order.PaymentStatus), "paid") {
-		return
+		return errors.New("accounting event order is not paid")
 	}
-
-	if err := uc.autoPosting.PostSalesEntry(order, postedBy); err != nil {
-		logAccountingPostingFailure("paid_order", "sales_post", order.TenantID, order.RestaurantID, order.ID, err)
-	}
-	if err := uc.autoPosting.PostCOGSEntry(order, postedBy); err != nil {
-		logAccountingPostingFailure("paid_order", "cogs_post", order.TenantID, order.RestaurantID, order.ID, err)
-	}
+	salesErr := uc.autoPosting.PostSalesEntry(order, postedBy)
+	cogsErr := uc.autoPosting.PostCOGSEntry(order, postedBy)
+	return errors.Join(salesErr, cogsErr)
 }
 
-// AutoPostPaidOrderByID reloads the order before posting to accounting.
-func (uc *OrderUseCase) AutoPostPaidOrderByID(tenantID, restaurantID, orderID int64, postedBy *int) {
-	if uc.autoPosting == nil {
-		return
+// ProcessNextAccountingEvent claims and processes one durable event, returning false when idle.
+func (uc *OrderUseCase) ProcessNextAccountingEvent(ctx context.Context) (bool, error) {
+	if uc.accountingEvents == nil {
+		return false, errors.New("accounting event repository is not configured")
 	}
-
-	order, err := uc.GetOrder(tenantID, restaurantID, orderID)
+	event, err := uc.accountingEvents.ClaimNext(ctx)
 	if err != nil {
-		logAccountingPostingFailure("paid_order", "order_reload", tenantID, restaurantID, orderID, err)
-		return
+		return false, err
 	}
-	uc.AutoPostPaidOrder(order, postedBy)
+	if event == nil {
+		return false, nil
+	}
+	order, err := uc.GetOrder(event.TenantID, event.RestaurantID, event.OrderID)
+	if err == nil {
+		err = uc.AutoPostPaidOrder(order, intPointer(event.PostedBy))
+	}
+	if err != nil {
+		if saveErr := uc.accountingEvents.Fail(ctx, event, err); saveErr != nil {
+			return true, errors.Join(err, saveErr)
+		}
+		log.Printf("[AccountingRecovery] event_id=%s tenant_id=%d restaurant_id=%d order_id=%d status=%s attempt=%d error=%v",
+			event.EventID, event.TenantID, event.RestaurantID, event.OrderID,
+			accountingEventFailureStatus(event), event.Attempts, err)
+		return true, err
+	}
+	if err := uc.accountingEvents.Complete(ctx, event); err != nil {
+		return true, err
+	}
+	log.Printf("[AccountingRecovery] event_id=%s tenant_id=%d restaurant_id=%d order_id=%d status=completed attempt=%d",
+		event.EventID, event.TenantID, event.RestaurantID, event.OrderID, event.Attempts)
+	return true, nil
 }
 
-func logAccountingPostingFailure(sourceEventType, operation string, tenantID, restaurantID, sourceEventID int64, err error) {
-	failureCategory := "posting_failure"
-	if operation == "order_reload" {
-		failureCategory = "order_reload_failure"
+// ReconcileAccountingEvents repairs absent intents and reports stuck or inconsistent states.
+func (uc *OrderUseCase) ReconcileAccountingEvents(ctx context.Context) error {
+	if uc.accountingEvents == nil {
+		return errors.New("accounting event repository is not configured")
 	}
-	log.Printf(
-		"[AccountingAutoPost] source_event_type=%q operation=%q tenant_id=%d restaurant_id=%d source_event_id=%d failure_category=%s recovery_state=not_durable correlation_id=unavailable error_type=%T",
-		sourceEventType, operation, tenantID, restaurantID, sourceEventID, failureCategory, err,
-	)
+	result, err := uc.accountingEvents.ReconcilePaidOrders(ctx)
+	if err != nil {
+		return err
+	}
+	if result.MissingIntents+result.Pending+result.Processing+result.Retryable+result.Failed+result.CompletedWithoutSalesJournal > 0 {
+		log.Printf("[AccountingRecovery] reconciliation missing_intents=%d pending=%d processing=%d retryable=%d failed=%d completed_without_sales_journal=%d",
+			result.MissingIntents, result.Pending, result.Processing, result.Retryable, result.Failed, result.CompletedWithoutSalesJournal)
+	}
+	return nil
+}
+
+func intPointer(value *int64) *int {
+	if value == nil || *value <= 0 {
+		return nil
+	}
+	converted := int(*value)
+	return &converted
+}
+
+func accountingEventFailureStatus(event *repository.AccountingEvent) string {
+	if event.Attempts >= event.MaxAttempts {
+		return repository.AccountingEventFailed
+	}
+	return repository.AccountingEventRetryable
 }
 
 // GetOrderStats retrieves order statistics

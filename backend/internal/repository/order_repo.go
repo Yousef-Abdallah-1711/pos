@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"database/sql"
 	"encoding/json"
 	"errors"
@@ -534,17 +535,28 @@ func (r *OrderRepository) UpdateOrderStatus(tenantID, restaurantID, orderID int6
 
 // UpdatePaymentStatus updates the payment status of an order
 func (r *OrderRepository) UpdatePaymentStatus(tenantID, restaurantID, orderID int64, paymentStatus string) error {
+	return r.UpdatePaymentStatusAs(tenantID, restaurantID, orderID, paymentStatus, nil)
+}
+
+func (r *OrderRepository) UpdatePaymentStatusAs(tenantID, restaurantID, orderID int64, paymentStatus string, postedBy *int) error {
 	if !domain.ValidPaymentStatus(paymentStatus) {
 		return errors.New("invalid payment status")
 	}
 
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	tx, err := r.db.BeginTx(ctx, nil)
+	if err != nil {
+		return fmt.Errorf("begin payment status update: %w", err)
+	}
+	defer tx.Rollback()
 	query := `
 		UPDATE orders
 		SET payment_status = $1, updated_at = CURRENT_TIMESTAMP
 		WHERE id = $2 AND tenant_id = $3 AND restaurant_id = $4
 	`
 
-	result, err := r.db.Exec(query, paymentStatus, orderID, tenantID, restaurantID)
+	result, err := tx.ExecContext(ctx, query, paymentStatus, orderID, tenantID, restaurantID)
 	if err != nil {
 		return fmt.Errorf("failed to update payment status: %w", err)
 	}
@@ -556,6 +568,15 @@ func (r *OrderRepository) UpdatePaymentStatus(tenantID, restaurantID, orderID in
 
 	if rowsAffected == 0 {
 		return errors.New("order not found")
+	}
+	if strings.EqualFold(strings.TrimSpace(paymentStatus), "paid") {
+		events := NewAccountingEventRepository(r.db)
+		if err := events.EnqueuePaidOrderTx(ctx, tx, tenantID, restaurantID, orderID, postedBy); err != nil {
+			return err
+		}
+	}
+	if err := tx.Commit(); err != nil {
+		return fmt.Errorf("commit payment status and accounting intent: %w", err)
 	}
 
 	return nil
