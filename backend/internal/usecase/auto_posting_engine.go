@@ -19,12 +19,12 @@ type AutoPostingService interface {
 }
 
 type AutoPostingEngine struct {
-	autoPostingRepo      *repository.AutoPostingRepository
-	accountRepo          *repository.AccountRepository
-	journalRepo          *repository.JournalEntryRepository
+	autoPostingRepo       *repository.AutoPostingRepository
+	accountRepo           *repository.AccountRepository
+	journalRepo           *repository.JournalEntryRepository
 	inventoryMovementRepo *repository.InventoryMovementRepository
-	generalLedgerRepo    *repository.GeneralLedgerRepository
-	productRepo          *repository.ProductRepository
+	generalLedgerRepo     *repository.GeneralLedgerRepository
+	productRepo           *repository.ProductRepository
 }
 
 func NewAutoPostingEngine(
@@ -464,7 +464,7 @@ func (e *AutoPostingEngine) PostPayrollEntry(salary *domain.Salary, postedBy *in
 			PostedBy:        postedBy,
 		},
 		payrollEntryDate(salary),
-		e.normalizeBalancedLines(lines),
+		lines,
 	)
 	return err
 }
@@ -531,6 +531,10 @@ func (e *AutoPostingEngine) createAndPostEntry(
 	if len(lines) < 2 {
 		return 0, errors.New("at least two journal lines are required")
 	}
+	validatedLines, err := validateAutoPostingLines(lines)
+	if err != nil {
+		return 0, err
+	}
 
 	if entryDate.IsZero() {
 		entryDate = time.Now()
@@ -549,7 +553,7 @@ func (e *AutoPostingEngine) createAndPostEntry(
 		Status:          domain.JournalStatusDraft,
 		CreatedBy:       createdBy,
 		UpdatedBy:       createdBy,
-		Lines:           e.normalizeBalancedLines(lines),
+		Lines:           validatedLines,
 	}
 
 	id, err := e.journalRepo.CreateJournalEntry(&entry)
@@ -628,38 +632,6 @@ func (e *AutoPostingEngine) resolveAccount(tenantID, restaurantID int, candidate
 		}
 	}
 	return nil, fmt.Errorf("account not found for candidates %v", candidates)
-}
-
-func (e *AutoPostingEngine) normalizeBalancedLines(lines []domain.JournalEntryLine) []domain.JournalEntryLine {
-	normalized := make([]domain.JournalEntryLine, 0, len(lines))
-	totalDebit := 0.0
-	totalCredit := 0.0
-	for _, line := range lines {
-		line.DebitAmount = roundedAmount(line.DebitAmount)
-		line.CreditAmount = roundedAmount(line.CreditAmount)
-		if line.DebitAmount <= 0 && line.CreditAmount <= 0 {
-			continue
-		}
-		if line.LineOrder == 0 {
-			line.LineOrder = len(normalized) + 1
-		}
-		totalDebit += line.DebitAmount
-		totalCredit += line.CreditAmount
-		normalized = append(normalized, line)
-	}
-
-	diff := roundedAmount(totalDebit - totalCredit)
-	if math.Abs(diff) <= 0.009 || len(normalized) == 0 {
-		return normalized
-	}
-
-	lastIndex := len(normalized) - 1
-	if diff > 0 {
-		normalized[lastIndex].CreditAmount = roundedAmount(normalized[lastIndex].CreditAmount + diff)
-	} else {
-		normalized[lastIndex].DebitAmount = roundedAmount(normalized[lastIndex].DebitAmount + (-diff))
-	}
-	return normalized
 }
 
 func roundedAmount(value float64) float64 {
