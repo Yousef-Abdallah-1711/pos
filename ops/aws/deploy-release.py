@@ -129,19 +129,27 @@ def rollback_apps(previous_path):
     if failures:
         raise RuntimeError('Application rollback incomplete: '+', '.join(failures))
 
+def replace_metadata(path, raw, mode, owner=False):
+    path.parent.mkdir(parents=True,exist_ok=True)
+    temporary=path.with_suffix('.tmp')
+    temporary.write_bytes(raw)
+    temporary.chmod(mode)
+    if owner:checked(['chown','ubuntu:ubuntu',str(temporary)])
+    temporary.replace(path)
+
 def record_release(manifest,sha,path,previous):
-    state = {'sha': sha, 'compose': str(path), 'images': manifest['images'], 'image_ids':manifest['image_ids'], 'ci_run_id': manifest['ci_run_id'], 'previous':{key:previous[key] for key in ['sha','compose','images','image_ids'] if key in previous}, 'deployed_utc': time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime())}
-    temporary_state=STATE.with_suffix('.tmp')
-    temporary_state.write_text(json.dumps(state,indent=2)+'\n')
-    temporary_state.chmod(0o600)
-    checked(['chown','ubuntu:ubuntu',str(temporary_state)])
-    temporary_state.replace(STATE)
+    state={'sha':sha,'compose':str(path),'images':manifest['images'],'image_ids':manifest['image_ids'],'ci_run_id':manifest['ci_run_id'],'previous':{key:previous[key] for key in ['sha','compose','images','image_ids'] if key in previous},'deployed_utc':time.strftime('%Y-%m-%dT%H:%M:%SZ',time.gmtime())}
     status=Path('/var/lib/servio-deployer/public/release.json')
-    status.parent.mkdir(parents=True,exist_ok=True)
-    temporary=status.with_suffix('.tmp')
-    temporary.write_text(json.dumps({'sha':sha,'status':'verified','environment':'staging','ci_run_id':manifest['ci_run_id']})+'\n')
-    temporary.chmod(0o644)
-    temporary.replace(status)
+    receipt={'sha':sha,'status':'verified','environment':'staging','ci_run_id':manifest['ci_run_id']}
+    snapshots={file:file.read_bytes() if file.exists() else None for file in [STATE,status]}
+    try:
+        replace_metadata(STATE,(json.dumps(state,indent=2)+'\n').encode(),0o600,True)
+        replace_metadata(status,(json.dumps(receipt)+'\n').encode(),0o644)
+    except Exception:
+        for file,raw in snapshots.items():
+            if raw is None:file.unlink(missing_ok=True)
+            else:replace_metadata(file,raw,0o600 if file==STATE else 0o644,file==STATE)
+        raise
 
 
 def deploy(manifest, requested, artifacts):

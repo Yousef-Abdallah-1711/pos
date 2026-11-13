@@ -93,7 +93,10 @@ def verify_release(release):
 def fetch_artifacts(release, manifest, directory):
     if set(manifest.get('images',{}))!=set(SERVICES) or set(manifest.get('archives',{}))!=set(SERVICES):
         raise RuntimeError('Incomplete release artifact set')
+    if set(manifest.get('image_ids',{}))!=set(SERVICES):raise RuntimeError('Incomplete immutable image identities')
     for name in SERVICES:
+        if not re.fullmatch('sha256:[0-9a-f]{64}',manifest['image_ids'][name]):raise RuntimeError('Invalid immutable image identity')
+        if not re.fullmatch('ghcr.io/yousef-abdallah-1711/pos/'+re.escape(name)+'@sha256:[0-9a-f]{64}',manifest['images'][name]):raise RuntimeError('Unapproved immutable registry reference')
         asset=manifest['archives'][name]
         if asset['file']!=name+'.docker.tar.gz' or not isinstance(asset['size'],int) or not 0<asset['size']<=2*1024**3 or not re.fullmatch('[0-9a-f]{64}',asset['sha256']):
             raise RuntimeError('Invalid bounded archive metadata')
