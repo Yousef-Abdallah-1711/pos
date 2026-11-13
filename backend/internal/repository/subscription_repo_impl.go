@@ -47,7 +47,8 @@ func (r *SubscriptionRepositoryImpl) GetTenantSubscriptionInfo(ctx context.Conte
 			disabled_at,
 			disabled_reason,
 			COALESCE(email, ''),
-			COALESCE(phone, '')
+			COALESCE(phone, ''),
+            is_active
 		FROM tenants
 		WHERE id = $1
 	`, tenantID).Scan(
@@ -66,6 +67,7 @@ func (r *SubscriptionRepositoryImpl) GetTenantSubscriptionInfo(ctx context.Conte
 		&disabledReason,
 		&info.ContactEmail,
 		&info.ContactPhone,
+		&info.IsActive,
 	)
 
 	if err == sql.ErrNoRows {
@@ -103,21 +105,11 @@ func (r *SubscriptionRepositoryImpl) GetTenantSubscriptionInfo(ctx context.Conte
 		info.DaysRemaining = 0
 	}
 
-	// Determine access status
-	if info.IsDisabled {
-		info.CanAccess = false
-		blockReason := "tenant_disabled"
-		info.BlockReason = &blockReason
-	} else if info.SubscriptionStatus == "expired" {
-		info.CanAccess = false
-		blockReason := "expired"
-		info.BlockReason = &blockReason
-	} else if info.SubscriptionStatus == "trial" && info.TrialEndDate != nil && time.Now().After(*info.TrialEndDate) {
-		info.CanAccess = false
-		blockReason := "trial_expired"
-		info.BlockReason = &blockReason
-	} else {
-		info.CanAccess = true
+	reason := (domain.TenantAccessState{Active: info.IsActive, Disabled: info.IsDisabled,
+		Status: info.SubscriptionStatus, TrialEnd: info.TrialEndDate, SubscriptionEnd: info.SubscriptionExpiresAt}).BlockReason(time.Now())
+	info.CanAccess = reason == ""
+	if reason != "" {
+		info.BlockReason = &reason
 	}
 
 	log.Printf("[SubscriptionRepo] Query result - status: %s, days_remaining: %d, can_access: %v\n",
@@ -319,7 +311,7 @@ func (r *SubscriptionRepositoryImpl) DisableTenant(ctx context.Context, params *
 	// Get current status
 	var currentStatus string
 	err = tx.QueryRowContext(ctx, `
-		SELECT subscription_status FROM tenants WHERE id = $1
+		SELECT subscription_status FROM tenants WHERE id = $1 FOR UPDATE
 	`, params.TenantID).Scan(&currentStatus)
 
 	if err == sql.ErrNoRows {
@@ -333,11 +325,12 @@ func (r *SubscriptionRepositoryImpl) DisableTenant(ctx context.Context, params *
 	}
 
 	// Update tenant
-	disabledStatus := "disabled"
+	disabledStatus := currentStatus
 	result, err := tx.ExecContext(ctx, `
 		UPDATE tenants
 		SET
 			is_disabled = true,
+            is_active = false,
 			disabled_at = NOW(),
 			disabled_by = $1,
 			disabled_reason = $2,
@@ -395,10 +388,10 @@ func (r *SubscriptionRepositoryImpl) EnableTenant(ctx context.Context, params *d
 
 	// Get current status and check if disabled
 	var currentStatus string
-	var isDisabled bool
+	var isDisabled, isActive bool
 	err = tx.QueryRowContext(ctx, `
-		SELECT subscription_status, is_disabled FROM tenants WHERE id = $1
-	`, params.TenantID).Scan(&currentStatus, &isDisabled)
+		SELECT subscription_status, is_disabled, is_active FROM tenants WHERE id = $1 FOR UPDATE
+	`, params.TenantID).Scan(&currentStatus, &isDisabled, &isActive)
 
 	if err == sql.ErrNoRows {
 		log.Printf("[SubscriptionRepo] ERROR: Tenant not found - tenant_id: %d\n", params.TenantID)
@@ -410,15 +403,20 @@ func (r *SubscriptionRepositoryImpl) EnableTenant(ctx context.Context, params *d
 		return fmt.Errorf("failed to query tenant: %w", err)
 	}
 
-	if !isDisabled {
+	if !isDisabled && isActive {
 		log.Printf("[SubscriptionRepo] ERROR: Tenant is not disabled - tenant_id: %d\n", params.TenantID)
 		return fmt.Errorf("tenant is not disabled")
 	}
 
-	// Restore to trial if no paid subscription
-	restoredStatus := "trial"
-	if currentStatus == "active" || currentStatus == "suspended" {
-		restoredStatus = currentStatus
+	// Manual suspension does not grant a new trial or change billing entitlement.
+	restoredStatus := currentStatus
+	if currentStatus == "disabled" {
+		err = tx.QueryRowContext(ctx, `SELECT old_status FROM tenant_subscription_history
+   WHERE tenant_id = $1 AND action = $2 AND old_status <> 'disabled'
+   ORDER BY created_at DESC, id DESC LIMIT 1`, params.TenantID, domain.ActionTenantDisabled).Scan(&restoredStatus)
+		if err != nil {
+			return fmt.Errorf("cannot restore prior subscription status: %w", err)
+		}
 	}
 
 	// Update tenant
@@ -426,6 +424,7 @@ func (r *SubscriptionRepositoryImpl) EnableTenant(ctx context.Context, params *d
 		UPDATE tenants
 		SET
 			is_disabled = false,
+            is_active = true,
 			enabled_at = NOW(),
 			disabled_by = NULL,
 			disabled_reason = NULL,
@@ -795,36 +794,24 @@ func (r *SubscriptionRepositoryImpl) GetTenantsScheduledForDeletion(ctx context.
 func (r *SubscriptionRepositoryImpl) CheckTenantAccess(ctx context.Context, tenantID int64) (bool, string, error) {
 	log.Printf("[SubscriptionRepo] CheckTenantAccess - tenant_id: %d\n", tenantID)
 
-	var isDisabled bool
-	var status string
-	var trialEndDate sql.NullTime
-
+	var state domain.TenantAccessState
+	var trialEnd, subscriptionEnd sql.NullTime
 	err := r.db.QueryRowContext(ctx, `
-		SELECT is_disabled, subscription_status, trial_end_date
-		FROM tenants
-		WHERE id = $1
-	`, tenantID).Scan(&isDisabled, &status, &trialEndDate)
-
+ SELECT is_active, is_disabled, subscription_status, trial_end_date, subscription_expires_at
+ FROM tenants WHERE id = $1
+ `, tenantID).Scan(&state.Active, &state.Disabled, &state.Status, &trialEnd, &subscriptionEnd)
 	if err == sql.ErrNoRows {
-		log.Printf("[SubscriptionRepo] ERROR: Tenant not found - tenant_id: %d\n", tenantID)
 		return false, "tenant_not_found", fmt.Errorf("tenant not found")
 	}
-
 	if err != nil {
-		log.Printf("[SubscriptionRepo] ERROR: Failed to query tenant - error: %v\n", err)
 		return false, "", fmt.Errorf("failed to check access: %w", err)
 	}
-
-	if isDisabled {
-		log.Printf("[SubscriptionRepo] Tenant is disabled - tenant_id: %d\n", tenantID)
-		return false, "tenant_disabled", nil
+	if trialEnd.Valid {
+		state.TrialEnd = &trialEnd.Time
 	}
-
-	if status == "trial" && trialEndDate.Valid && time.Now().After(trialEndDate.Time) {
-		log.Printf("[SubscriptionRepo] Trial expired - tenant_id: %d\n", tenantID)
-		return false, "trial_expired", nil
+	if subscriptionEnd.Valid {
+		state.SubscriptionEnd = &subscriptionEnd.Time
 	}
-
-	log.Printf("[SubscriptionRepo] Tenant has access - tenant_id: %d\n", tenantID)
-	return true, "", nil
+	reason := state.BlockReason(time.Now())
+	return reason == "", reason, nil
 }

@@ -549,9 +549,9 @@ func main() {
 	// Public routes - Order API (minimal authentication required)
 	// These routes require X-Tenant-ID and X-Restaurant-ID headers from middleware context
 	// POST routes for order creation and validation
-	mux.Handle("POST /api/v1/public/orders", middleware.RateLimitByIP(publicOrderWriteRequestsPerMinute)(tenantContext(http.HandlerFunc(publicOrderHandler.CreateOrder))))
-	mux.Handle("POST /api/v1/public/orders/quote", middleware.RateLimitByIP(publicOrderReadRequestsPerMinute)(tenantContext(http.HandlerFunc(publicOrderHandler.QuoteOrder))))
-	mux.Handle("POST /api/v1/public/orders/validate", middleware.RateLimitByIP(publicOrderReadRequestsPerMinute)(tenantContext(http.HandlerFunc(publicOrderHandler.ValidateOrder))))
+	mux.Handle("POST /api/v1/public/orders", middleware.RateLimitByIP(publicOrderWriteRequestsPerMinute)(tenantContext(middleware.TenantStatusMiddleware(subscriptionRepo)(http.HandlerFunc(publicOrderHandler.CreateOrder)))))
+	mux.Handle("POST /api/v1/public/orders/quote", middleware.RateLimitByIP(publicOrderReadRequestsPerMinute)(tenantContext(middleware.TenantStatusMiddleware(subscriptionRepo)(http.HandlerFunc(publicOrderHandler.QuoteOrder)))))
+	mux.Handle("POST /api/v1/public/orders/validate", middleware.RateLimitByIP(publicOrderReadRequestsPerMinute)(tenantContext(middleware.TenantStatusMiddleware(subscriptionRepo)(http.HandlerFunc(publicOrderHandler.ValidateOrder)))))
 
 	mux.Handle("GET /api/v1/public/orders/number/{number}/lookup", middleware.RateLimitByIP(publicOrderReadRequestsPerMinute)(tenantContext(http.HandlerFunc(publicOrderHandler.GetOrderByNumber))))
 	mux.Handle("GET /api/v1/public/orders/{id}/status", middleware.RateLimitByIP(publicOrderReadRequestsPerMinute)(tenantContext(http.HandlerFunc(publicOrderHandler.GetOrderStatus))))
@@ -1874,8 +1874,6 @@ func main() {
 		mux.Handle("GET /api/v1/super-admin/tenants/{id}", wrapSuperAdmin(http.HandlerFunc(superAdminHandler.GetTenant)))
 		mux.Handle("GET /api/v1/super-admin/tenants/{id}/users", wrapSuperAdmin(http.HandlerFunc(superAdminHandler.GetTenantUsers)))
 		mux.Handle("POST /api/v1/super-admin/tenants/{id}/dashboard-login", wrapSuperAdmin(http.HandlerFunc(superAdminHandler.GenerateDashboardLoginToken)))
-		mux.Handle("PUT /api/v1/super-admin/tenants/{id}/disable", wrapSuperAdmin(http.HandlerFunc(superAdminHandler.DisableTenant)))
-		mux.Handle("PUT /api/v1/super-admin/tenants/{id}/enable", wrapSuperAdmin(http.HandlerFunc(superAdminHandler.EnableTenant)))
 
 		// User Management (across all tenants)
 		mux.Handle("GET /api/v1/super-admin/users", wrapSuperAdmin(http.HandlerFunc(superAdminHandler.ListUsers)))
@@ -1918,7 +1916,9 @@ func main() {
 		mux.Handle("GET /api/v1/super-admin/tenants/{id}/subscription", wrapSuperAdmin(http.HandlerFunc(subscriptionHandler.GetTenantSubscriptionByID)))
 		mux.Handle("POST /api/v1/super-admin/tenants/{id}/extend-trial", wrapSuperAdmin(http.HandlerFunc(subscriptionHandler.ExtendTenantTrial)))
 		mux.Handle("POST /api/v1/super-admin/tenants/{id}/disable", wrapSuperAdmin(http.HandlerFunc(subscriptionHandler.DisableTenant)))
+		mux.Handle("PUT /api/v1/super-admin/tenants/{id}/disable", wrapSuperAdmin(http.HandlerFunc(subscriptionHandler.DisableTenant)))
 		mux.Handle("POST /api/v1/super-admin/tenants/{id}/enable", wrapSuperAdmin(http.HandlerFunc(subscriptionHandler.EnableTenant)))
+		mux.Handle("PUT /api/v1/super-admin/tenants/{id}/enable", wrapSuperAdmin(http.HandlerFunc(subscriptionHandler.EnableTenant)))
 		mux.Handle("DELETE /api/v1/super-admin/tenants/{id}", wrapSuperAdmin(http.HandlerFunc(subscriptionHandler.DeleteTenant)))
 		mux.Handle("GET /api/v1/super-admin/tenants/{id}/subscription-history", wrapSuperAdmin(http.HandlerFunc(subscriptionHandler.GetSubscriptionHistory)))
 

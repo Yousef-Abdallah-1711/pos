@@ -61,29 +61,11 @@ func (t *Tenant) DaysRemainingInTrial() int {
 
 // CanAccess returns true if the tenant can access the system
 func (t *Tenant) CanAccess() bool {
-	// Cannot access if manually disabled
-	if t.IsDisabled {
-		return false
-	}
-
-	// Cannot access if trial expired and not a paid subscription
-	if t.SubscriptionStatus == "trial" && t.IsTrialExpired() {
-		return false
-	}
-
-	// Can access for all other statuses (active, expired with payment plan, etc)
-	return true
+	return t.GetBlockReason() == ""
 }
 
-// GetBlockReason returns the reason why tenant cannot access, or empty string if can access
+// GetBlockReason applies the shared tenant entitlement policy.
 func (t *Tenant) GetBlockReason() string {
-	if t.IsDisabled {
-		return "tenant_disabled"
-	}
-
-	if t.SubscriptionStatus == "trial" && t.IsTrialExpired() {
-		return "trial_expired"
-	}
-
-	return ""
+	return (TenantAccessState{Active: t.IsActive, Disabled: t.IsDisabled,
+		Status: t.SubscriptionStatus, TrialEnd: t.TrialEndDate}).BlockReason(time.Now())
 }
