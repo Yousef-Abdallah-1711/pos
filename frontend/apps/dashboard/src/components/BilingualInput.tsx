@@ -1,3 +1,5 @@
+
+import type { JSX } from 'react'
 /**
  * BilingualInput Component
  * Provides dual-language input with EN/AR tabs and RTL support

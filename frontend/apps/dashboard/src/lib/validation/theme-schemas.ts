@@ -287,7 +287,7 @@ export function validateThemeCreate(data: unknown): ValidationResult {
     return { isValid: true, errors: [] }
   } catch (error) {
     if (error instanceof z.ZodError) {
-      const errors: ValidationError[] = error.errors.map((err) => ({
+      const errors: ValidationError[] = error.issues.map((err) => ({
         field: err.path.join('.'),
         message: err.message,
         code: getErrorCode(err.path.join('.'), err.message),
@@ -316,7 +316,7 @@ export function validateThemeUpdate(data: unknown): ValidationResult {
     return { isValid: true, errors: [] }
   } catch (error) {
     if (error instanceof z.ZodError) {
-      const errors: ValidationError[] = error.errors.map((err) => ({
+      const errors: ValidationError[] = error.issues.map((err) => ({
         field: err.path.join('.'),
         message: err.message,
         code: getErrorCode(err.path.join('.'), err.message),
@@ -375,7 +375,7 @@ export const fieldValidators = {
       if (error instanceof z.ZodError) {
         return {
           isValid: false,
-          error: error.errors[0]?.message || 'Invalid color',
+          error: error.issues[0]?.message || 'Invalid color',
         }
       }
       return { isValid: false, error: 'Validation failed' }
@@ -390,7 +390,7 @@ export const fieldValidators = {
       if (error instanceof z.ZodError) {
         return {
           isValid: false,
-          error: error.errors[0]?.message || 'Invalid font size',
+          error: error.issues[0]?.message || 'Invalid font size',
         }
       }
       return { isValid: false, error: 'Validation failed' }
@@ -405,7 +405,7 @@ export const fieldValidators = {
       if (error instanceof z.ZodError) {
         return {
           isValid: false,
-          error: error.errors[0]?.message || 'Invalid URL',
+          error: error.issues[0]?.message || 'Invalid URL',
         }
       }
       return { isValid: false, error: 'Validation failed' }
@@ -420,7 +420,7 @@ export const fieldValidators = {
       if (error instanceof z.ZodError) {
         return {
           isValid: false,
-          error: error.errors[0]?.message || 'Invalid font',
+          error: error.issues[0]?.message || 'Invalid font',
         }
       }
       return { isValid: false, error: 'Validation failed' }
@@ -435,7 +435,7 @@ export const fieldValidators = {
       if (error instanceof z.ZodError) {
         return {
           isValid: false,
-          error: error.errors[0]?.message || 'Invalid name',
+          error: error.issues[0]?.message || 'Invalid name',
         }
       }
       return { isValid: false, error: 'Validation failed' }
@@ -510,7 +510,7 @@ export const bilingualFieldValidators = {
       if (error instanceof z.ZodError) {
         return {
           isValid: false,
-          error: error.errors[0]?.message || 'Invalid English text',
+          error: error.issues[0]?.message || 'Invalid English text',
         }
       }
       return { isValid: false, error: 'Validation failed' }
@@ -531,7 +531,7 @@ export const bilingualFieldValidators = {
       if (error instanceof z.ZodError) {
         return {
           isValid: false,
-          error: error.errors[0]?.message || 'Invalid Arabic text',
+          error: error.issues[0]?.message || 'Invalid Arabic text',
         }
       }
       return { isValid: false, error: 'Validation failed' }
@@ -549,7 +549,7 @@ export const bilingualFieldValidators = {
       if (error instanceof z.ZodError) {
         return {
           isValid: false,
-          error: error.errors[0]?.message || 'Invalid bilingual text',
+          error: error.issues[0]?.message || 'Invalid bilingual text',
         }
       }
       return { isValid: false, error: 'Validation failed' }
@@ -567,7 +567,7 @@ export const bilingualFieldValidators = {
       if (error instanceof z.ZodError) {
         return {
           isValid: false,
-          error: error.errors[0]?.message || 'Invalid bilingual component',
+          error: error.issues[0]?.message || 'Invalid bilingual component',
         }
       }
       return { isValid: false, error: 'Validation failed' }

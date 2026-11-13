@@ -1,3 +1,5 @@
+
+import type { JSX } from 'react'
 ﻿/**
  * TestimonialsEditor Component
  * Specialized editor for testimonials/reviews carousel sections

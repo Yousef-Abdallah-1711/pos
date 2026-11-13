@@ -1,3 +1,5 @@
+
+import type { JSX } from 'react'
 /**
  * WhyUsEditor Component
  * Specialized editor for why-us/features/benefits section components

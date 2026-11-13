@@ -1,3 +1,5 @@
+
+import type { JSX } from 'react'
 /**
  * CTAEditor Component
  * Specialized editor for call-to-action button sections

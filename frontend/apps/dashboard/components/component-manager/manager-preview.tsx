@@ -1,5 +1,7 @@
 'use client';
 
+import type { JSX } from 'react'
+
 import React from 'react';
 import { ThemeSection } from './component-sidebar';
 

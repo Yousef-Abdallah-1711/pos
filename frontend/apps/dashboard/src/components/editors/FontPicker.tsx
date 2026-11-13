@@ -1,3 +1,5 @@
+
+import type { JSX } from 'react'
 ﻿'use client'
 
 import React, { useState, useCallback, useEffect, useMemo } from 'react'

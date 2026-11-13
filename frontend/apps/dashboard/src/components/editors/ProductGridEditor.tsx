@@ -1,3 +1,5 @@
+
+import type { JSX } from 'react'
 ﻿/**
  * ProductGridEditor Component
  * Specialized editor for product grid/showcase components

@@ -1,5 +1,7 @@
 'use client'
 
+import type { JSX } from 'react'
+
 import React from 'react'
 import { ThemeComponent, ComponentType } from '@/types/theme'
 import { HeroEditor } from './HeroEditor'
