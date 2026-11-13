@@ -1,210 +1,273 @@
-# SERVIO AWS staging operations
+# SERVIO AWS staging runbook
 
-Run from `/opt/servio`. This deployment is staging and must not accept customer payments.
-`ops/aws/servio` wraps the exact Compose project and private environment file.
+This is staging. Production remains approval-gated and NO-GO. Run from `/opt/servio`.
+The previous report/evidence is preserved in the recovery branch and private backup.
 
-## Commands
+## Inspect safely
 
 ```sh
-ops/aws/servio config -q
 ops/aws/servio ps
-ops/aws/servio logs --tail=100 backend
-ops/aws/servio logs --tail=100 proxy
+ops/aws/servio config -q
+ops/aws/health
 sudo docker stats --no-stream
-ops/aws/servio exec -T backend curl -fsS http://127.0.0.1:8080/api/v1/health
-ops/aws/servio restart backend
-ops/aws/servio stop                  # preserves every volume
-ops/aws/servio up -d                # use only after required images exist
+sudo systemctl status servio-deploy.timer servio-deploy.service
+sudo tail -n 100 /var/log/servio-deploy/agent.log
+sudo journalctl -u servio-deploy.service --since today
 ```
 
-The Docker daemon starts at boot. Services use `unless-stopped`, 30-second graceful
-shutdown and rotated logs. A deliberately stopped service stays stopped across reboot.
-The host restarted externally at 2026-11-13 02:24:57 UTC; all eight services recovered
-healthy with database, Redis session and TLS state preserved. No reboot-required marker
-remains. The deployment agent did not initiate that reboot.
+Never print rendered Compose environment values, raw inspect environments, `.env`,
+private keys, passwords or tokens. `ops/aws/servio` uses the deployed release's recorded
+Compose file when a release receipt exists, otherwise the preserved original configuration.
+Only proxy ports 80/443 are public. PostgreSQL/Redis have no published ports; storefront
+13003 is loopback-only. Preserve the existing administrative SSH rule.
 
-## Builds and updates
+## Outbound release installation
 
-Keep the source SHA and the local deployment changes with each release. Do not pull a
-new branch into a running release without inspection and a backup. Do not merge or push
-as part of deployment. No trusted CI-published application images were found.
+CI builds applications in GitHub Actions, not on the 2 GiB instance. PR/main gates cover
+lint/types/unit/integration/race/security/build/Chromium. Only a successful main push
+publishes a signed release; production has no automatic release path.
 
-Build one service at a time using the constrained `servio-builder` BuildKit builder.
-The builder is capped at 1200 MiB RAM with up to 1200 MiB additional swap and one build
-step at a time. Frontend build type checks remain enabled. Public frontend environment
-variables are compiled into images; changing them requires rebuilding.
+Root prerequisites:
+
+- `/etc/servio/release-signing.pub.pem`: pinned Ed25519 public key, root-owned 0644.
+- `/etc/servio/approved-workflow-id`: pinned workflow ID `415727583`, root-owned 0644.
+- `/etc/servio/approved-migrations.json`: reviewed filename→SHA256 mapping for unapplied
+  migrations. Do not approve unknown/destructive SQL simply to unblock automation.
+- Existing `ops/aws/.env` 0600, named volumes, DNS, certificates and private acceptance
+  fixtures. Independent `JWT_SECRET` and `SUPER_ADMIN_JWT_SECRET` are required.
+- Root-owned pinned Playwright 1.64.1 runtime and Node 24 at
+  `/usr/local/lib/servio/browser`; native Chromium dependencies installed. No credentials
+  are embedded. The CLI package and Chromium were installed from official distribution
+  over HTTPS. The normal wrapper falls back to the pinned browser container on another host.
+
+Install reviewed agent code without activation:
 
 ```sh
-# Create once on a new installation; preserve an existing builder/cache.
-sudo docker buildx create --name servio-builder --driver docker-container --driver-opt memory=1200m,memory-swap=2400m --buildkitd-config ops/aws/buildkitd.toml --use
-sudo docker buildx inspect --bootstrap servio-builder
+ops/aws/install-pull-agent
+sudo /usr/local/sbin/servio-pull-agent --check-only
+sudo systemctl is-enabled servio-deploy.timer
+```
+
+The agent uses anonymous read-only public GitHub HTTPS fetches: no GitHub/registry fetch
+credential exists in the systemd service. The signing private key belongs only to the
+protected staging publisher secret `SERVIO_RELEASE_SIGNING_KEY`. Its local provisioning
+copy is outside Git, mode 0600; never copy it into a release or logs. Rotate by provisioning
+a new protected secret and separately pinning its public key during a reviewed maintenance
+operation. Keep old provenance receipts for audit.
+
+The root-installed verifier is not replaced automatically by downloaded source. Agent
+upgrades require review and rerunning its tests/install command. The downloaded application
+source is hash verified and its smoke scripts execute only after provenance acceptance.
+Image archives are checksum verified, loaded locally, and pinned to immutable image
+SHA256 IDs (verified config or archive OCI manifest, depending on image store) with exact OCI revision labels; registry manifest digests are also
+retained. No mutable image tag is used for promotion.
+
+## Candidate acceptance and first main deployment
+
+Before merge, the separate operator-only candidate command can verify a completed
+successful owner-dispatched CI bundle. Download the `release-bundle` ZIP using authorized
+GitHub CLI access, keeping it private. The root candidate helper independently compares
+its SHA256 with GitHub's artifact metadata, checks exact successful pinned workflow,
+current branch SHA and latest-main ancestry, and extracts only the fixed bounded members.
+
+```sh
+sudo /usr/local/sbin/servio-stage-candidate CI_RUN_ID PRIVATE_ARTIFACT_ZIP
+```
+
+A candidate is staging-only, labeled `candidate`, and can never activate recurring main
+deployment. Ordinary source branch push access does not authorize bypassing CI or reviews.
+PR #32 requires all final checks and the one approval required by CODING_STANDARDS.md.
+After accepted merge, wait for its signed exact-main release, then run the root agent once
+and verify the actual deployed SHA. Do not claim a feature SHA is main.
+
+```sh
+sudo /usr/local/sbin/servio-pull-agent
+ops/aws/health
+curl -fsS https://api.pos.rakmyat.online/_ops/release
+```
+
+The agent backs up PostgreSQL, allows only reviewed unapplied migrations, applies them
+atomically per migration, and promotes backend/frontends/proxy incrementally. All five
+trusted HTTPS routes, database readiness, API/session/tenant/RBAC/POS/WSS/inventory and
+33 base browser, 13 cash/contrast checks, 14 upload/browser checks, 13 journal assertions,
+13 negative form assertions and database role boundaries must pass before it writes
+`status: verified`. No production payment
+operation is enabled by deployment. Run full page/flow QA separately against that SHA.
+
+Activation is a final acceptance step, never an install side effect:
+
+```sh
+sudo python3 ops/aws/activate-pull-agent.py
+sudo systemctl list-timers servio-deploy.timer
+```
+
+The activation script rejects candidates and missing/failed release smoke or full browser
+traversal evidence (full scope and matching discovered/visited counts), rechecks signed current-main provenance/runtime images, and verifies
+health before creating the acceptance marker and enabling the timer. Do not create that
+marker manually to circumvent a failure. The timer is currently disabled.
+
+## Monitoring, retry and emergency disable
+
+The oneshot service has a deployment lock, 25-minute limit, bounded network/process
+operations, memory limits and a five-minute timer with jitter. Three failed attempts per
+SHA stop further deployment until inspection. Pending CI and stale releases do not promote.
+Logs: `/var/log/servio-deploy/agent.log` (0600), rotated daily/10 MiB with seven rotations.
+Attempts: `/var/lib/servio-deployer/attempts.json`; signed receipts/downloads are private.
+
+```sh
+sudo systemctl disable --now servio-deploy.timer
+sudo systemctl stop servio-deploy.service
+sudo rm -f /etc/servio/staging-agent.accepted
+```
+
+Stopping an in-progress service requests application rollback; inspect logs and all service
+health afterward. To retry an exhausted SHA, first disable polling, diagnose and correct
+its failure, preserve the existing attempts file, then reset only that SHA's attempt entry
+in a reviewed root operation. Never reset all retry history blindly. No external alert
+provider is configured yet; arrange monitoring before production.
+
+## Rollback and recovery
+
+Promotion failure attempts every previous application and proxy even if one restoration
+fails. It restores prior release metadata if publication fails. SQL, named volumes,
+uploads, secrets, TLS state, backups and prior loaded images are preserved. Do not run
+Docker prune, `down -v`, or automatic destructive SQL rollback.
+
+`ops/aws/evidence/deployed-release.json` records the active Compose file and prior image
+references. To roll back manually, disable the timer, inspect schema compatibility and
+select the previous recorded Compose file with the same project/private environment.
+Run each application and proxy with `up -d --no-deps --wait`, then health/HTTPS/auth checks.
+Do not point operations at an arbitrary old root Compose file after immutable promotion.
+New inventory audit columns/receipts must be retained; old application code may not display
+partial cancellations correctly. Review that compatibility rather than reversing data.
+
+## Accounting migration compatibility and recovery
+
+`180_enforce_journal_integrity.sql` and `182_accounting_runtime_roles.sql` require the
+new accounting writer before their guards and grants are installed. Provision the private
+`pos_accounting` login through `backend/scripts/db/create_accounting_role.sql`; keep its
+password only in the private environment. Grant the reviewed expansion permissions before
+switching the backend. Never grant this writer core business-table writes or schema CREATE.
+`pos_app` cannot write journal history, migration receipts or reservation ledgers.
+
+Pin reviewed SQL hashes in `/etc/servio/approved-migrations.json`. The root-owned
+`/etc/servio/migration-rollbacks.json` must mark these two migrations `keep_backend`.
+The deployer starts the verified compatible backend against the old schema, backs up before
+changes, and applies forward migrations with atomic receipts. The migration CLI removes
+outer transaction wrappers only for the two explicitly reviewed legacy migration files;
+DDL and its receipt remain in the same Go transaction.
+
+After a contract migration, failure preserves a healthy compatible backend and restores
+previous frontend/proxy images. The receipt explicitly records `recovery_required`, mixed
+application identities and the generated recovery Compose path; the public receipt has no
+verified commit SHA. Stop promotion, inspect private logs and roll forward with a corrected
+verified release. Activation rejects this state. Never restore an incompatible old backend
+or automatically reverse financial guards/ACLs. Owner-reviewed SQL recovery requires its
+own backup, audit and plan; monetary history must remain intact.
+
+Activation also rechecks the deployment receipt under the global deployment lock after
+its provenance poll. A changed release requires fresh acceptance before enabling the timer.
+
+## Backups
+
+`ops/aws/backup` creates a 0600 custom-format PostgreSQL dump, validates its archive and
+writes a SHA256 sidecar. Restore into a NEW uniquely named database, never the live one:
+
+```sh
 ops/aws/backup
-ops/aws/servio build --builder servio-builder backend
-ops/aws/servio up -d --force-recreate migrate
-ops/aws/servio up -d backend
-ops/aws/servio build --builder servio-builder landing
-ops/aws/servio up -d landing
-# Repeat individually for dashboard, restaurant-website and super-admin.
+ops/aws/servio exec -T postgres createdb -U postgres -O pos_migrator UNIQUE_RESTORE_DATABASE
+ops/aws/servio exec -T postgres pg_restore -U postgres -d UNIQUE_RESTORE_DATABASE --exit-on-error < CHOSEN_BACKUP.dump
+ops/aws/servio exec -T postgres psql -U postgres -d UNIQUE_RESTORE_DATABASE -c 'SELECT count(*) FROM schema_migrations;'
 ```
 
-This deployment runs a separate one-shot migrator and revokes runtime access to migration
-bookkeeping before API startup. The API does not receive migration credentials. For future releases,
-review SQL and back up first; do not repeatedly restart a failed migration. The current
-main migration runner executes every `.sql` filename and does not atomically couple
-schema changes to its bookkeeping insert. This is a production blocker requiring review.
-Never run automatic destructive rollback SQL on a populated database.
+Local dumps share the EBS disk and are not disaster recovery. Encrypted off-host copies,
+retention and restoration of uploads/private environment/TLS/Redis state remain production
+gates. No paid backup resource has been created. Preserve original databases and volumes.
 
-## Backup and restore
+## Domains, TLS, secrets and owner login
 
-`ops/aws/backup` writes a permission-restricted PostgreSQL custom-format dump, verifies
-its archive directory, and writes a SHA256 sidecar. Local backups are on the same EBS
-disk and are not disaster recovery. Arrange encrypted off-host copies and retention
-before production; no paid storage has been provisioned. Back up uploads and the private
-`.env` separately with encryption. Redis requires an independent password and AOF preserves revocable session state; session
-loss should require users to log in again. No Redis port is public.
+The five approved hosts are pos.rakmyat.online, api.pos.rakmyat.online,
+pos.app.rakmyat.online, admin.pos.rakmyat.online and restaurant-1.pos.rakmyat.online.
+Caddy's persistent volumes provide trusted certificates, renewal, HTTPS redirects and
+WebSockets. Owner-configured `*.pos` DNS alone does not enable another tenant: explicitly
+validate its hostname, application scope/status, CORS, proxy route and certificate. Never
+enable unrestricted on-demand TLS. Do not edit DNS or Hostinger email records.
 
-Restore into a NEW database first, never over the active database:
+The preserved root Caddyfile compensates for OLD vulnerable images with Basic Auth and
+an image optimizer block. `Caddyfile.public` is used only by patched verified promotion;
+it removes that gateway while retaining normal auth and payment restrictions. Gateway
+credentials remain private recovery material, not normal application credentials.
+
+Owner super-admin: `superadmin@pos-saas.com`, https://admin.pos.rakmyat.online/login .
+Retrieve the strong provisioned password privately on the authorized server:
 
 ```sh
-ops/aws/servio exec -T postgres createdb -U postgres -O pos_migrator servio_restore_check
-ops/aws/servio exec -T postgres pg_restore -U postgres -d servio_restore_check --exit-on-error < ops/aws/backups/CHOSEN.dump
-ops/aws/servio exec -T postgres psql -U postgres -d servio_restore_check -c 'SELECT count(*) FROM schema_migrations;'
+jq -r '.password' /opt/servio/ops/aws/evidence/owner-admin.json
 ```
 
-After validating a restore, schedule a maintenance window, stop backend, take another
-backup, point a separately reviewed configuration to the restored database, and restart.
-Do not delete the original database or volumes. To roll back an application, restore
-its prior immutable image and compatible configuration; keep forward schema compatibility
-or restore a reviewed backup into another database. This is the first deployment, so
-there is no previous application image release to select yet.
+Never share the output in CI/reports/commits. Rotate before production. Synthetic browser
+admin and synthetic tenant fixtures are separate and remain 0600. Email/payment provider
+credentials were not invented; no real charges or customer notifications are authorized.
 
-## Secrets and environment inventory
+## Resource and production limits
 
-`ops/aws/.env` is mode 0600 and excluded locally from Git. It contains independent random
-`DB_BOOTSTRAP_PASSWORD`, `DB_PASSWORD`, `MIGRATE_DB_PASSWORD`, `JWT_SECRET` and `REDIS_PASSWORD` values. Never
-print `docker compose config` without `-q` or share raw Docker inspect environment output.
-The deployment JSON contains variable names and nonsecret configuration only.
+2 vCPU, approximately 1.9 GiB RAM, 2 GiB swap and 29 GiB root. Do not build frontends
+concurrently here or delete builder cache/volumes to force a release. Before download,
+ensure compressed archives plus 4 GiB free headroom; before loading require 4 GiB. Native
+Chromium avoids pulling the multi-browser container on this host. Keep previous images.
+Monitor free disk/swap, CPU, OOM and health after each change.
 
-Backend configuration includes ENV=staging, DB_HOST/PORT/USER/NAME/SSLMODE,
-DB_MAX_OPEN_CONNS=15, DB_MAX_IDLE_CONNS=5, JWT_EXPIRY=2h, REDIS_URL,
-RBAC_ENFORCEMENT=enforce, PAYMOB_MODE=mock, CORS_ORIGINS, APP_BASE_URL,
-DASHBOARD_URL, LANDING_URL, RESTAURANT_DOMAIN, UPLOAD_BASE_URL, WEBHOOK_BASE_URL.
-Payment initiation, callbacks, mock iframe/process and provider refund paths are denied
-at the public proxy. Mock mode exists only for isolated staging checks. Do not remove
-those restrictions until provider configuration and payment integrity are accepted.
-Production requires real PAYMOB_API_KEY, PAYMOB_HMAC_SECRET, PAYMOB_IFRAME_ID and reviewed
-integration settings; none were invented. Email/Sentry provider configuration is absent.
+The instance's public IPv4 is auto-assigned and can change after stop/start. Obtain approval
+for a stable endpoint before permanent production. No EIP, resize or paid AWS resources
+were created. A kernel update is pending; no reboot was initiated. The earlier external
+reboot recovered all eight services with persisted data/TLS. API and Redis recreation on
+f733efb subsequently preserved sessions; logout revoked them. A planned kernel reboot
+and external recovery access remain separate production gates. Production remains NO-GO.
 
-Frontend builds use NEXT_PUBLIC_API_URL, NEXT_PUBLIC_API_BASE_URL,
-NEXT_PUBLIC_SUPER_ADMIN_API_URL, NEXT_PUBLIC_LANDING_URL,
-NEXT_PUBLIC_DASHBOARD_URL, NEXT_PUBLIC_RESTAURANT_DOMAIN and
-NEXT_IGNORE_BUILD_ERRORS=false. Restaurant domain is pos.rakmyat.online. The owner approved and configured *.pos A
-16.192.159.205. Only restaurant-1.pos.rakmyat.online is currently enabled at Caddy;
-future tenants require an explicit route and certificate onboarding step.
+## Local verification caches
 
-## Proxy, HTTPS and AWS network
+CI builds the images. On this 30 GiB host, regenerable workspace node_modules and pnpm/Go
+caches were reclaimed after local checks; source and lockfiles remain. Reinstall local
+frontend dependencies with the pinned pnpm and `pnpm --dir frontend install --frozen-lockfile`
+when needed. This does not affect immutable running container dependencies. Never remove
+volumes, backups, uploads, secrets, certificates or working images to bypass disk reserves.
+Rejected-candidate duplicate downloads may be reclaimed only after recording provider
+checksums and verifying retained loaded images/source; keep their failure evidence.
 
-Caddy routes the four approved application hostnames and the approved seeded storefront hostname. It manages certificates and
-renewal in persistent caddy_data, redirects HTTP to HTTPS, forwards WebSockets and proxy
-headers, caps request bodies at 10 MiB and backend response headers at 30 seconds.
-Secure is appended to API cookies at this trusted edge because upstream staging cookies
-do not infer TLS from the proxy. The API and public frontends publish no host ports. The storefront also has a loopback-only verification port 127.0.0.1:13003 and an
-egress network for server fetches. Public requests use its approved hostname.
+## Main branch protection
 
-Security group `sg-03b8b98d6e882a843`: inspect AWS EC2 in eu-north-1, select instance
-`i-04fd39d4964e1194f`, Security tab, group, Edit inbound rules. Preserve the SSH rule;
-allow TCP 80 and TCP 443 from 0.0.0.0/0 for public web/TLS validation. Do not add database,
-Redis, API, frontend, or Docker daemon ports. Verify administrative SSH CIDR separately;
-this host has no instance role and cannot read the effective AWS rule set.
-If 80/443 remain unreachable after the group fix, inspect the subnet route table,
-internet gateway and network ACL in both directions. No AWS rules were changed here.
+Main requires one approving review, current main ancestry, resolved review conversations
+and three GitHub Actions checks: `required`, `runtime-localhost-guardrail` and
+`url-domain-config-smoke`. Admins are subject to these rules; force push and deletion are
+disabled. Do not remove protection to merge a release. A changed commit dismisses stale
+approvals and must rerun CI. Production approval remains separate from Git review.
 
-Do not edit the four existing A records or any email records. The owner also approved
-and configured wildcard A `*.pos` → 16.192.159.205, TTL 14400. Public wildcard resolution
-was verified using restaurant-1.pos.rakmyat.online and an arbitrary test label. The
-storefront uses the first hostname label as its restaurant slug; no path rewrite is used.
-Only restaurant-1.pos.rakmyat.online is initially routed and receives an individual
-automatically renewed certificate. The wildcard DNS record alone does not onboard a new
-tenant: add an explicit, validated hostname to Caddy and verify tenant status, TLS, CORS
-and API context for each tenant. Do not enable unrestricted on-demand certificate issuance.
-A wildcard certificate would need a reviewed DNS-01 provider integration; none was added.
+## Prepared disk expansion — owner approval required
 
-The migration seed had tenant slug test-tenant and restaurant slug restaurant-1; the public
-status endpoint therefore returned 404. align-seeded-storefront.sql aligns only that
-synthetic fixture to restaurant-1 and its approved domain, without changing subscriptions
-or access controls. This is not a production/customer data migration.
+Root EBS volume `vol-0ec6bfabc3638a90c` is 30 GiB; root partition is
+`/dev/nvme0n1p1`, ext4. Approximately 4 GiB free is insufficient for the next compressed
+release plus the 4 GiB deployment reserve. The proposed change is **30 → 50 GiB**, keeping
+instance type, volume type, IOPS, throughput and networking unchanged. This adds AWS
+storage cost and has NOT been executed. No destructive pruning is an alternative here.
 
-The current auto-assigned EC2 IPv4 may change after stop/start. Approve a stable endpoint
-before permanent production use. No Elastic IP, instance resize, load balancer, managed
-database or other paid AWS resource was created.
+After explicit owner approval, an authorized AWS operator can modify this exact volume
+in eu-north-1, preserving its other settings. This host has no AWS role to perform the
+cloud-side change. After the device actually reports the new size and AWS modification
+is ready, verify the mounted device and use the existing growpart/resize2fs tools to
+extend partition 1 and its ext4 filesystem, then recheck free space, all services and data.
+Never run these against an unverified device. Preserve pre-change backups and evidence.
 
-## Acceptance limits and monitoring
+AWS documents [volume modification](https://docs.aws.amazon.com/ebs/latest/userguide/requesting-ebs-volume-modifications.html)
+and [Linux filesystem extension](https://docs.aws.amazon.com/ebs/latest/userguide/recognize-expanded-volume-linux.html).
+Do not treat approval alone as proof that the cloud-side resize has happened.
 
-`ops/aws/health` checks all eight long-running containers for health/OOM state and
-verifies the public API's database health. Nonzero exit requires inspection, not blind
-restarts. No external alert delivery is configured. Keep health checks and disk/swap
-monitoring in the release workflow; schedule a reviewed alert integration before production.
+## Publisher guardrail verification
 
-The staging POS test reproduced tracked inventory remaining 20 after selling two units.
-Cash order creation, 10% tax calculation, authenticated WSS order_new delivery and KDS
-bumps worked, but inventory acceptance failed. Do not treat this stack as accepted for
-real sales. Review order transaction/stock movement behavior and test concurrency and
-rollback before enabling production use.
-
-Node 20 and Go 1.24 in the repository are out of official support as of this deployment.
-Plan supported-runtime upgrades and complete regression/security checks before production:
-https://nodejs.org/en/about/previous-releases and https://go.dev/doc/devel/release .
-
-## Repeating repository acceptance tests
-
-After app builds finish, run `python3 ops/aws/init-secrets.py --acceptance` and
-`python3 ops/aws/run-go-acceptance.py`. The latter positively checks the disposable
-PostgreSQL label and `servio_test` database name, applies all migrations in the separate
-cluster, and runs Go vet plus integration-tagged tests with one package at a time.
-Its test network has no public ports or application network attachment. Output is
-redacted before being written to evidence logs. Test containers are stopped afterward;
-volumes are preserved. Never substitute a staging/production database URL.
-
-The special legacy audit test requiring exactly `pos_phase2a_e2e` is not configured by
-this generic disposable database. Record skips honestly. Frontend unit tests and audit
-use `Dockerfile.frontend-check` targets `checks` and `audit` and preserve nonzero exits.
-
-Before changing backend image tags, update both backend and migrate to the same new
-immutable release. Retain prior image tags and config plus a tested database backup.
-Preserve the private environment file; changing it alone does not rotate passwords in
-an already initialized PostgreSQL volume. Back up uploads and Caddy data/config volumes
-along with the private environment using encryption; automated backups here cover the
-PostgreSQL archive only. Upload/certificate disaster recovery is not yet verified.
-
-## Temporary staging gateway and dependency gate
-
-All four Next.js hosts require HTTPS Basic authentication before application login.
-The API retains its normal application authentication and explicit CORS allowlist.
-The gateway credential is in `ops/aws/evidence/staging-gateway.json` (0600); retrieve it
-privately on the server. Never paste it into reports, URLs, logs, tickets or shell arguments.
-Its bcrypt hash is the private `STAGING_GATEWAY_PASSWORD_HASH` environment variable.
-Caddy strips gateway Authorization headers before forwarding to frontend containers.
-Unauthenticated frontend requests must return 401 with a browser authentication challenge.
-`/_next/image` is temporarily denied with 503 because installed Next 15.5.9 matches
-critical image optimizer advisories. Optimized images may therefore be unavailable.
-These restrictions mitigate exposure and do not establish dependency safety. Do not
-remove them before supported runtime/dependency upgrades and all acceptance gates pass.
-
-For a new isolated installation, run `python3 ops/aws/init-secrets.py`, then
-`python3 ops/aws/enable-staging-gateway.py` before Compose configuration validation.
-The latter uses the pinned Caddy image without network access to hash a generated private
-credential; it does not require an existing proxy container. Preserve both private files
-for recovery. For this existing installation they are already provisioned.
-
-Validate with `python3 ops/aws/verify-http.py` (credentials only sent to the four approved
-HTTPS frontend hosts), `python3 ops/aws/check-gateway.py`, and `ops/aws/health`.
-Run browser checks with `ops/aws/run-browser-checks`. Synthetic browser application login
-fixtures must be created separately; they are deliberately excluded from release bundles.
-
-Reproduce from the recorded baseline SHA, apply `ops/aws/source.patch`, copy the bundled
-operations files, provision secrets, and create the constrained BuildKit builder using
-`buildkitd.toml`. Build backend first, start PostgreSQL/Redis, run the reviewed one-shot
-migrator, start backend, then build/start each frontend sequentially. Start the proxy only
-after approved DNS resolves and ports 80/443 are reachable. Do not apply the seed alignment
-SQL to customer data. Back up before every update. This is a staging reproduction procedure,
-not authorization to expose another deployment or bypass the production NO-GO.
+Before reading the signing key or publishing assets, `sign-publish-release.py` invokes
+`release_checks.py`. It waits within a bounded polling budget for all three protected
+contexts. It pins each workflow ID/path, Actions application, successful check conclusion,
+main push event, exact SHA and the current aggregate CI run. The two auxiliary workflows
+must be completed successfully, not merely have one green job. Main advancing, a failed
+check or spoofed identity stops signing/publication. The publisher token adds only read
+access to checks; existing contents-write/actions-read permissions remain scoped to that
+protected main publication job. The systemd agent still uses anonymous read-only fetches.
