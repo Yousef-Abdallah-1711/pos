@@ -1,0 +1,165 @@
+x-frontend-args: &frontend-args
+  NEXT_IGNORE_BUILD_ERRORS: "false"
+  NEXT_PUBLIC_API_URL: http://127.0.0.1:28280/api/v1
+  NEXT_PUBLIC_API_BASE_URL: http://127.0.0.1:28280/api/v1
+  NEXT_PUBLIC_SUPER_ADMIN_API_URL: http://127.0.0.1:28280/api/v1/super-admin
+  NEXT_PUBLIC_LANDING_URL: http://127.0.0.1:23201
+  NEXT_PUBLIC_DASHBOARD_URL: http://127.0.0.1:23202
+  NEXT_PUBLIC_RESTAURANT_DOMAIN: localhost:23203
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    command: [postgres, -c, shared_preload_libraries=pg_stat_statements]
+    labels:
+      com.pos.disposable: "true"
+      com.pos.purpose: phase2c-recovery
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${P2C_DB_PASSWORD:?P2C_DB_PASSWORD must be set}
+      POSTGRES_DB: pos_p2c_perf
+    tmpfs:
+      - /var/lib/postgresql/data
+    ports:
+      - 127.0.0.1:25435:5432
+    healthcheck:
+      test: [CMD-SHELL, pg_isready -U postgres -d pos_p2c_perf]
+      interval: 3s
+      timeout: 3s
+      retries: 30
+
+  redis:
+    image: redis:7-alpine
+    labels:
+      com.pos.disposable: "true"
+      com.pos.purpose: phase2c-recovery
+    command: [redis-server, --save, "", --appendonly, "no"]
+    ports:
+      - 127.0.0.1:26379:6379
+    healthcheck:
+      test: [CMD, redis-cli, ping]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  api:
+    build:
+      context: ../../backend
+      dockerfile: Dockerfile
+    labels:
+      com.pos.disposable: "true"
+      com.pos.purpose: phase2c-recovery
+      com.pos.source.commit: ${P2C_SOURCE_COMMIT:?P2C_SOURCE_COMMIT must be set}
+    environment:
+      PORT: 28280
+      ENV: phase2c-test
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASSWORD: ${P2C_DB_PASSWORD:?P2C_DB_PASSWORD must be set}
+      DB_NAME: pos_p2c_perf
+      DB_SSLMODE: disable
+      JWT_SECRET: ${P2C_JWT_SECRET:?P2C_JWT_SECRET must be set}
+      JWT_EXPIRY: 24h
+      REDIS_URL: redis://redis:6379/0
+      PAYMOB_MODE: mock
+      CORS_ORIGINS: http://127.0.0.1:23201,http://127.0.0.1:23202,http://127.0.0.1:23203,http://127.0.0.1:23204,http://localhost:23201,http://localhost:23202,http://localhost:23203,http://localhost:23204,http://p2c-restaurant-a.localhost:23203
+      APP_BASE_URL: http://127.0.0.1:28280
+      DASHBOARD_URL: http://127.0.0.1:23202
+      LANDING_URL: http://127.0.0.1:23201
+      RESTAURANT_DOMAIN: localhost:23203
+      UPLOAD_BASE_URL: http://127.0.0.1:28280/uploads
+      WEBHOOK_BASE_URL: http://127.0.0.1:28280
+    ports:
+      - 127.0.0.1:28280:28280
+      - 127.0.0.1:23201:23201
+      - 127.0.0.1:23202:23202
+      - 127.0.0.1:23203:23203
+      - 127.0.0.1:23204:23204
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: [CMD-SHELL, curl -fsS http://127.0.0.1:28280/api/v1/health/ready >/dev/null]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+      start_period: 90s
+
+  landing:
+    build:
+      context: ../../frontend
+      dockerfile: Dockerfile.prod
+      args:
+        <<: *frontend-args
+        APP: landing
+    labels:
+      com.pos.disposable: "true"
+      com.pos.purpose: phase2c-recovery
+      com.pos.source.commit: ${P2C_SOURCE_COMMIT:?P2C_SOURCE_COMMIT must be set}
+    network_mode: service:api
+    depends_on:
+      api:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 23201
+
+  dashboard:
+    build:
+      context: ../../frontend
+      dockerfile: Dockerfile.prod
+      args:
+        <<: *frontend-args
+        APP: dashboard
+    labels:
+      com.pos.disposable: "true"
+      com.pos.purpose: phase2c-recovery
+      com.pos.source.commit: ${P2C_SOURCE_COMMIT:?P2C_SOURCE_COMMIT must be set}
+    network_mode: service:api
+    depends_on:
+      api:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 23202
+
+  restaurant-website:
+    build:
+      context: ../../frontend
+      dockerfile: Dockerfile.prod
+      args:
+        <<: *frontend-args
+        APP: restaurant-website
+    labels:
+      com.pos.disposable: "true"
+      com.pos.purpose: phase2c-recovery
+      com.pos.source.commit: ${P2C_SOURCE_COMMIT:?P2C_SOURCE_COMMIT must be set}
+    network_mode: service:api
+    depends_on:
+      api:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 23203
+
+  super-admin:
+    build:
+      context: ../../frontend
+      dockerfile: Dockerfile.prod
+      args:
+        <<: *frontend-args
+        APP: super-admin
+    labels:
+      com.pos.disposable: "true"
+      com.pos.purpose: phase2c-recovery
+      com.pos.source.commit: ${P2C_SOURCE_COMMIT:?P2C_SOURCE_COMMIT must be set}
+    network_mode: service:api
+    depends_on:
+      api:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 23204
