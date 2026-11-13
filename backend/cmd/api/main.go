@@ -112,6 +112,14 @@ func main() {
 		}
 	}
 
+	accountingDB, accountingErr := connectAccountingDatabase(db, cfg.Database)
+	if accountingErr != nil {
+		log.Fatalf("Accounting database configuration rejected: %v", accountingErr)
+	}
+	if accountingDB != nil && accountingDB != db {
+		defer accountingDB.Close()
+	}
+
 	// Initialize JWT service
 	tokenService, err := jwt.NewTokenService(cfg.JWT.Secret, cfg.JWT.Expiry)
 	if err != nil {
@@ -171,24 +179,24 @@ func main() {
 	attendanceRepo := repository.NewAttendanceRepository(db)
 	salaryRepo := repository.NewSalaryRepository(db)
 	leaveRepo := repository.NewLeaveRepository(db)
-	accountRepo := repository.NewAccountRepository(db)
-	journalEntryRepo := repository.NewJournalEntryRepository(db)
-	autoPostingRepo := repository.NewAutoPostingRepository(db)
+	accountRepo := repository.NewAccountRepository(accountingDB)
+	journalEntryRepo := repository.NewJournalEntryRepository(accountingDB)
+	autoPostingRepo := repository.NewAutoPostingRepository(accountingDB)
 	inventoryMovementRepo := repository.NewInventoryMovementRepository(db)
-	generalLedgerRepo := repository.NewGeneralLedgerRepository(db, journalEntryRepo)
-	supplierRepo := repository.NewSupplierRepository(db)
-	customerAcctRepo := repository.NewCustomerAccountRepository(db)
-	bankAccountRepo := repository.NewBankAccountRepository(db)
-	customerInvoiceRepo := repository.NewCustomerInvoiceRepository(db, journalEntryRepo, accountRepo)
-	supplierInvoiceRepo := repository.NewSupplierInvoiceRepository(db, journalEntryRepo, accountRepo)
-	paymentAccountingRepo := repository.NewPaymentAccountingRepository(db, journalEntryRepo, accountRepo, bankAccountRepo)
-	taxRepo := repository.NewTaxRepository(db)
+	generalLedgerRepo := repository.NewGeneralLedgerRepository(accountingDB, journalEntryRepo)
+	supplierRepo := repository.NewSupplierRepository(accountingDB)
+	customerAcctRepo := repository.NewCustomerAccountRepository(accountingDB)
+	bankAccountRepo := repository.NewBankAccountRepository(accountingDB)
+	customerInvoiceRepo := repository.NewCustomerInvoiceRepository(accountingDB, journalEntryRepo, accountRepo)
+	supplierInvoiceRepo := repository.NewSupplierInvoiceRepository(accountingDB, journalEntryRepo, accountRepo)
+	paymentAccountingRepo := repository.NewPaymentAccountingRepository(accountingDB, journalEntryRepo, accountRepo, bankAccountRepo)
+	taxRepo := repository.NewTaxRepository(accountingDB)
 	performanceReviewRepo := repository.NewPerformanceReviewRepository(db)
 	trainingRepo := repository.NewTrainingRepository(db)
 	insuranceRepo := repository.NewInsuranceRepository(db)
 	contractRepo := repository.NewContractRepository(db)
 	resignationRepo := repository.NewResignationRepository(db)
-	accountingAdvancedRepo := repository.NewAccountingAdvancedRepository(db, journalEntryRepo)
+	accountingAdvancedRepo := repository.NewAccountingAdvancedRepository(accountingDB, journalEntryRepo)
 
 	// Notification repository
 	notificationRepo := repository.NewNotificationRepository(db)

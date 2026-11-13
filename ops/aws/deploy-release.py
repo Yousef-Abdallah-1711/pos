@@ -185,6 +185,21 @@ def public_checks():
             if host.startswith('api.') and not json.load(response).get('db_healthy'):
                 raise RuntimeError('Database health failed')
 
+def runtime_role_checks(path,evidence):
+    sql="""SELECT
+    NOT EXISTS (SELECT 1 FROM unnest(ARRAY['journal_entries','journal_entry_lines','general_ledger','schema_migrations','order_stock_reservations','order_item_cancellations']) AS table_name
+      CROSS JOIN unnest(ARRAY['INSERT','UPDATE','DELETE']) AS permission
+      WHERE has_table_privilege('pos_app',table_name,permission))
+    AND NOT EXISTS (SELECT 1 FROM unnest(ARRAY['users','products','orders','schema_migrations','order_stock_reservations']) AS table_name
+      CROSS JOIN unnest(ARRAY['INSERT','UPDATE','DELETE']) AS permission
+      WHERE has_table_privilege('pos_accounting',table_name,permission))
+    AND NOT has_schema_privilege('pos_accounting','public','CREATE')
+    AND EXISTS (SELECT 1 FROM pg_roles WHERE rolname='pos_accounting' AND rolcanlogin
+      AND NOT rolsuper AND NOT rolcreatedb AND NOT rolcreaterole AND NOT rolbypassrls)"""
+    result=compose(path,'exec','-T','postgres','psql','-U','postgres','-d','servio_staging','-qAt','-v','ON_ERROR_STOP=1','-c',sql,stdout=subprocess.PIPE,text=True)
+    if result.stdout.strip()!='t':raise RuntimeError('Core and accounting database role boundaries failed')
+    (evidence/'database-role-smoke.json').write_text(json.dumps({'checks':[{'check':'Core/accounting database role boundaries','status':'PASS'}]})+'\n')
+
 def acceptance(destination):
     evidence = destination / 'ops/aws/evidence'
     evidence.mkdir(mode=0o700)
@@ -194,6 +209,7 @@ def acceptance(destination):
     if not storefront.get('synthetic') or storefront.get('tenant_id')!=1 or storefront.get('restaurant_id')!=1:raise RuntimeError('Guarded storefront fixture required')
     shutil.copyfile(OPS / 'evidence/browser-admin.json', evidence / 'browser-admin.json')
     shutil.copyfile(OPS/'evidence/storefront-qa-fixture.json',evidence/'storefront-qa-fixture.json')
+    runtime_role_checks(destination/'ops/aws/compose.json',evidence)
     # Synthetic acceptance admin only; never use the owner's interactive account.
     for file in evidence.iterdir(): file.chmod(0o600)
     (evidence/'.docker').mkdir(mode=0o700)
@@ -202,6 +218,7 @@ def acceptance(destination):
     commands.append([str(destination / 'ops/aws/run-browser-checks')])
     commands.append(['/usr/local/lib/servio/browser/node',str(destination/'ops/aws/browser-storefront-flow.cjs')])
     commands.append(['/usr/local/lib/servio/browser/node',str(destination/'ops/aws/browser-upload.cjs')])
+    commands.append(['/usr/local/lib/servio/browser/node',str(destination/'ops/aws/journal-api-acceptance.cjs')])
     for command in commands:
         checked(['runuser','-u','ubuntu','--','env','DOCKER_CONFIG='+str(evidence/'.docker'),'NODE_PATH=/usr/local/lib/servio/browser/node_modules','PLAYWRIGHT_BROWSERS_PATH=/usr/local/lib/servio/browser/browsers',*command])
 

@@ -37,6 +37,7 @@ jobs:
       POS_TEST_DATABASE_URL: postgres://postgres:disposable-ci-only@127.0.0.1:5432/servio_test?sslmode=disable
       POS_RLS_ADMIN_URL: postgres://postgres:disposable-ci-only@127.0.0.1:5432/servio_test?sslmode=disable
       POS_RLS_APP_URL: postgres://pos_app:disposable-app-only@127.0.0.1:5432/servio_test?sslmode=disable
+      POS_ACCOUNTING_DATABASE_URL: postgres://pos_accounting:disposable-accounting-only@127.0.0.1:5432/servio_test?sslmode=disable
       POS_APP_DATABASE_URL: postgres://pos_app:disposable-app-only@127.0.0.1:5432/servio_test?sslmode=disable
       POOS_SESSION_REDIS_URL: redis://127.0.0.1:6379/0
     steps:
@@ -49,7 +50,7 @@ jobs:
         working-directory: backend
         env:
           PGPASSWORD: disposable-ci-only
-        run: psql -h 127.0.0.1 -U postgres -d postgres -v ON_ERROR_STOP=1 -v dbname=servio_test -v migrator_pw=disposable-migrator-only -v app_pw=disposable-app-only -f scripts/db/create_runtime_roles.sql
+        run: psql -h 127.0.0.1 -U postgres -d postgres -v ON_ERROR_STOP=1 -v dbname=servio_test -v migrator_pw=disposable-migrator-only -v app_pw=disposable-app-only -v accounting_pw=disposable-accounting-only -f scripts/db/create_runtime_roles.sql
       - run: go mod verify
         working-directory: backend
       - run: go fmt ./... && git diff --exit-code
@@ -172,6 +173,7 @@ jobs:
             ops/aws/evidence/browser/results.json
             ops/aws/evidence/browser/storefront-browser-flow.json
             ops/aws/evidence/browser/upload-browser.json
+            ops/aws/evidence/browser/journal-api-acceptance.json
           if-no-files-found: ignore
 
   required:

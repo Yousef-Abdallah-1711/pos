@@ -34,12 +34,14 @@
         "POSTGRES_PASSWORD": "${TEST_POSTGRES_PASSWORD:?required}",
         "POSTGRES_DB": "servio_test",
         "POS_MIGRATOR_PASSWORD": "${TEST_MIGRATOR_PASSWORD:?required}",
-        "POS_APP_PASSWORD": "${TEST_APP_PASSWORD:?required}"
+        "POS_APP_PASSWORD": "${TEST_APP_PASSWORD:?required}",
+        "POS_ACCOUNTING_PASSWORD": "${TEST_ACCOUNTING_PASSWORD:?required}"
       },
       "volumes": [
         "test_postgres_data:/var/lib/postgresql/data",
         "../../backend/scripts/db/create_runtime_roles.sql:/pos/create_runtime_roles.sql:ro",
-        "../../backend/scripts/db/init-runtime-roles.sh:/docker-entrypoint-initdb.d/10-init-runtime-roles.sh:ro"
+        "../../backend/scripts/db/init-runtime-roles.sh:/docker-entrypoint-initdb.d/10-init-runtime-roles.sh:ro",
+        "../../backend/scripts/db/create_accounting_role.sql:/pos/create_accounting_role.sql:ro"
       ],
       "healthcheck": {
         "test": [

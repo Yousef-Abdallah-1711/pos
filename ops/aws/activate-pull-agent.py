@@ -16,7 +16,7 @@ def activate():
     release=ROOT/'releases'/sha
     if Path(state['compose'])!=release/'ops/aws/compose.json':raise RuntimeError('Unexpected deployment directory')
     evidence=release/'ops/aws/evidence'
-    for name in ['api-smoke.json','refresh-smoke.json','admin-smoke.json','pos-kds-smoke.json','completed-sale-inventory.json','browser/results.json','storefront-browser-flow.json','upload-browser.json']:
+    for name in ['database-role-smoke.json','api-smoke.json','refresh-smoke.json','admin-smoke.json','pos-kds-smoke.json','completed-sale-inventory.json','browser/results.json','storefront-browser-flow.json','upload-browser.json','journal-api-acceptance.json']:
         data=json.loads((evidence/name).read_text());rows=data['checks'] if isinstance(data,dict) else data
         if not rows or any(row.get('status')!='PASS' for row in rows):raise RuntimeError('Acceptance failed: '+name)
     full=json.loads((ROOT/'ops/aws/evidence/full-browser/run.json').read_text())

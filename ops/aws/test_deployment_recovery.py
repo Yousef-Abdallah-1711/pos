@@ -109,3 +109,18 @@ class MigrationRecoveryTests(unittest.TestCase):
                 recovery_call=mocks[-2].call_args
                 self.assertTrue(recovery_call.args[1]['backend_ready'])
                 self.assertTrue(recovery_call.args[2])
+
+class RuntimeRoleGateTests(unittest.TestCase):
+    def test_invalid_role_boundaries_stop_acceptance(self):
+        with tempfile.TemporaryDirectory() as directory:
+            with patch.object(deploy,'compose',return_value=SimpleNamespace(stdout='f\n')):
+                with self.assertRaisesRegex(RuntimeError,'role boundaries failed'):
+                    deploy.runtime_role_checks(Path('compose.json'),Path(directory))
+            self.assertFalse((Path(directory)/'database-role-smoke.json').exists())
+
+    def test_checked_role_boundaries_write_explicit_pass_evidence(self):
+        with tempfile.TemporaryDirectory() as directory:
+            with patch.object(deploy,'compose',return_value=SimpleNamespace(stdout='t\n')):
+                deploy.runtime_role_checks(Path('compose.json'),Path(directory))
+            evidence=json.loads((Path(directory)/'database-role-smoke.json').read_text())
+            self.assertEqual(evidence['checks'][0]['status'],'PASS')

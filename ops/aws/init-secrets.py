@@ -8,7 +8,7 @@ for name in ['evidence','backups']:
     (root/name).chmod(0o700)
 acceptance='--acceptance' in sys.argv[1:]
 p=root/'evidence/acceptance.env' if acceptance else root/'.env'
-keys=['TEST_POSTGRES_PASSWORD','TEST_APP_PASSWORD','TEST_MIGRATOR_PASSWORD','TEST_REDIS_PASSWORD'] if acceptance else ['DB_BOOTSTRAP_PASSWORD','DB_PASSWORD','MIGRATE_DB_PASSWORD','JWT_SECRET','SUPER_ADMIN_JWT_SECRET','REDIS_PASSWORD']
+keys=['TEST_ACCOUNTING_PASSWORD','TEST_POSTGRES_PASSWORD','TEST_APP_PASSWORD','TEST_MIGRATOR_PASSWORD','TEST_REDIS_PASSWORD'] if acceptance else ['ACCOUNTING_DB_PASSWORD','DB_BOOTSTRAP_PASSWORD','DB_PASSWORD','MIGRATE_DB_PASSWORD','JWT_SECRET','SUPER_ADMIN_JWT_SECRET','REDIS_PASSWORD']
 if p.exists():
     p.chmod(0o600)
     existing={line.split('=',1)[0] for line in p.read_text().splitlines() if '=' in line}
