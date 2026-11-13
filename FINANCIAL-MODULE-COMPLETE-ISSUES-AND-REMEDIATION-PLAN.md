@@ -120,17 +120,16 @@ Statuses mean: **SOURCE-CONFIRMED** = code/schema establishes the defect or gap;
 
 ### CFR-004 — Journal draft creation and GL posting have a recoverable partial-failure window
 
-- **Severity/status:** P1 — BLOCKED for runtime reproduction; source structure confirms separate stages.
-- **Problem / impact:** A draft may remain orphaned or an operational event may be marked paid without an accounting effect when the second step fails or process crashes.
-- **Current / expected:** `createAndPostEntry` calls repository create then `AppendEntry`; each repository operation owns its transaction. Expected: atomic local transaction, or durable outbox with replayable/idempotent posting and visible reconciliation.
-- **Root cause:** `backend/internal/usecase/auto_posting_engine.go:522-568`; `backend/internal/repository/journal_entry_repo.go` create/post transactions.
-- **Reproduction/evidence:** Structural source finding; no DB failure injection this session. Phase 00 local-only diagnostics are not a fix and do not exist on main.
-- **Baseline scope:** Main and current branch. Local-only posting diagnostics offer limited visibility but not atomicity.
-- **Recommended solution / components:** Prefer a single DB transaction if all effects are local; otherwise write durable outbox with business transaction, unique event key, retry/dead-letter and reconciliation. Do not claim exactly-once network delivery.
-- **Migration:** Outbox/inbox schema only if async/hybrid is selected; transaction refactor may need none.
-- **Dependencies/policy:** Architecture option and synchronous latency/availability tradeoff.
-- **Acceptance:** Inject failure at each write boundary and crash/restart; no paid-without-journal state without a durable retry record; duplicate replay creates one accounting effect; orphan drafts are reportable/recoverable.
-- **Checklist:** OPEN.
+- **Severity/status:** P1 — PARTIALLY IMPLEMENTED. Local journal creation and GL posting now share one PostgreSQL transaction; business-event durability/recovery remains open.
+- **Problem / impact:** Previously, a draft could commit before GL posting failed. Separately persisted order/payment state can still exist without durable accounting intent after a process failure.
+- **Current implementation:** `CreateAndPostAutoEntry` obtains a transaction-scoped advisory lock keyed by tenant, restaurant, source type/ID, and entry type; checks existing entries within both tenant and restaurant scope; returns an existing posted entry on retry; rejects historical duplicate, draft, void, or unsupported states; creates journal, lines, GL rows, and posted status using the same transaction. No migration was needed. The repository now writes absent JSONB attachments as SQL NULL so a nil attachment payload is valid PostgreSQL input.
+- **Source files changed:** `backend/internal/repository/general_ledger_repo.go`, `backend/internal/repository/journal_entry_repo.go`, `backend/internal/usecase/auto_posting_engine.go`, `backend/cmd/api/main.go`, `backend/internal/usecase/auto_posting_engine_test.go`, `backend/internal/usecase/phase6_accounting_cycle_test.go`, and new `backend/internal/repository/general_ledger_atomic_posting_integration_test.go`.
+- **Tests and results (2026-11-13):** Dedicated disposable PostgreSQL 16 with the current migration set applied: concurrent duplicate replay returns one posted journal/two GL rows; identical references in separate tenants/restaurants remain isolated; injected failures at journal-line insert, GL insert, and posted-status update leave zero journal/GL rows and unchanged account balances. Focused CFR-004 unit/usecase suite passed. `go test ./... -p 1 -count=1` passed with `POS_TEST_DATABASE_URL` unset (PostgreSQL-gated tests skipped); `go vet ./...` and `go build ./...` passed. Enabling the repository’s PostgreSQL-gated tests against the disposable database exposed two unrelated existing failures, each reproduced separately: `TestImpersonationHTTPAuditSessionLifecycle` leaves an expired session active, and `TestSubscriptionExpiryWorkerPostgresScopesEachTenantByItsOwnExpiry` leaves the expired tenant active. No production or existing development database was used.
+- **Remaining acceptance gaps:** Paid-order persistence and auto-posting are not one shared transaction; `OrderUseCase` currently logs/swallows auto-posting errors. No durable event/outbox or crash/restart recovery is included. There is no automatic recovery for a pre-existing draft or void entry; those cases fail closed for manual reconciliation. Full Go suite has the two unrelated failures above. Do not claim end-to-end paid-event recovery or VERIFIED FIXED.
+- **Required owner/accountant decisions:** Confirm canonical accounting trigger/source identity across payment/order channels and acceptable synchronous posting behavior. Define operational handling for historical orphan drafts/voided sources. No tax, rounding, refund, or reversal policy is changed in this PR.
+- **PR / commit / merge:** Draft PR [#33](https://github.com/Yousef-Abdallah-1711/pos/pull/33); implementation commit `9c6beb8bd60ba848230c3efa2ccee8cea8e91493`; merge SHA pending because the PR is unmerged and awaiting CI/review.
+- **Acceptance still required:** Keep the atomic transaction, duplicate replay, isolation, rollback, CFR-001 imbalance regression, handler/usecase tests, standard Go suite, `go vet`, and build passing; resolve or obtain an explicit disposition for the two optional PostgreSQL integration failures; decide and implement separately the durable business-event recovery lifecycle. Merge must wait for required CI and approvals; never claim full recovery from this local atomicity change.
+- **Next action:** Complete CI and review on PR #33; resolve or receive explicit disposition for the optional PostgreSQL integration failures before any merge decision. Keep CFR-004 PARTIALLY IMPLEMENTED until the business-event recovery gap is resolved and accepted.
 
 ### CFR-005 — Paid orders can suppress posting failures and have no proven cancellation/refund reversal
 
@@ -538,7 +537,7 @@ Run one issue per implementation session unless prerequisites couple it. “VERI
 ### P1 — implement in this order
 
 - [ ] **PARTIAL CFR-001** Reject unbalanced auto-posting before persistence. Focused, package, and full Go suites plus vet/build pass; disposable-PostgreSQL acceptance remains pending. Any currency-specific rounding behavior requires owner/accountant policy approval.
-- [ ] **OPEN CFR-004** Make journal+GL posting atomic or durably replayable. Gate: failure injection/restart/replay leaves no invisible partial result.
+- [ ] **PARTIALLY IMPLEMENTED CFR-004** Journal+GL are atomic and duplicate source retries are serialized; business-event persistence/recovery and order error surfacing remain open. See the evidence and acceptance gaps above.
 - [ ] **OPEN CFR-005** Surface paid-order posting failures and implement linked refund/cancel reversal events. Gate: order/payment/refund totals reconcile to GL.
 - [ ] **OPEN CFR-002** Enforce balanced posted entries and immutability in PostgreSQL. Gate: direct SQL negative tests and safe migration/backfill.
 - [ ] **OPEN CFR-003** Serialize journal state/number/balance writes and prevent duplicate GL effects. Gate: concurrent PG tests.

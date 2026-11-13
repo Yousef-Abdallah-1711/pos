@@ -298,7 +298,6 @@ func main() {
 	autoPostingEngine := usecase.NewAutoPostingEngine(
 		autoPostingRepo,
 		accountRepo,
-		journalEntryRepo,
 		inventoryMovementRepo,
 		generalLedgerRepo,
 		productRepo,
