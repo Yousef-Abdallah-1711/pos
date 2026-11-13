@@ -34,7 +34,7 @@ func TestAutoPostingEnginePostSalesEntryCreatesJournalAndLedger(t *testing.T) {
 	}
 	postedBy := 7
 
-	mockAutoPostingDefaults(mock, domain.AutoPostingEventOrderPaid, int(order.ID))
+	mockAutoPostingDefaults(mock, domain.AutoPostingEventOrderPaid)
 	mockAccountByCode(mock, 10, 20, "1110", 1101, "1110", "Cash on Hand", domain.NormalBalanceDebit)
 	mockAccountByCode(mock, 10, 20, "4100", 4100, "4100", "Food Sales", domain.NormalBalanceCredit)
 	mockAccountByCode(mock, 10, 20, "2120", 2120, "2120", "VAT Payable", domain.NormalBalanceCredit)
@@ -83,7 +83,7 @@ func TestAutoPostingEnginePostPayrollEntryCreatesJournalAndLedger(t *testing.T) 
 	}
 	postedBy := 9
 
-	mockAutoPostingDefaults(mock, domain.AutoPostingEventSalaryPaid, salary.ID)
+	mockAutoPostingDefaults(mock, domain.AutoPostingEventSalaryPaid)
 	mockAccountByCode(mock, 10, 20, "1111", 1111, "1111", "Main Bank Account", domain.NormalBalanceDebit)
 	mockAccountByCode(mock, 10, 20, "5210", 5210, "5210", "Salaries Expense", domain.NormalBalanceDebit)
 	mockAccountByCode(mock, 10, 20, "2110", 2110, "2110", "Accrued Expenses", domain.NormalBalanceCredit)
@@ -151,19 +151,15 @@ func newAutoPostingEngineForTest(db *sql.DB) *AutoPostingEngine {
 	return NewAutoPostingEngine(
 		repository.NewAutoPostingRepository(db),
 		repository.NewAccountRepository(db),
-		journalRepo,
 		repository.NewInventoryMovementRepository(db),
 		repository.NewGeneralLedgerRepository(db, journalRepo),
 		repository.NewProductRepository(db),
 	)
 }
 
-func mockAutoPostingDefaults(mock sqlmock.Sqlmock, eventCode string, referenceID int) {
+func mockAutoPostingDefaults(mock sqlmock.Sqlmock, eventCode string) {
 	mock.ExpectQuery(`FROM auto_posting_rules`).
 		WithArgs(10, 20, eventCode).
-		WillReturnError(sql.ErrNoRows)
-	mock.ExpectQuery(`FROM journal_entries`).
-		WithArgs(10, 20, referenceTypeForEvent(eventCode), referenceID, entryTypeForEvent(eventCode), domain.JournalStatusVoid).
 		WillReturnError(sql.ErrNoRows)
 }
 
@@ -187,6 +183,12 @@ func mockAccountByCode(mock sqlmock.Sqlmock, tenantID, restaurantID int, code st
 
 func mockCreateJournalEntry(mock sqlmock.Sqlmock, entryDate time.Time, journalEntryID int, lines []postingExpectation) {
 	mock.ExpectBegin()
+	mock.ExpectQuery(`pg_advisory_xact_lock`).
+		WithArgs(sqlmock.AnyArg()).
+		WillReturnRows(sqlmock.NewRows([]string{"?column?"}).AddRow(1))
+	mock.ExpectQuery(`SELECT id, status\s+FROM journal_entries`).
+		WithArgs(10, 20, sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
+		WillReturnRows(sqlmock.NewRows([]string{"id", "status"}))
 	mock.ExpectQuery(`SELECT COALESCE\(MAX\(CAST\(RIGHT\(entry_number, 5\) AS INT\)\), 0\) \+ 1`).
 		WithArgs(10, 20, "JE-2026-%").
 		WillReturnRows(sqlmock.NewRows([]string{"next_number"}).AddRow(1))
@@ -219,12 +221,9 @@ func mockCreateJournalEntry(mock sqlmock.Sqlmock, entryDate time.Time, journalEn
 			).
 			WillReturnResult(sqlmock.NewResult(1, 1))
 	}
-
-	mock.ExpectCommit()
 }
 
 func mockPostJournalEntry(mock sqlmock.Sqlmock, journalEntryID int, entryDate time.Time, lines []postingExpectation, postedBy int) {
-	mock.ExpectBegin()
 	mock.ExpectQuery(`SELECT status, entry_date`).
 		WithArgs(journalEntryID, 10, 20).
 		WillReturnRows(sqlmock.NewRows([]string{"status", "entry_date", "fiscal_period"}).AddRow(domain.JournalStatusDraft, entryDate, "2026-02"))
@@ -259,22 +258,4 @@ func mockPostJournalEntry(mock sqlmock.Sqlmock, journalEntryID int, entryDate ti
 		WithArgs(domain.JournalStatusPosted, postedBy, journalEntryID, 10, 20).
 		WillReturnResult(sqlmock.NewResult(1, 1))
 	mock.ExpectCommit()
-}
-
-func referenceTypeForEvent(eventCode string) string {
-	switch eventCode {
-	case domain.AutoPostingEventSalaryPaid:
-		return domain.AutoPostingReferenceTypeSalary
-	default:
-		return domain.AutoPostingReferenceTypeOrder
-	}
-}
-
-func entryTypeForEvent(eventCode string) string {
-	switch eventCode {
-	case domain.AutoPostingEventSalaryPaid:
-		return domain.AutoPostingEntryTypePayroll
-	default:
-		return domain.AutoPostingEntryTypeSales
-	}
 }

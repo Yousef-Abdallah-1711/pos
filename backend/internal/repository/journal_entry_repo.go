@@ -202,6 +202,10 @@ func (r *JournalEntryRepository) CreateJournalEntryTx(tx *sql.Tx, entry *domain.
 	if err != nil {
 		return 0, err
 	}
+	var attachments interface{}
+	if len(entry.Attachments) > 0 {
+		attachments = entry.Attachments
+	}
 
 	var id int
 	err = tx.QueryRow(`
@@ -233,7 +237,7 @@ func (r *JournalEntryRepository) CreateJournalEntryTx(tx *sql.Tx, entry *domain.
 		totalCredit,
 		entry.Status,
 		entry.Notes,
-		entry.Attachments,
+		attachments,
 		entry.CreatedBy,
 		entry.UpdatedBy,
 	).Scan(&id)
