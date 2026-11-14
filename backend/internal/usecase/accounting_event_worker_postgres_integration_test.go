@@ -391,8 +391,16 @@ func TestFailedAccountingEventVisibilityAndAuditedRedriveStayScoped(t *testing.T
 		t.Fatalf("cross-scope redrive error=%v, want not-found", err)
 	}
 
-	if err := orderRepo.UpdatePaymentStatus(otherTenantID, otherRestaurantID, otherOrderID, "refunded"); err != nil {
-		t.Fatalf("mark second order refunded: %v", err)
+	// Model an already provider-confirmed refund. The generic order payment
+	// transition intentionally cannot assert a refund on a pending order.
+	result, err := db.Exec(`UPDATE orders SET payment_status = 'refunded'
+		WHERE id = $1 AND tenant_id = $2 AND restaurant_id = $3 AND payment_status = 'paid'`,
+		otherOrderID, otherTenantID, otherRestaurantID)
+	if err != nil {
+		t.Fatalf("record synthetic provider-confirmed refund: %v", err)
+	}
+	if rows, err := result.RowsAffected(); err != nil || rows != 1 {
+		t.Fatalf("record synthetic provider-confirmed refund affected %d rows, err=%v; want 1", rows, err)
 	}
 	var otherEventID int64
 	if err := db.QueryRow(`SELECT id FROM accounting_event_outbox WHERE tenant_id=$1 AND restaurant_id=$2 AND order_id=$3`,
