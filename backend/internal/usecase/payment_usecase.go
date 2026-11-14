@@ -227,17 +227,10 @@ func (uc *PaymentUseCase) HandleWebhook(ctx context.Context, rawPayload []byte, 
 		return fmt.Errorf("unknown plan id for payment: %s", planID)
 	}
 
-	if payment.AmountCents != plan.PriceCents {
-		return fmt.Errorf(
-			"stored payment amount mismatch for plan %s: expected %d got %d",
-			planID,
-			plan.PriceCents,
-			payment.AmountCents,
-		)
-	}
-
-	if payload.Obj.AmountCents != plan.PriceCents {
-		return fmt.Errorf("amount mismatch: expected %d got %d", plan.PriceCents, payload.Obj.AmountCents)
+	// A signed callback settles the immutable payment snapshot, not today's offer.
+	// Catalog price changes must not invalidate previously initiated payments.
+	if payment.AmountCents <= 0 || payload.Obj.AmountCents != payment.AmountCents {
+		return fmt.Errorf("amount mismatch: expected %d got %d", payment.AmountCents, payload.Obj.AmountCents)
 	}
 
 	if !strings.EqualFold(payload.Obj.Currency, payment.Currency) {
