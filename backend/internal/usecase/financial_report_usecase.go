@@ -311,25 +311,18 @@ func (uc *FinancialReportUseCase) GenerateBalanceSheet(tenantID, restaurantID in
 			return report, err
 		}
 
-		amount := running
-		if normalBalance == "credit" {
-			amount = -running
-		}
-		if amount < 0 {
-			amount = -amount
-		}
-		line.Amount = amount
+		line.Amount = balanceSheetContribution(accountType, normalBalance, running)
 
 		switch accountType {
 		case "asset":
 			report.Assets = append(report.Assets, line)
-			report.TotalAssets += amount
+			report.TotalAssets += line.Amount
 		case "liability":
 			report.Liabilities = append(report.Liabilities, line)
-			report.TotalLiabilities += amount
+			report.TotalLiabilities += line.Amount
 		case "equity":
 			report.Equity = append(report.Equity, line)
-			report.TotalEquity += amount
+			report.TotalEquity += line.Amount
 		}
 	}
 	if err := rows.Err(); err != nil {
@@ -347,6 +340,17 @@ func (uc *FinancialReportUseCase) GenerateBalanceSheet(tenantID, restaurantID in
 		report.IntegrityStatus = "UNRECONCILED"
 	}
 	return report, nil
+}
+
+func balanceSheetContribution(accountType, normalBalance string, runningBalance float64) float64 {
+	expectedNormalBalance := "credit"
+	if accountType == "asset" {
+		expectedNormalBalance = "debit"
+	}
+	if normalBalance != expectedNormalBalance {
+		return -runningBalance
+	}
+	return runningBalance
 }
 
 func (uc *FinancialReportUseCase) GenerateCashFlow(tenantID, restaurantID int, from, to time.Time) (CashFlowReport, error) {

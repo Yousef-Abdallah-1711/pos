@@ -168,7 +168,7 @@ func TestFinancialReportUseCase_GenerateBalanceSheetIntegrityStatus(t *testing.T
 			rows: [][]driver.Value{
 				{"1110", "Cash on Hand", "asset", "debit", 100.0},
 				{"2101", "Accounts Payable", "liability", "credit", 0.0},
-				{"3300", "Current Year Earnings", "equity", "credit", -100.0},
+				{"3300", "Current Year Earnings", "equity", "credit", 100.0},
 			},
 			wantStatus: "RECONCILED", wantBalanced: true,
 			wantAssets: 100, wantLiabilities: 0, wantEquity: 100, wantEquationDelta: 0,
@@ -207,6 +207,41 @@ func TestFinancialReportUseCase_GenerateBalanceSheetIntegrityStatus(t *testing.T
 				t.Fatalf("unmet sqlmock expectations: %v", err)
 			}
 		})
+	}
+}
+
+func TestFinancialReportUseCase_GenerateBalanceSheetKeepsContraBalancesNegative(t *testing.T) {
+	db, mock, err := sqlmock.New()
+	if err != nil {
+		t.Fatalf("sqlmock.New failed: %v", err)
+	}
+	defer db.Close()
+
+	asOf := time.Date(2026, time.November, 10, 0, 0, 0, 0, time.UTC)
+	mock.ExpectQuery(`WITH latest AS`).WithArgs(1, 2, asOf).WillReturnRows(
+		sqlmock.NewRows([]string{"account_code", "account_name", "account_type", "normal_balance", "running_balance"}).
+			AddRow("1110", "Cash", "asset", "debit", 100.0).
+			AddRow("1240", "Accumulated Depreciation", "asset", "credit", 20.0).
+			AddRow("2101", "Accounts Payable", "liability", "credit", 20.0).
+			AddRow("3100", "Owner Capital", "equity", "credit", 70.0).
+			AddRow("3190", "Owner Distributions", "equity", "debit", 10.0),
+	)
+
+	report, err := NewFinancialReportUseCase(db, nil).GenerateBalanceSheet(1, 2, asOf)
+	if err != nil {
+		t.Fatalf("GenerateBalanceSheet returned error: %v", err)
+	}
+	if report.TotalAssets != 80 || report.TotalLiabilities != 20 || report.TotalEquity != 60 {
+		t.Fatalf("contra balances changed totals: assets/liabilities/equity = %v/%v/%v, want 80/20/60", report.TotalAssets, report.TotalLiabilities, report.TotalEquity)
+	}
+	if len(report.Assets) != 2 || report.Assets[1].Amount != -20 || len(report.Equity) != 2 || report.Equity[1].Amount != -10 {
+		t.Fatalf("contra balances were not preserved as negative: assets=%+v equity=%+v", report.Assets, report.Equity)
+	}
+	if !report.EquationBalanced || report.IntegrityStatus != "RECONCILED" {
+		t.Fatalf("integrity status/balanced = %s/%t, want RECONCILED/true", report.IntegrityStatus, report.EquationBalanced)
+	}
+	if err := mock.ExpectationsWereMet(); err != nil {
+		t.Fatalf("unmet sqlmock expectations: %v", err)
 	}
 }
 
