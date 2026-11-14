@@ -45,18 +45,23 @@ async function load(page, locale, route) {
  check(`accessibility ${locale}${route}`, violations.length === 0, JSON.stringify(violations))
 }
 async function capture(page, name) {
- const missing = await page.evaluate(async () => {
-  const missing = []
-  for (const image of document.querySelectorAll('main img')) {
-   if (image.closest('[hidden]')) continue
-   image.scrollIntoView()
-   try { await image.decode() } catch { missing.push(image.getAttribute('src')) }
-  }
-  window.scrollTo(0, 0)
-  return missing
- })
- check(`captures decoded ${name}`, missing.length === 0, missing.join('; '))
+ const missing = []
+ const images = page.locator('main img')
+ for (let index = 0; index < await images.count(); index++) {
+  const image = images.nth(index)
+  if (await image.evaluate(element => !!element.closest('[hidden]'))) continue
+  await image.scrollIntoViewIfNeeded()
+  const handle = await image.elementHandle()
+  try {
+   await page.waitForFunction(element => element.complete && element.naturalWidth > 0, handle, { timeout: 15000 })
+  } catch (error) {
+   missing.push({ ...await image.evaluate(element => ({ src: element.currentSrc || element.src, complete: element.complete, width: element.naturalWidth })), error: error.message.slice(0, 160) })
+   break
+  } finally { await handle.dispose() }
+ }
+ await page.evaluate(() => window.scrollTo(0, 0))
  await page.screenshot({ path: path.join(output, `${name}.png`), fullPage: page.viewportSize().width <= 1440 })
+ check(`captures loaded ${name}`, missing.length === 0, JSON.stringify(missing))
 }
 async function focusChecks(page, locale) {
  await load(page, locale, '')
