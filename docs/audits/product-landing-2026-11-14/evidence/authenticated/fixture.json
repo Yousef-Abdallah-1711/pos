@@ -1,0 +1,87 @@
+{
+  "synthetic": true,
+  "tenant_id": 13,
+  "restaurant_id": 13,
+  "category_id": 13,
+  "product_id": 10,
+  "table_id": 3,
+  "employee_id": 1,
+  "themes_before": {
+    "themes": [
+      {
+        "id": 13,
+        "tenant_id": 13,
+        "restaurant_id": 13,
+        "name": "Default Theme",
+        "slug": "default-theme",
+        "config": {
+          "rtl": {
+            "enabled": false
+          },
+          "colors": {
+            "text": "#1f2937",
+            "accent": "#0ea5e9",
+            "border": "#e5e7eb",
+            "shadow": "#000000",
+            "primary": "#3b82f6",
+            "secondary": "#1e40af",
+            "background": "#ffffff"
+          },
+          "custom": {},
+          "footer": {
+            "text": "\u00a9 2025 SERVIO Audit Synthetic. All rights reserved.",
+            "links": [],
+            "bgColor": "#1f2937",
+            "textColor": "#f3f4f6"
+          },
+          "header": {
+            "navBg": "#ffffff",
+            "sticky": true,
+            "logoUrl": "",
+            "navText": "#1f2937",
+            "navHeight": 80
+          },
+          "darkMode": {
+            "enabled": false,
+            "textDark": "#f3f4f6",
+            "primaryDark": "#1e40af",
+            "secondaryDark": "#1e3a8a",
+            "backgroundDark": "#111827"
+          },
+          "homepage": {
+            "sections": []
+          },
+          "identity": {
+            "domain": "audit-1794625969.pos.rakmyat.online",
+            "logoUrl": "",
+            "siteTitle": "SERVIO Audit Synthetic",
+            "faviconUrl": ""
+          },
+          "components": [],
+          "typography": {
+            "baseSize": 16,
+            "fontMono": "Courier, monospace",
+            "fontSans": "Inter, Arial, sans-serif",
+            "fontSerif": "Georgia, serif",
+            "lineHeight": 1.5,
+            "borderRadius": 8
+          }
+        },
+        "description": "Default theme for SERVIO Audit Synthetic",
+        "is_active": true,
+        "is_published": true,
+        "version": 1,
+        "created_by": 14,
+        "created_at": "2026-11-14T03:12:53.442991Z",
+        "updated_at": "2026-11-14T03:12:53.442991Z"
+      }
+    ],
+    "total": 1,
+    "page": 1,
+    "page_size": 10,
+    "total_pages": 1
+  },
+  "pos_order_id": 10,
+  "pos_order_number": "ORD-2026-2c544c21-4266-4953-a15b-0c61a10d3f68",
+  "leave_id": 1
+}
