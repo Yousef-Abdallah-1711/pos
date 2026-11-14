@@ -607,9 +607,16 @@ func (r *PaymentAccountingRepository) applySupplierInvoicePaymentTx(tx *sql.Tx, 
 func (r *PaymentAccountingRepository) generatePaymentNumberTx(tx *sql.Tx, mode string, tenantID, restaurantID int, paymentDate time.Time) (string, error) {
 	tableName := "payments_received"
 	prefix := fmt.Sprintf("PMT-R-%d-", paymentDate.Year())
+	family := "payment-received"
 	if mode == "made" {
 		tableName = "payments_made"
 		prefix = fmt.Sprintf("PMT-M-%d-", paymentDate.Year())
+		family = "payment-made"
+	} else if mode != "received" {
+		return "", fmt.Errorf("unsupported accounting payment mode %q", mode)
+	}
+	if err := lockFinancialDocumentNumberTx(tx, family, tenantID, restaurantID, prefix); err != nil {
+		return "", err
 	}
 
 	query := fmt.Sprintf(`
