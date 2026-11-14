@@ -5,6 +5,9 @@ import api from '@/lib/api'
 import { useAuthStore } from '@/stores/authStore'
 import { BlockedOverlay } from '../BlockedOverlay'
 import { TrialExpiredScreen } from '../TrialExpiredScreen'
+import { BlockedSidebar } from '../BlockedSidebar'
+
+vi.mock('@/hooks/useTenantStatus', () => ({ useTenantStatus: () => ({ blockReason: 'trial_expired' }) }))
 
 vi.mock('next/navigation', () => ({ usePathname: vi.fn(), useRouter: vi.fn() }))
 vi.mock('@/lib/api', () => ({ default: { post: vi.fn() } }))
@@ -72,4 +75,39 @@ it('waits for server revocation before clearing state and navigating', async () 
   revoke?.()
   await waitFor(() => expect(replace).toHaveBeenCalledWith('/en/auth/login'))
   expect(logout).toHaveBeenCalledOnce()
+})
+
+
+it('closes the blocked mobile navigation by Escape, button and billing navigation', () => {
+  const close = vi.fn()
+  render(<BlockedSidebar isMobileOpen onMobileToggle={close} />)
+  fireEvent.keyDown(window, { key: 'Escape' })
+  expect(close).toHaveBeenCalledTimes(1)
+  fireEvent.click(screen.getAllByRole('button', { name: 'Close navigation' })[0])
+  expect(close).toHaveBeenCalledTimes(2)
+  fireEvent.click(screen.getByRole('link', { name: 'Billing & subscription' }))
+  expect(close).toHaveBeenCalledTimes(3)
+})
+
+it('revokes the blocked sidebar session before clearing state', async () => {
+  let revoke: (() => void) | undefined
+  vi.mocked(api.post).mockImplementationOnce(() => new Promise(resolve => { revoke = () => resolve({ data: {} }) }))
+  vi.mocked(usePathname).mockReturnValue('/ar/dashboard')
+  render(<BlockedSidebar isMobileOpen onMobileToggle={vi.fn()} />)
+  fireEvent.click(screen.getByRole('button', { name: 'تسجيل الخروج' }))
+  expect(api.post).toHaveBeenCalledWith('/auth/logout')
+  expect(logout).not.toHaveBeenCalled()
+  expect(replace).not.toHaveBeenCalled()
+  revoke?.()
+  await waitFor(() => expect(replace).toHaveBeenCalledWith('/ar/auth/login'))
+  expect(logout).toHaveBeenCalledOnce()
+})
+
+it('keeps a blocked sidebar session available for retry if revocation fails', async () => {
+  vi.mocked(api.post).mockRejectedValueOnce(new Error('network failure'))
+  render(<BlockedSidebar isMobileOpen={false} onMobileToggle={vi.fn()} />)
+  fireEvent.click(screen.getByRole('button', { name: 'Sign out' }))
+  expect(await screen.findByRole('alert')).toHaveTextContent('Sign out failed')
+  expect(logout).not.toHaveBeenCalled()
+  expect(replace).not.toHaveBeenCalled()
 })

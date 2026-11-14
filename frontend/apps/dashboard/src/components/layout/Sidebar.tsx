@@ -321,7 +321,7 @@ export function Sidebar({ isMobileOpen, onMobileToggle, isCollapsed, onCollapsed
 
   // Keep hooks above conditional returns so loading/status changes preserve hook order.
   if (isBlocked) {
-    return <BlockedSidebar />
+    return <BlockedSidebar isMobileOpen={isMobileOpen} onMobileToggle={onMobileToggle} />
   }
 
   if (permissionsLoading) {
@@ -359,7 +359,7 @@ export function Sidebar({ isMobileOpen, onMobileToggle, isCollapsed, onCollapsed
 
   // Show blocked sidebar if tenant is blocked
   if (isBlocked) {
-    return <BlockedSidebar />
+    return <BlockedSidebar isMobileOpen={isMobileOpen} onMobileToggle={onMobileToggle} />
   }
 
   if (permissionsLoading) {
