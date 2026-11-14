@@ -1,4 +1,5 @@
 import { MarketingShell } from '@/components/marketing/MarketingShell'
+import { BillingDetails } from '@/components/marketing/BillingDetails'
 import { PricingOffer } from '@/components/marketing/PricingOffer'
 import { MarketingFAQ } from '@/components/marketing/ClosingSections'
 import { marketingMetadata } from '@/lib/marketingMetadata'
@@ -10,5 +11,5 @@ export async function generateMetadata({ params }: Props) {
 }
 export default async function PricingPage({ params }: Props) {
  const { locale } = await params
- return <MarketingShell><PricingOffer locale={locale} detailed /><MarketingFAQ locale={locale} /></MarketingShell>
+ return <MarketingShell><PricingOffer locale={locale} detailed /><BillingDetails locale={locale} /><MarketingFAQ locale={locale} /></MarketingShell>
 }

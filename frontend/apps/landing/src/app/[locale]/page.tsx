@@ -6,9 +6,17 @@ import { ManagementSections } from '@/components/marketing/ManagementSections'
 import { ProductExplorer } from '@/components/marketing/ProductExplorer'
 import { PricingOffer } from '@/components/marketing/PricingOffer'
 import { GettingStarted, MarketingFAQ, FinalCTA } from '@/components/marketing/ClosingSections'
+import { TrialLink } from '@/components/marketing/TrialLink'
+import { marketingMetadata } from '@/lib/marketingMetadata'
 import { SectionHead } from '@/components/marketing/SectionHead'
 import { getFeatures } from '@/content/features'
 import { getSiteCopy, type Locale } from '@/content/site'
+
+export async function generateMetadata({ params }: { params: Promise<{ locale: Locale }> }) {
+  const { locale } = await params
+  const c = getSiteCopy(locale)
+  return marketingMetadata(locale, '', `${c.heroStart} ${c.heroEnd}`, c.heroBody)
+}
 
 export default async function HomePage({ params }: { params: Promise<{ locale: Locale }> }) {
   const { locale } = await params
@@ -16,8 +24,8 @@ export default async function HomePage({ params }: { params: Promise<{ locale: L
   return <MarketingShell><HomeHero locale={locale} /><OrderJourney locale={locale} />
     <OperationsSections locale={locale} /><ManagementSections locale={locale} />
     <section id="product-explorer" className="sv-section"><div className="sv-shell">
-      <SectionHead eyebrow={c.explorerEyebrow} title={c.explorerTitle} />
-      <ProductExplorer locale={locale} features={getFeatures(locale)} />
+      <SectionHead eyebrow={c.explorerEyebrow} title={c.explorerTitle} body={c.explorerBody} />
+      <ProductExplorer locale={locale} features={getFeatures(locale)} /><TrialLink locale={locale} source="home-explorer" compact />
     </div></section><GettingStarted locale={locale} /><PricingOffer locale={locale} />
     <MarketingFAQ locale={locale} /><FinalCTA locale={locale} /></MarketingShell>
 }

@@ -1,4 +1,4 @@
-import Link from 'next/link'
+import { FeatureActions } from './FeatureActions'
 import { getSiteCopy, type Locale } from '@/content/site'
 import { SectionHead } from './SectionHead'
 
@@ -12,7 +12,7 @@ export function OrderJourney({ locale }: { locale: Locale }) {
           <summary><span className="sv-step-number">{number}</span><h3>{title}</h3><span aria-hidden="true" className="sv-expand">+</span></summary>
           <p>{body}</p>
         </details>)}
-        <Link className="sv-text-link" href={`/${locale}/how-it-works`}>{c.how}<span aria-hidden="true">↗</span></Link>
+        <FeatureActions locale={locale} source="order-journey" destination="how-it-works" label={c.how} />
       </div>
     </div>
   </section>
