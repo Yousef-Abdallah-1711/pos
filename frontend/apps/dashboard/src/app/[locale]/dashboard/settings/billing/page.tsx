@@ -108,7 +108,9 @@ export default function BillingSettingsPage() {
     }
 
     if (resolvedPlans.length > 0) {
-      const preferredPlanID =
+      const preferredOffer = resolvedCurrent?.subscription_status === 'trial' && resolvedCurrent.preferred_billing_period
+        ? resolvedPlans.find(plan => isAnnualPlan(plan) === (resolvedCurrent?.preferred_billing_period === 'annual'))?.id : undefined
+      const preferredPlanID = preferredOffer ||
         resolvedCurrent?.current_plan?.id ||
         resolvedCurrent?.plan?.id ||
         ''
@@ -320,7 +322,7 @@ export default function BillingSettingsPage() {
                   </p>
                   {isAnnualPlan(plan) && (
                     <span className="inline-flex mt-2 rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-medium text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300">
-                      {t('settings.billingPage.saveAnnual', 'Save 17%')}
+                      {t('settings.billingPage.saveAnnual', 'Save approximately 44.4%')}
                     </span>
                   )}
                 </button>
@@ -334,11 +336,12 @@ export default function BillingSettingsPage() {
               key={plan.id}
               plan={plan}
               isActive={isActiveSubscription && currentPlanID === plan.id}
+              disabled={currentSubscription?.checkout_available !== true}
               isLoading={paymentFlow.isLoading}
               locale={locale}
-              subscribeLabel={t('settings.billingPage.subscribeNow', 'Subscribe Now')}
+              subscribeLabel={currentSubscription?.checkout_available !== true ? (isRTL ? 'الدفع غير متاح حاليًا' : 'Paid checkout unavailable') : t('settings.billingPage.subscribeNow', 'Subscribe Now')}
               activeLabel={t('settings.billingPage.activePlan', 'Already Active')}
-              annualSaveLabel={t('settings.billingPage.saveAnnual', 'Save 17%')}
+              annualSaveLabel={t('settings.billingPage.saveAnnual', 'Save approximately 44.4%')}
               translateFeature={(feature) => {
                 const featureMap: Record<string, string> = {
                   'Full POS System': t('settings.billingPage.features.fullPosSystem', 'Full POS System'),

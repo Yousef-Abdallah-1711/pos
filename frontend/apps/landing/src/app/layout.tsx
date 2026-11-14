@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { Alexandria, IBM_Plex_Sans_Arabic, Manrope } from 'next/font/google'
 import './globals.css'
+import './marketing.css'
 import { ThemeProvider } from 'next-themes'
 
 const alexandria = Alexandria({
@@ -25,14 +26,14 @@ export const metadata: Metadata = {
   metadataBase: process.env.NEXT_PUBLIC_LANDING_URL
     ? new URL(process.env.NEXT_PUBLIC_LANDING_URL)
     : undefined,
-  title: 'POOS | إدارة متصلة لكل تفاصيل مطعمك',
+  title: 'SERVIO | إدارة متصلة لكل تفاصيل مطعمك',
   description: 'منصة واحدة لإدارة العمل في مطعمك من واجهة الخدمة إلى ما يدور خلفها.',
-  applicationName: 'POOS',
-  keywords: ['POOS', 'إدارة المطاعم', 'restaurant management'],
+  applicationName: 'SERVIO',
+  keywords: ['SERVIO', 'إدارة المطاعم', 'restaurant management'],
   openGraph: {
-    title: 'POOS | إدارة متصلة لكل تفاصيل مطعمك',
+    title: 'SERVIO | إدارة متصلة لكل تفاصيل مطعمك',
     description: 'منصة واحدة لإدارة العمل في مطعمك من واجهة الخدمة إلى ما يدور خلفها.',
-    siteName: 'POOS',
+    siteName: 'SERVIO',
     type: 'website',
   },
 }

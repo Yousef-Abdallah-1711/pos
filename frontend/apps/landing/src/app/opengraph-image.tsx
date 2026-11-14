@@ -1,6 +1,6 @@
 import { ImageResponse } from 'next/og'
 
-export const alt = 'POOS — one view of your restaurant’s work'
+export const alt = 'SERVIO — one view of your restaurant’s work'
 export const size = { width: 1200, height: 630 }
 export const contentType = 'image/png'
 
@@ -24,15 +24,15 @@ export default function OpenGraphImage() {
             <path d="M11 39V9h14a10 10 0 0 1 0 20H11m14 0h12" stroke="#6D28D9" strokeWidth="7" strokeLinecap="round" strokeLinejoin="round" />
             <circle cx="37" cy="29" r="3.5" fill="#8B5CF6" />
           </svg>
-          POOS
+          SERVIO
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', maxWidth: 960, borderTop: '2px solid #6D28D9', paddingTop: 32 }}>
-          <div style={{ fontSize: 64, lineHeight: 1.25, fontWeight: 700 }}>One view of your restaurant’s work.</div>
-          <div style={{ marginTop: 20, color: '#5C566F', fontSize: 30 }}>One platform for front- and back-of-house work.</div>
+          <div style={{ fontSize: 64, lineHeight: 1.25, fontWeight: 700 }}>Every order, connected.</div>
+          <div style={{ marginTop: 20, color: '#5C566F', fontSize: 30 }}>From the counter to the kitchen.</div>
         </div>
         <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid #D9D1EB', paddingTop: 20, color: '#6D28D9', fontSize: 22 }}>
           <span>RESTAURANT MANAGEMENT</span>
-          <span>POOS / RESTAURANT OPERATIONS</span>
+          <span>SERVIO / RESTAURANT OPERATIONS</span>
         </div>
       </div>
     ),

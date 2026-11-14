@@ -86,6 +86,8 @@ type TenantBillingInfo struct {
 
 // CurrentSubscriptionResponse is returned by GET /subscription/current.
 type CurrentSubscriptionResponse struct {
+	PreferredBillingPeriod  string                    `json:"preferred_billing_period,omitempty"`
+	CheckoutAvailable       bool                      `json:"checkout_available"`
 	SubscriptionStatus      string                    `json:"subscription_status"`
 	TrialEndDate            *time.Time                `json:"trial_end_date,omitempty"`
 	SubscriptionExpiresAt   *time.Time                `json:"subscription_expires_at,omitempty"`

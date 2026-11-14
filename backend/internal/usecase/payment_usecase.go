@@ -13,6 +13,7 @@ import (
 	"strings"
 	"time"
 
+	"pos-saas/internal/commerce"
 	"pos-saas/internal/domain"
 	"pos-saas/internal/pkg/database"
 	"pos-saas/internal/repository"
@@ -459,6 +460,13 @@ func (uc *PaymentUseCase) GetCurrentSubscription(ctx context.Context, tenantID i
 	}
 
 	plan, ok := planByID[planID]
+	if !ok && uc.planRepo != nil {
+		// Historical subscriptions retain their legacy catalog price and identity.
+		if historical, err := uc.planRepo.GetByCode(ctx, planID); err == nil && historical != nil {
+			plan = *historical
+			ok = true
+		}
+	}
 	if !ok {
 		plan = uc.defaultPlan()
 	}
@@ -475,6 +483,8 @@ func (uc *PaymentUseCase) GetCurrentSubscription(ctx context.Context, tenantID i
 	}
 
 	return &domain.CurrentSubscriptionResponse{
+		PreferredBillingPeriod:  subscription.PreferredBillingPeriod,
+		CheckoutAvailable:       commerce.Current().CheckoutAvailable,
 		SubscriptionStatus:      subscription.SubscriptionStatus,
 		TrialEndDate:            subscription.TrialEndDate,
 		SubscriptionExpiresAt:   billingInfo.SubscriptionExpiresAt,
@@ -831,6 +841,12 @@ func (uc *PaymentUseCase) getPlanByID(ctx context.Context, planID string) (domai
 			return plan, true
 		}
 	}
+	// Compatibility aliases apply only when no explicit legacy plan was supplied.
+	for _, plan := range uc.listPlans(ctx) {
+		if (targetID == "monthly" && plan.ID == commerce.Current().MonthlyPlanID) || (targetID == "annual" && plan.ID == commerce.Current().AnnualPlanID) {
+			return plan, true
+		}
+	}
 	return domain.SubscriptionPlan{}, false
 }
 
@@ -846,8 +862,8 @@ func (uc *PaymentUseCase) defaultPlan() domain.SubscriptionPlan {
 		ID:         "monthly",
 		Name:       "Pro Plan",
 		NameAr:     "Pro Plan",
-		Price:      500,
-		PriceCents: 50000,
+		Price:      commerce.Current().MonthlyPriceCents / 100,
+		PriceCents: commerce.Current().MonthlyPriceCents,
 		Currency:   "EGP",
 		Period:     "month",
 	}
@@ -1087,57 +1103,12 @@ func (uc *PaymentUseCase) writeSubscriptionHistory(ctx context.Context, params *
 }
 
 func buildDefaultPlans() map[string]domain.SubscriptionPlan {
-	monthlyPriceCents := getEnvInt("SUBSCRIPTION_MONTHLY_PRICE_CENTS", 50000)
-	annualPriceCents := getEnvInt("SUBSCRIPTION_ANNUAL_PRICE_CENTS", 500000)
-	currency := strings.ToUpper(getEnvString("SUBSCRIPTION_CURRENCY", "EGP"))
-	if currency == "" {
-		currency = "EGP"
-	}
-
-	monthlyFeatures := []string{
-		"Full POS System",
-		"Kitchen Display System",
-		"Online Ordering Website",
-		"Analytics and Reports",
-		"Multi-Restaurant Management",
-		"Mobile Apps",
-		"Unlimited Staff",
-		"Priority Support",
-		"Free Updates",
-		"Driver Management",
-	}
-
+	offer := commerce.Current()
+	features := []string{"Cashier POS", "Kitchen display", "Cash ordering", "Theme configuration"}
+	featuresAr := []string{"نقاط البيع", "شاشة المطبخ", "الطلبات النقدية", "إعداد القالب"}
 	return map[string]domain.SubscriptionPlan{
-		"monthly": {
-			ID:         "monthly",
-			Name:       "Pro Plan",
-			NameAr:     "Pro Plan",
-			Price:      monthlyPriceCents / 100,
-			PriceCents: monthlyPriceCents,
-			Currency:   currency,
-			Period:     "month",
-			Features:   monthlyFeatures,
-			FeaturesAr: monthlyFeatures,
-		},
-		"annual": {
-			ID:         "annual",
-			Name:       "Pro Plan (Annual)",
-			NameAr:     "Pro Plan (Annual)",
-			Price:      annualPriceCents / 100,
-			PriceCents: annualPriceCents,
-			Currency:   currency,
-			Period:     "year",
-			Features: []string{
-				"Everything in Monthly Plan",
-				"Save 17% (2 months free)",
-				"Annual billing convenience",
-			},
-			FeaturesAr: []string{
-				"Everything in Monthly Plan",
-				"Save 17% (2 months free)",
-				"Annual billing convenience",
-			},
-		},
+		"monthly": {ID: offer.MonthlyPlanID, Name: "SERVIO Monthly", NameAr: "سيرفيو شهري", Price: offer.MonthlyPriceCents / 100, PriceCents: offer.MonthlyPriceCents, Currency: offer.Currency, Period: "month", Features: features, FeaturesAr: featuresAr},
+		"annual":  {ID: offer.AnnualPlanID, Name: "SERVIO Annual", NameAr: "سيرفيو سنوي", Price: offer.AnnualPriceCents / 100, PriceCents: offer.AnnualPriceCents, Currency: offer.Currency, Period: "year", Features: features, FeaturesAr: featuresAr},
 	}
 }
 

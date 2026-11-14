@@ -6,6 +6,7 @@ import { SubscriptionPlan } from '@/lib/api'
 
 interface PlanCardProps {
   plan: SubscriptionPlan
+  disabled?: boolean
   isActive: boolean
   isLoading: boolean
   locale?: 'en' | 'ar'
@@ -33,11 +34,12 @@ function isAnnualPlan(plan: SubscriptionPlan) {
 export function PlanCard({
   plan,
   isActive,
+  disabled = false,
   isLoading,
   locale = 'en',
   subscribeLabel = 'Subscribe Now',
   activeLabel = 'Already Active',
-  annualSaveLabel = 'Save 17%',
+  annualSaveLabel = 'Save approximately 44.4%',
   translateFeature,
   onSubscribe,
 }: PlanCardProps) {
@@ -64,7 +66,7 @@ export function PlanCard({
         </div>
         <Button
           onClick={() => onSubscribe(plan.id)}
-          disabled={isLoading || isActive}
+          disabled={disabled || isLoading || isActive}
           className="gap-2"
         >
           {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <CreditCard className="h-4 w-4" />}
