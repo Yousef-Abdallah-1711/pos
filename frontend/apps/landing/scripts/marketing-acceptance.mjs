@@ -121,12 +121,19 @@ async function interactions(page, locale) {
  check(`menu escape ${locale}`, await menu.getAttribute('aria-expanded') === 'false')
  await focusChecks(page, locale)
 }
+async function createPage(browser, viewport) {
+ const page = await browser.newPage({ ignoreHTTPSErrors: process.env.SERVIO_DISPOSABLE_BROWSER === '1', viewport, reducedMotion: 'reduce' })
+ // Routing disables HTTP cache, so each raw-SSR assertion reads a fresh response.
+ // https://playwright.dev/docs/api/class-browsercontext#browser-context-route
+ await page.route('**/*', route => route.continue())
+ return page
+}
 async function main() {
  await fs.mkdir(output, { recursive: true })
  const browserType = browserName === 'firefox' ? firefox : chromium
  const browser = await browserType.launch({ headless: true, ...(process.env.SERVIO_BROWSER_EXECUTABLE ? { executablePath: process.env.SERVIO_BROWSER_EXECUTABLE } : {}), ...(browserName === 'chromium' ? { args: ['--no-sandbox'] } : {}) })
  try {
-  let page = await browser.newPage({ ignoreHTTPSErrors: process.env.SERVIO_DISPOSABLE_BROWSER === '1', viewport: { width: 1440, height: 1000 }, reducedMotion: 'reduce' })
+  let page = await createPage(browser, { width: 1440, height: 1000 })
   const errors = []
   const networkFailures = []
   const observe = page => {
@@ -143,7 +150,7 @@ async function main() {
     await capture(page, `${locale}-${width}`)
     for (const route of routes.slice(1)) await load(page, locale, route)
     await page.close()
-    page = await browser.newPage({ ignoreHTTPSErrors: process.env.SERVIO_DISPOSABLE_BROWSER === '1', viewport: { width, height: 1000 }, reducedMotion: 'reduce' })
+    page = await createPage(browser, { width, height: 1000 })
     observe(page)
    }
    await interactions(page, locale)
