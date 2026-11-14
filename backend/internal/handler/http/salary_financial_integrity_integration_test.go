@@ -200,7 +200,7 @@ func TestCFR009PostgresPostingFailureRollsBackPaymentState(t *testing.T) {
 	fixture := openPayrollFixture(t)
 	triggerName := fmt.Sprintf("cfr009_fail_journal_%d", time.Now().UnixNano())
 	functionName := fmt.Sprintf("cfr009_fail_journal_fn_%d", time.Now().UnixNano())
-	if _, err := fixture.db.Exec(fmt.Sprintf(`CREATE FUNCTION %s() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN IF NEW.reference_type='salary' THEN RAISE EXCEPTION 'injected payroll journal failure'; END IF; RETURN NEW; END $$`, functionName)); err != nil {
+	if _, err := fixture.db.Exec(fmt.Sprintf(`CREATE FUNCTION %s() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN IF NEW.reference_type='salary' AND NEW.tenant_id=%d THEN RAISE EXCEPTION 'injected payroll journal failure'; END IF; RETURN NEW; END $$`, functionName, fixture.tenantID)); err != nil {
 		t.Fatalf("create failure-injection function: %v", err)
 	}
 	if _, err := fixture.db.Exec(fmt.Sprintf(`CREATE TRIGGER %s BEFORE INSERT ON journal_entries FOR EACH ROW EXECUTE FUNCTION %s()`, triggerName, functionName)); err != nil {
@@ -230,7 +230,7 @@ func TestCFR009PostgresFailureAtEachPaymentStageRollsBackAllEffects(t *testing.T
 			fixture := openPayrollFixture(t)
 			triggerName := fmt.Sprintf("cfr009_abort_%d", time.Now().UnixNano())
 			functionName := fmt.Sprintf("cfr009_abort_fn_%d", time.Now().UnixNano())
-			if _, err := fixture.db.Exec(fmt.Sprintf(`CREATE FUNCTION %s() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN RAISE EXCEPTION 'injected %s failure'; END $$`, functionName, table)); err != nil {
+			if _, err := fixture.db.Exec(fmt.Sprintf(`CREATE FUNCTION %s() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN IF NEW.tenant_id=%d THEN RAISE EXCEPTION 'injected %s failure'; END IF; RETURN NEW; END $$`, functionName, fixture.tenantID, table)); err != nil {
 				t.Fatalf("create failure-injection function: %v", err)
 			}
 			triggerOperation := "INSERT"
