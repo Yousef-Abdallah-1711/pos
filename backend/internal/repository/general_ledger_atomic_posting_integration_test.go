@@ -273,3 +273,62 @@ func cleanupAtomicPostingFixtureRows(t *testing.T, db *sql.DB, fixture *atomicPo
 	// CFR-002 makes ledger history immutable, so deleting test postings would weaken
 	// the behavior under test; discard the entire database after the suite instead.
 }
+
+type supplierAutoPostingCase struct {
+	entryType     string
+	referenceType string
+	referenceID   int
+}
+
+func TestSupplierAutoPostingEntryTypesFitPostgresColumn(t *testing.T) {
+	db, fixture := openAtomicPostingFixture(t)
+	defer cleanupAtomicPostingFixture(t, db, fixture)
+
+	cases := []supplierAutoPostingCase{
+		{entryType: domain.AutoPostingEntryTypeSupplierInvoice, referenceType: "supplier_invoice", referenceID: 118600},
+		{entryType: domain.AutoPostingEntryTypeSupplierPayment, referenceType: "supplier_payment", referenceID: 118601},
+	}
+	for _, testCase := range cases {
+		t.Run(testCase.entryType, func(t *testing.T) {
+			assertSupplierAutoPostingTypePersists(t, db, fixture, testCase)
+		})
+	}
+}
+
+func assertSupplierAutoPostingTypePersists(t *testing.T, db *sql.DB, fixture *atomicPostingFixture, testCase supplierAutoPostingCase) {
+	t.Helper()
+	entry := fixture.entry()
+	entry.EntryType = testCase.entryType
+	entry.ReferenceType = testCase.referenceType
+	entry.ReferenceID = &testCase.referenceID
+	entry.ReferenceNumber = fmt.Sprintf("CFR011-%d", testCase.referenceID)
+
+	journalID, err := fixture.ledger.CreateAndPostAutoEntry(entry, 0)
+	if err != nil {
+		t.Fatalf("post supplier accounting entry type %q: %v", testCase.entryType, err)
+	}
+
+	var persistedType string
+	if err := db.QueryRow(`
+		SELECT entry_type
+		FROM journal_entries
+		WHERE id = $1 AND tenant_id = $2 AND restaurant_id = $3
+	`, journalID, fixture.tenantID, fixture.restaurantID).Scan(&persistedType); err != nil {
+		t.Fatalf("read persisted supplier entry type: %v", err)
+	}
+	if persistedType != testCase.entryType {
+		t.Fatalf("persisted entry type = %q, want %q", persistedType, testCase.entryType)
+	}
+
+	var ledgerRows int
+	if err := db.QueryRow(`
+		SELECT COUNT(*)
+		FROM general_ledger
+		WHERE journal_entry_id = $1 AND tenant_id = $2 AND restaurant_id = $3
+	`, journalID, fixture.tenantID, fixture.restaurantID).Scan(&ledgerRows); err != nil {
+		t.Fatalf("count supplier general-ledger rows: %v", err)
+	}
+	if ledgerRows != len(entry.Lines) {
+		t.Fatalf("supplier general-ledger rows = %d, want %d", ledgerRows, len(entry.Lines))
+	}
+}

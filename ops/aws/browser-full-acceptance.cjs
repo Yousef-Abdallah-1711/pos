@@ -2,6 +2,7 @@
 const {chromium}=require('playwright');
 const fs=require('fs');
 const path=require('path');
+const {discoverRoutes}=require('./browser-route-inventory.cjs');
 const root=path.resolve(__dirname,'../..');
 const evidence=path.join(root,'ops/aws/evidence/full-browser');
 fs.mkdirSync(evidence,{recursive:true,mode:0o700});
@@ -9,13 +10,6 @@ const rows=[];
 const dynamicOnly=process.env.SERVIO_DYNAMIC_ONLY==='1';
 const run={scope:dynamicOnly?'dynamic-diagnostic':'full',started_utc:new Date().toISOString(),sha:process.env.SERVIO_RELEASE_SHA||null};
 const hosts={landing:'https://pos.rakmyat.online',dashboard:'https://pos.app.rakmyat.online','super-admin':'https://admin.pos.rakmyat.online','restaurant-website':'https://restaurant-1.pos.rakmyat.online'};
-function discover(directory){
- return fs.readdirSync(directory,{withFileTypes:true}).flatMap(entry=>entry.isDirectory()?discover(path.join(directory,entry.name)):entry.name==='page.tsx'?[path.join(directory,entry.name)]:[]);
-}
-function routes(app){
- const base=path.join(root,'frontend/apps',app,app==='restaurant-website'?'app':'src/app');
- return [...new Set(discover(base).map(file=>'/'+path.relative(base,file).replace(/\/page.tsx$|^page.tsx$/g,'')))].sort();
-}
 function resolveFixture(app,raw){
  const file=app==='restaurant-website'?'storefront-qa-fixture.json':'route-qa-fixtures.json';
  const fixture=JSON.parse(fs.readFileSync(path.join(root,'ops/aws/evidence',file)));
@@ -109,7 +103,7 @@ async function verifyLogout(context,admin){
  if(!run.sha||run.sha!==run.observed_sha)throw new Error('Full acceptance requires the exact deployed SHA');
  fs.writeFileSync(path.join(evidence,'run.json'),JSON.stringify(run,null,2));
  if(!dynamicOnly)await verifyAnonymousCallbacks(browser);
- const inventory=Object.fromEntries(Object.keys(hosts).map(app=>[app,routes(app)]));
+ const inventory=Object.fromEntries(Object.keys(hosts).map(app=>[app,discoverRoutes(root,app)]));
  fs.writeFileSync(path.join(evidence,'discovered-routes.json'),JSON.stringify(inventory,null,2));
  run.expected_checks=(dynamicOnly?0:3)+2+Object.entries(inventory).reduce((total,[app,list])=>total+list.filter(raw=>!raw.includes('/callback')&&!raw.includes('/test-url')&&(app!=='dashboard'||raw.startsWith('/[locale]/dashboard'))&&(!dynamicOnly||/\[(id|tableId|orderNumber)\]/.test(raw))).reduce((sum,raw)=>sum+(raw.includes('[locale]')?6:3),0),0);
  for(const app of Object.keys(hosts)){
