@@ -1,3 +1,4 @@
+import { RootDocument, rootMetadata } from '@/components/RootDocument'
 import { LanguageProvider } from '@/contexts/LanguageContext'
 import { Toaster } from 'sonner'
 import type { Metadata } from 'next'
@@ -25,6 +26,7 @@ export async function generateMetadata({ params }: Pick<LocaleLayoutProps, 'para
     : 'One platform for the work at the front and back of your restaurant.'
 
   return {
+    ...rootMetadata,
     title,
     description,
     alternates: {
@@ -41,9 +43,9 @@ export default async function LocaleLayout({ children, params }: LocaleLayoutPro
   const locale: Locale = rawLocale === 'ar' ? 'ar' : 'en'
 
   return (
-    <LanguageProvider locale={locale}>
+    <RootDocument locale={locale}><LanguageProvider locale={locale}>
       {children}
       <Toaster position={locale === 'ar' ? 'top-left' : 'top-right'} richColors />
-    </LanguageProvider>
+    </LanguageProvider></RootDocument>
   )
 }

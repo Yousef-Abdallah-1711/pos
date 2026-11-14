@@ -9,7 +9,7 @@ import { getFeatures } from '@/content/features'
 import { getSiteCopy, type Locale } from '@/content/site'
 import { marketingMetadata } from '@/lib/marketingMetadata'
 type Props = { params: Promise<{ locale: Locale; slug: string }> }
-export function generateStaticParams() { return ['en', 'ar'].flatMap(locale => getFeatures(locale as Locale).map(({ slug }) => ({ locale, slug }))) }
+export function generateStaticParams() { return getFeatures('en').map(({ slug }) => ({ slug })) }
 export async function generateMetadata({ params }: Props) {
  const { locale, slug } = await params; const feature = getFeatures(locale).find(f => f.slug === slug)
  if (!feature) notFound()

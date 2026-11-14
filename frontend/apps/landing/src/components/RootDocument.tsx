@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import { Alexandria, IBM_Plex_Sans_Arabic, Manrope } from 'next/font/google'
-import './globals.css'
-import './marketing.css'
+import '@/app/globals.css'
+import '@/app/marketing.css'
 import { ThemeProvider } from 'next-themes'
 
 const alexandria = Alexandria({
@@ -17,12 +17,12 @@ const plex = IBM_Plex_Sans_Arabic({
 })
 const manrope = Manrope({ subsets: ['latin'], display: 'swap', variable: '--font-manrope' })
 
-interface RootLayoutProps {
+interface RootDocumentProps {
   children: React.ReactNode
-  params: Promise<{ locale?: string }>
+  locale: 'en' | 'ar'
 }
 
-export const metadata: Metadata = {
+export const rootMetadata: Metadata = {
   metadataBase: process.env.NEXT_PUBLIC_LANDING_URL
     ? new URL(process.env.NEXT_PUBLIC_LANDING_URL)
     : undefined,
@@ -38,9 +38,7 @@ export const metadata: Metadata = {
   },
 }
 
-export default async function RootLayout({ children, params }: RootLayoutProps) {
-  const { locale: routeLocale } = await params
-  const locale = routeLocale === 'ar' ? 'ar' : 'en'
+export function RootDocument({ children, locale }: RootDocumentProps) {
 
   return (
     <html lang={locale} dir={locale === 'ar' ? 'rtl' : 'ltr'} suppressHydrationWarning>

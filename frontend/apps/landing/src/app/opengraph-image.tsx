@@ -21,8 +21,9 @@ export default function OpenGraphImage() {
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 18, color: '#6D28D9', fontSize: 38, fontWeight: 800 }}>
           <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
-            <path d="M11 39V9h14a10 10 0 0 1 0 20H11m14 0h12" stroke="#6D28D9" strokeWidth="7" strokeLinecap="round" strokeLinejoin="round" />
-            <circle cx="37" cy="29" r="3.5" fill="#8B5CF6" />
+            <rect x="8" y="17" width="7" height="23" fill="#6D28D9" />
+            <rect x="21" y="8" width="7" height="32" fill="#6D28D9" />
+            <rect x="34" y="22" width="7" height="18" fill="#6D28D9" />
           </svg>
           SERVIO
         </div>
