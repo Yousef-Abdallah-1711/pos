@@ -1,5 +1,28 @@
 # SERVIO production readiness
 
+## Owner-approved merge policy and latest integration — November 14, 2026
+
+The owner explicitly removed the mandatory one-approval requirement. PR-based merging,
+green checks, strict main ancestry, admin enforcement, conversation resolution and blocks
+on force pushes/deletion remain. GitHub requires backend/runtime-localhost/URL checks;
+the signed publisher additionally requires the full `required` aggregate and both pinned
+guardrail workflows. No failing check may be bypassed. Earlier one-approval statements
+below describe the preserved November 13 checkpoint and are superseded by this policy.
+
+Main PR #35 (`ce65b393fe85fca7ff52e0fc4d88c98861e23044`) is now integrated into PR #32,
+including durable paid-order intents, fenced recovery leases and idempotent financial sale
+history. Integration normalizes its explicitly wrapped migration without rewriting SQL
+history. Migration 185 grants core-runtime enqueue/lease permissions and insert-only sale
+receipts, preserving dedicated accounting writes and denying receipt mutation/deletion.
+Regression checks cover atomic receipt rollback and the two roles' effective privileges.
+
+AWS remains on candidate f733efb with 133 migration receipts at this checkpoint. The new
+outbox migrations are not yet approved/applied there. Latest PR checks and merge status are
+authoritative at https://github.com/Yousef-Abdallah-1711/pos/pull/32 . Earlier test counts
+and the 578-check browser matrix below are historical verified evidence for their stated
+SHAs, not verification of the later main release. Staging automation remains disabled
+until that exact signed main release, migrations, capacity and live acceptance are verified.
+
 Verdict: **NO-GO. AWS staging remediation is PARTIAL.** Updated 2026-11-13 (Africa/Cairo).
 
 | Gate | Evidence/status |

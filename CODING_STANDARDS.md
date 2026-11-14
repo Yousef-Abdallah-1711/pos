@@ -1813,7 +1813,7 @@ RULES:
 ```
 main / master:
 - No direct pushes
-- Requires PR with at least 1 approval
+- Requires PR; approving review is optional for SERVIO (owner override, 2026-11-14)
 - CI must pass (lint + test + build)
 - No force push EVER
 
