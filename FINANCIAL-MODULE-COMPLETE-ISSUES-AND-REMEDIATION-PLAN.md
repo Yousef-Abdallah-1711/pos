@@ -726,3 +726,18 @@ This continuation supersedes §13's Git and CFR-004 state. The current fetched m
 This integration preserves the source histories of PRs #36, #37, #46 and #48 on current main `9fe3a11db1db3bab2f0d325141d542572feb0278`. Older references above describe their stated checkpoints, not current merge/deployment or financial acceptance. The owner removed mandatory PR approval in the repository policy; protected exact-head CI and normal PR merging remain required. Financial policy-dependent acceptance is still open.
 
 The previously unapplied recovery audit migration is now `188_accounting_event_redrive_audit.sql`, after main's existing trial-offer 186 and journal-width 187. Applied migrations are unchanged. Recovery grants are explicitly append-only. The integration requires fresh complete CI, signed-main publishing and exact-SHA live acceptance; no new deployment or cloud disk expansion is claimed here. ORDERLY collateral is retained under `branding/`; it does not replace the SERVIO application identity or publish social accounts. Draft production/security-preservation work remains separate.
+
+## 20. CFR-004 operator recovery controls — continuation 2026-11-15
+
+This section records the PR #37 branch refresh against current `origin/main` `9fe3a11db1db3bab2f0d325141d542572feb0278`. Resolving the merge retained the newer mainline history and this follow-up's recovery-control code; no unrelated tracker history was discarded.
+
+- PR [#37](https://github.com/Yousef-Abdallah-1711/pos/pull/37) adds migration `186_accounting_event_redrive_audit.sql`, tenant/restaurant scoped failed-event list and audited redrive endpoints, bounded error details, and retry/reconciliation observability. The distinct main migration `186_servio_trial_offer.sql` and PR #37 migration retain their separate filenames; disposable compatibility evidence is recorded in the audit report.
+- PR #37 was previously `DIRTY` against stale base `ea23d95a213f46fd8cdc59648b56e8474fc679f2`. This branch merge was made in the clean `H:\Projects\pos-cfr004-ops-final` checkout. The sibling `H:\Projects\pos-cfr004-durable-recovery` checkout has pre-existing uncommitted changes and remains untouched.
+- Conflict resolution chose the current-main tracker version and appended this current follow-up record, preserving the newer CFR-005, CFR-009, CFR-003, and CFR-010 sections. No acceptance verdict or accounting policy was inferred.
+- Current branch: `codex/cfr004-ops-recovery-controls-final`. Await refreshed CI and review. Financial release is still **NO-GO** until financial policy, end-to-end acceptance, and independent review gates close.
+
+## 21. Concurrent main reconciliation
+
+PRs #46, #37 and #48 were independently merged while the integration PR #51 was in CI. The integration now includes main `22901d6aed4334878b9d727b957a6860a8c4c543` through a normal merge, retains the refreshed financial evidence and the provider-confirmed-refund fixture's affected-row assertion, and keeps the focused scoped recovery tests and append-only audit review. The recovery migration has not been applied on staging; its original 186 filename is superseded by reviewed migration 188 in this integration. Existing applied migrations are unchanged. A fresh exact-head CI run and signed-main deployment remain required.
+
+The separately owner-approved EBS expansion has been confirmed through the authorized AWS Console and independently recognized in Ubuntu. Root partition 1/ext4 were expanded without changing the filesystem UUID or boot partitions; service health and isolated backup/restore checks passed. This storage result is not a claim that PR #51 is deployed or live-accepted.

@@ -98,10 +98,13 @@ func TestAccountingEventRedriveRejectsForeignOrNoLongerPaidOrders(t *testing.T) 
 	request := redriveRequest(fixture.foreign, event.ID)
 	// Simulate a provider-side state change in this disposable fixture. The public
 	// payment API deliberately rejects paid-to-refunded transitions without policy.
-	_, err := fixture.db.Exec(`UPDATE orders SET payment_status='refunded'
+	result, err := fixture.db.Exec(`UPDATE orders SET payment_status='refunded'
   WHERE id=$1 AND tenant_id=$2 AND restaurant_id=$3 AND payment_status='paid'`, fixture.foreignOrder, fixture.foreign.TenantID, fixture.foreign.RestaurantID)
 	if err != nil {
 		t.Fatal(err)
+	}
+	if rows, err := result.RowsAffected(); err != nil || rows != 1 {
+		t.Fatalf("synthetic provider-state change affected %d rows, err=%v; want 1", rows, err)
 	}
 	var foreignEvent int64
 	err = fixture.db.QueryRow(`SELECT id FROM accounting_event_outbox WHERE tenant_id=$1 AND restaurant_id=$2 AND order_id=$3`, fixture.foreign.TenantID, fixture.foreign.RestaurantID, fixture.foreignOrder).Scan(&foreignEvent)
