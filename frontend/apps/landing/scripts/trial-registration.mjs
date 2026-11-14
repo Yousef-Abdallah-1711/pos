@@ -13,7 +13,7 @@ function check(name, passed) {
  checks.push({ name, passed: !!passed })
  if (!passed) throw new Error(name)
 }
-async function register(page, locale, billing) {
+async function register(page, locale, billing, otherCategory) {
  const slug = `website-qa-${Date.now()}-${randomBytes(3).toString('hex')}`
  const password = randomBytes(18).toString('hex')
  await page.goto(`${base}/${locale}/auth/register?billing=${billing}`)
@@ -42,15 +42,36 @@ async function register(page, locale, billing) {
  check(`14-day entitlement ${locale}`, duration > 14 * 86400000 - 180000 && duration <= 14 * 86400000)
  check(`checkout unavailable ${locale}`, subscription.data.checkout_available === false)
  await page.screenshot({ path: path.join(output, `${locale}-${billing}-dashboard.png`) })
- await page.evaluate(async origin => { await fetch(`${origin}/auth/logout`, { method: 'POST', credentials: 'include' }) }, api)
+ const category = await firstAction(page, locale, otherCategory)
+ const loggedOut = await page.evaluate(async origin => (await fetch(`${origin}/auth/logout`, { method: 'POST', credentials: 'include' })).ok, api)
+ check(`session revoked ${locale}`, loggedOut)
+ return category
+}
+async function firstAction(page, locale, otherCategory) {
+ const dashboard = new URL(page.url()).origin
+ const category = `Synthetic First Menu ${locale}`
+ await page.goto(`${dashboard}/${locale}/dashboard/categories/new`)
+ await page.locator('input[name=name]').fill(category)
+ const [response] = await Promise.all([
+  page.waitForResponse(response => response.request().method() === 'POST' && new URL(response.url()).pathname.endsWith('/categories')),
+  page.locator('button[type=submit]').click(),
+ ])
+ check(`first menu action accepted ${locale}`, response.ok())
+ await page.waitForURL(`**/${locale}/dashboard/categories`)
+ await page.getByRole('cell', { name: category, exact: true }).waitFor()
+ check(`first menu action visible ${locale}`, true)
+ if (otherCategory) check('new workspace menu isolation', await page.getByRole('cell', { name: otherCategory, exact: true }).count() === 0)
+ await page.screenshot({ path: path.join(output, `${locale}-first-menu-action.png`) })
+ return category
 }
 async function main() {
  await fs.mkdir(output, { recursive: true })
  const browser = await chromium.launch({ headless: true })
  try {
+  let previousCategory
   for (const [locale, billing] of [['en', 'annual'], ['ar', 'monthly']]) {
    const context = await browser.newContext({ ignoreHTTPSErrors: process.env.SERVIO_DISPOSABLE_BROWSER === '1', viewport: { width: 1440, height: 1000 } })
-   try { await register(await context.newPage(), locale, billing) } finally { await context.close() }
+   try { previousCategory = await register(await context.newPage(), locale, billing, previousCategory) } finally { await context.close() }
   }
  } finally {
   await browser.close()
