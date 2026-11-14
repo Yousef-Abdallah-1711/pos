@@ -554,6 +554,23 @@ func (r *OrderRepository) UpdatePaymentStatusAs(tenantID, restaurantID, orderID 
 		return fmt.Errorf("begin payment status update: %w", err)
 	}
 	defer tx.Rollback()
+
+	var orderStatus, currentPaymentStatus string
+	err = tx.QueryRowContext(ctx, `
+		SELECT status, payment_status
+		FROM orders
+		WHERE id = $1 AND tenant_id = $2 AND restaurant_id = $3
+		FOR UPDATE`, orderID, tenantID, restaurantID).Scan(&orderStatus, &currentPaymentStatus)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return errors.New("order not found")
+		}
+		return fmt.Errorf("lock order payment state: %w", err)
+	}
+	if !domain.CanTransitionOrderPaymentStatus(orderStatus, currentPaymentStatus, paymentStatus) {
+		return fmt.Errorf("invalid order payment status transition from %s to %s for order state %s", currentPaymentStatus, paymentStatus, orderStatus)
+	}
+
 	query := `
 		UPDATE orders
 		SET payment_status = $1, updated_at = CURRENT_TIMESTAMP
@@ -600,18 +617,21 @@ func (r *OrderRepository) transitionOrderStatus(tenantID, restaurantID, orderID 
 	}
 	defer tx.Rollback()
 
-	var currentStatus string
+	var currentStatus, paymentStatus string
 	err = tx.QueryRow(
-		`SELECT status FROM orders
+		`SELECT status, payment_status FROM orders
 		 WHERE id = $1 AND tenant_id = $2 AND restaurant_id = $3
 		 FOR UPDATE`,
 		orderID, tenantID, restaurantID,
-	).Scan(&currentStatus)
+	).Scan(&currentStatus, &paymentStatus)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return errors.New("order not found")
 		}
 		return fmt.Errorf("get order status: %w", err)
+	}
+	if newStatus == "cancelled" && (paymentStatus == "paid" || paymentStatus == "refunded") {
+		return errors.New("cannot cancel paid or refunded order before a supported refund and accounting reversal workflow exists")
 	}
 	if !domain.CanTransitionStatus(currentStatus, newStatus) {
 		return fmt.Errorf("invalid status transition from %s to %s", currentStatus, newStatus)

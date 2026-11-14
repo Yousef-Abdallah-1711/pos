@@ -336,6 +336,9 @@ func (uc *OrderUseCase) CancelOrder(tenantID, restaurantID, orderID int64, reaso
 	if order.Status == "cancelled" {
 		return errors.New("order is already cancelled")
 	}
+	if order.PaymentStatus == "paid" || order.PaymentStatus == "refunded" {
+		return errors.New("cannot cancel paid or refunded order before a supported refund and accounting reversal workflow exists")
+	}
 
 	// Cancel order
 	err = uc.orderRepo.CancelOrder(tenantID, restaurantID, orderID, reason)
