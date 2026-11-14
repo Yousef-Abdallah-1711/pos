@@ -625,6 +625,7 @@ func main() {
 	if paymentHandler != nil {
 		log.Println("[PaymentSystem] Registering public payment routes")
 		mux.HandleFunc("GET /api/v1/subscription/plans", paymentHandler.GetPlans)
+		mux.HandleFunc("GET /api/v1/public/commercial-offer", paymentHandler.GetOffer)
 		mux.Handle(
 			"POST /api/v1/webhook/paymob",
 			middleware.RateLimitByIP(60)(http.HandlerFunc(paymentHandler.HandlePaymobWebhook)),
@@ -732,7 +733,7 @@ func main() {
 
 	// Payment routes: auth required, but no tenant status middleware (blocked tenants must still pay).
 	if paymentHandler != nil {
-		mux.Handle("POST /api/v1/subscription/initiate", wrapProtectedNoStatus(http.HandlerFunc(paymentHandler.InitiatePayment)))
+		mux.Handle("POST /api/v1/subscription/initiate", wrapProtectedNoStatus(middleware.CommercialCheckoutGate(http.HandlerFunc(paymentHandler.InitiatePayment))))
 		mux.Handle("GET /api/v1/subscription/payments", wrapProtectedNoStatus(http.HandlerFunc(paymentHandler.GetPaymentHistory)))
 		mux.Handle("GET /api/v1/subscription/current", wrapProtectedNoStatus(http.HandlerFunc(paymentHandler.GetCurrentSubscription)))
 		mux.Handle("POST /api/v1/subscription/cancel", wrapProtectedNoStatus(http.HandlerFunc(paymentHandler.CancelSubscription)))

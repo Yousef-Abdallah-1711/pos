@@ -1,49 +1,43 @@
 import type { Metadata } from 'next'
-import { Alexandria, IBM_Plex_Sans_Arabic, Manrope } from 'next/font/google'
-import './globals.css'
+import { IBM_Plex_Sans_Arabic, Manrope } from 'next/font/google'
+import '@/app/globals.css'
+import '@/app/marketing.css'
 import { ThemeProvider } from 'next-themes'
 
-const alexandria = Alexandria({
-  subsets: ['arabic', 'latin'],
-  display: 'swap',
-  variable: '--font-alexandria',
-})
 const plex = IBM_Plex_Sans_Arabic({
-  weight: ['400', '500', '600', '700'],
+  weight: ['400', '600', '700'],
   subsets: ['arabic', 'latin'],
   display: 'swap',
   variable: '--font-plex',
 })
 const manrope = Manrope({ subsets: ['latin'], display: 'swap', variable: '--font-manrope' })
 
-interface RootLayoutProps {
+interface RootDocumentProps {
   children: React.ReactNode
-  params: Promise<{ locale?: string }>
+  locale: 'en' | 'ar'
 }
 
-export const metadata: Metadata = {
+export const rootMetadata: Metadata = {
   metadataBase: process.env.NEXT_PUBLIC_LANDING_URL
     ? new URL(process.env.NEXT_PUBLIC_LANDING_URL)
     : undefined,
-  title: 'POOS | إدارة متصلة لكل تفاصيل مطعمك',
+  title: 'SERVIO | إدارة متصلة لكل تفاصيل مطعمك',
   description: 'منصة واحدة لإدارة العمل في مطعمك من واجهة الخدمة إلى ما يدور خلفها.',
-  applicationName: 'POOS',
-  keywords: ['POOS', 'إدارة المطاعم', 'restaurant management'],
+  applicationName: 'SERVIO',
+  keywords: ['SERVIO', 'إدارة المطاعم', 'restaurant management'],
   openGraph: {
-    title: 'POOS | إدارة متصلة لكل تفاصيل مطعمك',
+    title: 'SERVIO | إدارة متصلة لكل تفاصيل مطعمك',
     description: 'منصة واحدة لإدارة العمل في مطعمك من واجهة الخدمة إلى ما يدور خلفها.',
-    siteName: 'POOS',
+    siteName: 'SERVIO',
     type: 'website',
   },
 }
 
-export default async function RootLayout({ children, params }: RootLayoutProps) {
-  const { locale: routeLocale } = await params
-  const locale = routeLocale === 'ar' ? 'ar' : 'en'
+export function RootDocument({ children, locale }: RootDocumentProps) {
 
   return (
     <html lang={locale} dir={locale === 'ar' ? 'rtl' : 'ltr'} suppressHydrationWarning>
-      <body className={`${alexandria.variable} ${plex.variable} ${manrope.variable}`}>
+      <body className={`${plex.variable} ${manrope.variable}`}>
         <ThemeProvider attribute="class" defaultTheme="light" forcedTheme="light">
           {children}
         </ThemeProvider>

@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"pos-saas/internal/commerce"
 	"pos-saas/internal/domain"
 	"pos-saas/internal/middleware"
 	"pos-saas/internal/service"
@@ -52,6 +53,11 @@ func (h *PaymentHandler) GetPlans(w http.ResponseWriter, r *http.Request) {
 	OKResponse(w, map[string]interface{}{
 		"plans": plans,
 	})
+}
+
+// GetOffer exposes the approved public offer without tenant or payment data.
+func (h *PaymentHandler) GetOffer(w http.ResponseWriter, r *http.Request) {
+	OKResponse(w, commerce.Current())
 }
 
 // InitiatePayment handles POST /api/v1/subscription/initiate.

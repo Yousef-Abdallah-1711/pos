@@ -1,0 +1,58 @@
+[
+  {
+    "service": "backend",
+    "image": "sha256:2d3b4a9cf417a83beee81bf92523666b85c772d337b7b7b95c816dec72d361fd",
+    "state": "running",
+    "health": "healthy",
+    "revision": "f733efb5e7f5730fea5a56a65d66d9c339e6c040"
+  },
+  {
+    "service": "dashboard",
+    "image": "sha256:5c385e22b8cd63fbc7e306d741ecf5183e8cc15d2e09ed444c5c664a9567e00c",
+    "state": "running",
+    "health": "healthy",
+    "revision": "f733efb5e7f5730fea5a56a65d66d9c339e6c040"
+  },
+  {
+    "service": "landing",
+    "image": "sha256:74558eb71a4e3859781d6f3302234b788fb174dbeb94f70e134afc2ddccac6c8",
+    "state": "running",
+    "health": "healthy",
+    "revision": "f733efb5e7f5730fea5a56a65d66d9c339e6c040"
+  },
+  {
+    "service": "postgres",
+    "image": "postgres@sha256:fc41cfa8a90c09e84dd723ee764be4b2f59ba6c98b1e5b3fca540adddf68a5ba",
+    "state": "running",
+    "health": "healthy",
+    "revision": null
+  },
+  {
+    "service": "proxy",
+    "image": "caddy@sha256:78bd35025c7ba85961dd149ae670315129954e77abe2383ac47c89106b35ade9",
+    "state": "running",
+    "health": "healthy",
+    "revision": null
+  },
+  {
+    "service": "redis",
+    "image": "redis@sha256:7f7d30b7fdd09467bac58198a1f166dd69789d348d4fe859cccb20e0cf287fbe",
+    "state": "running",
+    "health": "healthy",
+    "revision": null
+  },
+  {
+    "service": "restaurant-website",
+    "image": "sha256:7e54e36c30b47db0a5919cf9b97872508775f6bc3711b126478cbfd96979a1d4",
+    "state": "running",
+    "health": "healthy",
+    "revision": "f733efb5e7f5730fea5a56a65d66d9c339e6c040"
+  },
+  {
+    "service": "super-admin",
+    "image": "sha256:ceb71614809a92dcd91be9762c53d375deddedd3d6d61613f8e54539998b699f",
+    "state": "running",
+    "health": "healthy",
+    "revision": "f733efb5e7f5730fea5a56a65d66d9c339e6c040"
+  }
+]

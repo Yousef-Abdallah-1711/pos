@@ -1,0 +1,236 @@
+[
+  {
+    "method": "GET",
+    "route": "/products/10",
+    "http": 200,
+    "response": {
+      "id": 10,
+      "tenant_id": 13,
+      "restaurant_id": 13,
+      "category_id": 13,
+      "sku": "audit-product-20261114",
+      "name_en": "Audit Test Dish",
+      "name_ar": "طبق اختبار",
+      "description_en": "Synthetic audit. Do not fulfill.",
+      "price": 100,
+      "cost": 20,
+      "is_vegetarian": false,
+      "is_vegan": false,
+      "is_spicy": false,
+      "is_gluten_free": false,
+      "is_available": true,
+      "track_inventory": true,
+      "quantity_in_stock": 20,
+      "low_stock_threshold": 3,
+      "reorder_quantity": 0,
+      "display_order": 0,
+      "featured": false,
+      "status": "active",
+      "created_by": 14,
+      "created_at": "2026-11-14T03:13:49.43905Z",
+      "updated_at": "2026-11-14T03:13:49.43905Z"
+    }
+  },
+  {
+    "check": "initial_stock",
+    "value": 20
+  },
+  {
+    "check": "pos_cart_before_submit",
+    "text": "03:16:31 AM\nCashier:\nproduct-audit-1794625969@example.invalid\nOnline\nExit POS\n\nShortcut: Ctrl+F or /\n\nAll\nF1\n1\nA\n\nAudit Test Dish\n\n$100.00\nCart\n1\nHold (Ctrl+H)\nClear (Esc)\n\nAudit Test Dish\n\n$100.00\n\n1\n$100.00\nTable\nNo table (Takeaway)\n#1 - Audit table (4 seats) - Available\nCustomer name\nCustomer phone\nPayment method\nCash\nCard\nWallet\nOrder notes\nSubtotal\n$100.00\nTax (14%)\n$14.00\nTotal\n$114.00\nPlace Order (1)\nSpace"
+  },
+  {
+    "check": "UI POS submission",
+    "http": 201,
+    "order": {
+      "created_at": "2026-11-14T03:16:31.628138Z",
+      "customer_name": "Audit Synthetic Guest",
+      "id": 10,
+      "order_number": "ORD-2026-2c544c21-4266-4953-a15b-0c61a10d3f68",
+      "status": "confirmed",
+      "table_id": 3,
+      "total_amount": 110
+    }
+  },
+  {
+    "check": "KDS live appearance",
+    "order_visible": true,
+    "frames": [
+      {
+        "type": "connected",
+        "keys": [
+          "restaurant_id",
+          "tenant_id",
+          "timestamp",
+          "type",
+          "user_id"
+        ]
+      },
+      {
+        "type": "order_new",
+        "keys": [
+          "type",
+          "data",
+          "timestamp"
+        ]
+      }
+    ],
+    "text": "Kitchen Display\n\nLive kitchen queue\n\nConnected\n\nACTIVE ORDERS\n\n0\n\nNEW\n\n0\n\nIN PROGRESS\n\n0\n\nAVG PREP\n\n0.0m\n\nAll\nNew\nIn Progress\nReady\nCompleted\n#ORD-2026-2c544c21-4266-4953-a15b-0c61a10d3f68\n\nCustomer: Audit Synthetic Guest\n\nTables #1 - Audit table\n\n00:02\nNew\n\n1x Audit Test Dish\n\nBump\n\nNew -> In Progress"
+  },
+  {
+    "method": "GET",
+    "route": "/admin/orders/10",
+    "http": 200,
+    "response": {
+      "id": 10,
+      "order_number": "ORD-2026-2c544c21-4266-4953-a15b-0c61a10d3f68",
+      "order_source": "pos",
+      "customer_name": "Audit Synthetic Guest",
+      "customer_email": "",
+      "customer_phone": "+12025550123",
+      "delivery_address": "",
+      "status": "confirmed",
+      "payment_status": "paid",
+      "payment_method": "cash",
+      "subtotal": 100,
+      "tax": 10,
+      "delivery_fee": 0,
+      "discount": 0,
+      "total": 110,
+      "created_at": "2026-11-14T03:16:31.628138Z",
+      "table": {
+        "id": 3,
+        "number": 1,
+        "name": "Audit table",
+        "location": "indoor",
+        "capacity": 4,
+        "is_assigned": true
+      },
+      "items": [
+        {
+          "id": 10,
+          "product_id": 10,
+          "product_name": "Audit Test Dish",
+          "quantity": 1,
+          "unit_price": 100,
+          "subtotal": 100
+        }
+      ],
+      "status_history": [
+        {
+          "id": 28,
+          "status": "confirmed",
+          "notes": "Auto-confirmed POS order",
+          "changed_at": "2026-11-14T03:16:31.692142Z"
+        }
+      ]
+    }
+  },
+  {
+    "method": "GET",
+    "route": "/products/10",
+    "http": 200,
+    "response": {
+      "id": 10,
+      "tenant_id": 13,
+      "restaurant_id": 13,
+      "category_id": 13,
+      "sku": "audit-product-20261114",
+      "name_en": "Audit Test Dish",
+      "name_ar": "طبق اختبار",
+      "description_en": "Synthetic audit. Do not fulfill.",
+      "price": 100,
+      "cost": 20,
+      "is_vegetarian": false,
+      "is_vegan": false,
+      "is_spicy": false,
+      "is_gluten_free": false,
+      "is_available": true,
+      "track_inventory": true,
+      "quantity_in_stock": 19,
+      "low_stock_threshold": 3,
+      "reorder_quantity": 0,
+      "display_order": 0,
+      "featured": false,
+      "status": "active",
+      "created_by": 14,
+      "created_at": "2026-11-14T03:13:49.43905Z",
+      "updated_at": "2026-11-14T03:16:31.692142Z"
+    }
+  },
+  {
+    "method": "GET",
+    "route": "/tables/3",
+    "http": 200,
+    "response": {
+      "data": {
+        "id": 3,
+        "tenant_id": 13,
+        "restaurant_id": 13,
+        "table_number": 1,
+        "name": "Audit table",
+        "capacity": 4,
+        "location": "indoor",
+        "status": "occupied",
+        "description": "Synthetic product audit only",
+        "qr_code_config": {},
+        "position_x": 0,
+        "position_y": 0,
+        "shape": "square",
+        "created_at": "2026-11-14T03:13:49.468956Z",
+        "updated_at": "2026-11-14T03:16:31.688377Z"
+      },
+      "success": true
+    }
+  },
+  {
+    "method": "GET",
+    "route": "/kds/queue",
+    "http": 200,
+    "response": {
+      "data": [
+        {
+          "id": 7,
+          "tenant_id": 13,
+          "restaurant_id": 13,
+          "order_id": 10,
+          "order_number": "ORD-2026-2c544c21-4266-4953-a15b-0c61a10d3f68",
+          "order_source": "pos",
+          "table_id": 3,
+          "table_number": 1,
+          "table_name": "Audit table",
+          "customer_name": "Audit Synthetic Guest",
+          "status": "new",
+          "priority": 0,
+          "station_id": "expo",
+          "items": [
+            {
+              "product_id": 10,
+              "product_name": "Audit Test Dish",
+              "quantity": 1
+            }
+          ],
+          "received_at": "2026-11-14T03:16:31.714432Z",
+          "elapsed_seconds": 2,
+          "created_at": "2026-11-14T03:16:31.714432Z",
+          "updated_at": "2026-11-14T03:16:31.714432Z"
+        }
+      ],
+      "success": true
+    }
+  },
+  {
+    "check": "KDS controls",
+    "buttons": [
+      "",
+      "",
+      "",
+      "All",
+      "New",
+      "In Progress",
+      "Ready",
+      "Completed",
+      "Bump"
+    ]
+  }
+]

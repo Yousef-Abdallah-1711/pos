@@ -20,6 +20,7 @@ func TestTenantAccessEntitlement(t *testing.T) {
 		{"unknown", TenantAccessState{Active: true, Status: "unknown"}, "subscription_expired"},
 		{"missing trial", TenantAccessState{Active: true, Status: "trial"}, "trial_expired"},
 		{"expired trial", TenantAccessState{Active: true, Status: "trial", TrialEnd: &past}, "trial_expired"},
+		{"exact trial expiry", TenantAccessState{Active: true, Status: "trial", TrialEnd: &now}, "trial_expired"},
 		{"valid trial", TenantAccessState{Active: true, Status: "trial", TrialEnd: &future}, ""},
 		{"expired paid", TenantAccessState{Active: true, Status: "active", SubscriptionEnd: &past}, "subscription_expired"},
 		{"valid paid", TenantAccessState{Active: true, Status: "active", SubscriptionEnd: &future}, ""},

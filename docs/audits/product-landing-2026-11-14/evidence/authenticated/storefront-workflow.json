@@ -1,0 +1,258 @@
+[
+  {
+    "method": "GET",
+    "route": "/products/5",
+    "http": 200,
+    "response": {
+      "id": 5,
+      "tenant_id": 1,
+      "restaurant_id": 1,
+      "category_id": 7,
+      "sku": "servio-qa-staging-20261113",
+      "name_en": "SERVIO staging QA item",
+      "name_ar": "منتج اختبار سيرفيو",
+      "description_en": "Synthetic staging acceptance. No real sale.",
+      "description_ar": "بيانات اختبار فقط",
+      "price": 25,
+      "cost": 5,
+      "is_vegetarian": false,
+      "is_vegan": false,
+      "is_spicy": false,
+      "is_gluten_free": false,
+      "is_available": true,
+      "track_inventory": true,
+      "quantity_in_stock": 20,
+      "low_stock_threshold": 10,
+      "reorder_quantity": 50,
+      "display_order": 0,
+      "featured": false,
+      "status": "active",
+      "created_by": 0,
+      "created_at": "2026-11-13T07:40:55.184368Z",
+      "updated_at": "2026-11-13T07:40:55.184368Z"
+    }
+  },
+  {
+    "check": "synthetic stock baseline",
+    "value": 20
+  },
+  {
+    "check": "guest checkout before submit",
+    "text": "Test Restaurant\n1\nCheckout\nCustomer Information\nFull Name\nEmail Address\nPhone Number\nDelivery Information\nDelivery Address\nSpecial Instructions (Optional)\nPayment Method\n💵 Cash on Delivery (Cash on Delivery)\n\nPay when your order arrives\n\nPlace Order\nOrder Summary\n\nSERVIO staging QA item\n\nx 1\n\n25 EGP\n\nSubtotal\n25 EGP\nTax\n2.50 EGP\nDelivery\n0 EGP\nTotal\n27.50 EGP\nContinue Shopping\nTest Restaurant\n\nQuick Links\nHours\n\nDaily 10:00 AM - 12:00 AM\n\nContact\n\n(c) 2026 Test Restaurant. All rights reserved.\n\nTop\nHome\nMenu\n1\nCart\nOrders\nSettings"
+  },
+  {
+    "check": "guest submission",
+    "http": 201,
+    "order": {
+      "created_at": "2026-11-14T03:20:39.510345Z",
+      "customer_name": "Product Audit Synthetic Guest",
+      "id": 11,
+      "order_number": "ORD-2026-f6af0c20-3998-4ef8-8d40-082ee270c111",
+      "status": "pending",
+      "table_id": null,
+      "total_amount": 27.5
+    }
+  },
+  {
+    "method": "GET",
+    "route": "/admin/orders/11",
+    "http": 200,
+    "response": {
+      "id": 11,
+      "order_number": "ORD-2026-f6af0c20-3998-4ef8-8d40-082ee270c111",
+      "order_source": "website",
+      "customer_name": "Product Audit Synthetic Guest",
+      "customer_email": "product-audit-guest@example.invalid",
+      "customer_phone": "+12025550123",
+      "delivery_address": "Synthetic staging audit. Do not fulfill.",
+      "delivery_notes": "Synthetic audit only; no real delivery or notifications.",
+      "status": "pending",
+      "payment_status": "pending",
+      "payment_method": "cash",
+      "subtotal": 25,
+      "tax": 2.5,
+      "delivery_fee": 0,
+      "discount": 0,
+      "total": 27.5,
+      "created_at": "2026-11-14T03:20:39.510345Z",
+      "items": [
+        {
+          "id": 11,
+          "product_id": 5,
+          "product_name": "SERVIO staging QA item",
+          "quantity": 1,
+          "unit_price": 25,
+          "subtotal": 25
+        }
+      ],
+      "status_history": []
+    }
+  },
+  {
+    "method": "GET",
+    "route": "/products/5",
+    "http": 200,
+    "response": {
+      "id": 5,
+      "tenant_id": 1,
+      "restaurant_id": 1,
+      "category_id": 7,
+      "sku": "servio-qa-staging-20261113",
+      "name_en": "SERVIO staging QA item",
+      "name_ar": "منتج اختبار سيرفيو",
+      "description_en": "Synthetic staging acceptance. No real sale.",
+      "description_ar": "بيانات اختبار فقط",
+      "price": 25,
+      "cost": 5,
+      "is_vegetarian": false,
+      "is_vegan": false,
+      "is_spicy": false,
+      "is_gluten_free": false,
+      "is_available": true,
+      "track_inventory": true,
+      "quantity_in_stock": 20,
+      "low_stock_threshold": 10,
+      "reorder_quantity": 50,
+      "display_order": 0,
+      "featured": false,
+      "status": "active",
+      "created_by": 0,
+      "created_at": "2026-11-13T07:40:55.184368Z",
+      "updated_at": "2026-11-13T07:40:55.184368Z"
+    }
+  },
+  {
+    "method": "PUT",
+    "route": "/admin/orders/11/status",
+    "http": 200,
+    "response": {
+      "success": true
+    }
+  },
+  {
+    "method": "GET",
+    "route": "/kds/queue",
+    "http": 200,
+    "response": {
+      "data": [
+        {
+          "id": 8,
+          "tenant_id": 1,
+          "restaurant_id": 1,
+          "order_id": 11,
+          "order_number": "ORD-2026-f6af0c20-3998-4ef8-8d40-082ee270c111",
+          "order_source": "website",
+          "customer_name": "Product Audit Synthetic Guest",
+          "status": "new",
+          "priority": 0,
+          "station_id": "expo",
+          "items": [
+            {
+              "product_id": 5,
+              "product_name": "SERVIO staging QA item",
+              "quantity": 1
+            }
+          ],
+          "notes": "Synthetic audit only; no real delivery or notifications.",
+          "received_at": "2026-11-14T03:20:40.512503Z",
+          "elapsed_seconds": 0,
+          "created_at": "2026-11-14T03:20:40.512503Z",
+          "updated_at": "2026-11-14T03:20:40.512503Z"
+        }
+      ],
+      "success": true
+    }
+  },
+  {
+    "method": "GET",
+    "route": "/products/5",
+    "http": 200,
+    "response": {
+      "id": 5,
+      "tenant_id": 1,
+      "restaurant_id": 1,
+      "category_id": 7,
+      "sku": "servio-qa-staging-20261113",
+      "name_en": "SERVIO staging QA item",
+      "name_ar": "منتج اختبار سيرفيو",
+      "description_en": "Synthetic staging acceptance. No real sale.",
+      "description_ar": "بيانات اختبار فقط",
+      "price": 25,
+      "cost": 5,
+      "is_vegetarian": false,
+      "is_vegan": false,
+      "is_spicy": false,
+      "is_gluten_free": false,
+      "is_available": true,
+      "track_inventory": true,
+      "quantity_in_stock": 19,
+      "low_stock_threshold": 10,
+      "reorder_quantity": 50,
+      "display_order": 0,
+      "featured": false,
+      "status": "active",
+      "created_by": 0,
+      "created_at": "2026-11-13T07:40:55.184368Z",
+      "updated_at": "2026-11-14T03:20:40.501249Z"
+    }
+  },
+  {
+    "check": "guest order in kitchen UI",
+    "visible": true
+  },
+  {
+    "check": "guest token-authorized order detail",
+    "text": "Test Restaurant\nOrder History\n\ncommon.orderNumber: ORD-2026-f6af0c20-3998-4ef8-8d40-082ee270c111\n\nOrder Status\n\nPending\n\nConfirmed\n\nPreparing\n\nReady\n\nOut for Delivery\n\nDelivered\n\nConfirmed\n\nYour order has been confirmed and will be prepared shortly\n\nOrder Summary\ncommon.orderNumber\nORD-2026-f6af0c20-3998-4ef8-8d40-082ee270c111\nTotal\n27.50 EGP\nOrder Date\n11/14/2026\nCustomer Information\n\nFull Name\n\nProduct Audit Synthetic Guest\n\nEmail Address\n\nproduct-audit-guest@example.invalid\n\nPhone Number\n\n+12025550123\n\nDelivery Address\n\nSynthetic staging audit. Do not fulfill.\n\nOrder Details\n\nSERVIO staging QA item\n\nQuantity: 1\n\n25 EGP\n\nOrder History\nTrack Order\nDelete\nMenu\nTest Restaurant\n\nQuick Links\nHours\n\nDaily 10:00 AM - 12:00 AM\n\nContact\n\n(c) 2026 Test Restaurant. All rights reserved.\n\nTop\nHome\nMenu\nCart\nOrders\nSettings"
+  },
+  {
+    "check": "unauthorized guest identifier-only access",
+    "http": 404
+  },
+  {
+    "method": "PUT",
+    "route": "/admin/orders/11/status",
+    "http": 200,
+    "response": {
+      "success": true
+    }
+  },
+  {
+    "method": "GET",
+    "route": "/products/5",
+    "http": 200,
+    "response": {
+      "id": 5,
+      "tenant_id": 1,
+      "restaurant_id": 1,
+      "category_id": 7,
+      "sku": "servio-qa-staging-20261113",
+      "name_en": "SERVIO staging QA item",
+      "name_ar": "منتج اختبار سيرفيو",
+      "description_en": "Synthetic staging acceptance. No real sale.",
+      "description_ar": "بيانات اختبار فقط",
+      "price": 25,
+      "cost": 5,
+      "is_vegetarian": false,
+      "is_vegan": false,
+      "is_spicy": false,
+      "is_gluten_free": false,
+      "is_available": true,
+      "track_inventory": true,
+      "quantity_in_stock": 20,
+      "low_stock_threshold": 10,
+      "reorder_quantity": 50,
+      "display_order": 0,
+      "featured": false,
+      "status": "active",
+      "created_by": 0,
+      "created_at": "2026-11-13T07:40:55.184368Z",
+      "updated_at": "2026-11-14T03:20:42.662943Z"
+    }
+  },
+  {
+    "check": "synthetic storefront order identity",
+    "id": 11,
+    "number": "ORD-2026-f6af0c20-3998-4ef8-8d40-082ee270c111",
+    "stock_before": 20
+  }
+]
