@@ -161,7 +161,7 @@ func seedAdminOrderBenchmarkData(t *testing.T, db *sql.DB, orderCount int) (int6
 	if err := db.QueryRow(`INSERT INTO restaurants (tenant_id, name, slug, address) VALUES ($1, $2, $2, 'synthetic') RETURNING id`, tenantID, key).Scan(&restaurantID); err != nil {
 		t.Fatalf("insert synthetic restaurant: %v", err)
 	}
-	if err := db.QueryRow(`INSERT INTO products (tenant_id, restaurant_id, name, price) VALUES ($1, $2, 'Benchmark Product', 10) RETURNING id`, tenantID, restaurantID).Scan(&productID); err != nil {
+	if err := db.QueryRow(`INSERT INTO products (tenant_id, restaurant_id, name, price, track_inventory) VALUES ($1, $2, 'Benchmark Product', 10, false) RETURNING id`, tenantID, restaurantID).Scan(&productID); err != nil {
 		t.Fatalf("insert synthetic product: %v", err)
 	}
 	createdAt := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
@@ -225,7 +225,6 @@ func seedAdminOrderBenchmarkData(t *testing.T, db *sql.DB, orderCount int) (int6
 func cleanupAdminOrderBenchmarkData(t *testing.T, db *sql.DB) {
 	t.Helper()
 	statements := []string{
-		`DELETE FROM order_items WHERE order_id IN (SELECT id FROM orders WHERE order_number LIKE 'admin-order-benchmark-%')`,
 		`DELETE FROM orders WHERE order_number LIKE 'admin-order-benchmark-%'`,
 		`DELETE FROM products WHERE restaurant_id IN (SELECT id FROM restaurants WHERE slug IN ('admin-order-benchmark', 'admin-order-benchmark-sibling', 'admin-order-benchmark-foreign'))`,
 		`DELETE FROM restaurants WHERE slug IN ('admin-order-benchmark', 'admin-order-benchmark-sibling', 'admin-order-benchmark-foreign')`,

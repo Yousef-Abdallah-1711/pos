@@ -26,27 +26,27 @@ type HealthCheckResult struct {
 
 // HealthChecker continuously monitors server health
 type HealthChecker struct {
-	loadBalancer     *LoadBalancer
-	healthProbes     map[string]HealthProbe
-	checkInterval    time.Duration
-	checkTimeout     time.Duration
-	unhealthyCount   map[string]int // consecutive failures
+	loadBalancer           *LoadBalancer
+	healthProbes           map[string]HealthProbe
+	checkInterval          time.Duration
+	checkTimeout           time.Duration
+	unhealthyCount         map[string]int // consecutive failures
 	maxConsecutiveFailures int
-	results          []HealthCheckResult
-	mu               sync.RWMutex
-	stopChannel      chan bool
-	isRunning        bool
+	results                []HealthCheckResult
+	mu                     sync.RWMutex
+	stopChannel            chan bool
+	isRunning              bool
 }
 
 // HealthProbe defines how to check health of a server
 type HealthProbe struct {
-	ServerID        string
-	Endpoint        string
-	Port            int
-	Path            string // Usually "/health"
-	Method          string
-	ExpectedStatus  int
-	Timeout         time.Duration
+	ServerID       string
+	Endpoint       string
+	Port           int
+	Path           string // Usually "/health"
+	Method         string
+	ExpectedStatus int
+	Timeout        time.Duration
 }
 
 // NewHealthChecker creates a new health checker

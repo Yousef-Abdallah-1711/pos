@@ -103,6 +103,13 @@ func (r *AuthRepository) CreateTenantWithUserContext(ctx context.Context, req *d
 		return nil, ErrTenantSlugExists
 	}
 
+	if _, err := tx.ExecContext(ctx, `UPDATE tenants
+ SET trial_start_date = created_at,
+ trial_end_date = created_at + trial_days * INTERVAL '1 day'
+ WHERE id = $1 AND subscription_status = 'trial'`, tenantID); err != nil {
+		return nil, fmt.Errorf("initialize tenant trial: %w", err)
+	}
+
 	// 2. Hash password
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 	if err != nil {

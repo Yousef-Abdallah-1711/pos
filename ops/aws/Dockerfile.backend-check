@@ -1,0 +1,21 @@
+# Build stage
+FROM golang:1.27.4-alpine@sha256:0a5f7fe796599ff487605987432e7619ae45beeb2fba4c2ce0b907879932aebf AS builder
+
+WORKDIR /app
+
+# Copy go mod files
+COPY go.mod go.sum ./
+RUN go mod download
+
+# Copy source code
+COPY . .
+
+# Build the application
+RUN CGO_ENABLED=0 GOOS=linux go build -p 1 -o /app/migrate ./cmd/migrate
+RUN CGO_ENABLED=0 GOOS=linux go build -p 1 -o /app/api ./cmd/api
+
+
+FROM builder AS vet
+RUN GOMAXPROCS=1 go vet -p 1 ./...
+FROM builder AS tests
+RUN GOMAXPROCS=1 go test -p 1 -timeout 120s ./...

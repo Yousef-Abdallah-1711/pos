@@ -79,4 +79,5 @@ export interface ProductListProps {
   onEdit?: (product: ProductSummary) => void
   onDelete?: (productId: number) => void | Promise<void>
   canDelete?: boolean
+  totalPages?: number
 }

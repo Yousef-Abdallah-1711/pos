@@ -26,8 +26,8 @@ func TestPublicTrackingToken_RejectsWrongEmptyAndForeignTokens(t *testing.T) {
 	raw1, hash1, _ := GeneratePublicTrackingToken()
 	raw2, hash2, _ := GeneratePublicTrackingToken()
 	cases := []struct {
-		name         string
-		raw, stored  string
+		name        string
+		raw, stored string
 	}{
 		{"other order's token", raw2, hash1},
 		{"empty token", "", hash1},

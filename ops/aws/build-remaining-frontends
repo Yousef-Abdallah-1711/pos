@@ -1,0 +1,23 @@
+#!/bin/sh
+set -u
+cd /opt/servio
+failed=0
+for app in restaurant-website super-admin landing; do
+  printf '%s\n' "$app" > ops/aws/evidence/current-frontend-build.txt
+  if ops/aws/servio build "$app" > "ops/aws/evidence/build-$app.log" 2>&1; then
+    printf 'PASS image build: %s\n' "$app"
+    if ops/aws/servio up -d --no-deps --wait --wait-timeout 120 "$app" > "ops/aws/evidence/start-$app.log" 2>&1; then
+      printf 'PASS container health: %s\n' "$app"
+    else
+      printf 'FAIL container health: %s\n' "$app"
+      ops/aws/servio logs --tail=60 "$app" > "ops/aws/evidence/unhealthy-$app.log" 2>&1
+      ops/aws/servio stop "$app" >> "ops/aws/evidence/start-$app.log" 2>&1
+      failed=1
+    fi
+  else
+    printf 'FAIL image build: %s\n' "$app"
+    failed=1
+  fi
+done
+printf 'finished\n' > ops/aws/evidence/current-frontend-build.txt
+exit "$failed"

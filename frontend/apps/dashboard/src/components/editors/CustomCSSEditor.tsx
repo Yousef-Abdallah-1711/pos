@@ -1,5 +1,7 @@
 'use client'
 
+import type { JSX } from 'react'
+
 import React, { useState, useCallback } from 'react'
 import { AlertCircle, CheckCircle, Copy, Trash2 } from 'lucide-react'
 import type { ThemeComponent } from '@/types/theme'

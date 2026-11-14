@@ -1,3 +1,5 @@
+
+import type { JSX } from 'react'
 ﻿/**
  * TestimonialsEditor Component
  * Specialized editor for testimonials/reviews carousel sections
@@ -640,7 +642,7 @@ export function TestimonialsEditor({
                 {(config.testimonials || []).length > 0 && (
                   <>
                     {config.showQuoteIcon && (
-                      <div className="text-5xl text-gray-300 dark:text-gray-600 mb-4">"</div>
+                      <div className="text-5xl text-gray-300 dark:text-gray-600 mb-4">&quot;</div>
                     )}
                     <p className="testimonial-content text-lg mb-6 italic">
                       {(config.testimonials || [])[0]?.content}
@@ -690,7 +692,7 @@ export function TestimonialsEditor({
                     className="testimonials-preview-card p-6"
                   >
                     {config.showQuoteIcon && (
-                      <div className="text-4xl text-gray-300 dark:text-gray-600 mb-3">"</div>
+                      <div className="text-4xl text-gray-300 dark:text-gray-600 mb-3">&quot;</div>
                     )}
                     <p className="testimonial-content mb-4 italic">
                       {testimonial.content}

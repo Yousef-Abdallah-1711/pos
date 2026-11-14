@@ -412,27 +412,7 @@ func (h *PublicOrderHandler) ValidateOrder(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	// Calculate estimated totals (basic calculation)
-	subtotal := 0.0
-	for _, item := range req.Items {
-		// In production, we'd fetch actual prices from DB
-		// For now, return validation success with placeholders
-		_ = item
-	}
-
-	// Return validation success
-	respondJSON(w, http.StatusOK, map[string]interface{}{
-		"success": true,
-		"message": "Order is valid",
-		"data": map[string]interface{}{
-			"customer_name":      req.CustomerName,
-			"customer_phone":     req.CustomerPhone,
-			"payment_method":     req.PaymentMethod,
-			"item_count":         len(req.Items),
-			"estimated_subtotal": subtotal,
-			// Estimated totals would include tax, delivery, etc.
-		},
-	})
+	h.writeValidatedOrderQuote(w, r, &req)
 }
 
 // CancelOrder cancels a pending or confirmed order

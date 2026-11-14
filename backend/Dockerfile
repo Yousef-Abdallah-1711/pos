@@ -1,5 +1,5 @@
 # Build stage
-FROM golang:1.24.13-alpine3.23@sha256:8bee1901f1e530bfb4a7850aa7a479d17ae3a18beb6e09064ed54cfd245b7191 AS builder
+FROM golang:1.27.4-alpine@sha256:0a5f7fe796599ff487605987432e7619ae45beeb2fba4c2ce0b907879932aebf AS builder
 
 WORKDIR /app
 
@@ -11,8 +11,8 @@ RUN go mod download
 COPY . .
 
 # Build the application
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o /app/migrate ./cmd/migrate
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o /app/api ./cmd/api
+RUN CGO_ENABLED=0 GOOS=linux go build -p 1 -o /app/migrate ./cmd/migrate
+RUN CGO_ENABLED=0 GOOS=linux go build -p 1 -o /app/api ./cmd/api
 
 # Runtime stage
 FROM alpine:3.23@sha256:469c9ea410b9215eaee7976ba6c0639039b444be8e5d638f7abbada189971eb2 AS runtime

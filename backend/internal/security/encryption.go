@@ -15,9 +15,9 @@ import (
 
 // EncryptionManager handles encryption/decryption for sensitive data
 type EncryptionManager struct {
-	masterKey        []byte
-	cipher           cipher.Block
-	encryptionAlgo   string
+	masterKey         []byte
+	cipher            cipher.Block
+	encryptionAlgo    string
 	keyDerivationAlgo string
 }
 
@@ -46,9 +46,9 @@ func NewEncryptionManager(masterKeyPath string) (*EncryptionManager, error) {
 	}
 
 	em := &EncryptionManager{
-		masterKey:        keyBytes,
-		cipher:           block,
-		encryptionAlgo:   "AES-256-GCM",
+		masterKey:         keyBytes,
+		cipher:            block,
+		encryptionAlgo:    "AES-256-GCM",
 		keyDerivationAlgo: "SHA-256",
 	}
 
@@ -265,10 +265,10 @@ func SaveMasterKeyToFile(key []byte, filePath string) error {
 
 // TLSConfig holds TLS configuration
 type TLSConfig struct {
-	CertFile   string
-	KeyFile    string
-	CAFile     string
-	MinVersion string
+	CertFile     string
+	KeyFile      string
+	CAFile       string
+	MinVersion   string
 	CipherSuites []string
 }
 

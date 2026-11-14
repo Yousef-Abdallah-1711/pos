@@ -1,6 +1,7 @@
 'use client';
 
 import Image from 'next/image';
+import { formatPrice } from '@/lib/utils/format';
 
 interface ProductCardProps {
   product: any;
@@ -47,7 +48,7 @@ export function ProductCard({ product, onAddToCart, locale = 'en' }: ProductCard
 
       {/* Price and Action */}
       <div className="flex items-center justify-between mt-auto">
-        <p className="text-xl font-black text-orange-600">${price.toFixed(2)}</p>
+        <p className="text-xl font-black text-orange-600">{formatPrice(price, locale)}</p>
 
         {/* Add to Cart */}
         <button

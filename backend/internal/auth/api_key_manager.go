@@ -13,38 +13,38 @@ import (
 
 // APIKey represents an API key
 type APIKey struct {
-	ID            int64
-	TenantID      int64
-	UserID        int64
-	KeyHash       string
-	KeyPrefix     string    // First 8 chars for display
-	Name          string
-	Permissions   []string
-	AllowedIPs    []string
+	ID             int64
+	TenantID       int64
+	UserID         int64
+	KeyHash        string
+	KeyPrefix      string // First 8 chars for display
+	Name           string
+	Permissions    []string
+	AllowedIPs     []string
 	AllowedOrigins []string
-	RateLimit     int       // Requests per minute
-	LastUsedAt    *time.Time
-	ExpiresAt     *time.Time
-	IsActive      bool
-	CreatedAt     time.Time
-	UpdatedAt     time.Time
+	RateLimit      int // Requests per minute
+	LastUsedAt     *time.Time
+	ExpiresAt      *time.Time
+	IsActive       bool
+	CreatedAt      time.Time
+	UpdatedAt      time.Time
 }
 
 // APIKeyUsage represents API key usage statistics
 type APIKeyUsage struct {
-	KeyID         int64
-	TenantID      int64
-	RequestCount  int64
-	LastUsedAt    time.Time
-	TodayRequests int64
+	KeyID           int64
+	TenantID        int64
+	RequestCount    int64
+	LastUsedAt      time.Time
+	TodayRequests   int64
 	MonthlyRequests int64
 }
 
 // APIKeyManager manages API keys for service-to-service communication
 type APIKeyManager struct {
-	db           *sql.DB
-	auditLogger  AuditLogger
-	keyPrefix    string
+	db            *sql.DB
+	auditLogger   AuditLogger
+	keyPrefix     string
 	hashAlgorithm string
 }
 

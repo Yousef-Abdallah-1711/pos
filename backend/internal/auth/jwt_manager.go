@@ -10,15 +10,15 @@ import (
 
 // JWTClaims represents JWT claims with tenant context
 type JWTClaims struct {
-	UserID      int64    `json:"user_id"`
-	TenantID    int64    `json:"tenant_id"`
-	Email       string   `json:"email"`
-	Username    string   `json:"username"`
-	Roles       []string `json:"roles"`
-	Permissions []string `json:"permissions"`
-	IPAddress   string   `json:"ip_address"`
-	UserAgent   string   `json:"user_agent"`
-	SessionID   string   `json:"session_id"`
+	UserID      int64     `json:"user_id"`
+	TenantID    int64     `json:"tenant_id"`
+	Email       string    `json:"email"`
+	Username    string    `json:"username"`
+	Roles       []string  `json:"roles"`
+	Permissions []string  `json:"permissions"`
+	IPAddress   string    `json:"ip_address"`
+	UserAgent   string    `json:"user_agent"`
+	SessionID   string    `json:"session_id"`
 	IssuedAt    time.Time `json:"iat"`
 	ExpiresAt   time.Time `json:"exp"`
 	jwt.RegisteredClaims
@@ -35,13 +35,13 @@ type RefreshToken struct {
 
 // JWTManager manages JWT token generation and validation
 type JWTManager struct {
-	signingKey            []byte
-	refreshSigningKey     []byte
-	accessTokenExpiry     time.Duration
-	refreshTokenExpiry    time.Duration
-	refreshTokens         map[string]*RefreshToken // In-memory store (use Redis in production)
-	issuer                string
-	audience              string
+	signingKey         []byte
+	refreshSigningKey  []byte
+	accessTokenExpiry  time.Duration
+	refreshTokenExpiry time.Duration
+	refreshTokens      map[string]*RefreshToken // In-memory store (use Redis in production)
+	issuer             string
+	audience           string
 }
 
 // NewJWTManager creates a new JWT manager

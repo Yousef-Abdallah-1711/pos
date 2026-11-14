@@ -1,5 +1,7 @@
 'use client'
 
+import type { JSX } from 'react'
+
 import React, { useState, useCallback } from 'react'
 import type { ThemeComponent } from '@/types/theme'
 

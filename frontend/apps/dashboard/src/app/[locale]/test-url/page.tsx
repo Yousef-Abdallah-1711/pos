@@ -51,7 +51,7 @@ export default function TestUrlPage() {
         <p className="text-gray-400 text-sm p-4 bg-blue-950 rounded">
           ℹ️ This page has NO DashboardAuthProvider - it only uses the standard AuthProvider from the locale layout.<br/>
           If you can see this page, it means the URL parameters are reaching your app.<br/>
-          If you see this page REDIRECT to login, it means there's a redirect happening in the locale layout.
+          If you see this page REDIRECT to login, it means there&apos;s a redirect happening in the locale layout.
         </p>
       </div>
     </div>

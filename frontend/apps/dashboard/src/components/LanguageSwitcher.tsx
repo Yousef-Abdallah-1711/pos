@@ -1,3 +1,5 @@
+
+import type { JSX } from 'react'
 /**
  * LanguageSwitcher Component
  * Allows users to switch between supported languages

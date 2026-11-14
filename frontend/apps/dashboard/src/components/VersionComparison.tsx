@@ -1,3 +1,5 @@
+
+import type { JSX } from 'react'
 /**
  * VersionComparison Component
  * Displays side-by-side comparison of two theme versions

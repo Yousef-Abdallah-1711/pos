@@ -46,6 +46,7 @@ type SubscriptionHistory struct {
 
 // TenantSubscriptionInfo holds comprehensive subscription information for a tenant
 type TenantSubscriptionInfo struct {
+	IsActive              bool                     `json:"is_active"`
 	TenantID              int64                    `json:"tenant_id"`
 	TenantName            string                   `json:"tenant_name"`
 	Slug                  string                   `json:"slug"`

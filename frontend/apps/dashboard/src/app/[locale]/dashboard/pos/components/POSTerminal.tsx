@@ -85,7 +85,7 @@ export function POSTerminal({
         </div>
       )}
 
-      <div className={`mt-3 grid min-h-0 flex-1 gap-3 ${isRTL ? 'lg:[grid-template-columns:35%_65%]' : 'lg:[grid-template-columns:65%_35%]'}`}>
+      <div className={`mt-3 grid min-h-0 flex-1 gap-3 ${isRTL ? 'lg:[grid-template-columns:minmax(0,1fr)_minmax(0,1.85fr)]' : 'lg:[grid-template-columns:minmax(0,1.85fr)_minmax(0,1fr)]'}`}>
         <section className="flex min-h-0 flex-col gap-2">
           <POSSearchBar locale={locale} t={t} />
           <POSCategoryTabs

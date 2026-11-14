@@ -1,3 +1,5 @@
+
+import type { JSX } from 'react'
 /**
  * BilingualContext
  * Manages bilingual state and language switching across the application

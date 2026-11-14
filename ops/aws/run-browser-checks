@@ -1,0 +1,31 @@
+#!/bin/sh
+set -eu
+cd "$(dirname "$0")/../.."
+mkdir -p ops/aws/evidence/browser
+chmod 700 ops/aws/evidence/browser
+# The same pinned Playwright version can run locally without the multi-browser
+# Docker image on this 30 GiB host. The runtime is root-owned and read-only.
+if [ -x /usr/local/lib/servio/browser/node ]; then
+  fixtures_dir=$(mktemp -d)
+  trap 'rm -rf "$fixtures_dir"' 0 INT TERM
+  cp ops/aws/evidence/browser-fixtures.json "$fixtures_dir/users.json"
+  cp ops/aws/evidence/browser-admin.json "$fixtures_dir/admin.json"
+  export SERVIO_BROWSER_FIXTURES="$fixtures_dir"
+  export SERVIO_BROWSER_EVIDENCE="$PWD/ops/aws/evidence/browser"
+  export PLAYWRIGHT_BROWSERS_PATH=/usr/local/lib/servio/browser/browsers
+  export NODE_PATH=/usr/local/lib/servio/browser/node_modules
+  /usr/local/lib/servio/browser/node ops/aws/browser-smoke.cjs
+  exit
+fi
+if docker version --format '{{.Server.Version}}' >/dev/null 2>&1; then
+  docker_command=docker
+else
+  docker_command='sudo -n docker'
+fi
+exec $docker_command run --rm --user 1000:1000 -e NPM_CONFIG_CACHE=/tmp/servio-npm-cache --memory 768m --memory-swap 1024m --cpus 1 --pids-limit 128 --shm-size 128m --ulimit core=0 --security-opt no-new-privileges:true --cap-drop ALL --network servio-staging_edge \
+  -v "$PWD"/ops/aws/browser-smoke.cjs:/work/browser-smoke.cjs:ro \
+  -v "$PWD"/ops/aws/evidence/browser-fixtures.json:/fixtures/users.json:ro \
+  -v "$PWD"/ops/aws/evidence/browser-admin.json:/fixtures/admin.json:ro \
+  -v "$PWD"/ops/aws/evidence/browser:/evidence \
+  mcr.microsoft.com/playwright@sha256:ee15712262f017b8157421b212b12099146645f44b1bc5c0514cbbe6a229b1d0 \
+  sh -c 'npm install --prefix /tmp/servio-browser --ignore-scripts --no-audit --no-fund playwright@1.64.1 >/tmp/servio-browser-install.log 2>&1 || { cat /tmp/servio-browser-install.log; exit 1; }; NODE_PATH=/tmp/servio-browser/node_modules node /work/browser-smoke.cjs'

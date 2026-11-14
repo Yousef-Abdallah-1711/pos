@@ -1,3 +1,5 @@
+
+import type { JSX } from 'react'
 /**
  * HeroEditor Component
  * Specialized editor for hero/banner components with background image, overlay, and CTA

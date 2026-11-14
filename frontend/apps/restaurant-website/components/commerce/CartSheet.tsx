@@ -8,7 +8,8 @@ import { Separator } from '@/components/ui/separator'
 import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
 import { CartItem } from '@/components/commerce/CartItem'
-import { formatPrice } from '@/lib/utils/format'
+import { useOrderQuote } from '@/lib/hooks/use-order-quote'
+import { OrderQuoteSummary } from './OrderQuoteSummary'
 import { useCart } from '@/lib/hooks/use-cart'
 
 interface CartSheetProps {
@@ -19,9 +20,8 @@ interface CartSheetProps {
 
 export function CartSheet({ locale, open, onOpenChange }: CartSheetProps) {
   const isArabic = locale === 'ar'
-  const { items, totalItems, totalPrice, updateQty, removeItem } = useCart()
-  const deliveryFee = totalPrice > 500 ? 0 : 45
-  const grandTotal = totalPrice + deliveryFee
+  const { items, totalItems, updateQty, removeItem } = useCart()
+  const quote = useOrderQuote(items)
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -70,20 +70,7 @@ export function CartSheet({ locale, open, onOpenChange }: CartSheetProps) {
                 placeholder={isArabic ? 'ملاحظات الطلب (اختياري)' : 'Order notes (optional)'}
                 className="min-h-20"
               />
-              <div className="space-y-1 text-sm">
-                <div className={`flex items-center justify-between ${isArabic ? 'flex-row-reverse' : ''}`}>
-                  <span className="text-[hsl(var(--theme-text))]/70">{isArabic ? 'المجموع' : 'Subtotal'}</span>
-                  <span className="font-medium">{formatPrice(totalPrice, locale)}</span>
-                </div>
-                <div className={`flex items-center justify-between ${isArabic ? 'flex-row-reverse' : ''}`}>
-                  <span className="text-[hsl(var(--theme-text))]/70">{isArabic ? 'التوصيل' : 'Delivery'}</span>
-                  <span className="font-medium">{deliveryFee === 0 ? (isArabic ? 'مجاني' : 'Free') : formatPrice(deliveryFee, locale)}</span>
-                </div>
-                <div className={`flex items-center justify-between text-base font-bold ${isArabic ? 'flex-row-reverse' : ''}`}>
-                  <span>{isArabic ? 'الإجمالي' : 'Total'}</span>
-                  <span className="text-[hsl(var(--theme-primary))]">{formatPrice(grandTotal, locale)}</span>
-                </div>
-              </div>
+              <OrderQuoteSummary state={quote} locale={locale} />
               <Button asChild className="h-11 w-full bg-[linear-gradient(130deg,hsl(var(--theme-primary)),hsl(var(--theme-accent)))] text-white">
                 <Link href={`/${locale}/checkout`} onClick={() => onOpenChange(false)}>
                   {isArabic ? 'إتمام الطلب' : 'Checkout'}

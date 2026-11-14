@@ -70,7 +70,6 @@ export default function EditCategoryPage() {
 
   const breadcrumbItems = [
     { href: `/${locale}/dashboard/categories`, label: t('categories.title') },
-    { href: `/${locale}/dashboard/categories/${categoryId}`, label: category?.name || 'Category' },
     { label: t('categories.editCategory') }
   ]
 

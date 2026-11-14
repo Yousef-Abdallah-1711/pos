@@ -76,12 +76,14 @@ func TestOrderUseCase_CreateOrderAutoOccupiesTable(t *testing.T) {
 				),
 		)
 
+	mock.ExpectBegin()
 	mock.ExpectQuery("INSERT INTO orders").
 		WillReturnRows(sqlmock.NewRows([]string{"id", "created_at", "updated_at"}).AddRow(int64(501), now, now))
 
 	mock.ExpectQuery("INSERT INTO order_items").
 		WillReturnRows(sqlmock.NewRows([]string{"id", "created_at", "updated_at"}).AddRow(int64(1), now, now))
 
+	mock.ExpectCommit()
 	mock.ExpectQuery("FROM orders o").
 		WithArgs(int64(501), int64(1), int64(2)).
 		WillReturnRows(

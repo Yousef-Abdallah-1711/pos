@@ -1,3 +1,5 @@
+
+import type { JSX } from 'react'
 /**
  * VersionHistory Component
  * Displays theme version history with timeline, comparisons, and rollback

@@ -8,6 +8,8 @@ import { Search, Package, MapPin, Clock, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 import { getLocaleFromPath, createTranslator } from '@/lib/translations';
 import { apiClient } from '@/lib/api-client';
+import { formatPrice } from '@/lib/utils/format';
+import { useThemeStore } from '@/lib/store/theme-store';
 
 type StatusHistoryEntry = {
   new_status?: string;
@@ -33,8 +35,6 @@ type TrackedOrder = {
   estimatedDelivery?: string;
   items: TrackedItem[];
   deliveryAddress?: string;
-  customerName?: string;
-  customerPhone?: string;
   paymentStatus?: string;
 };
 
@@ -70,8 +70,6 @@ const normalizeOrder = (raw: any): TrackedOrder => {
       raw?.estimatedDeliveryTime,
     items: normalizedItems,
     deliveryAddress: raw?.delivery_address || raw?.deliveryAddress,
-    customerName: raw?.customer_name || raw?.customerName,
-    customerPhone: raw?.customer_phone || raw?.customerPhone,
     paymentStatus: raw?.payment_status || raw?.paymentStatus,
   };
 };
@@ -100,6 +98,9 @@ export default function TrackPageContent({ initialOrderNumber }: TrackPageConten
   const pathname = usePathname();
   const locale = getLocaleFromPath(pathname);
   const isRTL = locale === 'ar';
+  const restaurantName = useThemeStore(state => state.currentTheme?.identity?.site_title || '');
+  const phoneValue = useThemeStore(state => state.currentTheme?.footer?.phone || '');
+  const restaurantPhone = /^\+?[0-9 ()-]{7,25}$/.test(phoneValue) ? phoneValue.replace(/[^0-9+]/g, '') : '';
   const t = useMemo(() => createTranslator(locale), [locale]);
 
   const [orderNumber, setOrderNumber] = useState('');
@@ -214,10 +215,11 @@ export default function TrackPageContent({ initialOrderNumber }: TrackPageConten
             <div className={`flex flex-col sm:flex-row gap-3 ${isRTL ? 'sm:flex-row-reverse' : ''}`}>
               <input
                 type="text"
+                aria-label={t('orderTracking.searchPlaceholder')}
                 placeholder={t('orderTracking.searchPlaceholder')}
                 value={orderNumber}
                 onChange={(e) => setOrderNumber(e.target.value)}
-                className={`flex-1 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary dark:bg-gray-700 dark:text-white ${isRTL ? 'text-right' : ''}`}
+                className={`min-w-0 w-full flex-1 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary dark:bg-gray-700 dark:text-white ${isRTL ? 'text-right' : ''}`}
               />
               <input
                 type="tel"
@@ -227,7 +229,7 @@ export default function TrackPageContent({ initialOrderNumber }: TrackPageConten
                 placeholder={isRTL ? 'رقم الهاتف (مطلوب من جهاز آخر)' : 'Phone used at checkout (needed on another device)'}
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                className={`flex-1 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary dark:bg-gray-700 dark:text-white ${isRTL ? 'text-right' : ''}`}
+                className={`min-w-0 w-full flex-1 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary dark:bg-gray-700 dark:text-white ${isRTL ? 'text-right' : ''}`}
               />
               <Button type="submit" disabled={isLoading} className={`px-6 py-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
                 <Search className="h-5 w-5 mr-2" />
@@ -298,29 +300,6 @@ export default function TrackPageContent({ initialOrderNumber }: TrackPageConten
               </div>
             )}
 
-            {/* Driver Information */}
-            {trackedOrder.status === 'out_for_delivery' && (
-              <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-                <h3 className="text-lg font-semibold mb-4">{t('orderTracking.driver')}</h3>
-                <div className={`grid grid-cols-1 md:grid-cols-2 gap-4 ${isRTL ? 'text-right' : ''}`}>
-                  <div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">{t('orderTracking.driverName')}</p>
-                    <p className="text-lg font-semibold">{trackedOrder.customerName || '-'}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">{t('orderTracking.contactDriver')}</p>
-                    {trackedOrder.customerPhone ? (
-                      <a href={`tel:${trackedOrder.customerPhone}`} className="text-primary hover:underline font-semibold">
-                        {trackedOrder.customerPhone}
-                      </a>
-                    ) : (
-                      <span className="text-gray-500 dark:text-gray-400">-</span>
-                    )}
-                  </div>
-                </div>
-              </div>
-            )}
-
             {/* Order Details */}
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
               <h3 className="text-lg font-semibold mb-4">{t('orderTracking.orderDetails')}</h3>
@@ -336,27 +315,29 @@ export default function TrackPageContent({ initialOrderNumber }: TrackPageConten
                         {t('common.quantity')}: {item.quantity}
                       </p>
                     </div>
-                    <p className="font-semibold">${(item.price * item.quantity).toFixed(2)}</p>
+                    <p className="font-semibold">{formatPrice(item.price * item.quantity, locale)}</p>
                   </div>
                 ))}
               </div>
               <div className={`border-t border-gray-200 dark:border-gray-700 pt-4 flex justify-between items-center ${isRTL ? 'flex-row-reverse' : ''}`}>
                 <p className="text-lg font-bold">{t('common.total')}:</p>
-                <p className="text-2xl font-bold text-primary">${trackedOrder.totalAmount.toFixed(2)}</p>
+                <p className="text-2xl font-bold text-primary">{formatPrice(trackedOrder.totalAmount, locale)}</p>
               </div>
             </div>
 
             {/* Restaurant Info */}
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
               <h3 className="text-lg font-semibold mb-4">{t('orderTracking.restaurantInfo')}</h3>
-              <p className="text-lg font-medium mb-4">{t('common.restaurant')}</p>
+              <p className="text-lg font-medium mb-4">{restaurantName}</p>
               <div className={`flex gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                <Button variant="outline" size="sm">
+                <Link href={`/${locale}/menu`} className="rounded border px-3 py-2 text-sm">
                   {t('orderTracking.viewMenu')}
-                </Button>
-                <Button variant="outline" size="sm">
-                  {t('orderTracking.contactRestaurant')}
-                </Button>
+                </Link>
+                {restaurantPhone && (
+                  <a href={`tel:${restaurantPhone}`} className="rounded border px-3 py-2 text-sm">
+                    {t('orderTracking.contactRestaurant')}
+                  </a>
+                )}
               </div>
             </div>
 

@@ -3,6 +3,8 @@ const createNextIntlPlugin = require('next-intl/plugin');
 const withNextIntl = createNextIntlPlugin('./i18n/request.ts');
 
 /** @type {import('next').NextConfig} */
+const apiImageURL = new URL(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api/v1')
+
 const nextConfig = {
   reactStrictMode: true,
   // Windows local builds can fail with EPERM on standalone symlink tracing.
@@ -22,6 +24,7 @@ const nextConfig = {
   // Configure external image sources
   images: {
     remotePatterns: [
+      { protocol: apiImageURL.protocol.slice(0, -1), hostname: apiImageURL.hostname, port: apiImageURL.port, pathname: '/uploads/products/**' },
       {
         protocol: 'https',
         hostname: 'images.unsplash.com',

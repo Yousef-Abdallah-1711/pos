@@ -50,7 +50,7 @@ export function TrialExpiredScreen({
 
         {/* Benefits List */}
         <div className="bg-white dark:bg-gray-800 rounded-lg p-6 mb-8 text-left">
-          <h3 className="font-semibold text-gray-900 dark:text-white mb-4">What you're missing:</h3>
+          <h3 className="font-semibold text-gray-900 dark:text-white mb-4">What you&apos;re missing:</h3>
           <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-300">
             <li>✓ Full access to all dashboard features</li>
             <li>✓ Order management and tracking</li>

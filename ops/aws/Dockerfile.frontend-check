@@ -1,0 +1,26 @@
+# syntax=docker/dockerfile:1
+FROM node:24.22.3-alpine@sha256:116b800c3754b440ee0aa3ed2f20f5bf3d99a554bfd9adeea09ea8017f6e85f5 AS base
+RUN apk add --no-cache libc6-compat \
+ && corepack enable \
+ && corepack prepare pnpm@10.34.9 --activate
+WORKDIR /app
+FROM base AS deps
+COPY . .
+RUN pnpm install --frozen-lockfile
+FROM deps AS checks
+ENV NODE_OPTIONS=--max-old-space-size=512
+RUN result=0; for app in landing dashboard super-admin; do pnpm --filter "./apps/$app" test:run --maxWorkers=1 --no-file-parallelism; code=$?; echo "SERVIO_TEST_RESULT $app $code"; if [ "$code" != 0 ]; then result=1; fi; done; pnpm --filter ./apps/restaurant-website run test --runInBand; code=$?; echo "SERVIO_TEST_RESULT restaurant-website $code"; if [ "$code" != 0 ]; then result=1; fi; exit "$result"
+FROM deps AS audit
+RUN pnpm audit --prod --json > /tmp/audit.json; code=$?; node -e 'const d=require("/tmp/audit.json");console.log("SERVIO_AUDIT_METADATA "+JSON.stringify(d.metadata||d));for(const a of Object.values(d.advisories||{})){console.log("SERVIO_ADVISORY "+JSON.stringify({id:a.id,module:a.module_name,severity:a.severity,title:a.title,vulnerable:a.vulnerable_versions,patched:a.patched_versions,url:a.url,installed:(a.findings||[]).map(f=>f.version)}))}'; exit "$code"
+FROM deps AS lint
+ENV CI=true NODE_OPTIONS=--max-old-space-size=512
+RUN result=0; for app in landing dashboard restaurant-website super-admin; do pnpm --filter "./apps/$app" lint; code=$?; echo "SERVIO_LINT_RESULT $app $code"; if [ "$code" != 0 ]; then result=1; fi; done; exit "$result"
+FROM deps AS dashboard-tests
+ENV CI=true NODE_OPTIONS=--max-old-space-size=512
+RUN timeout 900 pnpm --filter ./apps/dashboard test:run --maxWorkers=1 --no-file-parallelism
+FROM deps AS super-admin-tests
+ENV CI=true NODE_OPTIONS=--max-old-space-size=512
+RUN timeout 600 pnpm --filter ./apps/super-admin test:run --maxWorkers=1 --no-file-parallelism
+FROM deps AS storefront-tests
+ENV CI=true NODE_OPTIONS=--max-old-space-size=512
+RUN timeout 600 pnpm --filter ./apps/restaurant-website run test --runInBand

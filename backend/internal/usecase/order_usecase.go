@@ -4,7 +4,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/google/uuid"
 	"log"
+	"math"
 	"pos-saas/internal/domain"
 	"pos-saas/internal/repository"
 	"strings"
@@ -67,10 +69,9 @@ func (uc *OrderUseCase) CreateOrder(
 
 	// Generate unique order number
 	// In production, this should query the current order count for the restaurant
-	orderNumber := domain.GenerateOrderNumber(tenantID, time.Now().Unix()%1000000)
+	orderNumber := "ORD-" + time.Now().Format("2006") + "-" + uuid.NewString()
 
-	// Calculate totals from items
-	subtotal := 0.0
+	// Validate that at least one item is present.
 	totalItems := len(req.Items)
 	if totalItems == 0 {
 		return nil, errors.New("order must have at least one item")
@@ -144,28 +145,9 @@ func (uc *OrderUseCase) CreateOrder(
 			return nil, fmt.Errorf("insufficient inventory for product %s", product.NameEn)
 		}
 
-		// Calculate item pricing
-		unitPrice := product.Price
-		if product.DiscountPrice != nil && *product.DiscountPrice > 0 {
-			unitPrice = *product.DiscountPrice
-		}
-
-		itemTotal := float64(itemReq.Quantity) * unitPrice
-		subtotal += itemTotal
-
-		// Create order item
-		item := domain.OrderItem{
-			ProductID:   itemReq.ProductID,
-			VariantID:   itemReq.VariantID,
-			ProductName: product.NameEn,
-			Quantity:    itemReq.Quantity,
-			UnitPrice:   unitPrice,
-			TotalPrice:  itemTotal,
-		}
-
-		// Handle special instructions
-		if itemReq.SpecialInstructions != "" {
-			item.SpecialInstructions = itemReq.SpecialInstructions
+		item, err := pricedOrderItem(*product, itemReq)
+		if err != nil {
+			return nil, err
 		}
 
 		items = append(items, item)
@@ -173,38 +155,18 @@ func (uc *OrderUseCase) CreateOrder(
 
 	// Set order items
 	order.Items = items
-	order.Subtotal = subtotal
+	if err := applyOrderPricing(order); err != nil {
+		return nil, err
+	}
 
-	// Calculate taxes - assume 10% if not specified
-	order.TaxAmount = subtotal * 0.10
-
-	// Discounts can be applied (in real system, validate against promotions)
-	// For now, accept request discount if provided
-
-	// Delivery fee - in real system, would calculate based on delivery distance/zone
-	order.DeliveryFee = 0
-
-	// Calculate final total
-	order.TotalAmount = order.Subtotal + order.TaxAmount - order.DiscountAmount + order.DeliveryFee
-
-	// Validate final totals
-	if order.TotalAmount < 0 {
-		return nil, errors.New("order total cannot be negative")
+	if req.ExpectedTotal != nil && (math.IsNaN(*req.ExpectedTotal) || math.IsInf(*req.ExpectedTotal, 0) || math.Abs(*req.ExpectedTotal-order.TotalAmount) > 0.004) {
+		return nil, errors.New("order total changed; refresh the quote before confirming")
 	}
 
 	// Create order in repository
-	createdOrder, err := uc.orderRepo.CreateOrder(order)
+	createdOrder, err := uc.orderRepo.CreateOrderWithItems(order)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create order: %w", err)
-	}
-
-	// Create order items
-	for _, item := range items {
-		item.OrderID = createdOrder.ID
-		_, err := uc.orderRepo.CreateOrderItem(tenantID, restaurantID, &item)
-		if err != nil {
-			return nil, fmt.Errorf("failed to create order item: %w", err)
-		}
 	}
 
 	// Reload order with items
@@ -238,8 +200,9 @@ func (uc *OrderUseCase) CreateOrder(
 			Reason: "Auto-confirmed POS order",
 		}
 		if confirmErr := uc.UpdateOrderStatus(tenantID, restaurantID, finalOrder.ID, confirmReq); confirmErr != nil {
-			// Keep order creation successful even when status transition/KDS enqueue fails.
-			log.Printf("[KDS] failed to auto-confirm POS order: tenant=%d restaurant=%d order=%d err=%v", tenantID, restaurantID, finalOrder.ID, confirmErr)
+			// The complete draft is preserved for audit, but a POS sale must never be
+			// reported successful when its atomic reservation could not be made.
+			return nil, fmt.Errorf("POS confirmation failed: %w", confirmErr)
 		} else {
 			updatedOrder, reloadErr := uc.orderRepo.GetOrderByID(tenantID, restaurantID, finalOrder.ID)
 			if reloadErr != nil {
@@ -337,7 +300,7 @@ func (uc *OrderUseCase) UpdateOrderStatus(
 	}
 
 	// Update status with optional user ID (nil for system updates)
-	err = uc.orderRepo.UpdateOrderStatus(tenantID, restaurantID, orderID, req.Status, nil, req.Reason)
+	err = uc.orderRepo.UpdateOrderStatus(tenantID, restaurantID, orderID, req.Status, req.ChangedBy, req.Reason)
 	if err != nil {
 		return fmt.Errorf("failed to update order status: %w", err)
 	}

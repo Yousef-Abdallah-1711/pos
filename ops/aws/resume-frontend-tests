@@ -1,0 +1,14 @@
+#!/bin/sh
+set -u
+cd /opt/servio
+result=0
+: > ops/aws/evidence/frontend-resumed-results.txt
+for target in super-admin-tests storefront-tests dashboard-tests; do
+  if sudo docker buildx build --builder servio-builder --target "$target" -f ops/aws/Dockerfile.frontend-check frontend > "ops/aws/evidence/frontend-$target.log" 2>&1; then
+    printf 'PASS %s\n' "$target" | tee -a ops/aws/evidence/frontend-resumed-results.txt
+  else
+    printf 'FAIL %s\n' "$target" | tee -a ops/aws/evidence/frontend-resumed-results.txt
+    result=1
+  fi
+done
+exit "$result"

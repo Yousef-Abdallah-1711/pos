@@ -1,0 +1,13 @@
+[Unit]
+Description=Bounded polling for verified SERVIO staging releases
+
+[Timer]
+OnBootSec=90s
+OnUnitInactiveSec=5min
+RandomizedDelaySec=30s
+AccuracySec=15s
+Unit=servio-deploy.service
+Persistent=true
+
+[Install]
+WantedBy=timers.target

@@ -98,7 +98,7 @@ export default function AdvancedFinancialInsightsPage() {
             Phase 8 analytics + Phase 9 compliance export center.
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <Button variant="outline" onClick={exportAudit}>Export Audit CSV</Button>
           <Button variant="outline" onClick={exportSocialInsurance}>Export Social Insurance CSV</Button>
         </div>

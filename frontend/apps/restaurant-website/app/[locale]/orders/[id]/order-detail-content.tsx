@@ -8,6 +8,8 @@ import Link from 'next/link';
 import { getLocaleFromPath, createTranslator } from '@/lib/translations';
 import { useOrder, useCancelOrder } from '@/lib/hooks/use-api-queries';
 import { useState } from 'react';
+import axios from 'axios';
+import { formatPrice } from '@/lib/utils/format';
 
 export default function OrderDetailContent() {
   const pathname = usePathname();
@@ -50,15 +52,16 @@ export default function OrderDetailContent() {
     );
   }
 
-  const orderData = order as any;
+  const orderData = order;
 
   const handleCancelOrder = () => {
     cancelOrder(orderId, {
       onSuccess: () => {
         setCancelConfirm(false);
       },
-      onError: (err: any) => {
-        setCancelError(err.response?.data?.message || t('errors.somethingWentWrong'));
+      onError: (err) => {
+        const message = axios.isAxiosError<{ message?: string }>(err) ? err.response?.data?.message : undefined;
+        setCancelError(message || t('errors.somethingWentWrong'));
       },
     });
   };
@@ -112,11 +115,11 @@ export default function OrderDetailContent() {
               <div className={`space-y-3 ${isRTL ? 'text-right' : ''}`}>
                 <div className={`flex justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
                   <span className="text-gray-600 dark:text-gray-400">{t('common.orderNumber')}</span>
-                  <span className="font-semibold">{orderData.orderNumber}</span>
+                  <span className="break-all font-semibold">{orderData.orderNumber}</span>
                 </div>
                 <div className={`flex justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
                   <span className="text-gray-600 dark:text-gray-400">{t('common.total')}</span>
-                  <span className="font-semibold text-lg">${orderData.totalAmount.toFixed(2)}</span>
+                  <span className="font-semibold text-lg">{formatPrice(orderData.totalAmount, locale)}</span>
                 </div>
                 <div className={`flex justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
                   <span className="text-gray-600 dark:text-gray-400">{t('orders.orderDate')}</span>
@@ -190,7 +193,7 @@ export default function OrderDetailContent() {
                         <p className="text-sm text-gray-500 italic">Note: {item.notes}</p>
                       )}
                     </div>
-                    <p className="font-semibold">${(item.price * item.quantity).toFixed(2)}</p>
+                    <p className="font-semibold">{formatPrice(item.price * item.quantity, locale)}</p>
                   </div>
                 ))}
               </div>

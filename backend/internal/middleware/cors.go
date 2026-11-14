@@ -22,7 +22,7 @@ func CORSMiddleware(next http.Handler) http.Handler {
 		originAllowed := isOriginAllowed(origin)
 
 		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS")
-		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Tenant-ID, X-Restaurant-ID, X-Impersonation-Token")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Tenant-ID, X-Restaurant-ID, X-Impersonation-Token, Idempotency-Key, X-Order-Token, X-Customer-Phone")
 		w.Header().Set("Access-Control-Expose-Headers", "X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset, Retry-After")
 		w.Header().Add("Vary", "Origin")
 

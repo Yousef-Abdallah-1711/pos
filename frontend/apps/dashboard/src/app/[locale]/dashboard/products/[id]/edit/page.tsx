@@ -91,7 +91,6 @@ export default function EditProductPage() {
 
   const breadcrumbItems = [
     { href: `/${locale}/dashboard/products`, label: t('products.title') },
-    { href: `/${locale}/dashboard/products/${productId}`, label: product?.name_en || 'Product' },
     { label: t('products.editProduct') }
   ]
 

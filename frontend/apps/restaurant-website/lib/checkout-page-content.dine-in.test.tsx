@@ -1,8 +1,11 @@
+import type { OrderQuote } from './order-quote'
 import { fireEvent, render, waitFor } from '@testing-library/react'
 import { CheckoutPageContent } from '@/app/[locale]/checkout/checkout-page-content'
 import { useCartStore } from '@/lib/store/cart-store'
 
 const mutateSpy = jest.fn()
+const mockQuoteState: { data: OrderQuote | undefined; isError: boolean; isFetching: boolean; refetch: jest.Mock } = { data: undefined, isError: false, isFetching: false, refetch: jest.fn() }
+jest.mock('@/lib/hooks/use-order-quote', () => ({ useOrderQuote: () => mockQuoteState }))
 
 jest.mock('@pos-saas/ui', () => ({
   Button: ({ children, ...props }: any) => <button {...props}>{children}</button>,
@@ -22,6 +25,9 @@ jest.mock('@/lib/translations', () => ({
 describe('CheckoutPageContent dine-in flow', () => {
   beforeEach(() => {
     mutateSpy.mockReset()
+    mockQuoteState.data = { subtotal: 24, tax_amount: 2.4, delivery_fee: 0, total_amount: 26.4, currency: 'EGP', items: [{ product_id: 101, quantity: 2, unit_price: 12, total_price: 24 }] }
+    mockQuoteState.isError = false
+    mockQuoteState.isFetching = false
     localStorage.clear()
     useCartStore.setState({
       items: [
@@ -67,6 +73,7 @@ describe('CheckoutPageContent dine-in flow', () => {
 
     const [payload] = mutateSpy.mock.calls[0]
     expect(payload).toMatchObject({
+      expected_total: 26.4,
       customer_name: 'Garden 8',
       customer_phone: '0100000000',
       delivery_address: '',
@@ -83,4 +90,13 @@ describe('CheckoutPageContent dine-in flow', () => {
       },
     ])
   })
+  it('does not place an order while authoritative pricing is unavailable', () => {
+    mockQuoteState.data = undefined
+    mockQuoteState.isError = true
+    const { container, getByRole } = render(<CheckoutPageContent locale="en" themeData={{ colors: {} }} />)
+    expect(getByRole('alert')).toBeVisible()
+    expect(container.querySelector('button[type="submit"]')).toBeDisabled()
+    expect(mutateSpy).not.toHaveBeenCalled()
+  })
+
 })

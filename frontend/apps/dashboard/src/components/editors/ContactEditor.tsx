@@ -1,3 +1,5 @@
+
+import type { JSX } from 'react'
 /**
  * ContactEditor Component
  * Specialized editor for contact form and information sections

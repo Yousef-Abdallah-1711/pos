@@ -49,7 +49,7 @@ export const RoleGuard: React.FC<RoleGuardProps> = ({
               Access Denied
             </h3>
             <p className="text-red-700 dark:text-red-400 text-sm mt-1">
-              You don't have the required permissions to access this content.
+              You don&apos;t have the required permissions to access this content.
               {permissionLevel &&
                 permissionLevel !== PERMISSION_LEVELS.READ &&
                 ` (Required: ${permissionLevel})`}

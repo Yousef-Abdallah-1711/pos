@@ -31,52 +31,52 @@ type ThemeConfig struct {
 	} `json:"identity"`
 
 	Colors struct {
-		Primary   string `json:"primary"`
-		Secondary string `json:"secondary"`
-		Accent    string `json:"accent"`
+		Primary    string `json:"primary"`
+		Secondary  string `json:"secondary"`
+		Accent     string `json:"accent"`
 		Background string `json:"background"`
-		Text      string `json:"text"`
-		Border    string `json:"border"`
-		Shadow    string `json:"shadow"`
+		Text       string `json:"text"`
+		Border     string `json:"border"`
+		Shadow     string `json:"shadow"`
 	} `json:"colors"`
 
 	Typography struct {
-		FontFamily  string      `json:"fontFamily"`
-		BaseFontSize int        `json:"baseFontSize"`
-		LineHeight float64     `json:"lineHeight"`
-		BorderRadius int       `json:"borderRadius"`
-		Headings   map[string]interface{} `json:"headings"`
+		FontFamily   string                 `json:"fontFamily"`
+		BaseFontSize int                    `json:"baseFontSize"`
+		LineHeight   float64                `json:"lineHeight"`
+		BorderRadius int                    `json:"borderRadius"`
+		Headings     map[string]interface{} `json:"headings"`
 	} `json:"typography"`
 
 	Header struct {
-		Style              string                   `json:"style"`
-		Layout             string                   `json:"layout"`
-		Position           string                   `json:"position"`
-		Height             int                      `json:"height"`
-		Padding            int                      `json:"padding"`
-		BackgroundColor    string                   `json:"backgroundColor"`
-		TextColor          string                   `json:"textColor"`
-		LogoPosition       string                   `json:"logoPosition"`
-		ShowLogo           bool                     `json:"showLogo"`
-		ShowSearch         bool                     `json:"showSearch"`
-		ShowLanguageSwitcher bool                  `json:"showLanguageSwitcher"`
-		NavigationItems    []map[string]interface{} `json:"navigationItems"`
-		CtaButton          map[string]interface{}   `json:"ctaButton"`
+		Style                string                   `json:"style"`
+		Layout               string                   `json:"layout"`
+		Position             string                   `json:"position"`
+		Height               int                      `json:"height"`
+		Padding              int                      `json:"padding"`
+		BackgroundColor      string                   `json:"backgroundColor"`
+		TextColor            string                   `json:"textColor"`
+		LogoPosition         string                   `json:"logoPosition"`
+		ShowLogo             bool                     `json:"showLogo"`
+		ShowSearch           bool                     `json:"showSearch"`
+		ShowLanguageSwitcher bool                     `json:"showLanguageSwitcher"`
+		NavigationItems      []map[string]interface{} `json:"navigationItems"`
+		CtaButton            map[string]interface{}   `json:"ctaButton"`
 	} `json:"header"`
 
 	Footer struct {
-		Style             string                   `json:"style"`
-		Layout            string                   `json:"layout"`
-		Columns           int                      `json:"columns"`
-		BackgroundColor   string                   `json:"backgroundColor"`
-		TextColor         string                   `json:"textColor"`
-		LinkColor         string                   `json:"linkColor"`
-		ShowBackToTop     bool                     `json:"showBackToTop"`
-		CompanyInfo       map[string]interface{}   `json:"companyInfo"`
-		Sections          []map[string]interface{} `json:"sections"`
-		SocialLinks       []map[string]interface{} `json:"socialLinks"`
-		LegalLinks        []map[string]interface{} `json:"legalLinks"`
-		CopyrightText     interface{}              `json:"copyrightText"`
+		Style           string                   `json:"style"`
+		Layout          string                   `json:"layout"`
+		Columns         int                      `json:"columns"`
+		BackgroundColor string                   `json:"backgroundColor"`
+		TextColor       string                   `json:"textColor"`
+		LinkColor       string                   `json:"linkColor"`
+		ShowBackToTop   bool                     `json:"showBackToTop"`
+		CompanyInfo     map[string]interface{}   `json:"companyInfo"`
+		Sections        []map[string]interface{} `json:"sections"`
+		SocialLinks     []map[string]interface{} `json:"socialLinks"`
+		LegalLinks      []map[string]interface{} `json:"legalLinks"`
+		CopyrightText   interface{}              `json:"copyrightText"`
 	} `json:"footer"`
 
 	Components []map[string]interface{} `json:"components"`

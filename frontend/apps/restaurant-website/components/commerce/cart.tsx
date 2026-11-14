@@ -1,5 +1,8 @@
 ﻿'use client'
 
+import { useOrderQuote } from '@/lib/hooks/use-order-quote'
+import { OrderQuoteSummary } from './OrderQuoteSummary'
+import { formatPrice } from '@/lib/utils/format'
 import { useCartStore } from '@/lib/store/cart-store'
 import { Button } from '@pos-saas/ui'
 import { Minus, Plus, Trash2, ShoppingCart } from 'lucide-react'
@@ -21,15 +24,18 @@ interface CartProps {
  * Uses theme CSS variables for colors
  */
 export function Cart({ locale = 'en', themeColors = {} }: CartProps) {
-  const items = useCartStore((state) => state.items)
+  const storedItems = useCartStore((state) => state.items)
+  const quote = useOrderQuote(storedItems)
+  const items = storedItems.map(item => {
+    const price = quote.data?.items.find(line => line.product_id === item.productId)
+    return price ? { ...item, price: price.unit_price, total: price.total_price } : item
+  })
   const removeItem = useCartStore((state) => state.removeItem)
   const updateQuantity = useCartStore((state) => state.updateQuantity)
   const updateNotes = useCartStore((state) => state.updateNotes)
-  const getTotal = useCartStore((state) => state.getTotal)
   const getTotalItems = useCartStore((state) => state.getTotalItems)
   const clearCart = useCartStore((state) => state.clearCart)
   const isRTL = locale === 'ar'
-  const total = getTotal()
   const itemCount = getTotalItems()
 
   const bgColor = themeColors.background || '#ffffff'
@@ -41,12 +47,12 @@ export function Cart({ locale = 'en', themeColors = {} }: CartProps) {
     return (
       <div className="text-center py-12">
         <ShoppingCart className="cart-empty-icon h-16 w-16 mx-auto mb-4" />
-        <h3 className="cart-empty-title text-xl font-semibold mb-2">{locale === 'en' ? 'Your cart is empty' : 'Ø³Ù„ØªÙƒ ÙØ§Ø±ØºØ©'}</h3>
+        <h3 className="cart-empty-title text-xl font-semibold mb-2">{locale === 'en' ? 'Your cart is empty' : 'سلتك فارغة'}</h3>
         <p className="cart-empty-subtitle mb-6">
-          {locale === 'en' ? 'Add some delicious items to get started' : 'Ø£Ø¶Ù Ø¨Ø¹Ø¶ Ø§Ù„Ø¹Ù†Ø§ØµØ± Ø§Ù„Ù„Ø°ÙŠØ°Ø© Ù„Ù„Ø¨Ø¯Ø¡'}
+          {locale === 'en' ? 'Add some delicious items to get started' : 'أضف بعض العناصر اللذيذة للبدء'}
         </p>
         <Link href={`/${locale}/menu`}>
-          <Button variant="default">{locale === 'en' ? 'Continue Shopping' : 'Ù…ØªØ§Ø¨Ø¹Ø© Ø§Ù„ØªØ³ÙˆÙ‚'}</Button>
+          <Button variant="default">{locale === 'en' ? 'Continue Shopping' : 'متابعة التسوق'}</Button>
         </Link>
 
         <style jsx>{`
@@ -94,7 +100,7 @@ export function Cart({ locale = 'en', themeColors = {} }: CartProps) {
               <div className="flex-1">
                 <h3 className="cart-item-name font-semibold text-lg mb-1">{item.name}</h3>
                 <p className="cart-item-price text-sm mb-4">
-                  ${item.price.toFixed(2)} {locale === 'en' ? 'each' : 'Ù„ÙƒÙ„ ÙˆØ§Ø­Ø¯'}
+                  {formatPrice(item.price, locale)} {locale === 'en' ? 'each' : 'لكل واحد'}
                 </p>
 
                 <div className="flex items-center gap-3 mb-4">
@@ -118,7 +124,7 @@ export function Cart({ locale = 'en', themeColors = {} }: CartProps) {
                 <textarea
                   value={item.notes || ''}
                   onChange={(e) => updateNotes(item.productId, e.target.value)}
-                  placeholder={locale === 'en' ? 'Add special notes...' : 'Ø£Ø¶Ù Ù…Ù„Ø§Ø­Ø¸Ø§Øª Ø®Ø§ØµØ©...'}
+                  placeholder={locale === 'en' ? 'Add special notes...' : 'أضف ملاحظات خاصة...'}
                   className="cart-notes w-full p-2 text-sm border rounded resize-none focus:outline-none"
                   rows={2}
                 />
@@ -126,8 +132,8 @@ export function Cart({ locale = 'en', themeColors = {} }: CartProps) {
 
               <div className={`flex flex-col items-end gap-4 ${isRTL ? 'items-start' : ''}`}>
                 <div className={isRTL ? 'text-left' : 'text-right'}>
-                  <p className="cart-total-label text-sm">{locale === 'en' ? 'Total' : 'Ø§Ù„Ø¥Ø¬Ù…Ø§Ù„ÙŠ'}</p>
-                  <p className="cart-total-value text-2xl font-bold">${item.total.toFixed(2)}</p>
+                  <p className="cart-total-label text-sm">{locale === 'en' ? 'Total' : 'الإجمالي'}</p>
+                  <p className="cart-total-value text-2xl font-bold">{formatPrice(item.total, locale)}</p>
                 </div>
                 <button onClick={() => removeItem(item.productId)} className="cart-delete-btn p-2 rounded transition-colors">
                   <Trash2 className="h-5 w-5" />
@@ -139,37 +145,17 @@ export function Cart({ locale = 'en', themeColors = {} }: CartProps) {
       </div>
 
       <div className="cart-summary rounded-lg shadow-md p-6 space-y-4">
-        <div className="space-y-2">
-          <div className={`flex justify-between ${isRTL ? 'flex-row-reverse' : ''} cart-summary-row`}>
-            <span>{locale === 'en' ? 'Subtotal' : 'Ø§Ù„Ù…Ø¬Ù…ÙˆØ¹'}</span>
-            <span>${total.toFixed(2)}</span>
-          </div>
-          <div className={`flex justify-between ${isRTL ? 'flex-row-reverse' : ''} cart-summary-row`}>
-            <span>{locale === 'en' ? 'Delivery' : 'Ø§Ù„ØªÙˆØµÙŠÙ„'}</span>
-            <span>${(total > 50 ? 0 : 5).toFixed(2)}</span>
-          </div>
-          {total > 50 && (
-            <p className="cart-free-delivery text-sm">
-              {locale === 'en' ? 'Free delivery on orders over $50!' : 'ØªÙˆØµÙŠÙ„ Ù…Ø¬Ø§Ù†ÙŠ Ø¹Ù„Ù‰ Ø§Ù„Ø·Ù„Ø¨Ø§Øª ÙÙˆÙ‚ 50 Ø¯ÙˆÙ„Ø§Ø±!'}
-            </p>
-          )}
-        </div>
-
+        <OrderQuoteSummary state={quote} locale={locale} totalClassName="cart-total-primary" />
         <div className="cart-summary-total pt-4">
-          <div className={`flex justify-between text-lg font-bold mb-6 ${isRTL ? 'flex-row-reverse' : ''}`}>
-            <span className="cart-total-title">{locale === 'en' ? 'Total' : 'Ø§Ù„Ø¥Ø¬Ù…Ø§Ù„ÙŠ'}</span>
-            <span className="cart-total-primary">${(total + (total > 50 ? 0 : 5)).toFixed(2)}</span>
-          </div>
-
           <div className="space-y-3">
             <Button asChild className="w-full" size="lg">
               <Link href={`/${locale}/checkout`}>
-                {locale === 'en' ? 'Proceed to Checkout' : 'Ù…ØªØ§Ø¨Ø¹Ø© Ø§Ù„Ø¯ÙØ¹'}
+                {locale === 'en' ? 'Proceed to Checkout' : 'متابعة الدفع'}
               </Link>
             </Button>
             <Button asChild variant="outline" className="w-full" size="lg">
               <Link href={`/${locale}/menu`}>
-                {locale === 'en' ? 'Continue Shopping' : 'Ù…ØªØ§Ø¨Ø¹Ø© Ø§Ù„ØªØ³ÙˆÙ‚'}
+                {locale === 'en' ? 'Continue Shopping' : 'متابعة التسوق'}
               </Link>
             </Button>
           </div>
@@ -177,13 +163,13 @@ export function Cart({ locale = 'en', themeColors = {} }: CartProps) {
 
         <button
           onClick={() => {
-            if (window.confirm(locale === 'en' ? 'Clear cart?' : 'Ù…Ø³Ø­ Ø§Ù„Ø³Ù„Ø©ØŸ')) {
+            if (window.confirm(locale === 'en' ? 'Clear cart?' : 'مسح السلة؟')) {
               clearCart()
             }
           }}
           className="cart-clear-btn w-full font-semibold py-2 rounded transition-colors"
         >
-          {locale === 'en' ? 'Clear Cart' : 'Ù…Ø³Ø­ Ø§Ù„Ø³Ù„Ø©'}
+          {locale === 'en' ? 'Clear Cart' : 'مسح السلة'}
         </button>
       </div>
 

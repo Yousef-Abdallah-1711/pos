@@ -1,0 +1,62 @@
+(common) {
+	@staging_frontend {
+		not host api.pos.rakmyat.online
+	}
+	basic_auth @staging_frontend {
+		staging {$STAGING_GATEWAY_PASSWORD_HASH}
+	}
+	@image_optimizer path /_next/image /_next/image/*
+	respond @image_optimizer "Image optimization is unavailable on staging" 503
+
+  header {
+    Strict-Transport-Security "max-age=86400"
+		X-Content-Type-Options nosniff
+    X-Frame-Options DENY
+    Referrer-Policy strict-origin-when-cross-origin
+    X-Robots-Tag "noindex, nofollow"
+    X-Servio-Environment staging
+  }
+  request_body {
+    max_size 10MB
+  }
+}
+(api) {
+  @payments path /api/v1/mock/* /api/v1/webhook/* /api/v1/subscription/initiate /api/v1/subscription/cancel /api/v1/super-admin/payments/*
+  respond @payments "Payment operations are unavailable on this staging deployment" 503
+  reverse_proxy backend:8080 {
+    header_down Set-Cookie "(.*)" "$1; Secure"
+    transport http {
+      dial_timeout 5s
+      response_header_timeout 30s
+    }
+  }
+}
+api.pos.rakmyat.online {
+  import common
+  import api
+}
+pos.rakmyat.online {
+  import common
+  reverse_proxy landing:3000 {
+    header_up -Authorization
+  }
+}
+pos.app.rakmyat.online {
+  import common
+  reverse_proxy dashboard:3000 {
+    header_up -Authorization
+  }
+}
+admin.pos.rakmyat.online {
+  import common
+  reverse_proxy super-admin:3000 {
+    header_up -Authorization
+  }
+}
+
+restaurant-1.pos.rakmyat.online {
+  import common
+  reverse_proxy restaurant-website:3000 {
+    header_up -Authorization
+  }
+}

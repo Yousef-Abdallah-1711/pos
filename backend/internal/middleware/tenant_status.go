@@ -1,108 +1,42 @@
 package middleware
 
 import (
+	"context"
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"strings"
-	"sync"
 	"time"
 
 	"pos-saas/internal/repository"
-	"pos-saas/internal/service"
 )
 
-const tenantStatusCacheTTL = 30 * time.Second
-
-type cachedTenantAccess struct {
-	CanAccess   bool   `json:"can_access"`
-	BlockReason string `json:"block_reason,omitempty"`
-}
-
-var (
-	tenantStatusCacheOnce sync.Once
-	tenantStatusCache     service.KVCache
-)
-
-func getTenantStatusCache() service.KVCache {
-	tenantStatusCacheOnce.Do(func() {
-		tenantStatusCache = service.NewCacheFromEnv()
-	})
-	return tenantStatusCache
-}
-
-// TenantStatusMiddleware checks if a tenant can access the system.
-// Based on subscription status (trial not expired, not disabled, etc.).
-// This middleware should be applied AFTER authentication and tenant context middleware.
-func TenantStatusMiddleware(subscriptionRepo repository.SubscriptionRepository) func(http.Handler) http.Handler {
+// TenantStatusMiddleware checks current entitlement on every business request.
+// Access decisions must not be cached: suspension must take effect immediately.
+func TenantStatusMiddleware(repo repository.SubscriptionRepository) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			log.Printf("[TenantStatusMiddleware] Checking tenant status - path: %s\n", r.URL.Path)
-
 			tenantID := GetTenantID(r)
-			if tenantID == 0 {
-				log.Printf("[TenantStatusMiddleware] Skip check - no tenant in context\n")
+			if tenantID == 0 || shouldSkipStatusCheck(r.URL.Path) {
 				next.ServeHTTP(w, r)
 				return
 			}
-
-			if shouldSkipStatusCheck(r.URL.Path) {
-				log.Printf("[TenantStatusMiddleware] Skip check - path matched skip list - path: %s\n", r.URL.Path)
-				next.ServeHTTP(w, r)
-				return
-			}
-
-			cache := getTenantStatusCache()
-			cacheKey := fmt.Sprintf("tenant_access:%d", tenantID)
-			if cache != nil {
-				cached, err := cache.Get(r.Context(), cacheKey)
-				if err == nil && strings.TrimSpace(cached) != "" {
-					var access cachedTenantAccess
-					if err := json.Unmarshal([]byte(cached), &access); err == nil {
-						if !access.CanAccess {
-							reason := strings.TrimSpace(access.BlockReason)
-							if reason == "" {
-								reason = "internal_error"
-							}
-							log.Printf("[TenantStatusMiddleware] Tenant BLOCKED (cache) - tenant_id: %d, reason: %s\n", tenantID, reason)
-							respondTenantBlocked(w, reason, getBlockMessage(reason))
-							return
-						}
-
-						log.Printf("[TenantStatusMiddleware] Tenant has access (cache) - tenant_id: %d\n", tenantID)
-						next.ServeHTTP(w, r)
-						return
-					}
-				}
-			}
-
-			log.Printf("[TenantStatusMiddleware] Performing access check - tenant_id: %d\n", tenantID)
-
-			canAccess, blockReason, err := subscriptionRepo.CheckTenantAccess(r.Context(), tenantID)
-			if err != nil {
-				log.Printf("[TenantStatusMiddleware] ERROR: Failed to check access - error: %v\n", err)
+			if repo == nil {
 				respondTenantBlocked(w, "internal_error", "Unable to verify access")
 				return
 			}
-
-			if cache != nil {
-				payload, marshalErr := json.Marshal(cachedTenantAccess{
-					CanAccess:   canAccess,
-					BlockReason: blockReason,
-				})
-				if marshalErr == nil {
-					_ = cache.Set(r.Context(), cacheKey, string(payload), tenantStatusCacheTTL)
-				}
-			}
-
-			if !canAccess {
-				log.Printf("[TenantStatusMiddleware] Tenant BLOCKED - tenant_id: %d, reason: %s\n", tenantID, blockReason)
-				respondTenantBlocked(w, blockReason, getBlockMessage(blockReason))
+			ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
+			allowed, reason, err := repo.CheckTenantAccess(ctx, tenantID)
+			cancel()
+			if err != nil {
+				log.Printf("tenant access lookup failed: %v", err)
+				respondTenantBlocked(w, "internal_error", "Unable to verify access")
 				return
 			}
-
-			log.Printf("[TenantStatusMiddleware] Tenant has access - tenant_id: %d\n", tenantID)
+			if !allowed {
+				respondTenantBlocked(w, reason, getBlockMessage(reason))
+				return
+			}
 			next.ServeHTTP(w, r)
 		})
 	}
@@ -111,6 +45,9 @@ func TenantStatusMiddleware(subscriptionRepo repository.SubscriptionRepository) 
 // shouldSkipStatusCheck returns true if the request path should skip tenant status checks.
 func shouldSkipStatusCheck(path string) bool {
 	path = strings.TrimSpace(path)
+	if path == "/api/v1/public/orders" || path == "/api/v1/public/orders/quote" || path == "/api/v1/public/orders/validate" {
+		return false
+	}
 
 	skipPaths := []string{
 		"/api/v1/tenant/status",
@@ -159,6 +96,7 @@ func getBlockMessage(reason string) string {
 // respondTenantBlocked writes a 403 response when tenant access is blocked.
 func respondTenantBlocked(w http.ResponseWriter, reason string, message string) {
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Cache-Control", "no-store")
 	w.WriteHeader(http.StatusForbidden)
 
 	response := map[string]interface{}{

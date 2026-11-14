@@ -14,11 +14,11 @@ import (
 // TestPublicOrderRoutes tests all public order endpoints are registered
 func TestPublicOrderRoutes(t *testing.T) {
 	tests := []struct {
-		name            string
-		method          string
-		path            string
-		expectedStatus  int
-		description     string
+		name           string
+		method         string
+		path           string
+		expectedStatus int
+		description    string
 	}{
 		{
 			name:           "POST /api/v1/public/orders",
@@ -177,7 +177,7 @@ func TestOrderContextHeaders(t *testing.T) {
 				"X-Restaurant-ID": "1",
 			},
 			expectedMissing: "",
-			description:    "Should accept valid headers",
+			description:     "Should accept valid headers",
 		},
 		{
 			name: "Missing tenant header",
@@ -185,7 +185,7 @@ func TestOrderContextHeaders(t *testing.T) {
 				"X-Restaurant-ID": "1",
 			},
 			expectedMissing: "X-Tenant-ID",
-			description:    "Should reject without tenant header",
+			description:     "Should reject without tenant header",
 		},
 		{
 			name: "Missing restaurant header",
@@ -193,13 +193,13 @@ func TestOrderContextHeaders(t *testing.T) {
 				"X-Tenant-ID": "1",
 			},
 			expectedMissing: "X-Restaurant-ID",
-			description:    "Should reject without restaurant header",
+			description:     "Should reject without restaurant header",
 		},
 		{
 			name:            "Missing both headers",
 			headers:         map[string]string{},
 			expectedMissing: "X-Tenant-ID",
-			description:    "Should reject without both headers",
+			description:     "Should reject without both headers",
 		},
 	}
 
@@ -239,42 +239,42 @@ func TestOrderEndpointMethods(t *testing.T) {
 			method:          "POST",
 			path:            "/api/v1/public/orders",
 			shouldBeAllowed: true,
-			description:    "POST should be allowed for order creation",
+			description:     "POST should be allowed for order creation",
 		},
 		{
 			name:            "GET to retrieve order",
 			method:          "GET",
 			path:            "/api/v1/public/orders/1",
 			shouldBeAllowed: true,
-			description:    "GET should be allowed for order retrieval",
+			description:     "GET should be allowed for order retrieval",
 		},
 		{
 			name:            "PUT to update status",
 			method:          "PUT",
 			path:            "/api/v1/admin/orders/1/status",
 			shouldBeAllowed: true,
-			description:    "PUT should be allowed for status updates",
+			description:     "PUT should be allowed for status updates",
 		},
 		{
 			name:            "DELETE to cancel order",
 			method:          "DELETE",
 			path:            "/api/v1/public/orders/1",
 			shouldBeAllowed: true,
-			description:    "DELETE should be allowed for order cancellation",
+			description:     "DELETE should be allowed for order cancellation",
 		},
 		{
 			name:            "GET to list orders",
 			method:          "GET",
 			path:            "/api/v1/admin/orders",
 			shouldBeAllowed: true,
-			description:    "GET should be allowed for order listing",
+			description:     "GET should be allowed for order listing",
 		},
 		{
 			name:            "GET for export",
 			method:          "GET",
 			path:            "/api/v1/admin/orders/export",
 			shouldBeAllowed: true,
-			description:    "GET should be allowed for order export",
+			description:     "GET should be allowed for order export",
 		},
 	}
 
@@ -294,10 +294,10 @@ func TestOrderEndpointMethods(t *testing.T) {
 // TestOrderResponseFormats tests expected response formats
 func TestOrderResponseFormats(t *testing.T) {
 	tests := []struct {
-		name            string
-		responseData    interface{}
-		shouldContain   []string
-		description     string
+		name          string
+		responseData  interface{}
+		shouldContain []string
+		description   string
 	}{
 		{
 			name: "Order response format",
@@ -331,7 +331,7 @@ func TestOrderResponseFormats(t *testing.T) {
 				TotalRevenue:      1500.00,
 				AverageOrderValue: 150.00,
 				OrdersByStatus: map[string]int64{
-					"pending": 5,
+					"pending":   5,
 					"delivered": 5,
 				},
 			},
@@ -430,8 +430,8 @@ func TestOrderFilterParameters(t *testing.T) {
 		{
 			name: "Status filters",
 			queryParams: map[string]string{
-				"status":          "pending",
-				"payment_status":  "paid",
+				"status":         "pending",
+				"payment_status": "paid",
 			},
 			description: "Should handle status filters",
 		},

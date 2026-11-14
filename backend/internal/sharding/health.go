@@ -38,29 +38,29 @@ type ShardHealth struct {
 
 // HealthChecker monitors the health of all shards
 type HealthChecker struct {
-	router               *ShardRouter
-	shards               []ShardInfo
-	healthCache          map[int]*ShardHealth
-	metrics              map[int]*ShardMetrics
-	mu                   sync.RWMutex
-	checkInterval        time.Duration
-	degradedThreshold    time.Duration // Latency threshold for degraded status
-	unhealthyThreshold   time.Duration // Latency threshold for unhealthy status
-	maxErrorRate         float64       // Error rate threshold (0.1 = 10%)
-	maxReplicationLag    time.Duration // Max acceptable replication lag
-	stopChan             chan bool
-	isRunning            bool
+	router             *ShardRouter
+	shards             []ShardInfo
+	healthCache        map[int]*ShardHealth
+	metrics            map[int]*ShardMetrics
+	mu                 sync.RWMutex
+	checkInterval      time.Duration
+	degradedThreshold  time.Duration // Latency threshold for degraded status
+	unhealthyThreshold time.Duration // Latency threshold for unhealthy status
+	maxErrorRate       float64       // Error rate threshold (0.1 = 10%)
+	maxReplicationLag  time.Duration // Max acceptable replication lag
+	stopChan           chan bool
+	isRunning          bool
 }
 
 // ShardMetrics tracks metrics for a shard
 type ShardMetrics struct {
-	TotalQueries   int64
-	FailedQueries  int64
-	TotalLatency   time.Duration
-	MaxLatency     time.Duration
-	MinLatency     time.Duration
-	LastResetTime  time.Time
-	mu             sync.RWMutex
+	TotalQueries  int64
+	FailedQueries int64
+	TotalLatency  time.Duration
+	MaxLatency    time.Duration
+	MinLatency    time.Duration
+	LastResetTime time.Time
+	mu            sync.RWMutex
 }
 
 // NewHealthChecker creates a new health checker instance
@@ -68,16 +68,16 @@ func NewHealthChecker(router *ShardRouter, checkInterval time.Duration) *HealthC
 	shards := router.GetAllShards()
 
 	hc := &HealthChecker{
-		router:            router,
-		shards:            shards,
-		healthCache:       make(map[int]*ShardHealth),
-		metrics:           make(map[int]*ShardMetrics),
-		checkInterval:     checkInterval,
-		degradedThreshold: 500 * time.Millisecond,  // 500ms = degraded
+		router:             router,
+		shards:             shards,
+		healthCache:        make(map[int]*ShardHealth),
+		metrics:            make(map[int]*ShardMetrics),
+		checkInterval:      checkInterval,
+		degradedThreshold:  500 * time.Millisecond,  // 500ms = degraded
 		unhealthyThreshold: 2000 * time.Millisecond, // 2 seconds = unhealthy
-		maxErrorRate:      0.05,                     // 5% error rate
-		maxReplicationLag:  10 * time.Second,       // 10 seconds max lag
-		stopChan:          make(chan bool),
+		maxErrorRate:       0.05,                    // 5% error rate
+		maxReplicationLag:  10 * time.Second,        // 10 seconds max lag
+		stopChan:           make(chan bool),
 	}
 
 	// Initialize metrics for each shard
@@ -348,13 +348,13 @@ func (hc *HealthChecker) GetHealthSummary() map[string]interface{} {
 	}
 
 	return map[string]interface{}{
-		"total_shards":      totalShards,
-		"healthy_shards":    healthyShards,
-		"degraded_shards":   degradedShards,
-		"unhealthy_shards":  unhealthyShards,
-		"average_latency":   avgLatency,
-		"system_healthy":    unhealthyShards == 0,
-		"last_check_time":   time.Now(),
+		"total_shards":     totalShards,
+		"healthy_shards":   healthyShards,
+		"degraded_shards":  degradedShards,
+		"unhealthy_shards": unhealthyShards,
+		"average_latency":  avgLatency,
+		"system_healthy":   unhealthyShards == 0,
+		"last_check_time":  time.Now(),
 	}
 }
 
@@ -423,14 +423,14 @@ func (hc *HealthChecker) GetMetrics(shardID int) map[string]interface{} {
 	}
 
 	return map[string]interface{}{
-		"total_queries":      metrics.TotalQueries,
-		"failed_queries":     metrics.FailedQueries,
-		"error_rate":         float64(metrics.FailedQueries) / float64(metrics.TotalQueries),
-		"avg_latency":        avgLatency,
-		"max_latency":        metrics.MaxLatency,
-		"min_latency":        metrics.MinLatency,
-		"qps":                hc.calculateQPS(metrics),
-		"last_reset_time":    metrics.LastResetTime,
+		"total_queries":   metrics.TotalQueries,
+		"failed_queries":  metrics.FailedQueries,
+		"error_rate":      float64(metrics.FailedQueries) / float64(metrics.TotalQueries),
+		"avg_latency":     avgLatency,
+		"max_latency":     metrics.MaxLatency,
+		"min_latency":     metrics.MinLatency,
+		"qps":             hc.calculateQPS(metrics),
+		"last_reset_time": metrics.LastResetTime,
 	}
 }
 

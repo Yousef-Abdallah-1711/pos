@@ -1,5 +1,7 @@
 'use client'
 
+import type { JSX } from 'react'
+
 import React, { useState, useCallback, useMemo } from 'react'
 import { usePathname } from 'next/navigation'
 import { Plus, Trash2, ChevronUp, ChevronDown, Eye, EyeOff } from 'lucide-react'

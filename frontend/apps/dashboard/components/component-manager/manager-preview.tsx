@@ -1,5 +1,7 @@
 'use client';
 
+import type { JSX } from 'react'
+
 import React from 'react';
 import { ThemeSection } from './component-sidebar';
 
@@ -239,7 +241,7 @@ function SectionPreview({
                   ))}
                 </div>
                 <p className="text-gray-700 dark:text-gray-300 mb-4">
-                  "Outstanding service and delicious food. Highly recommended!"
+                  &quot;Outstanding service and delicious food. Highly recommended!&quot;
                 </p>
                 <p className="font-semibold text-gray-900 dark:text-white">Customer {i}</p>
               </div>

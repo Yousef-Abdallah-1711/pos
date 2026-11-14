@@ -387,9 +387,15 @@ func (h *AdminOrderHandler) UpdateOrderStatus(w http.ResponseWriter, r *http.Req
 		reason = req.Notes
 	}
 
+	actorID := middleware.GetUserID(r)
+	var changedBy *int64
+	if actorID > 0 {
+		changedBy = &actorID
+	}
 	err = h.orderUC.UpdateOrderStatus(tenantID, restaurantID, orderID, &domain.UpdateOrderStatusRequest{
-		Status: req.Status,
-		Reason: reason,
+		Status:    req.Status,
+		Reason:    reason,
+		ChangedBy: changedBy,
 	})
 	if err != nil {
 		errMsg := err.Error()

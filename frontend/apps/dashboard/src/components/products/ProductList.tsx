@@ -42,9 +42,12 @@ export function ProductList({
   onEdit,
   onDelete,
   canDelete = false,
+  totalPages = 1,
 }: ProductListProps) {
   const pathname = usePathname()
   const locale = getLocaleFromPath(pathname)
+  const pageCount = Math.max(1, totalPages)
+  const firstPage = Math.max(1, Math.min(filters.page - 2, pageCount - 4))
   const handleSearchChange = (value: string) => {
     onFilterChange({ ...filters, searchText: value, page: 1 })
   }
@@ -208,25 +211,26 @@ export function ProductList({
       </div>
 
       {/* Pagination - Only show if products exist */}
-      {products.length > 0 && (
+      {(products.length > 0 || pageCount > 1) && (
         <Pagination>
           <PaginationContent>
             <PaginationItem>
               <PaginationPrevious
-                onClick={() =>
-                  handlePageChange(Math.max(1, filters.page - 1))
-                }
+                href={`?page=${Math.max(1, filters.page - 1)}`}
+                onClick={(event) => { event.preventDefault(); handlePageChange(Math.max(1, filters.page - 1)) }}
+                tabIndex={filters.page === 1 ? -1 : undefined}
                 aria-disabled={filters.page === 1}
                 className={filters.page === 1 ? 'pointer-events-none opacity-50' : undefined}
               />
             </PaginationItem>
 
-            {Array.from({ length: 5 }).map((_, i) => {
-              const page = i + 1
+            {Array.from({ length: Math.min(5, pageCount) }).map((_, i) => {
+              const page = firstPage + i
               return (
                 <PaginationItem key={page}>
                   <PaginationLink
-                    onClick={() => handlePageChange(page)}
+                    href={`?page=${page}`}
+                    onClick={(event) => { event.preventDefault(); handlePageChange(page) }}
                     isActive={filters.page === page}
                   >
                     {page}
@@ -237,7 +241,11 @@ export function ProductList({
 
             <PaginationItem>
               <PaginationNext
-                onClick={() => handlePageChange(filters.page + 1)}
+                href={`?page=${Math.min(pageCount, filters.page + 1)}`}
+                onClick={(event) => { event.preventDefault(); handlePageChange(Math.min(pageCount, filters.page + 1)) }}
+                tabIndex={filters.page >= pageCount ? -1 : undefined}
+                aria-disabled={filters.page >= pageCount}
+                className={filters.page >= pageCount ? 'pointer-events-none opacity-50' : undefined}
               />
             </PaginationItem>
           </PaginationContent>

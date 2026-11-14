@@ -1,0 +1,8 @@
+#!/bin/sh
+set -eu
+cd /opt/servio
+compose_file=ops/aws/compose.json
+if [ -f ops/aws/evidence/deployed-release.json ]; then
+  compose_file=$(python3 -c 'import json; print(json.load(open("ops/aws/evidence/deployed-release.json"))["compose"])')
+fi
+exec sudo docker compose -p servio-staging --env-file ops/aws/.env -f "$compose_file" "$@"

@@ -135,7 +135,7 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
             <div className="mt-6 space-y-2">
               <p className="text-sm font-medium text-gray-900 dark:text-white">Things you can try:</p>
               <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-1 list-disc list-inside">
-                <li>Click "Try Again" to retry the operation</li>
+                <li>Click &quot;Try Again&quot; to retry the operation</li>
                 <li>Refresh the page (Ctrl+R or Cmd+R)</li>
                 <li>Check your internet connection</li>
                 <li>Clear browser cache and refresh</li>

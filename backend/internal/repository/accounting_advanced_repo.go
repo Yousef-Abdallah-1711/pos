@@ -970,9 +970,9 @@ func (r *AccountingAdvancedRepository) GetMenuItemProfitability(tenantID, restau
 		SELECT
 			oi.product_id,
 			COALESCE(NULLIF(oi.product_name, ''), p.name, CONCAT('Product #', oi.product_id::text)) AS product_name,
-			COALESCE(SUM(oi.quantity), 0) AS quantity,
+			COALESCE(SUM(oi.quantity - oi.cancelled_quantity), 0) AS quantity,
 			COALESCE(SUM(oi.total_price), 0) AS revenue,
-			COALESCE(SUM(oi.quantity * COALESCE(p.cost_price, 0)), 0) AS cogs
+			COALESCE(SUM((oi.quantity - oi.cancelled_quantity) * COALESCE(p.cost_price, 0)), 0) AS cogs
 		FROM order_items oi
 		JOIN orders o ON o.id = oi.order_id
 		LEFT JOIN products p ON p.id = oi.product_id
@@ -1041,7 +1041,7 @@ func (r *AccountingAdvancedRepository) GetBreakEvenAnalysis(tenantID, restaurant
 	}
 
 	if err := r.db.QueryRow(`
-		SELECT COALESCE(SUM(oi.quantity * COALESCE(p.cost_price, 0)), 0)
+		SELECT COALESCE(SUM((oi.quantity - oi.cancelled_quantity) * COALESCE(p.cost_price, 0)), 0)
 		FROM order_items oi
 		JOIN orders o ON o.id = oi.order_id
 		LEFT JOIN products p ON p.id = oi.product_id

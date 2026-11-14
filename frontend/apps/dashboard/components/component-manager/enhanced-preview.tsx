@@ -255,7 +255,7 @@ export function EnhancedPreview({
             <ul className="text-blue-800 dark:text-blue-300 text-xs mt-1 space-y-1">
               <li>• Use device buttons to test on different screen sizes</li>
               <li>• Use zoom to see exact pixel dimensions</li>
-              <li>• Click "Compare" to see changes side-by-side</li>
+              <li>• Click &quot;Compare&quot; to see changes side-by-side</li>
               <li>• Download preview to share with team</li>
             </ul>
           </div>

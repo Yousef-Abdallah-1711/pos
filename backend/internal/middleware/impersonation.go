@@ -216,7 +216,6 @@ func GetImpersonationSession(r *http.Request) *domain.ImpersonationSession {
 	return session
 }
 
-
 // RepositoryImpersonationAuthenticator validates impersonation tokens against
 // the impersonation_sessions table (hashed token, active flag, expiry) and
 // resolves the impersonated user from the users table.

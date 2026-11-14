@@ -83,3 +83,12 @@ export function tokenForOrderUrl(url: string | undefined): string | null {
 export function isCreateOrderRequest(method: string | undefined, url: string | undefined): boolean {
   return (method ?? '').toLowerCase() === 'post' && /\/public\/orders\/?(?:\?.*)?$/.test(url ?? '');
 }
+
+/** Bounded history contains only numeric order IDs with a device-held capability. */
+export function rememberedOrderIds(): string[] {
+  const store = read();
+  return store.order.slice(-MAX_REMEMBERED_ORDERS).reverse().filter(id =>
+    typeof id === 'string' && /^[1-9][0-9]{0,18}$/.test(id) &&
+    typeof store.byId[id] === 'string' && store.byId[id].length > 0 && store.byId[id].length <= 512
+  );
+}

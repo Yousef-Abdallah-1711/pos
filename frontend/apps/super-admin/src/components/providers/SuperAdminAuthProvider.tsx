@@ -15,8 +15,7 @@ const PROTECTED_ROUTES = ["/dashboard"];
 export function SuperAdminAuthProvider({ children }: SuperAdminAuthProviderProps) {
   const router = useRouter();
   const pathname = usePathname();
-  const { token, isLoading, setLoading } = useAuthStore();
-  const isAuthenticated = useAuthStore((state) => state.isAuthenticated());
+  const { isLoading, setLoading } = useAuthStore();
 
   useEffect(() => {
     let active = true;
@@ -44,7 +43,7 @@ export function SuperAdminAuthProvider({ children }: SuperAdminAuthProviderProps
     });
 
     return () => { active = false; };
-  }, [pathname, token, isAuthenticated, router, setLoading]);
+  }, [pathname, router, setLoading]);
 
   if (isLoading) {
     return (

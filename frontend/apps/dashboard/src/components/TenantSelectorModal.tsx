@@ -90,7 +90,7 @@ export function TenantSelectorModal({
             Select Organization
           </h2>
           <p className="text-gray-600 dark:text-gray-400 mt-2">
-            You have accounts in multiple organizations. Please select which one you'd like to access.
+            You have accounts in multiple organizations. Please select which one you&apos;d like to access.
           </p>
         </div>
 

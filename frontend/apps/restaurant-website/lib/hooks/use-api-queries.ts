@@ -1,5 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "../api-client";
+import { loadRememberedOrders } from "../order-history";
+import { normalizePublicOrder } from "../order-response";
 
 // Types
 export interface Category {
@@ -35,6 +37,7 @@ export interface CreateOrderItemPayload {
 }
 
 export interface CreateOrderPayload {
+  expected_total?: number;
   customer_name: string;
   customer_email: string;
   customer_phone: string;
@@ -180,10 +183,7 @@ export function useSearchProducts(query: string, restaurantSlug: string) {
 export function useOrders() {
   return useQuery({
     queryKey: queryKeys.orders(),
-    queryFn: async () => {
-      const response = await apiClient.get<OrderListResponse>("/public/orders");
-      return response;
-    },
+    queryFn: loadRememberedOrders,
     staleTime: 1 * 60 * 1000,
     gcTime: 10 * 60 * 1000,
     retry: 1,
@@ -198,8 +198,8 @@ export function useOrder(orderId: number) {
   return useQuery({
     queryKey: queryKeys.orderById(orderId),
     queryFn: async () => {
-      const response = await apiClient.get<OrderResponse>(`/public/orders/${orderId}`);
-      return response;
+      const response = await apiClient.get<unknown>(`/public/orders/${orderId}`);
+      return normalizePublicOrder(response);
     },
     enabled: !!orderId,
     staleTime: 30 * 1000,
@@ -237,8 +237,8 @@ export function useCreateOrder() {
 
   return useMutation({
     mutationFn: async (orderData: CreateOrderPayload) => {
-      const response = await apiClient.post<OrderResponse>("/public/orders", orderData);
-      return response;
+      const response = await apiClient.post<unknown>("/public/orders", orderData);
+      return normalizePublicOrder(response);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.orders() });

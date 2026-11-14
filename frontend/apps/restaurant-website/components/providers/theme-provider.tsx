@@ -52,7 +52,7 @@ function ThemeCSSInjector() {
       '--theme-footer-bg': memoHexToHSL(footerBg ?? '#111827'),
       '--theme-footer-text': memoHexToHSL(footerText),
     }
-  }, [currentTheme?.slug, (currentTheme as { version?: number } | null)?.version, isDark])
+  }, [currentTheme?.colors, isDark])
 
   /**
    * Apply theme colors and typography to DOM

@@ -89,6 +89,9 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to load config: %v", err)
 	}
+	if err := validateAPISigningSecrets(cfg); err != nil {
+		log.Fatal(err)
+	}
 	if err := config.ValidateProductionURLConfig(); err != nil {
 		log.Fatalf("Invalid production URL configuration: %v", err)
 	}
@@ -107,6 +110,14 @@ func main() {
 		if err := productionStartupGuards(context.Background(), db); err != nil {
 			log.Fatalf("Unsafe production configuration: %v", err)
 		}
+	}
+
+	accountingDB, accountingErr := connectAccountingDatabase(db, cfg.Database)
+	if accountingErr != nil {
+		log.Fatalf("Accounting database configuration rejected: %v", accountingErr)
+	}
+	if accountingDB != nil && accountingDB != db {
+		defer accountingDB.Close()
 	}
 
 	// Initialize JWT service
@@ -168,24 +179,24 @@ func main() {
 	attendanceRepo := repository.NewAttendanceRepository(db)
 	salaryRepo := repository.NewSalaryRepository(db)
 	leaveRepo := repository.NewLeaveRepository(db)
-	accountRepo := repository.NewAccountRepository(db)
-	journalEntryRepo := repository.NewJournalEntryRepository(db)
-	autoPostingRepo := repository.NewAutoPostingRepository(db)
+	accountRepo := repository.NewAccountRepository(accountingDB)
+	journalEntryRepo := repository.NewJournalEntryRepository(accountingDB)
+	autoPostingRepo := repository.NewAutoPostingRepository(accountingDB)
 	inventoryMovementRepo := repository.NewInventoryMovementRepository(db)
-	generalLedgerRepo := repository.NewGeneralLedgerRepository(db, journalEntryRepo)
-	supplierRepo := repository.NewSupplierRepository(db)
-	customerAcctRepo := repository.NewCustomerAccountRepository(db)
-	bankAccountRepo := repository.NewBankAccountRepository(db)
-	customerInvoiceRepo := repository.NewCustomerInvoiceRepository(db, journalEntryRepo, accountRepo)
-	supplierInvoiceRepo := repository.NewSupplierInvoiceRepository(db, journalEntryRepo, accountRepo)
-	paymentAccountingRepo := repository.NewPaymentAccountingRepository(db, journalEntryRepo, accountRepo, bankAccountRepo)
-	taxRepo := repository.NewTaxRepository(db)
+	generalLedgerRepo := repository.NewGeneralLedgerRepository(accountingDB, journalEntryRepo)
+	supplierRepo := repository.NewSupplierRepository(accountingDB)
+	customerAcctRepo := repository.NewCustomerAccountRepository(accountingDB)
+	bankAccountRepo := repository.NewBankAccountRepository(accountingDB)
+	customerInvoiceRepo := repository.NewCustomerInvoiceRepository(accountingDB, journalEntryRepo, accountRepo)
+	supplierInvoiceRepo := repository.NewSupplierInvoiceRepository(accountingDB, journalEntryRepo, accountRepo)
+	paymentAccountingRepo := repository.NewPaymentAccountingRepository(accountingDB, journalEntryRepo, accountRepo, bankAccountRepo)
+	taxRepo := repository.NewTaxRepository(accountingDB)
 	performanceReviewRepo := repository.NewPerformanceReviewRepository(db)
 	trainingRepo := repository.NewTrainingRepository(db)
 	insuranceRepo := repository.NewInsuranceRepository(db)
 	contractRepo := repository.NewContractRepository(db)
 	resignationRepo := repository.NewResignationRepository(db)
-	accountingAdvancedRepo := repository.NewAccountingAdvancedRepository(db, journalEntryRepo)
+	accountingAdvancedRepo := repository.NewAccountingAdvancedRepository(accountingDB, journalEntryRepo)
 
 	// Notification repository
 	notificationRepo := repository.NewNotificationRepository(db)
@@ -314,7 +325,14 @@ func main() {
 	themeService := service.NewThemeService(themeRepo)
 
 	// Super Admin token service (uses separate secret for extra security)
-	superAdminTokenService, err := jwt.NewSuperAdminTokenService(cfg.JWT.Secret+"_super_admin", "15m")
+	superAdminSecret := cfg.JWT.SuperAdminSecret
+	if superAdminSecret == "" {
+		// Compatibility for isolated development/test stacks only; staged and
+		// production APIs fail validation before database initialization.
+		superAdminSecret = cfg.JWT.Secret + "_super_admin"
+	}
+
+	superAdminTokenService, err := jwt.NewSuperAdminTokenService(superAdminSecret, "15m")
 	if err != nil {
 		log.Printf("Warning: Failed to create super admin token service: %v", err)
 	}
@@ -492,6 +510,11 @@ func main() {
 
 	// Setup routes
 	mux := http.NewServeMux()
+	productImages, imageErr := handler.NewProductImageHandler("./uploads")
+	if imageErr != nil {
+		log.Fatalf("Product image storage unavailable: %v", imageErr)
+	}
+	mux.Handle("GET /uploads/{path...}", productImages)
 
 	// Impersonation tokens are accepted only when validated against server-side sessions.
 	// If the repositories are unavailable this slice is empty and the header is rejected.
@@ -544,8 +567,9 @@ func main() {
 	// Public routes - Order API (minimal authentication required)
 	// These routes require X-Tenant-ID and X-Restaurant-ID headers from middleware context
 	// POST routes for order creation and validation
-	mux.Handle("POST /api/v1/public/orders", middleware.RateLimitByIP(publicOrderWriteRequestsPerMinute)(tenantContext(http.HandlerFunc(publicOrderHandler.CreateOrder))))
-	mux.Handle("POST /api/v1/public/orders/validate", middleware.RateLimitByIP(publicOrderReadRequestsPerMinute)(tenantContext(http.HandlerFunc(publicOrderHandler.ValidateOrder))))
+	mux.Handle("POST /api/v1/public/orders", middleware.RateLimitByIP(publicOrderWriteRequestsPerMinute)(tenantContext(middleware.TenantStatusMiddleware(subscriptionRepo)(http.HandlerFunc(publicOrderHandler.CreateOrder)))))
+	mux.Handle("POST /api/v1/public/orders/quote", middleware.RateLimitByIP(publicOrderReadRequestsPerMinute)(tenantContext(middleware.TenantStatusMiddleware(subscriptionRepo)(http.HandlerFunc(publicOrderHandler.QuoteOrder)))))
+	mux.Handle("POST /api/v1/public/orders/validate", middleware.RateLimitByIP(publicOrderReadRequestsPerMinute)(tenantContext(middleware.TenantStatusMiddleware(subscriptionRepo)(http.HandlerFunc(publicOrderHandler.ValidateOrder)))))
 
 	mux.Handle("GET /api/v1/public/orders/number/{number}/lookup", middleware.RateLimitByIP(publicOrderReadRequestsPerMinute)(tenantContext(http.HandlerFunc(publicOrderHandler.GetOrderByNumber))))
 	mux.Handle("GET /api/v1/public/orders/{id}/status", middleware.RateLimitByIP(publicOrderReadRequestsPerMinute)(tenantContext(http.HandlerFunc(publicOrderHandler.GetOrderStatus))))
@@ -1371,6 +1395,7 @@ func main() {
 	mux.Handle("GET /api/v1/admin/orders/stats", wrapWithPermission(http.HandlerFunc(adminOrderHandler.GetOrderStats), 10, "READ"))
 	mux.Handle("GET /api/v1/admin/orders/export", wrapWithPermission(http.HandlerFunc(adminOrderHandler.ExportOrders), 10, "READ"))
 	mux.Handle("GET /api/v1/admin/orders/{id}/history", wrapWithPermission(http.HandlerFunc(adminOrderHandler.GetOrderHistory), 10, "READ"))
+	mux.Handle("POST /api/v1/admin/orders/{id}/items/{item_id}/cancel", wrapWithPermission(http.HandlerFunc(adminOrderHandler.CancelOrderItem), 10, "WRITE"))
 	mux.Handle("PUT /api/v1/admin/orders/{id}/status", wrapWithPermission(http.HandlerFunc(adminOrderHandler.UpdateOrderStatus), 10, "WRITE"))
 	mux.Handle("PUT /api/v1/admin/orders/{id}/payment-status", wrapWithPermission(http.HandlerFunc(adminOrderHandler.UpdatePaymentStatus), 10, "WRITE"))
 	mux.Handle("DELETE /api/v1/admin/orders/{id}", wrapWithPermission(http.HandlerFunc(adminOrderHandler.CancelOrder), 10, "DELETE"))
@@ -1867,8 +1892,6 @@ func main() {
 		mux.Handle("GET /api/v1/super-admin/tenants/{id}", wrapSuperAdmin(http.HandlerFunc(superAdminHandler.GetTenant)))
 		mux.Handle("GET /api/v1/super-admin/tenants/{id}/users", wrapSuperAdmin(http.HandlerFunc(superAdminHandler.GetTenantUsers)))
 		mux.Handle("POST /api/v1/super-admin/tenants/{id}/dashboard-login", wrapSuperAdmin(http.HandlerFunc(superAdminHandler.GenerateDashboardLoginToken)))
-		mux.Handle("PUT /api/v1/super-admin/tenants/{id}/disable", wrapSuperAdmin(http.HandlerFunc(superAdminHandler.DisableTenant)))
-		mux.Handle("PUT /api/v1/super-admin/tenants/{id}/enable", wrapSuperAdmin(http.HandlerFunc(superAdminHandler.EnableTenant)))
 
 		// User Management (across all tenants)
 		mux.Handle("GET /api/v1/super-admin/users", wrapSuperAdmin(http.HandlerFunc(superAdminHandler.ListUsers)))
@@ -1911,7 +1934,9 @@ func main() {
 		mux.Handle("GET /api/v1/super-admin/tenants/{id}/subscription", wrapSuperAdmin(http.HandlerFunc(subscriptionHandler.GetTenantSubscriptionByID)))
 		mux.Handle("POST /api/v1/super-admin/tenants/{id}/extend-trial", wrapSuperAdmin(http.HandlerFunc(subscriptionHandler.ExtendTenantTrial)))
 		mux.Handle("POST /api/v1/super-admin/tenants/{id}/disable", wrapSuperAdmin(http.HandlerFunc(subscriptionHandler.DisableTenant)))
+		mux.Handle("PUT /api/v1/super-admin/tenants/{id}/disable", wrapSuperAdmin(http.HandlerFunc(subscriptionHandler.DisableTenant)))
 		mux.Handle("POST /api/v1/super-admin/tenants/{id}/enable", wrapSuperAdmin(http.HandlerFunc(subscriptionHandler.EnableTenant)))
+		mux.Handle("PUT /api/v1/super-admin/tenants/{id}/enable", wrapSuperAdmin(http.HandlerFunc(subscriptionHandler.EnableTenant)))
 		mux.Handle("DELETE /api/v1/super-admin/tenants/{id}", wrapSuperAdmin(http.HandlerFunc(subscriptionHandler.DeleteTenant)))
 		mux.Handle("GET /api/v1/super-admin/tenants/{id}/subscription-history", wrapSuperAdmin(http.HandlerFunc(subscriptionHandler.GetSubscriptionHistory)))
 

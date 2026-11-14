@@ -11,19 +11,19 @@ import (
 
 // AuditLogEntry represents a single audit log entry
 type AuditLogEntry struct {
-	ID              int64
-	TenantID        int64
-	UserID          int64
-	Action          string
-	ResourceType    string
-	ResourceID      string
-	Details         string
-	IPAddress       string
-	UserAgent       string
-	Status          string // success, failure
-	ErrorMessage    string
-	Duration        time.Duration
-	CreatedAt       time.Time
+	ID           int64
+	TenantID     int64
+	UserID       int64
+	Action       string
+	ResourceType string
+	ResourceID   string
+	Details      string
+	IPAddress    string
+	UserAgent    string
+	Status       string // success, failure
+	ErrorMessage string
+	Duration     time.Duration
+	CreatedAt    time.Time
 }
 
 // AuditLogManager manages audit logging for compliance and security

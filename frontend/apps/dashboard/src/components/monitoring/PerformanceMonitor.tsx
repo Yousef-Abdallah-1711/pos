@@ -20,20 +20,16 @@ interface PerformanceMonitorProps {
 /**
  * Main Performance Monitor Component
  */
-export function PerformanceMonitor({
+export function PerformanceMonitor(props: PerformanceMonitorProps) {
+  if (process.env.NODE_ENV === 'production' && !props.showOnProduction) return null
+  return <PerformanceMonitorContent {...props} />
+}
+
+function PerformanceMonitorContent({
   position = 'bottom-right',
   compact = false,
   showOnProduction = false,
 }: PerformanceMonitorProps) {
-  // Only show in development unless explicitly enabled
-  if (
-    typeof window !== 'undefined' &&
-    process.env.NODE_ENV === 'production' &&
-    !showOnProduction
-  ) {
-    return null
-  }
-
   const vitals = useWebVitals()
   const { score, rating } = usePerformanceScore()
   const resources = useResourceMetrics()

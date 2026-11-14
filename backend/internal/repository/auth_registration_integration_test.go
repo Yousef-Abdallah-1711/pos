@@ -46,6 +46,19 @@ func TestCreateTenantWithUserRegistrationContract(t *testing.T) {
 	if user.Phone != "+16505550123" || user.RestaurantID == nil {
 		t.Fatalf("unexpected created owner: %#v", user)
 	}
+	allowed, reason, err := NewSubscriptionRepository(db).CheckTenantAccess(ctx, int64(user.TenantID))
+	if err != nil || !allowed {
+		t.Fatalf("new registration has no valid entitlement: reason=%s err=%v", reason, err)
+	}
+	var trialStart, trialEnd time.Time
+	var trialDays int
+	if err := db.QueryRow(`SELECT trial_start_date, trial_end_date, trial_days FROM tenants WHERE id = $1`, user.TenantID).Scan(&trialStart, &trialEnd, &trialDays); err != nil {
+		t.Fatal(err)
+	}
+	if trialDays <= 0 || !trialEnd.Equal(trialStart.AddDate(0, 0, trialDays)) {
+		t.Fatal("registration trial dates do not match configured duration")
+	}
+
 	var storedTenantPhone, storedUserPhone sql.NullString
 	if err := db.QueryRow(`SELECT phone FROM tenants WHERE id = $1`, user.TenantID).Scan(&storedTenantPhone); err != nil {
 		t.Fatal(err)

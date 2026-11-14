@@ -13,27 +13,27 @@ import (
 type MigrationState string
 
 const (
-	MigrationStatePending    MigrationState = "pending"     // Not started
+	MigrationStatePending      MigrationState = "pending"      // Not started
 	MigrationStateInitializing MigrationState = "initializing" // Setting up dual-write
-	MigrationStateInProgress MigrationState = "in_progress"  // Copying data
-	MigrationStateVerifying  MigrationState = "verifying"    // Verifying data
-	MigrationStateCutover    MigrationState = "cutover"      // Switching traffic
-	MigrationStateCompleted  MigrationState = "completed"    // Migration done
-	MigrationStateRolledBack MigrationState = "rolled_back"  // Migration failed, rolled back
+	MigrationStateInProgress   MigrationState = "in_progress"  // Copying data
+	MigrationStateVerifying    MigrationState = "verifying"    // Verifying data
+	MigrationStateCutover      MigrationState = "cutover"      // Switching traffic
+	MigrationStateCompleted    MigrationState = "completed"    // Migration done
+	MigrationStateRolledBack   MigrationState = "rolled_back"  // Migration failed, rolled back
 )
 
 // MigrationProgress tracks migration progress metrics
 type MigrationProgress struct {
-	State             MigrationState
-	TotalRecords      int64
-	MigratedRecords   int64
-	VerifiedRecords   int64
-	FailedRecords     int64
-	StartTime         time.Time
-	EstimatedEndTime  time.Time
-	PercentComplete   float64
-	ElapsedSeconds    int64
-	EstimatedSeconds  int64
+	State            MigrationState
+	TotalRecords     int64
+	MigratedRecords  int64
+	VerifiedRecords  int64
+	FailedRecords    int64
+	StartTime        time.Time
+	EstimatedEndTime time.Time
+	PercentComplete  float64
+	ElapsedSeconds   int64
+	EstimatedSeconds int64
 }
 
 // MigrationConfig holds migration configuration
@@ -41,24 +41,24 @@ type MigrationConfig struct {
 	SourceShardID   int
 	TargetShardID   int
 	BatchSize       int
-	DualWriteLeader int       // Which shard to lead for dual-write
-	VerifyAll       bool      // Verify all data after migration
-	RollbackOnError bool      // Rollback if errors occur
+	DualWriteLeader int  // Which shard to lead for dual-write
+	VerifyAll       bool // Verify all data after migration
+	RollbackOnError bool // Rollback if errors occur
 	Timeout         time.Duration
 }
 
 // ShardMigration manages live migration between shards
 type ShardMigration struct {
-	config        MigrationConfig
-	sourceConn    *sql.DB
-	targetConn    *sql.DB
-	state         MigrationState
-	progress      MigrationProgress
-	dualWriter    *DualWriteCoordinator
-	mu            sync.RWMutex
-	errorChan     chan error
-	cancelFunc    context.CancelFunc
-	ctx           context.Context
+	config     MigrationConfig
+	sourceConn *sql.DB
+	targetConn *sql.DB
+	state      MigrationState
+	progress   MigrationProgress
+	dualWriter *DualWriteCoordinator
+	mu         sync.RWMutex
+	errorChan  chan error
+	cancelFunc context.CancelFunc
+	ctx        context.Context
 }
 
 // DualWriteCoordinator handles writing to both source and target shards
@@ -76,10 +76,10 @@ func NewShardMigration(config MigrationConfig, sourceConn, targetConn *sql.DB) *
 	ctx, cancel := context.WithCancel(context.Background())
 
 	return &ShardMigration{
-		config:    config,
+		config:     config,
 		sourceConn: sourceConn,
 		targetConn: targetConn,
-		state:     MigrationStatePending,
+		state:      MigrationStatePending,
 		progress: MigrationProgress{
 			State:     MigrationStatePending,
 			StartTime: time.Now(),

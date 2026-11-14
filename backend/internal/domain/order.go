@@ -108,10 +108,11 @@ type OrderStatusHistory struct {
 
 // CreateOrderRequest is the request for creating a new order
 type CreateOrderRequest struct {
-	CustomerName  string `json:"customer_name" validate:"required"`
-	CustomerEmail string `json:"customer_email"`
-	CustomerPhone string `json:"customer_phone" validate:"required"`
-	TableID       *int64 `json:"table_id"`
+	ExpectedTotal *float64 `json:"expected_total,omitempty"`
+	CustomerName  string   `json:"customer_name" validate:"required"`
+	CustomerEmail string   `json:"customer_email"`
+	CustomerPhone string   `json:"customer_phone" validate:"required"`
+	TableID       *int64   `json:"table_id"`
 
 	DeliveryAddress      string   `json:"delivery_address"`
 	DeliveryCity         string   `json:"delivery_city"`
@@ -146,8 +147,9 @@ type OrderAddOnRequest struct {
 
 // UpdateOrderStatusRequest is the request for updating order status
 type UpdateOrderStatusRequest struct {
-	Status string `json:"status" validate:"required,oneof=pending confirmed preparing ready out_for_delivery delivered cancelled"`
-	Reason string `json:"reason"`
+	ChangedBy *int64 `json:"-"`
+	Status    string `json:"status" validate:"required,oneof=pending confirmed preparing ready out_for_delivery delivered cancelled"`
+	Reason    string `json:"reason"`
 }
 
 // OrderListFilters for filtering orders in list queries

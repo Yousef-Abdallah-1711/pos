@@ -63,7 +63,7 @@ export function FooterLegal({ config, locale }: { config: FooterConfig; locale: 
   )
 }
 
-export function BackToTop() {
+export function BackToTop({ locale }: { locale: 'en' | 'ar' }) {
   return (
     <Button
       type="button"
@@ -73,7 +73,7 @@ export function BackToTop() {
       className="h-9 gap-1 border-white/20 bg-transparent text-current hover:bg-white/10"
     >
       <ChevronUp className="h-4 w-4" />
-      Top
+      {locale === 'ar' ? 'الأعلى' : 'Top'}
     </Button>
   )
 }

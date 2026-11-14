@@ -217,6 +217,7 @@ GET /api/v1/users
 GET /api/v1/users
 GET /api/v1/users/{userId}/profile
 GET /api/v1/users/{userId}/settings
+GET /uploads/{path...}
 POST /api/v1/accounting/accounts
 POST /api/v1/accounting/bank-accounts
 POST /api/v1/accounting/bank-reconciliation/sessions
@@ -247,6 +248,7 @@ POST /api/v1/accounting/supplier-payment-schedules/{id}/send-reminder
 POST /api/v1/accounting/tax/periods
 POST /api/v1/accounting/tax/periods/{id}/close
 POST /api/v1/admin/drivers
+POST /api/v1/admin/orders/{id}/items/{item_id}/cancel
 POST /api/v1/admin/orders/{orderId}/assign
 POST /api/v1/admin/themes
 POST /api/v1/admin/themes/{id}/activate
@@ -291,6 +293,7 @@ POST /api/v1/notifications/{id}/unread
 POST /api/v1/pos/orders
 POST /api/v1/products
 POST /api/v1/public/orders
+POST /api/v1/public/orders/quote
 POST /api/v1/public/orders/validate
 POST /api/v1/rbac/permissions/assign
 POST /api/v1/rbac/roles

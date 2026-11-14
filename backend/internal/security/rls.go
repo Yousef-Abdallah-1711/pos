@@ -11,19 +11,19 @@ import (
 
 // TenantContext holds tenant-specific context information
 type TenantContext struct {
-	TenantID     int64
-	UserID       int64
-	Permissions  []string
-	SetTime      time.Time
+	TenantID    int64
+	UserID      int64
+	Permissions []string
+	SetTime     time.Time
 }
 
 // RLSManager manages row-level security for multi-tenant data
 type RLSManager struct {
-	db               *sql.DB
-	contextCache     map[int64]*TenantContext // Map of user_id -> TenantContext
-	mu               sync.RWMutex
-	auditingEnabled  bool
-	strictMode       bool // If true, reject requests without tenant context
+	db              *sql.DB
+	contextCache    map[int64]*TenantContext // Map of user_id -> TenantContext
+	mu              sync.RWMutex
+	auditingEnabled bool
+	strictMode      bool // If true, reject requests without tenant context
 }
 
 // NewRLSManager creates a new RLS manager
@@ -231,13 +231,13 @@ func (rm *RLSManager) GetSecurityAuditLog(ctx context.Context, conn *sql.Conn, t
 		}
 
 		logs = append(logs, map[string]interface{}{
-			"id":                       id,
-			"tenant_id":                tenantID,
-			"user_id":                  userID,
-			"action":                   action,
-			"table_name":               tableName,
+			"id":                         id,
+			"tenant_id":                  tenantID,
+			"user_id":                    userID,
+			"action":                     action,
+			"table_name":                 tableName,
 			"attempted_access_to_tenant": attemptedTenantID,
-			"created_at":               createdAt,
+			"created_at":                 createdAt,
 		})
 	}
 
@@ -273,19 +273,19 @@ func (rm *RLSManager) GetPermissionStatus(userID int64) map[string]interface{} {
 	ctx := rm.GetUserContext(userID)
 	if ctx == nil {
 		return map[string]interface{}{
-			"user_id":    userID,
-			"is_cached":  false,
-			"status":     "not_cached",
+			"user_id":   userID,
+			"is_cached": false,
+			"status":    "not_cached",
 		}
 	}
 
 	return map[string]interface{}{
-		"user_id":      ctx.UserID,
-		"tenant_id":    ctx.TenantID,
-		"permissions":  ctx.Permissions,
-		"is_cached":    true,
-		"cached_at":    ctx.SetTime,
-		"cache_age":    time.Since(ctx.SetTime).String(),
+		"user_id":     ctx.UserID,
+		"tenant_id":   ctx.TenantID,
+		"permissions": ctx.Permissions,
+		"is_cached":   true,
+		"cached_at":   ctx.SetTime,
+		"cache_age":   time.Since(ctx.SetTime).String(),
 	}
 }
 
@@ -365,12 +365,12 @@ func (rm *RLSManager) GetRLSViolationLogs(ctx context.Context, conn *sql.Conn, t
 		}
 
 		logs = append(logs, map[string]interface{}{
-			"id":              id,
-			"tenant_id":       tenantID,
-			"user_id":         userID,
-			"operation":       operation,
-			"table_name":      tableName,
-			"violation_time":  violationTime,
+			"id":             id,
+			"tenant_id":      tenantID,
+			"user_id":        userID,
+			"operation":      operation,
+			"table_name":     tableName,
+			"violation_time": violationTime,
 		})
 	}
 

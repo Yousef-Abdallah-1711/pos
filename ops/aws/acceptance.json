@@ -1,0 +1,211 @@
+{
+  "name": "servio-acceptance",
+  "services": {
+    "postgres": {
+      "image": "postgres@sha256:fc41cfa8a90c09e84dd723ee764be4b2f59ba6c98b1e5b3fca540adddf68a5ba",
+      "mem_limit": "192m",
+      "memswap_limit": "192m",
+      "restart": "no",
+      "stop_grace_period": "30s",
+      "logging": {
+        "driver": "json-file",
+        "options": {
+          "max-size": "10m",
+          "max-file": "3"
+        }
+      },
+      "security_opt": [
+        "no-new-privileges:true"
+      ],
+      "networks": [
+        "isolated"
+      ],
+      "command": [
+        "postgres",
+        "-c",
+        "max_connections=50",
+        "-c",
+        "shared_buffers=32MB",
+        "-c",
+        "work_mem=1MB"
+      ],
+      "environment": {
+        "POSTGRES_USER": "postgres",
+        "POSTGRES_PASSWORD": "${TEST_POSTGRES_PASSWORD:?required}",
+        "POSTGRES_DB": "servio_test",
+        "POS_MIGRATOR_PASSWORD": "${TEST_MIGRATOR_PASSWORD:?required}",
+        "POS_APP_PASSWORD": "${TEST_APP_PASSWORD:?required}",
+        "POS_ACCOUNTING_PASSWORD": "${TEST_ACCOUNTING_PASSWORD:?required}"
+      },
+      "volumes": [
+        "test_postgres_data:/var/lib/postgresql/data",
+        "../../backend/scripts/db/create_runtime_roles.sql:/pos/create_runtime_roles.sql:ro",
+        "../../backend/scripts/db/init-runtime-roles.sh:/docker-entrypoint-initdb.d/10-init-runtime-roles.sh:ro",
+        "../../backend/scripts/db/create_accounting_role.sql:/pos/create_accounting_role.sql:ro"
+      ],
+      "healthcheck": {
+        "test": [
+          "CMD-SHELL",
+          "pg_isready -U postgres -d servio_test"
+        ],
+        "interval": "3s",
+        "timeout": "3s",
+        "retries": 20
+      },
+      "pids_limit": 128,
+      "labels": {
+        "com.servio.disposable": "true"
+      }
+    },
+    "redis": {
+      "image": "redis@sha256:7f7d30b7fdd09467bac58198a1f166dd69789d348d4fe859cccb20e0cf287fbe",
+      "mem_limit": "64m",
+      "memswap_limit": "64m",
+      "restart": "no",
+      "stop_grace_period": "30s",
+      "logging": {
+        "driver": "json-file",
+        "options": {
+          "max-size": "10m",
+          "max-file": "3"
+        }
+      },
+      "security_opt": [
+        "no-new-privileges:true"
+      ],
+      "networks": [
+        "isolated"
+      ],
+      "command": [
+        "exec redis-server --appendonly yes --appendfsync everysec --maxmemory 48mb --maxmemory-policy noeviction --requirepass \"$$REDIS_PASSWORD\""
+      ],
+      "volumes": [
+        "test_redis_data:/data"
+      ],
+      "healthcheck": {
+        "test": [
+          "CMD-SHELL",
+          "REDISCLI_AUTH=\"$$REDIS_PASSWORD\" redis-cli ping | grep -q PONG"
+        ],
+        "interval": "10s",
+        "timeout": "3s",
+        "retries": 6
+      },
+      "environment": {
+        "REDIS_PASSWORD": "${TEST_REDIS_PASSWORD:?required}"
+      },
+      "entrypoint": [
+        "/bin/sh",
+        "-ec"
+      ],
+      "user": "redis",
+      "cap_drop": [
+        "ALL"
+      ],
+      "pids_limit": 128,
+      "labels": {
+        "com.servio.disposable": "true"
+      }
+    },
+    "migrate": {
+      "image": "servio-backend:208bcae-aws1",
+      "entrypoint": [
+        "/bin/sh",
+        "-ec"
+      ],
+      "environment": {
+        "ENV": "test",
+        "DB_HOST": "postgres",
+        "DB_PORT": "5432",
+        "DB_NAME": "servio_test",
+        "DB_USER": "pos_migrator",
+        "DB_PASSWORD": "${TEST_MIGRATOR_PASSWORD:?required}",
+        "DB_SSLMODE": "disable",
+        "DB_MAX_OPEN_CONNS": "10",
+        "DB_MAX_IDLE_CONNS": "3"
+      },
+      "networks": [
+        "isolated"
+      ],
+      "depends_on": {
+        "postgres": {
+          "condition": "service_healthy"
+        }
+      },
+      "restart": "no",
+      "mem_limit": "256m",
+      "logging": {
+        "driver": "json-file",
+        "options": {
+          "max-size": "10m",
+          "max-file": "3"
+        }
+      },
+      "command": [
+        "./migrate && PGPASSWORD=\"$$DB_PASSWORD\" psql -h \"$$DB_HOST\" -U \"$$DB_USER\" -d \"$$DB_NAME\" -v ON_ERROR_STOP=1 -c \"REVOKE ALL ON TABLE schema_migrations FROM pos_app\""
+      ],
+      "cap_drop": [
+        "ALL"
+      ],
+      "pids_limit": 128,
+      "labels": {
+        "com.servio.disposable": "true"
+      }
+    },
+    "tools": {
+      "image": "servio-go-acceptance:208bcae-aws1",
+      "working_dir": "/app",
+      "entrypoint": [
+        "go"
+      ],
+      "command": [
+        "test",
+        "-tags",
+        "integration",
+        "-p",
+        "1",
+        "-timeout",
+        "10m",
+        "-json",
+        "./..."
+      ],
+      "mem_limit": "900m",
+      "memswap_limit": "1500m",
+      "pids_limit": 128,
+      "cap_drop": [
+        "ALL"
+      ],
+      "security_opt": [
+        "no-new-privileges:true"
+      ],
+      "networks": [
+        "isolated"
+      ],
+      "restart": "no",
+      "labels": {
+        "com.servio.disposable": "true"
+      },
+      "environment": {
+        "GOMAXPROCS": "1",
+        "ENV": "test",
+        "POS_TEST_DATABASE_URL": "postgres://postgres:${TEST_POSTGRES_PASSWORD}@postgres:5432/servio_test?sslmode=disable",
+        "POS_RLS_ADMIN_URL": "postgres://postgres:${TEST_POSTGRES_PASSWORD}@postgres:5432/servio_test?sslmode=disable",
+        "POS_RLS_APP_URL": "postgres://pos_app:${TEST_APP_PASSWORD}@postgres:5432/servio_test?sslmode=disable",
+        "POS_APP_DATABASE_URL": "postgres://pos_app:${TEST_APP_PASSWORD}@postgres:5432/servio_test?sslmode=disable",
+        "POOS_SESSION_REDIS_URL": "redis://:${TEST_REDIS_PASSWORD}@redis:6379/0"
+      },
+      "volumes": [
+        "../../backend:/app:ro"
+      ]
+    }
+  },
+  "networks": {
+    "isolated": {
+      "internal": true
+    }
+  },
+  "volumes": {
+    "test_postgres_data": {},
+    "test_redis_data": {}
+  }
+}
