@@ -1,0 +1,30 @@
+{
+  "updated_utc": "2026-11-14T03:30:02.746645+00:00",
+  "timezone": "Africa/Cairo",
+  "source_sha": "ea23d95a213f46fd8cdc59648b56e8474fc679f2",
+  "live_app_revision": "f733efb5e7f5730fea5a56a65d66d9c339e6c040",
+  "schema_migration_receipts": 138,
+  "capability_counts": {
+    "IMPLEMENTED BUT NOT END-TO-END VERIFIED": 47,
+    "VERIFIED WORKING": 15,
+    "PARTIALLY IMPLEMENTED": 14,
+    "NOT FOUND": 8
+  },
+  "authenticated_route_observations": 79,
+  "authenticated_screenshots": 51,
+  "credentials_in_reports": false,
+  "synthetic_data_mutations_authorized": true,
+  "source_or_infrastructure_changes": false,
+  "repo_test_suites_run": false,
+  "validation": "Real browser/API/scoped SQL audit checks, local link and private-password scans",
+  "reports": {
+    "LANDING_PAGE_IMPLEMENTATION_ROADMAP.md": "25a26987a1bcf2f000654e6a1e1354c982bbdbba30ec0c3f367c46537cf65691",
+    "PRODUCT_VISUAL_ASSET_PLAN.md": "bba9db1d8895c5bc922da35c8a7b05382271df0edaea9eedf04418aba06e5bd9",
+    "LANDING_PAGE_INFORMATION_ARCHITECTURE.md": "a731e50b9820068900e5e45abd1488dbceffccc25050a574a8e37abeb9986d75",
+    "LANDING_PAGE_EXECUTIVE_AUDIT.md": "1e21c2b099de8f4e621516f0ef515cebb9c2b0f570f4a253bfcf38f7bffd5c8f",
+    "LANDING_PAGE_CONTENT_STRATEGY_EN_AR.md": "24991d0ef941b4d96a646351312384bdcaa09f73d0878b612e1fcba4b1032ca0",
+    "PRODUCT_LANDING_GAP_MATRIX.md": "8bddfcaf34c36d6a877e80576644d326f60ed96012d800624b909b3658463639",
+    "LANDING_PAGE_CURRENT_STATE_AUDIT.md": "7427f4d4a9627f339cfbc4606290da54e263da54db3eacce96abe9a01a315ad4",
+    "PRODUCT_CAPABILITY_INVENTORY.md": "9bc5b2c69e41318ecd305a24c43f4708778a90cd0e126bc8b2604e0245298749"
+  }
+}

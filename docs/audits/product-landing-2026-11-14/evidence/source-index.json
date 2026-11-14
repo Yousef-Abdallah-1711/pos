@@ -1,0 +1,4691 @@
+{
+  "backend/cmd/api/main.go": {
+    "lines": 2028,
+    "symbols": [
+      {
+        "line": 64,
+        "text": "func init() {"
+      },
+      {
+        "line": 81,
+        "text": "func main() {"
+      },
+      {
+        "line": 1991,
+        "text": "func startDBHealthMonitor(ctx context.Context, db *sql.DB, interval time.Duration) {"
+      }
+    ],
+    "sha256": "82acaa305b251d9f6f5cf206cc68e077a49e6524b08794fea6236a1f54eb7454"
+  },
+  "backend/internal/handler/http/accounting_advanced_handler.go": {
+    "lines": 1354,
+    "symbols": [
+      {
+        "line": 31,
+        "text": "func NewAccountingAdvancedHandler("
+      },
+      {
+        "line": 43,
+        "text": "func (h *AccountingAdvancedHandler) ListBankReconciliationSessions(w http.ResponseWriter, r *http.Request) {"
+      },
+      {
+        "line": 58,
+        "text": "func (h *AccountingAdvancedHandler) CreateBankReconciliationSession(w http.ResponseWriter, r *http.Request) {"
+      },
+      {
+        "line": 110,
+        "text": "func (h *AccountingAdvancedHandler) AddBankReconciliationLine(w http.ResponseWriter, r *http.Request) {"
+      },
+      {
+        "line": 151,
+        "text": "func (h *AccountingAdvancedHandler) CompleteBankReconciliationSession(w http.ResponseWriter, r *http.Request) {"
+      },
+      {
+        "line": 173,
+        "text": "func (h *AccountingAdvancedHandler) ListRecurringJournalTemplates(w http.ResponseWriter, r *http.Request) {"
+      },
+      {
+        "line": 184,
+        "text": "func (h *AccountingAdvancedHandler) CreateRecurringJournalTemplate(w http.ResponseWriter, r *http.Request) {"
+      },
+      {
+        "line": 259,
+        "text": "func (h *AccountingAdvancedHandler) UpdateRecurringJournalTemplate(w http.ResponseWriter, r *http.Request) {"
+      },
+      {
+        "line": 351,
+        "text": "func (h *AccountingAdvancedHandler) DeleteRecurringJournalTemplate(w http.ResponseWriter, r *http.Request) {"
+      },
+      {
+        "line": 366,
+        "text": "func (h *AccountingAdvancedHandler) RunRecurringJournalTemplate(w http.ResponseWriter, r *http.Request) {"
+      },
+      {
+        "line": 403,
+        "text": "func (h *AccountingAdvancedHandler) ListBudgets(w http.ResponseWriter, r *http.Request) {"
+      },
+      {
+        "line": 415,
+        "text": "func (h *AccountingAdvancedHandler) UpsertBudget(w http.ResponseWriter, r *http.Request) {"
+      },
+      {
+        "line": 452,
+        "text": "func (h *AccountingAdvancedHandler) ListExchangeRates(w http.ResponseWriter, r *http.Request) {"
+      },
+      {
+        "line": 465,
+        "text": "func (h *AccountingAdvancedHandler) UpsertExchangeRate(w http.ResponseWriter, r *http.Request) {"
+      },
+      {
+        "line": 510,
+        "text": "func (h *AccountingAdvancedHandler) ConvertCurrency(w http.ResponseWriter, r *http.Request) {"
+      },
+      {
+        "line": 543,
+        "text": "func (h *AccountingAdvancedHandler) ListSupplierPaymentSchedules(w http.ResponseWriter, r *http.Request) {"
+      },
+      {
+        "line": 554,
+        "text": "func (h *AccountingAdvancedHandler) CreateSupplierPaymentSchedule(w http.ResponseWriter, r *http.Request) {"
+      },
+      {
+        "line": 602,
+        "text": "func (h *AccountingAdvancedHandler) ListSupplierPaymentReminders(w http.ResponseWriter, r *http.Request) {"
+      },
+      {
+        "line": 614,
+        "text": "func (h *AccountingAdvancedHandler) TriggerSupplierPaymentReminder(w http.ResponseWriter, r *http.Request) {"
+      },
+      {
+        "line": 629,
+        "text": "func (h *AccountingAdvancedHandler) DownloadCustomerInvoicePDF(w http.ResponseWriter, r *http.Request) {"
+      },
+      {
+        "line": 663,
+        "text": "func (h *AccountingAdvancedHandler) SendCustomerInvoiceEmail(w http.ResponseWriter, r *http.Request) {"
+      },
+      {
+        "line": 729,
+        "text": "INSERT INTO invoice_delivery_logs ("
+      },
+      {
+        "line": 755,
+        "text": "func (h *AccountingAdvancedHandler) GetFinancialKPIs(w http.ResponseWriter, r *http.Request) {"
+      },
+      {
+        "line": 771,
+        "text": "func (h *AccountingAdvancedHandler) GetMenuProfitability(w http.ResponseWriter, r *http.Request) {"
+      },
+      {
+        "line": 788,
+        "text": "func (h *AccountingAdvancedHandler) GetBreakEvenAnalysis(w http.ResponseWriter, r *http.Request) {"
+      },
+      {
+        "line": 804,
+        "text": "func (h *AccountingAdvancedHandler) GetPredictiveCashFlow(w http.ResponseWriter, r *http.Request) {"
+      },
+      {
+        "line": 817,
+        "text": "func (h *AccountingAdvancedHandler) GetHRCostAnalysis(w http.ResponseWriter, r *http.Request) {"
+      },
+      {
+        "line": 833,
+        "text": "func (h *AccountingAdvancedHandler) SubmitEInvoice(w http.ResponseWriter, r *http.Request) {"
+      },
+      {
+        "line": 901,
+        "text": "func (h *AccountingAdvancedHandler) ListEInvoiceSubmissions(w http.ResponseWriter, r *http.Request) {"
+      },
+      {
+        "line": 912,
+        "text": "func (h *AccountingAdvancedHandler) ExportSocialInsuranceCSV(w http.ResponseWriter, r *http.Request) {"
+      },
+      {
+        "line": 950,
+        "text": "func (h *AccountingAdvancedHandler) ExportAuditTrailCSV(w http.ResponseWriter, r *http.Request) {"
+      },
+      {
+        "line": 985,
+        "text": "func (h *AccountingAdvancedHandler) ExportChartOfAccountsExcel(w http.ResponseWriter, r *http.Request) {"
+      },
+      {
+        "line": 996,
+        "text": "func (h *AccountingAdvancedHandler) ExportJournalEntriesExcel(w http.ResponseWriter, r *http.Request) {"
+      },
+      {
+        "line": 1012,
+        "text": "func (h *AccountingAdvancedHandler) ImportChartOfAccountsExcel(w http.ResponseWriter, r *http.Request) {"
+      },
+      {
+        "line": 1067,
+        "text": "func (h *AccountingAdvancedHandler) ImportJournalEntriesExcel(w http.ResponseWriter, r *http.Request) {"
+      },
+      {
+        "line": 1158,
+        "text": "func parseIntQueryParam(r *http.Request, key string, fallback int) (int, error) {"
+      },
+      {
+        "line": 1170,
+        "text": "func parseDateRangeForReports(r *http.Request) (time.Time, time.Time, error) {"
+      },
+      {
+        "line": 1200,
+        "text": "func writeCSVAttachment(w http.ResponseWriter, filename string, rows [][]string) {"
+      },
+      {
+        "line": 1214,
+        "text": "func parseUploadedCSVRows(r *http.Request) ([][]string, error) {"
+      },
+      {
+        "line": 1232,
+        "text": "func normalizeCSVHeaders(headers []string) []string {"
+      },
+      {
+        "line": 1240,
+        "text": "func mapCSVRecord(headers, row []string) map[string]string {"
+      },
+      {
+        "line": 1252,
+        "text": "func buildCustomerInvoicePDF(invoice *domain.CustomerInvoice) ([]byte, error) {"
+      },
+      {
+        "line": 1300,
+        "text": "func truncateForPDF(value string, max int) string {"
+      },
+      {
+        "line": 1311,
+        "text": "func (h *AccountingAdvancedHandler) lookupCustomerEmail(tenantID, restaurantID, customerID int) string {"
+      },
+      {
+        "line": 1317,
+        "text": "SELECT email"
+      },
+      {
+        "line": 1327,
+        "text": "func toFloat64(value interface{}) float64 {"
+      },
+      {
+        "line": 1348,
+        "text": "func readEnvDefault(key, fallback string) string {"
+      }
+    ],
+    "sha256": "423a44ce914ffe88730847c43432ede1d073bffc326ae53669bab3e2763ad108"
+  },
+  "backend/internal/handler/http/admin_driver_handler.go": {
+    "lines": 461,
+    "symbols": [
+      {
+        "line": 24,
+        "text": "func NewAdminDriverHandler(driverRepo repository.DriverRepository, orderUC *usecase.OrderUseCase) *AdminDriverHandler {"
+      },
+      {
+        "line": 78,
+        "text": "func formatDateOnly(value *time.Time) string {"
+      },
+      {
+        "line": 85,
+        "text": "func parseDateOnly(value string) (*time.Time, error) {"
+      },
+      {
+        "line": 96,
+        "text": "func toDriverResponse(driver domain.Driver) driverResponse {"
+      },
+      {
+        "line": 129,
+        "text": "func (h *AdminDriverHandler) CreateDriver(w http.ResponseWriter, r *http.Request) {"
+      },
+      {
+        "line": 192,
+        "text": "func (h *AdminDriverHandler) ListDrivers(w http.ResponseWriter, r *http.Request) {"
+      },
+      {
+        "line": 218,
+        "text": "func (h *AdminDriverHandler) GetAvailableDrivers(w http.ResponseWriter, r *http.Request) {"
+      },
+      {
+        "line": 244,
+        "text": "func (h *AdminDriverHandler) GetDriver(w http.ResponseWriter, r *http.Request) {"
+      },
+      {
+        "line": 269,
+        "text": "func (h *AdminDriverHandler) UpdateDriver(w http.ResponseWriter, r *http.Request) {"
+      },
+      {
+        "line": 331,
+        "text": "func (h *AdminDriverHandler) DeleteDriver(w http.ResponseWriter, r *http.Request) {"
+      },
+      {
+        "line": 362,
+        "text": "func (h *AdminDriverHandler) UpdateDriverStatus(w http.ResponseWriter, r *http.Request) {"
+      },
+      {
+        "line": 407,
+        "text": "func (h *AdminDriverHandler) AssignOrderToDriver(w http.ResponseWriter, r *http.Request) {"
+      }
+    ],
+    "sha256": "9eca0a8ed5d7e223f144ce0f789dc8a43487c1916093f6110ee398f66a2109ac"
+  },
+  "backend/internal/handler/http/admin_order_handler.go": {
+    "lines": 778,
+    "symbols": [
+      {
+        "line": 26,
+        "text": "func NewAdminOrderHandler(orderUC *usecase.OrderUseCase, driverRepo repository.DriverRepository, userRoleRepo *repository.UserRoleRepository) *AdminOrderHandler {"
+      },
+      {
+        "line": 110,
+        "text": "func (h *AdminOrderHandler) ListOrders(w http.ResponseWriter, r *http.Request) {"
+      },
+      {
+        "line": 231,
+        "text": "func (h *AdminOrderHandler) GetOrder(w http.ResponseWriter, r *http.Request) {"
+      },
+      {
+        "line": 357,
+        "text": "func (h *AdminOrderHandler) UpdateOrderStatus(w http.ResponseWriter, r *http.Request) {"
+      },
+      {
+        "line": 421,
+        "text": "func (h *AdminOrderHandler) CancelOrder(w http.ResponseWriter, r *http.Request) {"
+      },
+      {
+        "line": 466,
+        "text": "func (h *AdminOrderHandler) UpdatePaymentStatus(w http.ResponseWriter, r *http.Request) {"
+      },
+      {
+        "line": 522,
+        "text": "func (h *AdminOrderHandler) GetOrderHistory(w http.ResponseWriter, r *http.Request) {"
+      },
+      {
+        "line": 590,
+        "text": "func (h *AdminOrderHandler) GetOrderStats(w http.ResponseWriter, r *http.Request) {"
+      },
+      {
+        "line": 623,
+        "text": "func (h *AdminOrderHandler) ExportOrders(w http.ResponseWriter, r *http.Request) {"
+      },
+      {
+        "line": 708,
+        "text": "func parseInt64(value string, fallback int64) int64 {"
+      },
+      {
+        "line": 719,
+        "text": "func parseFloat64(value string, fallback float64) float64 {"
+      },
+      {
+        "line": 730,
+        "text": "func parseTime(value string) time.Time {"
+      },
+      {
+        "line": 741,
+        "text": "func (h *AdminOrderHandler) resolveDriverContext(r *http.Request, tenantID, restaurantID int64) (*domain.Driver, bool, error) {"
+      },
+      {
+        "line": 771,
+        "text": "func hasRoleCode(roles []domain.Role, code string) bool {"
+      }
+    ],
+    "sha256": "b057deb78b9945b384cc46f4d7762e43c76de41751cb0d86e47bc3bb2327fc10"
+  },
+  "backend/internal/handler/http/admin_theme_handler_v2.go": {
+    "lines": 560,
+    "symbols": [
+      {
+        "line": 24,
+        "text": "func NewAdminThemeHandlerV2(svc service.ThemeService) *AdminThemeHandlerV2 {"
+      },
+      {
+        "line": 32,
+        "text": "func (h *AdminThemeHandlerV2) CreateTheme(w http.ResponseWriter, r *http.Request) {"
+      },
+      {
+        "line": 90,
+        "text": "func (h *AdminThemeHandlerV2) ListThemes(w http.ResponseWriter, r *http.Request) {"
+      },
+      {
+        "line": 129,
+        "text": "func (h *AdminThemeHandlerV2) ListThemePresets(w http.ResponseWriter, r *http.Request) {"
+      },
+      {
+        "line": 164,
+        "text": "func (h *AdminThemeHandlerV2) loadOwnedTheme(w http.ResponseWriter, r *http.Request, id int64) (*domain.Theme, bool) {"
+      },
+      {
+        "line": 189,
+        "text": "func themeBelongsToCaller(theme *domain.Theme, tenantID, restaurantID int64) bool {"
+      },
+      {
+        "line": 195,
+        "text": "func (h *AdminThemeHandlerV2) GetTheme(w http.ResponseWriter, r *http.Request) {"
+      },
+      {
+        "line": 253,
+        "text": "func (h *AdminThemeHandlerV2) UpdateTheme(w http.ResponseWriter, r *http.Request) {"
+      },
+      {
+        "line": 371,
+        "text": "func (h *AdminThemeHandlerV2) DeleteTheme(w http.ResponseWriter, r *http.Request) {"
+      },
+      {
+        "line": 408,
+        "text": "func (h *AdminThemeHandlerV2) ActivateTheme(w http.ResponseWriter, r *http.Request) {"
+      },
+      {
+        "line": 447,
+        "text": "func (h *AdminThemeHandlerV2) DuplicateTheme(w http.ResponseWriter, r *http.Request) {"
+      },
+      {
+        "line": 539,
+        "text": "func (h *AdminThemeHandlerV2) RegisterRoutes(mux *http.ServeMux) {"
+      }
+    ],
+    "sha256": "bcce90a0d24d340fdf960beb815f4ed2be7755117c7d2700f40849bfc3197e0d"
+  },
+  "backend/internal/handler/http/hr_report_handler.go": {
+    "lines": 1083,
+    "symbols": [
+      {
+        "line": 21,
+        "text": "func NewHRReportHandler(db *sql.DB) *HRReportHandler {"
+      },
+      {
+        "line": 25,
+        "text": "func (h *HRReportHandler) GetHeadcountReport(w http.ResponseWriter, r *http.Request) {"
+      },
+      {
+        "line": 114,
+        "text": "SELECT COALESCE(NULLIF(TRIM(department), ''), 'Unassigned') AS department, COUNT(*) AS count"
+      },
+      {
+        "line": 151,
+        "text": "SELECT employment_status, COUNT(*) AS count"
+      },
+      {
+        "line": 188,
+        "text": "SELECT employment_type, COUNT(*) AS count"
+      },
+      {
+        "line": 246,
+        "text": "func (h *HRReportHandler) GetTurnoverReport(w http.ResponseWriter, r *http.Request) {"
+      },
+      {
+        "line": 269,
+        "text": "SELECT COUNT(*)"
+      },
+      {
+        "line": 279,
+        "text": "SELECT COUNT(*)"
+      },
+      {
+        "line": 292,
+        "text": "SELECT COUNT(*)"
+      },
+      {
+        "line": 303,
+        "text": "SELECT COUNT(*)"
+      },
+      {
+        "line": 323,
+        "text": "SELECT generate_series("
+      },
+      {
+        "line": 330,
+        "text": "SELECT date_trunc('month', hire_date)::date AS month_start, COUNT(*) AS hires"
+      },
+      {
+        "line": 338,
+        "text": "SELECT date_trunc('month', termination_date)::date AS month_start, COUNT(*) AS departures"
+      },
+      {
+        "line": 346,
+        "text": "SELECT"
+      },
+      {
+        "line": 397,
+        "text": "func (h *HRReportHandler) GetAbsenteeismReport(w http.ResponseWriter, r *http.Request) {"
+      },
+      {
+        "line": 439,
+        "text": "SELECT COUNT(*)"
+      },
+      {
+        "line": 452,
+        "text": "SELECT COUNT(*)"
+      },
+      {
+        "line": 475,
+        "text": "SELECT"
+      },
+      {
+        "line": 511,
+        "text": "SELECT"
+      },
+      {
+        "line": 571,
+        "text": "func (h *HRReportHandler) GetOvertimeReport(w http.ResponseWriter, r *http.Request) {"
+      },
+      {
+        "line": 597,
+        "text": "SELECT COALESCE(SUM(overtime_hours), 0), COUNT(DISTINCT employee_id)"
+      },
+      {
+        "line": 615,
+        "text": "SELECT"
+      },
+      {
+        "line": 694,
+        "text": "func (h *HRReportHandler) GetLeaveBalancesReport(w http.ResponseWriter, r *http.Request) {"
+      },
+      {
+        "line": 724,
+        "text": "SELECT"
+      },
+      {
+        "line": 801,
+        "text": "func (h *HRReportHandler) GetTrainingComplianceReport(w http.ResponseWriter, r *http.Request) {"
+      },
+      {
+        "line": 839,
+        "text": "SELECT COUNT(*)"
+      },
+      {
+        "line": 853,
+        "text": "SELECT COUNT(DISTINCT tr.employee_id)"
+      },
+      {
+        "line": 892,
+        "text": "SELECT id, COALESCE(NULLIF(TRIM(department), ''), 'Unassigned') AS department"
+      },
+      {
+        "line": 900,
+        "text": "SELECT DISTINCT employee_id"
+      },
+      {
+        "line": 907,
+        "text": "SELECT"
+      },
+      {
+        "line": 955,
+        "text": "SELECT"
+      },
+      {
+        "line": 1019,
+        "text": "func parseHRDateRange(fromRaw, toRaw string, defaultDays int) (time.Time, time.Time, error) {"
+      },
+      {
+        "line": 1044,
+        "text": "func weekdayName(day int) string {"
+      },
+      {
+        "line": 1065,
+        "text": "func parsePageAndSize(r *http.Request, defaultPage, defaultPageSize, maxPageSize int) (int, int) {"
+      }
+    ],
+    "sha256": "4cfd211460985e40004d0b01fb31dabd5facdb09480ff8e16dec91782e8181ca"
+  },
+  "backend/internal/handler/http/inventory_adjustment_handler.go": {
+    "lines": 113,
+    "symbols": [
+      {
+        "line": 18,
+        "text": "func NewInventoryAdjustmentHandler(db *sql.DB) *InventoryAdjustmentHandler {"
+      },
+      {
+        "line": 29,
+        "text": "func (h *InventoryAdjustmentHandler) Adjust(w http.ResponseWriter, r *http.Request) {"
+      },
+      {
+        "line": 61,
+        "text": "SELECT quantity_in_stock"
+      },
+      {
+        "line": 81,
+        "text": "UPDATE products SET quantity_in_stock = $1, updated_at = NOW()"
+      },
+      {
+        "line": 88,
+        "text": "INSERT INTO inventory_movements ("
+      },
+      {
+        "line": 106,
+        "text": "func validInventoryAdjustmentReason(reason string) bool {"
+      }
+    ],
+    "sha256": "41d8f3cd64d1ac4377f92da400f22e37b2895040ae218476df67b3855293f6bd"
+  },
+  "backend/internal/handler/http/product_image_handler.go": {
+    "lines": 50,
+    "symbols": [
+      {
+        "line": 16,
+        "text": "func NewProductImageHandler(directory string) (*ProductImageHandler, error) {"
+      },
+      {
+        "line": 27,
+        "text": "func (h *ProductImageHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {"
+      }
+    ],
+    "sha256": "c2b9aab49bb390b4e9c25fe5bc80a9c71dd54ee85edfd5996401a2d740496538"
+  },
+  "backend/internal/handler/http/public_homepage_handler.go": {
+    "lines": 249,
+    "symbols": [
+      {
+        "line": 18,
+        "text": "func NewPublicHomepageHandler("
+      },
+      {
+        "line": 30,
+        "text": "func (h *PublicHomepageHandler) GetHomepageData(w http.ResponseWriter, r *http.Request) {"
+      },
+      {
+        "line": 103,
+        "text": "func (h *PublicHomepageHandler) GetThemeOnly(w http.ResponseWriter, r *http.Request) {"
+      },
+      {
+        "line": 150,
+        "text": "func (h *PublicHomepageHandler) GetSectionsOnly(w http.ResponseWriter, r *http.Request) {"
+      },
+      {
+        "line": 203,
+        "text": "func (h *PublicHomepageHandler) GetSettingsOnly(w http.ResponseWriter, r *http.Request) {"
+      }
+    ],
+    "sha256": "98bb1152788dbabc5f318c1f6f916009168d0c159b9ad62ec4b7105b1921ddbf"
+  },
+  "backend/internal/handler/http/public_order_handler.go": {
+    "lines": 484,
+    "symbols": [
+      {
+        "line": 14,
+        "text": "func setPublicOrderNoCacheHeaders(w http.ResponseWriter) {"
+      },
+      {
+        "line": 25,
+        "text": "func NewPublicOrderHandler("
+      },
+      {
+        "line": 39,
+        "text": "func (h *PublicOrderHandler) CreateOrder(w http.ResponseWriter, r *http.Request) {"
+      },
+      {
+        "line": 104,
+        "text": "func classifyCreateOrderError(err error) (statusCode int, message string) {"
+      },
+      {
+        "line": 131,
+        "text": "func (h *PublicOrderHandler) GetOrder(w http.ResponseWriter, r *http.Request) {"
+      },
+      {
+        "line": 178,
+        "text": "func publicOrderProof(r *http.Request) (token, phone string) {"
+      },
+      {
+        "line": 184,
+        "text": "func (h *PublicOrderHandler) requirePublicOrderAccess(w http.ResponseWriter, r *http.Request, tenantID, restaurantID, orderID int64, allowPhone bool) bool {"
+      },
+      {
+        "line": 199,
+        "text": "func (h *PublicOrderHandler) GetOrderByNumber(w http.ResponseWriter, r *http.Request) {"
+      },
+      {
+        "line": 245,
+        "text": "func (h *PublicOrderHandler) GetOrderStatus(w http.ResponseWriter, r *http.Request) {"
+      },
+      {
+        "line": 300,
+        "text": "func (h *PublicOrderHandler) TrackOrder(w http.ResponseWriter, r *http.Request) {"
+      },
+      {
+        "line": 366,
+        "text": "func (h *PublicOrderHandler) ValidateOrder(w http.ResponseWriter, r *http.Request) {"
+      },
+      {
+        "line": 421,
+        "text": "func (h *PublicOrderHandler) CancelOrder(w http.ResponseWriter, r *http.Request) {"
+      }
+    ],
+    "sha256": "d133ea37784b02e668d115f9d53ace7c63c317c2a7686f6f007d3516eb4e8e62"
+  },
+  "backend/internal/handler/http/report_handler.go": {
+    "lines": 2681,
+    "symbols": [
+      {
+        "line": 42,
+        "text": "func NewReportHandler(db *sql.DB) *ReportHandler {"
+      },
+      {
+        "line": 61,
+        "text": "func newReportResponseCache() *reportResponseCache {"
+      },
+      {
+        "line": 67,
+        "text": "func (c *reportResponseCache) Get(key string) ([]byte, string, bool) {"
+      },
+      {
+        "line": 91,
+        "text": "func (c *reportResponseCache) Set(key string, payload []byte, contentType string, ttl time.Duration) {"
+      },
+      {
+        "line": 286,
+        "text": "func withReportDBTimeout() (context.Context, context.CancelFunc) {"
+      },
+      {
+        "line": 290,
+        "text": "func withReportDBTimeoutFrom(parent context.Context) (context.Context, context.CancelFunc) {"
+      },
+      {
+        "line": 297,
+        "text": "func writeJSONPayload(w http.ResponseWriter, status int, payload []byte) {"
+      },
+      {
+        "line": 303,
+        "text": "func (h *ReportHandler) writeCachedOrStoreJSON("
+      },
+      {
+        "line": 320,
+        "text": "func (h *ReportHandler) logReportEndpointTiming("
+      },
+      {
+        "line": 344,
+        "text": "func reportCacheKey(parts ...string) string {"
+      },
+      {
+        "line": 350,
+        "text": "func (h *ReportHandler) GetSalesReport(w http.ResponseWriter, r *http.Request) {"
+      },
+      {
+        "line": 470,
+        "text": "func (h *ReportHandler) GetProfitabilityReport(w http.ResponseWriter, r *http.Request) {"
+      },
+      {
+        "line": 556,
+        "text": "func (h *ReportHandler) GetInventoryReport(w http.ResponseWriter, r *http.Request) {"
+      },
+      {
+        "line": 645,
+        "text": "func (h *ReportHandler) GetOverviewReport(w http.ResponseWriter, r *http.Request) {"
+      },
+      {
+        "line": 813,
+        "text": "func (h *ReportHandler) ExportReport(w http.ResponseWriter, r *http.Request) {"
+      },
+      {
+        "line": 969,
+        "text": "func parseReportExportRequest(r *http.Request) (reportExportRequest, error) {"
+      },
+      {
+        "line": 1009,
+        "text": "func (r reportExportRequest) DateFromOr(fallback time.Time) string {"
+      },
+      {
+        "line": 1016,
+        "text": "func (r reportExportRequest) DateToOr(fallback time.Time) string {"
+      },
+      {
+        "line": 1023,
+        "text": "func (h *ReportHandler) buildSalesReportDataForExport("
+      },
+      {
+        "line": 1035,
+        "text": "func (h *ReportHandler) buildProfitabilityReportDataForExport("
+      },
+      {
+        "line": 1046,
+        "text": "func (h *ReportHandler) buildInventoryReportDataForExport("
+      },
+      {
+        "line": 1058,
+        "text": "func (h *ReportHandler) logReportExportAudit(ctx context.Context, record reportExportAuditRecord) error {"
+      },
+      {
+        "line": 1075,
+        "text": "INSERT INTO report_export_audit_logs ("
+      },
+      {
+        "line": 1100,
+        "text": "func clientIPFromRequest(r *http.Request) string {"
+      },
+      {
+        "line": 1123,
+        "text": "func (h *ReportHandler) buildSalesReportData("
+      },
+      {
+        "line": 1167,
+        "text": "func (h *ReportHandler) buildProfitabilityReportData("
+      },
+      {
+        "line": 1195,
+        "text": "func (h *ReportHandler) buildInventoryReportData("
+      },
+      {
+        "line": 1277,
+        "text": "func normalizeReportLocale(value string) string {"
+      },
+      {
+        "line": 1288,
+        "text": "func reportExportTexts(locale string) reportExportTextSet {"
+      },
+      {
+        "line": 1399,
+        "text": "func reportExportBool(value bool, locale string) string {"
+      },
+      {
+        "line": 1412,
+        "text": "func formatReportCurrency(amount float64, locale string) string {"
+      },
+      {
+        "line": 1419,
+        "text": "func writeArabicPDFFallbackNoticeIfNeeded(pdf *fpdf.Fpdf, locale string) {"
+      },
+      {
+        "line": 1424,
+        "text": "func buildSalesCSV(report salesReportResponse, locale string) ([]byte, error) {"
+      },
+      {
+        "line": 1455,
+        "text": "func buildProfitabilityCSV(report profitabilityReportResponse, locale string) ([]byte, error) {"
+      },
+      {
+        "line": 1497,
+        "text": "func buildInventoryCSV(report inventoryReportResponse, locale string) ([]byte, error) {"
+      },
+      {
+        "line": 1526,
+        "text": "func buildSalesPDFSummary(report salesReportResponse, locale string) ([]byte, error) {"
+      },
+      {
+        "line": 1604,
+        "text": "func buildProfitabilityPDFSummary(report profitabilityReportResponse, locale string) ([]byte, error) {"
+      },
+      {
+        "line": 1671,
+        "text": "func buildInventoryPDFSummary(report inventoryReportResponse, locale string) ([]byte, error) {"
+      },
+      {
+        "line": 1731,
+        "text": "func newReportPDF(title string, filters map[string]interface{}, generatedAt string, locale string) *fpdf.Fpdf {"
+      },
+      {
+        "line": 1824,
+        "text": "func registerReportPDFFonts(pdf *fpdf.Fpdf) {"
+      },
+      {
+        "line": 1832,
+        "text": "func writePDFSectionTitle(pdf *fpdf.Fpdf, title string) {"
+      },
+      {
+        "line": 1848,
+        "text": "func writePDFLine(pdf *fpdf.Fpdf, line string) {"
+      },
+      {
+        "line": 1859,
+        "text": "func outputPDF(pdf *fpdf.Fpdf) ([]byte, error) {"
+      },
+      {
+        "line": 1878,
+        "text": "func writePDFMetricCards(pdf *fpdf.Fpdf, cards []pdfMetricCard) {"
+      },
+      {
+        "line": 1932,
+        "text": "func writePDFNotice(pdf *fpdf.Fpdf, text string) {"
+      },
+      {
+        "line": 1942,
+        "text": "func writePDFTable(pdf *fpdf.Fpdf, title string, cols []pdfTableColumn, rows [][]string, locale string) {"
+      },
+      {
+        "line": 1979,
+        "text": "func writePDFTableHeader(pdf *fpdf.Fpdf, cols []pdfTableColumn) {"
+      },
+      {
+        "line": 1995,
+        "text": "func ensurePDFSpaceForTableRow(pdf *fpdf.Fpdf, rowH float64, cols []pdfTableColumn) {"
+      },
+      {
+        "line": 2003,
+        "text": "func ensurePDFSpace(pdf *fpdf.Fpdf, needed float64) {"
+      },
+      {
+        "line": 2009,
+        "text": "func needsNewPDFPage(pdf *fpdf.Fpdf, needed float64) bool {"
+      },
+      {
+        "line": 2014,
+        "text": "func pdfContentWidth(pdf *fpdf.Fpdf) float64 {"
+      },
+      {
+        "line": 2019,
+        "text": "func pdfBox(pdf *fpdf.Fpdf) (pageW, pageH, left, top, right, bottom float64) {"
+      },
+      {
+        "line": 2025,
+        "text": "func fitPDFText(pdf *fpdf.Fpdf, text string, width float64) string {"
+      },
+      {
+        "line": 2050,
+        "text": "func pdfNoDataText(locale string) string {"
+      },
+      {
+        "line": 2057,
+        "text": "func pdfHumanLabel(value string, locale string) string {"
+      },
+      {
+        "line": 2087,
+        "text": "func localizePDFGranularity(value string, isArabic bool) string {"
+      },
+      {
+        "line": 2103,
+        "text": "func formatPDFHeaderValue(value string, isArabic bool) string {"
+      },
+      {
+        "line": 2117,
+        "text": "func formatPDFHeaderDateTime(value string, isArabic bool) string {"
+      },
+      {
+        "line": 2131,
+        "text": "func minInt(a, b int) int {"
+      },
+      {
+        "line": 2138,
+        "text": "func asciiSafe(value string) string {"
+      },
+      {
+        "line": 2160,
+        "text": "func containsArabicText(s string) bool {"
+      },
+      {
+        "line": 2169,
+        "text": "func (h *ReportHandler) querySalesSummary(tenantID, restaurantID int64, dateFrom, dateToExclusive time.Time) (salesSummaryResponse, error) {"
+      },
+      {
+        "line": 2171,
+        "text": "SELECT"
+      },
+      {
+        "line": 2190,
+        "text": "func (h *ReportHandler) querySalesTrend(tenantID, restaurantID int64, dateFrom, dateToExclusive time.Time, granularity string) ([]salesTrendPoint, error) {"
+      },
+      {
+        "line": 2200,
+        "text": "SELECT"
+      },
+      {
+        "line": 2232,
+        "text": "func (h *ReportHandler) querySalesHourly(tenantID, restaurantID int64, dateFrom, dateToExclusive time.Time) ([]salesHourlyPoint, error) {"
+      },
+      {
+        "line": 2234,
+        "text": "SELECT"
+      },
+      {
+        "line": 2278,
+        "text": "func (h *ReportHandler) queryTopItems(tenantID, restaurantID int64, dateFrom, dateToExclusive time.Time, limit int64) ([]salesTopItem, error) {"
+      },
+      {
+        "line": 2280,
+        "text": "SELECT"
+      },
+      {
+        "line": 2318,
+        "text": "func (h *ReportHandler) queryTopCategories(tenantID, restaurantID int64, dateFrom, dateToExclusive time.Time, limit int64) ([]salesTopCategory, error) {"
+      },
+      {
+        "line": 2320,
+        "text": "SELECT"
+      },
+      {
+        "line": 2359,
+        "text": "func (h *ReportHandler) queryProfitabilitySummary(tenantID, restaurantID int64, dateFrom, dateToExclusive time.Time) (profitabilitySummaryResponse, error) {"
+      },
+      {
+        "line": 2361,
+        "text": "SELECT"
+      },
+      {
+        "line": 2390,
+        "text": "func (h *ReportHandler) queryProfitabilityItems(tenantID, restaurantID int64, dateFrom, dateToExclusive time.Time, limit int64) ([]profitabilityItem, []profitabilityItem, error) {"
+      },
+      {
+        "line": 2393,
+        "text": "SELECT"
+      },
+      {
+        "line": 2415,
+        "text": "SELECT"
+      },
+      {
+        "line": 2475,
+        "text": "func (h *ReportHandler) queryInventoryTurnoverItems(tenantID, restaurantID int64, dateFrom, dateToExclusive time.Time, daysInRange int64) ([]inventoryTurnoverItem, error) {"
+      },
+      {
+        "line": 2478,
+        "text": "SELECT"
+      },
+      {
+        "line": 2490,
+        "text": "SELECT"
+      },
+      {
+        "line": 2505,
+        "text": "SELECT"
+      },
+      {
+        "line": 2514,
+        "text": "SELECT"
+      },
+      {
+        "line": 2529,
+        "text": "SELECT i.quantity_after::DOUBLE PRECISION AS opening_qty"
+      },
+      {
+        "line": 2583,
+        "text": "func summarizeInventoryItems(items []inventoryTurnoverItem) inventorySummaryResponse {"
+      },
+      {
+        "line": 2605,
+        "text": "func splitInventoryItems(items []inventoryTurnoverItem, topLimit int64) ([]inventoryTurnoverItem, []inventoryTurnoverItem) {"
+      },
+      {
+        "line": 2629,
+        "text": "func parseReportTopLimit(raw string, fallback int64) int64 {"
+      },
+      {
+        "line": 2640,
+        "text": "func normalizeGranularity(raw string) string {"
+      },
+      {
+        "line": 2651,
+        "text": "func parseReportDateRange(fromRaw, toRaw string) (time.Time, time.Time, time.Time, error) {"
+      }
+    ],
+    "sha256": "296e67cef9aa173163c4dc4ebf4df27d390e4d9723a383796d7370f8281b130a"
+  },
+  "backend/internal/handler/http/table_handler.go": {
+    "lines": 353,
+    "symbols": [
+      {
+        "line": 21,
+        "text": "func NewTableHandler(tableUC *usecase.TableUseCase) *TableHandler {"
+      },
+      {
+        "line": 27,
+        "text": "func (h *TableHandler) CreateTable(w http.ResponseWriter, r *http.Request) {"
+      },
+      {
+        "line": 54,
+        "text": "func (h *TableHandler) ListTables(w http.ResponseWriter, r *http.Request) {"
+      },
+      {
+        "line": 76,
+        "text": "func (h *TableHandler) GetTable(w http.ResponseWriter, r *http.Request) {"
+      },
+      {
+        "line": 103,
+        "text": "func (h *TableHandler) UpdateTable(w http.ResponseWriter, r *http.Request) {"
+      },
+      {
+        "line": 134,
+        "text": "func (h *TableHandler) DeleteTable(w http.ResponseWriter, r *http.Request) {"
+      },
+      {
+        "line": 159,
+        "text": "func (h *TableHandler) UpdateStatus(w http.ResponseWriter, r *http.Request) {"
+      },
+      {
+        "line": 190,
+        "text": "func (h *TableHandler) UpdatePositions(w http.ResponseWriter, r *http.Request) {"
+      },
+      {
+        "line": 215,
+        "text": "func (h *TableHandler) GetTableStats(w http.ResponseWriter, r *http.Request) {"
+      },
+      {
+        "line": 236,
+        "text": "func (h *TableHandler) GetLayouts(w http.ResponseWriter, r *http.Request) {"
+      },
+      {
+        "line": 257,
+        "text": "func (h *TableHandler) CreateLayout(w http.ResponseWriter, r *http.Request) {"
+      },
+      {
+        "line": 284,
+        "text": "func (h *TableHandler) GetPublicTableInfo(w http.ResponseWriter, r *http.Request) {"
+      },
+      {
+        "line": 303,
+        "text": "func tableTenantContext(r *http.Request) (int64, int64, bool) {"
+      },
+      {
+        "line": 312,
+        "text": "func parseTableIDParam(r *http.Request) (int64, error) {"
+      },
+      {
+        "line": 320,
+        "text": "func decodeTableBody(r *http.Request, target interface{}) error {"
+      },
+      {
+        "line": 326,
+        "text": "func respondTableError(w http.ResponseWriter, err error, fallbackMessage string) {"
+      }
+    ],
+    "sha256": "17d3e5e3f49bf679ee6d67fe306c852d190294e4bb3548f353eaa06494fc9d4a"
+  },
+  "backend/internal/handler/http/tax_handler.go": {
+    "lines": 288,
+    "symbols": [
+      {
+        "line": 16,
+        "text": "func NewTaxHandler(taxRepo *repository.TaxRepository) *TaxHandler {"
+      },
+      {
+        "line": 20,
+        "text": "func (h *TaxHandler) ListTaxPeriods(w http.ResponseWriter, r *http.Request) {"
+      },
+      {
+        "line": 57,
+        "text": "func (h *TaxHandler) GetTaxPeriod(w http.ResponseWriter, r *http.Request) {"
+      },
+      {
+        "line": 83,
+        "text": "func (h *TaxHandler) CreateTaxPeriod(w http.ResponseWriter, r *http.Request) {"
+      },
+      {
+        "line": 109,
+        "text": "func (h *TaxHandler) UpdateTaxPeriod(w http.ResponseWriter, r *http.Request) {"
+      },
+      {
+        "line": 141,
+        "text": "func (h *TaxHandler) DeleteTaxPeriod(w http.ResponseWriter, r *http.Request) {"
+      },
+      {
+        "line": 168,
+        "text": "func (h *TaxHandler) GetVATReport(w http.ResponseWriter, r *http.Request) {"
+      },
+      {
+        "line": 194,
+        "text": "func (h *TaxHandler) CloseTaxPeriod(w http.ResponseWriter, r *http.Request) {"
+      },
+      {
+        "line": 229,
+        "text": "func parseTaxDateRange(fromRaw, toRaw string) (time.Time, time.Time, error) {"
+      },
+      {
+        "line": 252,
+        "text": "func parseTaxPeriodInput(r *http.Request) (repository.TaxPeriodInput, error) {"
+      },
+      {
+        "line": 288,
+        "text": "func (e errValidation) Error() string { return string(e) }"
+      }
+    ],
+    "sha256": "d4bb39d315b6c0283b3a24e00267376edca62bfd6f2b4efc1e6a2d5fdfb149e4"
+  },
+  "backend/internal/handler/ws/kds_ws_handler.go": {
+    "lines": 188,
+    "symbols": [
+      {
+        "line": 25,
+        "text": "func newKDSConnectionLimiter(maxPerRoom int) *kdsConnectionLimiter {"
+      },
+      {
+        "line": 36,
+        "text": "func buildKDSConnectionKey(tenantID, restaurantID int64) string {"
+      },
+      {
+        "line": 40,
+        "text": "func (l *kdsConnectionLimiter) Acquire(tenantID, restaurantID int64) bool {"
+      },
+      {
+        "line": 54,
+        "text": "func (l *kdsConnectionLimiter) Release(tenantID, restaurantID int64) {"
+      },
+      {
+        "line": 80,
+        "text": "func NewKDSWSHandler(hub *KDSHub, tokenService *jwt.TokenService, sessions ...interface {"
+      },
+      {
+        "line": 105,
+        "text": "func (h *KDSWSHandler) ServeWS(w http.ResponseWriter, r *http.Request) {"
+      },
+      {
+        "line": 181,
+        "text": "func respondJSONError(w http.ResponseWriter, status int, message string) {"
+      }
+    ],
+    "sha256": "b86d90a019f9125139d16b1879e5ae06651cb804c12c91a6af6cec65e2454dbc"
+  },
+  "backend/internal/middleware/permission.go": {
+    "lines": 148,
+    "symbols": [
+      {
+        "line": 36,
+        "text": "func ParsePermissionMode(explicit string, production bool) (PermissionMode, error) {"
+      },
+      {
+        "line": 63,
+        "text": "func NewPermissionMiddleware(evaluator PermissionEvaluator, mode PermissionMode) func(moduleID int64, requiredLevel string) func(http.Handler) http.Handler {"
+      },
+      {
+        "line": 108,
+        "text": "func WithRequiredPermission(moduleID int64, permissionLevel string) func(http.Handler) http.Handler {"
+      },
+      {
+        "line": 126,
+        "text": "func (e RepositoryPermissionEvaluator) EffectiveLevel(ctx context.Context, claims *jwt.Claims, moduleID int64) (string, error) {"
+      }
+    ],
+    "sha256": "48aea4bb7536dae456e8e2278ca4bc99b2552c45af29346ff144a2be35c4c711"
+  },
+  "backend/internal/middleware/tenant_status.go": {
+    "lines": 116,
+    "symbols": [
+      {
+        "line": 16,
+        "text": "func TenantStatusMiddleware(repo repository.SubscriptionRepository) func(http.Handler) http.Handler {"
+      },
+      {
+        "line": 46,
+        "text": "func shouldSkipStatusCheck(path string) bool {"
+      },
+      {
+        "line": 83,
+        "text": "func getBlockMessage(reason string) string {"
+      },
+      {
+        "line": 97,
+        "text": "func respondTenantBlocked(w http.ResponseWriter, reason string, message string) {"
+      }
+    ],
+    "sha256": "2d9230000e62780cef4ad44635cd0cc6ed530f60ba41ea9771b5d856ecf0240f"
+  },
+  "backend/internal/repository/account_repo.go": {
+    "lines": 399,
+    "symbols": [
+      {
+        "line": 16,
+        "text": "func NewAccountRepository(db *sql.DB) *AccountRepository {"
+      },
+      {
+        "line": 20,
+        "text": "func (r *AccountRepository) ListAccountsPaged(ctx context.Context, tenantID, restaurantID int, includeInactive bool, page, pageSize int) ([]domain.Account, int, error) {"
+      },
+      {
+        "line": 33,
+        "text": "SELECT COUNT(*)"
+      },
+      {
+        "line": 46,
+        "text": "SELECT"
+      },
+      {
+        "line": 83,
+        "text": "func (r *AccountRepository) ListAccounts(tenantID, restaurantID int, includeInactive bool) ([]domain.Account, error) {"
+      },
+      {
+        "line": 88,
+        "text": "func (r *AccountRepository) GetAccountByID(tenantID, restaurantID, id int) (*domain.Account, error) {"
+      },
+      {
+        "line": 90,
+        "text": "SELECT"
+      },
+      {
+        "line": 112,
+        "text": "func (r *AccountRepository) GetAccountByCode(tenantID, restaurantID int, code string) (*domain.Account, error) {"
+      },
+      {
+        "line": 114,
+        "text": "SELECT"
+      },
+      {
+        "line": 136,
+        "text": "func (r *AccountRepository) CreateAccount(account *domain.Account) (int, error) {"
+      },
+      {
+        "line": 138,
+        "text": "INSERT INTO chart_of_accounts ("
+      },
+      {
+        "line": 144,
+        "text": "SELECT"
+      },
+      {
+        "line": 150,
+        "text": "SELECT 1 FROM restaurants r WHERE r.id = $2 AND r.tenant_id = $1"
+      },
+      {
+        "line": 152,
+        "text": "SELECT 1 FROM chart_of_accounts parent"
+      },
+      {
+        "line": 190,
+        "text": "func (r *AccountRepository) UpdateAccount(account *domain.Account) error {"
+      },
+      {
+        "line": 192,
+        "text": "UPDATE chart_of_accounts"
+      },
+      {
+        "line": 212,
+        "text": "SELECT 1 FROM chart_of_accounts parent"
+      },
+      {
+        "line": 250,
+        "text": "func (r *AccountRepository) DeleteAccount(tenantID, restaurantID, id int) error {"
+      },
+      {
+        "line": 272,
+        "text": "func (r *AccountRepository) GetAccountTree(tenantID, restaurantID int, includeInactive bool) ([]domain.Account, error) {"
+      },
+      {
+        "line": 311,
+        "text": "func (r *AccountRepository) HasChildAccounts(tenantID, restaurantID, id int) (bool, error) {"
+      },
+      {
+        "line": 314,
+        "text": "SELECT EXISTS("
+      },
+      {
+        "line": 315,
+        "text": "SELECT 1"
+      },
+      {
+        "line": 323,
+        "text": "func (r *AccountRepository) HasJournalEntries(tenantID, restaurantID, id int) (bool, error) {"
+      },
+      {
+        "line": 326,
+        "text": "SELECT EXISTS("
+      },
+      {
+        "line": 327,
+        "text": "SELECT 1"
+      },
+      {
+        "line": 342,
+        "text": "func scanAccount(scanner accountScanner) (domain.Account, error) {"
+      }
+    ],
+    "sha256": "b8e682e3291dde592869e4ab8b76461e26d550445f32dc531fa12facf1589216"
+  },
+  "backend/internal/repository/attendance_repo.go": {
+    "lines": 318,
+    "symbols": [
+      {
+        "line": 17,
+        "text": "func NewAttendanceRepository(db *sql.DB) *AttendanceRepository {"
+      },
+      {
+        "line": 22,
+        "text": "func (r *AttendanceRepository) ListAttendancePaged(ctx context.Context, tenantID, restaurantID int, startDate, endDate time.Time, page, pageSize int) ([]domain.Attendance, int, error) {"
+      },
+      {
+        "line": 35,
+        "text": "SELECT COUNT(*)"
+      },
+      {
+        "line": 46,
+        "text": "SELECT"
+      },
+      {
+        "line": 121,
+        "text": "func (r *AttendanceRepository) ListAttendance(tenantID, restaurantID int, startDate, endDate time.Time) ([]domain.Attendance, error) {"
+      },
+      {
+        "line": 127,
+        "text": "func (r *AttendanceRepository) GetAttendanceByID(tenantID, restaurantID, id int) (*domain.Attendance, error) {"
+      },
+      {
+        "line": 129,
+        "text": "SELECT"
+      },
+      {
+        "line": 191,
+        "text": "func (r *AttendanceRepository) CreateAttendance(attendance *domain.Attendance) (int, error) {"
+      },
+      {
+        "line": 193,
+        "text": "INSERT INTO attendance ("
+      },
+      {
+        "line": 198,
+        "text": "SELECT $1, $2, e.id, $4, $5, $6, $7, $8, $9, $10, $11"
+      },
+      {
+        "line": 221,
+        "text": "func (r *AttendanceRepository) UpdateAttendance(attendance *domain.Attendance) error {"
+      },
+      {
+        "line": 223,
+        "text": "UPDATE attendance"
+      },
+      {
+        "line": 245,
+        "text": "func (r *AttendanceRepository) ClockIn(tenantID, restaurantID, employeeID int) (int, error) {"
+      },
+      {
+        "line": 247,
+        "text": "INSERT INTO attendance ("
+      },
+      {
+        "line": 251,
+        "text": "SELECT $1, $2, e.id, CURRENT_DATE, CURRENT_TIMESTAMP, 'present'"
+      },
+      {
+        "line": 267,
+        "text": "func (r *AttendanceRepository) ClockOut(tenantID, restaurantID, employeeID int) error {"
+      },
+      {
+        "line": 269,
+        "text": "UPDATE attendance"
+      },
+      {
+        "line": 280,
+        "text": "func (r *AttendanceRepository) GetTodayAttendance(tenantID, restaurantID, employeeID int) (*domain.Attendance, error) {"
+      },
+      {
+        "line": 282,
+        "text": "SELECT"
+      }
+    ],
+    "sha256": "e6d8689f8b2689e1261dafc03699c34f7b4f5ec53165c09a405ed3b78d47d581"
+  },
+  "backend/internal/repository/bank_account_repo.go": {
+    "lines": 363,
+    "symbols": [
+      {
+        "line": 17,
+        "text": "func NewBankAccountRepository(db *sql.DB) *BankAccountRepository {"
+      },
+      {
+        "line": 21,
+        "text": "func (r *BankAccountRepository) ListBankAccountsPaged(ctx context.Context, tenantID, restaurantID, page, pageSize int) ([]domain.BankAccount, int, error) {"
+      },
+      {
+        "line": 37,
+        "text": "SELECT"
+      },
+      {
+        "line": 69,
+        "text": "func (r *BankAccountRepository) ListBankAccounts(tenantID, restaurantID int) ([]domain.BankAccount, error) {"
+      },
+      {
+        "line": 74,
+        "text": "func (r *BankAccountRepository) GetBankAccountByID(tenantID, restaurantID, id int) (*domain.BankAccount, error) {"
+      },
+      {
+        "line": 76,
+        "text": "SELECT"
+      },
+      {
+        "line": 95,
+        "text": "func (r *BankAccountRepository) CreateBankAccount(account *domain.BankAccount) (int, error) {"
+      },
+      {
+        "line": 98,
+        "text": "INSERT INTO bank_accounts_ledger ("
+      },
+      {
+        "line": 137,
+        "text": "func (r *BankAccountRepository) UpdateBankAccount(account *domain.BankAccount) error {"
+      },
+      {
+        "line": 139,
+        "text": "UPDATE bank_accounts_ledger"
+      },
+      {
+        "line": 190,
+        "text": "func (r *BankAccountRepository) DeleteBankAccount(tenantID, restaurantID, id int) error {"
+      },
+      {
+        "line": 192,
+        "text": "DELETE FROM bank_accounts_ledger"
+      },
+      {
+        "line": 208,
+        "text": "func (r *BankAccountRepository) GetBankTransactions(tenantID, restaurantID, id int) ([]domain.BankTransaction, error) {"
+      },
+      {
+        "line": 221,
+        "text": "SELECT"
+      },
+      {
+        "line": 267,
+        "text": "func (r *BankAccountRepository) AdjustBalanceTx(tx *sql.Tx, tenantID, restaurantID, id int, delta float64) error {"
+      },
+      {
+        "line": 276,
+        "text": "UPDATE bank_accounts_ledger"
+      },
+      {
+        "line": 298,
+        "text": "func scanBankAccount(scanner bankAccountScanner) (domain.BankAccount, error) {"
+      },
+      {
+        "line": 361,
+        "text": "func parseAccountingDate(value string) (time.Time, error) {"
+      }
+    ],
+    "sha256": "2ef65cb068f82b17bddae253c96fa97229a5227c5f79a0420f0c0c01bf0612f0"
+  },
+  "backend/internal/repository/contract_repo.go": {
+    "lines": 264,
+    "symbols": [
+      {
+        "line": 16,
+        "text": "func NewContractRepository(db *sql.DB) *ContractRepository {"
+      },
+      {
+        "line": 20,
+        "text": "func (r *ContractRepository) ListPaged(ctx context.Context, tenantID, restaurantID, page, pageSize int) ([]domain.EmploymentContract, int, error) {"
+      },
+      {
+        "line": 36,
+        "text": "SELECT"
+      },
+      {
+        "line": 77,
+        "text": "func (r *ContractRepository) List(tenantID, restaurantID int) ([]domain.EmploymentContract, error) {"
+      },
+      {
+        "line": 82,
+        "text": "func (r *ContractRepository) GetByID(tenantID, restaurantID, id int) (*domain.EmploymentContract, error) {"
+      },
+      {
+        "line": 86,
+        "text": "SELECT"
+      },
+      {
+        "line": 118,
+        "text": "func (r *ContractRepository) Create(item *domain.EmploymentContract) (int, error) {"
+      },
+      {
+        "line": 121,
+        "text": "INSERT INTO employment_contracts ("
+      },
+      {
+        "line": 125,
+        "text": "SELECT $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13"
+      },
+      {
+        "line": 127,
+        "text": "SELECT 1 FROM employees e"
+      },
+      {
+        "line": 140,
+        "text": "func (r *ContractRepository) Update(tenantID, restaurantID int, item *domain.EmploymentContract) error {"
+      },
+      {
+        "line": 142,
+        "text": "UPDATE employment_contracts"
+      },
+      {
+        "line": 147,
+        "text": "SELECT 1 FROM employees e"
+      },
+      {
+        "line": 166,
+        "text": "func (r *ContractRepository) Delete(tenantID, restaurantID, id int) error {"
+      },
+      {
+        "line": 168,
+        "text": "DELETE FROM employment_contracts"
+      },
+      {
+        "line": 184,
+        "text": "func (r *ContractRepository) Renew(tenantID, restaurantID, id int, startDate time.Time, endDate *time.Time, salaryAmount float64, currency string, updatedBy int) (int, error) {"
+      },
+      {
+        "line": 200,
+        "text": "UPDATE employment_contracts"
+      },
+      {
+        "line": 209,
+        "text": "INSERT INTO employment_contracts ("
+      },
+      {
+        "line": 228,
+        "text": "func (r *ContractRepository) GetExpiring(tenantID, restaurantID int, withinDays int) ([]domain.EmploymentContract, error) {"
+      },
+      {
+        "line": 234,
+        "text": "SELECT"
+      }
+    ],
+    "sha256": "a5631b076c83b3821424afcab8b1b0e3273b1405bbf145717aa02f2563031df1"
+  },
+  "backend/internal/repository/customer_acct_repo.go": {
+    "lines": 370,
+    "symbols": [
+      {
+        "line": 16,
+        "text": "func NewCustomerAccountRepository(db *sql.DB) *CustomerAccountRepository {"
+      },
+      {
+        "line": 20,
+        "text": "func (r *CustomerAccountRepository) ListCustomersPaged(ctx context.Context, tenantID, restaurantID, page, pageSize int) ([]domain.CustomerAccount, int, error) {"
+      },
+      {
+        "line": 36,
+        "text": "SELECT"
+      },
+      {
+        "line": 71,
+        "text": "func (r *CustomerAccountRepository) ListCustomers(tenantID, restaurantID int) ([]domain.CustomerAccount, error) {"
+      },
+      {
+        "line": 76,
+        "text": "func (r *CustomerAccountRepository) GetCustomerByID(tenantID, restaurantID, id int) (*domain.CustomerAccount, error) {"
+      },
+      {
+        "line": 78,
+        "text": "SELECT"
+      },
+      {
+        "line": 100,
+        "text": "func (r *CustomerAccountRepository) CreateCustomer(customer *domain.CustomerAccount) (int, error) {"
+      },
+      {
+        "line": 108,
+        "text": "INSERT INTO customers_accounting ("
+      },
+      {
+        "line": 120,
+        "text": "SELECT 1 FROM chart_of_accounts a"
+      },
+      {
+        "line": 158,
+        "text": "func (r *CustomerAccountRepository) UpdateCustomer(customer *domain.CustomerAccount) error {"
+      },
+      {
+        "line": 160,
+        "text": "UPDATE customers_accounting"
+      },
+      {
+        "line": 184,
+        "text": "SELECT 1 FROM chart_of_accounts a"
+      },
+      {
+        "line": 226,
+        "text": "func (r *CustomerAccountRepository) DeleteCustomer(tenantID, restaurantID, id int) error {"
+      },
+      {
+        "line": 242,
+        "text": "func (r *CustomerAccountRepository) GetCustomerStatement(tenantID, restaurantID, customerID int) ([]domain.CustomerStatementLine, error) {"
+      },
+      {
+        "line": 255,
+        "text": "SELECT"
+      },
+      {
+        "line": 298,
+        "text": "func (r *CustomerAccountRepository) generateCustomerCode(tenantID, restaurantID int) (string, error) {"
+      },
+      {
+        "line": 301,
+        "text": "SELECT COALESCE(MAX(CAST(RIGHT(customer_code, 4) AS INT)), 0) + 1"
+      },
+      {
+        "line": 315,
+        "text": "func scanCustomerAccount(scanner customerAccountScanner) (domain.CustomerAccount, error) {"
+      }
+    ],
+    "sha256": "4dfab0ee1a378a217459fcf8ea2bd7e068b97b7f34342d195d0b396c693ed130"
+  },
+  "backend/internal/repository/employee_repo.go": {
+    "lines": 450,
+    "symbols": [
+      {
+        "line": 17,
+        "text": "func NewEmployeeRepository(db *sql.DB) *EmployeeRepository {"
+      },
+      {
+        "line": 22,
+        "text": "func (r *EmployeeRepository) ListEmployeesPaged(ctx context.Context, tenantID, restaurantID, page, pageSize int) ([]domain.Employee, int, error) {"
+      },
+      {
+        "line": 35,
+        "text": "SELECT COUNT(*)"
+      },
+      {
+        "line": 46,
+        "text": "SELECT"
+      },
+      {
+        "line": 152,
+        "text": "func (r *EmployeeRepository) ListEmployees(tenantID, restaurantID int) ([]domain.Employee, error) {"
+      },
+      {
+        "line": 158,
+        "text": "func (r *EmployeeRepository) GetEmployeeByID(tenantID, restaurantID, id int) (*domain.Employee, error) {"
+      },
+      {
+        "line": 160,
+        "text": "SELECT"
+      },
+      {
+        "line": 248,
+        "text": "func (r *EmployeeRepository) CreateEmployee(employee *domain.Employee) (int, error) {"
+      },
+      {
+        "line": 250,
+        "text": "INSERT INTO employees ("
+      },
+      {
+        "line": 265,
+        "text": "SELECT 1 FROM employees manager"
+      },
+      {
+        "line": 320,
+        "text": "func (r *EmployeeRepository) UpdateEmployee(employee *domain.Employee) error {"
+      },
+      {
+        "line": 322,
+        "text": "UPDATE employees"
+      },
+      {
+        "line": 336,
+        "text": "SELECT 1 FROM employees manager"
+      },
+      {
+        "line": 369,
+        "text": "func (r *EmployeeRepository) DeleteEmployee(tenantID, restaurantID, id int) error {"
+      },
+      {
+        "line": 371,
+        "text": "UPDATE employees"
+      },
+      {
+        "line": 382,
+        "text": "func (r *EmployeeRepository) GetEmployeesByStatus(tenantID, restaurantID int, status string) ([]domain.Employee, error) {"
+      },
+      {
+        "line": 384,
+        "text": "SELECT"
+      },
+      {
+        "line": 426,
+        "text": "func (r *EmployeeRepository) GetEmployeeByCode(tenantID int, employeeCode string) (*domain.Employee, error) {"
+      },
+      {
+        "line": 428,
+        "text": "SELECT"
+      }
+    ],
+    "sha256": "bf53a493370b452c63691b56c4336fc3cbab0c7d8bf0448107bc1ff4b39ed1a7"
+  },
+  "backend/internal/repository/general_ledger_repo.go": {
+    "lines": 437,
+    "symbols": [
+      {
+        "line": 27,
+        "text": "func NewGeneralLedgerRepository(db *sql.DB, journalRepo *JournalEntryRepository) *GeneralLedgerRepository {"
+      },
+      {
+        "line": 37,
+        "text": "func (r *GeneralLedgerRepository) CreateAndPostAutoEntry(entry *domain.JournalEntry, postedBy int) (int, error) {"
+      },
+      {
+        "line": 64,
+        "text": "SELECT id, status"
+      },
+      {
+        "line": 129,
+        "text": "func (r *GeneralLedgerRepository) AppendEntry(tenantID, restaurantID, journalEntryID, postedBy int) error {"
+      },
+      {
+        "line": 136,
+        "text": "func (r *GeneralLedgerRepository) GetAccountBalance(tenantID, restaurantID, accountID int, asOf *time.Time) (float64, error) {"
+      },
+      {
+        "line": 138,
+        "text": "SELECT COALESCE(running_balance, 0)"
+      },
+      {
+        "line": 161,
+        "text": "func (r *GeneralLedgerRepository) GetLedgerByAccount(tenantID, restaurantID, accountID int, startDate, endDate *time.Time) ([]domain.GeneralLedgerLine, error) {"
+      },
+      {
+        "line": 166,
+        "text": "func (r *GeneralLedgerRepository) GetLedgerByAccountCursor("
+      },
+      {
+        "line": 185,
+        "text": "SELECT"
+      },
+      {
+        "line": 274,
+        "text": "func (r *GeneralLedgerRepository) GetLedgerPeriodSummaries(tenantID, restaurantID, accountID int, startDate, endDate *time.Time) ([]LedgerPeriodSummary, error) {"
+      },
+      {
+        "line": 283,
+        "text": "SELECT id, fiscal_period, entry_date, debit_amount, credit_amount, running_balance"
+      },
+      {
+        "line": 300,
+        "text": "SELECT"
+      },
+      {
+        "line": 309,
+        "text": "SELECT DISTINCT ON (fiscal_period)"
+      },
+      {
+        "line": 315,
+        "text": "SELECT"
+      },
+      {
+        "line": 354,
+        "text": "func (r *GeneralLedgerRepository) GetTrialBalance(tenantID, restaurantID int, asOf time.Time) ([]domain.TrialBalanceRow, error) {"
+      },
+      {
+        "line": 361,
+        "text": "SELECT DISTINCT ON (gl.account_id)"
+      },
+      {
+        "line": 370,
+        "text": "SELECT"
+      },
+      {
+        "line": 432,
+        "text": "func nullString(value string) interface{} {"
+      }
+    ],
+    "sha256": "3910a0b5ac1a5cf5f203b2686a925ff0d7d6f670049def41d18557fd77560e85"
+  },
+  "backend/internal/repository/insurance_repo.go": {
+    "lines": 213,
+    "symbols": [
+      {
+        "line": 16,
+        "text": "func NewInsuranceRepository(db *sql.DB) *InsuranceRepository {"
+      },
+      {
+        "line": 20,
+        "text": "func (r *InsuranceRepository) ListPaged(ctx context.Context, tenantID, restaurantID, page, pageSize int) ([]domain.InsuranceTracking, int, error) {"
+      },
+      {
+        "line": 36,
+        "text": "SELECT"
+      },
+      {
+        "line": 73,
+        "text": "func (r *InsuranceRepository) List(tenantID, restaurantID int) ([]domain.InsuranceTracking, error) {"
+      },
+      {
+        "line": 78,
+        "text": "func (r *InsuranceRepository) GetByID(tenantID, restaurantID, id int) (*domain.InsuranceTracking, error) {"
+      },
+      {
+        "line": 82,
+        "text": "SELECT"
+      },
+      {
+        "line": 110,
+        "text": "func (r *InsuranceRepository) Create(item *domain.InsuranceTracking) (int, error) {"
+      },
+      {
+        "line": 113,
+        "text": "INSERT INTO insurance_tracking ("
+      },
+      {
+        "line": 117,
+        "text": "SELECT $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12"
+      },
+      {
+        "line": 119,
+        "text": "SELECT 1 FROM employees e"
+      },
+      {
+        "line": 132,
+        "text": "func (r *InsuranceRepository) Update(tenantID, restaurantID int, item *domain.InsuranceTracking) error {"
+      },
+      {
+        "line": 134,
+        "text": "UPDATE insurance_tracking"
+      },
+      {
+        "line": 140,
+        "text": "SELECT 1 FROM employees e"
+      },
+      {
+        "line": 160,
+        "text": "func (r *InsuranceRepository) Delete(tenantID, restaurantID, id int) error {"
+      },
+      {
+        "line": 162,
+        "text": "DELETE FROM insurance_tracking"
+      },
+      {
+        "line": 178,
+        "text": "func (r *InsuranceRepository) GetExpiring(tenantID, restaurantID int, withinDays int) ([]domain.InsuranceTracking, error) {"
+      },
+      {
+        "line": 184,
+        "text": "SELECT"
+      }
+    ],
+    "sha256": "28ae0857d360d2641457fb70f9c09ee07f5178267bc0f710f31a9a38a02a6df5"
+  },
+  "backend/internal/repository/inventory_movement_repo.go": {
+    "lines": 251,
+    "symbols": [
+      {
+        "line": 17,
+        "text": "func NewInventoryMovementRepository(db *sql.DB) *InventoryMovementRepository {"
+      },
+      {
+        "line": 21,
+        "text": "func (r *InventoryMovementRepository) CreateMovement(movement *domain.InventoryMovement) (int, error) {"
+      },
+      {
+        "line": 28,
+        "text": "func (r *InventoryMovementRepository) CreateOrderSaleMovementIfAbsent(movement *domain.InventoryMovement) (int, error) {"
+      },
+      {
+        "line": 45,
+        "text": "INSERT INTO accounting_inventory_movement_events (tenant_id, restaurant_id, order_id, product_id)"
+      },
+      {
+        "line": 58,
+        "text": "SELECT id FROM inventory_movements"
+      },
+      {
+        "line": 84,
+        "text": "func createInventoryMovement(execer inventoryMovementExecer, movement *domain.InventoryMovement) (int, error) {"
+      },
+      {
+        "line": 87,
+        "text": "INSERT INTO inventory_movements ("
+      },
+      {
+        "line": 94,
+        "text": "SELECT 1 FROM products"
+      },
+      {
+        "line": 98,
+        "text": "SELECT 1 FROM orders"
+      },
+      {
+        "line": 102,
+        "text": "SELECT 1 FROM users"
+      },
+      {
+        "line": 128,
+        "text": "func (r *InventoryMovementRepository) ListMovements(tenantID, restaurantID int, productID int64) ([]domain.InventoryMovement, error) {"
+      },
+      {
+        "line": 130,
+        "text": "SELECT id, tenant_id, restaurant_id, product_id, order_id,"
+      },
+      {
+        "line": 158,
+        "text": "func (r *InventoryMovementRepository) GetProductCost(tenantID, restaurantID int, productID int64) (float64, error) {"
+      },
+      {
+        "line": 161,
+        "text": "SELECT unit_cost"
+      },
+      {
+        "line": 188,
+        "text": "SELECT cost"
+      },
+      {
+        "line": 209,
+        "text": "func scanInventoryMovement(scanner inventoryMovementScanner) (domain.InventoryMovement, error) {"
+      }
+    ],
+    "sha256": "c2ac628256a09e08db402f523e9db8978609332c08cb6cc3efc1cf89b9232094"
+  },
+  "backend/internal/repository/invoice_customer_repo.go": {
+    "lines": 847,
+    "symbols": [
+      {
+        "line": 20,
+        "text": "func NewCustomerInvoiceRepository(db *sql.DB, journalRepo *JournalEntryRepository, accountRepo *AccountRepository) *CustomerInvoiceRepository {"
+      },
+      {
+        "line": 28,
+        "text": "func (r *CustomerInvoiceRepository) ListInvoices(tenantID, restaurantID int) ([]domain.CustomerInvoice, error) {"
+      },
+      {
+        "line": 33,
+        "text": "func (r *CustomerInvoiceRepository) ListInvoicesPaged(tenantID, restaurantID, page, pageSize int) ([]domain.CustomerInvoice, int, error) {"
+      },
+      {
+        "line": 47,
+        "text": "SELECT COUNT(*)"
+      },
+      {
+        "line": 55,
+        "text": "SELECT"
+      },
+      {
+        "line": 94,
+        "text": "func (r *CustomerInvoiceRepository) GetInvoiceByID(tenantID, restaurantID, id int) (*domain.CustomerInvoice, error) {"
+      },
+      {
+        "line": 96,
+        "text": "SELECT"
+      },
+      {
+        "line": 128,
+        "text": "func (r *CustomerInvoiceRepository) CreateInvoice(invoice *domain.CustomerInvoice) (int, error) {"
+      },
+      {
+        "line": 153,
+        "text": "func (r *CustomerInvoiceRepository) UpdateInvoice(invoice *domain.CustomerInvoice) error {"
+      },
+      {
+        "line": 192,
+        "text": "UPDATE invoices_customer"
+      },
+      {
+        "line": 206,
+        "text": "SELECT 1 FROM customers_accounting c"
+      },
+      {
+        "line": 210,
+        "text": "SELECT 1 FROM orders o"
+      },
+      {
+        "line": 270,
+        "text": "UPDATE invoices_customer"
+      },
+      {
+        "line": 280,
+        "text": "func (r *CustomerInvoiceRepository) MarkAsSent(tenantID, restaurantID, id int, updatedBy *int) error {"
+      },
+      {
+        "line": 294,
+        "text": "UPDATE invoices_customer"
+      },
+      {
+        "line": 303,
+        "text": "func (r *CustomerInvoiceRepository) VoidInvoice(tenantID, restaurantID, id int, voidedBy int, reason string) error {"
+      },
+      {
+        "line": 327,
+        "text": "UPDATE invoices_customer"
+      },
+      {
+        "line": 341,
+        "text": "func (r *CustomerInvoiceRepository) GetOverdueInvoices(tenantID, restaurantID int) ([]domain.CustomerInvoice, error) {"
+      },
+      {
+        "line": 346,
+        "text": "func (r *CustomerInvoiceRepository) GetOverdueInvoicesPaged(tenantID, restaurantID, page, pageSize int) ([]domain.CustomerInvoice, int, error) {"
+      },
+      {
+        "line": 360,
+        "text": "SELECT COUNT(*)"
+      },
+      {
+        "line": 372,
+        "text": "SELECT"
+      },
+      {
+        "line": 410,
+        "text": "func (r *CustomerInvoiceRepository) createInvoiceTx(tx *sql.Tx, invoice *domain.CustomerInvoice) (int, error) {"
+      },
+      {
+        "line": 431,
+        "text": "INSERT INTO invoices_customer ("
+      },
+      {
+        "line": 440,
+        "text": "SELECT 1 FROM customers_accounting c"
+      },
+      {
+        "line": 444,
+        "text": "SELECT 1 FROM orders o"
+      },
+      {
+        "line": 486,
+        "text": "UPDATE invoices_customer"
+      },
+      {
+        "line": 497,
+        "text": "func (r *CustomerInvoiceRepository) syncJournalEntryTx(tx *sql.Tx, invoice *domain.CustomerInvoice, actor *int) (int, error) {"
+      },
+      {
+        "line": 519,
+        "text": "func (r *CustomerInvoiceRepository) buildJournalEntry(tx *sql.Tx, invoice *domain.CustomerInvoice, actor *int) (domain.JournalEntry, error) {"
+      },
+      {
+        "line": 596,
+        "text": "func (r *CustomerInvoiceRepository) lookupCustomerReceivableAccountTx(tx *sql.Tx, tenantID, restaurantID, customerID int) (int, error) {"
+      },
+      {
+        "line": 599,
+        "text": "SELECT receivable_account_id"
+      },
+      {
+        "line": 620,
+        "text": "func (r *CustomerInvoiceRepository) getInvoiceLines(invoiceID int) ([]domain.InvoiceLine, error) {"
+      },
+      {
+        "line": 622,
+        "text": "SELECT"
+      },
+      {
+        "line": 637,
+        "text": "func (r *CustomerInvoiceRepository) getInvoiceByIDTx(tx *sql.Tx, tenantID, restaurantID, id int) (*domain.CustomerInvoice, error) {"
+      },
+      {
+        "line": 639,
+        "text": "SELECT"
+      },
+      {
+        "line": 660,
+        "text": "SELECT"
+      },
+      {
+        "line": 682,
+        "text": "func (r *CustomerInvoiceRepository) insertCustomerInvoiceLinesTx(tx *sql.Tx, invoiceID, tenantID, restaurantID int, lines []domain.InvoiceLine) error {"
+      },
+      {
+        "line": 689,
+        "text": "INSERT INTO invoice_customer_lines ("
+      },
+      {
+        "line": 698,
+        "text": "SELECT 1 FROM chart_of_accounts a"
+      },
+      {
+        "line": 731,
+        "text": "func (r *CustomerInvoiceRepository) generateInvoiceNumberTx(tx *sql.Tx, tenantID, restaurantID int, invoiceDate time.Time) (string, error) {"
+      },
+      {
+        "line": 735,
+        "text": "SELECT COALESCE(MAX(CAST(RIGHT(invoice_number, 5) AS INT)), 0) + 1"
+      },
+      {
+        "line": 751,
+        "text": "func scanCustomerInvoice(scanner customerInvoiceScanner) (domain.CustomerInvoice, error) {"
+      },
+      {
+        "line": 811,
+        "text": "func scanInvoiceLines(rows *sql.Rows) ([]domain.InvoiceLine, error) {"
+      }
+    ],
+    "sha256": "9ea3cb54c007ea19471e17cdd002bb96b168e5af6289e218ac7be9b36c3b8216"
+  },
+  "backend/internal/repository/invoice_supplier_repo.go": {
+    "lines": 670,
+    "symbols": [
+      {
+        "line": 20,
+        "text": "func NewSupplierInvoiceRepository(db *sql.DB, journalRepo *JournalEntryRepository, accountRepo *AccountRepository) *SupplierInvoiceRepository {"
+      },
+      {
+        "line": 28,
+        "text": "func (r *SupplierInvoiceRepository) ListInvoices(tenantID, restaurantID int) ([]domain.SupplierInvoice, error) {"
+      },
+      {
+        "line": 33,
+        "text": "func (r *SupplierInvoiceRepository) ListInvoicesPaged(tenantID, restaurantID, page, pageSize int) ([]domain.SupplierInvoice, int, error) {"
+      },
+      {
+        "line": 47,
+        "text": "SELECT COUNT(*)"
+      },
+      {
+        "line": 55,
+        "text": "SELECT"
+      },
+      {
+        "line": 95,
+        "text": "func (r *SupplierInvoiceRepository) GetInvoiceByID(tenantID, restaurantID, id int) (*domain.SupplierInvoice, error) {"
+      },
+      {
+        "line": 97,
+        "text": "SELECT"
+      },
+      {
+        "line": 130,
+        "text": "func (r *SupplierInvoiceRepository) CreateInvoice(invoice *domain.SupplierInvoice) (int, error) {"
+      },
+      {
+        "line": 163,
+        "text": "INSERT INTO invoices_supplier ("
+      },
+      {
+        "line": 172,
+        "text": "SELECT 1 FROM suppliers s"
+      },
+      {
+        "line": 205,
+        "text": "func (r *SupplierInvoiceRepository) UpdateInvoice(invoice *domain.SupplierInvoice) error {"
+      },
+      {
+        "line": 244,
+        "text": "UPDATE invoices_supplier"
+      },
+      {
+        "line": 257,
+        "text": "SELECT 1 FROM suppliers s"
+      },
+      {
+        "line": 295,
+        "text": "func (r *SupplierInvoiceRepository) ApproveInvoice(tenantID, restaurantID, id int, actor *int) error {"
+      },
+      {
+        "line": 336,
+        "text": "UPDATE invoices_supplier"
+      },
+      {
+        "line": 350,
+        "text": "func (r *SupplierInvoiceRepository) VoidInvoice(tenantID, restaurantID, id int, voidedBy int, reason string) error {"
+      },
+      {
+        "line": 374,
+        "text": "UPDATE invoices_supplier"
+      },
+      {
+        "line": 388,
+        "text": "func (r *SupplierInvoiceRepository) getInvoiceLines(invoiceID int) ([]domain.InvoiceLine, error) {"
+      },
+      {
+        "line": 390,
+        "text": "SELECT"
+      },
+      {
+        "line": 405,
+        "text": "func (r *SupplierInvoiceRepository) getInvoiceByIDTx(tx *sql.Tx, tenantID, restaurantID, id int) (*domain.SupplierInvoice, error) {"
+      },
+      {
+        "line": 407,
+        "text": "SELECT"
+      },
+      {
+        "line": 427,
+        "text": "SELECT"
+      },
+      {
+        "line": 449,
+        "text": "func (r *SupplierInvoiceRepository) insertSupplierInvoiceLinesTx(tx *sql.Tx, invoiceID, tenantID, restaurantID int, lines []domain.InvoiceLine) error {"
+      },
+      {
+        "line": 456,
+        "text": "INSERT INTO invoice_supplier_lines ("
+      },
+      {
+        "line": 465,
+        "text": "SELECT 1 FROM chart_of_accounts a"
+      },
+      {
+        "line": 498,
+        "text": "func (r *SupplierInvoiceRepository) buildJournalEntry(tx *sql.Tx, invoice *domain.SupplierInvoice, actor *int) (domain.JournalEntry, error) {"
+      },
+      {
+        "line": 574,
+        "text": "func (r *SupplierInvoiceRepository) lookupSupplierPayableAccountTx(tx *sql.Tx, tenantID, restaurantID, supplierID int) (int, error) {"
+      },
+      {
+        "line": 577,
+        "text": "SELECT payable_account_id"
+      },
+      {
+        "line": 598,
+        "text": "func (r *SupplierInvoiceRepository) generateInvoiceNumberTx(tx *sql.Tx, tenantID, restaurantID int, invoiceDate time.Time) (string, error) {"
+      },
+      {
+        "line": 602,
+        "text": "SELECT COALESCE(MAX(CAST(RIGHT(invoice_number, 5) AS INT)), 0) + 1"
+      },
+      {
+        "line": 618,
+        "text": "func scanSupplierInvoice(scanner supplierInvoiceScanner) (domain.SupplierInvoice, error) {"
+      }
+    ],
+    "sha256": "60d9abd2651a414345198e1d410144a855c723ff47569d84e23446c0c9d5cd9a"
+  },
+  "backend/internal/repository/journal_entry_repo.go": {
+    "lines": 906,
+    "symbols": [
+      {
+        "line": 19,
+        "text": "func NewJournalEntryRepository(db *sql.DB) *JournalEntryRepository {"
+      },
+      {
+        "line": 23,
+        "text": "func (r *JournalEntryRepository) ListJournalEntries(tenantID, restaurantID int, filters domain.JournalEntryFilters) ([]domain.JournalEntry, error) {"
+      },
+      {
+        "line": 28,
+        "text": "func (r *JournalEntryRepository) ListJournalEntriesPaginated(tenantID, restaurantID int, filters domain.JournalEntryFilters, limit, offset int) ([]domain.JournalEntry, int, error) {"
+      },
+      {
+        "line": 46,
+        "text": "SELECT"
+      },
+      {
+        "line": 133,
+        "text": "func (r *JournalEntryRepository) GetJournalEntryByID(tenantID, restaurantID, id int) (*domain.JournalEntry, error) {"
+      },
+      {
+        "line": 135,
+        "text": "SELECT"
+      },
+      {
+        "line": 162,
+        "text": "func (r *JournalEntryRepository) CreateJournalEntry(entry *domain.JournalEntry) (int, error) {"
+      },
+      {
+        "line": 181,
+        "text": "func (r *JournalEntryRepository) CreateJournalEntryTx(tx *sql.Tx, entry *domain.JournalEntry) (int, error) {"
+      },
+      {
+        "line": 212,
+        "text": "INSERT INTO journal_entries ("
+      },
+      {
+        "line": 260,
+        "text": "func (r *JournalEntryRepository) UpdateDraftEntry(entry *domain.JournalEntry) error {"
+      },
+      {
+        "line": 295,
+        "text": "UPDATE journal_entries"
+      },
+      {
+        "line": 343,
+        "text": "func (r *JournalEntryRepository) PostEntry(tenantID, restaurantID, id, postedBy int) error {"
+      },
+      {
+        "line": 357,
+        "text": "func (r *JournalEntryRepository) PostEntryTx(tx *sql.Tx, tenantID, restaurantID, id, postedBy int) error {"
+      },
+      {
+        "line": 402,
+        "text": "UPDATE journal_entries"
+      },
+      {
+        "line": 426,
+        "text": "func (r *JournalEntryRepository) VoidEntry(tenantID, restaurantID, id, voidedBy int, reason string) error {"
+      },
+      {
+        "line": 440,
+        "text": "func (r *JournalEntryRepository) VoidEntryTx(tx *sql.Tx, tenantID, restaurantID, id, voidedBy int, reason string) error {"
+      },
+      {
+        "line": 486,
+        "text": "UPDATE journal_entries"
+      },
+      {
+        "line": 522,
+        "text": "func (r *JournalEntryRepository) getPostingLinesTx(tx *sql.Tx, journalEntryID int) ([]postingLine, error) {"
+      },
+      {
+        "line": 524,
+        "text": "SELECT"
+      },
+      {
+        "line": 552,
+        "text": "func (r *JournalEntryRepository) appendGeneralLedgerTx(tx *sql.Tx, tenantID, restaurantID, journalEntryID int, entryDate time.Time, fiscalPeriod string, lines []postingLine) error {"
+      },
+      {
+        "line": 556,
+        "text": "SELECT COALESCE(running_balance, 0)"
+      },
+      {
+        "line": 571,
+        "text": "INSERT INTO general_ledger ("
+      },
+      {
+        "line": 594,
+        "text": "UPDATE chart_of_accounts"
+      },
+      {
+        "line": 605,
+        "text": "func (r *JournalEntryRepository) getLines(journalEntryID int) ([]domain.JournalEntryLine, error) {"
+      },
+      {
+        "line": 607,
+        "text": "SELECT"
+      },
+      {
+        "line": 650,
+        "text": "func (r *JournalEntryRepository) insertLinesTx(tx *sql.Tx, journalEntryID, tenantID, restaurantID int, lines []domain.JournalEntryLine) error {"
+      },
+      {
+        "line": 666,
+        "text": "INSERT INTO journal_entry_lines ("
+      },
+      {
+        "line": 695,
+        "text": "func lookupAccountForLine(tx *sql.Tx, tenantID, restaurantID, accountID int) (string, bool, error) {"
+      },
+      {
+        "line": 701,
+        "text": "SELECT account_code, is_header"
+      },
+      {
+        "line": 714,
+        "text": "func validateJournalLines(lines []domain.JournalEntryLine) (float64, float64, error) {"
+      },
+      {
+        "line": 745,
+        "text": "func validatePostingLines(lines []postingLine) (float64, float64, error) {"
+      },
+      {
+        "line": 758,
+        "text": "func formatFiscalPeriod(entryDate time.Time) string {"
+      },
+      {
+        "line": 762,
+        "text": "func (r *JournalEntryRepository) ensureFiscalPeriodOpenTx(tx *sql.Tx, tenantID, restaurantID int, entryDate time.Time, fiscalPeriod string) error {"
+      },
+      {
+        "line": 765,
+        "text": "SELECT status"
+      },
+      {
+        "line": 785,
+        "text": "func calculateBalanceDelta(normalBalance string, debitAmount, creditAmount float64) float64 {"
+      },
+      {
+        "line": 792,
+        "text": "func (r *JournalEntryRepository) generateEntryNumberTx(tx *sql.Tx, tenantID, restaurantID int, entryDate time.Time) (string, error) {"
+      },
+      {
+        "line": 798,
+        "text": "SELECT COALESCE(MAX(CAST(RIGHT(entry_number, 5) AS INT)), 0) + 1"
+      },
+      {
+        "line": 815,
+        "text": "func scanJournalEntry(scanner journalEntryScanner) (domain.JournalEntry, error) {"
+      }
+    ],
+    "sha256": "928e77b16640a7bc8339920c57865e7eee71a41bd389b8b4b7aa775ff56cbd35"
+  },
+  "backend/internal/repository/kds_repo.go": {
+    "lines": 862,
+    "symbols": [
+      {
+        "line": 21,
+        "text": "func defaultKDSSettings(tenantID, restaurantID int64) *domain.KDSSettings {"
+      },
+      {
+        "line": 34,
+        "text": "func isMissingColumnError(err error, columnName string) bool {"
+      },
+      {
+        "line": 44,
+        "text": "func isMissingRelationError(err error, relationName string) bool {"
+      },
+      {
+        "line": 55,
+        "text": "func NewKDSRepository(db *sql.DB) *KDSRepository {"
+      },
+      {
+        "line": 60,
+        "text": "func (r *KDSRepository) EnqueueOrder(ctx context.Context, tenantID, restaurantID, orderID int64) (*domain.KDSOrder, error) {"
+      },
+      {
+        "line": 74,
+        "text": "INSERT INTO kds_queue ("
+      },
+      {
+        "line": 117,
+        "text": "func (r *KDSRepository) GetQueue(ctx context.Context, tenantID, restaurantID int64, statuses []string) ([]domain.KDSOrder, error) {"
+      },
+      {
+        "line": 126,
+        "text": "SELECT"
+      },
+      {
+        "line": 191,
+        "text": "func (r *KDSRepository) BumpOrder(ctx context.Context, tenantID, restaurantID, queueID, userID int64) (*domain.KDSOrder, error) {"
+      },
+      {
+        "line": 208,
+        "text": "SELECT status, order_id"
+      },
+      {
+        "line": 227,
+        "text": "UPDATE kds_queue"
+      },
+      {
+        "line": 267,
+        "text": "func (r *KDSRepository) RecallOrder(ctx context.Context, tenantID, restaurantID, queueID int64) (*domain.KDSOrder, error) {"
+      },
+      {
+        "line": 276,
+        "text": "UPDATE kds_queue"
+      },
+      {
+        "line": 301,
+        "text": "func (r *KDSRepository) GetStats(ctx context.Context, tenantID, restaurantID int64) (*domain.KDSStats, error) {"
+      },
+      {
+        "line": 310,
+        "text": "SELECT"
+      },
+      {
+        "line": 341,
+        "text": "func (r *KDSRepository) GetAnalytics(ctx context.Context, tenantID, restaurantID int64) (*domain.KDSAnalytics, error) {"
+      },
+      {
+        "line": 355,
+        "text": "SELECT"
+      },
+      {
+        "line": 374,
+        "text": "SELECT generate_series("
+      },
+      {
+        "line": 381,
+        "text": "SELECT"
+      },
+      {
+        "line": 391,
+        "text": "SELECT"
+      },
+      {
+        "line": 420,
+        "text": "SELECT generate_series(0, 23) AS hour"
+      },
+      {
+        "line": 422,
+        "text": "SELECT"
+      },
+      {
+        "line": 456,
+        "text": "func (r *KDSRepository) GetSettings(ctx context.Context, tenantID, restaurantID int64) (*domain.KDSSettings, error) {"
+      },
+      {
+        "line": 465,
+        "text": "SELECT"
+      },
+      {
+        "line": 489,
+        "text": "SELECT"
+      },
+      {
+        "line": 533,
+        "text": "func (r *KDSRepository) UpdateSettings(ctx context.Context, settings *domain.KDSSettings) error {"
+      },
+      {
+        "line": 545,
+        "text": "INSERT INTO kds_settings ("
+      },
+      {
+        "line": 576,
+        "text": "INSERT INTO kds_settings ("
+      },
+      {
+        "line": 612,
+        "text": "func (r *KDSRepository) buildQueuePayload(ctx context.Context, tenantID, restaurantID, orderID int64) (string, string, string, []byte, error) {"
+      },
+      {
+        "line": 614,
+        "text": "SELECT order_number, customer_name, COALESCE(notes, '')"
+      },
+      {
+        "line": 631,
+        "text": "SELECT"
+      },
+      {
+        "line": 672,
+        "text": "func (r *KDSRepository) getOrderByQueueID(ctx context.Context, tenantID, restaurantID, queueID int64) (*domain.KDSOrder, error) {"
+      },
+      {
+        "line": 674,
+        "text": "SELECT"
+      },
+      {
+        "line": 698,
+        "text": "func (r *KDSRepository) syncOrderStatusAfterBump("
+      },
+      {
+        "line": 719,
+        "text": "UPDATE orders"
+      },
+      {
+        "line": 737,
+        "text": "INSERT INTO order_status_history (order_id, old_status, new_status, changed_by, change_reason)"
+      },
+      {
+        "line": 748,
+        "text": "func nextBumpStatus(currentStatus string) (string, error) {"
+      },
+      {
+        "line": 769,
+        "text": "func scanKDSOrder(scanner kdsScanner) (*domain.KDSOrder, error) {"
+      }
+    ],
+    "sha256": "53a16d9478946a12b4487fb49ca752c6c6a6ca2ce31f4046fa0ada80b15a9935"
+  },
+  "backend/internal/repository/leave_repo.go": {
+    "lines": 350,
+    "symbols": [
+      {
+        "line": 17,
+        "text": "func NewLeaveRepository(db *sql.DB) *LeaveRepository {"
+      },
+      {
+        "line": 22,
+        "text": "func (r *LeaveRepository) ListLeavesPaged(ctx context.Context, tenantID, restaurantID int, startDate, endDate time.Time, page, pageSize int) ([]domain.Leave, int, error) {"
+      },
+      {
+        "line": 35,
+        "text": "SELECT COUNT(*)"
+      },
+      {
+        "line": 46,
+        "text": "SELECT"
+      },
+      {
+        "line": 90,
+        "text": "func (r *LeaveRepository) ListLeaves(tenantID, restaurantID int, startDate, endDate time.Time) ([]domain.Leave, error) {"
+      },
+      {
+        "line": 96,
+        "text": "func (r *LeaveRepository) GetLeaveByID(tenantID, restaurantID, id int) (*domain.Leave, error) {"
+      },
+      {
+        "line": 98,
+        "text": "SELECT"
+      },
+      {
+        "line": 168,
+        "text": "func (r *LeaveRepository) CreateLeave(leave *domain.Leave) (int, error) {"
+      },
+      {
+        "line": 170,
+        "text": "INSERT INTO leaves ("
+      },
+      {
+        "line": 176,
+        "text": "SELECT $1, $2, e.id, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16"
+      },
+      {
+        "line": 205,
+        "text": "func (r *LeaveRepository) UpdateLeave(leave *domain.Leave) error {"
+      },
+      {
+        "line": 207,
+        "text": "UPDATE leaves"
+      },
+      {
+        "line": 228,
+        "text": "func (r *LeaveRepository) ApproveLeave(tenantID, restaurantID, id int, approvedBy int, notes string) error {"
+      },
+      {
+        "line": 230,
+        "text": "UPDATE leaves"
+      },
+      {
+        "line": 243,
+        "text": "func (r *LeaveRepository) RejectLeave(tenantID, restaurantID, id int, rejectedBy int, reason string) error {"
+      },
+      {
+        "line": 245,
+        "text": "UPDATE leaves"
+      },
+      {
+        "line": 258,
+        "text": "func (r *LeaveRepository) CancelLeave(tenantID, restaurantID, id int, cancelledBy int, reason string) error {"
+      },
+      {
+        "line": 260,
+        "text": "UPDATE leaves"
+      },
+      {
+        "line": 273,
+        "text": "func (r *LeaveRepository) GetPendingLeaves(tenantID, restaurantID int) ([]domain.Leave, error) {"
+      },
+      {
+        "line": 275,
+        "text": "SELECT"
+      },
+      {
+        "line": 313,
+        "text": "func (r *LeaveRepository) GetEmployeeLeaves(tenantID, restaurantID, employeeID int) ([]domain.Leave, error) {"
+      },
+      {
+        "line": 315,
+        "text": "SELECT"
+      }
+    ],
+    "sha256": "0946004221585161a4490c633755beceb0bd283242b247b46075bae9da7eef24"
+  },
+  "backend/internal/repository/notification_repo.go": {
+    "lines": 292,
+    "symbols": [
+      {
+        "line": 22,
+        "text": "func NewNotificationRepository(db *sql.DB) *NotificationRepository {"
+      },
+      {
+        "line": 26,
+        "text": "func (r *NotificationRepository) CreateNotification(ctx context.Context, notification *domain.Notification) (*domain.Notification, error) {"
+      },
+      {
+        "line": 48,
+        "text": "func (r *NotificationRepository) GetNotification(ctx context.Context, userID, tenantID, restaurantID, notificationID int) (*domain.Notification, error) {"
+      },
+      {
+        "line": 66,
+        "text": "func (r *NotificationRepository) ListNotifications(ctx context.Context, userID, tenantID, restaurantID int, filters *domain.NotificationFilters) (*domain.NotificationListResponse, error) {"
+      },
+      {
+        "line": 156,
+        "text": "func (r *NotificationRepository) MarkAsRead(ctx context.Context, userID, tenantID, restaurantID, notificationID int) error {"
+      },
+      {
+        "line": 160,
+        "text": "func (r *NotificationRepository) MarkAsUnread(ctx context.Context, userID, tenantID, restaurantID, notificationID int) error {"
+      },
+      {
+        "line": 164,
+        "text": "func (r *NotificationRepository) updateReadState(ctx context.Context, userID, tenantID, restaurantID, notificationID int, read bool) error {"
+      },
+      {
+        "line": 188,
+        "text": "func (r *NotificationRepository) MarkAllAsRead(ctx context.Context, userID, tenantID, restaurantID int) error {"
+      },
+      {
+        "line": 200,
+        "text": "func (r *NotificationRepository) DeleteNotification(ctx context.Context, userID, tenantID, restaurantID, notificationID int) error {"
+      },
+      {
+        "line": 222,
+        "text": "func (r *NotificationRepository) GetUnreadCount(ctx context.Context, userID, tenantID, restaurantID int) (int, error) {"
+      },
+      {
+        "line": 234,
+        "text": "func (r *NotificationRepository) GetNotificationStats(ctx context.Context, userID, tenantID, restaurantID int) (*domain.NotificationStats, error) {"
+      },
+      {
+        "line": 277,
+        "text": "func scanNotification(row interface{ Scan(...any) error }) (domain.Notification, error) {"
+      }
+    ],
+    "sha256": "01d9c7b56237571823434c2aad97dc7a02a1cbcb6131ca93edd7efb5729a16df"
+  },
+  "backend/internal/repository/order_cancellation.go": {
+    "lines": 23,
+    "symbols": [
+      {
+        "line": 14,
+        "text": "func (r *OrderRepository) CancelOrderItem(ctx context.Context, request domain.OrderItemCancellation) (json.RawMessage, error) {"
+      }
+    ],
+    "sha256": "116f119b211d05b6b7c658a59de8233596b4c720b6fc1aff60defc9357064ef4"
+  },
+  "backend/internal/repository/payment_acct_repo.go": {
+    "lines": 738,
+    "symbols": [
+      {
+        "line": 20,
+        "text": "func NewPaymentAccountingRepository(db *sql.DB, journalRepo *JournalEntryRepository, accountRepo *AccountRepository, bankRepo *BankAccountRepository) *PaymentAccountingRepository {"
+      },
+      {
+        "line": 29,
+        "text": "func (r *PaymentAccountingRepository) CreatePaymentReceived(payment *domain.PaymentReceived) (int, error) {"
+      },
+      {
+        "line": 72,
+        "text": "INSERT INTO payments_received ("
+      },
+      {
+        "line": 142,
+        "text": "UPDATE payments_received"
+      },
+      {
+        "line": 156,
+        "text": "UPDATE customers_accounting"
+      },
+      {
+        "line": 175,
+        "text": "func (r *PaymentAccountingRepository) CreatePaymentMade(payment *domain.PaymentMade) (int, error) {"
+      },
+      {
+        "line": 218,
+        "text": "INSERT INTO payments_made ("
+      },
+      {
+        "line": 288,
+        "text": "UPDATE payments_made"
+      },
+      {
+        "line": 302,
+        "text": "UPDATE suppliers"
+      },
+      {
+        "line": 321,
+        "text": "func (r *PaymentAccountingRepository) ListPaymentsReceived(tenantID, restaurantID int) ([]domain.PaymentReceived, error) {"
+      },
+      {
+        "line": 326,
+        "text": "func (r *PaymentAccountingRepository) ListPaymentsReceivedPaged(tenantID, restaurantID, page, pageSize int) ([]domain.PaymentReceived, int, error) {"
+      },
+      {
+        "line": 340,
+        "text": "SELECT COUNT(*)"
+      },
+      {
+        "line": 348,
+        "text": "SELECT"
+      },
+      {
+        "line": 379,
+        "text": "func (r *PaymentAccountingRepository) ListPaymentsMade(tenantID, restaurantID int) ([]domain.PaymentMade, error) {"
+      },
+      {
+        "line": 384,
+        "text": "func (r *PaymentAccountingRepository) ListPaymentsMadePaged(tenantID, restaurantID, page, pageSize int) ([]domain.PaymentMade, int, error) {"
+      },
+      {
+        "line": 398,
+        "text": "SELECT COUNT(*)"
+      },
+      {
+        "line": 406,
+        "text": "SELECT"
+      },
+      {
+        "line": 437,
+        "text": "func (r *PaymentAccountingRepository) resolveCustomerPaymentContextTx(tx *sql.Tx, payment *domain.PaymentReceived) (int, int, *int, float64, error) {"
+      },
+      {
+        "line": 445,
+        "text": "SELECT ic.customer_id, c.receivable_account_id, ic.balance_due"
+      },
+      {
+        "line": 472,
+        "text": "SELECT receivable_account_id"
+      },
+      {
+        "line": 492,
+        "text": "func (r *PaymentAccountingRepository) resolveSupplierPaymentContextTx(tx *sql.Tx, payment *domain.PaymentMade) (int, int, *int, float64, error) {"
+      },
+      {
+        "line": 500,
+        "text": "SELECT inv.supplier_id, s.payable_account_id, inv.balance_due"
+      },
+      {
+        "line": 527,
+        "text": "SELECT payable_account_id"
+      },
+      {
+        "line": 547,
+        "text": "func (r *PaymentAccountingRepository) resolveCollectionAccountTx(tx *sql.Tx, tenantID, restaurantID int, bankAccountID *int, paymentMethod string) (int, error) {"
+      },
+      {
+        "line": 551,
+        "text": "SELECT gl_account_id"
+      },
+      {
+        "line": 573,
+        "text": "func (r *PaymentAccountingRepository) applyCustomerInvoicePaymentTx(tx *sql.Tx, tenantID, restaurantID, invoiceID int, amount float64) error {"
+      },
+      {
+        "line": 575,
+        "text": "UPDATE invoices_customer"
+      },
+      {
+        "line": 590,
+        "text": "func (r *PaymentAccountingRepository) applySupplierInvoicePaymentTx(tx *sql.Tx, tenantID, restaurantID, invoiceID int, amount float64) error {"
+      },
+      {
+        "line": 592,
+        "text": "UPDATE invoices_supplier"
+      },
+      {
+        "line": 607,
+        "text": "func (r *PaymentAccountingRepository) generatePaymentNumberTx(tx *sql.Tx, mode string, tenantID, restaurantID int, paymentDate time.Time) (string, error) {"
+      },
+      {
+        "line": 616,
+        "text": "SELECT COALESCE(MAX(CAST(RIGHT(payment_number, 5) AS INT)), 0) + 1"
+      },
+      {
+        "line": 634,
+        "text": "func scanPaymentReceived(scanner paymentReceivedScanner) (domain.PaymentReceived, error) {"
+      },
+      {
+        "line": 689,
+        "text": "func scanPaymentMade(scanner paymentMadeScanner) (domain.PaymentMade, error) {"
+      }
+    ],
+    "sha256": "5acac51df03cf661764efd68388f789a95ecb79532be6b64a57eb7239e0b8856"
+  },
+  "backend/internal/repository/performance_review_repo.go": {
+    "lines": 372,
+    "symbols": [
+      {
+        "line": 16,
+        "text": "func NewPerformanceReviewRepository(db *sql.DB) *PerformanceReviewRepository {"
+      },
+      {
+        "line": 20,
+        "text": "func (r *PerformanceReviewRepository) List(tenantID, restaurantID int) ([]domain.PerformanceReview, error) {"
+      },
+      {
+        "line": 25,
+        "text": "func (r *PerformanceReviewRepository) ListPaginated(tenantID, restaurantID, limit, offset int) ([]domain.PerformanceReview, int, error) {"
+      },
+      {
+        "line": 38,
+        "text": "SELECT COUNT(*)"
+      },
+      {
+        "line": 46,
+        "text": "SELECT"
+      },
+      {
+        "line": 103,
+        "text": "func (r *PerformanceReviewRepository) GetByID(tenantID, restaurantID, id int) (*domain.PerformanceReview, error) {"
+      },
+      {
+        "line": 107,
+        "text": "SELECT"
+      },
+      {
+        "line": 154,
+        "text": "func (r *PerformanceReviewRepository) Create(review *domain.PerformanceReview) (int, error) {"
+      },
+      {
+        "line": 163,
+        "text": "INSERT INTO performance_reviews ("
+      },
+      {
+        "line": 181,
+        "text": "func (r *PerformanceReviewRepository) Update(tenantID, restaurantID int, review *domain.PerformanceReview) error {"
+      },
+      {
+        "line": 189,
+        "text": "UPDATE performance_reviews"
+      },
+      {
+        "line": 225,
+        "text": "func (r *PerformanceReviewRepository) Delete(tenantID, restaurantID, id int) error {"
+      },
+      {
+        "line": 227,
+        "text": "DELETE FROM performance_reviews"
+      },
+      {
+        "line": 243,
+        "text": "func (r *PerformanceReviewRepository) Acknowledge(tenantID, restaurantID, id, acknowledgedBy int) error {"
+      },
+      {
+        "line": 245,
+        "text": "UPDATE performance_reviews"
+      },
+      {
+        "line": 266,
+        "text": "func (r *PerformanceReviewRepository) Complete(tenantID, restaurantID, id int) error {"
+      },
+      {
+        "line": 268,
+        "text": "UPDATE performance_reviews"
+      },
+      {
+        "line": 288,
+        "text": "func (r *PerformanceReviewRepository) GetEmployeeHistory(tenantID, restaurantID, employeeID int) ([]domain.PerformanceReview, float64, error) {"
+      },
+      {
+        "line": 290,
+        "text": "SELECT"
+      },
+      {
+        "line": 347,
+        "text": "func normalizePerformanceStatus(status string) string {"
+      },
+      {
+        "line": 358,
+        "text": "func calculateWeightedRating(goals, technical, communication, leadership float64) float64 {"
+      },
+      {
+        "line": 363,
+        "text": "func parseDateOrDefault(raw string) time.Time {"
+      }
+    ],
+    "sha256": "53b3964ddb1dacab93578c2be1e247847a9779cf10694ddb29ecd2bf7ce9ac7c"
+  },
+  "backend/internal/repository/product_repo.go": {
+    "lines": 625,
+    "symbols": [
+      {
+        "line": 20,
+        "text": "func NewProductRepository(db *sql.DB) *ProductRepository {"
+      },
+      {
+        "line": 25,
+        "text": "func (r *ProductRepository) CreateProduct(product *domain.Product) (*domain.Product, error) {"
+      },
+      {
+        "line": 29,
+        "text": "func (r *ProductRepository) CreateProductContext(parent context.Context, product *domain.Product) (*domain.Product, error) {"
+      },
+      {
+        "line": 38,
+        "text": "INSERT INTO products ("
+      },
+      {
+        "line": 49,
+        "text": "SELECT"
+      },
+      {
+        "line": 55,
+        "text": "SELECT 1 FROM categories WHERE id = $3 AND tenant_id = $1 AND restaurant_id = $2"
+      },
+      {
+        "line": 166,
+        "text": "func (r *ProductRepository) GetProductByID(tenantID, restaurantID, productID int) (*domain.Product, error) {"
+      },
+      {
+        "line": 168,
+        "text": "SELECT"
+      },
+      {
+        "line": 253,
+        "text": "func (r *ProductRepository) ListProducts(tenantID, restaurantID int, filters *ProductFilters) (*domain.ProductListResponse, error) {"
+      },
+      {
+        "line": 255,
+        "text": "SELECT"
+      },
+      {
+        "line": 356,
+        "text": "func (r *ProductRepository) DeleteProduct(tenantID, restaurantID, productID int, deletedBy int) error {"
+      },
+      {
+        "line": 358,
+        "text": "UPDATE products"
+      },
+      {
+        "line": 381,
+        "text": "func (r *ProductRepository) ListPublic(tenantID, restaurantID int, lang string) ([]domain.Product, error) {"
+      },
+      {
+        "line": 383,
+        "text": "SELECT"
+      },
+      {
+        "line": 437,
+        "text": "func (r *ProductRepository) ListByCategoryPublic(tenantID, restaurantID, categoryID int, lang string) ([]domain.Product, error) {"
+      },
+      {
+        "line": 439,
+        "text": "SELECT"
+      },
+      {
+        "line": 491,
+        "text": "func (r *ProductRepository) SearchPublic(tenantID, restaurantID int, queryStr string, lang string) ([]domain.Product, error) {"
+      },
+      {
+        "line": 494,
+        "text": "SELECT"
+      },
+      {
+        "line": 546,
+        "text": "func (r *ProductRepository) GetProductImages(tenantID, restaurantID, productID int) ([]domain.ProductImage, error) {"
+      },
+      {
+        "line": 574,
+        "text": "func (r *ProductRepository) GetLowStockAlerts(tenantID, restaurantID int) ([]domain.Product, error) {"
+      },
+      {
+        "line": 576,
+        "text": "SELECT"
+      }
+    ],
+    "sha256": "92c8eee1bba026a087558f03ef97b977d73aa609b97350b741f1488e23771de2"
+  },
+  "backend/internal/repository/resignation_repo.go": {
+    "lines": 229,
+    "symbols": [
+      {
+        "line": 16,
+        "text": "func NewResignationRepository(db *sql.DB) *ResignationRepository {"
+      },
+      {
+        "line": 20,
+        "text": "func (r *ResignationRepository) ListPaged(ctx context.Context, tenantID, restaurantID, page, pageSize int) ([]domain.Resignation, int, error) {"
+      },
+      {
+        "line": 36,
+        "text": "SELECT"
+      },
+      {
+        "line": 73,
+        "text": "func (r *ResignationRepository) List(tenantID, restaurantID int) ([]domain.Resignation, error) {"
+      },
+      {
+        "line": 78,
+        "text": "func (r *ResignationRepository) GetByID(tenantID, restaurantID, id int) (*domain.Resignation, error) {"
+      },
+      {
+        "line": 82,
+        "text": "SELECT"
+      },
+      {
+        "line": 110,
+        "text": "func (r *ResignationRepository) Create(item *domain.Resignation) (int, error) {"
+      },
+      {
+        "line": 116,
+        "text": "INSERT INTO resignations ("
+      },
+      {
+        "line": 120,
+        "text": "SELECT $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13"
+      },
+      {
+        "line": 122,
+        "text": "SELECT 1 FROM employees e"
+      },
+      {
+        "line": 135,
+        "text": "func (r *ResignationRepository) Update(tenantID, restaurantID int, item *domain.Resignation) error {"
+      },
+      {
+        "line": 137,
+        "text": "UPDATE resignations"
+      },
+      {
+        "line": 143,
+        "text": "SELECT 1 FROM employees e"
+      },
+      {
+        "line": 163,
+        "text": "func (r *ResignationRepository) Delete(tenantID, restaurantID, id int) error {"
+      },
+      {
+        "line": 165,
+        "text": "DELETE FROM resignations"
+      },
+      {
+        "line": 181,
+        "text": "func (r *ResignationRepository) Acknowledge(tenantID, restaurantID, id int) error {"
+      },
+      {
+        "line": 183,
+        "text": "UPDATE resignations"
+      },
+      {
+        "line": 200,
+        "text": "func (r *ResignationRepository) Complete(tenantID, restaurantID, id int, settlementAmount float64) error {"
+      },
+      {
+        "line": 202,
+        "text": "UPDATE resignations"
+      },
+      {
+        "line": 222,
+        "text": "func (r *ResignationRepository) CalculateSettlement(item *domain.Resignation) float64 {"
+      },
+      {
+        "line": 227,
+        "text": "func calculateNoticePeriodDays(resignationDate, lastWorkingDate time.Time) int {"
+      }
+    ],
+    "sha256": "c6c9b0d01c727ffcd0a337a8d7e3deef512266da12e4cdcabadac3a9c58a354d"
+  },
+  "backend/internal/repository/restaurant_theme_repo.go": {
+    "lines": 345,
+    "symbols": [
+      {
+        "line": 20,
+        "text": "func NewRestaurantThemeRepository(db *sql.DB) *RestaurantThemeRepository {"
+      },
+      {
+        "line": 25,
+        "text": "func (r *RestaurantThemeRepository) CreateTheme(ctx context.Context, theme *domain.RestaurantTheme) (*domain.RestaurantTheme, error) {"
+      },
+      {
+        "line": 27,
+        "text": "INSERT INTO restaurant_themes (restaurant_id, tenant_id, primary_color, secondary_color, accent_color, logo_url, font_family, created_at, updated_at)"
+      },
+      {
+        "line": 64,
+        "text": "func (r *RestaurantThemeRepository) GetThemeByRestaurantID(ctx context.Context, restaurantID int64, tenantID int64) (*domain.RestaurantTheme, error) {"
+      },
+      {
+        "line": 66,
+        "text": "SELECT id, restaurant_id, tenant_id, primary_color, secondary_color, accent_color, logo_url, font_family, created_at, updated_at"
+      },
+      {
+        "line": 103,
+        "text": "func (r *RestaurantThemeRepository) UpdateTheme(ctx context.Context, theme *domain.RestaurantTheme) error {"
+      },
+      {
+        "line": 105,
+        "text": "UPDATE restaurant_themes"
+      },
+      {
+        "line": 139,
+        "text": "func (r *RestaurantThemeRepository) CreateSection(ctx context.Context, section *domain.ThemeSection) (*domain.ThemeSection, error) {"
+      },
+      {
+        "line": 146,
+        "text": "INSERT INTO theme_sections (theme_id, section_type, \"order\", is_visible, title, subtitle, description, background_image, button_text, button_link, content, created_at, updated_at)"
+      },
+      {
+        "line": 200,
+        "text": "func (r *RestaurantThemeRepository) GetSectionsByThemeID(ctx context.Context, themeID int64) ([]domain.ThemeSection, error) {"
+      },
+      {
+        "line": 202,
+        "text": "SELECT id, theme_id, section_type, \"order\", is_visible, title, subtitle, description, background_image, button_text, button_link, content, created_at, updated_at"
+      },
+      {
+        "line": 259,
+        "text": "func (r *RestaurantThemeRepository) UpdateSection(ctx context.Context, section *domain.ThemeSection) error {"
+      },
+      {
+        "line": 266,
+        "text": "UPDATE theme_sections"
+      },
+      {
+        "line": 306,
+        "text": "func (r *RestaurantThemeRepository) DeleteSection(ctx context.Context, sectionID int64, themeID int64) error {"
+      },
+      {
+        "line": 308,
+        "text": "DELETE FROM theme_sections"
+      },
+      {
+        "line": 330,
+        "text": "func (r *RestaurantThemeRepository) UpdateSectionOrder(ctx context.Context, themeID int64, orders map[int64]int) error {"
+      },
+      {
+        "line": 333,
+        "text": "UPDATE theme_sections"
+      }
+    ],
+    "sha256": "7e3325376ae781abf89d48e3194d6adf8cb5de38142c2c4a701cbf4099345f47"
+  },
+  "backend/internal/repository/salary_repo.go": {
+    "lines": 303,
+    "symbols": [
+      {
+        "line": 17,
+        "text": "func NewSalaryRepository(db *sql.DB) *SalaryRepository {"
+      },
+      {
+        "line": 22,
+        "text": "func (r *SalaryRepository) ListSalariesPaged(ctx context.Context, tenantID, restaurantID int, startDate, endDate time.Time, page, pageSize int) ([]domain.Salary, int, error) {"
+      },
+      {
+        "line": 35,
+        "text": "SELECT COUNT(*)"
+      },
+      {
+        "line": 46,
+        "text": "SELECT"
+      },
+      {
+        "line": 107,
+        "text": "func (r *SalaryRepository) ListSalaries(tenantID, restaurantID int, startDate, endDate time.Time) ([]domain.Salary, error) {"
+      },
+      {
+        "line": 113,
+        "text": "func (r *SalaryRepository) GetSalaryByID(tenantID, restaurantID, id int) (*domain.Salary, error) {"
+      },
+      {
+        "line": 115,
+        "text": "SELECT"
+      },
+      {
+        "line": 176,
+        "text": "func (r *SalaryRepository) CreateSalary(salary *domain.Salary) (int, error) {"
+      },
+      {
+        "line": 178,
+        "text": "INSERT INTO salaries ("
+      },
+      {
+        "line": 187,
+        "text": "SELECT $1, $2, e.id, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13,"
+      },
+      {
+        "line": 216,
+        "text": "func (r *SalaryRepository) UpdateSalary(salary *domain.Salary) error {"
+      },
+      {
+        "line": 218,
+        "text": "UPDATE salaries"
+      },
+      {
+        "line": 247,
+        "text": "func (r *SalaryRepository) MarkAsPaid(tenantID, restaurantID, id int, paidBy int, paymentRef string) error {"
+      },
+      {
+        "line": 249,
+        "text": "UPDATE salaries"
+      },
+      {
+        "line": 261,
+        "text": "func (r *SalaryRepository) GetEmployeeSalaries(tenantID, restaurantID, employeeID int) ([]domain.Salary, error) {"
+      },
+      {
+        "line": 263,
+        "text": "SELECT"
+      }
+    ],
+    "sha256": "b105a425e0309365c040433664fdb15164182ca1e0064e624ae193cc6cd5c828"
+  },
+  "backend/internal/repository/training_repo.go": {
+    "lines": 215,
+    "symbols": [
+      {
+        "line": 16,
+        "text": "func NewTrainingRepository(db *sql.DB) *TrainingRepository {"
+      },
+      {
+        "line": 20,
+        "text": "func (r *TrainingRepository) ListPaged(ctx context.Context, tenantID, restaurantID, page, pageSize int) ([]domain.TrainingRecord, int, error) {"
+      },
+      {
+        "line": 36,
+        "text": "SELECT"
+      },
+      {
+        "line": 74,
+        "text": "func (r *TrainingRepository) List(tenantID, restaurantID int) ([]domain.TrainingRecord, error) {"
+      },
+      {
+        "line": 79,
+        "text": "func (r *TrainingRepository) GetByID(tenantID, restaurantID, id int) (*domain.TrainingRecord, error) {"
+      },
+      {
+        "line": 83,
+        "text": "SELECT"
+      },
+      {
+        "line": 111,
+        "text": "func (r *TrainingRepository) Create(item *domain.TrainingRecord) (int, error) {"
+      },
+      {
+        "line": 114,
+        "text": "INSERT INTO training_records ("
+      },
+      {
+        "line": 118,
+        "text": "SELECT $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13"
+      },
+      {
+        "line": 120,
+        "text": "SELECT 1 FROM employees e"
+      },
+      {
+        "line": 133,
+        "text": "func (r *TrainingRepository) Update(tenantID, restaurantID int, item *domain.TrainingRecord) error {"
+      },
+      {
+        "line": 135,
+        "text": "UPDATE training_records"
+      },
+      {
+        "line": 141,
+        "text": "SELECT 1 FROM employees e"
+      },
+      {
+        "line": 161,
+        "text": "func (r *TrainingRepository) Delete(tenantID, restaurantID, id int) error {"
+      },
+      {
+        "line": 163,
+        "text": "DELETE FROM training_records"
+      },
+      {
+        "line": 179,
+        "text": "func (r *TrainingRepository) GetExpiringCertificates(tenantID, restaurantID int, withinDays int) ([]domain.TrainingRecord, error) {"
+      },
+      {
+        "line": 185,
+        "text": "SELECT"
+      }
+    ],
+    "sha256": "71032193f6bf1627beddd901dc50c7fd65e869b0828c608e5db9b8b702706a58"
+  },
+  "backend/internal/service/auth_session.go": {
+    "lines": 125,
+    "symbols": [
+      {
+        "line": 24,
+        "text": "func NewAuthSessionStore(cache KVCache, ttl time.Duration) *AuthSessionStore {"
+      },
+      {
+        "line": 28,
+        "text": "func (s *AuthSessionStore) Create(ctx context.Context, credential string) (string, error) {"
+      },
+      {
+        "line": 46,
+        "text": "func (s *AuthSessionStore) Rotate(ctx context.Context, oldSessionID, credential string) (string, error) {"
+      },
+      {
+        "line": 65,
+        "text": "func (s *AuthSessionStore) Resolve(ctx context.Context, sessionID string) (string, error) {"
+      },
+      {
+        "line": 79,
+        "text": "func (s *AuthSessionStore) Revoke(ctx context.Context, sessionID string) error {"
+      },
+      {
+        "line": 86,
+        "text": "func sessionKey(sessionID string) string {"
+      },
+      {
+        "line": 97,
+        "text": "func (s *AuthSessionStore) CreateImpersonation(ctx context.Context, token string, ttl time.Duration) (string, error) {"
+      },
+      {
+        "line": 112,
+        "text": "func IsImpersonationCredential(credential string) bool {"
+      },
+      {
+        "line": 116,
+        "text": "func UnwrapImpersonationCredential(credential string) string {"
+      },
+      {
+        "line": 120,
+        "text": "func (s *AuthSessionStore) TTL() time.Duration {"
+      }
+    ],
+    "sha256": "05df1bd06009e45db74a4e0de78547c2cf6765799b0b45a9a13fdd336341c2d6"
+  },
+  "backend/internal/service/theme_service.go": {
+    "lines": 481,
+    "symbols": [
+      {
+        "line": 30,
+        "text": "func NewSimpleCache() Cache {"
+      },
+      {
+        "line": 40,
+        "text": "func (c *simpleCache) Get(key string) (interface{}, bool) {"
+      },
+      {
+        "line": 57,
+        "text": "func (c *simpleCache) Set(key string, value interface{}, ttl time.Duration) {"
+      },
+      {
+        "line": 68,
+        "text": "func (c *simpleCache) Delete(key string) {"
+      },
+      {
+        "line": 76,
+        "text": "func (c *simpleCache) Clear() {"
+      },
+      {
+        "line": 84,
+        "text": "func (c *simpleCache) cleanupExpired() {"
+      },
+      {
+        "line": 134,
+        "text": "func NewThemeService(repo repository.ThemeRepository) ThemeService {"
+      },
+      {
+        "line": 142,
+        "text": "func NewThemeServiceWithCache(repo repository.ThemeRepository, cache Cache) ThemeService {"
+      },
+      {
+        "line": 150,
+        "text": "func (s *themeServiceImpl) CreateTheme(ctx context.Context, req *domain.ThemeCreateRequest, tenantID, restaurantID, createdBy int64) (*domain.Theme, error) {"
+      },
+      {
+        "line": 198,
+        "text": "func (s *themeServiceImpl) GetTheme(ctx context.Context, tenantID, restaurantID, id int64) (*domain.Theme, error) {"
+      },
+      {
+        "line": 223,
+        "text": "func (s *themeServiceImpl) UpdateTheme(ctx context.Context, tenantID, restaurantID, id int64, req *domain.ThemeUpdateRequest, updatedBy int64) (*domain.Theme, error) {"
+      },
+      {
+        "line": 276,
+        "text": "func (s *themeServiceImpl) DeleteTheme(ctx context.Context, tenantID, restaurantID, id int64) error {"
+      },
+      {
+        "line": 304,
+        "text": "func (s *themeServiceImpl) ListThemes(ctx context.Context, tenantID, restaurantID int64, page, pageSize int) (*domain.ThemeListResponse, error) {"
+      },
+      {
+        "line": 352,
+        "text": "func (s *themeServiceImpl) ListThemePresets(ctx context.Context, page, pageSize int) (map[string]interface{}, error) {"
+      },
+      {
+        "line": 404,
+        "text": "func (s *themeServiceImpl) GetPreset(ctx context.Context, id int64) (*domain.Theme, error) {"
+      },
+      {
+        "line": 431,
+        "text": "func (s *themeServiceImpl) ActivateTheme(ctx context.Context, tenantID, restaurantID, id int64) error {"
+      },
+      {
+        "line": 457,
+        "text": "func (s *themeServiceImpl) invalidateListCaches(tenantID, restaurantID int64) {"
+      }
+    ],
+    "sha256": "8d1c39f06ac3de076d303e863092c69febaec2b923b9896b5c71baf6ff004267"
+  },
+  "backend/internal/usecase/auto_posting_engine.go": {
+    "lines": 626,
+    "symbols": [
+      {
+        "line": 29,
+        "text": "func NewAutoPostingEngine("
+      },
+      {
+        "line": 45,
+        "text": "func (e *AutoPostingEngine) PostSalesEntry(order *domain.Order, postedBy *int) error {"
+      },
+      {
+        "line": 138,
+        "text": "func (e *AutoPostingEngine) PostCOGSEntry(order *domain.Order, postedBy *int) error {"
+      },
+      {
+        "line": 256,
+        "text": "func (e *AutoPostingEngine) PostPayrollEntry(salary *domain.Salary, postedBy *int) error {"
+      },
+      {
+        "line": 435,
+        "text": "func (e *AutoPostingEngine) PostSupplierInvoiceEntry(event *domain.PostingEvent, lines []domain.JournalEntryLine) error {"
+      },
+      {
+        "line": 450,
+        "text": "func (e *AutoPostingEngine) PostSupplierPaymentEntry(event *domain.PostingEvent, lines []domain.JournalEntryLine) error {"
+      },
+      {
+        "line": 465,
+        "text": "func (e *AutoPostingEngine) PostDepreciationEntries(entryDate time.Time, tenantID, restaurantID, assetID int, description string, postedBy *int, lines []domain.JournalEntryLine) error {"
+      },
+      {
+        "line": 489,
+        "text": "func (e *AutoPostingEngine) createAndPostEntry("
+      },
+      {
+        "line": 551,
+        "text": "func (e *AutoPostingEngine) ruleAccounts(tenantID, restaurantID int, ruleCode string) (map[string]string, bool, error) {"
+      },
+      {
+        "line": 569,
+        "text": "func (e *AutoPostingEngine) resolvePaymentAccount(tenantID, restaurantID int, paymentMethod string, accounts map[string]string) (*domain.Account, error) {"
+      },
+      {
+        "line": 586,
+        "text": "func (e *AutoPostingEngine) resolveAccount(tenantID, restaurantID int, candidates ...string) (*domain.Account, error) {"
+      },
+      {
+        "line": 603,
+        "text": "func roundedAmount(value float64) float64 {"
+      },
+      {
+        "line": 607,
+        "text": "func intPtr(value int) *int {"
+      },
+      {
+        "line": 615,
+        "text": "func payrollEntryDate(salary *domain.Salary) time.Time {"
+      }
+    ],
+    "sha256": "88991117d17b3ebceed523c90e35091a18825d74c841baaf291c2bdfadfaf455"
+  },
+  "backend/internal/usecase/financial_report_usecase.go": {
+    "lines": 562,
+    "symbols": [
+      {
+        "line": 113,
+        "text": "func NewFinancialReportUseCase(db *sql.DB, generalLedgerRepo *repository.GeneralLedgerRepository) *FinancialReportUseCase {"
+      },
+      {
+        "line": 120,
+        "text": "func (uc *FinancialReportUseCase) GenerateProfitLoss(tenantID, restaurantID int, from, to time.Time) (ProfitLossReport, error) {"
+      },
+      {
+        "line": 149,
+        "text": "func (uc *FinancialReportUseCase) GenerateProfitLossWithComparison("
+      },
+      {
+        "line": 173,
+        "text": "func (uc *FinancialReportUseCase) generateProfitLossCore(tenantID, restaurantID int, from, to time.Time) (ProfitLossReport, error) {"
+      },
+      {
+        "line": 182,
+        "text": "SELECT"
+      },
+      {
+        "line": 240,
+        "text": "func (uc *FinancialReportUseCase) GenerateTrialBalance(tenantID, restaurantID int, asOf time.Time) (TrialBalanceReport, error) {"
+      },
+      {
+        "line": 264,
+        "text": "func (uc *FinancialReportUseCase) GenerateBalanceSheet(tenantID, restaurantID int, asOf time.Time) (BalanceSheetReport, error) {"
+      },
+      {
+        "line": 274,
+        "text": "SELECT DISTINCT ON (gl.account_id)"
+      },
+      {
+        "line": 283,
+        "text": "SELECT"
+      },
+      {
+        "line": 352,
+        "text": "func (uc *FinancialReportUseCase) GenerateCashFlow(tenantID, restaurantID int, from, to time.Time) (CashFlowReport, error) {"
+      },
+      {
+        "line": 359,
+        "text": "SELECT"
+      },
+      {
+        "line": 376,
+        "text": "SELECT"
+      },
+      {
+        "line": 392,
+        "text": "SELECT"
+      },
+      {
+        "line": 411,
+        "text": "func (uc *FinancialReportUseCase) GenerateReceivablesAging(tenantID, restaurantID int, asOf time.Time) (AgingReport, error) {"
+      },
+      {
+        "line": 424,
+        "text": "func (uc *FinancialReportUseCase) GeneratePayablesAging(tenantID, restaurantID int, asOf time.Time) (AgingReport, error) {"
+      },
+      {
+        "line": 437,
+        "text": "func (uc *FinancialReportUseCase) generateAging("
+      },
+      {
+        "line": 448,
+        "text": "SELECT"
+      },
+      {
+        "line": 497,
+        "text": "func (uc *FinancialReportUseCase) GenerateInventoryValuation(tenantID, restaurantID int, asOf time.Time) (InventoryValuationReport, error) {"
+      },
+      {
+        "line": 504,
+        "text": "SELECT"
+      },
+      {
+        "line": 537,
+        "text": "func round2(value float64) float64 {"
+      },
+      {
+        "line": 541,
+        "text": "func percentChange(previous, current float64) float64 {"
+      },
+      {
+        "line": 551,
+        "text": "func mapTrialBalanceRow(in domain.TrialBalanceRow) TrialBalanceRow {"
+      }
+    ],
+    "sha256": "2334aedcaf6f088abe31f4df919f91d3ce4e1304abca09f559fa05de10231770"
+  },
+  "backend/internal/usecase/kds_usecase.go": {
+    "lines": 213,
+    "symbols": [
+      {
+        "line": 27,
+        "text": "func NewKDSUseCase(repo *repository.KDSRepository) *KDSUseCase {"
+      },
+      {
+        "line": 32,
+        "text": "func (uc *KDSUseCase) SetBroadcaster(broadcaster KDSBroadcaster) {"
+      },
+      {
+        "line": 37,
+        "text": "func (uc *KDSUseCase) GetQueue(ctx context.Context, tenantID, restaurantID int64, filters domain.KDSFilters) ([]domain.KDSOrder, error) {"
+      },
+      {
+        "line": 82,
+        "text": "func (uc *KDSUseCase) BumpOrder(ctx context.Context, tenantID, restaurantID, queueID, userID int64) (*domain.KDSOrder, error) {"
+      },
+      {
+        "line": 117,
+        "text": "func (uc *KDSUseCase) RecallOrder(ctx context.Context, tenantID, restaurantID, queueID int64) (*domain.KDSOrder, error) {"
+      },
+      {
+        "line": 145,
+        "text": "func (uc *KDSUseCase) GetStats(ctx context.Context, tenantID, restaurantID int64) (*domain.KDSStats, error) {"
+      },
+      {
+        "line": 156,
+        "text": "func (uc *KDSUseCase) GetAnalytics(ctx context.Context, tenantID, restaurantID int64) (*domain.KDSAnalytics, error) {"
+      },
+      {
+        "line": 167,
+        "text": "func (uc *KDSUseCase) GetSettings(ctx context.Context, tenantID, restaurantID int64) (*domain.KDSSettings, error) {"
+      },
+      {
+        "line": 178,
+        "text": "func (uc *KDSUseCase) UpdateSettings(ctx context.Context, settings *domain.KDSSettings) error {"
+      },
+      {
+        "line": 206,
+        "text": "func (uc *KDSUseCase) broadcast(ctx context.Context, tenantID, restaurantID int64, messageType string, payload interface{}) {"
+      }
+    ],
+    "sha256": "1525abf60aee20071fc75b0276f64ab5b2a3247912144b68a5158e046cf68d4b"
+  },
+  "backend/internal/usecase/order_pricing.go": {
+    "lines": 100,
+    "symbols": [
+      {
+        "line": 14,
+        "text": "func pricedOrderItem(product domain.Product, request domain.CreateOrderItemRequest) (domain.OrderItem, error) {"
+      },
+      {
+        "line": 38,
+        "text": "func applyOrderPricing(order *domain.Order) error {"
+      },
+      {
+        "line": 60,
+        "text": "func (uc *OrderUseCase) QuoteOrder(ctx context.Context, tenant, restaurant int64, request *domain.OrderQuoteRequest) (*domain.OrderQuote, error) {"
+      }
+    ],
+    "sha256": "75f9a2f650aa896df844d1a088e2bec32a34f07351175468f38eb6622c2461a0"
+  },
+  "backend/internal/usecase/order_usecase.go": {
+    "lines": 623,
+    "symbols": [
+      {
+        "line": 28,
+        "text": "func NewOrderUseCase(orderRepo *repository.OrderRepository, productRepo *repository.ProductRepository) *OrderUseCase {"
+      },
+      {
+        "line": 36,
+        "text": "func (uc *OrderUseCase) SetKDSRepository(kdsRepo *repository.KDSRepository) {"
+      },
+      {
+        "line": 41,
+        "text": "func (uc *OrderUseCase) SetKDSBroadcaster(broadcaster KDSBroadcaster) {"
+      },
+      {
+        "line": 46,
+        "text": "func (uc *OrderUseCase) SetAutoPostingEngine(engine AutoPostingService) {"
+      },
+      {
+        "line": 51,
+        "text": "func (uc *OrderUseCase) SetAccountingEventRepository(events *repository.AccountingEventRepository) {"
+      },
+      {
+        "line": 56,
+        "text": "func (uc *OrderUseCase) SetTableRepository(tableRepo *repository.TableRepository) {"
+      },
+      {
+        "line": 61,
+        "text": "func (uc *OrderUseCase) CreateOrder("
+      },
+      {
+        "line": 224,
+        "text": "func (uc *OrderUseCase) AuthorizePublicOrderAccess(tenantID, restaurantID, orderID int64, token, phone string) bool {"
+      },
+      {
+        "line": 236,
+        "text": "func (uc *OrderUseCase) GetOrder(tenantID, restaurantID, orderID int64) (*domain.Order, error) {"
+      },
+      {
+        "line": 245,
+        "text": "func (uc *OrderUseCase) GetOrderByNumber(tenantID, restaurantID int64, orderNumber string) (*domain.Order, error) {"
+      },
+      {
+        "line": 254,
+        "text": "func (uc *OrderUseCase) ListOrders(tenantID, restaurantID int64, filters *domain.OrderListFilters) (*domain.OrderListResponse, error) {"
+      },
+      {
+        "line": 277,
+        "text": "func (uc *OrderUseCase) GetOrderItemCounts(tenantID, restaurantID int64, orderIDs []int64) (map[int64]int, error) {"
+      },
+      {
+        "line": 282,
+        "text": "func (uc *OrderUseCase) UpdateOrderStatus("
+      },
+      {
+        "line": 325,
+        "text": "func (uc *OrderUseCase) CancelOrder(tenantID, restaurantID, orderID int64, reason string) error {"
+      },
+      {
+        "line": 350,
+        "text": "func (uc *OrderUseCase) ConfirmOrder(tenantID, restaurantID, orderID int64) error {"
+      },
+      {
+        "line": 369,
+        "text": "func (uc *OrderUseCase) CompleteOrder(tenantID, restaurantID, orderID int64) error {"
+      },
+      {
+        "line": 402,
+        "text": "func (uc *OrderUseCase) DeliverOrder(tenantID, restaurantID, orderID int64) error {"
+      },
+      {
+        "line": 429,
+        "text": "func (uc *OrderUseCase) CompleteDelivery(tenantID, restaurantID, orderID int64) error {"
+      },
+      {
+        "line": 447,
+        "text": "func (uc *OrderUseCase) UpdatePaymentStatus(tenantID, restaurantID, orderID int64, paymentStatus string) error {"
+      },
+      {
+        "line": 451,
+        "text": "func (uc *OrderUseCase) UpdatePaymentStatusAs(tenantID, restaurantID, orderID int64, paymentStatus string, postedBy *int) error {"
+      },
+      {
+        "line": 465,
+        "text": "func (uc *OrderUseCase) AutoPostPaidOrder(order *domain.Order, postedBy *int) error {"
+      },
+      {
+        "line": 478,
+        "text": "func (uc *OrderUseCase) ProcessNextAccountingEvent(ctx context.Context) (bool, error) {"
+      },
+      {
+        "line": 511,
+        "text": "func (uc *OrderUseCase) ReconcileAccountingEvents(ctx context.Context) error {"
+      },
+      {
+        "line": 526,
+        "text": "func intPointer(value *int64) *int {"
+      },
+      {
+        "line": 534,
+        "text": "func accountingEventFailureStatus(event *repository.AccountingEvent) string {"
+      },
+      {
+        "line": 542,
+        "text": "func (uc *OrderUseCase) GetOrderStats(tenantID, restaurantID int64, startDate, endDate time.Time) (*domain.OrderStats, error) {"
+      },
+      {
+        "line": 565,
+        "text": "func (uc *OrderUseCase) GetOrderStatusHistory(tenantID, restaurantID, orderID int64) ([]domain.OrderStatusHistory, error) {"
+      },
+      {
+        "line": 574,
+        "text": "func (uc *OrderUseCase) validateCreateOrderRequest(req *domain.CreateOrderRequest) error {"
+      }
+    ],
+    "sha256": "3d8ce520c4fee67c08bf7c04dcb41ec3c9c4100ff441c04923d55ea93fefc540"
+  },
+  "backend/internal/usecase/subscription_usecase.go": {
+    "lines": 273,
+    "symbols": [
+      {
+        "line": 19,
+        "text": "func NewSubscriptionUseCase("
+      },
+      {
+        "line": 30,
+        "text": "func (uc *SubscriptionUseCase) GetTenantSubscription(ctx context.Context, tenantID int64) (*domain.TenantSubscriptionInfo, error) {"
+      },
+      {
+        "line": 44,
+        "text": "func (uc *SubscriptionUseCase) GetTenantSubscriptionBySlug(ctx context.Context, slug string) (*domain.TenantSubscriptionInfo, error) {"
+      },
+      {
+        "line": 57,
+        "text": "func (uc *SubscriptionUseCase) ExtendTrial("
+      },
+      {
+        "line": 108,
+        "text": "func (uc *SubscriptionUseCase) DisableTenant("
+      },
+      {
+        "line": 154,
+        "text": "func (uc *SubscriptionUseCase) EnableTenant("
+      },
+      {
+        "line": 190,
+        "text": "func (uc *SubscriptionUseCase) DeleteTenant("
+      },
+      {
+        "line": 231,
+        "text": "func (uc *SubscriptionUseCase) GetSubscriptionHistory("
+      },
+      {
+        "line": 257,
+        "text": "func (uc *SubscriptionUseCase) CheckTenantAccess(ctx context.Context, tenantID int64) (bool, string, error) {"
+      },
+      {
+        "line": 271,
+        "text": "func stringPtr(s string) *string {"
+      }
+    ],
+    "sha256": "9756cae634363815c76ae5572012a4d6d771ddabcb0990afc5ba94ab5f91e6f4"
+  },
+  "backend/internal/usecase/super_admin_tenant_usecase.go": {
+    "lines": 380,
+    "symbols": [
+      {
+        "line": 19,
+        "text": "func NewSuperAdminTenantUseCase("
+      },
+      {
+        "line": 30,
+        "text": "func (uc *SuperAdminTenantUseCase) GetDashboardStats(ctx context.Context, superAdminID int64, ip, userAgent string) (*domain.SuperAdminDashboardStats, error) {"
+      },
+      {
+        "line": 42,
+        "text": "func (uc *SuperAdminTenantUseCase) ListTenants("
+      },
+      {
+        "line": 81,
+        "text": "func (uc *SuperAdminTenantUseCase) GetTenantDetails("
+      },
+      {
+        "line": 113,
+        "text": "func (uc *SuperAdminTenantUseCase) GetTenantUsers("
+      },
+      {
+        "line": 143,
+        "text": "func (uc *SuperAdminTenantUseCase) ListAllUsers("
+      },
+      {
+        "line": 182,
+        "text": "func (uc *SuperAdminTenantUseCase) GetUserDetails("
+      },
+      {
+        "line": 218,
+        "text": "func (uc *SuperAdminTenantUseCase) DisableTenant("
+      },
+      {
+        "line": 260,
+        "text": "func (uc *SuperAdminTenantUseCase) EnableTenant("
+      },
+      {
+        "line": 300,
+        "text": "func (uc *SuperAdminTenantUseCase) GetAuditLogs("
+      },
+      {
+        "line": 339,
+        "text": "func (uc *SuperAdminTenantUseCase) GenerateDashboardLoginToken("
+      }
+    ],
+    "sha256": "ba7c02270988a089a4e33cb94fdcb2f47bc1a6c77c33a2224993b17871fefc27"
+  },
+  "backend/internal/usecase/table_usecase.go": {
+    "lines": 352,
+    "symbols": [
+      {
+        "line": 21,
+        "text": "func NewTableUseCase(tableRepo *repository.TableRepository) *TableUseCase {"
+      },
+      {
+        "line": 26,
+        "text": "func (uc *TableUseCase) CreateTable(tenantID, restaurantID int64, req *domain.CreateTableRequest) (*domain.RestaurantTable, error) {"
+      },
+      {
+        "line": 81,
+        "text": "func (uc *TableUseCase) GetTable(tenantID, restaurantID, tableID int64) (*domain.RestaurantTable, error) {"
+      },
+      {
+        "line": 92,
+        "text": "func (uc *TableUseCase) ListTables(tenantID, restaurantID int64, status string) ([]domain.RestaurantTable, error) {"
+      },
+      {
+        "line": 109,
+        "text": "func (uc *TableUseCase) UpdateTable(tenantID, restaurantID, tableID int64, req *domain.UpdateTableRequest) error {"
+      },
+      {
+        "line": 151,
+        "text": "func (uc *TableUseCase) DeleteTable(tenantID, restaurantID, tableID int64) error {"
+      },
+      {
+        "line": 171,
+        "text": "func (uc *TableUseCase) UpdateTableStatus(tenantID, restaurantID, tableID int64, newStatus string) error {"
+      },
+      {
+        "line": 200,
+        "text": "func (uc *TableUseCase) FreeTable(tenantID, restaurantID, tableID int64) error {"
+      },
+      {
+        "line": 205,
+        "text": "func (uc *TableUseCase) GetTableStats(tenantID, restaurantID int64) (*domain.TableStats, error) {"
+      },
+      {
+        "line": 216,
+        "text": "func (uc *TableUseCase) UpdateTablePositions(tenantID, restaurantID int64, positions []domain.TablePosition) error {"
+      },
+      {
+        "line": 235,
+        "text": "func (uc *TableUseCase) CreateLayout(tenantID, restaurantID int64, req *domain.CreateLayoutRequest) (*domain.TableLayout, error) {"
+      },
+      {
+        "line": 272,
+        "text": "func (uc *TableUseCase) GetLayouts(tenantID, restaurantID int64) ([]domain.TableLayout, error) {"
+      },
+      {
+        "line": 283,
+        "text": "func (uc *TableUseCase) GetTablePublicInfo(tableID int64) (*domain.TablePublicInfo, error) {"
+      },
+      {
+        "line": 293,
+        "text": "func canTransitionTableStatus(oldStatus, newStatus domain.TableStatus) bool {"
+      },
+      {
+        "line": 333,
+        "text": "func sanitizeTableText(input string, maxLen int) string {"
+      }
+    ],
+    "sha256": "829a03103aff374fde77c7de8273e533acf700be61a47fc5ad7c521e7bf4d7fc"
+  },
+  "backend/migrations/180_order_stock_reservations.sql": {
+    "lines": 109,
+    "symbols": [
+      {
+        "line": 3,
+        "text": "CREATE TABLE order_stock_reservations ("
+      },
+      {
+        "line": 40,
+        "text": "SELECT p.id, p.quantity_in_stock, q.quantity"
+      },
+      {
+        "line": 52,
+        "text": "INSERT INTO public.order_stock_reservations(order_id, tenant_id, restaurant_id, product_id, quantity)"
+      },
+      {
+        "line": 54,
+        "text": "UPDATE public.products SET quantity_in_stock = quantity_in_stock - item.quantity, updated_at = CURRENT_TIMESTAMP"
+      },
+      {
+        "line": 56,
+        "text": "INSERT INTO public.inventory_movements(tenant_id,restaurant_id,product_id,order_id,reference_type,movement_type,quantity,notes)"
+      },
+      {
+        "line": 61,
+        "text": "SELECT p.id, s.quantity FROM public.order_stock_reservations s"
+      },
+      {
+        "line": 66,
+        "text": "UPDATE public.products SET quantity_in_stock = quantity_in_stock + item.quantity, updated_at = CURRENT_TIMESTAMP"
+      },
+      {
+        "line": 68,
+        "text": "INSERT INTO public.inventory_movements(tenant_id,restaurant_id,product_id,order_id,reference_type,movement_type,quantity,notes)"
+      },
+      {
+        "line": 70,
+        "text": "UPDATE public.order_stock_reservations SET released = true, released_at = CURRENT_TIMESTAMP"
+      },
+      {
+        "line": 91,
+        "text": "SELECT status INTO parent_status FROM public.orders"
+      }
+    ],
+    "sha256": "f7e5db3027b955ca02297d7cc636e44a822d7e32a52ddae5051a4dff62188db6"
+  },
+  "frontend/apps/dashboard/src/app/[locale]/dashboard//page.tsx": {
+    "lines": 897,
+    "symbols": [
+      {
+        "line": 242,
+        "text": "export default function DashboardPage() {"
+      }
+    ],
+    "sha256": "870e0124b422d107ec15ee609d45112264c11839ea3131ac79adf0f951195c8e"
+  },
+  "frontend/apps/dashboard/src/app/[locale]/dashboard/accounting/advanced/page.tsx": {
+    "lines": 298,
+    "symbols": [
+      {
+        "line": 39,
+        "text": "export default function AdvancedAccountingToolsPage() {"
+      }
+    ],
+    "sha256": "758b188f12379d8bb587b768d246e2d82cd686b26960fedcbc5541eb9459f057"
+  },
+  "frontend/apps/dashboard/src/app/[locale]/dashboard/accounting/bank-accounts/page.tsx": {
+    "lines": 386,
+    "symbols": [
+      {
+        "line": 37,
+        "text": "export default function BankAccountsPage() {"
+      }
+    ],
+    "sha256": "f9c4be6701625d9ff5797b5e003d9286d92c5dec6ecdc573242a5df83bdaba1e"
+  },
+  "frontend/apps/dashboard/src/app/[locale]/dashboard/accounting/chart-of-accounts/page.tsx": {
+    "lines": 248,
+    "symbols": [
+      {
+        "line": 30,
+        "text": "export default function ChartOfAccountsPage() {"
+      }
+    ],
+    "sha256": "e0e5c1e6001f254f7a27785ee09006d8adfc82126f33189ea50b94c5d034d115"
+  },
+  "frontend/apps/dashboard/src/app/[locale]/dashboard/accounting/customer-invoices/page.tsx": {
+    "lines": 539,
+    "symbols": [
+      {
+        "line": 46,
+        "text": "export default function CustomerInvoicesPage() {"
+      }
+    ],
+    "sha256": "7680749d593a0749cbad52bc3c082e4452bdfc72b2e3367fec2c2fde49592596"
+  },
+  "frontend/apps/dashboard/src/app/[locale]/dashboard/accounting/customers/page.tsx": {
+    "lines": 381,
+    "symbols": [
+      {
+        "line": 42,
+        "text": "export default function CustomersPage() {"
+      }
+    ],
+    "sha256": "9262154c66285406aa65edff630a76c5b13a2b2dd0529460546de0659b62db5f"
+  },
+  "frontend/apps/dashboard/src/app/[locale]/dashboard/accounting/general-ledger/page.tsx": {
+    "lines": 122,
+    "symbols": [
+      {
+        "line": 25,
+        "text": "export default function GeneralLedgerPage() {"
+      }
+    ],
+    "sha256": "b960538c7fc695dbeb92a16b7e7674d2ab99042b3527b33dddcfb57cd422fba4"
+  },
+  "frontend/apps/dashboard/src/app/[locale]/dashboard/accounting/journal-entries/page.tsx": {
+    "lines": 212,
+    "symbols": [
+      {
+        "line": 37,
+        "text": "export default function JournalEntriesPage() {"
+      }
+    ],
+    "sha256": "18fdcba9a85977087599afcba4876f632ab0ca25e1281056a223f4210e405f36"
+  },
+  "frontend/apps/dashboard/src/app/[locale]/dashboard/accounting/supplier-invoices/page.tsx": {
+    "lines": 506,
+    "symbols": [
+      {
+        "line": 45,
+        "text": "export default function SupplierInvoicesPage() {"
+      }
+    ],
+    "sha256": "e89e1c66ffed315045488ba9eaa9639768590cc51957405e033a812560894fda"
+  },
+  "frontend/apps/dashboard/src/app/[locale]/dashboard/drivers/page.tsx": {
+    "lines": 330,
+    "symbols": [
+      {
+        "line": 43,
+        "text": "export default function DriversPage() {"
+      }
+    ],
+    "sha256": "c9807872826a15bba4505b5d30e94e28466106a2ec32cb31ad04ba15e95c009c"
+  },
+  "frontend/apps/dashboard/src/app/[locale]/dashboard/hr/attendance/page.tsx": {
+    "lines": 333,
+    "symbols": [
+      {
+        "line": 38,
+        "text": "export default function AttendancePage() {"
+      }
+    ],
+    "sha256": "2f1b43c24d3623cb9753209e8b41cd10ee3f072c001319b579b6d12edc0fbee4"
+  },
+  "frontend/apps/dashboard/src/app/[locale]/dashboard/hr/contracts/page.tsx": {
+    "lines": 75,
+    "symbols": [
+      {
+        "line": 11,
+        "text": "export default function ContractsPage() {"
+      }
+    ],
+    "sha256": "5c6d545bf176835b50ee9cc9d4bd709ee51a37560429aa8e610641da9b89eff2"
+  },
+  "frontend/apps/dashboard/src/app/[locale]/dashboard/hr/employees/page.tsx": {
+    "lines": 275,
+    "symbols": [
+      {
+        "line": 38,
+        "text": "export default function EmployeesPage() {"
+      }
+    ],
+    "sha256": "8b81851c751e422fe78b0655dd3f2af742472b71ac186fe3680e431206ccc386"
+  },
+  "frontend/apps/dashboard/src/app/[locale]/dashboard/hr/insurance/page.tsx": {
+    "lines": 68,
+    "symbols": [
+      {
+        "line": 11,
+        "text": "export default function InsurancePage() {"
+      }
+    ],
+    "sha256": "110f1c961d842b9879844a6a537ac320db55f7409bb3d04bc3dfd41ec4167139"
+  },
+  "frontend/apps/dashboard/src/app/[locale]/dashboard/hr/leaves/page.tsx": {
+    "lines": 439,
+    "symbols": [
+      {
+        "line": 39,
+        "text": "export default function LeavesPage() {"
+      }
+    ],
+    "sha256": "d7657f5ec99fa6b1e64f1ab7118ca0c2a9355c6446ea477ca1f6234ad35a79e7"
+  },
+  "frontend/apps/dashboard/src/app/[locale]/dashboard/hr/payroll/page.tsx": {
+    "lines": 298,
+    "symbols": [
+      {
+        "line": 38,
+        "text": "export default function PayrollPage() {"
+      }
+    ],
+    "sha256": "e4ff0c4619388a489f4028356599157fda542b2adff7b86d02c9ecf0e5afb769"
+  },
+  "frontend/apps/dashboard/src/app/[locale]/dashboard/hr/performance/page.tsx": {
+    "lines": 73,
+    "symbols": [
+      {
+        "line": 11,
+        "text": "export default function PerformancePage() {"
+      }
+    ],
+    "sha256": "f68ee272d08cde375feb3cb316d45eed125ec0038a7a80d50c7f6ec0f3c740de"
+  },
+  "frontend/apps/dashboard/src/app/[locale]/dashboard/hr/resignations/page.tsx": {
+    "lines": 89,
+    "symbols": [
+      {
+        "line": 12,
+        "text": "export default function ResignationsPage() {"
+      }
+    ],
+    "sha256": "2b0c0b4360f9746c34feb6bf8f695b42902303a994edd043b49103a295df4e03"
+  },
+  "frontend/apps/dashboard/src/app/[locale]/dashboard/hr/training/page.tsx": {
+    "lines": 68,
+    "symbols": [
+      {
+        "line": 11,
+        "text": "export default function TrainingPage() {"
+      }
+    ],
+    "sha256": "3d5d3df7ad907dd0fda8b1f99edfaacaf19b29a2bd19c0e12d94af865223668b"
+  },
+  "frontend/apps/dashboard/src/app/[locale]/dashboard/inventory/page.tsx": {
+    "lines": 314,
+    "symbols": [
+      {
+        "line": 54,
+        "text": "export default function InventoryPage() {"
+      }
+    ],
+    "sha256": "923370848df80c3e4d231aae9ad85b1acb80e8833816caed782640571c49b181"
+  },
+  "frontend/apps/dashboard/src/app/[locale]/dashboard/kds/page.tsx": {
+    "lines": 315,
+    "symbols": [
+      {
+        "line": 18,
+        "text": "export default function KDSPage() {"
+      }
+    ],
+    "sha256": "7b0558d877e1bac65b9ff6dc891a34ab6129bac92007f59b5eeb93990fc72719"
+  },
+  "frontend/apps/dashboard/src/app/[locale]/dashboard/kds/settings/page.tsx": {
+    "lines": 493,
+    "symbols": [
+      {
+        "line": 103,
+        "text": "export default function KDSSettingsPage() {"
+      }
+    ],
+    "sha256": "fbbafe3a6ea1c650c4303800ed855120f9207dacc4a5d6e214eadfbe87815dbb"
+  },
+  "frontend/apps/dashboard/src/app/[locale]/dashboard/notifications/page.tsx": {
+    "lines": 396,
+    "symbols": [
+      {
+        "line": 35,
+        "text": "export default function NotificationsPage() {"
+      }
+    ],
+    "sha256": "7c620a7f33bff8c7b421d6a9a586a37f1b75edd21ecf5f59f1ba311d408ca74f"
+  },
+  "frontend/apps/dashboard/src/app/[locale]/dashboard/orders/[id]/page.tsx": {
+    "lines": 668,
+    "symbols": [
+      {
+        "line": 127,
+        "text": "export default function OrderDetailsPage() {"
+      }
+    ],
+    "sha256": "9bbfa6bb5bcefed24744ad0cb356ee2e8085addbe1a67d0c4bdcffe826da5c43"
+  },
+  "frontend/apps/dashboard/src/app/[locale]/dashboard/orders/page.tsx": {
+    "lines": 625,
+    "symbols": [
+      {
+        "line": 54,
+        "text": "export default function OrdersPage() {"
+      }
+    ],
+    "sha256": "82cb4cdf15f8aaf42dc40b397f30f42ff1737e41e1bf0572b345ce3bae056089"
+  },
+  "frontend/apps/dashboard/src/app/[locale]/dashboard/pos/page.tsx": {
+    "lines": 522,
+    "symbols": [
+      {
+        "line": 70,
+        "text": "export default function POSPage() {"
+      }
+    ],
+    "sha256": "b44117876316877f5e3183904d719cab255fe8fc65ada8b788cb54fb8a514025"
+  },
+  "frontend/apps/dashboard/src/app/[locale]/dashboard/products/new/page.tsx": {
+    "lines": 170,
+    "symbols": [
+      {
+        "line": 19,
+        "text": "export default function CreateProductPage() {"
+      }
+    ],
+    "sha256": "b9b7c835ba89aeb5f17cedcd8e0a2ced2debb37d06b7b6255db6d41ac921f42f"
+  },
+  "frontend/apps/dashboard/src/app/[locale]/dashboard/products/page.tsx": {
+    "lines": 194,
+    "symbols": [
+      {
+        "line": 23,
+        "text": "export default function ProductsPage() {"
+      }
+    ],
+    "sha256": "e2b7567f3ff57e7bf1e38ab95215900c34999e2f2262d04999c287d973f014b8"
+  },
+  "frontend/apps/dashboard/src/app/[locale]/dashboard/reports/financial/advanced/page.tsx": {
+    "lines": 194,
+    "symbols": [
+      {
+        "line": 37,
+        "text": "export default function AdvancedFinancialInsightsPage() {"
+      }
+    ],
+    "sha256": "5fa29eb554ef1095df9c0f6b932e48fc3b25659f315338394a80c03891a31af4"
+  },
+  "frontend/apps/dashboard/src/app/[locale]/dashboard/reports/financial/balance-sheet/page.tsx": {
+    "lines": 87,
+    "symbols": [
+      {
+        "line": 13,
+        "text": "export default function BalanceSheetPage() {"
+      }
+    ],
+    "sha256": "2a35b767a80d78d7a27b5653b17c8e8459ee133dc498afdde9d0ccfc279e5681"
+  },
+  "frontend/apps/dashboard/src/app/[locale]/dashboard/reports/financial/cash-flow/page.tsx": {
+    "lines": 99,
+    "symbols": [
+      {
+        "line": 19,
+        "text": "export default function CashFlowPage() {"
+      }
+    ],
+    "sha256": "3931e2f6ac098888daeaa694161a8c7c08281af65ccfb0a9b166d1ecbe68611d"
+  },
+  "frontend/apps/dashboard/src/app/[locale]/dashboard/reports/financial/inventory-valuation/page.tsx": {
+    "lines": 86,
+    "symbols": [
+      {
+        "line": 12,
+        "text": "export default function InventoryValuationPage() {"
+      }
+    ],
+    "sha256": "864fbbf553bfb10d6a1531c27d3fed9536fb8cfb5e616e0a0b25fd19c184b55f"
+  },
+  "frontend/apps/dashboard/src/app/[locale]/dashboard/reports/financial/profit-loss/page.tsx": {
+    "lines": 130,
+    "symbols": [
+      {
+        "line": 28,
+        "text": "export default function ProfitLossPage() {"
+      }
+    ],
+    "sha256": "b7a9992dafc04f58fa7219c02f7d9184a12953b826a523f038041cc35fdd11ca"
+  },
+  "frontend/apps/dashboard/src/app/[locale]/dashboard/reports/financial/receivables-aging/page.tsx": {
+    "lines": 89,
+    "symbols": [
+      {
+        "line": 12,
+        "text": "export default function ReceivablesAgingPage() {"
+      }
+    ],
+    "sha256": "bf7590c11b49e4f9a6aa69f57254ad7c1275eea695eea3d31ee75b4cc914c95e"
+  },
+  "frontend/apps/dashboard/src/app/[locale]/dashboard/reports/financial/vat/page.tsx": {
+    "lines": 99,
+    "symbols": [
+      {
+        "line": 19,
+        "text": "export default function VATReportPage() {"
+      }
+    ],
+    "sha256": "26d312d1a45be3d5681420cc28080039dbeaec1cb858e5e7a563f3074dfd329e"
+  },
+  "frontend/apps/dashboard/src/app/[locale]/dashboard/reports/hr/page.tsx": {
+    "lines": 260,
+    "symbols": [
+      {
+        "line": 28,
+        "text": "export default function HRReportsPage() {"
+      }
+    ],
+    "sha256": "8f95477eac2ed199f3e97f9da47d4be36866269ea99aa308e29da3b6727c0228"
+  },
+  "frontend/apps/dashboard/src/app/[locale]/dashboard/reports/inventory/page.tsx": {
+    "lines": 250,
+    "symbols": [
+      {
+        "line": 49,
+        "text": "export default function InventoryReportsPage() {"
+      }
+    ],
+    "sha256": "e05102246d8a927072e97eac3da9c4bf0313d168070323e6ba0f14586597b61e"
+  },
+  "frontend/apps/dashboard/src/app/[locale]/dashboard/reports/overview/page.tsx": {
+    "lines": 255,
+    "symbols": [
+      {
+        "line": 32,
+        "text": "export default function ReportsOverviewPage() {"
+      }
+    ],
+    "sha256": "6f27f1c6ba8fb63306140e6abe8f1b32159eca537d65fefb918f748bf42fa569"
+  },
+  "frontend/apps/dashboard/src/app/[locale]/dashboard/reports/profitability/page.tsx": {
+    "lines": 280,
+    "symbols": [
+      {
+        "line": 53,
+        "text": "export default function ProfitabilityReportsPage() {"
+      }
+    ],
+    "sha256": "db2999e3ecd01954745053bfe3ec179479172fc26a9560512ac11227e6462cf5"
+  },
+  "frontend/apps/dashboard/src/app/[locale]/dashboard/reports/sales/page.tsx": {
+    "lines": 404,
+    "symbols": [
+      {
+        "line": 78,
+        "text": "export default function SalesReportsPage() {"
+      }
+    ],
+    "sha256": "fc0aabe1ad98032458d677bff4f2d503e8727d9e2a50b875862a6bef7366b23b"
+  },
+  "frontend/apps/dashboard/src/app/[locale]/dashboard/settings/access-control/page.tsx": {
+    "lines": 41,
+    "symbols": [
+      {
+        "line": 9,
+        "text": "export default function AccessControlPage() {"
+      }
+    ],
+    "sha256": "e1662d374ba04189ced695a37175d0f02b1d8b98cd31b66ef8e5fd66aacc451d"
+  },
+  "frontend/apps/dashboard/src/app/[locale]/dashboard/settings/account/page.tsx": {
+    "lines": 256,
+    "symbols": [
+      {
+        "line": 13,
+        "text": "export default function AccountSettingsPage() {"
+      }
+    ],
+    "sha256": "a1bc0b907aff052cc59ae8b938c30a3f6ec848a846ab379db2f473a2e0b4273a"
+  },
+  "frontend/apps/dashboard/src/app/[locale]/dashboard/settings/billing/page.tsx": {
+    "lines": 455,
+    "symbols": [
+      {
+        "line": 69,
+        "text": "export default function BillingSettingsPage() {"
+      }
+    ],
+    "sha256": "9aef12eb042f73760c680c702f5394076b5d56e86b80411fc4e8a8ec4008328a"
+  },
+  "frontend/apps/dashboard/src/app/[locale]/dashboard/tables/layout/page.tsx": {
+    "lines": 460,
+    "symbols": [
+      {
+        "line": 39,
+        "text": "export default function TablesLayoutPage() {"
+      }
+    ],
+    "sha256": "22f5536bd89945d4130ec8c613ae7882e4ee763870ac277daa21a7f942a2e48c"
+  },
+  "frontend/apps/dashboard/src/app/[locale]/dashboard/tables/page.tsx": {
+    "lines": 453,
+    "symbols": [
+      {
+        "line": 32,
+        "text": "export default function TablesPage() {"
+      }
+    ],
+    "sha256": "9aa931c77868c5b46739b9c2b7c72307e5c86574fbc9595018d1599511d362c5"
+  },
+  "frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/editor/[id]/page.tsx": {
+    "lines": 574,
+    "symbols": [
+      {
+        "line": 250,
+        "text": "export default function ThemeEditorPage({ params: paramsPromise }: EditorPageProps) {"
+      }
+    ],
+    "sha256": "eebd883370493b0ae8a0c4d6a987653a4d94c1d32d6a69826cbe57c0bd026d79"
+  },
+  "frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/import/page.tsx": {
+    "lines": 273,
+    "symbols": [
+      {
+        "line": 11,
+        "text": "export default function ImportThemePage() {"
+      }
+    ],
+    "sha256": "7022aadc04bec7fa9065fc1388d9f4f830787145f711d40e4a6dd4bf93713816"
+  },
+  "frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/page.tsx": {
+    "lines": 676,
+    "symbols": [
+      {
+        "line": 18,
+        "text": "export default function ThemeBuilderPage() {"
+      }
+    ],
+    "sha256": "0f49e5591b8e9c3532d72c9c81dfadd5e28352a26e352ace122bb06e5da2bfcb"
+  },
+  "frontend/apps/dashboard/src/hooks/useKDSWebSocket.ts": {
+    "lines": 190,
+    "symbols": [
+      {
+        "line": 45,
+        "text": "export const useKDSWebSocket = ({ onOrderNew }: UseKDSWebSocketOptions = {}) => {"
+      }
+    ],
+    "sha256": "78726e83d499992ce1ee78d83cd8a3e5c1ec6f45408f52f2e4a8211514046e83"
+  },
+  "frontend/apps/dashboard/src/hooks/usePOSOffline.ts": {
+    "lines": 263,
+    "symbols": [
+      {
+        "line": 147,
+        "text": "export const usePOSOffline = (): POSOfflineResult => {"
+      }
+    ],
+    "sha256": "b3e49a3721fc3c50ee2fcf49011a8564849a573249603835c4862c840495b94b"
+  },
+  "frontend/apps/dashboard/src/hooks/usePOSPrint.ts": {
+    "lines": 424,
+    "symbols": [
+      {
+        "line": 239,
+        "text": "export const buildPOSReceiptMarkup = (data: POSReceiptData) => {"
+      },
+      {
+        "line": 339,
+        "text": "export const usePOSPrint = (options?: UsePOSPrintOptions) => {"
+      }
+    ],
+    "sha256": "dcc23ae7263dd61fb109d1091dc00d6014dfc1ae600d285aff74bc00f6ef96b8"
+  },
+  "frontend/apps/dashboard/src/lib/api/posApi.ts": {
+    "lines": 276,
+    "symbols": [
+      {
+        "line": 218,
+        "text": "export const posApi = {"
+      }
+    ],
+    "sha256": "1a0eb90c660007f82b95c93575ff3d2bb67396ffc629bcf938a1cb79785562be"
+  },
+  "frontend/apps/dashboard/src/stores/posStore.ts": {
+    "lines": 647,
+    "symbols": [
+      {
+        "line": 350,
+        "text": "export const usePOSStore = create<POSState>()("
+      },
+      {
+        "line": 625,
+        "text": "export const selectPOSItems = (state: POSState) => state.items"
+      },
+      {
+        "line": 626,
+        "text": "export const selectPOSHeldOrders = (state: POSState) => state.heldOrders"
+      },
+      {
+        "line": 627,
+        "text": "export const selectPOSHeldOrdersCount = (state: POSState) => state.heldOrders.length"
+      },
+      {
+        "line": 628,
+        "text": "export const selectPOSTableId = (state: POSState) => state.tableId"
+      },
+      {
+        "line": 629,
+        "text": "export const selectPOSTableName = (state: POSState) => state.tableName"
+      },
+      {
+        "line": 630,
+        "text": "export const selectPOSCustomerName = (state: POSState) => state.customerName"
+      },
+      {
+        "line": 631,
+        "text": "export const selectPOSCustomerPhone = (state: POSState) => state.customerPhone"
+      },
+      {
+        "line": 632,
+        "text": "export const selectPOSPaymentMethod = (state: POSState) => state.paymentMethod"
+      },
+      {
+        "line": 633,
+        "text": "export const selectPOSOrderNotes = (state: POSState) => state.orderNotes"
+      },
+      {
+        "line": 634,
+        "text": "export const selectPOSSelectedCategoryId = (state: POSState) => state.selectedCategoryId"
+      },
+      {
+        "line": 635,
+        "text": "export const selectPOSSearchQuery = (state: POSState) => state.searchQuery"
+      },
+      {
+        "line": 636,
+        "text": "export const selectPOSSoundEnabled = (state: POSState) => state.soundEnabled"
+      },
+      {
+        "line": 637,
+        "text": "export const selectPOSAutoPrintEnabled = (state: POSState) => state.autoPrintEnabled"
+      },
+      {
+        "line": 638,
+        "text": "export const selectPOSFocusModeEnabled = (state: POSState) => state.focusModeEnabled"
+      },
+      {
+        "line": 639,
+        "text": "export const selectPOSHideOutOfStockProducts = (state: POSState) =>"
+      },
+      {
+        "line": 641,
+        "text": "export const selectPOSProductCardSize = (state: POSState) => state.productCardSize"
+      },
+      {
+        "line": 642,
+        "text": "export const selectPOSSubtotal = (state: POSState) => state.getSubtotal()"
+      },
+      {
+        "line": 643,
+        "text": "export const selectPOSTax = (state: POSState) => state.getTax()"
+      },
+      {
+        "line": 644,
+        "text": "export const selectPOSTotal = (state: POSState) => state.getTotal()"
+      },
+      {
+        "line": 645,
+        "text": "export const selectPOSTotalItems = (state: POSState) => state.getTotalItems()"
+      },
+      {
+        "line": 646,
+        "text": "export const selectPOSItemByProductId = (productId: number) => (state: POSState) =>"
+      }
+    ],
+    "sha256": "cefe662405b150c1c6499f7ef795904b1188f1754102aaf4d02c9a5da15c320b"
+  },
+  "frontend/apps/landing/src/contexts/LanguageContext.tsx": {
+    "lines": 61,
+    "symbols": [
+      {
+        "line": 21,
+        "text": "export function LanguageProvider({ children, locale }: LanguageProviderProps) {"
+      },
+      {
+        "line": 55,
+        "text": "export function useLanguage() {"
+      }
+    ],
+    "sha256": "bff7aa61dd6ae6c7217454851b5c22272dac5dc28259ede19f38830729ac6da4"
+  },
+  "frontend/apps/landing/src/lib/translations.ts": {
+    "lines": 359,
+    "symbols": [
+      {
+        "line": 1,
+        "text": "export const translations = {"
+      }
+    ],
+    "sha256": "a2450e65aedeb098917ca4596c7523669a35f69dc6439b034f5de183a03eed6c"
+  },
+  "frontend/apps/restaurant-website/app/[locale]/checkout/page.tsx": {
+    "lines": 25,
+    "symbols": [
+      {
+        "line": 10,
+        "text": "export const metadata = {"
+      }
+    ],
+    "sha256": "043acd09271d8bd64f5e3ca83c9fd30c3492e91eb9a5daeba8728551d470b8de"
+  },
+  "frontend/apps/restaurant-website/app/[locale]/orders/track/[orderNumber]/page.tsx": {
+    "lines": 16,
+    "symbols": [],
+    "sha256": "cd29cf8d10dab2720f7b0faa561c56f74282192c2bac36bf127013d65245a896"
+  },
+  "frontend/apps/restaurant-website/app/[locale]/page.tsx": {
+    "lines": 175,
+    "symbols": [
+      {
+        "line": 30,
+        "text": "export const revalidate = 300"
+      }
+    ],
+    "sha256": "1404eaf3a6b18e2b1cb21677df89c5cbca0a014cef989784c7b47e17512b937e"
+  },
+  "frontend/apps/super-admin/src/app/login/page.tsx": {
+    "lines": 135,
+    "symbols": [
+      {
+        "line": 9,
+        "text": "export default function LoginPage() {"
+      }
+    ],
+    "sha256": "b66d88c30c088633432d8ef11ec6e6a25e734667525d4447db940706ee358043"
+  }
+}

@@ -30,6 +30,7 @@ func (u *User) VerifyPassword(password string) bool {
 }
 
 type RegisterRequest struct {
+	BillingPeriod  string `json:"billing_period"`
 	Name           string `json:"name"`
 	Email          string `json:"email"`
 	Password       string `json:"password"`

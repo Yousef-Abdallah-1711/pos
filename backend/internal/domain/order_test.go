@@ -109,6 +109,34 @@ func TestCanTransitionStatus(t *testing.T) {
 	}
 }
 
+func TestCanTransitionOrderPaymentStatus(t *testing.T) {
+	tests := []struct {
+		name        string
+		orderStatus string
+		current     string
+		next        string
+		want        bool
+	}{
+		{name: "pending order may become paid", orderStatus: "pending", current: "pending", next: "paid", want: true},
+		{name: "failed payment may later succeed", orderStatus: "confirmed", current: "failed", next: "paid", want: true},
+		{name: "repeated paid state is idempotent", orderStatus: "confirmed", current: "paid", next: "paid", want: true},
+		{name: "generic status cannot assert refund", orderStatus: "confirmed", current: "paid", next: "refunded", want: false},
+		{name: "paid state cannot be downgraded", orderStatus: "confirmed", current: "paid", next: "failed", want: false},
+		{name: "refunded state cannot be reactivated", orderStatus: "confirmed", current: "refunded", next: "paid", want: false},
+		{name: "cancelled order cannot become paid", orderStatus: "cancelled", current: "pending", next: "paid", want: false},
+		{name: "unknown status is rejected", orderStatus: "pending", current: "pending", next: "captured", want: false},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			if got := CanTransitionOrderPaymentStatus(test.orderStatus, test.current, test.next); got != test.want {
+				t.Fatalf("CanTransitionOrderPaymentStatus(%q, %q, %q) = %v, want %v",
+					test.orderStatus, test.current, test.next, got, test.want)
+			}
+		})
+	}
+}
+
 // TestGenerateOrderNumber tests the GenerateOrderNumber function
 func TestGenerateOrderNumber(t *testing.T) {
 	tests := []struct {

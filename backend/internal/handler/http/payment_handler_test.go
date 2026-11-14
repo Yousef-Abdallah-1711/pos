@@ -331,7 +331,7 @@ func TestPaymentHandlerHandlePaymobWebhookReturns200(t *testing.T) {
 		"hmac": "mock_hmac",
 		"obj": map[string]interface{}{
 			"id":                     time.Now().UnixNano(),
-			"amount_cents":           50000,
+			"amount_cents":           75000,
 			"success":                false,
 			"currency":               "EGP",
 			"is_auth":                false,

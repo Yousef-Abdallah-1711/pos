@@ -13,6 +13,7 @@ import (
 
 	"github.com/lib/pq"
 	"golang.org/x/crypto/bcrypt"
+	"pos-saas/internal/commerce"
 	"pos-saas/internal/domain"
 	"pos-saas/internal/pkg/database"
 )
@@ -80,10 +81,10 @@ func (r *AuthRepository) CreateTenantWithUserContext(ctx context.Context, req *d
 	var tenantID int
 	for attempt := 0; attempt < 20; attempt++ {
 		err = tx.QueryRowContext(ctx, `
-			INSERT INTO tenants (name, slug, domain, email, phone, subscription_plan, max_restaurants, max_users, is_active)
-			VALUES ($1, $2, $3, $4, NULLIF($5, ''), 'free', 1, 5, true)
+			INSERT INTO tenants (name, slug, domain, email, phone, subscription_plan, max_restaurants, max_users, is_active, trial_days, preferred_billing_period)
+			VALUES ($1, $2, $3, $4, NULLIF($5, ''), 'free', 1, 5, true, $7, COALESCE(NULLIF($6, ''), 'monthly'))
 			RETURNING id
-		`, req.RestaurantName, slug, slug+"."+restaurantDomain, req.Email, req.Phone).Scan(&tenantID)
+		`, req.RestaurantName, slug, slug+"."+restaurantDomain, req.Email, req.Phone, req.BillingPeriod, commerce.Current().TrialDays).Scan(&tenantID)
 		if err == nil {
 			break
 		}

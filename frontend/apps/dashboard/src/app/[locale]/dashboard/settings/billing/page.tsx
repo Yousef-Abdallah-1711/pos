@@ -105,10 +105,13 @@ export default function BillingSettingsPage() {
       setCurrentSubscription(resolvedCurrent)
     } else {
       setCurrentSubscription(null)
+      setErrorMessage(previous => previous || t('settings.billingPage.loadSubscriptionFailed', 'Could not load your current subscription. Please refresh the page.'))
     }
 
     if (resolvedPlans.length > 0) {
-      const preferredPlanID =
+      const preferredOffer = resolvedCurrent?.subscription_status === 'trial' && resolvedCurrent.preferred_billing_period
+        ? resolvedPlans.find(plan => isAnnualPlan(plan) === (resolvedCurrent?.preferred_billing_period === 'annual'))?.id : undefined
+      const preferredPlanID = preferredOffer ||
         resolvedCurrent?.current_plan?.id ||
         resolvedCurrent?.plan?.id ||
         ''
@@ -234,7 +237,7 @@ export default function BillingSettingsPage() {
       </div>
 
       {errorMessage && (
-        <div className="rounded-lg border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900/40 dark:bg-red-900/20 dark:text-red-300">
+        <div role="alert" className="rounded-lg border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900/40 dark:bg-red-900/20 dark:text-red-300">
           {errorMessage}
         </div>
       )}
@@ -314,13 +317,13 @@ export default function BillingSettingsPage() {
                       : 'border-gray-200 dark:border-gray-700 hover:border-primary-300'
                   }`}
                 >
-                  <p className="text-sm font-semibold text-gray-900 dark:text-white">{plan.name}</p>
+                  <p className="text-sm font-semibold text-gray-900 dark:text-white">{locale === 'ar' && plan.name_ar ? plan.name_ar : plan.name}</p>
                   <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                     {formatPlanPrice(plan, locale)} / {locale === 'ar' ? (isAnnualPlan(plan) ? 'سنة' : 'شهر') : plan.period}
                   </p>
                   {isAnnualPlan(plan) && (
                     <span className="inline-flex mt-2 rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-medium text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300">
-                      {t('settings.billingPage.saveAnnual', 'Save 17%')}
+                      {t('settings.billingPage.saveAnnual', 'Save approximately 44.4%')}
                     </span>
                   )}
                 </button>
@@ -334,11 +337,12 @@ export default function BillingSettingsPage() {
               key={plan.id}
               plan={plan}
               isActive={isActiveSubscription && currentPlanID === plan.id}
+              disabled={currentSubscription?.checkout_available !== true}
               isLoading={paymentFlow.isLoading}
               locale={locale}
-              subscribeLabel={t('settings.billingPage.subscribeNow', 'Subscribe Now')}
+              subscribeLabel={currentSubscription?.checkout_available !== true ? (isRTL ? 'الدفع غير متاح حاليًا' : 'Paid checkout unavailable') : t('settings.billingPage.subscribeNow', 'Subscribe Now')}
               activeLabel={t('settings.billingPage.activePlan', 'Already Active')}
-              annualSaveLabel={t('settings.billingPage.saveAnnual', 'Save 17%')}
+              annualSaveLabel={t('settings.billingPage.saveAnnual', 'Save approximately 44.4%')}
               translateFeature={(feature) => {
                 const featureMap: Record<string, string> = {
                   'Full POS System': t('settings.billingPage.features.fullPosSystem', 'Full POS System'),

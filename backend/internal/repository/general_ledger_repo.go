@@ -35,8 +35,33 @@ func NewGeneralLedgerRepository(db *sql.DB, journalRepo *JournalEntryRepository)
 // one transaction. A transaction-scoped advisory lock serializes retries for
 // the same source event so only one posting can be created for that identity.
 func (r *GeneralLedgerRepository) CreateAndPostAutoEntry(entry *domain.JournalEntry, postedBy int) (int, error) {
+	if r.db == nil {
+		return 0, errors.New("general ledger repository is required")
+	}
+	tx, err := r.db.Begin()
+	if err != nil {
+		return 0, err
+	}
+	defer tx.Rollback()
+	id, err := r.CreateAndPostAutoEntryTx(tx, entry, postedBy)
+	if err != nil {
+		return 0, err
+	}
+	if err := tx.Commit(); err != nil {
+		return 0, fmt.Errorf("failed to commit auto-posting journal %d: %w", id, err)
+	}
+	return id, nil
+}
+
+// CreateAndPostAutoEntryTx writes the journal and GL rows using a caller-owned
+// transaction, allowing a paid payroll transition and its posting to commit as
+// one unit.
+func (r *GeneralLedgerRepository) CreateAndPostAutoEntryTx(tx *sql.Tx, entry *domain.JournalEntry, postedBy int) (int, error) {
 	if r.db == nil || r.journalRepo == nil {
 		return 0, errors.New("general ledger and journal repositories are required")
+	}
+	if tx == nil {
+		return 0, errors.New("transaction is required")
 	}
 	if entry == nil {
 		return 0, errors.New("journal entry is required")
@@ -47,12 +72,6 @@ func (r *GeneralLedgerRepository) CreateAndPostAutoEntry(entry *domain.JournalEn
 	if entry.ReferenceID == nil || *entry.ReferenceID <= 0 || strings.TrimSpace(entry.ReferenceType) == "" || strings.TrimSpace(entry.EntryType) == "" {
 		return 0, errors.New("auto-posting requires a stable source reference and entry type")
 	}
-
-	tx, err := r.db.Begin()
-	if err != nil {
-		return 0, err
-	}
-	defer tx.Rollback()
 
 	lockKey := fmt.Sprintf("auto-posting:%d:%d:%s:%d:%s", entry.TenantID, entry.RestaurantID, entry.ReferenceType, *entry.ReferenceID, entry.EntryType)
 	var lockAcquired int
@@ -100,9 +119,6 @@ func (r *GeneralLedgerRepository) CreateAndPostAutoEntry(entry *domain.JournalEn
 	if len(existing) == 1 {
 		switch existing[0].status {
 		case domain.JournalStatusPosted:
-			if err := tx.Commit(); err != nil {
-				return 0, err
-			}
 			return existing[0].id, nil
 		case domain.JournalStatusDraft:
 			return 0, fmt.Errorf("auto-posting draft %d already exists and requires recovery", existing[0].id)
@@ -119,9 +135,6 @@ func (r *GeneralLedgerRepository) CreateAndPostAutoEntry(entry *domain.JournalEn
 	}
 	if err := r.journalRepo.PostEntryTx(tx, entry.TenantID, entry.RestaurantID, id, postedBy); err != nil {
 		return 0, fmt.Errorf("failed to post auto-posting journal %d: %w", id, err)
-	}
-	if err := tx.Commit(); err != nil {
-		return 0, fmt.Errorf("failed to commit auto-posting journal %d: %w", id, err)
 	}
 	return id, nil
 }

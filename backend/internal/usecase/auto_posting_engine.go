@@ -1,6 +1,7 @@
 package usecase
 
 import (
+	"database/sql"
 	"errors"
 	"fmt"
 	"log"
@@ -16,6 +17,10 @@ type AutoPostingService interface {
 	PostSalesEntry(order *domain.Order, postedBy *int) error
 	PostCOGSEntry(order *domain.Order, postedBy *int) error
 	PostPayrollEntry(salary *domain.Salary, postedBy *int) error
+}
+
+type TransactionalPayrollPostingService interface {
+	PostPayrollEntryTx(tx *sql.Tx, salary *domain.Salary, postedBy *int) error
 }
 
 type AutoPostingEngine struct {
@@ -254,16 +259,37 @@ func (e *AutoPostingEngine) PostCOGSEntry(order *domain.Order, postedBy *int) er
 }
 
 func (e *AutoPostingEngine) PostPayrollEntry(salary *domain.Salary, postedBy *int) error {
+	_, err := e.postPayrollEntry(nil, salary, postedBy)
+	return err
+}
+
+// PostPayrollEntryTx joins the payroll journal and ledger writes to a caller's
+// salary-payment transaction so the paid state cannot commit by itself.
+func (e *AutoPostingEngine) PostPayrollEntryTx(tx *sql.Tx, salary *domain.Salary, postedBy *int) error {
+	if tx == nil {
+		return errors.New("payroll posting transaction is required")
+	}
+	_, err := e.postPayrollEntry(tx, salary, postedBy)
+	return err
+}
+
+func (e *AutoPostingEngine) postPayrollEntry(tx *sql.Tx, salary *domain.Salary, postedBy *int) (int, error) {
 	if salary == nil {
-		return errors.New("salary is required")
+		return 0, errors.New("salary is required")
 	}
 	if !salary.IsPaid && !strings.EqualFold(strings.TrimSpace(salary.Status), "paid") {
-		return nil
+		return 0, nil
 	}
 
 	accounts, enabled, err := e.ruleAccounts(salary.TenantID, salary.RestaurantID, domain.AutoPostingEventSalaryPaid)
-	if err != nil || !enabled {
-		return err
+	if err != nil {
+		return 0, err
+	}
+	if !enabled {
+		if tx != nil {
+			return 0, errors.New("payroll auto-posting is disabled; payment state cannot be committed")
+		}
+		return 0, nil
 	}
 
 	paymentKey := "bank"
@@ -272,12 +298,12 @@ func (e *AutoPostingEngine) PostPayrollEntry(salary *domain.Salary, postedBy *in
 	}
 	paymentAccount, err := e.resolvePaymentAccount(salary.TenantID, salary.RestaurantID, paymentKey, accounts)
 	if err != nil {
-		return err
+		return 0, err
 	}
 
 	salaryExpenseAccount, err := e.resolveAccount(salary.TenantID, salary.RestaurantID, accounts["salary_expense"], "5210")
 	if err != nil {
-		return err
+		return 0, err
 	}
 
 	baseExpense := roundedAmount(salary.GrossSalary - salary.OvertimeAmount - salary.Tips)
@@ -297,7 +323,7 @@ func (e *AutoPostingEngine) PostPayrollEntry(salary *domain.Salary, postedBy *in
 	if salary.OvertimeAmount > 0 {
 		overtimeExpenseAccount, err := e.resolveAccount(salary.TenantID, salary.RestaurantID, accounts["overtime_expense"], "5220", "5210")
 		if err != nil {
-			return err
+			return 0, err
 		}
 		lines = append(lines, domain.JournalEntryLine{
 			AccountID:   overtimeExpenseAccount.ID,
@@ -309,7 +335,7 @@ func (e *AutoPostingEngine) PostPayrollEntry(salary *domain.Salary, postedBy *in
 	if salary.Tips > 0 {
 		tipsPayableAccount, err := e.resolveAccount(salary.TenantID, salary.RestaurantID, accounts["tips_payable"], "2140", "5210")
 		if err != nil {
-			return err
+			return 0, err
 		}
 		lines = append(lines, domain.JournalEntryLine{
 			AccountID:   tipsPayableAccount.ID,
@@ -321,7 +347,7 @@ func (e *AutoPostingEngine) PostPayrollEntry(salary *domain.Salary, postedBy *in
 	if salary.Tax > 0 {
 		taxPayableAccount, err := e.resolveAccount(salary.TenantID, salary.RestaurantID, accounts["tax_payable"], accounts["accrued_expenses"], "2110")
 		if err != nil {
-			return err
+			return 0, err
 		}
 		lines = append(lines, domain.JournalEntryLine{
 			AccountID:    taxPayableAccount.ID,
@@ -333,7 +359,7 @@ func (e *AutoPostingEngine) PostPayrollEntry(salary *domain.Salary, postedBy *in
 	if salary.SocialInsurance > 0 {
 		socialPayableAccount, err := e.resolveAccount(salary.TenantID, salary.RestaurantID, accounts["social_insurance_payable"], accounts["accrued_expenses"], "2110")
 		if err != nil {
-			return err
+			return 0, err
 		}
 		lines = append(lines, domain.JournalEntryLine{
 			AccountID:    socialPayableAccount.ID,
@@ -345,7 +371,7 @@ func (e *AutoPostingEngine) PostPayrollEntry(salary *domain.Salary, postedBy *in
 	if salary.HealthInsurance > 0 {
 		healthPayableAccount, err := e.resolveAccount(salary.TenantID, salary.RestaurantID, accounts["health_insurance_payable"], accounts["accrued_expenses"], "2110")
 		if err != nil {
-			return err
+			return 0, err
 		}
 		lines = append(lines, domain.JournalEntryLine{
 			AccountID:    healthPayableAccount.ID,
@@ -357,7 +383,7 @@ func (e *AutoPostingEngine) PostPayrollEntry(salary *domain.Salary, postedBy *in
 	if salary.Pension > 0 {
 		pensionPayableAccount, err := e.resolveAccount(salary.TenantID, salary.RestaurantID, accounts["pension_payable"], accounts["accrued_expenses"], "2110")
 		if err != nil {
-			return err
+			return 0, err
 		}
 		lines = append(lines, domain.JournalEntryLine{
 			AccountID:    pensionPayableAccount.ID,
@@ -369,7 +395,7 @@ func (e *AutoPostingEngine) PostPayrollEntry(salary *domain.Salary, postedBy *in
 	if salary.LoanDeduction > 0 {
 		loanClearingAccount, err := e.resolveAccount(salary.TenantID, salary.RestaurantID, accounts["loan_clearing"], accounts["accrued_expenses"], "2110")
 		if err != nil {
-			return err
+			return 0, err
 		}
 		lines = append(lines, domain.JournalEntryLine{
 			AccountID:    loanClearingAccount.ID,
@@ -381,7 +407,7 @@ func (e *AutoPostingEngine) PostPayrollEntry(salary *domain.Salary, postedBy *in
 	if salary.AdvanceDeduction > 0 {
 		advanceAccount, err := e.resolveAccount(salary.TenantID, salary.RestaurantID, accounts["employee_advances"], "1121", "2110")
 		if err != nil {
-			return err
+			return 0, err
 		}
 		lines = append(lines, domain.JournalEntryLine{
 			AccountID:    advanceAccount.ID,
@@ -395,7 +421,7 @@ func (e *AutoPostingEngine) PostPayrollEntry(salary *domain.Salary, postedBy *in
 	if otherDeductions > 0 {
 		otherDeductionsAccount, err := e.resolveAccount(salary.TenantID, salary.RestaurantID, accounts["other_deductions_payable"], accounts["accrued_expenses"], "2110")
 		if err != nil {
-			return err
+			return 0, err
 		}
 		lines = append(lines, domain.JournalEntryLine{
 			AccountID:    otherDeductionsAccount.ID,
@@ -414,7 +440,8 @@ func (e *AutoPostingEngine) PostPayrollEntry(salary *domain.Salary, postedBy *in
 	}
 
 	description := fmt.Sprintf("Auto-posted payroll for salary #%d", salary.ID)
-	_, err = e.createAndPostEntry(
+	_, err = e.createAndPostEntryTx(
+		tx,
 		salary.TenantID,
 		salary.RestaurantID,
 		domain.PostingEvent{
@@ -429,7 +456,7 @@ func (e *AutoPostingEngine) PostPayrollEntry(salary *domain.Salary, postedBy *in
 		payrollEntryDate(salary),
 		lines,
 	)
-	return err
+	return 0, err
 }
 
 func (e *AutoPostingEngine) PostSupplierInvoiceEntry(event *domain.PostingEvent, lines []domain.JournalEntryLine) error {
@@ -492,6 +519,16 @@ func (e *AutoPostingEngine) createAndPostEntry(
 	entryDate time.Time,
 	lines []domain.JournalEntryLine,
 ) (int, error) {
+	return e.createAndPostEntryTx(nil, tenantID, restaurantID, event, entryDate, lines)
+}
+
+func (e *AutoPostingEngine) createAndPostEntryTx(
+	tx *sql.Tx,
+	tenantID, restaurantID int,
+	event domain.PostingEvent,
+	entryDate time.Time,
+	lines []domain.JournalEntryLine,
+) (int, error) {
 	if tenantID <= 0 || restaurantID <= 0 {
 		return 0, errors.New("tenant and restaurant are required")
 	}
@@ -530,7 +567,12 @@ func (e *AutoPostingEngine) createAndPostEntry(
 	if event.PostedBy != nil {
 		postedBy = *event.PostedBy
 	}
-	id, err := e.generalLedgerRepo.CreateAndPostAutoEntry(&entry, postedBy)
+	var id int
+	if tx == nil {
+		id, err = e.generalLedgerRepo.CreateAndPostAutoEntry(&entry, postedBy)
+	} else {
+		id, err = e.generalLedgerRepo.CreateAndPostAutoEntryTx(tx, &entry, postedBy)
+	}
 	if err != nil {
 		return id, err
 	}

@@ -598,6 +598,9 @@ func (r *SupplierInvoiceRepository) lookupSupplierPayableAccountTx(tx *sql.Tx, t
 func (r *SupplierInvoiceRepository) generateInvoiceNumberTx(tx *sql.Tx, tenantID, restaurantID int, invoiceDate time.Time) (string, error) {
 	var nextNumber int
 	prefix := fmt.Sprintf("PINV-%d-", invoiceDate.Year())
+	if err := lockFinancialDocumentNumberTx(tx, "supplier-invoice", tenantID, restaurantID, prefix); err != nil {
+		return "", err
+	}
 	err := tx.QueryRow(`
 		SELECT COALESCE(MAX(CAST(RIGHT(invoice_number, 5) AS INT)), 0) + 1
 		FROM invoices_supplier

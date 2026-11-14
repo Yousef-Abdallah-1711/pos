@@ -1,0 +1,689 @@
+[
+  {
+    "method": "POST",
+    "route": "/accounting/accounts",
+    "http": 201,
+    "response": {
+      "data": {
+        "id": 67,
+        "tenant_id": 13,
+        "restaurant_id": 13,
+        "account_code": "19901",
+        "account_name": "Audit Cash",
+        "account_type": "asset",
+        "normal_balance": "debit",
+        "level": 1,
+        "is_header": false,
+        "current_balance": 0,
+        "currency": "EGP",
+        "is_active": true,
+        "is_system": false,
+        "is_reconcilable": false,
+        "created_at": "2026-11-14T03:18:20.496729Z",
+        "updated_at": "2026-11-14T03:18:20.496729Z",
+        "created_by": 14,
+        "updated_by": 14
+      },
+      "success": true
+    }
+  },
+  {
+    "method": "POST",
+    "route": "/accounting/accounts",
+    "http": 201,
+    "response": {
+      "data": {
+        "id": 68,
+        "tenant_id": 13,
+        "restaurant_id": 13,
+        "account_code": "49901",
+        "account_name": "Audit Revenue",
+        "account_type": "revenue",
+        "normal_balance": "credit",
+        "level": 1,
+        "is_header": false,
+        "current_balance": 0,
+        "currency": "EGP",
+        "is_active": true,
+        "is_system": false,
+        "is_reconcilable": false,
+        "created_at": "2026-11-14T03:18:20.543052Z",
+        "updated_at": "2026-11-14T03:18:20.543052Z",
+        "created_by": 14,
+        "updated_by": 14
+      },
+      "success": true
+    }
+  },
+  {
+    "method": "POST",
+    "route": "/accounting/accounts",
+    "http": 201,
+    "response": {
+      "data": {
+        "id": 69,
+        "tenant_id": 13,
+        "restaurant_id": 13,
+        "account_code": "29901",
+        "account_name": "Audit Tax",
+        "account_type": "liability",
+        "normal_balance": "credit",
+        "level": 1,
+        "is_header": false,
+        "current_balance": 0,
+        "currency": "EGP",
+        "is_active": true,
+        "is_system": false,
+        "is_reconcilable": false,
+        "created_at": "2026-11-14T03:18:20.55737Z",
+        "updated_at": "2026-11-14T03:18:20.55737Z",
+        "created_by": 14,
+        "updated_by": 14
+      },
+      "success": true
+    }
+  },
+  {
+    "method": "POST",
+    "route": "/accounting/journal-entries",
+    "http": 201,
+    "response": {
+      "data": {
+        "id": 3,
+        "tenant_id": 13,
+        "restaurant_id": 13,
+        "entry_number": "JE-2026-00001",
+        "entry_date": "2026-11-14T00:00:00Z",
+        "fiscal_period": "2026-11",
+        "description": "Synthetic audit fixture. Not business revenue.",
+        "reference_type": "product_audit",
+        "entry_type": "manual",
+        "total_debit": 110,
+        "total_credit": 110,
+        "status": "draft",
+        "is_approved": false,
+        "created_at": "2026-11-14T03:18:20.572602Z",
+        "updated_at": "2026-11-14T03:18:20.572602Z",
+        "created_by": 14,
+        "updated_by": 14,
+        "lines": [
+          {
+            "id": 5,
+            "journal_entry_id": 3,
+            "tenant_id": 13,
+            "account_id": 67,
+            "account_code": "19901",
+            "debit_amount": 110,
+            "credit_amount": 0,
+            "line_order": 1,
+            "tax_amount": 0,
+            "created_at": "2026-11-14T03:18:20.572602Z"
+          },
+          {
+            "id": 6,
+            "journal_entry_id": 3,
+            "tenant_id": 13,
+            "account_id": 68,
+            "account_code": "49901",
+            "debit_amount": 0,
+            "credit_amount": 100,
+            "line_order": 2,
+            "tax_amount": 0,
+            "created_at": "2026-11-14T03:18:20.572602Z"
+          },
+          {
+            "id": 7,
+            "journal_entry_id": 3,
+            "tenant_id": 13,
+            "account_id": 69,
+            "account_code": "29901",
+            "debit_amount": 0,
+            "credit_amount": 10,
+            "line_order": 3,
+            "tax_amount": 0,
+            "created_at": "2026-11-14T03:18:20.572602Z"
+          }
+        ]
+      },
+      "success": true
+    }
+  },
+  {
+    "method": "POST",
+    "route": "/accounting/journal-entries/3/post",
+    "http": 200,
+    "response": {
+      "data": {
+        "id": 3,
+        "tenant_id": 13,
+        "restaurant_id": 13,
+        "entry_number": "JE-2026-00001",
+        "entry_date": "2026-11-14T00:00:00Z",
+        "fiscal_period": "2026-11",
+        "description": "Synthetic audit fixture. Not business revenue.",
+        "reference_type": "product_audit",
+        "entry_type": "manual",
+        "total_debit": 110,
+        "total_credit": 110,
+        "status": "posted",
+        "posted_at": "2026-11-14T03:18:20.67081Z",
+        "posted_by": 14,
+        "is_approved": false,
+        "created_at": "2026-11-14T03:18:20.572602Z",
+        "updated_at": "2026-11-14T03:18:20.67081Z",
+        "created_by": 14,
+        "updated_by": 14,
+        "lines": [
+          {
+            "id": 5,
+            "journal_entry_id": 3,
+            "tenant_id": 13,
+            "account_id": 67,
+            "account_code": "19901",
+            "debit_amount": 110,
+            "credit_amount": 0,
+            "line_order": 1,
+            "tax_amount": 0,
+            "created_at": "2026-11-14T03:18:20.572602Z"
+          },
+          {
+            "id": 6,
+            "journal_entry_id": 3,
+            "tenant_id": 13,
+            "account_id": 68,
+            "account_code": "49901",
+            "debit_amount": 0,
+            "credit_amount": 100,
+            "line_order": 2,
+            "tax_amount": 0,
+            "created_at": "2026-11-14T03:18:20.572602Z"
+          },
+          {
+            "id": 7,
+            "journal_entry_id": 3,
+            "tenant_id": 13,
+            "account_id": 69,
+            "account_code": "29901",
+            "debit_amount": 0,
+            "credit_amount": 10,
+            "line_order": 3,
+            "tax_amount": 0,
+            "created_at": "2026-11-14T03:18:20.572602Z"
+          }
+        ]
+      },
+      "success": true
+    }
+  },
+  {
+    "method": "POST",
+    "route": "/accounting/journal-entries/3/post",
+    "http": 400,
+    "response": {
+      "error": "only draft journal entries can be posted",
+      "success": false
+    }
+  },
+  {
+    "method": "GET",
+    "route": "/accounting/journal-entries/3",
+    "http": 200,
+    "response": {
+      "data": {
+        "id": 3,
+        "tenant_id": 13,
+        "restaurant_id": 13,
+        "entry_number": "JE-2026-00001",
+        "entry_date": "2026-11-14T00:00:00Z",
+        "fiscal_period": "2026-11",
+        "description": "Synthetic audit fixture. Not business revenue.",
+        "reference_type": "product_audit",
+        "entry_type": "manual",
+        "total_debit": 110,
+        "total_credit": 110,
+        "status": "posted",
+        "posted_at": "2026-11-14T03:18:20.67081Z",
+        "posted_by": 14,
+        "is_approved": false,
+        "created_at": "2026-11-14T03:18:20.572602Z",
+        "updated_at": "2026-11-14T03:18:20.67081Z",
+        "created_by": 14,
+        "updated_by": 14,
+        "lines": [
+          {
+            "id": 5,
+            "journal_entry_id": 3,
+            "tenant_id": 13,
+            "account_id": 67,
+            "account_code": "19901",
+            "debit_amount": 110,
+            "credit_amount": 0,
+            "line_order": 1,
+            "tax_amount": 0,
+            "created_at": "2026-11-14T03:18:20.572602Z"
+          },
+          {
+            "id": 6,
+            "journal_entry_id": 3,
+            "tenant_id": 13,
+            "account_id": 68,
+            "account_code": "49901",
+            "debit_amount": 0,
+            "credit_amount": 100,
+            "line_order": 2,
+            "tax_amount": 0,
+            "created_at": "2026-11-14T03:18:20.572602Z"
+          },
+          {
+            "id": 7,
+            "journal_entry_id": 3,
+            "tenant_id": 13,
+            "account_id": 69,
+            "account_code": "29901",
+            "debit_amount": 0,
+            "credit_amount": 10,
+            "line_order": 3,
+            "tax_amount": 0,
+            "created_at": "2026-11-14T03:18:20.572602Z"
+          }
+        ]
+      },
+      "success": true
+    }
+  },
+  {
+    "method": "GET",
+    "route": "/accounting/trial-balance",
+    "http": 200,
+    "response": {
+      "data": {
+        "as_of": "2026-11-14",
+        "is_balanced": true,
+        "rows": [
+          {
+            "account_id": 67,
+            "account_code": "19901",
+            "account_name": "Audit Cash",
+            "account_type": "asset",
+            "normal_balance": "debit",
+            "debit_balance": 110,
+            "credit_balance": 0,
+            "net_balance": 110,
+            "as_of_date": "2026-11-14T03:18:20.739472936Z"
+          },
+          {
+            "account_id": 69,
+            "account_code": "29901",
+            "account_name": "Audit Tax",
+            "account_type": "liability",
+            "normal_balance": "credit",
+            "debit_balance": 0,
+            "credit_balance": 10,
+            "net_balance": 10,
+            "as_of_date": "2026-11-14T03:18:20.739472936Z"
+          },
+          {
+            "account_id": 68,
+            "account_code": "49901",
+            "account_name": "Audit Revenue",
+            "account_type": "revenue",
+            "normal_balance": "credit",
+            "debit_balance": 0,
+            "credit_balance": 100,
+            "net_balance": 100,
+            "as_of_date": "2026-11-14T03:18:20.739472936Z"
+          }
+        ],
+        "total_credit": 110,
+        "total_debit": 110
+      },
+      "success": true
+    }
+  },
+  {
+    "method": "GET",
+    "route": "/reports/financial/profit-loss?from=2026-11-01&to=2026-11-30",
+    "http": 200,
+    "response": {
+      "data": {
+        "date_from": "2026-10-16",
+        "date_to": "2026-11-14",
+        "revenue": [
+          {
+            "account_code": "49901",
+            "account_name": "Audit Revenue",
+            "amount": 100
+          }
+        ],
+        "expenses": [],
+        "total_revenue": 100,
+        "total_expenses": 0,
+        "net_profit": 100,
+        "comparison_date_from": "2026-09-16",
+        "comparison_date_to": "2026-10-15",
+        "revenue_change_percent": 100,
+        "net_profit_change_percent": 100
+      },
+      "success": true
+    }
+  },
+  {
+    "method": "GET",
+    "route": "/reports/financial/balance-sheet?as_of=2026-11-14",
+    "http": 200,
+    "response": {
+      "data": {
+        "as_of_date": "2026-11-14",
+        "assets": [],
+        "liabilities": [],
+        "equity": [],
+        "total_assets": 0,
+        "total_liabilities": 0,
+        "total_equity": 0,
+        "equation_balanced": true,
+        "integrity_status": "RECONCILED",
+        "equation_difference": 0,
+        "integrity_check_basis": "existing_round2_equation_check"
+      },
+      "success": true
+    }
+  },
+  {
+    "method": "GET",
+    "route": "/reports/financial/cash-flow?from=2026-11-01&to=2026-11-30",
+    "http": 200,
+    "response": {
+      "data": {
+        "date_from": "2026-10-16",
+        "date_to": "2026-11-14",
+        "operating_cash_flow": 100,
+        "investing_cash_flow": 0,
+        "financing_cash_flow": 0,
+        "net_cash_flow": 100
+      },
+      "success": true
+    }
+  },
+  {
+    "method": "GET",
+    "route": "/reports/financial/inventory-valuation?as_of=2020-01-01",
+    "http": 200,
+    "response": {
+      "data": {
+        "as_of_date": "2020-01-01",
+        "rows": [
+          {
+            "product_id": 10,
+            "product_name": "Audit Test Dish",
+            "quantity": 20,
+            "cost_per_unit": 20,
+            "total_value": 400
+          }
+        ],
+        "total_value": 400
+      },
+      "success": true
+    }
+  },
+  {
+    "check": "financial UI",
+    "route": "accounting/journal-entries/3",
+    "text": "POS Dashboard\nDashboard\nCashier POS\nKitchen Display\nOrders\nProducts\nHuman Resources\nAccounting\nSuppliers\nFinancial Reports\nReports\nTheme Builder\nSettings\nEnglish\nP\n\nproduct-audit-1794625969@example.invalid\n\nOwner\n\nBack to journal entries\nJE-2026-00001\n\nSynthetic audit fixture. Not business revenue.\n\nVoid\nEntry date\nNov 14, 2026\nEntry type\nmanual\nTotal debit\nEGP 110.00\nTotal credit\nEGP 110.00\nPosted\nJournal lines\nAccount\tDescription\tDebit\tCredit\n\n19901\n\t-\tEGP 110.00\tEGP 0.00\n\n49901\n\t-\tEGP 0.00\tEGP 100.00\n\n29901\n\t-\tEGP 0.00\tEGP 10.00"
+  },
+  {
+    "check": "financial UI",
+    "route": "accounting/general-ledger",
+    "text": "POS Dashboard\nDashboard\nCashier POS\nKitchen Display\nOrders\nProducts\nHuman Resources\nAccounting\nSuppliers\nFinancial Reports\nReports\nTheme Builder\nSettings\nEnglish\nP\n\nproduct-audit-1794625969@example.invalid\n\nOwner\n\nGeneral Ledger\n\nReview posted accounting activity by account and validate the trial balance.\n\nLedger\nTrial Balance\nSelect account\n19901 - Audit Cash\nStart date\nEnd date\nFilter\n\nAccount\n\n19901 - Audit Cash\n\nBalance\n\nEGP 110.00\n\nFiscal period summary\nFiscal period\tEntries\tTotal debit\tTotal credit\tNet change\tClosing balance\n2026-11\t1\tEGP 110.00\tEGP 0.00\tEGP 110.00\tEGP 110.00\nEntry date\tEntry #\tDescription\tReference\tTotal debit\tTotal credit\tRunning balance\nNov 14, 2026\tJE-2026-00001\t\n\nSynthetic audit fixture. Not business revenue.\n\n\tproduct_audit\tEGP 110.00\tEGP 0.00\tEGP 110.00"
+  },
+  {
+    "check": "financial UI",
+    "route": "reports/financial/profit-loss",
+    "text": "POS Dashboard\nDashboard\nCashier POS\nKitchen Display\nOrders\nProducts\nHuman Resources\nAccounting\nSuppliers\nFinancial Reports\nReports\nTheme Builder\nSettings\nEnglish\nP\n\nproduct-audit-1794625969@example.invalid\n\nOwner\n\nProfit & Loss\n\nRevenue and expense performance for the selected period.\n\nRefresh\nExport PDF\nTotal Revenue\nEGP 0.00\nTotal Expenses\nEGP 0.00\nNet Profit\nEGP 0.00\nRevenue Accounts\nHide\nCode\tAccount\tAmount\nNo data available\nExpense Accounts\nHide\nCode\tAccount\tAmount\nNo data available"
+  },
+  {
+    "check": "financial UI",
+    "route": "reports/financial/balance-sheet",
+    "text": "POS Dashboard\nDashboard\nCashier POS\nKitchen Display\nOrders\nProducts\nHuman Resources\nAccounting\nSuppliers\nFinancial Reports\nReports\nTheme Builder\nSettings\nEnglish\nP\n\nproduct-audit-1794625969@example.invalid\n\nOwner\n\nBalance Sheet\n\nAssets, liabilities, and equity as of a specific date.\n\nRefresh\nExport PDF\nThe balance sheet passes the current application equation check. This status is not an accountant's approval or a certification of financial statements.\nTotal Assets\nEGP 0.00\nTotal Liabilities\nEGP 0.00\nTotal Equity\nEGP 0.00\nEquation\nBalanced\nAssets\nCode\tAccount\tAmount\nNo data available\nLiabilities\nCode\tAccount\tAmount\nNo data available\nEquity\nCode\tAccount\tAmount\nNo data available"
+  },
+  {
+    "method": "POST",
+    "route": "/accounting/journal-entries/3/void",
+    "http": 200,
+    "response": {
+      "data": {
+        "id": 3,
+        "tenant_id": 13,
+        "restaurant_id": 13,
+        "entry_number": "JE-2026-00001",
+        "entry_date": "2026-11-14T00:00:00Z",
+        "fiscal_period": "2026-11",
+        "description": "Synthetic audit fixture. Not business revenue.",
+        "reference_type": "product_audit",
+        "entry_type": "manual",
+        "total_debit": 110,
+        "total_credit": 110,
+        "status": "void",
+        "posted_at": "2026-11-14T03:18:20.67081Z",
+        "posted_by": 14,
+        "voided_at": "2026-11-14T03:18:25.65739Z",
+        "voided_by": 14,
+        "void_reason": "Reverse synthetic product audit fixture",
+        "is_approved": false,
+        "created_at": "2026-11-14T03:18:20.572602Z",
+        "updated_at": "2026-11-14T03:18:25.65739Z",
+        "created_by": 14,
+        "updated_by": 14,
+        "lines": [
+          {
+            "id": 5,
+            "journal_entry_id": 3,
+            "tenant_id": 13,
+            "account_id": 67,
+            "account_code": "19901",
+            "debit_amount": 110,
+            "credit_amount": 0,
+            "line_order": 1,
+            "tax_amount": 0,
+            "created_at": "2026-11-14T03:18:20.572602Z"
+          },
+          {
+            "id": 6,
+            "journal_entry_id": 3,
+            "tenant_id": 13,
+            "account_id": 68,
+            "account_code": "49901",
+            "debit_amount": 0,
+            "credit_amount": 100,
+            "line_order": 2,
+            "tax_amount": 0,
+            "created_at": "2026-11-14T03:18:20.572602Z"
+          },
+          {
+            "id": 7,
+            "journal_entry_id": 3,
+            "tenant_id": 13,
+            "account_id": 69,
+            "account_code": "29901",
+            "debit_amount": 0,
+            "credit_amount": 10,
+            "line_order": 3,
+            "tax_amount": 0,
+            "created_at": "2026-11-14T03:18:20.572602Z"
+          }
+        ]
+      },
+      "success": true
+    }
+  },
+  {
+    "method": "POST",
+    "route": "/accounting/journal-entries/3/void",
+    "http": 400,
+    "response": {
+      "error": "journal entry is already void",
+      "success": false
+    }
+  },
+  {
+    "method": "GET",
+    "route": "/accounting/ledger?account_id=67&limit=100",
+    "http": 200,
+    "response": {
+      "data": {
+        "account_id": 67,
+        "balance": 0,
+        "limit": 100,
+        "lines": [
+          {
+            "account_id": 67,
+            "account_code": "19901",
+            "account_name": "Audit Cash",
+            "journal_entry_id": 3,
+            "journal_line_id": 5,
+            "entry_date": "2026-11-14T00:00:00Z",
+            "entry_number": "JE-2026-00001",
+            "description": "Synthetic audit fixture. Not business revenue.",
+            "reference_type": "product_audit",
+            "debit_amount": 0,
+            "credit_amount": 110,
+            "running_balance": 0
+          },
+          {
+            "account_id": 67,
+            "account_code": "19901",
+            "account_name": "Audit Cash",
+            "journal_entry_id": 3,
+            "journal_line_id": 5,
+            "entry_date": "2026-11-14T00:00:00Z",
+            "entry_number": "JE-2026-00001",
+            "description": "Synthetic audit fixture. Not business revenue.",
+            "reference_type": "product_audit",
+            "debit_amount": 110,
+            "credit_amount": 0,
+            "running_balance": 110
+          }
+        ],
+        "next_cursor": null,
+        "period_summaries": [
+          {
+            "fiscal_period": "2026-11",
+            "entry_count": 2,
+            "debit_total": 110,
+            "credit_total": 110,
+            "net_change": 0,
+            "closing_balance": 0
+          }
+        ]
+      },
+      "success": true
+    }
+  },
+  {
+    "method": "GET",
+    "route": "/accounting/ledger?account_id=68&limit=100",
+    "http": 200,
+    "response": {
+      "data": {
+        "account_id": 68,
+        "balance": 0,
+        "limit": 100,
+        "lines": [
+          {
+            "account_id": 68,
+            "account_code": "49901",
+            "account_name": "Audit Revenue",
+            "journal_entry_id": 3,
+            "journal_line_id": 6,
+            "entry_date": "2026-11-14T00:00:00Z",
+            "entry_number": "JE-2026-00001",
+            "description": "Synthetic audit fixture. Not business revenue.",
+            "reference_type": "product_audit",
+            "debit_amount": 100,
+            "credit_amount": 0,
+            "running_balance": 0
+          },
+          {
+            "account_id": 68,
+            "account_code": "49901",
+            "account_name": "Audit Revenue",
+            "journal_entry_id": 3,
+            "journal_line_id": 6,
+            "entry_date": "2026-11-14T00:00:00Z",
+            "entry_number": "JE-2026-00001",
+            "description": "Synthetic audit fixture. Not business revenue.",
+            "reference_type": "product_audit",
+            "debit_amount": 0,
+            "credit_amount": 100,
+            "running_balance": 100
+          }
+        ],
+        "next_cursor": null,
+        "period_summaries": [
+          {
+            "fiscal_period": "2026-11",
+            "entry_count": 2,
+            "debit_total": 100,
+            "credit_total": 100,
+            "net_change": 0,
+            "closing_balance": 0
+          }
+        ]
+      },
+      "success": true
+    }
+  },
+  {
+    "method": "GET",
+    "route": "/accounting/ledger?account_id=69&limit=100",
+    "http": 200,
+    "response": {
+      "data": {
+        "account_id": 69,
+        "balance": 0,
+        "limit": 100,
+        "lines": [
+          {
+            "account_id": 69,
+            "account_code": "29901",
+            "account_name": "Audit Tax",
+            "journal_entry_id": 3,
+            "journal_line_id": 7,
+            "entry_date": "2026-11-14T00:00:00Z",
+            "entry_number": "JE-2026-00001",
+            "description": "Synthetic audit fixture. Not business revenue.",
+            "reference_type": "product_audit",
+            "debit_amount": 10,
+            "credit_amount": 0,
+            "running_balance": 0
+          },
+          {
+            "account_id": 69,
+            "account_code": "29901",
+            "account_name": "Audit Tax",
+            "journal_entry_id": 3,
+            "journal_line_id": 7,
+            "entry_date": "2026-11-14T00:00:00Z",
+            "entry_number": "JE-2026-00001",
+            "description": "Synthetic audit fixture. Not business revenue.",
+            "reference_type": "product_audit",
+            "debit_amount": 0,
+            "credit_amount": 10,
+            "running_balance": 10
+          }
+        ],
+        "next_cursor": null,
+        "period_summaries": [
+          {
+            "fiscal_period": "2026-11",
+            "entry_count": 2,
+            "debit_total": 10,
+            "credit_total": 10,
+            "net_change": 0,
+            "closing_balance": 0
+          }
+        ]
+      },
+      "success": true
+    }
+  }
+]

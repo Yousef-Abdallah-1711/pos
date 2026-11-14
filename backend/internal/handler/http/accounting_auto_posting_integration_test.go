@@ -3,6 +3,7 @@ package http
 import (
 	"bytes"
 	"context"
+	"database/sql"
 	"encoding/json"
 	stdhttp "net/http"
 	"net/http/httptest"
@@ -45,6 +46,10 @@ func (s *recordingAutoPostingService) PostPayrollEntry(salary *domain.Salary, po
 	return nil
 }
 
+func (s *recordingAutoPostingService) PostPayrollEntryTx(_ *sql.Tx, salary *domain.Salary, postedBy *int) error {
+	return s.PostPayrollEntry(salary, postedBy)
+}
+
 func TestAdminOrderHandler_UpdatePaymentStatusPersistsDurableAccountingIntent(t *testing.T) {
 	db, mock, err := sqlmock.New()
 	if err != nil {
@@ -58,6 +63,9 @@ func TestAdminOrderHandler_UpdatePaymentStatusPersistsDurableAccountingIntent(t 
 	handler := NewAdminOrderHandler(orderUC, nil, nil)
 
 	mock.ExpectBegin()
+	mock.ExpectQuery(`SELECT status, payment_status`).
+		WithArgs(int64(501), int64(1), int64(2)).
+		WillReturnRows(sqlmock.NewRows([]string{"status", "payment_status"}).AddRow("pending", "pending"))
 	mock.ExpectExec(`UPDATE orders`).WithArgs("paid", int64(501), int64(1), int64(2)).WillReturnResult(sqlmock.NewResult(0, 1))
 	mock.ExpectExec(`INSERT INTO accounting_event_outbox`).WithArgs("paid-order:1:2:501", int64(1), int64(2), int64(501), 77).WillReturnResult(sqlmock.NewResult(1, 1))
 	mock.ExpectCommit()
@@ -104,27 +112,40 @@ func TestHRSalaryHandler_MarkAsPaidTriggersPayrollAutoPosting(t *testing.T) {
 	salaryID := 44
 	userID := 88
 
-	mock.ExpectExec(`UPDATE salaries`).
-		WithArgs(userID, "BANK-REF-44", salaryID, 1, 2).
-		WillReturnResult(sqlmock.NewResult(0, 1))
-
-	mock.ExpectQuery(`FROM salaries`).
-		WithArgs(salaryID, 1, 2).
-		WillReturnRows(
-			sqlmock.NewRows(salaryColumnsForAccountingTests()).
-				AddRow(
-					salaryID, 1, 2, 9, periodStart,
-					periodEnd, paymentDate, 2, 2026, 3000.0,
-					"USD", 0.0, 0.0, 0.0,
-					200.0, 0.0, 100.0, 0.0, 0.0,
-					"{}", 150.0, 50.0, 25.0,
-					0.0, 0.0, 0.0, 0.0,
-					"{}", 3300.0, 225.0, 3075.0,
-					22, 0, 176.0, 0.0,
-					"bank_transfer", "BANK-REF-44", nil,
-					nil, "paid", true, nil, paymentDate, paymentDate,
-				),
-		)
+	mock.ExpectBegin()
+	mock.ExpectQuery(`FROM salaries`).WithArgs(salaryID, 1, 2).WillReturnRows(
+		sqlmock.NewRows(salaryColumnsForAccountingTests()).AddRow(
+			salaryID, 1, 2, 9, periodStart,
+			periodEnd, paymentDate, 2, 2026, 3000.0,
+			"USD", 0.0, 0.0, 0.0,
+			200.0, 0.0, 100.0, 0.0, 0.0,
+			"{}", 150.0, 50.0, 25.0,
+			0.0, 0.0, 0.0, 0.0,
+			"{}", 3300.0, 225.0, 3075.0,
+			22, 0, 176.0, 0.0,
+			"bank_transfer", nil, nil,
+			nil, "unpaid", false, nil, nil, nil, paymentDate, paymentDate,
+		),
+	)
+	mock.ExpectExec(`UPDATE salaries`).WithArgs(userID, "BANK-REF-44", salaryID, 1, 2).WillReturnResult(sqlmock.NewResult(0, 1))
+	mock.ExpectQuery(`FROM salaries`).WithArgs(salaryID, 1, 2).WillReturnRows(
+		sqlmock.NewRows(salaryColumnsForAccountingTests()).AddRow(
+			salaryID, 1, 2, 9, periodStart,
+			periodEnd, paymentDate, 2, 2026, 3000.0,
+			"USD", 0.0, 0.0, 0.0,
+			200.0, 0.0, 100.0, 0.0, 0.0,
+			"{}", 150.0, 50.0, 25.0,
+			0.0, 0.0, 0.0, 0.0,
+			"{}", 3300.0, 225.0, 3075.0,
+			22, 0, 176.0, 0.0,
+			"bank_transfer", "BANK-REF-44", nil,
+			nil, "paid", true, paymentDate, userID, nil, paymentDate, paymentDate,
+		),
+	)
+	mock.ExpectExec(`INSERT INTO hr_audit_logs`).
+		WithArgs(1, 2, salaryID, "unpaid", false, "", "paid", true, "BANK-REF-44", paymentDate, userID).
+		WillReturnResult(sqlmock.NewResult(1, 1))
+	mock.ExpectCommit()
 
 	body, err := json.Marshal(map[string]string{"payment_reference": "BANK-REF-44"})
 	if err != nil {
@@ -247,6 +268,6 @@ func salaryColumnsForAccountingTests() []string {
 		"deductions_details", "gross_salary", "total_deductions", "net_salary",
 		"days_worked", "days_absent", "total_hours_worked", "total_overtime_hours",
 		"payment_method", "payment_reference", "bank_account_number",
-		"bank_name", "status", "is_paid", "notes", "created_at", "updated_at",
+		"bank_name", "status", "is_paid", "paid_at", "paid_by", "notes", "created_at", "updated_at",
 	}
 }

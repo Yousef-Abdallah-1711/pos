@@ -35,7 +35,7 @@ export function LanguageProvider({ children, locale }: LanguageProviderProps) {
     // segments[0] is '', segments[1] is the current locale
     segments[1] = lang
     const newPath = segments.join('/')
-    router.push(newPath)
+    router.push(newPath + window.location.search + window.location.hash)
   }
 
   return (

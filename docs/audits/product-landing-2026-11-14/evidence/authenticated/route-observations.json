@@ -1,0 +1,3967 @@
+[
+  {
+    "route": "/en/dashboard",
+    "label": "desktop-en",
+    "url": "https://pos.app.rakmyat.online/en/dashboard",
+    "http": 200,
+    "text": "POS Dashboard\nDashboard\nCashier POS\nKitchen Display\nOrders\nProducts\nHuman Resources\nAccounting\nSuppliers\nFinancial Reports\nReports\nTheme Builder\nSettings\nEnglish\nP\n\nproduct-audit-1794625969@example.invalid\n\nOwner\n\nWelcome, product-audit-1794625969@example.invalid\n\nHere is an overview of your restaurant performance with live data from orders, menu, staff, and notifications.\n\nRole:\nOwner\nAccess: Active\n15 day(s) remaining\nCashier POS\nKitchen Display\nView Orders\nAdd Product\nAdd Category\nTheme Builder\nTeam\nSettings\nLast updated (dashboard refresh): 11/14/2026, 3:14:29 AM\n\nRecent Paid Revenue\n\nEGP 0.00\n\nFrom the latest loaded orders\n\nOpen\n\nOrders\n\n0\n\nTotal orders in system\n\nOpen\n\nPending Orders\n\n0\n\nAwaiting processing\n\nOpen\n\nRestaurants\n\n1\n\nLinked restaurants\n\nOpen\n\nProducts\n\n1\n\nMenu items\n\nOpen\n\nCategories\n\n1\n\nMenu sections\n\nOpen\n\nStaff\n\n1\n\nEmployees\n\nOpen\n\nDrivers\n\n0\n\nDelivery team\n\nOpen\n\nUnread Notifications\n\n0\n\n0 total notifications\n\nOpen\nRecent Orders\n\nLatest orders from your storefront and POS channels\n\nView all orders\n\nNo orders yet\n\nOrders will appear here once customers start placing them.\n\nOpen Theme Builder\nTables Overview\nManage Tables\n\nTrack dine-in table availability and occupancy at a glance.\n\nAvailable\n\n1\n\nOccupied\n\n0\n\nReserved\n\n0\n\nTotal Tables: 1\n\nWorkspace Status\nTenant Access\nActive\nPlan\nFree Trial\nNotifications\n0 unread / 0 total\nData sources\nAll healthy\nGetting Started\n4/5\n\nComplete the setup checklist to make the dashboard fully operational.\n\n✓\n\nRestaurant connected\n\nYour tenant and restaurant are linked and ready to manage.\n\n✓\n\nCreate categories\n\nOrganize your menu into sections like main courses, drinks, and desserts.\n\n✓\n\nAdd menu products\n\nCreate products with pricing and inventory to start taking orders.\n\n✓\n\nAdd your team\n\nInvite employees and assign roles for operations and cashier workflows.\n\n5\n\nCustomize storefront theme\n\nAdjust homepage sections, branding, header, and footer in Theme Builder.",
+    "pageerrors": [],
+    "failedResponses": [],
+    "title": "Dashboard - Restaurant POS SaaS",
+    "lang": "en",
+    "dir": "ltr",
+    "overflow": false,
+    "buttons": [
+      null,
+      "Orders",
+      "Products",
+      "Human Resources",
+      "Accounting",
+      "Suppliers",
+      "Financial Reports",
+      "Reports",
+      null,
+      null,
+      "English",
+      null,
+      "P\n\nproduct-audit-1794625969@example.invalid\n\nOwner",
+      "Cashier POS",
+      "Kitchen Display",
+      "View Orders",
+      "Add Product",
+      "Add Category",
+      "Theme Builder",
+      "Team",
+      "Settings",
+      "View all orders",
+      "Open Theme Builder",
+      "Manage Tables"
+    ],
+    "fields": [],
+    "headings": [
+      "Welcome, product-audit-1794625969@example.invalid",
+      "Recent Orders",
+      "Tables Overview",
+      "Workspace Status",
+      "Getting Started"
+    ]
+  },
+  {
+    "route": "/en/dashboard/accounting/advanced",
+    "label": "desktop-en",
+    "url": "https://pos.app.rakmyat.online/en/dashboard/accounting/advanced",
+    "http": 200,
+    "text": "POS Dashboard\nDashboard\nCashier POS\nKitchen Display\nOrders\nProducts\nHuman Resources\nAccounting\nSuppliers\nFinancial Reports\nReports\nTheme Builder\nSettings\nEnglish\nP\n\nproduct-audit-1794625969@example.invalid\n\nOwner\n\nAdvanced Accounting Tools\n\nPhase 7 operations + Phase 9 integration/import/export utilities.\n\nExport COA CSV\nExport Journals CSV\nRefresh\nBank Reconciliation\nCreate Session\nRecurring Journals\nCreate Sample Template\nBudgets + Exchange Rates\nSave Budget\nSave FX Rate\nSupplier Payment Scheduling + Reminders\nCreate Schedule\nE-Invoice + Excel-Compatible Import\nSubmit E-Invoice (Customer)\nImport COA CSV\nImport Journals CSV",
+    "pageerrors": [],
+    "failedResponses": [],
+    "title": "Dashboard - Restaurant POS SaaS",
+    "lang": "en",
+    "dir": "ltr",
+    "overflow": false,
+    "buttons": [
+      null,
+      "Orders",
+      "Products",
+      "Human Resources",
+      "Accounting",
+      "Suppliers",
+      "Financial Reports",
+      "Reports",
+      null,
+      null,
+      "English",
+      null,
+      "P\n\nproduct-audit-1794625969@example.invalid\n\nOwner",
+      "Export COA CSV",
+      "Export Journals CSV",
+      "Refresh",
+      "Create Session",
+      "Create Sample Template",
+      "Save Budget",
+      "Save FX Rate",
+      "Create Schedule",
+      "Submit E-Invoice (Customer)"
+    ],
+    "fields": [
+      {
+        "name": "",
+        "type": "number",
+        "label": null
+      },
+      {
+        "name": "",
+        "type": "date",
+        "label": null
+      },
+      {
+        "name": "",
+        "type": "number",
+        "label": null
+      },
+      {
+        "name": "",
+        "type": "number",
+        "label": null
+      },
+      {
+        "name": "",
+        "type": "number",
+        "label": null
+      },
+      {
+        "name": "",
+        "type": "number",
+        "label": null
+      },
+      {
+        "name": "",
+        "type": "number",
+        "label": null
+      },
+      {
+        "name": "",
+        "type": "number",
+        "label": null
+      },
+      {
+        "name": "",
+        "type": "text",
+        "label": null
+      },
+      {
+        "name": "",
+        "type": "text",
+        "label": null
+      },
+      {
+        "name": "",
+        "type": "text",
+        "label": null
+      },
+      {
+        "name": "",
+        "type": "number",
+        "label": null
+      },
+      {
+        "name": "",
+        "type": "date",
+        "label": null
+      },
+      {
+        "name": "",
+        "type": "number",
+        "label": null
+      },
+      {
+        "name": "",
+        "type": "date",
+        "label": null
+      },
+      {
+        "name": "",
+        "type": "number",
+        "label": null
+      },
+      {
+        "name": "",
+        "type": "number",
+        "label": null
+      },
+      {
+        "name": "",
+        "type": "text",
+        "label": null
+      },
+      {
+        "name": "",
+        "type": "number",
+        "label": null
+      },
+      {
+        "name": "",
+        "type": "file",
+        "label": "Import COA CSV"
+      },
+      {
+        "name": "",
+        "type": "file",
+        "label": "Import Journals CSV"
+      }
+    ],
+    "headings": [
+      "Advanced Accounting Tools",
+      "Bank Reconciliation",
+      "Recurring Journals",
+      "Budgets + Exchange Rates",
+      "Supplier Payment Scheduling + Reminders",
+      "E-Invoice + Excel-Compatible Import"
+    ]
+  },
+  {
+    "route": "/en/dashboard/accounting/bank-accounts",
+    "label": "desktop-en",
+    "url": "https://pos.app.rakmyat.online/en/dashboard/accounting/bank-accounts",
+    "http": 200,
+    "text": "POS Dashboard\nDashboard\nCashier POS\nKitchen Display\nOrders\nProducts\nHuman Resources\nAccounting\nSuppliers\nFinancial Reports\nReports\nTheme Builder\nSettings\nEnglish\nP\n\nproduct-audit-1794625969@example.invalid\n\nOwner\n\nBank Accounts\n\nManage settlement accounts, link them to the ledger, and review posted bank activity.\n\nNew bank account\nNo bank accounts yet\n\nCreate your first bank account to start routing payments and transfers.\n\nBank Transactions\n\nSelect a bank account to review the journal-backed transaction history.\n\nNo transactions yet\n\nChoose a bank account from the list to view its transaction stream.",
+    "pageerrors": [],
+    "failedResponses": [],
+    "title": "Dashboard - Restaurant POS SaaS",
+    "lang": "en",
+    "dir": "ltr",
+    "overflow": false,
+    "buttons": [
+      null,
+      "Orders",
+      "Products",
+      "Human Resources",
+      "Accounting",
+      "Suppliers",
+      "Financial Reports",
+      "Reports",
+      null,
+      null,
+      "English",
+      null,
+      "P\n\nproduct-audit-1794625969@example.invalid\n\nOwner",
+      "New bank account"
+    ],
+    "fields": [],
+    "headings": [
+      "Bank Accounts",
+      "Bank Transactions"
+    ]
+  },
+  {
+    "route": "/en/dashboard/accounting/chart-of-accounts",
+    "label": "desktop-en",
+    "url": "https://pos.app.rakmyat.online/en/dashboard/accounting/chart-of-accounts",
+    "http": 200,
+    "text": "POS Dashboard\nDashboard\nCashier POS\nKitchen Display\nOrders\nProducts\nHuman Resources\nAccounting\nSuppliers\nFinancial Reports\nReports\nTheme Builder\nSettings\nEnglish\nP\n\nproduct-audit-1794625969@example.invalid\n\nOwner\n\nChart of Accounts\n\nManage your account hierarchy, balances, and posting structure.\n\nNew account\nAll account types\nAsset\nLiability\nEquity\nRevenue\nExpense\nNo accounts found\n\nAdjust the search or filters to find a matching account.",
+    "pageerrors": [],
+    "failedResponses": [],
+    "title": "Dashboard - Restaurant POS SaaS",
+    "lang": "en",
+    "dir": "ltr",
+    "overflow": false,
+    "buttons": [
+      null,
+      "Orders",
+      "Products",
+      "Human Resources",
+      "Accounting",
+      "Suppliers",
+      "Financial Reports",
+      "Reports",
+      null,
+      null,
+      "English",
+      null,
+      "P\n\nproduct-audit-1794625969@example.invalid\n\nOwner",
+      "New account"
+    ],
+    "fields": [
+      {
+        "name": "",
+        "type": "text",
+        "label": null
+      },
+      {
+        "name": "",
+        "type": "select-one",
+        "label": null
+      }
+    ],
+    "headings": [
+      "Chart of Accounts"
+    ]
+  },
+  {
+    "route": "/en/dashboard/accounting/customer-invoices",
+    "label": "desktop-en",
+    "url": "https://pos.app.rakmyat.online/en/dashboard/accounting/customer-invoices",
+    "http": 200,
+    "text": "POS Dashboard\nDashboard\nCashier POS\nKitchen Display\nOrders\nProducts\nHuman Resources\nAccounting\nSuppliers\nFinancial Reports\nReports\nTheme Builder\nSettings\nEnglish\nP\n\nproduct-audit-1794625969@example.invalid\n\nOwner\n\nCustomer Invoices\n\nManage receivable invoices, follow overdue balances, and record incoming settlements.\n\nRecord payment\nNew customer invoice\nOpen invoices\n0\nOverdue invoices\n0\nTotal receivables\nEGP 0.00\nInvoices\nOverdue\nReceived Payments\nAll statuses\nDraft\nSent\nApproved\nPartially paid\nPaid\nOverdue\nVoid\nNo invoices found\n\nCreate an invoice or widen the filters to show more records.",
+    "pageerrors": [],
+    "failedResponses": [],
+    "title": "Dashboard - Restaurant POS SaaS",
+    "lang": "en",
+    "dir": "ltr",
+    "overflow": false,
+    "buttons": [
+      null,
+      "Orders",
+      "Products",
+      "Human Resources",
+      "Accounting",
+      "Suppliers",
+      "Financial Reports",
+      "Reports",
+      null,
+      null,
+      "English",
+      null,
+      "P\n\nproduct-audit-1794625969@example.invalid\n\nOwner",
+      "Record payment",
+      "New customer invoice",
+      "Invoices",
+      "Overdue",
+      "Received Payments"
+    ],
+    "fields": [
+      {
+        "name": "",
+        "type": "text",
+        "label": null
+      },
+      {
+        "name": "",
+        "type": "select-one",
+        "label": null
+      }
+    ],
+    "headings": [
+      "Customer Invoices"
+    ]
+  },
+  {
+    "route": "/en/dashboard/accounting/customers",
+    "label": "desktop-en",
+    "url": "https://pos.app.rakmyat.online/en/dashboard/accounting/customers",
+    "http": 200,
+    "text": "POS Dashboard\nDashboard\nCashier POS\nKitchen Display\nOrders\nProducts\nHuman Resources\nAccounting\nSuppliers\nFinancial Reports\nReports\nTheme Builder\nSettings\nEnglish\nP\n\nproduct-audit-1794625969@example.invalid\n\nOwner\n\nCustomer Accounts\n\nTrack receivable customers, credit terms, and account statements.\n\nCustomer invoices\nNew customer\nNo customers found\n\nAdd a customer account or use a broader search query.",
+    "pageerrors": [],
+    "failedResponses": [],
+    "title": "Dashboard - Restaurant POS SaaS",
+    "lang": "en",
+    "dir": "ltr",
+    "overflow": false,
+    "buttons": [
+      null,
+      "Orders",
+      "Products",
+      "Human Resources",
+      "Accounting",
+      "Suppliers",
+      "Financial Reports",
+      "Reports",
+      null,
+      null,
+      "English",
+      null,
+      "P\n\nproduct-audit-1794625969@example.invalid\n\nOwner",
+      "New customer"
+    ],
+    "fields": [
+      {
+        "name": "",
+        "type": "text",
+        "label": null
+      }
+    ],
+    "headings": [
+      "Customer Accounts"
+    ]
+  },
+  {
+    "route": "/en/dashboard/accounting/general-ledger",
+    "label": "desktop-en",
+    "url": "https://pos.app.rakmyat.online/en/dashboard/accounting/general-ledger",
+    "http": 200,
+    "text": "POS Dashboard\nDashboard\nCashier POS\nKitchen Display\nOrders\nProducts\nHuman Resources\nAccounting\nSuppliers\nFinancial Reports\nReports\nTheme Builder\nSettings\nEnglish\nP\n\nproduct-audit-1794625969@example.invalid\n\nOwner\n\nGeneral Ledger\n\nReview posted accounting activity by account and validate the trial balance.\n\nLedger\nTrial Balance\nSelect account\nSelect account\nStart date\nEnd date\nFilter\n\nAccount\n\n-\n\nBalance\n\nEGP 0.00\n\nEntry date\tEntry #\tDescription\tReference\tTotal debit\tTotal credit\tRunning balance\nNo ledger activity matches the selected filters.",
+    "pageerrors": [],
+    "failedResponses": [],
+    "title": "Dashboard - Restaurant POS SaaS",
+    "lang": "en",
+    "dir": "ltr",
+    "overflow": false,
+    "buttons": [
+      null,
+      "Orders",
+      "Products",
+      "Human Resources",
+      "Accounting",
+      "Suppliers",
+      "Financial Reports",
+      "Reports",
+      null,
+      null,
+      "English",
+      null,
+      "P\n\nproduct-audit-1794625969@example.invalid\n\nOwner",
+      "Ledger",
+      "Trial Balance",
+      "Select account",
+      "Filter"
+    ],
+    "fields": [
+      {
+        "name": "",
+        "type": "date",
+        "label": null
+      },
+      {
+        "name": "",
+        "type": "date",
+        "label": null
+      }
+    ],
+    "headings": [
+      "General Ledger"
+    ]
+  },
+  {
+    "route": "/en/dashboard/accounting/journal-entries",
+    "label": "desktop-en",
+    "url": "https://pos.app.rakmyat.online/en/dashboard/accounting/journal-entries",
+    "http": 200,
+    "text": "POS Dashboard\nDashboard\nCashier POS\nKitchen Display\nOrders\nProducts\nHuman Resources\nAccounting\nSuppliers\nFinancial Reports\nReports\nTheme Builder\nSettings\nEnglish\nP\n\nproduct-audit-1794625969@example.invalid\n\nOwner\n\nJournal Entries\n\nCreate, review, and post manual accounting entries.\n\nNew journal entry\nAll statuses\nDraft\nPosted\nVoid\nNo journal entries found\n\nCreate a manual entry or widen the filters to see more results.",
+    "pageerrors": [],
+    "failedResponses": [],
+    "title": "Dashboard - Restaurant POS SaaS",
+    "lang": "en",
+    "dir": "ltr",
+    "overflow": false,
+    "buttons": [
+      null,
+      "Orders",
+      "Products",
+      "Human Resources",
+      "Accounting",
+      "Suppliers",
+      "Financial Reports",
+      "Reports",
+      null,
+      null,
+      "English",
+      null,
+      "P\n\nproduct-audit-1794625969@example.invalid\n\nOwner",
+      "New journal entry"
+    ],
+    "fields": [
+      {
+        "name": "",
+        "type": "date",
+        "label": null
+      },
+      {
+        "name": "",
+        "type": "date",
+        "label": null
+      },
+      {
+        "name": "",
+        "type": "select-one",
+        "label": null
+      },
+      {
+        "name": "",
+        "type": "text",
+        "label": null
+      }
+    ],
+    "headings": [
+      "Journal Entries"
+    ]
+  },
+  {
+    "route": "/en/dashboard/accounting/supplier-invoices",
+    "label": "desktop-en",
+    "url": "https://pos.app.rakmyat.online/en/dashboard/accounting/supplier-invoices",
+    "http": 200,
+    "text": "POS Dashboard\nDashboard\nCashier POS\nKitchen Display\nOrders\nProducts\nHuman Resources\nAccounting\nSuppliers\nFinancial Reports\nReports\nTheme Builder\nSettings\nEnglish\nP\n\nproduct-audit-1794625969@example.invalid\n\nOwner\n\nSupplier Invoices\n\nTrack vendor bills, approve payable entries, and record outgoing settlements.\n\nRecord payment\nNew supplier invoice\nOpen supplier invoices\n0\nTotal payables\nEGP 0.00\nPending approvals\n0\nInvoices\nPayments Made\nAll statuses\nDraft\nSent\nApproved\nPartially paid\nPaid\nOverdue\nVoid\nNo invoices found\n\nCreate an invoice or widen the filters to show more records.",
+    "pageerrors": [],
+    "failedResponses": [],
+    "title": "Dashboard - Restaurant POS SaaS",
+    "lang": "en",
+    "dir": "ltr",
+    "overflow": false,
+    "buttons": [
+      null,
+      "Orders",
+      "Products",
+      "Human Resources",
+      "Accounting",
+      "Suppliers",
+      "Financial Reports",
+      "Reports",
+      null,
+      null,
+      "English",
+      null,
+      "P\n\nproduct-audit-1794625969@example.invalid\n\nOwner",
+      "Record payment",
+      "New supplier invoice",
+      "Invoices",
+      "Payments Made"
+    ],
+    "fields": [
+      {
+        "name": "",
+        "type": "text",
+        "label": null
+      },
+      {
+        "name": "",
+        "type": "select-one",
+        "label": null
+      }
+    ],
+    "headings": [
+      "Supplier Invoices"
+    ]
+  },
+  {
+    "route": "/en/dashboard/accounting/suppliers",
+    "label": "desktop-en",
+    "url": "https://pos.app.rakmyat.online/en/dashboard/accounting/suppliers",
+    "http": 200,
+    "text": "POS Dashboard\nDashboard\nCashier POS\nKitchen Display\nOrders\nProducts\nHuman Resources\nAccounting\nSuppliers\nFinancial Reports\nReports\nTheme Builder\nSettings\nEnglish\nP\n\nproduct-audit-1794625969@example.invalid\n\nOwner\n\nSuppliers\n\nMaintain supplier master data and payable account links.\n\nSupplier invoices\nNew supplier\nSuppliers\nPurchase Invoices\nAll categories\nfood\nbeverage\npackaging\nequipment\nservices\nNo suppliers found\n\nAdd a supplier or relax the filters to see matching records.",
+    "pageerrors": [],
+    "failedResponses": [],
+    "title": "Dashboard - Restaurant POS SaaS",
+    "lang": "en",
+    "dir": "ltr",
+    "overflow": false,
+    "buttons": [
+      null,
+      "Orders",
+      "Products",
+      "Human Resources",
+      "Accounting",
+      "Suppliers",
+      "Financial Reports",
+      "Reports",
+      null,
+      null,
+      "English",
+      null,
+      "P\n\nproduct-audit-1794625969@example.invalid\n\nOwner",
+      "New supplier",
+      "Suppliers",
+      "Purchase Invoices"
+    ],
+    "fields": [
+      {
+        "name": "",
+        "type": "text",
+        "label": null
+      },
+      {
+        "name": "",
+        "type": "select-one",
+        "label": null
+      }
+    ],
+    "headings": [
+      "Suppliers"
+    ]
+  },
+  {
+    "route": "/en/dashboard/categories",
+    "label": "desktop-en",
+    "url": "https://pos.app.rakmyat.online/en/dashboard/categories",
+    "http": 200,
+    "text": "POS Dashboard\nDashboard\nCashier POS\nKitchen Display\nOrders\nProducts\nHuman Resources\nAccounting\nSuppliers\nFinancial Reports\nReports\nTheme Builder\nSettings\nEnglish\nP\n\nproduct-audit-1794625969@example.invalid\n\nOwner\n\nCategories\n\nManage your product categories\n\nAdd Category\nName\tName (Arabic)\tDescription\tDisplay Order\tStatus\tActions\nAudit menu\tقائمة الاختبار\tSynthetic product audit only\t0\tActive\t\nEdit\nDelete",
+    "pageerrors": [],
+    "failedResponses": [],
+    "title": "Dashboard - Restaurant POS SaaS",
+    "lang": "en",
+    "dir": "ltr",
+    "overflow": false,
+    "buttons": [
+      null,
+      "Orders",
+      "Products",
+      "Human Resources",
+      "Accounting",
+      "Suppliers",
+      "Financial Reports",
+      "Reports",
+      null,
+      null,
+      "English",
+      null,
+      "P\n\nproduct-audit-1794625969@example.invalid\n\nOwner",
+      "Add Category",
+      "Edit",
+      "Delete"
+    ],
+    "fields": [],
+    "headings": [
+      "Categories"
+    ]
+  },
+  {
+    "route": "/en/dashboard/categories/new",
+    "label": "desktop-en",
+    "url": "https://pos.app.rakmyat.online/en/dashboard/categories/new",
+    "http": 200,
+    "text": "POS Dashboard\nDashboard\nCashier POS\nKitchen Display\nOrders\nProducts\nHuman Resources\nAccounting\nSuppliers\nFinancial Reports\nReports\nTheme Builder\nSettings\nEnglish\nP\n\nproduct-audit-1794625969@example.invalid\n\nOwner\n\nCategories\nCreate Category\nCreate Category\n\nAdd a new category to organize your products\n\nGeneral Information\n\nCategory name and basic details\n\nName (English) *\nName (Arabic)\nDescription (English)\nDescription (Arabic)\nSettings\n\nDisplay order and visibility\n\nDisplay Order\n\nLower numbers appear first\n\nActive\n\nCategory is visible and available\n\nCancel\nCreate Category",
+    "pageerrors": [],
+    "failedResponses": [],
+    "title": "Dashboard - Restaurant POS SaaS",
+    "lang": "en",
+    "dir": "ltr",
+    "overflow": false,
+    "buttons": [
+      null,
+      "Orders",
+      "Products",
+      "Human Resources",
+      "Accounting",
+      "Suppliers",
+      "Financial Reports",
+      "Reports",
+      null,
+      null,
+      "English",
+      null,
+      "P\n\nproduct-audit-1794625969@example.invalid\n\nOwner",
+      null,
+      "Cancel",
+      "Create Category"
+    ],
+    "fields": [
+      {
+        "name": "name",
+        "type": "text",
+        "label": null
+      },
+      {
+        "name": "name_ar",
+        "type": "text",
+        "label": null
+      },
+      {
+        "name": "description",
+        "type": "textarea",
+        "label": null
+      },
+      {
+        "name": "description_ar",
+        "type": "textarea",
+        "label": null
+      },
+      {
+        "name": "display_order",
+        "type": "number",
+        "label": null
+      },
+      {
+        "name": "",
+        "type": "checkbox",
+        "label": null
+      }
+    ],
+    "headings": [
+      "Create Category",
+      "General Information",
+      "Settings"
+    ]
+  },
+  {
+    "route": "/en/dashboard/drivers",
+    "label": "desktop-en",
+    "url": "https://pos.app.rakmyat.online/en/dashboard/drivers",
+    "http": 200,
+    "text": "POS Dashboard\nDashboard\nCashier POS\nKitchen Display\nOrders\nProducts\nHuman Resources\nAccounting\nSuppliers\nFinancial Reports\nReports\nTheme Builder\nSettings\nEnglish\nP\n\nproduct-audit-1794625969@example.invalid\n\nOwner\n\nDrivers\n\nManage delivery drivers and assignments\n\nAdd Driver\nAll Drivers\nActive\nAvailable\n\nNo drivers found",
+    "pageerrors": [],
+    "failedResponses": [],
+    "title": "Dashboard - Restaurant POS SaaS",
+    "lang": "en",
+    "dir": "ltr",
+    "overflow": false,
+    "buttons": [
+      null,
+      "Orders",
+      "Products",
+      "Human Resources",
+      "Accounting",
+      "Suppliers",
+      "Financial Reports",
+      "Reports",
+      null,
+      null,
+      "English",
+      null,
+      "P\n\nproduct-audit-1794625969@example.invalid\n\nOwner",
+      "Add Driver",
+      "All Drivers",
+      "Active",
+      "Available"
+    ],
+    "fields": [],
+    "headings": [
+      "Drivers"
+    ]
+  },
+  {
+    "route": "/en/dashboard/drivers/new",
+    "label": "desktop-en",
+    "url": "https://pos.app.rakmyat.online/en/dashboard/drivers/new",
+    "http": 200,
+    "text": "POS Dashboard\nDashboard\nCashier POS\nKitchen Display\nOrders\nProducts\nHuman Resources\nAccounting\nSuppliers\nFinancial Reports\nReports\nTheme Builder\nSettings\nEnglish\nP\n\nproduct-audit-1794625969@example.invalid\n\nOwner\n\nBack\nAdd New Driver\n\nCreate a new driver account\n\nRequired Information\nFirst Name*\nLast Name*\nEmail*\nPhone Number*\nLicense Number*\nVehicle Type*\nSelect vehicle type\nCar\nBike\nVan\nTruck\nVehicle Number*\nAdditional Information\nDate of Birth\nAddress\nCity\nState/Province\nZip Code\nNotes\nCancel\nAdd Driver",
+    "pageerrors": [],
+    "failedResponses": [],
+    "title": "Dashboard - Restaurant POS SaaS",
+    "lang": "en",
+    "dir": "ltr",
+    "overflow": false,
+    "buttons": [
+      null,
+      "Orders",
+      "Products",
+      "Human Resources",
+      "Accounting",
+      "Suppliers",
+      "Financial Reports",
+      "Reports",
+      null,
+      null,
+      "English",
+      null,
+      "P\n\nproduct-audit-1794625969@example.invalid\n\nOwner",
+      "Back",
+      "Cancel",
+      "Add Driver"
+    ],
+    "fields": [
+      {
+        "name": "first_name",
+        "type": "text",
+        "label": null
+      },
+      {
+        "name": "last_name",
+        "type": "text",
+        "label": null
+      },
+      {
+        "name": "email",
+        "type": "email",
+        "label": null
+      },
+      {
+        "name": "phone_number",
+        "type": "tel",
+        "label": null
+      },
+      {
+        "name": "license_number",
+        "type": "text",
+        "label": null
+      },
+      {
+        "name": "vehicle_type",
+        "type": "select-one",
+        "label": null
+      },
+      {
+        "name": "vehicle_number",
+        "type": "text",
+        "label": null
+      },
+      {
+        "name": "date_of_birth",
+        "type": "date",
+        "label": null
+      },
+      {
+        "name": "address",
+        "type": "text",
+        "label": null
+      },
+      {
+        "name": "city",
+        "type": "text",
+        "label": null
+      },
+      {
+        "name": "state",
+        "type": "text",
+        "label": null
+      },
+      {
+        "name": "zip_code",
+        "type": "text",
+        "label": null
+      },
+      {
+        "name": "notes",
+        "type": "textarea",
+        "label": null
+      }
+    ],
+    "headings": [
+      "Add New Driver",
+      "Required Information",
+      "Additional Information"
+    ]
+  },
+  {
+    "route": "/en/dashboard/hr/attendance",
+    "label": "desktop-en",
+    "url": "https://pos.app.rakmyat.online/en/dashboard/hr/attendance",
+    "http": 200,
+    "text": "POS Dashboard\nDashboard\nCashier POS\nKitchen Display\nOrders\nProducts\nHuman Resources\nAccounting\nSuppliers\nFinancial Reports\nReports\nTheme Builder\nSettings\nEnglish\nP\n\nproduct-audit-1794625969@example.invalid\n\nOwner\n\nAttendance\n\nTrack and manage employee attendance records\n\nRecord Attendance\nFrom Date\nTo Date\n\nSuccessfully loaded 1 attendance records at 3:14:48 AM\n\nEmployee\tClock In\tClock Out\tStatus\tHours\tActions\nAudit Employee\t11/14/2026, 3:13:49 AM\t-\tpresent\t-\t\nEdit",
+    "pageerrors": [],
+    "failedResponses": [],
+    "title": "Dashboard - Restaurant POS SaaS",
+    "lang": "en",
+    "dir": "ltr",
+    "overflow": false,
+    "buttons": [
+      null,
+      "Orders",
+      "Products",
+      "Human Resources",
+      "Accounting",
+      "Suppliers",
+      "Financial Reports",
+      "Reports",
+      null,
+      null,
+      "English",
+      null,
+      "P\n\nproduct-audit-1794625969@example.invalid\n\nOwner",
+      "Record Attendance",
+      "Edit",
+      null
+    ],
+    "fields": [
+      {
+        "name": "",
+        "type": "date",
+        "label": null
+      },
+      {
+        "name": "",
+        "type": "date",
+        "label": null
+      },
+      {
+        "name": "",
+        "type": "text",
+        "label": null
+      }
+    ],
+    "headings": [
+      "Attendance"
+    ]
+  },
+  {
+    "route": "/en/dashboard/hr/contracts",
+    "label": "desktop-en",
+    "url": "https://pos.app.rakmyat.online/en/dashboard/hr/contracts",
+    "http": 200,
+    "text": "POS Dashboard\nDashboard\nCashier POS\nKitchen Display\nOrders\nProducts\nHuman Resources\nAccounting\nSuppliers\nFinancial Reports\nReports\nTheme Builder\nSettings\nEnglish\nP\n\nproduct-audit-1794625969@example.invalid\n\nOwner\n\nEmployment Contracts\n\nTrack contract lifecycle and renewals.\n\nAdd Contract\nEmployee\tContract\tDates\tStatus\tActions\nNo contracts",
+    "pageerrors": [],
+    "failedResponses": [],
+    "title": "Dashboard - Restaurant POS SaaS",
+    "lang": "en",
+    "dir": "ltr",
+    "overflow": false,
+    "buttons": [
+      null,
+      "Orders",
+      "Products",
+      "Human Resources",
+      "Accounting",
+      "Suppliers",
+      "Financial Reports",
+      "Reports",
+      null,
+      null,
+      "English",
+      null,
+      "P\n\nproduct-audit-1794625969@example.invalid\n\nOwner",
+      "Add Contract"
+    ],
+    "fields": [],
+    "headings": [
+      "Employment Contracts"
+    ]
+  },
+  {
+    "route": "/en/dashboard/hr/employees",
+    "label": "desktop-en",
+    "url": "https://pos.app.rakmyat.online/en/dashboard/hr/employees",
+    "http": 200,
+    "text": "POS Dashboard\nDashboard\nCashier POS\nKitchen Display\nOrders\nProducts\nHuman Resources\nAccounting\nSuppliers\nFinancial Reports\nReports\nTheme Builder\nSettings\nEnglish\nP\n\nproduct-audit-1794625969@example.invalid\n\nOwner\n\nEmployees\n\nManage your employee information and records\n\nAdd Employee\n\nSuccessfully loaded 1 employees at 3:14:50 AM\n\nTable\nCards\nName\tEmail\tPosition\tCode\tStatus\tActions\n\nAE\nAudit Employee\nKitchen\n\taudit-employee@example.invalid\tKitchen audit\tAUDIT-01\t\n\t\nEdit",
+    "pageerrors": [],
+    "failedResponses": [],
+    "title": "Dashboard - Restaurant POS SaaS",
+    "lang": "en",
+    "dir": "ltr",
+    "overflow": false,
+    "buttons": [
+      null,
+      "Orders",
+      "Products",
+      "Human Resources",
+      "Accounting",
+      "Suppliers",
+      "Financial Reports",
+      "Reports",
+      null,
+      null,
+      "English",
+      null,
+      "P\n\nproduct-audit-1794625969@example.invalid\n\nOwner",
+      "Add Employee",
+      "Table",
+      "Cards",
+      "Edit",
+      null
+    ],
+    "fields": [
+      {
+        "name": "",
+        "type": "text",
+        "label": null
+      }
+    ],
+    "headings": [
+      "Employees"
+    ]
+  },
+  {
+    "route": "/en/dashboard/hr/insurance",
+    "label": "desktop-en",
+    "url": "https://pos.app.rakmyat.online/en/dashboard/hr/insurance",
+    "http": 200,
+    "text": "POS Dashboard\nDashboard\nCashier POS\nKitchen Display\nOrders\nProducts\nHuman Resources\nAccounting\nSuppliers\nFinancial Reports\nReports\nTheme Builder\nSettings\nEnglish\nP\n\nproduct-audit-1794625969@example.invalid\n\nOwner\n\nInsurance Tracking\n\nManage policy coverage and renewal alerts.\n\nAdd Policy\nEmployee\tPolicy\tProvider\tCoverage End\tActions\nNo insurance records",
+    "pageerrors": [],
+    "failedResponses": [],
+    "title": "Dashboard - Restaurant POS SaaS",
+    "lang": "en",
+    "dir": "ltr",
+    "overflow": false,
+    "buttons": [
+      null,
+      "Orders",
+      "Products",
+      "Human Resources",
+      "Accounting",
+      "Suppliers",
+      "Financial Reports",
+      "Reports",
+      null,
+      null,
+      "English",
+      null,
+      "P\n\nproduct-audit-1794625969@example.invalid\n\nOwner",
+      "Add Policy"
+    ],
+    "fields": [],
+    "headings": [
+      "Insurance Tracking"
+    ]
+  },
+  {
+    "route": "/en/dashboard/hr/leaves",
+    "label": "desktop-en",
+    "url": "https://pos.app.rakmyat.online/en/dashboard/hr/leaves",
+    "http": 200,
+    "text": "POS Dashboard\nDashboard\nCashier POS\nKitchen Display\nOrders\nProducts\nHuman Resources\nAccounting\nSuppliers\nFinancial Reports\nReports\nTheme Builder\nSettings\nEnglish\nP\n\nproduct-audit-1794625969@example.invalid\n\nOwner\n\nLeave Requests\n\nManage employee leave requests and approvals\n\nRequest Leave\nFrom Date\nTo Date\n\nSuccessfully loaded 0 leave requests at 3:14:53 AM\n\nNo Leave Requests\n\nGet started by creating a leave request",
+    "pageerrors": [],
+    "failedResponses": [],
+    "title": "Dashboard - Restaurant POS SaaS",
+    "lang": "en",
+    "dir": "ltr",
+    "overflow": false,
+    "buttons": [
+      null,
+      "Orders",
+      "Products",
+      "Human Resources",
+      "Accounting",
+      "Suppliers",
+      "Financial Reports",
+      "Reports",
+      null,
+      null,
+      "English",
+      null,
+      "P\n\nproduct-audit-1794625969@example.invalid\n\nOwner",
+      "Request Leave"
+    ],
+    "fields": [
+      {
+        "name": "",
+        "type": "date",
+        "label": null
+      },
+      {
+        "name": "",
+        "type": "date",
+        "label": null
+      }
+    ],
+    "headings": [
+      "Leave Requests"
+    ]
+  },
+  {
+    "route": "/en/dashboard/hr/payroll",
+    "label": "desktop-en",
+    "url": "https://pos.app.rakmyat.online/en/dashboard/hr/payroll",
+    "http": 200,
+    "text": "POS Dashboard\nDashboard\nCashier POS\nKitchen Display\nOrders\nProducts\nHuman Resources\nAccounting\nSuppliers\nFinancial Reports\nReports\nTheme Builder\nSettings\nEnglish\nP\n\nproduct-audit-1794625969@example.invalid\n\nOwner\n\nPayroll\n\nManage employee salaries and payroll records\n\nCreate Salary\nFrom Date\nTo Date\n\nSuccessfully loaded 0 salary records\n\nNo Salary Records\n\nCreate your first salary record",
+    "pageerrors": [],
+    "failedResponses": [],
+    "title": "Dashboard - Restaurant POS SaaS",
+    "lang": "en",
+    "dir": "ltr",
+    "overflow": false,
+    "buttons": [
+      null,
+      "Orders",
+      "Products",
+      "Human Resources",
+      "Accounting",
+      "Suppliers",
+      "Financial Reports",
+      "Reports",
+      null,
+      null,
+      "English",
+      null,
+      "P\n\nproduct-audit-1794625969@example.invalid\n\nOwner",
+      "Create Salary"
+    ],
+    "fields": [
+      {
+        "name": "",
+        "type": "date",
+        "label": null
+      },
+      {
+        "name": "",
+        "type": "date",
+        "label": null
+      }
+    ],
+    "headings": [
+      "Payroll"
+    ]
+  },
+  {
+    "route": "/en/dashboard/hr/performance",
+    "label": "desktop-en",
+    "url": "https://pos.app.rakmyat.online/en/dashboard/hr/performance",
+    "http": 200,
+    "text": "POS Dashboard\nDashboard\nCashier POS\nKitchen Display\nOrders\nProducts\nHuman Resources\nAccounting\nSuppliers\nFinancial Reports\nReports\nTheme Builder\nSettings\nEnglish\nP\n\nproduct-audit-1794625969@example.invalid\n\nOwner\n\nPerformance Reviews\n\nCreate, acknowledge, and complete employee performance reviews.\n\nAdd Review\nEmployee\tPeriod\tRating\tStatus\tActions\nNo performance reviews",
+    "pageerrors": [],
+    "failedResponses": [],
+    "title": "Dashboard - Restaurant POS SaaS",
+    "lang": "en",
+    "dir": "ltr",
+    "overflow": false,
+    "buttons": [
+      null,
+      "Orders",
+      "Products",
+      "Human Resources",
+      "Accounting",
+      "Suppliers",
+      "Financial Reports",
+      "Reports",
+      null,
+      null,
+      "English",
+      null,
+      "P\n\nproduct-audit-1794625969@example.invalid\n\nOwner",
+      "Add Review"
+    ],
+    "fields": [],
+    "headings": [
+      "Performance Reviews"
+    ]
+  },
+  {
+    "route": "/en/dashboard/hr/resignations",
+    "label": "desktop-en",
+    "url": "https://pos.app.rakmyat.online/en/dashboard/hr/resignations",
+    "http": 200,
+    "text": "POS Dashboard\nDashboard\nCashier POS\nKitchen Display\nOrders\nProducts\nHuman Resources\nAccounting\nSuppliers\nFinancial Reports\nReports\nTheme Builder\nSettings\nEnglish\nP\n\nproduct-audit-1794625969@example.invalid\n\nOwner\n\nResignations\n\nManage resignation workflow and final settlement.\n\nAdd Resignation\nExit Checklist\nReturn company assets\nFinalize attendance\nPayroll clearance\nNo resignations",
+    "pageerrors": [],
+    "failedResponses": [],
+    "title": "Dashboard - Restaurant POS SaaS",
+    "lang": "en",
+    "dir": "ltr",
+    "overflow": false,
+    "buttons": [
+      null,
+      "Orders",
+      "Products",
+      "Human Resources",
+      "Accounting",
+      "Suppliers",
+      "Financial Reports",
+      "Reports",
+      null,
+      null,
+      "English",
+      null,
+      "P\n\nproduct-audit-1794625969@example.invalid\n\nOwner",
+      "Add Resignation"
+    ],
+    "fields": [
+      {
+        "name": "",
+        "type": "checkbox",
+        "label": "Return company assets"
+      },
+      {
+        "name": "",
+        "type": "checkbox",
+        "label": "Finalize attendance"
+      },
+      {
+        "name": "",
+        "type": "checkbox",
+        "label": "Payroll clearance"
+      }
+    ],
+    "headings": [
+      "Resignations"
+    ]
+  },
+  {
+    "route": "/en/dashboard/hr/training",
+    "label": "desktop-en",
+    "url": "https://pos.app.rakmyat.online/en/dashboard/hr/training",
+    "http": 200,
+    "text": "POS Dashboard\nDashboard\nCashier POS\nKitchen Display\nOrders\nProducts\nHuman Resources\nAccounting\nSuppliers\nFinancial Reports\nReports\nTheme Builder\nSettings\nEnglish\nP\n\nproduct-audit-1794625969@example.invalid\n\nOwner\n\nTraining Records\n\nTrack training, certificates, and upcoming expirations.\n\nAdd Training\nEmployee\tTitle\tDates\tCertificate Expiry\tActions\nNo training records",
+    "pageerrors": [],
+    "failedResponses": [],
+    "title": "Dashboard - Restaurant POS SaaS",
+    "lang": "en",
+    "dir": "ltr",
+    "overflow": false,
+    "buttons": [
+      null,
+      "Orders",
+      "Products",
+      "Human Resources",
+      "Accounting",
+      "Suppliers",
+      "Financial Reports",
+      "Reports",
+      null,
+      null,
+      "English",
+      null,
+      "P\n\nproduct-audit-1794625969@example.invalid\n\nOwner",
+      "Add Training"
+    ],
+    "fields": [],
+    "headings": [
+      "Training Records"
+    ]
+  },
+  {
+    "route": "/en/dashboard/inventory",
+    "label": "desktop-en",
+    "url": "https://pos.app.rakmyat.online/en/dashboard/inventory",
+    "http": 200,
+    "text": "POS Dashboard\nDashboard\nCashier POS\nKitchen Display\nOrders\nProducts\nHuman Resources\nAccounting\nSuppliers\nFinancial Reports\nReports\nTheme Builder\nSettings\nEnglish\nP\n\nproduct-audit-1794625969@example.invalid\n\nOwner\n\nInventory Management\n\nTrack and manage product stock levels\n\nCurrent Stock Levels\nProduct\tCurrent Stock\tLow Stock Threshold\tStatus\tActions\nAudit Test Dish\t20\t3\tIn Stock\tAdjust Stock",
+    "pageerrors": [],
+    "failedResponses": [],
+    "title": "Dashboard - Restaurant POS SaaS",
+    "lang": "en",
+    "dir": "ltr",
+    "overflow": false,
+    "buttons": [
+      null,
+      "Orders",
+      "Products",
+      "Human Resources",
+      "Accounting",
+      "Suppliers",
+      "Financial Reports",
+      "Reports",
+      null,
+      null,
+      "English",
+      null,
+      "P\n\nproduct-audit-1794625969@example.invalid\n\nOwner",
+      "Adjust Stock"
+    ],
+    "fields": [],
+    "headings": [
+      "Inventory Management",
+      "Current Stock Levels"
+    ]
+  },
+  {
+    "route": "/en/dashboard/kds",
+    "label": "desktop-en",
+    "url": "https://pos.app.rakmyat.online/en/dashboard/kds",
+    "http": 200,
+    "text": "Kitchen Display\n\nLive kitchen queue\n\nConnected\n\nACTIVE ORDERS\n\n0\n\nNEW\n\n0\n\nIN PROGRESS\n\n0\n\nAVG PREP\n\n0.0m\n\nAll\nNew\nIn Progress\nReady\nCompleted\nNo active orders\n\nNew kitchen orders will appear here as soon as they are confirmed.",
+    "pageerrors": [],
+    "failedResponses": [],
+    "title": "Dashboard - Restaurant POS SaaS",
+    "lang": "en",
+    "dir": "ltr",
+    "overflow": false,
+    "buttons": [
+      "Sound on",
+      "Dark Mode",
+      "Fullscreen",
+      "All",
+      "New",
+      "In Progress",
+      "Ready",
+      "Completed"
+    ],
+    "fields": [],
+    "headings": [
+      "Kitchen Display"
+    ]
+  },
+  {
+    "route": "/en/dashboard/kds/settings",
+    "label": "desktop-en",
+    "url": "https://pos.app.rakmyat.online/en/dashboard/kds/settings",
+    "http": 200,
+    "text": "POS Dashboard\nDashboard\nCashier POS\nKitchen Display\nOrders\nProducts\nHuman Resources\nAccounting\nSuppliers\nFinancial Reports\nReports\nTheme Builder\nSettings\nEnglish\nP\n\nproduct-audit-1794625969@example.invalid\n\nOwner\n\nKDS Settings\n\nConfigure timers, audio alerts, and display preferences\n\nBack to KDS\nDisplay & Alerts\n\nControl how orders are shown and when alerts fire\n\nAuto bump timer\nDisabled (0 minutes)\n5 minutes\n10 minutes\n15 minutes\n20 minutes\nDisplay density\nCompact\nComfortable\nSpacious\nWarning threshold (minutes)\nDanger threshold (minutes)\n\nEnable alert sound\n\nPlay a sound when a new order arrives\n\nShow kitchen analytics panel\n\nDisable this for a distraction-free kitchen queue view\n\nDanger threshold must be greater than warning threshold.\n\nReset\nSave settings",
+    "pageerrors": [],
+    "failedResponses": [],
+    "title": "Dashboard - Restaurant POS SaaS",
+    "lang": "en",
+    "dir": "ltr",
+    "overflow": false,
+    "buttons": [
+      null,
+      "Orders",
+      "Products",
+      "Human Resources",
+      "Accounting",
+      "Suppliers",
+      "Financial Reports",
+      "Reports",
+      null,
+      null,
+      "English",
+      null,
+      "P\n\nproduct-audit-1794625969@example.invalid\n\nOwner",
+      "Reset",
+      "Save settings"
+    ],
+    "fields": [
+      {
+        "name": "",
+        "type": "select-one",
+        "label": "Auto bump timer\nDisabled (0 minutes)\n5 minutes\n10 minutes\n15 minutes\n20 minutes"
+      },
+      {
+        "name": "",
+        "type": "select-one",
+        "label": "Display density\nCompact\nComfortable\nSpacious"
+      },
+      {
+        "name": "",
+        "type": "number",
+        "label": "Warning threshold (minutes)"
+      },
+      {
+        "name": "",
+        "type": "number",
+        "label": "Danger threshold (minutes)"
+      },
+      {
+        "name": "",
+        "type": "checkbox",
+        "label": "Enable alert sound\n\nPlay a sound when a new order arrives"
+      },
+      {
+        "name": "",
+        "type": "checkbox",
+        "label": "Show kitchen analytics panel\n\nDisable this for a distraction-free kitchen queue view"
+      }
+    ],
+    "headings": [
+      "KDS Settings",
+      "Display & Alerts"
+    ]
+  },
+  {
+    "route": "/en/dashboard/notifications",
+    "label": "desktop-en",
+    "url": "https://pos.app.rakmyat.online/en/dashboard/notifications",
+    "http": 200,
+    "text": "POS Dashboard\nDashboard\nCashier POS\nKitchen Display\nOrders\nProducts\nHuman Resources\nAccounting\nSuppliers\nFinancial Reports\nReports\nTheme Builder\nSettings\nEnglish\nP\n\nproduct-audit-1794625969@example.invalid\n\nOwner\n\nAll Notifications\n\nYou have 0 unread notifications out of 0 total\n\nTotal\n\n0\n\nUnread\n\n0\n\nRead\n\n0\n\nCritical\n\n0\n\nFilters\nModule\nAll\nProducts\nOrders\nHR\nInventory\nSystem\nPriority\nAll\nCritical\nHigh\nNormal\nLow\nStatus\nAll\nUnread\nSort By\nNewest\nPriority\n\nNo notifications",
+    "pageerrors": [],
+    "failedResponses": [],
+    "title": "Dashboard - Restaurant POS SaaS",
+    "lang": "en",
+    "dir": "ltr",
+    "overflow": false,
+    "buttons": [
+      null,
+      "Orders",
+      "Products",
+      "Human Resources",
+      "Accounting",
+      "Suppliers",
+      "Financial Reports",
+      "Reports",
+      null,
+      null,
+      "English",
+      null,
+      "P\n\nproduct-audit-1794625969@example.invalid\n\nOwner"
+    ],
+    "fields": [
+      {
+        "name": "",
+        "type": "select-one",
+        "label": null
+      },
+      {
+        "name": "",
+        "type": "select-one",
+        "label": null
+      },
+      {
+        "name": "",
+        "type": "select-one",
+        "label": null
+      },
+      {
+        "name": "",
+        "type": "select-one",
+        "label": null
+      }
+    ],
+    "headings": [
+      "All Notifications",
+      "Filters"
+    ]
+  },
+  {
+    "route": "/en/dashboard/orders",
+    "label": "desktop-en",
+    "url": "https://pos.app.rakmyat.online/en/dashboard/orders",
+    "http": 200,
+    "text": "POS Dashboard\nDashboard\nCashier POS\nKitchen Display\nOrders\nProducts\nHuman Resources\nAccounting\nSuppliers\nFinancial Reports\nReports\nTheme Builder\nSettings\nEnglish\nP\n\nproduct-audit-1794625969@example.invalid\n\nOwner\n\nOrders\n\nManage and track all customer orders\n\nAll Orders\nPending\nConfirmed\nPreparing\nReady\nOut for Delivery\nDelivered\nCancelled\nAll Payments\nPending\nPaid\nFailed\nRefunded\nAll Tables\nORDER #\tCUSTOMER\tITEMS\tTOTAL\tSTATUS\tPAYMENT\tDATE\tACTIONS\nNo orders found",
+    "pageerrors": [],
+    "failedResponses": [],
+    "title": "Dashboard - Restaurant POS SaaS",
+    "lang": "en",
+    "dir": "ltr",
+    "overflow": false,
+    "buttons": [
+      null,
+      "Orders",
+      "Products",
+      "Human Resources",
+      "Accounting",
+      "Suppliers",
+      "Financial Reports",
+      "Reports",
+      null,
+      null,
+      "English",
+      null,
+      "P\n\nproduct-audit-1794625969@example.invalid\n\nOwner"
+    ],
+    "fields": [
+      {
+        "name": "",
+        "type": "text",
+        "label": null
+      },
+      {
+        "name": "",
+        "type": "select-one",
+        "label": null
+      },
+      {
+        "name": "",
+        "type": "select-one",
+        "label": null
+      },
+      {
+        "name": "",
+        "type": "select-one",
+        "label": null
+      }
+    ],
+    "headings": [
+      "Orders"
+    ]
+  },
+  {
+    "route": "/en/dashboard/pos",
+    "label": "desktop-en",
+    "url": "https://pos.app.rakmyat.online/en/dashboard/pos",
+    "http": 200,
+    "text": "03:15:07 AM\nCashier:\nproduct-audit-1794625969@example.invalid\nOnline\nExit POS\n\nShortcut: Ctrl+F or /\n\nAll\nF1\nA\n\nAudit Test Dish\n\n$100.00\nCart\n0\nHold (Ctrl+H)\nClear (Esc)\n\nCart is empty\n\nTap a product to add it",
+    "pageerrors": [],
+    "failedResponses": [],
+    "title": "Dashboard - Restaurant POS SaaS",
+    "lang": "en",
+    "dir": "ltr",
+    "overflow": false,
+    "buttons": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      "Exit POS",
+      "All",
+      "F1\nA\n\nAudit Test Dish\n\n$100.00",
+      "Hold (Ctrl+H)",
+      "Clear (Esc)"
+    ],
+    "fields": [
+      {
+        "name": "",
+        "type": "search",
+        "label": null
+      }
+    ],
+    "headings": [
+      "Cart"
+    ]
+  },
+  {
+    "route": "/en/dashboard/pos/settings",
+    "label": "desktop-en",
+    "url": "https://pos.app.rakmyat.online/en/dashboard/pos/settings",
+    "http": 200,
+    "text": "POS Dashboard\nDashboard\nCashier POS\nKitchen Display\nOrders\nProducts\nHuman Resources\nAccounting\nSuppliers\nFinancial Reports\nReports\nTheme Builder\nSettings\nEnglish\nP\n\nproduct-audit-1794625969@example.invalid\n\nOwner\n\nPOS Settings\n\nConfigure cashier workspace behavior and display preferences\n\nSave\nBack to POS\nWorkspace Preferences\n\nTune POS to match cashier workflow and reduce distractions\n\nFocus mode\n\nHide non-essential overlays such as the POS performance badge\n\nHide out-of-stock products\n\nKeep only available products visible for faster cashier flow\n\nProduct card size\n\nChoose smaller or larger cards for your screen\n\nSmall\nLarge\n\nSound alerts\n\nPlay sounds for add/remove, success, and error actions\n\nAuto print receipts\n\nAutomatically print receipt after successful order placement\n\nTheme mode\n\nSwitch cashier interface between light and dark themes\n\nLight Mode\nDark Mode",
+    "pageerrors": [],
+    "failedResponses": [],
+    "title": "Dashboard - Restaurant POS SaaS",
+    "lang": "en",
+    "dir": "ltr",
+    "overflow": false,
+    "buttons": [
+      null,
+      "Orders",
+      "Products",
+      "Human Resources",
+      "Accounting",
+      "Suppliers",
+      "Financial Reports",
+      "Reports",
+      null,
+      null,
+      "English",
+      null,
+      "P\n\nproduct-audit-1794625969@example.invalid\n\nOwner",
+      "Save",
+      "Small",
+      "Large",
+      "Light Mode",
+      "Dark Mode"
+    ],
+    "fields": [
+      {
+        "name": "",
+        "type": "checkbox",
+        "label": "Focus mode\n\nHide non-essential overlays such as the POS performance badge"
+      },
+      {
+        "name": "",
+        "type": "checkbox",
+        "label": "Hide out-of-stock products\n\nKeep only available products visible for faster cashier flow"
+      },
+      {
+        "name": "",
+        "type": "checkbox",
+        "label": "Sound alerts\n\nPlay sounds for add/remove, success, and error actions"
+      },
+      {
+        "name": "",
+        "type": "checkbox",
+        "label": "Auto print receipts\n\nAutomatically print receipt after successful order placement"
+      }
+    ],
+    "headings": [
+      "POS Settings",
+      "Workspace Preferences"
+    ]
+  },
+  {
+    "route": "/en/dashboard/products",
+    "label": "desktop-en",
+    "url": "https://pos.app.rakmyat.online/en/dashboard/products",
+    "http": 200,
+    "text": "POS Dashboard\nDashboard\nCashier POS\nKitchen Display\nOrders\nProducts\nHuman Resources\nAccounting\nSuppliers\nFinancial Reports\nReports\nTheme Builder\nSettings\nEnglish\nP\n\nproduct-audit-1794625969@example.invalid\n\nOwner\n\nProducts\n\nManage your product inventory and details\n\nAdd Product\nSearch\nCategory\nAll categories\nImage\tName\tCategory\tPrice\tStock\tStatus\tActions\n\tAudit Test Dish\tAudit menu\t100.00 EGP\t20\tAvailable\t\nEdit\nDelete\nPrevious\n1\nNext",
+    "pageerrors": [],
+    "failedResponses": [],
+    "title": "Dashboard - Restaurant POS SaaS",
+    "lang": "en",
+    "dir": "ltr",
+    "overflow": false,
+    "buttons": [
+      null,
+      "Orders",
+      "Products",
+      "Human Resources",
+      "Accounting",
+      "Suppliers",
+      "Financial Reports",
+      "Reports",
+      null,
+      null,
+      "English",
+      null,
+      "P\n\nproduct-audit-1794625969@example.invalid\n\nOwner",
+      "Add Product",
+      "All categories",
+      "Edit",
+      "Delete"
+    ],
+    "fields": [
+      {
+        "name": "",
+        "type": "text",
+        "label": null
+      }
+    ],
+    "headings": [
+      "Products"
+    ]
+  },
+  {
+    "route": "/en/dashboard/products/new",
+    "label": "desktop-en",
+    "url": "https://pos.app.rakmyat.online/en/dashboard/products/new",
+    "http": 200,
+    "text": "POS Dashboard\nDashboard\nCashier POS\nKitchen Display\nOrders\nProducts\nHuman Resources\nAccounting\nSuppliers\nFinancial Reports\nReports\nTheme Builder\nSettings\nEnglish\nP\n\nproduct-audit-1794625969@example.invalid\n\nOwner\n\nProducts\nCreate New Product\nCreate New Product\n\nAdd a new product to your menu\n\nGeneral Information\n\nBasic product details and naming\n\nProduct Image\nName (English) *\nName (Arabic)\nCategory\nSelect category\nAudit menu\nDescription (English)\nDescription (Arabic)\nAvailable\n\nMark this product as available for purchase\n\nFeatured Product\n\nDisplay prominently in menu\n\nPricing\n\nSet prices and discounts\n\nPrice (EGP) *\nCost (EGP)\nDiscount Price (EGP)\nInventory\n\nManage stock and tracking\n\nTrack Inventory\n\nMonitor stock levels for this product\n\nQuantity in Stock\nLow Stock Threshold\nClassification\n\nDietary and allergen information\n\nVegetarian\nVegan\nSpicy\nGluten Free\nCancel\nCreate Product",
+    "pageerrors": [],
+    "failedResponses": [],
+    "title": "Dashboard - Restaurant POS SaaS",
+    "lang": "en",
+    "dir": "ltr",
+    "overflow": false,
+    "buttons": [
+      null,
+      "Orders",
+      "Products",
+      "Human Resources",
+      "Accounting",
+      "Suppliers",
+      "Financial Reports",
+      "Reports",
+      null,
+      null,
+      "English",
+      null,
+      "P\n\nproduct-audit-1794625969@example.invalid\n\nOwner",
+      "Select category",
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      "Cancel",
+      "Create Product"
+    ],
+    "fields": [
+      {
+        "name": "",
+        "type": "file",
+        "label": null
+      },
+      {
+        "name": "name_en",
+        "type": "text",
+        "label": null
+      },
+      {
+        "name": "name_ar",
+        "type": "text",
+        "label": null
+      },
+      {
+        "name": "",
+        "type": "select-one",
+        "label": null
+      },
+      {
+        "name": "description_en",
+        "type": "textarea",
+        "label": null
+      },
+      {
+        "name": "description_ar",
+        "type": "textarea",
+        "label": null
+      },
+      {
+        "name": "",
+        "type": "checkbox",
+        "label": null
+      },
+      {
+        "name": "",
+        "type": "checkbox",
+        "label": null
+      },
+      {
+        "name": "price",
+        "type": "number",
+        "label": null
+      },
+      {
+        "name": "cost",
+        "type": "number",
+        "label": null
+      },
+      {
+        "name": "discount_price",
+        "type": "number",
+        "label": null
+      },
+      {
+        "name": "",
+        "type": "checkbox",
+        "label": null
+      },
+      {
+        "name": "quantity_in_stock",
+        "type": "number",
+        "label": null
+      },
+      {
+        "name": "low_stock_threshold",
+        "type": "number",
+        "label": null
+      },
+      {
+        "name": "",
+        "type": "checkbox",
+        "label": null
+      },
+      {
+        "name": "",
+        "type": "checkbox",
+        "label": null
+      },
+      {
+        "name": "",
+        "type": "checkbox",
+        "label": null
+      },
+      {
+        "name": "",
+        "type": "checkbox",
+        "label": null
+      }
+    ],
+    "headings": [
+      "Create New Product",
+      "General Information",
+      "Pricing",
+      "Inventory",
+      "Classification"
+    ]
+  },
+  {
+    "route": "/en/dashboard/rbac/roles",
+    "label": "desktop-en",
+    "url": "https://pos.app.rakmyat.online/en/dashboard/rbac/roles",
+    "http": 200,
+    "text": "POS Dashboard\nDashboard\nCashier POS\nKitchen Display\nOrders\nProducts\nHuman Resources\nAccounting\nSuppliers\nFinancial Reports\nReports\nTheme Builder\nSettings\nEnglish\nP\n\nproduct-audit-1794625969@example.invalid\n\nOwner\n\nRBAC Role Management\n\nCreate and manage roles with granular permissions\n\nCreate Role\nAdministratorSystem\n\nFull system access\n\nDriverSystem\n\nDriver access to assigned orders\n\nEmployeeSystem\n\nStaff access\n\nManagerSystem\n\nManagement access",
+    "pageerrors": [],
+    "failedResponses": [],
+    "title": "Dashboard - Restaurant POS SaaS",
+    "lang": "en",
+    "dir": "ltr",
+    "overflow": false,
+    "buttons": [
+      null,
+      "Orders",
+      "Products",
+      "Human Resources",
+      "Accounting",
+      "Suppliers",
+      "Financial Reports",
+      "Reports",
+      null,
+      null,
+      "English",
+      null,
+      "P\n\nproduct-audit-1794625969@example.invalid\n\nOwner",
+      "Create Role"
+    ],
+    "fields": [],
+    "headings": [
+      "RBAC Role Management"
+    ]
+  },
+  {
+    "route": "/en/dashboard/reports",
+    "label": "desktop-en",
+    "url": "https://pos.app.rakmyat.online/en/dashboard/reports",
+    "http": 200,
+    "text": "POS Dashboard\nDashboard\nCashier POS\nKitchen Display\nOrders\nProducts\nHuman Resources\nAccounting\nSuppliers\nFinancial Reports\nReports\nTheme Builder\nSettings\nEnglish\nP\n\nproduct-audit-1794625969@example.invalid\n\nOwner\n\nReports Center\n\nAccess operational and financial reporting from one place.\n\nOverview\n\nQuick snapshot across sales, profitability, and inventory.\n\nSales Analytics\n\nOrder and revenue trends for selected periods.\n\nProfitability\n\nMargin-focused analysis by product performance.\n\nFinancial Reports\n\nP&L, balance sheet, cash flow, VAT, and related statements.\n\nHR Reports\n\nHeadcount, turnover, absenteeism, overtime, leave balances, and training compliance.",
+    "pageerrors": [],
+    "failedResponses": [],
+    "title": "Dashboard - Restaurant POS SaaS",
+    "lang": "en",
+    "dir": "ltr",
+    "overflow": false,
+    "buttons": [
+      null,
+      "Orders",
+      "Products",
+      "Human Resources",
+      "Accounting",
+      "Suppliers",
+      "Financial Reports",
+      "Reports",
+      null,
+      null,
+      "English",
+      null,
+      "P\n\nproduct-audit-1794625969@example.invalid\n\nOwner"
+    ],
+    "fields": [],
+    "headings": [
+      "Reports Center",
+      "Overview",
+      "Sales Analytics",
+      "Profitability",
+      "Financial Reports",
+      "HR Reports"
+    ]
+  },
+  {
+    "route": "/en/dashboard/reports/financial",
+    "label": "desktop-en",
+    "url": "https://pos.app.rakmyat.online/en/dashboard/reports/financial",
+    "http": 200,
+    "text": "POS Dashboard\nDashboard\nCashier POS\nKitchen Display\nOrders\nProducts\nHuman Resources\nAccounting\nSuppliers\nFinancial Reports\nReports\nTheme Builder\nSettings\nEnglish\nP\n\nproduct-audit-1794625969@example.invalid\n\nOwner\n\nFinancial Reports\n\nProfit and loss, balance sheet, cash flow, VAT, aging, and inventory valuation.\n\nNet VAT\nEGP 0.00\nOutput VAT\nEGP 0.00\nInput VAT\nEGP 0.00\nProfit & Loss\n\nRevenue, expense, and net profit by date range.\n\nBalance Sheet\n\nAssets, liabilities, and equity as-of a selected date.\n\nCash Flow\n\nOperating, investing, and financing cash movement.\n\nVAT Report\n\nOutput VAT, input VAT, and net payable amount.\n\nReceivables Aging\n\nOutstanding customer balances by aging buckets.\n\nPayables Aging\n\nOutstanding supplier balances by aging buckets.\n\nInventory Valuation\n\nQuantity and cost-based stock valuation.\n\nAdvanced Insights\n\nKPI dashboard, break-even, predictive cash flow, and labor cost analytics.",
+    "pageerrors": [],
+    "failedResponses": [],
+    "title": "Dashboard - Restaurant POS SaaS",
+    "lang": "en",
+    "dir": "ltr",
+    "overflow": false,
+    "buttons": [
+      null,
+      "Orders",
+      "Products",
+      "Human Resources",
+      "Accounting",
+      "Suppliers",
+      "Financial Reports",
+      "Reports",
+      null,
+      null,
+      "English",
+      null,
+      "P\n\nproduct-audit-1794625969@example.invalid\n\nOwner"
+    ],
+    "fields": [],
+    "headings": [
+      "Financial Reports"
+    ]
+  },
+  {
+    "route": "/en/dashboard/reports/financial/advanced",
+    "label": "desktop-en",
+    "url": "https://pos.app.rakmyat.online/en/dashboard/reports/financial/advanced",
+    "http": 200,
+    "text": "POS Dashboard\nDashboard\nCashier POS\nKitchen Display\nOrders\nProducts\nHuman Resources\nAccounting\nSuppliers\nFinancial Reports\nReports\nTheme Builder\nSettings\nEnglish\nP\n\nproduct-audit-1794625969@example.invalid\n\nOwner\n\nAdvanced Financial Insights\n\nPhase 8 analytics + Phase 9 compliance export center.\n\nExport Audit CSV\nExport Social Insurance CSV\nRefresh\nClick refresh to load the advanced reports.",
+    "pageerrors": [],
+    "failedResponses": [],
+    "title": "Dashboard - Restaurant POS SaaS",
+    "lang": "en",
+    "dir": "ltr",
+    "overflow": false,
+    "buttons": [
+      null,
+      "Orders",
+      "Products",
+      "Human Resources",
+      "Accounting",
+      "Suppliers",
+      "Financial Reports",
+      "Reports",
+      null,
+      null,
+      "English",
+      null,
+      "P\n\nproduct-audit-1794625969@example.invalid\n\nOwner",
+      "Export Audit CSV",
+      "Export Social Insurance CSV",
+      "Refresh"
+    ],
+    "fields": [
+      {
+        "name": "",
+        "type": "date",
+        "label": null
+      },
+      {
+        "name": "",
+        "type": "date",
+        "label": null
+      }
+    ],
+    "headings": [
+      "Advanced Financial Insights"
+    ]
+  },
+  {
+    "route": "/en/dashboard/reports/financial/balance-sheet",
+    "label": "desktop-en",
+    "url": "https://pos.app.rakmyat.online/en/dashboard/reports/financial/balance-sheet",
+    "http": 200,
+    "text": "POS Dashboard\nDashboard\nCashier POS\nKitchen Display\nOrders\nProducts\nHuman Resources\nAccounting\nSuppliers\nFinancial Reports\nReports\nTheme Builder\nSettings\nEnglish\nP\n\nproduct-audit-1794625969@example.invalid\n\nOwner\n\nBalance Sheet\n\nAssets, liabilities, and equity as of a specific date.\n\nRefresh\nExport PDF\nThe balance sheet passes the current application equation check. This status is not an accountant's approval or a certification of financial statements.\nTotal Assets\nEGP 0.00\nTotal Liabilities\nEGP 0.00\nTotal Equity\nEGP 0.00\nEquation\nBalanced\nAssets\nCode\tAccount\tAmount\nNo data available\nLiabilities\nCode\tAccount\tAmount\nNo data available\nEquity\nCode\tAccount\tAmount\nNo data available",
+    "pageerrors": [],
+    "failedResponses": [],
+    "title": "Dashboard - Restaurant POS SaaS",
+    "lang": "en",
+    "dir": "ltr",
+    "overflow": false,
+    "buttons": [
+      null,
+      "Orders",
+      "Products",
+      "Human Resources",
+      "Accounting",
+      "Suppliers",
+      "Financial Reports",
+      "Reports",
+      null,
+      null,
+      "English",
+      null,
+      "P\n\nproduct-audit-1794625969@example.invalid\n\nOwner",
+      "Refresh",
+      "Export PDF"
+    ],
+    "fields": [
+      {
+        "name": "",
+        "type": "date",
+        "label": null
+      }
+    ],
+    "headings": [
+      "Balance Sheet"
+    ]
+  },
+  {
+    "route": "/en/dashboard/reports/financial/cash-flow",
+    "label": "desktop-en",
+    "url": "https://pos.app.rakmyat.online/en/dashboard/reports/financial/cash-flow",
+    "http": 200,
+    "text": "POS Dashboard\nDashboard\nCashier POS\nKitchen Display\nOrders\nProducts\nHuman Resources\nAccounting\nSuppliers\nFinancial Reports\nReports\nTheme Builder\nSettings\nEnglish\nP\n\nproduct-audit-1794625969@example.invalid\n\nOwner\n\nCash Flow Statement\n\nCash movement grouped by operating, investing, and financing activity.\n\nRefresh\nExport PDF\nOperating Cash Flow\nEGP 0.00\nInvesting Cash Flow\nEGP 0.00\nFinancing Cash Flow\nEGP 0.00\nNet Cash Flow\nEGP 0.00",
+    "pageerrors": [],
+    "failedResponses": [],
+    "title": "Dashboard - Restaurant POS SaaS",
+    "lang": "en",
+    "dir": "ltr",
+    "overflow": false,
+    "buttons": [
+      null,
+      "Orders",
+      "Products",
+      "Human Resources",
+      "Accounting",
+      "Suppliers",
+      "Financial Reports",
+      "Reports",
+      null,
+      null,
+      "English",
+      null,
+      "P\n\nproduct-audit-1794625969@example.invalid\n\nOwner",
+      "Refresh",
+      "Export PDF"
+    ],
+    "fields": [
+      {
+        "name": "",
+        "type": "date",
+        "label": null
+      },
+      {
+        "name": "",
+        "type": "date",
+        "label": null
+      }
+    ],
+    "headings": [
+      "Cash Flow Statement"
+    ]
+  },
+  {
+    "route": "/en/dashboard/reports/financial/inventory-valuation",
+    "label": "desktop-en",
+    "url": "https://pos.app.rakmyat.online/en/dashboard/reports/financial/inventory-valuation",
+    "http": 200,
+    "text": "POS Dashboard\nDashboard\nCashier POS\nKitchen Display\nOrders\nProducts\nHuman Resources\nAccounting\nSuppliers\nFinancial Reports\nReports\nTheme Builder\nSettings\nEnglish\nP\n\nproduct-audit-1794625969@example.invalid\n\nOwner\n\nInventory Valuation\n\nInventory quantity and cost valuation as of a selected date.\n\nRefresh\nExport PDF\nInventory Valuation\nProduct\tQty\tCost / Unit\tTotal Value\nAudit Test Dish\t20.00\tEGP 20.00\tEGP 400.00\nTotal\t\tEGP 400.00",
+    "pageerrors": [],
+    "failedResponses": [],
+    "title": "Dashboard - Restaurant POS SaaS",
+    "lang": "en",
+    "dir": "ltr",
+    "overflow": false,
+    "buttons": [
+      null,
+      "Orders",
+      "Products",
+      "Human Resources",
+      "Accounting",
+      "Suppliers",
+      "Financial Reports",
+      "Reports",
+      null,
+      null,
+      "English",
+      null,
+      "P\n\nproduct-audit-1794625969@example.invalid\n\nOwner",
+      "Refresh",
+      "Export PDF"
+    ],
+    "fields": [
+      {
+        "name": "",
+        "type": "date",
+        "label": null
+      }
+    ],
+    "headings": [
+      "Inventory Valuation"
+    ]
+  },
+  {
+    "route": "/en/dashboard/reports/financial/payables-aging",
+    "label": "desktop-en",
+    "url": "https://pos.app.rakmyat.online/en/dashboard/reports/financial/payables-aging",
+    "http": 200,
+    "text": "POS Dashboard\nDashboard\nCashier POS\nKitchen Display\nOrders\nProducts\nHuman Resources\nAccounting\nSuppliers\nFinancial Reports\nReports\nTheme Builder\nSettings\nEnglish\nP\n\nproduct-audit-1794625969@example.invalid\n\nOwner\n\nPayables Aging\n\nOutstanding supplier balances grouped by age buckets.\n\nRefresh\nExport PDF\nPayables Aging\nEntity\tCurrent\t30\t60\t90\t90+\tTotal\nNo data available\nTotal\t\tEGP 0.00",
+    "pageerrors": [],
+    "failedResponses": [],
+    "title": "Dashboard - Restaurant POS SaaS",
+    "lang": "en",
+    "dir": "ltr",
+    "overflow": false,
+    "buttons": [
+      null,
+      "Orders",
+      "Products",
+      "Human Resources",
+      "Accounting",
+      "Suppliers",
+      "Financial Reports",
+      "Reports",
+      null,
+      null,
+      "English",
+      null,
+      "P\n\nproduct-audit-1794625969@example.invalid\n\nOwner",
+      "Refresh",
+      "Export PDF"
+    ],
+    "fields": [
+      {
+        "name": "",
+        "type": "date",
+        "label": null
+      }
+    ],
+    "headings": [
+      "Payables Aging"
+    ]
+  },
+  {
+    "route": "/en/dashboard/reports/financial/profit-loss",
+    "label": "desktop-en",
+    "url": "https://pos.app.rakmyat.online/en/dashboard/reports/financial/profit-loss",
+    "http": 200,
+    "text": "POS Dashboard\nDashboard\nCashier POS\nKitchen Display\nOrders\nProducts\nHuman Resources\nAccounting\nSuppliers\nFinancial Reports\nReports\nTheme Builder\nSettings\nEnglish\nP\n\nproduct-audit-1794625969@example.invalid\n\nOwner\n\nProfit & Loss\n\nRevenue and expense performance for the selected period.\n\nRefresh\nExport PDF\nTotal Revenue\nEGP 0.00\nTotal Expenses\nEGP 0.00\nNet Profit\nEGP 0.00\nRevenue Accounts\nHide\nCode\tAccount\tAmount\nNo data available\nExpense Accounts\nHide\nCode\tAccount\tAmount\nNo data available",
+    "pageerrors": [],
+    "failedResponses": [],
+    "title": "Dashboard - Restaurant POS SaaS",
+    "lang": "en",
+    "dir": "ltr",
+    "overflow": false,
+    "buttons": [
+      null,
+      "Orders",
+      "Products",
+      "Human Resources",
+      "Accounting",
+      "Suppliers",
+      "Financial Reports",
+      "Reports",
+      null,
+      null,
+      "English",
+      null,
+      "P\n\nproduct-audit-1794625969@example.invalid\n\nOwner",
+      "Refresh",
+      "Export PDF",
+      "Revenue Accounts\nHide",
+      "Expense Accounts\nHide"
+    ],
+    "fields": [
+      {
+        "name": "",
+        "type": "date",
+        "label": null
+      },
+      {
+        "name": "",
+        "type": "date",
+        "label": null
+      },
+      {
+        "name": "",
+        "type": "date",
+        "label": null
+      },
+      {
+        "name": "",
+        "type": "date",
+        "label": null
+      }
+    ],
+    "headings": [
+      "Profit & Loss"
+    ]
+  },
+  {
+    "route": "/en/dashboard/reports/financial/receivables-aging",
+    "label": "desktop-en",
+    "url": "https://pos.app.rakmyat.online/en/dashboard/reports/financial/receivables-aging",
+    "http": 200,
+    "text": "POS Dashboard\nDashboard\nCashier POS\nKitchen Display\nOrders\nProducts\nHuman Resources\nAccounting\nSuppliers\nFinancial Reports\nReports\nTheme Builder\nSettings\nEnglish\nP\n\nproduct-audit-1794625969@example.invalid\n\nOwner\n\nReceivables Aging\n\nOutstanding customer balances grouped by age buckets.\n\nRefresh\nExport PDF\nReceivables Aging\nEntity\tCurrent\t30\t60\t90\t90+\tTotal\nNo data available\nTotal\t\tEGP 0.00",
+    "pageerrors": [],
+    "failedResponses": [],
+    "title": "Dashboard - Restaurant POS SaaS",
+    "lang": "en",
+    "dir": "ltr",
+    "overflow": false,
+    "buttons": [
+      null,
+      "Orders",
+      "Products",
+      "Human Resources",
+      "Accounting",
+      "Suppliers",
+      "Financial Reports",
+      "Reports",
+      null,
+      null,
+      "English",
+      null,
+      "P\n\nproduct-audit-1794625969@example.invalid\n\nOwner",
+      "Refresh",
+      "Export PDF"
+    ],
+    "fields": [
+      {
+        "name": "",
+        "type": "date",
+        "label": null
+      }
+    ],
+    "headings": [
+      "Receivables Aging"
+    ]
+  },
+  {
+    "route": "/en/dashboard/reports/financial/vat",
+    "label": "desktop-en",
+    "url": "https://pos.app.rakmyat.online/en/dashboard/reports/financial/vat",
+    "http": 200,
+    "text": "POS Dashboard\nDashboard\nCashier POS\nKitchen Display\nOrders\nProducts\nHuman Resources\nAccounting\nSuppliers\nFinancial Reports\nReports\nTheme Builder\nSettings\nEnglish\nP\n\nproduct-audit-1794625969@example.invalid\n\nOwner\n\nVAT Report\n\nOutput VAT vs input VAT for the selected date range.\n\nRefresh\nExport PDF\nOutput VAT\nEGP 0.00\nInput VAT\nEGP 0.00\nNet VAT\nEGP 0.00",
+    "pageerrors": [],
+    "failedResponses": [],
+    "title": "Dashboard - Restaurant POS SaaS",
+    "lang": "en",
+    "dir": "ltr",
+    "overflow": false,
+    "buttons": [
+      null,
+      "Orders",
+      "Products",
+      "Human Resources",
+      "Accounting",
+      "Suppliers",
+      "Financial Reports",
+      "Reports",
+      null,
+      null,
+      "English",
+      null,
+      "P\n\nproduct-audit-1794625969@example.invalid\n\nOwner",
+      "Refresh",
+      "Export PDF"
+    ],
+    "fields": [
+      {
+        "name": "",
+        "type": "date",
+        "label": null
+      },
+      {
+        "name": "",
+        "type": "date",
+        "label": null
+      }
+    ],
+    "headings": [
+      "VAT Report"
+    ]
+  },
+  {
+    "route": "/en/dashboard/reports/hr",
+    "label": "desktop-en",
+    "url": "https://pos.app.rakmyat.online/en/dashboard/reports/hr",
+    "http": 200,
+    "text": "POS Dashboard\nDashboard\nCashier POS\nKitchen Display\nOrders\nProducts\nHuman Resources\nAccounting\nSuppliers\nFinancial Reports\nReports\nTheme Builder\nSettings\nEnglish\nP\n\nproduct-audit-1794625969@example.invalid\n\nOwner\n\nHR Reports\n\nHeadcount, turnover, absenteeism, overtime, leave balances, and training compliance.\n\nRefresh\nDate from\nDate to\nYear\nGenerated\n11/14/2026, 3:15:27 AM\nTotal Employees\n1\nTurnover Rate\n0%\nAbsenteeism Rate\n0%\nOvertime Cost\nEGP 0.00\nHeadcount by Department\nDepartment\tEmployees\nKitchen\t1\nTurnover Trend\nMonth\tHires\tDepartures\n2026-10\t0\t0\n2026-11\t1\t0\nTop Absentees\nNo absences\nOvertime by Employee\nNo overtime\nLeave Balances\nEmployee\tAnnual Used\tAnnual Remaining\nAudit Employee\t0\t21\nTraining Compliance by Department\nDepartment\tCertified\tTotal\tRate\nKitchen\t0\t1\t0%\nTraining Compliance Summary\nCertified employees: 0 of 1 (0%)",
+    "pageerrors": [],
+    "failedResponses": [],
+    "title": "Dashboard - Restaurant POS SaaS",
+    "lang": "en",
+    "dir": "ltr",
+    "overflow": false,
+    "buttons": [
+      null,
+      "Orders",
+      "Products",
+      "Human Resources",
+      "Accounting",
+      "Suppliers",
+      "Financial Reports",
+      "Reports",
+      null,
+      null,
+      "English",
+      null,
+      "P\n\nproduct-audit-1794625969@example.invalid\n\nOwner",
+      "Refresh"
+    ],
+    "fields": [
+      {
+        "name": "",
+        "type": "date",
+        "label": null
+      },
+      {
+        "name": "",
+        "type": "date",
+        "label": null
+      },
+      {
+        "name": "",
+        "type": "number",
+        "label": null
+      }
+    ],
+    "headings": [
+      "HR Reports",
+      "Headcount by Department",
+      "Turnover Trend",
+      "Top Absentees",
+      "Overtime by Employee",
+      "Leave Balances",
+      "Training Compliance by Department"
+    ]
+  },
+  {
+    "route": "/en/dashboard/reports/inventory",
+    "label": "desktop-en",
+    "url": "https://pos.app.rakmyat.online/en/dashboard/reports/inventory",
+    "http": 200,
+    "text": "POS Dashboard\nDashboard\nCashier POS\nKitchen Display\nOrders\nProducts\nHuman Resources\nAccounting\nSuppliers\nFinancial Reports\nReports\nTheme Builder\nSettings\nEnglish\nP\n\nproduct-audit-1794625969@example.invalid\n\nOwner\n\nInventory Turnover\n\nTurnover ratios, estimated COGS, and slow-moving items\n\nRefresh\nDownload CSV\nDownload PDF\nDate From\nDate To\nAvg Monthly Turnover\n0.00x\nLast updated\n11/14/2026, 3:15:29 AM\nLast updated (dashboard refresh)\n11/14/2026, 3:15:29 AM\n\nTurnover is estimated using current product cost (`products.cost`) and average inventory value.\n\nCurrent Inventory Value\nEGP 400.00\nEstimated COGS\nEGP 0.00\nSlow Moving Items\n1\nTracked Products\n1\nTop Turnover\nSold QtyTurnover/Month\nSlowest Moving\nProduct\tSold Qty\tCurrent Stock\tTurnover/Month\tWaste\nAudit Test Dish\t0\t20\t0.00x\t0\nTop Turnover\nProduct\tSold Qty\tCurrent Stock\tTurnover/Month\tWaste\nNo data for selected range",
+    "pageerrors": [],
+    "failedResponses": [],
+    "title": "Dashboard - Restaurant POS SaaS",
+    "lang": "en",
+    "dir": "ltr",
+    "overflow": false,
+    "buttons": [
+      null,
+      "Orders",
+      "Products",
+      "Human Resources",
+      "Accounting",
+      "Suppliers",
+      "Financial Reports",
+      "Reports",
+      null,
+      null,
+      "English",
+      null,
+      "P\n\nproduct-audit-1794625969@example.invalid\n\nOwner",
+      "Refresh",
+      "Download CSV",
+      "Download PDF"
+    ],
+    "fields": [
+      {
+        "name": "",
+        "type": "date",
+        "label": null
+      },
+      {
+        "name": "",
+        "type": "date",
+        "label": null
+      }
+    ],
+    "headings": [
+      "Inventory Turnover",
+      "Top Turnover",
+      "Slowest Moving",
+      "Top Turnover"
+    ]
+  },
+  {
+    "route": "/en/dashboard/reports/overview",
+    "label": "desktop-en",
+    "url": "https://pos.app.rakmyat.online/en/dashboard/reports/overview",
+    "http": 200,
+    "text": "POS Dashboard\nDashboard\nCashier POS\nKitchen Display\nOrders\nProducts\nHuman Resources\nAccounting\nSuppliers\nFinancial Reports\nReports\nTheme Builder\nSettings\nEnglish\nP\n\nproduct-audit-1794625969@example.invalid\n\nOwner\n\nReports Overview\n\nQuick view of sales, profitability, and inventory turnover\n\nAuto-refresh every 30 seconds\n\nRefresh\nDate From\nDate To\nLast updated\n11/14/2026, 3:15:31 AM\nLast updated (dashboard refresh)\n11/14/2026, 3:15:31 AM\nSales Analytics\nRevenue\nEGP 0.00\nOrders\n0\nAverage Ticket\nEGP 0.00\nView Details\nProfitability\nGross Margin %\n0.0%\nFood Cost %\n0.0%\nGross Profit\nEGP 0.00\nView Details\nInventory Turnover\nAvg Monthly Turnover\n0.00x\nSlow Moving Items\n1\nCurrent Inventory Value\nEGP 400.00\n\nSlowest Item: Audit Test Dish\n\nView Details",
+    "pageerrors": [],
+    "failedResponses": [],
+    "title": "Dashboard - Restaurant POS SaaS",
+    "lang": "en",
+    "dir": "ltr",
+    "overflow": false,
+    "buttons": [
+      null,
+      "Orders",
+      "Products",
+      "Human Resources",
+      "Accounting",
+      "Suppliers",
+      "Financial Reports",
+      "Reports",
+      null,
+      null,
+      "English",
+      null,
+      "P\n\nproduct-audit-1794625969@example.invalid\n\nOwner",
+      "Refresh"
+    ],
+    "fields": [
+      {
+        "name": "",
+        "type": "date",
+        "label": null
+      },
+      {
+        "name": "",
+        "type": "date",
+        "label": null
+      }
+    ],
+    "headings": [
+      "Reports Overview",
+      "Sales Analytics",
+      "Profitability",
+      "Inventory Turnover"
+    ]
+  },
+  {
+    "route": "/en/dashboard/reports/profitability",
+    "label": "desktop-en",
+    "url": "https://pos.app.rakmyat.online/en/dashboard/reports/profitability",
+    "http": 200,
+    "text": "POS Dashboard\nDashboard\nCashier POS\nKitchen Display\nOrders\nProducts\nHuman Resources\nAccounting\nSuppliers\nFinancial Reports\nReports\nTheme Builder\nSettings\nEnglish\nP\n\nproduct-audit-1794625969@example.invalid\n\nOwner\n\nProduct Profitability\n\nTop and low-margin items by gross profit and food cost\n\nRefresh\nDownload CSV\nDownload PDF\nDate From\nDate To\nGross Margin %\n0.0%\nLast updated\n11/14/2026, 3:15:32 AM\nLast updated (dashboard refresh)\n11/14/2026, 3:15:32 AM\nTotal Revenue\nEGP 0.00\nTotal COGS\nEGP 0.00\nGross Profit\nEGP 0.00\nFood Cost %\n0.0%\nTop Profitable Items\nMargin %Profit\nTop Profitable Items\nProduct\tQty\tRevenue\tCOGS\tProfit\tMargin %\nNo data for selected range\nLowest Margin Items\nProduct\tQty\tRevenue\tCOGS\tProfit\tMargin %\nNo data for selected range",
+    "pageerrors": [],
+    "failedResponses": [],
+    "title": "Dashboard - Restaurant POS SaaS",
+    "lang": "en",
+    "dir": "ltr",
+    "overflow": false,
+    "buttons": [
+      null,
+      "Orders",
+      "Products",
+      "Human Resources",
+      "Accounting",
+      "Suppliers",
+      "Financial Reports",
+      "Reports",
+      null,
+      null,
+      "English",
+      null,
+      "P\n\nproduct-audit-1794625969@example.invalid\n\nOwner",
+      "Refresh",
+      "Download CSV",
+      "Download PDF"
+    ],
+    "fields": [
+      {
+        "name": "",
+        "type": "date",
+        "label": null
+      },
+      {
+        "name": "",
+        "type": "date",
+        "label": null
+      }
+    ],
+    "headings": [
+      "Product Profitability",
+      "Top Profitable Items",
+      "Top Profitable Items",
+      "Lowest Margin Items"
+    ]
+  },
+  {
+    "route": "/en/dashboard/reports/sales",
+    "label": "desktop-en",
+    "url": "https://pos.app.rakmyat.online/en/dashboard/reports/sales",
+    "http": 200,
+    "text": "POS Dashboard\nDashboard\nCashier POS\nKitchen Display\nOrders\nProducts\nHuman Resources\nAccounting\nSuppliers\nFinancial Reports\nReports\nTheme Builder\nSettings\nEnglish\nP\n\nproduct-audit-1794625969@example.invalid\n\nOwner\n\nSales Analytics\n\nRevenue, order trends, peak hours, and top performers\n\nAuto-refresh every 30 seconds\n\nRefresh\nDownload CSV\nDownload PDF\nDate From\nDate To\nGranularity\nDaily\nWeekly\nMonthly\nLast updated\n11/14/2026, 3:15:33 AM\nLast updated (dashboard refresh)\n11/14/2026, 3:15:33 AM\nTotal Revenue\nEGP 0.00\nTotal Orders\n0\nAverage Ticket\nEGP 0.00\nSales Trend\nTop Categories\nSales Per Hour\nTop Items\nProduct\tQty\tRevenue\nNo data for selected range\nTop Categories\nCategory\tQty\tRevenue\nNo data for selected range\n0",
+    "pageerrors": [],
+    "failedResponses": [],
+    "title": "Dashboard - Restaurant POS SaaS",
+    "lang": "en",
+    "dir": "ltr",
+    "overflow": false,
+    "buttons": [
+      null,
+      "Orders",
+      "Products",
+      "Human Resources",
+      "Accounting",
+      "Suppliers",
+      "Financial Reports",
+      "Reports",
+      null,
+      null,
+      "English",
+      null,
+      "P\n\nproduct-audit-1794625969@example.invalid\n\nOwner",
+      "Refresh",
+      "Download CSV",
+      "Download PDF"
+    ],
+    "fields": [
+      {
+        "name": "",
+        "type": "date",
+        "label": null
+      },
+      {
+        "name": "",
+        "type": "date",
+        "label": null
+      },
+      {
+        "name": "",
+        "type": "select-one",
+        "label": null
+      }
+    ],
+    "headings": [
+      "Sales Analytics",
+      "Sales Trend",
+      "Top Categories",
+      "Sales Per Hour",
+      "Top Items",
+      "Top Categories"
+    ]
+  },
+  {
+    "route": "/en/dashboard/settings",
+    "label": "desktop-en",
+    "url": "https://pos.app.rakmyat.online/en/dashboard/settings/account",
+    "http": 200,
+    "text": "POS Dashboard\nDashboard\nCashier POS\nKitchen Display\nOrders\nProducts\nHuman Resources\nAccounting\nSuppliers\nFinancial Reports\nReports\nTheme Builder\nSettings\nEnglish\nP\n\nproduct-audit-1794625969@example.invalid\n\nOwner\n\nSettings\n\nManage your account settings and preferences\n\nSETTINGS\n\nAccount Settings\n\nProfile, security, preferences\n\nRestaurant\n\nContact info, maintenance page\n\nAppearance\n\nTheme and colors\n\nAccess Control\n\nView your roles and permissions\n\nBilling & Subscription\n\nManage plans and payments\n\nADMINISTRATION\n\nRole Management\n\nCreate and manage roles\n\nUser Assignments\n\nAssign roles to users\n\nHelp & Support\n\nContact administrator\n\nProfile Information\nName*\nEmail\nRole\nUpdate Profile\nChange Password\nCurrent Password\nNew Password\n\nPassword must be at least 8 characters\n\nConfirm Password\nChange Password",
+    "pageerrors": [],
+    "failedResponses": [],
+    "title": "Dashboard - Restaurant POS SaaS",
+    "lang": "en",
+    "dir": "ltr",
+    "overflow": false,
+    "buttons": [
+      null,
+      "Orders",
+      "Products",
+      "Human Resources",
+      "Accounting",
+      "Suppliers",
+      "Financial Reports",
+      "Reports",
+      null,
+      null,
+      "English",
+      null,
+      "P\n\nproduct-audit-1794625969@example.invalid\n\nOwner",
+      "Help & Support\n\nContact administrator",
+      "Update Profile",
+      "Change Password"
+    ],
+    "fields": [
+      {
+        "name": "",
+        "type": "text",
+        "label": "Name*"
+      },
+      {
+        "name": "",
+        "type": "email",
+        "label": null
+      },
+      {
+        "name": "",
+        "type": "text",
+        "label": null
+      },
+      {
+        "name": "",
+        "type": "password",
+        "label": null
+      },
+      {
+        "name": "",
+        "type": "password",
+        "label": null
+      },
+      {
+        "name": "",
+        "type": "password",
+        "label": null
+      }
+    ],
+    "headings": [
+      "Settings",
+      "Profile Information",
+      "Change Password"
+    ]
+  },
+  {
+    "route": "/en/dashboard/settings/access-control",
+    "label": "desktop-en",
+    "url": "https://pos.app.rakmyat.online/en/dashboard/settings/access-control",
+    "http": 200,
+    "text": "POS Dashboard\nDashboard\nCashier POS\nKitchen Display\nOrders\nProducts\nHuman Resources\nAccounting\nSuppliers\nFinancial Reports\nReports\nTheme Builder\nSettings\nEnglish\nP\n\nproduct-audit-1794625969@example.invalid\n\nOwner\n\nSettings\n\nManage your account settings and preferences\n\nSETTINGS\n\nAccount Settings\n\nProfile, security, preferences\n\nRestaurant\n\nContact info, maintenance page\n\nAppearance\n\nTheme and colors\n\nAccess Control\n\nView your roles and permissions\n\nBilling & Subscription\n\nManage plans and payments\n\nADMINISTRATION\n\nRole Management\n\nCreate and manage roles\n\nUser Assignments\n\nAssign roles to users\n\nHelp & Support\n\nContact administrator\n\nAccess Control\n\nView your roles and permissions\n\nAccess Control & Permissions\n\nManage your roles and view your permissions across the system\n\nUser Roles - product-audit-1794625969@example.invalid\nAssign Role\n\nAdministrator\n\nFull system access\n\nYour Roles\n\nAdministrator\n\nFull system access\n\nPermission Summary\n\nYour permissions across different modules:\n\nProducts\n\nADMIN - Full access (admin)\n\nCategories\n\nADMIN - Full access (admin)\n\nHR\n\nADMIN - Full access (admin)\n\nNotifications\n\nADMIN - Full access (admin)\n\nSettings\n\nADMIN - Full access (admin)\n\nUsers\n\nADMIN - Full access (admin)\n\nRoles\n\nADMIN - Full access (admin)\n\nReports\n\nADMIN - Full access (admin)\n\nThemes\n\nADMIN - Full access (admin)\n\nOrders\n\nADMIN - Full access (admin)\n\nLeaves\n\nADMIN - Full access (admin)\n\nPayroll\n\nADMIN - Full access (admin)\n\nKitchen Display\n\nADMIN - Full access (admin)\n\nTables\n\nADMIN - Full access (admin)\n\nAccounting\n\nADMIN - Full access (admin)\n\nSuppliers\n\nADMIN - Full access (admin)\n\nFinancial Reports\n\nADMIN - Full access (admin)\n\nPerformance\n\nADMIN - Full access (admin)\n\nTraining\n\nADMIN - Full access (admin)\n\nContracts\n\nADMIN - Full access (admin)\n\nYour permissions are determined by the roles assigned to you. Each role provides access to different modules with specific permission levels.",
+    "pageerrors": [],
+    "failedResponses": [],
+    "title": "Dashboard - Restaurant POS SaaS",
+    "lang": "en",
+    "dir": "ltr",
+    "overflow": false,
+    "buttons": [
+      null,
+      "Orders",
+      "Products",
+      "Human Resources",
+      "Accounting",
+      "Suppliers",
+      "Financial Reports",
+      "Reports",
+      null,
+      null,
+      "English",
+      null,
+      "P\n\nproduct-audit-1794625969@example.invalid\n\nOwner",
+      "Help & Support\n\nContact administrator",
+      "Assign Role",
+      null
+    ],
+    "fields": [],
+    "headings": [
+      "Settings",
+      "Access Control"
+    ]
+  },
+  {
+    "route": "/en/dashboard/settings/account",
+    "label": "desktop-en",
+    "url": "https://pos.app.rakmyat.online/en/dashboard/settings/account",
+    "http": 200,
+    "text": "POS Dashboard\nDashboard\nCashier POS\nKitchen Display\nOrders\nProducts\nHuman Resources\nAccounting\nSuppliers\nFinancial Reports\nReports\nTheme Builder\nSettings\nEnglish\nP\n\nproduct-audit-1794625969@example.invalid\n\nOwner\n\nSettings\n\nManage your account settings and preferences\n\nSETTINGS\n\nAccount Settings\n\nProfile, security, preferences\n\nRestaurant\n\nContact info, maintenance page\n\nAppearance\n\nTheme and colors\n\nAccess Control\n\nView your roles and permissions\n\nBilling & Subscription\n\nManage plans and payments\n\nADMINISTRATION\n\nRole Management\n\nCreate and manage roles\n\nUser Assignments\n\nAssign roles to users\n\nHelp & Support\n\nContact administrator\n\nProfile Information\nName*\nEmail\nRole\nUpdate Profile\nChange Password\nCurrent Password\nNew Password\n\nPassword must be at least 8 characters\n\nConfirm Password\nChange Password",
+    "pageerrors": [],
+    "failedResponses": [],
+    "title": "Dashboard - Restaurant POS SaaS",
+    "lang": "en",
+    "dir": "ltr",
+    "overflow": false,
+    "buttons": [
+      null,
+      "Orders",
+      "Products",
+      "Human Resources",
+      "Accounting",
+      "Suppliers",
+      "Financial Reports",
+      "Reports",
+      null,
+      null,
+      "English",
+      null,
+      "P\n\nproduct-audit-1794625969@example.invalid\n\nOwner",
+      "Help & Support\n\nContact administrator",
+      "Update Profile",
+      "Change Password"
+    ],
+    "fields": [
+      {
+        "name": "",
+        "type": "text",
+        "label": "Name*"
+      },
+      {
+        "name": "",
+        "type": "email",
+        "label": null
+      },
+      {
+        "name": "",
+        "type": "text",
+        "label": null
+      },
+      {
+        "name": "",
+        "type": "password",
+        "label": null
+      },
+      {
+        "name": "",
+        "type": "password",
+        "label": null
+      },
+      {
+        "name": "",
+        "type": "password",
+        "label": null
+      }
+    ],
+    "headings": [
+      "Settings",
+      "Profile Information",
+      "Change Password"
+    ]
+  },
+  {
+    "route": "/en/dashboard/settings/appearance",
+    "label": "desktop-en",
+    "url": "https://pos.app.rakmyat.online/en/dashboard/settings/appearance",
+    "http": 200,
+    "text": "POS Dashboard\nDashboard\nCashier POS\nKitchen Display\nOrders\nProducts\nHuman Resources\nAccounting\nSuppliers\nFinancial Reports\nReports\nTheme Builder\nSettings\nEnglish\nP\n\nproduct-audit-1794625969@example.invalid\n\nOwner\n\nSettings\n\nManage your account settings and preferences\n\nSETTINGS\n\nAccount Settings\n\nProfile, security, preferences\n\nRestaurant\n\nContact info, maintenance page\n\nAppearance\n\nTheme and colors\n\nAccess Control\n\nView your roles and permissions\n\nBilling & Subscription\n\nManage plans and payments\n\nADMINISTRATION\n\nRole Management\n\nCreate and manage roles\n\nUser Assignments\n\nAssign roles to users\n\nHelp & Support\n\nContact administrator\n\nTheme\nLight\nDark\nSystem\nTheme\nTheme Colors\nPrimary Color\nSecondary Color\nAccent Color\nPreview\nPrimary\nSecondary\nAccent\nTheme Colors",
+    "pageerrors": [],
+    "failedResponses": [],
+    "title": "Dashboard - Restaurant POS SaaS",
+    "lang": "en",
+    "dir": "ltr",
+    "overflow": false,
+    "buttons": [
+      null,
+      "Orders",
+      "Products",
+      "Human Resources",
+      "Accounting",
+      "Suppliers",
+      "Financial Reports",
+      "Reports",
+      null,
+      null,
+      "English",
+      null,
+      "P\n\nproduct-audit-1794625969@example.invalid\n\nOwner",
+      "Help & Support\n\nContact administrator",
+      "Light",
+      "Dark",
+      "System",
+      "Theme",
+      "Primary",
+      "Secondary",
+      "Accent",
+      "Theme Colors"
+    ],
+    "fields": [
+      {
+        "name": "",
+        "type": "color",
+        "label": null
+      },
+      {
+        "name": "",
+        "type": "text",
+        "label": null
+      },
+      {
+        "name": "",
+        "type": "color",
+        "label": null
+      },
+      {
+        "name": "",
+        "type": "text",
+        "label": null
+      },
+      {
+        "name": "",
+        "type": "color",
+        "label": null
+      },
+      {
+        "name": "",
+        "type": "text",
+        "label": null
+      }
+    ],
+    "headings": [
+      "Settings",
+      "Theme",
+      "Theme Colors"
+    ]
+  },
+  {
+    "route": "/en/dashboard/settings/billing",
+    "label": "desktop-en",
+    "url": "https://pos.app.rakmyat.online/en/dashboard/settings/billing",
+    "http": 200,
+    "text": "POS Dashboard\nDashboard\nCashier POS\nKitchen Display\nOrders\nProducts\nHuman Resources\nAccounting\nSuppliers\nFinancial Reports\nReports\nTheme Builder\nSettings\nEnglish\nP\n\nproduct-audit-1794625969@example.invalid\n\nOwner\n\nSettings\n\nManage your account settings and preferences\n\nSETTINGS\n\nAccount Settings\n\nProfile, security, preferences\n\nRestaurant\n\nContact info, maintenance page\n\nAppearance\n\nTheme and colors\n\nAccess Control\n\nView your roles and permissions\n\nBilling & Subscription\n\nManage plans and payments\n\nADMINISTRATION\n\nRole Management\n\nCreate and manage roles\n\nUser Assignments\n\nAssign roles to users\n\nHelp & Support\n\nContact administrator\n\nBilling & Subscription\n\nManage your subscription plan and payment history.\n\nCurrent Subscription\n\nYour current subscription access details\n\nTRIAL\n\nDays Remaining\n\n15\n\nSubscription Expires\n\n-\n\nAvailable Plan\n\nPro Plan\n\nEGP 500.00 / month\n\nPro Plan (Annual)\n\nEGP 5,000.00 / year\n\nSave 17%\n\nPro Plan\n\nEGP 500.00 / month\n\nSubscribe Now\nFull POS System\nKitchen Display System\nOnline Ordering Website\nAnalytics and Reports\nMulti-Restaurant Management\nMobile Apps\nUnlimited Staff\nPriority Support\nFree Updates\nDriver Management\nPayment History\nDate\tAmount\tStatus\tMethod\tCard\tReference\nNo payments yet",
+    "pageerrors": [],
+    "failedResponses": [],
+    "title": "Dashboard - Restaurant POS SaaS",
+    "lang": "en",
+    "dir": "ltr",
+    "overflow": false,
+    "buttons": [
+      null,
+      "Orders",
+      "Products",
+      "Human Resources",
+      "Accounting",
+      "Suppliers",
+      "Financial Reports",
+      "Reports",
+      null,
+      null,
+      "English",
+      null,
+      "P\n\nproduct-audit-1794625969@example.invalid\n\nOwner",
+      "Help & Support\n\nContact administrator",
+      "Pro Plan\n\nEGP 500.00 / month",
+      "Pro Plan (Annual)\n\nEGP 5,000.00 / year\n\nSave 17%",
+      "Subscribe Now"
+    ],
+    "fields": [],
+    "headings": [
+      "Settings",
+      "Billing & Subscription",
+      "Current Subscription",
+      "Available Plan",
+      "Payment History"
+    ]
+  },
+  {
+    "route": "/en/dashboard/settings/restaurant",
+    "label": "desktop-en",
+    "url": "https://pos.app.rakmyat.online/en/dashboard/settings/restaurant",
+    "http": 200,
+    "text": "POS Dashboard\nDashboard\nCashier POS\nKitchen Display\nOrders\nProducts\nHuman Resources\nAccounting\nSuppliers\nFinancial Reports\nReports\nTheme Builder\nSettings\nEnglish\nP\n\nproduct-audit-1794625969@example.invalid\n\nOwner\n\nSettings\n\nManage your account settings and preferences\n\nSETTINGS\n\nAccount Settings\n\nProfile, security, preferences\n\nRestaurant\n\nContact info, maintenance page\n\nAppearance\n\nTheme and colors\n\nAccess Control\n\nView your roles and permissions\n\nBilling & Subscription\n\nManage plans and payments\n\nADMINISTRATION\n\nRole Management\n\nCreate and manage roles\n\nUser Assignments\n\nAssign roles to users\n\nHelp & Support\n\nContact administrator\n\nRestaurant Settings\n\nManage your restaurant contact information. This info is shown to customers when your site is under maintenance.\n\nContact Information\n\nThis contact information will be displayed on your maintenance page so customers can reach you when your online ordering is unavailable.\n\nRestaurant Name\n\nRestaurant name is managed by your system administrator.\n\nContact Email\nContact Phone\nSave Changes",
+    "pageerrors": [],
+    "failedResponses": [],
+    "title": "Dashboard - Restaurant POS SaaS",
+    "lang": "en",
+    "dir": "ltr",
+    "overflow": false,
+    "buttons": [
+      null,
+      "Orders",
+      "Products",
+      "Human Resources",
+      "Accounting",
+      "Suppliers",
+      "Financial Reports",
+      "Reports",
+      null,
+      null,
+      "English",
+      null,
+      "P\n\nproduct-audit-1794625969@example.invalid\n\nOwner",
+      "Help & Support\n\nContact administrator",
+      "Save Changes"
+    ],
+    "fields": [
+      {
+        "name": "",
+        "type": "text",
+        "label": null
+      },
+      {
+        "name": "",
+        "type": "email",
+        "label": null
+      },
+      {
+        "name": "",
+        "type": "tel",
+        "label": null
+      }
+    ],
+    "headings": [
+      "Settings",
+      "Restaurant Settings",
+      "Contact Information"
+    ]
+  },
+  {
+    "route": "/en/dashboard/settings/roles",
+    "label": "desktop-en",
+    "url": "https://pos.app.rakmyat.online/en/dashboard/settings/roles",
+    "http": 200,
+    "text": "POS Dashboard\nDashboard\nCashier POS\nKitchen Display\nOrders\nProducts\nHuman Resources\nAccounting\nSuppliers\nFinancial Reports\nReports\nTheme Builder\nSettings\nEnglish\nP\n\nproduct-audit-1794625969@example.invalid\n\nOwner\n\nSettings\n\nManage your account settings and preferences\n\nSETTINGS\n\nAccount Settings\n\nProfile, security, preferences\n\nRestaurant\n\nContact info, maintenance page\n\nAppearance\n\nTheme and colors\n\nAccess Control\n\nView your roles and permissions\n\nBilling & Subscription\n\nManage plans and payments\n\nADMINISTRATION\n\nRole Management\n\nCreate and manage roles\n\nUser Assignments\n\nAssign roles to users\n\nHelp & Support\n\nContact administrator\n\nRole Management\n\nCreate and manage roles with custom permissions\n\nNew Role\nName\tDescription\tPermissions\tCreated\tActions\nAdministrator\tFull system access\t20 permissions\t11/14/2026\t\nEdit\nDelete\n\nDriver\tDriver access to assigned orders\t20 permissions\t11/14/2026\t\nEdit\nDelete\n\nEmployee\tStaff access\t20 permissions\t11/14/2026\t\nEdit\nDelete\n\nManager\tManagement access\t20 permissions\t11/14/2026\t\nEdit\nDelete",
+    "pageerrors": [],
+    "failedResponses": [],
+    "title": "Dashboard - Restaurant POS SaaS",
+    "lang": "en",
+    "dir": "ltr",
+    "overflow": false,
+    "buttons": [
+      null,
+      "Orders",
+      "Products",
+      "Human Resources",
+      "Accounting",
+      "Suppliers",
+      "Financial Reports",
+      "Reports",
+      null,
+      null,
+      "English",
+      null,
+      "P\n\nproduct-audit-1794625969@example.invalid\n\nOwner",
+      "Help & Support\n\nContact administrator",
+      "Delete",
+      "Delete",
+      "Delete",
+      "Delete"
+    ],
+    "fields": [],
+    "headings": [
+      "Settings",
+      "Role Management"
+    ]
+  },
+  {
+    "route": "/en/dashboard/settings/roles/new",
+    "label": "desktop-en",
+    "url": "https://pos.app.rakmyat.online/en/dashboard/settings/roles/new",
+    "http": 200,
+    "text": "POS Dashboard\nDashboard\nCashier POS\nKitchen Display\nOrders\nProducts\nHuman Resources\nAccounting\nSuppliers\nFinancial Reports\nReports\nTheme Builder\nSettings\nEnglish\nP\n\nproduct-audit-1794625969@example.invalid\n\nOwner\n\nSettings\n\nManage your account settings and preferences\n\nSETTINGS\n\nAccount Settings\n\nProfile, security, preferences\n\nRestaurant\n\nContact info, maintenance page\n\nAppearance\n\nTheme and colors\n\nAccess Control\n\nView your roles and permissions\n\nBilling & Subscription\n\nManage plans and payments\n\nADMINISTRATION\n\nRole Management\n\nCreate and manage roles\n\nUser Assignments\n\nAssign roles to users\n\nHelp & Support\n\nContact administrator\n\nBack to Roles\nCreate New Role\n\nDefine a new role and assign permissions to modules\n\nBasic Information\nRole Name *\nDescription\nAssign Permissions\nProducts\n\nRead\n\nView only\n\nWrite\n\nView and edit\n\nDelete\n\nView, edit, and delete\n\nAdmin\n\nFull access (admin)\n\nCategories\n\nRead\n\nView only\n\nWrite\n\nView and edit\n\nDelete\n\nView, edit, and delete\n\nAdmin\n\nFull access (admin)\n\nOrders & POS\n\nRead\n\nView only\n\nWrite\n\nView and edit\n\nDelete\n\nView, edit, and delete\n\nAdmin\n\nFull access (admin)\n\nKitchen Display (KDS)\n\nRead\n\nView only\n\nWrite\n\nView and edit\n\nDelete\n\nView, edit, and delete\n\nAdmin\n\nFull access (admin)\n\nTables\n\nRead\n\nView only\n\nWrite\n\nView and edit\n\nDelete\n\nView, edit, and delete\n\nAdmin\n\nFull access (admin)\n\nHR & Payroll\n\nRead\n\nView only\n\nWrite\n\nView and edit\n\nDelete\n\nView, edit, and delete\n\nAdmin\n\nFull access (admin)\n\nLeaves\n\nRead\n\nView only\n\nWrite\n\nView and edit\n\nDelete\n\nView, edit, and delete\n\nAdmin\n\nFull access (admin)\n\nPayroll\n\nRead\n\nView only\n\nWrite\n\nView and edit\n\nDelete\n\nView, edit, and delete\n\nAdmin\n\nFull access (admin)\n\nNotifications\n\nRead\n\nView only\n\nWrite\n\nView and edit\n\nDelete\n\nView, edit, and delete\n\nAdmin\n\nFull access (admin)\n\nSettings\n\nRead\n\nView only\n\nWrite\n\nView and edit\n\nDelete\n\nView, edit, and delete\n\nAdmin\n\nFull access (admin)\n\nUsers\n\nRead\n\nView only\n\nWrite\n\nView and edit\n\nDelete\n\nView, edit, and delete\n\nAdmin\n\nFull access (admin)\n\nRoles\n\nRead\n\nView only\n\nWrite\n\nView and edit\n\nDelete\n\nView, edit, and delete\n\nAdmin\n\nFull access (admin)\n\nReports\n\nRead\n\nView only\n\nWrite\n\nView and edit\n\nDelete\n\nView, edit, and delete\n\nAdmin\n\nFull access (admin)\n\nThemes\n\nRead\n\nView only\n\nWrite\n\nView and edit\n\nDelete\n\nView, edit, and delete\n\nAdmin\n\nFull access (admin)\n\nAccounting\n\nRead\n\nView only\n\nWrite\n\nView and edit\n\nDelete\n\nView, edit, and delete\n\nAdmin\n\nFull access (admin)\n\nSuppliers\n\nRead\n\nView only\n\nWrite\n\nView and edit\n\nDelete\n\nView, edit, and delete\n\nAdmin\n\nFull access (admin)\n\nFinancial Reports\n\nRead\n\nView only\n\nWrite\n\nView and edit\n\nDelete\n\nView, edit, and delete\n\nAdmin\n\nFull access (admin)\n\nPerformance\n\nRead\n\nView only\n\nWrite\n\nView and edit\n\nDelete\n\nView, edit, and delete\n\nAdmin\n\nFull access (admin)\n\nTraining\n\nRead\n\nView only\n\nWrite\n\nView and edit\n\nDelete\n\nView, edit, and delete\n\nAdmin\n\nFull access (admin)\n\nContracts\n\nRead\n\nView only\n\nWrite\n\nView and edit\n\nDelete\n\nView, edit, and delete\n\nAdmin\n\nFull access (admin)\n\nCancel\nCreate Role",
+    "pageerrors": [],
+    "failedResponses": [],
+    "title": "Dashboard - Restaurant POS SaaS",
+    "lang": "en",
+    "dir": "ltr",
+    "overflow": false,
+    "buttons": [
+      null,
+      "Orders",
+      "Products",
+      "Human Resources",
+      "Accounting",
+      "Suppliers",
+      "Financial Reports",
+      "Reports",
+      null,
+      null,
+      "English",
+      null,
+      "P\n\nproduct-audit-1794625969@example.invalid\n\nOwner",
+      "Help & Support\n\nContact administrator",
+      "Read\n\nView only",
+      "Write\n\nView and edit",
+      "Delete\n\nView, edit, and delete",
+      "Admin\n\nFull access (admin)",
+      "Read\n\nView only",
+      "Write\n\nView and edit",
+      "Delete\n\nView, edit, and delete",
+      "Admin\n\nFull access (admin)",
+      "Read\n\nView only",
+      "Write\n\nView and edit",
+      "Delete\n\nView, edit, and delete",
+      "Admin\n\nFull access (admin)",
+      "Read\n\nView only",
+      "Write\n\nView and edit",
+      "Delete\n\nView, edit, and delete",
+      "Admin\n\nFull access (admin)",
+      "Read\n\nView only",
+      "Write\n\nView and edit",
+      "Delete\n\nView, edit, and delete",
+      "Admin\n\nFull access (admin)",
+      "Read\n\nView only",
+      "Write\n\nView and edit",
+      "Delete\n\nView, edit, and delete",
+      "Admin\n\nFull access (admin)",
+      "Read\n\nView only",
+      "Write\n\nView and edit",
+      "Delete\n\nView, edit, and delete",
+      "Admin\n\nFull access (admin)",
+      "Read\n\nView only",
+      "Write\n\nView and edit",
+      "Delete\n\nView, edit, and delete",
+      "Admin\n\nFull access (admin)",
+      "Read\n\nView only",
+      "Write\n\nView and edit",
+      "Delete\n\nView, edit, and delete",
+      "Admin\n\nFull access (admin)",
+      "Read\n\nView only",
+      "Write\n\nView and edit",
+      "Delete\n\nView, edit, and delete",
+      "Admin\n\nFull access (admin)",
+      "Read\n\nView only",
+      "Write\n\nView and edit",
+      "Delete\n\nView, edit, and delete",
+      "Admin\n\nFull access (admin)",
+      "Read\n\nView only",
+      "Write\n\nView and edit",
+      "Delete\n\nView, edit, and delete",
+      "Admin\n\nFull access (admin)",
+      "Read\n\nView only",
+      "Write\n\nView and edit",
+      "Delete\n\nView, edit, and delete",
+      "Admin\n\nFull access (admin)",
+      "Read\n\nView only",
+      "Write\n\nView and edit",
+      "Delete\n\nView, edit, and delete",
+      "Admin\n\nFull access (admin)",
+      "Read\n\nView only",
+      "Write\n\nView and edit",
+      "Delete\n\nView, edit, and delete",
+      "Admin\n\nFull access (admin)",
+      "Read\n\nView only",
+      "Write\n\nView and edit",
+      "Delete\n\nView, edit, and delete",
+      "Admin\n\nFull access (admin)",
+      "Read\n\nView only",
+      "Write\n\nView and edit",
+      "Delete\n\nView, edit, and delete",
+      "Admin\n\nFull access (admin)",
+      "Read\n\nView only",
+      "Write\n\nView and edit",
+      "Delete\n\nView, edit, and delete",
+      "Admin\n\nFull access (admin)",
+      "Read\n\nView only",
+      "Write\n\nView and edit",
+      "Delete\n\nView, edit, and delete",
+      "Admin\n\nFull access (admin)",
+      "Read\n\nView only",
+      "Write\n\nView and edit",
+      "Delete\n\nView, edit, and delete",
+      "Admin\n\nFull access (admin)",
+      "Create Role"
+    ],
+    "fields": [
+      {
+        "name": "",
+        "type": "text",
+        "label": null
+      },
+      {
+        "name": "",
+        "type": "textarea",
+        "label": null
+      }
+    ],
+    "headings": [
+      "Settings",
+      "Create New Role"
+    ]
+  },
+  {
+    "route": "/en/dashboard/settings/users",
+    "label": "desktop-en",
+    "url": "https://pos.app.rakmyat.online/en/dashboard/settings/users",
+    "http": 200,
+    "text": "POS Dashboard\nDashboard\nCashier POS\nKitchen Display\nOrders\nProducts\nHuman Resources\nAccounting\nSuppliers\nFinancial Reports\nReports\nTheme Builder\nSettings\nEnglish\nP\n\nproduct-audit-1794625969@example.invalid\n\nOwner\n\nSettings\n\nManage your account settings and preferences\n\nSETTINGS\n\nAccount Settings\n\nProfile, security, preferences\n\nRestaurant\n\nContact info, maintenance page\n\nAppearance\n\nTheme and colors\n\nAccess Control\n\nView your roles and permissions\n\nBilling & Subscription\n\nManage plans and payments\n\nADMINISTRATION\n\nRole Management\n\nCreate and manage roles\n\nUser Assignments\n\nAssign roles to users\n\nHelp & Support\n\nContact administrator\n\nUser Management\n\nCreate and manage users in your organization\n\nAdd New User\nName\tEmail\tPhone\tStatus\tActions\nSERVIO Product Audit\tproduct-audit-1794625969@example.invalid\t-\tactive\t\nRoles",
+    "pageerrors": [],
+    "failedResponses": [],
+    "title": "Dashboard - Restaurant POS SaaS",
+    "lang": "en",
+    "dir": "ltr",
+    "overflow": false,
+    "buttons": [
+      null,
+      "Orders",
+      "Products",
+      "Human Resources",
+      "Accounting",
+      "Suppliers",
+      "Financial Reports",
+      "Reports",
+      null,
+      null,
+      "English",
+      null,
+      "P\n\nproduct-audit-1794625969@example.invalid\n\nOwner",
+      "Help & Support\n\nContact administrator",
+      "Add New User",
+      "Roles",
+      null,
+      null
+    ],
+    "fields": [
+      {
+        "name": "",
+        "type": "text",
+        "label": null
+      }
+    ],
+    "headings": [
+      "Settings",
+      "User Management"
+    ]
+  },
+  {
+    "route": "/en/dashboard/tables",
+    "label": "desktop-en",
+    "url": "https://pos.app.rakmyat.online/en/dashboard/tables",
+    "http": 200,
+    "text": "POS Dashboard\nDashboard\nCashier POS\nKitchen Display\nOrders\nProducts\nHuman Resources\nAccounting\nSuppliers\nFinancial Reports\nReports\nTheme Builder\nSettings\nEnglish\nP\n\nproduct-audit-1794625969@example.invalid\n\nOwner\n\nTable Management\n\nManage dine-in tables, statuses, and capacity\n\nAdd Table\nRefresh\nPrint All QR Codes\nLayout View\n\nTotal Tables\n\n1\n\nAvailable\n\n1\n\nOccupied\n\n0\n\nReserved\n\n0\n\nMaintenance\n\n0\n\nAll\nAvailable\nOccupied\nReserved\nMaintenance\nTABLE #\tTABLE NAME\tCAPACITY\tLOCATION\tSHAPE\tSTATUS\tACTIONS\n#1\tAudit table\t4 persons\tIndoor\tSquare\t\nAvailable\nOccupied\nReserved\nMaintenance\n\t",
+    "pageerrors": [],
+    "failedResponses": [],
+    "title": "Dashboard - Restaurant POS SaaS",
+    "lang": "en",
+    "dir": "ltr",
+    "overflow": false,
+    "buttons": [
+      null,
+      "Orders",
+      "Products",
+      "Human Resources",
+      "Accounting",
+      "Suppliers",
+      "Financial Reports",
+      "Reports",
+      null,
+      null,
+      "English",
+      null,
+      "P\n\nproduct-audit-1794625969@example.invalid\n\nOwner",
+      "Add Table",
+      "Refresh",
+      "Print All QR Codes",
+      "Layout View",
+      "All",
+      "Available",
+      "Occupied",
+      "Reserved",
+      "Maintenance",
+      null,
+      null,
+      null,
+      null,
+      null
+    ],
+    "fields": [
+      {
+        "name": "",
+        "type": "select-one",
+        "label": null
+      }
+    ],
+    "headings": [
+      "Table Management"
+    ]
+  },
+  {
+    "route": "/en/dashboard/tables/layout",
+    "label": "desktop-en",
+    "url": "https://pos.app.rakmyat.online/en/dashboard/tables/layout",
+    "http": 200,
+    "text": "POS Dashboard\nDashboard\nCashier POS\nKitchen Display\nOrders\nProducts\nHuman Resources\nAccounting\nSuppliers\nFinancial Reports\nReports\nTheme Builder\nSettings\nEnglish\nP\n\nproduct-audit-1794625969@example.invalid\n\nOwner\n\nBack to Tables\nFloor Plan\n\nVisual layout scaffold for table positions\n\nAll (1)\nUnassigned (1)\nNew Layout\n\nShowing tables across all layouts.\n\nFloor Plan\n\nSelect a table and move it using the controls below.\n\nZoom Out\nZoom In\nFit\n101%\nGrid Snap\nReset\nSave Positions\nScaffold mode: pick a table and nudge positions, then save.\n\nDouble-click a table to open edit view.\n\n#1\n\nAudit table\n\n4 persons\n\nAvailable\nSelected Table\n\nSelect a table on the canvas to adjust its position.",
+    "pageerrors": [],
+    "failedResponses": [],
+    "title": "Dashboard - Restaurant POS SaaS",
+    "lang": "en",
+    "dir": "ltr",
+    "overflow": false,
+    "buttons": [
+      null,
+      "Orders",
+      "Products",
+      "Human Resources",
+      "Accounting",
+      "Suppliers",
+      "Financial Reports",
+      "Reports",
+      null,
+      null,
+      "English",
+      null,
+      "P\n\nproduct-audit-1794625969@example.invalid\n\nOwner",
+      "Back to Tables",
+      "All (1)",
+      "Unassigned (1)",
+      "New Layout",
+      "Zoom Out",
+      "Zoom In",
+      "Fit",
+      "Grid Snap",
+      "Reset",
+      "Save Positions"
+    ],
+    "fields": [],
+    "headings": [
+      "Floor Plan",
+      "Floor Plan"
+    ]
+  },
+  {
+    "route": "/en/dashboard/theme-builder",
+    "label": "desktop-en",
+    "url": "https://pos.app.rakmyat.online/en/dashboard/theme-builder",
+    "http": 200,
+    "text": "POS Dashboard\nDashboard\nCashier POS\nKitchen Display\nOrders\nProducts\nHuman Resources\nAccounting\nSuppliers\nFinancial Reports\nReports\nTheme Builder\nSettings\nEnglish\nP\n\nproduct-audit-1794625969@example.invalid\n\nOwner\n\nThemes\nQR Builder\nTheme Builder\n\nCreate and manage website themes\n\nYour Website\n\naudit-1794625969.pos.rakmyat.online\n\nPreview Website\nYour Themes (1)\nFrom Template\nImport\n+ Create Theme\nMigrate Configs\nKeep 2 Themes\nAll Themes\nActive Only\nInactive\nRecent First\nName (A-Z)\nActive First\nDefault Theme\n\nUpdated 11/14/2026\n\nActive\n\nDefault theme for SERVIO Audit Synthetic\n\nEdit\nCopy\nExport",
+    "pageerrors": [],
+    "failedResponses": [],
+    "title": "Dashboard - Restaurant POS SaaS",
+    "lang": "en",
+    "dir": "ltr",
+    "overflow": false,
+    "buttons": [
+      null,
+      "Orders",
+      "Products",
+      "Human Resources",
+      "Accounting",
+      "Suppliers",
+      "Financial Reports",
+      "Reports",
+      null,
+      null,
+      "English",
+      null,
+      "P\n\nproduct-audit-1794625969@example.invalid\n\nOwner",
+      "From Template",
+      "Import",
+      "+ Create Theme",
+      "Migrate Configs",
+      "Keep 2 Themes",
+      "Edit",
+      "Copy",
+      "Export"
+    ],
+    "fields": [
+      {
+        "name": "",
+        "type": "text",
+        "label": null
+      },
+      {
+        "name": "",
+        "type": "select-one",
+        "label": null
+      },
+      {
+        "name": "",
+        "type": "select-one",
+        "label": null
+      }
+    ],
+    "headings": [
+      "Theme Builder",
+      "Your Themes (1)"
+    ]
+  },
+  {
+    "route": "/en/dashboard/theme-builder/import",
+    "label": "desktop-en",
+    "url": "https://pos.app.rakmyat.online/en/dashboard/theme-builder/import",
+    "http": 200,
+    "text": "POS Dashboard\nDashboard\nCashier POS\nKitchen Display\nOrders\nProducts\nHuman Resources\nAccounting\nSuppliers\nFinancial Reports\nReports\nTheme Builder\nSettings\nEnglish\nP\n\nproduct-audit-1794625969@example.invalid\n\nOwner\n\nImport Theme\n\nImport a theme from a previously exported JSON file\n\nTheme JSON\nUpload JSON File\nPaste from Clipboard\nOr paste JSON directly:\n\n💡 Tip: Export a theme first from the theme list to get a valid JSON file. Then import it here to create a copy with modifications.\n\nImport Theme\nCancel",
+    "pageerrors": [],
+    "failedResponses": [],
+    "title": "Dashboard - Restaurant POS SaaS",
+    "lang": "en",
+    "dir": "ltr",
+    "overflow": false,
+    "buttons": [
+      null,
+      "Orders",
+      "Products",
+      "Human Resources",
+      "Accounting",
+      "Suppliers",
+      "Financial Reports",
+      "Reports",
+      null,
+      null,
+      "English",
+      null,
+      "P\n\nproduct-audit-1794625969@example.invalid\n\nOwner",
+      null,
+      "Paste from Clipboard",
+      "Import Theme",
+      "Cancel"
+    ],
+    "fields": [
+      {
+        "name": "",
+        "type": "file",
+        "label": "Upload JSON File"
+      },
+      {
+        "name": "",
+        "type": "textarea",
+        "label": null
+      }
+    ],
+    "headings": [
+      "Import Theme"
+    ]
+  },
+  {
+    "route": "/en/dashboard/theme-builder/presets",
+    "label": "desktop-en",
+    "url": "https://pos.app.rakmyat.online/en/dashboard/theme-builder/presets",
+    "http": 200,
+    "text": "POS Dashboard\nDashboard\nCashier POS\nKitchen Display\nOrders\nProducts\nHuman Resources\nAccounting\nSuppliers\nFinancial Reports\nReports\nTheme Builder\nSettings\nEnglish\nP\n\nproduct-audit-1794625969@example.invalid\n\nOwner\n\nTheme Templates\n\nChoose a pre-designed theme and customize it to match your brand\n\nChoose a Theme Template\n\nStart with a pre-designed theme and customize it to match your brand\n\nOther\nModern Blue\n0\n\nClean, professional blue theme with modern styling perfect for restaurants and businesses.\n\nElegant Dark\n0\n\nSophisticated dark theme with gold accents for upscale dining establishments.\n\nVibrant Orange\n0\n\nEnergetic and warm theme with vibrant orange tones, ideal for casual dining.\n\nFresh Green\n0\n\nNatural and fresh theme with green tones, perfect for organic and healthy food businesses.\n\nMinimalist White\n0\n\nUltra-clean minimalist design with simple white background and black text.\n\nPurple Luxury\n0\n\nPremium purple theme with elegant styling for fine dining experiences.\n\nModern Bistro\n0\n\nContemporary minimalist design with clean typography and professional color palette. Perfect for upscale restaurants and bistros.\n\nWarm Comfort\n0\n\nCozy and inviting design with warm earth tones. Ideal for comfort food restaurants, diners, and family eateries.\n\nVibrant Energy\n0\n\nBold and colorful design with energetic typography. Perfect for casual dining, cafes, and fun food concepts.\n\nElegant Simplicity\n0\n\nMinimalist luxury design with elegant serif typography and refined color palette. Ideal for fine dining establishments.\n\nUrban Fresh\n0\n\nContemporary urban design with trendy colors and modern typography. Perfect for health-conscious restaurants, juice bars, and modern cafes.\n\nCoastal Breeze\n0\n\nFresh, oceanside-inspired design with calming blues and natural elements. Perfect for seafood restaurants and beach cafes.\n\nSpicy Fusion\n0\n\nVibrant and bold design with fiery colors. Perfect for Asian, Indian, and fusion restaurants.\n\nGarden Fresh\n0\n\nNatural, organic-inspired design with earthy colors. Ideal for farm-to-table restaurants and vegetarian establishments.\n\nPremium Dark\n0\n\nLuxurious dark theme with gold accents. Designed for high-end restaurants and exclusive dining concepts.\n\nPlayful Pop\n0\n\nBright, fun, and colorful design. Ideal for children's restaurants, ice cream shops, and casual eateries.\n\n💡 Tip: Click on any template to start creating a new theme based on it. You can then customize all colors, fonts, and content to match your restaurant's brand.",
+    "pageerrors": [],
+    "failedResponses": [],
+    "title": "Dashboard - Restaurant POS SaaS",
+    "lang": "en",
+    "dir": "ltr",
+    "overflow": false,
+    "buttons": [
+      null,
+      "Orders",
+      "Products",
+      "Human Resources",
+      "Accounting",
+      "Suppliers",
+      "Financial Reports",
+      "Reports",
+      null,
+      null,
+      "English",
+      null,
+      "P\n\nproduct-audit-1794625969@example.invalid\n\nOwner",
+      null
+    ],
+    "fields": [],
+    "headings": [
+      "Theme Templates",
+      "Choose a Theme Template"
+    ]
+  },
+  {
+    "route": "/en/dashboard/theme-builder/qr",
+    "label": "desktop-en",
+    "url": "https://pos.app.rakmyat.online/en/dashboard/theme-builder/qr",
+    "http": 200,
+    "text": "POS Dashboard\nDashboard\nCashier POS\nKitchen Display\nOrders\nProducts\nHuman Resources\nAccounting\nSuppliers\nFinancial Reports\nReports\nTheme Builder\nSettings\nEnglish\nP\n\nproduct-audit-1794625969@example.invalid\n\nOwner\n\nThemes\nQR Builder\nWebsite QR Builder\n\nCreate QR codes for your website home page or menu page.\n\nQR Target\nHome Page\nMenu Page\n\nCurrent Host: audit-1794625969.pos.rakmyat.online\n\nhttps://audit-1794625969.pos.rakmyat.online/en\nPreset Library\nAll\nRestaurant\nCafe\nBar\n\nClassic Bistro\n\nWarm and elegant dining style.\n\nFine Dining Gold\n\nLuxury look with premium contrast.\n\nCoffee House\n\nCozy tones for specialty cafes.\n\nArtisan Bakery\n\nSoft neutral palette for bakery counters.\n\nCocktail Neon\n\nNight bar identity with bold colors.\n\nRooftop Lounge\n\nElegant dark style for lounge menus.\n\nMinimal Pro\n\nUniversal pro preset for print and screen.\n\nBuilder Controls\n\nQR Size\n\nSmall (128px)\nMedium (256px)\nLarge (512px)\n256px\n\nShape\n\nSquare\nCircle\nDiamond\n\nStyle\n\nStandard\nRounded\nCircular\nError Correction\nLow (~7%)\nMedium (~15%)\nQuartile (~25%)\nHigh (~30%)\nInclude quiet margin\nBranding & Content\nForeground\nBackground\nSolid Background\nTransparent Background\n\nLogo Overlay\n\nLabel Mode\n\nUse website info\nCustom label\nNo label\nExport\nhttps://audit-1794625969.pos.rakmyat.online/en\nCopy Link\nOpen Link\nDownload PNG\nDownload SVG\nPrint PDF\nLive Preview\n\nPreset: Minimal Pro\n\nScan to visit website\n\naudit-1794625969.pos.rakmyat.online",
+    "pageerrors": [],
+    "failedResponses": [],
+    "title": "Dashboard - Restaurant POS SaaS",
+    "lang": "en",
+    "dir": "ltr",
+    "overflow": false,
+    "buttons": [
+      null,
+      "Orders",
+      "Products",
+      "Human Resources",
+      "Accounting",
+      "Suppliers",
+      "Financial Reports",
+      "Reports",
+      null,
+      null,
+      "English",
+      null,
+      "P\n\nproduct-audit-1794625969@example.invalid\n\nOwner",
+      "All",
+      "Restaurant",
+      "Cafe",
+      "Bar",
+      "Classic Bistro\n\nWarm and elegant dining style.",
+      "Fine Dining Gold\n\nLuxury look with premium contrast.",
+      "Coffee House\n\nCozy tones for specialty cafes.",
+      "Artisan Bakery\n\nSoft neutral palette for bakery counters.",
+      "Cocktail Neon\n\nNight bar identity with bold colors.",
+      "Rooftop Lounge\n\nElegant dark style for lounge menus.",
+      "Minimal Pro\n\nUniversal pro preset for print and screen.",
+      "Small (128px)",
+      "Medium (256px)",
+      "Large (512px)",
+      "Square",
+      "Circle",
+      "Diamond",
+      "Standard",
+      "Rounded",
+      "Circular",
+      "Copy Link",
+      "Open Link",
+      "Download PNG",
+      "Download SVG",
+      "Print PDF"
+    ],
+    "fields": [
+      {
+        "name": "qr-target",
+        "type": "radio",
+        "label": "Home Page"
+      },
+      {
+        "name": "qr-target",
+        "type": "radio",
+        "label": "Menu Page"
+      },
+      {
+        "name": "",
+        "type": "range",
+        "label": null
+      },
+      {
+        "name": "",
+        "type": "select-one",
+        "label": "Error Correction\nLow (~7%)\nMedium (~15%)\nQuartile (~25%)\nHigh (~30%)"
+      },
+      {
+        "name": "",
+        "type": "checkbox",
+        "label": "Include quiet margin"
+      },
+      {
+        "name": "",
+        "type": "color",
+        "label": "Foreground"
+      },
+      {
+        "name": "",
+        "type": "color",
+        "label": "Background"
+      },
+      {
+        "name": "bg-mode",
+        "type": "radio",
+        "label": "Solid Background"
+      },
+      {
+        "name": "bg-mode",
+        "type": "radio",
+        "label": "Transparent Background"
+      },
+      {
+        "name": "",
+        "type": "file",
+        "label": null
+      },
+      {
+        "name": "label-mode",
+        "type": "radio",
+        "label": "Use website info"
+      },
+      {
+        "name": "label-mode",
+        "type": "radio",
+        "label": "Custom label"
+      },
+      {
+        "name": "label-mode",
+        "type": "radio",
+        "label": "No label"
+      }
+    ],
+    "headings": [
+      "Website QR Builder",
+      "QR Target",
+      "Preset Library",
+      "Builder Controls",
+      "Branding & Content",
+      "Export",
+      "Live Preview"
+    ]
+  },
+  {
+    "route": "/ar/dashboard",
+    "label": "mobile-ar",
+    "url": "https://pos.app.rakmyat.online/ar/dashboard",
+    "http": 200,
+    "text": "POS Dashboard\nلوحة التحكم\nنقطة بيع الكاشير\nشاشة المطبخ\nالطلبات\nالمنتجات\nالموارد البشرية\nالحسابات\nالموردون\nالتقارير المالية\nالتقارير\nمنشئ القالب\nالإعدادات\nP\nأهلا وسهلا, product-audit-1794625969@example.invalid\n\nإليك نظرة عامة على أداء مطعمك مع بيانات حية من الطلبات والقائمة والموظفين والإشعارات.\n\nالدور:\nOwner\nالوصول: نشط\n15 يوم متبقٍ\nنقطة بيع الكاشير\nشاشة المطبخ\nعرض الطلبات\nإضافة منتج\nإضافة فئة\nمنشئ القالب\nالفريق\nالإعدادات\nآخر تحديث (وقت المتصفح): ١٤‏/١١‏/٢٠٢٦، ٣:١٥:٥٤ ص\n\nإيراد المدفوعات الأخيرة\n\n‏٠٫٠٠ ج.م.‏\n\nمن أحدث الطلبات المحمّلة\n\nفتح\n\nالطلبات\n\n0\n\nإجمالي الطلبات في النظام\n\nفتح\n\nالطلبات المعلقة\n\n0\n\nبانتظار المعالجة\n\nفتح\n\nالمطاعم\n\n1\n\nمطاعم مرتبطة\n\nفتح\n\nالمنتجات\n\n1\n\nعناصر القائمة\n\nفتح\n\nالفئات\n\n1\n\nأقسام القائمة\n\nفتح\n\nالموظفون\n\n1\n\nالموظفون المسجلون\n\nفتح\n\nالسائقون\n\n0\n\nفريق التوصيل\n\nفتح\n\nإشعارات غير مقروءة\n\n0\n\n٠ إجمالي الإشعارات\n\nفتح\nالطلبات الأخيرة\n\nأحدث الطلبات من موقعك وقنوات نقاط البيع\n\nعرض كل الطلبات\n\nلا توجد طلبات بعد\n\nستظهر الطلبات هنا بمجرد أن يبدأ العملاء بإرسال طلباتهم.\n\nفتح منشئ القالب\nنظرة عامة على الطاولات\nإدارة الطاولات\n\nعرض حالة الطاولات والسعة وتوزيع الصالة.\n\nAvailable\n\n1\n\nOccupied\n\n0\n\nReserved\n\n0\n\nTotal Tables: 1\n\nحالة مساحة العمل\nوصول المستأجر\nنشط\nالخطة\nFree Trial\nالإشعارات\n0 غير مقروء / 0 إجمالي\nمصادر البيانات\nجميعها سليمة\nابدأ الآن\n4/5\n\nأكمل قائمة الإعداد لجعل لوحة التحكم جاهزة للعمل بالكامل.\n\n✓\n\nتم ربط المطعم\n\nالمستأجر والمطعم مرتبطان وجاهزان للإدارة.\n\n✓\n\nإنشاء الفئات\n\nنظّم قائمتك إلى أقسام مثل الأطباق الرئيسية والمشروبات والحلويات.\n\n✓\n\nإضافة منتجات القائمة\n\nأنشئ منتجات بالتسعير والمخزون لبدء استقبال الطلبات.\n\n✓\n\nإضافة فريقك\n\nأضف الموظفين وحدد الأدوار لسير العمل والعمليات.\n\n5\n\nتخصيص قالب الواجهة\n\nعدّل أقسام الصفحة الرئيسية والعلامة التجارية والرأس والتذييل من منشئ القالب.",
+    "pageerrors": [],
+    "failedResponses": [],
+    "title": "Dashboard - Restaurant POS SaaS",
+    "lang": "ar",
+    "dir": "rtl",
+    "overflow": false,
+    "buttons": [
+      null,
+      "الطلبات",
+      "المنتجات",
+      "الموارد البشرية",
+      "الحسابات",
+      "الموردون",
+      "التقارير المالية",
+      "التقارير",
+      null,
+      null,
+      "تغيير اللغة",
+      null,
+      "P",
+      "نقطة بيع الكاشير",
+      "شاشة المطبخ",
+      "عرض الطلبات",
+      "إضافة منتج",
+      "إضافة فئة",
+      "منشئ القالب",
+      "الفريق",
+      "الإعدادات",
+      "عرض كل الطلبات",
+      "فتح منشئ القالب",
+      "إدارة الطاولات"
+    ],
+    "fields": [],
+    "headings": [
+      "أهلا وسهلا, product-audit-1794625969@example.invalid",
+      "الطلبات الأخيرة",
+      "نظرة عامة على الطاولات",
+      "حالة مساحة العمل",
+      "ابدأ الآن"
+    ]
+  },
+  {
+    "route": "/ar/dashboard/pos",
+    "label": "mobile-ar",
+    "url": "https://pos.app.rakmyat.online/ar/dashboard/pos",
+    "http": 200,
+    "text": "٠٣:١٥:٥٤ ص\nمتصل\n\nShortcut: Ctrl+F or /\n\nالكل\nF1\nط\n\nطبق اختبار\n\n‏١٠٠٫٠٠ US$\nالسلة\n0\nتعليق (Ctrl+H)\nتفريغ (Esc)\n\nالسلة فارغة\n\nاضغط على منتج لإضافته",
+    "pageerrors": [],
+    "failedResponses": [],
+    "title": "Dashboard - Restaurant POS SaaS",
+    "lang": "ar",
+    "dir": "rtl",
+    "overflow": false,
+    "buttons": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      "الكل",
+      "F1\nط\n\nطبق اختبار\n\n‏١٠٠٫٠٠ US$",
+      "تعليق (Ctrl+H)",
+      "تفريغ (Esc)"
+    ],
+    "fields": [
+      {
+        "name": "",
+        "type": "search",
+        "label": null
+      }
+    ],
+    "headings": [
+      "السلة"
+    ]
+  },
+  {
+    "route": "/ar/dashboard/kds",
+    "label": "mobile-ar",
+    "url": "https://pos.app.rakmyat.online/ar/dashboard/kds",
+    "http": 200,
+    "text": "شاشة المطبخ\n\nقائمة المطبخ المباشرة\n\nمتصل\n\nالطلبات النشطة\n\n0\n\nجديد\n\n0\n\nقيد التحضير\n\n0\n\nمتوسط التحضير\n\n0.0د\n\nالكل\nجديد\nقيد التحضير\nجاهز\nCompleted\nلا توجد طلبات نشطة\n\nستظهر الطلبات الجديدة هنا فور تأكيدها.",
+    "pageerrors": [],
+    "failedResponses": [],
+    "title": "Dashboard - Restaurant POS SaaS",
+    "lang": "ar",
+    "dir": "rtl",
+    "overflow": false,
+    "buttons": [
+      "الصوت مُفعل",
+      "الوضع الداكن",
+      "ملء الشاشة",
+      "الكل",
+      "جديد",
+      "قيد التحضير",
+      "جاهز",
+      "Completed"
+    ],
+    "fields": [],
+    "headings": [
+      "شاشة المطبخ"
+    ]
+  },
+  {
+    "route": "/ar/dashboard/theme-builder",
+    "label": "mobile-ar",
+    "url": "https://pos.app.rakmyat.online/ar/dashboard/theme-builder",
+    "http": 200,
+    "text": "POS Dashboard\nلوحة التحكم\nنقطة بيع الكاشير\nشاشة المطبخ\nالطلبات\nالمنتجات\nالموارد البشرية\nالحسابات\nالموردون\nالتقارير المالية\nالتقارير\nمنشئ القالب\nالإعدادات\nP\nThemes\nQR Builder\nمنشئ القالب\n\nإنشاء وإدارة قوالب الموقع\n\nموقعك\n\naudit-1794625969.pos.rakmyat.online\n\nمعاينة الموقع\nقوالبك (1)\nمن قالب\nاستيراد\n+ إنشاء قالب\nترحيل الإعدادات\nالاحتفاظ بقالبين\nجميع القوالب\nالنشطة فقط\nغير النشطة\nالأحدث أولاً\nالاسم (أ-ي)\nالنشطة أولاً\nDefault Theme\n\nآخر تحديث ١٤‏/١١‏/٢٠٢٦\n\nنشط\n\nDefault theme for SERVIO Audit Synthetic\n\nتعديل\nنسخ\nتصدير",
+    "pageerrors": [],
+    "failedResponses": [],
+    "title": "Dashboard - Restaurant POS SaaS",
+    "lang": "ar",
+    "dir": "rtl",
+    "overflow": false,
+    "buttons": [
+      null,
+      "الطلبات",
+      "المنتجات",
+      "الموارد البشرية",
+      "الحسابات",
+      "الموردون",
+      "التقارير المالية",
+      "التقارير",
+      null,
+      null,
+      "تغيير اللغة",
+      null,
+      "P",
+      "من قالب",
+      "استيراد",
+      "+ إنشاء قالب",
+      "ترحيل الإعدادات",
+      "الاحتفاظ بقالبين",
+      "تعديل",
+      "نسخ",
+      "تصدير"
+    ],
+    "fields": [
+      {
+        "name": "",
+        "type": "text",
+        "label": null
+      },
+      {
+        "name": "",
+        "type": "select-one",
+        "label": null
+      },
+      {
+        "name": "",
+        "type": "select-one",
+        "label": null
+      }
+    ],
+    "headings": [
+      "منشئ القالب",
+      "قوالبك (1)"
+    ]
+  },
+  {
+    "route": "/ar/dashboard/inventory",
+    "label": "mobile-ar",
+    "url": "https://pos.app.rakmyat.online/ar/dashboard/inventory",
+    "http": 200,
+    "text": "POS Dashboard\nلوحة التحكم\nنقطة بيع الكاشير\nشاشة المطبخ\nالطلبات\nالمنتجات\nالموارد البشرية\nالحسابات\nالموردون\nالتقارير المالية\nالتقارير\nمنشئ القالب\nالإعدادات\nP\nإدارة المخزون\n\nتتبع وإدارة مستويات مخزون المنتجات\n\nمستويات المخزون الحالية\nالمنتج\tالمخزون الحالي\tحد المخزون المنخفض\tالحالة\tالإجراءات\nAudit Test Dish\t20\t3\tفي المخزون\tتعديل المخزون",
+    "pageerrors": [],
+    "failedResponses": [],
+    "title": "Dashboard - Restaurant POS SaaS",
+    "lang": "ar",
+    "dir": "rtl",
+    "overflow": false,
+    "buttons": [
+      null,
+      "الطلبات",
+      "المنتجات",
+      "الموارد البشرية",
+      "الحسابات",
+      "الموردون",
+      "التقارير المالية",
+      "التقارير",
+      null,
+      null,
+      "تغيير اللغة",
+      null,
+      "P",
+      "تعديل المخزون"
+    ],
+    "fields": [],
+    "headings": [
+      "إدارة المخزون",
+      "مستويات المخزون الحالية"
+    ]
+  },
+  {
+    "route": "/ar/dashboard/hr/employees",
+    "label": "mobile-ar",
+    "url": "https://pos.app.rakmyat.online/ar/dashboard/hr/employees",
+    "http": 200,
+    "text": "POS Dashboard\nلوحة التحكم\nنقطة بيع الكاشير\nشاشة المطبخ\nالطلبات\nالمنتجات\nالموارد البشرية\nالحسابات\nالموردون\nالتقارير المالية\nالتقارير\nمنشئ القالب\nالإعدادات\nP\nالموظفون\n\nإدارة معلومات الموظفين والسجلات\n\nإضافة موظف\n\nSuccessfully loaded 1 employees at 3:15:59 AM\n\nTable\nCards\nName\tEmail\tPosition\tCode\tStatus\tActions\n\nAE\nAudit Employee\nKitchen\n\taudit-employee@example.invalid\tKitchen audit\tAUDIT-01\t\n\t\nEdit",
+    "pageerrors": [],
+    "failedResponses": [],
+    "title": "Dashboard - Restaurant POS SaaS",
+    "lang": "ar",
+    "dir": "rtl",
+    "overflow": false,
+    "buttons": [
+      null,
+      "الطلبات",
+      "المنتجات",
+      "الموارد البشرية",
+      "الحسابات",
+      "الموردون",
+      "التقارير المالية",
+      "التقارير",
+      null,
+      null,
+      "تغيير اللغة",
+      null,
+      "P",
+      "إضافة موظف",
+      "Table",
+      "Cards",
+      "Edit",
+      null
+    ],
+    "fields": [
+      {
+        "name": "",
+        "type": "text",
+        "label": null
+      }
+    ],
+    "headings": [
+      "الموظفون"
+    ]
+  },
+  {
+    "route": "/ar/dashboard/hr/attendance",
+    "label": "mobile-ar",
+    "url": "https://pos.app.rakmyat.online/ar/dashboard/hr/attendance",
+    "http": 200,
+    "text": "POS Dashboard\nلوحة التحكم\nنقطة بيع الكاشير\nشاشة المطبخ\nالطلبات\nالمنتجات\nالموارد البشرية\nالحسابات\nالموردون\nالتقارير المالية\nالتقارير\nمنشئ القالب\nالإعدادات\nP\nالحضور\n\nتتبع وإدارة سجلات حضور الموظفين\n\nتسجيل الحضور\nمن التاريخ\nإلى التاريخ\n\nSuccessfully loaded 1 attendance records at 3:16:01 AM\n\nEmployee\tClock In\tClock Out\tStatus\tHours\tActions\nAudit Employee\t11/14/2026, 3:13:49 AM\t-\tpresent\t-\t\nEdit",
+    "pageerrors": [],
+    "failedResponses": [],
+    "title": "Dashboard - Restaurant POS SaaS",
+    "lang": "ar",
+    "dir": "rtl",
+    "overflow": false,
+    "buttons": [
+      null,
+      "الطلبات",
+      "المنتجات",
+      "الموارد البشرية",
+      "الحسابات",
+      "الموردون",
+      "التقارير المالية",
+      "التقارير",
+      null,
+      null,
+      "تغيير اللغة",
+      null,
+      "P",
+      "تسجيل الحضور",
+      "Edit",
+      null
+    ],
+    "fields": [
+      {
+        "name": "",
+        "type": "date",
+        "label": null
+      },
+      {
+        "name": "",
+        "type": "date",
+        "label": null
+      },
+      {
+        "name": "",
+        "type": "text",
+        "label": null
+      }
+    ],
+    "headings": [
+      "الحضور"
+    ]
+  },
+  {
+    "route": "/ar/dashboard/hr/leaves",
+    "label": "mobile-ar",
+    "url": "https://pos.app.rakmyat.online/ar/dashboard/hr/leaves",
+    "http": 200,
+    "text": "POS Dashboard\nلوحة التحكم\nنقطة بيع الكاشير\nشاشة المطبخ\nالطلبات\nالمنتجات\nالموارد البشرية\nالحسابات\nالموردون\nالتقارير المالية\nالتقارير\nمنشئ القالب\nالإعدادات\nP\nطلبات الإجازات\n\nإدارة طلبات الإجازات والموافقات\n\nطلب إجازة\nمن التاريخ\nإلى التاريخ\n\nSuccessfully loaded 0 leave requests at 3:16:03 AM\n\nNo Leave Requests\n\nGet started by creating a leave request",
+    "pageerrors": [],
+    "failedResponses": [],
+    "title": "Dashboard - Restaurant POS SaaS",
+    "lang": "ar",
+    "dir": "rtl",
+    "overflow": false,
+    "buttons": [
+      null,
+      "الطلبات",
+      "المنتجات",
+      "الموارد البشرية",
+      "الحسابات",
+      "الموردون",
+      "التقارير المالية",
+      "التقارير",
+      null,
+      null,
+      "تغيير اللغة",
+      null,
+      "P",
+      "طلب إجازة"
+    ],
+    "fields": [
+      {
+        "name": "",
+        "type": "date",
+        "label": null
+      },
+      {
+        "name": "",
+        "type": "date",
+        "label": null
+      }
+    ],
+    "headings": [
+      "طلبات الإجازات"
+    ]
+  },
+  {
+    "route": "/en/dashboard",
+    "label": "tablet-en",
+    "url": "https://pos.app.rakmyat.online/en/dashboard",
+    "http": 200,
+    "text": "POS Dashboard\nDashboard\nCashier POS\nKitchen Display\nOrders\nProducts\nHuman Resources\nAccounting\nSuppliers\nFinancial Reports\nReports\nTheme Builder\nSettings\nEnglish\nP\nWelcome, product-audit-1794625969@example.invalid\n\nHere is an overview of your restaurant performance with live data from orders, menu, staff, and notifications.\n\nRole:\nOwner\nAccess: Active\n15 day(s) remaining\nCashier POS\nKitchen Display\nView Orders\nAdd Product\nAdd Category\nTheme Builder\nTeam\nSettings\nLast updated (dashboard refresh): 11/14/2026, 3:16:04 AM\n\nRecent Paid Revenue\n\nEGP 0.00\n\nFrom the latest loaded orders\n\nOpen\n\nOrders\n\n0\n\nTotal orders in system\n\nOpen\n\nPending Orders\n\n0\n\nAwaiting processing\n\nOpen\n\nRestaurants\n\n1\n\nLinked restaurants\n\nOpen\n\nProducts\n\n1\n\nMenu items\n\nOpen\n\nCategories\n\n1\n\nMenu sections\n\nOpen\n\nStaff\n\n1\n\nEmployees\n\nOpen\n\nDrivers\n\n0\n\nDelivery team\n\nOpen\n\nUnread Notifications\n\n0\n\n0 total notifications\n\nOpen\nRecent Orders\n\nLatest orders from your storefront and POS channels\n\nView all orders\n\nNo orders yet\n\nOrders will appear here once customers start placing them.\n\nOpen Theme Builder\nTables Overview\nManage Tables\n\nTrack dine-in table availability and occupancy at a glance.\n\nAvailable\n\n1\n\nOccupied\n\n0\n\nReserved\n\n0\n\nTotal Tables: 1\n\nWorkspace Status\nTenant Access\nActive\nPlan\nFree Trial\nNotifications\n0 unread / 0 total\nData sources\nAll healthy\nGetting Started\n4/5\n\nComplete the setup checklist to make the dashboard fully operational.\n\n✓\n\nRestaurant connected\n\nYour tenant and restaurant are linked and ready to manage.\n\n✓\n\nCreate categories\n\nOrganize your menu into sections like main courses, drinks, and desserts.\n\n✓\n\nAdd menu products\n\nCreate products with pricing and inventory to start taking orders.\n\n✓\n\nAdd your team\n\nInvite employees and assign roles for operations and cashier workflows.\n\n5\n\nCustomize storefront theme\n\nAdjust homepage sections, branding, header, and footer in Theme Builder.",
+    "pageerrors": [],
+    "failedResponses": [],
+    "title": "Dashboard - Restaurant POS SaaS",
+    "lang": "en",
+    "dir": "ltr",
+    "overflow": false,
+    "buttons": [
+      null,
+      "Orders",
+      "Products",
+      "Human Resources",
+      "Accounting",
+      "Suppliers",
+      "Financial Reports",
+      "Reports",
+      null,
+      null,
+      "English",
+      null,
+      "P",
+      "Cashier POS",
+      "Kitchen Display",
+      "View Orders",
+      "Add Product",
+      "Add Category",
+      "Theme Builder",
+      "Team",
+      "Settings",
+      "View all orders",
+      "Open Theme Builder",
+      "Manage Tables"
+    ],
+    "fields": [],
+    "headings": [
+      "Welcome, product-audit-1794625969@example.invalid",
+      "Recent Orders",
+      "Tables Overview",
+      "Workspace Status",
+      "Getting Started"
+    ]
+  },
+  {
+    "route": "/en/dashboard/pos",
+    "label": "tablet-en",
+    "url": "https://pos.app.rakmyat.online/en/dashboard/pos",
+    "http": 200,
+    "text": "03:16:06 AM\nCashier:\nproduct-audit-1794625969@example.invalid\nOnline\nExit POS\n\nShortcut: Ctrl+F or /\n\nAll\nF1\nA\n\nAudit Test Dish\n\n$100.00\nCart\n0\nHold (Ctrl+H)\nClear (Esc)\n\nCart is empty\n\nTap a product to add it",
+    "pageerrors": [],
+    "failedResponses": [],
+    "title": "Dashboard - Restaurant POS SaaS",
+    "lang": "en",
+    "dir": "ltr",
+    "overflow": false,
+    "buttons": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      "Exit POS",
+      "All",
+      "F1\nA\n\nAudit Test Dish\n\n$100.00",
+      "Hold (Ctrl+H)",
+      "Clear (Esc)"
+    ],
+    "fields": [
+      {
+        "name": "",
+        "type": "search",
+        "label": null
+      }
+    ],
+    "headings": [
+      "Cart"
+    ]
+  },
+  {
+    "route": "/en/dashboard/kds",
+    "label": "tablet-en",
+    "url": "https://pos.app.rakmyat.online/en/dashboard/kds",
+    "http": 200,
+    "text": "Kitchen Display\n\nLive kitchen queue\n\nConnected\n\nACTIVE ORDERS\n\n0\n\nNEW\n\n0\n\nIN PROGRESS\n\n0\n\nAVG PREP\n\n0.0m\n\nAll\nNew\nIn Progress\nReady\nCompleted\nNo active orders\n\nNew kitchen orders will appear here as soon as they are confirmed.",
+    "pageerrors": [],
+    "failedResponses": [],
+    "title": "Dashboard - Restaurant POS SaaS",
+    "lang": "en",
+    "dir": "ltr",
+    "overflow": false,
+    "buttons": [
+      "Sound on",
+      "Dark Mode",
+      "Fullscreen",
+      "All",
+      "New",
+      "In Progress",
+      "Ready",
+      "Completed"
+    ],
+    "fields": [],
+    "headings": [
+      "Kitchen Display"
+    ]
+  },
+  {
+    "route": "/en/dashboard/theme-builder",
+    "label": "tablet-en",
+    "url": "https://pos.app.rakmyat.online/en/dashboard/theme-builder",
+    "http": 200,
+    "text": "POS Dashboard\nDashboard\nCashier POS\nKitchen Display\nOrders\nProducts\nHuman Resources\nAccounting\nSuppliers\nFinancial Reports\nReports\nTheme Builder\nSettings\nEnglish\nP\nThemes\nQR Builder\nTheme Builder\n\nCreate and manage website themes\n\nYour Website\n\naudit-1794625969.pos.rakmyat.online\n\nPreview Website\nYour Themes (1)\nFrom Template\nImport\n+ Create Theme\nMigrate Configs\nKeep 2 Themes\nAll Themes\nActive Only\nInactive\nRecent First\nName (A-Z)\nActive First\nDefault Theme\n\nUpdated 11/14/2026\n\nActive\n\nDefault theme for SERVIO Audit Synthetic\n\nEdit\nCopy\nExport",
+    "pageerrors": [],
+    "failedResponses": [],
+    "title": "Dashboard - Restaurant POS SaaS",
+    "lang": "en",
+    "dir": "ltr",
+    "overflow": false,
+    "buttons": [
+      null,
+      "Orders",
+      "Products",
+      "Human Resources",
+      "Accounting",
+      "Suppliers",
+      "Financial Reports",
+      "Reports",
+      null,
+      null,
+      "English",
+      null,
+      "P",
+      "From Template",
+      "Import",
+      "+ Create Theme",
+      "Migrate Configs",
+      "Keep 2 Themes",
+      "Edit",
+      "Copy",
+      "Export"
+    ],
+    "fields": [
+      {
+        "name": "",
+        "type": "text",
+        "label": null
+      },
+      {
+        "name": "",
+        "type": "select-one",
+        "label": null
+      },
+      {
+        "name": "",
+        "type": "select-one",
+        "label": null
+      }
+    ],
+    "headings": [
+      "Theme Builder",
+      "Your Themes (1)"
+    ]
+  },
+  {
+    "route": "/en/dashboard/inventory",
+    "label": "tablet-en",
+    "url": "https://pos.app.rakmyat.online/en/dashboard/inventory",
+    "http": 200,
+    "text": "POS Dashboard\nDashboard\nCashier POS\nKitchen Display\nOrders\nProducts\nHuman Resources\nAccounting\nSuppliers\nFinancial Reports\nReports\nTheme Builder\nSettings\nEnglish\nP\nInventory Management\n\nTrack and manage product stock levels\n\nCurrent Stock Levels\nProduct\tCurrent Stock\tLow Stock Threshold\tStatus\tActions\nAudit Test Dish\t20\t3\tIn Stock\tAdjust Stock",
+    "pageerrors": [],
+    "failedResponses": [],
+    "title": "Dashboard - Restaurant POS SaaS",
+    "lang": "en",
+    "dir": "ltr",
+    "overflow": false,
+    "buttons": [
+      null,
+      "Orders",
+      "Products",
+      "Human Resources",
+      "Accounting",
+      "Suppliers",
+      "Financial Reports",
+      "Reports",
+      null,
+      null,
+      "English",
+      null,
+      "P",
+      "Adjust Stock"
+    ],
+    "fields": [],
+    "headings": [
+      "Inventory Management",
+      "Current Stock Levels"
+    ]
+  },
+  {
+    "route": "/en/dashboard/hr/employees",
+    "label": "tablet-en",
+    "url": "https://pos.app.rakmyat.online/en/dashboard/hr/employees",
+    "http": 200,
+    "text": "POS Dashboard\nDashboard\nCashier POS\nKitchen Display\nOrders\nProducts\nHuman Resources\nAccounting\nSuppliers\nFinancial Reports\nReports\nTheme Builder\nSettings\nEnglish\nP\nEmployees\n\nManage your employee information and records\n\nAdd Employee\n\nSuccessfully loaded 1 employees at 3:16:11 AM\n\nTable\nCards\nName\tEmail\tPosition\tCode\tStatus\tActions\n\nAE\nAudit Employee\nKitchen\n\taudit-employee@example.invalid\tKitchen audit\tAUDIT-01\t\n\t\nEdit",
+    "pageerrors": [],
+    "failedResponses": [],
+    "title": "Dashboard - Restaurant POS SaaS",
+    "lang": "en",
+    "dir": "ltr",
+    "overflow": false,
+    "buttons": [
+      null,
+      "Orders",
+      "Products",
+      "Human Resources",
+      "Accounting",
+      "Suppliers",
+      "Financial Reports",
+      "Reports",
+      null,
+      null,
+      "English",
+      null,
+      "P",
+      "Add Employee",
+      "Table",
+      "Cards",
+      "Edit",
+      null
+    ],
+    "fields": [
+      {
+        "name": "",
+        "type": "text",
+        "label": null
+      }
+    ],
+    "headings": [
+      "Employees"
+    ]
+  },
+  {
+    "route": "/en/dashboard/hr/attendance",
+    "label": "tablet-en",
+    "url": "https://pos.app.rakmyat.online/en/dashboard/hr/attendance",
+    "http": 200,
+    "text": "POS Dashboard\nDashboard\nCashier POS\nKitchen Display\nOrders\nProducts\nHuman Resources\nAccounting\nSuppliers\nFinancial Reports\nReports\nTheme Builder\nSettings\nEnglish\nP\nAttendance\n\nTrack and manage employee attendance records\n\nRecord Attendance\nFrom Date\nTo Date\n\nSuccessfully loaded 1 attendance records at 3:16:12 AM\n\nEmployee\tClock In\tClock Out\tStatus\tHours\tActions\nAudit Employee\t11/14/2026, 3:13:49 AM\t-\tpresent\t-\t\nEdit",
+    "pageerrors": [],
+    "failedResponses": [],
+    "title": "Dashboard - Restaurant POS SaaS",
+    "lang": "en",
+    "dir": "ltr",
+    "overflow": false,
+    "buttons": [
+      null,
+      "Orders",
+      "Products",
+      "Human Resources",
+      "Accounting",
+      "Suppliers",
+      "Financial Reports",
+      "Reports",
+      null,
+      null,
+      "English",
+      null,
+      "P",
+      "Record Attendance",
+      "Edit",
+      null
+    ],
+    "fields": [
+      {
+        "name": "",
+        "type": "date",
+        "label": null
+      },
+      {
+        "name": "",
+        "type": "date",
+        "label": null
+      },
+      {
+        "name": "",
+        "type": "text",
+        "label": null
+      }
+    ],
+    "headings": [
+      "Attendance"
+    ]
+  },
+  {
+    "route": "/en/dashboard/hr/leaves",
+    "label": "tablet-en",
+    "url": "https://pos.app.rakmyat.online/en/dashboard/hr/leaves",
+    "http": 200,
+    "text": "POS Dashboard\nDashboard\nCashier POS\nKitchen Display\nOrders\nProducts\nHuman Resources\nAccounting\nSuppliers\nFinancial Reports\nReports\nTheme Builder\nSettings\nEnglish\nP\nLeave Requests\n\nManage employee leave requests and approvals\n\nRequest Leave\nFrom Date\nTo Date\n\nSuccessfully loaded 0 leave requests at 3:16:14 AM\n\nNo Leave Requests\n\nGet started by creating a leave request",
+    "pageerrors": [],
+    "failedResponses": [],
+    "title": "Dashboard - Restaurant POS SaaS",
+    "lang": "en",
+    "dir": "ltr",
+    "overflow": false,
+    "buttons": [
+      null,
+      "Orders",
+      "Products",
+      "Human Resources",
+      "Accounting",
+      "Suppliers",
+      "Financial Reports",
+      "Reports",
+      null,
+      null,
+      "English",
+      null,
+      "P",
+      "Request Leave"
+    ],
+    "fields": [
+      {
+        "name": "",
+        "type": "date",
+        "label": null
+      },
+      {
+        "name": "",
+        "type": "date",
+        "label": null
+      }
+    ],
+    "headings": [
+      "Leave Requests"
+    ]
+  }
+]

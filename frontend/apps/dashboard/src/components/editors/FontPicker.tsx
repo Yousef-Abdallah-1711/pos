@@ -1,6 +1,5 @@
-
+'use client'
 import type { JSX } from 'react'
-﻿'use client'
 
 import React, { useState, useCallback, useEffect, useMemo } from 'react'
 import { usePathname } from 'next/navigation'

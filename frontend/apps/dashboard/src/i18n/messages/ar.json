@@ -399,6 +399,7 @@
     "billingPage": {
       "title": "الفوترة والاشتراك",
       "description": "إدارة خطة الاشتراك وسجل المدفوعات.",
+      "loadSubscriptionFailed": "تعذّر تحميل اشتراكك الحالي. يرجى تحديث الصفحة.",
       "loadPlansFailed": "فشل تحميل خطط الاشتراك.",
       "paymentSuccess": "تم إكمال الدفع بنجاح.",
       "paymentFailed": "فشل الدفع. يرجى المحاولة مرة أخرى.",
@@ -427,7 +428,7 @@
       "checkoutUnavailable": "رابط الدفع غير متاح.",
       "openNewTab": "فتح في تبويب جديد",
       "refreshStatus": "تحديث الحالة",
-      "saveAnnual": "وفّر 17%",
+      "saveAnnual": "وفّر حوالي 44.4%",
       "cancelSuccess": "تمت جدولة إلغاء الاشتراك حتى نهاية الفترة الحالية.",
       "cancelFailed": "فشل إلغاء الاشتراك",
       "cancellationScheduled": "سيتم إنهاء الاشتراك في {date}.",

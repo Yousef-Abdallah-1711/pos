@@ -11,3 +11,13 @@ tmp/
 docs/
 audit-reports/
 testdata/
+
+# Never copy generated host executables into Linux build contexts.
+api
+api.exe
+api-local.exe
+pos-backend
+main
+pos-api.exe
+pos-api
+app

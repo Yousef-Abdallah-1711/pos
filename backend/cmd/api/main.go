@@ -627,6 +627,7 @@ func main() {
 	if paymentHandler != nil {
 		log.Println("[PaymentSystem] Registering public payment routes")
 		mux.HandleFunc("GET /api/v1/subscription/plans", paymentHandler.GetPlans)
+		mux.HandleFunc("GET /api/v1/public/commercial-offer", paymentHandler.GetOffer)
 		mux.Handle(
 			"POST /api/v1/webhook/paymob",
 			middleware.RateLimitByIP(60)(http.HandlerFunc(paymentHandler.HandlePaymobWebhook)),
@@ -734,7 +735,7 @@ func main() {
 
 	// Payment routes: auth required, but no tenant status middleware (blocked tenants must still pay).
 	if paymentHandler != nil {
-		mux.Handle("POST /api/v1/subscription/initiate", wrapProtectedNoStatus(http.HandlerFunc(paymentHandler.InitiatePayment)))
+		mux.Handle("POST /api/v1/subscription/initiate", wrapProtectedNoStatus(middleware.CommercialCheckoutGate(http.HandlerFunc(paymentHandler.InitiatePayment))))
 		mux.Handle("GET /api/v1/subscription/payments", wrapProtectedNoStatus(http.HandlerFunc(paymentHandler.GetPaymentHistory)))
 		mux.Handle("GET /api/v1/subscription/current", wrapProtectedNoStatus(http.HandlerFunc(paymentHandler.GetCurrentSubscription)))
 		mux.Handle("POST /api/v1/subscription/cancel", wrapProtectedNoStatus(http.HandlerFunc(paymentHandler.CancelSubscription)))
@@ -1395,7 +1396,7 @@ func main() {
 	// Admin Order Management endpoints (require authentication)
 	// Module ID 10 = Orders (from migrations)
 	// POS order creation uses the verified server session for tenant scope.
-	mux.Handle("POST /api/v1/pos/orders", wrapProtectedNoStatus(http.HandlerFunc(publicOrderHandler.CreateOrder)))
+	registerPOSOrderRoute(mux, posOrderGuards{authenticateTenant: wrapProtectedNoStatus, requirePermission: requirePermission}, subscriptionRepo, http.HandlerFunc(publicOrderHandler.CreateOrder))
 	mux.Handle("GET /api/v1/admin/orders/stats", wrapWithPermission(http.HandlerFunc(adminOrderHandler.GetOrderStats), 10, "READ"))
 	mux.Handle("GET /api/v1/admin/orders/export", wrapWithPermission(http.HandlerFunc(adminOrderHandler.ExportOrders), 10, "READ"))
 	mux.Handle("GET /api/v1/admin/orders/{id}/history", wrapWithPermission(http.HandlerFunc(adminOrderHandler.GetOrderHistory), 10, "READ"))

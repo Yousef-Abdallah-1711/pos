@@ -1,0 +1,1438 @@
+[
+  {
+    "line": 517,
+    "declaration": "mux.Handle(\"GET /uploads/{path...}\", productImages)"
+  },
+  {
+    "line": 528,
+    "declaration": "mux.Handle(\"POST /api/v1/auth/register\", middleware.RequireTrustedOrigin(middleware.RateLimitByIP(10)(http.HandlerFunc(authHandler.Register))))"
+  },
+  {
+    "line": 529,
+    "declaration": "mux.Handle(\"POST /api/v1/auth/login\", middleware.RequireTrustedOrigin(middleware.RateLimitByIP(20)(http.HandlerFunc(authHandler.Login))))"
+  },
+  {
+    "line": 530,
+    "declaration": "mux.Handle(\"POST /api/v1/auth/login/confirm\", middleware.RequireTrustedOrigin(middleware.RateLimitByIP(20)(http.HandlerFunc(authHandler.LoginConfirm))))"
+  },
+  {
+    "line": 531,
+    "declaration": "mux.Handle(\"GET /api/v1/auth/session\", authenticateRequest(http.HandlerFunc(authHandler.Session)))"
+  },
+  {
+    "line": 532,
+    "declaration": "mux.Handle(\"POST /api/v1/auth/refresh\", middleware.RequireTrustedOrigin(middleware.RateLimitByIP(20)(middleware.SessionAuthMiddleware(tokenService, authSessionStore)(http.HandlerFunc(authHandler.Refresh)))))"
+  },
+  {
+    "line": 533,
+    "declaration": "mux.Handle(\"POST /api/v1/auth/logout\", http.HandlerFunc(authHandler.Logout))"
+  },
+  {
+    "line": 536,
+    "declaration": "mux.Handle(\"POST /api/v1/auth/forgot-password\", middleware.RateLimitByIP(5)(http.HandlerFunc(authHandler.ForgotPassword)))"
+  },
+  {
+    "line": 537,
+    "declaration": "mux.Handle(\"GET /api/v1/auth/check-subdomain\", middleware.RateLimitByIP(60)(http.HandlerFunc(authHandler.CheckSubdomainAvailability)))"
+  },
+  {
+    "line": 540,
+    "declaration": "mux.HandleFunc(\"GET /api/v1/public/restaurants/{slug}/menu\", publicMenuHandler.GetRestaurantMenu)"
+  },
+  {
+    "line": 541,
+    "declaration": "mux.HandleFunc(\"GET /api/v1/public/restaurants/{slug}/products\", publicMenuHandler.GetRestaurantProducts)"
+  },
+  {
+    "line": 542,
+    "declaration": "mux.HandleFunc(\"GET /api/v1/public/restaurants/{slug}/categories\", publicMenuHandler.GetRestaurantCategories)"
+  },
+  {
+    "line": 543,
+    "declaration": "mux.HandleFunc(\"GET /api/v1/public/restaurants/{slug}/info\", publicMenuHandler.GetRestaurantInfo)"
+  },
+  {
+    "line": 544,
+    "declaration": "mux.HandleFunc(\"GET /api/v1/public/restaurants/{slug}/categories/{categoryId}/products\", publicMenuHandler.GetCategoryProducts)"
+  },
+  {
+    "line": 545,
+    "declaration": "mux.HandleFunc(\"GET /api/v1/public/restaurants/{slug}/products/{productId}\", publicMenuHandler.GetProductDetails)"
+  },
+  {
+    "line": 546,
+    "declaration": "mux.HandleFunc(\"GET /api/v1/public/restaurants/{slug}/search\", publicMenuHandler.SearchProducts)"
+  },
+  {
+    "line": 550,
+    "declaration": "mux.HandleFunc(\"GET /api/v1/public/restaurants/{slug}/homepage\", publicHomepageHandler.GetHomepageData)"
+  },
+  {
+    "line": 551,
+    "declaration": "mux.HandleFunc(\"GET /api/v1/public/restaurants/{slug}/theme\", publicHomepageHandler.GetThemeOnly)"
+  },
+  {
+    "line": 552,
+    "declaration": "mux.HandleFunc(\"GET /api/v1/public/restaurants/{slug}/sections\", publicHomepageHandler.GetSectionsOnly)"
+  },
+  {
+    "line": 553,
+    "declaration": "mux.HandleFunc(\"GET /api/v1/public/restaurants/{slug}/settings\", publicHomepageHandler.GetSettingsOnly)"
+  },
+  {
+    "line": 554,
+    "declaration": "mux.Handle("
+  },
+  {
+    "line": 570,
+    "declaration": "mux.Handle(\"POST /api/v1/public/orders\", middleware.RateLimitByIP(publicOrderWriteRequestsPerMinute)(tenantContext(middleware.TenantStatusMiddleware(subscriptionRepo)(http.HandlerFunc(publicOrderHandler.CreateOrder)))))"
+  },
+  {
+    "line": 571,
+    "declaration": "mux.Handle(\"POST /api/v1/public/orders/quote\", middleware.RateLimitByIP(publicOrderReadRequestsPerMinute)(tenantContext(middleware.TenantStatusMiddleware(subscriptionRepo)(http.HandlerFunc(publicOrderHandler.QuoteOrder)))))"
+  },
+  {
+    "line": 572,
+    "declaration": "mux.Handle(\"POST /api/v1/public/orders/validate\", middleware.RateLimitByIP(publicOrderReadRequestsPerMinute)(tenantContext(middleware.TenantStatusMiddleware(subscriptionRepo)(http.HandlerFunc(publicOrderHandler.ValidateOrder)))))"
+  },
+  {
+    "line": 574,
+    "declaration": "mux.Handle(\"GET /api/v1/public/orders/number/{number}/lookup\", middleware.RateLimitByIP(publicOrderReadRequestsPerMinute)(tenantContext(http.HandlerFunc(publicOrderHandler.GetOrderByNumber))))"
+  },
+  {
+    "line": 575,
+    "declaration": "mux.Handle(\"GET /api/v1/public/orders/{id}/status\", middleware.RateLimitByIP(publicOrderReadRequestsPerMinute)(tenantContext(http.HandlerFunc(publicOrderHandler.GetOrderStatus))))"
+  },
+  {
+    "line": 576,
+    "declaration": "mux.Handle(\"GET /api/v1/public/orders/{id}/track\", middleware.RateLimitByIP(publicOrderReadRequestsPerMinute)(tenantContext(http.HandlerFunc(publicOrderHandler.TrackOrder))))"
+  },
+  {
+    "line": 580,
+    "declaration": "mux.Handle(\"GET /api/v1/public/orders/{id}\", middleware.RateLimitByIP(publicOrderReadRequestsPerMinute)(tenantContext(http.HandlerFunc(publicOrderHandler.GetOrder))))"
+  },
+  {
+    "line": 583,
+    "declaration": "mux.Handle(\"DELETE /api/v1/public/orders/{id}\", middleware.RateLimitByIP(publicOrderWriteRequestsPerMinute)(tenantContext(http.HandlerFunc(publicOrderHandler.CancelOrder))))"
+  },
+  {
+    "line": 609,
+    "declaration": "mux.Handle(\"GET /api/v1/public/test-routing/{slug}\", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {"
+  },
+  {
+    "line": 619,
+    "declaration": "mux.Handle(\"GET /api/v1/public/tenant-status/{slug}\", http.HandlerFunc(subscriptionHandler.GetTenantStatusBySlug))"
+  },
+  {
+    "line": 627,
+    "declaration": "mux.HandleFunc(\"GET /api/v1/subscription/plans\", paymentHandler.GetPlans)"
+  },
+  {
+    "line": 628,
+    "declaration": "mux.Handle("
+  },
+  {
+    "line": 638,
+    "declaration": "mux.HandleFunc(\"GET /api/v1/mock/paymob/iframe\", mockPaymobHandler.ServeIframe)"
+  },
+  {
+    "line": 639,
+    "declaration": "mux.HandleFunc(\"POST /api/v1/mock/paymob/process\", mockPaymobHandler.ProcessPayment)"
+  },
+  {
+    "line": 735,
+    "declaration": "mux.Handle(\"POST /api/v1/subscription/initiate\", wrapProtectedNoStatus(http.HandlerFunc(paymentHandler.InitiatePayment)))"
+  },
+  {
+    "line": 736,
+    "declaration": "mux.Handle(\"GET /api/v1/subscription/payments\", wrapProtectedNoStatus(http.HandlerFunc(paymentHandler.GetPaymentHistory)))"
+  },
+  {
+    "line": 737,
+    "declaration": "mux.Handle(\"GET /api/v1/subscription/current\", wrapProtectedNoStatus(http.HandlerFunc(paymentHandler.GetCurrentSubscription)))"
+  },
+  {
+    "line": 738,
+    "declaration": "mux.Handle(\"POST /api/v1/subscription/cancel\", wrapProtectedNoStatus(http.HandlerFunc(paymentHandler.CancelSubscription)))"
+  },
+  {
+    "line": 745,
+    "declaration": "mux.Handle(\"GET /api/v1/me\", wrapProtectedNoStatus(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {"
+  },
+  {
+    "line": 753,
+    "declaration": "mux.Handle(\"POST /api/v1/products\", wrapWithPermission(http.HandlerFunc(productHandler.CreateProduct), 1, \"WRITE\"))"
+  },
+  {
+    "line": 754,
+    "declaration": "mux.Handle(\"GET /api/v1/products\", wrapWithPermission(http.HandlerFunc(productHandler.ListProducts), 1, \"READ\"))"
+  },
+  {
+    "line": 755,
+    "declaration": "mux.Handle(\"GET /api/v1/products/alerts/low-stock\", wrapWithPermission(http.HandlerFunc(productHandler.GetLowStockAlerts), 1, \"READ\"))"
+  },
+  {
+    "line": 756,
+    "declaration": "mux.Handle(\"POST /api/v1/inventory/adjust\", wrapWithPermission(http.HandlerFunc(inventoryAdjustmentHandler.Adjust), 1, \"WRITE\"))"
+  },
+  {
+    "line": 757,
+    "declaration": "mux.Handle(\"GET /api/v1/products/{id}\", wrapWithPermission(http.HandlerFunc(productHandler.GetProduct), 1, \"READ\"))"
+  },
+  {
+    "line": 758,
+    "declaration": "mux.Handle(\"PUT /api/v1/products/{id}\", wrapWithPermission(http.HandlerFunc(productHandler.UpdateProduct), 1, \"WRITE\"))"
+  },
+  {
+    "line": 759,
+    "declaration": "mux.Handle(\"DELETE /api/v1/products/{id}\", wrapWithPermission(http.HandlerFunc(productHandler.DeleteProduct), 1, \"DELETE\"))"
+  },
+  {
+    "line": 762,
+    "declaration": "mux.Handle(\"GET /api/v1/categories\", wrapWithPermission(http.HandlerFunc(categoryHandler.ListCategories), 2, \"READ\"))"
+  },
+  {
+    "line": 763,
+    "declaration": "mux.Handle(\"GET /api/v1/categories/{id}\", wrapWithPermission(http.HandlerFunc(categoryHandler.GetCategory), 2, \"READ\"))"
+  },
+  {
+    "line": 764,
+    "declaration": "mux.Handle(\"POST /api/v1/categories\", wrapWithPermission(http.HandlerFunc(categoryHandler.CreateCategory), 2, \"WRITE\"))"
+  },
+  {
+    "line": 765,
+    "declaration": "mux.Handle(\"PUT /api/v1/categories/{id}\", wrapWithPermission(http.HandlerFunc(categoryHandler.UpdateCategory), 2, \"WRITE\"))"
+  },
+  {
+    "line": 766,
+    "declaration": "mux.Handle(\"DELETE /api/v1/categories/{id}\", wrapWithPermission(http.HandlerFunc(categoryHandler.DeleteCategory), 2, \"DELETE\"))"
+  },
+  {
+    "line": 772,
+    "declaration": "mux.Handle(\"GET /api/v1/tenant/status\", wrapProtectedWithStatus(http.HandlerFunc(subscriptionHandler.GetTenantStatus)))"
+  },
+  {
+    "line": 775,
+    "declaration": "mux.Handle(\"GET /api/v1/tenant/status\", wrapProtectedNoStatus(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {"
+  },
+  {
+    "line": 793,
+    "declaration": "mux.Handle(\"GET /api/v1/tenant/contact-info\", wrapWithPermission(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {"
+  },
+  {
+    "line": 816,
+    "declaration": "mux.Handle(\"PUT /api/v1/tenant/contact-info\", wrapWithPermission(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {"
+  },
+  {
+    "line": 848,
+    "declaration": "mux.Handle(\"GET /api/v1/hr/employees\", wrapWithPermission(http.HandlerFunc(hrEmployeeHandler.ListEmployees), 3, \"READ\"))"
+  },
+  {
+    "line": 849,
+    "declaration": "mux.Handle(\"GET /api/v1/hr/employees/{id}\", wrapWithPermission(http.HandlerFunc(hrEmployeeHandler.GetEmployee), 3, \"READ\"))"
+  },
+  {
+    "line": 850,
+    "declaration": "mux.Handle(\"POST /api/v1/hr/employees\", wrapWithPermission(http.HandlerFunc(hrEmployeeHandler.CreateEmployee), 3, \"WRITE\"))"
+  },
+  {
+    "line": 851,
+    "declaration": "mux.Handle(\"PUT /api/v1/hr/employees/{id}\", wrapWithPermission(http.HandlerFunc(hrEmployeeHandler.UpdateEmployee), 3, \"WRITE\"))"
+  },
+  {
+    "line": 852,
+    "declaration": "mux.Handle(\"DELETE /api/v1/hr/employees/{id}\", wrapWithPermission(http.HandlerFunc(hrEmployeeHandler.DeleteEmployee), 3, \"DELETE\"))"
+  },
+  {
+    "line": 856,
+    "declaration": "mux.Handle(\"GET /api/v1/hr/roles\", wrapWithPermission(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {"
+  },
+  {
+    "line": 898,
+    "declaration": "mux.Handle(\"POST /api/v1/hr/roles\", wrapWithPermission(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {"
+  },
+  {
+    "line": 949,
+    "declaration": "mux.Handle(\"PUT /api/v1/hr/roles/{id}\", wrapWithPermission(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {"
+  },
+  {
+    "line": 990,
+    "declaration": "mux.Handle(\"DELETE /api/v1/hr/roles/{id}\", wrapWithPermission(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {"
+  },
+  {
+    "line": 1018,
+    "declaration": "mux.Handle(\"GET /api/v1/rbac/roles\", wrapAuthPermission(http.HandlerFunc(rbacRoleHandler.ListRoles), 7, \"READ\"))"
+  },
+  {
+    "line": 1019,
+    "declaration": "mux.Handle(\"GET /api/v1/rbac/roles/{id}\", wrapAuthPermission(http.HandlerFunc(rbacRoleHandler.GetRole), 7, \"READ\"))"
+  },
+  {
+    "line": 1020,
+    "declaration": "mux.Handle(\"POST /api/v1/rbac/roles\", wrapAuthPermission(http.HandlerFunc(rbacRoleHandler.CreateRole), 7, \"WRITE\"))"
+  },
+  {
+    "line": 1021,
+    "declaration": "mux.Handle(\"PUT /api/v1/rbac/roles/{id}\", wrapAuthPermission(http.HandlerFunc(rbacRoleHandler.UpdateRole), 7, \"WRITE\"))"
+  },
+  {
+    "line": 1022,
+    "declaration": "mux.Handle(\"DELETE /api/v1/rbac/roles/{id}\", wrapAuthPermission(http.HandlerFunc(rbacRoleHandler.DeleteRole), 7, \"DELETE\"))"
+  },
+  {
+    "line": 1025,
+    "declaration": "mux.Handle(\"POST /api/v1/rbac/permissions/assign\", wrapAuthPermission(http.HandlerFunc(rbacPermissionHandler.AssignPermission), 7, \"ADMIN\"))"
+  },
+  {
+    "line": 1026,
+    "declaration": "mux.Handle(\"DELETE /api/v1/rbac/permissions/{roleId}/{moduleId}\", wrapAuthPermission(http.HandlerFunc(rbacPermissionHandler.RevokePermission), 7, \"ADMIN\"))"
+  },
+  {
+    "line": 1027,
+    "declaration": "mux.Handle(\"GET /api/v1/rbac/roles/{roleId}/permissions\", wrapAuthPermission(http.HandlerFunc(rbacPermissionHandler.GetRolePermissions), 7, \"READ\"))"
+  },
+  {
+    "line": 1028,
+    "declaration": "mux.Handle(\"GET /api/v1/rbac/check-permission\", wrapAuthOnly(http.HandlerFunc(rbacPermissionHandler.CheckPermission)))"
+  },
+  {
+    "line": 1029,
+    "declaration": "mux.Handle(\"GET /api/v1/rbac/me/permissions\", wrapAuthOnly(http.HandlerFunc(rbacPermissionHandler.GetUserPermissions)))"
+  },
+  {
+    "line": 1032,
+    "declaration": "mux.Handle(\"POST /api/v1/rbac/users/{userId}/roles\", wrapAuthPermission(http.HandlerFunc(rbacUserRoleHandler.AssignRoleToUser), 7, \"ADMIN\"))"
+  },
+  {
+    "line": 1033,
+    "declaration": "mux.Handle(\"DELETE /api/v1/rbac/users/{userId}/roles/{roleId}\", wrapAuthPermission(http.HandlerFunc(rbacUserRoleHandler.RemoveRoleFromUser), 7, \"ADMIN\"))"
+  },
+  {
+    "line": 1034,
+    "declaration": "mux.Handle(\"GET /api/v1/rbac/users/{userId}/roles\", wrapAuthPermission(http.HandlerFunc(rbacUserRoleHandler.GetUserRoles), 7, \"READ\"))"
+  },
+  {
+    "line": 1035,
+    "declaration": "mux.Handle(\"GET /api/v1/rbac/me/roles\", wrapAuthOnly(http.HandlerFunc(rbacUserRoleHandler.GetMyRoles)))"
+  },
+  {
+    "line": 1036,
+    "declaration": "mux.Handle(\"POST /api/v1/rbac/users-by-email/{email}/roles\", wrapAuthPermission(http.HandlerFunc(rbacUserRoleHandler.AssignRoleToUserByEmail), 7, \"ADMIN\"))"
+  },
+  {
+    "line": 1037,
+    "declaration": "mux.Handle(\"DELETE /api/v1/rbac/users-by-email/{email}/roles/{roleId}\", wrapAuthPermission(http.HandlerFunc(rbacUserRoleHandler.RemoveRoleFromUserByEmail), 7, \"ADMIN\"))"
+  },
+  {
+    "line": 1038,
+    "declaration": "mux.Handle(\"GET /api/v1/rbac/users-by-email/{email}/roles\", wrapAuthPermission(http.HandlerFunc(rbacUserRoleHandler.GetUserRolesByEmail), 7, \"READ\"))"
+  },
+  {
+    "line": 1043,
+    "declaration": "mux.Handle(\"GET /api/v1/hr/attendance\", wrapWithPermission(http.HandlerFunc(hrAttendanceHandler.ListAttendance), 3, \"READ\"))"
+  },
+  {
+    "line": 1044,
+    "declaration": "mux.Handle(\"GET /api/v1/hr/attendance/{id}\", wrapWithPermission(http.HandlerFunc(hrAttendanceHandler.GetAttendance), 3, \"READ\"))"
+  },
+  {
+    "line": 1045,
+    "declaration": "mux.Handle(\"POST /api/v1/hr/attendance\", wrapWithPermission(http.HandlerFunc(hrAttendanceHandler.CreateAttendance), 3, \"WRITE\"))"
+  },
+  {
+    "line": 1046,
+    "declaration": "mux.Handle(\"POST /api/v1/hr/attendance/clock-in\", wrapWithPermission(http.HandlerFunc(hrAttendanceHandler.ClockIn), 3, \"WRITE\"))"
+  },
+  {
+    "line": 1047,
+    "declaration": "mux.Handle(\"PUT /api/v1/hr/attendance/{id}\", wrapWithPermission(http.HandlerFunc(hrAttendanceHandler.UpdateAttendance), 3, \"WRITE\"))"
+  },
+  {
+    "line": 1048,
+    "declaration": "mux.Handle(\"DELETE /api/v1/hr/attendance/{id}\", wrapWithPermission(http.HandlerFunc(hrAttendanceHandler.DeleteAttendance), 3, \"DELETE\"))"
+  },
+  {
+    "line": 1052,
+    "declaration": "mux.Handle(\"GET /api/v1/hr/leaves\", wrapWithPermission(http.HandlerFunc(hrLeaveHandler.ListLeaves), 11, \"READ\"))"
+  },
+  {
+    "line": 1053,
+    "declaration": "mux.Handle(\"GET /api/v1/hr/leaves/{id}\", wrapWithPermission(http.HandlerFunc(hrLeaveHandler.GetLeave), 11, \"READ\"))"
+  },
+  {
+    "line": 1054,
+    "declaration": "mux.Handle(\"POST /api/v1/hr/leaves\", wrapWithPermission(http.HandlerFunc(hrLeaveHandler.CreateLeave), 11, \"WRITE\"))"
+  },
+  {
+    "line": 1055,
+    "declaration": "mux.Handle(\"PUT /api/v1/hr/leaves/{id}\", wrapWithPermission(http.HandlerFunc(hrLeaveHandler.UpdateLeave), 11, \"WRITE\"))"
+  },
+  {
+    "line": 1056,
+    "declaration": "mux.Handle(\"DELETE /api/v1/hr/leaves/{id}\", wrapWithPermission(http.HandlerFunc(hrLeaveHandler.DeleteLeave), 11, \"DELETE\"))"
+  },
+  {
+    "line": 1057,
+    "declaration": "mux.Handle(\"POST /api/v1/hr/leaves/{id}/approve\", wrapWithPermission(http.HandlerFunc(hrLeaveHandler.ApproveLeave), 11, \"WRITE\"))"
+  },
+  {
+    "line": 1058,
+    "declaration": "mux.Handle(\"POST /api/v1/hr/leaves/{id}/reject\", wrapWithPermission(http.HandlerFunc(hrLeaveHandler.RejectLeave), 11, \"WRITE\"))"
+  },
+  {
+    "line": 1062,
+    "declaration": "mux.Handle(\"GET /api/v1/hr/salaries\", wrapWithPermission(http.HandlerFunc(hrSalaryHandler.ListSalaries), 12, \"READ\"))"
+  },
+  {
+    "line": 1063,
+    "declaration": "mux.Handle(\"GET /api/v1/hr/salaries/{id}\", wrapWithPermission(http.HandlerFunc(hrSalaryHandler.GetSalary), 12, \"READ\"))"
+  },
+  {
+    "line": 1064,
+    "declaration": "mux.Handle(\"POST /api/v1/hr/salaries\", wrapWithPermission(http.HandlerFunc(hrSalaryHandler.CreateSalary), 12, \"WRITE\"))"
+  },
+  {
+    "line": 1065,
+    "declaration": "mux.Handle(\"PUT /api/v1/hr/salaries/{id}\", wrapWithPermission(http.HandlerFunc(hrSalaryHandler.UpdateSalary), 12, \"WRITE\"))"
+  },
+  {
+    "line": 1066,
+    "declaration": "mux.Handle(\"DELETE /api/v1/hr/salaries/{id}\", wrapWithPermission(http.HandlerFunc(hrSalaryHandler.DeleteSalary), 12, \"DELETE\"))"
+  },
+  {
+    "line": 1067,
+    "declaration": "mux.Handle(\"POST /api/v1/hr/salaries/{id}/mark-paid\", wrapWithPermission(http.HandlerFunc(hrSalaryHandler.MarkAsPaid), 12, \"WRITE\"))"
+  },
+  {
+    "line": 1073,
+    "declaration": "mux.Handle(\"GET /api/v1/accounting/accounts\", wrapWithPermission(http.HandlerFunc(accountHandler.ListAccounts), 15, \"READ\"))"
+  },
+  {
+    "line": 1074,
+    "declaration": "mux.Handle(\"POST /api/v1/accounting/accounts\", wrapWithPermission(http.HandlerFunc(accountHandler.CreateAccount), 15, \"WRITE\"))"
+  },
+  {
+    "line": 1075,
+    "declaration": "mux.Handle(\"GET /api/v1/accounting/accounts/{id}\", wrapWithPermission(http.HandlerFunc(accountHandler.GetAccount), 15, \"READ\"))"
+  },
+  {
+    "line": 1076,
+    "declaration": "mux.Handle(\"PUT /api/v1/accounting/accounts/{id}\", wrapWithPermission(http.HandlerFunc(accountHandler.UpdateAccount), 15, \"WRITE\"))"
+  },
+  {
+    "line": 1077,
+    "declaration": "mux.Handle(\"DELETE /api/v1/accounting/accounts/{id}\", wrapWithPermission(http.HandlerFunc(accountHandler.DeleteAccount), 15, \"DELETE\"))"
+  },
+  {
+    "line": 1079,
+    "declaration": "mux.Handle(\"GET /api/v1/accounting/journal-entries\", wrapWithPermission(http.HandlerFunc(journalEntryHandler.ListJournalEntries), 15, \"READ\"))"
+  },
+  {
+    "line": 1080,
+    "declaration": "mux.Handle(\"POST /api/v1/accounting/journal-entries\", wrapWithPermission(http.HandlerFunc(journalEntryHandler.CreateJournalEntry), 15, \"WRITE\"))"
+  },
+  {
+    "line": 1081,
+    "declaration": "mux.Handle(\"POST /api/v1/accounting/journal-entries/{id}/post\", wrapWithPermission(http.HandlerFunc(journalEntryHandler.PostJournalEntry), 15, \"WRITE\"))"
+  },
+  {
+    "line": 1082,
+    "declaration": "mux.Handle(\"POST /api/v1/accounting/journal-entries/{id}/void\", wrapWithPermission(http.HandlerFunc(journalEntryHandler.VoidJournalEntry), 15, \"WRITE\"))"
+  },
+  {
+    "line": 1083,
+    "declaration": "mux.Handle(\"GET /api/v1/accounting/journal-entries/{id}\", wrapWithPermission(http.HandlerFunc(journalEntryHandler.GetJournalEntry), 15, \"READ\"))"
+  },
+  {
+    "line": 1084,
+    "declaration": "mux.Handle(\"PUT /api/v1/accounting/journal-entries/{id}\", wrapWithPermission(http.HandlerFunc(journalEntryHandler.UpdateJournalEntry), 15, \"WRITE\"))"
+  },
+  {
+    "line": 1085,
+    "declaration": "mux.Handle(\"GET /api/v1/accounting/ledger\", wrapWithPermission(http.HandlerFunc(ledgerHandler.GetLedger), 15, \"READ\"))"
+  },
+  {
+    "line": 1086,
+    "declaration": "mux.Handle(\"GET /api/v1/accounting/trial-balance\", wrapWithPermission(http.HandlerFunc(ledgerHandler.GetTrialBalance), 15, \"READ\"))"
+  },
+  {
+    "line": 1087,
+    "declaration": "mux.Handle(\"GET /api/v1/accounting/bank-accounts\", wrapWithPermission(http.HandlerFunc(bankAccountHandler.ListBankAccounts), 15, \"READ\"))"
+  },
+  {
+    "line": 1088,
+    "declaration": "mux.Handle(\"POST /api/v1/accounting/bank-accounts\", wrapWithPermission(http.HandlerFunc(bankAccountHandler.CreateBankAccount), 15, \"WRITE\"))"
+  },
+  {
+    "line": 1089,
+    "declaration": "mux.Handle(\"GET /api/v1/accounting/bank-accounts/{id}/transactions\", wrapWithPermission(http.HandlerFunc(bankAccountHandler.GetTransactions), 15, \"READ\"))"
+  },
+  {
+    "line": 1090,
+    "declaration": "mux.Handle(\"GET /api/v1/accounting/bank-accounts/{id}\", wrapWithPermission(http.HandlerFunc(bankAccountHandler.GetBankAccount), 15, \"READ\"))"
+  },
+  {
+    "line": 1091,
+    "declaration": "mux.Handle(\"PUT /api/v1/accounting/bank-accounts/{id}\", wrapWithPermission(http.HandlerFunc(bankAccountHandler.UpdateBankAccount), 15, \"WRITE\"))"
+  },
+  {
+    "line": 1092,
+    "declaration": "mux.Handle(\"DELETE /api/v1/accounting/bank-accounts/{id}\", wrapWithPermission(http.HandlerFunc(bankAccountHandler.DeleteBankAccount), 15, \"DELETE\"))"
+  },
+  {
+    "line": 1094,
+    "declaration": "mux.Handle(\"GET /api/v1/accounting/customers\", wrapWithPermission(http.HandlerFunc(customerAccountHandler.ListCustomers), 15, \"READ\"))"
+  },
+  {
+    "line": 1095,
+    "declaration": "mux.Handle(\"POST /api/v1/accounting/customers\", wrapWithPermission(http.HandlerFunc(customerAccountHandler.CreateCustomer), 15, \"WRITE\"))"
+  },
+  {
+    "line": 1096,
+    "declaration": "mux.Handle(\"GET /api/v1/accounting/customers/{id}/statement\", wrapWithPermission(http.HandlerFunc(customerAccountHandler.GetCustomerStatement), 15, \"READ\"))"
+  },
+  {
+    "line": 1097,
+    "declaration": "mux.Handle(\"GET /api/v1/accounting/customers/{id}\", wrapWithPermission(http.HandlerFunc(customerAccountHandler.GetCustomer), 15, \"READ\"))"
+  },
+  {
+    "line": 1098,
+    "declaration": "mux.Handle(\"PUT /api/v1/accounting/customers/{id}\", wrapWithPermission(http.HandlerFunc(customerAccountHandler.UpdateCustomer), 15, \"WRITE\"))"
+  },
+  {
+    "line": 1099,
+    "declaration": "mux.Handle(\"DELETE /api/v1/accounting/customers/{id}\", wrapWithPermission(http.HandlerFunc(customerAccountHandler.DeleteCustomer), 15, \"DELETE\"))"
+  },
+  {
+    "line": 1100,
+    "declaration": "mux.Handle(\"GET /api/v1/accounting/customer-invoices\", wrapWithPermission(http.HandlerFunc(customerInvoiceHandler.ListInvoices), 15, \"READ\"))"
+  },
+  {
+    "line": 1101,
+    "declaration": "mux.Handle(\"POST /api/v1/accounting/customer-invoices\", wrapWithPermission(http.HandlerFunc(customerInvoiceHandler.CreateInvoice), 15, \"WRITE\"))"
+  },
+  {
+    "line": 1102,
+    "declaration": "mux.Handle(\"GET /api/v1/accounting/customer-invoices/overdue\", wrapWithPermission(http.HandlerFunc(customerInvoiceHandler.ListOverdueInvoices), 15, \"READ\"))"
+  },
+  {
+    "line": 1103,
+    "declaration": "mux.Handle(\"POST /api/v1/accounting/customer-invoices/{id}/send\", wrapWithPermission(http.HandlerFunc(customerInvoiceHandler.MarkAsSent), 15, \"WRITE\"))"
+  },
+  {
+    "line": 1104,
+    "declaration": "mux.Handle(\"GET /api/v1/accounting/customer-invoices/{id}/pdf\", wrapWithPermission(http.HandlerFunc(accountingAdvancedHandler.DownloadCustomerInvoicePDF), 15, \"READ\"))"
+  },
+  {
+    "line": 1105,
+    "declaration": "mux.Handle(\"POST /api/v1/accounting/customer-invoices/{id}/send-email\", wrapWithPermission(http.HandlerFunc(accountingAdvancedHandler.SendCustomerInvoiceEmail), 15, \"WRITE\"))"
+  },
+  {
+    "line": 1106,
+    "declaration": "mux.Handle(\"POST /api/v1/accounting/customer-invoices/{id}/void\", wrapWithPermission(http.HandlerFunc(customerInvoiceHandler.VoidInvoice), 15, \"WRITE\"))"
+  },
+  {
+    "line": 1107,
+    "declaration": "mux.Handle(\"GET /api/v1/accounting/customer-invoices/{id}\", wrapWithPermission(http.HandlerFunc(customerInvoiceHandler.GetInvoice), 15, \"READ\"))"
+  },
+  {
+    "line": 1108,
+    "declaration": "mux.Handle(\"PUT /api/v1/accounting/customer-invoices/{id}\", wrapWithPermission(http.HandlerFunc(customerInvoiceHandler.UpdateInvoice), 15, \"WRITE\"))"
+  },
+  {
+    "line": 1109,
+    "declaration": "mux.Handle(\"GET /api/v1/accounting/supplier-invoices\", wrapWithPermission(http.HandlerFunc(supplierInvoiceHandler.ListInvoices), 15, \"READ\"))"
+  },
+  {
+    "line": 1110,
+    "declaration": "mux.Handle(\"POST /api/v1/accounting/supplier-invoices\", wrapWithPermission(http.HandlerFunc(supplierInvoiceHandler.CreateInvoice), 15, \"WRITE\"))"
+  },
+  {
+    "line": 1111,
+    "declaration": "mux.Handle(\"POST /api/v1/accounting/supplier-invoices/{id}/approve\", wrapWithPermission(http.HandlerFunc(supplierInvoiceHandler.ApproveInvoice), 15, \"WRITE\"))"
+  },
+  {
+    "line": 1112,
+    "declaration": "mux.Handle(\"POST /api/v1/accounting/supplier-invoices/{id}/void\", wrapWithPermission(http.HandlerFunc(supplierInvoiceHandler.VoidInvoice), 15, \"WRITE\"))"
+  },
+  {
+    "line": 1113,
+    "declaration": "mux.Handle(\"GET /api/v1/accounting/supplier-invoices/{id}\", wrapWithPermission(http.HandlerFunc(supplierInvoiceHandler.GetInvoice), 15, \"READ\"))"
+  },
+  {
+    "line": 1114,
+    "declaration": "mux.Handle(\"PUT /api/v1/accounting/supplier-invoices/{id}\", wrapWithPermission(http.HandlerFunc(supplierInvoiceHandler.UpdateInvoice), 15, \"WRITE\"))"
+  },
+  {
+    "line": 1115,
+    "declaration": "mux.Handle(\"GET /api/v1/accounting/payments/received\", wrapWithPermission(http.HandlerFunc(paymentAccountingHandler.ListPaymentsReceived), 15, \"READ\"))"
+  },
+  {
+    "line": 1116,
+    "declaration": "mux.Handle(\"POST /api/v1/accounting/payments/received\", wrapWithPermission(http.HandlerFunc(paymentAccountingHandler.CreatePaymentReceived), 15, \"WRITE\"))"
+  },
+  {
+    "line": 1117,
+    "declaration": "mux.Handle(\"GET /api/v1/accounting/payments/made\", wrapWithPermission(http.HandlerFunc(paymentAccountingHandler.ListPaymentsMade), 15, \"READ\"))"
+  },
+  {
+    "line": 1118,
+    "declaration": "mux.Handle(\"POST /api/v1/accounting/payments/made\", wrapWithPermission(http.HandlerFunc(paymentAccountingHandler.CreatePaymentMade), 15, \"WRITE\"))"
+  },
+  {
+    "line": 1119,
+    "declaration": "mux.Handle(\"GET /api/v1/accounting/bank-reconciliation/sessions\", wrapWithPermission(http.HandlerFunc(accountingAdvancedHandler.ListBankReconciliationSessions), 15, \"READ\"))"
+  },
+  {
+    "line": 1120,
+    "declaration": "mux.Handle(\"POST /api/v1/accounting/bank-reconciliation/sessions\", wrapWithPermission(http.HandlerFunc(accountingAdvancedHandler.CreateBankReconciliationSession), 15, \"WRITE\"))"
+  },
+  {
+    "line": 1121,
+    "declaration": "mux.Handle(\"POST /api/v1/accounting/bank-reconciliation/sessions/{id}/lines\", wrapWithPermission(http.HandlerFunc(accountingAdvancedHandler.AddBankReconciliationLine), 15, \"WRITE\"))"
+  },
+  {
+    "line": 1122,
+    "declaration": "mux.Handle(\"POST /api/v1/accounting/bank-reconciliation/sessions/{id}/complete\", wrapWithPermission(http.HandlerFunc(accountingAdvancedHandler.CompleteBankReconciliationSession), 15, \"WRITE\"))"
+  },
+  {
+    "line": 1123,
+    "declaration": "mux.Handle(\"GET /api/v1/accounting/recurring-journals\", wrapWithPermission(http.HandlerFunc(accountingAdvancedHandler.ListRecurringJournalTemplates), 15, \"READ\"))"
+  },
+  {
+    "line": 1124,
+    "declaration": "mux.Handle(\"POST /api/v1/accounting/recurring-journals\", wrapWithPermission(http.HandlerFunc(accountingAdvancedHandler.CreateRecurringJournalTemplate), 15, \"WRITE\"))"
+  },
+  {
+    "line": 1125,
+    "declaration": "mux.Handle(\"PUT /api/v1/accounting/recurring-journals/{id}\", wrapWithPermission(http.HandlerFunc(accountingAdvancedHandler.UpdateRecurringJournalTemplate), 15, \"WRITE\"))"
+  },
+  {
+    "line": 1126,
+    "declaration": "mux.Handle(\"DELETE /api/v1/accounting/recurring-journals/{id}\", wrapWithPermission(http.HandlerFunc(accountingAdvancedHandler.DeleteRecurringJournalTemplate), 15, \"DELETE\"))"
+  },
+  {
+    "line": 1127,
+    "declaration": "mux.Handle(\"POST /api/v1/accounting/recurring-journals/{id}/run\", wrapWithPermission(http.HandlerFunc(accountingAdvancedHandler.RunRecurringJournalTemplate), 15, \"WRITE\"))"
+  },
+  {
+    "line": 1128,
+    "declaration": "mux.Handle(\"GET /api/v1/accounting/budgets\", wrapWithPermission(http.HandlerFunc(accountingAdvancedHandler.ListBudgets), 15, \"READ\"))"
+  },
+  {
+    "line": 1129,
+    "declaration": "mux.Handle(\"POST /api/v1/accounting/budgets\", wrapWithPermission(http.HandlerFunc(accountingAdvancedHandler.UpsertBudget), 15, \"WRITE\"))"
+  },
+  {
+    "line": 1130,
+    "declaration": "mux.Handle(\"GET /api/v1/accounting/exchange-rates\", wrapWithPermission(http.HandlerFunc(accountingAdvancedHandler.ListExchangeRates), 15, \"READ\"))"
+  },
+  {
+    "line": 1131,
+    "declaration": "mux.Handle(\"POST /api/v1/accounting/exchange-rates\", wrapWithPermission(http.HandlerFunc(accountingAdvancedHandler.UpsertExchangeRate), 15, \"WRITE\"))"
+  },
+  {
+    "line": 1132,
+    "declaration": "mux.Handle(\"GET /api/v1/accounting/exchange-rates/convert\", wrapWithPermission(http.HandlerFunc(accountingAdvancedHandler.ConvertCurrency), 15, \"READ\"))"
+  },
+  {
+    "line": 1133,
+    "declaration": "mux.Handle(\"GET /api/v1/accounting/supplier-payment-schedules\", wrapWithPermission(http.HandlerFunc(accountingAdvancedHandler.ListSupplierPaymentSchedules), 15, \"READ\"))"
+  },
+  {
+    "line": 1134,
+    "declaration": "mux.Handle(\"POST /api/v1/accounting/supplier-payment-schedules\", wrapWithPermission(http.HandlerFunc(accountingAdvancedHandler.CreateSupplierPaymentSchedule), 15, \"WRITE\"))"
+  },
+  {
+    "line": 1135,
+    "declaration": "mux.Handle(\"GET /api/v1/accounting/supplier-payment-reminders\", wrapWithPermission(http.HandlerFunc(accountingAdvancedHandler.ListSupplierPaymentReminders), 15, \"READ\"))"
+  },
+  {
+    "line": 1136,
+    "declaration": "mux.Handle(\"POST /api/v1/accounting/supplier-payment-schedules/{id}/send-reminder\", wrapWithPermission(http.HandlerFunc(accountingAdvancedHandler.TriggerSupplierPaymentReminder), 15, \"WRITE\"))"
+  },
+  {
+    "line": 1137,
+    "declaration": "mux.Handle(\"POST /api/v1/accounting/einvoice/{id}/submit\", wrapWithPermission(http.HandlerFunc(accountingAdvancedHandler.SubmitEInvoice), 15, \"WRITE\"))"
+  },
+  {
+    "line": 1138,
+    "declaration": "mux.Handle(\"GET /api/v1/accounting/einvoice/submissions\", wrapWithPermission(http.HandlerFunc(accountingAdvancedHandler.ListEInvoiceSubmissions), 15, \"READ\"))"
+  },
+  {
+    "line": 1139,
+    "declaration": "mux.Handle(\"GET /api/v1/accounting/excel/chart-of-accounts/export\", wrapWithPermission(http.HandlerFunc(accountingAdvancedHandler.ExportChartOfAccountsExcel), 15, \"EXPORT\"))"
+  },
+  {
+    "line": 1140,
+    "declaration": "mux.Handle(\"POST /api/v1/accounting/excel/chart-of-accounts/import\", wrapWithPermission(http.HandlerFunc(accountingAdvancedHandler.ImportChartOfAccountsExcel), 15, \"WRITE\"))"
+  },
+  {
+    "line": 1141,
+    "declaration": "mux.Handle(\"GET /api/v1/accounting/excel/journal-entries/export\", wrapWithPermission(http.HandlerFunc(accountingAdvancedHandler.ExportJournalEntriesExcel), 15, \"EXPORT\"))"
+  },
+  {
+    "line": 1142,
+    "declaration": "mux.Handle(\"POST /api/v1/accounting/excel/journal-entries/import\", wrapWithPermission(http.HandlerFunc(accountingAdvancedHandler.ImportJournalEntriesExcel), 15, \"WRITE\"))"
+  },
+  {
+    "line": 1144,
+    "declaration": "mux.Handle(\"GET /api/v1/suppliers\", wrapWithPermission(http.HandlerFunc(supplierHandler.ListSuppliers), 16, \"READ\"))"
+  },
+  {
+    "line": 1145,
+    "declaration": "mux.Handle(\"POST /api/v1/suppliers\", wrapWithPermission(http.HandlerFunc(supplierHandler.CreateSupplier), 16, \"WRITE\"))"
+  },
+  {
+    "line": 1146,
+    "declaration": "mux.Handle(\"GET /api/v1/suppliers/{id}\", wrapWithPermission(http.HandlerFunc(supplierHandler.GetSupplier), 16, \"READ\"))"
+  },
+  {
+    "line": 1147,
+    "declaration": "mux.Handle(\"PUT /api/v1/suppliers/{id}\", wrapWithPermission(http.HandlerFunc(supplierHandler.UpdateSupplier), 16, \"WRITE\"))"
+  },
+  {
+    "line": 1148,
+    "declaration": "mux.Handle(\"DELETE /api/v1/suppliers/{id}\", wrapWithPermission(http.HandlerFunc(supplierHandler.DeleteSupplier), 16, \"DELETE\"))"
+  },
+  {
+    "line": 1153,
+    "declaration": "mux.Handle(\"GET /api/v1/users\", wrapWithPermission(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {"
+  },
+  {
+    "line": 1158,
+    "declaration": "mux.Handle(\"GET /api/v1/users\", wrapWithPermission(http.HandlerFunc(userSettingsHandler.ListUsers), 6, \"READ\"))"
+  },
+  {
+    "line": 1160,
+    "declaration": "mux.Handle(\"GET /api/v1/users/{userId}/settings\", wrapProtected(http.HandlerFunc(userSettingsHandler.GetUserSettings)))"
+  },
+  {
+    "line": 1161,
+    "declaration": "mux.Handle(\"PUT /api/v1/users/{userId}/settings/language\", wrapProtected(http.HandlerFunc(userSettingsHandler.UpdateLanguage)))"
+  },
+  {
+    "line": 1162,
+    "declaration": "mux.Handle(\"PUT /api/v1/users/{userId}/settings/theme\", wrapProtected(http.HandlerFunc(userSettingsHandler.UpdateTheme)))"
+  },
+  {
+    "line": 1163,
+    "declaration": "mux.Handle(\"PUT /api/v1/users/{userId}/settings/theme-colors\", wrapProtected(http.HandlerFunc(userSettingsHandler.UpdateColors)))"
+  },
+  {
+    "line": 1164,
+    "declaration": "mux.Handle(\"POST /api/v1/users/{userId}/settings/change-password\", wrapProtected(http.HandlerFunc(userSettingsHandler.ChangePassword)))"
+  },
+  {
+    "line": 1165,
+    "declaration": "mux.Handle(\"GET /api/v1/users/{userId}/profile\", wrapProtected(http.HandlerFunc(userSettingsHandler.GetUserProfile)))"
+  },
+  {
+    "line": 1166,
+    "declaration": "mux.Handle(\"PUT /api/v1/users/{userId}/profile\", wrapProtected(http.HandlerFunc(userSettingsHandler.UpdateProfile)))"
+  },
+  {
+    "line": 1171,
+    "declaration": "mux.Handle(\"POST /api/v1/users\", wrapWithPermission(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {"
+  },
+  {
+    "line": 1195,
+    "declaration": "mux.Handle(\"PUT /api/v1/users/{id}\", wrapWithPermission(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {"
+  },
+  {
+    "line": 1216,
+    "declaration": "mux.Handle(\"DELETE /api/v1/users/{id}\", wrapWithPermission(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {"
+  },
+  {
+    "line": 1224,
+    "declaration": "mux.Handle(\"POST /api/v1/users\", wrapWithPermission(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {"
+  },
+  {
+    "line": 1298,
+    "declaration": "mux.Handle(\"PUT /api/v1/users/{id}\", wrapWithPermission(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {"
+  },
+  {
+    "line": 1359,
+    "declaration": "mux.Handle(\"DELETE /api/v1/users/{id}\", wrapWithPermission(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {"
+  },
+  {
+    "line": 1394,
+    "declaration": "mux.Handle(\"POST /api/v1/pos/orders\", wrapProtectedNoStatus(http.HandlerFunc(publicOrderHandler.CreateOrder)))"
+  },
+  {
+    "line": 1395,
+    "declaration": "mux.Handle(\"GET /api/v1/admin/orders/stats\", wrapWithPermission(http.HandlerFunc(adminOrderHandler.GetOrderStats), 10, \"READ\"))"
+  },
+  {
+    "line": 1396,
+    "declaration": "mux.Handle(\"GET /api/v1/admin/orders/export\", wrapWithPermission(http.HandlerFunc(adminOrderHandler.ExportOrders), 10, \"READ\"))"
+  },
+  {
+    "line": 1397,
+    "declaration": "mux.Handle(\"GET /api/v1/admin/orders/{id}/history\", wrapWithPermission(http.HandlerFunc(adminOrderHandler.GetOrderHistory), 10, \"READ\"))"
+  },
+  {
+    "line": 1398,
+    "declaration": "mux.Handle(\"POST /api/v1/admin/orders/{id}/items/{item_id}/cancel\", wrapWithPermission(http.HandlerFunc(adminOrderHandler.CancelOrderItem), 10, \"WRITE\"))"
+  },
+  {
+    "line": 1399,
+    "declaration": "mux.Handle(\"PUT /api/v1/admin/orders/{id}/status\", wrapWithPermission(http.HandlerFunc(adminOrderHandler.UpdateOrderStatus), 10, \"WRITE\"))"
+  },
+  {
+    "line": 1400,
+    "declaration": "mux.Handle(\"PUT /api/v1/admin/orders/{id}/payment-status\", wrapWithPermission(http.HandlerFunc(adminOrderHandler.UpdatePaymentStatus), 10, \"WRITE\"))"
+  },
+  {
+    "line": 1401,
+    "declaration": "mux.Handle(\"DELETE /api/v1/admin/orders/{id}\", wrapWithPermission(http.HandlerFunc(adminOrderHandler.CancelOrder), 10, \"DELETE\"))"
+  },
+  {
+    "line": 1402,
+    "declaration": "mux.Handle(\"GET /api/v1/admin/orders/{id}\", wrapWithPermission(http.HandlerFunc(adminOrderHandler.GetOrder), 10, \"READ\"))"
+  },
+  {
+    "line": 1403,
+    "declaration": "mux.Handle(\"GET /api/v1/admin/orders\", wrapWithPermission(http.HandlerFunc(adminOrderHandler.ListOrders), 10, \"READ\"))"
+  },
+  {
+    "line": 1407,
+    "declaration": "mux.Handle(\"POST /api/v1/tables\", wrapWithPermission(http.HandlerFunc(tableHandler.CreateTable), 14, \"WRITE\"))"
+  },
+  {
+    "line": 1408,
+    "declaration": "mux.Handle(\"GET /api/v1/tables\", wrapWithPermission(http.HandlerFunc(tableHandler.ListTables), 14, \"READ\"))"
+  },
+  {
+    "line": 1409,
+    "declaration": "mux.Handle(\"GET /api/v1/tables/stats\", wrapWithPermission(http.HandlerFunc(tableHandler.GetTableStats), 14, \"READ\"))"
+  },
+  {
+    "line": 1410,
+    "declaration": "mux.Handle(\"GET /api/v1/tables/layouts\", wrapWithPermission(http.HandlerFunc(tableHandler.GetLayouts), 14, \"READ\"))"
+  },
+  {
+    "line": 1411,
+    "declaration": "mux.Handle(\"POST /api/v1/tables/layouts\", wrapWithPermission(http.HandlerFunc(tableHandler.CreateLayout), 14, \"WRITE\"))"
+  },
+  {
+    "line": 1412,
+    "declaration": "mux.Handle(\"PUT /api/v1/tables/positions\", wrapWithPermission(http.HandlerFunc(tableHandler.UpdatePositions), 14, \"WRITE\"))"
+  },
+  {
+    "line": 1413,
+    "declaration": "mux.Handle(\"GET /api/v1/tables/{id}\", wrapWithPermission(http.HandlerFunc(tableHandler.GetTable), 14, \"READ\"))"
+  },
+  {
+    "line": 1414,
+    "declaration": "mux.Handle(\"PUT /api/v1/tables/{id}\", wrapWithPermission(http.HandlerFunc(tableHandler.UpdateTable), 14, \"WRITE\"))"
+  },
+  {
+    "line": 1415,
+    "declaration": "mux.Handle(\"DELETE /api/v1/tables/{id}\", wrapWithPermission(http.HandlerFunc(tableHandler.DeleteTable), 14, \"DELETE\"))"
+  },
+  {
+    "line": 1416,
+    "declaration": "mux.Handle(\"PUT /api/v1/tables/{id}/status\", wrapWithPermission(http.HandlerFunc(tableHandler.UpdateStatus), 14, \"WRITE\"))"
+  },
+  {
+    "line": 1420,
+    "declaration": "mux.Handle(\"GET /api/v1/kds/ws\", wrapKDSWithPermission(http.HandlerFunc(kdsWSHandler.ServeWS), \"READ\", false))"
+  },
+  {
+    "line": 1421,
+    "declaration": "mux.Handle(\"GET /api/v1/kds/queue\", wrapKDSWithPermission(http.HandlerFunc(kdsHandler.GetQueue), \"READ\", false))"
+  },
+  {
+    "line": 1422,
+    "declaration": "mux.Handle(\"PUT /api/v1/kds/orders/{id}/bump\", wrapKDSWithPermission(http.HandlerFunc(kdsHandler.BumpOrder), \"WRITE\", true))"
+  },
+  {
+    "line": 1423,
+    "declaration": "mux.Handle(\"PUT /api/v1/kds/orders/{id}/recall\", wrapKDSWithPermission(http.HandlerFunc(kdsHandler.RecallOrder), \"WRITE\", false))"
+  },
+  {
+    "line": 1424,
+    "declaration": "mux.Handle(\"GET /api/v1/kds/stats\", wrapKDSWithPermission(http.HandlerFunc(kdsHandler.GetStats), \"READ\", false))"
+  },
+  {
+    "line": 1425,
+    "declaration": "mux.Handle(\"GET /api/v1/kds/analytics\", wrapKDSWithPermission(http.HandlerFunc(kdsHandler.GetAnalytics), \"ADMIN\", false))"
+  },
+  {
+    "line": 1426,
+    "declaration": "mux.Handle(\"GET /api/v1/kds/settings\", wrapKDSWithPermission(http.HandlerFunc(kdsHandler.GetSettings), \"READ\", false))"
+  },
+  {
+    "line": 1427,
+    "declaration": "mux.Handle(\"PUT /api/v1/kds/settings\", wrapKDSWithPermission(http.HandlerFunc(kdsHandler.UpdateSettings), \"ADMIN\", false))"
+  },
+  {
+    "line": 1430,
+    "declaration": "mux.Handle(\"GET /api/v1/reports/overview\", wrapWithPermission(http.HandlerFunc(reportHandler.GetOverviewReport), 8, \"READ\"))"
+  },
+  {
+    "line": 1431,
+    "declaration": "mux.Handle(\"GET /api/v1/reports/sales\", wrapWithPermission(http.HandlerFunc(reportHandler.GetSalesReport), 8, \"READ\"))"
+  },
+  {
+    "line": 1432,
+    "declaration": "mux.Handle(\"GET /api/v1/reports/profitability\", wrapWithPermission(http.HandlerFunc(reportHandler.GetProfitabilityReport), 8, \"READ\"))"
+  },
+  {
+    "line": 1433,
+    "declaration": "mux.Handle(\"GET /api/v1/reports/inventory\", wrapWithPermission(http.HandlerFunc(reportHandler.GetInventoryReport), 8, \"READ\"))"
+  },
+  {
+    "line": 1434,
+    "declaration": "mux.Handle(\"POST /api/v1/reports/export\", wrapWithPermission(http.HandlerFunc(reportHandler.ExportReport), 8, \"EXPORT\"))"
+  },
+  {
+    "line": 1435,
+    "declaration": "mux.Handle(\"GET /api/v1/reports/financial/profit-loss\", wrapWithPermission(http.HandlerFunc(financialReportHandler.GetProfitLoss), 17, \"READ\"))"
+  },
+  {
+    "line": 1436,
+    "declaration": "mux.Handle(\"GET /api/v1/reports/financial/balance-sheet\", wrapWithPermission(http.HandlerFunc(financialReportHandler.GetBalanceSheet), 17, \"READ\"))"
+  },
+  {
+    "line": 1437,
+    "declaration": "mux.Handle(\"GET /api/v1/reports/financial/cash-flow\", wrapWithPermission(http.HandlerFunc(financialReportHandler.GetCashFlow), 17, \"READ\"))"
+  },
+  {
+    "line": 1438,
+    "declaration": "mux.Handle(\"GET /api/v1/reports/financial/receivables-aging\", wrapWithPermission(http.HandlerFunc(financialReportHandler.GetReceivablesAging), 17, \"READ\"))"
+  },
+  {
+    "line": 1439,
+    "declaration": "mux.Handle(\"GET /api/v1/reports/financial/payables-aging\", wrapWithPermission(http.HandlerFunc(financialReportHandler.GetPayablesAging), 17, \"READ\"))"
+  },
+  {
+    "line": 1440,
+    "declaration": "mux.Handle(\"GET /api/v1/reports/financial/inventory-valuation\", wrapWithPermission(http.HandlerFunc(financialReportHandler.GetInventoryValuation), 17, \"READ\"))"
+  },
+  {
+    "line": 1441,
+    "declaration": "mux.Handle(\"GET /api/v1/reports/financial/trial-balance\", wrapWithPermission(http.HandlerFunc(financialReportHandler.GetTrialBalance), 17, \"READ\"))"
+  },
+  {
+    "line": 1442,
+    "declaration": "mux.Handle(\"GET /api/v1/reports/financial/kpis\", wrapWithPermission(http.HandlerFunc(accountingAdvancedHandler.GetFinancialKPIs), 17, \"READ\"))"
+  },
+  {
+    "line": 1443,
+    "declaration": "mux.Handle(\"GET /api/v1/reports/financial/menu-profitability\", wrapWithPermission(http.HandlerFunc(accountingAdvancedHandler.GetMenuProfitability), 17, \"READ\"))"
+  },
+  {
+    "line": 1444,
+    "declaration": "mux.Handle(\"GET /api/v1/reports/financial/break-even\", wrapWithPermission(http.HandlerFunc(accountingAdvancedHandler.GetBreakEvenAnalysis), 17, \"READ\"))"
+  },
+  {
+    "line": 1445,
+    "declaration": "mux.Handle(\"GET /api/v1/reports/financial/predictive-cash-flow\", wrapWithPermission(http.HandlerFunc(accountingAdvancedHandler.GetPredictiveCashFlow), 17, \"READ\"))"
+  },
+  {
+    "line": 1446,
+    "declaration": "mux.Handle(\"GET /api/v1/reports/hr/headcount\", wrapWithPermission(http.HandlerFunc(hrReportHandler.GetHeadcountReport), 8, \"READ\"))"
+  },
+  {
+    "line": 1447,
+    "declaration": "mux.Handle(\"GET /api/v1/reports/hr/turnover\", wrapWithPermission(http.HandlerFunc(hrReportHandler.GetTurnoverReport), 8, \"READ\"))"
+  },
+  {
+    "line": 1448,
+    "declaration": "mux.Handle(\"GET /api/v1/reports/hr/absenteeism\", wrapWithPermission(http.HandlerFunc(hrReportHandler.GetAbsenteeismReport), 8, \"READ\"))"
+  },
+  {
+    "line": 1449,
+    "declaration": "mux.Handle(\"GET /api/v1/reports/hr/overtime\", wrapWithPermission(http.HandlerFunc(hrReportHandler.GetOvertimeReport), 8, \"READ\"))"
+  },
+  {
+    "line": 1450,
+    "declaration": "mux.Handle(\"GET /api/v1/reports/hr/leave-balances\", wrapWithPermission(http.HandlerFunc(hrReportHandler.GetLeaveBalancesReport), 8, \"READ\"))"
+  },
+  {
+    "line": 1451,
+    "declaration": "mux.Handle(\"GET /api/v1/reports/hr/training-compliance\", wrapWithPermission(http.HandlerFunc(hrReportHandler.GetTrainingComplianceReport), 8, \"READ\"))"
+  },
+  {
+    "line": 1452,
+    "declaration": "mux.Handle(\"GET /api/v1/reports/hr/cost-analysis\", wrapWithPermission(http.HandlerFunc(accountingAdvancedHandler.GetHRCostAnalysis), 8, \"READ\"))"
+  },
+  {
+    "line": 1453,
+    "declaration": "mux.Handle(\"GET /api/v1/reports/hr/social-insurance\", wrapWithPermission(http.HandlerFunc(accountingAdvancedHandler.ExportSocialInsuranceCSV), 8, \"EXPORT\"))"
+  },
+  {
+    "line": 1454,
+    "declaration": "mux.Handle(\"GET /api/v1/audit/export\", wrapWithPermission(http.HandlerFunc(accountingAdvancedHandler.ExportAuditTrailCSV), 17, \"EXPORT\"))"
+  },
+  {
+    "line": 1455,
+    "declaration": "mux.Handle(\"GET /api/v1/accounting/tax/periods\", wrapWithPermission(http.HandlerFunc(taxHandler.ListTaxPeriods), 17, \"READ\"))"
+  },
+  {
+    "line": 1456,
+    "declaration": "mux.Handle(\"POST /api/v1/accounting/tax/periods\", wrapWithPermission(http.HandlerFunc(taxHandler.CreateTaxPeriod), 17, \"WRITE\"))"
+  },
+  {
+    "line": 1457,
+    "declaration": "mux.Handle(\"GET /api/v1/accounting/tax/periods/{id}\", wrapWithPermission(http.HandlerFunc(taxHandler.GetTaxPeriod), 17, \"READ\"))"
+  },
+  {
+    "line": 1458,
+    "declaration": "mux.Handle(\"PUT /api/v1/accounting/tax/periods/{id}\", wrapWithPermission(http.HandlerFunc(taxHandler.UpdateTaxPeriod), 17, \"WRITE\"))"
+  },
+  {
+    "line": 1459,
+    "declaration": "mux.Handle(\"DELETE /api/v1/accounting/tax/periods/{id}\", wrapWithPermission(http.HandlerFunc(taxHandler.DeleteTaxPeriod), 17, \"DELETE\"))"
+  },
+  {
+    "line": 1460,
+    "declaration": "mux.Handle(\"GET /api/v1/accounting/tax/vat-report\", wrapWithPermission(http.HandlerFunc(taxHandler.GetVATReport), 17, \"READ\"))"
+  },
+  {
+    "line": 1461,
+    "declaration": "mux.Handle(\"POST /api/v1/accounting/tax/periods/{id}/close\", wrapWithPermission(http.HandlerFunc(taxHandler.CloseTaxPeriod), 17, \"WRITE\"))"
+  },
+  {
+    "line": 1462,
+    "declaration": "mux.Handle(\"GET /api/v1/hr/performance\", wrapWithPermission(http.HandlerFunc(performanceHandler.List), 18, \"READ\"))"
+  },
+  {
+    "line": 1463,
+    "declaration": "mux.Handle(\"POST /api/v1/hr/performance\", wrapWithPermission(http.HandlerFunc(performanceHandler.Create), 18, \"WRITE\"))"
+  },
+  {
+    "line": 1464,
+    "declaration": "mux.Handle(\"GET /api/v1/hr/performance/{id}\", wrapWithPermission(http.HandlerFunc(performanceHandler.Get), 18, \"READ\"))"
+  },
+  {
+    "line": 1465,
+    "declaration": "mux.Handle(\"PUT /api/v1/hr/performance/{id}\", wrapWithPermission(http.HandlerFunc(performanceHandler.Update), 18, \"WRITE\"))"
+  },
+  {
+    "line": 1466,
+    "declaration": "mux.Handle(\"DELETE /api/v1/hr/performance/{id}\", wrapWithPermission(http.HandlerFunc(performanceHandler.Delete), 18, \"DELETE\"))"
+  },
+  {
+    "line": 1467,
+    "declaration": "mux.Handle(\"POST /api/v1/hr/performance/{id}/acknowledge\", wrapWithPermission(http.HandlerFunc(performanceHandler.Acknowledge), 18, \"WRITE\"))"
+  },
+  {
+    "line": 1468,
+    "declaration": "mux.Handle(\"POST /api/v1/hr/performance/{id}/complete\", wrapWithPermission(http.HandlerFunc(performanceHandler.Complete), 18, \"WRITE\"))"
+  },
+  {
+    "line": 1469,
+    "declaration": "mux.Handle(\"GET /api/v1/hr/performance/employee/{employeeId}\", wrapWithPermission(http.HandlerFunc(performanceHandler.EmployeeHistory), 18, \"READ\"))"
+  },
+  {
+    "line": 1470,
+    "declaration": "mux.Handle(\"GET /api/v1/hr/training\", wrapWithPermission(http.HandlerFunc(trainingHandler.List), 19, \"READ\"))"
+  },
+  {
+    "line": 1471,
+    "declaration": "mux.Handle(\"POST /api/v1/hr/training\", wrapWithPermission(http.HandlerFunc(trainingHandler.Create), 19, \"WRITE\"))"
+  },
+  {
+    "line": 1472,
+    "declaration": "mux.Handle(\"GET /api/v1/hr/training/{id}\", wrapWithPermission(http.HandlerFunc(trainingHandler.Get), 19, \"READ\"))"
+  },
+  {
+    "line": 1473,
+    "declaration": "mux.Handle(\"PUT /api/v1/hr/training/{id}\", wrapWithPermission(http.HandlerFunc(trainingHandler.Update), 19, \"WRITE\"))"
+  },
+  {
+    "line": 1474,
+    "declaration": "mux.Handle(\"DELETE /api/v1/hr/training/{id}\", wrapWithPermission(http.HandlerFunc(trainingHandler.Delete), 19, \"DELETE\"))"
+  },
+  {
+    "line": 1475,
+    "declaration": "mux.Handle(\"GET /api/v1/hr/training/expiring\", wrapWithPermission(http.HandlerFunc(trainingHandler.Expiring), 19, \"READ\"))"
+  },
+  {
+    "line": 1476,
+    "declaration": "mux.Handle(\"GET /api/v1/hr/insurance\", wrapWithPermission(http.HandlerFunc(insuranceHandler.List), 20, \"READ\"))"
+  },
+  {
+    "line": 1477,
+    "declaration": "mux.Handle(\"POST /api/v1/hr/insurance\", wrapWithPermission(http.HandlerFunc(insuranceHandler.Create), 20, \"WRITE\"))"
+  },
+  {
+    "line": 1478,
+    "declaration": "mux.Handle(\"GET /api/v1/hr/insurance/{id}\", wrapWithPermission(http.HandlerFunc(insuranceHandler.Get), 20, \"READ\"))"
+  },
+  {
+    "line": 1479,
+    "declaration": "mux.Handle(\"PUT /api/v1/hr/insurance/{id}\", wrapWithPermission(http.HandlerFunc(insuranceHandler.Update), 20, \"WRITE\"))"
+  },
+  {
+    "line": 1480,
+    "declaration": "mux.Handle(\"DELETE /api/v1/hr/insurance/{id}\", wrapWithPermission(http.HandlerFunc(insuranceHandler.Delete), 20, \"DELETE\"))"
+  },
+  {
+    "line": 1481,
+    "declaration": "mux.Handle(\"GET /api/v1/hr/insurance/expiring\", wrapWithPermission(http.HandlerFunc(insuranceHandler.Expiring), 20, \"READ\"))"
+  },
+  {
+    "line": 1482,
+    "declaration": "mux.Handle(\"GET /api/v1/hr/contracts\", wrapWithPermission(http.HandlerFunc(contractHandler.List), 20, \"READ\"))"
+  },
+  {
+    "line": 1483,
+    "declaration": "mux.Handle(\"POST /api/v1/hr/contracts\", wrapWithPermission(http.HandlerFunc(contractHandler.Create), 20, \"WRITE\"))"
+  },
+  {
+    "line": 1484,
+    "declaration": "mux.Handle(\"GET /api/v1/hr/contracts/{id}\", wrapWithPermission(http.HandlerFunc(contractHandler.Get), 20, \"READ\"))"
+  },
+  {
+    "line": 1485,
+    "declaration": "mux.Handle(\"PUT /api/v1/hr/contracts/{id}\", wrapWithPermission(http.HandlerFunc(contractHandler.Update), 20, \"WRITE\"))"
+  },
+  {
+    "line": 1486,
+    "declaration": "mux.Handle(\"DELETE /api/v1/hr/contracts/{id}\", wrapWithPermission(http.HandlerFunc(contractHandler.Delete), 20, \"DELETE\"))"
+  },
+  {
+    "line": 1487,
+    "declaration": "mux.Handle(\"POST /api/v1/hr/contracts/{id}/renew\", wrapWithPermission(http.HandlerFunc(contractHandler.Renew), 20, \"WRITE\"))"
+  },
+  {
+    "line": 1488,
+    "declaration": "mux.Handle(\"GET /api/v1/hr/contracts/expiring\", wrapWithPermission(http.HandlerFunc(contractHandler.Expiring), 20, \"READ\"))"
+  },
+  {
+    "line": 1489,
+    "declaration": "mux.Handle(\"GET /api/v1/hr/resignations\", wrapWithPermission(http.HandlerFunc(resignationHandler.List), 20, \"READ\"))"
+  },
+  {
+    "line": 1490,
+    "declaration": "mux.Handle(\"POST /api/v1/hr/resignations\", wrapWithPermission(http.HandlerFunc(resignationHandler.Create), 20, \"WRITE\"))"
+  },
+  {
+    "line": 1491,
+    "declaration": "mux.Handle(\"GET /api/v1/hr/resignations/{id}\", wrapWithPermission(http.HandlerFunc(resignationHandler.Get), 20, \"READ\"))"
+  },
+  {
+    "line": 1492,
+    "declaration": "mux.Handle(\"PUT /api/v1/hr/resignations/{id}\", wrapWithPermission(http.HandlerFunc(resignationHandler.Update), 20, \"WRITE\"))"
+  },
+  {
+    "line": 1493,
+    "declaration": "mux.Handle(\"DELETE /api/v1/hr/resignations/{id}\", wrapWithPermission(http.HandlerFunc(resignationHandler.Delete), 20, \"DELETE\"))"
+  },
+  {
+    "line": 1494,
+    "declaration": "mux.Handle(\"POST /api/v1/hr/resignations/{id}/acknowledge\", wrapWithPermission(http.HandlerFunc(resignationHandler.Acknowledge), 20, \"WRITE\"))"
+  },
+  {
+    "line": 1495,
+    "declaration": "mux.Handle(\"POST /api/v1/hr/resignations/{id}/complete\", wrapWithPermission(http.HandlerFunc(resignationHandler.Complete), 20, \"WRITE\"))"
+  },
+  {
+    "line": 1496,
+    "declaration": "mux.Handle(\"GET /api/v1/hr/resignations/{id}/settlement\", wrapWithPermission(http.HandlerFunc(resignationHandler.CalculateSettlement), 20, \"READ\"))"
+  },
+  {
+    "line": 1499,
+    "declaration": "mux.Handle(\"POST /api/v1/admin/drivers\", wrapWithPermission(http.HandlerFunc(adminDriverHandler.CreateDriver), 10, \"WRITE\"))"
+  },
+  {
+    "line": 1500,
+    "declaration": "mux.Handle(\"GET /api/v1/admin/drivers\", wrapWithPermission(http.HandlerFunc(adminDriverHandler.ListDrivers), 10, \"READ\"))"
+  },
+  {
+    "line": 1501,
+    "declaration": "mux.Handle(\"GET /api/v1/admin/drivers/available\", wrapWithPermission(http.HandlerFunc(adminDriverHandler.GetAvailableDrivers), 10, \"READ\"))"
+  },
+  {
+    "line": 1502,
+    "declaration": "mux.Handle(\"GET /api/v1/admin/drivers/{id}\", wrapWithPermission(http.HandlerFunc(adminDriverHandler.GetDriver), 10, \"READ\"))"
+  },
+  {
+    "line": 1503,
+    "declaration": "mux.Handle(\"PUT /api/v1/admin/drivers/{id}\", wrapWithPermission(http.HandlerFunc(adminDriverHandler.UpdateDriver), 10, \"WRITE\"))"
+  },
+  {
+    "line": 1504,
+    "declaration": "mux.Handle(\"DELETE /api/v1/admin/drivers/{id}\", wrapWithPermission(http.HandlerFunc(adminDriverHandler.DeleteDriver), 10, \"DELETE\"))"
+  },
+  {
+    "line": 1505,
+    "declaration": "mux.Handle(\"PUT /api/v1/admin/drivers/{id}/status\", wrapWithPermission(http.HandlerFunc(adminDriverHandler.UpdateDriverStatus), 10, \"WRITE\"))"
+  },
+  {
+    "line": 1506,
+    "declaration": "mux.Handle(\"POST /api/v1/admin/orders/{orderId}/assign\", wrapWithPermission(http.HandlerFunc(adminDriverHandler.AssignOrderToDriver), 10, \"WRITE\"))"
+  },
+  {
+    "line": 1515,
+    "declaration": "mux.Handle(\"GET /api/v1/notifications\", wrapWithPermission(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {"
+  },
+  {
+    "line": 1519,
+    "declaration": "mux.Handle(\"GET /api/v1/notifications/stats\", wrapWithPermission(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {"
+  },
+  {
+    "line": 1523,
+    "declaration": "mux.Handle(\"GET /api/v1/notifications/unread-count\", wrapWithPermission(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {"
+  },
+  {
+    "line": 1527,
+    "declaration": "mux.Handle(\"POST /api/v1/notifications\", wrapWithPermission(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {"
+  },
+  {
+    "line": 1531,
+    "declaration": "mux.Handle(\"POST /api/v1/notifications/mark-all-read\", wrapWithPermission(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {"
+  },
+  {
+    "line": 1535,
+    "declaration": "mux.Handle(\"POST /api/v1/notifications/{id}/read\", wrapWithPermission(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {"
+  },
+  {
+    "line": 1539,
+    "declaration": "mux.Handle(\"POST /api/v1/notifications/{id}/unread\", wrapWithPermission(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {"
+  },
+  {
+    "line": 1543,
+    "declaration": "mux.Handle(\"GET /api/v1/notifications/{id}\", wrapWithPermission(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {"
+  },
+  {
+    "line": 1547,
+    "declaration": "mux.Handle(\"DELETE /api/v1/notifications/{id}\", wrapWithPermission(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {"
+  },
+  {
+    "line": 1552,
+    "declaration": "mux.Handle(\"GET /api/v1/notifications\", wrapWithPermission(http.HandlerFunc(notificationHandler.ListNotifications), 4, \"READ\"))"
+  },
+  {
+    "line": 1553,
+    "declaration": "mux.Handle(\"GET /api/v1/notifications/stats\", wrapWithPermission(http.HandlerFunc(notificationHandler.GetStats), 4, \"READ\"))"
+  },
+  {
+    "line": 1554,
+    "declaration": "mux.Handle(\"GET /api/v1/notifications/unread-count\", wrapWithPermission(http.HandlerFunc(notificationHandler.GetUnreadCount), 4, \"READ\"))"
+  },
+  {
+    "line": 1555,
+    "declaration": "mux.Handle(\"POST /api/v1/notifications\", wrapWithPermission(http.HandlerFunc(notificationHandler.CreateNotification), 4, \"WRITE\"))"
+  },
+  {
+    "line": 1556,
+    "declaration": "mux.Handle(\"POST /api/v1/notifications/mark-all-read\", wrapWithPermission(http.HandlerFunc(notificationHandler.MarkAllAsRead), 4, \"READ\"))"
+  },
+  {
+    "line": 1557,
+    "declaration": "mux.Handle(\"POST /api/v1/notifications/{id}/read\", wrapWithPermission(http.HandlerFunc(notificationHandler.MarkAsRead), 4, \"READ\"))"
+  },
+  {
+    "line": 1558,
+    "declaration": "mux.Handle(\"POST /api/v1/notifications/{id}/unread\", wrapWithPermission(http.HandlerFunc(notificationHandler.MarkAsUnread), 4, \"READ\"))"
+  },
+  {
+    "line": 1559,
+    "declaration": "mux.Handle(\"GET /api/v1/notifications/{id}\", wrapWithPermission(http.HandlerFunc(notificationHandler.GetNotification), 4, \"READ\"))"
+  },
+  {
+    "line": 1560,
+    "declaration": "mux.Handle(\"DELETE /api/v1/notifications/{id}\", wrapWithPermission(http.HandlerFunc(notificationHandler.DeleteNotification), 4, \"DELETE\"))"
+  },
+  {
+    "line": 1564,
+    "declaration": "mux.Handle(\"GET /api/v1/admin/themes\", wrapWithPermission(http.HandlerFunc(themeHandler.ListThemes), 9, \"READ\"))"
+  },
+  {
+    "line": 1565,
+    "declaration": "mux.Handle(\"POST /api/v1/admin/themes\", wrapWithPermission(http.HandlerFunc(themeHandler.CreateTheme), 9, \"WRITE\"))"
+  },
+  {
+    "line": 1566,
+    "declaration": "mux.Handle(\"GET /api/v1/admin/themes/{id}\", wrapWithPermission(http.HandlerFunc(themeHandler.GetTheme), 9, \"READ\"))"
+  },
+  {
+    "line": 1567,
+    "declaration": "mux.Handle(\"PUT /api/v1/admin/themes/{id}\", wrapWithPermission(http.HandlerFunc(themeHandler.UpdateTheme), 9, \"WRITE\"))"
+  },
+  {
+    "line": 1568,
+    "declaration": "mux.Handle(\"DELETE /api/v1/admin/themes/{id}\", wrapWithPermission(http.HandlerFunc(themeHandler.DeleteTheme), 9, \"DELETE\"))"
+  },
+  {
+    "line": 1569,
+    "declaration": "mux.Handle(\"POST /api/v1/admin/themes/{id}/activate\", wrapWithPermission(http.HandlerFunc(themeHandler.ActivateTheme), 9, \"WRITE\"))"
+  },
+  {
+    "line": 1570,
+    "declaration": "mux.Handle(\"POST /api/v1/admin/themes/{id}/duplicate\", wrapWithPermission(http.HandlerFunc(themeHandler.DuplicateTheme), 9, \"WRITE\"))"
+  },
+  {
+    "line": 1571,
+    "declaration": "mux.Handle(\"GET /api/v1/admin/themes/{id}/history\", wrapWithPermission(http.HandlerFunc(themeHandler.GetThemeHistory), 9, \"READ\"))"
+  },
+  {
+    "line": 1574,
+    "declaration": "mux.Handle(\"GET /api/v1/admin/theme-presets\", wrapWithPermission(http.HandlerFunc(themeHandlerV2.ListThemePresets), 9, \"READ\"))"
+  },
+  {
+    "line": 1578,
+    "declaration": "mux.Handle(\"GET /api/v1/rbac/roles\", wrapWithPermission(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {"
+  },
+  {
+    "line": 1593,
+    "declaration": "mux.Handle(\"POST /api/v1/rbac/roles\", wrapWithPermission(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {"
+  },
+  {
+    "line": 1632,
+    "declaration": "mux.Handle(\"GET /api/v1/rbac/roles/{id}\", wrapWithPermission(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {"
+  },
+  {
+    "line": 1655,
+    "declaration": "mux.Handle(\"PUT /api/v1/rbac/roles/{id}\", wrapWithPermission(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {"
+  },
+  {
+    "line": 1704,
+    "declaration": "mux.Handle(\"DELETE /api/v1/rbac/roles/{id}\", wrapWithPermission(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {"
+  },
+  {
+    "line": 1734,
+    "declaration": "mux.Handle(\"GET /api/v1/rbac/me/roles\", wrapProtectedNoStatus(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {"
+  },
+  {
+    "line": 1739,
+    "declaration": "mux.Handle(\"GET /api/v1/rbac/users/{userId}/roles\", wrapWithPermission(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {"
+  },
+  {
+    "line": 1764,
+    "declaration": "mux.Handle(\"POST /api/v1/rbac/users/{userId}/roles\", wrapWithPermission(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {"
+  },
+  {
+    "line": 1814,
+    "declaration": "mux.Handle(\"DELETE /api/v1/rbac/users/{userId}/roles/{roleId}\", wrapWithPermission(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {"
+  },
+  {
+    "line": 1846,
+    "declaration": "mux.Handle(\"GET /api/v1/rbac/me/permissions\", wrapProtectedNoStatus(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {"
+  },
+  {
+    "line": 1851,
+    "declaration": "mux.Handle(\"GET /api/v1/rbac/check-permission\", wrapProtected(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {"
+  },
+  {
+    "line": 1872,
+    "declaration": "mux.Handle(\"POST /api/v1/super-admin/auth/login\", middleware.RequireTrustedOrigin(middleware.RateLimitByIP(10)(http.HandlerFunc(superAdminHandler.Login))))"
+  },
+  {
+    "line": 1873,
+    "declaration": "mux.Handle(\"GET /api/v1/super-admin/auth/session\", wrapSuperAdmin(http.HandlerFunc(superAdminHandler.Session)))"
+  },
+  {
+    "line": 1876,
+    "declaration": "mux.Handle(\"POST /api/v1/super-admin/auth/logout\", wrapSuperAdmin(http.HandlerFunc(superAdminHandler.Logout)))"
+  },
+  {
+    "line": 1877,
+    "declaration": "mux.Handle(\"GET /api/v1/super-admin/dashboard/stats\", wrapSuperAdmin(http.HandlerFunc(superAdminHandler.GetDashboardStats)))"
+  },
+  {
+    "line": 1879,
+    "declaration": "mux.Handle(\"GET /api/v1/super-admin/payment-metrics\", wrapSuperAdmin(http.HandlerFunc(paymentMonitoringHandler.GetPaymentMetrics)))"
+  },
+  {
+    "line": 1880,
+    "declaration": "mux.Handle(\"GET /api/v1/super-admin/webhook-health\", wrapSuperAdmin(http.HandlerFunc(paymentMonitoringHandler.GetWebhookHealth)))"
+  },
+  {
+    "line": 1885,
+    "declaration": "mux.Handle(\"POST /api/v1/super-admin/payments/{id}/refund\", wrapSuperAdmin(http.HandlerFunc(paymentHandler.RefundPayment)))"
+  },
+  {
+    "line": 1891,
+    "declaration": "mux.Handle(\"GET /api/v1/super-admin/tenants\", wrapSuperAdmin(http.HandlerFunc(superAdminHandler.ListTenants)))"
+  },
+  {
+    "line": 1892,
+    "declaration": "mux.Handle(\"GET /api/v1/super-admin/tenants/{id}\", wrapSuperAdmin(http.HandlerFunc(superAdminHandler.GetTenant)))"
+  },
+  {
+    "line": 1893,
+    "declaration": "mux.Handle(\"GET /api/v1/super-admin/tenants/{id}/users\", wrapSuperAdmin(http.HandlerFunc(superAdminHandler.GetTenantUsers)))"
+  },
+  {
+    "line": 1894,
+    "declaration": "mux.Handle(\"POST /api/v1/super-admin/tenants/{id}/dashboard-login\", wrapSuperAdmin(http.HandlerFunc(superAdminHandler.GenerateDashboardLoginToken)))"
+  },
+  {
+    "line": 1897,
+    "declaration": "mux.Handle(\"GET /api/v1/super-admin/users\", wrapSuperAdmin(http.HandlerFunc(superAdminHandler.ListUsers)))"
+  },
+  {
+    "line": 1898,
+    "declaration": "mux.Handle(\"GET /api/v1/super-admin/users/{id}\", wrapSuperAdmin(http.HandlerFunc(superAdminHandler.GetUser)))"
+  },
+  {
+    "line": 1901,
+    "declaration": "mux.Handle(\"POST /api/v1/super-admin/impersonate/{userID}\", wrapSuperAdmin(http.HandlerFunc(impersonationHandler.StartImpersonation)))"
+  },
+  {
+    "line": 1902,
+    "declaration": "mux.Handle(\"POST /api/v1/super-admin/impersonate/end\", wrapSuperAdmin(http.HandlerFunc(impersonationHandler.EndImpersonation)))"
+  },
+  {
+    "line": 1903,
+    "declaration": "mux.Handle(\"GET /api/v1/super-admin/impersonate/status\", wrapSuperAdmin(http.HandlerFunc(impersonationHandler.GetImpersonationStatus)))"
+  },
+  {
+    "line": 1906,
+    "declaration": "mux.Handle(\"GET /api/v1/super-admin/audit-logs\", wrapSuperAdmin(http.HandlerFunc(superAdminHandler.GetAuditLogs)))"
+  },
+  {
+    "line": 1909,
+    "declaration": "mux.Handle(\"PUT /api/v1/super-admin/settings/ip-whitelist\", wrapSuperAdmin(http.HandlerFunc(superAdminHandler.UpdateIPWhitelist)))"
+  },
+  {
+    "line": 1912,
+    "declaration": "mux.HandleFunc(\"GET /api/v1/impersonation/validate\", impersonationHandler.ValidateImpersonationToken)"
+  },
+  {
+    "line": 1913,
+    "declaration": "mux.Handle(\"POST /api/v1/impersonation/end\", middleware.RequireTrustedOrigin(http.HandlerFunc(impersonationHandler.EndImpersonationByToken)))"
+  },
+  {
+    "line": 1914,
+    "declaration": "mux.HandleFunc(\"GET /api/v1/impersonation/check\", impersonationHandler.CheckImpersonation)"
+  },
+  {
+    "line": 1934,
+    "declaration": "mux.Handle(\"GET /api/v1/super-admin/tenants/{id}/subscription\", wrapSuperAdmin(http.HandlerFunc(subscriptionHandler.GetTenantSubscriptionByID)))"
+  },
+  {
+    "line": 1935,
+    "declaration": "mux.Handle(\"POST /api/v1/super-admin/tenants/{id}/extend-trial\", wrapSuperAdmin(http.HandlerFunc(subscriptionHandler.ExtendTenantTrial)))"
+  },
+  {
+    "line": 1936,
+    "declaration": "mux.Handle(\"POST /api/v1/super-admin/tenants/{id}/disable\", wrapSuperAdmin(http.HandlerFunc(subscriptionHandler.DisableTenant)))"
+  },
+  {
+    "line": 1937,
+    "declaration": "mux.Handle(\"PUT /api/v1/super-admin/tenants/{id}/disable\", wrapSuperAdmin(http.HandlerFunc(subscriptionHandler.DisableTenant)))"
+  },
+  {
+    "line": 1938,
+    "declaration": "mux.Handle(\"POST /api/v1/super-admin/tenants/{id}/enable\", wrapSuperAdmin(http.HandlerFunc(subscriptionHandler.EnableTenant)))"
+  },
+  {
+    "line": 1939,
+    "declaration": "mux.Handle(\"PUT /api/v1/super-admin/tenants/{id}/enable\", wrapSuperAdmin(http.HandlerFunc(subscriptionHandler.EnableTenant)))"
+  },
+  {
+    "line": 1940,
+    "declaration": "mux.Handle(\"DELETE /api/v1/super-admin/tenants/{id}\", wrapSuperAdmin(http.HandlerFunc(subscriptionHandler.DeleteTenant)))"
+  },
+  {
+    "line": 1941,
+    "declaration": "mux.Handle(\"GET /api/v1/super-admin/tenants/{id}/subscription-history\", wrapSuperAdmin(http.HandlerFunc(subscriptionHandler.GetSubscriptionHistory)))"
+  }
+]

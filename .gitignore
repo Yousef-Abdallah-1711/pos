@@ -73,3 +73,13 @@ __pycache__/
 
 # Root-managed release copies contain private acceptance fixtures and deployment state.
 /releases/
+
+# Generated backend executables (build from Go source; retain history).
+/backend/api
+/backend/api.exe
+/backend/api-local.exe
+/backend/pos-backend
+/backend/main
+/backend/pos-api.exe
+/backend/pos-api
+/backend/app

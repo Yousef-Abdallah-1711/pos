@@ -1,0 +1,472 @@
+[
+  {
+    "method": "POST",
+    "route": "/categories",
+    "http": 201,
+    "response": {
+      "id": 13,
+      "tenant_id": 13,
+      "restaurant_id": 13,
+      "name": "Audit menu",
+      "name_ar": "قائمة الاختبار",
+      "description": "Synthetic product audit only",
+      "display_order": 0,
+      "is_active": true,
+      "language": "",
+      "created_by": 0,
+      "created_at": "0001-01-01T00:00:00Z",
+      "updated_at": "0001-01-01T00:00:00Z"
+    }
+  },
+  {
+    "method": "POST",
+    "route": "/products",
+    "http": 201,
+    "response": {
+      "id": 10,
+      "tenant_id": 13,
+      "restaurant_id": 13,
+      "category_id": 13,
+      "sku": "audit-product-20261114",
+      "name_en": "Audit Test Dish",
+      "name_ar": "طبق اختبار",
+      "description_en": "Synthetic audit. Do not fulfill.",
+      "price": 100,
+      "cost": 20,
+      "is_vegetarian": false,
+      "is_vegan": false,
+      "is_spicy": false,
+      "is_gluten_free": false,
+      "is_available": true,
+      "track_inventory": true,
+      "quantity_in_stock": 20,
+      "low_stock_threshold": 3,
+      "reorder_quantity": 0,
+      "display_order": 0,
+      "featured": false,
+      "status": "active",
+      "created_by": 14,
+      "created_at": "2026-11-14T03:13:49.43905Z",
+      "updated_at": "2026-11-14T03:13:49.43905Z"
+    }
+  },
+  {
+    "method": "POST",
+    "route": "/tables",
+    "http": 201,
+    "response": {
+      "data": {
+        "id": 3,
+        "tenant_id": 13,
+        "restaurant_id": 13,
+        "table_number": 1,
+        "name": "Audit table",
+        "capacity": 4,
+        "location": "indoor",
+        "status": "available",
+        "description": "Synthetic product audit only",
+        "qr_code_config": {},
+        "position_x": 0,
+        "position_y": 0,
+        "shape": "square",
+        "created_at": "2026-11-14T03:13:49.468956Z",
+        "updated_at": "2026-11-14T03:13:49.468956Z"
+      },
+      "success": true
+    }
+  },
+  {
+    "method": "POST",
+    "route": "/hr/employees",
+    "http": 201,
+    "response": {
+      "data": {
+        "id": 1,
+        "tenant_id": 13,
+        "restaurant_id": 13,
+        "employee_code": "AUDIT-01",
+        "first_name": "Audit",
+        "last_name": "Employee",
+        "first_name_ar": "موظف",
+        "last_name_ar": "اختبار",
+        "email": "audit-employee@example.invalid",
+        "gender": "male",
+        "hire_date": "2026-11-14T00:00:00Z",
+        "employment_type": "full_time",
+        "employment_status": "active",
+        "position": "Kitchen audit",
+        "department": "Kitchen",
+        "base_salary": 1000,
+        "salary_currency": "EGP",
+        "payment_frequency": "monthly",
+        "working_hours_per_week": 40,
+        "shift_type": "day",
+        "notes": "Synthetic product audit only",
+        "is_active": true,
+        "created_at": "0001-01-01T00:00:00Z",
+        "updated_at": "0001-01-01T00:00:00Z",
+        "created_by": 14
+      },
+      "success": true
+    }
+  },
+  {
+    "method": "GET",
+    "route": "/admin/themes",
+    "http": 200,
+    "response": {
+      "themes": [
+        {
+          "id": 13,
+          "tenant_id": 13,
+          "restaurant_id": 13,
+          "name": "Default Theme",
+          "slug": "default-theme",
+          "config": {
+            "rtl": {
+              "enabled": false
+            },
+            "colors": {
+              "text": "#1f2937",
+              "accent": "#0ea5e9",
+              "border": "#e5e7eb",
+              "shadow": "#000000",
+              "primary": "#3b82f6",
+              "secondary": "#1e40af",
+              "background": "#ffffff"
+            },
+            "custom": {},
+            "footer": {
+              "text": "© 2025 SERVIO Audit Synthetic. All rights reserved.",
+              "links": [],
+              "bgColor": "#1f2937",
+              "textColor": "#f3f4f6"
+            },
+            "header": {
+              "navBg": "#ffffff",
+              "sticky": true,
+              "logoUrl": "",
+              "navText": "#1f2937",
+              "navHeight": 80
+            },
+            "darkMode": {
+              "enabled": false,
+              "textDark": "#f3f4f6",
+              "primaryDark": "#1e40af",
+              "secondaryDark": "#1e3a8a",
+              "backgroundDark": "#111827"
+            },
+            "homepage": {
+              "sections": []
+            },
+            "identity": {
+              "domain": "audit-1794625969.pos.rakmyat.online",
+              "logoUrl": "",
+              "siteTitle": "SERVIO Audit Synthetic",
+              "faviconUrl": ""
+            },
+            "components": [],
+            "typography": {
+              "baseSize": 16,
+              "fontMono": "Courier, monospace",
+              "fontSans": "Inter, Arial, sans-serif",
+              "fontSerif": "Georgia, serif",
+              "lineHeight": 1.5,
+              "borderRadius": 8
+            }
+          },
+          "description": "Default theme for SERVIO Audit Synthetic",
+          "is_active": true,
+          "is_published": true,
+          "version": 1,
+          "created_by": 14,
+          "created_at": "2026-11-14T03:12:53.442991Z",
+          "updated_at": "2026-11-14T03:12:53.442991Z"
+        }
+      ],
+      "total": 1,
+      "page": 1,
+      "page_size": 10,
+      "total_pages": 1
+    }
+  },
+  {
+    "method": "POST",
+    "route": "/hr/attendance/clock-in",
+    "http": 201,
+    "response": {
+      "data": {
+        "clock_in": "2026-11-14T03:13:49.559396345Z",
+        "employee_id": 1,
+        "id": 1,
+        "status": "present"
+      },
+      "success": true
+    }
+  },
+  {
+    "method": "POST",
+    "route": "/hr/attendance/clock-out",
+    "http": 405,
+    "response": {
+      "error": "Method Not Allowed\n"
+    }
+  },
+  {
+    "method": "GET",
+    "route": "/products",
+    "http": 200,
+    "response": {
+      "pagination": {
+        "page": 1,
+        "page_size": 20,
+        "total": 1,
+        "total_pages": 1
+      },
+      "products": [
+        {
+          "id": 10,
+          "tenant_id": 13,
+          "restaurant_id": 13,
+          "category_id": 13,
+          "sku": "audit-product-20261114",
+          "name_en": "Audit Test Dish",
+          "name_ar": "طبق اختبار",
+          "price": 100,
+          "is_vegetarian": false,
+          "is_vegan": false,
+          "is_spicy": false,
+          "is_gluten_free": false,
+          "is_available": true,
+          "track_inventory": true,
+          "quantity_in_stock": 20,
+          "low_stock_threshold": 3,
+          "reorder_quantity": 0,
+          "display_order": 0,
+          "featured": false,
+          "status": "active",
+          "created_by": 0,
+          "created_at": "2026-11-14T03:13:49.43905Z",
+          "updated_at": "0001-01-01T00:00:00Z"
+        }
+      ]
+    }
+  },
+  {
+    "method": "GET",
+    "route": "/categories",
+    "http": 200,
+    "response": [
+      {
+        "id": 13,
+        "tenant_id": 13,
+        "restaurant_id": 13,
+        "name": "Audit menu",
+        "name_ar": "قائمة الاختبار",
+        "description": "Synthetic product audit only",
+        "display_order": 0,
+        "is_active": true,
+        "language": "",
+        "created_by": 0,
+        "created_at": "2026-11-14T03:13:49.418523Z",
+        "updated_at": "2026-11-14T03:13:49.418523Z"
+      }
+    ]
+  },
+  {
+    "method": "GET",
+    "route": "/tables",
+    "http": 200,
+    "response": {
+      "data": [
+        {
+          "id": 3,
+          "tenant_id": 13,
+          "restaurant_id": 13,
+          "table_number": 1,
+          "name": "Audit table",
+          "capacity": 4,
+          "location": "indoor",
+          "status": "available",
+          "description": "Synthetic product audit only",
+          "qr_code_config": {},
+          "position_x": 0,
+          "position_y": 0,
+          "shape": "square",
+          "created_at": "2026-11-14T03:13:49.468956Z",
+          "updated_at": "2026-11-14T03:13:49.468956Z"
+        }
+      ],
+      "success": true
+    }
+  },
+  {
+    "method": "GET",
+    "route": "/hr/employees",
+    "http": 200,
+    "response": {
+      "data": [
+        {
+          "id": 1,
+          "tenant_id": 13,
+          "restaurant_id": 13,
+          "employee_code": "AUDIT-01",
+          "first_name": "Audit",
+          "last_name": "Employee",
+          "first_name_ar": "موظف",
+          "last_name_ar": "اختبار",
+          "email": "audit-employee@example.invalid",
+          "gender": "male",
+          "hire_date": "2026-11-14T00:00:00Z",
+          "employment_type": "full_time",
+          "employment_status": "active",
+          "position": "Kitchen audit",
+          "department": "Kitchen",
+          "base_salary": 1000,
+          "salary_currency": "EGP",
+          "payment_frequency": "monthly",
+          "working_hours_per_week": 40,
+          "shift_type": "day",
+          "documents": [],
+          "notes": "Synthetic product audit only",
+          "is_active": true,
+          "created_at": "2026-11-14T03:13:49.488455Z",
+          "updated_at": "2026-11-14T03:13:49.488455Z",
+          "created_by": 14
+        }
+      ],
+      "pagination": {
+        "page": 1,
+        "page_size": 20,
+        "total": 1,
+        "total_pages": 1
+      },
+      "success": true
+    }
+  },
+  {
+    "method": "GET",
+    "route": "/hr/attendance",
+    "http": 200,
+    "response": {
+      "data": [
+        {
+          "id": 1,
+          "tenant_id": 13,
+          "restaurant_id": 13,
+          "employee_id": 1,
+          "attendance_date": "2026-11-14T00:00:00Z",
+          "clock_in": "2026-11-14T03:13:49.541505Z",
+          "total_break_minutes": 0,
+          "regular_hours": 0,
+          "overtime_hours": 0,
+          "status": "present",
+          "is_late": false,
+          "late_by_minutes": 0,
+          "is_early_departure": false,
+          "early_departure_minutes": 0,
+          "is_overtime": false,
+          "overtime_approved": false,
+          "requires_approval": false,
+          "is_approved": false,
+          "created_at": "2026-11-14T03:13:49.541505Z",
+          "updated_at": "2026-11-14T03:13:49.541505Z"
+        }
+      ],
+      "pagination": {
+        "page": 1,
+        "page_size": 20,
+        "total": 1,
+        "total_pages": 1
+      },
+      "success": true
+    }
+  },
+  {
+    "method": "GET",
+    "route": "/tenant/status",
+    "http": 200,
+    "response": {
+      "success": true,
+      "data": {
+        "is_active": true,
+        "tenant_id": 13,
+        "tenant_name": "SERVIO Audit Synthetic",
+        "slug": "audit-1794625969",
+        "subscription_status": "trial",
+        "subscription_plan": "free",
+        "trial_start_date": "2026-11-14T03:12:53.307834Z",
+        "trial_end_date": "2026-11-29T03:12:53.307834Z",
+        "subscription_expires_at": null,
+        "last_payment_at": null,
+        "trial_days": 15,
+        "days_remaining": 15,
+        "is_disabled": false,
+        "can_access": true,
+        "plan": {
+          "id": "free",
+          "name": "Free Trial",
+          "price": 0,
+          "price_cents": 0,
+          "currency": "EGP",
+          "period": ""
+        },
+        "contact_email": "product-audit-1794625969@example.invalid"
+      }
+    }
+  },
+  {
+    "method": "GET",
+    "route": "/accounting/accounts",
+    "http": 200,
+    "response": {
+      "data": [],
+      "pagination": {
+        "page": 1,
+        "page_size": 50,
+        "total": 0
+      },
+      "success": true
+    }
+  },
+  {
+    "method": "GET",
+    "route": "/reports/financial/profit-loss",
+    "http": 200,
+    "response": {
+      "data": {
+        "date_from": "2026-10-16",
+        "date_to": "2026-11-14",
+        "revenue": [],
+        "expenses": [],
+        "total_revenue": 0,
+        "total_expenses": 0,
+        "net_profit": 0,
+        "comparison_date_from": "2026-09-16",
+        "comparison_date_to": "2026-10-15"
+      },
+      "success": true
+    }
+  },
+  {
+    "method": "GET",
+    "route": "/reports/financial/balance-sheet",
+    "http": 200,
+    "response": {
+      "data": {
+        "as_of_date": "2026-11-14",
+        "assets": [],
+        "liabilities": [],
+        "equity": [],
+        "total_assets": 0,
+        "total_liabilities": 0,
+        "total_equity": 0,
+        "equation_balanced": true,
+        "integrity_status": "RECONCILED",
+        "equation_difference": 0,
+        "integrity_check_basis": "existing_round2_equation_check"
+      },
+      "success": true
+    }
+  }
+]

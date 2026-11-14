@@ -37,7 +37,7 @@ func TestCreateTenantWithUserRegistrationContract(t *testing.T) {
 	slug := fmt.Sprintf("regtest-%d", stamp)
 	request := &domain.RegisterRequest{
 		Name: "Test Owner", Email: fmt.Sprintf("registration-%d@example.test", stamp), Password: "synthetic-password-123",
-		RestaurantName: name, RestaurantSlug: slug, Phone: "+16505550123",
+		RestaurantName: name, RestaurantSlug: slug, BillingPeriod: "annual", Phone: "+16505550123",
 	}
 	user, err := NewAuthRepository(db).CreateTenantWithUserContext(ctx, request)
 	if err != nil {
@@ -55,8 +55,13 @@ func TestCreateTenantWithUserRegistrationContract(t *testing.T) {
 	if err := db.QueryRow(`SELECT trial_start_date, trial_end_date, trial_days FROM tenants WHERE id = $1`, user.TenantID).Scan(&trialStart, &trialEnd, &trialDays); err != nil {
 		t.Fatal(err)
 	}
-	if trialDays <= 0 || !trialEnd.Equal(trialStart.AddDate(0, 0, trialDays)) {
+	if trialDays != 14 || !trialEnd.Equal(trialStart.AddDate(0, 0, trialDays)) {
 		t.Fatal("registration trial dates do not match configured duration")
+	}
+
+	var preference string
+	if err := db.QueryRow(`SELECT preferred_billing_period FROM tenants WHERE id = $1`, user.TenantID).Scan(&preference); err != nil || preference != "annual" {
+		t.Fatalf("billing preference=%q err=%v", preference, err)
 	}
 
 	var storedTenantPhone, storedUserPhone sql.NullString

@@ -1,0 +1,26 @@
+[
+  {
+    "check": "registration POST",
+    "status": 201,
+    "result": "response body intentionally excluded; browser navigation can discard it"
+  },
+  {
+    "check": "registration dashboard redirect",
+    "url": "https://pos.app.rakmyat.online/en/dashboard",
+    "body": "POS Dashboard\nDashboard\nCashier POS\nKitchen Display\nOrders\nProducts\nHuman Resources\nAccounting\nSuppliers\nFinancial Reports\nReports\nTheme Builder\nSettings\nEnglish\nP\n\nproduct-audit-1794626160@example.invalid\n\nOwner\n\nWelcome, product-audit-1794626160@example.invalid\n\nHere is an overview of your restaurant performance with live data from orders, menu, staff, and notifications.\n\nRole:\nOwner\nAccess: Active\n15 day(s) remaining\nCashier POS\nKitchen Display\nView Orders\nAdd Product\nAdd Category\nTheme Builder\nTeam\nSettings\nLast updated (dashboard refresh): 11/14/2026, 3:16:08 AM\n\nRecent Paid Revenue\n\nEGP 0.00\n\nFrom the latest loaded orders\n\nOpen\n\nOrders\n\n0\n\nTotal orders in system\n\nOpen\n\nPending Orders\n\n0\n\nAwaiting processing\n\nOpen\n\nRestaurants\n\n1\n\nLinked restaurants\n\nOpen\n\nProducts\n\n0\n\nMenu items\n\nOpen\n\nCategories\n\n0\n\nMenu sections\n\nOpen\n\nStaff\n\n0\n\nEmployees\n\nOpen\n\nDrivers\n\n0\n\nDelivery team\n\nOpen\n\nUnread Notifications\n\n0\n\n0 total notifications\n\nOpen\nRecent Orders\n\nLatest orders from your storefront and POS channels\n\nView all orders\n\nNo orders yet\n\nOrders will appear here once customers start placing them.\n\nOpen Theme Builder\nTables Overview\nManage Tables\n\nTrack dine-in table availability and occupancy at a glance.\n\nAvailable\n\n0\n\nOccupied\n\n0\n\nReserved\n\n0\n\nTotal Tables: 0\n\nWorkspace Status\nTenant Access\nActive\nPlan\nFree Trial\nNotifications\n0 unread / 0 total\nData sources\nAll healthy\nGetting Started\n1/5\n\nComplete the setup checklist to make the dashboard fully operational.\n\n✓\n\nRestaurant connected\n\nYour tenant and restaurant are linked and ready to manage.\n\n2\n\nCreate categories\n\nOrganize your menu into sections like main courses, drinks, and desserts.\n\n3\n\nAdd menu products\n\nCreate products with pricing and inventory to start taking orders.\n\n4\n\nAdd your team\n\nInvite employees and assign roles for operations and cashier workflows.\n\n5\n\nCustomize storefront theme\n\nAdjust homepage sections, branding, header, and footer in Theme Builder."
+  },
+  {
+    "check": "session",
+    "status": 200,
+    "keys": [
+      "email",
+      "id",
+      "is_super_admin",
+      "name",
+      "restaurant_id",
+      "role",
+      "tenant_id",
+      "user_id"
+    ]
+  }
+]

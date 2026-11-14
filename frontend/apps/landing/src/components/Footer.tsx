@@ -2,30 +2,16 @@
 
 import Link from 'next/link'
 import { useLanguage } from '@/contexts/LanguageContext'
-import { BrandMark } from '@/components/BrandMark'
+import { getSiteCopy } from '@/content/site'
+import { BrandMark } from './BrandMark'
 
 export function Footer() {
-  const { t, language, dir } = useLanguage()
-  const locale = language
-  const year = new Date().getFullYear()
-
-  return (
-    <footer className="poos-footer" dir={dir}>
-      <div className="poos-shell poos-footer__inner">
-        <div>
-          <BrandMark href={`/${locale}`} label="POOS" inverse />
-          <p className="poos-muted">{t.footer.tagline}</p>
-        </div>
-        <nav className="poos-footer__links" aria-label={t.nav.mainNavigation}>
-          <Link href="#product">{t.footer.features}</Link>
-          <Link href="#how-it-works">{t.nav.howItWorks}</Link>
-          <Link href="#audience">{t.nav.audience}</Link>
-          <Link href="#faq">{t.nav.faq}</Link>
-          <Link href={`/${locale}/auth/login`}>{t.nav.login}</Link>
-          <Link href={`/${locale}/auth/register`}>{t.nav.getStarted}</Link>
-        </nav>
-        <small className="poos-muted">© {year} POOS</small>
-      </div>
-    </footer>
-  )
+  const { language } = useLanguage()
+  const c = getSiteCopy(language)
+  const links = [['features', c.platform], ['how-it-works', c.how], ['pricing', c.pricing], ['demo', c.demo], ['contact', c.contact], ['privacy', c.privacy]]
+  return <footer className="sv-footer"><div className="sv-shell">
+    <div className="sv-footer-top"><div><BrandMark href={`/${language}`} label="SERVIO" inverse /><p>{c.footerLine}</p></div>
+      <nav aria-label={language === 'ar' ? 'روابط المنتج' : 'Product links'}>{links.map(([path, label]) => <Link key={path} href={`/${language}/${path}`}>{label}</Link>)}<Link href={`/${language}/auth/login`}>{c.login}</Link><Link href={`/${language}/auth/register`}>{c.trial}</Link></nav></div>
+    <div className="sv-footer-bottom"><p>{c.sampleNote}</p><small>© {new Date().getFullYear()} SERVIO</small></div>
+  </div></footer>
 }

@@ -253,3 +253,21 @@ func TestRefundPayment_WhenConcurrentRefundAlreadyCommitted_SkipsProviderCall(t 
 		t.Fatalf("unmet SQL expectations: %v", err)
 	}
 }
+
+func TestWebhookSecurity_HistoricalPaymentKeepsStoredPrice(t *testing.T) {
+	repo := newTestPaymentRepo()
+	uc := NewPaymentUseCase(repo, newTestSubscriptionRepo(), nil, &testPaymobClient{verifyHMAC: true}, nil)
+	id := pendingPaymentWithOrder(t, repo, domain.PaymentStatusPending, 9901)
+	payload := webhookPayloadForTest(9901, 50000, false, true, false)
+	raw, err := json.Marshal(payload)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := uc.HandleWebhook(context.Background(), raw, payload, "ok"); err != nil {
+		t.Fatalf("historical payment rejected after current offer changed: %v", err)
+	}
+	payment, err := repo.GetPaymentByID(context.Background(), 1, id)
+	if err != nil || payment.AmountCents != 50000 || payment.Status != domain.PaymentStatusPending {
+		t.Fatalf("historical snapshot changed: payment=%+v err=%v", payment, err)
+	}
+}

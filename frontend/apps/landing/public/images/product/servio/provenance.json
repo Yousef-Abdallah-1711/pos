@@ -1,0 +1,22 @@
+{
+  "capture_date": "2026-11-14",
+  "release": "f733efb5e7f5730fea5a56a65d66d9c339e6c040",
+  "data": "Synthetic audit workspace only",
+  "assets": {
+    "pos.png": "desktop-en-_en_dashboard_pos.png",
+    "kitchen.png": "kds-after-pos.png",
+    "kitchen-completed.png": "kds-completed.png",
+    "checkout.png": "guest-checkout-mobile.png",
+    "confirmation.png": "guest-confirmation-mobile.png",
+    "theme.png": "theme-ui-color-save.png",
+    "inventory.png": "desktop-en-_en_dashboard_inventory.png",
+    "staff.png": "hr-populated-leaves.png",
+    "dashboard.png": "fresh-tenant-dashboard.png"
+  },
+  "limits": [
+    "POS capture uses empty cart; disputed transaction totals are not shown.",
+    "Kitchen header statistics may lag ticket updates.",
+    "English application screenshots are labelled as such on Arabic pages.",
+    "Theme editor preview is not evidence of new hostname provisioning."
+  ]
+}

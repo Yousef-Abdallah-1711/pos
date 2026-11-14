@@ -1,0 +1,620 @@
+[
+  {
+    "method": "GET",
+    "route": "/admin/orders/10",
+    "http": 200,
+    "response": {
+      "id": 10,
+      "order_number": "ORD-2026-2c544c21-4266-4953-a15b-0c61a10d3f68",
+      "order_source": "pos",
+      "customer_name": "Audit Synthetic Guest",
+      "customer_email": "",
+      "customer_phone": "+12025550123",
+      "delivery_address": "",
+      "status": "preparing",
+      "payment_status": "paid",
+      "payment_method": "cash",
+      "subtotal": 100,
+      "tax": 10,
+      "delivery_fee": 0,
+      "discount": 0,
+      "total": 110,
+      "created_at": "2026-11-14T03:16:31.628138Z",
+      "table": {
+        "id": 3,
+        "number": 1,
+        "name": "Audit table",
+        "location": "indoor",
+        "capacity": 4,
+        "is_assigned": true
+      },
+      "items": [
+        {
+          "id": 10,
+          "product_id": 10,
+          "product_name": "Audit Test Dish",
+          "quantity": 1,
+          "unit_price": 100,
+          "subtotal": 100
+        }
+      ],
+      "status_history": [
+        {
+          "id": 29,
+          "status": "preparing",
+          "notes": "Synced from KDS bump",
+          "changed_at": "2026-11-14T03:17:13.276507Z",
+          "changed_by": "14"
+        },
+        {
+          "id": 28,
+          "status": "confirmed",
+          "notes": "Auto-confirmed POS order",
+          "changed_at": "2026-11-14T03:16:31.692142Z"
+        }
+      ]
+    }
+  },
+  {
+    "method": "GET",
+    "route": "/kds/queue?include_completed=true",
+    "http": 200,
+    "response": {
+      "data": [
+        {
+          "id": 7,
+          "tenant_id": 13,
+          "restaurant_id": 13,
+          "order_id": 10,
+          "order_number": "ORD-2026-2c544c21-4266-4953-a15b-0c61a10d3f68",
+          "order_source": "pos",
+          "table_id": 3,
+          "table_number": 1,
+          "table_name": "Audit table",
+          "customer_name": "Audit Synthetic Guest",
+          "status": "in_progress",
+          "priority": 0,
+          "station_id": "expo",
+          "items": [
+            {
+              "product_id": 10,
+              "product_name": "Audit Test Dish",
+              "quantity": 1
+            }
+          ],
+          "received_at": "2026-11-14T03:16:31.714432Z",
+          "started_at": "2026-11-14T03:17:13.276507Z",
+          "bumped_by": 14,
+          "elapsed_seconds": 42,
+          "created_at": "2026-11-14T03:16:31.714432Z",
+          "updated_at": "2026-11-14T03:17:13.276507Z"
+        }
+      ],
+      "success": true
+    }
+  },
+  {
+    "check": "KDS UI bump 1",
+    "text": "Kitchen Display\n\nLive kitchen queue\n\nConnected\n\nACTIVE ORDERS\n\n1\n\nNEW\n\n1\n\nIN PROGRESS\n\n0\n\nAVG PREP\n\n0.0m\n\nAll\nNew\nIn Progress\nReady\nCompleted\n#ORD-2026-2c544c21-4266-4953-a15b-0c61a10d3f68\n\nCustomer: Audit Synthetic Guest\n\nTables #1 - Audit table\n\n00:42\nIn Progress\n\n1x Audit Test Dish\n\nBump\n\nIn Progress -> Ready"
+  },
+  {
+    "method": "GET",
+    "route": "/admin/orders/10",
+    "http": 200,
+    "response": {
+      "id": 10,
+      "order_number": "ORD-2026-2c544c21-4266-4953-a15b-0c61a10d3f68",
+      "order_source": "pos",
+      "customer_name": "Audit Synthetic Guest",
+      "customer_email": "",
+      "customer_phone": "+12025550123",
+      "delivery_address": "",
+      "status": "ready",
+      "payment_status": "paid",
+      "payment_method": "cash",
+      "subtotal": 100,
+      "tax": 10,
+      "delivery_fee": 0,
+      "discount": 0,
+      "total": 110,
+      "created_at": "2026-11-14T03:16:31.628138Z",
+      "table": {
+        "id": 3,
+        "number": 1,
+        "name": "Audit table",
+        "location": "indoor",
+        "capacity": 4,
+        "is_assigned": true
+      },
+      "items": [
+        {
+          "id": 10,
+          "product_id": 10,
+          "product_name": "Audit Test Dish",
+          "quantity": 1,
+          "unit_price": 100,
+          "subtotal": 100
+        }
+      ],
+      "status_history": [
+        {
+          "id": 30,
+          "status": "ready",
+          "notes": "Synced from KDS bump",
+          "changed_at": "2026-11-14T03:17:14.037378Z",
+          "changed_by": "14"
+        },
+        {
+          "id": 29,
+          "status": "preparing",
+          "notes": "Synced from KDS bump",
+          "changed_at": "2026-11-14T03:17:13.276507Z",
+          "changed_by": "14"
+        },
+        {
+          "id": 28,
+          "status": "confirmed",
+          "notes": "Auto-confirmed POS order",
+          "changed_at": "2026-11-14T03:16:31.692142Z"
+        }
+      ]
+    }
+  },
+  {
+    "method": "GET",
+    "route": "/kds/queue?include_completed=true",
+    "http": 200,
+    "response": {
+      "data": [
+        {
+          "id": 7,
+          "tenant_id": 13,
+          "restaurant_id": 13,
+          "order_id": 10,
+          "order_number": "ORD-2026-2c544c21-4266-4953-a15b-0c61a10d3f68",
+          "order_source": "pos",
+          "table_id": 3,
+          "table_number": 1,
+          "table_name": "Audit table",
+          "customer_name": "Audit Synthetic Guest",
+          "status": "ready",
+          "priority": 0,
+          "station_id": "expo",
+          "items": [
+            {
+              "product_id": 10,
+              "product_name": "Audit Test Dish",
+              "quantity": 1
+            }
+          ],
+          "received_at": "2026-11-14T03:16:31.714432Z",
+          "started_at": "2026-11-14T03:17:13.276507Z",
+          "bumped_by": 14,
+          "elapsed_seconds": 43,
+          "created_at": "2026-11-14T03:16:31.714432Z",
+          "updated_at": "2026-11-14T03:17:14.037378Z"
+        }
+      ],
+      "success": true
+    }
+  },
+  {
+    "check": "KDS UI bump 2",
+    "text": "Kitchen Display\n\nLive kitchen queue\n\nConnected\n\nACTIVE ORDERS\n\n1\n\nNEW\n\n1\n\nIN PROGRESS\n\n0\n\nAVG PREP\n\n0.0m\n\nAll\nNew\nIn Progress\nReady\nCompleted\n#ORD-2026-2c544c21-4266-4953-a15b-0c61a10d3f68\n\nCustomer: Audit Synthetic Guest\n\nTables #1 - Audit table\n\n00:43\nReady\n\n1x Audit Test Dish\n\nBump\n\nReady -> Completed"
+  },
+  {
+    "method": "GET",
+    "route": "/admin/orders/10",
+    "http": 200,
+    "response": {
+      "id": 10,
+      "order_number": "ORD-2026-2c544c21-4266-4953-a15b-0c61a10d3f68",
+      "order_source": "pos",
+      "customer_name": "Audit Synthetic Guest",
+      "customer_email": "",
+      "customer_phone": "+12025550123",
+      "delivery_address": "",
+      "status": "ready",
+      "payment_status": "paid",
+      "payment_method": "cash",
+      "subtotal": 100,
+      "tax": 10,
+      "delivery_fee": 0,
+      "discount": 0,
+      "total": 110,
+      "created_at": "2026-11-14T03:16:31.628138Z",
+      "table": {
+        "id": 3,
+        "number": 1,
+        "name": "Audit table",
+        "location": "indoor",
+        "capacity": 4,
+        "is_assigned": true
+      },
+      "items": [
+        {
+          "id": 10,
+          "product_id": 10,
+          "product_name": "Audit Test Dish",
+          "quantity": 1,
+          "unit_price": 100,
+          "subtotal": 100
+        }
+      ],
+      "status_history": [
+        {
+          "id": 30,
+          "status": "ready",
+          "notes": "Synced from KDS bump",
+          "changed_at": "2026-11-14T03:17:14.037378Z",
+          "changed_by": "14"
+        },
+        {
+          "id": 29,
+          "status": "preparing",
+          "notes": "Synced from KDS bump",
+          "changed_at": "2026-11-14T03:17:13.276507Z",
+          "changed_by": "14"
+        },
+        {
+          "id": 28,
+          "status": "confirmed",
+          "notes": "Auto-confirmed POS order",
+          "changed_at": "2026-11-14T03:16:31.692142Z"
+        }
+      ]
+    }
+  },
+  {
+    "method": "GET",
+    "route": "/kds/queue?include_completed=true",
+    "http": 200,
+    "response": {
+      "data": [
+        {
+          "id": 7,
+          "tenant_id": 13,
+          "restaurant_id": 13,
+          "order_id": 10,
+          "order_number": "ORD-2026-2c544c21-4266-4953-a15b-0c61a10d3f68",
+          "order_source": "pos",
+          "table_id": 3,
+          "table_number": 1,
+          "table_name": "Audit table",
+          "customer_name": "Audit Synthetic Guest",
+          "status": "completed",
+          "priority": 0,
+          "station_id": "expo",
+          "items": [
+            {
+              "product_id": 10,
+              "product_name": "Audit Test Dish",
+              "quantity": 1
+            }
+          ],
+          "received_at": "2026-11-14T03:16:31.714432Z",
+          "started_at": "2026-11-14T03:17:13.276507Z",
+          "completed_at": "2026-11-14T03:17:14.771758Z",
+          "bumped_by": 14,
+          "elapsed_seconds": 43,
+          "created_at": "2026-11-14T03:16:31.714432Z",
+          "updated_at": "2026-11-14T03:17:14.771758Z"
+        }
+      ],
+      "success": true
+    }
+  },
+  {
+    "check": "KDS UI bump 3",
+    "text": "Kitchen Display\n\nLive kitchen queue\n\nConnected\n\nACTIVE ORDERS\n\n1\n\nNEW\n\n1\n\nIN PROGRESS\n\n0\n\nAVG PREP\n\n0.0m\n\nAll\nNew\nIn Progress\nReady\nCompleted\n#ORD-2026-2c544c21-4266-4953-a15b-0c61a10d3f68\n\nCustomer: Audit Synthetic Guest\n\nTables #1 - Audit table\n\n00:43\nCompleted\n\n1x Audit Test Dish\n\nRecall"
+  },
+  {
+    "check": "completed tab",
+    "text": "Kitchen Display\n\nLive kitchen queue\n\nConnected\n\nACTIVE ORDERS\n\n1\n\nNEW\n\n1\n\nIN PROGRESS\n\n0\n\nAVG PREP\n\n0.0m\n\nAll\nNew\nIn Progress\nReady\nCompleted\n#ORD-2026-2c544c21-4266-4953-a15b-0c61a10d3f68\n\nCustomer: Audit Synthetic Guest\n\nTables #1 - Audit table\n\n00:43\nCompleted\n\n1x Audit Test Dish\n\nRecall",
+    "buttons": [
+      "",
+      "",
+      "",
+      "All",
+      "New",
+      "In Progress",
+      "Ready",
+      "Completed",
+      "Recall"
+    ]
+  },
+  {
+    "method": "GET",
+    "route": "/kds/queue",
+    "http": 200,
+    "response": {
+      "data": [
+        {
+          "id": 7,
+          "tenant_id": 13,
+          "restaurant_id": 13,
+          "order_id": 10,
+          "order_number": "ORD-2026-2c544c21-4266-4953-a15b-0c61a10d3f68",
+          "order_source": "pos",
+          "table_id": 3,
+          "table_number": 1,
+          "table_name": "Audit table",
+          "customer_name": "Audit Synthetic Guest",
+          "status": "ready",
+          "priority": 0,
+          "station_id": "expo",
+          "items": [
+            {
+              "product_id": 10,
+              "product_name": "Audit Test Dish",
+              "quantity": 1
+            }
+          ],
+          "received_at": "2026-11-14T03:16:31.714432Z",
+          "started_at": "2026-11-14T03:17:13.276507Z",
+          "bumped_by": 14,
+          "elapsed_seconds": 44,
+          "created_at": "2026-11-14T03:16:31.714432Z",
+          "updated_at": "2026-11-14T03:17:15.973605Z"
+        }
+      ],
+      "success": true
+    }
+  },
+  {
+    "method": "PUT",
+    "route": "/admin/orders/10/status",
+    "http": 200,
+    "response": {
+      "success": true
+    }
+  },
+  {
+    "method": "GET",
+    "route": "/products/10",
+    "http": 200,
+    "response": {
+      "id": 10,
+      "tenant_id": 13,
+      "restaurant_id": 13,
+      "category_id": 13,
+      "sku": "audit-product-20261114",
+      "name_en": "Audit Test Dish",
+      "name_ar": "طبق اختبار",
+      "description_en": "Synthetic audit. Do not fulfill.",
+      "price": 100,
+      "cost": 20,
+      "is_vegetarian": false,
+      "is_vegan": false,
+      "is_spicy": false,
+      "is_gluten_free": false,
+      "is_available": true,
+      "track_inventory": true,
+      "quantity_in_stock": 20,
+      "low_stock_threshold": 3,
+      "reorder_quantity": 0,
+      "display_order": 0,
+      "featured": false,
+      "status": "active",
+      "created_by": 14,
+      "created_at": "2026-11-14T03:13:49.43905Z",
+      "updated_at": "2026-11-14T03:17:16.508601Z"
+    }
+  },
+  {
+    "method": "GET",
+    "route": "/tables/3",
+    "http": 200,
+    "response": {
+      "data": {
+        "id": 3,
+        "tenant_id": 13,
+        "restaurant_id": 13,
+        "table_number": 1,
+        "name": "Audit table",
+        "capacity": 4,
+        "location": "indoor",
+        "status": "occupied",
+        "description": "Synthetic product audit only",
+        "qr_code_config": {},
+        "position_x": 0,
+        "position_y": 0,
+        "shape": "square",
+        "created_at": "2026-11-14T03:13:49.468956Z",
+        "updated_at": "2026-11-14T03:16:31.688377Z"
+      },
+      "success": true
+    }
+  },
+  {
+    "method": "GET",
+    "route": "/kds/queue?include_completed=true",
+    "http": 200,
+    "response": {
+      "data": [
+        {
+          "id": 7,
+          "tenant_id": 13,
+          "restaurant_id": 13,
+          "order_id": 10,
+          "order_number": "ORD-2026-2c544c21-4266-4953-a15b-0c61a10d3f68",
+          "order_source": "pos",
+          "table_id": 3,
+          "table_number": 1,
+          "table_name": "Audit table",
+          "customer_name": "Audit Synthetic Guest",
+          "status": "ready",
+          "priority": 0,
+          "station_id": "expo",
+          "items": [
+            {
+              "product_id": 10,
+              "product_name": "Audit Test Dish",
+              "quantity": 1
+            }
+          ],
+          "received_at": "2026-11-14T03:16:31.714432Z",
+          "started_at": "2026-11-14T03:17:13.276507Z",
+          "bumped_by": 14,
+          "elapsed_seconds": 44,
+          "created_at": "2026-11-14T03:16:31.714432Z",
+          "updated_at": "2026-11-14T03:17:15.973605Z"
+        }
+      ],
+      "success": true
+    }
+  },
+  {
+    "method": "GET",
+    "route": "/hr/attendance",
+    "http": 200,
+    "response": {
+      "data": [
+        {
+          "id": 1,
+          "tenant_id": 13,
+          "restaurant_id": 13,
+          "employee_id": 1,
+          "attendance_date": "2026-11-14T00:00:00Z",
+          "clock_in": "2026-11-14T03:13:49.541505Z",
+          "total_break_minutes": 0,
+          "regular_hours": 0,
+          "overtime_hours": 0,
+          "status": "present",
+          "is_late": false,
+          "late_by_minutes": 0,
+          "is_early_departure": false,
+          "early_departure_minutes": 0,
+          "is_overtime": false,
+          "overtime_approved": false,
+          "requires_approval": false,
+          "is_approved": false,
+          "created_at": "2026-11-14T03:13:49.541505Z",
+          "updated_at": "2026-11-14T03:13:49.541505Z"
+        }
+      ],
+      "pagination": {
+        "page": 1,
+        "page_size": 20,
+        "total": 1,
+        "total_pages": 1
+      },
+      "success": true
+    }
+  },
+  {
+    "method": "PUT",
+    "route": "/hr/attendance/1",
+    "http": 200,
+    "response": {
+      "data": {
+        "id": 1,
+        "tenant_id": 13,
+        "restaurant_id": 13,
+        "employee_id": 1,
+        "attendance_date": "2026-11-14T00:00:00Z",
+        "clock_in": "2026-11-14T03:13:49.541505Z",
+        "clock_out": "2026-11-14T03:20:00Z",
+        "total_break_minutes": 0,
+        "regular_hours": 0,
+        "overtime_hours": 0,
+        "status": "present",
+        "is_late": false,
+        "late_by_minutes": 0,
+        "is_early_departure": false,
+        "early_departure_minutes": 0,
+        "is_overtime": false,
+        "overtime_approved": false,
+        "notes": "Synthetic audit time record",
+        "requires_approval": false,
+        "is_approved": false,
+        "created_at": "2026-11-14T03:13:49.541505Z",
+        "updated_at": "2026-11-14T03:13:49.541505Z",
+        "updated_by": 14
+      },
+      "success": true
+    }
+  },
+  {
+    "method": "POST",
+    "route": "/hr/leaves",
+    "http": 201,
+    "response": {
+      "data": {
+        "id": 1,
+        "tenant_id": 13,
+        "restaurant_id": 13,
+        "employee_id": 1,
+        "start_date": "2026-11-20T00:00:00Z",
+        "end_date": "2026-11-20T00:00:00Z",
+        "total_days": 1,
+        "is_half_day": false,
+        "leave_type": "annual",
+        "leave_category": "paid",
+        "reason": "Synthetic audit leave request",
+        "status": "pending",
+        "is_approved": false,
+        "deducted_from_balance": false,
+        "handover_completed": false,
+        "notify_manager": false,
+        "notify_hr": false,
+        "created_at": "0001-01-01T00:00:00Z",
+        "updated_at": "0001-01-01T00:00:00Z",
+        "created_by": 14
+      },
+      "success": true
+    }
+  },
+  {
+    "method": "POST",
+    "route": "/hr/leaves/1/approve",
+    "http": 200,
+    "response": {
+      "success": true
+    }
+  },
+  {
+    "method": "GET",
+    "route": "/hr/leaves",
+    "http": 200,
+    "response": {
+      "data": [
+        {
+          "id": 1,
+          "tenant_id": 13,
+          "restaurant_id": 13,
+          "employee_id": 1,
+          "start_date": "2026-11-20T00:00:00Z",
+          "end_date": "2026-11-20T00:00:00Z",
+          "total_days": 1,
+          "is_half_day": false,
+          "leave_type": "annual",
+          "leave_category": "paid",
+          "reason": "Synthetic audit leave request",
+          "status": "approved",
+          "is_approved": true,
+          "deducted_from_balance": false,
+          "handover_completed": false,
+          "notify_manager": false,
+          "notify_hr": false,
+          "created_at": "2026-11-14T03:17:16.647004Z",
+          "updated_at": "2026-11-14T03:17:16.673065Z"
+        }
+      ],
+      "pagination": {
+        "page": 1,
+        "page_size": 20,
+        "total": 1,
+        "total_pages": 1
+      },
+      "success": true
+    }
+  },
+  {
+    "check": "tenant B reading tenant A synthetic product",
+    "http": 404,
+    "response": {
+      "error": "product not found"
+    }
+  }
+]

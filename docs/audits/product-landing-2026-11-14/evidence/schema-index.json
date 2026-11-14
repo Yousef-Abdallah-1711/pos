@@ -1,0 +1,313 @@
+{
+  "backend/migrations/153_create_fiscal_periods.sql": [
+    "fiscal_periods"
+  ],
+  "backend/migrations/022_create_employee_roles_table.sql": [
+    "employee_roles"
+  ],
+  "backend/migrations/104_create_role_permissions_table.sql": [
+    "role_permissions"
+  ],
+  "backend/migrations/155_add_accounting_rbac_modules.sql": [],
+  "backend/migrations/181_durable_accounting_event_outbox.sql": [
+    "accounting_event_outbox"
+  ],
+  "backend/migrations/101_create_permission_levels_table.sql": [
+    "permission_levels"
+  ],
+  "backend/migrations/146_create_tax_periods.sql": [
+    "tax_periods"
+  ],
+  "backend/migrations/140_create_bank_accounts.sql": [
+    "bank_accounts_ledger"
+  ],
+  "backend/migrations/071_create_theme_components_table.sql": [
+    "theme_components"
+  ],
+  "backend/migrations/074_create_theme_presets.sql": [
+    "theme_presets"
+  ],
+  "backend/migrations/141_create_invoices_customer.sql": [
+    "invoices_customer",
+    "invoice_customer_lines"
+  ],
+  "backend/migrations/013_update_products_for_product_module.sql": [],
+  "backend/migrations/040_create_user_settings.sql": [
+    "user_settings",
+    "user_settings_audit_log",
+    "password_change_history",
+    "email_change_requests"
+  ],
+  "backend/migrations/137_create_journal_entries.sql": [
+    "journal_entries",
+    "journal_entry_lines"
+  ],
+  "backend/migrations/114_add_payment_fields_to_tenants.sql": [],
+  "backend/migrations/118_create_subscription_plans_table.sql": [
+    "subscription_plans"
+  ],
+  "backend/migrations/157_optimize_financial_reporting_indexes.sql": [],
+  "backend/migrations/099_add_test_restaurant.sql": [],
+  "backend/migrations/177_rls_user_roles.sql": [],
+  "backend/migrations/090_enhance_theme_history.sql": [
+    "theme_snapshots"
+  ],
+  "backend/migrations/154_create_general_ledger.sql": [
+    "general_ledger"
+  ],
+  "backend/migrations/181_partial_order_cancellations.sql": [
+    "order_item_cancellations"
+  ],
+  "backend/migrations/999_theme_migration_legacy.sql": [
+    "restaurant_themes",
+    "theme_sections"
+  ],
+  "backend/migrations/175_durable_payment_refund_state.sql": [],
+  "backend/migrations/063_enhance_restaurant_config_with_theme.sql": [
+    "if",
+    "restaurant_config"
+  ],
+  "backend/migrations/119_add_subscription_cancellation_fields.sql": [],
+  "backend/migrations/161_add_public_token_to_orders.sql": [],
+  "backend/migrations/017_create_product_audit_log.sql": [
+    "product_audit_log"
+  ],
+  "backend/migrations/148_create_training_records.sql": [
+    "training_records"
+  ],
+  "backend/migrations/142_create_invoices_supplier.sql": [
+    "invoices_supplier",
+    "invoice_supplier_lines"
+  ],
+  "backend/migrations/111_create_subscription_history_table.sql": [
+    "tenant_subscription_history"
+  ],
+  "backend/migrations/131_add_table_id_to_orders.sql": [],
+  "backend/migrations/108_add_is_super_admin_to_users.sql": [],
+  "backend/migrations/014_create_product_images.sql": [
+    "product_images"
+  ],
+  "backend/migrations/129_add_kds_performance_indexes.sql": [],
+  "backend/migrations/061_create_order_items_table.sql": [
+    "order_items"
+  ],
+  "backend/migrations/121_add_reporting_indexes.sql": [],
+  "backend/migrations/136_create_chart_of_accounts.sql": [
+    "chart_of_accounts"
+  ],
+  "backend/migrations/170_rls_permission_audit_logs.sql": [],
+  "backend/migrations/176_rls_role_permissions.sql": [],
+  "backend/migrations/107_create_super_admin_tables.sql": [
+    "super_admins",
+    "impersonation_sessions",
+    "super_admin_audit_logs"
+  ],
+  "backend/migrations/068_create_homepage_sections_table.sql": [
+    "homepage_sections"
+  ],
+  "backend/migrations/106_backfill_rbac_defaults.sql": [],
+  "backend/migrations/158_create_phase7_phase9_extensions.sql": [
+    "bank_reconciliation_sessions",
+    "bank_reconciliation_lines",
+    "recurring_journal_templates",
+    "account_budgets",
+    "exchange_rates",
+    "supplier_payment_schedules",
+    "invoice_delivery_logs",
+    "e_invoice_submissions",
+    "audit_export_logs"
+  ],
+  "backend/migrations/166_rls_notification_preferences.sql": [],
+  "backend/migrations/026_create_performance_reviews_table.sql": [
+    "performance_reviews"
+  ],
+  "backend/migrations/152_create_auto_posting_rules.sql": [
+    "auto_posting_rules"
+  ],
+  "backend/migrations/173_webhook_retry_queue_runtime_grants.sql": [],
+  "backend/migrations/062_create_order_status_history_table.sql": [
+    "order_status_history"
+  ],
+  "backend/migrations/067_create_themes_table.sql": [
+    "themes"
+  ],
+  "backend/migrations/105_add_rbac_modules.sql": [],
+  "backend/migrations/159_seed_external_accountant_role.sql": [],
+  "backend/migrations/071_create_driver_assignments_table.sql": [
+    "driver_assignments"
+  ],
+  "backend/migrations/147_create_performance_reviews.sql": [
+    "performance_reviews"
+  ],
+  "backend/migrations/027_create_hr_audit_logs_table.sql": [
+    "hr_audit_logs"
+  ],
+  "backend/migrations/065_add_restaurant_id_to_order_items.sql": [],
+  "backend/migrations/180_order_stock_reservations.sql": [
+    "order_stock_reservations"
+  ],
+  "backend/migrations/128_add_kds_show_analytics_setting.sql": [],
+  "backend/migrations/103_create_user_roles_table.sql": [
+    "user_roles"
+  ],
+  "backend/migrations/168_rls_report_export_audit_logs.sql": [],
+  "backend/migrations/073_enhance_themes_table.sql": [],
+  "backend/migrations/145_create_fixed_assets.sql": [
+    "fixed_assets"
+  ],
+  "backend/migrations/151_create_resignations.sql": [
+    "resignations"
+  ],
+  "backend/migrations/156_seed_chart_of_accounts.sql": [],
+  "backend/migrations/002_create_restaurants.sql": [
+    "restaurants"
+  ],
+  "backend/migrations/182_index_paid_orders_for_accounting_recovery.sql": [],
+  "backend/migrations/132_add_tables_rbac_module.sql": [],
+  "backend/migrations/117_create_webhook_retry_queue.sql": [
+    "webhook_retry_queue"
+  ],
+  "backend/migrations/169_rls_invoice_delivery_logs.sql": [],
+  "backend/migrations/067_theme_migrations_placeholder.sql": [],
+  "backend/migrations/126_add_kds_rbac_module.sql": [],
+  "backend/migrations/123_create_report_export_audit_logs.sql": [
+    "report_export_audit_logs"
+  ],
+  "backend/migrations/060_create_orders_table.sql": [
+    "orders"
+  ],
+  "backend/migrations/130_create_restaurant_tables.sql": [
+    "restaurant_tables"
+  ],
+  "backend/migrations/161_add_theme_dark_colors.sql": [],
+  "backend/migrations/135_backfill_tables_role_permissions.sql": [],
+  "backend/migrations/005_create_products.sql": [
+    "products"
+  ],
+  "backend/migrations/070_create_themes_v2_table.sql": [
+    "themes_v2"
+  ],
+  "backend/migrations/127_backfill_kds_role_permissions.sql": [],
+  "backend/migrations/115_create_payments_table.sql": [
+    "payments"
+  ],
+  "backend/migrations/100_create_modules_table.sql": [
+    "modules"
+  ],
+  "backend/migrations/133_create_table_layouts.sql": [
+    "table_layouts"
+  ],
+  "backend/migrations/064_enhance_restaurant_settings_for_orders.sql": [
+    "restaurant_settings"
+  ],
+  "backend/migrations/149_create_insurance_tracking.sql": [
+    "insurance_tracking"
+  ],
+  "backend/migrations/113_fix_subscription_history_fk.sql": [],
+  "backend/migrations/066_add_restaurant_id_indexes.sql": [],
+  "backend/migrations/021_create_roles_table.sql": [
+    "roles"
+  ],
+  "backend/migrations/180_enforce_journal_integrity.sql": [],
+  "backend/migrations/072_create_theme_history_table.sql": [
+    "theme_history"
+  ],
+  "backend/migrations/072_create_driver_location_history_table.sql": [
+    "driver_location_history"
+  ],
+  "backend/migrations/122_add_export_permission_level.sql": [],
+  "backend/migrations/178_payment_void_state.sql": [],
+  "backend/migrations/003_create_users.sql": [
+    "users"
+  ],
+  "backend/migrations/134_set_kds_analytics_default_hidden.sql": [],
+  "backend/migrations/163_seed_theme_dark_colors_and_templates.sql": [],
+  "backend/migrations/184_idempotent_order_sale_inventory_movements.sql": [
+    "accounting_inventory_movement_events"
+  ],
+  "backend/migrations/001_create_tenants.sql": [
+    "tenants"
+  ],
+  "backend/migrations/075_add_bilingual_support_to_components.sql": [],
+  "backend/migrations/139_create_customers_accounting.sql": [
+    "customers_accounting"
+  ],
+  "backend/migrations/167_rls_audit_export_logs.sql": [],
+  "backend/migrations/078_seed_production_themes.sql": [],
+  "backend/migrations/016_create_low_stock_alerts.sql": [
+    "low_stock_alerts"
+  ],
+  "backend/migrations/160_add_hr_reporting_indexes.sql": [],
+  "backend/migrations/143_create_payments.sql": [
+    "payments_received",
+    "payments_made"
+  ],
+  "backend/migrations/109_seed_super_admin.sql": [],
+  "backend/migrations/124_create_kds_queue.sql": [
+    "kds_queue"
+  ],
+  "backend/migrations/162_add_theme_template_variants.sql": [],
+  "backend/migrations/120_ensure_reports_module_seed.sql": [],
+  "backend/migrations/163_add_user_auth_audit_logs.sql": [
+    "user_auth_audit_logs"
+  ],
+  "backend/migrations/182_accounting_runtime_roles.sql": [],
+  "backend/migrations/012_update_categories_for_product_module.sql": [],
+  "backend/migrations/020_create_employees_table.sql": [
+    "employees"
+  ],
+  "backend/migrations/024_create_salaries_table.sql": [
+    "salaries"
+  ],
+  "backend/migrations/185_accounting_recovery_runtime_permissions.sql": [],
+  "backend/migrations/069_create_website_settings_table.sql": [
+    "website_settings"
+  ],
+  "backend/migrations/171_rls_e_invoice_submissions.sql": [],
+  "backend/migrations/174_rls_payments.sql": [],
+  "backend/migrations/164_rls_user_auth_audit_logs.sql": [],
+  "backend/migrations/023_create_attendance_table.sql": [
+    "attendance"
+  ],
+  "backend/migrations/162_add_dashboard_access_audit_action.sql": [],
+  "backend/migrations/116_add_payment_history_actions.sql": [],
+  "backend/migrations/183_fence_accounting_event_leases.sql": [],
+  "backend/migrations/125_create_kds_settings.sql": [
+    "kds_settings"
+  ],
+  "backend/migrations/025_create_leaves_table.sql": [
+    "leaves"
+  ],
+  "backend/migrations/165_rls_user_settings.sql": [],
+  "backend/migrations/172_rls_notifications.sql": [],
+  "backend/migrations/070_create_drivers_table.sql": [
+    "drivers"
+  ],
+  "backend/migrations/077_enhance_themes_with_jsonb_config.sql": [],
+  "backend/migrations/112_seed_existing_tenants_trial.sql": [],
+  "backend/migrations/138_create_suppliers.sql": [
+    "suppliers"
+  ],
+  "backend/migrations/015_create_inventory.sql": [
+    "inventory"
+  ],
+  "backend/migrations/050_create_notifications_system.sql": [
+    "notifications",
+    "notification_preferences",
+    "notification_read_tracking"
+  ],
+  "backend/migrations/004_create_categories.sql": [
+    "categories"
+  ],
+  "backend/migrations/104_create_permission_audit_logs_table.sql": [
+    "permission_audit_logs"
+  ],
+  "backend/migrations/179_index_users_email_lower.sql": [],
+  "backend/migrations/144_create_inventory_movements.sql": [
+    "inventory_movements"
+  ],
+  "backend/migrations/150_create_employment_contracts.sql": [
+    "employment_contracts"
+  ],
+  "backend/migrations/110_add_tenant_subscription_fields.sql": []
+}

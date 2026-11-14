@@ -213,6 +213,25 @@ func ValidPaymentStatus(status string) bool {
 	return false
 }
 
+// CanTransitionOrderPaymentStatus keeps the generic status endpoint from
+// asserting a refund or undoing a paid event without a provider-backed,
+// accounting-aware workflow. Stored legacy statuses remain valid for reads.
+func CanTransitionOrderPaymentStatus(orderStatus, currentPaymentStatus, nextPaymentStatus string) bool {
+	if !ValidPaymentStatus(nextPaymentStatus) || nextPaymentStatus == "refunded" {
+		return false
+	}
+	if currentPaymentStatus == "refunded" {
+		return false
+	}
+	if currentPaymentStatus == "paid" && nextPaymentStatus != "paid" {
+		return false
+	}
+	if orderStatus == "cancelled" && nextPaymentStatus == "paid" {
+		return false
+	}
+	return true
+}
+
 // CanTransitionStatus checks if a status transition is valid
 func CanTransitionStatus(oldStatus, newStatus string) bool {
 	// Allow any status to transition to cancelled

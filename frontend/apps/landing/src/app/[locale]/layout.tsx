@@ -1,3 +1,4 @@
+import { RootDocument, rootMetadata } from '@/components/RootDocument'
 import { LanguageProvider } from '@/contexts/LanguageContext'
 import { Toaster } from 'sonner'
 import type { Metadata } from 'next'
@@ -19,19 +20,20 @@ export async function generateMetadata({ params }: Pick<LocaleLayoutProps, 'para
   if (locale !== 'en' && locale !== 'ar') notFound()
 
   const isArabic = locale === 'ar'
-  const title = isArabic ? 'POOS | إدارة متصلة لكل تفاصيل مطعمك' : 'POOS | Connected restaurant management'
+  const title = isArabic ? 'SERVIO | إدارة متصلة لكل تفاصيل مطعمك' : 'SERVIO | Connected restaurant management'
   const description = isArabic
     ? 'منصة واحدة لإدارة العمل في مطعمك من واجهة الخدمة إلى ما يدور خلفها.'
     : 'One platform for the work at the front and back of your restaurant.'
 
   return {
+    ...rootMetadata,
     title,
     description,
     alternates: {
       canonical: `/${locale}`,
       languages: { en: '/en', ar: '/ar' },
     },
-    openGraph: { title, description, siteName: 'POOS', type: 'website', locale: isArabic ? 'ar_EG' : 'en_US' },
+    openGraph: { title, description, siteName: 'SERVIO', type: 'website', locale: isArabic ? 'ar_EG' : 'en_US' },
   }
 }
 
@@ -41,9 +43,9 @@ export default async function LocaleLayout({ children, params }: LocaleLayoutPro
   const locale: Locale = rawLocale === 'ar' ? 'ar' : 'en'
 
   return (
-    <LanguageProvider locale={locale}>
+    <RootDocument locale={locale}><LanguageProvider locale={locale}>
       {children}
       <Toaster position={locale === 'ar' ? 'top-left' : 'top-right'} richColors />
-    </LanguageProvider>
+    </LanguageProvider></RootDocument>
   )
 }

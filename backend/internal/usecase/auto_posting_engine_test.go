@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"database/sql"
+	"sort"
 	"testing"
 	"time"
 
@@ -189,6 +190,9 @@ func mockCreateJournalEntry(mock sqlmock.Sqlmock, entryDate time.Time, journalEn
 	mock.ExpectQuery(`SELECT id, status\s+FROM journal_entries`).
 		WithArgs(10, 20, sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
 		WillReturnRows(sqlmock.NewRows([]string{"id", "status"}))
+	mock.ExpectQuery(`pg_advisory_xact_lock`).
+		WithArgs(sqlmock.AnyArg()).
+		WillReturnRows(sqlmock.NewRows([]string{"?column?"}).AddRow(1))
 	mock.ExpectQuery(`SELECT COALESCE\(MAX\(CAST\(RIGHT\(entry_number, 5\) AS INT\)\), 0\) \+ 1`).
 		WithArgs(10, 20, "JE-2026-%").
 		WillReturnRows(sqlmock.NewRows([]string{"next_number"}).AddRow(1))
@@ -242,6 +246,21 @@ func mockPostJournalEntry(mock sqlmock.Sqlmock, journalEntryID int, entryDate ti
 	mock.ExpectExec(`UPDATE journal_entries`).
 		WithArgs(domain.JournalStatusPosted, postedBy, journalEntryID, 10, 20).
 		WillReturnResult(sqlmock.NewResult(1, 1))
+	accountIDs := make([]int, 0, len(lines))
+	seenAccounts := make(map[int]struct{}, len(lines))
+	for _, line := range lines {
+		if _, exists := seenAccounts[line.accountID]; exists {
+			continue
+		}
+		seenAccounts[line.accountID] = struct{}{}
+		accountIDs = append(accountIDs, line.accountID)
+	}
+	sort.Ints(accountIDs)
+	for _, accountID := range accountIDs {
+		mock.ExpectQuery(`SELECT id\s+FROM chart_of_accounts`).
+			WithArgs(accountID, 10, 20).
+			WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(accountID))
+	}
 
 	for _, line := range lines {
 		mock.ExpectQuery(`FROM general_ledger`).

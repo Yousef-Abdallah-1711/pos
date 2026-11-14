@@ -288,6 +288,8 @@ export interface SubscriptionPlan {
 }
 
 export interface CurrentSubscriptionResponse {
+  preferred_billing_period?: 'monthly' | 'annual'
+  checkout_available?: boolean
   subscription_status: string
   trial_end_date?: string | null
   subscription_expires_at?: string | null

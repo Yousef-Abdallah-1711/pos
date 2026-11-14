@@ -1,0 +1,10 @@
+{
+  "version": "2026-11-14",
+  "currency": "EGP",
+  "trial_days": 14,
+  "monthly_price_cents": 75000,
+  "annual_price_cents": 500000,
+  "monthly_plan_id": "servio-monthly-v1",
+  "annual_plan_id": "servio-annual-v1",
+  "checkout_available": false
+}

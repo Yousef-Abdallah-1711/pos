@@ -103,7 +103,7 @@ export default function LoginPage() {
       <Navbar />
       <main id="main-content" className="auth-page" dir={dir}>
         <div className="auth-layout">
-          <section className="auth-story" aria-label={language === 'ar' ? 'عن POOS' : 'About POOS'}>
+          <section className="auth-story" aria-label={language === 'ar' ? 'عن SERVIO' : 'About SERVIO'}>
             <div>
               <h1>{language === 'ar' ? 'إدارة مطعمك في صورة واحدة.' : 'Your restaurant, in one view.'}</h1>
               <p>{t.footer.tagline}</p>
@@ -112,7 +112,7 @@ export default function LoginPage() {
           </section>
           <section className="auth-form-panel" aria-labelledby="login-heading">
             <div className="auth-form">
-              <Link className="auth-form__back" href={`/${locale}`}>{language === 'ar' ? 'العودة إلى POOS' : 'Back to POOS'}</Link>
+              <Link className="auth-form__back" href={`/${locale}`}>{language === 'ar' ? 'العودة إلى SERVIO' : 'Back to SERVIO'}</Link>
               <h2 id="login-heading">{t.auth.login.title}</h2>
               <p className="auth-form__intro">{language === 'ar' ? 'أدخل بيانات حسابك للمتابعة.' : 'Enter your account details to continue.'}</p>
               <form method="post" noValidate onSubmit={handleSubmit(onSubmit, (invalid) => { const first = Object.keys(invalid)[0] as keyof LoginForm | undefined; if (first) window.requestAnimationFrame(() => setFocus(first)) })} className="auth-form__fields">
@@ -127,6 +127,7 @@ export default function LoginPage() {
                   {isLoading ? <><Loader2 aria-hidden="true" className="animate-spin" size={18} />{t.auth.login.signingIn}</> : t.auth.login.signIn}
                 </Button>
               </form>
+              <Link className="sv-text-link" href={`/${language}/auth/register`}>{language === 'ar' ? 'إنشاء حساب' : 'Create account'}</Link>
             </div>
           </section>
         </div>

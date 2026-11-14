@@ -48,7 +48,7 @@ func (r *SubscriptionRepositoryImpl) GetTenantSubscriptionInfo(ctx context.Conte
 			disabled_reason,
 			COALESCE(email, ''),
 			COALESCE(phone, ''),
-            is_active
+            is_active, COALESCE(preferred_billing_period, '')
 		FROM tenants
 		WHERE id = $1
 	`, tenantID).Scan(
@@ -68,6 +68,7 @@ func (r *SubscriptionRepositoryImpl) GetTenantSubscriptionInfo(ctx context.Conte
 		&info.ContactEmail,
 		&info.ContactPhone,
 		&info.IsActive,
+		&info.PreferredBillingPeriod,
 	)
 
 	if err == sql.ErrNoRows {

@@ -1,0 +1,414 @@
+[
+  {
+    "tenant": 13,
+    "method": "POST",
+    "route": "/hr/leaves",
+    "http": 201,
+    "response": {
+      "data": {
+        "id": 2,
+        "tenant_id": 13,
+        "restaurant_id": 13,
+        "employee_id": 1,
+        "start_date": "2026-11-21T00:00:00Z",
+        "end_date": "2026-11-21T00:00:00Z",
+        "total_days": 1,
+        "is_half_day": false,
+        "leave_type": "annual",
+        "leave_category": "paid",
+        "reason": "Synthetic audit rejection fixture",
+        "status": "pending",
+        "is_approved": false,
+        "deducted_from_balance": false,
+        "handover_completed": false,
+        "notify_manager": false,
+        "notify_hr": false,
+        "created_at": "0001-01-01T00:00:00Z",
+        "updated_at": "0001-01-01T00:00:00Z",
+        "created_by": 14
+      },
+      "success": true
+    }
+  },
+  {
+    "tenant": 13,
+    "method": "POST",
+    "route": "/hr/leaves/2/reject",
+    "http": 200,
+    "response": {
+      "success": true
+    }
+  },
+  {
+    "tenant": 13,
+    "method": "GET",
+    "route": "/hr/leaves",
+    "http": 200,
+    "response": {
+      "data": [
+        {
+          "id": 2,
+          "tenant_id": 13,
+          "restaurant_id": 13,
+          "employee_id": 1,
+          "start_date": "2026-11-21T00:00:00Z",
+          "end_date": "2026-11-21T00:00:00Z",
+          "total_days": 1,
+          "is_half_day": false,
+          "leave_type": "annual",
+          "leave_category": "paid",
+          "reason": "Synthetic audit rejection fixture",
+          "status": "rejected",
+          "is_approved": false,
+          "deducted_from_balance": false,
+          "handover_completed": false,
+          "notify_manager": false,
+          "notify_hr": false,
+          "created_at": "2026-11-14T03:24:36.835865Z",
+          "updated_at": "2026-11-14T03:24:36.865166Z"
+        },
+        {
+          "id": 1,
+          "tenant_id": 13,
+          "restaurant_id": 13,
+          "employee_id": 1,
+          "start_date": "2026-11-20T00:00:00Z",
+          "end_date": "2026-11-20T00:00:00Z",
+          "total_days": 1,
+          "is_half_day": false,
+          "leave_type": "annual",
+          "leave_category": "paid",
+          "reason": "Synthetic audit leave request",
+          "status": "approved",
+          "is_approved": true,
+          "deducted_from_balance": false,
+          "handover_completed": false,
+          "notify_manager": false,
+          "notify_hr": false,
+          "created_at": "2026-11-14T03:17:16.647004Z",
+          "updated_at": "2026-11-14T03:17:16.673065Z"
+        }
+      ],
+      "pagination": {
+        "page": 1,
+        "page_size": 20,
+        "total": 2,
+        "total_pages": 1
+      },
+      "success": true
+    }
+  },
+  {
+    "tenant": 13,
+    "method": "GET",
+    "route": "/kds/queue?include_completed=true",
+    "http": 200,
+    "response": {
+      "data": [
+        {
+          "id": 7,
+          "tenant_id": 13,
+          "restaurant_id": 13,
+          "order_id": 10,
+          "order_number": "ORD-2026-2c544c21-4266-4953-a15b-0c61a10d3f68",
+          "order_source": "pos",
+          "table_id": 3,
+          "table_number": 1,
+          "table_name": "Audit table",
+          "customer_name": "Audit Synthetic Guest",
+          "status": "ready",
+          "priority": 0,
+          "station_id": "expo",
+          "items": [
+            {
+              "product_id": 10,
+              "product_name": "Audit Test Dish",
+              "quantity": 1
+            }
+          ],
+          "received_at": "2026-11-14T03:16:31.714432Z",
+          "started_at": "2026-11-14T03:17:13.276507Z",
+          "bumped_by": 14,
+          "elapsed_seconds": 485,
+          "created_at": "2026-11-14T03:16:31.714432Z",
+          "updated_at": "2026-11-14T03:17:15.973605Z"
+        }
+      ],
+      "success": true
+    }
+  },
+  {
+    "check": "cancelled synthetic ticket before manual queue cleanup",
+    "tenant": 13,
+    "ticket_status": "ready",
+    "order_id": 10
+  },
+  {
+    "tenant": 13,
+    "method": "PUT",
+    "route": "/kds/orders/7/bump",
+    "http": 200,
+    "response": {
+      "data": {
+        "id": 7,
+        "tenant_id": 13,
+        "restaurant_id": 13,
+        "order_id": 10,
+        "order_number": "ORD-2026-2c544c21-4266-4953-a15b-0c61a10d3f68",
+        "order_source": "pos",
+        "table_id": 3,
+        "table_number": 1,
+        "table_name": "Audit table",
+        "customer_name": "Audit Synthetic Guest",
+        "status": "completed",
+        "priority": 0,
+        "station_id": "expo",
+        "items": [
+          {
+            "product_id": 10,
+            "product_name": "Audit Test Dish",
+            "quantity": 1
+          }
+        ],
+        "received_at": "2026-11-14T03:16:31.714432Z",
+        "started_at": "2026-11-14T03:17:13.276507Z",
+        "completed_at": "2026-11-14T03:24:36.92142Z",
+        "bumped_by": 14,
+        "elapsed_seconds": 485,
+        "created_at": "2026-11-14T03:16:31.714432Z",
+        "updated_at": "2026-11-14T03:24:36.92142Z"
+      },
+      "success": true
+    }
+  },
+  {
+    "tenant": 13,
+    "method": "PUT",
+    "route": "/tables/3/status",
+    "http": 200,
+    "response": {
+      "success": true
+    }
+  },
+  {
+    "tenant": 13,
+    "method": "POST",
+    "route": "/auth/logout",
+    "http": 204,
+    "response": {
+      "error": ""
+    }
+  },
+  {
+    "tenant": 13,
+    "method": "GET",
+    "route": "/auth/session",
+    "http": 401,
+    "response": {
+      "error": "Unauthorized - missing authorization header\n"
+    }
+  },
+  {
+    "tenant": 1,
+    "method": "GET",
+    "route": "/kds/queue?include_completed=true",
+    "http": 200,
+    "response": {
+      "data": [
+        {
+          "id": 8,
+          "tenant_id": 1,
+          "restaurant_id": 1,
+          "order_id": 11,
+          "order_number": "ORD-2026-f6af0c20-3998-4ef8-8d40-082ee270c111",
+          "order_source": "website",
+          "customer_name": "Product Audit Synthetic Guest",
+          "status": "new",
+          "priority": 0,
+          "station_id": "expo",
+          "items": [
+            {
+              "product_id": 5,
+              "product_name": "SERVIO staging QA item",
+              "quantity": 1
+            }
+          ],
+          "notes": "Synthetic audit only; no real delivery or notifications.",
+          "received_at": "2026-11-14T03:20:40.512503Z",
+          "elapsed_seconds": 236,
+          "created_at": "2026-11-14T03:20:40.512503Z",
+          "updated_at": "2026-11-14T03:20:40.512503Z"
+        }
+      ],
+      "success": true
+    }
+  },
+  {
+    "check": "cancelled synthetic ticket before manual queue cleanup",
+    "tenant": 1,
+    "ticket_status": "new",
+    "order_id": 11
+  },
+  {
+    "tenant": 1,
+    "method": "PUT",
+    "route": "/kds/orders/8/bump",
+    "http": 200,
+    "response": {
+      "data": {
+        "id": 8,
+        "tenant_id": 1,
+        "restaurant_id": 1,
+        "order_id": 11,
+        "order_number": "ORD-2026-f6af0c20-3998-4ef8-8d40-082ee270c111",
+        "order_source": "website",
+        "customer_name": "Product Audit Synthetic Guest",
+        "status": "in_progress",
+        "priority": 0,
+        "station_id": "expo",
+        "items": [
+          {
+            "product_id": 5,
+            "product_name": "SERVIO staging QA item",
+            "quantity": 1
+          }
+        ],
+        "notes": "Synthetic audit only; no real delivery or notifications.",
+        "received_at": "2026-11-14T03:20:40.512503Z",
+        "started_at": "2026-11-14T03:24:37.141672Z",
+        "bumped_by": 16,
+        "elapsed_seconds": 236,
+        "created_at": "2026-11-14T03:20:40.512503Z",
+        "updated_at": "2026-11-14T03:24:37.141672Z"
+      },
+      "success": true
+    }
+  },
+  {
+    "tenant": 1,
+    "method": "PUT",
+    "route": "/kds/orders/8/bump",
+    "http": 200,
+    "response": {
+      "data": {
+        "id": 8,
+        "tenant_id": 1,
+        "restaurant_id": 1,
+        "order_id": 11,
+        "order_number": "ORD-2026-f6af0c20-3998-4ef8-8d40-082ee270c111",
+        "order_source": "website",
+        "customer_name": "Product Audit Synthetic Guest",
+        "status": "ready",
+        "priority": 0,
+        "station_id": "expo",
+        "items": [
+          {
+            "product_id": 5,
+            "product_name": "SERVIO staging QA item",
+            "quantity": 1
+          }
+        ],
+        "notes": "Synthetic audit only; no real delivery or notifications.",
+        "received_at": "2026-11-14T03:20:40.512503Z",
+        "started_at": "2026-11-14T03:24:37.141672Z",
+        "bumped_by": 16,
+        "elapsed_seconds": 236,
+        "created_at": "2026-11-14T03:20:40.512503Z",
+        "updated_at": "2026-11-14T03:24:37.161422Z"
+      },
+      "success": true
+    }
+  },
+  {
+    "tenant": 1,
+    "method": "PUT",
+    "route": "/kds/orders/8/bump",
+    "http": 200,
+    "response": {
+      "data": {
+        "id": 8,
+        "tenant_id": 1,
+        "restaurant_id": 1,
+        "order_id": 11,
+        "order_number": "ORD-2026-f6af0c20-3998-4ef8-8d40-082ee270c111",
+        "order_source": "website",
+        "customer_name": "Product Audit Synthetic Guest",
+        "status": "completed",
+        "priority": 0,
+        "station_id": "expo",
+        "items": [
+          {
+            "product_id": 5,
+            "product_name": "SERVIO staging QA item",
+            "quantity": 1
+          }
+        ],
+        "notes": "Synthetic audit only; no real delivery or notifications.",
+        "received_at": "2026-11-14T03:20:40.512503Z",
+        "started_at": "2026-11-14T03:24:37.141672Z",
+        "completed_at": "2026-11-14T03:24:37.177384Z",
+        "bumped_by": 16,
+        "elapsed_seconds": 236,
+        "created_at": "2026-11-14T03:20:40.512503Z",
+        "updated_at": "2026-11-14T03:24:37.177384Z"
+      },
+      "success": true
+    }
+  },
+  {
+    "tenant": 1,
+    "method": "POST",
+    "route": "/auth/logout",
+    "http": 204,
+    "response": {
+      "error": ""
+    }
+  },
+  {
+    "tenant": 1,
+    "method": "GET",
+    "route": "/auth/session",
+    "http": 401,
+    "response": {
+      "error": "Unauthorized - missing authorization header\n"
+    }
+  },
+  {
+    "tenant": 15,
+    "method": "POST",
+    "route": "/auth/logout",
+    "http": 204,
+    "response": {
+      "error": ""
+    }
+  },
+  {
+    "tenant": 15,
+    "method": "GET",
+    "route": "/auth/session",
+    "http": 401,
+    "response": {
+      "error": "Unauthorized - missing authorization header\n"
+    }
+  },
+  {
+    "tenant": null,
+    "method": "POST",
+    "route": "/super-admin/auth/logout",
+    "http": 200,
+    "response": {
+      "message": "logged out successfully",
+      "success": true
+    }
+  },
+  {
+    "tenant": null,
+    "method": "GET",
+    "route": "/super-admin/auth/session",
+    "http": 401,
+    "response": {
+      "error": "missing authorization",
+      "success": false
+    }
+  }
+]

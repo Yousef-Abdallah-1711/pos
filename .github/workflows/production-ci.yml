@@ -136,6 +136,7 @@ jobs:
       - run: bash -n scripts/production/*.sh
       - run: python3 -m py_compile ops/aws/*.py
       - run: python3 -m unittest discover -s ops/aws -p 'test_*.py'
+      - run: node --test ops/aws/test_browser_route_inventory.cjs
       - name: Verify hardened service privilege drop
         run: python3 ops/aws/check-service-identity.py
       - run: git diff --check
@@ -177,6 +178,11 @@ jobs:
             ops/aws/evidence/browser/upload-browser.json
             ops/aws/evidence/browser/journal-api-acceptance.json
             ops/aws/evidence/browser/auth-form-validation.json
+            ops/aws/evidence/browser/marketing/
+            ops/aws/evidence/browser/marketing-firefox/
+            ops/aws/evidence/browser/trial-registration/
+            ops/aws/evidence/browser/landing-regression/
+            ops/aws/evidence/browser/lighthouse/
           if-no-files-found: ignore
 
   required:

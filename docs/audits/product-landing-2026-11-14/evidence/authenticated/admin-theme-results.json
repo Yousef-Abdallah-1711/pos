@@ -1,0 +1,533 @@
+[
+  {
+    "method": "GET",
+    "route": "/auth/session",
+    "http": 200,
+    "response": {
+      "email": "product-audit-1794626160@example.invalid",
+      "id": 15,
+      "is_super_admin": false,
+      "name": "product-audit-1794626160@example.invalid",
+      "restaurant_id": 14,
+      "role": "owner",
+      "tenant_id": 15,
+      "user_id": 15
+    }
+  },
+  {
+    "method": "GET",
+    "route": "/super-admin/tenants/15",
+    "http": 200,
+    "response": {
+      "data": {
+        "id": 15,
+        "name": "SERVIO Audit B 1794626160",
+        "slug": "audit-1794626160",
+        "domain": "audit-1794626160.pos.rakmyat.online",
+        "email": "product-audit-1794626160@example.invalid",
+        "phone": "",
+        "logo_url": "",
+        "subscription_plan": "free",
+        "max_restaurants": 1,
+        "max_users": 5,
+        "is_active": true,
+        "created_at": "2026-11-14T03:16:05.991165Z",
+        "updated_at": "2026-11-14T03:16:05.991165Z",
+        "subscription_status": "",
+        "trial_days": 0,
+        "is_disabled": false,
+        "grace_period_days": 0,
+        "total_users": 1,
+        "total_restaurants": 1,
+        "total_orders": 0,
+        "last_activity_at": "2026-11-14T03:16:05.991165Z"
+      },
+      "success": true
+    }
+  },
+  {
+    "method": "POST",
+    "route": "/super-admin/tenants/15/disable",
+    "http": 200,
+    "response": {
+      "success": true,
+      "data": {
+        "disabled_at": "2026-11-14T03:20:58.221298Z",
+        "previous_status": "disabled"
+      }
+    }
+  },
+  {
+    "method": "GET",
+    "route": "/products",
+    "http": 403,
+    "response": {
+      "error": {
+        "code": "TENANT_ACCESS_BLOCKED",
+        "details": {
+          "contact_support": true,
+          "support_email": "support@pos-saas.com"
+        },
+        "message": "Your account has been temporarily disabled. Please contact support for assistance.",
+        "reason": "tenant_disabled"
+      },
+      "success": false
+    }
+  },
+  {
+    "method": "POST",
+    "route": "/super-admin/tenants/15/enable",
+    "http": 200,
+    "response": {
+      "success": true,
+      "data": {
+        "is_disabled": false,
+        "subscription_status": "trial"
+      }
+    }
+  },
+  {
+    "method": "GET",
+    "route": "/products",
+    "http": 200,
+    "response": {
+      "pagination": {
+        "page": 1,
+        "page_size": 20,
+        "total": 0,
+        "total_pages": 0
+      },
+      "products": []
+    }
+  },
+  {
+    "check": "Super Admin synthetic tenant UI",
+    "text": "POS SaaS\n\nSuper Admin\n\nDashboard\nTenants\nUsers\nAudit Logs\nPayments\nSettings\nLogout\nSuper Admin Dashboard\n\nLogged in as: aws-admin-1794531723@example.invalid\n\nSERVIO Audit B 1794626160\n\nTenant Management\n\nTenant Information\nAccess Paused\nName\n\nSERVIO Audit B 1794626160\n\nSlug\n\naudit-1794626160\n\nCreated At\n\n11/14/2026\n\nUpdated At\n\n11/14/2026\n\nSubscription & Trial Management\n\nStatus\n\nTrial\n\nTrial Days Remaining\n\n15 days remaining\n\nTrial End Date\n\n11/29/2026\n\nAccount Status\n\nActive\nExtend Trial\nDisable Tenant\nDelete Tenant\nRefund Last Payment\nRecent Subscription Changes\n\nError: Failed to fetch history\n\nUsers in this Tenant\nName\tEmail\tRole\tCreated\tActions\n\tproduct-audit-1794626160@example.invalid\towner\t11/14/2026\t\nImpersonate"
+  },
+  {
+    "method": "POST",
+    "route": "/admin/themes/13/duplicate",
+    "http": 201,
+    "response": {
+      "id": 15,
+      "tenant_id": 13,
+      "restaurant_id": 13,
+      "name": "Audit Theme Copy",
+      "slug": "default-theme-copy-1794626518",
+      "config": {
+        "rtl": {
+          "enabled": false
+        },
+        "colors": {
+          "text": "#1f2937",
+          "accent": "#0ea5e9",
+          "border": "#e5e7eb",
+          "shadow": "#000000",
+          "primary": "#7c3aed",
+          "secondary": "#1e40af",
+          "background": "#ffffff"
+        },
+        "custom": {},
+        "footer": {
+          "text": "© 2025 SERVIO Audit Synthetic. All rights reserved.",
+          "links": [],
+          "bgColor": "#1f2937",
+          "textColor": "#f3f4f6"
+        },
+        "header": {
+          "navBg": "#ffffff",
+          "sticky": true,
+          "logoUrl": "",
+          "navText": "#1f2937",
+          "navHeight": 80
+        },
+        "darkMode": {
+          "enabled": false,
+          "textDark": "#f3f4f6",
+          "primaryDark": "#1e40af",
+          "secondaryDark": "#1e3a8a",
+          "backgroundDark": "#111827"
+        },
+        "homepage": {
+          "sections": []
+        },
+        "identity": {
+          "domain": "audit-1794625969.pos.rakmyat.online",
+          "logoUrl": "",
+          "siteTitle": "Audit Theme Verified",
+          "faviconUrl": ""
+        },
+        "components": [],
+        "typography": {
+          "baseSize": 16,
+          "fontMono": "Courier, monospace",
+          "fontSans": "Inter, Arial, sans-serif",
+          "fontSerif": "Georgia, serif",
+          "lineHeight": 1.5,
+          "borderRadius": 8
+        }
+      },
+      "description": "Default theme for SERVIO Audit Synthetic",
+      "is_active": false,
+      "is_published": false,
+      "version": 1,
+      "created_by": 14,
+      "created_at": "2026-11-14T03:21:58.883846Z",
+      "updated_at": "2026-11-14T03:21:58.883846Z"
+    }
+  },
+  {
+    "method": "PUT",
+    "route": "/admin/themes/15",
+    "http": 200,
+    "response": {
+      "id": 15,
+      "tenant_id": 13,
+      "restaurant_id": 13,
+      "name": "Audit Theme Copy",
+      "slug": "default-theme-copy-1794626518",
+      "config": {
+        "rtl": {
+          "enabled": false
+        },
+        "colors": {
+          "text": "#1f2937",
+          "accent": "#0ea5e9",
+          "border": "#e5e7eb",
+          "shadow": "#000000",
+          "primary": "#7c3aed",
+          "secondary": "#1e40af",
+          "background": "#ffffff"
+        },
+        "custom": {},
+        "footer": {
+          "text": "© 2025 SERVIO Audit Synthetic. All rights reserved.",
+          "links": [],
+          "bgColor": "#1f2937",
+          "textColor": "#f3f4f6"
+        },
+        "header": {
+          "navBg": "#ffffff",
+          "sticky": true,
+          "logoUrl": "",
+          "navText": "#1f2937",
+          "navHeight": 80
+        },
+        "darkMode": {
+          "enabled": false,
+          "textDark": "#f3f4f6",
+          "primaryDark": "#1e40af",
+          "secondaryDark": "#1e3a8a",
+          "backgroundDark": "#111827"
+        },
+        "homepage": {
+          "sections": []
+        },
+        "identity": {
+          "domain": "audit-1794625969.pos.rakmyat.online",
+          "logoUrl": "",
+          "siteTitle": "Audit Theme Verified",
+          "faviconUrl": ""
+        },
+        "components": [],
+        "typography": {
+          "baseSize": 16,
+          "fontMono": "Courier, monospace",
+          "fontSans": "Inter, Arial, sans-serif",
+          "fontSerif": "Georgia, serif",
+          "lineHeight": 1.5,
+          "borderRadius": 8
+        }
+      },
+      "description": "Default theme for SERVIO Audit Synthetic",
+      "is_active": false,
+      "is_published": false,
+      "version": 2,
+      "created_by": 14,
+      "updated_by": 14,
+      "created_at": "2026-11-14T03:21:58.883846Z",
+      "updated_at": "2026-11-14T03:21:58.92745Z"
+    }
+  },
+  {
+    "method": "POST",
+    "route": "/admin/themes/15/activate",
+    "http": 200,
+    "response": {
+      "message": "theme activated successfully"
+    }
+  },
+  {
+    "method": "GET",
+    "route": "/admin/themes/15",
+    "http": 200,
+    "response": {
+      "colors": {
+        "accent": "#0ea5e9",
+        "background": "#ffffff",
+        "border": "#e5e7eb",
+        "primary": "#7c3aed",
+        "secondary": "#1e40af",
+        "shadow": "#000000",
+        "text": "#1f2937"
+      },
+      "components": [],
+      "config": {
+        "rtl": {
+          "enabled": false
+        },
+        "colors": {
+          "text": "#1f2937",
+          "accent": "#0ea5e9",
+          "border": "#e5e7eb",
+          "shadow": "#000000",
+          "primary": "#7c3aed",
+          "secondary": "#1e40af",
+          "background": "#ffffff"
+        },
+        "custom": {},
+        "footer": {
+          "text": "© 2025 SERVIO Audit Synthetic. All rights reserved.",
+          "links": [],
+          "bgColor": "#1f2937",
+          "textColor": "#f3f4f6"
+        },
+        "header": {
+          "navBg": "#ffffff",
+          "sticky": true,
+          "logoUrl": "",
+          "navText": "#1f2937",
+          "navHeight": 80
+        },
+        "darkMode": {
+          "enabled": false,
+          "textDark": "#f3f4f6",
+          "primaryDark": "#1e40af",
+          "secondaryDark": "#1e3a8a",
+          "backgroundDark": "#111827"
+        },
+        "homepage": {
+          "sections": []
+        },
+        "identity": {
+          "domain": "audit-1794625969.pos.rakmyat.online",
+          "logoUrl": "",
+          "siteTitle": "Audit Theme Verified",
+          "faviconUrl": ""
+        },
+        "components": [],
+        "typography": {
+          "baseSize": 16,
+          "fontMono": "Courier, monospace",
+          "fontSans": "Inter, Arial, sans-serif",
+          "fontSerif": "Georgia, serif",
+          "lineHeight": 1.5,
+          "borderRadius": 8
+        }
+      },
+      "created_at": "2026-11-14T03:21:58.883846Z",
+      "created_by": 14,
+      "custom": {},
+      "darkMode": {
+        "backgroundDark": "#111827",
+        "enabled": false,
+        "primaryDark": "#1e40af",
+        "secondaryDark": "#1e3a8a",
+        "textDark": "#f3f4f6"
+      },
+      "description": "Default theme for SERVIO Audit Synthetic",
+      "footer": {
+        "bgColor": "#1f2937",
+        "links": [],
+        "text": "© 2025 SERVIO Audit Synthetic. All rights reserved.",
+        "textColor": "#f3f4f6"
+      },
+      "header": {
+        "logoUrl": "",
+        "navBg": "#ffffff",
+        "navHeight": 80,
+        "navText": "#1f2937",
+        "sticky": true
+      },
+      "homepage": {
+        "sections": []
+      },
+      "id": 15,
+      "identity": {
+        "domain": "audit-1794625969.pos.rakmyat.online",
+        "faviconUrl": "",
+        "logoUrl": "",
+        "siteTitle": "Audit Theme Verified"
+      },
+      "is_active": false,
+      "is_published": false,
+      "name": "Audit Theme Copy",
+      "published_at": null,
+      "restaurant_id": 13,
+      "rtl": {
+        "enabled": false
+      },
+      "slug": "default-theme-copy-1794626518",
+      "tenant_id": 13,
+      "typography": {
+        "baseSize": 16,
+        "borderRadius": 8,
+        "fontMono": "Courier, monospace",
+        "fontSans": "Inter, Arial, sans-serif",
+        "fontSerif": "Georgia, serif",
+        "lineHeight": 1.5
+      },
+      "updated_at": "2026-11-14T03:21:58.92745Z",
+      "updated_by": 14,
+      "version": 2
+    }
+  },
+  {
+    "method": "GET",
+    "route": "/public/restaurants/audit-1794625969/theme",
+    "http": 200,
+    "response": {
+      "success": true,
+      "data": {
+        "data": {
+          "colors": {
+            "accent": "#0ea5e9",
+            "background": "#ffffff",
+            "border": "#e5e7eb",
+            "primary": "#7c3aed",
+            "secondary": "#1e40af",
+            "shadow": "#000000",
+            "text": "#1f2937"
+          },
+          "components": [],
+          "custom": {},
+          "darkMode": {
+            "backgroundDark": "#111827",
+            "enabled": false,
+            "primaryDark": "#1e40af",
+            "secondaryDark": "#1e3a8a",
+            "textDark": "#f3f4f6"
+          },
+          "footer": {
+            "bgColor": "#1f2937",
+            "links": [],
+            "text": "© 2025 SERVIO Audit Synthetic. All rights reserved.",
+            "textColor": "#f3f4f6"
+          },
+          "header": {
+            "logoUrl": "",
+            "navBg": "#ffffff",
+            "navHeight": 80,
+            "navText": "#1f2937",
+            "sticky": true
+          },
+          "homepage": {
+            "sections": []
+          },
+          "identity": {
+            "domain": "audit-1794625969.pos.rakmyat.online",
+            "faviconUrl": "",
+            "logoUrl": "",
+            "siteTitle": "Audit Theme Verified"
+          },
+          "rtl": {
+            "enabled": false
+          },
+          "typography": {
+            "baseSize": 16,
+            "borderRadius": 8,
+            "fontMono": "Courier, monospace",
+            "fontSans": "Inter, Arial, sans-serif",
+            "fontSerif": "Georgia, serif",
+            "lineHeight": 1.5
+          }
+        },
+        "success": true
+      }
+    }
+  },
+  {
+    "check": "theme editor loaded saved configuration",
+    "text": "POS Dashboard\nDashboard\nCashier POS\nKitchen Display\nOrders\nProducts\nHuman Resources\nAccounting\nSuppliers\nFinancial Reports\nReports\nTheme Builder\nSettings\nEnglish\nP\n\nproduct-audit-1794625969@example.invalid\n\nOwner\n\nAudit Theme Copy\n\nEditing theme\n\nColors\nHomepage\nHeader\nFooter\nSettings\nHistory\nColor Palettes\nAll Palettes\nProfessional\nCreative\nMinimal\nBold\nProfessional Blue\nProfessional\nApply\nPri\nSec\nAcc\nBg\nTxt\nBor\nSha\nElegant Dark\nProfessional\nApply\nPri\nSec\nAcc\nBg\nTxt\nBor\nSha\nFresh Green\nCreative\nApply\nPri\nSec\nAcc\nBg\nTxt\nBor\nSha\nVibrant Orange\nBold\nApply\nPri\nSec\nAcc\nBg\nTxt\nBor\nSha\nMinimal White\nMinimal\nApply\nPri\nSec\nAcc\nBg\nTxt\nBor\nSha\nLuxury Purple\nProfessional\nApply\nPri\nSec\nAcc\nBg\nTxt\nBor\nSha\nOcean Blue\nCreative\nApply\nPri\nSec\nAcc\nBg\nTxt\nBor\nSha\nWarm Sunset\nBold\nApply\nPri\nSec\nAcc\nBg\nTxt\nBor\nSha\n\nTip: Click \"Apply\" to instantly apply a palette to all theme colors, then fine-tune individual colors.\n\nGlobal Colors\nPrimary\nCopy\n\nMain brand color\n\nSecondary\nCopy\n\nComplementary color\n\nAccent\nCopy\n\nHighlight color\n\nBackground\nCopy\n\nPage background\n\nText\nCopy\n\nText color\n\nBorder\nCopy\n\nBorder color\n\nShadow\nCopy\n\nShadow color\n\n2 Contrast Issues\n\n2 color combination(s) fail WCAG AA standard (4.5:1)\n\nPrimary On Background\n\nRatio: 5.70:1\n\nAA\nLarge AA ✓\nLarge AAA ✓\n\nSecondary On Background\n\nRatio: 8.72:1\n\nAA\nAAA\nLarge AA ✓\nLarge AAA ✓\n\nAccent On Background\n\nRatio: 2.77:1\n\nFail\nLarge AA ✗\nLarge AAA ✗\n\nText On Background\n\nRatio: 14.68:1\n\nAA\nAAA\nLarge AA ✓\nLarge AAA ✓\n\nBorder On Background\n\nRatio: 1.24:1\n\nFail\nLarge AA ✗\nLarge AAA ✗\n\nRecommendations:\n\nIncrease contrast for Accent (current: 2.77:1, need: 4.5:1)\nIncrease contrast for Border (current: 1.24:1, need: 4.5:1)\nLive Preview\nEN\nArabic\nDesktop\nTablet\nMobile\nAudit Theme Verified\nAudit Theme Verified\nBack to top\n\n© 2026 Audit Theme Verified. All rights reserved.",
+    "fields": [
+      {
+        "type": "color",
+        "name": "",
+        "value": "#7c3aed"
+      },
+      {
+        "type": "text",
+        "name": "",
+        "value": "#7c3aed"
+      },
+      {
+        "type": "color",
+        "name": "",
+        "value": "#1e40af"
+      },
+      {
+        "type": "text",
+        "name": "",
+        "value": "#1e40af"
+      },
+      {
+        "type": "color",
+        "name": "",
+        "value": "#0ea5e9"
+      },
+      {
+        "type": "text",
+        "name": "",
+        "value": "#0ea5e9"
+      },
+      {
+        "type": "color",
+        "name": "",
+        "value": "#ffffff"
+      },
+      {
+        "type": "text",
+        "name": "",
+        "value": "#ffffff"
+      },
+      {
+        "type": "color",
+        "name": "",
+        "value": "#1f2937"
+      },
+      {
+        "type": "text",
+        "name": "",
+        "value": "#1f2937"
+      },
+      {
+        "type": "color",
+        "name": "",
+        "value": "#e5e7eb"
+      },
+      {
+        "type": "text",
+        "name": "",
+        "value": "#e5e7eb"
+      },
+      {
+        "type": "color",
+        "name": "",
+        "value": "#000000"
+      },
+      {
+        "type": "text",
+        "name": "",
+        "value": "#000000"
+      }
+    ]
+  },
+  {
+    "method": "POST",
+    "route": "/admin/themes/13/activate",
+    "http": 200,
+    "response": {
+      "message": "theme activated successfully"
+    }
+  }
+]

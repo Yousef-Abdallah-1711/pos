@@ -3,9 +3,18 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"errors"
+	"fmt"
+	"strings"
 	"time"
 
 	"pos-saas/internal/domain"
+)
+
+var (
+	ErrSalaryNotFound = errors.New("salary record not found")
+	ErrSalaryPaid     = errors.New("paid salary is immutable")
+	ErrSalaryState    = errors.New("salary state does not allow payment")
 )
 
 // SalaryRepository handles salary/payroll data operations
@@ -226,9 +235,10 @@ func (r *SalaryRepository) UpdateSalary(salary *domain.Salary) error {
 			payment_method = $20, status = $21, updated_by = $22,
 			updated_at = CURRENT_TIMESTAMP
 		WHERE id = $23 AND tenant_id = $24 AND restaurant_id = $25
+		  AND is_paid = FALSE AND LOWER(BTRIM(status)) <> 'paid'
 	`
 
-	_, err := r.db.Exec(
+	result, err := r.db.Exec(
 		query,
 		salary.BaseSalary, salary.OvertimeHours, salary.OvertimeRate,
 		salary.Bonus, salary.Commission, salary.Allowances, salary.Tips,
@@ -240,21 +250,183 @@ func (r *SalaryRepository) UpdateSalary(salary *domain.Salary) error {
 		salary.ID, salary.TenantID, salary.RestaurantID,
 	)
 
-	return err
+	if err != nil {
+		return fmt.Errorf("update salary: %w", err)
+	}
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("check salary update result: %w", err)
+	}
+	if rows == 1 {
+		return nil
+	}
+	return r.salaryMutationFailure(salary.TenantID, salary.RestaurantID, salary.ID)
 }
 
-// MarkAsPaid marks a salary record as paid
-func (r *SalaryRepository) MarkAsPaid(tenantID, restaurantID, id int, paidBy int, paymentRef string) error {
-	query := `
-		UPDATE salaries
-		SET
-			is_paid = true, paid_at = CURRENT_TIMESTAMP, paid_by = $1,
-			payment_reference = $2, status = 'paid', updated_at = CURRENT_TIMESTAMP
-		WHERE id = $3 AND tenant_id = $4 AND restaurant_id = $5
-	`
+// DeleteUnpaidSalary preserves payroll history once a salary has been paid.
+func (r *SalaryRepository) DeleteUnpaidSalary(tenantID, restaurantID, id int) error {
+	result, err := r.db.Exec(`
+		DELETE FROM salaries
+		WHERE id = $1 AND tenant_id = $2 AND restaurant_id = $3
+		  AND is_paid = FALSE AND LOWER(BTRIM(status)) <> 'paid'
+	`, id, tenantID, restaurantID)
+	if err != nil {
+		return fmt.Errorf("delete salary: %w", err)
+	}
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("check salary delete result: %w", err)
+	}
+	if rows == 1 {
+		return nil
+	}
+	return r.salaryMutationFailure(tenantID, restaurantID, id)
+}
 
-	_, err := r.db.Exec(query, paidBy, paymentRef, id, tenantID, restaurantID)
-	return err
+func (r *SalaryRepository) salaryMutationFailure(tenantID, restaurantID, id int) error {
+	var isPaid bool
+	var status string
+	err := r.db.QueryRow(`
+		SELECT is_paid, status FROM salaries
+		WHERE id = $1 AND tenant_id = $2 AND restaurant_id = $3
+	`, id, tenantID, restaurantID).Scan(&isPaid, &status)
+	if errors.Is(err, sql.ErrNoRows) {
+		return ErrSalaryNotFound
+	}
+	if err != nil {
+		return fmt.Errorf("inspect salary mutation result: %w", err)
+	}
+	if isPaid || strings.EqualFold(strings.TrimSpace(status), "paid") {
+		return ErrSalaryPaid
+	}
+	return fmt.Errorf("salary mutation did not affect a row")
+}
+
+// MarkAsPaidTx locks and transitions one scoped salary. Repeated calls return
+// the original paid record without changing its audit fields.
+func (r *SalaryRepository) MarkAsPaidTx(ctx context.Context, tx *sql.Tx, tenantID, restaurantID, id, paidBy int, paymentRef string) (*domain.Salary, bool, error) {
+	salary, err := r.getSalaryByID(ctx, tx, tenantID, restaurantID, id, true)
+	if err != nil {
+		return nil, false, err
+	}
+	if salary == nil {
+		return nil, false, ErrSalaryNotFound
+	}
+	if salary.IsPaid || strings.EqualFold(strings.TrimSpace(salary.Status), "paid") {
+		return salary, false, nil
+	}
+	if strings.EqualFold(strings.TrimSpace(salary.Status), "cancelled") || strings.EqualFold(strings.TrimSpace(salary.Status), "on_hold") {
+		return nil, false, ErrSalaryState
+	}
+	previousStatus := salary.Status
+	previousPaid := salary.IsPaid
+	previousPaymentReference := salary.PaymentReference
+
+	result, err := tx.ExecContext(ctx, `
+		UPDATE salaries
+		SET is_paid = TRUE, paid_at = CURRENT_TIMESTAMP, paid_by = NULLIF($1, 0),
+		    payment_reference = $2, status = 'paid', updated_at = CURRENT_TIMESTAMP
+		WHERE id = $3 AND tenant_id = $4 AND restaurant_id = $5
+		  AND is_paid = FALSE AND LOWER(BTRIM(status)) <> 'paid'
+	`, paidBy, paymentRef, id, tenantID, restaurantID)
+	if err != nil {
+		return nil, false, fmt.Errorf("mark salary paid: %w", err)
+	}
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return nil, false, fmt.Errorf("check salary payment transition: %w", err)
+	}
+	if rows != 1 {
+		return nil, false, ErrSalaryPaid
+	}
+	salary, err = r.getSalaryByID(ctx, tx, tenantID, restaurantID, id, false)
+	if err != nil {
+		return nil, false, err
+	}
+	_, err = tx.ExecContext(ctx, `
+		INSERT INTO hr_audit_logs (
+		    tenant_id, restaurant_id, entity_type, entity_id, action,
+		    action_description, old_values, new_values, changed_fields, user_id
+		)
+		VALUES (
+		    $1, $2, 'salary', $3, 'update', 'Salary marked paid',
+		    jsonb_build_object('status', $4::text, 'is_paid', $5::boolean, 'payment_reference', $6::text),
+		    jsonb_build_object('status', $7::text, 'is_paid', $8::boolean, 'payment_reference', $9::text, 'paid_at', $10::timestamptz, 'paid_by', $11::integer),
+		    ARRAY['status', 'is_paid', 'payment_reference', 'paid_at', 'paid_by'], NULLIF($11::integer, 0)
+		)
+	`, tenantID, restaurantID, id, previousStatus, previousPaid, previousPaymentReference,
+		salary.Status, salary.IsPaid, salary.PaymentReference, salary.PaidAt, paidBy)
+	if err != nil {
+		return nil, false, fmt.Errorf("audit salary payment transition: %w", err)
+	}
+	return salary, true, nil
+}
+
+func (r *SalaryRepository) getSalaryByID(ctx context.Context, tx *sql.Tx, tenantID, restaurantID, id int, lock bool) (*domain.Salary, error) {
+	query := `
+		SELECT id, tenant_id, restaurant_id, employee_id, pay_period_start,
+		       pay_period_end, payment_date, month, year, base_salary, currency,
+		       overtime_hours, overtime_rate, overtime_amount, bonus, commission,
+		       allowances, tips, other_earnings, earnings_details, tax,
+		       social_insurance, health_insurance, pension, loan_deduction,
+		       advance_deduction, other_deductions, deductions_details, gross_salary,
+		       total_deductions, net_salary, days_worked, days_absent,
+		       total_hours_worked, total_overtime_hours, payment_method,
+	       payment_reference, bank_account_number, bank_name, status, is_paid, paid_at, paid_by,
+		       notes, created_at, updated_at
+		FROM salaries WHERE id = $1 AND tenant_id = $2 AND restaurant_id = $3`
+	if lock {
+		query += ` FOR UPDATE`
+	}
+	row := tx.QueryRowContext(ctx, query, id, tenantID, restaurantID)
+	var salary domain.Salary
+	var paymentDate sql.NullTime
+	var paidAt sql.NullTime
+	var paidBy sql.NullInt64
+	var paymentRef, bankAccount, bankName, notes sql.NullString
+	var earningsDetails, deductionsDetails sql.NullString
+	err := row.Scan(
+		&salary.ID, &salary.TenantID, &salary.RestaurantID, &salary.EmployeeID,
+		&salary.PayPeriodStart, &salary.PayPeriodEnd, &paymentDate,
+		&salary.Month, &salary.Year, &salary.BaseSalary, &salary.Currency,
+		&salary.OvertimeHours, &salary.OvertimeRate, &salary.OvertimeAmount,
+		&salary.Bonus, &salary.Commission, &salary.Allowances, &salary.Tips,
+		&salary.OtherEarnings, &earningsDetails, &salary.Tax,
+		&salary.SocialInsurance, &salary.HealthInsurance, &salary.Pension,
+		&salary.LoanDeduction, &salary.AdvanceDeduction, &salary.OtherDeductions,
+		&deductionsDetails, &salary.GrossSalary, &salary.TotalDeductions,
+		&salary.NetSalary, &salary.DaysWorked, &salary.DaysAbsent,
+		&salary.TotalHoursWorked, &salary.TotalOvertimeHours, &salary.PaymentMethod,
+		&paymentRef, &bankAccount, &bankName, &salary.Status, &salary.IsPaid, &paidAt, &paidBy,
+		&notes, &salary.CreatedAt, &salary.UpdatedAt,
+	)
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, fmt.Errorf("load salary in payment transaction: %w", err)
+	}
+	if paymentDate.Valid {
+		salary.PaymentDate = &paymentDate.Time
+	}
+	if paidAt.Valid {
+		salary.PaidAt = &paidAt.Time
+	}
+	if paidBy.Valid {
+		value := int(paidBy.Int64)
+		salary.PaidBy = &value
+	}
+	salary.PaymentReference = paymentRef.String
+	salary.BankAccountNumber = bankAccount.String
+	salary.BankName = bankName.String
+	salary.Notes = notes.String
+	if earningsDetails.Valid {
+		salary.EarningsDetails = []byte(earningsDetails.String)
+	}
+	if deductionsDetails.Valid {
+		salary.DeductionsDetails = []byte(deductionsDetails.String)
+	}
+	return &salary, nil
 }
 
 // GetEmployeeSalaries retrieves all salary records for an employee

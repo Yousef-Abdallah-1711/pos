@@ -1,0 +1,38 @@
+{
+  "pos": {
+    "width": 1440,
+    "height": 1000
+  },
+  "confirmation": {
+    "width": 390,
+    "height": 1479
+  },
+  "kitchen-completed": {
+    "width": 1440,
+    "height": 1000
+  },
+  "kitchen": {
+    "width": 1440,
+    "height": 1000
+  },
+  "dashboard": {
+    "width": 1280,
+    "height": 2649
+  },
+  "inventory": {
+    "width": 1440,
+    "height": 1001
+  },
+  "checkout": {
+    "width": 390,
+    "height": 2124
+  },
+  "theme": {
+    "width": 1440,
+    "height": 1065
+  },
+  "staff": {
+    "width": 1440,
+    "height": 1001
+  }
+}

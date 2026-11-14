@@ -37,6 +37,13 @@ func (e *ValidationErrors) Error() string { return "Please review the highlighte
 // Name limits count Unicode code points; phone is stored as canonical E.164.
 func (r *RegisterRequest) NormalizeAndValidate() error {
 	fields := make(map[string]string)
+	r.BillingPeriod = strings.ToLower(strings.TrimSpace(r.BillingPeriod))
+	if r.BillingPeriod == "" {
+		r.BillingPeriod = "monthly"
+	}
+	if r.BillingPeriod != "monthly" && r.BillingPeriod != "annual" {
+		fields["billing_period"] = "Choose monthly or annual billing."
+	}
 	r.Name = strings.TrimSpace(r.Name)
 	r.Email = strings.ToLower(strings.TrimSpace(r.Email))
 	r.RestaurantName = strings.TrimSpace(r.RestaurantName)

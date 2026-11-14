@@ -165,3 +165,26 @@ func TestLoginRequestNormalizeAndValidate(t *testing.T) {
 		})
 	}
 }
+
+func TestRegistrationBillingPreference(t *testing.T) {
+	for _, value := range []string{"", "monthly", " annual ", "weekly"} {
+		request := RegisterRequest{Name: "Demo Owner", Email: "demo@example.test", Password: "password123", RestaurantName: "Demo Cafe", BillingPeriod: value}
+		err := request.NormalizeAndValidate()
+		if value == "weekly" {
+			if err == nil {
+				t.Fatal("invalid period accepted")
+			}
+			continue
+		}
+		if err != nil {
+			t.Fatal(err)
+		}
+		expected := "monthly"
+		if value == " annual " {
+			expected = "annual"
+		}
+		if request.BillingPeriod != expected {
+			t.Fatalf("got %q want %q", request.BillingPeriod, expected)
+		}
+	}
+}

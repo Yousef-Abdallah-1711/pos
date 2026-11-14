@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"math"
+	"sort"
 	"strings"
 	"time"
 
@@ -550,6 +551,32 @@ func (r *JournalEntryRepository) getPostingLinesTx(tx *sql.Tx, journalEntryID in
 }
 
 func (r *JournalEntryRepository) appendGeneralLedgerTx(tx *sql.Tx, tenantID, restaurantID, journalEntryID int, entryDate time.Time, fiscalPeriod string, lines []postingLine) error {
+	accountIDs := make([]int, 0, len(lines))
+	seenAccounts := make(map[int]struct{}, len(lines))
+	for _, line := range lines {
+		if _, exists := seenAccounts[line.AccountID]; exists {
+			continue
+		}
+		seenAccounts[line.AccountID] = struct{}{}
+		accountIDs = append(accountIDs, line.AccountID)
+	}
+	sort.Ints(accountIDs)
+	for _, accountID := range accountIDs {
+		var lockedAccountID int
+		err := tx.QueryRow(`
+			SELECT id
+			FROM chart_of_accounts
+			WHERE id = $1 AND tenant_id = $2 AND restaurant_id = $3
+			FOR UPDATE
+		`, accountID, tenantID, restaurantID).Scan(&lockedAccountID)
+		if errors.Is(err, sql.ErrNoRows) {
+			return errors.New("posting account is outside tenant and restaurant scope")
+		}
+		if err != nil {
+			return fmt.Errorf("lock ledger account %d: %w", accountID, err)
+		}
+	}
+
 	for _, line := range lines {
 		var currentBalance float64
 		err := tx.QueryRow(`
@@ -792,6 +819,9 @@ func calculateBalanceDelta(normalBalance string, debitAmount, creditAmount float
 func (r *JournalEntryRepository) generateEntryNumberTx(tx *sql.Tx, tenantID, restaurantID int, entryDate time.Time) (string, error) {
 	year := entryDate.Format("2006")
 	prefix := fmt.Sprintf("JE-%s-", year)
+	if err := lockFinancialDocumentNumberTx(tx, "journal-entry", tenantID, restaurantID, prefix); err != nil {
+		return "", err
+	}
 
 	var nextNumber int
 	err := tx.QueryRow(`
