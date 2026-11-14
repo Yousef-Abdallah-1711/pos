@@ -10,6 +10,7 @@ const output = process.env.SERVIO_MARKETING_EVIDENCE || (process.env.SERVIO_BROW
 const widths = [360, 390, 768, 1024, 1440, 1920]
 const routes = ['', '/features', '/features/pos', '/features/kitchen-display', '/features/online-ordering', '/features/website-builder', '/features/inventory', '/features/hr', '/features/analytics', '/how-it-works', '/pricing', '/demo', '/contact', '/privacy']
 const checks = []
+const descriptions = new Map()
 function check(name, condition, detail = '') {
  checks.push({ name, passed: !!condition, detail })
  if (!condition) throw new Error(`${name}: ${detail}`)
@@ -23,6 +24,12 @@ async function load(page, locale, route) {
  await page.locator('main h1').waitFor()
  const canonical = await page.locator('link[rel=canonical]').getAttribute('href')
  check(`canonical ${locale}${route}`, canonical === `${base}/${locale}${route}`, canonical)
+ const description = await page.locator('meta[name="description"]').getAttribute('content')
+ const duplicate = [...descriptions].find(([url, text]) => url !== canonical && text === description)
+ check(`unique description ${locale}${route}`, !!description && !duplicate, duplicate?.[0] || '')
+ descriptions.set(canonical, description)
+ const alternates = await page.locator('link[rel=alternate][hreflang]').evaluateAll(links => links.map(link => ({ language: link.hreflang, href: link.href })))
+ check(`hreflang ${locale}${route}`, ['en', 'ar'].every(language => alternates.some(link => link.language === language && link.href === `${base}/${language}${route}`)))
  const schema = JSON.parse(await page.locator('script[type="application/ld+json"]').textContent())
  check(`structured data ${locale}${route}`, schema['@type'] === 'WebSite' && schema.name === 'SERVIO')
  check(`heading ${locale}${route}`, await page.locator('main h1').count() === 1)
@@ -88,6 +95,7 @@ async function main() {
   const networkFailures = []
   const observe = page => {
    page.on('pageerror', error => errors.push(error.message))
+   page.on('console', message => { if (message.type() === 'error') errors.push(message.text()) })
    page.on('response', response => { if (response.status() >= 400) networkFailures.push(`${response.status()} ${new URL(response.url()).pathname}`) })
   }
   observe(page)

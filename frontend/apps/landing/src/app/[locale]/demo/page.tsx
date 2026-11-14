@@ -8,7 +8,7 @@ import { marketingMetadata } from '@/lib/marketingMetadata'
 type Props = { params: Promise<{ locale: Locale }> }
 export async function generateMetadata({ params }: Props) {
  const { locale } = await params; const c = getSiteCopy(locale)
- return marketingMetadata(locale, '/demo', c.demo, c.explorerBody)
+ return marketingMetadata(locale, '/demo', c.demo, locale === 'ar' ? 'استكشف شاشات سيرفيو الفعلية لنقاط البيع وتذاكر المطبخ والطلبات النقدية والقوالب والمخزون وسجلات الموظفين، ضمن جولة ببيانات تجريبية.' : 'Explore authentic SERVIO screens for cashier POS, kitchen tickets, guest cash orders, storefront themes, inventory and staff records.')
 }
 export default async function DemoPage({ params }: Props) {
  const { locale } = await params; const c = getSiteCopy(locale)

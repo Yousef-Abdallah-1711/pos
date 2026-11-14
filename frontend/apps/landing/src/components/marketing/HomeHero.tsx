@@ -18,6 +18,7 @@ export function HomeHero({ locale }: { locale: Locale }) {
       </div>
       <div className="sv-hero-stage" aria-label={locale === 'ar' ? 'الكاشير والمطبخ ضمن مسار الطلب' : 'Cashier and kitchen in the order workflow'}>
         <div className="sv-stage-rail"><span>01 / {c.counter}</span><span>02 / {c.kitchen}</span></div>
+        <p className="sv-stage-source">{c.englishCapture}</p>
         <ProductCapture locale={locale} image="pos" alt={locale === 'ar' ? 'شاشة نقاط البيع مع صنف تجريبي وسلة فارغة' : 'Cashier menu with a synthetic dish and an empty cart'} priority className="sv-hero-pos" />
         <div className="sv-handoff"><span />{locale === 'ar' ? 'طلب مؤكد ← تذكرة مطبخ' : 'Confirmed order → kitchen ticket'}</div>
         <ProductCapture locale={locale} image="kitchen" alt={locale === 'ar' ? 'تذكرة طلب تجريبي واردة في شاشة المطبخ' : 'A synthetic incoming order ticket in the kitchen display'} priority className="sv-hero-kitchen" />

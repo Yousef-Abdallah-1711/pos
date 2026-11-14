@@ -9,9 +9,9 @@ const api = process.env.SERVIO_MARKETING_API_URL
 if (process.env.SERVIO_SYNTHETIC_TRIAL !== '1' || !base || !api) throw new Error('Explicit synthetic trial flag and landing/API URLs are required')
 const output = path.join(process.env.SERVIO_BROWSER_EVIDENCE || '/tmp/servio-trial-acceptance', 'trial-registration')
 const checks = []
-function check(name, passed) {
- checks.push({ name, passed: !!passed })
- if (!passed) throw new Error(name)
+function check(name, passed, detail = '') {
+ checks.push({ name, passed: !!passed, detail })
+ if (!passed) throw new Error(`${name}: ${detail}`)
 }
 async function register(page, locale, billing, otherCategory) {
  const slug = `website-qa-${Date.now()}-${randomBytes(3).toString('hex')}`
@@ -21,13 +21,13 @@ async function register(page, locale, billing, otherCategory) {
   const input = document.querySelector('input[type=email]')
   return input && Object.keys(input).some(key => key.startsWith('__reactProps') && typeof input[key]?.onChange === 'function')
  })
- for (const [name, value] of Object.entries({ name: 'Synthetic Website Owner', email: `${slug}@example.test`, restaurantName: 'Synthetic Website Acceptance', restaurantSlug: slug, password, confirmPassword: password })) await page.locator(`input[name=${name}]`).fill(value)
+ for (const [name, value] of Object.entries({ name: 'Synthetic Website Owner', email: `${slug}@example.test`, restaurantName: `Synthetic Website Acceptance ${slug}`, restaurantSlug: slug, password, confirmPassword: password })) await page.locator(`input[name=${name}]`).fill(value)
  await page.getByText(locale === 'ar' ? 'النطاق الفرعي متاح' : 'Subdomain is available', { exact: true }).waitFor()
  const [response] = await Promise.all([
   page.waitForResponse(r => r.request().method() === 'POST' && new URL(r.url()).pathname.endsWith('/auth/register')),
   page.locator('button[type=submit]').click(),
  ])
- check(`registration accepted ${locale}/${billing}`, response.status() === 201 || response.status() === 200)
+ check(`registration accepted ${locale}/${billing}`, response.status() === 201 || response.status() === 200, `HTTP ${response.status()}`)
  await page.waitForURL(`**/${locale}/dashboard**`, { timeout: 60000 })
  check(`owner reaches dashboard ${locale}/${billing}`, page.url().includes(`/${locale}/dashboard`))
  const subscription = await page.evaluate(async origin => {
@@ -51,6 +51,10 @@ async function firstAction(page, locale, otherCategory) {
  const dashboard = new URL(page.url()).origin
  const category = `Synthetic First Menu ${locale}`
  await page.goto(`${dashboard}/${locale}/dashboard/categories/new`)
+ await page.waitForFunction(() => {
+  const input = document.querySelector('input[name=name]')
+  return input && Object.keys(input).some(key => key.startsWith('__reactProps') && typeof input[key]?.onChange === 'function')
+ })
  await page.locator('input[name=name]').fill(category)
  const [response] = await Promise.all([
   page.waitForResponse(response => response.request().method() === 'POST' && new URL(response.url()).pathname.endsWith('/categories')),

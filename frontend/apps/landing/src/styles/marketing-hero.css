@@ -118,3 +118,10 @@
   min-height:48px;
   color:var(--sv-ink);
 }
+
+.sv-stage-source {
+  margin: 0 0 12px;
+  color: var(--sv-muted);
+  font-size: 10px;
+  line-height: 1.5;
+}

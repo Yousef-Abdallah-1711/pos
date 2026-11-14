@@ -193,3 +193,6 @@ html[lang=ar] .sv-main :is(h1,h2,h3) {
 .sv-directional:dir(rtl) {
   transform:scaleX(-1);
 }
+
+.sv-header a { min-width: 48px; }
+.poos-skip-link { min-height: 48px; }
