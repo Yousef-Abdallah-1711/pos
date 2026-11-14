@@ -2,14 +2,14 @@
 
 ## Reproducible successful acceptance
 
-[CI run 43575769431](https://github.com/Yousef-Abdallah-1711/pos/actions/runs/43575769431) passed the complete verified workflow for PR head `9e897f6ad2aa2bfbeaf0a539c37320d2be32ad4c`, including all five production image builds. Evidence: [summary](evidence/candidate-verification.json); full `chromium-smoke-results` and `backend-test-results` artifacts on the run.
+[CI run 43577385555](https://github.com/Yousef-Abdallah-1711/pos/actions/runs/43577385555) passed the complete verified workflow for PR head `60f7499689927fd3439370c1a46bef34527fce93`, including all five production image builds. Evidence: [summary](evidence/candidate-verification.json); full `chromium-smoke-results` and `backend-test-results` artifacts on the run.
 
 | Check | Passed | Failed | Scope |
 |---|---:|---:|---|
-| Backend integration/unit tests | 1,241 | 0 | Two environment-specific tests skipped |
+| Backend integration/unit tests | 1,242 | 0 | Two environment-specific tests skipped |
 | Landing unit/component tests | 64 | 0 | Eleven files |
 | Dashboard unit/component tests | 665 | 0 | Fifty-two files |
-| Marketing browser assertions | 436 | 0 | EN/AR, six homepage widths, all public routes, metadata, axe, navigation, pricing |
+| Marketing browser assertions | 1,612 | 0 | All public routes at all six widths in EN/AR, metadata, axe, navigation, annual mobile pricing |
 | New-owner trial assertions | 21 | 0 | Two accounts; annual/monthly persistence, 14-day entitlement, dashboard, category creation, isolation, logout |
 | Existing landing visual samples | 60 | 0 | Ten widths × three routes × two locales |
 | Existing mobile-menu checks | 4 | 0 | Open and Escape close |
@@ -24,6 +24,6 @@ The two skipped backend tests are the opt-in disposable Admin Orders benchmark a
 
 `capture-landing-acceptance.mjs` retains the pre-existing 60-sample regression suite with updated navigation and hidden/lazy-image handling. `lighthouse-acceptance.mjs` uses pinned Lighthouse 13.6.0 and rejects performance below 90, accessibility below 95, or CLS at/above 0.1.
 
-`ops/aws/run-ci-browser-checks.sh` runs all suites and returns failure if any suite fails. Nothing is converted to a warning. Final expanded counts and the exact approved main/release SHA are recorded in the [PR delivery record](https://github.com/Yousef-Abdallah-1711/pos/pull/43) after the final required workflow; do not infer AWS acceptance from a PR image build.
+`ops/aws/run-ci-browser-checks.sh` runs all suites and returns failure if any suite fails. Nothing is converted to a warning. Final focus/logout assertion counts and the exact approved main/release SHA are recorded in the [PR delivery record](https://github.com/Yousef-Abdallah-1711/pos/pull/43) after the final required workflow; do not infer AWS acceptance from a PR image build.
 
 The browser method is repository Playwright tooling in the existing pinned CI browser image; Playwright MCP was not available.

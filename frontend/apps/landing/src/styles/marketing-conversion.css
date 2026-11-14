@@ -187,3 +187,9 @@
   color:var(--sv-muted);
   font-size:15px;
 }
+
+.sv-main .sv-dark :focus-visible,
+.sv-main .sv-final :focus-visible,
+.sv-footer :focus-visible {
+  outline-color: #e4d6ff;
+}

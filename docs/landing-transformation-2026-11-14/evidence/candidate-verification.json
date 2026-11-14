@@ -1,10 +1,10 @@
 {
-  "candidate_head": "9e897f6ad2aa2bfbeaf0a539c37320d2be32ad4c",
+  "candidate_head": "60f7499689927fd3439370c1a46bef34527fce93",
   "base_main": "018682b",
-  "ci": "https://github.com/Yousef-Abdallah-1711/pos/actions/runs/43575769431",
+  "ci": "https://github.com/Yousef-Abdallah-1711/pos/actions/runs/43577385555",
   "kind": "GitHub PR merge candidate; not an AWS deployment",
   "backend": {
-    "passed": 1241,
+    "passed": 1242,
     "failed": 0,
     "skipped": 2
   },
@@ -17,9 +17,9 @@
     "failed": 0
   },
   "marketing": {
-    "passed": 436,
+    "passed": 1612,
     "failed": 0,
-    "checks": 436
+    "checks": 1612
   },
   "trial-registration": {
     "passed": 21,
@@ -31,10 +31,10 @@
     "results": [
       {
         "locale": "en",
-        "performance": 0.95,
+        "performance": 0.93,
         "accessibility": 1,
         "seo": 0.69,
-        "lcpMs": 922.5495,
+        "lcpMs": 912.7065,
         "cls": 0
       },
       {
@@ -42,7 +42,7 @@
         "performance": 0.96,
         "accessibility": 1,
         "seo": 0.69,
-        "lcpMs": 1351.1018,
+        "lcpMs": 986.5146,
         "cls": 0
       }
     ]
@@ -73,5 +73,7 @@
         "contentType": "text/html; charset=utf-8"
       }
     ]
-  }
+  },
+  "public_route_viewport_samples": 168,
+  "screenshots_identical_to_manually_reviewed_candidate": true
 }

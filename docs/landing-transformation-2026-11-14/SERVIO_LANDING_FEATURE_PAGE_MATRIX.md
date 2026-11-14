@@ -22,4 +22,4 @@ The feature template shares navigation and layout, while every feature supplies 
 
 ## Verification
 
-Every listed route passed the successful candidate EN/AR HTTP, server language, heading, canonical, unique-description, hreflang, structured-data and axe checks. Final protected CI broadens this to every route at all six requested viewport widths. The `/pricing` page adds trial timing, annual calculation, same-subscription explanation and payment/activation boundaries beyond the homepage offer.
+Every listed route passed the successful candidate EN/AR HTTP, server language, heading, canonical, unique-description, hreflang, structured-data and axe checks. The verified candidate covers every route at all six requested viewport widths; final protected CI repeats this and adds focus visibility/contrast checks. The `/pricing` page adds trial timing, annual calculation, same-subscription explanation and payment/activation boundaries beyond the homepage offer.

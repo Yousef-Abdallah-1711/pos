@@ -44,7 +44,9 @@ async function register(page, locale, billing, otherCategory) {
  await page.screenshot({ path: path.join(output, `${locale}-${billing}-dashboard.png`) })
  const category = await firstAction(page, locale, otherCategory)
  const loggedOut = await page.evaluate(async origin => (await fetch(`${origin}/auth/logout`, { method: 'POST', credentials: 'include' })).ok, api)
- check(`session revoked ${locale}`, loggedOut)
+ check(`logout accepted ${locale}`, loggedOut)
+ const afterLogout = await page.evaluate(async origin => (await fetch(`${origin}/auth/session`, { credentials: 'include' })).status, api)
+ check(`logged-out access denied ${locale}`, afterLogout === 401)
  return category
 }
 async function firstAction(page, locale, otherCategory) {

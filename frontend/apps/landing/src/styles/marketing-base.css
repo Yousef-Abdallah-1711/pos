@@ -81,8 +81,10 @@ html[lang=ar] .sv-main :is(h1,h2,h3) {
 .sv-text-link:hover {
   text-decoration:underline;
 }
-.sv-main a:focus-visible,.sv-header :focus-visible,.sv-footer :focus-visible,.sv-main button:focus-visible,.sv-main summary:focus-visible {
-  outline:3px solid #a584f3;
+.sv-main :focus-visible,
+.sv-header :focus-visible,
+.sv-footer :focus-visible {
+  outline:3px solid #6938d3;
   outline-offset:5px;
 }
 .sv-header {

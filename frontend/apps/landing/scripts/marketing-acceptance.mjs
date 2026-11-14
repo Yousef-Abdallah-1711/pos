@@ -56,6 +56,29 @@ async function capture(page, name) {
  check(`captures decoded ${name}`, missing.length === 0, missing.join('; '))
  await page.screenshot({ path: path.join(output, `${name}.png`), fullPage: page.viewportSize().width <= 1440 })
 }
+async function focusChecks(page, locale) {
+ await load(page, locale, '')
+ await page.keyboard.press('Tab')
+ for (const [name, selector] of [['light', '.sv-hero .sv-button'], ['dark', '#kitchen .sv-section-actions a'], ['final', '.sv-final .sv-button'], ['footer', '.sv-footer nav a']]) {
+  const target = page.locator(selector).first()
+  await target.focus()
+  await target.scrollIntoViewIfNeeded()
+  const result = await target.evaluate(element => {
+   const luminance = color => {
+    const channels = color.match(/[\d.]+/g).slice(0, 3).map(Number).map(value => value / 255).map(value => value <= .04045 ? value / 12.92 : ((value + .055) / 1.055) ** 2.4)
+    return channels.reduce((total, value, index) => total + value * [.2126, .7152, .0722][index], 0)
+   }
+   let parent = element.parentElement
+   while (parent && (getComputedStyle(parent).backgroundColor === 'rgba(0, 0, 0, 0)' || getComputedStyle(parent).backgroundColor === 'transparent')) parent = parent.parentElement
+   const style = getComputedStyle(element)
+   const levels = [luminance(style.outlineColor), luminance(parent ? getComputedStyle(parent).backgroundColor : 'rgb(255, 255, 255)')].sort((a, b) => a - b)
+   const rect = element.getBoundingClientRect()
+   const visible = document.elementFromPoint(rect.x + rect.width / 2, rect.y + rect.height / 2)
+   return { contrast: (levels[1] + .05) / (levels[0] + .05), width: Number.parseFloat(style.outlineWidth), focusVisible: element.matches(':focus-visible'), unobscured: !!visible && element.contains(visible) }
+  })
+  check(`keyboard focus ${locale}/${name}`, result.focusVisible && result.width >= 2 && result.contrast >= 3 && result.unobscured, JSON.stringify(result))
+ }
+}
 async function interactions(page, locale) {
  await page.setViewportSize({ width: 390, height: 844 })
  await load(page, locale, '/pricing')
@@ -89,6 +112,7 @@ async function interactions(page, locale) {
  check(`mobile menu ${locale}`, await menu.getAttribute('aria-expanded') === 'true')
  await page.keyboard.press('Escape')
  check(`menu escape ${locale}`, await menu.getAttribute('aria-expanded') === 'false')
+ await focusChecks(page, locale)
 }
 async function main() {
  await fs.mkdir(output, { recursive: true })

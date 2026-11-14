@@ -2,7 +2,7 @@
 
 ## Verified candidate
 
-[Verified CI run](https://github.com/Yousef-Abdallah-1711/pos/actions/runs/43575769431), PR head `9e897f6ad2aa2bfbeaf0a539c37320d2be32ad4c`, includes the current main finance fixes. This is built-image acceptance in a disposable synthetic stack, not proof of AWS deployment. [Machine-readable summary](evidence/candidate-verification.json).
+[Verified CI run](https://github.com/Yousef-Abdallah-1711/pos/actions/runs/43577385555), PR head `60f7499689927fd3439370c1a46bef34527fce93`, includes the current main finance fixes. This is built-image acceptance in a disposable synthetic stack, not proof of AWS deployment. [Machine-readable summary](evidence/candidate-verification.json).
 
 Manual visual review covered English and Arabic at 1440px and 390px. The evidence shows loaded product captures, readable hierarchy, independent mobile compositions, RTL ordering, distinct section rhythms, and a clear monthly offer. Hero captures explicitly disclose English application views and synthetic data.
 
@@ -17,7 +17,7 @@ Before: [English desktop](../audits/product-landing-2026-11-14/evidence/en-deskt
 
 ## Responsive and interaction evidence
 
-Both languages passed homepage checks at 360, 390, 768, 1024, 1440 and 1920px. All dedicated routes passed desktop route/metadata/accessibility checks. The retained regression suite also passed 60 homepage/login/registration samples at ten widths and four mobile-menu checks. The final release gate expands every public route across all six requested widths and captures the annual offer at 390px. Its exact result is in the latest [PR validation record](https://github.com/Yousef-Abdallah-1711/pos/pull/43) and `chromium-smoke-results` artifact. At 1920px the marketing image is a viewport capture; the page is still scrolled for screenshot loading and checked for document overflow.
+Every public route passed at 360, 390, 768, 1024, 1440 and 1920px in both languages: 168 route/viewport samples. The screenshots retained here are byte-identical to the manually reviewed candidate. The retained regression suite also passed 60 homepage/login/registration samples at ten widths and four mobile-menu checks. Annual mobile pricing was also captured and verified at 390px. The final release gate additionally measures visible, unobscured focus indicators with at least 3:1 contrast on light, dark, final-action and footer surfaces. Its exact result is in the latest [PR validation record](https://github.com/Yousef-Abdallah-1711/pos/pull/43) and `chromium-smoke-results` artifact. At 1920px the marketing image is a viewport capture; the page is still scrolled for screenshot loading and checked for document overflow.
 
 No failed public network responses, browser exceptions, or console errors were recorded in the successful candidate. Native FAQ disclosure, keyboard walkthrough tabs, annual registration routing, locale switching, and menu Escape behavior passed.
 
@@ -27,8 +27,8 @@ The candidate's axe WCAG A/AA scans had zero violations. Lighthouse mobile acces
 
 | Locale | Lighthouse performance | Accessibility | LCP | CLS |
 |---|---:|---:|---:|---:|
-| EN | 95 | 100 | 0.923s | 0 |
-| AR | 96 | 100 | 1.351s | 0 |
+| EN | 93 | 100 | 0.913s | 0 |
+| AR | 96 | 100 | 0.987s | 0 |
 
 These are standard Lighthouse mobile simulations in CI, not field conversion data or real-device measurements. NVDA/VoiceOver and physical Android/iOS testing were not performed. No certification or conversion-uplift claim is made.
 
