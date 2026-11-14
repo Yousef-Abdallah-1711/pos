@@ -9,6 +9,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"pos-saas/internal/domain"
@@ -177,6 +178,10 @@ func (h *HRSalaryHandler) CreateSalary(w http.ResponseWriter, r *http.Request) {
 		})
 		return
 	}
+	if strings.EqualFold(strings.TrimSpace(req.Status), "paid") {
+		writeJSON(w, http.StatusConflict, map[string]interface{}{"success": false, "error": "Use the mark-paid operation to record payroll payment"})
+		return
+	}
 	if err := validateStringLengths(
 		stringLengthRule{Name: "currency", Value: req.Currency, Max: 16},
 		stringLengthRule{Name: "payment_method", Value: req.PaymentMethod, Max: 50},
@@ -301,6 +306,10 @@ func (h *HRSalaryHandler) UpdateSalary(w http.ResponseWriter, r *http.Request) {
 		})
 		return
 	}
+	if existing.IsPaid || strings.EqualFold(strings.TrimSpace(existing.Status), "paid") {
+		writeJSON(w, http.StatusConflict, map[string]interface{}{"success": false, "error": "Paid salary records are immutable"})
+		return
+	}
 
 	var req map[string]interface{}
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -315,6 +324,10 @@ func (h *HRSalaryHandler) UpdateSalary(w http.ResponseWriter, r *http.Request) {
 	}
 	if v, ok := req["status"].(string); ok && len(v) > 32 {
 		writeJSON(w, http.StatusBadRequest, map[string]interface{}{"success": false, "error": "status exceeds maximum length of 32"})
+		return
+	}
+	if v, ok := req["status"].(string); ok && strings.EqualFold(strings.TrimSpace(v), "paid") {
+		writeJSON(w, http.StatusConflict, map[string]interface{}{"success": false, "error": "Use the mark-paid operation to record payroll payment"})
 		return
 	}
 
@@ -386,6 +399,14 @@ func (h *HRSalaryHandler) UpdateSalary(w http.ResponseWriter, r *http.Request) {
 
 	if err := h.salaryRepo.UpdateSalary(existing); err != nil {
 		log.Printf("[HR-Salary] UpdateSalary ERROR: %v\n", err)
+		if errors.Is(err, repository.ErrSalaryPaid) {
+			writeJSON(w, http.StatusConflict, map[string]interface{}{"success": false, "error": "Paid salary records are immutable"})
+			return
+		}
+		if errors.Is(err, repository.ErrSalaryNotFound) {
+			writeJSON(w, http.StatusNotFound, map[string]interface{}{"success": false, "error": "Salary record not found"})
+			return
+		}
 		writeJSON(w, http.StatusInternalServerError, map[string]interface{}{
 			"success": false, "error": "Failed to update salary record",
 		})
@@ -413,12 +434,17 @@ func (h *HRSalaryHandler) DeleteSalary(w http.ResponseWriter, r *http.Request) {
 
 	log.Printf("[HR-Salary] DeleteSalary: tenantID=%d, restaurantID=%d, id=%d\n", tenantID, restaurantID, id)
 
-	_, err = h.db.Exec(
-		`DELETE FROM salaries WHERE id = $1 AND tenant_id = $2 AND restaurant_id = $3`,
-		id, tenantID, restaurantID,
-	)
+	err = h.salaryRepo.DeleteUnpaidSalary(tenantID, restaurantID, id)
 	if err != nil {
 		log.Printf("[HR-Salary] DeleteSalary ERROR: %v\n", err)
+		if errors.Is(err, repository.ErrSalaryPaid) {
+			writeJSON(w, http.StatusConflict, map[string]interface{}{"success": false, "error": "Paid salary records cannot be deleted"})
+			return
+		}
+		if errors.Is(err, repository.ErrSalaryNotFound) {
+			writeJSON(w, http.StatusNotFound, map[string]interface{}{"success": false, "error": "Salary record not found"})
+			return
+		}
 		writeJSON(w, http.StatusInternalServerError, map[string]interface{}{
 			"success": false, "error": "Failed to delete salary record",
 		})
@@ -465,28 +491,54 @@ func (h *HRSalaryHandler) MarkAsPaid(w http.ResponseWriter, r *http.Request) {
 
 	log.Printf("[HR-Salary] MarkAsPaid: tenantID=%d, restaurantID=%d, id=%d, paidBy=%d\n",
 		tenantID, restaurantID, id, userID)
-
-	if err := h.salaryRepo.MarkAsPaid(tenantID, restaurantID, id, userID, req.PaymentReference); err != nil {
-		log.Printf("[HR-Salary] MarkAsPaid ERROR: %v\n", err)
-		writeJSON(w, http.StatusInternalServerError, map[string]interface{}{
-			"success": false, "error": "Failed to mark salary as paid",
-		})
+	if h.autoPosting == nil {
+		writeJSON(w, http.StatusServiceUnavailable, map[string]interface{}{"success": false, "error": "Payroll accounting posting is unavailable"})
+		return
+	}
+	posting, ok := h.autoPosting.(usecase.TransactionalPayrollPostingService)
+	if !ok {
+		writeJSON(w, http.StatusServiceUnavailable, map[string]interface{}{"success": false, "error": "Payroll accounting posting does not support atomic payment"})
 		return
 	}
 
-	if h.autoPosting != nil {
-		salary, err := h.salaryRepo.GetSalaryByID(tenantID, restaurantID, id)
-		if err != nil {
-			log.Printf("[AccountingAutoPost] salary reload failed tenant=%d restaurant=%d salary=%d err=%v", tenantID, restaurantID, id, err)
-		} else if salary != nil {
-			postedBy := &userID
-			if userID <= 0 {
-				postedBy = nil
-			}
-			if err := h.autoPosting.PostPayrollEntry(salary, postedBy); err != nil {
-				log.Printf("[AccountingAutoPost] payroll posting failed tenant=%d restaurant=%d salary=%d err=%v", tenantID, restaurantID, id, err)
-			}
+	tx, err := h.db.BeginTx(r.Context(), nil)
+	if err != nil {
+		log.Printf("[HR-Salary] MarkAsPaid begin transaction failed salary=%d err=%v", id, err)
+		writeJSON(w, http.StatusInternalServerError, map[string]interface{}{
+			"success": false, "error": "Failed to start salary payment",
+		})
+		return
+	}
+	defer tx.Rollback()
+
+	salary, _, err := h.salaryRepo.MarkAsPaidTx(r.Context(), tx, tenantID, restaurantID, id, userID, req.PaymentReference)
+	if err != nil {
+		log.Printf("[HR-Salary] MarkAsPaid transition failed salary=%d err=%v", id, err)
+		if errors.Is(err, repository.ErrSalaryNotFound) {
+			writeJSON(w, http.StatusNotFound, map[string]interface{}{"success": false, "error": "Salary record not found"})
+			return
 		}
+		if errors.Is(err, repository.ErrSalaryState) {
+			writeJSON(w, http.StatusConflict, map[string]interface{}{"success": false, "error": "Salary state does not allow payment"})
+			return
+		}
+		writeJSON(w, http.StatusInternalServerError, map[string]interface{}{"success": false, "error": "Failed to mark salary as paid"})
+		return
+	}
+
+	postedBy := &userID
+	if userID <= 0 {
+		postedBy = nil
+	}
+	if err := posting.PostPayrollEntryTx(tx, salary, postedBy); err != nil {
+		log.Printf("[AccountingAutoPost] payroll posting failed tenant=%d restaurant=%d salary=%d err=%v", tenantID, restaurantID, id, err)
+		writeJSON(w, http.StatusInternalServerError, map[string]interface{}{"success": false, "error": "Payroll accounting posting failed"})
+		return
+	}
+	if err := tx.Commit(); err != nil {
+		log.Printf("[HR-Salary] MarkAsPaid commit failed salary=%d err=%v", id, err)
+		writeJSON(w, http.StatusInternalServerError, map[string]interface{}{"success": false, "error": "Failed to commit salary payment"})
+		return
 	}
 
 	log.Printf("[HR-Salary] MarkAsPaid SUCCESS: id=%d\n", id)
