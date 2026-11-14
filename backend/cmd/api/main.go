@@ -1392,7 +1392,7 @@ func main() {
 	// Admin Order Management endpoints (require authentication)
 	// Module ID 10 = Orders (from migrations)
 	// POS order creation uses the verified server session for tenant scope.
-	registerPOSOrderRoute(mux, wrapProtectedNoStatus, subscriptionRepo, http.HandlerFunc(publicOrderHandler.CreateOrder))
+	registerPOSOrderRoute(mux, posOrderGuards{authenticateTenant: wrapProtectedNoStatus, requirePermission: requirePermission}, subscriptionRepo, http.HandlerFunc(publicOrderHandler.CreateOrder))
 	mux.Handle("GET /api/v1/admin/orders/stats", wrapWithPermission(http.HandlerFunc(adminOrderHandler.GetOrderStats), 10, "READ"))
 	mux.Handle("GET /api/v1/admin/orders/export", wrapWithPermission(http.HandlerFunc(adminOrderHandler.ExportOrders), 10, "READ"))
 	mux.Handle("GET /api/v1/admin/orders/{id}/history", wrapWithPermission(http.HandlerFunc(adminOrderHandler.GetOrderHistory), 10, "READ"))
