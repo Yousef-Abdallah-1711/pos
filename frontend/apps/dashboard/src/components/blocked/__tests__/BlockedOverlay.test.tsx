@@ -16,7 +16,10 @@ const replace = vi.fn()
 beforeEach(() => {
   vi.clearAllMocks()
   vi.mocked(usePathname).mockReturnValue('/en/dashboard')
-  vi.mocked(useRouter).mockReturnValue({ replace } as ReturnType<typeof useRouter>)
+  vi.mocked(useRouter).mockReturnValue({
+    back: vi.fn(), forward: vi.fn(), refresh: vi.fn(), hmrRefresh: vi.fn(),
+    push: vi.fn(), prefetch: vi.fn(), replace,
+  })
   vi.mocked(useAuthStore).mockReturnValue(logout)
 })
 afterEach(cleanup)
