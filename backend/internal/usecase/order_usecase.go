@@ -8,6 +8,7 @@ import (
 	"log"
 	"math"
 	"pos-saas/internal/domain"
+	"pos-saas/internal/observability"
 	"pos-saas/internal/repository"
 	"strings"
 	"time"
@@ -515,6 +516,15 @@ func (uc *OrderUseCase) ReconcileAccountingEvents(ctx context.Context) error {
 	result, err := uc.accountingEvents.ReconcilePaidOrders(ctx)
 	if err != nil {
 		return err
+	}
+	observability.RecordAccountingEvents(observability.AccountingEventMetrics{
+		MissingIntents: result.MissingIntents, Pending: result.Pending,
+		Processing: result.Processing, Retryable: result.Retryable,
+		Failed: result.Failed, CompletedWithoutSalesJournal: result.CompletedWithoutSalesJournal,
+	})
+	if result.Failed > 0 || result.CompletedWithoutSalesJournal > 0 {
+		log.Printf("[AccountingRecovery] ALERT terminal_failure=%d completed_without_sales_journal=%d action=inspect_failed_events_and_reconcile",
+			result.Failed, result.CompletedWithoutSalesJournal)
 	}
 	if result.MissingIntents+result.Pending+result.Processing+result.Retryable+result.Failed+result.CompletedWithoutSalesJournal > 0 {
 		log.Printf("[AccountingRecovery] reconciliation missing_intents=%d pending=%d processing=%d retryable=%d failed=%d completed_without_sales_journal=%d",

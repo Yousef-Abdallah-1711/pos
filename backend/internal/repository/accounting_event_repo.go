@@ -3,9 +3,15 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"strings"
 	"time"
+)
+
+var (
+	ErrAccountingEventNotFound      = errors.New("accounting event not found")
+	ErrAccountingEventNotRedrivable = errors.New("accounting event is not eligible for redrive")
 )
 
 const (
@@ -40,6 +46,19 @@ type AccountingEventReconciliation struct {
 	Retryable                    int64
 	Failed                       int64
 	CompletedWithoutSalesJournal int64
+}
+
+// FailedAccountingEvent is a tenant-scoped operator view of a terminal event.
+type FailedAccountingEvent struct {
+	ID           int64     `json:"id"`
+	EventID      string    `json:"event_id"`
+	OrderID      int64     `json:"order_id"`
+	Attempts     int       `json:"attempts"`
+	MaxAttempts  int       `json:"max_attempts"`
+	LastError    string    `json:"last_error"`
+	RedriveCount int64     `json:"redrive_count"`
+	CreatedAt    time.Time `json:"created_at"`
+	UpdatedAt    time.Time `json:"updated_at"`
 }
 
 // AccountingEventRepository claims and advances durable accounting work.
@@ -211,6 +230,111 @@ func (r *AccountingEventRepository) Fail(ctx context.Context, event *AccountingE
 		WHERE id = $4 AND tenant_id = $5 AND restaurant_id = $6 AND status = 'processing' AND lease_generation = $7`,
 		status, int(backoff.Seconds()), strings.TrimSpace(message), event.ID, event.TenantID, event.RestaurantID, event.LeaseGeneration)
 	return requireAccountingEventUpdate(result, err, "record failure")
+}
+
+// ListFailed returns only terminal failures inside the authenticated restaurant scope.
+func (r *AccountingEventRepository) ListFailed(ctx context.Context, tenantID, restaurantID int64, limit, offset int) ([]FailedAccountingEvent, int64, error) {
+	if tenantID <= 0 || restaurantID <= 0 {
+		return nil, 0, errors.New("tenant and restaurant scope are required")
+	}
+	if limit < 1 || limit > 100 || offset < 0 {
+		return nil, 0, errors.New("invalid failed-event pagination")
+	}
+	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
+
+	var total int64
+	if err := r.db.QueryRowContext(ctx, `
+		SELECT COUNT(*)
+		FROM accounting_event_outbox
+		WHERE tenant_id = $1 AND restaurant_id = $2 AND status = 'failed'`,
+		tenantID, restaurantID).Scan(&total); err != nil {
+		return nil, 0, fmt.Errorf("count failed accounting events: %w", err)
+	}
+	rows, err := r.db.QueryContext(ctx, `
+		SELECT e.id, e.event_id, e.order_id, e.attempts, e.max_attempts,
+		       LEFT(COALESCE(e.last_error, ''), 2000),
+	       (SELECT COUNT(*) FROM accounting_event_redrive_audit a WHERE a.outbox_id = e.id),
+	       e.created_at, e.updated_at
+		FROM accounting_event_outbox e
+		WHERE e.tenant_id = $1 AND e.restaurant_id = $2 AND e.status = 'failed'
+		ORDER BY e.updated_at DESC, e.id DESC
+		LIMIT $3 OFFSET $4`, tenantID, restaurantID, limit, offset)
+	if err != nil {
+		return nil, 0, fmt.Errorf("list failed accounting events: %w", err)
+	}
+	defer rows.Close()
+
+	items := make([]FailedAccountingEvent, 0)
+	for rows.Next() {
+		var item FailedAccountingEvent
+		if err := rows.Scan(&item.ID, &item.EventID, &item.OrderID, &item.Attempts,
+			&item.MaxAttempts, &item.LastError, &item.RedriveCount, &item.CreatedAt, &item.UpdatedAt); err != nil {
+			return nil, 0, fmt.Errorf("scan failed accounting event: %w", err)
+		}
+		items = append(items, item)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, 0, fmt.Errorf("iterate failed accounting events: %w", err)
+	}
+	return items, total, nil
+}
+
+// RedriveFailed records an operator reason and requeues exactly one paid-order event.
+func (r *AccountingEventRepository) RedriveFailed(ctx context.Context, tenantID, restaurantID, eventDBID, actorUserID int64, reason string) (string, error) {
+	if tenantID <= 0 || restaurantID <= 0 || eventDBID <= 0 || actorUserID <= 0 {
+		return "", errors.New("tenant, restaurant, event, and actor identifiers are required")
+	}
+	reason = strings.TrimSpace(reason)
+	if reason == "" || len(reason) > 1000 {
+		return "", errors.New("redrive reason must contain 1 to 1000 bytes")
+	}
+	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
+	tx, err := r.db.BeginTx(ctx, nil)
+	if err != nil {
+		return "", fmt.Errorf("begin accounting event redrive: %w", err)
+	}
+	defer tx.Rollback()
+
+	var eventID, status, paymentStatus, lastError string
+	var attempts int
+	err = tx.QueryRowContext(ctx, `
+		SELECT e.event_id, e.status, LOWER(BTRIM(o.payment_status)),
+		       e.attempts, LEFT(COALESCE(e.last_error, ''), 2000)
+		FROM accounting_event_outbox e
+		JOIN orders o ON o.id = e.order_id AND o.tenant_id = e.tenant_id AND o.restaurant_id = e.restaurant_id
+		WHERE e.id = $1 AND e.tenant_id = $2 AND e.restaurant_id = $3
+		FOR UPDATE OF e, o`, eventDBID, tenantID, restaurantID).Scan(&eventID, &status, &paymentStatus, &attempts, &lastError)
+	if errors.Is(err, sql.ErrNoRows) {
+		return "", ErrAccountingEventNotFound
+	}
+	if err != nil {
+		return "", fmt.Errorf("load accounting event for redrive: %w", err)
+	}
+	if status != AccountingEventFailed || paymentStatus != "paid" {
+		return "", ErrAccountingEventNotRedrivable
+	}
+
+	if _, err := tx.ExecContext(ctx, `
+		INSERT INTO accounting_event_redrive_audit
+		    (outbox_id, actor_user_id, previous_attempts, previous_error, reason)
+		VALUES ($1, $2, $3, $4, $5)`, eventDBID, actorUserID, attempts, lastError, reason); err != nil {
+		return "", fmt.Errorf("audit accounting event redrive: %w", err)
+	}
+	result, err := tx.ExecContext(ctx, `
+		UPDATE accounting_event_outbox
+		SET status = 'retryable', attempts = 0, next_attempt_at = CURRENT_TIMESTAMP,
+		    lease_expires_at = NULL, updated_at = CURRENT_TIMESTAMP
+		WHERE id = $1 AND tenant_id = $2 AND restaurant_id = $3 AND status = 'failed'`,
+		eventDBID, tenantID, restaurantID)
+	if err := requireAccountingEventUpdate(result, err, "redrive"); err != nil {
+		return "", err
+	}
+	if err := tx.Commit(); err != nil {
+		return "", fmt.Errorf("commit accounting event redrive: %w", err)
+	}
+	return eventID, nil
 }
 
 func requireAccountingEventUpdate(result sql.Result, err error, operation string) error {
