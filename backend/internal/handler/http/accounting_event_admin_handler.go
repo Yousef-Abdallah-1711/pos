@@ -34,7 +34,7 @@ func (h *AccountingEventAdminHandler) ListFailed(w http.ResponseWriter, r *http.
 		respondError(w, http.StatusBadRequest, err.Error())
 		return
 	}
-	items, total, err := h.events.ListFailed(r.Context(), tenantID, restaurantID, limit, (page-1)*limit)
+	items, total, err := h.events.ListFailed(r.Context(), repository.AccountingEventScope{TenantID: tenantID, RestaurantID: restaurantID}, limit, (page-1)*limit)
 	if err != nil {
 		log.Printf("[AccountingEventAdmin] list_failed tenant_id=%d restaurant_id=%d error=%v", tenantID, restaurantID, err)
 		respondError(w, http.StatusInternalServerError, "Failed to list failed accounting events")
@@ -75,7 +75,10 @@ func (h *AccountingEventAdminHandler) RedriveFailed(w http.ResponseWriter, r *ht
 		respondError(w, http.StatusBadRequest, "A redrive reason of 1 to 1000 bytes is required")
 		return
 	}
-	eventID, err := h.events.RedriveFailed(r.Context(), tenantID, restaurantID, eventDBID, actorUserID, request.Reason)
+	eventID, err := h.events.RedriveFailed(r.Context(), repository.AccountingEventRedriveRequest{
+		Scope:   repository.AccountingEventScope{TenantID: tenantID, RestaurantID: restaurantID},
+		EventID: eventDBID, ActorUserID: actorUserID, Reason: request.Reason,
+	})
 	switch {
 	case errors.Is(err, repository.ErrAccountingEventNotFound):
 		respondError(w, http.StatusNotFound, "Accounting event not found")
