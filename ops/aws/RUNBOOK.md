@@ -294,3 +294,14 @@ must be completed successfully, not merely have one green job. Main advancing, a
 check or spoofed identity stops signing/publication. The publisher token adds only read
 access to checks; existing contents-write/actions-read permissions remain scoped to that
 protected main publication job. The systemd agent still uses anonymous read-only fetches.
+
+## Hardened acceptance identity transition
+
+The first real-main bootstrap exposed a host-specific privilege transition failure:
+`runuser` could not change UID under the hardened unit. Application images rolled back;
+forward database migrations and data were retained. The root service explicitly preserves
+CAP_SETUID/CAP_SETGID for this transition while keeping NoNewPrivileges enabled. The
+unprivileged acceptance child has zero effective/ambient capabilities and cannot regain
+root. `check-service-identity.py` executes this behavior through systemd on the host and
+in CI; installation does not enable the recurring timer. Preserve the failed bootstrap
+logs and do not weaken the sandbox to bypass this check.
