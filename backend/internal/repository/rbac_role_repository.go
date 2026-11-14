@@ -309,7 +309,7 @@ func (r *RBACRoleRepository) DeactivateWithPermissions(ctx context.Context, tena
 func insertRBACPermission(ctx context.Context, tx *sql.Tx, tenantID, restaurantID, roleID int64, permission RBACPermissionMutation, now time.Time) error {
 	result, err := tx.ExecContext(ctx, `
 		INSERT INTO role_permissions (tenant_id, role_id, module_id, permission_level, created_at, updated_at)
-		SELECT $1, $2, $3, $4, $5, $5
+		SELECT $1::bigint, $2::bigint, $3::bigint, $4, $5, $5
 		WHERE EXISTS (SELECT 1 FROM roles WHERE id = $2 AND tenant_id = $1 AND restaurant_id = $6 AND is_active = TRUE)
 		  AND EXISTS (SELECT 1 FROM modules WHERE id = $3)
 	`, tenantID, roleID, permission.ModuleID, permission.Level, now, restaurantID)
