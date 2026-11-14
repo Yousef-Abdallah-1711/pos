@@ -34,9 +34,9 @@ export function Navbar() {
       <div className="sv-desktop-trial"><TrialLink locale={language} source="navigation" /></div>
       <button className="sv-menu-button" ref={trigger} type="button" aria-controls="sv-mobile-navigation" aria-expanded={open} aria-label={open ? (language === 'ar' ? 'إغلاق القائمة' : 'Close menu') : (language === 'ar' ? 'فتح القائمة' : 'Open menu')} onClick={() => setOpen(!open)}>{open ? <X aria-hidden="true" /> : <Menu aria-hidden="true" />}</button>
     </div>
-  </nav>{open && <div className="sv-mobile-navigation sv-shell" id="sv-mobile-navigation" ref={nav}>
+  </nav><div hidden={!open} className="sv-mobile-navigation sv-shell" id="sv-mobile-navigation" ref={nav}>
     {links.map(([path, label]) => <Link key={path} href={`/${language}/${path}`} onClick={() => setOpen(false)}>{label}</Link>)}
     <Link href={`/${language}/auth/login`} onClick={() => setOpen(false)}>{c.login}</Link>
     <TrialLink locale={language} source="mobile-navigation" />
-  </div>}</header>
+  </div></header>
 }

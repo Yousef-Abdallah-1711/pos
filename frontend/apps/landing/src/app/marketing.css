@@ -13,3 +13,5 @@ html[lang=ar] .sv-main :is(h1,h2,h3){letter-spacing:0;line-height:1.45}
 @media(prefers-reduced-motion:reduce){.sv-main *,.sv-header *{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
 
 .sv-section-actions{display:flex;flex-wrap:wrap;align-items:center;gap:8px 26px;margin-top:20px}.sv-button-compact{padding:10px 0;background:transparent;color:var(--sv-violet);border-radius:0;font-size:13px}.sv-button-compact:hover{background:transparent;color:#45218b;transform:none;text-decoration:underline}.sv-section-actions>.sv-text-link{color:var(--sv-muted);font-size:13px;font-weight:500}.sv-dark .sv-button-compact,.sv-dark .sv-section-actions>.sv-text-link{color:#dcc8ff}.sv-final .sv-text-link{color:#f0e6ff}.sv-editorial-row>.sv-section-actions{max-width:390px}.sv-kitchen-heading>.sv-section-actions{min-width:260px}
+
+.sv-mobile-navigation[hidden]{display:none}.sv-explorer-panel h2{font-size:30px}.auth-page .auth-field__password button{min-width:48px;min-height:48px}@media(min-width:1024px){.sv-mobile-navigation{display:none}}

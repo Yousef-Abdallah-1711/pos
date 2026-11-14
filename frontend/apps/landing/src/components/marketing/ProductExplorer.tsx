@@ -6,10 +6,11 @@ import type { Feature } from '@/content/features'
 import { getSiteCopy, type Locale } from '@/content/site'
 import { ProductCapture } from './ProductCapture'
 
-export function ProductExplorer({ locale, features }: { locale: Locale; features: Feature[] }) {
+export function ProductExplorer({ locale, features, headingLevel = 3 }: { locale: Locale; features: Feature[]; headingLevel?: 2 | 3 }) {
   const [selected, setSelected] = useState(0)
   const tabs = useRef<(HTMLButtonElement | null)[]>([])
   const c = getSiteCopy(locale)
+  const Heading = headingLevel === 2 ? 'h2' : 'h3'
   const navigate = (event: KeyboardEvent<HTMLButtonElement>, index: number) => {
     const forward = locale === 'ar' ? 'ArrowLeft' : 'ArrowRight'
     const back = locale === 'ar' ? 'ArrowRight' : 'ArrowLeft'
@@ -27,7 +28,7 @@ export function ProductExplorer({ locale, features }: { locale: Locale; features
     </div>
     {features.map((feature, i) => <div key={feature.slug} role="tabpanel" id={`explore-panel-${feature.slug}`} aria-labelledby={`explore-tab-${feature.slug}`} hidden={selected !== i} tabIndex={0}>
       <div className="sv-explorer-panel"><ProductCapture locale={locale} image={feature.image} alt={feature.title} />
-        <div><p className="sv-eyebrow">{feature.eyebrow}</p><h3>{feature.headline}</h3><p>{feature.description}</p><Link className="sv-text-link" href={`/${locale}/features/${feature.slug}`}>{c.details}<span aria-hidden="true">↗</span></Link></div></div>
+        <div><p className="sv-eyebrow">{feature.eyebrow}</p><Heading>{feature.headline}</Heading><p>{feature.description}</p><Link className="sv-text-link" href={`/${locale}/features/${feature.slug}`}>{c.details}<span aria-hidden="true">↗</span></Link></div></div>
     </div>)}
   </div>
 }

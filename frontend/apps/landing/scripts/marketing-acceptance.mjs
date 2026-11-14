@@ -1,6 +1,7 @@
 /* Run against a preview or the deployed landing URL. Captures contain public synthetic data. */
 import { createRequire } from 'node:module'
-const { chromium } = createRequire(import.meta.url)('playwright')
+const require = createRequire(import.meta.url)
+const { chromium } = require('playwright')
 import fs from 'node:fs/promises'
 import path from 'node:path'
 const base = process.env.SERVIO_MARKETING_URL
@@ -27,6 +28,12 @@ async function load(page, locale, route) {
  check(`heading ${locale}${route}`, await page.locator('main h1').count() === 1)
  const overflow = await page.evaluate(() => document.documentElement.scrollWidth > innerWidth)
  check(`overflow ${locale}${route}`, !overflow)
+ await page.addScriptTag({ path: require.resolve('axe-core/axe.min.js') })
+ const violations = await page.evaluate(async () => {
+  const result = await window.axe.run(document, { runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa'] } })
+  return result.violations.map(item => ({ id: item.id, impact: item.impact, nodes: item.nodes.map(node => node.target) }))
+ })
+ check(`accessibility ${locale}${route}`, violations.length === 0, JSON.stringify(violations))
 }
 async function capture(page, name) {
  await page.evaluate(async () => {
