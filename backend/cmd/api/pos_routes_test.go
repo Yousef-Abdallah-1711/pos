@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"pos-saas/internal/middleware"
+	"pos-saas/internal/pkg/jwt"
 	"pos-saas/internal/repository"
 )
 
@@ -29,6 +30,7 @@ func (s *posAccessStub) CheckTenantAccess(_ context.Context, tenant int64) (bool
 func authenticatedPOSFixture(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx := context.WithValue(r.Context(), middleware.TenantContextKey, int64(42))
+		ctx = context.WithValue(ctx, middleware.UserContextKey, &jwt.Claims{UserID: 7, TenantID: 42, RestaurantID: 3, Role: "employee"})
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
@@ -39,7 +41,7 @@ func TestPOSOrderRouteBlocksExpiredAndDisabledTenants(t *testing.T) {
 			repo := &posAccessStub{reason: reason}
 			mux := http.NewServeMux()
 			writes := 0
-			registerPOSOrderRoute(mux, authenticatedPOSFixture, repo, http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+			registerPOSOrderRoute(mux, posGuardFixture(), repo, http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 				writes++
 				w.WriteHeader(http.StatusCreated)
 			}))
@@ -61,7 +63,7 @@ func TestPOSOrderRouteAllowsActiveTenantAndRechecksEachRequest(t *testing.T) {
 	repo := &posAccessStub{allowed: true}
 	mux := http.NewServeMux()
 	writes := 0
-	registerPOSOrderRoute(mux, authenticatedPOSFixture, repo, http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+	registerPOSOrderRoute(mux, posGuardFixture(), repo, http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		writes++
 		w.WriteHeader(http.StatusCreated)
 	}))
@@ -81,7 +83,7 @@ func TestPOSOrderRouteAllowsActiveTenantAndRechecksEachRequest(t *testing.T) {
 func TestPOSOrderRouteRejectsUnavailableEntitlementLookup(t *testing.T) {
 	for _, repo := range []repository.SubscriptionRepository{nil, &posAccessStub{err: errors.New("lookup unavailable")}} {
 		mux := http.NewServeMux()
-		registerPOSOrderRoute(mux, authenticatedPOSFixture, repo, http.HandlerFunc(func(http.ResponseWriter, *http.Request) {
+		registerPOSOrderRoute(mux, posGuardFixture(), repo, http.HandlerFunc(func(http.ResponseWriter, *http.Request) {
 			t.Fatal("order creation ran without verified entitlement")
 		}))
 		response := httptest.NewRecorder()
@@ -98,12 +100,76 @@ func TestPOSOrderRouteKeepsAuthenticationBeforeEntitlementLookup(t *testing.T) {
 		return http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) { w.WriteHeader(http.StatusUnauthorized) })
 	}
 	mux := http.NewServeMux()
-	registerPOSOrderRoute(mux, denyAnonymous, repo, http.HandlerFunc(func(http.ResponseWriter, *http.Request) {
+	guards := posGuardFixture()
+	guards.authenticateTenant = denyAnonymous
+	registerPOSOrderRoute(mux, guards, repo, http.HandlerFunc(func(http.ResponseWriter, *http.Request) {
 		t.Fatal("anonymous request reached order creation")
 	}))
 	response := httptest.NewRecorder()
 	mux.ServeHTTP(response, httptest.NewRequest(http.MethodPost, "/api/v1/pos/orders", nil))
 	if response.Code != http.StatusUnauthorized || repo.calls != 0 {
 		t.Fatal("anonymous request must stop before entitlement lookup")
+	}
+}
+
+type posPermissionStub struct {
+	level  string
+	err    error
+	module int64
+	tenant int
+}
+
+func (s *posPermissionStub) EffectiveLevel(_ context.Context, claims *jwt.Claims, module int64) (string, error) {
+	s.module, s.tenant = module, claims.TenantID
+	return s.level, s.err
+}
+
+func posGuardFixture() posOrderGuards {
+	return posOrderGuards{
+		authenticateTenant: authenticatedPOSFixture,
+		requirePermission:  middleware.NewPermissionMiddleware(&posPermissionStub{level: "WRITE"}, middleware.PermissionModeEnforce),
+	}
+}
+
+func TestPOSOrderRouteEnforcesOrdersWritePermission(t *testing.T) {
+	for _, tc := range []struct {
+		level string
+		want  int
+	}{
+		{"NONE", http.StatusForbidden}, {"READ", http.StatusForbidden},
+		{"WRITE", http.StatusCreated}, {"ADMIN", http.StatusCreated},
+	} {
+		t.Run(tc.level, func(t *testing.T) {
+			evaluator := &posPermissionStub{level: tc.level}
+			guards := posGuardFixture()
+			guards.requirePermission = middleware.NewPermissionMiddleware(evaluator, middleware.PermissionModeEnforce)
+			mux := http.NewServeMux()
+			writes := 0
+			registerPOSOrderRoute(mux, guards, &posAccessStub{allowed: true}, http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+				writes++
+				w.WriteHeader(http.StatusCreated)
+			}))
+			response := httptest.NewRecorder()
+			mux.ServeHTTP(response, httptest.NewRequest(http.MethodPost, "/api/v1/pos/orders", nil))
+			if response.Code != tc.want || (writes == 1) != (tc.want == http.StatusCreated) || evaluator.module != 10 || evaluator.tenant != 42 {
+				t.Fatalf("status=%d writes=%d module=%d tenant=%d", response.Code, writes, evaluator.module, evaluator.tenant)
+			}
+		})
+	}
+}
+
+func TestPOSOrderRouteFailsClosedWhenPermissionLookupIsUnavailable(t *testing.T) {
+	for _, evaluator := range []middleware.PermissionEvaluator{nil, &posPermissionStub{err: errors.New("RBAC lookup unavailable")}} {
+		guards := posGuardFixture()
+		guards.requirePermission = middleware.NewPermissionMiddleware(evaluator, middleware.PermissionModeEnforce)
+		mux := http.NewServeMux()
+		registerPOSOrderRoute(mux, guards, &posAccessStub{allowed: true}, http.HandlerFunc(func(http.ResponseWriter, *http.Request) {
+			t.Fatal("permission outage reached order creation")
+		}))
+		response := httptest.NewRecorder()
+		mux.ServeHTTP(response, httptest.NewRequest(http.MethodPost, "/api/v1/pos/orders", nil))
+		if response.Code != http.StatusServiceUnavailable {
+			t.Fatalf("status=%d, want 503", response.Code)
+		}
 	}
 }
