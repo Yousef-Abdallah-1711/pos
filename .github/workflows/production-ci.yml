@@ -136,6 +136,7 @@ jobs:
       - run: bash -n scripts/production/*.sh
       - run: python3 -m py_compile ops/aws/*.py
       - run: python3 -m unittest discover -s ops/aws -p 'test_*.py'
+      - run: node --test ops/aws/test_browser_route_inventory.cjs
       - name: Verify hardened service privilege drop
         run: python3 ops/aws/check-service-identity.py
       - run: git diff --check
