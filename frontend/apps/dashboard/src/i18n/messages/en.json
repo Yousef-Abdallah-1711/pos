@@ -557,6 +557,7 @@
     "billingPage": {
       "title": "Billing & Subscription",
       "description": "Manage your subscription plan and payment history.",
+      "loadSubscriptionFailed": "Could not load your current subscription. Please refresh the page.",
       "loadPlansFailed": "Failed to load subscription plans.",
       "paymentSuccess": "Payment completed successfully.",
       "paymentFailed": "Payment failed. Please try again.",

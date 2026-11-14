@@ -399,6 +399,7 @@
     "billingPage": {
       "title": "الفوترة والاشتراك",
       "description": "إدارة خطة الاشتراك وسجل المدفوعات.",
+      "loadSubscriptionFailed": "تعذّر تحميل اشتراكك الحالي. يرجى تحديث الصفحة.",
       "loadPlansFailed": "فشل تحميل خطط الاشتراك.",
       "paymentSuccess": "تم إكمال الدفع بنجاح.",
       "paymentFailed": "فشل الدفع. يرجى المحاولة مرة أخرى.",

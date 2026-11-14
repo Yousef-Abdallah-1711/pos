@@ -105,6 +105,7 @@ export default function BillingSettingsPage() {
       setCurrentSubscription(resolvedCurrent)
     } else {
       setCurrentSubscription(null)
+      setErrorMessage(previous => previous || t('settings.billingPage.loadSubscriptionFailed', 'Could not load your current subscription. Please refresh the page.'))
     }
 
     if (resolvedPlans.length > 0) {
@@ -236,7 +237,7 @@ export default function BillingSettingsPage() {
       </div>
 
       {errorMessage && (
-        <div className="rounded-lg border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900/40 dark:bg-red-900/20 dark:text-red-300">
+        <div role="alert" className="rounded-lg border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900/40 dark:bg-red-900/20 dark:text-red-300">
           {errorMessage}
         </div>
       )}
