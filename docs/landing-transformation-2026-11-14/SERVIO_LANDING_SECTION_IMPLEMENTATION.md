@@ -21,6 +21,6 @@ Fourteen sections, followed by a real footer. All destinations below are localiz
 
 ## Verification map
 
-`marketing-acceptance.cjs` checks HTTP responses, single h1, viewport overflow, section count, annual registration propagation, walkthrough keyboard navigation, and menu Escape behavior in both languages. Component tests check annual total/savings and the selected registration destination. Backend tests check approved policy equality, validation, expiry boundary, and checkout rejection before provider handling. Registration integration checks exact trial duration and persisted annual preference.
+`marketing-acceptance.mjs` checks HTTP responses, single h1, viewport overflow, section count, annual registration propagation, walkthrough keyboard navigation, and menu Escape behavior in both languages. Component tests check annual total/savings and the selected registration destination. Backend tests check approved policy equality, validation, expiry boundary, and checkout rejection before provider handling. Registration integration checks exact trial duration and persisted annual preference.
 
 Events are a local browser bridge (`servio:funnel`), without personal identifiers or external collection. This is not a durable analytics service. Onboarding start/completion events must only be emitted by a real persisted onboarding workflow; this repository has no explicit onboarding completion contract, so these are not fabricated.

@@ -1,8 +1,10 @@
 /* Run against a preview or the deployed landing URL. Captures contain public synthetic data. */
-const { chromium } = require('playwright')
-const fs = require('node:fs/promises')
-const path = require('node:path')
-const base = process.env.SERVIO_MARKETING_URL || 'http://localhost:3101'
+import { createRequire } from 'node:module'
+const { chromium } = createRequire(import.meta.url)('playwright')
+import fs from 'node:fs/promises'
+import path from 'node:path'
+const base = process.env.SERVIO_MARKETING_URL
+if (!base) throw new Error('Set SERVIO_MARKETING_URL to the intended preview or deployment URL')
 const output = process.env.SERVIO_MARKETING_EVIDENCE || (process.env.SERVIO_BROWSER_EVIDENCE ? path.join(process.env.SERVIO_BROWSER_EVIDENCE, 'marketing') : '/tmp/servio-marketing-acceptance')
 const widths = [360, 390, 768, 1024, 1440, 1920]
 const routes = ['', '/features', '/features/pos', '/features/kitchen-display', '/features/online-ordering', '/features/website-builder', '/features/inventory', '/features/hr', '/features/analytics', '/how-it-works', '/pricing', '/demo', '/contact', '/privacy']
