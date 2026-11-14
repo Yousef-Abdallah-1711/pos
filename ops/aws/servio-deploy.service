@@ -16,6 +16,9 @@ KillMode=mixed
 Restart=no
 UMask=0077
 NoNewPrivileges=yes
+# Preserve only the identity transition needed to drop acceptance tests to ubuntu.
+# runuser clears these capabilities in the unprivileged child; NNP remains enabled.
+AmbientCapabilities=CAP_SETUID CAP_SETGID
 PrivateTmp=yes
 ProtectSystem=strict
 ProtectHome=yes
