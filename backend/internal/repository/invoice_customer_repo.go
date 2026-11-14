@@ -731,6 +731,9 @@ func (r *CustomerInvoiceRepository) insertCustomerInvoiceLinesTx(tx *sql.Tx, inv
 func (r *CustomerInvoiceRepository) generateInvoiceNumberTx(tx *sql.Tx, tenantID, restaurantID int, invoiceDate time.Time) (string, error) {
 	var nextNumber int
 	prefix := fmt.Sprintf("INV-%d-", invoiceDate.Year())
+	if err := lockFinancialDocumentNumberTx(tx, "customer-invoice", tenantID, restaurantID, prefix); err != nil {
+		return "", err
+	}
 	err := tx.QueryRow(`
 		SELECT COALESCE(MAX(CAST(RIGHT(invoice_number, 5) AS INT)), 0) + 1
 		FROM invoices_customer
