@@ -36,14 +36,17 @@ async function load(page, locale, route) {
  check(`accessibility ${locale}${route}`, violations.length === 0, JSON.stringify(violations))
 }
 async function capture(page, name) {
- await page.evaluate(async () => {
+ const missing = await page.evaluate(async () => {
+  const missing = []
   for (const image of document.querySelectorAll('main img')) {
    if (image.closest('[hidden]')) continue
    image.scrollIntoView()
-   await image.decode().catch(() => undefined)
+   try { await image.decode() } catch { missing.push(image.getAttribute('src')) }
   }
   window.scrollTo(0, 0)
+  return missing
  })
+ check(`captures decoded ${name}`, missing.length === 0, missing.join('; '))
  await page.screenshot({ path: path.join(output, `${name}.png`), fullPage: page.viewportSize().width <= 1440 })
 }
 async function interactions(page, locale) {
@@ -82,7 +85,12 @@ async function main() {
  try {
   let page = await browser.newPage({ ignoreHTTPSErrors: process.env.SERVIO_DISPOSABLE_BROWSER === '1', viewport: { width: 1440, height: 1000 }, reducedMotion: 'reduce' })
   const errors = []
-  page.on('pageerror', error => errors.push(error.message))
+  const networkFailures = []
+  const observe = page => {
+   page.on('pageerror', error => errors.push(error.message))
+   page.on('response', response => { if (response.status() >= 400) networkFailures.push(`${response.status()} ${new URL(response.url()).pathname}`) })
+  }
+  observe(page)
   for (const locale of ['en', 'ar']) {
    for (const width of widths) {
     await page.setViewportSize({ width, height: 1000 })
@@ -91,12 +99,13 @@ async function main() {
     await capture(page, `${locale}-${width}`)
     await page.close()
     page = await browser.newPage({ ignoreHTTPSErrors: process.env.SERVIO_DISPOSABLE_BROWSER === '1', viewport: { width, height: 1000 }, reducedMotion: 'reduce' })
-    page.on('pageerror', error => errors.push(error.message))
+    observe(page)
    }
    for (const route of routes.slice(1)) await load(page, locale, route)
    await interactions(page, locale)
   }
   check('browser exceptions', errors.length === 0, errors.join('; '))
+  check('failed network responses', networkFailures.length === 0, networkFailures.join('; '))
  } finally {
   await browser.close()
   await fs.writeFile(path.join(output, 'results.json'), JSON.stringify({ base, checks }, null, 2))

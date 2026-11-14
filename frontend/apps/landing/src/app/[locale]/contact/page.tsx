@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { ViewEvent } from '@/components/marketing/ViewEvent'
 import { MarketingShell } from '@/components/marketing/MarketingShell'
 import { TrialLink } from '@/components/marketing/TrialLink'
 import { getSiteCopy, type Locale } from '@/content/site'
@@ -8,5 +9,5 @@ const copy = { en: { title: 'Explore SERVIO with a product walkthrough', body: '
 export async function generateMetadata({ params }: Props) { const { locale } = await params; return marketingMetadata(locale, '/contact', copy[locale].title, copy[locale].body) }
 export default async function Page({ params }: Props) {
  const { locale } = await params; const c = getSiteCopy(locale)
- return <MarketingShell><section className="sv-section sv-feature-hero"><div className="sv-shell"><h1>{copy[locale].title}</h1><p className="sv-lead">{copy[locale].body}</p><div className="sv-actions"><Link className="sv-text-link" href={`/${locale}/demo`}>{c.demo}<span aria-hidden="true">↗</span></Link><TrialLink locale={locale} source="contact" /></div></div></section></MarketingShell>
+ return <MarketingShell><ViewEvent locale={locale} source="contact" event="demo_contact_initiated" /><section className="sv-section sv-feature-hero"><div className="sv-shell"><h1>{copy[locale].title}</h1><p className="sv-lead">{copy[locale].body}</p><div className="sv-actions"><Link className="sv-text-link" href={`/${locale}/demo`}>{c.demo}<span aria-hidden="true">↗</span></Link><TrialLink locale={locale} source="contact" /></div></div></section></MarketingShell>
 }
