@@ -87,6 +87,11 @@ function BlockedSignOut({ pathname, copy }: { pathname: string; copy: Copy }) {
   </>
 }
 
+export function BlockedLogout() {
+  const pathname = usePathname()
+  return <BlockedSignOut pathname={pathname} copy={messages[getLocaleFromPath(pathname)]} />
+}
+
 export function BlockedOverlay({ blockReason, supportEmail }: BlockedOverlayProps) {
   const pathname = usePathname()
   const locale = getLocaleFromPath(pathname)

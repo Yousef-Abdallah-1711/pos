@@ -1,114 +1,74 @@
 'use client'
 
-import { ChefHat, CreditCard, Lock, LogOut } from 'lucide-react'
+import { useEffect } from 'react'
+import { ChefHat, CreditCard, Lock, X } from 'lucide-react'
 import Link from 'next/link'
-import { Button } from '@/components/ui/button'
-import { getDashboardLoginUrl } from '@/lib/authSession'
-import { useAuthStore } from '@/stores/authStore'
 import { usePathname } from 'next/navigation'
 import { getLocaleFromPath } from '@/lib/translations'
 import { useTenantStatus } from '@/hooks/useTenantStatus'
+import { BlockedLogout } from './BlockedOverlay'
 
-export function BlockedSidebar() {
-  const pathname = usePathname()
-  const locale = getLocaleFromPath(pathname)
-  const logout = useAuthStore((state) => state.logout)
+interface BlockedSidebarProps {
+  isMobileOpen: boolean
+  onMobileToggle: () => void
+}
+
+const messages = {
+  en: {
+    title: 'Access restricted', description: 'Review your billing details or contact your account administrator.',
+    billing: 'Billing & subscription', close: 'Close navigation',
+    items: ['Dashboard', 'Orders', 'Products', 'Staff', 'Settings'],
+  },
+  ar: {
+    title: 'الوصول مقيّد', description: 'راجع تفاصيل الفوترة أو تواصل مع مسؤول حسابك.',
+    billing: 'الفوترة والاشتراك', close: 'إغلاق القائمة',
+    items: ['لوحة التحكم', 'الطلبات', 'المنتجات', 'الموظفون', 'الإعدادات'],
+  },
+}
+
+function BlockedNotice({ locale, hasBilling, onNavigate }: {
+  locale: 'en' | 'ar'; hasBilling: boolean; onNavigate: () => void
+}) {
+  const copy = messages[locale]
+  return <div className="p-4 space-y-3">
+    <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-900 dark:border-red-800 dark:bg-red-900/20 dark:text-red-300">
+      <p className="flex items-center gap-2 text-sm font-semibold"><Lock className="h-5 w-5 shrink-0" aria-hidden="true" />{copy.title}</p>
+      <p className="mt-2 text-xs">{copy.description}</p>
+    </div>
+    {hasBilling && <Link href={`/${locale}/dashboard/settings/billing`} onClick={onNavigate}
+      className="flex min-h-12 items-center gap-2 rounded-lg border border-gray-300 px-3 text-sm text-gray-700 dark:border-gray-600 dark:text-gray-200">
+      <CreditCard className="h-4 w-4" aria-hidden="true" />{copy.billing}
+    </Link>}
+    <ul className="space-y-2" aria-label={copy.title}>
+      {copy.items.map(item => <li key={item} aria-disabled="true" className="rounded-lg px-4 py-3 text-sm text-gray-500 dark:text-gray-400">{item}</li>)}
+    </ul>
+  </div>
+}
+
+export function BlockedSidebar({ isMobileOpen, onMobileToggle }: BlockedSidebarProps) {
+  const locale = getLocaleFromPath(usePathname())
   const { blockReason } = useTenantStatus()
-  const isRTL = locale === 'ar'
-  const billingHref = `/${locale}/dashboard/settings/billing`
-  const isBillingPage = pathname.includes('/dashboard/settings/billing')
-
-  const blockedDescription =
-    blockReason === 'expired'
-      ? 'Your subscription has expired. Update billing to restore dashboard access.'
-      : 'Your account access is temporarily restricted. Please contact support.'
-
-  const handleLogout = () => {
-    logout()
-    window.location.href = getDashboardLoginUrl(pathname)
-  }
-
-  return (
-    <aside
-      className={`fixed inset-y-0 ${isRTL ? 'right-0' : 'left-0'} z-40 w-64 bg-white dark:bg-gray-800 ${
-        isRTL ? 'border-l' : 'border-r'
-      } border-gray-200 dark:border-gray-700`}
-    >
-      {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
-        <div className="flex items-center gap-2 opacity-50">
-          <ChefHat className="h-8 w-8 text-gray-400 dark:text-gray-500" />
-          <span className="text-xl font-bold text-gray-400 dark:text-gray-500">POS Dashboard</span>
-        </div>
+  const copy = messages[locale]
+  useEffect(() => {
+    if (!isMobileOpen) return
+    const closeOnEscape = (event: KeyboardEvent) => { if (event.key === 'Escape') onMobileToggle() }
+    window.addEventListener('keydown', closeOnEscape)
+    return () => window.removeEventListener('keydown', closeOnEscape)
+  }, [isMobileOpen, onMobileToggle])
+  return <>
+    <aside dir={locale === 'ar' ? 'rtl' : 'ltr'} aria-label={copy.title}
+      className={`fixed inset-y-0 ${locale === 'ar' ? 'right-0 border-l' : 'left-0 border-r'} z-40 w-64 max-w-[calc(100vw-2rem)] flex-col border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800 ${isMobileOpen ? 'flex' : 'hidden md:flex'}`}>
+      <div className="flex min-h-16 items-center justify-between border-b border-gray-200 px-4 dark:border-gray-700">
+        <ChefHat className="h-8 w-8 text-gray-500" aria-hidden="true" />
+        <button type="button" onClick={onMobileToggle} aria-label={copy.close}
+          className="flex h-12 w-12 items-center justify-center rounded-md text-gray-700 md:hidden dark:text-gray-200"><X className="h-5 w-5" aria-hidden="true" /></button>
       </div>
-
-      {/* Blocked Notice */}
-      <div className="p-4">
-        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 flex items-start gap-3">
-          <Lock className="h-5 w-5 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
-          <div>
-            <p className="text-sm font-semibold text-red-900 dark:text-red-300">Access Restricted</p>
-            <p className="text-xs text-red-800 dark:text-red-400 mt-1">
-              {blockedDescription}
-            </p>
-          </div>
-        </div>
-        <Link
-          href={billingHref}
-          className={`mt-3 flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium transition ${
-            isBillingPage
-              ? 'bg-primary-100 text-primary-700 border-primary-200 dark:bg-primary-900/30 dark:text-primary-300 dark:border-primary-800'
-              : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700 dark:hover:bg-gray-700'
-          }`}
-        >
-          <CreditCard className="h-4 w-4" />
-          Billing & Subscription
-        </Link>
+      <div className="min-h-0 flex-1 overflow-y-auto">
+        <BlockedNotice locale={locale} hasBilling={blockReason === 'trial_expired' || blockReason === 'expired'} onNavigate={() => { if (isMobileOpen) onMobileToggle() }} />
       </div>
-
-      {/* Disabled Menu Items */}
-      <nav className="p-4">
-        <ul className="space-y-2">
-          <li>
-            <div className="flex items-center gap-3 px-4 py-3 rounded-lg opacity-50 cursor-not-allowed text-gray-400 dark:text-gray-600">
-              <div className="h-5 w-5 rounded bg-gray-200 dark:bg-gray-700"></div>
-              <span className="font-medium text-sm">Dashboard</span>
-            </div>
-          </li>
-          <li>
-            <div className="flex items-center gap-3 px-4 py-3 rounded-lg opacity-50 cursor-not-allowed text-gray-400 dark:text-gray-600">
-              <div className="h-5 w-5 rounded bg-gray-200 dark:bg-gray-700"></div>
-              <span className="font-medium text-sm">Orders</span>
-            </div>
-          </li>
-          <li>
-            <div className="flex items-center gap-3 px-4 py-3 rounded-lg opacity-50 cursor-not-allowed text-gray-400 dark:text-gray-600">
-              <div className="h-5 w-5 rounded bg-gray-200 dark:bg-gray-700"></div>
-              <span className="font-medium text-sm">Products</span>
-            </div>
-          </li>
-          <li>
-            <div className="flex items-center gap-3 px-4 py-3 rounded-lg opacity-50 cursor-not-allowed text-gray-400 dark:text-gray-600">
-              <div className="h-5 w-5 rounded bg-gray-200 dark:bg-gray-700"></div>
-              <span className="font-medium text-sm">Staff</span>
-            </div>
-          </li>
-          <li>
-            <div className="flex items-center gap-3 px-4 py-3 rounded-lg opacity-50 cursor-not-allowed text-gray-400 dark:text-gray-600">
-              <div className="h-5 w-5 rounded bg-gray-200 dark:bg-gray-700"></div>
-              <span className="font-medium text-sm">Settings</span>
-            </div>
-          </li>
-        </ul>
-      </nav>
-
-      {/* Logout Button - Always Active */}
-      <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
-        <Button onClick={handleLogout} variant="outline" size="sm" className="w-full text-xs">
-          <LogOut className="h-4 w-4 mr-2" />
-          Sign Out
-        </Button>
-      </div>
+      <div className="border-t border-gray-200 p-4 dark:border-gray-700"><BlockedLogout /></div>
     </aside>
-  )
+    {isMobileOpen && <button type="button" onClick={onMobileToggle} aria-label={copy.close}
+      className="fixed inset-0 z-30 bg-black/40 md:hidden" />}
+  </>
 }

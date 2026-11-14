@@ -66,17 +66,18 @@ export default function AuditLogsPage() {
 
       {/* Filters */}
       <div className="bg-white rounded-lg shadow p-4">
-        <div className="flex items-center gap-4">
-          <label className="text-sm font-medium text-gray-700">
+        <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:gap-4">
+          <label htmlFor="audit-action" className="text-sm font-medium text-gray-700">
             Filter by Action:
           </label>
           <select
+            id="audit-action"
             value={filterAction}
             onChange={(e) => {
               setFilterAction(e.target.value);
               setPage(1);
             }}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+            className="min-h-12 min-w-0 max-w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
           >
             <option value="">All Actions</option>
             {uniqueActions.map((action) => (
@@ -112,10 +113,10 @@ export default function AuditLogsPage() {
                 key={log.id}
                 className="bg-white rounded-lg shadow p-6 border-l-4 border-blue-500"
               >
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex items-center gap-3">
-                    <Shield className="text-blue-600" size={24} />
-                    <div>
+                <div className="flex flex-col items-start justify-between gap-3 mb-4 sm:flex-row">
+                  <div className="flex min-w-0 items-center gap-3">
+                    <Shield className="shrink-0 text-blue-600" size={24} />
+                    <div className="min-w-0 break-words">
                       <h3 className="font-semibold text-gray-900">
                         {log.action}
                       </h3>
@@ -134,12 +135,12 @@ export default function AuditLogsPage() {
                   </span>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50 rounded p-4">
+                <div className="grid min-w-0 grid-cols-1 break-words md:grid-cols-2 gap-4 bg-gray-50 rounded p-4 [&>div]:min-w-0">
                   <div>
                     <p className="text-xs text-gray-600 font-medium uppercase">
                       IP Address
                     </p>
-                    <p className="text-sm text-gray-900 mt-1 font-mono">
+                    <p className="text-sm text-gray-900 mt-1 font-mono [overflow-wrap:anywhere]">
                       {log.ip_address}
                     </p>
                   </div>
@@ -168,7 +169,7 @@ export default function AuditLogsPage() {
                       <p className="text-xs text-gray-600 font-medium uppercase">
                         Details
                       </p>
-                      <p className="text-xs text-gray-900 mt-1 font-mono">
+                      <p className="text-xs text-gray-900 mt-1 font-mono [overflow-wrap:anywhere]">
                         {JSON.stringify(safeDetails)}
                       </p>
                     </div>
@@ -181,16 +182,16 @@ export default function AuditLogsPage() {
 
           {/* Pagination */}
           {totalPages > 1 && (
-            <div className="flex items-center justify-between bg-white rounded-lg shadow p-4">
+            <div className="flex flex-col items-start justify-between gap-3 bg-white rounded-lg shadow p-4 sm:flex-row sm:items-center">
               <p className="text-sm text-gray-600">
                 Showing {(page - 1) * limit + 1} to{" "}
                 {Math.min(page * limit, total)} of {total} logs
               </p>
-              <div className="flex gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <button
                   onClick={() => setPage(Math.max(1, page - 1))}
                   disabled={page === 1}
-                  className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="min-h-12 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Previous
                 </button>
@@ -200,7 +201,7 @@ export default function AuditLogsPage() {
                 <button
                   onClick={() => setPage(Math.min(totalPages, page + 1))}
                   disabled={page === totalPages}
-                  className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="min-h-12 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Next
                 </button>
