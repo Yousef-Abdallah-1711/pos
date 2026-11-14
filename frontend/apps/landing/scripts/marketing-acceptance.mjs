@@ -6,6 +6,8 @@ const browserName = process.env.SERVIO_MARKETING_BROWSER || 'chromium'
 if (!['chromium', 'firefox'].includes(browserName)) throw new Error('Unsupported marketing browser')
 import fs from 'node:fs/promises'
 import path from 'node:path'
+const colorScheme = process.env.SERVIO_COLOR_SCHEME || 'light'
+if (!['light', 'dark'].includes(colorScheme)) throw new Error('Unsupported browser color scheme')
 const base = process.env.SERVIO_MARKETING_URL
 if (!base) throw new Error('Set SERVIO_MARKETING_URL to the intended preview or deployment URL')
 const output = process.env.SERVIO_MARKETING_EVIDENCE || (process.env.SERVIO_BROWSER_EVIDENCE ? path.join(process.env.SERVIO_BROWSER_EVIDENCE, 'marketing') : '/tmp/servio-marketing-acceptance')
@@ -122,7 +124,7 @@ async function interactions(page, locale) {
  await focusChecks(page, locale)
 }
 async function createPage(browser, viewport) {
- const page = await browser.newPage({ ignoreHTTPSErrors: process.env.SERVIO_DISPOSABLE_BROWSER === '1', viewport, reducedMotion: 'reduce' })
+ const page = await browser.newPage({ colorScheme, ignoreHTTPSErrors: process.env.SERVIO_DISPOSABLE_BROWSER === '1', viewport, reducedMotion: 'reduce' })
  // Routing disables HTTP cache, so each raw-SSR assertion reads a fresh response.
  // https://playwright.dev/docs/api/class-browsercontext#browser-context-route
  await page.route('**/*', route => route.continue())
@@ -159,7 +161,7 @@ async function main() {
   check('failed network responses', networkFailures.length === 0, networkFailures.join('; '))
  } finally {
   await browser.close()
-  await fs.writeFile(path.join(output, 'results.json'), JSON.stringify({ base, browser: browserName, checks }, null, 2))
+  await fs.writeFile(path.join(output, 'results.json'), JSON.stringify({ base, browser: browserName, color_scheme: colorScheme, checks }, null, 2))
  }
 }
 main().catch(error => { console.error(error.message); process.exitCode = 1 })
