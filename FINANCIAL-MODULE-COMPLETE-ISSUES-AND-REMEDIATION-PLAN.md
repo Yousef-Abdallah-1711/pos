@@ -216,17 +216,18 @@ Statuses mean: **SOURCE-CONFIRMED** = code/schema establishes the defect or gap;
 
 ### CFR-011 — Automatic supplier entry type exceeds journal schema width
 
-- **Severity/status:** P2 — REPRODUCED in isolated PostgreSQL; end-to-end supplier posting BLOCKED.
+- **Severity/status:** P2 — OPEN ON MAIN; source mismatch confirmed at `origin/main` SHA `018682beb9448eea6dd72fd2418876b439a94dbf`. A candidate fix is in PR #44; do not mark fixed before merge and acceptance.
 - **Problem / impact:** Auto supplier invoice/payment journal insert can fail because `auto_supplier_invoice` / `auto_supplier_payment` exceed `VARCHAR(20)`; AP operation may persist without its journal depending on transaction boundaries.
 - **Current / expected:** Auto-posting constants use those strings; migration 137 sets `entry_type VARCHAR(20)`. Expected: valid bounded type persisted consistently with event catalog, no partial AP operation.
 - **Root cause:** `backend/internal/domain/auto_posting.go:19-20`; `backend/migrations/137_create_journal_entries.sql:19`; supplier auto-post caller `backend/internal/usecase/auto_posting_engine.go:472-498`.
-- **Reproduction/evidence:** Disposable PostgreSQL 16 rejected `auto_supplier_invoice` with `string_data_right_truncation` against `VARCHAR(20)`. No application-level supplier posting fixture ran.
-- **Baseline scope:** Present on main/current.
-- **Recommended solution / components:** Choose stable shorter enum/type code or widen schema under migration, and enforce schema/domain compatibility in test. Bind supplier invoice/payment state with posting/outbox.
-- **Migration:** Required if retaining current 21-character values; otherwise no schema migration if mapping changed safely. Determine historical values first.
-- **Dependencies/policy:** Naming/catalog decision; accountant reviews historical/report usage.
-- **Acceptance:** Disposable PostgreSQL supplier invoice and payment post, reverse, list/filter and export succeed; migration upgrade and rollback/forward plan validated.
-- **Checklist:** OPEN.
+- **Reproduction/evidence:** Disposable PostgreSQL 16 rejected `auto_supplier_invoice` with `string_data_right_truncation` against `VARCHAR(20)` in the prior assessment. Current-main source still has the 21-character constants and 20-character column. PR #44 adds migration 187 and tagged PostgreSQL integration assertions for both entry types and their GL rows; its backend CI check passed, remaining checks/review were pending at audit cutoff.
+- **Candidate implementation:** [PR #44](https://github.com/Yousef-Abdallah-1711/pos/pull/44) widens `entry_type` to `VARCHAR(32)` without changing journal history. `backend/scripts/rollback_187_journal_entry_type_to_32.sql` refuses to downgrade if a value exceeds 20 characters rather than truncating it. PR #37 already reserves migration 186 on its open recovery-controls branch, so migration 187 is used.
+- **Baseline scope:** Defect remains on main until PR #44 is reviewed and merged.
+- **Recommended solution / components:** Keep stable supplier event/type values and enforce schema/domain compatibility with PostgreSQL integration coverage. Bind supplier invoice/payment state with posting/outbox.
+- **Migration:** Candidate additive-width change is in migration 187. Review lock/upgrade compatibility and the guarded rollback before merge.
+- **Dependencies/policy:** No accounting-policy choice is introduced by this schema-width correction; accountant review of end-to-end supplier posting remains required.
+- **Acceptance:** Disposable PostgreSQL supplier invoice and payment post, reverse, list/filter and export succeed; migration upgrade and guarded rollback/forward plan validated. PR #44’s integration test covers journal type persistence and GL rows, not the full AP lifecycle.
+- **Checklist:** OPEN ON MAIN; candidate PR #44 requires all checks and independent review. Full AP lifecycle and accounting reconciliation remain unverified.
 
 ### CFR-012 — Cash Flow report uses account classification heuristics, not demonstrated cash movement policy
 
