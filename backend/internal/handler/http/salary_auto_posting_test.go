@@ -31,27 +31,40 @@ func TestSalaryAutoPostingIntegration_MarkPaidCreatesPayrollEntry(t *testing.T) 
 	salaryID := 55
 	userID := 108
 
-	mock.ExpectExec(`UPDATE salaries`).
-		WithArgs(userID, "PAYROLL-55", salaryID, 1, 2).
-		WillReturnResult(sqlmock.NewResult(0, 1))
-
-	mock.ExpectQuery(`FROM salaries`).
-		WithArgs(salaryID, 1, 2).
-		WillReturnRows(
-			sqlmock.NewRows(salaryColumnsForAccountingTests()).
-				AddRow(
-					salaryID, 1, 2, 11, periodStart,
-					periodEnd, paymentDate, 2, 2026, 4000.0,
-					"USD", 0.0, 0.0, 0.0,
-					250.0, 0.0, 100.0, 0.0, 0.0,
-					"{}", 200.0, 75.0, 25.0,
-					0.0, 0.0, 0.0, 0.0,
-					"{}", 4350.0, 300.0, 4050.0,
-					24, 0, 192.0, 0.0,
-					"bank_transfer", "PAYROLL-55", nil,
-					nil, "paid", true, nil, paymentDate, paymentDate,
-				),
-		)
+	mock.ExpectBegin()
+	mock.ExpectQuery(`FROM salaries`).WithArgs(salaryID, 1, 2).WillReturnRows(
+		sqlmock.NewRows(salaryColumnsForAccountingTests()).AddRow(
+			salaryID, 1, 2, 11, periodStart,
+			periodEnd, paymentDate, 2, 2026, 4000.0,
+			"USD", 0.0, 0.0, 0.0,
+			250.0, 0.0, 100.0, 0.0, 0.0,
+			"{}", 200.0, 75.0, 25.0,
+			0.0, 0.0, 0.0, 0.0,
+			"{}", 4350.0, 300.0, 4050.0,
+			24, 0, 192.0, 0.0,
+			"bank_transfer", nil, nil,
+			nil, "unpaid", false, nil, nil, nil, paymentDate, paymentDate,
+		),
+	)
+	mock.ExpectExec(`UPDATE salaries`).WithArgs(userID, "PAYROLL-55", salaryID, 1, 2).WillReturnResult(sqlmock.NewResult(0, 1))
+	mock.ExpectQuery(`FROM salaries`).WithArgs(salaryID, 1, 2).WillReturnRows(
+		sqlmock.NewRows(salaryColumnsForAccountingTests()).AddRow(
+			salaryID, 1, 2, 11, periodStart,
+			periodEnd, paymentDate, 2, 2026, 4000.0,
+			"USD", 0.0, 0.0, 0.0,
+			250.0, 0.0, 100.0, 0.0, 0.0,
+			"{}", 200.0, 75.0, 25.0,
+			0.0, 0.0, 0.0, 0.0,
+			"{}", 4350.0, 300.0, 4050.0,
+			24, 0, 192.0, 0.0,
+			"bank_transfer", "PAYROLL-55", nil,
+			nil, "paid", true, paymentDate, userID, nil, paymentDate, paymentDate,
+		),
+	)
+	mock.ExpectExec(`INSERT INTO hr_audit_logs`).
+		WithArgs(1, 2, salaryID, "unpaid", false, "", "paid", true, "PAYROLL-55", paymentDate, userID).
+		WillReturnResult(sqlmock.NewResult(1, 1))
+	mock.ExpectCommit()
 
 	body, err := json.Marshal(map[string]string{"payment_reference": "PAYROLL-55"})
 	if err != nil {
