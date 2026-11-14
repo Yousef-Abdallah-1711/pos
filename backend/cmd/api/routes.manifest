@@ -54,6 +54,7 @@ GET /api/v1/accounting/exchange-rates/convert
 GET /api/v1/accounting/journal-entries
 GET /api/v1/accounting/journal-entries/{id}
 GET /api/v1/accounting/ledger
+GET /api/v1/accounting/paid-order-events/failed
 GET /api/v1/accounting/payments/made
 GET /api/v1/accounting/payments/received
 GET /api/v1/accounting/recurring-journals
@@ -236,6 +237,7 @@ POST /api/v1/accounting/exchange-rates
 POST /api/v1/accounting/journal-entries
 POST /api/v1/accounting/journal-entries/{id}/post
 POST /api/v1/accounting/journal-entries/{id}/void
+POST /api/v1/accounting/paid-order-events/{id}/redrive
 POST /api/v1/accounting/payments/made
 POST /api/v1/accounting/payments/received
 POST /api/v1/accounting/recurring-journals

@@ -322,6 +322,88 @@ func TestPaidOrderAccountingIntentPreservesTenantAndRestaurantScope(t *testing.T
 	}
 }
 
+func TestFailedAccountingEventVisibilityAndAuditedRedriveStayScoped(t *testing.T) {
+	db := openAccountingEventTestDB(t)
+	tenantID, restaurantID, orderID := createPaidOrderEventFixture(t, db)
+	otherTenantID, otherRestaurantID, otherOrderID := createPaidOrderEventFixture(t, db)
+	orderRepo := repository.NewOrderRepository(db)
+	for _, scope := range []struct{ tenantID, restaurantID, orderID int64 }{
+		{tenantID, restaurantID, orderID}, {otherTenantID, otherRestaurantID, otherOrderID},
+	} {
+		if err := orderRepo.UpdatePaymentStatus(scope.tenantID, scope.restaurantID, scope.orderID, "paid"); err != nil {
+			t.Fatalf("enqueue paid-order event: %v", err)
+		}
+		if _, err := db.Exec(`UPDATE accounting_event_outbox
+			SET status = 'failed', attempts = max_attempts, last_error = repeat('x', 3000)
+			WHERE tenant_id = $1 AND restaurant_id = $2 AND order_id = $3`,
+			scope.tenantID, scope.restaurantID, scope.orderID); err != nil {
+			t.Fatalf("mark synthetic terminal event: %v", err)
+		}
+	}
+
+	events := repository.NewAccountingEventRepository(db)
+	visible, total, err := events.ListFailed(context.Background(), tenantID, restaurantID, 25, 0)
+	if err != nil {
+		t.Fatalf("list failed events in tenant scope: %v", err)
+	}
+	if total != 1 || len(visible) != 1 || visible[0].OrderID != orderID || visible[0].RedriveCount != 0 {
+		t.Fatalf("failed-event list leaked scope or wrong state: total=%d events=%+v", total, visible)
+	}
+	if len(visible[0].LastError) != 2000 {
+		t.Fatalf("failed-event error length=%d, want bounded length 2000", len(visible[0].LastError))
+	}
+	var auditReadable, auditWritable, auditSequenceUsable bool
+	if err := db.QueryRow(`SELECT
+		has_table_privilege('pos_app', 'accounting_event_redrive_audit', 'SELECT'),
+		has_table_privilege('pos_app', 'accounting_event_redrive_audit', 'INSERT'),
+		has_sequence_privilege('pos_app', 'accounting_event_redrive_audit_id_seq', 'USAGE')`).
+		Scan(&auditReadable, &auditWritable, &auditSequenceUsable); err != nil {
+		t.Fatalf("check runtime redrive audit privileges: %v", err)
+	}
+	if !auditReadable || !auditWritable || !auditSequenceUsable {
+		t.Fatalf("pos_app redrive privileges: read=%t write=%t sequence=%t", auditReadable, auditWritable, auditSequenceUsable)
+	}
+
+	const actorID int64 = 91
+	const reason = "corrected the missing account mapping"
+	eventID, err := events.RedriveFailed(context.Background(), tenantID, restaurantID, visible[0].ID, actorID, reason)
+	if err != nil {
+		t.Fatalf("redrive failed event: %v", err)
+	}
+	if eventID != visible[0].EventID {
+		t.Fatalf("redrive returned event ID %q, want %q", eventID, visible[0].EventID)
+	}
+	assertAccountingEventState(t, db, tenantID, restaurantID, orderID, repository.AccountingEventRetryable, 0, 1)
+	var auditActor, priorAttempts int64
+	var auditReason, priorError string
+	if err := db.QueryRow(`SELECT actor_user_id, previous_attempts, previous_error, reason
+		FROM accounting_event_redrive_audit WHERE outbox_id = $1`, visible[0].ID).
+		Scan(&auditActor, &priorAttempts, &priorError, &auditReason); err != nil {
+		t.Fatalf("read redrive audit: %v", err)
+	}
+	if auditActor != actorID || priorAttempts != 8 || len(priorError) != 2000 || auditReason != reason {
+		t.Fatalf("redrive audit=%d/%d/%q/%q, want actor/retries/error/reason preserved", auditActor, priorAttempts, priorError, auditReason)
+	}
+	if _, err := events.RedriveFailed(context.Background(), tenantID, restaurantID, visible[0].ID, actorID, reason); !errors.Is(err, repository.ErrAccountingEventNotRedrivable) {
+		t.Fatalf("duplicate redrive error=%v, want not-redrivable", err)
+	}
+	if _, err := events.RedriveFailed(context.Background(), otherTenantID, otherRestaurantID, visible[0].ID, actorID, reason); !errors.Is(err, repository.ErrAccountingEventNotFound) {
+		t.Fatalf("cross-scope redrive error=%v, want not-found", err)
+	}
+
+	if err := orderRepo.UpdatePaymentStatus(otherTenantID, otherRestaurantID, otherOrderID, "refunded"); err != nil {
+		t.Fatalf("mark second order refunded: %v", err)
+	}
+	var otherEventID int64
+	if err := db.QueryRow(`SELECT id FROM accounting_event_outbox WHERE tenant_id=$1 AND restaurant_id=$2 AND order_id=$3`,
+		otherTenantID, otherRestaurantID, otherOrderID).Scan(&otherEventID); err != nil {
+		t.Fatalf("read second event ID: %v", err)
+	}
+	if _, err := events.RedriveFailed(context.Background(), otherTenantID, otherRestaurantID, otherEventID, actorID, reason); !errors.Is(err, repository.ErrAccountingEventNotRedrivable) {
+		t.Fatalf("redrive of no-longer-paid order error=%v, want not-redrivable", err)
+	}
+}
+
 func openAccountingEventTestDB(t *testing.T) *sql.DB {
 	t.Helper()
 	db, err := sql.Open("postgres", testdb.URL(t))
