@@ -178,6 +178,7 @@ jobs:
             ops/aws/evidence/browser/journal-api-acceptance.json
             ops/aws/evidence/browser/auth-form-validation.json
             ops/aws/evidence/browser/marketing/
+            ops/aws/evidence/browser/marketing-firefox/
             ops/aws/evidence/browser/trial-registration/
             ops/aws/evidence/browser/landing-regression/
             ops/aws/evidence/browser/lighthouse/

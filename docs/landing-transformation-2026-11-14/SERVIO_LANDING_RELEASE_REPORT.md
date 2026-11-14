@@ -4,7 +4,7 @@
 
 [PR #43](https://github.com/Yousef-Abdallah-1711/pos/pull/43) is the authoritative delivery record for merge state, exact approved main SHA, final CI run, signed release, deployed SHA, and live verification. These values are updated in the PR description after merge/deployment so the report does not pretend to know its own future merge hash. The code must not be called deployed until the runtime receipt agrees with that main release.
 
-The built candidate at PR head `60f7499689927fd3439370c1a46bef34527fce93` passed [all verified CI stages](https://github.com/Yousef-Abdallah-1711/pos/actions/runs/43577385555), including all five application builds and browser acceptance. See [test results](SERVIO_LANDING_PLAYWRIGHT_RESULTS.md) and [visual QA](SERVIO_LANDING_VISUAL_QA.md). All public routes passed at all requested widths, including the historical-plan catalog-outage regression. The final gate adds explicit keyboard-focus contrast/visibility and post-logout denial checks.
+The built candidate at PR head `60691410a2245c1f194efc613dd77c3f39c1a705` passed [all verified CI stages](https://github.com/Yousef-Abdallah-1711/pos/actions/runs/43579188642), including all five application builds and browser acceptance. See [test results](SERVIO_LANDING_PLAYWRIGHT_RESULTS.md) and [visual QA](SERVIO_LANDING_VISUAL_QA.md). All public routes passed at all requested widths, including the historical-plan catalog-outage regression. Keyboard-focus contrast/visibility and post-logout denial also passed. The final gate repeats the public matrix in Firefox as well as Chromium.
 
 ## Delivered scope
 

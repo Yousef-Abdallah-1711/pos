@@ -21,4 +21,4 @@ No fake customers, testimonials, certifications, integration availability, unlim
 
 ## Release verification
 
-Candidate CI run 43577385555 passed both synthetic registration workflows, 14-day entitlement, saved billing preference, real first category creation, menu isolation, and logout. The verified candidate also rejects a catalog outage rather than displaying a current offer as an unresolved historical plan. The exact final CI/main/deployed identities are maintained in the PR delivery record linked from the release report.
+Candidate CI run 43579188642 passed both synthetic registration workflows, 14-day entitlement, saved billing preference, real first category creation, menu isolation, and logout. The verified candidate also rejects a catalog outage rather than displaying a current offer as an unresolved historical plan. The exact final CI/main/deployed identities are maintained in the PR delivery record linked from the release report.

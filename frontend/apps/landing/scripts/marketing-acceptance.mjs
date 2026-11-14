@@ -1,7 +1,9 @@
 /* Run against a preview or the deployed landing URL. Captures contain public synthetic data. */
 import { createRequire } from 'node:module'
 const require = createRequire(import.meta.url)
-const { chromium } = require('playwright')
+const { chromium, firefox } = require('playwright')
+const browserName = process.env.SERVIO_MARKETING_BROWSER || 'chromium'
+if (!['chromium', 'firefox'].includes(browserName)) throw new Error('Unsupported marketing browser')
 import fs from 'node:fs/promises'
 import path from 'node:path'
 const base = process.env.SERVIO_MARKETING_URL
@@ -116,7 +118,8 @@ async function interactions(page, locale) {
 }
 async function main() {
  await fs.mkdir(output, { recursive: true })
- const browser = await chromium.launch({ headless: true, ...(process.env.SERVIO_BROWSER_EXECUTABLE ? { executablePath: process.env.SERVIO_BROWSER_EXECUTABLE } : {}), args: ['--no-sandbox'] })
+ const browserType = browserName === 'firefox' ? firefox : chromium
+ const browser = await browserType.launch({ headless: true, ...(process.env.SERVIO_BROWSER_EXECUTABLE ? { executablePath: process.env.SERVIO_BROWSER_EXECUTABLE } : {}), ...(browserName === 'chromium' ? { args: ['--no-sandbox'] } : {}) })
  try {
   let page = await browser.newPage({ ignoreHTTPSErrors: process.env.SERVIO_DISPOSABLE_BROWSER === '1', viewport: { width: 1440, height: 1000 }, reducedMotion: 'reduce' })
   const errors = []
@@ -144,7 +147,7 @@ async function main() {
   check('failed network responses', networkFailures.length === 0, networkFailures.join('; '))
  } finally {
   await browser.close()
-  await fs.writeFile(path.join(output, 'results.json'), JSON.stringify({ base, checks }, null, 2))
+  await fs.writeFile(path.join(output, 'results.json'), JSON.stringify({ base, browser: browserName, checks }, null, 2))
  }
 }
 main().catch(error => { console.error(error.message); process.exitCode = 1 })

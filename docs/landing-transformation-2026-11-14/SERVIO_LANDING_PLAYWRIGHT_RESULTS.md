@@ -2,15 +2,15 @@
 
 ## Reproducible successful acceptance
 
-[CI run 43577385555](https://github.com/Yousef-Abdallah-1711/pos/actions/runs/43577385555) passed the complete verified workflow for PR head `60f7499689927fd3439370c1a46bef34527fce93`, including all five production image builds. Evidence: [summary](evidence/candidate-verification.json); full `chromium-smoke-results` and `backend-test-results` artifacts on the run.
+[CI run 43579188642](https://github.com/Yousef-Abdallah-1711/pos/actions/runs/43579188642) passed the complete verified workflow for PR head `60691410a2245c1f194efc613dd77c3f39c1a705`, including all five production image builds. Evidence: [summary](evidence/candidate-verification.json); full `chromium-smoke-results` and `backend-test-results` artifacts on the run.
 
 | Check | Passed | Failed | Scope |
 |---|---:|---:|---|
 | Backend integration/unit tests | 1,242 | 0 | Two environment-specific tests skipped |
 | Landing unit/component tests | 64 | 0 | Eleven files |
 | Dashboard unit/component tests | 665 | 0 | Fifty-two files |
-| Marketing browser assertions | 1,612 | 0 | All public routes at all six widths in EN/AR, metadata, axe, navigation, annual mobile pricing |
-| New-owner trial assertions | 21 | 0 | Two accounts; annual/monthly persistence, 14-day entitlement, dashboard, category creation, isolation, logout |
+| Marketing browser assertions | 1,638 | 0 | All public routes at all six widths in EN/AR, metadata, axe, navigation, annual mobile pricing |
+| New-owner trial assertions | 23 | 0 | Two accounts; annual/monthly persistence, 14-day entitlement, dashboard, category creation, isolation, logout |
 | Existing landing visual samples | 60 | 0 | Ten widths × three routes × two locales |
 | Existing mobile-menu checks | 4 | 0 | Open and Escape close |
 
@@ -27,3 +27,7 @@ The two skipped backend tests are the opt-in disposable Admin Orders benchmark a
 `ops/aws/run-ci-browser-checks.sh` runs all suites and returns failure if any suite fails. Nothing is converted to a warning. Final focus/logout assertion counts and the exact approved main/release SHA are recorded in the [PR delivery record](https://github.com/Yousef-Abdallah-1711/pos/pull/43) after the final required workflow; do not infer AWS acceptance from a PR image build.
 
 The browser method is repository Playwright tooling in the existing pinned CI browser image; Playwright MCP was not available.
+
+## Cross-browser release gate
+
+The same public-route, viewport, axe, keyboard-focus, metadata and pricing checks run in Firefox as well as Chromium in the pinned Playwright image. Both suites must pass; Firefox results are uploaded separately under `marketing-firefox/`. [Official Docker reproduction guidance](https://playwright.dev/docs/docker). The final PR delivery record includes both actual outcomes.

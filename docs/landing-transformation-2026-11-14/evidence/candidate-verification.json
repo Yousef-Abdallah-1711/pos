@@ -1,7 +1,7 @@
 {
-  "candidate_head": "60f7499689927fd3439370c1a46bef34527fce93",
+  "candidate_head": "60691410a2245c1f194efc613dd77c3f39c1a705",
   "base_main": "018682b",
-  "ci": "https://github.com/Yousef-Abdallah-1711/pos/actions/runs/43577385555",
+  "ci": "https://github.com/Yousef-Abdallah-1711/pos/actions/runs/43579188642",
   "kind": "GitHub PR merge candidate; not an AWS deployment",
   "backend": {
     "passed": 1242,
@@ -17,32 +17,32 @@
     "failed": 0
   },
   "marketing": {
-    "passed": 1612,
+    "passed": 1638,
     "failed": 0,
-    "checks": 1612
+    "checks": 1638
   },
   "trial-registration": {
-    "passed": 21,
+    "passed": 23,
     "failed": 0,
-    "checks": 21
+    "checks": 23
   },
   "lighthouse": {
     "note": "Standard Lighthouse mobile simulation. Staging intentionally remains noindex.",
     "results": [
       {
         "locale": "en",
-        "performance": 0.93,
+        "performance": 0.99,
         "accessibility": 1,
         "seo": 0.69,
-        "lcpMs": 912.7065,
+        "lcpMs": 1020.763,
         "cls": 0
       },
       {
         "locale": "ar",
-        "performance": 0.96,
+        "performance": 0.98,
         "accessibility": 1,
         "seo": 0.69,
-        "lcpMs": 986.5146,
+        "lcpMs": 1066.0016,
         "cls": 0
       }
     ]

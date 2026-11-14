@@ -14,5 +14,13 @@ for script in browser-smoke.cjs storefront-flow.cjs browser-upload.cjs \
   if ! NODE_PATH=/tmp/browser/node_modules node "/work/$script"; then
     failed=1
   fi
+  if [ "$script" = marketing-acceptance.mjs ]; then
+    echo "Running Firefox marketing acceptance"
+    if ! SERVIO_MARKETING_BROWSER=firefox \
+      SERVIO_MARKETING_EVIDENCE="${SERVIO_BROWSER_EVIDENCE:-/evidence}/marketing-firefox" \
+      NODE_PATH=/tmp/browser/node_modules node /work/marketing-acceptance.mjs; then
+      failed=1
+    fi
+  fi
 done
 exit "$failed"
