@@ -58,6 +58,9 @@ func TestAdminOrderHandler_UpdatePaymentStatusPersistsDurableAccountingIntent(t 
 	handler := NewAdminOrderHandler(orderUC, nil, nil)
 
 	mock.ExpectBegin()
+	mock.ExpectQuery(`SELECT status, payment_status`).
+		WithArgs(int64(501), int64(1), int64(2)).
+		WillReturnRows(sqlmock.NewRows([]string{"status", "payment_status"}).AddRow("pending", "pending"))
 	mock.ExpectExec(`UPDATE orders`).WithArgs("paid", int64(501), int64(1), int64(2)).WillReturnResult(sqlmock.NewResult(0, 1))
 	mock.ExpectExec(`INSERT INTO accounting_event_outbox`).WithArgs("paid-order:1:2:501", int64(1), int64(2), int64(501), 77).WillReturnResult(sqlmock.NewResult(1, 1))
 	mock.ExpectCommit()

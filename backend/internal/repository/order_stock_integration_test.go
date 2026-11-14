@@ -68,13 +68,40 @@ func TestOrderStockAggregatesDuplicateLinesAndDeductsOnce(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	for _, payment := range []string{"paid", "paid", "refunded", "refunded"} {
-		if err := f.repo.UpdatePaymentStatus(int64(f.tenant), int64(f.restaurant), id, payment); err != nil {
+	for range 2 {
+		if err := f.repo.UpdatePaymentStatus(int64(f.tenant), int64(f.restaurant), id, "paid"); err != nil {
 			t.Fatal(err)
 		}
 	}
-	// A monetary refund does not imply physical inventory was returned.
+	if err := f.repo.UpdatePaymentStatus(int64(f.tenant), int64(f.restaurant), id, "refunded"); err == nil {
+		t.Fatal("generic payment status update must not assert a refund without provider and accounting workflows")
+	}
+	// A future monetary refund must not imply a physical inventory return.
 	f.assertStock(t, 15)
+}
+
+func TestPaidOrderCancellationDoesNotReleaseReservedStock(t *testing.T) {
+	f := newStockFixture(t, 20)
+	id := f.order(t, "stock-paid-cancel-blocked", 2)
+	if err := f.transition(id, "confirmed"); err != nil {
+		t.Fatal(err)
+	}
+	if err := f.repo.UpdatePaymentStatus(int64(f.tenant), int64(f.restaurant), id, "paid"); err != nil {
+		t.Fatal(err)
+	}
+	f.assertStock(t, 18)
+
+	if err := f.repo.CancelOrder(int64(f.tenant), int64(f.restaurant), id, "refund requested"); err == nil {
+		t.Fatal("paid order cancellation must remain blocked until refund and accounting reversal are supported")
+	}
+	f.assertStock(t, 18)
+	var released bool
+	if err := f.db.QueryRow(`SELECT released FROM order_stock_reservations WHERE order_id = $1 AND tenant_id = $2 AND restaurant_id = $3`, id, f.tenant, f.restaurant).Scan(&released); err != nil {
+		t.Fatal(err)
+	}
+	if released {
+		t.Fatal("blocked paid-order cancellation released its stock reservation")
+	}
 }
 
 func TestOrderStockCancellationReleasesExactlyOnce(t *testing.T) {
