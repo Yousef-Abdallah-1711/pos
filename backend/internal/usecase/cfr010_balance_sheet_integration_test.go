@@ -30,6 +30,16 @@ func TestCFR010PostgresBalanceSheetAndEarningsReconcileByScope(t *testing.T) {
 	postCFR010Entry(t, db, fixture, "2025-06-05", "prior period expenses", cfr010Line{"expense", 300, 0}, cfr010Line{"cash", 0, 300})
 	postCFR010Entry(t, db, fixture, "2025-06-10", "owner distribution", cfr010Line{"distribution", 50, 0}, cfr010Line{"cash", 0, 50})
 
+	expenseAsOf := cfr010Date("2025-06-05")
+	expenseBalanceSheet := generateCFR010BalanceSheet(t, db, fixture, expenseAsOf)
+	if expenseBalanceSheet.TotalAssets != 1200 || expenseBalanceSheet.TotalEquity != 1000 || expenseBalanceSheet.EquationDifference != 200 {
+		t.Fatalf("post-expense balances = assets %.2f, equity %.2f, difference %.2f; want 1200/1000/200", expenseBalanceSheet.TotalAssets, expenseBalanceSheet.TotalEquity, expenseBalanceSheet.EquationDifference)
+	}
+	expenseProfitLoss := generateCFR010ProfitLoss(t, db, fixture, cfr010Date("2025-06-01"), expenseAsOf)
+	if expenseProfitLoss.TotalRevenue != 500 || expenseProfitLoss.TotalExpenses != 300 || expenseProfitLoss.NetProfit != 200 {
+		t.Fatalf("expense fixture P&L = revenue/expenses/net %.2f/%.2f/%.2f, want 500/300/200", expenseProfitLoss.TotalRevenue, expenseProfitLoss.TotalExpenses, expenseProfitLoss.NetProfit)
+	}
+
 	priorAsOf := cfr010Date("2025-06-30")
 	priorBalanceSheet := generateCFR010BalanceSheet(t, db, fixture, priorAsOf)
 	if priorBalanceSheet.TotalAssets != 1150 || priorBalanceSheet.TotalLiabilities != 0 || priorBalanceSheet.TotalEquity != 950 {
@@ -102,6 +112,48 @@ func TestCFR010PostgresBalanceSheetAndEarningsReconcileByScope(t *testing.T) {
 	}
 	if postedCount != 8 || nonPostedCount != 0 {
 		t.Fatalf("journal states after reporting = posted %d / other %d, want 8/0", postedCount, nonPostedCount)
+	}
+}
+
+func TestCFR010PostgresReproducesOpeningBalanceOutsideGL(t *testing.T) {
+	db, err := sql.Open("postgres", testdb.URL(t))
+	if err != nil {
+		t.Fatalf("open disposable PostgreSQL: %v", err)
+	}
+	defer db.Close()
+
+	fixture := createCFR010Fixture(t, db)
+	accountNumber := fmt.Sprintf("synthetic-%d", time.Now().UnixNano())
+	if _, err := db.Exec(`
+		INSERT INTO bank_accounts_ledger (
+			tenant_id, restaurant_id, account_name, bank_name, account_number, currency,
+			account_type, opening_balance, current_balance, opening_date, gl_account_id
+		) VALUES ($1, $2, 'Synthetic Opening Cash', 'Synthetic Bank', $3, 'EGP', 'checking', 1000, 900, '2025-01-01', $4)
+	`, fixture.tenantID, fixture.restaurantID, accountNumber, fixture.accounts["cash"]); err != nil {
+		t.Fatalf("create bank account with off-ledger opening amount: %v", err)
+	}
+	postCFR010Entry(t, db, fixture, "2025-01-02", "cash expense", cfr010Line{"expense", 100, 0}, cfr010Line{"cash", 0, 100})
+
+	var openingBalance, currentBalance, glBalance float64
+	if err := db.QueryRow(`
+		SELECT opening_balance, current_balance FROM bank_accounts_ledger
+		WHERE tenant_id = $1 AND restaurant_id = $2 AND account_number = $3
+	`, fixture.tenantID, fixture.restaurantID, accountNumber).Scan(&openingBalance, &currentBalance); err != nil {
+		t.Fatalf("read synthetic bank balances: %v", err)
+	}
+	if err := db.QueryRow(`
+		SELECT COALESCE(SUM(debit_amount - credit_amount), 0)
+		FROM general_ledger WHERE tenant_id = $1 AND restaurant_id = $2 AND account_id = $3
+	`, fixture.tenantID, fixture.restaurantID, fixture.accounts["cash"]).Scan(&glBalance); err != nil {
+		t.Fatalf("read synthetic cash GL balance: %v", err)
+	}
+	if openingBalance != 1000 || currentBalance != 900 || glBalance != -100 {
+		t.Fatalf("opening/current/GL cash = %.2f/%.2f/%.2f; want 1000/900/-100", openingBalance, currentBalance, glBalance)
+	}
+
+	report := generateCFR010BalanceSheet(t, db, fixture, cfr010Date("2025-01-02"))
+	if report.TotalAssets != -100 || report.TotalLiabilities != 0 || report.TotalEquity != 0 || report.EquationDifference != -100 {
+		t.Fatalf("off-ledger opening report = assets/liabilities/equity/residual %.2f/%.2f/%.2f/%.2f; want -100/0/0/-100", report.TotalAssets, report.TotalLiabilities, report.TotalEquity, report.EquationDifference)
 	}
 }
 
