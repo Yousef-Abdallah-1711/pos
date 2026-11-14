@@ -14,4 +14,4 @@ Primary references inspected: [Linear](https://linear.app), [Stripe](https://str
 
 ## Implementation
 
-`frontend/apps/landing/src/app/marketing.css` defines the scoped visual system. Marketing content is server-rendered. Client components implement navigation, billing selection, walkthrough tabs, and local funnel events. Next Image receives actual capture dimensions. Below-fold captures lazy load. Public capture provenance is recorded beside the assets.
+`frontend/apps/landing/src/app/marketing.css` imports five readable, scoped stylesheets under `src/styles/`; each stays below the repository file-size limit. Marketing content is server-rendered. Client components implement navigation, billing selection, walkthrough tabs, and local funnel events. Next Image receives actual capture dimensions. Below-fold captures lazy load. Public capture provenance is recorded beside the assets.

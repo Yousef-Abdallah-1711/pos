@@ -52,9 +52,9 @@ async function capture(page, name) {
 async function interactions(page, locale) {
  await load(page, locale, '/pricing')
  await page.locator('input[value=annual]').check()
- const href = await page.locator('main a.sv-button').getAttribute('href')
+ const href = await page.locator('#pricing a.sv-button').getAttribute('href')
  check(`annual preference ${locale}`, href.endsWith('?billing=annual'), href)
- await page.locator('main a.sv-button').click()
+ await page.locator('#pricing a.sv-button').click()
  await page.waitForURL('**/auth/register?billing=annual')
  await page.waitForFunction(() => /annual|سنوي/.test(document.querySelector('main')?.textContent || ''))
  check(`registration annual ${locale}`, (await page.locator('main').textContent()).includes(locale === 'ar' ? 'سنوي' : 'annual'))
