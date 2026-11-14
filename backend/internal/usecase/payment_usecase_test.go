@@ -586,8 +586,8 @@ func TestPaymentUseCaseGetCurrentSubscriptionReturnsPlanAndBilling(t *testing.T)
 	if resp.SubscriptionStatus != domain.StatusActive {
 		t.Fatalf("expected active subscription status, got %s", resp.SubscriptionStatus)
 	}
-	if resp.Plan.ID != "monthly" {
-		t.Fatalf("expected monthly plan id, got %s", resp.Plan.ID)
+	if resp.Plan.ID != "monthly" || resp.Plan.PriceCents != 50000 {
+		t.Fatalf("historical plan changed: %+v", resp.Plan)
 	}
 	if resp.SubscriptionExpiresAt == nil {
 		t.Fatal("expected subscription_expires_at to be set")

@@ -19,3 +19,7 @@ Every path has English and Arabic copy and route-specific metadata.
 | /privacy | Describe implemented data handling | Local event bridge and account creation | No invented legal/retention promises |
 
 The feature template shares navigation and layout, while every feature supplies its own headline, task sequence, capture, and explicit boundary. Unknown feature slugs return 404.
+
+## Verification
+
+Every listed route passed the successful candidate EN/AR HTTP, server language, heading, canonical, unique-description, hreflang, structured-data and axe checks. Final protected CI broadens this to every route at all six requested viewport widths. The `/pricing` page adds trial timing, annual calculation, same-subscription explanation and payment/activation boundaries beyond the homepage offer.

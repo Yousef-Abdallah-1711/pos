@@ -452,16 +452,9 @@ func (uc *PaymentUseCase) GetCurrentSubscription(ctx context.Context, tenantID i
 		planByID[p.ID] = p
 	}
 
-	plan, ok := planByID[planID]
-	if !ok && uc.planRepo != nil {
-		// Historical subscriptions retain their legacy catalog price and identity.
-		if historical, err := uc.planRepo.GetByCode(ctx, planID); err == nil && historical != nil {
-			plan = *historical
-			ok = true
-		}
-	}
-	if !ok {
-		plan = uc.defaultPlan()
+	plan, err := uc.currentSubscriptionPlan(ctx, planID, planByID)
+	if err != nil {
+		return nil, err
 	}
 
 	daysRemaining := subscription.DaysRemaining
@@ -843,25 +836,6 @@ func (uc *PaymentUseCase) getPlanByID(ctx context.Context, planID string) (domai
 	return domain.SubscriptionPlan{}, false
 }
 
-func (uc *PaymentUseCase) defaultPlan() domain.SubscriptionPlan {
-	monthlyPlan, ok := uc.plans["monthly"]
-	if ok {
-		return monthlyPlan
-	}
-	for _, plan := range uc.plans {
-		return plan
-	}
-	return domain.SubscriptionPlan{
-		ID:         "monthly",
-		Name:       "Pro Plan",
-		NameAr:     "Pro Plan",
-		Price:      commerce.Current().MonthlyPriceCents / 100,
-		PriceCents: commerce.Current().MonthlyPriceCents,
-		Currency:   "EGP",
-		Period:     "month",
-	}
-}
-
 func (uc *PaymentUseCase) markPaymentFailed(ctx context.Context, tenantID, paymentID int64, message string) error {
 	msg := strings.TrimSpace(message)
 	if msg == "" {
@@ -1092,16 +1066,6 @@ func (uc *PaymentUseCase) writeSubscriptionHistory(ctx context.Context, params *
 	}
 	if err := uc.subscriptionRepo.CreateHistoryRecord(ctx, params); err != nil {
 		log.Printf("[PaymentUseCase] WARN: failed to write subscription history action %s: %v\n", params.Action, err)
-	}
-}
-
-func buildDefaultPlans() map[string]domain.SubscriptionPlan {
-	offer := commerce.Current()
-	features := []string{"Cashier POS", "Kitchen display", "Cash ordering", "Theme configuration"}
-	featuresAr := []string{"نقاط البيع", "شاشة المطبخ", "الطلبات النقدية", "إعداد القالب"}
-	return map[string]domain.SubscriptionPlan{
-		"monthly": {ID: offer.MonthlyPlanID, Name: "SERVIO Monthly", NameAr: "سيرفيو شهري", Price: offer.MonthlyPriceCents / 100, PriceCents: offer.MonthlyPriceCents, Currency: offer.Currency, Period: "month", Features: features, FeaturesAr: featuresAr},
-		"annual":  {ID: offer.AnnualPlanID, Name: "SERVIO Annual", NameAr: "سيرفيو سنوي", Price: offer.AnnualPriceCents / 100, PriceCents: offer.AnnualPriceCents, Currency: offer.Currency, Period: "year", Features: features, FeaturesAr: featuresAr},
 	}
 }
 

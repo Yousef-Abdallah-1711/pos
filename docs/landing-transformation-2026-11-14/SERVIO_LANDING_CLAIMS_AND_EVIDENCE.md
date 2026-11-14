@@ -18,3 +18,7 @@ The authenticated audit in `docs/audits/product-landing-2026-11-14` remains the 
 Canonical policy: `backend/internal/commerce/offer.json`. The landing Docker context contains a byte-identical generated copy, checked by a Go test and synchronized by `scripts/sync-commercial-offer.py`. Versioned catalog entries retain legacy IDs and payment snapshots. Migration 186 changes the trial default for future inserts and adds nullable billing preference; it does not rewrite existing trial timestamps or paid subscriptions. Registration explicitly uses the approved duration with database timestamps. Annual savings: 12 × 750 − 5,000 = 4,000 EGP, approximately 44.4%; equivalent approximately 416.67 EGP/month billed annually.
 
 No fake customers, testimonials, certifications, integration availability, unlimited entitlements, mobile apps, instant publishing, offline guarantees, or complete financial reporting claims are introduced. Checkout remains unavailable at the application and staging edge. Captures contain synthetic records and no credentials.
+
+## Release verification
+
+Candidate CI run 43575769431 passed both synthetic registration workflows, 14-day entitlement, saved billing preference, real first category creation, menu isolation, and logout. Subsequent release gating also rejects a catalog outage rather than displaying a current offer as an unresolved historical plan. The exact final CI/main/deployed identities are maintained in the PR delivery record linked from the release report.

@@ -57,10 +57,14 @@ async function capture(page, name) {
  await page.screenshot({ path: path.join(output, `${name}.png`), fullPage: page.viewportSize().width <= 1440 })
 }
 async function interactions(page, locale) {
+ await page.setViewportSize({ width: 390, height: 844 })
  await load(page, locale, '/pricing')
  await page.locator('input[value=annual]').check()
  const href = await page.locator('#pricing a.sv-button').getAttribute('href')
  check(`annual preference ${locale}`, href.endsWith('?billing=annual'), href)
+ check(`annual charge ${locale}`, (await page.locator('#pricing .sv-price-value strong').first().textContent()) === (locale === 'ar' ? '٥٬٠٠٠' : '5,000'))
+ check(`annual mobile overflow ${locale}`, await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth))
+ await capture(page, `${locale}-pricing-annual-390`)
  await page.locator('#pricing a.sv-button').click()
  await page.waitForURL('**/auth/register?billing=annual')
  await page.waitForFunction(() => /annual|سنوي/.test(document.querySelector('main')?.textContent || ''))
@@ -105,11 +109,11 @@ async function main() {
     await load(page, locale, '')
     check(`sections ${locale}/${width}`, await page.locator('main section').count() === 14)
     await capture(page, `${locale}-${width}`)
+    for (const route of routes.slice(1)) await load(page, locale, route)
     await page.close()
     page = await browser.newPage({ ignoreHTTPSErrors: process.env.SERVIO_DISPOSABLE_BROWSER === '1', viewport: { width, height: 1000 }, reducedMotion: 'reduce' })
     observe(page)
    }
-   for (const route of routes.slice(1)) await load(page, locale, route)
    await interactions(page, locale)
   }
   check('browser exceptions', errors.length === 0, errors.join('; '))

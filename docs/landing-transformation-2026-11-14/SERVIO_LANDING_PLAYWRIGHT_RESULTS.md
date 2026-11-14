@@ -1,7 +1,29 @@
 # Browser and test results
 
-Local landing TypeScript: passed. Local landing component/unit suite: 64 tests passed in 11 files. Local landing lint: no errors, ten existing authentication/navigation/library warnings. Test TypeScript and expanded browser verification are in progress.
+## Reproducible successful acceptance
 
-`frontend/apps/landing/scripts/marketing-acceptance.mjs` is the reproducible public browser check. It covers both locales, the six requested widths, all dedicated routes, annual signup navigation, walkthrough keyboard behavior and mobile menu Escape/focus behavior. Run with `SERVIO_MARKETING_URL` and `SERVIO_MARKETING_EVIDENCE`; optional `SERVIO_BROWSER_EXECUTABLE` supports the staging host's installed browser. Exact final counts and live deployment checks remain pending.
+[CI run 43575769431](https://github.com/Yousef-Abdallah-1711/pos/actions/runs/43575769431) passed the complete verified workflow for PR head `9e897f6ad2aa2bfbeaf0a539c37320d2be32ad4c`, including all five production image builds. Evidence: [summary](evidence/candidate-verification.json); full `chromium-smoke-results` and `backend-test-results` artifacts on the run.
 
-Backend tests include policy-copy consistency, billing preference validation, exact expiry boundary, registration duration/preference, and disabled checkout rejection. Full integration, race, build, and image/browser gates run in the existing verified CI workflow. No CI result is assumed from local checks.
+| Check | Passed | Failed | Scope |
+|---|---:|---:|---|
+| Backend integration/unit tests | 1,241 | 0 | Two environment-specific tests skipped |
+| Landing unit/component tests | 64 | 0 | Eleven files |
+| Dashboard unit/component tests | 665 | 0 | Fifty-two files |
+| Marketing browser assertions | 436 | 0 | EN/AR, six homepage widths, all public routes, metadata, axe, navigation, pricing |
+| New-owner trial assertions | 21 | 0 | Two accounts; annual/monthly persistence, 14-day entitlement, dashboard, category creation, isolation, logout |
+| Existing landing visual samples | 60 | 0 | Ten widths × three routes × two locales |
+| Existing mobile-menu checks | 4 | 0 | Open and Escape close |
+
+The two skipped backend tests are the opt-in disposable Admin Orders benchmark and the WS05-specific Super Admin audit database test. None of the new commercial/trial checks were skipped. Existing authentication/navigation/library lint warnings remain; lint, typecheck and test typecheck passed for all frontend applications.
+
+## Final release gate
+
+`frontend/apps/landing/scripts/marketing-acceptance.mjs` now covers every public route in both languages at 360, 390, 768, 1024, 1440 and 1920px: 168 route/viewport samples, plus interaction journeys and annual mobile pricing captures. It validates raw server language/direction, single h1, canonical URLs, unique descriptions, hreflang, WebSite structured data, screenshot decoding, document overflow, axe WCAG A/AA rules, browser/console errors, and failed HTTP responses.
+
+`trial-registration.mjs` requires explicit synthetic-write enablement and landing/API URLs. It creates unique workspaces, verifies the subscription through the authenticated API, performs a real first menu action through the dashboard, checks workspace separation and revokes sessions. No credentials are written to reports.
+
+`capture-landing-acceptance.mjs` retains the pre-existing 60-sample regression suite with updated navigation and hidden/lazy-image handling. `lighthouse-acceptance.mjs` uses pinned Lighthouse 13.6.0 and rejects performance below 90, accessibility below 95, or CLS at/above 0.1.
+
+`ops/aws/run-ci-browser-checks.sh` runs all suites and returns failure if any suite fails. Nothing is converted to a warning. Final expanded counts and the exact approved main/release SHA are recorded in the [PR delivery record](https://github.com/Yousef-Abdallah-1711/pos/pull/43) after the final required workflow; do not infer AWS acceptance from a PR image build.
+
+The browser method is repository Playwright tooling in the existing pinned CI browser image; Playwright MCP was not available.

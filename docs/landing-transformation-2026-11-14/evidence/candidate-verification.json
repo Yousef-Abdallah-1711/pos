@@ -1,0 +1,77 @@
+{
+  "candidate_head": "9e897f6ad2aa2bfbeaf0a539c37320d2be32ad4c",
+  "base_main": "018682b",
+  "ci": "https://github.com/Yousef-Abdallah-1711/pos/actions/runs/43575769431",
+  "kind": "GitHub PR merge candidate; not an AWS deployment",
+  "backend": {
+    "passed": 1241,
+    "failed": 0,
+    "skipped": 2
+  },
+  "landing_unit": {
+    "passed": 64,
+    "failed": 0
+  },
+  "dashboard_unit": {
+    "passed": 665,
+    "failed": 0
+  },
+  "marketing": {
+    "passed": 436,
+    "failed": 0,
+    "checks": 436
+  },
+  "trial-registration": {
+    "passed": 21,
+    "failed": 0,
+    "checks": 21
+  },
+  "lighthouse": {
+    "note": "Standard Lighthouse mobile simulation. Staging intentionally remains noindex.",
+    "results": [
+      {
+        "locale": "en",
+        "performance": 0.95,
+        "accessibility": 1,
+        "seo": 0.69,
+        "lcpMs": 922.5495,
+        "cls": 0
+      },
+      {
+        "locale": "ar",
+        "performance": 0.96,
+        "accessibility": 1,
+        "seo": 0.69,
+        "lcpMs": 1351.1018,
+        "cls": 0
+      }
+    ]
+  },
+  "landing_regression": {
+    "page_samples": 60,
+    "menu_checks": 4,
+    "browser_errors": 0,
+    "endpoints": [
+      {
+        "path": "/opengraph-image",
+        "status": 200,
+        "contentType": "image/png"
+      },
+      {
+        "path": "/robots.txt",
+        "status": 200,
+        "contentType": "text/plain"
+      },
+      {
+        "path": "/sitemap.xml",
+        "status": 200,
+        "contentType": "application/xml"
+      },
+      {
+        "path": "/en/route-that-does-not-exist",
+        "status": 404,
+        "contentType": "text/html; charset=utf-8"
+      }
+    ]
+  }
+}
