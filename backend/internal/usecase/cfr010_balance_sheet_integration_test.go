@@ -30,6 +30,16 @@ func TestCFR010PostgresBalanceSheetAndEarningsReconcileByScope(t *testing.T) {
 	postCFR010Entry(t, db, fixture, "2025-06-05", "prior period expenses", cfr010Line{"expense", 300, 0}, cfr010Line{"cash", 0, 300})
 	postCFR010Entry(t, db, fixture, "2025-06-10", "owner distribution", cfr010Line{"distribution", 50, 0}, cfr010Line{"cash", 0, 50})
 
+	openingAsOf := cfr010Date("2025-01-01")
+	openingBalanceSheet := generateCFR010BalanceSheet(t, db, fixture, openingAsOf)
+	if openingBalanceSheet.TotalAssets != 1000 || openingBalanceSheet.TotalLiabilities != 0 || openingBalanceSheet.TotalEquity != 1000 || !openingBalanceSheet.EquationBalanced {
+		t.Fatalf("opening balances = assets/liabilities/equity %.2f/%.2f/%.2f balanced=%t; want 1000/0/1000/true", openingBalanceSheet.TotalAssets, openingBalanceSheet.TotalLiabilities, openingBalanceSheet.TotalEquity, openingBalanceSheet.EquationBalanced)
+	}
+	openingProfitLoss := generateCFR010ProfitLoss(t, db, fixture, openingAsOf, openingAsOf)
+	if openingProfitLoss.TotalRevenue != 0 || openingProfitLoss.TotalExpenses != 0 || openingProfitLoss.NetProfit != 0 {
+		t.Fatalf("opening P&L = revenue/expenses/net %.2f/%.2f/%.2f, want 0/0/0", openingProfitLoss.TotalRevenue, openingProfitLoss.TotalExpenses, openingProfitLoss.NetProfit)
+	}
+
 	expenseAsOf := cfr010Date("2025-06-05")
 	expenseBalanceSheet := generateCFR010BalanceSheet(t, db, fixture, expenseAsOf)
 	if expenseBalanceSheet.TotalAssets != 1200 || expenseBalanceSheet.TotalEquity != 1000 || expenseBalanceSheet.EquationDifference != 200 {
