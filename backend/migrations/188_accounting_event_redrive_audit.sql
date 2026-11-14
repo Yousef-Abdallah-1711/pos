@@ -20,6 +20,7 @@ CREATE INDEX idx_accounting_event_redrive_audit_event
 
 -- Runtime migrations may be run by postgres instead of pos_migrator; grant only
 -- the read/write access needed for the new audit history.
+REVOKE UPDATE, DELETE, TRUNCATE ON accounting_event_redrive_audit FROM pos_app;
 GRANT SELECT, INSERT ON accounting_event_redrive_audit TO pos_app;
 GRANT USAGE ON SEQUENCE accounting_event_redrive_audit_id_seq TO pos_app;
 

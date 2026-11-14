@@ -8,7 +8,9 @@ const evidence=path.join(root,'ops/aws/evidence/full-browser');
 fs.mkdirSync(evidence,{recursive:true,mode:0o700});
 const rows=[];
 const dynamicOnly=process.env.SERVIO_DYNAMIC_ONLY==='1';
-const run={scope:dynamicOnly?'dynamic-diagnostic':'full',started_utc:new Date().toISOString(),sha:process.env.SERVIO_RELEASE_SHA||null};
+const colorScheme=process.env.SERVIO_COLOR_SCHEME||'light';
+if(!['light','dark'].includes(colorScheme))throw new Error('Unsupported browser color scheme');
+const run={scope:dynamicOnly?'dynamic-diagnostic':'full',color_scheme:colorScheme,started_utc:new Date().toISOString(),sha:process.env.SERVIO_RELEASE_SHA||null};
 const hosts={landing:'https://pos.rakmyat.online',dashboard:'https://pos.app.rakmyat.online','super-admin':'https://admin.pos.rakmyat.online','restaurant-website':'https://restaurant-1.pos.rakmyat.online'};
 function resolveFixture(app,raw){
  const file=app==='restaurant-website'?'storefront-qa-fixture.json':'route-qa-fixtures.json';
@@ -42,7 +44,7 @@ async function inspect(page,app,route,width){
   // including redirect bootstraps, while retaining every 429/network assertion.
   await page.waitForTimeout(app==='super-admin'?4000:1200);
   row.http=result.status();row.finalURL=safeURL(page.url());
-  row.layout=await page.evaluate(()=>({lang:document.documentElement.lang,dir:document.documentElement.dir,overflow:document.documentElement.scrollWidth>innerWidth+2,bodyLength:document.body.innerText.trim().length,applicationError:/Application error|Internal Server Error|Something went wrong|حدث خطأ غير متوقع/.test(document.body.innerText),brokenImages:[...document.images].filter(i=>i.complete&&i.currentSrc&&i.naturalWidth===0).map(i=>({alt:i.alt,src:new URL(i.currentSrc).pathname})),forms:[...document.forms].map(f=>({fields:f.elements.length,invalid:f.querySelectorAll(':invalid').length})),unlabelledFields:[...document.querySelectorAll('input:not([type=hidden]),select,textarea')].filter(i=>!i.labels?.length&&!i.getAttribute('aria-label')&&!i.getAttribute('aria-labelledby')).map(i=>({type:i.type,name:i.name})),headings:document.querySelectorAll('h1').length}));
+  row.layout=await page.evaluate(()=>({prefersDark:matchMedia('(prefers-color-scheme: dark)').matches,darkClass:document.documentElement.classList.contains('dark'),lang:document.documentElement.lang,dir:document.documentElement.dir,overflow:document.documentElement.scrollWidth>innerWidth+2,bodyLength:document.body.innerText.trim().length,applicationError:/Application error|Internal Server Error|Something went wrong|حدث خطأ غير متوقع/.test(document.body.innerText),brokenImages:[...document.images].filter(i=>i.complete&&i.currentSrc&&i.naturalWidth===0).map(i=>({alt:i.alt,src:new URL(i.currentSrc).pathname})),forms:[...document.forms].map(f=>({fields:f.elements.length,invalid:f.querySelectorAll(':invalid').length})),unlabelledFields:[...document.querySelectorAll('input:not([type=hidden]),select,textarea')].filter(i=>!i.labels?.length&&!i.getAttribute('aria-label')&&!i.getAttribute('aria-labelledby')).map(i=>({type:i.type,name:i.name})),headings:document.querySelectorAll('h1').length}));
   await page.keyboard.press('Tab');
   row.keyboardFocus=await page.evaluate(()=>({tag:document.activeElement.tagName,visible:!!document.activeElement.getClientRects().length}));
   const locale=route.startsWith('/ar')?'ar':route.startsWith('/en')?'en':null;
@@ -58,7 +60,7 @@ async function inspect(page,app,route,width){
  console.log(`${row.status} ${app} ${route} ${width}`);
 }
 async function verifyAnonymousCallbacks(browser){
- const context=await browser.newContext();const page=await context.newPage();
+ const context=await browser.newContext({colorScheme});const page=await context.newPage();
  for(const route of ['/auth/callback','/en/auth/callback','/ar/auth/callback'])for(const width of [390]){
   const row={app:'dashboard',route:route+' anonymous rejection',width,status:'FAIL'};
   try{
@@ -98,7 +100,7 @@ async function verifyLogout(context,admin){
 }
 (async()=>{
  const browser=await chromium.launch({headless:true});
- const proof=await (await browser.newContext()).request.get('https://api.pos.rakmyat.online/_ops/release');
+ const proof=await (await browser.newContext({colorScheme})).request.get('https://api.pos.rakmyat.online/_ops/release');
  run.observed_sha=(await proof.json()).sha;
  if(!run.sha||run.sha!==run.observed_sha)throw new Error('Full acceptance requires the exact deployed SHA');
  fs.writeFileSync(path.join(evidence,'run.json'),JSON.stringify(run,null,2));
@@ -108,7 +110,7 @@ async function verifyLogout(context,admin){
  run.expected_checks=(dynamicOnly?0:3)+2+Object.entries(inventory).reduce((total,[app,list])=>total+list.filter(raw=>!raw.includes('/callback')&&!raw.includes('/test-url')&&(app!=='dashboard'||raw.startsWith('/[locale]/dashboard'))&&(!dynamicOnly||/\[(id|tableId|orderNumber)\]/.test(raw))).reduce((sum,raw)=>sum+(raw.includes('[locale]')?6:3),0),0);
  for(const app of Object.keys(hosts)){
   const state=path.join(root,'ops/aws/evidence/storefront-qa-state.json');
-  const context=await browser.newContext({viewport:{width:1440,height:900},...(app==='restaurant-website'?{storageState:state}:{})});
+  const context=await browser.newContext({colorScheme,viewport:{width:1440,height:900},...(app==='restaurant-website'?{storageState:state}:{})});
   const authenticated=app==='dashboard'||app==='super-admin';
   if(authenticated)await login(context,app==='super-admin');
   const page=await context.newPage();
@@ -124,7 +126,7 @@ async function verifyLogout(context,admin){
   if(authenticated)await verifyLogout(context,app==='super-admin');
   await context.close();
  }
- const finalProof=await (await browser.newContext()).request.get('https://api.pos.rakmyat.online/_ops/release');
+ const finalProof=await (await browser.newContext({colorScheme})).request.get('https://api.pos.rakmyat.online/_ops/release');
  if((await finalProof.json()).sha!==run.sha)throw new Error('Deployed release changed during traversal');
  await browser.close();
  fs.writeFileSync(path.join(evidence,'results.json'),JSON.stringify(rows,null,2));

@@ -4,6 +4,8 @@ import { randomBytes } from 'node:crypto'
 import fs from 'node:fs/promises'
 import path from 'node:path'
 const { chromium } = createRequire(import.meta.url)('playwright')
+const colorScheme = process.env.SERVIO_COLOR_SCHEME || 'light'
+if (!['light', 'dark'].includes(colorScheme)) throw new Error('Unsupported browser color scheme')
 const base = process.env.SERVIO_MARKETING_URL
 const api = process.env.SERVIO_MARKETING_API_URL
 if (process.env.SERVIO_SYNTHETIC_TRIAL !== '1' || !base || !api) throw new Error('Explicit synthetic trial flag and landing/API URLs are required')
@@ -76,12 +78,12 @@ async function main() {
  try {
   let previousCategory
   for (const [locale, billing] of [['en', 'annual'], ['ar', 'monthly']]) {
-   const context = await browser.newContext({ ignoreHTTPSErrors: process.env.SERVIO_DISPOSABLE_BROWSER === '1', viewport: { width: 1440, height: 1000 } })
+   const context = await browser.newContext({ colorScheme, ignoreHTTPSErrors: process.env.SERVIO_DISPOSABLE_BROWSER === '1', viewport: { width: 1440, height: 1000 } })
    try { previousCategory = await register(await context.newPage(), locale, billing, previousCategory) } finally { await context.close() }
   }
  } finally {
   await browser.close()
-  await fs.writeFile(path.join(output, 'results.json'), JSON.stringify({ checks }, null, 2))
+  await fs.writeFile(path.join(output, 'results.json'), JSON.stringify({ color_scheme: colorScheme, checks }, null, 2))
  }
 }
 main().catch(error => { console.error(error.message); process.exitCode = 1 })
