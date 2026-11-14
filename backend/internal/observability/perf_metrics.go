@@ -39,17 +39,29 @@ type MetricSummary struct {
 }
 
 type MetricsSnapshot struct {
-	GeneratedAt string                   `json:"generated_at"`
-	UptimeSec   int64                    `json:"uptime_sec"`
-	API         map[string]MetricSummary `json:"api"`
-	DB          map[string]MetricSummary `json:"db"`
+	GeneratedAt      string                   `json:"generated_at"`
+	UptimeSec        int64                    `json:"uptime_sec"`
+	API              map[string]MetricSummary `json:"api"`
+	DB               map[string]MetricSummary `json:"db"`
+	AccountingEvents *AccountingEventMetrics  `json:"accounting_events,omitempty"`
+}
+
+type AccountingEventMetrics struct {
+	ObservedAt                   string `json:"observed_at"`
+	MissingIntents               int64  `json:"missing_intents"`
+	Pending                      int64  `json:"pending"`
+	Processing                   int64  `json:"processing"`
+	Retryable                    int64  `json:"retryable"`
+	Failed                       int64  `json:"failed"`
+	CompletedWithoutSalesJournal int64  `json:"completed_without_sales_journal"`
 }
 
 type collector struct {
-	mu        sync.RWMutex
-	startedAt time.Time
-	api       map[string]*metricWindow
-	db        map[string]*metricWindow
+	mu               sync.RWMutex
+	startedAt        time.Time
+	api              map[string]*metricWindow
+	db               map[string]*metricWindow
+	accountingEvents *AccountingEventMetrics
 }
 
 func newCollector() *collector {
@@ -138,6 +150,14 @@ func RecordDB(metric string, duration time.Duration) {
 	window.add(float64(duration.Milliseconds()))
 }
 
+// RecordAccountingEvents publishes the latest durable-recovery reconciliation state.
+func RecordAccountingEvents(snapshot AccountingEventMetrics) {
+	snapshot.ObservedAt = time.Now().Format(time.RFC3339)
+	globalCollector.mu.Lock()
+	defer globalCollector.mu.Unlock()
+	globalCollector.accountingEvents = &snapshot
+}
+
 // Snapshot returns an in-memory performance summary including p95 values.
 func Snapshot() MetricsSnapshot {
 	globalCollector.mu.RLock()
@@ -152,11 +172,17 @@ func Snapshot() MetricsSnapshot {
 	for key, window := range globalCollector.db {
 		db[key] = summarize(window)
 	}
+	var accountingEvents *AccountingEventMetrics
+	if globalCollector.accountingEvents != nil {
+		copy := *globalCollector.accountingEvents
+		accountingEvents = &copy
+	}
 
 	return MetricsSnapshot{
-		GeneratedAt: time.Now().Format(time.RFC3339),
-		UptimeSec:   int64(time.Since(globalCollector.startedAt).Seconds()),
-		API:         api,
-		DB:          db,
+		GeneratedAt:      time.Now().Format(time.RFC3339),
+		UptimeSec:        int64(time.Since(globalCollector.startedAt).Seconds()),
+		API:              api,
+		DB:               db,
+		AccountingEvents: accountingEvents,
 	}
 }
