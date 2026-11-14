@@ -21,6 +21,14 @@ for script in browser-smoke.cjs storefront-flow.cjs browser-upload.cjs \
       NODE_PATH=/tmp/browser/node_modules node /work/marketing-acceptance.mjs; then
       failed=1
     fi
+    for browser in chromium firefox; do
+      echo "Running $browser dark-preference marketing acceptance"
+      if ! SERVIO_MARKETING_BROWSER="$browser" SERVIO_COLOR_SCHEME=dark \
+        SERVIO_MARKETING_EVIDENCE="${SERVIO_BROWSER_EVIDENCE:-/evidence}/marketing-$browser-dark" \
+        NODE_PATH=/tmp/browser/node_modules node /work/marketing-acceptance.mjs; then
+        failed=1
+      fi
+    done
   fi
 done
 exit "$failed"
