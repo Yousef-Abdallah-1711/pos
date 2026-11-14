@@ -71,9 +71,9 @@ func (h *PublicOrderHandler) CreateOrder(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	// Default order source to website if not provided
-	if req.OrderSource == "" {
-		req.OrderSource = "website"
+	if !applyTrustedOrderSource(r, &req) {
+		respondError(w, http.StatusForbidden, "POS orders require the authorized cashier endpoint")
+		return
 	}
 
 	// Create order via usecase
