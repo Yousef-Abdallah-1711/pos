@@ -129,6 +129,7 @@ GET /api/v1/notifications/{id}
 GET /api/v1/products
 GET /api/v1/products/alerts/low-stock
 GET /api/v1/products/{id}
+GET /api/v1/public/commercial-offer
 GET /api/v1/public/orders/number/{number}/lookup
 GET /api/v1/public/orders/{id}
 GET /api/v1/public/orders/{id}/status

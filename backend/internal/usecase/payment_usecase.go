@@ -13,6 +13,7 @@ import (
 	"strings"
 	"time"
 
+	"pos-saas/internal/commerce"
 	"pos-saas/internal/domain"
 	"pos-saas/internal/pkg/database"
 	"pos-saas/internal/repository"
@@ -226,17 +227,10 @@ func (uc *PaymentUseCase) HandleWebhook(ctx context.Context, rawPayload []byte, 
 		return fmt.Errorf("unknown plan id for payment: %s", planID)
 	}
 
-	if payment.AmountCents != plan.PriceCents {
-		return fmt.Errorf(
-			"stored payment amount mismatch for plan %s: expected %d got %d",
-			planID,
-			plan.PriceCents,
-			payment.AmountCents,
-		)
-	}
-
-	if payload.Obj.AmountCents != plan.PriceCents {
-		return fmt.Errorf("amount mismatch: expected %d got %d", plan.PriceCents, payload.Obj.AmountCents)
+	// A signed callback settles the immutable payment snapshot, not today's offer.
+	// Catalog price changes must not invalidate previously initiated payments.
+	if payment.AmountCents <= 0 || payload.Obj.AmountCents != payment.AmountCents {
+		return fmt.Errorf("amount mismatch: expected %d got %d", payment.AmountCents, payload.Obj.AmountCents)
 	}
 
 	if !strings.EqualFold(payload.Obj.Currency, payment.Currency) {
@@ -458,9 +452,9 @@ func (uc *PaymentUseCase) GetCurrentSubscription(ctx context.Context, tenantID i
 		planByID[p.ID] = p
 	}
 
-	plan, ok := planByID[planID]
-	if !ok {
-		plan = uc.defaultPlan()
+	plan, err := uc.currentSubscriptionPlan(ctx, planID, planByID)
+	if err != nil {
+		return nil, err
 	}
 
 	daysRemaining := subscription.DaysRemaining
@@ -475,6 +469,8 @@ func (uc *PaymentUseCase) GetCurrentSubscription(ctx context.Context, tenantID i
 	}
 
 	return &domain.CurrentSubscriptionResponse{
+		PreferredBillingPeriod:  subscription.PreferredBillingPeriod,
+		CheckoutAvailable:       commerce.Current().CheckoutAvailable,
 		SubscriptionStatus:      subscription.SubscriptionStatus,
 		TrialEndDate:            subscription.TrialEndDate,
 		SubscriptionExpiresAt:   billingInfo.SubscriptionExpiresAt,
@@ -831,26 +827,13 @@ func (uc *PaymentUseCase) getPlanByID(ctx context.Context, planID string) (domai
 			return plan, true
 		}
 	}
+	// Compatibility aliases apply only when no explicit legacy plan was supplied.
+	for _, plan := range uc.listPlans(ctx) {
+		if (targetID == "monthly" && plan.ID == commerce.Current().MonthlyPlanID) || (targetID == "annual" && plan.ID == commerce.Current().AnnualPlanID) {
+			return plan, true
+		}
+	}
 	return domain.SubscriptionPlan{}, false
-}
-
-func (uc *PaymentUseCase) defaultPlan() domain.SubscriptionPlan {
-	monthlyPlan, ok := uc.plans["monthly"]
-	if ok {
-		return monthlyPlan
-	}
-	for _, plan := range uc.plans {
-		return plan
-	}
-	return domain.SubscriptionPlan{
-		ID:         "monthly",
-		Name:       "Pro Plan",
-		NameAr:     "Pro Plan",
-		Price:      500,
-		PriceCents: 50000,
-		Currency:   "EGP",
-		Period:     "month",
-	}
 }
 
 func (uc *PaymentUseCase) markPaymentFailed(ctx context.Context, tenantID, paymentID int64, message string) error {
@@ -1083,61 +1066,6 @@ func (uc *PaymentUseCase) writeSubscriptionHistory(ctx context.Context, params *
 	}
 	if err := uc.subscriptionRepo.CreateHistoryRecord(ctx, params); err != nil {
 		log.Printf("[PaymentUseCase] WARN: failed to write subscription history action %s: %v\n", params.Action, err)
-	}
-}
-
-func buildDefaultPlans() map[string]domain.SubscriptionPlan {
-	monthlyPriceCents := getEnvInt("SUBSCRIPTION_MONTHLY_PRICE_CENTS", 50000)
-	annualPriceCents := getEnvInt("SUBSCRIPTION_ANNUAL_PRICE_CENTS", 500000)
-	currency := strings.ToUpper(getEnvString("SUBSCRIPTION_CURRENCY", "EGP"))
-	if currency == "" {
-		currency = "EGP"
-	}
-
-	monthlyFeatures := []string{
-		"Full POS System",
-		"Kitchen Display System",
-		"Online Ordering Website",
-		"Analytics and Reports",
-		"Multi-Restaurant Management",
-		"Mobile Apps",
-		"Unlimited Staff",
-		"Priority Support",
-		"Free Updates",
-		"Driver Management",
-	}
-
-	return map[string]domain.SubscriptionPlan{
-		"monthly": {
-			ID:         "monthly",
-			Name:       "Pro Plan",
-			NameAr:     "Pro Plan",
-			Price:      monthlyPriceCents / 100,
-			PriceCents: monthlyPriceCents,
-			Currency:   currency,
-			Period:     "month",
-			Features:   monthlyFeatures,
-			FeaturesAr: monthlyFeatures,
-		},
-		"annual": {
-			ID:         "annual",
-			Name:       "Pro Plan (Annual)",
-			NameAr:     "Pro Plan (Annual)",
-			Price:      annualPriceCents / 100,
-			PriceCents: annualPriceCents,
-			Currency:   currency,
-			Period:     "year",
-			Features: []string{
-				"Everything in Monthly Plan",
-				"Save 17% (2 months free)",
-				"Annual billing convenience",
-			},
-			FeaturesAr: []string{
-				"Everything in Monthly Plan",
-				"Save 17% (2 months free)",
-				"Annual billing convenience",
-			},
-		},
 	}
 }
 

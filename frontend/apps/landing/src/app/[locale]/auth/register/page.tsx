@@ -1,6 +1,7 @@
 'use client'
 
-import { useCallback } from 'react'
+import { useCallback, useEffect, useState } from 'react'
+import { trackFunnel } from '@/lib/funnel'
 import Link from 'next/link'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -14,6 +15,12 @@ import { Navbar } from '@/components/Navbar'
 type RegisterForm = { name: string; email: string; password: string; confirmPassword: string; restaurantName: string; restaurantSlug: string; phone: string }
 
 export default function RegisterPage() {
+  const [billing, setBilling] = useState<'monthly' | 'annual'>('monthly')
+  useEffect(() => {
+    const selected = new URLSearchParams(window.location.search).get('billing') === 'annual' ? 'annual' : 'monthly'
+    setBilling(selected)
+    trackFunnel('trial_registration_started', { locale: window.location.pathname.startsWith('/ar') ? 'ar' : 'en', source: 'registration', billing: selected })
+  }, [])
   const setAuth = useAuthStore((state) => state.setAuth)
   const { t, dir, language } = useLanguage()
   const text = t.auth.register
@@ -43,7 +50,8 @@ export default function RegisterPage() {
     }
     clearErrors()
     try {
-      const response = await api.post('/auth/register', { name: data.name, email: data.email, password: data.password, restaurant_name: data.restaurantName, restaurant_slug: data.restaurantSlug, phone: data.phone || undefined })
+      const response = await api.post('/auth/register', { name: data.name, email: data.email, password: data.password, restaurant_name: data.restaurantName, restaurant_slug: data.restaurantSlug, phone: data.phone || undefined, billing_period: billing })
+      trackFunnel('trial_registration_completed', { locale: language, source: 'registration', billing })
       const { user, session_established: sessionEstablished } = response.data
       if (!sessionEstablished) {
         window.location.href = `/${language}/auth/login?created=1`
@@ -76,7 +84,7 @@ export default function RegisterPage() {
     <Navbar />
     <main id="main-content" dir={dir} className="auth-page">
       <div className="auth-layout">
-        <section className="auth-story" aria-label={language === 'ar' ? 'عن POOS' : 'About POOS'}>
+        <section className="auth-story" aria-label={language === 'ar' ? 'عن SERVIO' : 'About SERVIO'}>
           <div>
             <h1>{language === 'ar' ? 'ابدأ مساحة عمل مطعمك.' : 'Set up your restaurant workspace.'}</h1>
             <p>{t.footer.tagline}</p>
@@ -85,16 +93,17 @@ export default function RegisterPage() {
         </section>
         <section className="auth-form-panel" aria-labelledby="register-heading">
           <div className="auth-form">
-            <Link className="auth-form__back" href={`/${language}`}>{language === 'ar' ? 'العودة إلى POOS' : 'Back to POOS'}</Link>
+            <Link className="auth-form__back" href={`/${language}`}>{language === 'ar' ? 'العودة إلى SERVIO' : 'Back to SERVIO'}</Link>
             <h2 id="register-heading">{text.title}</h2>
             <p className="auth-form__intro">{language === 'ar' ? 'أدخل بياناتك وبيانات مطعمك لبدء إنشاء الحساب.' : 'Enter your details and restaurant information to create an account.'}</p>
             <form method="post" noValidate onSubmit={handleSubmit(onSubmit, onInvalid)} className="auth-form__fields">
+              <p className="mb-6 text-sm text-slate-600">{language === 'ar' ? `تجربة لمدة 14 يومًا. تفضيل الفوترة: ${billing === 'annual' ? 'سنوي' : 'شهري'}. لا يتم تحصيل أي مبلغ عند التسجيل.` : `14-day trial. Billing preference: ${billing}. Registration does not charge you.`}</p>
               <FormErrorSummary title={fallback.validation} errors={isSubmitted ? Object.fromEntries(Object.entries(errors).filter(([key]) => key !== 'root').map(([key, value]) => [key, value?.message ?? 'Review this field'])) : {}} onFocusField={(key) => setFocus(key as keyof RegisterForm)} />
               {errors.root?.server?.message && <p role="alert" className="poos-error">{errors.root.server.message}</p>}
               <FormField id="name" label={text.fullName} required error={fieldError('name')}><input {...register('name')} {...fieldAccessibility('name', fieldError('name'))} autoComplete="name" maxLength={255} placeholder={text.fullNamePlaceholder} {...common} /></FormField>
               <FormField id="email" label={text.email} required error={fieldError('email')}><input {...register('email')} {...fieldAccessibility('email', fieldError('email'))} type="email" autoComplete="email" maxLength={255} placeholder={text.emailPlaceholder} {...common} /></FormField>
               <FormField id="restaurantName" label={text.restaurantName} required error={fieldError('restaurantName')}><input {...register('restaurantName')} {...fieldAccessibility('restaurantName', fieldError('restaurantName'))} autoComplete="organization" maxLength={255} placeholder={text.restaurantNamePlaceholder} {...common} /></FormField>
-              <FormField id="restaurantSlug" label={text.websiteSubdomain} required description={`${text.websiteAccessible} ${restaurantSlug || 'your-subdomain'}.${restaurantDomain}`} error={fieldError('restaurantSlug')}>
+              <FormField id="restaurantSlug" label={text.websiteSubdomain} required description={`${language === 'ar' ? 'عنوان الموقع المطلوب؛ تفعيل الموقع خطوة إعداد مستقلة:' : 'Requested address; storefront activation is a separate setup step:'} ${restaurantSlug || 'your-subdomain'}.${restaurantDomain}`} error={fieldError('restaurantSlug')}>
                 <input {...register('restaurantSlug')} {...fieldAccessibility('restaurantSlug', fieldError('restaurantSlug'))} autoCapitalize="none" autoCorrect="off" maxLength={63} placeholder={text.subdomainPlaceholder} {...common} />
                 <AsyncAvailabilityField state={availability.state} messages={messagesByState} />
               </FormField>

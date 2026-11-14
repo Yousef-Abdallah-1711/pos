@@ -1,0 +1,127 @@
+.sv-hero {
+  padding-top:64px;
+  background:radial-gradient(ellipse at 90% 20%,#ede5ff,transparent 52%);
+}
+.sv-hero h1 {
+  font-size:clamp(43px,5.2vw,78px);
+  max-width:680px;
+}
+.sv-hero h1 em {
+  font-style:normal;
+  color:var(--sv-violet);
+}
+.sv-hero .sv-lead {
+  margin-top:25px;
+}
+.sv-status-dot {
+  display:inline-block;
+  width:7px;
+  height:7px;
+  border-radius:50%;
+  background:var(--sv-violet);
+  margin-inline-end:8px;
+}
+.sv-hero-grid {
+  display:grid;
+  gap:44px;
+}
+.sv-hero-stage {
+  position:relative;
+  background:#eee8f7;
+  border:1px solid #ded4ef;
+  border-radius:16px;
+  padding:16px 14px 0;
+  min-width:0;
+}
+.sv-stage-rail {
+  display:flex;
+  justify-content:space-between;
+  font-size:10px;
+  letter-spacing:.07em;
+  color:#514366;
+  padding-bottom:15px;
+}
+.sv-capture {
+  margin:0;
+  min-width:0;
+}
+.sv-capture-image {
+  border:1px solid #d9d1e6;
+  border-radius:8px;
+  overflow:hidden;
+  background:#fff;
+  box-shadow:0 18px 45px -28px #35234e55;
+}
+.sv-capture img {
+  display:block;
+  width:100%;
+  height:auto;
+}
+.sv-capture figcaption {
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  font-size:10px;
+  color:var(--sv-muted);
+  padding-block:10px;
+  line-height:1.5;
+}
+.sv-capture figcaption a {
+  display:inline-flex;
+  align-items:center;
+  min-height:48px;
+  text-decoration:underline;
+  flex-shrink:0;
+}
+.sv-hero-pos .sv-capture-image {
+  max-height:300px;
+}
+.sv-hero-pos img {
+  width:130%;
+  max-width:none;
+}
+.sv-hero-stage figcaption {
+  display:none;
+}
+.sv-hero-kitchen {
+  width:85%;
+  margin-inline-start:auto;
+  transform:translateY(15px);
+}
+.sv-hero-kitchen .sv-capture-image {
+  height:150px;
+}
+.sv-hero-kitchen img {
+  width:150%;
+  max-width:none;
+}
+.sv-handoff {
+  font-size:11px;
+  font-weight:600;
+  margin:15px 0 0;
+}
+.sv-hero-foot {
+  margin-top:55px;
+  border-top:1px solid var(--sv-line);
+  padding-block:22px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:20px;
+  font-size:12px;
+  color:var(--sv-muted);
+}
+.sv-hero-foot a {
+  display:flex;
+  align-items:center;
+  gap:10px;
+  min-height:48px;
+  color:var(--sv-ink);
+}
+
+.sv-stage-source {
+  margin: 0 0 12px;
+  color: var(--sv-muted);
+  font-size: 10px;
+  line-height: 1.5;
+}

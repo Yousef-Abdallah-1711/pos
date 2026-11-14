@@ -6,6 +6,7 @@ import { SubscriptionPlan } from '@/lib/api'
 
 interface PlanCardProps {
   plan: SubscriptionPlan
+  disabled?: boolean
   isActive: boolean
   isLoading: boolean
   locale?: 'en' | 'ar'
@@ -33,14 +34,17 @@ function isAnnualPlan(plan: SubscriptionPlan) {
 export function PlanCard({
   plan,
   isActive,
+  disabled = false,
   isLoading,
   locale = 'en',
   subscribeLabel = 'Subscribe Now',
   activeLabel = 'Already Active',
-  annualSaveLabel = 'Save 17%',
+  annualSaveLabel = 'Save approximately 44.4%',
   translateFeature,
   onSubscribe,
 }: PlanCardProps) {
+  const features = locale === 'ar' && plan.features_ar?.length ? plan.features_ar : plan.features
+  const displayName = locale === 'ar' && plan.name_ar ? plan.name_ar : plan.name
   const periodLabel =
     locale === 'ar'
       ? ((plan.period || '').toLowerCase() === 'year' || (plan.period || '').toLowerCase() === 'annual' ? 'سنة' : 'شهر')
@@ -51,7 +55,7 @@ export function PlanCard({
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
-            <p className="text-lg font-semibold text-gray-900 dark:text-white">{plan.name}</p>
+            <p className="text-lg font-semibold text-gray-900 dark:text-white">{displayName}</p>
             {isAnnualPlan(plan) && (
               <span className="inline-flex rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-medium text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300">
                 {annualSaveLabel}
@@ -64,7 +68,7 @@ export function PlanCard({
         </div>
         <Button
           onClick={() => onSubscribe(plan.id)}
-          disabled={isLoading || isActive}
+          disabled={disabled || isLoading || isActive}
           className="gap-2"
         >
           {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <CreditCard className="h-4 w-4" />}
@@ -72,9 +76,9 @@ export function PlanCard({
         </Button>
       </div>
 
-      {plan.features && plan.features.length > 0 && (
+      {features && features.length > 0 && (
         <ul className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-gray-600 dark:text-gray-300">
-          {plan.features.map((feature) => (
+          {features.map((feature) => (
             <li key={feature} className="flex items-start gap-2">
               <CheckCircle2 className="h-4 w-4 mt-0.5 text-green-500" />
               <span>{translateFeature ? translateFeature(feature) : feature}</span>

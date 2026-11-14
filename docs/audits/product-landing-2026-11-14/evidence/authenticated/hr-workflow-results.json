@@ -1,0 +1,444 @@
+[
+  {
+    "method": "POST",
+    "route": "/hr/training",
+    "http": 201,
+    "response": {
+      "data": {
+        "id": 1,
+        "tenant_id": 13,
+        "restaurant_id": 13,
+        "employee_id": 1,
+        "training_title": "Audit Food Safety Training",
+        "training_provider": "Synthetic audit",
+        "training_type": "internal",
+        "start_date": "2026-11-14T00:00:00Z",
+        "end_date": "2026-11-15T00:00:00Z",
+        "status": "scheduled",
+        "notes": "Synthetic audit",
+        "created_at": "0001-01-01T00:00:00Z",
+        "updated_at": "0001-01-01T00:00:00Z",
+        "created_by": 14
+      },
+      "success": true
+    }
+  },
+  {
+    "method": "POST",
+    "route": "/hr/training/1/complete",
+    "http": 404,
+    "response": {
+      "error": "404 page not found\n"
+    }
+  },
+  {
+    "method": "POST",
+    "route": "/hr/insurance",
+    "http": 201,
+    "response": {
+      "data": {
+        "id": 1,
+        "tenant_id": 13,
+        "restaurant_id": 13,
+        "employee_id": 1,
+        "policy_type": "health",
+        "provider_name": "Audit Synthetic Provider",
+        "policy_number": "AUDIT-INS-01",
+        "coverage_start": "2026-11-14T00:00:00Z",
+        "coverage_end": "2027-11-14T00:00:00Z",
+        "monthly_premium": 10,
+        "status": "active",
+        "notes": "Synthetic audit",
+        "created_at": "0001-01-01T00:00:00Z",
+        "updated_at": "0001-01-01T00:00:00Z",
+        "created_by": 14
+      },
+      "success": true
+    }
+  },
+  {
+    "method": "POST",
+    "route": "/hr/contracts",
+    "http": 201,
+    "response": {
+      "data": {
+        "id": 1,
+        "tenant_id": 13,
+        "restaurant_id": 13,
+        "employee_id": 1,
+        "contract_type": "fixed_term",
+        "contract_number": "AUDIT-CON-01",
+        "start_date": "2026-11-14T00:00:00Z",
+        "end_date": "2027-11-14T00:00:00Z",
+        "salary_amount": 1000,
+        "currency": "EGP",
+        "status": "active",
+        "notes": "Synthetic audit",
+        "created_at": "0001-01-01T00:00:00Z",
+        "updated_at": "0001-01-01T00:00:00Z",
+        "created_by": 14
+      },
+      "success": true
+    }
+  },
+  {
+    "method": "POST",
+    "route": "/hr/performance",
+    "http": 500,
+    "response": {
+      "error": "Failed to create performance review"
+    }
+  },
+  {
+    "method": "POST",
+    "route": "/hr/resignations",
+    "http": 201,
+    "response": {
+      "data": {
+        "id": 1,
+        "tenant_id": 13,
+        "restaurant_id": 13,
+        "employee_id": 1,
+        "resignation_date": "2026-11-14T00:00:00Z",
+        "last_working_date": "2026-12-14T00:00:00Z",
+        "reason": "Synthetic audit only",
+        "status": "submitted",
+        "notice_period_days": 30,
+        "pending_salary": 100,
+        "unused_leave_balance": 0,
+        "settlement_amount": 100,
+        "created_at": "0001-01-01T00:00:00Z",
+        "updated_at": "0001-01-01T00:00:00Z",
+        "created_by": 14,
+        "updated_by": 14
+      },
+      "success": true
+    }
+  },
+  {
+    "method": "POST",
+    "route": "/hr/resignations/1/acknowledge",
+    "http": 200,
+    "response": {
+      "data": {
+        "status": "acknowledged"
+      },
+      "success": true
+    }
+  },
+  {
+    "method": "GET",
+    "route": "/hr/employees",
+    "http": 200,
+    "response": {
+      "data": [
+        {
+          "id": 1,
+          "tenant_id": 13,
+          "restaurant_id": 13,
+          "employee_code": "AUDIT-01",
+          "first_name": "Audit",
+          "last_name": "Employee",
+          "first_name_ar": "موظف",
+          "last_name_ar": "اختبار",
+          "email": "audit-employee@example.invalid",
+          "gender": "male",
+          "hire_date": "2026-11-14T00:00:00Z",
+          "employment_type": "full_time",
+          "employment_status": "active",
+          "position": "Kitchen audit",
+          "department": "Kitchen",
+          "base_salary": 1000,
+          "salary_currency": "EGP",
+          "payment_frequency": "monthly",
+          "working_hours_per_week": 40,
+          "shift_type": "day",
+          "documents": [],
+          "notes": "Synthetic product audit only",
+          "is_active": true,
+          "created_at": "2026-11-14T03:13:49.488455Z",
+          "updated_at": "2026-11-14T03:13:49.488455Z",
+          "created_by": 14
+        }
+      ],
+      "pagination": {
+        "page": 1,
+        "page_size": 20,
+        "total": 1,
+        "total_pages": 1
+      },
+      "success": true
+    }
+  },
+  {
+    "method": "GET",
+    "route": "/hr/attendance",
+    "http": 200,
+    "response": {
+      "data": [
+        {
+          "id": 1,
+          "tenant_id": 13,
+          "restaurant_id": 13,
+          "employee_id": 1,
+          "attendance_date": "2026-11-14T00:00:00Z",
+          "clock_in": "2026-11-14T03:13:49.541505Z",
+          "clock_out": "2026-11-14T03:20:00Z",
+          "total_break_minutes": 0,
+          "total_hours": 0.1,
+          "regular_hours": 0.1,
+          "overtime_hours": 0,
+          "status": "present",
+          "is_late": false,
+          "late_by_minutes": 0,
+          "is_early_departure": false,
+          "early_departure_minutes": 0,
+          "is_overtime": false,
+          "overtime_approved": false,
+          "notes": "Synthetic audit time record",
+          "requires_approval": false,
+          "is_approved": false,
+          "created_at": "2026-11-14T03:13:49.541505Z",
+          "updated_at": "2026-11-14T03:17:16.61785Z"
+        }
+      ],
+      "pagination": {
+        "page": 1,
+        "page_size": 20,
+        "total": 1,
+        "total_pages": 1
+      },
+      "success": true
+    }
+  },
+  {
+    "method": "GET",
+    "route": "/hr/leaves",
+    "http": 200,
+    "response": {
+      "data": [
+        {
+          "id": 1,
+          "tenant_id": 13,
+          "restaurant_id": 13,
+          "employee_id": 1,
+          "start_date": "2026-11-20T00:00:00Z",
+          "end_date": "2026-11-20T00:00:00Z",
+          "total_days": 1,
+          "is_half_day": false,
+          "leave_type": "annual",
+          "leave_category": "paid",
+          "reason": "Synthetic audit leave request",
+          "status": "approved",
+          "is_approved": true,
+          "deducted_from_balance": false,
+          "handover_completed": false,
+          "notify_manager": false,
+          "notify_hr": false,
+          "created_at": "2026-11-14T03:17:16.647004Z",
+          "updated_at": "2026-11-14T03:17:16.673065Z"
+        }
+      ],
+      "pagination": {
+        "page": 1,
+        "page_size": 20,
+        "total": 1,
+        "total_pages": 1
+      },
+      "success": true
+    }
+  },
+  {
+    "method": "GET",
+    "route": "/hr/training",
+    "http": 200,
+    "response": {
+      "data": [
+        {
+          "id": 1,
+          "tenant_id": 13,
+          "restaurant_id": 13,
+          "employee_id": 1,
+          "training_title": "Audit Food Safety Training",
+          "training_provider": "Synthetic audit",
+          "training_type": "internal",
+          "start_date": "2026-11-14T00:00:00Z",
+          "end_date": "2026-11-15T00:00:00Z",
+          "status": "scheduled",
+          "notes": "Synthetic audit",
+          "created_at": "2026-11-14T03:18:49.531367Z",
+          "updated_at": "2026-11-14T03:18:49.531367Z",
+          "created_by": 14
+        }
+      ],
+      "pagination": {
+        "page": 1,
+        "page_size": 20,
+        "total": 1
+      },
+      "success": true
+    }
+  },
+  {
+    "method": "GET",
+    "route": "/hr/insurance",
+    "http": 200,
+    "response": {
+      "data": [
+        {
+          "id": 1,
+          "tenant_id": 13,
+          "restaurant_id": 13,
+          "employee_id": 1,
+          "policy_type": "health",
+          "provider_name": "Audit Synthetic Provider",
+          "policy_number": "AUDIT-INS-01",
+          "coverage_start": "2026-11-14T00:00:00Z",
+          "coverage_end": "2027-11-14T00:00:00Z",
+          "monthly_premium": 10,
+          "status": "active",
+          "notes": "Synthetic audit",
+          "created_at": "2026-11-14T03:18:49.561814Z",
+          "updated_at": "2026-11-14T03:18:49.561814Z",
+          "created_by": 14
+        }
+      ],
+      "pagination": {
+        "page": 1,
+        "page_size": 20,
+        "total": 1
+      },
+      "success": true
+    }
+  },
+  {
+    "method": "GET",
+    "route": "/hr/contracts",
+    "http": 200,
+    "response": {
+      "data": [
+        {
+          "id": 1,
+          "tenant_id": 13,
+          "restaurant_id": 13,
+          "employee_id": 1,
+          "contract_type": "fixed_term",
+          "contract_number": "AUDIT-CON-01",
+          "start_date": "2026-11-14T00:00:00Z",
+          "end_date": "2027-11-14T00:00:00Z",
+          "salary_amount": 1000,
+          "currency": "EGP",
+          "status": "active",
+          "notes": "Synthetic audit",
+          "created_at": "2026-11-14T03:18:49.578866Z",
+          "updated_at": "2026-11-14T03:18:49.578866Z",
+          "created_by": 14
+        }
+      ],
+      "pagination": {
+        "page": 1,
+        "page_size": 20,
+        "total": 1
+      },
+      "success": true
+    }
+  },
+  {
+    "method": "GET",
+    "route": "/hr/performance",
+    "http": 200,
+    "response": {
+      "data": [],
+      "pagination": {
+        "page": 1,
+        "page_size": 20,
+        "total": 0
+      },
+      "success": true
+    }
+  },
+  {
+    "method": "GET",
+    "route": "/hr/resignations",
+    "http": 200,
+    "response": {
+      "data": [
+        {
+          "id": 1,
+          "tenant_id": 13,
+          "restaurant_id": 13,
+          "employee_id": 1,
+          "resignation_date": "2026-11-14T00:00:00Z",
+          "last_working_date": "2026-12-14T00:00:00Z",
+          "reason": "Synthetic audit only",
+          "status": "acknowledged",
+          "notice_period_days": 30,
+          "pending_salary": 100,
+          "unused_leave_balance": 0,
+          "settlement_amount": 100,
+          "acknowledged_at": "2026-11-14T03:18:49.633685Z",
+          "created_at": "2026-11-14T03:18:49.609449Z",
+          "updated_at": "2026-11-14T03:18:49.633685Z",
+          "created_by": 14,
+          "updated_by": 14
+        }
+      ],
+      "pagination": {
+        "page": 1,
+        "page_size": 20,
+        "total": 1
+      },
+      "success": true
+    }
+  },
+  {
+    "method": "GET",
+    "route": "/hr/salaries",
+    "http": 200,
+    "response": {
+      "data": [],
+      "pagination": {
+        "page": 1,
+        "page_size": 20,
+        "total": 0,
+        "total_pages": 0
+      },
+      "success": true
+    }
+  },
+  {
+    "check": "populated HR UI",
+    "module": "attendance",
+    "text": "POS Dashboard\nDashboard\nCashier POS\nKitchen Display\nOrders\nProducts\nHuman Resources\nAccounting\nSuppliers\nFinancial Reports\nReports\nTheme Builder\nSettings\nEnglish\nP\n\nproduct-audit-1794625969@example.invalid\n\nOwner\n\nAttendance\n\nTrack and manage employee attendance records\n\nRecord Attendance\nFrom Date\nTo Date\n\nSuccessfully loaded 1 attendance records at 3:18:50 AM\n\nEmployee\tClock In\tClock Out\tStatus\tHours\tActions\nAudit Employee\t11/14/2026, 3:13:49 AM\t11/14/2026, 3:20:00 AM\tpresent\t0.10h\t\nEdit"
+  },
+  {
+    "check": "populated HR UI",
+    "module": "leaves",
+    "text": "POS Dashboard\nDashboard\nCashier POS\nKitchen Display\nOrders\nProducts\nHuman Resources\nAccounting\nSuppliers\nFinancial Reports\nReports\nTheme Builder\nSettings\nEnglish\nP\n\nproduct-audit-1794625969@example.invalid\n\nOwner\n\nLeave Requests\n\nManage employee leave requests and approvals\n\nRequest Leave\nFrom Date\nTo Date\n\nSuccessfully loaded 1 leave requests at 3:18:51 AM\n\nEmployee\tType\tStart Date\tEnd Date\tStatus\tActions\nAudit Employee\tAnnual\t11/20/2026\t11/20/2026\t\nApproved\n\t"
+  },
+  {
+    "check": "populated HR UI",
+    "module": "training",
+    "text": "POS Dashboard\nDashboard\nCashier POS\nKitchen Display\nOrders\nProducts\nHuman Resources\nAccounting\nSuppliers\nFinancial Reports\nReports\nTheme Builder\nSettings\nEnglish\nP\n\nproduct-audit-1794625969@example.invalid\n\nOwner\n\nTraining Records\n\nTrack training, certificates, and upcoming expirations.\n\nAdd Training\nEmployee\tTitle\tDates\tCertificate Expiry\tActions\n#1\tAudit Food Safety Training\t2026-11-14T00:00:00Z - 2026-11-15T00:00:00Z\t-\tEditDelete"
+  },
+  {
+    "check": "populated HR UI",
+    "module": "insurance",
+    "text": "POS Dashboard\nDashboard\nCashier POS\nKitchen Display\nOrders\nProducts\nHuman Resources\nAccounting\nSuppliers\nFinancial Reports\nReports\nTheme Builder\nSettings\nEnglish\nP\n\nproduct-audit-1794625969@example.invalid\n\nOwner\n\nInsurance Tracking\n\nManage policy coverage and renewal alerts.\n\nAdd Policy\nEmployee\tPolicy\tProvider\tCoverage End\tActions\n#1\tAUDIT-INS-01\tAudit Synthetic Provider\t2027-11-14T00:00:00Z\tEditDelete"
+  },
+  {
+    "check": "populated HR UI",
+    "module": "contracts",
+    "text": "POS Dashboard\nDashboard\nCashier POS\nKitchen Display\nOrders\nProducts\nHuman Resources\nAccounting\nSuppliers\nFinancial Reports\nReports\nTheme Builder\nSettings\nEnglish\nP\n\nproduct-audit-1794625969@example.invalid\n\nOwner\n\nEmployment Contracts\n\nTrack contract lifecycle and renewals.\n\nAdd Contract\nEmployee\tContract\tDates\tStatus\tActions\n#1\tAUDIT-CON-01\t2026-11-14T00:00:00Z - 2027-11-14T00:00:00Z\tactive\tEditRenewDelete"
+  },
+  {
+    "check": "populated HR UI",
+    "module": "performance",
+    "text": "POS Dashboard\nDashboard\nCashier POS\nKitchen Display\nOrders\nProducts\nHuman Resources\nAccounting\nSuppliers\nFinancial Reports\nReports\nTheme Builder\nSettings\nEnglish\nP\n\nproduct-audit-1794625969@example.invalid\n\nOwner\n\nPerformance Reviews\n\nCreate, acknowledge, and complete employee performance reviews.\n\nAdd Review\nEmployee\tPeriod\tRating\tStatus\tActions\nNo performance reviews"
+  },
+  {
+    "check": "populated HR UI",
+    "module": "resignations",
+    "text": "POS Dashboard\nDashboard\nCashier POS\nKitchen Display\nOrders\nProducts\nHuman Resources\nAccounting\nSuppliers\nFinancial Reports\nReports\nTheme Builder\nSettings\nEnglish\nP\n\nproduct-audit-1794625969@example.invalid\n\nOwner\n\nResignations\n\nManage resignation workflow and final settlement.\n\nAdd Resignation\nExit Checklist\nReturn company assets\nFinalize attendance\nPayroll clearance\nEmployee #1\nEditDelete\nStatus: acknowledged\nNotice: 30 days\nAcknowledge\nComplete\nCalculate Settlement"
+  }
+]

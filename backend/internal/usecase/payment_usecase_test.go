@@ -449,7 +449,7 @@ func TestPaymentUseCaseHandleWebhookFailedPaymentMarksFailed(t *testing.T) {
 		t.Fatalf("InitiatePayment failed: %v", err)
 	}
 
-	payload := webhookPayloadForTest(initResp.PaymobOrderID, 50000, false, false, true)
+	payload := webhookPayloadForTest(initResp.PaymobOrderID, 75000, false, false, true)
 	raw, _ := json.Marshal(payload)
 	if err := uc.HandleWebhook(context.Background(), raw, payload, "ok"); err != nil {
 		t.Fatalf("HandleWebhook failed payload returned error: %v", err)
@@ -478,7 +478,7 @@ func TestPaymentUseCaseHandleWebhookPendingPaymentDoesNotMutateState(t *testing.
 		t.Fatalf("InitiatePayment failed: %v", err)
 	}
 
-	payload := webhookPayloadForTest(initResp.PaymobOrderID, 50000, false, true, false)
+	payload := webhookPayloadForTest(initResp.PaymobOrderID, 75000, false, true, false)
 	raw, err := json.Marshal(payload)
 	if err != nil {
 		t.Fatalf("marshal pending webhook: %v", err)
@@ -512,7 +512,7 @@ func TestPaymentUseCaseGetPlansIncludesMonthlyPlan(t *testing.T) {
 
 	foundMonthly := false
 	for _, plan := range plans {
-		if plan.ID == "monthly" {
+		if plan.ID == "servio-monthly-v1" {
 			foundMonthly = true
 			break
 		}
@@ -562,6 +562,9 @@ func TestPaymentUseCaseGetCurrentSubscriptionReturnsPlanAndBilling(t *testing.T)
 	client := &testPaymobClient{verifyHMAC: true}
 	uc := NewPaymentUseCase(repo, subRepo, nil, client, nil)
 
+	// A known legacy catalog entry remains authoritative for existing subscribers.
+	uc.plans["monthly"] = domain.SubscriptionPlan{ID: "monthly", Name: "Legacy monthly", PriceCents: 50000, Price: 500, Currency: "EGP", Period: "month"}
+
 	exp := time.Now().Add(7 * 24 * time.Hour)
 	lastPayment := time.Now().Add(-24 * time.Hour)
 	subRepo.infoByTenant[1] = &domain.TenantSubscriptionInfo{
@@ -583,8 +586,8 @@ func TestPaymentUseCaseGetCurrentSubscriptionReturnsPlanAndBilling(t *testing.T)
 	if resp.SubscriptionStatus != domain.StatusActive {
 		t.Fatalf("expected active subscription status, got %s", resp.SubscriptionStatus)
 	}
-	if resp.Plan.ID != "monthly" {
-		t.Fatalf("expected monthly plan id, got %s", resp.Plan.ID)
+	if resp.Plan.ID != "monthly" || resp.Plan.PriceCents != 50000 {
+		t.Fatalf("historical plan changed: %+v", resp.Plan)
 	}
 	if resp.SubscriptionExpiresAt == nil {
 		t.Fatal("expected subscription_expires_at to be set")

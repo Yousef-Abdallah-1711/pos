@@ -1,6 +1,7 @@
 import { mkdir, writeFile } from 'node:fs/promises'
 import path from 'node:path'
-import { chromium } from '@playwright/test'
+import { createRequire } from 'node:module'
+const { chromium } = createRequire(import.meta.url)('playwright')
 
 const baseURL = (process.env.POOS_ACCEPTANCE_URL ?? 'http://localhost:38691').replace(/\/$/, '')
 const evidenceRoot = path.resolve(process.env.POOS_ACCEPTANCE_EVIDENCE ?? '../../../audit-reports/poos-final-acceptance-2026-11-11/evidence')
@@ -16,7 +17,7 @@ await mkdir(evidenceRoot, { recursive: true })
 
 const browser = await chromium.launch({ headless: true })
 try {
-  const page = await browser.newPage({ deviceScaleFactor: 1 })
+  const page = await browser.newPage({ deviceScaleFactor: 1, ignoreHTTPSErrors: process.env.SERVIO_DISPOSABLE_BROWSER === '1' })
   page.on('console', (message) => { if (message.type() === 'error') browserErrors.push({ type: 'console', text: message.text() }) })
   page.on('pageerror', (error) => browserErrors.push({ type: 'pageerror', text: error.message }))
   await page.addInitScript(() => {
@@ -38,13 +39,22 @@ try {
         await page.setViewportSize({ width, height: 900 })
         const response = await page.goto(`${baseURL}${route.path(locale)}`, { waitUntil: 'networkidle', timeout: 45_000 })
         await page.evaluate(() => document.fonts.ready)
+        await page.evaluate(async () => {
+          for (const image of document.images) {
+            if (image.closest('[hidden]')) continue
+            image.scrollIntoView()
+            try { await image.decode() } catch { /* Failed decoding is recorded below. */ }
+          }
+          window.scrollTo(0, 0)
+          await new Promise(resolve => requestAnimationFrame(resolve))
+        })
         await page.waitForTimeout(350)
         const checks = await page.evaluate(() => {
           const header = document.querySelector('header')
           const headerRect = header?.getBoundingClientRect()
           const authContent = document.querySelector('.auth-layout')
           const authRect = authContent?.getBoundingClientRect()
-          const images = [...document.images]
+          const images = [...document.images].filter(image => !image.closest('[hidden]'))
           const navigation = performance.getEntriesByType('navigation')[0]
           const resources = performance.getEntriesByType('resource')
           const metrics = window.__poosPerformance ?? { cls: 0, lcp: 0 }
@@ -95,7 +105,7 @@ try {
   for (const width of [320, 390, 768, 1024]) {
     await page.setViewportSize({ width, height: 900 })
     await page.goto(`${baseURL}/en`, { waitUntil: 'networkidle' })
-    const menu = page.locator('button[aria-controls="poos-mobile-navigation"]')
+    const menu = page.locator('button[aria-controls="sv-mobile-navigation"]')
     if (await menu.isVisible()) {
       await menu.click()
       const opened = await menu.getAttribute('aria-expanded')
@@ -103,7 +113,7 @@ try {
       const closed = await menu.getAttribute('aria-expanded')
       results.push({ route: '/en', width, interaction: 'mobile menu open and Escape close', passed: opened === 'true' && closed === 'false' })
     } else {
-      results.push({ route: '/en', width, interaction: 'mobile menu', passed: width > 1088 })
+      results.push({ route: '/en', width, interaction: 'mobile menu', passed: width >= 1024 })
     }
   }
 
@@ -114,7 +124,7 @@ try {
   }
   const output = { baseURL, capturedAt: new Date().toISOString(), viewports, routes: results, browserErrors, endpointChecks }
   await writeFile(path.join(evidenceRoot, 'acceptance-results.json'), `${JSON.stringify(output, null, 2)}\n`, 'utf8')
-  const failures = results.filter((result) => result.status && (result.status !== 200 || result.overflow || !result.headerVisible || !result.authFormBelowHeader || result.failedImages?.length || result.passed === false))
+  const failures = results.filter((result) => result.passed === false || result.status && (result.status !== 200 || result.overflow || !result.headerVisible || !result.authFormBelowHeader || result.failedImages?.length || result.passed === false))
   if (failures.length || browserErrors.length || endpointChecks.some((item) => item.path === '/opengraph-image' ? item.status !== 200 || !item.contentType?.startsWith('image/png') : item.path === '/robots.txt' ? item.status !== 200 || !item.contentType?.startsWith('text/plain') : item.path === '/sitemap.xml' ? item.status !== 200 || !item.contentType?.includes('xml') : item.status !== 404)) {
     process.exitCode = 1
   }
