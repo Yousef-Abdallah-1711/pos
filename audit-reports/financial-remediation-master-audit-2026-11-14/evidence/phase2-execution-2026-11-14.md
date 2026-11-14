@@ -78,3 +78,10 @@ Next operator/accountant actions:
 5. Accountant/owner must decide opening balance offset, fiscal year, reporting cutoff, retained-earnings close, distribution treatment, and Cash Flow classification before changing report policy.
 6. Reproduce the mobile overflow against a clean latest-main dashboard at 375px, identify the live DOM node, and submit a focused responsive fix with browser regression evidence.
 7. Reassess NO-GO only after exact API workflows, independent ledger/export reconciliation, policy approval, browser acceptance, and independent review pass.
+
+
+## Final CI refresh
+
+- PR #46 required workflow run [43588382267](https://github.com/Yousef-Abdallah-1711/pos/actions/runs/43588382267) concluded success: backend, tagged Go integration, all frontend app jobs, security/config, runtime guardrail, URL/domain smoke, application images, and required rollup. publish-main-release was skipped by workflow condition, which is expected for a PR. The PR remains unreviewed and is not merged.
+- Documentation PR #48 is open at head ced977aef3fa3a13047a57feb8ef2250f45dca4; CI was still running at this report refresh. No independent review is available in the current repository account context.
+
