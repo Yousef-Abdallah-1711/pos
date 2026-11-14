@@ -316,7 +316,7 @@ export default function BillingSettingsPage() {
                       : 'border-gray-200 dark:border-gray-700 hover:border-primary-300'
                   }`}
                 >
-                  <p className="text-sm font-semibold text-gray-900 dark:text-white">{plan.name}</p>
+                  <p className="text-sm font-semibold text-gray-900 dark:text-white">{locale === 'ar' && plan.name_ar ? plan.name_ar : plan.name}</p>
                   <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                     {formatPlanPrice(plan, locale)} / {locale === 'ar' ? (isAnnualPlan(plan) ? 'سنة' : 'شهر') : plan.period}
                   </p>
