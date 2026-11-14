@@ -697,3 +697,12 @@ This continuation supersedes §16's CFR-003 Git state: PR #41 is merged at `2cec
 ### Next executable financial remediation
 
 CFR-011 remains an engineering-first option: shorten the unsupported supplier auto-posting entry-type strings or widen the schema only after auditing historical uses; prove supplier invoice/payment journal persistence is atomic and database-compatible. It is P2 and has a directly reproduced PostgreSQL width defect, but requires a narrow naming/schema decision and independent reviewer. CFR-010 earnings presentation remains blocked on accountant/owner policy.
+
+## 18. CFR-004 operator recovery controls — continuation 2026-11-15
+
+This section records the PR #37 branch refresh against current `origin/main` `9fe3a11db1db3bab2f0d325141d542572feb0278`. Resolving the merge retained the newer mainline history and this follow-up's recovery-control code; no unrelated tracker history was discarded.
+
+- PR [#37](https://github.com/Yousef-Abdallah-1711/pos/pull/37) adds migration `186_accounting_event_redrive_audit.sql`, tenant/restaurant scoped failed-event list and audited redrive endpoints, bounded error details, and retry/reconciliation observability. The distinct main migration `186_servio_trial_offer.sql` and PR #37 migration retain their separate filenames; disposable compatibility evidence is recorded in the audit report.
+- PR #37 was previously `DIRTY` against stale base `ea23d95a213f46fd8cdc59648b56e8474fc679f2`. This branch merge was made in the clean `H:\Projects\pos-cfr004-ops-final` checkout. The sibling `H:\Projects\pos-cfr004-durable-recovery` checkout has pre-existing uncommitted changes and remains untouched.
+- Conflict resolution chose the current-main tracker version and appended this current follow-up record, preserving the newer CFR-005, CFR-009, CFR-003, and CFR-010 sections. No acceptance verdict or accounting policy was inferred.
+- Current branch: `codex/cfr004-ops-recovery-controls-final`. Await refreshed CI and review. Financial release is still **NO-GO** until financial policy, end-to-end acceptance, and independent review gates close.
