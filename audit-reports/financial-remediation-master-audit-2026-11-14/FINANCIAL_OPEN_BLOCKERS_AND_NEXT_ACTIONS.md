@@ -1,5 +1,5 @@
 # Financial Open Blockers and Next Actions
-> **Phase 2 execution update (2026-11-14):** `origin/main` was fetched and verified at `165837c7ad2e506dbf20b1a45c9a123476f2f8e9`. Focused CFR-010 A–D PostgreSQL fixtures pass against a newly provisioned schema-only disposable database; independent SQL confirms Fixture A balanced opening (assets/equity 1,000/1,000), Fixture B off-ledger opening reproduces the historical -100 EGP residual, Fixture C expense and Fixture D two-period/close cases reconcile to their independent figures. Migrations `186_accounting_event_redrive_audit.sql` (PR #37), `186_servio_trial_offer.sql` (main), and `187_expand_journal_entry_type_to_32.sql` (PR #44) applied together in fresh and upgraded disposable schemas; long `auto_supplier_*` values persisted, and unsafe rollback refused. This does **not** execute authenticated supplier auto-posting: the only production references to those methods/constants are definitions, with tests as the only callers. Manual browser acceptance remains blocked; no credentialed synthetic browser session is available. PR #46 adds the regression and its CI is green on all required jobs. Financial production remains **NO-GO**.
+> **Latest Phase 2 refresh (2026-11-14):** Current `origin/main` is `df4612f558b4eeb1ff73446f96517d078675a3bb` after PR #47 merged PR #44’s migration 187. The schema-width defect is fixed on main; exact authenticated `auto_supplier_*` acceptance remains unexecuted because production source has no caller. CFR-010 Fixtures A–D and independent SQL passed on disposable PostgreSQL. All reported CI checks, including application-images, are passing on current PR heads #46 (`a4f1807`) and #48 (`af88e09`). The pending report update will trigger a fresh #48 run when pushed. No authorized synthetic browser session or independent reviewer is available. Production remains **NO-GO**.
 
 > **Execution update (2026-11-14):** A later audit pass ran a verified local disposable stack: 1 authenticated supplier invoice/payment API workflow, 6 automated API-backed report views, 1 unauthenticated authorization-negative request, and 0 manual financial browser workflows. Independent SQL reconciliation found source/payment/GL/TB/P&L/AP/AR differences of 0.00 for the narrow fixture, but a -100.00 EGP Balance Sheet residual because opening cash is absent from GL. Local isolation PASS for observed controls; existing staging isolation UNKNOWN. Financial release remains **NO-GO**. Detailed scope, values, commands, and limitations: [disposable execution evidence](evidence/disposable-execution-2026-11-14.md). This update supersedes earlier statements of no local fixture where applicable.
 
@@ -7,7 +7,7 @@
 
 1. **Staging isolation and release identity (owner/operator).** Public staging still reports candidate SHA `f733efb5e7f5730fea5a56a65d66d9c339e6c040`; staging database/Redis/integration isolation is UNKNOWN. Do not write to staging until the operator supplies auditable isolation proof and a verified release identity.
 2. **Manual browser session (owner/operator).** No stable pre-authenticated synthetic UI session was usable in Computer Use. Provide an authorized session through a secure mechanism and ensure the browser surface is available; do not send credentials in chat.
-3. **CFR-011 (engineering/reviewer).** Main still has 21-character supplier entry types versus `VARCHAR(20)`. PR #44 full required CI is green and migration 187 width 32 was observed in the disposable candidate stack, but the authenticated workflow used other entry types. Obtain independent review and execute the exact `auto_supplier_*` path before accepting.
+3. **CFR-011 (engineering/reviewer).** Migration 187 widened `entry_type` to 32 on main through PR #47. The authenticated supplier workflow used other entry types, and production source has no caller for the exact `auto_supplier_*` methods. Add or identify the supported caller, then execute the exact path with independent review before accepting.
 4. **PR #37 recovery operations (engineering/reviewer).** PR #37 has green checks but stale base, `DIRTY` merge state, no review, and a tracker conflict. Owner must refresh the base/resolve conflict and request an authorized independent reviewer. Migrations 186 and 187 target separate objects.
 5. **Financial policy (accounting owner).** Disposable oracle exposed opening cash 1,000.00 EGP absent from GL and a -100.00 EGP Balance Sheet residual. Accountant must decide opening-balance/equity treatment and approve Cash Flow classification. Do not plug the difference.
 6. **Broader acceptance (QA/engineering).** Owner order/payment, accountant valid/invalid journal, payroll lifecycle, exact CFR-011 posting, tenant/RBAC/RLS, exports, worker failure/replay, concurrency and manual desktop/mobile workflows remain unexecuted.
@@ -25,7 +25,7 @@ No policy-dependent calculation should be implemented or claimed correct until a
 
 ## Next actions
 
-1. Obtain authorized independent review on PR #44; checks are green. Keep it unmerged until review and branch protections pass.
+1. Obtain authorized independent review of the merged CFR-011 migration and regression through the normal review process; do not self-approve.
 2. Review PR #37 independently and resolve its migration/runtime grants; do not treat green CI as review approval.
 3. Provide a verified synthetic staging session and inspectable isolation evidence. Confirm PostgreSQL, Redis, accounts/records, external integrations, and production separation; deploy/verify the current SHA only through the authorized release workflow.
 4. Run the owner, accountant, payroll, supplier, security, recovery, and bilingual/mobile browser scenarios against that verified isolated environment. Save screenshots/traces without credentials or tokens.
@@ -35,19 +35,17 @@ No policy-dependent calculation should be implemented or claimed correct until a
 
 ## Release decision
 
-**NO-GO** until CFR-011 is merged/reviewed, required policies are approved, the isolated environment and test access are verifiable, manual/API E2E and independent reconciliation pass, and independent review is recorded. No deploy or merge was performed by this audit.
+**NO-GO** until CFR-011 exact-path behavior is verified, required policies are approved, the isolated environment and test access are verifiable, manual/API E2E and independent reconciliation pass, and independent review is recorded. No deploy or merge was performed by this audit.
 
 
 
 ## Phase 2 refreshed blockers
 
 - Latest main after merge PR #47 is `df4612f558b4eeb1ff73446f96517d078675a3bb`.
-- PR #46 now carries the CFR-010 regression assertions. Head `1e7d08443b5a9dfb1f0aa57515d4b065efd7226c`; backend and frontend checks passed, all reported required CI checks are now green; independent approval absent.
+- PR #46 now carries the CFR-010 regression assertions. Head `1e7d08443b5a9dfb1f0aa57515d4b065efd7226c`; backend and frontend checks passed, all reported checks pass on refreshed head; independent approval absent.
 - Migration interoperability is verified on disposable schema-only fixtures, including both distinct migration 186 filenames and migration 187. This is not a full application runner or authenticated supplier-posting acceptance.
 - Source inspection established that `PostSupplierInvoiceEntry` and `PostSupplierPaymentEntry` have no production caller in the examined PR #44 code; exact API acceptance requires an engineering caller/workflow or a documented removal of dead paths.
 - Public UI ports in the existing stack did not expose a dashboard route for authenticated testing; Playwright currently has only `about:blank`. No session or approved credential-broker access is present. Manual acceptance remains BLOCKED.
 - The 375px overflow is historical candidate evidence and was not re-reproduced on a clean latest-main UI. Fix only after a clean UI reproduction identifies the live overflowing element.
 - Generic container egress is not proven blocked because the Compose bridge is `internal=false`. Do not invoke external providers.
 - Owner-only collaborator listing (1) means no independent reviewer is available in the current repository account context. No PR was self-approved or merged.
-
-
