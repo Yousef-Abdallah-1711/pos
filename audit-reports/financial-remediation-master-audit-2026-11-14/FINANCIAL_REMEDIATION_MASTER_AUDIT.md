@@ -5,7 +5,7 @@
 
 **Assessment date:** 2026-11-14 (Africa/Cairo)  
 **Repository:** `Yousef-Abdallah-1711/pos`  
-**Authoritative baseline (Phase 2 refresh):** `origin/main` `165837c7ad2e506dbf20b1a45c9a123476f2f8e9` (fetched during this audit)  
+**Authoritative baseline (Phase 2 refresh):** `origin/main` `df4612f558b4eeb1ff73446f96517d078675a3bb` (fetched during this audit)  
 **Local audit checkout:** `H:\Projects\pos`, branch `codex/phase2a-continuation`, HEAD `50380eaa1b95768ec40b1cb695035a601d26ab7c`  
 **Remediation worktree:** `C:\Users\yosea\.codex\worktrees\cfr011-entry-type-width\pos`, branch `codex/cfr011-journal-entry-type-width`, commit `092ff33f4ac68d77e13480aad2afdd74ea56c511` based on the authoritative SHA.  
 **Current related PRs:** [#37](https://github.com/Yousef-Abdallah-1711/pos/pull/37) remains open and `DIRTY` on a stale base; [#44](https://github.com/Yousef-Abdallah-1711/pos/pull/44) remains open/behind with CI green but no independent review or exact API path; [#45](https://github.com/Yousef-Abdallah-1711/pos/pull/45) is unrelated and behind main; [#46](https://github.com/Yousef-Abdallah-1711/pos/pull/46) adds the CFR-010 PostgreSQL residual fixtures at head `1e7d08443b5a9dfb1f0aa57515d4b065efd7226c`, CI green, independent review pending.
@@ -77,4 +77,5 @@ This audit did not use production financial records, production databases, payme
 ## Phase 2 completion snapshot
 
 Latest main was fetched at `165837c7ad2e506dbf20b1a45c9a123476f2f8e9`. CFR-010's independent PostgreSQL Fixtures A-D passed; the prior -100 EGP residual was reproduced when opening cash exists only outside GL, while a posted opening journal reconciles. The latest-main regression is proposed in PR #46 (head `1e7d08443b5a9dfb1f0aa57515d4b065efd7226c`); all reported checks except `application-images` had passed at refresh, reviewer absent. Migration 186 from main, distinct 186 from #37, and 187 from #44 applied together in fresh/upgraded schema fixtures. Exact authenticated supplier `auto_supplier_*` application execution is blocked because production source contains no callers. No manual financial browser acceptance or broader authenticated roles/scenarios were run. This reinforces, but does not change, **NO-GO**.
+
 

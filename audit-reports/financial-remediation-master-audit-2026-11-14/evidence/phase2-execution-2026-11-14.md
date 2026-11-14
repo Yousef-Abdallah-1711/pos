@@ -85,3 +85,15 @@ Next operator/accountant actions:
 - PR #46 required workflow run [43588382267](https://github.com/Yousef-Abdallah-1711/pos/actions/runs/43588382267) concluded success: backend, tagged Go integration, all frontend app jobs, security/config, runtime guardrail, URL/domain smoke, application images, and required rollup. publish-main-release was skipped by workflow condition, which is expected for a PR. The PR remains unreviewed and is not merged.
 - Documentation PR #48 is open at head ced977aef3fa3a13047a57feb8ef2250f45dca4; CI was still running at this report refresh. No independent review is available in the current repository account context.
 
+
+## Latest-main and merge refresh (2026-11-14)
+
+A second `git fetch origin main` observed main advance from `165837c7ad2e506dbf20b1a45c9a123476f2f8e9` to `df4612f558b4eeb1ff73446f96517d078675a3bb` as PR #47 merged. That PR includes PR #44 migration 187 and its rollback guard, PR #45's unrelated FontPicker fix, and the initial CFR-010 regression commit `8432d51a8bcdf5ae7095142dcaec7195dca19215`. Accordingly:
+
+- CFR-011's schema-width defect is fixed on current main. Do not describe it as an outstanding schema defect.
+- Source search on current main still finds no production caller of the two supplier posting methods/constants. Exact API/user acceptance remains open.
+- The additional balanced-opening assertions are the only PR #46 delta after bringing its branch up to current main; CI is rerunning on refreshed head `a4f180738d97ef60f68bc35f2d5900c8a297b628`.
+- Evidence PR #48 was also brought forward to current main. Its required CI was still running at refresh.
+- PR #37 remains open on its older base without independent review. PR #44/#45/#47 are merged. The repository lists one collaborator (owner only), so independent review is not currently available from this account context.
+
+Financial production remains NO-GO because authenticated workflow/manual browser acceptance, accounting policy, independent review, and staging/network isolation gates remain incomplete—not because migration 187 is missing from main.

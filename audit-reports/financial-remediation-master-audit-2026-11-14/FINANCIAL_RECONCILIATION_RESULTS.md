@@ -52,3 +52,4 @@ The new latest-main CFR-010 fixtures use a disposable PostgreSQL database and in
 
 The previous -100 EGP report residual results from a bank opening amount stored in `bank_accounts_ledger` without a corresponding opening GL journal. A correctly posted opening journal balances independently. Unclosed earnings explain the separate +200 and -20 period residuals. No balancing plugs were entered and no production policy was implemented. Details and SQL method are in [Phase 2 execution evidence](evidence/phase2-execution-2026-11-14.md).
 
+

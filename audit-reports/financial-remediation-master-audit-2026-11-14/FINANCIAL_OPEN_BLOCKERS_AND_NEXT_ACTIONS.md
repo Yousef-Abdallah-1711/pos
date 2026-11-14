@@ -41,7 +41,7 @@ No policy-dependent calculation should be implemented or claimed correct until a
 
 ## Phase 2 refreshed blockers
 
-- Latest main is `165837c7ad2e506dbf20b1a45c9a123476f2f8e9`.
+- Latest main after merge PR #47 is `df4612f558b4eeb1ff73446f96517d078675a3bb`.
 - PR #46 now carries the CFR-010 regression assertions. Head `1e7d08443b5a9dfb1f0aa57515d4b065efd7226c`; backend and frontend checks passed, all reported required CI checks are now green; independent approval absent.
 - Migration interoperability is verified on disposable schema-only fixtures, including both distinct migration 186 filenames and migration 187. This is not a full application runner or authenticated supplier-posting acceptance.
 - Source inspection established that `PostSupplierInvoiceEntry` and `PostSupplierPaymentEntry` have no production caller in the examined PR #44 code; exact API acceptance requires an engineering caller/workflow or a documented removal of dead paths.
@@ -49,4 +49,5 @@ No policy-dependent calculation should be implemented or claimed correct until a
 - The 375px overflow is historical candidate evidence and was not re-reproduced on a clean latest-main UI. Fix only after a clean UI reproduction identifies the live overflowing element.
 - Generic container egress is not proven blocked because the Compose bridge is `internal=false`. Do not invoke external providers.
 - Owner-only collaborator listing (1) means no independent reviewer is available in the current repository account context. No PR was self-approved or merged.
+
 
