@@ -179,6 +179,8 @@ jobs:
             ops/aws/evidence/browser/auth-form-validation.json
             ops/aws/evidence/browser/marketing/
             ops/aws/evidence/browser/trial-registration/
+            ops/aws/evidence/browser/landing-regression/
+            ops/aws/evidence/browser/lighthouse/
           if-no-files-found: ignore
 
   required:

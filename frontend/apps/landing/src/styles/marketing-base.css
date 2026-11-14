@@ -1,3 +1,6 @@
+/* Preserve the shared auth heading token without downloading a third font family. */
+body { --font-alexandria: var(--font-manrope); }
+html[lang=ar] body { --font-alexandria: var(--font-plex); }
 :root {
   --sv-ink:#211b31;
   --sv-muted:#625b70;
