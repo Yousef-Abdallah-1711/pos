@@ -412,6 +412,7 @@ async function main() {
  const browser = await browserType.launch({ headless: true, ...(process.env.SERVIO_BROWSER_EXECUTABLE ? { executablePath: process.env.SERVIO_BROWSER_EXECUTABLE } : {}), ...(browserName === 'chromium' ? { args: ['--no-sandbox'] } : {}) })
  const cancelledNextChunkRequests = []
  const cancelledNextChunkPaths = new Set()
+ const cancelledNextChunkPagePaths = new Set()
  const nextChunkExceptions = []
  try {
   let page = await createPage(browser, { width: 1440, height: 1000 })
@@ -420,6 +421,7 @@ async function main() {
   const networkFailures = []
   const failedNextChunkRequests = []
   const pendingReactErrorDetails = []
+  const deferredChunkDiagnostics = []
   const deferNextChunkException = (pageUrl, details) => {
    const message = details?.message || ''
    const url = message.match(/https?:\/\/[^)\s]+\/_next\/static\/chunks\/[^)\s]+/)?.[0]
@@ -451,7 +453,13 @@ async function main() {
         if (details?.name === 'ChunkLoadError' && deferNextChunkException(pageUrl, details)) return
         errors.push(`${pageUrl}: ${JSON.stringify({ text, location, details })}`)
        })
-       .catch(error => errors.push(`${pageUrl}: ${JSON.stringify({ text, location, detailReadError: error.message })}`)))
+       .catch(error => {
+        if (/Execution context was destroyed|Target closed/.test(error.message)) {
+         deferredChunkDiagnostics.push({ pageUrl, location, detailReadError: error.message })
+         return
+        }
+        errors.push(`${pageUrl}: ${JSON.stringify({ text, location, detailReadError: error.message })}`)
+       }))
       return
      }
     }
@@ -465,6 +473,7 @@ async function main() {
      if (/NS_BINDING_ABORTED|ERR_ABORTED/.test(reason)) {
       cancelledNextChunkRequests.push(detail)
       cancelledNextChunkPaths.add(requestUrl.pathname)
+      try { cancelledNextChunkPagePaths.add(new URL(page.url()).pathname) } catch {}
      }
      else failedNextChunkRequests.push(detail)
     }
@@ -494,6 +503,10 @@ async function main() {
   await Promise.all(pendingReactErrorDetails)
   const unmatchedNextChunkExceptions = nextChunkExceptions.filter(({ pathname }) => !cancelledNextChunkPaths.has(pathname))
   for (const exception of unmatchedNextChunkExceptions) errors.push(`${exception.pageUrl}: ${JSON.stringify(exception.details)}`)
+  const unexplainedChunkDiagnostics = deferredChunkDiagnostics.filter(({ pageUrl }) => {
+   try { return !cancelledNextChunkPagePaths.has(new URL(pageUrl).pathname) } catch { return true }
+  })
+  for (const diagnostic of unexplainedChunkDiagnostics) errors.push(`${diagnostic.pageUrl}: ${JSON.stringify(diagnostic)}`)
   const expectedPaths = new Set(['en', 'ar'].flatMap(locale => routes.map(route => `/${locale}${route}`)))
   const invalidFallbacks = recoveredRscNavigations.filter(({ pageUrl, destination }) => {
    try {
@@ -506,12 +519,13 @@ async function main() {
   check('recovered Next.js navigation fallbacks use verified routes', invalidFallbacks.length === 0, JSON.stringify(invalidFallbacks))
   check('cancelled Next.js chunk requests recorded', true, JSON.stringify(cancelledNextChunkRequests))
   check('chunk load errors explained by cancelled Next.js chunks', unmatchedNextChunkExceptions.length === 0, JSON.stringify(unmatchedNextChunkExceptions))
+  check('interrupted chunk diagnostics explained by same-route cancellation', unexplainedChunkDiagnostics.length === 0, JSON.stringify(unexplainedChunkDiagnostics))
   check('failed Next.js chunk requests', failedNextChunkRequests.length === 0, JSON.stringify(failedNextChunkRequests))
   check('failed network responses', networkFailures.length === 0, networkFailures.join('; '))
   check('browser exceptions', errors.length === 0, errors.join('; '))
  } finally {
   await browser.close()
-  await fs.writeFile(path.join(output, 'results.json'), JSON.stringify({ base, browser: browserName, color_scheme: colorScheme, theme: expectedTheme, cancelled_next_chunk_requests: cancelledNextChunkRequests, checks }, null, 2))
+  await fs.writeFile(path.join(output, 'results.json'), JSON.stringify({ base, browser: browserName, color_scheme: colorScheme, theme: expectedTheme, cancelled_next_chunk_requests: cancelledNextChunkRequests, cancelled_next_chunk_page_paths: [...cancelledNextChunkPagePaths], checks }, null, 2))
   await fs.writeFile(path.join(output, 'navigation-evidence.json'), JSON.stringify({ sourceCommit, screenshots: navigationScreenshots }, null, 2))
  }
 }

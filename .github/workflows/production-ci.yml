@@ -187,6 +187,8 @@ jobs:
             ops/aws/evidence/browser/auth-form-validation.json
             ops/aws/evidence/browser/marketing/
             ops/aws/evidence/browser/marketing-firefox/
+            ops/aws/evidence/browser/marketing-chromium-light/
+            ops/aws/evidence/browser/marketing-firefox-light/
             ops/aws/evidence/browser/marketing-chromium-dark/
             ops/aws/evidence/browser/marketing-firefox-dark/
             ops/aws/evidence/browser/trial-registration/
