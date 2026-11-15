@@ -501,6 +501,7 @@ func (r *PaymentAccountingRepository) resolveSupplierPaymentContextTx(tx *sql.Tx
 			FROM invoices_supplier inv
 			JOIN suppliers s ON s.id = inv.supplier_id
 			WHERE inv.id = $1 AND inv.tenant_id = $2 AND inv.restaurant_id = $3
+			FOR UPDATE OF inv
 		`, *payment.InvoiceID, payment.TenantID, payment.RestaurantID).Scan(&supplierID, &payableAccountID, &balanceDue)
 		if err != nil {
 			if errors.Is(err, sql.ErrNoRows) {
