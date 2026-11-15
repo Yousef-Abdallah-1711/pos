@@ -158,7 +158,9 @@
       "trialPreference": "14-day trial. Billing preference: {billing}. Registration does not charge you.",
       "requestedAddress": "Requested address; storefront activation is a separate setup step:",
       "passwordDescription": "At least 6 characters; maximum 72 UTF-8 bytes.",
-      "checkingAvailability": "Checking availability…"
+      "checkingAvailability": "Checking availability…",
+      "showPassword": "Show password",
+      "hidePassword": "Hide password"
     },
     "validation": {
       "required": "This field is required.",

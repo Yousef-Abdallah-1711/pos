@@ -1,6 +1,6 @@
 import type { Locale } from '@pos-saas/i18n'
-import english from '@/i18n/messages/en/features.json'
-import arabic from '@/i18n/messages/ar/features.json'
+import english from '../i18n/messages/en/features.json'
+import arabic from '../i18n/messages/ar/features.json'
 import captures from './captures.json'
 
 export interface FeatureStep {

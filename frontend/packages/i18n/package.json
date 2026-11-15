@@ -5,6 +5,7 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
-    "./locales/*/*.json": "./locales/*/*.json"
+    "./locales/en/subscription.json": "./locales/en/subscription.json",
+    "./locales/ar/subscription.json": "./locales/ar/subscription.json"
   }
 }

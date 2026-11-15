@@ -65,8 +65,9 @@ export function translate<
     return (node as Record<string, unknown>)[part]
   }, dictionary)
   if (typeof value !== 'string') throw new Error(`Missing translation: ${key}`)
+  const interpolations = values as Record<string, string | number> | undefined
   return value.replace(/\{([a-zA-Z][a-zA-Z0-9_]*)\}/g, (token, name: string) => {
-    const replacement = values?.[name as keyof typeof values]
+    const replacement = interpolations?.[name]
     if (replacement === undefined) throw new Error(`Missing interpolation value: ${key}.${name}`)
     return String(replacement)
   })

@@ -158,7 +158,9 @@
       "trialPreference": "تجربة لمدة 14 يومًا. تفضيل الفوترة: {billing}. لا يتم تحصيل أي مبلغ عند التسجيل.",
       "requestedAddress": "عنوان الموقع المطلوب؛ تفعيل الموقع خطوة إعداد مستقلة:",
       "passwordDescription": "6 أحرف على الأقل، وبحد أقصى 72 بايتًا.",
-      "checkingAvailability": "جارٍ التحقق من التوفر…"
+      "checkingAvailability": "جارٍ التحقق من التوفر…",
+      "showPassword": "إظهار كلمة المرور",
+      "hidePassword": "إخفاء كلمة المرور"
     },
     "validation": {
       "required": "هذا الحقل مطلوب.",
