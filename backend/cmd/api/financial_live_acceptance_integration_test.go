@@ -197,8 +197,10 @@ func seedLiveFinancialOrderFixture(t *testing.T, db *sql.DB) liveFinancialFixtur
 	}
 	for _, account := range []struct{ code, name, kind, normal string }{
 		{"1110", "Synthetic Cash", "asset", "debit"},
+		{"1130", "Synthetic Inventory", "asset", "debit"},
 		{"4100", "Synthetic Sales", "revenue", "credit"},
 		{"2120", "Synthetic Tax Payable", "liability", "credit"},
+		{"5110", "Synthetic Food COGS", "expense", "debit"},
 	} {
 		if _, err := db.Exec(`INSERT INTO chart_of_accounts (tenant_id, restaurant_id, account_code, account_name, account_type, normal_balance) VALUES ($1, $2, $3, $4, $5, $6)`, fixture.tenantID, fixture.restaurantID, account.code, account.name, account.kind, account.normal); err != nil {
 			t.Fatalf("seed account %s: %v", account.code, err)
