@@ -2,10 +2,11 @@
 
 **Snapshot date:** 2026-11-15
 **Audited baseline:** `origin/main` `e35b3c2caba58431c785f6c33aa62ce9c2b22c08`
-**Execution commit:** `7d1422fe295460194cfe8479244b8f1997d4746e`
+**Execution commit:** `cd021ad8eb51bb9cf28bf87abf5a06868e9b46d7`
 **Pull request:** [#57](https://github.com/Yousef-Abdallah-1711/pos/pull/57), open and unmerged
-**Financial CI:** [run 43728374780](https://github.com/Yousef-Abdallah-1711/pos/actions/runs/43728374780), success; evidence artifact `14167084474`
-**Required verified CI:** run `43728374754` was canceled; backend, all frontend jobs, and security/config passed, while application-images was stopped before completion because its acceptance script performs writes against `api.pos.rakmyat.online`.
+**Financial CI:** [run 43729808639](https://github.com/Yousef-Abdallah-1711/pos/actions/runs/43729808639), success; evidence artifact `14168175685`
+**Acceptance status:** 10 PASS, 6 PARTIAL, 1 NOT RUN, 0 FAIL; policy approvals remain separate and pending.
+**Required verified CI:** latest run `43729808684` was canceled while queued because the application-image smoke writes against an unverified external API. Backend, frontend, and security/config had passed on the prior code head; the final CSV fix was validated by financial CI.
 
 ## Runtime and data safety
 
@@ -19,7 +20,8 @@ The API scenarios used the running Go application, authenticated synthetic owner
 - Authenticated accountant journal: create returned 201; cashier post returned 403; accountant post returned 200; duplicate post returned 400. Persisted debit/credit were 10000¢/10000¢, two GL rows, no partial writes, and three validation failures were rejected.
 - Payroll source gross/net 150000¢/150000¢ reconciled to expense and cash GL at 150000¢ each. Posting failure returned 500 and rolled back; retry and duplicate mark-paid returned 200; one journal and two GL rows remained. Paid edit/delete and foreign-tenant access were denied.
 - Supplier invoice approval posting failure rolled back to draft with no journal; retry succeeded; repeated approval was rejected while retaining exactly one journal. Payment posting failure left no payment, journal, lines, or GL. Five concurrent requests of 5000¢ resulted in exactly four successes; the fifth, the repeated 5000¢ request, and an additional 2100¢ overpayment were rejected. Final source balance, AP net GL credit, and authenticated AP aging report were each 2000¢.
-- Balance Sheet API figures matched independent raw-GL calculations: assets 5500¢, liabilities 500¢, equity 0¢, and residual 5000¢ (`UNRECONCILED`). AR aging was 0¢ vs 0¢ for this order-only fixture; supplier AP aging reconciled 2000¢ vs 2000¢ source and GL. Cash Flow net was 5000¢, matching the SQL classification; classification policy remains open. A valid 16003-byte PDF downloaded, but its monetary content was not extracted.
+- The sales CSV downloaded through the authenticated API reconciled to 5500¢ gross and one order. A synthetic `=HYPERLINK(...)` product name was apostrophe-prefixed in the downloaded CSV; focused tests cover formula-like names in sales, profitability, and inventory exports.
+- Balance Sheet API figures matched independent raw-GL calculations: assets 5500¢, liabilities 500¢, equity 0¢, and residual 5000¢ (`UNRECONCILED`). AR aging was 0¢ vs 0¢ for this order-only fixture; supplier AP aging reconciled 2000¢ vs 2000¢ source and GL. Cash Flow net was 5000¢, matching the SQL classification; classification policy remains open. A valid 17029-byte PDF downloaded, but its monetary content was not extracted.
 
 ## Engineering correction
 
