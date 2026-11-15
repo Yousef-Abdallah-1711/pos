@@ -59,6 +59,37 @@ jobs:
       - name: Apply latest-main migrations
         working-directory: backend
         run: go run ./cmd/migrate
+      - name: Build the real API process
+        working-directory: backend
+        run: go build -o /tmp/servio-financial-api ./cmd/api
+      - name: Start API with restricted application and accounting roles
+        working-directory: backend
+        env:
+          DB_USER: pos_app
+          DB_PASSWORD: disposable-app-only
+          ACCOUNTING_DB_USER: pos_accounting
+          ACCOUNTING_DB_PASSWORD: disposable-accounting-only
+          PORT: '8080'
+          JWT_SECRET: synthetic-financial-acceptance-signing-secret
+          REDIS_URL: redis://127.0.0.1:6379/0
+          PAYMOB_MODE: mock
+          CORS_ORIGINS: http://localhost:3002
+        shell: bash
+        run: |
+          set -euo pipefail
+          nohup /tmp/servio-financial-api >/tmp/servio-financial-api.log 2>&1 &
+          echo $! > /tmp/servio-financial-api.pid
+          for attempt in $(seq 1 60); do
+            if curl --fail --silent http://127.0.0.1:8080/api/v1/health/ready >/dev/null; then exit 0; fi
+            sleep 2
+          done
+          cat /tmp/servio-financial-api.log
+          exit 1
+      - name: Exercise authenticated order-to-ledger workflow through the running API
+        working-directory: backend
+        env:
+          POS_FINANCIAL_ACCEPTANCE_API_URL: http://127.0.0.1:8080
+        run: go test -tags integration -count=1 -timeout 90s ./cmd/api -run '^TestFinancialAcceptanceLiveAPIOrderToLedger$' -v
       - name: Verify payment, auth, order, accounting, and reporting integration scenarios
         working-directory: backend
         run: |
@@ -75,3 +106,10 @@ jobs:
           name: financial-acceptance-${{ github.sha }}
           path: backend/financial-acceptance-tests.jsonl
           if-no-files-found: warn
+      - name: Stop the API process
+        if: always()
+        shell: bash
+        run: |
+          if [ -f /tmp/servio-financial-api.pid ]; then
+            kill "$(cat /tmp/servio-financial-api.pid)" 2>/dev/null || true
+          fi
