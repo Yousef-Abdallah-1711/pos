@@ -195,7 +195,7 @@ func (r *SalaryRepository) CreateSalary(salary *domain.Salary) (int, error) {
 		)
 		SELECT $1, $2, e.id, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13,
 			$14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28,
-			EXTRACT(MONTH FROM $4)::int, EXTRACT(YEAR FROM $4)::int
+			EXTRACT(MONTH FROM $4::date)::int, EXTRACT(YEAR FROM $4::date)::int
 		FROM employees e
 		WHERE e.id = $3 AND e.tenant_id = $1 AND e.restaurant_id = $2
 		RETURNING id
