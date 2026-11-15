@@ -150,7 +150,7 @@ try:
     docker_args = [
         'docker', 'run', '--rm', '--user', f'{os.getuid()}:{os.getgid()}',
         '--security-opt', 'no-new-privileges:true', '--cap-drop', 'ALL',
-        '--network', 'servio-ci_edge', '--memory', '1500m', '--shm-size', '256m',
+        '--network', 'servio-ci_edge', '--memory', '2g', '--shm-size', '512m',
         '-e', 'SERVIO_ACCEPTANCE_ENV=ci', '-e', 'SERVIO_DISPOSABLE_BROWSER=1',
         '-e', 'SERVIO_ACCEPTANCE_LANDING_URL=https://pos.servio.test',
         '-e', 'SERVIO_ACCEPTANCE_DASHBOARD_URL=https://pos.app.servio.test',

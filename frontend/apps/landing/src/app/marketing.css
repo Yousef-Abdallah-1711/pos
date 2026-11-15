@@ -3,6 +3,7 @@
 @import '../styles/marketing-product.css';
 @import '../styles/marketing-conversion.css';
 @import '../styles/marketing-responsive.css';
+@import '../styles/marketing-navigation.css';
 
 /* Dark is the server-rendered default too; saved light opts out once its class is applied. */
 html:not(.light) body { background:var(--sv-paper); color:var(--sv-ink); }
