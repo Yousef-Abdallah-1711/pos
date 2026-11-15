@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { defaultLocale, isLocale } from '@pos-saas/i18n'
 
-const SUPPORTED_LOCALES = new Set(['en', 'ar'])
-const DEFAULT_LOCALE = 'en'
 const ROOT_METADATA_ROUTES = ['/opengraph-image', '/robots.txt', '/sitemap.xml']
 
 export function middleware(request: NextRequest) {
@@ -24,7 +23,7 @@ export function middleware(request: NextRequest) {
   const shortcut = pathname.match(/^\/(?:(en|ar)\/)?(login|register)\/?$/)
   if (shortcut) {
     const url = request.nextUrl.clone()
-    url.pathname = `/${shortcut[1] || DEFAULT_LOCALE}/auth/${shortcut[2]}`
+    url.pathname = `/${shortcut[1] || defaultLocale}/auth/${shortcut[2]}`
     return NextResponse.redirect(url)
   }
 
@@ -32,14 +31,14 @@ export function middleware(request: NextRequest) {
   const pathnameSegments = pathname.split('/')
   const firstSegment = pathnameSegments[1]
 
-  if (SUPPORTED_LOCALES.has(firstSegment)) {
+  if (isLocale(firstSegment)) {
     // Already has a valid locale — proceed
     return NextResponse.next()
   }
 
   // Redirect to default locale
   const url = request.nextUrl.clone()
-  url.pathname = `/${DEFAULT_LOCALE}${pathname === '/' ? '' : pathname}`
+  url.pathname = `/${defaultLocale}${pathname === '/' ? '' : pathname}`
   return NextResponse.redirect(url)
 }
 

@@ -5,6 +5,7 @@ import { useRouter, usePathname } from 'next/navigation'
 import { getDashboardLoginUrl } from '@/lib/authSession'
 import { useAuthStore } from '@/stores/authStore'
 import { getConfig } from '@/lib/config'
+import { defaultLocale } from '@pos-saas/i18n'
 
 export default function LocaleHomePage() {
   const router = useRouter()
@@ -26,7 +27,7 @@ export default function LocaleHomePage() {
     // Preserve query parameters during redirect (important for auth flow)
     if (!isValidLocale) {
       const queryString = window.location.search || ''
-      window.location.href = `${getConfig().dashboardUrl}/en/dashboard${queryString}`
+      window.location.href = `${getConfig().dashboardUrl}/${defaultLocale}/dashboard${queryString}`
       return
     }
 

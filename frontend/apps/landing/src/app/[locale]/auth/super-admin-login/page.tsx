@@ -37,19 +37,8 @@ export default function SuperAdminLoginPage() {
         setTimeout(() => {
           window.location.href = `${getConfig().dashboardUrl}/${locale}/dashboard`;
         }, 500);
-      } catch (err: unknown) {
-        let errorMessage = t.auth.superAdmin.authError;
-
-        if (err && typeof err === 'object') {
-          const axiosError = err as { response?: { data?: { error?: string } }; message?: string };
-          if (axiosError.response?.data?.error) {
-            errorMessage = axiosError.response.data.error;
-          } else if (axiosError.message) {
-            errorMessage = axiosError.message;
-          }
-        }
-
-        setError(errorMessage);
+      } catch {
+        setError(t.auth.superAdmin.authError)
         setIsLoading(false);
       }
     };

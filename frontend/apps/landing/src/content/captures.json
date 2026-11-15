@@ -1,27 +1,19 @@
 {
   "pos": {
     "width": 1440,
-    "height": 1000
-  },
-  "confirmation": {
-    "width": 390,
-    "height": 1479
-  },
-  "kitchen-completed": {
-    "width": 1440,
-    "height": 1000
+    "height": 900
   },
   "kitchen": {
     "width": 1440,
-    "height": 1000
+    "height": 900
   },
   "dashboard": {
-    "width": 1280,
-    "height": 2649
+    "width": 1440,
+    "height": 900
   },
   "inventory": {
     "width": 1440,
-    "height": 1001
+    "height": 900
   },
   "checkout": {
     "width": 390,
@@ -29,10 +21,10 @@
   },
   "theme": {
     "width": 1440,
-    "height": 1065
+    "height": 900
   },
   "staff": {
     "width": 1440,
-    "height": 1001
+    "height": 900
   }
 }

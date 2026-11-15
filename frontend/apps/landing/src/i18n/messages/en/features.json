@@ -1,0 +1,268 @@
+[
+  {
+    "slug": "pos",
+    "title": "Cashier POS",
+    "eyebrow": "The counter",
+    "headline": "Take the order. Keep the context.",
+    "image": "pos",
+    "description": "A menu-led cashier workspace for selecting products and sending confirmed orders into kitchen preparation.",
+    "steps": [
+      {
+        "title": "Select from the menu",
+        "description": "Browse categories and add the requested products to the cart."
+      },
+      {
+        "title": "Add the service context",
+        "description": "Attach a table and guest details where the order needs them."
+      },
+      {
+        "title": "Send it to preparation",
+        "description": "Cashier submission confirms the order and creates its kitchen ticket."
+      }
+    ],
+    "boundary": "The capture shows menu selection with an empty cart. Tax, payment, receipt and offline workflows require separate acceptance; no payment terminal or offline reliability is promised.",
+    "faqs": [
+      {
+        "question": "When is a cashier order confirmed?",
+        "answer": "Submitting it confirms the order and creates its kitchen ticket."
+      },
+      {
+        "question": "Does this screen promise tax or payment behavior?",
+        "answer": "No. Tax, payment, receipts and offline operation require separate verification."
+      }
+    ],
+    "related": [
+      "kitchen-display",
+      "inventory",
+      "online-ordering"
+    ]
+  },
+  {
+    "slug": "kitchen-display",
+    "title": "Kitchen display",
+    "eyebrow": "The kitchen",
+    "headline": "A clear next action for every ticket.",
+    "image": "kitchen",
+    "description": "See incoming orders and coordinate preparation through new, in-progress, ready and completed ticket states.",
+    "steps": [
+      {
+        "title": "Receive the confirmed order",
+        "description": "An open kitchen display receives a ticket for the confirmed order."
+      },
+      {
+        "title": "Move preparation forward",
+        "description": "Bump the ticket to in progress, then ready, as work advances."
+      },
+      {
+        "title": "Review and recall",
+        "description": "Find completed tickets and recall one when the team needs to revisit it."
+      }
+    ],
+    "boundary": "Kitchen completion is separate from delivery and payment. The demonstrated handoff is not a guarantee of delivery under every network condition or of multi-station routing.",
+    "faqs": [
+      {
+        "question": "When does a ticket appear?",
+        "answer": "After a cashier order is submitted or staff confirm an online order."
+      },
+      {
+        "question": "Does a completed ticket mean the order was paid?",
+        "answer": "No. Kitchen preparation, fulfillment and payment are separate states."
+      }
+    ],
+    "related": [
+      "pos",
+      "online-ordering",
+      "analytics"
+    ]
+  },
+  {
+    "slug": "online-ordering",
+    "title": "Online ordering",
+    "eyebrow": "The guest experience",
+    "headline": "From your guest’s menu to your team’s queue.",
+    "image": "checkout",
+    "description": "Guests browse a restaurant storefront, review a cash-on-delivery checkout and receive an order confirmation.",
+    "steps": [
+      {
+        "title": "Choose from the restaurant menu",
+        "description": "The guest adds a product and reviews the cart."
+      },
+      {
+        "title": "Send a cash order",
+        "description": "Checkout creates a pending order and returns its confirmation."
+      },
+      {
+        "title": "Let staff confirm",
+        "description": "Staff confirmation sends the order into the kitchen preparation queue."
+      }
+    ],
+    "boundary": "The demonstrated flow uses the configured demo storefront and cash on delivery. Online card processing and instant availability of newly registered public hostnames are not promised.",
+    "faqs": [
+      {
+        "question": "Can guests pay online by card?",
+        "answer": "This verified flow supports cash on delivery. Online card processing is not available in this demonstrated flow."
+      },
+      {
+        "question": "When does an online order reach the kitchen?",
+        "answer": "After restaurant staff confirm the pending guest order."
+      }
+    ],
+    "related": [
+      "kitchen-display",
+      "website-builder",
+      "pos"
+    ]
+  },
+  {
+    "slug": "website-builder",
+    "title": "Storefront customization",
+    "eyebrow": "Your restaurant’s presentation",
+    "headline": "Your colors. A menu that feels like yours.",
+    "image": "theme",
+    "description": "Use the theme editor to adjust colors, save the configuration, preview it and activate a restaurant theme.",
+    "steps": [
+      {
+        "title": "Start with a theme",
+        "description": "Review a restaurant theme or duplicate it into your own configuration."
+      },
+      {
+        "title": "Make a considered change",
+        "description": "Adjust a color and inspect the preview; the editor also surfaces contrast feedback."
+      },
+      {
+        "title": "Save and activate",
+        "description": "Saved configuration persists after reload and can be exposed by the restaurant’s public theme endpoint."
+      }
+    ],
+    "boundary": "This is storefront configuration, not arbitrary page building. Editor previews can use sample content. Public hostname and TLS setup is a separate onboarding requirement; instant publishing is not promised.",
+    "faqs": [
+      {
+        "question": "What can the editor change?",
+        "answer": "The verified workflow edits storefront theme colors, saves the configuration and previews it."
+      },
+      {
+        "question": "Does saving instantly provision a public domain?",
+        "answer": "No. Public hostname and TLS setup is a separate onboarding step."
+      }
+    ],
+    "related": [
+      "online-ordering",
+      "analytics",
+      "pos"
+    ]
+  },
+  {
+    "slug": "inventory",
+    "title": "Inventory",
+    "eyebrow": "Tracked product quantities",
+    "headline": "See the stock effect of a confirmed order.",
+    "image": "inventory",
+    "description": "Connect tracked product quantities with order confirmation and eligible unfulfilled cancellations.",
+    "steps": [
+      {
+        "title": "Start with tracked stock",
+        "description": "The demonstrated product began with 20 available units."
+      },
+      {
+        "title": "Confirm one item",
+        "description": "Confirmation reserved one unit and changed the available quantity to 19."
+      },
+      {
+        "title": "Release an eligible cancellation",
+        "description": "Cancelling the unfulfilled order restored the quantity to 20."
+      }
+    ],
+    "boundary": "This example does not establish ingredient recipes, purchasing, historical valuation or automatic physical returns. Refunding money is different from returning stock.",
+    "faqs": [
+      {
+        "question": "What happens when one tracked unit is confirmed?",
+        "answer": "The verified example moves available stock from 20 units to 19."
+      },
+      {
+        "question": "What happens after an eligible unfulfilled cancellation?",
+        "answer": "The reserved unit is released and stock returns to 20. A money refund or physical return is separate."
+      }
+    ],
+    "related": [
+      "pos",
+      "analytics",
+      "hr"
+    ]
+  },
+  {
+    "slug": "hr",
+    "title": "Staff records",
+    "eyebrow": "The team behind service",
+    "headline": "Keep attendance and leave decisions organized.",
+    "image": "staff",
+    "description": "Maintain employee information, attendance records and leave requests within the restaurant workspace.",
+    "steps": [
+      {
+        "title": "Keep employee information",
+        "description": "Create and review the employee’s record."
+      },
+      {
+        "title": "Record attendance",
+        "description": "Record clock-in and maintain clock-out information through attendance editing."
+      },
+      {
+        "title": "Review a leave request",
+        "description": "Record approval or rejection and revisit the request’s resulting state."
+      }
+    ],
+    "boundary": "These are demonstrated record-keeping actions. Statutory payroll, automatic working-hour accuracy, country-specific HR compliance and performance-review workflows are not advertised.",
+    "faqs": [
+      {
+        "question": "Which staff workflows are demonstrated?",
+        "answer": "Employee records, attendance records and leave decisions."
+      },
+      {
+        "question": "Is statutory payroll or HR compliance included?",
+        "answer": "Those capabilities have not been verified and are not claimed here."
+      }
+    ],
+    "related": [
+      "analytics",
+      "pos",
+      "inventory"
+    ]
+  },
+  {
+    "slug": "analytics",
+    "title": "Operational overview",
+    "eyebrow": "Daily visibility",
+    "headline": "Know what needs your attention next.",
+    "image": "dashboard",
+    "description": "Review recent orders, pending work, basic workspace counts and subscription status in an operational overview.",
+    "steps": [
+      {
+        "title": "Review recent work",
+        "description": "Use the latest loaded orders and pending-order count as a starting point."
+      },
+      {
+        "title": "Check the workspace",
+        "description": "Review available product, team and table information for your current restaurant."
+      },
+      {
+        "title": "Understand the data context",
+        "description": "The overview identifies unavailable sources and shows when data was loaded."
+      }
+    ],
+    "boundary": "Recent paid revenue is based on the latest loaded orders, not a complete accounting period. Financial statements, forecast accuracy and consolidated multi-location reporting are outside this demonstrated scope.",
+    "faqs": [
+      {
+        "question": "What does the operational overview summarize?",
+        "answer": "Recent loaded orders, pending work, workspace counts and subscription status."
+      },
+      {
+        "question": "Is this a financial statement?",
+        "answer": "No. Recent paid revenue is not a complete accounting period or consolidated report."
+      }
+    ],
+    "related": [
+      "pos",
+      "kitchen-display",
+      "inventory"
+    ]
+  }
+]

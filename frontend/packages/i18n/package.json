@@ -1,0 +1,11 @@
+{
+  "name": "@pos-saas/i18n",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./locales/en/subscription.json": "./locales/en/subscription.json",
+    "./locales/ar/subscription.json": "./locales/ar/subscription.json"
+  }
+}

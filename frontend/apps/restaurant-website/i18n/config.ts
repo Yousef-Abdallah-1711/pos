@@ -1,5 +1,7 @@
-export const LOCALES = ['en', 'ar'] as const;
-export const DEFAULT_LOCALE = 'en';
+import { defaultLocale, locales } from '@pos-saas/i18n'
+
+export const LOCALES = locales
+export const DEFAULT_LOCALE = defaultLocale
 
 export const LOCALE_NAMES = {
   en: 'English',

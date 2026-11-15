@@ -1,22 +1,25 @@
 {
-  "capture_date": "2026-11-14",
-  "release": "f733efb5e7f5730fea5a56a65d66d9c339e6c040",
-  "data": "Synthetic audit workspace only",
+  "capture_date": "2026-11-15",
+  "release": "e192f30df18a85d2aeb65d554199f27e1ff7fc13",
+  "source": "https://pos.app.rakmyat.online and https://restaurant-1.pos.rakmyat.online",
+  "data": "Authorized synthetic staging workspace only; checkout captures use an unsubmitted cash-only form.",
+  "redaction": "Captured with Playwright locator masks for synthetic account emails, tenant identifiers, order IDs, and QA fixture names. No CSS inversion, recoloring, or generated UI.",
+  "matrix": "screenshot-matrix.json",
   "assets": {
-    "pos.png": "desktop-en-_en_dashboard_pos.png",
-    "kitchen.png": "kds-after-pos.png",
-    "kitchen-completed.png": "kds-completed.png",
-    "checkout.png": "guest-checkout-mobile.png",
-    "confirmation.png": "guest-confirmation-mobile.png",
-    "theme.png": "theme-ui-color-save.png",
-    "inventory.png": "desktop-en-_en_dashboard_inventory.png",
-    "staff.png": "hr-populated-leaves.png",
-    "dashboard.png": "fresh-tenant-dashboard.png"
+    "pos.png": "matrix/pos-en-light.png",
+    "kitchen.png": "matrix/kitchen-en-light.png",
+    "inventory.png": "matrix/inventory-en-light.png",
+    "staff.png": "matrix/staff-en-light.png",
+    "theme.png": "matrix/theme-en-light.png",
+    "dashboard.png": "matrix/dashboard-en-light.png",
+    "checkout.png": "matrix/checkout-en-light.png"
   },
   "limits": [
-    "POS capture uses empty cart; disputed transaction totals are not shown.",
-    "Kitchen header statistics may lag ticket updates.",
-    "English application screenshots are labelled as such on Arabic pages.",
-    "Theme editor preview is not evidence of new hostname provisioning."
+    "Screens are authentic but contain synthetic workspace data; redacted fields are shown as solid masks.",
+    "Dashboard matrix covers overview, cashier POS, kitchen display, inventory, employees, and theme builder in EN/AR and light/dark.",
+    "Storefront matrix covers the unsubmitted cash checkout form in EN/AR and light/dark.",
+    "No order was submitted during screenshot capture. The confirmation screen is omitted because a safe EN/AR and light/dark capture matrix is not yet available.",
+    "POS screen shows an empty cart; displayed workspace counts remain synthetic.",
+    "Theme editor shows saved theme configuration; this does not verify public hostname provisioning."
   ]
 }

@@ -29,13 +29,13 @@ it('supports keyboard navigation through the product walkthrough', () => {
 it('loads only the active walkthrough capture and preserves every tab target', () => {
   render(<ProductExplorer locale="en" features={getFeatures('en')} />)
   expect(screen.getAllByRole('img', { hidden: true })).toHaveLength(1)
-  expect(screen.getByRole('img', { name: 'Cashier POS' })).toBeInTheDocument()
+  expect(screen.getByRole('img', { name: /Cashier POS/ })).toBeInTheDocument()
   for (const tab of screen.getAllByRole('tab')) {
     expect(document.getElementById(tab.getAttribute('aria-controls') || '')).toBeInTheDocument()
   }
   fireEvent.click(screen.getByRole('tab', { name: 'Kitchen display' }))
   expect(screen.getAllByRole('img', { hidden: true })).toHaveLength(1)
-  expect(screen.getByRole('img', { name: 'Kitchen display' })).toBeInTheDocument()
+  expect(screen.getByRole('img', { name: /Kitchen display/ })).toBeInTheDocument()
   fireEvent.click(screen.getByRole('tab', { name: 'Cashier POS' }))
-  expect(screen.getByRole('img', { name: 'Cashier POS' })).toBeInTheDocument()
+  expect(screen.getByRole('img', { name: /Cashier POS/ })).toBeInTheDocument()
 })

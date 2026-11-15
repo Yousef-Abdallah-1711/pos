@@ -21,7 +21,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: L
 export default async function HomePage({ params }: { params: Promise<{ locale: Locale }> }) {
   const { locale } = await params
   const c = getSiteCopy(locale)
-  return <MarketingShell><HomeHero locale={locale} /><OrderJourney locale={locale} />
+  return <MarketingShell locale={locale}><HomeHero locale={locale} /><OrderJourney locale={locale} />
     <OperationsSections locale={locale} /><ManagementSections locale={locale} />
     <section id="product-explorer" className="sv-section"><div className="sv-shell">
       <SectionHead eyebrow={c.explorerEyebrow} title={c.explorerTitle} body={c.explorerBody} />

@@ -1,13 +1,11 @@
-'use client'
-
 import Link from 'next/link'
-import { useLanguage } from '@/contexts/LanguageContext'
 import { getSiteCopy } from '@/content/site'
+import type { Locale } from '@/content/site'
 import { BrandMark } from './BrandMark'
 
-export function Footer() {
-  const { language } = useLanguage()
-  const c = getSiteCopy(language)
+export function Footer({ locale }: { locale: Locale }) {
+  const c = getSiteCopy(locale)
+  const language = locale
   const links = [['features', c.platform], ['how-it-works', c.how], ['pricing', c.pricing], ['demo', c.demo], ['contact', c.contact], ['privacy', c.privacy]]
   return <footer className="sv-footer"><div className="sv-shell">
     <div className="sv-footer-top"><div><BrandMark href={`/${language}`} label="SERVIO" inverse /><p>{c.footerLine}</p></div>

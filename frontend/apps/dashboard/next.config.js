@@ -16,7 +16,7 @@ const apiImageURL = new URL(process.env.NEXT_PUBLIC_API_URL || 'http://localhost
 const nextConfig = {
   reactStrictMode: true,
   typescript: { ignoreBuildErrors: false },
-  transpilePackages: ['@pos-saas/ui', '@pos-saas/types', '@pos-saas/form-foundation'],
+  transpilePackages: ['@pos-saas/ui', '@pos-saas/types', '@pos-saas/form-foundation', '@pos-saas/i18n'],
   images: {
     remotePatterns: [{ protocol: apiImageURL.protocol.slice(0, -1), hostname: apiImageURL.hostname, port: apiImageURL.port, pathname: '/uploads/products/**' }, { protocol: 'https', hostname: 'images.unsplash.com' }],
     // Enable AVIF for better compression (25-30% smaller than WebP)
@@ -127,38 +127,11 @@ const nextConfig = {
   async headers() {
     return [
       {
-        source: '/static/:path*',
-        headers: [
-          {
-            key: 'Cache-Control',
-            value: 'public, max-age=31536000, immutable',
-          },
-        ],
-      },
-      {
-        source: '/_next/static/:path*',
-        headers: [
-          {
-            key: 'Cache-Control',
-            value: 'public, max-age=31536000, immutable',
-          },
-        ],
-      },
-      {
-        source: '/fonts/:path*',
-        headers: [
-          {
-            key: 'Cache-Control',
-            value: 'public, max-age=31536000, immutable',
-          },
-        ],
-      },
-      {
         source: '/:path*',
         headers: [
           {
             key: 'Cache-Control',
-            value: 'public, max-age=3600, s-maxage=3600',
+            value: 'private, no-store, max-age=0',
           },
           {
             key: 'X-Frame-Options',
@@ -189,6 +162,30 @@ const nextConfig = {
                 },
               ]
             : []),
+        ],
+      },
+      {
+        source: '/_next/static/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+      {
+        source: '/fonts/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+      {
+        source: '/static/:path*',
+        headers: [
+          { key: 'Cache-Control', value: 'public, max-age=3600, stale-while-revalidate=86400' },
         ],
       },
     ]

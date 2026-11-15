@@ -39,7 +39,7 @@ export function PricingOffer({ locale, detailed = false }: { locale: Locale; det
       <fieldset className="sv-billing-selector"><legend className="sr-only">{c.billingPreference}</legend>
         {(['monthly', 'annual'] as const).map(value => <label key={value} data-selected={billing === value}><input type="radio" name={detailed ? 'page-billing' : 'home-billing'} value={value} checked={billing === value} onChange={() => select(value)} />{value === 'annual' ? c.annual : c.monthly}</label>)}
       </fieldset>
-      <div className="sv-price-value" aria-live="polite" aria-atomic="true"><p><strong><bdi>{price}</bdi></strong><span>{locale === 'ar' ? 'جنيه مصري' : 'EGP'}</span></p><span>{annual ? c.yearUnit : c.monthUnit}</span>
+      <div className="sv-price-value" aria-live="polite" aria-atomic="true"><p><strong><bdi>{price}</bdi></strong><span>{c.currencyName}</span></p><span>{annual ? c.yearUnit : c.monthUnit}</span>
         <p className="sv-billing-description">{annual ? c.annualBilling : c.monthlyBilling}</p>
         {annual && <div className="sv-savings"><strong>{c.annualSavings}</strong><p>{c.annualEquivalent}</p><p>{c.savingsBasis}</p></div>}
       </div>

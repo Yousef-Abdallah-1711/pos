@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { IBM_Plex_Sans_Arabic, Manrope } from 'next/font/google'
+import { ThemeProvider } from 'next-themes'
 import '@/app/globals.css'
 import '@/app/marketing.css'
 
@@ -35,9 +36,11 @@ export const rootMetadata: Metadata = {
 export function RootDocument({ children, locale }: RootDocumentProps) {
 
   return (
-    <html lang={locale} dir={locale === 'ar' ? 'rtl' : 'ltr'} className="light" style={{ colorScheme: 'light' }}>
+    <html lang={locale} dir={locale === 'ar' ? 'rtl' : 'ltr'} suppressHydrationWarning>
       <body className={`${plex.variable} ${manrope.variable}`}>
-        {children}
+        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false} storageKey="servio-marketing-theme">
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   )

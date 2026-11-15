@@ -1,0 +1,255 @@
+{
+  "platform": "The platform",
+  "how": "How it works",
+  "pricing": "Pricing",
+  "login": "Log in",
+  "trial": "Start your 14-day free trial",
+  "explore": "Explore the product",
+  "eyebrow": "Restaurant operations, connected",
+  "heroStart": "One restaurant.",
+  "heroEnd": "Every order, connected.",
+  "heroBody": "From the first tap at the counter to the next ticket in the kitchen. Give your team one place to coordinate the work of service.",
+  "heroSecondary": "See the order journey",
+  "capture": "Actual product · synthetic workspace",
+  "englishCapture": "English, light-theme application screen · synthetic data; QA identifiers redacted",
+  "captureMatrix": {
+    "enLight": "English, light-theme application screen · synthetic data; QA identifiers redacted",
+    "enDark": "English, dark-theme application screen · synthetic data; QA identifiers redacted",
+    "arLight": "Arabic, light-theme application screen · synthetic data; QA identifiers redacted",
+    "arDark": "Arabic, dark-theme application screen · synthetic data; QA identifiers redacted"
+  },
+  "counter": "AT THE COUNTER",
+  "kitchen": "IN THE KITCHEN",
+  "guest": "WITH YOUR GUESTS",
+  "heroNote": "Cashier orders are confirmed on submission. Online orders wait for your team’s confirmation.",
+  "journeyEyebrow": "Follow the order, not the paperwork",
+  "journeyTitle": "A shared thread through service.",
+  "journeyBody": "Two ways in. One preparation workflow. See what happens at each handoff.",
+  "journey": [
+    [
+      "01",
+      "Take the order",
+      "A cashier selects menu items, or a guest sends an order from the restaurant storefront."
+    ],
+    [
+      "02",
+      "Confirm the handoff",
+      "Cashier orders confirm on submission. Staff confirm online orders before they enter the kitchen."
+    ],
+    [
+      "03",
+      "Prepare in the kitchen",
+      "The kitchen sees the ticket and moves it from new to in progress."
+    ],
+    [
+      "04",
+      "Mark it ready",
+      "Update the preparation state so the team can coordinate the next step."
+    ],
+    [
+      "05",
+      "Coordinate fulfillment",
+      "Kitchen completion and order fulfillment are separate actions. Keep the handoff clear."
+    ]
+  ],
+  "posEyebrow": "01 / Cashier POS",
+  "posTitle": "A familiar place to take the next order.",
+  "posBody": "Browse the menu, select a dish and add the table or guest context. The confirmed order becomes a kitchen ticket.",
+  "posPoints": [
+    "Menu and category selection",
+    "An order with table and guest context",
+    "A connected kitchen handoff"
+  ],
+  "posLink": "Explore cashier POS",
+  "kitchenEyebrow": "02 / Kitchen display",
+  "kitchenTitle": "From incoming ticket to ready.",
+  "kitchenBody": "A focused preparation queue for the kitchen. Move a ticket forward, view completed tickets, or recall one when needed.",
+  "kitchenNote": "Preparation states are shown here. A completed kitchen ticket does not mean an order has been delivered or paid.",
+  "kitchenLink": "Explore the kitchen display",
+  "orderingEyebrow": "03 / Online ordering",
+  "orderingTitle": "The guest’s first step. Your team’s next ticket.",
+  "orderingBody": "Let guests browse the restaurant menu and send a cash-on-delivery order. Your team confirms it before preparation starts.",
+  "orderingSteps": [
+    "Browse the menu",
+    "Review the cash checkout",
+    "Receive an order confirmation"
+  ],
+  "orderingLink": "Explore online ordering",
+  "themeEyebrow": "04 / Storefront customization",
+  "themeTitle": "Make the menu feel like your restaurant.",
+  "themeBody": "Adjust a theme’s colors, save the configuration and preview the result. Keep your restaurant’s presentation connected to its menu.",
+  "themeNote": "Theme editing and saved configuration are demonstrated. Public hostname setup is a separate onboarding step; instant publishing is not promised.",
+  "themeLink": "Explore storefront customization",
+  "inventoryEyebrow": "05 / Stock lifecycle",
+  "inventoryTitle": "Know when an order changes stock.",
+  "inventoryBody": "Tracked product quantities change when an order is confirmed. An eligible unfulfilled cancellation releases the reserved quantity.",
+  "stockStates": [
+    "Before confirmation",
+    "After confirmation",
+    "After eligible cancellation"
+  ],
+  "stockNote": "Demonstrated fixture: one item, starting stock 20. Cancellation, a monetary refund and a physical return are different events.",
+  "inventoryLink": "Explore inventory",
+  "teamEyebrow": "06 / The people behind service",
+  "teamTitle": "Keep the daily details together.",
+  "teamBody": "Employee information, attendance records and leave decisions belong alongside the work your team manages.",
+  "teamItems": [
+    [
+      "Employee records",
+      "Keep employee information organized."
+    ],
+    [
+      "Attendance",
+      "Record clock-in and maintain clock-out records."
+    ],
+    [
+      "Leave decisions",
+      "Review requests and record approval or rejection."
+    ]
+  ],
+  "teamLink": "Explore staff records",
+  "visibilityEyebrow": "07 / Operational overview",
+  "visibilityTitle": "A useful view of the work in front of you.",
+  "visibilityBody": "Review recent orders, pending work and workspace status. The overview identifies unavailable data sources and when data was loaded.",
+  "visibilityNote": "Recent paid revenue uses the latest loaded orders. It is not a complete financial statement or a consolidated group report.",
+  "visibilityLink": "Explore operational visibility",
+  "explorerEyebrow": "A closer look",
+  "explorerTitle": "The product, without the guesswork.",
+  "explorerBody": "Select an area to inspect an authentic screen and the task it supports. This is a product tour, not a live restaurant account.",
+  "openCapture": "Open the full capture",
+  "details": "Explore this feature",
+  "setupEyebrow": "Getting started",
+  "setupTitle": "Your first service starts with a few clear steps.",
+  "setup": [
+    [
+      "Create your account",
+      "Start a 14-day trial with your restaurant details."
+    ],
+    [
+      "Set up the restaurant",
+      "Review the restaurant information and staff access."
+    ],
+    [
+      "Build your menu",
+      "Add categories and products for your team to use."
+    ],
+    [
+      "Run a supported order",
+      "Try the cashier-to-kitchen workflow with your own menu."
+    ]
+  ],
+  "setupNote": "Storefront hostname provisioning and paid billing activation are separate from creating your trial account.",
+  "offerEyebrow": "One subscription. Two billing frequencies.",
+  "offerTitle": "Clear pricing. Room to get familiar.",
+  "offerBody": "Start with a 14-day free trial. Choose your preferred billing period for a future paid subscription.",
+  "monthly": "Monthly",
+  "annual": "Annual",
+  "monthUnit": "per month",
+  "yearUnit": "per year",
+  "annualEquivalent": "Approximately 416.67 EGP per month, billed annually.",
+  "annualSavings": "Save 4,000 EGP a year · approximately 44.4%",
+  "savingsBasis": "Compared with 12 monthly payments of 750 EGP (9,000 EGP).",
+  "monthlyBilling": "750 EGP billed monthly.",
+  "annualBilling": "5,000 EGP billed annually.",
+  "billingPreference": "Billing preference",
+  "offerScope": "Two billing frequencies for the same subscription. No extra feature tiers are implied.",
+  "checkoutLimit": "Paid checkout is not available here. Selecting a preference starts trial registration and does not authorize a charge. Payment and tax terms are confirmed before paid activation.",
+  "pricingLink": "View pricing details",
+  "faqEyebrow": "Before you begin",
+  "faqTitle": "Questions about the verified product",
+  "finalEyebrow": "Give the next order a clear path",
+  "finalTitle": "Bring the counter and kitchen into the same conversation.",
+  "finalBody": "Explore the workflow, set up your restaurant and try a real order handoff during your 14-day trial.",
+  "footerLine": "Connected orders. Coordinated service.",
+  "product": "Product",
+  "getStarted": "Get started",
+  "demo": "Product walkthrough",
+  "contact": "Demonstration options",
+  "privacy": "Privacy information",
+  "terms": "Subscription information",
+  "sampleNote": "Product screens use synthetic data. Availability and setup requirements are described on each feature page.",
+  "rights": "Restaurant operations, thoughtfully connected.",
+  "switchToDark": "Switch to dark mode",
+  "switchToLight": "Switch to light mode",
+  "directoryEyebrow": "One connected restaurant workflow",
+  "directoryTitle": "Every role sees the next step.",
+  "directoryBody": "Explore verified product screens and the handoffs that connect the counter, kitchen, guest, stock and team.",
+  "workflowTitle": "A clear thread from order to preparation",
+  "workflowBody": "The team sees each handoff in context, with cashier and guest orders following their verified paths.",
+  "tasksTitle": "Explore the work by task",
+  "tasksBody": "Start with the responsibility your team handles today, then follow its connected workflow.",
+  "galleryTitle": "Real product screens from a synthetic workspace",
+  "galleryBody": "Each capture is an unmodified application screen. Captures currently available are English and light-theme; the label identifies that limitation.",
+  "relatedTitle": "Continue into a connected workflow",
+  "faqBody": "Answers reflect the demonstrated workflows and their current limits.",
+  "featureStepsTitle": "What your team can do",
+  "featureRelatedTitle": "Related workflows",
+  "featureFaqTitle": "Frequently asked questions",
+  "workflowAccessibleLabel": "Connected workflow from order to preparation",
+  "navLabel": "Main navigation",
+  "switchLanguage": "Switch language",
+  "switchToArabic": "Switch to Arabic",
+  "switchToEnglish": "Switch to English",
+  "openMenu": "Open menu",
+  "closeMenu": "Close menu",
+  "currencyName": "EGP",
+  "stockUnit": "units",
+  "handoff": "Confirmed order → kitchen ticket",
+  "posCaptureAlt": "Cashier menu with synthetic items and an empty cart",
+  "kitchenCaptureAlt": "A synthetic incoming order ticket in the kitchen display",
+  "checkoutCaptureAlt": "Synthetic cash-on-delivery checkout in the restaurant storefront",
+  "themeCaptureAlt": "Storefront theme editor with a saved color and sample preview",
+  "dashboardCaptureAlt": "Synthetic restaurant overview with recent orders and workspace status",
+  "billingDetailsEyebrow": "Subscription details",
+  "billingDetailsTitle": "Know what starts now, and what comes later.",
+  "kitchenStates": [
+    "New",
+    "In progress",
+    "Ready",
+    "Completed"
+  ],
+  "faqItems": [
+    [
+      "How do the cashier and kitchen connect?",
+      "Submitting a cashier order confirms it and creates its kitchen ticket. The kitchen team then moves the ticket through preparation states."
+    ],
+    [
+      "Can guests order online?",
+      "The demonstrated flow lets a guest browse the menu and submit a cash-on-delivery order. Staff confirm it before it enters the kitchen."
+    ],
+    [
+      "What can I customize on my storefront?",
+      "Theme color editing, saving and previewing are demonstrated. Public hostname setup is separate; instant publishing and arbitrary page creation are not promised."
+    ],
+    [
+      "How does the free trial start?",
+      "Create a restaurant account to begin a 14-day trial. Then configure restaurant information, add products and try a supported order workflow."
+    ],
+    [
+      "Does selecting annual billing charge me?",
+      "Selecting a billing preference does not initiate a payment. Paid checkout is not available here; paid activation requires separate confirmation."
+    ],
+    [
+      "Are Arabic and English available?",
+      "The public website supports both languages and right-to-left layout. Product captures are labelled with their language; complete translation of every application screen is not implied."
+    ]
+  ],
+  "billingDetails": [
+    {
+      "title": "Your trial begins when the account is created",
+      "body": "Create a restaurant workspace with a {trialDays}-day trial. The server determines the expiry time and enforces the access boundary when that time is reached."
+    },
+    {
+      "title": "Monthly and annual are the same subscription",
+      "body": "{monthly} EGP billed monthly, or {annual} EGP billed annually. Choosing annual billing does not imply an additional feature tier."
+    },
+    {
+      "title": "How the annual comparison works",
+      "body": "Twelve monthly payments total {comparison} EGP. The annual price saves {savings} EGP, approximately {percent}%. Its equivalent monthly average is {average} EGP, billed annually."
+    },
+    {
+      "title": "A billing preference is not a payment",
+      "body": "Your preference is saved with the new restaurant account. Paid checkout is currently unavailable; payment and tax terms must be confirmed before paid activation. This offer does not rewrite existing trial dates or payment records."
+    }
+  ]
+}

@@ -17,6 +17,7 @@
     "typecheck:test": "tsc --noEmit -p tsconfig.test.json"
   },
   "dependencies": {
+    "@pos-saas/i18n": "workspace:*",
     "@hookform/resolvers": "7.0.6",
     "@pos-saas/form-foundation": "workspace:*",
     "@radix-ui/react-dropdown-menu": "^2.1.2",

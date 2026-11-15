@@ -1,6 +1,9 @@
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { NextIntlClientProvider } from 'next-intl'
 import { usePathname, useRouter } from 'next/navigation'
+import enSubscription from '@pos-saas/i18n/locales/en/subscription.json'
+import arSubscription from '@pos-saas/i18n/locales/ar/subscription.json'
 import api from '@/lib/api'
 import { useAuthStore } from '@/stores/authStore'
 import { BlockedOverlay } from '../BlockedOverlay'
@@ -27,8 +30,13 @@ beforeEach(() => {
 })
 afterEach(cleanup)
 
+function renderWithI18n(node: React.ReactNode, locale: 'en' | 'ar' = 'en') {
+  const messages = locale === 'ar' ? arSubscription : enSubscription
+  return render(<NextIntlClientProvider locale={locale} messages={{ subscription: messages }}>{node}</NextIntlClientProvider>)
+}
+
 it('routes an expired trial to billing without repricing historical entitlements', () => {
-  render(<BlockedOverlay blockReason="trial_expired" />)
+  renderWithI18n(<BlockedOverlay blockReason="trial_expired" />)
   expect(screen.getByRole('heading', { name: 'Your trial has expired' })).toBeInTheDocument()
   expect(screen.getByRole('link', { name: 'Review billing options' })).toHaveAttribute('href', '/en/dashboard/settings/billing')
   expect(document.body).not.toHaveTextContent(/500|15-day|support@pos-saas\.com/)
@@ -36,27 +44,27 @@ it('routes an expired trial to billing without repricing historical entitlements
 
 it('localizes expired access and billing in Arabic', () => {
   vi.mocked(usePathname).mockReturnValue('/ar/dashboard')
-  render(<BlockedOverlay blockReason="expired" />)
+  renderWithI18n(<BlockedOverlay blockReason="expired" />, 'ar')
   expect(screen.getByRole('heading', { name: 'انتهت صلاحية الاشتراك' })).toBeInTheDocument()
   expect(screen.getByRole('link', { name: 'مراجعة خيارات الفوترة' })).toHaveAttribute('href', '/ar/dashboard/settings/billing')
   expect(screen.getByRole('button', { name: 'تسجيل الخروج' })).toBeEnabled()
 })
 
 it('does not advertise purchasing or an invented mailbox for a disabled account', () => {
-  render(<BlockedOverlay blockReason="tenant_disabled" />)
+  renderWithI18n(<BlockedOverlay blockReason="tenant_disabled" />)
   expect(screen.queryByRole('link')).not.toBeInTheDocument()
   expect(screen.getByText(/Contact your account administrator/)).toBeInTheDocument()
 })
 
 it('keeps the legacy expiry entry point on the same accurate flow', () => {
-  render(<TrialExpiredScreen trialEndDate="2026-01-01" />)
+  renderWithI18n(<TrialExpiredScreen trialEndDate="2026-01-01" />)
   expect(screen.getByRole('link', { name: 'Review billing options' })).toBeInTheDocument()
   expect(document.body).not.toHaveTextContent(/15-day|500 EGP/)
 })
 
 it('retains the session and offers retry when server revocation fails', async () => {
   vi.mocked(api.post).mockRejectedValueOnce(new Error('network failure'))
-  render(<BlockedOverlay blockReason="trial_expired" />)
+  renderWithI18n(<BlockedOverlay blockReason="trial_expired" />)
   fireEvent.click(screen.getByRole('button', { name: 'Sign out' }))
   expect(await screen.findByRole('alert')).toHaveTextContent('Sign out failed')
   expect(logout).not.toHaveBeenCalled()
@@ -67,7 +75,7 @@ it('retains the session and offers retry when server revocation fails', async ()
 it('waits for server revocation before clearing state and navigating', async () => {
   let revoke: (() => void) | undefined
   vi.mocked(api.post).mockImplementationOnce(() => new Promise(resolve => { revoke = () => resolve({ data: {} }) }))
-  render(<BlockedOverlay blockReason="trial_expired" />)
+  renderWithI18n(<BlockedOverlay blockReason="trial_expired" />)
   fireEvent.click(screen.getByRole('button', { name: 'Sign out' }))
   expect(api.post).toHaveBeenCalledWith('/auth/logout')
   expect(screen.getByRole('button', { name: 'Signing out…' })).toBeDisabled()
@@ -80,7 +88,7 @@ it('waits for server revocation before clearing state and navigating', async () 
 
 it('closes the blocked mobile navigation by Escape, button and billing navigation', () => {
   const close = vi.fn()
-  render(<BlockedSidebar isMobileOpen onMobileToggle={close} />)
+  renderWithI18n(<BlockedSidebar isMobileOpen onMobileToggle={close} />)
   fireEvent.keyDown(window, { key: 'Escape' })
   expect(close).toHaveBeenCalledTimes(1)
   fireEvent.click(screen.getAllByRole('button', { name: 'Close navigation' })[0])
@@ -93,7 +101,7 @@ it('revokes the blocked sidebar session before clearing state', async () => {
   let revoke: (() => void) | undefined
   vi.mocked(api.post).mockImplementationOnce(() => new Promise(resolve => { revoke = () => resolve({ data: {} }) }))
   vi.mocked(usePathname).mockReturnValue('/ar/dashboard')
-  render(<BlockedSidebar isMobileOpen onMobileToggle={vi.fn()} />)
+  renderWithI18n(<BlockedSidebar isMobileOpen onMobileToggle={vi.fn()} />, 'ar')
   fireEvent.click(screen.getByRole('button', { name: 'تسجيل الخروج' }))
   expect(api.post).toHaveBeenCalledWith('/auth/logout')
   expect(logout).not.toHaveBeenCalled()
@@ -105,7 +113,7 @@ it('revokes the blocked sidebar session before clearing state', async () => {
 
 it('keeps a blocked sidebar session available for retry if revocation fails', async () => {
   vi.mocked(api.post).mockRejectedValueOnce(new Error('network failure'))
-  render(<BlockedSidebar isMobileOpen={false} onMobileToggle={vi.fn()} />)
+  renderWithI18n(<BlockedSidebar isMobileOpen={false} onMobileToggle={vi.fn()} />)
   fireEvent.click(screen.getByRole('button', { name: 'Sign out' }))
   expect(await screen.findByRole('alert')).toHaveTextContent('Sign out failed')
   expect(logout).not.toHaveBeenCalled()

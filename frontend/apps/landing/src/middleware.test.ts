@@ -9,22 +9,21 @@ describe('locale middleware', () => {
     expect(response.headers.get('location')).toBeNull()
   })
 
-  it('redirects the root to the default locale', () => {
+  it('redirects new public visitors to Arabic by default', () => {
     const response = middleware(new NextRequest('https://www.poos.example/'))
 
-    expect(response.headers.get('location')).toBe('https://www.poos.example/en')
+    expect(response.headers.get('location')).toBe('https://www.poos.example/ar')
   })
 
-  it('does not rewrite locale-prefixed pages', () => {
-    const response = middleware(new NextRequest('https://www.poos.example/ar'))
-
+  it.each(['/ar', '/en'])('does not rewrite an explicit locale route %s', (pathname) => {
+    const response = middleware(new NextRequest(`https://www.poos.example${pathname}`))
     expect(response.headers.get('location')).toBeNull()
   })
 })
 
 describe('authentication shortcuts', () => {
   it.each([
-    ['/login', '/en/auth/login'], ['/register', '/en/auth/register'],
+    ['/login', '/ar/auth/login'], ['/register', '/ar/auth/register'],
     ['/en/login', '/en/auth/login'], ['/ar/login', '/ar/auth/login'],
     ['/en/register', '/en/auth/register'], ['/ar/register', '/ar/auth/register'],
   ])('routes %s to the actual localized authentication page', (pathname, target) => {

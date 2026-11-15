@@ -1,0 +1,31 @@
+{
+  "blocked": {
+    "trialExpired": {
+      "title": "Your trial has expired",
+      "description": "Review your account's billing details and access options."
+    },
+    "subscriptionExpired": {
+      "title": "Your subscription has expired",
+      "description": "Review your account's billing details and access options."
+    },
+    "tenantDisabled": {
+      "title": "Account access disabled",
+      "description": "Your account has been temporarily disabled."
+    },
+    "restricted": {
+      "title": "Access restricted",
+      "description": "Your account access is currently restricted."
+    },
+    "actions": {
+      "billing": "Review billing options",
+      "billingNotice": "Opening billing does not authorize a charge.",
+      "supportHelp": "Contact your account administrator if you need help restoring access.",
+      "contactSupport": "Contact support",
+      "signOut": "Sign out",
+      "signingOut": "Signing out…"
+    },
+    "errors": {
+      "signOut": "Sign out failed. Please try again."
+    }
+  }
+}
