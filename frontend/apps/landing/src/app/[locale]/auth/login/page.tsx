@@ -14,6 +14,7 @@ import { getConfig } from '@/lib/config'
 import { TenantSelectorModal } from '@/components/TenantSelectorModal'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { Navbar } from '@/components/Navbar'
+import { Footer } from '@/components/Footer'
 
 type LoginForm = {
   email: string
@@ -138,6 +139,7 @@ export default function LoginPage() {
           </section>
         </div>
       </main>
+      <Footer locale={language} />
 
       {/* Tenant Selector Modal */}
       <TenantSelectorModal

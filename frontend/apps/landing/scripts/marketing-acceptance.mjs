@@ -17,6 +17,8 @@ const widths = [360, 390, 768, 1024, 1440, 1920]
 const routes = ['', '/features', '/features/pos', '/features/kitchen-display', '/features/online-ordering', '/features/website-builder', '/features/inventory', '/features/hr', '/features/analytics', '/how-it-works', '/pricing', '/demo', '/contact', '/privacy']
 const checks = []
 const descriptions = new Map()
+const navigationScreenshots = []
+const sourceCommit = process.env.SERVIO_SOURCE_SHA || 'unknown'
 function check(name, condition, detail = '') {
  checks.push({ name, passed: !!condition, detail })
  if (!condition) throw new Error(`${name}: ${detail}`)
@@ -46,6 +48,7 @@ async function load(page, locale, route) {
  const schema = JSON.parse(await page.locator('script[type="application/ld+json"]').textContent())
  check(`structured data ${locale}${route}`, schema['@type'] === 'WebSite' && schema.name === 'SERVIO')
  check(`heading ${locale}${route}`, await page.locator('main h1').count() === 1)
+ check(`shared header and footer ${locale}${route}`, await page.locator('.sv-desktop-links[aria-label]').count() === 1 && await page.locator('.sv-mobile-navigation nav[aria-label]').count() === 1 && await page.locator('.sv-footer nav[aria-label]').count() === 1)
  const overflow = await page.evaluate(() => document.documentElement.scrollWidth > innerWidth)
  check(`overflow ${locale}${route}`, !overflow)
  await page.addScriptTag({ path: require.resolve('axe-core/axe.min.js') })
@@ -73,6 +76,46 @@ async function capture(page, name) {
  await page.evaluate(() => window.scrollTo(0, 0))
  await page.screenshot({ path: path.join(output, `${name}.png`), fullPage: page.viewportSize().width <= 1440 })
  check(`captures loaded ${name}`, missing.length === 0, JSON.stringify(missing))
+}
+async function captureNavigationEvidence(browser, page, { locale, variant, viewport, frame }) {
+ const directory = path.join(output, 'navigation')
+ await fs.mkdir(directory, { recursive: true })
+ const filename = `${locale}-${expectedTheme}-${variant}-${viewport.width}x${viewport.height}.png`
+ const rawPath = path.join(directory, filename)
+ await page.screenshot({ path: rawPath, fullPage: false, animations: 'disabled' })
+ const evidence = {
+  variant,
+  application: 'public marketing website',
+  route: new URL(page.url()).pathname,
+  sourceEnvironment: new URL(base).origin,
+  sourceCommit,
+  userRole: 'anonymous public visitor',
+  authenticationVerified: false,
+  dataSanitized: true,
+  locale,
+  direction: locale === 'ar' ? 'rtl' : 'ltr',
+  theme: expectedTheme,
+  viewport,
+  timestamp: new Date().toISOString(),
+  screenshot: path.relative(output, rawPath),
+  frame: null,
+ }
+ if (frame) {
+  const image = (await fs.readFile(rawPath)).toString('base64')
+  const label = `${locale.toUpperCase()} · ${evidence.direction.toUpperCase()} · ${expectedTheme.toUpperCase()} · ${variant.replaceAll('-', ' ')}`
+  const outer = { width: viewport.width + 120, height: viewport.height + 200 }
+  const framePage = await browser.newPage({ viewport: outer, deviceScaleFactor: 1 })
+  const shape = frame === 'phone' ? 'phone' : frame === 'tablet' ? 'tablet' : 'desktop'
+  await framePage.setContent(`<!doctype html><html lang="${locale}" dir="${evidence.direction}"><meta charset="utf-8"><style>
+    *{box-sizing:border-box}html,body{margin:0;min-height:100%;background:#eeeaf3;color:#241d31;font-family:Arial,sans-serif}body{display:grid;place-items:center;padding:24px}.board{display:grid;justify-items:center;gap:12px}.label{font-size:12px;font-weight:700;letter-spacing:.04em;text-align:center}.device{padding:12px;background:#17131f;border:1px solid #625a6d;box-shadow:0 24px 60px #241d3130}.device.phone{border-width:11px;border-radius:42px}.device.tablet{border-width:12px;border-radius:25px}.device.desktop{border-width:10px;border-radius:14px}.chrome{height:22px;margin:-2px 0 8px;border-radius:5px;background:#302a39;color:#ded5e8;font-size:10px;padding:4px 8px}.screen{display:block;width:${viewport.width}px;height:${viewport.height}px;object-fit:fill;background:#fff}.source{font-size:10px;color:#625b70;text-align:center}
+    </style><body><main class="board"><div class="label">${label}</div><div class="device ${shape}">${frame === 'desktop' ? '<div class="chrome">SERVIO · genuine browser capture</div>' : ''}<img class="screen" width="${viewport.width}" height="${viewport.height}" src="data:image/png;base64,${image}" alt="Unmodified SERVIO browser capture"></div><div class="source">Presentation frame only · raw: ${filename}</div></main></body></html>`)
+  const frameName = filename.replace(/\.png$/, '-framed.png')
+  const framePath = path.join(directory, frameName)
+  await framePage.screenshot({ path: framePath, fullPage: true, animations: 'disabled' })
+  await framePage.close()
+  evidence.frame = path.relative(output, framePath)
+ }
+ navigationScreenshots.push(evidence)
 }
 async function focusChecks(page, locale) {
  await load(page, locale, '')
@@ -138,17 +181,171 @@ async function interactions(page, locale) {
  await page.waitForURL(`**/${other}`)
  await page.waitForFunction(direction => document.documentElement.dir === direction, other === 'ar' ? 'rtl' : 'ltr')
  check(`language switch ${locale}`, page.url().endsWith(`/${other}`))
+ await load(page, locale, '/features/analytics')
+ await page.locator('.sv-language').click()
+ await page.waitForURL(`${base}/${other}/features/analytics`)
+ check(`locale switch preserves equivalent feature route ${locale}`, page.url() === `${base}/${other}/features/analytics`)
+ check(`locale switch preserves theme ${locale}`, await page.evaluate(theme => document.documentElement.classList.contains(theme), expectedTheme))
+ await page.locator('.sv-language').click()
+ await page.waitForURL(`${base}/${locale}/features/analytics`)
+
+ await page.setViewportSize({ width: 1440, height: 1000 })
+ await load(page, locale, '')
+ await page.waitForLoadState('networkidle')
+ const menuApiRequests = []
+ const trackMenuApiRequest = request => { if (/\/api(?:\/|$)/.test(new URL(request.url()).pathname)) menuApiRequests.push(new URL(request.url()).pathname) }
+ page.on('request', trackMenuApiRequest)
+ const platform = page.locator('.sv-platform-trigger')
+ await platform.click()
+ await page.waitForTimeout(100)
+ page.off('request', trackMenuApiRequest)
+ check(`mega menu has no API dependency ${locale}`, menuApiRequests.length === 0, JSON.stringify(menuApiRequests))
+ check(`desktop platform disclosure ${locale}`, await platform.getAttribute('aria-expanded') === 'true')
+ const expectedFeatures = ['pos', 'kitchen-display', 'online-ordering', 'website-builder', 'inventory', 'hr', 'analytics'].map(slug => `${base}/${locale}/features/${slug}`)
+ const renderedFeatureHrefs = await page.locator('.sv-mega-group a').evaluateAll(links => links.map(link => link.href))
+ check(`mega menu feature route coverage ${locale}`, expectedFeatures.every(href => renderedFeatureHrefs.includes(href)) && renderedFeatureHrefs.length === expectedFeatures.length, JSON.stringify(renderedFeatureHrefs))
+ check(`mega menu groups ${locale}`, await page.locator('.sv-mega-group').count() === 3)
+ const desktopMenuViolations = await page.evaluate(async () => (await window.axe.run(document, { runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa'] } })).violations.map(item => ({ id: item.id, nodes: item.nodes.map(node => node.target) })))
+ check(`desktop mega menu accessibility ${locale}`, desktopMenuViolations.length === 0, JSON.stringify(desktopMenuViolations))
+ await captureNavigationEvidence(browser, page, { locale, variant: 'desktop-mega-menu-open', viewport: { width: 1440, height: 1000 }, frame: 'desktop' })
+ await page.keyboard.press('Escape')
+ check(`desktop menu Escape and focus return ${locale}`, await platform.getAttribute('aria-expanded') === 'false' && await platform.evaluate(element => document.activeElement === element))
+ await platform.focus()
+ await page.keyboard.press('Enter')
+ await page.keyboard.press('Tab')
+ const focusedMenuItem = await page.locator('.sv-mega-group a').first().evaluate(element => element === document.activeElement && element.matches(':focus-visible'))
+ check(`desktop menu keyboard focus ${locale}`, focusedMenuItem)
+ await captureNavigationEvidence(browser, page, { locale, variant: 'desktop-mega-menu-keyboard-focused', viewport: { width: 1440, height: 1000 }, frame: 'desktop' })
+ await page.keyboard.press('Escape')
+ await platform.hover()
+ check(`desktop menu pointer hover ${locale}`, await platform.getAttribute('aria-expanded') === 'true')
+ await page.locator('.sv-main').hover({ position: { x: 8, y: 8 } })
+ await page.waitForTimeout(120)
+ check(`desktop menu closes after pointer leave ${locale}`, await platform.getAttribute('aria-expanded') === 'false')
+ await platform.click()
+ check(`desktop menu click open ${locale}`, await platform.getAttribute('aria-expanded') === 'true')
+ await platform.click()
+ check(`desktop menu click toggle ${locale}`, await platform.getAttribute('aria-expanded') === 'false')
+ await platform.click()
+ await page.locator('.sv-main').click({ position: { x: 8, y: 8 } })
+ check(`desktop menu outside click ${locale}`, await platform.getAttribute('aria-expanded') === 'false')
+ for (const slug of ['pos', 'kitchen-display', 'online-ordering', 'website-builder', 'inventory', 'hr', 'analytics']) {
+  await load(page, locale, '')
+  await page.locator('.sv-platform-trigger').click()
+  const destination = `${base}/${locale}/features/${slug}`
+  await Promise.all([page.waitForURL(destination), page.locator(`.sv-mega-group a[href="/${locale}/features/${slug}"]`).click()])
+  await page.locator('main h1').waitFor()
+  check(`mega menu destination ${locale}/${slug}`, page.url() === destination)
+ }
+ await load(page, locale, '')
+ const footerTargets = await page.locator('.sv-footer nav a').evaluateAll(links => [...new Set(links.map(link => link.href))])
+ check(`footer has unique verified destinations ${locale}`, footerTargets.length >= 15 && footerTargets.every(href => new URL(href).origin === new URL(base).origin))
+ for (const destination of footerTargets) {
+  const destinationPath = new URL(destination).pathname
+  await load(page, locale, '')
+  const route = destinationPath.replace(new RegExp(`^/${locale}`), '')
+  const link = page.locator(`.sv-footer nav a[href="${destinationPath}"]`).first()
+  await Promise.all([page.waitForURL(destination), link.click()])
+  check(`footer destination ${locale}${route || '/'}`, page.url() === destination)
+ }
+
+ await page.setViewportSize({ width: 390, height: 844 })
+ await load(page, locale, '')
+ const menu = page.locator('.sv-menu-button')
+ await menu.click()
+ check(`mobile menu ${locale}`, await menu.getAttribute('aria-expanded') === 'true')
+ const mobileControls = page.locator('.sv-mobile-navigation__controls button')
+ await mobileControls.nth(1).click()
+ await page.waitForFunction(theme => document.documentElement.classList.contains(theme), otherTheme)
+ check(`mobile drawer theme control ${locale}`, await page.evaluate(theme => document.documentElement.classList.contains(theme), otherTheme))
+ await mobileControls.nth(1).click()
+ await page.waitForFunction(theme => document.documentElement.classList.contains(theme), expectedTheme)
+ await page.locator('.sv-mobile-navigation__accordion').click()
+ const mobileFeatureHrefs = await page.locator('.sv-mobile-feature-links a[href*="/features/"]').evaluateAll(links => links.map(link => link.href))
+ check(`mobile feature accordion routes ${locale}`, expectedFeatures.every(href => mobileFeatureHrefs.includes(href)) && mobileFeatureHrefs.length === expectedFeatures.length)
+ for (const slug of ['pos', 'kitchen-display', 'online-ordering', 'website-builder', 'inventory', 'hr', 'analytics']) {
+  await load(page, locale, '')
+  await page.locator('.sv-menu-button').click()
+  await page.locator('.sv-mobile-navigation__accordion').click()
+  const destination = `${base}/${locale}/features/${slug}`
+  await Promise.all([page.waitForURL(destination), page.locator(`.sv-mobile-feature-links a[href="/${locale}/features/${slug}"]`).click()])
+  await page.locator('main h1').waitFor()
+  check(`mobile feature destination ${locale}/${slug}`, page.url() === destination)
+ }
+ await load(page, locale, '')
+ await menu.click()
+ await page.locator('.sv-mobile-navigation__accordion').click()
+ check(`mobile navigation overflow ${locale}`, await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth))
+ const mobileMenuViolations = await page.evaluate(async () => (await window.axe.run(document, { runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa'] } })).violations.map(item => ({ id: item.id, nodes: item.nodes.map(node => node.target) })))
+ check(`mobile navigation accessibility ${locale}`, mobileMenuViolations.length === 0, JSON.stringify(mobileMenuViolations))
+ await captureNavigationEvidence(browser, page, { locale, variant: 'mobile-features-expanded', viewport: { width: 390, height: 844 }, frame: 'phone' })
+ await page.keyboard.press('Escape')
+ await page.waitForFunction(() => document.querySelector('.sv-menu-button')?.getAttribute('aria-expanded') === 'false' && document.activeElement === document.querySelector('.sv-menu-button'))
+ check(`mobile menu Escape and focus return ${locale}`, await menu.getAttribute('aria-expanded') === 'false' && await menu.evaluate(element => document.activeElement === element))
+ await menu.click()
+ check(`mobile drawer locks body scroll ${locale}`, await page.evaluate(() => document.body.style.overflow === 'hidden'))
+ await page.locator('.sv-mobile-backdrop').click({ position: { x: 8, y: 120 } })
+ await page.waitForFunction(() => document.querySelector('.sv-menu-button')?.getAttribute('aria-expanded') === 'false' && document.activeElement === document.querySelector('.sv-menu-button'))
+ check(`mobile backdrop closes and restores focus ${locale}`, await menu.getAttribute('aria-expanded') === 'false' && await menu.evaluate(element => document.activeElement === element) && await page.evaluate(() => document.body.style.overflow !== 'hidden'))
+ await menu.click()
+ await mobileControls.nth(0).click()
+ const otherLocale = locale === 'en' ? 'ar' : 'en'
+ await page.waitForURL(`${base}/${otherLocale}`)
+ check(`mobile drawer locale control ${locale}`, page.url() === `${base}/${otherLocale}` && await page.evaluate(theme => document.documentElement.classList.contains(theme), expectedTheme))
+ await page.locator('.sv-language').click()
+ await page.waitForURL(`${base}/${locale}`)
+
+ for (const [name, viewport] of [['tablet-portrait', { width: 768, height: 1024 }], ['tablet-landscape', { width: 1024, height: 768 }]]) {
+  await page.setViewportSize(viewport)
+  await load(page, locale, '')
+  const tabletMenu = page.locator('.sv-menu-button')
+  await tabletMenu.click()
+  check(`${name} navigation opens ${locale}`, await tabletMenu.getAttribute('aria-expanded') === 'true' && await page.locator('.sv-mobile-navigation').isVisible())
+  check(`${name} navigation fits ${locale}`, await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth))
+  if (name === 'tablet-portrait') await captureNavigationEvidence(browser, page, { locale, variant: name, viewport, frame: 'tablet' })
+  await page.keyboard.press('Escape')
+ }
+
+ for (const [name, viewport] of [['mobile', { width: 390, height: 844 }], ['desktop', { width: 1440, height: 1000 }]]) {
+  await page.setViewportSize(viewport)
+  await load(page, locale, '')
+  const footerPath = path.join(output, 'navigation', `${locale}-${expectedTheme}-${name}-footer.png`)
+  await fs.mkdir(path.dirname(footerPath), { recursive: true })
+  await page.locator('.sv-footer').screenshot({ path: footerPath, animations: 'disabled' })
+  navigationScreenshots.push({
+   application: 'public marketing website', route: `/${locale}`, sourceEnvironment: new URL(base).origin,
+   variant: `${name}-footer`,
+   sourceCommit, userRole: 'anonymous public visitor', authenticationVerified: false, dataSanitized: true,
+   locale, direction: locale === 'ar' ? 'rtl' : 'ltr', theme: expectedTheme, viewport,
+   timestamp: new Date().toISOString(), screenshot: path.relative(output, footerPath), frame: null,
+  })
+ }
+
  await load(page, locale, '/demo')
  const tabs = page.getByRole('tab')
  await tabs.first().focus()
  await page.keyboard.press(locale === 'ar' ? 'ArrowLeft' : 'ArrowRight')
  check(`keyboard tabs ${locale}`, await tabs.nth(1).getAttribute('aria-selected') === 'true')
- await page.setViewportSize({ width: 390, height: 844 })
- const menu = page.locator('.sv-menu-button')
- await menu.click()
- check(`mobile menu ${locale}`, await menu.getAttribute('aria-expanded') === 'true')
- await page.keyboard.press('Escape')
- check(`menu escape ${locale}`, await menu.getAttribute('aria-expanded') === 'false')
+ for (const width of [320, 360, 375, 390, 430, 600, 768, 820, 1024, 1180, 1200, 1280, 1440, 1920]) {
+  const height = width < 600 ? 844 : width === 1024 || width === 1180 ? 768 : width < 1200 ? 1024 : width === 1920 ? 1080 : 900
+  await page.setViewportSize({ width, height })
+  await load(page, locale, '')
+  const desktop = width >= 1200
+  const desktopLinks = page.locator('.sv-desktop-links')
+  const mobileTrigger = page.locator('.sv-menu-button')
+  check(`navigation breakpoint ${locale}/${width}`, desktop ? await desktopLinks.isVisible() && !await mobileTrigger.isVisible() : !await desktopLinks.isVisible() && await mobileTrigger.isVisible())
+  if (desktop) {
+   const trigger = page.locator('.sv-platform-trigger')
+   await trigger.click()
+   const bounds = await page.locator('.sv-mega-menu').boundingBox()
+   check(`desktop mega menu viewport fit ${locale}/${width}`, !!bounds && bounds.x >= 0 && bounds.x + bounds.width <= width)
+   await page.keyboard.press('Escape')
+  } else {
+   await mobileTrigger.click()
+   check(`responsive drawer opens without overflow ${locale}/${width}`, await page.locator('.sv-mobile-navigation').isVisible() && await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth))
+   await page.keyboard.press('Escape')
+  }
+ }
  await focusChecks(page, locale)
 }
 async function createPage(browser, viewport) {
@@ -160,6 +357,31 @@ async function createPage(browser, viewport) {
  // https://playwright.dev/docs/api/class-browsercontext#browser-context-route
  await page.route('**/*', route => route.continue())
  return page
+}
+async function captureComparisonBoards(browser) {
+ for (const locale of ['en', 'ar']) {
+  const variants = ['mobile-features-expanded', 'tablet-portrait', 'desktop-mega-menu-open']
+  const sources = variants.map(variant => navigationScreenshots.find(item => item.locale === locale && item.variant === variant))
+  if (sources.some(item => !item)) throw new Error(`Missing navigation screenshots for ${locale} comparison board`)
+  const images = await Promise.all(sources.map(async item => (await fs.readFile(path.join(output, item.screenshot))).toString('base64')))
+  const labels = ['Mobile 390 × 844', 'Tablet portrait 768 × 1024', 'Desktop mega menu 1440 × 1000']
+  const cards = images.map((image, index) => `<figure><figcaption>${labels[index]}</figcaption><img src="data:image/png;base64,${image}" alt="${locale.toUpperCase()} ${labels[index]} genuine browser capture"><small>Raw source: ${sources[index].screenshot}</small></figure>`).join('')
+  const boardPage = await browser.newPage({ viewport: { width: 2000, height: 1200 }, deviceScaleFactor: 1 })
+  await boardPage.setContent(`<!doctype html><html lang="${locale}" dir="${locale === 'ar' ? 'rtl' : 'ltr'}"><meta charset="utf-8"><style>*{box-sizing:border-box}html,body{margin:0;background:#eeeaf3;color:#241d31;font-family:Arial,sans-serif}body{padding:28px}.board{display:grid;gap:22px}.heading{font-size:20px;font-weight:700}.cards{display:grid;grid-template-columns:.62fr .9fr 1.5fr;gap:18px;align-items:start}figure{display:grid;gap:10px;justify-items:center;margin:0;padding:14px;border-radius:14px;background:#fff;box-shadow:0 14px 36px #241d311a}figcaption{font-size:13px;font-weight:700;text-align:center}img{display:block;width:100%;height:800px;object-fit:contain;object-position:top center}small{font-size:10px;color:#625b70;text-align:center;overflow-wrap:anywhere}</style><body><main class="board"><div class="heading">SERVIO navigation · ${locale.toUpperCase()} · ${expectedTheme.toUpperCase()} · ${sourceCommit}</div><div class="cards">${cards}</div></main></body></html>`)
+  const filename = `${locale}-${expectedTheme}-mobile-tablet-desktop-comparison-board.png`
+  const boardPath = path.join(output, 'navigation', filename)
+  await boardPage.screenshot({ path: boardPath, fullPage: true, animations: 'disabled' })
+  await boardPage.close()
+  navigationScreenshots.push({
+   application: 'public marketing website', variant: 'mobile-tablet-desktop-comparison-board',
+   route: `/${locale}`, sourceEnvironment: new URL(base).origin, sourceCommit,
+   userRole: 'anonymous public visitor', authenticationVerified: false, dataSanitized: true,
+   locale, direction: locale === 'ar' ? 'rtl' : 'ltr', theme: expectedTheme,
+   viewport: { width: 2000, height: 1200 }, timestamp: new Date().toISOString(),
+   screenshot: path.relative(output, boardPath), frame: null,
+   sourceScreenshots: sources.map(item => item.screenshot),
+  })
+ }
 }
 async function main() {
  await fs.mkdir(output, { recursive: true })
@@ -188,11 +410,13 @@ async function main() {
    }
    await interactions(page, locale)
   }
+  await captureComparisonBoards(browser)
   check('browser exceptions', errors.length === 0, errors.join('; '))
   check('failed network responses', networkFailures.length === 0, networkFailures.join('; '))
  } finally {
   await browser.close()
   await fs.writeFile(path.join(output, 'results.json'), JSON.stringify({ base, browser: browserName, color_scheme: colorScheme, theme: expectedTheme, checks }, null, 2))
+  await fs.writeFile(path.join(output, 'navigation-evidence.json'), JSON.stringify({ sourceCommit, screenshots: navigationScreenshots }, null, 2))
  }
 }
 main().catch(error => { console.error(error.message); process.exitCode = 1 })
