@@ -163,6 +163,17 @@ func CacheMiddleware(next http.Handler) http.Handler {
 	})
 }
 
+// NoStoreAPIResponses gives API responses a private no-store default. Public
+// endpoints that intentionally cache their response can explicitly override it.
+func NoStoreAPIResponses(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if strings.HasPrefix(r.URL.Path, "/api/") {
+			w.Header().Set("Cache-Control", "private, no-store")
+		}
+		next.ServeHTTP(w, r)
+	})
+}
+
 // determineCacheStrategy determines the caching strategy based on URL path
 func determineCacheStrategy(path string) string {
 	// Static assets with version hash (immutable)
