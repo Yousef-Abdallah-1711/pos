@@ -37,7 +37,7 @@ export default async function FeaturePage({ params }: Props) {
   if (!feature) notFound()
   const copy = getSiteCopy(locale)
   const related = getFeatures(locale).filter(item => feature.related.includes(item.slug))
-  return <MarketingShell><ViewEvent locale={locale} source={slug} />
+  return <MarketingShell locale={locale}><ViewEvent locale={locale} source={slug} />
     <section className={`sv-section sv-feature-hero sv-feature-page sv-feature-page--${feature.slug}`}>
       <div className="sv-shell">
         <Link className="sv-text-link" href={`/${locale}/features`}>{copy.platform}</Link>

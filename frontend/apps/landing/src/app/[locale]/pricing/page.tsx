@@ -11,5 +11,5 @@ export async function generateMetadata({ params }: Props) {
 }
 export default async function PricingPage({ params }: Props) {
  const { locale } = await params
- return <MarketingShell><PricingOffer locale={locale} detailed /><BillingDetails locale={locale} /><MarketingFAQ locale={locale} /></MarketingShell>
+ return <MarketingShell locale={locale}><PricingOffer locale={locale} detailed /><BillingDetails locale={locale} /><MarketingFAQ locale={locale} /></MarketingShell>
 }

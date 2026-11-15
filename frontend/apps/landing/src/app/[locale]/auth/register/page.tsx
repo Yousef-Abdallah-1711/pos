@@ -94,7 +94,7 @@ export default function RegisterPage() {
 
   return <>
     <a className="poos-skip-link" href="#main-content">{t.nav.skipToContent}</a>
-    <Navbar />
+    <Navbar locale={language} />
     <main id="main-content" dir={dir} className="auth-page">
       <div className="auth-layout">
         <section className="auth-story" aria-label={text.storyLabel}>

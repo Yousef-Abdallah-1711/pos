@@ -1,5 +1,4 @@
 import { RootDocument, rootMetadata } from '@/components/RootDocument'
-import { LanguageProvider } from '@/contexts/LanguageContext'
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 
@@ -41,9 +40,5 @@ export default async function LocaleLayout({ children, params }: LocaleLayoutPro
   if (rawLocale !== 'en' && rawLocale !== 'ar') notFound()
   const locale: Locale = rawLocale === 'ar' ? 'ar' : 'en'
 
-  return (
-    <RootDocument locale={locale}><LanguageProvider locale={locale}>
-      {children}
-    </LanguageProvider></RootDocument>
-  )
+  return <RootDocument locale={locale}>{children}</RootDocument>
 }

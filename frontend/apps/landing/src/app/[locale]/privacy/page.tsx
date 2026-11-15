@@ -8,5 +8,5 @@ const copy = { en: { title: 'Privacy information for this website', body: 'Publi
 export async function generateMetadata({ params }: Props) { const { locale } = await params; return marketingMetadata(locale, '/privacy', copy[locale].title, copy[locale].body) }
 export default async function Page({ params }: Props) {
  const { locale } = await params; const c = getSiteCopy(locale)
- return <MarketingShell><section className="sv-section sv-feature-hero"><div className="sv-shell"><h1>{copy[locale].title}</h1><p className="sv-lead">{copy[locale].body}</p><div className="sv-actions"><Link className="sv-text-link" href={`/${locale}/demo`}>{c.demo}<span aria-hidden="true">↗</span></Link><TrialLink locale={locale} source="privacy" /></div></div></section></MarketingShell>
+ return <MarketingShell locale={locale}><section className="sv-section sv-feature-hero"><div className="sv-shell"><h1>{copy[locale].title}</h1><p className="sv-lead">{copy[locale].body}</p><div className="sv-actions"><Link className="sv-text-link" href={`/${locale}/demo`}>{c.demo}<span aria-hidden="true">↗</span></Link><TrialLink locale={locale} source="privacy" /></div></div></section></MarketingShell>
 }

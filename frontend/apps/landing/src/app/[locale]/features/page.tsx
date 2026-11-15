@@ -52,7 +52,7 @@ export default async function FeaturesPage({ params }: Props) {
   const copy = getSiteCopy(locale)
   const features = getFeatures(locale)
   const hero = features[0]
-  return <MarketingShell>
+  return <MarketingShell locale={locale}>
     <section className="sv-section sv-feature-directory">
       <div className="sv-shell">
         <div className="sv-feature-directory__hero">

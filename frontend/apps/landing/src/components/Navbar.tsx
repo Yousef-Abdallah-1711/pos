@@ -2,21 +2,24 @@
 
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
+import { usePathname, useRouter } from 'next/navigation'
 import { Globe2, Menu, Moon, Sun, X } from 'lucide-react'
 import { useTheme } from 'next-themes'
-import { useLanguage } from '@/contexts/LanguageContext'
-import { getSiteCopy } from '@/content/site'
+import { getSiteCopy, type Locale } from '@/content/site'
 import { BrandMark } from './BrandMark'
 import { TrialLink } from './marketing/TrialLink'
 
-export function Navbar() {
-  const { language, setLanguage } = useLanguage()
+export function Navbar({ locale: language }: { locale: Locale }) {
   const { resolvedTheme, setTheme } = useTheme()
+  const pathname = usePathname()
+  const router = useRouter()
   const [mounted, setMounted] = useState(false)
   const [open, setOpen] = useState(false)
   const trigger = useRef<HTMLButtonElement>(null)
   const nav = useRef<HTMLDivElement>(null)
   const c = getSiteCopy(language)
+  const nextLocale = language === 'en' ? 'ar' : 'en'
+  const localizedPath = pathname.replace(/^\/(?:en|ar)(?=\/|$)/, `/${nextLocale}`)
   const theme = mounted ? resolvedTheme : 'dark'
   useEffect(() => setMounted(true), [])
   const links = [['features', c.platform], ['how-it-works', c.how], ['pricing', c.pricing]]
@@ -34,7 +37,11 @@ export function Navbar() {
   return <header className="sv-header"><nav className="sv-shell sv-nav" aria-label={c.navLabel}>
     <BrandMark href={`/${language}`} label="SERVIO" />
     <div className="sv-desktop-links">{links.map(([path, label]) => <Link key={path} href={`/${language}/${path}`}>{label}</Link>)}</div>
-    <div className="sv-nav-actions"><button className="sv-language" onClick={() => { setLanguage(language === 'en' ? 'ar' : 'en'); setOpen(false) }} aria-label={c.switchLanguage}><Globe2 size={18} aria-hidden="true" /><span>{language === 'en' ? 'العربية' : 'English'}</span></button>
+    <div className="sv-nav-actions"><Link className="sv-language" href={localizedPath} aria-label={c.switchLanguage} onClick={event => {
+      event.preventDefault()
+      setOpen(false)
+      router.push(`${localizedPath}${window.location.search}${window.location.hash}`)
+    }}><Globe2 size={18} aria-hidden="true" /><span>{language === 'en' ? 'العربية' : 'English'}</span></Link>
       <button className="sv-theme-toggle" type="button" onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')} aria-label={theme === 'dark' ? c.switchToLight : c.switchToDark} title={theme === 'dark' ? c.switchToLight : c.switchToDark}>{theme === 'dark' ? <Sun size={18} aria-hidden="true" /> : <Moon size={18} aria-hidden="true" />}</button>
       <Link className="sv-login" href={`/${language}/auth/login`}>{c.login}</Link>
       <div className="sv-desktop-trial"><TrialLink locale={language} source="navigation" /></div>
