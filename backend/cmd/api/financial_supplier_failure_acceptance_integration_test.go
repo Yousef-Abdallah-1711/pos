@@ -29,8 +29,26 @@ func TestFinancialAcceptanceLiveAPISupplierRollbackAndConcurrentPayments(t *test
 	supplierID := createAcceptanceSupplier(t, api)
 	invoiceID := createAcceptanceSupplierInvoice(t, api, supplierID)
 	journalID := assertSupplierPostingRollback(t, api, invoiceID)
+	assertForeignSupplierAccessDenied(t, api, supplierID, invoiceID)
 	assertSupplierPaymentRollback(t, api, supplierID, invoiceID)
 	assertConcurrentSupplierPayments(t, api, supplierID, invoiceID, journalID)
+}
+
+func assertForeignSupplierAccessDenied(t *testing.T, api *supplierAcceptanceAPI, supplierID, invoiceID int) {
+	t.Helper()
+	tenantID, restaurantID, email, password := seedLiveFinancialOtherTenant(t, api.db)
+	foreignFixture := liveFinancialFixture{tenantID: tenantID, restaurantID: restaurantID, email: email, password: password}
+	client := supplierAcceptanceOwnerClient(t, api.baseURL, foreignFixture)
+	path := fmt.Sprintf("%s/api/v1/accounting/supplier-invoices/%d/approve", api.baseURL, invoiceID)
+	approvalStatus, approvalBody := acceptanceJSONRequest(t, client, http.MethodPost, path, map[string]any{})
+	paymentStatus, paymentBody := supplierPaymentRequest(t, client, api.baseURL, supplierID, invoiceID, 1)
+	if approvalStatus < 400 || paymentStatus < 400 {
+		t.Fatalf("foreign supplier mutations were not denied: approval=%d %s payment=%d %s", approvalStatus, approvalBody, paymentStatus, paymentBody)
+	}
+	assertSupplierInvoiceState(t, api, invoiceID, "approved", 0, 22000)
+	if countSupplierInvoiceJournals(t, api, invoiceID) != 1 {
+		t.Fatal("foreign supplier requests changed invoice journal state")
+	}
 }
 
 func assertSupplierPostingRollback(t *testing.T, api *supplierAcceptanceAPI, invoiceID int) int64 {
@@ -94,6 +112,10 @@ func assertConcurrentSupplierPayments(t *testing.T, api *supplierAcceptanceAPI, 
 		t.Fatalf("concurrent supplier payments expected success/source/balance/count=4/20000/2000/4; actual=%d/%d/%d/%d", succeeded, paid, balance, payments)
 	}
 	assertSupplierAPBalance(t, api, invoiceID, invoiceJournalID, balance)
+	retryStatus, retryBody := supplierPaymentRequest(t, api.client, api.baseURL, supplierID, invoiceID, 50)
+	if retryStatus < 400 {
+		t.Fatalf("repeated supplier payment of 50.00 returned %d after balance fell to 20.00: %s", retryStatus, retryBody)
+	}
 	status, body := supplierPaymentRequest(t, api.client, api.baseURL, supplierID, invoiceID, 21)
 	if status < 400 {
 		t.Fatalf("supplier payment exceeding remaining 20.00 balance returned %d: %s", status, body)
@@ -102,7 +124,9 @@ func assertConcurrentSupplierPayments(t *testing.T, api *supplierAcceptanceAPI, 
 	if err := api.db.QueryRowContext(api.ctx, `SELECT COUNT(*) FROM payments_made WHERE invoice_id=$1 AND tenant_id=$2 AND restaurant_id=$3`, invoiceID, api.fixture.tenantID, api.fixture.restaurantID).Scan(&payments); err != nil || payments != 4 {
 		t.Fatalf("overpayment rejection expected four persisted payments; actual=%d err=%v", payments, err)
 	}
-	t.Logf("financial_acceptance scenario=supplier_rollback_and_concurrent_payments expected_successes=4 actual_successes=%d expected_paid_cents=20000 actual_paid_cents=%d expected_balance_cents=2000 actual_balance_cents=%d expected_ap_net_credit_cents=2000", succeeded, paid, balance)
+	reports := liveFinancialReportAcceptance{baseURL: api.baseURL, reportDate: time.Now().UTC().Format("2006-01-02"), client: api.client, db: api.db, ctx: api.ctx, fixture: api.fixture}
+	verifyLiveAgingEndpoint(t, reports, "payables-aging", "invoices_supplier")
+	t.Logf("financial_acceptance scenario=supplier_rollback_and_concurrent_payments expected_successes=4 actual_successes=%d expected_paid_cents=20000 actual_paid_cents=%d expected_balance_cents=2000 actual_balance_cents=%d expected_ap_net_credit_cents=2000 repeated_payment_status=%d overpayment_status=%d", succeeded, paid, balance, retryStatus, status)
 }
 
 func submitConcurrentSupplierPayments(t *testing.T, api *supplierAcceptanceAPI, supplierID, invoiceID int) int {

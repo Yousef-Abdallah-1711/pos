@@ -42,6 +42,9 @@ func verifyLiveFinancialReportsAndExports(t *testing.T, acceptance liveFinancial
 	}
 	verifyLiveProfitLossEndpoint(t, acceptance)
 	verifyLiveTrialBalanceEndpoint(t, acceptance)
+	verifyLiveBalanceSheetEndpoint(t, acceptance)
+	verifyLiveAgingEndpoints(t, acceptance)
+	verifyLiveCashFlowEndpoint(t, acceptance)
 	csvRevenueCents := verifyLiveSalesCSVDownload(t, acceptance)
 	pdfBytes := verifyLiveSalesPDFDownload(t, acceptance)
 	t.Logf("financial_acceptance scenario=authenticated_reports_and_downloads tenant_id=%d restaurant_id=%d order_id=%d source_pnl_revenue_cents=%d sql_gl_revenue_cents=%d pnl_expense_cents=%d trial_debits_cents=%d trial_credits_cents=%d sales_export_gross_cents=%d sales_csv_gross_cents=%d csv_difference_cents=%d pdf_bytes=%d",
@@ -49,6 +52,116 @@ func verifyLiveFinancialReportsAndExports(t *testing.T, acceptance liveFinancial
 		acceptance.sourceRevenueCents, acceptance.sqlRevenueCents, acceptance.sqlExpenseCents,
 		acceptance.sqlTrialDebitsCents, acceptance.sqlTrialCreditsCents, acceptance.sourceGrossSalesCents,
 		csvRevenueCents, csvRevenueCents-acceptance.sourceGrossSalesCents, pdfBytes)
+}
+
+func verifyLiveBalanceSheetEndpoint(t *testing.T, acceptance liveFinancialReportAcceptance) {
+	t.Helper()
+	path := fmt.Sprintf("%s/api/v1/reports/financial/balance-sheet?as_of=%s", acceptance.baseURL, acceptance.reportDate)
+	status, body := acceptanceJSONRequest(t, acceptance.client, http.MethodGet, path, nil)
+	var response struct {
+		Data struct {
+			TotalAssets        float64 `json:"total_assets"`
+			TotalLiabilities   float64 `json:"total_liabilities"`
+			TotalEquity        float64 `json:"total_equity"`
+			EquationDifference float64 `json:"equation_difference"`
+			IntegrityStatus    string  `json:"integrity_status"`
+		} `json:"data"`
+	}
+	if status != http.StatusOK || json.Unmarshal(body, &response) != nil {
+		t.Fatalf("authenticated Balance Sheet returned %d: %s", status, body)
+	}
+	var assets, liabilities, equity int64
+	date, err := time.Parse("2006-01-02", acceptance.reportDate)
+	if err != nil {
+		t.Fatalf("parse Balance Sheet date: %v", err)
+	}
+	err = acceptance.db.QueryRowContext(acceptance.ctx, `
+		WITH balances AS (
+			SELECT a.account_type, a.normal_balance, SUM(gl.debit_amount-gl.credit_amount) AS net_debit
+			FROM general_ledger gl JOIN chart_of_accounts a ON a.id=gl.account_id AND a.tenant_id=gl.tenant_id AND a.restaurant_id=gl.restaurant_id
+			WHERE gl.tenant_id=$1 AND gl.restaurant_id=$2 AND gl.entry_date <= $3
+			GROUP BY a.account_type, a.normal_balance
+		)
+		SELECT
+			ROUND(COALESCE(SUM(CASE WHEN account_type='asset' THEN CASE WHEN normal_balance='debit' THEN net_debit ELSE -net_debit END ELSE 0 END),0)*100)::bigint,
+			ROUND(COALESCE(SUM(CASE WHEN account_type='liability' THEN CASE WHEN normal_balance='credit' THEN -net_debit ELSE net_debit END ELSE 0 END),0)*100)::bigint,
+			ROUND(COALESCE(SUM(CASE WHEN account_type='equity' THEN CASE WHEN normal_balance='credit' THEN -net_debit ELSE net_debit END ELSE 0 END),0)*100)::bigint
+		FROM balances`, acceptance.fixture.tenantID, acceptance.fixture.restaurantID, date).Scan(&assets, &liabilities, &equity)
+	assertReportCents(t, "Balance Sheet assets", response.Data.TotalAssets, assets, err)
+	assertReportCents(t, "Balance Sheet liabilities", response.Data.TotalLiabilities, liabilities, err)
+	assertReportCents(t, "Balance Sheet equity", response.Data.TotalEquity, equity, err)
+	difference := int64(math.Round(response.Data.EquationDifference * 100))
+	if difference != assets-liabilities-equity {
+		t.Fatalf("Balance Sheet equation difference=%d cents; independent SQL expected=%d cents", difference, assets-liabilities-equity)
+	}
+	t.Logf("financial_acceptance scenario=balance_sheet_report expected_assets_cents=%d actual_assets_cents=%d expected_liabilities_cents=%d actual_liabilities_cents=%d expected_equity_cents=%d actual_equity_cents=%d equation_difference_cents=%d integrity_status=%s", assets, int64(math.Round(response.Data.TotalAssets*100)), liabilities, int64(math.Round(response.Data.TotalLiabilities*100)), equity, int64(math.Round(response.Data.TotalEquity*100)), difference, response.Data.IntegrityStatus)
+}
+
+func verifyLiveAgingEndpoints(t *testing.T, acceptance liveFinancialReportAcceptance) {
+	t.Helper()
+	verifyLiveAgingEndpoint(t, acceptance, "receivables-aging", "invoices_customer")
+	verifyLiveAgingEndpoint(t, acceptance, "payables-aging", "invoices_supplier")
+}
+
+func verifyLiveAgingEndpoint(t *testing.T, acceptance liveFinancialReportAcceptance, route, table string) {
+	t.Helper()
+	path := fmt.Sprintf("%s/api/v1/reports/financial/%s?as_of=%s", acceptance.baseURL, route, acceptance.reportDate)
+	status, body := acceptanceJSONRequest(t, acceptance.client, http.MethodGet, path, nil)
+	var response struct {
+		Data struct {
+			Total float64 `json:"total"`
+		} `json:"data"`
+	}
+	if status != http.StatusOK || json.Unmarshal(body, &response) != nil {
+		t.Fatalf("authenticated %s report returned %d: %s", route, status, body)
+	}
+	var expected int64
+	query := fmt.Sprintf("SELECT ROUND(COALESCE(SUM(balance_due),0)*100)::bigint FROM %s WHERE tenant_id=$1 AND restaurant_id=$2 AND status <> 'void' AND balance_due > 0", table)
+	err := acceptance.db.QueryRowContext(acceptance.ctx, query, acceptance.fixture.tenantID, acceptance.fixture.restaurantID).Scan(&expected)
+	assertReportCents(t, route, response.Data.Total, expected, err)
+	t.Logf("financial_acceptance scenario=%s expected_open_balance_cents=%d actual_open_balance_cents=%d", route, expected, int64(math.Round(response.Data.Total*100)))
+}
+
+func verifyLiveCashFlowEndpoint(t *testing.T, acceptance liveFinancialReportAcceptance) {
+	t.Helper()
+	path := fmt.Sprintf("%s/api/v1/reports/financial/cash-flow?date_from=%s&date_to=%s", acceptance.baseURL, acceptance.reportDate, acceptance.reportDate)
+	status, body := acceptanceJSONRequest(t, acceptance.client, http.MethodGet, path, nil)
+	var response struct {
+		Data struct {
+			Operating float64 `json:"operating_cash_flow"`
+			Investing float64 `json:"investing_cash_flow"`
+			Financing float64 `json:"financing_cash_flow"`
+			Net       float64 `json:"net_cash_flow"`
+		} `json:"data"`
+	}
+	if status != http.StatusOK || json.Unmarshal(body, &response) != nil {
+		t.Fatalf("authenticated Cash Flow report returned %d: %s", status, body)
+	}
+	date, err := time.Parse("2006-01-02", acceptance.reportDate)
+	if err != nil {
+		t.Fatalf("parse Cash Flow date: %v", err)
+	}
+	var expected float64
+	err = acceptance.db.QueryRowContext(acceptance.ctx, `
+		SELECT COALESCE(SUM(CASE WHEN a.account_type='revenue' THEN jel.credit_amount-jel.debit_amount
+			WHEN a.account_type='expense' THEN jel.credit_amount-jel.debit_amount ELSE 0 END),0)
+		FROM journal_entry_lines jel JOIN journal_entries je ON je.id=jel.journal_entry_id
+		JOIN chart_of_accounts a ON a.id=jel.account_id
+		WHERE je.tenant_id=$1 AND je.restaurant_id=$2 AND je.status='posted' AND je.entry_date >= $3 AND je.entry_date <= $4`,
+		acceptance.fixture.tenantID, acceptance.fixture.restaurantID, date, date).Scan(&expected)
+	if err != nil || int64(math.Round(response.Data.Net*100)) != int64(math.Round(expected*100)) ||
+		int64(math.Round(response.Data.Net*100)) != int64(math.Round((response.Data.Operating+response.Data.Investing+response.Data.Financing)*100)) {
+		t.Fatalf("Cash Flow API net=%0.2f; independent SQL expected=%0.2f; components=%0.2f/%0.2f/%0.2f; err=%v", response.Data.Net, expected, response.Data.Operating, response.Data.Investing, response.Data.Financing, err)
+	}
+	t.Logf("financial_acceptance scenario=cash_flow_report sql_classified_net_cents=%d api_net_cents=%d operating_cents=%d investing_cents=%d financing_cents=%d; classification remains accounting-policy-dependent", int64(math.Round(expected*100)), int64(math.Round(response.Data.Net*100)), int64(math.Round(response.Data.Operating*100)), int64(math.Round(response.Data.Investing*100)), int64(math.Round(response.Data.Financing*100)))
+}
+
+func assertReportCents(t *testing.T, report string, actualAmount float64, expectedCents int64, err error) {
+	t.Helper()
+	actual := int64(math.Round(actualAmount * 100))
+	if err != nil || actual != expectedCents {
+		t.Fatalf("%s report actual=%d cents; independent SQL expected=%d cents; err=%v", report, actual, expectedCents, err)
+	}
 }
 
 func readIndependentFinancialReportTotals(t *testing.T, acceptance *liveFinancialReportAcceptance) {
