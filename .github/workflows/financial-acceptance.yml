@@ -1,0 +1,77 @@
+name: SERVIO financial acceptance
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: servio-financial-acceptance-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  financial-postgres:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    services:
+      postgres:
+        image: postgres@sha256:fc41cfa8a90c09e84dd723ee764be4b2f59ba6c98e1b5b3fca540adddf68a5ba
+        env:
+          POSTGRES_PASSWORD: disposable-ci-only
+          POSTGRES_DB: servio_test
+        ports: [5432:5432]
+        options: --health-cmd "pg_isready -U postgres -d servio_test" --health-interval 3s --health-timeout 3s --health-retries 20
+      redis:
+        image: redis@sha256:7f7d30b7fdd09467bac58198a1f166dd69789d348d4fe859cccb20e0cf287fbe
+        ports: [6379:6379]
+        options: --health-cmd "redis-cli ping" --health-interval 3s --health-timeout 3s --health-retries 20
+    env:
+      GOMAXPROCS: '2'
+      GOFLAGS: -p=1
+      ENV: test
+      DB_HOST: 127.0.0.1
+      DB_PORT: '5432'
+      DB_NAME: servio_test
+      DB_USER: pos_migrator
+      DB_PASSWORD: disposable-migrator-only
+      DB_SSLMODE: disable
+      POS_TEST_DATABASE_URL: postgres://postgres:disposable-ci-only@127.0.0.1:5432/servio_test?sslmode=disable
+      POS_RLS_ADMIN_URL: postgres://postgres:disposable-ci-only@127.0.0.1:5432/servio_test?sslmode=disable
+      POS_RLS_APP_URL: postgres://pos_app:disposable-app-only@127.0.0.1:5432/servio_test?sslmode=disable
+      POS_ACCOUNTING_DATABASE_URL: postgres://pos_accounting:disposable-accounting-only@127.0.0.1:5432/servio_test?sslmode=disable
+      POS_APP_DATABASE_URL: postgres://pos_app:disposable-app-only@127.0.0.1:5432/servio_test?sslmode=disable
+      POOS_SESSION_REDIS_URL: redis://127.0.0.1:6379/0
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e
+        with:
+          go-version-file: backend/go.mod
+          cache-dependency-path: backend/go.sum
+      - name: Initialize restricted disposable database roles
+        working-directory: backend
+        env:
+          PGPASSWORD: disposable-ci-only
+        run: psql -h 127.0.0.1 -U postgres -d postgres -v ON_ERROR_STOP=1 -v dbname=servio_test -v migrator_pw=disposable-migrator-only -v app_pw=disposable-app-only -v accounting_pw=disposable-accounting-only -f scripts/db/create_runtime_roles.sql
+      - name: Apply latest-main migrations
+        working-directory: backend
+        run: go run ./cmd/migrate
+      - name: Verify payment, auth, order, accounting, and reporting integration scenarios
+        working-directory: backend
+        run: |
+          set -o pipefail
+          go test -tags integration -count=1 -timeout 25m -json \
+            ./internal/handler/http \
+            ./internal/usecase \
+            ./internal/repository \
+            ./cmd/api | tee financial-acceptance-tests.jsonl
+      - name: Upload financial acceptance test evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: financial-acceptance-${{ github.sha }}
+          path: backend/financial-acceptance-tests.jsonl
+          if-no-files-found: warn
