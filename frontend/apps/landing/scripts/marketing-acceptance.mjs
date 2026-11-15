@@ -170,8 +170,8 @@ async function main() {
   const errors = []
   const networkFailures = []
   const observe = page => {
-   page.on('pageerror', error => errors.push(error.message))
-   page.on('console', message => { if (message.type() === 'error') errors.push(message.text()) })
+   page.on('pageerror', error => errors.push(`${page.url()}: ${error.message}`))
+   page.on('console', message => { if (message.type() === 'error') errors.push(`${page.url()}: ${message.text()}`) })
    page.on('response', response => { if (response.status() >= 400) networkFailures.push(`${response.status()} ${new URL(response.url()).pathname}`) })
   }
   observe(page)
