@@ -46,23 +46,35 @@ jobs:
             echo "::add-mask::$secret"
           done
           docker run --detach --name servio-financial-postgres \
-            --publish 5432:5432 --env POSTGRES_PASSWORD="$POSTGRES_PASSWORD" \
+            --publish 127.0.0.1:5432:5432 --env POSTGRES_PASSWORD="$POSTGRES_PASSWORD" \
             --env POSTGRES_DB=servio_test \
             postgres@sha256:e62fbf9d3e2b49816a32c400ed2dba83e3b361e6833e624024309c35d334b412 >/dev/null
           docker run --detach --name servio-financial-redis \
-            --publish 6379:6379 --env REDIS_PASSWORD="$REDIS_PASSWORD" \
+            --publish 127.0.0.1:6379:6379 --env REDIS_PASSWORD="$REDIS_PASSWORD" \
             redis@sha256:02419de7eddf55aa5bcf49efb74e88fa8d931b4d77c07eff8a6b2144472b6952 \
             sh -c 'exec redis-server --requirepass "$REDIS_PASSWORD"' >/dev/null
-          for attempt in $(seq 1 40); do
-            if PGPASSWORD="$POSTGRES_PASSWORD" pg_isready -h 127.0.0.1 -U postgres -d servio_test >/dev/null 2>&1; then break; fi
-            sleep 2
-          done
-          PGPASSWORD="$POSTGRES_PASSWORD" pg_isready -h 127.0.0.1 -U postgres -d servio_test >/dev/null
-          for attempt in $(seq 1 40); do
-            if REDISCLI_AUTH="$REDIS_PASSWORD" redis-cli -h 127.0.0.1 ping 2>/dev/null | grep -q PONG; then break; fi
-            sleep 2
-          done
-          REDISCLI_AUTH="$REDIS_PASSWORD" redis-cli -h 127.0.0.1 ping 2>/dev/null | grep -q PONG
+          wait_for_container() {
+            local name="$1"
+            shift
+            for attempt in $(seq 1 40); do
+              if docker exec "$@" >/dev/null 2>&1; then return 0; fi
+              if [ "$(docker inspect --format '{{.State.Running}}' "$name" 2>/dev/null || true)" != true ]; then
+                echo "Disposable service stopped before becoming ready: $name"
+                docker inspect --format 'status={{.State.Status}} exit={{.State.ExitCode}} error={{.State.Error}}' "$name" || true
+                docker logs --tail 100 "$name" || true
+                return 1
+              fi
+              sleep 2
+            done
+            echo "Timed out waiting for disposable service: $name"
+            docker inspect --format 'status={{.State.Status}} exit={{.State.ExitCode}} error={{.State.Error}}' "$name" || true
+            docker logs --tail 100 "$name" || true
+            return 1
+          }
+          wait_for_container servio-financial-postgres \
+            servio-financial-postgres pg_isready -U postgres -d servio_test
+          wait_for_container servio-financial-redis \
+            --env REDISCLI_AUTH="$REDIS_PASSWORD" servio-financial-redis redis-cli ping
           {
             echo "POSTGRES_PASSWORD=$POSTGRES_PASSWORD"
             echo "DB_PASSWORD=$MIGRATOR_PASSWORD"
