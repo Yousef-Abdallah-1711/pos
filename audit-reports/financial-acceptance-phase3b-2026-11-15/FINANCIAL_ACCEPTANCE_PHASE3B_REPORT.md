@@ -1,12 +1,12 @@
 # SERVIO Financial Acceptance — Phase 3B Current Snapshot
 
 **Snapshot date:** 2026-11-15
-**Audited baseline:** `origin/main` `e35b3c2caba58431c785f6c33aa62ce9c2b22c08`
-**Execution commit:** `cd021ad8eb51bb9cf28bf87abf5a06868e9b46d7`
+**Audited baseline:** `origin/main` `3ed336c5f00d25596da3186176256a629d0d474c`
+**Execution commit:** `d843ae6aca6cf4a7d7233233a7373753bd76e5d2`
 **Pull request:** [#57](https://github.com/Yousef-Abdallah-1711/pos/pull/57), open and unmerged
-**Financial CI:** [run 43729808639](https://github.com/Yousef-Abdallah-1711/pos/actions/runs/43729808639), success; evidence artifact `14168175685`
+**Financial CI:** [run 43730539837](https://github.com/Yousef-Abdallah-1711/pos/actions/runs/43730539837), success; evidence artifact `14167589858`
 **Acceptance status:** 10 PASS, 6 PARTIAL, 1 NOT RUN, 0 FAIL; policy approvals remain separate and pending.
-**Required verified CI:** latest run `43729808684` was canceled while queued because the application-image smoke writes against an unverified external API. Backend, frontend, and security/config had passed on the prior code head; the final CSV fix was validated by financial CI.
+**Required verified CI:** PR run `43730539790` was canceled before application-image smoke; its required aggregate is therefore not green. Backend/frontend/security passed on earlier head `7d1422f`, before the CSV correction and latest-main merge. Latest-main run `43730274563` was canceled during image build before Chromium smoke.
 
 ## Runtime and data safety
 
@@ -31,7 +31,7 @@ The API scenarios used the running Go application, authenticated synthetic owner
 
 The repository `production-ci.yml` application-image smoke is not isolated CI: `ops/aws/journal-api-acceptance.cjs` hard-codes `https://api.pos.rakmyat.online/api/v1`. In run 43728374754 it created two synthetic chart-of-account entries, posted a synthetic 1.00 EGP journal, and then successfully created an audited reversal. The journal effects were reversed; the script does not delete the two synthetic accounts. I canceled the run before its remaining external marketing and synthetic-trial steps. This environment was not verified as disposable, so those external API writes are not counted as acceptance evidence. No credentials were included in the report.
 
-On latest-main run 43726424284, uploaded marketing results show the EN/AR marketing axe checks passed and Lighthouse accessibility was 1.00 for both locales. The run failed its English Lighthouse performance gate at 0.88 against 0.90; Arabic was 0.90. The reported 14 marketing-button contrast failures were not reproduced in that latest-main evidence, so no accessibility fix PR was opened.
+On earlier baseline `e35b3c2` run 43726424284, uploaded marketing results show the EN/AR marketing axe checks passed and Lighthouse accessibility was 1.00 for both locales. The run failed its English Lighthouse performance gate at 0.88 against 0.90; Arabic was 0.90. The reported 14 marketing-button contrast failures were not reproduced in that earlier baseline evidence, so no accessibility fix PR was opened.
 ## Open acceptance work and decisions
 
 - CFR-011 remains a product/accounting contract gap: `auto_supplier_invoice` and `auto_supplier_payment` entry methods still lack an established production caller. This phase tested the supported `supplier_invoice` and `payment_made` API path and does not wire or certify those exact methods.
