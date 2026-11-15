@@ -2,8 +2,8 @@
 
 **Snapshot date:** 2026-11-15 (Africa/Cairo)  
 **Repository:** `Yousef-Abdallah-1711/pos`  
-**Latest-main baseline:** `0a3b104da33209c4b2cdcd0ec64998375e2c8cef`  
-**PR head:** `041eccce1a32e5f30139ab5281a68751a234b90a`
+**Latest-main baseline:** `5c00e53434fe96b5ec5e2f73d6d3d853fbfa7bd9`  
+**Last accepted implementation commit before main advanced:** `6583d5f16e9908dab4571af398a375dc5cbc3e87`
 **Pull request:** [#57 — isolated financial acceptance runner](https://github.com/Yousef-Abdallah-1711/pos/pull/57)
 
 ## Current decision
@@ -12,7 +12,7 @@
 
 ## Executed CI evidence
 
-- Financial workflow: [run 43697897712](https://github.com/Yousef-Abdallah-1711/pos/actions/runs/43697897712), job `financial-postgres`, **success** on PR head `041eccce1a32e5f30139ab5281a68751a234b90a` and latest-main base `0a3b104da33209c4b2cdcd0ec64998375e2c8cef`.
+- The implementation passed financial workflow [run 43697897712](https://github.com/Yousef-Abdallah-1711/pos/actions/runs/43697897712) and a repeat [run 43698262832](https://github.com/Yousef-Abdallah-1711/pos/actions/runs/43698262832), including the actual API process and the independent reconciliation below. Both runs used base `0a3b104da33209c4b2cdcd0ec64998375e2c8cef`. Main has since advanced to `5c00e53434fe96b5ec5e2f73d6d3d853fbfa7bd9`; that revision is now merged into the PR branch, and its CI rerun is pending. Treat the two previous runs as prior-baseline evidence until the new run completes.
 - CI started disposable, loopback-bound PostgreSQL and password-protected Redis containers, initialized `pos_migrator`, `pos_app`, and `pos_accounting`, applied migrations, built and started the actual API, and removed the containers after test completion. The API authenticated a synthetic owner. No production or staging system was used.
 - The live test repeated the authenticated `paid` confirmation (HTTP 200) and persisted exactly one accounting event (`paid-order:2:2:1`, event count 1), which the worker completed. It found one posted `auto_sales` journal (ID 1) with three GL rows. Independent source totals were subtotal **5,000¢**, tax **500¢**, discount **0¢**, delivery **0¢**, gross **5,500¢**. Persisted order total was **5,500¢** (difference **0¢**); GL cash was **5,500¢** (difference **0¢**), sales revenue **5,000¢** (difference **0¢**), and tax payable **500¢** (difference **0¢**). The synthetic product was non-inventory with zero cost, so this scenario did not post or assert a COGS journal.
 - The foreign synthetic tenant authenticated and received HTTP **404** reading the first tenant’s order. The focused API test passed in **10.35s**. The broader PostgreSQL-backed handler/use-case/repository/route suite recorded **422 top-level passes, 3 skips, 0 failures**; three skips are not counted as passed acceptance scenarios.
