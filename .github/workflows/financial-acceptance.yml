@@ -19,14 +19,14 @@ jobs:
     timeout-minutes: 35
     services:
       postgres:
-        image: postgres@sha256:fc41cfa8a90c09e84dd723ee764be4b2f59ba6c98e1b5b3fca540adddf68a5ba
+        image: postgres@sha256:e62fbf9d3e2b49816a32c400ed2dba83e3b361e6833e624024309c35d334b412
         env:
           POSTGRES_PASSWORD: disposable-ci-only
           POSTGRES_DB: servio_test
         ports: [5432:5432]
         options: --health-cmd "pg_isready -U postgres -d servio_test" --health-interval 3s --health-timeout 3s --health-retries 20
       redis:
-        image: redis@sha256:7f7d30b7fdd09467bac58198a1f166dd69789d348d4fe859cccb20e0cf287fbe
+        image: redis@sha256:02419de7eddf55aa5bcf49efb74e88fa8d931b4d77c07eff8a6b2144472b6952
         ports: [6379:6379]
         options: --health-cmd "redis-cli ping" --health-interval 3s --health-timeout 3s --health-retries 20
     env:
