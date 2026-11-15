@@ -409,12 +409,13 @@ async function main() {
   const recoveredRscNavigations = []
   const networkFailures = []
   const observe = page => {
-   page.on('pageerror', error => errors.push(`${page.url()}: ${error.message}`))
+   page.on('pageerror', error => errors.push(`${page.url()}: ${error.stack || error.message}`))
    page.on('console', message => {
     if (message.type() !== 'error') return
     const text = message.text()
-    if (text.startsWith('Failed to fetch RSC payload for ') && text.includes('. Falling back to browser navigation.')) {
-     recoveredRscNavigations.push(`${page.url()}: ${text}`)
+    const rscFallback = text.match(/^Failed to fetch RSC payload for (https?:\/\/\S+)\. Falling back to browser navigation\./)
+    if (rscFallback) {
+     recoveredRscNavigations.push({ pageUrl: page.url(), destination: rscFallback[1] })
      return
     }
     errors.push(`${page.url()}: ${text}`)
@@ -437,9 +438,13 @@ async function main() {
   }
   await captureComparisonBoards(browser)
   const expectedPaths = new Set(['en', 'ar'].flatMap(locale => routes.map(route => `/${locale}${route}`)))
-  const invalidFallbacks = recoveredRscNavigations.filter(fallback => {
-   const pathname = fallback.match(/https?:\/\/[^/]+(\/[^ .]+)/)?.[1]
-   return !pathname || !expectedPaths.has(pathname)
+  const invalidFallbacks = recoveredRscNavigations.filter(({ pageUrl, destination }) => {
+   try {
+    const destinationUrl = new URL(destination)
+    return !expectedPaths.has(destinationUrl.pathname) || new URL(pageUrl).pathname !== destinationUrl.pathname
+   } catch {
+    return true
+   }
   })
   check('recovered Next.js navigation fallbacks use verified routes', invalidFallbacks.length === 0, JSON.stringify(invalidFallbacks))
   check('browser exceptions', errors.length === 0, errors.join('; '))
