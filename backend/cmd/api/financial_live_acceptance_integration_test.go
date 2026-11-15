@@ -225,7 +225,9 @@ func seedLiveFinancialOrderFixture(t *testing.T, db *sql.DB) liveFinancialFixtur
 	}
 	for _, account := range []struct{ code, name, kind, normal string }{
 		{"1110", "Synthetic Cash", "asset", "debit"},
+		{"1150", "Synthetic Input VAT", "asset", "debit"},
 		{"1130", "Synthetic Inventory", "asset", "debit"},
+		{"2101", "Synthetic Accounts Payable", "liability", "credit"},
 		{"4100", "Synthetic Sales", "revenue", "credit"},
 		{"2120", "Synthetic Tax Payable", "liability", "credit"},
 		{"5110", "Synthetic Food COGS", "expense", "debit"},
