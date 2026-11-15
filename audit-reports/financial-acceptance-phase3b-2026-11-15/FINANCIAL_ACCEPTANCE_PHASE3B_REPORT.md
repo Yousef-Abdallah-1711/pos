@@ -1,10 +1,10 @@
 # SERVIO Financial Acceptance — Phase 3B Current Snapshot
 
-**Snapshot date:** 2026-11-15  
-**Audited baseline:** `origin/main` `e35b3c2caba58431c785f6c33aa62ce9c2b22c08`  
-**Execution commit:** `7d1422fe295460194cfe8479244b8f1997d4746e`  
-**Pull request:** [#57](https://github.com/Yousef-Abdallah-1711/pos/pull/57), open and unmerged  
-**Financial CI:** [run 43728374780](https://github.com/Yousef-Abdallah-1711/pos/actions/runs/43728374780), success; evidence artifact `14167084474`  
+**Snapshot date:** 2026-11-15
+**Audited baseline:** `origin/main` `e35b3c2caba58431c785f6c33aa62ce9c2b22c08`
+**Execution commit:** `7d1422fe295460194cfe8479244b8f1997d4746e`
+**Pull request:** [#57](https://github.com/Yousef-Abdallah-1711/pos/pull/57), open and unmerged
+**Financial CI:** [run 43728374780](https://github.com/Yousef-Abdallah-1711/pos/actions/runs/43728374780), success; evidence artifact `14167084474`
 **Required verified CI:** run `43728374754` was canceled; backend, all frontend jobs, and security/config passed, while application-images was stopped before completion because its acceptance script performs writes against `api.pos.rakmyat.online`.
 
 ## Runtime and data safety
@@ -42,6 +42,3 @@ On latest-main run 43726424284, uploaded marketing results show the EN/AR market
 ## Release decision
 
 **Financial release: NO-GO.** The order-to-ledger chain, accountant journal workflow, payroll posting, and supported supplier invoice/payment API lifecycle now have real isolated API evidence with 0¢ differences for the executed reconciliation checks. Release remains blocked by pending independent review, exact CFR-011 contract, worker process restart/replay, Balance Sheet/AR/PDF content acceptance, accounting policy decisions, and authenticated responsive browser acceptance.
-
-
-
