@@ -410,13 +410,13 @@ async function main() {
  await fs.mkdir(output, { recursive: true })
  const browserType = browserName === 'firefox' ? firefox : chromium
  const browser = await browserType.launch({ headless: true, ...(process.env.SERVIO_BROWSER_EXECUTABLE ? { executablePath: process.env.SERVIO_BROWSER_EXECUTABLE } : {}), ...(browserName === 'chromium' ? { args: ['--no-sandbox'] } : {}) })
+ const cancelledRouteChunkRequests = []
  try {
   let page = await createPage(browser, { width: 1440, height: 1000 })
   const errors = []
   const recoveredRscNavigations = []
   const networkFailures = []
   const failedRouteChunkRequests = []
-  const cancelledRouteChunkRequests = []
   const pendingReactErrorDetails = []
   const observe = page => {
    page.on('pageerror', error => {
