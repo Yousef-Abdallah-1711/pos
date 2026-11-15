@@ -140,7 +140,7 @@ async function focusChecks(page, locale) {
   check(`keyboard focus ${locale}/${name}`, result.focusVisible && result.width >= 2 && result.contrast >= 3 && result.unobscured, JSON.stringify(result))
  }
 }
-async function interactions(page, locale) {
+async function interactions(browser, page, locale) {
  await page.setViewportSize({ width: 390, height: 844 })
  await page.goto(`${base}/${locale}`, { waitUntil: 'domcontentloaded' })
  await page.waitForFunction(theme => document.documentElement.classList.contains(theme), expectedTheme)
@@ -410,7 +410,7 @@ async function main() {
     page = await createPage(browser, { width, height: 1000 })
     observe(page)
    }
-   await interactions(page, locale)
+   await interactions(browser, page, locale)
   }
   await captureComparisonBoards(browser)
   check('browser exceptions', errors.length === 0, errors.join('; '))
