@@ -80,16 +80,20 @@ func TestFinancialAcceptanceLiveAPIOrderToLedger(t *testing.T) {
 	if paidStatus != http.StatusOK {
 		t.Fatalf("authenticated payment confirmation returned %d: %s", paidStatus, paidResponse)
 	}
+	repeatedPaidStatus, repeatedPaidResponse := acceptanceJSONRequest(t, client, http.MethodPut, paidPath, paidBody)
+	if repeatedPaidStatus != http.StatusOK {
+		t.Fatalf("idempotent payment confirmation returned %d: %s", repeatedPaidStatus, repeatedPaidResponse)
+	}
 
 	deadline := time.Now().Add(30 * time.Second)
-	var eventStatus string
+	var eventID, eventStatus string
 	var eventError sql.NullString
 	var eventAttempts int
 	for time.Now().Before(deadline) {
 		err := db.QueryRowContext(ctx, `
-			SELECT status, last_error, attempts FROM accounting_event_outbox
+			SELECT event_id, status, last_error, attempts FROM accounting_event_outbox
 			WHERE tenant_id = $1 AND restaurant_id = $2 AND order_id = $3
-			ORDER BY created_at DESC LIMIT 1`, fixture.tenantID, fixture.restaurantID, created.Data.ID).Scan(&eventStatus, &eventError, &eventAttempts)
+			ORDER BY created_at DESC LIMIT 1`, fixture.tenantID, fixture.restaurantID, created.Data.ID).Scan(&eventID, &eventStatus, &eventError, &eventAttempts)
 		if err == nil && eventStatus == "completed" {
 			break
 		}
@@ -97,6 +101,16 @@ func TestFinancialAcceptanceLiveAPIOrderToLedger(t *testing.T) {
 	}
 	if eventStatus != "completed" {
 		t.Fatalf("accounting worker did not complete synthetic order event; last status=%q attempts=%d last_error=%q", eventStatus, eventAttempts, eventError.String)
+	}
+	var eventCount int
+	if err := db.QueryRowContext(ctx, `
+		SELECT COUNT(*) FROM accounting_event_outbox
+		WHERE tenant_id = $1 AND restaurant_id = $2 AND order_id = $3 AND event_type = 'paid_order'`,
+		fixture.tenantID, fixture.restaurantID, created.Data.ID).Scan(&eventCount); err != nil {
+		t.Fatalf("count persisted paid-order accounting intents: %v", err)
+	}
+	if eventCount != 1 {
+		t.Fatalf("repeated authenticated payment confirmation created %d accounting intents, want exactly one", eventCount)
 	}
 
 	var expectedSubtotalCents, expectedTaxCents, expectedDiscountCents, expectedDeliveryCents, expectedTotalCents int64
@@ -169,10 +183,10 @@ func TestFinancialAcceptanceLiveAPIOrderToLedger(t *testing.T) {
 		t.Fatal("other synthetic restaurant was not created")
 	}
 
-	t.Logf("financial_acceptance scenario=authenticated_order_to_ledger tenant_id=%d restaurant_id=%d order_id=%d source_subtotal_cents=%d source_tax_cents=%d source_discount_cents=%d source_delivery_cents=%d source_total_cents=%d actual_order_cents=%d order_difference_cents=%d journal_id=%d cash_gl_cents=%d cash_difference_cents=%d revenue_gl_cents=%d revenue_difference_cents=%d tax_payable_gl_cents=%d tax_difference_cents=%d gl_rows=%d event_status=%s foreign_tenant_id=%d cross_tenant_read_status=%d",
+	t.Logf("financial_acceptance scenario=authenticated_order_to_ledger tenant_id=%d restaurant_id=%d order_id=%d source_subtotal_cents=%d source_tax_cents=%d source_discount_cents=%d source_delivery_cents=%d source_total_cents=%d actual_order_cents=%d order_difference_cents=%d event_id=%s event_count=%d repeated_payment_http_status=%d journal_id=%d cash_gl_cents=%d cash_difference_cents=%d revenue_gl_cents=%d revenue_difference_cents=%d tax_payable_gl_cents=%d tax_difference_cents=%d gl_rows=%d event_status=%s foreign_tenant_id=%d cross_tenant_read_status=%d",
 		fixture.tenantID, fixture.restaurantID, created.Data.ID,
 		expectedSubtotalCents, expectedTaxCents, expectedDiscountCents, expectedDeliveryCents, expectedTotalCents,
-		orderTotalCents, orderTotalCents-expectedTotalCents, journalID,
+		orderTotalCents, orderTotalCents-expectedTotalCents, eventID, eventCount, repeatedPaidStatus, journalID,
 		glCashCents, glCashCents-expectedTotalCents, glRevenueCents, glRevenueCents-expectedSubtotalCents,
 		glTaxPayableCents, glTaxPayableCents-expectedTaxCents, glRows, eventStatus, otherTenantID, foreignStatus)
 }
