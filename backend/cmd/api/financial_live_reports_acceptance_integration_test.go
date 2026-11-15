@@ -12,6 +12,7 @@ import (
 	"io"
 	"math"
 	"net/http"
+	"os/exec"
 	"strconv"
 	"strings"
 	"testing"
@@ -53,12 +54,14 @@ func verifyLiveFinancialReportsAndExports(t *testing.T, acceptance liveFinancial
 	verifyLiveAgingEndpoints(t, acceptance)
 	verifyLiveCashFlowEndpoint(t, acceptance)
 	csvRevenueCents := verifyLiveSalesCSVDownload(t, acceptance)
-	pdfBytes := verifyLiveSalesPDFDownload(t, acceptance)
-	t.Logf("financial_acceptance scenario=authenticated_reports_and_downloads tenant_id=%d restaurant_id=%d order_id=%d source_pnl_revenue_cents=%d sql_gl_revenue_cents=%d pnl_expense_cents=%d trial_debits_cents=%d trial_credits_cents=%d sales_export_gross_cents=%d sales_csv_gross_cents=%d csv_difference_cents=%d pdf_bytes=%d",
+	pdfRevenueCents, pdfOrders := verifyLiveSalesPDFDownload(t, acceptance)
+	verifyUnauthenticatedFinancialDownloadDenied(t, acceptance)
+	t.Logf("financial_acceptance scenario=authenticated_reports_and_downloads tenant_id=%d restaurant_id=%d order_id=%d source_pnl_revenue_cents=%d sql_gl_revenue_cents=%d pnl_expense_cents=%d trial_debits_cents=%d trial_credits_cents=%d sales_export_gross_cents=%d sales_csv_gross_cents=%d csv_difference_cents=%d pdf_revenue_cents=%d pdf_orders=%d pdf_difference_cents=%d",
 		acceptance.fixture.tenantID, acceptance.fixture.restaurantID, acceptance.orderID,
 		acceptance.sourceRevenueCents, acceptance.sqlRevenueCents, acceptance.sqlExpenseCents,
 		acceptance.sqlTrialDebitsCents, acceptance.sqlTrialCreditsCents, acceptance.sourceGrossSalesCents,
-		csvRevenueCents, csvRevenueCents-acceptance.sourceGrossSalesCents, pdfBytes)
+		csvRevenueCents, csvRevenueCents-acceptance.sourceGrossSalesCents, pdfRevenueCents, pdfOrders,
+		pdfRevenueCents-acceptance.sourceGrossSalesCents)
 }
 
 func verifyLiveBalanceSheetEndpoint(t *testing.T, acceptance liveFinancialReportAcceptance) {
@@ -281,7 +284,7 @@ func verifySalesCSVProductNameIsSafe(t *testing.T, records [][]string) {
 	t.Fatal("sales CSV omitted the synthetic formula-injection product row")
 }
 
-func verifyLiveSalesPDFDownload(t *testing.T, acceptance liveFinancialReportAcceptance) int {
+func verifyLiveSalesPDFDownload(t *testing.T, acceptance liveFinancialReportAcceptance) (int64, int64) {
 	t.Helper()
 	status, headers, body := requestLiveFinancialDownload(t, acceptance, "pdf")
 	if status != http.StatusOK || !strings.HasPrefix(headers.Get("Content-Type"), "application/pdf") ||
@@ -289,7 +292,65 @@ func verifyLiveSalesPDFDownload(t *testing.T, acceptance liveFinancialReportAcce
 		t.Fatalf("authenticated sales PDF download invalid: status=%d content_type=%q disposition=%q bytes=%d", status,
 			headers.Get("Content-Type"), headers.Get("Content-Disposition"), len(body))
 	}
-	return len(body)
+	text := extractFinancialPDFText(t, body)
+	assertFinancialPDFMetric(t, text, "Total Revenue", formatAcceptancePDFAmount(acceptance.sourceGrossSalesCents))
+	assertFinancialPDFMetric(t, text, "Total Orders", "1")
+	return acceptance.sourceGrossSalesCents, 1
+}
+
+func assertFinancialPDFMetric(t *testing.T, text, label, expected string) {
+	t.Helper()
+	labelIndex := strings.Index(text, label)
+	if labelIndex < 0 {
+		t.Fatalf("sales PDF omitted summary label %q: %q", label, text)
+	}
+	valueRegion := text[labelIndex+len(label):]
+	if len(valueRegion) > 80 {
+		valueRegion = valueRegion[:80]
+	}
+	if !strings.Contains(valueRegion, expected) {
+		t.Fatalf("sales PDF metric %q does not contain expected value %q: %q", label, expected, valueRegion)
+	}
+}
+
+func extractFinancialPDFText(t *testing.T, body []byte) string {
+	t.Helper()
+	command := exec.Command("pdftotext", "-layout", "-", "-")
+	command.Stdin = bytes.NewReader(body)
+	var output bytes.Buffer
+	command.Stdout = &output
+	var stderr bytes.Buffer
+	command.Stderr = &stderr
+	if err := command.Run(); err != nil {
+		t.Fatalf("extract downloaded PDF text: %v (%s)", err, stderr.String())
+	}
+	return strings.Join(strings.Fields(output.String()), " ")
+}
+
+func formatAcceptancePDFAmount(cents int64) string {
+	return fmt.Sprintf("%d.%02d", cents/100, cents%100)
+}
+
+func verifyUnauthenticatedFinancialDownloadDenied(t *testing.T, acceptance liveFinancialReportAcceptance) {
+	t.Helper()
+	client := &http.Client{Timeout: 10 * time.Second}
+	body, err := json.Marshal(map[string]string{
+		"report_type": "sales", "format": "pdf", "date_from": acceptance.salesDate,
+		"date_to": acceptance.salesDate, "locale": "en",
+	})
+	if err != nil {
+		t.Fatalf("encode unauthenticated export request: %v", err)
+	}
+	request, err := http.NewRequestWithContext(t.Context(), http.MethodPost, acceptance.baseURL+"/api/v1/reports/export", bytes.NewReader(body))
+	if err != nil {
+		t.Fatalf("create unauthenticated export request: %v", err)
+	}
+	request.Header.Set("Content-Type", "application/json")
+	request.Header.Set("Origin", "http://localhost:3002")
+	status, _, _ := sendLiveFinancialDownload(t, client, request)
+	if status != http.StatusUnauthorized {
+		t.Fatalf("unauthenticated financial export returned %d, want 401", status)
+	}
 }
 
 func requestLiveFinancialDownload(t *testing.T, acceptance liveFinancialReportAcceptance, format string) (int, http.Header, []byte) {

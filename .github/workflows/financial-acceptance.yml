@@ -32,6 +32,10 @@ jobs:
         with:
           go-version-file: backend/go.mod
           cache-dependency-path: backend/go.sum
+      - name: Install PDF text verifier
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes poppler-utils
       - name: Start isolated services with ephemeral credentials
         shell: bash
         run: |
