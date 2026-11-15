@@ -190,7 +190,7 @@ func seedLiveFinancialOrderFixture(t *testing.T, db *sql.DB) liveFinancialFixtur
 	if err := db.QueryRow(`INSERT INTO categories (tenant_id, restaurant_id, name, name_en, is_active) VALUES ($1, $2, 'Acceptance', 'Acceptance', TRUE) RETURNING id`, fixture.tenantID, fixture.restaurantID).Scan(&categoryID); err != nil {
 		t.Fatalf("seed synthetic category: %v", err)
 	}
-	if err := db.QueryRow(`INSERT INTO products (tenant_id, restaurant_id, category_id, name, name_en, price, cost, sku, status, is_available) VALUES ($1, $2, $3, 'Acceptance item', 'Acceptance item', 25, 0, $4, 'active', TRUE) RETURNING id`, fixture.tenantID, fixture.restaurantID, categoryID, "FA-"+runID).Scan(&fixture.productID); err != nil {
+	if err := db.QueryRow(`INSERT INTO products (tenant_id, restaurant_id, category_id, name, name_en, price, cost, sku, status, is_available, track_inventory) VALUES ($1, $2, $3, 'Acceptance item', 'Acceptance item', 25, 0, $4, 'active', TRUE, FALSE) RETURNING id`, fixture.tenantID, fixture.restaurantID, categoryID, "FA-"+runID).Scan(&fixture.productID); err != nil {
 		t.Fatalf("seed synthetic product: %v", err)
 	}
 	for _, account := range []struct{ code, name, kind, normal string }{
