@@ -3,28 +3,30 @@
 **Snapshot date:** 2026-11-15 (Africa/Cairo)  
 **Repository:** `Yousef-Abdallah-1711/pos`  
 **Latest-main baseline:** `0a3b104da33209c4b2cdcd0ec64998375e2c8cef`  
-**PR head:** `4de0dad048f679cb669fa86dc68f08c98bfebc76`  
+**PR head:** `041eccce1a32e5f30139ab5281a68751a234b90a`
 **Pull request:** [#57 — isolated financial acceptance runner](https://github.com/Yousef-Abdallah-1711/pos/pull/57)
 
 ## Current decision
 
-**Financial release remains NO-GO.** A disposable PostgreSQL/Redis CI stack was actually provisioned, restricted roles initialized, latest-main migrations applied, and database-backed handler/use-case/repository integration tests executed. This is materially beyond the earlier “NOT RUN” snapshot, but it is not a full authenticated running-API order-to-ledger acceptance run, does not exercise positive supplier invoice/payment lifecycles, and does not establish browser acceptance or accountant-approved policy.
+**Financial release remains NO-GO.** A disposable PostgreSQL/Redis CI stack was provisioned, restricted roles initialized, latest-main migrations applied, and the real API process started with restricted database identities. One authenticated order → repeated payment confirmation → durable event → worker → sales journal → GL workflow passed with independent SQL reconciliation and cross-tenant denial. Positive supplier AP lifecycles, accountant/cashier API-process workflows, financial report downloads, browser acceptance, and accountant-approved policy are still open.
 
 ## Executed CI evidence
 
-- Financial workflow: [run 43695500770](https://github.com/Yousef-Abdallah-1711/pos/actions/runs/43695500770), job `financial-postgres`, **success**. The workflow ran with the PR merge base at the exact latest-main SHA shown above.
-- The job started disposable PostgreSQL and Redis containers, initialized the repository’s restricted `pos_migrator`, `pos_app`, and `pos_accounting` roles, and applied migrations successfully. CI stopped the containers at job completion. No production or staging database was used.
-- The test command ran integration-tagged packages `internal/handler/http`, `internal/usecase`, `internal/repository`, and `cmd/api` against CI PostgreSQL. Raw Go JSON events were uploaded as artifact `financial-acceptance-76d91630a9483c757cf3aa345114e36a8fea1fe5` ([artifact](https://github.com/Yousef-Abdallah-1711/pos/actions/runs/43695500770/artifacts/14154078867)).
-- Artifact counts: **422 top-level tests passed, 2 top-level tests skipped, 0 failed**. Across nested test/subtest events, 956 passed, 2 skipped, 0 failed. The skipped benchmark is not acceptance evidence.
-- The separate `SERVIO verified CI` run [43695500767](https://github.com/Yousef-Abdallah-1711/pos/actions/runs/43695500767) passed backend and its `go test -tags integration ./...` step; the overall run was still in progress at snapshot time. This broader run is not counted as a second financial-acceptance run.
-- PR #57 is open and awaits independent review. No merge, deployment, production write, or staging write was made.
+- Financial workflow: [run 43697897712](https://github.com/Yousef-Abdallah-1711/pos/actions/runs/43697897712), job `financial-postgres`, **success** on PR head `041eccce1a32e5f30139ab5281a68751a234b90a` and latest-main base `0a3b104da33209c4b2cdcd0ec64998375e2c8cef`.
+- CI started disposable, loopback-bound PostgreSQL and password-protected Redis containers, initialized `pos_migrator`, `pos_app`, and `pos_accounting`, applied migrations, built and started the actual API, and removed the containers after test completion. The API authenticated a synthetic owner. No production or staging system was used.
+- The live test repeated the authenticated `paid` confirmation (HTTP 200) and persisted exactly one accounting event (`paid-order:2:2:1`, event count 1), which the worker completed. It found one posted `auto_sales` journal (ID 1) with three GL rows. Independent source totals were subtotal **5,000¢**, tax **500¢**, discount **0¢**, delivery **0¢**, gross **5,500¢**. Persisted order total was **5,500¢** (difference **0¢**); GL cash was **5,500¢** (difference **0¢**), sales revenue **5,000¢** (difference **0¢**), and tax payable **500¢** (difference **0¢**). The synthetic product was non-inventory with zero cost, so this scenario did not post or assert a COGS journal.
+- The foreign synthetic tenant authenticated and received HTTP **404** reading the first tenant’s order. The focused API test passed in **10.35s**. The broader PostgreSQL-backed handler/use-case/repository/route suite recorded **422 top-level passes, 3 skips, 0 failures**; three skips are not counted as passed acceptance scenarios.
+- Supporting artifact: [financial acceptance JSON evidence](https://github.com/Yousef-Abdallah-1711/pos/actions/runs/43697897712/artifacts/14155123441). The final log contains only synthetic tenant/order/event identifiers and monetary values.
+- CI history is preserved: run [43696982964](https://github.com/Yousef-Abdallah-1711/pos/actions/runs/43696982964) appeared green because its `go test | tee` pipeline lacked `pipefail`; its uploaded artifact actually recorded a worker retry. Strict pipeline handling exposed the fixture’s missing standard COGS accounts; the following run exposed an incorrect test assertion that compared gross order total to revenue. The fixture and assertion were corrected, and run 43697897712 is the first honest green live run. No product-side accounting behavior was changed.
+- PR #57 remains open. The only repository collaborator available to request as reviewer is the PR author, so independent review is still pending; no self-review, merge, deployment, production write, or staging write was made.
 
 ## What the persisted tests established
 
-- Durable paid-order intent, worker retry/replay, expired-lease recovery, idempotent posting, tenant scope, and exact journal/GL row counts passed in PostgreSQL-backed integration tests.
+- The real running API authenticated a synthetic owner, created and paid an order, accepted an identical payment confirmation idempotently, and persisted exactly one paid-order event. The worker completed that event and posted one sales journal; SQL independently reconciled order total and cash/revenue/tax GL with zero-cent differences.
+- Durable paid-order intent, worker retry/replay, expired-lease recovery, idempotent posting, tenant scope, and exact journal/GL row counts also passed in PostgreSQL-backed integration tests.
 - Payroll mark-paid persistence, duplicate/concurrent payment prevention, tenant scope, and rollback-at-failure-boundary tests passed.
 - Journal/GL integrity and restricted-role protections, cross-tenant accounting denial, and financial report/earnings boundary assertions passed.
-- PostgreSQL-backed auth/session and handler integration tests passed, but they construct handlers and middleware in test processes. They did **not** log into a separately running full API binary. Therefore authenticated application-process acceptance remains **NOT RUN**.
+- PostgreSQL-backed auth/session and handler integration tests passed, but those tests construct handlers and middleware in test processes. The focused synthetic owner order/payment scenario above is the only authenticated workflow exercised through a separately running API binary; cashier, accountant, supplier, payroll, reporting, and export workflows through that API remain **NOT RUN**.
 - The supported supplier invoice/payment positive lifecycle was not exercised by this runner. Existing negative-scope checks and mocked auto-posting examples do not prove live AP reconciliation. `PostSupplierInvoiceEntry` / `PostSupplierPaymentEntry` remain outside the active production contract; do not invent a caller. CFR-011 support versus supersession is still an owner decision.
 
 The dated scenario matrix separates PASS, PARTIAL, and NOT RUN and records exact test names: [Phase 3A financial acceptance matrix](FINANCIAL_ACCEPTANCE_MATRIX.csv).
@@ -35,7 +37,7 @@ The first run, [43695391211](https://github.com/Yousef-Abdallah-1711/pos/actions
 
 ## Remaining execution and policy gates
 
-1. Add a full API-process integration scenario with synthetic authenticated owner/accountant/cashier users and persisted source fixtures; query independent SQL totals for the complete order → payment → event → worker → journal → GL chain.
+1. Extend the real API-process scenarios to cashier and accountant roles and test the complete inventory/COGS branch, including worker interruption/restart and replay through the process boundary.
 2. Execute the positive supported supplier invoice approval and payment routes with AP/GL reconciliation, atomicity, and idempotency. Keep exact CFR-011 `auto_supplier_*` behavior pending the owner’s support/accounting decision.
 3. Execute authenticated accountant valid/invalid journal workflows and inspect real financial report CSV/PDF/XLSX downloads; do not infer download results from handler response-shape tests.
 4. Run authenticated Playwright English/Arabic desktop and 375px mobile scenarios. Do not call automated checks manual acceptance.
