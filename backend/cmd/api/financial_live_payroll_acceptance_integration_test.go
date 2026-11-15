@@ -29,9 +29,9 @@ func TestFinancialAcceptanceLiveAPIPayrollLifecycle(t *testing.T) {
 	seedLivePayrollPostingRule(t, db, fixture)
 	salaryID := createLiveFinancialSalary(t, baseURL, client, employeeID)
 	var grossCents, netCents int64
-	var month, year int
-	if err := db.QueryRowContext(ctx, `SELECT ROUND(gross_salary*100)::bigint, ROUND(net_salary*100)::bigint, month, year FROM salaries WHERE id=$1 AND tenant_id=$2 AND restaurant_id=$3`, salaryID, fixture.tenantID, fixture.restaurantID).Scan(&grossCents, &netCents, &month, &year); err != nil || grossCents != 150000 || netCents != 150000 || month != int(time.Now().UTC().Month()) || year != time.Now().UTC().Year() {
-		t.Fatalf("synthetic source salary gross/net=%d/%d cents period=%d/%d, expected 150000/150000 and current period (err=%v)", grossCents, netCents, month, year, err)
+	var month, year, periodMonth, periodYear int
+	if err := db.QueryRowContext(ctx, `SELECT ROUND(gross_salary*100)::bigint, ROUND(net_salary*100)::bigint, month, year, EXTRACT(MONTH FROM pay_period_start)::int, EXTRACT(YEAR FROM pay_period_start)::int FROM salaries WHERE id=$1 AND tenant_id=$2 AND restaurant_id=$3`, salaryID, fixture.tenantID, fixture.restaurantID).Scan(&grossCents, &netCents, &month, &year, &periodMonth, &periodYear); err != nil || grossCents != 150000 || netCents != 150000 || month != periodMonth || year != periodYear {
+		t.Fatalf("synthetic source salary gross/net=%d/%d cents stored period=%d/%d pay period=%d/%d (err=%v)", grossCents, netCents, month, year, periodMonth, periodYear, err)
 	}
 	markPath := financialAcceptancePath(baseURL, "/api/v1/hr/salaries/%d/mark-paid", salaryID)
 	status, body := acceptanceJSONRequest(t, client, http.MethodPost, markPath, map[string]any{"payment_reference": "FA-PAYROLL-1500"})
