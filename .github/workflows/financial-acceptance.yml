@@ -105,7 +105,7 @@ jobs:
           set -euo pipefail
           export DB_USER=pos_app DB_PASSWORD="$APP_PASSWORD"
           export ACCOUNTING_DB_USER=pos_accounting ACCOUNTING_DB_PASSWORD="$ACCOUNTING_PASSWORD"
-          export PORT=8080 JWT_SECRET PAYMOB_MODE=mock CORS_ORIGINS=http://localhost:3002
+          export PORT=8080 JWT_SECRET PAYMOB_MODE=mock CORS_ORIGINS=http://localhost:3002 RBAC_ENFORCEMENT=enforce
           export REDIS_URL="redis://:$REDIS_PASSWORD@127.0.0.1:6379/0"
           nohup /tmp/servio-financial-api >/tmp/servio-financial-api.log 2>&1 &
           echo $! > /tmp/servio-financial-api.pid
@@ -125,6 +125,8 @@ jobs:
           go test -tags integration -count=1 -timeout 90s ./cmd/api -run '^TestFinancialAcceptanceLiveAPI' -json | tee financial-live-api-tests.jsonl
       - name: Verify payment, auth, order, accounting, and reporting integration scenarios
         working-directory: backend
+        env:
+          POS_FINANCIAL_ACCEPTANCE_API_URL: http://127.0.0.1:8080
         run: |
           set -euo pipefail
           go test -tags integration -count=1 -timeout 25m -json \

@@ -191,10 +191,11 @@ func (r *SalaryRepository) CreateSalary(salary *domain.Salary) (int, error) {
 			other_earnings, tax, social_insurance, health_insurance,
 			pension, loan_deduction, advance_deduction, other_deductions,
 			days_worked, days_absent, total_hours_worked, total_overtime_hours,
-			payment_method, status, created_by
+			payment_method, status, created_by, month, year
 		)
 		SELECT $1, $2, e.id, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13,
-			$14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28
+			$14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28,
+			EXTRACT(MONTH FROM $4)::int, EXTRACT(YEAR FROM $4)::int
 		FROM employees e
 		WHERE e.id = $3 AND e.tenant_id = $1 AND e.restaurant_id = $2
 		RETURNING id
