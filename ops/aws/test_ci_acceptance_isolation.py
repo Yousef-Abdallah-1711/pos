@@ -14,8 +14,15 @@ class CIIsolationTests(unittest.TestCase):
         self.assertIn("SERVIO_ACCEPTANCE_API_BASE_URL=https://api.servio.test/api/v1", runner)
         self.assertIn('/work/acceptance-target.cjs:ro', runner)
         self.assertIn("replace('rakmyat.online', 'servio.test')", runner)
+        self.assertIn("replace('api.pos.servio.test', 'api.servio.test')", runner)
         self.assertIn("service.pop('ports', None)", runner)
         self.assertNotIn("'--network', 'host'", runner)
+
+    def test_upload_acceptance_closes_browser_when_session_logout_fails(self):
+        script = (ROOT / 'ops/aws/browser-upload.cjs').read_text()
+        self.assertIn("timeout:10000", script)
+        self.assertIn("await browser.close();", script)
+        self.assertIn("catch(error){\n   checks.push({check:'Synthetic tenant session logout'", script)
 
     def test_compose_targets_and_external_services_are_safe(self):
         compose = json.loads((ROOT / 'ops/aws/compose.json').read_text())

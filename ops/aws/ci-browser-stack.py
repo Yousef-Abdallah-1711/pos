@@ -70,6 +70,8 @@ config['networks']['edge']['internal'] = True
 # CI uses its own local CA only; this does not modify or relax public HTTPS.
 caddy = (OPS / 'Caddyfile.public').read_text()
 caddy = caddy.replace('rakmyat.online', 'servio.test')
+# CI's API TLS route uses the same short host as the browser target guard.
+caddy = caddy.replace('api.pos.servio.test', 'api.servio.test')
 caddy = re.sub(r'\s*@staging_frontend\s*\{[^}]*\}\s*basic_auth @staging_frontend\s*\{[^\n]*\n\s*staging [^\n]*\n\s*\}', '', caddy)
 (PRIVATE / 'ci-Caddyfile').write_text('{\n local_certs\n}\n' + caddy)
 path = PRIVATE / 'ci-compose.json'

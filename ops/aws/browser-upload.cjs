@@ -55,7 +55,14 @@ async function object(response){const raw=await response.json();return raw.data|
  }catch(error){checks.push({check:'Synthetic image browser acceptance',status:'FAIL',error:String(error.message).replaceAll(user.password,'[redacted]').slice(0,300)});}
  finally{
   record('No upload browser runtime exceptions',errors.length,0);
-  await context.request.post(base+'/auth/logout',{headers,data:{}});await browser.close();
+  try{
+   const logout=await context.request.post(base+'/auth/logout',{headers,data:{},timeout:10000});
+   record('Synthetic tenant session logout',logout.status(),200);
+  }catch(error){
+   checks.push({check:'Synthetic tenant session logout',status:'FAIL',error:String(error.message).replaceAll(user.password,'[redacted]').slice(0,200)});
+  }finally{
+   await browser.close();
+  }
  }
  fs.writeFileSync(path.join(evidence,'upload-browser.json'),JSON.stringify({checks,errors},null,2),{mode:0o600});
  for(const row of checks)console.log(row.status+' '+row.check);
