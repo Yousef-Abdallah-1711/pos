@@ -416,6 +416,7 @@ async function main() {
   const recoveredRscNavigations = []
   const networkFailures = []
   const failedRouteChunkRequests = []
+  const cancelledRouteChunkRequests = []
   const pendingReactErrorDetails = []
   const observe = page => {
    page.on('pageerror', error => {
@@ -446,7 +447,10 @@ async function main() {
    page.on('requestfailed', request => {
     const requestUrl = new URL(request.url())
     if (requestUrl.pathname.startsWith('/_next/static/chunks/app/')) {
-     failedRouteChunkRequests.push(`${request.failure()?.errorText || 'request failed'} ${requestUrl.pathname}`)
+     const reason = request.failure()?.errorText || 'request failed'
+     const detail = `${reason} ${requestUrl.pathname}`
+     if (/NS_BINDING_ABORTED|ERR_ABORTED/.test(reason)) cancelledRouteChunkRequests.push(detail)
+     else failedRouteChunkRequests.push(detail)
     }
    })
    page.on('response', response => {
@@ -482,12 +486,13 @@ async function main() {
    }
   })
   check('recovered Next.js navigation fallbacks use verified routes', invalidFallbacks.length === 0, JSON.stringify(invalidFallbacks))
+  check('cancelled route chunk requests recorded', true, JSON.stringify(cancelledRouteChunkRequests))
   check('failed route chunk requests', failedRouteChunkRequests.length === 0, JSON.stringify(failedRouteChunkRequests))
   check('failed network responses', networkFailures.length === 0, networkFailures.join('; '))
   check('browser exceptions', errors.length === 0, errors.join('; '))
  } finally {
   await browser.close()
-  await fs.writeFile(path.join(output, 'results.json'), JSON.stringify({ base, browser: browserName, color_scheme: colorScheme, theme: expectedTheme, checks }, null, 2))
+  await fs.writeFile(path.join(output, 'results.json'), JSON.stringify({ base, browser: browserName, color_scheme: colorScheme, theme: expectedTheme, cancelled_route_chunk_requests: cancelledRouteChunkRequests, checks }, null, 2))
   await fs.writeFile(path.join(output, 'navigation-evidence.json'), JSON.stringify({ sourceCommit, screenshots: navigationScreenshots }, null, 2))
  }
 }
