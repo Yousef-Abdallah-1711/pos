@@ -346,7 +346,7 @@ func (r *CustomerInvoiceRepository) VoidInvoice(tenantID, restaurantID, id int, 
 	_, err = tx.Exec(`
 		UPDATE invoices_customer
 		SET status = $1,
-			internal_notes = CONCAT(COALESCE(internal_notes, ''), CASE WHEN COALESCE(internal_notes, '') = '' THEN '' ELSE E'\n' END, $2),
+			internal_notes = CONCAT(COALESCE(internal_notes, ''), CASE WHEN COALESCE(internal_notes, '') = '' THEN '' ELSE E'\n' END, $2::text),
 			updated_by = $3,
 			updated_at = CURRENT_TIMESTAMP
 		WHERE id = $4 AND tenant_id = $5 AND restaurant_id = $6
