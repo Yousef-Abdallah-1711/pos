@@ -247,6 +247,8 @@ html.dark .auth-form__fields > p { color: #cbd5e1; }
 html.dark .auth-form__footer a { color: #c4b5fd; }
 html.dark .auth-status--available { color: #86efac; }
 html.dark .auth-status--unavailable { color: #fca5a5; }
+html.dark .auth-page .poos-input { border-color: #64748b; background: #111827; color: #f9fafb; }
+html.dark .auth-page .poos-input::placeholder { color: #cbd5e1; }
 
 .tenant-dialog { width: min(calc(100% - 2rem), 34rem); max-height: min(90dvh, 44rem); border: 1px solid var(--poos-rule); border-radius: 1rem; padding: 0; color: var(--poos-ink); background: var(--poos-white); box-shadow: 0 1.5rem 4rem rgb(23 19 39 / 24%); }
 .tenant-dialog::backdrop { background: rgb(23 19 39 / 54%); }
