@@ -4,6 +4,7 @@ import { useRouter, usePathname } from 'next/navigation'
 import { Globe, Check } from 'lucide-react'
 import { useState, useRef, useEffect } from 'react'
 import { usePreferencesStore } from '@/stores/preferencesStore'
+import { defaultLocale } from '@pos-saas/i18n'
 
 const LANGUAGE_NAMES: Record<string, string> = {
   'en': 'English',
@@ -14,7 +15,7 @@ export function LanguageSwitcher() {
   const router = useRouter()
   const pathname = usePathname()
   // Extract locale from pathname (e.g., /en/dashboard -> 'en')
-  const locale = (pathname.split('/')[1] || 'en') as 'en' | 'ar'
+  const locale = (pathname.split('/')[1] || defaultLocale) as 'en' | 'ar'
   const [isOpen, setIsOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
 

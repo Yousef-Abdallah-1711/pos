@@ -1,6 +1,6 @@
-﻿export const defaultLocale = 'en' as const
-export const locales = ['en', 'ar'] as const
+import { defaultLocale, locales } from '@pos-saas/i18n'
 
+export { defaultLocale, locales }
 export type Locale = (typeof locales)[number]
 
 export const localeNames: Record<Locale, string> = {
@@ -9,4 +9,4 @@ export const localeNames: Record<Locale, string> = {
 }
 
 export const rtlLocales = ['ar'] as const
-export const isRTL = (locale: Locale) => rtlLocales.includes(locale as any)
+export const isRTL = (locale: Locale) => rtlLocales.includes(locale as (typeof rtlLocales)[number])

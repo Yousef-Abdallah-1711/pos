@@ -1,5 +1,7 @@
 import { getRequestConfig } from 'next-intl/server'
 import { defaultLocale, locales, type Locale } from '@/i18n/config'
+import subscriptionEn from '@pos-saas/i18n/locales/en/subscription.json'
+import subscriptionAr from '@pos-saas/i18n/locales/ar/subscription.json'
 
 function resolveLocale(input: string | undefined): Locale {
   if (!input) {
@@ -10,13 +12,14 @@ function resolveLocale(input: string | undefined): Locale {
 
 export default getRequestConfig(async ({ requestLocale }) => {
   const locale = resolveLocale(await requestLocale)
-  const messages =
+  const appMessages =
     locale === 'ar'
       ? (await import('@/i18n/messages/ar.json')).default
       : (await import('@/i18n/messages/en.json')).default
+  const subscription = locale === 'ar' ? subscriptionAr : subscriptionEn
 
   return {
     locale,
-    messages,
+    messages: { ...appMessages, subscription },
   }
 })

@@ -7,6 +7,7 @@
 import enMessages from '@/i18n/messages/en.json'
 import arMessages from '@/i18n/messages/ar.json'
 import { debugError, debugWarn } from '@/lib/debug'
+import { defaultLocale } from '@pos-saas/i18n'
 
 const messages = {
   en: enMessages,
@@ -32,18 +33,18 @@ export function getTranslation(
 ): string {
   try {
     const keys = path.split('.')
-    let value: any = messages[locale]
+  let value: unknown = messages[locale]
 
     for (const key of keys) {
       if (value && typeof value === 'object' && key in value) {
-        value = value[key]
+        value = (value as Record<string, unknown>)[key]
       } else {
         const cacheKey = `${locale}.${path}`
         if (!missingKeyCache.has(cacheKey)) {
           missingKeyCache.add(cacheKey)
           debugWarn(`Translation key not found: ${cacheKey}`)
         }
-        return fallback || path
+        return fallback || `⟦${cacheKey}⟧`
       }
     }
 
@@ -71,7 +72,7 @@ export function createTranslator(locale: Locale) {
 export function getLocaleFromPath(pathname: string): Locale {
   const parts = pathname.split('/')
   const locale = parts[1]
-  return (locale === 'ar' ? 'ar' : 'en') as Locale
+  return (locale === 'en' || locale === 'ar' ? locale : defaultLocale) as Locale
 }
 
 /**

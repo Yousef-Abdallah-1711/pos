@@ -18,7 +18,7 @@ export function OperationsSections({ locale }: { locale: Locale }) {
         <FeatureActions locale={locale} source="home-kitchen-display" destination="features/kitchen-display" label={c.kitchenLink} />
       </div>
       <div className="sv-kitchen-stage"><ProductCapture locale={locale} image="kitchen" alt={c.kitchenTitle} />
-        <div className="sv-state-ledger">{(locale === 'ar' ? ['جديد', 'قيد التجهيز', 'جاهز', 'مكتمل'] : ['New', 'In progress', 'Ready', 'Completed']).map((state, i) => <p key={state}><span>0{i + 1}</span>{state}</p>)}</div>
+        <div className="sv-state-ledger">{c.kitchenStates.map((state, i) => <p key={state}><span>0{i + 1}</span>{state}</p>)}</div>
       </div><p className="sv-note">{c.kitchenNote}</p>
     </div></section>
     <section id="online-ordering" className="sv-section sv-ordering"><div className="sv-shell sv-ordering-grid">
@@ -26,8 +26,9 @@ export function OperationsSections({ locale }: { locale: Locale }) {
         <ol className="sv-plain-steps">{c.orderingSteps.map((step, i) => <li key={step}><span>0{i + 1}</span>{step}</li>)}</ol>
         <FeatureActions locale={locale} source="home-online-ordering" destination="features/online-ordering" label={c.orderingLink} />
       </div>
-      <div className="sv-guest-captures"><ProductCapture locale={locale} image="checkout" alt={locale === 'ar' ? 'إتمام طلب تجريبي نقدي بقيمة 27.50 جنيه' : 'Synthetic cash checkout totaling 27.50 EGP'} />
-        <ProductCapture locale={locale} image="confirmation" alt={locale === 'ar' ? 'تأكيد الطلب التجريبي المرسل من موقع المطعم' : 'Confirmation of the synthetic storefront order'} /></div>
+      <div className="sv-guest-captures sv-guest-captures--single">
+        <ProductCapture locale={locale} image="checkout" alt={c.checkoutCaptureAlt} />
+      </div>
     </div></section>
   </>
 }

@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation'
+import { defaultLocale } from '@pos-saas/i18n'
 
 export default function RootPage() {
-  // Phase 1: Redirect to /en (English only)
-  redirect('/en')
+  redirect(`/${defaultLocale}`)
 }

@@ -11,6 +11,7 @@ import { useAuthStore } from '@/stores/authStore'
 import { getConfig } from '@/lib/config'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { Navbar } from '@/components/Navbar'
+import { getSiteCopy } from '@/content/site'
 
 type RegisterForm = { name: string; email: string; password: string; confirmPassword: string; restaurantName: string; restaurantSlug: string; phone: string }
 
@@ -23,6 +24,7 @@ export default function RegisterPage() {
   }, [])
   const setAuth = useAuthStore((state) => state.setAuth)
   const { t, dir, language } = useLanguage()
+  const siteCopy = getSiteCopy(language)
   const text = t.auth.register
   const messages = { required: t.auth.validation.required, nameMin: t.auth.validation.nameMin, nameMax: t.auth.validation.nameMax, invalidEmail: t.auth.validation.invalidEmail, emailMax: t.auth.validation.emailMax, passwordMin: t.auth.validation.passwordMin, passwordMax: t.auth.validation.passwordMax, passwordMismatch: t.auth.validation.passwordsMismatch, invalidSubdomain: t.auth.validation.invalidSubdomain, reservedSubdomain: t.auth.validation.reservedSubdomain, invalidPhone: t.auth.validation.invalidPhone }
   const schema = createRegisterSchema(messages)
@@ -34,12 +36,23 @@ export default function RegisterPage() {
     return /reserved/i.test(String(response.data.message)) ? 'reserved' as const : false
   }, [])
   const availability = useDebouncedAvailability(restaurantSlug, isSubdomainFormatValid, checkAvailability, 500)
-  const fallback = language === 'ar'
-    ? { validation: 'يرجى مراجعة الحقول الموضحة.', invalidCredentials: 'البريد الإلكتروني أو كلمة المرور غير صحيحة.', rateLimited: 'محاولات كثيرة. انتظر قليلًا ثم حاول مجددًا.', unavailable: 'الخدمة غير متاحة مؤقتًا. حاول مرة أخرى.', network: 'تعذر الاتصال. تحقق من الاتصال ثم حاول مجددًا.', unexpected: 'تعذر إنشاء الحساب. حاول مرة أخرى.', conflict: 'هذا البريد الإلكتروني أو رابط الموقع مستخدم بالفعل.' }
-    : { validation: 'Please review the highlighted fields.', invalidCredentials: 'Email or password is incorrect.', rateLimited: 'Too many attempts. Wait a moment and try again.', unavailable: 'The service is temporarily unavailable. Please try again.', network: 'Unable to connect. Check your connection and try again.', unexpected: 'We could not create your account. Please try again.', conflict: 'That email or website address is already in use.' }
-  const messagesByState = language === 'ar'
-    ? { invalid: messages.invalidSubdomain, checking: 'جارٍ التحقق من التوفر…', available: text.subdomainAvailable, taken: text.subdomainUnavailable, reserved: 'رابط الموقع هذا محجوز.', error: 'تعذر التحقق من التوفر. تحقق من الاتصال ثم حاول مجددًا.' }
-    : { invalid: messages.invalidSubdomain, checking: 'Checking availability…', available: text.subdomainAvailable, taken: text.subdomainUnavailable, reserved: 'This website address is reserved.', error: 'Availability could not be checked. Check your connection and try again.' }
+  const fallback = {
+    validation: t.auth.validation.review,
+    invalidCredentials: t.auth.login.invalidCredentials,
+    rateLimited: t.auth.errors.rateLimited,
+    unavailable: t.auth.errors.registrationUnavailable,
+    network: t.auth.errors.network,
+    unexpected: t.auth.errors.unexpectedRegistration,
+    conflict: t.auth.errors.registrationConflict,
+  }
+  const messagesByState = {
+    invalid: messages.invalidSubdomain,
+    checking: text.checkingAvailability,
+    available: text.subdomainAvailable,
+    taken: text.subdomainUnavailable,
+    reserved: t.auth.errors.reservedAddress,
+    error: t.auth.errors.availability,
+  }
   const focusField = (field: keyof RegisterForm) => window.requestAnimationFrame(() => setFocus(field))
 
   const onSubmit = async (data: RegisterForm) => {
@@ -84,32 +97,32 @@ export default function RegisterPage() {
     <Navbar />
     <main id="main-content" dir={dir} className="auth-page">
       <div className="auth-layout">
-        <section className="auth-story" aria-label={language === 'ar' ? 'عن SERVIO' : 'About SERVIO'}>
+        <section className="auth-story" aria-label={text.storyLabel}>
           <div>
-            <h1>{language === 'ar' ? 'ابدأ مساحة عمل مطعمك.' : 'Set up your restaurant workspace.'}</h1>
+            <h1>{text.storyTitle}</h1>
             <p>{t.footer.tagline}</p>
           </div>
-          <div className="auth-story__rule">{language === 'ar' ? 'منصة واحدة لفريق الخدمة والمطبخ.' : 'One platform for front- and back-of-house work.'}</div>
+          <div className="auth-story__rule">{text.storyRule}</div>
         </section>
         <section className="auth-form-panel" aria-labelledby="register-heading">
           <div className="auth-form">
-            <Link className="auth-form__back" href={`/${language}`}>{language === 'ar' ? 'العودة إلى SERVIO' : 'Back to SERVIO'}</Link>
+            <Link className="auth-form__back" href={`/${language}`}>{text.backToBrand}</Link>
             <h2 id="register-heading">{text.title}</h2>
-            <p className="auth-form__intro">{language === 'ar' ? 'أدخل بياناتك وبيانات مطعمك لبدء إنشاء الحساب.' : 'Enter your details and restaurant information to create an account.'}</p>
+            <p className="auth-form__intro">{text.intro}</p>
             <form method="post" noValidate onSubmit={handleSubmit(onSubmit, onInvalid)} className="auth-form__fields">
-              <p className="mb-6 text-sm text-slate-600">{language === 'ar' ? `تجربة لمدة 14 يومًا. تفضيل الفوترة: ${billing === 'annual' ? 'سنوي' : 'شهري'}. لا يتم تحصيل أي مبلغ عند التسجيل.` : `14-day trial. Billing preference: ${billing}. Registration does not charge you.`}</p>
+              <p className="mb-6 text-sm text-slate-600">{text.trialPreference.replace('{billing}', billing === 'annual' ? siteCopy.annual : siteCopy.monthly)}</p>
               <FormErrorSummary title={fallback.validation} errors={isSubmitted ? Object.fromEntries(Object.entries(errors).filter(([key]) => key !== 'root').map(([key, value]) => [key, value?.message ?? 'Review this field'])) : {}} onFocusField={(key) => setFocus(key as keyof RegisterForm)} />
               {errors.root?.server?.message && <p role="alert" className="poos-error">{errors.root.server.message}</p>}
               <FormField id="name" label={text.fullName} required error={fieldError('name')}><input {...register('name')} {...fieldAccessibility('name', fieldError('name'))} autoComplete="name" maxLength={255} placeholder={text.fullNamePlaceholder} {...common} /></FormField>
               <FormField id="email" label={text.email} required error={fieldError('email')}><input {...register('email')} {...fieldAccessibility('email', fieldError('email'))} type="email" autoComplete="email" maxLength={255} placeholder={text.emailPlaceholder} {...common} /></FormField>
               <FormField id="restaurantName" label={text.restaurantName} required error={fieldError('restaurantName')}><input {...register('restaurantName')} {...fieldAccessibility('restaurantName', fieldError('restaurantName'))} autoComplete="organization" maxLength={255} placeholder={text.restaurantNamePlaceholder} {...common} /></FormField>
-              <FormField id="restaurantSlug" label={text.websiteSubdomain} required description={`${language === 'ar' ? 'عنوان الموقع المطلوب؛ تفعيل الموقع خطوة إعداد مستقلة:' : 'Requested address; storefront activation is a separate setup step:'} ${restaurantSlug || 'your-subdomain'}.${restaurantDomain}`} error={fieldError('restaurantSlug')}>
+              <FormField id="restaurantSlug" label={text.websiteSubdomain} required description={`${text.requestedAddress} ${restaurantSlug || 'your-subdomain'}.${restaurantDomain}`} error={fieldError('restaurantSlug')}>
                 <input {...register('restaurantSlug')} {...fieldAccessibility('restaurantSlug', fieldError('restaurantSlug'))} autoCapitalize="none" autoCorrect="off" maxLength={63} placeholder={text.subdomainPlaceholder} {...common} />
                 <AsyncAvailabilityField state={availability.state} messages={messagesByState} />
               </FormField>
               <FormField id="phone" label={text.phone} optionalLabel={t.auth.validation.optional} error={fieldError('phone')}><input {...register('phone')} {...fieldAccessibility('phone', fieldError('phone'))} type="tel" autoComplete="tel" placeholder={text.phonePlaceholder} {...common} /></FormField>
-              <FormField id="password" label={text.password} required description={language === 'ar' ? '6 أحرف على الأقل، وبحد أقصى 72 بايتًا.' : 'At least 6 characters; maximum 72 UTF-8 bytes.'} error={fieldError('password')}><div className="auth-field__password"><PasswordField {...register('password')} {...fieldAccessibility('password', fieldError('password'))} autoComplete="new-password" placeholder={text.passwordPlaceholder} label={text.password} visibleLabel={language === 'ar' ? 'إظهار كلمة المرور' : 'Show password'} hiddenLabel={language === 'ar' ? 'إخفاء كلمة المرور' : 'Hide password'} {...common} /></div></FormField>
-              <FormField id="confirmPassword" label={text.confirmPassword} required error={fieldError('confirmPassword')}><div className="auth-field__password"><PasswordField {...register('confirmPassword')} {...fieldAccessibility('confirmPassword', fieldError('confirmPassword'))} autoComplete="new-password" placeholder={text.confirmPasswordPlaceholder} label={text.confirmPassword} visibleLabel={language === 'ar' ? 'إظهار كلمة المرور' : 'Show password'} hiddenLabel={language === 'ar' ? 'إخفاء كلمة المرور' : 'Hide password'} {...common} /></div></FormField>
+              <FormField id="password" label={text.password} required description={text.passwordDescription} error={fieldError('password')}><div className="auth-field__password"><PasswordField {...register('password')} {...fieldAccessibility('password', fieldError('password'))} autoComplete="new-password" placeholder={text.passwordPlaceholder} label={text.password} visibleLabel={text.showPassword} hiddenLabel={text.hidePassword} {...common} /></div></FormField>
+              <FormField id="confirmPassword" label={text.confirmPassword} required error={fieldError('confirmPassword')}><div className="auth-field__password"><PasswordField {...register('confirmPassword')} {...fieldAccessibility('confirmPassword', fieldError('confirmPassword'))} autoComplete="new-password" placeholder={text.confirmPasswordPlaceholder} label={text.confirmPassword} visibleLabel={text.showPassword} hiddenLabel={text.hidePassword} {...common} /></div></FormField>
               <SubmitButton isSubmitting={isSubmitting} loadingLabel={text.creatingAccount} className="poos-button auth-form__submit">{text.createAccount}</SubmitButton>
             </form>
           </div>

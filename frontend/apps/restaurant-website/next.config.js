@@ -6,6 +6,7 @@ const withNextIntl = createNextIntlPlugin('./i18n/request.ts');
 const apiImageURL = new URL(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api/v1')
 
 const nextConfig = {
+  transpilePackages: ['@pos-saas/i18n'],
   reactStrictMode: true,
   // Windows local builds can fail with EPERM on standalone symlink tracing.
   output: process.platform === 'win32' ? undefined : 'standalone',

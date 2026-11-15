@@ -61,7 +61,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <SubdomainProvider>
           <ThemeProvider>
             <QueryProvider>{children}</QueryProvider>
-            <Toaster position="top-right" richColors />
+            <Toaster position={dir === 'rtl' ? 'top-left' : 'top-right'} richColors />
           </ThemeProvider>
         </SubdomainProvider>
       </body>

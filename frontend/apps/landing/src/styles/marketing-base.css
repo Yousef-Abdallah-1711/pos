@@ -2,11 +2,38 @@
 body { --font-alexandria: var(--font-manrope); }
 html[lang=ar] body { --font-alexandria: var(--font-plex); }
 :root {
+  color-scheme:dark;
+  --poos-paper:#17131f;
+  --poos-surface:#211a2b;
+  --poos-surface-raised:#282132;
+  --poos-ink:#f5f0ff;
+  --poos-ink-soft:#e2d9ee;
+  --poos-muted:#c0b6cd;
+  --poos-rule:#493d56;
+  --sv-ink:#f5f0ff;
+  --sv-muted:#c0b6cd;
+  --sv-violet:#c7aaff;
+  --sv-paper:#17131f;
+  --sv-line:#493d56;
+  --sv-surface:#211a2b;
+  --sv-surface-raised:#282132;
+}
+:root.light {
+  color-scheme:light;
+  --poos-paper:#f7f5ff;
+  --poos-surface:#f0ecf8;
+  --poos-surface-raised:#fff;
+  --poos-ink:#171327;
+  --poos-ink-soft:#373147;
+  --poos-muted:#575066;
+  --poos-rule:#d9d1eb;
   --sv-ink:#211b31;
   --sv-muted:#625b70;
   --sv-violet:#6938d3;
   --sv-paper:#faf9fc;
   --sv-line:#e4dfed;
+  --sv-surface:#f0edf6;
+  --sv-surface-raised:#fff;
 }
 .sv-main,.sv-header,.sv-footer {
   font-family:var(--font-manrope),sans-serif;

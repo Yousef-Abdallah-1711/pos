@@ -19,7 +19,7 @@ describe('landing route states', () => {
 
     expect(screen.getByRole('main')).toHaveAttribute('dir', 'rtl')
     expect(screen.getByRole('main')).toHaveAttribute('aria-busy', 'true')
-    expect(screen.getByRole('status')).toHaveTextContent('جاري التحميل...')
+    expect(screen.getByRole('status')).toHaveTextContent('جارٍ التحميل…')
   })
 
   it('offers localized recovery after a route error', () => {

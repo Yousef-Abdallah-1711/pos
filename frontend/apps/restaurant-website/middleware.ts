@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getApiBaseUrl } from './lib/config/api';
+import { defaultLocale } from '@pos-saas/i18n'
 
 /**
  * Middleware to extract restaurant context from request
@@ -30,18 +31,18 @@ export async function middleware(request: NextRequest) {
   const restaurantSlug = hostWithoutPort.split('.')[0] || '';
   const supportedLocales = ['en', 'ar'];
 
-  // Redirect root path `/` to `/en` (default locale)
+  // Redirect new public visitors to the Arabic-first storefront locale.
   const pathParts = pathname.split('/');
   const firstSegment = pathParts[1] || '';
   if (pathname === '/' || (!supportedLocales.includes(firstSegment.toLowerCase()) && !firstSegment.startsWith('_next') && firstSegment !== 'favicon.ico' && firstSegment !== 'public' && firstSegment !== 'api')) {
     const url = request.nextUrl.clone();
-    url.pathname = `/en${pathname === '/' ? '' : pathname}`;
+    url.pathname = `/${defaultLocale}${pathname === '/' ? '' : pathname}`;
     return NextResponse.redirect(url);
   }
 
   // Extract locale from pathname
   const rawLocale = firstSegment || 'en';
-  const validLocale = supportedLocales.includes(rawLocale.toLowerCase()) ? rawLocale.toLowerCase() : 'en';
+  const validLocale = supportedLocales.includes(rawLocale.toLowerCase()) ? rawLocale.toLowerCase() : defaultLocale;
 
   // Set headers
   const requestHeaders = new Headers(request.headers);

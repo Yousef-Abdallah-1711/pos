@@ -1,0 +1,216 @@
+{
+  "nav": {
+    "features": "The platform",
+    "howItWorks": "How it works",
+    "audience": "Who it is for",
+    "faq": "Questions",
+    "mainNavigation": "Main navigation",
+    "switchLanguage": "Switch language",
+    "skipToContent": "Skip to content",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "about": "About",
+    "contact": "Contact",
+    "login": "Login",
+    "getStarted": "Create account"
+  },
+  "hero": {
+    "title": "All-in-one restaurant",
+    "titleHighlight": "management.",
+    "description": "One platform for the work at the front and back of the house.",
+    "cta": "Create your restaurant workspace",
+    "demo": "See how it works",
+    "captureLabel": "POOS dashboard",
+    "captureSection": "Role management",
+    "captureAlt": "POOS dashboard role-management screen in a synthetic sample workspace",
+    "captureCaption": "Role management in the POOS dashboard.",
+    "sampleLabel": "Sample workspace",
+    "viewCapture": "Open full screenshot",
+    "productAreas": "Restaurant management areas",
+    "areas": [
+      {
+        "label": "Front of house",
+        "href": "#product"
+      },
+      {
+        "label": "Back of house",
+        "href": "#product"
+      }
+    ]
+  },
+  "features": {
+    "title": "One platform for both sides of service",
+    "subtitle": "Keep the front and back of your restaurant in the same management system.",
+    "frontLabel": "FRONT OF HOUSE",
+    "frontTitle": "The work your guests see.",
+    "frontNote": "A restaurant team, working in POOS.",
+    "backLabel": "BACK OF HOUSE",
+    "backTitle": "The work that keeps service moving.",
+    "backNote": "One platform for the whole restaurant.",
+    "connectionLabel": "Connected restaurant work"
+  },
+  "audience": {
+    "title": "For the people responsible for a restaurant.",
+    "independent": "Independent restaurants",
+    "groups": "Multi-location restaurant groups"
+  },
+  "howItWorks": {
+    "title": "Start with your restaurant",
+    "subtitle": "Create an account with your restaurant details, then continue into your POOS workspace.",
+    "step1": {
+      "number": "01",
+      "title": "Create an account",
+      "description": "Add your name, email, password, and restaurant details."
+    },
+    "step2": {
+      "number": "02",
+      "title": "Continue to your workspace",
+      "description": "After registration, POOS opens your restaurant dashboard."
+    },
+    "step3": {
+      "number": "03",
+      "title": "Choose where to begin",
+      "description": "Explore the areas available in your restaurant workspace."
+    }
+  },
+  "cta": {
+    "title": "Bring your restaurant work into one platform.",
+    "subtitle": "Create your restaurant workspace to continue.",
+    "button": "Create your workspace",
+    "noCard": ""
+  },
+  "footer": {
+    "tagline": "All-in-one restaurant management. One platform for front and back of house.",
+    "product": "Product",
+    "features": "The platform",
+    "demo": "Platform",
+    "company": "Company",
+    "about": "About",
+    "blog": "Questions",
+    "contact": "Contact",
+    "support": "Support",
+    "helpCenter": "Help Center",
+    "documentation": "Documentation",
+    "api": "API",
+    "rights": "All rights reserved."
+  },
+  "auth": {
+    "brandName": "Restaurant POS",
+    "login": {
+      "title": "Sign in to your account",
+      "email": "Email",
+      "emailPlaceholder": "your@email.com",
+      "password": "Password",
+      "passwordPlaceholder": "Enter your password",
+      "forgotPassword": "Forgot password?",
+      "signingIn": "Signing in...",
+      "signIn": "Sign in",
+      "noAccount": "Don't have an account?",
+      "createAccount": "Create account",
+      "loginFailed": "Login failed. Please try again.",
+      "invalidCredentials": "Invalid email or password. Please check your credentials.",
+      "networkError": "Network error. Please check your connection and try again.",
+      "multipleTenants": "You have accounts in multiple organizations. Please select one.",
+      "loginSuccess": "Login successful!",
+      "createdToast": "Your account is ready. Sign in to continue.",
+      "storyTitle": "Your restaurant, in one view.",
+      "storyRule": "One platform for front- and back-of-house work.",
+      "backToBrand": "Back to SERVIO",
+      "intro": "Enter your account details to continue.",
+      "showPassword": "Show password",
+      "hidePassword": "Hide password",
+      "createAccountLink": "Create account"
+    },
+    "register": {
+      "title": "Create your account and start managing your restaurant",
+      "fullName": "Full Name",
+      "fullNamePlaceholder": "John Doe",
+      "email": "Email",
+      "emailPlaceholder": "your@email.com",
+      "restaurantName": "Restaurant Name",
+      "restaurantNamePlaceholder": "My Restaurant",
+      "websiteSubdomain": "Website Subdomain",
+      "subdomainPlaceholder": "my-restaurant",
+      "subdomainAvailable": "Subdomain is available",
+      "subdomainUnavailable": "This subdomain is not available",
+      "subdomainError": "Error checking availability",
+      "websiteAccessible": "Your website will be accessible at:",
+      "phone": "Phone",
+      "phonePlaceholder": "+1234567890",
+      "password": "Password",
+      "passwordPlaceholder": "At least 6 characters",
+      "confirmPassword": "Confirm Password",
+      "confirmPasswordPlaceholder": "Confirm your password",
+      "creatingAccount": "Creating account...",
+      "createAccount": "Create account",
+      "hasAccount": "Already have an account?",
+      "signIn": "Sign in",
+      "subdomainRequired": "Please choose an available subdomain for your website",
+      "accountCreated": "Account created successfully!",
+      "registrationFailed": "Registration failed. Please try again.",
+      "invalidInput": "Invalid input. Please check your information.",
+      "networkError": "Network error. Please check your connection and try again.",
+      "storyLabel": "About SERVIO",
+      "storyTitle": "Set up your restaurant workspace.",
+      "storyRule": "One platform for front- and back-of-house work.",
+      "backToBrand": "Back to SERVIO",
+      "intro": "Enter your details and restaurant information to create an account.",
+      "trialPreference": "14-day trial. Billing preference: {billing}. Registration does not charge you.",
+      "requestedAddress": "Requested address; storefront activation is a separate setup step:",
+      "passwordDescription": "At least 6 characters; maximum 72 UTF-8 bytes.",
+      "checkingAvailability": "Checking availability…"
+    },
+    "validation": {
+      "required": "This field is required.",
+      "optional": "Optional",
+      "invalidEmail": "Invalid email address",
+      "nameMax": "Use 255 characters or fewer.",
+      "emailMax": "Use 255 characters or fewer.",
+      "passwordMax": "Password must be 72 bytes or fewer.",
+      "invalidPhone": "Enter a valid international number with its country code, such as +1 650 555 0123.",
+      "invalidSubdomain": "Use 2–63 lowercase letters, numbers, or single hyphens.",
+      "reservedSubdomain": "This website address is reserved.",
+      "passwordMin": "Password must be at least 6 characters",
+      "nameMin": "Name must be at least 2 characters",
+      "restaurantNameMin": "Restaurant name must be at least 2 characters",
+      "subdomainMin": "Website subdomain must be at least 2 characters",
+      "subdomainMax": "Subdomain must not exceed 63 characters",
+      "passwordsMismatch": "Passwords don't match",
+      "review": "Please review the highlighted fields."
+    },
+    "tenantSelector": {
+      "title": "Select Organization",
+      "description": "You have accounts in multiple organizations. Please select which one you'd like to access.",
+      "failedToSelect": "Failed to select organization",
+      "anError": "An error occurred",
+      "loggedInAs": "Logged in as:"
+    },
+    "superAdmin": {
+      "noToken": "No token provided. Invalid access link.",
+      "accessing": "Accessing Dashboard",
+      "pleaseWait": "Please wait while we set up your access...",
+      "accessFailed": "Access Failed",
+      "goToLogin": "Go to Login",
+      "accessGranted": "Access Granted!",
+      "verified": "Your super admin access has been verified.",
+      "redirecting": "Redirecting to dashboard...",
+      "authError": "An error occurred during authentication",
+      "noJwt": "No JWT token or user received"
+    },
+    "errors": {
+      "rateLimited": "Too many attempts. Wait a moment and try again.",
+      "serviceUnavailable": "Sign in is temporarily unavailable. Please try again.",
+      "registrationUnavailable": "The service is temporarily unavailable. Please try again.",
+      "unexpectedRegistration": "We could not create the account. Please try again.",
+      "registrationConflict": "That email or website address is already in use.",
+      "network": "Unable to connect. Check your connection and try again.",
+      "availability": "Availability could not be checked. Check your connection and try again.",
+      "reservedAddress": "This website address is reserved."
+    }
+  },
+  "errors": {
+    "pageUnavailable": "This page could not load.",
+    "retry": "Try again",
+    "backHome": "Back to home"
+  }
+}

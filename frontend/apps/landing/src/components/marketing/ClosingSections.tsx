@@ -15,21 +15,7 @@ export function GettingStarted({ locale }: { locale: Locale }) {
 
 export function MarketingFAQ({ locale }: { locale: Locale }) {
   const c = getSiteCopy(locale)
-  const questions = locale === 'ar' ? [
-    ['كيف يتصل الكاشير بالمطبخ؟', 'يؤكد إرسال طلب الكاشير الطلب، ثم ينشئ تذكرته في شاشة المطبخ. يتابع الفريق مراحل التجهيز من هناك.'],
-    ['هل يمكن للضيف إرسال طلب إلكتروني؟', 'نعم، المسار الموثّق يتيح تصفّح القائمة وإرسال طلب للدفع النقدي عند الاستلام. يؤكد الفريق الطلب قبل انتقاله للمطبخ.'],
-    ['ما الذي يمكن تخصيصه في الموقع؟', 'تم التحقق من تعديل ألوان القالب وحفظها ومعاينتها. تجهيز العنوان العام خطوة مستقلة؛ لا نعد بالنشر الفوري أو بإنشاء صفحات حرة.'],
-    ['كيف تبدأ التجربة المجانية؟', 'أنشئ حساب المطعم لبدء تجربة لمدة 14 يومًا. يمكنك بعدها إعداد بيانات المطعم وإضافة الأصناف وتجربة مسار الطلب.'],
-    ['هل اختيار الفترة السنوية يخصم المبلغ؟', 'لا ينفّذ اختيار فترة الفوترة عملية دفع. الدفع للاشتراك غير متاح هنا حاليًا، ويتطلب التفعيل المدفوع تأكيدًا مستقلًا.'],
-    ['هل يتوفر الموقع بالعربية والإنجليزية؟', 'نعم، الموقع التعريفي متاح باللغتين ويدعم الاتجاه من اليمين إلى اليسار. الشاشات التجريبية موسومة بلغتها؛ لا نفترض اكتمال ترجمة كل شاشة داخل المنتج.'],
-  ] : [
-    ['How do the cashier and kitchen connect?', 'Submitting a cashier order confirms it and creates its kitchen ticket. The kitchen team then moves the ticket through preparation states.'],
-    ['Can guests order online?', 'The demonstrated flow lets a guest browse the menu and submit a cash-on-delivery order. Staff confirm it before it enters the kitchen.'],
-    ['What can I customize on my storefront?', 'Theme color editing, saving and previewing are demonstrated. Public hostname setup is separate; instant publishing and arbitrary page creation are not promised.'],
-    ['How does the free trial start?', 'Create a restaurant account to begin a 14-day trial. Then configure restaurant information, add products and try a supported order workflow.'],
-    ['Does selecting annual billing charge me?', 'Selecting a billing preference does not initiate a payment. Paid checkout is not available here; paid activation requires separate confirmation.'],
-    ['Are Arabic and English available?', 'The public website supports both languages and right-to-left layout. Product captures are labelled with their language; complete translation of every application screen is not implied.'],
-  ]
+  const questions = c.faqItems
   return <section id="faq" className="sv-section sv-faq"><div className="sv-shell sv-faq-layout"><SectionHead eyebrow={c.faqEyebrow} title={c.faqTitle} />
     <div>{questions.map(([question, answer]) => <details key={question}><summary>{question}<span aria-hidden="true">+</span></summary><p>{answer}</p></details>)}<FeatureActions locale={locale} source="faq" destination="contact" label={c.contact} /></div>
   </div></section>

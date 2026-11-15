@@ -126,6 +126,16 @@ jobs:
           node-version: 24.22.3
       - run: corepack enable && corepack prepare pnpm@10.34.9 --activate
       - run: pnpm --dir frontend install --frozen-lockfile
+      - name: Validate EN/AR JSON dictionaries and report unused-key candidates
+        env:
+          I18N_REPORT_PATH: ${{ runner.temp }}/servio-i18n-unused-keys.report.json
+        run: node frontend/scripts/validate-i18n.mjs
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: i18n-unused-key-report
+          path: ${{ runner.temp }}/servio-i18n-unused-keys.report.json
+          if-no-files-found: ignore
       - name: Audit production dependencies (all severities)
         run: pnpm --dir frontend audit --prod
       - name: Audit development dependencies (high and critical gate; lower findings visible)

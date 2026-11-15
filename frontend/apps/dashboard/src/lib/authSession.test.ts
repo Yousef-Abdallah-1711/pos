@@ -29,6 +29,6 @@ describe('auth session helpers', () => {
     const { getDashboardLoginUrl } = await import('@/lib/authSession')
 
     expect(getDashboardLoginUrl('/ar/dashboard/orders')).toBe('http://localhost:3001/ar/auth/login')
-    expect(getDashboardLoginUrl('/dashboard')).toBe('http://localhost:3001/en/auth/login')
+    expect(getDashboardLoginUrl('/dashboard')).toBe('http://localhost:3001/ar/auth/login')
   })
 })

@@ -9,6 +9,8 @@ import { NextIntlClientProvider } from 'next-intl'
 import AuthProvider from '@/components/providers/AuthProvider'
 import { PerformanceMonitor } from '@/components/providers/PerformanceMonitor'
 import { WebVitalsProvider } from '@/components/providers/WebVitalsProvider'
+import subscriptionEn from '@pos-saas/i18n/locales/en/subscription.json'
+import subscriptionAr from '@pos-saas/i18n/locales/ar/subscription.json'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -43,7 +45,8 @@ export default async function LocaleLayout({
   const locale = paramLocale === 'ar' ? 'ar' : 'en'
   const isRTL = locale === 'ar'
   const dir = isRTL ? 'rtl' : 'ltr'
-  const messages = await getLocaleMessages(locale)
+  const appMessages = await getLocaleMessages(locale)
+  const messages = { ...appMessages, subscription: locale === 'ar' ? subscriptionAr : subscriptionEn }
 
   return (
     <NextIntlClientProvider locale={locale} messages={messages}>
