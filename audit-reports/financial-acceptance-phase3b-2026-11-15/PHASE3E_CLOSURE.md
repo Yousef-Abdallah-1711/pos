@@ -11,7 +11,7 @@ PR #57 had merged to main with a failing financial job. Its authenticated AR lif
 
 Local `go test ./cmd/api` passed. The local Docker engine was unavailable, so PostgreSQL-backed acceptance ran in the repository's GitHub Actions workflow. That workflow started disposable PostgreSQL and Redis with ephemeral credentials, created restricted runtime roles, applied migrations, started the real Go API, used authenticated synthetic identities and mocked payments, and destroyed the services afterward. No public API, staging, production, or real customer data was used.
 
-The exact-head and post-merge financial jobs both passed, including the live API step and the broader PostgreSQL-backed handler, use-case, repository, and API test suites. The exact full `SERVIO verified CI` status is tracked by its run [43763556436](https://github.com/Yousef-Abdallah-1711/pos/actions/runs/43763556436); that run includes the application-image Chromium smoke and is separate from financial API acceptance.
+The exact-head and post-merge financial jobs both passed, including the live API step and the broader PostgreSQL-backed handler, use-case, repository, and API test suites. Full `SERVIO verified CI` also passed on the exact PR head in [run 43763455259](https://github.com/Yousef-Abdallah-1711/pos/actions/runs/43763455259) and on merged main `4a5482d` in [run 43763556436](https://github.com/Yousef-Abdallah-1711/pos/actions/runs/43763556436), including the five application-image build, Chromium smoke, and required aggregate. This general CI does not replace the authenticated financial browser acceptance that remains open.
 
 ## Reconciled API scenarios
 
