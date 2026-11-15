@@ -2,11 +2,11 @@
 
 **Snapshot date:** 2026-11-15
 **Audited baseline:** `origin/main` `3ed336c5f00d25596da3186176256a629d0d474c`
-**Execution commit:** `d843ae6aca6cf4a7d7233233a7373753bd76e5d2`
+**Execution commit:** `805ec00ef1f24c3f2bb64c15eb80a1c341268a43`
 **Pull request:** [#57](https://github.com/Yousef-Abdallah-1711/pos/pull/57), open and unmerged
-**Financial CI:** [run 43730539837](https://github.com/Yousef-Abdallah-1711/pos/actions/runs/43730539837), success; evidence artifact `14167589858`
+**Financial CI:** [run 43730850181](https://github.com/Yousef-Abdallah-1711/pos/actions/runs/43730850181), success; evidence artifact `14168416975`
 **Acceptance status:** 10 PASS, 6 PARTIAL, 1 NOT RUN, 0 FAIL; policy approvals remain separate and pending.
-**Required verified CI:** PR run `43730539790` was canceled before application-image smoke; its required aggregate is therefore not green. Backend/frontend/security passed on earlier head `7d1422f`, before the CSV correction and latest-main merge. Latest-main run `43730274563` was canceled during image build before Chromium smoke.
+**Required verified CI:** final-head PR run `43730850184` was canceled before application-image smoke; the required aggregate is therefore not green. Backend, security/config, and three frontend jobs passed; dashboard frontend was canceled. Latest-main run `43730274563` was canceled during image build before Chromium smoke.
 
 ## Runtime and data safety
 
