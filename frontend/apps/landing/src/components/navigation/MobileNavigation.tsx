@@ -26,6 +26,7 @@ export function MobileNavigation({ locale, pathname, open, onClose, triggerRef, 
   const [featuresOpen, setFeaturesOpen] = useState(false)
   const closeAndRestoreFocus = useCallback(() => {
     onClose()
+    setFeaturesOpen(false)
     window.requestAnimationFrame(() => triggerRef.current?.focus())
   }, [onClose, triggerRef])
 
