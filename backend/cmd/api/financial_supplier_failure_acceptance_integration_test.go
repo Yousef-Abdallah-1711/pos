@@ -78,7 +78,7 @@ func assertSupplierPaymentRollback(t *testing.T, api *supplierAcceptanceAPI, sup
 		FROM invoices_supplier inv
 		LEFT JOIN payments_made pm ON pm.invoice_id=inv.id AND pm.tenant_id=inv.tenant_id AND pm.restaurant_id=inv.restaurant_id
 		LEFT JOIN journal_entries je ON je.reference_type='payment_made' AND je.reference_id=pm.id AND je.tenant_id=inv.tenant_id AND je.restaurant_id=inv.restaurant_id
-		LEFT JOIN journal_entry_lines jel ON jel.journal_entry_id=je.id AND jel.tenant_id=je.tenant_id AND jel.restaurant_id=je.restaurant_id
+		LEFT JOIN journal_entry_lines jel ON jel.journal_entry_id=je.id
 		LEFT JOIN general_ledger gl ON gl.journal_entry_id=je.id AND gl.tenant_id=je.tenant_id AND gl.restaurant_id=je.restaurant_id
 		WHERE inv.id=$1 AND inv.tenant_id=$2 AND inv.restaurant_id=$3`, invoiceID, api.fixture.tenantID, api.fixture.restaurantID).Scan(&paymentCount, &journalCount, &lineCount, &ledgerCount)
 	if err != nil || paymentCount+journalCount+lineCount+ledgerCount != 0 {
