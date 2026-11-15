@@ -27,7 +27,7 @@ html.dark .sv-main input,html.dark .sv-main select,html.dark .sv-main textarea {
 html.dark .sv-main input::placeholder,html.dark .sv-main textarea::placeholder { color:#c0b6cd; }
 html.dark .sv-main :focus-visible,html.dark .sv-header :focus-visible { outline-color:#d2baff; }
 html.dark :is(.sv-main,.sv-header,.sv-footer) a { color:var(--sv-violet); }
-html.dark .sv-button,html.dark .sv-header .sv-button { color:#fff; }
+html.dark .sv-button,html.dark .sv-header .sv-button { background:#6938d3; border-color:#6938d3; color:#fff; }
 html.dark .sv-footer { background:#100d17; color:#ded4ec; }
 html.dark .sv-footer a { color:#d6c0ff; }
 html.dark .sv-final { background:#392268; }
