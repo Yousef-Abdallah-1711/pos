@@ -1,0 +1,157 @@
+name: SERVIO financial acceptance
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: servio-financial-acceptance-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  financial-postgres:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    env:
+      GOMAXPROCS: '2'
+      GOFLAGS: -p=1
+      ENV: test
+      DB_HOST: 127.0.0.1
+      DB_PORT: '5432'
+      DB_NAME: servio_test
+      DB_USER: pos_migrator
+      DB_SSLMODE: disable
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e
+        with:
+          go-version-file: backend/go.mod
+          cache-dependency-path: backend/go.sum
+      - name: Install PDF text verifier
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes poppler-utils
+      - name: Start isolated services with ephemeral credentials
+        shell: bash
+        run: |
+          set -euo pipefail
+          POSTGRES_PASSWORD="$(openssl rand -hex 32)"
+          MIGRATOR_PASSWORD="$(openssl rand -hex 32)"
+          APP_PASSWORD="$(openssl rand -hex 32)"
+          ACCOUNTING_PASSWORD="$(openssl rand -hex 32)"
+          REDIS_PASSWORD="$(openssl rand -hex 32)"
+          JWT_SECRET="$(openssl rand -hex 32)"
+          for secret in "$POSTGRES_PASSWORD" "$MIGRATOR_PASSWORD" "$APP_PASSWORD" "$ACCOUNTING_PASSWORD" "$REDIS_PASSWORD" "$JWT_SECRET"; do
+            echo "::add-mask::$secret"
+          done
+          docker run --detach --name servio-financial-postgres \
+            --publish 127.0.0.1:5432:5432 --env POSTGRES_PASSWORD="$POSTGRES_PASSWORD" \
+            --env POSTGRES_DB=servio_test \
+            postgres@sha256:e62fbf9d3e2b49816a32c400ed2dba83e3b361e6833e624024309c35d334b412 >/dev/null
+          docker run --detach --name servio-financial-redis \
+            --publish 127.0.0.1:6379:6379 --env REDIS_PASSWORD="$REDIS_PASSWORD" \
+            redis@sha256:02419de7eddf55aa5bcf49efb74e88fa8d931b4d77c07eff8a6b2144472b6952 \
+            sh -c 'exec redis-server --requirepass "$REDIS_PASSWORD"' >/dev/null
+          wait_for_container() {
+            local name="$1"
+            shift
+            for attempt in $(seq 1 40); do
+              if docker exec "$@" >/dev/null 2>&1; then return 0; fi
+              if [ "$(docker inspect --format '{{.State.Running}}' "$name" 2>/dev/null || true)" != true ]; then
+                echo "Disposable service stopped before becoming ready: $name"
+                docker inspect --format 'status={{.State.Status}} exit={{.State.ExitCode}} error={{.State.Error}}' "$name" || true
+                docker logs --tail 100 "$name" || true
+                return 1
+              fi
+              sleep 2
+            done
+            echo "Timed out waiting for disposable service: $name"
+            docker inspect --format 'status={{.State.Status}} exit={{.State.ExitCode}} error={{.State.Error}}' "$name" || true
+            docker logs --tail 100 "$name" || true
+            return 1
+          }
+          wait_for_container servio-financial-postgres \
+            servio-financial-postgres pg_isready -U postgres -d servio_test
+          wait_for_container servio-financial-redis \
+            --env REDISCLI_AUTH="$REDIS_PASSWORD" servio-financial-redis redis-cli ping
+          {
+            echo "POSTGRES_PASSWORD=$POSTGRES_PASSWORD"
+            echo "DB_PASSWORD=$MIGRATOR_PASSWORD"
+            echo "APP_PASSWORD=$APP_PASSWORD"
+            echo "ACCOUNTING_PASSWORD=$ACCOUNTING_PASSWORD"
+            echo "REDIS_PASSWORD=$REDIS_PASSWORD"
+            echo "JWT_SECRET=$JWT_SECRET"
+            echo "POS_TEST_DATABASE_URL=postgres://postgres:$POSTGRES_PASSWORD@127.0.0.1:5432/servio_test?sslmode=disable"
+            echo "POS_RLS_ADMIN_URL=postgres://postgres:$POSTGRES_PASSWORD@127.0.0.1:5432/servio_test?sslmode=disable"
+            echo "POS_RLS_APP_URL=postgres://pos_app:$APP_PASSWORD@127.0.0.1:5432/servio_test?sslmode=disable"
+            echo "POS_ACCOUNTING_DATABASE_URL=postgres://pos_accounting:$ACCOUNTING_PASSWORD@127.0.0.1:5432/servio_test?sslmode=disable"
+            echo "POS_APP_DATABASE_URL=postgres://pos_app:$APP_PASSWORD@127.0.0.1:5432/servio_test?sslmode=disable"
+            echo "POOS_SESSION_REDIS_URL=redis://:$REDIS_PASSWORD@127.0.0.1:6379/0"
+          } >> "$GITHUB_ENV"
+      - name: Initialize restricted disposable database roles
+        working-directory: backend
+        run: PGPASSWORD="$POSTGRES_PASSWORD" psql -h 127.0.0.1 -U postgres -d postgres -v ON_ERROR_STOP=1 -v dbname=servio_test -v migrator_pw="$DB_PASSWORD" -v app_pw="$APP_PASSWORD" -v accounting_pw="$ACCOUNTING_PASSWORD" -f scripts/db/create_runtime_roles.sql
+      - name: Apply latest-main migrations
+        working-directory: backend
+        run: go run ./cmd/migrate
+      - name: Build the real API process
+        working-directory: backend
+        run: go build -o /tmp/servio-financial-api ./cmd/api
+      - name: Start API with restricted application and accounting roles
+        working-directory: backend
+        shell: bash
+        run: |
+          set -euo pipefail
+          export DB_USER=pos_app DB_PASSWORD="$APP_PASSWORD"
+          export ACCOUNTING_DB_USER=pos_accounting ACCOUNTING_DB_PASSWORD="$ACCOUNTING_PASSWORD"
+          export PORT=8080 JWT_SECRET PAYMOB_MODE=mock CORS_ORIGINS=http://localhost:3002 RBAC_ENFORCEMENT=enforce
+          export REDIS_URL="redis://:$REDIS_PASSWORD@127.0.0.1:6379/0"
+          nohup /tmp/servio-financial-api >/tmp/servio-financial-api.log 2>&1 &
+          echo $! > /tmp/servio-financial-api.pid
+          for attempt in $(seq 1 60); do
+            if curl --fail --silent http://127.0.0.1:8080/api/v1/health/ready >/dev/null; then exit 0; fi
+            sleep 2
+          done
+          cat /tmp/servio-financial-api.log
+          exit 1
+      - name: Exercise authenticated order-to-ledger workflow through the running API
+        working-directory: backend
+        shell: bash
+        env:
+          POS_FINANCIAL_ACCEPTANCE_API_URL: http://127.0.0.1:8080
+        run: |
+          set -euo pipefail
+          go test -tags integration -count=1 -timeout 90s ./cmd/api -run '^TestFinancialAcceptanceLiveAPI' -json | tee financial-live-api-tests.jsonl
+      - name: Verify payment, auth, order, accounting, and reporting integration scenarios
+        working-directory: backend
+        run: |
+          set -euo pipefail
+          go test -tags integration -count=1 -timeout 25m -json \
+            ./internal/handler/http \
+            ./internal/usecase \
+            ./internal/repository \
+            ./cmd/api | tee financial-acceptance-tests.jsonl
+      - name: Upload financial acceptance test evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: financial-acceptance-${{ github.sha }}
+          path: |
+            backend/financial-acceptance-tests.jsonl
+            backend/financial-live-api-tests.jsonl
+          if-no-files-found: warn
+      - name: Stop the API process
+        if: always()
+        shell: bash
+        run: |
+          if [ -f /tmp/servio-financial-api.pid ]; then
+            kill "$(cat /tmp/servio-financial-api.pid)" 2>/dev/null || true
+          fi
+      - name: Destroy disposable services
+        if: always()
+        run: docker rm --force servio-financial-postgres servio-financial-redis >/dev/null 2>&1 || true
