@@ -99,12 +99,17 @@ func TestFinancialAcceptanceLiveAPIOrderToLedger(t *testing.T) {
 		t.Fatalf("accounting worker did not complete synthetic order event; last status=%q attempts=%d last_error=%q", eventStatus, eventAttempts, eventError.String)
 	}
 
-	var expectedCents int64
+	var expectedSubtotalCents, expectedTaxCents, expectedDiscountCents, expectedDeliveryCents, expectedTotalCents int64
 	err = db.QueryRowContext(ctx, `
-		SELECT ROUND((COALESCE(SUM(oi.total_price), 0) + o.tax_amount - o.discount_amount + o.delivery_fee) * 100)::bigint
+		SELECT ROUND(COALESCE(SUM(oi.total_price), 0) * 100)::bigint,
+		       ROUND(o.tax_amount * 100)::bigint,
+		       ROUND(o.discount_amount * 100)::bigint,
+		       ROUND(o.delivery_fee * 100)::bigint,
+		       ROUND((COALESCE(SUM(oi.total_price), 0) + o.tax_amount - o.discount_amount + o.delivery_fee) * 100)::bigint
 		FROM orders o JOIN order_items oi ON oi.order_id = o.id
 		WHERE o.id = $1 AND o.tenant_id = $2 AND o.restaurant_id = $3
-		GROUP BY o.id`, created.Data.ID, fixture.tenantID, fixture.restaurantID).Scan(&expectedCents)
+		GROUP BY o.id`, created.Data.ID, fixture.tenantID, fixture.restaurantID).Scan(
+		&expectedSubtotalCents, &expectedTaxCents, &expectedDiscountCents, &expectedDeliveryCents, &expectedTotalCents)
 	if err != nil {
 		t.Fatalf("independently calculate source total: %v", err)
 	}
@@ -112,8 +117,8 @@ func TestFinancialAcceptanceLiveAPIOrderToLedger(t *testing.T) {
 	if err := db.QueryRowContext(ctx, `SELECT ROUND(total_amount * 100)::bigint FROM orders WHERE id = $1 AND tenant_id = $2 AND restaurant_id = $3`, created.Data.ID, fixture.tenantID, fixture.restaurantID).Scan(&orderTotalCents); err != nil {
 		t.Fatalf("read persisted order total: %v", err)
 	}
-	if orderTotalCents != expectedCents {
-		t.Fatalf("source/order total cents=%d/%d, difference=%d", expectedCents, orderTotalCents, orderTotalCents-expectedCents)
+	if orderTotalCents != expectedTotalCents {
+		t.Fatalf("source/order total cents=%d/%d, difference=%d", expectedTotalCents, orderTotalCents, orderTotalCents-expectedTotalCents)
 	}
 
 	var journalID int64
@@ -129,19 +134,23 @@ func TestFinancialAcceptanceLiveAPIOrderToLedger(t *testing.T) {
 	if journalCount != 1 || journalID <= 0 {
 		t.Fatalf("posted sales journals=%d id=%d, want exactly one", journalCount, journalID)
 	}
-	var glDebitCents, glCreditCents, glRows int64
+	var glCashCents, glRevenueCents, glTaxPayableCents, glRows int64
 	if err := db.QueryRowContext(ctx, `
-		SELECT COALESCE(ROUND(SUM(debit_amount - credit_amount) FILTER (WHERE a.account_code = '1110') * 100), 0)::bigint,
-		       COALESCE(ROUND(SUM(credit_amount - debit_amount) FILTER (WHERE a.account_code = '4100') * 100), 0)::bigint,
+		SELECT COALESCE(ROUND(SUM(gl.debit_amount - gl.credit_amount) FILTER (WHERE a.account_code = '1110') * 100), 0)::bigint,
+		       COALESCE(ROUND(SUM(gl.credit_amount - gl.debit_amount) FILTER (WHERE a.account_code = '4100') * 100), 0)::bigint,
+		       COALESCE(ROUND(SUM(gl.credit_amount - gl.debit_amount) FILTER (WHERE a.account_code = '2120') * 100), 0)::bigint,
 	       COUNT(*)
 		FROM general_ledger gl JOIN chart_of_accounts a
 		  ON a.id = gl.account_id AND a.tenant_id = gl.tenant_id AND a.restaurant_id = gl.restaurant_id
 		WHERE gl.tenant_id = $1 AND gl.restaurant_id = $2 AND gl.journal_entry_id = $3`,
-		fixture.tenantID, fixture.restaurantID, journalID).Scan(&glDebitCents, &glCreditCents, &glRows); err != nil {
+		fixture.tenantID, fixture.restaurantID, journalID).Scan(&glCashCents, &glRevenueCents, &glTaxPayableCents, &glRows); err != nil {
 		t.Fatalf("reconcile general ledger: %v", err)
 	}
-	if glDebitCents != expectedCents || glCreditCents != expectedCents || glRows != 2 {
-		t.Fatalf("journal=%d source=%d actual cash/revenue=%d/%d GL rows=%d; differences=%d/%d", journalID, expectedCents, glDebitCents, glCreditCents, glRows, glDebitCents-expectedCents, glCreditCents-expectedCents)
+	if glCashCents != expectedTotalCents || glRevenueCents != expectedSubtotalCents || glTaxPayableCents != expectedTaxCents || glRows != 3 {
+		t.Fatalf("journal=%d source subtotal/tax/discount/delivery/total=%d/%d/%d/%d/%d actual cash/revenue/tax=%d/%d/%d GL rows=%d; differences=%d/%d/%d",
+			journalID, expectedSubtotalCents, expectedTaxCents, expectedDiscountCents, expectedDeliveryCents, expectedTotalCents,
+			glCashCents, glRevenueCents, glTaxPayableCents, glRows,
+			glCashCents-expectedTotalCents, glRevenueCents-expectedSubtotalCents, glTaxPayableCents-expectedTaxCents)
 	}
 
 	otherTenantID, otherRestaurantID, otherEmail, otherPassword := seedLiveFinancialOtherTenant(t, db)
@@ -160,7 +169,12 @@ func TestFinancialAcceptanceLiveAPIOrderToLedger(t *testing.T) {
 		t.Fatal("other synthetic restaurant was not created")
 	}
 
-	t.Logf("financial_acceptance scenario=authenticated_order_to_ledger tenant_id=%d restaurant_id=%d order_id=%d source_cents=%d actual_order_cents=%d difference_cents=%d journal_id=%d cash_gl_cents=%d revenue_gl_cents=%d cash_difference_cents=%d revenue_difference_cents=%d gl_rows=%d event_status=%s foreign_tenant_id=%d cross_tenant_read_status=%d", fixture.tenantID, fixture.restaurantID, created.Data.ID, expectedCents, orderTotalCents, orderTotalCents-expectedCents, journalID, glDebitCents, glCreditCents, glDebitCents-expectedCents, glCreditCents-expectedCents, glRows, eventStatus, otherTenantID, foreignStatus)
+	t.Logf("financial_acceptance scenario=authenticated_order_to_ledger tenant_id=%d restaurant_id=%d order_id=%d source_subtotal_cents=%d source_tax_cents=%d source_discount_cents=%d source_delivery_cents=%d source_total_cents=%d actual_order_cents=%d order_difference_cents=%d journal_id=%d cash_gl_cents=%d cash_difference_cents=%d revenue_gl_cents=%d revenue_difference_cents=%d tax_payable_gl_cents=%d tax_difference_cents=%d gl_rows=%d event_status=%s foreign_tenant_id=%d cross_tenant_read_status=%d",
+		fixture.tenantID, fixture.restaurantID, created.Data.ID,
+		expectedSubtotalCents, expectedTaxCents, expectedDiscountCents, expectedDeliveryCents, expectedTotalCents,
+		orderTotalCents, orderTotalCents-expectedTotalCents, journalID,
+		glCashCents, glCashCents-expectedTotalCents, glRevenueCents, glRevenueCents-expectedSubtotalCents,
+		glTaxPayableCents, glTaxPayableCents-expectedTaxCents, glRows, eventStatus, otherTenantID, foreignStatus)
 }
 
 type liveFinancialFixture struct {
