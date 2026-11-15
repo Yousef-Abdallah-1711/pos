@@ -56,7 +56,7 @@ func createReceivablesAgingFixture(t *testing.T, db *sql.DB, label string) recei
 	if err := db.QueryRow(`INSERT INTO restaurants (tenant_id,name,slug,address) VALUES ($1,$2,$2,'test') RETURNING id`, fixture.tenantID, name).Scan(&fixture.restaurantID); err != nil {
 		t.Fatalf("create %s restaurant: %v", label, err)
 	}
-	if err := db.QueryRow(`INSERT INTO customers_accounting (tenant_id,restaurant_id,customer_code,customer_name,current_balance) VALUES ($1,$2,$3,$4,85) RETURNING id`, fixture.tenantID, fixture.restaurantID, name, name).Scan(&fixture.customerID); err != nil {
+	if err := db.QueryRow(`INSERT INTO customers_accounting (tenant_id,restaurant_id,customer_code,customer_name,current_balance) VALUES ($1,$2,$3,$4,85) RETURNING id`, fixture.tenantID, fixture.restaurantID, fmt.Sprintf("C-%d", time.Now().UnixNano()%1_000_000_000_000_000), name).Scan(&fixture.customerID); err != nil {
 		t.Fatalf("create %s customer: %v", label, err)
 	}
 	return fixture
@@ -64,7 +64,7 @@ func createReceivablesAgingFixture(t *testing.T, db *sql.DB, label string) recei
 
 func insertReceivablesAgingInvoice(t *testing.T, db *sql.DB, fixture receivablesAgingFixture, dueDate time.Time, balance float64, status string) {
 	t.Helper()
-	invoiceNumber := fmt.Sprintf("AR-%s-%d", status, time.Now().UnixNano())
+	invoiceNumber := fmt.Sprintf("%c-%d", status[0], time.Now().UnixNano()%10_000_000_000_000_000)
 	_, err := db.Exec(`
 		INSERT INTO invoices_customer (tenant_id,restaurant_id,invoice_number,invoice_date,due_date,customer_id,total_amount,balance_due,currency,status)
 		VALUES ($1,$2,$3,$4,$5,$6,$7,$7,'EGP',$8)
