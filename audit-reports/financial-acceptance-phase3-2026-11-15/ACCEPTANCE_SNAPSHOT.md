@@ -1,5 +1,7 @@
 # SERVIO Financial Integration Acceptance — Phase 3 Snapshot
 
+> Historical cutoff retained as recorded. The later Phase 3A CI execution and updated scenario statuses are in [the current Phase 3A snapshot](../financial-acceptance-phase3a-2026-11-15/ACCEPTANCE_SNAPSHOT.md) and [matrix](../financial-acceptance-phase3a-2026-11-15/FINANCIAL_ACCEPTANCE_MATRIX.csv). The statements below describe the earlier Phase 3 cutoff and are not the latest status.
+
 **Snapshot date:** 2026-11-15 (Africa/Cairo)
 
 **Repository:** `Yousef-Abdallah-1711/pos`

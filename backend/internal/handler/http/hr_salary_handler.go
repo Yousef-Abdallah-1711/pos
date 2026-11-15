@@ -22,6 +22,8 @@ import (
 type HRSalaryHandler struct {
 	salaryRepo  *repository.SalaryRepository
 	db          *sql.DB
+	payrollRepo *repository.SalaryRepository
+	payrollDB   *sql.DB
 	autoPosting usecase.AutoPostingService
 }
 
@@ -35,6 +37,16 @@ func NewHRSalaryHandler(salaryRepo *repository.SalaryRepository, db *sql.DB) *HR
 // SetAutoPostingEngine links accounting auto-posting to salary payment updates.
 func (h *HRSalaryHandler) SetAutoPostingEngine(engine usecase.AutoPostingService) {
 	h.autoPosting = engine
+}
+
+// SetPayrollTransactionDatabase keeps paid-state and financial posting writes
+// on the restricted accounting connection so they can commit atomically.
+func (h *HRSalaryHandler) SetPayrollTransactionDatabase(db *sql.DB) {
+	if db == nil {
+		return
+	}
+	h.payrollDB = db
+	h.payrollRepo = repository.NewSalaryRepository(db)
 }
 
 // ListSalaries handles GET /hr/salaries?start_date=...&end_date=...
@@ -501,7 +513,11 @@ func (h *HRSalaryHandler) MarkAsPaid(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tx, err := h.db.BeginTx(r.Context(), nil)
+	payrollDB, payrollRepo := h.payrollDB, h.payrollRepo
+	if payrollDB == nil || payrollRepo == nil {
+		payrollDB, payrollRepo = h.db, h.salaryRepo
+	}
+	tx, err := payrollDB.BeginTx(r.Context(), nil)
 	if err != nil {
 		log.Printf("[HR-Salary] MarkAsPaid begin transaction failed salary=%d err=%v", id, err)
 		writeJSON(w, http.StatusInternalServerError, map[string]interface{}{
@@ -511,7 +527,7 @@ func (h *HRSalaryHandler) MarkAsPaid(w http.ResponseWriter, r *http.Request) {
 	}
 	defer tx.Rollback()
 
-	salary, _, err := h.salaryRepo.MarkAsPaidTx(r.Context(), tx, tenantID, restaurantID, id, userID, req.PaymentReference)
+	salary, _, err := payrollRepo.MarkAsPaidTx(r.Context(), tx, tenantID, restaurantID, id, userID, req.PaymentReference)
 	if err != nil {
 		log.Printf("[HR-Salary] MarkAsPaid transition failed salary=%d err=%v", id, err)
 		if errors.Is(err, repository.ErrSalaryNotFound) {

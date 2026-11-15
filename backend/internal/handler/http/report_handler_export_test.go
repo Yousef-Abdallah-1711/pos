@@ -250,6 +250,62 @@ func TestReportHandler_ExportReport_ArabicCSVLocaleLabels(t *testing.T) {
 	}
 }
 
+func TestCSVSafeTextCellPreventsSpreadsheetFormulaInjection(t *testing.T) {
+	tests := []struct {
+		name, input, expected string
+	}{
+		{name: "equals", input: `=HYPERLINK("https://example.invalid")`, expected: `'=HYPERLINK("https://example.invalid")`},
+		{name: "plus after whitespace", input: "  +SUM(1,1)", expected: "'  +SUM(1,1)"},
+		{name: "equals after tab", input: "\t=1+1", expected: "'\t=1+1"},
+		{name: "minus", input: "-1+1", expected: "'-1+1"},
+		{name: "at", input: "@SUM(A1:A2)", expected: "'@SUM(A1:A2)"},
+		{name: "ordinary text", input: "Fresh salad", expected: "Fresh salad"},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			if actual := csvSafeTextCell(test.input); actual != test.expected {
+				t.Fatalf("csvSafeTextCell(%q)=%q, want %q", test.input, actual, test.expected)
+			}
+		})
+	}
+}
+
+func TestReportCSVExportsEscapeUntrustedNames(t *testing.T) {
+	formula := `=HYPERLINK("https://example.invalid")`
+	sales, err := buildSalesCSV(salesReportResponse{TopItems: []salesTopItem{{Name: formula}}}, "en")
+	if err != nil {
+		t.Fatalf("build sales CSV: %v", err)
+	}
+	profitability, err := buildProfitabilityCSV(profitabilityReportResponse{TopItems: []profitabilityItem{{Name: formula}}}, "en")
+	if err != nil {
+		t.Fatalf("build profitability CSV: %v", err)
+	}
+	inventory, err := buildInventoryCSV(inventoryReportResponse{Items: []inventoryTurnoverItem{{Name: formula}}}, "en")
+	if err != nil {
+		t.Fatalf("build inventory CSV: %v", err)
+	}
+	for _, report := range []struct {
+		name string
+		data []byte
+	}{{"sales", sales}, {"profitability", profitability}, {"inventory", inventory}} {
+		records, err := csv.NewReader(bytes.NewReader(bytes.TrimPrefix(report.data, []byte{0xef, 0xbb, 0xbf}))).ReadAll()
+		if err != nil || !csvRecordsContain(records, "'"+formula) {
+			t.Errorf("%s CSV did not escape formula-like name; err=%v", report.name, err)
+		}
+	}
+}
+
+func csvRecordsContain(records [][]string, expected string) bool {
+	for _, record := range records {
+		for _, cell := range record {
+			if cell == expected {
+				return true
+			}
+		}
+	}
+	return false
+}
+
 func newReportExportRequestForTest(body string) *http.Request {
 	req := httptest.NewRequest(http.MethodPost, "/api/v1/reports/export", strings.NewReader(body))
 	req.Header.Set("Content-Type", "application/json")
