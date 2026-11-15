@@ -117,13 +117,16 @@ jobs:
           exit 1
       - name: Exercise authenticated order-to-ledger workflow through the running API
         working-directory: backend
+        shell: bash
         env:
           POS_FINANCIAL_ACCEPTANCE_API_URL: http://127.0.0.1:8080
-        run: go test -tags integration -count=1 -timeout 90s ./cmd/api -run '^TestFinancialAcceptanceLiveAPIOrderToLedger$' -json | tee financial-live-api-tests.jsonl
+        run: |
+          set -euo pipefail
+          go test -tags integration -count=1 -timeout 90s ./cmd/api -run '^TestFinancialAcceptanceLiveAPIOrderToLedger$' -json | tee financial-live-api-tests.jsonl
       - name: Verify payment, auth, order, accounting, and reporting integration scenarios
         working-directory: backend
         run: |
-          set -o pipefail
+          set -euo pipefail
           go test -tags integration -count=1 -timeout 25m -json \
             ./internal/handler/http \
             ./internal/usecase \

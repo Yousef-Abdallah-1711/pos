@@ -83,18 +83,20 @@ func TestFinancialAcceptanceLiveAPIOrderToLedger(t *testing.T) {
 
 	deadline := time.Now().Add(30 * time.Second)
 	var eventStatus string
+	var eventError sql.NullString
+	var eventAttempts int
 	for time.Now().Before(deadline) {
 		err := db.QueryRowContext(ctx, `
-			SELECT status FROM accounting_event_outbox
+			SELECT status, last_error, attempts FROM accounting_event_outbox
 			WHERE tenant_id = $1 AND restaurant_id = $2 AND order_id = $3
-			ORDER BY created_at DESC LIMIT 1`, fixture.tenantID, fixture.restaurantID, created.Data.ID).Scan(&eventStatus)
+			ORDER BY created_at DESC LIMIT 1`, fixture.tenantID, fixture.restaurantID, created.Data.ID).Scan(&eventStatus, &eventError, &eventAttempts)
 		if err == nil && eventStatus == "completed" {
 			break
 		}
 		time.Sleep(250 * time.Millisecond)
 	}
 	if eventStatus != "completed" {
-		t.Fatalf("accounting worker did not complete synthetic order event; last status=%q", eventStatus)
+		t.Fatalf("accounting worker did not complete synthetic order event; last status=%q attempts=%d last_error=%q", eventStatus, eventAttempts, eventError.String)
 	}
 
 	var expectedCents int64
