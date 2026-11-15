@@ -166,6 +166,11 @@ func TestFinancialAcceptanceLiveAPIOrderToLedger(t *testing.T) {
 			glCashCents, glRevenueCents, glTaxPayableCents, glRows,
 			glCashCents-expectedTotalCents, glRevenueCents-expectedSubtotalCents, glTaxPayableCents-expectedTaxCents)
 	}
+	verifyLiveFinancialReportsAndExports(t, liveFinancialReportAcceptance{
+		baseURL: baseURL, client: client, db: db, ctx: ctx, fixture: fixture,
+		orderID: created.Data.ID, sourceRevenueCents: expectedSubtotalCents,
+		sourceGrossSalesCents: expectedTotalCents,
+	})
 
 	otherTenantID, otherRestaurantID, otherEmail, otherPassword := seedLiveFinancialOtherTenant(t, db)
 	otherJar, _ := cookiejar.New(nil)
