@@ -47,11 +47,12 @@ async function captureDeviceFrame(page,label,width,height) {
  const frame=await page.context().newPage();
  const outer={width:width+100,height:height+156};
  await frame.setViewportSize(outer);
+ const chrome=device==='laptop'||device==='desktop'?`<div class="chrome">Genuine browser capture · ${width} × ${height}</div>`:'';
  const encodedLabel=label.replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
  const base64=bytes.toString('base64');
  await frame.setContent(`<!doctype html><html lang="${locale}" dir="${direction}"><meta charset="utf-8"><style>
  *{box-sizing:border-box}html,body{margin:0;min-height:100%;background:#eeeaf3;color:#241d31;font-family:Arial,sans-serif}body{display:grid;place-items:center;padding:20px}.board{display:grid;justify-items:center;gap:10px}.caption{font-size:12px;font-weight:700;text-align:center}.device{padding:10px;background:#17131f;border:1px solid #625a6d;box-shadow:0 20px 50px #241d3130}.device.phone{padding:9px;border:8px solid #17131f;border-radius:38px}.device.tablet{padding:10px;border:8px solid #17131f;border-radius:24px}.device.laptop{border-radius:11px 11px 4px 4px}.device.desktop{border-radius:14px}.screen{display:block;width:${width}px;height:${height}px;object-fit:fill;background:#fff}.chrome{height:18px;margin:-2px 0 7px;border-radius:5px;background:#302a39;color:#ded5e8;font-size:9px;padding:3px 7px}.source{font-size:10px;color:#625b70;text-align:center}
- </style><body><main class="board"><div class="caption">SERVIO · ${locale.toUpperCase()} ${direction.toUpperCase()} · ${theme.toUpperCase()} · ${encodedLabel}</div><div class="device ${device}">${device==='laptop'||device==='desktop'?'<div class="chrome">Genuine browser capture · ${width} × ${height}</div>':''}<img class="screen" width="${width}" height="${height}" src="data:image/png;base64,${base64}" alt="Unmodified SERVIO browser viewport"></div><div class="source">Presentation frame only · raw viewport: ${encodedLabel}-${width}x${height}.png</div></main></body></html>`);
+ </style><body><main class="board"><div class="caption">SERVIO · ${locale.toUpperCase()} ${direction.toUpperCase()} · ${theme.toUpperCase()} · ${encodedLabel}</div><div class="device ${device}">${chrome}<img class="screen" width="${width}" height="${height}" src="data:image/png;base64,${base64}" alt="Unmodified SERVIO browser viewport"></div><div class="source">Presentation frame only · raw viewport: ${encodedLabel}-${width}x${height}.png</div></main></body></html>`);
  await frame.screenshot({path:`${frameEvidence}/${label}-${locale}-${theme}-${width}x${height}.png`,fullPage:true});
  await frame.close();
 }

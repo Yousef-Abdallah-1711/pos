@@ -1,6 +1,7 @@
 import { MarketingShell } from '@/components/marketing/MarketingShell'
 import { HomeHero } from '@/components/marketing/HomeHero'
 import { OrderJourney } from '@/components/marketing/OrderJourney'
+import { HospitalityStory } from '@/components/marketing/HospitalityStory'
 import { OperationsSections } from '@/components/marketing/OperationsSections'
 import { ManagementSections } from '@/components/marketing/ManagementSections'
 import { ProductExplorer } from '@/components/marketing/ProductExplorer'
@@ -21,7 +22,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: L
 export default async function HomePage({ params }: { params: Promise<{ locale: Locale }> }) {
   const { locale } = await params
   const c = getSiteCopy(locale)
-  return <MarketingShell locale={locale}><HomeHero locale={locale} /><OrderJourney locale={locale} />
+  return <MarketingShell locale={locale}><HomeHero locale={locale} /><OrderJourney locale={locale} /><HospitalityStory locale={locale} />
     <OperationsSections locale={locale} /><ManagementSections locale={locale} />
     <section id="product-explorer" className="sv-section"><div className="sv-shell">
       <SectionHead eyebrow={c.explorerEyebrow} title={c.explorerTitle} body={c.explorerBody} />

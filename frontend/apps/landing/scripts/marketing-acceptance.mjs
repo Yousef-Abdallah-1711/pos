@@ -193,7 +193,7 @@ async function main() {
     const { width, height } = viewport
     await page.setViewportSize(viewport)
     await load(page, locale, '')
-    check(`sections ${locale}/${width}x${height}`, await page.locator('main section').count() === 14)
+    check(`sections ${locale}/${width}x${height}`, await page.locator('main section').count() === 15)
     await capture(page, `${locale}-${width}x${height}`)
     for (const route of routes.slice(1)) await load(page, locale, route)
     await page.close()
