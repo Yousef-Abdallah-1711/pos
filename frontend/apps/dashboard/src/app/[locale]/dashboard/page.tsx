@@ -625,7 +625,8 @@ export default function DashboardPage() {
           <div className="space-y-4">
             <div>
               <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-3xl">
-                {t('dashboard.welcome', 'Welcome')}, {userDisplayName}
+                {t('dashboard.welcome', 'Welcome')},{' '}
+                <span className="break-words [overflow-wrap:anywhere]">{userDisplayName}</span>
               </h1>
               <p className="mt-2 text-sm text-gray-600 dark:text-gray-400 sm:text-base">
                 {t('dashboard.overviewWithLiveData', 'Here is an overview of your restaurant performance with live data from orders, menu, staff, and notifications.')}

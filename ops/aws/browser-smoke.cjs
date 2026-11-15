@@ -17,9 +17,10 @@ const anonymous=[
 async function snapshot(page,label,width,url) {
  const errors=[];const onError=e=>errors.push(e.message);page.on('pageerror',onError);
  try {
+  await page.setViewportSize({width,height:900});
   const response=await page.goto(url,{waitUntil:'domcontentloaded',timeout:45000});
   await page.waitForTimeout(1200);
-  const layout=await page.evaluate(()=>({lang:document.documentElement.lang,dir:document.documentElement.dir,overflow:document.documentElement.scrollWidth>innerWidth+2,applicationError:/Application error|Internal Server Error/.test(document.body.innerText)}));
+  const layout=await page.evaluate(()=>{const root=document.documentElement;const width=innerWidth;const overflow=root.scrollWidth>width+2;const elements=overflow?[...document.querySelectorAll('body *')].map(element=>{const rect=element.getBoundingClientRect();return{tag:element.tagName,id:element.id,className:typeof element.className==='string'?element.className.slice(0,100):'',right:Math.round(rect.right),width:Math.round(rect.width)}}).filter(element=>element.right>width+2&&element.width>0).sort((a,b)=>b.right-a.right).slice(0,8):[];return{lang:root.lang,dir:root.dir,overflow,viewportWidth:width,scrollWidth:root.scrollWidth,overflowElements:elements,applicationError:/Application error|Internal Server Error/.test(document.body.innerText)}});
   await page.screenshot({path:`${evidence}/${label}-${width}.png`,fullPage:true});
   rows.push({label,width,url:page.url(),http:response.status(),layout,errors,status:response.status()<400&&!layout.applicationError&&!errors.length&&!layout.overflow&&(!new URL(url).pathname.startsWith('/ar')||(layout.lang==='ar'&&layout.dir==='rtl'))?'PASS':'FAIL'});
  } catch(e) { rows.push({label,width,status:'FAIL',error:e.message}); }
@@ -46,8 +47,8 @@ async function loginJourney(browser,admin=false) {
   const jwtInStorage=await page.evaluate(()=>Object.values(localStorage).some(v=>/eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+/.test(v)));
   rows.push({label,url:page.url(),session,cookies,jwtInStorage,status:session===200&&!jwtInStorage&&cookies.some(c=>c.secure&&c.httpOnly)?'PASS':'FAIL'});
   await page.screenshot({path:`${evidence}/${label}.png`,fullPage:true});
-  if(!admin) for(const route of ['dashboard','dashboard/pos','dashboard/kds']) await snapshot(page,'authenticated-'+route.replaceAll('/','-'),1440,'https://pos.app.rakmyat.online/en/'+route);
-  else await snapshot(page,'admin-authenticated-dashboard',1440,'https://admin.pos.rakmyat.online/dashboard');
+  if(!admin) for(const route of ['dashboard','dashboard/pos','dashboard/kds']) for(const width of [390,768,1440]) await snapshot(page,'authenticated-'+route.replaceAll('/','-'),width,'https://pos.app.rakmyat.online/en/'+route);
+  else for(const width of [390,768,1440]) await snapshot(page,'admin-authenticated-dashboard',width,'https://admin.pos.rakmyat.online/dashboard');
  } catch(e) {
   rows.push({label,status:'FAIL',error:String(e.message).replaceAll(user.password,'[redacted]'),url:page.url()});
   await page.screenshot({path:`${evidence}/${label}-failure.png`,fullPage:true}).catch(()=>{});
