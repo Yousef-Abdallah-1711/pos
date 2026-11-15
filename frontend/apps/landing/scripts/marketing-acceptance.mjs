@@ -408,6 +408,7 @@ async function main() {
   const errors = []
   const recoveredRscNavigations = []
   const networkFailures = []
+  const pendingReactErrorDetails = []
   const observe = page => {
    page.on('pageerror', error => {
     const details = Object.fromEntries(Object.getOwnPropertyNames(error).map(key => [key, error[key]]))
@@ -421,7 +422,18 @@ async function main() {
      recoveredRscNavigations.push({ pageUrl: page.url(), destination: rscFallback[1] })
      return
     }
-    errors.push(`${page.url()}: ${text} @ ${JSON.stringify(message.location())}`)
+    const location = message.location()
+    if (text === 'Error' && location.url.includes('/_next/static/chunks/')) {
+     const pageUrl = page.url()
+     const errorHandle = message.args()[0]
+     if (errorHandle) {
+      pendingReactErrorDetails.push(errorHandle.evaluate(error => ({ name: error?.name, message: error?.message, stack: error?.stack, cause: error?.cause?.stack || error?.cause?.message }))
+       .then(details => errors.push(`${pageUrl}: ${JSON.stringify({ text, location, details })}`))
+       .catch(error => errors.push(`${pageUrl}: ${JSON.stringify({ text, location, detailReadError: error.message })}`)))
+      return
+     }
+    }
+    errors.push(`${page.url()}: ${text} @ ${JSON.stringify(location)}`)
    })
    page.on('response', response => { if (response.status() >= 400) networkFailures.push(`${response.status()} ${new URL(response.url()).pathname}`) })
   }
@@ -440,6 +452,7 @@ async function main() {
    await interactions(browser, page, locale)
   }
   await captureComparisonBoards(browser)
+  await Promise.all(pendingReactErrorDetails)
   const expectedPaths = new Set(['en', 'ar'].flatMap(locale => routes.map(route => `/${locale}${route}`)))
   const invalidFallbacks = recoveredRscNavigations.filter(({ pageUrl, destination }) => {
    try {
