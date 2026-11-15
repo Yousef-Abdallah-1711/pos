@@ -2,11 +2,11 @@
 
 **Snapshot date:** 2026-11-15
 **Audited baseline:** `origin/main` `3ed336c5f00d25596da3186176256a629d0d474c`
-**Execution commit:** `793365c743f8f0197fc6cb525c4dedad285b6b87`
+**Execution commit:** `06cd42dda9b7bbd7e758c6211057b4049f4128f0`
 **Pull request:** [#57](https://github.com/Yousef-Abdallah-1711/pos/pull/57), open and unmerged
-**Financial CI:** [run 43731635122](https://github.com/Yousef-Abdallah-1711/pos/actions/runs/43731635122), success on the exact PR head; evidence artifact `14168891640`
+**Financial CI:** [run 43732291416](https://github.com/Yousef-Abdallah-1711/pos/actions/runs/43732291416), success on the exact PR head; evidence artifact `14168413081`
 **Acceptance status:** 10 PASS, 6 PARTIAL, 1 NOT RUN, 0 FAIL; policy approvals remain separate and pending.
-**Required verified CI:** final-head PR run [43731635077](https://github.com/Yousef-Abdallah-1711/pos/actions/runs/43731635077) was canceled during image build before Chromium smoke. Backend, all four frontend suites, and security/config passed; the required aggregate failed because the image stage was canceled. No smoke or publication occurred. Main-branch run `43730274563` was also canceled during image build before smoke or publication.
+**Required verified CI:** final-head PR run [43732291388](https://github.com/Yousef-Abdallah-1711/pos/actions/runs/43732291388) built all images, then was canceled during disposable-stack startup before any browser scripts ran. Backend, all four frontend suites, and security/config passed; the required aggregate failed because the image smoke was canceled. No Chromium smoke script or publication ran. Main-branch run `43730274563` was also canceled before smoke or publication.
 
 ## Runtime and data safety
 
@@ -29,7 +29,7 @@ The API scenarios used the running Go application, authenticated synthetic owner
 
 ## CI scope and safety finding
 
-The repository `production-ci.yml` application-image smoke is not isolated CI: `ops/aws/journal-api-acceptance.cjs` hard-codes `https://api.pos.rakmyat.online/api/v1`. In run 43728374754 it created two synthetic chart-of-account entries, posted a synthetic 1.00 EGP journal, and then successfully created an audited reversal. The journal effects were reversed; the script does not delete the two synthetic accounts. I canceled the run before its remaining external marketing and synthetic-trial steps. This environment was not verified as disposable, so those external API writes are not counted as acceptance evidence. No credentials were included in the report.
+The repository `production-ci.yml` application-image smoke is not isolated CI: `ops/aws/journal-api-acceptance.cjs` hard-codes `https://api.pos.rakmyat.online/api/v1`. In run 43728374754 it created two synthetic chart-of-account entries, posted a synthetic 1.00 EGP journal, and then successfully created an audited reversal. The journal effects were reversed; the script does not delete the two synthetic accounts. I canceled the run before its remaining external marketing and synthetic-trial steps. This environment was not verified as disposable, so those external API writes are not counted as acceptance evidence. On latest-head run 43732291388, the disposable stack started but cancellation occurred before browser scripts ran; logs show no corresponding synthetic journal API calls. No credentials were included in the report.
 
 On earlier baseline `e35b3c2` run 43726424284, uploaded marketing results show the EN/AR marketing axe checks passed and Lighthouse accessibility was 1.00 for both locales. The run failed its English Lighthouse performance gate at 0.88 against 0.90; Arabic was 0.90. The reported 14 marketing-button contrast failures were not reproduced in that earlier baseline evidence, so no accessibility fix PR was opened.
 ## Open acceptance work and decisions
