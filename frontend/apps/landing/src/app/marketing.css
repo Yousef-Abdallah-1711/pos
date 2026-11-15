@@ -4,35 +4,35 @@
 @import '../styles/marketing-conversion.css';
 @import '../styles/marketing-responsive.css';
 
-/* Public marketing defaults to dark; saved light preference uses the original design tokens. */
-html.dark body { background:var(--sv-paper); color:var(--sv-ink); }
-html.dark .poos-header,html.dark .sv-header { background:rgb(23 19 31 / 96%); border-color:var(--sv-line); }
-html.dark .poos-header__links a,html.dark .poos-header__login,html.dark .poos-language,
-html.dark .sv-header a,html.dark .sv-header button { color:var(--sv-ink); }
-html.dark .sv-main { background:var(--sv-paper); color:var(--sv-ink); }
-html.dark .sv-hero { background:radial-gradient(ellipse at 90% 20%,#35264b,transparent 55%); }
-html.dark .sv-setup { background:#211a2b; }
-html.dark .sv-setup li { border-color:#493d56; }
-html.dark .sv-hero-stage,html.dark .sv-guest-captures,html.dark .sv-customization,
-html.dark .sv-visibility,html.dark .sv-billing-selector,html.dark .sv-savings { background:#211a2b; }
-html.dark .sv-offer,html.dark .sv-feature-card,html.dark .sv-explorer-panel,
-html.dark .sv-feature-directory__task,html.dark .sv-feature-showcase__copy { background:var(--sv-surface-raised); color:var(--sv-ink); }
-html.dark .sv-billing-selector label[data-selected=true] { background:#3a2d4a; }
-html.dark .sv-button-secondary { background:#30263d; color:#f6f0ff; border-color:#786695; }
-html.dark .sv-capture-image { background:#211a2b; border-color:var(--sv-line); }
-html.dark .sv-capture figcaption,html.dark .sv-mobile-navigation { color:var(--sv-muted); }
-html.dark .sv-mobile-navigation { background:#211a2b; }
-html.dark .sv-faq details,html.dark .sv-feature-card,html.dark .sv-feature-showcase { border-color:var(--sv-line); }
-html.dark .sv-main input,html.dark .sv-main select,html.dark .sv-main textarea { background:#211a2b; color:var(--sv-ink); border-color:#77678c; }
-html.dark .sv-main input::placeholder,html.dark .sv-main textarea::placeholder { color:#c0b6cd; }
-html.dark .sv-main :focus-visible,html.dark .sv-header :focus-visible { outline-color:#d2baff; }
-html.dark :is(.sv-main,.sv-header,.sv-footer) a { color:var(--sv-violet); }
-html.dark .sv-button,html.dark .sv-header .sv-button { background:#6938d3; border-color:#6938d3; color:#fff; }
-html.dark .sv-footer { background:#100d17; color:#ded4ec; }
-html.dark .sv-footer a { color:#d6c0ff; }
-html.dark .sv-final { background:#392268; }
-html.dark .sv-hero-stage .sv-stage-rail { background:#30263d; color:#e8e0f4; }
-html.dark .sv-capture figcaption a { color:#d6c0ff; }
+/* Dark is the server-rendered default too; saved light opts out once its class is applied. */
+html:not(.light) body { background:var(--sv-paper); color:var(--sv-ink); }
+html:not(.light) .poos-header,html:not(.light) .sv-header { background:rgb(23 19 31 / 96%); border-color:var(--sv-line); }
+html:not(.light) .poos-header__links a,html:not(.light) .poos-header__login,html:not(.light) .poos-language,
+html:not(.light) .sv-header a,html:not(.light) .sv-header button { color:var(--sv-ink); }
+html:not(.light) .sv-main { background:var(--sv-paper); color:var(--sv-ink); }
+html:not(.light) .sv-hero { background:radial-gradient(ellipse at 90% 20%,#35264b,transparent 55%); }
+html:not(.light) .sv-setup { background:#211a2b; }
+html:not(.light) .sv-setup li { border-color:#493d56; }
+html:not(.light) .sv-hero-stage,html:not(.light) .sv-guest-captures,html:not(.light) .sv-customization,
+html:not(.light) .sv-visibility,html:not(.light) .sv-billing-selector,html:not(.light) .sv-savings { background:#211a2b; }
+html:not(.light) .sv-offer,html:not(.light) .sv-feature-card,html:not(.light) .sv-explorer-panel,
+html:not(.light) .sv-feature-directory__task,html:not(.light) .sv-feature-showcase__copy { background:var(--sv-surface-raised); color:var(--sv-ink); }
+html:not(.light) .sv-billing-selector label[data-selected=true] { background:#3a2d4a; }
+html:not(.light) .sv-button-secondary { background:#30263d; color:#f6f0ff; border-color:#786695; }
+html:not(.light) .sv-capture-image { background:#211a2b; border-color:var(--sv-line); }
+html:not(.light) .sv-capture figcaption,html:not(.light) .sv-mobile-navigation { color:var(--sv-muted); }
+html:not(.light) .sv-mobile-navigation { background:#211a2b; }
+html:not(.light) .sv-faq details,html:not(.light) .sv-feature-card,html:not(.light) .sv-feature-showcase { border-color:var(--sv-line); }
+html:not(.light) .sv-main input,html:not(.light) .sv-main select,html:not(.light) .sv-main textarea { background:#211a2b; color:var(--sv-ink); border-color:#77678c; }
+html:not(.light) .sv-main input::placeholder,html:not(.light) .sv-main textarea::placeholder { color:#c0b6cd; }
+html:not(.light) .sv-main :focus-visible,html:not(.light) .sv-header :focus-visible { outline-color:#d2baff; }
+html:not(.light) :is(.sv-main,.sv-header,.sv-footer) a { color:var(--sv-violet); }
+html:not(.light) .sv-button,html:not(.light) .sv-header .sv-button { background:#6938d3; border-color:#6938d3; color:#fff; }
+html:not(.light) .sv-footer { background:#100d17; color:#ded4ec; }
+html:not(.light) .sv-footer a { color:#d6c0ff; }
+html:not(.light) .sv-final { background:#392268; }
+html:not(.light) .sv-hero-stage .sv-stage-rail { background:#30263d; color:#e8e0f4; }
+html:not(.light) .sv-capture figcaption a { color:#d6c0ff; }
 .sv-guest-captures--single { grid-template-columns:minmax(0,1fr); }
 .sv-guest-captures--single .sv-capture { max-width:600px; }
 

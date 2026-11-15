@@ -15,16 +15,13 @@ for script in browser-smoke.cjs storefront-flow.cjs browser-upload.cjs \
     failed=1
   fi
   if [ "$script" = marketing-acceptance.mjs ]; then
-    echo "Running Firefox marketing acceptance"
-    if ! SERVIO_MARKETING_BROWSER=firefox \
-      SERVIO_MARKETING_EVIDENCE="${SERVIO_BROWSER_EVIDENCE:-/evidence}/marketing-firefox" \
-      NODE_PATH=/tmp/browser/node_modules node /work/marketing-acceptance.mjs; then
-      failed=1
-    fi
-    for browser in chromium firefox; do
-      echo "Running $browser dark-preference marketing acceptance"
-      if ! SERVIO_MARKETING_BROWSER="$browser" SERVIO_COLOR_SCHEME=dark \
-        SERVIO_MARKETING_EVIDENCE="${SERVIO_BROWSER_EVIDENCE:-/evidence}/marketing-$browser-dark" \
+    for combination in 'chromium light' 'firefox light' 'firefox dark'; do
+      set -- $combination
+      browser=$1
+      theme=$2
+      echo "Running $browser $theme theme marketing acceptance"
+      if ! SERVIO_MARKETING_BROWSER="$browser" SERVIO_THEME="$theme" SERVIO_COLOR_SCHEME="$theme" \
+        SERVIO_MARKETING_EVIDENCE="${SERVIO_BROWSER_EVIDENCE:-/evidence}/marketing-$browser-$theme" \
         NODE_PATH=/tmp/browser/node_modules node /work/marketing-acceptance.mjs; then
         failed=1
       fi

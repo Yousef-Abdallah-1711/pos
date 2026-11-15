@@ -8,6 +8,8 @@ import fs from 'node:fs/promises'
 import path from 'node:path'
 const colorScheme = process.env.SERVIO_COLOR_SCHEME || 'light'
 if (!['light', 'dark'].includes(colorScheme)) throw new Error('Unsupported browser color scheme')
+const expectedTheme = process.env.SERVIO_THEME || 'dark'
+if (!['light', 'dark'].includes(expectedTheme)) throw new Error('Unsupported marketing theme')
 const base = process.env.SERVIO_MARKETING_URL
 if (!base) throw new Error('Set SERVIO_MARKETING_URL to the intended preview or deployment URL')
 const output = process.env.SERVIO_MARKETING_EVIDENCE || (process.env.SERVIO_BROWSER_EVIDENCE ? path.join(process.env.SERVIO_BROWSER_EVIDENCE, 'marketing') : '/tmp/servio-marketing-acceptance')
@@ -31,6 +33,8 @@ async function load(page, locale, route) {
   const headings = document.querySelectorAll('main h1')
   return headings.length === 1 && headings[0].getClientRects().length > 0
  })
+ await page.waitForFunction(theme => document.documentElement.classList.contains(theme), expectedTheme)
+ check(`resolved theme ${locale}${route}`, await page.evaluate(theme => document.documentElement.classList.contains(theme), expectedTheme))
  const canonical = await page.locator('link[rel=canonical]').getAttribute('href')
  check(`canonical ${locale}${route}`, canonical === `${base}/${locale}${route}`, canonical)
  const description = await page.locator('meta[name="description"]').getAttribute('content')
@@ -47,7 +51,7 @@ async function load(page, locale, route) {
  await page.addScriptTag({ path: require.resolve('axe-core/axe.min.js') })
  const violations = await page.evaluate(async () => {
   const result = await window.axe.run(document, { runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa'] } })
-  return result.violations.map(item => ({ id: item.id, impact: item.impact, nodes: item.nodes.map(node => node.target) }))
+  return result.violations.map(item => ({ id: item.id, impact: item.impact, nodes: item.nodes.map(node => ({ target: node.target, summary: node.failureSummary, contrast: node.any.map(check => check.data).filter(Boolean) })) }))
  })
  check(`accessibility ${locale}${route}`, violations.length === 0, JSON.stringify(violations))
 }
@@ -95,6 +99,16 @@ async function focusChecks(page, locale) {
 }
 async function interactions(page, locale) {
  await page.setViewportSize({ width: 390, height: 844 })
+ await page.goto(`${base}/${locale}`, { waitUntil: 'domcontentloaded' })
+ await page.waitForFunction(theme => document.documentElement.classList.contains(theme), expectedTheme)
+ const otherTheme = expectedTheme === 'dark' ? 'light' : 'dark'
+ await page.locator('.sv-theme-toggle').click()
+ await page.waitForFunction(theme => document.documentElement.classList.contains(theme), otherTheme)
+ await page.reload({ waitUntil: 'domcontentloaded' })
+ await page.waitForFunction(theme => document.documentElement.classList.contains(theme), otherTheme)
+ await page.locator('.sv-theme-toggle').click()
+ await page.waitForFunction(theme => document.documentElement.classList.contains(theme), expectedTheme)
+ check(`theme toggle and persistence ${locale}`, await page.evaluate(theme => document.documentElement.classList.contains(theme), expectedTheme))
  await load(page, locale, '/pricing')
  await page.locator('input[value=annual]').check()
  const href = await page.locator('#pricing a.sv-button').getAttribute('href')
@@ -130,6 +144,9 @@ async function interactions(page, locale) {
 }
 async function createPage(browser, viewport) {
  const page = await browser.newPage({ colorScheme, ignoreHTTPSErrors: process.env.SERVIO_DISPOSABLE_BROWSER === '1', viewport, reducedMotion: 'reduce' })
+ if (process.env.SERVIO_THEME) await page.addInitScript(({ theme, origin }) => {
+  if (location.origin === origin && !localStorage.getItem('servio-marketing-theme')) localStorage.setItem('servio-marketing-theme', theme)
+ }, { theme: expectedTheme, origin: new URL(base).origin })
  // Routing disables HTTP cache, so each raw-SSR assertion reads a fresh response.
  // https://playwright.dev/docs/api/class-browsercontext#browser-context-route
  await page.route('**/*', route => route.continue())
@@ -166,7 +183,7 @@ async function main() {
   check('failed network responses', networkFailures.length === 0, networkFailures.join('; '))
  } finally {
   await browser.close()
-  await fs.writeFile(path.join(output, 'results.json'), JSON.stringify({ base, browser: browserName, color_scheme: colorScheme, checks }, null, 2))
+  await fs.writeFile(path.join(output, 'results.json'), JSON.stringify({ base, browser: browserName, color_scheme: colorScheme, theme: expectedTheme, checks }, null, 2))
  }
 }
 main().catch(error => { console.error(error.message); process.exitCode = 1 })
