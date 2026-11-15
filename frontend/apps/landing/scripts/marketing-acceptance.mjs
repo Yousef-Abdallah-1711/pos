@@ -411,6 +411,8 @@ async function main() {
  const browserType = browserName === 'firefox' ? firefox : chromium
  const browser = await browserType.launch({ headless: true, ...(process.env.SERVIO_BROWSER_EXECUTABLE ? { executablePath: process.env.SERVIO_BROWSER_EXECUTABLE } : {}), ...(browserName === 'chromium' ? { args: ['--no-sandbox'] } : {}) })
  const cancelledRouteChunkRequests = []
+ const cancelledRouteChunkPaths = new Set()
+ const routeChunkExceptions = []
  try {
   let page = await createPage(browser, { width: 1440, height: 1000 })
   const errors = []
@@ -418,9 +420,17 @@ async function main() {
   const networkFailures = []
   const failedRouteChunkRequests = []
   const pendingReactErrorDetails = []
+  const deferRouteChunkException = (pageUrl, details) => {
+   const message = details?.message || ''
+   const url = message.match(/https?:\/\/[^)\s]+\/_next\/static\/chunks\/app\/[^)\s]+/)?.[0]
+   if (!url) return false
+   routeChunkExceptions.push({ pageUrl, pathname: new URL(url).pathname, details })
+   return true
+  }
   const observe = page => {
    page.on('pageerror', error => {
     const details = Object.fromEntries(Object.getOwnPropertyNames(error).map(key => [key, error[key]]))
+    if (error.name === 'ChunkLoadError' && deferRouteChunkException(page.url(), { name: error.name, message: error.message, details })) return
     errors.push(`${page.url()}: ${JSON.stringify({ name: error.name, message: error.message, cause: error.cause, details })}`)
    })
    page.on('console', message => {
@@ -437,7 +447,10 @@ async function main() {
      const errorHandle = message.args()[0]
      if (errorHandle) {
       pendingReactErrorDetails.push(errorHandle.evaluate(error => ({ name: error?.name, message: error?.message, stack: error?.stack, cause: error?.cause?.stack || error?.cause?.message }))
-       .then(details => errors.push(`${pageUrl}: ${JSON.stringify({ text, location, details })}`))
+       .then(details => {
+        if (details?.name === 'ChunkLoadError' && deferRouteChunkException(pageUrl, details)) return
+        errors.push(`${pageUrl}: ${JSON.stringify({ text, location, details })}`)
+       })
        .catch(error => errors.push(`${pageUrl}: ${JSON.stringify({ text, location, detailReadError: error.message })}`)))
       return
      }
@@ -449,7 +462,10 @@ async function main() {
     if (requestUrl.pathname.startsWith('/_next/static/chunks/app/')) {
      const reason = request.failure()?.errorText || 'request failed'
      const detail = `${reason} ${requestUrl.pathname}`
-     if (/NS_BINDING_ABORTED|ERR_ABORTED/.test(reason)) cancelledRouteChunkRequests.push(detail)
+     if (/NS_BINDING_ABORTED|ERR_ABORTED/.test(reason)) {
+      cancelledRouteChunkRequests.push(detail)
+      cancelledRouteChunkPaths.add(requestUrl.pathname)
+     }
      else failedRouteChunkRequests.push(detail)
     }
    })
@@ -476,6 +492,8 @@ async function main() {
   }
   await captureComparisonBoards(browser)
   await Promise.all(pendingReactErrorDetails)
+  const unmatchedRouteChunkExceptions = routeChunkExceptions.filter(({ pathname }) => !cancelledRouteChunkPaths.has(pathname))
+  for (const exception of unmatchedRouteChunkExceptions) errors.push(`${exception.pageUrl}: ${JSON.stringify(exception.details)}`)
   const expectedPaths = new Set(['en', 'ar'].flatMap(locale => routes.map(route => `/${locale}${route}`)))
   const invalidFallbacks = recoveredRscNavigations.filter(({ pageUrl, destination }) => {
    try {
@@ -487,6 +505,7 @@ async function main() {
   })
   check('recovered Next.js navigation fallbacks use verified routes', invalidFallbacks.length === 0, JSON.stringify(invalidFallbacks))
   check('cancelled route chunk requests recorded', true, JSON.stringify(cancelledRouteChunkRequests))
+  check('route chunk load errors explained by cancelled requests', unmatchedRouteChunkExceptions.length === 0, JSON.stringify(unmatchedRouteChunkExceptions))
   check('failed route chunk requests', failedRouteChunkRequests.length === 0, JSON.stringify(failedRouteChunkRequests))
   check('failed network responses', networkFailures.length === 0, networkFailures.join('; '))
   check('browser exceptions', errors.length === 0, errors.join('; '))
