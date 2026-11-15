@@ -17,6 +17,7 @@ const anonymous=[
 async function snapshot(page,label,width,url) {
  const errors=[];const onError=e=>errors.push(e.message);page.on('pageerror',onError);
  try {
+  await page.setViewportSize({width,height:900});
   const response=await page.goto(url,{waitUntil:'domcontentloaded',timeout:45000});
   await page.waitForTimeout(1200);
   const layout=await page.evaluate(()=>({lang:document.documentElement.lang,dir:document.documentElement.dir,overflow:document.documentElement.scrollWidth>innerWidth+2,applicationError:/Application error|Internal Server Error/.test(document.body.innerText)}));
@@ -46,8 +47,8 @@ async function loginJourney(browser,admin=false) {
   const jwtInStorage=await page.evaluate(()=>Object.values(localStorage).some(v=>/eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+/.test(v)));
   rows.push({label,url:page.url(),session,cookies,jwtInStorage,status:session===200&&!jwtInStorage&&cookies.some(c=>c.secure&&c.httpOnly)?'PASS':'FAIL'});
   await page.screenshot({path:`${evidence}/${label}.png`,fullPage:true});
-  if(!admin) for(const route of ['dashboard','dashboard/pos','dashboard/kds']) await snapshot(page,'authenticated-'+route.replaceAll('/','-'),1440,'https://pos.app.rakmyat.online/en/'+route);
-  else await snapshot(page,'admin-authenticated-dashboard',1440,'https://admin.pos.rakmyat.online/dashboard');
+  if(!admin) for(const route of ['dashboard','dashboard/pos','dashboard/kds']) for(const width of [390,768,1440]) await snapshot(page,'authenticated-'+route.replaceAll('/','-'),width,'https://pos.app.rakmyat.online/en/'+route);
+  else for(const width of [390,768,1440]) await snapshot(page,'admin-authenticated-dashboard',width,'https://admin.pos.rakmyat.online/dashboard');
  } catch(e) {
   rows.push({label,status:'FAIL',error:String(e.message).replaceAll(user.password,'[redacted]'),url:page.url()});
   await page.screenshot({path:`${evidence}/${label}-failure.png`,fullPage:true}).catch(()=>{});
