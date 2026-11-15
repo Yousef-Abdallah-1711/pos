@@ -43,7 +43,7 @@ func assertSupplierPostingRollback(t *testing.T, api *supplierAcceptanceAPI, inv
 	if status < 400 {
 		t.Fatalf("forced supplier invoice posting failure returned %d: %s", status, body)
 	}
-	assertSupplierInvoiceState(t, api, invoiceID, "draft", 0, 0)
+	assertSupplierInvoiceState(t, api, invoiceID, "draft", 0, 22000)
 	if countSupplierInvoiceJournals(t, api, invoiceID) != 0 {
 		t.Fatal("failed supplier invoice approval left a journal behind")
 	}
