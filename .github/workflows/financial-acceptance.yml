@@ -125,8 +125,6 @@ jobs:
           go test -tags integration -count=1 -timeout 90s ./cmd/api -run '^TestFinancialAcceptanceLiveAPI' -json | tee financial-live-api-tests.jsonl
       - name: Verify payment, auth, order, accounting, and reporting integration scenarios
         working-directory: backend
-        env:
-          POS_FINANCIAL_ACCEPTANCE_API_URL: http://127.0.0.1:8080
         run: |
           set -euo pipefail
           go test -tags integration -count=1 -timeout 25m -json \
