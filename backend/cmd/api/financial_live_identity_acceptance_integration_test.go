@@ -58,17 +58,36 @@ func seedLiveFinancialIdentity(t *testing.T, db *sql.DB, fixture liveFinancialFi
 			t.Fatalf("grant synthetic %s module %d permission: %v", role, permission.moduleID, err)
 		}
 	}
-	var ownerID int64
-	if err := db.QueryRow(`SELECT id FROM users WHERE tenant_id=$1 AND restaurant_id=$2 AND email=$3`,
-		fixture.tenantID, fixture.restaurantID, fixture.email).Scan(&ownerID); err != nil {
-		t.Fatalf("read synthetic owner for role assignment: %v", err)
-	}
+	ownerID := seedLiveFinancialOwner(t, db, fixture)
 	if _, err := db.Exec(`
 		INSERT INTO user_roles (tenant_id, user_id, role_id, assigned_by)
 		VALUES ($1, $2, $3, $4)`, fixture.tenantID, identity.userID, roleID, ownerID); err != nil {
 		t.Fatalf("assign synthetic %s RBAC role: %v", role, err)
 	}
 	return identity
+}
+
+func seedLiveFinancialOwner(t *testing.T, db *sql.DB, fixture liveFinancialFixture) int64 {
+	t.Helper()
+	if fixture.email != "" {
+		var ownerID int64
+		if err := db.QueryRow(`SELECT id FROM users WHERE tenant_id=$1 AND restaurant_id=$2 AND email=$3`,
+			fixture.tenantID, fixture.restaurantID, fixture.email).Scan(&ownerID); err != nil {
+			t.Fatalf("read synthetic owner for role assignment: %v", err)
+		}
+		return ownerID
+	}
+	runID := strconv.FormatInt(time.Now().UnixNano(), 10)
+	email := "financial-owner-" + runID + "@example.test"
+	hash, err := bcrypt.GenerateFromPassword([]byte("synthetic-owner-"+runID), bcrypt.MinCost)
+	if err != nil {
+		t.Fatalf("hash synthetic owner password: %v", err)
+	}
+	var ownerID int64
+	if err := db.QueryRow(`INSERT INTO users (tenant_id, restaurant_id, email, password_hash, name, role, status) VALUES ($1,$2,$3,$4,'Synthetic Owner','owner','active') RETURNING id`, fixture.tenantID, fixture.restaurantID, email, string(hash)).Scan(&ownerID); err != nil {
+		t.Fatalf("seed synthetic owner for RBAC assignment: %v", err)
+	}
+	return ownerID
 }
 
 func loginLiveFinancialIdentity(t *testing.T, baseURL string, identity liveFinancialIdentity) *http.Client {
