@@ -11,6 +11,7 @@ import { useAuthStore } from '@/stores/authStore'
 import { getConfig } from '@/lib/config'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { Navbar } from '@/components/Navbar'
+import { Footer } from '@/components/Footer'
 import { getSiteCopy } from '@/content/site'
 
 type RegisterForm = { name: string; email: string; password: string; confirmPassword: string; restaurantName: string; restaurantSlug: string; phone: string }
@@ -129,5 +130,6 @@ export default function RegisterPage() {
         </section>
       </div>
     </main>
+    <Footer locale={language} />
   </>
 }
