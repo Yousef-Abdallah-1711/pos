@@ -358,7 +358,8 @@ func createPaidOrderEventFixture(t *testing.T, db *sql.DB) (int64, int64, int64)
 func newPostgresAutoPostingEngine(db *sql.DB) *AutoPostingEngine {
 	journalRepo := repository.NewJournalEntryRepository(db)
 	return NewAutoPostingEngine(repository.NewAutoPostingRepository(db), repository.NewAccountRepository(db),
-		repository.NewInventoryMovementRepository(db), repository.NewGeneralLedgerRepository(db, journalRepo), nil)
+		repository.NewInventoryMovementRepository(db), repository.NewGeneralLedgerRepository(db, journalRepo),
+		repository.NewProductRepository(db))
 }
 
 func seedPaidOrderPostingAccounts(t *testing.T, db *sql.DB, tenantID, restaurantID int64) {
