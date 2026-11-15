@@ -32,11 +32,11 @@ func TestPaidOrderAccountingWorkerSurvivesProcessInterruption(t *testing.T) {
 	}
 	parkOtherAccountingEvents(t, db, tenantID, restaurantID, orderID)
 
-	first, firstOutput := startAccountingWorkerProcess(t, "claim-and-wait")
-	claimed := readAccountingWorkerSignal(t, firstOutput, "CLAIMED")
-	if claimed != fmt.Sprintf("CLAIMED paid-order:%d:%d:%d", tenantID, restaurantID, orderID) {
+	first, firstOutput := startAccountingWorkerProcess(t, "post-and-wait")
+	posted := readAccountingWorkerSignal(t, firstOutput, "POSTED")
+	if posted != fmt.Sprintf("POSTED paid-order:%d:%d:%d", tenantID, restaurantID, orderID) {
 		stopAccountingWorkerProcess(first)
-		t.Fatalf("first worker claimed %q, want target event", claimed)
+		t.Fatalf("first worker posted %q, want target event", posted)
 	}
 	assertInterruptedAccountingEvent(t, db, tenantID, restaurantID, orderID)
 	parkOtherAccountingEvents(t, db, tenantID, restaurantID, orderID)
@@ -78,7 +78,7 @@ func TestAccountingWorkerProcessHelper(t *testing.T) {
 		if signal == "IDLE" || strings.HasPrefix(signal, "ERROR ") {
 			t.Fatal(signal)
 		}
-		if mode == "claim-and-wait" {
+		if mode == "post-and-wait" {
 			<-ctx.Done()
 		}
 	case <-time.After(60 * time.Second):
@@ -113,8 +113,8 @@ func (p *subprocessAccountingProcessor) ReconcileAccountingEvents(ctx context.Co
 }
 
 func (p *subprocessAccountingProcessor) ProcessNextAccountingEvent(ctx context.Context) (bool, error) {
-	if p.mode == "claim-and-wait" {
-		return p.claimAndWait(ctx)
+	if p.mode == "post-and-wait" {
+		return p.postAndWait(ctx)
 	}
 	processed, err := p.processor.ProcessNextAccountingEvent(ctx)
 	if err != nil {
@@ -127,12 +127,21 @@ func (p *subprocessAccountingProcessor) ProcessNextAccountingEvent(ctx context.C
 	return processed, err
 }
 
-func (p *subprocessAccountingProcessor) claimAndWait(ctx context.Context) (bool, error) {
+func (p *subprocessAccountingProcessor) postAndWait(ctx context.Context) (bool, error) {
 	event, err := repository.NewAccountingEventRepository(p.db).ClaimNext(ctx)
 	if err != nil || event == nil {
 		return event != nil, err
 	}
-	p.signal <- "CLAIMED " + event.EventID
+	order, err := p.processor.GetOrder(event.TenantID, event.RestaurantID, event.OrderID)
+	if err != nil {
+		p.signal <- "ERROR " + err.Error()
+		return true, err
+	}
+	if err := p.processor.AutoPostPaidOrder(order, intPointer(event.PostedBy)); err != nil {
+		p.signal <- "ERROR " + err.Error()
+		return true, err
+	}
+	p.signal <- "POSTED " + event.EventID
 	<-ctx.Done()
 	return false, ctx.Err()
 }
@@ -202,7 +211,7 @@ func readAccountingWorkerSignal(t *testing.T, signals <-chan string, want string
 				t.Fatalf("worker process exited before %s signal; output=%s", want, strings.Join(output, " | "))
 			}
 			output = append(output, signal)
-			if signal == "COMPLETED" || signal == "IDLE" || strings.HasPrefix(signal, "CLAIMED ") || strings.HasPrefix(signal, "ERROR ") {
+			if signal == "COMPLETED" || signal == "IDLE" || strings.HasPrefix(signal, "POSTED ") || strings.HasPrefix(signal, "ERROR ") {
 				return signal
 			}
 		case <-deadline:
@@ -224,19 +233,23 @@ func assertInterruptedAccountingEvent(t *testing.T, db *sql.DB, tenantID, restau
 	t.Helper()
 	var status string
 	var attempts int
-	var journalCount int
+	var journalCount, movementCount, movementQuantity int
 	err := db.QueryRow(`
 		SELECT e.status, e.attempts,
 		       (SELECT COUNT(*) FROM journal_entries j WHERE j.tenant_id=e.tenant_id
 		        AND j.restaurant_id=e.restaurant_id AND j.reference_type='order' AND j.reference_id=e.order_id
-	        AND j.entry_type IN ('auto_sales','auto_cogs'))
+	        AND j.entry_type IN ('auto_sales','auto_cogs')),
+	       (SELECT COUNT(*) FROM inventory_movements m WHERE m.tenant_id=e.tenant_id
+	        AND m.restaurant_id=e.restaurant_id AND m.order_id=e.order_id AND m.movement_type='sale'),
+	       (SELECT COALESCE(SUM(m.quantity),0)::int FROM inventory_movements m WHERE m.tenant_id=e.tenant_id
+	        AND m.restaurant_id=e.restaurant_id AND m.order_id=e.order_id AND m.movement_type='sale')
 		FROM accounting_event_outbox e WHERE e.tenant_id=$1 AND e.restaurant_id=$2 AND e.order_id=$3`,
-		tenantID, restaurantID, orderID).Scan(&status, &attempts, &journalCount)
+		tenantID, restaurantID, orderID).Scan(&status, &attempts, &journalCount, &movementCount, &movementQuantity)
 	if err != nil {
 		t.Fatalf("read event after worker interruption: %v", err)
 	}
-	if status != repository.AccountingEventProcessing || attempts != 1 || journalCount != 0 {
-		t.Fatalf("interrupted worker state=%s attempts=%d journals=%d, want processing/1/0", status, attempts, journalCount)
+	if status != repository.AccountingEventProcessing || attempts != 1 || journalCount != 2 || movementCount != 1 || movementQuantity != -2 {
+		t.Fatalf("interrupted worker state=%s attempts=%d journals=%d movements=%d quantity=%d, want processing/1/2/1/-2 after financial commit", status, attempts, journalCount, movementCount, movementQuantity)
 	}
 }
 
