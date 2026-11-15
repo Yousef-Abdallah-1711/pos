@@ -96,7 +96,7 @@ export function KDSHeader({
           </p>
         </div>
 
-        <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+        <div className={`flex min-w-0 max-w-full flex-wrap items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
           <span
             className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-medium ${
               isOffline
