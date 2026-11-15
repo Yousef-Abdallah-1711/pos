@@ -16,6 +16,27 @@ import (
 	"time"
 )
 
+type supplierPaymentRequestInput struct {
+	supplierID, invoiceID int
+	amount                float64
+}
+
+type supplierInvoiceStateExpectation struct {
+	status                  string
+	paidCents, balanceCents int64
+}
+
+type supplierConcurrentPaymentScenario struct {
+	supplierID, invoiceID int
+	invoiceJournalID      int64
+}
+
+type supplierAPBalanceExpectation struct {
+	invoiceID        int
+	invoiceJournalID int64
+	balanceCents     int64
+}
+
 func TestFinancialAcceptanceLiveAPISupplierRollbackAndConcurrentPayments(t *testing.T) {
 	baseURL := strings.TrimRight(strings.TrimSpace(os.Getenv("POS_FINANCIAL_ACCEPTANCE_API_URL")), "/")
 	if baseURL == "" {
@@ -31,7 +52,7 @@ func TestFinancialAcceptanceLiveAPISupplierRollbackAndConcurrentPayments(t *test
 	journalID := assertSupplierPostingRollback(t, api, invoiceID)
 	assertForeignSupplierAccessDenied(t, api, supplierID, invoiceID)
 	assertSupplierPaymentRollback(t, api, supplierID, invoiceID)
-	assertConcurrentSupplierPayments(t, api, supplierID, invoiceID, journalID)
+	assertConcurrentSupplierPayments(t, api, supplierConcurrentPaymentScenario{supplierID, invoiceID, journalID})
 }
 
 func assertForeignSupplierAccessDenied(t *testing.T, api *supplierAcceptanceAPI, supplierID, invoiceID int) {
@@ -41,11 +62,11 @@ func assertForeignSupplierAccessDenied(t *testing.T, api *supplierAcceptanceAPI,
 	client := supplierAcceptanceOwnerClient(t, api.baseURL, foreignFixture)
 	path := fmt.Sprintf("%s/api/v1/accounting/supplier-invoices/%d/approve", api.baseURL, invoiceID)
 	approvalStatus, approvalBody := acceptanceJSONRequest(t, client, http.MethodPost, path, map[string]any{})
-	paymentStatus, paymentBody := supplierPaymentRequest(t, client, api.baseURL, supplierID, invoiceID, 1)
+	paymentStatus, paymentBody := supplierPaymentRequest(t, client, api.baseURL, supplierPaymentRequestInput{supplierID, invoiceID, 1})
 	if approvalStatus < 400 || paymentStatus < 400 {
 		t.Fatalf("foreign supplier mutations were not denied: approval=%d %s payment=%d %s", approvalStatus, approvalBody, paymentStatus, paymentBody)
 	}
-	assertSupplierInvoiceState(t, api, invoiceID, "approved", 0, 22000)
+	assertSupplierInvoiceState(t, api, invoiceID, supplierInvoiceStateExpectation{"approved", 0, 22000})
 	if countSupplierInvoiceJournals(t, api, invoiceID) != 1 {
 		t.Fatal("foreign supplier requests changed invoice journal state")
 	}
@@ -61,7 +82,7 @@ func assertSupplierPostingRollback(t *testing.T, api *supplierAcceptanceAPI, inv
 	if status < 400 {
 		t.Fatalf("forced supplier invoice posting failure returned %d: %s", status, body)
 	}
-	assertSupplierInvoiceState(t, api, invoiceID, "draft", 0, 22000)
+	assertSupplierInvoiceState(t, api, invoiceID, supplierInvoiceStateExpectation{"draft", 0, 22000})
 	if countSupplierInvoiceJournals(t, api, invoiceID) != 0 {
 		t.Fatal("failed supplier invoice approval left a journal behind")
 	}
@@ -84,12 +105,12 @@ func assertSupplierPaymentRollback(t *testing.T, api *supplierAcceptanceAPI, sup
 	t.Helper()
 	removeTrigger := installSupplierJournalFailure(t, api.db, invoiceID, "payment_made")
 	defer removeTrigger()
-	status, body := supplierPaymentRequest(t, api.client, api.baseURL, supplierID, invoiceID, 220)
+	status, body := supplierPaymentRequest(t, api.client, api.baseURL, supplierPaymentRequestInput{supplierID, invoiceID, 220})
 	removeTrigger()
 	if status < 400 {
 		t.Fatalf("forced supplier payment posting failure returned %d: %s", status, body)
 	}
-	assertSupplierInvoiceState(t, api, invoiceID, "approved", 0, 22000)
+	assertSupplierInvoiceState(t, api, invoiceID, supplierInvoiceStateExpectation{"approved", 0, 22000})
 	var paymentCount, journalCount, lineCount, ledgerCount int
 	err := api.db.QueryRowContext(api.ctx, `
 		SELECT COUNT(pm.id), COUNT(je.id), COUNT(jel.id), COUNT(gl.id)
@@ -104,24 +125,24 @@ func assertSupplierPaymentRollback(t *testing.T, api *supplierAcceptanceAPI, sup
 	}
 }
 
-func assertConcurrentSupplierPayments(t *testing.T, api *supplierAcceptanceAPI, supplierID, invoiceID int, invoiceJournalID int64) {
+func assertConcurrentSupplierPayments(t *testing.T, api *supplierAcceptanceAPI, scenario supplierConcurrentPaymentScenario) {
 	t.Helper()
-	succeeded := submitConcurrentSupplierPayments(t, api, supplierID, invoiceID)
-	paid, balance, payments := readSupplierPaymentTotals(t, api, invoiceID)
+	succeeded := submitConcurrentSupplierPayments(t, api, scenario.supplierID, scenario.invoiceID)
+	paid, balance, payments := readSupplierPaymentTotals(t, api, scenario.invoiceID)
 	if succeeded != 4 || paid != 20000 || balance != 2000 || payments != 4 {
 		t.Fatalf("concurrent supplier payments expected success/source/balance/count=4/20000/2000/4; actual=%d/%d/%d/%d", succeeded, paid, balance, payments)
 	}
-	assertSupplierAPBalance(t, api, invoiceID, invoiceJournalID, balance)
-	retryStatus, retryBody := supplierPaymentRequest(t, api.client, api.baseURL, supplierID, invoiceID, 50)
+	assertSupplierAPBalance(t, api, supplierAPBalanceExpectation{scenario.invoiceID, scenario.invoiceJournalID, balance})
+	retryStatus, retryBody := supplierPaymentRequest(t, api.client, api.baseURL, supplierPaymentRequestInput{scenario.supplierID, scenario.invoiceID, 50})
 	if retryStatus < 400 {
 		t.Fatalf("repeated supplier payment of 50.00 returned %d after balance fell to 20.00: %s", retryStatus, retryBody)
 	}
-	status, body := supplierPaymentRequest(t, api.client, api.baseURL, supplierID, invoiceID, 21)
+	status, body := supplierPaymentRequest(t, api.client, api.baseURL, supplierPaymentRequestInput{scenario.supplierID, scenario.invoiceID, 21})
 	if status < 400 {
 		t.Fatalf("supplier payment exceeding remaining 20.00 balance returned %d: %s", status, body)
 	}
-	assertSupplierInvoiceState(t, api, invoiceID, "partially_paid", 20000, 2000)
-	if err := api.db.QueryRowContext(api.ctx, `SELECT COUNT(*) FROM payments_made WHERE invoice_id=$1 AND tenant_id=$2 AND restaurant_id=$3`, invoiceID, api.fixture.tenantID, api.fixture.restaurantID).Scan(&payments); err != nil || payments != 4 {
+	assertSupplierInvoiceState(t, api, scenario.invoiceID, supplierInvoiceStateExpectation{"partially_paid", 20000, 2000})
+	if err := api.db.QueryRowContext(api.ctx, `SELECT COUNT(*) FROM payments_made WHERE invoice_id=$1 AND tenant_id=$2 AND restaurant_id=$3`, scenario.invoiceID, api.fixture.tenantID, api.fixture.restaurantID).Scan(&payments); err != nil || payments != 4 {
 		t.Fatalf("overpayment rejection expected four persisted payments; actual=%d err=%v", payments, err)
 	}
 	reports := liveFinancialReportAcceptance{baseURL: api.baseURL, reportDate: time.Now().UTC().Format("2006-01-02"), client: api.client, db: api.db, ctx: api.ctx, fixture: api.fixture}
@@ -141,7 +162,7 @@ func submitConcurrentSupplierPayments(t *testing.T, api *supplierAcceptanceAPI, 
 		go func() {
 			defer workers.Done()
 			<-start
-			status, _, err := doSupplierPaymentRequest(api.ctx, api.client, api.baseURL, supplierID, invoiceID, 50)
+			status, _, err := doSupplierPaymentRequest(api.ctx, api.client, api.baseURL, supplierPaymentRequestInput{supplierID, invoiceID, 50})
 			if err != nil {
 				errors <- err
 				return
@@ -180,7 +201,7 @@ func readSupplierPaymentTotals(t *testing.T, api *supplierAcceptanceAPI, invoice
 	return paid, balance, payments
 }
 
-func assertSupplierAPBalance(t *testing.T, api *supplierAcceptanceAPI, invoiceID int, invoiceJournalID int64, balance int64) {
+func assertSupplierAPBalance(t *testing.T, api *supplierAcceptanceAPI, expected supplierAPBalanceExpectation) {
 	t.Helper()
 	var apNetCredit int64
 	err := api.db.QueryRowContext(api.ctx, `
@@ -190,9 +211,9 @@ func assertSupplierAPBalance(t *testing.T, api *supplierAcceptanceAPI, invoiceID
 		WHERE gl.tenant_id=$1 AND gl.restaurant_id=$2 AND a.account_code='2101' AND je.status='posted'
 		AND ((je.reference_type='supplier_invoice' AND je.reference_id=$3) OR
 		 (je.reference_type='payment_made' AND je.reference_id IN (SELECT id FROM payments_made WHERE invoice_id=$3 AND tenant_id=$1 AND restaurant_id=$2)))`,
-		api.fixture.tenantID, api.fixture.restaurantID, invoiceID).Scan(&apNetCredit)
-	if err != nil || apNetCredit != balance || invoiceJournalID <= 0 {
-		t.Fatalf("supplier AP reconciliation expected GL net credit=%d, actual=%d invoice_journal=%d err=%v", balance, apNetCredit, invoiceJournalID, err)
+		api.fixture.tenantID, api.fixture.restaurantID, expected.invoiceID).Scan(&apNetCredit)
+	if err != nil || apNetCredit != expected.balanceCents || expected.invoiceJournalID <= 0 {
+		t.Fatalf("supplier AP reconciliation expected GL net credit=%d, actual=%d invoice_journal=%d err=%v", expected.balanceCents, apNetCredit, expected.invoiceJournalID, err)
 	}
 }
 
@@ -220,18 +241,18 @@ func installSupplierJournalFailure(t *testing.T, db *sql.DB, id int, entryType s
 	}
 }
 
-func supplierPaymentRequest(t *testing.T, client *http.Client, baseURL string, supplierID, invoiceID int, amount float64) (int, []byte) {
+func supplierPaymentRequest(t *testing.T, client *http.Client, baseURL string, input supplierPaymentRequestInput) (int, []byte) {
 	t.Helper()
-	status, body, err := doSupplierPaymentRequest(t.Context(), client, baseURL, supplierID, invoiceID, amount)
+	status, body, err := doSupplierPaymentRequest(t.Context(), client, baseURL, input)
 	if err != nil {
 		t.Fatalf("send supplier payment request: %v", err)
 	}
 	return status, body
 }
 
-func doSupplierPaymentRequest(ctx context.Context, client *http.Client, baseURL string, supplierID, invoiceID int, amount float64) (int, []byte, error) {
-	payload, err := json.Marshal(map[string]any{"payment_date": time.Now().UTC().Format("2006-01-02"), "supplier_id": supplierID,
-		"invoice_id": invoiceID, "amount": amount, "payment_method": "cash", "reference": "FIN-ACCEPTANCE-CONCURRENT"})
+func doSupplierPaymentRequest(ctx context.Context, client *http.Client, baseURL string, input supplierPaymentRequestInput) (int, []byte, error) {
+	payload, err := json.Marshal(map[string]any{"payment_date": time.Now().UTC().Format("2006-01-02"), "supplier_id": input.supplierID,
+		"invoice_id": input.invoiceID, "amount": input.amount, "payment_method": "cash", "reference": "FIN-ACCEPTANCE-CONCURRENT"})
 	if err != nil {
 		return 0, nil, err
 	}
@@ -253,14 +274,14 @@ func doSupplierPaymentRequest(ctx context.Context, client *http.Client, baseURL 
 	return response.StatusCode, body, nil
 }
 
-func assertSupplierInvoiceState(t *testing.T, api *supplierAcceptanceAPI, invoiceID int, expectedState string, expectedPaid, expectedBalance int64) {
+func assertSupplierInvoiceState(t *testing.T, api *supplierAcceptanceAPI, invoiceID int, expected supplierInvoiceStateExpectation) {
 	t.Helper()
 	var state string
 	var paid, balance int64
 	err := api.db.QueryRowContext(api.ctx, `SELECT status, ROUND(amount_paid*100)::bigint, ROUND(balance_due*100)::bigint
 		FROM invoices_supplier WHERE id=$1 AND tenant_id=$2 AND restaurant_id=$3`, invoiceID, api.fixture.tenantID, api.fixture.restaurantID).Scan(&state, &paid, &balance)
-	if err != nil || state != expectedState || paid != expectedPaid || balance != expectedBalance {
-		t.Fatalf("supplier invoice expected state/paid/balance=%s/%d/%d; actual=%s/%d/%d err=%v", expectedState, expectedPaid, expectedBalance, state, paid, balance, err)
+	if err != nil || state != expected.status || paid != expected.paidCents || balance != expected.balanceCents {
+		t.Fatalf("supplier invoice expected state/paid/balance=%s/%d/%d; actual=%s/%d/%d err=%v", expected.status, expected.paidCents, expected.balanceCents, state, paid, balance, err)
 	}
 }
 

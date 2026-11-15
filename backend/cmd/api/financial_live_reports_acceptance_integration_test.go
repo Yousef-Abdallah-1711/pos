@@ -33,6 +33,13 @@ type liveFinancialReportAcceptance struct {
 	sqlTrialCreditsCents           int64
 }
 
+type financialReportComparison struct {
+	name          string
+	actualAmount  float64
+	expectedCents int64
+	err           error
+}
+
 func verifyLiveFinancialReportsAndExports(t *testing.T, acceptance liveFinancialReportAcceptance) {
 	t.Helper()
 	readIndependentFinancialReportTotals(t, &acceptance)
@@ -87,9 +94,9 @@ func verifyLiveBalanceSheetEndpoint(t *testing.T, acceptance liveFinancialReport
 			ROUND(COALESCE(SUM(CASE WHEN account_type='liability' THEN CASE WHEN normal_balance='credit' THEN -net_debit ELSE net_debit END ELSE 0 END),0)*100)::bigint,
 			ROUND(COALESCE(SUM(CASE WHEN account_type='equity' THEN CASE WHEN normal_balance='credit' THEN -net_debit ELSE net_debit END ELSE 0 END),0)*100)::bigint
 		FROM balances`, acceptance.fixture.tenantID, acceptance.fixture.restaurantID, date).Scan(&assets, &liabilities, &equity)
-	assertReportCents(t, "Balance Sheet assets", response.Data.TotalAssets, assets, err)
-	assertReportCents(t, "Balance Sheet liabilities", response.Data.TotalLiabilities, liabilities, err)
-	assertReportCents(t, "Balance Sheet equity", response.Data.TotalEquity, equity, err)
+	assertReportCents(t, financialReportComparison{"Balance Sheet assets", response.Data.TotalAssets, assets, err})
+	assertReportCents(t, financialReportComparison{"Balance Sheet liabilities", response.Data.TotalLiabilities, liabilities, err})
+	assertReportCents(t, financialReportComparison{"Balance Sheet equity", response.Data.TotalEquity, equity, err})
 	difference := int64(math.Round(response.Data.EquationDifference * 100))
 	if difference != assets-liabilities-equity {
 		t.Fatalf("Balance Sheet equation difference=%d cents; independent SQL expected=%d cents", difference, assets-liabilities-equity)
@@ -118,7 +125,7 @@ func verifyLiveAgingEndpoint(t *testing.T, acceptance liveFinancialReportAccepta
 	var expected int64
 	query := fmt.Sprintf("SELECT ROUND(COALESCE(SUM(balance_due),0)*100)::bigint FROM %s WHERE tenant_id=$1 AND restaurant_id=$2 AND status <> 'void' AND balance_due > 0", table)
 	err := acceptance.db.QueryRowContext(acceptance.ctx, query, acceptance.fixture.tenantID, acceptance.fixture.restaurantID).Scan(&expected)
-	assertReportCents(t, route, response.Data.Total, expected, err)
+	assertReportCents(t, financialReportComparison{route, response.Data.Total, expected, err})
 	t.Logf("financial_acceptance scenario=%s expected_open_balance_cents=%d actual_open_balance_cents=%d", route, expected, int64(math.Round(response.Data.Total*100)))
 }
 
@@ -156,11 +163,11 @@ func verifyLiveCashFlowEndpoint(t *testing.T, acceptance liveFinancialReportAcce
 	t.Logf("financial_acceptance scenario=cash_flow_report sql_classified_net_cents=%d api_net_cents=%d operating_cents=%d investing_cents=%d financing_cents=%d; classification remains accounting-policy-dependent", int64(math.Round(expected*100)), int64(math.Round(response.Data.Net*100)), int64(math.Round(response.Data.Operating*100)), int64(math.Round(response.Data.Investing*100)), int64(math.Round(response.Data.Financing*100)))
 }
 
-func assertReportCents(t *testing.T, report string, actualAmount float64, expectedCents int64, err error) {
+func assertReportCents(t *testing.T, comparison financialReportComparison) {
 	t.Helper()
-	actual := int64(math.Round(actualAmount * 100))
-	if err != nil || actual != expectedCents {
-		t.Fatalf("%s report actual=%d cents; independent SQL expected=%d cents; err=%v", report, actual, expectedCents, err)
+	actual := int64(math.Round(comparison.actualAmount * 100))
+	if comparison.err != nil || actual != comparison.expectedCents {
+		t.Fatalf("%s report actual=%d cents; independent SQL expected=%d cents; err=%v", comparison.name, actual, comparison.expectedCents, comparison.err)
 	}
 }
 
