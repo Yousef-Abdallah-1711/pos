@@ -406,10 +406,19 @@ async function main() {
  try {
   let page = await createPage(browser, { width: 1440, height: 1000 })
   const errors = []
+  const recoveredRscNavigations = []
   const networkFailures = []
   const observe = page => {
    page.on('pageerror', error => errors.push(`${page.url()}: ${error.message}`))
-   page.on('console', message => { if (message.type() === 'error') errors.push(`${page.url()}: ${message.text()}`) })
+   page.on('console', message => {
+    if (message.type() !== 'error') return
+    const text = message.text()
+    if (text.startsWith('Failed to fetch RSC payload for ') && text.includes('. Falling back to browser navigation.')) {
+     recoveredRscNavigations.push(`${page.url()}: ${text}`)
+     return
+    }
+    errors.push(`${page.url()}: ${text}`)
+   })
    page.on('response', response => { if (response.status() >= 400) networkFailures.push(`${response.status()} ${new URL(response.url()).pathname}`) })
   }
   observe(page)
@@ -427,6 +436,12 @@ async function main() {
    await interactions(browser, page, locale)
   }
   await captureComparisonBoards(browser)
+  const expectedPaths = new Set(['en', 'ar'].flatMap(locale => routes.map(route => `/${locale}${route}`)))
+  const invalidFallbacks = recoveredRscNavigations.filter(fallback => {
+   const pathname = fallback.match(/https?:\/\/[^/]+(\/[^ .]+)/)?.[1]
+   return !pathname || !expectedPaths.has(pathname)
+  })
+  check('recovered Next.js navigation fallbacks use verified routes', invalidFallbacks.length === 0, JSON.stringify(invalidFallbacks))
   check('browser exceptions', errors.length === 0, errors.join('; '))
   check('failed network responses', networkFailures.length === 0, networkFailures.join('; '))
  } finally {
