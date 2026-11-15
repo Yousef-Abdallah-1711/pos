@@ -75,6 +75,9 @@ func TestAccountingWorkerProcessHelper(t *testing.T) {
 	select {
 	case signal := <-processor.signal:
 		fmt.Fprintln(os.Stdout, signal)
+		if signal == "IDLE" || strings.HasPrefix(signal, "ERROR ") {
+			t.Fatal(signal)
+		}
 		if mode == "claim-and-wait" {
 			<-ctx.Done()
 		}
@@ -114,8 +117,12 @@ func (p *subprocessAccountingProcessor) ProcessNextAccountingEvent(ctx context.C
 		return p.claimAndWait(ctx)
 	}
 	processed, err := p.processor.ProcessNextAccountingEvent(ctx)
-	if processed && err == nil {
+	if err != nil {
+		p.signal <- "ERROR " + err.Error()
+	} else if processed {
 		p.signal <- "COMPLETED"
+	} else {
+		p.signal <- "IDLE"
 	}
 	return processed, err
 }
@@ -162,6 +169,7 @@ func startAccountingWorkerProcess(t *testing.T, mode string) (*exec.Cmd, <-chan 
 	t.Helper()
 	command := exec.Command(os.Args[0], "-test.run=^TestAccountingWorkerProcessHelper$")
 	command.Env = append(os.Environ(), accountingWorkerTestMode+"="+mode)
+	command.Stderr = os.Stderr
 	output, err := command.StdoutPipe()
 	if err != nil {
 		t.Fatalf("open accounting worker process output: %v", err)
@@ -169,34 +177,38 @@ func startAccountingWorkerProcess(t *testing.T, mode string) (*exec.Cmd, <-chan 
 	if err := command.Start(); err != nil {
 		t.Fatalf("start accounting worker process: %v", err)
 	}
-	signals := make(chan string, 1)
+	signals := make(chan string, 64)
 	go scanAccountingWorkerSignal(output, signals)
 	return command, signals
 }
 
 func scanAccountingWorkerSignal(output io.Reader, signals chan<- string) {
+	defer close(signals)
 	scanner := bufio.NewScanner(output)
 	for scanner.Scan() {
 		line := strings.TrimSpace(scanner.Text())
-		if strings.HasPrefix(line, "CLAIMED ") || line == "COMPLETED" {
-			signals <- line
-			return
-		}
+		signals <- line
 	}
-	close(signals)
 }
 
 func readAccountingWorkerSignal(t *testing.T, signals <-chan string, want string) string {
 	t.Helper()
-	select {
-	case signal, ok := <-signals:
-		if !ok {
-			t.Fatalf("worker process exited before %s signal", want)
+	var output []string
+	deadline := time.After(60 * time.Second)
+	for {
+		select {
+		case signal, ok := <-signals:
+			if !ok {
+				t.Fatalf("worker process exited before %s signal; output=%s", want, strings.Join(output, " | "))
+			}
+			output = append(output, signal)
+			if signal == "COMPLETED" || signal == "IDLE" || strings.HasPrefix(signal, "CLAIMED ") || strings.HasPrefix(signal, "ERROR ") {
+				return signal
+			}
+		case <-deadline:
+			t.Fatalf("timed out waiting for worker process %s signal; output=%s", want, strings.Join(output, " | "))
+			return ""
 		}
-		return signal
-	case <-time.After(60 * time.Second):
-		t.Fatalf("timed out waiting for worker process %s signal", want)
-		return ""
 	}
 }
 
