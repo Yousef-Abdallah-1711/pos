@@ -184,6 +184,7 @@ async function interactions(page, locale) {
  await load(page, locale, '/features/analytics')
  await page.locator('.sv-language').click()
  await page.waitForURL(`${base}/${other}/features/analytics`)
+ await page.waitForFunction(theme => document.documentElement.classList.contains(theme), expectedTheme)
  check(`locale switch preserves equivalent feature route ${locale}`, page.url() === `${base}/${other}/features/analytics`)
  check(`locale switch preserves theme ${locale}`, await page.evaluate(theme => document.documentElement.classList.contains(theme), expectedTheme))
  await page.locator('.sv-language').click()
@@ -291,6 +292,7 @@ async function interactions(page, locale) {
  await mobileControls.nth(0).click()
  const otherLocale = locale === 'en' ? 'ar' : 'en'
  await page.waitForURL(`${base}/${otherLocale}`)
+ await page.waitForFunction(theme => document.documentElement.classList.contains(theme), expectedTheme)
  check(`mobile drawer locale control ${locale}`, page.url() === `${base}/${otherLocale}` && await page.evaluate(theme => document.documentElement.classList.contains(theme), expectedTheme))
  await page.locator('.sv-language').click()
  await page.waitForURL(`${base}/${locale}`)
