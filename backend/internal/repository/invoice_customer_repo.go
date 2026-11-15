@@ -214,7 +214,7 @@ func (r *CustomerInvoiceRepository) UpdateInvoice(invoice *domain.CustomerInvoic
 			SELECT 1 FROM customers_accounting c
 			WHERE c.id = $3 AND c.tenant_id = $12 AND c.restaurant_id = $13
 		  )
-		  AND ($4::integer IS NULL OR EXISTS (
+		  AND ($4::bigint IS NULL OR EXISTS (
 			SELECT 1 FROM orders o
 			WHERE o.id = $4 AND o.tenant_id = $12 AND o.restaurant_id = $13
 		  ))
@@ -482,7 +482,7 @@ func (r *CustomerInvoiceRepository) createInvoiceTx(tx *sql.Tx, invoice *domain.
 			SELECT 1 FROM customers_accounting c
 			WHERE c.id = $6 AND c.tenant_id = $1 AND c.restaurant_id = $2
 		)
-		  AND ($7::integer IS NULL OR EXISTS (
+		  AND ($7::bigint IS NULL OR EXISTS (
 			SELECT 1 FROM orders o
 			WHERE o.id = $7 AND o.tenant_id = $1 AND o.restaurant_id = $2
 		  ))
