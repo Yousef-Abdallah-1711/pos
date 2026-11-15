@@ -1,6 +1,7 @@
 'use client'
 
 import type { SubscriptionStatus } from '@/types'
+import { useSuperAdminText } from '@/components/providers/PreferencesProvider'
 
 interface TenantStatusBadgeProps {
   status: SubscriptionStatus
@@ -13,6 +14,7 @@ export function TenantStatusBadge({
   isDisabled = false,
   className = '',
 }: TenantStatusBadgeProps) {
+  const t = useSuperAdminText()
   // Override status if disabled
   const displayStatus = isDisabled ? 'disabled' : status
 
@@ -65,7 +67,7 @@ export function TenantStatusBadge({
     <span
       className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${styles.bg} ${styles.text} ${className}`}
     >
-      {styles.label}
+      {t(styles.label)}
     </span>
   )
 }

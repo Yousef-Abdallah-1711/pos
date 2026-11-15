@@ -4,6 +4,7 @@ import React, { useEffect, ReactNode } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useAuthStore } from "@/stores/authStore";
 import { superAdminAPI } from "@/lib/api";
+import { useSuperAdminText } from "@/components/providers/PreferencesProvider";
 
 interface SuperAdminAuthProviderProps {
   children: ReactNode;
@@ -13,6 +14,7 @@ const PUBLIC_ROUTES = ["/login", "/"];
 const PROTECTED_ROUTES = ["/dashboard"];
 
 export function SuperAdminAuthProvider({ children }: SuperAdminAuthProviderProps) {
+  const t = useSuperAdminText();
   const router = useRouter();
   const pathname = usePathname();
   const { isLoading, setLoading } = useAuthStore();
@@ -50,7 +52,7 @@ export function SuperAdminAuthProvider({ children }: SuperAdminAuthProviderProps
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
           <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-          <p className="mt-4 text-gray-600">Loading...</p>
+          <p className="mt-4 text-gray-600">{t("Loading...")}</p>
         </div>
       </div>
     );

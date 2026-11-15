@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import type { SubscriptionHistoryItem } from '@/types'
+import { useSuperAdminText } from '@/components/providers/PreferencesProvider'
 
 interface SubscriptionHistoryTableProps {
   tenantId: number
@@ -12,6 +13,7 @@ export function SubscriptionHistoryTable({
   tenantId,
   className = '',
 }: SubscriptionHistoryTableProps) {
+  const t = useSuperAdminText()
   const [history, setHistory] = useState<SubscriptionHistoryItem[]>([])
   const [total, setTotal] = useState(0)
   const [page, setPage] = useState(1)
@@ -84,7 +86,7 @@ export function SubscriptionHistoryTable({
   if (isLoading && history.length === 0) {
     return (
       <div className={`text-center py-8 ${className}`}>
-        <p className="text-gray-500">Loading history...</p>
+        <p className="text-gray-500">{t('Loading history...')}</p>
       </div>
     )
   }
@@ -100,7 +102,7 @@ export function SubscriptionHistoryTable({
   if (history.length === 0) {
     return (
       <div className={`text-center py-8 ${className}`}>
-        <p className="text-gray-500">No history available</p>
+        <p className="text-gray-500">{t('No history available')}</p>
       </div>
     )
   }

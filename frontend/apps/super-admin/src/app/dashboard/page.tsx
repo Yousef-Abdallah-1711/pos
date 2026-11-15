@@ -6,8 +6,11 @@ import { superAdminAPI } from "@/lib/api";
 import type { DashboardStats } from "@/types";
 import { BarChart3, Users, Building2, Activity } from "lucide-react";
 import { toast } from "sonner";
+import { useSuperAdminPreferences, useSuperAdminText } from "@/components/providers/PreferencesProvider";
 
 export default function DashboardPage() {
+  const t = useSuperAdminText();
+  const { locale } = useSuperAdminPreferences();
   const superAdmin = useAuthStore((state) => state.superAdmin);
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -18,7 +21,7 @@ export default function DashboardPage() {
         const data = await superAdminAPI.getDashboardStats();
         setStats(data);
       } catch (error) {
-        toast.error("Failed to load dashboard statistics");
+        toast.error(t("Failed to load dashboard statistics"));
         console.error(error);
       } finally {
         setIsLoading(false);
@@ -26,14 +29,14 @@ export default function DashboardPage() {
     };
 
     fetchStats();
-  }, []);
+  }, [t]);
 
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
           <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-          <p className="mt-4 text-gray-600">Loading statistics...</p>
+          <p className="mt-4 text-gray-600">{t("Loading statistics...")}</p>
         </div>
       </div>
     );
@@ -43,9 +46,9 @@ export default function DashboardPage() {
     <div className="space-y-8">
       {/* Welcome Section */}
       <div>
-        <h1 className="text-3xl font-bold text-gray-900">Welcome back!</h1>
+        <h1 className="text-3xl font-bold text-gray-900">{t("Welcome back!")}</h1>
         <p className="text-gray-600 mt-2">
-          Here&apos;s an overview of your POS SaaS platform
+          {t("Here's an overview of your POS SaaS platform")}
         </p>
       </div>
 
@@ -54,7 +57,7 @@ export default function DashboardPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {/* Total Tenants */}
           <StatCard
-            title="Total Tenants"
+            title={t("Total Tenants")}
             value={stats.total_tenants}
             icon={Building2}
             color="bg-blue-50"
@@ -63,7 +66,7 @@ export default function DashboardPage() {
 
           {/* Total Users */}
           <StatCard
-            title="Total Users"
+            title={t("Total Users")}
             value={stats.total_users}
             icon={Users}
             color="bg-green-50"
@@ -72,7 +75,7 @@ export default function DashboardPage() {
 
           {/* Active Impersonations */}
           <StatCard
-            title="Active Impersonations"
+            title={t("Active Impersonations")}
             value={stats.active_impersonations}
             icon={Activity}
             color="bg-orange-50"
@@ -81,7 +84,7 @@ export default function DashboardPage() {
 
           {/* Total Audit Logs */}
           <StatCard
-            title="Total Audit Logs"
+            title={t("Total Audit Logs")}
             value={stats.total_audit_logs}
             icon={BarChart3}
             color="bg-purple-50"
@@ -93,27 +96,27 @@ export default function DashboardPage() {
       {/* Quick Actions */}
       <div className="bg-white rounded-lg shadow p-6">
         <h2 className="text-lg font-semibold text-gray-900 mb-4">
-          Quick Actions
+          {t("Quick Actions")}
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <QuickActionButton
-            label="View All Tenants"
+            label={t("View All Tenants")}
             href="/dashboard/tenants"
           />
           <QuickActionButton
-            label="View All Users"
+            label={t("View All Users")}
             href="/dashboard/users"
           />
           <QuickActionButton
-            label="View Audit Logs"
+            label={t("View Audit Logs")}
             href="/dashboard/audit-logs"
           />
           <QuickActionButton
-            label="Payment Health"
+            label={t("Payment Health")}
             href="/dashboard/payments"
           />
           <QuickActionButton
-            label="Manage Settings"
+            label={t("Manage Settings")}
             href="/dashboard/settings"
           />
         </div>
@@ -123,7 +126,7 @@ export default function DashboardPage() {
       {stats?.recent_activity && stats.recent_activity.length > 0 && (
         <div className="bg-white rounded-lg shadow p-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">
-            Recent Activity
+          {t("Recent Activity")}
           </h2>
           <div className="space-y-4">
             {stats.recent_activity.slice(0, 5).map((log) => (
@@ -134,11 +137,11 @@ export default function DashboardPage() {
                 <div>
                   <p className="font-medium text-gray-900">{log.action}</p>
                   <p className="text-sm text-gray-600">
-                    from {log.ip_address}
+                    {t("from")} {log.ip_address}
                   </p>
                 </div>
-                <span className="text-xs text-gray-500">
-                  {new Date(log.created_at).toLocaleDateString()}
+                  <span className="text-xs text-gray-500">
+                    {new Date(log.created_at).toLocaleDateString(locale)}
                 </span>
               </div>
             ))}
@@ -149,10 +152,10 @@ export default function DashboardPage() {
       {/* Info Box */}
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
         <h3 className="font-semibold text-blue-900 mb-2">
-          📋 Platform Overview
+          📋 {t("Platform Overview")}
         </h3>
         <p className="text-blue-800 text-sm">
-          You have full control over the entire POS SaaS platform. Navigate using the sidebar to manage tenants, users, and monitor activities. Use the impersonation feature to access any tenant dashboard for support or troubleshooting.
+          {t("You have full control over the entire POS SaaS platform. Navigate using the sidebar to manage tenants, users, and monitor activities. Use the impersonation feature to access any tenant dashboard for support or troubleshooting.")}
         </p>
       </div>
     </div>

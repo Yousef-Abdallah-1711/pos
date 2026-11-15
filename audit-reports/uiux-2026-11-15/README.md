@@ -40,9 +40,10 @@ widths, and broad anonymous marketing/storefront samples. They do not establish
 full route by locale by theme visual acceptance. The fields in the CSV remain
 pending until evidence is captured and reviewed.
 
-Source-derived baseline issue also observed in the dashboard overview: its
-loading message is removed only after the request settles, but an API failure
-can leave the screen without a visible error or retry state. Existing trial
-registration screenshot capture checks subscription creation but can capture
-the dashboard before overview data has settled. These require an authenticated
-synthetic flow to verify and are listed as follow-up acceptance work.
+Source-derived baseline issue also observed in the dashboard overview: the
+screen has a partial-load warning, but its compact status line can continue to
+say “Loading dashboard data…” after a failed first load. Trial registration
+also captured the dashboard immediately after checking the subscription, before
+waiting for the overview request group to settle. The current branch changes
+the status line to a visible unavailable message and makes the synthetic trial
+acceptance wait for the overview status before accepting its screenshot.

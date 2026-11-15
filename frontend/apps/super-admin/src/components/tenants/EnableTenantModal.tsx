@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useSuperAdminText } from '@/components/providers/PreferencesProvider'
 
 interface EnableTenantModalProps {
   tenantId: number
@@ -21,6 +22,7 @@ export function EnableTenantModal({
   onClose,
   onSuccess,
 }: EnableTenantModalProps) {
+  const t = useSuperAdminText()
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -56,31 +58,31 @@ export function EnableTenantModal({
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg shadow-lg max-w-md w-full mx-4 p-6">
-        <h2 className="text-xl font-bold mb-4 text-green-600">Re-enable Tenant</h2>
+        <h2 className="text-xl font-bold mb-4 text-green-600">{t('Re-enable Tenant')}</h2>
         <p className="text-gray-600 mb-4">
-          Tenant: <span className="font-semibold">{tenantName}</span>
+          {t('Tenant:')} <span className="font-semibold">{tenantName}</span>
         </p>
 
         {disabledAt && (
           <div className="mb-4 p-3 bg-gray-50 border border-gray-200 rounded text-sm">
             <p className="text-gray-600">
-              <span className="font-semibold">Disabled at:</span>{' '}
+              <span className="font-semibold">{t('Disabled at:')}</span>{' '}
               {new Date(disabledAt).toLocaleString()}
             </p>
             {disabledReason && (
               <p className="text-gray-600 mt-2">
-                <span className="font-semibold">Reason:</span> {disabledReason}
+                <span className="font-semibold">{t('Reason:')}</span> {disabledReason}
               </p>
             )}
           </div>
         )}
 
         <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded text-sm text-green-700">
-          <p className="font-semibold mb-1">✓ Enabling this tenant will:</p>
+          <p className="font-semibold mb-1">✓ {t('Enabling this tenant will:')}</p>
           <ul className="list-disc list-inside space-y-1">
-            <li>Restore access to the dashboard</li>
-            <li>Restaurant website will be back online</li>
-            <li>All features will be re-enabled</li>
+            <li>{t('Restore access to the dashboard')}</li>
+            <li>{t('Restaurant website will be back online')}</li>
+            <li>{t('All features will be re-enabled')}</li>
           </ul>
         </div>
 
@@ -97,7 +99,7 @@ export function EnableTenantModal({
             className="flex-1 px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors"
             disabled={isLoading}
           >
-            Cancel
+              {t('Cancel')}
           </button>
           <button
             type="submit"
@@ -105,7 +107,7 @@ export function EnableTenantModal({
             className="flex-1 px-4 py-2 text-white bg-green-600 hover:bg-green-700 rounded-md transition-colors disabled:opacity-50"
             disabled={isLoading}
           >
-            {isLoading ? 'Enabling...' : 'Enable Tenant'}
+              {isLoading ? t('Enabling...') : t('Enable Tenant')}
           </button>
         </div>
       </div>

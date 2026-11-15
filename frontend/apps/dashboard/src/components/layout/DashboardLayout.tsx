@@ -207,6 +207,9 @@ export default function DashboardLayout({
                       // Also update preferences store for persistence
                       updateTheme(newTheme)
                     }}
+                    aria-label={effectiveTheme === 'dark'
+                      ? locale === 'ar' ? 'التبديل إلى الوضع الفاتح' : 'Switch to light mode'
+                      : locale === 'ar' ? 'التبديل إلى الوضع الداكن' : 'Switch to dark mode'}
                     className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition"
                     title={effectiveTheme === 'dark' ? t('common.lightMode', 'Switch to light mode') : t('common.darkMode', 'Switch to dark mode')}
                   >

@@ -5,8 +5,10 @@ import { superAdminAPI } from "@/lib/api";
 import type { User, PaginatedResponse } from "@/types";
 import { Search, ChevronRight, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
+import { useSuperAdminText } from "@/components/providers/PreferencesProvider";
 
 export default function UsersPage() {
+  const t = useSuperAdminText();
   const [users, setUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -26,7 +28,7 @@ export default function UsersPage() {
         setTotal(totalCount);
       } catch (error) {
         console.error("[UsersPage] Error fetching users:", error);
-        toast.error("Failed to load users");
+        toast.error(t("Failed to load users"));
         setUsers([]);
       } finally {
         setIsLoading(false);
@@ -34,7 +36,7 @@ export default function UsersPage() {
     };
 
     fetchUsers();
-  }, [page, searchQuery]);
+  }, [page, searchQuery, t]);
 
   const totalPages = Math.ceil(total / limit);
 
@@ -42,8 +44,8 @@ export default function UsersPage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-gray-900">All Users</h1>
-        <p className="text-gray-600 mt-2">Manage all platform users across all tenants</p>
+        <h1 className="text-3xl font-bold text-gray-900">{t("All Users")}</h1>
+        <p className="text-gray-600 mt-2">{t("Manage all platform users across all tenants")}</p>
       </div>
 
       {/* Search */}
@@ -52,7 +54,7 @@ export default function UsersPage() {
           <Search size={20} className="text-gray-400" />
           <input
             type="text"
-            placeholder="Search users by name or email..."
+            placeholder={t("Search users by name or email...")}
             value={searchQuery}
             onChange={(e) => {
               setSearchQuery(e.target.value);
@@ -68,13 +70,13 @@ export default function UsersPage() {
         <div className="flex items-center justify-center p-12">
           <div className="text-center">
             <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-            <p className="mt-4 text-gray-600">Loading users...</p>
+            <p className="mt-4 text-gray-600">{t("Loading users...")}</p>
           </div>
         </div>
       ) : !users || users.length === 0 ? (
         <div className="bg-white rounded-lg shadow p-12 text-center">
           <AlertCircle className="mx-auto text-gray-400" size={48} />
-          <p className="text-gray-600 mt-4">No users found</p>
+          <p className="text-gray-600 mt-4">{t("No users found")}</p>
         </div>
       ) : (
         <>
@@ -83,22 +85,22 @@ export default function UsersPage() {
               <thead>
                 <tr className="bg-gray-50 border-b border-gray-200">
                   <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
-                    Name
+                    {t("Name")}
                   </th>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
-                    Email
+                    {t("Email")}
                   </th>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
-                    Role
+                    {t("Role")}
                   </th>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
-                    Tenant ID
+                    {t("Tenant ID")}
                   </th>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
-                    Created
+                    {t("Created")}
                   </th>
                   <th className="px-6 py-3 text-right text-sm font-semibold text-gray-900">
-                    Actions
+                    {t("Actions")}
                   </th>
                 </tr>
               </thead>
@@ -130,7 +132,7 @@ export default function UsersPage() {
                         href={`/dashboard/users/${user.id}`}
                         className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-700 font-medium"
                       >
-                        View
+                        {t("View")}
                         <ChevronRight size={16} />
                       </a>
                     </td>
@@ -144,7 +146,7 @@ export default function UsersPage() {
           {totalPages > 1 && (
             <div className="flex flex-wrap items-center justify-between gap-3 bg-white rounded-lg shadow p-4">
               <p className="text-sm text-gray-600">
-                Showing {(page - 1) * limit + 1} to{" "}
+                {t("Showing")} {(page - 1) * limit + 1} {t("to")} {" "}
                 {Math.min(page * limit, total)} of {total} users
               </p>
               <div className="flex gap-2">
@@ -153,17 +155,17 @@ export default function UsersPage() {
                   disabled={page === 1}
                   className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Previous
+                  {t("Previous")}
                 </button>
                 <span className="px-4 py-2 text-sm font-medium text-gray-900">
-                  Page {page} of {totalPages}
+                  {t("Page")} {page} {t("of")} {totalPages}
                 </span>
                 <button
                   onClick={() => setPage(Math.min(totalPages, page + 1))}
                   disabled={page === totalPages}
                   className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Next
+                  {t("Next")}
                 </button>
               </div>
             </div>

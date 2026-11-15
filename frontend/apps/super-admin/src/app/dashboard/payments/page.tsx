@@ -7,6 +7,7 @@ import { getSuperAdminApiBaseUrl } from "@/lib/config";
 import type { PaymentMetrics, WebhookHealthResponse } from "@/types";
 import { toast } from "sonner";
 import { Activity, Clock3, RefreshCw, WalletCards, Webhook } from "lucide-react";
+import { useSuperAdminText } from "@/components/providers/PreferencesProvider";
 
 type Period = "today" | "week" | "month" | "all";
 
@@ -76,6 +77,7 @@ function getErrorMessage(error: unknown) {
 }
 
 export default function PaymentsMonitoringPage() {
+  const t = useSuperAdminText();
   const [period, setPeriod] = useState<Period>("month");
   const [metrics, setMetrics] = useState<PaymentMetrics | null>(null);
   const [health, setHealth] = useState<WebhookHealthResponse | null>(null);
@@ -140,7 +142,7 @@ export default function PaymentsMonitoringPage() {
       <div className="flex items-center justify-center min-h-[300px]">
         <div className="text-center">
           <div className="inline-block animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600" />
-          <p className="mt-3 text-gray-600">Loading payment monitoring...</p>
+          <p className="mt-3 text-gray-600">{t("Loading payment monitoring...")}</p>
         </div>
       </div>
     );
@@ -150,9 +152,9 @@ export default function PaymentsMonitoringPage() {
     <div className="space-y-6">
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Payments & Webhook Health</h1>
+          <h1 className="text-3xl font-bold text-gray-900">{t("Payments & Webhook Health")}</h1>
           <p className="text-gray-600 mt-1">
-            Monitor payment outcomes, webhook processing, and retry queue reliability.
+            {t("Monitor payment outcomes, webhook processing, and retry queue reliability.")}
           </p>
         </div>
 
@@ -164,7 +166,7 @@ export default function PaymentsMonitoringPage() {
           >
             {PERIOD_OPTIONS.map((option) => (
               <option key={option.value} value={option.value}>
-                {option.label}
+                {t(option.label)}
               </option>
             ))}
           </select>
@@ -174,14 +176,14 @@ export default function PaymentsMonitoringPage() {
             className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:bg-gray-400 flex items-center gap-2"
           >
             <RefreshCw size={16} className={isRefreshing ? "animate-spin" : ""} />
-            Refresh
+            {t("Refresh")}
           </button>
         </div>
       </div>
 
       {loadError && (
         <div className="rounded-lg border border-amber-300 bg-amber-50 p-4 text-amber-900">
-          <p className="font-medium">Backend connection issue</p>
+          <p className="font-medium">{t("Backend connection issue")}</p>
           <p className="text-sm mt-1">{loadError}</p>
         </div>
       )}
@@ -190,7 +192,7 @@ export default function PaymentsMonitoringPage() {
         <div className={`rounded-lg border p-4 ${summaryCardClass("blue")}`}>
           <div className="flex items-center gap-2 text-gray-700">
             <WalletCards size={18} />
-            <span className="text-sm font-medium">Total Payments</span>
+            <span className="text-sm font-medium">{t("Total Payments")}</span>
           </div>
           <p className="text-2xl font-bold text-gray-900 mt-2">{metrics?.total_payments ?? 0}</p>
         </div>
@@ -198,7 +200,7 @@ export default function PaymentsMonitoringPage() {
         <div className={`rounded-lg border p-4 ${summaryCardClass("green")}`}>
           <div className="flex items-center gap-2 text-gray-700">
             <Activity size={18} />
-            <span className="text-sm font-medium">Success Rate</span>
+            <span className="text-sm font-medium">{t("Success Rate")}</span>
           </div>
           <p className="text-2xl font-bold text-gray-900 mt-2">
             {(metrics?.success_rate ?? 0).toFixed(2)}%
@@ -208,7 +210,7 @@ export default function PaymentsMonitoringPage() {
         <div className={`rounded-lg border p-4 ${summaryCardClass("purple")}`}>
           <div className="flex items-center gap-2 text-gray-700">
             <WalletCards size={18} />
-            <span className="text-sm font-medium">Revenue</span>
+            <span className="text-sm font-medium">{t("Revenue")}</span>
           </div>
           <p className="text-2xl font-bold text-gray-900 mt-2">
             {metrics?.total_revenue_formatted ?? "0 EGP"}
@@ -218,7 +220,7 @@ export default function PaymentsMonitoringPage() {
         <div className={`rounded-lg border p-4 ${summaryCardClass("orange")}`}>
           <div className="flex items-center gap-2 text-gray-700">
             <Clock3 size={18} />
-            <span className="text-sm font-medium">Avg Processing</span>
+            <span className="text-sm font-medium">{t("Avg Processing")}</span>
           </div>
           <p className="text-2xl font-bold text-gray-900 mt-2">
             {(metrics?.avg_processing_time_ms ?? 0).toFixed(0)} ms
@@ -228,24 +230,24 @@ export default function PaymentsMonitoringPage() {
 
       <div className="bg-white rounded-lg shadow p-6">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-gray-900">Webhook Retry Queue</h2>
-          <span className="text-sm text-gray-500">Total records: {totalRetryQueue}</span>
+          <h2 className="text-lg font-semibold text-gray-900">{t("Webhook Retry Queue")}</h2>
+          <span className="text-sm text-gray-500">{t("Total records:")} {totalRetryQueue}</span>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-3">
-            <p className="text-xs text-yellow-700">Pending</p>
+            <p className="text-xs text-yellow-700">{t("Pending")}</p>
             <p className="text-xl font-semibold text-yellow-900">{retryStats.pending}</p>
           </div>
           <div className="rounded-lg border border-blue-200 bg-blue-50 p-3">
-            <p className="text-xs text-blue-700">Processing</p>
+            <p className="text-xs text-blue-700">{t("Processing")}</p>
             <p className="text-xl font-semibold text-blue-900">{retryStats.processing}</p>
           </div>
           <div className="rounded-lg border border-green-200 bg-green-50 p-3">
-            <p className="text-xs text-green-700">Success</p>
+            <p className="text-xs text-green-700">{t("Success")}</p>
             <p className="text-xl font-semibold text-green-900">{retryStats.success}</p>
           </div>
           <div className="rounded-lg border border-red-200 bg-red-50 p-3">
-            <p className="text-xs text-red-700">Failed</p>
+            <p className="text-xs text-red-700">{t("Failed")}</p>
             <p className="text-xl font-semibold text-red-900">{retryStats.failed}</p>
           </div>
         </div>
@@ -254,7 +256,7 @@ export default function PaymentsMonitoringPage() {
       <div className="bg-white rounded-lg shadow p-6">
         <div className="flex items-center gap-2 mb-4">
           <Webhook size={18} className="text-gray-700" />
-          <h2 className="text-lg font-semibold text-gray-900">Latest Webhook Events</h2>
+          <h2 className="text-lg font-semibold text-gray-900">{t("Latest Webhook Events")}</h2>
         </div>
 
         {!health?.events?.length ? (
@@ -266,13 +268,13 @@ export default function PaymentsMonitoringPage() {
             <table className="min-w-full text-sm">
               <thead>
                 <tr className="border-b border-gray-200 text-left text-gray-600">
-                  <th className="py-2 pr-4">Time</th>
-                  <th className="py-2 pr-4">Order ID</th>
-                  <th className="py-2 pr-4">Status</th>
-                  <th className="py-2 pr-4">HMAC</th>
-                  <th className="py-2 pr-4">Processing (ms)</th>
-                  <th className="py-2 pr-4">Source</th>
-                  <th className="py-2">Error</th>
+                  <th className="py-2 pr-4">{t("Time")}</th>
+                  <th className="py-2 pr-4">{t("Order ID")}</th>
+                  <th className="py-2 pr-4">{t("Status")}</th>
+                  <th className="py-2 pr-4">{t("HMAC")}</th>
+                  <th className="py-2 pr-4">{t("Processing (ms)")}</th>
+                  <th className="py-2 pr-4">{t("Source")}</th>
+                  <th className="py-2">{t("Error")}</th>
                 </tr>
               </thead>
               <tbody>

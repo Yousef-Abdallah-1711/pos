@@ -5,8 +5,11 @@ import { useAuthStore } from "@/stores/authStore";
 import { superAdminAPI } from "@/lib/api";
 import { AlertTriangle, X, LogOut } from "lucide-react";
 import { toast } from "sonner";
+import { useSuperAdminPreferences, useSuperAdminText } from "@/components/providers/PreferencesProvider";
 
 export function ImpersonationBanner() {
+  const t = useSuperAdminText();
+  const { locale } = useSuperAdminPreferences();
   const impersonation = useAuthStore((state) => state.impersonation);
   const { setImpersonation } = useAuthStore();
   const [isEnding, setIsEnding] = useState(false);
@@ -20,9 +23,9 @@ export function ImpersonationBanner() {
       setIsEnding(true);
       await superAdminAPI.endImpersonation();
       setImpersonation(null);
-      toast.success("Impersonation session ended");
+      toast.success(t("Impersonation session ended"));
     } catch (error) {
-      toast.error("Failed to end impersonation session");
+      toast.error(t("Failed to end impersonation session"));
       console.error(error);
     } finally {
       setIsEnding(false);
@@ -36,17 +39,17 @@ export function ImpersonationBanner() {
           <AlertTriangle className="text-amber-600 flex-shrink-0 mt-0.5" size={20} />
           <div>
             <p className="font-semibold text-amber-900">
-              Impersonating User
+              {t("Impersonating User")}
             </p>
             <p className="text-sm text-amber-800 mt-1">
               {impersonation?.target_user?.first_name}{" "}
               {impersonation?.target_user?.last_name} (
-              {impersonation?.target_user?.email})
+              <span dir="ltr">{impersonation?.target_user?.email}</span>)
             </p>
             {impersonation?.expires_at && (
               <p className="text-xs text-amber-700 mt-1">
-                Session expires:{" "}
-                {new Date(impersonation.expires_at).toLocaleTimeString()}
+                {t("Session expires:")}{" "}
+                {new Date(impersonation.expires_at).toLocaleTimeString(locale)}
               </p>
             )}
           </div>
@@ -58,7 +61,7 @@ export function ImpersonationBanner() {
           className="flex items-center gap-2 px-4 py-2 bg-amber-600 hover:bg-amber-700 disabled:bg-gray-400 text-white rounded-lg font-medium transition-colors flex-shrink-0"
         >
           <LogOut size={16} />
-          {isEnding ? "Ending..." : "End Session"}
+          {isEnding ? t("Ending...") : t("End Session")}
         </button>
       </div>
     </div>

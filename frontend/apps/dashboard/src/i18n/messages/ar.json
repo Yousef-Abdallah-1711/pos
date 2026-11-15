@@ -126,6 +126,7 @@
     "subscriptionLabel": "الاشتراك",
     "daysRemaining": "يوم متبقٍ",
     "loadingData": "جارٍ تحميل بيانات لوحة التحكم...",
+    "dataUnavailable": "تعذر تحميل بيانات لوحة التحكم. حدّث الصفحة للمحاولة مرة أخرى.",
     "refreshing": "(جارٍ التحديث)",
     "workspaceStatus": "حالة مساحة العمل",
     "tenantAccess": "وصول المستأجر",

@@ -1,5 +1,7 @@
 'use client'
 
+import { useSuperAdminPreferences, useSuperAdminText } from '@/components/providers/PreferencesProvider'
+
 interface TrialDaysCounterProps {
   trialEndDate: string | null | undefined
   trialDays: number
@@ -13,8 +15,10 @@ export function TrialDaysCounter({
   showProgress = false,
   className = '',
 }: TrialDaysCounterProps) {
+  const t = useSuperAdminText()
+  const { locale } = useSuperAdminPreferences()
   if (!trialEndDate) {
-    return <span className={`text-red-600 ${className}`}>No trial date</span>
+    return <span className={`text-red-600 ${className}`}>{t('No trial date')}</span>
   }
 
   const endDate = new Date(trialEndDate)
@@ -41,7 +45,13 @@ export function TrialDaysCounter({
 
   let displayText: string
 
-  if (daysRemaining > 7) {
+  if (locale === 'ar' && daysRemaining > 0) {
+    displayText = `متبقي ${daysRemaining} يومًا`
+  } else if (locale === 'ar' && daysRemaining === 0) {
+    displayText = 'تنتهي اليوم'
+  } else if (locale === 'ar') {
+    displayText = `انتهت منذ ${Math.abs(daysRemaining)} يومًا`
+  } else if (daysRemaining > 7) {
     displayText = `${daysRemaining} days remaining`
   } else if (daysRemaining >= 1 && daysRemaining <= 7) {
     displayText = `${daysRemaining} day${daysRemaining !== 1 ? 's' : ''} remaining`

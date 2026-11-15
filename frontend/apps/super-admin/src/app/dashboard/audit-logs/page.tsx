@@ -6,6 +6,7 @@ import type { AuditLog } from "@/types";
 import { getSafeAuditDetails } from "@/lib/audit-log-details";
 import { AlertCircle, Shield } from "lucide-react";
 import { toast } from "sonner";
+import { useSuperAdminPreferences, useSuperAdminText } from "@/components/providers/PreferencesProvider";
 
 const ACTION_COLORS: Record<string, string> = {
   LOGIN_SUCCESS: "bg-green-100 text-green-700",
@@ -19,6 +20,8 @@ const ACTION_COLORS: Record<string, string> = {
 };
 
 export default function AuditLogsPage() {
+  const t = useSuperAdminText();
+  const { locale } = useSuperAdminPreferences();
   const [logs, setLogs] = useState<AuditLog[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [page, setPage] = useState(1);
@@ -41,7 +44,7 @@ export default function AuditLogsPage() {
         setTotal(totalCount);
       } catch (error) {
         console.error("[AuditLogsPage] Error fetching logs:", error);
-        toast.error("Failed to load audit logs");
+        toast.error(t("Failed to load audit logs"));
         setLogs([]);
       } finally {
         setIsLoading(false);
@@ -49,7 +52,7 @@ export default function AuditLogsPage() {
     };
 
     fetchLogs();
-  }, [page, filterAction]);
+  }, [page, filterAction, t]);
 
   const totalPages = Math.ceil(total / limit);
   const uniqueActions = logs && logs.length > 0 ? Array.from(new Set(logs.map((log) => log.action))) : [];
@@ -58,9 +61,9 @@ export default function AuditLogsPage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-gray-900">Audit Logs</h1>
+        <h1 className="text-3xl font-bold text-gray-900">{t("Audit Logs")}</h1>
         <p className="text-gray-600 mt-2">
-          Complete activity log of all super admin actions
+          {t("Complete activity log of all super admin actions")}
         </p>
       </div>
 
@@ -68,7 +71,7 @@ export default function AuditLogsPage() {
       <div className="bg-white rounded-lg shadow p-4">
         <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:gap-4">
           <label htmlFor="audit-action" className="text-sm font-medium text-gray-700">
-            Filter by Action:
+            {t("Filter by Action:")}
           </label>
           <select
             id="audit-action"
@@ -79,7 +82,7 @@ export default function AuditLogsPage() {
             }}
             className="min-h-12 min-w-0 max-w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
           >
-            <option value="">All Actions</option>
+            <option value="">{t("All Actions")}</option>
             {uniqueActions.map((action) => (
               <option key={action} value={action}>
                 {action}
@@ -94,13 +97,13 @@ export default function AuditLogsPage() {
         <div className="flex items-center justify-center p-12">
           <div className="text-center">
             <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-            <p className="mt-4 text-gray-600">Loading audit logs...</p>
+            <p className="mt-4 text-gray-600">{t("Loading audit logs...")}</p>
           </div>
         </div>
       ) : !logs || logs.length === 0 ? (
         <div className="bg-white rounded-lg shadow p-12 text-center">
           <AlertCircle className="mx-auto text-gray-400" size={48} />
-          <p className="text-gray-600 mt-4">No audit logs found</p>
+          <p className="text-gray-600 mt-4">{t("No audit logs found")}</p>
         </div>
       ) : (
         <>
@@ -131,25 +134,25 @@ export default function AuditLogsPage() {
                     </div>
                   </div>
                   <span className="text-sm text-gray-500">
-                    {new Date(log.created_at).toLocaleString()}
+                    {new Date(log.created_at).toLocaleString(locale)}
                   </span>
                 </div>
 
                 <div className="grid min-w-0 grid-cols-1 break-words md:grid-cols-2 gap-4 bg-gray-50 rounded p-4 [&>div]:min-w-0">
                   <div>
                     <p className="text-xs text-gray-600 font-medium uppercase">
-                      IP Address
+                      {t("IP Address")}
                     </p>
-                    <p className="text-sm text-gray-900 mt-1 font-mono [overflow-wrap:anywhere]">
+                    <p dir="ltr" className="text-sm text-gray-900 mt-1 font-mono [overflow-wrap:anywhere]">
                       {log.ip_address}
                     </p>
                   </div>
                   {log.target_user_id && (
                     <div>
                       <p className="text-xs text-gray-600 font-medium uppercase">
-                        Target User ID
+                        {t("Target User ID")}
                       </p>
-                      <p className="text-sm text-gray-900 mt-1">
+                        <p dir="ltr" className="text-sm text-gray-900 mt-1">
                         {log.target_user_id}
                       </p>
                     </div>
@@ -157,9 +160,9 @@ export default function AuditLogsPage() {
                   {log.target_tenant_id && (
                     <div>
                       <p className="text-xs text-gray-600 font-medium uppercase">
-                        Target Tenant ID
+                        {t("Target Tenant ID")}
                       </p>
-                      <p className="text-sm text-gray-900 mt-1">
+                        <p dir="ltr" className="text-sm text-gray-900 mt-1">
                         {log.target_tenant_id}
                       </p>
                     </div>
@@ -167,7 +170,7 @@ export default function AuditLogsPage() {
                   {safeDetails && Object.keys(safeDetails).length > 0 && (
                     <div>
                       <p className="text-xs text-gray-600 font-medium uppercase">
-                        Details
+                        {t("Details")}
                       </p>
                       <p className="text-xs text-gray-900 mt-1 font-mono [overflow-wrap:anywhere]">
                         {JSON.stringify(safeDetails)}
