@@ -1,7 +1,7 @@
 # SERVIO Financial Acceptance — Phase 3A Snapshot
 
-**Snapshot date:** 2026-11-15 (Africa/Cairo)  
-**Repository:** `Yousef-Abdallah-1711/pos`  
+**Snapshot date:** 2026-11-15 (Africa/Cairo)
+**Repository:** `Yousef-Abdallah-1711/pos`
 **Latest-main baseline:** `5c00e53434fe96b5ec5e2f73d6d3d853fbfa7bd9`
 **Financial acceptance code/test commit:** `662f71932a6ce4d439e0f047bc85a103cf119ab1` (based on the latest-main SHA above)
 **Pull request:** [#57 — isolated financial acceptance runner](https://github.com/Yousef-Abdallah-1711/pos/pull/57)
