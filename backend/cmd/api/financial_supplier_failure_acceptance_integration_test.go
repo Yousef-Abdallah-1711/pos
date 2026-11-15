@@ -66,7 +66,7 @@ func assertSupplierPaymentRollback(t *testing.T, api *supplierAcceptanceAPI, sup
 	t.Helper()
 	removeTrigger := installSupplierJournalFailure(t, api.db, invoiceID, "payment_made")
 	defer removeTrigger()
-	status, body := supplierPaymentRequest(t.Context(), api.client, api.baseURL, supplierID, invoiceID, 220)
+	status, body := supplierPaymentRequest(t, api.client, api.baseURL, supplierID, invoiceID, 220)
 	removeTrigger()
 	if status < 400 {
 		t.Fatalf("forced supplier payment posting failure returned %d: %s", status, body)
@@ -159,7 +159,7 @@ func readSupplierPaymentTotals(t *testing.T, api *supplierAcceptanceAPI, invoice
 func assertSupplierAPBalance(t *testing.T, api *supplierAcceptanceAPI, invoiceID int, invoiceJournalID int64, balance int64) {
 	t.Helper()
 	var apNetCredit int64
-	err = api.db.QueryRowContext(api.ctx, `
+	err := api.db.QueryRowContext(api.ctx, `
 		SELECT ROUND(COALESCE(SUM(gl.credit_amount-gl.debit_amount),0)*100)::bigint
 		FROM general_ledger gl JOIN chart_of_accounts a ON a.id=gl.account_id AND a.tenant_id=gl.tenant_id AND a.restaurant_id=gl.restaurant_id
 		JOIN journal_entries je ON je.id=gl.journal_entry_id AND je.tenant_id=gl.tenant_id AND je.restaurant_id=gl.restaurant_id
