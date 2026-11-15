@@ -22,6 +22,7 @@ class CIIsolationTests(unittest.TestCase):
         script = (ROOT / 'ops/aws/browser-upload.cjs').read_text()
         self.assertIn("timeout:10000", script)
         self.assertIn("await browser.close();", script)
+        self.assertIn("record('Synthetic tenant session logout',logout.status(),204);", script)
         self.assertIn("catch(error){\n   checks.push({check:'Synthetic tenant session logout'", script)
 
     def test_compose_targets_and_external_services_are_safe(self):

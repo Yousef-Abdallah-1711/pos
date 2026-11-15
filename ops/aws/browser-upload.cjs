@@ -57,7 +57,7 @@ async function object(response){const raw=await response.json();return raw.data|
   record('No upload browser runtime exceptions',errors.length,0);
   try{
    const logout=await context.request.post(base+'/auth/logout',{headers,data:{},timeout:10000});
-   record('Synthetic tenant session logout',logout.status(),200);
+   record('Synthetic tenant session logout',logout.status(),204);
   }catch(error){
    checks.push({check:'Synthetic tenant session logout',status:'FAIL',error:String(error.message).replaceAll(user.password,'[redacted]').slice(0,200)});
   }finally{
