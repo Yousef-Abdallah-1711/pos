@@ -30,8 +30,7 @@ beforeEach(() => {
 })
 afterEach(cleanup)
 
-function renderWithI18n(node: React.ReactNode) {
-  const locale = vi.mocked(usePathname).mock.results.at(-1)?.value?.startsWith('/ar') ? 'ar' : 'en'
+function renderWithI18n(node: React.ReactNode, locale: 'en' | 'ar' = 'en') {
   const messages = locale === 'ar' ? arSubscription : enSubscription
   return render(<NextIntlClientProvider locale={locale} messages={{ subscription: messages }}>{node}</NextIntlClientProvider>)
 }
@@ -45,7 +44,7 @@ it('routes an expired trial to billing without repricing historical entitlements
 
 it('localizes expired access and billing in Arabic', () => {
   vi.mocked(usePathname).mockReturnValue('/ar/dashboard')
-  renderWithI18n(<BlockedOverlay blockReason="expired" />)
+  renderWithI18n(<BlockedOverlay blockReason="expired" />, 'ar')
   expect(screen.getByRole('heading', { name: 'انتهت صلاحية الاشتراك' })).toBeInTheDocument()
   expect(screen.getByRole('link', { name: 'مراجعة خيارات الفوترة' })).toHaveAttribute('href', '/ar/dashboard/settings/billing')
   expect(screen.getByRole('button', { name: 'تسجيل الخروج' })).toBeEnabled()
@@ -102,7 +101,7 @@ it('revokes the blocked sidebar session before clearing state', async () => {
   let revoke: (() => void) | undefined
   vi.mocked(api.post).mockImplementationOnce(() => new Promise(resolve => { revoke = () => resolve({ data: {} }) }))
   vi.mocked(usePathname).mockReturnValue('/ar/dashboard')
-  renderWithI18n(<BlockedSidebar isMobileOpen onMobileToggle={vi.fn()} />)
+  renderWithI18n(<BlockedSidebar isMobileOpen onMobileToggle={vi.fn()} />, 'ar')
   fireEvent.click(screen.getByRole('button', { name: 'تسجيل الخروج' }))
   expect(api.post).toHaveBeenCalledWith('/auth/logout')
   expect(logout).not.toHaveBeenCalled()
