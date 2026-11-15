@@ -26,8 +26,9 @@ html:not(.light) .sv-faq details,html:not(.light) .sv-feature-card,html:not(.lig
 html:not(.light) .sv-main input,html:not(.light) .sv-main select,html:not(.light) .sv-main textarea { background:#211a2b; color:var(--sv-ink); border-color:#77678c; }
 html:not(.light) .sv-main input::placeholder,html:not(.light) .sv-main textarea::placeholder { color:#c0b6cd; }
 html:not(.light) .sv-main :focus-visible,html:not(.light) .sv-header :focus-visible { outline-color:#d2baff; }
-html:not(.light) :is(.sv-main,.sv-header,.sv-footer) a { color:var(--sv-violet); }
-html:not(.light) .sv-button,html:not(.light) .sv-header .sv-button { background:#6938d3; border-color:#6938d3; color:#fff; }
+html:not(.light) :is(.sv-main,.sv-header,.sv-footer) a:not(.sv-button) { color:var(--sv-violet); }
+html:not(.light) .sv-button:not(.sv-button-compact):not(.sv-button-secondary),
+html:not(.light) .sv-header .sv-button:not(.sv-button-compact):not(.sv-button-secondary) { background:#6938d3; border-color:#6938d3; color:#fff; }
 html:not(.light) .sv-footer { background:#100d17; color:#ded4ec; }
 html:not(.light) .sv-footer a { color:#d6c0ff; }
 html:not(.light) .sv-final { background:#392268; }
