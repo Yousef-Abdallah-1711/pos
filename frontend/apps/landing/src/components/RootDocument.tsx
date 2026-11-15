@@ -2,7 +2,6 @@ import type { Metadata } from 'next'
 import { IBM_Plex_Sans_Arabic, Manrope } from 'next/font/google'
 import '@/app/globals.css'
 import '@/app/marketing.css'
-import { ThemeProvider } from 'next-themes'
 
 const plex = IBM_Plex_Sans_Arabic({
   weight: ['400', '600', '700'],
@@ -36,11 +35,9 @@ export const rootMetadata: Metadata = {
 export function RootDocument({ children, locale }: RootDocumentProps) {
 
   return (
-    <html lang={locale} dir={locale === 'ar' ? 'rtl' : 'ltr'} suppressHydrationWarning>
+    <html lang={locale} dir={locale === 'ar' ? 'rtl' : 'ltr'} className="light" style={{ colorScheme: 'light' }}>
       <body className={`${plex.variable} ${manrope.variable}`}>
-        <ThemeProvider attribute="class" defaultTheme="light" forcedTheme="light">
-          {children}
-        </ThemeProvider>
+        {children}
       </body>
     </html>
   )

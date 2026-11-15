@@ -1,6 +1,5 @@
 import { RootDocument, rootMetadata } from '@/components/RootDocument'
 import { LanguageProvider } from '@/contexts/LanguageContext'
-import { Toaster } from 'sonner'
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 
@@ -45,7 +44,6 @@ export default async function LocaleLayout({ children, params }: LocaleLayoutPro
   return (
     <RootDocument locale={locale}><LanguageProvider locale={locale}>
       {children}
-      <Toaster position={locale === 'ar' ? 'top-left' : 'top-right'} richColors />
     </LanguageProvider></RootDocument>
   )
 }
