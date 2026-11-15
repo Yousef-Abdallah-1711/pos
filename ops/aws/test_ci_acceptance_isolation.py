@@ -31,6 +31,11 @@ class CIIsolationTests(unittest.TestCase):
         self.assertEqual(compose['services']['backend']['environment']['PAYMOB_MODE'], 'mock')
         self.assertNotIn('PAYMOB_API_KEY', compose['services']['backend']['environment'])
 
+    def test_browser_smoke_measures_the_reported_375px_mobile_width(self):
+        script = (ROOT / 'ops/aws/browser-smoke.cjs').read_text()
+        self.assertIn('for(const width of [1440,768,390,375])', script)
+        self.assertEqual(script.count('[320,375,390,768,1440]'), 2)
+
     def test_mutating_acceptance_scripts_have_no_public_production_api_literals(self):
         scripts = [
             'ops/aws/browser-smoke.cjs',

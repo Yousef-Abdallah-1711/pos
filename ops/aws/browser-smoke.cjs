@@ -51,8 +51,8 @@ async function loginJourney(browser,admin=false) {
   const jwtInStorage=await page.evaluate(()=>Object.values(localStorage).some(v=>/eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+/.test(v)));
   rows.push({label,url:page.url(),session,cookies,jwtInStorage,status:session===200&&!jwtInStorage&&cookies.some(c=>c.secure&&c.httpOnly)?'PASS':'FAIL'});
   await page.screenshot({path:`${evidence}/${label}.png`,fullPage:true});
-  if(!admin) for(const route of ['dashboard','dashboard/pos','dashboard/kds']) for(const width of [320,390,768,1440]) await snapshot(page,'authenticated-'+route.replaceAll('/','-'),width,'https://pos.app.servio.test/en/'+route);
-  else for(const width of [320,390,768,1440]) await snapshot(page,'admin-authenticated-dashboard',width,'https://admin.pos.servio.test/dashboard');
+  if(!admin) for(const route of ['dashboard','dashboard/pos','dashboard/kds']) for(const width of [320,375,390,768,1440]) await snapshot(page,'authenticated-'+route.replaceAll('/','-'),width,'https://pos.app.servio.test/en/'+route);
+  else for(const width of [320,375,390,768,1440]) await snapshot(page,'admin-authenticated-dashboard',width,'https://admin.pos.servio.test/dashboard');
  } catch(e) {
   rows.push({label,status:'FAIL',error:String(e.message).replaceAll(user.password,'[redacted]'),url:page.url()});
   await page.screenshot({path:`${evidence}/${label}-failure.png`,fullPage:true}).catch(()=>{});
@@ -61,7 +61,7 @@ async function loginJourney(browser,admin=false) {
 }
 (async()=>{
  const browser=await chromium.launch({headless:true,args:['--disable-dev-shm-usage']});
- for(const width of [1440,768,390]) {
+ for(const width of [1440,768,390,375]) {
   const context=await browser.newContext({ignoreHTTPSErrors:process.env.SERVIO_DISPOSABLE_BROWSER==='1',viewport:{width,height:900}});await guardContext(context);const page=await context.newPage();
 
   for(const [label,url] of anonymous) await snapshot(page,label,width,url);
