@@ -67,3 +67,40 @@ func TestSecurityHeadersMiddlewareDeniesCheckoutFramingWithoutConfig(t *testing.
 		t.Fatalf("X-Frame-Options = %q, want DENY", got)
 	}
 }
+
+func TestNoStoreAPIResponsesProtectsPersonalizedResponses(t *testing.T) {
+	handler := NoStoreAPIResponses(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	}))
+	recorder := httptest.NewRecorder()
+	handler.ServeHTTP(recorder, httptest.NewRequest(http.MethodGet, "/api/v1/auth/session", nil))
+
+	if got := recorder.Header().Get("Cache-Control"); got != "private, no-store" {
+		t.Fatalf("Cache-Control = %q, want private, no-store", got)
+	}
+}
+
+func TestNoStoreAPIResponsesKeepsExplicitPublicPolicy(t *testing.T) {
+	handler := NoStoreAPIResponses(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.Header().Set("Cache-Control", "public, max-age=300")
+		w.WriteHeader(http.StatusOK)
+	}))
+	recorder := httptest.NewRecorder()
+	handler.ServeHTTP(recorder, httptest.NewRequest(http.MethodGet, "/api/v1/public/restaurants/demo/menu", nil))
+
+	if got := recorder.Header().Get("Cache-Control"); got != "public, max-age=300" {
+		t.Fatalf("Cache-Control = %q, want explicit public policy", got)
+	}
+}
+
+func TestNoStoreAPIResponsesDoesNotChangeNonAPIResponses(t *testing.T) {
+	handler := NoStoreAPIResponses(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	}))
+	recorder := httptest.NewRecorder()
+	handler.ServeHTTP(recorder, httptest.NewRequest(http.MethodGet, "/health", nil))
+
+	if got := recorder.Header().Get("Cache-Control"); got != "" {
+		t.Fatalf("Cache-Control = %q, want no default for non-API route", got)
+	}
+}

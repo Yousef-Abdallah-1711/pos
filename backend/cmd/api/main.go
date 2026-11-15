@@ -1949,7 +1949,8 @@ func main() {
 	}
 
 	// Apply global middleware
-	corsHandler := middleware.CORSMiddleware(mux)
+	cacheControlHandler := middleware.NoStoreAPIResponses(mux)
+	corsHandler := middleware.CORSMiddleware(cacheControlHandler)
 	compressedHandler := middleware.GzipMiddleware(corsHandler)
 	securedHandler := middleware.SecurityHeadersMiddleware(compressedHandler)
 	metricsHandler := middleware.RequestMetricsMiddleware(securedHandler)

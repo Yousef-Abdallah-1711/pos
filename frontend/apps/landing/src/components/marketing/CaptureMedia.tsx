@@ -1,6 +1,7 @@
 'use client'
 
 import Image from 'next/image'
+import { useEffect, useState } from 'react'
 import { useTheme } from 'next-themes'
 import captures from '@/content/captures.json'
 import type { Locale } from '@/content/site'
@@ -20,8 +21,12 @@ interface CaptureMediaProps {
 
 export function CaptureMedia({ image, alt, locale, captions, openLabel, priority }: CaptureMediaProps) {
   const { resolvedTheme } = useTheme()
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => setMounted(true), [])
   const hasMatrix = MATRIX_IMAGES.includes(image as (typeof MATRIX_IMAGES)[number])
-  const theme = resolvedTheme === 'light' ? 'light' : 'dark'
+  // Keep the server and first client render identical; next-themes reads saved
+  // preferences only in the browser, then this image updates after hydration.
+  const theme = mounted && resolvedTheme === 'light' ? 'light' : 'dark'
   const sourceLocale = hasMatrix ? locale : 'en'
   const sourceTheme = hasMatrix ? theme : 'light'
   const source = hasMatrix
