@@ -27,8 +27,8 @@ export function ProductExplorer({ locale, features, headingLevel = 3 }: { locale
       {features.map((feature, i) => <button key={feature.slug} ref={element => { tabs.current[i] = element }} type="button" role="tab" id={`explore-tab-${feature.slug}`} aria-controls={`explore-panel-${feature.slug}`} aria-selected={selected === i} tabIndex={selected === i ? 0 : -1} onClick={() => setSelected(i)} onKeyDown={event => navigate(event, i)}>{feature.title}</button>)}
     </div>
     {features.map((feature, i) => <div key={feature.slug} role="tabpanel" id={`explore-panel-${feature.slug}`} aria-labelledby={`explore-tab-${feature.slug}`} hidden={selected !== i} tabIndex={0}>
-      <div className="sv-explorer-panel"><ProductCapture locale={locale} image={feature.image} alt={feature.title} />
-        <div><p className="sv-eyebrow">{feature.eyebrow}</p><Heading>{feature.headline}</Heading><p>{feature.description}</p><Link className="sv-text-link" href={`/${locale}/features/${feature.slug}`}>{c.details}<span aria-hidden="true">↗</span></Link></div></div>
+      {selected === i && <div className="sv-explorer-panel"><ProductCapture locale={locale} image={feature.image} alt={feature.title} />
+        <div><p className="sv-eyebrow">{feature.eyebrow}</p><Heading>{feature.headline}</Heading><p>{feature.description}</p><Link className="sv-text-link" href={`/${locale}/features/${feature.slug}`}>{c.details}<span aria-hidden="true">↗</span></Link></div></div>}
     </div>)}
   </div>
 }
