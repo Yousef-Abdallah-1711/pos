@@ -1,6 +1,6 @@
 # SERVIO Accounting and Product Decision Register
 
-**Snapshot:** 2026-11-15 (Africa/Cairo)  
+**Snapshot:** 2026-11-15 (Africa/Cairo)
 **Baseline:** `origin/main` `3ed336c5f00d25596da3186176256a629d0d474c`
 
 These entries record questions that engineering must not settle by inventing accounting policy. The recommended direction is a proposal for review, not an approved policy. No production posting or policy-dependent code change is authorized by this register.
