@@ -99,19 +99,19 @@ export function MobileNavigation({ locale, pathname, open, onClose, triggerRef, 
             <span>{copy.navigation.platform}</span><ChevronDown size={18} aria-hidden="true" />
           </button>
           <div className="sv-mobile-feature-links" id="sv-mobile-feature-links" hidden={!featuresOpen}>
-            <Link href={localizedHref(locale, 'features')} aria-current={isNavigationRouteActive(pathname, 'features') ? 'page' : undefined} onClick={closeAndRestoreFocus}>{copy.navigation.allFeatures}</Link>
+            <Link href={localizedHref(locale, 'features')} prefetch={false} aria-current={isNavigationRouteActive(pathname, 'features') ? 'page' : undefined} onClick={closeAndRestoreFocus}>{copy.navigation.allFeatures}</Link>
             {FEATURE_GROUPS.map(group => <section key={group.id}>
               <h2>{copy.navigation[group.label]}</h2>
-              {group.items.map(item => <Link key={item.id} href={localizedHref(locale, `features/${item.id}`)} aria-current={pathname === localizedHref(locale, `features/${item.id}`) ? 'page' : undefined} onClick={closeAndRestoreFocus}>
+              {group.items.map(item => <Link key={item.id} href={localizedHref(locale, `features/${item.id}`)} prefetch={false} aria-current={pathname === localizedHref(locale, `features/${item.id}`) ? 'page' : undefined} onClick={closeAndRestoreFocus}>
                 <span>{copy.navigation[item.label]}</span><span className="sv-mobile-feature-links__description">{copy.navigation[item.description]}</span>
               </Link>)}
             </section>)}
           </div>
         </div>
-        {HEADER_LINKS.filter(item => item.route !== 'features').map(item => <Link className="sv-mobile-navigation__link" key={item.id} href={localizedHref(locale, item.route)} onClick={closeAndRestoreFocus}>
+        {HEADER_LINKS.filter(item => item.route !== 'features').map(item => <Link className="sv-mobile-navigation__link" key={item.id} href={localizedHref(locale, item.route)} prefetch={false} onClick={closeAndRestoreFocus}>
           {copy.navigation[item.label]}<ArrowUpRight size={15} aria-hidden="true" />
         </Link>)}
-        <Link className="sv-mobile-navigation__link" href={localizedHref(locale, 'privacy')} onClick={closeAndRestoreFocus}>{copy.navigation.privacy}</Link>
+        <Link className="sv-mobile-navigation__link" href={localizedHref(locale, 'privacy')} prefetch={false} onClick={closeAndRestoreFocus}>{copy.navigation.privacy}</Link>
         <Link className="sv-mobile-navigation__link" href={localizedHref(locale, 'login')} prefetch={false} onClick={closeAndRestoreFocus}>{copy.navigation.login}</Link>
       </nav>
       <div className="sv-mobile-navigation__controls">

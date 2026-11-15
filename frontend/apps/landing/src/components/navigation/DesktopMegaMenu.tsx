@@ -80,7 +80,7 @@ export function DesktopMegaMenu({ locale, pathname }: { locale: Locale; pathname
               const Icon = navigationIcons[item.icon]
               const href = localizedHref(locale, `features/${item.id}`)
               return <li key={item.id}>
-                <Link href={href} aria-current={pathname === href ? 'page' : undefined} onClick={closeMenu}>
+                <Link href={href} prefetch={false} aria-current={pathname === href ? 'page' : undefined} onClick={closeMenu}>
                   <span className="sv-mega-item__icon"><Icon size={19} aria-hidden="true" /></span>
                   <span className="sv-mega-item__copy">
                     <span className="sv-mega-item__title">{copy.navigation[item.label]}</span>
@@ -96,8 +96,8 @@ export function DesktopMegaMenu({ locale, pathname }: { locale: Locale; pathname
       <div className="sv-mega-menu__footer">
         <p>{copy.navigation.menuFooter}</p>
         <div>
-          <Link href={localizedHref(locale, 'features')} onClick={closeMenu}>{copy.navigation.allFeatures}<ArrowUpRight size={15} aria-hidden="true" /></Link>
-          <Link href={localizedHref(locale, 'productTour')} onClick={closeMenu}>{copy.navigation.productTour}<ArrowUpRight size={15} aria-hidden="true" /></Link>
+          <Link href={localizedHref(locale, 'features')} prefetch={false} onClick={closeMenu}>{copy.navigation.allFeatures}<ArrowUpRight size={15} aria-hidden="true" /></Link>
+          <Link href={localizedHref(locale, 'productTour')} prefetch={false} onClick={closeMenu}>{copy.navigation.productTour}<ArrowUpRight size={15} aria-hidden="true" /></Link>
           <TrialLink locale={locale} source="mega-menu" />
         </div>
       </div>

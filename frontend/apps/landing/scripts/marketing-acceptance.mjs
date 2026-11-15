@@ -408,6 +408,7 @@ async function main() {
   const errors = []
   const recoveredRscNavigations = []
   const networkFailures = []
+  const failedRouteChunkRequests = []
   const pendingReactErrorDetails = []
   const observe = page => {
    page.on('pageerror', error => {
@@ -435,7 +436,18 @@ async function main() {
     }
     errors.push(`${page.url()}: ${text} @ ${JSON.stringify(location)}`)
    })
-   page.on('response', response => { if (response.status() >= 400) networkFailures.push(`${response.status()} ${new URL(response.url()).pathname}`) })
+   page.on('requestfailed', request => {
+    const requestUrl = new URL(request.url())
+    if (requestUrl.pathname.startsWith('/_next/static/chunks/app/')) {
+     failedRouteChunkRequests.push(`${request.failure()?.errorText || 'request failed'} ${requestUrl.pathname}`)
+    }
+   })
+   page.on('response', response => {
+    if (response.status() < 400) return
+    const pathname = new URL(response.url()).pathname
+    networkFailures.push(`${response.status()} ${pathname}`)
+    if (pathname.startsWith('/_next/static/chunks/app/')) failedRouteChunkRequests.push(`${response.status()} ${pathname}`)
+   })
   }
   observe(page)
   for (const locale of ['en', 'ar']) {
@@ -463,8 +475,9 @@ async function main() {
    }
   })
   check('recovered Next.js navigation fallbacks use verified routes', invalidFallbacks.length === 0, JSON.stringify(invalidFallbacks))
-  check('browser exceptions', errors.length === 0, errors.join('; '))
+  check('failed route chunk requests', failedRouteChunkRequests.length === 0, JSON.stringify(failedRouteChunkRequests))
   check('failed network responses', networkFailures.length === 0, networkFailures.join('; '))
+  check('browser exceptions', errors.length === 0, errors.join('; '))
  } finally {
   await browser.close()
   await fs.writeFile(path.join(output, 'results.json'), JSON.stringify({ base, browser: browserName, color_scheme: colorScheme, theme: expectedTheme, checks }, null, 2))
