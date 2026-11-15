@@ -409,7 +409,10 @@ async function main() {
   const recoveredRscNavigations = []
   const networkFailures = []
   const observe = page => {
-   page.on('pageerror', error => errors.push(`${page.url()}: ${error.stack || error.message}`))
+   page.on('pageerror', error => {
+    const details = Object.fromEntries(Object.getOwnPropertyNames(error).map(key => [key, error[key]]))
+    errors.push(`${page.url()}: ${JSON.stringify({ name: error.name, message: error.message, cause: error.cause, details })}`)
+   })
    page.on('console', message => {
     if (message.type() !== 'error') return
     const text = message.text()
