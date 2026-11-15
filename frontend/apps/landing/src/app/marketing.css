@@ -11,6 +11,8 @@ html.dark .poos-header__links a,html.dark .poos-header__login,html.dark .poos-la
 html.dark .sv-header a,html.dark .sv-header button { color:var(--sv-ink); }
 html.dark .sv-main { background:var(--sv-paper); color:var(--sv-ink); }
 html.dark .sv-hero { background:radial-gradient(ellipse at 90% 20%,#35264b,transparent 55%); }
+html.dark .sv-setup { background:#211a2b; }
+html.dark .sv-setup li { border-color:#493d56; }
 html.dark .sv-hero-stage,html.dark .sv-guest-captures,html.dark .sv-customization,
 html.dark .sv-visibility,html.dark .sv-billing-selector,html.dark .sv-savings { background:#211a2b; }
 html.dark .sv-offer,html.dark .sv-feature-card,html.dark .sv-explorer-panel,

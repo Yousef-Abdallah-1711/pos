@@ -125,7 +125,7 @@ function SectionTable({
   title: string
   rows: { account_code: string; account_name: string; amount: number }[]
   formatter: Intl.NumberFormat
-  t: (key: string, values?: Record<string, string | number>) => string
+  t: ReturnType<typeof useTranslations<'reports.financial'>>
   expanded: boolean
   onToggle: () => void
 }) {
