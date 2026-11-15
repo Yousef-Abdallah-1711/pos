@@ -17,7 +17,8 @@ export const SITE_ROUTES = {
 export type SiteRouteId = keyof typeof SITE_ROUTES
 
 export function localizedHref(locale: Locale, route: SiteRouteId | string): string {
-  return route ? `/${locale}/${route}` : `/${locale}`
+  const resolvedRoute = route in SITE_ROUTES ? SITE_ROUTES[route as SiteRouteId] : route
+  return resolvedRoute ? `/${locale}/${resolvedRoute}` : `/${locale}`
 }
 
 export const HEADER_LINKS = [

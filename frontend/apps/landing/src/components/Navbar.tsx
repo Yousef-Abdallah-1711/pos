@@ -27,6 +27,7 @@ export function Navbar({ locale }: { locale: Locale }) {
 
   useEffect(() => setMounted(true), [])
   useEffect(() => {
+    if (typeof window.matchMedia !== 'function') return
     const desktop = window.matchMedia('(min-width: 1200px)')
     const closeOnDesktop = () => {
       if (desktop.matches) setMobileOpen(false)
