@@ -8,7 +8,7 @@
 ## Remediation in this change
 
 - API, UI, browser, and synthetic trial acceptance now require explicit CI targets on exact `.servio.test` hosts. Public hosts, unknown hosts, HTTP, credentials, query strings, fragments, and unsafe ports fail validation. Redirect following is disabled for API requests; browser routing aborts requests outside the allowlist.
-- The GitHub Actions browser stack rewrites compiled frontend origins, backend origins, the seeded storefront domain, and Caddy virtual hosts to `.servio.test`. It binds its proxy only to loopback and checks the actual disposable PostgreSQL database, backend environment, mocked payment mode, Redis container, and internal-only Docker networks before registering synthetic users.
+- The GitHub Actions browser stack rewrites compiled frontend origins, backend origins, the seeded storefront domain, and Caddy virtual hosts to `.servio.test`. It publishes no application ports to the runner host, seeds users through backend-local loopback, and checks the actual disposable PostgreSQL database, backend environment, mocked payment mode, Redis container, and internal-only Docker networks before browser testing.
 - Browser package installation now happens on the GitHub runner before synthetic fixture credentials are created. The browser container receives only synthetic credentials and a read-only dependency mount; its network has no external route.
 - Automatic GHCR image publication, signed release publication on main pushes, and workflow-run staging verification were removed. The remaining staging workflow is manual and performs no staging request or write.
 - CI artifacts include the exact commit SHA, run ID, isolated environment label, database name, and API target without credentials.
@@ -23,7 +23,7 @@ Existing CI evidence for run [43728374754](https://github.com/Yousef-Abdallah-17
 - Python target tests: 3 passed.
 - CI isolation guard tests: 4 passed, including a source scan that rejects public production API literals in every mutating acceptance entrypoint.
 - Changed JavaScript syntax and Python compilation checks passed; `git diff --check` passed.
-- The disposable Docker stack and full GitHub Actions pipeline have not yet run on this safety branch. CI acceptance remains pending; no green aggregate is claimed.
+- Full required CI run [43736821949](https://github.com/Yousef-Abdallah-1711/pos/actions/runs/43736821949) passed backend, all frontend suites, security/config, and image builds, but failed during browser-stack setup because the runner host could not reach a loopback-published proxy port. The registration request was refused before reaching the API; no synthetic registration occurred in that run. The proxy port publication has since been removed, and full CI is pending a rerun. No green aggregate is claimed.
 
 ## Release and financial status
 

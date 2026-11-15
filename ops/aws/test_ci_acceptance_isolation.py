@@ -14,6 +14,7 @@ class CIIsolationTests(unittest.TestCase):
         self.assertIn("SERVIO_ACCEPTANCE_API_BASE_URL=https://api.servio.test/api/v1", runner)
         self.assertIn('/work/acceptance-target.cjs:ro', runner)
         self.assertIn("replace('rakmyat.online', 'servio.test')", runner)
+        self.assertIn("service.pop('ports', None)", runner)
         self.assertNotIn("'--network', 'host'", runner)
 
     def test_compose_targets_and_external_services_are_safe(self):

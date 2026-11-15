@@ -1,14 +1,11 @@
 #!/usr/bin/env python3
 """Verify built images in a separate, synthetic GitHub Actions Compose stack."""
 import crypt
-import http.client
 import json
 import os
 from pathlib import Path
 import re
 import secrets
-import ssl
-import socket
 import subprocess
 import runpy
 
@@ -47,7 +44,7 @@ for name, service in config['services'].items():
         service['healthcheck']['test'] = ['CMD-SHELL', 'pg_isready -U postgres -d servio_ci_test']
     if name == 'proxy':
         service['environment'] = {}
-        service['ports'] = ['127.0.0.1:80:80', '127.0.0.1:443:443']
+        service.pop('ports', None)
         service['networks']['edge'] = {'aliases': hosts}
     if name == 'backend':
         environment = service.setdefault('environment', {})
@@ -87,12 +84,8 @@ def verify_disposable_stack():
         container = json.loads(subprocess.check_output(['docker', 'inspect', f'servio-ci-{name}-1']))[0]
         if container['Config']['Labels'].get('com.servio.disposable') != 'true':
             raise RuntimeError(f'{name} is not labeled as disposable')
-        if name != 'proxy' and container['HostConfig'].get('PortBindings'):
+        if container['HostConfig'].get('PortBindings'):
             raise RuntimeError(f'{name} unexpectedly publishes a host port')
-        if name == 'proxy':
-            bindings = container['HostConfig'].get('PortBindings') or {}
-            if any(binding.get('HostIp') != '127.0.0.1' for rows in bindings.values() for binding in rows):
-                raise RuntimeError('Disposable proxy is not bound exclusively to loopback')
         if name == 'postgres' and 'POSTGRES_DB=servio_ci_test' not in container['Config']['Env']:
             raise RuntimeError('Disposable PostgreSQL database identity mismatch')
         if name == 'backend':
@@ -108,24 +101,23 @@ def verify_disposable_stack():
         if network.get('Internal') is not True:
             raise RuntimeError(f'{name} permits external egress')
 
-class LoopbackTLS(http.client.HTTPSConnection):
-    def connect(self):
-        # Connect only to this disposable runner while sending the correct TLS SNI.
-        raw=socket.create_connection(('127.0.0.1',443),timeout=self.timeout)
-        self.sock=self._context.wrap_socket(raw,server_hostname='api.servio.test')
-
 def register(suffix):
     email = 'ci-responsive-overflow-' + suffix + '-' + ('x' * 72) + '@example.invalid' if suffix == 'a' else 'ci-' + suffix + '@example.invalid'
     name = 'CI responsive overflow ' + ('x' * 72) if suffix == 'a' else 'CI synthetic ' + suffix
     user = {'name': name, 'email': email, 'password': secrets.token_urlsafe(32), 'restaurant_name': 'CI ' + suffix, 'restaurant_slug': 'ci-' + suffix, 'phone': ''}
-    # Fixed loopback destination: no production DNS lookup or live registration.
-    connection = LoopbackTLS('127.0.0.1', 443, context=ssl._create_unverified_context(), timeout=30)
-    connection.request('POST', '/api/v1/auth/register', json.dumps(user), {'Host': 'api.servio.test', 'Origin': 'https://pos.servio.test', 'Content-Type': 'application/json'})
-    response = connection.getresponse()
-    response.read()
-    if response.status != 201:
-        raise RuntimeError('CI registration failed: HTTP ' + str(response.status))
-    connection.close()
+    # Seed through backend-local loopback; the GitHub runner has no app-network route.
+    result = subprocess.run(
+        compose + ['exec', '-T', 'backend', 'curl', '--silent', '--show-error',
+                   '--max-time', '30', '--output', '-', '--write-out', '\n%{http_code}',
+                   '--request', 'POST', '--header', 'Host: api.servio.test',
+                   '--header', 'Origin: https://pos.servio.test',
+                   '--header', 'Content-Type: application/json', '--data-binary', '@-',
+                   'http://127.0.0.1:8080/api/v1/auth/register'],
+        input=json.dumps(user), text=True, stdout=subprocess.PIPE, check=True,
+    )
+    status = result.stdout.rsplit('\n', 1)[-1]
+    if status != '201':
+        raise RuntimeError('Disposable API registration failed: HTTP ' + status)
     return user
 
 try:
