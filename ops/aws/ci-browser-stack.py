@@ -67,7 +67,8 @@ class LoopbackTLS(http.client.HTTPSConnection):
 
 def register(suffix):
     email = 'ci-responsive-overflow-' + suffix + '-' + ('x' * 72) + '@example.invalid' if suffix == 'a' else 'ci-' + suffix + '@example.invalid'
-    user = {'name': 'CI synthetic ' + suffix, 'email': email, 'password': secrets.token_urlsafe(32), 'restaurant_name': 'CI ' + suffix, 'restaurant_slug': 'ci-' + suffix, 'phone': ''}
+    name = 'CI responsive overflow ' + ('x' * 72) if suffix == 'a' else 'CI synthetic ' + suffix
+    user = {'name': name, 'email': email, 'password': secrets.token_urlsafe(32), 'restaurant_name': 'CI ' + suffix, 'restaurant_slug': 'ci-' + suffix, 'phone': ''}
     # Fixed loopback destination: no production DNS lookup or live registration.
     connection = LoopbackTLS('127.0.0.1', 443, context=ssl._create_unverified_context(), timeout=30)
     connection.request('POST', '/api/v1/auth/register', json.dumps(user), {'Host': 'api.pos.rakmyat.online', 'Origin': 'https://pos.rakmyat.online', 'Content-Type': 'application/json'})

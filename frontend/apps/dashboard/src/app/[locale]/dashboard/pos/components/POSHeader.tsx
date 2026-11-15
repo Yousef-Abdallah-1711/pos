@@ -122,14 +122,14 @@ export function POSHeader({
 
   return (
     <header className="flex flex-wrap items-center justify-between gap-3 rounded-lg bg-gray-900 px-4 py-3 text-white">
-      <div className={`flex items-center gap-4 ${isRTL ? 'flex-row-reverse text-right' : ''}`}>
+      <div className={`flex min-w-0 flex-wrap items-center gap-4 ${isRTL ? 'flex-row-reverse text-right' : ''}`}>
         <div className={`flex flex-wrap items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
           <Clock3 className="h-4 w-4 text-gray-300" />
           <span className="whitespace-nowrap text-sm font-semibold tabular-nums">{formatClock(now, locale)}</span>
         </div>
         <div className={`hidden items-center gap-2 text-xs text-gray-300 sm:flex ${isRTL ? 'flex-row-reverse' : ''}`}>
           <span>{t('pos.cashier', 'Cashier')}:</span>
-          <span className="font-medium text-white">{user?.name || '—'}</span>
+          <span className="max-w-full break-words font-medium text-white [overflow-wrap:anywhere]">{user?.name || '—'}</span>
         </div>
       </div>
 
