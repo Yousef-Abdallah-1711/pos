@@ -1,11 +1,11 @@
 // Guarded demo-tenant suspension. Always restore its original active state.
-const{chromium}=require('playwright');const fs=require('fs');const path=require('path');
+const{chromium}=require('playwright');const fs=require('fs');const path=require('path');const{assertCompleteTargetConfig,apiBase,guardContext}=require('./acceptance-target.cjs');assertCompleteTargetConfig();const api=apiBase();
 const evidence=path.resolve(__dirname,'evidence');const admin=JSON.parse(fs.readFileSync(path.join(evidence,'browser-admin.json')));const fixture=JSON.parse(fs.readFileSync(path.join(evidence,'storefront-qa-fixture.json')));
-const checks=[];const base='https://api.pos.rakmyat.online/api/v1';let disabled=false;
+const checks=[];const base=api;let disabled=false;
 function record(check,actual,expected){checks.push({check,actual,expected,status:actual===expected?'PASS':'FAIL'});}
 (async()=>{
- const browser=await chromium.launch();const owner=await browser.newContext();const guest=await browser.newContext({viewport:{width:390,height:900}});const page=await guest.newPage();
- const adminHeaders={Origin:'https://admin.pos.rakmyat.online'};
+const browser=await chromium.launch();const owner=await browser.newContext();await guardContext(owner);const guest=await browser.newContext({viewport:{width:390,height:900}});await guardContext(guest);const page=await guest.newPage();
+ const adminHeaders={Origin:'https://admin.pos.servio.test'};
  try{
   const login=await owner.request.post(base+'/super-admin/auth/login',{headers:adminHeaders,data:{email:admin.email,password:admin.password}});if(login.status()!==200)throw new Error('Synthetic administrator login failed');
   const response=await owner.request.get(base+'/super-admin/tenants/1');const raw=await response.json();const tenant=raw.data||raw;
@@ -15,13 +15,13 @@ function record(check,actual,expected){checks.push({check,actual,expected,status
   const suspend=await owner.request.put(base+'/super-admin/tenants/1/disable',{headers:adminHeaders,data:{reason:'Synthetic storefront suspension acceptance'}});
   if(suspend.status()!==200)throw new Error('Authorized demo suspension failed');disabled=true;
   const status=await guest.request.get(base+'/public/tenant-status/restaurant-1');const statusRaw=await status.json();record('Suspended demo tenant cannot access storefront',(statusRaw.data||statusRaw).can_access,false);
-  await page.goto('https://restaurant-1.pos.rakmyat.online/en');record('Suspended storefront renders maintenance',new URL(page.url()).pathname,'/maintenance');
+  await page.goto('https://restaurant-1.pos.servio.test/en');record('Suspended storefront renders maintenance',new URL(page.url()).pathname,'/maintenance');
   await page.screenshot({path:path.join(evidence,'suspended-storefront.png'),fullPage:true});
-  const create=await guest.request.post(base+'/public/orders',{headers:{Origin:'https://restaurant-1.pos.rakmyat.online','X-Tenant-ID':'1','X-Restaurant-ID':'1'},data:{customer_name:'SERVIO disabled-tenant QA',customer_email:'disabled-qa@example.invalid',customer_phone:'+12025550123',delivery_address:'Synthetic only. Do not deliver.',payment_method:'cash',order_source:'website',notes:'Negative staging acceptance. Do not fulfill.',items:[{product_id:fixture.product_id,quantity:1}]}});
+  const create=await guest.request.post(base+'/public/orders',{headers:{Origin:'https://restaurant-1.pos.servio.test','X-Tenant-ID':'1','X-Restaurant-ID':'1'},data:{customer_name:'SERVIO disabled-tenant QA',customer_email:'disabled-qa@example.invalid',customer_phone:'+12025550123',delivery_address:'Synthetic only. Do not deliver.',payment_method:'cash',order_source:'website',notes:'Negative staging acceptance. Do not fulfill.',items:[{product_id:fixture.product_id,quantity:1}]}});
   record('Suspended tenant rejects new anonymous orders',[401,402,403,423].includes(create.status()),true);
   if(create.status()===201){
    const body=await create.json();const order=body.data||body;
-   if(order.tracking_token){await guest.request.delete(base+'/public/orders/'+order.id,{headers:{Origin:'https://restaurant-1.pos.rakmyat.online','X-Tenant-ID':'1','X-Restaurant-ID':'1','X-Order-Token':order.tracking_token}});}
+   if(order.tracking_token){await guest.request.delete(base+'/public/orders/'+order.id,{headers:{Origin:'https://restaurant-1.pos.servio.test','X-Tenant-ID':'1','X-Restaurant-ID':'1','X-Order-Token':order.tracking_token}});}
   }
   const missing=await guest.request.get(base+'/public/tenant-status/servio-does-not-exist');record('Missing tenant status fails closed',missing.status(),404);
   const enable=await owner.request.put(base+'/super-admin/tenants/1/enable',{headers:adminHeaders,data:{}});if(enable.status()!==200)throw new Error('Demo restoration failed');disabled=false;

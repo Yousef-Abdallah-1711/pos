@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 import copy,http.cookiejar,json,urllib.request,urllib.error
 from pathlib import Path
-jar=http.cookiejar.CookieJar();op=urllib.request.build_opener(urllib.request.HTTPCookieProcessor(jar));rows=[]
+from acceptance_target import api_base, safe_opener, ui_origin
+BASE=api_base();ORIGIN=ui_origin('dashboard')
+jar=http.cookiejar.CookieJar();op=safe_opener(urllib.request.HTTPCookieProcessor(jar));rows=[]
 def request(client,method,path,payload=None):
-    req=urllib.request.Request('https://api.pos.rakmyat.online/api/v1'+path,data=None if payload is None else json.dumps(payload).encode(),headers={'Origin':'https://pos.app.rakmyat.online','Content-Type':'application/json'},method=method)
+    req=urllib.request.Request(BASE+path,data=None if payload is None else json.dumps(payload).encode(),headers={'Origin':ORIGIN,'Content-Type':'application/json'},method=method)
     try:r=client.open(req,timeout=20)
     except urllib.error.HTTPError as e:r=e
     r.read();return r.status

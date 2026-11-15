@@ -1,5 +1,6 @@
 // Full route discovery and read-only browser acceptance. Evidence contains no passwords.
 const {chromium}=require('playwright');
+const { assertCompleteTargetConfig, apiBase, guardContext }=require('./acceptance-target.cjs');assertCompleteTargetConfig();const api=apiBase();
 const fs=require('fs');
 const path=require('path');
 const {discoverRoutes}=require('./browser-route-inventory.cjs');
@@ -11,7 +12,7 @@ const dynamicOnly=process.env.SERVIO_DYNAMIC_ONLY==='1';
 const colorScheme=process.env.SERVIO_COLOR_SCHEME||'light';
 if(!['light','dark'].includes(colorScheme))throw new Error('Unsupported browser color scheme');
 const run={scope:dynamicOnly?'dynamic-diagnostic':'full',color_scheme:colorScheme,started_utc:new Date().toISOString(),sha:process.env.SERVIO_RELEASE_SHA||null};
-const hosts={landing:'https://pos.rakmyat.online',dashboard:'https://pos.app.rakmyat.online','super-admin':'https://admin.pos.rakmyat.online','restaurant-website':'https://restaurant-1.pos.rakmyat.online'};
+const hosts={landing:'https://pos.servio.test',dashboard:'https://pos.app.servio.test','super-admin':'https://admin.pos.servio.test','restaurant-website':'https://restaurant-1.pos.servio.test'};
 function resolveFixture(app,raw){
  const file=app==='restaurant-website'?'storefront-qa-fixture.json':'route-qa-fixtures.json';
  const fixture=JSON.parse(fs.readFileSync(path.join(root,'ops/aws/evidence',file)));
@@ -60,14 +61,14 @@ async function inspect(page,app,route,width){
  console.log(`${row.status} ${app} ${route} ${width}`);
 }
 async function verifyAnonymousCallbacks(browser){
- const context=await browser.newContext({colorScheme});const page=await context.newPage();
+const context=await browser.newContext({colorScheme});await guardContext(context);const page=await context.newPage();
  for(const route of ['/auth/callback','/en/auth/callback','/ar/auth/callback'])for(const width of [390]){
   const row={app:'dashboard',route:route+' anonymous rejection',width,status:'FAIL'};
   try{
    await page.setViewportSize({width,height:900});
    await page.goto(hosts.dashboard+route+'?token=invalid-synthetic-token');
    await page.waitForURL(url=>url.origin===hosts.landing&&url.pathname.endsWith('/auth/login'));
-   const session=await context.request.get('https://api.pos.rakmyat.online/api/v1/auth/session');
+   const session=await context.request.get(api+'/auth/session');
    row.http=session.status();row.status=row.http===401?'PASS':'FAIL';
   }catch(error){row.error=error.message.slice(0,200);}
   rows.push(row);console.log(row.status+' '+row.route+' '+width);
@@ -88,10 +89,10 @@ async function login(context,admin=false){
 }
 async function verifyLogout(context,admin){
  const prefix=admin?'/super-admin':'';
- const result=await context.request.post('https://api.pos.rakmyat.online/api/v1'+prefix+'/auth/logout',{headers:{Origin:hosts[admin?'super-admin':'landing']},data:{}});
+ const result=await context.request.post(api+prefix+'/auth/logout',{headers:{Origin:hosts[admin?'super-admin':'landing']},data:{}});
  let session;let rateLimitRetries=0;
  for(let attempt=0;attempt<3;attempt++){
-  session=await context.request.get('https://api.pos.rakmyat.online/api/v1'+prefix+'/auth/session');
+  session=await context.request.get(api+prefix+'/auth/session');
   if(session.status()!==429)break;
   rateLimitRetries++;const delay=Math.max(1,Math.min(60,Number(session.headers()['retry-after'])||60));
   await new Promise(resolve=>setTimeout(resolve,delay*1000));
@@ -100,7 +101,7 @@ async function verifyLogout(context,admin){
 }
 (async()=>{
  const browser=await chromium.launch({headless:true});
- const proof=await (await browser.newContext({colorScheme})).request.get('https://api.pos.rakmyat.online/_ops/release');
+const proofContext=await browser.newContext({colorScheme});await guardContext(proofContext);const proof=await proofContext.request.get('https://api.servio.test/_ops/release');
  run.observed_sha=(await proof.json()).sha;
  if(!run.sha||run.sha!==run.observed_sha)throw new Error('Full acceptance requires the exact deployed SHA');
  fs.writeFileSync(path.join(evidence,'run.json'),JSON.stringify(run,null,2));
@@ -110,7 +111,7 @@ async function verifyLogout(context,admin){
  run.expected_checks=(dynamicOnly?0:3)+2+Object.entries(inventory).reduce((total,[app,list])=>total+list.filter(raw=>!raw.includes('/callback')&&!raw.includes('/test-url')&&(app!=='dashboard'||raw.startsWith('/[locale]/dashboard'))&&(!dynamicOnly||/\[(id|tableId|orderNumber)\]/.test(raw))).reduce((sum,raw)=>sum+(raw.includes('[locale]')?6:3),0),0);
  for(const app of Object.keys(hosts)){
   const state=path.join(root,'ops/aws/evidence/storefront-qa-state.json');
-  const context=await browser.newContext({colorScheme,viewport:{width:1440,height:900},...(app==='restaurant-website'?{storageState:state}:{})});
+const context=await browser.newContext({colorScheme,viewport:{width:1440,height:900},...(app==='restaurant-website'?{storageState:state}:{})});await guardContext(context);
   const authenticated=app==='dashboard'||app==='super-admin';
   if(authenticated)await login(context,app==='super-admin');
   const page=await context.newPage();
@@ -126,7 +127,7 @@ async function verifyLogout(context,admin){
   if(authenticated)await verifyLogout(context,app==='super-admin');
   await context.close();
  }
- const finalProof=await (await browser.newContext({colorScheme})).request.get('https://api.pos.rakmyat.online/_ops/release');
+const finalProofContext=await browser.newContext({colorScheme});await guardContext(finalProofContext);const finalProof=await finalProofContext.request.get('https://api.servio.test/_ops/release');
  if((await finalProof.json()).sha!==run.sha)throw new Error('Deployed release changed during traversal');
  await browser.close();
  fs.writeFileSync(path.join(evidence,'results.json'),JSON.stringify(rows,null,2));

@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 import base64,http.cookiejar,json,secrets,socket,ssl,struct,time,urllib.request,urllib.error
 from pathlib import Path
-BASE='https://api.pos.rakmyat.online/api/v1'; ORIGIN='https://pos.app.rakmyat.online'
+from acceptance_target import api_base, safe_opener, ui_origin
+BASE=api_base(); ORIGIN=ui_origin('dashboard'); API_HOST='api.servio.test'
 rows=[]
 def check(name,actual,expected):
     expected=expected if isinstance(expected,list) else [expected]
@@ -22,10 +23,10 @@ def req(op,method,path,body=None,multipart=False):
     return r.status,parsed
 
 def ws_connect(jar):
-    ws=ssl.create_default_context().wrap_socket(socket.create_connection(('api.pos.rakmyat.online',443),timeout=15),server_hostname='api.pos.rakmyat.online')
+    ws=ssl.create_default_context().wrap_socket(socket.create_connection((API_HOST,443),timeout=15),server_hostname=API_HOST)
     key=base64.b64encode(secrets.token_bytes(16)).decode()
     cookies='; '.join(c.name+'='+c.value for c in jar)
-    request=f'GET /api/v1/kds/ws HTTP/1.1\r\nHost: api.pos.rakmyat.online\r\nUpgrade: websocket\r\nConnection: Upgrade\r\nSec-WebSocket-Key: {key}\r\nSec-WebSocket-Version: 13\r\nOrigin: {ORIGIN}\r\nCookie: {cookies}\r\n\r\n'
+    request=f'GET /api/v1/kds/ws HTTP/1.1\r\nHost: {API_HOST}\r\nUpgrade: websocket\r\nConnection: Upgrade\r\nSec-WebSocket-Key: {key}\r\nSec-WebSocket-Version: 13\r\nOrigin: {ORIGIN}\r\nCookie: {cookies}\r\n\r\n'
     ws.sendall(request.encode());response=b''
     while b'\r\n\r\n' not in response:response+=ws.recv(1)
     code=int(response.split(b' ')[1]);check('Authenticated WSS through Caddy',code,101)
@@ -47,7 +48,7 @@ def ws_event(ws):
 
 def run():
     fixture=json.loads((Path(__file__).resolve().parents[2]/'ops/aws/evidence/browser-fixtures.json').read_text())[0]
-    jar=http.cookiejar.CookieJar();op=urllib.request.build_opener(urllib.request.HTTPCookieProcessor(jar))
+    jar=http.cookiejar.CookieJar();op=safe_opener(urllib.request.HTTPCookieProcessor(jar))
     code,_=req(op,'POST','/auth/login',{'email':fixture['email'],'password':fixture['password']});check('Flow login',code,200)
     stamp=str(int(time.time()))
     code,category=req(op,'POST','/categories',{'name':'AWS POS flow '+stamp,'is_active':True});check('Flow category',code,201)

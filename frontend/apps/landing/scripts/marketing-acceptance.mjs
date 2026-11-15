@@ -12,6 +12,7 @@ const expectedTheme = process.env.SERVIO_THEME || 'dark'
 if (!['light', 'dark'].includes(expectedTheme)) throw new Error('Unsupported marketing theme')
 const base = process.env.SERVIO_MARKETING_URL
 if (!base) throw new Error('Set SERVIO_MARKETING_URL to the intended preview or deployment URL')
+if (process.env.SERVIO_ACCEPTANCE_ENV === 'ci' && new URL(base).origin !== 'https://pos.servio.test') throw new Error('CI marketing acceptance accepts only the disposable landing host')
 const output = process.env.SERVIO_MARKETING_EVIDENCE || (process.env.SERVIO_BROWSER_EVIDENCE ? path.join(process.env.SERVIO_BROWSER_EVIDENCE, 'marketing') : '/tmp/servio-marketing-acceptance')
 const widths = [360, 390, 768, 1024, 1440, 1920]
 const routes = ['', '/features', '/features/pos', '/features/kitchen-display', '/features/online-ordering', '/features/website-builder', '/features/inventory', '/features/hr', '/features/analytics', '/how-it-works', '/pricing', '/demo', '/contact', '/privacy']
@@ -153,6 +154,12 @@ async function interactions(page, locale) {
 }
 async function createPage(browser, viewport) {
  const page = await browser.newPage({ colorScheme, ignoreHTTPSErrors: process.env.SERVIO_DISPOSABLE_BROWSER === '1', viewport, reducedMotion: 'reduce' })
+ if (process.env.SERVIO_ACCEPTANCE_ENV === 'ci') await page.route('**/*', route => {
+  const url = new URL(route.request().url())
+  if (url.protocol === 'https:' && ['pos.servio.test', 'api.servio.test', 'pos.app.servio.test', 'restaurant-1.pos.servio.test'].includes(url.hostname)) return route.continue()
+  if (['data:', 'blob:'].includes(url.protocol)) return route.continue()
+  return route.abort('blockedbyclient')
+ })
  if (process.env.SERVIO_THEME) await page.addInitScript(({ theme, origin }) => {
   if (location.origin === origin && !localStorage.getItem('servio-marketing-theme')) localStorage.setItem('servio-marketing-theme', theme)
  }, { theme: expectedTheme, origin: new URL(base).origin })

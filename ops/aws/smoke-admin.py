@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 import http.cookiejar,json,urllib.request,urllib.error
 from pathlib import Path
-jar=http.cookiejar.CookieJar();op=urllib.request.build_opener(urllib.request.HTTPCookieProcessor(jar));rows=[]
+from acceptance_target import api_base, safe_opener, ui_origin
+BASE=api_base()+'/super-admin';ORIGIN=ui_origin('admin')
+jar=http.cookiejar.CookieJar();op=safe_opener(urllib.request.HTTPCookieProcessor(jar));rows=[]
 fixture=json.loads((Path(__file__).resolve().parents[2]/'ops/aws/evidence/browser-admin.json').read_text())
 for label,method,path,data,expected in [
  ('Super-admin login','POST','/auth/login',fixture,200),
@@ -12,7 +14,7 @@ for label,method,path,data,expected in [
  ('Super-admin logout','POST','/auth/logout',{},200),
  ('Super-admin session revocation','GET','/auth/session',None,401),
 ]:
-    request=urllib.request.Request('https://api.pos.rakmyat.online/api/v1/super-admin'+path,data=None if data is None else json.dumps(data).encode(),headers={'Origin':'https://admin.pos.rakmyat.online','Content-Type':'application/json'},method=method)
+    request=urllib.request.Request(BASE+path,data=None if data is None else json.dumps(data).encode(),headers={'Origin':ORIGIN,'Content-Type':'application/json'},method=method)
     try:response=op.open(request,timeout=20)
     except urllib.error.HTTPError as e:response=e
     response.read();code=response.status
