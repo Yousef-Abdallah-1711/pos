@@ -18,7 +18,7 @@ export function Hero() {
             <h1>{t.hero.title} <span>{t.hero.titleHighlight}</span></h1>
             <p>{t.hero.description}</p>
             <div className="ledger-spread__actions">
-              <Link className="poos-button" href={`/${locale}/auth/register`}>
+              <Link className="poos-button" href={`/${locale}/auth/register`} prefetch={false}>
                 {t.hero.cta}<Arrow aria-hidden="true" size={18} />
               </Link>
               <a className="poos-button poos-button-secondary" href="#how-it-works">{t.hero.demo}</a>

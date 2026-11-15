@@ -15,7 +15,7 @@ export function CTA() {
           <h2>{t.cta.title}</h2>
           <p className="poos-muted">{t.cta.subtitle}</p>
         </div>
-        <Link className="poos-button" href={`/${language}/auth/register`}>
+        <Link className="poos-button" href={`/${language}/auth/register`} prefetch={false}>
           {t.cta.button}<Arrow aria-hidden="true" size={18} />
         </Link>
       </div>
