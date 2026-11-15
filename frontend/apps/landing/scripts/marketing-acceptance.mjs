@@ -408,7 +408,6 @@ async function main() {
   const errors = []
   const recoveredRscNavigations = []
   const networkFailures = []
-  const pendingConsoleErrors = []
   const observe = page => {
    page.on('pageerror', error => {
     const details = Object.fromEntries(Object.getOwnPropertyNames(error).map(key => [key, error[key]]))
@@ -422,14 +421,7 @@ async function main() {
      recoveredRscNavigations.push({ pageUrl: page.url(), destination: rscFallback[1] })
      return
     }
-    const pageUrl = page.url()
-    const serialize = Promise.all(message.args().map(argument => argument.evaluate(value => {
-     if (!value || typeof value !== 'object') return String(value)
-     return Object.fromEntries(Object.getOwnPropertyNames(value).map(key => [key, String(value[key])]))
-    })))
-     .then(argumentsDetails => errors.push(`${pageUrl}: ${JSON.stringify({ text, location: message.location(), arguments: argumentsDetails })}`))
-     .catch(error => errors.push(`${pageUrl}: ${JSON.stringify({ text, location: message.location(), serializationError: error.message })}`))
-    pendingConsoleErrors.push(serialize)
+    errors.push(`${page.url()}: ${text} @ ${JSON.stringify(message.location())}`)
    })
    page.on('response', response => { if (response.status() >= 400) networkFailures.push(`${response.status()} ${new URL(response.url()).pathname}`) })
   }
@@ -448,7 +440,6 @@ async function main() {
    await interactions(browser, page, locale)
   }
   await captureComparisonBoards(browser)
-  await Promise.all(pendingConsoleErrors)
   const expectedPaths = new Set(['en', 'ar'].flatMap(locale => routes.map(route => `/${locale}${route}`)))
   const invalidFallbacks = recoveredRscNavigations.filter(({ pageUrl, destination }) => {
    try {
