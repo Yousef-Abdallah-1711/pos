@@ -15,6 +15,7 @@ import (
 	"strings"
 	"sync"
 	"time"
+	"unicode"
 
 	"pos-saas/internal/middleware"
 	"pos-saas/internal/pkg/database"
@@ -1440,16 +1441,29 @@ func buildSalesCSV(report salesReportResponse, locale string) ([]byte, error) {
 		rows = append(rows, []string{t.SectionHourly, fmt.Sprintf("%d", p.Hour), "", fmt.Sprintf("%.2f", p.Revenue), fmt.Sprintf("%d", p.Orders), ""})
 	}
 	for _, item := range report.TopItems {
-		rows = append(rows, []string{t.SectionTopItems, item.Name, "", fmt.Sprintf("%.2f", item.Revenue), "", fmt.Sprintf("%d", item.Quantity)})
+		rows = append(rows, []string{t.SectionTopItems, csvSafeTextCell(item.Name), "", fmt.Sprintf("%.2f", item.Revenue), "", fmt.Sprintf("%d", item.Quantity)})
 	}
 	for _, item := range report.TopCategories {
-		rows = append(rows, []string{t.SectionTopCategories, item.Name, "", fmt.Sprintf("%.2f", item.Revenue), "", fmt.Sprintf("%d", item.Quantity)})
+		rows = append(rows, []string{t.SectionTopCategories, csvSafeTextCell(item.Name), "", fmt.Sprintf("%.2f", item.Revenue), "", fmt.Sprintf("%d", item.Quantity)})
 	}
 
 	if err := w.WriteAll(rows); err != nil {
 		return nil, err
 	}
 	return buf.Bytes(), w.Error()
+}
+
+func csvSafeTextCell(value string) string {
+	for _, character := range value {
+		if unicode.IsSpace(character) || unicode.IsControl(character) {
+			continue
+		}
+		if strings.ContainsRune("=+-@", character) {
+			return "'" + value
+		}
+		return value
+	}
+	return value
 }
 
 func buildProfitabilityCSV(report profitabilityReportResponse, locale string) ([]byte, error) {
@@ -1465,7 +1479,7 @@ func buildProfitabilityCSV(report profitabilityReportResponse, locale string) ([
 	for _, item := range report.TopItems {
 		rows = append(rows, []string{
 			t.SectionTopItems,
-			item.Name,
+			csvSafeTextCell(item.Name),
 			fmt.Sprintf("%d", item.Quantity),
 			fmt.Sprintf("%.2f", item.Revenue),
 			fmt.Sprintf("%.2f", item.COGS),
@@ -1478,7 +1492,7 @@ func buildProfitabilityCSV(report profitabilityReportResponse, locale string) ([
 	for _, item := range report.LowestItems {
 		rows = append(rows, []string{
 			t.SectionLowestMarginItems,
-			item.Name,
+			csvSafeTextCell(item.Name),
 			fmt.Sprintf("%d", item.Quantity),
 			fmt.Sprintf("%.2f", item.Revenue),
 			fmt.Sprintf("%.2f", item.COGS),
@@ -1507,7 +1521,7 @@ func buildInventoryCSV(report inventoryReportResponse, locale string) ([]byte, e
 	for _, item := range report.Items {
 		rows = append(rows, []string{
 			t.SectionItems,
-			item.Name,
+			csvSafeTextCell(item.Name),
 			fmt.Sprintf("%.2f", item.CurrentStockQty),
 			fmt.Sprintf("%d", item.SoldQty),
 			fmt.Sprintf("%d", item.WasteQty),

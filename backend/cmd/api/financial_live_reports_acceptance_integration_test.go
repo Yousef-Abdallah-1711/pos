@@ -259,12 +259,26 @@ func verifyLiveSalesCSVDownload(t *testing.T, acceptance liveFinancialReportAcce
 	if err != nil || len(records) < 2 || len(records[1]) < 5 || records[1][1] != "Total Revenue" {
 		t.Fatalf("sales CSV has no summary revenue row: records=%v err=%v", records, err)
 	}
+	verifySalesCSVProductNameIsSafe(t, records)
 	revenue, err := strconv.ParseFloat(records[1][3], 64)
 	if err != nil || int64(math.Round(revenue*100)) != acceptance.sourceGrossSalesCents || records[1][4] != "1" {
 		t.Fatalf("downloaded sales CSV gross revenue/orders=%q/%q; expected=%d cents/1 order (err=%v)",
 			records[1][3], records[1][4], acceptance.sourceGrossSalesCents, err)
 	}
 	return int64(math.Round(revenue * 100))
+}
+
+func verifySalesCSVProductNameIsSafe(t *testing.T, records [][]string) {
+	t.Helper()
+	for _, record := range records {
+		if len(record) > 1 && record[0] == "top_items" {
+			if !strings.HasPrefix(record[1], "'") {
+				t.Fatalf("CSV product cell was not formula-escaped: %q", record[1])
+			}
+			return
+		}
+	}
+	t.Fatal("sales CSV omitted the synthetic formula-injection product row")
 }
 
 func verifyLiveSalesPDFDownload(t *testing.T, acceptance liveFinancialReportAcceptance) int {
