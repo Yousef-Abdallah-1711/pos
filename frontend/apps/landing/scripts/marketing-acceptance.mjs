@@ -218,6 +218,7 @@ async function interactions(browser, page, locale) {
  check(`desktop menu keyboard focus ${locale}`, focusedMenuItem)
  await captureNavigationEvidence(browser, page, { locale, variant: 'desktop-mega-menu-keyboard-focused', viewport: { width: 1440, height: 1000 }, frame: 'desktop' })
  await page.keyboard.press('Escape')
+ await page.mouse.move(8, page.viewportSize().height - 8)
  await platform.hover()
  check(`desktop menu pointer hover ${locale}`, await platform.getAttribute('aria-expanded') === 'true')
  await page.locator('.sv-main').hover({ position: { x: 8, y: 8 } })
