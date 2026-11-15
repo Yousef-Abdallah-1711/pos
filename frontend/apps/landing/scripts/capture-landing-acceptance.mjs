@@ -4,6 +4,7 @@ import { createRequire } from 'node:module'
 const { chromium } = createRequire(import.meta.url)('playwright')
 
 const baseURL = (process.env.POOS_ACCEPTANCE_URL ?? 'http://localhost:38691').replace(/\/$/, '')
+if (process.env.SERVIO_ACCEPTANCE_ENV === 'ci' && new URL(baseURL).origin !== 'https://pos.servio.test') throw new Error('CI capture accepts only the disposable landing host')
 const evidenceRoot = path.resolve(process.env.POOS_ACCEPTANCE_EVIDENCE ?? '../../../audit-reports/poos-final-acceptance-2026-11-11/evidence')
 const viewports = [320, 375, 390, 430, 768, 820, 1024, 1280, 1440, 1920]
 const routes = [
@@ -18,6 +19,12 @@ await mkdir(evidenceRoot, { recursive: true })
 const browser = await chromium.launch({ headless: true })
 try {
   const page = await browser.newPage({ deviceScaleFactor: 1, ignoreHTTPSErrors: process.env.SERVIO_DISPOSABLE_BROWSER === '1' })
+  if (process.env.SERVIO_ACCEPTANCE_ENV === 'ci') await page.route('**/*', route => {
+    const url = new URL(route.request().url())
+    if (url.protocol === 'https:' && ['pos.servio.test', 'api.servio.test', 'pos.app.servio.test', 'restaurant-1.pos.servio.test'].includes(url.hostname)) return route.continue()
+    if (['data:', 'blob:'].includes(url.protocol)) return route.continue()
+    return route.abort('blockedbyclient')
+  })
   page.on('console', (message) => { if (message.type() === 'error') browserErrors.push({ type: 'console', text: message.text() }) })
   page.on('pageerror', (error) => browserErrors.push({ type: 'pageerror', text: error.message }))
   await page.addInitScript(() => {

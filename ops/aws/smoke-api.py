@@ -2,13 +2,14 @@
 """Non-destructive checks using unique, synthetic staging tenants only."""
 import http.cookiejar, json, secrets, time, urllib.request, urllib.error
 from pathlib import Path
-BASE='https://api.pos.rakmyat.online/api/v1'
-ORIGIN='https://pos.rakmyat.online'
+from acceptance_target import api_base, safe_opener, ui_origin
+BASE=api_base()
+ORIGIN=ui_origin('landing')
 results=[]
 fixtures=[]
 def client():
     jar=http.cookiejar.CookieJar()
-    return urllib.request.build_opener(urllib.request.HTTPCookieProcessor(jar)),jar
+    return safe_opener(urllib.request.HTTPCookieProcessor(jar)),jar
 
 def call(opener,method,path,payload=None,headers=None):
     hdr={'Origin':ORIGIN,'Content-Type':'application/json',**(headers or {})}

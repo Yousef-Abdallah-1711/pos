@@ -1,18 +1,20 @@
 // Synthetic catalog image acceptance: no real contacts, payments or notifications.
 const {chromium}=require('playwright');
+const { assertCompleteTargetConfig, apiBase, guardContext }=require('./acceptance-target.cjs');assertCompleteTargetConfig();const api=apiBase();
 const fs=require('fs');const path=require('path');
 const evidence=process.env.SERVIO_BROWSER_EVIDENCE||path.join(__dirname,'evidence');
 const usersFile=process.env.SERVIO_UPLOAD_USERS||path.join(__dirname,'evidence/browser-fixtures.json');
 const user=JSON.parse(fs.readFileSync(usersFile))[0];
 if(!user.email.endsWith('@example.invalid'))throw new Error('Synthetic tenant fixture required');
-const checks=[];const errors=[];const base='https://api.pos.rakmyat.online/api/v1';
-const headers={Origin:'https://pos.app.rakmyat.online'};
+const checks=[];const errors=[];const base=api;
+const headers={Origin:'https://pos.app.servio.test'};
 const png=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR4nGNw6TjzHwAFRAKYH64YhwAAAABJRU5ErkJggg==','base64');
 function record(check,actual,expected){checks.push({check,actual,expected,status:actual===expected?'PASS':'FAIL'});}
 async function object(response){const raw=await response.json();return raw.data||raw;}
 (async()=>{
  const browser=await chromium.launch();
  const context=await browser.newContext({ignoreHTTPSErrors:process.env.SERVIO_DISPOSABLE_BROWSER==='1',viewport:{width:390,height:900}});
+ await guardContext(context);
  const page=await context.newPage();page.on('pageerror',error=>errors.push(error.message.slice(0,200)));
  try{
   const login=await context.request.post(base+'/auth/login',{headers,data:{email:user.email,password:user.password}});
@@ -43,8 +45,8 @@ async function object(response){const raw=await response.json();return raw.data|
   record('Previous uploaded image retained',(await context.request.get(initialURL)).status(),200);
   const invalid=await context.request.post(base+'/products',{headers,multipart:{data:JSON.stringify({...product,sku:product.sku+'-invalid'}),image:{name:'spoof.png',mimeType:'image/png',buffer:Buffer.from('<html><script>invalid()</script></html>')}}});
   record('Spoofed executable upload rejected',invalid.status(),400);
-  record('Upload directories are not listed',(await context.request.get('https://api.pos.rakmyat.online/uploads/products/')).status(),404);
-  await page.goto('https://pos.app.rakmyat.online/en/dashboard/products/'+created.id+'/edit');
+  record('Upload directories are not listed',(await context.request.get(new URL('/uploads/products/',api).toString())).status(),404);
+  await page.goto('https://pos.app.servio.test/en/dashboard/products/'+created.id+'/edit');
   await page.waitForFunction(url=>[...document.images].some(image=>{
    const value=image.currentSrc||image.src;if(!value)return false;const src=new URL(value,location.href);return (src.href===url||src.searchParams.get('url')===url)&&image.complete&&image.naturalWidth>0;
   }),updated.main_image_url,{timeout:20000});
@@ -53,7 +55,14 @@ async function object(response){const raw=await response.json();return raw.data|
  }catch(error){checks.push({check:'Synthetic image browser acceptance',status:'FAIL',error:String(error.message).replaceAll(user.password,'[redacted]').slice(0,300)});}
  finally{
   record('No upload browser runtime exceptions',errors.length,0);
-  await context.request.post(base+'/auth/logout',{headers,data:{}});await browser.close();
+  try{
+   const logout=await context.request.post(base+'/auth/logout',{headers,data:{},timeout:10000});
+   record('Synthetic tenant session logout',logout.status(),204);
+  }catch(error){
+   checks.push({check:'Synthetic tenant session logout',status:'FAIL',error:String(error.message).replaceAll(user.password,'[redacted]').slice(0,200)});
+  }finally{
+   await browser.close();
+  }
  }
  fs.writeFileSync(path.join(evidence,'upload-browser.json'),JSON.stringify({checks,errors},null,2),{mode:0o600});
  for(const row of checks)console.log(row.status+' '+row.check);

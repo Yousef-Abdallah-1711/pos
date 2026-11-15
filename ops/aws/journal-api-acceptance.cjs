@@ -1,10 +1,11 @@
 // Authenticated synthetic journals only; no provider payments or real business tenant.
 const {request}=require('playwright');const fs=require('fs');const path=require('path');
+const { assertCompleteTargetConfig, apiBase, apiRequestOptions }=require('./acceptance-target.cjs');assertCompleteTargetConfig();const api=apiBase();
 const evidence=process.env.SERVIO_BROWSER_EVIDENCE||path.join(__dirname,'evidence');
 const users=process.env.SERVIO_UPLOAD_USERS||path.join(__dirname,'evidence/browser-fixtures.json');
 const user=JSON.parse(fs.readFileSync(users))[0];
 if(!user.email.endsWith('@example.invalid'))throw new Error('Synthetic accounting fixture required');
-const base='https://api.pos.rakmyat.online/api/v1';const headers={Origin:'https://pos.app.rakmyat.online'};const checks=[];
+const base=api;const headers={Origin:'https://pos.app.servio.test'};const checks=[];
 function record(check,actual,expected){checks.push({check,actual,expected,status:actual===expected?'PASS':'FAIL'});}
 async function object(response){const raw=await response.json();return raw.data||raw;}
 async function accounts(context){
@@ -39,7 +40,7 @@ async function journal(context,rows,state){
  const final=await ledger(context,rows,state.id);record('Original and inverse ledger effects retained',final.count,4);record('Synthetic account balances return to zero',final.balanced,true);
 }
 (async()=>{
- const context=await request.newContext({ignoreHTTPSErrors:process.env.SERVIO_DISPOSABLE_BROWSER==='1'});const state={id:null,posted:false,voided:false};
+ const context=await request.newContext(apiRequestOptions({ignoreHTTPSErrors:process.env.SERVIO_DISPOSABLE_BROWSER==='1'}));const state={id:null,posted:false,voided:false};
  try{
   const login=await context.post(base+'/auth/login',{headers,data:{email:user.email,password:user.password}});
   if(login.status()!==200)throw new Error('Synthetic accounting login failed');
