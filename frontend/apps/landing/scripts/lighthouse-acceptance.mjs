@@ -8,6 +8,7 @@ const { default: lighthouse } = await import(pathToFileURL(require.resolve('ligh
 const { launch } = await import(pathToFileURL(require.resolve('chrome-launcher')).href)
 const base = process.env.SERVIO_MARKETING_URL
 if (!base) throw new Error('Set the intended SERVIO_MARKETING_URL')
+if (process.env.SERVIO_ACCEPTANCE_ENV === 'ci' && new URL(base).origin !== 'https://pos.servio.test') throw new Error('CI lighthouse acceptance accepts only the disposable landing host')
 const output = path.join(process.env.SERVIO_BROWSER_EVIDENCE || '/tmp/servio-lighthouse', 'lighthouse')
 await fs.mkdir(output, { recursive: true })
 const chrome = await launch({ chromePath: chromium.executablePath(), chromeFlags: ['--headless', '--no-sandbox', '--disable-dev-shm-usage', ...(process.env.SERVIO_DISPOSABLE_BROWSER === '1' ? ['--ignore-certificate-errors'] : [])] })

@@ -11,11 +11,20 @@ SHA = os.environ.get('GITHUB_SHA', '')
 if os.environ.get('GITHUB_ACTIONS') != 'true' or not re.fullmatch('[0-9a-f]{40}', SHA):
     raise SystemExit('Refusing CI builds outside GitHub Actions or without an immutable SHA')
 config = json.loads((ROOT / 'ops/aws/compose.json').read_text())
+test_hosts = {
+    'api.pos.rakmyat.online': 'api.servio.test',
+    'pos.app.rakmyat.online': 'pos.app.servio.test',
+    'admin.pos.rakmyat.online': 'admin.pos.servio.test',
+    'restaurant-1.pos.rakmyat.online': 'restaurant-1.pos.servio.test',
+    'pos.rakmyat.online': 'pos.servio.test',
+}
 for name in ['backend', 'landing', 'dashboard', 'restaurant-website', 'super-admin']:
     build = config['services'][name]['build']
     context = (ROOT / 'ops/aws' / build['context']).resolve()
     dockerfile = (context / build['dockerfile']).resolve()
     command = ['docker', 'build', '--label', 'org.opencontainers.image.revision=' + SHA, '--label', 'org.opencontainers.image.source=https://github.com/Yousef-Abdallah-1711/pos', '-t', f'servio-ci-{name}:{SHA}', '-f', str(dockerfile)]
     for key, value in build.get('args', {}).items():
+        for production_host, test_host in test_hosts.items():
+            value = value.replace(production_host, test_host)
         command.extend(['--build-arg', key + '=' + value])
     subprocess.run(command + [str(context)], check=True)

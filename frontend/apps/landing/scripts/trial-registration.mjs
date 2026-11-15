@@ -9,6 +9,7 @@ if (!['light', 'dark'].includes(colorScheme)) throw new Error('Unsupported brows
 const base = process.env.SERVIO_MARKETING_URL
 const api = process.env.SERVIO_MARKETING_API_URL
 if (process.env.SERVIO_SYNTHETIC_TRIAL !== '1' || !base || !api) throw new Error('Explicit synthetic trial flag and landing/API URLs are required')
+if (process.env.SERVIO_ACCEPTANCE_ENV !== 'ci' || new URL(base).origin !== 'https://pos.servio.test' || new URL(api).origin !== 'https://api.servio.test' || new URL(api).pathname.replace(/\/$/, '') !== '/api/v1') throw new Error('Synthetic trials require exact disposable CI service URLs')
 const output = path.join(process.env.SERVIO_BROWSER_EVIDENCE || '/tmp/servio-trial-acceptance', 'trial-registration')
 const checks = []
 function check(name, passed, detail = '') {
@@ -79,6 +80,12 @@ async function main() {
   let previousCategory
   for (const [locale, billing] of [['en', 'annual'], ['ar', 'monthly']]) {
    const context = await browser.newContext({ colorScheme, ignoreHTTPSErrors: process.env.SERVIO_DISPOSABLE_BROWSER === '1', viewport: { width: 1440, height: 1000 } })
+   await context.route('**/*', route => {
+    const url = new URL(route.request().url())
+    if (url.protocol === 'https:' && ['pos.servio.test', 'pos.app.servio.test', 'api.servio.test'].includes(url.hostname)) return route.continue()
+    if (['data:', 'blob:'].includes(url.protocol)) return route.continue()
+    return route.abort('blockedbyclient')
+   })
    try { previousCategory = await register(await context.newPage(), locale, billing, previousCategory) } finally { await context.close() }
   }
  } finally {

@@ -8,13 +8,14 @@ import urllib.error
 import urllib.request
 
 ROOT=Path(__file__).resolve().parents[2]
-BASE='https://api.pos.rakmyat.online/api/v1'
+from acceptance_target import api_base, safe_opener, ui_origin
+BASE=api_base();ORIGIN=ui_origin('dashboard')
 
 class Client:
     def __init__(self):
-        self.opener=urllib.request.build_opener(urllib.request.HTTPCookieProcessor(http.cookiejar.CookieJar()))
+        self.opener=safe_opener(urllib.request.HTTPCookieProcessor(http.cookiejar.CookieJar()))
     def call(self,method,path,data=None):
-        request=urllib.request.Request(BASE+path,data=None if data is None else json.dumps(data).encode(),method=method,headers={'Origin':'https://pos.app.rakmyat.online','Content-Type':'application/json'})
+        request=urllib.request.Request(BASE+path,data=None if data is None else json.dumps(data).encode(),method=method,headers={'Origin':ORIGIN,'Content-Type':'application/json'})
         try:response=self.opener.open(request,timeout=20)
         except urllib.error.HTTPError as error:response=error
         raw=response.read()

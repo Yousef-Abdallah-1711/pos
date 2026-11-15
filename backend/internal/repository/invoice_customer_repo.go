@@ -143,6 +143,14 @@ func (r *CustomerInvoiceRepository) CreateInvoice(invoice *domain.CustomerInvoic
 	if err != nil {
 		return 0, err
 	}
+	var balanceDue float64
+	if err := tx.QueryRow(`SELECT balance_due FROM invoices_customer WHERE id = $1 AND tenant_id = $2 AND restaurant_id = $3`,
+		id, invoice.TenantID, invoice.RestaurantID).Scan(&balanceDue); err != nil {
+		return 0, err
+	}
+	if err := adjustCustomerBalanceTx(tx, invoice.TenantID, invoice.RestaurantID, invoice.CustomerID, balanceDue); err != nil {
+		return 0, err
+	}
 
 	if err := tx.Commit(); err != nil {
 		return 0, err
@@ -206,7 +214,7 @@ func (r *CustomerInvoiceRepository) UpdateInvoice(invoice *domain.CustomerInvoic
 			SELECT 1 FROM customers_accounting c
 			WHERE c.id = $3 AND c.tenant_id = $12 AND c.restaurant_id = $13
 		  )
-		  AND ($4::integer IS NULL OR EXISTS (
+		  AND ($4::bigint IS NULL OR EXISTS (
 			SELECT 1 FROM orders o
 			WHERE o.id = $4 AND o.tenant_id = $12 AND o.restaurant_id = $13
 		  ))
@@ -273,6 +281,18 @@ func (r *CustomerInvoiceRepository) UpdateInvoice(invoice *domain.CustomerInvoic
 	`, journalID, invoice.ID, invoice.TenantID, invoice.RestaurantID); err != nil {
 		return err
 	}
+	if existing.CustomerID == updated.CustomerID {
+		if err := adjustCustomerBalanceTx(tx, invoice.TenantID, invoice.RestaurantID, existing.CustomerID, updated.BalanceDue-existing.BalanceDue); err != nil {
+			return err
+		}
+	} else {
+		if err := adjustCustomerBalanceTx(tx, invoice.TenantID, invoice.RestaurantID, existing.CustomerID, -existing.BalanceDue); err != nil {
+			return err
+		}
+		if err := adjustCustomerBalanceTx(tx, invoice.TenantID, invoice.RestaurantID, updated.CustomerID, updated.BalanceDue); err != nil {
+			return err
+		}
+	}
 
 	return tx.Commit()
 }
@@ -326,7 +346,7 @@ func (r *CustomerInvoiceRepository) VoidInvoice(tenantID, restaurantID, id int, 
 	_, err = tx.Exec(`
 		UPDATE invoices_customer
 		SET status = $1,
-			internal_notes = CONCAT(COALESCE(internal_notes, ''), CASE WHEN COALESCE(internal_notes, '') = '' THEN '' ELSE E'\n' END, $2),
+			internal_notes = CONCAT(COALESCE(internal_notes, ''), CASE WHEN COALESCE(internal_notes, '') = '' THEN '' ELSE E'\n' END, $2::text),
 			updated_by = $3,
 			updated_at = CURRENT_TIMESTAMP
 		WHERE id = $4 AND tenant_id = $5 AND restaurant_id = $6
@@ -334,8 +354,30 @@ func (r *CustomerInvoiceRepository) VoidInvoice(tenantID, restaurantID, id int, 
 	if err != nil {
 		return err
 	}
+	if err := adjustCustomerBalanceTx(tx, tenantID, restaurantID, invoice.CustomerID, -invoice.BalanceDue); err != nil {
+		return err
+	}
 
 	return tx.Commit()
+}
+
+func adjustCustomerBalanceTx(tx *sql.Tx, tenantID, restaurantID, customerID int, delta float64) error {
+	result, err := tx.Exec(`
+		UPDATE customers_accounting
+		SET current_balance = current_balance + $1, updated_at = CURRENT_TIMESTAMP
+		WHERE id = $2 AND tenant_id = $3 AND restaurant_id = $4
+	`, delta, customerID, tenantID, restaurantID)
+	if err != nil {
+		return fmt.Errorf("adjust customer receivable balance: %w", err)
+	}
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("check customer receivable balance update: %w", err)
+	}
+	if rowsAffected != 1 {
+		return errors.New("customer account not found in invoice scope")
+	}
+	return nil
 }
 
 func (r *CustomerInvoiceRepository) GetOverdueInvoices(tenantID, restaurantID int) ([]domain.CustomerInvoice, error) {
@@ -440,7 +482,7 @@ func (r *CustomerInvoiceRepository) createInvoiceTx(tx *sql.Tx, invoice *domain.
 			SELECT 1 FROM customers_accounting c
 			WHERE c.id = $6 AND c.tenant_id = $1 AND c.restaurant_id = $2
 		)
-		  AND ($7::integer IS NULL OR EXISTS (
+		  AND ($7::bigint IS NULL OR EXISTS (
 			SELECT 1 FROM orders o
 			WHERE o.id = $7 AND o.tenant_id = $1 AND o.restaurant_id = $2
 		  ))

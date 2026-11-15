@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 import http.cookiejar,json,os,sys,time,urllib.request,urllib.error
 from pathlib import Path
+from acceptance_target import api_base, safe_opener, ui_origin
+BASE=api_base();ORIGIN=ui_origin('dashboard')
 p=Path('/opt/servio/ops/aws/evidence/restart-cookies.private')
 jar=http.cookiejar.LWPCookieJar(str(p))
-op=urllib.request.build_opener(urllib.request.HTTPCookieProcessor(jar))
+op=safe_opener(urllib.request.HTTPCookieProcessor(jar))
 def request(method,path,body=None):
-    req=urllib.request.Request('https://api.pos.rakmyat.online/api/v1'+path,data=None if body is None else json.dumps(body).encode(),headers={'Origin':'https://pos.app.rakmyat.online','Content-Type':'application/json'},method=method)
+    req=urllib.request.Request(BASE+path,data=None if body is None else json.dumps(body).encode(),headers={'Origin':ORIGIN,'Content-Type':'application/json'},method=method)
     try:r=op.open(req,timeout=10)
     except urllib.error.HTTPError as e:r=e
     r.read();return r.status

@@ -1,9 +1,8 @@
 #!/bin/sh
 # Every suite runs for useful failure evidence; any failure rejects the image gate.
 set -eu
-if ! npm install --prefix /tmp/browser --ignore-scripts --no-audit --no-fund \
-  playwright@1.64.1 axe-core@4.11.0 lighthouse@13.6.0 >/tmp/install.log 2>&1; then
-  tail -30 /tmp/install.log
+if [ ! -d /tmp/browser/node_modules/playwright ]; then
+  echo 'Runner-installed Playwright dependencies are required.' >&2
   exit 1
 fi
 failed=0

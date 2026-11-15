@@ -1,45 +1,14 @@
-name: SERVIO staging deployment verification
+name: SERVIO staging deployment lockdown
 on:
-  workflow_run:
-    workflows: [SERVIO verified CI]
-    types: [completed]
+  workflow_dispatch:
 permissions:
   contents: read
 concurrency:
   group: servio-staging-deployment
   cancel-in-progress: false
 jobs:
-  verify-outbound-deployment:
-    if: >-
-      github.repository == 'Yousef-Abdallah-1711/pos' &&
-      github.event.workflow_run.conclusion == 'success' &&
-      github.event.workflow_run.head_branch == 'main' &&
-      github.event.workflow_run.event == 'push'
-    environment: staging
+  deployment-locked:
     runs-on: ubuntu-24.04
-    timeout-minutes: 30
     steps:
-      - name: Verify the outbound agent deployed this exact accepted main release
-        env:
-          RELEASE_SHA: ${{ github.event.workflow_run.head_sha }}
-        run: |
-          python3 - <<'PY'
-          import json,os,time,urllib.request
-          expected=os.environ['RELEASE_SHA']
-          for attempt in range(100):
-              try:
-                  with urllib.request.urlopen('https://api.pos.rakmyat.online/_ops/release',timeout=15) as response:
-                      observed=json.load(response)
-                  if observed.get('sha')==expected and observed.get('status')=='verified' and observed.get('environment')=='staging':
-                      for host,path in {'pos.rakmyat.online':'/en','api.pos.rakmyat.online':'/api/v1/health','pos.app.rakmyat.online':'/en/dashboard','admin.pos.rakmyat.online':'/login','restaurant-1.pos.rakmyat.online':'/en'}.items():
-                          with urllib.request.urlopen('https://'+host+path,timeout=20) as check:
-                              assert check.status==200 and not check.headers.get('WWW-Authenticate'),host
-                              if host.startswith('api.'):assert json.load(check).get('db_healthy') is True
-                      print('PASS outbound agent deployed verified main '+expected)
-                      break
-              except Exception:
-                  pass
-              time.sleep(15)
-          else:
-              raise SystemExit('BLOCKED: exact-main staging deployment was not verified before the bounded deadline; inspect /var/log/servio-deploy/agent.log')
-          PY
+      - name: Keep staging deployment verification disabled
+        run: echo 'Automatic staging deployment verification is disabled pending independently verified isolation.'

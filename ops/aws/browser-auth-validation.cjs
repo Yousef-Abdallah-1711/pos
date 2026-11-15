@@ -1,5 +1,6 @@
 // Negative synthetic form acceptance: never creates an account or sends notifications.
 const {chromium}=require('playwright');
+const { assertCompleteTargetConfig, guardContext }=require('./acceptance-target.cjs');assertCompleteTargetConfig();
 const fs=require('fs');const path=require('path');
 const evidence=process.env.SERVIO_BROWSER_EVIDENCE||path.join(__dirname,'evidence');
 const checks=[];
@@ -9,10 +10,11 @@ async function hydrated(page){
 }
 async function validateLanding(browser,locale,form){
  const context=await browser.newContext({ignoreHTTPSErrors:process.env.SERVIO_DISPOSABLE_BROWSER==='1'});
+ await guardContext(context);
  const page=await context.newPage();let mutations=0;
  page.on('request',request=>{if(request.method()==='POST'&&new URL(request.url()).pathname.startsWith('/api/v1/auth/'))mutations++;});
  try{
-  await page.goto(`https://pos.rakmyat.online/${locale}/auth/${form}`);await hydrated(page);
+  await page.goto(`https://pos.servio.test/${locale}/auth/${form}`);await hydrated(page);
   await page.locator('button[type=submit]').click();
   await page.locator('input[aria-invalid=true]').first().waitFor();
   record(`${locale} ${form} rejects empty required fields`,await page.locator('input[aria-invalid=true]').count()>0,true);
@@ -21,10 +23,11 @@ async function validateLanding(browser,locale,form){
 }
 async function validateAdmin(browser){
  const context=await browser.newContext({ignoreHTTPSErrors:process.env.SERVIO_DISPOSABLE_BROWSER==='1'});
+ await guardContext(context);
  const page=await context.newPage();let mutations=0;
  page.on('request',request=>{if(request.method()==='POST'&&new URL(request.url()).pathname.endsWith('/super-admin/auth/login'))mutations++;});
  try{
-  await page.goto('https://admin.pos.rakmyat.online/login');await hydrated(page);
+  await page.goto('https://admin.pos.servio.test/login');await hydrated(page);
   await page.locator('input[type=email]').fill('');await page.locator('button[type=submit]').click();
   await page.getByText('Please enter both email and password',{exact:true}).waitFor();
   record('Administrator empty fields show validation',true,true);
