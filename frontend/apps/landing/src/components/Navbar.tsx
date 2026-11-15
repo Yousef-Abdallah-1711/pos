@@ -43,13 +43,13 @@ export function Navbar({ locale: language }: { locale: Locale }) {
       router.push(`${localizedPath}${window.location.search}${window.location.hash}`)
     }}><Globe2 size={18} aria-hidden="true" /><span>{language === 'en' ? 'العربية' : 'English'}</span></Link>
       <button className="sv-theme-toggle" type="button" onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')} aria-label={theme === 'dark' ? c.switchToLight : c.switchToDark} title={theme === 'dark' ? c.switchToLight : c.switchToDark}>{theme === 'dark' ? <Sun size={18} aria-hidden="true" /> : <Moon size={18} aria-hidden="true" />}</button>
-      <Link className="sv-login" href={`/${language}/auth/login`}>{c.login}</Link>
+      <Link className="sv-login" href={`/${language}/auth/login`} prefetch={false}>{c.login}</Link>
       <div className="sv-desktop-trial"><TrialLink locale={language} source="navigation" /></div>
       <button className="sv-menu-button" ref={trigger} type="button" aria-controls="sv-mobile-navigation" aria-expanded={open} aria-label={open ? c.closeMenu : c.openMenu} onClick={() => setOpen(!open)}>{open ? <X aria-hidden="true" /> : <Menu aria-hidden="true" />}</button>
     </div>
   </nav><div hidden={!open} className="sv-mobile-navigation sv-shell" id="sv-mobile-navigation" ref={nav}>
     {links.map(([path, label]) => <Link key={path} href={`/${language}/${path}`} onClick={() => setOpen(false)}>{label}</Link>)}
-    <Link href={`/${language}/auth/login`} onClick={() => setOpen(false)}>{c.login}</Link>
+    <Link href={`/${language}/auth/login`} prefetch={false} onClick={() => setOpen(false)}>{c.login}</Link>
     <TrialLink locale={language} source="mobile-navigation" />
   </div></header>
 }
