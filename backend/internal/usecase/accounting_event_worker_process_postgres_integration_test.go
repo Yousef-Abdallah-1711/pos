@@ -157,8 +157,8 @@ func createTrackedWorkerProduct(t *testing.T, db *sql.DB, tenantID, restaurantID
 	var productID int64
 	name := fmt.Sprintf("worker-restart-product-%d", time.Now().UnixNano())
 	err := db.QueryRow(`
-		INSERT INTO products (tenant_id, restaurant_id, name, price, cost)
-		VALUES ($1, $2, $3, 50, 5) RETURNING id`, tenantID, restaurantID, name).Scan(&productID)
+		INSERT INTO products (tenant_id, restaurant_id, name, name_en, price, cost, track_inventory)
+		VALUES ($1, $2, $3, $3, 50, 5, TRUE) RETURNING id`, tenantID, restaurantID, name).Scan(&productID)
 	if err != nil {
 		t.Fatalf("create tracked worker product: %v", err)
 	}
