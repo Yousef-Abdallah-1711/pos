@@ -401,6 +401,7 @@ func main() {
 	hrAttendanceHandler := handler.NewHRAttendanceHandler(attendanceRepo, db)
 	hrLeaveHandler := handler.NewHRLeaveHandler(leaveRepo, db)
 	hrSalaryHandler := handler.NewHRSalaryHandler(salaryRepo, db)
+	hrSalaryHandler.SetPayrollTransactionDatabase(accountingDB)
 	hrSalaryHandler.SetAutoPostingEngine(autoPostingEngine)
 	accountHandler := handler.NewAccountHandler(accountingUC)
 	journalEntryHandler := handler.NewJournalEntryHandler(journalEntryRepo)

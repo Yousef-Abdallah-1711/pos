@@ -34,6 +34,13 @@ func TestFinancialAcceptanceLiveAPIPayrollLifecycle(t *testing.T) {
 		t.Fatalf("synthetic source salary gross/net=%d/%d cents stored period=%d/%d pay period end=%d/%d (err=%v)", grossCents, netCents, month, year, periodMonth, periodYear, err)
 	}
 	markPath := financialAcceptancePath(baseURL, "/api/v1/hr/salaries/%d/mark-paid", salaryID)
+	setLivePayrollRuleEnabled(t, db, fixture, false)
+	failureStatus, failureBody := acceptanceJSONRequest(t, client, http.MethodPost, markPath, map[string]any{"payment_reference": "FA-PAYROLL-FAILED"})
+	if failureStatus != http.StatusInternalServerError {
+		t.Fatalf("disabled payroll posting returned %d, want 500: %s", failureStatus, failureBody)
+	}
+	assertLivePayrollPaymentRolledBack(t, db, ctx, fixture, salaryID)
+	setLivePayrollRuleEnabled(t, db, fixture, true)
 	status, body := acceptanceJSONRequest(t, client, http.MethodPost, markPath, map[string]any{"payment_reference": "FA-PAYROLL-1500"})
 	if status != http.StatusOK {
 		t.Fatalf("authorized payroll mark-paid returned %d: %s", status, body)
@@ -50,7 +57,31 @@ func TestFinancialAcceptanceLiveAPIPayrollLifecycle(t *testing.T) {
 	assertPaidPayrollIsImmutable(t, baseURL, client, salaryID)
 	assertForeignPayrollAccessDenied(t, db, baseURL, fixture, salaryID)
 	assertLivePayrollPaymentIdentity(t, db, ctx, fixture, salaryID)
-	t.Logf("financial_acceptance scenario=authenticated_payroll_api tenant_id=%d restaurant_id=%d salary_id=%d journal_id=%d source_gross_cents=%d source_net_cents=%d expense_gl_cents=%d cash_gl_cents=%d journal_count=%d gl_rows=%d source_gl_difference_cents=0 duplicate_mark_paid_http_status=%d immutable_edit_delete=true foreign_tenant_denied=true", fixture.tenantID, fixture.restaurantID, salaryID, journalID, grossCents, netCents, expenseCents, cashCreditCents, journalCount, ledgerRows, duplicateStatus)
+	t.Logf("financial_acceptance scenario=authenticated_payroll_api tenant_id=%d restaurant_id=%d salary_id=%d journal_id=%d source_gross_cents=%d source_net_cents=%d expense_gl_cents=%d cash_gl_cents=%d journal_count=%d gl_rows=%d source_gl_difference_cents=0 failed_post_http_status=%d rollback_verified=true retry_http_status=%d duplicate_mark_paid_http_status=%d immutable_edit_delete=true foreign_tenant_denied=true", fixture.tenantID, fixture.restaurantID, salaryID, journalID, grossCents, netCents, expenseCents, cashCreditCents, journalCount, ledgerRows, failureStatus, status, duplicateStatus)
+}
+
+func setLivePayrollRuleEnabled(t *testing.T, db *sql.DB, fixture liveFinancialFixture, enabled bool) {
+	t.Helper()
+	result, err := db.Exec(`UPDATE auto_posting_rules SET is_active=$1 WHERE tenant_id=$2 AND restaurant_id=$3 AND rule_code='SALARY_PAID'`, enabled, fixture.tenantID, fixture.restaurantID)
+	if err != nil {
+		t.Fatalf("set synthetic payroll posting rule enabled=%v: %v", enabled, err)
+	}
+	if rows, err := result.RowsAffected(); err != nil || rows != 1 {
+		t.Fatalf("update synthetic payroll rule affected %d rows (err=%v), want one", rows, err)
+	}
+}
+
+func assertLivePayrollPaymentRolledBack(t *testing.T, db *sql.DB, ctx context.Context, fixture liveFinancialFixture, salaryID int64) {
+	t.Helper()
+	var isPaid bool
+	var status string
+	var journals int
+	if err := db.QueryRowContext(ctx, `SELECT is_paid, status FROM salaries WHERE id=$1 AND tenant_id=$2 AND restaurant_id=$3`, salaryID, fixture.tenantID, fixture.restaurantID).Scan(&isPaid, &status); err != nil || isPaid || status != "pending" {
+		t.Fatalf("failed payroll posting left salary is_paid/status=%v/%s err=%v", isPaid, status, err)
+	}
+	if err := db.QueryRowContext(ctx, `SELECT COUNT(*) FROM journal_entries WHERE tenant_id=$1 AND restaurant_id=$2 AND reference_type='salary' AND reference_id=$3`, fixture.tenantID, fixture.restaurantID, salaryID).Scan(&journals); err != nil || journals != 0 {
+		t.Fatalf("failed payroll posting left %d journals (err=%v), want none", journals, err)
+	}
 }
 
 func seedLiveFinancialEmployee(t *testing.T, db *sql.DB, fixture liveFinancialFixture) int64 {
