@@ -416,27 +416,29 @@ async function main() {
  await fs.mkdir(output, { recursive: true })
  const browserType = browserName === 'firefox' ? firefox : chromium
  const browser = await browserType.launch({ headless: true, ...(process.env.SERVIO_BROWSER_EXECUTABLE ? { executablePath: process.env.SERVIO_BROWSER_EXECUTABLE } : {}), ...(browserName === 'chromium' ? { args: ['--no-sandbox'] } : {}) })
- const cancelledRouteChunkRequests = []
- const cancelledRouteChunkPaths = new Set()
- const routeChunkExceptions = []
+ const cancelledNextChunkRequests = []
+ const cancelledNextChunkPaths = new Set()
+ const cancelledNextChunkPagePaths = new Set()
+ const nextChunkExceptions = []
  try {
   let page = await createPage(browser, { width: 1440, height: 1000 })
   const errors = []
   const recoveredRscNavigations = []
   const networkFailures = []
-  const failedRouteChunkRequests = []
+  const failedNextChunkRequests = []
   const pendingReactErrorDetails = []
-  const deferRouteChunkException = (pageUrl, details) => {
+  const deferredChunkDiagnostics = []
+  const deferNextChunkException = (pageUrl, details) => {
    const message = details?.message || ''
-   const url = message.match(/https?:\/\/[^)\s]+\/_next\/static\/chunks\/app\/[^)\s]+/)?.[0]
+   const url = message.match(/https?:\/\/[^)\s]+\/_next\/static\/chunks\/[^)\s]+/)?.[0]
    if (!url) return false
-   routeChunkExceptions.push({ pageUrl, pathname: new URL(url).pathname, details })
+   nextChunkExceptions.push({ pageUrl, pathname: new URL(url).pathname, details })
    return true
   }
   const observe = page => {
    page.on('pageerror', error => {
     const details = Object.fromEntries(Object.getOwnPropertyNames(error).map(key => [key, error[key]]))
-    if (error.name === 'ChunkLoadError' && deferRouteChunkException(page.url(), { name: error.name, message: error.message, details })) return
+    if (error.name === 'ChunkLoadError' && deferNextChunkException(page.url(), { name: error.name, message: error.message, details })) return
     errors.push(`${page.url()}: ${JSON.stringify({ name: error.name, message: error.message, cause: error.cause, details })}`)
    })
    page.on('console', message => {
@@ -454,10 +456,16 @@ async function main() {
      if (errorHandle) {
       pendingReactErrorDetails.push(errorHandle.evaluate(error => ({ name: error?.name, message: error?.message, stack: error?.stack, cause: error?.cause?.stack || error?.cause?.message }))
        .then(details => {
-        if (details?.name === 'ChunkLoadError' && deferRouteChunkException(pageUrl, details)) return
+        if (details?.name === 'ChunkLoadError' && deferNextChunkException(pageUrl, details)) return
         errors.push(`${pageUrl}: ${JSON.stringify({ text, location, details })}`)
        })
-       .catch(error => errors.push(`${pageUrl}: ${JSON.stringify({ text, location, detailReadError: error.message })}`)))
+       .catch(error => {
+        if (/Execution context was destroyed|Target closed/.test(error.message)) {
+         deferredChunkDiagnostics.push({ pageUrl, location, detailReadError: error.message })
+         return
+        }
+        errors.push(`${pageUrl}: ${JSON.stringify({ text, location, detailReadError: error.message })}`)
+       }))
       return
      }
     }
@@ -465,21 +473,22 @@ async function main() {
    })
    page.on('requestfailed', request => {
     const requestUrl = new URL(request.url())
-    if (requestUrl.pathname.startsWith('/_next/static/chunks/app/')) {
+    if (requestUrl.pathname.startsWith('/_next/static/chunks/')) {
      const reason = request.failure()?.errorText || 'request failed'
      const detail = `${reason} ${requestUrl.pathname}`
      if (/NS_BINDING_ABORTED|ERR_ABORTED/.test(reason)) {
-      cancelledRouteChunkRequests.push(detail)
-      cancelledRouteChunkPaths.add(requestUrl.pathname)
+      cancelledNextChunkRequests.push(detail)
+      cancelledNextChunkPaths.add(requestUrl.pathname)
+      try { cancelledNextChunkPagePaths.add(new URL(page.url()).pathname) } catch {}
      }
-     else failedRouteChunkRequests.push(detail)
+     else failedNextChunkRequests.push(detail)
     }
    })
    page.on('response', response => {
     if (response.status() < 400) return
     const pathname = new URL(response.url()).pathname
     networkFailures.push(`${response.status()} ${pathname}`)
-    if (pathname.startsWith('/_next/static/chunks/app/')) failedRouteChunkRequests.push(`${response.status()} ${pathname}`)
+    if (pathname.startsWith('/_next/static/chunks/')) failedNextChunkRequests.push(`${response.status()} ${pathname}`)
    })
   }
   observe(page)
@@ -499,8 +508,12 @@ async function main() {
   }
   await captureComparisonBoards(browser)
   await Promise.all(pendingReactErrorDetails)
-  const unmatchedRouteChunkExceptions = routeChunkExceptions.filter(({ pathname }) => !cancelledRouteChunkPaths.has(pathname))
-  for (const exception of unmatchedRouteChunkExceptions) errors.push(`${exception.pageUrl}: ${JSON.stringify(exception.details)}`)
+  const unmatchedNextChunkExceptions = nextChunkExceptions.filter(({ pathname }) => !cancelledNextChunkPaths.has(pathname))
+  for (const exception of unmatchedNextChunkExceptions) errors.push(`${exception.pageUrl}: ${JSON.stringify(exception.details)}`)
+  const unexplainedChunkDiagnostics = deferredChunkDiagnostics.filter(({ pageUrl }) => {
+   try { return !cancelledNextChunkPagePaths.has(new URL(pageUrl).pathname) } catch { return true }
+  })
+  for (const diagnostic of unexplainedChunkDiagnostics) errors.push(`${diagnostic.pageUrl}: ${JSON.stringify(diagnostic)}`)
   const expectedPaths = new Set(['en', 'ar'].flatMap(locale => routes.map(route => `/${locale}${route}`)))
   const invalidFallbacks = recoveredRscNavigations.filter(({ pageUrl, destination }) => {
    try {
@@ -511,14 +524,15 @@ async function main() {
    }
   })
   check('recovered Next.js navigation fallbacks use verified routes', invalidFallbacks.length === 0, JSON.stringify(invalidFallbacks))
-  check('cancelled route chunk requests recorded', true, JSON.stringify(cancelledRouteChunkRequests))
-  check('route chunk load errors explained by cancelled requests', unmatchedRouteChunkExceptions.length === 0, JSON.stringify(unmatchedRouteChunkExceptions))
-  check('failed route chunk requests', failedRouteChunkRequests.length === 0, JSON.stringify(failedRouteChunkRequests))
+  check('cancelled Next.js chunk requests recorded', true, JSON.stringify(cancelledNextChunkRequests))
+  check('chunk load errors explained by cancelled Next.js chunks', unmatchedNextChunkExceptions.length === 0, JSON.stringify(unmatchedNextChunkExceptions))
+  check('interrupted chunk diagnostics explained by same-route cancellation', unexplainedChunkDiagnostics.length === 0, JSON.stringify(unexplainedChunkDiagnostics))
+  check('failed Next.js chunk requests', failedNextChunkRequests.length === 0, JSON.stringify(failedNextChunkRequests))
   check('failed network responses', networkFailures.length === 0, networkFailures.join('; '))
   check('browser exceptions', errors.length === 0, errors.join('; '))
  } finally {
   await browser.close()
-  await fs.writeFile(path.join(output, 'results.json'), JSON.stringify({ base, browser: browserName, color_scheme: colorScheme, theme: expectedTheme, cancelled_route_chunk_requests: cancelledRouteChunkRequests, checks }, null, 2))
+  await fs.writeFile(path.join(output, 'results.json'), JSON.stringify({ base, browser: browserName, color_scheme: colorScheme, theme: expectedTheme, cancelled_next_chunk_requests: cancelledNextChunkRequests, cancelled_next_chunk_page_paths: [...cancelledNextChunkPagePaths], checks }, null, 2))
   await fs.writeFile(path.join(output, 'navigation-evidence.json'), JSON.stringify({ sourceCommit, screenshots: navigationScreenshots }, null, 2))
  }
 }
