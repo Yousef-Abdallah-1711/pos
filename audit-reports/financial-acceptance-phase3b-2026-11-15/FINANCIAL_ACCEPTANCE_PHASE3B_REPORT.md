@@ -2,11 +2,11 @@
 
 **Snapshot date:** 2026-11-15
 **Audited baseline:** `origin/main` `3ed336c5f00d25596da3186176256a629d0d474c`
-**Execution commit:** `ee09452865a09c060ced08fcde0ab655dfc17921`
+**Execution commit:** `793365c743f8f0197fc6cb525c4dedad285b6b87`
 **Pull request:** [#57](https://github.com/Yousef-Abdallah-1711/pos/pull/57), open and unmerged
-**Financial CI:** [run 43731090055](https://github.com/Yousef-Abdallah-1711/pos/actions/runs/43731090055), success on the exact PR head; evidence artifact `14168321849`
+**Financial CI:** [run 43731635122](https://github.com/Yousef-Abdallah-1711/pos/actions/runs/43731635122), success on the exact PR head; evidence artifact `14168891640`
 **Acceptance status:** 10 PASS, 6 PARTIAL, 1 NOT RUN, 0 FAIL; policy approvals remain separate and pending.
-**Required verified CI:** final-head PR run `43731089974` was canceled before the `application-images` job started; its required aggregate failed because backend and frontend validations were canceled. Security/config passed. The main-branch run `43730274563` was canceled while building images, before its Chromium smoke step. No image smoke or publication occurred in either run.
+**Required verified CI:** final-head PR run [43731635077](https://github.com/Yousef-Abdallah-1711/pos/actions/runs/43731635077) was canceled during image build before Chromium smoke. Backend, all four frontend suites, and security/config passed; the required aggregate failed because the image stage was canceled. No smoke or publication occurred. Main-branch run `43730274563` was also canceled during image build before smoke or publication.
 
 ## Runtime and data safety
 
