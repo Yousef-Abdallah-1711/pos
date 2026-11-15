@@ -24,7 +24,20 @@ function check(name, condition, detail = '') {
  if (!condition) throw new Error(`${name}: ${detail}`)
 }
 async function load(page, locale, route) {
- const response = await page.goto(`${base}/${locale}${route}`, { waitUntil: 'domcontentloaded', timeout: 60000 })
+ let response
+ let navigationError
+ for (let attempt = 0; attempt < 2; attempt++) {
+  try {
+   response = await page.goto(`${base}/${locale}${route}`, { waitUntil: 'domcontentloaded', timeout: 60000 })
+   navigationError = undefined
+   break
+  } catch (error) {
+   navigationError = error
+   if (attempt === 0) await page.waitForTimeout(250)
+  }
+ }
+ if (navigationError) throw navigationError
+ if (!response) throw new Error(`No response loading ${locale}${route}`)
  check(`HTTP ${locale}${route}`, response.status() === 200, response.status())
  const html = await response.text()
  const root = html.match(/<html[^>]*>/)?.[0] || ''

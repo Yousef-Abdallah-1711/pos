@@ -235,6 +235,7 @@ html[dir=rtl] .sv-mobile-navigation__link svg { transform:scaleX(-1); }
 :root.light .sv-footer-group h2 { color:#575066; }
 :root.light .sv-footer-group li a { color:#373147!important; }
 :root.light .sv-footer-group li a:hover { color:#45218b!important; }
+:root.light .sv-footer :focus-visible { outline-color:#6938d3; }
 :root.light .sv-footer-bottom { border-color:#d9d1eb; color:#575066; }
 @media (max-width:359px) {
   .sv-nav { gap:6px; }
