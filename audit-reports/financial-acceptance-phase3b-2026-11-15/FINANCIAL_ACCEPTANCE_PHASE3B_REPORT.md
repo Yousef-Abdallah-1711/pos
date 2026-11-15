@@ -1,5 +1,7 @@
 # SERVIO Financial Acceptance — Phase 3B Current Snapshot
 
+> **Superseded for current status:** Phase 3E corrected the AR fixture failure, ran authenticated financial acceptance on the current mainline, and recorded measured reconciliation results in [the Phase 3E closure report](PHASE3E_CLOSURE.md). This file retains the Phase 3B historical snapshot below.
+
 **Snapshot date:** 2026-11-15
 **Audited baseline:** `origin/main` `3ed336c5f00d25596da3186176256a629d0d474c`
 **Execution commit:** `06cd42dda9b7bbd7e758c6211057b4049f4128f0`
