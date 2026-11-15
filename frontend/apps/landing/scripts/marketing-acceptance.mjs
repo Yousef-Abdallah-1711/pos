@@ -25,7 +25,12 @@ async function load(page, locale, route) {
  const html = await response.text()
  const root = html.match(/<html[^>]*>/)?.[0] || ''
  check(`server locale ${locale}${route}`, root.includes(`lang="${locale}"`) && root.includes(`dir="${locale === 'ar' ? 'rtl' : 'ltr'}"`), root)
- await page.locator('main h1').waitFor()
+ // Next.js may briefly retain a hidden streamed tree during navigation. Wait
+ // for one rendered heading; persistent duplicates must still time out/fail.
+ await page.waitForFunction(() => {
+  const headings = document.querySelectorAll('main h1')
+  return headings.length === 1 && headings[0].getClientRects().length > 0
+ })
  const canonical = await page.locator('link[rel=canonical]').getAttribute('href')
  check(`canonical ${locale}${route}`, canonical === `${base}/${locale}${route}`, canonical)
  const description = await page.locator('meta[name="description"]').getAttribute('content')
