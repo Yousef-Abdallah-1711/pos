@@ -41,7 +41,8 @@ func seedLiveReceivableCustomer(t *testing.T, db *sql.DB, fixture liveFinancialF
 	t.Helper()
 	receivableID := liveFinancialAccountID(t, db, fixture, "1120")
 	var customerID int64
-	code := fmt.Sprintf("FA-AR-%d", time.Now().UnixNano())
+	// customer_code is VARCHAR(20); keep the synthetic timestamp key within that schema.
+	code := fmt.Sprintf("FA-AR-%d", time.Now().UnixNano()%1_000_000_000_000)
 	err := db.QueryRow(`INSERT INTO customers_accounting (tenant_id, restaurant_id, customer_code, customer_name, receivable_account_id, is_active) VALUES ($1,$2,$3,'Synthetic AR Customer',$4,TRUE) RETURNING id`, fixture.tenantID, fixture.restaurantID, code, receivableID).Scan(&customerID)
 	if err != nil {
 		t.Fatalf("seed synthetic receivable customer: %v", err)
