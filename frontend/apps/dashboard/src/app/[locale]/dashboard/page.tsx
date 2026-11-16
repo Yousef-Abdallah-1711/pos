@@ -678,8 +678,17 @@ export default function DashboardPage() {
                 </Link>
               ))}
             </div>
-            <div className="text-xs text-gray-500 dark:text-gray-400">
-              {overview.lastUpdatedAt ? `${t('reports.common.lastUpdated', 'Last updated')}: ${formatDateTime(overview.lastUpdatedAt, locale)}` : t('dashboard.loadingData', 'Loading dashboard data...')}
+            <div
+              data-testid="dashboard-overview-status"
+              data-status={overviewError ? 'error' : overview.lastUpdatedAt ? 'ready' : isLoading ? 'loading' : 'error'}
+              aria-live="polite"
+              className="text-xs text-gray-500 dark:text-gray-400"
+            >
+              {overview.lastUpdatedAt
+                ? `${t('reports.common.lastUpdated', 'Last updated')}: ${formatDateTime(overview.lastUpdatedAt, locale)}`
+                : isLoading
+                  ? t('dashboard.loadingData', 'Loading dashboard data...')
+                  : t('dashboard.dataUnavailable', 'Dashboard data could not be loaded. Refresh to try again.')}
               {isRefreshing && ` ${t('dashboard.refreshing', '(refreshing)')}`}
             </div>
           </div>

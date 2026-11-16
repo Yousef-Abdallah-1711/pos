@@ -7,6 +7,7 @@ import { getDashboardBaseUrl } from "@/lib/config";
 import type { User } from "@/types";
 import { X, AlertCircle, Copy, Check } from "lucide-react";
 import { toast } from "sonner";
+import { useSuperAdminText } from "@/components/providers/PreferencesProvider";
 
 interface ImpersonationModalProps {
   isOpen: boolean;
@@ -21,6 +22,7 @@ export function ImpersonationModal({
   user,
   tenantId,
 }: ImpersonationModalProps) {
+  const t = useSuperAdminText();
   const [isLoading, setIsLoading] = useState(false);
   const [impersonationToken, setImpersonationToken] = useState<string | null>(
     null
@@ -34,11 +36,11 @@ export function ImpersonationModal({
       setIsLoading(true);
       await superAdminAPI.endImpersonation();
       setImpersonation(null);
-      toast.success("Previous session ended");
+      toast.success(t("Previous session ended"));
       // Now start the new impersonation
       await handleStartImpersonation();
     } catch (error) {
-      toast.error("Failed to end current session");
+      toast.error(t("Failed to end current session"));
       console.error(error);
       setIsLoading(false);
     }
@@ -64,15 +66,15 @@ export function ImpersonationModal({
         expires_at: response.expires_at,
       });
 
-      toast.success("Impersonation session started");
+      toast.success(t("Impersonation session started"));
     } catch (error: unknown) {
       // Extract error message from API response
       const axiosError = error as { response?: { data?: { error?: string } }; message?: string };
-      const errorMessage = axiosError.response?.data?.error || axiosError.message || "Failed to start impersonation";
+      const errorMessage = axiosError.response?.data?.error || axiosError.message || t("Failed to start impersonation");
 
       // Check if it's an active session error
       if (errorMessage.includes("active impersonation session")) {
-        toast.error("You have an active session. Ending it first...");
+        toast.error(t("You have an active session. Ending it first..."));
         // Auto-end the current session and retry
         await handleEndCurrentSession();
       } else {
@@ -88,7 +90,7 @@ export function ImpersonationModal({
     if (dashboardUrl) {
       navigator.clipboard.writeText(dashboardUrl);
       setCopied(true);
-      toast.success("URL copied to clipboard");
+      toast.success(t("URL copied to clipboard"));
       setTimeout(() => setCopied(false), 2000);
     }
   };
@@ -107,10 +109,11 @@ export function ImpersonationModal({
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <h2 className="text-xl font-semibold text-gray-900">
-            Impersonate User
+            {t("Impersonate User")}
           </h2>
           <button
             onClick={onClose}
+            aria-label={t("Close")}
             className="p-1 hover:bg-gray-100 rounded-lg transition-colors"
           >
             <X size={24} className="text-gray-600" />
@@ -121,22 +124,21 @@ export function ImpersonationModal({
         <div className="p-6 space-y-6">
           {/* User Info */}
           <div className="bg-gray-50 rounded-lg p-4">
-            <p className="text-sm text-gray-600 mb-1">User to impersonate</p>
+            <p className="text-sm text-gray-600 mb-1">{t("User to impersonate")}</p>
             <p className="font-semibold text-gray-900">
               {user.first_name} {user.last_name}
             </p>
-            <p className="text-sm text-gray-600">{user.email}</p>
-            <p className="text-xs text-gray-500 mt-2">Role: {user.role}</p>
+            <p dir="ltr" className="text-sm text-gray-600">{user.email}</p>
+            <p className="text-xs text-gray-500 mt-2">{t("Role")}: {user.role}</p>
           </div>
 
           {/* Warning */}
           <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 flex gap-3">
             <AlertCircle className="text-amber-600 flex-shrink-0 mt-0.5" size={20} />
             <div className="text-sm text-amber-900">
-              <p className="font-medium mb-1">Important</p>
+              <p className="font-medium mb-1">{t("Important")}</p>
               <p>
-                You will have full access to this user&apos;s dashboard. All actions
-                will be logged for audit purposes.
+                {t("You will have full access to this user's dashboard. All actions will be logged for audit purposes.")}
               </p>
             </div>
           </div>
@@ -147,16 +149,16 @@ export function ImpersonationModal({
               disabled={isLoading}
               className="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded-lg font-medium transition-colors"
             >
-              {isLoading ? "Starting..." : "Start Impersonation"}
+              {isLoading ? t("Starting...") : t("Start Impersonation")}
             </button>
           ) : (
             <>
               {/* Session link */}
               <div className="bg-gray-50 rounded-lg p-4">
                 <p className="text-sm text-gray-600 mb-2">
-                  Dashboard session link
+                  {t("Dashboard session link")}
                 </p>
-                <div className="font-mono text-xs text-gray-900 break-all bg-white p-2 rounded border border-gray-200 mb-3">
+                <div dir="ltr" className="font-mono text-xs text-gray-900 break-all bg-white p-2 rounded border border-gray-200 mb-3">
                   {dashboardUrl}
                 </div>
                 <button
@@ -166,12 +168,12 @@ export function ImpersonationModal({
                   {copied ? (
                     <>
                       <Check size={16} />
-                      Copied!
+                      {t("Copied!")}
                     </>
                   ) : (
                     <>
                       <Copy size={16} />
-                      Copy Dashboard URL
+                      {t("Copy Dashboard URL")}
                     </>
                   )}
                 </button>
@@ -183,16 +185,15 @@ export function ImpersonationModal({
                   onClick={handleOpenDashboard}
                   className="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
                 >
-                  Open Dashboard in New Tab
+                  {t("Open Dashboard in New Tab")}
                 </button>
               </div>
 
               {/* Session Info */}
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-sm text-blue-900">
-                <p className="font-medium mb-1">Session Information</p>
+                <p className="font-medium mb-1">{t("Session Information")}</p>
                 <p>
-                  This impersonation session will expire in 1 hour. You will need
-                  to start a new session afterward.
+                  {t("This impersonation session will expire in 1 hour. You will need to start a new session afterward.")}
                 </p>
               </div>
             </>
@@ -203,7 +204,7 @@ export function ImpersonationModal({
             onClick={onClose}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg font-medium text-gray-900 hover:bg-gray-50 transition-colors"
           >
-            Close
+            {t("Close")}
           </button>
         </div>
       </div>

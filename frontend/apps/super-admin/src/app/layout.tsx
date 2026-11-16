@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
-import { Toaster } from "sonner";
 import { SuperAdminAuthProvider } from "@/components/providers/SuperAdminAuthProvider";
+import { PreferencesProvider } from "@/components/providers/PreferencesProvider";
+import { PreferencesToaster } from "@/components/providers/PreferencesToaster";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -18,12 +19,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang="en" dir="ltr" suppressHydrationWarning>
       <body>
-        <SuperAdminAuthProvider>
-          {children}
-        </SuperAdminAuthProvider>
-        <Toaster />
+        <PreferencesProvider>
+          <SuperAdminAuthProvider>
+            {children}
+          </SuperAdminAuthProvider>
+          <PreferencesToaster />
+        </PreferencesProvider>
       </body>
     </html>
   );

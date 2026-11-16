@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useSuperAdminText } from '@/components/providers/PreferencesProvider'
 import { superAdminAPI } from '@/lib/api'
 import type { SubscriptionHistoryItem } from '@/types'
 
@@ -21,6 +22,7 @@ export function ExtendTrialModal({
   onClose,
   onSuccess,
 }: ExtendTrialModalProps) {
+  const t = useSuperAdminText()
   const [days, setDays] = useState<string>('15')
   const [reason, setReason] = useState<string>('')
   const [isLoading, setIsLoading] = useState(false)
@@ -65,9 +67,9 @@ export function ExtendTrialModal({
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg shadow-lg max-w-md w-full mx-4 p-6">
-        <h2 className="text-xl font-bold mb-4">Extend Trial Period</h2>
+        <h2 className="text-xl font-bold mb-4">{t('Extend Trial Period')}</h2>
         <p className="text-gray-600 mb-4">
-          Tenant: <span className="font-semibold">{tenantName}</span>
+          {t('Tenant:')} <span className="font-semibold">{tenantName}</span>
         </p>
 
         {error && (
@@ -79,7 +81,7 @@ export function ExtendTrialModal({
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Days to extend *
+              {t('Days to extend *')}
             </label>
             <input
               type="number"
@@ -94,21 +96,21 @@ export function ExtendTrialModal({
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Reason (optional)
+              {t('Reason (optional)')}
             </label>
             <textarea
               value={reason}
               onChange={(e) => setReason(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               rows={3}
-              placeholder="e.g., Customer requested extension"
+              placeholder={t('e.g., Customer requested extension')}
             />
           </div>
 
           {currentTrialEndDate && (
             <div className="p-3 bg-blue-50 border border-blue-200 rounded">
               <p className="text-sm text-gray-600">
-                New trial end date:{' '}
+                {t('New trial end date:')}{' '}
                 <span className="font-semibold text-blue-600">
                   {calculateNewDate()}
                 </span>
@@ -123,14 +125,14 @@ export function ExtendTrialModal({
               className="flex-1 px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors"
               disabled={isLoading}
             >
-              Cancel
+              {t('Cancel')}
             </button>
             <button
               type="submit"
               className="flex-1 px-4 py-2 text-white bg-blue-600 hover:bg-blue-700 rounded-md transition-colors disabled:opacity-50"
               disabled={isLoading}
             >
-              {isLoading ? 'Extending...' : 'Extend Trial'}
+              {isLoading ? t('Extending...') : t('Extend Trial')}
             </button>
           </div>
         </form>

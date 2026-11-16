@@ -14,7 +14,13 @@ const base = process.env.SERVIO_MARKETING_URL
 if (!base) throw new Error('Set SERVIO_MARKETING_URL to the intended preview or deployment URL')
 if (process.env.SERVIO_ACCEPTANCE_ENV === 'ci' && new URL(base).origin !== 'https://pos.servio.test') throw new Error('CI marketing acceptance accepts only the disposable landing host')
 const output = process.env.SERVIO_MARKETING_EVIDENCE || (process.env.SERVIO_BROWSER_EVIDENCE ? path.join(process.env.SERVIO_BROWSER_EVIDENCE, 'marketing') : '/tmp/servio-marketing-acceptance')
-const widths = [360, 390, 768, 1024, 1440, 1920]
+const viewports = [
+ { width: 320, height: 568 }, { width: 360, height: 800 }, { width: 375, height: 812 },
+ { width: 390, height: 844 }, { width: 430, height: 932 }, { width: 600, height: 960 },
+ { width: 768, height: 1024 }, { width: 820, height: 1180 }, { width: 1024, height: 768 },
+ { width: 1180, height: 820 }, { width: 1280, height: 800 }, { width: 1440, height: 900 },
+ { width: 1920, height: 1080 },
+]
 const routes = ['', '/features', '/features/pos', '/features/kitchen-display', '/features/online-ordering', '/features/website-builder', '/features/inventory', '/features/hr', '/features/analytics', '/how-it-works', '/pricing', '/demo', '/contact', '/privacy']
 const checks = []
 const descriptions = new Map()
@@ -159,11 +165,11 @@ async function interactions(browser, page, locale) {
  await page.goto(`${base}/${locale}`, { waitUntil: 'domcontentloaded' })
  await page.waitForFunction(theme => document.documentElement.classList.contains(theme), expectedTheme)
  const otherTheme = expectedTheme === 'dark' ? 'light' : 'dark'
- await page.locator('.sv-theme-toggle').click()
+ await page.locator('.sv-theme-toggle').first().click()
  await page.waitForFunction(theme => document.documentElement.classList.contains(theme), otherTheme)
  await page.reload({ waitUntil: 'domcontentloaded' })
  await page.waitForFunction(theme => document.documentElement.classList.contains(theme), otherTheme)
- await page.locator('.sv-theme-toggle').click()
+ await page.locator('.sv-theme-toggle').first().click()
  await page.waitForFunction(theme => document.documentElement.classList.contains(theme), expectedTheme)
  check(`theme toggle and persistence ${locale}`, await page.evaluate(theme => document.documentElement.classList.contains(theme), expectedTheme))
  await load(page, locale, '/pricing')
@@ -487,14 +493,15 @@ async function main() {
   }
   observe(page)
   for (const locale of ['en', 'ar']) {
-   for (const width of widths) {
-    await page.setViewportSize({ width, height: 1000 })
+   for (const viewport of viewports) {
+    const { width, height } = viewport
+    await page.setViewportSize(viewport)
     await load(page, locale, '')
-    check(`sections ${locale}/${width}`, await page.locator('main section').count() === 14)
-    await capture(page, `${locale}-${width}`)
+    check(`sections ${locale}/${width}x${height}`, await page.locator('main section').count() === 15)
+    await capture(page, `${locale}-${width}x${height}`)
     for (const route of routes.slice(1)) await load(page, locale, route)
     await page.close()
-    page = await createPage(browser, { width, height: 1000 })
+    page = await createPage(browser, { width, height })
     observe(page)
    }
    await interactions(browser, page, locale)

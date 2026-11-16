@@ -126,6 +126,7 @@
     "subscriptionLabel": "Subscription",
     "daysRemaining": "day(s) remaining",
     "loadingData": "Loading dashboard data...",
+    "dataUnavailable": "Dashboard data could not be loaded. Refresh to try again.",
     "refreshing": "(refreshing)",
     "workspaceStatus": "Workspace Status",
     "tablesOverviewTitle": "Tables Overview",

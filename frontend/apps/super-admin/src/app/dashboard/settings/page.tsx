@@ -5,8 +5,10 @@ import { useAuthStore } from "@/stores/authStore";
 import { superAdminAPI } from "@/lib/api";
 import { toast } from "sonner";
 import { Save, Plus, Trash2, AlertCircle } from "lucide-react";
+import { useSuperAdminText } from "@/components/providers/PreferencesProvider";
 
 export default function SettingsPage() {
+  const t = useSuperAdminText();
   const superAdmin = useAuthStore((state) => state.superAdmin);
   const [ipWhitelist, setIpWhitelist] = useState<string[]>(
     superAdmin?.ip_whitelist || []
@@ -16,32 +18,32 @@ export default function SettingsPage() {
 
   const handleAddIP = () => {
     if (!newIp.trim()) {
-      toast.error("Please enter an IP address");
+      toast.error(t("Please enter an IP address"));
       return;
     }
 
     if (ipWhitelist.includes(newIp.trim())) {
-      toast.error("This IP is already in the whitelist");
+      toast.error(t("This IP is already in the whitelist"));
       return;
     }
 
     setIpWhitelist([...ipWhitelist, newIp.trim()]);
     setNewIp("");
-    toast.success("IP added to whitelist");
+    toast.success(t("IP added to whitelist"));
   };
 
   const handleRemoveIP = (ip: string) => {
     setIpWhitelist(ipWhitelist.filter((item) => item !== ip));
-    toast.success("IP removed from whitelist");
+    toast.success(t("IP removed from whitelist"));
   };
 
   const handleSave = async () => {
     try {
       setIsSaving(true);
       await superAdminAPI.updateIPWhitelist(ipWhitelist);
-      toast.success("IP whitelist updated successfully");
+      toast.success(t("IP whitelist updated successfully"));
     } catch (error) {
-      toast.error("Failed to update IP whitelist");
+      toast.error(t("Failed to update IP whitelist"));
       console.error(error);
     } finally {
       setIsSaving(false);
@@ -52,24 +54,24 @@ export default function SettingsPage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-gray-900">Settings</h1>
-        <p className="text-gray-600 mt-2">Manage your super admin account settings</p>
+        <h1 className="text-3xl font-bold text-gray-900">{t("Settings")}</h1>
+        <p className="text-gray-600 mt-2">{t("Manage your super admin account settings")}</p>
       </div>
 
       {/* Account Information */}
       <div className="bg-white rounded-lg shadow p-6">
         <h2 className="text-lg font-semibold text-gray-900 mb-4">
-          Account Information
+          {t("Account Information")}
         </h2>
         <div className="space-y-4">
           <div>
-            <label className="text-sm font-medium text-gray-600">Email</label>
-            <p className="mt-1 px-4 py-2 bg-gray-50 rounded-lg text-gray-900">
+            <label className="text-sm font-medium text-gray-600">{t("Email")}</label>
+            <p dir="ltr" className="mt-1 px-4 py-2 bg-gray-50 rounded-lg text-gray-900">
               {superAdmin?.email}
             </p>
           </div>
           <div>
-            <label className="text-sm font-medium text-gray-600">Account Status</label>
+            <label className="text-sm font-medium text-gray-600">{t("Account Status")}</label>
             <div className="mt-1 flex items-center gap-2">
               <span
                 className={`px-3 py-1 rounded-full text-sm font-medium ${
@@ -78,7 +80,7 @@ export default function SettingsPage() {
                     : "bg-red-100 text-red-700"
                 }`}
               >
-                {superAdmin?.is_active ? "Active" : "Inactive"}
+                {t(superAdmin?.is_active ? "Active" : "Inactive")}
               </span>
             </div>
           </div>
@@ -88,24 +90,24 @@ export default function SettingsPage() {
       {/* IP Whitelist */}
       <div className="bg-white rounded-lg shadow p-6">
         <h2 className="text-lg font-semibold text-gray-900 mb-4">
-          IP Whitelist
+          {t("IP Whitelist")}
         </h2>
         <p className="text-sm text-gray-600 mb-4">
-          Add IP addresses that are allowed to access this super admin account. Leave empty to allow all IPs.
+          {t("Add IP addresses that are allowed to access this super admin account. Leave empty to allow all IPs.")}
         </p>
 
         {/* Info Box */}
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6 flex gap-3">
           <AlertCircle className="text-blue-600 flex-shrink-0 mt-0.5" size={20} />
           <div className="text-sm text-blue-900">
-            <p className="font-medium mb-1">IP Whitelist Information</p>
-            <p>Only requests from whitelisted IP addresses will be allowed. If the list is empty, all IP addresses are permitted.</p>
+            <p className="font-medium mb-1">{t("IP Whitelist Information")}</p>
+            <p>{t("Only requests from whitelisted IP addresses will be allowed. If the list is empty, all IP addresses are permitted.")}</p>
           </div>
         </div>
 
         {/* Add IP Form */}
-        <div className="mb-6 p-4 bg-gray-50 rounded-lg">
-          <div className="flex gap-2">
+        <div className="mb-6 min-w-0 p-3 sm:p-4 bg-gray-50 rounded-lg">
+          <div className="flex min-w-0 flex-col gap-2 sm:flex-row">
             <input
               type="text"
               value={newIp}
@@ -115,15 +117,15 @@ export default function SettingsPage() {
                   handleAddIP();
                 }
               }}
-              placeholder="e.g., 192.168.1.1 or 10.0.0.0/8"
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+              placeholder={t("e.g., 192.168.1.1 or 10.0.0.0/8")}
+              className="w-full min-w-0 flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
             />
             <button
               onClick={handleAddIP}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+              className="w-full shrink-0 justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 sm:w-auto"
             >
               <Plus size={18} />
-              Add IP
+              {t("Add IP")}
             </button>
           </div>
         </div>
@@ -131,9 +133,9 @@ export default function SettingsPage() {
         {/* IP List */}
         {!ipWhitelist || ipWhitelist.length === 0 ? (
           <div className="text-center py-8 bg-gray-50 rounded-lg">
-            <p className="text-gray-600">No IP addresses in whitelist</p>
+            <p className="text-gray-600">{t("No IP addresses in whitelist")}</p>
             <p className="text-sm text-gray-500 mt-1">
-              All IP addresses are currently allowed
+              {t("All IP addresses are currently allowed")}
             </p>
           </div>
         ) : (
@@ -147,7 +149,7 @@ export default function SettingsPage() {
                 <button
                   onClick={() => handleRemoveIP(ip)}
                   className="p-2 hover:bg-red-50 text-red-600 rounded-lg transition-colors"
-                  title="Remove IP"
+                  title={t("Remove IP")}
                 >
                   <Trash2 size={18} />
                 </button>
@@ -164,7 +166,7 @@ export default function SettingsPage() {
             className="px-6 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded-lg transition-colors flex items-center gap-2"
           >
             <Save size={18} />
-            {isSaving ? "Saving..." : "Save Changes"}
+            {isSaving ? t("Saving...") : t("Save Changes")}
           </button>
         </div>
       </div>
@@ -172,15 +174,15 @@ export default function SettingsPage() {
       {/* Security Information */}
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
         <h2 className="text-lg font-semibold text-blue-900 mb-3">
-          🔒 Security Best Practices
+          🔒 {t("Security Best Practices")}
         </h2>
         <ul className="space-y-2 text-sm text-blue-800">
-          <li>✓ Always enable IP whitelist for production environments</li>
-          <li>✓ Use static IP addresses for maximum security</li>
-          <li>✓ Monitor audit logs regularly for suspicious activity</li>
-          <li>✓ Change your password frequently</li>
-          <li>✓ Never share your login credentials</li>
-          <li>✓ Log out when finished using the super admin dashboard</li>
+          <li>✓ {t("Always enable IP whitelist for production environments")}</li>
+          <li>✓ {t("Use static IP addresses for maximum security")}</li>
+          <li>✓ {t("Monitor audit logs regularly for suspicious activity")}</li>
+          <li>✓ {t("Change your password frequently")}</li>
+          <li>✓ {t("Never share your login credentials")}</li>
+          <li>✓ {t("Log out when finished using the super admin dashboard")}</li>
         </ul>
       </div>
     </div>

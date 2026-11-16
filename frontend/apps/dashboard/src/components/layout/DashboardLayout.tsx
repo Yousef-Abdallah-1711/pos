@@ -207,6 +207,9 @@ export default function DashboardLayout({
                       // Also update preferences store for persistence
                       updateTheme(newTheme)
                     }}
+                    aria-label={effectiveTheme === 'dark'
+                      ? locale === 'ar' ? 'التبديل إلى الوضع الفاتح' : 'Switch to light mode'
+                      : locale === 'ar' ? 'التبديل إلى الوضع الداكن' : 'Switch to dark mode'}
                     className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition"
                     title={effectiveTheme === 'dark' ? t('common.lightMode', 'Switch to light mode') : t('common.darkMode', 'Switch to dark mode')}
                   >
@@ -221,16 +224,16 @@ export default function DashboardLayout({
                   <div className="relative" ref={dropdownRef}>
                     <button
                       onClick={() => setIsProfileOpen(!isProfileOpen)}
-                      className={`flex items-center gap-2 sm:gap-3 px-2 sm:px-3 py-2 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition ${isRTL ? 'flex-row-reverse' : ''}`}
+                      className={`flex min-w-0 max-w-full items-center gap-2 sm:gap-3 px-2 sm:px-3 py-2 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition ${isRTL ? 'flex-row-reverse' : ''}`}
                     >
                       <div className="w-8 h-8 rounded-full bg-primary-500 flex items-center justify-center text-white font-medium">
                         {user?.name?.charAt(0).toUpperCase() || 'U'}
                       </div>
-                      <div className={`hidden lg:block ${isRTL ? 'text-right' : 'text-left'}`}>
-                        <p className="text-sm font-medium text-gray-900 dark:text-white">
+                      <div className={`hidden min-w-0 max-w-[min(40vw,18rem)] lg:block ${isRTL ? 'text-right' : 'text-left'}`}>
+                        <p className="truncate text-sm font-medium text-gray-900 dark:text-white">
                           {user?.name}
                         </p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400 capitalize">
+                        <p className="truncate text-xs text-gray-500 dark:text-gray-400 capitalize">
                           {user?.role}
                         </p>
                       </div>

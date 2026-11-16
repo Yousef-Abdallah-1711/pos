@@ -12,9 +12,29 @@ if (process.env.SERVIO_SYNTHETIC_TRIAL !== '1' || !base || !api) throw new Error
 if (process.env.SERVIO_ACCEPTANCE_ENV !== 'ci' || new URL(base).origin !== 'https://pos.servio.test' || new URL(api).origin !== 'https://api.servio.test' || new URL(api).pathname.replace(/\/$/, '') !== '/api/v1') throw new Error('Synthetic trials require exact disposable CI service URLs')
 const output = path.join(process.env.SERVIO_BROWSER_EVIDENCE || '/tmp/servio-trial-acceptance', 'trial-registration')
 const checks = []
+const responsiveViewports = [
+ { width: 320, height: 568 }, { width: 360, height: 800 }, { width: 375, height: 812 },
+ { width: 390, height: 844 }, { width: 430, height: 932 }, { width: 600, height: 960 },
+ { width: 768, height: 1024 }, { width: 820, height: 1180 }, { width: 1024, height: 768 },
+ { width: 1180, height: 820 }, { width: 1280, height: 800 }, { width: 1440, height: 900 },
+ { width: 1920, height: 1080 },
+]
 function check(name, passed, detail = '') {
  checks.push({ name, passed: !!passed, detail })
  if (!passed) throw new Error(`${name}: ${detail}`)
+}
+async function captureResponsiveScreens(page, label) {
+ for (const viewport of responsiveViewports) {
+  await page.setViewportSize(viewport)
+  const layout = await page.evaluate(() => ({
+   viewportWidth: innerWidth,
+   scrollWidth: document.documentElement.scrollWidth,
+   overflow: document.documentElement.scrollWidth > innerWidth + 2,
+  }))
+  const screenshot = `${label}-${viewport.width}x${viewport.height}.png`
+  await page.screenshot({ path: path.join(output, screenshot), fullPage: true })
+  check(`responsive layout ${screenshot}`, !layout.overflow, JSON.stringify(layout))
+ }
 }
 async function register(page, locale, billing, otherCategory) {
  const slug = `website-qa-${Date.now()}-${randomBytes(3).toString('hex')}`
@@ -41,10 +61,16 @@ async function register(page, locale, billing, otherCategory) {
  check(`trial subscription readable ${locale}`, subscription.status === 200)
  check(`billing preference persisted ${locale}`, subscription.data.preferred_billing_period === billing)
  check(`trial status ${locale}`, subscription.data.subscription_status === 'trial' && subscription.data.can_access)
+ await page.getByTestId('dashboard-overview-status').waitFor({ state: 'visible', timeout: 30000 })
+ await page.waitForFunction(() => document.querySelector('[data-testid="dashboard-overview-status"]')?.dataset.status !== 'loading', null, { timeout: 60000 })
+ const overviewStatus = await page.getByTestId('dashboard-overview-status').getAttribute('data-status')
  const duration = new Date(subscription.data.trial_end_date).getTime() - Date.now()
  check(`14-day entitlement ${locale}`, duration > 14 * 86400000 - 180000 && duration <= 14 * 86400000)
  check(`checkout unavailable ${locale}`, subscription.data.checkout_available === false)
+ await captureResponsiveScreens(page, `${locale}-${billing}-dashboard`)
+ await page.setViewportSize({ width: 1440, height: 900 })
  await page.screenshot({ path: path.join(output, `${locale}-${billing}-dashboard.png`) })
+ check(`dashboard overview loaded ${locale}/${billing}`, overviewStatus === 'ready', `status=${overviewStatus}`)
  const category = await firstAction(page, locale, otherCategory)
  const loggedOut = await page.evaluate(async origin => (await fetch(`${origin}/auth/logout`, { method: 'POST', credentials: 'include' })).ok, api)
  check(`logout accepted ${locale}`, loggedOut)
@@ -70,6 +96,8 @@ async function firstAction(page, locale, otherCategory) {
  await page.getByRole('cell', { name: category, exact: true }).waitFor()
  check(`first menu action visible ${locale}`, true)
  if (otherCategory) check('new workspace menu isolation', await page.getByRole('cell', { name: otherCategory, exact: true }).count() === 0)
+ await captureResponsiveScreens(page, `${locale}-first-menu-action`)
+ await page.setViewportSize({ width: 1440, height: 900 })
  await page.screenshot({ path: path.join(output, `${locale}-first-menu-action.png`) })
  return category
 }

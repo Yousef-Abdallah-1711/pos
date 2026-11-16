@@ -3,20 +3,24 @@
 import React from "react";
 import { useAuthStore } from "@/stores/authStore";
 import { AlertCircle, Clock } from "lucide-react";
+import { PreferenceControls } from "@/components/layout/PreferenceControls";
+import { useSuperAdminPreferences, useSuperAdminText } from "@/components/providers/PreferencesProvider";
 
 export function DashboardHeader() {
+  const t = useSuperAdminText();
+  const { locale } = useSuperAdminPreferences();
   const superAdmin = useAuthStore((state) => state.superAdmin);
   const impersonation = useAuthStore((state) => state.impersonation);
 
   return (
-    <header className="bg-white shadow border-b border-gray-200 px-6 py-4">
-      <div className="flex items-center justify-between">
+    <header className="border-b border-gray-200 bg-white px-4 py-4 shadow-sm dark:border-gray-700 dark:bg-gray-900 sm:px-6">
+      <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <h2 className="text-xl font-semibold text-gray-900">
-            Super Admin Dashboard
+            {t("Super Admin Dashboard")}
           </h2>
           <p className="text-sm text-gray-600 mt-1">
-            Logged in as: <span className="font-medium">{superAdmin?.email}</span>
+            {t("Logged in as:")} <span dir="ltr" className="font-medium">{superAdmin?.email}</span>
           </p>
         </div>
 
@@ -26,7 +30,7 @@ export function DashboardHeader() {
             <AlertCircle className="text-amber-600 mt-0.5 flex-shrink-0" size={20} />
             <div>
               <p className="text-sm font-medium text-amber-900">
-                Impersonating User
+                {t("Impersonating User")}
               </p>
               <p className="text-xs text-amber-800 mt-1">
                 {impersonation?.target_user?.first_name} {impersonation?.target_user?.last_name}
@@ -34,12 +38,13 @@ export function DashboardHeader() {
               {impersonation?.expires_at && (
                 <p className="text-xs text-amber-700 mt-1 flex items-center gap-1">
                   <Clock size={12} />
-                  Session expires: {new Date(impersonation.expires_at).toLocaleTimeString()}
+                  {t("Session expires:")} {new Date(impersonation.expires_at).toLocaleTimeString(locale)}
                 </p>
               )}
             </div>
           </div>
         )}
+        <PreferenceControls />
       </div>
     </header>
   );

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useSuperAdminText } from '@/components/providers/PreferencesProvider'
 
 interface DeleteTenantModalProps {
   tenantId: number
@@ -17,6 +18,7 @@ export function DeleteTenantModal({
   onClose,
   onSuccess,
 }: DeleteTenantModalProps) {
+  const t = useSuperAdminText()
   const [confirmText, setConfirmText] = useState<string>('')
   const [reason, setReason] = useState<string>('')
   const [isLoading, setIsLoading] = useState(false)
@@ -67,18 +69,18 @@ export function DeleteTenantModal({
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg shadow-lg max-w-md w-full mx-4 p-6">
-        <h2 className="text-xl font-bold mb-2 text-red-700">Delete Tenant Permanently</h2>
+        <h2 className="text-xl font-bold mb-2 text-red-700">{t('Delete Tenant Permanently')}</h2>
         <p className="text-gray-600 mb-4">
-          Tenant: <span className="font-semibold text-red-600">{tenantName}</span>
+          {t('Tenant:')} <span className="font-semibold text-red-600">{tenantName}</span>
         </p>
 
         <div className="mb-4 p-3 bg-red-50 border-2 border-red-300 rounded text-sm text-red-700">
-          <p className="font-bold mb-2">🚨 CRITICAL WARNING:</p>
+          <p className="font-bold mb-2">{t('🚨 CRITICAL WARNING:')}</p>
           <ul className="list-disc list-inside space-y-1">
-            <li>This action is IRREVERSIBLE</li>
-            <li>All tenant data will be permanently deleted</li>
-            <li>Backups should be created before proceeding</li>
-            <li>Users will lose all access immediately</li>
+            <li>{t('This action is IRREVERSIBLE')}</li>
+            <li>{t('All tenant data will be permanently deleted')}</li>
+            <li>{t('Backups should be created before proceeding')}</li>
+            <li>{t('Users will lose all access immediately')}</li>
           </ul>
         </div>
 
@@ -91,7 +93,7 @@ export function DeleteTenantModal({
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Type tenant name to confirm: <span className="font-bold">{tenantName}</span> *
+              {t('Type tenant name to confirm:')} <span className="font-bold">{tenantName}</span> *
             </label>
             <input
               type="text"
@@ -107,21 +109,21 @@ export function DeleteTenantModal({
                   isConfirmed ? 'text-green-600' : 'text-red-600'
                 }`}
               >
-                {isConfirmed ? '✓ Confirmed' : '✗ Does not match'}
+                {isConfirmed ? `✓ ${t('Confirmed')}` : `✗ ${t('Does not match')}`}
               </p>
             )}
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Reason for deletion (optional)
+              {t('Reason for deletion (optional)')}
             </label>
             <textarea
               value={reason}
               onChange={(e) => setReason(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
               rows={3}
-              placeholder="e.g., Customer requested account closure"
+              placeholder={t('e.g., Customer requested account closure')}
             />
           </div>
 
@@ -132,14 +134,14 @@ export function DeleteTenantModal({
               className="flex-1 px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors"
               disabled={isLoading}
             >
-              Cancel
+              {t('Cancel')}
             </button>
             <button
               type="submit"
               className="flex-1 px-4 py-2 text-white bg-red-700 hover:bg-red-800 rounded-md transition-colors disabled:opacity-50"
               disabled={isLoading || !isConfirmed}
             >
-              {isLoading ? 'Deleting...' : 'Delete Permanently'}
+              {isLoading ? t('Deleting...') : t('Delete Permanently')}
             </button>
           </div>
         </form>

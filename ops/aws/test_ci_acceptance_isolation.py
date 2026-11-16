@@ -33,8 +33,11 @@ class CIIsolationTests(unittest.TestCase):
 
     def test_browser_smoke_measures_the_reported_375px_mobile_width(self):
         script = (ROOT / 'ops/aws/browser-smoke.cjs').read_text()
-        self.assertIn('for(const width of [1440,768,390,375])', script)
-        self.assertEqual(script.count('[320,375,390,768,1440]'), 2)
+        self.assertIn('const responsiveViewports=[', script)
+        for width in (320, 375, 390, 768, 1440):
+            with self.subTest(width=width):
+                self.assertIn(f'{{width:{width},height:', script)
+        self.assertIn('await page.setViewportSize({width,height});', script)
 
     def test_mutating_acceptance_scripts_have_no_public_production_api_literals(self):
         scripts = [
