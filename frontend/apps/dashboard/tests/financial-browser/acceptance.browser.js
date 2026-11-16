@@ -363,6 +363,21 @@ test.describe('authenticated financial browser acceptance', () => {
     expect(paymentPayload.data.amount).toBe(40)
     await expect(invoiceRow).toContainText('60.00')
 
+    const overpaymentResponse = await page.request.post(`${apiBase}/accounting/payments/made`, {
+      headers: { Origin: dashboardOrigin },
+      data: {
+        payment_date: new Date().toISOString().slice(0, 10),
+        supplier_id: invoicePayload.data.supplier_id,
+        invoice_id: invoicePayload.data.id,
+        amount: 60.01,
+        payment_method: 'cash',
+        reference: 'BROWSER-AP-OVERPAYMENT',
+      },
+    })
+    expect(overpaymentResponse.status(), await overpaymentResponse.text()).toBeGreaterThanOrEqual(400)
+    await page.reload()
+    await expect(invoiceRow).toContainText('60.00')
+
     await page.goto('/en/dashboard/reports/financial/payables-aging')
     const agingRow = page.locator('tbody tr').filter({ hasText: fixture.supplier_name })
     await expect(agingRow).toBeVisible()
