@@ -77,10 +77,11 @@ async function loginJourney(browser,admin=false) {
    await page.locator('input[type=email]').fill(user.email);
    await page.locator('input[type=password]').fill(user.password);
    await Promise.all([page.waitForURL('**/dashboard',{timeout:45000}),page.locator('button[type=submit]').click()]);
-   await page.waitForFunction(async apiBase=>{
+   const sessionStatus=await page.evaluate(async apiBase=>{
     const response=await fetch(`${apiBase}/super-admin/auth/session`,{credentials:'include'});
-    return response.status===200;
-   },api,{timeout:20000});
+    return response.status;
+   },api);
+   if(sessionStatus!==200) throw new Error(`Synthetic Super Admin session returned HTTP ${sessionStatus} after login`);
   } finally {
    refreshingAdminSession=false;
   }
@@ -159,17 +160,28 @@ async function loginJourney(browser,admin=false) {
    };
    const adminRoutes=['/dashboard','/dashboard/tenants','/dashboard/users','/dashboard/audit-logs','/dashboard/payments','/dashboard/settings'];
    const waitForAdminRoute=async route=>{
-    await page.waitForFunction(async({apiBase,pathname})=>{
+    await page.waitForFunction(pathname=>{
      if(window.location.pathname==='/login') return true;
-     if(window.location.pathname!==pathname||!document.querySelector('main h1')) return false;
-     try {
-      const response=await fetch(`${apiBase}/super-admin/auth/session`,{credentials:'include'});
-      return response.status===200;
-     } catch {
-      return false;
-     }
-    },{apiBase:api,pathname:route},{timeout:45000});
-    return new URL(page.url()).pathname==='/login';
+     const heading=document.querySelector('main h1');
+     return window.location.pathname===pathname&&heading&&heading.getClientRects().length>0;
+    },route,{timeout:45000});
+    if(new URL(page.url()).pathname==='/login') return true;
+    const sessionStatus=await page.evaluate(async apiBase=>{
+     const response=await fetch(`${apiBase}/super-admin/auth/session`,{credentials:'include'});
+     return response.status;
+    },api);
+    if(sessionStatus!==200){
+     await page.waitForURL('**/login',{timeout:10000}).catch(()=>{});
+     return new URL(page.url()).pathname==='/login';
+    }
+    await page.waitForTimeout(1000);
+    if(new URL(page.url()).pathname==='/login') return true;
+    try {
+     await page.locator('main h1').first().waitFor({state:'visible',timeout:10000});
+    } catch(error) {
+     throw new Error(`Super Admin route ${route} did not render a visible heading at ${page.url()}: ${error.message}`);
+    }
+    return false;
    };
    const switchTo=async(locale,theme)=>{
     const current=await page.evaluate(()=>({locale:document.documentElement.lang,theme:document.documentElement.classList.contains('dark')}));
