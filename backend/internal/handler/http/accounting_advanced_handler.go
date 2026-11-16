@@ -982,10 +982,10 @@ func (h *AccountingAdvancedHandler) ExportAuditTrailCSV(w http.ResponseWriter, r
 	writeCSVAttachment(w, fmt.Sprintf("audit-trail-%s.csv", time.Now().UTC().Format("20060102-150405")), csvRows)
 }
 
-func (h *AccountingAdvancedHandler) ExportChartOfAccountsExcel(w http.ResponseWriter, r *http.Request) {
+func (h *AccountingAdvancedHandler) ExportChartOfAccountsCSV(w http.ResponseWriter, r *http.Request) {
 	tenantID := int(middleware.GetTenantID(r))
 	restaurantID := int(middleware.GetRestaurantID(r))
-	rows, err := h.repo.GetChartOfAccountsExcelRows(tenantID, restaurantID)
+	rows, err := h.repo.GetChartOfAccountsCSVRows(tenantID, restaurantID)
 	if err != nil {
 		writeJSON(w, http.StatusInternalServerError, map[string]interface{}{"success": false, "error": "Failed to export chart of accounts"})
 		return
@@ -993,7 +993,7 @@ func (h *AccountingAdvancedHandler) ExportChartOfAccountsExcel(w http.ResponseWr
 	writeCSVAttachment(w, "chart-of-accounts-export.csv", rows)
 }
 
-func (h *AccountingAdvancedHandler) ExportJournalEntriesExcel(w http.ResponseWriter, r *http.Request) {
+func (h *AccountingAdvancedHandler) ExportJournalEntriesCSV(w http.ResponseWriter, r *http.Request) {
 	tenantID := int(middleware.GetTenantID(r))
 	restaurantID := int(middleware.GetRestaurantID(r))
 	dateFrom, dateTo, err := parseDateRangeForReports(r)
@@ -1001,7 +1001,7 @@ func (h *AccountingAdvancedHandler) ExportJournalEntriesExcel(w http.ResponseWri
 		writeJSON(w, http.StatusBadRequest, map[string]interface{}{"success": false, "error": err.Error()})
 		return
 	}
-	rows, err := h.repo.GetJournalEntriesExcelRows(tenantID, restaurantID, dateFrom, dateTo)
+	rows, err := h.repo.GetJournalEntriesCSVRows(tenantID, restaurantID, dateFrom, dateTo)
 	if err != nil {
 		writeJSON(w, http.StatusInternalServerError, map[string]interface{}{"success": false, "error": "Failed to export journal entries"})
 		return
@@ -1009,7 +1009,7 @@ func (h *AccountingAdvancedHandler) ExportJournalEntriesExcel(w http.ResponseWri
 	writeCSVAttachment(w, "journal-entries-export.csv", rows)
 }
 
-func (h *AccountingAdvancedHandler) ImportChartOfAccountsExcel(w http.ResponseWriter, r *http.Request) {
+func (h *AccountingAdvancedHandler) ImportChartOfAccountsCSV(w http.ResponseWriter, r *http.Request) {
 	tenantID := int(middleware.GetTenantID(r))
 	restaurantID := int(middleware.GetRestaurantID(r))
 	userID := int(middleware.GetUserID(r))
@@ -1064,7 +1064,7 @@ func (h *AccountingAdvancedHandler) ImportChartOfAccountsExcel(w http.ResponseWr
 	})
 }
 
-func (h *AccountingAdvancedHandler) ImportJournalEntriesExcel(w http.ResponseWriter, r *http.Request) {
+func (h *AccountingAdvancedHandler) ImportJournalEntriesCSV(w http.ResponseWriter, r *http.Request) {
 	tenantID := int(middleware.GetTenantID(r))
 	restaurantID := int(middleware.GetRestaurantID(r))
 	userID := int(middleware.GetUserID(r))

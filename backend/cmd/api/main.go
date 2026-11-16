@@ -1142,10 +1142,16 @@ func main() {
 	mux.Handle("POST /api/v1/accounting/supplier-payment-schedules/{id}/send-reminder", wrapWithPermission(http.HandlerFunc(accountingAdvancedHandler.TriggerSupplierPaymentReminder), 15, "WRITE"))
 	mux.Handle("POST /api/v1/accounting/einvoice/{id}/submit", wrapWithPermission(http.HandlerFunc(accountingAdvancedHandler.SubmitEInvoice), 15, "WRITE"))
 	mux.Handle("GET /api/v1/accounting/einvoice/submissions", wrapWithPermission(http.HandlerFunc(accountingAdvancedHandler.ListEInvoiceSubmissions), 15, "READ"))
-	mux.Handle("GET /api/v1/accounting/excel/chart-of-accounts/export", wrapWithPermission(http.HandlerFunc(accountingAdvancedHandler.ExportChartOfAccountsExcel), 15, "EXPORT"))
-	mux.Handle("POST /api/v1/accounting/excel/chart-of-accounts/import", wrapWithPermission(http.HandlerFunc(accountingAdvancedHandler.ImportChartOfAccountsExcel), 15, "WRITE"))
-	mux.Handle("GET /api/v1/accounting/excel/journal-entries/export", wrapWithPermission(http.HandlerFunc(accountingAdvancedHandler.ExportJournalEntriesExcel), 15, "EXPORT"))
-	mux.Handle("POST /api/v1/accounting/excel/journal-entries/import", wrapWithPermission(http.HandlerFunc(accountingAdvancedHandler.ImportJournalEntriesExcel), 15, "WRITE"))
+	mux.Handle("GET /api/v1/accounting/csv/chart-of-accounts/export", wrapWithPermission(http.HandlerFunc(accountingAdvancedHandler.ExportChartOfAccountsCSV), 15, "EXPORT"))
+	mux.Handle("POST /api/v1/accounting/csv/chart-of-accounts/import", wrapWithPermission(http.HandlerFunc(accountingAdvancedHandler.ImportChartOfAccountsCSV), 15, "WRITE"))
+	mux.Handle("GET /api/v1/accounting/csv/journal-entries/export", wrapWithPermission(http.HandlerFunc(accountingAdvancedHandler.ExportJournalEntriesCSV), 15, "EXPORT"))
+	mux.Handle("POST /api/v1/accounting/csv/journal-entries/import", wrapWithPermission(http.HandlerFunc(accountingAdvancedHandler.ImportJournalEntriesCSV), 15, "WRITE"))
+	// Keep the historical Excel-named routes as compatibility aliases. The
+	// handlers accept and return CSV; these routes do not provide XLSX support.
+	mux.Handle("GET /api/v1/accounting/excel/chart-of-accounts/export", wrapWithPermission(http.HandlerFunc(accountingAdvancedHandler.ExportChartOfAccountsCSV), 15, "EXPORT"))
+	mux.Handle("POST /api/v1/accounting/excel/chart-of-accounts/import", wrapWithPermission(http.HandlerFunc(accountingAdvancedHandler.ImportChartOfAccountsCSV), 15, "WRITE"))
+	mux.Handle("GET /api/v1/accounting/excel/journal-entries/export", wrapWithPermission(http.HandlerFunc(accountingAdvancedHandler.ExportJournalEntriesCSV), 15, "EXPORT"))
+	mux.Handle("POST /api/v1/accounting/excel/journal-entries/import", wrapWithPermission(http.HandlerFunc(accountingAdvancedHandler.ImportJournalEntriesCSV), 15, "WRITE"))
 
 	mux.Handle("GET /api/v1/suppliers", wrapWithPermission(http.HandlerFunc(supplierHandler.ListSuppliers), 16, "READ"))
 	mux.Handle("POST /api/v1/suppliers", wrapWithPermission(http.HandlerFunc(supplierHandler.CreateSupplier), 16, "WRITE"))
