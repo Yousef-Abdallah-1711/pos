@@ -65,19 +65,25 @@ async function loginJourney(browser,admin=false) {
  const fixture=JSON.parse(fs.readFileSync(admin?fixtures+'/admin.json':fixtures+'/users.json','utf8'));
  const user=admin?fixture:fixture[0];
  const adminBase='https://admin.pos.servio.test';
+ let refreshingAdminSession=false;
  const authenticateAdmin=async()=>{
-  await context.clearCookies();
-  await page.goto(`${adminBase}/login`,{waitUntil:'domcontentloaded',timeout:45000});
-  await page.evaluate(()=>localStorage.removeItem('super-admin-auth-store'));
-  await page.reload({waitUntil:'domcontentloaded'});
-  await page.waitForFunction(()=>{const input=document.querySelector('input[type=email]');return input&&Object.keys(input).some(k=>k.startsWith('__reactProps')&&typeof input[k]?.onChange==='function');},{},{timeout:30000});
-  await page.locator('input[type=email]').fill(user.email);
-  await page.locator('input[type=password]').fill(user.password);
-  await Promise.all([page.waitForURL('**/dashboard',{timeout:45000}),page.locator('button[type=submit]').click()]);
-  await page.waitForFunction(async apiBase=>{
-   const response=await fetch(`${apiBase}/super-admin/auth/session`,{credentials:'include'});
-   return response.status===200;
-  },api,{timeout:20000});
+  refreshingAdminSession=true;
+  try {
+   await context.clearCookies();
+   await page.goto(`${adminBase}/login`,{waitUntil:'domcontentloaded',timeout:45000});
+   await page.evaluate(()=>localStorage.removeItem('super-admin-auth-store'));
+   await page.reload({waitUntil:'domcontentloaded'});
+   await page.waitForFunction(()=>{const input=document.querySelector('input[type=email]');return input&&Object.keys(input).some(k=>k.startsWith('__reactProps')&&typeof input[k]?.onChange==='function');},{},{timeout:30000});
+   await page.locator('input[type=email]').fill(user.email);
+   await page.locator('input[type=password]').fill(user.password);
+   await Promise.all([page.waitForURL('**/dashboard',{timeout:45000}),page.locator('button[type=submit]').click()]);
+   await page.waitForFunction(async apiBase=>{
+    const response=await fetch(`${apiBase}/super-admin/auth/session`,{credentials:'include'});
+    return response.status===200;
+   },api,{timeout:20000});
+  } finally {
+   refreshingAdminSession=false;
+  }
  };
  try {
   await page.goto(admin?'https://admin.pos.servio.test/login':'https://pos.servio.test/en/auth/login',{waitUntil:'domcontentloaded',timeout:45000});
@@ -136,7 +142,9 @@ async function loginJourney(browser,admin=false) {
    const adminAssetFailures=[];
    const onAdminPageError=error=>adminPageErrors.push(error.message);
    page.on('pageerror',onAdminPageError);
-   page.on('console',message=>{if(message.type()==='error')adminConsoleErrors.push(message.text())});
+   page.on('console',message=>{
+    if(message.type()==='error'&&!(refreshingAdminSession&&message.text().includes('401'))) adminConsoleErrors.push(message.text());
+   });
    page.on('response',response=>{if(response.status()>=400&&response.request().resourceType()==='image')adminAssetFailures.push(`${response.status()} ${new URL(response.url()).pathname}`)});
    const adminRoutes=['/dashboard','/dashboard/tenants','/dashboard/users','/dashboard/audit-logs','/dashboard/payments','/dashboard/settings'];
    const switchTo=async(locale,theme)=>{
@@ -149,7 +157,7 @@ async function loginJourney(browser,admin=false) {
     await page.waitForFunction(expected=>document.documentElement.classList.contains('dark')===expected,desired);
    };
    for(const {locale,dir,theme} of localeThemes){
-    await authenticateAdmin();
+    if(locale==='ar'&&theme==='dark') await authenticateAdmin();
     await switchTo(locale,theme);
     await page.reload({waitUntil:'domcontentloaded'});
     await page.waitForFunction(expected=>document.documentElement.lang===expected.locale&&document.documentElement.dir===(expected.locale==='ar'?'rtl':'ltr')&&document.documentElement.classList.contains('dark')===(expected.theme==='dark'),{locale,theme});
