@@ -106,8 +106,8 @@ export default function SettingsPage() {
         </div>
 
         {/* Add IP Form */}
-        <div className="mb-6 p-4 bg-gray-50 rounded-lg">
-          <div className="flex gap-2">
+        <div className="mb-6 min-w-0 p-3 sm:p-4 bg-gray-50 rounded-lg">
+          <div className="flex min-w-0 flex-col gap-2 sm:flex-row">
             <input
               type="text"
               value={newIp}
@@ -118,11 +118,11 @@ export default function SettingsPage() {
                 }
               }}
               placeholder={t("e.g., 192.168.1.1 or 10.0.0.0/8")}
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+              className="w-full min-w-0 flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
             />
             <button
               onClick={handleAddIP}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+              className="w-full shrink-0 justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 sm:w-auto"
             >
               <Plus size={18} />
               {t("Add IP")}

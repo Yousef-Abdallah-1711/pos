@@ -64,6 +64,14 @@ async function loginJourney(browser,admin=false) {
  const page=await context.newPage();const label=admin?'admin-browser-login':'tenant-browser-login';
  const fixture=JSON.parse(fs.readFileSync(admin?fixtures+'/admin.json':fixtures+'/users.json','utf8'));
  const user=admin?fixture:fixture[0];
+ const adminBase='https://admin.pos.servio.test';
+ const authenticateAdmin=async()=>{
+  await page.goto(`${adminBase}/login`,{waitUntil:'domcontentloaded',timeout:45000});
+  await page.waitForFunction(()=>{const input=document.querySelector('input[type=email]');return input&&Object.keys(input).some(k=>k.startsWith('__reactProps')&&typeof input[k]?.onChange==='function');},{},{timeout:30000});
+  await page.locator('input[type=email]').fill(user.email);
+  await page.locator('input[type=password]').fill(user.password);
+  await Promise.all([page.waitForURL('**/dashboard',{timeout:45000}),page.locator('button[type=submit]').click()]);
+ };
  try {
   await page.goto(admin?'https://admin.pos.servio.test/login':'https://pos.servio.test/en/auth/login',{waitUntil:'domcontentloaded',timeout:45000});
   // Server-rendered inputs exist before React attaches their controlled handlers.
@@ -110,7 +118,6 @@ async function loginJourney(browser,admin=false) {
    }
   }
   else {
-   const adminBase='https://admin.pos.servio.test';
    const localeThemes=[
     {locale:'en',dir:'ltr',theme:'light'},
     {locale:'en',dir:'ltr',theme:'dark'},
@@ -139,7 +146,11 @@ async function loginJourney(browser,admin=false) {
     await page.reload({waitUntil:'domcontentloaded'});
     await page.waitForFunction(expected=>document.documentElement.lang===expected.locale&&document.documentElement.dir===(expected.locale==='ar'?'rtl':'ltr')&&document.documentElement.classList.contains('dark')===(expected.theme==='dark'),{locale,theme});
     for(const route of adminRoutes){
-     const response=await page.goto(adminBase+route,{waitUntil:'domcontentloaded',timeout:45000});
+     let response=await page.goto(adminBase+route,{waitUntil:'domcontentloaded',timeout:45000});
+     if(page.url()===`${adminBase}/login`){
+      await authenticateAdmin();
+      response=await page.goto(adminBase+route,{waitUntil:'domcontentloaded',timeout:45000});
+     }
      await page.locator('main h1').first().waitFor({state:'visible',timeout:30000});
      await page.waitForTimeout(350);
      for(const {width,height} of responsiveViewports){
