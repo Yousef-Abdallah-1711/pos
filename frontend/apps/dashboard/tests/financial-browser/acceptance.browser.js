@@ -80,7 +80,8 @@ test.describe('authenticated financial browser acceptance', () => {
     const journalLines = dialog.locator('tbody tr')
     await journalLines.nth(0).locator('input[type="number"]').nth(0).fill('50')
     await journalLines.nth(1).locator('input[type="number"]').nth(1).fill('50')
-    await expect(dialog.getByText(/Debit: EGP 50\.00 Credit: EGP 50\.00 Balanced/)).toBeVisible()
+    const journalTotals = dialog.locator('p').filter({ hasText: 'Debit:' })
+    await expect(journalTotals).toContainText(/Debit: EGP 50\.00 Credit: EGP 50\.00 Balanced/)
     const createResponse = page.waitForResponse((response) =>
       response.url().endsWith('/accounting/journal-entries') && response.request().method() === 'POST'
     )
@@ -156,7 +157,7 @@ test.describe('authenticated financial browser acceptance', () => {
     const session = await login(page, identities.accountant)
     expect(session.role).toBe('accountant')
     const errors = await openFinancialPage(page, 'en', 'accounting/journal-entries')
-    await expect(page.locator('main').getByRole('heading', { name: /Journal Entries/i })).toBeVisible()
+    await expect(page.locator('main').getByRole('heading', { name: 'Journal Entries', exact: true })).toBeVisible()
     await page.goto('/en/dashboard/reports/financial/profit-loss')
     await expect(page.getByRole('heading', { name: /Profit.?Loss/i })).toBeVisible()
     const pdfButton = page.getByRole('button', { name: /Export PDF/i })
