@@ -190,6 +190,7 @@ type financialBenchmarkMeasurement struct {
 
 type financialBenchmarkIndexComparison struct {
 	IndexName  string                        `json:"index_name"`
+	IndexBytes int64                         `json:"index_bytes"`
 	BeforePlan json.RawMessage               `json:"before_plan"`
 	AfterPlan  json.RawMessage               `json:"after_plan"`
 	Before     financialBenchmarkMeasurement `json:"before"`

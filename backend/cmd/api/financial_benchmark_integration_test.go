@@ -77,6 +77,10 @@ func TestFinancialQueryBenchmarkIntegration(t *testing.T) {
 		t.Fatalf("analyze indexed ledger fixture: %v", err)
 	}
 	indexedPlan := financialLedgerPageExplain(t, db, fixture, asOf)
+	var candidateIndexBytes int64
+	if err := db.QueryRow(`SELECT pg_relation_size($1::regclass)`, financialLedgerPageIndex).Scan(&candidateIndexBytes); err != nil {
+		t.Fatalf("read candidate ledger page index size: %v", err)
+	}
 	indexedPage := measureFinancialOperation(t, db, "general_ledger_account_page_with_index", func() error {
 		rows, _, err := ledger.GetLedgerByAccountCursor(fixture.tenantID, fixture.restaurantID, fixture.cashAccountID, nil, &asOf, 200, nil)
 		if err == nil && len(rows) != minInt(journalCount, 200) {
@@ -164,7 +168,7 @@ func TestFinancialQueryBenchmarkIntegration(t *testing.T) {
 		SharedBuffers: sharedBuffers, RunnerCPUCount: runtime.NumCPU(), Concurrency: 1,
 		WarmupSamples: 5, MeasuredSamples: 30, Dataset: financialBenchmarkDataset{TenantCount: 1, JournalEntries: journalCount, JournalLines: journalCount * 3, GeneralLedgerRows: journalCount * 3, DatabaseBytes: databaseBytes},
 		ProcessMemoryAllocBytes: memory.TotalAlloc, ProcessHeapBytes: memory.HeapAlloc, ProcessSysBytes: memory.Sys, Measurements: measurements,
-		LedgerPageIndexComparison: financialBenchmarkIndexComparison{IndexName: financialLedgerPageIndex, BeforePlan: baselinePlan, AfterPlan: indexedPlan, Before: baselinePage, After: indexedPage},
+		LedgerPageIndexComparison: financialBenchmarkIndexComparison{IndexName: financialLedgerPageIndex, IndexBytes: candidateIndexBytes, BeforePlan: baselinePlan, AfterPlan: indexedPlan, Before: baselinePage, After: indexedPage},
 	}
 	encoded, err := json.MarshalIndent(result, "", "  ")
 	if err != nil {
