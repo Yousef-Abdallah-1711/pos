@@ -149,13 +149,13 @@ export default function AdvancedAccountingToolsPage() {
   }
 
   const exportCoa = async () => {
-    const blob = await downloadCsv('/accounting/excel/chart-of-accounts/export')
+    const blob = await downloadCsv('/accounting/csv/chart-of-accounts/export')
     downloadBlob('chart-of-accounts-export.csv', blob)
   }
 
   const exportJournals = async () => {
     const today = toDateInput(new Date())
-    const blob = await downloadCsv('/accounting/excel/journal-entries/export', { date_from: '2024-01-01', date_to: today })
+    const blob = await downloadCsv('/accounting/csv/journal-entries/export', { date_from: '2024-01-01', date_to: today })
     downloadBlob('journal-entries-export.csv', blob)
   }
 
@@ -164,8 +164,8 @@ export default function AdvancedAccountingToolsPage() {
     const form = new FormData()
     form.append('file', file)
     const url = type === 'coa'
-      ? '/accounting/excel/chart-of-accounts/import'
-      : '/accounting/excel/journal-entries/import'
+      ? '/accounting/csv/chart-of-accounts/import'
+      : '/accounting/csv/journal-entries/import'
     await api.post(url, form, { headers: { 'Content-Type': 'multipart/form-data' } })
     await loadAll()
   }

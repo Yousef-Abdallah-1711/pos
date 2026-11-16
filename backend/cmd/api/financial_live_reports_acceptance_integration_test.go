@@ -53,6 +53,7 @@ func verifyLiveFinancialReportsAndExports(t *testing.T, acceptance liveFinancial
 	verifyLiveBalanceSheetEndpoint(t, acceptance)
 	verifyLiveAgingEndpoints(t, acceptance)
 	verifyLiveCashFlowEndpoint(t, acceptance)
+	verifyLiveAccountingCSVExportContracts(t, acceptance)
 	csvRevenueCents := verifyLiveSalesCSVDownload(t, acceptance)
 	pdfRevenueCents, pdfOrders := verifyLiveSalesPDFDownload(t, acceptance)
 	verifyUnauthenticatedFinancialDownloadDenied(t, acceptance)
@@ -62,6 +63,32 @@ func verifyLiveFinancialReportsAndExports(t *testing.T, acceptance liveFinancial
 		acceptance.sqlTrialDebitsCents, acceptance.sqlTrialCreditsCents, acceptance.sourceGrossSalesCents,
 		csvRevenueCents, csvRevenueCents-acceptance.sourceGrossSalesCents, pdfRevenueCents, pdfOrders,
 		pdfRevenueCents-acceptance.sourceGrossSalesCents)
+}
+
+func verifyLiveAccountingCSVExportContracts(t *testing.T, acceptance liveFinancialReportAcceptance) {
+	t.Helper()
+	for _, route := range []string{
+		"/api/v1/accounting/csv/chart-of-accounts/export",
+		"/api/v1/accounting/csv/journal-entries/export?date_from=" + acceptance.reportDate + "&date_to=" + acceptance.reportDate,
+		// Historical Excel-named paths remain compatible but still return CSV.
+		"/api/v1/accounting/excel/chart-of-accounts/export",
+		"/api/v1/accounting/excel/journal-entries/export?date_from=" + acceptance.reportDate + "&date_to=" + acceptance.reportDate,
+	} {
+		request, err := http.NewRequestWithContext(t.Context(), http.MethodGet, acceptance.baseURL+route, nil)
+		if err != nil {
+			t.Fatalf("create accounting CSV request %q: %v", route, err)
+		}
+		request.Header.Set("Origin", "http://localhost:3002")
+		status, headers, body := sendLiveFinancialDownload(t, acceptance.client, request)
+		if status != http.StatusOK || !strings.HasPrefix(headers.Get("Content-Type"), "text/csv") ||
+			!strings.Contains(strings.ToLower(headers.Get("Content-Disposition")), ".csv") {
+			t.Fatalf("accounting CSV route %q returned status=%d content-type=%q disposition=%q body=%q",
+				route, status, headers.Get("Content-Type"), headers.Get("Content-Disposition"), body)
+		}
+		if _, err := csv.NewReader(bytes.NewReader(body)).ReadAll(); err != nil {
+			t.Fatalf("accounting export route %q did not return parseable CSV: %v", route, err)
+		}
+	}
 }
 
 func verifyLiveBalanceSheetEndpoint(t *testing.T, acceptance liveFinancialReportAcceptance) {
