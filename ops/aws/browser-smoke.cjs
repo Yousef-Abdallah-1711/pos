@@ -58,10 +58,10 @@ async function captureDeviceFrame(page,label,width,height) {
  await frame.close();
 }
 async function loginJourney(browser,admin=false) {
- const context=await browser.newContext({ignoreHTTPSErrors:process.env.SERVIO_DISPOSABLE_BROWSER==='1',viewport:{width:1440,height:900}});
+ let context=await browser.newContext({ignoreHTTPSErrors:process.env.SERVIO_DISPOSABLE_BROWSER==='1',viewport:{width:1440,height:900}});
  await guardContext(context);
 
- const page=await context.newPage();const label=admin?'admin-browser-login':'tenant-browser-login';
+ let page=await context.newPage();const label=admin?'admin-browser-login':'tenant-browser-login';
  const fixture=JSON.parse(fs.readFileSync(admin?fixtures+'/admin.json':fixtures+'/users.json','utf8'));
  const user=admin?fixture:fixture[0];
  const adminBase='https://admin.pos.servio.test';
@@ -141,11 +141,22 @@ async function loginJourney(browser,admin=false) {
    const adminConsoleErrors=[];
    const adminAssetFailures=[];
    const onAdminPageError=error=>adminPageErrors.push(error.message);
-   page.on('pageerror',onAdminPageError);
-   page.on('console',message=>{
-    if(message.type()==='error'&&!(refreshingAdminSession&&message.text().includes('401'))) adminConsoleErrors.push(message.text());
-   });
-   page.on('response',response=>{if(response.status()>=400&&response.request().resourceType()==='image')adminAssetFailures.push(`${response.status()} ${new URL(response.url()).pathname}`)});
+   const monitorAdminPage=()=>{
+    page.on('pageerror',onAdminPageError);
+    page.on('console',message=>{
+     if(message.type()==='error'&&!(refreshingAdminSession&&message.text().includes('401'))) adminConsoleErrors.push(message.text());
+    });
+    page.on('response',response=>{if(response.status()>=400&&response.request().resourceType()==='image')adminAssetFailures.push(`${response.status()} ${new URL(response.url()).pathname}`)});
+   };
+   monitorAdminPage();
+   const startAdminThemeContext=async()=>{
+    await context.close();
+    context=await browser.newContext({ignoreHTTPSErrors:process.env.SERVIO_DISPOSABLE_BROWSER==='1',viewport:{width:1440,height:900}});
+    await guardContext(context);
+    page=await context.newPage();
+    monitorAdminPage();
+    await authenticateAdmin();
+   };
    const adminRoutes=['/dashboard','/dashboard/tenants','/dashboard/users','/dashboard/audit-logs','/dashboard/payments','/dashboard/settings'];
    const waitForAdminRoute=async route=>{
     await page.waitForFunction(async({apiBase,pathname})=>{
@@ -169,8 +180,8 @@ async function loginJourney(browser,admin=false) {
     if(dark!==desired) await page.getByRole('button',{name:locale==='ar'?(desired?'تفعيل الوضع الداكن':'تفعيل الوضع الفاتح'):`Switch to ${desired?'dark':'light'} mode`}).click();
     await page.waitForFunction(expected=>document.documentElement.classList.contains('dark')===expected,desired);
    };
-   for(const {locale,dir,theme} of localeThemes){
-    if(locale==='ar'&&theme==='dark') await authenticateAdmin();
+   for(const [themeIndex,{locale,dir,theme}] of localeThemes.entries()){
+    if(themeIndex>0) await startAdminThemeContext();
     await switchTo(locale,theme);
     await page.reload({waitUntil:'domcontentloaded'});
     await page.waitForFunction(expected=>document.documentElement.lang===expected.locale&&document.documentElement.dir===(expected.locale==='ar'?'rtl':'ltr')&&document.documentElement.classList.contains('dark')===(expected.theme==='dark'),{locale,theme});

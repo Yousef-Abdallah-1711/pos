@@ -165,11 +165,11 @@ async function interactions(browser, page, locale) {
  await page.goto(`${base}/${locale}`, { waitUntil: 'domcontentloaded' })
  await page.waitForFunction(theme => document.documentElement.classList.contains(theme), expectedTheme)
  const otherTheme = expectedTheme === 'dark' ? 'light' : 'dark'
- await page.locator('.sv-theme-toggle').click()
+ await page.locator('.sv-theme-toggle').first().click()
  await page.waitForFunction(theme => document.documentElement.classList.contains(theme), otherTheme)
  await page.reload({ waitUntil: 'domcontentloaded' })
  await page.waitForFunction(theme => document.documentElement.classList.contains(theme), otherTheme)
- await page.locator('.sv-theme-toggle').click()
+ await page.locator('.sv-theme-toggle').first().click()
  await page.waitForFunction(theme => document.documentElement.classList.contains(theme), expectedTheme)
  check(`theme toggle and persistence ${locale}`, await page.evaluate(theme => document.documentElement.classList.contains(theme), expectedTheme))
  await load(page, locale, '/pricing')
