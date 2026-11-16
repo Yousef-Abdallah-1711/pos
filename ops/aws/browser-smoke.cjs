@@ -151,12 +151,20 @@ async function loginJourney(browser,admin=false) {
    };
    monitorAdminPage();
    const startAdminThemeContext=async()=>{
+    const storageState=await context.storageState();
     await context.close();
-    context=await browser.newContext({ignoreHTTPSErrors:process.env.SERVIO_DISPOSABLE_BROWSER==='1',viewport:{width:1440,height:900}});
+    context=await browser.newContext({storageState,ignoreHTTPSErrors:process.env.SERVIO_DISPOSABLE_BROWSER==='1',viewport:{width:1440,height:900}});
     await guardContext(context);
     page=await context.newPage();
     monitorAdminPage();
-    await authenticateAdmin();
+    await page.goto(`${adminBase}/dashboard`,{waitUntil:'domcontentloaded',timeout:45000});
+    await page.waitForFunction(()=>window.location.pathname==='/login'||(window.location.pathname==='/dashboard'&&document.querySelector('main h1')?.getClientRects().length>0),{},{timeout:45000});
+    if(new URL(page.url()).pathname==='/login') throw new Error('Super Admin session was not preserved when restoring the isolated theme context');
+    const sessionStatus=await page.evaluate(async apiBase=>{
+     const response=await fetch(`${apiBase}/super-admin/auth/session`,{credentials:'include'});
+     return response.status;
+    },api);
+    if(sessionStatus!==200) throw new Error(`Restored Super Admin session returned HTTP ${sessionStatus}`);
    };
    const adminRoutes=['/dashboard','/dashboard/tenants','/dashboard/users','/dashboard/audit-logs','/dashboard/payments','/dashboard/settings'];
    const waitForAdminRoute=async route=>{
