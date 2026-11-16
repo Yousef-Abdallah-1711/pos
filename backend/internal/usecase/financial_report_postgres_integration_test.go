@@ -45,6 +45,7 @@ func TestGenerateBalanceSheetPostgresBackdatedJournalUsesAsOfMovementSum(t *test
 	defer db.Close()
 
 	stamp := time.Now().UnixNano()
+	accountSuffix := stamp % 1_000_000_000_000
 	var tenantID, restaurantID, assetID, revenueID int
 	if err := db.QueryRow(`INSERT INTO tenants (name, slug, domain) VALUES ($1, $2, $3) RETURNING id`, fmt.Sprintf("Backdated report %d", stamp), fmt.Sprintf("backdated-%d", stamp), fmt.Sprintf("backdated-%d.example.test", stamp)).Scan(&tenantID); err != nil {
 		t.Fatalf("create isolated tenant: %v", err)
@@ -52,10 +53,10 @@ func TestGenerateBalanceSheetPostgresBackdatedJournalUsesAsOfMovementSum(t *test
 	if err := db.QueryRow(`INSERT INTO restaurants (tenant_id, name, slug, address) VALUES ($1, $2, $3, 'test') RETURNING id`, tenantID, "Backdated report fixture", fmt.Sprintf("backdated-%d", stamp)).Scan(&restaurantID); err != nil {
 		t.Fatalf("create isolated restaurant: %v", err)
 	}
-	if err := db.QueryRow(`INSERT INTO chart_of_accounts (tenant_id, restaurant_id, account_code, account_name, account_type, normal_balance) VALUES ($1,$2,$3,'Backdated cash','asset','debit') RETURNING id`, tenantID, restaurantID, fmt.Sprintf("BD-A-%d", stamp)).Scan(&assetID); err != nil {
+	if err := db.QueryRow(`INSERT INTO chart_of_accounts (tenant_id, restaurant_id, account_code, account_name, account_type, normal_balance) VALUES ($1,$2,$3,'Backdated cash','asset','debit') RETURNING id`, tenantID, restaurantID, fmt.Sprintf("BDA%d", accountSuffix)).Scan(&assetID); err != nil {
 		t.Fatalf("create asset account: %v", err)
 	}
-	if err := db.QueryRow(`INSERT INTO chart_of_accounts (tenant_id, restaurant_id, account_code, account_name, account_type, normal_balance) VALUES ($1,$2,$3,'Backdated revenue','revenue','credit') RETURNING id`, tenantID, restaurantID, fmt.Sprintf("BD-R-%d", stamp)).Scan(&revenueID); err != nil {
+	if err := db.QueryRow(`INSERT INTO chart_of_accounts (tenant_id, restaurant_id, account_code, account_name, account_type, normal_balance) VALUES ($1,$2,$3,'Backdated revenue','revenue','credit') RETURNING id`, tenantID, restaurantID, fmt.Sprintf("BDR%d", accountSuffix)).Scan(&revenueID); err != nil {
 		t.Fatalf("create revenue account: %v", err)
 	}
 	ledger := repository.NewGeneralLedgerRepository(db, repository.NewJournalEntryRepository(db))

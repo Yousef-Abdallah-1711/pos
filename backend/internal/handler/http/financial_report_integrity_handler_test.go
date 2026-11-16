@@ -21,7 +21,7 @@ func TestFinancialReportHandler_BalanceSheetAddsIntegrityFieldsWithoutChangingLe
 	defer db.Close()
 
 	asOf := time.Date(2026, time.November, 10, 0, 0, 0, 0, time.UTC)
-	mock.ExpectQuery(`WITH latest AS`).WithArgs(1, 2, asOf).WillReturnRows(
+	mock.ExpectQuery(`SELECT\s+coa\.account_code,`).WithArgs(1, 2, asOf).WillReturnRows(
 		sqlmock.NewRows([]string{"account_code", "account_name", "account_type", "normal_balance", "running_balance"}).
 			AddRow("1110", "Cash", "asset", "debit", 100.0).
 			AddRow("2101", "Payables", "liability", "credit", 0.0),
