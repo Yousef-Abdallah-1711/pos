@@ -151,12 +151,20 @@ async function loginJourney(browser,admin=false) {
    };
    monitorAdminPage();
    const startAdminThemeContext=async()=>{
+    const storageState=await context.storageState();
     await context.close();
-    context=await browser.newContext({ignoreHTTPSErrors:process.env.SERVIO_DISPOSABLE_BROWSER==='1',viewport:{width:1440,height:900}});
+    context=await browser.newContext({storageState,ignoreHTTPSErrors:process.env.SERVIO_DISPOSABLE_BROWSER==='1',viewport:{width:1440,height:900}});
     await guardContext(context);
     page=await context.newPage();
     monitorAdminPage();
-    await authenticateAdmin();
+    await page.goto(`${adminBase}/dashboard`,{waitUntil:'domcontentloaded',timeout:45000});
+    await page.waitForFunction(()=>window.location.pathname==='/login'||(window.location.pathname==='/dashboard'&&document.querySelector('main h1')?.getClientRects().length>0),{},{timeout:45000});
+    if(new URL(page.url()).pathname==='/login') throw new Error('Super Admin session was not preserved when restoring the isolated theme context');
+    const sessionStatus=await page.evaluate(async apiBase=>{
+     const response=await fetch(`${apiBase}/super-admin/auth/session`,{credentials:'include'});
+     return response.status;
+    },api);
+    if(sessionStatus!==200) throw new Error(`Restored Super Admin session returned HTTP ${sessionStatus}`);
    };
    const adminRoutes=['/dashboard','/dashboard/tenants','/dashboard/users','/dashboard/audit-logs','/dashboard/payments','/dashboard/settings'];
    const waitForAdminRoute=async route=>{
@@ -166,15 +174,7 @@ async function loginJourney(browser,admin=false) {
      return window.location.pathname===pathname&&heading&&heading.getClientRects().length>0;
     },route,{timeout:45000});
     if(new URL(page.url()).pathname==='/login') return true;
-    const sessionStatus=await page.evaluate(async apiBase=>{
-     const response=await fetch(`${apiBase}/super-admin/auth/session`,{credentials:'include'});
-     return response.status;
-    },api);
-    if(sessionStatus!==200){
-     await page.waitForURL('**/login',{timeout:10000}).catch(()=>{});
-     return new URL(page.url()).pathname==='/login';
-    }
-    await page.waitForTimeout(1000);
+    await page.waitForTimeout(500);
     if(new URL(page.url()).pathname==='/login') return true;
     try {
      await page.locator('main h1').first().waitFor({state:'visible',timeout:10000});
@@ -198,6 +198,9 @@ async function loginJourney(browser,admin=false) {
     await page.reload({waitUntil:'domcontentloaded'});
     await page.waitForFunction(expected=>document.documentElement.lang===expected.locale&&document.documentElement.dir===(expected.locale==='ar'?'rtl':'ltr')&&document.documentElement.classList.contains('dark')===(expected.theme==='dark'),{locale,theme});
     for(const route of adminRoutes){
+     // The API applies a shared 30 requests/minute Super Admin limit per proxy IP.
+     // Pace route transitions so the visual matrix does not burst through it.
+     await page.waitForTimeout(20000);
      let response=await page.goto(adminBase+route,{waitUntil:'domcontentloaded',timeout:45000});
      if(await waitForAdminRoute(route)){
       await authenticateAdmin();
