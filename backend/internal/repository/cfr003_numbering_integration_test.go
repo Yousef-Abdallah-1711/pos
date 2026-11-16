@@ -298,6 +298,61 @@ func TestCFR003PostgresConcurrentJournalPostingPreservesRunningBalance(t *testin
 	}
 }
 
+func TestCFR003PostgresBackdatedEntryKeepsAsOfBalancesChronological(t *testing.T) {
+	db, fixture := openAtomicPostingFixture(t)
+	defer cleanupAtomicPostingFixture(t, db, fixture)
+
+	lateDate := time.Date(2026, time.November, 20, 0, 0, 0, 0, time.UTC)
+	earlyDate := time.Date(2026, time.November, 10, 0, 0, 0, 0, time.UTC)
+	for _, posting := range []struct {
+		referenceID int
+		entryDate   time.Time
+		amount      float64
+	}{{43020, lateDate, 100}, {43010, earlyDate, 50}} {
+		entry := fixture.entry()
+		entry.ReferenceID = &posting.referenceID
+		entry.EntryDate = posting.entryDate
+		entry.Lines[0].DebitAmount = posting.amount
+		entry.Lines[1].CreditAmount = posting.amount
+		if _, err := fixture.ledger.CreateAndPostAutoEntry(entry, 0); err != nil {
+			t.Fatalf("post journal %d: %v", posting.referenceID, err)
+		}
+	}
+
+	debitBalance, err := fixture.ledger.GetAccountBalance(fixture.tenantID, fixture.restaurantID, fixture.debitAccountID, &earlyDate)
+	if err != nil {
+		t.Fatalf("get debit balance as of early date: %v", err)
+	}
+	if debitBalance != 50 {
+		t.Fatalf("debit balance as of %s = %.2f, want 50.00", earlyDate.Format("2006-01-02"), debitBalance)
+	}
+
+	trialBalance, err := fixture.ledger.GetTrialBalance(fixture.tenantID, fixture.restaurantID, earlyDate)
+	if err != nil {
+		t.Fatalf("get trial balance as of early date: %v", err)
+	}
+	var debitFound, creditFound bool
+	for _, row := range trialBalance {
+		switch row.AccountID {
+		case fixture.debitAccountID:
+			debitFound = row.DebitBalance == 50 && row.CreditBalance == 0
+		case fixture.creditAccountID:
+			creditFound = row.DebitBalance == 0 && row.CreditBalance == 50
+		}
+	}
+	if !debitFound || !creditFound {
+		t.Fatalf("as-of trial balance does not reflect only the early posting: %+v", trialBalance)
+	}
+
+	ledgerLines, err := fixture.ledger.GetLedgerByAccount(fixture.tenantID, fixture.restaurantID, fixture.debitAccountID, nil, nil)
+	if err != nil {
+		t.Fatalf("list debit ledger: %v", err)
+	}
+	if len(ledgerLines) != 2 || ledgerLines[0].RunningBalance != 150 || ledgerLines[1].RunningBalance != 50 {
+		t.Fatalf("chronological running balances in descending display order = %+v, want [150, 50]", ledgerLines)
+	}
+}
+
 func TestCFR003PostgresConcurrentJournalNumbersKeepTenantRestaurantScopes(t *testing.T) {
 	db, fixture := openAtomicPostingFixture(t)
 	defer cleanupAtomicPostingFixture(t, db, fixture)

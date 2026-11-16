@@ -270,29 +270,27 @@ func (uc *FinancialReportUseCase) GenerateBalanceSheet(tenantID, restaurantID in
 	}
 
 	rows, err := uc.db.Query(`
-		WITH latest AS (
-			SELECT DISTINCT ON (gl.account_id)
-				gl.account_id,
-				gl.running_balance
-			FROM general_ledger gl
-			WHERE gl.tenant_id = $1
-			  AND gl.restaurant_id = $2
-			  AND gl.entry_date <= $3
-			ORDER BY gl.account_id, gl.entry_date DESC, gl.id DESC
-		)
 		SELECT
 			coa.account_code,
 			coa.account_name,
 			coa.account_type,
 			coa.normal_balance,
-			COALESCE(latest.running_balance, 0) AS running_balance
+			COALESCE(SUM(CASE WHEN coa.normal_balance = 'credit'
+				THEN gl.credit_amount - gl.debit_amount
+				ELSE gl.debit_amount - gl.credit_amount
+			END), 0) AS running_balance
 		FROM chart_of_accounts coa
-		LEFT JOIN latest ON latest.account_id = coa.id
+		LEFT JOIN general_ledger gl
+			ON gl.account_id = coa.id
+			AND gl.tenant_id = $1
+			AND gl.restaurant_id = $2
+			AND gl.entry_date <= $3
 		WHERE coa.tenant_id = $1
 		  AND coa.restaurant_id = $2
 		  AND coa.is_active = TRUE
 		  AND coa.is_header = FALSE
 		  AND coa.account_type IN ('asset', 'liability', 'equity')
+		GROUP BY coa.id, coa.account_code, coa.account_name, coa.account_type, coa.normal_balance
 		ORDER BY coa.account_code ASC
 	`, tenantID, restaurantID, asOf)
 	if err != nil {

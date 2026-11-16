@@ -10,6 +10,8 @@ import (
 	"time"
 
 	_ "github.com/lib/pq"
+	"pos-saas/internal/domain"
+	"pos-saas/internal/repository"
 	"pos-saas/tests/testdb"
 )
 
@@ -32,6 +34,57 @@ func TestGenerateBalanceSheetPostgresIntegrityStatus(t *testing.T) {
 	}
 	if report.TotalAssets != 100 || report.TotalEquity != 0 || report.EquationDifference != 100 {
 		t.Fatalf("report changed source figures: assets=%v equity=%v difference=%v", report.TotalAssets, report.TotalEquity, report.EquationDifference)
+	}
+}
+
+func TestGenerateBalanceSheetPostgresBackdatedJournalUsesAsOfMovementSum(t *testing.T) {
+	db, err := sql.Open("postgres", testdb.URL(t))
+	if err != nil {
+		t.Fatalf("open disposable PostgreSQL: %v", err)
+	}
+	defer db.Close()
+
+	stamp := time.Now().UnixNano()
+	var tenantID, restaurantID, assetID, revenueID int
+	if err := db.QueryRow(`INSERT INTO tenants (name, slug, domain) VALUES ($1, $2, $3) RETURNING id`, fmt.Sprintf("Backdated report %d", stamp), fmt.Sprintf("backdated-%d", stamp), fmt.Sprintf("backdated-%d.example.test", stamp)).Scan(&tenantID); err != nil {
+		t.Fatalf("create isolated tenant: %v", err)
+	}
+	if err := db.QueryRow(`INSERT INTO restaurants (tenant_id, name, slug, address) VALUES ($1, $2, $3, 'test') RETURNING id`, tenantID, "Backdated report fixture", fmt.Sprintf("backdated-%d", stamp)).Scan(&restaurantID); err != nil {
+		t.Fatalf("create isolated restaurant: %v", err)
+	}
+	if err := db.QueryRow(`INSERT INTO chart_of_accounts (tenant_id, restaurant_id, account_code, account_name, account_type, normal_balance) VALUES ($1,$2,$3,'Backdated cash','asset','debit') RETURNING id`, tenantID, restaurantID, fmt.Sprintf("BD-A-%d", stamp)).Scan(&assetID); err != nil {
+		t.Fatalf("create asset account: %v", err)
+	}
+	if err := db.QueryRow(`INSERT INTO chart_of_accounts (tenant_id, restaurant_id, account_code, account_name, account_type, normal_balance) VALUES ($1,$2,$3,'Backdated revenue','revenue','credit') RETURNING id`, tenantID, restaurantID, fmt.Sprintf("BD-R-%d", stamp)).Scan(&revenueID); err != nil {
+		t.Fatalf("create revenue account: %v", err)
+	}
+	ledger := repository.NewGeneralLedgerRepository(db, repository.NewJournalEntryRepository(db))
+	post := func(referenceID int, date time.Time, amount float64) {
+		t.Helper()
+		entry := &domain.JournalEntry{
+			TenantID: tenantID, RestaurantID: restaurantID, EntryDate: date,
+			Description: "Synthetic backdated financial report fixture", ReferenceType: "test", ReferenceID: &referenceID,
+			EntryType: "manual", Status: domain.JournalStatusDraft,
+			Lines: []domain.JournalEntryLine{
+				{AccountID: assetID, DebitAmount: amount, LineOrder: 1},
+				{AccountID: revenueID, CreditAmount: amount, LineOrder: 2},
+			},
+		}
+		if _, err := ledger.CreateAndPostAutoEntry(entry, 0); err != nil {
+			t.Fatalf("post synthetic journal %d: %v", referenceID, err)
+		}
+	}
+	lateDate := time.Date(2026, time.November, 20, 0, 0, 0, 0, time.UTC)
+	earlyDate := time.Date(2026, time.November, 10, 0, 0, 0, 0, time.UTC)
+	post(1, lateDate, 100)
+	post(2, earlyDate, 50)
+
+	report, err := NewFinancialReportUseCase(db, nil).GenerateBalanceSheet(tenantID, restaurantID, earlyDate)
+	if err != nil {
+		t.Fatalf("GenerateBalanceSheet returned error: %v", err)
+	}
+	if report.TotalAssets != 50 {
+		t.Fatalf("balance sheet assets as of %s = %.2f, want only backdated 50.00 posting", earlyDate.Format("2006-01-02"), report.TotalAssets)
 	}
 }
 
