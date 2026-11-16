@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"pos-saas/internal/domain"
+	"pos-saas/internal/pkg/csvutil"
 	"pos-saas/internal/pkg/database"
 )
 
@@ -1616,7 +1617,7 @@ func (r *AccountingAdvancedRepository) LogAuditExport(
 	})
 }
 
-func (r *AccountingAdvancedRepository) GetChartOfAccountsExcelRows(tenantID, restaurantID int) ([][]string, error) {
+func (r *AccountingAdvancedRepository) GetChartOfAccountsCSVRows(tenantID, restaurantID int) ([][]string, error) {
 	rows, err := r.db.Query(`
 		SELECT
 			account_code,
@@ -1674,14 +1675,14 @@ func (r *AccountingAdvancedRepository) GetChartOfAccountsExcelRows(tenantID, res
 			return nil, err
 		}
 		out = append(out, []string{
-			accountCode,
-			accountName,
-			accountNameAr,
-			accountType,
-			normalBalance,
-			currency,
-			accountSubtype,
-			description,
+			csvutil.SafeTextCell(accountCode),
+			csvutil.SafeTextCell(accountName),
+			csvutil.SafeTextCell(accountNameAr),
+			csvutil.SafeTextCell(accountType),
+			csvutil.SafeTextCell(normalBalance),
+			csvutil.SafeTextCell(currency),
+			csvutil.SafeTextCell(accountSubtype),
+			csvutil.SafeTextCell(description),
 			fmt.Sprintf("%t", isActive),
 		})
 	}
@@ -1691,7 +1692,7 @@ func (r *AccountingAdvancedRepository) GetChartOfAccountsExcelRows(tenantID, res
 	return out, nil
 }
 
-func (r *AccountingAdvancedRepository) GetJournalEntriesExcelRows(tenantID, restaurantID int, dateFrom, dateTo time.Time) ([][]string, error) {
+func (r *AccountingAdvancedRepository) GetJournalEntriesCSVRows(tenantID, restaurantID int, dateFrom, dateTo time.Time) ([][]string, error) {
 	rows, err := r.db.Query(`
 		SELECT
 			je.entry_number,
@@ -1757,13 +1758,13 @@ func (r *AccountingAdvancedRepository) GetJournalEntriesExcelRows(tenantID, rest
 			return nil, err
 		}
 		out = append(out, []string{
-			entryNumber,
+			csvutil.SafeTextCell(entryNumber),
 			entryDate.Format("2006-01-02"),
-			description,
-			entryType,
-			status,
-			accountCode,
-			lineDescription,
+			csvutil.SafeTextCell(description),
+			csvutil.SafeTextCell(entryType),
+			csvutil.SafeTextCell(status),
+			csvutil.SafeTextCell(accountCode),
+			csvutil.SafeTextCell(lineDescription),
 			fmt.Sprintf("%.2f", debitAmount),
 			fmt.Sprintf("%.2f", creditAmount),
 		})

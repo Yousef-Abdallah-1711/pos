@@ -15,9 +15,9 @@ import (
 	"strings"
 	"sync"
 	"time"
-	"unicode"
 
 	"pos-saas/internal/middleware"
+	"pos-saas/internal/pkg/csvutil"
 	"pos-saas/internal/pkg/database"
 
 	goarabic "github.com/01walid/goarabic"
@@ -1454,16 +1454,7 @@ func buildSalesCSV(report salesReportResponse, locale string) ([]byte, error) {
 }
 
 func csvSafeTextCell(value string) string {
-	for _, character := range value {
-		if unicode.IsSpace(character) || unicode.IsControl(character) {
-			continue
-		}
-		if strings.ContainsRune("=+-@", character) {
-			return "'" + value
-		}
-		return value
-	}
-	return value
+	return csvutil.SafeTextCell(value)
 }
 
 func buildProfitabilityCSV(report profitabilityReportResponse, locale string) ([]byte, error) {
