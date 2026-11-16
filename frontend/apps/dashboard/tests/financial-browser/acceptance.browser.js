@@ -11,6 +11,7 @@ const fixture = JSON.parse(fs.readFileSync(fixtureFile, 'utf8'))
 const identities = {
   accountant: fixture.accountant,
   cashier: fixture.cashier,
+  payroll: fixture.payroll,
   secondTenant: fixture.second_tenant,
 }
 
@@ -270,9 +271,139 @@ test.describe('authenticated financial browser acceptance', () => {
     await page.goto('/en/dashboard/hr/payroll')
     await expect(page.getByRole('heading', { name: 'Payroll', exact: true })).toBeVisible()
     await expect(page.getByRole('heading', { name: 'No Salary Records', exact: true })).toBeVisible()
-    await expect(page.getByRole('button', { name: 'Create Salary', exact: true })).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Create Salary', exact: true })).toBeDisabled()
     await assertNoDocumentOverflow(page)
     await page.screenshot({ path: testInfo.outputPath('en-desktop-payroll.png'), fullPage: true })
+  })
+
+  test('accountant EN desktop creates an AR invoice, receives a partial payment, and sees the open balance', async ({ page }, testInfo) => {
+    await setViewport(page, 1440, 900)
+    await login(page, identities.accountant)
+    await openFinancialPage(page, 'en', 'accounting/customer-invoices')
+
+    await page.getByRole('button', { name: 'New customer invoice', exact: true }).click()
+    const invoiceDialog = page.getByRole('dialog')
+    await invoiceDialog.getByText('Customer', { exact: true }).locator('..').locator('select').selectOption({ label: fixture.customer_name })
+    await invoiceDialog.getByText('Status', { exact: true }).locator('..').locator('select').selectOption('sent')
+    await invoiceDialog.getByText('Description', { exact: true }).locator('..').locator('input').fill('Browser synthetic service')
+    await invoiceDialog.getByText('Quantity', { exact: true }).locator('..').locator('input').fill('1')
+    await invoiceDialog.getByText('Unit price', { exact: true }).locator('..').locator('input').fill('100')
+    const createInvoice = page.waitForResponse((response) =>
+      new URL(response.url()).pathname === '/api/v1/accounting/customer-invoices' && response.request().method() === 'POST'
+    )
+    await invoiceDialog.getByRole('button', { name: 'Create customer invoice', exact: true }).click()
+    const invoiceResponse = await createInvoice
+    expect(invoiceResponse.status()).toBe(201)
+    const invoicePayload = await invoiceResponse.json()
+    expect(invoicePayload.data.total_amount).toBe(100)
+    expect(invoicePayload.data.balance_due).toBe(100)
+    const invoiceNumber = invoicePayload.data.invoice_number
+    const invoiceRow = page.locator('tbody tr').filter({ hasText: fixture.customer_name }).filter({ hasText: invoiceNumber })
+    await expect(invoiceRow).toContainText('100.00')
+
+    await page.getByRole('button', { name: 'Record payment', exact: true }).click()
+    const paymentDialog = page.getByRole('dialog')
+    await paymentDialog.getByText('Customer invoice', { exact: true }).locator('..').locator('select').selectOption({ label: `${invoiceNumber} • ${fixture.customer_name}` })
+    await paymentDialog.getByText('Amount', { exact: true }).locator('..').locator('input').fill('40')
+    await paymentDialog.getByText('Payment method', { exact: true }).locator('..').locator('select').selectOption('cash')
+    const createPayment = page.waitForResponse((response) =>
+      new URL(response.url()).pathname === '/api/v1/accounting/payments/received' && response.request().method() === 'POST'
+    )
+    await paymentDialog.getByRole('button', { name: 'Record payment received', exact: true }).click()
+    const paymentResponse = await createPayment
+    expect(paymentResponse.status()).toBe(201)
+    const paymentPayload = await paymentResponse.json()
+    expect(paymentPayload.data.amount).toBe(40)
+    await expect(invoiceRow).toContainText('60.00')
+    await page.screenshot({ path: testInfo.outputPath('en-desktop-ar-partial-payment-open-balance.png'), fullPage: true })
+  })
+
+  test('accountant EN desktop approves an AP invoice, pays partially, and sees remaining balance in payables aging', async ({ page }, testInfo) => {
+    await setViewport(page, 1440, 900)
+    await login(page, identities.accountant)
+    await openFinancialPage(page, 'en', 'accounting/supplier-invoices')
+
+    await page.getByRole('button', { name: 'New supplier invoice', exact: true }).click()
+    const invoiceDialog = page.getByRole('dialog')
+    await invoiceDialog.getByText('Supplier', { exact: true }).locator('..').locator('select').selectOption({ label: fixture.supplier_name })
+    await invoiceDialog.getByText('Supplier reference', { exact: true }).locator('..').locator('input').fill('BROWSER-AP-PARTIAL')
+    await invoiceDialog.getByText('Description', { exact: true }).locator('..').locator('input').fill('Browser synthetic supplies')
+    await invoiceDialog.getByText('Quantity', { exact: true }).locator('..').locator('input').fill('1')
+    await invoiceDialog.getByText('Unit price', { exact: true }).locator('..').locator('input').fill('100')
+    const createInvoice = page.waitForResponse((response) =>
+      new URL(response.url()).pathname === '/api/v1/accounting/supplier-invoices' && response.request().method() === 'POST'
+    )
+    await invoiceDialog.getByRole('button', { name: 'Create supplier invoice', exact: true }).click()
+    const invoiceResponse = await createInvoice
+    expect(invoiceResponse.status()).toBe(201)
+    const invoicePayload = await invoiceResponse.json()
+    expect(invoicePayload.data.total_amount).toBe(100)
+    const invoiceNumber = invoicePayload.data.invoice_number
+    let invoiceRow = page.locator('tbody tr').filter({ hasText: fixture.supplier_name }).filter({ hasText: invoiceNumber })
+    const approvalResponseWait = page.waitForResponse((response) =>
+      new URL(response.url()).pathname === `/api/v1/accounting/supplier-invoices/${invoicePayload.data.id}/approve` && response.request().method() === 'POST'
+    )
+    await invoiceRow.getByRole('button', { name: 'Approve', exact: true }).click()
+    const approvalResponse = await approvalResponseWait
+    expect(approvalResponse.status()).toBe(200)
+    await expect(invoiceRow).toContainText('approved')
+
+    await page.getByRole('button', { name: 'Record payment', exact: true }).click()
+    const paymentDialog = page.getByRole('dialog')
+    await paymentDialog.getByText('Supplier invoice', { exact: true }).locator('..').locator('select').selectOption({ label: `${invoiceNumber} • ${fixture.supplier_name}` })
+    await paymentDialog.getByText('Amount', { exact: true }).locator('..').locator('input').fill('40')
+    await paymentDialog.getByText('Payment method', { exact: true }).locator('..').locator('select').selectOption('cash')
+    const createPayment = page.waitForResponse((response) =>
+      new URL(response.url()).pathname === '/api/v1/accounting/payments/made' && response.request().method() === 'POST'
+    )
+    await paymentDialog.getByRole('button', { name: 'Record payment made', exact: true }).click()
+    const paymentResponse = await createPayment
+    expect(paymentResponse.status()).toBe(201)
+    const paymentPayload = await paymentResponse.json()
+    expect(paymentPayload.data.amount).toBe(40)
+    await expect(invoiceRow).toContainText('60.00')
+
+    await page.goto('/en/dashboard/reports/financial/payables-aging')
+    const agingRow = page.locator('tbody tr').filter({ hasText: fixture.supplier_name })
+    await expect(agingRow).toBeVisible()
+    await expect(agingRow).toContainText('60.00')
+    await page.screenshot({ path: testInfo.outputPath('en-desktop-ap-partial-payment-aging.png'), fullPage: true })
+  })
+
+  test('payroll manager EN desktop creates and marks a synthetic salary paid', async ({ page }, testInfo) => {
+    await setViewport(page, 1440, 900)
+    const session = await login(page, identities.payroll)
+    expect(session.role).toBe('payroll-manager')
+    await openFinancialPage(page, 'en', 'hr/payroll')
+    await page.getByRole('button', { name: 'Create Salary', exact: true }).click()
+    const salaryDialog = page.getByRole('dialog')
+    await salaryDialog.locator('select[name="employee_id"]').selectOption({ label: fixture.employee_name })
+    const today = new Date().toISOString().slice(0, 10)
+    const nextMonthEnd = new Date()
+    nextMonthEnd.setUTCMonth(nextMonthEnd.getUTCMonth() + 1)
+    nextMonthEnd.setUTCDate(0)
+    await salaryDialog.locator('input[name="pay_period_start"]').fill(today)
+    await salaryDialog.locator('input[name="pay_period_end"]').fill(nextMonthEnd.toISOString().slice(0, 10))
+    await salaryDialog.locator('input[name="base_salary"]').fill('1500')
+    const createSalary = page.waitForResponse((response) =>
+      new URL(response.url()).pathname === '/api/v1/hr/salaries' && response.request().method() === 'POST'
+    )
+    await salaryDialog.getByRole('button', { name: /Create Salary/i }).click()
+    const salaryResponse = await createSalary
+    expect(salaryResponse.status()).toBe(201)
+    const salaryPayload = await salaryResponse.json()
+    expect(salaryPayload.data.net_salary).toBe(1500)
+    const salaryId = salaryPayload.data.id
+    const salaryRow = page.locator('tbody tr').filter({ hasText: fixture.employee_name })
+    await expect(salaryRow).toContainText('Pending')
+    const markPaid = page.waitForResponse((response) =>
+      new URL(response.url()).pathname === `/api/v1/hr/salaries/${salaryId}/mark-paid` && response.request().method() === 'POST'
+    )
+    await salaryRow.getByRole('button', { name: 'Mark Paid', exact: true }).click()
+    const paidResponse = await markPaid
+    expect(paidResponse.status()).toBe(200)
+    await expect(salaryRow).toContainText('Paid')
+    await page.screenshot({ path: testInfo.outputPath('en-desktop-payroll-salary-paid.png'), fullPage: true })
   })
 
   test('cashier AR mobile remains denied by server-side accounting RBAC', async ({ page }, testInfo) => {

@@ -6,6 +6,7 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -25,6 +26,7 @@ type financialBrowserIdentityFixture struct {
 type financialBrowserFixture struct {
 	Accountant      financialBrowserIdentityFixture `json:"accountant"`
 	Cashier         financialBrowserIdentityFixture `json:"cashier"`
+	Payroll         financialBrowserIdentityFixture `json:"payroll"`
 	SecondTenant    financialBrowserIdentityFixture `json:"second_tenant"`
 	PrimaryAccount  int64                           `json:"primary_account_id"`
 	RevenueAccount  int64                           `json:"revenue_account_id"`
@@ -32,6 +34,9 @@ type financialBrowserFixture struct {
 	ForeignAccount  int64                           `json:"foreign_account_id"`
 	AccountName     string                          `json:"account_name"`
 	FormulaName     string                          `json:"formula_name"`
+	CustomerName    string                          `json:"customer_name"`
+	SupplierName    string                          `json:"supplier_name"`
+	EmployeeName    string                          `json:"employee_name"`
 }
 
 // TestFinancialAcceptanceSeedBrowserFixtures runs only in the isolated CI
@@ -62,8 +67,32 @@ func TestFinancialAcceptanceSeedBrowserFixtures(t *testing.T) {
 		{moduleID: 12, level: "READ"},
 	})
 	cashier := seedLiveFinancialIdentity(t, db, primary, "cashier", "BROWSER-CASHIER", nil)
+	// This persona mirrors the dedicated payroll API acceptance role and only
+	// receives the approved HR employee read and Salaries delete levels.
+	payroll := seedLiveFinancialIdentity(t, db, primary, "payroll-manager", "BROWSER-PAYROLL", []liveFinancialPermission{
+		{moduleID: 3, level: "READ"},
+		{moduleID: 12, level: "DELETE"},
+	})
 	primaryAccountID := liveFinancialAccountID(t, db, primary, "1110")
 	revenueAccountID := liveFinancialAccountID(t, db, primary, "4100")
+	receivableAccountID := liveFinancialAccountID(t, db, primary, "1120")
+	payableAccountID := liveFinancialAccountID(t, db, primary, "2101")
+	cashAccountID := primaryAccountID
+	customerName := "Synthetic Browser AR Customer"
+	customerCode := strings.ToUpper(strings.ReplaceAll(fmt.Sprintf("FB-AR-%d", time.Now().UnixNano()%1_000_000_000_000), " ", ""))
+	if _, err := db.ExecContext(ctx, `INSERT INTO customers_accounting (tenant_id, restaurant_id, customer_code, customer_name, receivable_account_id, is_active) VALUES ($1,$2,$3,$4,$5,TRUE)`, primary.tenantID, primary.restaurantID, customerCode, customerName, receivableAccountID); err != nil {
+		t.Fatalf("seed browser AR customer: %v", err)
+	}
+	supplierName := "Synthetic Browser AP Supplier"
+	supplierCode := fmt.Sprintf("FB-AP-%d", time.Now().UnixNano()%1_000_000_000_000)
+	if _, err := db.ExecContext(ctx, `INSERT INTO suppliers (tenant_id, restaurant_id, supplier_code, company_name, payable_account_id, is_active) VALUES ($1,$2,$3,$4,$5,TRUE)`, primary.tenantID, primary.restaurantID, supplierCode, supplierName, payableAccountID); err != nil {
+		t.Fatalf("seed browser AP supplier: %v", err)
+	}
+	if _, err := db.ExecContext(ctx, `INSERT INTO bank_accounts_ledger (tenant_id, restaurant_id, account_name, bank_name, account_number, currency, account_type, opening_date, gl_account_id, is_active, is_primary) VALUES ($1,$2,'Synthetic Browser Cash','Synthetic QA Bank',$3,'EGP','petty_cash',CURRENT_DATE,$4,TRUE,FALSE)`, primary.tenantID, primary.restaurantID, fmt.Sprintf("FB-%d", time.Now().UnixNano()), cashAccountID); err != nil {
+		t.Fatalf("seed browser payment account: %v", err)
+	}
+	seedLiveFinancialEmployee(t, db, primary)
+	seedLivePayrollPostingRule(t, db, primary)
 	formulaName := `=HYPERLINK("https://example.invalid","Synthetic account")`
 	if _, err := db.ExecContext(ctx, `
 		INSERT INTO chart_of_accounts (tenant_id, restaurant_id, account_code, account_name, account_type, normal_balance)
@@ -89,6 +118,7 @@ func TestFinancialAcceptanceSeedBrowserFixtures(t *testing.T) {
 	fixture := financialBrowserFixture{
 		Accountant:      financialBrowserIdentityFixture{Email: accountant.email, Password: accountant.password, Role: accountant.role},
 		Cashier:         financialBrowserIdentityFixture{Email: cashier.email, Password: cashier.password, Role: cashier.role},
+		Payroll:         financialBrowserIdentityFixture{Email: payroll.email, Password: payroll.password, Role: payroll.role},
 		SecondTenant:    financialBrowserIdentityFixture{Email: secondTenant.email, Password: secondTenant.password, Role: secondTenant.role},
 		PrimaryAccount:  primaryAccountID,
 		RevenueAccount:  revenueAccountID,
@@ -96,6 +126,9 @@ func TestFinancialAcceptanceSeedBrowserFixtures(t *testing.T) {
 		ForeignAccount:  foreignAccountID,
 		AccountName:     "Synthetic Cash",
 		FormulaName:     formulaName,
+		CustomerName:    customerName,
+		SupplierName:    supplierName,
+		EmployeeName:    "Synthetic Employee",
 	}
 	encoded, err := json.MarshalIndent(fixture, "", "  ")
 	if err != nil {
