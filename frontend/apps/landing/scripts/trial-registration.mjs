@@ -26,6 +26,7 @@ function check(name, passed, detail = '') {
 async function captureResponsiveScreens(page, label) {
  for (const viewport of responsiveViewports) {
   await page.setViewportSize(viewport)
+  await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
   const layout = await page.evaluate(() => ({
    viewportWidth: innerWidth,
    scrollWidth: document.documentElement.scrollWidth,
@@ -33,7 +34,32 @@ async function captureResponsiveScreens(page, label) {
   }))
   const screenshot = `${label}-${viewport.width}x${viewport.height}.png`
   await page.screenshot({ path: path.join(output, screenshot), fullPage: true })
-  check(`responsive layout ${screenshot}`, !layout.overflow, JSON.stringify(layout))
+  const diagnostics = layout.overflow
+   ? await page.evaluate(() => Array.from(document.body.querySelectorAll('*'))
+    .map(element => {
+     const rect = element.getBoundingClientRect()
+     const style = getComputedStyle(element)
+     return {
+      tag: element.tagName.toLowerCase(),
+      id: element.id || undefined,
+      className: typeof element.className === 'string' ? element.className : undefined,
+      left: Math.round(rect.left),
+      right: Math.round(rect.right),
+      width: Math.round(rect.width),
+      scrollWidth: element.scrollWidth,
+      clientWidth: element.clientWidth,
+      position: style.position,
+      display: style.display,
+      overflowX: style.overflowX,
+      minWidth: style.minWidth,
+      whiteSpace: style.whiteSpace,
+     }
+    })
+    .filter(element => element.width > 0 && element.right > innerWidth + 2)
+    .sort((left, right) => right.right - left.right)
+    .slice(0, 20))
+   : undefined
+  check(`responsive layout ${screenshot}`, !layout.overflow, JSON.stringify({ ...layout, ...(diagnostics ? { overflowingElements: diagnostics } : {}) }))
  }
 }
 async function register(page, locale, billing, otherCategory) {
