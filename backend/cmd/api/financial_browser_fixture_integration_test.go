@@ -55,6 +55,7 @@ func TestFinancialAcceptanceSeedBrowserFixtures(t *testing.T) {
 
 	primary := seedLiveFinancialOrderFixture(t, db)
 	accountant := seedLiveFinancialIdentity(t, db, primary, "accountant", "BROWSER-ACCOUNTANT", []liveFinancialPermission{
+		{moduleID: 3, level: "READ"},
 		{moduleID: 15, level: "WRITE"},
 		{moduleID: 16, level: "READ"},
 		{moduleID: 17, level: "READ"},
