@@ -214,9 +214,15 @@ test.describe('authenticated financial browser acceptance', () => {
     const session = await login(page, identities.accountant)
     expect(session.role).toBe('accountant')
     await openFinancialPage(page, 'ar', 'accounting/advanced')
-    await expect(page.getByRole('heading', { name: /Advanced Accounting Tools/i })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'أدوات المحاسبة المتقدمة', exact: true })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'تسوية البنك', exact: true })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'القيود المتكررة', exact: true })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'الموازنات وأسعار الصرف', exact: true })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'جدولة مدفوعات الموردين والتذكيرات', exact: true })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'الفاتورة الإلكترونية والاستيراد المتوافق مع Excel', exact: true })).toBeVisible()
+    await expect(page.getByLabel('معرّف الحساب البنكي')).toBeVisible()
     const downloadEvent = page.waitForEvent('download')
-    await page.getByRole('button', { name: /Export COA CSV/i }).click()
+    await page.getByRole('button', { name: 'تصدير دليل الحسابات CSV', exact: true }).click()
     const download = await downloadEvent
     expect(download.suggestedFilename()).toMatch(/\.csv$/i)
     const csvPath = testInfo.outputPath('chart-of-accounts.csv')
@@ -228,6 +234,45 @@ test.describe('authenticated financial browser acceptance', () => {
     await expect(page.locator('html')).toHaveAttribute('dir', 'rtl')
     await assertNoDocumentOverflow(page)
     await page.screenshot({ path: testInfo.outputPath('ar-mobile-accounting-tools.png'), fullPage: true })
+  })
+
+  test('accountant EN desktop reviews AR/AP registers, aging reports, and payroll', async ({ page }, testInfo) => {
+    await setViewport(page, 1440, 900)
+    const session = await login(page, identities.accountant)
+    expect(session.role).toBe('accountant')
+
+    await openFinancialPage(page, 'en', 'accounting/customer-invoices')
+    await expect(page.getByRole('heading', { name: 'Customer Invoices', exact: true })).toBeVisible()
+    await expect(page.getByRole('button', { name: 'New customer invoice', exact: true })).toBeEnabled()
+    await expect(page.getByRole('button', { name: 'Record payment', exact: true })).toBeEnabled()
+    await expect(page.getByRole('heading', { name: 'No invoices found', exact: true })).toBeVisible()
+    await page.getByRole('tab', { name: 'Payments', exact: true }).click()
+    await expect(page.getByRole('heading', { name: 'No received payments yet', exact: true })).toBeVisible()
+    await page.screenshot({ path: testInfo.outputPath('en-desktop-customer-invoices-payments.png'), fullPage: true })
+
+    await page.goto('/en/dashboard/accounting/supplier-invoices')
+    await expect(page.getByRole('heading', { name: 'Supplier Invoices', exact: true })).toBeVisible()
+    await expect(page.getByRole('button', { name: 'New supplier invoice', exact: true })).toBeEnabled()
+    await page.getByRole('tab', { name: 'Payments', exact: true }).click()
+    await expect(page.getByRole('heading', { name: 'No supplier payments yet', exact: true })).toBeVisible()
+    await page.screenshot({ path: testInfo.outputPath('en-desktop-supplier-invoices-payments.png'), fullPage: true })
+
+    await page.goto('/en/dashboard/reports/financial/receivables-aging')
+    await expect(page.getByRole('heading', { name: 'Receivables Aging', exact: true })).toBeVisible()
+    await expect(page.getByRole('table')).toBeVisible()
+    await page.screenshot({ path: testInfo.outputPath('en-desktop-receivables-aging.png'), fullPage: true })
+
+    await page.goto('/en/dashboard/reports/financial/payables-aging')
+    await expect(page.getByRole('heading', { name: 'Payables Aging', exact: true })).toBeVisible()
+    await expect(page.getByRole('table')).toBeVisible()
+    await page.screenshot({ path: testInfo.outputPath('en-desktop-payables-aging.png'), fullPage: true })
+
+    await page.goto('/en/dashboard/hr/payroll')
+    await expect(page.getByRole('heading', { name: 'Payroll', exact: true })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'No Salary Records', exact: true })).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Create Salary', exact: true })).toBeVisible()
+    await assertNoDocumentOverflow(page)
+    await page.screenshot({ path: testInfo.outputPath('en-desktop-payroll.png'), fullPage: true })
   })
 
   test('cashier AR mobile remains denied by server-side accounting RBAC', async ({ page }, testInfo) => {
