@@ -1,0 +1,93 @@
+name: SERVIO financial query benchmark
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/financial-benchmark.yml'
+      - 'backend/cmd/api/financial_benchmark_integration_test.go'
+      - 'backend/migrations/190_financial_ledger_account_page_index.sql'
+  workflow_dispatch:
+    inputs:
+      journal_count:
+        description: Synthetic balanced journal count
+        required: true
+        type: choice
+        options: ['1000', '10000', '50000']
+        default: '10000'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: servio-financial-benchmark-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    env:
+      GOMAXPROCS: '2'
+      GOFLAGS: -p=1
+      ENV: test
+      DB_HOST: 127.0.0.1
+      DB_PORT: '5432'
+      DB_NAME: servio_benchmark_test
+      DB_USER: pos_migrator
+      DB_SSLMODE: disable
+      POS_FINANCIAL_BENCHMARK: '1'
+      POS_FINANCIAL_BENCHMARK_JOURNALS: ${{ github.event.inputs.journal_count || '10000' }}
+      POS_FINANCIAL_BENCHMARK_OUTPUT: audit-reports/financial-benchmark/financial-query-benchmark.json
+      POS_FINANCIAL_BENCHMARK_COMMIT: ${{ github.sha }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e
+        with:
+          go-version-file: backend/go.mod
+          cache-dependency-path: backend/go.sum
+      - name: Start disposable PostgreSQL with query statistics
+        shell: bash
+        run: |
+          set -euo pipefail
+          POSTGRES_PASSWORD="$(openssl rand -hex 32)"
+          MIGRATOR_PASSWORD="$(openssl rand -hex 32)"
+          APP_PASSWORD="$(openssl rand -hex 32)"
+          ACCOUNTING_PASSWORD="$(openssl rand -hex 32)"
+          for secret in "$POSTGRES_PASSWORD" "$MIGRATOR_PASSWORD" "$APP_PASSWORD" "$ACCOUNTING_PASSWORD"; do echo "::add-mask::$secret"; done
+          docker run --detach --name servio-financial-benchmark-postgres \
+            --publish 127.0.0.1:5432:5432 --memory 4g --shm-size 1g \
+            --env POSTGRES_PASSWORD="$POSTGRES_PASSWORD" --env POSTGRES_DB=servio_benchmark_test \
+            postgres@sha256:e62fbf9d3e2b49816a32c400ed2dba83e3b361e6833e624024309c35d334b412 \
+            -c shared_preload_libraries=pg_stat_statements >/dev/null
+          for attempt in $(seq 1 40); do
+            if docker exec servio-financial-benchmark-postgres pg_isready -U postgres -d servio_benchmark_test >/dev/null 2>&1; then break; fi
+            if [ "$(docker inspect --format '{{.State.Running}}' servio-financial-benchmark-postgres 2>/dev/null || true)" != true ]; then docker logs servio-financial-benchmark-postgres; exit 1; fi
+            sleep 2
+          done
+          docker exec servio-financial-benchmark-postgres pg_isready -U postgres -d servio_benchmark_test
+          {
+            echo "POSTGRES_PASSWORD=$POSTGRES_PASSWORD"
+            echo "DB_PASSWORD=$MIGRATOR_PASSWORD"
+            echo "APP_PASSWORD=$APP_PASSWORD"
+            echo "ACCOUNTING_PASSWORD=$ACCOUNTING_PASSWORD"
+            echo "POS_TEST_DATABASE_URL=postgres://postgres:$POSTGRES_PASSWORD@127.0.0.1:5432/servio_benchmark_test?sslmode=disable"
+          } >> "$GITHUB_ENV"
+      - name: Create restricted database roles
+        working-directory: backend
+        run: PGPASSWORD="$POSTGRES_PASSWORD" psql -h 127.0.0.1 -U postgres -d postgres -v ON_ERROR_STOP=1 -v dbname=servio_benchmark_test -v migrator_pw="$DB_PASSWORD" -v app_pw="$APP_PASSWORD" -v accounting_pw="$ACCOUNTING_PASSWORD" -f scripts/db/create_runtime_roles.sql
+      - name: Apply migrations to the disposable database
+        working-directory: backend
+        run: go run ./cmd/migrate
+      - name: Execute PostgreSQL-backed financial benchmark
+        working-directory: backend
+        run: go test -tags integration -count=1 -timeout 35m ./cmd/api -run '^TestFinancialQueryBenchmarkIntegration$' -v
+      - name: Upload benchmark report
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: financial-query-benchmark-${{ github.sha }}-${{ github.event.inputs.journal_count || '10000' }}
+          path: audit-reports/financial-benchmark/financial-query-benchmark.json
+          if-no-files-found: warn
+      - name: Destroy disposable PostgreSQL
+        if: always()
+        run: docker rm --force servio-financial-benchmark-postgres >/dev/null 2>&1 || true
