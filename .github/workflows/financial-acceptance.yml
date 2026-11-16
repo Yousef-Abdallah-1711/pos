@@ -169,7 +169,7 @@ jobs:
           SERVIO_FINANCIAL_DASHBOARD_URL: http://localhost:3002
           SERVIO_FINANCIAL_BROWSER_FIXTURE_FILE: ${{ runner.temp }}/servio-financial-browser-fixture.json
         run: |
-          node --check apps/dashboard/tests/financial-browser/acceptance.spec.js
+          node --check apps/dashboard/tests/financial-browser/acceptance.browser.js
           pnpm --filter @pos-saas/dashboard exec playwright test --config playwright.financial.config.ts
       - name: Verify payment, auth, order, accounting, and reporting integration scenarios
         working-directory: backend
