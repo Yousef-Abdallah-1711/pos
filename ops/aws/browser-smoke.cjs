@@ -174,15 +174,7 @@ async function loginJourney(browser,admin=false) {
      return window.location.pathname===pathname&&heading&&heading.getClientRects().length>0;
     },route,{timeout:45000});
     if(new URL(page.url()).pathname==='/login') return true;
-    const sessionStatus=await page.evaluate(async apiBase=>{
-     const response=await fetch(`${apiBase}/super-admin/auth/session`,{credentials:'include'});
-     return response.status;
-    },api);
-    if(sessionStatus!==200){
-     await page.waitForURL('**/login',{timeout:10000}).catch(()=>{});
-     return new URL(page.url()).pathname==='/login';
-    }
-    await page.waitForTimeout(1000);
+    await page.waitForTimeout(500);
     if(new URL(page.url()).pathname==='/login') return true;
     try {
      await page.locator('main h1').first().waitFor({state:'visible',timeout:10000});
