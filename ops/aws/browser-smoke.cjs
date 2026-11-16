@@ -147,6 +147,19 @@ async function loginJourney(browser,admin=false) {
    });
    page.on('response',response=>{if(response.status()>=400&&response.request().resourceType()==='image')adminAssetFailures.push(`${response.status()} ${new URL(response.url()).pathname}`)});
    const adminRoutes=['/dashboard','/dashboard/tenants','/dashboard/users','/dashboard/audit-logs','/dashboard/payments','/dashboard/settings'];
+   const waitForAdminRoute=async route=>{
+    await page.waitForFunction(async({apiBase,pathname})=>{
+     if(window.location.pathname==='/login') return true;
+     if(window.location.pathname!==pathname||!document.querySelector('main h1')) return false;
+     try {
+      const response=await fetch(`${apiBase}/super-admin/auth/session`,{credentials:'include'});
+      return response.status===200;
+     } catch {
+      return false;
+     }
+    },{apiBase:api,pathname:route},{timeout:45000});
+    return new URL(page.url()).pathname==='/login';
+   };
    const switchTo=async(locale,theme)=>{
     const current=await page.evaluate(()=>({locale:document.documentElement.lang,theme:document.documentElement.classList.contains('dark')}));
     if(current.locale!==locale) await page.getByRole('button',{name:current.locale==='en'?'Switch to Arabic':'التغيير إلى الإنجليزية'}).click();
@@ -163,14 +176,12 @@ async function loginJourney(browser,admin=false) {
     await page.waitForFunction(expected=>document.documentElement.lang===expected.locale&&document.documentElement.dir===(expected.locale==='ar'?'rtl':'ltr')&&document.documentElement.classList.contains('dark')===(expected.theme==='dark'),{locale,theme});
     for(const route of adminRoutes){
      let response=await page.goto(adminBase+route,{waitUntil:'domcontentloaded',timeout:45000});
-     await page.waitForFunction(()=>window.location.pathname==='/login'||document.querySelector('main h1'),null,{timeout:30000});
-     if(new URL(page.url()).pathname==='/login'){
+     if(await waitForAdminRoute(route)){
       await authenticateAdmin();
       response=await page.goto(adminBase+route,{waitUntil:'domcontentloaded',timeout:45000});
-      await page.locator('main h1').first().waitFor({state:'visible',timeout:30000});
-     } else {
-      await page.locator('main h1').first().waitFor({state:'visible',timeout:30000});
+      if(await waitForAdminRoute(route)) throw new Error(`Super Admin session unavailable after reauthentication on ${route}`);
      }
+     await page.locator('main h1').first().waitFor({state:'visible',timeout:30000});
      await page.waitForTimeout(350);
      for(const {width,height} of responsiveViewports){
       await page.setViewportSize({width,height});
