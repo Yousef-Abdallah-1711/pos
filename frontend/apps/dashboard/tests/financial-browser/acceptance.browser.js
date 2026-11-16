@@ -15,6 +15,46 @@ const identities = {
 }
 
 let postedJournalId
+const browserDiagnostics = new WeakMap()
+
+const expectedNotificationDenials = new Set([
+  '/api/v1/notifications',
+  '/api/v1/notifications/stats',
+  '/api/v1/notifications/unread-count',
+])
+
+test.beforeEach(async ({ page }) => {
+  const diagnostics = { unexpected: [], notification403Responses: 0, generic403ConsoleErrors: 0 }
+  browserDiagnostics.set(page, diagnostics)
+
+  page.on('pageerror', (error) => diagnostics.unexpected.push(`page: ${error.message}`))
+  page.on('console', (message) => {
+    if (message.type() !== 'error') return
+    if (message.text() === 'Failed to load resource: the server responded with a status of 403 (Forbidden)') {
+      diagnostics.generic403ConsoleErrors += 1
+      return
+    }
+    diagnostics.unexpected.push(`console: ${message.text()}`)
+  })
+  page.on('response', (response) => {
+    if (!response.url().startsWith(apiBase)) return
+    const pathname = new URL(response.url()).pathname
+    if (response.status() === 403 && response.request().method() === 'GET' && expectedNotificationDenials.has(pathname)) {
+      diagnostics.notification403Responses += 1
+      return
+    }
+    if (response.status() >= 400) {
+      diagnostics.unexpected.push(`api ${response.status()}: ${response.request().method()} ${pathname}`)
+    }
+  })
+})
+
+test.afterEach(async ({ page }) => {
+  const diagnostics = browserDiagnostics.get(page)
+  expect(diagnostics.generic403ConsoleErrors, 'console 403s must correspond to the documented notification permission probes')
+    .toBe(diagnostics.notification403Responses)
+  expect(diagnostics.unexpected, 'no unexpected page, console, or API errors').toEqual([])
+})
 
 async function login(page, identity) {
   const response = await page.request.post(`${apiBase}/auth/login`, {
@@ -33,22 +73,11 @@ async function setViewport(page, width, height) {
 }
 
 async function openFinancialPage(page, locale, route) {
-  const errors = []
-  page.on('pageerror', (error) => errors.push(`page: ${error.message}`))
-  page.on('console', (message) => {
-    if (message.type() === 'error') errors.push(`console: ${message.text()}`)
-  })
-  page.on('response', (response) => {
-    const url = response.url()
-    if (url.startsWith(apiBase) && response.status() >= 500) {
-      errors.push(`api ${response.status()}: ${new URL(url).pathname}`)
-    }
-  })
   await page.goto(`/${locale}/dashboard/${route}`, { waitUntil: 'domcontentloaded' })
   await expect(page).toHaveURL(new RegExp(`/${locale}/dashboard/${route.replaceAll('/', '\\/')}`))
   await expect(page.locator('main')).toBeVisible()
+  await expect(page.locator('html')).toHaveAttribute('lang', locale)
   await expect.poll(() => page.locator('html').getAttribute('dir')).toBe(locale === 'ar' ? 'rtl' : 'ltr')
-  return errors
 }
 
 async function assertNoDocumentOverflow(page) {
@@ -64,7 +93,7 @@ test.describe('authenticated financial browser acceptance', () => {
     await setViewport(page, 1440, 900)
     const session = await login(page, identities.accountant)
     expect(session.role).toBe('accountant')
-    const errors = await openFinancialPage(page, 'en', 'accounting/chart-of-accounts')
+    await openFinancialPage(page, 'en', 'accounting/chart-of-accounts')
     await expect(page.getByRole('heading', { name: /Chart of Accounts/i })).toBeVisible()
     await expect(page.getByText(fixture.account_name, { exact: false }).first()).toBeVisible()
     await page.getByPlaceholder(/Search accounts/i).fill(fixture.account_name)
@@ -107,7 +136,6 @@ test.describe('authenticated financial browser acceptance', () => {
     await expect(page.locator('table').last()).toContainText(/50\.00/)
     await assertNoDocumentOverflow(page)
     await page.screenshot({ path: testInfo.outputPath('en-desktop-ledger.png'), fullPage: true })
-    expect(errors).toEqual([])
   })
 
   test('cashier EN desktop is denied financial screens and posting', async ({ page }, testInfo) => {
@@ -138,7 +166,7 @@ test.describe('authenticated financial browser acceptance', () => {
         url.pathname.endsWith('/reports/financial/balance-sheet') &&
         response.request().method() === 'GET' && response.status() === 200
     })
-    const errors = await openFinancialPage(page, 'ar', 'reports/financial/balance-sheet')
+    await openFinancialPage(page, 'ar', 'reports/financial/balance-sheet')
     const balanceSheetPayload = await (await balanceSheetResponse).json()
     const balanceSheetData = balanceSheetPayload.data || balanceSheetPayload
     expect(Number.isFinite(balanceSheetData.total_assets)).toBe(true)
@@ -158,14 +186,13 @@ test.describe('authenticated financial browser acceptance', () => {
     await page.goto('/ar/dashboard/reports/financial/cash-flow')
     await expect(page.locator('main')).toBeVisible()
     await assertNoDocumentOverflow(page)
-    expect(errors).toEqual([])
   })
 
   test('accountant EN mobile navigates journal, P&L, cash-flow, and downloads PDF', async ({ page }, testInfo) => {
     await setViewport(page, 375, 812)
     const session = await login(page, identities.accountant)
     expect(session.role).toBe('accountant')
-    const errors = await openFinancialPage(page, 'en', 'accounting/journal-entries')
+    await openFinancialPage(page, 'en', 'accounting/journal-entries')
     await expect(page.locator('main').getByRole('heading', { name: 'Journal Entries', exact: true })).toBeVisible()
     await page.goto('/en/dashboard/reports/financial/profit-loss')
     await expect(page.getByRole('heading', { name: 'Profit & Loss', exact: true })).toBeVisible()
@@ -179,7 +206,6 @@ test.describe('authenticated financial browser acceptance', () => {
     await download.saveAs(pdfPath)
     expect(fs.readFileSync(pdfPath).subarray(0, 4).toString()).toBe('%PDF')
     await assertNoDocumentOverflow(page)
-    expect(errors).toEqual([])
     await page.screenshot({ path: testInfo.outputPath('en-mobile-profit-loss.png'), fullPage: true })
   })
 
