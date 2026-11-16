@@ -351,6 +351,22 @@ func TestCFR003PostgresBackdatedEntryKeepsAsOfBalancesChronological(t *testing.T
 	if len(ledgerLines) != 2 || ledgerLines[0].RunningBalance != 150 || ledgerLines[1].RunningBalance != 50 {
 		t.Fatalf("chronological running balances in descending display order = %+v, want [150, 50]", ledgerLines)
 	}
+
+	firstPage, nextCursor, err := fixture.ledger.GetLedgerByAccountCursor(fixture.tenantID, fixture.restaurantID, fixture.debitAccountID, nil, nil, 1, nil)
+	if err != nil {
+		t.Fatalf("list first chronological ledger page: %v", err)
+	}
+	if len(firstPage) != 1 || nextCursor == nil || firstPage[0].RunningBalance != 150 {
+		t.Fatalf("first ledger page/cursor = %+v/%v, want one newest row and a continuation cursor", firstPage, nextCursor)
+	}
+
+	secondPage, finalCursor, err := fixture.ledger.GetLedgerByAccountCursor(fixture.tenantID, fixture.restaurantID, fixture.debitAccountID, nil, nil, 1, nextCursor)
+	if err != nil {
+		t.Fatalf("continue chronological ledger page: %v", err)
+	}
+	if len(secondPage) != 1 || finalCursor != nil || secondPage[0].EntryDate != earlyDate || secondPage[0].RunningBalance != 50 {
+		t.Fatalf("second ledger page/cursor = %+v/%v, want the backdated row and no further cursor", secondPage, finalCursor)
+	}
 }
 
 func TestCFR003PostgresConcurrentJournalNumbersKeepTenantRestaurantScopes(t *testing.T) {

@@ -251,7 +251,15 @@ func (r *GeneralLedgerRepository) GetLedgerByAccountCursor(
 	}
 
 	if cursor != nil && *cursor > 0 {
-		builder.WriteString(fmt.Sprintf(" AND gl.id < $%d", argPos))
+		builder.WriteString(fmt.Sprintf(`
+			AND (gl.entry_date, gl.id) < (
+				SELECT cursor_row.entry_date, cursor_row.id
+				FROM general_ledger cursor_row
+				WHERE cursor_row.id = $%d
+				  AND cursor_row.tenant_id = $1
+				  AND cursor_row.restaurant_id = $2
+				  AND cursor_row.account_id = $3
+			)`, argPos))
 		args = append(args, *cursor)
 		argPos++
 	}

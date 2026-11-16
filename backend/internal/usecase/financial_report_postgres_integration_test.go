@@ -6,6 +6,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"os"
 	"testing"
 	"time"
 
@@ -16,6 +17,7 @@ import (
 )
 
 func TestGenerateBalanceSheetPostgresIntegrityStatus(t *testing.T) {
+	requireDisposableFinancialTestDatabase(t)
 	db, err := sql.Open("postgres", testdb.URL(t))
 	if err != nil {
 		t.Fatalf("open disposable PostgreSQL: %v", err)
@@ -38,6 +40,7 @@ func TestGenerateBalanceSheetPostgresIntegrityStatus(t *testing.T) {
 }
 
 func TestGenerateBalanceSheetPostgresBackdatedJournalUsesAsOfMovementSum(t *testing.T) {
+	requireDisposableFinancialTestDatabase(t)
 	db, err := sql.Open("postgres", testdb.URL(t))
 	if err != nil {
 		t.Fatalf("open disposable PostgreSQL: %v", err)
@@ -86,6 +89,13 @@ func TestGenerateBalanceSheetPostgresBackdatedJournalUsesAsOfMovementSum(t *test
 	}
 	if report.TotalAssets != 50 {
 		t.Fatalf("balance sheet assets as of %s = %.2f, want only backdated 50.00 posting", earlyDate.Format("2006-01-02"), report.TotalAssets)
+	}
+}
+
+func requireDisposableFinancialTestDatabase(t *testing.T) {
+	t.Helper()
+	if os.Getenv("SERVIO_DISPOSABLE_FINANCIAL_TEST_DB") != "1" {
+		t.Skip("this test posts immutable synthetic ledger history; set SERVIO_DISPOSABLE_FINANCIAL_TEST_DB=1 only for a disposable PostgreSQL database")
 	}
 }
 
