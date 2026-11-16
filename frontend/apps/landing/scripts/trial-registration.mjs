@@ -26,12 +26,33 @@ function check(name, passed, detail = '') {
 async function captureResponsiveScreens(page, label) {
  for (const viewport of responsiveViewports) {
   await page.setViewportSize(viewport)
-  await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
+  await page.evaluate(async () => {
+   await document.fonts.ready
+   await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))
+   const activeTransitions = document.getAnimations().filter(animation =>
+    animation.playState === 'running' && animation.effect?.getComputedTiming().iterations !== Infinity,
+   )
+   await Promise.all(activeTransitions.map(animation => animation.finished.catch(() => undefined)))
+   await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))
+  })
   const layout = await page.evaluate(() => ({
    viewportWidth: innerWidth,
    scrollWidth: document.documentElement.scrollWidth,
    overflow: document.documentElement.scrollWidth > innerWidth + 2,
   }))
+  const clippedControls = await page.evaluate(() => Array.from(document.querySelectorAll(
+   'header button, main button, main a, main input, main select, main textarea',
+  )).map(element => {
+   const rect = element.getBoundingClientRect()
+   return {
+    tag: element.tagName.toLowerCase(),
+    id: element.id || undefined,
+    className: typeof element.className === 'string' ? element.className : undefined,
+    left: Math.round(rect.left),
+    right: Math.round(rect.right),
+    width: Math.round(rect.width),
+   }
+  }).filter(element => element.width > 0 && (element.left < -2 || element.right > innerWidth + 2)))
   const screenshot = `${label}-${viewport.width}x${viewport.height}.png`
   await page.screenshot({ path: path.join(output, screenshot), fullPage: true })
   const diagnostics = layout.overflow
@@ -60,6 +81,7 @@ async function captureResponsiveScreens(page, label) {
     .slice(0, 20))
    : undefined
   check(`responsive layout ${screenshot}`, !layout.overflow, JSON.stringify({ ...layout, ...(diagnostics ? { overflowingElements: diagnostics } : {}) }))
+  check(`visible controls fit ${screenshot}`, clippedControls.length === 0, JSON.stringify(clippedControls))
  }
 }
 async function register(page, locale, billing, otherCategory) {
