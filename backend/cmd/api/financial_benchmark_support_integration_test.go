@@ -30,7 +30,10 @@ func invokeFinancialBenchmarkHandler(fixture financialBenchmarkFixture, query st
 	return recorder
 }
 
-type financialBenchmarkFixture struct{ tenantID, restaurantID, cashAccountID, postedBy int }
+type financialBenchmarkFixture struct {
+	tenantID, restaurantID, cashAccountID, postedBy int
+	postingDuration                                 time.Duration
+}
 
 func financialBenchmarkJournalCount(t *testing.T) int {
 	t.Helper()
@@ -143,6 +146,7 @@ func seedFinancialBenchmarkDataset(t *testing.T, db *sql.DB, journalCount int) f
 	}
 	defer postingTx.Rollback()
 	journalRepository := repository.NewJournalEntryRepository(db)
+	postingStart := time.Now()
 	for _, id := range entryIDs {
 		if err := journalRepository.PostEntryTx(postingTx, int(base.tenantID), int(base.restaurantID), id, fixture.postedBy); err != nil {
 			t.Fatalf("post synthetic balanced journal %d through repository workflow: %v", id, err)
@@ -151,6 +155,7 @@ func seedFinancialBenchmarkDataset(t *testing.T, db *sql.DB, journalCount int) f
 	if err := postingTx.Commit(); err != nil {
 		t.Fatalf("commit synthetic financial postings: %v", err)
 	}
+	fixture.postingDuration = time.Since(postingStart)
 	var entries, lines, ledgerRows int
 	if err := db.QueryRow(`SELECT COUNT(*) FROM journal_entries WHERE tenant_id=$1 AND restaurant_id=$2 AND reference_type='financial_benchmark'`, base.tenantID, base.restaurantID).Scan(&entries); err != nil {
 		t.Fatalf("verify benchmark journal count: %v", err)
@@ -198,11 +203,13 @@ type financialBenchmarkIndexComparison struct {
 }
 
 type financialBenchmarkDataset struct {
-	TenantCount       int   `json:"tenant_count"`
-	JournalEntries    int   `json:"journal_entries"`
-	JournalLines      int   `json:"journal_lines"`
-	GeneralLedgerRows int   `json:"general_ledger_rows"`
-	DatabaseBytes     int64 `json:"database_bytes"`
+	TenantCount                int     `json:"tenant_count"`
+	JournalEntries             int     `json:"journal_entries"`
+	JournalLines               int     `json:"journal_lines"`
+	GeneralLedgerRows          int     `json:"general_ledger_rows"`
+	DatabaseBytes              int64   `json:"database_bytes"`
+	PostingDurationMS          float64 `json:"posting_duration_ms"`
+	PostingThroughputPerSecond float64 `json:"posting_throughput_per_second"`
 }
 type financialBenchmarkReport struct {
 	Commit                    string                            `json:"commit"`
