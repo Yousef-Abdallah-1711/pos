@@ -147,11 +147,14 @@ async function loginJourney(browser,admin=false) {
     await page.waitForFunction(expected=>document.documentElement.lang===expected.locale&&document.documentElement.dir===(expected.locale==='ar'?'rtl':'ltr')&&document.documentElement.classList.contains('dark')===(expected.theme==='dark'),{locale,theme});
     for(const route of adminRoutes){
      let response=await page.goto(adminBase+route,{waitUntil:'domcontentloaded',timeout:45000});
-     if(page.url()===`${adminBase}/login`){
+     await page.waitForFunction(()=>window.location.pathname==='/login'||document.querySelector('main h1'),null,{timeout:30000});
+     if(new URL(page.url()).pathname==='/login'){
       await authenticateAdmin();
       response=await page.goto(adminBase+route,{waitUntil:'domcontentloaded',timeout:45000});
+      await page.locator('main h1').first().waitFor({state:'visible',timeout:30000});
+     } else {
+      await page.locator('main h1').first().waitFor({state:'visible',timeout:30000});
      }
-     await page.locator('main h1').first().waitFor({state:'visible',timeout:30000});
      await page.waitForTimeout(350);
      for(const {width,height} of responsiveViewports){
       await page.setViewportSize({width,height});
