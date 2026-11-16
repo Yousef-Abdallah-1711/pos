@@ -40,19 +40,65 @@ async function captureResponsiveScreens(page, label) {
    scrollWidth: document.documentElement.scrollWidth,
    overflow: document.documentElement.scrollWidth > innerWidth + 2,
   }))
-  const clippedControls = await page.evaluate(() => Array.from(document.querySelectorAll(
-   'header button, main button, main a, main input, main select, main textarea',
-  )).map(element => {
-   const rect = element.getBoundingClientRect()
-   return {
-    tag: element.tagName.toLowerCase(),
-    id: element.id || undefined,
-    className: typeof element.className === 'string' ? element.className : undefined,
-    left: Math.round(rect.left),
-    right: Math.round(rect.right),
-    width: Math.round(rect.width),
+  const clippedControls = await page.evaluate(() => {
+   const failures = []
+   const controls = document.querySelectorAll(
+    'header button, main button, main a, main input, main select, main textarea',
+   )
+   for (const element of controls) {
+    const initialRect = element.getBoundingClientRect()
+    if (initialRect.width <= 0 || (initialRect.left >= -2 && initialRect.right <= innerWidth + 2)) continue
+
+    let scrollport = element.parentElement
+    while (scrollport && scrollport !== document.body) {
+     const style = getComputedStyle(scrollport)
+     if (['auto', 'scroll', 'overlay'].includes(style.overflowX) && scrollport.scrollWidth > scrollport.clientWidth + 2) break
+     scrollport = scrollport.parentElement
+    }
+    if (!scrollport || scrollport === document.body) {
+     failures.push({ reason: 'outside viewport without a horizontal scrollport', ...describeControl(element, initialRect) })
+     continue
+    }
+
+    const ancestors = []
+    for (let ancestor = element.parentElement; ancestor; ancestor = ancestor.parentElement) {
+     ancestors.push({ element: ancestor, scrollLeft: ancestor.scrollLeft })
+    }
+    const pagePosition = { x: scrollX, y: scrollY }
+    element.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'instant' })
+    const visibleRect = element.getBoundingClientRect()
+    const portRect = scrollport.getBoundingClientRect()
+    const portLeft = portRect.left + scrollport.clientLeft
+    const portRight = portLeft + scrollport.clientWidth
+    const visible = visibleRect.left >= Math.max(-2, portLeft - 2)
+     && visibleRect.right <= Math.min(innerWidth + 2, portRight + 2)
+    if (!visible) {
+     failures.push({
+      reason: 'horizontal scrollport could not bring control fully into view',
+      ...describeControl(element, initialRect),
+      scrollport: {
+       className: typeof scrollport.className === 'string' ? scrollport.className : undefined,
+       scrollWidth: scrollport.scrollWidth,
+       clientWidth: scrollport.clientWidth,
+      },
+     })
+    }
+    for (const ancestor of ancestors) ancestor.element.scrollLeft = ancestor.scrollLeft
+    scrollTo(pagePosition.x, pagePosition.y)
    }
-  }).filter(element => element.width > 0 && (element.left < -2 || element.right > innerWidth + 2)))
+   return failures
+
+   function describeControl(element, rect) {
+    return {
+     tag: element.tagName.toLowerCase(),
+     id: element.id || undefined,
+     className: typeof element.className === 'string' ? element.className : undefined,
+     left: Math.round(rect.left),
+     right: Math.round(rect.right),
+     width: Math.round(rect.width),
+    }
+   }
+  })
   const screenshot = `${label}-${viewport.width}x${viewport.height}.png`
   await page.screenshot({ path: path.join(output, screenshot), fullPage: true })
   const diagnostics = layout.overflow
