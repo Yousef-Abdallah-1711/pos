@@ -2,7 +2,9 @@ const { test, expect } = require('@playwright/test')
 const fs = require('node:fs')
 const path = require('node:path')
 
-const apiBase = process.env.SERVIO_FINANCIAL_API_URL || 'http://localhost:8080/api/v1'
+const apiBase = process.env.SERVIO_FINANCIAL_API_URL
+if (!apiBase) throw new Error('Disposable financial API URL is required')
+const dashboardOrigin = new URL(process.env.SERVIO_FINANCIAL_DASHBOARD_URL).origin
 const fixtureFile = process.env.SERVIO_FINANCIAL_BROWSER_FIXTURE_FILE
 if (!fixtureFile) throw new Error('Private financial browser fixture file is required')
 const fixture = JSON.parse(fs.readFileSync(fixtureFile, 'utf8'))
@@ -16,7 +18,7 @@ let postedJournalId
 
 async function login(page, identity) {
   const response = await page.request.post(`${apiBase}/auth/login`, {
-    headers: { Origin: 'http://localhost:3002' },
+    headers: { Origin: dashboardOrigin },
     data: { email: identity.email, password: identity.password },
   })
   expect(response.status(), 'synthetic browser identity login').toBe(200)
@@ -112,7 +114,7 @@ test.describe('authenticated financial browser acceptance', () => {
     await expect(page.getByRole('button', { name: /New journal entry/i })).toHaveCount(0)
     if (!postedJournalId) throw new Error('Accountant journal prerequisite did not run')
     const response = await page.request.post(`${apiBase}/accounting/journal-entries/${postedJournalId}/post`, {
-      headers: { Origin: 'http://localhost:3002' },
+      headers: { Origin: dashboardOrigin },
       data: {},
     })
     expect(response.status()).toBe(403)
