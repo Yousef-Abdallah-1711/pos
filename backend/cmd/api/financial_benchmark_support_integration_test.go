@@ -18,6 +18,7 @@ import (
 
 	"github.com/lib/pq"
 	"pos-saas/internal/middleware"
+	"pos-saas/internal/repository"
 )
 
 func invokeFinancialBenchmarkHandler(fixture financialBenchmarkFixture, query string, handler http.HandlerFunc) *httptest.ResponseRecorder {
@@ -29,7 +30,7 @@ func invokeFinancialBenchmarkHandler(fixture financialBenchmarkFixture, query st
 	return recorder
 }
 
-type financialBenchmarkFixture struct{ tenantID, restaurantID, cashAccountID int }
+type financialBenchmarkFixture struct{ tenantID, restaurantID, cashAccountID, postedBy int }
 
 func financialBenchmarkJournalCount(t *testing.T) int {
 	t.Helper()
@@ -48,6 +49,9 @@ func seedFinancialBenchmarkDataset(t *testing.T, db *sql.DB, journalCount int) f
 	t.Helper()
 	base := seedLiveFinancialOrderFixture(t, db)
 	fixture := financialBenchmarkFixture{tenantID: int(base.tenantID), restaurantID: int(base.restaurantID)}
+	if err := db.QueryRow(`SELECT id FROM users WHERE tenant_id=$1 AND restaurant_id=$2 AND email=$3`, base.tenantID, base.restaurantID, base.email).Scan(&fixture.postedBy); err != nil {
+		t.Fatalf("read synthetic posting actor: %v", err)
+	}
 	accountIDs := make(map[string]int64, 3)
 	rows, err := db.Query(`SELECT account_code, id FROM chart_of_accounts WHERE tenant_id=$1 AND restaurant_id=$2 AND account_code IN ('1110','4100','2120')`, base.tenantID, base.restaurantID)
 	if err != nil {
@@ -84,7 +88,7 @@ func seedFinancialBenchmarkDataset(t *testing.T, db *sql.DB, journalCount int) f
 	}
 	startDate := time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC)
 	for i := 0; i < journalCount; i++ {
-		entryDate := startDate.AddDate(0, 0, i%365)
+		entryDate := startDate.AddDate(0, 0, i*364/journalCount)
 		if _, err := copyEntries.Exec(i, fmt.Sprintf("BM%017d", i), entryDate, entryDate.Format("2006-01")); err != nil {
 			copyEntries.Close()
 			t.Fatalf("stage benchmark journal %d: %v", i, err)
@@ -98,8 +102,8 @@ func seedFinancialBenchmarkDataset(t *testing.T, db *sql.DB, journalCount int) f
 		t.Fatalf("close benchmark journal copy: %v", err)
 	}
 	if _, err := tx.Exec(`
-		INSERT INTO journal_entries (tenant_id, restaurant_id, entry_number, entry_date, fiscal_period, description, reference_type, entry_type, total_debit, total_credit, status, posted_at)
-		SELECT $1, $2, entry_number, entry_date, fiscal_period, 'Synthetic performance fixture', 'financial_benchmark', 'manual', 100, 100, 'posted', entry_date::timestamp
+		INSERT INTO journal_entries (tenant_id, restaurant_id, entry_number, entry_date, fiscal_period, description, reference_type, entry_type, status)
+		SELECT $1, $2, entry_number, entry_date, fiscal_period, 'Synthetic performance fixture', 'financial_benchmark', 'manual', 'draft'
 		FROM financial_benchmark_entries ORDER BY ordinal`, base.tenantID, base.restaurantID); err != nil {
 		t.Fatalf("insert balanced benchmark journals: %v", err)
 	}
@@ -111,17 +115,41 @@ func seedFinancialBenchmarkDataset(t *testing.T, db *sql.DB, journalCount int) f
 		CROSS JOIN (VALUES ($3::bigint, '1110', 100::numeric, 0::numeric, 1), ($4::bigint, '4100', 0::numeric, 90::numeric, 2), ($5::bigint, '2120', 0::numeric, 10::numeric, 3)) AS line(account_id, account_code, debit_amount, credit_amount, line_order)`, base.tenantID, base.restaurantID, accountIDs["1110"], accountIDs["4100"], accountIDs["2120"]); err != nil {
 		t.Fatalf("insert balanced benchmark journal lines: %v", err)
 	}
-	if _, err := tx.Exec(`
-		INSERT INTO general_ledger (tenant_id, restaurant_id, account_id, journal_entry_id, journal_line_id, entry_date, fiscal_period, debit_amount, credit_amount, running_balance)
-		SELECT jel.tenant_id, je.restaurant_id, jel.account_id, je.id, jel.id, je.entry_date, je.fiscal_period, jel.debit_amount, jel.credit_amount,
-		       SUM(jel.debit_amount-jel.credit_amount) OVER (PARTITION BY jel.account_id ORDER BY je.entry_date, je.id, jel.line_order ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW)
-		FROM journal_entry_lines jel JOIN journal_entries je ON je.id=jel.journal_entry_id
-		WHERE je.tenant_id=$1 AND je.restaurant_id=$2 AND je.reference_type='financial_benchmark'
-		ORDER BY je.entry_date, je.id, jel.line_order`, base.tenantID, base.restaurantID); err != nil {
-		t.Fatalf("insert benchmark general ledger rows: %v", err)
-	}
 	if err := tx.Commit(); err != nil {
-		t.Fatalf("commit synthetic financial benchmark data: %v", err)
+		t.Fatalf("commit synthetic financial draft data: %v", err)
+	}
+	entryRows, err := db.Query(`SELECT id FROM journal_entries WHERE tenant_id=$1 AND restaurant_id=$2 AND reference_type='financial_benchmark' ORDER BY entry_date, id`, base.tenantID, base.restaurantID)
+	if err != nil {
+		t.Fatalf("list benchmark drafts for posting: %v", err)
+	}
+	entryIDs := make([]int, 0, journalCount)
+	for entryRows.Next() {
+		var id int
+		if err := entryRows.Scan(&id); err != nil {
+			entryRows.Close()
+			t.Fatalf("scan benchmark draft ID: %v", err)
+		}
+		entryIDs = append(entryIDs, id)
+	}
+	if err := entryRows.Close(); err != nil {
+		t.Fatalf("close benchmark draft rows: %v", err)
+	}
+	if len(entryIDs) != journalCount {
+		t.Fatalf("benchmark draft count=%d, want %d", len(entryIDs), journalCount)
+	}
+	postingTx, err := db.BeginTx(t.Context(), nil)
+	if err != nil {
+		t.Fatalf("begin supported journal posting transaction: %v", err)
+	}
+	defer postingTx.Rollback()
+	journalRepository := repository.NewJournalEntryRepository(db)
+	for _, id := range entryIDs {
+		if err := journalRepository.PostEntryTx(postingTx, int(base.tenantID), int(base.restaurantID), id, fixture.postedBy); err != nil {
+			t.Fatalf("post synthetic balanced journal %d through repository workflow: %v", id, err)
+		}
+	}
+	if err := postingTx.Commit(); err != nil {
+		t.Fatalf("commit synthetic financial postings: %v", err)
 	}
 	var entries, lines, ledgerRows int
 	if err := db.QueryRow(`SELECT COUNT(*) FROM journal_entries WHERE tenant_id=$1 AND restaurant_id=$2 AND reference_type='financial_benchmark'`, base.tenantID, base.restaurantID).Scan(&entries); err != nil {
