@@ -2,7 +2,7 @@ import { defineConfig, devices } from '@playwright/test'
 
 export default defineConfig({
   testDir: './tests/financial-browser',
-  testMatch: '**/*.spec.cjs',
+  testMatch: '**/*.spec.js',
   fullyParallel: false,
   workers: 1,
   retries: 0,
