@@ -399,7 +399,10 @@ export function Sidebar({ isMobileOpen, onMobileToggle, isCollapsed, onCollapsed
     <>
       {/* Sidebar */}
       <aside
-        className={`fixed inset-y-0 ${isRTL ? 'right-0' : 'left-0'} z-40 ${isCollapsed ? 'w-20' : 'w-64'} bg-white dark:bg-gray-800 ${isRTL ? 'border-l' : 'border-r'} border-gray-200 dark:border-gray-700 transform ${isMobileOpen ? 'translate-x-0' : isRTL ? 'translate-x-full' : '-translate-x-full'} md:translate-x-0 transition-all duration-300 ease-in-out`}
+        className={`dashboard-sidebar fixed inset-y-0 ${isRTL ? 'right-0' : 'left-0'} z-40 ${isCollapsed ? 'w-20' : 'w-64'} bg-white dark:bg-gray-800 ${isRTL ? 'border-l' : 'border-r'} border-gray-200 dark:border-gray-700 transform ${isMobileOpen ? 'translate-x-0' : isRTL ? 'translate-x-full' : '-translate-x-full'} md:translate-x-0 transition-all duration-300 ease-in-out`}
+        data-collapsed={isCollapsed}
+        data-direction={isRTL ? 'rtl' : 'ltr'}
+        data-mobile-open={isMobileOpen}
       >
         <div className={`flex h-[89px] items-center ${isCollapsed ? 'justify-center' : 'justify-between'} p-4 border-b border-gray-200 dark:border-gray-700`}>
           <Link

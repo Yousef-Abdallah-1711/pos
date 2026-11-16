@@ -173,7 +173,12 @@ export default function DashboardLayout({
       )}
 
       {/* Main Content Area */}
-      <div className={`min-w-0 flex-1 ${isFullscreenRoute ? '' : isRTL ? (isSidebarCollapsed ? 'md:mr-20' : 'md:mr-64') : (isSidebarCollapsed ? 'md:ml-20' : 'md:ml-64')} transition-all duration-300`}>
+      <div
+        className="dashboard-main-shell min-w-0 flex-1 transition-all duration-300"
+        data-direction={isRTL ? 'rtl' : 'ltr'}
+        data-fullscreen={isFullscreenRoute}
+        data-sidebar-collapsed={isSidebarCollapsed}
+      >
         {/* Header */}
         {!isFullscreenRoute && (
           <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-30">
