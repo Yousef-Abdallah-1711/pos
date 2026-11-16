@@ -26,6 +26,9 @@ function check(name, passed, detail = '') {
 async function captureResponsiveScreens(page, label) {
  for (const viewport of responsiveViewports) {
   await page.setViewportSize(viewport)
+  // The dashboard shell animates sidebar spacing and drawer transforms for 300ms.
+  // Let those responsive transitions finish before measuring overflow or capturing.
+  await page.waitForTimeout(350)
   const layout = await page.evaluate(() => ({
    viewportWidth: innerWidth,
    scrollWidth: document.documentElement.scrollWidth,
