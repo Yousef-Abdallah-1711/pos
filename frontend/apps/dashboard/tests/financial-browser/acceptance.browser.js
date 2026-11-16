@@ -246,14 +246,14 @@ test.describe('authenticated financial browser acceptance', () => {
     await expect(page.getByRole('button', { name: 'New customer invoice', exact: true })).toBeEnabled()
     await expect(page.getByRole('button', { name: 'Record payment', exact: true })).toBeEnabled()
     await expect(page.getByRole('heading', { name: 'No invoices found', exact: true })).toBeVisible()
-    await page.getByRole('tab', { name: 'Payments', exact: true }).click()
+    await page.getByRole('tab', { name: 'Received Payments', exact: true }).click()
     await expect(page.getByRole('heading', { name: 'No received payments yet', exact: true })).toBeVisible()
     await page.screenshot({ path: testInfo.outputPath('en-desktop-customer-invoices-payments.png'), fullPage: true })
 
     await page.goto('/en/dashboard/accounting/supplier-invoices')
     await expect(page.getByRole('heading', { name: 'Supplier Invoices', exact: true })).toBeVisible()
     await expect(page.getByRole('button', { name: 'New supplier invoice', exact: true })).toBeEnabled()
-    await page.getByRole('tab', { name: 'Payments', exact: true }).click()
+    await page.getByRole('tab', { name: 'Payments Made', exact: true }).click()
     await expect(page.getByRole('heading', { name: 'No supplier payments yet', exact: true })).toBeVisible()
     await page.screenshot({ path: testInfo.outputPath('en-desktop-supplier-invoices-payments.png'), fullPage: true })
 
