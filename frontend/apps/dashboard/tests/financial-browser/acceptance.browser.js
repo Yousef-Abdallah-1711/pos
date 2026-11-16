@@ -77,9 +77,10 @@ test.describe('authenticated financial browser acceptance', () => {
     await dialog.locator('input').nth(2).fill('Browser acceptance balanced journal')
     await dialog.locator('tbody select').nth(0).selectOption(String(fixture.primary_account_id))
     await dialog.locator('tbody select').nth(1).selectOption(String(fixture.revenue_account_id))
-    await dialog.locator('input[type="number"]').nth(0).fill('50')
-    await dialog.locator('input[type="number"]').nth(1).fill('50')
-    await expect(dialog.getByText('Balanced', { exact: true })).toBeVisible()
+    const journalLines = dialog.locator('tbody tr')
+    await journalLines.nth(0).locator('input[type="number"]').nth(0).fill('50')
+    await journalLines.nth(1).locator('input[type="number"]').nth(1).fill('50')
+    await expect(dialog.getByText(/Debit: EGP 50\.00 Credit: EGP 50\.00 Balanced/)).toBeVisible()
     const createResponse = page.waitForResponse((response) =>
       response.url().endsWith('/accounting/journal-entries') && response.request().method() === 'POST'
     )
@@ -127,9 +128,12 @@ test.describe('authenticated financial browser acceptance', () => {
     await setViewport(page, 1440, 900)
     const session = await login(page, identities.accountant)
     expect(session.role).toBe('accountant')
-    const balanceSheetResponse = page.waitForResponse((response) =>
-      response.url().includes('/reports/financial/balance-sheet') && response.status() === 200
-    )
+    const balanceSheetResponse = page.waitForResponse((response) => {
+      const url = new URL(response.url())
+      return response.url().startsWith(apiBase) &&
+        url.pathname.endsWith('/reports/financial/balance-sheet') &&
+        response.request().method() === 'GET' && response.status() === 200
+    })
     const errors = await openFinancialPage(page, 'ar', 'reports/financial/balance-sheet')
     const balanceSheetPayload = await (await balanceSheetResponse).json()
     const balanceSheetData = balanceSheetPayload.data || balanceSheetPayload
@@ -152,7 +156,7 @@ test.describe('authenticated financial browser acceptance', () => {
     const session = await login(page, identities.accountant)
     expect(session.role).toBe('accountant')
     const errors = await openFinancialPage(page, 'en', 'accounting/journal-entries')
-    await expect(page.getByRole('heading', { name: /Journal Entries/i })).toBeVisible()
+    await expect(page.locator('main').getByRole('heading', { name: /Journal Entries/i })).toBeVisible()
     await page.goto('/en/dashboard/reports/financial/profit-loss')
     await expect(page.getByRole('heading', { name: /Profit.?Loss/i })).toBeVisible()
     const pdfButton = page.getByRole('button', { name: /Export PDF/i })
@@ -183,7 +187,8 @@ test.describe('authenticated financial browser acceptance', () => {
     await download.saveAs(csvPath)
     const csv = fs.readFileSync(csvPath, 'utf8')
     expect(csv).toContain(fixture.account_name)
-    expect(csv).toContain(`'${fixture.formula_name}`)
+    const escapedFormulaCell = `QA-FORMULA-1,"'${fixture.formula_name.replaceAll('"', '""')}"`
+    expect(csv).toContain(escapedFormulaCell)
     await expect(page.locator('html')).toHaveAttribute('dir', 'rtl')
     await assertNoDocumentOverflow(page)
     await page.screenshot({ path: testInfo.outputPath('ar-mobile-accounting-tools.png'), fullPage: true })
@@ -194,7 +199,7 @@ test.describe('authenticated financial browser acceptance', () => {
     const session = await login(page, identities.cashier)
     expect(session.role).toBe('cashier')
     await openFinancialPage(page, 'ar', 'accounting/chart-of-accounts')
-    await expect(page.getByRole('heading', { name: /غير مصرح|Access denied/i })).toBeVisible()
+    await expect(page.getByRole('heading', { name: /تم رفض الوصول|Access denied/i })).toBeVisible()
     await assertNoDocumentOverflow(page)
     await page.screenshot({ path: testInfo.outputPath('ar-mobile-cashier-denied.png'), fullPage: true })
   })

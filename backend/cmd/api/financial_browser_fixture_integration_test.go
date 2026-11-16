@@ -69,6 +69,12 @@ func TestFinancialAcceptanceSeedBrowserFixtures(t *testing.T) {
 	}
 
 	foreignTenantID, foreignRestaurantID, foreignEmail, foreignPassword := seedLiveFinancialOtherTenant(t, db)
+	secondTenant := seedLiveFinancialIdentity(t, db, liveFinancialFixture{
+		tenantID: foreignTenantID, restaurantID: foreignRestaurantID,
+		email: foreignEmail, password: foreignPassword,
+	}, "owner", "BROWSER-SECOND-TENANT", []liveFinancialPermission{
+		{moduleID: 15, level: "READ"},
+	})
 	foreignAccountID := int64(0)
 	if err := db.QueryRowContext(ctx, `
 		INSERT INTO chart_of_accounts (tenant_id, restaurant_id, account_code, account_name, account_type, normal_balance)
@@ -80,7 +86,7 @@ func TestFinancialAcceptanceSeedBrowserFixtures(t *testing.T) {
 	fixture := financialBrowserFixture{
 		Accountant:      financialBrowserIdentityFixture{Email: accountant.email, Password: accountant.password, Role: accountant.role},
 		Cashier:         financialBrowserIdentityFixture{Email: cashier.email, Password: cashier.password, Role: cashier.role},
-		SecondTenant:    financialBrowserIdentityFixture{Email: foreignEmail, Password: foreignPassword, Role: "owner"},
+		SecondTenant:    financialBrowserIdentityFixture{Email: secondTenant.email, Password: secondTenant.password, Role: secondTenant.role},
 		PrimaryAccount:  primaryAccountID,
 		RevenueAccount:  revenueAccountID,
 		PrimaryTenantID: primary.tenantID,
