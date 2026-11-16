@@ -198,6 +198,9 @@ async function loginJourney(browser,admin=false) {
     await page.reload({waitUntil:'domcontentloaded'});
     await page.waitForFunction(expected=>document.documentElement.lang===expected.locale&&document.documentElement.dir===(expected.locale==='ar'?'rtl':'ltr')&&document.documentElement.classList.contains('dark')===(expected.theme==='dark'),{locale,theme});
     for(const route of adminRoutes){
+     // The API applies a shared 30 requests/minute Super Admin limit per proxy IP.
+     // Pace route transitions so the visual matrix does not burst through it.
+     await page.waitForTimeout(20000);
      let response=await page.goto(adminBase+route,{waitUntil:'domcontentloaded',timeout:45000});
      if(await waitForAdminRoute(route)){
       await authenticateAdmin();
