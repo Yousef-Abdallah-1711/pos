@@ -364,7 +364,7 @@ func TestCFR003PostgresBackdatedEntryKeepsAsOfBalancesChronological(t *testing.T
 	if err != nil {
 		t.Fatalf("continue chronological ledger page: %v", err)
 	}
-	if len(secondPage) != 1 || finalCursor != nil || secondPage[0].EntryDate != earlyDate || secondPage[0].RunningBalance != 50 {
+	if len(secondPage) != 1 || finalCursor != nil || !secondPage[0].EntryDate.Equal(earlyDate) || secondPage[0].RunningBalance != 50 {
 		t.Fatalf("second ledger page/cursor = %+v/%v, want the backdated row and no further cursor", secondPage, finalCursor)
 	}
 }
