@@ -256,6 +256,7 @@ func mockPostJournalEntry(mock sqlmock.Sqlmock, journalEntryID int, entryDate ti
 		accountIDs = append(accountIDs, line.accountID)
 	}
 	sort.Ints(accountIDs)
+	normalBalances := make(map[int]string, len(accountIDs))
 	for _, accountID := range accountIDs {
 		var normalBalance string
 		for _, line := range lines {
@@ -264,35 +265,40 @@ func mockPostJournalEntry(mock sqlmock.Sqlmock, journalEntryID int, entryDate ti
 				break
 			}
 		}
+		normalBalances[accountID] = normalBalance
 		mock.ExpectQuery(`SELECT id, normal_balance\s+FROM chart_of_accounts`).
 			WithArgs(accountID, 10, 20).
 			WillReturnRows(sqlmock.NewRows([]string{"id", "normal_balance"}).AddRow(accountID, normalBalance))
 	}
 
+	priorBalances := make(map[int]float64, len(accountIDs))
+	currentBalances := make(map[int]float64, len(accountIDs))
 	for _, line := range lines {
-		mock.ExpectQuery(`SELECT COALESCE\(SUM\(CASE WHEN \$4 = 'credit'`).
-			WithArgs(10, 20, line.accountID, line.normalBalance, entryDate).
-			WillReturnRows(sqlmock.NewRows([]string{"coalesce"}).AddRow(0.0))
+		mock.ExpectQuery(`FROM general_ledger`).
+			WithArgs(10, 20, line.accountID, normalBalances[line.accountID], entryDate).
+			WillReturnRows(sqlmock.NewRows([]string{"prior_balance"}).AddRow(priorBalances[line.accountID]))
 		mock.ExpectExec(`INSERT INTO general_ledger`).
 			WithArgs(
 				10, 20, line.accountID, journalEntryID, line.lineID,
 				entryDate, "2026-02", line.debit, line.credit, sqlmock.AnyArg(),
 			).
 			WillReturnResult(sqlmock.NewResult(1, 1))
-	}
-	for _, accountID := range accountIDs {
-		var normalBalance string
-		for _, line := range lines {
-			if line.accountID == accountID {
-				normalBalance = line.normalBalance
-				break
-			}
+		// The next line for this account sees this line's dated movement.
+		if normalBalances[line.accountID] == domain.NormalBalanceCredit {
+			priorBalances[line.accountID] += line.credit - line.debit
+			currentBalances[line.accountID] += line.credit - line.debit
+		} else {
+			priorBalances[line.accountID] += line.debit - line.credit
+			currentBalances[line.accountID] += line.debit - line.credit
 		}
-		mock.ExpectQuery(`SELECT COALESCE\(SUM\(CASE WHEN \$4 = 'credit'`).
-			WithArgs(10, 20, accountID, normalBalance).
-			WillReturnRows(sqlmock.NewRows([]string{"coalesce"}).AddRow(0.0))
+	}
+
+	for _, accountID := range accountIDs {
+		mock.ExpectQuery(`FROM general_ledger`).
+			WithArgs(10, 20, accountID, normalBalances[accountID]).
+			WillReturnRows(sqlmock.NewRows([]string{"current_balance"}).AddRow(currentBalances[accountID]))
 		mock.ExpectExec(`UPDATE chart_of_accounts`).
-			WithArgs(sqlmock.AnyArg(), accountID, 10, 20).
+			WithArgs(currentBalances[accountID], accountID, 10, 20).
 			WillReturnResult(sqlmock.NewResult(1, 1))
 	}
 
