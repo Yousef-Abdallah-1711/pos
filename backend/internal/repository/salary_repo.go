@@ -22,6 +22,10 @@ type SalaryRepository struct {
 	db *sql.DB
 }
 
+type salaryQueryRower interface {
+	QueryRow(query string, args ...any) *sql.Row
+}
+
 // NewSalaryRepository creates a new salary repository
 func NewSalaryRepository(db *sql.DB) *SalaryRepository {
 	return &SalaryRepository{db: db}
@@ -120,6 +124,10 @@ func (r *SalaryRepository) ListSalaries(tenantID, restaurantID int, startDate, e
 
 // GetSalaryByID retrieves a single salary record by ID
 func (r *SalaryRepository) GetSalaryByID(tenantID, restaurantID, id int) (*domain.Salary, error) {
+	return getSalaryByID(r.db, tenantID, restaurantID, id)
+}
+
+func getSalaryByID(queryer salaryQueryRower, tenantID, restaurantID, id int) (*domain.Salary, error) {
 	query := `
 		SELECT
 			id, tenant_id, restaurant_id, employee_id, pay_period_start,
@@ -141,7 +149,7 @@ func (r *SalaryRepository) GetSalaryByID(tenantID, restaurantID, id int) (*domai
 	var paymentRef, bankAccount, bankName, notes sql.NullString
 	var earningsDetails, deductionsDetails sql.NullString
 
-	err := r.db.QueryRow(query, id, tenantID, restaurantID).Scan(
+	err := queryer.QueryRow(query, id, tenantID, restaurantID).Scan(
 		&sal.ID, &sal.TenantID, &sal.RestaurantID, &sal.EmployeeID,
 		&sal.PayPeriodStart, &sal.PayPeriodEnd, &paymentDate,
 		&sal.Month, &sal.Year, &sal.BaseSalary, &sal.Currency,
@@ -183,6 +191,35 @@ func (r *SalaryRepository) GetSalaryByID(tenantID, restaurantID, id int) (*domai
 
 // CreateSalary creates a new salary record
 func (r *SalaryRepository) CreateSalary(salary *domain.Salary) (int, error) {
+	return insertSalary(r.db, salary)
+}
+
+// CreateSalaryAndGet commits only after the inserted salary can be read back.
+func (r *SalaryRepository) CreateSalaryAndGet(salary *domain.Salary) (*domain.Salary, error) {
+	tx, err := r.db.Begin()
+	if err != nil {
+		return nil, fmt.Errorf("begin salary creation: %w", err)
+	}
+	defer tx.Rollback()
+
+	id, err := insertSalary(tx, salary)
+	if err != nil {
+		return nil, err
+	}
+	created, err := getSalaryByID(tx, salary.TenantID, salary.RestaurantID, id)
+	if err != nil {
+		return nil, fmt.Errorf("read created salary before commit: %w", err)
+	}
+	if created == nil {
+		return nil, ErrSalaryNotFound
+	}
+	if err := tx.Commit(); err != nil {
+		return nil, fmt.Errorf("commit salary creation: %w", err)
+	}
+	return created, nil
+}
+
+func insertSalary(queryer salaryQueryRower, salary *domain.Salary) (int, error) {
 	query := `
 		INSERT INTO salaries (
 			tenant_id, restaurant_id, employee_id, pay_period_start,
@@ -201,7 +238,7 @@ func (r *SalaryRepository) CreateSalary(salary *domain.Salary) (int, error) {
 	`
 
 	var id int
-	err := r.db.QueryRow(
+	err := queryer.QueryRow(
 		query,
 		salary.TenantID, salary.RestaurantID, salary.EmployeeID,
 		salary.PayPeriodStart, salary.PayPeriodEnd, salary.BaseSalary,

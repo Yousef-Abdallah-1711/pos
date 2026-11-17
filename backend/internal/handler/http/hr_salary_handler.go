@@ -272,7 +272,7 @@ func (h *HRSalaryHandler) CreateSalary(w http.ResponseWriter, r *http.Request) {
 		CreatedBy:          &userID,
 	}
 
-	id, err := h.salaryRepo.CreateSalary(salary)
+	createdSalary, err := h.salaryRepo.CreateSalaryAndGet(salary)
 	if err != nil {
 		log.Printf("[HR-Salary] CreateSalary ERROR: %v\n", err)
 		writeJSON(w, http.StatusInternalServerError, map[string]interface{}{
@@ -280,19 +280,7 @@ func (h *HRSalaryHandler) CreateSalary(w http.ResponseWriter, r *http.Request) {
 		})
 		return
 	}
-
-	createdSalary, err := h.salaryRepo.GetSalaryByID(tenantID, restaurantID, id)
-	if err != nil || createdSalary == nil {
-		if err == nil {
-			err = errors.New("created salary record was not found")
-		}
-		log.Printf("[HR-Salary] read created salary ERROR: %v\n", err)
-		writeJSON(w, http.StatusInternalServerError, map[string]interface{}{
-			"success": false, "error": "Failed to read created salary record",
-		})
-		return
-	}
-	log.Printf("[HR-Salary] CreateSalary SUCCESS: id=%d\n", id)
+	log.Printf("[HR-Salary] CreateSalary SUCCESS: id=%d\n", createdSalary.ID)
 
 	writeJSON(w, http.StatusCreated, map[string]interface{}{
 		"success": true, "data": createdSalary,
