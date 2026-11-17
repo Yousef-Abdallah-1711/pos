@@ -92,7 +92,19 @@ async function assertNoDocumentOverflow(page) {
 async function assertFinancialContentClearsSidebar(page) {
   const layout = await page.evaluate(() => {
     const heading = document.querySelector('main h1')?.getBoundingClientRect()
-    const sidebar = document.querySelector('aside.fixed')?.getBoundingClientRect()
+    const sidebar = [...document.querySelectorAll('aside.fixed')]
+      .map((element) => ({
+        bounds: element.getBoundingClientRect(),
+        style: window.getComputedStyle(element),
+      }))
+      .find(({ bounds, style }) => (
+        bounds.width > 0
+        && bounds.height > 0
+        && bounds.right > 0
+        && bounds.left < window.innerWidth
+        && style.visibility !== 'hidden'
+        && style.display !== 'none'
+      ))?.bounds
     const main = document.querySelector('main')?.getBoundingClientRect()
     const content = [...document.querySelectorAll('main table')].map((table) => {
       const viewport = table.closest('.overflow-x-auto')?.getBoundingClientRect() || table.getBoundingClientRect()
