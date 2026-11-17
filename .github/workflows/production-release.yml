@@ -1,14 +1,65 @@
-name: SERVIO staging deployment lockdown
+name: Publish verified SERVIO staging release
 on:
   workflow_dispatch:
+    inputs:
+      sha:
+        description: Exact current main SHA whose successful CI bundle will be signed
+        required: true
+        type: string
+      ci_run_id:
+        description: Successful SERVIO verified CI run ID for that exact main SHA
+        required: true
+        type: string
+      confirmation:
+        description: Type PUBLISH-STAGING to authorize publishing (does not deploy)
+        required: true
+        type: string
 permissions:
   contents: read
 concurrency:
-  group: servio-staging-deployment
+  group: servio-staging-release-publication
   cancel-in-progress: false
 jobs:
-  deployment-locked:
+  publish-staging-release:
+    if: github.repository == 'Yousef-Abdallah-1711/pos' && github.ref == 'refs/heads/main' && github.actor == github.repository_owner
     runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    environment: staging
+    permissions:
+      actions: read
+      checks: read
+      contents: write
     steps:
-      - name: Keep staging deployment verification disabled
-        run: echo 'Automatic staging deployment verification is disabled pending independently verified isolation.'
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.sha }}
+      - name: Verify owner authorization and exact current-main CI run
+        env:
+          RELEASE_SHA: ${{ inputs.sha }}
+          CI_RUN_ID: ${{ inputs.ci_run_id }}
+          CONFIRMATION: ${{ inputs.confirmation }}
+          SERVIO_RELEASE_SIGNING_KEY: ${{ secrets.SERVIO_RELEASE_SIGNING_KEY }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          [[ "$GITHUB_REF" == refs/heads/main ]]
+          [[ "$GITHUB_ACTOR" == "$GITHUB_REPOSITORY_OWNER" ]]
+          [[ "$RELEASE_SHA" == "$GITHUB_SHA" ]]
+          [[ "$CONFIRMATION" == PUBLISH-STAGING ]]
+          [[ "$CI_RUN_ID" =~ ^[1-9][0-9]*$ ]]
+          run_identity="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$CI_RUN_ID" --jq '[.head_sha,.head_branch,.event,.status,.conclusion,.path] | @tsv')"
+          IFS=$'\t' read -r run_sha run_branch run_event run_status run_conclusion run_path <<< "$run_identity"
+          [[ "$run_sha" == "$RELEASE_SHA" && "$run_branch" == main && "$run_event" == push && "$run_status" == completed && "$run_conclusion" == success && "$run_path" == .github/workflows/production-ci.yml ]]
+          [[ -n "${SERVIO_RELEASE_SIGNING_KEY:-}" ]]
+      - name: Download release bundle from the verified CI run
+        env:
+          CI_RUN_ID: ${{ inputs.ci_run_id }}
+          GH_TOKEN: ${{ github.token }}
+        run: gh run download "$CI_RUN_ID" --name release-bundle --dir release-bundle
+      - name: Sign and publish immutable staging release
+        env:
+          SERVIO_CI_RUN_ID: ${{ inputs.ci_run_id }}
+          SERVIO_RELEASE_CONFIRMATION: ${{ inputs.confirmation }}
+          SERVIO_RELEASE_SIGNING_KEY: ${{ secrets.SERVIO_RELEASE_SIGNING_KEY }}
+          GH_TOKEN: ${{ github.token }}
+        run: python3 ops/aws/sign-publish-release.py

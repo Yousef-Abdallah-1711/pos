@@ -59,13 +59,34 @@ class CIIsolationTests(unittest.TestCase):
             with self.subTest(script=name):
                 self.assertNotIn('rakmyat.online', (ROOT / name).read_text(encoding='utf-8'))
 
-    def test_staging_publish_and_deploy_are_not_automatic(self):
+    def test_staging_release_requires_owner_dispatch_and_exact_main_ci(self):
         ci = (ROOT / '.github/workflows/production-ci.yml').read_text()
         release = (ROOT / '.github/workflows/production-release.yml').read_text()
-        self.assertNotIn('publish-main-release:', ci)
-        self.assertNotIn('publish-ci-images.py', ci)
+        publisher = (ROOT / 'ops/aws/sign-publish-release.py').read_text()
+        image_publisher = (ROOT / 'ops/aws/publish-ci-images.py').read_text()
+        image_stager = (ROOT / 'ops/aws/stage-ci-images.py').read_text()
+        self.assertIn("if: github.event_name == 'push' && github.ref == 'refs/heads/main'", ci)
+        self.assertIn('ops/aws/stage-ci-images.py', ci)
+        self.assertIn('ops/aws/publish-ci-images.py', ci)
+        self.assertIn('name: release-bundle', ci)
+        self.assertNotIn('gh release create', ci)
+        unprivileged_jobs = ci.split('publish-release-images:', maxsplit=1)[0]
+        self.assertNotIn('packages: write', unprivileged_jobs)
+        self.assertIn('needs: [application-images, required]', ci)
+        self.assertIn('wait_checks(sha, int(os.environ[\'GITHUB_RUN_ID\']))', image_publisher)
+        self.assertIn("os.environ.get('GITHUB_EVENT_NAME') != 'push'", image_stager)
+        self.assertNotIn('GHCR_TOKEN', image_stager)
         self.assertIn('workflow_dispatch:', release)
         self.assertNotIn('workflow_run:', release)
+        self.assertIn("github.actor == github.repository_owner", release)
+        self.assertIn('environment: staging', release)
+        self.assertIn('PUBLISH-STAGING', release)
+        self.assertIn('SERVIO_CI_RUN_ID', publisher)
+        self.assertIn('SERVIO_RELEASE_CONFIRMATION', publisher)
+        self.assertIn('wait_checks(sha,ci_run_id)', publisher)
+        self.assertIn("ci_jobs=api('actions/runs/'+str(ci_run_id)+'/jobs?per_page=100')['jobs']", publisher)
+        self.assertIn("job.get('name')=='publish-release-images'", publisher)
+        self.assertIn("os.environ.get('GITHUB_EVENT_NAME')!='workflow_dispatch'", publisher)
 
 
 if __name__ == '__main__':
