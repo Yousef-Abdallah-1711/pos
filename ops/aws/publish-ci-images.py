@@ -39,11 +39,15 @@ def publish_images(bundle: Path, sha: str, actor: str, token: str) -> dict:
         raise RuntimeError('Incomplete image archive metadata')
     if set(manifest.get('image_ids', {})) != set(IMAGE_NAMES):
         raise RuntimeError('Incomplete immutable image identities')
+    if set(manifest.get('image_sizes', {})) != set(IMAGE_NAMES):
+        raise RuntimeError('Incomplete immutable image size metadata')
     if not re.fullmatch('[0-9a-f]{64}', manifest.get('source_sha256', '')):
         raise RuntimeError('Invalid source archive identity')
     source = bundle / 'source.tar.gz'
     if not 0 < source.stat().st_size <= 150 * 1024**2:
         raise RuntimeError('Source archive exceeds the deployment bound')
+    if manifest.get('source_size') != source.stat().st_size:
+        raise RuntimeError('Source archive size metadata mismatch')
     with source.open('rb') as stream:
         if hashlib.file_digest(stream, 'sha256').hexdigest() != manifest['source_sha256']:
             raise RuntimeError('Source archive checksum mismatch')
@@ -82,6 +86,8 @@ def publish_images(bundle: Path, sha: str, actor: str, token: str) -> dict:
             image = inspect_image(name, local_tag)
             if image.get('Id') != manifest['image_ids'][name]:
                 raise RuntimeError('Loaded image identity mismatch: ' + name)
+            if image.get('Size') != manifest['image_sizes'][name]:
+                raise RuntimeError('Loaded image size metadata mismatch: ' + name)
             labels = image.get('Config', {}).get('Labels') or {}
             if labels.get('org.opencontainers.image.revision') != sha:
                 raise RuntimeError('Loaded image revision mismatch: ' + name)

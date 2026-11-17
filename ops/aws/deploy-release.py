@@ -12,6 +12,7 @@ import sys
 import tarfile
 import tempfile
 import time
+import uuid
 import urllib.request
 
 sys.path.insert(0,str(Path(__file__).resolve().parent))
@@ -21,6 +22,9 @@ ROOT = Path('/opt/servio')
 OPS = ROOT / 'ops/aws'
 REPO = 'Yousef-Abdallah-1711/pos'
 SERVICES = ['backend', 'landing', 'dashboard', 'restaurant-website', 'super-admin']
+DEPLOYMENT_DISK_RESERVE_BYTES = 4 * 1024**3
+SOURCE_EXPANSION_RESERVE_BYTES = 1024**3
+ACCEPTANCE_EVIDENCE_RESERVE_BYTES = 512 * 1024**2
 STATE = OPS / 'evidence/deployed-release.json'
 PUBLIC_STATUS=Path('/var/lib/servio-deployer/public/release.json')
 
@@ -85,9 +89,13 @@ def extract_source(sha, destination, artifacts):
 
 def verify_artifacts(manifest, artifacts):
     source=artifacts/'source.tar.gz'
+    if not isinstance(manifest.get('source_size'),int) or not 0<manifest['source_size']<=150*1024**2 or source.stat().st_size!=manifest['source_size']:
+        raise RuntimeError('Source archive size metadata mismatch')
     with source.open('rb') as stream:
         if hashlib.file_digest(stream,'sha256').hexdigest()!=manifest['source_sha256']:
             raise RuntimeError('Source artifact integrity failure')
+    if set(manifest.get('image_sizes',{}))!=set(SERVICES):
+        raise RuntimeError('Incomplete signed image size metadata')
     for name in SERVICES:
         asset=manifest['archives'][name]
         if asset['file']!=name+'.docker.tar.gz' or not isinstance(asset['size'],int) or not 0<asset['size']<=2*1024**3:
@@ -98,6 +106,9 @@ def verify_artifacts(manifest, artifacts):
                 raise RuntimeError('Image archive integrity failure: '+name)
         if not re.fullmatch('sha256:[0-9a-f]{64}',manifest['image_ids'][name]):
             raise RuntimeError('Missing immutable image content identity')
+        image_size=manifest['image_sizes'][name]
+        if not isinstance(image_size,int) or not 0<image_size<=5*1024**3:
+            raise RuntimeError('Invalid signed image size: '+name)
 
 def verify_migrations(destination, previous_path):
     policy=Path('/etc/servio/approved-migrations.json')
@@ -173,8 +184,40 @@ def backup(path):
         compose(path, 'exec', '-T', 'postgres', 'pg_restore', '--list', stdin=source, stdout=subprocess.DEVNULL)
     sidecar = target.with_suffix('.dump.sha256')
     with target.open('rb') as stream:
-        sidecar.write_text(hashlib.file_digest(stream,'sha256').hexdigest() + '  ' + target.name + '\n')
-    checked(['chown', 'ubuntu:ubuntu', str(target), str(sidecar)])
+        expected=hashlib.file_digest(stream,'sha256').hexdigest()
+    sidecar.write_text(expected + '  ' + target.name + '\n')
+    with target.open('rb') as stream:
+        if hashlib.file_digest(stream,'sha256').hexdigest()!=expected:
+            raise RuntimeError('Backup checksum verification failed')
+    restore_db='servio_restore_verify_'+uuid.uuid4().hex[:12]
+    if not restore_db.startswith('servio_restore_verify_'):
+        raise RuntimeError('Invalid disposable restore database identity')
+    compose(path,'exec','-T','postgres','createdb','-U','postgres','--template=template0',restore_db)
+    try:
+        with target.open('rb') as source:
+            compose(path,'exec','-T','postgres','pg_restore','--single-transaction','--exit-on-error','-U','postgres','-d',restore_db,stdin=source,stdout=subprocess.DEVNULL)
+        result=compose(path,'exec','-T','postgres','psql','-U','postgres','-d',restore_db,'-qAt','-v','ON_ERROR_STOP=1','-c','SELECT count(*) FROM schema_migrations',stdout=subprocess.PIPE,text=True)
+        if not result.stdout.strip().isdigit() or int(result.stdout.strip())==0:
+            raise RuntimeError('Disposable backup restore did not recover migration receipts')
+    finally:
+        compose(path,'exec','-T','postgres','dropdb','--if-exists','-U','postgres',restore_db)
+    validation=target.with_suffix('.restore.json')
+    validation.write_text(json.dumps({'status':'PASS','sha256':expected,'dump_bytes':target.stat().st_size,'restored_migration_receipts':int(result.stdout.strip()),'verified_utc':time.strftime('%Y-%m-%dT%H:%M:%SZ',time.gmtime())},sort_keys=True)+'\n')
+    validation.chmod(0o600)
+    checked(['chown', 'ubuntu:ubuntu', str(target), str(sidecar), str(validation)])
+
+
+def verify_disk_headroom(manifest, *, after_images=False):
+    if after_images:
+        required=DEPLOYMENT_DISK_RESERVE_BYTES+ACCEPTANCE_EVIDENCE_RESERVE_BYTES
+    else:
+        sizes=manifest.get('image_sizes',{})
+        if set(sizes)!=set(SERVICES) or any(not isinstance(size,int) or not 0<size<=5*1024**3 for size in sizes.values()):
+            raise RuntimeError('Signed image size metadata is invalid')
+        required=sum(sizes.values())+DEPLOYMENT_DISK_RESERVE_BYTES+SOURCE_EXPANSION_RESERVE_BYTES+ACCEPTANCE_EVIDENCE_RESERVE_BYTES
+    free=shutil.disk_usage(ROOT).free
+    if free<required:
+        raise RuntimeError(f'Insufficient deployment disk headroom: {free} bytes free; {required} required')
 
 def public_checks():
     paths = {'pos.rakmyat.online': '/en', 'api.pos.rakmyat.online': '/api/v1/health', 'pos.app.rakmyat.online': '/en/dashboard', 'admin.pos.rakmyat.online': '/login', 'restaurant-1.pos.rakmyat.online': '/en'}
@@ -299,8 +342,7 @@ def prepare_release(manifest,sha,artifacts,previous):
 def deploy(manifest,requested,artifacts,candidate=False):
     sha=verify_manifest(manifest,requested,candidate=candidate)
     verify_artifacts(manifest,artifacts)
-    if shutil.disk_usage(ROOT).free<4*1024**3:
-        raise RuntimeError('Less than 4 GiB disk headroom; refusing image load')
+    verify_disk_headroom(manifest)
     previous=json.loads(STATE.read_text()) if STATE.exists() else {'compose':str(OPS/'compose.json')}
     previous_path=Path(previous['compose'])
     destination,path=prepare_release(manifest,sha,artifacts,previous)
@@ -308,8 +350,10 @@ def deploy(manifest,requested,artifacts,candidate=False):
     forward_backend=requires_compatible_backend(pending,previous)
     backend_ready=False
     runtime=load_verified_images(manifest,artifacts)
+    verify_disk_headroom(manifest,after_images=True)
     configure_runtime_images(path,runtime)
     backup(previous_path)
+    verify_disk_headroom(manifest,after_images=True)
     # A reviewed contract migration may need the new writer before installing guards.
     try:
         verify_manifest(manifest,requested,candidate=candidate)
@@ -323,6 +367,7 @@ def deploy(manifest,requested,artifacts,candidate=False):
             compose(path,'up','-d','--no-deps','--wait','--wait-timeout','150',name)
         public_checks()
         acceptance(destination)
+        verify_disk_headroom(manifest,after_images=True)
         verify_manifest(manifest,requested,candidate=candidate)
         record_release(dict(manifest,runtime_image_ids=runtime),path,previous,candidate=candidate)
     except Exception:

@@ -21,9 +21,12 @@ REPO = 'Yousef-Abdallah-1711/pos'
 SERVICES = ['backend','landing','dashboard','restaurant-website','super-admin']
 STATE = Path('/opt/servio/ops/aws/evidence/deployed-release.json')
 MAX_ATTEMPTS = 3
-MIN_DISK_FREE_BYTES = 25 * 1024**3
-MIN_MEM_AVAILABLE_BYTES = 8 * 1024**3
+MIN_STAGING_DISK_FREE_BYTES = 6 * 1024**3
+MIN_STAGING_MEM_AVAILABLE_BYTES = 512 * 1024**2
+MIN_STAGING_SWAP_FREE_BYTES = 512 * 1024**2
 DEPLOYMENT_DISK_RESERVE_BYTES = 4 * 1024**3
+SOURCE_EXPANSION_RESERVE_BYTES = 1024**3
+ACCEPTANCE_EVIDENCE_RESERVE_BYTES = 512 * 1024**2
 
 class PendingRelease(Exception):
     pass
@@ -84,7 +87,7 @@ def verify_release(release):
     result=subprocess.run(['openssl','pkeyutl','-verify','-rawin','-pubin','-inkey',str(KEY),'-in',str(directory/'release-manifest.json'),'-sigfile',str(directory/'release-manifest.sig')],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL,timeout=10)
     if result.returncode: raise RuntimeError('Release signature does not match the pinned CI public key')
     manifest=json.loads(raw)
-    if manifest.get('schema_version')!=1 or manifest.get('workflow_ref')!=REPO+'/.github/workflows/production-ci.yml@refs/heads/main' or manifest.get('workflow_sha')!=sha:raise RuntimeError('Signed workflow identity mismatch')
+    if manifest.get('schema_version')!=2 or manifest.get('workflow_ref')!=REPO+'/.github/workflows/production-ci.yml@refs/heads/main' or manifest.get('workflow_sha')!=sha:raise RuntimeError('Signed workflow identity mismatch')
     if manifest.get('sha')!=sha or manifest.get('environment')!='staging': raise RuntimeError('Signed environment or SHA mismatch')
     run=github('actions/runs/'+str(manifest['ci_run_id']))
     if run.get('workflow_id')!=int(WORKFLOW_ID.read_text().strip()):raise RuntimeError('Unapproved workflow ID')
@@ -95,11 +98,13 @@ def verify_release(release):
     return manifest,directory
 
 def fetch_artifacts(release, manifest, directory):
-    if set(manifest.get('images',{}))!=set(SERVICES) or set(manifest.get('archives',{}))!=set(SERVICES):
+    if set(manifest.get('images',{}))!=set(SERVICES) or set(manifest.get('archives',{}))!=set(SERVICES) or set(manifest.get('image_sizes',{}))!=set(SERVICES):
         raise RuntimeError('Incomplete release artifact set')
     if set(manifest.get('image_ids',{}))!=set(SERVICES):raise RuntimeError('Incomplete immutable image identities')
     for name in SERVICES:
         if not re.fullmatch('sha256:[0-9a-f]{64}',manifest['image_ids'][name]):raise RuntimeError('Invalid immutable image identity')
+        image_size=manifest['image_sizes'][name]
+        if not isinstance(image_size,int) or not 0<image_size<=5*1024**3:raise RuntimeError('Invalid immutable image size')
         if not re.fullmatch('ghcr.io/yousef-abdallah-1711/pos/'+re.escape(name)+'@sha256:[0-9a-f]{64}',manifest['images'][name]):raise RuntimeError('Unapproved immutable registry reference')
         asset=manifest['archives'][name]
         if asset['file']!=name+'.docker.tar.gz' or not isinstance(asset['size'],int) or not 0<asset['size']<=2*1024**3 or not re.fullmatch('[0-9a-f]{64}',asset['sha256']):
@@ -108,26 +113,41 @@ def fetch_artifacts(release, manifest, directory):
     source=next(a for a in release['assets'] if a['name']=='source.tar.gz')
     if not 0<source['size']<=150*1024**2 or not re.fullmatch('[0-9a-f]{64}',manifest['source_sha256']):
         raise RuntimeError('Invalid source artifact metadata')
+    if manifest.get('source_size')!=source['size']:raise RuntimeError('Source artifact size metadata mismatch')
     download(release,'source.tar.gz',directory/'source.tar.gz',(source['size'],manifest['source_sha256']))
 
 def ensure_deployment_capacity(manifest, base=BASE, meminfo=Path('/proc/meminfo')):
     archives=manifest.get('archives',{})
     if set(archives)!=set(SERVICES):raise RuntimeError('Incomplete release archive metadata')
-    sizes=[]
+    image_sizes=manifest.get('image_sizes',{})
+    if set(image_sizes)!=set(SERVICES):raise RuntimeError('Incomplete release image size metadata')
+    archive_bytes=0
+    image_bytes=0
     for name in SERVICES:
         size=archives[name].get('size')
         if not isinstance(size,int) or not 0<size<=2*1024**3:raise RuntimeError('Invalid release archive size: '+name)
-        sizes.append(size)
-    required_disk=max(MIN_DISK_FREE_BYTES,sum(sizes)+DEPLOYMENT_DISK_RESERVE_BYTES)
+        archive_bytes+=size
+        image_size=image_sizes[name]
+        if not isinstance(image_size,int) or not 0<image_size<=5*1024**3:raise RuntimeError('Invalid release image size: '+name)
+        image_bytes+=image_size
+    source_size=manifest.get('source_size')
+    if not isinstance(source_size,int) or not 0<source_size<=150*1024**2:raise RuntimeError('Invalid source archive size')
+    required_disk=max(MIN_STAGING_DISK_FREE_BYTES,
+        archive_bytes+source_size+image_bytes+DEPLOYMENT_DISK_RESERVE_BYTES+
+        SOURCE_EXPANSION_RESERVE_BYTES+ACCEPTANCE_EVIDENCE_RESERVE_BYTES)
     free_disk=shutil.disk_usage(base).free
     if free_disk<required_disk:
         raise PendingRelease(f'Insufficient disk reserve: {free_disk} bytes free; {required_disk} required')
     memory_text=meminfo.read_text()
-    match=re.search(r'^MemAvailable:\s+(\d+)\s+kB$',memory_text,re.MULTILINE)
-    if not match:raise RuntimeError('MemAvailable is unavailable')
-    available_memory=int(match.group(1))*1024
-    if available_memory<MIN_MEM_AVAILABLE_BYTES:
-        raise PendingRelease(f'Insufficient memory reserve: {available_memory} bytes available; {MIN_MEM_AVAILABLE_BYTES} required')
+    available_match=re.search(r'^MemAvailable:\s+(\d+)\s+kB$',memory_text,re.MULTILINE)
+    swap_match=re.search(r'^SwapFree:\s+(\d+)\s+kB$',memory_text,re.MULTILINE)
+    if not available_match or not swap_match:raise RuntimeError('Available memory or swap is unavailable')
+    available_memory=int(available_match.group(1))*1024
+    free_swap=int(swap_match.group(1))*1024
+    if available_memory<MIN_STAGING_MEM_AVAILABLE_BYTES:
+        raise PendingRelease(f'Insufficient staging RAM reserve: {available_memory} bytes available; {MIN_STAGING_MEM_AVAILABLE_BYTES} required')
+    if free_swap<MIN_STAGING_SWAP_FREE_BYTES:
+        raise PendingRelease(f'Insufficient staging swap reserve: {free_swap} bytes free; {MIN_STAGING_SWAP_FREE_BYTES} required')
 
 def deployer():
     spec=importlib.util.spec_from_file_location('servio_installed_deployer','/usr/local/lib/servio/deploy_release.py')

@@ -24,7 +24,7 @@ def digest(path: Path) -> str:
         return hashlib.file_digest(stream, 'sha256').hexdigest()
 
 
-def archive_image(bundle: Path, name: str, sha: str) -> tuple[Path, str]:
+def archive_image(bundle: Path, name: str, sha: str) -> tuple[Path, str, int]:
     image_tag = f'servio-ci-{name}:{sha}'
     config = json.loads(subprocess.check_output(['docker', 'image', 'inspect', image_tag], text=True))[0]
     labels = config.get('Config', {}).get('Labels') or {}
@@ -51,23 +51,28 @@ def archive_image(bundle: Path, name: str, sha: str) -> tuple[Path, str]:
     image_id = 'sha256:' + hashlib.sha256(raw).hexdigest()
     if config.get('Id') != image_id:
         raise RuntimeError('Archived image config does not match the tested image: ' + name)
-    return archive, image_id
+    image_size = config.get('Size')
+    if not isinstance(image_size, int) or not 0 < image_size <= 5 * 1024**3:
+        raise RuntimeError('Image size is missing or exceeds the deployment bound: ' + name)
+    return archive, image_id, image_size
 
 
 def stage_bundle(bundle: Path, sha: str, run_id: int) -> dict:
     bundle.mkdir()
     manifest = {
-        'schema_version': 1,
+        'schema_version': 2,
         'environment': 'staging',
         'sha': sha,
         'ci_run_id': run_id,
         'images': {},
         'image_ids': {},
+        'image_sizes': {},
         'archives': {},
     }
     for name in IMAGE_NAMES:
-        archive, image_id = archive_image(bundle, name, sha)
+        archive, image_id, image_size = archive_image(bundle, name, sha)
         manifest['image_ids'][name] = image_id
+        manifest['image_sizes'][name] = image_size
         manifest['archives'][name] = {
             'file': archive.name,
             'sha256': digest(archive),
@@ -81,6 +86,7 @@ def stage_bundle(bundle: Path, sha: str, run_id: int) -> dict:
     if not 0 < source.stat().st_size <= MAX_SOURCE_SIZE:
         raise RuntimeError('Source archive exceeds the deployment bound')
     manifest['source_sha256'] = digest(source)
+    manifest['source_size'] = source.stat().st_size
     (bundle / 'release-manifest.json').write_text(
         json.dumps(manifest, sort_keys=True, separators=(',', ':')) + '\n',
         encoding='utf-8',
