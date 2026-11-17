@@ -83,3 +83,16 @@ See [security threat model](SERVIO_AUTH_SECURITY_THREAT_MODEL.md) and [implement
 This report was reconciled against `origin/main` at `c052c817e114df4d060d8428e6e236f6011876f8`. The current implementation slice, P0/P1 traceability, test evidence, and outstanding work are recorded in [IMPLEMENTATION_STATUS.md](IMPLEMENTATION_STATUS.md); the refreshed repository/CI baseline is in [BASELINE.md](BASELINE.md). Historical audit conclusions remain intact. This update does not mark unimplemented Redis replay/rate-limit work, the full E2E matrix, Super Admin/storefront acceptance, cache-boundary testing, or 10K measurements as complete.
 
 The E2E matrix remains **PASS 0 · FAIL 0 · BLOCKED 0 · NOT RUN 30** for browser-level scenarios. Selected unit/component tests were run for this branch and do not count as matrix executions.
+
+## Candidate browser subset — 2026-11-17
+
+The Landing session-island UI subset was subsequently executed on candidate commit `b7986af` with Playwright 1.64.1 / Chromium against a disposable local Next dev server. All four tests passed. The session and logout endpoints were fulfilled by Playwright route mocks with synthetic profile/cookie fixtures; the Go API, Redis, PostgreSQL, Dashboard, CDN, and real cross-origin revocation were not part of this run. Treat these as focused mock-browser checks, not PASS results for the end-to-end rows above.
+
+| Executed browser check | Result | Scope and limit |
+|---|---|---|
+| Session profile, shared HTML, account links, new tab, confirmed logout | PASS (mock API) | Asserts private profile values are absent from Landing's initial HTML, account details and authorized links render after session discovery, a second tab discovers the fixture session, and mocked 204 logout changes both Landing views and expires the test cookie. No backend revocation was exercised. |
+| Temporary outage and retry | PASS (mock API) | A mocked 503 keeps the header in its temporary-unavailable state; retry after the route changes to 401 reaches guest actions. |
+| Responsive account navigation | PASS (mock API) | Checks 320, 390, 768, 1024, and 1440 px, horizontal overflow, 44 px minimum sign-out target, Escape/focus restoration, light theme, Arabic locale and RTL. This is not a screen-reader, arrow-key, contrast, or WCAG audit. |
+| Logout failure | PASS (mock API) | A mocked 503 displays an unconfirmed-logout message and keeps the test session cookie and authenticated state. |
+
+Reviewed UI captures: [authenticated desktop](evidence/landing-authenticated-desktop.png) and [authenticated mobile at 320 px](evidence/landing-authenticated-mobile-320.png). Passing-run Playwright traces were retained locally after replacing the synthetic cookie value with `[REDACTED]`; they were not committed. Full scenarios 1–30 retain their NOT RUN status unless separately executed with the required backend and environment evidence.

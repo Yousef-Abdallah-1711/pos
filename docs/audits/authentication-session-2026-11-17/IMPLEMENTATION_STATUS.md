@@ -39,13 +39,15 @@ This is an implementation update to the eight audit artifacts in this directory.
 
 Run results are recorded as execution evidence, not inferred from test files:
 
+- Landing session-island Playwright subset: **PASS**, 4 browser tests on candidate commit `b7986af`. It ran against a disposable local Next dev server and Playwright Chromium with session/logout API routes mocked; it is UI and request-contract evidence only, not a live Go/Redis authentication test. The tests cover session display and a new tab, 503-to-401 retry, menu behavior at 320/390/768/1024/1440 px with EN/AR and theme changes, and failed logout. Reviewed screenshots are [desktop](evidence/landing-authenticated-desktop.png) and [320px mobile](evidence/landing-authenticated-mobile-320.png). Sanitized traces were retained as local run artifacts under `/tmp/servio-auth-evidence/trace-results/` and are not committed.
 - Landing session/account/navigation unit and component suites: **PASS**, 13 tests.
 - Dashboard session status-classifier suite: **PASS**, 4 tests.
 - Landing and Dashboard application typechecks: **PASS** (`tsc --noEmit -p tsconfig.json`).
 - Landing and Dashboard test typechecks: **PASS** (`tsc --noEmit -p tsconfig.test.json`).
+- Landing ESLint: **PASS**, 0 errors and 12 existing warnings across unrelated auth, tenant-selector, marketing, and API files; the added browser test has no lint findings.
 - Backend package tests: **PASS** for `internal/handler/http`, `internal/repository`, and `internal/usecase` under Go 1.27.4. The HTTP session lifecycle test skipped because `POS_TEST_DATABASE_URL` was not configured; its PostgreSQL assertions are not counted as executed.
 - Landing and Dashboard full lint commands: **PASS** with non-failing repository warnings. Focused lint over changed source/tests: **PASS** with no source findings (ESLint reports the app's existing `.eslintignore` configuration warning).
-- Full E2E matrix, visual viewport matrix, accessibility audit, CDN cache test, load test, and deployment validation: **NOT RUN**.
+- Full 30-scenario API-backed E2E matrix, screen-reader/contrast audit, CDN cache test, and deployment validation: **NOT RUN**. The mocked Landing viewport checks above do not count as the complete matrix.
 
 The initial Landing run found and led to a JSX test-harness parse fix; the corrected run passed the three selected files. The implementation branch has not yet been reviewed by GitHub CI.
 
