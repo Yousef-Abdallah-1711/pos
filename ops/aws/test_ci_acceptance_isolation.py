@@ -7,6 +7,11 @@ ROOT = Path(__file__).resolve().parents[2]
 
 
 class CIIsolationTests(unittest.TestCase):
+    def test_shared_postgres_backend_packages_run_serially(self):
+        workflow = (ROOT / '.github/workflows/production-ci.yml').read_text()
+        backend = workflow.split('  backend:', maxsplit=1)[1].split('\n  frontend:', maxsplit=1)[0]
+        self.assertIn('GOFLAGS: -p=1', backend)
+
     def test_generated_browser_stack_has_no_external_route(self):
         runner = (ROOT / 'ops/aws/ci-browser-stack.py').read_text()
         self.assertIn("config['networks']['edge']['internal'] = True", runner)
@@ -38,6 +43,13 @@ class CIIsolationTests(unittest.TestCase):
             with self.subTest(width=width):
                 self.assertIn(f'{{width:{width},height:', script)
         self.assertIn('await page.setViewportSize({width,height});', script)
+
+    def test_marketing_console_errors_are_read_before_route_navigation(self):
+        script = (ROOT / 'frontend/apps/landing/scripts/marketing-acceptance.mjs').read_text()
+        load = script.split('async function load(page, locale, route) {', maxsplit=1)[1].split('\nasync function ', maxsplit=1)[0]
+        self.assertLess(load.index('await flushPendingReactErrorDetails(page)'), load.index('await page.goto('))
+        self.assertIn('await flushPendingReactErrorDetails(page)\n}', load)
+        self.assertIn('pendingReactErrorDetails.set(page, pending)', script)
 
     def test_mutating_acceptance_scripts_have_no_public_production_api_literals(self):
         scripts = [
