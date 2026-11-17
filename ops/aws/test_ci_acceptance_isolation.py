@@ -7,6 +7,11 @@ ROOT = Path(__file__).resolve().parents[2]
 
 
 class CIIsolationTests(unittest.TestCase):
+    def test_shared_postgres_backend_packages_run_serially(self):
+        workflow = (ROOT / '.github/workflows/production-ci.yml').read_text()
+        backend = workflow.split('  backend:', maxsplit=1)[1].split('\n  frontend:', maxsplit=1)[0]
+        self.assertIn('GOFLAGS: -p=1', backend)
+
     def test_generated_browser_stack_has_no_external_route(self):
         runner = (ROOT / 'ops/aws/ci-browser-stack.py').read_text()
         self.assertIn("config['networks']['edge']['internal'] = True", runner)
