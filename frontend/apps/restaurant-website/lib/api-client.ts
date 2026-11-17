@@ -5,7 +5,7 @@ import { isCreateOrderRequest, rememberOrderToken, tokenForOrderUrl } from './or
 
 /**
  * API Client with Axios
- * Includes interceptors for error handling, auth, and request/response logging
+ * Includes interceptors for public order capabilities and request/response logging
  */
 class ApiClient {
   private instance: AxiosInstance;
@@ -29,11 +29,16 @@ class ApiClient {
     // Request interceptor
     this.instance.interceptors.request.use(
       (config: InternalAxiosRequestConfig) => {
-        // Add auth token if available
-        const token = typeof window !== "undefined" ? localStorage.getItem("auth-token") : null;
-        if (token) {
-          config.headers.Authorization = `Bearer ${token}`;
+        // Remove credentials left by older storefront builds. Public storefront
+        // requests use order-specific capabilities, not staff bearer tokens.
+        if (typeof window !== "undefined") {
+          try {
+            window.localStorage.removeItem("auth-token");
+          } catch {
+            // Storage can be disabled; public requests should still proceed.
+          }
         }
+        config.headers.delete("Authorization");
 
         if (config.method && !['get', 'head', 'options'].includes(config.method.toLowerCase())) {
           config.headers['Content-Type'] = 'application/json'
@@ -61,7 +66,6 @@ class ApiClient {
           debugLog(`[API] ${config.method?.toUpperCase()} ${config.url}`, {
             tenantId,
             restaurantId,
-            headers: config.headers
           });
         }
 
@@ -82,23 +86,15 @@ class ApiClient {
 
         // Log successful responses in development
         if (process.env.NODE_ENV === "development") {
-          debugLog(`[API] Response from ${response.config.url}`, response.data);
+          debugLog(`[API] Response from ${response.config.url}`, { status: response.status });
         }
         return response;
       },
       (error: AxiosError) => {
-        // Handle specific error cases
-        if (error.response?.status === 401) {
-          // Unauthorized - clear auth and redirect to login
-          if (typeof window !== "undefined") {
-            localStorage.removeItem("auth-token");
-            window.location.href = "/login";
-          }
-        }
-
+        // Public 401 responses pass through without redirecting visitors to a staff login page.
         if (error.response?.status === 403) {
           // Forbidden
-          debugError("[API] Forbidden:", error.response.data);
+          debugError("[API] Forbidden:", { url: error.config?.url });
         }
 
         if (error.response?.status === 404) {
@@ -108,14 +104,13 @@ class ApiClient {
 
         if (error.response?.status === 500) {
           // Server error
-          debugError("[API] Server error:", error.response.data);
+          debugError("[API] Server error:", { url: error.config?.url });
         }
 
         // Log error in development
         if (process.env.NODE_ENV === "development") {
           debugError(`[API] Error from ${error.config?.url}`, {
             status: error.response?.status,
-            data: error.response?.data,
             message: error.message,
           });
         }
@@ -174,26 +169,6 @@ class ApiClient {
   async delete<T>(url: string, config?: any): Promise<T> {
     const response = await this.instance.delete<T>(url, config);
     return response.data;
-  }
-
-  /**
-   * Set authorization token
-   */
-  setAuthToken(token: string) {
-    if (typeof window !== "undefined") {
-      localStorage.setItem("auth-token", token);
-    }
-    this.instance.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-  }
-
-  /**
-   * Clear authorization token
-   */
-  clearAuthToken() {
-    if (typeof window !== "undefined") {
-      localStorage.removeItem("auth-token");
-    }
-    delete this.instance.defaults.headers.common["Authorization"];
   }
 
   /**

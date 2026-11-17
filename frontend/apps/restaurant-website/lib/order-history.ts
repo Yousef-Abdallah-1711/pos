@@ -5,7 +5,7 @@ import { rememberedOrderIds } from './order-access'
 import type { OrderListResponse } from './hooks/use-api-queries'
 
 // There is deliberately no unauthenticated order-list endpoint. Each saved order
-// is fetched with its own capability by the existing API client's token interceptor.
+// is fetched with its own capability by the public API client's order-token interceptor.
 export async function loadRememberedOrders(): Promise<OrderListResponse> {
   const entries = await Promise.all(rememberedOrderIds().map(async id => {
     try {
