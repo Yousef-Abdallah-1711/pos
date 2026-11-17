@@ -138,8 +138,8 @@ func (h *FinancialReportHandler) GetReceivablesAging(w http.ResponseWriter, r *h
 		return
 	}
 
-	cacheKey := h.financialReportCacheKey(tenantID, restaurantID, r.URL.Path, r.URL.RawQuery)
-	h.respondFinancialReportWithCache(w, r, cacheKey, func() (interface{}, error) {
+	// Invoice and receipt mutations must be visible immediately in aging balances.
+	h.respondFinancialReportWithoutCache(w, func() (interface{}, error) {
 		return h.financialReportUC.GenerateReceivablesAging(tenantID, restaurantID, asOf)
 	}, "Failed to generate receivables aging report")
 }
@@ -158,8 +158,7 @@ func (h *FinancialReportHandler) GetPayablesAging(w http.ResponseWriter, r *http
 		return
 	}
 
-	cacheKey := h.financialReportCacheKey(tenantID, restaurantID, r.URL.Path, r.URL.RawQuery)
-	h.respondFinancialReportWithCache(w, r, cacheKey, func() (interface{}, error) {
+	h.respondFinancialReportWithoutCache(w, func() (interface{}, error) {
 		return h.financialReportUC.GeneratePayablesAging(tenantID, restaurantID, asOf)
 	}, "Failed to generate payables aging report")
 }
@@ -243,6 +242,22 @@ func (h *FinancialReportHandler) respondFinancialReportWithCache(
 		_ = h.cache.Set(r.Context(), cacheKey, payload, h.cacheTTL)
 	}
 	writeFinancialReportJSON(w, payload)
+}
+
+func (h *FinancialReportHandler) respondFinancialReportWithoutCache(
+	w http.ResponseWriter,
+	build func() (interface{}, error),
+	errorMessage string,
+) {
+	report, err := build()
+	if err != nil {
+		respondError(w, http.StatusInternalServerError, errorMessage)
+		return
+	}
+	respondJSON(w, http.StatusOK, map[string]interface{}{
+		"success": true,
+		"data":    report,
+	})
 }
 
 func (h *FinancialReportHandler) getCachedFinancialReport(r *http.Request, cacheKey string) string {

@@ -281,11 +281,21 @@ func (h *HRSalaryHandler) CreateSalary(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	salary.ID = id
+	createdSalary, err := h.salaryRepo.GetSalaryByID(tenantID, restaurantID, id)
+	if err != nil || createdSalary == nil {
+		if err == nil {
+			err = errors.New("created salary record was not found")
+		}
+		log.Printf("[HR-Salary] read created salary ERROR: %v\n", err)
+		writeJSON(w, http.StatusInternalServerError, map[string]interface{}{
+			"success": false, "error": "Failed to read created salary record",
+		})
+		return
+	}
 	log.Printf("[HR-Salary] CreateSalary SUCCESS: id=%d\n", id)
 
 	writeJSON(w, http.StatusCreated, map[string]interface{}{
-		"success": true, "data": salary,
+		"success": true, "data": createdSalary,
 	})
 }
 

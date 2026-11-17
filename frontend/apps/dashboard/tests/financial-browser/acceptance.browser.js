@@ -422,12 +422,11 @@ test.describe('authenticated financial browser acceptance', () => {
     await page.getByRole('button', { name: 'Create Salary', exact: true }).click()
     const salaryDialog = page.getByRole('dialog')
     await salaryDialog.locator('select[name="employee_id"]').selectOption({ label: fixture.employee_name })
-    const today = new Date().toISOString().slice(0, 10)
-    const nextMonthEnd = new Date()
-    nextMonthEnd.setUTCMonth(nextMonthEnd.getUTCMonth() + 1)
-    nextMonthEnd.setUTCDate(0)
-    await salaryDialog.locator('input[name="pay_period_start"]').fill(today)
-    await salaryDialog.locator('input[name="pay_period_end"]').fill(nextMonthEnd.toISOString().slice(0, 10))
+    const today = new Date()
+    const payPeriodStart = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), 1)).toISOString().slice(0, 10)
+    const payPeriodEnd = today.toISOString().slice(0, 10)
+    await salaryDialog.locator('input[name="pay_period_start"]').fill(payPeriodStart)
+    await salaryDialog.locator('input[name="pay_period_end"]').fill(payPeriodEnd)
     await salaryDialog.locator('input[name="base_salary"]').fill('1500')
     const createSalary = page.waitForResponse((response) =>
       new URL(response.url()).pathname === '/api/v1/hr/salaries' && response.request().method() === 'POST'
