@@ -89,6 +89,36 @@ async function assertNoDocumentOverflow(page) {
   expect(dimensions.documentWidth, JSON.stringify(dimensions)).toBeLessThanOrEqual(dimensions.viewportWidth)
 }
 
+async function assertMobileFinancialContentWithinViewport(page) {
+  const geometry = await page.evaluate(() => {
+    const main = document.querySelector('main')?.getBoundingClientRect()
+    const heading = document.querySelector('main h1')?.getBoundingClientRect()
+    const tableViewports = [...document.querySelectorAll('main table')].map((table) => {
+      const viewport = table.closest('.overflow-x-auto') || table
+      const bounds = viewport.getBoundingClientRect()
+      return { left: bounds.left, right: bounds.right }
+    })
+
+    return {
+      viewportWidth: window.innerWidth,
+      documentWidth: document.documentElement.scrollWidth,
+      main: main ? { left: main.left, right: main.right } : null,
+      heading: heading ? { left: heading.left, right: heading.right } : null,
+      tableViewports,
+    }
+  })
+
+  expect(geometry.documentWidth, JSON.stringify(geometry)).toBeLessThanOrEqual(geometry.viewportWidth)
+  expect(geometry.main, JSON.stringify(geometry)).not.toBeNull()
+  expect(geometry.heading, JSON.stringify(geometry)).not.toBeNull()
+  expect(geometry.tableViewports, 'financial report must expose its table viewport').not.toHaveLength(0)
+
+  for (const element of [geometry.main, geometry.heading, ...geometry.tableViewports]) {
+    expect(element.left, JSON.stringify(geometry)).toBeGreaterThanOrEqual(0)
+    expect(element.right, JSON.stringify(geometry)).toBeLessThanOrEqual(geometry.viewportWidth)
+  }
+}
+
 async function assertFinancialContentClearsSidebar(page) {
   const layout = await page.evaluate(() => {
     const heading = document.querySelector('main h1')?.getBoundingClientRect()
@@ -289,7 +319,8 @@ test.describe('authenticated financial browser acceptance', () => {
 
     await setViewport(page, 320, 812)
     await expect(page.getByRole('heading', { name: 'Profit & Loss', exact: true })).toBeVisible()
-    await assertNoDocumentOverflow(page)
+    await assertMobileFinancialContentWithinViewport(page)
+    await page.screenshot({ path: testInfo.outputPath('en-mobile-profit-loss-320.png'), fullPage: true })
   })
 
   test('accountant AR mobile preserves RTL and exports CSV through the dashboard', async ({ page }, testInfo) => {
