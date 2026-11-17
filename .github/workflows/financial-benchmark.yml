@@ -6,7 +6,16 @@ on:
       - '.github/workflows/financial-benchmark.yml'
       - 'backend/cmd/api/financial_benchmark_integration_test.go'
       - 'backend/cmd/api/financial_benchmark_support_integration_test.go'
-      - 'backend/migrations/157_optimize_financial_reporting_indexes.sql'
+      - 'backend/internal/repository/accounting_*.go'
+      - 'backend/internal/repository/general_ledger_*.go'
+      - 'backend/internal/repository/inventory_movement_repo.go'
+      - 'backend/internal/usecase/financial_report*.go'
+      - 'backend/internal/handler/http/financial_report*.go'
+      - 'backend/internal/handler/http/report_handler*.go'
+      - 'backend/internal/handler/http/*export*.go'
+      - 'backend/migrations/**'
+      - 'backend/go.mod'
+      - 'backend/go.sum'
   workflow_dispatch:
     inputs:
       journal_count:
