@@ -174,6 +174,16 @@ jobs:
         env:
           SERVIO_CI_BROWSER_NODE_MODULES: ${{ runner.temp }}/servio-browser/node_modules
         run: ops/aws/ci-browser-smoke
+      - name: Stage immutable release inputs for exact main CI
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: python3 ops/aws/stage-ci-images.py
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: success() && github.event_name == 'push' && github.ref == 'refs/heads/main'
+        with:
+          name: release-image-input
+          path: release-bundle/
+          retention-days: 30
+          if-no-files-found: error
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always()
         with:
@@ -198,6 +208,36 @@ jobs:
             ops/aws/evidence/browser/landing-regression/
             ops/aws/evidence/browser/lighthouse/
           if-no-files-found: ignore
+
+  publish-release-images:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [application-images, required]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions:
+      actions: read
+      checks: read
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.sha }}
+      - name: Download immutable image inputs from this CI run
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh run download "$GITHUB_RUN_ID" --name release-image-input --dir release-bundle
+      - name: Publish image digests for exact main SHA
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GHCR_TOKEN: ${{ github.token }}
+        run: python3 ops/aws/publish-ci-images.py
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: release-bundle
+          path: release-bundle/
+          retention-days: 30
+          if-no-files-found: error
 
   required:
     if: always()
