@@ -22,6 +22,7 @@ import (
 	"github.com/lib/pq"
 	"pos-saas/internal/domain"
 	"pos-saas/internal/middleware"
+	appjwt "pos-saas/internal/pkg/jwt"
 	"pos-saas/internal/repository"
 )
 
@@ -29,6 +30,9 @@ func invokeFinancialBenchmarkHandler(fixture financialBenchmarkFixture, query st
 	request := httptest.NewRequest(http.MethodGet, "/api/v1/accounting/csv/benchmark"+query, nil)
 	ctx := context.WithValue(request.Context(), middleware.TenantContextKey, int64(fixture.tenantID))
 	ctx = context.WithValue(ctx, middleware.RestaurantContextKey, int64(fixture.restaurantID))
+	ctx = context.WithValue(ctx, middleware.UserContextKey, &appjwt.Claims{
+		UserID: fixture.postedBy, TenantID: fixture.tenantID, RestaurantID: fixture.restaurantID,
+	})
 	recorder := httptest.NewRecorder()
 	handler.ServeHTTP(recorder, request.WithContext(ctx))
 	return recorder
@@ -71,6 +75,9 @@ func invokeFinancialBenchmarkReportExport(fixture financialBenchmarkFixture, bod
 	request.Header.Set("Content-Type", "application/json")
 	ctx := context.WithValue(request.Context(), middleware.TenantContextKey, int64(fixture.tenantID))
 	ctx = context.WithValue(ctx, middleware.RestaurantContextKey, int64(fixture.restaurantID))
+	ctx = context.WithValue(ctx, middleware.UserContextKey, &appjwt.Claims{
+		UserID: fixture.postedBy, TenantID: fixture.tenantID, RestaurantID: fixture.restaurantID,
+	})
 	recorder := httptest.NewRecorder()
 	handler.ServeHTTP(recorder, request.WithContext(ctx))
 	return recorder
@@ -289,7 +296,7 @@ func seedFinancialBenchmarkDocuments(t *testing.T, db *sql.DB, fixture financial
 		INSERT INTO inventory_movements (tenant_id, restaurant_id, product_id, reference_type, reference_id, movement_type, quantity, unit_cost, total_cost, notes, created_by, created_at)
 		SELECT $1, $2, $3, 'financial_benchmark', seq, CASE WHEN seq % 5 = 0 THEN 'sale' ELSE 'purchase' END,
 		       CASE WHEN seq % 5 = 0 THEN -1 ELSE 1 END, 12.50, 12.50, 'Synthetic benchmark inventory movement', $4,
-		       TIMESTAMP '2024-01-01' + (seq * INTERVAL '1 day')
+		       TIMESTAMP '2020-01-01' + (seq * INTERVAL '1 day')
 		FROM generate_series(1, $5) AS seq`, fixture.tenantID, fixture.restaurantID, fixture.productID, fixture.postedBy, fixture.documentCount); err != nil {
 		t.Fatalf("seed benchmark inventory movements: %v", err)
 	}
