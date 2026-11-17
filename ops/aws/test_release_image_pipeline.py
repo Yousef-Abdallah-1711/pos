@@ -46,6 +46,13 @@ def write_docker_archive(path: Path, name: str, sha: str, image_id: str) -> int:
 
 
 class ReleaseImagePipelineTests(unittest.TestCase):
+    def test_installer_copies_deployer_runtime_dependencies(self):
+        installer = (ROOT / 'ops/aws/install-pull-agent').read_text(encoding='utf-8')
+        self.assertIn(
+            'ops/aws/release_image_archive.py /usr/local/lib/servio/release_image_archive.py',
+            installer,
+        )
+
     def test_size_budget_uses_stable_uncompressed_archive_layer_bytes(self):
         with tempfile.TemporaryDirectory() as directory:
             archive = Path(directory) / 'backend.docker.tar.gz'
