@@ -364,11 +364,22 @@ func seedFinancialBenchmarkSalesOrders(t *testing.T, db *sql.DB, fixture financi
 		  AND orders.order_number LIKE 'FINBM-SALES-%'`, fixture.tenantID, fixture.restaurantID, fixture.productID); err != nil {
 		t.Fatalf("seed benchmark sales items: %v", err)
 	}
-	// Migration 181 permits item inserts only while an order is pre-fulfillment.
-	if _, err := db.Exec(`
-		UPDATE orders SET status='delivered', updated_at=created_at
-		WHERE tenant_id=$1 AND restaurant_id=$2 AND order_number LIKE 'FINBM-SALES-%'`, fixture.tenantID, fixture.restaurantID); err != nil {
-		t.Fatalf("fulfill benchmark sales orders: %v", err)
+	// Payment status is synthetic to exercise the sales report/export query; these
+	// rows do not represent payment/outbox or GL posting work. Fulfillment follows
+	// the valid transition path so tracked inventory reservations remain realistic.
+	for _, transition := range [][2]string{
+		{"pending", "confirmed"},
+		{"confirmed", "preparing"},
+		{"preparing", "ready"},
+		{"ready", "out_for_delivery"},
+		{"out_for_delivery", "delivered"},
+	} {
+		if _, err := db.Exec(`
+			UPDATE orders SET status=$1, updated_at=created_at
+			WHERE tenant_id=$2 AND restaurant_id=$3 AND order_number LIKE 'FINBM-SALES-%' AND status=$4`,
+			transition[1], fixture.tenantID, fixture.restaurantID, transition[0]); err != nil {
+			t.Fatalf("advance benchmark sales orders from %s to %s: %v", transition[0], transition[1], err)
+		}
 	}
 }
 
