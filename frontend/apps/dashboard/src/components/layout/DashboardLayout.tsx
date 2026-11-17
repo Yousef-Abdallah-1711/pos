@@ -162,16 +162,16 @@ export default function DashboardLayout({
 
   const mainContentClass = isFullscreenRoute
     ? 'w-full h-full'
-    : isRTL
-      ? isSidebarCollapsed
-        ? 'md:mr-20'
-        : 'md:mr-64'
-      : isSidebarCollapsed
-        ? 'md:ml-20'
-        : 'md:ml-64'
+    : ''
 
   return (
-    <div dir="ltr" data-locale={locale} className={`min-h-screen flex ${isFullscreenRoute ? 'bg-gray-50 text-gray-900 dark:bg-slate-950 dark:text-slate-100' : 'bg-gray-50 dark:bg-gray-900'}`}>
+    <div
+      dir="ltr"
+      data-locale={locale}
+      data-sidebar-collapsed={isSidebarCollapsed}
+      data-fullscreen={isFullscreenRoute}
+      className={`dashboard-layout min-h-screen flex ${isFullscreenRoute ? 'bg-gray-50 text-gray-900 dark:bg-slate-950 dark:text-slate-100' : 'bg-gray-50 dark:bg-gray-900'}`}
+    >
       {/* Sidebar */}
       {!isFullscreenRoute && (
         <Sidebar
@@ -183,7 +183,10 @@ export default function DashboardLayout({
       )}
 
       {/* Main Content Area */}
-      <div dir={isRTL ? 'rtl' : 'ltr'} className={`min-w-0 flex-1 w-full md:w-auto ${mainContentClass} ${isFullscreenRoute ? '' : 'md:transition-[margin,width] md:duration-300'}`}>
+      <div
+        dir={isRTL ? 'rtl' : 'ltr'}
+        className={`dashboard-main min-w-0 flex-1 w-full ${mainContentClass} ${isFullscreenRoute ? '' : 'md:transition-[margin,width] md:duration-300'}`}
+      >
         {/* Header */}
         {!isFullscreenRoute && (
           <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-30">
