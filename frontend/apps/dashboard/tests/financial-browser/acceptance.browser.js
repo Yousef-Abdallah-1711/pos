@@ -286,6 +286,10 @@ test.describe('authenticated financial browser acceptance', () => {
     expect(fs.readFileSync(pdfPath).subarray(0, 4).toString()).toBe('%PDF')
     await assertNoDocumentOverflow(page)
     await page.screenshot({ path: testInfo.outputPath('en-mobile-profit-loss.png'), fullPage: true })
+
+    await setViewport(page, 320, 812)
+    await expect(page.getByRole('heading', { name: 'Profit & Loss', exact: true })).toBeVisible()
+    await assertNoDocumentOverflow(page)
   })
 
   test('accountant AR mobile preserves RTL and exports CSV through the dashboard', async ({ page }, testInfo) => {
