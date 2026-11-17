@@ -100,7 +100,7 @@ func TestFinancialReportUseCase_GenerateTrialBalance_ManualCalculationMatches(t 
 	uc := NewFinancialReportUseCase(db, generalLedgerRepo)
 
 	asOf := time.Date(2026, time.March, 31, 0, 0, 0, 0, time.UTC)
-	mock.ExpectQuery(`WITH latest_balances AS`).
+	mock.ExpectQuery(`SELECT\s+coa\.id,`).
 		WithArgs(1, 2, asOf).
 		WillReturnRows(
 			sqlmock.NewRows([]string{
@@ -188,7 +188,7 @@ func TestFinancialReportUseCase_GenerateBalanceSheetIntegrityStatus(t *testing.T
 			for _, row := range tt.rows {
 				rows.AddRow(row...)
 			}
-			mock.ExpectQuery(`WITH latest AS`).WithArgs(1, 2, asOf).WillReturnRows(rows)
+			mock.ExpectQuery(`SELECT\s+coa\.account_code,`).WithArgs(1, 2, asOf).WillReturnRows(rows)
 
 			report, err := NewFinancialReportUseCase(db, nil).GenerateBalanceSheet(1, 2, asOf)
 			if err != nil {
@@ -218,7 +218,7 @@ func TestFinancialReportUseCase_GenerateBalanceSheetKeepsContraBalancesNegative(
 	defer db.Close()
 
 	asOf := time.Date(2026, time.November, 10, 0, 0, 0, 0, time.UTC)
-	mock.ExpectQuery(`WITH latest AS`).WithArgs(1, 2, asOf).WillReturnRows(
+	mock.ExpectQuery(`SELECT\s+coa\.account_code,`).WithArgs(1, 2, asOf).WillReturnRows(
 		sqlmock.NewRows([]string{"account_code", "account_name", "account_type", "normal_balance", "running_balance"}).
 			AddRow("1110", "Cash", "asset", "debit", 100.0).
 			AddRow("1240", "Accumulated Depreciation", "asset", "credit", 20.0).

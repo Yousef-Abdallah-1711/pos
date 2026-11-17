@@ -561,39 +561,48 @@ func (r *JournalEntryRepository) appendGeneralLedgerTx(tx *sql.Tx, tenantID, res
 		accountIDs = append(accountIDs, line.AccountID)
 	}
 	sort.Ints(accountIDs)
+	accountNormalBalances := make(map[int]string, len(accountIDs))
 	for _, accountID := range accountIDs {
 		var lockedAccountID int
+		var normalBalance string
 		err := tx.QueryRow(`
-			SELECT id
+			SELECT id, normal_balance
 			FROM chart_of_accounts
 			WHERE id = $1 AND tenant_id = $2 AND restaurant_id = $3
 			FOR UPDATE
-		`, accountID, tenantID, restaurantID).Scan(&lockedAccountID)
+		`, accountID, tenantID, restaurantID).Scan(&lockedAccountID, &normalBalance)
 		if errors.Is(err, sql.ErrNoRows) {
 			return errors.New("posting account is outside tenant and restaurant scope")
 		}
 		if err != nil {
 			return fmt.Errorf("lock ledger account %d: %w", accountID, err)
 		}
+		accountNormalBalances[accountID] = normalBalance
+	}
+	for _, line := range lines {
+		if accountNormalBalances[line.AccountID] != line.NormalBalance {
+			return fmt.Errorf("posting account %d normal balance changed before posting", line.AccountID)
+		}
 	}
 
 	for _, line := range lines {
-		var currentBalance float64
+		var priorBalance float64
+		normalBalance := accountNormalBalances[line.AccountID]
+		// Posted ledger rows remain immutable. Derive each new snapshot from movements
+		// through its accounting date so a backdated entry cannot inherit a later balance.
 		err := tx.QueryRow(`
-			SELECT COALESCE(running_balance, 0)
+			SELECT COALESCE(SUM(CASE WHEN $4 = 'credit'
+				THEN credit_amount - debit_amount
+				ELSE debit_amount - credit_amount
+			END), 0)
 			FROM general_ledger
 			WHERE tenant_id = $1 AND restaurant_id = $2 AND account_id = $3
-			ORDER BY entry_date DESC, id DESC
-			LIMIT 1
-		`, tenantID, restaurantID, line.AccountID).Scan(&currentBalance)
-		if err != nil && !errors.Is(err, sql.ErrNoRows) {
+			  AND entry_date <= $5
+		`, tenantID, restaurantID, line.AccountID, normalBalance, entryDate).Scan(&priorBalance)
+		if err != nil {
 			return err
 		}
-		if errors.Is(err, sql.ErrNoRows) {
-			currentBalance = 0
-		}
-
-		newBalance := currentBalance + calculateBalanceDelta(line.NormalBalance, line.DebitAmount, line.CreditAmount)
+		newBalance := priorBalance + calculateBalanceDelta(normalBalance, line.DebitAmount, line.CreditAmount)
 		if _, err := tx.Exec(`
 			INSERT INTO general_ledger (
 				tenant_id, restaurant_id, account_id, journal_entry_id, journal_line_id,
@@ -617,12 +626,27 @@ func (r *JournalEntryRepository) appendGeneralLedgerTx(tx *sql.Tx, tenantID, res
 			return err
 		}
 
+	}
+
+	for _, accountID := range accountIDs {
+		normalBalance := accountNormalBalances[accountID]
+		var currentBalance float64
+		if err := tx.QueryRow(`
+			SELECT COALESCE(SUM(CASE WHEN $4 = 'credit'
+				THEN credit_amount - debit_amount
+				ELSE debit_amount - credit_amount
+			END), 0)
+			FROM general_ledger
+			WHERE tenant_id = $1 AND restaurant_id = $2 AND account_id = $3
+		`, tenantID, restaurantID, accountID, normalBalance).Scan(&currentBalance); err != nil {
+			return err
+		}
 		if _, err := tx.Exec(`
 			UPDATE chart_of_accounts
 			SET current_balance = $1,
 				updated_at = CURRENT_TIMESTAMP
 			WHERE id = $2 AND tenant_id = $3 AND restaurant_id = $4
-		`, newBalance, line.AccountID, tenantID, restaurantID); err != nil {
+		`, currentBalance, accountID, tenantID, restaurantID); err != nil {
 			return err
 		}
 	}

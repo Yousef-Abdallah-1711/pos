@@ -54,7 +54,7 @@ func TestGeneralLedgerRepository_GetLedgerPeriodSummaries_ReturnsAggregates(t *t
 
 	repo := NewGeneralLedgerRepository(db, nil)
 
-	mock.ExpectQuery(`WITH filtered AS`).
+	mock.ExpectQuery(`WITH ledger_balances AS`).
 		WithArgs(1, 2, 1101).
 		WillReturnRows(sqlmock.NewRows([]string{
 			"fiscal_period", "entry_count", "debit_total", "credit_total", "net_change", "running_balance",

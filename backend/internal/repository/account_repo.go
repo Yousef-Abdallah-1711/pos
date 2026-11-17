@@ -188,7 +188,41 @@ func (r *AccountRepository) CreateAccount(account *domain.Account) (int, error) 
 }
 
 func (r *AccountRepository) UpdateAccount(account *domain.Account) error {
-	result, err := r.db.Exec(`
+	tx, err := r.db.Begin()
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+
+	var existingNormalBalance string
+	err = tx.QueryRow(`
+		SELECT normal_balance
+		FROM chart_of_accounts
+		WHERE id = $1 AND tenant_id = $2 AND restaurant_id = $3
+		FOR UPDATE
+	`, account.ID, account.TenantID, account.RestaurantID).Scan(&existingNormalBalance)
+	if errors.Is(err, sql.ErrNoRows) {
+		return errors.New("account not found")
+	}
+	if err != nil {
+		return err
+	}
+	if existingNormalBalance != account.NormalBalance {
+		var hasLedgerEntries bool
+		if err := tx.QueryRow(`
+			SELECT EXISTS (
+				SELECT 1 FROM general_ledger
+				WHERE tenant_id = $1 AND restaurant_id = $2 AND account_id = $3
+			)
+		`, account.TenantID, account.RestaurantID, account.ID).Scan(&hasLedgerEntries); err != nil {
+			return err
+		}
+		if hasLedgerEntries {
+			return errors.New("normal balance cannot be changed after ledger entries exist")
+		}
+	}
+
+	result, err := tx.Exec(`
 		UPDATE chart_of_accounts
 		SET account_code = $1,
 			account_name = $2,
@@ -244,7 +278,7 @@ func (r *AccountRepository) UpdateAccount(account *domain.Account) error {
 	if rowsAffected == 0 {
 		return errors.New("account not found")
 	}
-	return nil
+	return tx.Commit()
 }
 
 func (r *AccountRepository) DeleteAccount(tenantID, restaurantID, id int) error {

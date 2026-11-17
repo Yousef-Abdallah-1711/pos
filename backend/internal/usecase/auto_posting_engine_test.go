@@ -257,23 +257,42 @@ func mockPostJournalEntry(mock sqlmock.Sqlmock, journalEntryID int, entryDate ti
 	}
 	sort.Ints(accountIDs)
 	for _, accountID := range accountIDs {
-		mock.ExpectQuery(`SELECT id\s+FROM chart_of_accounts`).
+		var normalBalance string
+		for _, line := range lines {
+			if line.accountID == accountID {
+				normalBalance = line.normalBalance
+				break
+			}
+		}
+		mock.ExpectQuery(`SELECT id, normal_balance\s+FROM chart_of_accounts`).
 			WithArgs(accountID, 10, 20).
-			WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(accountID))
+			WillReturnRows(sqlmock.NewRows([]string{"id", "normal_balance"}).AddRow(accountID, normalBalance))
 	}
 
 	for _, line := range lines {
-		mock.ExpectQuery(`FROM general_ledger`).
-			WithArgs(10, 20, line.accountID).
-			WillReturnError(sql.ErrNoRows)
+		mock.ExpectQuery(`SELECT COALESCE\(SUM\(CASE WHEN \$4 = 'credit'`).
+			WithArgs(10, 20, line.accountID, line.normalBalance, entryDate).
+			WillReturnRows(sqlmock.NewRows([]string{"coalesce"}).AddRow(0.0))
 		mock.ExpectExec(`INSERT INTO general_ledger`).
 			WithArgs(
 				10, 20, line.accountID, journalEntryID, line.lineID,
 				entryDate, "2026-02", line.debit, line.credit, sqlmock.AnyArg(),
 			).
 			WillReturnResult(sqlmock.NewResult(1, 1))
+	}
+	for _, accountID := range accountIDs {
+		var normalBalance string
+		for _, line := range lines {
+			if line.accountID == accountID {
+				normalBalance = line.normalBalance
+				break
+			}
+		}
+		mock.ExpectQuery(`SELECT COALESCE\(SUM\(CASE WHEN \$4 = 'credit'`).
+			WithArgs(10, 20, accountID, normalBalance).
+			WillReturnRows(sqlmock.NewRows([]string{"coalesce"}).AddRow(0.0))
 		mock.ExpectExec(`UPDATE chart_of_accounts`).
-			WithArgs(sqlmock.AnyArg(), line.accountID, 10, 20).
+			WithArgs(sqlmock.AnyArg(), accountID, 10, 20).
 			WillReturnResult(sqlmock.NewResult(1, 1))
 	}
 

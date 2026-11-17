@@ -5,6 +5,7 @@ package repository
 import (
 	"database/sql"
 	"fmt"
+	"math"
 	"sync"
 	"testing"
 	"time"
@@ -285,16 +286,184 @@ func TestCFR003PostgresConcurrentJournalPostingPreservesRunningBalance(t *testin
 	}
 
 	for _, accountID := range []int{fixture.debitAccountID, fixture.creditAccountID} {
-		var accountBalance, latestRunningBalance float64
+		var accountBalance float64
 		if err := db.QueryRow(`SELECT current_balance FROM chart_of_accounts WHERE id = $1 AND tenant_id = $2 AND restaurant_id = $3`, accountID, fixture.tenantID, fixture.restaurantID).Scan(&accountBalance); err != nil {
 			t.Fatalf("read account %d balance: %v", accountID, err)
 		}
-		if err := db.QueryRow(`SELECT running_balance FROM general_ledger WHERE account_id = $1 AND tenant_id = $2 AND restaurant_id = $3 ORDER BY entry_date DESC, id DESC LIMIT 1`, accountID, fixture.tenantID, fixture.restaurantID).Scan(&latestRunningBalance); err != nil {
-			t.Fatalf("read account %d latest running balance: %v", accountID, err)
+		ledgerBalance, err := fixture.ledger.GetAccountBalance(fixture.tenantID, fixture.restaurantID, accountID, nil)
+		if err != nil {
+			t.Fatalf("read account %d movement balance: %v", accountID, err)
 		}
-		if accountBalance != count*100 || latestRunningBalance != count*100 {
-			t.Fatalf("account %d current/latest running balance = %.2f/%.2f, want %.2f", accountID, accountBalance, latestRunningBalance, float64(count*100))
+		assertFinancialBalanceCents(t, fmt.Sprintf("account %d stored current balance", accountID), int64(count*10000), accountBalance)
+		assertFinancialBalanceCents(t, fmt.Sprintf("account %d independent movement balance", accountID), int64(count*10000), ledgerBalance)
+	}
+}
+
+func TestCFR003PostgresBackdatedEntryKeepsAsOfBalancesChronological(t *testing.T) {
+	db, fixture := openAtomicPostingFixture(t)
+	defer cleanupAtomicPostingFixture(t, db, fixture)
+
+	lateDate := time.Date(2026, time.November, 20, 0, 0, 0, 0, time.UTC)
+	earlyDate := time.Date(2026, time.November, 10, 0, 0, 0, 0, time.UTC)
+	for _, posting := range []struct {
+		referenceID int
+		entryDate   time.Time
+		amount      float64
+	}{{43020, lateDate, 100}, {43010, earlyDate, 50}, {43011, earlyDate, 25}} {
+		entry := fixture.entry()
+		entry.ReferenceID = &posting.referenceID
+		entry.EntryDate = posting.entryDate
+		entry.Lines[0].DebitAmount = posting.amount
+		entry.Lines[1].CreditAmount = posting.amount
+		if _, err := fixture.ledger.CreateAndPostAutoEntry(entry, 0); err != nil {
+			t.Fatalf("post journal %d: %v", posting.referenceID, err)
 		}
+	}
+
+	debitBalance, err := fixture.ledger.GetAccountBalance(fixture.tenantID, fixture.restaurantID, fixture.debitAccountID, &earlyDate)
+	if err != nil {
+		t.Fatalf("get debit balance as of early date: %v", err)
+	}
+	assertFinancialBalanceCents(t, "debit balance as of backdated date", 7500, debitBalance)
+
+	trialBalance, err := fixture.ledger.GetTrialBalance(fixture.tenantID, fixture.restaurantID, earlyDate)
+	if err != nil {
+		t.Fatalf("get trial balance as of early date: %v", err)
+	}
+	var debitFound, creditFound bool
+	for _, row := range trialBalance {
+		switch row.AccountID {
+		case fixture.debitAccountID:
+			debitFound = row.DebitBalance == 75 && row.CreditBalance == 0
+		case fixture.creditAccountID:
+			creditFound = row.DebitBalance == 0 && row.CreditBalance == 75
+		}
+	}
+	if !debitFound || !creditFound {
+		t.Fatalf("as-of trial balance does not reflect only the early posting: %+v", trialBalance)
+	}
+	var independentAsOfBalance float64
+	if err := db.QueryRow(`SELECT COALESCE(SUM(debit_amount - credit_amount), 0) FROM general_ledger WHERE tenant_id = $1 AND restaurant_id = $2 AND account_id = $3 AND entry_date <= $4`, fixture.tenantID, fixture.restaurantID, fixture.debitAccountID, earlyDate).Scan(&independentAsOfBalance); err != nil {
+		t.Fatalf("independently reconcile backdated as-of balance: %v", err)
+	}
+	assertFinancialBalanceCents(t, "independent SQL debit balance as of backdated date", 7500, independentAsOfBalance)
+
+	ledgerLines, err := fixture.ledger.GetLedgerByAccount(fixture.tenantID, fixture.restaurantID, fixture.debitAccountID, nil, nil)
+	if err != nil {
+		t.Fatalf("list debit ledger: %v", err)
+	}
+	if len(ledgerLines) != 3 {
+		t.Fatalf("ledger row count = %d, want 3 rows including equal-date movements", len(ledgerLines))
+	}
+	assertFinancialBalanceCents(t, "latest ledger running balance", 17500, ledgerLines[0].RunningBalance)
+	assertFinancialBalanceCents(t, "second ledger running balance", 7500, ledgerLines[1].RunningBalance)
+	assertFinancialBalanceCents(t, "oldest ledger running balance", 5000, ledgerLines[2].RunningBalance)
+	if !ledgerLines[1].EntryDate.Equal(earlyDate) || !ledgerLines[2].EntryDate.Equal(earlyDate) || ledgerLines[1].JournalEntryID <= ledgerLines[2].JournalEntryID {
+		t.Fatalf("equal-date ledger rows are not deterministically ordered by descending id: %+v", ledgerLines)
+	}
+
+	firstPage, nextCursor, err := fixture.ledger.GetLedgerByAccountCursor(fixture.tenantID, fixture.restaurantID, fixture.debitAccountID, nil, nil, 1, nil)
+	if err != nil {
+		t.Fatalf("list first chronological ledger page: %v", err)
+	}
+	if len(firstPage) != 1 || nextCursor == nil || math.Round(firstPage[0].RunningBalance*100) != 17500 {
+		t.Fatalf("first ledger page/cursor = %+v/%v, want one newest row and a continuation cursor", firstPage, nextCursor)
+	}
+
+	secondPage, finalCursor, err := fixture.ledger.GetLedgerByAccountCursor(fixture.tenantID, fixture.restaurantID, fixture.debitAccountID, nil, nil, 1, nextCursor)
+	if err != nil {
+		t.Fatalf("continue chronological ledger page: %v", err)
+	}
+	if len(secondPage) != 1 || finalCursor == nil || !secondPage[0].EntryDate.Equal(earlyDate) || math.Round(secondPage[0].RunningBalance*100) != 7500 {
+		t.Fatalf("second ledger page/cursor = %+v/%v, want newest equal-date row and another cursor", secondPage, finalCursor)
+	}
+
+	thirdPage, finalCursor, err := fixture.ledger.GetLedgerByAccountCursor(fixture.tenantID, fixture.restaurantID, fixture.debitAccountID, nil, nil, 1, finalCursor)
+	if err != nil {
+		t.Fatalf("continue ledger pagination across equal-date rows: %v", err)
+	}
+	if len(thirdPage) != 1 || finalCursor != nil || !thirdPage[0].EntryDate.Equal(earlyDate) || math.Round(thirdPage[0].RunningBalance*100) != 5000 {
+		t.Fatalf("third ledger page/cursor = %+v/%v, want oldest equal-date row and no further cursor", thirdPage, finalCursor)
+	}
+
+	var persistedLateSnapshot float64
+	if err := db.QueryRow(`SELECT running_balance FROM general_ledger WHERE tenant_id = $1 AND restaurant_id = $2 AND account_id = $3 AND entry_date = $4 ORDER BY id LIMIT 1`, fixture.tenantID, fixture.restaurantID, fixture.debitAccountID, lateDate).Scan(&persistedLateSnapshot); err != nil {
+		t.Fatalf("read immutable posting-time snapshot: %v", err)
+	}
+	assertFinancialBalanceCents(t, "unchanged original posting-time snapshot", 10000, persistedLateSnapshot)
+
+	var storedCurrentBalance float64
+	if err := db.QueryRow(`SELECT current_balance FROM chart_of_accounts WHERE id = $1 AND tenant_id = $2 AND restaurant_id = $3`, fixture.debitAccountID, fixture.tenantID, fixture.restaurantID).Scan(&storedCurrentBalance); err != nil {
+		t.Fatalf("read account current balance: %v", err)
+	}
+	assertFinancialBalanceCents(t, "stored current balance after backdated and equal-date postings", 17500, storedCurrentBalance)
+	var independentCurrentBalance float64
+	if err := db.QueryRow(`SELECT COALESCE(SUM(debit_amount - credit_amount), 0) FROM general_ledger WHERE tenant_id = $1 AND restaurant_id = $2 AND account_id = $3`, fixture.tenantID, fixture.restaurantID, fixture.debitAccountID).Scan(&independentCurrentBalance); err != nil {
+		t.Fatalf("independently reconcile current account balance: %v", err)
+	}
+	assertFinancialBalanceCents(t, "independent SQL current balance", 17500, independentCurrentBalance)
+}
+
+func TestCFR003PostgresNormalBalanceCanChangeBeforeLedgerHistory(t *testing.T) {
+	db, fixture := openAtomicPostingFixture(t)
+	defer cleanupAtomicPostingFixture(t, db, fixture)
+
+	accountRepo := NewAccountRepository(db)
+	account, err := accountRepo.GetAccountByID(fixture.tenantID, fixture.restaurantID, fixture.debitAccountID)
+	if err != nil || account == nil {
+		t.Fatalf("read unposted account: account=%+v err=%v", account, err)
+	}
+	account.NormalBalance = "credit"
+	if err := accountRepo.UpdateAccount(account); err != nil {
+		t.Fatalf("change normal balance before ledger history: %v", err)
+	}
+	account, err = accountRepo.GetAccountByID(fixture.tenantID, fixture.restaurantID, fixture.debitAccountID)
+	if err != nil || account == nil || account.NormalBalance != "credit" {
+		t.Fatalf("unposted account normal balance = %+v err=%v, want credit", account, err)
+	}
+	advancedRepo := NewAccountingAdvancedRepository(db, fixture.ledger.journalRepo)
+	if err := advancedRepo.UpsertAccountFromImport(
+		fixture.tenantID, fixture.restaurantID, "CFR004-D", "Imported debit fixture", "", "asset", "credit", "EGP", "", "", true,
+	); err != nil {
+		t.Fatalf("import normal balance before ledger history: %v", err)
+	}
+}
+
+func TestCFR003PostgresNormalBalanceChangeRejectedAfterPosting(t *testing.T) {
+	db, fixture := openAtomicPostingFixture(t)
+	defer cleanupAtomicPostingFixture(t, db, fixture)
+
+	entry := fixture.entry()
+	if _, err := fixture.ledger.CreateAndPostAutoEntry(entry, 0); err != nil {
+		t.Fatalf("post historical journal: %v", err)
+	}
+	accountRepo := NewAccountRepository(db)
+	account, err := accountRepo.GetAccountByID(fixture.tenantID, fixture.restaurantID, fixture.debitAccountID)
+	if err != nil || account == nil {
+		t.Fatalf("read posted account: account=%+v err=%v", account, err)
+	}
+	account.NormalBalance = "credit"
+	if err := accountRepo.UpdateAccount(account); err == nil {
+		t.Fatal("normal balance change after posting unexpectedly succeeded")
+	}
+	advancedRepo := NewAccountingAdvancedRepository(db, fixture.ledger.journalRepo)
+	if err := advancedRepo.UpsertAccountFromImport(
+		fixture.tenantID, fixture.restaurantID, "CFR004-D", "Imported debit fixture", "", "asset", "credit", "EGP", "", "", true,
+	); err == nil {
+		t.Fatal("account import changed normal balance after posting unexpectedly succeeded")
+	}
+	account, err = accountRepo.GetAccountByID(fixture.tenantID, fixture.restaurantID, fixture.debitAccountID)
+	if err != nil || account == nil || account.NormalBalance != "debit" {
+		t.Fatalf("rejected mutation changed historical normal balance: account=%+v err=%v", account, err)
+	}
+}
+
+func assertFinancialBalanceCents(t *testing.T, label string, expected int64, observedAmount float64) {
+	t.Helper()
+	observed := int64(math.Round(observedAmount * 100))
+	difference := observed - expected
+	if difference != 0 {
+		t.Fatalf("%s reconciliation: expected=%d cents observed=%d cents difference=%d cents", label, expected, observed, difference)
 	}
 }
 
