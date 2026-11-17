@@ -242,7 +242,7 @@ func (r *AccountRepository) UpdateAccount(account *domain.Account) error {
 			updated_by = $16,
 			updated_at = CURRENT_TIMESTAMP
 		WHERE id = $17 AND tenant_id = $18 AND restaurant_id = $19
-		  AND ($9 IS NULL OR EXISTS (
+		  AND ($9::INTEGER IS NULL OR EXISTS (
 			SELECT 1 FROM chart_of_accounts parent
 			WHERE parent.id = $9 AND parent.tenant_id = $18 AND parent.restaurant_id = $19
 		  ))
