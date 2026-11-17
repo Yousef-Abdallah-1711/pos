@@ -39,6 +39,13 @@ class CIIsolationTests(unittest.TestCase):
                 self.assertIn(f'{{width:{width},height:', script)
         self.assertIn('await page.setViewportSize({width,height});', script)
 
+    def test_marketing_console_errors_are_read_before_route_navigation(self):
+        script = (ROOT / 'frontend/apps/landing/scripts/marketing-acceptance.mjs').read_text()
+        load = script.split('async function load(page, locale, route) {', maxsplit=1)[1].split('\nasync function ', maxsplit=1)[0]
+        self.assertLess(load.index('await flushPendingReactErrorDetails(page)'), load.index('await page.goto('))
+        self.assertIn('await flushPendingReactErrorDetails(page)\n}', load)
+        self.assertIn('pendingReactErrorDetails.set(page, pending)', script)
+
     def test_mutating_acceptance_scripts_have_no_public_production_api_literals(self):
         scripts = [
             'ops/aws/browser-smoke.cjs',

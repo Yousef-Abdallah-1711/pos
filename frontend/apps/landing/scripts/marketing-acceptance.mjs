@@ -26,11 +26,20 @@ const checks = []
 const descriptions = new Map()
 const navigationScreenshots = []
 const sourceCommit = process.env.SERVIO_SOURCE_SHA || 'unknown'
+const pendingReactErrorDetails = new WeakMap()
 function check(name, condition, detail = '') {
  checks.push({ name, passed: !!condition, detail })
  if (!condition) throw new Error(`${name}: ${detail}`)
 }
+async function flushPendingReactErrorDetails(page) {
+ const pending = pendingReactErrorDetails.get(page) || []
+ await Promise.all(pending.splice(0))
+}
 async function load(page, locale, route) {
+ // Resolve console Error handles while their document context is still alive.
+ // Navigating immediately after a console event can destroy the execution
+ // context before Playwright reads the React error details.
+ await flushPendingReactErrorDetails(page)
  let response
  let navigationError
  for (let attempt = 0; attempt < 2; attempt++) {
@@ -81,6 +90,7 @@ async function load(page, locale, route) {
   return result.violations.map(item => ({ id: item.id, impact: item.impact, nodes: item.nodes.map(node => ({ target: node.target, summary: node.failureSummary, contrast: node.any.map(check => check.data).filter(Boolean) })) }))
  })
  check(`accessibility ${locale}${route}`, violations.length === 0, JSON.stringify(violations))
+ await flushPendingReactErrorDetails(page)
 }
 async function capture(page, name) {
  const missing = []
@@ -166,6 +176,7 @@ async function focusChecks(page, locale) {
 }
 async function interactions(browser, page, locale) {
  await page.setViewportSize({ width: 390, height: 844 })
+ await flushPendingReactErrorDetails(page)
  await page.goto(`${base}/${locale}`, { waitUntil: 'domcontentloaded' })
  await page.waitForFunction(theme => document.documentElement.classList.contains(theme), expectedTheme)
  const otherTheme = expectedTheme === 'dark' ? 'light' : 'dark'
@@ -430,7 +441,6 @@ async function main() {
   const recoveredRscNavigations = []
   const networkFailures = []
   const failedNextChunkRequests = []
-  const pendingReactErrorDetails = []
   const deferredChunkDiagnostics = []
   const deferNextChunkException = (pageUrl, details) => {
    const message = details?.message || ''
@@ -458,7 +468,9 @@ async function main() {
      const pageUrl = page.url()
      const errorHandle = message.args()[0]
      if (errorHandle) {
-      pendingReactErrorDetails.push(errorHandle.evaluate(error => ({ name: error?.name, message: error?.message, stack: error?.stack, cause: error?.cause?.stack || error?.cause?.message }))
+      const pending = pendingReactErrorDetails.get(page) || []
+      pendingReactErrorDetails.set(page, pending)
+      pending.push(errorHandle.evaluate(error => ({ name: error?.name, message: error?.message, stack: error?.stack, cause: error?.cause?.stack || error?.cause?.message }))
        .then(details => {
         if (details?.name === 'ChunkLoadError' && deferNextChunkException(pageUrl, details)) return
         errors.push(`${pageUrl}: ${JSON.stringify({ text, location, details })}`)
@@ -511,7 +523,7 @@ async function main() {
    await interactions(browser, page, locale)
   }
   await captureComparisonBoards(browser)
-  await Promise.all(pendingReactErrorDetails)
+  await flushPendingReactErrorDetails(page)
   const unmatchedNextChunkExceptions = nextChunkExceptions.filter(({ pathname }) => !cancelledNextChunkPaths.has(pathname))
   for (const exception of unmatchedNextChunkExceptions) errors.push(`${exception.pageUrl}: ${JSON.stringify(exception.details)}`)
   const unexplainedChunkDiagnostics = deferredChunkDiagnostics.filter(({ pageUrl }) => {
