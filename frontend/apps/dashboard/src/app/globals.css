@@ -109,7 +109,7 @@ body {
 }
 
 @media (max-width: 767px) {
-  .dashboard-layout {
+  .dashboard-layout:not([data-fullscreen='true']) {
     padding-left: 0;
     padding-right: 0;
   }
