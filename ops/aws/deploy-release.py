@@ -17,6 +17,7 @@ import urllib.request
 
 sys.path.insert(0,str(Path(__file__).resolve().parent))
 from deployment_recovery import compatible_recovery, requires_compatible_backend
+from release_image_archive import uncompressed_layer_bytes
 
 ROOT = Path('/opt/servio')
 OPS = ROOT / 'ops/aws'
@@ -109,6 +110,8 @@ def verify_artifacts(manifest, artifacts):
         image_size=manifest['image_sizes'][name]
         if not isinstance(image_size,int) or not 0<image_size<=5*1024**3:
             raise RuntimeError('Invalid signed image size: '+name)
+        if uncompressed_layer_bytes(path)!=image_size:
+            raise RuntimeError('Signed image size does not match verified archive layers: '+name)
 
 def verify_migrations(destination, previous_path):
     policy=Path('/etc/servio/approved-migrations.json')

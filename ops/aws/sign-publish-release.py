@@ -28,7 +28,7 @@ if len(publish_jobs)!=1 or publish_jobs[0].get('status')!='completed' or publish
     raise SystemExit('Exact-main immutable image publication did not complete successfully')
 root=Path('release-bundle')
 manifest=json.loads((root/'release-manifest.json').read_text())
-if manifest.get('schema_version')!=2 or manifest.get('environment')!='staging' or manifest.get('sha')!=sha or manifest.get('ci_run_id')!=ci_run_id:
+if manifest.get('schema_version')!=3 or manifest.get('environment')!='staging' or manifest.get('sha')!=sha or manifest.get('ci_run_id')!=ci_run_id:
     raise SystemExit('Artifact provenance identity mismatch')
 names=['backend','landing','dashboard','restaurant-website','super-admin']
 expected={'release-manifest.json','source.tar.gz',*[name+'.docker.tar.gz' for name in names]}

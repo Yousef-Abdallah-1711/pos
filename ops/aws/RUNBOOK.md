@@ -50,6 +50,10 @@ CI builds applications in GitHub Actions, not on the staging instance. PR/main g
 lint/types/unit/integration/race/security/build/Chromium. A successful exact-main run stages
 the browser-tested images without credentials; a separate least-privilege job publishes
 their content digests only after the main aggregate and pinned guardrail workflows pass.
+Signed schema v3 records each image's uncompressed Docker-save layer tar byte total,
+computed from the immutable archive and rechecked by the publisher and staging deployer.
+This stable, conservative budget avoids Docker Engine `inspect Size` differences while
+retaining archive checksums, image config IDs and registry digests as separate identity gates.
 Signing is an explicit owner action through `Publish verified SERVIO staging release`: it
 requires the exact current main SHA, the successful CI run ID, the typed confirmation
 `PUBLISH-STAGING`, the `staging` environment, and the protected signing key. This publishes

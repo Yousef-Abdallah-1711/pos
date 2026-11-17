@@ -23,7 +23,7 @@ class PullAgentTrustTests(unittest.TestCase):
         self.private=self.root/'key.pem';self.public=self.root/'public.pem'
         subprocess.run(['openssl','genpkey','-algorithm','ED25519','-out',str(self.private)],check=True,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
         subprocess.run(['openssl','pkey','-in',str(self.private),'-pubout','-out',str(self.public)],check=True,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
-        self.manifest={'sha':SHA,'environment':'staging','ci_run_id':123,'schema_version':2,'workflow_ref':agent.REPO+'/.github/workflows/production-ci.yml@refs/heads/main','workflow_sha':SHA}
+        self.manifest={'sha':SHA,'environment':'staging','ci_run_id':123,'schema_version':3,'workflow_ref':agent.REPO+'/.github/workflows/production-ci.yml@refs/heads/main','workflow_sha':SHA}
         self.raw=json.dumps(self.manifest).encode()
         source=self.root/'manifest';source.write_bytes(self.raw)
         signature=self.root/'signature'

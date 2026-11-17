@@ -87,7 +87,7 @@ def verify_release(release):
     result=subprocess.run(['openssl','pkeyutl','-verify','-rawin','-pubin','-inkey',str(KEY),'-in',str(directory/'release-manifest.json'),'-sigfile',str(directory/'release-manifest.sig')],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL,timeout=10)
     if result.returncode: raise RuntimeError('Release signature does not match the pinned CI public key')
     manifest=json.loads(raw)
-    if manifest.get('schema_version')!=2 or manifest.get('workflow_ref')!=REPO+'/.github/workflows/production-ci.yml@refs/heads/main' or manifest.get('workflow_sha')!=sha:raise RuntimeError('Signed workflow identity mismatch')
+    if manifest.get('schema_version')!=3 or manifest.get('workflow_ref')!=REPO+'/.github/workflows/production-ci.yml@refs/heads/main' or manifest.get('workflow_sha')!=sha:raise RuntimeError('Signed workflow identity mismatch')
     if manifest.get('sha')!=sha or manifest.get('environment')!='staging': raise RuntimeError('Signed environment or SHA mismatch')
     run=github('actions/runs/'+str(manifest['ci_run_id']))
     if run.get('workflow_id')!=int(WORKFLOW_ID.read_text().strip()):raise RuntimeError('Unapproved workflow ID')
