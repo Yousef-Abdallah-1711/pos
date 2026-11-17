@@ -89,6 +89,20 @@ async function assertNoDocumentOverflow(page) {
   expect(dimensions.documentWidth, JSON.stringify(dimensions)).toBeLessThanOrEqual(dimensions.viewportWidth)
 }
 
+async function assertFinancialHeadingClearsSidebar(page) {
+  const layout = await page.evaluate(() => {
+    const heading = document.querySelector('main h1')?.getBoundingClientRect()
+    const sidebar = document.querySelector('aside.fixed')?.getBoundingClientRect()
+    if (!heading || !sidebar) return { foundHeading: Boolean(heading), foundSidebar: Boolean(sidebar), overlap: true }
+    return {
+      foundHeading: true,
+      foundSidebar: true,
+      overlap: heading.left < sidebar.right && heading.right > sidebar.left,
+    }
+  })
+  expect(layout, JSON.stringify(layout)).toEqual({ foundHeading: true, foundSidebar: true, overlap: false })
+}
+
 test.describe('authenticated financial browser acceptance', () => {
   test('accountant EN desktop creates/posts a balanced journal and reconciles the visible ledger', async ({ page }, testInfo) => {
     await setViewport(page, 1440, 900)
@@ -147,6 +161,7 @@ test.describe('authenticated financial browser acceptance', () => {
 
     await page.goto('/en/dashboard/accounting/general-ledger')
     await expect(page.getByRole('heading', { name: /General Ledger/i })).toBeVisible()
+    await assertFinancialHeadingClearsSidebar(page)
     await expect(page.getByRole('tab', { name: /Trial Balance/i })).toBeVisible()
     await page.getByRole('tab', { name: /Trial Balance/i }).click()
     await expect(page.getByText(/Debit/i).first()).toBeVisible()
@@ -202,6 +217,7 @@ test.describe('authenticated financial browser acceptance', () => {
     expect(Math.round((balanceSheetData.total_assets - balanceSheetData.total_liabilities - balanceSheetData.total_equity) * 100))
       .toBe(Math.round(balanceSheetData.equation_difference * 100))
     await expect(page.getByRole('heading', { name: /الميزانية العمومية|Balance Sheet/i })).toBeVisible()
+    await assertFinancialHeadingClearsSidebar(page)
     await expect(page.getByText(/غير متطابق|UNRECONCILED|unreconciled/i).first()).toBeVisible()
     await page.screenshot({ path: testInfo.outputPath('ar-desktop-balance-sheet.png'), fullPage: true })
 
