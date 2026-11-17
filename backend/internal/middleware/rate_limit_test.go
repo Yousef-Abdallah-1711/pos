@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"sync"
@@ -9,7 +10,56 @@ import (
 	"time"
 
 	"pos-saas/internal/pkg/jwt"
+	"pos-saas/internal/service"
 )
+
+func TestSharedIPRateLimitIsSharedAcrossMiddlewareInstances(t *testing.T) {
+	store := service.NewInMemoryRateLimitStore(32)
+	first := RateLimitByIPWithStore(store, "auth-login", 1, time.Minute)(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) { w.WriteHeader(http.StatusOK) }))
+	second := RateLimitByIPWithStore(store, "auth-login", 1, time.Minute)(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) { w.WriteHeader(http.StatusOK) }))
+
+	doRequest := func(handler http.Handler, remoteAddr string) *httptest.ResponseRecorder {
+		req := httptest.NewRequest(http.MethodPost, "/api/v1/auth/login", nil)
+		req.RemoteAddr = remoteAddr
+		response := httptest.NewRecorder()
+		handler.ServeHTTP(response, req)
+		return response
+	}
+	if response := doRequest(first, "203.0.113.10:1234"); response.Code != http.StatusOK {
+		t.Fatalf("first request = %d, want 200", response.Code)
+	}
+	blocked := doRequest(second, "203.0.113.10:5678")
+	if blocked.Code != http.StatusTooManyRequests {
+		t.Fatalf("second instance request = %d, want 429", blocked.Code)
+	}
+	if blocked.Header().Get("Retry-After") == "" || blocked.Header().Get("X-RateLimit-Remaining") != "0" {
+		t.Fatalf("rate-limit response headers missing: %v", blocked.Header())
+	}
+	if response := doRequest(second, "203.0.113.11:1234"); response.Code != http.StatusOK {
+		t.Fatalf("different IP = %d, want 200", response.Code)
+	}
+}
+
+type failingSharedRateLimitStore struct{}
+
+func (failingSharedRateLimitStore) IncrementWindow(context.Context, string, time.Duration) (int64, time.Duration, error) {
+	return 0, 0, errors.New("store unavailable")
+}
+
+func TestSharedIPRateLimitFailsClosedWhenStoreIsUnavailable(t *testing.T) {
+	handlerCalled := false
+	wrapped := RateLimitByIPWithStore(failingSharedRateLimitStore{}, "auth-login", 20, time.Minute)(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		handlerCalled = true
+		w.WriteHeader(http.StatusOK)
+	}))
+	request := httptest.NewRequest(http.MethodPost, "/api/v1/auth/login", nil)
+	request.RemoteAddr = "203.0.113.10:1234"
+	response := httptest.NewRecorder()
+	wrapped.ServeHTTP(response, request)
+	if response.Code != http.StatusServiceUnavailable || handlerCalled {
+		t.Fatalf("store failure status=%d handlerCalled=%t, want 503 and false", response.Code, handlerCalled)
+	}
+}
 
 func withTestUser(req *http.Request, userID int) *http.Request {
 	claims := &jwt.Claims{UserID: userID}

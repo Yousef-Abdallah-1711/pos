@@ -2,14 +2,19 @@ package usecase
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"errors"
 	"fmt"
+	"sort"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
 
 	"golang.org/x/crypto/bcrypt"
 	"pos-saas/internal/domain"
+	"pos-saas/internal/observability"
 	"pos-saas/internal/pkg/jwt"
 	"pos-saas/internal/repository"
 )
@@ -20,6 +25,11 @@ type loginConfirmStore interface {
 	UpdateLastLogin(userID int) error
 }
 
+// SelectionProofStore atomically consumes a proof key until its TTL expires.
+type SelectionProofStore interface {
+	SetIfAbsent(ctx context.Context, key, value string, ttl time.Duration) (bool, error)
+}
+
 // selectionTokenTTL bounds how long a multi-tenant login proof stays valid.
 const selectionTokenTTL = 5 * time.Minute
 
@@ -28,6 +38,7 @@ type AuthUseCase struct {
 	superAdminRepo *repository.SuperAdminRepository
 	tokenService   *jwt.TokenService
 	confirmStore   loginConfirmStore
+	proofStore     SelectionProofStore
 
 	// usedSelections remembers consumed selection-token IDs until they expire.
 	// It is per-process; running several API replicas needs a shared store.
@@ -69,6 +80,13 @@ func (u *AuthUseCase) consumeSelection(id string, expires time.Time) bool {
 // SetSuperAdminRepo sets the super admin repository for token exchange
 func (u *AuthUseCase) SetSuperAdminRepo(repo *repository.SuperAdminRepository) {
 	u.superAdminRepo = repo
+}
+
+// SetSelectionProofStore configures shared one-time proof consumption. The API
+// wires this to Redis before serving requests; the local fallback exists for
+// isolated tests and non-production construction paths.
+func (u *AuthUseCase) SetSelectionProofStore(store SelectionProofStore) {
+	u.proofStore = store
 }
 
 // Register creates a new tenant, restaurant, and admin user
@@ -237,6 +255,15 @@ func (u *AuthUseCase) Login(req *domain.LoginRequest) (interface{}, error) {
 // valid, unexpired, unused proof covering the requested tenant and email, no
 // session is issued.
 func (u *AuthUseCase) LoginConfirm(req *domain.TenantSelectionRequest) (*domain.AuthResponse, error) {
+	return u.LoginConfirmContext(context.Background(), req)
+}
+
+// LoginConfirmContext validates and atomically consumes a multi-tenant login
+// proof using the configured shared store.
+func (u *AuthUseCase) LoginConfirmContext(ctx context.Context, req *domain.TenantSelectionRequest) (*domain.AuthResponse, error) {
+	if req == nil {
+		return nil, errors.New("email and tenant_id are required")
+	}
 	if req.Email == "" || req.TenantID == 0 {
 		return nil, errors.New("email and tenant_id are required")
 	}
@@ -272,9 +299,26 @@ func (u *AuthUseCase) LoginConfirm(req *domain.TenantSelectionRequest) (*domain.
 	}
 
 	// Consume the proof only once the selection is known to be valid.
-	if !u.consumeSelection(proof.ID, proof.ExpiresAt.Time) {
+	proofTTL := time.Until(proof.ExpiresAt.Time)
+	if proofTTL <= 0 {
+		return nil, errors.New("login verification expired or invalid: please sign in again")
+	}
+	if u.proofStore != nil {
+		binding := selectionProofBinding(proof.Email, proof.TenantIDs)
+		consumed, consumeErr := u.proofStore.SetIfAbsent(ctx, selectionProofKey(proof.ID), binding, proofTTL)
+		if consumeErr != nil {
+			observability.RecordAuthSecurity(func(metrics *observability.AuthSecurityMetrics) { metrics.SelectionProofStoreErrors++ })
+			return nil, fmt.Errorf("%w: consume login proof", domain.ErrAuthDependencyUnavailable)
+		}
+		if !consumed {
+			observability.RecordAuthSecurity(func(metrics *observability.AuthSecurityMetrics) { metrics.SelectionProofReplayRejected++ })
+			return nil, errors.New("login verification already used: please sign in again")
+		}
+	} else if !u.consumeSelection(proof.ID, proof.ExpiresAt.Time) {
+		observability.RecordAuthSecurity(func(metrics *observability.AuthSecurityMetrics) { metrics.SelectionProofReplayRejected++ })
 		return nil, errors.New("login verification already used: please sign in again")
 	}
+	observability.RecordAuthSecurity(func(metrics *observability.AuthSecurityMetrics) { metrics.SelectionProofConsumed++ })
 
 	_ = u.confirmStore.UpdateLastLogin(selectedUser.ID)
 
@@ -288,6 +332,24 @@ func (u *AuthUseCase) LoginConfirm(req *domain.TenantSelectionRequest) (*domain.
 		User:  selectedUser,
 		Token: token,
 	}, nil
+}
+
+func selectionProofKey(id string) string {
+	sum := sha256.Sum256([]byte(id))
+	return "pos-saas:auth:selection-proof:v1:" + hex.EncodeToString(sum[:])
+}
+
+func selectionProofBinding(email string, tenantIDs []int) string {
+	ids := append([]int(nil), tenantIDs...)
+	sort.Ints(ids)
+	var canonical strings.Builder
+	canonical.WriteString(strings.ToLower(strings.TrimSpace(email)))
+	for _, id := range ids {
+		canonical.WriteByte(':')
+		canonical.WriteString(strconv.Itoa(id))
+	}
+	sum := sha256.Sum256([]byte(canonical.String()))
+	return hex.EncodeToString(sum[:])
 }
 
 // RefreshToken issues a replacement access token for an already authenticated

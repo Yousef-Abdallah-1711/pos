@@ -1,12 +1,16 @@
 package usecase
 
 import (
+	"context"
 	"errors"
+	"os"
+	"sync"
 	"testing"
 	"time"
 
 	"pos-saas/internal/domain"
 	"pos-saas/internal/pkg/jwt"
+	"pos-saas/internal/service"
 )
 
 type fakeConfirmStore struct {
@@ -122,6 +126,83 @@ func TestLoginConfirm_StoreFailureDoesNotBurnProof(t *testing.T) {
 	uc.confirmStore = &fakeConfirmStore{users: []domain.User{{ID: 1, TenantID: 3, Email: "a@example.test", Role: "owner"}}}
 	if _, err := uc.LoginConfirm(req); err != nil {
 		t.Fatalf("proof should still be usable after a transient failure: %v", err)
+	}
+}
+
+type failingProofStore struct{}
+
+func (failingProofStore) SetIfAbsent(context.Context, string, string, time.Duration) (bool, error) {
+	return false, errors.New("shared store unavailable")
+}
+
+func TestLoginConfirm_ProofStoreFailureFailsClosedWithoutLocalFallback(t *testing.T) {
+	uc, ts, _ := newConfirmUC(t)
+	uc.SetSelectionProofStore(failingProofStore{})
+	tok, _ := ts.GenerateSelectionToken("a@example.test", []int{3}, time.Minute)
+	req := &domain.TenantSelectionRequest{Email: "a@example.test", TenantID: 3, SelectionToken: tok}
+	if _, err := uc.LoginConfirmContext(context.Background(), req); !errors.Is(err, domain.ErrAuthDependencyUnavailable) {
+		t.Fatalf("proof store outage must fail as unavailable, got %v", err)
+	}
+	if len(uc.usedSelections) != 0 {
+		t.Fatal("shared-store failure must not consume through the process-local fallback")
+	}
+	uc.SetSelectionProofStore(service.NewInMemoryCache())
+	if _, err := uc.LoginConfirmContext(context.Background(), req); err != nil {
+		t.Fatalf("proof should remain usable after transient shared-store failure: %v", err)
+	}
+}
+
+func TestLoginConfirm_TwoUseCasesShareAtomicProofConsumption(t *testing.T) {
+	redisURL := os.Getenv("POOS_SESSION_REDIS_URL")
+	if redisURL == "" {
+		t.Skip("set POOS_SESSION_REDIS_URL to verify cross-instance proof consumption")
+	}
+	firstCache, err := service.NewRedisCache(redisURL)
+	if err != nil {
+		t.Fatalf("connect first Redis client: %v", err)
+	}
+	defer firstCache.Close()
+	secondCache, err := service.NewRedisCache(redisURL)
+	if err != nil {
+		t.Fatalf("connect second Redis client: %v", err)
+	}
+	defer secondCache.Close()
+
+	first, ts, store := newConfirmUC(t)
+	second := &AuthUseCase{tokenService: ts, confirmStore: store}
+	first.SetSelectionProofStore(firstCache)
+	second.SetSelectionProofStore(secondCache)
+	tok, err := ts.GenerateSelectionToken("a@example.test", []int{3}, time.Minute)
+	if err != nil {
+		t.Fatal(err)
+	}
+	request := &domain.TenantSelectionRequest{Email: "a@example.test", TenantID: 3, SelectionToken: tok}
+
+	start := make(chan struct{})
+	var wait sync.WaitGroup
+	results := make(chan error, 2)
+	for _, uc := range []*AuthUseCase{first, second} {
+		wait.Add(1)
+		go func(uc *AuthUseCase) {
+			defer wait.Done()
+			<-start
+			_, confirmErr := uc.LoginConfirmContext(context.Background(), request)
+			results <- confirmErr
+		}(uc)
+	}
+	close(start)
+	wait.Wait()
+	close(results)
+	successes, rejected := 0, 0
+	for confirmErr := range results {
+		if confirmErr == nil {
+			successes++
+		} else {
+			rejected++
+		}
+	}
+	if successes != 1 || rejected != 1 {
+		t.Fatalf("cross-instance proof race: successes=%d rejected=%d, want one each", successes, rejected)
 	}
 }
 

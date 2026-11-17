@@ -123,7 +123,7 @@ func (h *AuthHandler) LoginConfirm(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response, err := h.useCase.LoginConfirm(&req)
+	response, err := h.useCase.LoginConfirmContext(r.Context(), &req)
 	if err != nil {
 		if errors.Is(err, domain.ErrAuthDependencyUnavailable) {
 			log.Printf("login-confirm dependency unavailable request_id=%s error=%v", middleware.RequestIDFromContext(r.Context()), err)
