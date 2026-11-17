@@ -54,9 +54,6 @@
   color:var(--sv-violet);
   font-size:12px;
 }
-.sv-wide-capture .sv-capture-image {
-  max-height:650px;
-}
 .sv-dark {
   background:#21182e;
   color:#fff;
@@ -107,9 +104,6 @@
 }
 .sv-guest-captures figure:nth-child(2) {
   padding-top:60px;
-}
-.sv-guest-captures .sv-capture-image {
-  max-height:580px;
 }
 .sv-guest-captures figcaption {
   flex-direction:column;
@@ -172,9 +166,6 @@
 .sv-visibility {
   background:#eeebf4;
 }
-.sv-visibility .sv-capture-image {
-  max-height:480px;
-}
 .sv-visibility img {
   object-position:top;
 }
@@ -214,9 +205,6 @@
 .sv-explorer-panel p:not(.sv-eyebrow) {
   font-size:15px;
   color:var(--sv-muted);
-}
-.sv-explorer-panel .sv-capture-image {
-  max-height:420px;
 }
 .sv-setup {
   background:#f0edf4;

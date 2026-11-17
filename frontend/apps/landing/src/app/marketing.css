@@ -58,7 +58,6 @@ html:not(.light) .sv-capture figcaption a { color:#d6c0ff; }
 .sv-feature-showcase__copy h3 { font-size:clamp(25px,3vw,38px); }
 .sv-feature-showcase__capture { min-width:0; }
 .sv-feature-showcase__capture .sv-capture { margin:0; }
-.sv-feature-showcase__capture .sv-capture-image { max-height:390px; }
 .sv-hospitality-story__layout {
   display:grid;
   grid-template-columns:minmax(0,1fr);

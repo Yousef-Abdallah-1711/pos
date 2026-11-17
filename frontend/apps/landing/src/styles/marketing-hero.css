@@ -73,13 +73,6 @@
   text-decoration:underline;
   flex-shrink:0;
 }
-.sv-hero-pos .sv-capture-image {
-  max-height:300px;
-}
-.sv-hero-pos img {
-  width:130%;
-  max-width:none;
-}
 .sv-hero-stage figcaption {
   display:none;
 }
@@ -88,16 +81,10 @@
   margin-inline-start:auto;
   transform:translateY(15px);
 }
-.sv-hero-kitchen .sv-capture-image {
-  height:150px;
-}
-.sv-hero-kitchen img {
-  width:150%;
-  max-width:none;
-}
 .sv-handoff {
   font-size:11px;
   font-weight:600;
+  color:#37264b;
   margin:15px 0 0;
 }
 .sv-hero-foot {
