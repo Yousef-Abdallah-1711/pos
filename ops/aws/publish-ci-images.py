@@ -7,6 +7,7 @@ import os
 from pathlib import Path
 import re
 import subprocess
+from release_image_archive import uncompressed_layer_bytes
 
 from release_checks import wait_checks
 
@@ -86,8 +87,8 @@ def publish_images(bundle: Path, sha: str, actor: str, token: str) -> dict:
             image = inspect_image(name, local_tag)
             if image.get('Id') != manifest['image_ids'][name]:
                 raise RuntimeError('Loaded image identity mismatch: ' + name)
-            if image.get('Size') != manifest['image_sizes'][name]:
-                raise RuntimeError('Loaded image size metadata mismatch: ' + name)
+            if uncompressed_layer_bytes(archive) != manifest['image_sizes'][name]:
+                raise RuntimeError('Archived image size metadata mismatch: ' + name)
             labels = image.get('Config', {}).get('Labels') or {}
             if labels.get('org.opencontainers.image.revision') != sha:
                 raise RuntimeError('Loaded image revision mismatch: ' + name)

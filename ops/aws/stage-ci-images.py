@@ -11,6 +11,7 @@ import shutil
 import subprocess
 import tarfile
 import urllib.request
+from release_image_archive import uncompressed_layer_bytes
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -51,7 +52,7 @@ def archive_image(bundle: Path, name: str, sha: str) -> tuple[Path, str, int]:
     image_id = 'sha256:' + hashlib.sha256(raw).hexdigest()
     if config.get('Id') != image_id:
         raise RuntimeError('Archived image config does not match the tested image: ' + name)
-    image_size = config.get('Size')
+    image_size = uncompressed_layer_bytes(archive)
     if not isinstance(image_size, int) or not 0 < image_size <= 5 * 1024**3:
         raise RuntimeError('Image size is missing or exceeds the deployment bound: ' + name)
     return archive, image_id, image_size
@@ -60,7 +61,7 @@ def archive_image(bundle: Path, name: str, sha: str) -> tuple[Path, str, int]:
 def stage_bundle(bundle: Path, sha: str, run_id: int) -> dict:
     bundle.mkdir()
     manifest = {
-        'schema_version': 2,
+        'schema_version': 3,
         'environment': 'staging',
         'sha': sha,
         'ci_run_id': run_id,
