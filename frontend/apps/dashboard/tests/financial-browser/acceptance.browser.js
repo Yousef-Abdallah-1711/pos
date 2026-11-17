@@ -129,6 +129,22 @@ test.describe('authenticated financial browser acceptance', () => {
     postedJournalId = Number(journalHref.split('/').pop())
     expect(postedJournalId).toBeGreaterThan(0)
 
+    const duplicatePostResponse = await page.request.post(
+      `${apiBase}/accounting/journal-entries/${postedJournalId}/post`,
+      { headers: { Origin: dashboardOrigin }, data: {} },
+    )
+    expect(duplicatePostResponse.status()).toBe(400)
+    expect((await duplicatePostResponse.json()).error).toBe('only draft journal entries can be posted')
+    const ledgerResponse = await page.request.get(
+      `${apiBase}/accounting/ledger?account_id=${fixture.primary_account_id}`,
+    )
+    expect(ledgerResponse.status()).toBe(200)
+    const ledgerPayload = await ledgerResponse.json()
+    const postedJournalRows = (ledgerPayload.data?.lines || []).filter(
+      (line) => line.journal_entry_id === postedJournalId,
+    )
+    expect(postedJournalRows).toHaveLength(1)
+
     await page.goto('/en/dashboard/accounting/general-ledger')
     await expect(page.getByRole('heading', { name: /General Ledger/i })).toBeVisible()
     await expect(page.getByRole('tab', { name: /Trial Balance/i })).toBeVisible()
@@ -154,6 +170,13 @@ test.describe('authenticated financial browser acceptance', () => {
     expect(response.status()).toBe(403)
     const exportResponse = await page.request.get(`${apiBase}/accounting/csv/chart-of-accounts/export`)
     expect(exportResponse.status()).toBe(403)
+    for (const format of ['csv', 'pdf']) {
+      const reportExportResponse = await page.request.post(`${apiBase}/reports/export`, {
+        headers: { Origin: dashboardOrigin },
+        data: { report_type: 'sales', format },
+      })
+      expect(reportExportResponse.status(), `cashier ${format.toUpperCase()} export is denied`).toBe(403)
+    }
     await page.screenshot({ path: testInfo.outputPath('en-desktop-cashier-denied.png'), fullPage: true })
   })
 
@@ -272,6 +295,11 @@ test.describe('authenticated financial browser acceptance', () => {
     await expect(page.getByRole('heading', { name: 'Payroll', exact: true })).toBeVisible()
     await expect(page.getByRole('heading', { name: 'No Salary Records', exact: true })).toBeVisible()
     await expect(page.getByRole('button', { name: 'Create Salary', exact: true })).toBeDisabled()
+    const unauthorizedSalaryCreation = await page.request.post(`${apiBase}/hr/salaries`, {
+      headers: { Origin: dashboardOrigin },
+      data: {},
+    })
+    expect(unauthorizedSalaryCreation.status()).toBe(403)
     await assertNoDocumentOverflow(page)
     await page.screenshot({ path: testInfo.outputPath('en-desktop-payroll.png'), fullPage: true })
   })
@@ -374,7 +402,8 @@ test.describe('authenticated financial browser acceptance', () => {
         reference: 'BROWSER-AP-OVERPAYMENT',
       },
     })
-    expect(overpaymentResponse.status(), await overpaymentResponse.text()).toBeGreaterThanOrEqual(400)
+    expect(overpaymentResponse.status()).toBe(400)
+    expect((await overpaymentResponse.json()).error).toBe('payment amount exceeds invoice balance')
     await page.reload()
     await expect(invoiceRow).toContainText('60.00')
 
