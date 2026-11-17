@@ -115,8 +115,10 @@ export function SalaryForm({ salary, employees = [], onSubmit, onCancel }: Salar
         days_worked: parseInt(data.days_worked.toString()) || 0,
         days_absent: parseInt(data.days_absent.toString()) || 0,
         total_hours_worked: parseFloat(data.total_hours_worked.toString()) || 0,
-        pay_period_start: new Date(data.pay_period_start).toISOString(),
-        pay_period_end: new Date(data.pay_period_end).toISOString(),
+        // The API persists calendar dates, so keep these date-input values date-only.
+        // Converting through UTC added a time suffix that the date parser rejects.
+        pay_period_start: data.pay_period_start,
+        pay_period_end: data.pay_period_end,
       }
 
       addDebugLog(`Cleaned data: ${JSON.stringify(cleanData)}`)
