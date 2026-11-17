@@ -55,6 +55,10 @@ async function load(page, locale, route) {
   const headings = document.querySelectorAll('main h1')
   return headings.length === 1 && headings[0].getClientRects().length > 0
  })
+ // Let route and shared chunks finish loading before taking evidence or
+ // navigating again. A visible server-rendered heading can appear before
+ // Next.js has completed the client-side route hydration.
+ await page.waitForLoadState('networkidle', { timeout: 15000 })
  await page.waitForFunction(theme => document.documentElement.classList.contains(theme), expectedTheme)
  check(`resolved theme ${locale}${route}`, await page.evaluate(theme => document.documentElement.classList.contains(theme), expectedTheme))
  const canonical = await page.locator('link[rel=canonical]').getAttribute('href')
