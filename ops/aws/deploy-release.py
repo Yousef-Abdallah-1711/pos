@@ -155,15 +155,26 @@ def archive_identities(path,config_id):
             identities.add(digest)
         return identities
 
+def archive_image_config(path,name,sha):
+    with tarfile.open(path) as source:
+        entries=json.loads(archive_member(source,'manifest.json'))
+        expected_tag='servio-ci-'+name+':'+sha
+        if len(entries)!=1 or entries[0].get('RepoTags')!=[expected_tag]:
+            raise RuntimeError('Unexpected loaded image tag: '+name)
+        config=json.loads(archive_member(source,entries[0]['Config']))
+        return expected_tag,config
+
 def load_verified_images(manifest,artifacts):
     runtime={}
     for name in SERVICES:
         archive=artifacts/manifest['archives'][name]['file']
         identities=archive_identities(archive,manifest['image_ids'][name])
+        tag,config=archive_image_config(archive,name,manifest['sha'])
         checked(['docker','load','-i',str(archive)],stdout=subprocess.DEVNULL)
-        tag=manifest['images'][name].split('@')[0]+':sha-'+manifest['sha']
         metadata=json.loads(subprocess.check_output(['docker','image','inspect',tag]))[0]
-        if metadata.get('Os')!='linux' or metadata.get('Architecture')!='amd64' or metadata['Id'] not in identities or metadata['Config'].get('Labels',{}).get('org.opencontainers.image.revision')!=manifest['sha']:
+        if (metadata.get('Os')!=config.get('os') or metadata.get('Architecture')!=config.get('architecture') or
+                metadata.get('Config')!=config.get('config') or metadata.get('RootFS',{}).get('Layers')!=config.get('rootfs',{}).get('diff_ids') or
+                metadata['Config'].get('Labels',{}).get('org.opencontainers.image.revision')!=manifest['sha']):
             raise RuntimeError('Loaded image identity mismatch: '+name)
         runtime[name]=metadata['Id']
     return runtime
