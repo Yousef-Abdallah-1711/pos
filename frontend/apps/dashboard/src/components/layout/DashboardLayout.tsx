@@ -161,14 +161,14 @@ export default function DashboardLayout({
         : 'mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8'
 
   const mainContentClass = isFullscreenRoute
-    ? 'w-full h-full flex-none'
+    ? 'w-full h-full'
     : isRTL
       ? isSidebarCollapsed
-        ? 'w-full md:w-[calc(100%_-_5rem)] md:mr-20'
-        : 'w-full md:w-[calc(100%_-_16rem)] md:mr-64'
+        ? 'w-full md:flex-1 md:mr-20'
+        : 'w-full md:flex-1 md:mr-64'
       : isSidebarCollapsed
-        ? 'w-full md:w-[calc(100%_-_5rem)] md:ml-20'
-        : 'w-full md:w-[calc(100%_-_16rem)] md:ml-64'
+        ? 'w-full md:flex-1 md:ml-20'
+        : 'w-full md:flex-1 md:ml-64'
 
   return (
     <div className={`min-h-screen flex ${isFullscreenRoute ? 'bg-gray-50 text-gray-900 dark:bg-slate-950 dark:text-slate-100' : 'bg-gray-50 dark:bg-gray-900'}`}>
@@ -183,7 +183,7 @@ export default function DashboardLayout({
       )}
 
       {/* Main Content Area */}
-      <div className={`min-w-0 flex-none ${mainContentClass} ${isFullscreenRoute ? '' : 'md:transition-[margin,width] md:duration-300'}`}>
+      <div className={`min-w-0 flex-1 ${mainContentClass} ${isFullscreenRoute ? '' : 'md:transition-[margin,width] md:duration-300'}`}>
         {/* Header */}
         {!isFullscreenRoute && (
           <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-30">

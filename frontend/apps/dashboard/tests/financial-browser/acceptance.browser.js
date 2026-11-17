@@ -89,18 +89,45 @@ async function assertNoDocumentOverflow(page) {
   expect(dimensions.documentWidth, JSON.stringify(dimensions)).toBeLessThanOrEqual(dimensions.viewportWidth)
 }
 
-async function assertFinancialHeadingClearsSidebar(page) {
+async function assertFinancialContentClearsSidebar(page) {
   const layout = await page.evaluate(() => {
     const heading = document.querySelector('main h1')?.getBoundingClientRect()
     const sidebar = document.querySelector('aside.fixed')?.getBoundingClientRect()
-    if (!heading || !sidebar) return { foundHeading: Boolean(heading), foundSidebar: Boolean(sidebar), overlap: true }
+    const main = document.querySelector('main')?.getBoundingClientRect()
+    const content = [...document.querySelectorAll('main table')].map((table) => {
+      const viewport = table.closest('.overflow-x-auto')?.getBoundingClientRect() || table.getBoundingClientRect()
+      return {
+        left: viewport.left,
+        right: viewport.right,
+        overlapsSidebar: sidebar
+          ? viewport.left < sidebar.right && viewport.right > sidebar.left
+          : true,
+      }
+    })
+    if (!heading || !sidebar || !main) {
+      return { foundHeading: Boolean(heading), foundSidebar: Boolean(sidebar), foundMain: Boolean(main), content }
+    }
+    const intersectsSidebar = (bounds) => bounds.left < sidebar.right && bounds.right > sidebar.left
     return {
       foundHeading: true,
       foundSidebar: true,
-      overlap: heading.left < sidebar.right && heading.right > sidebar.left,
+      foundMain: true,
+      headingOverlaps: intersectsSidebar(heading),
+      mainOverlaps: intersectsSidebar(main),
+      content,
     }
   })
-  expect(layout, JSON.stringify(layout)).toEqual({ foundHeading: true, foundSidebar: true, overlap: false })
+  expect(layout, JSON.stringify(layout)).toMatchObject({
+    foundHeading: true,
+    foundSidebar: true,
+    foundMain: true,
+    headingOverlaps: false,
+    mainOverlaps: false,
+  })
+  expect(layout.content, 'financial tables must render in the unobstructed main pane').not.toHaveLength(0)
+  for (const content of layout.content) {
+    expect(content.overlapsSidebar, JSON.stringify(layout)).toBe(false)
+  }
 }
 
 test.describe('authenticated financial browser acceptance', () => {
@@ -161,7 +188,7 @@ test.describe('authenticated financial browser acceptance', () => {
 
     await page.goto('/en/dashboard/accounting/general-ledger')
     await expect(page.getByRole('heading', { name: /General Ledger/i })).toBeVisible()
-    await assertFinancialHeadingClearsSidebar(page)
+    await assertFinancialContentClearsSidebar(page)
     await expect(page.getByRole('tab', { name: /Trial Balance/i })).toBeVisible()
     await page.getByRole('tab', { name: /Trial Balance/i }).click()
     await expect(page.getByText(/Debit/i).first()).toBeVisible()
@@ -217,7 +244,7 @@ test.describe('authenticated financial browser acceptance', () => {
     expect(Math.round((balanceSheetData.total_assets - balanceSheetData.total_liabilities - balanceSheetData.total_equity) * 100))
       .toBe(Math.round(balanceSheetData.equation_difference * 100))
     await expect(page.getByRole('heading', { name: /الميزانية العمومية|Balance Sheet/i })).toBeVisible()
-    await assertFinancialHeadingClearsSidebar(page)
+    await assertFinancialContentClearsSidebar(page)
     await expect(page.getByText(/غير متطابق|UNRECONCILED|unreconciled/i).first()).toBeVisible()
     await page.screenshot({ path: testInfo.outputPath('ar-desktop-balance-sheet.png'), fullPage: true })
 
