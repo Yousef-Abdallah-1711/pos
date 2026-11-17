@@ -462,6 +462,7 @@ func assertFinancialBalanceCents(t *testing.T, label string, expected int64, obs
 	t.Helper()
 	observed := int64(math.Round(observedAmount * 100))
 	difference := observed - expected
+	t.Logf("financial_reconciliation scenario=%s expected_cents=%d observed_cents=%d difference_cents=%d", label, expected, observed, difference)
 	if difference != 0 {
 		t.Fatalf("%s reconciliation: expected=%d cents observed=%d cents difference=%d cents", label, expected, observed, difference)
 	}
