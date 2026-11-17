@@ -6,7 +6,7 @@ on:
       - '.github/workflows/financial-benchmark.yml'
       - 'backend/cmd/api/financial_benchmark_integration_test.go'
       - 'backend/cmd/api/financial_benchmark_support_integration_test.go'
-      - 'backend/migrations/190_financial_ledger_account_page_index.sql'
+      - 'backend/migrations/157_optimize_financial_reporting_indexes.sql'
   workflow_dispatch:
     inputs:
       journal_count:
@@ -39,7 +39,9 @@ jobs:
       POS_FINANCIAL_BENCHMARK: '1'
       POS_FINANCIAL_BENCHMARK_JOURNALS: ${{ github.event.inputs.journal_count || '10000' }}
       POS_FINANCIAL_BENCHMARK_OUTPUT: ${{ github.workspace }}/audit-reports/financial-benchmark/financial-query-benchmark.json
-      POS_FINANCIAL_BENCHMARK_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
+      POS_FINANCIAL_BENCHMARK_EFFECTIVE_SHA: ${{ github.sha }}
+      POS_FINANCIAL_BENCHMARK_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+      POS_FINANCIAL_BENCHMARK_BASE_SHA: ${{ github.event.pull_request.base.sha || github.sha }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e

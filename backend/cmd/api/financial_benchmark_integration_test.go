@@ -4,6 +4,7 @@ package main
 
 import (
 	"database/sql"
+	"encoding/csv"
 	"encoding/json"
 	"fmt"
 	"math"
@@ -177,6 +178,10 @@ func TestFinancialQueryBenchmarkIntegration(t *testing.T) {
 			if recorder.Code != http.StatusOK || recorder.Body.Len() == 0 || !strings.Contains(recorder.Header().Get("Content-Type"), "text/csv") {
 				return fmt.Errorf("sales report CSV status=%d content_type=%q bytes=%d", recorder.Code, recorder.Header().Get("Content-Type"), recorder.Body.Len())
 			}
+			rows, err := csv.NewReader(strings.NewReader(recorder.Body.String())).ReadAll()
+			if err != nil || len(rows) < 3 || rows[1][3] != fmt.Sprintf("%.2f", float64(fixture.salesOrderCount)*20) || rows[1][4] != fmt.Sprint(fixture.salesOrderCount) {
+				return fmt.Errorf("sales report CSV summary=%v parse_error=%v, want revenue=%.2f orders=%d", rows, err, float64(fixture.salesOrderCount)*20, fixture.salesOrderCount)
+			}
 			return nil
 		}},
 		{"sales_report_pdf_export", func() error {
@@ -187,10 +192,9 @@ func TestFinancialQueryBenchmarkIntegration(t *testing.T) {
 			return nil
 		}},
 		{"inventory_movement_history", func() error {
-			var movementCount int
-			err := db.QueryRow(`SELECT COUNT(*) FROM inventory_movements WHERE tenant_id=$1 AND restaurant_id=$2 AND product_id=$3 AND created_at < $4`, fixture.tenantID, fixture.restaurantID, fixture.productID, asOf).Scan(&movementCount)
-			if err == nil && movementCount != fixture.documentCount {
-				return fmt.Errorf("inventory movement rows=%d, want %d", movementCount, fixture.documentCount)
+			movements, err := repository.NewInventoryMovementRepository(db).ListMovements(fixture.tenantID, fixture.restaurantID, int64(fixture.productID))
+			if err == nil && len(movements) != fixture.documentCount {
+				return fmt.Errorf("production inventory movement history rows=%d, want %d", len(movements), fixture.documentCount)
 			}
 			return err
 		}},
@@ -242,6 +246,7 @@ func TestFinancialQueryBenchmarkIntegration(t *testing.T) {
 		return err
 	}
 	measurements = append(measurements, measureConcurrentFinancialOperation(t, db, "mixed_ledger_reads_and_postings", 4, 30, mixedReadWrite))
+	concurrentJournalWrites := int(mixedSequence.Load() / 4)
 
 	var databaseBytes int64
 	if err := db.QueryRow(`SELECT pg_database_size(current_database())`).Scan(&databaseBytes); err != nil {
@@ -254,18 +259,39 @@ func TestFinancialQueryBenchmarkIntegration(t *testing.T) {
 	cpuModel, runnerMemoryBytes := financialBenchmarkRunnerSpecs()
 	var memory runtime.MemStats
 	runtime.ReadMemStats(&memory)
+	primaryCounts := readFinancialBenchmarkTenantCounts(t, db, fixture.tenantID, fixture.restaurantID)
+	secondaryCounts := readFinancialBenchmarkTenantCounts(t, db, secondaryTenant.tenantID, secondaryTenant.restaurantID)
+	if primaryCounts.journalEntries != journalCount+fixture.backdatedJournalCount+concurrentJournalWrites {
+		t.Fatalf("primary benchmark journal rows=%d, want initial=%d backdated=%d concurrent=%d", primaryCounts.journalEntries, journalCount, fixture.backdatedJournalCount, concurrentJournalWrites)
+	}
+	if primaryCounts.journalDebitCents != primaryCounts.journalCreditCents || primaryCounts.journalDebitCents != primaryCounts.ledgerDebitCents || primaryCounts.journalCreditCents != primaryCounts.ledgerCreditCents {
+		t.Fatalf("primary benchmark reconciliation cents journal debit/credit=%d/%d GL debit/credit=%d/%d", primaryCounts.journalDebitCents, primaryCounts.journalCreditCents, primaryCounts.ledgerDebitCents, primaryCounts.ledgerCreditCents)
+	}
+	if secondaryCounts.journalEntries != secondaryTenant.journalCount || secondaryCounts.journalDebitCents != secondaryCounts.journalCreditCents || secondaryCounts.journalDebitCents != secondaryCounts.ledgerDebitCents || secondaryCounts.journalCreditCents != secondaryCounts.ledgerCreditCents {
+		t.Fatalf("secondary benchmark reconciliation rows=%d journal debit/credit=%d/%d GL debit/credit=%d/%d", secondaryCounts.journalEntries, secondaryCounts.journalDebitCents, secondaryCounts.journalCreditCents, secondaryCounts.ledgerDebitCents, secondaryCounts.ledgerCreditCents)
+	}
 	result := financialBenchmarkReport{
-		Commit: os.Getenv("POS_FINANCIAL_BENCHMARK_COMMIT"), GoVersion: runtime.Version(),
-		Database: "disposable PostgreSQL; pg_stat_statements enabled", PostgreSQLVersion: postgresVersion,
+		EffectiveCommit: os.Getenv("POS_FINANCIAL_BENCHMARK_EFFECTIVE_SHA"),
+		HeadCommit:      os.Getenv("POS_FINANCIAL_BENCHMARK_HEAD_SHA"),
+		BaseCommit:      os.Getenv("POS_FINANCIAL_BENCHMARK_BASE_SHA"),
+		GoVersion:       runtime.Version(),
+		Database:        "disposable PostgreSQL; pg_stat_statements enabled", PostgreSQLVersion: postgresVersion,
 		SharedBuffers: sharedBuffers, WorkMem: workMem, EffectiveCacheSize: effectiveCacheSize, MaxConnections: maxConnections,
 		RunnerOS: runtime.GOOS, RunnerArch: runtime.GOARCH, RunnerCPUModel: cpuModel,
 		RunnerCPUCount: runtime.NumCPU(), RunnerMemoryBytes: runnerMemoryBytes, GoMaxProcs: runtime.GOMAXPROCS(0), Concurrency: 1,
-		WarmupSamples: 5, MeasuredSamples: 30, Dataset: financialBenchmarkDataset{
-			TenantCount: 2, TenantJournalCounts: []int{journalCount + fixture.backdatedJournalCount, secondaryTenant.journalCount},
-			JournalEntries:    journalCount + fixture.backdatedJournalCount + secondaryTenant.journalCount,
-			JournalLines:      journalCount*5 + fixture.backdatedJournalCount*2 + secondaryTenant.journalCount*3,
-			GeneralLedgerRows: journalCount*5 + fixture.backdatedJournalCount*2 + secondaryTenant.journalCount*3,
-			DatabaseBytes:     databaseBytes, PostingDurationMS: float64(fixture.postingDuration.Microseconds()) / 1000,
+		WarmupSamples: 5, MeasuredSamples: 30, PercentileMethod: "nearest_rank; p99 is the maximum for 30 samples and is a low-confidence descriptive statistic",
+		Dataset: financialBenchmarkDataset{
+			TenantCount: 2, TenantJournalCounts: []int{primaryCounts.journalEntries, secondaryCounts.journalEntries},
+			JournalEntries:          primaryCounts.journalEntries + secondaryCounts.journalEntries,
+			JournalLines:            primaryCounts.journalLines + secondaryCounts.journalLines,
+			GeneralLedgerRows:       primaryCounts.generalLedgerRows + secondaryCounts.generalLedgerRows,
+			ConcurrentJournalWrites: concurrentJournalWrites,
+			SalesOrders:             fixture.salesOrderCount, SalesOrderItems: fixture.salesOrderCount * 2,
+			JournalDebitCents:        primaryCounts.journalDebitCents + secondaryCounts.journalDebitCents,
+			JournalCreditCents:       primaryCounts.journalCreditCents + secondaryCounts.journalCreditCents,
+			GeneralLedgerDebitCents:  primaryCounts.ledgerDebitCents + secondaryCounts.ledgerDebitCents,
+			GeneralLedgerCreditCents: primaryCounts.ledgerCreditCents + secondaryCounts.ledgerCreditCents,
+			DatabaseBytes:            databaseBytes, PostingDurationMS: float64(fixture.postingDuration.Microseconds()) / 1000,
 			PostingThroughputPerSecond: float64(journalCount) / fixture.postingDuration.Seconds(),
 		},
 		ProcessMemoryAllocBytes: memory.TotalAlloc, ProcessHeapBytes: memory.HeapAlloc, ProcessSysBytes: memory.Sys, Measurements: measurements,

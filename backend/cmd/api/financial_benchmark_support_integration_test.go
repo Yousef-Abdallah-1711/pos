@@ -86,7 +86,7 @@ func invokeFinancialBenchmarkReportExport(fixture financialBenchmarkFixture, bod
 type financialBenchmarkFixture struct {
 	tenantID, restaurantID, cashAccountID, revenueAccountID, inventoryAccountID, cogsAccountID, postedBy int
 	productID                                                                                            int
-	documentCount                                                                                        int
+	documentCount, salesOrderCount                                                                       int
 	backdatedJournalCount                                                                                int
 	postingDuration                                                                                      time.Duration
 }
@@ -94,6 +94,36 @@ type financialBenchmarkFixture struct {
 type financialBenchmarkTenant struct {
 	tenantID, restaurantID, cashAccountID int
 	journalCount                          int
+}
+
+type financialBenchmarkTenantCounts struct {
+	journalEntries, journalLines, generalLedgerRows                            int
+	journalDebitCents, journalCreditCents, ledgerDebitCents, ledgerCreditCents int64
+}
+
+func readFinancialBenchmarkTenantCounts(t *testing.T, db *sql.DB, tenantID, restaurantID int) financialBenchmarkTenantCounts {
+	t.Helper()
+	var counts financialBenchmarkTenantCounts
+	if err := db.QueryRow(`
+		SELECT COUNT(*), COALESCE(SUM(ROUND(total_debit * 100)::bigint), 0), COALESCE(SUM(ROUND(total_credit * 100)::bigint), 0)
+		FROM journal_entries WHERE tenant_id=$1 AND restaurant_id=$2
+	`, tenantID, restaurantID).Scan(&counts.journalEntries, &counts.journalDebitCents, &counts.journalCreditCents); err != nil {
+		t.Fatalf("count benchmark journals for tenant %d: %v", tenantID, err)
+	}
+	if err := db.QueryRow(`
+		SELECT COUNT(*) FROM journal_entry_lines jel
+		JOIN journal_entries je ON je.id=jel.journal_entry_id
+		WHERE je.tenant_id=$1 AND je.restaurant_id=$2
+	`, tenantID, restaurantID).Scan(&counts.journalLines); err != nil {
+		t.Fatalf("count benchmark journal lines for tenant %d: %v", tenantID, err)
+	}
+	if err := db.QueryRow(`
+		SELECT COUNT(*), COALESCE(SUM(ROUND(gl.debit_amount * 100)::bigint), 0), COALESCE(SUM(ROUND(gl.credit_amount * 100)::bigint), 0)
+		FROM general_ledger gl WHERE gl.tenant_id=$1 AND gl.restaurant_id=$2
+	`, tenantID, restaurantID).Scan(&counts.generalLedgerRows, &counts.ledgerDebitCents, &counts.ledgerCreditCents); err != nil {
+		t.Fatalf("count benchmark ledger rows for tenant %d: %v", tenantID, err)
+	}
+	return counts
 }
 
 func financialBenchmarkJournalCount(t *testing.T) int {
@@ -142,6 +172,7 @@ func seedFinancialBenchmarkDataset(t *testing.T, db *sql.DB, journalCount int) f
 	fixture.cogsAccountID = int(accountIDs["5110"])
 	fixture.productID = int(base.productID)
 	fixture.documentCount = minInt(journalCount, 2000)
+	fixture.salesOrderCount = fixture.documentCount
 	seedFinancialBenchmarkDocuments(t, db, fixture, accountIDs)
 
 	tx, err := db.BeginTx(t.Context(), nil)
@@ -300,6 +331,38 @@ func seedFinancialBenchmarkDocuments(t *testing.T, db *sql.DB, fixture financial
 		FROM generate_series(1, $5) AS seq`, fixture.tenantID, fixture.restaurantID, fixture.productID, fixture.postedBy, fixture.documentCount); err != nil {
 		t.Fatalf("seed benchmark inventory movements: %v", err)
 	}
+	seedFinancialBenchmarkSalesOrders(t, db, fixture)
+}
+
+func seedFinancialBenchmarkSalesOrders(t *testing.T, db *sql.DB, fixture financialBenchmarkFixture) {
+	t.Helper()
+	_, err := db.Exec(`
+		WITH seeded_orders AS (
+			INSERT INTO orders (
+				tenant_id, restaurant_id, order_number, customer_name, customer_phone,
+				subtotal, tax_amount, discount_amount, delivery_fee, total_amount,
+				payment_method, payment_status, status, order_source, created_at, updated_at
+			)
+			SELECT $1, $2, 'FINBM-SALES-' || lpad(sequence::text, 8, '0'),
+			       'Synthetic benchmark customer', '5550000000', 20, 0, 0, 0, 20,
+			       'cash', 'paid', 'delivered', 'website',
+			       TIMESTAMP '2025-01-01' + (sequence % 365) * INTERVAL '1 day' + (sequence % 24) * INTERVAL '1 hour',
+			       TIMESTAMP '2025-01-01' + (sequence % 365) * INTERVAL '1 day' + (sequence % 24) * INTERVAL '1 hour'
+			FROM generate_series(1, $4) AS sequence
+			RETURNING id, tenant_id, restaurant_id, created_at
+		)
+		INSERT INTO order_items (
+			order_id, product_id, tenant_id, restaurant_id, product_name,
+			quantity, unit_price, discount_amount, total_price, created_at, updated_at
+		)
+		SELECT seeded.id, $3, seeded.tenant_id, seeded.restaurant_id,
+		       'Financial benchmark product', 1, 10, 0, 10, seeded.created_at, seeded.created_at
+		FROM seeded_orders seeded
+		CROSS JOIN generate_series(1, 2) AS item_number
+	`, fixture.tenantID, fixture.restaurantID, fixture.productID, fixture.salesOrderCount)
+	if err != nil {
+		t.Fatalf("seed populated benchmark sales exports: %v", err)
+	}
 }
 
 func seedFinancialBenchmarkSecondaryTenant(t *testing.T, db *sql.DB, journalCount int) financialBenchmarkTenant {
@@ -371,12 +434,21 @@ type financialBenchmarkDataset struct {
 	JournalEntries             int     `json:"journal_entries"`
 	JournalLines               int     `json:"journal_lines"`
 	GeneralLedgerRows          int     `json:"general_ledger_rows"`
+	ConcurrentJournalWrites    int     `json:"concurrent_journal_writes"`
+	SalesOrders                int     `json:"sales_orders"`
+	SalesOrderItems            int     `json:"sales_order_items"`
+	JournalDebitCents          int64   `json:"journal_debit_cents"`
+	JournalCreditCents         int64   `json:"journal_credit_cents"`
+	GeneralLedgerDebitCents    int64   `json:"general_ledger_debit_cents"`
+	GeneralLedgerCreditCents   int64   `json:"general_ledger_credit_cents"`
 	DatabaseBytes              int64   `json:"database_bytes"`
 	PostingDurationMS          float64 `json:"posting_duration_ms"`
 	PostingThroughputPerSecond float64 `json:"posting_throughput_per_second"`
 }
 type financialBenchmarkReport struct {
-	Commit                    string                            `json:"commit"`
+	EffectiveCommit           string                            `json:"effective_commit"`
+	HeadCommit                string                            `json:"head_commit"`
+	BaseCommit                string                            `json:"base_commit"`
 	GoVersion                 string                            `json:"go_version"`
 	Database                  string                            `json:"database"`
 	PostgreSQLVersion         string                            `json:"postgresql_version"`
@@ -393,6 +465,7 @@ type financialBenchmarkReport struct {
 	Concurrency               int                               `json:"concurrency"`
 	WarmupSamples             int                               `json:"warmup_samples"`
 	MeasuredSamples           int                               `json:"measured_samples"`
+	PercentileMethod          string                            `json:"percentile_method_and_caveat"`
 	Dataset                   financialBenchmarkDataset         `json:"dataset"`
 	ProcessMemoryAllocBytes   uint64                            `json:"process_memory_alloc_bytes"`
 	ProcessHeapBytes          uint64                            `json:"process_heap_bytes"`
@@ -506,7 +579,21 @@ func measureConcurrentFinancialOperation(t *testing.T, db *sql.DB, name string, 
 func financialLedgerPageExplain(t *testing.T, db *sql.DB, fixture financialBenchmarkFixture, asOf time.Time) json.RawMessage {
 	t.Helper()
 	var plan []byte
-	if err := db.QueryRow(`EXPLAIN (ANALYZE, BUFFERS, FORMAT JSON) SELECT gl.id, gl.account_id, gl.journal_entry_id, gl.journal_line_id, gl.entry_date, gl.debit_amount, gl.credit_amount, gl.running_balance FROM general_ledger gl WHERE gl.tenant_id=$1 AND gl.restaurant_id=$2 AND gl.account_id=$3 AND gl.entry_date <= $4 ORDER BY gl.entry_date DESC, gl.id DESC LIMIT 201`, fixture.tenantID, fixture.restaurantID, fixture.cashAccountID, asOf).Scan(&plan); err != nil {
+	if err := db.QueryRow(`EXPLAIN (ANALYZE, BUFFERS, FORMAT JSON)
+		SELECT gl.id, gl.account_id, coa.account_code, coa.account_name,
+		       gl.journal_entry_id, gl.journal_line_id, gl.entry_date,
+		       je.entry_number, COALESCE(je.description, ''),
+		       COALESCE(je.reference_type, ''), COALESCE(je.reference_number, ''),
+		       gl.debit_amount, gl.credit_amount, gl.running_balance,
+		       COALESCE(jel.description, '')
+		FROM general_ledger gl
+		JOIN chart_of_accounts coa ON coa.id = gl.account_id
+		JOIN journal_entries je ON je.id = gl.journal_entry_id
+		LEFT JOIN journal_entry_lines jel ON jel.id = gl.journal_line_id
+		WHERE gl.tenant_id = $1 AND gl.restaurant_id = $2 AND gl.account_id = $3
+		  AND gl.entry_date <= $4
+		ORDER BY gl.entry_date DESC, gl.id DESC
+		LIMIT 201`, fixture.tenantID, fixture.restaurantID, fixture.cashAccountID, asOf).Scan(&plan); err != nil {
 		t.Fatalf("explain financial ledger page: %v", err)
 	}
 	return json.RawMessage(plan)
