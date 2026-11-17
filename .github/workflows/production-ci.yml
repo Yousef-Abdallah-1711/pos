@@ -26,7 +26,9 @@ jobs:
         ports: [6379:6379]
     env:
       GOMAXPROCS: '2'
-      GOFLAGS: -p=2
+      # Integration packages share one disposable PostgreSQL database. Serialize
+      # packages so durable outbox tests cannot claim another package's fixtures.
+      GOFLAGS: -p=1
       ENV: test
       DB_HOST: 127.0.0.1
       DB_PORT: '5432'
