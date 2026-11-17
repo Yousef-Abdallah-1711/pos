@@ -6,6 +6,8 @@ import (
 	"database/sql"
 	"fmt"
 	"math"
+	"os"
+	"path/filepath"
 	"sync"
 	"testing"
 	"time"
@@ -402,6 +404,80 @@ func TestCFR003PostgresBackdatedEntryKeepsAsOfBalancesChronological(t *testing.T
 		t.Fatalf("independently reconcile current account balance: %v", err)
 	}
 	assertFinancialBalanceCents(t, "independent SQL current balance", 17500, independentCurrentBalance)
+}
+
+func TestCFR003PostgresOperationalRepairReconcilesExistingBalanceCaches(t *testing.T) {
+	db, fixture := openAtomicPostingFixture(t)
+	defer cleanupAtomicPostingFixture(t, db, fixture)
+
+	entry := fixture.entry()
+	entry.Lines[0].DebitAmount = 40.25
+	entry.Lines[1].CreditAmount = 40.25
+	if _, err := fixture.ledger.CreateAndPostAutoEntry(entry, 0); err != nil {
+		t.Fatalf("post source journal: %v", err)
+	}
+
+	var zeroMovementAccountID int
+	if err := db.QueryRow(`
+		INSERT INTO chart_of_accounts (tenant_id, restaurant_id, account_code, account_name, account_type, normal_balance, current_balance)
+		VALUES ($1, $2, 'CFR004-Z', 'CFR-004 zero-movement fixture', 'asset', 'debit', 88.88)
+		RETURNING id
+	`, fixture.tenantID, fixture.restaurantID).Scan(&zeroMovementAccountID); err != nil {
+		t.Fatalf("create zero-movement account with stale cache: %v", err)
+	}
+
+	if _, err := db.Exec(`
+		UPDATE chart_of_accounts SET current_balance = CASE id
+			WHEN $1 THEN 999.99 WHEN $2 THEN -999.99 ELSE current_balance END
+		WHERE tenant_id = $3 AND restaurant_id = $4 AND id IN ($1, $2)
+	`, fixture.debitAccountID, fixture.creditAccountID, fixture.tenantID, fixture.restaurantID); err != nil {
+		t.Fatalf("seed stale derived balance caches: %v", err)
+	}
+	var journalCountBefore, ledgerCountBefore int
+	if err := db.QueryRow(`SELECT COUNT(*) FROM journal_entries WHERE tenant_id = $1 AND restaurant_id = $2`, fixture.tenantID, fixture.restaurantID).Scan(&journalCountBefore); err != nil {
+		t.Fatalf("count posted journal history before repair: %v", err)
+	}
+	if err := db.QueryRow(`SELECT COUNT(*) FROM general_ledger WHERE tenant_id = $1 AND restaurant_id = $2`, fixture.tenantID, fixture.restaurantID).Scan(&ledgerCountBefore); err != nil {
+		t.Fatalf("count GL history before repair: %v", err)
+	}
+
+	repairSQL, err := os.ReadFile(filepath.Join("..", "..", "scripts", "reconcile_chart_of_accounts_current_balance.sql"))
+	if err != nil {
+		t.Fatalf("read operational balance repair SQL: %v", err)
+	}
+	if _, err := db.Exec(string(repairSQL)); err != nil {
+		t.Fatalf("run operational balance repair transaction: %v", err)
+	}
+
+	for _, check := range []struct {
+		name      string
+		accountID int
+		wantCents int64
+	}{
+		{name: "debit-normal account", accountID: fixture.debitAccountID, wantCents: 4025},
+		{name: "credit-normal account", accountID: fixture.creditAccountID, wantCents: 4025},
+		{name: "zero-movement account", accountID: zeroMovementAccountID, wantCents: 0},
+	} {
+		var observed float64
+		if err := db.QueryRow(`
+			SELECT current_balance FROM chart_of_accounts
+			WHERE id = $1 AND tenant_id = $2 AND restaurant_id = $3
+		`, check.accountID, fixture.tenantID, fixture.restaurantID).Scan(&observed); err != nil {
+			t.Fatalf("read repaired %s cache: %v", check.name, err)
+		}
+		assertFinancialBalanceCents(t, "repaired "+check.name, check.wantCents, observed)
+	}
+
+	var journalCountAfter, ledgerCountAfter int
+	if err := db.QueryRow(`SELECT COUNT(*) FROM journal_entries WHERE tenant_id = $1 AND restaurant_id = $2`, fixture.tenantID, fixture.restaurantID).Scan(&journalCountAfter); err != nil {
+		t.Fatalf("count posted journal history after repair: %v", err)
+	}
+	if err := db.QueryRow(`SELECT COUNT(*) FROM general_ledger WHERE tenant_id = $1 AND restaurant_id = $2`, fixture.tenantID, fixture.restaurantID).Scan(&ledgerCountAfter); err != nil {
+		t.Fatalf("count GL history after repair: %v", err)
+	}
+	if journalCountAfter != journalCountBefore || ledgerCountAfter != ledgerCountBefore {
+		t.Fatalf("repair changed posted history: journals %d -> %d, GL rows %d -> %d", journalCountBefore, journalCountAfter, ledgerCountBefore, ledgerCountAfter)
+	}
 }
 
 func TestCFR003PostgresNormalBalanceCanChangeBeforeLedgerHistory(t *testing.T) {
