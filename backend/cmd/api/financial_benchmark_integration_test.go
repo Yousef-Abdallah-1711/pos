@@ -193,8 +193,9 @@ func TestFinancialQueryBenchmarkIntegration(t *testing.T) {
 		}},
 		{"inventory_movement_history", func() error {
 			movements, err := repository.NewInventoryMovementRepository(db).ListMovements(fixture.tenantID, fixture.restaurantID, int64(fixture.productID))
-			if err == nil && len(movements) != fixture.documentCount {
-				return fmt.Errorf("production inventory movement history rows=%d, want %d", len(movements), fixture.documentCount)
+			expectedMovements := fixture.documentCount + fixture.salesOrderCount
+			if err == nil && len(movements) != expectedMovements {
+				return fmt.Errorf("production inventory movement history rows=%d, want %d (%d synthetic movements + %d order reservations)", len(movements), expectedMovements, fixture.documentCount, fixture.salesOrderCount)
 			}
 			return err
 		}},
