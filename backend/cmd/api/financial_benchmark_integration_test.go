@@ -11,9 +11,12 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"strings"
+	"sync/atomic"
 	"testing"
 	"time"
 
+	"pos-saas/internal/domain"
 	httpHandler "pos-saas/internal/handler/http"
 	"pos-saas/internal/repository"
 	"pos-saas/internal/usecase"
@@ -48,9 +51,12 @@ func TestFinancialQueryBenchmarkIntegration(t *testing.T) {
 		t.Fatalf("enable pg_stat_statements on disposable database: %v", err)
 	}
 	fixture := seedFinancialBenchmarkDataset(t, db, journalCount)
+	secondaryJournalCount := maxIntBenchmark(25, journalCount/400)
+	secondaryTenant := seedFinancialBenchmarkSecondaryTenant(t, db, secondaryJournalCount)
 	ledger := repository.NewGeneralLedgerRepository(db, nil)
 	reports := usecase.NewFinancialReportUseCase(db, ledger)
 	accountingHandler := httpHandler.NewAccountingAdvancedHandler(db, repository.NewAccountingAdvancedRepository(db, nil), nil)
+	reportHandler := httpHandler.NewReportHandler(db)
 	dateFrom := time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC)
 	dateTo := time.Date(2025, 12, 31, 0, 0, 0, 0, time.UTC)
 	asOf := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
@@ -105,6 +111,13 @@ func TestFinancialQueryBenchmarkIntegration(t *testing.T) {
 			}
 			return err
 		}},
+		{"secondary_tenant_trial_balance", func() error {
+			report, err := reports.GenerateTrialBalance(secondaryTenant.tenantID, secondaryTenant.restaurantID, asOf)
+			if err == nil && !report.IsBalanced {
+				return fmt.Errorf("secondary tenant trial balance not balanced: debit=%0.2f credit=%0.2f", report.TotalDebits, report.TotalCredits)
+			}
+			return err
+		}},
 		{"profit_and_loss", func() error {
 			report, err := reports.GenerateProfitLoss(fixture.tenantID, fixture.restaurantID, dateFrom, dateTo)
 			if err == nil && math.Abs(report.TotalRevenue-float64(journalCount)*90) > .005 {
@@ -120,16 +133,25 @@ func TestFinancialQueryBenchmarkIntegration(t *testing.T) {
 			_, err := reports.GenerateCashFlow(fixture.tenantID, fixture.restaurantID, dateFrom, dateTo)
 			return err
 		}},
-		{"receivables_aging_empty_fixture", func() error {
-			_, err := reports.GenerateReceivablesAging(fixture.tenantID, fixture.restaurantID, asOf)
+		{"receivables_aging", func() error {
+			report, err := reports.GenerateReceivablesAging(fixture.tenantID, fixture.restaurantID, asOf)
+			if err == nil && (len(report.Rows) != 1 || math.Abs(report.Total-float64(fixture.documentCount)*75) > .005) {
+				return fmt.Errorf("receivables aging rows=%d total=%.2f, want 1 row totaling %.2f", len(report.Rows), report.Total, float64(fixture.documentCount)*75)
+			}
 			return err
 		}},
-		{"payables_aging_empty_fixture", func() error {
-			_, err := reports.GeneratePayablesAging(fixture.tenantID, fixture.restaurantID, asOf)
+		{"payables_aging", func() error {
+			report, err := reports.GeneratePayablesAging(fixture.tenantID, fixture.restaurantID, asOf)
+			if err == nil && (len(report.Rows) != 1 || math.Abs(report.Total-float64(fixture.documentCount)*60) > .005) {
+				return fmt.Errorf("payables aging rows=%d total=%.2f, want 1 row totaling %.2f", len(report.Rows), report.Total, float64(fixture.documentCount)*60)
+			}
 			return err
 		}},
-		{"inventory_valuation_empty_fixture", func() error {
-			_, err := reports.GenerateInventoryValuation(fixture.tenantID, fixture.restaurantID, asOf)
+		{"inventory_valuation", func() error {
+			report, err := reports.GenerateInventoryValuation(fixture.tenantID, fixture.restaurantID, asOf)
+			if err == nil && (len(report.Rows) == 0 || math.Abs(report.TotalValue) < .005) {
+				return fmt.Errorf("inventory valuation rows=%d total=%.2f, want non-empty inventory", len(report.Rows), report.TotalValue)
+			}
 			return err
 		}},
 		{"chart_of_accounts_csv_export", func() error {
@@ -147,26 +169,102 @@ func TestFinancialQueryBenchmarkIntegration(t *testing.T) {
 			}
 			return nil
 		}},
+		{"sales_report_csv_export", func() error {
+			recorder := invokeFinancialBenchmarkReportExport(fixture, `{"report_type":"sales","format":"csv","date_from":"2025-01-01","date_to":"2025-12-31"}`, reportHandler.ExportReport)
+			if recorder.Code != http.StatusOK || recorder.Body.Len() == 0 || !strings.Contains(recorder.Header().Get("Content-Type"), "text/csv") {
+				return fmt.Errorf("sales report CSV status=%d content_type=%q bytes=%d", recorder.Code, recorder.Header().Get("Content-Type"), recorder.Body.Len())
+			}
+			return nil
+		}},
+		{"sales_report_pdf_export", func() error {
+			recorder := invokeFinancialBenchmarkReportExport(fixture, `{"report_type":"sales","format":"pdf","date_from":"2025-01-01","date_to":"2025-12-31"}`, reportHandler.ExportReport)
+			if recorder.Code != http.StatusOK || recorder.Body.Len() == 0 || !strings.Contains(recorder.Header().Get("Content-Type"), "application/pdf") {
+				return fmt.Errorf("sales report PDF status=%d content_type=%q bytes=%d", recorder.Code, recorder.Header().Get("Content-Type"), recorder.Body.Len())
+			}
+			return nil
+		}},
+		{"inventory_movement_history", func() error {
+			var movementCount int
+			err := db.QueryRow(`SELECT COUNT(*) FROM inventory_movements WHERE tenant_id=$1 AND restaurant_id=$2 AND product_id=$3 AND created_at < $4`, fixture.tenantID, fixture.restaurantID, fixture.productID, asOf).Scan(&movementCount)
+			if err == nil && movementCount != fixture.documentCount {
+				return fmt.Errorf("inventory movement rows=%d, want %d", movementCount, fixture.documentCount)
+			}
+			return err
+		}},
 	}
 	for _, operation := range operations {
 		measurements = append(measurements, measureFinancialOperation(t, db, operation.name, operation.call))
 	}
 
+	journalRepo := repository.NewJournalEntryRepository(db)
+	postingLedger := repository.NewGeneralLedgerRepository(db, journalRepo)
+	var backdatedSequence atomic.Int64
+	backdatedPosting := func() error {
+		referenceID := int(backdatedSequence.Add(1))
+		entry := &domain.JournalEntry{
+			TenantID: fixture.tenantID, RestaurantID: fixture.restaurantID,
+			EntryDate:   time.Date(2024, time.December, 31, 0, 0, 0, 0, time.UTC).AddDate(0, 0, -referenceID),
+			Description: "Synthetic backdated benchmark journal", ReferenceType: "financial_benchmark_backdated",
+			ReferenceID: &referenceID, EntryType: "manual", Status: domain.JournalStatusDraft,
+			Lines: []domain.JournalEntryLine{
+				{AccountID: fixture.cashAccountID, DebitAmount: 1, LineOrder: 1},
+				{AccountID: fixture.revenueAccountID, CreditAmount: 1, LineOrder: 2},
+			},
+		}
+		_, err := postingLedger.CreateAndPostAutoEntry(entry, fixture.postedBy)
+		return err
+	}
+	measurements = append(measurements, measureFinancialOperation(t, db, "backdated_journal_posting", backdatedPosting))
+	fixture.backdatedJournalCount = 35
+
+	var mixedSequence atomic.Int64
+	mixedReadWrite := func() error {
+		sequence := mixedSequence.Add(1)
+		if sequence%4 != 0 {
+			_, err := ledger.GetAccountBalance(fixture.tenantID, fixture.restaurantID, fixture.cashAccountID, nil)
+			return err
+		}
+		referenceID := int(sequence)
+		entry := &domain.JournalEntry{
+			TenantID: fixture.tenantID, RestaurantID: fixture.restaurantID,
+			EntryDate:   time.Date(2026, time.November, 17, 0, 0, 0, 0, time.UTC),
+			Description: "Synthetic concurrent benchmark posting", ReferenceType: "financial_benchmark_concurrent",
+			ReferenceID: &referenceID, EntryType: "manual", Status: domain.JournalStatusDraft,
+			Lines: []domain.JournalEntryLine{
+				{AccountID: fixture.cashAccountID, DebitAmount: 1, LineOrder: 1},
+				{AccountID: fixture.revenueAccountID, CreditAmount: 1, LineOrder: 2},
+			},
+		}
+		_, err := postingLedger.CreateAndPostAutoEntry(entry, fixture.postedBy)
+		return err
+	}
+	measurements = append(measurements, measureConcurrentFinancialOperation(t, db, "mixed_ledger_reads_and_postings", 4, 30, mixedReadWrite))
+
 	var databaseBytes int64
 	if err := db.QueryRow(`SELECT pg_database_size(current_database())`).Scan(&databaseBytes); err != nil {
 		t.Fatalf("read benchmark database size: %v", err)
 	}
-	var postgresVersion, sharedBuffers string
-	if err := db.QueryRow(`SELECT current_setting('server_version'), current_setting('shared_buffers')`).Scan(&postgresVersion, &sharedBuffers); err != nil {
+	var postgresVersion, sharedBuffers, workMem, effectiveCacheSize, maxConnections string
+	if err := db.QueryRow(`SELECT current_setting('server_version'), current_setting('shared_buffers'), current_setting('work_mem'), current_setting('effective_cache_size'), current_setting('max_connections')`).Scan(&postgresVersion, &sharedBuffers, &workMem, &effectiveCacheSize, &maxConnections); err != nil {
 		t.Fatalf("read PostgreSQL benchmark environment: %v", err)
 	}
+	cpuModel, runnerMemoryBytes := financialBenchmarkRunnerSpecs()
 	var memory runtime.MemStats
 	runtime.ReadMemStats(&memory)
 	result := financialBenchmarkReport{
 		Commit: os.Getenv("POS_FINANCIAL_BENCHMARK_COMMIT"), GoVersion: runtime.Version(),
 		Database: "disposable PostgreSQL; pg_stat_statements enabled", PostgreSQLVersion: postgresVersion,
-		SharedBuffers: sharedBuffers, RunnerCPUCount: runtime.NumCPU(), Concurrency: 1,
-		WarmupSamples: 5, MeasuredSamples: 30, Dataset: financialBenchmarkDataset{TenantCount: 1, JournalEntries: journalCount, JournalLines: journalCount * 3, GeneralLedgerRows: journalCount * 3, DatabaseBytes: databaseBytes, PostingDurationMS: float64(fixture.postingDuration.Microseconds()) / 1000, PostingThroughputPerSecond: float64(journalCount) / fixture.postingDuration.Seconds()},
+		SharedBuffers: sharedBuffers, WorkMem: workMem, EffectiveCacheSize: effectiveCacheSize, MaxConnections: maxConnections,
+		RunnerOS: runtime.GOOS, RunnerArch: runtime.GOARCH, RunnerCPUModel: cpuModel,
+		RunnerCPUCount: runtime.NumCPU(), RunnerMemoryBytes: runnerMemoryBytes, GoMaxProcs: runtime.GOMAXPROCS(0), Concurrency: 1,
+		WarmupSamples: 5, MeasuredSamples: 30, Dataset: financialBenchmarkDataset{
+			TenantCount: 2, TenantJournalCounts: []int{journalCount + fixture.backdatedJournalCount, secondaryTenant.journalCount},
+			JournalEntries:    journalCount + fixture.backdatedJournalCount + secondaryTenant.journalCount,
+			JournalLines:      journalCount*5 + fixture.backdatedJournalCount*2 + secondaryTenant.journalCount*3,
+			GeneralLedgerRows: journalCount*5 + fixture.backdatedJournalCount*2 + secondaryTenant.journalCount*3,
+			DatabaseBytes:     databaseBytes, PostingDurationMS: float64(fixture.postingDuration.Microseconds()) / 1000,
+			PostingThroughputPerSecond: float64(journalCount) / fixture.postingDuration.Seconds(),
+		},
 		ProcessMemoryAllocBytes: memory.TotalAlloc, ProcessHeapBytes: memory.HeapAlloc, ProcessSysBytes: memory.Sys, Measurements: measurements,
 		LedgerPageIndexComparison: financialBenchmarkIndexComparison{IndexName: financialLedgerPageIndex, IndexBytes: existingIndexBytes, BeforePlan: baselinePlan, AfterPlan: indexedPlan, Before: baselinePage, After: indexedPage},
 	}

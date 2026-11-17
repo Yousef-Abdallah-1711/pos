@@ -5,6 +5,7 @@ on:
     paths:
       - '.github/workflows/financial-benchmark.yml'
       - 'backend/cmd/api/financial_benchmark_integration_test.go'
+      - 'backend/cmd/api/financial_benchmark_support_integration_test.go'
       - 'backend/migrations/190_financial_ledger_account_page_index.sql'
   workflow_dispatch:
     inputs:
