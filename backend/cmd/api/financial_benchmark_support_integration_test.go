@@ -233,7 +233,7 @@ func seedFinancialBenchmarkDataset(t *testing.T, db *sql.DB, journalCount int) f
 	if err := db.QueryRow(`SELECT ROUND(SUM(total_debit)*100)::bigint, ROUND(SUM(total_credit)*100)::bigint FROM journal_entries WHERE tenant_id=$1 AND restaurant_id=$2 AND reference_type='financial_benchmark'`, base.tenantID, base.restaurantID).Scan(&debitCents, &creditCents); err != nil {
 		t.Fatalf("independently reconcile seeded journal totals: %v", err)
 	}
-	expectedTotalCents := int64(journalCount) * 11000
+	expectedTotalCents := int64(journalCount) * financialBenchmarkJournalTotalCents
 	debitDifferenceCents := debitCents - expectedTotalCents
 	creditDifferenceCents := creditCents - expectedTotalCents
 	t.Logf("benchmark seed reconciliation cents: expected=%d observed_debit=%d debit_difference=%d observed_credit=%d credit_difference=%d", expectedTotalCents, debitCents, debitDifferenceCents, creditCents, creditDifferenceCents)

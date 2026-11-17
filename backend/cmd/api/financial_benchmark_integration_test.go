@@ -25,6 +25,9 @@ import (
 
 const financialLedgerPageIndex = "idx_gl_scope_account_date_desc"
 
+// Each synthetic journal balances 110.00: 100.00 cash plus 10.00 COGS.
+const financialBenchmarkJournalTotalCents int64 = 11000
+
 // TestFinancialQueryBenchmarkIntegration is opt-in and must only run on the
 // disposable PostgreSQL benchmark stack. It seeds balanced journals and their
 // matching ledger rows, then measures the production ledger repository query
