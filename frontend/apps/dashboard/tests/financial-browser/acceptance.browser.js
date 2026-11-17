@@ -363,7 +363,7 @@ test.describe('authenticated financial browser acceptance', () => {
     await page.screenshot({ path: testInfo.outputPath('en-desktop-payroll.png'), fullPage: true })
   })
 
-  test('accountant EN desktop creates an AR invoice, receives a partial payment, and sees the open balance', async ({ page }, testInfo) => {
+  test('accountant EN desktop creates an AR invoice, receives a partial payment, and sees the open balance in aging', async ({ page }, testInfo) => {
     await setViewport(page, 1440, 900)
     await login(page, identities.accountant)
     await openFinancialPage(page, 'en', 'accounting/customer-invoices')
@@ -402,7 +402,13 @@ test.describe('authenticated financial browser acceptance', () => {
     const paymentPayload = await paymentResponse.json()
     expect(paymentPayload.data.id).toBeGreaterThan(0)
     await expect(invoiceRow).toContainText('60.00')
-    await page.screenshot({ path: testInfo.outputPath('en-desktop-ar-partial-payment-open-balance.png'), fullPage: true })
+
+    await page.goto('/en/dashboard/reports/financial/receivables-aging')
+    await expect(page.getByRole('heading', { name: 'Receivables Aging', exact: true })).toBeVisible()
+    const receivablesAgingRow = page.locator('tbody tr').filter({ hasText: fixture.customer_name })
+    await expect(receivablesAgingRow).toBeVisible()
+    await expect(receivablesAgingRow.getByRole('cell').last()).toContainText('60.00')
+    await page.screenshot({ path: testInfo.outputPath('en-desktop-ar-partial-payment-aging.png'), fullPage: true })
   })
 
   test('accountant EN desktop approves an AP invoice, pays partially, and sees remaining balance in payables aging', async ({ page }, testInfo) => {
