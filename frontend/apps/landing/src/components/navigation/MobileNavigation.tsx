@@ -2,12 +2,14 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
-import { ArrowUpRight, ChevronDown, Globe2, Moon, Sun, X } from 'lucide-react'
+import { ArrowUpRight, ChevronDown, Globe2, LogOut, Moon, Sun, X } from 'lucide-react'
 import type { RefObject } from 'react'
 import type { Locale } from '@/content/site'
 import { getSiteCopy } from '@/content/site'
 import { FEATURE_GROUPS, HEADER_LINKS, isNavigationRouteActive, localizedHref } from '@/content/navigation'
 import { TrialLink } from '@/components/marketing/TrialLink'
+import { getConfig } from '@/lib/config'
+import type { LandingSessionState } from '@/lib/auth-session'
 
 interface MobileNavigationProps {
   locale: Locale
@@ -18,9 +20,22 @@ interface MobileNavigationProps {
   theme: string
   onToggleTheme: () => void
   onSwitchLocale: () => void
+  session: LandingSessionState
+  isSigningOut: boolean
+  onRetrySession: () => void
+  onSignOut: () => Promise<boolean>
 }
 
-export function MobileNavigation({ locale, pathname, open, onClose, triggerRef, theme, onToggleTheme, onSwitchLocale }: MobileNavigationProps) {
+interface MobileAccountSectionProps {
+  locale: Locale
+  session: LandingSessionState
+  isSigningOut: boolean
+  onRetry: () => void
+  onSignOut: () => Promise<boolean>
+  onClose: () => void
+}
+
+export function MobileNavigation({ locale, pathname, open, onClose, triggerRef, theme, onToggleTheme, onSwitchLocale, session, isSigningOut, onRetrySession, onSignOut }: MobileNavigationProps) {
   const copy = getSiteCopy(locale)
   const panelRef = useRef<HTMLDivElement>(null)
   const [featuresOpen, setFeaturesOpen] = useState(false)
@@ -86,6 +101,7 @@ export function MobileNavigation({ locale, pathname, open, onClose, triggerRef, 
         <span>{copy.navigation.mobileNavigation}</span>
         <button className="sv-mobile-navigation__close" type="button" onClick={closeAndRestoreFocus} aria-label={copy.closeMenu}><X size={20} aria-hidden="true" /></button>
       </div>
+      <MobileAccountSection locale={locale} session={session} isSigningOut={isSigningOut} onRetry={onRetrySession} onSignOut={onSignOut} onClose={closeAndRestoreFocus} />
       <nav aria-label={copy.navigation.mobileNavigation}>
         <div className="sv-mobile-navigation__group">
           <button
@@ -112,7 +128,7 @@ export function MobileNavigation({ locale, pathname, open, onClose, triggerRef, 
           {copy.navigation[item.label]}<ArrowUpRight size={15} aria-hidden="true" />
         </Link>)}
         <Link className="sv-mobile-navigation__link" href={localizedHref(locale, 'privacy')} prefetch={false} onClick={closeAndRestoreFocus}>{copy.navigation.privacy}</Link>
-        <Link className="sv-mobile-navigation__link" href={localizedHref(locale, 'login')} prefetch={false} onClick={closeAndRestoreFocus}>{copy.navigation.login}</Link>
+        {session.status === 'guest' && <Link className="sv-mobile-navigation__link" href={localizedHref(locale, 'login')} prefetch={false} onClick={closeAndRestoreFocus}>{copy.navigation.login}</Link>}
       </nav>
       <div className="sv-mobile-navigation__controls">
         <button type="button" onClick={() => { onSwitchLocale(); closeAndRestoreFocus() }} aria-label={locale === 'en' ? copy.switchToArabic : copy.switchToEnglish}>
@@ -122,7 +138,35 @@ export function MobileNavigation({ locale, pathname, open, onClose, triggerRef, 
           {theme === 'dark' ? <Sun size={18} aria-hidden="true" /> : <Moon size={18} aria-hidden="true" />}<span>{theme === 'dark' ? copy.switchToLight : copy.switchToDark}</span>
         </button>
       </div>
-      <div onClick={closeAndRestoreFocus}><TrialLink locale={locale} source="mobile-navigation" /></div>
+      {session.status === 'guest' && <div onClick={closeAndRestoreFocus}><TrialLink locale={locale} source="mobile-navigation" /></div>}
     </div>
   </>
+}
+
+function MobileAccountSection({ locale, session, isSigningOut, onRetry, onSignOut, onClose }: MobileAccountSectionProps) {
+  const copy = getSiteCopy(locale)
+  if (session.status === 'guest') return null
+  if (session.status === 'checking') return <p className="sv-mobile-account-status" role="status" aria-live="polite" aria-busy="true">{copy.account.checking}</p>
+  if (session.status === 'temporarily-unavailable') return <div className="sv-mobile-account-status" role="status">
+    <p>{session.reason === 'sign-out' ? copy.account.signOutFailed : copy.account.unavailable}</p>
+    <button type="button" onClick={onRetry}>{copy.account.retry}</button>
+  </div>
+
+  const { profile } = session
+  const dashboardUrl = getConfig().dashboardUrl
+  const finishSignOut = async () => {
+    if (await onSignOut()) onClose()
+  }
+  return <section className="sv-mobile-account" aria-label={copy.account.actionsLabel}>
+    <div className="sv-mobile-account__identity">
+      <strong><bdi dir="auto">{profile.name}</bdi></strong>
+      <span><bdi dir="auto">{profile.email}</bdi></span>
+      {profile.restaurantName && <span className="sv-mobile-account__restaurant"><small>{copy.account.restaurantContext}: </small><bdi dir="auto">{profile.restaurantName}</bdi></span>}
+    </div>
+    <a className="sv-mobile-navigation__link" href={`${dashboardUrl}/${locale}/dashboard`} onClick={onClose}>{copy.account.dashboard}</a>
+    <a className="sv-mobile-navigation__link" href={`${dashboardUrl}/${locale}/dashboard/settings/account`} onClick={onClose}>{copy.account.settings}</a>
+    <button className="sv-mobile-account__signout" type="button" disabled={isSigningOut} onClick={() => { void finishSignOut() }}>
+      <LogOut size={16} aria-hidden="true" />{isSigningOut ? copy.account.signingOut : copy.account.signOut}
+    </button>
+  </section>
 }

@@ -24,6 +24,16 @@ describe('auth session helpers', () => {
     expect(hasUsableBearerToken(null)).toBe(false)
   })
 
+  it('distinguishes expiry, authorization denial, and temporary session failures', async () => {
+    const { classifySessionBootstrapStatus } = await import('@/lib/authSession')
+
+    expect(classifySessionBootstrapStatus(200)).toBe('ready')
+    expect(classifySessionBootstrapStatus(401)).toBe('expired')
+    expect(classifySessionBootstrapStatus(403)).toBe('forbidden')
+    expect(classifySessionBootstrapStatus(429)).toBe('unavailable')
+    expect(classifySessionBootstrapStatus(503)).toBe('unavailable')
+  })
+
   it('builds locale-aware login urls', async () => {
     vi.stubEnv('NEXT_PUBLIC_LANDING_URL', 'http://localhost:3001')
     const { getDashboardLoginUrl } = await import('@/lib/authSession')

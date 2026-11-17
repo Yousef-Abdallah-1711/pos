@@ -2,6 +2,7 @@ package http
 
 import (
 	"context"
+	"database/sql"
 	"encoding/json"
 	"errors"
 	"io"
@@ -193,7 +194,7 @@ func respondRegistrationError(w http.ResponseWriter, r *http.Request, err error)
 
 func writeAuthError(w http.ResponseWriter, r *http.Request, status int, code, message string, fields map[string]string) {
 	requestID := middleware.RequestIDFromContext(r.Context())
-	w.Header().Set("Cache-Control", "no-store")
+	w.Header().Set("Cache-Control", "private, no-store")
 	respondJSON(w, status, authErrorResponse{Error: message, Code: code, Message: message, Fields: fields, RequestID: requestID})
 }
 
@@ -322,16 +323,45 @@ func (h *AuthHandler) setSessionCookie(w http.ResponseWriter, r *http.Request, s
 }
 
 func (h *AuthHandler) Session(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Cache-Control", "private, no-store")
+	w.Header().Set("Pragma", "no-cache")
 	claims := middleware.GetUserClaims(r)
 	if claims == nil {
-		respondError(w, http.StatusUnauthorized, "Unauthorized")
+		writeAuthError(w, r, http.StatusUnauthorized, "UNAUTHORIZED", "Unauthorized", nil)
 		return
 	}
+	profile, err := h.useCase.GetAuthSessionProfile(r.Context(), claims.UserID, claims.TenantID, claims.RestaurantID, claims.Role)
+	if errors.Is(err, sql.ErrNoRows) {
+		sessionCookieName := service.AuthSessionCookieName
+		if cookie, cookieErr := r.Cookie(service.ImpersonationSessionCookieName); cookieErr == nil && cookie.Value != "" {
+			sessionCookieName = service.ImpersonationSessionCookieName
+		}
+		if cookie, cookieErr := r.Cookie(sessionCookieName); cookieErr == nil && cookie.Value != "" && h.sessions != nil {
+			if revokeErr := h.sessions.Revoke(r.Context(), cookie.Value); revokeErr != nil && !errors.Is(revokeErr, service.ErrSessionNotFound) {
+				log.Printf("invalid session revocation failed request_id=%s error=%v", middleware.RequestIDFromContext(r.Context()), revokeErr)
+			}
+			http.SetCookie(w, &http.Cookie{Name: sessionCookieName, Value: "", Path: "/", HttpOnly: true, Secure: r.TLS != nil || config.IsProductionMode(), SameSite: http.SameSiteLaxMode, MaxAge: -1, Expires: time.Unix(1, 0)})
+		}
+		writeAuthError(w, r, http.StatusUnauthorized, "SESSION_INVALID", "Your session is no longer active.", nil)
+		return
+	}
+	if err != nil {
+		log.Printf("session profile unavailable request_id=%s error=%v", middleware.RequestIDFromContext(r.Context()), err)
+		writeAuthError(w, r, http.StatusServiceUnavailable, "SERVICE_UNAVAILABLE", "Sign-in status is temporarily unavailable. Please try again.", nil)
+		return
+	}
+	if profile.DisplayName == "" {
+		profile.DisplayName = profile.Email
+	}
+	restaurantID := 0
+	if profile.RestaurantID != nil {
+		restaurantID = *profile.RestaurantID
+	}
 	respondJSON(w, http.StatusOK, map[string]interface{}{
-		"id": claims.UserID, "user_id": claims.UserID, "email": claims.Email,
-		"name": claims.Email, "tenant_id": claims.TenantID,
-		"restaurant_id": claims.RestaurantID, "role": claims.Role,
-		"is_super_admin": false,
+		"id": profile.UserID, "user_id": profile.UserID, "email": profile.Email,
+		"name": profile.DisplayName, "tenant_id": profile.TenantID,
+		"restaurant_id": restaurantID, "restaurant_name": profile.RestaurantName,
+		"role": claims.Role, "is_super_admin": false,
 	})
 }
 

@@ -13,6 +13,15 @@ export const hasUsableBearerToken = (token: string | null | undefined) => {
   return !!token && token !== COOKIE_SESSION_MARKER
 }
 
+export type SessionBootstrapDisposition = 'ready' | 'expired' | 'forbidden' | 'unavailable'
+
+export const classifySessionBootstrapStatus = (status: number): SessionBootstrapDisposition => {
+  if (status === 200) return 'ready'
+  if (status === 401) return 'expired'
+  if (status === 403) return 'forbidden'
+  return 'unavailable'
+}
+
 export const getDashboardLoginUrl = (pathname?: string) => {
   const currentPath = pathname
     ?? (typeof window !== 'undefined' ? window.location.pathname : `/${defaultLocale}/dashboard`)

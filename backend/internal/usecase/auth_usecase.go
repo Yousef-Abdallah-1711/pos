@@ -300,6 +300,15 @@ func (u *AuthUseCase) RefreshToken(claims *jwt.Claims) (string, error) {
 	return u.tokenService.GenerateToken(claims.UserID, claims.TenantID, &claims.RestaurantID, claims.Email, claims.Role)
 }
 
+// GetAuthSessionProfile loads the minimal active profile from the tenant-bound
+// user row used to authorize the current browser session.
+func (u *AuthUseCase) GetAuthSessionProfile(ctx context.Context, userID, tenantID, restaurantID int, role string) (*domain.AuthSessionProfile, error) {
+	if u == nil || u.repo == nil || userID <= 0 || tenantID <= 0 || restaurantID < 0 || role == "" {
+		return nil, domain.ErrAuthDependencyUnavailable
+	}
+	return u.repo.GetAuthSessionProfile(ctx, userID, tenantID, restaurantID, role)
+}
+
 // ValidateCredential verifies a stored access credential before logout audit
 // attribution. It does not authenticate requests by itself.
 func (u *AuthUseCase) ValidateCredential(credential string) (*jwt.Claims, error) {
