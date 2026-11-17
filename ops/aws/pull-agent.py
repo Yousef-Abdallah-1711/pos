@@ -21,6 +21,9 @@ REPO = 'Yousef-Abdallah-1711/pos'
 SERVICES = ['backend','landing','dashboard','restaurant-website','super-admin']
 STATE = Path('/opt/servio/ops/aws/evidence/deployed-release.json')
 MAX_ATTEMPTS = 3
+MIN_DISK_FREE_BYTES = 25 * 1024**3
+MIN_MEM_AVAILABLE_BYTES = 8 * 1024**3
+DEPLOYMENT_DISK_RESERVE_BYTES = 4 * 1024**3
 
 class PendingRelease(Exception):
     pass
@@ -107,6 +110,25 @@ def fetch_artifacts(release, manifest, directory):
         raise RuntimeError('Invalid source artifact metadata')
     download(release,'source.tar.gz',directory/'source.tar.gz',(source['size'],manifest['source_sha256']))
 
+def ensure_deployment_capacity(manifest, base=BASE, meminfo=Path('/proc/meminfo')):
+    archives=manifest.get('archives',{})
+    if set(archives)!=set(SERVICES):raise RuntimeError('Incomplete release archive metadata')
+    sizes=[]
+    for name in SERVICES:
+        size=archives[name].get('size')
+        if not isinstance(size,int) or not 0<size<=2*1024**3:raise RuntimeError('Invalid release archive size: '+name)
+        sizes.append(size)
+    required_disk=max(MIN_DISK_FREE_BYTES,sum(sizes)+DEPLOYMENT_DISK_RESERVE_BYTES)
+    free_disk=shutil.disk_usage(base).free
+    if free_disk<required_disk:
+        raise PendingRelease(f'Insufficient disk reserve: {free_disk} bytes free; {required_disk} required')
+    memory_text=meminfo.read_text()
+    match=re.search(r'^MemAvailable:\s+(\d+)\s+kB$',memory_text,re.MULTILINE)
+    if not match:raise RuntimeError('MemAvailable is unavailable')
+    available_memory=int(match.group(1))*1024
+    if available_memory<MIN_MEM_AVAILABLE_BYTES:
+        raise PendingRelease(f'Insufficient memory reserve: {available_memory} bytes available; {MIN_MEM_AVAILABLE_BYTES} required')
+
 def deployer():
     spec=importlib.util.spec_from_file_location('servio_installed_deployer','/usr/local/lib/servio/deploy_release.py')
     module=importlib.util.module_from_spec(spec)
@@ -138,10 +160,9 @@ def poll(check_only=False):
                 actual=subprocess.check_output(['docker','inspect','--format','{{.Image}}','servio-staging-'+name+'-1'],text=True).strip()
                 if actual!=deployed.get('runtime_image_ids',{}).get(name):raise RuntimeError('Runtime image drift: '+name)
             print('PASS already deployed and immutable identities match '+sha); return
+    ensure_deployment_capacity(manifest)
     attempts[sha]={'count':attempts.get(sha,{}).get('count',0)+1,'started_utc':time.strftime('%Y-%m-%dT%H:%M:%SZ',time.gmtime())}
     atomic_json(attempts_path,attempts)
-    required=sum(asset['size'] for asset in manifest['archives'].values())+4*1024**3
-    if shutil.disk_usage(BASE).free<required: raise RuntimeError('Insufficient disk headroom for verified download and deployment')
     fetch_artifacts(release,manifest,directory)
     module=deployer()
     module.deploy(manifest,sha,directory)

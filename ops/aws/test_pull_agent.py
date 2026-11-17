@@ -7,6 +7,7 @@ from pathlib import Path
 import subprocess
 import tempfile
 import unittest
+from types import SimpleNamespace
 from unittest.mock import patch
 
 spec=importlib.util.spec_from_file_location('servio_agent',Path(__file__).with_name('pull-agent.py'))
@@ -91,5 +92,33 @@ class PullAgentTrustTests(unittest.TestCase):
         with patch.object(agent,'github',side_effect=[[stale,self.release],{'object':{'sha':SHA}}]),patch.object(agent,'verify_release',return_value=(self.manifest,self.root)) as verify:
             agent.poll(check_only=True)
             verify.assert_called_once_with(self.release)
+
+    def test_deployment_capacity_requires_disk_and_available_memory_reserves(self):
+        manifest={'archives':{name:{'size':1024} for name in agent.SERVICES}}
+        meminfo=self.root/'meminfo'
+        meminfo.write_text('MemTotal: 16777216 kB\nMemAvailable: 9000000 kB\n')
+        with patch.object(agent.shutil,'disk_usage',return_value=SimpleNamespace(free=26*1024**3)):
+            agent.ensure_deployment_capacity(manifest,self.root,meminfo)
+
+        with patch.object(agent.shutil,'disk_usage',return_value=SimpleNamespace(free=24*1024**3)):
+            with self.assertRaisesRegex(agent.PendingRelease,'Insufficient disk reserve'):
+                agent.ensure_deployment_capacity(manifest,self.root,meminfo)
+
+        meminfo.write_text('MemTotal: 16777216 kB\nMemAvailable: 7000000 kB\n')
+        with patch.object(agent.shutil,'disk_usage',return_value=SimpleNamespace(free=26*1024**3)):
+            with self.assertRaisesRegex(agent.PendingRelease,'Insufficient memory reserve'):
+                agent.ensure_deployment_capacity(manifest,self.root,meminfo)
+
+    def test_capacity_block_does_not_consume_a_release_retry(self):
+        manifest={
+            'sha':SHA,
+            'archives':{name:{'size':1024} for name in agent.SERVICES},
+        }
+        agent.BASE.mkdir()
+        with patch.object(agent,'github',side_effect=[[self.release],{'object':{'sha':SHA}}]),patch.object(
+            agent,'verify_release',return_value=(manifest,self.root)
+        ),patch.object(agent.shutil,'disk_usage',return_value=SimpleNamespace(free=24*1024**3)):
+            with self.assertRaises(agent.PendingRelease):agent.poll()
+        self.assertFalse((agent.BASE/'attempts.json').exists())
 
 if __name__=='__main__':unittest.main()

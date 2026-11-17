@@ -46,9 +46,14 @@ Only proxy ports 80/443 are public. PostgreSQL/Redis have no published ports; st
 
 ## Outbound release installation
 
-CI builds applications in GitHub Actions, not on the 2 GiB instance. PR/main gates cover
-lint/types/unit/integration/race/security/build/Chromium. Only a successful main push
-publishes a signed release; production has no automatic release path.
+CI builds applications in GitHub Actions, not on the staging instance. PR/main gates cover
+lint/types/unit/integration/race/security/build/Chromium. A successful exact-main run stages
+the browser-tested images without credentials; a separate least-privilege job publishes
+their content digests only after the main aggregate and pinned guardrail workflows pass.
+Signing is an explicit owner action through `Publish verified SERVIO staging release`: it
+requires the exact current main SHA, the successful CI run ID, the typed confirmation
+`PUBLISH-STAGING`, the `staging` environment, and the protected signing key. This publishes
+a signed release but does not deploy it. Production has no release or deployment path.
 
 Root prerequisites:
 
@@ -56,12 +61,18 @@ Root prerequisites:
 - `/etc/servio/approved-workflow-id`: pinned workflow ID `415727583`, root-owned 0644.
 - `/etc/servio/approved-migrations.json`: reviewed filename→SHA256 mapping for unapplied
   migrations. Do not approve unknown/destructive SQL simply to unblock automation.
-- Existing `ops/aws/.env` 0600, named volumes, DNS, certificates and private acceptance
+- Existing `ops/aws/.env` mode 0600, named volumes, DNS, certificates and private acceptance
   fixtures. Independent `JWT_SECRET` and `SUPER_ADMIN_JWT_SECRET` are required.
 - Root-owned pinned Playwright 1.64.1 runtime and Node 24 at
   `/usr/local/lib/servio/browser`; native Chromium dependencies installed. No credentials
   are embedded. The CLI package and Chromium were installed from official distribution
   over HTTPS. The normal wrapper falls back to the pinned browser container on another host.
+
+The separate production stack's `scripts/production/preflight.sh` expects
+`/etc/rakmyat-pos/production.env`. That path is not the staging pull-agent configuration.
+Staging uses `ops/aws/.env`, which must remain 0600, plus the root-owned staging verifier
+files listed above. Never copy staging secrets into the production path to silence a
+production preflight failure.
 
 Install reviewed agent code without activation:
 
@@ -99,9 +110,26 @@ sudo /usr/local/sbin/servio-stage-candidate CI_RUN_ID PRIVATE_ARTIFACT_ZIP
 
 A candidate is staging-only, labeled `candidate`, and can never activate recurring main
 deployment. Ordinary source branch push access does not authorize bypassing CI or reviews.
-PR #32 requires all final checks and the one approval required by CODING_STANDARDS.md.
-After accepted merge, wait for its signed exact-main release, then run the root agent once
-and verify the actual deployed SHA. Do not claim a feature SHA is main.
+After merge, wait for exact-main CI and its `release-bundle` artifact. An authorized
+repository owner must dispatch the staging publisher from `main` with that SHA, that CI
+run ID, and the exact confirmation phrase. The publisher rechecks current main and every
+required workflow before signing. Do not dispatch while capacity, backup, migration,
+isolation, or acceptance gates are open. Once those deployment gates are satisfied, install
+reviewed agent code if needed, run the root agent once, and verify the actual deployed SHA.
+Do not claim a feature SHA is main.
+
+The owner dispatches only after recording the successful exact-main run ID:
+
+```sh
+gh workflow run production-release.yml --ref main \
+  -f sha=EXACT_MAIN_SHA \
+  -f ci_run_id=SUCCESSFUL_MAIN_CI_RUN_ID \
+  -f confirmation=PUBLISH-STAGING
+```
+
+The publisher must remain manual and owner-only. Do not add a `push` or `workflow_run`
+release trigger. The staging environment is restricted to `main`; its signing key is an
+environment secret. The release workflow does not enable the recurring deployment timer.
 
 ```sh
 sudo /usr/local/sbin/servio-pull-agent
@@ -109,7 +137,10 @@ ops/aws/health
 curl -fsS https://api.pos.rakmyat.online/_ops/release
 ```
 
-The agent backs up PostgreSQL, allows only reviewed unapplied migrations, applies them
+Before downloading or applying a release, the agent requires at least 25 GiB free disk,
+8 GiB `MemAvailable`, and enough additional space for the release archives plus a 4 GiB
+deployment reserve. Capacity failures report `NOT READY` without consuming a release
+retry attempt. The agent backs up PostgreSQL, allows only reviewed unapplied migrations, applies them
 atomically per migration, and promotes backend/frontends/proxy incrementally. All five
 trusted HTTPS routes, database readiness, API/session/tenant/RBAC/POS/WSS/inventory and
 33 base browser, 13 cash/contrast checks, 14 upload/browser checks, 13 journal assertions,
@@ -232,13 +263,22 @@ Never share the output in CI/reports/commits. Rotate before production. Syntheti
 admin and synthetic tenant fixtures are separate and remain 0600. Email/payment provider
 credentials were not invented; no real charges or customer notifications are authorized.
 
-## Resource and production limits
+## Resource and staging limits
 
-2 vCPU, approximately 1.9 GiB RAM, 2 GiB swap and 29 GiB root. Do not build frontends
-concurrently here or delete builder cache/volumes to force a release. Before download,
-ensure compressed archives plus 4 GiB free headroom; before loading require 4 GiB. Native
-Chromium avoids pulling the multi-browser container on this host. Keep previous images.
-Monitor free disk/swap, CPU, OOM and health after each change.
+The verified host is currently a `t3.small` with 2 vCPU, approximately 1.9 GiB RAM, 2 GiB
+swap, a 50 GiB EBS root device and ext4 root filesystem. A fresh observation showed only
+about 8.9 GiB free disk and 605 MiB `MemAvailable`; the staging deployment gate requires
+25 GiB free and 8 GiB available memory. The host is therefore NO-GO for deployment. Do not
+build frontends here or delete builder cache/volumes to force a release. Native Chromium
+avoids pulling the multi-browser container. Keep previous images and monitor disk, memory,
+swap, CPU, OOM and service health after any approved capacity change.
+
+The smallest T3 size with enough total memory to potentially satisfy the 8 GiB available
+memory floor is `t3.xlarge` (4 vCPU, 16 GiB RAM); `t3.large` has only 8 GiB total and cannot
+meet an 8 GiB available-memory requirement after the OS and services start. AWS console
+and IMDS verification are required before applying any resize. Changing instance type
+requires a controlled stop/start and can change the public IPv4; verify DNS/recovery access
+and obtain owner approval for downtime before doing so.
 
 The instance's public IPv4 is auto-assigned and can change after stop/start. Obtain approval
 for a stable endpoint before permanent production. No EIP, resize or paid AWS resources
@@ -259,26 +299,33 @@ checksums and verifying retained loaded images/source; keep their failure eviden
 
 ## Main branch protection
 
-Main requires one approving review, current main ancestry, resolved review conversations
-and three GitHub Actions checks: `required`, `runtime-localhost-guardrail` and
-`url-domain-config-smoke`. Admins are subject to these rules; force push and deletion are
-disabled. Do not remove protection to merge a release. A changed commit dismisses stale
-approvals and must rerun CI. Production approval remains separate from Git review.
+As verified on 2026-11-17, main requires current ancestry, resolved review conversations,
+and GitHub Actions checks `backend`, `runtime-localhost-guardrail`, and
+`url-domain-config-smoke`; force push is disabled and no approving review is currently
+required. The signed publisher adds the full `required` aggregate plus exact successful
+main-push identity checks for both pinned guardrail workflows. Do not remove protection to
+merge a release. A changed commit must rerun CI. Staging publication and deployment are
+separate owner-authorized actions.
 
-## Prepared disk expansion — owner approval required
+## Completed disk expansion and pending capacity change approval
 
-Root EBS volume `vol-0ec6bfabc3638a90c` is 30 GiB; root partition is
-`/dev/nvme0n1p1`, ext4. Approximately 4 GiB free is insufficient for the next compressed
-release plus the 4 GiB deployment reserve. The proposed change is **30 → 50 GiB**, keeping
-instance type, volume type, IOPS, throughput and networking unchanged. This adds AWS
-storage cost and has NOT been executed. No destructive pruning is an alternative here.
+Root EBS volume `vol-0ec6bfabc3638a90c` has been expanded from 30 to 50 GiB per the owner's
+AWS Console report; the guest independently sees a 50 GiB `/dev/nvme0n1` and a grown ext4
+root partition. The console report stated gp3, 3,000 IOPS and 125 MiB/s were preserved.
+This host has no AWS CLI/role, so it cannot independently confirm the current control-plane
+optimization state.
 
-After explicit owner approval, an authorized AWS operator can modify this exact volume
-in eu-north-1, preserving its other settings. This host has no AWS role to perform the
-cloud-side change. After the device actually reports the new size and AWS modification
-is ready, verify the mounted device and use the existing growpart/resize2fs tools to
-extend partition 1 and its ext4 filesystem, then recheck free space, all services and data.
-Never run these against an unverified device. Preserve pre-change backups and evidence.
+To meet the current 25 GiB free-disk gate and retain rollback images, the proposed target
+is **80 GiB gp3**, preserving IOPS and throughput. The proposed compute target is
+**`t3.xlarge`**, preserving the current instance, ENI, security groups, EBS volume and data.
+An authorized AWS operator must first take and verify an EBS snapshot, confirm instance
+and volume identities/settings, then apply the 50→80 GiB resize and t3.small→t3.xlarge
+type change during an owner-approved staging maintenance window. The stop/start may change
+the public IPv4; confirm DNS and recovery access or obtain approval for a stable endpoint
+before the operation. Recheck the guest block device before extending the filesystem,
+then verify free disk, `MemAvailable`, containers, data and health. Do not make these
+billable changes until approved. Never prune protected images, volumes, backups, uploads,
+secrets or certificates instead of sizing the host.
 
 AWS documents [volume modification](https://docs.aws.amazon.com/ebs/latest/userguide/requesting-ebs-volume-modifications.html)
 and [Linux filesystem extension](https://docs.aws.amazon.com/ebs/latest/userguide/recognize-expanded-volume-linux.html).
@@ -291,9 +338,11 @@ Before reading the signing key or publishing assets, `sign-publish-release.py` i
 contexts. It pins each workflow ID/path, Actions application, successful check conclusion,
 main push event, exact SHA and the current aggregate CI run. The two auxiliary workflows
 must be completed successfully, not merely have one green job. Main advancing, a failed
-check or spoofed identity stops signing/publication. The publisher token adds only read
-access to checks; existing contents-write/actions-read permissions remain scoped to that
-protected main publication job. The systemd agent still uses anonymous read-only fetches.
+check or spoofed identity stops signing/publication. The main image publisher receives
+`packages:write` only in its isolated post-aggregate job. The manual signing workflow gets
+`actions:read`, `checks:read`, `contents:write`, and the staging environment's signing key;
+the owner-only dispatch and typed confirmation are explicit publication authorization.
+The systemd agent still uses anonymous read-only fetches.
 
 ## Hardened acceptance identity transition
 
