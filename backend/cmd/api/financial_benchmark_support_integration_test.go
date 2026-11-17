@@ -337,31 +337,38 @@ func seedFinancialBenchmarkDocuments(t *testing.T, db *sql.DB, fixture financial
 func seedFinancialBenchmarkSalesOrders(t *testing.T, db *sql.DB, fixture financialBenchmarkFixture) {
 	t.Helper()
 	_, err := db.Exec(`
-		WITH seeded_orders AS (
-			INSERT INTO orders (
-				tenant_id, restaurant_id, order_number, customer_name, customer_phone,
-				subtotal, tax_amount, discount_amount, delivery_fee, total_amount,
-				payment_method, payment_status, status, order_source, created_at, updated_at
-			)
-			SELECT $1, $2, 'FINBM-SALES-' || lpad(sequence::text, 8, '0'),
-			       'Synthetic benchmark customer', '5550000000', 20, 0, 0, 0, 20,
-			       'cash', 'paid', 'delivered', 'website',
-			       TIMESTAMP '2025-01-01' + (sequence % 365) * INTERVAL '1 day' + (sequence % 24) * INTERVAL '1 hour',
-			       TIMESTAMP '2025-01-01' + (sequence % 365) * INTERVAL '1 day' + (sequence % 24) * INTERVAL '1 hour'
-			FROM generate_series(1, $4) AS sequence
-			RETURNING id, tenant_id, restaurant_id, created_at
+		INSERT INTO orders (
+			tenant_id, restaurant_id, order_number, customer_name, customer_phone,
+			subtotal, tax_amount, discount_amount, delivery_fee, total_amount,
+			payment_method, payment_status, status, order_source, created_at, updated_at
 		)
+		SELECT $1, $2, 'FINBM-SALES-' || lpad(sequence::text, 8, '0'),
+		       'Synthetic benchmark customer', '5550000000', 20, 0, 0, 0, 20,
+		       'cash', 'paid', 'pending', 'website',
+		       TIMESTAMP '2025-01-01' + (sequence % 365) * INTERVAL '1 day' + (sequence % 24) * INTERVAL '1 hour',
+		       TIMESTAMP '2025-01-01' + (sequence % 365) * INTERVAL '1 day' + (sequence % 24) * INTERVAL '1 hour'
+		FROM generate_series(1, $3) AS sequence`, fixture.tenantID, fixture.restaurantID, fixture.salesOrderCount)
+	if err != nil {
+		t.Fatalf("seed benchmark sales orders: %v", err)
+	}
+	if _, err := db.Exec(`
 		INSERT INTO order_items (
 			order_id, product_id, tenant_id, restaurant_id, product_name,
 			quantity, unit_price, discount_amount, total_price, created_at, updated_at
 		)
-		SELECT seeded.id, $3, seeded.tenant_id, seeded.restaurant_id,
-		       'Financial benchmark product', 1, 10, 0, 10, seeded.created_at, seeded.created_at
-		FROM seeded_orders seeded
+		SELECT orders.id, $3, orders.tenant_id, orders.restaurant_id,
+		       'Financial benchmark product', 1, 10, 0, 10, orders.created_at, orders.created_at
+		FROM orders
 		CROSS JOIN generate_series(1, 2) AS item_number
-	`, fixture.tenantID, fixture.restaurantID, fixture.productID, fixture.salesOrderCount)
-	if err != nil {
-		t.Fatalf("seed populated benchmark sales exports: %v", err)
+		WHERE orders.tenant_id=$1 AND orders.restaurant_id=$2
+		  AND orders.order_number LIKE 'FINBM-SALES-%'`, fixture.tenantID, fixture.restaurantID, fixture.productID); err != nil {
+		t.Fatalf("seed benchmark sales items: %v", err)
+	}
+	// Migration 181 permits item inserts only while an order is pre-fulfillment.
+	if _, err := db.Exec(`
+		UPDATE orders SET status='delivered', updated_at=created_at
+		WHERE tenant_id=$1 AND restaurant_id=$2 AND order_number LIKE 'FINBM-SALES-%'`, fixture.tenantID, fixture.restaurantID); err != nil {
+		t.Fatalf("fulfill benchmark sales orders: %v", err)
 	}
 }
 
