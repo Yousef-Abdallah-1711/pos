@@ -160,6 +160,8 @@ jobs:
       - name: Install Chromium and its host dependencies
         working-directory: frontend/apps/dashboard
         run: pnpm exec playwright install --with-deps chromium
+      - name: Install the isolated marketing accessibility audit dependencies
+        run: npm install --prefix "$RUNNER_TEMP/servio-marketing" --ignore-scripts --no-audit --no-fund playwright@1.64.1 axe-core@4.11.0
       - name: Start the isolated API, PostgreSQL, and Redis
         run: docker compose -p "$AUTH_TEST_PROJECT" -f docker-compose.phase2a-e2e.yml up -d --build api
       - name: Wait for the isolated API health check
@@ -244,6 +246,19 @@ jobs:
             tests/phase2a-e2e/auth-lifecycle.spec.ts \
             --output "$RUNNER_TEMP/playwright-results" \
             --trace off
+          for theme in dark light; do
+            echo "Running isolated Landing accessibility acceptance for theme=$theme"
+            NODE_PATH="$RUNNER_TEMP/servio-marketing/node_modules" \
+              SERVIO_MARKETING_URL=https://localhost:13111 \
+              SERVIO_MARKETING_EVIDENCE="$WS05_AUTH_EVIDENCE_DIR/marketing-$theme" \
+              SERVIO_SOURCE_SHA="$GITHUB_SHA" \
+              SERVIO_THEME="$theme" \
+              SERVIO_COLOR_SCHEME="$theme" \
+              SERVIO_ACCEPTANCE_ENV=ci \
+              SERVIO_DISPOSABLE_BROWSER=1 \
+              SERVIO_MARKETING_BROWSER=chromium \
+              node frontend/apps/landing/scripts/marketing-acceptance.mjs
+          done
       - name: Checkout the reviewed PR #85 protected-session harness
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
@@ -338,6 +353,18 @@ jobs:
           python3 "$GITHUB_WORKSPACE/servio-pr85/backend/scripts/summarize_k6.py" \
             "$RUNNER_TEMP/auth-evidence/k6-summary-raw.json" \
             --output "$RUNNER_TEMP/auth-evidence/k6-measured-summary.json"
+          python3 - "$RUNNER_TEMP/auth-evidence/k6-summary-raw.json" <<'PY'
+          import json
+          import sys
+          with open(sys.argv[1], encoding='utf-8') as source:
+              metrics = json.load(source)['metrics']
+          checks = metrics.get('checks', {}).get('values', {})
+          failed_requests = metrics.get('http_req_failed', {}).get('values', {})
+          dropped = metrics.get('dropped_iterations', {}).get('values', {}).get('count', 0)
+          if checks.get('rate') != 1 or failed_requests.get('rate', 1) != 0 or dropped != 0:
+              raise SystemExit('Smoke load did not produce all-valid sessions with zero failed requests and dropped iterations.')
+          print('Smoke load assertions passed: all protected sessions valid, zero failed requests, zero dropped iterations.')
+          PY
           docker exec "$redis_container" redis-cli --raw INFO memory | awk -F: '/^(used_memory:|used_memory_peak:|used_memory_rss:|maxmemory:)/ { print $1 "=" $2 }' >"$RUNNER_TEMP/auth-evidence/redis-memory.txt"
           docker exec "$redis_container" redis-cli --raw INFO stats | awk -F: '/^(total_commands_processed:|instantaneous_ops_per_sec:|keyspace_hits:|keyspace_misses:|evicted_keys:)/ { print $1 "=" $2 }' >"$RUNNER_TEMP/auth-evidence/redis-stats.txt"
           docker exec "$postgres_container" psql -U postgres -d pos_phase2a_e2e -Atc \

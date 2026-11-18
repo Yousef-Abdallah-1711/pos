@@ -172,6 +172,11 @@ test('guest can open Landing and follow the canonical Login link', async ({ page
   expect(html).not.toContain(ownerEmail)
   expect(html).not.toContain(ownerName)
   await guestSessionCheck
+  await page.waitForTimeout(1_700)
+  const initialSessionRequests = authTimelines.get(page)?.events.filter((event) => {
+    return event.kind === 'request' && event.method === 'GET' && event.path === '/api/v1/auth/session'
+  }).length
+  expect(initialSessionRequests).toBe(1)
   const loginLink = page.getByRole('link', { name: /log in|login/i }).first()
   await expect(loginLink).toBeVisible()
   await captureScreenshot(page, 'landing-guest')
@@ -344,6 +349,7 @@ test('logout clears access and denies the next protected dashboard visit', async
   await expectSignedInDashboard(page)
   await dashboardTab.close()
 
+  await landingPage.bringToFront()
   await landingPage.keyboard.press('Escape')
   await expect(accountPanel).toBeHidden()
   await expect(landingAccountButton).toBeFocused()
@@ -502,7 +508,8 @@ test('Redis outage returns a private 503 without logging out, then recovers on r
     expect(outageResponse.status()).toBe(503)
     expect(outageResponse.headers()['cache-control']).toContain('private')
     expect(outageResponse.headers()['set-cookie']).toBeUndefined()
-    await expect(page.getByRole('alert')).toBeVisible()
+    const recoveryAlert = page.locator('main[role="alert"]')
+    await expect(recoveryAlert).toBeVisible()
     await expectPathname(page, '/en/dashboard')
     await expect.poll(() => page.evaluate(() => {
       const rawAuthState = localStorage.getItem('auth-storage')
@@ -520,7 +527,7 @@ test('Redis outage returns a private 503 without logging out, then recovers on r
     const recoveryResponsePromise = page.waitForResponse((response) => {
       return new URL(response.url()).pathname === '/api/v1/auth/session' && response.status() === 200
     }, { timeout: 30_000 })
-    await page.getByRole('alert').getByRole('button', { name: /try again/i }).click()
+    await recoveryAlert.getByRole('button', { name: /try again/i }).click()
     await recoveryResponsePromise
     await expectSignedInDashboard(page)
     await captureScreenshot(page, 'dashboard-session-recovered')

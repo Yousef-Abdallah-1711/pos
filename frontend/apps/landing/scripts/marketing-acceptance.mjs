@@ -12,7 +12,12 @@ const expectedTheme = process.env.SERVIO_THEME || 'dark'
 if (!['light', 'dark'].includes(expectedTheme)) throw new Error('Unsupported marketing theme')
 const base = process.env.SERVIO_MARKETING_URL
 if (!base) throw new Error('Set SERVIO_MARKETING_URL to the intended preview or deployment URL')
-if (process.env.SERVIO_ACCEPTANCE_ENV === 'ci' && new URL(base).origin !== 'https://pos.servio.test') throw new Error('CI marketing acceptance accepts only the disposable landing host')
+const ciPageOrigins = new Set(['https://pos.servio.test', 'https://localhost:13111'])
+const ciAllowedOrigins = new Set([
+ ...ciPageOrigins, 'https://api.servio.test', 'https://pos.app.servio.test',
+ 'https://restaurant-1.pos.servio.test', 'https://localhost:18443',
+])
+if (process.env.SERVIO_ACCEPTANCE_ENV === 'ci' && !ciPageOrigins.has(new URL(base).origin)) throw new Error('CI marketing acceptance accepts only a disposable local or SERVIO test landing host')
 const output = process.env.SERVIO_MARKETING_EVIDENCE || (process.env.SERVIO_BROWSER_EVIDENCE ? path.join(process.env.SERVIO_BROWSER_EVIDENCE, 'marketing') : '/tmp/servio-marketing-acceptance')
 const viewports = [
  { width: 320, height: 568 }, { width: 360, height: 800 }, { width: 375, height: 812 },
@@ -388,18 +393,17 @@ async function interactions(browser, page, locale) {
 }
 async function createPage(browser, viewport) {
  const page = await browser.newPage({ colorScheme, ignoreHTTPSErrors: process.env.SERVIO_DISPOSABLE_BROWSER === '1', viewport, reducedMotion: 'reduce' })
- if (process.env.SERVIO_ACCEPTANCE_ENV === 'ci') await page.route('**/*', route => {
+ await page.route('**/*', route => {
   const url = new URL(route.request().url())
-  if (url.protocol === 'https:' && ['pos.servio.test', 'api.servio.test', 'pos.app.servio.test', 'restaurant-1.pos.servio.test'].includes(url.hostname)) return route.continue()
   if (['data:', 'blob:'].includes(url.protocol)) return route.continue()
+  if (process.env.SERVIO_ACCEPTANCE_ENV !== 'ci') return route.continue()
+  if (ciAllowedOrigins.has(url.origin)) return route.continue()
   return route.abort('blockedbyclient')
  })
  if (process.env.SERVIO_THEME) await page.addInitScript(({ theme, origin }) => {
   if (location.origin === origin && !localStorage.getItem('servio-marketing-theme')) localStorage.setItem('servio-marketing-theme', theme)
  }, { theme: expectedTheme, origin: new URL(base).origin })
- // Routing disables HTTP cache, so each raw-SSR assertion reads a fresh response.
- // https://playwright.dev/docs/api/class-browsercontext#browser-context-route
- await page.route('**/*', route => route.continue())
+ // The single routing layer disables HTTP cache while retaining the CI egress allowlist above.
  return page
 }
 async function captureComparisonBoards(browser) {

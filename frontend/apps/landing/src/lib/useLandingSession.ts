@@ -58,19 +58,28 @@ export function useLandingSession(pathname: string) {
 
   useEffect(() => {
     let refreshTimeout: number | undefined
+    let wasInactive = document.visibilityState !== 'visible'
     const refreshWhenVisible = () => {
-      if (document.visibilityState !== 'visible') return
+      if (document.visibilityState !== 'visible') {
+        wasInactive = true
+        return
+      }
+      if (!wasInactive) return
+      wasInactive = false
       window.clearTimeout(refreshTimeout)
       refreshTimeout = window.setTimeout(() => { void revalidate(true) }, 100)
     }
+    const markInactive = () => { wasInactive = true }
     const unsubscribe = subscribeToSessionChanges(() => { void revalidate(true) })
     window.addEventListener('focus', refreshWhenVisible)
+    window.addEventListener('blur', markInactive)
     document.addEventListener('visibilitychange', refreshWhenVisible)
 
     return () => {
       unsubscribe()
       window.clearTimeout(refreshTimeout)
       window.removeEventListener('focus', refreshWhenVisible)
+      window.removeEventListener('blur', markInactive)
       document.removeEventListener('visibilitychange', refreshWhenVisible)
     }
   }, [revalidate])
