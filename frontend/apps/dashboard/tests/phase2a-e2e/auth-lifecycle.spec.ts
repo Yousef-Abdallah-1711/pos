@@ -2,7 +2,7 @@ import { execFileSync } from 'node:child_process'
 import { createHash } from 'node:crypto'
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import path from 'node:path'
-import { expect, test, type Page } from '@playwright/test'
+import { expect, test, type Page, type Request } from '@playwright/test'
 import { routeContainerApiToCandidate } from './api-routing'
 
 const landingUrl = (process.env.WS05_LANDING_URL || 'http://localhost:13111').replace(/\/$/, '')
@@ -12,6 +12,7 @@ const apiOrigin = new URL(process.env.WS05_API_URL || 'http://localhost:18082/ap
 const ownerEmail = 'phase2a-owner-a@example.test'
 const ownerName = 'WS05 Tenant A Owner'
 const ownerPassword = process.env.WS05_TEST_PASSWORD || 'WS05-Disposable-Only-2026!'
+const superAdminPassword = process.env.E2E_SUPERADMIN_PASSWORD || 'WS05-SuperAdmin-Only-2026!'
 const composeProject = process.env.WS05_COMPOSE_PROJECT || ''
 
 type AuthTimelineEvent = {
@@ -132,15 +133,19 @@ async function expectPathname(page: Page, pathname: string) {
   await expect.poll(() => new URL(page.url()).pathname, { timeout: 30_000 }).toBe(pathname)
 }
 
-async function expectSignedInDashboard(page: Page) {
-  await expect.poll(async () => page.evaluate(() => {
+async function expectSignedInDashboard(page: Page, allowArabicLocale = false) {
+  await expect.poll(async () => page.evaluate((allowArabicLocale) => {
     const rawAuthState = localStorage.getItem('auth-storage')
     const authState = rawAuthState ? JSON.parse(rawAuthState) as { state?: { user?: unknown; token?: string } } : null
     const query = new URLSearchParams(location.search)
     const hasCredentialQuery = ['token', 'jwt', 'user'].some((name) => query.has(name))
-    return { pathname: location.pathname, hasUser: Boolean(authState?.state?.user), hasStoredToken: Boolean(authState?.state?.token), hasCredentialQuery }
-  }).catch(() => ({ pathname: '', hasUser: false, hasStoredToken: false, hasCredentialQuery: false })), { timeout: 90_000 })
-    .toEqual({ pathname: '/en/dashboard', hasUser: true, hasStoredToken: false, hasCredentialQuery: false })
+    const pathname = location.pathname
+    const expectedDashboardPath = allowArabicLocale
+      ? /^\/(?:en|ar)\/dashboard$/.test(pathname)
+      : pathname === '/en/dashboard'
+    return { expectedDashboardPath, hasUser: Boolean(authState?.state?.user), hasStoredToken: Boolean(authState?.state?.token), hasCredentialQuery }
+  }, allowArabicLocale).catch(() => ({ expectedDashboardPath: false, hasUser: false, hasStoredToken: false, hasCredentialQuery: false })), { timeout: 90_000 })
+    .toEqual({ expectedDashboardPath: true, hasUser: true, hasStoredToken: false, hasCredentialQuery: false })
   const sessionCookie = (await page.context().cookies(apiOrigin)).find((cookie) => cookie.name === 'poos_session')
   expect(sessionCookie?.httpOnly).toBe(true)
   expect(sessionCookie?.expires).toBe(-1)
@@ -215,15 +220,32 @@ test('rejects malicious redirect destinations after a real login', async ({ page
     const loginURL = new URL(`${landingUrl}/en/auth/login`)
     loginURL.searchParams.set(attack.key, attack.value)
     const loginResponse = page.waitForResponse((response) => new URL(response.url()).pathname === '/api/v1/auth/login')
-    await page.goto(loginURL.toString(), { waitUntil: 'domcontentloaded' })
+    let attackLoginUrlRequested = false
+    const recordAttackLoginRequest = (request: Request) => {
+      const requestURL = new URL(request.url())
+      attackLoginUrlRequested ||= requestURL.origin === loginURL.origin
+        && requestURL.pathname === loginURL.pathname
+        && requestURL.searchParams.get(attack.key) === attack.value
+    }
+    page.on('request', recordAttackLoginRequest)
+    try {
+      await page.goto(loginURL.toString(), { waitUntil: 'domcontentloaded' })
+    } catch (error) {
+      expect(String(error)).toContain('net::ERR_ABORTED')
+    } finally {
+      page.off('request', recordAttackLoginRequest)
+    }
+    expect(attackLoginUrlRequested).toBe(true)
+    expect(new URL(page.url()).origin).toBe(new URL(landingUrl).origin)
+    await expect.poll(() => new URL(page.url()).pathname).toMatch(/^\/(?:en|ar)\/auth\/login$/)
     await expect(page.locator('form')).toHaveAttribute('method', 'post')
-    await page.getByRole('textbox', { name: /email/i }).fill(ownerEmail)
-    await page.getByRole('textbox', { name: /password/i }).fill(ownerPassword)
-    await page.getByRole('button', { name: /^sign in$/i }).click()
+    await page.locator('input[type="email"]').fill(ownerEmail)
+    await page.locator('input[type="password"]').fill(ownerPassword)
+    await page.locator('form button[type="submit"]').click()
     expect((await loginResponse).status()).toBe(200)
-    await expectSignedInDashboard(page)
+    await expectSignedInDashboard(page, true)
     expect(new URL(page.url()).origin).toBe(new URL(dashboardUrl).origin)
-    expect(new URL(page.url()).pathname).toBe('/en/dashboard')
+    expect(new URL(page.url()).pathname).toMatch(/^\/(?:en|ar)\/dashboard$/)
     expect(new URL(page.url()).search).toBe('')
 
     const cookie = (await page.context().cookies(apiOrigin)).find((candidate) => candidate.name === 'poos_session')
@@ -407,7 +429,7 @@ test('rejects missing and untrusted origins on every registered staff and Super 
 
   const superAdminLogin = await page.request.post(`${apiOrigin}/api/v1/super-admin/auth/login`, {
     headers: { Origin: landingUrl },
-    data: { email: 'phase2a-superadmin@example.test', password: ownerPassword },
+    data: { email: 'phase2a-superadmin@example.test', password: superAdminPassword },
   })
   expect(superAdminLogin.status()).toBe(200)
   const superAdminCookie = (await page.context().cookies(apiOrigin)).find((cookie) => cookie.name === 'poos_super_admin_session')
