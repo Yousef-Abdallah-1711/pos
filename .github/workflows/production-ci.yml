@@ -358,12 +358,27 @@ jobs:
           import sys
           with open(sys.argv[1], encoding='utf-8') as source:
               metrics = json.load(source)['metrics']
-          checks = metrics.get('checks', {}).get('values', {})
-          failed_requests = metrics.get('http_req_failed', {}).get('values', {})
-          dropped = metrics.get('dropped_iterations', {}).get('values', {}).get('count', 0)
-          if checks.get('rate') != 1 or failed_requests.get('rate', 1) != 0 or dropped != 0:
+          def metric_values(name):
+              metric = metrics.get(name, {})
+              if not isinstance(metric, dict):
+                  return {}
+              values = metric.get('values')
+              return values if isinstance(values, dict) else metric
+          checks = metric_values('checks')
+          failed_requests = metric_values('http_req_failed')
+          requests = metric_values('http_reqs')
+          dropped = metric_values('dropped_iterations').get('count', 0)
+          request_count = requests.get('count', 0)
+          if (
+              request_count <= 0 or
+              checks.get('value') != 1 or
+              checks.get('fails') != 0 or
+              checks.get('passes') != request_count or
+              failed_requests.get('value') != 0 or
+              dropped != 0
+          ):
               raise SystemExit('Smoke load did not produce all-valid sessions with zero failed requests and dropped iterations.')
-          print('Smoke load assertions passed: all protected sessions valid, zero failed requests, zero dropped iterations.')
+          print(f'Smoke load assertions passed: {request_count} protected sessions valid, zero failed requests, zero dropped iterations.')
           PY
           docker exec "$redis_container" redis-cli --raw INFO memory | awk -F: '/^(used_memory:|used_memory_peak:|used_memory_rss:|maxmemory:)/ { print $1 "=" $2 }' >"$RUNNER_TEMP/auth-evidence/redis-memory.txt"
           docker exec "$redis_container" redis-cli --raw INFO stats | awk -F: '/^(total_commands_processed:|instantaneous_ops_per_sec:|keyspace_hits:|keyspace_misses:|evicted_keys:)/ { print $1 "=" $2 }' >"$RUNNER_TEMP/auth-evidence/redis-stats.txt"
