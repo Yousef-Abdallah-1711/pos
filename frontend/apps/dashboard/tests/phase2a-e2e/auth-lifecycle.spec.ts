@@ -1,5 +1,5 @@
 import { execFileSync } from 'node:child_process'
-import { mkdir } from 'node:fs/promises'
+import { mkdir, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import { expect, test, type Page } from '@playwright/test'
 import { routeContainerApiToCandidate } from './api-routing'
@@ -9,7 +9,7 @@ const landingRedirectUrl = (process.env.WS05_LANDING_REDIRECT_URL || 'http://loc
 const dashboardUrl = (process.env.WS05_DASHBOARD_URL || 'http://localhost:13112').replace(/\/$/, '')
 const apiOrigin = new URL(process.env.WS05_API_URL || 'http://localhost:18082/api/v1').origin
 const ownerEmail = 'phase2a-owner-a@example.test'
-const ownerName = 'WS05 A Owner'
+const ownerName = 'WS05 Tenant A Owner'
 const ownerPassword = process.env.WS05_TEST_PASSWORD || 'WS05-Disposable-Only-2026!'
 const composeProject = process.env.WS05_COMPOSE_PROJECT || ''
 
@@ -104,10 +104,18 @@ test.afterEach(async ({ page }, testInfo) => {
         responseCounts[key] = (responseCounts[key] ?? 0) + 1
       }
     }
+    const evidence = JSON.stringify({ requestCounts, responseCounts, events: timeline.events }, null, 2)
     await testInfo.attach(`auth-browser-timeline-${index + 1}.json`, {
-      body: JSON.stringify({ requestCounts, responseCounts, events: timeline.events }, null, 2),
+      body: evidence,
       contentType: 'application/json',
     })
+    const evidenceDirectory = process.env.WS05_AUTH_EVIDENCE_DIR
+    if (evidenceDirectory) {
+      await mkdir(evidenceDirectory, { recursive: true })
+      const safeTitle = testInfo.title.replace(/[^a-z0-9]+/gi, '-').replace(/^-|-$/g, '').toLowerCase()
+      const fileName = `${safeTitle}-retry-${testInfo.retry}-page-${index + 1}.json`
+      await writeFile(path.join(evidenceDirectory, fileName), evidence, { mode: 0o600 })
+    }
   }
   authTimelinePages = []
 })
@@ -234,6 +242,7 @@ test('forged tenant headers cannot disclose another tenant product', async ({ pa
 
   const loginResponse = await signIn(page, ownerPassword)
   expect(loginResponse).toBe(200)
+  await expectSignedInDashboard(page)
   const sessionCookie = (await page.context().cookies(apiOrigin)).find((cookie) => cookie.name === 'poos_session')
   expect(sessionCookie?.httpOnly).toBe(true)
   const response = await page.evaluate(async ({ endpoint, tenantID, restaurantID }) => {
@@ -479,16 +488,18 @@ test('Redis outage returns a private 503 without logging out, then recovers on r
   expect(loginResponse).toBe(200)
   await expectSignedInDashboard(page)
 
-  let redisPaused = false
+  let redisStopped = false
   try {
-    execFileSync('docker', ['pause', redisContainerID], { stdio: 'ignore' })
-    redisPaused = true
+    execFileSync('docker', ['exec', redisContainerID, 'redis-cli', 'SAVE'], { stdio: 'ignore' })
+    execFileSync('docker', ['stop', '--time', '1', redisContainerID], { stdio: 'ignore' })
+    redisStopped = true
 
     const outageResponsePromise = page.waitForResponse((response) => {
-      return new URL(response.url()).pathname === '/api/v1/auth/session' && response.status() === 503
+      return new URL(response.url()).pathname === '/api/v1/auth/session'
     }, { timeout: 45_000 })
     await page.evaluate(() => window.dispatchEvent(new Event('focus')))
     const outageResponse = await outageResponsePromise
+    expect(outageResponse.status()).toBe(503)
     expect(outageResponse.headers()['cache-control']).toContain('private')
     expect(outageResponse.headers()['set-cookie']).toBeUndefined()
     await expect(page.getByRole('alert')).toBeVisible()
@@ -500,8 +511,11 @@ test('Redis outage returns a private 503 without logging out, then recovers on r
     })).toEqual({ hasUser: true, hasStoredToken: false })
     await captureScreenshot(page, 'dashboard-session-unavailable')
 
-    execFileSync('docker', ['unpause', redisContainerID], { stdio: 'ignore' })
-    redisPaused = false
+    execFileSync('docker', ['start', redisContainerID], { stdio: 'ignore' })
+    redisStopped = false
+    await expect.poll(() => execFileSync('docker', [
+      'inspect', '--format', '{{.State.Health.Status}}', redisContainerID,
+    ], { encoding: 'utf8' }).trim(), { timeout: 30_000 }).toBe('healthy')
 
     const recoveryResponsePromise = page.waitForResponse((response) => {
       return new URL(response.url()).pathname === '/api/v1/auth/session' && response.status() === 200
@@ -511,6 +525,6 @@ test('Redis outage returns a private 503 without logging out, then recovers on r
     await expectSignedInDashboard(page)
     await captureScreenshot(page, 'dashboard-session-recovered')
   } finally {
-    if (redisPaused) execFileSync('docker', ['unpause', redisContainerID], { stdio: 'ignore' })
+    if (redisStopped) execFileSync('docker', ['start', redisContainerID], { stdio: 'ignore' })
   }
 })
