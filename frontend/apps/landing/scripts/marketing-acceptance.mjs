@@ -438,12 +438,12 @@ async function main() {
  const cancelledNextChunkPaths = new Set()
  const cancelledNextChunkPagePaths = new Set()
  const nextChunkExceptions = []
+ let expectedGuestSessionDenials = 0
  try {
   let page = await createPage(browser, { width: 1440, height: 1000 })
   const errors = []
   const recoveredRscNavigations = []
   const networkFailures = []
-  let expectedGuestSessionDenials = 0
   const failedNextChunkRequests = []
   const deferredChunkDiagnostics = []
   const deferNextChunkException = (pageUrl, details) => {
