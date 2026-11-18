@@ -140,8 +140,8 @@ jobs:
           if-no-files-found: ignore
       - name: Audit production dependencies (all severities)
         run: pnpm --dir frontend audit --prod
-      - name: Audit development dependencies (high and critical gate; lower findings visible)
-        run: pnpm --dir frontend audit --audit-level high
+      - name: Audit development dependencies (all high and critical findings)
+        run: pnpm --dir frontend audit --dev --audit-level high
       - run: python3 scripts/check_runtime_localhost.py
       - run: scripts/production/check-compose-config.sh
       - run: scripts/production/check-nginx-template.sh
