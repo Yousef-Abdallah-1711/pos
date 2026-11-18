@@ -1,9 +1,62 @@
 # SERVIO Authentication End-to-End Acceptance Matrix
 
-**Audit date:** 2026-11-17 UTC · **Current result:** No authenticated live browser tests were executed.
+## Current execution status — 2026-11-18
+
+This section supersedes the historical 2026-11-17 statuses below. The matrix is intentionally conservative: a scenario is PASS only when its stated acceptance checks were exercised. Partial subchecks are described in the evidence column and do not make the full scenario PASS.
+
+**Candidate branch head:** `aa6251a2044953e63d50a696b84171eb5bb5a0e9` (PR #82). The real API, PostgreSQL, Redis, Landing, and Dashboard run used application/backend source `b75d050c5f99bb85e98b2d42c892e872958e7928`; the later `aa6251a` change only expanded the Playwright acceptance spec. **Environment:** isolated local disposable Docker network; synthetic fixture `WS05 A Owner` / `WS05 A Restaurant`; credentials and cookie values excluded. **Browser:** Playwright 1.64.1, Chromium 156.0.8078.80. Firefox was not run. **Current result:** PASS 11 · FAIL 0 · BLOCKED 2 · NOT RUN 17. The 3 passing browser tests are real HTTP/API tests, not Playwright route mocks.
+
+### Executed commands and evidence
+
+- HTTP login/session/logout and 12-way concurrent refresh: `go test ./internal/handler/http -run '^(TestAuthHTTPLoginCookieSessionAndLogoutLifecycle|TestAuthRefreshRotatesCookieSessionExactlyOnceConcurrently)$' -count=1 -p 1 -vet=off` — passed.
+- Redis sharing, 20-way atomic rotation, TTL, fail-closed outage probe, and recovery probe: `go test ./internal/service -run '^TestAuthSessionStoreRedisIntegration$' -count=1 -p 1 -vet=off` — passed using two independent Redis clients.
+- Registration contract and restricted runtime role: `go test ./internal/repository -run '^(TestCreateTenantWithUserRegistrationContract|TestTenantRegistrationSeedsRBACUnderRestrictedRuntimeRole)$' -count=1 -p 1 -vet=off` — passed.
+- Auth/session/tenant middleware and token unit tests: `go test ./internal/usecase ./internal/middleware ./internal/pkg/jwt -run '^Test(AuthMiddleware|LoginConfirm|SessionAuthMiddleware|TenantContext|TenantStatus|SelectionToken)_' -count=1 -p 1 -vet=off` — selected tests passed.
+- Real-browser journey: `./node_modules/.bin/playwright test --config playwright.phase2a.config.ts tests/phase2a-e2e/auth-lifecycle.spec.ts --output /evidence/auth-lifecycle-final-results --trace off` — **3 passed**. `networkidle` was not used because the dev server keeps HMR WebSockets open; the test waits for the real `/auth/session` bootstrap response. Trace capture was disabled to avoid retaining credentials/cookies.
+- Local frontend verification on the updated spec: dashboard `typecheck:test`, `typecheck`, and `lint` passed. The lint command reported 0 errors and 179 warnings.
+- Sanitized browser log: `/tmp/servio-auth-evidence/auth-lifecycle-final.log`. Screenshots: `/tmp/servio-auth-evidence/auth-lifecycle-screenshots/`. The dashboard screenshot contains loading skeletons in chart/card regions; visual QA is therefore partial. No HAR/request-count artifact was retained.
+
+### Current 30-scenario matrix
+
+| # | Scenario | Status | Evidence and exact remaining gap |
+|---:|---|---|---|
+| 1 | Guest opens Landing | PASS | Chromium guest load at `/en`; SSR HTML had no synthetic account identifiers. `landing-guest.png`. |
+| 2 | Guest clicks Login | PASS | Clicked Login and reached canonical localized `/en/auth/login`; browser journey log. |
+| 3 | Successful login | PASS | Real API returned 200; cookie metadata showed HttpOnly and SameSite=Lax; no bearer token persisted in browser auth state. HTTP lifecycle test also passed. Password/cookie values are not retained. |
+| 4 | Dashboard opens | PASS | Login redirected to Dashboard; real session endpoint returned 200 and authenticated state rendered. `dashboard-authenticated.png`. |
+| 5 | Return to Landing | PASS | Opened Landing in a second tab; session island showed the authenticated profile and authorized restaurant. `landing-authenticated-account-menu.png`. |
+| 6 | Profile menu | PASS | Display name and authorized restaurant shown; phone, IDs, session and token absent. Chromium screenshot reviewed. |
+| 7 | Dashboard link | PASS | Account menu Dashboard and settings hrefs matched configured canonical URLs. |
+| 8 | Refresh preserves session | NOT RUN | Dashboard refresh did preserve the session, but the complete acceptance check for both portals, zero-flash behavior, hydration, and exact single-bootstrap/request count was not completed. No request-count artifact. |
+| 9 | Dashboard in a new tab | NOT RUN | A second Landing tab was tested; a second Dashboard tab was not. |
+| 10 | Browser restart policy | BLOCKED | Persistence/idle/absolute lifetime policy is undecided. **Owner:** product/security policy owner (not assigned). |
+| 11 | Logout revokes session | PASS | Logout initiated from Landing and Dashboard returned 204; cookie expired; replay of old cookie returned 401. Real Go lifecycle integration also passed. |
+| 12 | Landing returns to guest | PASS | After Landing logout, guest actions appeared and session endpoint returned 401. `landing-after-logout.png`. |
+| 13 | Dashboard rejects revoked session | PASS | After Dashboard logout, protected Dashboard route returned to Login and old-session replay returned 401. `landing-after-dashboard-logout.png`; real Go lifecycle assertion passed. |
+| 14 | Expired session and transient API outage | NOT RUN | Store TTL behavior passed in Redis integration; browser/API 503 and network-outage recovery/no-loop journey was not run. **Owner:** auth E2E/QA (not assigned). |
+| 15 | Concurrent refresh | PASS | 12 concurrent HTTP handler refresh attempts produced one winner; separate Redis integration used 20 concurrent rotations across two Redis clients and confirmed one winner. This does not establish independent API-process behavior or a browser HAR/retry-storm count. |
+| 16 | Multiple restaurant memberships | NOT RUN | No multi-membership synthetic fixture/browser assertion. **Owner:** auth fixture/QA (not assigned). |
+| 17 | Tenant switching | NOT RUN | Tenant-switch end-to-end semantics and cache invalidation were not exercised. **Owner:** auth product/backend (not assigned). |
+| 18 | Cross-tenant denial | NOT RUN | HTTP integration covered session tenant binding and stale role invalidation, but row-level tenant A→B requests, forged tenant/restaurant IDs, and zero-leak assertions were not run. **Owner:** backend security/QA (not assigned). |
+| 19 | Super Admin boundary | NOT RUN | No real staff↔Super-Admin boundary journey. **Owner:** identity/backend security (not assigned). |
+| 20 | Anonymous storefront ordering | NOT RUN | No customer order flow/capability isolation run. **Owner:** storefront QA (not assigned). |
+| 21 | EN/AR navigation | NOT RUN | English and Arabic pages rendered; Arabic `lang=ar`, `dir=rtl` verified. Locale switching with route/state preservation was not tested. Screenshots include Arabic 320px. |
+| 22 | Light/dark behavior | NOT RUN | Authenticated Landing theme toggle was exercised and screenshot captured; guest/authenticated contrast, persistence, and full contrast audit were not completed. |
+| 23 | Mobile profile menu | NOT RUN | Overflow checked at 320/390/768/1024/1440; Arabic 320px drawer, 44px touch target, Escape/focus restoration passed. Full touch, screen-reader, and all header-state viewport coverage was not completed. |
+| 24 | Keyboard and screen reader | NOT RUN | Escape and focus restoration passed for menu/drawer. Tab sequence, arrow keys, screen-reader semantics/announcements, and reduced-motion audit were not run. |
+| 25 | CSRF rejection | NOT RUN | Real Go integration rejected an untrusted Origin on logout. Missing Origin and all unsafe routes/token cases were not exhaustively tested. |
+| 26 | Malicious redirect rejection | NOT RUN | No encoded, protocol-relative, alternate-host, userinfo, or malformed-locale redirect cases run. **Owner:** frontend security/QA (not assigned). |
+| 27 | CDN cache isolation | NOT RUN | Guest SSR did not contain identity and auth responses were private/no-store in local checks; no CDN warm A/B cache-poisoning run. **Owner:** release/platform (not assigned). |
+| 28 | Backend restart with shared Redis | NOT RUN | Two independent Redis clients shared sessions; API process restart/recovery with shared Redis was not run. **Owner:** backend/SRE (not assigned). |
+| 29 | Redis outage and recovery | NOT RUN | Redis integration asserted the store fails closed when an isolated client cannot connect and that the healthy client remains usable. Protected-route HTTP 503/401 behavior and browser retry after service restoration were not run. **Owner:** backend/auth E2E (not assigned). |
+| 30 | High concurrency/load | BLOCKED | No dedicated capacity-approved environment or k6 run; no 10k-session/333/2,000-RPS claim. **Owner:** performance/release engineering (not assigned). |
+
+**Release interpretation:** functional login/logout across Landing and Dashboard is demonstrated on a disposable Chromium stack. This matrix does not establish full tenant isolation, Super Admin/storefront boundaries, outage behavior, cache safety, accessibility conformance, Firefox support, or capacity readiness. Do not use it as staging or production acceptance.
+
+**Historical audit date:** 2026-11-17 UTC · At that time, no authenticated live browser tests had been executed.
 **Source SHA:** `18ac7a4d8fcb918ad14a15930e4718fc30fca0e9` · **Live staging SHA:** `96773ef22b818113327fb65ad044fdf7624c5656`.
 
-## Status definitions and count
+## Historical status definitions and count (2026-11-17)
 
 - **PASS:** actually executed against the named build and evidence stored.
 - **FAIL:** executed and assertion failed.
@@ -11,7 +64,7 @@
 - **NOT RUN:** defined, but not executed.
 - Source tests existing in repository are labeled **SOURCE TEST ONLY**, not PASS.
 
-**Execution count for this audit:** PASS 0 · FAIL 0 · BLOCKED 0 · NOT RUN 30. Source tests were read, not executed. Authenticated live journeys remain unverified because no approved synthetic account/session was provided through a secure mechanism. Public landing/API health endpoints were read-only checked and are documented in the architecture audit; they do not count as this matrix's authentication tests.
+**Historical execution count:** PASS 0 · FAIL 0 · BLOCKED 0 · NOT RUN 30. Source tests were read, not executed. Authenticated live journeys were unverified at that point. Public landing/API health endpoints were read-only checked and are documented in the architecture audit; they did not count as this matrix's authentication tests.
 
 **VERIFIED CURRENT BEHAVIOR:** Source tests define coverage for cookie login/logout, single-winner refresh and tenant-header enforcement. **OBSERVED DEFECT:** Landing profile/session acceptance cannot pass yet because the authenticated header island is absent from current source. **PROPOSED DESIGN:** Execute the matrix below with isolated synthetic accounts and evidence recording. **UNVERIFIED ASSUMPTION:** A safe synthetic identity provisioning path is available on a disposable staging dataset. **REQUIRED BUSINESS DECISION:** Define persistence lifetime, customer identity boundary, evidence retention and accepted load SLOs.
 
@@ -82,7 +135,7 @@ See [security threat model](SERVIO_AUTH_SECURITY_THREAT_MODEL.md) and [implement
 
 This report was reconciled against `origin/main` at `c052c817e114df4d060d8428e6e236f6011876f8`. The current implementation slice, P0/P1 traceability, test evidence, and outstanding work are recorded in [IMPLEMENTATION_STATUS.md](IMPLEMENTATION_STATUS.md); the refreshed repository/CI baseline is in [BASELINE.md](BASELINE.md). Historical audit conclusions remain intact. This update does not mark unimplemented Redis replay/rate-limit work, the full E2E matrix, Super Admin/storefront acceptance, cache-boundary testing, or 10K measurements as complete.
 
-The E2E matrix remains **PASS 0 · FAIL 0 · BLOCKED 0 · NOT RUN 30** for browser-level scenarios. Selected unit/component tests were run for this branch and do not count as matrix executions.
+At the time of this 2026-11-17 update, the E2E matrix was **PASS 0 · FAIL 0 · BLOCKED 0 · NOT RUN 30** for browser-level scenarios. Selected unit/component tests were run for that branch and did not count as matrix executions.
 
 ## Candidate browser subset — 2026-11-17
 
@@ -95,4 +148,4 @@ The Landing session-island UI subset was subsequently executed on candidate comm
 | Responsive account navigation | PASS (mock API) | Checks 320, 390, 768, 1024, and 1440 px, horizontal overflow, 44 px minimum sign-out target, Escape/focus restoration, light theme, Arabic locale and RTL. This is not a screen-reader, arrow-key, contrast, or WCAG audit. |
 | Logout failure | PASS (mock API) | A mocked 503 displays an unconfirmed-logout message and keeps the test session cookie and authenticated state. |
 
-Reviewed UI captures: [authenticated desktop](evidence/landing-authenticated-desktop.png) and [authenticated mobile at 320 px](evidence/landing-authenticated-mobile-320.png). Passing-run Playwright traces were retained locally after replacing the synthetic cookie value with `[REDACTED]`; they were not committed. Full scenarios 1–30 retain their NOT RUN status unless separately executed with the required backend and environment evidence.
+Reviewed UI captures: [authenticated desktop](evidence/landing-authenticated-desktop.png) and [authenticated mobile at 320 px](evidence/landing-authenticated-mobile-320.png). Passing-run Playwright traces were retained locally after replacing the synthetic cookie value with `[REDACTED]`; they were not committed. At the time of this 2026-11-17 mock-browser subset, full scenarios 1–30 had NOT RUN status; see the current execution section at the top for the 2026-11-18 real-service results.
