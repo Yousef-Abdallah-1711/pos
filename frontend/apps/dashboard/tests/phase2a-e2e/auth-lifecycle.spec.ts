@@ -429,6 +429,11 @@ test('rejects missing and untrusted origins on every registered staff and Super 
   expect(superAdminLogin.status()).toBe(200)
   const superAdminCookie = (await page.context().cookies(apiOrigin)).find((cookie) => cookie.name === 'poos_super_admin_session')
   expect(superAdminCookie?.httpOnly).toBe(true)
+  expect(superAdminCookie?.expires).toBe(-1)
+  const superAdminLoginBody = await superAdminLogin.json()
+  const superAdminExpiry = Date.parse(superAdminLoginBody.data.expires_at)
+  expect(superAdminExpiry).toBeGreaterThan(Date.now())
+  expect(superAdminExpiry).toBeLessThanOrEqual(Date.now() + 8 * 60 * 60 * 1000)
   const staffSessionWithSuperAdminCookie = await page.request.get(`${apiOrigin}/api/v1/auth/session`, {
     headers: { Cookie: `poos_super_admin_session=${superAdminCookie!.value}` },
   })
