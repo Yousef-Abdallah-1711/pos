@@ -136,7 +136,7 @@ services:
       REDIS_URL: redis://redis:6379/0
       # Host-published ports support local browser use; container ports support
       # Playwright runners sharing the disposable API network namespace.
-      CORS_ORIGINS: http://localhost:13111,http://localhost:13112,http://localhost:13113,http://localhost:13114,http://localhost:3001,http://localhost:3002,http://localhost:3003,http://localhost:3004
+      CORS_ORIGINS: ${P2A_CORS_ORIGINS:-http://localhost:13111,http://localhost:13112,http://localhost:13113,http://localhost:13114,http://localhost:3001,http://localhost:3002,http://localhost:3003,http://localhost:3004}
       APP_BASE_URL: http://localhost:${P2A_API_HOST_PORT:-18082}
       DASHBOARD_URL: http://localhost:13112
       LANDING_URL: http://localhost:13111

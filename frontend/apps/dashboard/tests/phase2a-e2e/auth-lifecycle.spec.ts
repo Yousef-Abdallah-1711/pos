@@ -33,38 +33,40 @@ function startAuthTimeline(page: Page) {
   authTimelines.set(page, timeline)
   authTimelinePages.push(page)
   const elapsedMs = () => Date.now() - timeline.startedAt
+  const isTimelinePath = (pathname: string) => pathname.startsWith('/api/v1/auth/') || pathname.startsWith('/api/v1/products/')
+  const sanitizedPath = (pathname: string) => pathname.replace(/^\/api\/v1\/products\/\d+(?=\/|$)/, '/api/v1/products/:id')
 
   page.on('request', (request) => {
     const url = new URL(request.url())
-    if (!url.pathname.startsWith('/api/v1/auth/')) return
+    if (!isTimelinePath(url.pathname)) return
     timeline.events.push({
       elapsedMs: elapsedMs(),
       kind: 'request',
       method: request.method(),
-      path: url.pathname,
+      path: sanitizedPath(url.pathname),
       resourceType: request.resourceType(),
     })
   })
   page.on('response', (response) => {
     const url = new URL(response.url())
-    if (!url.pathname.startsWith('/api/v1/auth/')) return
+    if (!isTimelinePath(url.pathname)) return
     timeline.events.push({
       elapsedMs: elapsedMs(),
       kind: 'response',
       method: response.request().method(),
-      path: url.pathname,
+      path: sanitizedPath(url.pathname),
       status: response.status(),
       resourceType: response.request().resourceType(),
     })
   })
   page.on('requestfailed', (request) => {
     const url = new URL(request.url())
-    if (!url.pathname.startsWith('/api/v1/auth/')) return
+    if (!isTimelinePath(url.pathname)) return
     timeline.events.push({
       elapsedMs: elapsedMs(),
       kind: 'request-failed',
       method: request.method(),
-      path: url.pathname,
+      path: sanitizedPath(url.pathname),
       resourceType: request.resourceType(),
       error: request.failure()?.errorText ?? 'unknown',
     })
@@ -180,6 +182,87 @@ test('invalid credentials stay on login and show an error', async ({ page }) => 
   await expect(page.getByText(/invalid|failed|credentials/i).last()).toBeVisible()
   await captureScreenshot(page, 'landing-invalid-login')
   await page.unrouteAll({ behavior: 'ignoreErrors' })
+})
+
+test('forged tenant headers cannot disclose another tenant product', async ({ page }, testInfo) => {
+  test.skip(!composeProject, 'requires the isolated GitHub Actions authentication Compose project')
+  expect(composeProject).toMatch(/^servio-auth-gha-\d+$/)
+
+  const postgresContainerIDs = execFileSync('docker', [
+    'ps',
+    '--filter', `label=com.docker.compose.project=${composeProject}`,
+    '--filter', 'label=com.docker.compose.service=postgres',
+    '--filter', 'label=com.pos.disposable=true',
+    '--filter', 'label=com.pos.workstream=WS05',
+    '--format', '{{.ID}}',
+  ], { encoding: 'utf8' }).trim().split(/\r?\n/).filter(Boolean)
+  expect(postgresContainerIDs).toHaveLength(1)
+  const postgresContainerID = postgresContainerIDs[0]
+  const postgresLabels = JSON.parse(execFileSync('docker', [
+    'inspect', '--format', '{{json .Config.Labels}}', postgresContainerID,
+  ], { encoding: 'utf8' })) as Record<string, string>
+  expect(postgresLabels['com.docker.compose.project']).toBe(composeProject)
+  expect(postgresLabels['com.docker.compose.service']).toBe('postgres')
+  expect(postgresLabels['com.pos.disposable']).toBe('true')
+  expect(postgresLabels['com.pos.workstream']).toBe('WS05')
+
+  const targetProduct = execFileSync('docker', [
+    'exec', postgresContainerID, 'psql', '-U', 'postgres', '-d', 'pos_phase2a_e2e', '-AtF', '|',
+    '-c', "SELECT id, tenant_id, restaurant_id FROM products WHERE name_en = 'WS05 E2E Burger B' LIMIT 1",
+  ], { encoding: 'utf8' }).trim().split('|').map(Number)
+  expect(targetProduct).toHaveLength(3)
+  expect(targetProduct.every(Number.isSafeInteger)).toBe(true)
+
+  const ownerScope = execFileSync('docker', [
+    'exec', postgresContainerID, 'psql', '-U', 'postgres', '-d', 'pos_phase2a_e2e', '-AtF', '|',
+    '-c', "SELECT tenant_id, restaurant_id FROM products WHERE name_en = 'WS05 E2E Burger A' LIMIT 1",
+  ], { encoding: 'utf8' }).trim().split('|').map(Number)
+  expect(ownerScope).toHaveLength(2)
+  expect(ownerScope.every(Number.isSafeInteger)).toBe(true)
+
+  const scopedRowCount = execFileSync('docker', [
+    'exec', '-e', 'PGPASSWORD=ws05-local-only-app', postgresContainerID,
+    'psql', '-U', 'pos_app', '-d', 'pos_phase2a_e2e', '-At',
+    '-c', `SELECT count(*) FROM products WHERE id = ${targetProduct[0]} AND tenant_id = ${ownerScope[0]} AND restaurant_id = ${ownerScope[1]}`,
+  ], { encoding: 'utf8' }).trim()
+  expect(scopedRowCount).toBe('0')
+
+  const rlsEnabled = execFileSync('docker', [
+    'exec', postgresContainerID, 'psql', '-U', 'postgres', '-d', 'pos_phase2a_e2e', '-At',
+    '-c', "SELECT relrowsecurity FROM pg_class WHERE oid = 'public.products'::regclass",
+  ], { encoding: 'utf8' }).trim()
+
+  const loginResponse = await signIn(page, ownerPassword)
+  expect(loginResponse).toBe(200)
+  const sessionCookie = (await page.context().cookies(apiOrigin)).find((cookie) => cookie.name === 'poos_session')
+  expect(sessionCookie?.httpOnly).toBe(true)
+  const response = await page.evaluate(async ({ endpoint, tenantID, restaurantID }) => {
+    const apiResponse = await fetch(endpoint, {
+      credentials: 'include',
+      headers: { 'X-Tenant-ID': String(tenantID), 'X-Restaurant-ID': String(restaurantID) },
+    })
+    return { status: apiResponse.status, body: await apiResponse.text() }
+  }, {
+    endpoint: `${apiOrigin}/api/v1/products/${targetProduct[0]}`,
+    tenantID: targetProduct[1],
+    restaurantID: targetProduct[2],
+  })
+  expect(response.status).toBe(404)
+  expect(response.body).not.toContain('WS05 E2E Burger B')
+  expect(response.body).not.toContain('WS05 B Restaurant')
+  expect(response.body).not.toContain('phase2a-restaurant-b')
+
+  await testInfo.attach('cross-tenant-zero-disclosure.json', {
+    body: JSON.stringify({
+      responseStatus: response.status,
+      responseBodyContainsTargetProduct: response.body.includes('WS05 E2E Burger B'),
+      responseBodyContainsTargetRestaurant: response.body.includes('WS05 B Restaurant'),
+      forgedTenantAndRestaurantHeaders: true,
+      ownerScopedProductRowsFoundByPOSApp: Number(scopedRowCount),
+      productsTableRowLevelSecurityEnabled: rlsEnabled === 't',
+    }, null, 2),
+    contentType: 'application/json',
+  })
 })
 
 test('multi-tenant login selects an authorized tenant before establishing the session', async ({ page }) => {
