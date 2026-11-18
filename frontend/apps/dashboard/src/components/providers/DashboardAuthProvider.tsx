@@ -4,48 +4,18 @@ import { ReactNode, useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { useAuthStore } from '@/stores/authStore'
 import { useTenantStatusStore } from '@/stores/tenantStatusStore'
-import { classifySessionBootstrapStatus, getDashboardLoginUrl } from '@/lib/authSession'
+import {
+  classifySessionBootstrapStatus,
+  getDashboardLoginUrl,
+  isDashboardSessionUser,
+  type DashboardSessionUser,
+} from '@/lib/authSession'
 import { getConfig } from '@/lib/config'
-
-interface SessionUser {
-  id: number
-  user_id: number
-  email: string
-  name: string
-  tenant_id: number
-  restaurant_id: number
-  restaurant_name?: string
-  role: string
-  is_super_admin: boolean
-}
 
 type BootstrapState = 'checking' | 'ready' | 'unavailable' | 'forbidden'
 
 const SESSION_REQUEST_TIMEOUT_MS = 8_000
 let sessionRequest: Promise<Response> | null = null
-
-function isSessionUser(value: unknown): value is SessionUser {
-  if (!value || typeof value !== 'object') return false
-  const candidate = value as Partial<SessionUser>
-  return typeof candidate.id === 'number'
-    && Number.isSafeInteger(candidate.id)
-    && candidate.id > 0
-    && typeof candidate.user_id === 'number'
-    && Number.isSafeInteger(candidate.user_id)
-    && candidate.user_id === candidate.id
-    && typeof candidate.email === 'string'
-    && candidate.email.trim().length > 0
-    && typeof candidate.name === 'string'
-    && typeof candidate.tenant_id === 'number'
-    && Number.isSafeInteger(candidate.tenant_id)
-    && candidate.tenant_id > 0
-    && typeof candidate.restaurant_id === 'number'
-    && Number.isSafeInteger(candidate.restaurant_id)
-    && candidate.restaurant_id >= 0
-    && typeof candidate.role === 'string'
-    && candidate.role.trim().length > 0
-    && candidate.is_super_admin === false
-}
 
 function requestSession(apiUrl: string, fetcher: typeof fetch): Promise<Response> {
   if (sessionRequest) return sessionRequest
@@ -166,7 +136,7 @@ interface SessionRestoreOptions {
   apiUrl: string
   fetcher: typeof fetch
   locale: string
-  setAuth: (user: SessionUser, token: string) => void
+  setAuth: (user: DashboardSessionUser, token: string) => void
   clearAuth: () => void
   clearTenantStatus: () => void
   setBootstrapState: (state: BootstrapState) => void
@@ -196,7 +166,7 @@ async function restoreDashboardSession(options: SessionRestoreOptions) {
 
     const sessionUser: unknown = await response.json()
     if (!options.active()) return
-    if (!isSessionUser(sessionUser)) {
+    if (!isDashboardSessionUser(sessionUser)) {
       options.setBootstrapState('unavailable')
       return
     }

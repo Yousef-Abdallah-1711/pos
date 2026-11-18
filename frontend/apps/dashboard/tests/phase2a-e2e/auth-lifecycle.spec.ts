@@ -11,6 +11,103 @@ const ownerEmail = 'phase2a-owner-a@example.test'
 const ownerName = 'WS05 A Owner'
 const ownerPassword = process.env.WS05_TEST_PASSWORD || 'WS05-Disposable-Only-2026!'
 
+type AuthTimelineEvent = {
+  elapsedMs: number
+  kind: 'request' | 'response' | 'navigation' | 'request-failed'
+  method?: string
+  path: string
+  status?: number
+  resourceType?: string
+  error?: string
+}
+
+type AuthTimeline = { startedAt: number; events: AuthTimelineEvent[] }
+const authTimelines = new WeakMap<Page, AuthTimeline>()
+let authTimelinePages: Page[] = []
+
+function startAuthTimeline(page: Page) {
+  if (authTimelines.has(page)) return
+  const timeline: AuthTimeline = { startedAt: Date.now(), events: [] }
+  authTimelines.set(page, timeline)
+  authTimelinePages.push(page)
+  const elapsedMs = () => Date.now() - timeline.startedAt
+
+  page.on('request', (request) => {
+    const url = new URL(request.url())
+    if (!url.pathname.startsWith('/api/v1/auth/')) return
+    timeline.events.push({
+      elapsedMs: elapsedMs(),
+      kind: 'request',
+      method: request.method(),
+      path: url.pathname,
+      resourceType: request.resourceType(),
+    })
+  })
+  page.on('response', (response) => {
+    const url = new URL(response.url())
+    if (!url.pathname.startsWith('/api/v1/auth/')) return
+    timeline.events.push({
+      elapsedMs: elapsedMs(),
+      kind: 'response',
+      method: response.request().method(),
+      path: url.pathname,
+      status: response.status(),
+      resourceType: response.request().resourceType(),
+    })
+  })
+  page.on('requestfailed', (request) => {
+    const url = new URL(request.url())
+    if (!url.pathname.startsWith('/api/v1/auth/')) return
+    timeline.events.push({
+      elapsedMs: elapsedMs(),
+      kind: 'request-failed',
+      method: request.method(),
+      path: url.pathname,
+      resourceType: request.resourceType(),
+      error: request.failure()?.errorText ?? 'unknown',
+    })
+  })
+  page.on('framenavigated', (frame) => {
+    if (frame !== page.mainFrame()) return
+    let pathname: string
+    try {
+      pathname = new URL(frame.url()).pathname
+    } catch {
+      return
+    }
+    timeline.events.push({ elapsedMs: elapsedMs(), kind: 'navigation', path: pathname })
+  })
+}
+
+test.beforeEach(async ({ page }) => {
+  authTimelinePages = []
+  startAuthTimeline(page)
+})
+
+test.afterEach(async ({ page }, testInfo) => {
+  startAuthTimeline(page)
+  for (const [index, timelinePage] of authTimelinePages.entries()) {
+    const timeline = authTimelines.get(timelinePage)
+    if (!timeline) continue
+    const requestCounts: Record<string, number> = {}
+    const responseCounts: Record<string, number> = {}
+    for (const event of timeline.events) {
+      if (event.kind === 'request') {
+        const key = `${event.method} ${event.path}`
+        requestCounts[key] = (requestCounts[key] ?? 0) + 1
+      } else if (event.kind === 'response') {
+        const key = `${event.method} ${event.path} ${event.status}`
+        responseCounts[key] = (responseCounts[key] ?? 0) + 1
+      }
+    }
+    await testInfo.attach(`auth-browser-timeline-${index + 1}.json`, {
+      body: JSON.stringify({ requestCounts, responseCounts, events: timeline.events }, null, 2),
+      contentType: 'application/json',
+    })
+  }
+  authTimelinePages = []
+})
+
 async function captureScreenshot(page: Page, name: string) {
   const evidenceDirectory = process.env.WS05_AUTH_EVIDENCE_DIR
   if (!evidenceDirectory) return
@@ -40,32 +137,16 @@ async function signIn(page: Page, password: string) {
   const landingSessionCheck = page.waitForResponse((response) => {
     return new URL(response.url()).pathname === '/api/v1/auth/session'
   }, { timeout: 30_000 })
-  let resolveLoginResponse!: (status: number) => void
-  const loginResponse = new Promise<number>((resolve) => {
-    resolveLoginResponse = resolve
-  })
-  page.on('framenavigated', (frame) => {
-    if (frame === page.mainFrame()) console.log(`BROWSER_NAVIGATION ${new URL(frame.url()).pathname}`)
-  })
-  page.on('pageerror', (error) => console.log(`BROWSER_PAGE_ERROR ${error.name}: ${error.message}`))
-  page.on('console', (message) => {
-    if (message.type() === 'error') console.log(`BROWSER_CONSOLE_ERROR ${message.text()}`)
-  })
-  page.on('requestfailed', (request) => console.log(`BROWSER_REQUEST_FAILED ${request.method()} ${new URL(request.url()).pathname} ${request.failure()?.errorText ?? 'unknown'}`))
-  page.on('response', (response) => {
-    const pathname = new URL(response.url()).pathname
-    if (pathname === '/api/v1/auth/login' || pathname === '/api/v1/auth/session' || pathname === '/api/v1/auth/logout') {
-      console.log(`BROWSER_AUTH_RESPONSE ${pathname} ${response.status()}`)
-    }
-    if (pathname === '/api/v1/auth/login') resolveLoginResponse(response.status())
-  })
+  const loginResponse = page.waitForResponse((response) => {
+    return new URL(response.url()).pathname === '/api/v1/auth/login'
+  }, { timeout: 30_000 })
   await page.goto(`${landingUrl}/en/auth/login`, { waitUntil: 'domcontentloaded' })
   await expect(page.locator('form')).toHaveAttribute('method', 'post')
   await landingSessionCheck
   await page.getByRole('textbox', { name: /email/i }).fill(ownerEmail)
   await page.getByRole('textbox', { name: /password/i }).fill(password)
   await page.getByRole('button', { name: /^sign in$/i }).click()
-  return loginResponse
+  return (await loginResponse).status()
 }
 
 test('guest can open Landing and follow the canonical Login link', async ({ page }) => {
@@ -99,6 +180,43 @@ test('invalid credentials stay on login and show an error', async ({ page }) => 
   await page.unrouteAll({ behavior: 'ignoreErrors' })
 })
 
+test('multi-tenant login selects an authorized tenant before establishing the session', async ({ page }) => {
+  await routeContainerApiToCandidate(page)
+  await page.goto(`${landingUrl}/en/auth/login`, { waitUntil: 'domcontentloaded' })
+  await expect(page.locator('form')).toBeVisible()
+  await page.getByRole('textbox', { name: /email/i }).fill('phase2a-multi-owner@example.test')
+  await page.getByRole('textbox', { name: /password/i }).fill(ownerPassword)
+  const loginResponse = page.waitForResponse((response) => {
+    return new URL(response.url()).pathname === '/api/v1/auth/login'
+  })
+  await page.getByRole('button', { name: /^sign in$/i }).click()
+  const response = await loginResponse
+  expect(response.status()).toBe(200)
+  const loginBody = await response.json() as {
+    multiple_tenants: boolean
+    tenants: Array<{ tenant_id: number; tenant_name: string }>
+  }
+  expect(loginBody.multiple_tenants).toBe(true)
+  expect(loginBody.tenants.length).toBeGreaterThanOrEqual(2)
+  expect((await page.context().cookies(apiOrigin)).some((cookie) => cookie.name === 'poos_session')).toBe(false)
+
+  const selectedTenant = loginBody.tenants[1]
+  const confirmationResponse = page.waitForResponse((candidate) => {
+    return new URL(candidate.url()).pathname === '/api/v1/auth/login/confirm'
+  })
+  await page.getByRole('button', { name: new RegExp(selectedTenant.tenant_name) }).click()
+  expect((await confirmationResponse).status()).toBe(200)
+  await expectSignedInDashboard(page)
+  const selectedTenantID = await page.evaluate(() => {
+    const rawAuthState = localStorage.getItem('auth-storage')
+    const state = rawAuthState ? JSON.parse(rawAuthState) as { state?: { user?: { tenant_id?: number } } } : null
+    return state?.state?.user?.tenant_id ?? null
+  })
+  expect(selectedTenantID).toBe(selectedTenant.tenant_id)
+  expect(new URL(page.url()).search).toBe('')
+  await page.unrouteAll({ behavior: 'ignoreErrors' })
+})
+
 test('logout clears access and denies the next protected dashboard visit', async ({ page }) => {
   test.setTimeout(240_000)
   const loginResponse = await signIn(page, ownerPassword)
@@ -108,6 +226,7 @@ test('logout clears access and denies the next protected dashboard visit', async
   await captureScreenshot(page, 'dashboard-authenticated')
 
   const landingPage = await page.context().newPage()
+  startAuthTimeline(landingPage)
   await landingPage.goto(`${landingUrl}/en`, { waitUntil: 'domcontentloaded' })
   const landingAccountButton = landingPage.getByRole('button', { name: new RegExp(ownerName) })
   await expect(landingAccountButton).toBeVisible({ timeout: 30_000 })
@@ -118,6 +237,18 @@ test('logout clears access and denies the next protected dashboard visit', async
   await expect(accountPanel.getByRole('link', { name: /dashboard/i })).toHaveAttribute('href', `${dashboardUrl}/en/dashboard`)
   await expect(accountPanel.getByRole('link', { name: /settings/i })).toHaveAttribute('href', `${dashboardUrl}/en/dashboard/settings/account`)
   await captureScreenshot(landingPage, 'landing-authenticated-account-menu')
+
+  const dashboardTab = await page.context().newPage()
+  startAuthTimeline(dashboardTab)
+  await dashboardTab.goto(`${dashboardUrl}/en/dashboard`, { waitUntil: 'domcontentloaded' })
+  await expectSignedInDashboard(dashboardTab)
+  await dashboardTab.reload({ waitUntil: 'domcontentloaded' })
+  await expectSignedInDashboard(dashboardTab)
+  await landingPage.reload({ waitUntil: 'domcontentloaded' })
+  await expect(landingPage.getByRole('button', { name: new RegExp(ownerName) })).toBeVisible({ timeout: 30_000 })
+  await page.reload({ waitUntil: 'domcontentloaded' })
+  await expectSignedInDashboard(page)
+  await dashboardTab.close()
 
   await landingPage.keyboard.press('Escape')
   await expect(accountPanel).toBeHidden()
@@ -138,12 +269,16 @@ test('logout clears access and denies the next protected dashboard visit', async
   const themeToggle = landingPage.locator('.sv-theme-toggle')
   const initialDarkTheme = await landingPage.evaluate(() => document.documentElement.classList.contains('dark'))
   await themeToggle.click()
-  await expect.poll(() => landingPage.evaluate(() => document.documentElement.classList.contains('dark'))).toBe(!initialDarkTheme)
+  const toggledDarkTheme = !initialDarkTheme
+  await expect.poll(() => landingPage.evaluate(() => document.documentElement.classList.contains('dark'))).toBe(toggledDarkTheme)
+  await landingPage.reload({ waitUntil: 'domcontentloaded' })
+  await expect.poll(() => landingPage.evaluate(() => document.documentElement.classList.contains('dark'))).toBe(toggledDarkTheme)
   await captureScreenshot(landingPage, 'landing-authenticated-theme-toggle')
-  await themeToggle.click()
+  await landingPage.locator('.sv-theme-toggle').click()
   await expect.poll(() => landingPage.evaluate(() => document.documentElement.classList.contains('dark'))).toBe(initialDarkTheme)
 
-  await landingPage.goto(`${landingUrl}/ar`, { waitUntil: 'domcontentloaded' })
+  await landingPage.locator('a.sv-language').click()
+  await expectPathname(landingPage, '/ar')
   await expect(landingPage.getByRole('button', { name: new RegExp(ownerName) })).toBeVisible({ timeout: 30_000 })
   const arabicDocument = await landingPage.evaluate(() => ({ language: document.documentElement.lang, direction: document.documentElement.dir }))
   expect(arabicDocument).toEqual({ language: 'ar', direction: 'rtl' })
@@ -154,8 +289,14 @@ test('logout clears access and denies the next protected dashboard visit', async
   await landingPage.setViewportSize({ width: 320, height: 800 })
   const mobileMenuButton = landingPage.locator('.sv-menu-button')
   const mobileDrawer = landingPage.locator('#sv-mobile-navigation')
+  await expect(mobileMenuButton).toHaveAttribute('aria-label', /.+/)
+  await expect(mobileMenuButton).toHaveAttribute('aria-expanded', 'false')
   await mobileMenuButton.click()
   await expect(mobileDrawer).toBeVisible()
+  await expect(mobileDrawer).toHaveAttribute('role', 'dialog')
+  await expect(mobileDrawer).toHaveAttribute('aria-modal', 'true')
+  await expect(mobileDrawer).toHaveAttribute('aria-label', /.+/)
+  await expect(mobileMenuButton).toHaveAttribute('aria-expanded', 'true')
   const mobileAccount = mobileDrawer.locator('.sv-mobile-account')
   await expect(mobileAccount.getByText('WS05 A Restaurant')).toBeVisible()
   await expect(mobileAccount.locator('a').nth(0)).toHaveAttribute('href', `${dashboardUrl}/ar/dashboard`)

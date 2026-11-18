@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"strings"
 
@@ -47,7 +48,12 @@ func SessionAuthMiddleware(tokenService *jwt.TokenService, sessions authSessionR
 			}
 			credential, err := sessions.Resolve(r.Context(), cookie.Value)
 			if err != nil {
-				http.Error(w, "Unauthorized", http.StatusUnauthorized)
+				if errors.Is(err, service.ErrSessionNotFound) {
+					http.Error(w, "Unauthorized", http.StatusUnauthorized)
+					return
+				}
+				w.Header().Set("Cache-Control", "private, no-store")
+				http.Error(w, "Session service temporarily unavailable", http.StatusServiceUnavailable)
 				return
 			}
 			request := r.Clone(r.Context())

@@ -87,7 +87,7 @@ services:
     environment:
       PGPASSWORD: ws05-local-only-postgres
     volumes:
-      - ./backend/scripts/db/create_runtime_roles.sql:/fixture/create_runtime_roles.sql:ro
+      - ./backend/scripts/db:/fixture:ro
     entrypoint:
       - sh
       - -c
@@ -96,6 +96,7 @@ services:
         -v dbname=pos_phase2a_e2e
         -v migrator_pw=ws05-local-only-migrator
         -v app_pw=ws05-local-only-app
+        -v accounting_pw=ws05-local-only-accounting
         -f /fixture/create_runtime_roles.sql
 
   api:
@@ -126,6 +127,8 @@ services:
       DB_SSLMODE: disable
       DB_MAX_OPEN_CONNS: 15
       DB_MAX_IDLE_CONNS: 5
+      ACCOUNTING_DB_USER: pos_accounting
+      ACCOUNTING_DB_PASSWORD: ws05-local-only-accounting
       MIGRATE_DB_USER: pos_migrator
       MIGRATE_DB_PASSWORD: ws05-local-only-migrator
       JWT_SECRET: ws05-test-only-jwt-secret-value-minimum-32-characters

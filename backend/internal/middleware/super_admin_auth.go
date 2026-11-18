@@ -3,6 +3,7 @@ package middleware
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"log"
 	"net"
 	"net/http"
@@ -51,7 +52,12 @@ func SuperAdminAuthMiddleware(validator SuperAdminTokenValidator, sessions ...au
 				}
 				credential, resolveErr := sessionResolver.Resolve(r.Context(), cookie.Value)
 				if resolveErr != nil {
-					respondError(w, http.StatusUnauthorized, "invalid or expired session")
+					if errors.Is(resolveErr, service.ErrSessionNotFound) {
+						respondError(w, http.StatusUnauthorized, "invalid or expired session")
+						return
+					}
+					w.Header().Set("Cache-Control", "private, no-store")
+					respondError(w, http.StatusServiceUnavailable, "session service temporarily unavailable")
 					return
 				}
 				token = credential
