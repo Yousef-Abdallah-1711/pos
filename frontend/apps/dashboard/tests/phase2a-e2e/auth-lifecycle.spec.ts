@@ -209,7 +209,10 @@ test('rejects malicious redirect destinations after a real login', async ({ page
   await routeContainerApiToCandidate(page)
   const attacks = [
     { key: 'next', value: '//attacker.example/steal' },
+    { key: 'next', value: '%2F%2Fattacker.example%2Fsteal' },
     { key: 'returnTo', value: 'https://attacker.example/' },
+    { key: 'redirect', value: 'https://localhost:8443/en/dashboard' },
+    { key: 'callbackUrl', value: 'https://localhost.attacker.example/en/dashboard' },
     { key: 'redirect', value: 'http://localhost:13111@attacker.example/' },
     { key: 'callbackUrl', value: '//attacker.example/callback' },
     { key: 'continue', value: String.raw`\\attacker.example\\login` },
@@ -242,6 +245,10 @@ test('rejects malicious redirect destinations after a real login', async ({ page
       headers: { Cookie: `poos_session=${cookie!.value}`, Origin: landingUrl },
     })
     expect(logout.status()).toBe(204)
+    expect((await page.context().cookies(apiOrigin)).some((candidate) => candidate.name === 'poos_session')).toBe(false)
+    // Remove the authenticated dashboard app before the next login navigation.
+    // Its session monitor can otherwise race the next page.goto after logout.
+    await page.goto('about:blank')
   }
 
   for (const malformedLocalePath of ['/xx/auth/login', '/../../attacker.example/auth/login', '/%2F%2Fattacker.example/auth/login']) {
