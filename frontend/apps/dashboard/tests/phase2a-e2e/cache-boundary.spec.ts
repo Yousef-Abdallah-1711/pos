@@ -64,10 +64,17 @@ async function observe(response: ResponseLike, principal: string, route: string,
 }
 
 async function signIn(context: BrowserContext, email: string) {
-  const response = await context.request.post(`${apiDirectUrl}/auth/login`, {
+  const login = () => context.request.post(`${apiDirectUrl}/auth/login`, {
     data: { email, password },
     headers: { origin: dashboardCacheUrl },
   })
+  let response = await login()
+  if (response.status() === 429) {
+    const retryAfterSeconds = Number(response.headers()['retry-after'])
+    expect(Number.isInteger(retryAfterSeconds) && retryAfterSeconds > 0 && retryAfterSeconds <= 60).toBe(true)
+    await new Promise<void>((resolve) => setTimeout(resolve, (retryAfterSeconds + 1) * 1000))
+    response = await login()
+  }
   expect(response.status()).toBe(200)
   expect((await context.cookies('https://localhost')).some((cookie) => cookie.name === 'poos_session')).toBe(true)
 }
