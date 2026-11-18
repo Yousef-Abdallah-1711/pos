@@ -181,6 +181,10 @@ jobs:
         run: docker compose -p "$AUTH_TEST_PROJECT" -f docker-compose.phase2a-e2e.yml up -d restaurant-website
       - name: Validate the isolated HTTPS proxy helper
         run: node --check scripts/phase2a-e2e/https-proxy.mjs
+      - name: Reset ignored production build outputs after disposable Compose startup
+        run: |
+          sudo rm -rf -- frontend/apps/landing/.next frontend/apps/dashboard/.next
+          mkdir -p frontend/apps/landing/.next frontend/apps/dashboard/.next
       - name: Build production Landing and Dashboard, then run real Chromium authentication tests
         env:
           WS05_AUTH_EVIDENCE_DIR: ${{ runner.temp }}/auth-evidence
