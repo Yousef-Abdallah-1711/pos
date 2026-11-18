@@ -1,3 +1,4 @@
+import { execFileSync } from 'node:child_process'
 import { mkdir } from 'node:fs/promises'
 import path from 'node:path'
 import { expect, test, type Page } from '@playwright/test'
@@ -10,6 +11,7 @@ const apiOrigin = new URL(process.env.WS05_API_URL || 'http://localhost:18082/ap
 const ownerEmail = 'phase2a-owner-a@example.test'
 const ownerName = 'WS05 A Owner'
 const ownerPassword = process.env.WS05_TEST_PASSWORD || 'WS05-Disposable-Only-2026!'
+const composeProject = process.env.WS05_COMPOSE_PROJECT || ''
 
 type AuthTimelineEvent = {
   elapsedMs: number
@@ -366,4 +368,66 @@ test('logout clears access and denies the next protected dashboard visit', async
   await expectPathname(page, '/en/auth/login')
   await expect(page.getByRole('textbox', { name: /password/i })).toBeVisible()
   await page.unrouteAll({ behavior: 'ignoreErrors' })
+})
+
+test('Redis outage returns a private 503 without logging out, then recovers on retry', async ({ page }) => {
+  test.skip(!composeProject, 'requires the isolated GitHub Actions authentication Compose project')
+  test.setTimeout(180_000)
+
+  expect(composeProject).toMatch(/^servio-auth-gha-\d+$/)
+  const redisContainerIDs = execFileSync('docker', [
+    'ps',
+    '--filter', `label=com.docker.compose.project=${composeProject}`,
+    '--filter', 'label=com.docker.compose.service=redis',
+    '--format', '{{.ID}}',
+  ], { encoding: 'utf8' }).trim().split(/\r?\n/).filter(Boolean)
+  expect(redisContainerIDs).toHaveLength(1)
+
+  const redisContainerID = redisContainerIDs[0]
+  const redisLabels = JSON.parse(execFileSync('docker', [
+    'inspect', '--format', '{{json .Config.Labels}}', redisContainerID,
+  ], { encoding: 'utf8' })) as Record<string, string>
+  expect(redisLabels['com.docker.compose.project']).toBe(composeProject)
+  expect(redisLabels['com.docker.compose.service']).toBe('redis')
+  expect(redisLabels['com.pos.disposable']).toBe('true')
+  expect(redisLabels['com.pos.workstream']).toBe('WS05')
+
+  const loginResponse = await signIn(page, ownerPassword)
+  expect(loginResponse).toBe(200)
+  await expectSignedInDashboard(page)
+
+  let redisPaused = false
+  try {
+    execFileSync('docker', ['pause', redisContainerID], { stdio: 'ignore' })
+    redisPaused = true
+
+    const outageResponsePromise = page.waitForResponse((response) => {
+      return new URL(response.url()).pathname === '/api/v1/auth/session' && response.status() === 503
+    }, { timeout: 45_000 })
+    await page.evaluate(() => window.dispatchEvent(new Event('focus')))
+    const outageResponse = await outageResponsePromise
+    expect(outageResponse.headers()['cache-control']).toContain('private')
+    expect(outageResponse.headers()['set-cookie']).toBeUndefined()
+    await expect(page.getByRole('alert')).toBeVisible()
+    await expectPathname(page, '/en/dashboard')
+    await expect.poll(() => page.evaluate(() => {
+      const rawAuthState = localStorage.getItem('auth-storage')
+      const authState = rawAuthState ? JSON.parse(rawAuthState) as { state?: { user?: unknown; token?: string } } : null
+      return { hasUser: Boolean(authState?.state?.user), hasStoredToken: Boolean(authState?.state?.token) }
+    })).toEqual({ hasUser: true, hasStoredToken: false })
+    await captureScreenshot(page, 'dashboard-session-unavailable')
+
+    execFileSync('docker', ['unpause', redisContainerID], { stdio: 'ignore' })
+    redisPaused = false
+
+    const recoveryResponsePromise = page.waitForResponse((response) => {
+      return new URL(response.url()).pathname === '/api/v1/auth/session' && response.status() === 200
+    }, { timeout: 30_000 })
+    await page.getByRole('alert').getByRole('button', { name: /try again/i }).click()
+    await recoveryResponsePromise
+    await expectSignedInDashboard(page)
+    await captureScreenshot(page, 'dashboard-session-recovered')
+  } finally {
+    if (redisPaused) execFileSync('docker', ['unpause', redisContainerID], { stdio: 'ignore' })
+  }
 })

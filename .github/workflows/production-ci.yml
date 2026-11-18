@@ -118,6 +118,116 @@ jobs:
             pnpm --filter "./apps/$APP" test:run --maxWorkers=2 --no-file-parallelism
           fi
 
+  auth-browser-acceptance:
+    if: github.event_name == 'pull_request' && github.event.pull_request.number == 82
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    env:
+      AUTH_TEST_PROJECT: servio-auth-gha-${{ github.run_id }}
+      P2A_API_HOST_PORT: '18082'
+      P2A_LANDING_HOST_PORT: '13115'
+      P2A_DASHBOARD_HOST_PORT: '13116'
+      P2A_RESTAURANT_HOST_PORT: '13117'
+      P2A_SUPER_ADMIN_HOST_PORT: '13118'
+      WS05_TEST_RUNNER_ON_HOST: 'true'
+      WS05_COMPOSE_PROJECT: servio-auth-gha-${{ github.run_id }}
+      WS05_API_HOST_PORT: '18082'
+      WS05_API_URL: http://localhost:18082/api/v1
+      WS05_API_INTERNAL_URL: http://localhost:18082/api/v1
+      WS05_LANDING_URL: http://localhost:13111
+      WS05_LANDING_REDIRECT_URL: http://localhost:13111
+      WS05_DASHBOARD_URL: http://localhost:13112
+      API_INTERNAL_URL: http://127.0.0.1:18082/api/v1
+      NEXT_PUBLIC_API_URL: http://localhost:18082/api/v1
+      NEXT_PUBLIC_API_BASE_URL: http://localhost:18082/api/v1
+      NEXT_PUBLIC_SUPER_ADMIN_API_URL: http://localhost:18082/api/v1/super-admin
+      NEXT_PUBLIC_LANDING_URL: http://localhost:13111
+      NEXT_PUBLIC_DASHBOARD_URL: http://localhost:13112
+      NEXT_PUBLIC_RESTAURANT_DOMAIN: localhost:13113
+      NEXT_TELEMETRY_DISABLED: '1'
+      NODE_OPTIONS: --max-old-space-size=3072
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: 24.22.3
+      - run: corepack enable && corepack prepare pnpm@10.34.9 --activate
+      - name: Install only Landing, Dashboard, and their workspace dependencies
+        working-directory: frontend
+        run: pnpm install --frozen-lockfile --filter @pos-saas/landing... --filter @pos-saas/dashboard...
+      - name: Install Chromium and its host dependencies
+        working-directory: frontend/apps/dashboard
+        run: pnpm exec playwright install --with-deps chromium
+      - name: Start the isolated API, PostgreSQL, and Redis
+        run: docker compose -p "$AUTH_TEST_PROJECT" -f docker-compose.phase2a-e2e.yml up -d --build api
+      - name: Wait for the isolated API health check
+        run: |
+          ready=false
+          for attempt in $(seq 1 60); do
+            if curl --fail --silent --max-time 5 http://127.0.0.1:18082/api/v1/health >/dev/null; then
+              ready=true
+              break
+            fi
+            sleep 5
+          done
+          test "$ready" = true
+      - name: Seed synthetic WS05 tenant fixtures
+        run: pwsh -NoProfile -NonInteractive -File scripts/phase2a-e2e/seed.ps1 -ProjectName "$AUTH_TEST_PROJECT"
+      - name: Build production Landing and Dashboard, then run real Chromium authentication tests
+        env:
+          WS05_AUTH_EVIDENCE_DIR: ${{ runner.temp }}/auth-evidence
+        run: |
+          mkdir -p "$WS05_AUTH_EVIDENCE_DIR" "$RUNNER_TEMP/playwright-results"
+          pnpm --dir frontend/apps/landing build
+          pnpm --dir frontend/apps/dashboard build
+
+          pnpm --dir frontend/apps/landing exec next start -p 13111 >"$RUNNER_TEMP/landing.log" 2>&1 &
+          landing_pid=$!
+          pnpm --dir frontend/apps/dashboard exec next start -p 13112 >"$RUNNER_TEMP/dashboard.log" 2>&1 &
+          dashboard_pid=$!
+          stop_frontends() {
+            kill "$landing_pid" "$dashboard_pid" 2>/dev/null || true
+            wait "$landing_pid" "$dashboard_pid" 2>/dev/null || true
+          }
+          trap stop_frontends EXIT
+
+          for url in http://127.0.0.1:13111/en http://127.0.0.1:13112/en/dashboard; do
+            ready=false
+            for attempt in $(seq 1 60); do
+              status=$(curl --silent --output /dev/null --write-out '%{http_code}' --max-time 5 "$url" || true)
+              if [ "$status" = 200 ] || [[ "$status" =~ ^30[0-9]$ ]]; then
+                ready=true
+                break
+              fi
+              sleep 5
+            done
+            test "$ready" = true
+          done
+
+          pnpm --dir frontend/apps/dashboard exec playwright test \
+            --config playwright.phase2a.config.ts \
+            tests/phase2a-e2e/auth-lifecycle.spec.ts \
+            --output "$RUNNER_TEMP/playwright-results" \
+            --trace off
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: auth-browser-acceptance-${{ github.run_id }}
+          path: |
+            ${{ runner.temp }}/playwright-results/
+            ${{ runner.temp }}/auth-evidence/
+          retention-days: 7
+          if-no-files-found: warn
+      - name: Remove only this run's disposable auth test project
+        if: always()
+        run: |
+          if [[ "$AUTH_TEST_PROJECT" =~ ^servio-auth-gha-[0-9]+$ ]]; then
+            docker compose -p "$AUTH_TEST_PROJECT" -f docker-compose.phase2a-e2e.yml down --volumes --remove-orphans
+          else
+            echo "Refusing cleanup because the auth test project name is unexpected."
+            exit 1
+          fi
+
   security-and-config:
     runs-on: ubuntu-24.04
     timeout-minutes: 15
@@ -243,10 +353,12 @@ jobs:
 
   required:
     if: always()
-    needs: [backend, frontend, security-and-config, application-images]
+    needs: [backend, frontend, security-and-config, application-images, auth-browser-acceptance]
     runs-on: ubuntu-24.04
+    env:
+      REQUIRE_AUTH_BROWSER: ${{ github.event_name == 'pull_request' && github.event.pull_request.number == 82 }}
     steps:
       - name: Require every validation stage
         env:
           RESULTS: ${{ toJSON(needs) }}
-        run: python3 -c 'import json,os; jobs=json.loads(os.environ["RESULTS"]); assert all(j["result"] == "success" for j in jobs.values()), jobs'
+        run: python3 -c 'import json,os; jobs=json.loads(os.environ["RESULTS"]); run_browser=os.environ["REQUIRE_AUTH_BROWSER"] == "true"; required=[job for name,job in jobs.items() if name != "auth-browser-acceptance" or run_browser]; assert all(job["result"] == "success" for job in required), jobs'

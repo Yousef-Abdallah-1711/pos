@@ -146,10 +146,10 @@ services:
       POS_TEST_SEED: "true"
     ports:
       - "127.0.0.1:${P2A_API_HOST_PORT:-18082}:18080"
-      - "127.0.0.1:13111:3001"
-      - "127.0.0.1:13112:3002"
-      - "127.0.0.1:13113:3003"
-      - "127.0.0.1:13114:3004"
+      - "127.0.0.1:${P2A_LANDING_HOST_PORT:-13111}:3001"
+      - "127.0.0.1:${P2A_DASHBOARD_HOST_PORT:-13112}:3002"
+      - "127.0.0.1:${P2A_RESTAURANT_HOST_PORT:-13113}:3003"
+      - "127.0.0.1:${P2A_SUPER_ADMIN_HOST_PORT:-13114}:3004"
     volumes:
       - ./backend:/app
       - p2a_go_mod_cache:/go/pkg/mod
