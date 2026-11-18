@@ -336,6 +336,18 @@ test('rejects cross-site writes across browser session and login routes', async 
     expect(response.status()).toBe(expectedStatus)
     orderPreflightResults.push({ origin: origin ?? 'missing', status: response.status() })
   }
+  const storefrontOrigin = 'http://phase2a-restaurant-a.localhost:13113'
+  const storefrontOrderPreflight = await page.request.fetch(`${apiOrigin}/api/v1/public/orders`, {
+    method: 'OPTIONS',
+    headers: {
+      Origin: storefrontOrigin,
+      'Access-Control-Request-Method': 'POST',
+      'Access-Control-Request-Headers': 'content-type,x-tenant-id,x-restaurant-id,x-order-token',
+    },
+  })
+  expect(storefrontOrderPreflight.status()).toBe(200)
+  expect(storefrontOrderPreflight.headers()['access-control-allow-origin']).toBe(storefrontOrigin)
+  orderPreflightResults.push({ origin: storefrontOrigin, status: storefrontOrderPreflight.status() })
 
   const trustedRefresh = await page.request.post(`${apiOrigin}/api/v1/auth/refresh`, {
     headers: { Cookie: staffCookieHeader, Origin: landingUrl },

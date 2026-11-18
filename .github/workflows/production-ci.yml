@@ -127,7 +127,7 @@ jobs:
       P2A_API_HOST_PORT: '18082'
       P2A_LANDING_HOST_PORT: '13115'
       P2A_DASHBOARD_HOST_PORT: '13116'
-      P2A_RESTAURANT_HOST_PORT: '13117'
+      P2A_RESTAURANT_HOST_PORT: '13113'
       P2A_SUPER_ADMIN_HOST_PORT: '13118'
       WS05_TEST_RUNNER_ON_HOST: 'true'
       WS05_COMPOSE_PROJECT: servio-auth-gha-${{ github.run_id }}
@@ -138,7 +138,7 @@ jobs:
       WS05_LANDING_REDIRECT_URL: https://localhost:13111
       WS05_DASHBOARD_URL: https://localhost:13112
       WS05_IGNORE_HTTPS_ERRORS: 'true'
-      P2A_CORS_ORIGINS: http://localhost:13111,http://localhost:13112,https://localhost:13111,https://localhost:13112
+      P2A_CORS_ORIGINS: http://localhost:13111,http://localhost:13112,http://phase2a-restaurant-a.localhost:13113,https://localhost:13111,https://localhost:13112
       API_INTERNAL_URL: http://127.0.0.1:18082/api/v1
       NEXT_PUBLIC_API_URL: https://localhost:18443/api/v1
       NEXT_PUBLIC_API_BASE_URL: https://localhost:18443/api/v1
