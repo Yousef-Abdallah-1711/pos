@@ -443,6 +443,7 @@ async function main() {
   const errors = []
   const recoveredRscNavigations = []
   const networkFailures = []
+  let expectedGuestSessionDenials = 0
   const failedNextChunkRequests = []
   const deferredChunkDiagnostics = []
   const deferNextChunkException = (pageUrl, details) => {
@@ -506,6 +507,11 @@ async function main() {
    page.on('response', response => {
     if (response.status() < 400) return
     const pathname = new URL(response.url()).pathname
+    const method = response.request().method()
+    if (response.status() === 401 && method === 'GET' && pathname === '/api/v1/auth/session') {
+     expectedGuestSessionDenials++
+     return
+    }
     networkFailures.push(`${response.status()} ${pathname}`)
     if (pathname.startsWith('/_next/static/chunks/')) failedNextChunkRequests.push(`${response.status()} ${pathname}`)
    })
@@ -551,7 +557,7 @@ async function main() {
   check('browser exceptions', errors.length === 0, errors.join('; '))
  } finally {
   await browser.close()
-  await fs.writeFile(path.join(output, 'results.json'), JSON.stringify({ base, browser: browserName, color_scheme: colorScheme, theme: expectedTheme, cancelled_next_chunk_requests: cancelledNextChunkRequests, cancelled_next_chunk_page_paths: [...cancelledNextChunkPagePaths], checks }, null, 2))
+  await fs.writeFile(path.join(output, 'results.json'), JSON.stringify({ base, browser: browserName, color_scheme: colorScheme, theme: expectedTheme, expected_guest_session_denials: expectedGuestSessionDenials, cancelled_next_chunk_requests: cancelledNextChunkRequests, cancelled_next_chunk_page_paths: [...cancelledNextChunkPagePaths], checks }, null, 2))
   await fs.writeFile(path.join(output, 'navigation-evidence.json'), JSON.stringify({ sourceCommit, screenshots: navigationScreenshots }, null, 2))
  }
 }
