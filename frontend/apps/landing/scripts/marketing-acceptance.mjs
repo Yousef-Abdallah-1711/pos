@@ -17,9 +17,11 @@ const ciAllowedOrigins = new Set([
  ...ciPageOrigins, 'https://api.servio.test', 'https://pos.app.servio.test',
  'https://restaurant-1.pos.servio.test', 'https://localhost:18443',
 ])
-const ciApiOrigin = process.env.SERVIO_ACCEPTANCE_ENV === 'ci' && process.env.NEXT_PUBLIC_API_URL
- ? new URL(process.env.NEXT_PUBLIC_API_URL).origin
+const configuredCiApiUrl = process.env.SERVIO_MARKETING_API_URL || process.env.NEXT_PUBLIC_API_URL
+const ciApiOrigin = process.env.SERVIO_ACCEPTANCE_ENV === 'ci' && configuredCiApiUrl
+ ? new URL(configuredCiApiUrl).origin
  : null
+if (ciApiOrigin && !ciAllowedOrigins.has(ciApiOrigin)) throw new Error('CI marketing acceptance accepts only its configured disposable API origin')
 if (process.env.SERVIO_ACCEPTANCE_ENV === 'ci' && !ciPageOrigins.has(new URL(base).origin)) throw new Error('CI marketing acceptance accepts only a disposable local or SERVIO test landing host')
 const output = process.env.SERVIO_MARKETING_EVIDENCE || (process.env.SERVIO_BROWSER_EVIDENCE ? path.join(process.env.SERVIO_BROWSER_EVIDENCE, 'marketing') : '/tmp/servio-marketing-acceptance')
 const viewports = [
