@@ -244,6 +244,109 @@ jobs:
             tests/phase2a-e2e/auth-lifecycle.spec.ts \
             --output "$RUNNER_TEMP/playwright-results" \
             --trace off
+      - name: Checkout the reviewed PR #85 protected-session harness
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: Yousef-Abdallah-1711/pos
+          ref: 954138f7e788220cea2b100da84860798ebd5f6f
+          path: servio-pr85
+          persist-credentials: false
+      - name: Run a small authenticated-session smoke load on the disposable API
+        env:
+          WS05_TEST_PASSWORD: WS05-Disposable-Only-2026!
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/auth-evidence"
+          chmod 700 "$RUNNER_TEMP/auth-evidence"
+          cookie_file="$RUNNER_TEMP/session-cookie-values"
+          trap 'rm -f "$cookie_file"' EXIT
+          python3 - "$cookie_file" <<'PY'
+          import http.cookiejar
+          import json
+          import os
+          import re
+          import sys
+          import urllib.request
+
+          output = sys.argv[1]
+          email = 'phase2a-owner-a@example.test'
+          password = os.environ['WS05_TEST_PASSWORD']
+          endpoint = 'http://127.0.0.1:18082/api/v1/auth/login'
+          values = []
+          for _ in range(10):
+              jar = http.cookiejar.CookieJar()
+              opener = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(jar))
+              request = urllib.request.Request(
+                  endpoint,
+                  data=json.dumps({'email': email, 'password': password}).encode(),
+                  headers={'Content-Type': 'application/json', 'Origin': 'http://localhost:13112'},
+                  method='POST',
+              )
+              try:
+                  with opener.open(request, timeout=15) as response:
+                      if response.status != 200:
+                          raise RuntimeError('synthetic session creation failed')
+              except Exception as error:
+                  raise SystemExit('synthetic session creation failed; details withheld') from None
+              cookies = [cookie.value for cookie in jar if cookie.name == 'poos_session']
+              if len(cookies) != 1 or not re.fullmatch(r'[A-Za-z0-9_-]{43}', cookies[0]):
+                  raise SystemExit('synthetic session response did not contain one opaque session cookie')
+              values.append(cookies[0])
+          if len(set(values)) != 10:
+              raise SystemExit('synthetic session pool was not unique')
+          with open(output, 'w', encoding='ascii') as destination:
+              destination.write('\n'.join(values) + '\n')
+          os.chmod(output, 0o600)
+          PY
+
+          docker pull grafana/k6:2.3.0 >/dev/null
+          postgres_container="$AUTH_TEST_PROJECT-postgres-1"
+          redis_container="$AUTH_TEST_PROJECT-redis-1"
+          api_container="$AUTH_TEST_PROJECT-api-1"
+          for container in "$api_container" "$postgres_container" "$redis_container"; do
+            test "$(docker inspect --format '{{index .Config.Labels "com.docker.compose.project"}}' "$container")" = "$AUTH_TEST_PROJECT"
+            test "$(docker inspect --format '{{index .Config.Labels "com.pos.disposable"}}' "$container")" = true
+          done
+
+          (
+            for sample in $(seq 1 18); do
+              printf '%s\n' "sample=$sample utc=$(date -u +%FT%TZ)"
+              docker stats --no-stream --format '{{.Name}} cpu={{.CPUPerc}} memory={{.MemUsage}} memory_pct={{.MemPerc}}' "$api_container" "$postgres_container" "$redis_container"
+              sleep 2
+            done
+          ) >"$RUNNER_TEMP/auth-evidence/k6-container-stats.txt" 2>&1 &
+          stats_pid=$!
+          docker run --rm --network host --user "$(id -u):$(id -g)" \
+            --mount "type=bind,src=$GITHUB_WORKSPACE/servio-pr85/backend/tests/load,dst=/harness,readonly" \
+            --mount "type=bind,src=$cookie_file,dst=/run/secrets/session-cookie-values,readonly" \
+            --mount "type=bind,src=$RUNNER_TEMP/auth-evidence,dst=/evidence" \
+            -e API_BASE_URL=http://127.0.0.1:18082 \
+            -e SESSION_COOKIE_VALUES_FILE=/run/secrets/session-cookie-values \
+            -e TARGET_RPS=10 -e MAX_VUS=10 -e PRE_ALLOCATED_VUS=10 -e DURATION=30s \
+            grafana/k6:2.3.0 run --quiet --summary-export=/evidence/k6-summary-raw.json \
+            /harness/protected-session-rps.js >"$RUNNER_TEMP/k6-console.log" 2>&1 || {
+              kill "$stats_pid" 2>/dev/null || true
+              wait "$stats_pid" 2>/dev/null || true
+              python3 "$GITHUB_WORKSPACE/servio-pr85/backend/scripts/summarize_k6.py" \
+                "$RUNNER_TEMP/auth-evidence/k6-summary-raw.json" \
+                --output "$RUNNER_TEMP/auth-evidence/k6-measured-summary.json" || true
+              echo 'The isolated authenticated-session smoke load failed; sanitized k6 output will be inspected.'
+              sed -E 's/(poos_session=)[A-Za-z0-9_-]+/\1[redacted]/g' "$RUNNER_TEMP/k6-console.log" | tail -80
+              exit 1
+            }
+          wait "$stats_pid"
+          python3 "$GITHUB_WORKSPACE/servio-pr85/backend/scripts/summarize_k6.py" \
+            "$RUNNER_TEMP/auth-evidence/k6-summary-raw.json" \
+            --output "$RUNNER_TEMP/auth-evidence/k6-measured-summary.json"
+          docker exec "$redis_container" redis-cli --raw INFO memory | awk -F: '/^(used_memory:|used_memory_peak:|used_memory_rss:|maxmemory:)/ { print $1 "=" $2 }' >"$RUNNER_TEMP/auth-evidence/redis-memory.txt"
+          docker exec "$redis_container" redis-cli --raw INFO stats | awk -F: '/^(total_commands_processed:|instantaneous_ops_per_sec:|keyspace_hits:|keyspace_misses:|evicted_keys:)/ { print $1 "=" $2 }' >"$RUNNER_TEMP/auth-evidence/redis-stats.txt"
+          docker exec "$postgres_container" psql -U postgres -d pos_phase2a_e2e -Atc \
+            "SELECT datname || ',xact_commit=' || xact_commit || ',tup_returned=' || tup_returned || ',tup_fetched=' || tup_fetched || ',active_connections=' || (SELECT count(*) FROM pg_stat_activity WHERE datname = 'pos_phase2a_e2e' AND state = 'active') FROM pg_stat_database WHERE datname = 'pos_phase2a_e2e'" \
+            >"$RUNNER_TEMP/auth-evidence/postgres-stats.txt"
+          printf 'source_sha=%s\nload_harness_sha=%s\ntarget_rps=10\nmax_vus=10\nduration=30s\nrunner_cpu_count=%s\n' \
+            "$GITHUB_SHA" '954138f7e788220cea2b100da84860798ebd5f6f' "$(nproc)" \
+            >"$RUNNER_TEMP/auth-evidence/k6-environment.txt"
+          free -b | sed -n '1,2p' >>"$RUNNER_TEMP/auth-evidence/k6-environment.txt"
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always()
         with:

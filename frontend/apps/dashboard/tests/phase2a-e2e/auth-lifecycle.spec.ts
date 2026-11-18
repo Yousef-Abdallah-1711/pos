@@ -258,14 +258,14 @@ test('forged tenant headers cannot disclose another tenant product', async ({ pa
   })
   expect(response.status).toBe(404)
   expect(response.body).not.toContain('WS05 E2E Burger B')
-  expect(response.body).not.toContain('WS05 B Restaurant')
+  expect(response.body).not.toContain('WS05 Tenant B Restaurant')
   expect(response.body).not.toContain('phase2a-restaurant-b')
 
   await testInfo.attach('cross-tenant-zero-disclosure.json', {
     body: JSON.stringify({
       responseStatus: response.status,
       responseBodyContainsTargetProduct: response.body.includes('WS05 E2E Burger B'),
-      responseBodyContainsTargetRestaurant: response.body.includes('WS05 B Restaurant'),
+      responseBodyContainsTargetRestaurant: response.body.includes('WS05 Tenant B Restaurant'),
       forgedTenantAndRestaurantHeaders: true,
       ownerScopedProductRowsFoundByPOSApp: Number(scopedRowCount),
       productsTableRowLevelSecurityEnabled: rlsEnabled === 't',
@@ -326,7 +326,7 @@ test('logout clears access and denies the next protected dashboard visit', async
   await expect(landingAccountButton).toBeVisible({ timeout: 30_000 })
   await landingAccountButton.click()
   const accountPanel = landingPage.locator('#sv-account-panel')
-  await expect(accountPanel.getByText('WS05 A Restaurant')).toBeVisible()
+  await expect(accountPanel.getByText('WS05 Tenant A Restaurant')).toBeVisible()
   expect(await accountPanel.innerText()).not.toMatch(/phone|user id|tenant id|session|token/i)
   await expect(accountPanel.getByRole('link', { name: /dashboard/i })).toHaveAttribute('href', `${dashboardUrl}/en/dashboard`)
   await expect(accountPanel.getByRole('link', { name: /settings/i })).toHaveAttribute('href', `${dashboardUrl}/en/dashboard/settings/account`)
@@ -392,7 +392,7 @@ test('logout clears access and denies the next protected dashboard visit', async
   await expect(mobileDrawer).toHaveAttribute('aria-label', /.+/)
   await expect(mobileMenuButton).toHaveAttribute('aria-expanded', 'true')
   const mobileAccount = mobileDrawer.locator('.sv-mobile-account')
-  await expect(mobileAccount.getByText('WS05 A Restaurant')).toBeVisible()
+  await expect(mobileAccount.getByText('WS05 Tenant A Restaurant')).toBeVisible()
   await expect(mobileAccount.locator('a').nth(0)).toHaveAttribute('href', `${dashboardUrl}/ar/dashboard`)
   await expect(mobileAccount.locator('a').nth(1)).toHaveAttribute('href', `${dashboardUrl}/ar/dashboard/settings/account`)
   const signOutBounds = await mobileAccount.locator('.sv-mobile-account__signout').boundingBox()
