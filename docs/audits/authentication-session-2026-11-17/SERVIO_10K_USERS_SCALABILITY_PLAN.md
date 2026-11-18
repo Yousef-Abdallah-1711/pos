@@ -111,3 +111,43 @@ See [current architecture](SERVIO_CURRENT_ARCHITECTURE_AUDIT.md), [security mode
 ## Implementation update — 2026-11-17
 
 This report was reconciled against `origin/main` at `c052c817e114df4d060d8428e6e236f6011876f8`. The current implementation slice, P0/P1 traceability, test evidence, and outstanding work are recorded in [IMPLEMENTATION_STATUS.md](IMPLEMENTATION_STATUS.md); the refreshed repository/CI baseline is in [BASELINE.md](BASELINE.md). Historical audit conclusions remain intact. This update does not mark unimplemented Redis replay/rate-limit work, the full E2E matrix, Super Admin/storefront acceptance, cache-boundary testing, or 10K measurements as complete.
+
+## Release-specific load-test specification — proposed, not approved
+
+This is a test plan only. The 10 RPS / 10 VU smoke run does not validate these targets. Do not execute the high-load profile until the owner authorizes a separate production-like environment with capacity, monitoring, rollback, and synthetic data confirmed.
+
+### Proposed workload
+
+1. Create and verify **10,000 active, idle staff sessions** in Redis with the approved 30-minute idle and eight-hour absolute policy. Record serialized session bytes, key TTL distribution, memory overhead, and expiry behavior. Keep the sessions valid using a separately documented idle cohort so the test does not silently extend TTLs.
+2. Ramp to **333 protected API requests/second for 30 minutes** across a representative tenant/restaurant distribution. Include the session lookup and ordinary read mix; keep mutation traffic separately labeled.
+3. Generate a **2,000 RPS protected-request burst for 60 seconds**, then measure the full return to steady latency and error rates.
+4. Run a login cohort of **100 simultaneous synthetic login attempts**, ramped over 30 seconds, with valid and invalid credentials tracked separately. Repeat only after verifying rate-limit behavior and monitoring password-hash CPU use.
+5. During a separate recovery scenario, interrupt Redis using the production-like failover procedure; confirm staff authentication fails closed, then confirm recovery after Redis is healthy without accepting revoked or expired sessions.
+
+### Proposed SLOs for owner approval
+
+| Measure | Proposed target |
+|---|---:|
+| Protected request latency at 333 RPS | p50 ≤ 100 ms, p95 ≤ 300 ms, p99 ≤ 750 ms |
+| Protected request latency during 2,000 RPS burst | p95 ≤ 500 ms, p99 ≤ 1,000 ms |
+| Valid login latency | p95 ≤ 1,000 ms, p99 ≤ 2,000 ms |
+| Protected-route timeout/5xx rate at steady load | < 0.1% |
+| Protected-route timeout/5xx rate during burst | < 0.5% |
+| False 401/403 for valid sessions | 0 |
+| Cross-tenant or cross-restaurant data disclosures | 0 |
+| Redis failover and stable recovery | ≤ 60 seconds, fail-closed throughout outage |
+
+These are proposed thresholds, not accepted product SLOs. Product and engineering owners must approve them before a load run can determine release readiness.
+
+### Required instrumentation and stop conditions
+
+- Record p50/p95/p99, request count, timeouts, 4xx/5xx, valid-session false denials, and recovery timelines by route class.
+- Record Redis used/peak memory, bytes per session, active clients, command latency, TTL distribution, rejected writes, and evictions. Proposed steady cap: ≤70% of configured Redis memory and zero evictions.
+- Record PostgreSQL active/idle/waiting connections, pool wait time, query latency, lock waits, and CPU. Proposed steady cap: ≤70% of configured connection capacity, no pool exhaustion.
+- Record service/host CPU and memory, OOM events, swap, container restarts, network, and disk/WAL growth. Proposed sustained CPU <70% and memory <80%; any OOM, unbounded growth, tenant leak, session false denial, or exhausted pool stops the run.
+- Include exact source SHA, immutable image digests, dataset generation seed, region/topology, runner/generator capacity, warm/cold cache state, request mix, raw histograms, and a signed run receipt.
+- Use isolated synthetic identities only. Do not point load generators at production or the shared staging stack. No infrastructure upgrades are authorized by this plan.
+
+### Approval status
+
+High-load execution environment: **not identified or authorized**. Proposed SLOs: **pending product and engineering approval**. 10K readiness: **not validated**. The existing 10 RPS smoke remains a small functional load check only.
