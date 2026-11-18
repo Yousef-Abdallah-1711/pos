@@ -380,7 +380,7 @@ test('rejects cross-site writes across browser session and login routes', async 
   await page.unrouteAll({ behavior: 'ignoreErrors' })
 })
 
-test('rejects missing and untrusted origins on every registered staff unsafe route', async ({ page }, testInfo) => {
+test('rejects missing and untrusted origins on every registered staff and Super Admin unsafe route', async ({ page }, testInfo) => {
   test.skip(!composeProject, 'requires the isolated GitHub Actions authentication Compose project')
   test.setTimeout(180_000)
   expect(await signIn(page, ownerPassword)).toBe(200)
@@ -393,7 +393,6 @@ test('rejects missing and untrusted origins on every registered staff unsafe rou
   const routePatterns = [...new Set(manifest.split(/\r?\n/).map((line) => line.trim()).filter(Boolean))]
   const exclusions = [
     { prefix: '/api/v1/public/orders', reason: 'anonymous customer capability routes are covered by storefront E2E' },
-    { prefix: '/api/v1/super-admin/', reason: 'Super Admin Origin matrix is exercised separately with its isolated cookie' },
     { prefix: '/api/v1/translations/', reason: 'translation upload uses bearer authorization, not browser session cookies' },
     { prefix: '/api/v1/mock/paymob/', reason: 'mock payment endpoint is unauthenticated and has no ambient session authority' },
     { prefix: '/api/v1/webhook/paymob', reason: 'payment webhook is server-to-server and uses webhook verification' },
@@ -406,14 +405,30 @@ test('rejects missing and untrusted origins on every registered staff unsafe rou
   })
   expect(unsafeRoutes.length).toBeGreaterThanOrEqual(140)
 
+  const superAdminLogin = await page.request.post(`${apiOrigin}/api/v1/super-admin/auth/login`, {
+    headers: { Origin: landingUrl },
+    data: { email: 'phase2a-superadmin@example.test', password: ownerPassword },
+  })
+  expect(superAdminLogin.status()).toBe(200)
+  const superAdminCookie = (await page.context().cookies(apiOrigin)).find((cookie) => cookie.name === 'poos_super_admin_session')
+  expect(superAdminCookie?.httpOnly).toBe(true)
+  const staffRoutes = unsafeRoutes.filter((route) => !route.pattern.startsWith('/api/v1/super-admin/'))
+  const superAdminRoutes = unsafeRoutes.filter((route) => route.pattern.startsWith('/api/v1/super-admin/'))
+  expect(staffRoutes.length).toBeGreaterThan(0)
+  expect(superAdminRoutes.length).toBeGreaterThan(0)
+
   const results: Array<{ method: string; path: string; origin: string; status: number }> = []
   for (const route of unsafeRoutes) {
     const concretePath = route.pattern.replace(/\{([^/{}]+)\}/g, (_token, name: string) => {
       return name.toLowerCase() === 'email' ? 'csrf-probe%40example.test' : '1'
     })
     for (const origin of [undefined, 'https://attacker.example']) {
+      const routeCookie = route.pattern.startsWith('/api/v1/super-admin/')
+        ? superAdminCookie
+        : sessionCookie
+      expect(routeCookie).toBeDefined()
       const headers: Record<string, string> = {
-        Cookie: `poos_session=${sessionCookie!.value}`,
+        Cookie: `${route.pattern.startsWith('/api/v1/super-admin/') ? 'poos_super_admin_session' : 'poos_session'}=${routeCookie!.value}`,
         'Content-Type': 'application/json',
       }
       if (origin) headers.Origin = origin
@@ -427,8 +442,15 @@ test('rejects missing and untrusted origins on every registered staff unsafe rou
     }
   }
 
-  await testInfo.attach('registered-staff-unsafe-route-csrf-matrix.json', {
-    body: JSON.stringify({ sourceManifest: 'backend/cmd/api/routes.manifest', routePatternsChecked: unsafeRoutes.length, excludedRoutes: exclusions, results }, null, 2),
+  await testInfo.attach('registered-staff-super-admin-unsafe-route-csrf-matrix.json', {
+    body: JSON.stringify({
+      sourceManifest: 'backend/cmd/api/routes.manifest',
+      routePatternsChecked: unsafeRoutes.length,
+      staffRoutesChecked: staffRoutes.length,
+      superAdminRoutesChecked: superAdminRoutes.length,
+      excludedRoutes: exclusions,
+      results,
+    }, null, 2),
     contentType: 'application/json',
   })
   await page.unrouteAll({ behavior: 'ignoreErrors' })
