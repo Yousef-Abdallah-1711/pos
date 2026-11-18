@@ -70,8 +70,20 @@ export function MobileNavigation({ locale, pathname, open, onClose, triggerRef, 
         closeAndRestoreFocus()
         return
       }
-      if (event.key !== 'Tab' || !panelRef.current) return
-      const controls = [...panelRef.current.querySelectorAll<HTMLElement>('a[href], button:not([disabled])')]
+      if (!panelRef.current) return
+      const nav = panelRef.current.querySelector<HTMLElement>('nav')
+      if ((event.key === 'ArrowDown' || event.key === 'ArrowUp') && nav) {
+        const navControls = getAvailableControls(nav)
+        const activeIndex = navControls.indexOf(document.activeElement as HTMLElement)
+        if (activeIndex >= 0 && navControls.length > 1) {
+          event.preventDefault()
+          const direction = event.key === 'ArrowDown' ? 1 : -1
+          navControls[(activeIndex + direction + navControls.length) % navControls.length]?.focus()
+        }
+        return
+      }
+      if (event.key !== 'Tab') return
+      const controls = getAvailableControls(panelRef.current)
       const first = controls[0]
       const last = controls.at(-1)
       if (event.shiftKey && document.activeElement === first) {
@@ -141,6 +153,11 @@ export function MobileNavigation({ locale, pathname, open, onClose, triggerRef, 
       {session.status === 'guest' && <div onClick={closeAndRestoreFocus}><TrialLink locale={locale} source="mobile-navigation" /></div>}
     </div>
   </>
+}
+
+function getAvailableControls(container: HTMLElement) {
+  return [...container.querySelectorAll<HTMLElement>('a[href], button:not([disabled])')]
+    .filter(control => !control.closest('[hidden], [inert], [aria-hidden="true"]'))
 }
 
 function MobileAccountSection({ locale, session, isSigningOut, onRetry, onSignOut, onClose }: MobileAccountSectionProps) {

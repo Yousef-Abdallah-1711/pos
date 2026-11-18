@@ -68,6 +68,31 @@ describe('marketing navigation interactions', () => {
     expect(onClose).toHaveBeenCalledTimes(2)
   })
 
+  it('moves through visible mobile navigation controls with arrow keys and traps focus', () => {
+    render(<MobileNavigationHarness onClose={vi.fn()} onToggleTheme={vi.fn()} onSwitchLocale={vi.fn()} />)
+    const panel = document.getElementById('sv-mobile-navigation')
+    const nav = panel?.querySelector('nav')
+    expect(panel).not.toBeNull()
+    expect(nav).not.toBeNull()
+
+    const availableControls = (container: Element) => [...container.querySelectorAll<HTMLElement>('a[href], button:not([disabled])')]
+      .filter(control => !control.closest('[hidden], [inert], [aria-hidden="true"]'))
+    const navControls = availableControls(nav!)
+    const dialogControls = availableControls(panel!)
+    expect(navControls.length).toBeGreaterThan(1)
+    expect(dialogControls.at(-1)).toBeTruthy()
+
+    navControls[0].focus()
+    fireEvent.keyDown(document, { key: 'ArrowDown' })
+    expect(navControls[1]).toHaveFocus()
+    fireEvent.keyDown(document, { key: 'ArrowUp' })
+    expect(navControls[0]).toHaveFocus()
+
+    dialogControls.at(-1)?.focus()
+    fireEvent.keyDown(document, { key: 'Tab' })
+    expect(dialogControls[0]).toHaveFocus()
+  })
+
   it('places authenticated account actions inside the mobile drawer', async () => {
     const onClose = vi.fn()
     const profileSession: LandingSessionState = {
