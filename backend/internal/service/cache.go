@@ -26,6 +26,12 @@ type AtomicSessionCache interface {
 	Rotate(ctx context.Context, oldKey, newKey, value string, ttl time.Duration) error
 }
 
+// SlidingSessionCache refreshes a session TTL only if its value has not been
+// replaced or revoked since it was read.
+type SlidingSessionCache interface {
+	Touch(ctx context.Context, key, expectedValue string, ttl time.Duration) error
+}
+
 type memoryCacheItem struct {
 	value     string
 	expiresAt time.Time
@@ -100,6 +106,29 @@ func (c *InMemoryCache) Rotate(_ context.Context, oldKey, newKey, value string, 
 	return nil
 }
 
+func (c *InMemoryCache) Touch(_ context.Context, key, expectedValue string, ttl time.Duration) error {
+	if ttl <= 0 {
+		return ErrSessionNotFound
+	}
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	item, ok := c.items[key]
+	if !ok {
+		return ErrSessionNotFound
+	}
+	now := time.Now()
+	if !item.expiresAt.IsZero() && !now.Before(item.expiresAt) {
+		delete(c.items, key)
+		return ErrSessionNotFound
+	}
+	if item.value != expectedValue {
+		return ErrSessionNotFound
+	}
+	item.expiresAt = now.Add(ttl)
+	c.items[key] = item
+	return nil
+}
+
 // RedisCache stores values in Redis.
 type RedisCache struct {
 	client *redis.Client
@@ -171,11 +200,41 @@ func (c *RedisCache) Rotate(ctx context.Context, oldKey, newKey, value string, t
 	if ttl <= 0 {
 		ttl = 5 * time.Minute
 	}
-	rotated, err := rotateSessionScript.Run(ctx, c.client, []string{oldKey, newKey}, value, ttl.Milliseconds()).Int()
+	ttlMilliseconds := ttl.Milliseconds()
+	if ttlMilliseconds <= 0 {
+		return ErrSessionNotFound
+	}
+	rotated, err := rotateSessionScript.Run(ctx, c.client, []string{oldKey, newKey}, value, ttlMilliseconds).Int()
 	if err != nil {
 		return err
 	}
 	if rotated != 1 {
+		return ErrSessionNotFound
+	}
+	return nil
+}
+
+var touchSessionScript = redis.NewScript(`
+if redis.call("GET", KEYS[1]) ~= ARGV[1] then
+	return 0
+end
+redis.call("PEXPIRE", KEYS[1], ARGV[2])
+return 1
+`)
+
+func (c *RedisCache) Touch(ctx context.Context, key, expectedValue string, ttl time.Duration) error {
+	if c == nil || c.client == nil {
+		return fmt.Errorf("redis session store is unavailable")
+	}
+	ttlMilliseconds := ttl.Milliseconds()
+	if ttlMilliseconds <= 0 {
+		return ErrSessionNotFound
+	}
+	touched, err := touchSessionScript.Run(ctx, c.client, []string{key}, expectedValue, ttlMilliseconds).Int()
+	if err != nil {
+		return err
+	}
+	if touched != 1 {
 		return ErrSessionNotFound
 	}
 	return nil

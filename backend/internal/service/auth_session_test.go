@@ -48,6 +48,73 @@ func TestAuthSessionStoreExpiresSession(t *testing.T) {
 	}
 }
 
+func TestAuthSessionStoreSlidesIdleTimeoutWithoutPassingAbsoluteDeadline(t *testing.T) {
+	store := NewAuthSessionStore(NewInMemoryCache(), time.Minute)
+	sessionID, err := store.CreateWithLifetimes(context.Background(), "synthetic-sliding-credential", 80*time.Millisecond, 180*time.Millisecond)
+	if err != nil {
+		t.Fatalf("create sliding session: %v", err)
+	}
+	time.Sleep(50 * time.Millisecond)
+	if credential, err := store.Resolve(context.Background(), sessionID); err != nil || credential != "synthetic-sliding-credential" {
+		t.Fatalf("session did not resolve before idle timeout: %q, %v", credential, err)
+	}
+	time.Sleep(50 * time.Millisecond)
+	if credential, err := store.Resolve(context.Background(), sessionID); err != nil || credential != "synthetic-sliding-credential" {
+		t.Fatalf("session activity did not extend the idle timeout: %q, %v", credential, err)
+	}
+	time.Sleep(100 * time.Millisecond)
+	if _, err := store.Resolve(context.Background(), sessionID); !errors.Is(err, ErrSessionNotFound) {
+		t.Fatalf("activity extended the session beyond its absolute deadline: %v", err)
+	}
+}
+
+func TestAuthSessionStoreRotationPreservesAbsoluteDeadline(t *testing.T) {
+	store := NewAuthSessionStore(NewInMemoryCache(), time.Minute)
+	ctx := context.Background()
+	oldID, err := store.CreateWithLifetimes(ctx, "before-refresh", 60*time.Millisecond, 110*time.Millisecond)
+	if err != nil {
+		t.Fatal(err)
+	}
+	time.Sleep(45 * time.Millisecond)
+	if _, err := store.Resolve(ctx, oldID); err != nil {
+		t.Fatalf("resolve before refresh: %v", err)
+	}
+	newID, err := store.Rotate(ctx, oldID, "after-refresh")
+	if err != nil {
+		t.Fatalf("rotate session: %v", err)
+	}
+	time.Sleep(45 * time.Millisecond)
+	if credential, err := store.Resolve(ctx, newID); err != nil || credential != "after-refresh" {
+		t.Fatalf("rotated session did not resolve before absolute deadline: %q, %v", credential, err)
+	}
+	time.Sleep(30 * time.Millisecond)
+	if _, err := store.Resolve(ctx, newID); !errors.Is(err, ErrSessionNotFound) {
+		t.Fatalf("rotation extended the absolute session lifetime: %v", err)
+	}
+}
+
+func TestAuthSessionStoreFreshLoginRotationStartsNewAbsoluteDeadline(t *testing.T) {
+	store := NewAuthSessionStore(NewInMemoryCache(), time.Minute)
+	ctx := context.Background()
+	oldID, err := store.CreateWithLifetimes(ctx, "before-login", 50*time.Millisecond, 60*time.Millisecond)
+	if err != nil {
+		t.Fatal(err)
+	}
+	time.Sleep(30 * time.Millisecond)
+	newID, err := store.RotateWithLifetimes(ctx, oldID, "fresh-login", 100*time.Millisecond, 150*time.Millisecond)
+	if err != nil {
+		t.Fatalf("rotate after fresh login: %v", err)
+	}
+	time.Sleep(80 * time.Millisecond)
+	if credential, err := store.Resolve(ctx, newID); err != nil || credential != "fresh-login" {
+		t.Fatalf("fresh login session ended at the previous absolute deadline: %q, %v", credential, err)
+	}
+	time.Sleep(80 * time.Millisecond)
+	if _, err := store.Resolve(ctx, newID); !errors.Is(err, ErrSessionNotFound) {
+		t.Fatalf("fresh login session exceeded its new absolute deadline: %v", err)
+	}
+}
+
 func TestAuthSessionStoreRotationConsumesPriorSessionOnce(t *testing.T) {
 	store := NewAuthSessionStore(NewInMemoryCache(), time.Minute)
 	ctx := context.Background()
@@ -167,6 +234,26 @@ func TestAuthSessionStoreRedisIntegration(t *testing.T) {
 	if _, err := second.Resolve(ctx, expiringID); !errors.Is(err, ErrSessionNotFound) {
 		t.Fatalf("Redis TTL was not enforced across clients: %v", err)
 	}
+
+	slidingStore := NewAuthSessionStore(firstCache, time.Minute)
+	slidingID, err := slidingStore.CreateWithLifetimes(ctx, "redis-sliding-credential", 180*time.Millisecond, 500*time.Millisecond)
+	if err != nil {
+		t.Fatalf("create Redis sliding session: %v", err)
+	}
+	t.Cleanup(func() { _ = first.Revoke(context.Background(), slidingID) })
+	time.Sleep(100 * time.Millisecond)
+	if credential, err := second.Resolve(ctx, slidingID); err != nil || credential != "redis-sliding-credential" {
+		t.Fatalf("Redis sliding session did not resolve on second client: %q, %v", credential, err)
+	}
+	time.Sleep(100 * time.Millisecond)
+	if credential, err := first.Resolve(ctx, slidingID); err != nil || credential != "redis-sliding-credential" {
+		t.Fatalf("Redis activity did not extend the idle timeout: %q, %v", credential, err)
+	}
+	time.Sleep(350 * time.Millisecond)
+	if _, err := second.Resolve(ctx, slidingID); !errors.Is(err, ErrSessionNotFound) {
+		t.Fatalf("Redis session activity passed its absolute lifetime: %v", err)
+	}
+
 	recoveryID, err := first.Create(ctx, "redis-recovery-credential")
 	if err != nil {
 		t.Fatalf("create recovery probe session: %v", err)

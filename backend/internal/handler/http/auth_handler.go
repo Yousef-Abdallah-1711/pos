@@ -202,17 +202,20 @@ func (h *AuthHandler) establishSession(w http.ResponseWriter, r *http.Request, c
 	if h.sessions == nil || credential == "" {
 		return service.ErrSessionNotFound
 	}
+	credential, err := h.useCase.BrowserSessionCredential(credential, service.StaffSessionAbsoluteLifetime)
+	if err != nil {
+		return err
+	}
 	var sessionID string
-	var err error
 	if previous, cookieErr := r.Cookie(service.AuthSessionCookieName); cookieErr == nil && previous.Value != "" {
-		sessionID, err = h.sessions.Rotate(r.Context(), previous.Value, credential)
+		sessionID, err = h.sessions.RotateWithLifetimes(r.Context(), previous.Value, credential, service.StaffSessionIdleTimeout, service.StaffSessionAbsoluteLifetime)
 		if errors.Is(err, service.ErrSessionNotFound) {
 			// A stale cookie must not block a fresh login. Create generates a new
 			// unpredictable identifier; the stale identifier is never adopted.
-			sessionID, err = h.sessions.Create(r.Context(), credential)
+			sessionID, err = h.sessions.CreateWithLifetimes(r.Context(), credential, service.StaffSessionIdleTimeout, service.StaffSessionAbsoluteLifetime)
 		}
 	} else {
-		sessionID, err = h.sessions.Create(r.Context(), credential)
+		sessionID, err = h.sessions.CreateWithLifetimes(r.Context(), credential, service.StaffSessionIdleTimeout, service.StaffSessionAbsoluteLifetime)
 	}
 	if err != nil {
 		return err
@@ -225,8 +228,6 @@ func (h *AuthHandler) establishSession(w http.ResponseWriter, r *http.Request, c
 		HttpOnly: true,
 		Secure:   secure,
 		SameSite: http.SameSiteLaxMode,
-		MaxAge:   int(h.sessions.TTL().Seconds()),
-		Expires:  time.Now().Add(h.sessions.TTL()),
 	})
 	w.Header().Set("Cache-Control", "no-store")
 	w.Header().Set("Referrer-Policy", "no-referrer")
@@ -287,7 +288,16 @@ func (h *AuthHandler) Refresh(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	claims := middleware.GetUserClaims(r)
-	credential, err := h.useCase.RefreshToken(claims)
+	remainingLifetime, err := h.sessions.AbsoluteLifetimeRemaining(r.Context(), cookie.Value)
+	if err != nil {
+		if errors.Is(err, service.ErrSessionNotFound) {
+			respondError(w, http.StatusUnauthorized, "Session expired")
+			return
+		}
+		respondError(w, http.StatusServiceUnavailable, "Session service temporarily unavailable")
+		return
+	}
+	credential, err := h.useCase.RefreshTokenForSession(claims, remainingLifetime)
 	if err != nil {
 		respondError(w, http.StatusUnauthorized, "Unauthorized")
 		return
@@ -315,8 +325,6 @@ func (h *AuthHandler) setSessionCookie(w http.ResponseWriter, r *http.Request, s
 		HttpOnly: true,
 		Secure:   secure,
 		SameSite: http.SameSiteLaxMode,
-		MaxAge:   int(h.sessions.TTL().Seconds()),
-		Expires:  time.Now().Add(h.sessions.TTL()),
 	})
 	w.Header().Set("Cache-Control", "no-store")
 	w.Header().Set("Referrer-Policy", "no-referrer")

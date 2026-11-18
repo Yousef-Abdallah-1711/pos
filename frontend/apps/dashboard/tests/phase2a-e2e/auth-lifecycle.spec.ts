@@ -1,4 +1,5 @@
 import { execFileSync } from 'node:child_process'
+import { createHash } from 'node:crypto'
 import { mkdir, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import { expect, test, type Page } from '@playwright/test'
@@ -142,9 +143,10 @@ async function expectSignedInDashboard(page: Page) {
     .toEqual({ pathname: '/en/dashboard', hasUser: true, hasStoredToken: false, hasCredentialQuery: false })
   const sessionCookie = (await page.context().cookies(apiOrigin)).find((cookie) => cookie.name === 'poos_session')
   expect(sessionCookie?.httpOnly).toBe(true)
+  expect(sessionCookie?.expires).toBe(-1)
 }
 
-async function signIn(page: Page, password: string) {
+async function signIn(page: Page, password: string, loginUrl = `${landingUrl}/en/auth/login`) {
   await routeContainerApiToCandidate(page)
   const landingSessionCheck = page.waitForResponse((response) => {
     return new URL(response.url()).pathname === '/api/v1/auth/session'
@@ -152,7 +154,7 @@ async function signIn(page: Page, password: string) {
   const loginResponse = page.waitForResponse((response) => {
     return new URL(response.url()).pathname === '/api/v1/auth/login'
   }, { timeout: 30_000 })
-  await page.goto(`${landingUrl}/en/auth/login`, { waitUntil: 'domcontentloaded' })
+  await page.goto(loginUrl, { waitUntil: 'domcontentloaded' })
   await expect(page.locator('form')).toHaveAttribute('method', 'post')
   await landingSessionCheck
   await page.getByRole('textbox', { name: /email/i }).fill(ownerEmail)
@@ -194,6 +196,166 @@ test('invalid credentials stay on login and show an error', async ({ page }) => 
   expect(new URL(page.url()).searchParams.has('password')).toBe(false)
   await expect(page.getByText(/invalid|failed|credentials/i).last()).toBeVisible()
   await captureScreenshot(page, 'landing-invalid-login')
+  await page.unrouteAll({ behavior: 'ignoreErrors' })
+})
+
+test('rejects malicious redirect destinations after a real login', async ({ page }) => {
+  test.setTimeout(240_000)
+  await routeContainerApiToCandidate(page)
+  const attacks = [
+    { key: 'next', value: '//attacker.example/steal' },
+    { key: 'returnTo', value: 'https://attacker.example/' },
+    { key: 'redirect', value: 'http://localhost:13111@attacker.example/' },
+    { key: 'callbackUrl', value: '//attacker.example/callback' },
+    { key: 'continue', value: String.raw`\\attacker.example\\login` },
+    { key: 'next', value: 'javascript:alert(1)' },
+    { key: 'locale', value: '../../attacker.example' },
+  ]
+
+  for (const attack of attacks) {
+    const loginURL = new URL(`${landingUrl}/en/auth/login`)
+    loginURL.searchParams.set(attack.key, attack.value)
+    const loginResponse = page.waitForResponse((response) => new URL(response.url()).pathname === '/api/v1/auth/login')
+    await page.goto(loginURL.toString(), { waitUntil: 'domcontentloaded' })
+    await expect(page.locator('form')).toHaveAttribute('method', 'post')
+    await page.getByRole('textbox', { name: /email/i }).fill(ownerEmail)
+    await page.getByRole('textbox', { name: /password/i }).fill(ownerPassword)
+    await page.getByRole('button', { name: /^sign in$/i }).click()
+    expect((await loginResponse).status()).toBe(200)
+    await expectSignedInDashboard(page)
+    expect(new URL(page.url()).origin).toBe(new URL(dashboardUrl).origin)
+    expect(new URL(page.url()).pathname).toBe('/en/dashboard')
+    expect(new URL(page.url()).search).toBe('')
+
+    const cookie = (await page.context().cookies(apiOrigin)).find((candidate) => candidate.name === 'poos_session')
+    expect(cookie).toBeDefined()
+    const logout = await page.request.post(`${apiOrigin}/api/v1/auth/logout`, {
+      headers: { Cookie: `poos_session=${cookie!.value}`, Origin: landingUrl },
+    })
+    expect(logout.status()).toBe(204)
+  }
+
+  for (const malformedLocalePath of ['/xx/auth/login', '/../../attacker.example/auth/login', '/%2F%2Fattacker.example/auth/login']) {
+    await page.goto(`${landingUrl}${malformedLocalePath}?next=https%3A%2F%2Fattacker.example`, { waitUntil: 'domcontentloaded' })
+    expect(new URL(page.url()).origin).toBe(new URL(landingUrl).origin)
+    expect(new URL(page.url()).pathname).not.toMatch(/^\/\/attacker\.example/)
+  }
+  await page.unrouteAll({ behavior: 'ignoreErrors' })
+})
+
+test('rejects cross-site writes across browser session and login routes', async ({ page }) => {
+  test.setTimeout(180_000)
+  expect(await signIn(page, ownerPassword)).toBe(200)
+  await expectSignedInDashboard(page)
+  const sessionCookie = (await page.context().cookies(apiOrigin)).find((cookie) => cookie.name === 'poos_session')
+  expect(sessionCookie).toBeDefined()
+  const staffCookieHeader = `poos_session=${sessionCookie!.value}`
+  const unsafeStaffRoutes = [
+    { method: 'POST', path: '/api/v1/products', data: { name_en: 'CSRF probe' } },
+    { method: 'PUT', path: '/api/v1/products/1', data: { name_en: 'CSRF probe' } },
+    { method: 'DELETE', path: '/api/v1/products/1' },
+  ] as const
+  const origins = [undefined, 'https://attacker.example']
+  const results: Array<{ method: string; path: string; origin: string; status: number }> = []
+
+  for (const route of unsafeStaffRoutes) {
+    for (const origin of origins) {
+      const headers: Record<string, string> = { Cookie: staffCookieHeader }
+      if (origin) headers.Origin = origin
+      const response = route.method === 'POST'
+        ? await page.request.post(`${apiOrigin}${route.path}`, { headers, data: route.data })
+        : route.method === 'PUT'
+          ? await page.request.put(`${apiOrigin}${route.path}`, { headers, data: route.data })
+          : await page.request.delete(`${apiOrigin}${route.path}`, { headers })
+      results.push({ method: route.method, path: route.path, origin: origin ?? 'missing', status: response.status() })
+      expect(response.status()).toBe(403)
+    }
+  }
+
+  const protectedPublicAuthRoutes = [
+    { path: '/api/v1/auth/register', data: {} },
+    { path: '/api/v1/auth/login', data: { email: 'invalid@example.test', password: 'synthetic' } },
+    { path: '/api/v1/auth/login/confirm', data: { email: 'invalid@example.test', tenant_id: 1, selection_token: 'invalid' } },
+    { path: '/api/v1/super-admin/auth/login', data: { email: 'invalid@example.test', password: 'synthetic' } },
+  ]
+  for (const route of protectedPublicAuthRoutes) {
+    for (const origin of origins) {
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' }
+      if (origin) headers.Origin = origin
+      const response = await page.request.post(`${apiOrigin}${route.path}`, { headers, data: route.data })
+      results.push({ method: 'POST', path: route.path, origin: origin ?? 'missing', status: response.status() })
+      expect(response.status()).toBe(403)
+    }
+  }
+
+  for (const route of [
+    { method: 'POST', path: '/api/v1/auth/refresh', data: {} },
+    { method: 'POST', path: '/api/v1/auth/logout', data: {} },
+  ]) {
+    for (const origin of origins) {
+      const headers: Record<string, string> = { Cookie: staffCookieHeader }
+      if (origin) headers.Origin = origin
+      const response = await page.request.post(`${apiOrigin}${route.path}`, { headers, data: route.data })
+      results.push({ method: route.method, path: route.path, origin: origin ?? 'missing', status: response.status() })
+      expect(response.status()).toBe(403)
+    }
+  }
+
+  for (const route of [
+    { method: 'POST', path: '/api/v1/super-admin/auth/logout', cookie: 'poos_super_admin_session=synthetic-invalid' },
+    { method: 'PUT', path: '/api/v1/super-admin/settings/ip-whitelist', cookie: 'poos_super_admin_session=synthetic-invalid' },
+  ]) {
+    for (const origin of origins) {
+      const headers: Record<string, string> = { Cookie: route.cookie }
+      if (origin) headers.Origin = origin
+      const response = route.method === 'POST'
+        ? await page.request.post(`${apiOrigin}${route.path}`, { headers, data: {} })
+        : await page.request.put(`${apiOrigin}${route.path}`, { headers, data: {} })
+      results.push({ method: route.method, path: route.path, origin: origin ?? 'missing', status: response.status() })
+      expect(response.status()).toBe(403)
+    }
+  }
+
+  for (const origin of origins) {
+    const headers: Record<string, string> = {}
+    if (origin) headers.Origin = origin
+    const tokenEnd = await page.request.post(`${apiOrigin}/api/v1/impersonation/end`, { headers, data: {} })
+    results.push({ method: 'POST', path: '/api/v1/impersonation/end', origin: origin ?? 'missing', status: tokenEnd.status() })
+    expect(tokenEnd.status()).toBe(403)
+  }
+
+  const orderPreflightResults = []
+  for (const origin of origins) {
+    const headers: Record<string, string> = {
+      'Access-Control-Request-Method': 'POST',
+      'Access-Control-Request-Headers': 'content-type,x-tenant-id,x-restaurant-id',
+    }
+    if (origin) headers.Origin = origin
+    const response = await page.request.fetch(`${apiOrigin}/api/v1/public/orders`, { method: 'OPTIONS', headers })
+    const expectedStatus = origin ? 403 : 200
+    expect(response.status()).toBe(expectedStatus)
+    orderPreflightResults.push({ origin: origin ?? 'missing', status: response.status() })
+  }
+
+  const trustedRefresh = await page.request.post(`${apiOrigin}/api/v1/auth/refresh`, {
+    headers: { Cookie: staffCookieHeader, Origin: landingUrl },
+  })
+  expect(trustedRefresh.status()).toBe(204)
+  expect(trustedRefresh.headers()['set-cookie']).toContain('poos_session=')
+  expect(trustedRefresh.headers()['cache-control']).toContain('no-store')
+
+  const currentCookie = (await page.context().cookies(apiOrigin)).find((cookie) => cookie.name === 'poos_session')
+  expect(currentCookie).toBeDefined()
+  const trustedLogout = await page.request.post(`${apiOrigin}/api/v1/auth/logout`, {
+    headers: { Cookie: `poos_session=${currentCookie!.value}`, Origin: landingUrl },
+  })
+  expect(trustedLogout.status()).toBe(204)
+  await expect(page.context().cookies(apiOrigin)).resolves.not.toContainEqual(expect.objectContaining({ name: 'poos_session' }))
+
+  await test.info().attach('unsafe-route-csrf-matrix.json', {
+    body: JSON.stringify({ results, publicOrderPreflightResults, trustedRefreshStatus: trustedRefresh.status(), trustedLogoutStatus: trustedLogout.status() }, null, 2),
+    contentType: 'application/json',
+  })
   await page.unrouteAll({ behavior: 'ignoreErrors' })
 })
 
@@ -293,7 +455,7 @@ test('multi-tenant login selects an authorized tenant before establishing the se
   expect(response.status()).toBe(200)
   const loginBody = await response.json() as {
     multiple_tenants: boolean
-    tenants: Array<{ tenant_id: number; tenant_name: string }>
+    tenants: Array<{ tenant_id: number; tenant_name: string; default_restaurant_id?: number }>
   }
   expect(loginBody.multiple_tenants).toBe(true)
   expect(loginBody.tenants.length).toBeGreaterThanOrEqual(2)
@@ -308,10 +470,16 @@ test('multi-tenant login selects an authorized tenant before establishing the se
   await expectSignedInDashboard(page)
   const selectedTenantID = await page.evaluate(() => {
     const rawAuthState = localStorage.getItem('auth-storage')
-    const state = rawAuthState ? JSON.parse(rawAuthState) as { state?: { user?: { tenant_id?: number } } } : null
-    return state?.state?.user?.tenant_id ?? null
+    const state = rawAuthState ? JSON.parse(rawAuthState) as { state?: { user?: { tenant_id?: number; restaurant_id?: number } } } : null
+    return {
+      tenantID: state?.state?.user?.tenant_id ?? null,
+      restaurantID: state?.state?.user?.restaurant_id ?? null,
+    }
   })
-  expect(selectedTenantID).toBe(selectedTenant.tenant_id)
+  expect(selectedTenantID).toEqual({
+    tenantID: selectedTenant.tenant_id,
+    restaurantID: selectedTenant.default_restaurant_id,
+  })
   expect(new URL(page.url()).search).toBe('')
   await page.unrouteAll({ behavior: 'ignoreErrors' })
 })
@@ -396,12 +564,24 @@ test('logout clears access and denies the next protected dashboard visit', async
   await expect(mobileDrawer).toHaveAttribute('aria-modal', 'true')
   await expect(mobileDrawer).toHaveAttribute('aria-label', /.+/)
   await expect(mobileMenuButton).toHaveAttribute('aria-expanded', 'true')
+  const accessibleTree = await mobileDrawer.ariaSnapshot()
+  expect(accessibleTree).toContain('dialog')
+  expect(accessibleTree).toContain('navigation')
+  expect(accessibleTree).toContain('link')
   const mobileAccount = mobileDrawer.locator('.sv-mobile-account')
   await expect(mobileAccount.getByText('WS05 Tenant A Restaurant')).toBeVisible()
   await expect(mobileAccount.locator('a').nth(0)).toHaveAttribute('href', `${dashboardUrl}/ar/dashboard`)
   await expect(mobileAccount.locator('a').nth(1)).toHaveAttribute('href', `${dashboardUrl}/ar/dashboard/settings/account`)
   const signOutBounds = await mobileAccount.locator('.sv-mobile-account__signout').boundingBox()
   expect(signOutBounds?.height ?? 0).toBeGreaterThanOrEqual(44)
+  const dialogCloseButton = mobileDrawer.locator('button').first()
+  await expect(dialogCloseButton).toBeFocused()
+  await landingPage.keyboard.press('ArrowDown')
+  await expect(dialogCloseButton).toBeFocused()
+  await landingPage.keyboard.press('Tab')
+  expect(await mobileDrawer.evaluate((element) => element.contains(document.activeElement))).toBe(true)
+  await landingPage.keyboard.press('Shift+Tab')
+  expect(await mobileDrawer.evaluate((element) => element.contains(document.activeElement))).toBe(true)
   await captureScreenshot(landingPage, 'landing-authenticated-arabic-320')
   await landingPage.keyboard.press('Escape')
   await expect(mobileDrawer).toBeHidden()
@@ -533,4 +713,100 @@ test('Redis outage returns a private 503 without logging out, then recovers on r
   } finally {
     if (redisStopped) execFileSync('docker', ['start', redisContainerID], { stdio: 'ignore' })
   }
+})
+
+test('expired Redis session TTL recovers the browser to the canonical login page', async ({ page }, testInfo) => {
+  test.skip(!composeProject, 'requires the isolated GitHub Actions authentication Compose project')
+  test.setTimeout(150_000)
+  expect(await signIn(page, ownerPassword)).toBe(200)
+  await expectSignedInDashboard(page)
+
+  const sessionCookie = (await page.context().cookies(apiOrigin)).find((cookie) => cookie.name === 'poos_session')
+  expect(sessionCookie).toBeDefined()
+  const redisContainerIDs = execFileSync('docker', [
+    'ps',
+    '--filter', `label=com.docker.compose.project=${composeProject}`,
+    '--filter', 'label=com.docker.compose.service=redis',
+    '--filter', 'label=com.pos.disposable=true',
+    '--filter', 'label=com.pos.workstream=WS05',
+    '--format', '{{.ID}}',
+  ], { encoding: 'utf8' }).trim().split(/\r?\n/).filter(Boolean)
+  expect(redisContainerIDs).toHaveLength(1)
+  const redisContainerID = redisContainerIDs[0]
+  const labels = JSON.parse(execFileSync('docker', [
+    'inspect', '--format', '{{json .Config.Labels}}', redisContainerID,
+  ], { encoding: 'utf8' })) as Record<string, string>
+  expect(labels['com.docker.compose.project']).toBe(composeProject)
+  expect(labels['com.docker.compose.service']).toBe('redis')
+  expect(labels['com.pos.disposable']).toBe('true')
+  expect(labels['com.pos.workstream']).toBe('WS05')
+
+  const sessionKey = `auth-session:v1:${createHash('sha256').update(sessionCookie!.value).digest('hex')}`
+  const shortened = execFileSync('docker', [
+    'exec', redisContainerID, 'redis-cli', 'PEXPIRE', sessionKey, '1',
+  ], { encoding: 'utf8' }).trim()
+  expect(shortened).toBe('1')
+  await expect.poll(() => execFileSync('docker', [
+    'exec', redisContainerID, 'redis-cli', 'EXISTS', sessionKey,
+  ], { encoding: 'utf8' }).trim(), { timeout: 10_000 }).toBe('0')
+
+  const expiredSessionResponse = page.waitForResponse((response) => {
+    return new URL(response.url()).pathname === '/api/v1/auth/session' && response.status() === 401
+  }, { timeout: 30_000 })
+  await page.evaluate(() => window.dispatchEvent(new Event('focus')))
+  const response = await expiredSessionResponse
+  await expectPathname(page, '/en/auth/login')
+  expect(new URL(page.url()).origin).toBe(new URL(landingUrl).origin)
+  await expect(page.getByRole('textbox', { name: /email/i })).toBeVisible()
+  expect(response.headers()['cache-control']).toContain('no-store')
+  const replay = await page.request.get(`${apiOrigin}/api/v1/auth/session`, {
+    headers: { Cookie: `poos_session=${sessionCookie!.value}`, Origin: landingUrl },
+  })
+  expect(replay.status()).toBe(401)
+  await testInfo.attach('expired-session-browser-recovery.json', {
+    body: JSON.stringify({ redisTTLForcedToOneMillisecond: shortened === '1', expiredKeyAbsent: true, expiredSessionStatus: response.status(), browserReturnedTo: new URL(page.url()).origin + new URL(page.url()).pathname, oldCookieReplayStatus: replay.status() }, null, 2),
+    contentType: 'application/json',
+  })
+  await page.unrouteAll({ behavior: 'ignoreErrors' })
+})
+
+test('authenticated Landing bootstrap has no guest flash or hydration mismatch', async ({ page, context }, testInfo) => {
+  test.setTimeout(150_000)
+  expect(await signIn(page, ownerPassword)).toBe(200)
+  await expectSignedInDashboard(page)
+
+  const landingPage = await context.newPage()
+  startAuthTimeline(landingPage)
+  const hydrationErrors: string[] = []
+  landingPage.on('console', (message) => {
+    if (message.type() !== 'error') return
+    if (/hydration|did not match|server html|text content does not match/i.test(message.text())) hydrationErrors.push(message.text())
+  })
+  landingPage.on('pageerror', (error) => {
+    if (/hydration|did not match|server html|text content does not match/i.test(error.message)) hydrationErrors.push(error.message)
+  })
+  await routeContainerApiToCandidate(landingPage)
+  await landingPage.route('**/api/v1/auth/session', async (route) => {
+    await new Promise((resolve) => setTimeout(resolve, 1_000))
+    await route.continue()
+  })
+  const htmlResponse = await landingPage.goto(`${landingUrl}/en/`, { waitUntil: 'domcontentloaded' })
+  expect(htmlResponse?.status()).toBe(200)
+  const sharedHTML = await htmlResponse?.text() ?? ''
+  expect(sharedHTML).not.toContain(ownerEmail)
+  expect(sharedHTML).not.toContain(ownerName)
+
+  const accountActions = landingPage.locator('.sv-desktop-account-actions')
+  const bootstrappingStatus = accountActions.getByRole('status')
+  await expect(bootstrappingStatus).toHaveAttribute('aria-busy', 'true')
+  await expect(accountActions.getByRole('link', { name: /log in/i })).toHaveCount(0)
+  const signedInButton = landingPage.getByRole('button', { name: new RegExp(ownerName) })
+  await expect(signedInButton).toBeVisible({ timeout: 30_000 })
+  expect(hydrationErrors).toEqual([])
+  await testInfo.attach('landing-bootstrap-sanitized.json', {
+    body: JSON.stringify({ serverHTMLContainsProfile: sharedHTML.includes(ownerEmail) || sharedHTML.includes(ownerName), guestLoginVisibleDuringSessionCheck: false, accountButtonAfterSessionRestore: await signedInButton.count(), hydrationMismatchCount: hydrationErrors.length }, null, 2),
+    contentType: 'application/json',
+  })
+  await landingPage.close()
+  await page.unrouteAll({ behavior: 'ignoreErrors' })
 })

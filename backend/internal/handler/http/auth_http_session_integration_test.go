@@ -58,8 +58,16 @@ func TestAuthHTTPLoginCookieSessionAndLogoutLifecycle(t *testing.T) {
 		t.Fatalf("login returned %d or exposed a bearer token: %s", loginRecorder.Code, loginRecorder.Body.String())
 	}
 	cookie := findNamedCookie(t, loginRecorder.Result().Cookies(), service.AuthSessionCookieName)
-	if !cookie.HttpOnly || cookie.SameSite != http.SameSiteLaxMode || cookie.Secure || cookie.Domain != "" || cookie.Value == "" {
+	if !cookie.HttpOnly || cookie.SameSite != http.SameSiteLaxMode || cookie.Secure || cookie.Domain != "" || cookie.Value == "" || cookie.MaxAge != 0 || !cookie.Expires.IsZero() {
 		t.Fatalf("login cookie has unexpected attributes: %#v", cookie)
+	}
+	credential, err := sessions.Resolve(t.Context(), cookie.Value)
+	if err != nil {
+		t.Fatalf("resolve session credential: %v", err)
+	}
+	claims, err := handler.useCase.ValidateCredential(credential)
+	if err != nil || claims.ExpiresAt == nil || time.Until(claims.ExpiresAt.Time) < 7*time.Hour {
+		t.Fatalf("browser session credential did not honor its eight-hour absolute policy: claims=%#v err=%v", claims, err)
 	}
 
 	protected := middleware.NoStoreAPIResponses(middleware.SessionAuthMiddleware(tokens, sessions)(http.HandlerFunc(handler.Session)))

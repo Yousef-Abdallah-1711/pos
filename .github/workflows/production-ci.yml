@@ -121,7 +121,7 @@ jobs:
   auth-browser-acceptance:
     if: github.event_name == 'pull_request' && github.event.pull_request.number == 82
     runs-on: ubuntu-24.04
-    timeout-minutes: 60
+    timeout-minutes: 90
     env:
       AUTH_TEST_PROJECT: servio-auth-gha-${{ github.run_id }}
       P2A_API_HOST_PORT: '18082'
@@ -177,6 +177,8 @@ jobs:
           test "$ready" = true
       - name: Seed synthetic WS05 tenant fixtures
         run: pwsh -NoProfile -NonInteractive -File scripts/phase2a-e2e/seed.ps1 -ProjectName "$AUTH_TEST_PROJECT"
+      - name: Start the disposable restaurant storefront for anonymous order acceptance
+        run: docker compose -p "$AUTH_TEST_PROJECT" -f docker-compose.phase2a-e2e.yml up -d restaurant-website
       - name: Validate the isolated HTTPS proxy helper
         run: node --check scripts/phase2a-e2e/https-proxy.mjs
       - name: Build production Landing and Dashboard, then run real Chromium authentication tests
@@ -244,6 +246,25 @@ jobs:
           pnpm --dir frontend/apps/dashboard exec playwright test \
             --config playwright.phase2a.config.ts \
             tests/phase2a-e2e/auth-lifecycle.spec.ts \
+            --output "$RUNNER_TEMP/playwright-results" \
+            --trace off
+
+          storefront_ready=false
+          for attempt in $(seq 1 120); do
+            status=$(curl --silent --output /dev/null --write-out '%{http_code}' --connect-timeout 2 --max-time 5 \
+              --resolve phase2a-restaurant-a.localhost:13113:127.0.0.1 \
+              http://phase2a-restaurant-a.localhost:13113/en/menu || true)
+            if [ "$status" = 200 ]; then
+              storefront_ready=true
+              break
+            fi
+            sleep 5
+          done
+          test "$storefront_ready" = true
+          pnpm --dir frontend/apps/dashboard exec playwright test \
+            --config playwright.phase2a.config.ts \
+            tests/phase2a-e2e/phase2a.spec.ts \
+            --grep 'storefront menu cart and checkout complete an order in the browser' \
             --output "$RUNNER_TEMP/playwright-results" \
             --trace off
           for theme in dark light; do
