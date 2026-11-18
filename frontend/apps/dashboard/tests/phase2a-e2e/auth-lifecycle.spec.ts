@@ -327,6 +327,7 @@ test('logout clears access and denies the next protected dashboard visit', async
   const landingPage = await page.context().newPage()
   startAuthTimeline(landingPage)
   await landingPage.goto(`${landingUrl}/en`, { waitUntil: 'domcontentloaded' })
+  await landingPage.bringToFront()
   const landingAccountButton = landingPage.getByRole('button', { name: new RegExp(ownerName) })
   await expect(landingAccountButton).toBeVisible({ timeout: 30_000 })
   await landingAccountButton.click()
@@ -336,6 +337,11 @@ test('logout clears access and denies the next protected dashboard visit', async
   await expect(accountPanel.getByRole('link', { name: /dashboard/i })).toHaveAttribute('href', `${dashboardUrl}/en/dashboard`)
   await expect(accountPanel.getByRole('link', { name: /settings/i })).toHaveAttribute('href', `${dashboardUrl}/en/dashboard/settings/account`)
   await captureScreenshot(landingPage, 'landing-authenticated-account-menu')
+  await landingPage.keyboard.press('Escape')
+  await expect(accountPanel).toBeHidden()
+  await expect(landingAccountButton).toBeFocused()
+  await landingAccountButton.press('Enter')
+  await expect(accountPanel).toBeVisible()
 
   const dashboardTab = await page.context().newPage()
   startAuthTimeline(dashboardTab)
@@ -348,13 +354,6 @@ test('logout clears access and denies the next protected dashboard visit', async
   await page.reload({ waitUntil: 'domcontentloaded' })
   await expectSignedInDashboard(page)
   await dashboardTab.close()
-
-  await landingPage.bringToFront()
-  await landingPage.keyboard.press('Escape')
-  await expect(accountPanel).toBeHidden()
-  await expect(landingAccountButton).toBeFocused()
-  await landingAccountButton.press('Enter')
-  await expect(accountPanel).toBeVisible()
 
   for (const width of [320, 390, 768, 1024, 1440]) {
     await landingPage.setViewportSize({ width, height: 900 })
