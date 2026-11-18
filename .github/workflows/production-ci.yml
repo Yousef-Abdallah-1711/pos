@@ -261,6 +261,20 @@ jobs:
             --output "$RUNNER_TEMP/playwright-results" \
             --trace off
 
+          # The API rate limiter is intentionally in-memory. Restart only the API
+          # between suites so prior synthetic login attempts cannot consume the
+          # independent cache-boundary test's disposable login budget.
+          docker compose -p "$AUTH_TEST_PROJECT" -f docker-compose.phase2a-e2e.yml restart api
+          api_ready=false
+          for attempt in $(seq 1 30); do
+            if curl --insecure --fail --silent --max-time 5 https://localhost:18443/api/v1/health >/dev/null; then
+              api_ready=true
+              break
+            fi
+            sleep 1
+          done
+          test "$api_ready" = true
+
           pnpm --dir frontend/apps/dashboard exec playwright test \
             --config playwright.phase2a.config.ts \
             tests/phase2a-e2e/cache-boundary.spec.ts \
