@@ -471,7 +471,9 @@ async function main() {
      return
     }
     const location = message.location()
-    if (ciApiOrigin && text === 'Failed to load resource: the server responded with a status of 401 (Unauthorized)') {
+    // Chromium versions vary the reason suffix for this expected guest denial, e.g. "401 ()" or "401 (Unauthorized)".
+    const expectedGuestSessionConsoleError = /^Failed to load resource: the server responded with a status of 401(?: \([^)]*\))?$/.test(text)
+    if (ciApiOrigin && expectedGuestSessionConsoleError) {
      try {
       const failedUrl = new URL(location.url)
       if (failedUrl.origin === ciApiOrigin && failedUrl.pathname === '/api/v1/auth/session') return
