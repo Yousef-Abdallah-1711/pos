@@ -422,6 +422,14 @@ test('rejects missing and untrusted origins on every registered staff and Super 
   expect(superAdminLogin.status()).toBe(200)
   const superAdminCookie = (await page.context().cookies(apiOrigin)).find((cookie) => cookie.name === 'poos_super_admin_session')
   expect(superAdminCookie?.httpOnly).toBe(true)
+  const staffSessionWithSuperAdminCookie = await page.request.get(`${apiOrigin}/api/v1/auth/session`, {
+    headers: { Cookie: `poos_super_admin_session=${superAdminCookie!.value}` },
+  })
+  expect(staffSessionWithSuperAdminCookie.status()).toBe(401)
+  const superAdminSessionWithStaffCookie = await page.request.get(`${apiOrigin}/api/v1/super-admin/auth/session`, {
+    headers: { Cookie: `poos_session=${sessionCookie!.value}` },
+  })
+  expect(superAdminSessionWithStaffCookie.status()).toBe(401)
   const staffRoutes = unsafeRoutes.filter((route) => !route.pattern.startsWith('/api/v1/super-admin/'))
   const superAdminRoutes = unsafeRoutes.filter((route) => route.pattern.startsWith('/api/v1/super-admin/'))
   expect(staffRoutes.length).toBeGreaterThan(0)
@@ -458,6 +466,8 @@ test('rejects missing and untrusted origins on every registered staff and Super 
       routePatternsChecked: unsafeRoutes.length,
       staffRoutesChecked: staffRoutes.length,
       superAdminRoutesChecked: superAdminRoutes.length,
+      staffSessionWithSuperAdminCookieStatus: staffSessionWithSuperAdminCookie.status(),
+      superAdminSessionWithStaffCookieStatus: superAdminSessionWithStaffCookie.status(),
       excludedRoutes: exclusions,
       results,
     }, null, 2),
