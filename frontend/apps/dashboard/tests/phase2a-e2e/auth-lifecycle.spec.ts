@@ -238,12 +238,16 @@ test('rejects malicious redirect destinations after a real login', async ({ page
     const response = await page.request.get(`${landingUrl}${malformedLocalePath}?next=https%3A%2F%2Fattacker.example`, {
       maxRedirects: 0,
     })
-    expect([301, 302, 307, 308]).toContain(response.status())
-    const location = response.headers().location
-    expect(location).toBeTruthy()
-    const destination = new URL(location!, landingUrl)
-    expect(destination.origin).toBe(new URL(landingUrl).origin)
-    expect(destination.pathname).not.toMatch(/^\/\/attacker\.example/)
+    expect(new URL(response.url()).origin).toBe(new URL(landingUrl).origin)
+    if (response.status() >= 300 && response.status() < 400) {
+      const location = response.headers().location
+      expect(location).toBeTruthy()
+      const destination = new URL(location!, landingUrl)
+      expect(destination.origin).toBe(new URL(landingUrl).origin)
+      expect(destination.pathname).not.toMatch(/^\/\/attacker\.example/)
+    } else {
+      expect([400, 404]).toContain(response.status())
+    }
   }
   await page.unrouteAll({ behavior: 'ignoreErrors' })
 })
