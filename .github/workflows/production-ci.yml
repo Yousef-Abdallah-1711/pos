@@ -140,12 +140,8 @@ jobs:
           if-no-files-found: ignore
       - name: Audit production dependencies (all severities)
         run: pnpm --dir frontend audit --prod
-      - name: Audit development dependencies (temporary exception for unpatched picomatch advisory)
-        run: |
-          package_backup="$(mktemp "$RUNNER_TEMP/frontend-package.XXXXXX")"
-          cp frontend/package.json "$package_backup"
-          trap 'cp "$package_backup" frontend/package.json; rm -f "$package_backup"' EXIT
-          pnpm --dir frontend audit --dev --audit-level high --ignore CVE-2026-112366
+      - name: Audit development dependencies (all high and critical findings)
+        run: pnpm --dir frontend audit --dev --audit-level high
       - run: python3 scripts/check_runtime_localhost.py
       - run: scripts/production/check-compose-config.sh
       - run: scripts/production/check-nginx-template.sh
