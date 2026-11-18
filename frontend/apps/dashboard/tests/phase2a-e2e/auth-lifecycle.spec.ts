@@ -1,6 +1,6 @@
 import { execFileSync } from 'node:child_process'
 import { createHash } from 'node:crypto'
-import { mkdir, writeFile } from 'node:fs/promises'
+import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import { expect, test, type Page } from '@playwright/test'
 import { routeContainerApiToCandidate } from './api-routing'
@@ -366,6 +366,60 @@ test('rejects cross-site writes across browser session and login routes', async 
 
   await test.info().attach('unsafe-route-csrf-matrix.json', {
     body: JSON.stringify({ results, orderPreflightResults, trustedRefreshStatus: trustedRefresh.status(), trustedLogoutStatus: trustedLogout.status() }, null, 2),
+    contentType: 'application/json',
+  })
+  await page.unrouteAll({ behavior: 'ignoreErrors' })
+})
+
+test('rejects missing and untrusted origins on every registered staff unsafe route', async ({ page }, testInfo) => {
+  test.skip(!composeProject, 'requires the isolated GitHub Actions authentication Compose project')
+  test.setTimeout(180_000)
+  expect(await signIn(page, ownerPassword)).toBe(200)
+  const sessionCookie = (await page.context().cookies(apiOrigin)).find((cookie) => cookie.name === 'poos_session')
+  expect(sessionCookie).toBeDefined()
+
+  const workspace = process.env.GITHUB_WORKSPACE
+  if (!workspace) throw new Error('The route-manifest check requires the CI workspace root')
+  const manifest = await readFile(path.join(workspace, 'backend/cmd/api/routes.manifest'), 'utf8')
+  const routePatterns = [...new Set(manifest.split(/\r?\n/).map((line) => line.trim()).filter(Boolean))]
+  const exclusions = [
+    { prefix: '/api/v1/public/orders', reason: 'anonymous customer capability routes are covered by storefront E2E' },
+    { prefix: '/api/v1/super-admin/', reason: 'Super Admin Origin matrix is exercised separately with its isolated cookie' },
+    { prefix: '/api/v1/translations/', reason: 'translation upload uses bearer authorization, not browser session cookies' },
+    { prefix: '/api/v1/mock/paymob/', reason: 'mock payment endpoint is unauthenticated and has no ambient session authority' },
+    { prefix: '/api/v1/webhook/paymob', reason: 'payment webhook is server-to-server and uses webhook verification' },
+    { prefix: '/api/v1/auth/forgot-password', reason: 'password reset is a public endpoint with no authenticated session authority' },
+  ]
+  const unsafeRoutes = routePatterns.flatMap((pattern) => {
+    const match = /^(POST|PUT|PATCH|DELETE) (\S+)$/.exec(pattern)
+    if (!match || exclusions.some(({ prefix }) => match[2].startsWith(prefix))) return []
+    return [{ method: match[1], pattern: match[2] }]
+  })
+  expect(unsafeRoutes.length).toBeGreaterThanOrEqual(140)
+
+  const results: Array<{ method: string; path: string; origin: string; status: number }> = []
+  for (const route of unsafeRoutes) {
+    const concretePath = route.pattern.replace(/\{([^/{}]+)\}/g, (_token, name: string) => {
+      return name.toLowerCase() === 'email' ? 'csrf-probe%40example.test' : '1'
+    })
+    for (const origin of [undefined, 'https://attacker.example']) {
+      const headers: Record<string, string> = {
+        Cookie: `poos_session=${sessionCookie!.value}`,
+        'Content-Type': 'application/json',
+      }
+      if (origin) headers.Origin = origin
+      const response = await page.request.fetch(`${apiOrigin}${concretePath}`, {
+        method: route.method,
+        headers,
+        ...(route.method === 'POST' || route.method === 'PUT' || route.method === 'PATCH' ? { data: {} } : {}),
+      })
+      results.push({ method: route.method, path: concretePath, origin: origin ?? 'missing', status: response.status() })
+      expect(response.status(), `${route.method} ${route.pattern} with ${origin ?? 'missing Origin'}`).toBe(403)
+    }
+  }
+
+  await testInfo.attach('registered-staff-unsafe-route-csrf-matrix.json', {
+    body: JSON.stringify({ sourceManifest: 'backend/cmd/api/routes.manifest', routePatternsChecked: unsafeRoutes.length, excludedRoutes: exclusions, results }, null, 2),
     contentType: 'application/json',
   })
   await page.unrouteAll({ behavior: 'ignoreErrors' })

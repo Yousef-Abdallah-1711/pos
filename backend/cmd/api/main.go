@@ -533,7 +533,7 @@ func main() {
 	mux.Handle("POST /api/v1/auth/login/confirm", middleware.RequireTrustedOrigin(middleware.RateLimitByIP(20)(http.HandlerFunc(authHandler.LoginConfirm))))
 	mux.Handle("GET /api/v1/auth/session", authenticateRequest(http.HandlerFunc(authHandler.Session)))
 	mux.Handle("POST /api/v1/auth/refresh", middleware.RequireTrustedOrigin(middleware.RateLimitByIP(20)(middleware.SessionAuthMiddleware(tokenService, authSessionStore)(http.HandlerFunc(authHandler.Refresh)))))
-	mux.Handle("POST /api/v1/auth/logout", http.HandlerFunc(authHandler.Logout))
+	mux.Handle("POST /api/v1/auth/logout", middleware.RequireTrustedOrigin(http.HandlerFunc(authHandler.Logout)))
 	// Browser handoff is performed server-to-server by the authenticated Super Admin route;
 	// do not expose a bearer/code exchange endpoint to arbitrary browser clients.
 	mux.Handle("POST /api/v1/auth/forgot-password", middleware.RateLimitByIP(5)(http.HandlerFunc(authHandler.ForgotPassword)))
