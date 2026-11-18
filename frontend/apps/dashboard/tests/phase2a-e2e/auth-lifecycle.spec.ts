@@ -365,7 +365,7 @@ test('rejects cross-site writes across browser session and login routes', async 
   await expect(page.context().cookies(apiOrigin)).resolves.not.toContainEqual(expect.objectContaining({ name: 'poos_session' }))
 
   await test.info().attach('unsafe-route-csrf-matrix.json', {
-    body: JSON.stringify({ results, publicOrderPreflightResults, trustedRefreshStatus: trustedRefresh.status(), trustedLogoutStatus: trustedLogout.status() }, null, 2),
+    body: JSON.stringify({ results, orderPreflightResults, trustedRefreshStatus: trustedRefresh.status(), trustedLogoutStatus: trustedLogout.status() }, null, 2),
     contentType: 'application/json',
   })
   await page.unrouteAll({ behavior: 'ignoreErrors' })
