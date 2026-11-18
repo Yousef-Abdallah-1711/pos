@@ -137,6 +137,8 @@ jobs:
       WS05_LANDING_URL: https://localhost:13111
       WS05_LANDING_REDIRECT_URL: https://localhost:13111
       WS05_DASHBOARD_URL: https://localhost:13112
+      WS05_STOREFRONT_URL: http://phase2a-restaurant-a.localhost:13113
+      WS05_MAP_LOCALHOST: '127.0.0.1'
       WS05_IGNORE_HTTPS_ERRORS: 'true'
       P2A_CORS_ORIGINS: http://localhost:13111,http://localhost:13112,http://phase2a-restaurant-a.localhost:13113,https://localhost:13111,https://localhost:13112
       API_INTERNAL_URL: http://127.0.0.1:18082/api/v1
