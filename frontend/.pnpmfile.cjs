@@ -16,8 +16,9 @@ function readPackage(pkg) {
     )
   }
 
-  // next-intl@4.15.1 ships no imports of @parcel/watcher. Removing this
-  // unused dependency also removes the vulnerable production micromatch path.
+  // Keep watcher available as a root development dependency for next-intl's
+  // config plugin, but remove it from next-intl's production dependency graph
+  // so the production audit excludes this build-only package.
   delete pkg.dependencies['@parcel/watcher']
   return pkg
 }
