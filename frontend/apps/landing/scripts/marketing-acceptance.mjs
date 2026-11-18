@@ -17,6 +17,9 @@ const ciAllowedOrigins = new Set([
  ...ciPageOrigins, 'https://api.servio.test', 'https://pos.app.servio.test',
  'https://restaurant-1.pos.servio.test', 'https://localhost:18443',
 ])
+const ciApiOrigin = process.env.SERVIO_ACCEPTANCE_ENV === 'ci' && process.env.NEXT_PUBLIC_API_URL
+ ? new URL(process.env.NEXT_PUBLIC_API_URL).origin
+ : null
 if (process.env.SERVIO_ACCEPTANCE_ENV === 'ci' && !ciPageOrigins.has(new URL(base).origin)) throw new Error('CI marketing acceptance accepts only a disposable local or SERVIO test landing host')
 const output = process.env.SERVIO_MARKETING_EVIDENCE || (process.env.SERVIO_BROWSER_EVIDENCE ? path.join(process.env.SERVIO_BROWSER_EVIDENCE, 'marketing') : '/tmp/servio-marketing-acceptance')
 const viewports = [
@@ -468,6 +471,12 @@ async function main() {
      return
     }
     const location = message.location()
+    if (ciApiOrigin && text === 'Failed to load resource: the server responded with a status of 401 (Unauthorized)') {
+     try {
+      const failedUrl = new URL(location.url)
+      if (failedUrl.origin === ciApiOrigin && failedUrl.pathname === '/api/v1/auth/session') return
+     } catch {}
+    }
     if (text === 'Error' && location.url.includes('/_next/static/chunks/')) {
      const pageUrl = page.url()
      const errorHandle = message.args()[0]
