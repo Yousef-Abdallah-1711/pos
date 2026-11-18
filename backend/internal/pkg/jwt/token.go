@@ -37,6 +37,19 @@ func NewTokenService(secret string, expiry string) (*TokenService, error) {
 }
 
 func (s *TokenService) GenerateToken(userID, tenantID int, restaurantID *int, email, role string) (string, error) {
+	if s == nil {
+		return "", errors.New("token service is not configured")
+	}
+	return s.GenerateTokenWithExpiry(userID, tenantID, restaurantID, email, role, s.expiry)
+}
+
+// GenerateTokenWithExpiry issues an access credential with a caller-selected
+// maximum lifetime. Session-backed browser credentials use the server session
+// absolute deadline; bearer and other token callers retain the configured TTL.
+func (s *TokenService) GenerateTokenWithExpiry(userID, tenantID int, restaurantID *int, email, role string, expiry time.Duration) (string, error) {
+	if s == nil || expiry <= 0 {
+		return "", errors.New("token service or expiry is invalid")
+	}
 	restID := 0
 	if restaurantID != nil {
 		restID = *restaurantID
@@ -49,7 +62,7 @@ func (s *TokenService) GenerateToken(userID, tenantID int, restaurantID *int, em
 		RestaurantID: restID,
 		Role:         role,
 		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(s.expiry)),
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(expiry)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 		},
 	}

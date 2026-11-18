@@ -300,6 +300,37 @@ func (u *AuthUseCase) RefreshToken(claims *jwt.Claims) (string, error) {
 	return u.tokenService.GenerateToken(claims.UserID, claims.TenantID, &claims.RestaurantID, claims.Email, claims.Role)
 }
 
+// RefreshTokenForSession issues a replacement credential capped by the
+// remaining lifetime of its server-side browser session.
+func (u *AuthUseCase) RefreshTokenForSession(claims *jwt.Claims, remainingLifetime time.Duration) (string, error) {
+	if u == nil || u.tokenService == nil || claims == nil || claims.UserID <= 0 || claims.TenantID <= 0 || remainingLifetime <= 0 {
+		return "", errors.New("authenticated session is required")
+	}
+	return u.tokenService.GenerateTokenWithExpiry(claims.UserID, claims.TenantID, &claims.RestaurantID, claims.Email, claims.Role, remainingLifetime)
+}
+
+// BrowserSessionCredential replaces the short-lived login token with one
+// bounded by the browser session's absolute lifetime before it is stored.
+func (u *AuthUseCase) BrowserSessionCredential(credential string, lifetime time.Duration) (string, error) {
+	if u == nil || lifetime <= 0 {
+		return "", errors.New("browser session lifetime is invalid")
+	}
+	claims, err := u.ValidateCredential(credential)
+	if err != nil {
+		return "", err
+	}
+	return u.RefreshTokenForSession(claims, lifetime)
+}
+
+// GetAuthSessionProfile loads the minimal active profile from the tenant-bound
+// user row used to authorize the current browser session.
+func (u *AuthUseCase) GetAuthSessionProfile(ctx context.Context, userID, tenantID, restaurantID int, role string) (*domain.AuthSessionProfile, error) {
+	if u == nil || u.repo == nil || userID <= 0 || tenantID <= 0 || restaurantID < 0 || role == "" {
+		return nil, domain.ErrAuthDependencyUnavailable
+	}
+	return u.repo.GetAuthSessionProfile(ctx, userID, tenantID, restaurantID, role)
+}
+
 // ValidateCredential verifies a stored access credential before logout audit
 // attribution. It does not authenticate requests by itself.
 func (u *AuthUseCase) ValidateCredential(credential string) (*jwt.Claims, error) {

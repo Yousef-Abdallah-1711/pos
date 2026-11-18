@@ -12,7 +12,15 @@ const expectedTheme = process.env.SERVIO_THEME || 'dark'
 if (!['light', 'dark'].includes(expectedTheme)) throw new Error('Unsupported marketing theme')
 const base = process.env.SERVIO_MARKETING_URL
 if (!base) throw new Error('Set SERVIO_MARKETING_URL to the intended preview or deployment URL')
-if (process.env.SERVIO_ACCEPTANCE_ENV === 'ci' && new URL(base).origin !== 'https://pos.servio.test') throw new Error('CI marketing acceptance accepts only the disposable landing host')
+const ciPageOrigins = new Set(['https://pos.servio.test', 'https://localhost:13111'])
+const ciAllowedOrigins = new Set([
+ ...ciPageOrigins, 'https://api.servio.test', 'https://pos.app.servio.test',
+ 'https://restaurant-1.pos.servio.test', 'https://localhost:18443',
+])
+const ciApiOrigin = process.env.SERVIO_ACCEPTANCE_ENV === 'ci' && process.env.NEXT_PUBLIC_API_URL
+ ? new URL(process.env.NEXT_PUBLIC_API_URL).origin
+ : null
+if (process.env.SERVIO_ACCEPTANCE_ENV === 'ci' && !ciPageOrigins.has(new URL(base).origin)) throw new Error('CI marketing acceptance accepts only a disposable local or SERVIO test landing host')
 const output = process.env.SERVIO_MARKETING_EVIDENCE || (process.env.SERVIO_BROWSER_EVIDENCE ? path.join(process.env.SERVIO_BROWSER_EVIDENCE, 'marketing') : '/tmp/servio-marketing-acceptance')
 const viewports = [
  { width: 320, height: 568 }, { width: 360, height: 800 }, { width: 375, height: 812 },
@@ -64,10 +72,10 @@ async function load(page, locale, route) {
   const headings = document.querySelectorAll('main h1')
   return headings.length === 1 && headings[0].getClientRects().length > 0
  })
- // Let route and shared chunks finish loading before taking evidence or
- // navigating again. A visible server-rendered heading can appear before
- // Next.js has completed the client-side route hydration.
- await page.waitForLoadState('networkidle', { timeout: 15000 })
+ // A quiet network is not a reliable readiness signal when Next.js prefetches
+ // routes or the page has background requests. The visible heading above is
+ // the content readiness check; later interactions exercise client hydration.
+ await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
  await page.waitForFunction(theme => document.documentElement.classList.contains(theme), expectedTheme)
  check(`resolved theme ${locale}${route}`, await page.evaluate(theme => document.documentElement.classList.contains(theme), expectedTheme))
  const canonical = await page.locator('link[rel=canonical]').getAttribute('href')
@@ -227,7 +235,6 @@ async function interactions(browser, page, locale) {
 
  await page.setViewportSize({ width: 1440, height: 1000 })
  await load(page, locale, '')
- await page.waitForLoadState('networkidle')
  const menuApiRequests = []
  const trackMenuApiRequest = request => { if (/\/api(?:\/|$)/.test(new URL(request.url()).pathname)) menuApiRequests.push(new URL(request.url()).pathname) }
  page.on('request', trackMenuApiRequest)
@@ -388,18 +395,17 @@ async function interactions(browser, page, locale) {
 }
 async function createPage(browser, viewport) {
  const page = await browser.newPage({ colorScheme, ignoreHTTPSErrors: process.env.SERVIO_DISPOSABLE_BROWSER === '1', viewport, reducedMotion: 'reduce' })
- if (process.env.SERVIO_ACCEPTANCE_ENV === 'ci') await page.route('**/*', route => {
+ await page.route('**/*', route => {
   const url = new URL(route.request().url())
-  if (url.protocol === 'https:' && ['pos.servio.test', 'api.servio.test', 'pos.app.servio.test', 'restaurant-1.pos.servio.test'].includes(url.hostname)) return route.continue()
   if (['data:', 'blob:'].includes(url.protocol)) return route.continue()
+  if (process.env.SERVIO_ACCEPTANCE_ENV !== 'ci') return route.continue()
+  if (ciAllowedOrigins.has(url.origin)) return route.continue()
   return route.abort('blockedbyclient')
  })
  if (process.env.SERVIO_THEME) await page.addInitScript(({ theme, origin }) => {
   if (location.origin === origin && !localStorage.getItem('servio-marketing-theme')) localStorage.setItem('servio-marketing-theme', theme)
  }, { theme: expectedTheme, origin: new URL(base).origin })
- // Routing disables HTTP cache, so each raw-SSR assertion reads a fresh response.
- // https://playwright.dev/docs/api/class-browsercontext#browser-context-route
- await page.route('**/*', route => route.continue())
+ // The single routing layer disables HTTP cache while retaining the CI egress allowlist above.
  return page
 }
 async function captureComparisonBoards(browser) {
@@ -435,6 +441,7 @@ async function main() {
  const cancelledNextChunkPaths = new Set()
  const cancelledNextChunkPagePaths = new Set()
  const nextChunkExceptions = []
+ let expectedGuestSessionDenials = 0
  try {
   let page = await createPage(browser, { width: 1440, height: 1000 })
   const errors = []
@@ -464,6 +471,12 @@ async function main() {
      return
     }
     const location = message.location()
+    if (ciApiOrigin && text === 'Failed to load resource: the server responded with a status of 401 (Unauthorized)') {
+     try {
+      const failedUrl = new URL(location.url)
+      if (failedUrl.origin === ciApiOrigin && failedUrl.pathname === '/api/v1/auth/session') return
+     } catch {}
+    }
     if (text === 'Error' && location.url.includes('/_next/static/chunks/')) {
      const pageUrl = page.url()
      const errorHandle = message.args()[0]
@@ -503,6 +516,11 @@ async function main() {
    page.on('response', response => {
     if (response.status() < 400) return
     const pathname = new URL(response.url()).pathname
+    const method = response.request().method()
+    if (response.status() === 401 && method === 'GET' && pathname === '/api/v1/auth/session') {
+     expectedGuestSessionDenials++
+     return
+    }
     networkFailures.push(`${response.status()} ${pathname}`)
     if (pathname.startsWith('/_next/static/chunks/')) failedNextChunkRequests.push(`${response.status()} ${pathname}`)
    })
@@ -548,7 +566,7 @@ async function main() {
   check('browser exceptions', errors.length === 0, errors.join('; '))
  } finally {
   await browser.close()
-  await fs.writeFile(path.join(output, 'results.json'), JSON.stringify({ base, browser: browserName, color_scheme: colorScheme, theme: expectedTheme, cancelled_next_chunk_requests: cancelledNextChunkRequests, cancelled_next_chunk_page_paths: [...cancelledNextChunkPagePaths], checks }, null, 2))
+  await fs.writeFile(path.join(output, 'results.json'), JSON.stringify({ base, browser: browserName, color_scheme: colorScheme, theme: expectedTheme, expected_guest_session_denials: expectedGuestSessionDenials, cancelled_next_chunk_requests: cancelledNextChunkRequests, cancelled_next_chunk_page_paths: [...cancelledNextChunkPagePaths], checks }, null, 2))
   await fs.writeFile(path.join(output, 'navigation-evidence.json'), JSON.stringify({ sourceCommit, screenshots: navigationScreenshots }, null, 2))
  }
 }

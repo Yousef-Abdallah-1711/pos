@@ -1,33 +1,34 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { usePathname } from 'next/navigation'
 import { useAuthStore } from '@/stores/authStore'
+import { requestDashboardCallbackSession } from '@/lib/authSession'
 import { getConfig } from '@/lib/config'
 
 export default function AuthCallbackContent() {
   const pathname = usePathname()
   const setAuth = useAuthStore((state) => state.setAuth)
+  const redirectedRef = useRef(false)
 
   useEffect(() => {
     let active = true
     const locale = pathname.split('/')[1] === 'ar' ? 'ar' : 'en'
 
-    fetch(`${getConfig().apiUrl}/auth/session`, { credentials: 'include', cache: 'no-store' })
-      .then(async (response) => {
-        if (!response.ok) throw new Error('Session unavailable')
-        return response.json()
-      })
-      .then((user: unknown) => {
-        if (!active) return
-        setAuth(user as Parameters<typeof setAuth>[0], '')
+    void requestDashboardCallbackSession(getConfig().apiUrl)
+      .then((user) => {
+        if (!active || redirectedRef.current) return
+        redirectedRef.current = true
+        setAuth(user, '')
         window.history.replaceState({}, document.title, pathname)
         // This callback crosses the landing/dashboard app boundary. A document
         // navigation avoids carrying a stale App Router tree from the callback.
         window.location.replace(`/${locale}/dashboard`)
       })
       .catch(() => {
-        if (active) window.location.replace(`${getConfig().landingUrl}/${locale}/auth/login`)
+        if (!active || redirectedRef.current) return
+        redirectedRef.current = true
+        window.location.replace(`${getConfig().landingUrl}/${locale}/auth/login`)
       })
 
     return () => { active = false }
