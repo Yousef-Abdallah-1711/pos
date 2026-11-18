@@ -2,7 +2,7 @@ import { execFileSync } from 'node:child_process'
 import { createHash } from 'node:crypto'
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import path from 'node:path'
-import { expect, test, type Page, type Request } from '@playwright/test'
+import { expect, test, type Page } from '@playwright/test'
 import { routeContainerApiToCandidate } from './api-routing'
 
 const landingUrl = (process.env.WS05_LANDING_URL || 'http://localhost:13111').replace(/\/$/, '')
@@ -217,27 +217,15 @@ test('rejects malicious redirect destinations after a real login', async ({ page
   ]
 
   for (const attack of attacks) {
-    const loginURL = new URL(`${landingUrl}/en/auth/login`)
+    // Start on the explicit Arabic route so locale negotiation cannot drop
+    // the attack query while redirecting /en to the browser's preferred locale.
+    const loginURL = new URL(`${landingUrl}/ar/auth/login`)
     loginURL.searchParams.set(attack.key, attack.value)
     const loginResponse = page.waitForResponse((response) => new URL(response.url()).pathname === '/api/v1/auth/login')
-    let attackLoginUrlRequested = false
-    const recordAttackLoginRequest = (request: Request) => {
-      const requestURL = new URL(request.url())
-      attackLoginUrlRequested ||= requestURL.origin === loginURL.origin
-        && requestURL.pathname === loginURL.pathname
-        && requestURL.searchParams.get(attack.key) === attack.value
-    }
-    page.on('request', recordAttackLoginRequest)
-    try {
-      await page.goto(loginURL.toString(), { waitUntil: 'domcontentloaded' })
-    } catch (error) {
-      expect(String(error)).toContain('net::ERR_ABORTED')
-    } finally {
-      page.off('request', recordAttackLoginRequest)
-    }
-    expect(attackLoginUrlRequested).toBe(true)
+    await page.goto(loginURL.toString(), { waitUntil: 'domcontentloaded' })
     expect(new URL(page.url()).origin).toBe(new URL(landingUrl).origin)
-    await expect.poll(() => new URL(page.url()).pathname).toMatch(/^\/(?:en|ar)\/auth\/login$/)
+    expect(new URL(page.url()).pathname).toBe('/ar/auth/login')
+    expect(new URL(page.url()).searchParams.get(attack.key)).toBe(attack.value)
     await expect(page.locator('form')).toHaveAttribute('method', 'post')
     await page.locator('input[type="email"]').fill(ownerEmail)
     await page.locator('input[type="password"]').fill(ownerPassword)
