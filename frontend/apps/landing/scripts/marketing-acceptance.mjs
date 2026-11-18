@@ -69,10 +69,10 @@ async function load(page, locale, route) {
   const headings = document.querySelectorAll('main h1')
   return headings.length === 1 && headings[0].getClientRects().length > 0
  })
- // Let route and shared chunks finish loading before taking evidence or
- // navigating again. A visible server-rendered heading can appear before
- // Next.js has completed the client-side route hydration.
- await page.waitForLoadState('networkidle', { timeout: 15000 })
+ // A quiet network is not a reliable readiness signal when Next.js prefetches
+ // routes or the page has background requests. The visible heading above is
+ // the content readiness check; later interactions exercise client hydration.
+ await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
  await page.waitForFunction(theme => document.documentElement.classList.contains(theme), expectedTheme)
  check(`resolved theme ${locale}${route}`, await page.evaluate(theme => document.documentElement.classList.contains(theme), expectedTheme))
  const canonical = await page.locator('link[rel=canonical]').getAttribute('href')
@@ -232,7 +232,6 @@ async function interactions(browser, page, locale) {
 
  await page.setViewportSize({ width: 1440, height: 1000 })
  await load(page, locale, '')
- await page.waitForLoadState('networkidle')
  const menuApiRequests = []
  const trackMenuApiRequest = request => { if (/\/api(?:\/|$)/.test(new URL(request.url()).pathname)) menuApiRequests.push(new URL(request.url()).pathname) }
  page.on('request', trackMenuApiRequest)
