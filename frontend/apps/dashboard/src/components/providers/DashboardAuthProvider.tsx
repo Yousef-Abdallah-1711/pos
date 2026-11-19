@@ -1,9 +1,10 @@
 'use client'
 
-import { ReactNode, useCallback, useEffect, useRef, useState } from 'react'
+import { Fragment, type ReactNode, useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslations } from 'next-intl'
-import { useAuthStore } from '@/stores/authStore'
+import { hasDifferentAuthScope, useAuthStore } from '@/stores/authStore'
 import { useTenantStatusStore } from '@/stores/tenantStatusStore'
+import { clearAuthScopedPersistentDatabases } from '@/lib/authScopeCleanup'
 import {
   classifySessionBootstrapStatus,
   getDashboardLoginUrl,
@@ -128,7 +129,11 @@ const DashboardAuthProvider = ({ children }: { children: ReactNode }) => {
     />
   }
 
-  return <>{children}</>
+  const identityKey = user
+    ? `${user.id}:${user.tenant_id}:${user.restaurant_id ?? 0}:${user.role}`
+    : 'anonymous'
+
+  return <Fragment key={identityKey}>{children}</Fragment>
 }
 
 interface SessionRestoreOptions {
@@ -170,6 +175,11 @@ async function restoreDashboardSession(options: SessionRestoreOptions) {
       options.setBootstrapState('unavailable')
       return
     }
+    const previousUser = useAuthStore.getState().user
+    if (!previousUser || hasDifferentAuthScope(previousUser, sessionUser)) {
+      await clearAuthScopedPersistentDatabases()
+    }
+    if (!options.active()) return
     options.clearTenantStatus()
     options.setAuth(sessionUser, '')
     options.setBootstrapState('ready')

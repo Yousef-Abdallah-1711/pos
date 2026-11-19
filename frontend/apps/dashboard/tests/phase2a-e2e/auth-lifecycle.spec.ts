@@ -11,6 +11,7 @@ const dashboardUrl = (process.env.WS05_DASHBOARD_URL || 'http://localhost:13112'
 const apiOrigin = new URL(process.env.WS05_API_URL || 'http://localhost:18082/api/v1').origin
 const ownerEmail = 'phase2a-owner-a@example.test'
 const ownerName = 'WS05 Tenant A Owner'
+const otherTenantOwnerEmail = 'phase2a-owner-b@example.test'
 const ownerPassword = process.env.WS05_TEST_PASSWORD || 'WS05-Disposable-Only-2026!'
 const superAdminPassword = process.env.E2E_SUPERADMIN_PASSWORD || 'WS05-SuperAdmin-Only-2026!'
 const composeProject = process.env.WS05_COMPOSE_PROJECT || ''
@@ -151,7 +152,12 @@ async function expectSignedInDashboard(page: Page, allowArabicLocale = false) {
   expect(sessionCookie?.expires).toBe(-1)
 }
 
-async function signIn(page: Page, password: string, loginUrl = `${landingUrl}/en/auth/login`) {
+async function signIn(
+  page: Page,
+  password: string,
+  loginUrl = `${landingUrl}/en/auth/login`,
+  email = ownerEmail,
+) {
   await routeContainerApiToCandidate(page)
   const landingSessionCheck = page.waitForResponse((response) => {
     return new URL(response.url()).pathname === '/api/v1/auth/session'
@@ -162,10 +168,89 @@ async function signIn(page: Page, password: string, loginUrl = `${landingUrl}/en
   await page.goto(loginUrl, { waitUntil: 'domcontentloaded' })
   await expect(page.locator('form')).toHaveAttribute('method', 'post')
   await landingSessionCheck
-  await page.getByRole('textbox', { name: /email/i }).fill(ownerEmail)
+  await page.getByRole('textbox', { name: /email/i }).fill(email)
   await page.getByRole('textbox', { name: /password/i }).fill(password)
   await page.getByRole('button', { name: /^sign in$/i }).click()
   return (await loginResponse).status()
+}
+
+type ScopedCategory = { id: number; tenant_id: number; restaurant_id: number }
+
+async function signInAndLoadTenantCategories(page: Page) {
+  expect(await signIn(page, ownerPassword)).toBe(200)
+  await expectSignedInDashboard(page)
+
+  const categoriesResponse = page.waitForResponse((response) => {
+    const url = new URL(response.url())
+    return url.pathname === '/api/v1/categories' && response.request().method() === 'GET'
+  })
+  await page.goto(`${dashboardUrl}/en/dashboard/products/new`, { waitUntil: 'domcontentloaded' })
+  const response = await categoriesResponse
+  expect(response.status()).toBe(200)
+  await expect(page.getByRole('combobox').first()).toBeVisible()
+  const categories = await response.json() as ScopedCategory[]
+  expect(categories.length).toBeGreaterThan(0)
+  return categories
+}
+
+async function seedTenantAScopedBrowserState(page: Page) {
+  await page.evaluate(() => {
+    localStorage.setItem('pos-storage', JSON.stringify({
+      state: {
+        items: [{ productId: 901, name: 'Synthetic Tenant A Item', price: 10, quantity: 1 }],
+        customerName: 'Synthetic Tenant A Customer',
+        customerPhone: '+10000000000',
+        heldOrders: [{ id: 'synthetic-a', customerName: 'Synthetic Tenant A Customer' }],
+      },
+      version: 0,
+    }))
+    localStorage.setItem('preferences-storage', JSON.stringify({ state: { settings: { userId: 41 } }, version: 0 }))
+    localStorage.setItem('theme-builder-storage', JSON.stringify({ state: { identity: { siteTitle: 'Synthetic Tenant A Theme' } }, version: 0 }))
+    localStorage.setItem('pos-products-cache', JSON.stringify([{ id: 901, name: 'Synthetic Tenant A Item' }]))
+    localStorage.setItem('kds-bootstrap-snapshot-v1', JSON.stringify({ orders: [{ customer_name: 'Synthetic Tenant A Customer' }] }))
+  })
+}
+
+async function loginOtherTenantInSecondTab(page: Page) {
+  const otherTenantPage = await page.context().newPage()
+  startAuthTimeline(otherTenantPage)
+  expect(await signIn(otherTenantPage, ownerPassword, `${landingUrl}/en/auth/login`, otherTenantOwnerEmail)).toBe(200)
+  await expectSignedInDashboard(otherTenantPage)
+  return otherTenantPage
+}
+
+async function readCategoriesAfterIdentityRefresh(page: Page) {
+  const sessionResponsePromise = page.waitForResponse((response) => {
+    const url = new URL(response.url())
+    return url.pathname === '/api/v1/auth/session' && response.request().method() === 'GET'
+  })
+  const categoriesResponsePromise = page.waitForResponse((response) => {
+    const url = new URL(response.url())
+    return url.pathname === '/api/v1/categories' && response.request().method() === 'GET'
+  })
+  await page.bringToFront()
+  const sessionResponse = await sessionResponsePromise
+  const categoriesResponse = await categoriesResponsePromise
+  expect(sessionResponse.status()).toBe(200)
+  expect(categoriesResponse.status()).toBe(200)
+  return { sessionResponse, categories: await categoriesResponse.json() as ScopedCategory[] }
+}
+
+async function readTenantStateCleanup(page: Page) {
+  return page.evaluate(() => {
+    const rawPOSState = localStorage.getItem('pos-storage')
+    const posState = rawPOSState ? JSON.parse(rawPOSState).state ?? {} : {}
+    const posStateText = JSON.stringify(posState)
+    return {
+      priorCustomerAbsent: !posStateText.includes('Synthetic Tenant A Customer'),
+      priorItemAbsent: !posStateText.includes('Synthetic Tenant A Item'),
+      heldOrdersEmpty: Array.isArray(posState.heldOrders) && posState.heldOrders.length === 0,
+      tenantCatalogCacheAbsent: localStorage.getItem('pos-products-cache') === null,
+      kdsSnapshotAbsent: localStorage.getItem('kds-bootstrap-snapshot-v1') === null,
+      preferencesStorageCleared: !localStorage.getItem('preferences-storage')?.includes('userId'),
+      themeStorageCleared: !localStorage.getItem('theme-builder-storage')?.includes('Synthetic Tenant A Theme'),
+    }
+  })
 }
 
 test('guest can open Landing and follow the canonical Login link', async ({ page }) => {
@@ -611,6 +696,54 @@ test('multi-tenant login selects an authorized tenant before establishing the se
   })
   expect(new URL(page.url()).search).toBe('')
   await page.unrouteAll({ behavior: 'ignoreErrors' })
+})
+
+test('cross-portal account changes clear cached categories in an open Dashboard tab', async ({ page }, testInfo) => {
+  test.setTimeout(120_000)
+  const categoriesA = await signInAndLoadTenantCategories(page)
+  await seedTenantAScopedBrowserState(page)
+
+  // A logout through Landing clears the shared cookie but leaves this Dashboard tab mounted.
+  const logout = await page.context().request.post(`${apiOrigin}/api/v1/auth/logout`, {
+    headers: { origin: landingUrl },
+  })
+  expect(logout.status()).toBe(204)
+
+  const otherTenantLoginPage = await loginOtherTenantInSecondTab(page)
+  const { sessionResponse, categories: categoriesB } = await readCategoriesAfterIdentityRefresh(page)
+  expect(categoriesB.length).toBeGreaterThan(0)
+  expect(new Set(categoriesA.map((category) => category.id))).not.toEqual(
+    new Set(categoriesB.map((category) => category.id)),
+  )
+  await expect.poll(() => page.evaluate(() => {
+    const raw = localStorage.getItem('auth-storage')
+    return raw ? JSON.parse(raw).state?.user?.email ?? null : null
+  })).toBe(otherTenantOwnerEmail)
+  const clearedTenantState = await readTenantStateCleanup(page)
+  expect(clearedTenantState).toEqual({
+    priorCustomerAbsent: true,
+    priorItemAbsent: true,
+    heldOrdersEmpty: true,
+    tenantCatalogCacheAbsent: true,
+    kdsSnapshotAbsent: true,
+    preferencesStorageCleared: true,
+    themeStorageCleared: true,
+  })
+
+  await testInfo.attach('dashboard-cross-account-cache-isolation.json', {
+    body: JSON.stringify({
+      sourceSha: process.env.GITHUB_SHA ?? 'local-uncommitted-candidate',
+      initialTenantCategoriesLoaded: categoriesA.length,
+      landingLogoutStatus: logout.status(),
+      secondTenantCategoriesLoaded: categoriesB.length,
+      sessionRefreshStatus: sessionResponse.status(),
+      categoryResponseChangedWithIdentity: true,
+      priorCategoriesReused: false,
+      tenantScopedBrowserStateCleared: clearedTenantState,
+    }, null, 2),
+    contentType: 'application/json',
+  })
+  await otherTenantLoginPage.close()
 })
 
 test('logout clears access and denies the next protected dashboard visit', async ({ page }) => {
