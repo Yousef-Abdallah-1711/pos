@@ -267,17 +267,43 @@ jobs:
             --output "$RUNNER_TEMP/playwright-results" \
             --trace off
 
+          # The final auth scenario restarts only this disposable API to reset
+          # its process-local test rate limiter. The storefront shares the API
+          # container's network namespace, so recreate only that sidecar before
+          # the anonymous ordering scenario.
+          if [[ ! "$AUTH_TEST_PROJECT" =~ ^servio-auth-gha-[0-9]+$ ]]; then
+            echo "Refusing storefront recovery outside the disposable auth project." >&2
+            exit 1
+          fi
+          api_container_id=$(docker ps -q \
+            --filter "label=com.docker.compose.project=$AUTH_TEST_PROJECT" \
+            --filter 'label=com.docker.compose.service=api')
+          test -n "$api_container_id"
+          test "$(printf '%s\n' "$api_container_id" | wc -l)" -eq 1
+          api_labels=$(docker inspect --format '{{json .Config.Labels}}' "$api_container_id")
+          echo "$api_labels" | jq -e '.["com.pos.disposable"] == "true" and .["com.pos.workstream"] == "WS05"' >/dev/null
+          docker compose -p "$AUTH_TEST_PROJECT" -f docker-compose.phase2a-e2e.yml \
+            up --detach --force-recreate --no-deps restaurant-website
+
           storefront_ready=false
           for attempt in $(seq 1 120); do
             status=$(curl --silent --output /dev/null --write-out '%{http_code}' --connect-timeout 2 --max-time 5 \
+              --noproxy '*' \
               --resolve phase2a-restaurant-a.localhost:13113:127.0.0.1 \
               http://phase2a-restaurant-a.localhost:13113/en/menu || true)
             if [ "$status" = 200 ]; then
               storefront_ready=true
               break
             fi
+            if [ "$((attempt % 20))" -eq 0 ]; then
+              echo "Waiting for isolated storefront readiness: HTTP $status (attempt $attempt/120)."
+            fi
             sleep 5
           done
+          if [ "$storefront_ready" != true ]; then
+            docker compose -p "$AUTH_TEST_PROJECT" -f docker-compose.phase2a-e2e.yml ps
+            docker compose -p "$AUTH_TEST_PROJECT" -f docker-compose.phase2a-e2e.yml logs --tail 120 restaurant-website
+          fi
           test "$storefront_ready" = true
           pnpm --dir frontend/apps/dashboard exec playwright test \
             --config playwright.phase2a.config.ts \
