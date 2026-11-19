@@ -248,6 +248,7 @@ async function seedTenantAScopedBrowserState(page: Page) {
 
 async function loginOtherTenantInSecondTab(page: Page) {
   const otherTenantPage = await page.context().newPage()
+  await otherTenantPage.bringToFront()
   startAuthTimeline(otherTenantPage)
   expect(await signIn(otherTenantPage, ownerPassword, `${landingUrl}/en/auth/login`, otherTenantOwnerEmail)).toBe(200)
   await expectSignedInDashboard(otherTenantPage)
@@ -261,6 +262,12 @@ async function readCategoriesAfterIdentityRefresh(page: Page) {
   })
   const categoriesCapture = await captureNextCategoriesResponse<ScopedCategory[]>(page)
   await page.bringToFront()
+  // Headless Chromium can keep multiple tabs logically visible without emitting
+  // the OS-driven focus event. Dispatch the same browser event the provider
+  // listens for after bringing this tab forward so the revalidation path is
+  // deterministic in CI.
+  await expect.poll(() => page.evaluate(() => document.visibilityState)).toBe('visible')
+  await page.evaluate(() => window.dispatchEvent(new Event('focus')))
   const sessionResponse = await sessionResponsePromise
   const categoriesResponse = await categoriesCapture.response
   expect(sessionResponse.status()).toBe(200)
