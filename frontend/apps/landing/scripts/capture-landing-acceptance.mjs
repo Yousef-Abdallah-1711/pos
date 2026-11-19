@@ -44,7 +44,8 @@ try {
     for (const route of routes) {
       for (const width of viewports) {
         await page.setViewportSize({ width, height: 900 })
-        const response = await page.goto(`${baseURL}${route.path(locale)}`, { waitUntil: 'networkidle', timeout: 45_000 })
+        const response = await page.goto(`${baseURL}${route.path(locale)}`, { waitUntil: 'domcontentloaded', timeout: 45_000 })
+        await page.locator('main h1').first().waitFor({ state: 'visible', timeout: 45_000 })
         await page.evaluate(() => document.fonts.ready)
         await page.evaluate(async () => {
           for (const image of document.images) {
