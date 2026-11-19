@@ -1189,18 +1189,24 @@ test('authenticated Landing bootstrap has no guest flash or hydration mismatch',
     headers: { Cookie: `poos_session=${retainedSessionCookie.value}`, Origin: landingUrl },
   })
   if (sessionAfterRestart.status() !== 200) throw new Error('The same session did not resolve after the API restart')
+  const restartEvidence = JSON.stringify({
+    sourceSha: process.env.GITHUB_SHA ?? 'local-uncommitted-candidate',
+    environment: 'disposable WS05 API and Redis services',
+    sessionBeforeRestartStatus: sessionBeforeRestart.status(),
+    sessionAfterRestartStatus: sessionAfterRestart.status(),
+    sameRedisContainerRemainedHealthy: true,
+    sameBrowserCookieRetained: true,
+    cookieValueCaptured: false,
+  }, null, 2)
   await testInfo.attach('redis-session-survives-api-restart.json', {
-    body: JSON.stringify({
-      sourceSha: process.env.GITHUB_SHA ?? 'local-uncommitted-candidate',
-      environment: 'disposable WS05 API and Redis services',
-      sessionBeforeRestartStatus: sessionBeforeRestart.status(),
-      sessionAfterRestartStatus: sessionAfterRestart.status(),
-      sameRedisContainerRemainedHealthy: true,
-      sameBrowserCookieRetained: true,
-      cookieValueCaptured: false,
-    }, null, 2),
+    body: restartEvidence,
     contentType: 'application/json',
   })
+  const evidenceDirectory = process.env.WS05_AUTH_EVIDENCE_DIR
+  if (evidenceDirectory) {
+    await mkdir(evidenceDirectory, { recursive: true })
+    await writeFile(path.join(evidenceDirectory, 'redis-session-survives-api-restart.json'), restartEvidence, { mode: 0o600 })
+  }
   const oldSessionLogout = await page.request.post(`${apiOrigin}/api/v1/auth/logout`, {
     headers: { Cookie: `poos_session=${retainedSessionCookie.value}`, Origin: landingUrl },
   })
