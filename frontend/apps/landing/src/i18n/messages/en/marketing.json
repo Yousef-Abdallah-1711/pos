@@ -11,7 +11,7 @@
   "heroBody": "From the first tap at the counter to the next ticket in the kitchen. Give your team one place to coordinate the work of service.",
   "heroSecondary": "See the order journey",
   "capture": "Actual product · synthetic workspace",
-  "englishCapture": "English, light-theme application screen · synthetic data; QA identifiers redacted",
+  "captureSource": "Actual POS and kitchen screens · synthetic data; QA identifiers redacted",
   "captureMatrix": {
     "enLight": "English, light-theme application screen · synthetic data; QA identifiers redacted",
     "enDark": "English, dark-theme application screen · synthetic data; QA identifiers redacted",
