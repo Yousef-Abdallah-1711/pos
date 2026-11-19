@@ -1,9 +1,9 @@
 # SERVIO Authentication Release Closure
 
-**Execution date:** 2026-11-19
+**Execution date:** 2026-11-20
 **Tested integration source SHA:** dc1fa993b946938e56dd4b19deaf0ec8e0805acd
 **Documentation-only integration branch:** `codex/auth-release-integration-20261118`
-**Closure state:** NO-GO pending independent review, protected merges, post-merge main validation, and staging capacity/preflight.
+**Closure state:** IN PROGRESS; integration changes are verified and ready for a protected merge. Independent review was not performed and is not required by the current main protection rule or owner direction for this staging release.
 
 The application code was tested at dc1fa993b946938e56dd4b19deaf0ec8e0805acd. Subsequent integration-branch commits add only this closure report and the acceptance-matrix update; no application source changed after the recorded runs.
 
@@ -13,9 +13,9 @@ This report describes the tested code SHA separately from the existing staging r
 
 - Starting and current main SHA: c052c817e114df4d060d8428e6e236f6011876f8.
 - Integration application source SHA: dc1fa993b946938e56dd4b19deaf0ec8e0805acd; exact-candidate CI passed on this SHA. Subsequent branch commits are documentation-only and are not represented as having separate CI runs.
-- PRs #80–#86 remain open. All current heads report CLEAN mergeability and their applicable checks pass. PRs #82–#86 were marked ready for review on 2026-11-19. No PR has an independent review or review request; the only repository collaborator is the repository owner.
-- No PR was merged; merge SHAs: none. Candidate changes have no SQL or migration files. The candidate resolves the #82/#83 conflict in backend/cmd/api/main.go. The only KDS-related candidate change is auth-scoped cache clearing; no unrelated KDS feature or SQL fixture is included.
-- Dependency-safe merge sequence for review: #86, #84, #85, #83, then independent #81/#80, and #82 after the #83 conflict is integrated and all exact-head checks are green. No merge was executed because the independent review gate is not satisfied.
+- PRs #80–#86 remain open. All current heads report CLEAN mergeability and their applicable checks pass. PRs #82–#86 are ready for review. No independent review was performed. Current main protection requires zero approving reviews; the owner authorized proceeding without an additional review gate for staging.
+- No PR was merged at this checkpoint; merge SHAs: none. The integrated candidate contains every unique change from #80–#86, with no SQL or migration files. It resolves the #82/#83 overlap in `backend/cmd/api/main.go`. The only KDS-related candidate change is auth-scoped cache clearing; no unrelated KDS feature or SQL fixture is included.
+- Merge strategy: one protected integration PR for the tested integrated branch, followed by closing #80–#86 as superseded only after verifying their changes on main. PR heads #80, #81, #83, #84, #85 and #86 are ancestors of the integration head. PR #82's four remaining commits are patch-equivalent in the integration branch; `git cherry` found no missing patch. No duplicate implementation is needed.
 - Additional open PRs #71–#73 are financial work, outside this auth release; #72/#73 are behind main. PRs #19/#20 are unrelated deployment/WIP work and report DIRTY mergeability. No evidence found that they supersede the auth candidate.
 - Main CI on exact SHA c052c817 is green: verified CI 44122610863, financial acceptance 44122610762, URL/domain smoke 44122611083, runtime guardrail 44122610731. Current protection requires runtime-localhost-guardrail, url-domain-config-smoke and backend with strict up-to-date ancestry; required approval count is configured as zero. The separately requested independent review remains a release requirement and was not bypassed.
 
@@ -32,6 +32,20 @@ This report describes the tested code SHA separately from the existing staging r
 | #86 | 1dae431d15008e7c62d6703280e38058e9684f62 | Open, ready, CLEAN | [44276230245](https://github.com/Yousef-Abdallah-1711/pos/actions/runs/44276230245) |
 
 Companion financial acceptance, runtime guardrail and URL/domain checks passed for those PR heads. PR #82 current head also passed all listed auth, backend, four frontend, image, security, financial, runtime and URL/domain jobs. These PR-head runs are not represented as integrated-candidate CI.
+
+### Release change ledger
+
+| PR | Head | Release scope | Integrated coverage | Exact-head CI | Migrations |
+|---:|---|---|---|---|---|
+| #80 | `a91f1ad123fb0936f92c69de2ee9c113e8ea81f1` | Inspect staging images by verified archive tag | Head is an integration ancestor | [44136198739](https://github.com/Yousef-Abdallah-1711/pos/actions/runs/44136198739) PASS | None |
+| #81 | `cfdd6307b9a6c6e2cde4063204e9e138cc4b4a91` | Landing product capture cropping, contrast and capture reliability | All 3 commits are ancestors | [44437402565](https://github.com/Yousef-Abdallah-1711/pos/actions/runs/44437402565) PASS | None |
+| #82 | `89c59a6ffe6eaae9e4999b45cc87bb2c03dd8a36` | Shared Landing staff session, Dashboard recovery, session lifecycle and auth E2E | Shared history plus 4 patch-equivalent follow-up commits; no missing patch | [44495248962](https://github.com/Yousef-Abdallah-1711/pos/actions/runs/44495248962) PASS | None |
+| #83 | `09ac107926e1a0ec79f02b7e9fd07bf529b15124` | Redis-backed proof replay and IP rate controls | Head is an integration ancestor; overlap with #82 resolved | [44162510775](https://github.com/Yousef-Abdallah-1711/pos/actions/runs/44162510775) PASS | None |
+| #84 | `a2f010827ae1074464b11e76071b4756e700abbc` | Remove legacy staff bearer forwarding from storefront | Head is an integration ancestor | [44164464924](https://github.com/Yousef-Abdallah-1711/pos/actions/runs/44164464924) PASS | None |
+| #85 | `954138f7e788220cea2b100da84860798ebd5f6f` | Replace unsupported load claims with a safe evidence-based k6 suite | Head is an integration ancestor | [44167778607](https://github.com/Yousef-Abdallah-1711/pos/actions/runs/44167778607) PASS | None |
+| #86 | `1dae431d15008e7c62d6703280e38058e9684f62` | Remove watcher from production dependency graph and remove audit suppression | All 3 commits are ancestors | [44276230245](https://github.com/Yousef-Abdallah-1711/pos/actions/runs/44276230245) PASS | None |
+
+The integration candidate changes `backend/internal/service/cache.go` and `frontend/apps/dashboard/src/stores/kdsStore.ts` only to clear auth-scoped cache/state on identity changes. It does not include the separate KDS backend edits or SQL fixtures from the main worktree.
 
 ## B. Implementation
 
@@ -124,8 +138,8 @@ The full 30-scenario status and per-scenario evidence are in [the updated accept
 | PERFORMANCE SMOKE | PASS |
 | 10K CAPACITY | NOT VALIDATED |
 | CI | GREEN on exact integration SHA dc1fa993b946938e56dd4b19deaf0ec8e0805acd |
-| REVIEW | BLOCKED: independent reviewer not assigned |
-| MERGE TO MAIN | BLOCKED |
+| INDEPENDENT REVIEW | NOT PERFORMED; not required by current protection |
+| MERGE TO MAIN | PENDING protected integration PR checks |
 | STAGING READINESS | BLOCKED |
 | STAGING DEPLOYMENT | BLOCKED |
 | LIVE E2E | NOT RUN for candidate |
@@ -136,8 +150,8 @@ The full 30-scenario status and per-scenario evidence are in [the updated accept
 | Issue | Owner | Required evidence/action | Blocks staging? | Blocks production? |
 |---|---|---|---|---|
 | Exact-candidate URL/domain resolver workflow was not dispatched | Release/CI owner | Run the required URL/domain workflow on the merged main SHA; its current PR-head runs are green, while the integration candidate had static template validation only. | Yes, through the required main gate | Yes |
-| Independent review not assigned | Repository owner / reviewer | Provide a distinct GitHub account with repository review access; request security/code approval for #80–#86. Do not self-approve. The owner is the only current collaborator. | Yes | Yes |
-| PRs #80–#86 open | Release owner | PRs #82–#86 are ready for review; after approval, merge through branch protection in dependency-safe order and record merge SHAs. | Yes | Yes |
+| Independent review | Release owner | Not performed. It remains recommended, but the configured main protection requires zero approving reviews and the owner authorized proceeding without an additional review gate for staging. | No for this staging release | Yes if required by a later policy |
+| PRs #80–#86 open | Release owner | Submit one protected integration PR from the verified branch; after merge, verify every unique PR change on main and close #80–#86 as superseded with the integration PR reference. | Yes until merged | Yes |
 | Post-merge validation and signed images absent | Release owner | Run required workflows on exact main SHA; verify signed immutable image digests and release provenance. | Yes | Yes |
 | Staging release preflight | Staging operator | Root now has 50 GiB free and all eight services are healthy. After exact signed images are published, pass the deploy agent's `4 GiB + archive sizes` check immediately before download. No further EBS resize is planned. | Yes until exact release preflight | Yes |
 | Fresh pre-deploy backup and rollout readiness | Staging operator | The 2026-11-19 dump protects current staging state; create/validate another backup after merge and immediately before deploy, verify rollback images, migration compatibility and deploy workflow authorization. | Yes | Yes |
