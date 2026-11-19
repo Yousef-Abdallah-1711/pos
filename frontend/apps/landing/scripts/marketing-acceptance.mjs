@@ -77,7 +77,10 @@ async function load(page, locale, route) {
  // A quiet network is not a reliable readiness signal when Next.js prefetches
  // routes or the page has background requests. The visible heading above is
  // the content readiness check; later interactions exercise client hydration.
- await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
+ await page.evaluate(async () => {
+  await document.fonts.ready
+  await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))
+ })
  await page.waitForFunction(theme => document.documentElement.classList.contains(theme), expectedTheme)
  check(`resolved theme ${locale}${route}`, await page.evaluate(theme => document.documentElement.classList.contains(theme), expectedTheme))
  const canonical = await page.locator('link[rel=canonical]').getAttribute('href')
@@ -92,8 +95,31 @@ async function load(page, locale, route) {
  check(`structured data ${locale}${route}`, schema['@type'] === 'WebSite' && schema.name === 'SERVIO')
  check(`heading ${locale}${route}`, await page.locator('main h1').count() === 1)
  check(`shared header and footer ${locale}${route}`, await page.locator('.sv-desktop-links[aria-label]').count() === 1 && await page.locator('.sv-mobile-navigation nav[aria-label]').count() === 1 && await page.locator('.sv-footer nav[aria-label]').count() === 1)
- const overflow = await page.evaluate(() => document.documentElement.scrollWidth > innerWidth)
- check(`overflow ${locale}${route}`, !overflow)
+ const overflow = await page.evaluate(() => {
+  const viewportWidth = document.documentElement.clientWidth || innerWidth
+  const documentWidth = document.documentElement.scrollWidth
+  const bodyWidth = document.body.scrollWidth
+  const offendingElements = [...document.body.querySelectorAll('*')].map(element => {
+   const bounds = element.getBoundingClientRect()
+   return {
+    tag: element.tagName.toLowerCase(),
+    id: element.id || undefined,
+    className: typeof element.className === 'string' ? element.className.slice(0, 160) : undefined,
+    left: Math.round(bounds.left * 100) / 100,
+    right: Math.round(bounds.right * 100) / 100,
+    width: Math.round(bounds.width * 100) / 100,
+   }
+  }).filter(element => element.left < 0 || element.right > viewportWidth)
+   .slice(0, 12)
+  return {
+   viewportWidth,
+   documentWidth,
+   bodyWidth,
+   offendingElements,
+   hasOverflow: documentWidth > viewportWidth || bodyWidth > viewportWidth,
+  }
+ })
+ check(`overflow ${locale}${route}`, !overflow.hasOverflow, overflow.hasOverflow ? JSON.stringify(overflow) : '')
  await page.addScriptTag({ path: require.resolve('axe-core/axe.min.js') })
  const violations = await page.evaluate(async () => {
   const result = await window.axe.run(document, { runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa'] } })
