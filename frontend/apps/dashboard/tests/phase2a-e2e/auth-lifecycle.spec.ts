@@ -54,6 +54,32 @@ function resetIsolatedAuthRateLimitCounters() {
   }
 }
 
+function isolatedHealthyRedisContainerID() {
+  if (!/^servio-auth-gha-\d+$/.test(composeProject)) {
+    throw new Error('Refusing to inspect Redis outside the disposable authentication test project')
+  }
+  const redisContainerIDs = execFileSync('docker', [
+    'ps', '-q',
+    '--filter', `label=com.docker.compose.project=${composeProject}`,
+    '--filter', 'label=com.docker.compose.service=redis',
+  ], { encoding: 'utf8' }).trim().split(/\r?\n/).filter(Boolean)
+  if (redisContainerIDs.length !== 1) {
+    throw new Error(`Expected one disposable Redis container, found ${redisContainerIDs.length}`)
+  }
+
+  const redisContainerID = redisContainerIDs[0]
+  const labels = JSON.parse(execFileSync('docker', [
+    'inspect', '--format', '{{json .Config.Labels}}', redisContainerID,
+  ], { encoding: 'utf8' })) as Record<string, string>
+  const health = execFileSync('docker', [
+    'inspect', '--format', '{{.State.Health.Status}}', redisContainerID,
+  ], { encoding: 'utf8' }).trim()
+  if (labels['com.pos.disposable'] !== 'true' || labels['com.pos.workstream'] !== 'WS05' || health !== 'healthy') {
+    throw new Error('The shared Redis service is not the healthy WS05 disposable fixture')
+  }
+  return redisContainerID
+}
+
 async function restartIsolatedAPIForFreshLoginWindow() {
   if (!composeProject) return
   if (!/^servio-auth-gha-\d+$/.test(composeProject)) {
@@ -1139,10 +1165,48 @@ test('expired Redis session TTL recovers the browser to the canonical login page
 test('authenticated Landing bootstrap has no guest flash or hydration mismatch', async ({ page, context }, testInfo) => {
   test.setTimeout(150_000)
   // On PR #82 alone, the disposable API uses its in-memory limiter until PR
-  // #83's Redis-backed shared limiter is integrated. Restart only this labeled
-  // test API so earlier synthetic login scenarios do not consume the final
-  // scenario's per-IP budget; the 20/minute limit remains enabled.
+  // #83's Redis-backed shared limiter is integrated. Let the earlier synthetic
+  // login requests age out of the 20/minute window, then use the guarded API
+  // restart below to verify that an existing session survives with shared Redis.
+  await new Promise((resolve) => setTimeout(resolve, 61_000))
+  const redisContainerBefore = isolatedHealthyRedisContainerID()
+  expect(await signIn(page, ownerPassword)).toBe(200)
+  const originalSessionCookie = (await context.cookies(apiOrigin)).find((cookie) => cookie.name === 'poos_session')
+  if (!originalSessionCookie) throw new Error('The browser did not retain the synthetic staff session cookie')
+  const sessionBeforeRestart = await page.request.get(`${apiOrigin}/api/v1/auth/session`, {
+    headers: { Cookie: `poos_session=${originalSessionCookie.value}`, Origin: landingUrl },
+  })
+  if (sessionBeforeRestart.status() !== 200) throw new Error('The synthetic session was not valid before the API restart')
+
   await restartIsolatedAPIForFreshLoginWindow()
+  const redisContainerAfter = isolatedHealthyRedisContainerID()
+  if (redisContainerAfter !== redisContainerBefore) throw new Error('The API restart replaced the shared Redis fixture')
+  const retainedSessionCookie = (await context.cookies(apiOrigin)).find((cookie) => cookie.name === 'poos_session')
+  if (!retainedSessionCookie || retainedSessionCookie.value !== originalSessionCookie.value) {
+    throw new Error('The browser session cookie changed during the API restart')
+  }
+  const sessionAfterRestart = await page.request.get(`${apiOrigin}/api/v1/auth/session`, {
+    headers: { Cookie: `poos_session=${retainedSessionCookie.value}`, Origin: landingUrl },
+  })
+  if (sessionAfterRestart.status() !== 200) throw new Error('The same session did not resolve after the API restart')
+  await testInfo.attach('redis-session-survives-api-restart.json', {
+    body: JSON.stringify({
+      sourceSha: process.env.GITHUB_SHA ?? 'local-uncommitted-candidate',
+      environment: 'disposable WS05 API and Redis services',
+      sessionBeforeRestartStatus: sessionBeforeRestart.status(),
+      sessionAfterRestartStatus: sessionAfterRestart.status(),
+      sameRedisContainerRemainedHealthy: true,
+      sameBrowserCookieRetained: true,
+      cookieValueCaptured: false,
+    }, null, 2),
+    contentType: 'application/json',
+  })
+  const oldSessionLogout = await page.request.post(`${apiOrigin}/api/v1/auth/logout`, {
+    headers: { Cookie: `poos_session=${retainedSessionCookie.value}`, Origin: landingUrl },
+  })
+  if (oldSessionLogout.status() !== 204) throw new Error('The temporary restart-continuity session could not be revoked')
+  await context.clearCookies()
+
   expect(await signIn(page, ownerPassword)).toBe(200)
   await expectSignedInDashboard(page)
 
