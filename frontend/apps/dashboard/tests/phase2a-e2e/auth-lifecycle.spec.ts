@@ -2,7 +2,7 @@ import { execFileSync } from 'node:child_process'
 import { createHash } from 'node:crypto'
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import path from 'node:path'
-import { expect, test, type Page, type Response } from '@playwright/test'
+import { expect, test, type Page, type Route } from '@playwright/test'
 import { routeContainerApiToCandidate } from './api-routing'
 
 const landingUrl = (process.env.WS05_LANDING_URL || 'http://localhost:13111').replace(/\/$/, '')
@@ -176,28 +176,51 @@ async function signIn(
 
 type ScopedCategory = { id: number; tenant_id: number; restaurant_id: number }
 
-function waitForJSONResponse<T>(page: Page, matches: (response: Response) => boolean) {
-  return new Promise<{ status: number; body: T }>((resolve, reject) => {
-    const captureResponse = (response: Response) => {
-      if (!matches(response)) return
-      page.off('response', captureResponse)
-      const status = response.status()
-      void response.json().then((body: T) => resolve({ status, body })).catch(reject)
-    }
-    page.on('response', captureResponse)
+async function captureNextCategoriesResponse<T>(page: Page) {
+  const routeMatcher = '**/api/v1/categories*'
+  let resolveCapture!: (result: { status: number; body: T }) => void
+  let rejectCapture!: (error: unknown) => void
+  const response = new Promise<{ status: number; body: T }>((resolve, reject) => {
+    resolveCapture = resolve
+    rejectCapture = reject
   })
+
+  const captureResponse = async (route: Route) => {
+    const request = route.request()
+    const url = new URL(request.url())
+    if (request.method() !== 'GET' || url.pathname !== '/api/v1/categories') {
+      await route.continue()
+      return
+    }
+
+    try {
+      // Read the upstream body through Playwright's route API before returning it
+      // to Chromium. This keeps the evidence available if Next navigates while
+      // the browser is still processing the response.
+      const upstream = await route.fetch()
+      const status = upstream.status()
+      const body = await upstream.json() as T
+      await route.fulfill({ response: upstream })
+      await page.unroute(routeMatcher, captureResponse)
+      resolveCapture({ status, body })
+    } catch (error) {
+      await route.abort().catch(() => undefined)
+      await page.unroute(routeMatcher, captureResponse).catch(() => undefined)
+      rejectCapture(error)
+    }
+  }
+
+  await page.route(routeMatcher, captureResponse)
+  return { response }
 }
 
 async function signInAndLoadTenantCategories(page: Page) {
   expect(await signIn(page, ownerPassword)).toBe(200)
   await expectSignedInDashboard(page)
 
-  const categoriesResponse = waitForJSONResponse<ScopedCategory[]>(page, (response) => {
-    const url = new URL(response.url())
-    return url.pathname === '/api/v1/categories' && response.request().method() === 'GET'
-  })
+  const categoriesCapture = await captureNextCategoriesResponse<ScopedCategory[]>(page)
   await page.goto(`${dashboardUrl}/en/dashboard/products/new`, { waitUntil: 'domcontentloaded' })
-  const response = await categoriesResponse
+  const response = await categoriesCapture.response
   expect(response.status).toBe(200)
   await expect(page.getByRole('combobox').first()).toBeVisible()
   const categories = response.body
@@ -236,13 +259,10 @@ async function readCategoriesAfterIdentityRefresh(page: Page) {
     const url = new URL(response.url())
     return url.pathname === '/api/v1/auth/session' && response.request().method() === 'GET'
   })
-  const categoriesResponsePromise = waitForJSONResponse<ScopedCategory[]>(page, (response) => {
-    const url = new URL(response.url())
-    return url.pathname === '/api/v1/categories' && response.request().method() === 'GET'
-  })
+  const categoriesCapture = await captureNextCategoriesResponse<ScopedCategory[]>(page)
   await page.bringToFront()
   const sessionResponse = await sessionResponsePromise
-  const categoriesResponse = await categoriesResponsePromise
+  const categoriesResponse = await categoriesCapture.response
   expect(sessionResponse.status()).toBe(200)
   expect(categoriesResponse.status).toBe(200)
   return { sessionResponse, categories: categoriesResponse.body }
