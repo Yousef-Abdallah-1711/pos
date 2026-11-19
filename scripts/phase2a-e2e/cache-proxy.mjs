@@ -9,6 +9,7 @@ const maxEntries = 128
 const maxEntryBytes = 4 * 1024 * 1024
 const maxCacheBytes = 16 * 1024 * 1024
 const cache = new Map()
+const cacheKeysByBaseKey = new Map()
 let cacheBytes = 0
 // These query names can carry credentials or proofs, so matching requests bypass shared caching.
 const sensitiveQueryName = /token|proof|password|secret|code|jwt|session|signature/i
@@ -21,18 +22,50 @@ if (!Number.isSafeInteger(listenPort) || listenPort < 1 || listenPort > 65535
   throw new Error('Usage: cache-proxy.mjs <listen-port> <upstream-port> <certificate> <key> <service>')
 }
 
-function cacheKey(request, requestUrl) {
+function cacheBaseKey(request, requestUrl) {
   const source = [
     serviceName,
     request.headers.host ?? '',
     requestUrl.pathname,
     requestUrl.search,
-    request.headers.accept ?? '',
-    request.headers['accept-encoding'] ?? '',
-    request.headers['accept-language'] ?? '',
-    request.headers.origin ?? '',
   ].join('\n')
   return createHash('sha256').update(source).digest('hex')
+}
+
+function headerValue(request, name) {
+  const value = request.headers[name.toLowerCase()]
+  return Array.isArray(value) ? value.join(',') : value ?? ''
+}
+
+function cacheKey(request, requestUrl, varyHeaders) {
+  const dimensions = [...new Set(varyHeaders.map((name) => name.toLowerCase()))].sort()
+  const values = dimensions.map((name) => [name, headerValue(request, name)])
+  const source = JSON.stringify([cacheBaseKey(request, requestUrl), values])
+  return createHash('sha256').update(source).digest('hex')
+}
+
+function responseVaryHeaders(headers) {
+  return [...new Set(String(headers.vary ?? '').split(',').map((name) => name.trim().toLowerCase()).filter(Boolean))].sort()
+}
+
+function requestMatchesVary(request, varyHeaders, varyValues) {
+  return varyHeaders.every((name) => headerValue(request, name) === varyValues[name])
+}
+
+function indexEntry(baseKey, key) {
+  const indexedKeys = cacheKeysByBaseKey.get(baseKey) ?? new Set()
+  indexedKeys.add(key)
+  cacheKeysByBaseKey.set(baseKey, indexedKeys)
+}
+
+function removeEntry(key) {
+  const entry = cache.get(key)
+  if (!entry) return
+  cache.delete(key)
+  cacheBytes -= entry.body.length
+  const indexedKeys = cacheKeysByBaseKey.get(entry.baseKey)
+  indexedKeys?.delete(key)
+  if (indexedKeys?.size === 0) cacheKeysByBaseKey.delete(entry.baseKey)
 }
 
 function cacheMaxAge(cacheControl) {
@@ -68,7 +101,11 @@ function requestMustBypass(request, requestUrl) {
 
 function responseMaxAge(statusCode, headers, bodyBytes, requestUrl, request) {
   const varyHeaders = String(headers.vary ?? '').split(',').map((name) => name.trim().toLowerCase()).filter(Boolean)
-  const supportedVaryHeaders = new Set(['accept', 'accept-encoding', 'accept-language', 'origin'])
+  // Next.js App Router responses vary by these request headers; cache keys include each announced value.
+  const supportedVaryHeaders = new Set([
+    'accept', 'accept-encoding', 'accept-language', 'origin', 'rsc', 'next-router-state-tree',
+    'next-router-prefetch', 'next-router-segment-prefetch', 'next-url',
+  ])
   if (statusCode !== 200 || bodyBytes > maxEntryBytes || headers['set-cookie']
     || varyHeaders.includes('*') || varyHeaders.some((name) => !supportedVaryHeaders.has(name))) return 0
   if (requestUrl.searchParams.size > 0 && [...requestUrl.searchParams.keys()].some((name) => sensitiveQueryName.test(name))) return 0
@@ -102,38 +139,47 @@ function send(response, statusCode, headers, body, decision, key, ageSeconds = 0
 
 function storeEntry(key, entry) {
   const previous = cache.get(key)
-  if (previous) cacheBytes -= previous.body.length
-  cache.delete(key)
+  if (previous) removeEntry(key)
+
+  const indexedKeys = cacheKeysByBaseKey.get(entry.baseKey)
+  for (const indexedKey of [...(indexedKeys ?? [])]) {
+    const existing = cache.get(indexedKey)
+    if (existing && JSON.stringify(existing.varyHeaders) !== JSON.stringify(entry.varyHeaders)) removeEntry(indexedKey)
+  }
+
   cache.set(key, entry)
   cacheBytes += entry.body.length
+  indexEntry(entry.baseKey, key)
 
   while (cache.size > maxEntries || cacheBytes > maxCacheBytes) {
     const oldestKey = cache.keys().next().value
-    const oldest = cache.get(oldestKey)
-    if (!oldest) break
-    cacheBytes -= oldest.body.length
-    cache.delete(oldestKey)
+    if (!oldestKey) break
+    removeEntry(oldestKey)
   }
 }
 
-function serveCachedResponse(response, key, bypassRequest) {
+function serveCachedResponse(request, response, baseKey, bypassRequest) {
   if (bypassRequest) return false
-  const cached = cache.get(key)
-  if (!cached) return false
+  const indexedKeys = cacheKeysByBaseKey.get(baseKey)
+  if (!indexedKeys) return false
 
-  const ageSeconds = cached.originAge + Math.floor((Date.now() - cached.storedAt) / 1000)
-  if (ageSeconds < cached.maxAge) {
-    cache.delete(key)
-    cache.set(key, cached)
-    send(response, cached.statusCode, cached.headers, cached.body, 'HIT', key, ageSeconds)
-    return true
+  for (const key of indexedKeys) {
+    const cached = cache.get(key)
+    if (!cached || !requestMatchesVary(request, cached.varyHeaders, cached.varyValues)) continue
+
+    const ageSeconds = cached.originAge + Math.floor((Date.now() - cached.storedAt) / 1000)
+    if (ageSeconds < cached.maxAge) {
+      cache.delete(key)
+      cache.set(key, cached)
+      send(response, cached.statusCode, cached.headers, cached.body, 'HIT', key, ageSeconds)
+      return true
+    }
+    removeEntry(key)
   }
-  cacheBytes -= cached.body.length
-  cache.delete(key)
   return false
 }
 
-function proxyToUpstream(request, response, requestUrl, key, bypassRequest) {
+function proxyToUpstream(request, response, requestUrl, baseKey, bypassRequest) {
   const upstream = https.request({
     hostname: '127.0.0.1',
     servername: 'localhost',
@@ -157,7 +203,7 @@ function proxyToUpstream(request, response, requestUrl, key, bypassRequest) {
       chunks.push(chunk)
       if (bodyBytes > maxEntryBytes) {
         streamed = true
-        response.writeHead(statusCode, forwardedHeaders(headers, 'BYPASS', key, 0))
+        response.writeHead(statusCode, forwardedHeaders(headers, 'BYPASS', baseKey, 0))
         for (const bufferedChunk of chunks) response.write(bufferedChunk)
         chunks.length = 0
       }
@@ -170,9 +216,22 @@ function proxyToUpstream(request, response, requestUrl, key, bypassRequest) {
       }
       const body = Buffer.concat(chunks)
       const originAge = originAgeSeconds(headers)
+      const varyHeaders = responseVaryHeaders(headers)
+      const key = cacheKey(request, requestUrl, varyHeaders)
       const maxAge = bypassRequest ? 0 : responseMaxAge(statusCode, headers, bodyBytes, requestUrl, request)
       if (maxAge > 0) {
-        storeEntry(key, { statusCode, headers, body, maxAge: maxAge + originAge, originAge, storedAt: Date.now() })
+        const varyValues = Object.fromEntries(varyHeaders.map((name) => [name, headerValue(request, name)]))
+        storeEntry(key, {
+          baseKey,
+          statusCode,
+          headers,
+          body,
+          varyHeaders,
+          varyValues,
+          maxAge: maxAge + originAge,
+          originAge,
+          storedAt: Date.now(),
+        })
         send(response, statusCode, headers, body, 'MISS', key, originAge)
         return
       }
@@ -197,10 +256,10 @@ function handleCacheRequest(request, response) {
     return
   }
 
-  const key = cacheKey(request, requestUrl)
+  const baseKey = cacheBaseKey(request, requestUrl)
   const bypassRequest = requestMustBypass(request, requestUrl)
-  if (serveCachedResponse(response, key, bypassRequest)) return
-  proxyToUpstream(request, response, requestUrl, key, bypassRequest)
+  if (serveCachedResponse(request, response, baseKey, bypassRequest)) return
+  proxyToUpstream(request, response, requestUrl, baseKey, bypassRequest)
 }
 
 const server = https.createServer({

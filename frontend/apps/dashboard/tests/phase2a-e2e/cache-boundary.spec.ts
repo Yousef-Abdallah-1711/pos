@@ -136,13 +136,16 @@ async function requestProtectedDashboard(context: BrowserContext, principal: str
 async function warmLandingVariants(anonymous: BrowserContext) {
   const english = await requestHtml({ context: anonymous, principal: 'anonymous', url: `${landingCacheUrl}/en`, route: 'landing-html', variant: 'en' })
   const englishAgain = await requestHtml({ context: anonymous, principal: 'anonymous', url: `${landingCacheUrl}/en`, route: 'landing-html', variant: 'en-repeat' })
-  expect(englishAgain.entry.cacheStatus).toBe(english.entry.cacheStatus === 'MISS' ? 'HIT' : 'BYPASS')
+  expect(english.entry.cacheStatus).toBe('MISS')
+  expect(englishAgain.entry.cacheStatus).toBe('HIT')
+  expect(englishAgain.entry.cacheKey).toBe(english.entry.cacheKey)
 
   const arabic = await requestHtml({ context: anonymous, principal: 'anonymous', url: `${landingCacheUrl}/ar`, route: 'landing-html', variant: 'ar' })
   const arabicAgain = await requestHtml({ context: anonymous, principal: 'anonymous', url: `${landingCacheUrl}/ar`, route: 'landing-html', variant: 'ar-repeat' })
-  expect(arabicAgain.entry.cacheStatus).toBe(arabic.entry.cacheStatus === 'MISS' ? 'HIT' : 'BYPASS')
+  expect(arabic.entry.cacheStatus).toBe('MISS')
+  expect(arabicAgain.entry.cacheStatus).toBe('HIT')
+  expect(arabicAgain.entry.cacheKey).toBe(arabic.entry.cacheKey)
   expect(english.entry.cacheKey).not.toBe(arabic.entry.cacheKey)
-  return english.entry.cacheStatus
 }
 
 async function verifyAuthenticatedCacheBypass(context: BrowserContext, principal: string) {
@@ -178,11 +181,11 @@ async function verifySessionProfiles(ownerA: BrowserContext, ownerB: BrowserCont
   expect(sessionB).not.toContain(ownerAEmail)
 }
 
-async function verifyAnonymousAfterUsers(anonymous: BrowserContext, warmStatus: string) {
+async function verifyAnonymousAfterUsers(anonymous: BrowserContext) {
   const menu = await requestMenu(anonymous, 'anonymous', 'a', 'en')
   expect(menu.cacheStatus).toBe('HIT')
   const response = await requestHtml({ context: anonymous, principal: 'anonymous', url: `${landingCacheUrl}/en`, route: 'landing-html', variant: 'after-users' })
-  expect(response.entry.cacheStatus).toBe(warmStatus === 'MISS' ? 'HIT' : 'BYPASS')
+  expect(response.entry.cacheStatus).toBe('HIT')
   expect(response.entry.containsOwnerAIdentity || response.entry.containsOwnerBIdentity).toBe(false)
 }
 
@@ -212,9 +215,9 @@ test('shared cache isolates public variants from authenticated sessions and HTML
 
   try {
     await verifyPublicMenuVariants(anonymous)
-    const landingWarmStatus = await warmLandingVariants(anonymous)
+    await warmLandingVariants(anonymous)
     await verifySessionProfiles(ownerA, ownerB)
-    await verifyAnonymousAfterUsers(anonymous, landingWarmStatus)
+    await verifyAnonymousAfterUsers(anonymous)
   } finally {
     await Promise.all([anonymous.close(), ownerA.close(), ownerB.close()])
     await saveEvidence(testInfo)
