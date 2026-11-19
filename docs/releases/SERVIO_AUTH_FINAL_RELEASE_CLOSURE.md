@@ -12,11 +12,11 @@ This report describes the tested code SHA separately from the existing staging r
 
 - Starting and current main SHA: c052c817e114df4d060d8428e6e236f6011876f8.
 - Integration application source SHA: dc1fa993b946938e56dd4b19deaf0ec8e0805acd; exact-candidate CI passed on this SHA. Subsequent branch commits are documentation-only and are not represented as having separate CI runs.
-- PRs #80–#86 remain open. All current heads report CLEAN mergeability and their applicable checks pass; #82–#86 remain drafts. No PR has an independent review or review request.
+- PRs #80–#86 remain open. All current heads report CLEAN mergeability and their applicable checks pass. PRs #82–#86 were marked ready for review on 2026-11-19. No PR has an independent review or review request; the only repository collaborator is the repository owner.
 - No PR was merged; merge SHAs: none. Candidate changes have no SQL or migration files. The candidate resolves the #82/#83 conflict in backend/cmd/api/main.go. The only KDS-related candidate change is auth-scoped cache clearing; no unrelated KDS feature or SQL fixture is included.
 - Dependency-safe merge sequence for review: #86, #84, #85, #83, then independent #81/#80, and #82 after the #83 conflict is integrated and all exact-head checks are green. No merge was executed because the independent review gate is not satisfied.
 - Additional open PRs #71–#73 are financial work, outside this auth release; #72/#73 are behind main. PRs #19/#20 are unrelated deployment/WIP work and report DIRTY mergeability. No evidence found that they supersede the auth candidate.
-- Main CI on exact SHA c052c817 is green: verified CI 44122610863, financial acceptance 44122610762, URL/domain smoke 44122611083, runtime guardrail 44122610731. Current protection requires runtime-localhost-guardrail, url-domain-config-smoke and backend; approval count is configured as zero. The requested independent review remains a release requirement and was not bypassed.
+- Main CI on exact SHA c052c817 is green: verified CI 44122610863, financial acceptance 44122610762, URL/domain smoke 44122611083, runtime guardrail 44122610731. Current protection requires runtime-localhost-guardrail, url-domain-config-smoke and backend with strict up-to-date ancestry; required approval count is configured as zero. The separately requested independent review remains a release requirement and was not bypassed.
 
 ### PR status and head CI
 
@@ -24,11 +24,11 @@ This report describes the tested code SHA separately from the existing staging r
 |---:|---|---|---|
 | #80 | a91f1ad123fb0936f92c69de2ee9c113e8ea81f1 | Open, ready, CLEAN | [44136198739](https://github.com/Yousef-Abdallah-1711/pos/actions/runs/44136198739) |
 | #81 | cfdd6307b9a6c6e2cde4063204e9e138cc4b4a91 | Open, ready, CLEAN | [44437402565](https://github.com/Yousef-Abdallah-1711/pos/actions/runs/44437402565) |
-| #82 | 89c59a6ffe6eaae9e4999b45cc87bb2c03dd8a36 | Open, draft, CLEAN | [44495248962](https://github.com/Yousef-Abdallah-1711/pos/actions/runs/44495248962) |
-| #83 | 09ac107926e1a0ec79f02b7e9fd07bf529b15124 | Open, draft, CLEAN | [44162510775](https://github.com/Yousef-Abdallah-1711/pos/actions/runs/44162510775) |
-| #84 | a2f010827ae1074464b11e76071b4756e700abbc | Open, draft, CLEAN | [44164464924](https://github.com/Yousef-Abdallah-1711/pos/actions/runs/44164464924) |
-| #85 | 954138f7e788220cea2b100da84860798ebd5f6f | Open, draft, CLEAN | [44167778607](https://github.com/Yousef-Abdallah-1711/pos/actions/runs/44167778607) |
-| #86 | 1dae431d15008e7c62d6703280e38058e9684f62 | Open, draft, CLEAN | [44276230245](https://github.com/Yousef-Abdallah-1711/pos/actions/runs/44276230245) |
+| #82 | 89c59a6ffe6eaae9e4999b45cc87bb2c03dd8a36 | Open, ready, CLEAN | [44495248962](https://github.com/Yousef-Abdallah-1711/pos/actions/runs/44495248962) |
+| #83 | 09ac107926e1a0ec79f02b7e9fd07bf529b15124 | Open, ready, CLEAN | [44162510775](https://github.com/Yousef-Abdallah-1711/pos/actions/runs/44162510775) |
+| #84 | a2f010827ae1074464b11e76071b4756e700abbc | Open, ready, CLEAN | [44164464924](https://github.com/Yousef-Abdallah-1711/pos/actions/runs/44164464924) |
+| #85 | 954138f7e788220cea2b100da84860798ebd5f6f | Open, ready, CLEAN | [44167778607](https://github.com/Yousef-Abdallah-1711/pos/actions/runs/44167778607) |
+| #86 | 1dae431d15008e7c62d6703280e38058e9684f62 | Open, ready, CLEAN | [44276230245](https://github.com/Yousef-Abdallah-1711/pos/actions/runs/44276230245) |
 
 Companion financial acceptance, runtime guardrail and URL/domain checks passed for those PR heads. PR #82 current head also passed all listed auth, backend, four frontend, image, security, financial, runtime and URL/domain jobs. These PR-head runs are not represented as integrated-candidate CI.
 
@@ -97,12 +97,14 @@ The full 30-scenario status and per-scenario evidence are in [the updated accept
 
 ## G. Deployment
 
-- No candidate deployment was performed. Current live staging receipt at https://api.pos.rakmyat.online/_ops/release reports SHA 96773ef22b818113327fb65ad044fdf7624c5656, status verified, environment staging, CI run 43717861737. API ready endpoint returned 200 and DB health true. Public Landing/Dashboard and Admin endpoints responded; this is baseline health only, not candidate acceptance.
+- No candidate deployment was performed. Current live staging receipt at https://api.pos.rakmyat.online/_ops/release reports SHA 96773ef22b818113327fb65ad044fdf7624c5656, status verified, environment staging, CI run 43717861737. The ready endpoint returned `status=ok`, `db_healthy=true`; API health also returned 200. On 2026-11-19 all five canonical TLS hosts returned HTTP 200 with certificate verification successful: Landing `pos.rakmyat.online/en`, Dashboard `pos.app.rakmyat.online/en/dashboard`, Super Admin `admin.pos.rakmyat.online/login`, storefront `restaurant-1.pos.rakmyat.online/en`, and API `/api/v1/health`. This is baseline health only, not candidate browser acceptance.
 - Current staging immutable GHCR digests for SHA 96773ef are recorded in ops/aws/evidence/deployed-release.json: backend 150c62db8814c03518e7ec8eb8330ab55acc4201d0dc46733418816453d6a6c1; dashboard 0bcadfe12ec5d008b1346d0789c5ba8d3e5e3fa542cd40296d382fb3a12b26a6; Landing b98732b7d7f516155db3e2e5064c3d0e815f00de14f8484be0ec163c890c5808; restaurant website c748db1d5ce22a154a23b0d4565136510e770063ef0a793ae59223da69f9e7ee; Super Admin 92a109d3e33ef684c4dd586026cf50f4434f534e18c3120ba8458f7e8e39aa2b. Candidate images are not signed/published. Candidate SHA dc1fa is not live.
 - Staging has no new candidate migrations. Applied receipts were read-only inspected; candidate diff has no SQL/migration files.
-- Last restore-verified backup evidence is ops/aws/backups/pre-release-20261117T171339Z.restore.json: 917,750 bytes, SHA-256 a016cf3a8a95f073f0fdb307240e56184b22a763e52d5765ef3eef5cca716ece, 141 migration receipts restored. No fresh pre-deployment backup was taken.
+- Last restore-verified backup evidence is ops/aws/backups/pre-release-20261117T171339Z.restore.json: 917,750 bytes, SHA-256 a016cf3a8a95f073f0fdb307240e56184b22a763e52d5765ef3eef5cca716ece, 141 migration receipts restored. It is not a fresh pre-deployment backup; one must be taken after merge and before deployment.
 - Existing rollback release receipt references prior SHA 1de384fe55273d546bb75393463b2956544427ca. No rollback was executed.
-- Eight existing staging containers are healthy. Host has 240 MiB free on a 48 GiB root filesystem (100% used), 755 MiB RAM available of 1.9 GiB, and 1.5 GiB swap free. AWS CLI is absent. Do not roll out candidate images until storage and capacity are safely restored/confirmed, backup readiness is refreshed, and the release gate is authorized.
+- Eight existing staging containers are healthy. Initial disk observation on 2026-11-19 was 236 MiB free on a 47.4 GiB root filesystem (100% used). Three completed synthetic browser-output directories were verified against retained GitHub artifacts for runs 44400098952, 44412154285 and 44140410771, then removed (315,153,150 + 315,191,857 + 277,020,253 bytes). After cleanup, disk reported 1.1 GiB free (98% used), RAM available about 1.0 GiB of 1.9 GiB, and 1.2 GiB swap free. The cleanup did not touch worktrees, evidence reports, Docker resources, databases, Redis, backups, SQL fixtures or user KDS changes.
+- The EBS device `/dev/nvme0n1` reports 100 GiB and serial `vol0ec6bfabc3638a90c`; root partition `/dev/nvme0n1p1` is only 49 GiB and ext4 is 47.4 GiB. `growpart -N /dev/nvme0n1 1` shows contiguous unused space and a proposed extension, but no partition or filesystem change was made. The runbook's earlier 30 GiB volume note is stale. The host has no AWS CLI or instance-profile credentials, so the current EBS modification state and snapshot availability could not be confirmed. AWS requires the resize to be `optimizing` or `completed` before filesystem extension and recommends an EBS snapshot first ([filesystem extension procedure](https://docs.aws.amazon.com/ebs/latest/userguide/recognize-expanded-volume-linux.html), [modification states](https://docs.aws.amazon.com/ebs/latest/userguide/monitoring-volume-modifications.html)). An authorized AWS operator must confirm state and arrange the pre-change snapshot; then extend partition 1 and ext4, and recheck all services. No AWS resize or extra paid resource was requested.
+- The deployment pull agent requires `4 GiB + the sum of all compressed release image archives` free before download; the deployer also refuses image load below 4 GiB. Candidate archive sizes do not exist until the exact approved main SHA is published, and only 1.1 GiB is free now. Local reclaimable BuildKit/auth caches, retained release images, and Docker volumes were preserved under the runbook's retention instructions. Do not deploy before capacity is expanded and the exact archive-size preflight passes.
 - Staging release publication requires an exact current-main push CI run, owner-triggered workflow on main, signing secret, and staging environment authorization. None was invoked for this candidate. Production was not deployed.
 - No live candidate browser acceptance, cross-portal authentication, or staging CDN test exists because candidate is not deployed.
 
@@ -110,7 +112,7 @@ The full 30-scenario status and per-scenario evidence are in [the updated accept
 
 | Gate | Verdict |
 |---|---|
-| AUTH FUNCTIONAL | PASS |
+| APPLICATION | PASS |
 | BACKEND | PASS |
 | FRONTENDS | PASS |
 | SECURITY | PASS |
@@ -119,10 +121,11 @@ The full 30-scenario status and per-scenario evidence are in [the updated accept
 | PERFORMANCE SMOKE | PASS |
 | 10K CAPACITY | NOT VALIDATED |
 | CI | GREEN on exact integration SHA dc1fa993b946938e56dd4b19deaf0ec8e0805acd |
-| REVIEW | PENDING |
+| REVIEW | BLOCKED: independent reviewer not assigned |
 | MERGE TO MAIN | BLOCKED |
+| STAGING READINESS | BLOCKED |
 | STAGING DEPLOYMENT | BLOCKED |
-| LIVE ACCEPTANCE | NOT RUN for candidate |
+| LIVE E2E | NOT RUN for candidate |
 | OVERALL RELEASE | NO-GO |
 
 ## I. Remaining actions
@@ -130,10 +133,10 @@ The full 30-scenario status and per-scenario evidence are in [the updated accept
 | Issue | Owner | Required evidence/action | Blocks staging? | Blocks production? |
 |---|---|---|---|---|
 | Exact-candidate URL/domain resolver workflow was not dispatched | Release/CI owner | Run the required URL/domain workflow on the merged main SHA; its current PR-head runs are green, while the integration candidate had static template validation only. | Yes, through the required main gate | Yes |
-| Independent review not assigned | Repository owner / reviewer | User to provide GitHub handle; grant repo access if needed; obtain independent security/code approval for #80–#86. Do not self-approve. | Yes | Yes |
-| PRs #80–#86 open; #82–#86 draft | Release owner | Make reviewed PRs ready, merge via branch protection in dependency-safe order, record merge SHAs. | Yes | Yes |
+| Independent review not assigned | Repository owner / reviewer | Provide a distinct GitHub account with repository review access; request security/code approval for #80–#86. Do not self-approve. The owner is the only current collaborator. | Yes | Yes |
+| PRs #80–#86 open | Release owner | PRs #82–#86 are ready for review; after approval, merge through branch protection in dependency-safe order and record merge SHAs. | Yes | Yes |
 | Post-merge validation and signed images absent | Release owner | Run required workflows on exact main SHA; verify signed immutable image digests and release provenance. | Yes | Yes |
-| Staging host root filesystem nearly full | Staging operator | Safe, owner-approved capacity recovery or provisioned capacity; remeasure disk/RAM without deleting persistent/user data. | Yes | Yes |
+| Staging filesystem capacity | Staging operator / AWS operator | Verify the 100 GiB EBS volume modification state, obtain/confirm a pre-change snapshot, then grow `/dev/nvme0n1p1` and ext4; require `4 GiB + exact compressed archive bytes` free before deployment. Recheck host and services. | Yes | Yes |
 | Fresh backup and rollout readiness not established | Staging operator | Verify backup/restore and rollback images for the intended main SHA; confirm migration compatibility and deploy workflow authorization. | Yes | Yes |
 | Candidate live browser receipt absent | QA/release owner | After authorized deployment, verify live SHA/digests and run real cross-portal staging smoke with synthetic accounts. | Yes | Yes |
 | Real screen-reader acceptance not run | Accessibility reviewer | Test on supported screen-reader/browser environment and record EN/AR announcements/focus behavior. | Pending accessibility sign-off | Yes |
