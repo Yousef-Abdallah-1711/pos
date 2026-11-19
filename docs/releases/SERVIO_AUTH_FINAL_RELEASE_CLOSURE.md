@@ -4,12 +4,14 @@
 **Tested integration source SHA:** dc1fa993b946938e56dd4b19deaf0ec8e0805acd
 **Closure state:** NO-GO pending independent review, protected merges, post-merge main validation, and staging capacity/preflight.
 
+The application code was tested at dc1fa993b946938e56dd4b19deaf0ec8e0805acd. Subsequent integration-branch commits add only this closure report and the acceptance-matrix update; no application source changed after the recorded runs.
+
 This report describes the tested code SHA separately from the existing staging release. No PR was merged and no candidate deployment was attempted.
 
 ## A. Repository
 
 - Starting and current main SHA: c052c817e114df4d060d8428e6e236f6011876f8.
-- Integration branch candidate: dc1fa993b946938e56dd4b19deaf0ec8e0805acd, remotely available on codex/auth-release-integration-20261118.
+- Integration application source SHA: dc1fa993b946938e56dd4b19deaf0ec8e0805acd; exact-candidate CI passed on this SHA. Subsequent branch commits are documentation-only and are not represented as having separate CI runs.
 - PRs #80–#86 remain open. All current heads report CLEAN mergeability and their applicable checks pass; #82–#86 remain drafts. No PR has an independent review or review request.
 - No PR was merged; merge SHAs: none. Candidate changes have no SQL or migration files. The candidate resolves the #82/#83 conflict in backend/cmd/api/main.go. The only KDS-related candidate change is auth-scoped cache clearing; no unrelated KDS feature or SQL fixture is included.
 - Dependency-safe merge sequence for review: #86, #84, #85, #83, then independent #81/#80, and #82 after the #83 conflict is integrated and all exact-head checks are green. No merge was executed because the independent review gate is not satisfied.
