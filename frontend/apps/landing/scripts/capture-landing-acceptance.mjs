@@ -4,6 +4,7 @@ import { createRequire } from 'node:module'
 const { chromium } = createRequire(import.meta.url)('playwright')
 
 const baseURL = (process.env.POOS_ACCEPTANCE_URL ?? 'http://localhost:38691').replace(/\/$/, '')
+const apiOrigin = process.env.SERVIO_MARKETING_API_URL ? new URL(process.env.SERVIO_MARKETING_API_URL).origin : null
 if (process.env.SERVIO_ACCEPTANCE_ENV === 'ci' && new URL(baseURL).origin !== 'https://pos.servio.test') throw new Error('CI capture accepts only the disposable landing host')
 const evidenceRoot = path.resolve(process.env.POOS_ACCEPTANCE_EVIDENCE ?? '../../../audit-reports/poos-final-acceptance-2026-11-11/evidence')
 const viewports = [320, 375, 390, 430, 768, 820, 1024, 1280, 1440, 1920]
@@ -14,6 +15,7 @@ const routes = [
 ]
 const results = []
 const browserErrors = []
+let expectedGuestSessionDenials = 0
 await mkdir(evidenceRoot, { recursive: true })
 
 const browser = await chromium.launch({ headless: true })
@@ -25,7 +27,21 @@ try {
     if (['data:', 'blob:'].includes(url.protocol)) return route.continue()
     return route.abort('blockedbyclient')
   })
-  page.on('console', (message) => { if (message.type() === 'error') browserErrors.push({ type: 'console', text: message.text() }) })
+  page.on('console', (message) => {
+    if (message.type() !== 'error') return
+    const text = message.text()
+    const expectedGuestSessionConsoleError = /^Failed to load resource: the server responded with a status of 401(?: \([^)]*\))?$/.test(text)
+    if (apiOrigin && expectedGuestSessionConsoleError) {
+      try {
+        const failedURL = new URL(message.location().url)
+        if (failedURL.origin === apiOrigin && failedURL.pathname === '/api/v1/auth/session') {
+          expectedGuestSessionDenials += 1
+          return
+        }
+      } catch {}
+    }
+    browserErrors.push({ type: 'console', text })
+  })
   page.on('pageerror', (error) => browserErrors.push({ type: 'pageerror', text: error.message }))
   await page.addInitScript(() => {
     const state = { cls: 0, lcp: 0 }
@@ -132,7 +148,7 @@ try {
     const response = await page.request.get(`${baseURL}${endpoint}`)
     endpointChecks.push({ path: endpoint, status: response.status(), contentType: response.headers()['content-type'] ?? null })
   }
-  const output = { baseURL, capturedAt: new Date().toISOString(), viewports, routes: results, browserErrors, endpointChecks }
+  const output = { baseURL, capturedAt: new Date().toISOString(), viewports, routes: results, expectedGuestSessionDenials, browserErrors, endpointChecks }
   await writeFile(path.join(evidenceRoot, 'acceptance-results.json'), `${JSON.stringify(output, null, 2)}\n`, 'utf8')
   const failures = results.filter((result) => result.passed === false || result.status && (result.status !== 200 || result.overflow || !result.headerVisible || !result.authFormBelowHeader || result.failedImages?.length || result.passed === false))
   if (failures.length || browserErrors.length || endpointChecks.some((item) => item.path === '/opengraph-image' ? item.status !== 200 || !item.contentType?.startsWith('image/png') : item.path === '/robots.txt' ? item.status !== 200 || !item.contentType?.startsWith('text/plain') : item.path === '/sitemap.xml' ? item.status !== 200 || !item.contentType?.includes('xml') : item.status !== 404)) {
