@@ -54,6 +54,35 @@ function resetIsolatedAuthRateLimitCounters() {
   }
 }
 
+async function restartIsolatedAPIForFreshLoginWindow() {
+  if (!composeProject) return
+  if (!/^servio-auth-gha-\d+$/.test(composeProject)) {
+    throw new Error('Refusing to restart an API outside the disposable authentication test project')
+  }
+
+  const apiContainerIDs = execFileSync('docker', [
+    'ps', '-q',
+    '--filter', `label=com.docker.compose.project=${composeProject}`,
+    '--filter', 'label=com.docker.compose.service=api',
+  ], { encoding: 'utf8' }).trim().split(/\r?\n/).filter(Boolean)
+  if (apiContainerIDs.length !== 1) {
+    throw new Error(`Expected one disposable API container, found ${apiContainerIDs.length}`)
+  }
+
+  const apiContainerID = apiContainerIDs[0]
+  const labels = JSON.parse(execFileSync('docker', [
+    'inspect', '--format', '{{json .Config.Labels}}', apiContainerID,
+  ], { encoding: 'utf8' })) as Record<string, string>
+  if (labels['com.pos.disposable'] !== 'true' || labels['com.pos.workstream'] !== 'WS05') {
+    throw new Error('Refusing to restart an API without the WS05 disposable fixture labels')
+  }
+
+  execFileSync('docker', ['restart', apiContainerID], { stdio: 'ignore' })
+  await expect.poll(() => execFileSync('docker', [
+    'inspect', '--format', '{{.State.Health.Status}}', apiContainerID,
+  ], { encoding: 'utf8' }).trim(), { timeout: 60_000 }).toBe('healthy')
+}
+
 function startAuthTimeline(page: Page) {
   if (authTimelines.has(page)) return
   const timeline: AuthTimeline = { startedAt: Date.now(), events: [] }
@@ -1109,6 +1138,11 @@ test('expired Redis session TTL recovers the browser to the canonical login page
 
 test('authenticated Landing bootstrap has no guest flash or hydration mismatch', async ({ page, context }, testInfo) => {
   test.setTimeout(150_000)
+  // On PR #82 alone, the disposable API uses its in-memory limiter until PR
+  // #83's Redis-backed shared limiter is integrated. Restart only this labeled
+  // test API so earlier synthetic login scenarios do not consume the final
+  // scenario's per-IP budget; the 20/minute limit remains enabled.
+  await restartIsolatedAPIForFreshLoginWindow()
   expect(await signIn(page, ownerPassword)).toBe(200)
   await expectSignedInDashboard(page)
 
