@@ -2,7 +2,7 @@ import { execFileSync } from 'node:child_process'
 import { createHash } from 'node:crypto'
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import path from 'node:path'
-import { expect, test, type Page } from '@playwright/test'
+import { expect, test, type Page, type Response } from '@playwright/test'
 import { routeContainerApiToCandidate } from './api-routing'
 
 const landingUrl = (process.env.WS05_LANDING_URL || 'http://localhost:13111').replace(/\/$/, '')
@@ -176,19 +176,31 @@ async function signIn(
 
 type ScopedCategory = { id: number; tenant_id: number; restaurant_id: number }
 
+function waitForJSONResponse<T>(page: Page, matches: (response: Response) => boolean) {
+  return new Promise<{ status: number; body: T }>((resolve, reject) => {
+    const captureResponse = (response: Response) => {
+      if (!matches(response)) return
+      page.off('response', captureResponse)
+      const status = response.status()
+      void response.json().then((body: T) => resolve({ status, body })).catch(reject)
+    }
+    page.on('response', captureResponse)
+  })
+}
+
 async function signInAndLoadTenantCategories(page: Page) {
   expect(await signIn(page, ownerPassword)).toBe(200)
   await expectSignedInDashboard(page)
 
-  const categoriesResponse = page.waitForResponse((response) => {
+  const categoriesResponse = waitForJSONResponse<ScopedCategory[]>(page, (response) => {
     const url = new URL(response.url())
     return url.pathname === '/api/v1/categories' && response.request().method() === 'GET'
   })
   await page.goto(`${dashboardUrl}/en/dashboard/products/new`, { waitUntil: 'domcontentloaded' })
   const response = await categoriesResponse
-  expect(response.status()).toBe(200)
+  expect(response.status).toBe(200)
   await expect(page.getByRole('combobox').first()).toBeVisible()
-  const categories = await response.json() as ScopedCategory[]
+  const categories = response.body
   expect(categories.length).toBeGreaterThan(0)
   return categories
 }
@@ -224,7 +236,7 @@ async function readCategoriesAfterIdentityRefresh(page: Page) {
     const url = new URL(response.url())
     return url.pathname === '/api/v1/auth/session' && response.request().method() === 'GET'
   })
-  const categoriesResponsePromise = page.waitForResponse((response) => {
+  const categoriesResponsePromise = waitForJSONResponse<ScopedCategory[]>(page, (response) => {
     const url = new URL(response.url())
     return url.pathname === '/api/v1/categories' && response.request().method() === 'GET'
   })
@@ -232,8 +244,8 @@ async function readCategoriesAfterIdentityRefresh(page: Page) {
   const sessionResponse = await sessionResponsePromise
   const categoriesResponse = await categoriesResponsePromise
   expect(sessionResponse.status()).toBe(200)
-  expect(categoriesResponse.status()).toBe(200)
-  return { sessionResponse, categories: await categoriesResponse.json() as ScopedCategory[] }
+  expect(categoriesResponse.status).toBe(200)
+  return { sessionResponse, categories: categoriesResponse.body }
 }
 
 async function readTenantStateCleanup(page: Page) {
