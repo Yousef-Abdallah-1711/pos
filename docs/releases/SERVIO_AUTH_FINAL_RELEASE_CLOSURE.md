@@ -2,7 +2,7 @@
 
 **Execution date:** 2026-11-19
 **Tested integration source SHA:** dc1fa993b946938e56dd4b19deaf0ec8e0805acd
-**Current documentation-only integration head:** 26d45660bcb4612ec9745aeb3521d32b7052ae29
+**Documentation-only integration branch:** `codex/auth-release-integration-20261118`
 **Closure state:** NO-GO pending independent review, protected merges, post-merge main validation, and staging capacity/preflight.
 
 The application code was tested at dc1fa993b946938e56dd4b19deaf0ec8e0805acd. Subsequent integration-branch commits add only this closure report and the acceptance-matrix update; no application source changed after the recorded runs.
