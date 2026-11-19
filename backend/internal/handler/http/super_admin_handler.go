@@ -72,15 +72,19 @@ func (h *SuperAdminHandler) Login(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	sessionID, err := h.sessions.Create(r.Context(), response.Token)
+	sessionExpiresAt := time.Now().Add(service.StaffSessionAbsoluteLifetime)
+	sessionID, err := h.sessions.CreateWithLifetimes(r.Context(), response.Token, service.StaffSessionIdleTimeout, service.StaffSessionAbsoluteLifetime)
 	if err != nil {
 		respondJSON(w, http.StatusInternalServerError, map[string]interface{}{"success": false, "error": "unable to establish session"})
 		return
 	}
 	secure := r.TLS != nil || appconfig.IsProductionMode()
-	http.SetCookie(w, &http.Cookie{Name: service.SuperAdminSessionCookieName, Value: sessionID, Path: "/", HttpOnly: true, Secure: secure, SameSite: http.SameSiteLaxMode, MaxAge: int(h.sessions.TTL().Seconds()), Expires: time.Now().Add(h.sessions.TTL())})
+	http.SetCookie(w, &http.Cookie{Name: service.SuperAdminSessionCookieName, Value: sessionID, Path: "/", HttpOnly: true, Secure: secure, SameSite: http.SameSiteLaxMode})
 	w.Header().Set("Cache-Control", "no-store")
 	w.Header().Set("Referrer-Policy", "no-referrer")
+	if response.ExpiresAt.After(sessionExpiresAt) {
+		response.ExpiresAt = sessionExpiresAt
+	}
 	respondJSON(w, http.StatusOK, map[string]interface{}{
 		"success": true,
 		"data":    map[string]interface{}{"super_admin": response.SuperAdmin, "user": response.User, "expires_at": response.ExpiresAt},

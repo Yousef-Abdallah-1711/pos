@@ -1,0 +1,92 @@
+{
+  "candidate": "local worktree codex/auth-session-island-20261117",
+  "environment": "disposable Compose project servio-auth-final-20261118",
+  "checks": {
+    "guestSession": "PASS",
+    "invalidLogin": "PASS",
+    "validLogin": "PASS",
+    "sessionCookie": {
+      "httpOnly": true,
+      "sameSite": "Lax",
+      "hostOnly": true,
+      "path": "/"
+    },
+    "sessionCacheControlPrivateNoStore": "PASS",
+    "staffIdentityIsNotSuperAdmin": "PASS",
+    "apiRestartPreservesSession": "PASS",
+    "redisOutageReturns503": "PASS",
+    "redisRecoveryPreservesSession": "PASS",
+    "logoutRevokesSession": "PASS",
+    "revokedCookieReplayRejected": "PASS"
+  },
+  "requestCounts": {
+    "GET /auth/session": 6,
+    "POST /auth/login": 2,
+    "POST /auth/logout": 1
+  },
+  "timeline": [
+    {
+      "name": "guest-session",
+      "elapsedMs": 5,
+      "method": "GET",
+      "path": "/auth/session",
+      "status": 401
+    },
+    {
+      "name": "invalid-login",
+      "elapsedMs": 80,
+      "method": "POST",
+      "path": "/auth/login",
+      "status": 401
+    },
+    {
+      "name": "login",
+      "elapsedMs": 162,
+      "method": "POST",
+      "path": "/auth/login",
+      "status": 200
+    },
+    {
+      "name": "authenticated-session",
+      "elapsedMs": 164,
+      "method": "GET",
+      "path": "/auth/session",
+      "status": 200
+    },
+    {
+      "name": "session-after-api-restart",
+      "elapsedMs": 3991,
+      "method": "GET",
+      "path": "/auth/session",
+      "status": 200
+    },
+    {
+      "name": "session-during-redis-outage",
+      "elapsedMs": 14105,
+      "method": "GET",
+      "path": "/auth/session",
+      "status": 503
+    },
+    {
+      "name": "session-after-redis-recovery-1",
+      "elapsedMs": 14653,
+      "method": "GET",
+      "path": "/auth/session",
+      "status": 200
+    },
+    {
+      "name": "logout",
+      "elapsedMs": 14660,
+      "method": "POST",
+      "path": "/auth/logout",
+      "status": 204
+    },
+    {
+      "name": "revoked-session-replay",
+      "elapsedMs": 14661,
+      "method": "GET",
+      "path": "/auth/session",
+      "status": 401
+    }
+  ]
+}

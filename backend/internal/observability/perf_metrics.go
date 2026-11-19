@@ -43,7 +43,19 @@ type MetricsSnapshot struct {
 	UptimeSec        int64                    `json:"uptime_sec"`
 	API              map[string]MetricSummary `json:"api"`
 	DB               map[string]MetricSummary `json:"db"`
+	AuthSecurity     AuthSecurityMetrics      `json:"auth_security"`
 	AccountingEvents *AccountingEventMetrics  `json:"accounting_events,omitempty"`
+}
+
+// AuthSecurityMetrics uses fixed low-cardinality counters and contains no
+// identity, IP address, token, or tenant labels.
+type AuthSecurityMetrics struct {
+	RateLimitAllowed             int64 `json:"rate_limit_allowed"`
+	RateLimitRejected            int64 `json:"rate_limit_rejected"`
+	RateLimitStoreErrors         int64 `json:"rate_limit_store_errors"`
+	SelectionProofConsumed       int64 `json:"selection_proof_consumed"`
+	SelectionProofReplayRejected int64 `json:"selection_proof_replay_rejected"`
+	SelectionProofStoreErrors    int64 `json:"selection_proof_store_errors"`
 }
 
 type AccountingEventMetrics struct {
@@ -62,6 +74,7 @@ type collector struct {
 	api              map[string]*metricWindow
 	db               map[string]*metricWindow
 	accountingEvents *AccountingEventMetrics
+	authSecurity     AuthSecurityMetrics
 }
 
 func newCollector() *collector {
@@ -158,6 +171,16 @@ func RecordAccountingEvents(snapshot AccountingEventMetrics) {
 	globalCollector.accountingEvents = &snapshot
 }
 
+// RecordAuthSecurity updates the fixed-cardinality authentication counters.
+func RecordAuthSecurity(update func(*AuthSecurityMetrics)) {
+	if update == nil {
+		return
+	}
+	globalCollector.mu.Lock()
+	defer globalCollector.mu.Unlock()
+	update(&globalCollector.authSecurity)
+}
+
 // Snapshot returns an in-memory performance summary including p95 values.
 func Snapshot() MetricsSnapshot {
 	globalCollector.mu.RLock()
@@ -183,6 +206,7 @@ func Snapshot() MetricsSnapshot {
 		UptimeSec:        int64(time.Since(globalCollector.startedAt).Seconds()),
 		API:              api,
 		DB:               db,
+		AuthSecurity:     globalCollector.authSecurity,
 		AccountingEvents: accountingEvents,
 	}
 }

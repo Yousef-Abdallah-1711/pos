@@ -10,6 +10,7 @@ export default defineConfig({
   use: {
     baseURL: process.env.WS05_DASHBOARD_URL || 'http://localhost:13102',
     headless: true,
+    ignoreHTTPSErrors: process.env.WS05_IGNORE_HTTPS_ERRORS === 'true',
     // Chrome 142+ gates local-site requests to loopback APIs behind LNA permission.
     // The disposable browser suite exercises this local development topology.
     permissions: ['local-network-access'],

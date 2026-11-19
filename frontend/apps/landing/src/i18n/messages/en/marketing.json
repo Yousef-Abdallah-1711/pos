@@ -11,7 +11,7 @@
   "heroBody": "From the first tap at the counter to the next ticket in the kitchen. Give your team one place to coordinate the work of service.",
   "heroSecondary": "See the order journey",
   "capture": "Actual product · synthetic workspace",
-  "englishCapture": "English, light-theme application screen · synthetic data; QA identifiers redacted",
+  "captureSource": "Actual POS and kitchen screens · synthetic data; QA identifiers redacted",
   "captureMatrix": {
     "enLight": "English, light-theme application screen · synthetic data; QA identifiers redacted",
     "enDark": "English, dark-theme application screen · synthetic data; QA identifiers redacted",
@@ -176,6 +176,19 @@
   "rights": "Restaurant operations, thoughtfully connected.",
   "switchToDark": "Switch to dark mode",
   "switchToLight": "Switch to light mode",
+  "account": {
+    "checking": "Checking sign-in",
+    "unavailable": "Sign-in status is temporarily unavailable.",
+    "retry": "Retry",
+    "menuLabelPrefix": "Account menu for",
+    "actionsLabel": "Account actions",
+    "dashboard": "Dashboard",
+    "settings": "Account settings",
+    "signOut": "Sign out",
+    "signingOut": "Signing out…",
+    "signOutFailed": "We could not confirm sign out. Try again.",
+    "restaurantContext": "Current restaurant"
+  },
   "directoryEyebrow": "One connected restaurant workflow",
   "directoryTitle": "Every role sees the next step.",
   "directoryBody": "Explore verified product screens and the handoffs that connect the counter, kitchen, guest, stock and team.",

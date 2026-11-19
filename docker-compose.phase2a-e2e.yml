@@ -87,7 +87,7 @@ services:
     environment:
       PGPASSWORD: ws05-local-only-postgres
     volumes:
-      - ./backend/scripts/db/create_runtime_roles.sql:/fixture/create_runtime_roles.sql:ro
+      - ./backend/scripts/db:/fixture:ro
     entrypoint:
       - sh
       - -c
@@ -96,6 +96,7 @@ services:
         -v dbname=pos_phase2a_e2e
         -v migrator_pw=ws05-local-only-migrator
         -v app_pw=ws05-local-only-app
+        -v accounting_pw=ws05-local-only-accounting
         -f /fixture/create_runtime_roles.sql
 
   api:
@@ -126,6 +127,8 @@ services:
       DB_SSLMODE: disable
       DB_MAX_OPEN_CONNS: 15
       DB_MAX_IDLE_CONNS: 5
+      ACCOUNTING_DB_USER: pos_accounting
+      ACCOUNTING_DB_PASSWORD: ws05-local-only-accounting
       MIGRATE_DB_USER: pos_migrator
       MIGRATE_DB_PASSWORD: ws05-local-only-migrator
       JWT_SECRET: ws05-test-only-jwt-secret-value-minimum-32-characters
@@ -133,7 +136,7 @@ services:
       REDIS_URL: redis://redis:6379/0
       # Host-published ports support local browser use; container ports support
       # Playwright runners sharing the disposable API network namespace.
-      CORS_ORIGINS: http://localhost:13111,http://localhost:13112,http://localhost:13113,http://localhost:13114,http://localhost:3001,http://localhost:3002,http://localhost:3003,http://localhost:3004
+      CORS_ORIGINS: ${P2A_CORS_ORIGINS:-http://localhost:13111,http://localhost:13112,http://localhost:13113,http://localhost:13114,http://localhost:3001,http://localhost:3002,http://localhost:3003,http://localhost:3004}
       APP_BASE_URL: http://localhost:${P2A_API_HOST_PORT:-18082}
       DASHBOARD_URL: http://localhost:13112
       LANDING_URL: http://localhost:13111
@@ -143,10 +146,10 @@ services:
       POS_TEST_SEED: "true"
     ports:
       - "127.0.0.1:${P2A_API_HOST_PORT:-18082}:18080"
-      - "127.0.0.1:13111:3001"
-      - "127.0.0.1:13112:3002"
-      - "127.0.0.1:13113:3003"
-      - "127.0.0.1:13114:3004"
+      - "127.0.0.1:${P2A_LANDING_HOST_PORT:-13111}:3001"
+      - "127.0.0.1:${P2A_DASHBOARD_HOST_PORT:-13112}:3002"
+      - "127.0.0.1:${P2A_RESTAURANT_HOST_PORT:-13113}:3003"
+      - "127.0.0.1:${P2A_SUPER_ADMIN_HOST_PORT:-13114}:3004"
     volumes:
       - ./backend:/app
       - p2a_go_mod_cache:/go/pkg/mod

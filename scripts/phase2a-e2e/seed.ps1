@@ -10,7 +10,6 @@ $database = 'pos_phase2a_e2e'
 $container = "$project-postgres-1"
 $password = 'WS05-Disposable-Only-2026!'
 $superAdminEmail = 'phase2a-superadmin@example.test'
-$superAdminPassword = 'WS05-SuperAdmin-Only-2026!'
 $superAdminPasswordHash = '$2a$10$cZ6RYwpViOspI8u.NYyXkeCD1IOXHF0xussswOrgijec47mn2OVEe'
 
 $labels = docker inspect --format '{{json .Config.Labels}}' $container | ConvertFrom-Json
@@ -96,6 +95,28 @@ ON CONFLICT (tenant_id, email) DO UPDATE SET
 "@
 $null = Invoke-DisposableSql $siblingUserSql
 
+$multiTenantUserSql = @"
+INSERT INTO users (tenant_id, restaurant_id, email, password_hash, name, phone, role, status, is_super_admin, created_at, updated_at)
+SELECT r.tenant_id, r.id, 'phase2a-multi-owner@example.test', source.password_hash,
+       'WS05 Multi Tenant Owner', '5550100212', 'owner', 'active', FALSE, NOW(), NOW()
+FROM restaurants r
+CROSS JOIN LATERAL (
+    SELECT password_hash FROM users
+    WHERE tenant_id = $($tenantA.TenantID) AND email = 'phase2a-owner-a@example.test'
+    LIMIT 1
+) source
+WHERE r.slug IN ('phase2a-restaurant-a', 'phase2a-restaurant-b')
+ON CONFLICT (tenant_id, email) DO UPDATE SET
+    restaurant_id = EXCLUDED.restaurant_id,
+    password_hash = EXCLUDED.password_hash,
+    name = EXCLUDED.name,
+    role = EXCLUDED.role,
+    status = 'active',
+    is_super_admin = FALSE,
+    updated_at = NOW();
+"@
+$null = Invoke-DisposableSql $multiTenantUserSql
+
 $fixtureSql = @"
 BEGIN;
 INSERT INTO categories (tenant_id, restaurant_id, name, display_order, is_active, created_at, updated_at)
@@ -138,8 +159,4 @@ COMMIT;
 "@
 $null = Invoke-DisposableSql $fixtureSql
 
-Write-Output "Seeded isolated WS05 fixtures: Tenant A $($tenantA.TenantID), Tenant B $($tenantB.TenantID)."
-Write-Output "Test-only account for both tenants: phase2a-owner-a@example.test / phase2a-owner-b@example.test"
-Write-Output "Test-only password: $password"
-Write-Output "Test-only super-admin account: $superAdminEmail"
-Write-Output "Test-only super-admin password: $superAdminPassword"
+Write-Output 'Seeded isolated WS05 fixtures.'

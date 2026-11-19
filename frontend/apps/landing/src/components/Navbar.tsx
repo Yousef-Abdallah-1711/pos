@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react'
 import type { MouseEvent } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
@@ -9,23 +9,28 @@ import { useTheme } from 'next-themes'
 import { getSiteCopy, type Locale } from '@/content/site'
 import { HEADER_LINKS, isNavigationRouteActive, localizedHref, SITE_ROUTES } from '@/content/navigation'
 import { BrandMark } from './BrandMark'
-import { TrialLink } from './marketing/TrialLink'
 import { DesktopMegaMenu } from './navigation/DesktopMegaMenu'
+import { LandingAccountActions } from './navigation/LandingAccountActions'
 import { MobileNavigation } from './navigation/MobileNavigation'
+import { useLandingSession } from '@/lib/useLandingSession'
+
+const subscribeToClientMount = () => () => undefined
+const getClientMountSnapshot = () => true
+const getServerMountSnapshot = () => false
 
 export function Navbar({ locale }: { locale: Locale }) {
   const { resolvedTheme, setTheme } = useTheme()
   const pathname = usePathname()
   const router = useRouter()
-  const [mounted, setMounted] = useState(false)
+  const mounted = useSyncExternalStore(subscribeToClientMount, getClientMountSnapshot, getServerMountSnapshot)
   const [mobileOpen, setMobileOpen] = useState(false)
   const triggerRef = useRef<HTMLButtonElement>(null)
+  const { session, retry, signOut, isSigningOut } = useLandingSession(pathname)
   const copy = getSiteCopy(locale)
   const theme = mounted ? resolvedTheme : 'dark'
   const nextLocale = locale === 'en' ? 'ar' : 'en'
   const localizedPath = pathname.replace(/^\/(?:en|ar)(?=\/|$)/, `/${nextLocale}`)
 
-  useEffect(() => setMounted(true), [])
   useEffect(() => {
     if (typeof window.matchMedia !== 'function') return
     const desktop = window.matchMedia('(min-width: 1200px)')
@@ -67,8 +72,9 @@ export function Navbar({ locale }: { locale: Locale }) {
           aria-label={theme === 'dark' ? copy.switchToLight : copy.switchToDark} title={theme === 'dark' ? copy.switchToLight : copy.switchToDark}>
           {theme === 'dark' ? <Sun size={18} aria-hidden="true" /> : <Moon size={18} aria-hidden="true" />}
         </button>
-        <Link className="sv-login" href={localizedHref(locale, 'login')} prefetch={false}>{copy.navigation.login}</Link>
-        <div className="sv-desktop-trial"><TrialLink locale={locale} source="navigation" /></div>
+        <div className="sv-desktop-account-actions">
+          <LandingAccountActions key={pathname} locale={locale} session={session} isSigningOut={isSigningOut} onRetry={retry} onSignOut={signOut} />
+        </div>
         <button className="sv-menu-button" ref={triggerRef} type="button" aria-controls="sv-mobile-navigation" aria-expanded={mobileOpen}
           aria-label={mobileOpen ? copy.closeMenu : copy.openMenu} onClick={() => setMobileOpen(value => !value)}>
           {mobileOpen ? <X aria-hidden="true" /> : <Menu aria-hidden="true" />}
@@ -84,6 +90,10 @@ export function Navbar({ locale }: { locale: Locale }) {
       theme={theme ?? 'dark'}
       onToggleTheme={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
       onSwitchLocale={changeLocale}
+      session={session}
+      isSigningOut={isSigningOut}
+      onRetrySession={retry}
+      onSignOut={signOut}
     />
   </header>
 }
