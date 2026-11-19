@@ -30,6 +30,30 @@ type AuthTimeline = { startedAt: number; events: AuthTimelineEvent[] }
 const authTimelines = new WeakMap<Page, AuthTimeline>()
 let authTimelinePages: Page[] = []
 
+function resetIsolatedAuthRateLimitCounters() {
+  if (!composeProject) return
+  if (!/^servio-auth-gha-\d+$/.test(composeProject)) {
+    throw new Error('Refusing to reset rate limits outside the disposable authentication test project')
+  }
+
+  const redisContainerIDs = execFileSync('docker', [
+    'ps', '-q',
+    '--filter', `label=com.docker.compose.project=${composeProject}`,
+    '--filter', 'label=com.docker.compose.service=redis',
+  ], { encoding: 'utf8' }).trim().split(/\r?\n/).filter(Boolean)
+  if (redisContainerIDs.length !== 1) {
+    throw new Error(`Expected one disposable Redis container, found ${redisContainerIDs.length}`)
+  }
+
+  const redisContainerID = redisContainerIDs[0]
+  const rateLimitKeys = execFileSync('docker', [
+    'exec', redisContainerID, 'redis-cli', '--scan', '--pattern', 'pos-saas:auth:rate-limit:v1:*',
+  ], { encoding: 'utf8' }).trim().split(/\r?\n/).filter(Boolean)
+  if (rateLimitKeys.length > 0) {
+    execFileSync('docker', ['exec', redisContainerID, 'redis-cli', 'DEL', ...rateLimitKeys], { stdio: 'ignore' })
+  }
+}
+
 function startAuthTimeline(page: Page) {
   if (authTimelines.has(page)) return
   const timeline: AuthTimeline = { startedAt: Date.now(), events: [] }
@@ -87,6 +111,10 @@ function startAuthTimeline(page: Page) {
 }
 
 test.beforeEach(async ({ page }) => {
+  // Browser scenarios share one loopback source IP. Reset only the disposable
+  // Redis rate-limit windows between tests; each scenario still exercises the
+  // real configured limits internally without inheriting earlier test traffic.
+  resetIsolatedAuthRateLimitCounters()
   authTimelinePages = []
   startAuthTimeline(page)
 })
@@ -239,7 +267,7 @@ async function seedTenantAScopedBrowserState(page: Page) {
       },
       version: 0,
     }))
-    localStorage.setItem('preferences-storage', JSON.stringify({ state: { settings: { userId: 41 } }, version: 0 }))
+    localStorage.setItem('preferences-storage', JSON.stringify({ state: { settings: { userId: 410041 } }, version: 0 }))
     localStorage.setItem('theme-builder-storage', JSON.stringify({ state: { identity: { siteTitle: 'Synthetic Tenant A Theme' } }, version: 0 }))
     localStorage.setItem('pos-products-cache', JSON.stringify([{ id: 901, name: 'Synthetic Tenant A Item' }]))
     localStorage.setItem('kds-bootstrap-snapshot-v1', JSON.stringify({ orders: [{ customer_name: 'Synthetic Tenant A Customer' }] }))
@@ -286,7 +314,7 @@ async function readTenantStateCleanup(page: Page) {
       heldOrdersEmpty: Array.isArray(posState.heldOrders) && posState.heldOrders.length === 0,
       tenantCatalogCacheAbsent: localStorage.getItem('pos-products-cache') === null,
       kdsSnapshotAbsent: localStorage.getItem('kds-bootstrap-snapshot-v1') === null,
-      preferencesStorageCleared: !localStorage.getItem('preferences-storage')?.includes('userId'),
+      priorPreferencesAbsent: !localStorage.getItem('preferences-storage')?.includes('410041'),
       themeStorageCleared: !localStorage.getItem('theme-builder-storage')?.includes('Synthetic Tenant A Theme'),
     }
   })
@@ -765,7 +793,7 @@ test('cross-portal account changes clear cached categories in an open Dashboard 
     heldOrdersEmpty: true,
     tenantCatalogCacheAbsent: true,
     kdsSnapshotAbsent: true,
-    preferencesStorageCleared: true,
+    priorPreferencesAbsent: true,
     themeStorageCleared: true,
   })
 
