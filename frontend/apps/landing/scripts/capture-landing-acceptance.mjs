@@ -112,7 +112,9 @@ try {
 
   for (const width of [320, 390, 768, 1024]) {
     await page.setViewportSize({ width, height: 900 })
-    await page.goto(`${baseURL}/en`, { waitUntil: 'networkidle' })
+    const response = await page.goto(`${baseURL}/en`, { waitUntil: 'domcontentloaded', timeout: 45_000 })
+    if (response?.status() !== 200) throw new Error(`Landing menu acceptance returned HTTP ${response?.status() ?? 'no response'}`)
+    await page.locator('main h1').first().waitFor({ state: 'visible', timeout: 45_000 })
     const menu = page.locator('button[aria-controls="sv-mobile-navigation"]')
     if (await menu.isVisible()) {
       await menu.click()
