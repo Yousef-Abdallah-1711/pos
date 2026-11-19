@@ -73,6 +73,7 @@ export interface POSState {
   setFocusModeEnabled: (enabled: boolean) => void
   setHideOutOfStockProducts: (enabled: boolean) => void
   setProductCardSize: (size: POSProductCardSize) => void
+  resetForAuthScopeChange: () => void
   toggleSound: () => void
   toggleAutoPrint: () => void
   toggleFocusMode: () => void
@@ -488,6 +489,25 @@ export const usePOSStore = create<POSState>()(
           paymentMethod: 'cash',
           orderNotes: '',
         }),
+
+      resetForAuthScopeChange: () =>
+        set((state) => ({
+          items: [],
+          tableId: null,
+          tableName: null,
+          customerName: '',
+          customerPhone: '',
+          paymentMethod: 'cash',
+          orderNotes: '',
+          heldOrders: [],
+          selectedCategoryId: null,
+          searchQuery: '',
+          soundEnabled: state.soundEnabled,
+          autoPrintEnabled: state.autoPrintEnabled,
+          focusModeEnabled: state.focusModeEnabled,
+          hideOutOfStockProducts: state.hideOutOfStockProducts,
+          productCardSize: state.productCardSize,
+        })),
 
       setTableContext: (tableId, tableName) => {
         const nextTableId = toPositiveIntOrNull(tableId)
