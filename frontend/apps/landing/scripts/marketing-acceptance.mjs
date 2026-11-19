@@ -144,7 +144,8 @@ async function capture(page, name) {
   } finally { await handle.dispose() }
  }
  await page.evaluate(() => window.scrollTo(0, 0))
- await page.screenshot({ path: path.join(output, `${name}.png`), fullPage: page.viewportSize().width <= 1440 })
+ // The geometry checks exercise the full page; keep larger viewport captures bounded on hosted Chromium.
+ await page.screenshot({ path: path.join(output, `${name}.png`), fullPage: page.viewportSize().width <= 768 })
  check(`captures loaded ${name}`, missing.length === 0, JSON.stringify(missing))
 }
 async function captureNavigationEvidence(browser, page, { locale, variant, viewport, frame }) {
