@@ -1,5 +1,50 @@
 # SERVIO Authentication End-to-End Acceptance Matrix
 
+## Latest integrated execution — 2026-11-19
+
+This update supersedes the older status blocks below. Exact integrated source SHA: **dc1fa993b946938e56dd4b19deaf0ec8e0805acd**. GitHub-hosted Ubuntu 24.04, disposable Compose stacks, synthetic fixtures, PostgreSQL and Redis; Playwright Chromium. No staging data was used. Full CI run: [44495296843](https://github.com/Yousef-Abdallah-1711/pos/actions/runs/44495296843), attempt 2, completed successfully. Attempt 1 failed only the EN Lighthouse performance threshold (0.89 against 0.90) after all 60 route captures completed with zero browser errors. Attempt 2 rebuilt all five application images and passed Chromium smoke, Lighthouse thresholds, and the required aggregate on the same SHA.
+
+Exact-SHA financial acceptance: [run 44506683977](https://github.com/Yousef-Abdallah-1711/pos/actions/runs/44506683977), success, artifact 14520061617. Auth browser evidence artifact 14514694990; successful image smoke artifact 14522626822 contains the attempt-2 browser and Lighthouse results. Attempt-1 artifact 14518895520 retains the original threshold failure.
+
+Executed suites include the full Go integration and race checks; four frontend lint, type, type-test, and unit/component jobs; security/config; Playwright auth lifecycle; cache-boundary proxy checks; anonymous storefront checkout; the 10 RPS session smoke; all five immutable image builds; the application-image browser flow; and financial acceptance on disposable services. The auth and image workflows exercised real app, PostgreSQL, Redis, and Chromium services. Browser and API evidence is sanitized.
+
+### Current 30-scenario classification
+
+| # | Scenario | Status | Candidate evidence / limitation |
+|---:|---|---|---|
+| 1 | Guest opens Landing | PASS | Chromium image smoke and auth lifecycle; guest HTML contains no synthetic profile. |
+| 2 | Guest opens Login | PASS | Auth lifecycle reaches localized login form. |
+| 3 | Successful and invalid login | PASS | Real API/browser flow; successful session and rejected invalid credentials. |
+| 4 | Dashboard opens after login | PASS | Production Dashboard resolves API session. |
+| 5 | Same session on Landing | PASS | Second tab resolves authorized Landing profile. |
+| 6 | Profile menu and identity privacy | PASS | Authorized name/restaurant only; keyboard, Escape and focus restoration checks. |
+| 7 | Dashboard links | PASS | Canonical configured URLs checked in EN and AR. |
+| 8 | Refresh preserves session | PASS | Landing and Dashboard refresh retain authenticated state. |
+| 9 | New Dashboard tab | PASS | Shared browser cookie restores session in new tab and after reload. |
+| 10 | Session persistence / expiration policy | PASS | Owner-approved session-only cookie; 30-minute server idle timeout and eight-hour absolute lifetime verified in implementation and tests. |
+| 11 | Logout revocation | PASS | Landing/Dashboard logout; old cookie replay receives 401. |
+| 12 | Landing guest state after logout | PASS | Authenticated mobile account view returns to guest Login action. |
+| 13 | Protected Dashboard after logout | PASS | Revoked session cannot reopen protected page. |
+| 14 | Expired TTL and browser recovery | PASS | Synthetic Redis session expiry returns 401 and recovers to localized Login; Redis outage/recovery also passes. |
+| 15 | Concurrent refresh | PASS | Atomic rotation tests produce one winner across concurrent handler and Redis-client attempts. Multi-process retry-storm behavior remains unproven. |
+| 16 | Multiple restaurants in one tenant | DEFERRED BY APPROVED SCOPE | Owner deferred same-tenant multi-restaurant support for release 1; schema remains one restaurant per membership. Login-time tenant selection remains covered. |
+| 17 | In-session tenant switching | DEFERRED BY APPROVED SCOPE | Owner deferred switching for release 1; switching remains disabled. |
+| 18 | Cross-tenant denial | PASS | Forged tenant/restaurant headers are denied without disclosing target identifiers; isolated scoped DB evidence. |
+| 19 | Staff / Super Admin isolation | PASS | Cross-portal cookies receive 401; Super Admin session is separate. |
+| 20 | Anonymous storefront ordering | PASS | Real browser checkout through the public customer capability flow, using isolated fixtures. |
+| 21 | EN/AR navigation and direction | PASS | EN and AR, locale switching, Arabic language/direction metadata. |
+| 22 | Light/dark behavior | PASS | Theme persistence and 5,497 accessibility/layout checks per theme with zero failures. |
+| 23 | Responsive mobile account menu | PASS | 320/390/768/1024/1440 px; no horizontal overflow; drawer keyboard/focus behavior and target size. |
+| 24 | Screen reader and keyboard accessibility | NOT RUN | Browser keyboard, axe, ARIA and focus checks pass. Real assistive-technology announcements were unavailable: host has no Orca, browser binary, or /dev/snd. |
+| 25 | Full unsafe-route CSRF matrix | PASS | 163 unsafe routes × missing/untrusted Origin = 326 expected 403s; trusted auth routes checked separately. |
+| 26 | Malicious redirects | PASS | Nine real-login redirect vectors and three malformed locale paths stay on configured origins. |
+| 27 | CDN cache isolation across users | PASS, LOCAL EQUIVALENT | Isolated reverse-cache proxy tests anonymous, User A and User B, public warm/cache-hit behavior, EN/AR, Landing, Dashboard and private session responses. No cross-user identity in shared responses. Live staging CDN behavior was not tested. |
+| 28 | API restart with shared Redis | PASS | Same cookie resolves after disposable API restart while Redis remains shared. |
+| 29 | Redis outage and recovery | PASS | Failure is private/no-store with no new cookie; identity remains recoverable and returns on retry. |
+| 30 | High-concurrency capacity | BLOCKED | Safe 10 RPS/10 VU smoke only; no separately authorized production-like 10K test or approved capacity SLO. No 10K readiness claim. |
+
+**Totals:** 26 PASS · 2 DEFERRED BY APPROVED SCOPE · 1 NOT RUN · 1 BLOCKED · 0 FAIL. Scenario 27 is a pass only for the isolated CDN-equivalent proxy, not for live staging CDN configuration. The 10 RPS result is a smoke result only. Integrated CI is green on the exact candidate SHA; this does not make staging deployment or review complete.
+
 ## Current execution status — 2026-11-18
 
 This section supersedes the historical 2026-11-17 statuses below. A scenario is PASS only when its stated acceptance checks were actually exercised. Partial subchecks remain visible but do not count as a full PASS.
