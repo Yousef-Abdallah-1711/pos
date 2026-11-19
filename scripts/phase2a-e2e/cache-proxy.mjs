@@ -27,6 +27,7 @@ function cacheBaseKey(request, requestUrl) {
     serviceName,
     request.headers.host ?? '',
     requestUrl.pathname,
+    // Preserve all query parameters, including Next.js's RSC cache discriminator.
     requestUrl.search,
   ].join('\n')
   return createHash('sha256').update(source).digest('hex')
@@ -34,7 +35,7 @@ function cacheBaseKey(request, requestUrl) {
 
 function headerValue(request, name) {
   const value = request.headers[name.toLowerCase()]
-  return Array.isArray(value) ? value.join(',') : value ?? ''
+  return Array.isArray(value) ? JSON.stringify(value) : value ?? ''
 }
 
 function cacheKey(request, requestUrl, varyHeaders) {
