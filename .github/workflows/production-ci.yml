@@ -566,6 +566,10 @@ jobs:
             ops/aws/evidence/browser/lighthouse/
           if-no-files-found: ignore
 
+  financial-postgres-acceptance:
+    name: financial-postgres-acceptance
+    uses: ./.github/workflows/financial-acceptance.yml
+
   publish-release-images:
     if: ${{ !cancelled() && github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.application-images.result == 'success' && needs.required.result == 'success' }}
     needs: [application-images, required]
@@ -598,7 +602,7 @@ jobs:
 
   required:
     if: always()
-    needs: [backend, frontend, security-and-config, application-images, auth-browser-acceptance]
+    needs: [backend, frontend, security-and-config, application-images, auth-browser-acceptance, financial-postgres-acceptance]
     runs-on: ubuntu-24.04
     env:
       REQUIRE_AUTH_BROWSER: ${{ (github.event_name == 'pull_request' && (github.event.pull_request.number == 72 || github.event.pull_request.number == 82 || github.event.pull_request.number == 93)) || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/codex/auth-release-integration-20261118') }}
@@ -606,4 +610,4 @@ jobs:
       - name: Require every validation stage
         env:
           RESULTS: ${{ toJSON(needs) }}
-        run: python3 -c 'import json,os; jobs=json.loads(os.environ["RESULTS"]); run_browser=os.environ["REQUIRE_AUTH_BROWSER"] == "true"; required=[job for name,job in jobs.items() if name != "auth-browser-acceptance" or run_browser]; assert all(job["result"] == "success" for job in required), jobs'
+        run: python3 ops/aws/check_required_ci_gates.py

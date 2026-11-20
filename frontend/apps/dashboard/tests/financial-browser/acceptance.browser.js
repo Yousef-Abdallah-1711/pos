@@ -8,6 +8,7 @@ const dashboardOrigin = new URL(process.env.SERVIO_FINANCIAL_DASHBOARD_URL).orig
 const fixtureFile = process.env.SERVIO_FINANCIAL_BROWSER_FIXTURE_FILE
 if (!fixtureFile) throw new Error('Private financial browser fixture file is required')
 const fixture = JSON.parse(fs.readFileSync(fixtureFile, 'utf8'))
+const browserJournalAmountCents = 5000
 const identities = {
   accountant: fixture.accountant,
   cashier: fixture.cashier,
@@ -79,6 +80,16 @@ async function openFinancialPage(page, locale, route) {
   await expect(page.locator('main')).toBeVisible()
   await expect(page.locator('html')).toHaveAttribute('lang', locale)
   await expect.poll(() => page.locator('html').getAttribute('dir')).toBe(locale === 'ar' ? 'rtl' : 'ltr')
+}
+
+async function expectFinancialMetric(page, label, amountCents, locale) {
+  const formatter = new Intl.NumberFormat(locale === 'ar' ? 'ar-EG' : 'en-US', {
+    style: 'currency',
+    currency: 'EGP',
+    maximumFractionDigits: 2,
+  })
+  const value = page.getByText(label, { exact: true }).locator('xpath=following-sibling::div')
+  await expect(value).toHaveText(formatter.format(amountCents / 100))
 }
 
 async function assertNoDocumentOverflow(page) {
@@ -193,10 +204,11 @@ test.describe('authenticated financial browser acceptance', () => {
     const journalLines = dialog.locator('tbody tr')
     const debitAmount = journalLines.nth(0).locator('input[type="number"]').nth(0)
     const creditAmount = journalLines.nth(1).locator('input[type="number"]').nth(1)
-    await debitAmount.fill('50')
-    await creditAmount.fill('50')
-    await expect(debitAmount).toHaveValue('50')
-    await expect(creditAmount).toHaveValue('50')
+    const browserJournalAmount = String(browserJournalAmountCents / 100)
+    await debitAmount.fill(browserJournalAmount)
+    await creditAmount.fill(browserJournalAmount)
+    await expect(debitAmount).toHaveValue(browserJournalAmount)
+    await expect(creditAmount).toHaveValue(browserJournalAmount)
     await expect(dialog.getByText('Balanced', { exact: true })).toBeVisible()
     const createResponse = page.waitForResponse((response) =>
       response.url().endsWith('/accounting/journal-entries') && response.request().method() === 'POST'
@@ -227,6 +239,9 @@ test.describe('authenticated financial browser acceptance', () => {
       (line) => line.journal_entry_id === postedJournalId,
     )
     expect(postedJournalRows).toHaveLength(1)
+    expect(postedJournalRows[0].account_id).toBe(fixture.primary_account_id)
+    expect(Math.round(postedJournalRows[0].debit_amount * 100)).toBe(browserJournalAmountCents)
+    expect(Math.round(postedJournalRows[0].credit_amount * 100)).toBe(0)
 
     await page.goto('/en/dashboard/accounting/general-ledger')
     await expect(page.getByRole('heading', { name: /General Ledger/i })).toBeVisible()
@@ -283,8 +298,14 @@ test.describe('authenticated financial browser acceptance', () => {
     expect(balanceSheetData.integrity_status).toBe('UNRECONCILED')
     expect(balanceSheetData.equation_balanced).toBe(false)
     expect(balanceSheetData.integrity_check_basis).toBe('existing_round2_equation_check')
+    expect(Math.round(balanceSheetData.total_assets * 100)).toBe(fixture.expected_balance_sheet.assets_cents)
+    expect(Math.round(balanceSheetData.total_liabilities * 100)).toBe(fixture.expected_balance_sheet.liabilities_cents)
+    expect(Math.round(balanceSheetData.total_equity * 100)).toBe(fixture.expected_balance_sheet.equity_cents)
     expect(Math.round((balanceSheetData.total_assets - balanceSheetData.total_liabilities - balanceSheetData.total_equity) * 100))
       .toBe(Math.round(balanceSheetData.equation_difference * 100))
+    await expectFinancialMetric(page, 'إجمالي الأصول', fixture.expected_balance_sheet.assets_cents, 'ar')
+    await expectFinancialMetric(page, 'إجمالي الالتزامات', fixture.expected_balance_sheet.liabilities_cents, 'ar')
+    await expectFinancialMetric(page, 'إجمالي حقوق الملكية', fixture.expected_balance_sheet.equity_cents, 'ar')
     await expect(page.getByRole('heading', { name: /الميزانية العمومية|Balance Sheet/i })).toBeVisible()
     await assertFinancialContentClearsSidebar(page)
     await expect(page.getByText(/غير متطابق|UNRECONCILED|unreconciled/i).first()).toBeVisible()

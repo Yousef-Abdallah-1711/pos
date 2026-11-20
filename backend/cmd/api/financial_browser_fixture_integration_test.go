@@ -24,20 +24,29 @@ type financialBrowserIdentityFixture struct {
 }
 
 type financialBrowserFixture struct {
-	Accountant      financialBrowserIdentityFixture `json:"accountant"`
-	Cashier         financialBrowserIdentityFixture `json:"cashier"`
-	Payroll         financialBrowserIdentityFixture `json:"payroll"`
-	SecondTenant    financialBrowserIdentityFixture `json:"second_tenant"`
-	PrimaryAccount  int64                           `json:"primary_account_id"`
-	RevenueAccount  int64                           `json:"revenue_account_id"`
-	PrimaryTenantID int64                           `json:"primary_tenant_id"`
-	ForeignAccount  int64                           `json:"foreign_account_id"`
-	AccountName     string                          `json:"account_name"`
-	FormulaName     string                          `json:"formula_name"`
-	CustomerName    string                          `json:"customer_name"`
-	SupplierName    string                          `json:"supplier_name"`
-	EmployeeName    string                          `json:"employee_name"`
+	Accountant           financialBrowserIdentityFixture `json:"accountant"`
+	Cashier              financialBrowserIdentityFixture `json:"cashier"`
+	Payroll              financialBrowserIdentityFixture `json:"payroll"`
+	SecondTenant         financialBrowserIdentityFixture `json:"second_tenant"`
+	PrimaryAccount       int64                           `json:"primary_account_id"`
+	RevenueAccount       int64                           `json:"revenue_account_id"`
+	PrimaryTenantID      int64                           `json:"primary_tenant_id"`
+	ForeignAccount       int64                           `json:"foreign_account_id"`
+	AccountName          string                          `json:"account_name"`
+	FormulaName          string                          `json:"formula_name"`
+	CustomerName         string                          `json:"customer_name"`
+	SupplierName         string                          `json:"supplier_name"`
+	EmployeeName         string                          `json:"employee_name"`
+	ExpectedBalanceSheet financialBrowserBalanceSheet    `json:"expected_balance_sheet"`
 }
+
+type financialBrowserBalanceSheet struct {
+	AssetsCents      int64 `json:"assets_cents"`
+	LiabilitiesCents int64 `json:"liabilities_cents"`
+	EquityCents      int64 `json:"equity_cents"`
+}
+
+const financialBrowserJournalAmountCents int64 = 5000
 
 // TestFinancialAcceptanceSeedBrowserFixtures runs only in the isolated CI
 // financial acceptance workflow and writes credentials to a private local file.
@@ -114,21 +123,23 @@ func TestFinancialAcceptanceSeedBrowserFixtures(t *testing.T) {
 		foreignTenantID, foreignRestaurantID).Scan(&foreignAccountID); err != nil {
 		t.Fatalf("seed foreign tenant browser account: %v", err)
 	}
+	expectedBalanceSheet := readFinancialBrowserBalanceSheet(t, db, primary, primaryAccountID)
 
 	fixture := financialBrowserFixture{
-		Accountant:      financialBrowserIdentityFixture{Email: accountant.email, Password: accountant.password, Role: accountant.role},
-		Cashier:         financialBrowserIdentityFixture{Email: cashier.email, Password: cashier.password, Role: cashier.role},
-		Payroll:         financialBrowserIdentityFixture{Email: payroll.email, Password: payroll.password, Role: payroll.role},
-		SecondTenant:    financialBrowserIdentityFixture{Email: secondTenant.email, Password: secondTenant.password, Role: secondTenant.role},
-		PrimaryAccount:  primaryAccountID,
-		RevenueAccount:  revenueAccountID,
-		PrimaryTenantID: primary.tenantID,
-		ForeignAccount:  foreignAccountID,
-		AccountName:     "Synthetic Cash",
-		FormulaName:     formulaName,
-		CustomerName:    customerName,
-		SupplierName:    supplierName,
-		EmployeeName:    "Synthetic Employee",
+		Accountant:           financialBrowserIdentityFixture{Email: accountant.email, Password: accountant.password, Role: accountant.role},
+		Cashier:              financialBrowserIdentityFixture{Email: cashier.email, Password: cashier.password, Role: cashier.role},
+		Payroll:              financialBrowserIdentityFixture{Email: payroll.email, Password: payroll.password, Role: payroll.role},
+		SecondTenant:         financialBrowserIdentityFixture{Email: secondTenant.email, Password: secondTenant.password, Role: secondTenant.role},
+		PrimaryAccount:       primaryAccountID,
+		RevenueAccount:       revenueAccountID,
+		PrimaryTenantID:      primary.tenantID,
+		ForeignAccount:       foreignAccountID,
+		AccountName:          "Synthetic Cash",
+		FormulaName:          formulaName,
+		CustomerName:         customerName,
+		SupplierName:         supplierName,
+		EmployeeName:         "Synthetic Employee",
+		ExpectedBalanceSheet: expectedBalanceSheet,
 	}
 	encoded, err := json.MarshalIndent(fixture, "", "  ")
 	if err != nil {
@@ -141,4 +152,35 @@ func TestFinancialAcceptanceSeedBrowserFixtures(t *testing.T) {
 		t.Fatalf("write private browser fixture: %v", err)
 	}
 	t.Log("created isolated accountant, cashier, second-tenant identities and account fixtures")
+}
+
+func readFinancialBrowserBalanceSheet(t *testing.T, db *sql.DB, fixture liveFinancialFixture, cashAccountID int64) financialBrowserBalanceSheet {
+	t.Helper()
+	var expected financialBrowserBalanceSheet
+	err := db.QueryRowContext(t.Context(), `
+		WITH balances AS (
+			SELECT a.account_type, a.normal_balance, SUM(gl.debit_amount-gl.credit_amount) AS net_debit
+			FROM general_ledger gl
+			JOIN chart_of_accounts a ON a.id=gl.account_id AND a.tenant_id=gl.tenant_id AND a.restaurant_id=gl.restaurant_id
+			WHERE gl.tenant_id=$1 AND gl.restaurant_id=$2 AND gl.entry_date<=CURRENT_DATE
+			GROUP BY a.account_type,a.normal_balance
+		)
+		SELECT
+			ROUND(COALESCE(SUM(CASE WHEN account_type='asset' THEN CASE WHEN normal_balance='debit' THEN net_debit ELSE -net_debit END ELSE 0 END),0)*100)::bigint,
+			ROUND(COALESCE(SUM(CASE WHEN account_type='liability' THEN CASE WHEN normal_balance='credit' THEN -net_debit ELSE net_debit END ELSE 0 END),0)*100)::bigint,
+			ROUND(COALESCE(SUM(CASE WHEN account_type='equity' THEN CASE WHEN normal_balance='credit' THEN -net_debit ELSE net_debit END ELSE 0 END),0)*100)::bigint
+		FROM balances`, fixture.tenantID, fixture.restaurantID).Scan(&expected.AssetsCents, &expected.LiabilitiesCents, &expected.EquityCents)
+	if err != nil {
+		t.Fatalf("calculate independent browser Balance Sheet oracle: %v", err)
+	}
+	var accountType, normalBalance string
+	if err := db.QueryRowContext(t.Context(), `SELECT account_type,normal_balance FROM chart_of_accounts WHERE id=$1 AND tenant_id=$2 AND restaurant_id=$3`, cashAccountID, fixture.tenantID, fixture.restaurantID).Scan(&accountType, &normalBalance); err != nil {
+		t.Fatalf("verify browser journal debit account: %v", err)
+	}
+	if accountType != "asset" || normalBalance != "debit" {
+		t.Fatalf("browser journal's planned debit must increase a debit-normal asset; account type=%q normal balance=%q", accountType, normalBalance)
+	}
+	// The browser journey posts this exact cash debit before opening the report.
+	expected.AssetsCents += financialBrowserJournalAmountCents
+	return expected
 }
