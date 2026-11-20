@@ -16,7 +16,6 @@ const identities = {
   secondTenant: fixture.second_tenant,
 }
 
-let postedJournalId
 const browserDiagnostics = new WeakMap()
 
 const expectedNotificationDenials = new Set([
@@ -68,6 +67,31 @@ async function login(page, identity) {
   expect(sessionResponse.status(), 'authenticated browser session').toBe(200)
   const session = await sessionResponse.json()
   return session.data || session
+}
+
+async function createAccountantDraftJournal(page, identity, description) {
+  const session = await login(page, identity)
+  expect(session.role).toBe('accountant')
+
+  const createResponse = await page.request.post(`${apiBase}/accounting/journal-entries`, {
+    headers: { Origin: dashboardOrigin },
+    data: {
+      entry_date: new Date().toISOString().slice(0, 10),
+      description,
+      entry_type: 'manual',
+      lines: [
+        { account_id: fixture.primary_account_id, debit_amount: 50, credit_amount: 0, line_order: 1 },
+        { account_id: fixture.revenue_account_id, debit_amount: 0, credit_amount: 50, line_order: 2 },
+      ],
+    },
+  })
+  expect(createResponse.status(), 'accountant creates a balanced authorization target').toBe(201)
+  const payload = await createResponse.json()
+  const journal = payload.data || payload
+  const journalId = Number(journal.id)
+  expect(journalId).toBeGreaterThan(0)
+
+  return journalId
 }
 
 async function setViewport(page, width, height) {
@@ -140,6 +164,7 @@ async function assertMobileFinancialContentWithinViewport(page) {
 }
 
 async function assertFinancialContentClearsSidebar(page) {
+  await expect(page.locator('main table').first(), 'financial content table mounts before layout checks').toBeVisible()
   const layout = await page.evaluate(() => {
     const heading = document.querySelector('main h1')?.getBoundingClientRect()
     const sidebar = [...document.querySelectorAll('aside.fixed')]
@@ -230,7 +255,7 @@ test.describe('authenticated financial browser acceptance', () => {
     await page.getByRole('button', { name: /^Post$/i }).click()
     await expect(page.getByText('posted', { exact: true })).toBeVisible()
     const journalHref = page.url()
-    postedJournalId = Number(journalHref.split('/').pop())
+    const postedJournalId = Number(journalHref.split('/').pop())
     expect(postedJournalId).toBeGreaterThan(0)
 
     const duplicatePostResponse = await page.request.post(
@@ -265,13 +290,13 @@ test.describe('authenticated financial browser acceptance', () => {
 
   test('cashier EN desktop is denied financial screens and posting', async ({ page }, testInfo) => {
     await setViewport(page, 1440, 900)
+    const draftJournalId = await createAccountantDraftJournal(page, identities.accountant, 'Cashier authorization target')
     const session = await login(page, identities.cashier)
     expect(session.role).toBe('cashier')
     await openFinancialPage(page, 'en', 'accounting/journal-entries')
     await expect(page.getByRole('heading', { name: /Access denied/i })).toBeVisible()
     await expect(page.getByRole('button', { name: /New journal entry/i })).toHaveCount(0)
-    if (!postedJournalId) throw new Error('Accountant journal prerequisite did not run')
-    const response = await page.request.post(`${apiBase}/accounting/journal-entries/${postedJournalId}/post`, {
+    const response = await page.request.post(`${apiBase}/accounting/journal-entries/${draftJournalId}/post`, {
       headers: { Origin: dashboardOrigin },
       data: {},
     })
