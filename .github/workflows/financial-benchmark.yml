@@ -95,6 +95,43 @@ jobs:
       - name: Execute PostgreSQL-backed financial benchmark
         working-directory: backend
         run: go test -tags integration -count=1 -timeout 35m ./cmd/api -run '^TestFinancialQueryBenchmarkIntegration$' -v
+      - name: Publish sanitized synthetic benchmark summary
+        if: always() && github.repository == 'Yousef-Abdallah-1711/pos'
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          report_path = Path(os.environ['GITHUB_WORKSPACE']) / 'audit-reports/financial-benchmark/financial-query-benchmark.json'
+          summary_path = Path(os.environ['GITHUB_STEP_SUMMARY'])
+          lines = ['## Synthetic financial query benchmark']
+          if not report_path.is_file():
+              lines.append('No benchmark report was produced; see the job result for the failure reason.')
+          else:
+              report = json.loads(report_path.read_text(encoding='utf-8'))
+              dataset = report['dataset']
+              lines.extend([
+                  f"- Source head SHA: `{report['head_commit']}`",
+                  f"- Effective SHA: `{report['effective_commit']}`",
+                  f"- Dataset: {dataset['tenant_count']} tenants, {dataset['journal_entries']:,} journal entries, {dataset['journal_lines']:,} journal lines, {dataset['general_ledger_rows']:,} GL rows, {dataset['sales_orders']:,} orders.",
+                  f"- Reconciliation: journal debits/credits {dataset['journal_debit_cents']:,}/{dataset['journal_credit_cents']:,} cents; GL debits/credits {dataset['general_ledger_debit_cents']:,}/{dataset['general_ledger_credit_cents']:,} cents.",
+                  f"- Percentile method: {report['percentile_method_and_caveat']}.",
+                  '- Approved production SLO thresholds: none supplied; results are descriptive and do not establish production capacity.',
+                  '',
+                  '| Operation | Samples | Concurrency | p50 ms | p95 ms | p99 ms | Max ms | Errors |',
+                  '| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |',
+              ])
+              for measurement in report['measurements']:
+                  lines.append(
+                      f"| {measurement['name']} | {measurement['samples']} | {measurement['concurrency']} | "
+                      f"{measurement['p50_ms']:.3f} | {measurement['p95_ms']:.3f} | {measurement['p99_ms']:.3f} | "
+                      f"{measurement['maximum_ms']:.3f} | {measurement['error_count']} |"
+                  )
+          with summary_path.open('a', encoding='utf-8') as summary:
+              summary.write('\n'.join(lines) + '\n')
+          PY
       - name: Upload benchmark report
         if: always() && github.repository == 'Yousef-Abdallah-1711/pos-phase5-private-acceptance'
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
