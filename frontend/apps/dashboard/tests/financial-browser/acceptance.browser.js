@@ -92,6 +92,15 @@ async function expectFinancialMetric(page, label, amountCents, locale) {
   await expect(value).toHaveText(formatter.format(amountCents / 100))
 }
 
+async function expectBalanceSheetMetrics(page, locale, expected) {
+  const labels = locale === 'ar'
+    ? ['إجمالي الأصول', 'إجمالي الالتزامات', 'إجمالي حقوق الملكية']
+    : ['Total Assets', 'Total Liabilities', 'Total Equity']
+  await expectFinancialMetric(page, labels[0], expected.assets_cents, locale)
+  await expectFinancialMetric(page, labels[1], expected.liabilities_cents, locale)
+  await expectFinancialMetric(page, labels[2], expected.equity_cents, locale)
+}
+
 async function assertNoDocumentOverflow(page) {
   const dimensions = await page.evaluate(() => ({
     viewportWidth: window.innerWidth,
@@ -279,7 +288,7 @@ test.describe('authenticated financial browser acceptance', () => {
     await page.screenshot({ path: testInfo.outputPath('en-desktop-cashier-denied.png'), fullPage: true })
   })
 
-  test('accountant AR desktop renders financial reports and preserves unreconciled status', async ({ page }, testInfo) => {
+  test('accountant EN/AR desktop and mobile Balance Sheet values match the SQL oracle', async ({ page }, testInfo) => {
     await setViewport(page, 1440, 900)
     const session = await login(page, identities.accountant)
     expect(session.role).toBe('accountant')
@@ -303,13 +312,27 @@ test.describe('authenticated financial browser acceptance', () => {
     expect(Math.round(balanceSheetData.total_equity * 100)).toBe(fixture.expected_balance_sheet.equity_cents)
     expect(Math.round((balanceSheetData.total_assets - balanceSheetData.total_liabilities - balanceSheetData.total_equity) * 100))
       .toBe(Math.round(balanceSheetData.equation_difference * 100))
-    await expectFinancialMetric(page, 'إجمالي الأصول', fixture.expected_balance_sheet.assets_cents, 'ar')
-    await expectFinancialMetric(page, 'إجمالي الالتزامات', fixture.expected_balance_sheet.liabilities_cents, 'ar')
-    await expectFinancialMetric(page, 'إجمالي حقوق الملكية', fixture.expected_balance_sheet.equity_cents, 'ar')
+    await expectBalanceSheetMetrics(page, 'ar', fixture.expected_balance_sheet)
     await expect(page.getByRole('heading', { name: /الميزانية العمومية|Balance Sheet/i })).toBeVisible()
     await assertFinancialContentClearsSidebar(page)
     await expect(page.getByText(/غير متطابق|UNRECONCILED|unreconciled/i).first()).toBeVisible()
     await page.screenshot({ path: testInfo.outputPath('ar-desktop-balance-sheet.png'), fullPage: true })
+
+    await setViewport(page, 375, 812)
+    await expectBalanceSheetMetrics(page, 'ar', fixture.expected_balance_sheet)
+    await assertMobileFinancialContentWithinViewport(page)
+    await page.screenshot({ path: testInfo.outputPath('ar-mobile-balance-sheet.png'), fullPage: true })
+
+    await openFinancialPage(page, 'en', 'reports/financial/balance-sheet')
+    await expect(page.getByRole('heading', { name: 'Balance Sheet', exact: true })).toBeVisible()
+    await expectBalanceSheetMetrics(page, 'en', fixture.expected_balance_sheet)
+    await assertNoDocumentOverflow(page)
+    await page.screenshot({ path: testInfo.outputPath('en-desktop-balance-sheet.png'), fullPage: true })
+
+    await setViewport(page, 375, 812)
+    await expectBalanceSheetMetrics(page, 'en', fixture.expected_balance_sheet)
+    await assertMobileFinancialContentWithinViewport(page)
+    await page.screenshot({ path: testInfo.outputPath('en-mobile-balance-sheet.png'), fullPage: true })
 
     await page.goto('/ar/dashboard/reports/financial/profit-loss')
     await expect(page.getByRole('heading', { name: /الأرباح والخسائر|Profit\s*&\s*Loss/i })).toBeVisible()
