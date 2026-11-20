@@ -129,6 +129,8 @@ jobs:
           go test -tags integration -count=1 -timeout 90s ./cmd/api -run '^TestFinancialAcceptanceLiveAPI' -json | tee financial-live-api-tests.jsonl
       - name: Verify payment, auth, order, accounting, and reporting integration scenarios
         working-directory: backend
+        env:
+          SERVIO_DISPOSABLE_FINANCIAL_TEST_DB: '1'
         run: |
           set -euo pipefail
           go test -tags integration -count=1 -timeout 25m -json \

@@ -1855,7 +1855,37 @@ func (r *AccountingAdvancedRepository) UpsertAccountFromImport(
 		return err
 	}
 
-	_, err = r.db.Exec(`
+	tx, err := r.db.Begin()
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+
+	var existingNormalBalance string
+	if err := tx.QueryRow(`
+		SELECT normal_balance
+		FROM chart_of_accounts
+		WHERE tenant_id = $1 AND restaurant_id = $2 AND id = $3
+		FOR UPDATE
+	`, tenantID, restaurantID, existingID).Scan(&existingNormalBalance); err != nil {
+		return err
+	}
+	if existingNormalBalance != normalBalance {
+		var hasLedgerEntries bool
+		if err := tx.QueryRow(`
+			SELECT EXISTS (
+				SELECT 1 FROM general_ledger
+				WHERE tenant_id = $1 AND restaurant_id = $2 AND account_id = $3
+			)
+		`, tenantID, restaurantID, existingID).Scan(&hasLedgerEntries); err != nil {
+			return err
+		}
+		if hasLedgerEntries {
+			return errors.New("normal balance cannot be changed after ledger entries exist")
+		}
+	}
+
+	_, err = tx.Exec(`
 		UPDATE chart_of_accounts
 		SET account_name = $1,
 			account_name_ar = $2,
@@ -1882,7 +1912,10 @@ func (r *AccountingAdvancedRepository) UpsertAccountFromImport(
 		restaurantID,
 		existingID,
 	)
-	return err
+	if err != nil {
+		return err
+	}
+	return tx.Commit()
 }
 
 func (r *AccountingAdvancedRepository) CreateImportedJournalEntry(

@@ -458,11 +458,10 @@ func (r *PaymentAccountingRepository) resolveCustomerPaymentContextTx(tx *sql.Tx
 		if receivableAccountID.Valid {
 			accountID = int(receivableAccountID.Int64)
 		} else {
-			account, err := lookupAccountByCode(r.accountRepo, payment.TenantID, payment.RestaurantID, "1120")
+			accountID, err = lookupAccountByCodeTx(tx, payment.TenantID, payment.RestaurantID, "1120")
 			if err != nil {
 				return 0, 0, nil, 0, err
 			}
-			accountID = account.ID
 		}
 		return customerID, accountID, payment.InvoiceID, balanceDue, nil
 	}
@@ -482,11 +481,11 @@ func (r *PaymentAccountingRepository) resolveCustomerPaymentContextTx(tx *sql.Tx
 	if receivableAccountID.Valid {
 		return payment.CustomerID, int(receivableAccountID.Int64), nil, 0, nil
 	}
-	account, err := lookupAccountByCode(r.accountRepo, payment.TenantID, payment.RestaurantID, "1120")
+	accountID, err := lookupAccountByCodeTx(tx, payment.TenantID, payment.RestaurantID, "1120")
 	if err != nil {
 		return 0, 0, nil, 0, err
 	}
-	return payment.CustomerID, account.ID, nil, 0, nil
+	return payment.CustomerID, accountID, nil, 0, nil
 }
 
 func (r *PaymentAccountingRepository) resolveSupplierPaymentContextTx(tx *sql.Tx, payment *domain.PaymentMade) (int, int, *int, float64, error) {
@@ -514,11 +513,10 @@ func (r *PaymentAccountingRepository) resolveSupplierPaymentContextTx(tx *sql.Tx
 		if payableAccountID.Valid {
 			accountID = int(payableAccountID.Int64)
 		} else {
-			account, err := lookupAccountByCode(r.accountRepo, payment.TenantID, payment.RestaurantID, "2101")
+			accountID, err = lookupAccountByCodeTx(tx, payment.TenantID, payment.RestaurantID, "2101")
 			if err != nil {
 				return 0, 0, nil, 0, err
 			}
-			accountID = account.ID
 		}
 		return supplierID, accountID, payment.InvoiceID, balanceDue, nil
 	}
@@ -538,11 +536,11 @@ func (r *PaymentAccountingRepository) resolveSupplierPaymentContextTx(tx *sql.Tx
 	if payableAccountID.Valid {
 		return payment.SupplierID, int(payableAccountID.Int64), nil, 0, nil
 	}
-	account, err := lookupAccountByCode(r.accountRepo, payment.TenantID, payment.RestaurantID, "2101")
+	accountID, err := lookupAccountByCodeTx(tx, payment.TenantID, payment.RestaurantID, "2101")
 	if err != nil {
 		return 0, 0, nil, 0, err
 	}
-	return payment.SupplierID, account.ID, nil, 0, nil
+	return payment.SupplierID, accountID, nil, 0, nil
 }
 
 func (r *PaymentAccountingRepository) resolveCollectionAccountTx(tx *sql.Tx, tenantID, restaurantID int, bankAccountID *int, paymentMethod string) (int, error) {
@@ -564,11 +562,7 @@ func (r *PaymentAccountingRepository) resolveCollectionAccountTx(tx *sql.Tx, ten
 		}
 	}
 
-	account, err := lookupAccountByCode(r.accountRepo, tenantID, restaurantID, fallbackCollectionAccountCode(paymentMethod))
-	if err != nil {
-		return 0, err
-	}
-	return account.ID, nil
+	return lookupAccountByCodeTx(tx, tenantID, restaurantID, fallbackCollectionAccountCode(paymentMethod))
 }
 
 func (r *PaymentAccountingRepository) applyCustomerInvoicePaymentTx(tx *sql.Tx, tenantID, restaurantID, invoiceID int, amount float64) error {
