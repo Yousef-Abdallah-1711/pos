@@ -2,7 +2,7 @@
 
 **Observed:** 2026-11-20.  
 **Current fetched public `origin/main`:** `102c804df820e4e047853eb3d3ea51c0ce11472e`.  
-**CFR-003 engineering candidate:** `821bf503080d9a5f0964a54715743f60a1461ab3` (three commits ahead of current main).  
+**CFR-003 candidate source and oracle test:** `5c1113c` (five commits ahead of current main).
 **Decision packets:** [ACCOUNTING_DECISION_PACKETS.md](ACCOUNTING_DECISION_PACKETS.md).
 
 ## Release gates
@@ -31,7 +31,7 @@ These are current work dispositions from the latest tracker snapshot reconciled 
 |---|---|---|
 | CFR-001 | Implemented on main; acceptance pending | Disposable PostgreSQL rejection-before-write evidence and ROUND-01. |
 | CFR-002 | Merged; acceptance pending | Current-SHA migration/rollback and direct-write evidence under approved roles. |
-| CFR-003 | Implemented in local candidate; not integrated | Candidate PostgreSQL evidence passed; exact-SHA hosted CI, independent reviewer approval and merge remain. |
+| CFR-003 | Implemented in local candidate; not integrated | Current-main and candidate disposable PostgreSQL oracle/backdating tests passed; exact-SHA hosted CI, independent reviewer approval and merge remain. |
 | CFR-004 | Partially implemented | Current-SHA crash/restart, terminal alert, replay and scoped operator recovery acceptance; provider settlement remains separate. |
 | CFR-005 | Policy blocked / partial | Provider event contract, refund/chargeback behavior, linked reversals and approvals. |
 | CFR-006 | Benchmark PR open; not accepted | Rebase/current exact-SHA run, inspect dataset/query plans and obtain approved SLO. |
