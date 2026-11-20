@@ -139,7 +139,7 @@ jobs:
             ./internal/repository \
             ./cmd/api | tee financial-acceptance-tests.jsonl
       - name: Upload financial acceptance test evidence
-        if: always()
+        if: always() && github.repository == 'Yousef-Abdallah-1711/pos-phase5-private-acceptance'
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: financial-acceptance-${{ github.sha }}

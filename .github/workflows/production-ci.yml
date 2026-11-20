@@ -457,7 +457,7 @@ jobs:
             >"$RUNNER_TEMP/auth-evidence/k6-environment.txt"
           free -b | sed -n '1,2p' >>"$RUNNER_TEMP/auth-evidence/k6-environment.txt"
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
-        if: always()
+        if: always() && github.repository == 'Yousef-Abdallah-1711/pos-phase5-private-acceptance'
         with:
           name: auth-browser-acceptance-${{ github.run_id }}
           path: |
@@ -544,7 +544,7 @@ jobs:
           retention-days: 30
           if-no-files-found: error
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
-        if: always()
+        if: always() && github.repository == 'Yousef-Abdallah-1711/pos-phase5-private-acceptance'
         with:
           name: chromium-smoke-results
           path: |

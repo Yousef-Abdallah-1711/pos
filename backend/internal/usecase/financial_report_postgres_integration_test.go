@@ -131,6 +131,132 @@ func TestGenerateBalanceSheetPostgresBackdatedJournalUsesAsOfMovementSum(t *test
 	}
 }
 
+func TestFinancialReportsPostgresReconcileToIndependentLedgerOracle(t *testing.T) {
+	requireDisposableFinancialTestDatabase(t)
+	db, err := sql.Open("postgres", testdb.URL(t))
+	if err != nil {
+		t.Fatalf("open disposable PostgreSQL: %v", err)
+	}
+	defer db.Close()
+
+	stamp := time.Now().UnixNano()
+	var tenantID, restaurantID, assetID, liabilityID, revenueID int
+	if err := db.QueryRow(`INSERT INTO tenants (name, slug, domain) VALUES ($1, $2, $3) RETURNING id`, fmt.Sprintf("Reconciliation oracle %d", stamp), fmt.Sprintf("reconcile-%d", stamp), fmt.Sprintf("reconcile-%d.example.test", stamp)).Scan(&tenantID); err != nil {
+		t.Fatalf("create isolated tenant: %v", err)
+	}
+	if err := db.QueryRow(`INSERT INTO restaurants (tenant_id, name, slug, address) VALUES ($1, $2, $3, 'test') RETURNING id`, tenantID, "Reconciliation oracle fixture", fmt.Sprintf("reconcile-%d", stamp)).Scan(&restaurantID); err != nil {
+		t.Fatalf("create isolated restaurant: %v", err)
+	}
+	accountSuffix := stamp % 1_000_000_000_000
+	for _, account := range []struct {
+		code, name, kind, normal string
+		destination              *int
+	}{
+		{fmt.Sprintf("ROA%d", accountSuffix), "Oracle cash", "asset", "debit", &assetID},
+		{fmt.Sprintf("ROL%d", accountSuffix), "Oracle payable", "liability", "credit", &liabilityID},
+		{fmt.Sprintf("ROR%d", accountSuffix), "Oracle revenue", "revenue", "credit", &revenueID},
+	} {
+		if err := db.QueryRow(`INSERT INTO chart_of_accounts (tenant_id, restaurant_id, account_code, account_name, account_type, normal_balance) VALUES ($1,$2,$3,$4,$5,$6) RETURNING id`, tenantID, restaurantID, account.code, account.name, account.kind, account.normal).Scan(account.destination); err != nil {
+			t.Fatalf("create %s account: %v", account.kind, err)
+		}
+	}
+
+	entryDate := time.Date(2026, time.November, 15, 0, 0, 0, 0, time.UTC)
+	referenceID := int(stamp % 1_000_000_000)
+	entry := &domain.JournalEntry{
+		TenantID: tenantID, RestaurantID: restaurantID, EntryDate: entryDate,
+		Description: "Synthetic reconciliation oracle fixture", ReferenceType: "test", ReferenceID: &referenceID,
+		EntryType: "manual", Status: domain.JournalStatusDraft,
+		Lines: []domain.JournalEntryLine{
+			{AccountID: assetID, DebitAmount: 55, LineOrder: 1},
+			{AccountID: liabilityID, CreditAmount: 5, LineOrder: 2},
+			{AccountID: revenueID, CreditAmount: 50, LineOrder: 3},
+		},
+	}
+	ledger := repository.NewGeneralLedgerRepository(db, repository.NewJournalEntryRepository(db))
+	journalID, err := ledger.CreateAndPostAutoEntry(entry, 0)
+	if err != nil {
+		t.Fatalf("post synthetic reconciliation journal: %v", err)
+	}
+
+	// Oracle calculation reads source posted journal lines directly; it does not
+	// reuse the report query, GL running-balance cache, or report mapping code.
+	var sourceDebits, sourceCredits float64
+	if err := db.QueryRow(`
+		SELECT COALESCE(SUM(jel.debit_amount), 0), COALESCE(SUM(jel.credit_amount), 0)
+		FROM journal_entry_lines jel
+		JOIN journal_entries je ON je.id = jel.journal_entry_id
+		WHERE je.id = $1 AND je.tenant_id = $2 AND je.restaurant_id = $3 AND je.status = 'posted'
+	`, journalID, tenantID, restaurantID).Scan(&sourceDebits, &sourceCredits); err != nil {
+		t.Fatalf("sum source journal lines: %v", err)
+	}
+	if sourceDebits != 55 || sourceCredits != 55 {
+		t.Fatalf("source journal oracle debits/credits = %.2f/%.2f, want 55/55 currency units", sourceDebits, sourceCredits)
+	}
+
+	type accountTotals struct{ debit, credit float64 }
+	oracle := map[string]accountTotals{}
+	rows, err := db.Query(`
+		SELECT coa.account_type, COALESCE(SUM(gl.debit_amount), 0), COALESCE(SUM(gl.credit_amount), 0)
+		FROM chart_of_accounts coa
+		LEFT JOIN general_ledger gl ON gl.account_id = coa.id AND gl.tenant_id = $1 AND gl.restaurant_id = $2 AND gl.entry_date <= $3
+		WHERE coa.tenant_id = $1 AND coa.restaurant_id = $2 AND coa.is_active = TRUE AND coa.is_header = FALSE
+		GROUP BY coa.account_type
+	`, tenantID, restaurantID, entryDate)
+	if err != nil {
+		t.Fatalf("sum independent ledger movements: %v", err)
+	}
+	for rows.Next() {
+		var kind string
+		var totals accountTotals
+		if err := rows.Scan(&kind, &totals.debit, &totals.credit); err != nil {
+			rows.Close()
+			t.Fatalf("scan independent account totals: %v", err)
+		}
+		oracle[kind] = totals
+	}
+	if err := rows.Err(); err != nil {
+		rows.Close()
+		t.Fatalf("read independent account totals: %v", err)
+	}
+	rows.Close()
+	assetCents := int64(math.Round((oracle["asset"].debit - oracle["asset"].credit) * 100))
+	liabilityCents := int64(math.Round((oracle["liability"].credit - oracle["liability"].debit) * 100))
+	equityCents := int64(math.Round((oracle["equity"].credit - oracle["equity"].debit) * 100))
+	revenueCents := int64(math.Round((oracle["revenue"].credit - oracle["revenue"].debit) * 100))
+	expenseCents := int64(math.Round((oracle["expense"].debit - oracle["expense"].credit) * 100))
+	if assetCents != 5500 || liabilityCents != 500 || equityCents != 0 || revenueCents != 5000 || expenseCents != 0 {
+		t.Fatalf("independent ledger oracle cents assets=%d liabilities=%d equity=%d revenue=%d expense=%d", assetCents, liabilityCents, equityCents, revenueCents, expenseCents)
+	}
+
+	usecase := NewFinancialReportUseCase(db, ledger)
+	trialBalance, err := usecase.GenerateTrialBalance(tenantID, restaurantID, entryDate)
+	if err != nil {
+		t.Fatalf("generate trial balance: %v", err)
+	}
+	if !trialBalance.IsBalanced || math.Round(trialBalance.TotalDebits*100) != 5500 || math.Round(trialBalance.TotalCredits*100) != 5500 {
+		t.Fatalf("trial balance diverges from source oracle: %+v", trialBalance)
+	}
+	profitLoss, err := usecase.GenerateProfitLossWithComparison(tenantID, restaurantID, entryDate, entryDate, entryDate.AddDate(0, 0, -1), entryDate.AddDate(0, 0, -1))
+	if err != nil {
+		t.Fatalf("generate profit and loss: %v", err)
+	}
+	assertUsecaseBalanceCents(t, "P&L revenue from independent oracle", revenueCents, profitLoss.TotalRevenue)
+	assertUsecaseBalanceCents(t, "P&L expense from independent oracle", expenseCents, profitLoss.TotalExpenses)
+	assertUsecaseBalanceCents(t, "P&L net income from independent oracle", revenueCents-expenseCents, profitLoss.NetProfit)
+	balanceSheet, err := usecase.GenerateBalanceSheet(tenantID, restaurantID, entryDate)
+	if err != nil {
+		t.Fatalf("generate balance sheet: %v", err)
+	}
+	assertUsecaseBalanceCents(t, "Balance Sheet assets from independent oracle", assetCents, balanceSheet.TotalAssets)
+	assertUsecaseBalanceCents(t, "Balance Sheet liabilities from independent oracle", liabilityCents, balanceSheet.TotalLiabilities)
+	assertUsecaseBalanceCents(t, "Balance Sheet equity from independent oracle", equityCents, balanceSheet.TotalEquity)
+	assertUsecaseBalanceCents(t, "unclosed-earnings residual from independent oracle", revenueCents-expenseCents, balanceSheet.EquationDifference)
+	if balanceSheet.IntegrityStatus != "UNRECONCILED" || balanceSheet.EquationBalanced {
+		t.Fatalf("Balance Sheet hid known unclosed-earnings difference: %+v", balanceSheet)
+	}
+}
+
 func assertUsecaseBalanceCents(t *testing.T, label string, expected int64, observedAmount float64) {
 	t.Helper()
 	observed := int64(math.Round(observedAmount * 100))
