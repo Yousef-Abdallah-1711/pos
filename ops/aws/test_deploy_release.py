@@ -99,13 +99,14 @@ class RollbackSafetyTests(unittest.TestCase):
             services={name:{'image':'old-'+name,'volumes':[]} for name in deploy.SERVICES+['postgres','redis','proxy','migrate']}
             old={'services':services}
             previous=ops/'compose.json';previous.write_text(__import__('json').dumps(old))
+            status=ops/'public/release.json';status.parent.mkdir();status.write_text('{"sha":"'+'c'*40+'","status":"verified"}\n')
             manifest={'sha':SHA,'ci_run_id':123,'images':{},'image_ids':{name:'sha256:'+'b'*64 for name in deploy.SERVICES},'image_sizes':{name:100*1024**2 for name in deploy.SERVICES}}
             calls=[]
             def extract(sha,destination,artifacts):
                 target=destination/'ops/aws';target.mkdir(parents=True)
                 (target/'compose.json').write_text(__import__('json').dumps(old))
             def compose(path,*args,**kwargs):calls.append((path,args))
-            patches=[patch.object(deploy,'ROOT',root),patch.object(deploy,'OPS',ops),patch.object(deploy,'STATE',ops/'state.json'),patch.object(deploy,'verify_manifest',return_value=SHA),patch.object(deploy,'verify_artifacts'),patch.object(deploy,'extract_source',side_effect=extract),patch.object(deploy,'load_verified_images',return_value=manifest['image_ids']),patch.object(deploy,'verify_migrations'),patch.object(deploy,'backup'),patch.object(deploy,'compose',side_effect=compose),patch.object(deploy,'public_checks',side_effect=RuntimeError('simulated readiness failure')),patch.object(deploy.shutil,'disk_usage',return_value=SimpleNamespace(free=20*1024**3))]
+            patches=[patch.object(deploy,'ROOT',root),patch.object(deploy,'OPS',ops),patch.object(deploy,'STATE',ops/'state.json'),patch.object(deploy,'PUBLIC_STATUS',status),patch.object(deploy,'verify_manifest',return_value=SHA),patch.object(deploy,'verify_artifacts'),patch.object(deploy,'extract_source',side_effect=extract),patch.object(deploy,'load_verified_images',return_value=manifest['image_ids']),patch.object(deploy,'verify_migrations'),patch.object(deploy,'backup'),patch.object(deploy,'compose',side_effect=compose),patch.object(deploy,'public_checks',side_effect=RuntimeError('simulated readiness failure')),patch.object(deploy.shutil,'disk_usage',return_value=SimpleNamespace(free=20*1024**3))]
             with __import__('contextlib').ExitStack() as stack:
                 for mocked in patches:stack.enter_context(mocked)
                 with self.assertRaisesRegex(RuntimeError,'simulated'):deploy.deploy(manifest,SHA,root)
@@ -156,5 +157,75 @@ class MetadataAtomicityTests(unittest.TestCase):
                     deploy.record_release(manifest,Path('/release.json'),{})
             self.assertEqual(state.read_bytes(),b'previous private state')
             self.assertEqual(status.read_bytes(),b'previous public receipt')
+
+class CandidateReceiptTests(unittest.TestCase):
+    def test_candidate_receipt_is_published_and_previous_receipt_can_be_restored(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as directory:
+            status = Path(directory) / 'release.json'
+            previous = b'{"sha":"' + b'c' * 40 + b'","status":"verified"}\n'
+            status.write_bytes(previous)
+            manifest = {'sha': SHA, 'ci_run_id': 456}
+            with patch.object(deploy, 'PUBLIC_STATUS', status):
+                deploy.publish_candidate_receipt(manifest)
+                self.assertEqual(json.loads(status.read_text()), {
+                    'sha': SHA, 'status': 'candidate', 'environment': 'staging', 'ci_run_id': 456,
+                })
+                deploy.restore_public_receipt(previous)
+            self.assertEqual(status.read_bytes(), previous)
+
+    def test_failed_staging_acceptance_restores_previous_receipt_after_app_rollback(self):
+        import tempfile
+        from contextlib import ExitStack
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            ops = root / 'ops/aws'
+            ops.mkdir(parents=True)
+            previous_compose = ops / 'compose.json'
+            services = {name: {'image': 'old-' + name, 'volumes': []}
+                        for name in deploy.SERVICES + ['postgres', 'redis', 'proxy', 'migrate']}
+            previous_compose.write_text(json.dumps({'services': services}))
+            state = ops / 'state.json'
+            state.write_text(json.dumps({'sha': 'c' * 40, 'compose': str(previous_compose)}))
+            status = ops / 'public/release.json'
+            status.parent.mkdir()
+            prior_receipt = b'{"sha":"' + b'c' * 40 + b'","status":"verified"}\n'
+            status.write_bytes(prior_receipt)
+            manifest = {
+                'sha': SHA, 'ci_run_id': 456,
+                'image_ids': {name: 'sha256:' + 'b' * 64 for name in deploy.SERVICES},
+                'image_sizes': {name: 100 * 1024**2 for name in deploy.SERVICES},
+            }
+
+            def extract(sha, destination, artifacts):
+                target = destination / 'ops/aws'
+                target.mkdir(parents=True)
+                (target / 'compose.json').write_text(json.dumps({'services': services}))
+
+            def fail_acceptance(destination, expected_sha):
+                self.assertEqual(json.loads(status.read_text())['sha'], expected_sha)
+                self.assertEqual(json.loads(status.read_text())['status'], 'candidate')
+                raise RuntimeError('simulated staging-safe acceptance failure')
+
+            patches = [
+                patch.object(deploy, 'ROOT', root), patch.object(deploy, 'OPS', ops),
+                patch.object(deploy, 'STATE', state), patch.object(deploy, 'PUBLIC_STATUS', status),
+                patch.object(deploy, 'verify_manifest', return_value=SHA),
+                patch.object(deploy, 'verify_artifacts'), patch.object(deploy, 'extract_source', side_effect=extract),
+                patch.object(deploy, 'verify_migrations', return_value=[]),
+                patch.object(deploy, 'requires_compatible_backend', return_value=False),
+                patch.object(deploy, 'load_verified_images', return_value=manifest['image_ids']),
+                patch.object(deploy, 'backup'), patch.object(deploy, 'public_checks'),
+                patch.object(deploy, 'acceptance', side_effect=fail_acceptance),
+                patch.object(deploy, 'compose'),
+                patch.object(deploy.shutil, 'disk_usage', return_value=SimpleNamespace(free=20 * 1024**3)),
+            ]
+            with ExitStack() as stack:
+                for mocked in patches:
+                    stack.enter_context(mocked)
+                with self.assertRaisesRegex(RuntimeError, 'simulated staging-safe acceptance failure'):
+                    deploy.deploy(manifest, SHA, root)
+            self.assertEqual(status.read_bytes(), prior_receipt)
+            self.assertEqual(json.loads(state.read_text())['sha'], 'c' * 40)
 
 if __name__ == '__main__':unittest.main()
