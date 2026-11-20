@@ -1,7 +1,7 @@
 # SERVIO accounting decision packets
 
-**Prepared:** 2026-11-20  
-**Code baseline:** `origin/main` `102c804df820e4e047853eb3d3ea51c0ce11472e`; the engineering candidate is `821bf503080d9a5f0964a54715743f60a1461ab3`.  
+**Prepared:** 2026-11-20
+**Code baseline:** `origin/main` `102c804df820e4e047853eb3d3ea51c0ce11472e`; the engineering candidate source/oracle test is `5c1113c`.
 **Approval status:** all decisions below are **PENDING**. Proposals are engineering recommendations only, not accounting approvals. Examples are illustrative and do not authorize postings.
 
 ## Approval record

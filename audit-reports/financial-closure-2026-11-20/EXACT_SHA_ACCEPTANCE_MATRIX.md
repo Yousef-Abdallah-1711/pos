@@ -1,7 +1,7 @@
 # Financial release acceptance matrix
 
-**Observed:** 2026-11-20.  
-**Current fetched public `origin/main`:** `102c804df820e4e047853eb3d3ea51c0ce11472e`.  
+**Observed:** 2026-11-20.
+**Current fetched public `origin/main`:** `102c804df820e4e047853eb3d3ea51c0ce11472e`.
 **CFR-003 candidate source and oracle test:** `5c1113c` (five commits ahead of current main).
 **Decision packets:** [ACCOUNTING_DECISION_PACKETS.md](ACCOUNTING_DECISION_PACKETS.md).
 
