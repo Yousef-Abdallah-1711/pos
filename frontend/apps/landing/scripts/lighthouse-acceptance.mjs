@@ -25,4 +25,17 @@ try {
  await chrome.kill()
  await fs.writeFile(path.join(output, 'results.json'), JSON.stringify({ note: 'Standard Lighthouse mobile simulation. Staging intentionally remains noindex.', results }, null, 2))
 }
-if (results.some(result => result.performance < .90 || result.accessibility < .95 || result.cls >= .1)) throw new Error('Lighthouse performance, accessibility, or layout stability threshold failed')
+const thresholdResults = results.map(result => ({
+ locale: result.locale,
+ performance: result.performance,
+ performancePass: result.performance >= .90,
+ accessibility: result.accessibility,
+ accessibilityPass: result.accessibility >= .95,
+ lcpMs: result.lcpMs,
+ cls: result.cls,
+ layoutStabilityPass: result.cls < .1,
+}))
+console.log(JSON.stringify({ thresholds: { performance: .90, accessibility: .95, cls: .1 }, results: thresholdResults }, null, 2))
+if (thresholdResults.some(result => !result.performancePass || !result.accessibilityPass || !result.layoutStabilityPass)) {
+ throw new Error('Lighthouse performance, accessibility, or layout stability threshold failed; inspect the per-locale metric results above')
+}
