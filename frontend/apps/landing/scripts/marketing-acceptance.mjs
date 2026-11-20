@@ -42,8 +42,11 @@ function check(name, condition, detail = '') {
  if (!condition) throw new Error(`${name}: ${detail}`)
 }
 async function flushPendingReactErrorDetails(page) {
- const pending = pendingReactErrorDetails.get(page) || []
- await Promise.all(pending.splice(0))
+ let pending
+ while ((pending = pendingReactErrorDetails.get(page) || []).length > 0) {
+  // Error events can arrive while the previous batch is being inspected.
+  await Promise.all(pending.splice(0))
+ }
 }
 async function load(page, locale, route) {
  // Resolve console Error handles while their document context is still alive.
@@ -569,6 +572,8 @@ async function main() {
     check(`sections ${locale}/${width}x${height}`, await page.locator('main section').count() === 15)
     await capture(page, `${locale}-${width}x${height}`)
     for (const route of routes.slice(1)) await load(page, locale, route)
+    // Drain late diagnostics while their document context is still alive.
+    await flushPendingReactErrorDetails(page)
     await page.close()
     page = await createPage(browser, { width, height })
     observe(page)
