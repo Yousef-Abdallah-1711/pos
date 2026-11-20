@@ -37,13 +37,17 @@ const descriptions = new Map()
 const navigationScreenshots = []
 const sourceCommit = process.env.SERVIO_SOURCE_SHA || 'unknown'
 const pendingReactErrorDetails = new WeakMap()
+const pageNavigationEpochs = new WeakMap()
 function check(name, condition, detail = '') {
  checks.push({ name, passed: !!condition, detail })
  if (!condition) throw new Error(`${name}: ${detail}`)
 }
 async function flushPendingReactErrorDetails(page) {
- const pending = pendingReactErrorDetails.get(page) || []
- await Promise.all(pending.splice(0))
+ let pending
+ while ((pending = pendingReactErrorDetails.get(page) || []).length > 0) {
+  // Error events can arrive while the previous batch is being inspected.
+  await Promise.all(pending.splice(0))
+ }
 }
 async function load(page, locale, route) {
  // Resolve console Error handles while their document context is still alive.
@@ -472,8 +476,8 @@ async function main() {
  const browser = await browserType.launch({ headless: true, ...(process.env.SERVIO_BROWSER_EXECUTABLE ? { executablePath: process.env.SERVIO_BROWSER_EXECUTABLE } : {}), ...(browserName === 'chromium' ? { args: ['--no-sandbox'] } : {}) })
  const cancelledNextChunkRequests = []
  const cancelledNextChunkPaths = new Set()
- const cancelledNextChunkPagePaths = new Set()
  const nextChunkExceptions = []
+ const deferredChunkDiagnostics = []
  let expectedGuestSessionDenials = 0
  try {
   let page = await createPage(browser, { width: 1440, height: 1000 })
@@ -481,7 +485,6 @@ async function main() {
   const recoveredRscNavigations = []
   const networkFailures = []
   const failedNextChunkRequests = []
-  const deferredChunkDiagnostics = []
   const deferNextChunkException = (pageUrl, details) => {
    const message = details?.message || ''
    const url = message.match(/https?:\/\/[^)\s]+\/_next\/static\/chunks\/[^)\s]+/)?.[0]
@@ -490,6 +493,10 @@ async function main() {
    return true
   }
   const observe = page => {
+   pageNavigationEpochs.set(page, 0)
+   page.on('framenavigated', frame => {
+    if (frame === page.mainFrame()) pageNavigationEpochs.set(page, (pageNavigationEpochs.get(page) || 0) + 1)
+   })
    page.on('pageerror', error => {
     const details = Object.fromEntries(Object.getOwnPropertyNames(error).map(key => [key, error[key]]))
     if (error.name === 'ChunkLoadError' && deferNextChunkException(page.url(), { name: error.name, message: error.message, details })) return
@@ -497,6 +504,7 @@ async function main() {
    })
    page.on('console', message => {
     if (message.type() !== 'error') return
+    const navigationEpochAtConsole = pageNavigationEpochs.get(page) || 0
     const text = message.text()
     const rscFallback = text.match(/^Failed to fetch RSC payload for (https?:\/\/\S+)\. Falling back to browser navigation\./)
     if (rscFallback) {
@@ -525,7 +533,17 @@ async function main() {
        })
        .catch(error => {
         if (/Execution context was destroyed|Target closed/.test(error.message)) {
-         deferredChunkDiagnostics.push({ pageUrl, location, detailReadError: error.message })
+         let observedPageUrl = ''
+         try { observedPageUrl = page.url() } catch {}
+         deferredChunkDiagnostics.push({
+          pageUrl,
+          location,
+          detailReadError: error.message,
+          navigationEpochAtConsole,
+          navigationEpochAtReadFailure: pageNavigationEpochs.get(page) || 0,
+          navigationInterrupted: (pageNavigationEpochs.get(page) || 0) > navigationEpochAtConsole,
+          observedPageUrl,
+         })
          return
         }
         errors.push(`${pageUrl}: ${JSON.stringify({ text, location, detailReadError: error.message })}`)
@@ -543,7 +561,6 @@ async function main() {
      if (/NS_BINDING_ABORTED|ERR_ABORTED/.test(reason)) {
       cancelledNextChunkRequests.push(detail)
       cancelledNextChunkPaths.add(requestUrl.pathname)
-      try { cancelledNextChunkPagePaths.add(new URL(page.url()).pathname) } catch {}
      }
      else failedNextChunkRequests.push(detail)
     }
@@ -569,6 +586,8 @@ async function main() {
     check(`sections ${locale}/${width}x${height}`, await page.locator('main section').count() === 15)
     await capture(page, `${locale}-${width}x${height}`)
     for (const route of routes.slice(1)) await load(page, locale, route)
+    // Drain late diagnostics while their document context is still alive.
+    await flushPendingReactErrorDetails(page)
     await page.close()
     page = await createPage(browser, { width, height })
     observe(page)
@@ -579,11 +598,15 @@ async function main() {
   await flushPendingReactErrorDetails(page)
   const unmatchedNextChunkExceptions = nextChunkExceptions.filter(({ pathname }) => !cancelledNextChunkPaths.has(pathname))
   for (const exception of unmatchedNextChunkExceptions) errors.push(`${exception.pageUrl}: ${JSON.stringify(exception.details)}`)
-  const unexplainedChunkDiagnostics = deferredChunkDiagnostics.filter(({ pageUrl }) => {
-   try { return !cancelledNextChunkPagePaths.has(new URL(pageUrl).pathname) } catch { return true }
+  const expectedPaths = new Set(['en', 'ar'].flatMap(locale => routes.map(route => `/${locale}${route}`)))
+  const unexplainedChunkDiagnostics = deferredChunkDiagnostics.filter(({ pageUrl, observedPageUrl, navigationInterrupted }) => {
+   try {
+    const source = new URL(pageUrl)
+    const observed = new URL(observedPageUrl)
+    return !navigationInterrupted || source.origin !== new URL(base).origin || observed.origin !== source.origin || !expectedPaths.has(source.pathname) || !expectedPaths.has(observed.pathname)
+   } catch { return true }
   })
   for (const diagnostic of unexplainedChunkDiagnostics) errors.push(`${diagnostic.pageUrl}: ${JSON.stringify(diagnostic)}`)
-  const expectedPaths = new Set(['en', 'ar'].flatMap(locale => routes.map(route => `/${locale}${route}`)))
   const invalidFallbacks = recoveredRscNavigations.filter(({ pageUrl, destination }) => {
    try {
     const destinationUrl = new URL(destination)
@@ -595,13 +618,13 @@ async function main() {
   check('recovered Next.js navigation fallbacks use verified routes', invalidFallbacks.length === 0, JSON.stringify(invalidFallbacks))
   check('cancelled Next.js chunk requests recorded', true, JSON.stringify(cancelledNextChunkRequests))
   check('chunk load errors explained by cancelled Next.js chunks', unmatchedNextChunkExceptions.length === 0, JSON.stringify(unmatchedNextChunkExceptions))
-  check('interrupted chunk diagnostics explained by same-route cancellation', unexplainedChunkDiagnostics.length === 0, JSON.stringify(unexplainedChunkDiagnostics))
+  check('interrupted chunk diagnostics explained by observed route navigation', unexplainedChunkDiagnostics.length === 0, JSON.stringify(unexplainedChunkDiagnostics))
   check('failed Next.js chunk requests', failedNextChunkRequests.length === 0, JSON.stringify(failedNextChunkRequests))
   check('failed network responses', networkFailures.length === 0, networkFailures.join('; '))
   check('browser exceptions', errors.length === 0, errors.join('; '))
  } finally {
   await browser.close()
-  await fs.writeFile(path.join(output, 'results.json'), JSON.stringify({ base, browser: browserName, color_scheme: colorScheme, theme: expectedTheme, expected_guest_session_denials: expectedGuestSessionDenials, cancelled_next_chunk_requests: cancelledNextChunkRequests, cancelled_next_chunk_page_paths: [...cancelledNextChunkPagePaths], checks }, null, 2))
+  await fs.writeFile(path.join(output, 'results.json'), JSON.stringify({ base, browser: browserName, color_scheme: colorScheme, theme: expectedTheme, expected_guest_session_denials: expectedGuestSessionDenials, cancelled_next_chunk_requests: cancelledNextChunkRequests, deferred_chunk_diagnostics: deferredChunkDiagnostics, checks }, null, 2))
   await fs.writeFile(path.join(output, 'navigation-evidence.json'), JSON.stringify({ sourceCommit, screenshots: navigationScreenshots }, null, 2))
  }
 }
