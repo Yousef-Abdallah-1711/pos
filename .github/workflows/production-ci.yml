@@ -63,6 +63,8 @@ jobs:
         working-directory: backend
       - run: go test -tags integration -count=1 -timeout 15m -json ./... > go-tests.jsonl
         working-directory: backend
+        env:
+          SERVIO_DISPOSABLE_FINANCIAL_TEST_DB: '1'
       - run: go test -race ./internal/middleware ./cmd/migrate
         working-directory: backend
       - name: Audit reachable Go vulnerabilities
