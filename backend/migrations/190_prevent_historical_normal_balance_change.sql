@@ -51,11 +51,10 @@ BEGIN
 END;
 $$;
 
--- PostgreSQL runs same-event triggers alphabetically. Take the account lock
--- before CFR-002 validates and inserts the ledger effect so a concurrent
--- normal_balance update cannot pass its history check at the same time.
-DROP TRIGGER IF EXISTS account_lock_before_cfr002_general_ledger_insert ON general_ledger;
-CREATE TRIGGER account_lock_before_cfr002_general_ledger_insert
+-- Keep the journal-then-account lock order used by repository posting while
+-- serializing ledger inserts against normal_balance updates before row write.
+DROP TRIGGER IF EXISTS cfr003_lock_account_after_cfr002_general_ledger_insert ON general_ledger;
+CREATE TRIGGER cfr003_lock_account_after_cfr002_general_ledger_insert
 BEFORE INSERT ON general_ledger
 FOR EACH ROW EXECUTE FUNCTION cfr003_lock_account_before_ledger_insert();
 
