@@ -522,6 +522,13 @@ func TestCFR003PostgresNormalBalanceChangeRejectedAfterPosting(t *testing.T) {
 	if err := accountRepo.UpdateAccount(account); err == nil {
 		t.Fatal("normal balance change after posting unexpectedly succeeded")
 	}
+	if _, err := db.Exec(`
+		UPDATE chart_of_accounts
+		SET normal_balance = 'credit'
+		WHERE id = $1 AND tenant_id = $2 AND restaurant_id = $3
+	`, fixture.debitAccountID, fixture.tenantID, fixture.restaurantID); err == nil {
+		t.Fatal("direct SQL normal balance change after posting unexpectedly succeeded")
+	}
 	advancedRepo := NewAccountingAdvancedRepository(db, fixture.ledger.journalRepo)
 	if err := advancedRepo.UpsertAccountFromImport(
 		fixture.tenantID, fixture.restaurantID, "CFR004-D", "Imported debit fixture", "", "asset", "credit", "EGP", "", "", true,
