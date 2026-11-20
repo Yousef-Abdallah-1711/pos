@@ -567,7 +567,7 @@ jobs:
           if-no-files-found: ignore
 
   publish-release-images:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: ${{ !cancelled() && github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.application-images.result == 'success' && needs.required.result == 'success' }}
     needs: [application-images, required]
     runs-on: ubuntu-24.04
     timeout-minutes: 30

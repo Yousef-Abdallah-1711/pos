@@ -100,6 +100,16 @@ class CIIsolationTests(unittest.TestCase):
         self.assertIn("job.get('name')=='publish-release-images'", publisher)
         self.assertIn("os.environ.get('GITHUB_EVENT_NAME')!='workflow_dispatch'", publisher)
 
+    def test_release_image_publisher_survives_only_unrelated_skips(self):
+        workflow = (ROOT / '.github/workflows/production-ci.yml').read_text()
+        publisher = workflow.split('  publish-release-images:', maxsplit=1)[1].split('\n  required:', maxsplit=1)[0]
+        self.assertIn('if: ${{ !cancelled()', publisher)
+        self.assertIn("github.event_name == 'push'", publisher)
+        self.assertIn("github.ref == 'refs/heads/main'", publisher)
+        self.assertIn("needs.application-images.result == 'success'", publisher)
+        self.assertIn("needs.required.result == 'success'", publisher)
+        self.assertIn('needs: [application-images, required]', publisher)
+
 
 if __name__ == '__main__':
     unittest.main()
