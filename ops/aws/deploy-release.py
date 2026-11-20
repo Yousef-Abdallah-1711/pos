@@ -257,28 +257,39 @@ def runtime_role_checks(path,evidence):
     if result.stdout.strip()!='t':raise RuntimeError('Core and accounting database role boundaries failed')
     (evidence/'database-role-smoke.json').write_text(json.dumps({'checks':[{'check':'Core/accounting database role boundaries','status':'PASS'}]})+'\n')
 
-def acceptance(destination):
+def acceptance(destination, expected_sha):
     evidence = destination / 'ops/aws/evidence'
-    evidence.mkdir(mode=0o700)
-    admin=json.loads((OPS/'evidence/browser-admin.json').read_text())
-    if not admin.get('email','').endswith('@example.invalid'):raise RuntimeError('Synthetic acceptance admin required')
-    storefront=json.loads((OPS/'evidence/storefront-qa-fixture.json').read_text())
-    if not storefront.get('synthetic') or storefront.get('tenant_id')!=1 or storefront.get('restaurant_id')!=1:raise RuntimeError('Guarded storefront fixture required')
-    shutil.copyfile(OPS / 'evidence/browser-admin.json', evidence / 'browser-admin.json')
-    shutil.copyfile(OPS/'evidence/storefront-qa-fixture.json',evidence/'storefront-qa-fixture.json')
-    runtime_role_checks(destination/'ops/aws/compose.json',evidence)
-    # Synthetic acceptance admin only; never use the owner's interactive account.
-    for file in evidence.iterdir(): file.chmod(0o600)
+    evidence.mkdir(mode=0o700, parents=True, exist_ok=True)
+    fixtures = ['browser-fixtures.json', 'browser-admin.json', 'storefront-qa-fixture.json']
+    for name in fixtures:
+        source = OPS / 'evidence' / name
+        if source.is_symlink() or not source.is_file() or source.stat().st_mode & 0o077:
+            raise RuntimeError('Protected synthetic acceptance fixture is unavailable')
+        shutil.copyfile(source, evidence / name)
+    staff = json.loads((evidence / 'browser-fixtures.json').read_text())
+    admin = json.loads((evidence / 'browser-admin.json').read_text())
+    storefront = json.loads((evidence / 'storefront-qa-fixture.json').read_text())
+    if (not isinstance(staff, list) or len(staff) < 2
+            or any(not user.get('email', '').endswith('@example.invalid') or not user.get('password') for user in staff[:2])
+            or not admin.get('email', '').endswith('@example.invalid') or not admin.get('password')
+            or not storefront.get('synthetic') or storefront.get('tenant_id') != 1
+            or storefront.get('restaurant_id') != 1):
+        raise RuntimeError('Only provisioned synthetic staging fixtures are accepted')
+    for file in evidence.iterdir():
+        if file.is_file():
+            file.chmod(0o600)
     (evidence/'.docker').mkdir(mode=0o700)
     checked(['chown', '-R', 'ubuntu:ubuntu', str(evidence)])
-    commands = [['python3', str(destination / 'ops/aws' / name)] for name in ['smoke-api.py', 'smoke-refresh.py', 'smoke-admin.py', 'smoke-pos-kds.py', 'check-completed-sale.py']]
-    commands.append([str(destination / 'ops/aws/run-browser-checks')])
-    commands.append(['/usr/local/lib/servio/browser/node',str(destination/'ops/aws/browser-storefront-flow.cjs')])
-    commands.append(['/usr/local/lib/servio/browser/node',str(destination/'ops/aws/browser-upload.cjs')])
-    commands.append(['/usr/local/lib/servio/browser/node',str(destination/'ops/aws/journal-api-acceptance.cjs')])
-    commands.append(['/usr/local/lib/servio/browser/node',str(destination/'ops/aws/browser-auth-validation.cjs')])
-    for command in commands:
-        checked(['runuser','-u','ubuntu','--','env','DOCKER_CONFIG='+str(evidence/'.docker'),'NODE_PATH=/usr/local/lib/servio/browser/node_modules','PLAYWRIGHT_BROWSERS_PATH=/usr/local/lib/servio/browser/browsers',*command])
+    command = [
+        'runuser', '-u', 'ubuntu', '--', 'env',
+        'SERVIO_RELEASE_SHA=' + expected_sha,
+        'SERVIO_STAGING_RECEIPT_STATUS=candidate',
+        'SERVIO_STAGING_FIXTURE_DIR=' + str(evidence),
+        'SERVIO_STAGING_EVIDENCE=' + str(evidence / 'staging-safe-acceptance.json'),
+        'python3', str(destination / 'ops/aws/staging-safe-acceptance.py'),
+    ]
+    checked(command)
+    runtime_role_checks(destination / 'ops/aws/compose.json', evidence)
 
 def rollback_apps(previous_path):
     failures=[]
@@ -325,6 +336,22 @@ def record_release(manifest,path,previous,candidate=False):
             else:replace_metadata(file,raw,0o600 if file==STATE else 0o644,file==STATE)
         raise
 
+def publish_candidate_receipt(manifest):
+    # The staging suite must observe the promoted SHA before it tests; verified is written only after every gate passes.
+    receipt = {
+        'sha': manifest['sha'],
+        'status': 'candidate',
+        'environment': 'staging',
+        'ci_run_id': manifest['ci_run_id'],
+    }
+    replace_metadata(PUBLIC_STATUS, (json.dumps(receipt) + '\n').encode(), 0o644)
+
+def restore_public_receipt(snapshot):
+    if snapshot is None:
+        PUBLIC_STATUS.unlink(missing_ok=True)
+        return
+    replace_metadata(PUBLIC_STATUS, snapshot, 0o644)
+
 
 def prepare_release(manifest,sha,artifacts,previous):
     destination=ROOT/'releases'/sha
@@ -358,6 +385,7 @@ def deploy(manifest,requested,artifacts,candidate=False):
     verify_artifacts(manifest,artifacts)
     verify_disk_headroom(manifest)
     previous=json.loads(STATE.read_text()) if STATE.exists() else {'compose':str(OPS/'compose.json')}
+    previous_receipt = PUBLIC_STATUS.read_bytes() if PUBLIC_STATUS.exists() else None
     previous_path=Path(previous['compose'])
     destination,path=prepare_release(manifest,sha,artifacts,previous)
     pending=verify_migrations(destination,previous_path)
@@ -380,14 +408,18 @@ def deploy(manifest,requested,artifacts,candidate=False):
             if name=='backend' and backend_ready:continue
             compose(path,'up','-d','--no-deps','--wait','--wait-timeout','150',name)
         public_checks()
-        acceptance(destination)
+        publish_candidate_receipt(manifest)
+        acceptance(destination, sha)
         verify_disk_headroom(manifest,after_images=True)
         verify_manifest(manifest,requested,candidate=candidate)
         record_release(dict(manifest,runtime_image_ids=runtime),path,previous,candidate=candidate)
     except Exception:
         print('Deployment failed; restoring prior application configuration. SQL/volumes are preserved.',file=sys.stderr)
+        preserve_backend = forward_backend and (backend_ready or previous.get('recovery_required',False))
         attempt={'manifest':manifest,'runtime':runtime,'backend_ready':backend_ready}
-        recover_failed_deployment(previous,attempt,forward_backend and (backend_ready or previous.get('recovery_required',False)))
+        recover_failed_deployment(previous,attempt,preserve_backend)
+        if not preserve_backend:
+            restore_public_receipt(previous_receipt)
         raise
     print('PASS deployed immutable '+('staging candidate ' if candidate else 'main ')+sha)
 

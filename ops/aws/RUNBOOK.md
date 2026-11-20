@@ -95,7 +95,9 @@ operation. Keep old provenance receipts for audit.
 
 The root-installed verifier is not replaced automatically by downloaded source. Agent
 upgrades require review and rerunning its tests/install command. The downloaded application
-source is hash verified and its smoke scripts execute only after provenance acceptance.
+source is hash verified before any acceptance script runs. Disposable CI retains its full
+mutation-based suite on explicitly isolated services; the staging deployer never invokes
+those CI-only mutators.
 Image archives are checksum verified, loaded locally, and pinned to immutable image
 SHA256 IDs (verified config or archive OCI manifest, depending on image store) with exact OCI revision labels; registry manifest digests are also
 retained. No mutable image tag is used for promotion.
@@ -155,11 +157,16 @@ checks recovered migration receipts, then drops only that newly created verifica
 The dump, checksum, and private restore receipt remain in `ops/aws/backups`. The agent allows
 only reviewed unapplied migrations, applies them atomically per migration, and promotes
 backend/frontends/proxy incrementally. All five
-trusted HTTPS routes, database readiness, API/session/tenant/RBAC/POS/WSS/inventory and
-33 base browser, 13 cash/contrast checks, 14 upload/browser checks, 13 journal assertions,
-13 negative form assertions and database role boundaries must pass before it writes
-`status: verified`. No production payment
-operation is enabled by deployment. Run full page/flow QA separately against that SHA.
+trusted HTTPS routes and database readiness must pass before the deployer publishes a
+temporary `status: candidate` receipt. The staging-safe API suite verifies that receipt's
+exact SHA before testing, then uses only protected `@example.invalid` staff/admin accounts
+and the approved synthetic storefront fixture. It checks session cookies, tenant isolation,
+CSRF rejection, Super Admin separation, and public catalog cache headers. It writes no
+business records and performs no financial posting. Runtime database-role boundaries must
+also pass before the deployer changes the receipt to `status: verified`; a successful app
+rollback restores the prior receipt. CI-only mutation guards remain fail-closed. No
+production payment operation is enabled by deployment. Run full Chromium page/flow QA
+separately against the verified SHA.
 
 Activation is a final acceptance step, never an install side effect:
 
