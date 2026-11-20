@@ -71,6 +71,31 @@ class CIIsolationTests(unittest.TestCase):
             with self.subTest(script=name):
                 self.assertNotIn('rakmyat.online', (ROOT / name).read_text(encoding='utf-8'))
 
+    def test_staging_deployer_uses_its_safe_suite_and_candidate_receipt(self):
+        deployer = (ROOT / 'ops/aws/deploy-release.py').read_text()
+        staging_acceptance = deployer.split('def acceptance(', maxsplit=1)[1].split('\ndef rollback_apps', maxsplit=1)[0]
+        for forbidden in ['smoke-api.py', 'smoke-refresh.py', 'smoke-admin.py', 'smoke-pos-kds.py', 'journal-api-acceptance.cjs']:
+            with self.subTest(helper=forbidden):
+                self.assertNotIn(forbidden, staging_acceptance)
+        self.assertIn('staging-safe-acceptance.py', staging_acceptance)
+        self.assertIn('SERVIO_STAGING_RECEIPT_STATUS=candidate', staging_acceptance)
+        self.assertIn('SERVIO_STAGING_FIXTURE_DIR=', staging_acceptance)
+
+        deploy = deployer.split('def deploy(', maxsplit=1)[1].split("\nif __name__", maxsplit=1)[0]
+        self.assertLess(deploy.index('publish_candidate_receipt(manifest)'), deploy.index('acceptance(destination, sha)'))
+        self.assertIn('restore_public_receipt(previous_receipt)', deploy)
+
+    def test_disposable_ci_guard_is_not_relaxed_for_staging(self):
+        target = (ROOT / 'ops/aws/acceptance_target.py').read_text()
+        suite = (ROOT / 'ops/aws/staging-safe-acceptance.py').read_text()
+        self.assertIn("os.environ.get('SERVIO_ACCEPTANCE_ENV') != 'ci'", target)
+        self.assertIn('Mutating acceptance is allowed only in disposable CI', target)
+        self.assertNotIn('SERVIO_ACCEPTANCE_ENV=ci', suite)
+        self.assertNotIn('SERVIO_DISPOSABLE_BROWSER=1', suite)
+        self.assertLess(suite.index('verify_receipt(RECEIPT_STATUS)'), suite.index("read_fixture('browser-fixtures.json')"))
+        self.assertNotIn('/accounting/journal-entries', suite)
+        self.assertNotIn('/public/orders', suite)
+
     def test_staging_release_requires_owner_dispatch_and_exact_main_ci(self):
         ci = (ROOT / '.github/workflows/production-ci.yml').read_text()
         release = (ROOT / '.github/workflows/production-release.yml').read_text()

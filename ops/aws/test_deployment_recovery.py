@@ -80,6 +80,7 @@ class MigrationRecoveryTests(unittest.TestCase):
             config['services']={name:{'image':OLD,'volumes':[]} for name in deploy.SERVICES+['postgres','redis','proxy','migrate']}
             Path(previous['compose']).write_text(json.dumps(config))
             state=ops/'state.json';state.write_text(json.dumps(previous))
+            status=ops/'public.json';status.write_text('{"sha":"'+'c'*40+'","status":"verified"}\n')
             manifest={'sha':SHA,'image_ids':{name:NEW for name in deploy.SERVICES},'image_sizes':{name:100*1024**2 for name in deploy.SERVICES}}
             calls=[]
             def extract(sha,destination,artifacts):
@@ -88,6 +89,7 @@ class MigrationRecoveryTests(unittest.TestCase):
                 patch.object(deploy,'ROOT',root),
                 patch.object(deploy,'OPS',ops),
                 patch.object(deploy,'STATE',state),
+                patch.object(deploy,'PUBLIC_STATUS',status),
                 patch.object(deploy,'verify_manifest',return_value=SHA),
                 patch.object(deploy,'verify_artifacts'),
                 patch.object(deploy,'extract_source',side_effect=extract),
