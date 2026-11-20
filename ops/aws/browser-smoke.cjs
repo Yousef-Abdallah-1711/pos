@@ -1,7 +1,11 @@
 const { chromium } = require('playwright');
-const { assertCompleteTargetConfig, apiBase, guardContext } = require('./acceptance-target.cjs');
+const { assertCompleteTargetConfig, apiBase, guardContext, uiOrigin } = require('./acceptance-target.cjs');
 assertCompleteTargetConfig();
 const api = apiBase();
+const landingBase = uiOrigin('landing');
+const dashboardBase = uiOrigin('dashboard');
+const adminBase = uiOrigin('admin');
+const storefrontBase = uiOrigin('storefront');
 const fs = require('fs');
 const evidence=process.env.SERVIO_BROWSER_EVIDENCE||'/evidence';
 const fixtures=process.env.SERVIO_BROWSER_FIXTURES||'/fixtures';
@@ -14,15 +18,15 @@ const responsiveViewports=[
  {width:1024,height:768},{width:1180,height:820},{width:1280,height:800},{width:1440,height:900},{width:1920,height:1080},
 ];
 const anonymous=[
- ['landing-en','https://pos.servio.test/en'],
- ['landing-ar','https://pos.servio.test/ar'],
- ['login','https://pos.servio.test/en/auth/login'],
- ['register','https://pos.servio.test/en/auth/register'],
- ['dashboard-anonymous','https://pos.app.servio.test/en/dashboard'],
- ['super-admin-login','https://admin.pos.servio.test/login'],
- ['storefront-en','https://restaurant-1.pos.servio.test/en'],
- ['storefront-ar','https://restaurant-1.pos.servio.test/ar'],
- ['storefront-menu','https://restaurant-1.pos.servio.test/en/menu'],
+ ['landing-en',`${landingBase}/en`],
+ ['landing-ar',`${landingBase}/ar`],
+ ['login',`${landingBase}/en/auth/login`],
+ ['register',`${landingBase}/en/auth/register`],
+ ['dashboard-anonymous',`${dashboardBase}/en/dashboard`],
+ ['super-admin-login',`${adminBase}/login`],
+ ['storefront-en',`${storefrontBase}/en`],
+ ['storefront-ar',`${storefrontBase}/ar`],
+ ['storefront-menu',`${storefrontBase}/en/menu`],
 ];
 async function snapshot(page,label,width,url,height=900) {
  const errors=[];const onError=e=>errors.push(e.message);page.on('pageerror',onError);
@@ -64,7 +68,6 @@ async function loginJourney(browser,admin=false) {
  let page=await context.newPage();const label=admin?'admin-browser-login':'tenant-browser-login';
  const fixture=JSON.parse(fs.readFileSync(admin?fixtures+'/admin.json':fixtures+'/users.json','utf8'));
  const user=admin?fixture:fixture[0];
- const adminBase='https://admin.pos.servio.test';
  let refreshingAdminSession=false;
  const authenticateAdmin=async()=>{
   refreshingAdminSession=true;
@@ -87,7 +90,7 @@ async function loginJourney(browser,admin=false) {
   }
  };
  try {
-  await page.goto(admin?'https://admin.pos.servio.test/login':'https://pos.servio.test/en/auth/login',{waitUntil:'domcontentloaded',timeout:45000});
+  await page.goto(admin?`${adminBase}/login`:`${landingBase}/en/auth/login`,{waitUntil:'domcontentloaded',timeout:45000});
   // Server-rendered inputs exist before React attaches their controlled handlers.
   await page.waitForFunction(()=>{const input=document.querySelector('input[type=email]');return input&&Object.keys(input).some(k=>k.startsWith('__reactProps')&&typeof input[k]?.onChange==='function');},{},{timeout:30000});
   await page.locator('input[type=email]').fill(user.email);
@@ -110,7 +113,7 @@ async function loginJourney(browser,admin=false) {
    ];
    for(const {locale,theme,dir} of combinations){
     const currentLocale=page.url().includes('/ar/')?'ar':'en';
-    await page.goto(`https://pos.app.servio.test/${currentLocale}/dashboard`,{waitUntil:'domcontentloaded',timeout:45000});
+    await page.goto(`${dashboardBase}/${currentLocale}/dashboard`,{waitUntil:'domcontentloaded',timeout:45000});
     await page.locator('main h1').first().waitFor({state:'visible',timeout:30000});
     if(currentLocale!==locale){
      await page.getByRole('button',{name:currentLocale==='ar'?'تغيير اللغة':'Change language'}).click();
@@ -126,7 +129,7 @@ async function loginJourney(browser,admin=false) {
     await page.reload({waitUntil:'domcontentloaded'});
     await page.waitForFunction(expected=>document.documentElement.lang===expected.locale&&document.documentElement.dir===expected.dir&&document.documentElement.classList.contains('dark')===(expected.theme==='dark'),{locale,dir,theme});
     for(const route of ['dashboard','dashboard/pos','dashboard/kds']) for(const viewport of responsiveViewports){
-     const url=`https://pos.app.servio.test/${locale}/${route}`;
+     const url=`${dashboardBase}/${locale}/${route}`;
      await snapshot(page,`authenticated-${locale}-${theme}-${route.replaceAll('/','-')}`,viewport.width,url,viewport.height);
     }
    }

@@ -2,12 +2,15 @@
 
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
+const childProcess = require('node:child_process');
 const {
+  STAGING_HOSTS,
   apiBase,
   apiRequestOptions,
   assertCompleteTargetConfig,
   guardContext,
   requireTarget,
+  uiOrigin,
 } = require('./acceptance-target.cjs');
 
 const targetEnvironment = {
@@ -50,6 +53,41 @@ test('production, staging, unknown hosts, and unsafe URL forms are rejected', ()
   } finally {
     if (original === undefined) delete process.env.SERVIO_ACCEPTANCE_ENV;
     else process.env.SERVIO_ACCEPTANCE_ENV = original;
+  }
+});
+
+test('staging targets require an exact host and a live staging marker', () => {
+  const original = { ...process.env };
+  const originalSpawnSync = childProcess.spawnSync;
+  const stagingEnvironment = {
+    SERVIO_ACCEPTANCE_ENV: 'staging',
+    SERVIO_ACCEPTANCE_API_BASE_URL: `${STAGING_HOSTS.api}/api/v1`,
+    SERVIO_ACCEPTANCE_LANDING_URL: STAGING_HOSTS.landing,
+    SERVIO_ACCEPTANCE_DASHBOARD_URL: STAGING_HOSTS.dashboard,
+    SERVIO_ACCEPTANCE_ADMIN_URL: STAGING_HOSTS.admin,
+    SERVIO_ACCEPTANCE_STOREFRONT_URL: STAGING_HOSTS.storefront,
+  };
+  try {
+    Object.assign(process.env, stagingEnvironment);
+    childProcess.spawnSync = () => ({
+      status: 0,
+      stdout: 'HTTP/2 200\r\nx-servio-environment: staging\r\n\r\n{"environment":"staging","status":"verified","sha":"0000000000000000000000000000000000000000"}',
+    });
+    assertCompleteTargetConfig();
+    assert.equal(apiBase(), stagingEnvironment.SERVIO_ACCEPTANCE_API_BASE_URL);
+    assert.equal(uiOrigin('dashboard'), STAGING_HOSTS.dashboard);
+
+    childProcess.spawnSync = () => ({
+      status: 0,
+      stdout: 'HTTP/2 200\r\nx-servio-environment: production\r\n\r\n{"environment":"staging","status":"verified","sha":"0000000000000000000000000000000000000000"}',
+    });
+    assert.throws(() => apiBase(), /did not identify itself as staging/);
+  } finally {
+    childProcess.spawnSync = originalSpawnSync;
+    for (const key of Object.keys(process.env)) {
+      if (!(key in original)) delete process.env[key];
+    }
+    Object.assign(process.env, original);
   }
 });
 

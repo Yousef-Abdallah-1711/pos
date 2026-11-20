@@ -277,8 +277,16 @@ def acceptance(destination):
     commands.append(['/usr/local/lib/servio/browser/node',str(destination/'ops/aws/browser-upload.cjs')])
     commands.append(['/usr/local/lib/servio/browser/node',str(destination/'ops/aws/journal-api-acceptance.cjs')])
     commands.append(['/usr/local/lib/servio/browser/node',str(destination/'ops/aws/browser-auth-validation.cjs')])
+    acceptance_targets = [
+        'SERVIO_ACCEPTANCE_ENV=staging',
+        'SERVIO_ACCEPTANCE_API_BASE_URL=https://api.pos.rakmyat.online/api/v1',
+        'SERVIO_ACCEPTANCE_LANDING_URL=https://pos.rakmyat.online',
+        'SERVIO_ACCEPTANCE_DASHBOARD_URL=https://pos.app.rakmyat.online',
+        'SERVIO_ACCEPTANCE_ADMIN_URL=https://admin.pos.rakmyat.online',
+        'SERVIO_ACCEPTANCE_STOREFRONT_URL=https://restaurant-1.pos.rakmyat.online',
+    ]
     for command in commands:
-        checked(['runuser','-u','ubuntu','--','env','DOCKER_CONFIG='+str(evidence/'.docker'),'NODE_PATH=/usr/local/lib/servio/browser/node_modules','PLAYWRIGHT_BROWSERS_PATH=/usr/local/lib/servio/browser/browsers',*command])
+        checked(['runuser','-u','ubuntu','--','env','DOCKER_CONFIG='+str(evidence/'.docker'),'NODE_PATH=/usr/local/lib/servio/browser/node_modules','PLAYWRIGHT_BROWSERS_PATH=/usr/local/lib/servio/browser/browsers',*acceptance_targets,*command])
 
 def rollback_apps(previous_path):
     failures=[]

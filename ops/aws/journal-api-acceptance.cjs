@@ -1,11 +1,11 @@
 // Authenticated synthetic journals only; no provider payments or real business tenant.
 const {request}=require('playwright');const fs=require('fs');const path=require('path');
-const { assertCompleteTargetConfig, apiBase, apiRequestOptions }=require('./acceptance-target.cjs');assertCompleteTargetConfig();const api=apiBase();
+const { assertCompleteTargetConfig, apiBase, apiRequestOptions, uiOrigin }=require('./acceptance-target.cjs');assertCompleteTargetConfig();const api=apiBase();
 const evidence=process.env.SERVIO_BROWSER_EVIDENCE||path.join(__dirname,'evidence');
 const users=process.env.SERVIO_UPLOAD_USERS||path.join(__dirname,'evidence/browser-fixtures.json');
 const user=JSON.parse(fs.readFileSync(users))[0];
 if(!user.email.endsWith('@example.invalid'))throw new Error('Synthetic accounting fixture required');
-const base=api;const headers={Origin:'https://pos.app.servio.test'};const checks=[];
+const base=api;const headers={Origin:uiOrigin('dashboard')};const checks=[];
 function record(check,actual,expected){checks.push({check,actual,expected,status:actual===expected?'PASS':'FAIL'});}
 async function object(response){const raw=await response.json();return raw.data||raw;}
 async function accounts(context){

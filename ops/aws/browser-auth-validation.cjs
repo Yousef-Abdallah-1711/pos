@@ -1,6 +1,6 @@
 // Negative synthetic form acceptance: never creates an account or sends notifications.
 const {chromium}=require('playwright');
-const { assertCompleteTargetConfig, guardContext }=require('./acceptance-target.cjs');assertCompleteTargetConfig();
+const { assertCompleteTargetConfig, guardContext, uiOrigin }=require('./acceptance-target.cjs');assertCompleteTargetConfig();const landing=uiOrigin('landing');const admin=uiOrigin('admin');
 const fs=require('fs');const path=require('path');
 const evidence=process.env.SERVIO_BROWSER_EVIDENCE||path.join(__dirname,'evidence');
 const checks=[];
@@ -14,7 +14,7 @@ async function validateLanding(browser,locale,form){
  const page=await context.newPage();let mutations=0;
  page.on('request',request=>{if(request.method()==='POST'&&new URL(request.url()).pathname.startsWith('/api/v1/auth/'))mutations++;});
  try{
-  await page.goto(`https://pos.servio.test/${locale}/auth/${form}`);await hydrated(page);
+  await page.goto(`${landing}/${locale}/auth/${form}`);await hydrated(page);
   await page.locator('button[type=submit]').click();
   await page.locator('input[aria-invalid=true]').first().waitFor();
   record(`${locale} ${form} rejects empty required fields`,await page.locator('input[aria-invalid=true]').count()>0,true);
@@ -27,7 +27,7 @@ async function validateAdmin(browser){
  const page=await context.newPage();let mutations=0;
  page.on('request',request=>{if(request.method()==='POST'&&new URL(request.url()).pathname.endsWith('/super-admin/auth/login'))mutations++;});
  try{
-  await page.goto('https://admin.pos.servio.test/login');await hydrated(page);
+  await page.goto(admin+'/login');await hydrated(page);
   await page.locator('input[type=email]').fill('');await page.locator('button[type=submit]').click();
   await page.getByText('Please enter both email and password',{exact:true}).waitFor();
   record('Administrator empty fields show validation',true,true);

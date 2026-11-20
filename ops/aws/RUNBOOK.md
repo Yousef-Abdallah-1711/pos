@@ -260,6 +260,15 @@ WebSockets. Owner-configured `*.pos` DNS alone does not enable another tenant: e
 validate its hostname, application scope/status, CORS, proxy route and certificate. Never
 enable unrestricted on-demand TLS. Do not edit DNS or Hostinger email records.
 
+Mutating release acceptance defaults to the disposable `servio.test` targets used by CI.
+The staging deployer passes `SERVIO_ACCEPTANCE_ENV=staging` with the five hosts above only
+to synthetic acceptance subprocesses. Before using them, the Python and Chromium target
+guards fetch `https://api.pos.rakmyat.online/_ops/release` without following redirects and
+require both `X-Servio-Environment: staging` and a valid staging release receipt. Unknown
+hosts, production markers, invalid receipts, and any other acceptance mode fail closed.
+Browser flows use these configured origins so their mutations reach the verified staging
+routes rather than the disposable CI hostnames.
+
 The preserved root Caddyfile compensates for OLD vulnerable images with Basic Auth and
 an image optimizer block. `Caddyfile.public` is used only by patched verified promotion;
 it removes that gateway while retaining normal auth and payment restrictions. Gateway

@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 import base64,http.cookiejar,json,secrets,socket,ssl,struct,time,urllib.request,urllib.error
 from pathlib import Path
+from urllib.parse import urlsplit
 from acceptance_target import api_base, safe_opener, ui_origin
-BASE=api_base(); ORIGIN=ui_origin('dashboard'); API_HOST='api.servio.test'
+BASE=api_base(); ORIGIN=ui_origin('dashboard'); API_HOST=urlsplit(BASE).hostname
 rows=[]
 def check(name,actual,expected):
     expected=expected if isinstance(expected,list) else [expected]

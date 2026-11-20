@@ -23,6 +23,39 @@ class CIIsolationTests(unittest.TestCase):
         self.assertIn("service.pop('ports', None)", runner)
         self.assertNotIn("'--network', 'host'", runner)
 
+    def test_staging_mutation_targets_are_explicit_and_environment_checked(self):
+        deployer = (ROOT / 'ops/aws/deploy-release.py').read_text()
+        python_target = (ROOT / 'ops/aws/acceptance_target.py').read_text()
+        browser_target = (ROOT / 'ops/aws/acceptance-target.cjs').read_text()
+        self.assertIn("'SERVIO_ACCEPTANCE_ENV=staging'", deployer)
+        for host in [
+            'api.pos.rakmyat.online',
+            'pos.rakmyat.online',
+            'pos.app.rakmyat.online',
+            'admin.pos.rakmyat.online',
+            'restaurant-1.pos.rakmyat.online',
+        ]:
+            with self.subTest(host=host):
+                self.assertIn(host, deployer)
+                self.assertIn(host, python_target)
+                self.assertIn(host, browser_target)
+        self.assertIn('X-Servio-Environment', python_target)
+        self.assertIn('x-servio-environment', browser_target)
+
+    def test_deployment_browser_scripts_use_configured_acceptance_origins(self):
+        scripts = [
+            'ops/aws/browser-smoke.cjs',
+            'ops/aws/browser-storefront-flow.cjs',
+            'ops/aws/browser-upload.cjs',
+            'ops/aws/journal-api-acceptance.cjs',
+            'ops/aws/browser-auth-validation.cjs',
+        ]
+        for name in scripts:
+            with self.subTest(script=name):
+                contents = (ROOT / name).read_text(encoding='utf-8')
+                self.assertNotIn('.servio.test', contents)
+                self.assertIn('uiOrigin', contents)
+
     def test_upload_acceptance_closes_browser_when_session_logout_fails(self):
         script = (ROOT / 'ops/aws/browser-upload.cjs').read_text()
         self.assertIn("timeout:10000", script)
