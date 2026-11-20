@@ -490,6 +490,10 @@ async function main() {
    return true
   }
   const observe = page => {
+   let mainFrameNavigationSequence = 0
+   page.on('framenavigated', frame => {
+    if (!frame.parentFrame()) mainFrameNavigationSequence++
+   })
    page.on('pageerror', error => {
     const details = Object.fromEntries(Object.getOwnPropertyNames(error).map(key => [key, error[key]]))
     if (error.name === 'ChunkLoadError' && deferNextChunkException(page.url(), { name: error.name, message: error.message, details })) return
@@ -514,6 +518,7 @@ async function main() {
     }
     if (text === 'Error' && location.url.includes('/_next/static/chunks/')) {
      const pageUrl = page.url()
+     const navigationSequenceAtConsole = mainFrameNavigationSequence
      const errorHandle = message.args()[0]
      if (errorHandle) {
       const pending = pendingReactErrorDetails.get(page) || []
@@ -523,9 +528,19 @@ async function main() {
         if (details?.name === 'ChunkLoadError' && deferNextChunkException(pageUrl, details)) return
         errors.push(`${pageUrl}: ${JSON.stringify({ text, location, details })}`)
        })
-       .catch(error => {
+       .catch(async error => {
         if (/Execution context was destroyed|Target closed/.test(error.message)) {
-         deferredChunkDiagnostics.push({ pageUrl, location, detailReadError: error.message })
+         // Let Playwright deliver the matching navigation event before classifying this remote-handle race.
+         await new Promise(resolve => setTimeout(resolve, 0))
+         let currentPageUrl = pageUrl
+         try { currentPageUrl = page.url() } catch {}
+         deferredChunkDiagnostics.push({
+          pageUrl,
+          location,
+          currentPageUrl,
+          navigationInterrupted: mainFrameNavigationSequence > navigationSequenceAtConsole || currentPageUrl !== pageUrl,
+          detailReadError: error.message,
+         })
          return
         }
         errors.push(`${pageUrl}: ${JSON.stringify({ text, location, detailReadError: error.message })}`)
@@ -579,9 +594,7 @@ async function main() {
   await flushPendingReactErrorDetails(page)
   const unmatchedNextChunkExceptions = nextChunkExceptions.filter(({ pathname }) => !cancelledNextChunkPaths.has(pathname))
   for (const exception of unmatchedNextChunkExceptions) errors.push(`${exception.pageUrl}: ${JSON.stringify(exception.details)}`)
-  const unexplainedChunkDiagnostics = deferredChunkDiagnostics.filter(({ pageUrl }) => {
-   try { return !cancelledNextChunkPagePaths.has(new URL(pageUrl).pathname) } catch { return true }
-  })
+  const unexplainedChunkDiagnostics = deferredChunkDiagnostics.filter(({ navigationInterrupted }) => !navigationInterrupted)
   for (const diagnostic of unexplainedChunkDiagnostics) errors.push(`${diagnostic.pageUrl}: ${JSON.stringify(diagnostic)}`)
   const expectedPaths = new Set(['en', 'ar'].flatMap(locale => routes.map(route => `/${locale}${route}`)))
   const invalidFallbacks = recoveredRscNavigations.filter(({ pageUrl, destination }) => {
@@ -595,7 +608,7 @@ async function main() {
   check('recovered Next.js navigation fallbacks use verified routes', invalidFallbacks.length === 0, JSON.stringify(invalidFallbacks))
   check('cancelled Next.js chunk requests recorded', true, JSON.stringify(cancelledNextChunkRequests))
   check('chunk load errors explained by cancelled Next.js chunks', unmatchedNextChunkExceptions.length === 0, JSON.stringify(unmatchedNextChunkExceptions))
-  check('interrupted chunk diagnostics explained by same-route cancellation', unexplainedChunkDiagnostics.length === 0, JSON.stringify(unexplainedChunkDiagnostics))
+  check('interrupted chunk diagnostics explained by main-frame navigation', unexplainedChunkDiagnostics.length === 0, JSON.stringify(unexplainedChunkDiagnostics))
   check('failed Next.js chunk requests', failedNextChunkRequests.length === 0, JSON.stringify(failedNextChunkRequests))
   check('failed network responses', networkFailures.length === 0, networkFailures.join('; '))
   check('browser exceptions', errors.length === 0, errors.join('; '))
