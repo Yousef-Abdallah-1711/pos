@@ -1,13 +1,24 @@
 package http
 
 import (
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"path/filepath"
 	"runtime"
+	"syscall"
 	"testing"
 )
+
+const (
+	windowsErrorNotSupported     syscall.Errno = 50
+	windowsErrorPrivilegeNotHeld syscall.Errno = 1314
+)
+
+func windowsSymlinkUnavailable(err error) bool {
+	return errors.Is(err, windowsErrorNotSupported) || errors.Is(err, windowsErrorPrivilegeNotHeld)
+}
 
 func TestProductImagesAreContainedRasterAssets(t *testing.T) {
 	directory := t.TempDir()
@@ -24,7 +35,7 @@ func TestProductImagesAreContainedRasterAssets(t *testing.T) {
 	}
 	symlinkFixtureAvailable := true
 	if err := os.Symlink(outside, filepath.Join(folder, "escape.png")); err != nil {
-		if runtime.GOOS != "windows" {
+		if runtime.GOOS != "windows" || !windowsSymlinkUnavailable(err) {
 			t.Fatalf("create external symlink fixture: %v", err)
 		}
 		symlinkFixtureAvailable = false
