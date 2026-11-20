@@ -73,7 +73,7 @@ jobs:
           go install golang.org/x/vuln/cmd/govulncheck@v1.9.0
           govulncheck ./...
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
-        if: always()
+        if: always() && github.repository == 'Yousef-Abdallah-1711/pos-phase5-private-acceptance'
         with:
           name: backend-test-results
           path: backend/go-tests.jsonl
