@@ -18,7 +18,7 @@ export function HomeHero({ locale }: { locale: Locale }) {
       </div>
       <div className="sv-hero-stage" aria-label={c.workflowAccessibleLabel}>
         <div className="sv-stage-rail"><span>01 / {c.counter}</span><span>02 / {c.kitchen}</span></div>
-        <p className="sv-stage-source">{c.englishCapture}</p>
+        <p className="sv-stage-source">{c.captureSource}</p>
         <ProductCapture locale={locale} image="pos" alt={c.posCaptureAlt} priority className="sv-hero-pos" />
         <div className="sv-handoff"><span />{c.handoff}</div>
         <ProductCapture locale={locale} image="kitchen" alt={c.kitchenCaptureAlt} priority className="sv-hero-kitchen" />

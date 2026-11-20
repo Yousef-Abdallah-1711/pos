@@ -7,6 +7,11 @@ ROOT = Path(__file__).resolve().parents[2]
 
 
 class CIIsolationTests(unittest.TestCase):
+    def test_shared_postgres_backend_packages_run_serially(self):
+        workflow = (ROOT / '.github/workflows/production-ci.yml').read_text()
+        backend = workflow.split('  backend:', maxsplit=1)[1].split('\n  frontend:', maxsplit=1)[0]
+        self.assertIn('GOFLAGS: -p=1', backend)
+
     def test_generated_browser_stack_has_no_external_route(self):
         runner = (ROOT / 'ops/aws/ci-browser-stack.py').read_text()
         self.assertIn("config['networks']['edge']['internal'] = True", runner)
@@ -38,6 +43,13 @@ class CIIsolationTests(unittest.TestCase):
             with self.subTest(width=width):
                 self.assertIn(f'{{width:{width},height:', script)
         self.assertIn('await page.setViewportSize({width,height});', script)
+
+    def test_marketing_console_errors_are_read_before_route_navigation(self):
+        script = (ROOT / 'frontend/apps/landing/scripts/marketing-acceptance.mjs').read_text()
+        load = script.split('async function load(page, locale, route) {', maxsplit=1)[1].split('\nasync function ', maxsplit=1)[0]
+        self.assertLess(load.index('await flushPendingReactErrorDetails(page)'), load.index('await page.goto('))
+        self.assertIn('await flushPendingReactErrorDetails(page)\n}', load)
+        self.assertIn('pendingReactErrorDetails.set(page, pending)', script)
 
     def test_mutating_acceptance_scripts_have_no_public_production_api_literals(self):
         scripts = [
@@ -87,6 +99,16 @@ class CIIsolationTests(unittest.TestCase):
         self.assertIn("ci_jobs=api('actions/runs/'+str(ci_run_id)+'/jobs?per_page=100')['jobs']", publisher)
         self.assertIn("job.get('name')=='publish-release-images'", publisher)
         self.assertIn("os.environ.get('GITHUB_EVENT_NAME')!='workflow_dispatch'", publisher)
+
+    def test_release_image_publisher_survives_only_unrelated_skips(self):
+        workflow = (ROOT / '.github/workflows/production-ci.yml').read_text()
+        publisher = workflow.split('  publish-release-images:', maxsplit=1)[1].split('\n  required:', maxsplit=1)[0]
+        self.assertIn('if: ${{ !cancelled()', publisher)
+        self.assertIn("github.event_name == 'push'", publisher)
+        self.assertIn("github.ref == 'refs/heads/main'", publisher)
+        self.assertIn("needs.application-images.result == 'success'", publisher)
+        self.assertIn("needs.required.result == 'success'", publisher)
+        self.assertIn('needs: [application-images, required]', publisher)
 
 
 if __name__ == '__main__':

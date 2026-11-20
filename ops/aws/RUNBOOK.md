@@ -50,6 +50,10 @@ CI builds applications in GitHub Actions, not on the staging instance. PR/main g
 lint/types/unit/integration/race/security/build/Chromium. A successful exact-main run stages
 the browser-tested images without credentials; a separate least-privilege job publishes
 their content digests only after the main aggregate and pinned guardrail workflows pass.
+Signed schema v3 records each image's uncompressed Docker-save layer tar byte total,
+computed from the immutable archive and rechecked by the publisher and staging deployer.
+This stable, conservative budget avoids Docker Engine `inspect Size` differences while
+retaining archive checksums, image config IDs and registry digests as separate identity gates.
 Signing is an explicit owner action through `Publish verified SERVIO staging release`: it
 requires the exact current main SHA, the successful CI run ID, the typed confirmation
 `PUBLISH-STAGING`, the `staging` environment, and the protected signing key. This publishes
@@ -137,11 +141,20 @@ ops/aws/health
 curl -fsS https://api.pos.rakmyat.online/_ops/release
 ```
 
-Before downloading or applying a release, the agent requires at least 25 GiB free disk,
-8 GiB `MemAvailable`, and enough additional space for the release archives plus a 4 GiB
-deployment reserve. Capacity failures report `NOT READY` without consuming a release
-retry attempt. The agent backs up PostgreSQL, allows only reviewed unapplied migrations, applies them
-atomically per migration, and promotes backend/frontends/proxy incrementally. All five
+Before downloading or applying a release, the staging agent requires at least 6 GiB free,
+512 MiB `MemAvailable`, 512 MiB free swap, and enough measured disk for the signed image
+archive bytes, signed uncompressed image sizes, source archive, source extraction headroom,
+acceptance evidence, and a retained 4 GiB deployment/rollback reserve. Image sizes are
+captured from the CI-built Docker images, checked again by the publisher, and covered by the
+release signature. Capacity failures report `NOT READY` without consuming a release retry
+attempt. This policy is scoped to the staging pull agent; it does not change production
+requirements. The 25 GiB/8 GiB static gate was not technically applicable to this 2 GiB
+staging host. Before migration, deployment creates a fresh custom-format PostgreSQL backup,
+checks its checksum and archive listing, restores it into a uniquely named disposable database,
+checks recovered migration receipts, then drops only that newly created verification database.
+The dump, checksum, and private restore receipt remain in `ops/aws/backups`. The agent allows
+only reviewed unapplied migrations, applies them atomically per migration, and promotes
+backend/frontends/proxy incrementally. All five
 trusted HTTPS routes, database readiness, API/session/tenant/RBAC/POS/WSS/inventory and
 33 base browser, 13 cash/contrast checks, 14 upload/browser checks, 13 journal assertions,
 13 negative form assertions and database role boundaries must pass before it writes
@@ -266,19 +279,12 @@ credentials were not invented; no real charges or customer notifications are aut
 ## Resource and staging limits
 
 The verified host is currently a `t3.small` with 2 vCPU, approximately 1.9 GiB RAM, 2 GiB
-swap, a 50 GiB EBS root device and ext4 root filesystem. A fresh observation showed only
-about 8.9 GiB free disk and 605 MiB `MemAvailable`; the staging deployment gate requires
-25 GiB free and 8 GiB available memory. The host is therefore NO-GO for deployment. Do not
-build frontends here or delete builder cache/volumes to force a release. Native Chromium
-avoids pulling the multi-browser container. Keep previous images and monitor disk, memory,
-swap, CPU, OOM and service health after any approved capacity change.
-
-The smallest T3 size with enough total memory to potentially satisfy the 8 GiB available
-memory floor is `t3.xlarge` (4 vCPU, 16 GiB RAM); `t3.large` has only 8 GiB total and cannot
-meet an 8 GiB available-memory requirement after the OS and services start. AWS console
-and IMDS verification are required before applying any resize. Changing instance type
-requires a controlled stop/start and can change the public IPv4; verify DNS/recovery access
-and obtain owner approval for downtime before doing so.
+swap, a 50 GiB EBS root device and ext4 root filesystem. The 2026-11-17 baseline was 8.9 GiB
+free disk, about 744 MiB `MemAvailable`, and about 1.49 GiB free swap; eight containers used
+about 394 MiB in aggregate under explicit memory limits. These are point-in-time observations,
+not a deployment result. Do not build application images on this host. The signed-size
+preflight must pass immediately before deployment; browser acceptance runs sequentially
+using the pinned native Chromium runtime. Preserve old images, volumes and backups.
 
 The instance's public IPv4 is auto-assigned and can change after stop/start. Obtain approval
 for a stable endpoint before permanent production. No EIP, resize or paid AWS resources
@@ -307,29 +313,15 @@ main-push identity checks for both pinned guardrail workflows. Do not remove pro
 merge a release. A changed commit must rerun CI. Staging publication and deployment are
 separate owner-authorized actions.
 
-## Completed disk expansion and pending capacity change approval
+## Disk and instance policy
 
-Root EBS volume `vol-0ec6bfabc3638a90c` has been expanded from 30 to 50 GiB per the owner's
-AWS Console report; the guest independently sees a 50 GiB `/dev/nvme0n1` and a grown ext4
-root partition. The console report stated gp3, 3,000 IOPS and 125 MiB/s were preserved.
-This host has no AWS CLI/role, so it cannot independently confirm the current control-plane
-optimization state.
-
-To meet the current 25 GiB free-disk gate and retain rollback images, the proposed target
-is **80 GiB gp3**, preserving IOPS and throughput. The proposed compute target is
-**`t3.xlarge`**, preserving the current instance, ENI, security groups, EBS volume and data.
-An authorized AWS operator must first take and verify an EBS snapshot, confirm instance
-and volume identities/settings, then apply the 50→80 GiB resize and t3.small→t3.xlarge
-type change during an owner-approved staging maintenance window. The stop/start may change
-the public IPv4; confirm DNS and recovery access or obtain approval for a stable endpoint
-before the operation. Recheck the guest block device before extending the filesystem,
-then verify free disk, `MemAvailable`, containers, data and health. Do not make these
-billable changes until approved. Never prune protected images, volumes, backups, uploads,
-secrets or certificates instead of sizing the host.
-
-AWS documents [volume modification](https://docs.aws.amazon.com/ebs/latest/userguide/requesting-ebs-volume-modifications.html)
-and [Linux filesystem extension](https://docs.aws.amazon.com/ebs/latest/userguide/recognize-expanded-volume-linux.html).
-Do not treat approval alone as proof that the cloud-side resize has happened.
+The owner explicitly authorized only the earlier 30→50 GiB EBS increase. The guest sees
+the resulting 50 GiB `/dev/nvme0n1` root device and ext4 partition; `growpart --dry-run`
+reports no further partition change. The current release task explicitly forbids any further
+instance-type, EBS-size or AWS infrastructure change. The prior 80 GiB/t3.xlarge proposal
+is superseded and must not be acted on. If signed measured requirements fail, report the
+specific failing measurement and preserve the current infrastructure. Never prune protected
+images, volumes, backups, uploads, secrets or certificates to pass preflight.
 
 ## Publisher guardrail verification
 

@@ -26,7 +26,9 @@ jobs:
         ports: [6379:6379]
     env:
       GOMAXPROCS: '2'
-      GOFLAGS: -p=2
+      # Integration packages share one disposable PostgreSQL database. Serialize
+      # packages so durable outbox tests cannot claim another package's fixtures.
+      GOFLAGS: -p=1
       ENV: test
       DB_HOST: 127.0.0.1
       DB_PORT: '5432'
@@ -116,6 +118,361 @@ jobs:
             pnpm --filter "./apps/$APP" test:run --maxWorkers=2 --no-file-parallelism
           fi
 
+  auth-browser-acceptance:
+    if: (github.event_name == 'pull_request' && github.event.pull_request.number == 82) || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/codex/auth-release-integration-20261118')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    env:
+      AUTH_TEST_PROJECT: servio-auth-gha-${{ github.run_id }}
+      P2A_API_HOST_PORT: '18082'
+      P2A_LANDING_HOST_PORT: '13115'
+      P2A_DASHBOARD_HOST_PORT: '13116'
+      P2A_RESTAURANT_HOST_PORT: '13113'
+      P2A_SUPER_ADMIN_HOST_PORT: '13118'
+      WS05_TEST_RUNNER_ON_HOST: 'true'
+      WS05_COMPOSE_PROJECT: servio-auth-gha-${{ github.run_id }}
+      WS05_API_HOST_PORT: '18082'
+      WS05_API_URL: https://localhost:18443/api/v1
+      WS05_API_INTERNAL_URL: http://localhost:18082/api/v1
+      WS05_LANDING_URL: https://localhost:13111
+      WS05_LANDING_REDIRECT_URL: https://localhost:13111
+      WS05_DASHBOARD_URL: https://localhost:13112
+      WS05_STOREFRONT_URL: http://phase2a-restaurant-a.localhost:13113
+      WS05_MAP_LOCALHOST: '127.0.0.1'
+      WS05_IGNORE_HTTPS_ERRORS: 'true'
+      P2A_CORS_ORIGINS: http://localhost:13111,http://localhost:13112,http://phase2a-restaurant-a.localhost:13113,https://localhost:13111,https://localhost:13112,https://localhost:13151,https://localhost:13152
+      API_INTERNAL_URL: http://127.0.0.1:18082/api/v1
+      NEXT_PUBLIC_API_URL: https://localhost:18443/api/v1
+      NEXT_PUBLIC_API_BASE_URL: https://localhost:18443/api/v1
+      NEXT_PUBLIC_SUPER_ADMIN_API_URL: https://localhost:18443/api/v1/super-admin
+      NEXT_PUBLIC_LANDING_URL: https://localhost:13111
+      NEXT_PUBLIC_DASHBOARD_URL: https://localhost:13112
+      NEXT_PUBLIC_RESTAURANT_DOMAIN: localhost:13113
+      NEXT_TELEMETRY_DISABLED: '1'
+      NODE_OPTIONS: --max-old-space-size=3072
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: 24.22.3
+      - run: corepack enable && corepack prepare pnpm@10.34.9 --activate
+      - name: Install only Landing, Dashboard, and their workspace dependencies
+        working-directory: frontend
+        run: pnpm install --frozen-lockfile --filter @pos-saas/landing... --filter @pos-saas/dashboard...
+      - name: Install Chromium and its host dependencies
+        working-directory: frontend/apps/dashboard
+        run: pnpm exec playwright install --with-deps chromium
+      - name: Install the isolated marketing accessibility audit dependencies
+        run: npm install --prefix "$RUNNER_TEMP/servio-marketing" --ignore-scripts --no-audit --no-fund playwright@1.64.1 axe-core@4.11.0
+      - name: Start the isolated API, PostgreSQL, and Redis
+        run: docker compose -p "$AUTH_TEST_PROJECT" -f docker-compose.phase2a-e2e.yml up -d --build api
+      - name: Wait for the isolated API health check
+        run: |
+          ready=false
+          for attempt in $(seq 1 60); do
+            if curl --fail --silent --max-time 5 http://127.0.0.1:18082/api/v1/health >/dev/null; then
+              ready=true
+              break
+            fi
+            sleep 5
+          done
+          test "$ready" = true
+      - name: Seed synthetic WS05 tenant fixtures
+        run: pwsh -NoProfile -NonInteractive -File scripts/phase2a-e2e/seed.ps1 -ProjectName "$AUTH_TEST_PROJECT"
+      - name: Start the disposable restaurant storefront for anonymous order acceptance
+        run: docker compose -p "$AUTH_TEST_PROJECT" -f docker-compose.phase2a-e2e.yml up -d restaurant-website
+      - name: Validate the isolated HTTPS proxy helper
+        run: node --check scripts/phase2a-e2e/https-proxy.mjs && node --check scripts/phase2a-e2e/cache-proxy.mjs
+      - name: Reset ignored production build outputs after disposable Compose startup
+        run: |
+          sudo rm -rf -- frontend/apps/landing/.next frontend/apps/dashboard/.next
+          mkdir -p frontend/apps/landing/.next frontend/apps/dashboard/.next
+      - name: Build production Landing and Dashboard, then run real Chromium authentication tests
+        env:
+          WS05_AUTH_EVIDENCE_DIR: ${{ runner.temp }}/auth-evidence
+        run: |
+          mkdir -p "$WS05_AUTH_EVIDENCE_DIR" "$RUNNER_TEMP/playwright-results"
+
+          openssl req -x509 -newkey rsa:2048 -nodes \
+            -keyout "$RUNNER_TEMP/localhost-key.pem" \
+            -out "$RUNNER_TEMP/localhost-cert.pem" \
+            -days 1 -subj '/CN=localhost' \
+            -addext 'subjectAltName=DNS:localhost'
+          export NODE_EXTRA_CA_CERTS="$RUNNER_TEMP/localhost-cert.pem"
+
+          node scripts/phase2a-e2e/https-proxy.mjs 18443 18082 "$RUNNER_TEMP/localhost-cert.pem" "$RUNNER_TEMP/localhost-key.pem" >"$RUNNER_TEMP/api-proxy.log" 2>&1 &
+          api_proxy_pid=$!
+          node scripts/phase2a-e2e/https-proxy.mjs 13111 13121 "$RUNNER_TEMP/localhost-cert.pem" "$RUNNER_TEMP/localhost-key.pem" >"$RUNNER_TEMP/landing-proxy.log" 2>&1 &
+          landing_proxy_pid=$!
+          node scripts/phase2a-e2e/https-proxy.mjs 13112 13122 "$RUNNER_TEMP/localhost-cert.pem" "$RUNNER_TEMP/localhost-key.pem" >"$RUNNER_TEMP/dashboard-proxy.log" 2>&1 &
+          dashboard_proxy_pid=$!
+          node scripts/phase2a-e2e/cache-proxy.mjs 18453 18443 "$RUNNER_TEMP/localhost-cert.pem" "$RUNNER_TEMP/localhost-key.pem" api >"$RUNNER_TEMP/api-cache-proxy.log" 2>&1 &
+          api_cache_proxy_pid=$!
+          node scripts/phase2a-e2e/cache-proxy.mjs 13151 13111 "$RUNNER_TEMP/localhost-cert.pem" "$RUNNER_TEMP/localhost-key.pem" landing >"$RUNNER_TEMP/landing-cache-proxy.log" 2>&1 &
+          landing_cache_proxy_pid=$!
+          node scripts/phase2a-e2e/cache-proxy.mjs 13152 13112 "$RUNNER_TEMP/localhost-cert.pem" "$RUNNER_TEMP/localhost-key.pem" dashboard >"$RUNNER_TEMP/dashboard-cache-proxy.log" 2>&1 &
+          dashboard_cache_proxy_pid=$!
+          landing_pid=''
+          dashboard_pid=''
+          stop_acceptance_servers() {
+            for pid in "$landing_pid" "$dashboard_pid" "$api_proxy_pid" "$landing_proxy_pid" "$dashboard_proxy_pid" "$api_cache_proxy_pid" "$landing_cache_proxy_pid" "$dashboard_cache_proxy_pid"; do
+              if [ -n "$pid" ]; then kill "$pid" 2>/dev/null || true; fi
+            done
+            for pid in "$landing_pid" "$dashboard_pid" "$api_proxy_pid" "$landing_proxy_pid" "$dashboard_proxy_pid" "$api_cache_proxy_pid" "$landing_cache_proxy_pid" "$dashboard_cache_proxy_pid"; do
+              if [ -n "$pid" ]; then wait "$pid" 2>/dev/null || true; fi
+            done
+          }
+          trap stop_acceptance_servers EXIT
+
+          api_ready=false
+          for attempt in $(seq 1 30); do
+            if curl --insecure --fail --silent --max-time 5 https://localhost:18443/api/v1/health >/dev/null; then
+              api_ready=true
+              break
+            fi
+            sleep 1
+          done
+          test "$api_ready" = true
+
+          pnpm --dir frontend/apps/landing build
+          pnpm --dir frontend/apps/dashboard build
+
+          pnpm --dir frontend/apps/landing exec next start -p 13121 >"$RUNNER_TEMP/landing.log" 2>&1 &
+          landing_pid=$!
+          pnpm --dir frontend/apps/dashboard exec next start -p 13122 >"$RUNNER_TEMP/dashboard.log" 2>&1 &
+          dashboard_pid=$!
+
+          for url in https://localhost:13111/en https://localhost:13112/en/dashboard https://localhost:13151/en https://localhost:13152/en/dashboard; do
+            ready=false
+            for attempt in $(seq 1 60); do
+              status=$(curl --insecure --silent --output /dev/null --write-out '%{http_code}' --max-time 5 "$url" || true)
+              if [ "$status" = 200 ] || [[ "$status" =~ ^30[0-9]$ ]]; then
+                ready=true
+                break
+              fi
+              sleep 5
+            done
+            test "$ready" = true
+          done
+
+          pnpm --dir frontend/apps/dashboard exec playwright test \
+            --config playwright.phase2a.config.ts \
+            tests/phase2a-e2e/auth-lifecycle.spec.ts \
+            --output "$RUNNER_TEMP/playwright-results" \
+            --trace off
+
+          pnpm --dir frontend/apps/dashboard exec playwright test \
+            --config playwright.phase2a.config.ts \
+            tests/phase2a-e2e/cache-boundary.spec.ts \
+            --output "$RUNNER_TEMP/playwright-results" \
+            --trace off
+
+          # The final auth scenario restarts only this disposable API to reset
+          # its process-local test rate limiter. The storefront shares the API
+          # container's network namespace, so recreate only that sidecar before
+          # the anonymous ordering scenario.
+          if [[ ! "$AUTH_TEST_PROJECT" =~ ^servio-auth-gha-[0-9]+$ ]]; then
+            echo "Refusing storefront recovery outside the disposable auth project." >&2
+            exit 1
+          fi
+          api_container_id=$(docker ps -q \
+            --filter "label=com.docker.compose.project=$AUTH_TEST_PROJECT" \
+            --filter 'label=com.docker.compose.service=api')
+          test -n "$api_container_id"
+          test "$(printf '%s\n' "$api_container_id" | wc -l)" -eq 1
+          api_labels=$(docker inspect --format '{{json .Config.Labels}}' "$api_container_id")
+          echo "$api_labels" | jq -e '.["com.pos.disposable"] == "true" and .["com.pos.workstream"] == "WS05"' >/dev/null
+          docker compose -p "$AUTH_TEST_PROJECT" -f docker-compose.phase2a-e2e.yml \
+            up --detach --force-recreate --no-deps restaurant-website
+
+          storefront_ready=false
+          for attempt in $(seq 1 120); do
+            status=$(curl --silent --output /dev/null --write-out '%{http_code}' --connect-timeout 2 --max-time 5 \
+              --noproxy '*' \
+              --resolve phase2a-restaurant-a.localhost:13113:127.0.0.1 \
+              http://phase2a-restaurant-a.localhost:13113/en/menu || true)
+            if [ "$status" = 200 ]; then
+              storefront_ready=true
+              break
+            fi
+            if [ "$((attempt % 20))" -eq 0 ]; then
+              echo "Waiting for isolated storefront readiness: HTTP $status (attempt $attempt/120)."
+            fi
+            sleep 5
+          done
+          if [ "$storefront_ready" != true ]; then
+            docker compose -p "$AUTH_TEST_PROJECT" -f docker-compose.phase2a-e2e.yml ps
+            docker compose -p "$AUTH_TEST_PROJECT" -f docker-compose.phase2a-e2e.yml logs --tail 120 restaurant-website
+          fi
+          test "$storefront_ready" = true
+          pnpm --dir frontend/apps/dashboard exec playwright test \
+            --config playwright.phase2a.config.ts \
+            tests/phase2a-e2e/phase2a.spec.ts \
+            --grep 'storefront menu cart and checkout complete an order in the browser' \
+            --output "$RUNNER_TEMP/playwright-results" \
+            --trace off
+          for theme in dark light; do
+            echo "Running isolated Landing accessibility acceptance for theme=$theme"
+            NODE_PATH="$RUNNER_TEMP/servio-marketing/node_modules" \
+              SERVIO_MARKETING_URL=https://localhost:13111 \
+              SERVIO_MARKETING_EVIDENCE="$WS05_AUTH_EVIDENCE_DIR/marketing-$theme" \
+              SERVIO_SOURCE_SHA="$GITHUB_SHA" \
+              SERVIO_THEME="$theme" \
+              SERVIO_COLOR_SCHEME="$theme" \
+              SERVIO_ACCEPTANCE_ENV=ci \
+              SERVIO_DISPOSABLE_BROWSER=1 \
+              SERVIO_MARKETING_BROWSER=chromium \
+              node frontend/apps/landing/scripts/marketing-acceptance.mjs
+          done
+      - name: Checkout the reviewed PR #85 protected-session harness
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: Yousef-Abdallah-1711/pos
+          ref: 954138f7e788220cea2b100da84860798ebd5f6f
+          path: servio-pr85
+          persist-credentials: false
+      - name: Run a small authenticated-session smoke load on the disposable API
+        env:
+          WS05_TEST_PASSWORD: WS05-Disposable-Only-2026!
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/auth-evidence"
+          chmod 700 "$RUNNER_TEMP/auth-evidence"
+          cookie_file="$RUNNER_TEMP/session-cookie-values"
+          trap 'rm -f "$cookie_file"' EXIT
+          python3 - "$cookie_file" <<'PY'
+          import http.cookiejar
+          import json
+          import os
+          import re
+          import sys
+          import urllib.request
+
+          output = sys.argv[1]
+          email = 'phase2a-owner-a@example.test'
+          password = os.environ['WS05_TEST_PASSWORD']
+          endpoint = 'http://127.0.0.1:18082/api/v1/auth/login'
+          values = []
+          for _ in range(10):
+              jar = http.cookiejar.CookieJar()
+              opener = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(jar))
+              request = urllib.request.Request(
+                  endpoint,
+                  data=json.dumps({'email': email, 'password': password}).encode(),
+                  headers={'Content-Type': 'application/json', 'Origin': 'http://localhost:13112'},
+                  method='POST',
+              )
+              try:
+                  with opener.open(request, timeout=15) as response:
+                      if response.status != 200:
+                          raise RuntimeError('synthetic session creation failed')
+              except Exception as error:
+                  raise SystemExit('synthetic session creation failed; details withheld') from None
+              cookies = [cookie.value for cookie in jar if cookie.name == 'poos_session']
+              if len(cookies) != 1 or not re.fullmatch(r'[A-Za-z0-9_-]{43}', cookies[0]):
+                  raise SystemExit('synthetic session response did not contain one opaque session cookie')
+              values.append(cookies[0])
+          if len(set(values)) != 10:
+              raise SystemExit('synthetic session pool was not unique')
+          with open(output, 'w', encoding='ascii') as destination:
+              destination.write('\n'.join(values) + '\n')
+          os.chmod(output, 0o600)
+          PY
+
+          docker pull grafana/k6:2.3.0 >/dev/null
+          postgres_container="$AUTH_TEST_PROJECT-postgres-1"
+          redis_container="$AUTH_TEST_PROJECT-redis-1"
+          api_container="$AUTH_TEST_PROJECT-api-1"
+          for container in "$api_container" "$postgres_container" "$redis_container"; do
+            test "$(docker inspect --format '{{index .Config.Labels "com.docker.compose.project"}}' "$container")" = "$AUTH_TEST_PROJECT"
+            test "$(docker inspect --format '{{index .Config.Labels "com.pos.disposable"}}' "$container")" = true
+          done
+
+          (
+            for sample in $(seq 1 18); do
+              printf '%s\n' "sample=$sample utc=$(date -u +%FT%TZ)"
+              docker stats --no-stream --format '{{.Name}} cpu={{.CPUPerc}} memory={{.MemUsage}} memory_pct={{.MemPerc}}' "$api_container" "$postgres_container" "$redis_container"
+              sleep 2
+            done
+          ) >"$RUNNER_TEMP/auth-evidence/k6-container-stats.txt" 2>&1 &
+          stats_pid=$!
+          docker run --rm --network host --user "$(id -u):$(id -g)" \
+            --mount "type=bind,src=$GITHUB_WORKSPACE/servio-pr85/backend/tests/load,dst=/harness,readonly" \
+            --mount "type=bind,src=$cookie_file,dst=/run/secrets/session-cookie-values,readonly" \
+            --mount "type=bind,src=$RUNNER_TEMP/auth-evidence,dst=/evidence" \
+            -e API_BASE_URL=http://127.0.0.1:18082 \
+            -e SESSION_COOKIE_VALUES_FILE=/run/secrets/session-cookie-values \
+            -e TARGET_RPS=10 -e MAX_VUS=10 -e PRE_ALLOCATED_VUS=10 -e DURATION=30s \
+            grafana/k6:2.3.0 run --quiet --summary-export=/evidence/k6-summary-raw.json \
+            /harness/protected-session-rps.js >"$RUNNER_TEMP/k6-console.log" 2>&1 || {
+              kill "$stats_pid" 2>/dev/null || true
+              wait "$stats_pid" 2>/dev/null || true
+              python3 "$GITHUB_WORKSPACE/servio-pr85/backend/scripts/summarize_k6.py" \
+                "$RUNNER_TEMP/auth-evidence/k6-summary-raw.json" \
+                --output "$RUNNER_TEMP/auth-evidence/k6-measured-summary.json" || true
+              echo 'The isolated authenticated-session smoke load failed; sanitized k6 output will be inspected.'
+              sed -E 's/(poos_session=)[A-Za-z0-9_-]+/\1[redacted]/g' "$RUNNER_TEMP/k6-console.log" | tail -80
+              exit 1
+            }
+          wait "$stats_pid"
+          python3 "$GITHUB_WORKSPACE/servio-pr85/backend/scripts/summarize_k6.py" \
+            "$RUNNER_TEMP/auth-evidence/k6-summary-raw.json" \
+            --output "$RUNNER_TEMP/auth-evidence/k6-measured-summary.json"
+          python3 - "$RUNNER_TEMP/auth-evidence/k6-summary-raw.json" <<'PY'
+          import json
+          import sys
+          with open(sys.argv[1], encoding='utf-8') as source:
+              metrics = json.load(source)['metrics']
+          def metric_values(name):
+              metric = metrics.get(name, {})
+              if not isinstance(metric, dict):
+                  return {}
+              values = metric.get('values')
+              return values if isinstance(values, dict) else metric
+          checks = metric_values('checks')
+          failed_requests = metric_values('http_req_failed')
+          requests = metric_values('http_reqs')
+          dropped = metric_values('dropped_iterations').get('count', 0)
+          request_count = requests.get('count', 0)
+          if (
+              request_count <= 0 or
+              checks.get('value') != 1 or
+              checks.get('fails') != 0 or
+              checks.get('passes') != request_count or
+              failed_requests.get('value') != 0 or
+              dropped != 0
+          ):
+              raise SystemExit('Smoke load did not produce all-valid sessions with zero failed requests and dropped iterations.')
+          print(f'Smoke load assertions passed: {request_count} protected sessions valid, zero failed requests, zero dropped iterations.')
+          PY
+          docker exec "$redis_container" redis-cli --raw INFO memory | awk -F: '/^(used_memory:|used_memory_peak:|used_memory_rss:|maxmemory:)/ { print $1 "=" $2 }' >"$RUNNER_TEMP/auth-evidence/redis-memory.txt"
+          docker exec "$redis_container" redis-cli --raw INFO stats | awk -F: '/^(total_commands_processed:|instantaneous_ops_per_sec:|keyspace_hits:|keyspace_misses:|evicted_keys:)/ { print $1 "=" $2 }' >"$RUNNER_TEMP/auth-evidence/redis-stats.txt"
+          docker exec "$postgres_container" psql -U postgres -d pos_phase2a_e2e -Atc \
+            "SELECT datname || ',xact_commit=' || xact_commit || ',tup_returned=' || tup_returned || ',tup_fetched=' || tup_fetched || ',active_connections=' || (SELECT count(*) FROM pg_stat_activity WHERE datname = 'pos_phase2a_e2e' AND state = 'active') FROM pg_stat_database WHERE datname = 'pos_phase2a_e2e'" \
+            >"$RUNNER_TEMP/auth-evidence/postgres-stats.txt"
+          printf 'source_sha=%s\nload_harness_sha=%s\ntarget_rps=10\nmax_vus=10\nduration=30s\nrunner_cpu_count=%s\n' \
+            "$GITHUB_SHA" '954138f7e788220cea2b100da84860798ebd5f6f' "$(nproc)" \
+            >"$RUNNER_TEMP/auth-evidence/k6-environment.txt"
+          free -b | sed -n '1,2p' >>"$RUNNER_TEMP/auth-evidence/k6-environment.txt"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: auth-browser-acceptance-${{ github.run_id }}
+          path: |
+            ${{ runner.temp }}/playwright-results/
+            ${{ runner.temp }}/auth-evidence/
+          retention-days: 7
+          if-no-files-found: warn
+      - name: Remove only this run's disposable auth test project
+        if: always()
+        run: |
+          if [[ "$AUTH_TEST_PROJECT" =~ ^servio-auth-gha-[0-9]+$ ]]; then
+            docker compose -p "$AUTH_TEST_PROJECT" -f docker-compose.phase2a-e2e.yml down --volumes --remove-orphans
+          else
+            echo "Refusing cleanup because the auth test project name is unexpected."
+            exit 1
+          fi
+
   security-and-config:
     runs-on: ubuntu-24.04
     timeout-minutes: 15
@@ -138,8 +495,8 @@ jobs:
           if-no-files-found: ignore
       - name: Audit production dependencies (all severities)
         run: pnpm --dir frontend audit --prod
-      - name: Audit development dependencies (high and critical gate; lower findings visible)
-        run: pnpm --dir frontend audit --audit-level high
+      - name: Audit development dependencies (all high and critical findings)
+        run: pnpm --dir frontend audit --dev --audit-level high
       - run: python3 scripts/check_runtime_localhost.py
       - run: scripts/production/check-compose-config.sh
       - run: scripts/production/check-nginx-template.sh
@@ -210,7 +567,7 @@ jobs:
           if-no-files-found: ignore
 
   publish-release-images:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: ${{ !cancelled() && github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.application-images.result == 'success' && needs.required.result == 'success' }}
     needs: [application-images, required]
     runs-on: ubuntu-24.04
     timeout-minutes: 30
@@ -241,10 +598,12 @@ jobs:
 
   required:
     if: always()
-    needs: [backend, frontend, security-and-config, application-images]
+    needs: [backend, frontend, security-and-config, application-images, auth-browser-acceptance]
     runs-on: ubuntu-24.04
+    env:
+      REQUIRE_AUTH_BROWSER: ${{ (github.event_name == 'pull_request' && github.event.pull_request.number == 82) || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/codex/auth-release-integration-20261118') }}
     steps:
       - name: Require every validation stage
         env:
           RESULTS: ${{ toJSON(needs) }}
-        run: python3 -c 'import json,os; jobs=json.loads(os.environ["RESULTS"]); assert all(j["result"] == "success" for j in jobs.values()), jobs'
+        run: python3 -c 'import json,os; jobs=json.loads(os.environ["RESULTS"]); run_browser=os.environ["REQUIRE_AUTH_BROWSER"] == "true"; required=[job for name,job in jobs.items() if name != "auth-browser-acceptance" or run_browser]; assert all(job["result"] == "success" for job in required), jobs'

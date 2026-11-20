@@ -1,8 +1,10 @@
 """Deployment trust-boundary tests; no Docker, SSH, database or network access."""
 import copy
 import importlib.util
+import json
 from pathlib import Path
 import unittest
+from types import SimpleNamespace
 from unittest.mock import patch
 
 spec = importlib.util.spec_from_file_location('servio_deploy', Path(__file__).with_name('deploy-release.py'))
@@ -54,6 +56,41 @@ class ReleaseTrustTests(unittest.TestCase):
             network.assert_not_called()
 
 class RollbackSafetyTests(unittest.TestCase):
+    def test_staging_headroom_rechecks_signed_image_budget(self):
+        manifest={'image_sizes':{name:100*1024**2 for name in deploy.SERVICES}}
+        with patch.object(deploy.shutil,'disk_usage',return_value=SimpleNamespace(free=7*1024**3)):
+            deploy.verify_disk_headroom(manifest)
+        with patch.object(deploy.shutil,'disk_usage',return_value=SimpleNamespace(free=5*1024**3)):
+            with self.assertRaisesRegex(RuntimeError,'Insufficient deployment disk headroom'):
+                deploy.verify_disk_headroom(manifest)
+        with patch.object(deploy.shutil,'disk_usage',return_value=SimpleNamespace(free=5*1024**3)):
+            deploy.verify_disk_headroom(manifest,after_images=True)
+        with patch.object(deploy.shutil,'disk_usage',return_value=SimpleNamespace(free=4*1024**3)):
+            with self.assertRaisesRegex(RuntimeError,'Insufficient deployment disk headroom'):
+                deploy.verify_disk_headroom(manifest,after_images=True)
+
+    def test_fresh_backup_must_restore_before_it_is_accepted(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory);ops=root/'ops/aws';(ops/'backups').mkdir(parents=True)
+            calls=[]
+            def compose(path,*args,**kwargs):
+                calls.append(args)
+                if args[0:3]==('exec','-T','postgres') and args[3]=='pg_dump':
+                    kwargs['stdout'].write(b'verified synthetic dump')
+                if args[0:3]==('exec','-T','postgres') and args[3]=='psql':
+                    return SimpleNamespace(stdout='3\n')
+                return SimpleNamespace(stdout='')
+            with patch.object(deploy,'OPS',ops),patch.object(deploy,'compose',side_effect=compose),patch.object(deploy,'checked'):
+                deploy.backup(Path('/tmp/compose.json'))
+            dumps=list((ops/'backups').glob('*.dump'))
+            self.assertEqual(len(dumps),1)
+            self.assertTrue(dumps[0].with_suffix('.dump.sha256').exists())
+            receipt=json.loads(dumps[0].with_suffix('.restore.json').read_text())
+            self.assertEqual(receipt['status'],'PASS')
+            self.assertEqual(receipt['restored_migration_receipts'],3)
+            self.assertTrue(any(call[-1].startswith('servio_restore_verify_') for call in calls if call and call[0]=='exec'))
+
     def test_failed_post_deployment_check_restores_apps_without_reversing_sql(self):
         import tempfile
         from types import SimpleNamespace
@@ -62,7 +99,7 @@ class RollbackSafetyTests(unittest.TestCase):
             services={name:{'image':'old-'+name,'volumes':[]} for name in deploy.SERVICES+['postgres','redis','proxy','migrate']}
             old={'services':services}
             previous=ops/'compose.json';previous.write_text(__import__('json').dumps(old))
-            manifest={'sha':SHA,'ci_run_id':123,'images':{},'image_ids':{name:'sha256:'+'b'*64 for name in deploy.SERVICES}}
+            manifest={'sha':SHA,'ci_run_id':123,'images':{},'image_ids':{name:'sha256:'+'b'*64 for name in deploy.SERVICES},'image_sizes':{name:100*1024**2 for name in deploy.SERVICES}}
             calls=[]
             def extract(sha,destination,artifacts):
                 target=destination/'ops/aws';target.mkdir(parents=True)

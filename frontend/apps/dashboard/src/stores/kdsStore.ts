@@ -69,6 +69,7 @@ interface KDSState {
   setFullscreen: (isFullscreen: boolean) => void
   toggleFullscreen: () => void
   setConnected: (isConnected: boolean) => void
+  resetForAuthScopeChange: () => void
 
   optimisticBump: (id: number) => KDSOrder | null
   optimisticRecall: (id: number) => KDSOrder | null
@@ -223,6 +224,7 @@ export const useKDSStore = create<KDSState>()(
       setFullscreen: (isFullscreen) => set({ isFullscreen }),
       toggleFullscreen: () => set((state) => ({ isFullscreen: !state.isFullscreen })),
       setConnected: (isConnected) => set({ isConnected }),
+      resetForAuthScopeChange: () => set({ orders: [], stats: null, isConnected: false }),
 
       optimisticBump: (id) => {
         const current = get().orders.find((order) => order.id === id)

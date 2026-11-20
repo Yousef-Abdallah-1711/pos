@@ -468,6 +468,7 @@ test('storefront menu cart and checkout complete an order in the browser', async
   expect(fixtureProduct).toBeTruthy()
 
   await page.goto(`${storefrontUrl}/en/menu`, { waitUntil: 'domcontentloaded', timeout: 90_000 })
+  expect((await page.context().cookies(new URL(api).origin)).some((cookie) => cookie.name === 'poos_session')).toBe(false)
   const productTitle = page.getByRole('heading', { name: 'WS05 E2E Burger A' })
   await expect(productTitle).toBeVisible({ timeout: 30_000 })
   const productCard = productTitle.locator('xpath=../..')

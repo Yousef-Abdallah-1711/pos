@@ -2,10 +2,12 @@
 
 import hashlib
 import importlib.util
+import io
 import json
 from pathlib import Path
 import sys
 import tempfile
+import tarfile
 import unittest
 from unittest.mock import patch
 
@@ -25,7 +27,38 @@ stager = load_script('stage-ci-images.py', 'servio_stage_ci_images')
 publisher = load_script('publish-ci-images.py', 'servio_publish_ci_images')
 
 
+def write_docker_archive(path: Path, name: str, sha: str, image_id: str) -> int:
+    config = json.dumps({
+        'architecture': 'amd64',
+        'os': 'linux',
+        'config': {'Labels': {'org.opencontainers.image.revision': sha}},
+        'rootfs': {'type': 'layers', 'diff_ids': []},
+    }).encode()
+    config_name = image_id.removeprefix('sha256:') + '.json'
+    layer_name = 'layer/layer.tar'
+    manifest = json.dumps([{'Config': config_name, 'RepoTags': [f'servio-ci-{name}:{sha}'], 'Layers': [layer_name]}]).encode()
+    with tarfile.open(path, 'w:gz') as archive:
+        for member_name, data in [('manifest.json', manifest), (config_name, config), (layer_name, b'x' * 8192)]:
+            info = tarfile.TarInfo(member_name)
+            info.size = len(data)
+            archive.addfile(info, io.BytesIO(data))
+    return 8192
+
+
 class ReleaseImagePipelineTests(unittest.TestCase):
+    def test_installer_copies_deployer_runtime_dependencies(self):
+        installer = (ROOT / 'ops/aws/install-pull-agent').read_text(encoding='utf-8')
+        self.assertIn(
+            'ops/aws/release_image_archive.py /usr/local/lib/servio/release_image_archive.py',
+            installer,
+        )
+
+    def test_size_budget_uses_stable_uncompressed_archive_layer_bytes(self):
+        with tempfile.TemporaryDirectory() as directory:
+            archive = Path(directory) / 'backend.docker.tar.gz'
+            write_docker_archive(archive, 'backend', 'd' * 40, 'sha256:' + 'a' * 64)
+            self.assertEqual(publisher.uncompressed_layer_bytes(archive), 8192)
+
     def test_stager_creates_fixed_set_and_exact_ci_identity(self):
         sha = 'a' * 40
         with tempfile.TemporaryDirectory() as directory:
@@ -34,7 +67,7 @@ class ReleaseImagePipelineTests(unittest.TestCase):
             def fake_archive(target: Path, name: str, actual_sha: str):
                 archive = target / (name + '.docker.tar.gz')
                 archive.write_bytes(('archive-' + name).encode())
-                return archive, 'sha256:' + name.encode().hex().ljust(64, '0')[:64]
+                return archive, 'sha256:' + name.encode().hex().ljust(64, '0')[:64], 123456
 
             def fake_source(_url: str, destination: Path):
                 Path(destination).write_bytes(b'synthetic source archive')
@@ -47,6 +80,9 @@ class ReleaseImagePipelineTests(unittest.TestCase):
 
             self.assertEqual(manifest['sha'], sha)
             self.assertEqual(manifest['ci_run_id'], 12345)
+            self.assertEqual(manifest['schema_version'], 3)
+            self.assertEqual(set(manifest['image_sizes']), set(stager.IMAGE_NAMES))
+            self.assertGreater(manifest['source_size'], 0)
             self.assertEqual(set(manifest['archives']), set(stager.IMAGE_NAMES))
             self.assertEqual(set(path.name for path in bundle.iterdir()), {
                 'release-manifest.json', 'source.tar.gz',
@@ -65,7 +101,7 @@ class ReleaseImagePipelineTests(unittest.TestCase):
             archives = {}
             for name in publisher.IMAGE_NAMES:
                 archive = bundle / (name + '.docker.tar.gz')
-                archive.write_bytes(('archive-' + name).encode())
+                write_docker_archive(archive, name, sha, image_ids[name])
                 archives[name] = {
                     'file': archive.name,
                     'sha256': hashlib.sha256(archive.read_bytes()).hexdigest(),
@@ -74,14 +110,16 @@ class ReleaseImagePipelineTests(unittest.TestCase):
             source = bundle / 'source.tar.gz'
             source.write_bytes(b'source')
             manifest = {
-                'schema_version': 1,
+                'schema_version': 3,
                 'environment': 'staging',
                 'sha': sha,
                 'ci_run_id': 12345,
                 'images': {},
                 'image_ids': image_ids,
+                'image_sizes': {name: 8192 for name in publisher.IMAGE_NAMES},
                 'archives': archives,
                 'source_sha256': hashlib.sha256(source.read_bytes()).hexdigest(),
+                'source_size': source.stat().st_size,
             }
             (bundle / 'release-manifest.json').write_text(json.dumps(manifest))
 
@@ -90,6 +128,8 @@ class ReleaseImagePipelineTests(unittest.TestCase):
                 name = tag.removeprefix('servio-ci-').split('/')[-1].split(':')[0]
                 image = {
                     'Id': image_ids[name],
+                    # Docker Engine's reported Size is intentionally allowed to differ.
+                    'Size': 9999,
                     'Config': {'Labels': {'org.opencontainers.image.revision': sha}},
                 }
                 if '/' in tag:
@@ -118,8 +158,10 @@ class ReleaseImagePipelineTests(unittest.TestCase):
             manifest = {
                 'environment': 'staging', 'sha': sha, 'ci_run_id': 12345,
                 'image_ids': {name: 'sha256:' + '1' * 64 for name in publisher.IMAGE_NAMES},
+                'image_sizes': {name: 123456 for name in publisher.IMAGE_NAMES},
                 'archives': archives,
                 'source_sha256': hashlib.sha256(source.read_bytes()).hexdigest(),
+                'source_size': source.stat().st_size,
             }
             (bundle / 'release-manifest.json').write_text(json.dumps(manifest))
             with patch.object(publisher.subprocess, 'run') as docker_run:

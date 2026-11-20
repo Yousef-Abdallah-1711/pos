@@ -80,7 +80,7 @@ class MigrationRecoveryTests(unittest.TestCase):
             config['services']={name:{'image':OLD,'volumes':[]} for name in deploy.SERVICES+['postgres','redis','proxy','migrate']}
             Path(previous['compose']).write_text(json.dumps(config))
             state=ops/'state.json';state.write_text(json.dumps(previous))
-            manifest={'sha':SHA,'image_ids':{name:NEW for name in deploy.SERVICES}}
+            manifest={'sha':SHA,'image_ids':{name:NEW for name in deploy.SERVICES},'image_sizes':{name:100*1024**2 for name in deploy.SERVICES}}
             calls=[]
             def extract(sha,destination,artifacts):
                 target=destination/'ops/aws';target.mkdir(parents=True);(target/'compose.json').write_text(json.dumps(config))

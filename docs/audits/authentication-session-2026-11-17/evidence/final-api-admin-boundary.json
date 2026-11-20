@@ -1,0 +1,48 @@
+{
+  "environment": "disposable Compose project servio-auth-final-20261118",
+  "checks": {
+    "staffCookieNameIsSeparate": "PASS",
+    "superAdminCookieNameIsSeparate": "PASS",
+    "staffCookieCannotReadSuperAdminSession": "PASS",
+    "superAdminCookieCannotReadStaffSession": "PASS",
+    "superAdminLoginAndSession": "PASS"
+  },
+  "requestCounts": {
+    "POST /auth/login": 1,
+    "POST /super-admin/auth/login": 1,
+    "GET /super-admin/auth/session": 2,
+    "GET /auth/session": 1
+  },
+  "timeline": [
+    {
+      "method": "POST",
+      "path": "/auth/login",
+      "status": 200,
+      "name": "staff-login"
+    },
+    {
+      "method": "GET",
+      "path": "/super-admin/auth/session",
+      "status": 401,
+      "name": "staff-cookie-to-admin-session"
+    },
+    {
+      "method": "POST",
+      "path": "/super-admin/auth/login",
+      "status": 200,
+      "name": "super-admin-login"
+    },
+    {
+      "method": "GET",
+      "path": "/super-admin/auth/session",
+      "status": 200,
+      "name": "super-admin-session"
+    },
+    {
+      "method": "GET",
+      "path": "/auth/session",
+      "status": 401,
+      "name": "super-admin-cookie-to-staff-session"
+    }
+  ]
+}

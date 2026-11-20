@@ -23,7 +23,7 @@ class PullAgentTrustTests(unittest.TestCase):
         self.private=self.root/'key.pem';self.public=self.root/'public.pem'
         subprocess.run(['openssl','genpkey','-algorithm','ED25519','-out',str(self.private)],check=True,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
         subprocess.run(['openssl','pkey','-in',str(self.private),'-pubout','-out',str(self.public)],check=True,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
-        self.manifest={'sha':SHA,'environment':'staging','ci_run_id':123,'schema_version':1,'workflow_ref':agent.REPO+'/.github/workflows/production-ci.yml@refs/heads/main','workflow_sha':SHA}
+        self.manifest={'sha':SHA,'environment':'staging','ci_run_id':123,'schema_version':3,'workflow_ref':agent.REPO+'/.github/workflows/production-ci.yml@refs/heads/main','workflow_sha':SHA}
         self.raw=json.dumps(self.manifest).encode()
         source=self.root/'manifest';source.write_bytes(self.raw)
         signature=self.root/'signature'
@@ -94,30 +94,37 @@ class PullAgentTrustTests(unittest.TestCase):
             verify.assert_called_once_with(self.release)
 
     def test_deployment_capacity_requires_disk_and_available_memory_reserves(self):
-        manifest={'archives':{name:{'size':1024} for name in agent.SERVICES}}
+        manifest={'archives':{name:{'size':1024} for name in agent.SERVICES},'image_sizes':{name:100*1024**2 for name in agent.SERVICES},'source_size':1024}
         meminfo=self.root/'meminfo'
-        meminfo.write_text('MemTotal: 16777216 kB\nMemAvailable: 9000000 kB\n')
-        with patch.object(agent.shutil,'disk_usage',return_value=SimpleNamespace(free=26*1024**3)):
+        meminfo.write_text('MemTotal: 2048000 kB\nMemAvailable: 900000 kB\nSwapTotal: 2097152 kB\nSwapFree: 900000 kB\n')
+        with patch.object(agent.shutil,'disk_usage',return_value=SimpleNamespace(free=7*1024**3)):
             agent.ensure_deployment_capacity(manifest,self.root,meminfo)
 
-        with patch.object(agent.shutil,'disk_usage',return_value=SimpleNamespace(free=24*1024**3)):
+        with patch.object(agent.shutil,'disk_usage',return_value=SimpleNamespace(free=5*1024**3)):
             with self.assertRaisesRegex(agent.PendingRelease,'Insufficient disk reserve'):
                 agent.ensure_deployment_capacity(manifest,self.root,meminfo)
 
-        meminfo.write_text('MemTotal: 16777216 kB\nMemAvailable: 7000000 kB\n')
-        with patch.object(agent.shutil,'disk_usage',return_value=SimpleNamespace(free=26*1024**3)):
-            with self.assertRaisesRegex(agent.PendingRelease,'Insufficient memory reserve'):
+        meminfo.write_text('MemTotal: 2048000 kB\nMemAvailable: 400000 kB\nSwapTotal: 2097152 kB\nSwapFree: 900000 kB\n')
+        with patch.object(agent.shutil,'disk_usage',return_value=SimpleNamespace(free=7*1024**3)):
+            with self.assertRaisesRegex(agent.PendingRelease,'Insufficient staging RAM reserve'):
+                agent.ensure_deployment_capacity(manifest,self.root,meminfo)
+
+        meminfo.write_text('MemTotal: 2048000 kB\nMemAvailable: 900000 kB\nSwapTotal: 2097152 kB\nSwapFree: 400000 kB\n')
+        with patch.object(agent.shutil,'disk_usage',return_value=SimpleNamespace(free=7*1024**3)):
+            with self.assertRaisesRegex(agent.PendingRelease,'Insufficient staging swap reserve'):
                 agent.ensure_deployment_capacity(manifest,self.root,meminfo)
 
     def test_capacity_block_does_not_consume_a_release_retry(self):
         manifest={
             'sha':SHA,
             'archives':{name:{'size':1024} for name in agent.SERVICES},
+            'image_sizes':{name:100*1024**2 for name in agent.SERVICES},
+            'source_size':1024,
         }
         agent.BASE.mkdir()
         with patch.object(agent,'github',side_effect=[[self.release],{'object':{'sha':SHA}}]),patch.object(
             agent,'verify_release',return_value=(manifest,self.root)
-        ),patch.object(agent.shutil,'disk_usage',return_value=SimpleNamespace(free=24*1024**3)):
+        ),patch.object(agent.shutil,'disk_usage',return_value=SimpleNamespace(free=5*1024**3)):
             with self.assertRaises(agent.PendingRelease):agent.poll()
         self.assertFalse((agent.BASE/'attempts.json').exists())
 
