@@ -1,0 +1,81 @@
+{
+  "environment": "disposable Compose project servio-auth-final-20261118",
+  "checks": {
+    "missingOriginRefreshRejected": "PASS",
+    "untrustedOriginRefreshRejected": "PASS",
+    "trustedOriginRefreshRotatesSession": "PASS",
+    "oldSessionAfterRefreshRejected": "PASS",
+    "crossTenantProductDeniedWithForgedScopeHeaders": "PASS",
+    "multiTenantLoginRequiresSelection": "PASS",
+    "authorizedTenantSelectionBindsSession": "PASS"
+  },
+  "requestCounts": {
+    "POST /auth/login": 2,
+    "POST /auth/refresh": 3,
+    "GET /auth/session": 3,
+    "GET /products/2": 1,
+    "POST /auth/login/confirm": 1
+  },
+  "timeline": [
+    {
+      "method": "POST",
+      "path": "/auth/login",
+      "status": 200,
+      "name": "staff-login"
+    },
+    {
+      "method": "POST",
+      "path": "/auth/refresh",
+      "status": 403,
+      "name": "refresh-without-origin"
+    },
+    {
+      "method": "POST",
+      "path": "/auth/refresh",
+      "status": 403,
+      "name": "refresh-untrusted-origin"
+    },
+    {
+      "method": "POST",
+      "path": "/auth/refresh",
+      "status": 204,
+      "name": "refresh-trusted-origin"
+    },
+    {
+      "method": "GET",
+      "path": "/auth/session",
+      "status": 200,
+      "name": "refreshed-session"
+    },
+    {
+      "method": "GET",
+      "path": "/auth/session",
+      "status": 401,
+      "name": "old-cookie-after-refresh"
+    },
+    {
+      "method": "GET",
+      "path": "/products/2",
+      "status": 404,
+      "name": "cross-tenant-product-with-forged-scope"
+    },
+    {
+      "method": "POST",
+      "path": "/auth/login",
+      "status": 200,
+      "name": "multi-tenant-login"
+    },
+    {
+      "method": "POST",
+      "path": "/auth/login/confirm",
+      "status": 200,
+      "name": "authorized-tenant-confirm"
+    },
+    {
+      "method": "GET",
+      "path": "/auth/session",
+      "status": 200,
+      "name": "selected-tenant-session"
+    }
+  ]
+}

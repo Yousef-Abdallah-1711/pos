@@ -1,434 +1,128 @@
-# Task 5.7: Comprehensive Load Testing
+# SERVIO Load Test Harness
 
-**Status**: ✅ Complete
-**Effort**: 4 hours
-**Tool**: k6 (modern load testing tool)
+**Status:** The synthetic k6 harness is implemented. Platform capacity, including 10K-user readiness, is **not validated**. No public staging or production load test is authorized by this suite.
 
----
+## Evidence correction
 
-## Overview
+Earlier versions of this document described requests to product, search, analytics, and static-asset paths that do not match the current API route inventory. They also published “expected results” and 1K–10K capacity figures without run evidence. Those paths and figures are invalid and must not be used for planning or release decisions. This document replaces them with a measured-only workflow.
 
-This task implements comprehensive load testing for the application with three scenarios:
-- **Baseline**: 10 concurrent users
-- **Normal Load**: 100 concurrent users
-- **Peak/Stress**: 1,000-10,000 concurrent users
+## Scope
 
-Tests validate performance under various load conditions and identify bottlenecks.
+The suite issues read-only `GET` requests to:
 
----
+- `GET /api/v1/health`
+- Optional `GET /api/v1/public/restaurants/{slug}/menu`
+- Optional authenticated `GET /api/v1/auth/session`
+- Optional Landing `GET /`
 
-## Implementation Summary
+There are no order, login, refresh, registration, or other mutation requests. The protected-session scenario requires a file of synthetic opaque session cookie values. It never prints cookie values, response bodies, or identity data. The repository does not include a fixture-provisioning command; prepare synthetic sessions through the approved test-environment setup and keep the fixture file outside version control.
 
-### 1. **Baseline Test** (`tests/load/baseline.js`)
+## Target guardrails
 
-Tests with 10 concurrent users to establish performance baseline.
+`API_BASE_URL` defaults to `http://127.0.0.1:8080`. `LANDING_BASE_URL` is optional. The scripts reject public DNS names and the historical `rakmyat.online` domains. Allowed targets are loopback, RFC1918 IPv4, local/private IPv6, and reserved `.test` or `.localhost` names. A `.test` name must resolve only inside the isolated test network.
 
-#### Test Scenario
-```
-Duration: 5 minutes
-├── Ramp up (1m): 0 → 10 users
-├── Sustain (3m): 10 users
-└── Ramp down (1m): 10 → 0 users
+Requests above 100 VUs or 100 requests per second require the explicit marker `POS_LOAD_TEST_ENVIRONMENT=dedicated`. The iteration-based scripts estimate a conservative request-rate ceiling from VUs, configured routes, and think time; the constant-arrival session script uses its configured RPS. The scripts also enforce local/private target rules; the marker does not make a public URL acceptable. Do not point these scripts at production or public staging. Use a dedicated environment with synthetic data, resource monitoring, an agreed load envelope, and an abort procedure.
 
-Endpoints tested:
-├── Homepage (/) - HTML page
-├── Products API - List endpoint
-├── Product Detail - Single item
-└── Search - Complex query
-```
+All response bodies are discarded. k6 summary output contains aggregate measurements only; do not enable request/response debug logging or attach cookie files to artifacts.
 
-#### Performance Targets
-```
-✓ Response time p(95): < 500ms
-✓ Response time p(99): < 1000ms
-✓ Error rate: < 10%
-```
+## Scenarios
 
-#### Run Command
-```bash
-# Basic run
-k6 run tests/load/baseline.js
+| Script | Default profile | Purpose |
+| --- | --- | --- |
+| `backend/tests/load/baseline.js` | Ramp to 10 VUs, hold 1 minute, ramp down | Establish a low-load measurement on public/read-only paths |
+| `backend/tests/load/normal-load.js` | Ramp to 100 VUs, hold 3 minutes, ramp down | Measure a controlled interactive-style GET mix |
+| `backend/tests/load/peak-load.js` | Ramp to 100 VUs, hold 1 minute, ramp down | Controlled higher concurrency; values above 100 require dedicated environment marker |
+| `backend/tests/load/protected-session-rps.js` | 10 session checks/second for 1 minute | Measure authenticated session validation with distinct synthetic sessions |
 
-# With custom URL
-k6 run tests/load/baseline.js --vus 10 --duration 5m
+The profiles are test inputs, not SLOs. VUs are not equivalent to registered users or idle sessions. For active request-rate testing, use `protected-session-rps.js` and set arrival rate independently from VU capacity.
 
-# With auth token
-AUTH_TOKEN="your_token" k6 run tests/load/baseline.js
+## Run with pinned k6
 
-# Generate report
-k6 run tests/load/baseline.js --out json=reports/baseline.json
-```
-
-#### Expected Results
-```
-Baseline (10 users):
-├── Total Requests: ~200-300
-├── Avg Response Time: 150-250ms
-├── p95 Response Time: 300-500ms
-├── p99 Response Time: 500-1000ms
-├── Error Rate: 0-1%
-└── Requests/sec: 0.6-1.0
-```
-
----
-
-### 2. **Normal Load Test** (`tests/load/normal-load.js`)
-
-Tests with 100 concurrent users for typical daily traffic.
-
-#### Test Scenario
-```
-Duration: 10 minutes
-├── Ramp up (2m): 0 → 100 users
-├── Sustain (5m): 100 users
-├── Ramp down (2m): 100 → 50 users
-└── Final ramp (1m): 50 → 0 users
-
-User flow simulation:
-1. Dashboard navigation
-2. Product browsing (pagination)
-3. Search queries
-4. Category listing
-5. Product detail view
-6. Analytics dashboard
-```
-
-#### Performance Targets
-```
-✓ Response time p(95): < 800ms
-✓ Response time p(99): < 2000ms
-✓ Error rate: < 5%
-```
-
-#### Run Command
-```bash
-# Run normal load test
-k6 run tests/load/normal-load.js
-
-# With 100 VUs explicitly
-k6 run tests/load/normal-load.js --vus 100 --duration 10m
-
-# With metrics output
-k6 run tests/load/normal-load.js \
-  --out json=reports/normal-load.json \
-  --out csv=reports/normal-load.csv
-```
-
-#### Expected Results
-```
-Normal Load (100 users):
-├── Total Requests: ~1500-2000
-├── Avg Response Time: 250-400ms
-├── p95 Response Time: 600-800ms
-├── p99 Response Time: 1500-2000ms
-├── Error Rate: 0-5%
-├── Requests/sec: 2.5-3.5
-└── Total Data Transferred: 50-100MB
-```
-
----
-
-### 3. **Peak/Stress Test** (`tests/load/peak-load.js`)
-
-Tests with 1,000-10,000 concurrent users for peak traffic scenarios.
-
-#### Test Scenario
-```
-Duration: 13 minutes
-├── Ramp up (2m): 0 → 500 users
-├── Ramp to peak (3m): 500 → 1000 users
-├── Sustain (5m): 1000 users (or higher)
-├── Ramp down (2m): 1000 → 500 users
-└── Final ramp (1m): 500 → 0 users
-
-Load profiles:
-├── Lightweight (70%): Static assets, list APIs
-├── Heavy (20%): Analytics, detailed queries
-└── Search (10%): Complex search operations
-
-Resource-aware testing:
-├── Reduce request frequency under load
-├── Prioritize critical paths
-└── Monitor degradation
-```
-
-#### Performance Targets
-```
-✓ Response time p(95): < 2000ms (degraded)
-✓ Response time p(99): < 5000ms (degraded)
-✓ Error rate: < 10% (acceptable under stress)
-```
-
-#### Run Command
-```bash
-# Peak load with 1000 users
-k6 run tests/load/peak-load.js --vus 1000 --duration 13m
-
-# Stress test with 10000 users
-k6 run tests/load/peak-load.js --vus 10000 --duration 13m
-
-# With detailed metrics
-k6 run tests/load/peak-load.js --vus 5000 \
-  --out json=reports/peak-5000.json \
-  --max-redirects 5 \
-  --batch 20 \
-  --batch-per-host 5
-```
-
-#### Expected Results
-```
-Peak Load (1000 users):
-├── Total Requests: ~5000-8000
-├── Avg Response Time: 500-1500ms
-├── p95 Response Time: 1500-2500ms
-├── p99 Response Time: 3000-5000ms
-├── Error Rate: 2-10% (acceptable)
-├── Requests/sec: 7-12
-├── Total Data: 200-300MB
-└── Database connections: < 500
-
-Stress Test (10000 users):
-├── Total Requests: ~15000-25000
-├── Avg Response Time: 2000-5000ms (degraded)
-├── p95 Response Time: 4000-8000ms
-├── p99 Response Time: 8000-15000ms
-├── Error Rate: 10-20%
-├── Requests/sec: 30-50
-└── System limits reached
-```
-
----
-
-## Running Load Tests
-
-### Installation
+Use the pinned image `grafana/k6:2.3.0` inside an isolated Docker network. Configure a private `.test` DNS alias for the API and, when needed, Landing. Keep the checkout mounted read-only and write results to a separate host directory.
 
 ```bash
-# macOS
-brew install k6
+mkdir -p reports
+docker run --rm \
+  --user "$(id -u):$(id -g)" \
+  --network servio-load-test \
+  --volume "$PWD:/work:ro" \
+  --volume "$PWD/reports:/reports" \
+  --workdir /work/backend \
+  -e API_BASE_URL=http://api.test:8080 \
+  grafana/k6:2.3.0 run \
+  --summary-export=/reports/baseline.raw.json \
+  tests/load/baseline.js
 
-# Linux (Ubuntu/Debian)
-sudo apt-get install k6
-
-# Docker
-docker pull grafana/k6
-
-# Windows (Chocolatey)
-choco install k6
+python3 backend/scripts/summarize_k6.py reports/baseline.raw.json \
+  --output reports/baseline.measured.json
 ```
 
-### Quick Start
+Create a new network with `docker network create servio-load-test`, then attach only the dedicated synthetic API/Landing test services to it with the `.test` aliases shown above. Do not attach it to existing staging services. The user mapping lets k6 read mode-`0600` synthetic cookie fixtures and write summaries into host-owned `reports/`. For local host-based runs, use the local k6 binary and a loopback/private URL.
+
+Example settings for a local k6 binary (for Docker, pass them with `docker run -e NAME=value`):
 
 ```bash
-# Run baseline test
-cd backend
-k6 run tests/load/baseline.js
-
-# Run all tests sequentially
-k6 run tests/load/baseline.js
-k6 run tests/load/normal-load.js
-k6 run tests/load/peak-load.js --vus 1000
+API_BASE_URL=http://api.test:8080
+LANDING_BASE_URL=http://landing.test:3000
+RESTAURANT_SLUG=synthetic-demo
+MAX_VUS=100
+RAMP_DURATION=1m
+HOLD_DURATION=3m
+RAMP_DOWN_DURATION=1m
 ```
 
-### Test Matrix
+Pass settings using the k6 environment interface (`-e NAME=value`) or the Docker container environment. `normal-load.js` caps `MAX_VUS` at 100. `peak-load.js` accepts up to 10,000 only when the dedicated marker is present and the target remains private. Start at low concurrency and increase only after reviewing service and database health.
+
+For authenticated session checks, create a mode-`0600` fixture file outside the repository with one raw 43-character `poos_session` value per synthetic session, one value per line. Do not include the `poos_session=` prefix. Ensure the file contains at least `MAX_VUS` distinct valid test sessions. Mount it read-only and set `SESSION_COOKIE_VALUES_FILE`. The protected RPS script also requires `MAX_VUS` values even when its preallocated pool is smaller, so each possible VU receives a distinct identity.
 
 ```bash
-#!/bin/bash
-
-# Test all scenarios
-echo "Running baseline test..."
-k6 run tests/load/baseline.js -o json=reports/baseline.json
-
-echo "Running normal load test..."
-k6 run tests/load/normal-load.js -o json=reports/normal-load.json
-
-echo "Running peak load test (1000 users)..."
-k6 run tests/load/peak-load.js --vus 1000 -o json=reports/peak-1000.json
-
-echo "Running stress test (5000 users)..."
-k6 run tests/load/peak-load.js --vus 5000 -o json=reports/peak-5000.json
-
-echo "Running stress test (10000 users)..."
-k6 run tests/load/peak-load.js --vus 10000 -o json=reports/peak-10000.json
+POS_LOAD_TEST_ENVIRONMENT=dedicated
+TARGET_RPS=333
+MAX_VUS=500
+PRE_ALLOCATED_VUS=100
+DURATION=5m
+SESSION_COOKIE_VALUES_FILE=/fixtures/synthetic-session-values.txt
 ```
 
----
-
-## Load Testing Metrics
-
-### Key Metrics
-
-| Metric | Description | Target |
-|--------|-------------|--------|
-| Response Time (avg) | Average response time | < 500ms (baseline) |
-| p(95) Response | 95th percentile latency | < 800ms (normal) |
-| p(99) Response | 99th percentile latency | < 2000ms (normal) |
-| Error Rate | % of failed requests | < 5% (normal) |
-| Throughput | Requests per second | > 10 (normal) |
-| Database Connections | Active DB connections | < 500 (peak) |
-
-### Interpreting Results
-
-```
-GOOD Results:
-├── Error Rate < 2%
-├── p(95) < target
-├── p(99) < 2× target
-├── Consistent response times
-└── CPU < 80%, Memory < 85%
-
-WARNING Results:
-├── Error Rate 2-5%
-├── p(95) at target
-├── p(99) > target
-├── Response time variance high
-└── CPU 80-90%, Memory 85-95%
-
-CRITICAL Results:
-├── Error Rate > 5%
-├── p(95) > target
-├── p(99) >> target
-├── Timeouts occurring
-└── CPU > 90%, Memory > 95%
-```
-
----
-
-## Analyzing Results
-
-### Using k6 Cloud
+Run the protected scenario as:
 
 ```bash
-# Upload results to k6 Cloud
-k6 run tests/load/baseline.js -o cloud
-
-# View in dashboard at https://app.k6.io
-# Compare across runs
-# Team collaboration
+k6 run \
+  -e API_BASE_URL=http://api.test:8080 \
+  -e POS_LOAD_TEST_ENVIRONMENT=dedicated \
+  -e TARGET_RPS=333 -e MAX_VUS=500 -e PRE_ALLOCATED_VUS=100 -e DURATION=5m \
+  -e SESSION_COOKIE_VALUES_FILE=/fixtures/synthetic-session-values.txt \
+  --summary-export=reports/session-333rps.raw.json \
+  backend/tests/load/protected-session-rps.js
 ```
 
-### Generating Reports
+Confirm the API and Redis have capacity for synthetic sessions before this run. Login bursts, order submission, Redis outage drills, websocket load, and tenant-isolation stress are not implemented by these read-only scripts and require separate test plans.
 
-```bash
-# JSON export
-k6 run tests/load/baseline.js -o json=results.json
+## Measured report
 
-# CSV export
-k6 run tests/load/baseline.js -o csv=results.csv
+`backend/scripts/summarize_k6.py` extracts request count/rate, failed-request rate, average/median/maximum/p90/p95/p99 HTTP duration, test duration when present, max VUs when present, and dropped iterations when k6 reports them. It errors when required k6 measurements are absent instead of filling in expected values. It does not copy test input paths, tags, response content, or headers. For arrival-rate tests, review dropped iterations alongside achieved request rate; configured arrival rate is not proof of achieved throughput.
 
-# HTML report (using extensions)
-k6 run tests/load/baseline.js \
-  --out json=results.json && \
-  node generate-html-report.js results.json
-```
+Keep the raw k6 summary and the sanitized measured report together. Record this run metadata separately:
 
-### Comparison Tools
+- Source commit and UTC run time.
+- Environment type, host/instance sizing, CPU and memory limits.
+- PostgreSQL and Redis versions/configuration.
+- Dataset/account/session/tenant counts.
+- Configured arrival rate, VU allocation, duration, and script.
+- CPU, RAM, network, PostgreSQL pool/query stats, and Redis memory/latency over the run.
+- Bottlenecks, aborts, and any errors.
 
-```bash
-# Install comparison tool
-npm install -g k6-compare
+Do not publish a result without its environment and dataset context. Do not compare measurements from different environments as a before/after improvement without a controlled protocol.
 
-# Compare two test runs
-k6-compare results1.json results2.json
-```
+## Current validation status
 
----
+- Pinned k6 2.3.0 parser checks for all four scripts: **passed**.
+- Public-domain/IP rejection and dedicated-environment VU/RPS guard checks: **passed**.
+- Short smoke runs against an ephemeral local mock HTTP server, including a synthetic cookie fixture: **passed**. This validates harness behavior only; it is not SERVIO performance evidence.
+- Functional load against a representative dedicated SERVIO environment: **not run**.
+- 10K registered accounts: **not validated**.
+- 10K idle sessions: **not validated**.
+- 10K concurrent Landing visitors: **not validated**.
+- 333 protected API RPS, 2,000 protected API RPS, login bursts, Redis recovery, and websocket/KDS concurrency: **not validated**.
 
-## Troubleshooting
-
-### High Error Rates
-
-**Problem**: 500 errors during load test
-
-**Solutions**:
-1. Check backend logs for exceptions
-2. Verify database connections aren't maxed
-3. Check file descriptor limits: `ulimit -n`
-4. Verify API rate limiting isn't triggered
-
-### Timeouts
-
-**Problem**: `context deadline exceeded` errors
-
-**Solutions**:
-1. Increase timeout: `http.get(url, { timeout: '30s' })`
-2. Reduce VUS (virtual users)
-3. Check network latency: `ping server`
-4. Verify server resources (CPU, memory)
-
-### Connection Refused
-
-**Problem**: `connection refused` at start
-
-**Solutions**:
-1. Verify server is running: `curl http://localhost:8080`
-2. Check firewall rules
-3. Verify DNS resolution
-4. Use IP instead of hostname
-
----
-
-## Performance Improvements Applied
-
-### From Previous Tasks
-
-| Task | Improvement | Impact |
-|------|-------------|--------|
-| 5.1 Code Splitting | Smaller initial bundles | 30% faster first paint |
-| 5.2 Bundle Optimization | Image compression, tree-shake | 50% smaller assets |
-| 5.3 Service Worker | Offline + caching | 90% cache hit rate |
-| 5.4 Client Cache | In-memory caching | <1s repeat requests |
-| 5.5 HTTP Headers | Long-term caching | Reduced bandwidth |
-| 5.6 Web Vitals | Performance monitoring | Real-time visibility |
-
-### Expected Load Test Results WITH Optimization
-
-```
-Without Optimization:
-├── 100 users: 50% error rate ❌
-├── 500 users: System overload ❌
-└── 1000 users: Complete failure ❌
-
-With Full Optimization:
-├── 100 users: 0-2% error rate ✅
-├── 500 users: 5-10% error rate ⚠️
-└── 1000 users: 10-15% error rate ⚠️
-```
-
----
-
-## Files Created
-
-1. ✅ `tests/load/baseline.js` - 10-user baseline test
-2. ✅ `tests/load/normal-load.js` - 100-user normal test
-3. ✅ `tests/load/peak-load.js` - 1000-10000 user stress test
-4. ✅ `docs/TASK_5.7_LOAD_TESTING.md` - This documentation
-
----
-
-## Acceptance Criteria
-
-- ✅ Baseline test runs successfully (10 users)
-- ✅ Normal load test runs successfully (100 users)
-- ✅ Peak load test runs successfully (1000+ users)
-- ✅ Response time p(95) < 2s under peak load
-- ✅ Error rate < 10% under stress
-- ✅ No crashes under load
-- ✅ Metrics collected and analyzable
-- ✅ Reports generated
-
----
-
-## Next Steps
-
-- **Task 5.8**: Performance benchmarking (v1.1.0 vs v2.0.0)
-- **Task 5.9**: Backward compatibility testing
-
----
-
-## References
-
-- [k6 Documentation](https://k6.io/docs/)
-- [k6 HTTP API](https://k6.io/docs/javascript-api/k6-http/)
-- [Load Testing Best Practices](https://k6.io/docs/testing-guides/)
-- [Performance Testing](https://k6.io/docs/get-started/running-k6/)
+Passing script or parser tests establish harness behavior only; they do not establish platform capacity.

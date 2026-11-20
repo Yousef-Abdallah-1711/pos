@@ -87,7 +87,15 @@ export const usePreferencesStore = create<PreferencesState>()(
 
       setLoading: (isLoading) => set({ isLoading }),
       setError: (error) => set({ error }),
-      reset: () => set({ settings: null, isLoading: false, error: null }),
+      reset: () => {
+        set({ settings: null, isLoading: false, error: null })
+        if (typeof document !== 'undefined') {
+          applyColors(defaultSettings.primaryColor, defaultSettings.secondaryColor, defaultSettings.accentColor)
+        }
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new CustomEvent('preferencesUpdated', { detail: defaultSettings }))
+        }
+      },
     }),
     {
       name: 'preferences-storage',

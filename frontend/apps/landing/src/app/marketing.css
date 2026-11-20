@@ -23,6 +23,7 @@ html:not(.light) .sv-button-secondary { background:#30263d; color:#f6f0ff; borde
 html:not(.light) .sv-capture-image { background:#211a2b; border-color:var(--sv-line); }
 html:not(.light) .sv-capture figcaption,html:not(.light) .sv-mobile-navigation { color:var(--sv-muted); }
 html:not(.light) .sv-mobile-navigation { background:#211a2b; }
+html:not(.light) .sv-handoff { background:var(--sv-surface-raised); border-color:var(--sv-line); color:var(--sv-ink); }
 html:not(.light) .sv-faq details,html:not(.light) .sv-feature-card,html:not(.light) .sv-feature-showcase { border-color:var(--sv-line); }
 html:not(.light) .sv-main input,html:not(.light) .sv-main select,html:not(.light) .sv-main textarea { background:#211a2b; color:var(--sv-ink); border-color:#77678c; }
 html:not(.light) .sv-main input::placeholder,html:not(.light) .sv-main textarea::placeholder { color:#c0b6cd; }
@@ -58,7 +59,6 @@ html:not(.light) .sv-capture figcaption a { color:#d6c0ff; }
 .sv-feature-showcase__copy h3 { font-size:clamp(25px,3vw,38px); }
 .sv-feature-showcase__capture { min-width:0; }
 .sv-feature-showcase__capture .sv-capture { margin:0; }
-.sv-feature-showcase__capture .sv-capture-image { max-height:390px; }
 .sv-hospitality-story__layout {
   display:grid;
   grid-template-columns:minmax(0,1fr);

@@ -22,6 +22,8 @@ type AuthRepository struct {
 	db *sql.DB
 }
 
+const authSessionProfileQueryTimeout = 3 * time.Second
+
 var (
 	ErrTenantSlugExists   = errors.New("restaurant slug already exists")
 	ErrTenantNameExists   = errors.New("restaurant name already exists")
@@ -309,6 +311,41 @@ func (r *AuthRepository) FindUserByEmailAllTenants(email string) ([]domain.User,
 	}
 
 	return users, nil
+}
+
+// GetAuthSessionProfile returns the active account display fields for the
+// exact user and tenant authenticated by the session middleware.
+func (r *AuthRepository) GetAuthSessionProfile(ctx context.Context, userID, tenantID, restaurantID int, role string) (*domain.AuthSessionProfile, error) {
+	if r.db == nil {
+		return nil, errors.New("auth profile database unavailable")
+	}
+
+	var profile domain.AuthSessionProfile
+	var storedRestaurantID sql.NullInt64
+	var restaurantName sql.NullString
+	queryCtx, cancel := context.WithTimeout(ctx, authSessionProfileQueryTimeout)
+	defer cancel()
+	err := r.db.QueryRowContext(queryCtx, `
+		SELECT u.id, u.name, u.email, u.tenant_id, u.restaurant_id, u.role, r.name
+		FROM users u
+		LEFT JOIN restaurants r ON r.id = u.restaurant_id AND r.tenant_id = u.tenant_id
+		WHERE u.id = $1 AND u.tenant_id = $2 AND u.status = 'active'
+		  AND COALESCE(u.restaurant_id, 0) = $3 AND u.role = $4
+	`, userID, tenantID, restaurantID, role).Scan(
+		&profile.UserID, &profile.DisplayName, &profile.Email, &profile.TenantID,
+		&storedRestaurantID, &profile.Role, &restaurantName,
+	)
+	if err != nil {
+		return nil, err
+	}
+	if storedRestaurantID.Valid {
+		id := int(storedRestaurantID.Int64)
+		profile.RestaurantID = &id
+	}
+	if restaurantName.Valid {
+		profile.RestaurantName = restaurantName.String
+	}
+	return &profile, nil
 }
 
 // UpdateLastLogin updates the user's last login time

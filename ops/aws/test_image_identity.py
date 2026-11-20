@@ -46,9 +46,57 @@ class ImageIdentityTests(unittest.TestCase):
     def test_loaded_image_outside_verified_identity_set_is_rejected(self):
         manifest={'sha':'a'*40,'image_ids':{'backend':'sha256:'+'b'*64},'images':{'backend':'ghcr.io/yousef-abdallah-1711/pos/backend@sha256:'+'c'*64},'archives':{'backend':{'file':'backend.docker.tar.gz'}}}
         loaded=[{'Id':'sha256:'+'d'*64,'Config':{'Labels':{'org.opencontainers.image.revision':'a'*40}}}]
-        with patch.object(deploy,'SERVICES',['backend']),patch.object(deploy,'archive_identities',return_value={'sha256:'+'b'*64}),patch.object(deploy,'checked'),patch.object(deploy.subprocess,'check_output',return_value=json.dumps(loaded)):
+        config={'os':'linux','architecture':'amd64','config':loaded[0]['Config'],'rootfs':{'diff_ids':[]}}
+        with patch.object(deploy,'SERVICES',['backend']),patch.object(deploy,'archive_identities',return_value={'sha256:'+'b'*64}),patch.object(deploy,'archive_image_config',return_value=('servio-ci-backend:sha',config)),patch.object(deploy,'checked'),patch.object(deploy.subprocess,'check_output',return_value=json.dumps(loaded)):
             with self.assertRaisesRegex(RuntimeError,'Loaded image identity mismatch'):
                 deploy.load_verified_images(manifest,Path('/unused'))
+
+    def test_loaded_image_is_checked_by_signed_archive_tag_and_config(self):
+        sha='a'*40
+        image_config={
+            'architecture':'amd64',
+            'os':'linux',
+            'config':{'Labels':{'org.opencontainers.image.revision':sha}},
+            'rootfs':{'type':'layers','diff_ids':['sha256:'+'c'*64]},
+        }
+        config_bytes=json.dumps(image_config,separators=(',',':')).encode()
+        config_id='sha256:'+hashlib.sha256(config_bytes).hexdigest()
+        with tempfile.TemporaryDirectory() as directory:
+            archive=Path(directory)/'backend.docker.tar.gz'
+            docker_tag='servio-ci-backend:'+sha
+            with tarfile.open(archive,'w:gz') as output:
+                members={
+                    'manifest.json':json.dumps([{
+                        'Config':'image.json','RepoTags':[docker_tag],
+                    }]).encode(),
+                    'image.json':config_bytes,
+                }
+                for name,data in members.items():
+                    member=tarfile.TarInfo(name);member.size=len(data)
+                    output.addfile(member,io.BytesIO(data))
+
+            manifest={
+                'sha':sha,
+                'image_ids':{'backend':config_id},
+                'images':{'backend':'ghcr.io/yousef-abdallah-1711/pos/backend@sha256:'+'d'*64},
+                'archives':{'backend':{'file':archive.name}},
+            }
+            # Docker Engine may normalize the config and expose a different local ID.
+            engine_image={
+                'Id':'sha256:'+'e'*64,
+                'Os':'linux',
+                'Architecture':'amd64',
+                'Config':image_config['config'],
+                'RootFS':{'Layers':image_config['rootfs']['diff_ids']},
+            }
+            with patch.object(deploy,'SERVICES',['backend']),patch.object(deploy,'checked') as docker_load,patch.object(
+                deploy.subprocess,'check_output',return_value=json.dumps([engine_image]),
+            ) as inspect:
+                result=deploy.load_verified_images(manifest,Path(directory))
+
+            docker_load.assert_called_once_with(['docker','load','-i',str(archive)],stdout=deploy.subprocess.DEVNULL)
+            inspect.assert_called_once_with(['docker','image','inspect',docker_tag])
+            self.assertEqual(result,{'backend':engine_image['Id']})
 
 class ExtractedSourcePermissionTests(unittest.TestCase):
     def test_private_agent_umask_does_not_hide_public_source_from_acceptance_user(self):

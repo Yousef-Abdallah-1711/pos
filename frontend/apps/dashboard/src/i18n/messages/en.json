@@ -96,7 +96,11 @@
     "signUp": "Sign Up",
     "or": "Or",
     "continueWith": "Continue with",
-    "redirectingToLogin": "Redirecting to login..."
+    "redirectingToLogin": "Redirecting to login...",
+    "checkingSession": "Checking your sign-in status…",
+    "sessionUnavailable": "Sign-in status is temporarily unavailable. Your session has not been confirmed. Try again.",
+    "sessionForbidden": "This account cannot open the staff dashboard. Contact your administrator if you need access.",
+    "retrySession": "Try again"
   },
   "dashboard": {
     "welcome": "Welcome",

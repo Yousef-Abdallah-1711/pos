@@ -168,9 +168,6 @@
 .sv-feature-hero .sv-capture {
   margin-top:45px;
 }
-.sv-feature-hero .sv-capture-image {
-  max-height:650px;
-}
 .sv-feature-grid {
   display:grid;
   gap:0 35px;

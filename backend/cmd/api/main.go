@@ -280,6 +280,11 @@ func main() {
 
 	// Initialize use cases
 	authUseCase := usecase.NewAuthUseCase(authRepo, tokenService)
+	proofStore, proofStoreOK := sessionCache.(usecase.SelectionProofStore)
+	if !proofStoreOK {
+		log.Fatal("atomic selection proof store is required")
+	}
+	authUseCase.SetSelectionProofStore(proofStore)
 	// Wire up super admin repo for token exchange (super admin dashboard access)
 	if superAdminRepo != nil {
 		authUseCase.SetSuperAdminRepo(superAdminRepo)
@@ -528,16 +533,24 @@ func main() {
 	authenticateRequest := middleware.SessionAuthMiddleware(tokenService, authSessionStore, impersonationAuthenticators...)
 
 	// Public routes - Authentication
-	mux.Handle("POST /api/v1/auth/register", middleware.RequireTrustedOrigin(middleware.RateLimitByIP(10)(http.HandlerFunc(authHandler.Register))))
-	mux.Handle("POST /api/v1/auth/login", middleware.RequireTrustedOrigin(middleware.RateLimitByIP(20)(http.HandlerFunc(authHandler.Login))))
-	mux.Handle("POST /api/v1/auth/login/confirm", middleware.RequireTrustedOrigin(middleware.RateLimitByIP(20)(http.HandlerFunc(authHandler.LoginConfirm))))
+	var authRateLimitStore middleware.SharedRateLimitStore
+	if redisCache, isRedis := sessionCache.(*service.RedisCache); isRedis {
+		authRateLimitStore = redisCache
+	} else if config.IsProductionMode() {
+		log.Fatal("Redis-backed auth rate limiting is required in production")
+	} else {
+		authRateLimitStore = service.NewInMemoryRateLimitStore(10000)
+	}
+	mux.Handle("POST /api/v1/auth/register", middleware.RequireTrustedOrigin(middleware.RateLimitByIPWithStore(authRateLimitStore, "auth-register", 10, time.Minute)(http.HandlerFunc(authHandler.Register))))
+	mux.Handle("POST /api/v1/auth/login", middleware.RequireTrustedOrigin(middleware.RateLimitByIPWithStore(authRateLimitStore, "auth-login", 20, time.Minute)(http.HandlerFunc(authHandler.Login))))
+	mux.Handle("POST /api/v1/auth/login/confirm", middleware.RequireTrustedOrigin(middleware.RateLimitByIPWithStore(authRateLimitStore, "auth-login-confirm", 20, time.Minute)(http.HandlerFunc(authHandler.LoginConfirm))))
 	mux.Handle("GET /api/v1/auth/session", authenticateRequest(http.HandlerFunc(authHandler.Session)))
-	mux.Handle("POST /api/v1/auth/refresh", middleware.RequireTrustedOrigin(middleware.RateLimitByIP(20)(middleware.SessionAuthMiddleware(tokenService, authSessionStore)(http.HandlerFunc(authHandler.Refresh)))))
-	mux.Handle("POST /api/v1/auth/logout", http.HandlerFunc(authHandler.Logout))
+	mux.Handle("POST /api/v1/auth/refresh", middleware.RequireTrustedOrigin(middleware.RateLimitByIPWithStore(authRateLimitStore, "auth-refresh", 20, time.Minute)(middleware.SessionAuthMiddleware(tokenService, authSessionStore)(http.HandlerFunc(authHandler.Refresh)))))
+	mux.Handle("POST /api/v1/auth/logout", middleware.RequireTrustedOrigin(http.HandlerFunc(authHandler.Logout)))
 	// Browser handoff is performed server-to-server by the authenticated Super Admin route;
 	// do not expose a bearer/code exchange endpoint to arbitrary browser clients.
-	mux.Handle("POST /api/v1/auth/forgot-password", middleware.RateLimitByIP(5)(http.HandlerFunc(authHandler.ForgotPassword)))
-	mux.Handle("GET /api/v1/auth/check-subdomain", middleware.RateLimitByIP(60)(http.HandlerFunc(authHandler.CheckSubdomainAvailability)))
+	mux.Handle("POST /api/v1/auth/forgot-password", middleware.RateLimitByIPWithStore(authRateLimitStore, "auth-forgot-password", 5, time.Minute)(http.HandlerFunc(authHandler.ForgotPassword)))
+	mux.Handle("GET /api/v1/auth/check-subdomain", middleware.RateLimitByIPWithStore(authRateLimitStore, "auth-check-subdomain", 60, time.Minute)(http.HandlerFunc(authHandler.CheckSubdomainAvailability)))
 
 	// Public routes - Menu API (no authentication required)
 	mux.HandleFunc("GET /api/v1/public/restaurants/{slug}/menu", publicMenuHandler.GetRestaurantMenu)
@@ -1881,7 +1894,7 @@ func main() {
 		}
 
 		// Super Admin Authentication (public - no auth required)
-		mux.Handle("POST /api/v1/super-admin/auth/login", middleware.RequireTrustedOrigin(middleware.RateLimitByIP(10)(http.HandlerFunc(superAdminHandler.Login))))
+		mux.Handle("POST /api/v1/super-admin/auth/login", middleware.RequireTrustedOrigin(middleware.RateLimitByIPWithStore(authRateLimitStore, "super-admin-login", 10, time.Minute)(http.HandlerFunc(superAdminHandler.Login))))
 		mux.Handle("GET /api/v1/super-admin/auth/session", wrapSuperAdmin(http.HandlerFunc(superAdminHandler.Session)))
 
 		// Super Admin Protected Routes

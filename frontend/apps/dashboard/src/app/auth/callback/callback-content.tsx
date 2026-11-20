@@ -1,27 +1,28 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { useAuthStore } from '@/stores/authStore'
+import { requestDashboardCallbackSession } from '@/lib/authSession'
 import { getConfig } from '@/lib/config'
 
 export default function AuthCallbackContent() {
   const setAuth = useAuthStore((state) => state.setAuth)
+  const redirectedRef = useRef(false)
 
   useEffect(() => {
     let active = true
-    fetch(`${getConfig().apiUrl}/auth/session`, { credentials: 'include', cache: 'no-store' })
-      .then(async (response) => {
-        if (!response.ok) throw new Error('Session unavailable')
-        return response.json()
-      })
-      .then((user: unknown) => {
-        if (!active) return
-        setAuth(user as Parameters<typeof setAuth>[0], '')
+    void requestDashboardCallbackSession(getConfig().apiUrl)
+      .then((user) => {
+        if (!active || redirectedRef.current) return
+        redirectedRef.current = true
+        setAuth(user, '')
         window.history.replaceState({}, document.title, '/auth/callback')
         window.location.replace('/en/dashboard')
       })
       .catch(() => {
-        if (active) window.location.replace(`${getConfig().landingUrl}/en/auth/login`)
+        if (!active || redirectedRef.current) return
+        redirectedRef.current = true
+        window.location.replace(`${getConfig().landingUrl}/en/auth/login`)
       })
 
     return () => { active = false }

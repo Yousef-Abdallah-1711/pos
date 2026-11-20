@@ -218,6 +218,8 @@ export const useThemeBuilderStore = create<ThemeBuilderState>()(
       resetTheme: () => {
         set({
           currentTheme: null,
+          isLoading: false,
+          isSaving: false,
           colors: defaultColors,
           typography: defaultTypography,
           identity: defaultIdentity,

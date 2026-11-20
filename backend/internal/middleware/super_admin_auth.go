@@ -3,6 +3,7 @@ package middleware
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"log"
 	"net"
 	"net/http"
@@ -51,7 +52,12 @@ func SuperAdminAuthMiddleware(validator SuperAdminTokenValidator, sessions ...au
 				}
 				credential, resolveErr := sessionResolver.Resolve(r.Context(), cookie.Value)
 				if resolveErr != nil {
-					respondError(w, http.StatusUnauthorized, "invalid or expired session")
+					if errors.Is(resolveErr, service.ErrSessionNotFound) {
+						respondError(w, http.StatusUnauthorized, "invalid or expired session")
+						return
+					}
+					w.Header().Set("Cache-Control", "private, no-store")
+					respondError(w, http.StatusServiceUnavailable, "session service temporarily unavailable")
 					return
 				}
 				token = credential
@@ -215,26 +221,39 @@ func RateLimitSuperAdmin(requestsPerMinute int) func(http.Handler) http.Handler 
 
 // GetClientIP extracts the real client IP from the request
 func GetClientIP(r *http.Request) string {
-	remoteIP := extractRemoteIP(r.RemoteAddr)
+	remoteIP := normalizeIP(extractRemoteIP(r.RemoteAddr))
 	trustForwarded := isTrustedProxy(remoteIP)
 
-	// Check X-Forwarded-For header first
 	xff := strings.TrimSpace(r.Header.Get("X-Forwarded-For"))
-	if trustForwarded && xff != "" {
-		// Take the first IP in the list
+	if trustForwarded && xff != "" && len(xff) <= 4096 {
 		ips := strings.Split(xff, ",")
-		if len(ips) > 0 {
-			ip := strings.TrimSpace(ips[0])
-			if net.ParseIP(ip) != nil {
-				return ip
+		if len(ips) > 32 {
+			ips = nil
+		}
+		current := remoteIP
+		validChain := len(ips) > 0
+		for i := len(ips) - 1; i >= 0; i-- {
+			if !isTrustedProxy(current) {
+				return current
 			}
+			candidate := normalizeIP(ips[i])
+			if candidate == "" {
+				validChain = false
+				break
+			}
+			current = candidate
+		}
+		if validChain && current != "" {
+			return current
 		}
 	}
 
 	// Check X-Real-IP header
 	xri := strings.TrimSpace(r.Header.Get("X-Real-IP"))
-	if trustForwarded && xri != "" && net.ParseIP(xri) != nil {
-		return xri
+	if trustForwarded && xri != "" {
+		if normalized := normalizeIP(xri); normalized != "" {
+			return normalized
+		}
 	}
 
 	// Fall back to RemoteAddr
@@ -242,6 +261,14 @@ func GetClientIP(r *http.Request) string {
 		return remoteIP
 	}
 	return r.RemoteAddr
+}
+
+func normalizeIP(value string) string {
+	parsed := net.ParseIP(strings.TrimSpace(value))
+	if parsed == nil {
+		return ""
+	}
+	return parsed.String()
 }
 
 func extractRemoteIP(remoteAddr string) string {
