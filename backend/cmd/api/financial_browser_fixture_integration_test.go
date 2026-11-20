@@ -30,6 +30,7 @@ type financialBrowserFixture struct {
 	SecondTenant         financialBrowserIdentityFixture `json:"second_tenant"`
 	PrimaryAccount       int64                           `json:"primary_account_id"`
 	RevenueAccount       int64                           `json:"revenue_account_id"`
+	ContraAssetAccount   int64                           `json:"contra_asset_account_id"`
 	PrimaryTenantID      int64                           `json:"primary_tenant_id"`
 	ForeignAccount       int64                           `json:"foreign_account_id"`
 	AccountName          string                          `json:"account_name"`
@@ -45,8 +46,6 @@ type financialBrowserBalanceSheet struct {
 	LiabilitiesCents int64 `json:"liabilities_cents"`
 	EquityCents      int64 `json:"equity_cents"`
 }
-
-const financialBrowserJournalAmountCents int64 = 5000
 
 // TestFinancialAcceptanceSeedBrowserFixtures runs only in the isolated CI
 // financial acceptance workflow and writes credentials to a private local file.
@@ -123,7 +122,7 @@ func TestFinancialAcceptanceSeedBrowserFixtures(t *testing.T) {
 		foreignTenantID, foreignRestaurantID).Scan(&foreignAccountID); err != nil {
 		t.Fatalf("seed foreign tenant browser account: %v", err)
 	}
-	expectedBalanceSheet := readFinancialBrowserBalanceSheet(t, db, primary, primaryAccountID)
+	expectedBalanceSheet := readFinancialBrowserBalanceSheet(t, db, primary)
 
 	fixture := financialBrowserFixture{
 		Accountant:           financialBrowserIdentityFixture{Email: accountant.email, Password: accountant.password, Role: accountant.role},
@@ -132,6 +131,7 @@ func TestFinancialAcceptanceSeedBrowserFixtures(t *testing.T) {
 		SecondTenant:         financialBrowserIdentityFixture{Email: secondTenant.email, Password: secondTenant.password, Role: secondTenant.role},
 		PrimaryAccount:       primaryAccountID,
 		RevenueAccount:       revenueAccountID,
+		ContraAssetAccount:   receivableAccountID,
 		PrimaryTenantID:      primary.tenantID,
 		ForeignAccount:       foreignAccountID,
 		AccountName:          "Synthetic Cash",
@@ -154,7 +154,7 @@ func TestFinancialAcceptanceSeedBrowserFixtures(t *testing.T) {
 	t.Log("created isolated accountant, cashier, second-tenant identities and account fixtures")
 }
 
-func readFinancialBrowserBalanceSheet(t *testing.T, db *sql.DB, fixture liveFinancialFixture, cashAccountID int64) financialBrowserBalanceSheet {
+func readFinancialBrowserBalanceSheet(t *testing.T, db *sql.DB, fixture liveFinancialFixture) financialBrowserBalanceSheet {
 	t.Helper()
 	var expected financialBrowserBalanceSheet
 	err := db.QueryRowContext(t.Context(), `
@@ -173,14 +173,5 @@ func readFinancialBrowserBalanceSheet(t *testing.T, db *sql.DB, fixture liveFina
 	if err != nil {
 		t.Fatalf("calculate independent browser Balance Sheet oracle: %v", err)
 	}
-	var accountType, normalBalance string
-	if err := db.QueryRowContext(t.Context(), `SELECT account_type,normal_balance FROM chart_of_accounts WHERE id=$1 AND tenant_id=$2 AND restaurant_id=$3`, cashAccountID, fixture.tenantID, fixture.restaurantID).Scan(&accountType, &normalBalance); err != nil {
-		t.Fatalf("verify browser journal debit account: %v", err)
-	}
-	if accountType != "asset" || normalBalance != "debit" {
-		t.Fatalf("browser journal's planned debit must increase a debit-normal asset; account type=%q normal balance=%q", accountType, normalBalance)
-	}
-	// The browser journey posts this exact cash debit before opening the report.
-	expected.AssetsCents += financialBrowserJournalAmountCents
 	return expected
 }

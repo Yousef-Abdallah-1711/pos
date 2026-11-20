@@ -218,7 +218,7 @@ async function assertFinancialContentClearsSidebar(page) {
 }
 
 test.describe('authenticated financial browser acceptance', () => {
-  test('accountant EN desktop creates/posts a balanced journal and reconciles the visible ledger', async ({ page }, testInfo) => {
+  test('accountant EN desktop posts a balanced asset transfer and reconciles the visible ledger', async ({ page }, testInfo) => {
     await setViewport(page, 1440, 900)
     const session = await login(page, identities.accountant)
     expect(session.role).toBe('accountant')
@@ -234,7 +234,8 @@ test.describe('authenticated financial browser acceptance', () => {
     const dialog = page.getByRole('dialog')
     await dialog.locator('input').nth(2).fill('Browser acceptance balanced journal')
     await dialog.locator('tbody select').nth(0).selectOption(String(fixture.primary_account_id))
-    await dialog.locator('tbody select').nth(1).selectOption(String(fixture.revenue_account_id))
+    // The counter-entry is another debit-normal asset so aggregate Balance Sheet values stay stable across test selection/order.
+    await dialog.locator('tbody select').nth(1).selectOption(String(fixture.contra_asset_account_id))
     const journalLines = dialog.locator('tbody tr')
     const debitAmount = journalLines.nth(0).locator('input[type="number"]').nth(0)
     const creditAmount = journalLines.nth(1).locator('input[type="number"]').nth(1)
@@ -276,6 +277,18 @@ test.describe('authenticated financial browser acceptance', () => {
     expect(postedJournalRows[0].account_id).toBe(fixture.primary_account_id)
     expect(Math.round(postedJournalRows[0].debit_amount * 100)).toBe(browserJournalAmountCents)
     expect(Math.round(postedJournalRows[0].credit_amount * 100)).toBe(0)
+    const contraAssetLedgerResponse = await page.request.get(
+      `${apiBase}/accounting/ledger?account_id=${fixture.contra_asset_account_id}`,
+    )
+    expect(contraAssetLedgerResponse.status()).toBe(200)
+    const contraAssetLedgerPayload = await contraAssetLedgerResponse.json()
+    const postedCounterRows = (contraAssetLedgerPayload.data?.lines || []).filter(
+      (line) => line.journal_entry_id === postedJournalId,
+    )
+    expect(postedCounterRows).toHaveLength(1)
+    expect(postedCounterRows[0].account_id).toBe(fixture.contra_asset_account_id)
+    expect(Math.round(postedCounterRows[0].debit_amount * 100)).toBe(0)
+    expect(Math.round(postedCounterRows[0].credit_amount * 100)).toBe(browserJournalAmountCents)
 
     await page.goto('/en/dashboard/accounting/general-ledger')
     await expect(page.getByRole('heading', { name: /General Ledger/i })).toBeVisible()
