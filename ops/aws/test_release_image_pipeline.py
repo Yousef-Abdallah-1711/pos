@@ -4,7 +4,9 @@ import hashlib
 import importlib.util
 import io
 import json
+import os
 from pathlib import Path
+import runpy
 import sys
 import tempfile
 import tarfile
@@ -36,7 +38,7 @@ def write_docker_archive(path: Path, name: str, sha: str, image_id: str) -> int:
     }).encode()
     config_name = image_id.removeprefix('sha256:') + '.json'
     layer_name = 'layer/layer.tar'
-    manifest = json.dumps([{'Config': config_name, 'RepoTags': [f'servio-ci-{name}:{sha}'], 'Layers': [layer_name]}]).encode()
+    manifest = json.dumps([{'Config': config_name, 'RepoTags': [f'servio-release-{name}:{sha}'], 'Layers': [layer_name]}]).encode()
     with tarfile.open(path, 'w:gz') as archive:
         for member_name, data in [('manifest.json', manifest), (config_name, config), (layer_name, b'x' * 8192)]:
             info = tarfile.TarInfo(member_name)
@@ -46,6 +48,57 @@ def write_docker_archive(path: Path, name: str, sha: str, image_id: str) -> int:
 
 
 class ReleaseImagePipelineTests(unittest.TestCase):
+    def test_builder_separates_ci_origins_from_main_release_origins(self):
+        sha = 'd' * 40
+        environment = {
+            'GITHUB_ACTIONS': 'true',
+            'GITHUB_REPOSITORY': 'Yousef-Abdallah-1711/pos',
+            'GITHUB_SHA': sha,
+            'GITHUB_EVENT_NAME': 'push',
+            'GITHUB_REF': 'refs/heads/main',
+        }
+        with patch.dict(os.environ, environment), patch('subprocess.run') as docker_run:
+            runpy.run_path(str(ROOT / 'ops/aws/build-ci-images.py'))
+        commands = [call.args[0] for call in docker_run.call_args_list]
+        ci_landing = next(command for command in commands if f'servio-ci-landing:{sha}' in command)
+        release_landing = next(command for command in commands if f'servio-release-landing:{sha}' in command)
+        self.assertIn('NEXT_PUBLIC_API_URL=https://api.servio.test/api/v1', ci_landing)
+        self.assertIn('NEXT_PUBLIC_API_URL=https://api.pos.rakmyat.online/api/v1', release_landing)
+        release_tags = {
+            argument
+            for command in commands
+            for argument in command
+            if argument.startswith('servio-release-') and argument.endswith(':' + sha)
+        }
+        self.assertEqual(release_tags, {f'servio-release-{name}:{sha}' for name in stager.IMAGE_NAMES})
+
+        pull_request = {**environment, 'GITHUB_EVENT_NAME': 'pull_request', 'GITHUB_REF': 'refs/pull/92/merge'}
+        with patch.dict(os.environ, pull_request), patch('subprocess.run') as docker_run:
+            runpy.run_path(str(ROOT / 'ops/aws/build-ci-images.py'))
+        pull_request_commands = [call.args[0] for call in docker_run.call_args_list]
+        self.assertEqual(len(pull_request_commands), 5)
+        self.assertFalse(any(
+            argument.startswith('servio-release-') and argument.endswith(':' + sha)
+            for command in pull_request_commands
+            for argument in command
+        ))
+
+    def test_release_frontend_bundle_requires_staging_api_and_rejects_ci_hosts(self):
+        with tempfile.TemporaryDirectory() as directory:
+            static = Path(directory)
+            (static / 'app.js').write_text('fetch("https://api.pos.rakmyat.online/api/v1/auth/session")')
+            stager.verify_frontend_static('landing', static)
+            (static / 'app.js').write_text('fetch("https://api.servio.test/api/v1/auth/session")')
+            with self.assertRaisesRegex(RuntimeError, 'Disposable CI host'):
+                stager.verify_frontend_static('landing', static)
+
+    def test_release_frontend_bundle_rejects_missing_staging_api_host(self):
+        with tempfile.TemporaryDirectory() as directory:
+            static = Path(directory)
+            (static / 'app.js').write_text('fetch("https://api.example.invalid/api/v1/auth/session")')
+            with self.assertRaisesRegex(RuntimeError, 'lacks its staging API host'):
+                stager.verify_frontend_static('landing', static)
+
     def test_installer_copies_deployer_runtime_dependencies(self):
         installer = (ROOT / 'ops/aws/install-pull-agent').read_text(encoding='utf-8')
         self.assertIn(
@@ -125,7 +178,7 @@ class ReleaseImagePipelineTests(unittest.TestCase):
 
             def fake_inspect(command, text):
                 tag = command[-1]
-                name = tag.removeprefix('servio-ci-').split('/')[-1].split(':')[0]
+                name = tag.removeprefix('servio-release-').split('/')[-1].split(':')[0]
                 image = {
                     'Id': image_ids[name],
                     # Docker Engine's reported Size is intentionally allowed to differ.

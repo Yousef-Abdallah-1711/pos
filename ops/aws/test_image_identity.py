@@ -47,7 +47,7 @@ class ImageIdentityTests(unittest.TestCase):
         manifest={'sha':'a'*40,'image_ids':{'backend':'sha256:'+'b'*64},'images':{'backend':'ghcr.io/yousef-abdallah-1711/pos/backend@sha256:'+'c'*64},'archives':{'backend':{'file':'backend.docker.tar.gz'}}}
         loaded=[{'Id':'sha256:'+'d'*64,'Config':{'Labels':{'org.opencontainers.image.revision':'a'*40}}}]
         config={'os':'linux','architecture':'amd64','config':loaded[0]['Config'],'rootfs':{'diff_ids':[]}}
-        with patch.object(deploy,'SERVICES',['backend']),patch.object(deploy,'archive_identities',return_value={'sha256:'+'b'*64}),patch.object(deploy,'archive_image_config',return_value=('servio-ci-backend:sha',config)),patch.object(deploy,'checked'),patch.object(deploy.subprocess,'check_output',return_value=json.dumps(loaded)):
+        with patch.object(deploy,'SERVICES',['backend']),patch.object(deploy,'archive_identities',return_value={'sha256:'+'b'*64}),patch.object(deploy,'archive_image_config',return_value=('servio-release-backend:sha',config)),patch.object(deploy,'checked'),patch.object(deploy.subprocess,'check_output',return_value=json.dumps(loaded)):
             with self.assertRaisesRegex(RuntimeError,'Loaded image identity mismatch'):
                 deploy.load_verified_images(manifest,Path('/unused'))
 
@@ -63,7 +63,7 @@ class ImageIdentityTests(unittest.TestCase):
         config_id='sha256:'+hashlib.sha256(config_bytes).hexdigest()
         with tempfile.TemporaryDirectory() as directory:
             archive=Path(directory)/'backend.docker.tar.gz'
-            docker_tag='servio-ci-backend:'+sha
+            docker_tag='servio-release-backend:'+sha
             with tarfile.open(archive,'w:gz') as output:
                 members={
                     'manifest.json':json.dumps([{

@@ -158,7 +158,7 @@ def archive_identities(path,config_id):
 def archive_image_config(path,name,sha):
     with tarfile.open(path) as source:
         entries=json.loads(archive_member(source,'manifest.json'))
-        expected_tag='servio-ci-'+name+':'+sha
+        expected_tag='servio-release-'+name+':'+sha
         if len(entries)!=1 or entries[0].get('RepoTags')!=[expected_tag]:
             raise RuntimeError('Unexpected loaded image tag: '+name)
         config=json.loads(archive_member(source,entries[0]['Config']))
