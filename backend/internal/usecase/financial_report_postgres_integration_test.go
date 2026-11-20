@@ -193,6 +193,23 @@ func TestFinancialReportsPostgresReconcileToIndependentLedgerOracle(t *testing.T
 	if sourceDebits != 55 || sourceCredits != 55 {
 		t.Fatalf("source journal oracle debits/credits = %.2f/%.2f, want 55/55 currency units", sourceDebits, sourceCredits)
 	}
+	var sourceLines, ledgerLines int
+	var journalLineDebits, journalLineCredits, ledgerLineDebits, ledgerLineCredits float64
+	if err := db.QueryRow(`
+		SELECT COUNT(DISTINCT jel.id), COUNT(DISTINCT gl.journal_line_id),
+			COALESCE(SUM(jel.debit_amount), 0), COALESCE(SUM(jel.credit_amount), 0),
+			COALESCE(SUM(gl.debit_amount), 0), COALESCE(SUM(gl.credit_amount), 0)
+		FROM journal_entry_lines jel
+		JOIN journal_entries je ON je.id = jel.journal_entry_id
+		LEFT JOIN general_ledger gl ON gl.journal_entry_id = je.id AND gl.journal_line_id = jel.id
+			AND gl.tenant_id = je.tenant_id AND gl.restaurant_id = je.restaurant_id
+		WHERE je.id = $1 AND je.tenant_id = $2 AND je.restaurant_id = $3 AND je.status = 'posted'
+	`, journalID, tenantID, restaurantID).Scan(&sourceLines, &ledgerLines, &journalLineDebits, &journalLineCredits, &ledgerLineDebits, &ledgerLineCredits); err != nil {
+		t.Fatalf("compare journal lines to GL movements: %v", err)
+	}
+	if sourceLines != 3 || ledgerLines != sourceLines || journalLineDebits != ledgerLineDebits || journalLineCredits != ledgerLineCredits {
+		t.Fatalf("journal-to-GL oracle diverges: source_lines=%d GL_lines=%d journal=%.2f/%.2f GL=%.2f/%.2f", sourceLines, ledgerLines, journalLineDebits, journalLineCredits, ledgerLineDebits, ledgerLineCredits)
+	}
 
 	type accountTotals struct{ debit, credit float64 }
 	oracle := map[string]accountTotals{}
