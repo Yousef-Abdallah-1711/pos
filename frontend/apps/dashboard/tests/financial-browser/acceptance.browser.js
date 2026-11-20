@@ -339,21 +339,28 @@ test.describe('authenticated financial browser acceptance', () => {
     await openFinancialPage(page, 'ar', 'reports/financial/balance-sheet')
     const balanceSheetPayload = await (await balanceSheetResponse).json()
     const balanceSheetData = balanceSheetPayload.data || balanceSheetPayload
+    const expectedEquationDifferenceCents = fixture.expected_balance_sheet.assets_cents -
+      fixture.expected_balance_sheet.liabilities_cents - fixture.expected_balance_sheet.equity_cents
+    const expectedEquationBalanced = expectedEquationDifferenceCents === 0
     expect(Number.isFinite(balanceSheetData.total_assets)).toBe(true)
     expect(Number.isFinite(balanceSheetData.total_liabilities)).toBe(true)
     expect(Number.isFinite(balanceSheetData.total_equity)).toBe(true)
-    expect(balanceSheetData.integrity_status).toBe('UNRECONCILED')
-    expect(balanceSheetData.equation_balanced).toBe(false)
+    expect(balanceSheetData.integrity_status).toBe(expectedEquationBalanced ? 'RECONCILED' : 'UNRECONCILED')
+    expect(balanceSheetData.equation_balanced).toBe(expectedEquationBalanced)
     expect(balanceSheetData.integrity_check_basis).toBe('existing_round2_equation_check')
     expect(Math.round(balanceSheetData.total_assets * 100)).toBe(fixture.expected_balance_sheet.assets_cents)
     expect(Math.round(balanceSheetData.total_liabilities * 100)).toBe(fixture.expected_balance_sheet.liabilities_cents)
     expect(Math.round(balanceSheetData.total_equity * 100)).toBe(fixture.expected_balance_sheet.equity_cents)
     expect(Math.round((balanceSheetData.total_assets - balanceSheetData.total_liabilities - balanceSheetData.total_equity) * 100))
-      .toBe(Math.round(balanceSheetData.equation_difference * 100))
+      .toBe(expectedEquationDifferenceCents)
+    expect(Math.round(balanceSheetData.equation_difference * 100)).toBe(expectedEquationDifferenceCents)
     await expectBalanceSheetMetrics(page, 'ar', fixture.expected_balance_sheet)
     await expect(page.getByRole('heading', { name: /الميزانية العمومية|Balance Sheet/i })).toBeVisible()
     await assertFinancialContentClearsSidebar(page)
-    await expect(page.getByText(/غير متطابق|UNRECONCILED|unreconciled/i).first()).toBeVisible()
+    const integrityNotice = expectedEquationBalanced
+      ? /تجتاز الميزانية فحص المعادلة الحالي|passes the current application equation check/i
+      : /غير متطابق|UNRECONCILED|unreconciled/i
+    await expect(page.locator('main').getByRole(expectedEquationBalanced ? 'status' : 'alert').filter({ hasText: integrityNotice })).toBeVisible()
     await page.screenshot({ path: testInfo.outputPath('ar-desktop-balance-sheet.png'), fullPage: true })
 
     await setViewport(page, 375, 812)
