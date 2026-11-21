@@ -98,7 +98,7 @@ func runFinancialReconciliationBenchmark(t *testing.T, db *sql.DB, fixture finan
 			TenantID: fixture.tenantID, RestaurantID: fixture.restaurantID,
 			EntryDate:     time.Date(2026, time.November, 17, 0, 0, 0, 0, time.UTC),
 			Description:   "Synthetic concurrent reconciliation benchmark posting",
-			ReferenceType: "financial_reconciliation_benchmark", ReferenceID: &referenceID,
+			ReferenceType: "reconcile_bench_post", ReferenceID: &referenceID,
 			EntryType: "manual", Status: domain.JournalStatusDraft,
 			Lines: []domain.JournalEntryLine{
 				{AccountID: fixture.cashAccountID, DebitAmount: 1, LineOrder: 1},
