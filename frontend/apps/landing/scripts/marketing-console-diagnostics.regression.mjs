@@ -12,7 +12,12 @@ async function main() {
   { kind: 'error', name: 'TypeError', message: 'NetworkError when attempting to fetch resource.' },
  ]
  assert.equal(parseSerializedRscFallback(serializedFallback), fallbackUrl)
+ assert.equal(parseSerializedRscFallback([
+  { kind: 'value', value: `Failed to fetch RSC payload for ${fallbackUrl}. Falling back to browser navigation.` },
+  { kind: 'error', name: 'TypeError', message: 'Error in input stream' },
+ ]), fallbackUrl)
  assert.equal(parseSerializedRscFallback([{ ...serializedFallback[0] }, { kind: 'error', name: 'RangeError', message: 'unrelated failure' }]), null)
+ assert.equal(parseSerializedRscFallback([{ ...serializedFallback[0] }, { kind: 'error', name: 'TypeError', message: 'Error in input stream (unexpected)' }]), null)
  assert.equal(parseSerializedRscFallback([...serializedFallback, { kind: 'value', value: 'unexpected extra console data' }]), null)
 
  const browser = await firefox.launch({ headless: true })
