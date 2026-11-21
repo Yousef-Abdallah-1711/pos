@@ -1,6 +1,6 @@
 /* Run against a preview or the deployed landing URL. Captures contain public synthetic data. */
 import { createRequire } from 'node:module'
-import { installConsoleErrorSerialization, parseSerializedConsoleError } from './marketing-console-diagnostics.mjs'
+import { installConsoleErrorSerialization, parseSerializedConsoleError, parseSerializedRscFallback } from './marketing-console-diagnostics.mjs'
 const require = createRequire(import.meta.url)
 const { chromium, firefox } = require('playwright')
 const browserName = process.env.SERVIO_MARKETING_BROWSER || 'chromium'
@@ -501,6 +501,11 @@ async function main() {
     if (message.type() !== 'error') return
     const text = message.text()
     const serializedErrors = parseSerializedConsoleError(text)
+    const serializedRscFallback = parseSerializedRscFallback(serializedErrors)
+    if (serializedRscFallback) {
+     recoveredRscNavigations.push({ pageUrl: page.url(), destination: serializedRscFallback })
+     return
+    }
     if (serializedErrors) {
      const details = serializedErrors.find(value => value.kind === 'error')
      if (details?.name === 'ChunkLoadError' && deferNextChunkException(page.url(), details)) return

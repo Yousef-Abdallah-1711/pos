@@ -33,3 +33,12 @@ export function parseSerializedConsoleError(text) {
   return null
  }
 }
+
+export function parseSerializedRscFallback(values) {
+ if (!Array.isArray(values) || values.length !== 2) return null
+ const [message, error] = values
+ if (message?.kind !== 'value' || typeof message.value !== 'string' || error?.kind !== 'error') return null
+ const match = message.value.match(/^Failed to fetch RSC payload for (https?:\/\/\S+)\. Falling back to browser navigation\.$/)
+ if (!match || error.name !== 'TypeError' || !/^(NetworkError when attempting to fetch resource\.|Failed to fetch)$/.test(error.message || '')) return null
+ return match[1]
+}

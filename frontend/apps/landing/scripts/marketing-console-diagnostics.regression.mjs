@@ -1,11 +1,20 @@
 import assert from 'node:assert/strict'
 import { createRequire } from 'node:module'
-import { installConsoleErrorSerialization, parseSerializedConsoleError } from './marketing-console-diagnostics.mjs'
+import { installConsoleErrorSerialization, parseSerializedConsoleError, parseSerializedRscFallback } from './marketing-console-diagnostics.mjs'
 
 const require = createRequire(import.meta.url)
 const { firefox } = require('playwright')
 
 async function main() {
+ const fallbackUrl = 'https://console-diagnostics.invalid/ar/features/online-ordering'
+ const serializedFallback = [
+  { kind: 'value', value: `Failed to fetch RSC payload for ${fallbackUrl}. Falling back to browser navigation.` },
+  { kind: 'error', name: 'TypeError', message: 'NetworkError when attempting to fetch resource.' },
+ ]
+ assert.equal(parseSerializedRscFallback(serializedFallback), fallbackUrl)
+ assert.equal(parseSerializedRscFallback([{ ...serializedFallback[0] }, { kind: 'error', name: 'RangeError', message: 'unrelated failure' }]), null)
+ assert.equal(parseSerializedRscFallback([...serializedFallback, { kind: 'value', value: 'unexpected extra console data' }]), null)
+
  const browser = await firefox.launch({ headless: true })
  try {
   const page = await browser.newPage()
