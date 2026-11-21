@@ -168,6 +168,7 @@ try:
         '-v', f'{OPS / "run-ci-browser-checks.sh"}:/work/run-ci-browser-checks.sh:ro',
         '-v', f'{ROOT / "frontend/apps/landing/scripts/capture-landing-acceptance.mjs"}:/work/capture-landing-acceptance.mjs:ro',
         '-v', f'{ROOT / "frontend/apps/landing/scripts/lighthouse-acceptance.mjs"}:/work/lighthouse-acceptance.mjs:ro',
+        '-v', f'{ROOT / "frontend/apps/landing/scripts/lighthouse-thresholds.mjs"}:/work/lighthouse-thresholds.mjs:ro',
         '-v', f'{ROOT / "frontend/apps/landing/scripts/trial-registration.mjs"}:/work/trial-registration.mjs:ro',
         '-v', f'{ROOT / "frontend/apps/landing/scripts/marketing-acceptance.mjs"}:/work/marketing-acceptance.mjs:ro',
         '-v', f'{ROOT / "frontend/apps/landing/scripts/marketing-console-diagnostics.mjs"}:/work/marketing-console-diagnostics.mjs:ro',
