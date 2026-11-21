@@ -611,3 +611,51 @@ At 18:42 UTC on the deployed staging database, a read-only aggregate query retur
 | Persistent login/global identity/OTP/invitations/MFA redesign | NOT IMPLEMENTED — NEXT AGENT REQUIRED | Four-phase roadmap §11 |
 | Production deployment | NOT APPLICABLE | Explicitly prohibited in this task |
 | User-owned KDS changes | PRESERVED | Root worktree remains untouched |
+
+## Evidence Addendum — continuation review, 2026-11-21
+
+This addendum records a fresh repository and staging check after the 18:42 UTC addendum above. It does not authorize a release or change staging.
+
+### Repository, staging, PRs, and workflows
+
+- Fetched `origin/main` is `c527e08bb47ec54e4d2f6fd14ecbd9b30e7cadc7`, matching the SHA reported in the continuation request.
+- Live `https://api.pos.rakmyat.online/_ops/release` returned `status=verified`, environment `staging`, SHA `b1db5ddd8793f049436b1ab371f21946224da929`, CI run `44921126989`.
+- Exact-main verified CI run `44946974348` completed successfully on `c527e08…`. Backend, four frontend jobs, security/config, financial PostgreSQL acceptance, `application-images`, required gate, and `publish-release-images` succeeded. `auth-browser-acceptance` was skipped and is not a pass.
+- The run has an unexpired `release-bundle` artifact, but no signed release/tag for `c527e08…` was found. The latest successful signed staging publication remains run `44926586319` for `b1db5ddd…`.
+- `production-release.yml` is active as **Publish verified SERVIO staging release**. It accepts only manual dispatch on `main`, requires the repository owner, exact main SHA, the successful exact-SHA CI run, the explicit `PUBLISH-STAGING` confirmation, and the signing secret. It publishes a signed immutable staging release; it is not the old automatic `workflow_run` deployment-verification workflow. Automatic staging deployment verification remains disabled.
+- Open preservation/deployment drafts remain PR #19 and #20. PR #105 is the new auth-boundary fix described below. No PR was merged and no staging release was dispatched in this continuation.
+- Live branch protection still reports required checks `backend`, `runtime-localhost-guardrail`, and `url-domain-config-smoke`, with zero required approving reviews, force push disabled, and branch deletion disabled. The runbook still describes one approval. Only the repository owner was returned as a write-capable collaborator; no independent reviewer account or approval is recorded.
+
+### Does `c527e08` require staging redeployment?
+
+A comparison of `b1db5ddd…..c527e08…` contains four changed paths: two documentation/financial-closure documents, this handoff, and the Landing multi-tenant login integration test. There are no runtime backend or frontend source changes in that delta. The staging receipt SHA therefore differs from main, but this main delta alone does not require a runtime redeploy. Do not publish or deploy solely to make the receipt SHA match.
+
+### Release lockdown cause and disposition
+
+- Commit `80f419b295eb19d34beac2f17ff2e25b63a54691` changed `production-release.yml` to a manual lockdown workflow with no deployment request and disabled the prior automatic staging verification trigger.
+- The security finding was CI acceptance-target isolation, documented in `audit-reports/financial-acceptance-phase3-2026-11-15/PHASE3C_CI_SAFETY_2026-11-15.md`. CI run `43728374754` reached a public API acceptance target. The incident record says two synthetic chart-of-account records were created and a balanced 1.00 journal was posted and reversed; cleanup of the chart records was not established. No cleanup request or mutation was made in this continuation.
+- The merged isolation controls use explicit `.servio.test` acceptance targets, reject public/unknown targets and redirects, rewrite built origins, use a loopback-bound proxy and internal-only CI networks, mock payment services, and test the runner boundary. The exact-main `c527e08` CI run passed `security-and-config` and `application-images`, including its Chromium smoke. This is evidence that the code-level controls currently pass their CI checks.
+- The historical external-write disposition is still unresolved and no independent isolation review is recorded. Therefore the incident risk is **mitigated in current CI code, but not independently closed**. Do not restore automatic deployment verification or weaken publication checks yet.
+- The current signed publisher is already available as an owner-dispatched exact-SHA gate. Safely resuming any downstream staging verification requires an independent reviewer to inspect the incident and target/network boundaries, an owner/repository-admin resolution of the review-rule discrepancy, exact-head green CI, fresh backup/resource/rollback preflight, and receipt equality. The owner must dispatch the signed publisher for a runtime change; no current runtime redeploy is needed for `c527e08`.
+
+### Separate auth isolation finding and remediation PR
+
+`AUTH-11` remains a separate tenant-boundary code-path finding: legacy same-email rows with divergent credentials could receive a proof for every row after only the first password hash was checked. The staging duplicate aggregate recorded in the earlier addendum does not establish production state and does not clear this code path.
+
+PR [#105](https://github.com/Yousef-Abdallah-1711/pos/pull/105), branch `fix/auth-tenant-password-isolation-20261121`, scopes selection to rows whose password hash matches and preserves selection when the same password matches multiple rows. It adds synthetic tests for both cases. The first CI run found one stale test-fixture field reference; commit `fce850cae3e1a964bdb33e3604b3cf8648f442a6` corrected it, and CI restarted. The first run also reported a financial PostgreSQL acceptance failure; inspect the rerun before merge. No reviewer is assigned and no approval is recorded. The local targeted Go command did not complete because the host lacks Go and container dependency downloads stalled; no database was touched.
+
+This fix does not create canonical identities and does not prove that equal email/password values represent the same human. It is not a substitute for Phase 1 account-linking controls or the independent review.
+
+### Phase 1 progress and review gate
+
+A design proposal is available at [`docs/security/AUTH_PHASE1_IDENTITY_DESIGN_2026-11-21.md`](../security/AUTH_PHASE1_IDENTITY_DESIGN_2026-11-21.md). It defines additive identity/membership tables, verified-email and no-email-only-linking rules, membership-specific role and restaurant grants, preservation of legacy user IDs, deny-by-default RLS, synthetic conflict cases, idempotent backfill, rollback, and unit/PostgreSQL/browser/security acceptance. It is review-only: no migration or runtime identity cutover has been implemented.
+
+The latest user instruction authorizes multiple memberships and login-time tenant selection in Phase 1. In-session tenant switching remains excluded. Owner decisions still needed before migration/cutover:
+
+1. Whether each existing legacy account must be proven separately before linking (proposal: yes; never merge by email alone).
+2. What a null legacy `users.restaurant_id` means (proposal: unresolved until verified; no implicit all-branch grant).
+3. Tenant activation behavior before email verification and whether public verification remains in Phase 2.
+4. Email normalization/verified-address reservation semantics.
+5. An independent security reviewer and repository-admin decision on required approvals.
+
+Do not implement the identity schema/cutover or claim independent approval until these decisions and review are complete. Keep the root `/opt/servio` KDS, seed, and audit work untouched; the continuation work is isolated in dedicated worktrees.
