@@ -398,6 +398,78 @@ Git reported prunable missing gitdir locations for `/tmp/servio-admin-ci-fix`, `
 
 No stash entries were present at inspection.
 
+### Complete worktree inventory (captured after creating this handoff branch)
+
+The table below is the complete `git worktree list --porcelain` output, including detached snapshots. “Prunable” means Git recorded a stale/missing worktree gitdir; it is not authorization to delete the branch or filesystem path.
+
+| Path | Branch / state | HEAD | Note |
+|---|---|---|---|
+| `/opt/servio` | `feat/marketing-navigation-mega-menu` | `18ac7a4d8fcb918ad14a15930e4718fc30fca0e9` | User-owned dirty checkout; preserve all listed files |
+| `/tmp/servio-admin-ci-fix` | `fix/admin-ci-session-reuse` | `e7b6745be24f489721cb3c94889b940f22f7b93b` | stale worktree metadata; do not prune |
+| `/tmp/servio-auth-boundary-review` | `codex/auth-boundary-review-20261117` | `a2f010827ae1074464b11e76071b4756e700abbc` | preserve; compare branch-only commits before disposition |
+| `/tmp/servio-auth-controls` | `codex/auth-distributed-controls-20261117` | `09ac107926e1a0ec79f02b7e9fd07bf529b15124` | preserve; compare branch-only commits before disposition |
+| `/tmp/servio-auth-handoff-2026-11-21` | `docs/auth-handoff-2026-11-21` | `a7149504904119fc0b54dac03566a6f6a1da71c5` | PR #102 documentation branch |
+| `/tmp/servio-auth-load-suite` | `codex/auth-load-suite-20261117` | `954138f7e788220cea2b100da84860798ebd5f6f` | preserve; compare branch-only commits before disposition |
+| `/tmp/servio-auth-pr82-cache` | `codex/pr82-cache-isolation-fix-20261119` | `cc6232e69871af7b1985163d08e7b274637e0b6d` | preserve; compare branch-only commits before disposition |
+| `/tmp/servio-auth-pr83` | `codex/auth-release-pr83-integration-20261119` | `8e2f7b95b1a74f950d0f2c0638d5bd9b14fc66b5` | preserve; compare branch-only commits before disposition |
+| `/tmp/servio-auth-session` | `codex/auth-release-integration-20261118` | `9d068f32f84f085ce9c0245765acf2aaba317fce` | preserve; compare branch-only commits before disposition |
+| `/tmp/servio-auth-session-evidence-fix` | `codex/auth-session-evidence-fix-20261119` | `89c59a6ffe6eaae9e4999b45cc87bb2c03dd8a36` | preserve; compare branch-only commits before disposition |
+| `/tmp/servio-ci-chunk-error-fix` | `fix/ci-chunk-error-diagnostics` | `ed9755bc2e679136da2b39d29d9d0f4449394e8f` | preserve; compare branch-only commits before disposition |
+| `/tmp/servio-ci-timeout` | `chore/extend-browser-ci-timeout` | `ec689d4e8799b27d24a102c24ac1d5872aeec5d8` | stale worktree metadata; do not prune |
+| `/tmp/servio-header-1430` | `fix/landing-auth-actions-1430` | `ba0fd23103bbb6888918a31cbc8b4e7513e4fd05` | preserve; compare branch-only commits before disposition |
+| `/tmp/servio-landing-capture-fix` | `fix/landing-capture-image-cropping` | `340183b034b516c9a14030727d5bffcca07e98bd` | preserve; compare branch-only commits before disposition |
+| `/tmp/servio-main-102c` | `detached` (detached) | `102c804df820e4e047853eb3d3ea51c0ce11472e` | detached snapshot; preserve |
+| `/tmp/servio-main-2593` | `detached` (detached) | `2593b2719ad426c3e50c79d3717b78c60875ffe4` | detached snapshot; preserve |
+| `/tmp/servio-marketing-acceptance-fix` | `fix/marketing-acceptance-navigation-diagnostics` | `f5d58aabd9056e3675d1efbf0575db7c0f8bb7b5` | preserve; compare branch-only commits before disposition |
+| `/tmp/servio-pr81-fix` | `codex/pr81-dark-theme-contrast` | `cfdd6307b9a6c6e2cde4063204e9e138cc4b4a91` | preserve; compare branch-only commits before disposition |
+| `/tmp/servio-pr82-fix` | `codex/pr82-marketing-api-origin` | `bda23b8fd21f06e2ce92ccb9d3f4d0913a54fc30` | preserve; compare branch-only commits before disposition |
+| `/tmp/servio-release-c052` | `bugfix/staging-load-verified-image-tag` | `a91f1ad123fb0936f92c69de2ee9c113e8ea81f1` | preserve; compare branch-only commits before disposition |
+| `/tmp/servio-release-deployment-remediation` | `codex/servio-release-deployment-remediation` | `d6f36c67d3d404f033c0150c17d6461873392df4` | stale worktree metadata; do not prune |
+| `/tmp/servio-release-frontend-config` | `fix/staging-release-production-frontend-config` | `d7e1582b7044aa58b29922f9f84c1fc3a90bdab6` | preserve; compare branch-only commits before disposition |
+| `/tmp/servio-release-publisher-fix` | `codex/fix-release-image-publisher-skip` | `5afb83a98644d1d09dc92cc49b94861cb507e2fc` | preserve; compare branch-only commits before disposition |
+| `/tmp/servio-responsive-refresh` | `codex/fix-chromium-responsive-overflow-refresh` | `0a23528205c9d8d96ffaef0dd1ea33331a925777` | stale worktree metadata; do not prune |
+| `/tmp/servio-rsc-input-stream` | `main` | `72ef0ce8d9116d88d72b8c66d83f3ac1903976ab` | preserve; compare branch-only commits before disposition |
+| `/tmp/servio-security-picomatch` | `codex/security-next-intl-watcher-removal-20261118` | `1dae431d15008e7c62d6703280e38058e9684f62` | preserve; compare branch-only commits before disposition |
+| `/tmp/servio-staging-acceptance-fix` | `fix/staging-acceptance-targets-20261120` | `cf6ab38a3e3a3c226493b7e7d826f89ac0cdf16f` | preserve; compare branch-only commits before disposition |
+| `/tmp/servio-staging-resource-aware` | `codex/install-staging-image-size-verifier` | `f448eae68973869c51c02a07f6b83f20b3c75feb` | stale worktree metadata; do not prune |
+| `/tmp/servio-staging-safe-acceptance` | `detached` (detached) | `2593b2719ad426c3e50c79d3717b78c60875ffe4` | detached snapshot; preserve |
+| `/tmp/servio-ui-audit` | `feat/full-platform-ui-ux` | `a10aa6c505809a6052a7d60c4cf51ced15cc2781` | stale worktree metadata; do not prune |
+
+### All fetched remote branches not contained in current main at capture
+
+These refs existed after `git fetch origin --prune`, but their tip commits were not ancestors of `origin/main` (`031971c8`). This mechanical result does not mean each branch has unique live work: compare the merge base and commits, PR state, and repository owner intent before merging or deleting. All refs remain remotely preserved.
+
+| Remote ref | Tip SHA | Tip subject | Disposition at capture |
+|---|---|---|---|
+| `origin/codex/auth-session-island-20261117` | `89c59a6ffe6eaae9e4999b45cc87bb2c03dd8a36` | test(landing): allow hosted screenshot capture to finish | preserved; unique delta / PR disposition requires review |
+| `origin/codex/canonical-image-size-manifest` | `d2cccd7f75972604a43754c0c520a47e14a60088` | fix(staging): use canonical image layer size budgets | preserved; unique delta / PR disposition requires review |
+| `origin/codex/financial-benchmark-current-20261120` | `9b59605d630e27f46d18f044161f18f53290c025` | ci(finance): expose sanitized benchmark percentiles | preserved; unique delta / PR disposition requires review |
+| `origin/codex/financial-closure-tracker-20261121` | `1f9c8c2aa9ee1a3471ec0238f4fe722872cf4a48` | docs(finance): clean closure formatting | preserved; unique delta / PR disposition requires review |
+| `origin/codex/financial-gl-integrity-refresh` | `eaed61b5603557aab70f1c10800348bda703b4ee` | fix(accounting): reconcile backdated ledger balances | preserved; unique delta / PR disposition requires review |
+| `origin/codex/financial-performance-benchmarking` | `37d3c9be855f85ba84878828f0b0533dc8ed1f7f` | Merge remote-tracking branch 'origin/main' into codex/financial-performance-benchmarking | preserved; unique delta / PR disposition requires review |
+| `origin/codex/financial-security-gl-integrity` | `01ebb99f7d4468dfb5352b25c01a25b2fbc84eae` | Merge remote-tracking branch 'origin/main' into codex/financial-gl-integrity-close | preserved; unique delta / PR disposition requires review |
+| `origin/codex/fix-landing-login-test-race` | `ba7566e6e552c51237084404035174d219396a16` | test(landing): wait for tenant selector controls | preserved; unique delta / PR disposition requires review |
+| `origin/codex/install-staging-image-size-verifier` | `f448eae68973869c51c02a07f6b83f20b3c75feb` | fix(staging): install archive size verifier | preserved; unique delta / PR disposition requires review |
+| `origin/codex/phase2a-continuation` | `50380eaa1b95768ec40b1cb695035a601d26ab7c` | chore(wip): preserve phase2a continuation work | preserved; unique delta / PR disposition requires review |
+| `origin/codex/phase2a-final-consolidation` | `36f553c8445c623b702df3cd242c630b79d67dc9` | docs(phase2a): refresh post-push review status | preserved; unique delta / PR disposition requires review |
+| `origin/codex/phase2c-final` | `6ff3ea304ee5c8d524ad01d073de71fb637c2811` | docs(perf): record final candidate CI status | preserved; unique delta / PR disposition requires review |
+| `origin/codex/phase2c-storefront-final` | `396b9e35ebe0afe1d77c62067a5aeccde68f5bd3` | perf(storefront): coalesce concurrent theme reads | preserved; unique delta / PR disposition requires review |
+| `origin/codex/production-deployment` | `33b91430cd9c010b4f1e7c194f2456cc7efafc2d` | feat(deploy): gate DNS and restore apps on release failure | open draft PR #20; production-only, do not deploy |
+| `origin/codex/staging-resource-aware-preflight` | `5c46dfc743b8dacd8bb8fe2ac381905d541fe776` | ci(backend): serialize shared database integration tests | preserved; unique delta / PR disposition requires review |
+| `origin/codex/wip-financial-worktree-preservation-2026-11-13` | `49a2903d0154418da93d2ab987db2b2079ba6bcc` | chore(wip): preserve financial worktree records | preserved; unique delta / PR disposition requires review |
+| `origin/codex/wip-phase2c-performance-tools-2026-11-13` | `c4b62218f869a002b0f72496d18e5cbb8a43fef4` | chore(wip): preserve local performance harness | preserved; unique delta / PR disposition requires review |
+| `origin/codex/wip-session-preservation-2026-11-12` | `ecfcc2aa3e7739c9b5d0a0c343ae0dcdfe41f508` | chore(wip): retain existing audit evidence baseline | preserved; unique delta / PR disposition requires review |
+| `origin/codex/wip-ws02-local-snapshot-2026-11-12` | `9bf9a7bce3aa6567a11b0882aa88baff99fef742` | chore(wip): preserve WS02 security closure snapshot | open draft PR #19; preserve WIP snapshot |
+| `origin/codex/wip-ws02-local-updates-2026-11-13` | `113c80a4643d64cfba2e588aaa262cc9bb7491b7` | chore(wip): preserve WS02 local security updates | preserved; unique delta / PR disposition requires review |
+| `origin/codex/ws02-final-security-closure` | `9cb9a288ff3538c68e11caa2be9f50dd79cf8ee2` | fix(accounting): scope recurring templates to restaurants | preserved; unique delta / PR disposition requires review |
+| `origin/docs/auth-handoff-2026-11-21` | `a7149504904119fc0b54dac03566a6f6a1da71c5` | docs(auth): add authentication identity handoff | PR #102; awaiting checks/review |
+| `origin/feat/unified-platform-ui-i18n-theme-release` | `c7427512017094cd359af086b5ca053f3d6efbf3` | fix(landing): make theme contrast deterministic | preserved; unique delta / PR disposition requires review |
+| `origin/fix/dashboard-test-typecheck-baseline` | `5528c6f4bac5c6575c3a185a45ad81eaffa36e6e` | test(dashboard): repair baseline test typecheck failures | preserved; unique delta / PR disposition requires review |
+| `origin/fix/financial-phase00-safety` | `5064daa89a27715c3eeacb8becc9f3f48de1853a` | fix(finance): add Phase 00 reporting integrity guardrails | preserved; unique delta / PR disposition requires review |
+| `origin/fix/marketing-acceptance-navigation-diagnostics` | `f5d58aabd9056e3675d1efbf0575db7c0f8bb7b5` | fix(ci): classify interrupted chunk diagnostics on navigation | preserved; unique delta / PR disposition requires review |
+| `origin/fix/staging-acceptance-targets-20261120` | `cf6ab38a3e3a3c226493b7e7d826f89ac0cdf16f` | fix(staging): enable verified live acceptance | preserved; unique delta / PR disposition requires review |
+| `pr/82` | `89c59a6ffe6eaae9e4999b45cc87bb2c03dd8a36` | test(landing): allow hosted screenshot capture to finish | preserved; unique delta / PR disposition requires review |
+
 ## 15. Risk and Decision Register
 
 | Decision | Current state | Approval needed |
