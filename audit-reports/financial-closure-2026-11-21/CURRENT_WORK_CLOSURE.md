@@ -1,8 +1,8 @@
 # SERVIO financial current-work closure
 
 **Observed:** 2026-11-21.  
-**Post-merge `origin/main`:** `3d685ccca8769fd7eeaecfac48852ac9a6fe4784`.  
-**Previous main:** `72ef0ce8d9116d88d72b8c66d83f3ac1903976ab`.  
+**Current `origin/main` when this report was refreshed:** `b1db5ddd8793f049436b1ab371f21946224da929`.  
+**Financial benchmark merge commit:** `3d685ccca8769fd7eeaecfac48852ac9a6fe4784`.  
 **Source PR:** [#94](https://github.com/Yousef-Abdallah-1711/pos/pull/94), source head `9b59605d630e27f46d18f044161f18f53290c025`, merged as `3d685ccca8769fd7eeaecfac48852ac9a6fe4784`.
 
 This update closes the active CI/benchmark integration work. It does not close the full financial remediation program or release the product to production.
@@ -17,7 +17,8 @@ This update closes the active CI/benchmark integration work. It does not close t
 | PR #93 dated GL | `8e0302ce730b24793542ec413447271bd4e03671` | PASS | [Run 44893473979](https://github.com/Yousef-Abdallah-1711/pos/actions/runs/44893473979): authenticated browser, PostgreSQL, security, application images and `required` passed. PR merged as `1fc3593005f0861a01a2f48b6b842d5381014f9f`. |
 | PR #96 Windows-safe image fixture | `9a43feba35ae663483d1ff1f6860fdcaad5fa61f` | PASS | [Run 44852993870](https://github.com/Yousef-Abdallah-1711/pos/actions/runs/44852993870): application images and required checks passed. PR merged as `3b78cc38158c18c514652f579ebfc521c5135c5c`. |
 | PR #98 Firefox RSC fallback | `2b2793fcf776a652a94074a3b8e0f2881842c9ab` | PASS | [Run 44898900181](https://github.com/Yousef-Abdallah-1711/pos/actions/runs/44898900181): application images, PostgreSQL, backend/frontend, security and `required` passed. Its separate auth-browser job was skipped by condition. PR merged as `72ef0ce8d9116d88d72b8c66d83f3ac1903976ab`. |
-| Post-merge main CI | `3d685ccca8769fd7eeaecfac48852ac9a6fe4784` | PASS | [Run 44913745466](https://github.com/Yousef-Abdallah-1711/pos/actions/runs/44913745466): backend, all frontends, security/config, financial PostgreSQL acceptance, application images and Chromium smoke, `required`, and `publish-release-images` all passed. The separate auth-browser job was skipped by the push-event condition; authenticated financial browser acceptance had passed on PR #72 exact-head run 44831032165. Runtime-localhost guard and URL/domain smoke passed on this main SHA as runs 44913745361 and 44913745464. The image job staged exact-SHA release inputs and published image digests/artifacts; no production deployment was run. |
+| Post-merge verification after PR #94 | `3d685ccca8769fd7eeaecfac48852ac9a6fe4784` | PASS | [Run 44913745466](https://github.com/Yousef-Abdallah-1711/pos/actions/runs/44913745466): backend, all frontends, security/config, financial PostgreSQL acceptance, application images and Chromium smoke, `required`, and `publish-release-images` all passed. The separate auth-browser job was skipped by the push-event condition; authenticated financial browser acceptance had passed on PR #72 exact-head run 44831032165. Runtime-localhost guard and URL/domain smoke passed on that SHA as runs 44913745361 and 44913745464. The image job staged exact-SHA release inputs and published image digests/artifacts; no production deployment was run. |
+| Current main after PR #99 | `b1db5ddd8793f049436b1ab371f21946224da929` | IN PROGRESS at refresh | [Run 44921126989](https://github.com/Yousef-Abdallah-1711/pos/actions/runs/44921126989): backend, all frontends, security/config and financial PostgreSQL acceptance passed; application-images was still running. Runtime-localhost guard and URL/domain smoke passed on this SHA as runs 44921126868 and 44921126891. |
 
 ## Benchmark result
 
@@ -93,7 +94,7 @@ This is the current disposition snapshot for all 21 tracked findings. â€œMergedâ
 | PR #96 | Merged as `3b78cc38158c18c514652f579ebfc521c5135c5c`; Windows-safe fixture correction. |
 | PR #98 | Merged as `72ef0ce8d9116d88d72b8c66d83f3ac1903976ab`; Firefox RSC stream fallback. |
 | PR #71 / #73 | Closed as superseded; no stale branch merged. |
-| `origin/main` | `3d685ccca8769fd7eeaecfac48852ac9a6fe4784`; post-merge verified CI run 44913745466 passed, including `required` and immutable image artifact publication. |
+| `origin/main` | `b1db5ddd8793f049436b1ab371f21946224da929`; main run 44921126989 was in progress at refresh. The preceding financial merge SHA `3d685cc` has complete passing post-merge CI. |
 
 ## Next executable work
 
