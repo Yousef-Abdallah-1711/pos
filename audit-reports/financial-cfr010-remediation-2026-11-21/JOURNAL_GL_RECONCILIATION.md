@@ -24,3 +24,5 @@ The candidate now uses one read-only `REPEATABLE READ` transaction for all recon
 Integration scenarios now include missing and duplicate effects, amount/account/date/period mismatches, non-posted effects, cross-tenant contamination, orphan line references, an unbalanced journal, offsetting line-level errors, valid reversal, sibling restaurant isolation, and concurrent reconciliation reads during a posting. They temporarily disable integrity triggers only in the disposable test database and restore fixture state on cleanup.
 
 The existing financial acceptance workflow now runs these tagged cases after applying migrations to its ephemeral PostgreSQL service. This acceptance has not yet run; only compile-only tagged validation is available locally.
+
+Further review-driven updates: non-posted-effect count now reports distinct journal headers; regression coverage now includes corrupt reversal date and period, explicit empty-scope status, and cleanup of trigger-disabled fixture anomalies. These are authored cases only pending disposable PostgreSQL execution.

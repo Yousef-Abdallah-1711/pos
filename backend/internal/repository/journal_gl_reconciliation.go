@@ -116,7 +116,7 @@ func (r *JournalEntryRepository) ReconcileJournalGL(
 		         WHERE (status = 'posted' AND (gl_count <> 1 OR original_matches <> 1))
 	            OR (status = 'void' AND (gl_count <> 2 OR original_matches <> 1 OR reversal_matches <> 1))
 	       ),
-		       COUNT(*) FILTER (WHERE status NOT IN ('posted', 'void') AND gl_count > 0),
+		       COUNT(DISTINCT journal_entry_id) FILTER (WHERE status NOT IN ('posted', 'void') AND gl_count > 0),
 		       COALESCE(SUM(scope_mismatches), 0),
 		       COALESCE(SUM(account_mismatches), 0),
 	       COALESCE(SUM(CASE WHEN status IN ('posted', 'void') THEN gl_count - amount_matches ELSE 0 END), 0),

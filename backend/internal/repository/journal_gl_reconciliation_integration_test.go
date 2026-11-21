@@ -46,6 +46,72 @@ func TestReconcileJournalGL_PostedAndVoidedEntriesHaveExpectedEffects(t *testing
 	}
 }
 
+func TestReconcileJournalGL_DetectsIncorrectReversalDateAndPeriod(t *testing.T) {
+	db, fixture := openAtomicPostingFixture(t)
+	defer cleanupAtomicPostingFixture(t, db, fixture)
+	entryID, err := fixture.ledger.CreateAndPostAutoEntry(fixture.entry(), 0)
+	if err != nil {
+		t.Fatalf("post synthetic journal: %v", err)
+	}
+	if err := NewJournalEntryRepository(db).VoidEntry(fixture.tenantID, fixture.restaurantID, entryID, 1, "synthetic test reversal"); err != nil {
+		t.Fatalf("void synthetic journal: %v", err)
+	}
+	if _, err := db.Exec(`ALTER TABLE general_ledger DISABLE TRIGGER ALL`); err != nil {
+		t.Fatalf("disable ledger trigger in disposable test database: %v", err)
+	}
+	defer func() {
+		if _, err := db.Exec(`ALTER TABLE general_ledger ENABLE TRIGGER ALL`); err != nil {
+			t.Errorf("re-enable ledger triggers: %v", err)
+		}
+	}()
+
+	var ledgerID int
+	var originalDate time.Time
+	var originalPeriod string
+	if err := db.QueryRow(`
+		SELECT gl.id, gl.entry_date, gl.fiscal_period
+		FROM general_ledger gl
+		JOIN journal_entry_lines jel ON jel.id = gl.journal_line_id
+		JOIN journal_entries je ON je.id = gl.journal_entry_id
+		WHERE je.id = $1 AND je.status = 'void'
+		  AND gl.debit_amount = jel.credit_amount AND gl.credit_amount = jel.debit_amount
+		  AND gl.entry_date = je.voided_at::date
+		LIMIT 1
+	`, entryID).Scan(&ledgerID, &originalDate, &originalPeriod); err != nil {
+		t.Fatalf("find synthetic reversal effect: %v", err)
+	}
+	repo := NewJournalEntryRepository(db)
+	if _, err := db.Exec(`UPDATE general_ledger SET entry_date = entry_date + 1 WHERE id = $1`, ledgerID); err != nil {
+		t.Fatalf("change reversal date: %v", err)
+	}
+	got := reconcileFixture(t, repo, fixture)
+	if got.GLDateMismatch != 1 || got.DuplicateOrInvalidGL == 0 || got.Status != "discrepancies" {
+		t.Fatalf("incorrect reversal date result = %+v", got)
+	}
+	if _, err := db.Exec(`UPDATE general_ledger SET entry_date = $1 WHERE id = $2`, originalDate, ledgerID); err != nil {
+		t.Fatalf("restore reversal date: %v", err)
+	}
+	if _, err := db.Exec(`UPDATE general_ledger SET fiscal_period = '2099-01' WHERE id = $1`, ledgerID); err != nil {
+		t.Fatalf("change reversal period: %v", err)
+	}
+	got = reconcileFixture(t, repo, fixture)
+	if got.GLDateMismatch != 1 || got.DuplicateOrInvalidGL == 0 || got.Status != "discrepancies" {
+		t.Fatalf("incorrect reversal period result = %+v", got)
+	}
+	if _, err := db.Exec(`UPDATE general_ledger SET fiscal_period = $1 WHERE id = $2`, originalPeriod, ledgerID); err != nil {
+		t.Fatalf("restore reversal period: %v", err)
+	}
+}
+
+func TestReconcileJournalGL_EmptyScopeIsExplicit(t *testing.T) {
+	db, fixture := openAtomicPostingFixture(t)
+	defer cleanupAtomicPostingFixture(t, db, fixture)
+	got := reconcileFixture(t, NewJournalEntryRepository(db), fixture)
+	if got.Status != "empty" || got.JournalCount != 0 || got.JournalLinesChecked != 0 || got.GLRowCount != 0 {
+		t.Fatalf("empty scope result = %+v", got)
+	}
+}
+
 func TestReconcileJournalGL_IsTenantAndRestaurantScoped(t *testing.T) {
 	db, fixture := openAtomicPostingFixture(t)
 	defer cleanupAtomicPostingFixture(t, db, fixture)
@@ -227,7 +293,7 @@ func TestReconcileJournalGL_DetectsIndividualLedgerAnomalies(t *testing.T) {
 		t.Fatalf("change journal state for non-posted case: %v", err)
 	}
 	got = reconcileFixture(t, repo, fixture)
-	if got.NonPostedJournalsWithGL != 2 {
+	if got.NonPostedJournalsWithGL != 1 {
 		t.Fatalf("non-posted GL result = %+v", got)
 	}
 	if _, err := db.Exec(`UPDATE journal_entries SET status = 'posted' WHERE id = $1`, entryID); err != nil {
