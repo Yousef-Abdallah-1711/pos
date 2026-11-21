@@ -195,6 +195,11 @@ func (u *AuthUseCase) Login(req *domain.LoginRequest) (interface{}, error) {
 	if len(users) == 0 {
 		return nil, errors.New("invalid email or password")
 	}
+	if hasDuplicateTenantIDs(users) {
+		// A tenant-only choice cannot safely distinguish multiple matching
+		// legacy rows in one tenant. Leave these case-fold collisions closed.
+		return nil, errors.New("invalid email or password")
+	}
 	firstUser := &users[0]
 
 	// Case 1: Single tenant - auto-login
@@ -235,11 +240,11 @@ func (u *AuthUseCase) Login(req *domain.LoginRequest) (interface{}, error) {
 		tenantList = append(tenantList, tenantInfo)
 	}
 
-	tenantIDs := make([]int, 0, len(users))
+	accounts := make([]jwt.SelectionAccount, 0, len(users))
 	for _, user := range users {
-		tenantIDs = append(tenantIDs, user.TenantID)
+		accounts = append(accounts, jwt.SelectionAccount{UserID: user.ID, TenantID: user.TenantID})
 	}
-	selectionToken, err := u.tokenService.GenerateSelectionToken(firstUser.Email, tenantIDs, selectionTokenTTL)
+	selectionToken, err := u.tokenService.GenerateSelectionToken(firstUser.Email, accounts, selectionTokenTTL)
 	if err != nil {
 		return nil, fmt.Errorf("%w: %v", domain.ErrTokenGeneration, err)
 	}
@@ -261,6 +266,17 @@ func usersMatchingPassword(users []domain.User, password string) []domain.User {
 		}
 	}
 	return matchingUsers
+}
+
+func hasDuplicateTenantIDs(users []domain.User) bool {
+	seen := make(map[int]struct{}, len(users))
+	for _, user := range users {
+		if _, exists := seen[user.TenantID]; exists {
+			return true
+		}
+		seen[user.TenantID] = struct{}{}
+	}
+	return false
 }
 
 // LoginConfirm exchanges a multi-tenant login proof (issued by Login after the
@@ -302,11 +318,11 @@ func (u *AuthUseCase) LoginConfirmContext(ctx context.Context, req *domain.Tenan
 
 	var selectedUser *domain.User
 	for i := range users {
-		if users[i].TenantID == req.TenantID {
+		if users[i].TenantID == req.TenantID && proof.AllowsAccount(users[i].TenantID, users[i].ID) {
 			if selectedUser != nil {
-				// The selection proof covers tenant IDs, not legacy user IDs. Fail
-				// closed if case-folded email lookup finds multiple rows in one
-				// tenant, because the schema's legacy email uniqueness is case-sensitive.
+				// If multiple password-matched legacy rows share this tenant, the
+				// tenant-only choice is ambiguous. The proof binds exact rows so a
+				// non-matching or replacement account cannot be selected.
 				return nil, errors.New("ambiguous user in selected organization")
 			}
 			selectedUser = &users[i]
@@ -322,7 +338,7 @@ func (u *AuthUseCase) LoginConfirmContext(ctx context.Context, req *domain.Tenan
 		return nil, errors.New("login verification expired or invalid: please sign in again")
 	}
 	if u.proofStore != nil {
-		binding := selectionProofBinding(proof.Email, proof.TenantIDs)
+		binding := selectionProofBinding(proof.Email, proof.Accounts)
 		consumed, consumeErr := u.proofStore.SetIfAbsent(ctx, selectionProofKey(proof.ID), binding, proofTTL)
 		if consumeErr != nil {
 			observability.RecordAuthSecurity(func(metrics *observability.AuthSecurityMetrics) { metrics.SelectionProofStoreErrors++ })
@@ -357,14 +373,21 @@ func selectionProofKey(id string) string {
 	return "pos-saas:auth:selection-proof:v1:" + hex.EncodeToString(sum[:])
 }
 
-func selectionProofBinding(email string, tenantIDs []int) string {
-	ids := append([]int(nil), tenantIDs...)
-	sort.Ints(ids)
+func selectionProofBinding(email string, accounts []jwt.SelectionAccount) string {
+	canonicalAccounts := append([]jwt.SelectionAccount(nil), accounts...)
+	sort.Slice(canonicalAccounts, func(i, j int) bool {
+		if canonicalAccounts[i].TenantID == canonicalAccounts[j].TenantID {
+			return canonicalAccounts[i].UserID < canonicalAccounts[j].UserID
+		}
+		return canonicalAccounts[i].TenantID < canonicalAccounts[j].TenantID
+	})
 	var canonical strings.Builder
 	canonical.WriteString(strings.ToLower(strings.TrimSpace(email)))
-	for _, id := range ids {
+	for _, account := range canonicalAccounts {
 		canonical.WriteByte(':')
-		canonical.WriteString(strconv.Itoa(id))
+		canonical.WriteString(strconv.Itoa(account.TenantID))
+		canonical.WriteByte(':')
+		canonical.WriteString(strconv.Itoa(account.UserID))
 	}
 	sum := sha256.Sum256([]byte(canonical.String()))
 	return hex.EncodeToString(sum[:])

@@ -98,8 +98,23 @@ func TestLogin_SamePasswordStillAllowsTenantSelection(t *testing.T) {
 		t.Fatalf("expected both matching tenant accounts, got %#v", result)
 	}
 	proof, err := tokenService.ValidateSelectionToken(selection.SelectionToken)
-	if err != nil || !proof.AllowsTenant(3) || !proof.AllowsTenant(9) {
+	if err != nil || !proof.AllowsTenant(3) || !proof.AllowsTenant(9) || !proof.AllowsAccount(3, 1) || !proof.AllowsAccount(9, 2) {
 		t.Fatalf("selection proof must cover both password-matching tenants, proof=%+v err=%v", proof, err)
+	}
+}
+
+func TestLogin_AmbiguousSameTenantRowsDoNotCreateSelectionProof(t *testing.T) {
+	uc, _, store := newConfirmUC(t)
+	store.users = []domain.User{
+		{ID: 1, TenantID: 3, Email: "a@example.test", PasswordHash: loginPasswordHash(t, "shared-password"), Role: "owner"},
+		{ID: 2, TenantID: 3, Email: "A@example.test", PasswordHash: loginPasswordHash(t, "shared-password"), Role: "cashier"},
+	}
+	result, err := uc.Login(&domain.LoginRequest{Email: "a@example.test", Password: "shared-password"})
+	if err == nil || result != nil {
+		t.Fatalf("ambiguous same-tenant accounts must not create a selection proof, result=%#v err=%v", result, err)
+	}
+	if len(store.lastLogins) != 0 {
+		t.Fatal("ambiguous account login must not update last login")
 	}
 }
 
@@ -127,7 +142,7 @@ func TestLoginConfirm_WithoutSelectionTokenIsRejected(t *testing.T) {
 func TestLoginConfirm_ForgedOrWrongSecretTokenIsRejected(t *testing.T) {
 	uc, _, _ := newConfirmUC(t)
 	other, _ := jwt.NewTokenService("another-secret-another-secret-another-1", "1h")
-	forged, _ := other.GenerateSelectionToken("a@example.test", []int{3}, time.Minute)
+	forged, _ := other.GenerateSelectionToken("a@example.test", []jwt.SelectionAccount{{UserID: 1, TenantID: 3}}, time.Minute)
 	if _, err := uc.LoginConfirm(&domain.TenantSelectionRequest{Email: "a@example.test", TenantID: 3, SelectionToken: forged}); err == nil {
 		t.Fatal("forged token must be rejected")
 	}
@@ -138,7 +153,7 @@ func TestLoginConfirm_ForgedOrWrongSecretTokenIsRejected(t *testing.T) {
 
 func TestLoginConfirm_ExpiredTokenIsRejected(t *testing.T) {
 	uc, ts, _ := newConfirmUC(t)
-	tok, _ := ts.GenerateSelectionToken("a@example.test", []int{3}, -time.Second)
+	tok, _ := ts.GenerateSelectionToken("a@example.test", []jwt.SelectionAccount{{UserID: 1, TenantID: 3}}, -time.Second)
 	if _, err := uc.LoginConfirm(&domain.TenantSelectionRequest{Email: "a@example.test", TenantID: 3, SelectionToken: tok}); err == nil {
 		t.Fatal("expired token must be rejected")
 	}
@@ -146,7 +161,7 @@ func TestLoginConfirm_ExpiredTokenIsRejected(t *testing.T) {
 
 func TestLoginConfirm_TenantOutsideProofIsRejected(t *testing.T) {
 	uc, ts, _ := newConfirmUC(t)
-	tok, _ := ts.GenerateSelectionToken("a@example.test", []int{3}, time.Minute)
+	tok, _ := ts.GenerateSelectionToken("a@example.test", []jwt.SelectionAccount{{UserID: 1, TenantID: 3}}, time.Minute)
 	if _, err := uc.LoginConfirm(&domain.TenantSelectionRequest{Email: "a@example.test", TenantID: 9, SelectionToken: tok}); err == nil {
 		t.Fatal("tenant not covered by the proof must be rejected")
 	}
@@ -158,7 +173,10 @@ func TestLoginConfirm_AmbiguousSameTenantEmailFailsClosed(t *testing.T) {
 		{ID: 1, TenantID: 3, Email: "a@example.test", Role: "owner"},
 		{ID: 2, TenantID: 3, Email: "A@example.test", Role: "cashier"},
 	}
-	tok, err := ts.GenerateSelectionToken("a@example.test", []int{3}, time.Minute)
+	tok, err := ts.GenerateSelectionToken("a@example.test", []jwt.SelectionAccount{
+		{UserID: 1, TenantID: 3},
+		{UserID: 2, TenantID: 3},
+	}, time.Minute)
 	if err != nil {
 		t.Fatalf("generate selection token: %v", err)
 	}
@@ -171,9 +189,27 @@ func TestLoginConfirm_AmbiguousSameTenantEmailFailsClosed(t *testing.T) {
 	}
 }
 
+func TestLoginConfirm_ReplacementUserCannotUseTenantProof(t *testing.T) {
+	uc, ts, store := newConfirmUC(t)
+	store.users = []domain.User{
+		{ID: 99, TenantID: 9, Email: "a@example.test", Role: "manager"},
+	}
+	tok, err := ts.GenerateSelectionToken("a@example.test", []jwt.SelectionAccount{{UserID: 2, TenantID: 9}}, time.Minute)
+	if err != nil {
+		t.Fatalf("generate selection token: %v", err)
+	}
+	resp, err := uc.LoginConfirm(&domain.TenantSelectionRequest{Email: "a@example.test", TenantID: 9, SelectionToken: tok})
+	if err == nil || resp != nil {
+		t.Fatalf("a replacement account must not use another user's proof, resp=%v err=%v", resp, err)
+	}
+	if len(store.lastLogins) != 0 {
+		t.Fatal("replacement account selection must not update last login")
+	}
+}
+
 func TestLoginConfirm_EmailMismatchIsRejected(t *testing.T) {
 	uc, ts, _ := newConfirmUC(t)
-	tok, _ := ts.GenerateSelectionToken("a@example.test", []int{3}, time.Minute)
+	tok, _ := ts.GenerateSelectionToken("a@example.test", []jwt.SelectionAccount{{UserID: 1, TenantID: 3}}, time.Minute)
 	if _, err := uc.LoginConfirm(&domain.TenantSelectionRequest{Email: "victim@example.test", TenantID: 3, SelectionToken: tok}); err == nil {
 		t.Fatal("email not matching the proof must be rejected")
 	}
@@ -181,7 +217,10 @@ func TestLoginConfirm_EmailMismatchIsRejected(t *testing.T) {
 
 func TestLoginConfirm_ValidProofIssuesSessionForSelectedTenantOnce(t *testing.T) {
 	uc, ts, store := newConfirmUC(t)
-	tok, _ := ts.GenerateSelectionToken("A@example.test", []int{3, 9}, time.Minute)
+	tok, _ := ts.GenerateSelectionToken("A@example.test", []jwt.SelectionAccount{
+		{UserID: 1, TenantID: 3},
+		{UserID: 2, TenantID: 9},
+	}, time.Minute)
 	req := &domain.TenantSelectionRequest{Email: "a@example.test", TenantID: 9, SelectionToken: tok}
 
 	resp, err := uc.LoginConfirm(req)
@@ -208,7 +247,7 @@ func TestLoginConfirm_ValidProofIssuesSessionForSelectedTenantOnce(t *testing.T)
 func TestLoginConfirm_StoreFailureDoesNotBurnProof(t *testing.T) {
 	uc, ts, _ := newConfirmUC(t)
 	uc.userStore = failingStore{}
-	tok, _ := ts.GenerateSelectionToken("a@example.test", []int{3}, time.Minute)
+	tok, _ := ts.GenerateSelectionToken("a@example.test", []jwt.SelectionAccount{{UserID: 1, TenantID: 3}}, time.Minute)
 	req := &domain.TenantSelectionRequest{Email: "a@example.test", TenantID: 3, SelectionToken: tok}
 	if _, err := uc.LoginConfirm(req); err == nil {
 		t.Fatal("expected store error")
@@ -228,7 +267,7 @@ func (failingProofStore) SetIfAbsent(context.Context, string, string, time.Durat
 func TestLoginConfirm_ProofStoreFailureFailsClosedWithoutLocalFallback(t *testing.T) {
 	uc, ts, _ := newConfirmUC(t)
 	uc.SetSelectionProofStore(failingProofStore{})
-	tok, _ := ts.GenerateSelectionToken("a@example.test", []int{3}, time.Minute)
+	tok, _ := ts.GenerateSelectionToken("a@example.test", []jwt.SelectionAccount{{UserID: 1, TenantID: 3}}, time.Minute)
 	req := &domain.TenantSelectionRequest{Email: "a@example.test", TenantID: 3, SelectionToken: tok}
 	if _, err := uc.LoginConfirmContext(context.Background(), req); !errors.Is(err, domain.ErrAuthDependencyUnavailable) {
 		t.Fatalf("proof store outage must fail as unavailable, got %v", err)
@@ -262,7 +301,7 @@ func TestLoginConfirm_TwoUseCasesShareAtomicProofConsumption(t *testing.T) {
 	second := &AuthUseCase{tokenService: ts, userStore: store}
 	first.SetSelectionProofStore(firstCache)
 	second.SetSelectionProofStore(secondCache)
-	tok, err := ts.GenerateSelectionToken("a@example.test", []int{3}, time.Minute)
+	tok, err := ts.GenerateSelectionToken("a@example.test", []jwt.SelectionAccount{{UserID: 1, TenantID: 3}}, time.Minute)
 	if err != nil {
 		t.Fatal(err)
 	}
