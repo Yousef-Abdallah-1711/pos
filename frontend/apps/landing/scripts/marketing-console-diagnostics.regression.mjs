@@ -3,7 +3,7 @@ import { createRequire } from 'node:module'
 import { installConsoleErrorSerialization, parseSerializedConsoleError } from './marketing-console-diagnostics.mjs'
 
 const require = createRequire(import.meta.url)
-const { firefox } = require('@playwright/test')
+const { firefox } = require('playwright')
 
 async function main() {
  const browser = await firefox.launch({ headless: true })
