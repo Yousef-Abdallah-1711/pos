@@ -1,12 +1,24 @@
 package http
 
 import (
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"runtime"
+	"syscall"
 	"testing"
 )
+
+const (
+	windowsErrorNotSupported     syscall.Errno = 50
+	windowsErrorPrivilegeNotHeld syscall.Errno = 1314
+)
+
+func windowsSymlinkUnavailable(err error) bool {
+	return errors.Is(err, windowsErrorNotSupported) || errors.Is(err, windowsErrorPrivilegeNotHeld)
+}
 
 func TestProductImagesAreContainedRasterAssets(t *testing.T) {
 	directory := t.TempDir()
@@ -21,8 +33,13 @@ func TestProductImagesAreContainedRasterAssets(t *testing.T) {
 	if err := os.WriteFile(outside, []byte("private"), 0600); err != nil {
 		t.Fatal(err)
 	}
+	symlinkFixtureAvailable := true
 	if err := os.Symlink(outside, filepath.Join(folder, "escape.png")); err != nil {
-		t.Fatal(err)
+		if runtime.GOOS != "windows" || !windowsSymlinkUnavailable(err) {
+			t.Fatalf("create external symlink fixture: %v", err)
+		}
+		symlinkFixtureAvailable = false
+		t.Logf("external-symlink assertion is exercised by Linux CI; this Windows host cannot create the fixture: %v", err)
 	}
 	handler, err := NewProductImageHandler(directory)
 	if err != nil {
@@ -33,7 +50,11 @@ func TestProductImagesAreContainedRasterAssets(t *testing.T) {
 			t.Error(err)
 		}
 	})
-	for _, name := range []string{"products/1/2/image.png", "products/1/2/escape.png", "products/1/2/image.html", "../private.txt", "products/1/2/", "products/1/2/missing.png"} {
+	paths := []string{"products/1/2/image.png", "products/1/2/image.html", "../private.txt", "products/1/2/", "products/1/2/missing.png"}
+	if symlinkFixtureAvailable {
+		paths = append(paths, "products/1/2/escape.png")
+	}
+	for _, name := range paths {
 		request := httptest.NewRequest(http.MethodGet, "/uploads/test", nil)
 		request.SetPathValue("path", name)
 		response := httptest.NewRecorder()
