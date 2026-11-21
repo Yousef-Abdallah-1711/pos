@@ -1,8 +1,8 @@
 # SERVIO financial current-work closure
 
 **Observed:** 2026-11-21.  
-**Current `origin/main` when this report was refreshed:** `b1db5ddd8793f049436b1ab371f21946224da929`.  
-**Financial benchmark merge commit:** `3d685ccca8769fd7eeaecfac48852ac9a6fe4784`.  
+**Current `origin/main` when this report was refreshed:** `b1db5ddd8793f049436b1ab371f21946224da929`.
+**Financial benchmark merge commit:** `3d685ccca8769fd7eeaecfac48852ac9a6fe4784`.
 **Source PR:** [#94](https://github.com/Yousef-Abdallah-1711/pos/pull/94), source head `9b59605d630e27f46d18f044161f18f53290c025`, merged as `3d685ccca8769fd7eeaecfac48852ac9a6fe4784`.
 
 This update closes the active CI/benchmark integration work. It does not close the full financial remediation program or release the product to production.
