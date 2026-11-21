@@ -73,12 +73,12 @@
     gap:28px;
     font-size:13px;
   }
-  .sv-desktop-links a,.sv-login,.sv-signup {
+  .sv-desktop-links a,.sv-login {
     min-height:48px;
     display:flex;
     align-items:center;
   }
-  .sv-login,.sv-signup,.sv-desktop-trial {
+  .sv-login,.sv-desktop-trial {
     display:block;
   }
   .sv-desktop-account-actions { display:flex; align-items:center; }

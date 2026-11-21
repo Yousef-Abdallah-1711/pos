@@ -9,8 +9,5 @@ export function AccountEntryLinks({ locale, mobile = false, onNavigate }: { loca
   const copy = getSiteCopy(locale)
   const className = mobile ? 'sv-mobile-navigation__link' : undefined
 
-  return <>
-    <Link className={mobile ? className : 'sv-login'} href={localizedHref(locale, 'login')} prefetch={false} onClick={onNavigate}>{copy.navigation.login}</Link>
-    <Link className={mobile ? className : 'sv-signup'} href={localizedHref(locale, 'register')} prefetch={false} onClick={onNavigate}>{copy.navigation.signUp}</Link>
-  </>
+  return <Link className={mobile ? className : 'sv-login'} href={localizedHref(locale, 'login')} prefetch={false} onClick={onNavigate}>{copy.navigation.login}</Link>
 }

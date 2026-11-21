@@ -45,15 +45,15 @@ describe('landing account actions', () => {
 
     expect(screen.getByRole('status')).toHaveTextContent('Sign-in status is temporarily unavailable.')
     expect(screen.getByRole('link', { name: 'Log in' })).toHaveAttribute('href', '/en/auth/login')
-    expect(screen.getByRole('link', { name: 'Sign up' })).toHaveAttribute('href', '/en/auth/register')
+    expect(screen.queryByRole('link', { name: 'Sign up' })).not.toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: 'Retry' }))
     expect(onRetry).toHaveBeenCalledOnce()
   })
 
-  it('shows localized login and registration links only after the session is confirmed anonymous', () => {
+  it('shows only the localized login link after the session is confirmed anonymous', () => {
     render(<LandingAccountActions locale="ar" session={{ status: 'guest' }} isSigningOut={false} onRetry={vi.fn()} onSignOut={async () => true} />)
 
     expect(screen.getByRole('link', { name: 'تسجيل الدخول' })).toHaveAttribute('href', '/ar/auth/login')
-    expect(screen.getByRole('link', { name: 'إنشاء حساب' })).toHaveAttribute('href', '/ar/auth/register')
+    expect(screen.queryByRole('link', { name: 'إنشاء حساب' })).not.toBeInTheDocument()
   })
 })

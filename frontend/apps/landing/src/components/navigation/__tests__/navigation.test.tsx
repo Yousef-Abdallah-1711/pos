@@ -112,13 +112,13 @@ describe('marketing navigation interactions', () => {
     await waitFor(() => expect(onClose).toHaveBeenCalledOnce())
   })
 
-  it('keeps mobile login and sign-up available while session verification is unavailable', () => {
+  it('keeps mobile login available while session verification is unavailable', () => {
     const onRetry = vi.fn()
     render(<MobileNavigationHarness onClose={vi.fn()} onToggleTheme={vi.fn()} onSwitchLocale={vi.fn()} onRetry={onRetry} session={{ status: 'temporarily-unavailable' }} />)
 
     expect(screen.getByRole('status')).toHaveTextContent('حالة تسجيل الدخول غير متاحة مؤقتًا.')
     expect(screen.getByRole('link', { name: 'تسجيل الدخول' })).toHaveAttribute('href', '/ar/auth/login')
-    expect(screen.getByRole('link', { name: 'إنشاء حساب' })).toHaveAttribute('href', '/ar/auth/register')
+    expect(screen.queryByRole('link', { name: 'إنشاء حساب' })).not.toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: 'إعادة المحاولة' }))
     expect(onRetry).toHaveBeenCalledOnce()
   })

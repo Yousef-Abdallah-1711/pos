@@ -6,7 +6,7 @@
 .sv-nav-actions { gap:8px; }
 .sv-nav .sv-brand { flex:0 0 auto; }
 .sv-desktop-links { display:none; }
-.sv-login,.sv-signup,.sv-desktop-trial { display:none; }
+.sv-login,.sv-desktop-trial { display:none; }
 .sv-desktop-account-actions { display:none; }
 .sv-account-status { min-width:112px; color:var(--sv-muted); font-size:12px; text-align:center; }
 .sv-account-unavailable { display:flex; align-items:center; gap:8px; max-width:300px; color:var(--sv-muted); font-size:11px; }
@@ -290,10 +290,11 @@ html[dir=rtl] .sv-mobile-navigation__link svg { transform:scaleX(-1); }
   .sv-desktop-links { display:flex; align-items:center; gap:clamp(13px,1.4vw,21px); flex:1 1 auto; min-width:0; font-size:13px; }
   .sv-desktop-links>a { display:flex; align-items:center; min-height:48px; color:var(--sv-ink)!important; text-decoration:none; white-space:nowrap; }
   .sv-desktop-links>a:hover,.sv-desktop-links>a[aria-current=page] { color:var(--sv-violet)!important; }
-  .sv-login,.sv-signup,.sv-desktop-trial { display:block; }
-  .sv-desktop-account-actions { display:flex; align-items:center; }
-  .sv-login,.sv-signup { min-height:44px; padding:10px 0; color:var(--sv-ink)!important; font-size:13px; text-decoration:none; white-space:nowrap; }
-  .sv-login:hover,.sv-signup:hover { color:var(--sv-violet)!important; }
+  .sv-login,.sv-desktop-trial { display:block; }
+  .sv-desktop-account-actions { display:flex; align-items:center; gap:8px; }
+  .sv-login { display:inline-flex; align-items:center; justify-content:center; min-height:44px; padding:10px 4px; color:var(--sv-ink)!important; font-size:13px; text-decoration:none; white-space:nowrap; }
+  .sv-login:hover { color:var(--sv-violet)!important; }
+  .sv-login:focus-visible { outline:2px solid var(--sv-violet); outline-offset:3px; }
   .sv-desktop-trial .sv-button { min-height:44px; padding:10px 13px; gap:8px; white-space:nowrap; font-size:12px; }
   .sv-menu-button,.sv-mobile-navigation,.sv-mobile-backdrop { display:none!important; }
   .sv-nav-actions { flex:0 0 auto; gap:10px; }
