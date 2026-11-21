@@ -28,6 +28,14 @@ SOURCE_EXPANSION_RESERVE_BYTES = 1024**3
 ACCEPTANCE_EVIDENCE_RESERVE_BYTES = 512 * 1024**2
 STATE = OPS / 'evidence/deployed-release.json'
 PUBLIC_STATUS=Path('/var/lib/servio-deployer/public/release.json')
+PUBLIC_CHECK_PATHS = {
+    'pos.rakmyat.online': '/en',
+    'api.pos.rakmyat.online': '/api/v1/health',
+    'pos.app.rakmyat.online': '/en/dashboard',
+    'admin.pos.rakmyat.online': '/login',
+    'restaurant-1.pos.rakmyat.online': '/en',
+    'got.rakmyat.online': '/',
+}
 
 def github(path):
     request = urllib.request.Request('https://api.github.com/repos/' + REPO + '/' + path, headers={'User-Agent': 'servio-staging-deployer', 'Accept': 'application/vnd.github+json'})
@@ -234,8 +242,7 @@ def verify_disk_headroom(manifest, *, after_images=False):
         raise RuntimeError(f'Insufficient deployment disk headroom: {free} bytes free; {required} required')
 
 def public_checks():
-    paths = {'pos.rakmyat.online': '/en', 'api.pos.rakmyat.online': '/api/v1/health', 'pos.app.rakmyat.online': '/en/dashboard', 'admin.pos.rakmyat.online': '/login', 'restaurant-1.pos.rakmyat.online': '/en'}
-    for host, path in paths.items():
+    for host, path in PUBLIC_CHECK_PATHS.items():
         with urllib.request.urlopen('https://' + host + path, timeout=30) as response:
             if response.status != 200:
                 raise RuntimeError('Public route failed: ' + host)

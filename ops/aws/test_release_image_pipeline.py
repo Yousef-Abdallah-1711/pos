@@ -27,6 +27,7 @@ def load_script(name: str, module_name: str):
 
 stager = load_script('stage-ci-images.py', 'servio_stage_ci_images')
 publisher = load_script('publish-ci-images.py', 'servio_publish_ci_images')
+release_deployer = load_script('deploy-release.py', 'servio_deploy_release')
 
 
 def write_docker_archive(path: Path, name: str, sha: str, image_id: str) -> int:
@@ -221,6 +222,41 @@ class ReleaseImagePipelineTests(unittest.TestCase):
                 with self.assertRaisesRegex(RuntimeError, 'archive checksum mismatch'):
                     publisher.publish_images(bundle, sha, 'servio-ci', 'synthetic-token')
             docker_run.assert_not_called()
+
+
+class GotStaticRouteTests(unittest.TestCase):
+    def test_public_caddy_route_serves_only_the_static_release_root(self):
+        caddyfile = (ROOT / 'ops/aws/Caddyfile.public').read_text(encoding='utf-8')
+        route = caddyfile.split('got.rakmyat.online {', 1)[1].split('\n}', 1)[0]
+
+        self.assertIn('import common', route)
+        self.assertIn('root * /srv/servio-release/got/current', route)
+        self.assertIn('file_server', route)
+        self.assertNotIn('reverse_proxy', route)
+
+    def test_public_readiness_checks_include_the_got_host(self):
+        requested_urls = []
+
+        class SuccessfulResponse:
+            status = 200
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *_args):
+                return False
+
+            def read(self):
+                return b'{"db_healthy": true}'
+
+        def fake_urlopen(url, timeout):
+            requested_urls.append(url)
+            return SuccessfulResponse()
+
+        with patch.object(release_deployer.urllib.request, 'urlopen', side_effect=fake_urlopen):
+            release_deployer.public_checks()
+
+        self.assertIn('https://got.rakmyat.online/', requested_urls)
 
 
 if __name__ == '__main__':

@@ -260,12 +260,15 @@ gates. No paid backup resource has been created. Preserve original databases and
 
 ## Domains, TLS, secrets and owner login
 
-The five approved hosts are pos.rakmyat.online, api.pos.rakmyat.online,
-pos.app.rakmyat.online, admin.pos.rakmyat.online and restaurant-1.pos.rakmyat.online.
-Caddy's persistent volumes provide trusted certificates, renewal, HTTPS redirects and
-WebSockets. Owner-configured `*.pos` DNS alone does not enable another tenant: explicitly
-validate its hostname, application scope/status, CORS, proxy route and certificate. Never
-enable unrestricted on-demand TLS. Do not edit DNS or Hostinger email records.
+The approved hosts are pos.rakmyat.online, api.pos.rakmyat.online,
+pos.app.rakmyat.online, admin.pos.rakmyat.online, restaurant-1.pos.rakmyat.online and
+got.rakmyat.online. The GØT host serves a public static prototype from the read-only Caddy
+release mount; its independently managed files live under
+`/var/lib/servio-deployer/public/got`. It has no API or CORS integration. Caddy's persistent
+volumes provide trusted certificates, renewal, HTTPS redirects and WebSockets. Owner-
+configured `*.pos` DNS alone does not enable another tenant: explicitly validate its
+hostname, application scope/status, CORS, proxy route and certificate. Never enable
+unrestricted on-demand TLS. Do not edit DNS or Hostinger email records.
 
 The preserved root Caddyfile compensates for OLD vulnerable images with Basic Auth and
 an image optimizer block. `Caddyfile.public` is used only by patched verified promotion;

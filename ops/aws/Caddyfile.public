@@ -65,3 +65,9 @@ restaurant-1.pos.rakmyat.online {
     header_up -Authorization
   }
 }
+
+got.rakmyat.online {
+  import common
+  root * /srv/servio-release/got/current
+  file_server
+}
