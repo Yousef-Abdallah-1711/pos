@@ -24,7 +24,10 @@ async function loadSessionClient() {
 
 describe('landing session client', () => {
   beforeEach(() => vi.stubGlobal('fetch', vi.fn()))
-  afterEach(() => vi.unstubAllGlobals())
+  afterEach(() => {
+    vi.useRealTimers()
+    vi.unstubAllGlobals()
+  })
 
   it('requests a minimal no-store session with API credentials and returns only display fields', async () => {
     const fetchMock = vi.mocked(fetch).mockResolvedValue(response(200, successfulProfile) as Response)
@@ -45,12 +48,26 @@ describe('landing session client', () => {
   it('keeps expired sessions separate from temporary API failures', async () => {
     const fetchMock = vi.mocked(fetch)
       .mockResolvedValueOnce(response(401) as Response)
-      .mockResolvedValueOnce(response(503) as Response)
+      .mockResolvedValueOnce(response(500) as Response)
     const { discoverLandingSession } = await loadSessionClient()
 
     await expect(discoverLandingSession(true)).resolves.toEqual({ status: 'guest' })
     await expect(discoverLandingSession(true)).resolves.toEqual({ status: 'temporarily-unavailable' })
     expect(fetchMock).toHaveBeenCalledTimes(2)
+  })
+
+  it('treats an aborted timeout as unavailable instead of an expired session', async () => {
+    vi.useFakeTimers()
+    const fetchMock = vi.mocked(fetch).mockImplementation((_url, init) => new Promise((_resolve, reject) => {
+      init?.signal?.addEventListener('abort', () => reject(new DOMException('Aborted', 'AbortError')), { once: true })
+    }))
+    const { discoverLandingSession } = await loadSessionClient()
+    const pending = discoverLandingSession(true)
+
+    await vi.advanceTimersByTimeAsync(5_000)
+
+    await expect(pending).resolves.toEqual({ status: 'temporarily-unavailable' })
+    expect(fetchMock).toHaveBeenCalledOnce()
   })
 
   it('rejects privileged or malformed session data instead of showing it as a staff account', async () => {

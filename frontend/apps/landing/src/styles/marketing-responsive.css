@@ -67,20 +67,21 @@
     grid-template-columns:1fr 1fr;
   }
 }
-@media(min-width:1024px) {
+@media(min-width:1200px) {
   .sv-desktop-links {
     display:flex;
     gap:28px;
     font-size:13px;
   }
-  .sv-desktop-links a,.sv-login {
+  .sv-desktop-links a,.sv-login,.sv-signup {
     min-height:48px;
     display:flex;
     align-items:center;
   }
-  .sv-login,.sv-desktop-trial {
+  .sv-login,.sv-signup,.sv-desktop-trial {
     display:block;
   }
+  .sv-desktop-account-actions { display:flex; align-items:center; }
   .sv-login {
     padding-block:15px;
     font-size:13px;
@@ -88,6 +89,8 @@
   .sv-menu-button {
     display:none;
   }
+}
+@media(min-width:1024px) {
   .sv-hero {
     padding-top:95px;
   }

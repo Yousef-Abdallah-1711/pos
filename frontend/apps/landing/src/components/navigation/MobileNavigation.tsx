@@ -8,6 +8,7 @@ import type { Locale } from '@/content/site'
 import { getSiteCopy } from '@/content/site'
 import { FEATURE_GROUPS, HEADER_LINKS, isNavigationRouteActive, localizedHref } from '@/content/navigation'
 import { TrialLink } from '@/components/marketing/TrialLink'
+import { AccountEntryLinks } from './AccountEntryLinks'
 import { getConfig } from '@/lib/config'
 import type { LandingSessionState } from '@/lib/auth-session'
 
@@ -140,7 +141,7 @@ export function MobileNavigation({ locale, pathname, open, onClose, triggerRef, 
           {copy.navigation[item.label]}<ArrowUpRight size={15} aria-hidden="true" />
         </Link>)}
         <Link className="sv-mobile-navigation__link" href={localizedHref(locale, 'privacy')} prefetch={false} onClick={closeAndRestoreFocus}>{copy.navigation.privacy}</Link>
-        {session.status === 'guest' && <Link className="sv-mobile-navigation__link" href={localizedHref(locale, 'login')} prefetch={false} onClick={closeAndRestoreFocus}>{copy.navigation.login}</Link>}
+        {session.status === 'guest' && <AccountEntryLinks locale={locale} mobile onNavigate={closeAndRestoreFocus} />}
       </nav>
       <div className="sv-mobile-navigation__controls">
         <button type="button" onClick={() => { onSwitchLocale(); closeAndRestoreFocus() }} aria-label={locale === 'en' ? copy.switchToArabic : copy.switchToEnglish}>
@@ -164,10 +165,15 @@ function MobileAccountSection({ locale, session, isSigningOut, onRetry, onSignOu
   const copy = getSiteCopy(locale)
   if (session.status === 'guest') return null
   if (session.status === 'checking') return <p className="sv-mobile-account-status" role="status" aria-live="polite" aria-busy="true">{copy.account.checking}</p>
-  if (session.status === 'temporarily-unavailable') return <div className="sv-mobile-account-status" role="status">
-    <p>{session.reason === 'sign-out' ? copy.account.signOutFailed : copy.account.unavailable}</p>
-    <button type="button" onClick={onRetry}>{copy.account.retry}</button>
-  </div>
+  if (session.status === 'temporarily-unavailable') return <>
+    <div className="sv-mobile-account-status" role="status">
+      <p>{session.reason === 'sign-out' ? copy.account.signOutFailed : copy.account.unavailable}</p>
+      <button type="button" onClick={onRetry}>{copy.account.retry}</button>
+    </div>
+    <nav className="sv-mobile-account-entry" aria-label={copy.account.actionsLabel}>
+      <AccountEntryLinks locale={locale} mobile onNavigate={onClose} />
+    </nav>
+  </>
 
   const { profile } = session
   const dashboardUrl = getConfig().dashboardUrl

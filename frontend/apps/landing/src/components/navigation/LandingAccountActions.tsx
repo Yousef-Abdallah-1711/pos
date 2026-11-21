@@ -6,8 +6,8 @@ import { ChevronDown, LogOut } from 'lucide-react'
 import { getConfig } from '@/lib/config'
 import type { LandingSessionProfile, LandingSessionState } from '@/lib/auth-session'
 import { getSiteCopy, type Locale } from '@/content/site'
-import { localizedHref } from '@/content/navigation'
 import { TrialLink } from '@/components/marketing/TrialLink'
+import { AccountEntryLinks } from './AccountEntryLinks'
 
 interface LandingAccountActionsProps {
   locale: Locale
@@ -53,15 +53,18 @@ export function LandingAccountActions({ locale, session, isSigningOut, onRetry, 
   }
 
   if (session.status === 'temporarily-unavailable') {
-    return <div className="sv-account-unavailable" role="status">
-      <span>{session.reason === 'sign-out' ? copy.account.signOutFailed : copy.account.unavailable}</span>
-      <button className="sv-account-retry" type="button" onClick={onRetry}>{copy.account.retry}</button>
-    </div>
+    return <>
+      <AccountEntryLinks locale={locale} />
+      <div className="sv-account-unavailable" role="status">
+        <span>{session.reason === 'sign-out' ? copy.account.signOutFailed : copy.account.unavailable}</span>
+        <button className="sv-account-retry" type="button" onClick={onRetry}>{copy.account.retry}</button>
+      </div>
+    </>
   }
 
   if (session.status === 'guest') {
     return <>
-      <Link className="sv-login" href={localizedHref(locale, 'login')} prefetch={false}>{copy.navigation.login}</Link>
+      <AccountEntryLinks locale={locale} />
       <div className="sv-desktop-trial"><TrialLink locale={locale} source="navigation" /></div>
     </>
   }
