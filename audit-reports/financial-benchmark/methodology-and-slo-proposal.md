@@ -6,7 +6,7 @@ This benchmark is engineering evidence from a disposable PostgreSQL database. It
 
 ## Dataset and workload
 
-- The primary tenant receives the selected journal volume (default 10,000; dispatch choices 1,000, 10,000, or 50,000), three posting dates across the year, five ledger lines per seeded journal, and a high-volume account history.
+- The primary tenant receives the selected journal volume (default 10,000; dispatch choices 1,000, 10,000, or 50,000), posting dates distributed across 364 days of the year, five ledger lines per seeded journal, and a high-volume account history.
 - A second tenant receives a smaller independently posted journal history. Its trial balance is measured separately.
 - The primary tenant also receives non-empty AR invoices and receipts, AP invoices and supplier payments, inventory valuation data, and inventory movement history.
 - Workloads cover GL account pagination, movement-derived running balances, Trial Balance, P&L, Balance Sheet, Cash Flow, AR/AP aging, inventory valuation, journal and account CSV exports, sales CSV/PDF exports, backdated postings, and a mixed read/write workload.
