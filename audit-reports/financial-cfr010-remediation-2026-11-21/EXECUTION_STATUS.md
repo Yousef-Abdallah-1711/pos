@@ -3,7 +3,7 @@
 **Observed:** 2026-11-21 (Africa/Cairo)
 **Overall:** PARTIAL / OPEN. Financial production remains NO-GO.
 **Baseline:** `origin/main` = `c527e08bb47ec54e4d2f6fd14ecbd9b30e7cadc7`.
-**Candidate at acceptance:** `e68d70d45ccf507ee0474449fbf5e3f19a96f76e`.
+**Candidate at acceptance:** `afc0da5e8659ddea9c331c309173c58d6d9be04a` (latest commit records evidence; implementation code was unchanged from `e68d70d45ccf507ee0474449fbf5e3f19a96f76e`).
 **Worktree:** `H:\Projects\pos-cfr010-complete-20261121`.
 **Branch:** `codex/cfr010-complete-balance-sheet-remediation`.
 
@@ -25,7 +25,7 @@
 
 ## Still open
 
-- The branch has not been merged. PR creation is pending the evidence update and final exact-SHA hosted run.
+- PR [#104](https://github.com/Yousef-Abdallah-1711/pos/pull/104) is open against main. Required PR checks are running; no merge or deployment occurred.
 - Reconciliation-query performance has not been measured with a realistic reconciliation workload. No p50/p95, query plan, or timeout result is claimed.
 - Security acceptance is limited to the repository's scoped read-only query and integration coverage; there is no new API endpoint or endpoint authorization matrix to assess.
 - Cross-report, opening-balance safeguard, earnings, and fiscal-close remediation are not completed by this candidate. Existing synthetic integration evidence is diagnostic only.

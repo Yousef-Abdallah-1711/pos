@@ -18,7 +18,7 @@
 - General cross-report diagnostic coverage is incomplete beyond existing synthetic/live report acceptance.
 - Reconciliation query performance has not been measured; the required representative dataset, query plan and latency distribution are absent.
 - Application-wide security acceptance is not claimed. The repository path was checked; no diagnostic API was added.
-- The code has not been merged. A policy-neutral engineering PR is the next integration step after the evidence update's exact-SHA CI run.
+- Policy-neutral engineering PR [#104](https://github.com/Yousef-Abdallah-1711/pos/pull/104) is open and required PR checks are running. It has not been merged.
 
 ## Closure criteria still required
 
