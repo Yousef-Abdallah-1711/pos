@@ -112,6 +112,7 @@ type financialBenchmarkDataset struct {
 	JournalLines               int     `json:"journal_lines"`
 	GeneralLedgerRows          int     `json:"general_ledger_rows"`
 	ConcurrentJournalWrites    int     `json:"concurrent_journal_writes"`
+	ReconciliationPosts        int64   `json:"reconciliation_concurrent_posts"`
 	SalesOrders                int     `json:"sales_orders"`
 	SalesOrderItems            int     `json:"sales_order_items"`
 	JournalDebitCents          int64   `json:"journal_debit_cents"`

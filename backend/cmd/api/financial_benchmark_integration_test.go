@@ -250,6 +250,7 @@ func TestFinancialQueryBenchmarkIntegration(t *testing.T) {
 	}
 	measurements = append(measurements, measureConcurrentFinancialOperation(t, db, "mixed_ledger_reads_and_postings", 4, 30, mixedReadWrite))
 	concurrentJournalWrites := int(mixedSequence.Load() / 4)
+	reconciliationConcurrentJournalWrites := int(reconciliationBenchmark.ConcurrentPosts)
 
 	var databaseBytes int64
 	if err := db.QueryRow(`SELECT pg_database_size(current_database())`).Scan(&databaseBytes); err != nil {
@@ -264,8 +265,8 @@ func TestFinancialQueryBenchmarkIntegration(t *testing.T) {
 	runtime.ReadMemStats(&memory)
 	primaryCounts := readFinancialBenchmarkTenantCounts(t, db, fixture.tenantID, fixture.restaurantID)
 	secondaryCounts := readFinancialBenchmarkTenantCounts(t, db, secondaryTenant.tenantID, secondaryTenant.restaurantID)
-	if primaryCounts.journalEntries != journalCount+fixture.backdatedJournalCount+concurrentJournalWrites {
-		t.Fatalf("primary benchmark journal rows=%d, want initial=%d backdated=%d concurrent=%d", primaryCounts.journalEntries, journalCount, fixture.backdatedJournalCount, concurrentJournalWrites)
+	if primaryCounts.journalEntries != journalCount+fixture.backdatedJournalCount+concurrentJournalWrites+reconciliationConcurrentJournalWrites {
+		t.Fatalf("primary benchmark journal rows=%d, want initial=%d backdated=%d mixed_concurrent=%d reconciliation_concurrent=%d", primaryCounts.journalEntries, journalCount, fixture.backdatedJournalCount, concurrentJournalWrites, reconciliationConcurrentJournalWrites)
 	}
 	if primaryCounts.journalDebitCents != primaryCounts.journalCreditCents || primaryCounts.journalDebitCents != primaryCounts.ledgerDebitCents || primaryCounts.journalCreditCents != primaryCounts.ledgerCreditCents {
 		t.Fatalf("primary benchmark reconciliation cents journal debit/credit=%d/%d GL debit/credit=%d/%d", primaryCounts.journalDebitCents, primaryCounts.journalCreditCents, primaryCounts.ledgerDebitCents, primaryCounts.ledgerCreditCents)
@@ -288,7 +289,8 @@ func TestFinancialQueryBenchmarkIntegration(t *testing.T) {
 			JournalEntries:          primaryCounts.journalEntries + secondaryCounts.journalEntries,
 			JournalLines:            primaryCounts.journalLines + secondaryCounts.journalLines,
 			GeneralLedgerRows:       primaryCounts.generalLedgerRows + secondaryCounts.generalLedgerRows,
-			ConcurrentJournalWrites: concurrentJournalWrites,
+			ConcurrentJournalWrites: concurrentJournalWrites + reconciliationConcurrentJournalWrites,
+			ReconciliationPosts:     reconciliationBenchmark.ConcurrentPosts,
 			SalesOrders:             fixture.salesOrderCount, SalesOrderItems: fixture.salesOrderCount * 2,
 			JournalDebitCents:        primaryCounts.journalDebitCents + secondaryCounts.journalDebitCents,
 			JournalCreditCents:       primaryCounts.journalCreditCents + secondaryCounts.journalCreditCents,
