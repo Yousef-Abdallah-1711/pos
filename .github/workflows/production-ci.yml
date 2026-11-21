@@ -130,7 +130,7 @@ jobs:
       - name: Verify Lighthouse acceptance rejects invalid metrics
         if: matrix.app == 'landing'
         working-directory: frontend/apps/landing
-        run: node --test scripts/lighthouse-thresholds.test.mjs
+        run: node --test scripts/lighthouse-thresholds.regression.mjs
 
   auth-browser-acceptance:
     if: (github.event_name == 'pull_request' && (github.event.pull_request.number == 72 || github.event.pull_request.number == 82 || github.event.pull_request.number == 93)) || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/codex/auth-release-integration-20261118')
