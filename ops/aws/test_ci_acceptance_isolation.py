@@ -18,6 +18,7 @@ class CIIsolationTests(unittest.TestCase):
         self.assertIn("'SERVIO_ACCEPTANCE_ENV=ci'", runner)
         self.assertIn("SERVIO_ACCEPTANCE_API_BASE_URL=https://api.servio.test/api/v1", runner)
         self.assertIn('/work/acceptance-target.cjs:ro', runner)
+        self.assertIn('/work/lighthouse-thresholds.mjs:ro', runner)
         self.assertIn("replace('rakmyat.online', 'servio.test')", runner)
         self.assertIn("replace('api.pos.servio.test', 'api.servio.test')", runner)
         self.assertIn("service.pop('ports', None)", runner)
