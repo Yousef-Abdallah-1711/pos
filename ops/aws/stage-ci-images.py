@@ -9,6 +9,7 @@ from pathlib import Path
 import re
 import shutil
 import subprocess
+import tempfile
 import tarfile
 import urllib.request
 from release_image_archive import uncompressed_layer_bytes
@@ -18,6 +19,36 @@ ROOT = Path(__file__).resolve().parents[2]
 IMAGE_NAMES = ['backend', 'landing', 'dashboard', 'restaurant-website', 'super-admin']
 MAX_ARCHIVE_SIZE = 2 * 1024**3
 MAX_SOURCE_SIZE = 150 * 1024**2
+RELEASE_API_HOST = b'api.pos.rakmyat.online'
+
+
+def verify_frontend_static(name: str, static_directory: Path) -> None:
+    scripts = list(static_directory.rglob('*.js'))
+    if not scripts:
+        raise RuntimeError('Release frontend has no compiled JavaScript: ' + name)
+    contains_release_api = False
+    for script in scripts:
+        content = script.read_bytes()
+        if b'servio.test' in content:
+            raise RuntimeError('Disposable CI host leaked into release frontend: ' + name)
+        contains_release_api = contains_release_api or RELEASE_API_HOST in content
+    if not contains_release_api:
+        raise RuntimeError('Release frontend bundle lacks its staging API host: ' + name)
+
+
+def verify_frontend_image(name: str, image_tag: str) -> None:
+    container = subprocess.check_output(['docker', 'create', image_tag], text=True).strip()
+    try:
+        with tempfile.TemporaryDirectory(prefix='servio-release-frontend-') as directory:
+            subprocess.run(
+                ['docker', 'cp', f'{container}:/app/apps/{name}/.next/static', directory],
+                check=True,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+            )
+            verify_frontend_static(name, Path(directory) / 'static')
+    finally:
+        subprocess.run(['docker', 'rm', container], check=True, stdout=subprocess.DEVNULL)
 
 
 def digest(path: Path) -> str:
@@ -26,11 +57,13 @@ def digest(path: Path) -> str:
 
 
 def archive_image(bundle: Path, name: str, sha: str) -> tuple[Path, str, int]:
-    image_tag = f'servio-ci-{name}:{sha}'
+    image_tag = f'servio-release-{name}:{sha}'
     config = json.loads(subprocess.check_output(['docker', 'image', 'inspect', image_tag], text=True))[0]
     labels = config.get('Config', {}).get('Labels') or {}
     if labels.get('org.opencontainers.image.revision') != sha:
         raise RuntimeError('Image revision label mismatch: ' + name)
+    if name != 'backend':
+        verify_frontend_image(name, image_tag)
     archive = bundle / (name + '.docker.tar.gz')
     with gzip.open(archive, 'wb', compresslevel=3) as output:
         process = subprocess.Popen(['docker', 'save', image_tag], stdout=subprocess.PIPE)

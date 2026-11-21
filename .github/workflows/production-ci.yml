@@ -127,6 +127,41 @@ jobs:
         if: matrix.app == 'landing'
         working-directory: frontend/apps/landing
         run: node scripts/marketing-console-diagnostics.regression.mjs
+      - name: Install Chromium for Landing session regressions
+        if: matrix.app == 'landing'
+        working-directory: frontend
+        run: pnpm --filter "./apps/landing" exec playwright install --with-deps chromium
+      - name: Start isolated Landing app for authentication browser regressions
+        if: matrix.app == 'landing'
+        working-directory: frontend
+        env:
+          NEXT_PUBLIC_API_URL: http://localhost:19482/api/v1
+          NEXT_PUBLIC_DASHBOARD_URL: http://localhost:14212
+          NEXT_PUBLIC_LANDING_URL: http://localhost:14211
+        run: |
+          set -euo pipefail
+          setsid pnpm --filter "./apps/landing" exec next dev -p 14211 >"$RUNNER_TEMP/servio-landing-session-e2e.log" 2>&1 &
+          echo $! >"$RUNNER_TEMP/servio-landing-session-e2e.pid"
+          for attempt in $(seq 1 90); do
+            if curl --fail --silent --output /dev/null http://localhost:14211/en/; then exit 0; fi
+            sleep 2
+          done
+          cat "$RUNNER_TEMP/servio-landing-session-e2e.log"
+          exit 1
+      - name: Run Landing session-state Chromium regressions
+        if: matrix.app == 'landing'
+        working-directory: frontend
+        env:
+          REG_E2E_API_URL: http://localhost:19482/api/v1
+          REG_E2E_LANDING_URL: http://localhost:14211
+        run: pnpm --filter "./apps/landing" test:e2e:auth-session-island
+      - name: Stop isolated Landing app
+        if: always() && matrix.app == 'landing'
+        shell: bash
+        run: |
+          if [ -f "$RUNNER_TEMP/servio-landing-session-e2e.pid" ]; then
+            kill -TERM -- "-$(cat "$RUNNER_TEMP/servio-landing-session-e2e.pid")" 2>/dev/null || true
+          fi
       - name: Verify Lighthouse acceptance rejects invalid metrics
         if: matrix.app == 'landing'
         working-directory: frontend/apps/landing
