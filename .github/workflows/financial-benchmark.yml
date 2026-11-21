@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - '.github/workflows/financial-benchmark.yml'
+      - 'backend/cmd/api/financial_benchmark_fixture_integration_test.go'
       - 'backend/cmd/api/financial_benchmark_integration_test.go'
       - 'backend/cmd/api/financial_benchmark_support_integration_test.go'
       - 'backend/internal/repository/accounting_*.go'
