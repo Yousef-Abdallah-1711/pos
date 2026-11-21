@@ -529,3 +529,80 @@ Statuses reflect evidence time, not intended work.
 ---
 
 **Evidence boundary:** historical staging screenshots and backup receipts relate to `b1db5ddd8793f049436b1ab371f21946224da929`; they are not evidence for `031971c80ba0eb2f7bcffd08c2cba979780aa325`. Skipped CI jobs remain NOT RUN. Recheck all mutable release and infrastructure facts before acting.
+
+## Evidence Addendum — refreshed 2026-11-21 18:42 UTC
+
+This addendum supersedes mutable release facts in the 18:17 UTC snapshot above. It does not change the earlier historical observations or claim the current main SHA is live on staging.
+
+### GitHub and staging refresh
+
+- Current `origin/main`: `a678f16168458886ca47c818bf769f4159d1110c`, merge commit for PR #102. PR #102 is merged at 2026-11-21 18:25:45Z. Its changed content is this handoff document only. GitHub reported its protected checks `backend`, `runtime-localhost-guardrail`, and `url-domain-config-smoke` successful; GitHub branch protection reports **zero required approving reviews**. No reviewer approval was recorded. This was a docs-only merge. An independent reviewer is still required before identity/auth redesign implementation.
+- The exact-main run for preceding SHA `031971c80ba0eb2f7bcffd08c2cba979780aa325` (`44934323375`) was interrupted by the subsequent main merge; its `application-images` Chromium smoke was cancelled. Do not call that run green.
+- Current exact-main run for `a678f16168458886ca47c818bf769f4159d1110c`: [44935479257](https://github.com/Yousef-Abdallah-1711/pos/actions/runs/44935479257). At 18:42 UTC, backend, Landing, Dashboard, storefront, Super Admin, security/config and financial PostgreSQL jobs were successful; `auth-browser-acceptance` was skipped; `application-images` was still running its Chromium smoke. Overall CI was therefore **IN PROGRESS**, with no complete release bundle/signature available yet.
+- Main guardrails for `a678f161…`: runtime localhost [44935479149](https://github.com/Yousef-Abdallah-1711/pos/actions/runs/44935479149) PASS; URL/domain [44935479147](https://github.com/Yousef-Abdallah-1711/pos/actions/runs/44935479147) PASS.
+- Staging release receipt remained verified at `b1db5ddd8793f049436b1ab371f21946224da929`, workflow run `44921126989`. It does **not** match main `a678f161…`. The previous signed release/tag and five image digests in §13 are for `b1db…` only.
+- Eight staging containers remained healthy at 18:42 UTC. Root disk had 36 GiB available; host reported 809 MiB available RAM and 494 MiB available swap. These are a point sample; recheck immediately before any deployment. No new candidate backup, image signature or deployment occurred after PR #102.
+- GitHub API branch protection for `main` showed required checks `backend`, `runtime-localhost-guardrail`, `url-domain-config-smoke`, strict main ancestry, force push disabled, deletion disabled, and **0** required approvals. This differs from `ops/aws/RUNBOOK.md:260-266`, which says one approval and a `required` context. This discrepancy needs owner/repository-admin review. Do not weaken protection or treat an unconfigured approval requirement as independent review.
+
+### Fresh live Chromium evidence for staging SHA `b1db5ddd…`
+
+Executed against the real public staging hosts using the host's preinstalled Playwright 1.64.1 / Chromium 156.0.8078.4. Synthetic test account values were read locally from the staging acceptance fixture and were not printed or included in evidence. The live browser run was read-only except for one temporary synthetic category, which was verified inaccessible across tenants and then deleted.
+
+| Check | Result |
+|---|---|
+| Guest header responsive matrix | PASS — EN and AR at 320, 360, 390, 430, 768, 1024, 1199, 1200, 1280, 1350, 1430, 1536 and 1920 px (26 combinations) |
+| Horizontal overflow | PASS — none at tested widths |
+| Guest account navigation | PASS — localized Login only; no standalone Register/Sign up action; free-trial CTA remains a registration route |
+| 1430 px header | PASS — Login and free-trial CTA do not overlap in EN or AR |
+| Arabic direction/mobile menu | PASS — RTL; localized Login shown in mobile menu |
+| Registration CTA | PASS — free-trial link opened `/en/auth/register?billing=monthly` |
+| Synthetic user login | PASS — reached Dashboard; session endpoint returned 200 |
+| Session cookie | PASS — `poos_session`, HttpOnly, Secure, SameSite=Lax |
+| Session reload persistence | PASS — same browser session remained authenticated after reload |
+| Landing account state | PASS — authenticated account menu replaces guest Login; menu contains Dashboard and Account settings |
+| Arabic mobile account | PASS — Dashboard and account-settings links visible; Login hidden |
+| Logout and revocation | PASS — UI sign-out cleared the server session; guest Login returned in EN; Arabic mobile logout returned session 401 |
+| Tenant isolation | PASS — two different synthetic tenant sessions; forged tenant headers did not change tenant A session; tenant B received 403/404 for a temporary tenant A category; owner still read it; test category deleted |
+| Super Admin isolation | PASS — staff session denied `/api/v1/super-admin/tenants` with 401/403 |
+| Old API host | PASS — no request to `api.servio.test` observed |
+| Browser runtime/hydration | PASS — no page exceptions or hydration mismatch; expected anonymous session 401 probe excluded from console-error count |
+
+Screenshots were retained locally during this run: `/tmp/servio-current-staging-guest-en-1430.png`, `/tmp/servio-current-staging-guest-ar-1430.png`, `/tmp/servio-current-staging-auth-en.png`, `/tmp/servio-current-staging-auth-ar-mobile.png`. They show synthetic test state and are not committed; regenerate if they are needed after this machine is recycled. This browser evidence is for staging SHA `b1db…`, not `a678f161…`.
+
+### Remaining release gates after this refresh
+
+- **Current-main CI:** still running application-image Chromium smoke at 18:42 UTC; wait for run `44935479257` to finish successfully on exact SHA `a678f161…`.
+- **Current-main signing/publication:** not run; do not reuse `b1db…` signatures or image digests.
+- **Staging deployment:** not run; staging remains `b1db…`. Require exact-main success, signed immutable artifacts, fresh backup/checksum/restore validation, migration compatibility, resource/rollback preflight and deployment agent receipt equality.
+- **Current-main real browser E2E:** NOT RUN. The fresh live browser above targets the staging release SHA, not `a678f161…`; CI's `auth-browser-acceptance` job was skipped.
+- **Full CSRF unsafe-route and malicious redirect matrix, TTL expiry simulation, session restart/deploy continuity, CDN cross-user cache test, screen-reader test, and load test:** NOT RUN in this refreshed browser pass. Existing automated tests may cover subsets; do not mark those scenario-level gates PASS without exact test evidence.
+- **Production:** not deployed and remains out of scope.
+
+### Branch-protection discrepancy finding
+
+**OPS-01 — Medium / confirmed configuration-documentation mismatch:** `ops/aws/RUNBOOK.md:260-266` describes a one-approval requirement and a `required` status context; GitHub's live `main` protection API at this refresh reports zero required approvals and exactly `backend`, `runtime-localhost-guardrail`, `url-domain-config-smoke`. This does not prove a bypass occurred; PR #102 was docs-only and merged under the actual configured checks. Repository owner/admin should decide whether to configure the intended independent-review requirement and update the runbook to match. Keep all currently required checks and force-push/deletion restrictions intact.
+
+**OPS-02 — Medium / confirmed capacity-documentation mismatch:** `ops/aws/RUNBOOK.md:237-241,268-280` describes a roughly 29–30 GiB root volume and says the then-current approximately 4 GiB free space was insufficient; live `df -h /` at 18:42 UTC reported a 96 GiB filesystem with 36 GiB available. The current observation provides disk headroom but does not prove the AWS volume metadata or reserved deployment capacity. Reconcile the runbook with AWS volume/partition state and the deployer's archive-plus-4-GiB check before the next release. Do not resize or prune resources as part of this handoff.
+
+### Additional worktree created for this addendum
+
+`/tmp/servio-auth-evidence-update-2026-11-21` is the isolated documentation-update worktree, branch `docs/auth-evidence-update-2026-11-21`, based on `a678f16168458886ca47c818bf769f4159d1110c`. It changes only this handoff file and is preserved pending PR review/checks. The original `/opt/servio` KDS/untracked state remains unchanged; the stash list remained empty.
+
+## Refreshed Final Checklist — 2026-11-21 18:42 UTC
+
+| Gate | Status | Evidence |
+|---|---|---|
+| Handoff pushed and on main | PASS | PR #102 merged at `a678f16168458886ca47c818bf769f4159d1110c`; remote file SHA-256 matched `90481c3459d179070ecb32c5679a7d4ac8aa4e53607d9e21df588487942c8192` before merge |
+| Latest main SHA recorded | PASS | `a678f16168458886ca47c818bf769f4159d1110c` |
+| Required main checks | IN PROGRESS | Run `44935479257`; required backend complete, image smoke pending; guardrails passed |
+| Security/config job | PASS | Run `44935479257` job `security-and-config`; whole run not complete |
+| Current-main signed artifacts | NOT RUN | Exact-main CI bundle not complete |
+| Staging exact SHA equals latest main | FAIL | Staging `b1db5ddd…`, main `a678f161…` |
+| Staging services healthy | PASS | Eight containers healthy at refreshed sample |
+| Fresh backup for latest main rollout | NOT RUN | Must be generated and restore-validated before rollout |
+| Live real Chromium on currently deployed SHA | PASS | Fresh b1db guest/auth/tenant smoke evidence above |
+| Live Chromium on current main SHA | NOT RUN | Current main is not deployed |
+| Independent security review for redesign | BLOCKED | No reviewer approval/account supplied; future auth redesign is not being implemented here |
+| Persistent login/global identity/OTP/invitations/MFA redesign | NOT IMPLEMENTED — NEXT AGENT REQUIRED | Four-phase roadmap §11 |
+| Production deployment | NOT APPLICABLE | Explicitly prohibited in this task |
+| User-owned KDS changes | PRESERVED | Root worktree remains untouched |
