@@ -39,6 +39,9 @@ export function parseSerializedRscFallback(values) {
  const [message, error] = values
  if (message?.kind !== 'value' || typeof message.value !== 'string' || error?.kind !== 'error') return null
  const match = message.value.match(/^Failed to fetch RSC payload for (https?:\/\/\S+)\. Falling back to browser navigation\.$/)
- if (!match || error.name !== 'TypeError' || !/^(NetworkError when attempting to fetch resource\.|Failed to fetch)$/.test(error.message || '')) return null
+ // Firefox reports an interrupted Next.js RSC stream as "Error in input stream".
+ // Accept that exact browser error only when it is paired with Next.js's explicit
+ // same-navigation fallback message; unrelated TypeErrors remain fatal.
+ if (!match || error.name !== 'TypeError' || !/^(NetworkError when attempting to fetch resource\.|Failed to fetch|Error in input stream)$/.test(error.message || '')) return null
  return match[1]
 }
