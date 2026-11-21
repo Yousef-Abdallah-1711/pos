@@ -19,8 +19,8 @@ import (
 	"pos-saas/internal/repository"
 )
 
-// loginConfirmStore is the persistence needed by LoginConfirm.
-type loginConfirmStore interface {
+// authUserStore provides the user lookups and login updates used by staff login.
+type authUserStore interface {
 	FindUserByEmailAllTenants(email string) ([]domain.User, error)
 	UpdateLastLogin(userID int) error
 }
@@ -37,7 +37,7 @@ type AuthUseCase struct {
 	repo           *repository.AuthRepository
 	superAdminRepo *repository.SuperAdminRepository
 	tokenService   *jwt.TokenService
-	confirmStore   loginConfirmStore
+	userStore      authUserStore
 	proofStore     SelectionProofStore
 
 	// usedSelections remembers consumed selection-token IDs until they expire.
@@ -52,7 +52,7 @@ func NewAuthUseCase(repo *repository.AuthRepository, tokenService *jwt.TokenServ
 		tokenService: tokenService,
 	}
 	if repo != nil {
-		uc.confirmStore = repo
+		uc.userStore = repo
 	}
 	return uc
 }
@@ -175,8 +175,12 @@ func (u *AuthUseCase) Login(req *domain.LoginRequest) (interface{}, error) {
 		return nil, err
 	}
 
-	// Find ALL users with this email across all tenants
-	users, err := u.repo.FindUserByEmailAllTenants(req.Email)
+	if u.userStore == nil {
+		return nil, domain.ErrAuthDependencyUnavailable
+	}
+
+	// Find ALL users with this email across all tenants.
+	users, err := u.userStore.FindUserByEmailAllTenants(req.Email)
 	if err != nil {
 		return nil, fmt.Errorf("%w: %v", domain.ErrAuthDependencyUnavailable, err)
 	}
@@ -185,21 +189,20 @@ func (u *AuthUseCase) Login(req *domain.LoginRequest) (interface{}, error) {
 		return nil, errors.New("invalid email or password")
 	}
 
-	// Verify password against the first user (all have same email, should have same password)
-	firstUser := &users[0]
-
-	// Verify password
-	err = bcrypt.CompareHashAndPassword([]byte(firstUser.PasswordHash), []byte(req.Password))
-	if err != nil {
+	// Legacy tenant rows can share an email while holding different credentials.
+	// Only accounts whose password matched may enter the tenant-selection proof.
+	users = usersMatchingPassword(users, req.Password)
+	if len(users) == 0 {
 		return nil, errors.New("invalid email or password")
 	}
+	firstUser := &users[0]
 
 	// Case 1: Single tenant - auto-login
 	if len(users) == 1 {
 		user := &users[0]
 
 		// Update last login
-		_ = u.repo.UpdateLastLogin(user.ID)
+		_ = u.userStore.UpdateLastLogin(user.ID)
 
 		// Generate JWT token
 		token, err := u.tokenService.GenerateToken(user.ID, user.TenantID, user.RestaurantID, user.Email, user.Role)
@@ -250,6 +253,16 @@ func (u *AuthUseCase) Login(req *domain.LoginRequest) (interface{}, error) {
 	}, nil
 }
 
+func usersMatchingPassword(users []domain.User, password string) []domain.User {
+	matchingUsers := make([]domain.User, 0, len(users))
+	for _, user := range users {
+		if bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(password)) == nil {
+			matchingUsers = append(matchingUsers, user)
+		}
+	}
+	return matchingUsers
+}
+
 // LoginConfirm exchanges a multi-tenant login proof (issued by Login after the
 // password was verified) plus the chosen tenant for a session token. Without a
 // valid, unexpired, unused proof covering the requested tenant and email, no
@@ -278,11 +291,11 @@ func (u *AuthUseCase) LoginConfirmContext(ctx context.Context, req *domain.Tenan
 	if !strings.EqualFold(strings.TrimSpace(req.Email), proof.Email) || !proof.AllowsTenant(req.TenantID) {
 		return nil, errors.New("invalid email or tenant selection")
 	}
-	if u.confirmStore == nil {
+	if u.userStore == nil {
 		return nil, domain.ErrAuthDependencyUnavailable
 	}
 
-	users, err := u.confirmStore.FindUserByEmailAllTenants(proof.Email)
+	users, err := u.userStore.FindUserByEmailAllTenants(proof.Email)
 	if err != nil {
 		return nil, fmt.Errorf("%w: %v", domain.ErrAuthDependencyUnavailable, err)
 	}
@@ -320,7 +333,7 @@ func (u *AuthUseCase) LoginConfirmContext(ctx context.Context, req *domain.Tenan
 	}
 	observability.RecordAuthSecurity(func(metrics *observability.AuthSecurityMetrics) { metrics.SelectionProofConsumed++ })
 
-	_ = u.confirmStore.UpdateLastLogin(selectedUser.ID)
+	_ = u.userStore.UpdateLastLogin(selectedUser.ID)
 
 	token, err := u.tokenService.GenerateToken(selectedUser.ID, selectedUser.TenantID, selectedUser.RestaurantID, selectedUser.Email, selectedUser.Role)
 	if err != nil {
