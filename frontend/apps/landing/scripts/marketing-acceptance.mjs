@@ -1,5 +1,6 @@
 /* Run against a preview or the deployed landing URL. Captures contain public synthetic data. */
 import { createRequire } from 'node:module'
+import { installConsoleErrorSerialization, parseSerializedConsoleError, parseSerializedRscFallback } from './marketing-console-diagnostics.mjs'
 const require = createRequire(import.meta.url)
 const { chromium, firefox } = require('playwright')
 const browserName = process.env.SERVIO_MARKETING_BROWSER || 'chromium'
@@ -36,24 +37,11 @@ const checks = []
 const descriptions = new Map()
 const navigationScreenshots = []
 const sourceCommit = process.env.SERVIO_SOURCE_SHA || 'unknown'
-const pendingReactErrorDetails = new WeakMap()
-const pageNavigationEpochs = new WeakMap()
 function check(name, condition, detail = '') {
  checks.push({ name, passed: !!condition, detail })
  if (!condition) throw new Error(`${name}: ${detail}`)
 }
-async function flushPendingReactErrorDetails(page) {
- let pending
- while ((pending = pendingReactErrorDetails.get(page) || []).length > 0) {
-  // Error events can arrive while the previous batch is being inspected.
-  await Promise.all(pending.splice(0))
- }
-}
 async function load(page, locale, route) {
- // Resolve console Error handles while their document context is still alive.
- // Navigating immediately after a console event can destroy the execution
- // context before Playwright reads the React error details.
- await flushPendingReactErrorDetails(page)
  let response
  let navigationError
  for (let attempt = 0; attempt < 2; attempt++) {
@@ -143,7 +131,6 @@ async function load(page, locale, route) {
   return result.violations.map(item => ({ id: item.id, impact: item.impact, nodes: item.nodes.map(node => ({ target: node.target, summary: node.failureSummary, contrast: node.any.map(check => check.data).filter(Boolean) })) }))
  })
  check(`accessibility ${locale}${route}`, violations.length === 0, JSON.stringify(violations))
- await flushPendingReactErrorDetails(page)
 }
 async function capture(page, name) {
  const missing = []
@@ -230,7 +217,6 @@ async function focusChecks(page, locale) {
 }
 async function interactions(browser, page, locale) {
  await page.setViewportSize({ width: 390, height: 844 })
- await flushPendingReactErrorDetails(page)
  await page.goto(`${base}/${locale}`, { waitUntil: 'domcontentloaded' })
  await page.waitForFunction(theme => document.documentElement.classList.contains(theme), expectedTheme)
  const otherTheme = expectedTheme === 'dark' ? 'light' : 'dark'
@@ -455,6 +441,7 @@ async function createPage(browser, viewport) {
  if (process.env.SERVIO_THEME) await page.addInitScript(({ theme, origin }) => {
   if (location.origin === origin && !localStorage.getItem('servio-marketing-theme')) localStorage.setItem('servio-marketing-theme', theme)
  }, { theme: expectedTheme, origin: new URL(base).origin })
+ await page.addInitScript(installConsoleErrorSerialization)
  // The single routing layer disables HTTP cache while retaining the CI egress allowlist above.
  return page
 }
@@ -490,7 +477,6 @@ async function main() {
  const cancelledNextChunkRequests = []
  const cancelledNextChunkPaths = new Set()
  const nextChunkExceptions = []
- const deferredChunkDiagnostics = []
  let expectedGuestSessionDenials = 0
  try {
   let page = await createPage(browser, { width: 1440, height: 1000 })
@@ -506,10 +492,6 @@ async function main() {
    return true
   }
   const observe = page => {
-   pageNavigationEpochs.set(page, 0)
-   page.on('framenavigated', frame => {
-    if (frame === page.mainFrame()) pageNavigationEpochs.set(page, (pageNavigationEpochs.get(page) || 0) + 1)
-   })
    page.on('pageerror', error => {
     const details = Object.fromEntries(Object.getOwnPropertyNames(error).map(key => [key, error[key]]))
     if (error.name === 'ChunkLoadError' && deferNextChunkException(page.url(), { name: error.name, message: error.message, details })) return
@@ -517,8 +499,19 @@ async function main() {
    })
    page.on('console', message => {
     if (message.type() !== 'error') return
-    const navigationEpochAtConsole = pageNavigationEpochs.get(page) || 0
     const text = message.text()
+    const serializedErrors = parseSerializedConsoleError(text)
+    const serializedRscFallback = parseSerializedRscFallback(serializedErrors)
+    if (serializedRscFallback) {
+     recoveredRscNavigations.push({ pageUrl: page.url(), destination: serializedRscFallback })
+     return
+    }
+    if (serializedErrors) {
+     const details = serializedErrors.find(value => value.kind === 'error')
+     if (details?.name === 'ChunkLoadError' && deferNextChunkException(page.url(), details)) return
+     errors.push(`${page.url()}: ${JSON.stringify({ text, location: message.location(), serializedErrors })}`)
+     return
+    }
     const rscFallback = text.match(/^Failed to fetch RSC payload for (https?:\/\/\S+)\. Falling back to browser navigation\./)
     if (rscFallback) {
      recoveredRscNavigations.push({ pageUrl: page.url(), destination: rscFallback[1] })
@@ -532,37 +525,6 @@ async function main() {
       const failedUrl = new URL(location.url)
       if (failedUrl.origin === ciApiOrigin && failedUrl.pathname === '/api/v1/auth/session') return
      } catch {}
-    }
-    if (text === 'Error' && location.url.includes('/_next/static/chunks/')) {
-     const pageUrl = page.url()
-     const errorHandle = message.args()[0]
-     if (errorHandle) {
-      const pending = pendingReactErrorDetails.get(page) || []
-      pendingReactErrorDetails.set(page, pending)
-      pending.push(errorHandle.evaluate(error => ({ name: error?.name, message: error?.message, stack: error?.stack, cause: error?.cause?.stack || error?.cause?.message }))
-       .then(details => {
-        if (details?.name === 'ChunkLoadError' && deferNextChunkException(pageUrl, details)) return
-        errors.push(`${pageUrl}: ${JSON.stringify({ text, location, details })}`)
-       })
-       .catch(error => {
-        if (/Execution context was destroyed|Target closed/.test(error.message)) {
-         let observedPageUrl = ''
-         try { observedPageUrl = page.url() } catch {}
-         deferredChunkDiagnostics.push({
-          pageUrl,
-          location,
-          detailReadError: error.message,
-          navigationEpochAtConsole,
-          navigationEpochAtReadFailure: pageNavigationEpochs.get(page) || 0,
-          navigationInterrupted: (pageNavigationEpochs.get(page) || 0) > navigationEpochAtConsole,
-          observedPageUrl,
-         })
-         return
-        }
-        errors.push(`${pageUrl}: ${JSON.stringify({ text, location, detailReadError: error.message })}`)
-       }))
-      return
-     }
     }
     errors.push(`${page.url()}: ${text} @ ${JSON.stringify(location)}`)
    })
@@ -599,8 +561,6 @@ async function main() {
     check(`sections ${locale}/${width}x${height}`, await page.locator('main section').count() === 15)
     await capture(page, `${locale}-${width}x${height}`)
     for (const route of routes.slice(1)) await load(page, locale, route)
-    // Drain late diagnostics while their document context is still alive.
-    await flushPendingReactErrorDetails(page)
     await page.close()
     page = await createPage(browser, { width, height })
     observe(page)
@@ -608,18 +568,9 @@ async function main() {
    await interactions(browser, page, locale)
   }
   await captureComparisonBoards(browser)
-  await flushPendingReactErrorDetails(page)
   const unmatchedNextChunkExceptions = nextChunkExceptions.filter(({ pathname }) => !cancelledNextChunkPaths.has(pathname))
   for (const exception of unmatchedNextChunkExceptions) errors.push(`${exception.pageUrl}: ${JSON.stringify(exception.details)}`)
   const expectedPaths = new Set(['en', 'ar'].flatMap(locale => routes.map(route => `/${locale}${route}`)))
-  const unexplainedChunkDiagnostics = deferredChunkDiagnostics.filter(({ pageUrl, observedPageUrl, navigationInterrupted }) => {
-   try {
-    const source = new URL(pageUrl)
-    const observed = new URL(observedPageUrl)
-    return !navigationInterrupted || source.origin !== new URL(base).origin || observed.origin !== source.origin || !expectedPaths.has(source.pathname) || !expectedPaths.has(observed.pathname)
-   } catch { return true }
-  })
-  for (const diagnostic of unexplainedChunkDiagnostics) errors.push(`${diagnostic.pageUrl}: ${JSON.stringify(diagnostic)}`)
   const invalidFallbacks = recoveredRscNavigations.filter(({ pageUrl, destination }) => {
    try {
     const destinationUrl = new URL(destination)
@@ -631,13 +582,12 @@ async function main() {
   check('recovered Next.js navigation fallbacks use verified routes', invalidFallbacks.length === 0, JSON.stringify(invalidFallbacks))
   check('cancelled Next.js chunk requests recorded', true, JSON.stringify(cancelledNextChunkRequests))
   check('chunk load errors explained by cancelled Next.js chunks', unmatchedNextChunkExceptions.length === 0, JSON.stringify(unmatchedNextChunkExceptions))
-  check('interrupted chunk diagnostics explained by observed route navigation', unexplainedChunkDiagnostics.length === 0, JSON.stringify(unexplainedChunkDiagnostics))
   check('failed Next.js chunk requests', failedNextChunkRequests.length === 0, JSON.stringify(failedNextChunkRequests))
   check('failed network responses', networkFailures.length === 0, networkFailures.join('; '))
   check('browser exceptions', errors.length === 0, errors.join('; '))
  } finally {
   await browser.close()
-  await fs.writeFile(path.join(output, 'results.json'), JSON.stringify({ base, browser: browserName, color_scheme: colorScheme, theme: expectedTheme, expected_guest_session_denials: expectedGuestSessionDenials, cancelled_next_chunk_requests: cancelledNextChunkRequests, deferred_chunk_diagnostics: deferredChunkDiagnostics, checks }, null, 2))
+  await fs.writeFile(path.join(output, 'results.json'), JSON.stringify({ base, browser: browserName, color_scheme: colorScheme, theme: expectedTheme, expected_guest_session_denials: expectedGuestSessionDenials, cancelled_next_chunk_requests: cancelledNextChunkRequests, checks }, null, 2))
   await fs.writeFile(path.join(output, 'navigation-evidence.json'), JSON.stringify({ sourceCommit, screenshots: navigationScreenshots }, null, 2))
  }
 }

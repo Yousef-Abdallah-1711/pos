@@ -101,6 +101,10 @@ jobs:
           key: ${{ runner.os }}-node24-pnpm10-${{ hashFiles('frontend/pnpm-lock.yaml') }}
       - run: pnpm install --frozen-lockfile
         working-directory: frontend
+      - name: Install Firefox for landing console diagnostics regression
+        if: matrix.app == 'landing'
+        working-directory: frontend
+        run: pnpm --filter "./apps/landing" exec playwright install --with-deps firefox
       - run: pnpm --filter "./apps/${{ matrix.app }}" lint
         working-directory: frontend
       - run: pnpm --filter "./apps/${{ matrix.app }}" typecheck
@@ -117,6 +121,10 @@ jobs:
           else
             pnpm --filter "./apps/$APP" test:run --maxWorkers=2 --no-file-parallelism
           fi
+      - name: Verify Firefox console error serialization survives navigation
+        if: matrix.app == 'landing'
+        working-directory: frontend/apps/landing
+        run: node scripts/marketing-console-diagnostics.regression.mjs
 
   auth-browser-acceptance:
     if: (github.event_name == 'pull_request' && (github.event.pull_request.number == 72 || github.event.pull_request.number == 82 || github.event.pull_request.number == 93)) || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/codex/auth-release-integration-20261118')
