@@ -263,6 +263,7 @@ describe('Multi-Tenant Login Integration Tests', () => {
         data: {
           success: true,
           multiple_tenants: true,
+          selection_token: 'proof-token',
           tenants: [
             {
               tenant_id: 1,
@@ -293,10 +294,10 @@ describe('Multi-Tenant Login Integration Tests', () => {
       await userEvent.type(passwordInput, 'password123')
       fireEvent.click(submitButton)
 
-      // Wait for modal to appear
-      await waitFor(() => {
-        expect(screen.getByText('Select Organization')).toBeInTheDocument()
-      })
+      // Wait for the interactive modal control itself. The toast uses the
+      // same title text, so waiting for text alone can pass before the modal
+      // has committed its tenant buttons.
+      await screen.findByRole('heading', { name: 'Select Organization' })
 
       // Now tenant selection fails
       const tenantError = {
@@ -308,7 +309,7 @@ describe('Multi-Tenant Login Integration Tests', () => {
 
       ;(global.fetch as Mock).mockResolvedValueOnce(tenantError)
 
-      const orgButton = screen.getByRole('button', { name: /org a/i })
+      const orgButton = await screen.findByRole('button', { name: /org a/i })
       fireEvent.click(orgButton)
 
       // Error message should be shown
