@@ -97,7 +97,7 @@ func TestPhase6FullAccountingCycle_OrderSalaryAndTrialBalanceBalanced(t *testing
 	}
 
 	asOf := time.Date(2026, time.February, 28, 0, 0, 0, 0, time.UTC)
-	mock.ExpectQuery(`WITH latest_balances AS`).
+	mock.ExpectQuery(`SELECT\s+coa\.id,`).
 		WithArgs(tenantID, restaurantID, asOf).
 		WillReturnRows(sqlmock.NewRows([]string{
 			"id", "account_code", "account_name", "account_type", "normal_balance", "net_balance",

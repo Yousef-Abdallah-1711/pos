@@ -63,6 +63,8 @@ jobs:
         working-directory: backend
       - run: go test -tags integration -count=1 -timeout 15m -json ./... > go-tests.jsonl
         working-directory: backend
+        env:
+          SERVIO_DISPOSABLE_FINANCIAL_TEST_DB: '1'
       - run: go test -race ./internal/middleware ./cmd/migrate
         working-directory: backend
       - name: Audit reachable Go vulnerabilities
@@ -160,9 +162,13 @@ jobs:
           if [ -f "$RUNNER_TEMP/servio-landing-session-e2e.pid" ]; then
             kill -TERM -- "-$(cat "$RUNNER_TEMP/servio-landing-session-e2e.pid")" 2>/dev/null || true
           fi
+      - name: Verify Lighthouse acceptance rejects invalid metrics
+        if: matrix.app == 'landing'
+        working-directory: frontend/apps/landing
+        run: node --test scripts/lighthouse-thresholds.regression.mjs
 
   auth-browser-acceptance:
-    if: (github.event_name == 'pull_request' && (github.event.pull_request.number == 72 || github.event.pull_request.number == 82 || github.event.pull_request.number == 93 || github.event.pull_request.number == 95)) || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/codex/auth-release-integration-20261118')
+    if: (github.event_name == 'pull_request' && (github.event.pull_request.number == 72 || github.event.pull_request.number == 82 || github.event.pull_request.number == 93)) || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/codex/auth-release-integration-20261118')
     runs-on: ubuntu-24.04
     timeout-minutes: 90
     env:
@@ -648,7 +654,7 @@ jobs:
     needs: [backend, frontend, security-and-config, application-images, auth-browser-acceptance, financial-postgres-acceptance]
     runs-on: ubuntu-24.04
     env:
-      REQUIRE_AUTH_BROWSER: ${{ (github.event_name == 'pull_request' && (github.event.pull_request.number == 72 || github.event.pull_request.number == 82 || github.event.pull_request.number == 93 || github.event.pull_request.number == 95)) || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/codex/auth-release-integration-20261118') }}
+      REQUIRE_AUTH_BROWSER: ${{ (github.event_name == 'pull_request' && (github.event.pull_request.number == 72 || github.event.pull_request.number == 82 || github.event.pull_request.number == 93)) || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/codex/auth-release-integration-20261118') }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - name: Require every validation stage

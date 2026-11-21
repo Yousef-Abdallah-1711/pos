@@ -148,23 +148,25 @@ func (r *GeneralLedgerRepository) AppendEntry(tenantID, restaurantID, journalEnt
 
 func (r *GeneralLedgerRepository) GetAccountBalance(tenantID, restaurantID, accountID int, asOf *time.Time) (float64, error) {
 	query := `
-		SELECT COALESCE(running_balance, 0)
-		FROM general_ledger
-		WHERE tenant_id = $1 AND restaurant_id = $2 AND account_id = $3
+		SELECT COALESCE(SUM(
+			CASE WHEN coa.normal_balance = 'credit'
+				THEN gl.credit_amount - gl.debit_amount
+				ELSE gl.debit_amount - gl.credit_amount
+			END
+		), 0)
+		FROM general_ledger gl
+		JOIN chart_of_accounts coa ON coa.id = gl.account_id
+		WHERE gl.tenant_id = $1 AND gl.restaurant_id = $2 AND gl.account_id = $3
 	`
 	args := []interface{}{tenantID, restaurantID, accountID}
 	if asOf != nil && !asOf.IsZero() {
-		query += " AND entry_date <= $4"
+		query += " AND gl.entry_date <= $4"
 		args = append(args, *asOf)
 	}
-	query += " ORDER BY entry_date DESC, id DESC LIMIT 1"
 
 	var balance float64
 	err := r.db.QueryRow(query, args...).Scan(&balance)
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return 0, nil
-		}
 		return 0, err
 	}
 
@@ -195,6 +197,25 @@ func (r *GeneralLedgerRepository) GetLedgerByAccountCursor(
 	}
 
 	builder.WriteString(`
+		WITH ledger_balances AS (
+			SELECT
+				gl.id,
+				gl.account_id,
+				coa.account_code,
+				coa.account_name,
+				gl.journal_entry_id,
+				gl.journal_line_id,
+				gl.entry_date,
+				gl.debit_amount,
+				gl.credit_amount,
+				SUM(CASE WHEN coa.normal_balance = 'credit'
+					THEN gl.credit_amount - gl.debit_amount
+					ELSE gl.debit_amount - gl.credit_amount
+				END) OVER (ORDER BY gl.entry_date, gl.id ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS running_balance
+			FROM general_ledger gl
+			JOIN chart_of_accounts coa ON coa.id = gl.account_id
+			WHERE gl.tenant_id = $1 AND gl.restaurant_id = $2 AND gl.account_id = $3
+		)
 		SELECT
 			gl.id,
 			gl.account_id,
@@ -211,11 +232,11 @@ func (r *GeneralLedgerRepository) GetLedgerByAccountCursor(
 			gl.credit_amount,
 			gl.running_balance,
 			COALESCE(jel.description, '')
-		FROM general_ledger gl
+		FROM ledger_balances gl
 		JOIN chart_of_accounts coa ON coa.id = gl.account_id
 		JOIN journal_entries je ON je.id = gl.journal_entry_id
 		LEFT JOIN journal_entry_lines jel ON jel.id = gl.journal_line_id
-		WHERE gl.tenant_id = $1 AND gl.restaurant_id = $2 AND gl.account_id = $3
+		WHERE TRUE
 	`)
 
 	if startDate != nil && !startDate.IsZero() {
@@ -230,7 +251,15 @@ func (r *GeneralLedgerRepository) GetLedgerByAccountCursor(
 	}
 
 	if cursor != nil && *cursor > 0 {
-		builder.WriteString(fmt.Sprintf(" AND gl.id < $%d", argPos))
+		builder.WriteString(fmt.Sprintf(`
+			AND (gl.entry_date, gl.id) < (
+				SELECT cursor_row.entry_date, cursor_row.id
+				FROM general_ledger cursor_row
+				WHERE cursor_row.id = $%d
+				  AND cursor_row.tenant_id = $1
+				  AND cursor_row.restaurant_id = $2
+				  AND cursor_row.account_id = $3
+			)`, argPos))
 		args = append(args, *cursor)
 		argPos++
 	}
@@ -292,10 +321,25 @@ func (r *GeneralLedgerRepository) GetLedgerPeriodSummaries(tenantID, restaurantI
 	)
 
 	builder.WriteString(`
-		WITH filtered AS (
+		WITH ledger_balances AS (
+			SELECT
+				gl.id,
+				gl.fiscal_period,
+				gl.entry_date,
+				gl.debit_amount,
+				gl.credit_amount,
+				SUM(CASE WHEN coa.normal_balance = 'credit'
+					THEN gl.credit_amount - gl.debit_amount
+					ELSE gl.debit_amount - gl.credit_amount
+				END) OVER (ORDER BY gl.entry_date, gl.id ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS running_balance
+			FROM general_ledger gl
+			JOIN chart_of_accounts coa ON coa.id = gl.account_id
+			WHERE gl.tenant_id = $1 AND gl.restaurant_id = $2 AND gl.account_id = $3
+		),
+		filtered AS (
 			SELECT id, fiscal_period, entry_date, debit_amount, credit_amount, running_balance
-			FROM general_ledger
-			WHERE tenant_id = $1 AND restaurant_id = $2 AND account_id = $3
+			FROM ledger_balances
+			WHERE TRUE
 	`)
 	if startDate != nil && !startDate.IsZero() {
 		builder.WriteString(fmt.Sprintf(" AND entry_date >= $%d", argPos))
@@ -370,29 +414,27 @@ func (r *GeneralLedgerRepository) GetTrialBalance(tenantID, restaurantID int, as
 	}
 
 	rows, err := r.db.Query(`
-		WITH latest_balances AS (
-			SELECT DISTINCT ON (gl.account_id)
-				gl.account_id,
-				gl.running_balance
-			FROM general_ledger gl
-			WHERE gl.tenant_id = $1
-			  AND gl.restaurant_id = $2
-			  AND gl.entry_date <= $3
-			ORDER BY gl.account_id, gl.entry_date DESC, gl.id DESC
-		)
 		SELECT
 			coa.id,
 			coa.account_code,
 			coa.account_name,
 			coa.account_type,
 			coa.normal_balance,
-			COALESCE(lb.running_balance, 0) AS net_balance
+			COALESCE(SUM(CASE WHEN coa.normal_balance = 'credit'
+				THEN gl.credit_amount - gl.debit_amount
+				ELSE gl.debit_amount - gl.credit_amount
+			END), 0) AS net_balance
 		FROM chart_of_accounts coa
-		LEFT JOIN latest_balances lb ON lb.account_id = coa.id
+		LEFT JOIN general_ledger gl
+			ON gl.account_id = coa.id
+			AND gl.tenant_id = $1
+			AND gl.restaurant_id = $2
+			AND gl.entry_date <= $3
 		WHERE coa.tenant_id = $1
 		  AND coa.restaurant_id = $2
 		  AND coa.is_active = TRUE
 		  AND coa.is_header = FALSE
+		GROUP BY coa.id, coa.account_code, coa.account_name, coa.account_type, coa.normal_balance
 		ORDER BY coa.account_code ASC
 	`, tenantID, restaurantID, asOf)
 	if err != nil {

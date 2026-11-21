@@ -2,6 +2,7 @@ package repository
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"math"
 	"strings"
@@ -60,6 +61,22 @@ func lookupAccountByCode(accountRepo *AccountRepository, tenantID, restaurantID 
 		return nil, fmt.Errorf("account %s not found", code)
 	}
 	return account, nil
+}
+
+func lookupAccountByCodeTx(tx *sql.Tx, tenantID, restaurantID int, code string) (int, error) {
+	var accountID int
+	err := tx.QueryRow(`
+		SELECT id
+		FROM chart_of_accounts
+		WHERE tenant_id = $1 AND restaurant_id = $2 AND account_code = $3
+	`, tenantID, restaurantID, code).Scan(&accountID)
+	if errors.Is(err, sql.ErrNoRows) {
+		return 0, fmt.Errorf("account %s not found", code)
+	}
+	if err != nil {
+		return 0, err
+	}
+	return accountID, nil
 }
 
 func scanNullableInt(scanner interface {
