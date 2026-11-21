@@ -240,7 +240,7 @@ func TestLoginConfirm_TwoUseCasesShareAtomicProofConsumption(t *testing.T) {
 	defer secondCache.Close()
 
 	first, ts, store := newConfirmUC(t)
-	second := &AuthUseCase{tokenService: ts, confirmStore: store}
+	second := &AuthUseCase{tokenService: ts, userStore: store}
 	first.SetSelectionProofStore(firstCache)
 	second.SetSelectionProofStore(secondCache)
 	tok, err := ts.GenerateSelectionToken("a@example.test", []int{3}, time.Minute)
