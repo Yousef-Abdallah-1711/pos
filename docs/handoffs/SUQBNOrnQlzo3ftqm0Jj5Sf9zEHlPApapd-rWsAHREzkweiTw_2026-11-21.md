@@ -648,7 +648,7 @@ This fix does not create canonical identities and does not prove that equal emai
 
 ### Phase 1 progress and review gate
 
-A design proposal is available at [`docs/security/AUTH_PHASE1_IDENTITY_DESIGN_2026-11-21.md`](../security/AUTH_PHASE1_IDENTITY_DESIGN_2026-11-21.md). It defines additive identity/membership tables, verified-email and no-email-only-linking rules, membership-specific role and restaurant grants, preservation of legacy user IDs, deny-by-default RLS, synthetic conflict cases, idempotent backfill, rollback, and unit/PostgreSQL/browser/security acceptance. It is review-only: no migration or runtime identity cutover has been implemented.
+A design proposal is available at [`docs/security/AUTH_PHASE1_IDENTITY_DESIGN_2026-11-21.md`](../security/AUTH_PHASE1_IDENTITY_DESIGN_2026-11-21.md). It defines additive identity/membership tables, verified-email and no-email-only-linking rules, membership-specific role and restaurant grants, preservation of legacy user IDs, deny-by-default RLS, idempotent backfill, rollback, and unit/PostgreSQL/browser/security acceptance. The companion [`AUTH_PHASE1_CONFLICT_REPORT_2026-11-21.md`](../security/AUTH_PHASE1_CONFLICT_REPORT_2026-11-21.md) gives an explicit eight-row synthetic fixture and expected aggregate results; those are not production/staging counts. Both are review-only: no migration or runtime identity cutover has been implemented.
 
 The latest user instruction authorizes multiple memberships and login-time tenant selection in Phase 1. In-session tenant switching remains excluded. Owner decisions still needed before migration/cutover:
 
