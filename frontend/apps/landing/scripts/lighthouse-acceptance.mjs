@@ -17,9 +17,45 @@ function median(values) {
  const middle = Math.floor(sorted.length / 2)
  return sorted.length % 2 ? sorted[middle] : (sorted[middle - 1] + sorted[middle]) / 2
 }
+
+function summarizeMetric(audit) {
+ return {
+  score: audit?.score ?? null,
+  value: Number.isFinite(audit?.numericValue) ? Math.round(audit.numericValue * 100) / 100 : null,
+  unit: audit?.numericUnit ?? null,
+ }
+}
+
+function summarizePerformance(report) {
+ const metrics = report.audits
+ const opportunities = report.categories.performance.auditRefs
+  .filter(({ id, weight }) => weight > 0 && metrics[id]?.details?.type === 'opportunity')
+  .map(({ id, weight }) => ({
+   id,
+   weight,
+   score: metrics[id].score ?? null,
+   savingsMs: summarizeMetric({ numericValue: metrics[id].details.overallSavingsMs }).value,
+   savingsBytes: summarizeMetric({ numericValue: metrics[id].details.overallSavingsBytes }).value,
+  }))
+  .sort((left, right) => (right.savingsMs ?? 0) - (left.savingsMs ?? 0) || right.weight - left.weight)
+  .slice(0, 5)
+ return {
+  metrics: {
+   firstContentfulPaint: summarizeMetric(metrics['first-contentful-paint']),
+   largestContentfulPaint: summarizeMetric(metrics['largest-contentful-paint']),
+   totalBlockingTime: summarizeMetric(metrics['total-blocking-time']),
+   speedIndex: summarizeMetric(metrics['speed-index']),
+   serverResponseTime: summarizeMetric(metrics['server-response-time']),
+   cumulativeLayoutShift: summarizeMetric(metrics['cumulative-layout-shift']),
+  },
+  leadingOpportunities: opportunities,
+ }
+}
+
 await fs.mkdir(output, { recursive: true })
 const chrome = await launch({ chromePath: chromium.executablePath(), chromeFlags: ['--headless', '--no-sandbox', '--disable-dev-shm-usage', ...(process.env.SERVIO_DISPOSABLE_BROWSER === '1' ? ['--ignore-certificate-errors'] : [])] })
 const results = []
+let failure
 try {
  for (const locale of ['en', 'ar']) {
   const samples = []
@@ -28,6 +64,7 @@ try {
    if (!result) throw new Error(`No Lighthouse result for ${locale}, run ${run}`)
    await fs.writeFile(path.join(output, `${locale}-${String(run).padStart(2, '0')}.json`), result.report)
    const report = result.lhr
+   const performanceDiagnostics = summarizePerformance(report)
    samples.push({
     performance: report.categories.performance.score,
     accessibility: report.categories.accessibility.score,
@@ -35,6 +72,7 @@ try {
     lcpMs: report.audits['largest-contentful-paint'].numericValue,
     cls: report.audits['cumulative-layout-shift'].numericValue,
     warnings: report.runWarnings || [],
+    ...performanceDiagnostics,
    })
   }
   const performanceScores = samples.map(sample => sample.performance)
@@ -53,10 +91,13 @@ try {
    samples,
   })
  }
+} catch (error) {
+ failure = { name: error?.name || 'Error', message: error?.message || String(error), stack: error?.stack }
+ throw error
 } finally {
  await chrome.kill()
- await fs.writeFile(path.join(output, 'results.json'), JSON.stringify({ note: 'Standard Lighthouse mobile simulation. Staging intentionally remains noindex.', results }, null, 2))
+ await fs.writeFile(path.join(output, 'results.json'), JSON.stringify({ note: 'Standard Lighthouse mobile simulation. Staging intentionally remains noindex.', thresholds: { performance: 0.90, accessibility: 0.95, clsExclusiveMaximum: 0.1 }, results, failure }, null, 2))
 }
-if (results.some(result => result.performance < .90 || result.accessibility < .95 || result.cls >= .1)) {
- throw new Error('Lighthouse median performance, per-run accessibility, or worst-run layout stability threshold failed')
-}
+const failedLocales = results.filter(result => result.performance < .90 || result.accessibility < .95 || result.cls >= .1).map(({ locale, performance, accessibility, cls }) => ({ locale, performance, accessibility, cls }))
+console.info(JSON.stringify({ lighthouseAcceptance: 'completed', results, failedLocales }))
+if (failedLocales.length > 0) throw new Error(`Lighthouse thresholds failed: ${JSON.stringify(failedLocales)}`)
