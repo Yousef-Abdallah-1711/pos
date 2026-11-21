@@ -94,6 +94,7 @@ test('restores the server session in Landing and a new tab, then propagates conf
   await page.getByRole('button', { name: 'Sign out' }).click()
   const desktopAccountActions = page.locator('.sv-desktop-account-actions')
   await expect(desktopAccountActions.getByRole('link', { name: /^Log in$/i })).toBeVisible()
+  await expect(desktopAccountActions.getByRole('link', { name: /^Sign up$/i })).toHaveCount(0)
   await expect(page.getByRole('button', { name: 'Account menu for Synthetic Owner' })).toHaveCount(0)
   await expect(mobileDialog.getByRole('link', { name: /^Log in$/i })).toBeVisible()
   await expect.poll(async () => (await context.cookies(apiOrigin)).some(cookie => cookie.name === 'poos_session')).toBe(false)
@@ -114,13 +115,13 @@ test('keeps a temporary API outage distinct from an expired session and retries 
   await expect(unavailable).toContainText('Sign-in status is temporarily unavailable.')
   const desktopAccountActions = page.locator('.sv-desktop-account-actions')
   await expect(desktopAccountActions.getByRole('link', { name: /^Log in$/i })).toBeVisible()
-  await expect(desktopAccountActions.getByRole('link', { name: /^Sign up$/i })).toBeVisible()
+  await expect(desktopAccountActions.getByRole('link', { name: /^Sign up$/i })).toHaveCount(0)
   await expect(desktopAccountActions.getByRole('button', { name: 'Retry' })).toBeVisible()
 
   status = 401
   await page.getByRole('button', { name: 'Retry' }).click()
   await expect(desktopAccountActions.getByRole('link', { name: /^Log in$/i })).toBeVisible()
-  await expect(desktopAccountActions.getByRole('link', { name: /^Sign up$/i })).toBeVisible()
+  await expect(desktopAccountActions.getByRole('link', { name: /^Sign up$/i })).toHaveCount(0)
   await expect(desktopAccountActions.getByRole('link', { name: /Start your 14-day free trial/i })).toBeVisible()
 })
 
@@ -148,7 +149,7 @@ test('keeps safe account links during a DNS failure and does not retry until req
   await expect(page.getByRole('status')).toContainText('Sign-in status is temporarily unavailable.')
   const accountActions = page.locator('.sv-desktop-account-actions')
   await expect(accountActions.getByRole('link', { name: /^Log in$/i })).toBeVisible()
-  await expect(accountActions.getByRole('link', { name: /^Sign up$/i })).toBeVisible()
+  await expect(accountActions.getByRole('link', { name: /^Sign up$/i })).toHaveCount(0)
   await page.waitForTimeout(1000)
   expect(sessionRequests).toBe(1)
 
@@ -164,13 +165,13 @@ test('keeps safe account links during a DNS failure and does not retry until req
   const mobileDialog = page.getByRole('dialog')
   await expect(mobileDialog.getByRole('status')).toContainText('Sign-in status is temporarily unavailable.')
   await expect(mobileDialog.getByRole('link', { name: /^Log in$/i })).toBeVisible()
-  await expect(mobileDialog.getByRole('link', { name: /^Sign up$/i })).toBeVisible()
+  await expect(mobileDialog.getByRole('link', { name: /^Sign up$/i })).toHaveCount(0)
   shouldFail = false
   await mobileDialog.getByRole('button', { name: 'Retry' }).click()
   await expect(mobileDialog.getByText(profile.email, { exact: true })).toBeVisible()
 })
 
-test('shows localized login and registration routes for anonymous users on mobile and desktop', async ({ page }) => {
+test('shows only localized login in account navigation and keeps registration on the trial CTA', async ({ page }) => {
   await page.route('**/api/v1/auth/session', route => route.fulfill({ status: 401, headers: corsHeaders, body: '' }))
 
   for (const width of [320, 375, 390, 768, 1024, 1440]) {
@@ -183,9 +184,10 @@ test('shows localized login and registration routes for anonymous users on mobil
 
       const entry = width < 1200 ? page.getByRole('dialog') : page.locator('.sv-desktop-account-actions')
       const loginLabel = locale === 'en' ? 'Log in' : 'تسجيل الدخول'
-      const signUpLabel = locale === 'en' ? 'Sign up' : 'إنشاء حساب'
       await expect(entry.getByRole('link', { name: loginLabel, exact: true })).toHaveAttribute('href', `/${locale}/auth/login`)
-      await expect(entry.getByRole('link', { name: signUpLabel, exact: true })).toHaveAttribute('href', `/${locale}/auth/register`)
+      await expect(entry.getByRole('link', { name: /Sign up|إنشاء حساب/i })).toHaveCount(0)
+      const trial = page.locator(width < 1200 ? '.sv-mobile-navigation' : '.sv-desktop-trial').locator(`a[href^="/${locale}/auth/register"]`)
+      await expect(trial).toHaveAttribute('href', `/${locale}/auth/register?billing=monthly`)
       await expect(entry.getByRole('button', { name: /account menu|قائمة الحساب/i })).toHaveCount(0)
       await expect(page.getByRole('status')).toHaveCount(0)
     }
@@ -266,7 +268,7 @@ test('keeps safe account navigation when the server cannot confirm logout', asyn
   await page.getByRole('button', { name: 'Sign out' }).click()
   await expect(page.getByRole('status')).toContainText('We could not confirm sign out. Try again.')
   await expect(page.locator('.sv-desktop-account-actions').getByRole('link', { name: /^Log in$/i })).toBeVisible()
-  await expect(page.locator('.sv-desktop-account-actions').getByRole('link', { name: /^Sign up$/i })).toBeVisible()
+  await expect(page.locator('.sv-desktop-account-actions').getByRole('link', { name: /^Sign up$/i })).toHaveCount(0)
   await expect(page.getByRole('button', { name: /Account menu for Synthetic Owner/ })).toHaveCount(0)
   await expect.poll(async () => (await context.cookies(apiOrigin)).some(cookie => cookie.name === 'poos_session')).toBe(true)
 })
