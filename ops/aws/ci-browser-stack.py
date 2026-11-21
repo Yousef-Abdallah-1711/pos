@@ -170,6 +170,8 @@ try:
         '-v', f'{ROOT / "frontend/apps/landing/scripts/lighthouse-acceptance.mjs"}:/work/lighthouse-acceptance.mjs:ro',
         '-v', f'{ROOT / "frontend/apps/landing/scripts/trial-registration.mjs"}:/work/trial-registration.mjs:ro',
         '-v', f'{ROOT / "frontend/apps/landing/scripts/marketing-acceptance.mjs"}:/work/marketing-acceptance.mjs:ro',
+        '-v', f'{ROOT / "frontend/apps/landing/scripts/marketing-console-diagnostics.mjs"}:/work/marketing-console-diagnostics.mjs:ro',
+        '-v', f'{ROOT / "frontend/apps/landing/scripts/marketing-console-diagnostics.test.mjs"}:/work/marketing-console-diagnostics.test.mjs:ro',
         '-v', f'{OPS / "browser-upload.cjs"}:/work/browser-upload.cjs:ro',
         '-v', f'{OPS / "journal-api-acceptance.cjs"}:/work/journal-api-acceptance.cjs:ro',
         '-v', f'{OPS / "acceptance-target.cjs"}:/work/acceptance-target.cjs:ro',
