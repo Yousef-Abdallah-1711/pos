@@ -38,3 +38,9 @@
 | CFR010-10 | Browser acceptance | Not run | Pending | Pending | Depends | Open |
 | CFR010-11 | Performance/concurrency | Not run | Pending | Pending | SLO owner | Open |
 | CFR010-12 | Independent financial acceptance | Not started | Pending | Required | Required | Open |
+
+## Continuation update — engineering verification boundary
+
+Additional anomaly scenarios and an exact-SHA PostgreSQL workflow step were added to the candidate. The workflow uses the existing financial acceptance job's disposable PostgreSQL service, generated ephemeral credentials, and migration setup. The local runtime still has no usable PostgreSQL service. Tagged integration code compiles, but no database-backed acceptance result is claimed until the workflow actually succeeds.
+
+Static and non-database verification on this candidate revision: full `go test ./...` passed; `go vet ./...` passed; `go test -tags=integration -run '^$' ./internal/repository` passed as compile-only validation; workflow YAML parsed successfully. These results do not replace tagged PostgreSQL execution.

@@ -16,3 +16,11 @@ It checks journal-line coverage for posted and void entries, duplicate or invali
 ## Limitations
 
 The candidate method has not been exercised against PostgreSQL, the original source dataset, or large-volume performance data. It is not wired to an API or financial user workflow. Exact accounting acceptance, issue-level exception details, and treatment of legacy/manual rows remain open. No source records were changed.
+
+## Continuation update — candidate hardening
+
+The candidate now uses one read-only `REPEATABLE READ` transaction for all reconciliation counts, adds separate scope/account/amount/date counters and deterministic `empty` / `reconciled` / `discrepancies` status, and checks journal and GL row totals. Voiding now stores one application timestamp for both `voided_at` and the reversal effect so the diagnostic can compare the reversal to the exact void event date.
+
+Integration scenarios now include missing and duplicate effects, amount/account/date/period mismatches, non-posted effects, cross-tenant contamination, orphan line references, an unbalanced journal, offsetting line-level errors, valid reversal, sibling restaurant isolation, and concurrent reconciliation reads during a posting. They temporarily disable integrity triggers only in the disposable test database and restore fixture state on cleanup.
+
+The existing financial acceptance workflow now runs these tagged cases after applying migrations to its ephemeral PostgreSQL service. This acceptance has not yet run; only compile-only tagged validation is available locally.

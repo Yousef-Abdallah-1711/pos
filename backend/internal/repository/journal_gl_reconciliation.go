@@ -2,22 +2,28 @@ package repository
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 )
 
 // JournalGLReconciliation summarizes read-only journal-to-ledger integrity for
 // one authorized tenant and restaurant scope.
 type JournalGLReconciliation struct {
-	TenantID                 int
-	RestaurantID             int
-	JournalLinesChecked      int64
-	PostedLinesMissingGL     int64
-	DuplicateOrInvalidGL     int64
-	GLScopeOrAccountMismatch int64
-	GLDateMismatch           int64
-	InvalidLedgerLinks       int64
-	UnbalancedJournals       int64
-	NonPostedJournalsWithGL  int64
+	TenantID                int
+	RestaurantID            int
+	JournalCount            int64
+	JournalLinesChecked     int64
+	GLRowCount              int64
+	PostedLinesMissingGL    int64
+	DuplicateOrInvalidGL    int64
+	GLScopeMismatch         int64
+	GLAccountMismatch       int64
+	GLAmountMismatch        int64
+	GLDateMismatch          int64
+	InvalidLedgerLinks      int64
+	UnbalancedJournals      int64
+	NonPostedJournalsWithGL int64
+	Status                  string
 }
 
 // ReconcileJournalGL checks source journal lines against their immutable GL
@@ -33,6 +39,11 @@ func (r *JournalEntryRepository) ReconcileJournalGL(
 	if tenantID <= 0 || restaurantID <= 0 {
 		return JournalGLReconciliation{}, fmt.Errorf("tenant and restaurant scope are required")
 	}
+	tx, err := r.db.BeginTx(ctx, &sql.TxOptions{Isolation: sql.LevelRepeatableRead, ReadOnly: true})
+	if err != nil {
+		return JournalGLReconciliation{}, fmt.Errorf("begin read-only reconciliation snapshot: %w", err)
+	}
+	defer tx.Rollback()
 	result := JournalGLReconciliation{TenantID: tenantID, RestaurantID: restaurantID}
 
 	const linesQuery = `
@@ -65,13 +76,19 @@ func (r *JournalEntryRepository) ReconcileJournalGL(
 				         AND gl.account_id = sl.account_id
 				         AND gl.debit_amount = sl.credit_amount
 				         AND gl.credit_amount = sl.debit_amount
-			         AND gl.entry_date >= sl.entry_date
-			         AND gl.fiscal_period = to_char(gl.entry_date, 'YYYY-MM')
+			         AND gl.entry_date = sl.voided_at::date
+			         AND gl.fiscal_period = to_char(sl.voided_at, 'YYYY-MM')
 			       ) AS reversal_matches,
 			       COUNT(gl.id) FILTER (
-				       WHERE gl.id IS NOT NULL
-				         AND (gl.tenant_id <> $1 OR gl.restaurant_id <> $2 OR gl.account_id <> sl.account_id)
-			       ) AS scope_or_account_mismatches,
+				       WHERE gl.id IS NOT NULL AND (gl.tenant_id <> $1 OR gl.restaurant_id <> $2)
+			       ) AS scope_mismatches,
+			       COUNT(gl.id) FILTER (
+				       WHERE gl.id IS NOT NULL AND gl.account_id <> sl.account_id
+			       ) AS account_mismatches,
+			       COUNT(gl.id) FILTER (
+				       WHERE gl.debit_amount = sl.debit_amount AND gl.credit_amount = sl.credit_amount
+			          OR (sl.status = 'void' AND gl.debit_amount = sl.credit_amount AND gl.credit_amount = sl.debit_amount)
+			       ) AS amount_matches,
 			       COUNT(gl.id) FILTER (
 				       WHERE gl.id IS NOT NULL
 				         AND gl.tenant_id = $1 AND gl.restaurant_id = $2
@@ -81,8 +98,8 @@ func (r *JournalEntryRepository) ReconcileJournalGL(
 			                 OR gl.fiscal_period <> COALESCE(sl.fiscal_period, to_char(sl.entry_date, 'YYYY-MM'))))
 			           OR (sl.status = 'void' AND gl.debit_amount = sl.credit_amount
 			               AND gl.credit_amount = sl.debit_amount
-			               AND (gl.entry_date < sl.entry_date
-			                 OR gl.fiscal_period <> to_char(gl.entry_date, 'YYYY-MM'))))
+			               AND (gl.entry_date <> sl.voided_at::date
+			                 OR gl.fiscal_period <> to_char(sl.voided_at, 'YYYY-MM'))))
 			       ) AS date_mismatches
 			FROM scoped_lines sl
 			LEFT JOIN general_ledger gl
@@ -100,24 +117,41 @@ func (r *JournalEntryRepository) ReconcileJournalGL(
 	            OR (status = 'void' AND (gl_count <> 2 OR original_matches <> 1 OR reversal_matches <> 1))
 	       ),
 		       COUNT(*) FILTER (WHERE status NOT IN ('posted', 'void') AND gl_count > 0),
-		       COALESCE(SUM(scope_or_account_mismatches), 0),
+		       COALESCE(SUM(scope_mismatches), 0),
+		       COALESCE(SUM(account_mismatches), 0),
+	       COALESCE(SUM(CASE WHEN status IN ('posted', 'void') THEN gl_count - amount_matches ELSE 0 END), 0),
 		       COALESCE(SUM(date_mismatches), 0),
-	       COUNT(*) FILTER (WHERE line_tenant_id <> $1 OR account_tenant_id <> $1 OR account_restaurant_id <> $2)
+	       COUNT(*) FILTER (WHERE line_tenant_id <> $1),
+	       COUNT(*) FILTER (WHERE account_tenant_id <> $1 OR account_restaurant_id <> $2)
 		FROM line_effects`
-	var lineScopeMismatches int64
-	if err := r.db.QueryRowContext(ctx, linesQuery, tenantID, restaurantID).Scan(
+	var lineTenantMismatches, accountScopeMismatches int64
+	if err := tx.QueryRowContext(ctx, linesQuery, tenantID, restaurantID).Scan(
 		&result.JournalLinesChecked,
 		&result.PostedLinesMissingGL,
 		&result.DuplicateOrInvalidGL,
 		&result.NonPostedJournalsWithGL,
-		&result.GLScopeOrAccountMismatch,
+		&result.GLScopeMismatch,
+		&result.GLAccountMismatch,
+		&result.GLAmountMismatch,
 		&result.GLDateMismatch,
-		&lineScopeMismatches,
+		&lineTenantMismatches,
+		&accountScopeMismatches,
 	); err != nil {
 		return JournalGLReconciliation{}, fmt.Errorf("reconcile journal lines to general ledger: %w", err)
 	}
-	result.GLScopeOrAccountMismatch += lineScopeMismatches
-	if err := r.db.QueryRowContext(ctx, `
+	result.GLScopeMismatch += lineTenantMismatches
+	result.GLAccountMismatch += accountScopeMismatches
+	if err := tx.QueryRowContext(ctx, `
+		SELECT COUNT(*) FROM journal_entries WHERE tenant_id = $1 AND restaurant_id = $2
+	`, tenantID, restaurantID).Scan(&result.JournalCount); err != nil {
+		return JournalGLReconciliation{}, fmt.Errorf("count scoped journals: %w", err)
+	}
+	if err := tx.QueryRowContext(ctx, `
+		SELECT COUNT(*) FROM general_ledger WHERE tenant_id = $1 AND restaurant_id = $2
+	`, tenantID, restaurantID).Scan(&result.GLRowCount); err != nil {
+		return JournalGLReconciliation{}, fmt.Errorf("count scoped ledger rows: %w", err)
+	}
+	if err := tx.QueryRowContext(ctx, `
 		SELECT COUNT(*)
 		FROM general_ledger gl
 		LEFT JOIN journal_entries je ON je.id = gl.journal_entry_id
@@ -143,7 +177,7 @@ func (r *JournalEntryRepository) ReconcileJournalGL(
 		LEFT JOIN journal_entry_lines jel ON jel.journal_entry_id = je.id
 		WHERE je.tenant_id = $1 AND je.restaurant_id = $2
 		GROUP BY je.id`
-	rows, err := r.db.QueryContext(ctx, headersQuery, tenantID, restaurantID)
+	rows, err := tx.QueryContext(ctx, headersQuery, tenantID, restaurantID)
 	if err != nil {
 		return JournalGLReconciliation{}, fmt.Errorf("reconcile journal header totals: %w", err)
 	}
@@ -157,6 +191,17 @@ func (r *JournalEntryRepository) ReconcileJournalGL(
 	}
 	if err := rows.Err(); err != nil {
 		return JournalGLReconciliation{}, fmt.Errorf("iterate journal header reconciliation: %w", err)
+	}
+	result.Status = "reconciled"
+	if result.JournalCount == 0 && result.GLRowCount == 0 {
+		result.Status = "empty"
+	} else if result.PostedLinesMissingGL+result.DuplicateOrInvalidGL+result.GLScopeMismatch+
+		result.GLAccountMismatch+result.GLAmountMismatch+result.GLDateMismatch+
+		result.InvalidLedgerLinks+result.UnbalancedJournals+result.NonPostedJournalsWithGL > 0 {
+		result.Status = "discrepancies"
+	}
+	if err := tx.Commit(); err != nil {
+		return JournalGLReconciliation{}, fmt.Errorf("finish read-only reconciliation snapshot: %w", err)
 	}
 	return result, nil
 }
