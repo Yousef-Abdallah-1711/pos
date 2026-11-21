@@ -148,6 +148,7 @@ type financialBenchmarkReport struct {
 	ProcessHeapBytes          uint64                            `json:"process_heap_bytes"`
 	ProcessSysBytes           uint64                            `json:"process_sys_bytes"`
 	Measurements              []financialBenchmarkMeasurement   `json:"measurements"`
+	Reconciliation            *financialReconciliationBenchmark `json:"reconciliation_benchmark,omitempty"`
 	LedgerPageIndexComparison financialBenchmarkIndexComparison `json:"ledger_page_index_comparison"`
 }
 
