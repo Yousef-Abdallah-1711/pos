@@ -7,7 +7,7 @@ import time
 REPO='Yousef-Abdallah-1711/pos'
 EXPECTED={
     'required':(415727583,'.github/workflows/production-ci.yml'),
-    'financial-postgres':(418987309,'.github/workflows/financial-acceptance.yml'),
+    'financial-postgres-acceptance / financial-postgres':(418987309,'.github/workflows/financial-acceptance.yml'),
     'runtime-localhost-guardrail':(404030479,'.github/workflows/runtime-localhost-guardrail.yml'),
     'url-domain-config-smoke':(404030480,'.github/workflows/url-domain-config-smoke.yml'),
 }

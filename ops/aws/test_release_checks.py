@@ -22,6 +22,11 @@ class RequiredPublicationTests(unittest.TestCase):
     def test_accepts_exact_main_and_all_completed_guardrail_workflows(self):
         self.assertTrue(self.ready())
 
+    def test_unqualified_financial_check_context_does_not_satisfy_gate(self):
+        financial_check=next(check for check in self.checks if check['name'].startswith('financial-postgres-acceptance'))
+        financial_check['name']='financial-postgres'
+        self.assertFalse(self.ready())
+
     def test_missing_required_context_waits_without_publication(self):
         self.checks.pop();self.assertFalse(self.ready())
 
