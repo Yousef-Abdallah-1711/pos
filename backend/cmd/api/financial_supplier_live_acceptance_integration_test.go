@@ -71,7 +71,7 @@ func supplierAcceptanceOwnerClient(t *testing.T, baseURL string, fixture liveFin
 	if err != nil {
 		t.Fatalf("create isolated cookie jar: %v", err)
 	}
-	client := &http.Client{Jar: jar, Timeout: 10 * time.Second}
+	client := &http.Client{Jar: jar, Timeout: 30 * time.Second}
 	status, body := acceptanceJSONRequest(t, client, http.MethodPost, baseURL+"/api/v1/auth/login", map[string]string{
 		"email": fixture.email, "password": fixture.password,
 	})

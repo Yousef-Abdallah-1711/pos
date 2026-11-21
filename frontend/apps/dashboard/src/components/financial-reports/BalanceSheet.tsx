@@ -44,7 +44,7 @@ export function BalanceSheet({ report, locale }: BalanceSheetProps) {
         />
       </div>
 
-      <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-2 2xl:grid-cols-3">
         <Block title={t('sections.assets')} rows={report.assets} formatter={formatter} />
         <Block title={t('sections.liabilities')} rows={report.liabilities} formatter={formatter} />
         <Block title={t('sections.equity')} rows={report.equity} formatter={formatter} />
@@ -113,7 +113,7 @@ function Block({
               rows.map((row) => (
                 <tr key={`${title}-${row.account_code}-${row.account_name}`}>
                   <td className="px-4 py-3 font-mono text-gray-700 dark:text-gray-200">{row.account_code}</td>
-                  <td className="px-4 py-3 text-gray-700 dark:text-gray-200">{row.account_name}</td>
+                  <td className="break-words px-4 py-3 text-gray-700 dark:text-gray-200">{row.account_name}</td>
                   <td className="px-4 py-3 text-right font-medium text-gray-900 dark:text-white">
                     {formatter.format(row.amount)}
                   </td>

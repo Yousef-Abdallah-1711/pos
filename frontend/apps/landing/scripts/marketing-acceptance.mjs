@@ -66,6 +66,19 @@ async function load(page, locale, route) {
   const headings = document.querySelectorAll('main h1')
   return headings.length === 1 && headings[0].getClientRects().length > 0
  })
+ // The layout audit needs the actual page styles, not the browser's default
+ // 40px figure margins and intrinsic image widths. Next can expose the heading
+ // before its route stylesheet has finished applying on a cold CI request.
+ await page.waitForFunction(() => {
+  const stylesheets = [...document.querySelectorAll('link[rel="stylesheet"]')]
+  const stylesheetsApplied = stylesheets.length > 0 && stylesheets.every(link => {
+   if (!link.sheet) return false
+   try { return link.sheet.cssRules.length > 0 } catch { return false }
+  })
+  const main = document.querySelector('.sv-main')
+  return stylesheetsApplied && getComputedStyle(document.body).margin === '0px' &&
+   !!main && getComputedStyle(main).overflowX === 'clip'
+ })
  // A quiet network is not a reliable readiness signal when Next.js prefetches
  // routes or the page has background requests. The visible heading above is
  // the content readiness check; later interactions exercise client hydration.
@@ -135,8 +148,8 @@ async function capture(page, name) {
   } finally { await handle.dispose() }
  }
  await page.evaluate(() => window.scrollTo(0, 0))
- // The geometry checks exercise the full page; keep larger viewport captures bounded on hosted Chromium.
- await page.screenshot({ path: path.join(output, `${name}.png`), fullPage: page.viewportSize().width <= 768, timeout: 60000 })
+ // Geometry checks exercise the full page at every viewport; keep evidence screenshots viewport-bounded on CI.
+ await page.screenshot({ path: path.join(output, `${name}.png`), fullPage: false, animations: 'disabled', timeout: 60000 })
  check(`captures loaded ${name}`, missing.length === 0, JSON.stringify(missing))
 }
 async function captureNavigationEvidence(browser, page, { locale, variant, viewport, frame }) {

@@ -2,8 +2,10 @@
 
 import { useMemo, useState } from 'react'
 import { Loader, RefreshCw } from 'lucide-react'
+import { usePathname } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { api } from '@/lib/api'
+import { createTranslator, getLocaleFromPath } from '@/lib/translations'
 import {
   createBankReconciliationSession,
   createRecurringJournal,
@@ -37,6 +39,9 @@ function downloadBlob(filename: string, blob: Blob) {
 }
 
 export default function AdvancedAccountingToolsPage() {
+  const pathname = usePathname()
+  const locale = getLocaleFromPath(pathname)
+  const t = useMemo(() => createTranslator(locale), [locale])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [state, setState] = useState<any>(null)
@@ -69,7 +74,7 @@ export default function AdvancedAccountingToolsPage() {
   })
   const [invoiceId, setInvoiceId] = useState(1)
 
-  const currency = useMemo(() => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'EGP', maximumFractionDigits: 2 }), [])
+  const currency = useMemo(() => new Intl.NumberFormat(locale === 'ar' ? 'ar-EG' : 'en-US', { style: 'currency', currency: 'EGP', maximumFractionDigits: 2 }), [locale])
 
   const loadAll = async () => {
     setLoading(true)
@@ -102,7 +107,7 @@ export default function AdvancedAccountingToolsPage() {
         eInvoices,
       })
     } catch (err: any) {
-      setError(err?.response?.data?.error || err?.message || 'Failed to load advanced accounting tools')
+      setError(err?.response?.data?.error || err?.message || t('accounting.advancedLoadError', 'Failed to load advanced accounting tools'))
     } finally {
       setLoading(false)
     }
@@ -131,13 +136,13 @@ export default function AdvancedAccountingToolsPage() {
   const onCreateRecurringSample = async () => {
     await createRecurringJournal({
       template_code: `REC-${Date.now()}`,
-      template_name: 'Monthly Rent',
+          template_name: t('accounting.advancedMonthlyRent', 'Monthly Rent'),
       frequency: 'monthly',
       start_date: toDateInput(new Date()),
       auto_post: false,
       lines: [
-        { account_id: 1, debit_amount: 5000, credit_amount: 0, line_order: 1, description: 'Rent Expense' },
-        { account_id: 2, debit_amount: 0, credit_amount: 5000, line_order: 2, description: 'Cash' },
+        { account_id: 1, debit_amount: 5000, credit_amount: 0, line_order: 1, description: t('accounting.advancedRentExpense', 'Rent Expense') },
+        { account_id: 2, debit_amount: 0, credit_amount: 5000, line_order: 2, description: t('accounting.advancedCash', 'Cash') },
       ],
     })
     await loadAll()
@@ -174,17 +179,17 @@ export default function AdvancedAccountingToolsPage() {
     <div className="space-y-6">
       <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Advanced Accounting Tools</h1>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{t('accounting.advancedTitle', 'Advanced Accounting Tools')}</h1>
           <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-            Phase 7 operations + Phase 9 integration/import/export utilities.
+            {t('accounting.advancedSubtitle', 'Phase 7 operations + Phase 9 integration/import/export utilities.')}
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <Button variant="outline" onClick={exportCoa}>Export COA CSV</Button>
-          <Button variant="outline" onClick={exportJournals}>Export Journals CSV</Button>
+          <Button variant="outline" onClick={exportCoa}>{t('accounting.advancedExportCoa', 'Export COA CSV')}</Button>
+          <Button variant="outline" onClick={exportJournals}>{t('accounting.advancedExportJournals', 'Export Journals CSV')}</Button>
           <Button onClick={loadAll} disabled={loading}>
             {loading ? <Loader className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
-            Refresh
+            {t('accounting.refreshTrialBalance', 'Refresh')}
           </Button>
         </div>
       </div>
@@ -193,61 +198,61 @@ export default function AdvancedAccountingToolsPage() {
         <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800 dark:border-red-800 dark:bg-red-900/20 dark:text-red-300">{error}</div>
       ) : null}
 
-      <Section title="Bank Reconciliation">
+      <Section title={t('accounting.advancedBankReconciliation', 'Bank Reconciliation')}>
         <div className="grid grid-cols-1 gap-2 md:grid-cols-5">
-          <input type="number" placeholder="Bank Account ID" value={reconciliationForm.bank_account_id} onChange={(e) => setReconciliationForm((s) => ({ ...s, bank_account_id: Number(e.target.value) }))} className="rounded border px-3 py-2" />
-          <input type="date" value={reconciliationForm.statement_date} onChange={(e) => setReconciliationForm((s) => ({ ...s, statement_date: e.target.value }))} className="rounded border px-3 py-2" />
-          <input type="number" placeholder="Statement Balance" value={reconciliationForm.statement_balance} onChange={(e) => setReconciliationForm((s) => ({ ...s, statement_balance: Number(e.target.value) }))} className="rounded border px-3 py-2" />
-          <input type="number" placeholder="Book Balance" value={reconciliationForm.book_balance} onChange={(e) => setReconciliationForm((s) => ({ ...s, book_balance: Number(e.target.value) }))} className="rounded border px-3 py-2" />
-          <Button onClick={onCreateReconciliation}>Create Session</Button>
+          <input type="number" aria-label={t('accounting.advancedBankAccountId', 'Bank Account ID')} placeholder={t('accounting.advancedBankAccountId', 'Bank Account ID')} value={reconciliationForm.bank_account_id} onChange={(e) => setReconciliationForm((s) => ({ ...s, bank_account_id: Number(e.target.value) }))} className="rounded border px-3 py-2" />
+          <input type="date" aria-label={t('accounting.advancedStatementDate', 'Statement Date')} value={reconciliationForm.statement_date} onChange={(e) => setReconciliationForm((s) => ({ ...s, statement_date: e.target.value }))} className="rounded border px-3 py-2" />
+          <input type="number" aria-label={t('accounting.advancedStatementBalance', 'Statement Balance')} placeholder={t('accounting.advancedStatementBalance', 'Statement Balance')} value={reconciliationForm.statement_balance} onChange={(e) => setReconciliationForm((s) => ({ ...s, statement_balance: Number(e.target.value) }))} className="rounded border px-3 py-2" />
+          <input type="number" aria-label={t('accounting.advancedBookBalance', 'Book Balance')} placeholder={t('accounting.advancedBookBalance', 'Book Balance')} value={reconciliationForm.book_balance} onChange={(e) => setReconciliationForm((s) => ({ ...s, book_balance: Number(e.target.value) }))} className="rounded border px-3 py-2" />
+          <Button onClick={onCreateReconciliation}>{t('accounting.advancedCreateSession', 'Create Session')}</Button>
         </div>
         <div className="space-y-2 text-sm">
           {(state?.sessions || []).slice(0, 8).map((item: any) => (
             <div key={item.id} className="flex items-center justify-between rounded border p-2">
               <span>#{item.id} {item.statement_date} ({item.status})</span>
-              <span>{currency.format(item.statement_balance || 0)} / Diff {currency.format(item.difference || 0)}</span>
+              <span>{currency.format(item.statement_balance || 0)} / {t('accounting.advancedDifference', 'Diff')} {currency.format(item.difference || 0)}</span>
             </div>
           ))}
         </div>
       </Section>
 
-      <Section title="Recurring Journals">
+      <Section title={t('accounting.advancedRecurringJournals', 'Recurring Journals')}>
         <div className="flex flex-wrap gap-2">
-          <Button variant="outline" onClick={onCreateRecurringSample}>Create Sample Template</Button>
+          <Button variant="outline" onClick={onCreateRecurringSample}>{t('accounting.advancedCreateSampleTemplate', 'Create Sample Template')}</Button>
           {(state?.recurring || []).slice(0, 3).map((item: any) => (
             <Button key={item.id} variant="outline" onClick={() => runRecurringJournal(item.id)}>
-              Run {item.template_name}
+              {t('accounting.advancedRun', 'Run')} {item.template_name}
             </Button>
           ))}
         </div>
       </Section>
 
-      <Section title="Budgets + Exchange Rates">
+      <Section title={t('accounting.advancedBudgetsExchangeRates', 'Budgets + Exchange Rates')}>
         <div className="grid grid-cols-1 gap-2 md:grid-cols-6">
-          <input type="number" placeholder="Account ID" value={budgetForm.account_id} onChange={(e) => setBudgetForm((s) => ({ ...s, account_id: Number(e.target.value) }))} className="rounded border px-3 py-2" />
-          <input type="number" placeholder="Year" value={budgetForm.fiscal_year} onChange={(e) => setBudgetForm((s) => ({ ...s, fiscal_year: Number(e.target.value) }))} className="rounded border px-3 py-2" />
-          <input type="number" placeholder="Month" value={budgetForm.period_month} onChange={(e) => setBudgetForm((s) => ({ ...s, period_month: Number(e.target.value) }))} className="rounded border px-3 py-2" />
-          <input type="number" placeholder="Budget Amount" value={budgetForm.budget_amount} onChange={(e) => setBudgetForm((s) => ({ ...s, budget_amount: Number(e.target.value) }))} className="rounded border px-3 py-2" />
-          <input type="text" placeholder="Currency" value={budgetForm.currency} onChange={(e) => setBudgetForm((s) => ({ ...s, currency: e.target.value }))} className="rounded border px-3 py-2" />
-          <Button onClick={onCreateBudget}>Save Budget</Button>
+          <input type="number" aria-label={t('accounting.advancedAccountId', 'Account ID')} placeholder={t('accounting.advancedAccountId', 'Account ID')} value={budgetForm.account_id} onChange={(e) => setBudgetForm((s) => ({ ...s, account_id: Number(e.target.value) }))} className="rounded border px-3 py-2" />
+          <input type="number" aria-label={t('accounting.advancedYear', 'Year')} placeholder={t('accounting.advancedYear', 'Year')} value={budgetForm.fiscal_year} onChange={(e) => setBudgetForm((s) => ({ ...s, fiscal_year: Number(e.target.value) }))} className="rounded border px-3 py-2" />
+          <input type="number" aria-label={t('accounting.advancedMonth', 'Month')} placeholder={t('accounting.advancedMonth', 'Month')} value={budgetForm.period_month} onChange={(e) => setBudgetForm((s) => ({ ...s, period_month: Number(e.target.value) }))} className="rounded border px-3 py-2" />
+          <input type="number" aria-label={t('accounting.advancedBudgetAmount', 'Budget Amount')} placeholder={t('accounting.advancedBudgetAmount', 'Budget Amount')} value={budgetForm.budget_amount} onChange={(e) => setBudgetForm((s) => ({ ...s, budget_amount: Number(e.target.value) }))} className="rounded border px-3 py-2" />
+          <input type="text" aria-label={t('accounting.advancedCurrency', 'Currency')} placeholder={t('accounting.advancedCurrency', 'Currency')} value={budgetForm.currency} onChange={(e) => setBudgetForm((s) => ({ ...s, currency: e.target.value }))} className="rounded border px-3 py-2" />
+          <Button onClick={onCreateBudget}>{t('accounting.advancedSaveBudget', 'Save Budget')}</Button>
         </div>
         <div className="grid grid-cols-1 gap-2 md:grid-cols-5">
-          <input type="text" placeholder="Base" value={rateForm.base_currency} onChange={(e) => setRateForm((s) => ({ ...s, base_currency: e.target.value }))} className="rounded border px-3 py-2" />
-          <input type="text" placeholder="Quote" value={rateForm.quote_currency} onChange={(e) => setRateForm((s) => ({ ...s, quote_currency: e.target.value }))} className="rounded border px-3 py-2" />
-          <input type="number" placeholder="Rate" value={rateForm.rate} onChange={(e) => setRateForm((s) => ({ ...s, rate: Number(e.target.value) }))} className="rounded border px-3 py-2" />
-          <input type="date" value={rateForm.effective_date} onChange={(e) => setRateForm((s) => ({ ...s, effective_date: e.target.value }))} className="rounded border px-3 py-2" />
-          <Button onClick={onCreateRate}>Save FX Rate</Button>
+          <input type="text" aria-label={t('accounting.advancedBaseCurrency', 'Base')} placeholder={t('accounting.advancedBaseCurrency', 'Base')} value={rateForm.base_currency} onChange={(e) => setRateForm((s) => ({ ...s, base_currency: e.target.value }))} className="rounded border px-3 py-2" />
+          <input type="text" aria-label={t('accounting.advancedQuoteCurrency', 'Quote')} placeholder={t('accounting.advancedQuoteCurrency', 'Quote')} value={rateForm.quote_currency} onChange={(e) => setRateForm((s) => ({ ...s, quote_currency: e.target.value }))} className="rounded border px-3 py-2" />
+          <input type="number" aria-label={t('accounting.advancedRate', 'Rate')} placeholder={t('accounting.advancedRate', 'Rate')} value={rateForm.rate} onChange={(e) => setRateForm((s) => ({ ...s, rate: Number(e.target.value) }))} className="rounded border px-3 py-2" />
+          <input type="date" aria-label={t('accounting.advancedEffectiveDate', 'Effective Date')} value={rateForm.effective_date} onChange={(e) => setRateForm((s) => ({ ...s, effective_date: e.target.value }))} className="rounded border px-3 py-2" />
+          <Button onClick={onCreateRate}>{t('accounting.advancedSaveFxRate', 'Save FX Rate')}</Button>
         </div>
       </Section>
 
-      <Section title="Supplier Payment Scheduling + Reminders">
+      <Section title={t('accounting.advancedSupplierPaymentScheduling', 'Supplier Payment Scheduling + Reminders')}>
         <div className="grid grid-cols-1 gap-2 md:grid-cols-6">
-          <input type="number" placeholder="Supplier ID" value={scheduleForm.supplier_id} onChange={(e) => setScheduleForm((s) => ({ ...s, supplier_id: Number(e.target.value) }))} className="rounded border px-3 py-2" />
-          <input type="date" value={scheduleForm.scheduled_date} onChange={(e) => setScheduleForm((s) => ({ ...s, scheduled_date: e.target.value }))} className="rounded border px-3 py-2" />
-          <input type="number" placeholder="Amount" value={scheduleForm.amount} onChange={(e) => setScheduleForm((s) => ({ ...s, amount: Number(e.target.value) }))} className="rounded border px-3 py-2" />
-          <input type="number" placeholder="Reminder Days" value={scheduleForm.reminder_days} onChange={(e) => setScheduleForm((s) => ({ ...s, reminder_days: Number(e.target.value) }))} className="rounded border px-3 py-2" />
-          <input type="text" placeholder="Currency" value={scheduleForm.currency} onChange={(e) => setScheduleForm((s) => ({ ...s, currency: e.target.value }))} className="rounded border px-3 py-2" />
-          <Button onClick={onCreateSchedule}>Create Schedule</Button>
+          <input type="number" aria-label={t('accounting.advancedSupplierId', 'Supplier ID')} placeholder={t('accounting.advancedSupplierId', 'Supplier ID')} value={scheduleForm.supplier_id} onChange={(e) => setScheduleForm((s) => ({ ...s, supplier_id: Number(e.target.value) }))} className="rounded border px-3 py-2" />
+          <input type="date" aria-label={t('accounting.advancedScheduledDate', 'Scheduled Date')} value={scheduleForm.scheduled_date} onChange={(e) => setScheduleForm((s) => ({ ...s, scheduled_date: e.target.value }))} className="rounded border px-3 py-2" />
+          <input type="number" aria-label={t('accounting.advancedAmount', 'Amount')} placeholder={t('accounting.advancedAmount', 'Amount')} value={scheduleForm.amount} onChange={(e) => setScheduleForm((s) => ({ ...s, amount: Number(e.target.value) }))} className="rounded border px-3 py-2" />
+          <input type="number" aria-label={t('accounting.advancedReminderDays', 'Reminder Days')} placeholder={t('accounting.advancedReminderDays', 'Reminder Days')} value={scheduleForm.reminder_days} onChange={(e) => setScheduleForm((s) => ({ ...s, reminder_days: Number(e.target.value) }))} className="rounded border px-3 py-2" />
+          <input type="text" aria-label={t('accounting.advancedCurrency', 'Currency')} placeholder={t('accounting.advancedCurrency', 'Currency')} value={scheduleForm.currency} onChange={(e) => setScheduleForm((s) => ({ ...s, currency: e.target.value }))} className="rounded border px-3 py-2" />
+          <Button onClick={onCreateSchedule}>{t('accounting.advancedCreateSchedule', 'Create Schedule')}</Button>
         </div>
         <div className="space-y-2 text-sm">
           {(state?.reminders || []).slice(0, 6).map((item: any) => (
@@ -255,30 +260,30 @@ export default function AdvancedAccountingToolsPage() {
               <span>{item.supplier_name || `Supplier #${item.supplier_id}`} {item.scheduled_date}</span>
               <div className="flex items-center gap-2">
                 <span>{currency.format(item.amount || 0)}</span>
-                <Button size="sm" variant="outline" onClick={() => sendSupplierPaymentReminder(item.id)}>Send Reminder</Button>
+                <Button size="sm" variant="outline" onClick={() => sendSupplierPaymentReminder(item.id)}>{t('accounting.advancedSendReminder', 'Send Reminder')}</Button>
               </div>
             </div>
           ))}
         </div>
       </Section>
 
-      <Section title="E-Invoice + Excel-Compatible Import">
+      <Section title={t('accounting.advancedEInvoiceImport', 'E-Invoice + Excel-Compatible Import')}>
         <div className="flex flex-wrap items-center gap-2">
-          <input type="number" value={invoiceId} onChange={(e) => setInvoiceId(Number(e.target.value))} className="rounded border px-3 py-2" />
-          <Button onClick={onSubmitEInvoice}>Submit E-Invoice (Customer)</Button>
+          <input type="number" aria-label={t('accounting.advancedInvoiceId', 'Invoice ID')} value={invoiceId} onChange={(e) => setInvoiceId(Number(e.target.value))} className="rounded border px-3 py-2" />
+          <Button onClick={onSubmitEInvoice}>{t('accounting.advancedSubmitCustomerEInvoice', 'Submit E-Invoice (Customer)')}</Button>
           <label className="rounded border px-3 py-2 text-sm cursor-pointer">
-            Import COA CSV
+            {t('accounting.advancedImportCoaCsv', 'Import COA CSV')}
             <input type="file" accept=".csv" className="hidden" onChange={(e) => onImportCsv('coa', e.target.files?.[0] || null)} />
           </label>
           <label className="rounded border px-3 py-2 text-sm cursor-pointer">
-            Import Journals CSV
+            {t('accounting.advancedImportJournalsCsv', 'Import Journals CSV')}
             <input type="file" accept=".csv" className="hidden" onChange={(e) => onImportCsv('journal', e.target.files?.[0] || null)} />
           </label>
         </div>
         <div className="space-y-2 text-sm">
           {(state?.eInvoices || []).slice(0, 8).map((item: any) => (
             <div key={item.id} className="flex items-center justify-between rounded border p-2">
-              <span>#{item.id} {item.invoice_type} invoice {item.invoice_id}</span>
+              <span>#{item.id} {item.invoice_type} {t('accounting.advancedInvoice', 'invoice')} {item.invoice_id}</span>
               <span>{item.status} {item.eta_uuid ? `(${item.eta_uuid})` : ''}</span>
             </div>
           ))}
