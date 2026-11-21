@@ -13,6 +13,7 @@ import tarfile
 import tempfile
 import time
 import uuid
+import urllib.error
 import urllib.request
 
 sys.path.insert(0,str(Path(__file__).resolve().parent))
@@ -28,6 +29,16 @@ SOURCE_EXPANSION_RESERVE_BYTES = 1024**3
 ACCEPTANCE_EVIDENCE_RESERVE_BYTES = 512 * 1024**2
 STATE = OPS / 'evidence/deployed-release.json'
 PUBLIC_STATUS=Path('/var/lib/servio-deployer/public/release.json')
+PUBLIC_CHECK_PATHS = {
+    'pos.rakmyat.online': '/en',
+    'api.pos.rakmyat.online': '/api/v1/health',
+    'pos.app.rakmyat.online': '/en/dashboard',
+    'admin.pos.rakmyat.online': '/login',
+    'restaurant-1.pos.rakmyat.online': '/en',
+    'got.rakmyat.online': '/',
+}
+PUBLIC_ROUTE_ATTEMPTS = 12
+PUBLIC_ROUTE_RETRY_DELAY_SECONDS = 5
 
 def github(path):
     request = urllib.request.Request('https://api.github.com/repos/' + REPO + '/' + path, headers={'User-Agent': 'servio-staging-deployer', 'Accept': 'application/vnd.github+json'})
@@ -233,10 +244,19 @@ def verify_disk_headroom(manifest, *, after_images=False):
     if free<required:
         raise RuntimeError(f'Insufficient deployment disk headroom: {free} bytes free; {required} required')
 
+def open_public_route(host, path):
+    url = 'https://' + host + path
+    for attempt in range(PUBLIC_ROUTE_ATTEMPTS):
+        try:
+            return urllib.request.urlopen(url, timeout=20)
+        except OSError as error:
+            if attempt + 1 == PUBLIC_ROUTE_ATTEMPTS:
+                raise RuntimeError('Public route did not become ready: ' + host) from error
+            time.sleep(PUBLIC_ROUTE_RETRY_DELAY_SECONDS)
+
 def public_checks():
-    paths = {'pos.rakmyat.online': '/en', 'api.pos.rakmyat.online': '/api/v1/health', 'pos.app.rakmyat.online': '/en/dashboard', 'admin.pos.rakmyat.online': '/login', 'restaurant-1.pos.rakmyat.online': '/en'}
-    for host, path in paths.items():
-        with urllib.request.urlopen('https://' + host + path, timeout=30) as response:
+    for host, path in PUBLIC_CHECK_PATHS.items():
+        with open_public_route(host, path) as response:
             if response.status != 200:
                 raise RuntimeError('Public route failed: ' + host)
             if host.startswith('api.') and not json.load(response).get('db_healthy'):
