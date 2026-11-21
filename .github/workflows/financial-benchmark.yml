@@ -133,6 +133,7 @@ jobs:
           with summary_path.open('a', encoding='utf-8') as summary:
               summary.write('\n'.join(lines) + '\n')
           PY
+          cat "$GITHUB_STEP_SUMMARY"
       - name: Upload benchmark report
         if: always() && github.repository == 'Yousef-Abdallah-1711/pos-phase5-private-acceptance'
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
