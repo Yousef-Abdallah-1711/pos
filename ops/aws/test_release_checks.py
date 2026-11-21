@@ -13,8 +13,10 @@ class RequiredPublicationTests(unittest.TestCase):
     def setUp(self):
         self.checks=[];self.runs={}
         for run_id,(name,(workflow_id,path)) in enumerate(gate.EXPECTED.items(),start=1):
-            self.checks.append({'id':run_id,'name':name,'head_sha':SHA,'app':{'slug':'github-actions'},'status':'completed','conclusion':'success','details_url':f'https://github.com/{gate.REPO}/actions/runs/{run_id}/job/99'})
+            observed_run_id=1 if name=='financial-postgres-acceptance / financial-postgres' else run_id
+            self.checks.append({'id':run_id,'name':name,'head_sha':SHA,'app':{'slug':'github-actions'},'status':'completed','conclusion':'success','details_url':f'https://github.com/{gate.REPO}/actions/runs/{observed_run_id}/job/99'})
             self.runs[run_id]={'workflow_id':workflow_id,'path':path,'head_sha':SHA,'head_branch':'main','event':'push','status':'in_progress' if run_id==1 else 'completed','conclusion':None if run_id==1 else 'success'}
+        self.runs[1].update(status='in_progress',conclusion=None)
         self.mock=patch.object(gate,'api',side_effect=lambda path:self.runs[int(path.rsplit('/',1)[1])]);self.mock.start();self.addCleanup(self.mock.stop)
 
     def ready(self):return gate.checks_ready(self.checks,SHA,1)
@@ -26,6 +28,21 @@ class RequiredPublicationTests(unittest.TestCase):
         financial_check=next(check for check in self.checks if check['name'].startswith('financial-postgres-acceptance'))
         financial_check['name']='financial-postgres'
         self.assertFalse(self.ready())
+
+    def test_financial_reusable_workflow_uses_observed_caller_run_identity(self):
+        financial_check=next(check for check in self.checks if check['name'].startswith('financial-postgres-acceptance'))
+        financial_run_id=int(financial_check['details_url'].split('/actions/runs/')[1].split('/')[0])
+        self.assertEqual(gate.EXPECTED[financial_check['name']],(415727583,'.github/workflows/production-ci.yml'))
+        self.assertEqual(self.runs[financial_run_id]['workflow_id'],415727583)
+        self.assertEqual(self.runs[financial_run_id]['path'],'.github/workflows/production-ci.yml')
+        self.assertEqual(financial_run_id,1)
+        self.assertTrue(self.ready())
+
+    def test_reusable_workflow_id_cannot_impersonate_its_caller(self):
+        financial_check=next(check for check in self.checks if check['name'].startswith('financial-postgres-acceptance'))
+        financial_run_id=int(financial_check['details_url'].split('/actions/runs/')[1].split('/')[0])
+        self.runs[financial_run_id].update(workflow_id=418987309,path='.github/workflows/financial-acceptance.yml')
+        with self.assertRaisesRegex(RuntimeError,'workflow identity mismatch'):self.ready()
 
     def test_missing_required_context_waits_without_publication(self):
         self.checks.pop();self.assertFalse(self.ready())
@@ -49,21 +66,21 @@ class RequiredPublicationTests(unittest.TestCase):
         with self.assertRaisesRegex(RuntimeError,'commit mismatch'):self.ready()
 
     def test_spoofed_workflow_name_or_id_is_rejected(self):
-        self.runs[2]['workflow_id']=999
+        self.runs[3]['workflow_id']=999
         with self.assertRaisesRegex(RuntimeError,'workflow identity'):self.ready()
 
     def test_dispatch_or_nonmain_run_cannot_publish(self):
         for field,value in [('event','workflow_dispatch'),('head_branch','feature')]:
             with self.subTest(field=field):
-                old=self.runs[2][field];self.runs[2][field]=value
+                old=self.runs[3][field];self.runs[3][field]=value
                 with self.assertRaisesRegex(RuntimeError,'exact main push'):self.ready()
-                self.runs[2][field]=old
+                self.runs[3][field]=old
 
     def test_different_primary_ci_run_is_rejected(self):
         with self.assertRaisesRegex(RuntimeError,'different CI run'):gate.checks_ready(self.checks,SHA,123)
 
     def test_incomplete_guardrail_workflow_waits_after_job_success(self):
-        self.runs[2]['status']='in_progress';self.runs[2]['conclusion']=None
+        self.runs[3]['status']='in_progress';self.runs[3]['conclusion']=None
         self.assertFalse(self.ready())
 
     def test_main_advance_stops_publication(self):

@@ -7,7 +7,7 @@ import time
 REPO='Yousef-Abdallah-1711/pos'
 EXPECTED={
     'required':(415727583,'.github/workflows/production-ci.yml'),
-    'financial-postgres-acceptance / financial-postgres':(418987309,'.github/workflows/financial-acceptance.yml'),
+    'financial-postgres-acceptance / financial-postgres':(415727583,'.github/workflows/production-ci.yml'),
     'runtime-localhost-guardrail':(404030479,'.github/workflows/runtime-localhost-guardrail.yml'),
     'url-domain-config-smoke':(404030480,'.github/workflows/url-domain-config-smoke.yml'),
 }
@@ -29,11 +29,11 @@ def run_ready(check,sha,main_run):
         raise RuntimeError('Required-check workflow identity mismatch')
     if (run.get('head_sha'),run.get('head_branch'),run.get('event'))!=(sha,'main','push'):
         raise RuntimeError('Required check is not an exact main push')
-    if check['name']=='required':
-        if run_id!=main_run:raise RuntimeError('Required aggregate belongs to a different CI run')
+    if check['name'] in ['required','financial-postgres-acceptance / financial-postgres']:
+        if run_id!=main_run:raise RuntimeError('Required check belongs to a different CI run')
         if run.get('status') not in ['in_progress','completed'] or run.get('conclusion') not in [None,'success']:
             raise RuntimeError('Publication CI is cancelled or unsuccessful')
-        return True  # This workflow is still running its publication job.
+        return True  # The completed required job is in the same run as publication.
     if run.get('status')!='completed':return False
     if run.get('conclusion')!='success':raise RuntimeError('Required guardrail workflow failed')
     return True
