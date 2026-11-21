@@ -57,3 +57,60 @@ html {
 body {
   @apply bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100;
 }
+
+.dashboard-layout {
+  direction: ltr;
+  flex-direction: row;
+}
+
+.dashboard-layout:not([data-fullscreen='true']) {
+  padding-left: 16rem;
+}
+
+.dashboard-main {
+  box-sizing: border-box;
+  flex: 1 1 0%;
+  min-width: 0;
+  width: 100%;
+}
+
+@media (min-width: 768px) {
+  .dashboard-layout:not([data-fullscreen='true']) > .dashboard-main {
+    flex: 1 1 0%;
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .dashboard-layout[data-locale='ar']:not([data-fullscreen='true']) {
+    padding-left: 0;
+    padding-right: 16rem;
+  }
+
+  .dashboard-layout[data-locale='ar']:not([data-fullscreen='true']) > .dashboard-main {
+    margin-right: 0;
+  }
+
+  .dashboard-layout[data-sidebar-collapsed='true']:not([data-fullscreen='true']) {
+    padding-left: 5rem;
+  }
+
+  .dashboard-layout[data-sidebar-collapsed='true']:not([data-fullscreen='true']) > .dashboard-main {
+    width: 100%;
+  }
+
+  .dashboard-layout[data-locale='ar'][data-sidebar-collapsed='true']:not([data-fullscreen='true']) {
+    padding-left: 0;
+    padding-right: 5rem;
+  }
+
+  .dashboard-layout[data-locale='ar'][data-sidebar-collapsed='true']:not([data-fullscreen='true']) > .dashboard-main {
+    margin-right: 0;
+  }
+}
+
+@media (max-width: 767px) {
+  .dashboard-layout:not([data-fullscreen='true']) {
+    padding-left: 0;
+    padding-right: 0;
+  }
+}

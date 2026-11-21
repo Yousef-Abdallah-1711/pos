@@ -272,7 +272,7 @@ func (h *HRSalaryHandler) CreateSalary(w http.ResponseWriter, r *http.Request) {
 		CreatedBy:          &userID,
 	}
 
-	id, err := h.salaryRepo.CreateSalary(salary)
+	createdSalary, err := h.salaryRepo.CreateSalaryAndGet(salary)
 	if err != nil {
 		log.Printf("[HR-Salary] CreateSalary ERROR: %v\n", err)
 		writeJSON(w, http.StatusInternalServerError, map[string]interface{}{
@@ -280,12 +280,10 @@ func (h *HRSalaryHandler) CreateSalary(w http.ResponseWriter, r *http.Request) {
 		})
 		return
 	}
-
-	salary.ID = id
-	log.Printf("[HR-Salary] CreateSalary SUCCESS: id=%d\n", id)
+	log.Printf("[HR-Salary] CreateSalary SUCCESS: id=%d\n", createdSalary.ID)
 
 	writeJSON(w, http.StatusCreated, map[string]interface{}{
-		"success": true, "data": salary,
+		"success": true, "data": createdSalary,
 	})
 }
 

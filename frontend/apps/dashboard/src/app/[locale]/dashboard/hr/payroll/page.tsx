@@ -156,7 +156,12 @@ export default function PayrollPage() {
       const response = await api.post('/hr/salaries', formData)
       debugLog('[CREATE_SALARY] Response:', response.data)
       const created = response.data?.data || response.data
-      setSalaries([created, ...salaries])
+      const employee = employees.find((item) => item.id === created.employee_id)
+      const createdSalary = {
+        ...created,
+        employee_name: employee ? `${employee.first_name} ${employee.last_name}` : undefined,
+      }
+      setSalaries((currentSalaries) => [createdSalary, ...currentSalaries])
       setShowForm(false)
       toast.success(t('hr.payroll.successCreated', 'Salary record created successfully'))
     } catch (error: any) {
