@@ -71,7 +71,7 @@ jobs:
           go install golang.org/x/vuln/cmd/govulncheck@v1.9.0
           govulncheck ./...
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
-        if: always()
+        if: always() && github.repository == 'Yousef-Abdallah-1711/pos-phase5-private-acceptance'
         with:
           name: backend-test-results
           path: backend/go-tests.jsonl
@@ -119,7 +119,7 @@ jobs:
           fi
 
   auth-browser-acceptance:
-    if: (github.event_name == 'pull_request' && github.event.pull_request.number == 82) || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/codex/auth-release-integration-20261118')
+    if: (github.event_name == 'pull_request' && (github.event.pull_request.number == 72 || github.event.pull_request.number == 82 || github.event.pull_request.number == 93)) || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/codex/auth-release-integration-20261118')
     runs-on: ubuntu-24.04
     timeout-minutes: 90
     env:
@@ -455,7 +455,7 @@ jobs:
             >"$RUNNER_TEMP/auth-evidence/k6-environment.txt"
           free -b | sed -n '1,2p' >>"$RUNNER_TEMP/auth-evidence/k6-environment.txt"
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
-        if: always()
+        if: always() && github.repository == 'Yousef-Abdallah-1711/pos-phase5-private-acceptance'
         with:
           name: auth-browser-acceptance-${{ github.run_id }}
           path: |
@@ -542,7 +542,7 @@ jobs:
           retention-days: 30
           if-no-files-found: error
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
-        if: always()
+        if: always() && github.repository == 'Yousef-Abdallah-1711/pos-phase5-private-acceptance'
         with:
           name: chromium-smoke-results
           path: |
@@ -565,6 +565,10 @@ jobs:
             ops/aws/evidence/browser/landing-regression/
             ops/aws/evidence/browser/lighthouse/
           if-no-files-found: ignore
+
+  financial-postgres-acceptance:
+    name: financial-postgres-acceptance
+    uses: ./.github/workflows/financial-acceptance.yml
 
   publish-release-images:
     if: ${{ !cancelled() && github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.application-images.result == 'success' && needs.required.result == 'success' }}
@@ -598,12 +602,13 @@ jobs:
 
   required:
     if: always()
-    needs: [backend, frontend, security-and-config, application-images, auth-browser-acceptance]
+    needs: [backend, frontend, security-and-config, application-images, auth-browser-acceptance, financial-postgres-acceptance]
     runs-on: ubuntu-24.04
     env:
-      REQUIRE_AUTH_BROWSER: ${{ (github.event_name == 'pull_request' && github.event.pull_request.number == 82) || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/codex/auth-release-integration-20261118') }}
+      REQUIRE_AUTH_BROWSER: ${{ (github.event_name == 'pull_request' && (github.event.pull_request.number == 72 || github.event.pull_request.number == 82 || github.event.pull_request.number == 93)) || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/codex/auth-release-integration-20261118') }}
     steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - name: Require every validation stage
         env:
           RESULTS: ${{ toJSON(needs) }}
-        run: python3 -c 'import json,os; jobs=json.loads(os.environ["RESULTS"]); run_browser=os.environ["REQUIRE_AUTH_BROWSER"] == "true"; required=[job for name,job in jobs.items() if name != "auth-browser-acceptance" or run_browser]; assert all(job["result"] == "success" for job in required), jobs'
+        run: python3 ops/aws/check_required_ci_gates.py

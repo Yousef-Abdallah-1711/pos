@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { usePathname } from 'next/navigation'
-import { getLocaleFromPath } from '@/lib/translations'
+import { createTranslator, getLocaleFromPath } from '@/lib/translations'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
@@ -31,6 +31,7 @@ interface SalaryListProps {
 export function SalaryList({ salaries, loading, onEdit, onDelete, onMarkPaid }: SalaryListProps) {
   const pathname = usePathname()
   const locale = getLocaleFromPath(pathname)
+  const t = createTranslator(locale)
   const isRTL = locale === 'ar'
   const [searchText, setSearchText] = useState('')
 
@@ -92,7 +93,7 @@ export function SalaryList({ salaries, loading, onEdit, onDelete, onMarkPaid }: 
                   <TableCell className="font-medium">{salary.base_salary?.toFixed(2) || '0.00'}</TableCell>
                   <TableCell>
                     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(salary.status)}`}>
-                      {salary.status}
+                      {t(`hr.payroll.${salary.status}`, salary.status)}
                     </span>
                   </TableCell>
                   <TableCell className="text-right">
