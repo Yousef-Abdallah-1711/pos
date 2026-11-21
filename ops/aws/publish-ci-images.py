@@ -83,7 +83,7 @@ def publish_images(bundle: Path, sha: str, actor: str, token: str) -> dict:
         for name in IMAGE_NAMES:
             archive = bundle / (name + '.docker.tar.gz')
             subprocess.run(['docker', 'load', '--input', str(archive)], check=True)
-            local_tag = f'servio-ci-{name}:{sha}'
+            local_tag = f'servio-release-{name}:{sha}'
             image = inspect_image(name, local_tag)
             if image.get('Id') != manifest['image_ids'][name]:
                 raise RuntimeError('Loaded image identity mismatch: ' + name)

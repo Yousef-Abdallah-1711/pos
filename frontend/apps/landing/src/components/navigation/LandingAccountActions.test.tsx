@@ -13,6 +13,14 @@ const authenticatedSession = {
 }
 
 describe('landing account actions', () => {
+  it('keeps guest actions hidden while the first session check is pending', () => {
+    render(<LandingAccountActions locale="en" session={{ status: 'checking' }} isSigningOut={false} onRetry={vi.fn()} onSignOut={async () => true} />)
+
+    expect(screen.getByRole('status')).toHaveTextContent('Checking sign-in')
+    expect(screen.queryByRole('link', { name: 'Log in' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: 'Sign up' })).not.toBeInTheDocument()
+  })
+
   it('shows authorized account details and canonical dashboard links in the disclosure', () => {
     render(<LandingAccountActions locale="ar" session={authenticatedSession} isSigningOut={false} onRetry={vi.fn()} onSignOut={async () => true} />)
     const trigger = screen.getByRole('button', { name: 'قائمة الحساب لـ Sample Manager' })
@@ -36,8 +44,16 @@ describe('landing account actions', () => {
     render(<LandingAccountActions locale="en" session={{ status: 'temporarily-unavailable' }} isSigningOut={false} onRetry={onRetry} onSignOut={async () => true} />)
 
     expect(screen.getByRole('status')).toHaveTextContent('Sign-in status is temporarily unavailable.')
-    expect(screen.queryByRole('link', { name: 'Log in' })).not.toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Log in' })).toHaveAttribute('href', '/en/auth/login')
+    expect(screen.getByRole('link', { name: 'Sign up' })).toHaveAttribute('href', '/en/auth/register')
     fireEvent.click(screen.getByRole('button', { name: 'Retry' }))
     expect(onRetry).toHaveBeenCalledOnce()
+  })
+
+  it('shows localized login and registration links only after the session is confirmed anonymous', () => {
+    render(<LandingAccountActions locale="ar" session={{ status: 'guest' }} isSigningOut={false} onRetry={vi.fn()} onSignOut={async () => true} />)
+
+    expect(screen.getByRole('link', { name: 'تسجيل الدخول' })).toHaveAttribute('href', '/ar/auth/login')
+    expect(screen.getByRole('link', { name: 'إنشاء حساب' })).toHaveAttribute('href', '/ar/auth/register')
   })
 })

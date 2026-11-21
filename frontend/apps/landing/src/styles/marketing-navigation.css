@@ -6,7 +6,7 @@
 .sv-nav-actions { gap:8px; }
 .sv-nav .sv-brand { flex:0 0 auto; }
 .sv-desktop-links { display:none; }
-.sv-login,.sv-desktop-trial { display:none; }
+.sv-login,.sv-signup,.sv-desktop-trial { display:none; }
 .sv-desktop-account-actions { display:none; }
 .sv-account-status { min-width:112px; color:var(--sv-muted); font-size:12px; text-align:center; }
 .sv-account-unavailable { display:flex; align-items:center; gap:8px; max-width:300px; color:var(--sv-muted); font-size:11px; }
@@ -37,6 +37,7 @@
 .sv-mobile-account__signout:disabled { opacity:.65; cursor:wait; }
 .sv-mobile-account-status { display:grid; gap:8px; margin:6px 0 14px; padding:12px; border:1px solid var(--sv-line); border-radius:12px; background:var(--sv-surface); color:var(--sv-muted); font-size:13px; }
 .sv-mobile-account-status p { margin:0; }
+.sv-mobile-account-entry { display:grid; gap:4px; margin-block-end:14px; }
 .sv-menu-button {
   display:inline-flex;
   align-items:center;
@@ -289,10 +290,10 @@ html[dir=rtl] .sv-mobile-navigation__link svg { transform:scaleX(-1); }
   .sv-desktop-links { display:flex; align-items:center; gap:clamp(13px,1.4vw,21px); flex:1 1 auto; min-width:0; font-size:13px; }
   .sv-desktop-links>a { display:flex; align-items:center; min-height:48px; color:var(--sv-ink)!important; text-decoration:none; white-space:nowrap; }
   .sv-desktop-links>a:hover,.sv-desktop-links>a[aria-current=page] { color:var(--sv-violet)!important; }
-  .sv-login,.sv-desktop-trial { display:block; }
+  .sv-login,.sv-signup,.sv-desktop-trial { display:block; }
   .sv-desktop-account-actions { display:flex; align-items:center; }
-  .sv-login { min-height:44px; padding:10px 0; color:var(--sv-ink)!important; font-size:13px; text-decoration:none; white-space:nowrap; }
-  .sv-login:hover { color:var(--sv-violet)!important; }
+  .sv-login,.sv-signup { min-height:44px; padding:10px 0; color:var(--sv-ink)!important; font-size:13px; text-decoration:none; white-space:nowrap; }
+  .sv-login:hover,.sv-signup:hover { color:var(--sv-violet)!important; }
   .sv-desktop-trial .sv-button { min-height:44px; padding:10px 13px; gap:8px; white-space:nowrap; font-size:12px; }
   .sv-menu-button,.sv-mobile-navigation,.sv-mobile-backdrop { display:none!important; }
   .sv-nav-actions { flex:0 0 auto; gap:10px; }

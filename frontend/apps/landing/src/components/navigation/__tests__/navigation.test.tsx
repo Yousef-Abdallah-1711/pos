@@ -11,12 +11,12 @@ vi.mock('next/link', () => ({
   default: ({ children, href, prefetch: _prefetch, ...props }: { children: ReactNode; href: string; prefetch?: boolean } & AnchorHTMLAttributes<HTMLAnchorElement>) => <a href={href} {...props}>{children}</a>,
 }))
 
-function MobileNavigationHarness({ onClose, onToggleTheme, onSwitchLocale, session = { status: 'guest' } }: { onClose: () => void; onToggleTheme: () => void; onSwitchLocale: () => void; session?: LandingSessionState }) {
+function MobileNavigationHarness({ onClose, onToggleTheme, onSwitchLocale, onRetry = vi.fn(), session = { status: 'guest' } }: { onClose: () => void; onToggleTheme: () => void; onSwitchLocale: () => void; onRetry?: () => void; session?: LandingSessionState }) {
   const [open, setOpen] = useState(true)
   const triggerRef = useRef<HTMLButtonElement>(null)
   return <><button ref={triggerRef} onClick={() => setOpen(true)}>Open</button><MobileNavigation locale="ar" pathname="/ar/features/pos" open={open}
     onClose={() => { onClose(); setOpen(false) }} triggerRef={triggerRef} theme="dark" onToggleTheme={onToggleTheme} onSwitchLocale={onSwitchLocale}
-    session={session} isSigningOut={false} onRetrySession={vi.fn()} onSignOut={async () => true} />
+    session={session} isSigningOut={false} onRetrySession={onRetry} onSignOut={async () => true} />
   </>
 }
 
@@ -105,10 +105,22 @@ describe('marketing navigation interactions', () => {
     expect(screen.getByRole('link', { name: 'لوحة التحكم' })).toHaveAttribute('href', 'http://localhost:3002/ar/dashboard')
     expect(screen.getByRole('link', { name: 'إعدادات الحساب' })).toHaveAttribute('href', 'http://localhost:3002/ar/dashboard/settings/account')
     expect(screen.queryByRole('link', { name: 'تسجيل الدخول' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: 'إنشاء حساب' })).not.toBeInTheDocument()
     expect(screen.queryByRole('link', { name: 'ابدأ تجربتك المجانية لمدة 14 يومًا' })).not.toBeInTheDocument()
 
     fireEvent.click(screen.getByRole('button', { name: 'تسجيل الخروج' }))
     await waitFor(() => expect(onClose).toHaveBeenCalledOnce())
+  })
+
+  it('keeps mobile login and sign-up available while session verification is unavailable', () => {
+    const onRetry = vi.fn()
+    render(<MobileNavigationHarness onClose={vi.fn()} onToggleTheme={vi.fn()} onSwitchLocale={vi.fn()} onRetry={onRetry} session={{ status: 'temporarily-unavailable' }} />)
+
+    expect(screen.getByRole('status')).toHaveTextContent('حالة تسجيل الدخول غير متاحة مؤقتًا.')
+    expect(screen.getByRole('link', { name: 'تسجيل الدخول' })).toHaveAttribute('href', '/ar/auth/login')
+    expect(screen.getByRole('link', { name: 'إنشاء حساب' })).toHaveAttribute('href', '/ar/auth/register')
+    fireEvent.click(screen.getByRole('button', { name: 'إعادة المحاولة' }))
+    expect(onRetry).toHaveBeenCalledOnce()
   })
 
   it('provides complete localized footer route groups without invented legal routes', () => {
