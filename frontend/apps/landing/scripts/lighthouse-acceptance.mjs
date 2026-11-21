@@ -2,6 +2,7 @@ import { createRequire } from 'node:module'
 import { pathToFileURL } from 'node:url'
 import fs from 'node:fs/promises'
 import path from 'node:path'
+import { evaluateLighthouseThresholds, failedLighthouseLocales } from './lighthouse-thresholds.mjs'
 const require = createRequire(import.meta.url)
 const { chromium } = require('playwright')
 const { default: lighthouse } = await import(pathToFileURL(require.resolve('lighthouse')).href)
@@ -64,17 +65,8 @@ try {
  await chrome.kill()
  await fs.writeFile(path.join(output, 'results.json'), JSON.stringify({ note: 'Standard Lighthouse mobile simulation. Staging intentionally remains noindex.', thresholds: { performance: 0.90, accessibility: 0.95, clsExclusiveMaximum: 0.1 }, results, failure }, null, 2))
 }
-const thresholdResults = results.map(result => ({
- locale: result.locale,
- performance: result.performance,
- performancePass: result.performance >= .90,
- accessibility: result.accessibility,
- accessibilityPass: result.accessibility >= .95,
- lcpMs: result.lcpMs,
- cls: result.cls,
- layoutStabilityPass: result.cls < .1,
-}))
-const failedLocales = results.filter(result => result.performance < .90 || result.accessibility < .95 || result.cls >= .1).map(({ locale, performance, accessibility, cls }) => ({ locale, performance, accessibility, cls }))
+const thresholdResults = evaluateLighthouseThresholds(results)
+const failedLocales = failedLighthouseLocales(thresholdResults)
 console.info(JSON.stringify({
  lighthouseAcceptance: 'completed',
  thresholds: { performance: .90, accessibility: .95, cls: .1 },
