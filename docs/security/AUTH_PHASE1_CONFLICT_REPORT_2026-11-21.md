@@ -18,7 +18,7 @@ Eight synthetic `users` rows cover three duplicate normalized-email groups plus 
 
 A separate synthetic employee record uses an email matching `SYN-A` but has no `users` foreign key. It remains an HR record and is not linked to either identity by email.
 
-A separate role fixture gives one legacy user `users.role='manager'` while its `user_roles` mapping resolves to `cashier`. It is marked as a permission-source conflict; backfill must not choose the more privileged result automatically.
+A separate role fixture is an annotation on one of the eight synthetic users: it gives that row `users.role='manager'` while its `user_roles` mapping resolves to `cashier`. It is marked as a permission-source conflict; backfill must not choose the more privileged result automatically. It does not add a ninth user row.
 
 ## Expected Aggregate Output
 

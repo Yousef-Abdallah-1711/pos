@@ -2,14 +2,14 @@
 
 **Status:** Review draft. This is a design proposal, not an applied schema change.
 **Baseline:** `origin/main` `c527e08bb47ec54e4d2f6fd14ecbd9b30e7cadc7`.
-**Related remediation:** PR #105, `fix(auth): bind tenant choices to verified passwords` (independent review and CI pending).
+**Related remediation:** PR #105, `fix(auth): bind tenant choices to verified accounts` (owner-directed self-review; CI pending).
 **Data boundary:** No production or staging data was queried for this proposal. Conflict cases below are synthetic.
 
 ## 1. Phase 1 Objective
 
 Give one verified person identity independently authorized memberships in multiple tenants. Login must list only eligible memberships after credential verification, then create a session bound to one membership, tenant, and restaurant scope. A membership’s roles and branch grants must never carry into another membership.
 
-The current task authorizes multiple memberships and login-time tenant selection. In-session tenant switching remains out of scope. Preserve the existing staff session policy (session-only cookie, 30-minute idle limit, eight-hour absolute limit), Super Admin identity/session boundary, legacy user IDs, and existing audit references.
+The current task authorizes multiple memberships, login-time tenant selection, and a minimal email verification path needed to establish one verified identity across tenants. In-session tenant switching, invitations, account recovery, and MFA remain out of scope. Preserve the existing staff session policy (session-only cookie, 30-minute idle limit, eight-hour absolute limit), Super Admin identity/session boundary, legacy user IDs, and existing audit references.
 
 No migration or runtime feature should be enabled until the owner decisions, independent review, exact-head CI, disposable-database migration tests, and rollback rehearsal below are complete.
 
@@ -27,7 +27,7 @@ No migration or runtime feature should be enabled until the owner decisions, ind
 
 `AUTH-11` is a confirmed code-path flaw conditional on duplicate same-email rows with different password hashes: current login checks the first row, then signs a tenant-selection proof covering the other rows. A holder of the first row's password can therefore select a different tenant row without proving its password.
 
-PR #105 narrows the proof to rows whose password hash matches the submitted password and keeps the existing same-credential selection flow. This is an interim guard, not canonical identity linking. Equal email, equal password, matching hashes, or a staging aggregate do not establish that two legacy rows belong to the same person. Production duplicate state remains unknown.
+PR #105 narrows login to rows whose password hash matches and binds the signed selection proof to their exact legacy user/tenant pairs. Confirmation re-reads the exact row, and same-tenant duplicate matches fail closed. This is an interim guard, not canonical identity linking. Equal email, equal password, matching hashes, or a staging aggregate do not establish that two legacy rows belong to the same person. Production duplicate state remains unknown.
 
 Phase 1 must also prevent:
 
@@ -49,6 +49,7 @@ Keep existing `users`, `user_roles`, role/permission tables, and their foreign k
 - `password_hash TEXT NOT NULL`, copied per legacy row for one-to-one backfill; a later explicit linking flow may replace it with one chosen credential.
 - `status` and monotonic `security_version`, plus timestamps.
 - A unique index on `normalized_email` for verified identities only. Keep unverified duplicates representable so the migration can preserve conflicting legacy accounts without merging them.
+- Add a `identity_email_challenges` table with identity/email binding, purpose, one-way token hash, expiry, attempt count, consumed timestamp, and creation metadata. Store no plaintext code or link token. Rate-limit issuance and verification, and consume atomically.
 
 ### `tenant_memberships`
 
@@ -67,7 +68,7 @@ Exact FK/index DDL depends on verifying existing composite keys for `tenants`, `
 
 ## 5. Login, Membership Linking, and Session Contract
 
-1. Normalize the supplied email using the existing normalization rule and authenticate an identity. Do not enumerate memberships before credential verification.
+1. Normalize the supplied email using the existing normalization rule and authenticate an identity. Do not enumerate memberships before credential verification. A minimal single-use email challenge verifies mailbox control in Phase 1; invitations, recovery, and MFA are later phases.
 2. List only active memberships for that authenticated identity whose email is verified and whose tenant is active. Return a short-lived signed proof covering the exact membership IDs, not a client-editable tenant list.
 3. If multiple memberships qualify, the user chooses one at login. Any restaurant choice must be constrained to explicit active grants for that membership. If a scope is unresolved, fail closed and return a safe generic error.
 4. Re-read identity, membership, tenant, restaurant grants, and effective role state when consuming the proof. Reject expired/replayed proofs and any membership that changed since issuance.
@@ -79,12 +80,14 @@ Exact FK/index DDL depends on verifying existing composite keys for `tenants`, `
 
 Backfill one identity per existing user row first. Do not merge rows because email strings or password hashes match. Linking multiple legacy rows to one verified identity requires:
 
-- Proof of control of the normalized email through an owner-approved verification method.
+- In Phase 1, prove mailbox control with a short-lived, one-time email challenge whose token is stored only as a hash. The challenge does not prove control of any legacy tenant account by itself.
 - Proof of control of each legacy membership being linked (current credential or an explicitly accepted invitation/recovery path), unless the owner approves a documented exception with independent security review.
 - Explicit user confirmation of the memberships and roles being linked.
 - Transactional conflict checks for tenant, role, branch, suspension, and audit state.
 
 If credentials diverge, never choose the first row’s password. Require an explicit credential reset or verified link procedure. If same-tenant rows or role/scope conflicts cannot be reconciled without privilege changes, preserve them separately and leave linking disabled for that identity.
+
+The challenge provider must use a disposable fake in automated tests and an owner-approved sandbox/allowlist in staging. Do not send test messages to real users. Keep an identity and its memberships pending until mailbox verification, account proof, and explicit membership confirmation succeed.
 
 ## 6. Backfill and Conflict Handling
 
@@ -125,6 +128,7 @@ The report must be generated from disposable/sanitized data or a privacy-approve
 - Update `PermissionEvaluator` to resolve role assignments through the selected membership and current restaurant, while preserving deny-by-default behavior and the established permission levels.
 - Remove legacy `users.role` elevation only after a parity report proves no user loses or gains permissions unexpectedly and the owner approves the compatibility window. Never allow role resolution to omit membership/tenant/restaurant predicates.
 - Add RLS to each new membership/role/scope table using transaction-local validated identity, membership, tenant, and restaurant context. Missing context returns no rows; the migration role remains separate from the runtime role.
+- Protect identity and email-challenge rows with a narrowly scoped auth lookup/verification boundary. The ordinary application role must not gain unrestricted cross-tenant reads to resolve global identities; challenge hashes and verified addresses must not be exposed through tenant APIs.
 - Do not grant the ordinary application role unrestricted cross-tenant access just to resolve identities at login. Select and review a least-privilege auth lookup boundary (dedicated auth DB role or a narrowly scoped database function) before implementation.
 - Keep parameterized queries, tenant and restaurant filters in repository methods, and consistent authorization at handler, use-case, repository, and RLS layers.
 - Audit membership creation, acceptance, suspension, role grant/revoke, restaurant grant/revoke, and identity-link events without logging passwords, selection proofs, cookies, or verification tokens.
@@ -161,6 +165,7 @@ All tests use synthetic identities and disposable databases. Never edit staging/
 ### Browser and security acceptance
 
 - Real Chromium login shows only active verified memberships after password verification; selecting one binds the session to that membership and restaurant scope.
+- Synthetic browser flow completes the email challenge, explicitly links only proven memberships, and rejects expired, replayed, rate-limited, or email-only linking attempts.
 - Tampered tenant, membership, restaurant, role, and user parameters fail in UI/API; forged headers do not change session scope.
 - A role or membership revocation denies the next authorized request within the approved invalidation bound.
 - Cross-tenant reads/writes fail through API, repository, RLS, and browser flows. Verify no response/cache contains another tenant's profile or role.
@@ -171,7 +176,7 @@ All tests use synthetic identities and disposable databases. Never edit staging/
 
 1. **Legacy account linking:** require the email owner to prove every existing account with its password, allow an approved support-assisted exception, or use a different explicit recovery process. Default proposal: prove each membership; no email-only merge.
 2. **Null restaurant scope:** decide whether legacy `users.restaurant_id IS NULL` means all existing branches, a tenant-wide grant including future branches, or unresolved scope. Default proposal: unresolved until source semantics are verified; no implicit expansion.
-3. **Verified-email activation:** decide whether an unverified tenant owner may create an inactive/pending tenant and which steps activate it. Existing registration has no verification challenge; Phase 2 owns public OTP/email delivery unless the owner moves that feature into Phase 1.
+3. **Email delivery and pending activation:** Phase 1 includes minimal email verification because verified identity is part of the requested scope. Default behavior keeps identity/membership pending until verification and account-link proof; do not send real messages until an owner-approved provider sandbox and recipient allowlist are configured. Broader OTP recovery remains a later phase.
 4. **Email normalization:** confirm the current lower/trim rule and reserve verified addresses even when an identity is disabled. Do not add plus-address or provider-specific equivalence rules.
 5. **Review and repository protection:** name an independent security reviewer and reconcile the live branch rule (zero required reviews) with `ops/aws/RUNBOOK.md` (one approval). Keep existing status checks and force-push/deletion restrictions.
 

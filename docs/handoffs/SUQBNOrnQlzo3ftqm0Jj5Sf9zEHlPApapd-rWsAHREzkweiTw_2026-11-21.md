@@ -642,7 +642,7 @@ A comparison of `b1db5ddd…..c527e08…` contains four changed paths: two docum
 
 `AUTH-11` remains a separate tenant-boundary code-path finding: legacy same-email rows with divergent credentials could receive a proof for every row after only the first password hash was checked. The staging duplicate aggregate recorded in the earlier addendum does not establish production state and does not clear this code path.
 
-PR [#105](https://github.com/Yousef-Abdallah-1711/pos/pull/105), branch `fix/auth-tenant-password-isolation-20261121`, scopes selection to rows whose password hash matches and preserves selection when the same password matches multiple rows. It adds synthetic tests for both cases. The first CI run found one stale test-fixture field reference; commit `fce850cae3e1a964bdb33e3604b3cf8648f442a6` corrected it, and CI restarted. The first run also reported a financial PostgreSQL acceptance failure; inspect the rerun before merge. No reviewer is assigned and no approval is recorded. The local targeted Go command did not complete because the host lacks Go and container dependency downloads stalled; no database was touched.
+PR [#105](https://github.com/Yousef-Abdallah-1711/pos/pull/105), branch `fix/auth-tenant-password-isolation-20261121`, now matches passwords across active same-email rows, binds the signed selection proof to exact legacy user/tenant pairs, and requires confirmation to re-read that exact row. It fails closed on multiple password-matching rows in one tenant and on replacement rows. Synthetic regression tests cover divergent credentials, shared-password cross-tenant selection, same-tenant collisions, and replacement rows. Latest head is `d645b4fadc602dbf5c2c0d4b2beec28e40071b83`; CI run `44957353401` has backend (unit/integration/race/vulnerability), frontend, security/config, and disposable PostgreSQL acceptance green. `application-images` Chromium smoke is still running; the `auth-browser-acceptance` check is skipped and is not a pass. The owner instructed the continuation agent to self-review and merge these PRs; that review is not independent, and no GitHub approving review is recorded. The local targeted Go command did not complete because Go is unavailable on the host and container dependency downloads stalled; CI provides the backend tests. No database was touched.
 
 This fix does not create canonical identities and does not prove that equal email/password values represent the same human. It is not a substitute for Phase 1 account-linking controls or the independent review.
 
@@ -650,12 +650,16 @@ This fix does not create canonical identities and does not prove that equal emai
 
 A design proposal is available at [`docs/security/AUTH_PHASE1_IDENTITY_DESIGN_2026-11-21.md`](../security/AUTH_PHASE1_IDENTITY_DESIGN_2026-11-21.md). It defines additive identity/membership tables, verified-email and no-email-only-linking rules, membership-specific role and restaurant grants, preservation of legacy user IDs, deny-by-default RLS, idempotent backfill, rollback, and unit/PostgreSQL/browser/security acceptance. The companion [`AUTH_PHASE1_CONFLICT_REPORT_2026-11-21.md`](../security/AUTH_PHASE1_CONFLICT_REPORT_2026-11-21.md) gives an explicit eight-row synthetic fixture and expected aggregate results; those are not production/staging counts. Both are review-only: no migration or runtime identity cutover has been implemented.
 
-The latest user instruction authorizes multiple memberships and login-time tenant selection in Phase 1. In-session tenant switching remains excluded. Owner decisions still needed before migration/cutover:
+The latest user instructions authorize multiple memberships, login-time tenant selection, and a minimal verified-email path in Phase 1. In-session tenant switching remains excluded; invitations, account recovery, and MFA stay in later phases. Use a fake provider for tests and do not send real messages until an owner-approved sandbox and recipient allowlist exist. Keep new identity/membership state pending until email verification, per-account proof, and explicit membership confirmation. The Phase 1 proposal now includes a one-time email challenge, with token-hash storage, expiry, replay prevention, and rate limits.
+
+The user directed the continuation agent to review and merge PRs #105 and #106. `CODING_STANDARDS.md` permits an owner override for approving reviews. The continuation agent is the author of #105, so its review is a transparent self-review, not an independent security approval. This instruction does not restore the automatic staging verification workflow or waive the separate review gate for identity migration/cutover and the historical CI isolation incident.
+
+Safe defaults before migration/cutover:
 
 1. Whether each existing legacy account must be proven separately before linking (proposal: yes; never merge by email alone).
 2. What a null legacy `users.restaurant_id` means (proposal: unresolved until verified; no implicit all-branch grant).
-3. Tenant activation behavior before email verification and whether public verification remains in Phase 2.
-4. Email normalization/verified-address reservation semantics.
-5. An independent security reviewer and repository-admin decision on required approvals.
+3. New identities/memberships remain pending until mailbox verification and per-account proof; email delivery requires an approved sandbox/allowlist.
+4. Use the existing lower(trim(email)) normalization rule and reserve a verified address uniquely.
+5. The identity migration/cutover and any restoration of automatic staging verification still require an independent security review; repository admin must reconcile the approval-rule documentation mismatch.
 
 Do not implement the identity schema/cutover or claim independent approval until these decisions and review are complete. Keep the root `/opt/servio` KDS, seed, and audit work untouched; the continuation work is isolated in dedicated worktrees.
