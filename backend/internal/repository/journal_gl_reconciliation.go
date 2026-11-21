@@ -85,9 +85,13 @@ const JournalGLReconciliationLinesQuery = `
 			                 OR gl.fiscal_period <> to_char(sl.voided_at, 'YYYY-MM'))))
 			       ) AS date_mismatches
 			FROM scoped_lines sl
-			LEFT JOIN general_ledger gl
-			  ON gl.journal_entry_id = sl.journal_entry_id
-			 AND gl.journal_line_id = sl.journal_line_id
+			LEFT JOIN LATERAL (
+				SELECT id, tenant_id, restaurant_id, account_id, debit_amount,
+				       credit_amount, entry_date, fiscal_period
+				FROM general_ledger gl
+				WHERE gl.journal_entry_id = sl.journal_entry_id
+				  AND gl.journal_line_id = sl.journal_line_id
+			) gl ON TRUE
 			GROUP BY sl.journal_entry_id, sl.status, sl.entry_date, sl.fiscal_period,
 		         sl.voided_at, sl.void_reason, sl.journal_line_id, sl.line_tenant_id, sl.account_id,
 		         sl.debit_amount, sl.credit_amount, sl.account_tenant_id,
