@@ -15,16 +15,17 @@ async function main() {
   })
   await page.addInitScript(installConsoleErrorSerialization)
 
-  await page.route('http://127.0.0.1/**', route => {
+  const testOrigin = 'https://console-diagnostics.invalid'
+  await page.route(`${testOrigin}/**`, route => {
    const isInitial = new URL(route.request().url()).pathname === '/initial'
    return route.fulfill({
     status: 200,
     contentType: 'text/html',
-    body: isInitial ? '<script>console.error(new Error("serialization survives navigation")); location.replace("/after")</script>' : '<p>after navigation</p>',
+    body: isInitial ? `<script>console.error(new Error("serialization survives navigation")); location.replace("${testOrigin}/after")</script>` : '<p>after navigation</p>',
    })
   })
-  await page.goto('http://127.0.0.1/initial')
-  await page.waitForURL('http://127.0.0.1/after', { timeout: 5000 })
+  await page.goto(`${testOrigin}/initial`)
+  await page.waitForURL(`${testOrigin}/after`, { timeout: 5000 })
 
   const serializedError = consoleErrors.map(parseSerializedConsoleError).find(Boolean)
   assert.ok(serializedError, 'Firefox console error should arrive with serialized details')
