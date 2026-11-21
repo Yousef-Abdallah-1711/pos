@@ -57,6 +57,8 @@ func TestFinancialQueryBenchmarkIntegration(t *testing.T) {
 	fixture := seedFinancialBenchmarkDataset(t, db, journalCount)
 	secondaryJournalCount := maxIntBenchmark(25, journalCount/400)
 	secondaryTenant := seedFinancialBenchmarkSecondaryTenant(t, db, secondaryJournalCount)
+	emptyRestaurantID := seedFinancialBenchmarkEmptyRestaurant(t, db, fixture.tenantID)
+	reconciliationBenchmark := runFinancialReconciliationBenchmark(t, db, fixture, secondaryTenant, emptyRestaurantID)
 	ledger := repository.NewGeneralLedgerRepository(db, nil)
 	reports := usecase.NewFinancialReportUseCase(db, ledger)
 	accountingHandler := httpHandler.NewAccountingAdvancedHandler(db, repository.NewAccountingAdvancedRepository(db, nil), nil)
@@ -296,6 +298,7 @@ func TestFinancialQueryBenchmarkIntegration(t *testing.T) {
 			PostingThroughputPerSecond: float64(journalCount) / fixture.postingDuration.Seconds(),
 		},
 		ProcessMemoryAllocBytes: memory.TotalAlloc, ProcessHeapBytes: memory.HeapAlloc, ProcessSysBytes: memory.Sys, Measurements: measurements,
+		Reconciliation:            reconciliationBenchmark,
 		LedgerPageIndexComparison: financialBenchmarkIndexComparison{IndexName: financialLedgerPageIndex, IndexBytes: existingIndexBytes, BeforePlan: baselinePlan, AfterPlan: indexedPlan, Before: baselinePage, After: indexedPage},
 	}
 	encoded, err := json.MarshalIndent(result, "", "  ")
