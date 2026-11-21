@@ -46,3 +46,7 @@ Additional anomaly scenarios and an exact-SHA PostgreSQL workflow step were adde
 Static and non-database verification on this candidate revision: full `go test ./...` passed; `go vet ./...` passed; `go test -tags=integration -run '^$' ./internal/repository` passed as compile-only validation; workflow YAML parsed successfully. These results do not replace tagged PostgreSQL execution.
 
 Review follow-up on 2026-11-21: the prior independent code review's two test defects were corrected (valid debit/credit side updates and complete GL row restoration), amount mismatches now count unexpected GL effects even when another matching effect exists, non-posted count is by distinct journal, and wrong void date/period scenarios were added. Full ordinary Go tests, tagged test compilation, all-package Go vet, workflow YAML parse, and `git diff --check` pass. PostgreSQL execution and the review of this newest diff remain pending.
+
+## PostgreSQL acceptance attempt 1
+
+Workflow run 44953642408 on SHA `59e5d92ad0dbb97ddc5520c7587f4da86e7b25aa` successfully provisioned its disposable services and applied migrations. The new targeted test step failed with PostgreSQL's `aggregate functions are not allowed in FILTER` error in the journal-header totals query. The SQL was corrected to aggregate grouped journal rows with `HAVING`; rerun is pending.

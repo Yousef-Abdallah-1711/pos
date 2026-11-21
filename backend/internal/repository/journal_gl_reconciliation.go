@@ -167,30 +167,20 @@ func (r *JournalEntryRepository) ReconcileJournalGL(
 	}
 
 	const headersQuery = `
-		SELECT COUNT(*) FILTER (
-		         WHERE je.status IN ('posted', 'void')
-		           AND (COALESCE(SUM(jel.debit_amount), 0) <> COALESCE(SUM(jel.credit_amount), 0)
-		             OR je.total_debit <> COALESCE(SUM(jel.debit_amount), 0)
-		             OR je.total_credit <> COALESCE(SUM(jel.credit_amount), 0))
-	       )
-		FROM journal_entries je
-		LEFT JOIN journal_entry_lines jel ON jel.journal_entry_id = je.id
-		WHERE je.tenant_id = $1 AND je.restaurant_id = $2
-		GROUP BY je.id`
-	rows, err := tx.QueryContext(ctx, headersQuery, tenantID, restaurantID)
-	if err != nil {
+		SELECT COUNT(*)
+		FROM (
+			SELECT je.id
+			FROM journal_entries je
+			LEFT JOIN journal_entry_lines jel ON jel.journal_entry_id = je.id
+			WHERE je.tenant_id = $1 AND je.restaurant_id = $2
+			GROUP BY je.id
+			HAVING je.status IN ('posted', 'void')
+			   AND (COALESCE(SUM(jel.debit_amount), 0) <> COALESCE(SUM(jel.credit_amount), 0)
+			     OR je.total_debit <> COALESCE(SUM(jel.debit_amount), 0)
+			     OR je.total_credit <> COALESCE(SUM(jel.credit_amount), 0))
+		) AS mismatched_journals`
+	if err := tx.QueryRowContext(ctx, headersQuery, tenantID, restaurantID).Scan(&result.UnbalancedJournals); err != nil {
 		return JournalGLReconciliation{}, fmt.Errorf("reconcile journal header totals: %w", err)
-	}
-	defer rows.Close()
-	for rows.Next() {
-		var unbalanced int64
-		if err := rows.Scan(&unbalanced); err != nil {
-			return JournalGLReconciliation{}, fmt.Errorf("scan journal header reconciliation: %w", err)
-		}
-		result.UnbalancedJournals += unbalanced
-	}
-	if err := rows.Err(); err != nil {
-		return JournalGLReconciliation{}, fmt.Errorf("iterate journal header reconciliation: %w", err)
 	}
 	result.Status = "reconciled"
 	if result.JournalCount == 0 && result.GLRowCount == 0 {
