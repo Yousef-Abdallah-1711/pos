@@ -1,0 +1,162 @@
+package repository
+
+import (
+	"context"
+	"fmt"
+)
+
+// JournalGLReconciliation summarizes read-only journal-to-ledger integrity for
+// one authorized tenant and restaurant scope.
+type JournalGLReconciliation struct {
+	TenantID                 int
+	RestaurantID             int
+	JournalLinesChecked      int64
+	PostedLinesMissingGL     int64
+	DuplicateOrInvalidGL     int64
+	GLScopeOrAccountMismatch int64
+	GLDateMismatch           int64
+	InvalidLedgerLinks       int64
+	UnbalancedJournals       int64
+	NonPostedJournalsWithGL  int64
+}
+
+// ReconcileJournalGL checks source journal lines against their immutable GL
+// effects. It performs no writes and uses exact NUMERIC comparisons in SQL.
+// Legacy journal types are classified by posting status and line linkage rather
+// than rejected by entry_type, so supported historical/manual journals remain
+// eligible for reconciliation.
+func (r *JournalEntryRepository) ReconcileJournalGL(
+	ctx context.Context,
+	tenantID int,
+	restaurantID int,
+) (JournalGLReconciliation, error) {
+	if tenantID <= 0 || restaurantID <= 0 {
+		return JournalGLReconciliation{}, fmt.Errorf("tenant and restaurant scope are required")
+	}
+	result := JournalGLReconciliation{TenantID: tenantID, RestaurantID: restaurantID}
+
+	const linesQuery = `
+		WITH scoped_lines AS (
+			SELECT je.id AS journal_entry_id, je.status, je.entry_date,
+			       je.fiscal_period, je.voided_at, je.void_reason, jel.id AS journal_line_id,
+			       jel.tenant_id AS line_tenant_id, jel.account_id,
+		       jel.debit_amount, jel.credit_amount,
+		       coa.tenant_id AS account_tenant_id, coa.restaurant_id AS account_restaurant_id
+			FROM journal_entries je
+			JOIN journal_entry_lines jel ON jel.journal_entry_id = je.id
+		JOIN chart_of_accounts coa ON coa.id = jel.account_id
+			WHERE je.tenant_id = $1 AND je.restaurant_id = $2
+		), line_effects AS (
+			SELECT sl.*,
+			       COUNT(gl.id) AS gl_count,
+			       COUNT(gl.id) FILTER (
+				       WHERE gl.tenant_id = $1 AND gl.restaurant_id = $2
+				         AND gl.account_id = sl.account_id
+			         AND gl.debit_amount = sl.debit_amount
+			         AND gl.credit_amount = sl.credit_amount
+			         AND gl.entry_date = sl.entry_date
+			         AND gl.fiscal_period = COALESCE(sl.fiscal_period, to_char(sl.entry_date, 'YYYY-MM'))
+			       ) AS original_matches,
+			       COUNT(gl.id) FILTER (
+				       WHERE sl.status = 'void'
+			         AND sl.voided_at IS NOT NULL
+			         AND btrim(COALESCE(sl.void_reason, '')) <> ''
+				         AND gl.tenant_id = $1 AND gl.restaurant_id = $2
+				         AND gl.account_id = sl.account_id
+				         AND gl.debit_amount = sl.credit_amount
+				         AND gl.credit_amount = sl.debit_amount
+			         AND gl.entry_date >= sl.entry_date
+			         AND gl.fiscal_period = to_char(gl.entry_date, 'YYYY-MM')
+			       ) AS reversal_matches,
+			       COUNT(gl.id) FILTER (
+				       WHERE gl.id IS NOT NULL
+				         AND (gl.tenant_id <> $1 OR gl.restaurant_id <> $2 OR gl.account_id <> sl.account_id)
+			       ) AS scope_or_account_mismatches,
+			       COUNT(gl.id) FILTER (
+				       WHERE gl.id IS NOT NULL
+				         AND gl.tenant_id = $1 AND gl.restaurant_id = $2
+				         AND gl.account_id = sl.account_id
+			         AND ((gl.debit_amount = sl.debit_amount AND gl.credit_amount = sl.credit_amount
+			               AND (gl.entry_date <> sl.entry_date
+			                 OR gl.fiscal_period <> COALESCE(sl.fiscal_period, to_char(sl.entry_date, 'YYYY-MM'))))
+			           OR (sl.status = 'void' AND gl.debit_amount = sl.credit_amount
+			               AND gl.credit_amount = sl.debit_amount
+			               AND (gl.entry_date < sl.entry_date
+			                 OR gl.fiscal_period <> to_char(gl.entry_date, 'YYYY-MM'))))
+			       ) AS date_mismatches
+			FROM scoped_lines sl
+			LEFT JOIN general_ledger gl
+			  ON gl.journal_entry_id = sl.journal_entry_id
+			 AND gl.journal_line_id = sl.journal_line_id
+			GROUP BY sl.journal_entry_id, sl.status, sl.entry_date, sl.fiscal_period,
+		         sl.voided_at, sl.void_reason, sl.journal_line_id, sl.line_tenant_id, sl.account_id,
+		         sl.debit_amount, sl.credit_amount, sl.account_tenant_id,
+		         sl.account_restaurant_id
+		)
+		SELECT COUNT(*),
+		       COUNT(*) FILTER (WHERE status = 'posted' AND gl_count = 0),
+		       COUNT(*) FILTER (
+		         WHERE (status = 'posted' AND (gl_count <> 1 OR original_matches <> 1))
+	            OR (status = 'void' AND (gl_count <> 2 OR original_matches <> 1 OR reversal_matches <> 1))
+	       ),
+		       COUNT(*) FILTER (WHERE status NOT IN ('posted', 'void') AND gl_count > 0),
+		       COALESCE(SUM(scope_or_account_mismatches), 0),
+		       COALESCE(SUM(date_mismatches), 0),
+	       COUNT(*) FILTER (WHERE line_tenant_id <> $1 OR account_tenant_id <> $1 OR account_restaurant_id <> $2)
+		FROM line_effects`
+	var lineScopeMismatches int64
+	if err := r.db.QueryRowContext(ctx, linesQuery, tenantID, restaurantID).Scan(
+		&result.JournalLinesChecked,
+		&result.PostedLinesMissingGL,
+		&result.DuplicateOrInvalidGL,
+		&result.NonPostedJournalsWithGL,
+		&result.GLScopeOrAccountMismatch,
+		&result.GLDateMismatch,
+		&lineScopeMismatches,
+	); err != nil {
+		return JournalGLReconciliation{}, fmt.Errorf("reconcile journal lines to general ledger: %w", err)
+	}
+	result.GLScopeOrAccountMismatch += lineScopeMismatches
+	if err := r.db.QueryRowContext(ctx, `
+		SELECT COUNT(*)
+		FROM general_ledger gl
+		LEFT JOIN journal_entries je ON je.id = gl.journal_entry_id
+		LEFT JOIN journal_entry_lines jel
+		  ON jel.id = gl.journal_line_id AND jel.journal_entry_id = gl.journal_entry_id
+		WHERE ((gl.tenant_id = $1 AND gl.restaurant_id = $2)
+		   OR (je.tenant_id = $1 AND je.restaurant_id = $2))
+		AND (je.id IS NULL OR jel.id IS NULL
+		  OR gl.tenant_id <> je.tenant_id OR gl.restaurant_id <> je.restaurant_id
+		  OR jel.tenant_id <> je.tenant_id OR gl.account_id <> jel.account_id)
+	`, tenantID, restaurantID).Scan(&result.InvalidLedgerLinks); err != nil {
+		return JournalGLReconciliation{}, fmt.Errorf("reconcile ledger source links: %w", err)
+	}
+
+	const headersQuery = `
+		SELECT COUNT(*) FILTER (
+		         WHERE je.status IN ('posted', 'void')
+		           AND (COALESCE(SUM(jel.debit_amount), 0) <> COALESCE(SUM(jel.credit_amount), 0)
+		             OR je.total_debit <> COALESCE(SUM(jel.debit_amount), 0)
+		             OR je.total_credit <> COALESCE(SUM(jel.credit_amount), 0))
+	       )
+		FROM journal_entries je
+		LEFT JOIN journal_entry_lines jel ON jel.journal_entry_id = je.id
+		WHERE je.tenant_id = $1 AND je.restaurant_id = $2
+		GROUP BY je.id`
+	rows, err := r.db.QueryContext(ctx, headersQuery, tenantID, restaurantID)
+	if err != nil {
+		return JournalGLReconciliation{}, fmt.Errorf("reconcile journal header totals: %w", err)
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var unbalanced int64
+		if err := rows.Scan(&unbalanced); err != nil {
+			return JournalGLReconciliation{}, fmt.Errorf("scan journal header reconciliation: %w", err)
+		}
+		result.UnbalancedJournals += unbalanced
+	}
+	if err := rows.Err(); err != nil {
+		return JournalGLReconciliation{}, fmt.Errorf("iterate journal header reconciliation: %w", err)
+	}
+	return result, nil
+}

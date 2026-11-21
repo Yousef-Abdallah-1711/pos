@@ -1,0 +1,8 @@
+# Root cause to fix matrix
+
+| Finding | Existing behavior / evidence | Candidate work | Approval dependency | Test evidence |
+|---|---|---|---|---|
+| 5,000-cent synthetic residual | Current Balance Sheet excludes P&L income accounts; the synthetic residual equals unclosed net earnings. This does not establish the original operation's cause. | No report policy activated. Keep the existing integrity diagnostic visible. | EARN-01 and CLOSE-01 | Historical synthetic CI evidence is not a substitute for original-source reconciliation. |
+| Off-ledger synthetic opening cash | A separate synthetic bank opening/current balance (1,000/900 EGP) has only the 100 EGP outflow in GL. The original opening source was not recovered. | Opening-balance safeguards not yet implemented. | OPEN-01 | Historical synthetic evidence only. |
+| Journal-to-GL linkage may be incomplete for historical/direct writes | Main has linked IDs and protected atomic posting, but the original operating rows have not been tied out. | Added read-only scoped reconciliation counters for missing/duplicate effects, amount/account/date/scope issues, malformed ledger links, non-posted effects and unbalanced journal headers. | None for read-only detection | Compile/vet pass. PostgreSQL integration could not start because the test role is absent and Docker is unavailable. |
+| Original opening-balance discrepancy | No original signed opening TB, source bank statement, opening journal, scoped GL export, exact report payload or provenance was found in the forensic evidence. | No data fabricated or modified. Source recovery remains required. | Finance data owner and qualified accountant | Not reconciled. |
