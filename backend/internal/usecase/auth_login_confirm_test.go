@@ -152,6 +152,25 @@ func TestLoginConfirm_TenantOutsideProofIsRejected(t *testing.T) {
 	}
 }
 
+func TestLoginConfirm_AmbiguousSameTenantEmailFailsClosed(t *testing.T) {
+	uc, ts, store := newConfirmUC(t)
+	store.users = []domain.User{
+		{ID: 1, TenantID: 3, Email: "a@example.test", Role: "owner"},
+		{ID: 2, TenantID: 3, Email: "A@example.test", Role: "cashier"},
+	}
+	tok, err := ts.GenerateSelectionToken("a@example.test", []int{3}, time.Minute)
+	if err != nil {
+		t.Fatalf("generate selection token: %v", err)
+	}
+	resp, err := uc.LoginConfirm(&domain.TenantSelectionRequest{Email: "a@example.test", TenantID: 3, SelectionToken: tok})
+	if err == nil || resp != nil {
+		t.Fatalf("ambiguous same-tenant accounts must not yield a session, resp=%v err=%v", resp, err)
+	}
+	if len(store.lastLogins) != 0 {
+		t.Fatal("ambiguous account selection must not update last login")
+	}
+}
+
 func TestLoginConfirm_EmailMismatchIsRejected(t *testing.T) {
 	uc, ts, _ := newConfirmUC(t)
 	tok, _ := ts.GenerateSelectionToken("a@example.test", []int{3}, time.Minute)

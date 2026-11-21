@@ -303,8 +303,13 @@ func (u *AuthUseCase) LoginConfirmContext(ctx context.Context, req *domain.Tenan
 	var selectedUser *domain.User
 	for i := range users {
 		if users[i].TenantID == req.TenantID {
+			if selectedUser != nil {
+				// The selection proof covers tenant IDs, not legacy user IDs. Fail
+				// closed if case-folded email lookup finds multiple rows in one
+				// tenant, because the schema's legacy email uniqueness is case-sensitive.
+				return nil, errors.New("ambiguous user in selected organization")
+			}
 			selectedUser = &users[i]
-			break
 		}
 	}
 	if selectedUser == nil {
