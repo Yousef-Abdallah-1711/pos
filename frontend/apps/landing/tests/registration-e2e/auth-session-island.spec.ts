@@ -248,7 +248,7 @@ test('preserves the account menu across mobile sizes, Arabic RTL, keyboard use, 
   await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true)
 })
 
-test('does not claim logout when the server cannot confirm it', async ({ page, context }) => {
+test('keeps safe account navigation when the server cannot confirm logout', async ({ page, context }) => {
   await addSyntheticSessionCookie(context)
   await context.route('**/api/v1/auth/session', async route => route.fulfill({
     status: 200,
@@ -265,7 +265,8 @@ test('does not claim logout when the server cannot confirm it', async ({ page, c
   await page.getByRole('button', { name: 'Account menu for Synthetic Owner' }).click()
   await page.getByRole('button', { name: 'Sign out' }).click()
   await expect(page.getByRole('status')).toContainText('We could not confirm sign out. Try again.')
-  await expect(page.locator('.sv-desktop-account-actions').getByRole('link', { name: /^Log in$/i })).toHaveCount(0)
+  await expect(page.locator('.sv-desktop-account-actions').getByRole('link', { name: /^Log in$/i })).toBeVisible()
+  await expect(page.locator('.sv-desktop-account-actions').getByRole('link', { name: /^Sign up$/i })).toBeVisible()
   await expect(page.getByRole('button', { name: /Account menu for Synthetic Owner/ })).toHaveCount(0)
   await expect.poll(async () => (await context.cookies(apiOrigin)).some(cookie => cookie.name === 'poos_session')).toBe(true)
 })
