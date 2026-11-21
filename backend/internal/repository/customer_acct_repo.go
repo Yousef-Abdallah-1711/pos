@@ -252,6 +252,23 @@ func (r *CustomerAccountRepository) GetCustomerStatement(tenantID, restaurantID,
 	}
 
 	rows, err := r.db.Query(`
+		WITH ledger_balances AS (
+			SELECT
+				gl.id,
+				gl.journal_entry_id,
+				gl.entry_date,
+				gl.debit_amount,
+				gl.credit_amount,
+				SUM(CASE WHEN coa.normal_balance = 'credit'
+					THEN gl.credit_amount - gl.debit_amount
+					ELSE gl.debit_amount - gl.credit_amount
+				END) OVER (ORDER BY gl.entry_date, gl.id ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS running_balance
+			FROM general_ledger gl
+			JOIN chart_of_accounts coa ON coa.id = gl.account_id
+			WHERE gl.tenant_id = $1
+			  AND gl.restaurant_id = $2
+			  AND gl.account_id = $3
+		)
 		SELECT
 			gl.entry_date,
 			je.entry_number,
@@ -260,11 +277,8 @@ func (r *CustomerAccountRepository) GetCustomerStatement(tenantID, restaurantID,
 			gl.debit_amount,
 			gl.credit_amount,
 			gl.running_balance
-		FROM general_ledger gl
+		FROM ledger_balances gl
 		JOIN journal_entries je ON je.id = gl.journal_entry_id
-		WHERE gl.tenant_id = $1
-		  AND gl.restaurant_id = $2
-		  AND gl.account_id = $3
 		ORDER BY gl.entry_date DESC, gl.id DESC
 	`, tenantID, restaurantID, *customer.ReceivableAccountID)
 	if err != nil {

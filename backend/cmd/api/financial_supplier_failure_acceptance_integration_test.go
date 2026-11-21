@@ -175,7 +175,7 @@ func submitConcurrentSupplierPayments(t *testing.T, api *supplierAcceptanceAPI, 
 	close(statuses)
 	close(errors)
 	for err := range errors {
-		t.Fatalf("concurrent synthetic payment request: %v", err)
+		t.Fatalf("concurrent synthetic payment request: %v; PostgreSQL activity: %s", err, supplierAcceptanceDBActivity(api.db))
 	}
 	succeeded := 0
 	for status := range statuses {
@@ -186,6 +186,39 @@ func submitConcurrentSupplierPayments(t *testing.T, api *supplierAcceptanceAPI, 
 		}
 	}
 	return succeeded
+}
+
+func supplierAcceptanceDBActivity(db *sql.DB) string {
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancel()
+	rows, err := db.QueryContext(ctx, `
+		SELECT pid, COALESCE(state, ''), COALESCE(wait_event_type, ''), COALESCE(wait_event, ''),
+		       COALESCE(array_to_string(pg_blocking_pids(pid), ','), ''),
+		       COALESCE(left(regexp_replace(query, E'\\s+', ' ', 'g'), 180), '')
+		FROM pg_stat_activity
+		WHERE datname = current_database() AND pid <> pg_backend_pid() AND state <> 'idle'
+		ORDER BY query_start NULLS LAST
+	`)
+	if err != nil {
+		return fmt.Sprintf("unavailable: %v", err)
+	}
+	defer rows.Close()
+	var activity []string
+	for rows.Next() {
+		var pid int
+		var state, waitType, waitEvent, blockers, query string
+		if err := rows.Scan(&pid, &state, &waitType, &waitEvent, &blockers, &query); err != nil {
+			return fmt.Sprintf("scan failed: %v", err)
+		}
+		activity = append(activity, fmt.Sprintf("pid=%d state=%s wait=%s/%s blockers=%s query=%q", pid, state, waitType, waitEvent, blockers, query))
+	}
+	if err := rows.Err(); err != nil {
+		return fmt.Sprintf("read failed: %v", err)
+	}
+	if len(activity) == 0 {
+		return "no active client sessions"
+	}
+	return strings.Join(activity, " | ")
 }
 
 func readSupplierPaymentTotals(t *testing.T, api *supplierAcceptanceAPI, invoiceID int) (int64, int64, int) {

@@ -8,7 +8,7 @@ fi
 failed=0
 for script in browser-smoke.cjs storefront-flow.cjs browser-upload.cjs \
   journal-api-acceptance.cjs browser-auth-validation.cjs marketing-acceptance.mjs \
-  trial-registration.mjs capture-landing-acceptance.mjs lighthouse-acceptance.mjs; do
+  marketing-console-diagnostics.regression.mjs trial-registration.mjs capture-landing-acceptance.mjs lighthouse-acceptance.mjs; do
   echo "Running $script"
   if ! NODE_PATH=/tmp/browser/node_modules node "/work/$script"; then
     failed=1
