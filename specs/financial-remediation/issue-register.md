@@ -4,7 +4,7 @@ Source: original tracker at `fa2e301`; current main `966a5004fc594d67f8ef1850909
 
 | ID | Original title | Severity | Current disposition | PRs |
 |---|---|---|---|---|
-| [CFR-001](issues/CFR-001/spec.md) | Auto-posting silently forces unbalanced lines to balance | P1 | IMPLEMENTATION MERGED OR OPEN — ACCEPTANCE PENDING; verify scope and PRs | 29 |
+| [CFR-001](issues/CFR-001/spec.md) | Auto-posting silently forces unbalanced lines to balance | P1 | FIXED_IN_MAIN_UNVERIFIED for automatic plug; full acceptance pending | 29 |
 | [CFR-002](issues/CFR-002/spec.md) | Journal integrity relies too heavily on application checks | P1 | IMPLEMENTATION MERGED OR OPEN — ACCEPTANCE PENDING; verify scope and PRs | 34 |
 | [CFR-003](issues/CFR-003/spec.md) | Concurrent journal posting, balance update and numbering races | P1 | IMPLEMENTATION MERGED OR OPEN — ACCEPTANCE PENDING; verify scope and PRs | 41 |
 | [CFR-004](issues/CFR-004/spec.md) | Journal draft creation and GL posting have a recoverable partial-failure window | P1 | IMPLEMENTATION MERGED OR OPEN — ACCEPTANCE PENDING; verify scope and PRs | 33, 35, 37 |

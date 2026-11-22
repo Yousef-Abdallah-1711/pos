@@ -28,3 +28,16 @@ The original tracker snapshot has Git blob ID
 commit `fa2e301a53a34bb85daa3d81012510c56ae9a819`. Its 21 original issue
 headings are present, but this comparison alone does not prove requirements
 traceability or current engineering status.
+
+## Fresh clone observation
+
+At commit `183572bc40d15629f6109e1f49fa45f75d0319bd`, a normal clone
+into a long Windows temporary path failed checkout on a long tracked filename.
+A second fresh clone into `C:\w\fr117-clone` succeeded with
+`git -c core.longpaths=true clone --filter=blob:none --single-branch --branch
+codex/financial-recovery-specs-20261122 <repository-url> <short-path>`.
+Its working tree was clean; all 21 issue directories contained each of
+`spec.md`, `plan.md`, and `tasks.md`, and the path-resolution command above
+worked when run from that clone. File presence is not completeness. Evidence
+links, all remote branches, substantive acceptance criteria, handoff
+sufficiency, and cross-artifact consistency were not verified by this check.

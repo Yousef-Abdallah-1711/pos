@@ -22,6 +22,21 @@ Status: IMPLEMENTATION MERGED OR OPEN — ACCEPTANCE PENDING; verify scope and P
 
 ## Current evidence and open questions
 
+At main `afda1f91c67922a92f66507adc208e6e1943d631`,
+`createAndPostEntryTx` calls `validateAutoPostingLines` before either
+`CreateAndPostAutoEntry` or `CreateAndPostAutoEntryTx`. PR
+[#29](https://github.com/Yousef-Abdallah-1711/pos/pull/29) merged as
+`57c57373ddd1f0b335369ab65717a036695bddcb`. Main contains
+`backend/internal/usecase/auto_posting_validation_test.go`, including tests
+named `TestValidateAutoPostingLinesRejectsBothDirectionsOfImbalance` and
+`TestAutoPostingRejectsUnbalancedEntriesBeforeJournalOrLedgerWrites`.
+These observations support **FIXED_IN_MAIN_UNVERIFIED** for the original
+automatic balancing behavior only: the tests have not been rerun against this
+exact main SHA in this session, and the full original acceptance, including
+approved rounding policy and visible recovery, is not established. Verify the
+validator's boundary behavior and run the tests on an exact-main checkout;
+also prove persistence and retry behavior with disposable PostgreSQL.
+
 Read the later dated sections of the [current tracker](../../../../FINANCIAL-MODULE-COMPLETE-ISSUES-AND-REMEDIATION-PLAN.md). Confirm each current behavior, policy, and source path against the final candidate; historical text above is not a current verdict.
 
 ## Definition of done

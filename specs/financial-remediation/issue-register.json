@@ -8,13 +8,13 @@
       "title": "Auto-posting silently forces unbalanced lines to balance",
       "original_severity": "P1",
       "original_source": "original-tracker-2026-11-12.md",
-      "current_state": "IMPLEMENTATION MERGED OR OPEN — ACCEPTANCE PENDING; verify scope and PRs",
+      "current_state": "Automatic plug fixed in main by source inspection; full acceptance pending",
       "source_paths": [
         "backend/internal/usecase/auto_posting_validation.go",
         "backend/internal/usecase/auto_posting_engine.go"
       ],
       "prs": "29",
-      "classification": "REQUIRES EVIDENCE REVIEW",
+      "classification": "FIXED_IN_MAIN_UNVERIFIED",
       "spec": "issues/CFR-001/spec.md",
       "plan": "issues/CFR-001/plan.md",
       "tasks": "issues/CFR-001/tasks.md"
