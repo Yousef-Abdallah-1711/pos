@@ -21,7 +21,7 @@ Amounts are in currency units (1.00 = 100 cents). A `POLICY_PENDING` status mean
 | 15 | Opening balance with authorized mapping | No approved mapping supplied | POLICY_PENDING |
 | 16 | Incorrect account classification | No dedicated fixture result captured | NOT_RUN |
 | 17 | Duplicate journal effects | Duplicate journal post rejected in prior browser/API acceptance; no duplicate GL effect shown | PASS for duplicate post rejection |
-| 18 | Voided journal | Date handling tested by PR #108; dedicated Balance Sheet void scenario not run here | NOT_RUN |
+| 18 | Voided journal | A posted 50.00 revenue sale voided later retains historical assets/P&L 50.00/50.00, reports -50.00 P&L in the reversal period and 0.00 across both periods; current assets 0. Separate GL revenue movements are +5,000/-5,000 cents. Before the P&L fix historical P&L incorrectly returned 0.00. | PASS for tested historical/reversal behavior; earnings policy remains pending |
 | 19 | Multiple restaurants, one tenant | Integration test adds sibling-restaurant posting and confirms no report change | PASS |
 | 20 | Separate tenants | Integration test adds another tenant posting and confirms no report change | PASS |
 | 21 | Negative balances | Existing unit test for contra-balance signs passes | PASS for tested sign case |

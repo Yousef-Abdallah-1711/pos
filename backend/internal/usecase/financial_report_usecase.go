@@ -178,21 +178,33 @@ func (uc *FinancialReportUseCase) generateProfitLossCore(tenantID, restaurantID 
 		Expenses: make([]FinancialReportLine, 0),
 	}
 
+	// A void reverses a posted journal on the void date; it must not erase
+	// the original movement from earlier P&L periods.
 	rows, err := uc.db.Query(`
+		WITH movements AS (
+			SELECT jel.account_id, jel.debit_amount, jel.credit_amount
+			FROM journal_entry_lines jel
+			JOIN journal_entries je ON je.id = jel.journal_entry_id
+			WHERE je.tenant_id = $1 AND je.restaurant_id = $2
+			  AND (je.status = 'posted' OR (je.status = 'void' AND je.posted_at IS NOT NULL))
+			  AND je.entry_date >= $3 AND je.entry_date <= $4
+			UNION ALL
+			SELECT jel.account_id, jel.credit_amount AS debit_amount, jel.debit_amount AS credit_amount
+			FROM journal_entry_lines jel
+			JOIN journal_entries je ON je.id = jel.journal_entry_id
+			WHERE je.tenant_id = $1 AND je.restaurant_id = $2
+			  AND je.status = 'void' AND je.posted_at IS NOT NULL AND je.voided_at IS NOT NULL
+			  AND je.voided_at::date >= $3 AND je.voided_at::date <= $4
+		)
 		SELECT
 			coa.account_code,
 			coa.account_name,
 			coa.account_type,
-			COALESCE(SUM(jel.debit_amount), 0) AS debit_total,
-			COALESCE(SUM(jel.credit_amount), 0) AS credit_total
-		FROM journal_entry_lines jel
-		JOIN journal_entries je ON je.id = jel.journal_entry_id
-		JOIN chart_of_accounts coa ON coa.id = jel.account_id
-		WHERE je.tenant_id = $1
-		  AND je.restaurant_id = $2
-		  AND je.status = 'posted'
-		  AND je.entry_date >= $3
-		  AND je.entry_date <= $4
+			COALESCE(SUM(m.debit_amount), 0) AS debit_total,
+			COALESCE(SUM(m.credit_amount), 0) AS credit_total
+		FROM movements m
+		JOIN chart_of_accounts coa ON coa.id = m.account_id
+		WHERE coa.tenant_id = $1 AND coa.restaurant_id = $2
 		  AND coa.account_type IN ('revenue', 'expense')
 		GROUP BY coa.account_code, coa.account_name, coa.account_type
 		ORDER BY coa.account_code ASC

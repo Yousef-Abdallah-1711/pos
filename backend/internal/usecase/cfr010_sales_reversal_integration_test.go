@@ -8,6 +8,7 @@ import (
 	"time"
 
 	_ "github.com/lib/pq"
+	"pos-saas/internal/repository"
 	"pos-saas/tests/testdb"
 )
 
@@ -26,6 +27,49 @@ func TestCFR010SalesAndReversalAccounting(t *testing.T) {
 	assertSalesAndReversal(t, db, f, date, 77, 7, 70)
 	postCFR010Entry(t, db, f, "2026-04-03", "partial sale reversal", cfr010Line{"revenue", 10, 0}, cfr010Line{"payable", 1, 0}, cfr010Line{"cash", 0, 11})
 	assertSalesAndReversal(t, db, f, date, 66, 6, 60)
+}
+
+func TestCFR010VoidPreservesHistoricalProfitLoss(t *testing.T) {
+	db, err := sql.Open("postgres", testdb.URL(t))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer db.Close()
+	f := createCFR010Fixture(t, db)
+	postCFR010Entry(t, db, f, "2025-01-01", "historical sale before void", cfr010Line{"cash", 50, 0}, cfr010Line{"revenue", 0, 50})
+	var id int
+	if err := db.QueryRow(`SELECT id FROM journal_entries WHERE tenant_id=$1 AND restaurant_id=$2 AND description=$3`, f.tenantID, f.restaurantID, "historical sale before void").Scan(&id); err != nil {
+		t.Fatal(err)
+	}
+	if err := repository.NewJournalEntryRepository(db).VoidEntry(f.tenantID, f.restaurantID, id, 1, "synthetic reversal"); err != nil {
+		t.Fatal(err)
+	}
+	bs := generateCFR010BalanceSheet(t, db, f, cfr010Date("2025-12-31"))
+	pl := generateCFR010ProfitLoss(t, db, f, cfr010Date("2025-01-01"), cfr010Date("2025-12-31"))
+	if bs.TotalAssets != 50 || pl.NetProfit != 50 {
+		t.Fatalf("historical asset/P&L = %.2f/%.2f, want 50/50 before the later void", bs.TotalAssets, pl.NetProfit)
+	}
+	today := cfr010Date(time.Now().Format("2006-01-02"))
+	reversal := generateCFR010ProfitLoss(t, db, f, today, today)
+	combined := generateCFR010ProfitLoss(t, db, f, cfr010Date("2025-01-01"), today)
+	current := generateCFR010BalanceSheet(t, db, f, today)
+	if reversal.NetProfit != -50 || combined.NetProfit != 0 || current.TotalAssets != 0 {
+		t.Fatalf("void-date P&L/combined P&L/current assets = %.2f/%.2f/%.2f, want -50/0/0", reversal.NetProfit, combined.NetProfit, current.TotalAssets)
+	}
+	var originalCents, reversalCents int64
+	err = db.QueryRow(`SELECT
+		(COALESCE(SUM(CASE WHEN gl.entry_date < $3 THEN gl.credit_amount-gl.debit_amount ELSE 0 END),0)*100)::bigint,
+		(COALESCE(SUM(CASE WHEN gl.entry_date = $3 THEN gl.credit_amount-gl.debit_amount ELSE 0 END),0)*100)::bigint
+		FROM general_ledger gl JOIN chart_of_accounts a ON a.id=gl.account_id AND a.tenant_id=gl.tenant_id AND a.restaurant_id=gl.restaurant_id
+		WHERE gl.tenant_id=$1 AND gl.restaurant_id=$2 AND a.account_type='revenue'`, f.tenantID, f.restaurantID, today).Scan(&originalCents, &reversalCents)
+	if err != nil || originalCents != 5000 || reversalCents != -5000 {
+		t.Fatalf("independent GL revenue original/reversal = %d/%d cents, want 5000/-5000: %v", originalCents, reversalCents, err)
+	}
+	other := createCFR010Fixture(t, db)
+	postCFR010Entry(t, db, other, "2025-01-01", "other tenant sale", cfr010Line{"cash", 90, 0}, cfr010Line{"revenue", 0, 90})
+	if isolated := generateCFR010ProfitLoss(t, db, f, cfr010Date("2025-01-01"), cfr010Date("2025-12-31")); isolated.NetProfit != 50 {
+		t.Fatalf("other tenant contaminated historical P&L: %.2f", isolated.NetProfit)
+	}
 }
 
 func assertSalesAndReversal(t *testing.T, db *sql.DB, f *cfr010Fixture, asOf time.Time, assets, liabilities, net float64) {
