@@ -19,8 +19,8 @@ import (
 	"pos-saas/internal/repository"
 )
 
-// loginConfirmStore is the persistence needed by LoginConfirm.
-type loginConfirmStore interface {
+// authUserStore provides the user lookups and login updates used by staff login.
+type authUserStore interface {
 	FindUserByEmailAllTenants(email string) ([]domain.User, error)
 	UpdateLastLogin(userID int) error
 }
@@ -37,7 +37,7 @@ type AuthUseCase struct {
 	repo           *repository.AuthRepository
 	superAdminRepo *repository.SuperAdminRepository
 	tokenService   *jwt.TokenService
-	confirmStore   loginConfirmStore
+	userStore      authUserStore
 	proofStore     SelectionProofStore
 
 	// usedSelections remembers consumed selection-token IDs until they expire.
@@ -52,7 +52,7 @@ func NewAuthUseCase(repo *repository.AuthRepository, tokenService *jwt.TokenServ
 		tokenService: tokenService,
 	}
 	if repo != nil {
-		uc.confirmStore = repo
+		uc.userStore = repo
 	}
 	return uc
 }
@@ -175,8 +175,12 @@ func (u *AuthUseCase) Login(req *domain.LoginRequest) (interface{}, error) {
 		return nil, err
 	}
 
-	// Find ALL users with this email across all tenants
-	users, err := u.repo.FindUserByEmailAllTenants(req.Email)
+	if u.userStore == nil {
+		return nil, domain.ErrAuthDependencyUnavailable
+	}
+
+	// Find ALL users with this email across all tenants.
+	users, err := u.userStore.FindUserByEmailAllTenants(req.Email)
 	if err != nil {
 		return nil, fmt.Errorf("%w: %v", domain.ErrAuthDependencyUnavailable, err)
 	}
@@ -185,21 +189,25 @@ func (u *AuthUseCase) Login(req *domain.LoginRequest) (interface{}, error) {
 		return nil, errors.New("invalid email or password")
 	}
 
-	// Verify password against the first user (all have same email, should have same password)
-	firstUser := &users[0]
-
-	// Verify password
-	err = bcrypt.CompareHashAndPassword([]byte(firstUser.PasswordHash), []byte(req.Password))
-	if err != nil {
+	// Legacy tenant rows can share an email while holding different credentials.
+	// Only accounts whose password matched may enter the tenant-selection proof.
+	users = usersMatchingPassword(users, req.Password)
+	if len(users) == 0 {
 		return nil, errors.New("invalid email or password")
 	}
+	if hasDuplicateTenantIDs(users) {
+		// A tenant-only choice cannot safely distinguish multiple matching
+		// legacy rows in one tenant. Leave these case-fold collisions closed.
+		return nil, errors.New("invalid email or password")
+	}
+	firstUser := &users[0]
 
 	// Case 1: Single tenant - auto-login
 	if len(users) == 1 {
 		user := &users[0]
 
 		// Update last login
-		_ = u.repo.UpdateLastLogin(user.ID)
+		_ = u.userStore.UpdateLastLogin(user.ID)
 
 		// Generate JWT token
 		token, err := u.tokenService.GenerateToken(user.ID, user.TenantID, user.RestaurantID, user.Email, user.Role)
@@ -232,11 +240,11 @@ func (u *AuthUseCase) Login(req *domain.LoginRequest) (interface{}, error) {
 		tenantList = append(tenantList, tenantInfo)
 	}
 
-	tenantIDs := make([]int, 0, len(users))
+	accounts := make([]jwt.SelectionAccount, 0, len(users))
 	for _, user := range users {
-		tenantIDs = append(tenantIDs, user.TenantID)
+		accounts = append(accounts, jwt.SelectionAccount{UserID: user.ID, TenantID: user.TenantID})
 	}
-	selectionToken, err := u.tokenService.GenerateSelectionToken(firstUser.Email, tenantIDs, selectionTokenTTL)
+	selectionToken, err := u.tokenService.GenerateSelectionToken(firstUser.Email, accounts, selectionTokenTTL)
 	if err != nil {
 		return nil, fmt.Errorf("%w: %v", domain.ErrTokenGeneration, err)
 	}
@@ -248,6 +256,27 @@ func (u *AuthUseCase) Login(req *domain.LoginRequest) (interface{}, error) {
 		Message:         "Multiple organizations found. Please select one.",
 		SelectionToken:  selectionToken,
 	}, nil
+}
+
+func usersMatchingPassword(users []domain.User, password string) []domain.User {
+	matchingUsers := make([]domain.User, 0, len(users))
+	for _, user := range users {
+		if bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(password)) == nil {
+			matchingUsers = append(matchingUsers, user)
+		}
+	}
+	return matchingUsers
+}
+
+func hasDuplicateTenantIDs(users []domain.User) bool {
+	seen := make(map[int]struct{}, len(users))
+	for _, user := range users {
+		if _, exists := seen[user.TenantID]; exists {
+			return true
+		}
+		seen[user.TenantID] = struct{}{}
+	}
+	return false
 }
 
 // LoginConfirm exchanges a multi-tenant login proof (issued by Login after the
@@ -278,20 +307,25 @@ func (u *AuthUseCase) LoginConfirmContext(ctx context.Context, req *domain.Tenan
 	if !strings.EqualFold(strings.TrimSpace(req.Email), proof.Email) || !proof.AllowsTenant(req.TenantID) {
 		return nil, errors.New("invalid email or tenant selection")
 	}
-	if u.confirmStore == nil {
+	if u.userStore == nil {
 		return nil, domain.ErrAuthDependencyUnavailable
 	}
 
-	users, err := u.confirmStore.FindUserByEmailAllTenants(proof.Email)
+	users, err := u.userStore.FindUserByEmailAllTenants(proof.Email)
 	if err != nil {
 		return nil, fmt.Errorf("%w: %v", domain.ErrAuthDependencyUnavailable, err)
 	}
 
 	var selectedUser *domain.User
 	for i := range users {
-		if users[i].TenantID == req.TenantID {
+		if users[i].TenantID == req.TenantID && proof.AllowsAccount(users[i].TenantID, users[i].ID) {
+			if selectedUser != nil {
+				// If multiple password-matched legacy rows share this tenant, the
+				// tenant-only choice is ambiguous. The proof binds exact rows so a
+				// non-matching or replacement account cannot be selected.
+				return nil, errors.New("ambiguous user in selected organization")
+			}
 			selectedUser = &users[i]
-			break
 		}
 	}
 	if selectedUser == nil {
@@ -304,7 +338,7 @@ func (u *AuthUseCase) LoginConfirmContext(ctx context.Context, req *domain.Tenan
 		return nil, errors.New("login verification expired or invalid: please sign in again")
 	}
 	if u.proofStore != nil {
-		binding := selectionProofBinding(proof.Email, proof.TenantIDs)
+		binding := selectionProofBinding(proof.Email, proof.Accounts)
 		consumed, consumeErr := u.proofStore.SetIfAbsent(ctx, selectionProofKey(proof.ID), binding, proofTTL)
 		if consumeErr != nil {
 			observability.RecordAuthSecurity(func(metrics *observability.AuthSecurityMetrics) { metrics.SelectionProofStoreErrors++ })
@@ -320,7 +354,7 @@ func (u *AuthUseCase) LoginConfirmContext(ctx context.Context, req *domain.Tenan
 	}
 	observability.RecordAuthSecurity(func(metrics *observability.AuthSecurityMetrics) { metrics.SelectionProofConsumed++ })
 
-	_ = u.confirmStore.UpdateLastLogin(selectedUser.ID)
+	_ = u.userStore.UpdateLastLogin(selectedUser.ID)
 
 	token, err := u.tokenService.GenerateToken(selectedUser.ID, selectedUser.TenantID, selectedUser.RestaurantID, selectedUser.Email, selectedUser.Role)
 	if err != nil {
@@ -339,14 +373,21 @@ func selectionProofKey(id string) string {
 	return "pos-saas:auth:selection-proof:v1:" + hex.EncodeToString(sum[:])
 }
 
-func selectionProofBinding(email string, tenantIDs []int) string {
-	ids := append([]int(nil), tenantIDs...)
-	sort.Ints(ids)
+func selectionProofBinding(email string, accounts []jwt.SelectionAccount) string {
+	canonicalAccounts := append([]jwt.SelectionAccount(nil), accounts...)
+	sort.Slice(canonicalAccounts, func(i, j int) bool {
+		if canonicalAccounts[i].TenantID == canonicalAccounts[j].TenantID {
+			return canonicalAccounts[i].UserID < canonicalAccounts[j].UserID
+		}
+		return canonicalAccounts[i].TenantID < canonicalAccounts[j].TenantID
+	})
 	var canonical strings.Builder
 	canonical.WriteString(strings.ToLower(strings.TrimSpace(email)))
-	for _, id := range ids {
+	for _, account := range canonicalAccounts {
 		canonical.WriteByte(':')
-		canonical.WriteString(strconv.Itoa(id))
+		canonical.WriteString(strconv.Itoa(account.TenantID))
+		canonical.WriteByte(':')
+		canonical.WriteString(strconv.Itoa(account.UserID))
 	}
 	sum := sha256.Sum256([]byte(canonical.String()))
 	return hex.EncodeToString(sum[:])

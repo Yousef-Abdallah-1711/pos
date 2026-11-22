@@ -168,7 +168,7 @@ jobs:
         run: node --test scripts/lighthouse-thresholds.regression.mjs
 
   auth-browser-acceptance:
-    if: (github.event_name == 'pull_request' && (github.event.pull_request.number == 72 || github.event.pull_request.number == 82 || github.event.pull_request.number == 93)) || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/codex/auth-release-integration-20261118')
+    if: (github.event_name == 'pull_request' && (github.event.pull_request.number == 72 || github.event.pull_request.number == 82 || github.event.pull_request.number == 93 || github.event.pull_request.number == 105)) || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/codex/auth-release-integration-20261118')
     runs-on: ubuntu-24.04
     timeout-minutes: 90
     env:
@@ -654,7 +654,7 @@ jobs:
     needs: [backend, frontend, security-and-config, application-images, auth-browser-acceptance, financial-postgres-acceptance]
     runs-on: ubuntu-24.04
     env:
-      REQUIRE_AUTH_BROWSER: ${{ (github.event_name == 'pull_request' && (github.event.pull_request.number == 72 || github.event.pull_request.number == 82 || github.event.pull_request.number == 93)) || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/codex/auth-release-integration-20261118') }}
+      REQUIRE_AUTH_BROWSER: ${{ (github.event_name == 'pull_request' && (github.event.pull_request.number == 72 || github.event.pull_request.number == 82 || github.event.pull_request.number == 93 || github.event.pull_request.number == 105)) || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/codex/auth-release-integration-20261118') }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - name: Require every validation stage
