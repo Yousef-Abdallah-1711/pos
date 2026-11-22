@@ -16,7 +16,8 @@ func newSvc(t *testing.T) *TokenService {
 
 func TestSelectionToken_RoundTrip(t *testing.T) {
 	s := newSvc(t)
-	tok, err := s.GenerateSelectionToken("A@Example.test", []int{3, 9}, time.Minute)
+	accounts := []SelectionAccount{{UserID: 10, TenantID: 3}, {UserID: 20, TenantID: 9}}
+	tok, err := s.GenerateSelectionToken("A@Example.test", accounts, time.Minute)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -24,17 +25,17 @@ func TestSelectionToken_RoundTrip(t *testing.T) {
 	if err != nil {
 		t.Fatalf("validate: %v", err)
 	}
-	if c.Email != "a@example.test" || len(c.TenantIDs) != 2 || c.ID == "" {
+	if c.Email != "a@example.test" || len(c.Accounts) != 2 || c.ID == "" {
 		t.Fatalf("unexpected claims %+v", c)
 	}
-	if !c.AllowsTenant(9) || c.AllowsTenant(4) {
-		t.Fatalf("tenant allow-list wrong: %+v", c.TenantIDs)
+	if !c.AllowsTenant(9) || c.AllowsTenant(4) || !c.AllowsAccount(9, 20) || c.AllowsAccount(9, 10) {
+		t.Fatalf("account allow-list wrong: %+v", c.Accounts)
 	}
 }
 
 func TestSelectionToken_ExpiredIsRejected(t *testing.T) {
 	s := newSvc(t)
-	tok, _ := s.GenerateSelectionToken("a@example.test", []int{3}, -time.Minute)
+	tok, _ := s.GenerateSelectionToken("a@example.test", []SelectionAccount{{UserID: 10, TenantID: 3}}, -time.Minute)
 	if _, err := s.ValidateSelectionToken(tok); err == nil {
 		t.Fatal("expired selection token must be rejected")
 	}
@@ -43,7 +44,7 @@ func TestSelectionToken_ExpiredIsRejected(t *testing.T) {
 func TestSelectionToken_TamperedOrForeignSecretRejected(t *testing.T) {
 	s := newSvc(t)
 	other, _ := NewTokenService("a-completely-different-secret-value-xyz", "1h")
-	tok, _ := other.GenerateSelectionToken("a@example.test", []int{3}, time.Minute)
+	tok, _ := other.GenerateSelectionToken("a@example.test", []SelectionAccount{{UserID: 10, TenantID: 3}}, time.Minute)
 	if _, err := s.ValidateSelectionToken(tok); err == nil {
 		t.Fatal("token signed with another secret must be rejected")
 	}
@@ -60,7 +61,7 @@ func TestSelectionToken_NotInterchangeableWithSessionToken(t *testing.T) {
 	if _, err := s.ValidateSelectionToken(session); err == nil {
 		t.Fatal("session token must not validate as a selection token")
 	}
-	sel, _ := s.GenerateSelectionToken("a@example.test", []int{3}, time.Minute)
+	sel, _ := s.GenerateSelectionToken("a@example.test", []SelectionAccount{{UserID: 10, TenantID: 3}}, time.Minute)
 	if _, err := s.ValidateToken(sel); err == nil {
 		t.Fatal("selection token must not validate as a session token")
 	}
