@@ -98,18 +98,34 @@ func (s *TokenService) ValidateToken(tokenString string) (*Claims, error) {
 
 const selectionAudience = "pos-saas:login-selection"
 
+// SelectionAccount identifies the exact legacy account whose password matched.
+type SelectionAccount struct {
+	UserID   int `json:"user_id"`
+	TenantID int `json:"tenant_id"`
+}
+
 // SelectionClaims is a short-lived proof that the holder already passed password
-// verification for Email and may choose one of TenantIDs.
+// verification for Email and may choose one of the exact account/tenant pairs.
 type SelectionClaims struct {
-	Email     string `json:"email"`
-	TenantIDs []int  `json:"tenant_ids"`
+	Email    string             `json:"email"`
+	Accounts []SelectionAccount `json:"accounts"`
 	jwt.RegisteredClaims
 }
 
 // AllowsTenant reports whether the proof covers the tenant.
 func (c *SelectionClaims) AllowsTenant(tenantID int) bool {
-	for _, id := range c.TenantIDs {
-		if id == tenantID {
+	for _, account := range c.Accounts {
+		if account.TenantID == tenantID {
+			return true
+		}
+	}
+	return false
+}
+
+// AllowsAccount reports whether the proof covers this exact legacy account.
+func (c *SelectionClaims) AllowsAccount(tenantID, userID int) bool {
+	for _, account := range c.Accounts {
+		if account.TenantID == tenantID && account.UserID == userID {
 			return true
 		}
 	}
@@ -117,15 +133,28 @@ func (c *SelectionClaims) AllowsTenant(tenantID int) bool {
 }
 
 // GenerateSelectionToken issues the proof returned by a successful multi-tenant login.
-func (s *TokenService) GenerateSelectionToken(email string, tenantIDs []int, ttl time.Duration) (string, error) {
+func (s *TokenService) GenerateSelectionToken(email string, accounts []SelectionAccount, ttl time.Duration) (string, error) {
+	if s == nil || len(accounts) == 0 || strings.TrimSpace(email) == "" {
+		return "", errors.New("selection token requires a configured service, email, and account")
+	}
+	seenUsers := make(map[int]struct{}, len(accounts))
+	for _, account := range accounts {
+		if account.UserID <= 0 || account.TenantID <= 0 {
+			return "", errors.New("selection token account identifiers must be positive")
+		}
+		if _, exists := seenUsers[account.UserID]; exists {
+			return "", errors.New("selection token accounts must not repeat a user")
+		}
+		seenUsers[account.UserID] = struct{}{}
+	}
 	idBytes := make([]byte, 16)
 	if _, err := rand.Read(idBytes); err != nil {
 		return "", err
 	}
 	now := time.Now()
 	claims := SelectionClaims{
-		Email:     strings.ToLower(strings.TrimSpace(email)),
-		TenantIDs: tenantIDs,
+		Email:    strings.ToLower(strings.TrimSpace(email)),
+		Accounts: append([]SelectionAccount(nil), accounts...),
 		RegisteredClaims: jwt.RegisteredClaims{
 			ID:        hex.EncodeToString(idBytes),
 			Audience:  jwt.ClaimStrings{selectionAudience},
@@ -148,8 +177,13 @@ func (s *TokenService) ValidateSelectionToken(tokenString string) (*SelectionCla
 		return nil, err
 	}
 	claims, ok := token.Claims.(*SelectionClaims)
-	if !ok || !token.Valid || claims.ID == "" {
+	if !ok || !token.Valid || claims.ID == "" || len(claims.Accounts) == 0 || claims.Email == "" {
 		return nil, errors.New("invalid selection token")
+	}
+	for _, account := range claims.Accounts {
+		if account.UserID <= 0 || account.TenantID <= 0 {
+			return nil, errors.New("invalid selection token account")
+		}
 	}
 	return claims, nil
 }
