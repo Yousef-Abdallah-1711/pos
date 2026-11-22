@@ -1,5 +1,23 @@
 # CFR-010 Engineering Finalization Status
 
+## Continuation snapshot — 2026-11-22
+
+This section supersedes the earlier point-in-time PR and main statuses below. Remote main was `966a5004fc594d67f8ef1850909bd7f8e963ecf5`. GitHub accepted updates from main for #108, #109, #110, and #112. Fresh checks were pending at this snapshot; previous successful checks apply to their previous heads, not these updated heads.
+
+| PR | Updated head at snapshot | GitHub review | Status |
+|---|---|---|---|
+| [#108](https://github.com/Yousef-Abdallah-1711/pos/pull/108) | `ea1b1f73e6d11e4a6967bae9731566a2f167836f` | None | OPEN; fresh checks pending |
+| [#109](https://github.com/Yousef-Abdallah-1711/pos/pull/109) | `179d8d252d38fa8d6ff041556c612524f9303076` | None | OPEN; fresh checks pending |
+| [#110](https://github.com/Yousef-Abdallah-1711/pos/pull/110) | `6517ddd242669e50633c4416746fb06cba1a7e32` | None | OPEN; fresh checks pending |
+| [#112](https://github.com/Yousef-Abdallah-1711/pos/pull/112) | See current GitHub head | None | OPEN; documentation packet and this tracker |
+| [#114](https://github.com/Yousef-Abdallah-1711/pos/pull/114) | `ca317c4fd415b78a8e1b1b1de8f2503948827088` | None | OPEN; [CI](https://github.com/Yousef-Abdallah-1711/pos/actions/runs/45054402180) in progress; financial PostgreSQL passed, image job pending |
+
+No new merge commits were recorded. Assign an authorized non-author reviewer and obtain recorded GitHub reviews. The collaborator listing identified only the author. Required branch-protection contexts remain runtime-localhost-guardrail, url-domain-config-smoke, and backend; auth-browser acceptance is not a required context. The task still requires independent review despite the protection rule specifying zero minimum approvals.
+
+The synthetic sale's 5,000-cent residual is explained by the Balance Sheet including asset, liability, and equity account types while excluding unclosed revenue and expense from equity. EARN-01 is pending, so the proposed earnings treatment is not activated. #114 also corrects stale report caching and historical P&L treatment of subsequently voided journals; its synthetic PostgreSQL and browser evidence is in `audit-reports/cfr010-balance-sheet-fix-2026-11-22/`. Manual interactive Dashboard acceptance remains not run. The original operating discrepancy remains NOT ESTABLISHED. OPEN-01, EARN-01 and CLOSE-01 remain PENDING; source records and signed decisions listed below are still required. Financial production remains NO-GO and CFR-010 remains OPEN.
+
+The #110 performance comparison remains uncontrolled: baseline p50/p95/max 174.044/175.441/175.524 ms versus candidate 180.726/182.565/182.660 ms, with approximately 3.8% higher candidate p50. The isolated query improved 160.660 to 148.041 ms and removed 3,544 temporary reads and 713 writes. No approved budget exists; performance acceptance is PENDING. Repeat under equivalent controlled conditions and obtain an approved budget.
+
 **Snapshot:** 2026-11-22 09:04 UTC
 **Repository:** `Yousef-Abdallah-1711/pos`
 **Current main:** `4f76e32351ef00821f74a5506b6e049715693a6f`
