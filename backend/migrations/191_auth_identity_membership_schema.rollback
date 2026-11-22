@@ -1,5 +1,9 @@
 -- Manual rollback for 191_auth_identity_membership_schema.sql.
 -- Refuses to drop any identity, challenge, membership, or grant data.
+-- Keep the guard and every DROP in one transaction: psql normally continues
+-- after SQL errors unless ON_ERROR_STOP is enabled.
+BEGIN;
+
 DO $$
 BEGIN
     IF EXISTS (SELECT 1 FROM auth_identities)
@@ -20,3 +24,5 @@ DROP TABLE auth_identities;
 DROP INDEX idx_roles_phase1_scope_id;
 DROP INDEX idx_restaurants_phase1_tenant_id;
 DROP INDEX idx_users_phase1_tenant_id;
+
+COMMIT;

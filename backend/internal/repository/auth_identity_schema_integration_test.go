@@ -220,8 +220,25 @@ func assertIdentitySchemaRollback(t *testing.T, ctx context.Context, db *sql.DB,
 	if err != nil {
 		t.Fatalf("read identity schema rollback: %v", err)
 	}
-	if _, err := db.ExecContext(ctx, string(rollback)); err == nil {
-		t.Fatal("rollback must refuse to discard populated identity data")
+	var preservedIdentities int
+	func() {
+		conn, err := db.Conn(ctx)
+		if err != nil {
+			t.Fatalf("acquire connection for protected rollback: %v", err)
+		}
+		defer conn.Close()
+		if _, err := conn.ExecContext(ctx, string(rollback)); err == nil {
+			t.Fatal("rollback must refuse to discard populated identity data")
+		}
+		if _, err := conn.ExecContext(ctx, `ROLLBACK`); err != nil {
+			t.Fatalf("clear failed protected rollback transaction: %v", err)
+		}
+		if err := conn.QueryRowContext(ctx, `SELECT count(*) FROM auth_identities`).Scan(&preservedIdentities); err != nil {
+			t.Fatalf("confirm protected rollback preserved identity data: %v", err)
+		}
+	}()
+	if preservedIdentities == 0 {
+		t.Fatal("protected rollback removed identity data after its guard failed")
 	}
 	for _, table := range []string{"membership_role_grants", "membership_restaurant_grants", "identity_email_challenges", "tenant_memberships", "auth_identities"} {
 		if _, err := db.ExecContext(ctx, `DELETE FROM `+table); err != nil {
