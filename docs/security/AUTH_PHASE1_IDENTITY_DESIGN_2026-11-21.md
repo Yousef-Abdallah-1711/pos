@@ -83,9 +83,11 @@ Backfill one identity per existing user row first. Do not merge rows because ema
 - In Phase 1, prove mailbox control with a short-lived, one-time email challenge whose token is stored only as a hash. The challenge does not prove control of any legacy tenant account by itself.
 - Proof of control of each legacy membership being linked (current credential or an explicitly accepted invitation/recovery path), unless the owner approves a documented exception with independent security review.
 - Explicit user confirmation of the memberships and roles being linked.
+- Authenticate the target identity and every legacy account being attached in the same linking flow. After all proofs succeed, require the user to set or re-confirm one canonical identity password. Only that identity credential authenticates the linked identity; legacy password hashes are never treated as alternate credentials for the global account.
 - Transactional conflict checks for tenant, role, branch, suspension, and audit state.
+- Invalidate sessions for the canonical identity and every linked legacy account after the link commits. Retain legacy hashes only as long as the rollback window requires them; the new identity login path must not consult them.
 
-If credentials diverge, never choose the first row’s password. Require an explicit credential reset or verified link procedure. If same-tenant rows or role/scope conflicts cannot be reconciled without privilege changes, preserve them separately and leave linking disabled for that identity.
+If credentials diverge, never choose the first row’s password or infer linkage from hash equality. The canonical credential step above is mandatory. If same-tenant rows or role/scope conflicts cannot be reconciled without privilege changes, preserve them separately and leave linking disabled for that identity.
 
 The challenge provider must use a disposable fake in automated tests and an owner-approved sandbox/allowlist in staging. Do not send test messages to real users. Keep an identity and its memberships pending until mailbox verification, account proof, and explicit membership confirmation succeed.
 
