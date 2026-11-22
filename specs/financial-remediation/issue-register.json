@@ -24,7 +24,7 @@
       "title": "Journal integrity relies too heavily on application checks",
       "original_severity": "P1",
       "original_source": "original-tracker-2026-11-12.md",
-      "current_state": "IMPLEMENTATION MERGED OR OPEN — ACCEPTANCE PENDING; verify scope and PRs",
+      "current_state": "Migration 180 merged; current acceptance and reversal policy pending",
       "source_paths": [
         "backend/migrations/180_enforce_journal_integrity.sql",
         "backend/scripts/preflight_180_journal_integrity.sql",
@@ -33,7 +33,7 @@
         "backend/internal/repository/journal_integrity_postgres_integration_test.go"
       ],
       "prs": "34",
-      "classification": "REQUIRES EVIDENCE REVIEW",
+      "classification": "PARTIALLY_FIXED",
       "spec": "issues/CFR-002/spec.md",
       "plan": "issues/CFR-002/plan.md",
       "tasks": "issues/CFR-002/tasks.md"

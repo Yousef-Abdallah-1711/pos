@@ -1,20 +1,18 @@
-# CFR-002 implementation plan — recovery draft
+# CFR-002 implementation plan
 
-## Verified candidate paths
+## Baseline and scope
 
-- `backend/migrations/180_enforce_journal_integrity.sql`
-- `backend/scripts/preflight_180_journal_integrity.sql`
-- `backend/scripts/rollback_180_journal_integrity.sql`
-- `backend/internal/repository/journal_entry_repo.go`
-- `backend/internal/repository/journal_integrity_postgres_integration_test.go`
+Main `afda1f91c67922a92f66507adc208e6e1943d631` includes PR #34 and migration 180. Preserve posted history; do not repair historical records without an approved plan. The primary risk is a database writer bypassing application validation.
 
-## Approach
+## Execution
 
-1. Compare the original issue and latest tracker continuation with current main and related PRs: 34. Establish whether code is merged, superseded, or still absent.
-2. Reproduce in isolated synthetic fixtures with an independent oracle; preserve existing journal and audit history. Record exact environment and baseline SHA.
-3. Design the smallest correction after identifying approved accounting decisions, API/UI impact, migration and rollback needs. Do not activate policy-dependent behavior without sign-off.
-4. Run applicable PostgreSQL, isolation, concurrent, API, browser and performance checks; record exact SHA and results. Deliver through reviewed PR and validate main.
+1. Provision a new isolated PostgreSQL database, apply the repository migrations and runtime-role setup, and record the migration and database versions. Confirm no existing database is targeted.
+2. Run `backend/scripts/preflight_180_journal_integrity.sql` against synthetic valid and invalid legacy fixtures. Check that the invalid fixture blocks migration without partial guards or data changes.
+3. Run `go test -tags=integration ./internal/repository -run '^TestCFR002' -count=1` from `backend`. Independently check journal header totals against line sums and original/inverse GL effects by tenant and restaurant.
+4. Exercise documented downgrade and forward recovery on disposable data, verifying that financial rows are unchanged. Retain the historical evidence separately from the new run.
+5. Obtain accounting decisions on historical repair, linked reversal representation and closed periods; reconcile CFR-004, CFR-005 and CFR-013 before proposing changes. Review privileged roles and restrict owner/superuser access.
+6. Record exact SHA, commands, results, exceptions and required reviewers in the issue register. Close only after the finding-level and financial release gates are met.
 
-## Gaps
+## Sources and boundaries
 
-Architecture, alternatives, contracts, migration, rollback and issue-specific acceptance require owner review. This draft does not assert those decisions.
+Migration 180, its preflight and rollback scripts, `journal_entry_repo.go`, and `journal_integrity_postgres_integration_test.go` are the primary implementation and test paths. Manual Dashboard coverage is not a substitute for direct SQL assertions; document any user workflow tested separately.

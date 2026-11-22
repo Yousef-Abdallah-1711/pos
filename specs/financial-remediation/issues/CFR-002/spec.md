@@ -22,6 +22,37 @@ Status: IMPLEMENTATION MERGED OR OPEN — ACCEPTANCE PENDING; verify scope and P
 
 ## Current evidence and open questions
 
+At main `afda1f91c67922a92f66507adc208e6e1943d631`, migration 180
+contains deferred journal/ledger checks and guards for posted-history mutation
+and tenant scope. PR [#34](https://github.com/Yousef-Abdallah-1711/pos/pull/34)
+merged as `fc8647d6a0b802c3abf7bc3e93dc0b69e1ca9e8d`. The current tracker
+records disposable PostgreSQL 16.15 tests on 2026-11-13, including both
+directions of imbalance, direct writes, tenant boundaries, concurrent posting,
+void, preflight, and downgrade. Those are historical results, not an exact-main
+rerun. Current issue classification: **PARTIALLY_FIXED**, with release
+acceptance pending; linked reversal-journal and closed-period policy remain
+unresolved, and historical-data repair needs accounting approval.
+
+### Acceptance scenarios
+
+- A balanced draft with matching ledger effects commits; a debit-heavy,
+  credit-heavy, or empty posted journal fails at the database boundary.
+- Posted headers, lines, and ledger effects reject update, deletion, and
+  duplicate effects; scope changes and cross-tenant account use are rejected.
+- Concurrent posting yields one successful transition and one original effect
+  per line; void produces one inverse effect and duplicate void fails.
+- Migration preflight detects invalid historical data without changing it;
+  upgrade and documented downgrade are exercised on disposable databases.
+- A qualified accounting owner decides the historical correction and
+  closed-period reversal policy. Existing inverse-GL behavior does not prove
+  the original linked reversal-journal requirement.
+
+Run `go test -tags=integration ./internal/repository -run '^TestCFR002' -count=1`
+from `backend` only with the documented disposable integration database and
+restricted roles. Record the exact main SHA, database version, migrations,
+role configuration, result and independent reconciliation. Do not use an
+existing or production database. Current-session PostgreSQL result: NOT RUN.
+
 Read the later dated sections of the [current tracker](../../../../FINANCIAL-MODULE-COMPLETE-ISSUES-AND-REMEDIATION-PLAN.md). Confirm each current behavior, policy, and source path against the final candidate; historical text above is not a current verdict.
 
 ## Definition of done

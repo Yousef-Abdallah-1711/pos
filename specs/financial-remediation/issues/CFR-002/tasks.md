@@ -1,10 +1,10 @@
-# CFR-002 tasks — recovery draft
+# CFR-002 ordered tasks
 
-- [ ] T001 [TODO] Read [original issue](spec.md) and current tracker; verify the baseline and update status with evidence.
-- [ ] T002 [TODO] Trace the paths in [plan.md](plan.md), relevant API, UI and migrations; identify missing or superseded code and PRs.
-- [ ] T003 [TODO] Build a scoped synthetic PostgreSQL fixture and independent numerical oracle for the issue-specific acceptance in the original issue. Record expected and actual amounts.
-- [ ] T004 [TODO] Reproduce confirmed defect with a failing regression; identify accounting decisions before changing financial behavior.
-- [ ] T005 [TODO] Implement or verify the smallest correction with rollback and migration review; rerun applicable acceptance, isolation, concurrency and browser checks.
-- [ ] T006 [REVIEW_PENDING] Record exact candidate SHA, CI, independent review, merge SHA and any outstanding accounting approval.
-
-None of these draft tasks claims completed work. Refine into issue-specific tasks with test commands and evidence before implementation.
+- [x] T001 Identify merged PR #34, migration 180, historical evidence and current-main source.
+- [ ] T002 Create a disposable PostgreSQL database and runtime roles; record version, migration state and exact code SHA.
+- [ ] T003 Test debit-heavy, credit-heavy and zero-line direct SQL posting; verify rejection leaves the journal draft and no ledger effects.
+- [ ] T004 Verify balanced posting, immutable header/lines/ledger, duplicate effects, cross-tenant and restaurant scope changes under appropriate roles.
+- [ ] T005 Race six postings of one draft; independently assert one original ledger effect per line, then verify void and duplicate void behavior.
+- [ ] T006 Run synthetic preflight, invalid-data migration rejection, documented downgrade and forward migration without altering financial rows.
+- [ ] T007 Obtain recorded accounting decisions for historical correction and linked/closed-period reversal; coordinate CFR-004, CFR-005 and CFR-013.
+- [ ] T008 Record current-SHA results, role boundaries, independent review and outstanding financial release gates before changing the issue status.

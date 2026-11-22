@@ -37,6 +37,10 @@ approved rounding policy and visible recovery, is not established. Verify the
 validator's boundary behavior and run the tests on an exact-main checkout;
 also prove persistence and retry behavior with disposable PostgreSQL.
 
+On 2026-11-23, the two named unit tests passed with
+`go test ./internal/usecase -run 'Test(ValidateAutoPostingLinesRejectsBothDirectionsOfImbalance|AutoPostingRejectsUnbalancedEntriesBeforeJournalOrLedgerWrites)$' -count=1`
+in the primary checkout. Its backend matched main `afda1f91c67922a92f66507adc208e6e1943d631` at that time. This does not establish the broader rounding, persistence, or recovery acceptance.
+
 Read the later dated sections of the [current tracker](../../../../FINANCIAL-MODULE-COMPLETE-ISSUES-AND-REMEDIATION-PLAN.md). Confirm each current behavior, policy, and source path against the final candidate; historical text above is not a current verdict.
 
 ## Definition of done
