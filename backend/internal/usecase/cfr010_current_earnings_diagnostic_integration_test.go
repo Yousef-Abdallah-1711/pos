@@ -39,6 +39,18 @@ func TestCFR010CurrentEarningsDiagnosticReportsKnownFiveThousandCentScenario(t *
 	}
 }
 
+func TestCFR010CurrentEarningsDiagnosticDoesNotTreatZeroNetActivityAsNoActivity(t *testing.T) {
+	db := openCFR010EarningsDiagnosticDB(t)
+	fixture := createCFR010Fixture(t, db)
+	postCFR010Entry(t, db, fixture, "2025-06-15", "synthetic offsetting revenue", cfr010Line{"cash", 50, 0}, cfr010Line{"revenue", 0, 50})
+	postCFR010Entry(t, db, fixture, "2025-06-16", "synthetic offsetting revenue adjustment", cfr010Line{"revenue", 50, 0}, cfr010Line{"cash", 0, 50})
+
+	got := diagnoseCurrentEarnings(t, db, fixture, "2025-06-01", "2025-06-30")
+	if got.Status != CurrentEarningsPolicyPending || got.RevenueCents != 0 || got.ExpenseCents != 0 || got.CandidateNetEarningsCents != 0 {
+		t.Fatalf("zero-net activity must preserve policy-pending status: %+v", got)
+	}
+}
+
 func TestCFR010CurrentEarningsDiagnosticIncludesPeriodEndAndReversalEffects(t *testing.T) {
 	db := openCFR010EarningsDiagnosticDB(t)
 	fixture := createCFR010Fixture(t, db)

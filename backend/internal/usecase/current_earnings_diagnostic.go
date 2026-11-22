@@ -92,8 +92,10 @@ func newCurrentEarningsDiagnostic(tenantID, restaurantID int, start, end time.Ti
 
 func readCurrentPeriodGL(ctx context.Context, tx *sql.Tx, result *CurrentEarningsDiagnostic) error {
 	var revenueText, expenseText string
+	var movementCount int64
 	err := tx.QueryRowContext(ctx, `
 		SELECT
+		  COUNT(*),
 		  COALESCE(SUM(CASE WHEN coa.account_type = 'revenue' THEN gl.credit_amount - gl.debit_amount ELSE 0 END), 0)::text,
 		  COALESCE(SUM(CASE WHEN coa.account_type = 'expense' THEN gl.debit_amount - gl.credit_amount ELSE 0 END), 0)::text
 		FROM general_ledger gl
@@ -102,7 +104,7 @@ func readCurrentPeriodGL(ctx context.Context, tx *sql.Tx, result *CurrentEarning
 		  AND gl.entry_date >= $3::date AND gl.entry_date <= $4::date
 		  AND coa.tenant_id = $1 AND coa.restaurant_id = $2
 		  AND coa.account_type IN ('revenue', 'expense')
-	`, result.TenantID, result.RestaurantID, result.PeriodStart, result.PeriodEnd).Scan(&revenueText, &expenseText)
+	`, result.TenantID, result.RestaurantID, result.PeriodStart, result.PeriodEnd).Scan(&movementCount, &revenueText, &expenseText)
 	if err != nil {
 		return fmt.Errorf("read scoped posted GL earnings movements: %w", err)
 	}
@@ -112,7 +114,7 @@ func readCurrentPeriodGL(ctx context.Context, tx *sql.Tx, result *CurrentEarning
 	if result.ExpenseCents, err = currentNumericTextToCents(expenseText); err != nil {
 		return fmt.Errorf("parse scoped GL expenses: %w", err)
 	}
-	if result.RevenueCents == 0 && result.ExpenseCents == 0 {
+	if movementCount == 0 {
 		result.Status = CurrentEarningsNoActivity
 	}
 	return nil
