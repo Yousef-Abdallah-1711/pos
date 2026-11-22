@@ -9,21 +9,22 @@ import (
 // JournalGLReconciliation summarizes read-only journal-to-ledger integrity for
 // one authorized tenant and restaurant scope.
 type JournalGLReconciliation struct {
-	TenantID                int
-	RestaurantID            int
-	JournalCount            int64
-	JournalLinesChecked     int64
-	GLRowCount              int64
-	PostedLinesMissingGL    int64
-	DuplicateOrInvalidGL    int64
-	GLScopeMismatch         int64
-	GLAccountMismatch       int64
-	GLAmountMismatch        int64
-	GLDateMismatch          int64
-	InvalidLedgerLinks      int64
-	UnbalancedJournals      int64
-	NonPostedJournalsWithGL int64
-	Status                  string
+	TenantID                   int
+	RestaurantID               int
+	JournalCount               int64
+	JournalLinesChecked        int64
+	PostedJournalsWithoutLines int64
+	GLRowCount                 int64
+	PostedLinesMissingGL       int64
+	DuplicateOrInvalidGL       int64
+	GLScopeMismatch            int64
+	GLAccountMismatch          int64
+	GLAmountMismatch           int64
+	GLDateMismatch             int64
+	InvalidLedgerLinks         int64
+	UnbalancedJournals         int64
+	NonPostedJournalsWithGL    int64
+	Status                     string
 }
 
 // ReconcileJournalGL checks source journal lines against their immutable GL
@@ -147,6 +148,18 @@ func (r *JournalEntryRepository) ReconcileJournalGL(
 		return JournalGLReconciliation{}, fmt.Errorf("count scoped journals: %w", err)
 	}
 	if err := tx.QueryRowContext(ctx, `
+		SELECT COUNT(*)
+		FROM journal_entries je
+		WHERE je.tenant_id = $1 AND je.restaurant_id = $2
+		  AND (je.status = 'posted' OR (je.status = 'void' AND je.posted_at IS NOT NULL))
+		  AND NOT EXISTS (
+			SELECT 1 FROM journal_entry_lines jel
+			WHERE jel.journal_entry_id = je.id
+		  )
+	`, tenantID, restaurantID).Scan(&result.PostedJournalsWithoutLines); err != nil {
+		return JournalGLReconciliation{}, fmt.Errorf("count posted journals without source lines: %w", err)
+	}
+	if err := tx.QueryRowContext(ctx, `
 		SELECT COUNT(*) FROM general_ledger WHERE tenant_id = $1 AND restaurant_id = $2
 	`, tenantID, restaurantID).Scan(&result.GLRowCount); err != nil {
 		return JournalGLReconciliation{}, fmt.Errorf("count scoped ledger rows: %w", err)
@@ -188,6 +201,9 @@ func (r *JournalEntryRepository) ReconcileJournalGL(
 	} else if result.PostedLinesMissingGL+result.DuplicateOrInvalidGL+result.GLScopeMismatch+
 		result.GLAccountMismatch+result.GLAmountMismatch+result.GLDateMismatch+
 		result.InvalidLedgerLinks+result.UnbalancedJournals+result.NonPostedJournalsWithGL > 0 {
+		result.Status = "discrepancies"
+	}
+	if result.PostedJournalsWithoutLines > 0 {
 		result.Status = "discrepancies"
 	}
 	if err := tx.Commit(); err != nil {

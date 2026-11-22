@@ -112,6 +112,50 @@ func TestReconcileJournalGL_EmptyScopeIsExplicit(t *testing.T) {
 	}
 }
 
+func TestReconcileJournalGL_DetectsPostedAndVoidedHeadersWithoutLines(t *testing.T) {
+	db, fixture := openAtomicPostingFixture(t)
+	defer cleanupAtomicPostingFixture(t, db, fixture)
+	if _, err := db.Exec(`ALTER TABLE journal_entries DISABLE TRIGGER cfr002_journal_integrity_header`); err != nil {
+		t.Fatalf("disable deferred integrity trigger for corrupt-state fixture: %v", err)
+	}
+	defer func() {
+		if _, err := db.Exec(`ALTER TABLE journal_entries ENABLE TRIGGER cfr002_journal_integrity_header`); err != nil {
+			t.Errorf("re-enable deferred integrity trigger: %v", err)
+		}
+	}()
+
+	for _, status := range []string{"posted", "void"} {
+		var entryID int
+		if err := db.QueryRow(`
+			INSERT INTO journal_entries (tenant_id, restaurant_id, entry_number, entry_date, fiscal_period,
+			  description, entry_type, status)
+			VALUES ($1, $2, $3, '2026-11-13', '2026-11', 'line-less diagnostic fixture', 'manual', 'draft')
+			RETURNING id
+		`, fixture.tenantID, fixture.restaurantID, "EMPTY-"+status).Scan(&entryID); err != nil {
+			t.Fatalf("create draft for %s fixture: %v", status, err)
+		}
+		if _, err := db.Exec(`
+			UPDATE journal_entries SET status = 'posted', posted_at = CURRENT_TIMESTAMP, posted_by = 1 WHERE id = $1
+		`, entryID); err != nil {
+			t.Fatalf("promote line-less fixture to posted: %v", err)
+		}
+		if status == "void" {
+			if _, err := db.Exec(`
+				UPDATE journal_entries SET status = 'void', voided_at = CURRENT_TIMESTAMP,
+				  voided_by = 1, void_reason = 'synthetic corrupt state' WHERE id = $1
+			`, entryID); err != nil {
+				t.Fatalf("promote line-less fixture to void: %v", err)
+			}
+		}
+	}
+
+	got := reconcileFixture(t, NewJournalEntryRepository(db), fixture)
+	if got.Status != "discrepancies" || got.JournalCount != 2 || got.JournalLinesChecked != 0 ||
+		got.PostedJournalsWithoutLines != 2 || got.GLRowCount != 0 {
+		t.Fatalf("line-less posted/void journal headers were not detected: %+v", got)
+	}
+}
+
 func TestReconcileJournalGL_IsTenantAndRestaurantScoped(t *testing.T) {
 	db, fixture := openAtomicPostingFixture(t)
 	defer cleanupAtomicPostingFixture(t, db, fixture)
