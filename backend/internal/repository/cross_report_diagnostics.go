@@ -305,9 +305,6 @@ func readCrossReportPeriodContext(ctx context.Context, tx *sql.Tx, tenantID, res
 func setCrossReportStatuses(result *CrossReportDiagnostics) {
 	if len(result.ProfitLossAccountMismatches) > 0 {
 		result.ProfitLossStatus = CrossReportDiscrepancies
-		if result.CrossPeriodVoidCount > 0 {
-			result.ProfitLossStatus = CrossReportPolicyPending
-		}
 	}
 	if result.TrialBalanceDebitsCents != result.TrialBalanceCreditsCents {
 		result.TrialBalanceStatus = CrossReportDiscrepancies

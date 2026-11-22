@@ -24,3 +24,15 @@ func TestCompareCrossReportMovements_ReportsExactPerAccountDifferencesInStableOr
 		t.Fatalf("exact cross-report comparison = %+v totals=%d/%d", got, result.JournalRevenueCents, result.LedgerRevenueCents)
 	}
 }
+
+func TestSetCrossReportStatusesPreservesConfirmedMismatchWithCrossPeriodVoid(t *testing.T) {
+	result := emptyCrossReportDiagnostics(1, 2, time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC), time.Date(2025, 12, 31, 0, 0, 0, 0, time.UTC))
+	result.ProfitLossAccountMismatches = []CrossReportAccountMismatch{{AccountID: 9, DifferenceCents: 1}}
+	result.CrossPeriodVoidCount = 1
+
+	setCrossReportStatuses(&result)
+
+	if result.ProfitLossStatus != CrossReportDiscrepancies || result.Status != CrossReportDiscrepancies {
+		t.Fatalf("confirmed account mismatch was masked by policy context: %+v", result)
+	}
+}
