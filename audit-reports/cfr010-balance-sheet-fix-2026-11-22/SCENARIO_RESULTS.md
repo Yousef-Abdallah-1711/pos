@@ -26,7 +26,7 @@ Amounts are in currency units (1.00 = 100 cents). A `POLICY_PENDING` status mean
 | 20 | Separate tenants | Integration test adds another tenant posting and confirms no report change | PASS |
 | 21 | Negative balances | Existing unit test for contra-balance signs passes | PASS for tested sign case |
 | 22 | High-precision decimal boundary | No dedicated boundary fixture captured | NOT_RUN |
-| 23 | Concurrent posting/report read | No dedicated concurrency fixture captured | NOT_RUN |
+| 23 | Concurrent posting/report read | `TestCFR010ConcurrentPostAndBalanceSheetRead`: 20 synthetic capital journals posted concurrently with 304 Balance Sheet reads, each balanced; final assets/equity 2,000/2,000 cents and independent GL debits/credits 2,000/2,000 cents. Other reports, authenticated API and Dashboard concurrency were not exercised. | PARTIAL |
 
 The request for full acceptance is not complete: scenarios marked `NOT_RUN` and approval-gated cases remain blockers. No scenario is upgraded to a production accounting pass by this cache correction.
 
