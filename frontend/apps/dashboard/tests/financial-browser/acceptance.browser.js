@@ -361,7 +361,7 @@ test.describe('authenticated financial browser acceptance', () => {
       ? /تجتاز الميزانية فحص المعادلة الحالي|passes the current application equation check/i
       : /غير متطابق|UNRECONCILED|unreconciled/i
     await expect(page.locator('main').getByRole(expectedEquationBalanced ? 'status' : 'alert').filter({ hasText: integrityNotice })).toBeVisible()
-    const balanceSheetPdfExport = page.getByRole('button', { name: /Export PDF/i })
+    const balanceSheetPdfExport = page.getByRole('button', { name: /Export PDF|تصدير PDF/i })
     if (expectedEquationBalanced) {
       await expect(balanceSheetPdfExport).toBeVisible()
     } else {
