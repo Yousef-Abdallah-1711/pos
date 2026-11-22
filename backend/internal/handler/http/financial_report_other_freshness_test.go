@@ -23,10 +23,8 @@ func TestFinancialReportHandler_CashFlowRefreshesAfterLedgerActivity(t *testing.
 	from := time.Date(2026, time.March, 1, 0, 0, 0, 0, time.UTC)
 	to := time.Date(2026, time.March, 2, 0, 0, 0, 0, time.UTC)
 	for _, operating := range []float64{0, 50} {
-		for _, value := range []float64{operating, 0, 0} {
-			mock.ExpectQuery(`FROM journal_entry_lines jel`).WithArgs(1, 2, from, to).
-				WillReturnRows(sqlmock.NewRows([]string{"amount"}).AddRow(value))
-		}
+		mock.ExpectQuery(`FROM journal_entry_lines jel`).WithArgs(1, 2, from, to).
+			WillReturnRows(sqlmock.NewRows([]string{"operating", "investing", "financing"}).AddRow(operating, 0, 0))
 	}
 	handler := NewFinancialReportHandlerWithCache(usecase.NewFinancialReportUseCase(db, nil), service.NewInMemoryCache(), 5*time.Minute)
 	for _, expected := range []float64{0, 50} {
