@@ -1,0 +1,22 @@
+-- Manual rollback for 191_auth_identity_membership_schema.sql.
+-- Refuses to drop any identity, challenge, membership, or grant data.
+DO $$
+BEGIN
+    IF EXISTS (SELECT 1 FROM auth_identities)
+       OR EXISTS (SELECT 1 FROM identity_email_challenges)
+       OR EXISTS (SELECT 1 FROM tenant_memberships)
+       OR EXISTS (SELECT 1 FROM membership_restaurant_grants)
+       OR EXISTS (SELECT 1 FROM membership_role_grants) THEN
+        RAISE EXCEPTION 'Refusing identity-schema rollback while identity data exists';
+    END IF;
+END;
+$$;
+
+DROP TABLE membership_role_grants;
+DROP TABLE membership_restaurant_grants;
+DROP TABLE tenant_memberships;
+DROP TABLE identity_email_challenges;
+DROP TABLE auth_identities;
+DROP INDEX idx_roles_phase1_scope_id;
+DROP INDEX idx_restaurants_phase1_tenant_id;
+DROP INDEX idx_users_phase1_tenant_id;

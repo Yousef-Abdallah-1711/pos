@@ -36,6 +36,7 @@ Phase 1 must also prevent:
 - A valid role in tenant A from authorizing an operation in tenant B or an ungranted restaurant in the same tenant.
 - A stale session from retaining access after membership suspension, role revocation, or identity security change.
 - A dual-read/backfill path from silently increasing the effective permissions of an existing account.
+- Email verification and account-link endpoints from revealing whether an address, identity, or membership exists. Public responses must be enumeration-resistant and issuance/verification must be rate-limited.
 
 ## 4. Proposed Additive Data Model
 
@@ -49,7 +50,7 @@ Keep existing `users`, `user_roles`, role/permission tables, and their foreign k
 - `password_hash TEXT NOT NULL`, copied per legacy row for one-to-one backfill; a later explicit linking flow may replace it with one chosen credential.
 - `status` and monotonic `security_version`, plus timestamps.
 - A unique index on `normalized_email` for verified identities only. Keep unverified duplicates representable so the migration can preserve conflicting legacy accounts without merging them.
-- Add a `identity_email_challenges` table with identity/email binding, purpose, one-way token hash, expiry, attempt count, consumed timestamp, and creation metadata. Store no plaintext code or link token. Rate-limit issuance and verification, and consume atomically.
+- Add a `identity_email_challenges` table with identity/email binding, purpose, one-way token hash, expiry, attempt count, consumed timestamp, and creation metadata. Generate at least 256 bits of random challenge material, store only its SHA-256 digest, store no plaintext code or link token, rate-limit issuance and verification, and consume atomically.
 
 ### `tenant_memberships`
 
@@ -150,6 +151,7 @@ All tests use synthetic identities and disposable databases. Never edit staging/
 ### Unit
 
 - Identity/email normalization and verified/unverified state transitions.
+- Email challenge issuance for known and unknown addresses returns indistinguishable public status/body and does not reveal membership count; issuance and verification rate limits hold across identity, email, and source network.
 - Link authorization: email proof alone cannot attach an unproven legacy membership.
 - Login proof includes exact membership IDs; expired, replayed, tampered, pending, suspended, and revoked memberships fail.
 - Role/restaurant decision functions are deny-by-default and do not trust request-supplied tenant IDs.
@@ -168,6 +170,7 @@ All tests use synthetic identities and disposable databases. Never edit staging/
 
 - Real Chromium login shows only active verified memberships after password verification; selecting one binds the session to that membership and restaurant scope.
 - Synthetic browser flow completes the email challenge, explicitly links only proven memberships, and rejects expired, replayed, rate-limited, or email-only linking attempts.
+- Unknown, suspended, and already-verified email challenge requests do not reveal account or membership existence through response status, content, or a practical timing difference.
 - Tampered tenant, membership, restaurant, role, and user parameters fail in UI/API; forged headers do not change session scope.
 - A role or membership revocation denies the next authorized request within the approved invalidation bound.
 - Cross-tenant reads/writes fail through API, repository, RLS, and browser flows. Verify no response/cache contains another tenant's profile or role.
