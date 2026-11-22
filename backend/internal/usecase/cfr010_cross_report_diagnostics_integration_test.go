@@ -50,4 +50,17 @@ func TestCFR010CrossReportDiagnosticKeepsUnclosedEarningsPolicyPending(t *testin
 		len(got.ProfitLossAccountMismatches) != 0 {
 		t.Fatalf("cross-report diagnostic = %+v", got)
 	}
+
+	profitLoss := generateCFR010ProfitLoss(t, db, fixture, from, to)
+	trialBalance := generateCFR010TrialBalance(t, db, fixture, to)
+	balanceSheet := generateCFR010BalanceSheet(t, db, fixture, to)
+	if int64(profitLoss.TotalRevenue*100) != got.LedgerRevenueCents ||
+		int64(profitLoss.TotalExpenses*100) != got.LedgerExpenseCents ||
+		int64(trialBalance.TotalDebits*100) != got.TrialBalanceDebitsCents ||
+		int64(trialBalance.TotalCredits*100) != got.TrialBalanceCreditsCents ||
+		int64(balanceSheet.TotalAssets*100) != got.BalanceSheetAssetsCents ||
+		int64(balanceSheet.TotalLiabilities*100) != got.BalanceSheetLiabilitiesCents ||
+		int64(balanceSheet.TotalEquity*100) != got.BalanceSheetEquityCents {
+		t.Fatalf("independent SQL oracles do not match reports: diagnostic=%+v P&L=%+v TB=%+v BS=%+v", got, profitLoss, trialBalance, balanceSheet)
+	}
 }
