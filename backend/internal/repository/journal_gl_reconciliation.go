@@ -42,60 +42,60 @@ const JournalGLReconciliationLinesQuery = `
 			WHERE je.tenant_id = $1 AND je.restaurant_id = $2
 		), line_effects AS (
 			SELECT sl.*,
-			       COUNT(gl.id) AS gl_count,
-			       COUNT(gl.id) FILTER (
-				       WHERE gl.tenant_id = $1 AND gl.restaurant_id = $2
-				         AND gl.account_id = sl.account_id
-			         AND gl.debit_amount = sl.debit_amount
-			         AND gl.credit_amount = sl.credit_amount
-			         AND gl.entry_date = sl.entry_date
-			         AND gl.fiscal_period = COALESCE(sl.fiscal_period, to_char(sl.entry_date, 'YYYY-MM'))
-			       ) AS original_matches,
-			       COUNT(gl.id) FILTER (
-				       WHERE sl.status = 'void'
-			         AND sl.voided_at IS NOT NULL
-			         AND btrim(COALESCE(sl.void_reason, '')) <> ''
-			         AND gl.tenant_id = $1 AND gl.restaurant_id = $2
-			         AND gl.account_id = sl.account_id
-			         AND gl.debit_amount = sl.credit_amount
-			         AND gl.credit_amount = sl.debit_amount
-			         AND gl.entry_date = sl.voided_at::date
-			         AND gl.fiscal_period = to_char(sl.voided_at, 'YYYY-MM')
-			       ) AS reversal_matches,
-			       COUNT(gl.id) FILTER (
-				       WHERE gl.id IS NOT NULL AND (gl.tenant_id <> $1 OR gl.restaurant_id <> $2)
-			       ) AS scope_mismatches,
-			       COUNT(gl.id) FILTER (
-				       WHERE gl.id IS NOT NULL AND gl.account_id <> sl.account_id
-			       ) AS account_mismatches,
-			       COUNT(gl.id) FILTER (
-				       WHERE gl.debit_amount = sl.debit_amount AND gl.credit_amount = sl.credit_amount
-			          OR (sl.status = 'void' AND gl.debit_amount = sl.credit_amount AND gl.credit_amount = sl.debit_amount)
-			       ) AS amount_matches,
-			       COUNT(gl.id) FILTER (
-				       WHERE gl.id IS NOT NULL
-			         AND gl.tenant_id = $1 AND gl.restaurant_id = $2
-			         AND gl.account_id = sl.account_id
-			         AND ((gl.debit_amount = sl.debit_amount AND gl.credit_amount = sl.credit_amount
-			               AND (gl.entry_date <> sl.entry_date
-			                 OR gl.fiscal_period <> COALESCE(sl.fiscal_period, to_char(sl.entry_date, 'YYYY-MM'))))
-			           OR (sl.status = 'void' AND gl.debit_amount = sl.credit_amount
-			               AND gl.credit_amount = sl.debit_amount
-			               AND (gl.entry_date <> sl.voided_at::date
-			                 OR gl.fiscal_period <> to_char(sl.voided_at, 'YYYY-MM'))))
-			       ) AS date_mismatches
+			       gl.gl_count,
+			       gl.original_matches,
+			       gl.reversal_matches,
+			       gl.scope_mismatches,
+			       gl.account_mismatches,
+			       gl.amount_matches,
+			       gl.date_mismatches
 			FROM scoped_lines sl
 			LEFT JOIN LATERAL (
-				SELECT id, tenant_id, restaurant_id, account_id, debit_amount,
-				       credit_amount, entry_date, fiscal_period
-				FROM general_ledger gl
-				WHERE gl.journal_entry_id = sl.journal_entry_id
-				  AND gl.journal_line_id = sl.journal_line_id
+				SELECT COUNT(ledger.id) AS gl_count,
+				       COUNT(ledger.id) FILTER (
+					       WHERE ledger.tenant_id = $1 AND ledger.restaurant_id = $2
+					         AND ledger.account_id = sl.account_id
+					         AND ledger.debit_amount = sl.debit_amount
+					         AND ledger.credit_amount = sl.credit_amount
+					         AND ledger.entry_date = sl.entry_date
+					         AND ledger.fiscal_period = COALESCE(sl.fiscal_period, to_char(sl.entry_date, 'YYYY-MM'))
+				       ) AS original_matches,
+				       COUNT(ledger.id) FILTER (
+					       WHERE sl.status = 'void'
+					         AND sl.voided_at IS NOT NULL
+					         AND btrim(COALESCE(sl.void_reason, '')) <> ''
+					         AND ledger.tenant_id = $1 AND ledger.restaurant_id = $2
+					         AND ledger.account_id = sl.account_id
+					         AND ledger.debit_amount = sl.credit_amount
+					         AND ledger.credit_amount = sl.debit_amount
+					         AND ledger.entry_date = sl.voided_at::date
+					         AND ledger.fiscal_period = to_char(sl.voided_at, 'YYYY-MM')
+				       ) AS reversal_matches,
+				       COUNT(ledger.id) FILTER (
+					       WHERE ledger.tenant_id <> $1 OR ledger.restaurant_id <> $2
+				       ) AS scope_mismatches,
+				       COUNT(ledger.id) FILTER (
+					       WHERE ledger.account_id <> sl.account_id
+				       ) AS account_mismatches,
+				       COUNT(ledger.id) FILTER (
+					       WHERE (ledger.debit_amount = sl.debit_amount AND ledger.credit_amount = sl.credit_amount)
+					          OR (sl.status = 'void' AND ledger.debit_amount = sl.credit_amount AND ledger.credit_amount = sl.debit_amount)
+				       ) AS amount_matches,
+				       COUNT(ledger.id) FILTER (
+					       WHERE ledger.tenant_id = $1 AND ledger.restaurant_id = $2
+					         AND ledger.account_id = sl.account_id
+					         AND ((ledger.debit_amount = sl.debit_amount AND ledger.credit_amount = sl.credit_amount
+					               AND (ledger.entry_date <> sl.entry_date
+					                 OR ledger.fiscal_period <> COALESCE(sl.fiscal_period, to_char(sl.entry_date, 'YYYY-MM'))))
+					           OR (sl.status = 'void' AND ledger.debit_amount = sl.credit_amount
+					               AND ledger.credit_amount = sl.debit_amount
+					               AND (ledger.entry_date <> sl.voided_at::date
+					                 OR ledger.fiscal_period <> to_char(sl.voided_at, 'YYYY-MM'))))
+				       ) AS date_mismatches
+				FROM general_ledger ledger
+				WHERE ledger.journal_entry_id = sl.journal_entry_id
+				  AND ledger.journal_line_id = sl.journal_line_id
 			) gl ON TRUE
-			GROUP BY sl.journal_entry_id, sl.status, sl.entry_date, sl.fiscal_period,
-		         sl.voided_at, sl.void_reason, sl.journal_line_id, sl.line_tenant_id, sl.account_id,
-		         sl.debit_amount, sl.credit_amount, sl.account_tenant_id,
-		         sl.account_restaurant_id
 		)
 		SELECT COUNT(*),
 		       COUNT(*) FILTER (WHERE status = 'posted' AND gl_count = 0),
