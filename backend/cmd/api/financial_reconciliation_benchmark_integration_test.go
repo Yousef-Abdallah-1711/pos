@@ -77,7 +77,7 @@ func runFinancialReconciliationBenchmark(t *testing.T, db *sql.DB, fixture finan
 	benchmark.WarmMeasurements = append(benchmark.WarmMeasurements,
 		measureReconciliation(t, db, journalRepo, "large_restaurant_warm", fixture.tenantID, fixture.restaurantID),
 		measureReconciliation(t, db, journalRepo, "small_restaurant_warm", secondary.tenantID, secondary.restaurantID),
-		measureReconciliation(t, db, journalRepo, "empty_restaurant_warm", fixture.tenantID, fixture.restaurantID+1000000),
+		measureReconciliation(t, db, journalRepo, "empty_restaurant_warm", fixture.tenantID, emptyRestaurantID),
 	)
 	benchmark.ConcurrentReads = measureConcurrentFinancialOperation(t, db, "reconciliation_concurrent_reads", 4, 10, func() error {
 		_, err := journalRepo.ReconcileJournalGL(t.Context(), fixture.tenantID, fixture.restaurantID)
