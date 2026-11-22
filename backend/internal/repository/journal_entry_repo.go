@@ -461,16 +461,15 @@ func (r *JournalEntryRepository) VoidEntryTx(tx *sql.Tx, tenantID, restaurantID,
 	}
 
 	var reversed []postingLine
-	var voidDate time.Time
 	var fiscalPeriod string
+	voidedAt := time.Now()
 	if status == domain.JournalStatusPosted {
 		lines, err := r.getPostingLinesTx(tx, id)
 		if err != nil {
 			return err
 		}
 
-		voidDate = time.Now()
-		fiscalPeriod = formatFiscalPeriod(voidDate)
+		fiscalPeriod = formatFiscalPeriod(voidedAt)
 		reversed = make([]postingLine, 0, len(lines))
 		for _, line := range lines {
 			reversed = append(reversed, postingLine{
@@ -486,14 +485,15 @@ func (r *JournalEntryRepository) VoidEntryTx(tx *sql.Tx, tenantID, restaurantID,
 	_, err = tx.Exec(`
 		UPDATE journal_entries
 		SET status = $1,
-			voided_at = CURRENT_TIMESTAMP,
-			voided_by = $2,
-			void_reason = $3,
-			updated_by = $2,
+			voided_at = $2,
+			voided_by = $3,
+			void_reason = $4,
+			updated_by = $3,
 			updated_at = CURRENT_TIMESTAMP
-		WHERE id = $4 AND tenant_id = $5 AND restaurant_id = $6
+		WHERE id = $5 AND tenant_id = $6 AND restaurant_id = $7
 	`,
 		domain.JournalStatusVoid,
+		voidedAt,
 		voidedBy,
 		reason,
 		id,
@@ -504,7 +504,7 @@ func (r *JournalEntryRepository) VoidEntryTx(tx *sql.Tx, tenantID, restaurantID,
 		return err
 	}
 	if status == domain.JournalStatusPosted {
-		if err := r.appendGeneralLedgerTx(tx, tenantID, restaurantID, id, voidDate, fiscalPeriod, reversed); err != nil {
+		if err := r.appendGeneralLedgerTx(tx, tenantID, restaurantID, id, voidedAt, fiscalPeriod, reversed); err != nil {
 			return err
 		}
 	}
