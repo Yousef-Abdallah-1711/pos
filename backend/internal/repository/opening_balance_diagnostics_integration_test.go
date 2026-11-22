@@ -102,13 +102,14 @@ func createOpeningBalanceDiagnosticFixture(t *testing.T, db *sql.DB) openingBala
 
 func insertOpeningBalanceDiagnosticAccount(t *testing.T, db *sql.DB, fixture openingBalanceDiagnosticFixture, amount, date string, accountID *int) {
 	t.Helper()
+	accountNumber := fmt.Sprintf("d%d", time.Now().UnixNano())
 	_, err := db.Exec(`
 		INSERT INTO bank_accounts_ledger (
 			tenant_id, restaurant_id, account_name, bank_name, account_number, currency,
 			account_type, opening_balance, current_balance, opening_date, gl_account_id
 		) VALUES ($1, $2, 'Synthetic opening account', 'Synthetic bank', $3, 'EGP',
 		         'checking', $4, 0, $5, $6)
-	`, fixture.tenantID, fixture.restaurantID, fixture.name, amount, date, accountID)
+	`, fixture.tenantID, fixture.restaurantID, accountNumber, amount, date, accountID)
 	if err != nil {
 		t.Fatalf("create scoped bank opening metadata: %v", err)
 	}
