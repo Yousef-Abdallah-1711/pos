@@ -22,6 +22,26 @@ Status: IMPLEMENTATION MERGED OR OPEN — ACCEPTANCE PENDING; verify scope and P
 
 ## Current evidence and open questions
 
+Current main `afda1f91c67922a92f66507adc208e6e1943d631` includes
+PR [#41](https://github.com/Yousef-Abdallah-1711/pos/pull/41), merged as
+`2cec224c13be5db9f74d193395d3415ae058388d`. Journal post and void paths
+use row locks. The current tracker records transaction-scoped advisory locks
+for five financial numbering series and sorted account-row locking; its
+2026-11-14 disposable PostgreSQL evidence includes concurrent allocations,
+rollback/retry and parallel journal posting. Later dated tracker entries
+describe additional dated-ledger work. These historical results must be tied
+to a fresh exact-main run before full acceptance; numbering scope and gapless
+policy are not approved. Existing integration tests are in
+`backend/internal/repository/cfr003_numbering_integration_test.go`.
+
+Next run `go test -tags=integration ./internal/repository -run
+'^TestCFR003Postgres' -count=1 -v` from `backend` against a newly provisioned
+disposable database. Independently verify unique identifiers per approved
+scope, exactly one GL effect per journal line, and running balances for
+concurrent and backdated postings. Test rollback, two tenants, and independent
+restaurants. Record the exact SHA and role configuration. No such run was
+performed in this session.
+
 Read the later dated sections of the [current tracker](../../../../FINANCIAL-MODULE-COMPLETE-ISSUES-AND-REMEDIATION-PLAN.md). Confirm each current behavior, policy, and source path against the final candidate; historical text above is not a current verdict.
 
 ## Definition of done
