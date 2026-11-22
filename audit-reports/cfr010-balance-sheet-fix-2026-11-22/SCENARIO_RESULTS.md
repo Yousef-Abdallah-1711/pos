@@ -16,7 +16,7 @@ Amounts are in currency units (1.00 = 100 cents). A `POLICY_PENDING` status mean
 | 10 | Current-period earnings | Current-period income/loss not rolled into equity | POLICY_PENDING |
 | 11 | Existing retained earnings | Explicit test close: assets/equity 1,150.00; retained 200.00 | PASS for explicit synthetic journal math; production policy pending |
 | 12 | Closing journal present | Explicit close fixture balanced at 1,150.00 | PASS for fixture; production policy pending |
-| 13 | Fiscal-year boundary | Date filters tested; approved fiscal-year boundary not configured/evidenced | NOT_RUN |
+| 13 | Fiscal-year boundary | `TestCFR010CalendarBoundaryAndSmallAmounts` posts 10.00 on December 31 and twenty 0.01 entries on January 1; report and independent GL both show 1,000 cents at December 31 and 1,020 cents at January 1. Approved fiscal close and reopen rules remain unevidenced. | PARTIAL; fiscal policy PENDING |
 | 14 | Opening balance missing | Opening balance outside GL reproduced; report includes GL -100.00, not bank opening 1,000.00 | PASS for defect reproduction |
 | 15 | Opening balance with authorized mapping | No approved mapping supplied | POLICY_PENDING |
 | 16 | Incorrect account classification | No dedicated fixture result captured | NOT_RUN |
@@ -25,7 +25,7 @@ Amounts are in currency units (1.00 = 100 cents). A `POLICY_PENDING` status mean
 | 19 | Multiple restaurants, one tenant | Integration test adds sibling-restaurant posting and confirms no report change | PASS |
 | 20 | Separate tenants | Integration test adds another tenant posting and confirms no report change | PASS |
 | 21 | Negative balances | Existing unit test for contra-balance signs passes | PASS for tested sign case |
-| 22 | High-precision decimal boundary | No dedicated boundary fixture captured | NOT_RUN |
+| 22 | High-precision decimal boundary | Twenty 0.01 entries total 20 cents in the January 1 scoped GL and report. Maximum values, sub-cent input, rounding, large and negative cases remain untested. | PARTIAL |
 | 23 | Concurrent posting/report read | `TestCFR010ConcurrentPostAndBalanceSheetRead`: 20 synthetic capital journals posted concurrently with 304 Balance Sheet reads, each balanced; final assets/equity 2,000/2,000 cents and independent GL debits/credits 2,000/2,000 cents. Other reports, authenticated API and Dashboard concurrency were not exercised. | PARTIAL |
 
 The request for full acceptance is not complete: scenarios marked `NOT_RUN` and approval-gated cases remain blockers. No scenario is upgraded to a production accounting pass by this cache correction.
