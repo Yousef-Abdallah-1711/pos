@@ -117,3 +117,45 @@ func TestValidateAuthLookupDatabaseRejectsAnyDirectTablePrivilege(t *testing.T) 
 		t.Fatal(err)
 	}
 }
+
+func TestValidateAuthLookupDatabaseRejectsPublicSchemaCreate(t *testing.T) {
+	db, mock, err := sqlmock.New()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer db.Close()
+
+	mock.ExpectQuery(`SELECT r\.rolname`).WillReturnRows(sqlmock.NewRows([]string{
+		"role", "privileged", "database_create", "public_schema_create", "schema_usage", "schema_create", "default_read_only",
+		"transaction_read_only", "identity_function", "memberships_function", "inherited_role",
+	}).AddRow("pos_auth_lookup", false, false, true, true, false, "on", "on", true, true, false))
+	if err := validateAuthLookupDatabase(context.Background(), db); err == nil {
+		t.Fatal("auth lookup role with effective public schema CREATE passed validation")
+	}
+	if err := mock.ExpectationsWereMet(); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestValidateAuthLookupDatabaseRejectsOtherSchemaPrivileges(t *testing.T) {
+	db, mock, err := sqlmock.New()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer db.Close()
+
+	mock.ExpectQuery(`SELECT r\.rolname`).WillReturnRows(sqlmock.NewRows([]string{
+		"role", "privileged", "database_create", "public_schema_create", "schema_usage", "schema_create", "default_read_only",
+		"transaction_read_only", "identity_function", "memberships_function", "inherited_role",
+	}).AddRow("pos_auth_lookup", false, false, false, true, false, "on", "on", true, true, false))
+	for range 4 {
+		mock.ExpectQuery(`SELECT count\(\*\)`).WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(0))
+	}
+	mock.ExpectQuery(`SELECT count\(\*\)`).WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(1))
+	if err := validateAuthLookupDatabase(context.Background(), db); err == nil {
+		t.Fatal("auth lookup role with privileges on another non-system schema passed validation")
+	}
+	if err := mock.ExpectationsWereMet(); err != nil {
+		t.Fatal(err)
+	}
+}
