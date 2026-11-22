@@ -787,3 +787,11 @@ This section supersedes the older PR, benchmark and release-gate observations in
 - **External blockers:** the private acceptance repository's four self-hosted runners were reported offline; no hosted-runner spend or plan change is authorized. No qualified approver/channel was provided for the ten accounting decisions. These blockers do not close unrelated engineering work.
 
 The active PR/CI closure is complete; the remaining work is the unresolved financial remediation and external acceptance listed in the current closure matrix. Do not begin policy-dependent changes without the required approval, do not create balancing entries, and do not promote production while any required gate remains open.
+
+## 23. CFR-010 execution continuation — 2026-11-21
+
+- Refreshed `origin/main` and live GitHub `refs/heads/main`; both resolve to `c527e08bb47ec54e4d2f6fd14ecbd9b30e7cadc7`. Existing PR #42 signed-balance correction is merged and included on this baseline.
+- Preserved the dirty shared checkout and created isolated candidate worktree `H:\Projects\pos-cfr010-complete-20261121` on `codex/cfr010-complete-balance-sheet-remediation`.
+- Added a read-only scoped journal-to-GL reconciliation repository method and PostgreSQL scenarios. Compile-only Go validation, repository `go vet`, and diff whitespace checks pass. PostgreSQL execution failed before test setup because local role `test` is unavailable; Docker is stopped and both local PostgreSQL services are stopped. No DB was created or modified.
+- Source recovery, OPEN-01, EARN-01, CLOSE-01, browser/hosted exact-SHA acceptance and independent review remain open. The original operating discrepancy remains **NOT ESTABLISHED**. Financial production remains **NO-GO**.
+- Evidence files: `audit-reports/financial-cfr010-remediation-2026-11-21/EXECUTION_STATUS.md`, `ROOT_CAUSE_TO_FIX_MATRIX.md`, `JOURNAL_GL_RECONCILIATION.md`, `ACCOUNTING_APPROVAL_STATUS.md`, and `REMAINING_BLOCKERS.md`.
