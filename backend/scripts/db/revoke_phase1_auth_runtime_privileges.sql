@@ -3,6 +3,7 @@
 DO $$
 DECLARE
     protected_table TEXT;
+    target_schema TEXT := current_schema();
 BEGIN
     FOREACH protected_table IN ARRAY ARRAY[
         'auth_identities',
@@ -11,8 +12,8 @@ BEGIN
         'membership_restaurant_grants',
         'membership_role_grants'
     ] LOOP
-        IF to_regclass(protected_table) IS NOT NULL THEN
-            EXECUTE format('REVOKE ALL ON TABLE %I FROM PUBLIC, pos_app', protected_table);
+        IF to_regclass(format('%I.%I', target_schema, protected_table)) IS NOT NULL THEN
+            EXECUTE format('REVOKE ALL ON TABLE %I.%I FROM PUBLIC, pos_app', target_schema, protected_table);
         END IF;
     END LOOP;
 END;

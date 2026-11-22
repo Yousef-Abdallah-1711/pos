@@ -111,9 +111,10 @@ func assertIdentityRoleReprovisioningPreservesIsolation(t *testing.T, ctx contex
 		t.Fatalf("read runtime role provisioning script: %v", err)
 	}
 	grantAll := strings.Index(string(roleScript), "GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO pos_app;")
+	setPublicSearchPath := strings.Index(string(roleScript), "SET search_path TO public;")
 	resetInclude := strings.Index(string(roleScript), `\ir revoke_phase1_auth_runtime_privileges.sql`)
-	if grantAll < 0 || resetInclude < grantAll {
-		t.Fatal("runtime role provisioning must reapply identity-table denials after broad grants")
+	if grantAll < 0 || setPublicSearchPath < grantAll || resetInclude < setPublicSearchPath {
+		t.Fatal("runtime role provisioning must select public and reapply identity-table denials after broad grants")
 	}
 
 	for _, table := range []string{

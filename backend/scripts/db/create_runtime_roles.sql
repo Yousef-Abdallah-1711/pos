@@ -71,4 +71,5 @@ $$;
 -- This provisioning script grants all existing tables above. Keep the new
 -- global identity boundary intact when roles are re-provisioned after
 -- migration 191 has been applied.
+SET search_path TO public;
 \ir revoke_phase1_auth_runtime_privileges.sql
