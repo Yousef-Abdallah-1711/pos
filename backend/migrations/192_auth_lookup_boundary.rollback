@@ -1,0 +1,8 @@
+-- Remove the Phase 1 lookup functions only. The schema contains no identity data.
+BEGIN;
+
+DROP FUNCTION auth_private.lookup_eligible_memberships(UUID);
+DROP FUNCTION auth_private.lookup_verified_identity_by_email(TEXT);
+DROP SCHEMA auth_private;
+
+COMMIT;
