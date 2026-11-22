@@ -199,11 +199,12 @@ func verifyReconciliationStatementTimeout(t *testing.T, fixture financialBenchma
 func financialReconciliationPlans(t *testing.T, db *sql.DB, tenantID, restaurantID int) map[string]json.RawMessage {
 	t.Helper()
 	queries := map[string]string{
-		"journal_lines_to_gl":   repository.JournalGLReconciliationLinesQuery,
-		"journal_count":         repository.JournalGLReconciliationJournalCountQuery,
-		"ledger_count":          repository.JournalGLReconciliationLedgerCountQuery,
-		"invalid_source_links":  repository.JournalGLReconciliationInvalidLinksQuery,
-		"journal_header_totals": repository.JournalGLReconciliationHeadersQuery,
+		"journal_lines_to_gl":           repository.JournalGLReconciliationLinesQuery,
+		"journal_count":                 repository.JournalGLReconciliationJournalCountQuery,
+		"posted_journals_without_lines": repository.JournalGLReconciliationPostedWithoutLinesQuery,
+		"ledger_count":                  repository.JournalGLReconciliationLedgerCountQuery,
+		"invalid_source_links":          repository.JournalGLReconciliationInvalidLinksQuery,
+		"journal_header_totals":         repository.JournalGLReconciliationHeadersQuery,
 	}
 	plans := make(map[string]json.RawMessage, len(queries))
 	for name, query := range queries {

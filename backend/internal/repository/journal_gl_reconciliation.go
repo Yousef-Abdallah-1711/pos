@@ -9,22 +9,22 @@ import (
 // JournalGLReconciliation summarizes read-only journal-to-ledger integrity for
 // one authorized tenant and restaurant scope.
 type JournalGLReconciliation struct {
-	TenantID                int
-	RestaurantID            int
-	JournalCount            int64
-	JournalLinesChecked     int64
+	TenantID                   int
+	RestaurantID               int
+	JournalCount               int64
+	JournalLinesChecked        int64
 	PostedJournalsWithoutLines int64
-	GLRowCount              int64
-	PostedLinesMissingGL    int64
-	DuplicateOrInvalidGL    int64
-	GLScopeMismatch         int64
-	GLAccountMismatch       int64
-	GLAmountMismatch        int64
-	GLDateMismatch          int64
-	InvalidLedgerLinks      int64
-	UnbalancedJournals      int64
-	NonPostedJournalsWithGL int64
-	Status                  string
+	GLRowCount                 int64
+	PostedLinesMissingGL       int64
+	DuplicateOrInvalidGL       int64
+	GLScopeMismatch            int64
+	GLAccountMismatch          int64
+	GLAmountMismatch           int64
+	GLDateMismatch             int64
+	InvalidLedgerLinks         int64
+	UnbalancedJournals         int64
+	NonPostedJournalsWithGL    int64
+	Status                     string
 }
 
 // JournalGLReconciliationLinesQuery is the production snapshot query used to
@@ -115,6 +115,18 @@ const JournalGLReconciliationLinesQuery = `
 // JournalGLReconciliationJournalCountQuery counts source journals in scope.
 const JournalGLReconciliationJournalCountQuery = `SELECT COUNT(*) FROM journal_entries WHERE tenant_id = $1 AND restaurant_id = $2`
 
+// JournalGLReconciliationPostedWithoutLinesQuery detects posted or voided
+// journal headers that lack source lines.
+const JournalGLReconciliationPostedWithoutLinesQuery = `
+	SELECT COUNT(*)
+	FROM journal_entries je
+	WHERE je.tenant_id = $1 AND je.restaurant_id = $2
+	  AND (je.status = 'posted' OR (je.status = 'void' AND je.posted_at IS NOT NULL))
+	  AND NOT EXISTS (
+		SELECT 1 FROM journal_entry_lines jel
+		WHERE jel.journal_entry_id = je.id
+	  )`
+
 // JournalGLReconciliationLedgerCountQuery counts ledger effects in scope.
 const JournalGLReconciliationLedgerCountQuery = `SELECT COUNT(*) FROM general_ledger WHERE tenant_id = $1 AND restaurant_id = $2`
 
@@ -187,16 +199,7 @@ func (r *JournalEntryRepository) ReconcileJournalGL(
 	if err := tx.QueryRowContext(ctx, JournalGLReconciliationJournalCountQuery, tenantID, restaurantID).Scan(&result.JournalCount); err != nil {
 		return JournalGLReconciliation{}, fmt.Errorf("count scoped journals: %w", err)
 	}
-	if err := tx.QueryRowContext(ctx, `
-		SELECT COUNT(*)
-		FROM journal_entries je
-		WHERE je.tenant_id = $1 AND je.restaurant_id = $2
-		  AND (je.status = 'posted' OR (je.status = 'void' AND je.posted_at IS NOT NULL))
-		  AND NOT EXISTS (
-			SELECT 1 FROM journal_entry_lines jel
-			WHERE jel.journal_entry_id = je.id
-		  )
-	`, tenantID, restaurantID).Scan(&result.PostedJournalsWithoutLines); err != nil {
+	if err := tx.QueryRowContext(ctx, JournalGLReconciliationPostedWithoutLinesQuery, tenantID, restaurantID).Scan(&result.PostedJournalsWithoutLines); err != nil {
 		return JournalGLReconciliation{}, fmt.Errorf("count posted journals without source lines: %w", err)
 	}
 	if err := tx.QueryRowContext(ctx, JournalGLReconciliationLedgerCountQuery, tenantID, restaurantID).Scan(&result.GLRowCount); err != nil {
