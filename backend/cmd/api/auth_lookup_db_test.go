@@ -61,9 +61,10 @@ func TestValidateAuthLookupDatabaseRequiresReadOnlyUnprivilegedPool(t *testing.T
 	defer db.Close()
 
 	mock.ExpectQuery(`SELECT r\.rolname`).WillReturnRows(sqlmock.NewRows([]string{
-		"role", "privileged", "database_create", "schema_usage", "schema_create", "default_read_only",
+		"role", "privileged", "database_create", "public_schema_create", "schema_usage", "schema_create", "default_read_only",
 		"transaction_read_only", "identity_function", "memberships_function", "inherited_role",
-	}).AddRow("pos_auth_lookup", false, false, true, false, "on", "on", true, true, false))
+	}).AddRow("pos_auth_lookup", false, false, false, true, false, "on", "on", true, true, false))
+	mock.ExpectQuery(`SELECT count\(\*\)`).WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(0))
 	mock.ExpectQuery(`SELECT count\(\*\)`).WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(0))
 	mock.ExpectQuery(`SELECT count\(\*\)`).WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(0))
 	mock.ExpectQuery(`SELECT count\(\*\)`).WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(0))
@@ -83,11 +84,34 @@ func TestValidateAuthLookupDatabaseRejectsSharedOrWritableRole(t *testing.T) {
 	}
 	defer db.Close()
 	mock.ExpectQuery(`SELECT r\.rolname`).WillReturnRows(sqlmock.NewRows([]string{
-		"role", "privileged", "database_create", "schema_usage", "schema_create", "default_read_only",
+		"role", "privileged", "database_create", "public_schema_create", "schema_usage", "schema_create", "default_read_only",
 		"transaction_read_only", "identity_function", "memberships_function", "inherited_role",
-	}).AddRow("pos_app", false, false, true, false, "off", "off", false, false, false))
+	}).AddRow("pos_app", false, false, false, true, false, "off", "off", false, false, false))
 	if err := validateAuthLookupDatabase(context.Background(), db); err == nil {
 		t.Fatal("shared writable database role passed auth lookup validation")
+	}
+	if err := mock.ExpectationsWereMet(); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestValidateAuthLookupDatabaseRejectsAnyDirectTablePrivilege(t *testing.T) {
+	db, mock, err := sqlmock.New()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer db.Close()
+	mock.ExpectQuery(`SELECT r\.rolname`).WillReturnRows(sqlmock.NewRows([]string{
+		"role", "privileged", "database_create", "public_schema_create", "schema_usage", "schema_create", "default_read_only",
+		"transaction_read_only", "identity_function", "memberships_function", "inherited_role",
+	}).AddRow("pos_auth_lookup", false, false, false, true, false, "on", "on", true, true, false))
+	mock.ExpectQuery(`SELECT count\(\*\)`).WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(1))
+	mock.ExpectQuery(`SELECT count\(\*\)`).WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(0))
+	mock.ExpectQuery(`SELECT count\(\*\)`).WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(0))
+	mock.ExpectQuery(`SELECT count\(\*\)`).WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(0))
+	mock.ExpectQuery(`SELECT count\(\*\)`).WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(0))
+	if err := validateAuthLookupDatabase(context.Background(), db); err == nil {
+		t.Fatal("auth lookup role with direct table privileges passed validation")
 	}
 	if err := mock.ExpectationsWereMet(); err != nil {
 		t.Fatal(err)

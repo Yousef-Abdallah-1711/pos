@@ -13,7 +13,7 @@ ALTER ROLE pos_auth_lookup LOGIN PASSWORD :'auth_lookup_pw' NOSUPERUSER NOCREATE
 GRANT CONNECT ON DATABASE :"dbname" TO pos_auth_lookup;
 \connect :"dbname"
 
-GRANT USAGE ON SCHEMA public TO pos_auth_lookup;
+REVOKE ALL ON SCHEMA public FROM pos_auth_lookup;
 REVOKE ALL PRIVILEGES ON ALL TABLES IN SCHEMA public FROM pos_auth_lookup;
 REVOKE ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public FROM pos_auth_lookup;
 REVOKE ALL PRIVILEGES ON ALL FUNCTIONS IN SCHEMA public FROM pos_auth_lookup;

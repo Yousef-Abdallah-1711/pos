@@ -55,7 +55,7 @@ func connectAuthLookupDatabase(primary *sql.DB, base config.DatabaseConfig) (*sq
 
 func validateAuthLookupDatabase(ctx context.Context, db *sql.DB) error {
 	var role string
-	var privileged, databaseCreate, authSchemaUsage, authSchemaCreate bool
+	var privileged, databaseCreate, publicSchemaCreate, authSchemaUsage, authSchemaCreate bool
 	var defaultReadOnly, transactionReadOnly string
 	var canLookupIdentity, canLookupMemberships bool
 	var inheritedRole bool
@@ -63,6 +63,7 @@ func validateAuthLookupDatabase(ctx context.Context, db *sql.DB) error {
 		SELECT r.rolname,
 		       r.rolsuper OR r.rolcreatedb OR r.rolcreaterole OR r.rolreplication OR r.rolbypassrls,
 	       has_database_privilege(current_user, current_database(), 'CREATE'),
+	       has_schema_privilege(current_user, 'public', 'CREATE'),
 	       has_schema_privilege(current_user, 'auth_private', 'USAGE'),
 	       has_schema_privilege(current_user, 'auth_private', 'CREATE'),
 	       current_setting('default_transaction_read_only'),
@@ -73,23 +74,24 @@ func validateAuthLookupDatabase(ctx context.Context, db *sql.DB) error {
 		FROM pg_roles r
 		WHERE r.rolname = current_user
 	`).Scan(
-		&role, &privileged, &databaseCreate, &authSchemaUsage, &authSchemaCreate,
+		&role, &privileged, &databaseCreate, &publicSchemaCreate, &authSchemaUsage, &authSchemaCreate,
 		&defaultReadOnly, &transactionReadOnly, &canLookupIdentity, &canLookupMemberships, &inheritedRole,
 	)
 	if err != nil {
 		return fmt.Errorf("inspect auth lookup role: %w", err)
 	}
-	if role != "pos_auth_lookup" || privileged || databaseCreate || !authSchemaUsage || authSchemaCreate ||
+	if role != "pos_auth_lookup" || privileged || databaseCreate || publicSchemaCreate || !authSchemaUsage || authSchemaCreate ||
 		defaultReadOnly != "on" || transactionReadOnly != "on" || !canLookupIdentity || !canLookupMemberships || inheritedRole {
 		return fmt.Errorf("auth lookup database must use the isolated read-only pos_auth_lookup role")
 	}
 
-	var tablePrivileges, sequencePrivileges, extraPrivateFunctions, callableDefiners int
+	var tablePrivileges, sequencePrivileges, extraPrivateFunctions, callableDefiners, schemaPrivileges int
 	if err := db.QueryRowContext(ctx, `
 		SELECT count(*)
 		FROM pg_class c
 		JOIN pg_namespace n ON n.oid = c.relnamespace
-		WHERE n.nspname = 'public'
+		WHERE n.nspname NOT IN ('pg_catalog', 'information_schema')
+		  AND n.nspname NOT LIKE 'pg_toast%'
 		  AND c.relkind IN ('r', 'p', 'v', 'm', 'f')
 		  AND (has_table_privilege(current_user, c.oid, 'SELECT')
 		    OR has_table_privilege(current_user, c.oid, 'INSERT')
@@ -105,7 +107,8 @@ func validateAuthLookupDatabase(ctx context.Context, db *sql.DB) error {
 		SELECT count(*)
 		FROM pg_class c
 		JOIN pg_namespace n ON n.oid = c.relnamespace
-		WHERE n.nspname = 'public'
+		WHERE n.nspname NOT IN ('pg_catalog', 'information_schema')
+		  AND n.nspname NOT LIKE 'pg_toast%'
 		  AND c.relkind = 'S'
 		  AND (has_sequence_privilege(current_user, c.oid, 'USAGE')
 		    OR has_sequence_privilege(current_user, c.oid, 'SELECT')
@@ -129,14 +132,25 @@ func validateAuthLookupDatabase(ctx context.Context, db *sql.DB) error {
 		SELECT count(*)
 		FROM pg_proc p
 		JOIN pg_namespace n ON n.oid = p.pronamespace
-	WHERE p.prosecdef
-	  AND p.prorettype <> 'trigger'::regtype
-	  AND n.nspname NOT IN ('pg_catalog', 'information_schema', 'auth_private')
-	  AND has_function_privilege(current_user, p.oid, 'EXECUTE')
+		WHERE p.prosecdef
+		  AND p.prorettype <> 'trigger'::regtype
+		  AND n.nspname NOT IN ('pg_catalog', 'information_schema', 'auth_private')
+		  AND n.nspname NOT LIKE 'pg_toast%'
+		  AND has_function_privilege(current_user, p.oid, 'EXECUTE')
 	`).Scan(&callableDefiners); err != nil {
 		return nilSafeAuthLookupError("inspect callable security-definer functions", err)
 	}
-	if tablePrivileges != 0 || sequencePrivileges != 0 || extraPrivateFunctions != 0 || callableDefiners != 0 {
+	if err := db.QueryRowContext(ctx, `
+		SELECT count(*)
+		FROM pg_namespace n
+		WHERE n.nspname NOT IN ('pg_catalog', 'information_schema', 'public', 'auth_private')
+		  AND n.nspname NOT LIKE 'pg_toast%'
+		  AND (has_schema_privilege(current_user, n.oid, 'USAGE')
+		    OR has_schema_privilege(current_user, n.oid, 'CREATE'))
+	`).Scan(&schemaPrivileges); err != nil {
+		return fmt.Errorf("inspect auth lookup schema privileges: %w", err)
+	}
+	if tablePrivileges != 0 || sequencePrivileges != 0 || extraPrivateFunctions != 0 || callableDefiners != 0 || schemaPrivileges != 0 {
 		return fmt.Errorf("auth lookup role has privileges beyond its two read-only lookup functions")
 	}
 	return nil
