@@ -1,8 +1,8 @@
 # SERVIO Phase 1 Identity and Membership Design Proposal
 
 **Status:** Review draft. This is a design proposal, not an applied schema change.
-**Baseline:** `origin/main` `c527e08bb47ec54e4d2f6fd14ecbd9b30e7cadc7`.
-**Related remediation:** PR #105, `fix(auth): bind tenant choices to verified accounts` (owner-directed self-review; CI pending).
+**Baseline:** `origin/main` `32f79c55f1e1643aafe09b6d9d93be8e62fb4b96` (2026-11-22).
+**Related remediation:** PR #105, `fix(auth): bind tenant choices to verified accounts` (owner-directed self-review; refreshed CI pending after merging this baseline).
 **Data boundary:** No production or staging data was queried for this proposal. Conflict cases below are synthetic.
 
 ## 1. Phase 1 Objective
