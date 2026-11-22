@@ -69,8 +69,7 @@ func (h *FinancialReportHandler) GetProfitLoss(w http.ResponseWriter, r *http.Re
 		compareTo = parsedTo
 	}
 
-	cacheKey := h.financialReportCacheKey(tenantID, restaurantID, r.URL.Path, r.URL.RawQuery)
-	h.respondFinancialReportWithCache(w, r, cacheKey, func() (interface{}, error) {
+	h.respondFinancialReportWithoutCache(w, func() (interface{}, error) {
 		var report usecase.ProfitLossReport
 		if useComparison {
 			report, err = h.financialReportUC.GenerateProfitLossWithComparison(tenantID, restaurantID, from, to, compareFrom, compareTo)
@@ -98,8 +97,7 @@ func (h *FinancialReportHandler) GetBalanceSheet(w http.ResponseWriter, r *http.
 		return
 	}
 
-	cacheKey := h.financialReportCacheKey(tenantID, restaurantID, r.URL.Path, r.URL.RawQuery)
-	h.respondFinancialReportWithCache(w, r, cacheKey, func() (interface{}, error) {
+	h.respondFinancialReportWithoutCache(w, func() (interface{}, error) {
 		return h.financialReportUC.GenerateBalanceSheet(tenantID, restaurantID, asOf)
 	}, "Failed to generate balance sheet")
 }
@@ -118,8 +116,7 @@ func (h *FinancialReportHandler) GetCashFlow(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	cacheKey := h.financialReportCacheKey(tenantID, restaurantID, r.URL.Path, r.URL.RawQuery)
-	h.respondFinancialReportWithCache(w, r, cacheKey, func() (interface{}, error) {
+	h.respondFinancialReportWithoutCache(w, func() (interface{}, error) {
 		return h.financialReportUC.GenerateCashFlow(tenantID, restaurantID, from, to)
 	}, "Failed to generate cash flow report")
 }
@@ -197,8 +194,7 @@ func (h *FinancialReportHandler) GetTrialBalance(w http.ResponseWriter, r *http.
 		return
 	}
 
-	cacheKey := h.financialReportCacheKey(tenantID, restaurantID, r.URL.Path, r.URL.RawQuery)
-	h.respondFinancialReportWithCache(w, r, cacheKey, func() (interface{}, error) {
+	h.respondFinancialReportWithoutCache(w, func() (interface{}, error) {
 		return h.financialReportUC.GenerateTrialBalance(tenantID, restaurantID, asOf)
 	}, "Failed to generate trial balance report")
 }

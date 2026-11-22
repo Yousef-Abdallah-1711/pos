@@ -125,6 +125,16 @@ async function expectBalanceSheetMetrics(page, locale, expected) {
   await expectFinancialMetric(page, labels[2], expected.equity_cents, locale)
 }
 
+async function expectContraAssetAmount(page, locale, amount) {
+  const currency = new Intl.NumberFormat(locale === 'ar' ? 'ar-EG' : 'en-US', {
+    style: 'currency',
+    currency: 'EGP',
+    maximumFractionDigits: 2,
+  }).format(amount)
+  const accountRow = page.locator('main table').first().locator('tbody tr').filter({ hasText: '1120' })
+  await expect(accountRow.getByRole('cell').last()).toHaveText(currency)
+}
+
 async function assertNoDocumentOverflow(page) {
   const dimensions = await page.evaluate(() => ({
     viewportWidth: window.innerWidth,
@@ -355,27 +365,38 @@ test.describe('authenticated financial browser acceptance', () => {
       .toBe(expectedEquationDifferenceCents)
     expect(Math.round(balanceSheetData.equation_difference * 100)).toBe(expectedEquationDifferenceCents)
     await expectBalanceSheetMetrics(page, 'ar', fixture.expected_balance_sheet)
+    await expectContraAssetAmount(page, 'ar', -50)
     await expect(page.getByRole('heading', { name: /الميزانية العمومية|Balance Sheet/i })).toBeVisible()
     await assertFinancialContentClearsSidebar(page)
     const integrityNotice = expectedEquationBalanced
       ? /تجتاز الميزانية فحص المعادلة الحالي|passes the current application equation check/i
       : /غير متطابق|UNRECONCILED|unreconciled/i
     await expect(page.locator('main').getByRole(expectedEquationBalanced ? 'status' : 'alert').filter({ hasText: integrityNotice })).toBeVisible()
+    const balanceSheetPdfExport = page.getByRole('button', { name: /Export PDF/i })
+    if (expectedEquationBalanced) {
+      await expect(balanceSheetPdfExport).toBeVisible()
+    } else {
+      await expect(balanceSheetPdfExport).toHaveCount(0)
+    }
     await page.screenshot({ path: testInfo.outputPath('ar-desktop-balance-sheet.png'), fullPage: true })
 
     await setViewport(page, 375, 812)
     await expectBalanceSheetMetrics(page, 'ar', fixture.expected_balance_sheet)
+    await expectContraAssetAmount(page, 'ar', -50)
     await assertMobileFinancialContentWithinViewport(page)
     await page.screenshot({ path: testInfo.outputPath('ar-mobile-balance-sheet.png'), fullPage: true })
 
+    await setViewport(page, 1440, 900)
     await openFinancialPage(page, 'en', 'reports/financial/balance-sheet')
     await expect(page.getByRole('heading', { name: 'Balance Sheet', exact: true })).toBeVisible()
     await expectBalanceSheetMetrics(page, 'en', fixture.expected_balance_sheet)
+    await expectContraAssetAmount(page, 'en', -50)
     await assertNoDocumentOverflow(page)
     await page.screenshot({ path: testInfo.outputPath('en-desktop-balance-sheet.png'), fullPage: true })
 
     await setViewport(page, 375, 812)
     await expectBalanceSheetMetrics(page, 'en', fixture.expected_balance_sheet)
+    await expectContraAssetAmount(page, 'en', -50)
     await assertMobileFinancialContentWithinViewport(page)
     await page.screenshot({ path: testInfo.outputPath('en-mobile-balance-sheet.png'), fullPage: true })
 
