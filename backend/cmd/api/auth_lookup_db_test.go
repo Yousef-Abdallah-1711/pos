@@ -106,10 +106,6 @@ func TestValidateAuthLookupDatabaseRejectsAnyDirectTablePrivilege(t *testing.T) 
 		"transaction_read_only", "identity_function", "memberships_function", "inherited_role",
 	}).AddRow("pos_auth_lookup", false, false, false, true, false, "on", "on", true, true, false))
 	mock.ExpectQuery(`SELECT count\(\*\)`).WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(1))
-	mock.ExpectQuery(`SELECT count\(\*\)`).WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(0))
-	mock.ExpectQuery(`SELECT count\(\*\)`).WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(0))
-	mock.ExpectQuery(`SELECT count\(\*\)`).WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(0))
-	mock.ExpectQuery(`SELECT count\(\*\)`).WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(0))
 	if err := validateAuthLookupDatabase(context.Background(), db); err == nil {
 		t.Fatal("auth lookup role with direct table privileges passed validation")
 	}
