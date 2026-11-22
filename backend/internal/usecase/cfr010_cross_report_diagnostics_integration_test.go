@@ -64,3 +64,40 @@ func TestCFR010CrossReportDiagnosticKeepsUnclosedEarningsPolicyPending(t *testin
 		t.Fatalf("independent SQL oracles do not match reports: diagnostic=%+v P&L=%+v TB=%+v BS=%+v", got, profitLoss, trialBalance, balanceSheet)
 	}
 }
+
+func TestCFR010CrossReportDiagnosticDatesVoidReversalAtVoidDate(t *testing.T) {
+	db, err := sql.Open("postgres", testdb.URL(t))
+	if err != nil {
+		t.Fatalf("open disposable PostgreSQL: %v", err)
+	}
+	defer db.Close()
+
+	fixture := createCFR010Fixture(t, db)
+	postCFR010Entry(t, db, fixture, "2025-06-01", "synthetic cross-period revenue", cfr010Line{"cash", 50, 0}, cfr010Line{"revenue", 0, 50})
+	var journalID int
+	if err := db.QueryRow(`
+		SELECT id FROM journal_entries
+		WHERE tenant_id = $1 AND restaurant_id = $2 AND description = $3
+	`, fixture.tenantID, fixture.restaurantID, "synthetic cross-period revenue").Scan(&journalID); err != nil {
+		t.Fatalf("find synthetic posted journal: %v", err)
+	}
+	journalRepository := repository.NewJournalEntryRepository(db)
+	if err := journalRepository.VoidEntry(fixture.tenantID, fixture.restaurantID, journalID, 1, "synthetic cross-period reversal"); err != nil {
+		t.Fatalf("void synthetic posted journal: %v", err)
+	}
+	var voidDate time.Time
+	if err := db.QueryRow(`SELECT voided_at::date FROM journal_entries WHERE id = $1`, journalID).Scan(&voidDate); err != nil {
+		t.Fatalf("read synthetic reversal date: %v", err)
+	}
+	got, err := repository.NewFinancialIntegrityDiagnosticRepository(db).DiagnoseCrossReportIntegrity(
+		t.Context(), fixture.tenantID, fixture.restaurantID, voidDate, voidDate,
+	)
+	if err != nil {
+		t.Fatalf("diagnose reversal-date P&L scope: %v", err)
+	}
+	if got.CrossPeriodVoidCount != 1 || got.ProfitLossStatus != repository.CrossReportReconciled ||
+		got.Status != repository.CrossReportPolicyPending || got.JournalRevenueCents != -5000 ||
+		got.LedgerRevenueCents != -5000 || len(got.ProfitLossAccountMismatches) != 0 {
+		t.Fatalf("dated cross-period reversal should reconcile while policy remains pending: %+v", got)
+	}
+}

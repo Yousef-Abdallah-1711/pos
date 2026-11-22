@@ -89,7 +89,7 @@ func (r *FinancialIntegrityDiagnosticRepository) DiagnoseCrossReportIntegrity(
 
 	journalMovements, err := readCrossReportMovements(ctx, tx, crossReportJournalMovementsQuery, tenantID, restaurantID, from, to)
 	if err != nil {
-		return CrossReportDiagnostics{}, fmt.Errorf("read posted journal P&L movements: %w", err)
+		return CrossReportDiagnostics{}, fmt.Errorf("read dated journal P&L movements: %w", err)
 	}
 	ledgerMovements, err := readCrossReportMovements(ctx, tx, crossReportLedgerMovementsQuery, tenantID, restaurantID, from, to)
 	if err != nil {
@@ -109,16 +109,29 @@ func (r *FinancialIntegrityDiagnosticRepository) DiagnoseCrossReportIntegrity(
 	return result, nil
 }
 
+// Original posted source effects and audited void reversals use their own dates,
+// matching the immutable GL movement dates without choosing report presentation policy.
 const crossReportJournalMovementsQuery = `
 	SELECT coa.id, coa.account_code, coa.account_type,
-	       COALESCE(SUM(CASE WHEN coa.account_type = 'revenue'
-	         THEN jel.credit_amount - jel.debit_amount
-	         ELSE jel.debit_amount - jel.credit_amount END), 0)::text
+	       COALESCE(SUM(
+	         CASE WHEN je.entry_date >= $3::date AND je.entry_date <= $4::date THEN
+	           CASE WHEN coa.account_type = 'revenue'
+	             THEN jel.credit_amount - jel.debit_amount
+	             ELSE jel.debit_amount - jel.credit_amount END
+	         ELSE 0 END
+	         + CASE WHEN je.status = 'void' AND je.voided_at::date >= $3::date AND je.voided_at::date <= $4::date THEN
+	           CASE WHEN coa.account_type = 'revenue'
+	             THEN jel.debit_amount - jel.credit_amount
+	             ELSE jel.credit_amount - jel.debit_amount END
+	         ELSE 0 END
+	       ), 0)::text
 	FROM journal_entry_lines jel
 	JOIN journal_entries je ON je.id = jel.journal_entry_id
 	JOIN chart_of_accounts coa ON coa.id = jel.account_id
-	WHERE je.tenant_id = $1 AND je.restaurant_id = $2 AND je.status = 'posted'
-	  AND je.entry_date >= $3::date AND je.entry_date <= $4::date
+	WHERE je.tenant_id = $1 AND je.restaurant_id = $2
+	  AND je.status IN ('posted', 'void') AND je.posted_at IS NOT NULL
+	  AND ((je.entry_date >= $3::date AND je.entry_date <= $4::date)
+	    OR (je.status = 'void' AND je.voided_at::date >= $3::date AND je.voided_at::date <= $4::date))
 	  AND coa.tenant_id = $1 AND coa.restaurant_id = $2
 	  AND coa.account_type IN ('revenue', 'expense')
 	GROUP BY coa.id, coa.account_code, coa.account_type
@@ -217,16 +230,29 @@ func sortCrossReportMismatches(mismatches []CrossReportAccountMismatch) {
 
 func readCrossReportControlTotals(ctx context.Context, tx *sql.Tx, tenantID, restaurantID int, to time.Time, result *CrossReportDiagnostics) error {
 	var debitText, creditText string
+	// Match the Trial Balance's active, non-header account population while
+	// computing its totals independently in exact PostgreSQL NUMERIC arithmetic.
 	err := tx.QueryRowContext(ctx, `
-		SELECT COALESCE(SUM(gl.debit_amount), 0)::text,
-		       COALESCE(SUM(gl.credit_amount), 0)::text
-		FROM general_ledger gl
-		JOIN chart_of_accounts coa ON coa.id = gl.account_id
-		WHERE gl.tenant_id = $1 AND gl.restaurant_id = $2 AND gl.entry_date <= $3::date
-		  AND coa.tenant_id = $1 AND coa.restaurant_id = $2
+		WITH account_balances AS (
+			SELECT coa.normal_balance,
+			       COALESCE(SUM(CASE WHEN coa.normal_balance = 'credit'
+			         THEN gl.credit_amount - gl.debit_amount
+			         ELSE gl.debit_amount - gl.credit_amount END), 0) AS net_balance
+			FROM chart_of_accounts coa
+			LEFT JOIN general_ledger gl ON gl.account_id = coa.id
+			  AND gl.tenant_id = $1 AND gl.restaurant_id = $2 AND gl.entry_date <= $3::date
+			WHERE coa.tenant_id = $1 AND coa.restaurant_id = $2
+			  AND coa.is_active = TRUE AND coa.is_header = FALSE
+			GROUP BY coa.id, coa.normal_balance
+		)
+		SELECT COALESCE(SUM(CASE WHEN normal_balance = 'credit'
+		           THEN GREATEST(-net_balance, 0) ELSE GREATEST(net_balance, 0) END), 0)::text,
+		       COALESCE(SUM(CASE WHEN normal_balance = 'credit'
+		           THEN GREATEST(net_balance, 0) ELSE GREATEST(-net_balance, 0) END), 0)::text
+		FROM account_balances
 	`, tenantID, restaurantID, to).Scan(&debitText, &creditText)
 	if err != nil {
-		return fmt.Errorf("read exact GL trial-balance totals: %w", err)
+		return fmt.Errorf("read independent exact Trial Balance totals: %w", err)
 	}
 	result.TrialBalanceDebitsCents, err = numericTextToCents(debitText)
 	if err != nil {
