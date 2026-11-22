@@ -27,6 +27,18 @@ func TestCFR010CurrentEarningsDiagnosticReportsExactCandidateAndPolicyRisk(t *te
 	}
 }
 
+func TestCFR010CurrentEarningsDiagnosticReportsKnownFiveThousandCentScenario(t *testing.T) {
+	db := openCFR010EarningsDiagnosticDB(t)
+	fixture := createCFR010Fixture(t, db)
+	postCFR010Entry(t, db, fixture, "2025-06-15", "synthetic known earnings", cfr010Line{"cash", 50, 0}, cfr010Line{"revenue", 0, 50})
+
+	got := diagnoseCurrentEarnings(t, db, fixture, "2025-06-01", "2025-06-30")
+	if got.Status != CurrentEarningsPolicyPending || got.RevenueCents != 5000 || got.ExpenseCents != 0 ||
+		got.CandidateNetEarningsCents != 5000 || got.RetainedEarningsMovementCents != 0 || got.PotentialDoubleCountingRisk {
+		t.Fatalf("known five-thousand-cent candidate = %+v", got)
+	}
+}
+
 func TestCFR010CurrentEarningsDiagnosticIncludesPeriodEndAndReversalEffects(t *testing.T) {
 	db := openCFR010EarningsDiagnosticDB(t)
 	fixture := createCFR010Fixture(t, db)
