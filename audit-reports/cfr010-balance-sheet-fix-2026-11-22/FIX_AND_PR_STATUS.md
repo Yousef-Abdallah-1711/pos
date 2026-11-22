@@ -29,11 +29,13 @@ All 23 requested Balance Sheet scenarios are accounted for in `SCENARIO_RESULTS.
 - Existing PR #109: open at `8b4831576a664a1ee82df5ac5ed59a2b904f9726`; latest required checks pass, `auth-browser-acceptance` is skipped (not required by branch protection), no recorded review, and PR reports BEHIND.
 - Existing PR #110: open at `3592dd1a50837d3827d8677f50480c3566243c46`; CI and benchmark checks pass, `auth-browser-acceptance` is skipped (not required by branch protection), no recorded review, and PR reports BEHIND. Benchmark CI is not accounting performance approval; see the separate acceptance decision.
 - Existing PR #112 (policy decision packet): open at `7004241a294b919ada5419c15feded7adbad6e05`; no recorded review and reports BEHIND.
+- Focused freshness remediation PR #114: https://github.com/Yousef-Abdallah-1711/pos/pull/114; implementation/evidence commit `d432a699d694ce2194065c4985d36e8e2c282b9f`; base `c9a57c1db92ce24acdd3ced0c55650a3ad031d90`. At the last refresh it was open, awaiting CI/review, with no recorded review.
 - No approving review is recorded on the existing PRs. Branch protection currently lists `runtime-localhost-guardrail`, `url-domain-config-smoke`, and `backend` as required contexts, and requires zero approving reviews; this project task separately requires an independent review, which has not been obtained.
 - PR #108 had an initial failure in `TestAccountingEventStopsAfterConfiguredRetryLimit` (`final failed attempt=(false,<nil>), want durable failure`); it passed on retry. Evidence does not establish a root cause, so this remains an unresolved intermittent test failure, not a confirmed flaky test or infrastructure failure.
+- PR #110 performance is not accepted: the separately hosted large-scope candidate run showed p50 +6.682 ms (+3.8%), while the isolated line-to-GL query plan improved and temporary I/O was eliminated. The runs were not controlled paired measurements, and no approved latency budget exists. See `PERFORMANCE_DECISION.md`.
 
 ## Delivery
 
-- Focused cache-freshness remediation PR: not yet created at this evidence snapshot.
+- Focused cache-freshness remediation PR #114 is open for independent review. It is not merged.
 - No merge or deployment is authorized or performed. No production financial records were changed.
 - CFR-010 remains open; production readiness is NO-GO.
