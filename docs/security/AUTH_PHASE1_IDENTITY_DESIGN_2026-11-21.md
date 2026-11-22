@@ -1,8 +1,8 @@
 # SERVIO Phase 1 Identity and Membership Design Proposal
 
 **Status:** Review draft. This is a design proposal, not an applied schema change.
-**Baseline:** `origin/main` `4f76e32351ef00821f74a5506b6e049715693a6f` (2026-11-22).
-**Related remediation:** PR #105, `fix(auth): bind tenant choices to verified accounts` (owner-directed self-review; refreshed CI pending after merging this baseline).
+**Baseline:** `origin/main` `4a630b35f90f9d475d3d0ba3472877058a0e2952` (2026-11-22).
+**Related remediation:** PR #105, `fix(auth): bind tenant choices to verified accounts` (merged after owner-directed self-review; no independent security approval).
 **Data boundary:** No production or staging data was queried for this proposal. Conflict cases below are synthetic.
 
 ## 1. Phase 1 Objective
@@ -184,6 +184,6 @@ All tests use synthetic identities and disposable databases. Never edit staging/
 
 Please review the threat model, additive schema, per-membership role/restaurant representation, email-linking proof, legacy permission parity, RLS design, and rollback before an implementation migration is opened. The first implementation PR should contain additive schema and tests only, with all new identity reads default-off. A separate reviewed change can then wire authentication behind the flag.
 
-PR #105 addresses the immediate divergent-password selection flaw, but remains open with CI running and no reviewer assigned. The currently configured GitHub branch rule requires zero approving reviews, and the only write-capable collaborator found is the repository owner/author. No independent review can be claimed until a reviewer is supplied and records approval.
+PR #105 addressed the immediate divergent-password selection flaw and merged as `4a630b35f90f9d475d3d0ba3472877058a0e2952` after exact-head CI, including auth-browser acceptance, passed. The owner directed the continuation agent to review and merge it; this was a self-review, not an independent security approval. The currently configured GitHub branch rule requires zero approving reviews. Independent review is still required before identity migration/cutover and before restoring automatic staging verification.
 
 Do not restore automatic staging deployment verification as part of this design. The CI isolation incident involved acceptance scripts reaching public staging endpoints; current main contains target guards, an internal-only CI network, mocked payments, and isolation tests. Historical synthetic chart records have unresolved cleanup status. Keep the signed owner-dispatched publisher and exact-SHA verification intact until an independent reviewer signs off on that boundary and the incident disposition is documented.
