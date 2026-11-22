@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"strings"
 	"testing"
 	"time"
 )
@@ -47,6 +48,7 @@ func TestAuthIdentityMembershipSchemaIsDefaultOffAndTenantConsistent(t *testing.
 	}
 
 	assertIdentitySchemaPrivileges(t, ctx, admin, schema)
+	assertIdentityRoleReprovisioningPreservesIsolation(t, ctx, admin, schema)
 	assertIdentitySchemaRLS(t, ctx, admin)
 	seedAndAssertIdentitySchema(t, ctx, admin)
 	assertIdentitySchemaRuntimeRoleDenied(t, ctx, appURL, schema)
@@ -82,18 +84,66 @@ func assertIdentitySchemaPrivileges(t *testing.T, ctx context.Context, db *sql.D
 		"membership_restaurant_grants",
 		"membership_role_grants",
 	} {
-		var appCanSelect, migratorCanSelect bool
+		var appCanSelect, appCanInsert, appCanUpdate, appCanDelete, migratorCanSelect bool
 		qualifiedName := schema + "." + table
-		if err := db.QueryRowContext(ctx, `SELECT has_table_privilege('pos_app', $1, 'SELECT'), has_table_privilege('pos_migrator', $1, 'SELECT')`, qualifiedName).Scan(&appCanSelect, &migratorCanSelect); err != nil {
+		if err := db.QueryRowContext(ctx, `
+			SELECT has_table_privilege('pos_app', $1, 'SELECT'),
+			       has_table_privilege('pos_app', $1, 'INSERT'),
+			       has_table_privilege('pos_app', $1, 'UPDATE'),
+			       has_table_privilege('pos_app', $1, 'DELETE'),
+			       has_table_privilege('pos_migrator', $1, 'SELECT')
+		`, qualifiedName).Scan(&appCanSelect, &appCanInsert, &appCanUpdate, &appCanDelete, &migratorCanSelect); err != nil {
 			t.Fatalf("inspect %s privileges: %v", table, err)
 		}
-		if appCanSelect {
-			t.Errorf("pos_app must not read %s before the auth boundary is implemented", table)
+		if appCanSelect || appCanInsert || appCanUpdate || appCanDelete {
+			t.Errorf("pos_app must not read or write %s before the auth boundary is implemented", table)
 		}
 		if !migratorCanSelect {
 			t.Errorf("pos_migrator must retain reviewed migration access to %s", table)
 		}
 	}
+}
+
+func assertIdentityRoleReprovisioningPreservesIsolation(t *testing.T, ctx context.Context, db *sql.DB, schema string) {
+	t.Helper()
+	roleScript, err := os.ReadFile(filepath.Join("..", "..", "scripts", "db", "create_runtime_roles.sql"))
+	if err != nil {
+		t.Fatalf("read runtime role provisioning script: %v", err)
+	}
+	grantAll := strings.Index(string(roleScript), "GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO pos_app;")
+	resetInclude := strings.Index(string(roleScript), `\ir revoke_phase1_auth_runtime_privileges.sql`)
+	if grantAll < 0 || resetInclude < grantAll {
+		t.Fatal("runtime role provisioning must reapply identity-table denials after broad grants")
+	}
+
+	for _, table := range []string{
+		"auth_identities",
+		"identity_email_challenges",
+		"tenant_memberships",
+		"membership_restaurant_grants",
+		"membership_role_grants",
+	} {
+		qualifiedName := schema + "." + table
+		if _, err := db.ExecContext(ctx, `GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE `+qualifiedName+` TO pos_app`); err != nil {
+			t.Fatalf("simulate role re-provisioning grant on %s: %v", table, err)
+		}
+	}
+	var appCanSelect bool
+	if err := db.QueryRowContext(ctx, `SELECT has_table_privilege('pos_app', $1, 'SELECT')`, schema+".auth_identities").Scan(&appCanSelect); err != nil {
+		t.Fatalf("inspect simulated re-provisioning grant: %v", err)
+	}
+	if !appCanSelect {
+		t.Fatal("test did not simulate the broad runtime-role re-provisioning grant")
+	}
+
+	reset, err := os.ReadFile(filepath.Join("..", "..", "scripts", "db", "revoke_phase1_auth_runtime_privileges.sql"))
+	if err != nil {
+		t.Fatalf("read identity runtime privilege reset: %v", err)
+	}
+	if _, err := db.ExecContext(ctx, string(reset)); err != nil {
+		t.Fatalf("reapply identity runtime privilege boundary: %v", err)
+	}
+	assertIdentitySchemaPrivileges(t, ctx, db, schema)
 }
 
 func assertIdentitySchemaRLS(t *testing.T, ctx context.Context, db *sql.DB) {
