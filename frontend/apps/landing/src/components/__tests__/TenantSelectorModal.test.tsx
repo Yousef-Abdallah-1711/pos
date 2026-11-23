@@ -1,11 +1,16 @@
 import React from 'react'
 import { vi, type Mock } from 'vitest'
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { act, render, screen, fireEvent, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { useRouter } from 'next/navigation'
 import { useAuthStore } from '@/stores/authStore'
 import { TenantSelectorModal } from '../TenantSelectorModal'
 import * as sonner from 'sonner'
+
+type MockFetchResponse = {
+  ok: boolean
+  json: () => Promise<Record<string, unknown>>
+}
 
 // Mock fetch globally
 global.fetch = vi.fn()
@@ -32,6 +37,7 @@ describe('TenantSelectorModal', () => {
       roles: ['manager', 'admin'],
     },
   ]
+  const failedFetchResponse: MockFetchResponse = { ok: false, json: async () => ({}) }
 
   beforeEach(() => {
     vi.clearAllMocks()
@@ -183,8 +189,9 @@ describe('TenantSelectorModal', () => {
     })
 
     it('should disable buttons while loading', async () => {
+      let resolveFetch!: (response: MockFetchResponse) => void
       ;(global.fetch as Mock).mockImplementation(
-        () => new Promise(resolve => setTimeout(resolve, 1000))
+        () => new Promise<MockFetchResponse>(resolve => { resolveFetch = resolve })
       )
 
       render(
@@ -207,6 +214,13 @@ describe('TenantSelectorModal', () => {
           expect(btn).toBeDisabled()
         }
       })
+
+      await act(async () => {
+        resolveFetch(failedFetchResponse)
+      })
+      await waitFor(() => {
+        expect(screen.getByText('Failed to select organization')).toBeInTheDocument()
+      })
     })
   })
 
@@ -220,8 +234,9 @@ describe('TenantSelectorModal', () => {
         }),
       }
 
+      let resolveFetch!: (response: MockFetchResponse) => void
       ;(global.fetch as Mock).mockImplementation(
-        () => new Promise(resolve => setTimeout(resolve, 100))
+        () => new Promise<MockFetchResponse>(resolve => { resolveFetch = resolve })
       )
 
       render(
@@ -240,11 +255,18 @@ describe('TenantSelectorModal', () => {
       await waitFor(() => {
         expect(companyAButton).toHaveClass('is-selected')
       })
+      await act(async () => {
+        resolveFetch(failedFetchResponse)
+      })
+      await waitFor(() => {
+        expect(screen.getByText('Failed to select organization')).toBeInTheDocument()
+      })
     })
 
     it('should show loading spinner when selecting tenant', async () => {
+      let resolveFetch!: (response: MockFetchResponse) => void
       ;(global.fetch as Mock).mockImplementation(
-        () => new Promise(resolve => setTimeout(resolve, 500))
+        () => new Promise<MockFetchResponse>(resolve => { resolveFetch = resolve })
       )
 
       render(
@@ -263,6 +285,12 @@ describe('TenantSelectorModal', () => {
       await waitFor(() => {
         const spinner = document.querySelector('.animate-spin')
         expect(spinner).toBeInTheDocument()
+      })
+      await act(async () => {
+        resolveFetch(failedFetchResponse)
+      })
+      await waitFor(() => {
+        expect(screen.getByText('Failed to select organization')).toBeInTheDocument()
       })
     })
   })
