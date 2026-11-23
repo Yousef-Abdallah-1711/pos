@@ -18,3 +18,5 @@ Immediate task: continue the individual issue audit at CFR-003 and execute the C
 On 2026-11-23, PRs #108, #109, #110, #112 and #114 were updated with main and need new-head CI and independent review. At that time the only listed collaborator was the PR author. PR #117 remains draft. OPEN-01, EARN-01 and CLOSE-01 remain pending; CFR-010 is open and financial production is NO-GO.
 
 PR #109 was subsequently updated to `244c44c8f7c53fc81adbd83453edf2875acce9fb` to classify overlapping closed periods and unrecognized period statuses as ambiguous. New PostgreSQL regression tests require exact-head CI: the local attempt could not connect to a test database. The original #109 worktree remains dirty and must not be reset. Check the PR's current checks and independent review before considering a merge.
+
+PR #110 proposes a production reconciliation query change alongside its benchmark. Its recorded warm large-scope latency increased between separate runs despite a faster line-query plan and eliminated temporary I/O; there is no approved performance budget. Do not treat passing benchmark CI as operational acceptance.
