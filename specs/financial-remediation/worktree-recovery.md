@@ -72,6 +72,7 @@ Snapshot 2026-11-22. Counts are reported by local Git, with untracked directorie
 
 ## Critical recovery actions
 
+- On 2026-11-23, the three local integration commits ending at `98aa00951756a2c89e15678888eeb67b2d66dd5e` from `H:/Projects/pos-cfr010-realworld-validation-20261122` were pushed and verified at remote `codex/preserve-cfr010-integrated-20261123`. They combine older #108–#110 candidate work and are a preservation branch, not an approved integration. A pattern scan of the committed delta found no likely credential strings; this is not a comprehensive secret audit. The worktree's untracked reports and browser artifacts and generated frontend changes were not included and still require classification and sensitive-data review.
 - #108, #109, #110, #112 and #114 have remote GitHub PR heads newer than some local worktrees. Fetch and compare exact SHAs before using local-only counts.
 - `pos-cfr010-earnings-post104-20261122`, `pos-cfr010-diagnostics-post104-20261122`, and `pos-cfr010-benchmark-post104-20261122` report modified files, but `git diff` and `git diff --cached` showed no content changes in this inspection. Verify index/line-ending state without resetting.
 - `pos-cfr010-realworld-validation-20261122` contains untracked evidence and frontend changes; inspect for sensitive material and compare with remote evidence before preserving.
