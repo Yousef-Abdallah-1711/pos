@@ -1,6 +1,6 @@
 # Financial issue register — recovery draft
 
-Source: original tracker at `fa2e301`; current main `966a5004fc594d67f8ef1850909bd7f8e963ecf5`. Statuses are provisional and must be reconciled to dated evidence.
+Source: original tracker at `fa2e301`; main observed 2026-11-23 `afda1f91c67922a92f66507adc208e6e1943d631`. Statuses are provisional and must be reconciled to dated evidence.
 
 | ID | Original title | Severity | Current disposition | PRs |
 |---|---|---|---|---|
@@ -25,3 +25,7 @@ Source: original tracker at `fa2e301`; current main `966a5004fc594d67f8ef1850909
 | [FIN-019](issues/FIN-019/spec.md) | Export parity and native XLSX / CSV safety are unverified | P3 | HISTORICAL — CURRENT DISPOSITION REQUIRES VERIFICATION | unmapped |
 | [FIN-020](issues/FIN-020/spec.md) | Multi-currency / FX and consolidated financial reporting policy is not established | P3 | HISTORICAL — CURRENT DISPOSITION REQUIRES VERIFICATION | unmapped |
 | [FIN-021](issues/FIN-021/spec.md) | Root HTML language/direction does not reflect the active locale | P3 | HISTORICAL — CURRENT DISPOSITION REQUIRES VERIFICATION | unmapped |
+
+## CFR-010 engineering review — 2026-11-23
+
+PR [#109](https://github.com/Yousef-Abdallah-1711/pos/pull/109) head `244c44c8f7c53fc81adbd83453edf2875acce9fb` corrects fiscal-period diagnostic classification when a closed period overlaps another period or a covering period has an unrecognized status. Two disposable PostgreSQL regression scenarios were added. The local attempt failed before fixture creation because no PostgreSQL server was listening; exact-head CI is pending. This is diagnostic work and does not approve earnings presentation or close CFR-010. Independent review and accounting decisions remain outstanding.
