@@ -1,6 +1,6 @@
 # CFR-009: Paid payroll remains editable/deletable and duplicate mark-paid guard is unproven
 
-Status: IMPLEMENTATION MERGED OR OPEN — ACCEPTANCE PENDING; verify scope and PRs. Original severity: P1. This is a source-backed recovery draft, not acceptance.
+Status: PARTIALLY IMPLEMENTED — correction workflow and current acceptance pending. Original severity: P1.
 
 ## Original issue text
 
@@ -22,8 +22,11 @@ Status: IMPLEMENTATION MERGED OR OPEN — ACCEPTANCE PENDING; verify scope and P
 
 ## Current evidence and open questions
 
-Read the later dated sections of the [current tracker](../../../../FINANCIAL-MODULE-COMPLETE-ISSUES-AND-REMEDIATION-PLAN.md). Confirm each current behavior, policy, and source path against the final candidate; historical text above is not a current verdict.
+At main `3fa3702148771f39af5c9f7f25f377ecdd3f0a98`, salary repository update and delete predicates reject paid rows. `MarkAsPaidTx` locks the salary, preserves repeated-payment metadata, and writes an audit record; the HTTP handler uses the same transaction for payroll posting. PR [#40](https://github.com/Yousef-Abdallah-1711/pos/pull/40) merged as `0d8fea4272bde8f9c9da62d486a02474276a8815`. Seven PostgreSQL integration tests cover unpaid mutations, paid immutability, concurrent payment, failure rollback, disabled posting and scope. The [historical tracker](../../../../FINANCIAL-MODULE-COMPLETE-ISSUES-AND-REMEDIATION-PLAN.md) reports those seven passed on PostgreSQL 17, but that is not a current-SHA rerun. A paid-salary correction and reversal policy has not been established by this trace.
 
 ## Definition of done
 
-Confirm root cause and approved behavior; demonstrate the failing regression and corrected result; run relevant PostgreSQL, isolation, API and browser checks; obtain required review and merge; reconcile independent financial evidence and document any required policy approval. Mark non-applicable checks with evidence.
+- Paid edit/delete return conflict, unpaid edits remain available, and concurrent repeated payment creates one transition, journal and audit trail in scoped PostgreSQL fixtures.
+- Failures at salary, audit, journal and GL writes roll back all effects; disabled posting cannot mark paid.
+- Authorized correction preserves original payment and uses an approved linked reversal; payroll reports independently reconcile to GL. Obtain payroll/statutory decisions before implementing policy-dependent corrections.
+- Retain exact-SHA PostgreSQL, API, role isolation, CI, review and main evidence before closure.

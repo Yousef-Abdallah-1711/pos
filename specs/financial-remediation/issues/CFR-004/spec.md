@@ -1,6 +1,6 @@
 # CFR-004: Journal draft creation and GL posting have a recoverable partial-failure window
 
-Status: IMPLEMENTATION MERGED OR OPEN — ACCEPTANCE PENDING; verify scope and PRs. Original severity: P1. This is a source-backed recovery draft, not acceptance.
+Status: PARTIALLY IMPLEMENTED — current acceptance pending. Original severity: P1. This is not closure.
 
 ## Original issue text
 
@@ -22,8 +22,13 @@ Status: IMPLEMENTATION MERGED OR OPEN — ACCEPTANCE PENDING; verify scope and P
 
 ## Current evidence and open questions
 
-Read the later dated sections of the [current tracker](../../../../FINANCIAL-MODULE-COMPLETE-ISSUES-AND-REMEDIATION-PLAN.md). Confirm each current behavior, policy, and source path against the final candidate; historical text above is not a current verdict.
+At main `3fa3702148771f39af5c9f7f25f377ecdd3f0a98`, `auto_posting_engine.go` calls `CreateAndPostAutoEntry` or its caller-owned transaction variant. `general_ledger_repo.go` creates and posts the auto journal within one transaction and serializes the source identity with a transaction-scoped advisory lock. `order_repo.go` updates paid status and enqueues a scoped paid-order intent in the same transaction; `accounting_event_repo.go` supplies a stable event identity and reconciliation. PR [#33](https://github.com/Yousef-Abdallah-1711/pos/pull/33) merged at `c6f320a19ec5a19f6a9ec59e0fe1cf8059a71a8c`, [#35](https://github.com/Yousef-Abdallah-1711/pos/pull/35) at `ce65b393fe85fca7ff52e0fc4d88c98861e23044`, and [#37](https://github.com/Yousef-Abdallah-1711/pos/pull/37) at `a3d4fd83cbb7fedf3c668417faf61fe28ec3242f`.
+
+The repository contains PostgreSQL tests for journal-line, GL and posted-status failure injection, duplicate attempts, tenant scope, paid-status/intent rollback, retry, expired lease and reconciliation. Historical focused passes are recorded in the [tracker](../../../../FINANCIAL-MODULE-COMPLETE-ISSUES-AND-REMEDIATION-PLAN.md); they are not a fresh run on this main SHA. The 2026-11-21 closure matrix still identifies restart/recovery, terminal alert and provider-settlement acceptance as incomplete. Do not infer support for provider settlement, refunds or external alert delivery from the paid-order outbox.
 
 ## Definition of done
 
-Confirm root cause and approved behavior; demonstrate the failing regression and corrected result; run relevant PostgreSQL, isolation, API and browser checks; obtain required review and merge; reconcile independent financial evidence and document any required policy approval. Mark non-applicable checks with evidence.
+- On a clean migrated disposable PostgreSQL database, failure at each journal/GL/status write leaves no partial posting; concurrent duplicate requests produce one scoped effect.
+- Paid transition and durable intent commit or roll back together; worker crash/restart, expired lease, bounded retry and redrive preserve a visible, recoverable state and one posting.
+- Prove tenant/restaurant isolation and actual API/operator recovery on the exact candidate SHA; reconcile source order, journal and GL using an independent oracle.
+- Establish provider-settlement and alerting requirements and demonstrate them where in scope; keep unapproved recognition and reversal policy pending. Record CI, review, merge and evidence before closure.

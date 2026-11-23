@@ -1,6 +1,6 @@
 # CFR-005: Paid orders can suppress posting failures and have no proven cancellation/refund reversal
 
-Status: IMPLEMENTATION MERGED OR OPEN — ACCEPTANCE PENDING; verify scope and PRs. Original severity: P1. This is a source-backed recovery draft, not acceptance.
+Status: PARTIALLY IMPLEMENTED — refund lifecycle and acceptance pending. Original severity: P1.
 
 ## Original issue text
 
@@ -22,8 +22,13 @@ Status: IMPLEMENTATION MERGED OR OPEN — ACCEPTANCE PENDING; verify scope and P
 
 ## Current evidence and open questions
 
-Read the later dated sections of the [current tracker](../../../../FINANCIAL-MODULE-COMPLETE-ISSUES-AND-REMEDIATION-PLAN.md). Confirm each current behavior, policy, and source path against the final candidate; historical text above is not a current verdict.
+At main `3fa3702148771f39af5c9f7f25f377ecdd3f0a98`, `OrderRepository.UpdatePaymentStatusAs` locks the scoped order and commits paid state with a durable paid-order accounting intent. `CanTransitionOrderPaymentStatus` rejects a generic refunded transition and paid downgrade. PR [#39](https://github.com/Yousef-Abdallah-1711/pos/pull/39) merged at `d208489b4946b39eb832931fbc9ac929a2013069`. The repository has PostgreSQL tests for unbacked refunds, cancelled orders, tenant scope and concurrent paid/cancel transitions; historical focused passes are described in the [tracker](../../../../FINANCIAL-MODULE-COMPLETE-ISSUES-AND-REMEDIATION-PLAN.md), not freshly rerun here.
+
+The historical tracker reports no restaurant-order provider refund lifecycle or linked accounting reversal. Subscription payment refunds do not demonstrate order refund accounting. That absence needs a complete current-path audit and provider contract; the existing guard prevents declaring an unsupported refund but does not perform one. Recognition, allocation, tax and closed-period decisions are pending.
 
 ## Definition of done
 
-Confirm root cause and approved behavior; demonstrate the failing regression and corrected result; run relevant PostgreSQL, isolation, API and browser checks; obtain required review and merge; reconcile independent financial evidence and document any required policy approval. Mark non-applicable checks with evidence.
+- Paid transition and intent are atomic; failures, replay, concurrency and cross-scope attempts are tested with synthetic orders and an independent journal/GL oracle.
+- An authorized provider contract supports full and partial refund, timeout/unknown outcome, callback replay, concurrent requests and recovery after provider success with local failure.
+- Refunds cannot exceed the remaining captured amount; each approved reversal links to its original and follows approved allocation, tax, recognition and period rules.
+- Reconcile source payments and refunds to journal and GL, exercise API/operator flows, and retain current-SHA PostgreSQL, CI, review and main evidence. Do not mark complete while accounting decisions or provider contract are absent.
