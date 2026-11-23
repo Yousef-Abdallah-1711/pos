@@ -103,11 +103,11 @@ func (mailer *SMTPMailer) Send(ctx context.Context, message Message) error {
 	stopClose := context.AfterFunc(ctx, func() { _ = connection.Close() })
 	defer stopClose()
 	defer connection.Close()
-	if deadline, ok := ctx.Deadline(); ok {
-		_ = connection.SetDeadline(deadline)
-	} else {
-		_ = connection.SetDeadline(time.Now().Add(mailer.config.Timeout))
+	deadline := time.Now().Add(mailer.config.Timeout)
+	if contextDeadline, ok := ctx.Deadline(); ok && contextDeadline.Before(deadline) {
+		deadline = contextDeadline
 	}
+	_ = connection.SetDeadline(deadline)
 	return mailer.sendOverTLS(connection, recipient.Address, payload)
 }
 

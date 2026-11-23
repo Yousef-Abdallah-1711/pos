@@ -95,6 +95,43 @@ func TestSMTPMailerRejectsHeaderInjectionBeforeConnecting(t *testing.T) {
 	}
 }
 
+func TestSMTPMailerBoundsSessionByConfiguredTimeout(t *testing.T) {
+	listener, err := net.Listen("tcp", "127.0.0.1:0")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer listener.Close()
+	address := listener.Addr().(*net.TCPAddr)
+	serverDone := make(chan struct{})
+	go func() {
+		defer close(serverDone)
+		connection, acceptErr := listener.Accept()
+		if acceptErr != nil {
+			return
+		}
+		defer connection.Close()
+		_, _ = io.Copy(io.Discard, connection)
+	}()
+	mailer, err := NewSMTPMailer(SMTPConfig{
+		Host: "127.0.0.1", Port: address.Port, Username: "smtp-user", Password: "smtp-secret",
+		FromAddress: "mailer@example.test", Timeout: 50 * time.Millisecond,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	started := time.Now()
+	err = mailer.Send(context.Background(), Message{
+		To: "staff@example.test", Subject: "Notice", HTMLBody: "<p>Notice</p>", TextBody: "Notice",
+	})
+	if err == nil {
+		t.Fatal("expected stalled SMTP greeting to time out")
+	}
+	if elapsed := time.Since(started); elapsed > time.Second {
+		t.Fatalf("SMTP session exceeded configured timeout: %s", elapsed)
+	}
+	<-serverDone
+}
+
 func startMockSMTP(t *testing.T, advertiseSTARTTLS bool) (string, *x509.CertPool, <-chan string, <-chan error) {
 	t.Helper()
 	listener, err := net.Listen("tcp", "127.0.0.1:0")
