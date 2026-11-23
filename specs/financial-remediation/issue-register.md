@@ -14,7 +14,7 @@ Source: original tracker at `fa2e301`; main observed 2026-11-23 `3fa3702148771f3
 | [CFR-008](issues/CFR-008/spec.md) | Order tax hardcoded; invoice tax computed before discount | P2 | HISTORICAL — CURRENT DISPOSITION REQUIRES VERIFICATION | unmapped |
 | [CFR-009](issues/CFR-009/spec.md) | Paid payroll remains editable/deletable and duplicate mark-paid guard is unproven | P1 | PARTIALLY IMPLEMENTED — paid guards and atomic posting merged; correction and current acceptance pending | 40 |
 | [CFR-010](issues/CFR-010/spec.md) | Balance Sheet omits current-period income from equity; mainline has no reliable warning/export gate | P1 | POLICY_PENDING / REVIEW_PENDING; synthetic equation unreconciled | 42, 46, 104, 108, 109, 110, 112, 114 |
-| [CFR-011](issues/CFR-011/spec.md) | Automatic supplier entry type exceeds journal schema width | P2 | IMPLEMENTATION MERGED OR OPEN — ACCEPTANCE PENDING; verify scope and PRs | 44 |
+| [CFR-011](issues/CFR-011/spec.md) | Automatic supplier entry type exceeds journal schema width | P2 | SCHEMA FIX MERGED — constructed-entry PostgreSQL tests pass; supported supplier lifecycle and acceptance pending | 44 |
 | [CFR-012](issues/CFR-012/spec.md) | Cash Flow report uses account classification heuristics, not demonstrated cash movement policy | P2 | HISTORICAL — CURRENT DISPOSITION REQUIRES VERIFICATION | unmapped |
 | [CFR-013](issues/CFR-013/spec.md) | Voiding a journal writes a reversal dated today without adequate closed-period handling | P2 | HISTORICAL — CURRENT DISPOSITION REQUIRES VERIFICATION | unmapped |
 | [CFR-014](issues/CFR-014/spec.md) | Inventory valuation, COGS timing and refunds/adjustments are not proven to reconcile | P2 | HISTORICAL — CURRENT DISPOSITION REQUIRES VERIFICATION | unmapped |

@@ -1,6 +1,6 @@
 # CFR-011: Automatic supplier entry type exceeds journal schema width
 
-Status: IMPLEMENTATION MERGED OR OPEN — ACCEPTANCE PENDING; verify scope and PRs. Original severity: P2. This is a source-backed recovery draft, not acceptance.
+Status: SCHEMA FIX MERGED — supplier lifecycle acceptance pending. Original severity: P2.
 
 ## Original issue text
 
@@ -22,8 +22,12 @@ Status: IMPLEMENTATION MERGED OR OPEN — ACCEPTANCE PENDING; verify scope and P
 
 ## Current evidence and open questions
 
-Read the later dated sections of the [current tracker](../../../../FINANCIAL-MODULE-COMPLETE-ISSUES-AND-REMEDIATION-PLAN.md). Confirm each current behavior, policy, and source path against the final candidate; historical text above is not a current verdict.
+Migration 187 widens the column to `VARCHAR(32)` without rewriting journal rows; its rollback script refuses to narrow when values over 20 characters exist. PR [#44](https://github.com/Yousef-Abdallah-1711/pos/pull/44) merged as `59ba1c2551ac3184a055c019ab52e9f98f1be418`. In the [#109 disposable PostgreSQL job](https://github.com/Yousef-Abdallah-1711/pos/actions/runs/45157868007/job/137635542663), both invoice and payment entry-type persistence subtests passed at candidate `244c44c8f7c53fc81adbd83453edf2875acce9fb`. These tests directly post constructed journal entries and inspect GL; they do not exercise a supplier invoice/payment API lifecycle.
+
+Current source search finds the `PostSupplierInvoiceEntry` and `PostSupplierPaymentEntry` definitions and tests, but no production caller. The historical tracker records a pending product/accounting decision about whether these hooks are supported or superseded. Do not equate the schema test with supplier lifecycle acceptance.
 
 ## Definition of done
 
-Confirm root cause and approved behavior; demonstrate the failing regression and corrected result; run relevant PostgreSQL, isolation, API and browser checks; obtain required review and merge; reconcile independent financial evidence and document any required policy approval. Mark non-applicable checks with evidence.
+- Both supplier types persist and post with correct scope and GL on upgraded PostgreSQL; the migration preserves existing data and rollback refuses unsafe narrowing.
+- Product owner establishes the supported supplier source lifecycle and accounting mapping. If supported, exercise invoice, payment, failure recovery, reversal, list/filter and export against an independent oracle; if superseded, record the approved contract and review any removal separately.
+- Retain exact-final-main database, API, review and migration evidence before closure.
