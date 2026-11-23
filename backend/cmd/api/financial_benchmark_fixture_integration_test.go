@@ -213,6 +213,17 @@ func seedFinancialBenchmarkDataset(t *testing.T, db *sql.DB, journalCount int) f
 	return fixture
 }
 
+func seedFinancialBenchmarkEmptyRestaurant(t *testing.T, db *sql.DB, tenantID int) int {
+	t.Helper()
+	runID := strconv.FormatInt(time.Now().UnixNano(), 10)
+	name := "financial-benchmark-empty-" + runID
+	var restaurantID int
+	if err := db.QueryRow(`INSERT INTO restaurants (tenant_id, name, slug, address) VALUES ($1, $2, $3, 'Synthetic benchmark scope') RETURNING id`, tenantID, name, name).Scan(&restaurantID); err != nil {
+		t.Fatalf("seed empty reconciliation restaurant: %v", err)
+	}
+	return restaurantID
+}
+
 func seedFinancialBenchmarkDocuments(t *testing.T, db *sql.DB, fixture financialBenchmarkFixture, accountIDs map[string]int64) {
 	t.Helper()
 	var customerID, supplierID int64

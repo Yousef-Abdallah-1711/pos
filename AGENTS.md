@@ -1,7 +1,7 @@
 # Project Agent Instructions
 
 ## Mandatory First Step
-- Before any coding, reviewing, refactoring, or planning, read `C:/Users/OPT/Desktop/POS/CODING_STANDARDS.md` in full.
+- Before any coding, reviewing, refactoring, or planning, read the repository's `CODING_STANDARDS.md` in full.
 - Treat `CODING_STANDARDS.md` as the primary implementation and review policy for this repository.
 
 ## Enforcement

@@ -57,6 +57,8 @@ func TestFinancialQueryBenchmarkIntegration(t *testing.T) {
 	fixture := seedFinancialBenchmarkDataset(t, db, journalCount)
 	secondaryJournalCount := maxIntBenchmark(25, journalCount/400)
 	secondaryTenant := seedFinancialBenchmarkSecondaryTenant(t, db, secondaryJournalCount)
+	emptyRestaurantID := seedFinancialBenchmarkEmptyRestaurant(t, db, fixture.tenantID)
+	reconciliationBenchmark := runFinancialReconciliationBenchmark(t, db, fixture, secondaryTenant, emptyRestaurantID)
 	ledger := repository.NewGeneralLedgerRepository(db, nil)
 	reports := usecase.NewFinancialReportUseCase(db, ledger)
 	accountingHandler := httpHandler.NewAccountingAdvancedHandler(db, repository.NewAccountingAdvancedRepository(db, nil), nil)
@@ -248,6 +250,7 @@ func TestFinancialQueryBenchmarkIntegration(t *testing.T) {
 	}
 	measurements = append(measurements, measureConcurrentFinancialOperation(t, db, "mixed_ledger_reads_and_postings", 4, 30, mixedReadWrite))
 	concurrentJournalWrites := int(mixedSequence.Load() / 4)
+	reconciliationConcurrentJournalWrites := int(reconciliationBenchmark.ConcurrentPosts)
 
 	var databaseBytes int64
 	if err := db.QueryRow(`SELECT pg_database_size(current_database())`).Scan(&databaseBytes); err != nil {
@@ -262,8 +265,8 @@ func TestFinancialQueryBenchmarkIntegration(t *testing.T) {
 	runtime.ReadMemStats(&memory)
 	primaryCounts := readFinancialBenchmarkTenantCounts(t, db, fixture.tenantID, fixture.restaurantID)
 	secondaryCounts := readFinancialBenchmarkTenantCounts(t, db, secondaryTenant.tenantID, secondaryTenant.restaurantID)
-	if primaryCounts.journalEntries != journalCount+fixture.backdatedJournalCount+concurrentJournalWrites {
-		t.Fatalf("primary benchmark journal rows=%d, want initial=%d backdated=%d concurrent=%d", primaryCounts.journalEntries, journalCount, fixture.backdatedJournalCount, concurrentJournalWrites)
+	if primaryCounts.journalEntries != journalCount+fixture.backdatedJournalCount+concurrentJournalWrites+reconciliationConcurrentJournalWrites {
+		t.Fatalf("primary benchmark journal rows=%d, want initial=%d backdated=%d mixed_concurrent=%d reconciliation_concurrent=%d", primaryCounts.journalEntries, journalCount, fixture.backdatedJournalCount, concurrentJournalWrites, reconciliationConcurrentJournalWrites)
 	}
 	if primaryCounts.journalDebitCents != primaryCounts.journalCreditCents || primaryCounts.journalDebitCents != primaryCounts.ledgerDebitCents || primaryCounts.journalCreditCents != primaryCounts.ledgerCreditCents {
 		t.Fatalf("primary benchmark reconciliation cents journal debit/credit=%d/%d GL debit/credit=%d/%d", primaryCounts.journalDebitCents, primaryCounts.journalCreditCents, primaryCounts.ledgerDebitCents, primaryCounts.ledgerCreditCents)
@@ -286,7 +289,8 @@ func TestFinancialQueryBenchmarkIntegration(t *testing.T) {
 			JournalEntries:          primaryCounts.journalEntries + secondaryCounts.journalEntries,
 			JournalLines:            primaryCounts.journalLines + secondaryCounts.journalLines,
 			GeneralLedgerRows:       primaryCounts.generalLedgerRows + secondaryCounts.generalLedgerRows,
-			ConcurrentJournalWrites: concurrentJournalWrites,
+			ConcurrentJournalWrites: concurrentJournalWrites + reconciliationConcurrentJournalWrites,
+			ReconciliationPosts:     reconciliationBenchmark.ConcurrentPosts,
 			SalesOrders:             fixture.salesOrderCount, SalesOrderItems: fixture.salesOrderCount * 2,
 			JournalDebitCents:        primaryCounts.journalDebitCents + secondaryCounts.journalDebitCents,
 			JournalCreditCents:       primaryCounts.journalCreditCents + secondaryCounts.journalCreditCents,
@@ -296,6 +300,7 @@ func TestFinancialQueryBenchmarkIntegration(t *testing.T) {
 			PostingThroughputPerSecond: float64(journalCount) / fixture.postingDuration.Seconds(),
 		},
 		ProcessMemoryAllocBytes: memory.TotalAlloc, ProcessHeapBytes: memory.HeapAlloc, ProcessSysBytes: memory.Sys, Measurements: measurements,
+		Reconciliation:            reconciliationBenchmark,
 		LedgerPageIndexComparison: financialBenchmarkIndexComparison{IndexName: financialLedgerPageIndex, IndexBytes: existingIndexBytes, BeforePlan: baselinePlan, AfterPlan: indexedPlan, Before: baselinePage, After: indexedPage},
 	}
 	encoded, err := json.MarshalIndent(result, "", "  ")

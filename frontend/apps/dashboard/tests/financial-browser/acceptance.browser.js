@@ -361,6 +361,12 @@ test.describe('authenticated financial browser acceptance', () => {
       ? /تجتاز الميزانية فحص المعادلة الحالي|passes the current application equation check/i
       : /غير متطابق|UNRECONCILED|unreconciled/i
     await expect(page.locator('main').getByRole(expectedEquationBalanced ? 'status' : 'alert').filter({ hasText: integrityNotice })).toBeVisible()
+    const balanceSheetPdfExport = page.getByRole('button', { name: /Export PDF|تصدير PDF/i })
+    if (expectedEquationBalanced) {
+      await expect(balanceSheetPdfExport).toBeVisible()
+    } else {
+      await expect(balanceSheetPdfExport).toHaveCount(0)
+    }
     await page.screenshot({ path: testInfo.outputPath('ar-desktop-balance-sheet.png'), fullPage: true })
 
     await setViewport(page, 375, 812)
@@ -368,6 +374,7 @@ test.describe('authenticated financial browser acceptance', () => {
     await assertMobileFinancialContentWithinViewport(page)
     await page.screenshot({ path: testInfo.outputPath('ar-mobile-balance-sheet.png'), fullPage: true })
 
+    await setViewport(page, 1440, 900)
     await openFinancialPage(page, 'en', 'reports/financial/balance-sheet')
     await expect(page.getByRole('heading', { name: 'Balance Sheet', exact: true })).toBeVisible()
     await expectBalanceSheetMetrics(page, 'en', fixture.expected_balance_sheet)

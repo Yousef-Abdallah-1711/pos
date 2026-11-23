@@ -1,0 +1,318 @@
+{
+  "snapshot_main": "966a5004fc594d67f8ef1850909bd7f8e963ecf5",
+  "original_commit": "fa2e301",
+  "status": "RECOVERY_DRAFT",
+  "issues": [
+    {
+      "id": "CFR-001",
+      "title": "Auto-posting silently forces unbalanced lines to balance",
+      "original_severity": "P1",
+      "original_source": "original-tracker-2026-11-12.md",
+      "current_state": "Automatic plug fixed in main by source inspection; full acceptance pending",
+      "source_paths": [
+        "backend/internal/usecase/auto_posting_validation.go",
+        "backend/internal/usecase/auto_posting_engine.go"
+      ],
+      "prs": "29",
+      "classification": "FIXED_IN_MAIN_UNVERIFIED",
+      "spec": "issues/CFR-001/spec.md",
+      "plan": "issues/CFR-001/plan.md",
+      "tasks": "issues/CFR-001/tasks.md"
+    },
+    {
+      "id": "CFR-002",
+      "title": "Journal integrity relies too heavily on application checks",
+      "original_severity": "P1",
+      "original_source": "original-tracker-2026-11-12.md",
+      "current_state": "Migration 180 merged; current acceptance and reversal policy pending",
+      "source_paths": [
+        "backend/migrations/180_enforce_journal_integrity.sql",
+        "backend/scripts/preflight_180_journal_integrity.sql",
+        "backend/scripts/rollback_180_journal_integrity.sql",
+        "backend/internal/repository/journal_entry_repo.go",
+        "backend/internal/repository/journal_integrity_postgres_integration_test.go"
+      ],
+      "prs": "34",
+      "classification": "PARTIALLY_FIXED",
+      "spec": "issues/CFR-002/spec.md",
+      "plan": "issues/CFR-002/plan.md",
+      "tasks": "issues/CFR-002/tasks.md"
+    },
+    {
+      "id": "CFR-003",
+      "title": "Concurrent journal posting, balance update and numbering races",
+      "original_severity": "P1",
+      "original_source": "original-tracker-2026-11-12.md",
+      "current_state": "IMPLEMENTATION MERGED OR OPEN — ACCEPTANCE PENDING; verify scope and PRs",
+      "source_paths": [
+        "backend/internal/repository/payment_acct_repo.go"
+      ],
+      "prs": "41",
+      "classification": "REQUIRES EVIDENCE REVIEW",
+      "spec": "issues/CFR-003/spec.md",
+      "plan": "issues/CFR-003/plan.md",
+      "tasks": "issues/CFR-003/tasks.md"
+    },
+    {
+      "id": "CFR-004",
+      "title": "Journal draft creation and GL posting have a recoverable partial-failure window",
+      "original_severity": "P1",
+      "original_source": "original-tracker-2026-11-12.md",
+      "current_state": "IMPLEMENTATION MERGED OR OPEN — ACCEPTANCE PENDING; verify scope and PRs",
+      "source_paths": [
+        "backend/internal/repository/journal_entry_repo.go",
+        "backend/internal/repository/general_ledger_repo.go",
+        "backend/internal/usecase/auto_posting_engine.go",
+        "backend/cmd/api/main.go",
+        "backend/internal/usecase/auto_posting_engine_test.go",
+        "backend/internal/usecase/phase6_accounting_cycle_test.go",
+        "backend/internal/repository/general_ledger_atomic_posting_integration_test.go"
+      ],
+      "prs": "33, 35, 37",
+      "classification": "REQUIRES EVIDENCE REVIEW",
+      "spec": "issues/CFR-004/spec.md",
+      "plan": "issues/CFR-004/plan.md",
+      "tasks": "issues/CFR-004/tasks.md"
+    },
+    {
+      "id": "CFR-005",
+      "title": "Paid orders can suppress posting failures and have no proven cancellation/refund reversal",
+      "original_severity": "P1",
+      "original_source": "original-tracker-2026-11-12.md",
+      "current_state": "IMPLEMENTATION MERGED OR OPEN — ACCEPTANCE PENDING; verify scope and PRs",
+      "source_paths": [
+        "backend/internal/handler/http/admin_order_handler.go"
+      ],
+      "prs": "39",
+      "classification": "REQUIRES EVIDENCE REVIEW",
+      "spec": "issues/CFR-005/spec.md",
+      "plan": "issues/CFR-005/plan.md",
+      "tasks": "issues/CFR-005/tasks.md"
+    },
+    {
+      "id": "CFR-006",
+      "title": "Historical report performance symptom not remeasured",
+      "original_severity": "P2",
+      "original_source": "original-tracker-2026-11-12.md",
+      "current_state": "HISTORICAL — CURRENT DISPOSITION REQUIRES VERIFICATION",
+      "source_paths": [
+        "backend/internal/usecase/financial_report_usecase.go",
+        "backend/internal/repository/general_ledger_repo.go"
+      ],
+      "prs": "",
+      "classification": "REQUIRES EVIDENCE REVIEW",
+      "spec": "issues/CFR-006/spec.md",
+      "plan": "issues/CFR-006/plan.md",
+      "tasks": "issues/CFR-006/tasks.md"
+    },
+    {
+      "id": "CFR-007",
+      "title": "Binary floating point is used across monetary domain and APIs",
+      "original_severity": "P2",
+      "original_source": "original-tracker-2026-11-12.md",
+      "current_state": "HISTORICAL — CURRENT DISPOSITION REQUIRES VERIFICATION",
+      "source_paths": [
+        "backend/internal/domain/accounting.go"
+      ],
+      "prs": "",
+      "classification": "REQUIRES EVIDENCE REVIEW",
+      "spec": "issues/CFR-007/spec.md",
+      "plan": "issues/CFR-007/plan.md",
+      "tasks": "issues/CFR-007/tasks.md"
+    },
+    {
+      "id": "CFR-008",
+      "title": "Order tax hardcoded; invoice tax computed before discount",
+      "original_severity": "P2",
+      "original_source": "original-tracker-2026-11-12.md",
+      "current_state": "HISTORICAL — CURRENT DISPOSITION REQUIRES VERIFICATION",
+      "source_paths": [],
+      "prs": "",
+      "classification": "REQUIRES EVIDENCE REVIEW",
+      "spec": "issues/CFR-008/spec.md",
+      "plan": "issues/CFR-008/plan.md",
+      "tasks": "issues/CFR-008/tasks.md"
+    },
+    {
+      "id": "CFR-009",
+      "title": "Paid payroll remains editable/deletable and duplicate mark-paid guard is unproven",
+      "original_severity": "P1",
+      "original_source": "original-tracker-2026-11-12.md",
+      "current_state": "IMPLEMENTATION MERGED OR OPEN — ACCEPTANCE PENDING; verify scope and PRs",
+      "source_paths": [],
+      "prs": "40",
+      "classification": "REQUIRES EVIDENCE REVIEW",
+      "spec": "issues/CFR-009/spec.md",
+      "plan": "issues/CFR-009/plan.md",
+      "tasks": "issues/CFR-009/tasks.md"
+    },
+    {
+      "id": "CFR-010",
+      "title": "Balance Sheet omits current-period income from equity; mainline has no reliable warning/export gate",
+      "original_severity": "P1",
+      "original_source": "original-tracker-2026-11-12.md",
+      "current_state": "POLICY_PENDING / REVIEW_PENDING; synthetic equation unreconciled",
+      "source_paths": [],
+      "prs": "42, 46, 104, 108, 109, 110, 112, 114",
+      "classification": "REQUIRES EVIDENCE REVIEW",
+      "spec": "issues/CFR-010/spec.md",
+      "plan": "issues/CFR-010/plan.md",
+      "tasks": "issues/CFR-010/tasks.md"
+    },
+    {
+      "id": "CFR-011",
+      "title": "Automatic supplier entry type exceeds journal schema width",
+      "original_severity": "P2",
+      "original_source": "original-tracker-2026-11-12.md",
+      "current_state": "IMPLEMENTATION MERGED OR OPEN — ACCEPTANCE PENDING; verify scope and PRs",
+      "source_paths": [
+        "backend/scripts/rollback_187_journal_entry_type_to_32.sql"
+      ],
+      "prs": "44",
+      "classification": "REQUIRES EVIDENCE REVIEW",
+      "spec": "issues/CFR-011/spec.md",
+      "plan": "issues/CFR-011/plan.md",
+      "tasks": "issues/CFR-011/tasks.md"
+    },
+    {
+      "id": "CFR-012",
+      "title": "Cash Flow report uses account classification heuristics, not demonstrated cash movement policy",
+      "original_severity": "P2",
+      "original_source": "original-tracker-2026-11-12.md",
+      "current_state": "HISTORICAL — CURRENT DISPOSITION REQUIRES VERIFICATION",
+      "source_paths": [],
+      "prs": "",
+      "classification": "REQUIRES EVIDENCE REVIEW",
+      "spec": "issues/CFR-012/spec.md",
+      "plan": "issues/CFR-012/plan.md",
+      "tasks": "issues/CFR-012/tasks.md"
+    },
+    {
+      "id": "CFR-013",
+      "title": "Voiding a journal writes a reversal dated today without adequate closed-period handling",
+      "original_severity": "P2",
+      "original_source": "original-tracker-2026-11-12.md",
+      "current_state": "HISTORICAL — CURRENT DISPOSITION REQUIRES VERIFICATION",
+      "source_paths": [],
+      "prs": "",
+      "classification": "REQUIRES EVIDENCE REVIEW",
+      "spec": "issues/CFR-013/spec.md",
+      "plan": "issues/CFR-013/plan.md",
+      "tasks": "issues/CFR-013/tasks.md"
+    },
+    {
+      "id": "CFR-014",
+      "title": "Inventory valuation, COGS timing and refunds/adjustments are not proven to reconcile",
+      "original_severity": "P2",
+      "original_source": "original-tracker-2026-11-12.md",
+      "current_state": "HISTORICAL — CURRENT DISPOSITION REQUIRES VERIFICATION",
+      "source_paths": [
+        "backend/internal/repository/inventory_movement_repo.go"
+      ],
+      "prs": "",
+      "classification": "REQUIRES EVIDENCE REVIEW",
+      "spec": "issues/CFR-014/spec.md",
+      "plan": "issues/CFR-014/plan.md",
+      "tasks": "issues/CFR-014/tasks.md"
+    },
+    {
+      "id": "CFR-015",
+      "title": "Product-wide financial tenant/RBAC isolation not independently proven",
+      "original_severity": "P2",
+      "original_source": "original-tracker-2026-11-12.md",
+      "current_state": "HISTORICAL — CURRENT DISPOSITION REQUIRES VERIFICATION",
+      "source_paths": [
+        "backend/cmd/api/main.go"
+      ],
+      "prs": "",
+      "classification": "REQUIRES EVIDENCE REVIEW",
+      "spec": "issues/CFR-015/spec.md",
+      "plan": "issues/CFR-015/plan.md",
+      "tasks": "issues/CFR-015/tasks.md"
+    },
+    {
+      "id": "FIN-016",
+      "title": "No complete gift-card/deposit/deferred-revenue lifecycle established",
+      "original_severity": "P3",
+      "original_source": "original-tracker-2026-11-12.md",
+      "current_state": "HISTORICAL — CURRENT DISPOSITION REQUIRES VERIFICATION",
+      "source_paths": [
+        "backend/migrations/136_create_chart_of_accounts.sql"
+      ],
+      "prs": "",
+      "classification": "REQUIRES EVIDENCE REVIEW",
+      "spec": "issues/FIN-016/spec.md",
+      "plan": "issues/FIN-016/plan.md",
+      "tasks": "issues/FIN-016/tasks.md"
+    },
+    {
+      "id": "FIN-017",
+      "title": "Fixed-asset acquisition, depreciation and disposal lifecycle not verified end to end",
+      "original_severity": "P3",
+      "original_source": "original-tracker-2026-11-12.md",
+      "current_state": "HISTORICAL — CURRENT DISPOSITION REQUIRES VERIFICATION",
+      "source_paths": [],
+      "prs": "",
+      "classification": "REQUIRES EVIDENCE REVIEW",
+      "spec": "issues/FIN-017/spec.md",
+      "plan": "issues/FIN-017/plan.md",
+      "tasks": "issues/FIN-017/tasks.md"
+    },
+    {
+      "id": "FIN-018",
+      "title": "No complete fiscal close and retained-earnings roll-forward established",
+      "original_severity": "P2",
+      "original_source": "original-tracker-2026-11-12.md",
+      "current_state": "HISTORICAL — CURRENT DISPOSITION REQUIRES VERIFICATION",
+      "source_paths": [
+        "backend/migrations/153_create_fiscal_periods.sql"
+      ],
+      "prs": "",
+      "classification": "REQUIRES EVIDENCE REVIEW",
+      "spec": "issues/FIN-018/spec.md",
+      "plan": "issues/FIN-018/plan.md",
+      "tasks": "issues/FIN-018/tasks.md"
+    },
+    {
+      "id": "FIN-019",
+      "title": "Export parity and native XLSX / CSV safety are unverified",
+      "original_severity": "P3",
+      "original_source": "original-tracker-2026-11-12.md",
+      "current_state": "HISTORICAL — CURRENT DISPOSITION REQUIRES VERIFICATION",
+      "source_paths": [
+        "backend/internal/handler/http/financial_report_handler.go"
+      ],
+      "prs": "",
+      "classification": "REQUIRES EVIDENCE REVIEW",
+      "spec": "issues/FIN-019/spec.md",
+      "plan": "issues/FIN-019/plan.md",
+      "tasks": "issues/FIN-019/tasks.md"
+    },
+    {
+      "id": "FIN-020",
+      "title": "Multi-currency / FX and consolidated financial reporting policy is not established",
+      "original_severity": "P3",
+      "original_source": "original-tracker-2026-11-12.md",
+      "current_state": "HISTORICAL — CURRENT DISPOSITION REQUIRES VERIFICATION",
+      "source_paths": [],
+      "prs": "",
+      "classification": "REQUIRES EVIDENCE REVIEW",
+      "spec": "issues/FIN-020/spec.md",
+      "plan": "issues/FIN-020/plan.md",
+      "tasks": "issues/FIN-020/tasks.md"
+    },
+    {
+      "id": "FIN-021",
+      "title": "Root HTML language/direction does not reflect the active locale",
+      "original_severity": "P3",
+      "original_source": "original-tracker-2026-11-12.md",
+      "current_state": "HISTORICAL — CURRENT DISPOSITION REQUIRES VERIFICATION",
+      "source_paths": [],
+      "prs": "",
+      "classification": "REQUIRES EVIDENCE REVIEW",
+      "spec": "issues/FIN-021/spec.md",
+      "plan": "issues/FIN-021/plan.md",
+      "tasks": "issues/FIN-021/tasks.md"
+    }
+  ]
+}
