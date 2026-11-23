@@ -95,6 +95,37 @@ func TestCFR010CurrentEarningsDiagnosticReportsClosedEmptyPeriod(t *testing.T) {
 	}
 }
 
+func TestCFR010CurrentEarningsDiagnosticReportsAmbiguousFiscalPeriod(t *testing.T) {
+	db := openCFR010EarningsDiagnosticDB(t)
+	fixture := createCFR010Fixture(t, db)
+	if _, err := db.Exec(`
+		INSERT INTO fiscal_periods (tenant_id, restaurant_id, period_name, period_type, start_date, end_date, status)
+		VALUES ($1, $2, '2027', 'year', '2027-01-01', '2027-12-31', 'closed'),
+		       ($1, $2, '2027-Q2', 'quarter', '2027-04-01', '2027-06-30', 'open')
+	`, fixture.tenantID, fixture.restaurantID); err != nil {
+		t.Fatalf("create overlapping synthetic fiscal periods: %v", err)
+	}
+	got := diagnoseCurrentEarnings(t, db, fixture, "2027-01-01", "2027-12-31")
+	if got.FiscalPeriodState != "AMBIGUOUS_PERIOD_SCOPE" {
+		t.Fatalf("overlapping closed period result = %+v", got)
+	}
+}
+
+func TestCFR010CurrentEarningsDiagnosticDoesNotTreatUnknownPeriodStatusAsOpen(t *testing.T) {
+	db := openCFR010EarningsDiagnosticDB(t)
+	fixture := createCFR010Fixture(t, db)
+	if _, err := db.Exec(`
+		INSERT INTO fiscal_periods (tenant_id, restaurant_id, period_name, period_type, start_date, end_date, status)
+		VALUES ($1, $2, '2027', 'year', '2027-01-01', '2027-12-31', 'locked')
+	`, fixture.tenantID, fixture.restaurantID); err != nil {
+		t.Fatalf("create synthetic fiscal period with unknown status: %v", err)
+	}
+	got := diagnoseCurrentEarnings(t, db, fixture, "2027-01-01", "2027-12-31")
+	if got.FiscalPeriodState != "AMBIGUOUS_PERIOD_SCOPE" {
+		t.Fatalf("unknown fiscal period status result = %+v", got)
+	}
+}
+
 func openCFR010EarningsDiagnosticDB(t *testing.T) *sql.DB {
 	t.Helper()
 	db, err := sql.Open("postgres", testdb.URL(t))

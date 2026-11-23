@@ -146,21 +146,22 @@ func readRetainedEarningsMovements(ctx context.Context, tx *sql.Tx, result *Curr
 }
 
 func readCurrentFiscalPeriodState(ctx context.Context, tx *sql.Tx, result *CurrentEarningsDiagnostic) error {
-	var covered, overlapping, closed int64
+	var covered, overlapping, closed, open int64
 	err := tx.QueryRowContext(ctx, `
 		SELECT COUNT(*) FILTER (WHERE start_date <= $3::date AND end_date >= $4::date),
 		       COUNT(*) FILTER (WHERE start_date <= $4::date AND end_date >= $3::date),
-		       COUNT(*) FILTER (WHERE start_date <= $3::date AND end_date >= $4::date AND status = 'closed')
+		       COUNT(*) FILTER (WHERE start_date <= $3::date AND end_date >= $4::date AND status = 'closed'),
+		       COUNT(*) FILTER (WHERE start_date <= $3::date AND end_date >= $4::date AND status = 'open')
 		FROM fiscal_periods
 		WHERE tenant_id = $1 AND restaurant_id = $2
-	`, result.TenantID, result.RestaurantID, result.PeriodStart, result.PeriodEnd).Scan(&covered, &overlapping, &closed)
+	`, result.TenantID, result.RestaurantID, result.PeriodStart, result.PeriodEnd).Scan(&covered, &overlapping, &closed, &open)
 	if err != nil {
 		return fmt.Errorf("read scoped current fiscal-period status: %w", err)
 	}
 	switch {
-	case covered == 1 && closed == 1:
+	case covered == 1 && overlapping == 1 && closed == 1:
 		result.FiscalPeriodState = "CLOSED_PERIOD_OBSERVED"
-	case covered == 1 && overlapping == 1:
+	case covered == 1 && overlapping == 1 && open == 1:
 		result.FiscalPeriodState = "OPEN_PERIOD_OBSERVED"
 	case covered == 0 && overlapping == 0:
 		result.FiscalPeriodState = "SOURCE_UNAVAILABLE"
