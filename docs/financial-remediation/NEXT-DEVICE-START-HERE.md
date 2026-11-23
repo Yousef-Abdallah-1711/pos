@@ -23,6 +23,8 @@ CFR-004, CFR-005 and CFR-009 now contain source-traced merged safeguards and iss
 
 CFR-011's migration 187 is merged and both constructed supplier entry-type persistence tests passed in the same PostgreSQL job. Current source search found no production caller for those two auto-post hooks; supplier lifecycle support, accounting mapping and end-to-end acceptance remain pending.
 
+CFR-012 remains policy pending: main's Cash Flow classification uses account types and code prefixes. A #114 synthetic taxed-sale fixture observed cash GL +55/-55 against the existing formula's +50/-50; its void-date tests passed in [candidate PostgreSQL CI](https://github.com/Yousef-Abdallah-1711/pos/actions/runs/45077468898/job/137377801133). That result is not an approved cash-flow methodology.
+
 PR #110 proposes a production reconciliation query change alongside its benchmark. Its recorded warm large-scope latency increased between separate runs despite a faster line-query plan and eliminated temporary I/O; there is no approved performance budget. Do not treat passing benchmark CI as operational acceptance.
 
 Main was merged into the five PR branches on 2026-11-23. Heads at that snapshot were #108 `d7712f4f84189a848f6bbdf43513fef179c73536`, #109 `bbd23164f81258190e85f1377cb261568ab631d9`, #110 `250028d0cd47fa90c34b8904de3dbefd8f0ac215`, #112 `8ac12b956b4da4503acc44b0db42c3af553d7c68`, and #114 `641e6b515cfb2419b212d771feab680dc4de36b9`. New CI was running; all had no recorded GitHub reviews. Check live heads and required checks again. The previous #109 candidate's three fiscal-period regression tests passed in disposable PostgreSQL.
