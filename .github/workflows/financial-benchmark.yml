@@ -7,6 +7,8 @@ on:
       - 'backend/cmd/api/financial_benchmark_fixture_integration_test.go'
       - 'backend/cmd/api/financial_benchmark_integration_test.go'
       - 'backend/cmd/api/financial_benchmark_support_integration_test.go'
+      - 'backend/cmd/api/financial_reconciliation_benchmark_integration_test.go'
+      - 'backend/internal/repository/journal_gl_reconciliation.go'
       - 'backend/internal/repository/accounting_*.go'
       - 'backend/internal/repository/general_ledger_*.go'
       - 'backend/internal/repository/inventory_movement_repo.go'
@@ -130,12 +132,36 @@ jobs:
                       f"{measurement['p50_ms']:.3f} | {measurement['p95_ms']:.3f} | {measurement['p99_ms']:.3f} | "
                       f"{measurement['maximum_ms']:.3f} | {measurement['error_count']} |"
                   )
+              reconciliation = report.get('reconciliation_benchmark')
+              if reconciliation:
+                  lines.extend([
+                      '',
+                      '### Journal/GL reconciliation operation',
+                      f"- First run after seeding: {reconciliation['first_run_after_seed_ms']:.3f} ms ({reconciliation['cold_run_status']}).",
+                      f"- Cache limitation: {reconciliation['cold_cache_limitation']}",
+                      '',
+                      '| Scope | Journals | Journal lines | GL rows |',
+                      '| --- | ---: | ---: | ---: |',
+                  ])
+                  for scope in reconciliation['scopes']:
+                      lines.append(f"| {scope['name']} | {scope['journal_count']} | {scope['journal_lines']} | {scope['general_ledger_rows']} |")
+                  lines.extend([
+                      '',
+                      '| Measurement | Samples | Concurrency | p50 ms | p95 ms | Max ms |',
+                      '| --- | ---: | ---: | ---: | ---: | ---: |',
+                  ])
+                  all_reconciliation_measurements = reconciliation['warm_measurements'] + [reconciliation['concurrent_reads'], reconciliation['reads_during_posting']]
+                  for measurement in all_reconciliation_measurements:
+                      lines.append(f"| {measurement['name']} | {measurement['samples']} | {measurement['concurrency']} | {measurement['p50_ms']:.3f} | {measurement['p95_ms']:.3f} | {measurement['maximum_ms']:.3f} |")
+                  timeout = reconciliation['statement_timeout']
+                  lines.append(f"- Concurrent postings during read workload: {reconciliation['concurrent_posts']}; statement timeout `{timeout['configured']}` observed as `{timeout['observed']}`: `{timeout['result']}` (SQLSTATE `{timeout['sql_state']}`).")
+                  lines.append('- Query plans and index usage are recorded in the JSON artifact; raw plans include actual rows, loops, and buffer reads/hits.')
           with summary_path.open('a', encoding='utf-8') as summary:
               summary.write('\n'.join(lines) + '\n')
           PY
           cat "$GITHUB_STEP_SUMMARY"
       - name: Upload benchmark report
-        if: always() && github.repository == 'Yousef-Abdallah-1711/pos-phase5-private-acceptance'
+        if: always() && github.repository == 'Yousef-Abdallah-1711/pos'
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: financial-query-benchmark-${{ github.sha }}-${{ github.event.inputs.journal_count || '10000' }}

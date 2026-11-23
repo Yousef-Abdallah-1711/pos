@@ -112,6 +112,7 @@ type financialBenchmarkDataset struct {
 	JournalLines               int     `json:"journal_lines"`
 	GeneralLedgerRows          int     `json:"general_ledger_rows"`
 	ConcurrentJournalWrites    int     `json:"concurrent_journal_writes"`
+	ReconciliationPosts        int64   `json:"reconciliation_concurrent_posts"`
 	SalesOrders                int     `json:"sales_orders"`
 	SalesOrderItems            int     `json:"sales_order_items"`
 	JournalDebitCents          int64   `json:"journal_debit_cents"`
@@ -148,6 +149,7 @@ type financialBenchmarkReport struct {
 	ProcessHeapBytes          uint64                            `json:"process_heap_bytes"`
 	ProcessSysBytes           uint64                            `json:"process_sys_bytes"`
 	Measurements              []financialBenchmarkMeasurement   `json:"measurements"`
+	Reconciliation            *financialReconciliationBenchmark `json:"reconciliation_benchmark,omitempty"`
 	LedgerPageIndexComparison financialBenchmarkIndexComparison `json:"ledger_page_index_comparison"`
 }
 
