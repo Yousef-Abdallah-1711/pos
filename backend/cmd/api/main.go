@@ -300,8 +300,9 @@ func main() {
 		productRepo,
 	)
 	orderUC.SetAutoPostingEngine(autoPostingEngine)
+	accountingEventRepo := repository.NewAccountingEventRepository(db)
 	if db != nil {
-		orderUC.SetAccountingEventRepository(repository.NewAccountingEventRepository(db))
+		orderUC.SetAccountingEventRepository(accountingEventRepo)
 	}
 	financialReportUC := usecase.NewFinancialReportUseCase(db, generalLedgerRepo)
 
@@ -368,6 +369,7 @@ func main() {
 	// Order Management handlers
 	publicOrderHandler := handler.NewPublicOrderHandler(orderUC, restaurantRepo)
 	adminOrderHandler := handler.NewAdminOrderHandler(orderUC, driverRepo, userRoleRepo)
+	accountingEventAdminHandler := handler.NewAccountingEventAdminHandler(accountingEventRepo)
 	tableHandler := handler.NewTableHandler(tableUC)
 	kdsHandler := handler.NewKDSHandler(kdsUC)
 	kdsWSHandler := kdsws.NewKDSWSHandler(kdsHub, tokenService, authSessionStore)
@@ -1046,6 +1048,8 @@ func main() {
 
 	// Accounting module endpoints (require authentication + RBAC permission)
 	// Module ID 15 = ACCOUNTING, Module ID 16 = SUPPLIERS
+	mux.Handle("GET /api/v1/accounting/paid-order-events/failed", wrapWithPermission(http.HandlerFunc(accountingEventAdminHandler.ListFailed), 15, "READ"))
+	mux.Handle("POST /api/v1/accounting/paid-order-events/{id}/redrive", wrapWithPermission(http.HandlerFunc(accountingEventAdminHandler.RedriveFailed), 15, "WRITE"))
 	mux.Handle("GET /api/v1/accounting/accounts", wrapWithPermission(http.HandlerFunc(accountHandler.ListAccounts), 15, "READ"))
 	mux.Handle("POST /api/v1/accounting/accounts", wrapWithPermission(http.HandlerFunc(accountHandler.CreateAccount), 15, "WRITE"))
 	mux.Handle("GET /api/v1/accounting/accounts/{id}", wrapWithPermission(http.HandlerFunc(accountHandler.GetAccount), 15, "READ"))
