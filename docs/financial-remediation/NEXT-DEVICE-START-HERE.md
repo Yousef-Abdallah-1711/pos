@@ -30,3 +30,15 @@ PR #110 proposes a production reconciliation query change alongside its benchmar
 Main was merged into the five PR branches on 2026-11-23. Heads at that snapshot were #108 `d7712f4f84189a848f6bbdf43513fef179c73536`, #109 `bbd23164f81258190e85f1377cb261568ab631d9`, #110 `250028d0cd47fa90c34b8904de3dbefd8f0ac215`, #112 `8ac12b956b4da4503acc44b0db42c3af553d7c68`, and #114 `641e6b515cfb2419b212d771feab680dc4de36b9`. New CI was running; all had no recorded GitHub reviews. Check live heads and required checks again. The previous #109 candidate's three fiscal-period regression tests passed in disposable PostgreSQL.
 
 The old integrated CFR-010 worktree's committed head `98aa00951756a2c89e15678888eeb67b2d66dd5e` is preserved at remote `codex/preserve-cfr010-integrated-20261123`. Its untracked evidence and browser outputs were not pushed and remain to be classified for sensitive data.
+
+
+## Consolidation update — 2026-11-23
+
+PR #117 merged into main as `a461d2104ee07002789bf0be32bb4ad2536189ad`. Clone main to obtain the draft issue packages and Spec Kit; the earlier branch-specific clone instructions above are historical. A clean clone of that commit contained all 21 issue folders with spec, plan and tasks, the register, constitution, and this handoff. File presence does not establish issue completion or financial acceptance.
+
+The owner authorized technical review followed by merge when GitHub protection and CI pass, without requiring a separate recorded independent approval. Recheck each PR head, current main, required checks and its financial risks before merging. PRs #108, #109, #110, #112 and #114 were updated with that main and their new checks are pending. Accounting decisions OPEN-01, EARN-01 and CLOSE-01 remain pending; CFR-010 remains open and production is NO-GO.
+
+Historical preservation branches include `codex/preserve-phase4-financial-proposals-20261123` at `1595bf54b4d5782e6b87993c08b63bece36ee38f`, `codex/preserve-phase00-integration-20261123` at `8062e54a559a85dc889ed37f78593dbd8890ccb9`, `codex/preserve-cfr004-dirty-20261123` at `5c6a987ba2ead8c96c8115eb966d50ffa5cf399c`, and `codex/preserve-cfr010-synthetic-reports-20261123` at `2a152faaa01b2501de54dad90894eaa74e62227b`. These are unmerged snapshots, not approved implementations. The local worktree inventory and sensitive evidence review are incomplete; not all work is proven recoverable from GitHub.
+
+
+Consolidated 21-issue snapshots, PRs, policy gates and recovery checklist: [Financial Tracking Progress](FINANCIAL_TRACKING_PROGRESS.md). This is a dated recovery draft; refresh live status before action.
