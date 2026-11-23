@@ -1,5 +1,16 @@
 # Financial Tracking Progress — consolidated recovery draft
 
+## Verified consolidation snapshot — 2026-11-23 16:56 UTC
+
+Verified `origin/main` at `4ab49cd0b796df778ffa5257acf9b8017eaeeabb`. The following financial and handoff PRs are merged: #104 (`32f79c55f1e1643aafe09b6d9d93be8e62fb4b96`), #108 (`abc3e540bcdbc74da9a3b26dadc2ecf464d3e4f8`), #109 (`6dade4e53dedf251ce0c8f52fbd0f7999d4f4727`), #110 (`4ab49cd0b796df778ffa5257acf9b8017eaeeabb`), #112 (`9d27aae8a7d64148d16434860ac284dffdae2fe6`), #114 (`ff519aa8472786c43dbeb1da8295ff8d87c200f1`), #117 (`a461d2104ee07002789bf0be32bb4ad2536189ad`), #121 (`7bc3d03c8c9fa51109ecae979d62df88e9cf7cd3`), and #122 (`d2f2473fff16708311a94a961e017c2920ccc139`). These exact merge SHAs were read from GitHub PR metadata. PR #110 was merged after its three branch-protection checks passed on head `79b6409f3e385a0e654a82c59be18a8279749acd`; its PostgreSQL acceptance passed. At merge time, its separate benchmark run `45220368464` and optional landing CI were still running. A successful benchmark is measurement evidence only, not performance acceptance.
+
+The 21 original issue packages, register, Spec Kit artifacts and handoff are present in `main` through #117. They remain recovery drafts: file presence does not mean all 21 issues are investigated, fixed, tested or accepted. Worktree and local-only-commit content reconciliation is still incomplete. Preserved remote snapshots that are not merged include `codex/preserve-cfr010-integrated-20261123` (`98aa00951756a2c89e15678888eeb67b2d66dd5e`), `codex/preserve-cfr010-benchmark-20261123` (`b492a0689c7f2d69ce40b350ddcde835d0ab6abe`), `codex/preserve-phase00-integration-20261123` (`8062e54a559a85dc889ed37f78593dbd8890ccb9`), `codex/preserve-financial-benchmark-trigger-20261123` (`6620d0dff6256be4a0223e4257bf219fd7eaf8b9`), `codex/preserve-dated-balances-20261123` (`49919f4b8a3d973167f5fcbedbc00d2c611c60db`), `codex/preserve-cfr004-dirty-20261123` (`5c6a987ba2ead8c96c8115eb966d50ffa5cf399c`), and `codex/preserve-cfr010-synthetic-reports-20261123` (`2a152faaa01b2501de54dad90894eaa74e62227b`). They are preservation branches, not approved implementations; review them before any merge. Local databases, browser traces and sensitive operating evidence still require content-level review before publication.
+
+Accounting decisions OPEN-01, EARN-01 and CLOSE-01 remain PENDING; CF-01, TAX-01, ROUND-01, REFUND-01, INV-01 and PAY-01 remain pending where applicable. CFR-010 remains OPEN. Financial production remains NO-GO. PR #110 performance acceptance remains NOT APPROVED because no approved performance budget exists and end-to-end candidate latency regressed in the recorded comparison. No production records or deployments were changed.
+
+---
+
+
 **Snapshot:** 2026-11-23; repository main `a461d2104ee07002789bf0be32bb4ad2536189ad`. Refresh GitHub before acting.
 
 **Release:** Financial production NO-GO. CFR-010 OPEN. Original operating root cause NOT ESTABLISHED.

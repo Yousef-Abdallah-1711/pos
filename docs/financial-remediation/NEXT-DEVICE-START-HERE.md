@@ -1,5 +1,16 @@
 # Financial remediation: start here
 
+## Current verified handoff — 2026-11-23
+
+Fetch `origin/main` before work. Verified integration snapshot at this handoff update: `4ab49cd0b796df778ffa5257acf9b8017eaeeabb`; the tracker addendum in this same documentation PR may advance `main` again, so use `git rev-parse origin/main` for the final SHA. Financial PRs #104, #108, #109, #110, #112, #114, #117, #121 and #122 are merged. PR #110 was merged at `4ab49cd0b796df778ffa5257acf9b8017eaeeabb`; its protected checks and PostgreSQL acceptance passed, while its then-running benchmark is not performance approval.
+
+The 21 issue folders and Spec Kit drafts are in `main`, but they are not 21 verified or accepted fixes. Start by reconciling the current tracker against original issues and evidence; worktree recovery remains incomplete. Keep local database/browser artifacts private until reviewed. Accounting decisions OPEN-01, EARN-01, CLOSE-01 and related policy items remain pending, CFR-010 is open, and production is NO-GO. Do not deploy or change production data.
+
+Read [current consolidated tracker](FINANCIAL_TRACKING_PROGRESS.md) first, then fetch and inspect the live branch/PR state. Preserved snapshots and their caveats are listed in its latest verified section.
+
+---
+
+
 This is a **partial recovery draft**. Repository: https://github.com/Yousef-Abdallah-1711/pos. Main at the latest 2026-11-23 snapshot was `3fa3702148771f39af5c9f7f25f377ecdd3f0a98`; always fetch and verify. Recovery is [PR #117](https://github.com/Yousef-Abdallah-1711/pos/pull/117), branch `codex/financial-recovery-specs-20261122`.
 
 Read [program overview](../../specs/financial-remediation/program-overview.md), [register](../../specs/financial-remediation/issue-register.md), [roadmap](../../specs/financial-remediation/roadmap.md), and [CFR-010](../../specs/financial-remediation/issues/CFR-010/continuation.md). The snapshot of the original tracker and the root current tracker preserve historical source text. These drafts are not a completed issue inventory or approved accounting policy.
