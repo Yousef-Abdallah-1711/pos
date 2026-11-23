@@ -39,3 +39,6 @@ PR #117 merged into main as `a461d2104ee07002789bf0be32bb4ad2536189ad`. Clone ma
 The owner authorized technical review followed by merge when GitHub protection and CI pass, without requiring a separate recorded independent approval. Recheck each PR head, current main, required checks and its financial risks before merging. PRs #108, #109, #110, #112 and #114 were updated with that main and their new checks are pending. Accounting decisions OPEN-01, EARN-01 and CLOSE-01 remain pending; CFR-010 remains open and production is NO-GO.
 
 Historical preservation branches include `codex/preserve-phase4-financial-proposals-20261123` at `1595bf54b4d5782e6b87993c08b63bece36ee38f`, `codex/preserve-phase00-integration-20261123` at `8062e54a559a85dc889ed37f78593dbd8890ccb9`, `codex/preserve-cfr004-dirty-20261123` at `5c6a987ba2ead8c96c8115eb966d50ffa5cf399c`, and `codex/preserve-cfr010-synthetic-reports-20261123` at `2a152faaa01b2501de54dad90894eaa74e62227b`. These are unmerged snapshots, not approved implementations. The local worktree inventory and sensitive evidence review are incomplete; not all work is proven recoverable from GitHub.
+
+
+Consolidated 21-issue snapshots, PRs, policy gates and recovery checklist: [Financial Tracking Progress](FINANCIAL_TRACKING_PROGRESS.md). This is a dated recovery draft; refresh live status before action.
