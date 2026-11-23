@@ -1,6 +1,7 @@
 package http
 
 import (
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -12,7 +13,7 @@ import (
 	"pos-saas/internal/usecase"
 )
 
-func TestFinancialReportHandler_GetProfitLoss_UsesCacheOnSecondRequest(t *testing.T) {
+func TestFinancialReportHandler_GetProfitLoss_ReflectsNewPostedLedgerActivity(t *testing.T) {
 	db, mock, err := sqlmock.New()
 	if err != nil {
 		t.Fatalf("sqlmock.New failed: %v", err)
@@ -38,6 +39,16 @@ func TestFinancialReportHandler_GetProfitLoss_UsesCacheOnSecondRequest(t *testin
 		WillReturnRows(sqlmock.NewRows(columns).
 			AddRow("4100", "Food Sales", "revenue", 0.0, 900.0).
 			AddRow("5110", "Food COGS", "expense", 270.0, 0.0))
+	mock.ExpectQuery(`FROM journal_entry_lines jel`).
+		WithArgs(1, 2, from, to).
+		WillReturnRows(sqlmock.NewRows(columns).
+			AddRow("4100", "Food Sales", "revenue", 0.0, 1200.0).
+			AddRow("5110", "Food COGS", "expense", 300.0, 0.0))
+	mock.ExpectQuery(`FROM journal_entry_lines jel`).
+		WithArgs(1, 2, prevFrom, prevTo).
+		WillReturnRows(sqlmock.NewRows(columns).
+			AddRow("4100", "Food Sales", "revenue", 0.0, 900.0).
+			AddRow("5110", "Food COGS", "expense", 270.0, 0.0))
 
 	req1 := httptest.NewRequest(http.MethodGet, "/api/v1/reports/financial/profit-loss?date_from=2026-03-01&date_to=2026-03-02", nil)
 	req1 = withAccountingAuthContext(req1, 1, 2, 9)
@@ -56,8 +67,23 @@ func TestFinancialReportHandler_GetProfitLoss_UsesCacheOnSecondRequest(t *testin
 	if rec2.Code != http.StatusOK {
 		t.Fatalf("second request expected 200, got %d body=%s", rec2.Code, rec2.Body.String())
 	}
-	if rec1.Body.String() != rec2.Body.String() {
-		t.Fatalf("expected cached response payload to match first response")
+	var first, second struct {
+		Data struct {
+			TotalRevenue float64 `json:"total_revenue"`
+			NetProfit    float64 `json:"net_profit"`
+		} `json:"data"`
+	}
+	if err := json.Unmarshal(rec1.Body.Bytes(), &first); err != nil {
+		t.Fatalf("decode first response: %v", err)
+	}
+	if err := json.Unmarshal(rec2.Body.Bytes(), &second); err != nil {
+		t.Fatalf("decode second response: %v", err)
+	}
+	if first.Data.TotalRevenue != 1000 || first.Data.NetProfit != 700 {
+		t.Fatalf("first response totals = revenue %.2f, net profit %.2f; want 1000, 700", first.Data.TotalRevenue, first.Data.NetProfit)
+	}
+	if second.Data.TotalRevenue != 1200 || second.Data.NetProfit != 900 {
+		t.Fatalf("second response totals = revenue %.2f, net profit %.2f; want refreshed 1200, 900", second.Data.TotalRevenue, second.Data.NetProfit)
 	}
 
 	if err := mock.ExpectationsWereMet(); err != nil {
