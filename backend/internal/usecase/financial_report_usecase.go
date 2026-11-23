@@ -178,21 +178,33 @@ func (uc *FinancialReportUseCase) generateProfitLossCore(tenantID, restaurantID 
 		Expenses: make([]FinancialReportLine, 0),
 	}
 
+	// A void reverses a posted journal on the void date; it must not erase
+	// the original movement from earlier P&L periods.
 	rows, err := uc.db.Query(`
+		WITH movements AS (
+			SELECT jel.account_id, jel.debit_amount, jel.credit_amount
+			FROM journal_entry_lines jel
+			JOIN journal_entries je ON je.id = jel.journal_entry_id
+			WHERE je.tenant_id = $1 AND je.restaurant_id = $2
+			  AND (je.status = 'posted' OR (je.status = 'void' AND je.posted_at IS NOT NULL))
+			  AND je.entry_date >= $3 AND je.entry_date <= $4
+			UNION ALL
+			SELECT jel.account_id, jel.credit_amount AS debit_amount, jel.debit_amount AS credit_amount
+			FROM journal_entry_lines jel
+			JOIN journal_entries je ON je.id = jel.journal_entry_id
+			WHERE je.tenant_id = $1 AND je.restaurant_id = $2
+			  AND je.status = 'void' AND je.posted_at IS NOT NULL AND je.voided_at IS NOT NULL
+			  AND je.voided_at::date >= $3 AND je.voided_at::date <= $4
+		)
 		SELECT
 			coa.account_code,
 			coa.account_name,
 			coa.account_type,
-			COALESCE(SUM(jel.debit_amount), 0) AS debit_total,
-			COALESCE(SUM(jel.credit_amount), 0) AS credit_total
-		FROM journal_entry_lines jel
-		JOIN journal_entries je ON je.id = jel.journal_entry_id
-		JOIN chart_of_accounts coa ON coa.id = jel.account_id
-		WHERE je.tenant_id = $1
-		  AND je.restaurant_id = $2
-		  AND je.status = 'posted'
-		  AND je.entry_date >= $3
-		  AND je.entry_date <= $4
+			COALESCE(SUM(m.debit_amount), 0) AS debit_total,
+			COALESCE(SUM(m.credit_amount), 0) AS credit_total
+		FROM movements m
+		JOIN chart_of_accounts coa ON coa.id = m.account_id
+		WHERE coa.tenant_id = $1 AND coa.restaurant_id = $2
 		  AND coa.account_type IN ('revenue', 'expense')
 		GROUP BY coa.account_code, coa.account_name, coa.account_type
 		ORDER BY coa.account_code ASC
@@ -357,52 +369,29 @@ func (uc *FinancialReportUseCase) GenerateCashFlow(tenantID, restaurantID int, f
 		DateTo:   to.Format("2006-01-02"),
 	}
 
+	// Preserve the existing classification formula while including each posted
+	// movement in its original period and its reversal in the void period.
 	if err := uc.db.QueryRow(`
+		WITH movements AS (
+			SELECT jel.account_id, jel.debit_amount, jel.credit_amount
+			FROM journal_entry_lines jel JOIN journal_entries je ON je.id = jel.journal_entry_id
+			WHERE je.tenant_id = $1 AND je.restaurant_id = $2
+			  AND (je.status = 'posted' OR (je.status = 'void' AND je.posted_at IS NOT NULL))
+			  AND je.entry_date >= $3 AND je.entry_date <= $4
+			UNION ALL
+			SELECT jel.account_id, jel.credit_amount, jel.debit_amount
+			FROM journal_entry_lines jel JOIN journal_entries je ON je.id = jel.journal_entry_id
+			WHERE je.tenant_id = $1 AND je.restaurant_id = $2
+			  AND je.status = 'void' AND je.posted_at IS NOT NULL AND je.voided_at IS NOT NULL
+			  AND je.voided_at::date >= $3 AND je.voided_at::date <= $4
+		)
 		SELECT
-			COALESCE(SUM(CASE WHEN coa.account_type = 'revenue' THEN jel.credit_amount - jel.debit_amount ELSE 0 END), 0)
-			-
-			COALESCE(SUM(CASE WHEN coa.account_type = 'expense' THEN jel.debit_amount - jel.credit_amount ELSE 0 END), 0) AS operating
-		FROM journal_entry_lines jel
-		JOIN journal_entries je ON je.id = jel.journal_entry_id
-		JOIN chart_of_accounts coa ON coa.id = jel.account_id
-		WHERE je.tenant_id = $1
-		  AND je.restaurant_id = $2
-		  AND je.status = 'posted'
-		  AND je.entry_date >= $3
-		  AND je.entry_date <= $4
-	`, tenantID, restaurantID, from, to).Scan(&report.OperatingCashFlow); err != nil {
-		return report, err
-	}
-
-	if err := uc.db.QueryRow(`
-		SELECT
-			COALESCE(SUM(jel.debit_amount - jel.credit_amount), 0)
-		FROM journal_entry_lines jel
-		JOIN journal_entries je ON je.id = jel.journal_entry_id
-		JOIN chart_of_accounts coa ON coa.id = jel.account_id
-		WHERE je.tenant_id = $1
-		  AND je.restaurant_id = $2
-		  AND je.status = 'posted'
-		  AND je.entry_date >= $3
-		  AND je.entry_date <= $4
-		  AND coa.account_code LIKE '12%%'
-	`, tenantID, restaurantID, from, to).Scan(&report.InvestingCashFlow); err != nil {
-		return report, err
-	}
-
-	if err := uc.db.QueryRow(`
-		SELECT
-			COALESCE(SUM(jel.credit_amount - jel.debit_amount), 0)
-		FROM journal_entry_lines jel
-		JOIN journal_entries je ON je.id = jel.journal_entry_id
-		JOIN chart_of_accounts coa ON coa.id = jel.account_id
-		WHERE je.tenant_id = $1
-		  AND je.restaurant_id = $2
-		  AND je.status = 'posted'
-		  AND je.entry_date >= $3
-		  AND je.entry_date <= $4
-		  AND (coa.account_type = 'equity' OR coa.account_code LIKE '22%%')
-	`, tenantID, restaurantID, from, to).Scan(&report.FinancingCashFlow); err != nil {
+			COALESCE(SUM(CASE WHEN coa.account_type IN ('revenue', 'expense') THEN m.credit_amount - m.debit_amount ELSE 0 END), 0),
+			COALESCE(SUM(CASE WHEN coa.account_code LIKE '12%' THEN m.debit_amount - m.credit_amount ELSE 0 END), 0),
+			COALESCE(SUM(CASE WHEN coa.account_type = 'equity' OR coa.account_code LIKE '22%' THEN m.credit_amount - m.debit_amount ELSE 0 END), 0)
+		FROM movements m JOIN chart_of_accounts coa ON coa.id = m.account_id
+		WHERE coa.tenant_id = $1 AND coa.restaurant_id = $2
+	`, tenantID, restaurantID, from, to).Scan(&report.OperatingCashFlow, &report.InvestingCashFlow, &report.FinancingCashFlow); err != nil {
 		return report, err
 	}
 
