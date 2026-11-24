@@ -4,6 +4,22 @@
 
 **Integration remains partial.** This record distinguishes work merged into the public `main` branch from changes preserved on branches or retained locally. A clean repository clone does not include local-only files. No production deployment or production database change was performed. Financial production readiness remains **NO-GO** pending accounting and operational acceptance.
 
+## Final recovery update — 2026-11-24
+
+After the earlier snapshot below, PR #130 merged at `a85b3d65efd3a9887067b881910c0a5872067d16`, and this closure report merged through PR #128 at `0c3f56acc7da6ae20efb3db16c8321ea38826d99`. At that snapshot, there were no open PRs. The primary `H:\Projects\pos` checkout is fast-forwarded to `0c3f56acc7da6ae20efb3db16c8321ea38826d99`; tracked files are clean and pre-existing untracked files remain untouched.
+
+A new clean clone at `0c3f56acc7da6ae20efb3db16c8321ea38826d99` passed package verification: all **21** issue directories and all **63** `spec.md`, `plan.md`, and `tasks.md` files exist. The master tracker, issue register JSON/Markdown, Spec Kit constitution, cross-device handoff, and this closure report are present. The clone has no working-tree changes. This confirms documentation availability, not issue acceptance or production readiness.
+
+The latest worktree census found **125 worktrees**, of which **33 were dirty with 526 default-status entries**. The census includes local-only test output and sensitive evidence; these were retained. Sixty worktrees are at the current `origin/main`; other worktrees remain on their own branches or cannot be advanced without overwriting untracked files. No worktree was deleted.
+
+Three unapproved implementation snapshots were moved to the private preservation repository so they are available across devices and remain outside public `main`:
+
+- `preserve/ws02-dirty-snapshot-20261124` — `922c746247096cf412cd7fab583688b953efa4eb`. Quarantined because sampled changes expose raw handler errors and weaken strict input validation and paid-order accounting behavior. No tests were run against this snapshot.
+- `preserve/phase00-final-acceptance-scripts-20261124` — `cad7d78d0c5b41b996c77fb45270e0e1634765ea`. Quarantined because it removes posted-void reversal reporting and durable accounting recovery behavior while replacing report calculations. Authenticated tenant JSON, screenshots, and raw evidence were excluded from this branch and remain local.
+- `preserve/cfr010-earnings-period-scope-proposal-20261124` — `8b4831576a664a1ee82df5ac5ed59a2b904f9726`. Quarantined because it removes ambiguous/unknown-period detection and its regression scenarios; no acceptance test was run on this proposal.
+
+Worktree edits that matched `origin/main` byte-for-byte after path normalization were treated as already represented. Generated Next.js type files, Playwright output, dependency stores, local databases, raw financial screenshots/JSONL, and reports containing authenticated tenant evidence were excluded from public commits. The unreviewed `H:\pbi` deletions and unrelated UI registry timestamp edit remain untouched. The overall reconciliation is still **partial**: the remaining 33 dirty worktrees and 526 status entries are not all individually reconciled, and no claim is made that all local evidence or every worktree file has been safely recovered.
+
 ## Main and pull request reconciliation
 
 At the time of this update, `origin/main` is `a85b3d65efd3a9887067b881910c0a5872067d16` (2026-11-24). This SHA includes PR #129 and the safe browser-capture utility from PR #130 after the earlier `d9545197...` inventory snapshot.
@@ -16,7 +32,7 @@ At the time of this update, `origin/main` is `a85b3d65efd3a9887067b881910c0a5872
 | #118, #119, #120–#124 | Merged | Current GitHub PR metadata reports merged. |
 | #126 | Merged | Merge commit `105e639981b3308b977fb5a92f5d0734e70f6750`; required branch-protection checks passed. The optional application-image job was still running at merge time. |
 | #127 | Merged | Merge commit `d9545197d63cc1bd0168348ef5f8a66af429a8c8`. Backend, financial PostgreSQL, all frontend, security/config, localhost-guardrail, and URL/domain checks passed. The non-required application-image job was still running at merge time. |
-| #128 | Open; refreshing checks on current main | This closure record is proposed for `main`; it is being refreshed after PR #130 and revalidated before merge. It records incomplete recovery rather than claiming repository-wide completion. |
+| #128 | Merged | Merge commit `0c3f56acc7da6ae20efb3db16c8321ea38826d99`. Required backend, financial PostgreSQL, frontend, security/config, localhost-guardrail, and URL/domain checks passed. The non-required application-image job was still running at merge time. |
 | #129 | Merged | Sanitized WS05 disposable-stack seed script is merged at `d396ae8c7ca2367ea4837300179453de31942b0b`. It reads a synthetic password from the environment and does not embed or print credential material. Static PowerShell parsing and credential-literal/output checks passed; it was not run against a database. |
 | #130 | Merged | Merge commit `a85b3d65efd3a9887067b881910c0a5872067d16`. The capture utility uses loopback-only origins, rejects redirects, blocks external browser requests, and keeps fixture/output paths outside the repository even through symlinks. Five local tests passed (two path-boundary tests and three loopback-origin tests); backend, financial PostgreSQL, all frontend, security/config, localhost-guardrail, and URL/domain CI passed. Auth-browser acceptance was skipped and not required; the non-required application-image job was still running at merge time. No database was used locally. |
 
