@@ -3,26 +3,23 @@ import { mkdir, readFile } from "node:fs/promises";
 import { createRequire } from "node:module";
 import os from "node:os";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { requireLocalOrigin } from "../performance/local-origin.mjs";
+import { resolveOutsideRepository } from "./path-boundary.mjs";
 
 const fixturePath = process.env.SERVIO_FINANCIAL_FIXTURE_PATH;
 const apiOrigin = process.env.SERVIO_FINANCIAL_API_URL;
 const dashboardOrigin = process.env.SERVIO_FINANCIAL_DASHBOARD_URL;
-const repositoryRoot = path.resolve(process.cwd());
-const fixtureFile = fixturePath ? path.resolve(fixturePath) : "";
-const outputDirectory = path.resolve(
+const repositoryRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
+const fixtureFile = fixturePath
+  ? await resolveOutsideRepository(path.resolve(repositoryRoot, fixturePath), repositoryRoot, "SERVIO_FINANCIAL_FIXTURE_PATH")
+  : "";
+const outputDirectory = await resolveOutsideRepository(path.resolve(
+  repositoryRoot,
   process.env.SERVIO_FINANCIAL_SCREENSHOT_DIR ?? path.join(os.tmpdir(), "servio-financial-captures")
-);
+), repositoryRoot, "SERVIO_FINANCIAL_SCREENSHOT_DIR");
 
 if (!fixturePath) throw new Error("Set SERVIO_FINANCIAL_FIXTURE_PATH to an out-of-repository synthetic fixture file.");
-function assertOutsideRepository(candidate, label) {
-  const relative = path.relative(repositoryRoot, candidate);
-  if (relative === "" || (!path.isAbsolute(relative) && relative !== ".." && !relative.startsWith(`..${path.sep}`))) {
-    throw new Error(`${label} must be outside the repository.`);
-  }
-}
-assertOutsideRepository(fixtureFile, "SERVIO_FINANCIAL_FIXTURE_PATH");
-assertOutsideRepository(outputDirectory, "SERVIO_FINANCIAL_SCREENSHOT_DIR");
 const api = requireLocalOrigin(apiOrigin, "SERVIO_FINANCIAL_API_URL");
 const dashboard = requireLocalOrigin(dashboardOrigin, "SERVIO_FINANCIAL_DASHBOARD_URL");
 const fixture = JSON.parse(await readFile(fixtureFile, "utf8"));
@@ -30,7 +27,7 @@ if (!fixture?.accountant?.email || !fixture?.accountant?.password) {
   throw new Error("The synthetic fixture must contain accountant.email and accountant.password.");
 }
 
-const requireFromWorkingDirectory = createRequire(path.resolve(process.cwd(), "package.json"));
+const requireFromWorkingDirectory = createRequire(path.join(repositoryRoot, "package.json"));
 const { chromium } = requireFromWorkingDirectory("@playwright/test");
 await mkdir(outputDirectory, { recursive: true });
 const browser = await chromium.launch();
