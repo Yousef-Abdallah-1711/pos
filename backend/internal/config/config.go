@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"strings"
 
 	"github.com/joho/godotenv"
 )
@@ -12,6 +13,7 @@ type Config struct {
 	Server   ServerConfig
 	Database DatabaseConfig
 	JWT      JWTConfig
+	Email    EmailConfig
 }
 
 type ServerConfig struct {
@@ -38,11 +40,28 @@ type JWTConfig struct {
 	Expiry           string
 }
 
+type EmailConfig struct {
+	SMTPHost     string
+	SMTPPort     int
+	SMTPUsername string
+	SMTPPassword string
+	FromEmail    string
+	FromName     string
+}
+
+func (c EmailConfig) SMTPConfigured() bool {
+	return c.SMTPHost != "" || c.SMTPUsername != "" || c.SMTPPassword != "" || c.FromEmail != ""
+}
+
 func Load() (*Config, error) {
 	// Load .env file
 	_ = godotenv.Load()
 
 	dbPort, _ := strconv.Atoi(getEnv("DB_PORT", "5432"))
+	emailConfig, err := loadEmailConfig()
+	if err != nil {
+		return nil, err
+	}
 
 	cfg := &Config{
 		Server: ServerConfig{
@@ -66,6 +85,7 @@ func Load() (*Config, error) {
 			SuperAdminSecret: getEnv("SUPER_ADMIN_JWT_SECRET", ""),
 			Expiry:           getEnv("JWT_EXPIRY", "24h"),
 		},
+		Email: emailConfig,
 	}
 
 	if cfg.Server.Env == "production" {
@@ -75,6 +95,29 @@ func Load() (*Config, error) {
 	}
 
 	return cfg, nil
+}
+
+func loadEmailConfig() (EmailConfig, error) {
+	port := 587
+	if rawPort := strings.TrimSpace(os.Getenv("SMTP_PORT")); rawPort != "" {
+		parsedPort, err := strconv.Atoi(rawPort)
+		if err != nil || parsedPort < 1 || parsedPort > 65535 {
+			return EmailConfig{}, fmt.Errorf("SMTP_PORT must be between 1 and 65535")
+		}
+		port = parsedPort
+	}
+	config := EmailConfig{
+		SMTPHost: strings.TrimSpace(os.Getenv("SMTP_HOST")), SMTPPort: port,
+		SMTPUsername: strings.TrimSpace(os.Getenv("SMTP_USERNAME")), SMTPPassword: os.Getenv("SMTP_PASSWORD"),
+		FromEmail: strings.TrimSpace(os.Getenv("SMTP_FROM_EMAIL")), FromName: strings.TrimSpace(os.Getenv("SMTP_FROM_NAME")),
+	}
+	if !config.SMTPConfigured() {
+		return config, nil
+	}
+	if config.SMTPHost == "" || config.SMTPUsername == "" || config.SMTPPassword == "" || config.FromEmail == "" {
+		return EmailConfig{}, fmt.Errorf("SMTP_HOST, SMTP_USERNAME, SMTP_PASSWORD, and SMTP_FROM_EMAIL must be configured together")
+	}
+	return config, nil
 }
 
 func (c *DatabaseConfig) DSN() string {
