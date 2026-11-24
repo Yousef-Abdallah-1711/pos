@@ -16,6 +16,7 @@ At the time this record was prepared, `origin/main` was `105e639981b3308b977fb5a
 | #118, #119, #120–#124 | Merged | Current GitHub PR metadata reports merged. |
 | #126 | Merged | Merge commit `105e639981b3308b977fb5a92f5d0734e70f6750`; required branch-protection checks passed. The optional application-image job was still running at merge time. |
 | #127 | Open; checks running | Local performance measurement tools were recovered, constrained to loopback, and pushed at head `5ef8cc4fd4ef486163bc37930c5ec94e5698aaee`. Required checks passed when last inspected; the broader application-image job and remaining CI jobs were still running. Do not merge until required and relevant checks complete. |
+| #128 | Open; checks running | This closure record is proposed for `main`; its CI is running. The report deliberately records incomplete recovery rather than claiming repository-wide completion. |
 
 At the last branch-protection query, `main` required `runtime-localhost-guardrail`, `url-domain-config-smoke`, and `backend`; the required approval count was zero and CODEOWNERS approval was not required. `auth-browser-acceptance` was skipped for the documentation/performance-tool PRs and is not a required context under that protection configuration.
 
@@ -40,7 +41,7 @@ The inventory is **not fully reconciled**: the 35 dirty worktrees and 531 non-id
 
 For PR #127, local checks passed: three loopback URL tests, syntax checks for both scripts and the helper, explicit rejection of non-loopback URLs by both CLIs, Compose configuration validation, and `git diff --check`. GitHub backend, financial PostgreSQL, frontend, security/config, localhost-guardrail, and URL/domain checks passed at the last poll; application-image validation was still running.
 
-The primary checkout was fast-forwarded to `105e639981b3308b977fb5a92f5d0734e70f6750`. Its existing 130 untracked entries were preserved. A final clean-clone package check at the final post-PR SHA remains required after PR #127 is resolved.
+The primary checkout was fast-forwarded to `105e639981b3308b977fb5a92f5d0734e70f6750`. Its existing 130 untracked entries were preserved. A clean clone at that SHA is clean and contains `spec.md`, `plan.md`, and `tasks.md` for all 21 issue packages, the master tracker, issue register, Spec Kit constitution, and handoff documents. Repeat this package check at the final post-PR SHA after PRs #127 and #128 are resolved.
 
 ## Remaining actions
 
