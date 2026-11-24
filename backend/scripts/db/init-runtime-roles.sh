@@ -4,10 +4,12 @@
 set -e
 
 (
+set --
 if [ -n "${POS_ACCOUNTING_PASSWORD:-}" ]; then
-  set -- -v "accounting_pw=$POS_ACCOUNTING_PASSWORD"
-else
-  set --
+  set -- "$@" -v "accounting_pw=$POS_ACCOUNTING_PASSWORD"
+fi
+if [ -n "${POS_AUTH_LOOKUP_PASSWORD:-}" ]; then
+  set -- "$@" -v "auth_lookup_pw=$POS_AUTH_LOOKUP_PASSWORD"
 fi
 
 psql "$@" -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname postgres \
