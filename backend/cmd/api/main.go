@@ -120,6 +120,18 @@ func main() {
 		defer accountingDB.Close()
 	}
 
+	// The canonical-identity login path remains disabled until its auth boundary
+	// is separately reviewed. If configured, this pool must be a distinct,
+	// read-only role; it is never allowed to fall back to pos_app.
+	authLookupDB, authLookupErr := connectAuthLookupDatabase(db, cfg.Database)
+	if authLookupErr != nil {
+		log.Fatalf("Authentication lookup database configuration rejected: %v", authLookupErr)
+	}
+	if authLookupDB != nil {
+		defer authLookupDB.Close()
+		startDBHealthMonitor(rootCtx, authLookupDB, 15*time.Second)
+	}
+
 	// Initialize JWT service
 	tokenService, err := jwt.NewTokenService(cfg.JWT.Secret, cfg.JWT.Expiry)
 	if err != nil {
