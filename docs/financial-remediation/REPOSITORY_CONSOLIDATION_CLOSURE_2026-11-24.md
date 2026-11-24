@@ -6,7 +6,7 @@
 
 ## Main and pull request reconciliation
 
-At the time of this update, `origin/main` is `d396ae8c7ca2367ea4837300179453de31942b0b` (2026-11-24). This SHA includes the merge of PR #129 after the earlier `d9545197...` inventory snapshot.
+At the time of this update, `origin/main` is `a85b3d65efd3a9887067b881910c0a5872067d16` (2026-11-24). This SHA includes PR #129 and the safe browser-capture utility from PR #130 after the earlier `d9545197...` inventory snapshot.
 
 | PR | Result | Evidence |
 | --- | --- | --- |
@@ -16,15 +16,15 @@ At the time of this update, `origin/main` is `d396ae8c7ca2367ea4837300179453de31
 | #118, #119, #120–#124 | Merged | Current GitHub PR metadata reports merged. |
 | #126 | Merged | Merge commit `105e639981b3308b977fb5a92f5d0734e70f6750`; required branch-protection checks passed. The optional application-image job was still running at merge time. |
 | #127 | Merged | Merge commit `d9545197d63cc1bd0168348ef5f8a66af429a8c8`. Backend, financial PostgreSQL, all frontend, security/config, localhost-guardrail, and URL/domain checks passed. The non-required application-image job was still running at merge time. |
-| #128 | Open; behind current main | This closure record is proposed for `main`; it is being refreshed against the latest `main` and revalidated before merge. It records incomplete recovery rather than claiming repository-wide completion. |
+| #128 | Open; refreshing checks on current main | This closure record is proposed for `main`; it is being refreshed after PR #130 and revalidated before merge. It records incomplete recovery rather than claiming repository-wide completion. |
 | #129 | Merged | Sanitized WS05 disposable-stack seed script is merged at `d396ae8c7ca2367ea4837300179453de31942b0b`. It reads a synthetic password from the environment and does not embed or print credential material. Static PowerShell parsing and credential-literal/output checks passed; it was not run against a database. |
-| #130 | Open; required checks running | Local balance-sheet browser capture was recovered with loopback-only origins, redirect blocking, external browser-request blocking, fixture path outside the repository, and screenshot output outside the repository. Syntax and loopback rejection checks passed; no database was used. Backend, security/config, localhost-guardrail, and URL/domain checks have passed on the current PR head; financial PostgreSQL and two frontend checks were still running at this snapshot. |
+| #130 | Merged | Merge commit `a85b3d65efd3a9887067b881910c0a5872067d16`. The capture utility uses loopback-only origins, rejects redirects, blocks external browser requests, and keeps fixture/output paths outside the repository even through symlinks. Five local tests passed (two path-boundary tests and three loopback-origin tests); backend, financial PostgreSQL, all frontend, security/config, localhost-guardrail, and URL/domain CI passed. Auth-browser acceptance was skipped and not required; the non-required application-image job was still running at merge time. No database was used locally. |
 
 At the last branch-protection query, `main` required `runtime-localhost-guardrail`, `url-domain-config-smoke`, and `backend`; the required approval count was zero and CODEOWNERS approval was not required. `auth-browser-acceptance` was skipped for the documentation/performance-tool PRs and is not a required context under that protection configuration.
 
 ## Worktree and file inventory snapshot
 
-The refreshed local inventory, taken before creating this report's isolated worktree, found **121 worktrees**, **35 dirty worktrees**, and **604 Git status entries**. The primary `H:\Projects\pos` checkout accounts for 130 untracked entries; those files were left intact. The primary checkout's tracked files are clean and its `main` is fast-forwarded to `origin/main` at the snapshot SHA above.
+The refreshed local inventory found **125 worktrees**, **35 dirty worktrees**, and **604 Git status entries** (default Git status grouping; recursively expanding the untracked `.codex-consolidation` directory yields a much larger count of generated manifest entries, not separate source changes). The primary `H:\Projects\pos` checkout accounts for 130 top-level untracked entries; those files were left intact. The primary checkout's tracked files are clean and its `main` is fast-forwarded to `origin/main` at the snapshot SHA above.
 
 The existing local candidate manifest contains 686 file comparisons against `main`: 131 byte-identical files, 531 non-identical files requiring content review, and 24 paths that are missing or not regular files. These are path/blob comparisons only, not a complete semantic, credential, sensitivity, or remote-branch audit. The 531 differences must not be described as lost work or as safe-to-publish source.
 
@@ -47,11 +47,13 @@ A refreshed ancestry check after fetching all branches from both configured remo
 
 For PR #127, local checks passed: three loopback URL tests, syntax checks for both scripts and the helper, explicit rejection of non-loopback URLs by both CLIs, Compose configuration validation, and `git diff --check`. GitHub backend, financial PostgreSQL, frontend, security/config, localhost-guardrail, and URL/domain checks passed. The application-image job was not a required branch-protection context and remained in progress at merge time.
 
-The primary checkout was fast-forwarded to `d396ae8c7ca2367ea4837300179453de31942b0b`. Its existing 130 untracked entries were preserved. A fresh clone at the earlier `d9545197...` SHA was clean and contained `spec.md`, `plan.md`, and `tasks.md` for all 21 issue packages, the master tracker, issue register, Spec Kit constitution, and handoff documents. Repeat this package check at the final post-PR SHA after PRs #128 and #130 are resolved.
+For PR #130, local syntax checks and all five path-boundary/loopback-origin tests passed; non-loopback origin rejection was verified before fixture loading. GitHub backend, financial PostgreSQL, frontend, security/config, localhost-guardrail, and URL/domain checks passed. The application-image job was not a required context and was still running at merge time.
+
+The primary checkout was fast-forwarded to `a85b3d65efd3a9887067b881910c0a5872067d16`. Its existing 130 untracked entries were preserved. A fresh clone at `d396ae8c...` was clean and contained `spec.md`, `plan.md`, and `tasks.md` for all 21 issue packages, the master tracker, the issue register at `audit-reports/phase-1-system-discovery/ISSUE-REGISTER.md`, Spec Kit constitution, and handoff documents. Repeat this package check at the final post-PR SHA after PR #128 is resolved.
 
 ## Remaining actions
 
-1. Complete current-head required CI for PR #130 and update/validate PR #128; merge each with the repository's normal strategy when branch protection permits it.
+1. Complete required CI for PR #128 after rebasing it onto `a85b3d65...`; merge with the repository's normal strategy when branch protection permits it.
 2. Repeat clean-clone verification at the final `origin/main` SHA, including all 21 financial issue folders, the master tracker, Spec Kit configuration, and handoff.
 3. Reconcile the 35 dirty worktrees and 531 non-identical candidates against current public and private refs. Publish only reviewed, non-sensitive, non-policy-dependent unique changes through normal PRs.
 4. Keep financial policy decisions pending and production financial operations blocked until their separate approval and acceptance gates pass.
