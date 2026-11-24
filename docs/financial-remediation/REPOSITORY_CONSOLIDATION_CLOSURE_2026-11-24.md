@@ -46,11 +46,11 @@ A refreshed ancestry check after fetching all branches from both configured remo
 
 For PR #127, local checks passed: three loopback URL tests, syntax checks for both scripts and the helper, explicit rejection of non-loopback URLs by both CLIs, Compose configuration validation, and `git diff --check`. GitHub backend, financial PostgreSQL, frontend, security/config, localhost-guardrail, and URL/domain checks passed. The application-image job was not a required branch-protection context and remained in progress at merge time.
 
-The primary checkout was fast-forwarded to `d9545197d63cc1bd0168348ef5f8a66af429a8c8`. Its existing 130 untracked entries were preserved. A fresh clone at the preceding SHA `105e639981b3308b977fb5a92f5d0734e70f6750` was clean and contained `spec.md`, `plan.md`, and `tasks.md` for all 21 issue packages, the master tracker, issue register, Spec Kit constitution, and handoff documents. Repeat this package check at the final post-PR SHA after PRs #128 and #129 are resolved.
+The primary checkout was fast-forwarded to `d9545197d63cc1bd0168348ef5f8a66af429a8c8`. Its existing 130 untracked entries were preserved. A fresh clone at that SHA was clean and contained `spec.md`, `plan.md`, and `tasks.md` for all 21 issue packages, the master tracker, issue register, Spec Kit constitution, and handoff documents. Repeat this package check at the final post-PR SHA after PRs #128 and #129 are resolved.
 
 ## Remaining actions
 
-1. Wait for PR #127's complete relevant CI and merge normally only after it is green and branch protection permits it.
+1. Complete PRs #128 and #129 only after their required and relevant CI passes; merge with the repository's normal strategy when branch protection permits it.
 2. Repeat clean-clone verification at the final `origin/main` SHA, including all 21 financial issue folders, the master tracker, Spec Kit configuration, and handoff.
 3. Reconcile the 35 dirty worktrees and 531 non-identical candidates against current public and private refs. Publish only reviewed, non-sensitive, non-policy-dependent unique changes through normal PRs.
 4. Keep financial policy decisions pending and production financial operations blocked until their separate approval and acceptance gates pass.
