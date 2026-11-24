@@ -800,3 +800,17 @@ This addendum supersedes mutable repository and staging snapshots above where th
 - Main includes migration 191's additive, forced-RLS identity/membership tables and PR #116's re-provisioning revocation correction. No backfill, identity linking, email verification issuance, auth-route cutover, or new-role provisioning has occurred.
 - PR #118 adds migration 192's private, narrowly scoped `SECURITY DEFINER` read functions, a NOLOGIN-by-default `pos_auth_lookup` role with bounded optional pool validation, and repository methods. The path remains optional and unconnected to login. Review of its latest head confirms effective `CREATE` on `public` and privileges on other non-system schemas are rejected as well as direct table/sequence privileges. Synthetic PostgreSQL integration and repository/backend tests passed; no customer or staging identities were queried.
 - Keep the session-only cookie policy (30-minute idle / eight-hour absolute) and Super Admin boundary unchanged. Keep memberships pending and restaurant scope explicit. Do not enable identity access/linking/cutover or invite/recovery/MFA flows until policy questions and the independent security review are closed. The next safe implementation boundary is reviewed login selection and session binding behind a default-off flag, with disposable PostgreSQL, security, and real-browser tenant-isolation acceptance before any activation.
+
+## Current handoff — 2026-11-24 (refreshed after consolidation)
+
+This section supersedes earlier mutable repository and pull request snapshots in this handoff.
+
+- Verified `origin/main`: `3faac394fe84ed67071349dff1ca23f166f26a09`.
+- PR #118 merged at `170e73766d265b46c81593af046cb91c3348a122`. Its read-only identity lookup adapter remains optional and disconnected from login. Migration 192 is additive; no identity backfill or login cutover is authorized here.
+- PR #125 merged at `3faac394fe84ed67071349dff1ca23f166f26a09`, updating Gorilla WebSocket to the version fixed for GO-2026-6278. Backend, PostgreSQL, frontend, security/config, runtime guardrail, and URL/domain checks passed on its current head. The non-required application-image job was still running at merge; exact-main CI on the merge SHA is running.
+- PR #120 is merged. Its SMTP transport/template foundation is not wired to active email or account-recovery flows.
+- Financial PRs #108, #109, #110, #112, #114, and #117 are merged. Their merge status does not constitute financial acceptance. Accounting-policy approvals remain pending; financial production readiness remains **NO-GO**.
+- PR #119 is this documentation-only handoff update. PRs #19 and #20 remain drafts with conflicts; #20 changes deployment infrastructure and is not approved for production use.
+- Do not deploy, modify production records, or treat unapproved accounting policy as active.
+
+This handoff intentionally excludes staging identifiers, account codes, ledger row identifiers, and other operational financial details. Consult access-controlled incident evidence through the authorized owner workflow when that evidence is required.
