@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import { readFile, writeFile } from "node:fs/promises";
+import { requireLocalOrigin } from "./local-origin.mjs";
 
 const HELP = [
   "Usage: node scripts/performance/measure-api.mjs --routes <safe-get-routes.json>",
@@ -50,7 +51,7 @@ async function main() {
   const routeFile = routeIndex >= 0 ? args[routeIndex + 1] : "";
   const baseValue = process.env.P2C_API_BASE_URL;
   if (!routeFile || !baseValue) throw new Error("Provide --routes and P2C_API_BASE_URL.");
-  const base = new URL(baseValue);
+  const base = requireLocalOrigin(baseValue, "P2C_API_BASE_URL");
   const tenantId = process.env.P2C_TENANT_ID ?? "";
   const restaurantId = process.env.P2C_RESTAURANT_ID ?? "";
   const role = process.env.P2C_ROLE ?? "synthetic-admin";
@@ -89,6 +90,7 @@ async function main() {
         const response = await fetch(url, {
           method: "GET",
           headers,
+          redirect: "manual",
           signal: AbortSignal.timeout(15000),
         });
         const body = await response.text();
