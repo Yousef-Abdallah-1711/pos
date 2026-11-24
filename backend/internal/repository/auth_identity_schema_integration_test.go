@@ -60,10 +60,10 @@ func createIdentitySchemaFixture(t *testing.T, ctx context.Context, db *sql.DB, 
 	// This fixture is deliberately confined to a unique disposable schema.
 	for _, statement := range []string{
 		`GRANT USAGE ON SCHEMA ` + schema + ` TO pos_app, pos_migrator`,
-		`CREATE TABLE tenants (id INTEGER PRIMARY KEY)`,
+		`CREATE TABLE tenants (id INTEGER PRIMARY KEY, name TEXT NOT NULL DEFAULT 'Test Tenant', is_active BOOLEAN NOT NULL DEFAULT true)`,
 		`CREATE TABLE users (id INTEGER PRIMARY KEY, tenant_id INTEGER NOT NULL REFERENCES tenants(id))`,
-		`CREATE TABLE restaurants (id INTEGER PRIMARY KEY, tenant_id INTEGER NOT NULL REFERENCES tenants(id))`,
-		`CREATE TABLE roles (id INTEGER PRIMARY KEY, tenant_id INTEGER NOT NULL REFERENCES tenants(id), restaurant_id INTEGER NOT NULL REFERENCES restaurants(id))`,
+		`CREATE TABLE restaurants (id INTEGER PRIMARY KEY, tenant_id INTEGER NOT NULL REFERENCES tenants(id), name TEXT NOT NULL DEFAULT 'Test Restaurant', status TEXT NOT NULL DEFAULT 'active')`,
+		`CREATE TABLE roles (id INTEGER PRIMARY KEY, tenant_id INTEGER NOT NULL REFERENCES tenants(id), restaurant_id INTEGER NOT NULL REFERENCES restaurants(id), role_code TEXT NOT NULL DEFAULT 'TEST', is_active BOOLEAN NOT NULL DEFAULT true)`,
 		`INSERT INTO tenants (id) VALUES (1), (2)`,
 		`INSERT INTO users (id, tenant_id) VALUES (101, 1), (202, 2)`,
 		`INSERT INTO restaurants (id, tenant_id) VALUES (11, 1), (22, 2)`,

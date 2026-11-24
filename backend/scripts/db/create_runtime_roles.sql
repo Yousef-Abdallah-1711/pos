@@ -43,6 +43,10 @@ GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA public TO pos_app;
 -- A distinct financial pool is provisioned without granting core-table writes.
 \ir create_accounting_role.sql
 
+-- Authentication lookup is a separate, read-only login. It remains NOLOGIN
+-- unless the operator supplies an independent AUTH_LOOKUP database secret.
+\ir create_auth_lookup_role.sql
+
 -- Re-provisioning must preserve security boundaries introduced by applied migrations.
 DO $$
 DECLARE protected_table TEXT;
