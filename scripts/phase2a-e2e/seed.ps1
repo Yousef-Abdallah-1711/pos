@@ -1,16 +1,12 @@
-param(
-    [string]$ProjectName = 'pos-p2a-ws05-e2e-20261108'
-)
-
 $ErrorActionPreference = 'Stop'
 
-$project = $ProjectName
-$api = 'http://localhost:18082/api/v1'
+$project = 'pos-p2a-ws05-e2e-20261103'
+$api = 'http://localhost:18080/api/v1'
 $database = 'pos_phase2a_e2e'
 $container = "$project-postgres-1"
-$password = 'WS05-Disposable-Only-2026!'
+$password = $env:P2A_E2E_PASSWORD
+if ([string]::IsNullOrWhiteSpace($password)) { throw 'Set P2A_E2E_PASSWORD to a synthetic disposable-account password.' }
 $superAdminEmail = 'phase2a-superadmin@example.test'
-$superAdminPasswordHash = '$2a$10$cZ6RYwpViOspI8u.NYyXkeCD1IOXHF0xussswOrgijec47mn2OVEe'
 
 $labels = docker inspect --format '{{json .Config.Labels}}' $container | ConvertFrom-Json
 if ($LASTEXITCODE -ne 0 -or $labels.'com.docker.compose.project' -ne $project -or $labels.'com.docker.compose.service' -ne 'postgres' -or $labels.'com.pos.disposable' -ne 'true') {
@@ -20,7 +16,7 @@ $databaseName = docker exec $container psql -U postgres -d $database -Atc 'SELEC
 if ($LASTEXITCODE -ne 0 -or $databaseName.Trim() -ne $database) {
     throw "Refusing to seed: expected disposable database '$database'."
 }
-$health = Invoke-RestMethod -Uri 'http://localhost:18082/api/v1/health' -TimeoutSec 10
+$health = Invoke-RestMethod -Uri 'http://localhost:18080/api/v1/health' -TimeoutSec 10
 if (-not $health) { throw 'The isolated API health check failed.' }
 
 function Invoke-DisposableSql([string]$sql) {
@@ -41,10 +37,10 @@ function Ensure-Tenant([string]$suffix, [string]$name) {
             password = $password
             restaurant_name = "WS05 $name Restaurant"
             restaurant_slug = $restaurantSlug
-            phone = '+201000000000'
+            phone = '5550100200'
         } | ConvertTo-Json
         try {
-            $null = Invoke-RestMethod -Method Post -Uri "$api/auth/register" -ContentType 'application/json' -Headers @{ Origin = 'http://localhost:13112' } -Body $registration -TimeoutSec 20
+            $null = Invoke-RestMethod -Method Post -Uri "$api/auth/register" -ContentType 'application/json' -Body $registration -TimeoutSec 20
         } catch {
             throw "Could not create disposable WS05 $name tenant account: $($_.Exception.Message)"
         }
@@ -55,67 +51,15 @@ function Ensure-Tenant([string]$suffix, [string]$name) {
     if (-not $restaurantID -or -not $user) { throw "The disposable WS05 $name account fixture is incomplete." }
 
     $login = @{ email = $email; password = $password } | ConvertTo-Json
-    $auth = Invoke-WebRequest -Method Post -Uri "$api/auth/login" -ContentType 'application/json' -Headers @{ Origin = 'http://localhost:13112' } -Body $login -TimeoutSec 20
-    if ($auth.StatusCode -ne 200 -or -not ($auth.Headers['Set-Cookie'] -match 'poos_session=')) {
-        throw "Could not establish the disposable WS05 $name browser session."
-    }
-    return [pscustomobject]@{ TenantID = [int]$tenantID; RestaurantID = [int]$restaurantID; UserID = [int]$user; Email = $email }
+    $auth = Invoke-RestMethod -Method Post -Uri "$api/auth/login" -ContentType 'application/json' -Body $login -TimeoutSec 20
+    if (-not $auth.token) { throw "Could not authenticate the disposable WS05 $name account." }
+    return [pscustomobject]@{ TenantID = [int]$tenantID; RestaurantID = [int]$restaurantID; UserID = [int]$user; Email = $email; Token = $auth.token }
 }
 
 $tenantA = Ensure-Tenant 'a' 'Tenant A'
 $tenantB = Ensure-Tenant 'b' 'Tenant B'
-
-$siblingRestaurantsSql = @"
-INSERT INTO restaurants (tenant_id, name, slug, address, status, created_at, updated_at)
-SELECT tenant_id, 'WS05 Tenant A Sibling Restaurant', 'phase2a-restaurant-a2', '43 Test Avenue', 'active', NOW(), NOW()
-FROM restaurants WHERE slug = 'phase2a-restaurant-a'
-ON CONFLICT (tenant_id, slug) DO NOTHING;
-INSERT INTO restaurants (tenant_id, name, slug, address, status, created_at, updated_at)
-SELECT tenant_id, 'WS05 Tenant B Sibling Restaurant', 'phase2a-restaurant-b2', '44 Test Avenue', 'active', NOW(), NOW()
-FROM restaurants WHERE slug = 'phase2a-restaurant-b'
-ON CONFLICT (tenant_id, slug) DO NOTHING;
-"@
-$null = Invoke-DisposableSql $siblingRestaurantsSql
-
-$siblingUserSql = @"
-INSERT INTO users (tenant_id, restaurant_id, email, password_hash, name, phone, role, status, is_super_admin, created_at, updated_at)
-SELECT r.tenant_id, r.id, 'phase2a-sibling-owner-a@example.test', u.password_hash,
-       'WS05 Tenant A Sibling Owner', '5550100211', 'owner', 'active', FALSE, NOW(), NOW()
-FROM restaurants r
-JOIN users u ON u.tenant_id = r.tenant_id AND u.email = 'phase2a-owner-a@example.test'
-WHERE r.slug = 'phase2a-restaurant-a2'
-ON CONFLICT (tenant_id, email) DO UPDATE SET
-    restaurant_id = EXCLUDED.restaurant_id,
-    password_hash = EXCLUDED.password_hash,
-    name = EXCLUDED.name,
-    role = EXCLUDED.role,
-    status = 'active',
-    is_super_admin = FALSE,
-    updated_at = NOW();
-"@
-$null = Invoke-DisposableSql $siblingUserSql
-
-$multiTenantUserSql = @"
-INSERT INTO users (tenant_id, restaurant_id, email, password_hash, name, phone, role, status, is_super_admin, created_at, updated_at)
-SELECT r.tenant_id, r.id, 'phase2a-multi-owner@example.test', source.password_hash,
-       'WS05 Multi Tenant Owner', '5550100212', 'owner', 'active', FALSE, NOW(), NOW()
-FROM restaurants r
-CROSS JOIN LATERAL (
-    SELECT password_hash FROM users
-    WHERE tenant_id = $($tenantA.TenantID) AND email = 'phase2a-owner-a@example.test'
-    LIMIT 1
-) source
-WHERE r.slug IN ('phase2a-restaurant-a', 'phase2a-restaurant-b')
-ON CONFLICT (tenant_id, email) DO UPDATE SET
-    restaurant_id = EXCLUDED.restaurant_id,
-    password_hash = EXCLUDED.password_hash,
-    name = EXCLUDED.name,
-    role = EXCLUDED.role,
-    status = 'active',
-    is_super_admin = FALSE,
-    updated_at = NOW();
-"@
-$null = Invoke-DisposableSql $multiTenantUserSql
+$superAdminPasswordHash = Invoke-DisposableSql "SELECT password_hash FROM users WHERE id = $($tenantA.UserID)"
+if ([string]::IsNullOrWhiteSpace($superAdminPasswordHash)) { throw 'Could not load the disposable tenant password hash for the super-admin fixture.' }
 
 $fixtureSql = @"
 BEGIN;
@@ -159,4 +103,6 @@ COMMIT;
 "@
 $null = Invoke-DisposableSql $fixtureSql
 
-Write-Output 'Seeded isolated WS05 fixtures.'
+Write-Output "Seeded isolated WS05 fixtures: Tenant A $($tenantA.TenantID), Tenant B $($tenantB.TenantID)."
+Write-Output "Test-only account for both tenants: phase2a-owner-a@example.test / phase2a-owner-b@example.test"
+Write-Output "Test-only super-admin account: $superAdminEmail"
