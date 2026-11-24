@@ -1,0 +1,32 @@
+diff --git a/dist/cjs/development/plugin.cjs b/dist/cjs/development/plugin.cjs
+index d7f906300e1dfa181b80a6898814dec6beeac954..25ae326ce1db1927d859f7117d63a89e1aeb69e1 100644
+--- a/dist/cjs/development/plugin.cjs
++++ b/dist/cjs/development/plugin.cjs
+@@ -4,7 +4,7 @@ var fs$1 = require('fs/promises');
+ var path = require('path');
+ var module$1 = require('module');
+ var url = require('url');
+-var watcher = require('@parcel/watcher');
++var watcher = { subscribe: async () => { throw new Error('[next-intl] experimental.extract file watching was removed in the SERVIO dependency-removal proof of concept.'); } };
+ var fs = require('fs');
+ var crypto = require('crypto');
+ 
+diff --git a/dist/esm/development/extractor/source/SourceFileWatcher.js b/dist/esm/development/extractor/source/SourceFileWatcher.js
+index a6814673f8b41daaf3a129ad969c670618e81606..723be7c9bf15e304bf29b331b57897edaffe05ee 100644
+--- a/dist/esm/development/extractor/source/SourceFileWatcher.js
++++ b/dist/esm/development/extractor/source/SourceFileWatcher.js
+@@ -1,6 +1,6 @@
+ import fs from 'fs/promises';
+ import path from 'path';
+-import { subscribe } from '@parcel/watcher';
++const subscribe = async () => { throw new Error('[next-intl] experimental.extract file watching was removed in the SERVIO dependency-removal proof of concept.'); };
+ import SourceFileFilter from './SourceFileFilter.js';
+ import SourceFileScanner from './SourceFileScanner.js';
+ 
+diff --git a/dist/esm/production/extractor/source/SourceFileWatcher.js b/dist/esm/production/extractor/source/SourceFileWatcher.js
+index a3e1597ff3fe9a514dfee789cf173b78e0021631..ddcc6cef5a55de6968292e6a1429233ab83826d6 100644
+--- a/dist/esm/production/extractor/source/SourceFileWatcher.js
++++ b/dist/esm/production/extractor/source/SourceFileWatcher.js
+@@ -1 +1 @@
+-import t from"fs/promises";import s from"path";import{subscribe as e}from"@parcel/watcher";import o from"./SourceFileFilter.js";import r from"./SourceFileScanner.js";class i{subscriptions=[];constructor(t,s){this.roots=t,this.onChange=s}async start(){if(this.subscriptions.length>0)return;const t=o.IGNORED_DIRECTORIES.map((t=>`**/${t}/**`));for(const s of this.roots){const o=await e(s,(async(t,s)=>{if(t)return void console.error(t);const e=await this.normalizeEvents(s);e.length>0&&await this.onChange(e)}),{ignore:t});this.subscriptions.push(o)}}async normalizeEvents(s){const e=[],i=[];await Promise.all(s.map((async s=>{if("create"===s.type)try{if((await t.stat(s.path)).isDirectory())return void e.push(s.path)}catch{}i.push(s)})));let a=[];if(e.length>0)try{const t=await r.getSourceFiles(e);a=Array.from(t).map((t=>({type:"create",path:t})))}catch{}const n=[...i,...a],c=new Set,p=[];for(const t of n){const s=`${t.type}:${t.path}`;c.has(s)||(c.add(s),p.push(t))}return p.filter((t=>"delete"===t.type||o.isSourceFile(t.path)))}async expandDirectoryDeleteEvents(t,e){const r=[];for(const i of t)if("delete"!==i.type||o.isSourceFile(i.path))r.push(i);else{const t=s.resolve(i.path),a=[];for(const s of e)o.isWithinPath(s,t)&&a.push(s);if(a.length>0)for(const t of a)r.push({type:"delete",path:t});else r.push(i)}return r}async stop(){await Promise.all(this.subscriptions.map((t=>t.unsubscribe()))),this.subscriptions=[]}[Symbol.dispose](){this.stop()}}export{i as default};
++import t from"fs/promises";import s from"path";const e = async () => { throw new Error('[next-intl] experimental.extract file watching was removed in the SERVIO dependency-removal proof of concept.'); };import o from"./SourceFileFilter.js";import r from"./SourceFileScanner.js";class i{subscriptions=[];constructor(t,s){this.roots=t,this.onChange=s}async start(){if(this.subscriptions.length>0)return;const t=o.IGNORED_DIRECTORIES.map((t=>`**/${t}/**`));for(const s of this.roots){const o=await e(s,(async(t,s)=>{if(t)return void console.error(t);const e=await this.normalizeEvents(s);e.length>0&&await this.onChange(e)}),{ignore:t});this.subscriptions.push(o)}}async normalizeEvents(s){const e=[],i=[];await Promise.all(s.map((async s=>{if("create"===s.type)try{if((await t.stat(s.path)).isDirectory())return void e.push(s.path)}catch{}i.push(s)})));let a=[];if(e.length>0)try{const t=await r.getSourceFiles(e);a=Array.from(t).map((t=>({type:"create",path:t})))}catch{}const n=[...i,...a],c=new Set,p=[];for(const t of n){const s=`${t.type}:${t.path}`;c.has(s)||(c.add(s),p.push(t))}return p.filter((t=>"delete"===t.type||o.isSourceFile(t.path)))}async expandDirectoryDeleteEvents(t,e){const r=[];for(const i of t)if("delete"!==i.type||o.isSourceFile(i.path))r.push(i);else{const t=s.resolve(i.path),a=[];for(const s of e)o.isWithinPath(s,t)&&a.push(s);if(a.length>0)for(const t of a)r.push({type:"delete",path:t});else r.push(i)}return r}async stop(){await Promise.all(this.subscriptions.map((t=>t.unsubscribe()))),this.subscriptions=[]}[Symbol.dispose](){this.stop()}}export{i as default};

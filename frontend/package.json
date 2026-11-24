@@ -71,6 +71,9 @@
       "esbuild",
       "sharp",
       "unrs-resolver"
-    ]
+    ],
+    "patchedDependencies": {
+      "next-intl@4.15.1": "patches/next-intl@4.15.1.patch"
+    }
   }
 }
