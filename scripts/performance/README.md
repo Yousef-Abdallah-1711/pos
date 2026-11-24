@@ -1,6 +1,6 @@
 # Local performance measurement scripts
 
-These scripts are for repeatable measurements against a disposable local stack loaded only with synthetic data. They do not mutate data. Confirm every configured route is a safe GET before running the API sampler; never point them at production or a shared development stack.
+These scripts are for repeatable measurements against a disposable local stack loaded only with synthetic data. They do not mutate data. Both tools reject non-loopback base URLs, and the browser sampler blocks network requests outside its configured local app/API origins. Confirm every configured API route is a safe GET before sampling; never point them at production or a shared development stack.
 
 ## API GET sampling
 

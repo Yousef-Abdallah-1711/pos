@@ -3,6 +3,7 @@ import path from "node:path";
 import { createHash } from "node:crypto";
 import { createRequire } from "node:module";
 import { readFile, writeFile } from "node:fs/promises";
+import { requireLocalOrigin } from "./local-origin.mjs";
 
 const HELP = [
   "Usage: node scripts/performance/profile-pages.mjs --routes <local-routes.json>",
@@ -40,8 +41,12 @@ async function main() {
   const routeIndex = args.indexOf("--routes");
   const routeFile = routeIndex >= 0 ? args[routeIndex + 1] : "";
   if (!routeFile || !process.env.P2C_BASE_URL) throw new Error("Provide --routes and P2C_BASE_URL.");
-  const base = new URL(process.env.P2C_BASE_URL);
-  const apiOrigin = new URL(process.env.P2C_API_ORIGIN ?? base.origin).origin;
+  const base = requireLocalOrigin(process.env.P2C_BASE_URL, "P2C_BASE_URL");
+  const apiOrigin = requireLocalOrigin(
+    process.env.P2C_API_ORIGIN ?? base.origin,
+    "P2C_API_ORIGIN"
+  ).origin;
+  const allowedOrigins = new Set([base.origin, apiOrigin]);
   const routes = JSON.parse(await readFile(routeFile, "utf8"));
   const samples = Number(process.env.P2C_PAGE_SAMPLES ?? 5);
   const readyTimeoutMs = Number(process.env.P2C_READY_TIMEOUT_MS ?? 15000);
@@ -66,6 +71,13 @@ async function main() {
         : {};
       const context = await browser.newContext(contextOptions);
       const page = await context.newPage();
+      await page.route("**/*", (route) => {
+        const requestUrl = new URL(route.request().url());
+        if (!["http:", "https:"].includes(requestUrl.protocol) || allowedOrigins.has(requestUrl.origin)) {
+          return route.continue();
+        }
+        return route.abort("blockedbyclient");
+      });
       let consoleErrors = 0;
       let javascriptErrors = 0;
       let failedRequests = 0;
