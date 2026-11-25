@@ -1,12 +1,12 @@
 # Financial remediation: start here
 
-## Current verified handoff — 2026-11-25
+## Current verified handoff — 2026-11-25 (after PR #132)
 
-Fetch origin/main before work. Verified SHA: fd3636370f853150e0ddf9b676f21eb0084ba9bf. GitHub currently reports zero open PRs; financial PRs #104, #108, #109, #110, #112, #114 and #117 are merged. The 21 issue packages and Spec Kit drafts are in main, but the issues are not all verified or accepted.
+Fetch `origin/main` before work. Latest verified SHA is `13f1aab2c099eb0584ba6c2d78c7802ac05cb327`; documentation PR #132 is merged and GitHub currently shows zero open PRs. All 21 issue packages have spec/plan/tasks in main; this does not mean all issues are accepted.
 
-Exact-main synthetic acceptance [run 45509343366](https://github.com/Yousef-Abdallah-1711/pos/actions/runs/45509343366) and benchmark [run 45509925241](https://github.com/Yousef-Abdallah-1711/pos/actions/runs/45509925241) passed. Neither is production or accounting acceptance. Benchmark data is recorded in the [single financial tracker](FINANCIAL_TRACKING_PROGRESS.md).
+The exact-main synthetic acceptance and benchmark are recorded in the [single financial tracker](FINANCIAL_TRACKING_PROGRESS.md). PR #132 required checks passed before merge. A fresh clone of 13f1aab2 verified all 21 issue folders and required docs. These checks do not establish production or accounting acceptance.
 
-The latest recovery review is [RECOVERY_REVIEW_2026-11-25.md](RECOVERY_REVIEW_2026-11-25.md). It is a partial branch/worktree review, not a declaration that all preserved or dirty work is recovered. Current inventory: 125 worktrees, 33 dirty, 10 with tracked modifications. Do not delete, reset, or clean those local worktrees. Local databases, raw browser traces/results, and potentially sensitive financial or operational evidence remain local/private until individually reviewed.
+The latest recovery review is [RECOVERY_REVIEW_2026-11-25.md](RECOVERY_REVIEW_2026-11-25.md). Recovery is partial: current inventory is 125 worktrees, 33 dirty, 10 with tracked modifications. Private preservation commits from the latest pass: forensic probe `6c9de4c619d7356e7004d76f42caef7140df2e54` and synthetic financial evidence `181430d6eec9e9d8e28c61ad2f64c44c564d81ed` in the private repository. Continue file-level review; do not delete, reset, or clean existing worktrees.
 
 Accounting decisions OPEN-01, EARN-01, CLOSE-01 and related policy items remain pending. CFR-010 is OPEN and financial production remains NO-GO. Do not deploy or change production data.
 
