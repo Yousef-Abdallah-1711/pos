@@ -1,15 +1,18 @@
 # Financial remediation: start here
 
-## Current verified handoff — 2026-11-23
+## Current verified handoff — 2026-11-25
 
-Fetch `origin/main` before work. Verified integration snapshot at this handoff update: `4ab49cd0b796df778ffa5257acf9b8017eaeeabb`; the tracker addendum in this same documentation PR may advance `main` again, so use `git rev-parse origin/main` for the final SHA. Financial PRs #104, #108, #109, #110, #112, #114, #117, #121 and #122 are merged. PR #110 was merged at `4ab49cd0b796df778ffa5257acf9b8017eaeeabb`; its protected checks and PostgreSQL acceptance passed, while its then-running benchmark is not performance approval.
+Fetch origin/main before work. Verified SHA: fd3636370f853150e0ddf9b676f21eb0084ba9bf. GitHub currently reports zero open PRs; financial PRs #104, #108, #109, #110, #112, #114 and #117 are merged. The 21 issue packages and Spec Kit drafts are in main, but the issues are not all verified or accepted.
 
-The 21 issue folders and Spec Kit drafts are in `main`, but they are not 21 verified or accepted fixes. Start by reconciling the current tracker against original issues and evidence; worktree recovery remains incomplete. Keep local database/browser artifacts private until reviewed. Accounting decisions OPEN-01, EARN-01, CLOSE-01 and related policy items remain pending, CFR-010 is open, and production is NO-GO. Do not deploy or change production data.
+Exact-main synthetic acceptance [run 45509343366](https://github.com/Yousef-Abdallah-1711/pos/actions/runs/45509343366) and benchmark [run 45509925241](https://github.com/Yousef-Abdallah-1711/pos/actions/runs/45509925241) passed. Neither is production or accounting acceptance. Benchmark data is recorded in the [single financial tracker](FINANCIAL_TRACKING_PROGRESS.md).
 
-Read [current consolidated tracker](FINANCIAL_TRACKING_PROGRESS.md) first, then fetch and inspect the live branch/PR state. Preserved snapshots and their caveats are listed in its latest verified section.
+The latest recovery review is [RECOVERY_REVIEW_2026-11-25.md](RECOVERY_REVIEW_2026-11-25.md). It is a partial branch/worktree review, not a declaration that all preserved or dirty work is recovered. Current inventory: 125 worktrees, 33 dirty, 10 with tracked modifications. Do not delete, reset, or clean those local worktrees. Local databases, raw browser traces/results, and potentially sensitive financial or operational evidence remain local/private until individually reviewed.
+
+Accounting decisions OPEN-01, EARN-01, CLOSE-01 and related policy items remain pending. CFR-010 is OPEN and financial production remains NO-GO. Do not deploy or change production data.
+
+Read [current consolidated tracker](FINANCIAL_TRACKING_PROGRESS.md) first, then fetch and inspect live GitHub state. Everything below this current handoff is historical source text; do not rely on its old PR, SHA, or task-status statements.
 
 ---
-
 
 This is a **partial recovery draft**. Repository: https://github.com/Yousef-Abdallah-1711/pos. Main at the latest 2026-11-23 snapshot was `3fa3702148771f39af5c9f7f25f377ecdd3f0a98`; always fetch and verify. Recovery is [PR #117](https://github.com/Yousef-Abdallah-1711/pos/pull/117), branch `codex/financial-recovery-specs-20261122`.
 
