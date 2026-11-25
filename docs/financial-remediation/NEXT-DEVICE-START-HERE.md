@@ -1,12 +1,12 @@
 # Financial remediation: start here
 
-## Current verified handoff — 2026-11-25 (after PR #132)
+## Current verified handoff — 2026-11-25 (after PR #133)
 
 Fetch `origin/main` before work. Latest verified SHA is `13f1aab2c099eb0584ba6c2d78c7802ac05cb327`; documentation PR #132 is merged and GitHub currently shows zero open PRs. All 21 issue packages have spec/plan/tasks in main; this does not mean all issues are accepted.
 
-The exact-main synthetic acceptance and benchmark are recorded in the [single financial tracker](FINANCIAL_TRACKING_PROGRESS.md). PR #132 required checks passed before merge. A fresh clone of 13f1aab2 verified all 21 issue folders and required docs. These checks do not establish production or accounting acceptance.
+Exact-main synthetic acceptance and benchmark evidence is summarized in the single tracker. A fresh clone updated to 9a258399 verified all 21 issue folders and the required handoff documents. This is documentation verification, not production/accounting acceptance.
 
-The latest recovery review is [RECOVERY_REVIEW_2026-11-25.md](RECOVERY_REVIEW_2026-11-25.md). Recovery is partial: current inventory is 125 worktrees, 33 dirty, 10 with tracked modifications. Private preservation commits from the latest pass: forensic probe `6c9de4c619d7356e7004d76f42caef7140df2e54` and synthetic financial evidence `181430d6eec9e9d8e28c61ad2f64c44c564d81ed` in the private repository. Continue file-level review; do not delete, reset, or clean existing worktrees.
+The latest recovery review is RECOVERY_REVIEW_2026-11-25.md. Current inventory: 125 worktrees, 33 dirty and 10 with tracked modifications. Three reviewed synthetic evidence sets and the historical CFR-001 probe are preserved on private branches listed in the tracker. Continue file-level review; do not reset or clean worktrees.
 
 Accounting decisions OPEN-01, EARN-01, CLOSE-01 and related policy items remain pending. CFR-010 is OPEN and financial production remains NO-GO. Do not deploy or change production data.
 
