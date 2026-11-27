@@ -222,11 +222,16 @@ async function interactions(browser, page, locale) {
  await page.setViewportSize({ width: 390, height: 844 })
  await page.goto(`${base}/${locale}`, { waitUntil: 'domcontentloaded' })
  await page.waitForFunction(theme => document.documentElement.classList.contains(theme), expectedTheme)
+ // Let required fonts finish before deliberate rapid navigation. Firefox emits
+ // a console error for an in-flight font canceled by a reload or route change.
+ // Actual font errors remain in the shared console-error collector.
+ await page.evaluate(() => document.fonts.ready)
  const otherTheme = expectedTheme === 'dark' ? 'light' : 'dark'
  await page.locator('.sv-theme-toggle').first().click()
  await page.waitForFunction(theme => document.documentElement.classList.contains(theme), otherTheme)
  await page.reload({ waitUntil: 'domcontentloaded' })
  await page.waitForFunction(theme => document.documentElement.classList.contains(theme), otherTheme)
+ await page.evaluate(() => document.fonts.ready)
  await page.locator('.sv-theme-toggle').first().click()
  await page.waitForFunction(theme => document.documentElement.classList.contains(theme), expectedTheme)
  check(`theme toggle and persistence ${locale}`, await page.evaluate(theme => document.documentElement.classList.contains(theme), expectedTheme))
@@ -262,15 +267,18 @@ async function interactions(browser, page, locale) {
  const other = locale === 'en' ? 'ar' : 'en'
  await page.waitForURL(`**/${other}`)
  await page.waitForFunction(direction => document.documentElement.dir === direction, other === 'ar' ? 'rtl' : 'ltr')
+ await page.evaluate(() => document.fonts.ready)
  check(`language switch ${locale}`, page.url().endsWith(`/${other}`))
  await load(page, locale, '/features/analytics')
  await page.locator('.sv-language').click()
  await page.waitForURL(`${base}/${other}/features/analytics`)
  await page.waitForFunction(theme => document.documentElement.classList.contains(theme), expectedTheme)
+ await page.evaluate(() => document.fonts.ready)
  check(`locale switch preserves equivalent feature route ${locale}`, page.url() === `${base}/${other}/features/analytics`)
  check(`locale switch preserves theme ${locale}`, await page.evaluate(theme => document.documentElement.classList.contains(theme), expectedTheme))
  await page.locator('.sv-language').click()
  await page.waitForURL(`${base}/${locale}/features/analytics`)
+ await page.evaluate(() => document.fonts.ready)
 
  await page.setViewportSize({ width: 1440, height: 1000 })
  await load(page, locale, '')
@@ -318,6 +326,7 @@ async function interactions(browser, page, locale) {
   const destination = `${base}/${locale}/features/${slug}`
   await Promise.all([page.waitForURL(destination), page.locator(`.sv-mega-group a[href="/${locale}/features/${slug}"]`).click()])
   await page.locator('main h1').waitFor()
+  await page.evaluate(() => document.fonts.ready)
   check(`mega menu destination ${locale}/${slug}`, page.url() === destination)
  }
  await load(page, locale, '')
@@ -329,6 +338,7 @@ async function interactions(browser, page, locale) {
   const route = destinationPath.replace(new RegExp(`^/${locale}`), '')
   const link = page.locator(`.sv-footer nav a[href="${destinationPath}"]`).first()
   await Promise.all([page.waitForURL(destination), link.click()])
+  await page.evaluate(() => document.fonts.ready)
   check(`footer destination ${locale}${route || '/'}`, page.url() === destination)
  }
 
@@ -353,6 +363,7 @@ async function interactions(browser, page, locale) {
   const destination = `${base}/${locale}/features/${slug}`
   await Promise.all([page.waitForURL(destination), page.locator(`.sv-mobile-feature-links a[href="/${locale}/features/${slug}"]`).click()])
   await page.locator('main h1').waitFor()
+  await page.evaluate(() => document.fonts.ready)
   check(`mobile feature destination ${locale}/${slug}`, page.url() === destination)
  }
  await load(page, locale, '')
@@ -375,9 +386,11 @@ async function interactions(browser, page, locale) {
  const otherLocale = locale === 'en' ? 'ar' : 'en'
  await page.waitForURL(`${base}/${otherLocale}`)
  await page.waitForFunction(theme => document.documentElement.classList.contains(theme), expectedTheme)
+ await page.evaluate(() => document.fonts.ready)
  check(`mobile drawer locale control ${locale}`, page.url() === `${base}/${otherLocale}` && await page.evaluate(theme => document.documentElement.classList.contains(theme), expectedTheme))
  await page.locator('.sv-language').click()
  await page.waitForURL(`${base}/${locale}`)
+ await page.evaluate(() => document.fonts.ready)
 
  for (const [name, viewport] of [['tablet-portrait', { width: 768, height: 1024 }], ['tablet-landscape', { width: 1024, height: 768 }]]) {
   await page.setViewportSize(viewport)
