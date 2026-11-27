@@ -2,7 +2,7 @@
 
 Updated 2026-11-27. Repository: `C:/Users/Yousef/Desktop/Projects/POSS`. App: `frontend/apps/landing`. Continue in **this worktree**. The landing implementation and evidence were prepared for integration through a pull request. Unrelated working files in other apps and local browser/audit artifacts were excluded; preserve them. No deployment was performed.
 
-Repository remote: `https://github.com/Yousef-Abdallah-1711/pos`. Landing branch: `feature/servio-bento-showcase-20261127`, head `b52745b01f56d87d3a1946407537c9798ef9984b`, [PR #137](https://github.com/Yousef-Abdallah-1711/pos/pull/137). At this update the PR is open and its application-images CI check is still running; verify the PR and remote main before claiming a merge. After integration, replace this paragraph with the verified merge commit and current branch. Do not interpret the commit SHA as the final remote `main` SHA.
+Repository remote: `https://github.com/Yousef-Abdallah-1711/pos`. Landing branch: `feature/servio-bento-showcase-20261127`, head `2781efa7`, [PR #137](https://github.com/Yousef-Abdallah-1711/pos/pull/137). At this update the PR is open. Its earlier image CI failed Lighthouse performance; a font-loading improvement was pushed and its new CI is pending. Verify the PR and remote main before claiming a merge. After integration, replace this paragraph with the verified merge commit and current branch. Do not interpret the commit SHA as the final remote `main` SHA.
 
 ## First steps for the next agent
 

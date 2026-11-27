@@ -10,7 +10,9 @@
 | Visual baseline | IN PROGRESS | Sixteen authenticated synthetic captures cover EN/AR, light/dark, collapsed desktop, Arabic mobile drawer, empty POS/KDS, a synthetic POS cart, six additional routes and one staff account with no assigned roles. Additional restricted users, populated states, other route variants and physical devices remain. See `baseline/README.md`. |
 | Implementation | NOT STARTED | No dashboard, database or storefront appearance behavior has been changed. |
 
-Landing closure is being tracked in PR #137 and `docs/landing-interactive-experience/operational-bento-showcase-report.md`. At discovery time the PR has not been merged. The last local mobile Lighthouse sample missed the LCP target and the detailed POS screenshot interaction remains incomplete; do not label the landing project fully verified. CI and the final browser rerun are in progress.
+Landing closure is being tracked in PR #137 and `docs/landing-interactive-experience/operational-bento-showcase-report.md`. At discovery time the PR has not been merged. The last local mobile Lighthouse sample missed the LCP target and the actual POS screenshot remains static with a separate illustrative cart; do not label the landing project fully verified. The 120-case browser matrix passed before the font-loading change and the new CI run is in progress.
+
+The previous PR #137 image gate failed its Lighthouse performance threshold (EN 88 and AR 86 versus 90). A font preload change on landing head `2781efa7` improved single local comparisons in both languages but did not reach the 2.5-second LCP goal; its new CI run is pending. See `docs/landing-interactive-experience/performance-and-accessibility.md` for methodology and limitations. Do not merge by bypassing the failed gate.
 
 Additional local Arabic mobile Lighthouse sample on the latest production build: performance 45, accessibility 100, LCP 6.35 s, CLS 0, TBT 2.59 s. This single run occurred with other containers active and is not a controlled comparison or a physical-device result. English and Arabic LCP both remain above the 2.5 s target in the measured samples.
 
