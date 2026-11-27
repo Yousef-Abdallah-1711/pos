@@ -3,7 +3,7 @@
 | Area | Status | Evidence and remaining work |
 | --- | --- | --- |
 | Source inventory | IN PROGRESS | Raw routes, colors, typography and SERVIO PNG CSVs generated; 63 static and eight synthetic-ID dashboard URLs visited as an English owner. Classification, other roles, remaining dynamic routes, active asset usage and full application coverage remain. |
-| Shell and sidebar | IN PROGRESS | Source behavior documented; authenticated desktop/mobile, RTL, permission and keyboard observation remains. |
+| Shell and sidebar | IN PROGRESS | Source behavior and selected authenticated desktop/mobile, RTL, permission and keyboard observations documented; broader role, device and keyboard coverage remains. |
 | Appearance lifecycle | IN PROGRESS | Personal settings and implicit storefront sync traced; tenant switching, caching and failure behavior remain unverified. |
 | Database/API | IN PROGRESS | User settings, RLS and site-theme endpoints identified; full schemas, effective role mapping and runtime isolation need review. |
 | Future proposal | IN PROGRESS | Initial ownership, API direction, token subset, UX and test plan drafted; complete token registry, validations and migration decisions remain. |
@@ -14,7 +14,7 @@ Two additional synthetic detail fixtures (a zero-line draft journal and a pendin
 
 In an unauthenticated local development browser, `/en/test-url` rendered its test page; `/`, `/en`, `/auth/callback` and `/en/auth/super-admin-login` redirected to the locally configured landing login. The unrelated host process at port 3001 showed a dependency build error during this check, so the destination login flow was not verified in that environment. The app's debug/test route exposure and intended production handling require independent review; no security conclusion is made from a single local request.
 
-Landing closure is being tracked in PR #137 and `docs/landing-interactive-experience/operational-bento-showcase-report.md`. At discovery time the PR has not been merged. The last local mobile Lighthouse sample missed the LCP target and the actual POS screenshot remains static with a separate illustrative cart; do not label the landing project fully verified. The 120-case browser matrix passed before the font-loading change and the new CI run is in progress.
+Landing closure is being tracked in PR #137 and `docs/landing-interactive-experience/operational-bento-showcase-report.md`. At discovery time the PR has not been merged. The last local mobile Lighthouse sample missed the LCP target and the actual POS screenshot remains static with a separate illustrative cart; do not label the landing project fully verified. An earlier 120-case browser matrix passed before the font-loading change; the subsequent final-source rerun is recorded below, and CI remains in progress.
 
 An earlier PR #137 image gate failed Lighthouse performance (EN 88 and AR 86 versus 90). A font preload change passed Lighthouse on the next CI run (EN 96 and AR 93; LCP 2.40 and 2.86 seconds), but Firefox dark acceptance reported canceled font requests. A local delayed-font reproduction produced the same cancellation, and waiting for fonts avoided it without suppressing errors. Landing head `8be2a08b` updates acceptance navigation and its new CI is pending. Arabic LCP still exceeded 2.5 seconds in the last CI sample. See `docs/landing-interactive-experience/performance-and-accessibility.md`. Do not bypass a failed gate.
 
