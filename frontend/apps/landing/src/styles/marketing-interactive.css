@@ -74,7 +74,7 @@ html[dir=rtl] .cv-showcase-controls svg { transform:rotate(180deg); }
 .cv-feature-slide-capture { min-width:0; }
 .cv-feature-slide-capture .sv-capture { margin:0; }
 .cv-feature-slide-capture .sv-capture-image { display:flex; justify-content:center; }
-.cv-feature-slide-capture img { display:block; width:auto; max-width:100%; max-height:380px; height:auto; object-fit:contain; }
+.cv-feature-slide-capture img { display:block; width:100%; max-width:100%; max-height:380px; height:auto; object-fit:contain; }
 .cv-feature-slide-capture figcaption { font-size:11px; }
 .cv-feature-slide-capture>small { display:block; margin-top:7px; color:var(--cv-ink-2); font-size:11px; }
 .cv-layered { position:relative; isolation:isolate; overflow:hidden; min-height:700px; padding-block:120px; background:var(--cv-footer); color:var(--cv-footer-ink); }
