@@ -7,7 +7,7 @@
 | Appearance lifecycle | IN PROGRESS | Personal settings and implicit storefront sync traced; tenant switching, caching and failure behavior remain unverified. |
 | Database/API | IN PROGRESS | User settings, RLS and site-theme endpoints identified; full schemas, effective role mapping and runtime isolation need review. |
 | Future proposal | IN PROGRESS | Initial ownership, API direction, token subset, UX and test plan drafted; complete token registry, validations and migration decisions remain. |
-| Visual baseline | IN PROGRESS | Fifteen authenticated synthetic owner captures cover EN/AR, light/dark, collapsed desktop, Arabic mobile drawer, empty POS/KDS, a synthetic POS cart and six additional routes; restricted users, additional populated states, other route variants and physical devices remain. See `baseline/README.md`. |
+| Visual baseline | IN PROGRESS | Sixteen authenticated synthetic captures cover EN/AR, light/dark, collapsed desktop, Arabic mobile drawer, empty POS/KDS, a synthetic POS cart, six additional routes and one staff account with no assigned roles. Additional restricted users, populated states, other route variants and physical devices remain. See `baseline/README.md`. |
 | Implementation | NOT STARTED | No dashboard, database or storefront appearance behavior has been changed. |
 
 Landing closure is being tracked in PR #137 and `docs/landing-interactive-experience/operational-bento-showcase-report.md`. At discovery time the PR has not been merged. The last local mobile Lighthouse sample missed the LCP target and the detailed POS screenshot interaction remains incomplete; do not label the landing project fully verified. CI and the final browser rerun are in progress.
