@@ -1,12 +1,12 @@
 # Financial remediation: start here
 
-## Current verified handoff — 2026-11-25 (after PR #133)
+## Current verified handoff — 2026-11-25 (after PR #134)
 
-Fetch `origin/main` before work. Latest verified SHA is `13f1aab2c099eb0584ba6c2d78c7802ac05cb327`; documentation PR #132 is merged and GitHub currently shows zero open PRs. All 21 issue packages have spec/plan/tasks in main; this does not mean all issues are accepted.
+Fetch `origin/main` before work. Latest verified SHA is `133260db66b1143c254d79476daa7650b41a33f0`; documentation PR #134 is merged and GitHub currently shows zero open PRs. All 21 issue packages have spec/plan/tasks in main; this does not mean all issues are accepted.
 
-Exact-main synthetic acceptance and benchmark evidence is summarized in the single tracker. A fresh clone updated to 9a258399 verified all 21 issue folders and the required handoff documents. This is documentation verification, not production/accounting acceptance.
+Exact-main synthetic acceptance and benchmark evidence is summarized in the single tracker. A fresh clone at 133260db verified all 21 issue folders and the required handoff documents. This is documentation verification, not production/accounting acceptance.
 
-The latest recovery review is RECOVERY_REVIEW_2026-11-25.md. Current inventory: 125 worktrees, 33 dirty and 10 with tracked modifications. Three reviewed synthetic evidence sets and the historical CFR-001 probe are preserved on private branches listed in the tracker. Continue file-level review; do not reset or clean worktrees.
+The latest recovery review is RECOVERY_REVIEW_2026-11-25.md. Latest known inventory: 125 worktrees, 33 dirty and 10 with tracked modifications. The #134 main workflow passed backend, financial PostgreSQL, frontend, and security/config jobs; application-images was still running and auth-browser-acceptance was skipped at last check. Phase 4C remains private because it includes an unsafe next-intl proof-of-concept and needs further review. Continue file-level review; do not reset or clean worktrees.
 
 Accounting decisions OPEN-01, EARN-01, CLOSE-01 and related policy items remain pending. CFR-010 is OPEN and financial production remains NO-GO. Do not deploy or change production data.
 
