@@ -51,6 +51,12 @@ export function OperationalBento({ locale }: { locale: Locale }) {
             <span>{c.problemSample}</span>
             <strong>{c.problemSampleDetails[index][steps[index]]}</strong>
             <span className="cv-bento-sample-indicator" aria-hidden="true">{steps[index] === 2 ? '✓' : `0${steps[index] + 1}`}</span>
+            {index === 0 && <div className="cv-bento-pos-example" aria-label={c.problemSample}>
+              <div><small>{c.problemPos.menu}</small><span className="cv-bento-pos-item" data-selected={steps[index] > 0}>{c.problemPos.item}</span></div>
+              <div><small>{c.problemPos.cart}</small><span>{steps[index] === 0 ? c.problemPos.empty : `${c.problemPos.item} · ${c.problemPos.quantity}: 1`}</span>
+                {steps[index] > 0 && <span className="cv-bento-pos-submit" data-highlight={steps[index] === 2}>{c.problemPos.place} (1)</span>}
+              </div>
+            </div>}
           </div>
           <div className="cv-bento-story">
             <div className="cv-bento-story-state">

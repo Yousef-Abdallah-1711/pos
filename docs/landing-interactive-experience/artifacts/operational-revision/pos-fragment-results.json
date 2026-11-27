@@ -1,0 +1,1719 @@
+{
+  "baseURL": "http://localhost:3013",
+  "capturedAt": "2026-11-27T12:46:57.485Z",
+  "results": [
+    {
+      "engine": "chromium",
+      "locale": "en",
+      "theme": "light",
+      "width": 390,
+      "height": 844,
+      "initial": {
+        "documentWidth": 390,
+        "viewportWidth": 390,
+        "language": "en",
+        "direction": "ltr",
+        "theme": "light",
+        "sections": 13,
+        "cards": 3,
+        "gridColumns": "358px",
+        "captureLocale": "en",
+        "captureTheme": "light",
+        "bridge": "#how-orders-move",
+        "trackWidth": 2542,
+        "viewportClient": 390,
+        "missingBentoImages": 0,
+        "cardBounds": [
+          {
+            "left": 16,
+            "right": 374,
+            "width": 358,
+            "height": 801.96875,
+            "scrollHeight": 800,
+            "clientHeight": 800
+          },
+          {
+            "left": 16,
+            "right": 374,
+            "width": 358,
+            "height": 626.28125,
+            "scrollHeight": 624,
+            "clientHeight": 624
+          },
+          {
+            "left": 16,
+            "right": 374,
+            "width": 358,
+            "height": 626.28125,
+            "scrollHeight": 624,
+            "clientHeight": 624
+          }
+        ]
+      },
+      "showcase": {
+        "pinSpacers": 0,
+        "overflow": "auto"
+      },
+      "issues": []
+    },
+    {
+      "engine": "chromium",
+      "locale": "en",
+      "theme": "light",
+      "width": 1440,
+      "height": 900,
+      "initial": {
+        "documentWidth": 1440,
+        "viewportWidth": 1440,
+        "language": "en",
+        "direction": "ltr",
+        "theme": "light",
+        "sections": 13,
+        "cards": 3,
+        "gridColumns": "682.297px 501.688px",
+        "captureLocale": "en",
+        "captureTheme": "light",
+        "bridge": "#how-orders-move",
+        "trackWidth": 8760,
+        "viewportClient": 1440,
+        "missingBentoImages": 0,
+        "cardBounds": [
+          {
+            "left": 120,
+            "right": 802.296875,
+            "width": 682.296875,
+            "height": 1003.96875,
+            "scrollHeight": 1002,
+            "clientHeight": 1002
+          },
+          {
+            "left": 818.296875,
+            "right": 1319.984375,
+            "width": 501.6875,
+            "height": 493.984375,
+            "scrollHeight": 492,
+            "clientHeight": 492
+          },
+          {
+            "left": 818.296875,
+            "right": 1319.984375,
+            "width": 501.6875,
+            "height": 493.984375,
+            "scrollHeight": 492,
+            "clientHeight": 492
+          }
+        ]
+      },
+      "showcase": {
+        "header": {
+          "top": 0,
+          "right": 1440,
+          "bottom": 77,
+          "left": 0
+        },
+        "stage": {
+          "top": 89.46875,
+          "right": 1440,
+          "bottom": 888.46875,
+          "left": 0
+        },
+        "slide": {
+          "top": 155.46875,
+          "right": 1320,
+          "bottom": 888.46875,
+          "left": 120
+        },
+        "copy": {
+          "top": 321.84375,
+          "right": 535.6875,
+          "bottom": 722.078125,
+          "left": 171
+        },
+        "action": {
+          "top": 674.078125,
+          "right": 317.765625,
+          "bottom": 722.078125,
+          "left": 171
+        },
+        "capture": {
+          "top": 285.21875,
+          "right": 1269,
+          "bottom": 758.71875,
+          "left": 591.6875
+        },
+        "image": {
+          "top": 286.21875,
+          "right": 1234.34375,
+          "bottom": 666.21875,
+          "left": 626.34375
+        },
+        "imageFrame": {
+          "top": 285.21875,
+          "right": 1269,
+          "bottom": 667.21875,
+          "left": 591.6875
+        },
+        "pinSpacers": 1,
+        "final": {
+          "viewport": {
+            "left": 0,
+            "right": 1440
+          },
+          "slide": {
+            "left": 121.99853515625,
+            "right": 1321.99853515625
+          },
+          "progress": "07 / 07"
+        }
+      },
+      "issues": []
+    },
+    {
+      "engine": "chromium",
+      "locale": "en",
+      "theme": "dark",
+      "width": 390,
+      "height": 844,
+      "initial": {
+        "documentWidth": 390,
+        "viewportWidth": 390,
+        "language": "en",
+        "direction": "ltr",
+        "theme": "dark",
+        "sections": 13,
+        "cards": 3,
+        "gridColumns": "358px",
+        "captureLocale": "en",
+        "captureTheme": "dark",
+        "bridge": "#how-orders-move",
+        "trackWidth": 2542,
+        "viewportClient": 390,
+        "missingBentoImages": 0,
+        "cardBounds": [
+          {
+            "left": 16,
+            "right": 374,
+            "width": 358,
+            "height": 801.96875,
+            "scrollHeight": 800,
+            "clientHeight": 800
+          },
+          {
+            "left": 16,
+            "right": 374,
+            "width": 358,
+            "height": 626.28125,
+            "scrollHeight": 624,
+            "clientHeight": 624
+          },
+          {
+            "left": 16,
+            "right": 374,
+            "width": 358,
+            "height": 626.28125,
+            "scrollHeight": 624,
+            "clientHeight": 624
+          }
+        ]
+      },
+      "showcase": {
+        "pinSpacers": 0,
+        "overflow": "auto"
+      },
+      "issues": []
+    },
+    {
+      "engine": "chromium",
+      "locale": "en",
+      "theme": "dark",
+      "width": 1440,
+      "height": 900,
+      "initial": {
+        "documentWidth": 1440,
+        "viewportWidth": 1440,
+        "language": "en",
+        "direction": "ltr",
+        "theme": "dark",
+        "sections": 13,
+        "cards": 3,
+        "gridColumns": "682.297px 501.688px",
+        "captureLocale": "en",
+        "captureTheme": "dark",
+        "bridge": "#how-orders-move",
+        "trackWidth": 8760,
+        "viewportClient": 1440,
+        "missingBentoImages": 0,
+        "cardBounds": [
+          {
+            "left": 120,
+            "right": 802.296875,
+            "width": 682.296875,
+            "height": 1003.96875,
+            "scrollHeight": 1002,
+            "clientHeight": 1002
+          },
+          {
+            "left": 818.296875,
+            "right": 1319.984375,
+            "width": 501.6875,
+            "height": 493.984375,
+            "scrollHeight": 492,
+            "clientHeight": 492
+          },
+          {
+            "left": 818.296875,
+            "right": 1319.984375,
+            "width": 501.6875,
+            "height": 493.984375,
+            "scrollHeight": 492,
+            "clientHeight": 492
+          }
+        ]
+      },
+      "showcase": {
+        "header": {
+          "top": 0,
+          "right": 1440,
+          "bottom": 77,
+          "left": 0
+        },
+        "stage": {
+          "top": 89.46875,
+          "right": 1440,
+          "bottom": 888.46875,
+          "left": 0
+        },
+        "slide": {
+          "top": 155.46875,
+          "right": 1320,
+          "bottom": 888.46875,
+          "left": 120
+        },
+        "copy": {
+          "top": 321.84375,
+          "right": 535.6875,
+          "bottom": 722.078125,
+          "left": 171
+        },
+        "action": {
+          "top": 674.078125,
+          "right": 317.765625,
+          "bottom": 722.078125,
+          "left": 171
+        },
+        "capture": {
+          "top": 285.21875,
+          "right": 1269,
+          "bottom": 758.71875,
+          "left": 591.6875
+        },
+        "image": {
+          "top": 286.21875,
+          "right": 1234.34375,
+          "bottom": 666.21875,
+          "left": 626.34375
+        },
+        "imageFrame": {
+          "top": 285.21875,
+          "right": 1269,
+          "bottom": 667.21875,
+          "left": 591.6875
+        },
+        "pinSpacers": 1,
+        "final": {
+          "viewport": {
+            "left": 0,
+            "right": 1440
+          },
+          "slide": {
+            "left": 121.99853515625,
+            "right": 1321.99853515625
+          },
+          "progress": "07 / 07"
+        }
+      },
+      "issues": []
+    },
+    {
+      "engine": "chromium",
+      "locale": "ar",
+      "theme": "light",
+      "width": 390,
+      "height": 844,
+      "initial": {
+        "documentWidth": 390,
+        "viewportWidth": 390,
+        "language": "ar",
+        "direction": "rtl",
+        "theme": "light",
+        "sections": 13,
+        "cards": 3,
+        "gridColumns": "358px",
+        "captureLocale": "ar",
+        "captureTheme": "light",
+        "bridge": "#how-orders-move",
+        "trackWidth": 2542,
+        "viewportClient": 390,
+        "missingBentoImages": 0,
+        "cardBounds": [
+          {
+            "left": 16,
+            "right": 374,
+            "width": 358,
+            "height": 770.046875,
+            "scrollHeight": 768,
+            "clientHeight": 768
+          },
+          {
+            "left": 16,
+            "right": 374,
+            "width": 358,
+            "height": 632.953125,
+            "scrollHeight": 631,
+            "clientHeight": 631
+          },
+          {
+            "left": 16,
+            "right": 374,
+            "width": 358,
+            "height": 610.5625,
+            "scrollHeight": 609,
+            "clientHeight": 609
+          }
+        ]
+      },
+      "showcase": {
+        "pinSpacers": 0,
+        "overflow": "auto"
+      },
+      "issues": []
+    },
+    {
+      "engine": "chromium",
+      "locale": "ar",
+      "theme": "light",
+      "width": 1440,
+      "height": 900,
+      "initial": {
+        "documentWidth": 1440,
+        "viewportWidth": 1440,
+        "language": "ar",
+        "direction": "rtl",
+        "theme": "light",
+        "sections": 13,
+        "cards": 3,
+        "gridColumns": "682.297px 501.688px",
+        "captureLocale": "ar",
+        "captureTheme": "light",
+        "bridge": "#how-orders-move",
+        "trackWidth": 8760,
+        "viewportClient": 1440,
+        "missingBentoImages": 0,
+        "cardBounds": [
+          {
+            "left": 637.703125,
+            "right": 1320,
+            "width": 682.296875,
+            "height": 975.75,
+            "scrollHeight": 974,
+            "clientHeight": 974
+          },
+          {
+            "left": 120.015625,
+            "right": 621.703125,
+            "width": 501.6875,
+            "height": 479.875,
+            "scrollHeight": 478,
+            "clientHeight": 478
+          },
+          {
+            "left": 120.015625,
+            "right": 621.703125,
+            "width": 501.6875,
+            "height": 479.875,
+            "scrollHeight": 478,
+            "clientHeight": 478
+          }
+        ]
+      },
+      "showcase": {
+        "header": {
+          "top": 0,
+          "right": 1440,
+          "bottom": 77,
+          "left": 0
+        },
+        "stage": {
+          "top": 88.921875,
+          "right": 1440,
+          "bottom": 887.921875,
+          "left": 0
+        },
+        "slide": {
+          "top": 154.921875,
+          "right": 1320,
+          "bottom": 887.921875,
+          "left": 120
+        },
+        "copy": {
+          "top": 352.921875,
+          "right": 1269,
+          "bottom": 689.921875,
+          "left": 904.3125
+        },
+        "action": {
+          "top": 641.921875,
+          "right": 1269,
+          "bottom": 689.921875,
+          "left": 1156.234375
+        },
+        "capture": {
+          "top": 284.671875,
+          "right": 848.3125,
+          "bottom": 758.171875,
+          "left": 171
+        },
+        "image": {
+          "top": 285.671875,
+          "right": 813.65625,
+          "bottom": 665.671875,
+          "left": 205.65625
+        },
+        "imageFrame": {
+          "top": 284.671875,
+          "right": 848.3125,
+          "bottom": 666.671875,
+          "left": 171
+        },
+        "pinSpacers": 1,
+        "final": {
+          "viewport": {
+            "left": 0,
+            "right": 1440
+          },
+          "slide": {
+            "left": 118.00146484375,
+            "right": 1318.00146484375
+          },
+          "progress": "07 / 07"
+        }
+      },
+      "issues": []
+    },
+    {
+      "engine": "chromium",
+      "locale": "ar",
+      "theme": "dark",
+      "width": 390,
+      "height": 844,
+      "initial": {
+        "documentWidth": 390,
+        "viewportWidth": 390,
+        "language": "ar",
+        "direction": "rtl",
+        "theme": "dark",
+        "sections": 13,
+        "cards": 3,
+        "gridColumns": "358px",
+        "captureLocale": "ar",
+        "captureTheme": "dark",
+        "bridge": "#how-orders-move",
+        "trackWidth": 2542,
+        "viewportClient": 390,
+        "missingBentoImages": 0,
+        "cardBounds": [
+          {
+            "left": 16,
+            "right": 374,
+            "width": 358,
+            "height": 770.046875,
+            "scrollHeight": 768,
+            "clientHeight": 768
+          },
+          {
+            "left": 16,
+            "right": 374,
+            "width": 358,
+            "height": 632.953125,
+            "scrollHeight": 631,
+            "clientHeight": 631
+          },
+          {
+            "left": 16,
+            "right": 374,
+            "width": 358,
+            "height": 610.5625,
+            "scrollHeight": 609,
+            "clientHeight": 609
+          }
+        ]
+      },
+      "showcase": {
+        "pinSpacers": 0,
+        "overflow": "auto"
+      },
+      "issues": []
+    },
+    {
+      "engine": "chromium",
+      "locale": "ar",
+      "theme": "dark",
+      "width": 1440,
+      "height": 900,
+      "initial": {
+        "documentWidth": 1440,
+        "viewportWidth": 1440,
+        "language": "ar",
+        "direction": "rtl",
+        "theme": "dark",
+        "sections": 13,
+        "cards": 3,
+        "gridColumns": "682.297px 501.688px",
+        "captureLocale": "ar",
+        "captureTheme": "dark",
+        "bridge": "#how-orders-move",
+        "trackWidth": 8760,
+        "viewportClient": 1440,
+        "missingBentoImages": 0,
+        "cardBounds": [
+          {
+            "left": 637.703125,
+            "right": 1320,
+            "width": 682.296875,
+            "height": 975.75,
+            "scrollHeight": 974,
+            "clientHeight": 974
+          },
+          {
+            "left": 120.015625,
+            "right": 621.703125,
+            "width": 501.6875,
+            "height": 479.875,
+            "scrollHeight": 478,
+            "clientHeight": 478
+          },
+          {
+            "left": 120.015625,
+            "right": 621.703125,
+            "width": 501.6875,
+            "height": 479.875,
+            "scrollHeight": 478,
+            "clientHeight": 478
+          }
+        ]
+      },
+      "showcase": {
+        "header": {
+          "top": 0,
+          "right": 1440,
+          "bottom": 77,
+          "left": 0
+        },
+        "stage": {
+          "top": 88.921875,
+          "right": 1440,
+          "bottom": 887.921875,
+          "left": 0
+        },
+        "slide": {
+          "top": 154.921875,
+          "right": 1320,
+          "bottom": 887.921875,
+          "left": 120
+        },
+        "copy": {
+          "top": 352.921875,
+          "right": 1269,
+          "bottom": 689.921875,
+          "left": 904.3125
+        },
+        "action": {
+          "top": 641.921875,
+          "right": 1269,
+          "bottom": 689.921875,
+          "left": 1156.234375
+        },
+        "capture": {
+          "top": 284.671875,
+          "right": 848.3125,
+          "bottom": 758.171875,
+          "left": 171
+        },
+        "image": {
+          "top": 285.671875,
+          "right": 813.65625,
+          "bottom": 665.671875,
+          "left": 205.65625
+        },
+        "imageFrame": {
+          "top": 284.671875,
+          "right": 848.3125,
+          "bottom": 666.671875,
+          "left": 171
+        },
+        "pinSpacers": 1,
+        "final": {
+          "viewport": {
+            "left": 0,
+            "right": 1440
+          },
+          "slide": {
+            "left": 118.00146484375,
+            "right": 1318.00146484375
+          },
+          "progress": "07 / 07"
+        }
+      },
+      "issues": []
+    },
+    {
+      "engine": "webkit",
+      "locale": "en",
+      "theme": "light",
+      "width": 390,
+      "height": 844,
+      "initial": {
+        "documentWidth": 390,
+        "viewportWidth": 390,
+        "language": "en",
+        "direction": "ltr",
+        "theme": "light",
+        "sections": 13,
+        "cards": 3,
+        "gridColumns": "358px",
+        "captureLocale": "en",
+        "captureTheme": "light",
+        "bridge": "#how-orders-move",
+        "trackWidth": 2542,
+        "viewportClient": 390,
+        "missingBentoImages": 0,
+        "cardBounds": [
+          {
+            "left": 16,
+            "right": 374,
+            "width": 358,
+            "height": 801.96875,
+            "scrollHeight": 800,
+            "clientHeight": 800
+          },
+          {
+            "left": 16,
+            "right": 374,
+            "width": 358,
+            "height": 626.28125,
+            "scrollHeight": 624,
+            "clientHeight": 624
+          },
+          {
+            "left": 16,
+            "right": 374,
+            "width": 358,
+            "height": 626.28125,
+            "scrollHeight": 624,
+            "clientHeight": 624
+          }
+        ]
+      },
+      "showcase": {
+        "pinSpacers": 0,
+        "overflow": "auto"
+      },
+      "issues": []
+    },
+    {
+      "engine": "webkit",
+      "locale": "en",
+      "theme": "light",
+      "width": 1440,
+      "height": 900,
+      "initial": {
+        "documentWidth": 1440,
+        "viewportWidth": 1440,
+        "language": "en",
+        "direction": "ltr",
+        "theme": "light",
+        "sections": 13,
+        "cards": 3,
+        "gridColumns": "682.296875px 501.6875px",
+        "captureLocale": "en",
+        "captureTheme": "light",
+        "bridge": "#how-orders-move",
+        "trackWidth": 8760,
+        "viewportClient": 1440,
+        "missingBentoImages": 0,
+        "cardBounds": [
+          {
+            "left": 120,
+            "right": 802.296875,
+            "width": 682.296875,
+            "height": 1003.96875,
+            "scrollHeight": 1002,
+            "clientHeight": 1002
+          },
+          {
+            "left": 818.296875,
+            "right": 1319.984375,
+            "width": 501.6875,
+            "height": 493.984375,
+            "scrollHeight": 492,
+            "clientHeight": 492
+          },
+          {
+            "left": 818.296875,
+            "right": 1319.984375,
+            "width": 501.6875,
+            "height": 493.984375,
+            "scrollHeight": 492,
+            "clientHeight": 492
+          }
+        ]
+      },
+      "showcase": {
+        "header": {
+          "top": 0,
+          "right": 1440,
+          "bottom": 77,
+          "left": 0
+        },
+        "stage": {
+          "top": 89.46875,
+          "right": 1440,
+          "bottom": 888.46875,
+          "left": 0
+        },
+        "slide": {
+          "top": 155.46875,
+          "right": 1320,
+          "bottom": 888.46875,
+          "left": 120
+        },
+        "copy": {
+          "top": 321.84375,
+          "right": 535.6875,
+          "bottom": 722.078125,
+          "left": 171
+        },
+        "action": {
+          "top": 674.078125,
+          "right": 317.765625,
+          "bottom": 722.078125,
+          "left": 171
+        },
+        "capture": {
+          "top": 285.21875,
+          "right": 1269,
+          "bottom": 758.71875,
+          "left": 591.6875
+        },
+        "image": {
+          "top": 286.21875,
+          "right": 1234.34375,
+          "bottom": 666.21875,
+          "left": 626.34375
+        },
+        "imageFrame": {
+          "top": 285.21875,
+          "right": 1269,
+          "bottom": 667.21875,
+          "left": 591.6875
+        },
+        "pinSpacers": 1,
+        "final": {
+          "viewport": {
+            "left": 0,
+            "right": 1440
+          },
+          "slide": {
+            "left": 121.99853515625,
+            "right": 1321.99853515625
+          },
+          "progress": "07 / 07"
+        }
+      },
+      "issues": []
+    },
+    {
+      "engine": "webkit",
+      "locale": "en",
+      "theme": "dark",
+      "width": 390,
+      "height": 844,
+      "initial": {
+        "documentWidth": 390,
+        "viewportWidth": 390,
+        "language": "en",
+        "direction": "ltr",
+        "theme": "dark",
+        "sections": 13,
+        "cards": 3,
+        "gridColumns": "358px",
+        "captureLocale": "en",
+        "captureTheme": "dark",
+        "bridge": "#how-orders-move",
+        "trackWidth": 2542,
+        "viewportClient": 390,
+        "missingBentoImages": 0,
+        "cardBounds": [
+          {
+            "left": 16,
+            "right": 374,
+            "width": 358,
+            "height": 801.96875,
+            "scrollHeight": 800,
+            "clientHeight": 800
+          },
+          {
+            "left": 16,
+            "right": 374,
+            "width": 358,
+            "height": 626.28125,
+            "scrollHeight": 624,
+            "clientHeight": 624
+          },
+          {
+            "left": 16,
+            "right": 374,
+            "width": 358,
+            "height": 626.28125,
+            "scrollHeight": 624,
+            "clientHeight": 624
+          }
+        ]
+      },
+      "showcase": {
+        "pinSpacers": 0,
+        "overflow": "auto"
+      },
+      "issues": []
+    },
+    {
+      "engine": "webkit",
+      "locale": "en",
+      "theme": "dark",
+      "width": 1440,
+      "height": 900,
+      "initial": {
+        "documentWidth": 1440,
+        "viewportWidth": 1440,
+        "language": "en",
+        "direction": "ltr",
+        "theme": "dark",
+        "sections": 13,
+        "cards": 3,
+        "gridColumns": "682.296875px 501.6875px",
+        "captureLocale": "en",
+        "captureTheme": "dark",
+        "bridge": "#how-orders-move",
+        "trackWidth": 8760,
+        "viewportClient": 1440,
+        "missingBentoImages": 0,
+        "cardBounds": [
+          {
+            "left": 120,
+            "right": 802.296875,
+            "width": 682.296875,
+            "height": 1003.96875,
+            "scrollHeight": 1002,
+            "clientHeight": 1002
+          },
+          {
+            "left": 818.296875,
+            "right": 1319.984375,
+            "width": 501.6875,
+            "height": 493.984375,
+            "scrollHeight": 492,
+            "clientHeight": 492
+          },
+          {
+            "left": 818.296875,
+            "right": 1319.984375,
+            "width": 501.6875,
+            "height": 493.984375,
+            "scrollHeight": 492,
+            "clientHeight": 492
+          }
+        ]
+      },
+      "showcase": {
+        "header": {
+          "top": 0,
+          "right": 1440,
+          "bottom": 77,
+          "left": 0
+        },
+        "stage": {
+          "top": 89.46875,
+          "right": 1440,
+          "bottom": 888.46875,
+          "left": 0
+        },
+        "slide": {
+          "top": 155.46875,
+          "right": 1320,
+          "bottom": 888.46875,
+          "left": 120
+        },
+        "copy": {
+          "top": 321.84375,
+          "right": 535.6875,
+          "bottom": 722.078125,
+          "left": 171
+        },
+        "action": {
+          "top": 674.078125,
+          "right": 317.765625,
+          "bottom": 722.078125,
+          "left": 171
+        },
+        "capture": {
+          "top": 285.21875,
+          "right": 1269,
+          "bottom": 758.71875,
+          "left": 591.6875
+        },
+        "image": {
+          "top": 286.21875,
+          "right": 1234.34375,
+          "bottom": 666.21875,
+          "left": 626.34375
+        },
+        "imageFrame": {
+          "top": 285.21875,
+          "right": 1269,
+          "bottom": 667.21875,
+          "left": 591.6875
+        },
+        "pinSpacers": 1,
+        "final": {
+          "viewport": {
+            "left": 0,
+            "right": 1440
+          },
+          "slide": {
+            "left": 121.99853515625,
+            "right": 1321.99853515625
+          },
+          "progress": "07 / 07"
+        }
+      },
+      "issues": []
+    },
+    {
+      "engine": "webkit",
+      "locale": "ar",
+      "theme": "light",
+      "width": 390,
+      "height": 844,
+      "initial": {
+        "documentWidth": 390,
+        "viewportWidth": 390,
+        "language": "ar",
+        "direction": "rtl",
+        "theme": "light",
+        "sections": 13,
+        "cards": 3,
+        "gridColumns": "358px",
+        "captureLocale": "ar",
+        "captureTheme": "light",
+        "bridge": "#how-orders-move",
+        "trackWidth": 2542,
+        "viewportClient": 390,
+        "missingBentoImages": 0,
+        "cardBounds": [
+          {
+            "left": 16,
+            "right": 374,
+            "width": 358,
+            "height": 770.046875,
+            "scrollHeight": 768,
+            "clientHeight": 768
+          },
+          {
+            "left": 16,
+            "right": 374,
+            "width": 358,
+            "height": 632.953125,
+            "scrollHeight": 631,
+            "clientHeight": 631
+          },
+          {
+            "left": 16,
+            "right": 374,
+            "width": 358,
+            "height": 610.5625,
+            "scrollHeight": 609,
+            "clientHeight": 609
+          }
+        ]
+      },
+      "showcase": {
+        "pinSpacers": 0,
+        "overflow": "auto"
+      },
+      "issues": []
+    },
+    {
+      "engine": "webkit",
+      "locale": "ar",
+      "theme": "light",
+      "width": 1440,
+      "height": 900,
+      "initial": {
+        "documentWidth": 1440,
+        "viewportWidth": 1440,
+        "language": "ar",
+        "direction": "rtl",
+        "theme": "light",
+        "sections": 13,
+        "cards": 3,
+        "gridColumns": "682.296875px 501.6875px",
+        "captureLocale": "ar",
+        "captureTheme": "light",
+        "bridge": "#how-orders-move",
+        "trackWidth": 8760,
+        "viewportClient": 1440,
+        "missingBentoImages": 0,
+        "cardBounds": [
+          {
+            "left": 637.703125,
+            "right": 1320,
+            "width": 682.296875,
+            "height": 975.75,
+            "scrollHeight": 974,
+            "clientHeight": 974
+          },
+          {
+            "left": 120.015625,
+            "right": 621.703125,
+            "width": 501.6875,
+            "height": 479.875,
+            "scrollHeight": 478,
+            "clientHeight": 478
+          },
+          {
+            "left": 120.015625,
+            "right": 621.703125,
+            "width": 501.6875,
+            "height": 479.875,
+            "scrollHeight": 478,
+            "clientHeight": 478
+          }
+        ]
+      },
+      "showcase": {
+        "header": {
+          "top": 0,
+          "right": 1440,
+          "bottom": 77,
+          "left": 0
+        },
+        "stage": {
+          "top": 89.921875,
+          "right": 1440,
+          "bottom": 888.921875,
+          "left": 0
+        },
+        "slide": {
+          "top": 155.921875,
+          "right": 1320,
+          "bottom": 888.921875,
+          "left": 120
+        },
+        "copy": {
+          "top": 353.921875,
+          "right": 1269,
+          "bottom": 690.921875,
+          "left": 904.3125
+        },
+        "action": {
+          "top": 642.921875,
+          "right": 1269,
+          "bottom": 690.921875,
+          "left": 1156.234375
+        },
+        "capture": {
+          "top": 285.671875,
+          "right": 848.3125,
+          "bottom": 759.171875,
+          "left": 171
+        },
+        "image": {
+          "top": 286.671875,
+          "right": 813.65625,
+          "bottom": 666.671875,
+          "left": 205.65625
+        },
+        "imageFrame": {
+          "top": 285.671875,
+          "right": 848.3125,
+          "bottom": 667.671875,
+          "left": 171
+        },
+        "pinSpacers": 1,
+        "final": {
+          "viewport": {
+            "left": 0,
+            "right": 1440
+          },
+          "slide": {
+            "left": 116.9990234375,
+            "right": 1316.9990234375
+          },
+          "progress": "07 / 07"
+        }
+      },
+      "issues": []
+    },
+    {
+      "engine": "webkit",
+      "locale": "ar",
+      "theme": "dark",
+      "width": 390,
+      "height": 844,
+      "initial": {
+        "documentWidth": 390,
+        "viewportWidth": 390,
+        "language": "ar",
+        "direction": "rtl",
+        "theme": "dark",
+        "sections": 13,
+        "cards": 3,
+        "gridColumns": "358px",
+        "captureLocale": "ar",
+        "captureTheme": "dark",
+        "bridge": "#how-orders-move",
+        "trackWidth": 2542,
+        "viewportClient": 390,
+        "missingBentoImages": 0,
+        "cardBounds": [
+          {
+            "left": 16,
+            "right": 374,
+            "width": 358,
+            "height": 770.046875,
+            "scrollHeight": 768,
+            "clientHeight": 768
+          },
+          {
+            "left": 16,
+            "right": 374,
+            "width": 358,
+            "height": 632.953125,
+            "scrollHeight": 631,
+            "clientHeight": 631
+          },
+          {
+            "left": 16,
+            "right": 374,
+            "width": 358,
+            "height": 610.5625,
+            "scrollHeight": 609,
+            "clientHeight": 609
+          }
+        ]
+      },
+      "showcase": {
+        "pinSpacers": 0,
+        "overflow": "auto"
+      },
+      "issues": []
+    },
+    {
+      "engine": "webkit",
+      "locale": "ar",
+      "theme": "dark",
+      "width": 1440,
+      "height": 900,
+      "initial": {
+        "documentWidth": 1440,
+        "viewportWidth": 1440,
+        "language": "ar",
+        "direction": "rtl",
+        "theme": "dark",
+        "sections": 13,
+        "cards": 3,
+        "gridColumns": "682.296875px 501.6875px",
+        "captureLocale": "ar",
+        "captureTheme": "dark",
+        "bridge": "#how-orders-move",
+        "trackWidth": 8760,
+        "viewportClient": 1440,
+        "missingBentoImages": 0,
+        "cardBounds": [
+          {
+            "left": 637.703125,
+            "right": 1320,
+            "width": 682.296875,
+            "height": 975.75,
+            "scrollHeight": 974,
+            "clientHeight": 974
+          },
+          {
+            "left": 120.015625,
+            "right": 621.703125,
+            "width": 501.6875,
+            "height": 479.875,
+            "scrollHeight": 478,
+            "clientHeight": 478
+          },
+          {
+            "left": 120.015625,
+            "right": 621.703125,
+            "width": 501.6875,
+            "height": 479.875,
+            "scrollHeight": 478,
+            "clientHeight": 478
+          }
+        ]
+      },
+      "showcase": {
+        "header": {
+          "top": 0,
+          "right": 1440,
+          "bottom": 77,
+          "left": 0
+        },
+        "stage": {
+          "top": 89.921875,
+          "right": 1440,
+          "bottom": 888.921875,
+          "left": 0
+        },
+        "slide": {
+          "top": 155.921875,
+          "right": 1320,
+          "bottom": 888.921875,
+          "left": 120
+        },
+        "copy": {
+          "top": 353.921875,
+          "right": 1269,
+          "bottom": 690.921875,
+          "left": 904.3125
+        },
+        "action": {
+          "top": 642.921875,
+          "right": 1269,
+          "bottom": 690.921875,
+          "left": 1156.234375
+        },
+        "capture": {
+          "top": 285.671875,
+          "right": 848.3125,
+          "bottom": 759.171875,
+          "left": 171
+        },
+        "image": {
+          "top": 286.671875,
+          "right": 813.65625,
+          "bottom": 666.671875,
+          "left": 205.65625
+        },
+        "imageFrame": {
+          "top": 285.671875,
+          "right": 848.3125,
+          "bottom": 667.671875,
+          "left": 171
+        },
+        "pinSpacers": 1,
+        "final": {
+          "viewport": {
+            "left": 0,
+            "right": 1440
+          },
+          "slide": {
+            "left": 116.9990234375,
+            "right": 1316.9990234375
+          },
+          "progress": "07 / 07"
+        }
+      },
+      "issues": []
+    }
+  ],
+  "reducedResults": [
+    {
+      "locale": "en",
+      "theme": "light",
+      "state": {
+        "pinSpacers": 0,
+        "overflow": "auto"
+      },
+      "focus": {
+        "linkLeft": 171,
+        "linkRight": 317.765625,
+        "viewportLeft": 0,
+        "viewportRight": 1440
+      },
+      "issues": []
+    },
+    {
+      "locale": "en",
+      "theme": "dark",
+      "state": {
+        "pinSpacers": 0,
+        "overflow": "auto"
+      },
+      "focus": {
+        "linkLeft": 171,
+        "linkRight": 317.765625,
+        "viewportLeft": 0,
+        "viewportRight": 1440
+      },
+      "issues": []
+    },
+    {
+      "locale": "ar",
+      "theme": "light",
+      "state": {
+        "pinSpacers": 0,
+        "overflow": "auto"
+      },
+      "focus": {
+        "linkLeft": 1156.234375,
+        "linkRight": 1269,
+        "viewportLeft": 0,
+        "viewportRight": 1440
+      },
+      "issues": []
+    },
+    {
+      "locale": "ar",
+      "theme": "dark",
+      "state": {
+        "pinSpacers": 0,
+        "overflow": "auto"
+      },
+      "focus": {
+        "linkLeft": 1156.234375,
+        "linkRight": 1269,
+        "viewportLeft": 0,
+        "viewportRight": 1440
+      },
+      "issues": []
+    }
+  ],
+  "routeResults": [
+    {
+      "locale": "en",
+      "route": "/en",
+      "status": 200,
+      "width": 390,
+      "viewport": 390,
+      "heading": true,
+      "footer": true,
+      "issues": []
+    },
+    {
+      "locale": "en",
+      "route": "/en/features/pos",
+      "status": 200,
+      "width": 390,
+      "viewport": 390,
+      "heading": true,
+      "footer": true,
+      "issues": []
+    },
+    {
+      "locale": "en",
+      "route": "/en/features/kitchen-display",
+      "status": 200,
+      "width": 390,
+      "viewport": 390,
+      "heading": true,
+      "footer": true,
+      "issues": []
+    },
+    {
+      "locale": "en",
+      "route": "/en/features/online-ordering",
+      "status": 200,
+      "width": 390,
+      "viewport": 390,
+      "heading": true,
+      "footer": true,
+      "issues": []
+    },
+    {
+      "locale": "en",
+      "route": "/en/features/inventory",
+      "status": 200,
+      "width": 390,
+      "viewport": 390,
+      "heading": true,
+      "footer": true,
+      "issues": []
+    },
+    {
+      "locale": "en",
+      "route": "/en/features/hr",
+      "status": 200,
+      "width": 390,
+      "viewport": 390,
+      "heading": true,
+      "footer": true,
+      "issues": []
+    },
+    {
+      "locale": "en",
+      "route": "/en/features/analytics",
+      "status": 200,
+      "width": 390,
+      "viewport": 390,
+      "heading": true,
+      "footer": true,
+      "issues": []
+    },
+    {
+      "locale": "en",
+      "route": "/en/features/website-builder",
+      "status": 200,
+      "width": 390,
+      "viewport": 390,
+      "heading": true,
+      "footer": true,
+      "issues": []
+    },
+    {
+      "locale": "en",
+      "route": "/en/features",
+      "status": 200,
+      "width": 390,
+      "viewport": 390,
+      "heading": true,
+      "footer": true,
+      "issues": []
+    },
+    {
+      "locale": "en",
+      "route": "/en/demo",
+      "status": 200,
+      "width": 390,
+      "viewport": 390,
+      "heading": true,
+      "footer": true,
+      "issues": []
+    },
+    {
+      "locale": "en",
+      "route": "/en/auth/register",
+      "status": 200,
+      "width": 390,
+      "viewport": 390,
+      "heading": true,
+      "footer": true,
+      "issues": []
+    },
+    {
+      "locale": "en",
+      "route": "/en/how-it-works",
+      "status": 200,
+      "width": 390,
+      "viewport": 390,
+      "heading": true,
+      "footer": true,
+      "issues": []
+    },
+    {
+      "locale": "en",
+      "route": "/en/pricing",
+      "status": 200,
+      "width": 390,
+      "viewport": 390,
+      "heading": true,
+      "footer": true,
+      "issues": []
+    },
+    {
+      "locale": "en",
+      "route": "/en/contact",
+      "status": 200,
+      "width": 390,
+      "viewport": 390,
+      "heading": true,
+      "footer": true,
+      "issues": []
+    },
+    {
+      "locale": "en",
+      "route": "/en/privacy",
+      "status": 200,
+      "width": 390,
+      "viewport": 390,
+      "heading": true,
+      "footer": true,
+      "issues": []
+    },
+    {
+      "locale": "en",
+      "route": "/en/auth/login",
+      "status": 200,
+      "width": 390,
+      "viewport": 390,
+      "heading": true,
+      "footer": true,
+      "issues": []
+    },
+    {
+      "locale": "ar",
+      "route": "/ar",
+      "status": 200,
+      "width": 390,
+      "viewport": 390,
+      "heading": true,
+      "footer": true,
+      "issues": []
+    },
+    {
+      "locale": "ar",
+      "route": "/ar/features/pos",
+      "status": 200,
+      "width": 390,
+      "viewport": 390,
+      "heading": true,
+      "footer": true,
+      "issues": []
+    },
+    {
+      "locale": "ar",
+      "route": "/ar/features/kitchen-display",
+      "status": 200,
+      "width": 390,
+      "viewport": 390,
+      "heading": true,
+      "footer": true,
+      "issues": []
+    },
+    {
+      "locale": "ar",
+      "route": "/ar/features/online-ordering",
+      "status": 200,
+      "width": 390,
+      "viewport": 390,
+      "heading": true,
+      "footer": true,
+      "issues": []
+    },
+    {
+      "locale": "ar",
+      "route": "/ar/features/inventory",
+      "status": 200,
+      "width": 390,
+      "viewport": 390,
+      "heading": true,
+      "footer": true,
+      "issues": []
+    },
+    {
+      "locale": "ar",
+      "route": "/ar/features/hr",
+      "status": 200,
+      "width": 390,
+      "viewport": 390,
+      "heading": true,
+      "footer": true,
+      "issues": []
+    },
+    {
+      "locale": "ar",
+      "route": "/ar/features/analytics",
+      "status": 200,
+      "width": 390,
+      "viewport": 390,
+      "heading": true,
+      "footer": true,
+      "issues": []
+    },
+    {
+      "locale": "ar",
+      "route": "/ar/features/website-builder",
+      "status": 200,
+      "width": 390,
+      "viewport": 390,
+      "heading": true,
+      "footer": true,
+      "issues": []
+    },
+    {
+      "locale": "ar",
+      "route": "/ar/features",
+      "status": 200,
+      "width": 390,
+      "viewport": 390,
+      "heading": true,
+      "footer": true,
+      "issues": []
+    },
+    {
+      "locale": "ar",
+      "route": "/ar/demo",
+      "status": 200,
+      "width": 390,
+      "viewport": 390,
+      "heading": true,
+      "footer": true,
+      "issues": []
+    },
+    {
+      "locale": "ar",
+      "route": "/ar/auth/register",
+      "status": 200,
+      "width": 390,
+      "viewport": 390,
+      "heading": true,
+      "footer": true,
+      "issues": []
+    },
+    {
+      "locale": "ar",
+      "route": "/ar/how-it-works",
+      "status": 200,
+      "width": 390,
+      "viewport": 390,
+      "heading": true,
+      "footer": true,
+      "issues": []
+    },
+    {
+      "locale": "ar",
+      "route": "/ar/pricing",
+      "status": 200,
+      "width": 390,
+      "viewport": 390,
+      "heading": true,
+      "footer": true,
+      "issues": []
+    },
+    {
+      "locale": "ar",
+      "route": "/ar/contact",
+      "status": 200,
+      "width": 390,
+      "viewport": 390,
+      "heading": true,
+      "footer": true,
+      "issues": []
+    },
+    {
+      "locale": "ar",
+      "route": "/ar/privacy",
+      "status": 200,
+      "width": 390,
+      "viewport": 390,
+      "heading": true,
+      "footer": true,
+      "issues": []
+    },
+    {
+      "locale": "ar",
+      "route": "/ar/auth/login",
+      "status": 200,
+      "width": 390,
+      "viewport": 390,
+      "heading": true,
+      "footer": true,
+      "issues": []
+    }
+  ],
+  "failures": []
+}

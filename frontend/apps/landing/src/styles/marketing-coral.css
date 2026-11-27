@@ -139,6 +139,14 @@ html:not(.light) .cv-hero .cv-button-outline:hover { color:#2b211d; }
 .cv-bento-sample strong { grid-column:1; font-size:13px; line-height:1.4; }
 .cv-bento-sample-indicator { grid-column:2; grid-row:1 / span 2; display:grid; place-items:center; width:32px; height:32px; border:1px solid var(--cv-rule); border-radius:50%; color:var(--cv-accent); font-size:11px; font-weight:800; }
 .cv-bento-sample[data-step="2"] .cv-bento-sample-indicator { background:var(--cv-accent); border-color:var(--cv-accent); color:var(--cv-accent-ink); }
+.cv-bento-pos-example { grid-column:1/-1; display:grid; grid-template-columns:1fr 1fr; gap:8px; padding-top:8px; }
+.cv-bento-pos-example>div { display:grid; align-content:start; gap:7px; min-width:0; padding:10px; border:1px solid var(--cv-rule); border-radius:6px; background:var(--cv-paper-2); }
+.cv-bento-pos-example small { color:var(--cv-ink-2); font-size:10px; font-weight:700; }
+.cv-bento-pos-example span { font-size:11px; line-height:1.4; }
+.cv-bento-pos-item { padding:7px; border:1px solid var(--cv-rule); border-radius:5px; background:var(--cv-paper); }
+.cv-bento-pos-item[data-selected="true"] { border-color:var(--cv-accent); }
+.cv-bento-pos-submit { padding:7px; border:1px solid var(--cv-rule); border-radius:5px; text-align:center; }
+.cv-bento-pos-submit[data-highlight="true"] { border-color:var(--cv-accent); background:var(--cv-accent); color:var(--cv-accent-ink); }
 .cv-bento-story { display:flex; align-items:center; justify-content:space-between; gap:12px; min-height:68px; padding-top:14px; }
 .cv-bento-card--2 .cv-bento-story,.cv-bento-card--3 .cv-bento-story { min-height:50px; }
 .cv-bento-card--1 .cv-bento-story { margin-top:auto; }

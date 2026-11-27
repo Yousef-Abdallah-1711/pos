@@ -173,9 +173,11 @@ for (const [engineName, engine] of Object.entries({ chromium, firefox, webkit })
         const pressed = await page.locator('.cv-bento-card--1 .cv-bento-story-controls button').nth(2).getAttribute('aria-pressed')
         if (pressed !== 'true') issues.push('bento step selection')
         if ((await page.locator('.cv-bento-card--1 .cv-bento-sample strong').textContent()) === beforeSample) issues.push('bento sample state')
+        if (await page.locator('.cv-bento-pos-submit[data-highlight="true"]').count() !== 1) issues.push('illustrative POS submit state')
         await page.locator('.cv-bento-card--1 .cv-bento-replay').click()
         const reset = await page.locator('.cv-bento-card--1 .cv-bento-story-controls button').first().getAttribute('aria-pressed')
         if (reset !== 'true') issues.push('bento replay')
+        if (await page.locator('.cv-bento-pos-submit').count() !== 0) issues.push('illustrative POS reset')
         await page.locator('.cv-problem').screenshot({ path: path.join(evidence, `${locale}-${theme}-bento-mobile.png`) })
       }
       const result = { engine: engineName, locale, theme, ...profile, initial, showcase, issues }

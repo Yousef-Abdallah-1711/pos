@@ -14,8 +14,9 @@ const english = {
   problemReplay: 'Restart this story',
   problemIllustration: 'Illustrative step',
   problemSample: 'Sample workflow',
+  problemPos: { menu: 'Menu', item: 'Sample item', cart: 'Cart', empty: 'Cart is empty', quantity: 'Quantity', place: 'Place Order' },
   problemSampleDetails: [
-    ['Menu item', '1 item selected', 'Cashier order sent'],
+    ['Choose a menu item', '1 item in the cart', 'Ready to place the order'],
     ['Online request', 'Pending staff review', 'Confirmed by staff'],
     ['New ticket', 'In preparation', 'Ready for fulfillment'],
   ],
@@ -87,8 +88,9 @@ const arabic: typeof english = {
   problemReplay: 'ابدأ القصة من جديد',
   problemIllustration: 'خطوة توضيحية',
   problemSample: 'مثال توضيحي',
+  problemPos: { menu: 'المنيو', item: 'صنف تجريبي', cart: 'السلة', empty: 'السلة فارغة', quantity: 'الكمية', place: 'إرسال الطلب' },
   problemSampleDetails: [
-    ['صنف من المنيو', 'تم اختيار صنف واحد', 'تم إرسال طلب الكاشير'],
+    ['اختار صنف من المنيو', 'صنف واحد في السلة', 'الطلب جاهز للإرسال'],
     ['طلب أونلاين', 'بانتظار مراجعة الفريق', 'أكّده الفريق'],
     ['تذكرة جديدة', 'جارٍ التحضير', 'جاهز للتسليم'],
   ],
