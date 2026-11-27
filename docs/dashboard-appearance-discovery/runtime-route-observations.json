@@ -2,7 +2,7 @@
   "captured_at": "2026-11-27",
   "environment": "Disposable pos-test backend and synthetic owner; local dashboard development image. Exact image source commit not independently recorded.",
   "method": "Navigated via Playwright; HTTP status and visible main heading sampled after client hydration. No writes submitted. A 200/heading is not proof of backend authorization or correct data.",
-  "limitations": "English, light mode, one owner, synthetic empty tenant; dynamic routes and restricted roles not tested.",
+  "limitations": "English, light or current mode, one synthetic owner; only the recorded dynamic IDs and one restricted-role sidebar were sampled. No write actions or authorization matrix validated.",
   "observations": [
     {
       "path": "/en/dashboard/accounting/advanced",
@@ -381,6 +381,30 @@
       "url": "http://localhost:3002/en/dashboard/theme-builder/qr",
       "status": 200,
       "heading": "Website QR Builder"
+    },
+    {
+      "path": "/en/dashboard/categories/1/edit",
+      "route_template": "/[locale]/dashboard/categories/[id]/edit",
+      "url": "http://localhost:3002/en/dashboard/categories/1/edit",
+      "status": 200,
+      "heading": "Edit Category",
+      "fixture": "synthetic category/product or default synthetic storefront theme"
+    },
+    {
+      "path": "/en/dashboard/products/1/edit",
+      "route_template": "/[locale]/dashboard/products/[id]/edit",
+      "url": "http://localhost:3002/en/dashboard/products/1/edit",
+      "status": 200,
+      "heading": "Edit Product",
+      "fixture": "synthetic category/product or default synthetic storefront theme"
+    },
+    {
+      "path": "/en/dashboard/theme-builder/editor/2",
+      "route_template": "/[locale]/dashboard/theme-builder/editor/[id]",
+      "url": "http://localhost:3002/en/dashboard/theme-builder/editor/2",
+      "status": 200,
+      "heading": "Default Theme",
+      "fixture": "synthetic category/product or default synthetic storefront theme"
     }
   ]
 }

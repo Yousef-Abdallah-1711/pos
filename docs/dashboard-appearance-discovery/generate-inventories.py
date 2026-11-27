@@ -17,7 +17,7 @@ def write(name, fields, rows):
 
 sidebar = (dashboard / 'src/components/layout/Sidebar.tsx').read_text(encoding='utf-8')
 observation_file = out / 'runtime-route-observations.json'
-observations = {item['path']: item for item in json.loads(observation_file.read_text(encoding='utf-8'))['observations']} if observation_file.exists() else {}
+observations = {(item.get('route_template') or item['path']): item for item in json.loads(observation_file.read_text(encoding='utf-8'))['observations']} if observation_file.exists() else {}
 sidebar_routes = {}
 for match in re.finditer(r'href:\s*`([^`]+)`([^\n]*)', sidebar):
     module = re.search(r'moduleId:\s*MODULE_IDS\.([A-Z_]+)', match.group(2))
@@ -33,7 +33,7 @@ for page in sorted((dashboard / 'src/app').rglob('page.tsx')):
     layouts = [parent / 'layout.tsx' for parent in [page.parent, *page.parent.parents] if parent == dashboard / 'src/app' or dashboard / 'src/app' in parent.parents]
     route = '/' + '/'.join(segments)
     sidebar_path = route.replace('/[locale]', '')
-    observed = observations.get(route.replace('/[locale]', '/en'))
+    observed = observations.get(route) or observations.get(route.replace('/[locale]', '/en'))
     access = ('Synthetic owner EN: HTTP ' + str(observed.get('status', 'unknown')) + '; heading: ' + str(observed.get('heading') or 'none') + '; see runtime observations' if observed and not observed.get('error') else 'Not verified')
     routes.append({'route': route, 'source': page.relative_to(root).as_posix(),
                    'layouts': '; '.join(p.relative_to(root).as_posix() for p in layouts if p.is_file()),
