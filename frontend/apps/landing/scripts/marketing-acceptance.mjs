@@ -197,8 +197,11 @@ async function focusChecks(page, locale) {
  await page.keyboard.press('Tab')
  for (const [name, selector] of [['light', '.cv-hero .sv-button'], ['dark', '#kitchen .cv-text-link'], ['final', '.cv-close .sv-button'], ['footer', '.sv-footer nav a']]) {
   const target = page.locator(selector).first()
-  await target.scrollIntoViewIfNeeded()
+  // Firefox can leave an already visible target at the viewport edge after
+  // route and breakpoint checks, where the sticky header covers its center.
+  await target.evaluate(element => element.scrollIntoView({ block: 'center', inline: 'center' }))
   await target.focus()
+  await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
   const result = await target.evaluate(element => {
    const luminance = color => {
     const channels = color.match(/[\d.]+/g).slice(0, 3).map(Number).map(value => value / 255).map(value => value <= .04045 ? value / 12.92 : ((value + .055) / 1.055) ** 2.4)
@@ -210,7 +213,7 @@ async function focusChecks(page, locale) {
    const levels = [luminance(style.outlineColor), luminance(parent ? getComputedStyle(parent).backgroundColor : 'rgb(255, 255, 255)')].sort((a, b) => a - b)
    const rect = element.getBoundingClientRect()
    const visible = document.elementFromPoint(rect.x + rect.width / 2, rect.y + rect.height / 2)
-   return { contrast: (levels[1] + .05) / (levels[0] + .05), width: Number.parseFloat(style.outlineWidth), focusVisible: element.matches(':focus-visible'), unobscured: !!visible && element.contains(visible) }
+   return { contrast: (levels[1] + .05) / (levels[0] + .05), width: Number.parseFloat(style.outlineWidth), focusVisible: element.matches(':focus-visible'), unobscured: !!visible && element.contains(visible), hit: visible?.tagName.toLowerCase(), hitClass: typeof visible?.className === 'string' ? visible.className.slice(0, 80) : '', bounds: { y: rect.y, height: rect.height } }
   })
   check(`keyboard focus ${locale}/${name}`, result.focusVisible && result.width >= 2 && result.contrast >= 3 && result.unobscured, JSON.stringify(result))
  }
