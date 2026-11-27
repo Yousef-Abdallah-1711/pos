@@ -23,3 +23,5 @@ Paths below are relative to `frontend/apps/dashboard/`; line numbers describe th
 | Collapse preference and page offset | `src/components/layout/DashboardLayout.tsx:59`, `:66`; `src/app/globals.css:93` | Local storage plus layout data attributes and CSS padding | Preserve preference, responsive thresholds and RTL content offsets. |
 
 Focus indicators, subscription badge colors, tooltips, mobile overlay accessibility, workspace switching, search and breadcrumbs require individual source and runtime verification; absence from this table is not evidence they are unsupported.
+
+In the [synthetic staff baseline](baseline/dashboard-en-restricted-light.png), the account had no `user_roles` rows and the sidebar showed Dashboard and Settings. A Theme Builder shortcut was nevertheless visible within the main dashboard. In that same disposable browser session, direct authenticated GET requests to `/api/v1/admin/themes` and `/api/v1/products` returned HTTP 403. This narrow observation does not prove authorization of every route/action or explain all partially loaded widgets; compare shortcut visibility with server authorization in a future role matrix.
