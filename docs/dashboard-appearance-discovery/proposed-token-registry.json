@@ -167,7 +167,36 @@
     "enBody": "Manrope",
     "enSelectedHeading": "Fraunces",
     "arBody": "IBM Plex Sans Arabic",
-    "sizes": "To be established from operational density testing"
+    "sizes": "To be established from operational density testing",
+    "proposedScalePx": {
+      "caption": 12,
+      "small": 14,
+      "body": 16,
+      "lead": 18,
+      "headingSmall": 24,
+      "headingMedium": 32,
+      "headingLarge": 40
+    },
+    "proposedWeights": {
+      "regular": 400,
+      "medium": 600,
+      "strong": 700
+    },
+    "proposedLineHeight": {
+      "compact": 1.3,
+      "body": 1.5,
+      "relaxed": 1.6
+    },
+    "proposedBounds": {
+      "bodyScalePercent": [
+        90,
+        115
+      ],
+      "lineHeight": [
+        1.3,
+        1.8
+      ]
+    }
   },
   "unresolved": [
     "all color pairs and WCAG contrast",
@@ -178,5 +207,50 @@
     "whether tenants may alter focus, selected, or sidebar aliases",
     "forced-colors handling",
     "dark hover measured in real screens"
-  ]
+  ],
+  "componentAliases": {
+    "buttonPrimary": [
+      "primary",
+      "primaryForeground",
+      "primaryHover",
+      "primaryActive",
+      "focusRing"
+    ],
+    "navigation": [
+      "sidebarBackground",
+      "sidebarForeground",
+      "selectionBackground",
+      "selectionForeground",
+      "focusRing"
+    ],
+    "dialog": [
+      "surfaceOverlay",
+      "foreground",
+      "borderStrong",
+      "focusRing"
+    ],
+    "table": [
+      "surface",
+      "foreground",
+      "foregroundSecondary",
+      "border",
+      "selectionBackground"
+    ],
+    "status": [
+      "success",
+      "warning",
+      "danger",
+      "information"
+    ]
+  },
+  "validationProposal": {
+    "allowedColorSyntax": "#RRGGBB only; opaque",
+    "unknownKeys": "reject",
+    "customCssOrUrls": "reject",
+    "fontSource": "bundled, audited allowlist only",
+    "overrides": "validate resolved pairs after inheritance for each mode",
+    "contrast": "normal text >=4.5:1; large text and relevant non-text controls >=3:1; review other accessibility criteria",
+    "sizeValues": "bounded enumerations or server-validated numbers; confirm exact bounds in usability review",
+    "revision": "nonnegative integer with optimistic concurrency"
+  }
 }
