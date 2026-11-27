@@ -30,6 +30,9 @@ Captured 2026-11-27 using the actual local dashboard in a Playwright-controlled 
 | [baseline-en-kds-dark.png](baseline-en-kds-dark.png) | `/en/dashboard/kds`, dark, empty queue | 1440 × 900 CSS pixels |
 | [baseline-en-manager-light.png](baseline-en-manager-light.png) | `/en/dashboard`, light, synthetic Manager role | 1440 × 900 CSS pixels |
 | [baseline-en-employee-light.png](baseline-en-employee-light.png) | `/en/dashboard`, light, synthetic Employee role | 1440 × 900 CSS pixels |
+| [baseline-en-light-mobile.png](baseline-en-light-mobile.png) | `/en/dashboard`, light, open mobile drawer | 390 × 844 CSS pixels |
+| [baseline-en-dark-mobile.png](baseline-en-dark-mobile.png) | `/en/dashboard`, dark, open mobile drawer | 390 × 844 CSS pixels |
+| [baseline-ar-dark-collapsed.png](baseline-ar-dark-collapsed.png) | `/ar/dashboard`, dark, collapsed sidebar | 1440 × 900 CSS pixels |
 
 The captures are visual baseline evidence, not proof that every control, permission, locale, dark mode, or screen reader works. Capture further routes, populated realistic synthetic data, restricted roles, and remaining viewport/theme combinations before approving a future rebrand. Physical devices were not used.
 
