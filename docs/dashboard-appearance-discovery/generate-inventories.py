@@ -50,11 +50,13 @@ for directory in [dashboard / 'src', dashboard / 'components', dashboard / 'lib'
         if file.suffix not in {'.ts', '.tsx', '.css', '.js'} or not file.is_file(): continue
         for line_no, line in enumerate(file.read_text(encoding='utf-8', errors='replace').splitlines(), 1):
             path = file.relative_to(root).as_posix()
-            for match in re.finditer(r'#[0-9a-fA-F]{3,8}\b|\b(?:bg|text|border|ring|from|to|via)-blue-\d+\b|--(?:primary|secondary|accent|background|foreground)[\w-]*', line):
+            for match in re.finditer(r'#[0-9a-fA-F]{3,8}\b|\b(?:rgba?|hsla?)\([^)]*\)|\b(?:bg|text|border|ring|from|to|via)-(?:slate|gray|zinc|neutral|stone|red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose)-\d+\b|--(?:primary|secondary|accent|background|foreground)[\w-]*', line):
                 value = match.group()
                 category = ('Candidate brand token' if value.startswith(('--primary', '--secondary', '--accent')) else
                             'Candidate structural token' if value.startswith(('--background', '--foreground')) else
-                            'Candidate hardcoded blue; may be semantic' if 'blue-' in value else 'Hex literal; role unknown')
+                            'Candidate hardcoded blue; may be semantic' if 'blue-' in value else
+                            'Color function; role unknown' if re.match(r'^(?:rgba?|hsla?)\(', value) else
+                            'Color literal or utility; role unknown')
                 colors.append({'source': path, 'line': line_no, 'value': value, 'classification': category + ' — unreviewed',
                                'proposed_token': 'Needs review', 'risk': 'Needs review'})
             if re.search(r'font-family|fontFamily|next/font|\b(?:text-(?:xs|sm|base|lg|xl|\d+xl)|font-(?:normal|medium|semibold|bold))\b', line):
