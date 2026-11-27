@@ -1,8 +1,10 @@
 import type { Metadata } from 'next'
-import { IBM_Plex_Sans_Arabic, Manrope } from 'next/font/google'
+import { Fraunces, IBM_Plex_Sans_Arabic, Manrope } from 'next/font/google'
 import { ThemeProvider } from 'next-themes'
 import '@/app/globals.css'
 import '@/app/marketing.css'
+import '@/styles/marketing-coral.css'
+import '@/styles/marketing-interactive.css'
 
 const plex = IBM_Plex_Sans_Arabic({
   weight: ['400', '600', '700'],
@@ -11,6 +13,7 @@ const plex = IBM_Plex_Sans_Arabic({
   variable: '--font-plex',
 })
 const manrope = Manrope({ subsets: ['latin'], display: 'swap', variable: '--font-manrope' })
+const fraunces = Fraunces({ subsets: ['latin'], display: 'swap', variable: '--font-fraunces' })
 
 interface RootDocumentProps {
   children: React.ReactNode
@@ -36,9 +39,9 @@ export const rootMetadata: Metadata = {
 export function RootDocument({ children, locale }: RootDocumentProps) {
 
   return (
-    <html lang={locale} dir={locale === 'ar' ? 'rtl' : 'ltr'} suppressHydrationWarning>
-      <body className={`${plex.variable} ${manrope.variable}`}>
-        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false} storageKey="servio-marketing-theme">
+    <html lang={locale} dir={locale === 'ar' ? 'rtl' : 'ltr'} className="light" suppressHydrationWarning>
+      <body className={`${plex.variable} ${manrope.variable} ${fraunces.variable}`}>
+        <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false} storageKey="servio-marketing-theme">
           {children}
         </ThemeProvider>
       </body>

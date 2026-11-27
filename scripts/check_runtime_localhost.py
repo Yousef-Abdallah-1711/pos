@@ -52,6 +52,9 @@ ALLOWLIST_FILES = {
     Path("frontend/apps/landing/tests/registration-e2e/fixtures.ts"),
     # Landing visual QA runner defaults to a local production preview; CI can override POOS_ACCEPTANCE_URL.
     Path("frontend/apps/landing/scripts/capture-landing-acceptance.mjs"),
+    # Interactive landing browser QA scripts target a local preview by default; LANDING_QA_URL overrides it.
+    Path("frontend/apps/landing/scripts/verify-interactive-landing.mjs"),
+    Path("frontend/apps/landing/scripts/smoke-marketing-routes.mjs"),
     # CI-only marketing acceptance validates its explicit disposable HTTPS origins before navigation.
     Path("frontend/apps/landing/scripts/marketing-acceptance.mjs"),
     Path("frontend/apps/landing/next.config.js"),

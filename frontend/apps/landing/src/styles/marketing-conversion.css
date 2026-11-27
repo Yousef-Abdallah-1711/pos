@@ -1,3 +1,5 @@
+/* Pricing, FAQ, final call to action, and footer. */
+
 .sv-pricing-layout {
   display:grid;
   gap:40px;
@@ -6,18 +8,18 @@
   font-size:clamp(36px,4vw,60px);
 }
 .sv-offer {
-  background:#fff;
-  border:1px solid #d9cdea;
+  background:var(--hallmark-color-fff);
+  border:1px solid var(--hallmark-color-d9cdea);
   border-radius:14px;
   padding:28px;
-  box-shadow:0 20px 60px -35px #6938d344;
+  box-shadow:0 20px 60px -35px var(--hallmark-color-6938d344);
 }
 .sv-billing-selector {
   display:flex;
   border:0;
   padding:5px;
   margin:0;
-  background:#f0edf6;
+  background:var(--hallmark-color-f0edf6);
   border-radius:8px;
   gap:8px;
 }
@@ -31,8 +33,8 @@
   font-size:14px;
 }
 .sv-billing-selector label[data-selected=true] {
-  background:#fff;
-  box-shadow:0 2px 8px #35234e15;
+  background:var(--hallmark-color-fff);
+  box-shadow:0 2px 8px var(--hallmark-color-35234e15);
 }
 .sv-billing-selector input {
   accent-color:var(--sv-violet);
@@ -62,7 +64,7 @@
 }
 .sv-savings {
   padding:16px;
-  background:#f3edf9;
+  background:var(--hallmark-color-f3edf9);
   border-radius:7px;
 }
 .sv-savings strong {
@@ -101,11 +103,11 @@
   margin-top:0;
 }
 .sv-final {
-  background:#5a2bb8;
+  background:var(--hallmark-color-5a2bb8);
   color:white;
 }
 .sv-final .sv-eyebrow {
-  color:#e4d6ff;
+  color:var(--hallmark-color-e4d6ff);
 }
 .sv-final h2 {
   font-size:clamp(40px,5.5vw,78px);
@@ -119,11 +121,11 @@
 }
 .sv-final-bottom p {
   max-width:560px;
-  color:#eadfff;
+  color:var(--hallmark-color-eadfff);
 }
 .sv-footer {
-  background:#21182e;
-  color:#c1b8ce;
+  background:var(--hallmark-color-21182e);
+  color:var(--hallmark-color-c1b8ce);
   padding-block:60px 25px;
 }
 .sv-footer-top {
@@ -146,7 +148,7 @@
   font-size:13px;
 }
 .sv-footer-bottom {
-  border-top:1px solid #4c3e5a;
+  border-top:1px solid var(--hallmark-color-4c3e5a);
   margin-top:40px;
   padding-top:20px;
   display:flex;
@@ -185,8 +187,6 @@
   font-size:15px;
 }
 
-.sv-main .sv-dark :focus-visible,
-.sv-main .sv-final :focus-visible,
-.sv-footer :focus-visible {
-  outline-color: #e4d6ff;
+.sv-main .sv-final :focus-visible, .sv-footer :focus-visible {
+  outline-color: var(--hallmark-color-e4d6ff);
 }

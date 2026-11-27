@@ -27,7 +27,7 @@ export function Navbar({ locale }: { locale: Locale }) {
   const triggerRef = useRef<HTMLButtonElement>(null)
   const { session, retry, signOut, isSigningOut } = useLandingSession(pathname)
   const copy = getSiteCopy(locale)
-  const theme = mounted ? resolvedTheme : 'dark'
+  const theme = mounted ? resolvedTheme : 'light'
   const nextLocale = locale === 'en' ? 'ar' : 'en'
   const localizedPath = pathname.replace(/^\/(?:en|ar)(?=\/|$)/, `/${nextLocale}`)
 
@@ -87,7 +87,7 @@ export function Navbar({ locale }: { locale: Locale }) {
       open={mobileOpen}
       onClose={closeMobile}
       triggerRef={triggerRef}
-      theme={theme ?? 'dark'}
+      theme={theme ?? 'light'}
       onToggleTheme={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
       onSwitchLocale={changeLocale}
       session={session}

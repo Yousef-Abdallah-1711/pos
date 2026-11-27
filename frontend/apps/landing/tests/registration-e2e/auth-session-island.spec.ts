@@ -72,8 +72,8 @@ test('restores the server session in Landing and a new tab, then propagates conf
   const desktopPanel = page.locator('#sv-account-panel')
   await expect(desktopPanel.getByText(profile.email, { exact: true })).toBeVisible()
   await expect(desktopPanel.getByText(profile.restaurant_name, { exact: true })).toBeVisible()
-  await expect(page.getByRole('link', { name: 'Dashboard' })).toHaveAttribute('href', /\/en\/dashboard$/)
-  await expect(page.getByRole('link', { name: 'Account settings' })).toHaveAttribute('href', /\/en\/dashboard\/settings\/account$/)
+  await expect(desktopPanel.getByRole('link', { name: 'Dashboard', exact: true })).toHaveAttribute('href', /\/en\/dashboard$/)
+  await expect(desktopPanel.getByRole('link', { name: 'Account settings', exact: true })).toHaveAttribute('href', /\/en\/dashboard\/settings\/account$/)
 
   const desktopCapture = process.env.AUTH_E2E_DESKTOP_CAPTURE
   if (desktopCapture) {
@@ -122,7 +122,7 @@ test('keeps a temporary API outage distinct from an expired session and retries 
   await page.getByRole('button', { name: 'Retry' }).click()
   await expect(desktopAccountActions.getByRole('link', { name: /^Log in$/i })).toBeVisible()
   await expect(desktopAccountActions.getByRole('link', { name: /^Sign up$/i })).toHaveCount(0)
-  await expect(desktopAccountActions.getByRole('link', { name: /Start your 14-day free trial/i })).toBeVisible()
+  await expect(page.locator('.sv-desktop-trial a[href="/en/auth/register?billing=monthly"]')).toBeVisible()
 })
 
 test('keeps safe account links during a DNS failure and does not retry until requested', async ({ page }) => {
@@ -239,6 +239,8 @@ test('preserves the account menu across mobile sizes, Arabic RTL, keyboard use, 
   await page.setViewportSize({ width: 320, height: 844 })
   await page.goto(`${landingURL}/en/`, { waitUntil: 'domcontentloaded' })
   await page.getByRole('button', { name: 'Open menu' }).click()
+  await page.getByRole('button', { name: 'Switch to dark mode' }).click()
+  await expect(page.locator('html')).toHaveClass(/dark/)
   await page.getByRole('button', { name: 'Switch to light mode' }).click()
   await expect(page.locator('html')).toHaveClass(/light/)
   await page.getByRole('button', { name: 'Switch to Arabic' }).click()

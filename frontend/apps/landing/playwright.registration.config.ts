@@ -15,6 +15,7 @@ export default defineConfig({
     ...devices['Desktop Chrome'],
     baseURL: landingURL,
     browserName: 'chromium',
+    channel: process.env.REG_E2E_BROWSER_CHANNEL,
     headless: true,
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',

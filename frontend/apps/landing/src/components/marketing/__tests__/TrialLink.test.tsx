@@ -11,6 +11,6 @@ vi.mock('next/link', () => ({
 
 it('does not prefetch the registration form from marketing calls to action', () => {
   render(<TrialLink locale="en" source="home-hero" />)
-  expect(screen.getByRole('link', { name: /start your 14-day/i })).toHaveAttribute('href', '/en/auth/register?billing=monthly')
-  expect(screen.getByRole('link', { name: /start your 14-day/i })).toHaveAttribute('data-prefetch', 'false')
+  expect(screen.getByRole('link', { name: /create your restaurant account/i })).toHaveAttribute('href', '/en/auth/register?billing=monthly')
+  expect(screen.getByRole('link', { name: /create your restaurant account/i })).toHaveAttribute('data-prefetch', 'false')
 })

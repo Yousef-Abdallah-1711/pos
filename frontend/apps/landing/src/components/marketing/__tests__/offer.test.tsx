@@ -14,7 +14,7 @@ it('shows the annual charge and carries the preference into trial registration',
   fireEvent.click(screen.getByRole('radio', { name: 'Annual' }))
   expect(screen.getByText('5,000')).toBeInTheDocument()
   expect(screen.getByText('Save 4,000 EGP a year · approximately 44.4%')).toBeInTheDocument()
-  expect(screen.getByRole('link', { name: /start your 14-day/i })).toHaveAttribute('href', '/en/auth/register?billing=annual')
+  expect(screen.getByRole('link', { name: /create your restaurant account/i })).toHaveAttribute('href', '/en/auth/register?billing=annual')
   expect(screen.getByText(/Paid checkout is not available here/)).toBeInTheDocument()
 })
 

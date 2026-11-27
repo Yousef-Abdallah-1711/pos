@@ -1,3 +1,5 @@
+/* Shared responsive rules for public marketing routes. */
+
 @media(min-width:768px) {
   .sv-shell {
     width:min(1280px,calc(100% - 80px));
@@ -8,37 +10,6 @@
   .sv-journey-layout,.sv-faq-layout {
     grid-template-columns:1fr 1.1fr;
     gap:65px;
-  }
-  .sv-editorial-row {
-    flex-direction:row;
-    justify-content:space-between;
-    align-items:flex-end;
-  }
-  .sv-editorial-row .sv-section-head {
-    max-width:62%;
-  }
-  .sv-annotations {
-    max-width:35%;
-  }
-  .sv-kitchen-stage {
-    grid-template-columns:minmax(0,3fr) 1fr;
-    align-items:center;
-  }
-  .sv-ordering-grid {
-    grid-template-columns:1fr 1fr;
-    align-items:center;
-    gap:50px;
-  }
-  .sv-stock-grid {
-    grid-template-columns:1fr 1fr;
-    gap:60px;
-  }
-  .sv-team-layout {
-    grid-template-columns:minmax(0,2fr) 1fr;
-    gap:40px;
-  }
-  .sv-visibility-grid {
-    grid-template-columns:1fr 1.2fr;
   }
   .sv-explorer-panel {
     grid-template-columns:minmax(0,1.6fr) 1fr;
@@ -91,43 +62,6 @@
   }
 }
 @media(min-width:1024px) {
-  .sv-hero {
-    padding-top:95px;
-  }
-  .sv-hero-grid {
-    grid-template-columns:1fr 1fr;
-    align-items:center;
-    gap:45px;
-  }
-  .sv-hero-stage {
-    min-height:440px;
-  }
-  .sv-hero-kitchen {
-    position:relative;
-    margin-top:-30px;
-    transform:translate(12px,35px);
-  }
-  .sv-handoff {
-    position:relative;
-    z-index:2;
-    background:#f6f1fc;
-    width:max-content;
-    padding:8px 14px;
-    border:1px solid #d9cdea;
-    border-radius:20px;
-    margin-top:-15px;
-  }
-  .sv-hero-foot {
-    margin-top:90px;
-  }
-  .sv-kitchen-heading {
-    flex-direction:row;
-    justify-content:space-between;
-    align-items:flex-end;
-  }
-  .sv-kitchen-heading .sv-section-head {
-    max-width:75%;
-  }
   .sv-offer {
     padding:38px;
   }
@@ -155,7 +89,7 @@
 }
 .sv-button-compact:hover {
   background:transparent;
-  color:#45218b;
+  color:var(--hallmark-color-45218b);
   transform:none;
   text-decoration:underline;
 }
@@ -164,17 +98,8 @@
   font-size:13px;
   font-weight:500;
 }
-.sv-dark .sv-button-compact,.sv-dark .sv-section-actions>.sv-text-link {
-  color:#dcc8ff;
-}
 .sv-final .sv-text-link {
-  color:#f0e6ff;
-}
-.sv-editorial-row>.sv-section-actions {
-  max-width:390px;
-}
-.sv-kitchen-heading>.sv-section-actions {
-  min-width:260px;
+  color:var(--hallmark-color-f0e6ff);
 }
 .sv-mobile-navigation[hidden] {
   display:none;
