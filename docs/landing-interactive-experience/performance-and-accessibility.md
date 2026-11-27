@@ -1,5 +1,9 @@
 # Landing performance and accessibility evidence
 
+## Final-source follow-up (2026-11-27)
+
+One local Lighthouse 13.6.0 mobile run against the final production container returned performance 57, accessibility 100, LCP 5.41 s and CLS 0. The LCP element remained `.cv-hero-photo`, and the audit reported the image was discoverable, eager and high priority. Root-document response was about 20 ms and total blocking time about 1.04 s. These are single-run local lab measurements under different runtime conditions from the earlier run, so they do not establish a controlled regression. The 2.5 s target remains unmet; no unmeasured image or animation change was made. Repeat controlled EN/AR runs and profile main-thread work before claiming a fix.
+
 Measured 2026-11-27 against the local Next.js production preview at `http://localhost:3001` with Lighthouse 13.6.0 and installed Chrome. These are simulated lab results, not field Core Web Vitals or physical device measurements. Raw reports are `artifacts/lighthouse-*-final.json`. The brief targets LCP at or below 2.5 s and CLS below 0.1.
 
 | Route / profile | Performance | Accessibility | FCP | LCP | TBT | CLS |
