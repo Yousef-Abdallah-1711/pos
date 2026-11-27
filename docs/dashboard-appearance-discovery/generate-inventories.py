@@ -59,7 +59,7 @@ for directory in [dashboard / 'src', dashboard / 'components', dashboard / 'lib'
                             'Color literal or utility; role unknown')
                 colors.append({'source': path, 'line': line_no, 'value': value, 'classification': category + ' — unreviewed',
                                'proposed_token': 'Needs review', 'risk': 'Needs review'})
-            if re.search(r'font-family|fontFamily|next/font|\b(?:text-(?:xs|sm|base|lg|xl|\d+xl)|font-(?:normal|medium|semibold|bold))\b', line):
+            if re.search(r'font-family|font-size|font-weight|line-height|letter-spacing|fontFamily|fontSize|fontWeight|lineHeight|letterSpacing|next/font|\b(?:text-(?:xs|sm|base|lg|xl|\d+xl)|font-(?:normal|medium|semibold|bold)|leading-[\w\[\]./-]+|tracking-[\w\[\]./-]+)\b|\btext-\[(?:\d|clamp|var)', line):
                 typography.append({'source': path, 'line': line_no, 'excerpt': line.strip()[:240], 'classification': 'Needs review'})
 write('color-inventory.csv', ['source', 'line', 'value', 'classification', 'proposed_token', 'risk'], colors)
 write('typography-inventory.csv', ['source', 'line', 'excerpt', 'classification'], typography)

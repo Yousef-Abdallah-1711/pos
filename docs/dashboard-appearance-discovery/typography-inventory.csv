@@ -110,18 +110,43 @@ frontend/apps/dashboard/src/components/VersionHistory.tsx,347,resize-none text-s
 frontend/apps/dashboard/src/components/VersionHistory.tsx,357,flex-1 px-3 py-2 rounded-lg font-medium text-sm,Needs review
 frontend/apps/dashboard/src/components/VersionHistory.tsx,367,flex-1 px-3 py-2 rounded-lg font-medium text-sm,Needs review
 frontend/apps/dashboard/src/components/VersionHistory.tsx,386,"<span className=""text-gray-900 dark:text-white font-medium text-right"">{value}</span>",Needs review
+frontend/apps/dashboard/src/hooks/useFormValidation.ts,168,} else if (field.includes('fontSize')) {,Needs review
+frontend/apps/dashboard/src/hooks/useFormValidation.ts,169,const sizeResult = fieldValidators.fontSize(fieldValue),Needs review
 frontend/apps/dashboard/src/hooks/useFormValidation.ts,180,} else if (field.includes('fontFamily')) {,Needs review
 frontend/apps/dashboard/src/hooks/usePOSPrint.ts,95,"font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, ""Liberation Mono"", ""Courier New"", monospace;",Needs review
+frontend/apps/dashboard/src/hooks/usePOSPrint.ts,96,font-size: 12px;,Needs review
+frontend/apps/dashboard/src/hooks/usePOSPrint.ts,97,line-height: 1.35;,Needs review
+frontend/apps/dashboard/src/hooks/usePOSPrint.ts,111,font-size: 15px;,Needs review
+frontend/apps/dashboard/src/hooks/usePOSPrint.ts,112,font-weight: 700;,Needs review
+frontend/apps/dashboard/src/hooks/usePOSPrint.ts,143,font-weight: 700;,Needs review
+frontend/apps/dashboard/src/hooks/usePOSPrint.ts,163,font-size: 10px;,Needs review
+frontend/apps/dashboard/src/hooks/usePOSPrint.ts,180,font-weight: 700;,Needs review
+frontend/apps/dashboard/src/hooks/usePOSPrint.ts,181,font-size: 13px;,Needs review
 frontend/apps/dashboard/src/hooks/useThemeStore.ts,62,"fontFamily: 'Inter',",Needs review
+frontend/apps/dashboard/src/hooks/useThemeStore.ts,65,"lineHeight: 1.5,",Needs review
+frontend/apps/dashboard/src/hooks/useThemeStore.ts,66,"fontWeights: [400, 700],",Needs review
+frontend/apps/dashboard/src/hooks/useThemeStore.ts,67,"fontSize: 14,",Needs review
 frontend/apps/dashboard/src/lib/code-splitting.ts,30,"{ className: 'text-gray-600 text-sm' },",Needs review
 frontend/apps/dashboard/src/lib/pdf-export.ts,73,"tempDiv.style.fontFamily = 'Arial, sans-serif';",Needs review
+frontend/apps/dashboard/src/lib/pdf-export.ts,243,const lineHeight = 7,Needs review
+frontend/apps/dashboard/src/lib/pdf-export.ts,267,"pdf.rect(marginX, y - 5, usableWidth, lineHeight, 'F')",Needs review
+frontend/apps/dashboard/src/lib/pdf-export.ts,275,y += lineHeight,Needs review
+frontend/apps/dashboard/src/lib/pdf-export.ts,294,y += lineHeight,Needs review
 frontend/apps/dashboard/src/lib/pdf-export.ts,399,"font-family: Arial, sans-serif;",Needs review
+frontend/apps/dashboard/src/lib/pdf-export.ts,413,font-size: 28px;,Needs review
+frontend/apps/dashboard/src/lib/pdf-export.ts,487,font-weight: bold;,Needs review
+frontend/apps/dashboard/src/lib/pdf-export.ts,515,font-size: 12px;,Needs review
+frontend/apps/dashboard/src/lib/pdf-export.ts,545,font-size: 16px;,Needs review
+frontend/apps/dashboard/src/lib/pdf-export.ts,546,font-weight: bold;,Needs review
+frontend/apps/dashboard/src/lib/pdf-export.ts,553,font-size: 12px;,Needs review
 frontend/apps/dashboard/src/lib/themeLoader.ts,48,"fontFamily: ""Inter, system-ui, sans-serif"",",Needs review
+frontend/apps/dashboard/src/lib/themeLoader.ts,50,"lineHeight: 1.6,",Needs review
 frontend/apps/dashboard/src/lib/validation.ts,73,* @param fontFamily - Font family name,Needs review
 frontend/apps/dashboard/src/lib/validation.ts,76,export function validateFontFamily(fontFamily: string): boolean {,Needs review
 frontend/apps/dashboard/src/lib/validation.ts,88,return allowedFonts.includes(fontFamily),Needs review
 frontend/apps/dashboard/src/lib/validation.ts,156,if (!validateFontFamily(theme.typography.fontFamily)) {,Needs review
 frontend/apps/dashboard/src/lib/validation.ts,157,errors.push(`Invalid font family: ${theme.typography.fontFamily}`),Needs review
+frontend/apps/dashboard/src/lib/validation.ts,168,"if (!validateNumberRange(theme.typography.lineHeight, 1, 3, 'Line height')) {",Needs review
 frontend/apps/dashboard/src/services/googleFontsService.ts,170,"getFontCssUrl: (fontFamily: string, weights: number[] = [400]): string => {",Needs review
 frontend/apps/dashboard/src/services/googleFontsService.ts,171,"const family = fontFamily.replace(/\s+/g, '+')",Needs review
 frontend/apps/dashboard/src/services/googleFontsService.ts,180,getFontFamilyCss: (fontFamily: string): string => {,Needs review
@@ -130,17 +155,38 @@ frontend/apps/dashboard/src/services/googleFontsService.ts,213,"loadFont: (fontF
 frontend/apps/dashboard/src/services/googleFontsService.ts,216,"link.href = googleFontsService.getFontCssUrl(fontFamily, weights)",Needs review
 frontend/apps/dashboard/src/services/googleFontsService.ts,219,link.onerror = () => reject(new Error(`Failed to load font: ${fontFamily}`)),Needs review
 frontend/apps/dashboard/src/stores/themeBuilderStore.test.ts,33,"fontFamily: 'Arial, sans-serif',",Needs review
+frontend/apps/dashboard/src/stores/themeBuilderStore.test.ts,36,"lineHeight: 1.5,",Needs review
+frontend/apps/dashboard/src/stores/themeBuilderStore.test.ts,98,expect(result.current.typography.lineHeight).toBe(1.5),Needs review
 frontend/apps/dashboard/src/stores/themeBuilderStore.test.ts,99,expect(result.current.typography.fontFamily).toContain('Segoe'),Needs review
 frontend/apps/dashboard/src/stores/themeBuilderStore.test.ts,170,"result.current.updateTypography({ fontFamily: 'Georgia, serif' })",Needs review
 frontend/apps/dashboard/src/stores/themeBuilderStore.test.ts,173,"expect(result.current.typography.fontFamily).toBe('Georgia, serif')",Needs review
+frontend/apps/dashboard/src/stores/themeBuilderStore.test.ts,193,"lineHeight: 1.8,",Needs review
+frontend/apps/dashboard/src/stores/themeBuilderStore.test.ts,199,expect(result.current.typography.lineHeight).toBe(1.8),Needs review
 frontend/apps/dashboard/src/stores/themeBuilderStore.ts,78,"fontFamily: 'Segoe UI, Tahoma, Geneva, Verdana, sans-serif',",Needs review
+frontend/apps/dashboard/src/stores/themeBuilderStore.ts,81,"lineHeight: 1.5,",Needs review
+frontend/apps/dashboard/src/stores/themeBuilderStore.ts,82,"fontWeights: [400, 500, 600, 700],",Needs review
 frontend/apps/dashboard/src/stores/themeBuilderStore.ts,273,Boolean(typography.fontFamily) &&,Needs review
 frontend/apps/dashboard/src/stores/themeBuilderStore.ts,274,typography.fontFamily.trim().length > 0 &&,Needs review
+frontend/apps/dashboard/src/stores/themeBuilderStore.ts,279,typography.lineHeight > 0 &&,Needs review
+frontend/apps/dashboard/src/stores/themeBuilderStore.ts,280,typography.lineHeight < 5,Needs review
 frontend/apps/dashboard/src/stores/themeBuilderUtils.ts,239,if (!typography.fontFamily || typography.fontFamily.trim().length === 0) {,Needs review
+frontend/apps/dashboard/src/stores/themeBuilderUtils.ts,247,if (!isValidLineHeight(typography.lineHeight)) {,Needs review
 frontend/apps/dashboard/src/types/theme.ts,18,fontFamily: string,Needs review
+frontend/apps/dashboard/src/types/theme.ts,21,lineHeight: number,Needs review
+frontend/apps/dashboard/src/types/theme.ts,22,fontWeights?: number[],Needs review
+frontend/apps/dashboard/src/types/theme.ts,23,fontSize?: number,Needs review
 frontend/apps/dashboard/src/lib/api/themeApi.ts,287,"fontFamily: typographySource.fontFamily || typographySource.font_family || typographySource.fontSans || 'Inter',",Needs review
+frontend/apps/dashboard/src/lib/api/themeApi.ts,290,"lineHeight: Number(typographySource.lineHeight || typographySource.line_height || 1.5),",Needs review
+frontend/apps/dashboard/src/lib/api/themeApi.ts,291,"fontWeights: Array.isArray(typographySource.fontWeights) ? typographySource.fontWeights : [400, 700],",Needs review
+frontend/apps/dashboard/src/lib/api/themeApi.ts,292,"fontSize: Number(typographySource.fontSize || typographySource.baseFontSize || 14),",Needs review
 frontend/apps/dashboard/src/lib/validation/theme-schemas.ts,66,const fontFamilySchema = z,Needs review
+frontend/apps/dashboard/src/lib/validation/theme-schemas.ts,73,const fontSizeSchema = z,Needs review
+frontend/apps/dashboard/src/lib/validation/theme-schemas.ts,83,const lineHeightSchema = z,Needs review
 frontend/apps/dashboard/src/lib/validation/theme-schemas.ts,89,"fontFamily: fontFamilySchema,",Needs review
+frontend/apps/dashboard/src/lib/validation/theme-schemas.ts,90,"baseFontSize: fontSizeSchema,",Needs review
+frontend/apps/dashboard/src/lib/validation/theme-schemas.ts,92,"lineHeight: lineHeightSchema,",Needs review
+frontend/apps/dashboard/src/lib/validation/theme-schemas.ts,385,fontSize: (size: number) => {,Needs review
+frontend/apps/dashboard/src/lib/validation/theme-schemas.ts,387,fontSizeSchema.parse(size),Needs review
 frontend/apps/dashboard/src/lib/validation/theme-schemas.ts,417,fontFamilySchema.parse(font),Needs review
 frontend/apps/dashboard/src/components/accounting/AccountForm.tsx,191,"className=""flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 ring-offset-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:border-",Needs review
 frontend/apps/dashboard/src/components/accounting/AccountForm.tsx,222,"className=""flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 ring-offset-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:border-",Needs review
@@ -440,6 +486,8 @@ frontend/apps/dashboard/src/components/editors/CTAEditor.tsx,558,"<h2 className=
 frontend/apps/dashboard/src/components/editors/CTAEditor.tsx,563,"<p className=""cta-preview-description text-lg text-center mb-8"">",Needs review
 frontend/apps/dashboard/src/components/editors/CTAEditor.tsx,571,"className=""cta-preview-primary font-semibold transition-all hover:shadow-lg""",Needs review
 frontend/apps/dashboard/src/components/editors/CTAEditor.tsx,579,"className=""cta-preview-secondary font-semibold transition-all hover:shadow-lg""",Needs review
+frontend/apps/dashboard/src/components/editors/CTAEditor.tsx,638,font-size: ${,Needs review
+frontend/apps/dashboard/src/components/editors/CTAEditor.tsx,681,font-size: ${,Needs review
 frontend/apps/dashboard/src/components/editors/CustomCSSEditor.tsx,186,"<h3 className=""text-lg font-semibold text-gray-900 dark:text-white"">CSS Preview</h3>",Needs review
 frontend/apps/dashboard/src/components/editors/CustomCSSEditor.tsx,189,"className=""px-3 py-2 text-sm bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition""",Needs review
 frontend/apps/dashboard/src/components/editors/CustomCSSEditor.tsx,197,"<p className=""text-sm text-yellow-800 dark:text-yellow-200"">Custom CSS is disabled.</p>",Needs review
@@ -469,12 +517,42 @@ frontend/apps/dashboard/src/components/editors/EditorErrorBoundary.tsx,60,"<deta
 frontend/apps/dashboard/src/components/editors/EditorErrorBoundary.tsx,62,"<pre className=""bg-red-100 dark:bg-red-800 p-2 rounded overflow-auto max-h-48 font-mono text-xs"">",Needs review
 frontend/apps/dashboard/src/components/editors/EditorErrorBoundary.tsx,69,"className=""inline-flex items-center gap-2 px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm transition""",Needs review
 frontend/apps/dashboard/src/components/editors/FontPicker.tsx,21,fontFamily?: string,Needs review
+frontend/apps/dashboard/src/components/editors/FontPicker.tsx,22,fontWeight?: number,Needs review
+frontend/apps/dashboard/src/components/editors/FontPicker.tsx,24,fontWeights?: number[],Needs review
+frontend/apps/dashboard/src/components/editors/FontPicker.tsx,25,fontSize?: number,Needs review
+frontend/apps/dashboard/src/components/editors/FontPicker.tsx,26,lineHeight?: number,Needs review
+frontend/apps/dashboard/src/components/editors/FontPicker.tsx,27,letterSpacing?: number,Needs review
 frontend/apps/dashboard/src/components/editors/FontPicker.tsx,59,"fontFamily: storeTypography.fontFamily,",Needs review
+frontend/apps/dashboard/src/components/editors/FontPicker.tsx,60,"fontWeight: storeTypography.fontWeights?.[0] || 400,",Needs review
+frontend/apps/dashboard/src/components/editors/FontPicker.tsx,62,"fontWeights: storeTypography.fontWeights || [400],",Needs review
+frontend/apps/dashboard/src/components/editors/FontPicker.tsx,63,"fontSize: storeTypography.fontSize || 16,",Needs review
+frontend/apps/dashboard/src/components/editors/FontPicker.tsx,64,"lineHeight: storeTypography.lineHeight || 1.5,",Needs review
+frontend/apps/dashboard/src/components/editors/FontPicker.tsx,65,"letterSpacing: 0,",Needs review
+frontend/apps/dashboard/src/components/editors/FontPicker.tsx,70,"fontWeight: 400,",Needs review
+frontend/apps/dashboard/src/components/editors/FontPicker.tsx,72,"fontSize: 16,",Needs review
+frontend/apps/dashboard/src/components/editors/FontPicker.tsx,73,"lineHeight: 1.6,",Needs review
+frontend/apps/dashboard/src/components/editors/FontPicker.tsx,74,"letterSpacing: 0,",Needs review
+frontend/apps/dashboard/src/components/editors/FontPicker.tsx,75,"fontWeights: [400],",Needs review
 frontend/apps/dashboard/src/components/editors/FontPicker.tsx,109,if (fontConfig.fontFamily) {,Needs review
 frontend/apps/dashboard/src/components/editors/FontPicker.tsx,110,const font = googleFontsService.getFont(fontConfig.fontFamily),Needs review
+frontend/apps/dashboard/src/components/editors/FontPicker.tsx,114,"googleFontsService.loadFont(font.family, fontConfig.fontWeights || [400]).then(() => {",Needs review
 frontend/apps/dashboard/src/components/editors/FontPicker.tsx,119,"}, [fontConfig.fontFamily])",Needs review
 frontend/apps/dashboard/src/components/editors/FontPicker.tsx,125,"fontFamily: font.id,",Needs review
+frontend/apps/dashboard/src/components/editors/FontPicker.tsx,126,"fontWeights: [400, 700],",Needs review
 frontend/apps/dashboard/src/components/editors/FontPicker.tsx,135,"fontFamily: font.id,",Needs review
+frontend/apps/dashboard/src/components/editors/FontPicker.tsx,136,"fontWeights: [400, 700],",Needs review
+frontend/apps/dashboard/src/components/editors/FontPicker.tsx,152,const weights = fontConfig.fontWeights || [400],Needs review
+frontend/apps/dashboard/src/components/editors/FontPicker.tsx,159,"fontWeights: newWeights.sort((a, b) => a - b),",Needs review
+frontend/apps/dashboard/src/components/editors/FontPicker.tsx,160,"fontWeight: weight,",Needs review
+frontend/apps/dashboard/src/components/editors/FontPicker.tsx,167,"fontWeights: newWeights.sort((a, b) => a - b),",Needs review
+frontend/apps/dashboard/src/components/editors/FontPicker.tsx,206,"fontSize: size,",Needs review
+frontend/apps/dashboard/src/components/editors/FontPicker.tsx,212,updateTypography({ fontSize: size }),Needs review
+frontend/apps/dashboard/src/components/editors/FontPicker.tsx,228,"lineHeight: height,",Needs review
+frontend/apps/dashboard/src/components/editors/FontPicker.tsx,234,updateTypography({ lineHeight: height }),Needs review
+frontend/apps/dashboard/src/components/editors/FontPicker.tsx,250,const previewFontSize = fontConfig.fontSize || 16,Needs review
+frontend/apps/dashboard/src/components/editors/FontPicker.tsx,252,const previewFontWeight = fontConfig.fontWeight || 400,Needs review
+frontend/apps/dashboard/src/components/editors/FontPicker.tsx,253,const previewLineHeight = fontConfig.lineHeight || 1.6,Needs review
+frontend/apps/dashboard/src/components/editors/FontPicker.tsx,254,const previewLetterSpacing = fontConfig.letterSpacing || 0,Needs review
 frontend/apps/dashboard/src/components/editors/FontPicker.tsx,256,const fontFamilyRules = fonts,Needs review
 frontend/apps/dashboard/src/components/editors/FontPicker.tsx,259,.font-family-${getSafeFontId(font.id)} {,Needs review
 frontend/apps/dashboard/src/components/editors/FontPicker.tsx,260,"font-family: '${font.family.replace(/'/g, ""\\'"")}', sans-serif;",Needs review
@@ -483,6 +561,9 @@ frontend/apps/dashboard/src/components/editors/FontPicker.tsx,274,"className=""p
 frontend/apps/dashboard/src/components/editors/FontPicker.tsx,284,"<h4 className=""font-semibold text-gray-900 dark:text-white mb-2"">{selectedFont.family}</h4>",Needs review
 frontend/apps/dashboard/src/components/editors/FontPicker.tsx,285,"<p className=""text-sm text-gray-600 dark:text-gray-400 mb-3"">",Needs review
 frontend/apps/dashboard/src/components/editors/FontPicker.tsx,288,"<div className=""space-y-2 text-xs text-gray-600 dark:text-gray-400"">",Needs review
+frontend/apps/dashboard/src/components/editors/FontPicker.tsx,290,"<strong>{tx('Selected Weight:', 'ÃƒËœÃ‚Â§Ãƒâ„¢Ã¢â‚¬Å¾Ãƒâ„¢Ã‹â€ ÃƒËœÃ‚Â²Ãƒâ„¢Ã¢â‚¬Â  ÃƒËœÃ‚Â§Ãƒâ„¢Ã¢â‚¬Å¾Ãƒâ„¢Ã¢â‚¬Â¦ÃƒËœÃ‚Â­ÃƒËœÃ‚Â¯ÃƒËœÃ‚Â¯:')}</strong> {fontConfig.fontWeight || 400}",Needs review
+frontend/apps/dashboard/src/components/editors/FontPicker.tsx,293,"<strong>{tx('Font Size:', 'ÃƒËœÃ‚Â­ÃƒËœÃ‚Â¬Ãƒâ„¢Ã¢â‚¬Â¦ ÃƒËœÃ‚Â§Ãƒâ„¢Ã¢â‚¬Å¾ÃƒËœÃ‚Â®ÃƒËœÃ‚Â·:')}</strong> {fontConfig.fontSize || 16}px",Needs review
+frontend/apps/dashboard/src/components/editors/FontPicker.tsx,296,"<strong>{tx('Line Height:', 'ÃƒËœÃ‚Â§ÃƒËœÃ‚Â±ÃƒËœÃ‚ÂªÃƒâ„¢Ã‚ÂÃƒËœÃ‚Â§ÃƒËœÃ‚Â¹ ÃƒËœÃ‚Â§Ãƒâ„¢Ã¢â‚¬Å¾ÃƒËœÃ‚Â³ÃƒËœÃ‚Â·ÃƒËœÃ‚Â±:')}</strong> {fontConfig.lineHeight || 1.6}",Needs review
 frontend/apps/dashboard/src/components/editors/FontPicker.tsx,304,"<h4 className=""font-semibold text-gray-900 dark:text-white"">{tx('Preview', 'Ãƒâ„¢Ã¢â‚¬Â¦ÃƒËœÃ‚Â¹ÃƒËœÃ‚Â§Ãƒâ„¢Ã…Â Ãƒâ„¢Ã¢â‚¬Â ÃƒËœÃ‚Â©')}</h4>",Needs review
 frontend/apps/dashboard/src/components/editors/FontPicker.tsx,314,"<h4 className=""font-semibold text-gray-900 dark:text-white"">{tx('Heading (24px, Bold)', 'ÃƒËœÃ‚Â¹Ãƒâ„¢Ã¢â‚¬Â Ãƒâ„¢Ã‹â€ ÃƒËœÃ‚Â§Ãƒâ„¢Ã¢â‚¬Â  (24pxÃƒËœÃ…â€™ ÃƒËœÃ‚Â¹ÃƒËœÃ‚Â±Ãƒâ„¢Ã…Â ÃƒËœÃ‚Â¶)')}</h4>",Needs review
 frontend/apps/dashboard/src/components/editors/FontPicker.tsx,333,"<h2 className=""text-lg font-bold text-gray-900 dark:text-white mb-2"">{tx('Font Picker', 'ÃƒËœÃ‚Â§ÃƒËœÃ‚Â®ÃƒËœÃ‚ÂªÃƒâ„¢Ã…Â ÃƒËœÃ‚Â§ÃƒËœÃ‚Â± ÃƒËœÃ‚Â§Ãƒâ„¢Ã¢â‚¬Å¾ÃƒËœÃ‚Â®ÃƒËœÃ‚Â·')}</h2>",Needs review
@@ -501,11 +582,23 @@ frontend/apps/dashboard/src/components/editors/FontPicker.tsx,428,"<span classNa
 frontend/apps/dashboard/src/components/editors/FontPicker.tsx,441,"<h3 className=""font-semibold text-gray-900 dark:text-white"">{tx('Font Configuration', 'ÃƒËœÃ‚Â¥ÃƒËœÃ‚Â¹ÃƒËœÃ‚Â¯ÃƒËœÃ‚Â§ÃƒËœÃ‚Â¯ÃƒËœÃ‚Â§ÃƒËœÃ‚Âª ÃƒËœÃ‚Â§Ãƒâ„¢Ã¢â‚¬Å¾ÃƒËœÃ‚Â®ÃƒËœÃ‚Â·')}</h3>",Needs review
 frontend/apps/dashboard/src/components/editors/FontPicker.tsx,445,"<label className=""block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"">",Needs review
 frontend/apps/dashboard/src/components/editors/FontPicker.tsx,453,className={`px-3 py-1.5 rounded-lg text-sm font-medium transition ${,Needs review
+frontend/apps/dashboard/src/components/editors/FontPicker.tsx,454,fontConfig.fontWeights?.includes(weight),Needs review
 frontend/apps/dashboard/src/components/editors/FontPicker.tsx,468,"<label className=""block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"">",Needs review
 frontend/apps/dashboard/src/components/editors/FontPicker.tsx,476,className={`px-4 py-2 rounded-lg text-sm font-medium transition ${,Needs review
 frontend/apps/dashboard/src/components/editors/FontPicker.tsx,491,"<label htmlFor=""font-size"" className=""block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"">",Needs review
+frontend/apps/dashboard/src/components/editors/FontPicker.tsx,492,"{tx('Font Size', 'ÃƒËœÃ‚Â­ÃƒËœÃ‚Â¬Ãƒâ„¢Ã¢â‚¬Â¦ ÃƒËœÃ‚Â§Ãƒâ„¢Ã¢â‚¬Å¾ÃƒËœÃ‚Â®ÃƒËœÃ‚Â·')}: {fontConfig.fontSize || 16}px",Needs review
+frontend/apps/dashboard/src/components/editors/FontPicker.tsx,495,"id=""font-size""",Needs review
+frontend/apps/dashboard/src/components/editors/FontPicker.tsx,500,value={fontConfig.fontSize || 16},Needs review
 frontend/apps/dashboard/src/components/editors/FontPicker.tsx,508,"<label className=""block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"">",Needs review
+frontend/apps/dashboard/src/components/editors/FontPicker.tsx,509,"{tx('Line Height', 'ÃƒËœÃ‚Â§ÃƒËœÃ‚Â±ÃƒËœÃ‚ÂªÃƒâ„¢Ã‚ÂÃƒËœÃ‚Â§ÃƒËœÃ‚Â¹ ÃƒËœÃ‚Â§Ãƒâ„¢Ã¢â‚¬Å¾ÃƒËœÃ‚Â³ÃƒËœÃ‚Â·ÃƒËœÃ‚Â±')}: {(fontConfig.lineHeight || 1.6).toFixed(1)}",Needs review
+frontend/apps/dashboard/src/components/editors/FontPicker.tsx,517,value={fontConfig.lineHeight || 1.6},Needs review
 frontend/apps/dashboard/src/components/editors/FontPicker.tsx,546,font-family: ${previewFontFamily};,Needs review
+frontend/apps/dashboard/src/components/editors/FontPicker.tsx,547,font-size: ${previewFontSize}px;,Needs review
+frontend/apps/dashboard/src/components/editors/FontPicker.tsx,549,font-weight: ${previewFontWeight};,Needs review
+frontend/apps/dashboard/src/components/editors/FontPicker.tsx,550,line-height: ${previewLineHeight};,Needs review
+frontend/apps/dashboard/src/components/editors/FontPicker.tsx,551,letter-spacing: ${previewLetterSpacing}px;,Needs review
+frontend/apps/dashboard/src/components/editors/FontPicker.tsx,555,font-size: 24px;,Needs review
+frontend/apps/dashboard/src/components/editors/FontPicker.tsx,556,font-weight: 700;,Needs review
 frontend/apps/dashboard/src/components/editors/FontPicker.tsx,559,${fontFamilyRules},Needs review
 frontend/apps/dashboard/src/components/editors/FooterEditor.tsx,271,"<h3 className=""text-lg font-semibold text-gray-900 dark:text-white"">{tx('Footer Preview', 'معاينة التذييل')}</h3>",Needs review
 frontend/apps/dashboard/src/components/editors/FooterEditor.tsx,274,"className=""px-3 py-2 text-sm bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition""",Needs review
@@ -628,6 +721,7 @@ frontend/apps/dashboard/src/components/editors/HeroEditor.tsx,441,"<label classN
 frontend/apps/dashboard/src/components/editors/HeroEditor.tsx,469,"<h1 className=""text-4xl font-bold mb-4"">{previewText(component.title, 'Hero Title')}</h1>",Needs review
 frontend/apps/dashboard/src/components/editors/HeroEditor.tsx,470,"<p className=""text-lg mb-6 max-w-2xl"">{previewText(component.subtitle, 'Hero subtitle goes here')}</p>",Needs review
 frontend/apps/dashboard/src/components/editors/HeroEditor.tsx,473,"className=""hero-preview-cta font-semibold rounded-lg transition-colors""",Needs review
+frontend/apps/dashboard/src/components/editors/HeroEditor.tsx,528,font-size: ${,Needs review
 frontend/apps/dashboard/src/components/editors/ProductGridEditor.tsx,110,className={`px-4 py-2 font-medium transition-colors ${,Needs review
 frontend/apps/dashboard/src/components/editors/ProductGridEditor.tsx,120,className={`px-4 py-2 font-medium transition-colors ${,Needs review
 frontend/apps/dashboard/src/components/editors/ProductGridEditor.tsx,134,"<h3 className=""font-semibold text-gray-900 dark:text-white"">Grid Layout</h3>",Needs review
@@ -664,6 +758,7 @@ frontend/apps/dashboard/src/components/editors/ProductGridEditor.tsx,517,"<p cla
 frontend/apps/dashboard/src/components/editors/ProductGridEditor.tsx,531,"<h2 className=""text-2xl font-bold text-gray-900 dark:text-white mb-6"">",Needs review
 frontend/apps/dashboard/src/components/editors/ProductGridEditor.tsx,550,"<h3 className=""font-semibold text-gray-900 dark:text-white mb-2"">",Needs review
 frontend/apps/dashboard/src/components/editors/ProductGridEditor.tsx,554,"<p className=""product-grid-preview-price text-lg font-bold mb-3"">",Needs review
+frontend/apps/dashboard/src/components/editors/ProductGridEditor.tsx,601,font-weight: 500;,Needs review
 frontend/apps/dashboard/src/components/editors/TestimonialsEditor.tsx,126,className={`px-4 py-2 font-medium transition-colors ${,Needs review
 frontend/apps/dashboard/src/components/editors/TestimonialsEditor.tsx,136,className={`px-4 py-2 font-medium transition-colors ${,Needs review
 frontend/apps/dashboard/src/components/editors/TestimonialsEditor.tsx,150,"<h3 className=""font-semibold text-gray-900 dark:text-white"">Layout Settings</h3>",Needs review
@@ -716,6 +811,17 @@ frontend/apps/dashboard/src/components/editors/TestimonialsEditor.tsx,695,"<div 
 frontend/apps/dashboard/src/components/editors/TestimonialsEditor.tsx,712,"<p className=""testimonial-author font-semibold"">",Needs review
 frontend/apps/dashboard/src/components/editors/TestimonialsEditor.tsx,716,"<p className=""text-xs text-gray-600 dark:text-gray-400"">",Needs review
 frontend/apps/dashboard/src/components/editors/TestimonialsEditor.tsx,727,"className=""testimonial-rating text-lg""",Needs review
+frontend/apps/dashboard/src/components/editors/TypographyPreview.tsx,14,lineHeight: number,Needs review
+frontend/apps/dashboard/src/components/editors/TypographyPreview.tsx,27,"lineHeight: 1.2,",Needs review
+frontend/apps/dashboard/src/components/editors/TypographyPreview.tsx,34,"lineHeight: 1.3,",Needs review
+frontend/apps/dashboard/src/components/editors/TypographyPreview.tsx,41,"lineHeight: 1.3,",Needs review
+frontend/apps/dashboard/src/components/editors/TypographyPreview.tsx,48,"lineHeight: typography.lineHeight,",Needs review
+frontend/apps/dashboard/src/components/editors/TypographyPreview.tsx,56,"lineHeight: 1.4,",Needs review
+frontend/apps/dashboard/src/components/editors/TypographyPreview.tsx,63,"lineHeight: 1.4,",Needs review
+frontend/apps/dashboard/src/components/editors/TypographyPreview.tsx,68,"}, [typography.baseFontSize, typography.lineHeight])",Needs review
+frontend/apps/dashboard/src/components/editors/TypographyPreview.tsx,74,font-size: ${item.size}px;,Needs review
+frontend/apps/dashboard/src/components/editors/TypographyPreview.tsx,75,line-height: ${item.lineHeight};,Needs review
+frontend/apps/dashboard/src/components/editors/TypographyPreview.tsx,76,font-weight: ${item.weight};,Needs review
 frontend/apps/dashboard/src/components/editors/TypographyPreview.tsx,85,"<h3 className=""font-semibold text-sm text-gray-900 dark:text-white mb-4"">",Needs review
 frontend/apps/dashboard/src/components/editors/TypographyPreview.tsx,92,"<p className=""text-xs text-gray-600 dark:text-gray-400 mb-1"">Font Family</p>",Needs review
 frontend/apps/dashboard/src/components/editors/TypographyPreview.tsx,93,"<p className=""typography-font-family text-sm font-medium text-gray-900 dark:text-white truncate"">",Needs review
@@ -724,11 +830,13 @@ frontend/apps/dashboard/src/components/editors/TypographyPreview.tsx,98,"<p clas
 frontend/apps/dashboard/src/components/editors/TypographyPreview.tsx,99,"<p className=""text-sm font-medium text-gray-900 dark:text-white"">",Needs review
 frontend/apps/dashboard/src/components/editors/TypographyPreview.tsx,104,"<p className=""text-xs text-gray-600 dark:text-gray-400 mb-1"">Line Height</p>",Needs review
 frontend/apps/dashboard/src/components/editors/TypographyPreview.tsx,105,"<p className=""text-sm font-medium text-gray-900 dark:text-white"">",Needs review
+frontend/apps/dashboard/src/components/editors/TypographyPreview.tsx,106,{typography.lineHeight},Needs review
 frontend/apps/dashboard/src/components/editors/TypographyPreview.tsx,110,"<p className=""text-xs text-gray-600 dark:text-gray-400 mb-1"">Border Radius</p>",Needs review
 frontend/apps/dashboard/src/components/editors/TypographyPreview.tsx,111,"<p className=""text-sm font-medium text-gray-900 dark:text-white"">",Needs review
 frontend/apps/dashboard/src/components/editors/TypographyPreview.tsx,126,"<h4 className=""text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide"">",Needs review
 frontend/apps/dashboard/src/components/editors/TypographyPreview.tsx,129,"<span className=""text-xs text-gray-500 dark:text-gray-500"">",Needs review
 frontend/apps/dashboard/src/components/editors/TypographyPreview.tsx,141,"<div className=""text-xs text-gray-500 dark:text-gray-400 space-y-1"">",Needs review
+frontend/apps/dashboard/src/components/editors/TypographyPreview.tsx,144,"<span className=""font-mono"">{item.lineHeight}</span>",Needs review
 frontend/apps/dashboard/src/components/editors/TypographyPreview.tsx,158,"<h4 className=""text-xs font-medium text-blue-900 dark:text-blue-300 mb-2"">",Needs review
 frontend/apps/dashboard/src/components/editors/TypographyPreview.tsx,161,"<ul className=""text-xs text-blue-800 dark:text-blue-400 space-y-1 list-disc list-inside"">",Needs review
 frontend/apps/dashboard/src/components/editors/TypographyPreview.tsx,171,".typography-font-family,",Needs review
@@ -771,6 +879,7 @@ frontend/apps/dashboard/src/components/editors/WhyUsEditor.tsx,525,"className=""
 frontend/apps/dashboard/src/components/editors/WhyUsEditor.tsx,541,"<h2 className=""whyus-preview-title text-2xl font-bold mb-8"">",Needs review
 frontend/apps/dashboard/src/components/editors/WhyUsEditor.tsx,552,"<h3 className=""whyus-preview-item-title font-semibold text-lg mb-2"">",Needs review
 frontend/apps/dashboard/src/components/editors/WhyUsEditor.tsx,556,"<p className=""whyus-preview-item-description text-sm"">",Needs review
+frontend/apps/dashboard/src/components/editors/WhyUsEditor.tsx,610,font-size: ${(config.iconSize || 48) * 0.6}px;,Needs review
 frontend/apps/dashboard/src/components/financial-reports/AgingReport.tsx,27,"<div className=""border-b border-gray-200 px-5 py-4 text-lg font-semibold text-gray-900 dark:border-gray-700 dark:text-white"">",Needs review
 frontend/apps/dashboard/src/components/financial-reports/AgingReport.tsx,31,"<table className=""min-w-full divide-y divide-gray-200 text-sm dark:divide-gray-700"">",Needs review
 frontend/apps/dashboard/src/components/financial-reports/AgingReport.tsx,34,"<th className=""px-4 py-3 text-left font-medium text-gray-500 dark:text-gray-400"">{t('table.entity')}</th>",Needs review
@@ -1167,6 +1276,10 @@ frontend/apps/dashboard/src/components/ui/tabs.tsx,32,'inline-flex items-center 
 frontend/apps/dashboard/src/components/ui/textarea.tsx,13,'flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-off,Needs review
 frontend/apps/dashboard/src/components/__tests__/enhanced-error-boundary.test.tsx,729,expect(heading).toHaveClass('text-2xl'),Needs review
 frontend/apps/dashboard/src/components/editors/__tests__/FontPicker.test.tsx,22,"fontFamily: 'roboto',",Needs review
+frontend/apps/dashboard/src/components/editors/__tests__/FontPicker.test.tsx,23,"fontWeight: 400,",Needs review
+frontend/apps/dashboard/src/components/editors/__tests__/FontPicker.test.tsx,24,"fontSize: 16,",Needs review
+frontend/apps/dashboard/src/components/editors/__tests__/FontPicker.test.tsx,25,"lineHeight: 1.6,",Needs review
+frontend/apps/dashboard/src/components/editors/__tests__/FontPicker.test.tsx,26,"fontWeights: [400, 700],",Needs review
 frontend/apps/dashboard/src/components/editors/__tests__/FontPicker.test.tsx,183,"config: { fontFamily: 'roboto', fontWeight: 400, fontSize: 16 },",Needs review
 frontend/apps/dashboard/src/components/editors/__tests__/FontPicker.test.tsx,221,"config: { fontFamily: 'roboto', fontWeights: [400, 700] },",Needs review
 frontend/apps/dashboard/src/components/editors/__tests__/FontPicker.test.tsx,233,"config: { fontFamily: 'roboto', fontWeights: [400] },",Needs review
@@ -1376,6 +1489,7 @@ frontend/apps/dashboard/src/app/[locale]/dashboard/pos/error.tsx,19,"<p classNam
 frontend/apps/dashboard/src/app/[locale]/dashboard/pos/error.tsx,23,"className=""inline-flex items-center rounded-lg bg-red-600 text-white px-4 py-2 text-sm font-medium hover:bg-red-700""",Needs review
 frontend/apps/dashboard/src/app/[locale]/dashboard/pos/page.tsx,459,"<h1 className=""text-base font-semibold text-red-700 dark:text-red-100"">",Needs review
 frontend/apps/dashboard/src/app/[locale]/dashboard/pos/page.tsx,462,"<p className=""mt-1 text-sm text-red-700/90 dark:text-red-200"">",Needs review
+frontend/apps/dashboard/src/app/[locale]/dashboard/pos/page.tsx,503,"<div className=""pointer-events-none fixed bottom-3 right-3 z-50 w-56 rounded-lg border border-sky-200 bg-white/95 p-2 text-[11px] shadow-lg backdrop-blur dark:border-sky-700/60 dark:bg-slate-900/95"">",Needs review
 frontend/apps/dashboard/src/app/[locale]/dashboard/pos/page.tsx,504,"<p className=""mb-1 font-semibold text-sky-700 dark:text-sky-300"">",Needs review
 frontend/apps/dashboard/src/app/[locale]/dashboard/products/error.tsx,18,"<h2 className=""text-lg font-semibold text-red-800 dark:text-red-300"">Something went wrong</h2>",Needs review
 frontend/apps/dashboard/src/app/[locale]/dashboard/products/error.tsx,19,"<p className=""text-sm text-red-700 dark:text-red-400"">An unexpected error occurred while loading this section.</p>",Needs review
@@ -1471,11 +1585,17 @@ frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/components/Live
 frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/components/LivePreview.tsx,161,"<span className=""text-sm font-medium"">{item.name}</span>",Needs review
 frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/components/LivePreview.tsx,168,"<div className=""preview-footer p-6 text-center text-sm"">",Needs review
 frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/components/PresetGallery.tsx,28,"fontFamily: 'Inter',",Needs review
+frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/components/PresetGallery.tsx,31,"lineHeight: 1.5,",Needs review
 frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/components/PresetGallery.tsx,48,"fontFamily: 'Georgia',",Needs review
+frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/components/PresetGallery.tsx,51,"lineHeight: 1.6,",Needs review
 frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/components/PresetGallery.tsx,68,"fontFamily: 'Poppins',",Needs review
+frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/components/PresetGallery.tsx,71,"lineHeight: 1.6,",Needs review
 frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/components/PresetGallery.tsx,88,"fontFamily: 'Playfair Display',",Needs review
+frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/components/PresetGallery.tsx,91,"lineHeight: 1.7,",Needs review
 frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/components/PresetGallery.tsx,108,"fontFamily: 'Helvetica',",Needs review
+frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/components/PresetGallery.tsx,111,"lineHeight: 1.5,",Needs review
 frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/components/PresetGallery.tsx,128,"fontFamily: 'Poppins',",Needs review
+frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/components/PresetGallery.tsx,131,"lineHeight: 1.6,",Needs review
 frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/components/PresetGallery.tsx,160,"<h2 className=""text-2xl font-bold text-gray-900 dark:text-white"">Theme Presets</h2>",Needs review
 frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/components/PresetGallery.tsx,196,"<h3 className=""font-semibold text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 transition"">",Needs review
 frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/components/PresetGallery.tsx,199,"<p className=""text-sm text-gray-600 dark:text-gray-400 mt-1"">",Needs review
@@ -1497,6 +1617,9 @@ frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/components/Prop
 frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/components/PropertiesPanel.tsx,192,"<label className=""block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"">",Needs review
 frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/components/PropertiesPanel.tsx,205,"<p className=""text-xs text-gray-500 dark:text-gray-400 mt-1"">0px - 20px</p>",Needs review
 frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/components/PropertiesPanel.tsx,209,"<label className=""block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"">",Needs review
+frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/components/PropertiesPanel.tsx,210,Line Height: {theme.typography.lineHeight.toFixed(1)},Needs review
+frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/components/PropertiesPanel.tsx,217,value={theme.typography.lineHeight},Needs review
+frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/components/PropertiesPanel.tsx,219,updateTypography({ lineHeight: parseFloat(e.target.value) }),Needs review
 frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/components/PropertiesPanel.tsx,223,"<p className=""text-xs text-gray-500 dark:text-gray-400 mt-1"">1.2 - 2.0</p>",Needs review
 frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/components/PropertiesPanel.tsx,234,"<h3 className=""font-semibold text-gray-900 dark:text-white mb-4"">Website Identity</h3>",Needs review
 frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/components/PropertiesPanel.tsx,237,"<label className=""block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"">",Needs review
@@ -1629,7 +1752,10 @@ frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/editor/componen
 frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/editor/components/CTAEditor.tsx,143,"className=""flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white font-mono text-sm""",Needs review
 frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/editor/components/CTAEditor.tsx,150,"<p className=""text-xs text-blue-700 dark:text-blue-400"">",Needs review
 frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/editor/components/EditorPreview.tsx,216,"fontFamily: theme.typography?.fontFamily || 'Inter',",Needs review
+frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/editor/components/EditorPreview.tsx,219,"lineHeight: theme.typography?.lineHeight || 1.5,",Needs review
 frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/editor/components/EditorPreview.tsx,235,--font-family: ${typography.fontFamily};,Needs review
+frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/editor/components/EditorPreview.tsx,236,--font-size-base: ${typography.baseFontSize}px;,Needs review
+frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/editor/components/EditorPreview.tsx,238,--line-height: ${typography.lineHeight};,Needs review
 frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/editor/components/EditorPreview.tsx,248,"<h3 className=""text-sm font-semibold text-gray-900 dark:text-white"">",Needs review
 frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/editor/components/EditorPreview.tsx,255,className={`px-2 py-1 rounded-md text-xs font-medium transition ${,Needs review
 frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/editor/components/EditorPreview.tsx,265,className={`px-2 py-1 rounded-md text-xs font-medium transition ${,Needs review
@@ -1637,16 +1763,29 @@ frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/editor/componen
 frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/editor/components/EditorPreview.tsx,291,className={`px-3 py-1 rounded-md text-sm transition flex items-center gap-1 ${,Needs review
 frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/editor/components/EditorPreview.tsx,303,className={`px-3 py-1 rounded-md text-sm transition flex items-center gap-1 ${,Needs review
 frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/editor/components/EditorPreview.tsx,335,font-family: ${typography.fontFamily};,Needs review
+frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/editor/components/EditorPreview.tsx,336,font-size: ${typography.baseFontSize}px;,Needs review
+frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/editor/components/EditorPreview.tsx,337,line-height: ${typography.lineHeight};,Needs review
 frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/editor/components/EditorSidebar.tsx,85,"fontFamily: 'Inter',",Needs review
+frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/editor/components/EditorSidebar.tsx,88,"lineHeight: 1.5,",Needs review
+frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/editor/components/EditorSidebar.tsx,89,"fontWeights: [400, 700] as number[],",Needs review
+frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/editor/components/EditorSidebar.tsx,90,"fontSize: 14,",Needs review
 frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/editor/components/EditorSidebar.tsx,168,"className=""w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 border border-gray-200 dark:border-",Needs review
 frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/editor/components/EditorSidebar.tsx,187,className={`flex flex-col items-center justify-center gap-1.5 px-3 py-3 rounded-lg text-xs font-medium transition-all ${,Needs review
+frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/editor/components/EditorSidebar.tsx,195,"<span className=""leading-tight"">{tab.label}</span>",Needs review
 frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/editor/components/EditorSidebar.tsx,213,"<h3 className=""font-semibold text-gray-900 dark:text-white mb-4 text-sm flex items-center gap-2"">",Needs review
 frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/editor/components/EditorSidebar.tsx,274,"<h3 className=""font-semibold text-gray-900 dark:text-white mb-4 text-sm flex items-center gap-2"">",Needs review
 frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/editor/components/EditorSidebar.tsx,287,"<h3 className=""font-semibold text-gray-900 dark:text-white mb-4 text-sm flex items-center gap-2"">",Needs review
 frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/editor/components/EditorSidebar.tsx,316,"<h3 className=""font-semibold text-gray-900 dark:text-white mb-4 text-sm flex items-center gap-2"">",Needs review
 frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/editor/components/EditorSidebar.tsx,346,"<h3 className=""font-semibold text-gray-900 dark:text-white mb-4 text-sm flex items-center gap-2"">",Needs review
 frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/editor/components/EditorSidebar.tsx,359,"fontFamily: typography.fontFamily,",Needs review
+frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/editor/components/EditorSidebar.tsx,360,"fontWeight: 400,",Needs review
+frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/editor/components/EditorSidebar.tsx,361,"fontSize: typography.baseFontSize,",Needs review
+frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/editor/components/EditorSidebar.tsx,362,"lineHeight: typography.lineHeight,",Needs review
+frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/editor/components/EditorSidebar.tsx,363,"fontWeights: typography.fontWeights || [400, 700],",Needs review
 frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/editor/components/EditorSidebar.tsx,370,"fontFamily: config.fontFamily as string,",Needs review
+frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/editor/components/EditorSidebar.tsx,371,"baseFontSize: config.fontSize as number || typography.baseFontSize,",Needs review
+frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/editor/components/EditorSidebar.tsx,372,"lineHeight: config.lineHeight as number || typography.lineHeight,",Needs review
+frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/editor/components/EditorSidebar.tsx,374,"fontWeights: config.fontWeights as number[],",Needs review
 frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/editor/components/EditorSidebar.tsx,390,"<h3 className=""font-semibold text-gray-900 dark:text-white mb-4 text-sm"">",Needs review
 frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/editor/components/EditorSidebar.tsx,423,"<p className=""text-sm text-blue-700 dark:text-blue-400"">",Needs review
 frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/editor/components/EditorSidebar.tsx,438,"<h3 className=""font-semibold text-gray-900 dark:text-white mb-4 text-sm flex items-center gap-2"">",Needs review
@@ -1704,8 +1843,13 @@ frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/editor/componen
 frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/editor/[id]/error.tsx,12,"<h2 className=""text-lg font-semibold text-red-700 dark:text-red-300"">Something went wrong</h2>",Needs review
 frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/editor/[id]/error.tsx,13,"<p className=""mt-2 text-sm text-red-600 dark:text-red-200"">Please retry. If the issue continues, check logs.</p>",Needs review
 frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/editor/[id]/error.tsx,17,"className=""mt-4 inline-flex rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700""",Needs review
+frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/editor/[id]/page.tsx,211,"fontWeights: [400, 700],",Needs review
+frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/editor/[id]/page.tsx,212,"fontSize: 14,",Needs review
 frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/editor/[id]/page.tsx,215,"fontFamily: themeTypography.fontFamily || themeTypography.font_family || 'Inter',",Needs review
+frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/editor/[id]/page.tsx,218,"lineHeight: Number(themeTypography.lineHeight || themeTypography.line_height || 1.5),",Needs review
 frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/editor/[id]/page.tsx,389,"fontFamily: currentTheme.typography.fontFamily,",Needs review
+frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/editor/[id]/page.tsx,392,"lineHeight: currentTheme.typography.lineHeight,",Needs review
+frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/editor/[id]/page.tsx,393,"fontWeights: currentTheme.typography.fontWeights || [400, 700],",Needs review
 frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/editor/[id]/page.tsx,453,"<h3 className=""font-semibold text-red-900 dark:text-red-300"">{tx('Error', 'Ø®Ø·Ø£')}</h3>",Needs review
 frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/editor/[id]/page.tsx,454,"<p className=""text-red-700 dark:text-red-200 text-sm"">{error}</p>",Needs review
 frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/editor/[id]/page.tsx,457,"className=""mt-2 text-sm text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 font-medium""",Needs review
@@ -1718,9 +1862,14 @@ frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/components/__te
 frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/components/__tests__/FormValidation.integration.test.tsx,133,"onChange={(e) => form.setValue('typography.fontFamily', e.target.value)}",Needs review
 frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/components/__tests__/FormValidation.integration.test.tsx,134,onBlur={() => form.markFieldTouched('typography.fontFamily')},Needs review
 frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/components/__tests__/FormValidation.integration.test.tsx,275,"fontFamily: 'Inter',",Needs review
+frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/components/__tests__/FormValidation.integration.test.tsx,278,"lineHeight: 1.5,",Needs review
 frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/components/__tests__/LivePreview.test.tsx,31,"fontFamily: 'Inter',",Needs review
+frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/components/__tests__/LivePreview.test.tsx,34,"lineHeight: 1.5,",Needs review
 frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/components/__tests__/PropertiesPanel.test.tsx,33,"fontFamily: 'Inter',",Needs review
+frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/components/__tests__/PropertiesPanel.test.tsx,36,"lineHeight: 1.5,",Needs review
 frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/components/__tests__/PropertiesPanel.test.tsx,209,expect(mockStoreActions.updateTypography).toHaveBeenCalledWith({ fontFamily: 'Poppins' }),Needs review
+frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/components/__tests__/PropertiesPanel.test.tsx,231,const fontSizeSlider = rangeInputs[0],Needs review
+frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/components/__tests__/PropertiesPanel.test.tsx,233,"fireEvent.change(fontSizeSlider, { target: { value: '18' } })",Needs review
 frontend/apps/dashboard/src/app/[locale]/dashboard/tables/components/AddTableForm.tsx,125,"<label className=""mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"">",Needs review
 frontend/apps/dashboard/src/app/[locale]/dashboard/tables/components/AddTableForm.tsx,139,"<label className=""mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"">",Needs review
 frontend/apps/dashboard/src/app/[locale]/dashboard/tables/components/AddTableForm.tsx,154,"<label className=""mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"">",Needs review
@@ -1738,9 +1887,12 @@ frontend/apps/dashboard/src/app/[locale]/dashboard/tables/components/FloorPlanEd
 frontend/apps/dashboard/src/app/[locale]/dashboard/tables/components/FloorPlanErrorBoundary.tsx,48,"<p className=""font-semibold text-red-900 dark:text-red-200"">",Needs review
 frontend/apps/dashboard/src/app/[locale]/dashboard/tables/components/FloorPlanErrorBoundary.tsx,51,"<p className=""mt-1 text-sm text-red-800 dark:text-red-300"">",Needs review
 frontend/apps/dashboard/src/app/[locale]/dashboard/tables/components/FloorPlanTable.tsx,152,"<p className=""text-xs font-semibold"">",Needs review
+frontend/apps/dashboard/src/app/[locale]/dashboard/tables/components/FloorPlanTable.tsx,155,"<p className=""truncate text-[11px] opacity-90"">",Needs review
+frontend/apps/dashboard/src/app/[locale]/dashboard/tables/components/FloorPlanTable.tsx,158,"<p className=""mt-1 text-[10px] opacity-80"">",Needs review
 frontend/apps/dashboard/src/app/[locale]/dashboard/tables/components/FloorPlanTable.tsx,170,"className=""absolute left-0 top-full z-30 mt-2 w-56 rounded-lg border border-gray-200 bg-white p-3 text-xs shadow-xl dark:border-gray-700 dark:bg-gray-900""",Needs review
 frontend/apps/dashboard/src/app/[locale]/dashboard/tables/components/FloorPlanTable.tsx,178,"<p className=""text-sm font-semibold text-gray-900 dark:text-white"">",Needs review
 frontend/apps/dashboard/src/app/[locale]/dashboard/tables/components/FloorPlanTable.tsx,193,"<p className=""mb-1 text-[11px] font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400"">",Needs review
+frontend/apps/dashboard/src/app/[locale]/dashboard/tables/components/FloorPlanTable.tsx,201,className={`rounded border px-2 py-1 text-[11px] transition ${,Needs review
 frontend/apps/dashboard/src/app/[locale]/dashboard/tables/components/QRBuilderModal.tsx,280,"<h2 className=""text-xl font-bold text-gray-900 dark:text-white"">",Needs review
 frontend/apps/dashboard/src/app/[locale]/dashboard/tables/components/QRBuilderModal.tsx,283,"<p className=""mt-1 text-sm text-gray-600 dark:text-gray-400"">",Needs review
 frontend/apps/dashboard/src/app/[locale]/dashboard/tables/components/QRBuilderModal.tsx,299,"<p className=""mb-2 text-sm font-medium text-gray-700 dark:text-gray-300"">",Needs review
@@ -1764,6 +1916,9 @@ frontend/apps/dashboard/src/app/[locale]/dashboard/tables/components/QRStudio.ts
 frontend/apps/dashboard/src/app/[locale]/dashboard/tables/components/QRStudio.tsx,498,className={`rounded-full px-3 py-1 text-xs font-medium transition ${,Needs review
 frontend/apps/dashboard/src/app/[locale]/dashboard/tables/components/QRStudio.tsx,524,"<p className=""text-sm font-semibold text-gray-900 dark:text-white"">",Needs review
 frontend/apps/dashboard/src/app/[locale]/dashboard/tables/components/QRStudio.tsx,529,"<p className=""mt-1 text-xs text-gray-600 dark:text-gray-400"">",Needs review
+frontend/apps/dashboard/src/app/[locale]/dashboard/tables/components/QRStudio.tsx,541,"<span className=""text-[11px] text-gray-500 dark:text-gray-400"">",Needs review
+frontend/apps/dashboard/src/app/[locale]/dashboard/tables/components/QRStudio.tsx,544,"<span className=""text-[11px] text-gray-500 dark:text-gray-400"">/</span>",Needs review
+frontend/apps/dashboard/src/app/[locale]/dashboard/tables/components/QRStudio.tsx,545,"<span className=""text-[11px] text-gray-500 dark:text-gray-400"">",Needs review
 frontend/apps/dashboard/src/app/[locale]/dashboard/tables/components/QRStudio.tsx,556,"<h2 className=""mb-4 text-base font-semibold text-gray-900 dark:text-white"">",Needs review
 frontend/apps/dashboard/src/app/[locale]/dashboard/tables/components/QRStudio.tsx,562,"<p className=""mb-2 text-sm font-medium text-gray-700 dark:text-gray-300"">",Needs review
 frontend/apps/dashboard/src/app/[locale]/dashboard/tables/components/QRStudio.tsx,571,className={`rounded-lg px-3 py-2 text-sm font-medium transition ${,Needs review
@@ -2027,6 +2182,9 @@ frontend/apps/dashboard/src/app/[locale]/dashboard/reports/inventory/page.tsx,13
 frontend/apps/dashboard/src/app/[locale]/dashboard/reports/inventory/page.tsx,153,"<input type=""date"" value={filters.date_from} onChange={(e) => setFilters((prev) => ({ ...prev, date_from: e.target.value }))} className=""w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-3 py-2 text-",Needs review
 frontend/apps/dashboard/src/app/[locale]/dashboard/reports/inventory/page.tsx,156,"<input type=""date"" value={filters.date_to} onChange={(e) => setFilters((prev) => ({ ...prev, date_to: e.target.value }))} className=""w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-3 py-2 text-sm"" ",Needs review
 frontend/apps/dashboard/src/app/[locale]/dashboard/reports/inventory/page.tsx,177,"<p className=""text-sm text-blue-800 dark:text-blue-300"">{labels.formulaNote}</p>",Needs review
+frontend/apps/dashboard/src/app/[locale]/dashboard/reports/inventory/page.tsx,191,"<XAxis dataKey=""name"" tick={{ fontSize: 12 }} interval={0} angle={-20} textAnchor=""end"" height={60} />",Needs review
+frontend/apps/dashboard/src/app/[locale]/dashboard/reports/inventory/page.tsx,192,"<YAxis yAxisId=""left"" tick={{ fontSize: 12 }} />",Needs review
+frontend/apps/dashboard/src/app/[locale]/dashboard/reports/inventory/page.tsx,193,"<YAxis yAxisId=""right"" orientation=""right"" tick={{ fontSize: 12 }} />",Needs review
 frontend/apps/dashboard/src/app/[locale]/dashboard/reports/inventory/page.tsx,235,"return <div className=""rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4""><label className=""text-sm text-gray-600 dark:text-gray-400 block mb-2"">{label}</label>{children}</div>",Needs review
 frontend/apps/dashboard/src/app/[locale]/dashboard/reports/inventory/page.tsx,242,"return <div className=""rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 p-6 text-sm text-red-800 dark:text-red-300"">{message}</div>",Needs review
 frontend/apps/dashboard/src/app/[locale]/dashboard/reports/inventory/page.tsx,245,"return <div className=""rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-6 text-sm text-gray-600 dark:text-gray-400"">{text}</div>",Needs review
@@ -2064,6 +2222,9 @@ frontend/apps/dashboard/src/app/[locale]/dashboard/reports/profitability/page.ts
 frontend/apps/dashboard/src/app/[locale]/dashboard/reports/profitability/page.tsx,193,"<p className=""font-semibold text-yellow-900 dark:text-yellow-300"">{labels.missingCost}</p>",Needs review
 frontend/apps/dashboard/src/app/[locale]/dashboard/reports/profitability/page.tsx,194,"<p className=""text-sm text-yellow-800 dark:text-yellow-400 mt-1"">{labels.missingCostText}</p>",Needs review
 frontend/apps/dashboard/src/app/[locale]/dashboard/reports/profitability/page.tsx,195,"<p className=""text-xs text-yellow-700 dark:text-yellow-500 mt-2"">",Needs review
+frontend/apps/dashboard/src/app/[locale]/dashboard/reports/profitability/page.tsx,212,"<XAxis dataKey=""name"" tick={{ fontSize: 12 }} interval={0} angle={-20} textAnchor=""end"" height={60} />",Needs review
+frontend/apps/dashboard/src/app/[locale]/dashboard/reports/profitability/page.tsx,213,"<YAxis yAxisId=""left"" tick={{ fontSize: 12 }} />",Needs review
+frontend/apps/dashboard/src/app/[locale]/dashboard/reports/profitability/page.tsx,214,"<YAxis yAxisId=""right"" orientation=""right"" tick={{ fontSize: 12 }} />",Needs review
 frontend/apps/dashboard/src/app/[locale]/dashboard/reports/profitability/page.tsx,260,"<label className=""text-sm text-gray-600 dark:text-gray-400 block mb-2"">{label}</label>",Needs review
 frontend/apps/dashboard/src/app/[locale]/dashboard/reports/profitability/page.tsx,275,"return <div className=""rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 p-6 text-sm text-red-800 dark:text-red-300"">{message}</div>",Needs review
 frontend/apps/dashboard/src/app/[locale]/dashboard/reports/profitability/page.tsx,279,"return <div className=""rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-6 text-sm text-gray-600 dark:text-gray-400"">{text}</div>",Needs review
@@ -2083,8 +2244,12 @@ frontend/apps/dashboard/src/app/[locale]/dashboard/reports/sales/page.tsx,232,"<
 frontend/apps/dashboard/src/app/[locale]/dashboard/reports/sales/page.tsx,238,"className=""w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-3 py-2 text-sm""",Needs review
 frontend/apps/dashboard/src/app/[locale]/dashboard/reports/sales/page.tsx,259,"<div className=""rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 p-6 text-sm text-red-800 dark:text-red-300"">",Needs review
 frontend/apps/dashboard/src/app/[locale]/dashboard/reports/sales/page.tsx,263,"<div className=""rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-6 text-sm text-gray-600 dark:text-gray-400"">",Needs review
+frontend/apps/dashboard/src/app/[locale]/dashboard/reports/sales/page.tsx,294,"<XAxis dataKey=""bucket"" tick={{ fontSize: 12 }} />",Needs review
+frontend/apps/dashboard/src/app/[locale]/dashboard/reports/sales/page.tsx,295,<YAxis tickFormatter={(value) => compactCurrency(value)} tick={{ fontSize: 12 }} />,Needs review
 frontend/apps/dashboard/src/app/[locale]/dashboard/reports/sales/page.tsx,324,"<div key={`${category.name}-${index}`} className=""flex items-center justify-between gap-3 text-sm"">",Needs review
 frontend/apps/dashboard/src/app/[locale]/dashboard/reports/sales/page.tsx,331,"<span className=""font-medium text-gray-900 dark:text-white"">",Needs review
+frontend/apps/dashboard/src/app/[locale]/dashboard/reports/sales/page.tsx,344,"<XAxis dataKey=""hour"" tickFormatter={(h) => `${h}:00`} tick={{ fontSize: 12 }} />",Needs review
+frontend/apps/dashboard/src/app/[locale]/dashboard/reports/sales/page.tsx,345,<YAxis tickFormatter={(value) => compactCurrency(value)} tick={{ fontSize: 12 }} />,Needs review
 frontend/apps/dashboard/src/app/[locale]/dashboard/reports/financial/advanced/error.tsx,12,"<h2 className=""text-lg font-semibold text-red-700 dark:text-red-300"">Something went wrong</h2>",Needs review
 frontend/apps/dashboard/src/app/[locale]/dashboard/reports/financial/advanced/error.tsx,13,"<p className=""mt-2 text-sm text-red-600 dark:text-red-200"">Please retry. If the issue continues, check logs.</p>",Needs review
 frontend/apps/dashboard/src/app/[locale]/dashboard/reports/financial/advanced/error.tsx,17,"className=""mt-4 inline-flex rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700""",Needs review
@@ -2211,6 +2376,7 @@ frontend/apps/dashboard/src/app/[locale]/dashboard/pos/components/POSProductGrid
 frontend/apps/dashboard/src/app/[locale]/dashboard/pos/components/POSSearchBar.tsx,63,className={`h-10 w-full rounded-lg border border-gray-300 bg-white px-10 text-sm text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-primary focus:ring-2 focus:ring-primary/30 dark:border-gray-700 dark:bg-gray-900 d,Needs review
 frontend/apps/dashboard/src/app/[locale]/dashboard/pos/components/POSSearchBar.tsx,79,<p className={`text-xs text-gray-500 dark:text-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}>,Needs review
 frontend/apps/dashboard/src/app/[locale]/dashboard/pos/components/POSSubmitButton.tsx,21,"className=""inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-emerald-500 px-4 text-sm font-semibold text-white shadow transition hover:bg-emerald-600 disabled:cursor-not-allowed disabled:opacity-60""",Needs review
+frontend/apps/dashboard/src/app/[locale]/dashboard/pos/components/POSSubmitButton.tsx,29,"{!isSubmitting && <span className=""rounded bg-black/20 px-1.5 py-0.5 text-[10px]"">Space</span>}",Needs review
 frontend/apps/dashboard/src/app/[locale]/dashboard/pos/components/POSTableSelector.tsx,20,<label className={`block text-xs font-semibold text-gray-600 dark:text-gray-300 ${isRTL ? 'text-right' : ''}`}>,Needs review
 frontend/apps/dashboard/src/app/[locale]/dashboard/pos/components/POSTableSelector.tsx,30,className={`h-9 w-full rounded border border-gray-300 bg-white px-2 text-sm text-gray-900 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 ${,Needs review
 frontend/apps/dashboard/src/app/[locale]/dashboard/pos/components/POSTerminal.tsx,83,<div className={`mt-2 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-xs font-medium text-amber-800 dark:border-amber-500/40 dark:bg-amber-500/10 dark:text-amber-200 ${isRTL ? 'text-right' : ''}`}>,Needs review
@@ -2307,6 +2473,7 @@ frontend/apps/dashboard/src/app/[locale]/dashboard/kds/components/KDSAnalyticsPa
 frontend/apps/dashboard/src/app/[locale]/dashboard/kds/components/KDSAnalyticsPanel.tsx,144,<p className={`text-xs text-gray-500 dark:text-slate-400 ${isRTL ? 'text-right' : ''}`}>,Needs review
 frontend/apps/dashboard/src/app/[locale]/dashboard/kds/components/KDSAnalyticsPanel.tsx,152,<p className={`mb-3 text-xs font-semibold uppercase tracking-wide text-gray-700 dark:text-slate-300 ${isRTL ? 'text-right' : ''}`}>,Needs review
 frontend/apps/dashboard/src/app/[locale]/dashboard/kds/components/KDSAnalyticsPanel.tsx,166,"<p className=""text-[10px] font-semibold text-gray-900 dark:text-slate-100"">{String(point.hour).padStart(2, '0')}</p>",Needs review
+frontend/apps/dashboard/src/app/[locale]/dashboard/kds/components/KDSAnalyticsPanel.tsx,167,"<p className=""text-[10px] text-gray-800 dark:text-slate-100/90"">{point.order_count}</p>",Needs review
 frontend/apps/dashboard/src/app/[locale]/dashboard/kds/components/KDSAnalyticsPanel.tsx,172,<p className={`col-span-full text-xs text-gray-500 dark:text-slate-400 ${isRTL ? 'text-right' : ''}`}>,Needs review
 frontend/apps/dashboard/src/app/[locale]/dashboard/kds/components/KDSErrorBoundary.tsx,52,"<h3 className=""text-base font-semibold text-red-700 dark:text-red-100"">",Needs review
 frontend/apps/dashboard/src/app/[locale]/dashboard/kds/components/KDSErrorBoundary.tsx,55,"<p className=""mt-1 text-sm text-red-700 dark:text-red-200"">",Needs review
