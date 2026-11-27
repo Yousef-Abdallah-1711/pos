@@ -2,7 +2,7 @@
 
 `frontend/apps/landing/src/content/captures.json` defines product capture dimensions; `ProductCapture.tsx` delegates to `CaptureMedia.tsx`, which selects files under `public/images/product/servio/matrix/` by locale and resolved theme for known capture names. Unknown/non-matrix captures use their fallback and disclosure. `screenshot-matrix.json` and `provenance.json` contain existing capture provenance. The current CSV covers 37 image assets under `public/images/product` plus the legacy capture identified below; it does not establish that every product screenshot elsewhere under `public` has been found or prove active usage for each asset. Audit feature routes and all product-image references before considering the inventory complete.
 
-Hero, bento, order story, workflow demos, feature showcase, ecosystem and management components consume these captures in different frames and may crop/scale them. Replacing files requires validating intrinsic dimensions, locale/theme source selection, disclosure, full-image links and animation geometry. Existing screenshots represent the old product appearance; they are not proof of a Coral-rebranded dashboard.
+Hero, bento, order story, workflow demos, feature showcase and management components consume these captures in different frames and may crop/scale them. The ecosystem map uses feature text and links rather than a product capture. Replacing files requires validating intrinsic dimensions, locale/theme source selection, disclosure, full-image links and animation geometry. Existing screenshots represent the old product appearance; they are not proof of a Coral-rebranded dashboard.
 
 | Source selection | Verified usage path |
 | --- | --- |

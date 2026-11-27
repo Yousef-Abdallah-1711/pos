@@ -85,6 +85,17 @@ write('migration-impact-map.csv', ['route', 'source', 'current_behavior', 'propo
 matrix = root / 'frontend/apps/landing/public/images/product/servio'
 metadata = json.loads((matrix / 'screenshot-matrix.json').read_text(encoding='utf-8'))
 captures = {item['file']: item for item in metadata['captures']}
+feature_items = json.loads((root / 'frontend/apps/landing/src/i18n/messages/en/features.json').read_text(encoding='utf-8'))
+feature_routes = {item['image']: '/{locale}/features/' + item['slug'] for item in feature_items}
+homepage_usage = {
+    'dashboard': 'hero; operational bento; order story; management',
+    'pos': 'operational bento; layered typography',
+    'kitchen': 'operational bento; order story; kitchen workflow',
+    'checkout': 'order story; online workflow',
+    'inventory': 'management',
+    'staff': 'management',
+    'theme': 'feature showcase',
+}
 assets = []
 product_assets = root / 'frontend/apps/landing/public/images/product'
 external_capture = root / 'frontend/apps/landing/public/images/poos-access-control-capture.png'
@@ -98,6 +109,8 @@ for image in sorted([*product_assets.rglob('*'), external_capture]):
             header = source.read(24)
         if header[:8] == b'\x89PNG\r\n\x1a\n':
             width, height = struct.unpack('>II', header[16:24])
+    name = record.get('name', '')
+    usage = ('Homepage: feature showcase; ' + homepage_usage.get(name, 'other usage unverified') + '; feature index and route: ' + feature_routes.get(name, 'unverified') if record else 'Historical or fallback; active route usage not verified')
     assets.append({'path': image.relative_to(root).as_posix(), 'absolute_path': str(image), 'bytes': image.stat().st_size,
                    'feature': record.get('name', 'Unspecified'), 'locale': record.get('locale', 'Unknown'),
                    'theme': record.get('theme', 'Unknown'), 'width': width,
@@ -105,6 +118,8 @@ for image in sorted([*product_assets.rglob('*'), external_capture]):
                    'source_app': ('Storefront checkout' if record.get('name') == 'checkout' else 'Dashboard' if record else 'Unknown'),
                    'source_route': 'Not recorded in matrix; verify', 'capture_method': 'Playwright, synthetic/redacted per provenance' if record else 'Unknown',
                    'source_release': record.get('sourceRelease', 'Unknown'), 'legacy_branding': 'Review visual',
-                   'usage': 'See CaptureMedia.tsx and captures.json; per-route usage unverified', 'regeneration': 'Review after rebrand'})
-write('marketing-screenshot-inventory.csv', ['path', 'absolute_path', 'bytes', 'feature', 'locale', 'theme', 'width', 'height', 'aspect_ratio', 'source_app', 'source_route', 'capture_method', 'source_release', 'legacy_branding', 'usage', 'regeneration'], assets)
+                   'usage': usage, 'rendering_component': 'ProductCapture.tsx → CaptureMedia.tsx' if record else 'Needs verification',
+                   'animation_geometry': 'Review hero, bento, story and showcase frame and scroll geometry' if record else 'Needs verification',
+                   'mobile_crop': 'Review responsive frame; dedicated crop not yet established', 'regeneration': 'Review after rebrand'})
+write('marketing-screenshot-inventory.csv', ['path', 'absolute_path', 'bytes', 'feature', 'locale', 'theme', 'width', 'height', 'aspect_ratio', 'source_app', 'source_route', 'capture_method', 'source_release', 'legacy_branding', 'usage', 'rendering_component', 'animation_geometry', 'mobile_crop', 'regeneration'], assets)
 print(f'routes={len(routes)} components={len(components)} color_occurrences={len(colors)} typography_lines={len(typography)} product_image_assets={len(assets)}')

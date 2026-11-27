@@ -57,6 +57,8 @@ All section routes are `/{locale}`. Shared Coral tokens, typography, responsive 
 
 The shared `Navbar.tsx`/`Footer.tsx` and `src/styles/marketing-navigation.css` provide the header, locale and theme controls, mobile menu and footer. RTL and light/dark use the root `lang`, `dir`, and theme class. Test the complete page using `scripts/verify-operational-landing.mjs` with `SERVIO_QA_URL`, and the shared routes and forms with the other scripts and `tests/registration-e2e/`. Motion details and current verification gaps are documented in `.gsap/current-state.md` and `docs/landing-interactive-experience/operational-bento-showcase-report.md`.
 
+`src/components/RootDocument.tsx` loads Manrope, Fraunces and IBM Plex Sans Arabic. The landing performance change disables automatic preloading for Plex so English does not fetch unused Arabic font variants; the browser still loads it when needed. See `docs/landing-interactive-experience/performance-and-accessibility.md` for the measured tradeoff and pending CI result. Do not assume the 2.5-second LCP goal has passed.
+
 English and Arabic content have equal priority. The route sets `lang` and `dir`; `next-themes` stores the choice under `servio-marketing-theme`. The hero and footer retain espresso treatment in both modes. Arabic copy is real Arabic, not auto-translation at runtime.
 
 ## Source map
