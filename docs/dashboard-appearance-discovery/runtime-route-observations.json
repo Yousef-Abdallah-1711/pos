@@ -405,6 +405,30 @@
       "status": 200,
       "heading": "Default Theme",
       "fixture": "synthetic category/product or default synthetic storefront theme"
+    },
+    {
+      "path": "/en/dashboard/tables/1",
+      "route_template": "/[locale]/dashboard/tables/[id]",
+      "url": "http://localhost:3002/en/dashboard/tables/1",
+      "status": 200,
+      "heading": "Table Details #101",
+      "fixture": "synthetic table"
+    },
+    {
+      "path": "/en/dashboard/tables/1/edit",
+      "route_template": "/[locale]/dashboard/tables/[id]/edit",
+      "url": "http://localhost:3002/en/dashboard/tables/1/edit",
+      "status": 200,
+      "heading": "Edit Table #101",
+      "fixture": "synthetic table"
+    },
+    {
+      "path": "/en/dashboard/tables/1/qr",
+      "route_template": "/[locale]/dashboard/tables/[id]/qr",
+      "url": "http://localhost:3002/en/dashboard/tables/1/qr",
+      "status": 200,
+      "heading": "QR Builder",
+      "fixture": "synthetic table"
     }
   ]
 }
