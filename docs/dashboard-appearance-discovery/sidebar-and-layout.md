@@ -44,6 +44,15 @@ Paths below are relative to `frontend/apps/dashboard/`; line numbers describe th
 
 Focus indicators, subscription badge colors, tooltips, mobile overlay accessibility, workspace switching, search and breadcrumbs require individual source and runtime verification; absence from this table is not evidence they are unsupported.
 
+### Accessibility observations to verify before redesign
+
+- `DashboardLayout.tsx:197` renders the mobile menu icon button without an explicit accessible label in the inspected source; the synthetic browser accessibility snapshot exposed an unnamed button. Confirm the underlying `Button` implementation and name computation, then add and test a localized name and expanded/controls state in the future work.
+- Group buttons in `Sidebar.tsx:432` use a `title` and toggle nested content, but the inspected markup does not set `aria-expanded` or `aria-controls`. The overlay at `:494` is a clickable `div`; verify Escape handling, focus containment, dismissal and focus return using keyboard and assistive technology before selecting a replacement.
+- Collapsed icon links/buttons use `title` for labels; test touch and keyboard discoverability rather than treating a native title as a fully accessible tooltip. The source does not itself establish screen-reader support.
+- In one Chromium synthetic-owner test at 390×844, opening the mobile drawer and pressing Escape left its open transform in place. This is a reproducible observation for that local development setup, not a complete keyboard audit; verify focus management and other browsers before designing the correction.
+
+These are source and limited browser observations, not an exhaustive WCAG audit. Do not modify dashboard behavior as part of this discovery.
+
 In the [synthetic staff baseline](baseline/dashboard-en-restricted-light.png), the account had no `user_roles` rows and the sidebar showed Dashboard and Settings. A Theme Builder shortcut was nevertheless visible within the main dashboard. In that same disposable browser session, direct authenticated GET requests to `/api/v1/admin/themes` and `/api/v1/products` returned HTTP 403. This narrow observation does not prove authorization of every route/action or explain all partially loaded widgets; compare shortcut visibility with server authorization in a future role matrix.
 
 Separate synthetic sessions using the tenant's seeded [Manager](baseline/baseline-en-manager-light.png) and [Employee](baseline/baseline-en-employee-light.png) roles rendered different navigation groups. Manager showed POS, KDS, orders, products, HR, financial reports, reports, theme builder and settings; Employee showed KDS, orders, products, HR and settings. These are observations for these seeded role definitions, not a general security guarantee or proof that child actions are permitted.
