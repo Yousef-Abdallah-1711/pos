@@ -1,0 +1,14 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "incremental": false,
+    "paths": {
+      "@/*": ["../src/*"],
+      "react": ["../node_modules/react"],
+      "react/jsx-runtime": ["../node_modules/react/jsx-runtime"],
+      "lucide-react": ["../node_modules/lucide-react"],
+      "zod": ["../node_modules/zod"],
+      "libphonenumber-js": ["../../../node_modules/.pnpm/libphonenumber-js@1.13.16/node_modules/libphonenumber-js"]
+    }
+  }
+}
