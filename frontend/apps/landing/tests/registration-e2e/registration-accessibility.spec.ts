@@ -54,6 +54,7 @@ test('focuses and associates the first invalid field, supports keyboard focus, a
 test('announces subdomain availability through a status region', async ({ page }) => {
   await openRegistration(page)
   await page.getByLabel(/website subdomain/i).fill(`a11y-${Date.now()}`)
-  await expect(page.getByRole('status').filter({ hasText: /checking|available/i })).toBeVisible()
-  await expect(page.getByRole('status').filter({ hasText: /available/i })).toBeVisible()
+  const availabilityStatus = page.locator('.auth-form-panel').getByRole('status')
+  await expect(availabilityStatus.filter({ hasText: /checking|available/i })).toBeVisible()
+  await expect(availabilityStatus.filter({ hasText: /available/i })).toBeVisible()
 })

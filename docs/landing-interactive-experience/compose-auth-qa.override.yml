@@ -1,0 +1,13 @@
+# Used only with docker-compose.pos-test.yml for disposable local auth checks.
+services:
+  postgres:
+    volumes:
+      - ./backend/scripts/db/create_accounting_role.sql:/pos/create_accounting_role.sql:ro
+      - ./backend/scripts/db/create_auth_lookup_role.sql:/pos/create_auth_lookup_role.sql:ro
+      - ./backend/scripts/db/revoke_phase1_auth_runtime_privileges.sql:/pos/revoke_phase1_auth_runtime_privileges.sql:ro
+  backend:
+    command: ["api"]
+    environment:
+      CORS_ORIGINS: "http://localhost:3001,http://localhost:3002"
+    ports: !override
+      - "127.0.0.1:8080:8080"

@@ -5,7 +5,11 @@ const nextConfig = {
   reactStrictMode: true,
   transpilePackages: ['@pos-saas/ui', '@pos-saas/types', '@pos-saas/form-foundation', '@pos-saas/i18n'],
   images: {
-    domains: ['localhost', 'images.unsplash.com'],
+    qualities: [50, 75],
+    remotePatterns: [
+      { protocol: 'http', hostname: 'localhost' },
+      { protocol: 'https', hostname: 'images.unsplash.com' },
+    ],
   },
   // Avoid Windows EPERM symlink failures during standalone trace copy.
   output: isWindows ? undefined : 'standalone',

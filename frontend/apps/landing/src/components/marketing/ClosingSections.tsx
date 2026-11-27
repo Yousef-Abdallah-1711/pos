@@ -6,11 +6,11 @@ import { FeatureActions } from './FeatureActions'
 
 export function GettingStarted({ locale }: { locale: Locale }) {
   const c = getSiteCopy(locale)
-  return <section id="getting-started" className="sv-section sv-setup"><div className="sv-shell">
+  return <article id="getting-started" className="sv-section sv-setup"><div className="sv-shell">
     <SectionHead eyebrow={c.setupEyebrow} title={c.setupTitle} />
     <ol>{c.setup.map(([title, body], i) => <li key={title}><span>0{i + 1}</span><h3>{title}</h3><p>{body}</p></li>)}</ol>
     <div className="sv-setup-foot"><p className="sv-note">{c.setupNote}<br /><Link className="sv-text-link" href={`/${locale}/how-it-works`}>{c.how}</Link></p><TrialLink locale={locale} source="getting-started" /></div>
-  </div></section>
+  </div></article>
 }
 
 export function MarketingFAQ({ locale }: { locale: Locale }) {

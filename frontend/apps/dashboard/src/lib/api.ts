@@ -4,6 +4,7 @@ import { getConfig } from './config'
 import { debugError, debugLog, debugWarn } from '@/lib/debug'
 import { recordPerformanceMetric } from '@/lib/performance'
 import { buildDedupIdentityScope, buildScopedGetRequestDedupKey } from './apiRequestDedup'
+import { getDashboardLoginUrl } from './authSession'
 
 const API_URL = getConfig().apiUrl
 const DEFAULT_API_TIMEOUT_MS = 6000
@@ -248,15 +249,8 @@ api.interceptors.response.use(
       localStorage.removeItem('user')
       localStorage.removeItem('auth-storage')
       authContextCache = null
-      // Redirect to landing app login
-      import('./config')
-        .then(({ getConfig }) => {
-          const { landingUrl } = getConfig()
-          window.location.href = `${landingUrl}/auth/login`
-        })
-        .catch(() => {
-          window.location.href = '/auth/login'
-        })
+      // Keep the dashboard locale when returning to the landing app.
+      window.location.href = getDashboardLoginUrl(window.location.pathname)
     } else if (error.response?.status === 401 && isUsingImpersonation) {
       debugLog('[API] Got 401 while impersonating - NOT logging out, backend should handle impersonation token')
     }

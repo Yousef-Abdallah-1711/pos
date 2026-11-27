@@ -1,7 +1,7 @@
 'use client'
 
 import Image from 'next/image'
-import { useEffect, useState } from 'react'
+import { useSyncExternalStore } from 'react'
 import { useTheme } from 'next-themes'
 import captures from '@/content/captures.json'
 import type { Locale } from '@/content/site'
@@ -9,6 +9,9 @@ import type { Locale } from '@/content/site'
 const MATRIX_IMAGES = ['pos', 'kitchen', 'inventory', 'staff', 'theme', 'dashboard', 'checkout'] as const
 type CaptureName = keyof typeof captures
 type CaptureCaption = 'enLight' | 'enDark' | 'arLight' | 'arDark'
+const subscribeToClientMount = () => () => undefined
+const getClientMountSnapshot = () => true
+const getServerMountSnapshot = () => false
 
 interface CaptureMediaProps {
   image: CaptureName
@@ -21,12 +24,11 @@ interface CaptureMediaProps {
 
 export function CaptureMedia({ image, alt, locale, captions, openLabel, priority }: CaptureMediaProps) {
   const { resolvedTheme } = useTheme()
-  const [mounted, setMounted] = useState(false)
-  useEffect(() => setMounted(true), [])
+  const mounted = useSyncExternalStore(subscribeToClientMount, getClientMountSnapshot, getServerMountSnapshot)
   const hasMatrix = MATRIX_IMAGES.includes(image as (typeof MATRIX_IMAGES)[number])
   // Keep the server and first client render identical; next-themes reads saved
   // preferences only in the browser, then this image updates after hydration.
-  const theme = mounted && resolvedTheme === 'light' ? 'light' : 'dark'
+  const theme = !mounted || resolvedTheme === 'light' ? 'light' : 'dark'
   const sourceLocale = hasMatrix ? locale : 'en'
   const sourceTheme = hasMatrix ? theme : 'light'
   const source = hasMatrix
@@ -42,7 +44,8 @@ export function CaptureMedia({ image, alt, locale, captions, openLabel, priority
   return <>
     <div className="sv-capture-image" data-source-locale={sourceLocale} data-source-theme={sourceTheme}>
       <Image src={source} alt={`${alt} — ${caption}`} width={dimensions.width} height={dimensions.height}
-        priority={priority} sizes="(max-width: 768px) 100vw, (max-width: 1440px) 75vw, 1180px" />
+        priority={priority} loading={priority ? 'eager' : 'lazy'}
+        sizes="(max-width: 768px) 100vw, (max-width: 1440px) 75vw, 1180px" />
     </div>
     <figcaption><span>{caption}</span>
       <a href={source} target="_blank" rel="noreferrer">{openLabel}<span className="sr-only">: {alt}</span></a>

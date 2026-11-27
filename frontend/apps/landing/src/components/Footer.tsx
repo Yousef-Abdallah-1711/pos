@@ -4,6 +4,7 @@ import type { Locale } from '@/content/site'
 import { getFooterGroups, localizedHref } from '@/content/navigation'
 import { BrandMark } from './BrandMark'
 import { TrialLink } from './marketing/TrialLink'
+import { getConversionCopy } from '@/content/conversionCopy'
 
 export function Footer({ locale }: { locale: Locale }) {
   const copy = getSiteCopy(locale)
@@ -14,7 +15,7 @@ export function Footer({ locale }: { locale: Locale }) {
         <div className="sv-footer-brand">
           <BrandMark href={localizedHref(locale, 'home')} label="SERVIO" inverse />
           <p>{copy.navigation.brandDescription}</p>
-          <TrialLink locale={locale} source="footer" />
+          <TrialLink locale={locale} source="footer" label={getConversionCopy(locale).footerCta} />
         </div>
         <nav aria-label={copy.navigation.footerNavigation}>
           <div className="sv-footer-groups">
@@ -31,9 +32,13 @@ export function Footer({ locale }: { locale: Locale }) {
           </div>
         </nav>
       </div>
+      <div className="sv-footer-signature" aria-hidden="true">SERVIO</div>
       <div className="sv-footer-bottom">
         <p>{copy.sampleNote}</p>
-        <small>© {new Date().getFullYear()} SERVIO</small>
+        <div className="sv-footer-utility">
+          <Link href={localizedHref(locale, 'privacy')}>{copy.navigation.privacy}</Link>
+          <small>© {new Date().getFullYear()} SERVIO</small>
+        </div>
       </div>
     </div>
   </footer>

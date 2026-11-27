@@ -55,6 +55,7 @@ export function LandingAccountActions({ locale, session, isSigningOut, onRetry, 
   if (session.status === 'temporarily-unavailable') {
     return <>
       <AccountEntryLinks locale={locale} />
+      <div className="sv-desktop-trial"><TrialLink locale={locale} source="navigation" /></div>
       <div className="sv-account-unavailable" role="status">
         <span>{session.reason === 'sign-out' ? copy.account.signOutFailed : copy.account.unavailable}</span>
         <button className="sv-account-retry" type="button" onClick={onRetry}>{copy.account.retry}</button>

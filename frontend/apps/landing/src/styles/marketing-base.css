@@ -1,24 +1,58 @@
+/* Shared base tokens and elements for public marketing routes. */
+
 /* Preserve the shared auth heading token without downloading a third font family. */
 body { --font-alexandria: var(--font-manrope); }
 html[lang=ar] body { --font-alexandria: var(--font-plex); }
 :root {
-  color-scheme:dark;
-  --poos-paper:#17131f;
-  --poos-surface:#211a2b;
-  --poos-surface-raised:#282132;
-  --poos-ink:#f5f0ff;
-  --poos-ink-soft:#e2d9ee;
-  --poos-muted:#c0b6cd;
-  --poos-rule:#493d56;
-  --sv-ink:#f5f0ff;
-  --sv-muted:#c0b6cd;
-  --sv-violet:#c7aaff;
-  --sv-paper:#17131f;
-  --sv-line:#493d56;
-  --sv-surface:#211a2b;
-  --sv-surface-raised:#282132;
-}
-:root.light {
+  --hallmark-color-35234e55:#35234e55;
+  --hallmark-color-d9d1e6:#d9d1e6;
+  --hallmark-color-fff:#fff;
+  --hallmark-color-21182e:#21182e;
+  --hallmark-color-5025ac:#5025ac;
+  --hallmark-color-c1b8ce:#c1b8ce;
+  --hallmark-color-d4c1f4:#d4c1f4;
+  --hallmark-color-d5cde0:#d5cde0;
+  --hallmark-color-eae0fa:#eae0fa;
+  --hallmark-color-f0edf4:#f0edf4;
+  --hallmark-color-35234e15:#35234e15;
+  --hallmark-color-4c3e5a:#4c3e5a;
+  --hallmark-color-5a2bb8:#5a2bb8;
+  --hallmark-color-6938d344:#6938d344;
+  --hallmark-color-d9cdea:#d9cdea;
+  --hallmark-color-e4d6ff:#e4d6ff;
+  --hallmark-color-eadfff:#eadfff;
+  --hallmark-color-f0edf6:#f0edf6;
+  --hallmark-color-f3edf9:#f3edf9;
+  --hallmark-color-211b31:#211b31;
+  --hallmark-color-373147:#373147;
+  --hallmark-color-45218b:#45218b;
+  --hallmark-color-554761:#554761;
+  --hallmark-color-575066:#575066;
+  --hallmark-color-6938d3:#6938d3;
+  --hallmark-color-d7c8e9:#d7c8e9;
+  --hallmark-color-d9d1eb:#d9d1eb;
+  --hallmark-color-e4d9ee:#e4d9ee;
+  --hallmark-color-e8dcf5:#e8dcf5;
+  --hallmark-color-f5f0ff:#f5f0ff;
+  --hallmark-color-b00024:rgb(0 0 0 / 24%);
+  --hallmark-color-b14102158:rgb(14 10 21 / 58%);
+  --hallmark-color-b15102324:rgb(15 10 23 / 24%);
+  --hallmark-color-f0e6ff:#f0e6ff;
+  --hallmark-color-100d17:#100d17;
+  --hallmark-color-211a2b:#211a2b;
+  --hallmark-color-30263d:#30263d;
+  --hallmark-color-392268:#392268;
+  --hallmark-color-3a2d4a:#3a2d4a;
+  --hallmark-color-493d56:#493d56;
+  --hallmark-color-77678c:#77678c;
+  --hallmark-color-786695:#786695;
+  --hallmark-color-c0b6cd:#c0b6cd;
+  --hallmark-color-d2baff:#d2baff;
+  --hallmark-color-d6c0ff:#d6c0ff;
+  --hallmark-color-ded4ec:#ded4ec;
+  --hallmark-color-f6f0ff:#f6f0ff;
+  --hallmark-color-b23193196:rgb(23 19 31 / 96%);
+
   color-scheme:light;
   --poos-paper:#f7f5ff;
   --poos-surface:#f0ecf8;
@@ -27,13 +61,60 @@ html[lang=ar] body { --font-alexandria: var(--font-plex); }
   --poos-ink-soft:#373147;
   --poos-muted:#575066;
   --poos-rule:#d9d1eb;
-  --sv-ink:#211b31;
-  --sv-muted:#625b70;
-  --sv-violet:#6938d3;
-  --sv-paper:#faf9fc;
-  --sv-line:#e4dfed;
-  --sv-surface:#f0edf6;
-  --sv-surface-raised:#fff;
+  --sv-ink:var(--poos-ink);
+  --sv-muted:var(--poos-muted);
+  --sv-violet:#6d28d9;
+  --sv-paper:var(--poos-paper);
+  --sv-line:var(--poos-rule);
+  --sv-surface:var(--poos-surface);
+  --sv-surface-raised:var(--poos-surface-raised);
+
+  --hallmark-color-171327:#171327;
+  --hallmark-color-211833:#211833;
+  --hallmark-color-302447:#302447;
+  --hallmark-color-492697:#492697;
+  --hallmark-color-625b70:#625b70;
+  --hallmark-color-c4b5fd:#c4b5fd;
+  --hallmark-color-e2d9ee:#e2d9ee;
+  --hallmark-color-e4dfed:#e4dfed;
+  --hallmark-color-f0ecf8:#f0ecf8;
+  --hallmark-color-f7f5ff:#f7f5ff;
+  --hallmark-color-faf9fc:#faf9fc;
+  --hallmark-color-ba25024925297:rgba(250,249,252,.97);
+}
+:root.light {
+  color-scheme:light;
+  --poos-paper:var(--hallmark-color-f7f5ff);
+  --poos-surface:var(--hallmark-color-f0ecf8);
+  --poos-surface-raised:var(--hallmark-color-fff);
+  --poos-ink:var(--hallmark-color-171327);
+  --poos-ink-soft:var(--hallmark-color-373147);
+  --poos-muted:var(--hallmark-color-575066);
+  --poos-rule:var(--hallmark-color-d9d1eb);
+  --sv-ink:var(--hallmark-color-211b31);
+  --sv-muted:var(--hallmark-color-625b70);
+  --sv-violet:var(--hallmark-color-6938d3);
+  --sv-paper:var(--hallmark-color-faf9fc);
+  --sv-line:var(--hallmark-color-e4dfed);
+  --sv-surface:var(--hallmark-color-f0edf6);
+  --sv-surface-raised:var(--hallmark-color-fff);
+}
+:root:not(.light) {
+  color-scheme:dark;
+  --poos-paper:var(--hallmark-color-171327);
+  --poos-surface:var(--hallmark-color-211833);
+  --poos-surface-raised:var(--hallmark-color-302447);
+  --poos-ink:var(--hallmark-color-f7f5ff);
+  --poos-ink-soft:var(--hallmark-color-e2d9ee);
+  --poos-muted:var(--hallmark-color-c4b5fd);
+  --poos-rule:var(--hallmark-color-493d56);
+  --sv-ink:var(--poos-ink);
+  --sv-muted:var(--poos-muted);
+  --sv-violet:var(--hallmark-color-c4b5fd);
+  --sv-paper:var(--poos-paper);
+  --sv-line:var(--poos-rule);
+  --sv-surface:var(--poos-surface);
+  --sv-surface-raised:var(--poos-surface-raised);
 }
 .sv-main,.sv-header,.sv-footer {
   font-family:var(--font-manrope),sans-serif;
@@ -52,6 +133,7 @@ html[lang=ar] .sv-main,html[lang=ar] .sv-header,html[lang=ar] .sv-footer {
   line-height:1.12;
   font-weight:600;
   margin:0;
+  text-wrap:balance;
 }
 html[lang=ar] .sv-main :is(h1,h2,h3) {
   letter-spacing:0;
@@ -68,10 +150,10 @@ html[lang=ar] .sv-main :is(h1,h2,h3) {
   padding-block:84px;
 }
 .sv-eyebrow {
-  font-size:12px;
+  font-size:14px;
   font-weight:700;
-  letter-spacing:.09em;
-  text-transform:uppercase;
+  letter-spacing:0;
+  text-transform:none;
   color:var(--sv-violet);
   margin:0 0 22px;
 }
@@ -111,11 +193,11 @@ html[lang=ar] .sv-main :is(h1,h2,h3) {
 .sv-main :focus-visible,
 .sv-header :focus-visible,
 .sv-footer :focus-visible {
-  outline:3px solid #6938d3;
+  outline:3px solid var(--hallmark-color-6938d3);
   outline-offset:5px;
 }
 .sv-header {
-  background:rgba(250,249,252,.97);
+  background:var(--hallmark-color-ba25024925297);
   border-bottom:1px solid var(--sv-line);
   position:sticky;
   top:0;
@@ -148,7 +230,7 @@ html[lang=ar] .sv-main :is(h1,h2,h3) {
 .sv-brand-mark i {
   display:block;
   width:6px;
-  background:var(--sv-violet);
+  background:var(--poos-violet);
   height:22px;
 }
 .sv-brand-mark i:nth-child(2) {
@@ -205,12 +287,12 @@ html[lang=ar] .sv-main :is(h1,h2,h3) {
   transition:background .18s,transform .18s;
 }
 .sv-button:hover {
-  background:#5025ac;
+  background:var(--poos-violet-deep);
   transform:translateY(-2px);
 }
 .sv-button-secondary {
   background:white;
-  color:#492697;
+  color:var(--hallmark-color-492697);
 }
 .sv-actions {
   display:flex;

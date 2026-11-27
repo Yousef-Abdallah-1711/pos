@@ -8,6 +8,7 @@ const projectRoot = dirname(fileURLToPath(import.meta.url))
 export default defineConfig({
   plugins: [react()],
   resolve: {
+    dedupe: ['react', 'react-dom'],
     alias: {
       '@': resolve(projectRoot, 'src'),
     },
