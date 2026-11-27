@@ -28,11 +28,15 @@ Captured 2026-11-27 using the actual local dashboard in a Playwright-controlled 
 | [baseline-ar-kds-dark.png](baseline-ar-kds-dark.png) | `/ar/dashboard/kds`, dark, empty queue | 1440 × 900 CSS pixels |
 | [baseline-en-pos-dark.png](baseline-en-pos-dark.png) | `/en/dashboard/pos`, dark, synthetic product | 1440 × 900 CSS pixels |
 | [baseline-en-kds-dark.png](baseline-en-kds-dark.png) | `/en/dashboard/kds`, dark, empty queue | 1440 × 900 CSS pixels |
+| [baseline-en-manager-light.png](baseline-en-manager-light.png) | `/en/dashboard`, light, synthetic Manager role | 1440 × 900 CSS pixels |
+| [baseline-en-employee-light.png](baseline-en-employee-light.png) | `/en/dashboard`, light, synthetic Employee role | 1440 × 900 CSS pixels |
 
 The captures are visual baseline evidence, not proof that every control, permission, locale, dark mode, or screen reader works. Capture further routes, populated realistic synthetic data, restricted roles, and remaining viewport/theme combinations before approving a future rebrand. Physical devices were not used.
 
 For the populated POS example, a synthetic category and product were inserted only into the fresh disposable test database; the product was selected in the actual POS UI. No order was submitted. This image is discovery evidence and has not replaced any marketing image.
 
 The separate synthetic staff account was inserted into the same disposable tenant with zero `user_roles` rows and logged in through the API in a separate browser context. Its observed sidebar contained Dashboard and Settings, while the dashboard displayed a partial-data warning. The Theme Builder shortcut was still visible in the dashboard content; its authorization outcome was not tested. This single artificial role state does not prove that protected routes or APIs enforce access correctly.
+
+Two additional synthetic accounts were assigned the existing tenant-scoped Manager and Employee system roles and used separate browser contexts. The manager sidebar showed POS, KDS, orders, products, HR, financial reports, reports, theme builder and settings; the employee sidebar showed KDS, orders, products, HR and settings. These are observations of this fresh fixture's seeded permissions, not a complete role/action authorization test.
 
 In the Arabic KDS capture, the Completed filter remained English; verify localization coverage in the future implementation. Attempts to switch dark mode by editing the browser's local theme key before navigation returned to light after preferences loaded. The dark POS/KDS captures were instead taken after switching the real POS control; dark mode remained active across the subsequent POS/KDS and locale navigations during that session. This observation does not cover a fresh login or all theme settings.
