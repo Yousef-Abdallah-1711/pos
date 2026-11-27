@@ -1,0 +1,5 @@
+# REL-001: 5 identical parallel POST /pos/orders (no Idempotency-Key); before: 3|47
+8|42
+"id":10 [201] 
+"id":11 [201] 
+"id":12 [201] 

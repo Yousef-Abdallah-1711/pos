@@ -1,0 +1,126 @@
+{
+ "run": "RUN-003",
+ "results": [
+  {
+   "id": "S1-click-200ms-after-typing",
+   "delayAfterTypeMs": 200,
+   "checkDelayMs": 0,
+   "slug": "obs-s1-probe",
+   "postsSent": 0,
+   "snaps": [
+    {
+     "afterMs": 300,
+     "availableShown": true,
+     "staleRequiredErrorShown": true
+    },
+    {
+     "afterMs": 3000,
+     "availableShown": true,
+     "staleRequiredErrorShown": true
+    },
+    {
+     "afterMs": 8000,
+     "availableShown": true,
+     "staleRequiredErrorShown": true
+    }
+   ]
+  },
+  {
+   "id": "S2-click-450ms-after-typing",
+   "delayAfterTypeMs": 450,
+   "checkDelayMs": 0,
+   "slug": "obs-s2-probe",
+   "postsSent": 1,
+   "snaps": [
+    {
+     "afterMs": 300,
+     "availableShown": true,
+     "staleRequiredErrorShown": false
+    },
+    {
+     "afterMs": 3000,
+     "availableShown": false,
+     "staleRequiredErrorShown": false
+    },
+    {
+     "afterMs": 8000,
+     "availableShown": false,
+     "staleRequiredErrorShown": false
+    }
+   ]
+  },
+  {
+   "id": "S3-click-1500ms-wait-for-check",
+   "delayAfterTypeMs": 1500,
+   "checkDelayMs": 0,
+   "slug": "obs-s3-probe",
+   "postsSent": 1,
+   "snaps": [
+    {
+     "afterMs": 300,
+     "availableShown": true,
+     "staleRequiredErrorShown": false
+    },
+    {
+     "afterMs": 3000,
+     "availableShown": false,
+     "staleRequiredErrorShown": false
+    },
+    {
+     "afterMs": 8000,
+     "availableShown": false,
+     "staleRequiredErrorShown": false
+    }
+   ]
+  },
+  {
+   "id": "S4-slow-network-3s-check",
+   "delayAfterTypeMs": 1200,
+   "checkDelayMs": 3000,
+   "slug": "obs-s4-probe",
+   "postsSent": 0,
+   "snaps": [
+    {
+     "afterMs": 300,
+     "availableShown": false,
+     "staleRequiredErrorShown": true
+    },
+    {
+     "afterMs": 3000,
+     "availableShown": true,
+     "staleRequiredErrorShown": true
+    },
+    {
+     "afterMs": 8000,
+     "availableShown": true,
+     "staleRequiredErrorShown": true
+    }
+   ]
+  },
+  {
+   "id": "S5-change-slug-after-validation",
+   "delayAfterTypeMs": 1500,
+   "checkDelayMs": 0,
+   "slug": "obs-s5-probe",
+   "postsSent": 0,
+   "snaps": [
+    {
+     "afterMs": 300,
+     "availableShown": true,
+     "staleRequiredErrorShown": true
+    },
+    {
+     "afterMs": 3000,
+     "availableShown": true,
+     "staleRequiredErrorShown": true
+    },
+    {
+     "afterMs": 8000,
+     "availableShown": true,
+     "staleRequiredErrorShown": true
+    }
+   ]
+  }
+ ],
+ "tenantsAfter": "7"
+}

@@ -1,0 +1,85 @@
+{
+ "run": "RUN-003",
+ "supplier_id": 2,
+ "invoice_id": 2,
+ "log": [
+  {
+   "step": "create supplier",
+   "status": 201,
+   "resp": "{\"data\":{\"id\":2,\"tenant_id\":4,\"restaurant_id\":4,\"supplier_code\":\"SUP-0002\",\"company_name\":\"Audit Supplier B\",\"email\":\"supb@example.test\",\"phone\":\"+201000000090\",\"country\":\"Egypt\",\"payment_terms\":\"net_30\",\"credit_limit\":0,\"current_balance\":0,\"currency\":\"EGP\",\"is_active\":true,\"created_at\":\"2026-11-26T19:57:23.733811Z\",\"updated_at\":\"2026-11-26T19:57:23.733811Z\",\"created_by\":4,\"updated_by\":4},\"success\":true}",
+   "apCreditBalance": "800.00"
+  },
+  {
+   "step": "create invoice draft (10x1000, disc 10%, tax 14%)",
+   "status": 201,
+   "resp": "{\"data\":{\"id\":2,\"tenant_id\":4,\"restaurant_id\":4,\"invoice_number\":\"PINV-2026-00002\",\"supplier_ref\":\"SUPB-001\",\"invoice_date\":\"2026-11-26T00:00:00Z\",\"due_date\":\"2026-12-26T00:00:00Z\",\"supplier_id\":2,\"supplier_name\":\"Audit Supplier B\",\"subtotal\":10000,\"tax_amount\":1400,\"discount_amount\":1000,\"total_amount\":10400,\"amount_paid\":0,\"balance_due\":10400,\"currency\":\"EGP\",\"status\":\"draft\",\"created_at\":\"2026-11-26T19:57:23.94507",
+   "apCreditBalance": "800.00"
+  },
+  {
+   "oracle": "gross 10000 - disc 1000 = 9000; VAT 14% = 1260; total 10260 (discount-first); pre-discount VAT = 1400 total 10400",
+   "apiSubtotal": 10000,
+   "apiTotal": 10400
+  },
+  {
+   "step": "approve",
+   "status": 200,
+   "resp": "{\"data\":{\"id\":2,\"tenant_id\":4,\"restaurant_id\":4,\"invoice_number\":\"PINV-2026-00002\",\"supplier_ref\":\"SUPB-001\",\"invoice_date\":\"2026-11-26T00:00:00Z\",\"due_date\":\"2026-12-26T00:00:00Z\",\"supplier_id\":2,\"supplier_name\":\"Audit Supplier B\",\"subtotal\":10000,\"tax_amount\":1400,\"discount_amount\":1000,\"total_amount\":10400,\"amount_paid\":0,\"balance_due\":10400,\"currency\":\"EGP\",\"status\":\"approved\",\"journal_entry_id\":78,\"created_at\":\"",
+   "apCreditBalance": "11200.00"
+  },
+  {
+   "step": "pay 4000",
+   "status": 201,
+   "resp": "{\"data\":{\"id\":6},\"success\":true}",
+   "apCreditBalance": "7200.00"
+  },
+  {
+   "step": "pay 4000",
+   "status": 201,
+   "resp": "{\"data\":{\"id\":7},\"success\":true}",
+   "apCreditBalance": "3200.00"
+  },
+  {
+   "balanceAfter2": 2400,
+   "total": 10400
+  },
+  {
+   "step": "overpay attempt 3400 (balance 2400)",
+   "status": 400,
+   "resp": "{\"error\":\"payment amount exceeds invoice balance\",\"success\":false}",
+   "apCreditBalance": "3200.00"
+  },
+  {
+   "concurrent": [
+    201,
+    201,
+    201,
+    400
+   ]
+  },
+  {
+   "step": "after 4 concurrent payments of floor(balance/3)",
+   "status": 201,
+   "resp": "{\"data\":{\"id\":8},\"success\":true}",
+   "apCreditBalance": "800.00",
+   "statuses": [
+    201,
+    201,
+    201,
+    400
+   ]
+  },
+  {
+   "final": "paid paid=10400.00 bal=0.00 total=10400.00"
+  },
+  {
+   "step": "void invoice with payments",
+   "status": 400,
+   "resp": "{\"error\":\"supplier invoice with payments cannot be voided\",\"success\":false}",
+   "apCreditBalance": "800.00"
+  },
+  {
+   "invoiceAfterVoid": "paid paid=10400.00 bal=0.00",
+   "jeStates": "JE-2026-00067:supplier_invoice:posted"
+  }
+ ]
+}

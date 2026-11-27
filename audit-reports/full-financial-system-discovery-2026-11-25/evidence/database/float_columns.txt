@@ -1,0 +1,4 @@
+restaurant_tables|position_x|double precision
+restaurant_tables|position_y|double precision
+table_layouts|canvas_height|double precision
+table_layouts|canvas_width|double precision

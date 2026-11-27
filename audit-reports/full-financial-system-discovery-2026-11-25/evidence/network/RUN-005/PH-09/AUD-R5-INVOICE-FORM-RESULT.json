@@ -1,0 +1,53 @@
+{
+ "run": "RUN-005",
+ "findings": [
+  "F-024",
+  "F-007",
+  "F-008"
+ ],
+ "out": {
+  "ui_summary_lines": [
+   "Capture line descriptions, account mapping, and tax/discount percentages. Totals are calculated automatically.",
+   "Tax rate %",
+   "Subtotal: EGP 5,000.00",
+   "Tax: EGP 630.00",
+   "Total: EGP 5,130.00",
+   "Totals"
+  ],
+  "request": "POST /accounting/customer-invoices 201",
+  "response_head": "{\"data\":{\"id\":15,\"tenant_id\":4,\"restaurant_id\":4,\"invoice_number\":\"INV-2026-00005\",\"invoice_date\":\"2026-11-27T00:00:00Z\",\"due_date\":\"2026-12-27T00:00:00Z\",\"customer_id\":92,\"customer_name\":\"000 R5 Invo",
+  "line_payload": {
+   "description": "R5 float probe line",
+   "description_ar": "بند اختبار",
+   "quantity": 1,
+   "unit_price": 5000,
+   "tax_rate": 14,
+   "tax_amount": 630.0000000000001,
+   "discount_rate": 10,
+   "discount_amount": 500,
+   "line_total": 5130,
+   "account_id": 96,
+   "line_order": 1
+  },
+  "payload_top": {
+   "invoice_date": "2026-11-27",
+   "due_date": "2026-12-27",
+   "customer_id": 92,
+   "order_id": null,
+   "currency": "EGP",
+   "status": "draft"
+  },
+  "raw_has_float_artefact": true,
+  "db": "draft|sub 5000.00|tax 700.00|total 5200.00|je 44787",
+  "journal": "1120 D5200.00 C0.00 ; 4100 D0.00 C4500.00 ; 2120 D0.00 C700.00"
+ },
+ "calls": [
+  {
+   "m": "POST",
+   "u": "/accounting/customer-invoices",
+   "s": 201,
+   "req": "{\"invoice_date\":\"2026-11-27\",\"due_date\":\"2026-12-27\",\"customer_id\":92,\"order_id\":null,\"currency\":\"EGP\",\"status\":\"draft\",\"lines\":[{\"description\":\"R5 float probe line\",\"description_ar\":\"بند اختبار\",\"quantity\":1,\"unit_price\":5000,\"tax_rate\":14,\"tax_amount\":630.0000000000001,\"discount_rate\":10,\"discount_amount\":500,\"line_total\":5130,\"account_id\":96,\"line_order\":1}]}",
+   "b": "{\"data\":{\"id\":15,\"tenant_id\":4,\"restaurant_id\":4,\"invoice_number\":\"INV-2026-00005\",\"invoice_date\":\"2026-11-27T00:00:00Z\",\"due_date\":\"2026-12-27T00:00:00Z\",\"customer_id\":92,\"customer_name\":\"000 R5 Invoice Customer 90500\",\"subtotal\":5000,\"tax_amount\":700,\"discount_amount\":500,\"total_amount\":5200,\"amou"
+  }
+ ]
+}

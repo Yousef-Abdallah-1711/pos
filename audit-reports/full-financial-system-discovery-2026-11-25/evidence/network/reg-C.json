@@ -1,0 +1,308 @@
+[
+ {
+  "m": "GET",
+  "u": "/api/v1/auth/check-subdomain?slug=audit-c-diag",
+  "s": 200,
+  "body": "{\"available\":true,\"message\":\"Subdomain is available\",\"slug\":\"audit-c-diag\"}"
+ },
+ {
+  "m": "POST",
+  "u": "/api/v1/auth/register",
+  "s": 201,
+  "body": ""
+ },
+ {
+  "m": "GET",
+  "u": "/api/v1/auth/session",
+  "s": 401,
+  "body": ""
+ },
+ {
+  "m": "GET",
+  "u": "/api/v1/auth/session",
+  "s": 200,
+  "body": "{\"email\":\"audit.c.owner@example.test\",\"id\":4,\"is_super_admin\":false,\"name\":\"Audit Owner C\",\"restaurant_id\":4,\"restaurant_name\":\"Audit C Diagnostic\",\"role\":\"owner\",\"tenant_id\":4,\"user_id\":4}"
+ },
+ {
+  "m": "GET",
+  "u": "/api/v1/auth/session",
+  "s": 200,
+  "body": "{\"email\":\"audit.c.owner@example.test\",\"id\":4,\"is_super_admin\":false,\"name\":\"Audit Owner C\",\"restaurant_id\":4,\"restaurant_name\":\"Audit C Diagnostic\",\"role\":\"owner\",\"tenant_id\":4,\"user_id\":4}"
+ },
+ {
+  "m": "GET",
+  "u": "/api/v1/rbac/me/permissions",
+  "s": 200,
+  "body": "{\"1\":\"ADMIN\",\"10\":\"ADMIN\",\"11\":\"ADMIN\",\"12\":\"ADMIN\",\"13\":\"ADMIN\",\"14\":\"ADMIN\",\"15\":\"ADMIN\",\"16\":\"ADMIN\",\"17\":\"ADMIN\",\"18\":\"ADMIN\",\"19\":\"ADMIN\",\"2\":\"ADMIN\",\"20\":\"ADMIN\",\"3\":\"ADMIN\",\"4\":\"ADMIN\",\"5\":\"ADMIN\",\"6\":\"ADMIN\",\"7\":\"ADMIN\",\"8\":\"ADMIN\",\"9\":\"ADMIN\"}"
+ },
+ {
+  "m": "GET",
+  "u": "/api/v1/rbac/check-permission?moduleId=10&permissionLevel=READ",
+  "s": 200,
+  "body": "{\"has_permission\":true,\"module_id\":10,\"permission_level\":\"ADMIN\"}"
+ },
+ {
+  "m": "GET",
+  "u": "/api/v1/rbac/check-permission?moduleId=1&permissionLevel=READ",
+  "s": 200,
+  "body": "{\"has_permission\":true,\"module_id\":1,\"permission_level\":\"ADMIN\"}"
+ },
+ {
+  "m": "GET",
+  "u": "/api/v1/rbac/check-permission?moduleId=2&permissionLevel=READ",
+  "s": 200,
+  "body": "{\"has_permission\":true,\"module_id\":2,\"permission_level\":\"ADMIN\"}"
+ },
+ {
+  "m": "GET",
+  "u": "/api/v1/rbac/check-permission?moduleId=8&permissionLevel=READ",
+  "s": 200,
+  "body": "{\"has_permission\":true,\"module_id\":8,\"permission_level\":\"ADMIN\"}"
+ },
+ {
+  "m": "GET",
+  "u": "/api/v1/rbac/check-permission?moduleId=3&permissionLevel=READ",
+  "s": 200,
+  "body": "{\"has_permission\":true,\"module_id\":3,\"permission_level\":\"ADMIN\"}"
+ },
+ {
+  "m": "GET",
+  "u": "/api/v1/rbac/check-permission?moduleId=14&permissionLevel=READ",
+  "s": 200,
+  "body": "{\"has_permission\":true,\"module_id\":14,\"permission_level\":\"ADMIN\"}"
+ },
+ {
+  "m": "GET",
+  "u": "/api/v1/users/4/settings",
+  "s": 200,
+  "body": "{\"id\":5,\"user_id\":4,\"language\":\"en\",\"theme\":\"light\",\"primary_color\":\"#3b82f6\",\"secondary_color\":\"#6366f1\",\"accent_color\":\"#10b981\",\"notifications_enabled\":true,\"email_notifications\":true,\"sms_notifications\":false,\"created_at\":\"2026-11-25T22:27:52.589127Z\",\"updated_at\":\"2026-11-25T22:27:52.589127Z\"}"
+ },
+ {
+  "m": "GET",
+  "u": "/api/v1/users/4/settings",
+  "s": 200,
+  "body": "{\"id\":5,\"user_id\":4,\"language\":\"en\",\"theme\":\"light\",\"primary_color\":\"#3b82f6\",\"secondary_color\":\"#6366f1\",\"accent_color\":\"#10b981\",\"notifications_enabled\":true,\"email_notifications\":true,\"sms_notifications\":false,\"created_at\":\"2026-11-25T22:27:52.589127Z\",\"updated_at\":\"2026-11-25T22:27:52.589127Z\"}"
+ },
+ {
+  "m": "GET",
+  "u": "/api/v1/rbac/check-permission?moduleId=13&permissionLevel=READ",
+  "s": 200,
+  "body": "{\"has_permission\":true,\"module_id\":13,\"permission_level\":\"ADMIN\"}"
+ },
+ {
+  "m": "GET",
+  "u": "/api/v1/rbac/check-permission?moduleId=10&permissionLevel=WRITE",
+  "s": 200,
+  "body": "{\"has_permission\":true,\"module_id\":10,\"permission_level\":\"ADMIN\"}"
+ },
+ {
+  "m": "GET",
+  "u": "/api/v1/admin/orders?page=1&page_size=1&status=pending",
+  "s": 200,
+  "body": "{\"limit\":1,\"orders\":[],\"page\":1,\"pages\":0,\"total\":0}"
+ },
+ {
+  "m": "GET",
+  "u": "/api/v1/admin/orders?page=1&page_size=5",
+  "s": 200,
+  "body": "{\"limit\":5,\"orders\":[],\"page\":1,\"pages\":0,\"total\":0}"
+ },
+ {
+  "m": "GET",
+  "u": "/api/v1/categories",
+  "s": 200,
+  "body": "[]"
+ },
+ {
+  "m": "GET",
+  "u": "/api/v1/products?page=1&page_size=1",
+  "s": 200,
+  "body": "{\"pagination\":{\"page\":1,\"page_size\":1,\"total\":0,\"total_pages\":0},\"products\":[]}"
+ },
+ {
+  "m": "GET",
+  "u": "/api/v1/hr/employees",
+  "s": 200,
+  "body": "{\"data\":[],\"pagination\":{\"page\":1,\"page_size\":20,\"total\":0,\"total_pages\":0},\"success\":true}\n"
+ },
+ {
+  "m": "GET",
+  "u": "/api/v1/admin/drivers",
+  "s": 200,
+  "body": "{\"drivers\":[]}"
+ },
+ {
+  "m": "GET",
+  "u": "/api/v1/rbac/me/permissions",
+  "s": 200,
+  "body": "{\"1\":\"ADMIN\",\"10\":\"ADMIN\",\"11\":\"ADMIN\",\"12\":\"ADMIN\",\"13\":\"ADMIN\",\"14\":\"ADMIN\",\"15\":\"ADMIN\",\"16\":\"ADMIN\",\"17\":\"ADMIN\",\"18\":\"ADMIN\",\"19\":\"ADMIN\",\"2\":\"ADMIN\",\"20\":\"ADMIN\",\"3\":\"ADMIN\",\"4\":\"ADMIN\",\"5\":\"ADMIN\",\"6\":\"ADMIN\",\"7\":\"ADMIN\",\"8\":\"ADMIN\",\"9\":\"ADMIN\"}"
+ },
+ {
+  "m": "GET",
+  "u": "/api/v1/notifications?",
+  "s": 200,
+  "body": "{\"total\":0,\"unread\":0,\"page\":1,\"page_size\":20,\"notifications\":[]}"
+ },
+ {
+  "m": "GET",
+  "u": "/api/v1/notifications/unread-count",
+  "s": 200,
+  "body": "{\"unread\":0}"
+ },
+ {
+  "m": "GET",
+  "u": "/api/v1/notifications/stats",
+  "s": 200,
+  "body": "{\"total\":0,\"unread\":0,\"read\":0,\"by_module\":{},\"by_priority\":{}}"
+ },
+ {
+  "m": "GET",
+  "u": "/api/v1/tenant/status",
+  "s": 200,
+  "body": "{\"success\":true,\"data\":{\"preferred_billing_period\":\"monthly\",\"is_active\":true,\"tenant_id\":4,\"tenant_name\":\"Audit C Diagnostic\",\"slug\":\"audit-c-diag\",\"subscription_status\":\"trial\",\"subscription_plan\":\"free\",\"trial_start_date\":\"2026-11-25T22:27:50.002483Z\",\"trial_end_date\":\"2026-12-09T22:27:50.002483Z\",\"subscription_expires_at\":null,\"last_payment_at\":null,\"trial_days\":14,\"days_remaining\":14,\"is_disabled\":false,\"can_access\":true,\"plan\":{\"id\":\"free\",\"name\":\"Free Trial\",\"price\":0,\"price_cents\":0,\"currency\":\"EGP\",\"period\":\"\"},\"contact_email\":\"audit.c.owner@example.test\",\"contact_phone\":\"+20100000000"
+ },
+ {
+  "m": "GET",
+  "u": "/api/v1/rbac/check-permission?moduleId=10&permissionLevel=READ",
+  "s": 200,
+  "body": "{\"has_permission\":true,\"module_id\":10,\"permission_level\":\"ADMIN\"}"
+ },
+ {
+  "m": "GET",
+  "u": "/api/v1/notifications?limit=5",
+  "s": 200,
+  "body": "{\"total\":0,\"unread\":0,\"page\":1,\"page_size\":5,\"notifications\":[]}"
+ },
+ {
+  "m": "GET",
+  "u": "/api/v1/rbac/check-permission?moduleId=1&permissionLevel=READ",
+  "s": 200,
+  "body": "{\"has_permission\":true,\"module_id\":1,\"permission_level\":\"ADMIN\"}"
+ },
+ {
+  "m": "GET",
+  "u": "/api/v1/rbac/check-permission?moduleId=2&permissionLevel=READ",
+  "s": 200,
+  "body": "{\"has_permission\":true,\"module_id\":2,\"permission_level\":\"ADMIN\"}"
+ },
+ {
+  "m": "GET",
+  "u": "/api/v1/rbac/check-permission?moduleId=8&permissionLevel=READ",
+  "s": 200,
+  "body": "{\"has_permission\":true,\"module_id\":8,\"permission_level\":\"ADMIN\"}"
+ },
+ {
+  "m": "GET",
+  "u": "/api/v1/rbac/check-permission?moduleId=3&permissionLevel=READ",
+  "s": 200,
+  "body": "{\"has_permission\":true,\"module_id\":3,\"permission_level\":\"ADMIN\"}"
+ },
+ {
+  "m": "GET",
+  "u": "/api/v1/rbac/check-permission?moduleId=14&permissionLevel=READ",
+  "s": 200,
+  "body": "{\"has_permission\":true,\"module_id\":14,\"permission_level\":\"ADMIN\"}"
+ },
+ {
+  "m": "GET",
+  "u": "/api/v1/rbac/check-permission?moduleId=13&permissionLevel=READ",
+  "s": 200,
+  "body": "{\"has_permission\":true,\"module_id\":13,\"permission_level\":\"ADMIN\"}"
+ },
+ {
+  "m": "GET",
+  "u": "/api/v1/rbac/check-permission?moduleId=10&permissionLevel=WRITE",
+  "s": 200,
+  "body": "{\"has_permission\":true,\"module_id\":10,\"permission_level\":\"ADMIN\"}"
+ },
+ {
+  "m": "GET",
+  "u": "/api/v1/products?page=1&page_size=1",
+  "s": 200,
+  "body": "{\"pagination\":{\"page\":1,\"page_size\":1,\"total\":0,\"total_pages\":0},\"products\":[]}"
+ },
+ {
+  "m": "GET",
+  "u": "/api/v1/admin/orders?page=1&page_size=1&status=pending",
+  "s": 200,
+  "body": "{\"limit\":1,\"orders\":[],\"page\":1,\"pages\":0,\"total\":0}"
+ },
+ {
+  "m": "GET",
+  "u": "/api/v1/categories",
+  "s": 200,
+  "body": "[]"
+ },
+ {
+  "m": "GET",
+  "u": "/api/v1/hr/employees",
+  "s": 200,
+  "body": "{\"data\":[],\"pagination\":{\"page\":1,\"page_size\":20,\"total\":0,\"total_pages\":0},\"success\":true}\n"
+ },
+ {
+  "m": "GET",
+  "u": "/api/v1/admin/orders?page=1&page_size=5",
+  "s": 200,
+  "body": "{\"limit\":5,\"orders\":[],\"page\":1,\"pages\":0,\"total\":0}"
+ },
+ {
+  "m": "GET",
+  "u": "/api/v1/admin/drivers",
+  "s": 200,
+  "body": "{\"drivers\":[]}"
+ },
+ {
+  "m": "GET",
+  "u": "/api/v1/products?page=1&page_size=1",
+  "s": 200,
+  "body": "{\"pagination\":{\"page\":1,\"page_size\":1,\"total\":0,\"total_pages\":0},\"products\":[]}"
+ },
+ {
+  "m": "GET",
+  "u": "/api/v1/tables/stats",
+  "s": 200,
+  "body": "{\"data\":{\"total_tables\":0,\"available\":0,\"occupied\":0,\"reserved\":0,\"maintenance\":0,\"total_capacity\":0},\"success\":true}"
+ },
+ {
+  "m": "GET",
+  "u": "/api/v1/hr/employees",
+  "s": 200,
+  "body": "{\"data\":[],\"pagination\":{\"page\":1,\"page_size\":20,\"total\":0,\"total_pages\":0},\"success\":true}\n"
+ },
+ {
+  "m": "GET",
+  "u": "/api/v1/admin/drivers",
+  "s": 200,
+  "body": "{\"drivers\":[]}"
+ },
+ {
+  "m": "GET",
+  "u": "/api/v1/tenant/status",
+  "s": 200,
+  "body": "{\"success\":true,\"data\":{\"preferred_billing_period\":\"monthly\",\"is_active\":true,\"tenant_id\":4,\"tenant_name\":\"Audit C Diagnostic\",\"slug\":\"audit-c-diag\",\"subscription_status\":\"trial\",\"subscription_plan\":\"free\",\"trial_start_date\":\"2026-11-25T22:27:50.002483Z\",\"trial_end_date\":\"2026-12-09T22:27:50.002483Z\",\"subscription_expires_at\":null,\"last_payment_at\":null,\"trial_days\":14,\"days_remaining\":14,\"is_disabled\":false,\"can_access\":true,\"plan\":{\"id\":\"free\",\"name\":\"Free Trial\",\"price\":0,\"price_cents\":0,\"currency\":\"EGP\",\"period\":\"\"},\"contact_email\":\"audit.c.owner@example.test\",\"contact_phone\":\"+20100000000"
+ },
+ {
+  "m": "GET",
+  "u": "/api/v1/notifications/stats",
+  "s": 200,
+  "body": "{\"total\":0,\"unread\":0,\"read\":0,\"by_module\":{},\"by_priority\":{}}"
+ },
+ {
+  "m": "GET",
+  "u": "/api/v1/admin/orders?page=1&page_size=1&status=pending",
+  "s": 200,
+  "body": "{\"limit\":1,\"orders\":[],\"page\":1,\"pages\":0,\"total\":0}"
+ },
+ {
+  "m": "GET",
+  "u": "/api/v1/admin/orders?page=1&page_size=5",
+  "s": 200,
+  "body": "{\"limit\":5,\"orders\":[],\"page\":1,\"pages\":0,\"total\":0}"
+ },
+ {
+  "m": "GET",
+  "u": "/api/v1/categories",
+  "s": 200,
+  "body": "[]"
+ }
+]

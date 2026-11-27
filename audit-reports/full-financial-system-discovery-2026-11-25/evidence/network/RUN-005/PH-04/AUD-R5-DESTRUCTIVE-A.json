@@ -1,0 +1,25 @@
+{
+ "run": "RUN-005",
+ "tag": "000R5DEL35002",
+ "tenant": 4,
+ "note": "disposable entities named R5DEL-*; isolated stack",
+ "log": [
+  {
+   "id": "DIALOG",
+   "what": "browser dialog",
+   "type": "confirm",
+   "message": "Are you sure you want to delete this product?"
+  },
+  {
+   "id": "51",
+   "what": "delete product",
+   "create_http": 201,
+   "clicked": true,
+   "confirmed": false,
+   "calls": [
+    "DELETE /products/51 200 {\"message\":\"Product deleted successfully\"}"
+   ],
+   "status_after": "deleted"
+  }
+ ]
+}

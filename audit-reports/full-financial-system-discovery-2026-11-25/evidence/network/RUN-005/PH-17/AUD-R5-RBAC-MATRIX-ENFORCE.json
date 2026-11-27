@@ -1,0 +1,1284 @@
+{
+ "run": "RUN-005",
+ "api": "isolated ENFORCE mode",
+ "setup": {
+  "MANAGER": {
+   "uid": "17",
+   "assign": 200,
+   "removeEmployee": 200,
+   "roles": "MANAGER"
+  },
+  "DRIVER": {
+   "uid": "18",
+   "assign": 200,
+   "removeEmployee": 200,
+   "roles": "DRIVER"
+  }
+ },
+ "cells": [
+  {
+   "role": "ADMIN",
+   "method": "GET",
+   "path": "/accounting/journal-entries",
+   "status": 200,
+   "rows_or_keys": 20,
+   "bytes": 11882,
+   "sensitive_fields": false
+  },
+  {
+   "role": "ADMIN",
+   "method": "GET",
+   "path": "/accounting/accounts",
+   "status": 200,
+   "rows_or_keys": 50,
+   "bytes": 20126,
+   "sensitive_fields": false
+  },
+  {
+   "role": "ADMIN",
+   "method": "GET",
+   "path": "/accounting/trial-balance",
+   "status": 200,
+   "rows_or_keys": 5,
+   "bytes": 12090,
+   "sensitive_fields": false
+  },
+  {
+   "role": "ADMIN",
+   "method": "GET",
+   "path": "/accounting/customers",
+   "status": 200,
+   "rows_or_keys": 20,
+   "bytes": 13104,
+   "sensitive_fields": false
+  },
+  {
+   "role": "ADMIN",
+   "method": "GET",
+   "path": "/suppliers",
+   "status": 200,
+   "rows_or_keys": 7,
+   "bytes": 3620,
+   "sensitive_fields": true
+  },
+  {
+   "role": "ADMIN",
+   "method": "GET",
+   "path": "/accounting/customer-invoices",
+   "status": 200,
+   "rows_or_keys": 4,
+   "bytes": 2013,
+   "sensitive_fields": false
+  },
+  {
+   "role": "ADMIN",
+   "method": "GET",
+   "path": "/accounting/supplier-invoices",
+   "status": 200,
+   "rows_or_keys": 3,
+   "bytes": 1604,
+   "sensitive_fields": false
+  },
+  {
+   "role": "ADMIN",
+   "method": "GET",
+   "path": "/accounting/bank-accounts",
+   "status": 200,
+   "rows_or_keys": 2,
+   "bytes": 1025,
+   "sensitive_fields": false
+  },
+  {
+   "role": "ADMIN",
+   "method": "GET",
+   "path": "/hr/employees",
+   "status": 200,
+   "rows_or_keys": 1,
+   "bytes": 624,
+   "sensitive_fields": true
+  },
+  {
+   "role": "ADMIN",
+   "method": "GET",
+   "path": "/hr/salaries",
+   "status": 200,
+   "rows_or_keys": 4,
+   "bytes": 3150,
+   "sensitive_fields": true
+  },
+  {
+   "role": "ADMIN",
+   "method": "GET",
+   "path": "/hr/attendance",
+   "status": 200,
+   "rows_or_keys": 6,
+   "bytes": 2964,
+   "sensitive_fields": false
+  },
+  {
+   "role": "ADMIN",
+   "method": "GET",
+   "path": "/hr/leaves",
+   "status": 200,
+   "rows_or_keys": 2,
+   "bytes": 1013,
+   "sensitive_fields": false
+  },
+  {
+   "role": "ADMIN",
+   "method": "GET",
+   "path": "/hr/contracts",
+   "status": 200,
+   "rows_or_keys": 4,
+   "bytes": 1404,
+   "sensitive_fields": true
+  },
+  {
+   "role": "ADMIN",
+   "method": "GET",
+   "path": "/users",
+   "status": 200,
+   "rows_or_keys": null,
+   "bytes": 1211,
+   "sensitive_fields": false
+  },
+  {
+   "role": "ADMIN",
+   "method": "GET",
+   "path": "/rbac/roles",
+   "status": 200,
+   "rows_or_keys": 7,
+   "bytes": 1390,
+   "sensitive_fields": false
+  },
+  {
+   "role": "ADMIN",
+   "method": "GET",
+   "path": "/reports/financial/profit-loss",
+   "status": 200,
+   "rows_or_keys": 12,
+   "bytes": 682,
+   "sensitive_fields": false
+  },
+  {
+   "role": "ADMIN",
+   "method": "GET",
+   "path": "/reports/financial/balance-sheet",
+   "status": 200,
+   "rows_or_keys": 11,
+   "bytes": 2447,
+   "sensitive_fields": false
+  },
+  {
+   "role": "ADMIN",
+   "method": "GET",
+   "path": "/reports/sales",
+   "status": 200,
+   "rows_or_keys": 7,
+   "bytes": 1796,
+   "sensitive_fields": false
+  },
+  {
+   "role": "ADMIN",
+   "method": "GET",
+   "path": "/admin/orders",
+   "status": 200,
+   "rows_or_keys": 5,
+   "bytes": 1997,
+   "sensitive_fields": false
+  },
+  {
+   "role": "ADMIN",
+   "method": "GET",
+   "path": "/products",
+   "status": 200,
+   "rows_or_keys": 5,
+   "bytes": 2342,
+   "sensitive_fields": false
+  },
+  {
+   "role": "ADMIN",
+   "method": "GET",
+   "path": "/categories",
+   "status": 200,
+   "rows_or_keys": null,
+   "bytes": 454,
+   "sensitive_fields": false
+  },
+  {
+   "role": "ADMIN",
+   "method": "GET",
+   "path": "/kds/queue",
+   "status": 200,
+   "rows_or_keys": 5762,
+   "bytes": 2554549,
+   "sensitive_fields": false
+  },
+  {
+   "role": "ADMIN",
+   "method": "GET",
+   "path": "/tables",
+   "status": 200,
+   "rows_or_keys": 4,
+   "bytes": 1213,
+   "sensitive_fields": false
+  },
+  {
+   "role": "ADMIN",
+   "method": "GET",
+   "path": "/admin/drivers",
+   "status": 200,
+   "rows_or_keys": 1,
+   "bytes": 2047,
+   "sensitive_fields": false
+  },
+  {
+   "role": "ADMIN",
+   "method": "GET",
+   "path": "/admin/themes",
+   "status": 200,
+   "rows_or_keys": 5,
+   "bytes": 3406,
+   "sensitive_fields": false
+  },
+  {
+   "role": "ADMIN",
+   "method": "GET",
+   "path": "/payments/subscription",
+   "status": 404,
+   "rows_or_keys": null,
+   "bytes": 19,
+   "sensitive_fields": false
+  },
+  {
+   "role": "ADMIN",
+   "method": "GET",
+   "path": "/notifications",
+   "status": 200,
+   "rows_or_keys": 5,
+   "bytes": 567,
+   "sensitive_fields": false
+  },
+  {
+   "role": "ADMIN",
+   "method": "GET",
+   "path": "/accounting/csv/journal-entries/export",
+   "status": 200,
+   "rows_or_keys": null,
+   "bytes": 2590881,
+   "sensitive_fields": false
+  },
+  {
+   "role": "ADMIN",
+   "method": "POST",
+   "path": "/accounting/accounts",
+   "status": 400,
+   "outcome": "AUTHORISED (rejected as invalid body)",
+   "body": "{\"error\":\"account_code is required\",\"success\":false}\n"
+  },
+  {
+   "role": "ADMIN",
+   "method": "POST",
+   "path": "/accounting/journal-entries",
+   "status": 400,
+   "outcome": "AUTHORISED (rejected as invalid body)",
+   "body": "{\"error\":\"journal entry must contain at least two lines\",\"success\":false}\n"
+  },
+  {
+   "role": "ADMIN",
+   "method": "POST",
+   "path": "/hr/employees",
+   "status": 400,
+   "outcome": "AUTHORISED (rejected as invalid body)",
+   "body": "{\"error\":\"first_name, last_name, and email are required\",\"success\":false}\n"
+  },
+  {
+   "role": "ADMIN",
+   "method": "POST",
+   "path": "/suppliers",
+   "status": 400,
+   "outcome": "AUTHORISED (rejected as invalid body)",
+   "body": "{\"error\":\"company_name is required\",\"success\":false}\n"
+  },
+  {
+   "role": "ADMIN",
+   "method": "POST",
+   "path": "/accounting/customers",
+   "status": 400,
+   "outcome": "AUTHORISED (rejected as invalid body)",
+   "body": "{\"error\":\"customer_name is required\",\"success\":false}\n"
+  },
+  {
+   "role": "ADMIN",
+   "method": "POST",
+   "path": "/admin/drivers",
+   "status": 400,
+   "outcome": "AUTHORISED (rejected as invalid body)",
+   "body": "{\"error\":\"Missing required driver fields\"}"
+  },
+  {
+   "role": "ADMIN",
+   "method": "POST",
+   "path": "/rbac/roles",
+   "status": 400,
+   "outcome": "AUTHORISED (rejected as invalid body)",
+   "body": "{\"error\":\"Role name is required\"}"
+  },
+  {
+   "role": "ADMIN",
+   "method": "POST",
+   "path": "/accounting/bank-reconciliation/sessions",
+   "status": 400,
+   "outcome": "AUTHORISED (rejected as invalid body)",
+   "body": "{\"error\":\"bank_account_id is required\",\"success\":false}\n"
+  },
+  {
+   "role": "MANAGER",
+   "method": "GET",
+   "path": "/accounting/journal-entries",
+   "status": 403,
+   "rows_or_keys": null,
+   "bytes": 25,
+   "sensitive_fields": false
+  },
+  {
+   "role": "MANAGER",
+   "method": "GET",
+   "path": "/accounting/accounts",
+   "status": 403,
+   "rows_or_keys": null,
+   "bytes": 25,
+   "sensitive_fields": false
+  },
+  {
+   "role": "MANAGER",
+   "method": "GET",
+   "path": "/accounting/trial-balance",
+   "status": 403,
+   "rows_or_keys": null,
+   "bytes": 25,
+   "sensitive_fields": false
+  },
+  {
+   "role": "MANAGER",
+   "method": "GET",
+   "path": "/accounting/customers",
+   "status": 403,
+   "rows_or_keys": null,
+   "bytes": 25,
+   "sensitive_fields": false
+  },
+  {
+   "role": "MANAGER",
+   "method": "GET",
+   "path": "/suppliers",
+   "status": 403,
+   "rows_or_keys": null,
+   "bytes": 25,
+   "sensitive_fields": false
+  },
+  {
+   "role": "MANAGER",
+   "method": "GET",
+   "path": "/accounting/customer-invoices",
+   "status": 403,
+   "rows_or_keys": null,
+   "bytes": 25,
+   "sensitive_fields": false
+  },
+  {
+   "role": "MANAGER",
+   "method": "GET",
+   "path": "/accounting/supplier-invoices",
+   "status": 403,
+   "rows_or_keys": null,
+   "bytes": 25,
+   "sensitive_fields": false
+  },
+  {
+   "role": "MANAGER",
+   "method": "GET",
+   "path": "/accounting/bank-accounts",
+   "status": 403,
+   "rows_or_keys": null,
+   "bytes": 25,
+   "sensitive_fields": false
+  },
+  {
+   "role": "MANAGER",
+   "method": "GET",
+   "path": "/hr/employees",
+   "status": 200,
+   "rows_or_keys": 1,
+   "bytes": 624,
+   "sensitive_fields": true
+  },
+  {
+   "role": "MANAGER",
+   "method": "GET",
+   "path": "/hr/salaries",
+   "status": 200,
+   "rows_or_keys": 4,
+   "bytes": 3150,
+   "sensitive_fields": true
+  },
+  {
+   "role": "MANAGER",
+   "method": "GET",
+   "path": "/hr/attendance",
+   "status": 200,
+   "rows_or_keys": 6,
+   "bytes": 2964,
+   "sensitive_fields": false
+  },
+  {
+   "role": "MANAGER",
+   "method": "GET",
+   "path": "/hr/leaves",
+   "status": 200,
+   "rows_or_keys": 2,
+   "bytes": 1013,
+   "sensitive_fields": false
+  },
+  {
+   "role": "MANAGER",
+   "method": "GET",
+   "path": "/hr/contracts",
+   "status": 403,
+   "rows_or_keys": null,
+   "bytes": 25,
+   "sensitive_fields": false
+  },
+  {
+   "role": "MANAGER",
+   "method": "GET",
+   "path": "/users",
+   "status": 200,
+   "rows_or_keys": null,
+   "bytes": 1211,
+   "sensitive_fields": false
+  },
+  {
+   "role": "MANAGER",
+   "method": "GET",
+   "path": "/rbac/roles",
+   "status": 200,
+   "rows_or_keys": 7,
+   "bytes": 1390,
+   "sensitive_fields": false
+  },
+  {
+   "role": "MANAGER",
+   "method": "GET",
+   "path": "/reports/financial/profit-loss",
+   "status": 403,
+   "rows_or_keys": null,
+   "bytes": 25,
+   "sensitive_fields": false
+  },
+  {
+   "role": "MANAGER",
+   "method": "GET",
+   "path": "/reports/financial/balance-sheet",
+   "status": 403,
+   "rows_or_keys": null,
+   "bytes": 25,
+   "sensitive_fields": false
+  },
+  {
+   "role": "MANAGER",
+   "method": "GET",
+   "path": "/reports/sales",
+   "status": 200,
+   "rows_or_keys": 7,
+   "bytes": 1796,
+   "sensitive_fields": false
+  },
+  {
+   "role": "MANAGER",
+   "method": "GET",
+   "path": "/admin/orders",
+   "status": 200,
+   "rows_or_keys": 5,
+   "bytes": 1997,
+   "sensitive_fields": false
+  },
+  {
+   "role": "MANAGER",
+   "method": "GET",
+   "path": "/products",
+   "status": 200,
+   "rows_or_keys": 5,
+   "bytes": 2342,
+   "sensitive_fields": false
+  },
+  {
+   "role": "MANAGER",
+   "method": "GET",
+   "path": "/categories",
+   "status": 200,
+   "rows_or_keys": null,
+   "bytes": 454,
+   "sensitive_fields": false
+  },
+  {
+   "role": "MANAGER",
+   "method": "GET",
+   "path": "/kds/queue",
+   "status": 200,
+   "rows_or_keys": 5762,
+   "bytes": 2554549,
+   "sensitive_fields": false
+  },
+  {
+   "role": "MANAGER",
+   "method": "GET",
+   "path": "/tables",
+   "status": 200,
+   "rows_or_keys": 4,
+   "bytes": 1213,
+   "sensitive_fields": false
+  },
+  {
+   "role": "MANAGER",
+   "method": "GET",
+   "path": "/admin/drivers",
+   "status": 200,
+   "rows_or_keys": 1,
+   "bytes": 2047,
+   "sensitive_fields": false
+  },
+  {
+   "role": "MANAGER",
+   "method": "GET",
+   "path": "/admin/themes",
+   "status": 200,
+   "rows_or_keys": 5,
+   "bytes": 3406,
+   "sensitive_fields": false
+  },
+  {
+   "role": "MANAGER",
+   "method": "GET",
+   "path": "/payments/subscription",
+   "status": 404,
+   "rows_or_keys": null,
+   "bytes": 19,
+   "sensitive_fields": false
+  },
+  {
+   "role": "MANAGER",
+   "method": "GET",
+   "path": "/notifications",
+   "status": 200,
+   "rows_or_keys": 5,
+   "bytes": 65,
+   "sensitive_fields": false
+  },
+  {
+   "role": "MANAGER",
+   "method": "GET",
+   "path": "/accounting/csv/journal-entries/export",
+   "status": 403,
+   "rows_or_keys": null,
+   "bytes": 25,
+   "sensitive_fields": false
+  },
+  {
+   "role": "MANAGER",
+   "method": "POST",
+   "path": "/accounting/accounts",
+   "status": 403,
+   "outcome": "DENIED",
+   "body": "Insufficient permissions\n"
+  },
+  {
+   "role": "MANAGER",
+   "method": "POST",
+   "path": "/accounting/journal-entries",
+   "status": 403,
+   "outcome": "DENIED",
+   "body": "Insufficient permissions\n"
+  },
+  {
+   "role": "MANAGER",
+   "method": "POST",
+   "path": "/hr/employees",
+   "status": 400,
+   "outcome": "AUTHORISED (rejected as invalid body)",
+   "body": "{\"error\":\"first_name, last_name, and email are required\",\"success\":false}\n"
+  },
+  {
+   "role": "MANAGER",
+   "method": "POST",
+   "path": "/suppliers",
+   "status": 403,
+   "outcome": "DENIED",
+   "body": "Insufficient permissions\n"
+  },
+  {
+   "role": "MANAGER",
+   "method": "POST",
+   "path": "/accounting/customers",
+   "status": 403,
+   "outcome": "DENIED",
+   "body": "Insufficient permissions\n"
+  },
+  {
+   "role": "MANAGER",
+   "method": "POST",
+   "path": "/admin/drivers",
+   "status": 400,
+   "outcome": "AUTHORISED (rejected as invalid body)",
+   "body": "{\"error\":\"Missing required driver fields\"}"
+  },
+  {
+   "role": "MANAGER",
+   "method": "POST",
+   "path": "/rbac/roles",
+   "status": 403,
+   "outcome": "DENIED",
+   "body": "Insufficient permissions\n"
+  },
+  {
+   "role": "MANAGER",
+   "method": "POST",
+   "path": "/accounting/bank-reconciliation/sessions",
+   "status": 403,
+   "outcome": "DENIED",
+   "body": "Insufficient permissions\n"
+  },
+  {
+   "role": "EMPLOYEE",
+   "method": "GET",
+   "path": "/accounting/journal-entries",
+   "status": 403,
+   "rows_or_keys": null,
+   "bytes": 25,
+   "sensitive_fields": false
+  },
+  {
+   "role": "EMPLOYEE",
+   "method": "GET",
+   "path": "/accounting/accounts",
+   "status": 403,
+   "rows_or_keys": null,
+   "bytes": 25,
+   "sensitive_fields": false
+  },
+  {
+   "role": "EMPLOYEE",
+   "method": "GET",
+   "path": "/accounting/trial-balance",
+   "status": 403,
+   "rows_or_keys": null,
+   "bytes": 25,
+   "sensitive_fields": false
+  },
+  {
+   "role": "EMPLOYEE",
+   "method": "GET",
+   "path": "/accounting/customers",
+   "status": 403,
+   "rows_or_keys": null,
+   "bytes": 25,
+   "sensitive_fields": false
+  },
+  {
+   "role": "EMPLOYEE",
+   "method": "GET",
+   "path": "/suppliers",
+   "status": 403,
+   "rows_or_keys": null,
+   "bytes": 25,
+   "sensitive_fields": false
+  },
+  {
+   "role": "EMPLOYEE",
+   "method": "GET",
+   "path": "/accounting/customer-invoices",
+   "status": 403,
+   "rows_or_keys": null,
+   "bytes": 25,
+   "sensitive_fields": false
+  },
+  {
+   "role": "EMPLOYEE",
+   "method": "GET",
+   "path": "/accounting/supplier-invoices",
+   "status": 403,
+   "rows_or_keys": null,
+   "bytes": 25,
+   "sensitive_fields": false
+  },
+  {
+   "role": "EMPLOYEE",
+   "method": "GET",
+   "path": "/accounting/bank-accounts",
+   "status": 403,
+   "rows_or_keys": null,
+   "bytes": 25,
+   "sensitive_fields": false
+  },
+  {
+   "role": "EMPLOYEE",
+   "method": "GET",
+   "path": "/hr/employees",
+   "status": 200,
+   "rows_or_keys": 1,
+   "bytes": 624,
+   "sensitive_fields": true
+  },
+  {
+   "role": "EMPLOYEE",
+   "method": "GET",
+   "path": "/hr/salaries",
+   "status": 403,
+   "rows_or_keys": null,
+   "bytes": 25,
+   "sensitive_fields": false
+  },
+  {
+   "role": "EMPLOYEE",
+   "method": "GET",
+   "path": "/hr/attendance",
+   "status": 200,
+   "rows_or_keys": 6,
+   "bytes": 2964,
+   "sensitive_fields": false
+  },
+  {
+   "role": "EMPLOYEE",
+   "method": "GET",
+   "path": "/hr/leaves",
+   "status": 200,
+   "rows_or_keys": 2,
+   "bytes": 1013,
+   "sensitive_fields": false
+  },
+  {
+   "role": "EMPLOYEE",
+   "method": "GET",
+   "path": "/hr/contracts",
+   "status": 403,
+   "rows_or_keys": null,
+   "bytes": 25,
+   "sensitive_fields": false
+  },
+  {
+   "role": "EMPLOYEE",
+   "method": "GET",
+   "path": "/users",
+   "status": 403,
+   "rows_or_keys": null,
+   "bytes": 25,
+   "sensitive_fields": false
+  },
+  {
+   "role": "EMPLOYEE",
+   "method": "GET",
+   "path": "/rbac/roles",
+   "status": 403,
+   "rows_or_keys": null,
+   "bytes": 25,
+   "sensitive_fields": false
+  },
+  {
+   "role": "EMPLOYEE",
+   "method": "GET",
+   "path": "/reports/financial/profit-loss",
+   "status": 403,
+   "rows_or_keys": null,
+   "bytes": 25,
+   "sensitive_fields": false
+  },
+  {
+   "role": "EMPLOYEE",
+   "method": "GET",
+   "path": "/reports/financial/balance-sheet",
+   "status": 403,
+   "rows_or_keys": null,
+   "bytes": 25,
+   "sensitive_fields": false
+  },
+  {
+   "role": "EMPLOYEE",
+   "method": "GET",
+   "path": "/reports/sales",
+   "status": 403,
+   "rows_or_keys": null,
+   "bytes": 25,
+   "sensitive_fields": false
+  },
+  {
+   "role": "EMPLOYEE",
+   "method": "GET",
+   "path": "/admin/orders",
+   "status": 200,
+   "rows_or_keys": 5,
+   "bytes": 1997,
+   "sensitive_fields": false
+  },
+  {
+   "role": "EMPLOYEE",
+   "method": "GET",
+   "path": "/products",
+   "status": 200,
+   "rows_or_keys": 5,
+   "bytes": 2342,
+   "sensitive_fields": false
+  },
+  {
+   "role": "EMPLOYEE",
+   "method": "GET",
+   "path": "/categories",
+   "status": 200,
+   "rows_or_keys": null,
+   "bytes": 454,
+   "sensitive_fields": false
+  },
+  {
+   "role": "EMPLOYEE",
+   "method": "GET",
+   "path": "/kds/queue",
+   "status": 200,
+   "rows_or_keys": 5762,
+   "bytes": 2554549,
+   "sensitive_fields": false
+  },
+  {
+   "role": "EMPLOYEE",
+   "method": "GET",
+   "path": "/tables",
+   "status": 200,
+   "rows_or_keys": 4,
+   "bytes": 1213,
+   "sensitive_fields": false
+  },
+  {
+   "role": "EMPLOYEE",
+   "method": "GET",
+   "path": "/admin/drivers",
+   "status": 200,
+   "rows_or_keys": 1,
+   "bytes": 2047,
+   "sensitive_fields": false
+  },
+  {
+   "role": "EMPLOYEE",
+   "method": "GET",
+   "path": "/admin/themes",
+   "status": 403,
+   "rows_or_keys": null,
+   "bytes": 25,
+   "sensitive_fields": false
+  },
+  {
+   "role": "EMPLOYEE",
+   "method": "GET",
+   "path": "/payments/subscription",
+   "status": 404,
+   "rows_or_keys": null,
+   "bytes": 19,
+   "sensitive_fields": false
+  },
+  {
+   "role": "EMPLOYEE",
+   "method": "GET",
+   "path": "/notifications",
+   "status": 200,
+   "rows_or_keys": 5,
+   "bytes": 65,
+   "sensitive_fields": false
+  },
+  {
+   "role": "EMPLOYEE",
+   "method": "GET",
+   "path": "/accounting/csv/journal-entries/export",
+   "status": 403,
+   "rows_or_keys": null,
+   "bytes": 25,
+   "sensitive_fields": false
+  },
+  {
+   "role": "EMPLOYEE",
+   "method": "POST",
+   "path": "/accounting/accounts",
+   "status": 403,
+   "outcome": "DENIED",
+   "body": "Insufficient permissions\n"
+  },
+  {
+   "role": "EMPLOYEE",
+   "method": "POST",
+   "path": "/accounting/journal-entries",
+   "status": 403,
+   "outcome": "DENIED",
+   "body": "Insufficient permissions\n"
+  },
+  {
+   "role": "EMPLOYEE",
+   "method": "POST",
+   "path": "/hr/employees",
+   "status": 403,
+   "outcome": "DENIED",
+   "body": "Insufficient permissions\n"
+  },
+  {
+   "role": "EMPLOYEE",
+   "method": "POST",
+   "path": "/suppliers",
+   "status": 403,
+   "outcome": "DENIED",
+   "body": "Insufficient permissions\n"
+  },
+  {
+   "role": "EMPLOYEE",
+   "method": "POST",
+   "path": "/accounting/customers",
+   "status": 403,
+   "outcome": "DENIED",
+   "body": "Insufficient permissions\n"
+  },
+  {
+   "role": "EMPLOYEE",
+   "method": "POST",
+   "path": "/admin/drivers",
+   "status": 403,
+   "outcome": "DENIED",
+   "body": "Insufficient permissions\n"
+  },
+  {
+   "role": "EMPLOYEE",
+   "method": "POST",
+   "path": "/rbac/roles",
+   "status": 403,
+   "outcome": "DENIED",
+   "body": "Insufficient permissions\n"
+  },
+  {
+   "role": "EMPLOYEE",
+   "method": "POST",
+   "path": "/accounting/bank-reconciliation/sessions",
+   "status": 403,
+   "outcome": "DENIED",
+   "body": "Insufficient permissions\n"
+  },
+  {
+   "role": "DRIVER",
+   "method": "GET",
+   "path": "/accounting/journal-entries",
+   "status": 403,
+   "rows_or_keys": null,
+   "bytes": 25,
+   "sensitive_fields": false
+  },
+  {
+   "role": "DRIVER",
+   "method": "GET",
+   "path": "/accounting/accounts",
+   "status": 403,
+   "rows_or_keys": null,
+   "bytes": 25,
+   "sensitive_fields": false
+  },
+  {
+   "role": "DRIVER",
+   "method": "GET",
+   "path": "/accounting/trial-balance",
+   "status": 403,
+   "rows_or_keys": null,
+   "bytes": 25,
+   "sensitive_fields": false
+  },
+  {
+   "role": "DRIVER",
+   "method": "GET",
+   "path": "/accounting/customers",
+   "status": 403,
+   "rows_or_keys": null,
+   "bytes": 25,
+   "sensitive_fields": false
+  },
+  {
+   "role": "DRIVER",
+   "method": "GET",
+   "path": "/suppliers",
+   "status": 403,
+   "rows_or_keys": null,
+   "bytes": 25,
+   "sensitive_fields": false
+  },
+  {
+   "role": "DRIVER",
+   "method": "GET",
+   "path": "/accounting/customer-invoices",
+   "status": 403,
+   "rows_or_keys": null,
+   "bytes": 25,
+   "sensitive_fields": false
+  },
+  {
+   "role": "DRIVER",
+   "method": "GET",
+   "path": "/accounting/supplier-invoices",
+   "status": 403,
+   "rows_or_keys": null,
+   "bytes": 25,
+   "sensitive_fields": false
+  },
+  {
+   "role": "DRIVER",
+   "method": "GET",
+   "path": "/accounting/bank-accounts",
+   "status": 403,
+   "rows_or_keys": null,
+   "bytes": 25,
+   "sensitive_fields": false
+  },
+  {
+   "role": "DRIVER",
+   "method": "GET",
+   "path": "/hr/employees",
+   "status": 403,
+   "rows_or_keys": null,
+   "bytes": 25,
+   "sensitive_fields": false
+  },
+  {
+   "role": "DRIVER",
+   "method": "GET",
+   "path": "/hr/salaries",
+   "status": 403,
+   "rows_or_keys": null,
+   "bytes": 25,
+   "sensitive_fields": false
+  },
+  {
+   "role": "DRIVER",
+   "method": "GET",
+   "path": "/hr/attendance",
+   "status": 403,
+   "rows_or_keys": null,
+   "bytes": 25,
+   "sensitive_fields": false
+  },
+  {
+   "role": "DRIVER",
+   "method": "GET",
+   "path": "/hr/leaves",
+   "status": 403,
+   "rows_or_keys": null,
+   "bytes": 25,
+   "sensitive_fields": false
+  },
+  {
+   "role": "DRIVER",
+   "method": "GET",
+   "path": "/hr/contracts",
+   "status": 403,
+   "rows_or_keys": null,
+   "bytes": 25,
+   "sensitive_fields": false
+  },
+  {
+   "role": "DRIVER",
+   "method": "GET",
+   "path": "/users",
+   "status": 403,
+   "rows_or_keys": null,
+   "bytes": 25,
+   "sensitive_fields": false
+  },
+  {
+   "role": "DRIVER",
+   "method": "GET",
+   "path": "/rbac/roles",
+   "status": 403,
+   "rows_or_keys": null,
+   "bytes": 25,
+   "sensitive_fields": false
+  },
+  {
+   "role": "DRIVER",
+   "method": "GET",
+   "path": "/reports/financial/profit-loss",
+   "status": 403,
+   "rows_or_keys": null,
+   "bytes": 25,
+   "sensitive_fields": false
+  },
+  {
+   "role": "DRIVER",
+   "method": "GET",
+   "path": "/reports/financial/balance-sheet",
+   "status": 403,
+   "rows_or_keys": null,
+   "bytes": 25,
+   "sensitive_fields": false
+  },
+  {
+   "role": "DRIVER",
+   "method": "GET",
+   "path": "/reports/sales",
+   "status": 403,
+   "rows_or_keys": null,
+   "bytes": 25,
+   "sensitive_fields": false
+  },
+  {
+   "role": "DRIVER",
+   "method": "GET",
+   "path": "/admin/orders",
+   "status": 200,
+   "rows_or_keys": 0,
+   "bytes": 52,
+   "sensitive_fields": false
+  },
+  {
+   "role": "DRIVER",
+   "method": "GET",
+   "path": "/products",
+   "status": 403,
+   "rows_or_keys": null,
+   "bytes": 25,
+   "sensitive_fields": false
+  },
+  {
+   "role": "DRIVER",
+   "method": "GET",
+   "path": "/categories",
+   "status": 403,
+   "rows_or_keys": null,
+   "bytes": 25,
+   "sensitive_fields": false
+  },
+  {
+   "role": "DRIVER",
+   "method": "GET",
+   "path": "/kds/queue",
+   "status": 403,
+   "rows_or_keys": null,
+   "bytes": 25,
+   "sensitive_fields": false
+  },
+  {
+   "role": "DRIVER",
+   "method": "GET",
+   "path": "/tables",
+   "status": 403,
+   "rows_or_keys": null,
+   "bytes": 25,
+   "sensitive_fields": false
+  },
+  {
+   "role": "DRIVER",
+   "method": "GET",
+   "path": "/admin/drivers",
+   "status": 200,
+   "rows_or_keys": 1,
+   "bytes": 2047,
+   "sensitive_fields": false
+  },
+  {
+   "role": "DRIVER",
+   "method": "GET",
+   "path": "/admin/themes",
+   "status": 403,
+   "rows_or_keys": null,
+   "bytes": 25,
+   "sensitive_fields": false
+  },
+  {
+   "role": "DRIVER",
+   "method": "GET",
+   "path": "/payments/subscription",
+   "status": 404,
+   "rows_or_keys": null,
+   "bytes": 19,
+   "sensitive_fields": false
+  },
+  {
+   "role": "DRIVER",
+   "method": "GET",
+   "path": "/notifications",
+   "status": 200,
+   "rows_or_keys": 5,
+   "bytes": 65,
+   "sensitive_fields": false
+  },
+  {
+   "role": "DRIVER",
+   "method": "GET",
+   "path": "/accounting/csv/journal-entries/export",
+   "status": 403,
+   "rows_or_keys": null,
+   "bytes": 25,
+   "sensitive_fields": false
+  },
+  {
+   "role": "DRIVER",
+   "method": "POST",
+   "path": "/accounting/accounts",
+   "status": 403,
+   "outcome": "DENIED",
+   "body": "Insufficient permissions\n"
+  },
+  {
+   "role": "DRIVER",
+   "method": "POST",
+   "path": "/accounting/journal-entries",
+   "status": 403,
+   "outcome": "DENIED",
+   "body": "Insufficient permissions\n"
+  },
+  {
+   "role": "DRIVER",
+   "method": "POST",
+   "path": "/hr/employees",
+   "status": 403,
+   "outcome": "DENIED",
+   "body": "Insufficient permissions\n"
+  },
+  {
+   "role": "DRIVER",
+   "method": "POST",
+   "path": "/suppliers",
+   "status": 403,
+   "outcome": "DENIED",
+   "body": "Insufficient permissions\n"
+  },
+  {
+   "role": "DRIVER",
+   "method": "POST",
+   "path": "/accounting/customers",
+   "status": 403,
+   "outcome": "DENIED",
+   "body": "Insufficient permissions\n"
+  },
+  {
+   "role": "DRIVER",
+   "method": "POST",
+   "path": "/admin/drivers",
+   "status": 403,
+   "outcome": "DENIED",
+   "body": "Insufficient permissions\n"
+  },
+  {
+   "role": "DRIVER",
+   "method": "POST",
+   "path": "/rbac/roles",
+   "status": 403,
+   "outcome": "DENIED",
+   "body": "Insufficient permissions\n"
+  },
+  {
+   "role": "DRIVER",
+   "method": "POST",
+   "path": "/accounting/bank-reconciliation/sessions",
+   "status": 403,
+   "outcome": "DENIED",
+   "body": "Insufficient permissions\n"
+  }
+ ]
+}

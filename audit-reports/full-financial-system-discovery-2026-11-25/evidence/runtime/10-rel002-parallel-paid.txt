@@ -1,0 +1,21 @@
+# REL-002: 20 parallel PUT payment-status=paid on order 3
+ order_id |  status   | attempts 
+----------+-----------+----------
+        3 | completed |        1
+(1 row)
+
+ journals_for_order3 
+---------------------
+                   2
+(1 row)
+
+    entry_type    | count 
+------------------+-------
+ auto_cogs        |     2
+ auto_payroll     |     1
+ auto_sales       |     2
+ manual           |     2
+ payment_made     |     1
+ supplier_invoice |     1
+(6 rows)
+

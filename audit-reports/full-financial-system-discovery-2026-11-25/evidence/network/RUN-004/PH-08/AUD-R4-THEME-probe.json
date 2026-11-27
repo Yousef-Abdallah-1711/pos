@@ -1,0 +1,38 @@
+{
+ "info": {
+  "text": "POS Dashboard\nDashboard\nCashier POS\nKitchen Display\nOrders\nProducts\nHuman Resources\nAccounting\nSuppliers\nFinancial Reports\nReports\nTheme Builder\nSettings\n1\nEnglish\nA\n\nAudit Owner C\n\nOwner\n\nThemes\nQR Builder\nTheme Builder\n\nCreate and manage website themes\n\nYour Website\n\naudit-c-diag.localhost:13113\n\nPreview Website\nYour Themes (2)\nFrom Template\nImport\n+ Create Theme\nMigrate Configs\nKeep 2 Themes\nAll Themes\nActive Only\nInactive\nRecent First\nName (A-Z)\nActive First\nDefault Theme\n\nUpdated 11/26/2026\n\nActive\n\nDefault theme for Audit C Diagnostic\n\nEdit\nCopy\nExport\nRUN3 <img src=x onerror=alert(1)> (Copy)\n\nUpdated 11/26/2026\n\nEdit\nCopy\nExport\nActivate Theme\nDelete",
+  "buttons": [
+   "From Template",
+   "Import",
+   "+ Create Theme",
+   "Migrate Configs",
+   "Keep 2 Themes",
+   "Edit",
+   "Copy",
+   "Export",
+   "Edit",
+   "Copy",
+   "Export",
+   "Activate Theme",
+   "Delete"
+  ],
+  "tabs": [],
+  "inputs": [
+   "text:Search themes..."
+  ]
+ },
+ "calls": [
+  {
+   "m": "GET",
+   "u": "/admin/themes?pageSize=100&page=1",
+   "s": 200,
+   "b": "{\"themes\":[{\"id\":11,\"tenant_id\":4,\"restaurant_id\":4,\"name\":\"RUN3 \\u003cimg src=x onerror=alert(1)\\u003e (Copy)\",\"slug\":\"run3-theme-copy-1795726492\",\"config\":{\"rtl\":{\"enabled\":false},\"colors\":{\"text\":\"url(javascript:alert(1))\",\"primary\":\"not-a-color\"}},\"is_active\":false,\"is_published\":false,\"version\""
+  },
+  {
+   "m": "GET",
+   "u": "/admin/themes?pageSize=100&page=1",
+   "s": 200,
+   "b": "{\"themes\":[{\"id\":11,\"tenant_id\":4,\"restaurant_id\":4,\"name\":\"RUN3 \\u003cimg src=x onerror=alert(1)\\u003e (Copy)\",\"slug\":\"run3-theme-copy-1795726492\",\"config\":{\"rtl\":{\"enabled\":false},\"colors\":{\"text\":\"url(javascript:alert(1))\",\"primary\":\"not-a-color\"}},\"is_active\":false,\"is_published\":false,\"version\""
+  }
+ ]
+}

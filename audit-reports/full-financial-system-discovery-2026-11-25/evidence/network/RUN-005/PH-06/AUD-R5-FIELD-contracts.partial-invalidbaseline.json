@@ -1,0 +1,907 @@
+{
+ "run": "RUN-005",
+ "form": "contracts",
+ "tenant": 4,
+ "results": [
+  {
+   "form": "contracts",
+   "field_index": 0,
+   "field": "Employee ID",
+   "placeholder": "Employee ID",
+   "input_type": "number",
+   "maxlength_attr": null,
+   "kind": "number",
+   "case": "empty",
+   "value_sent": "",
+   "submit_found": true,
+   "submit_disabled": false,
+   "html5_invalid": 1,
+   "messages": [],
+   "request": [],
+   "response": "",
+   "request_body": "",
+   "rows_created": 0,
+   "outcome": "REJECTED-BY-CLIENT"
+  },
+  {
+   "form": "contracts",
+   "field_index": 0,
+   "field": "Employee ID",
+   "placeholder": "Employee ID",
+   "input_type": "number",
+   "maxlength_attr": null,
+   "kind": "number",
+   "case": "negative",
+   "value_sent": "-5",
+   "submit_found": true,
+   "submit_disabled": false,
+   "html5_invalid": 0,
+   "messages": [
+    "Runtime AxiosError",
+    "Request failed with status code 400"
+   ],
+   "request": [
+    "POST /hr/contracts 400"
+   ],
+   "response": "{\"error\":\"employee_id, contract_type, contract_number, start_date are required\"}",
+   "request_body": "{\"employee_id\":-5,\"contract_type\":\"R5 84883486\",\"contract_number\":\"R5 84883486\",\"start_date\":\"2026-11-20\",\"end_date\":\"2026-11-20\",\"salary_amount\":12,\"currency\":\"R5 84883486\",\"status\":\"expired\",\"notes\"",
+   "rows_created": 0,
+   "outcome": "REJECTED-BY-SERVER(400)"
+  },
+  {
+   "form": "contracts",
+   "field_index": 0,
+   "field": "Employee ID",
+   "placeholder": "Employee ID",
+   "input_type": "number",
+   "maxlength_attr": null,
+   "kind": "number",
+   "case": "zero",
+   "value_sent": "0",
+   "submit_found": true,
+   "submit_disabled": false,
+   "html5_invalid": 1,
+   "messages": [],
+   "request": [],
+   "response": "",
+   "request_body": "",
+   "rows_created": 0,
+   "outcome": "REJECTED-BY-CLIENT"
+  },
+  {
+   "form": "contracts",
+   "field_index": 0,
+   "field": "Employee ID",
+   "placeholder": "Employee ID",
+   "input_type": "number",
+   "maxlength_attr": null,
+   "kind": "number",
+   "case": "decimal6",
+   "value_sent": "12.345678",
+   "submit_found": true,
+   "submit_disabled": false,
+   "html5_invalid": 0,
+   "messages": [
+    "Runtime AxiosError",
+    "Request failed with status code 400"
+   ],
+   "request": [
+    "POST /hr/contracts 400"
+   ],
+   "response": "{\"error\":\"invalid request body: json: cannot unmarshal number 12.345678 into Go struct field .employee_id of type int\"}",
+   "request_body": "{\"employee_id\":12.345678,\"contract_type\":\"R5 84898600\",\"contract_number\":\"R5 84898600\",\"start_date\":\"2026-11-20\",\"end_date\":\"2026-11-20\",\"salary_amount\":12,\"currency\":\"R5 84898600\",\"status\":\"expired\",",
+   "rows_created": 0,
+   "outcome": "REJECTED-BY-SERVER(400)"
+  },
+  {
+   "form": "contracts",
+   "field_index": 0,
+   "field": "Employee ID",
+   "placeholder": "Employee ID",
+   "input_type": "number",
+   "maxlength_attr": null,
+   "kind": "number",
+   "case": "huge",
+   "value_sent": "99999999999",
+   "submit_found": true,
+   "submit_disabled": false,
+   "html5_invalid": 0,
+   "messages": [
+    "Runtime AxiosError",
+    "Request failed with status code 400"
+   ],
+   "request": [
+    "POST /hr/contracts 400"
+   ],
+   "response": "{\"error\":\"pq: value \\\"99999999999\\\" is out of range for type integer\"}",
+   "request_body": "{\"employee_id\":99999999999,\"contract_type\":\"R5 84905992\",\"contract_number\":\"R5 84905992\",\"start_date\":\"2026-11-20\",\"end_date\":\"2026-11-20\",\"salary_amount\":12,\"currency\":\"R5 84905992\",\"status\":\"expired",
+   "rows_created": 0,
+   "outcome": "REJECTED-BY-SERVER(400)"
+  },
+  {
+   "form": "contracts",
+   "field_index": 0,
+   "field": "Employee ID",
+   "placeholder": "Employee ID",
+   "input_type": "number",
+   "maxlength_attr": null,
+   "kind": "number",
+   "case": "tiny",
+   "value_sent": "0.001",
+   "submit_found": true,
+   "submit_disabled": false,
+   "html5_invalid": 0,
+   "messages": [
+    "Runtime AxiosError",
+    "Request failed with status code 400"
+   ],
+   "request": [
+    "POST /hr/contracts 400"
+   ],
+   "response": "{\"error\":\"invalid request body: json: cannot unmarshal number 0.001 into Go struct field .employee_id of type int\"}",
+   "request_body": "{\"employee_id\":0.001,\"contract_type\":\"R5 84913319\",\"contract_number\":\"R5 84913319\",\"start_date\":\"2026-11-20\",\"end_date\":\"2026-11-20\",\"salary_amount\":12,\"currency\":\"R5 84913319\",\"status\":\"expired\",\"not",
+   "rows_created": 0,
+   "outcome": "REJECTED-BY-SERVER(400)"
+  },
+  {
+   "form": "contracts",
+   "field_index": 1,
+   "field": "Contract type",
+   "placeholder": "Contract type",
+   "input_type": "text",
+   "maxlength_attr": null,
+   "kind": "text",
+   "case": "empty",
+   "value_sent": "",
+   "submit_found": true,
+   "submit_disabled": false,
+   "html5_invalid": 1,
+   "messages": [],
+   "request": [],
+   "response": "",
+   "request_body": "",
+   "rows_created": 0,
+   "outcome": "REJECTED-BY-CLIENT"
+  },
+  {
+   "form": "contracts",
+   "field_index": 1,
+   "field": "Contract type",
+   "placeholder": "Contract type",
+   "input_type": "text",
+   "maxlength_attr": null,
+   "kind": "text",
+   "case": "whitespace",
+   "value_sent": "   ",
+   "submit_found": true,
+   "submit_disabled": false,
+   "html5_invalid": 0,
+   "messages": [
+    "Runtime AxiosError",
+    "Request failed with status code 400"
+   ],
+   "request": [
+    "POST /hr/contracts 400"
+   ],
+   "response": "{\"error\":\"pq: value too long for type character varying(10)\"}",
+   "request_body": "{\"employee_id\":12,\"contract_type\":\"   \",\"contract_number\":\"R5 84929377\",\"start_date\":\"2026-11-20\",\"end_date\":\"2026-11-20\",\"salary_amount\":12,\"currency\":\"R5 84929377\",\"status\":\"expired\",\"notes\":\"R5 849",
+   "rows_created": 0,
+   "outcome": "REJECTED-BY-SERVER(400)"
+  },
+  {
+   "form": "contracts",
+   "field_index": 1,
+   "field": "Contract type",
+   "placeholder": "Contract type",
+   "input_type": "text",
+   "maxlength_attr": null,
+   "kind": "text",
+   "case": "long300",
+   "value_sent": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX...(300)",
+   "submit_found": true,
+   "submit_disabled": false,
+   "html5_invalid": 0,
+   "messages": [
+    "Runtime AxiosError",
+    "Request failed with status code 400"
+   ],
+   "request": [
+    "POST /hr/contracts 400"
+   ],
+   "response": "{\"error\":\"pq: value too long for type character varying(50)\"}",
+   "request_body": "{\"employee_id\":12,\"contract_type\":\"XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+   "rows_created": 0,
+   "outcome": "REJECTED-BY-SERVER(400)"
+  },
+  {
+   "form": "contracts",
+   "field_index": 1,
+   "field": "Contract type",
+   "placeholder": "Contract type",
+   "input_type": "text",
+   "maxlength_attr": null,
+   "kind": "text",
+   "case": "arabic",
+   "value_sent": "اختبار عربي ٧٧",
+   "submit_found": true,
+   "submit_disabled": false,
+   "html5_invalid": 0,
+   "messages": [
+    "Runtime AxiosError",
+    "Request failed with status code 400"
+   ],
+   "request": [
+    "POST /hr/contracts 400"
+   ],
+   "response": "{\"error\":\"pq: value too long for type character varying(10)\"}",
+   "request_body": "{\"employee_id\":12,\"contract_type\":\"اختبار عربي ٧٧\",\"contract_number\":\"R5 84944407\",\"start_date\":\"2026-11-20\",\"end_date\":\"2026-11-20\",\"salary_amount\":12,\"currency\":\"R5 84944407\",\"status\":\"expired\",\"not",
+   "rows_created": 0,
+   "outcome": "REJECTED-BY-SERVER(400)"
+  },
+  {
+   "form": "contracts",
+   "field_index": 1,
+   "field": "Contract type",
+   "placeholder": "Contract type",
+   "input_type": "text",
+   "maxlength_attr": null,
+   "kind": "text",
+   "case": "special",
+   "value_sent": "<b>x</b>'; -- &amp;",
+   "submit_found": true,
+   "submit_disabled": false,
+   "html5_invalid": 0,
+   "messages": [
+    "Runtime AxiosError",
+    "Request failed with status code 400"
+   ],
+   "request": [
+    "POST /hr/contracts 400"
+   ],
+   "response": "{\"error\":\"pq: value too long for type character varying(10)\"}",
+   "request_body": "{\"employee_id\":12,\"contract_type\":\"<b>x</b>'; -- &amp;\",\"contract_number\":\"R5 84951853\",\"start_date\":\"2026-11-20\",\"end_date\":\"2026-11-20\",\"salary_amount\":12,\"currency\":\"R5 84951853\",\"status\":\"expired\"",
+   "rows_created": 0,
+   "outcome": "REJECTED-BY-SERVER(400)"
+  },
+  {
+   "form": "contracts",
+   "field_index": 2,
+   "field": "Contract number",
+   "placeholder": "Contract number",
+   "input_type": "text",
+   "maxlength_attr": null,
+   "kind": "text",
+   "case": "empty",
+   "value_sent": "",
+   "submit_found": true,
+   "submit_disabled": false,
+   "html5_invalid": 1,
+   "messages": [],
+   "request": [],
+   "response": "",
+   "request_body": "",
+   "rows_created": 0,
+   "outcome": "REJECTED-BY-CLIENT"
+  },
+  {
+   "form": "contracts",
+   "field_index": 2,
+   "field": "Contract number",
+   "placeholder": "Contract number",
+   "input_type": "text",
+   "maxlength_attr": null,
+   "kind": "text",
+   "case": "whitespace",
+   "value_sent": "   ",
+   "submit_found": true,
+   "submit_disabled": false,
+   "html5_invalid": 0,
+   "messages": [
+    "Runtime AxiosError",
+    "Request failed with status code 400"
+   ],
+   "request": [
+    "POST /hr/contracts 400"
+   ],
+   "response": "{\"error\":\"pq: value too long for type character varying(10)\"}",
+   "request_body": "{\"employee_id\":12,\"contract_type\":\"R5 84966651\",\"contract_number\":\"   \",\"start_date\":\"2026-11-20\",\"end_date\":\"2026-11-20\",\"salary_amount\":12,\"currency\":\"R5 84966651\",\"status\":\"expired\",\"notes\":\"R5 849",
+   "rows_created": 0,
+   "outcome": "REJECTED-BY-SERVER(400)"
+  },
+  {
+   "form": "contracts",
+   "field_index": 2,
+   "field": "Contract number",
+   "placeholder": "Contract number",
+   "input_type": "text",
+   "maxlength_attr": null,
+   "kind": "text",
+   "case": "long300",
+   "value_sent": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX...(300)",
+   "submit_found": true,
+   "submit_disabled": false,
+   "html5_invalid": 0,
+   "messages": [
+    "Runtime AxiosError",
+    "Request failed with status code 400"
+   ],
+   "request": [
+    "POST /hr/contracts 400"
+   ],
+   "response": "{\"error\":\"pq: value too long for type character varying(120)\"}",
+   "request_body": "{\"employee_id\":12,\"contract_type\":\"R5 84974128\",\"contract_number\":\"XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+   "rows_created": 0,
+   "outcome": "REJECTED-BY-SERVER(400)"
+  },
+  {
+   "form": "contracts",
+   "field_index": 2,
+   "field": "Contract number",
+   "placeholder": "Contract number",
+   "input_type": "text",
+   "maxlength_attr": null,
+   "kind": "text",
+   "case": "arabic",
+   "value_sent": "اختبار عربي ٧٧",
+   "submit_found": true,
+   "submit_disabled": false,
+   "html5_invalid": 0,
+   "messages": [
+    "Runtime AxiosError",
+    "Request failed with status code 400"
+   ],
+   "request": [
+    "POST /hr/contracts 400"
+   ],
+   "response": "{\"error\":\"pq: value too long for type character varying(10)\"}",
+   "request_body": "{\"employee_id\":12,\"contract_type\":\"R5 84981446\",\"contract_number\":\"اختبار عربي ٧٧\",\"start_date\":\"2026-11-20\",\"end_date\":\"2026-11-20\",\"salary_amount\":12,\"currency\":\"R5 84981446\",\"status\":\"expired\",\"not",
+   "rows_created": 0,
+   "outcome": "REJECTED-BY-SERVER(400)"
+  },
+  {
+   "form": "contracts",
+   "field_index": 2,
+   "field": "Contract number",
+   "placeholder": "Contract number",
+   "input_type": "text",
+   "maxlength_attr": null,
+   "kind": "text",
+   "case": "special",
+   "value_sent": "<b>x</b>'; -- &amp;",
+   "submit_found": true,
+   "submit_disabled": false,
+   "html5_invalid": 0,
+   "messages": [
+    "Runtime AxiosError",
+    "Request failed with status code 400"
+   ],
+   "request": [
+    "POST /hr/contracts 400"
+   ],
+   "response": "{\"error\":\"pq: value too long for type character varying(10)\"}",
+   "request_body": "{\"employee_id\":12,\"contract_type\":\"R5 84989210\",\"contract_number\":\"<b>x</b>'; -- &amp;\",\"start_date\":\"2026-11-20\",\"end_date\":\"2026-11-20\",\"salary_amount\":12,\"currency\":\"R5 84989210\",\"status\":\"expired\"",
+   "rows_created": 0,
+   "outcome": "REJECTED-BY-SERVER(400)"
+  },
+  {
+   "form": "contracts",
+   "field_index": 3,
+   "field": "date",
+   "placeholder": "",
+   "input_type": "date",
+   "maxlength_attr": null,
+   "kind": "date",
+   "case": "empty",
+   "value_sent": "",
+   "submit_found": true,
+   "submit_disabled": false,
+   "html5_invalid": 1,
+   "messages": [],
+   "request": [],
+   "response": "",
+   "request_body": "",
+   "rows_created": 0,
+   "outcome": "REJECTED-BY-CLIENT"
+  },
+  {
+   "form": "contracts",
+   "field_index": 3,
+   "field": "date",
+   "placeholder": "",
+   "input_type": "date",
+   "maxlength_attr": null,
+   "kind": "date",
+   "case": "past1900",
+   "value_sent": "1900-01-01",
+   "submit_found": true,
+   "submit_disabled": false,
+   "html5_invalid": 0,
+   "messages": [
+    "Runtime AxiosError",
+    "Request failed with status code 400"
+   ],
+   "request": [
+    "POST /hr/contracts 400"
+   ],
+   "response": "{\"error\":\"pq: value too long for type character varying(10)\"}",
+   "request_body": "{\"employee_id\":12,\"contract_type\":\"R5 85004447\",\"contract_number\":\"R5 85004447\",\"start_date\":\"1900-01-01\",\"end_date\":\"2026-11-20\",\"salary_amount\":12,\"currency\":\"R5 85004447\",\"status\":\"expired\",\"notes\"",
+   "rows_created": 0,
+   "outcome": "REJECTED-BY-SERVER(400)"
+  },
+  {
+   "form": "contracts",
+   "field_index": 3,
+   "field": "date",
+   "placeholder": "",
+   "input_type": "date",
+   "maxlength_attr": null,
+   "kind": "date",
+   "case": "future2999",
+   "value_sent": "2999-12-31",
+   "submit_found": true,
+   "submit_disabled": false,
+   "html5_invalid": 0,
+   "messages": [
+    "Runtime AxiosError",
+    "Request failed with status code 400"
+   ],
+   "request": [
+    "POST /hr/contracts 400"
+   ],
+   "response": "{\"error\":\"pq: value too long for type character varying(10)\"}",
+   "request_body": "{\"employee_id\":12,\"contract_type\":\"R5 85011891\",\"contract_number\":\"R5 85011891\",\"start_date\":\"2999-12-31\",\"end_date\":\"2026-11-20\",\"salary_amount\":12,\"currency\":\"R5 85011891\",\"status\":\"expired\",\"notes\"",
+   "rows_created": 0,
+   "outcome": "REJECTED-BY-SERVER(400)"
+  },
+  {
+   "form": "contracts",
+   "field_index": 4,
+   "field": "date",
+   "placeholder": "",
+   "input_type": "date",
+   "maxlength_attr": null,
+   "kind": "date",
+   "case": "empty",
+   "value_sent": "",
+   "submit_found": true,
+   "submit_disabled": false,
+   "html5_invalid": 0,
+   "messages": [
+    "Runtime AxiosError",
+    "Request failed with status code 400"
+   ],
+   "request": [
+    "POST /hr/contracts 400"
+   ],
+   "response": "{\"error\":\"pq: value too long for type character varying(10)\"}",
+   "request_body": "{\"employee_id\":12,\"contract_type\":\"R5 85019592\",\"contract_number\":\"R5 85019592\",\"start_date\":\"2026-11-20\",\"end_date\":\"\",\"salary_amount\":12,\"currency\":\"R5 85019592\",\"status\":\"expired\",\"notes\":\"R5 85019",
+   "rows_created": 0,
+   "outcome": "REJECTED-BY-SERVER(400)"
+  },
+  {
+   "form": "contracts",
+   "field_index": 4,
+   "field": "date",
+   "placeholder": "",
+   "input_type": "date",
+   "maxlength_attr": null,
+   "kind": "date",
+   "case": "past1900",
+   "value_sent": "1900-01-01",
+   "submit_found": true,
+   "submit_disabled": false,
+   "html5_invalid": 0,
+   "messages": [
+    "Runtime AxiosError",
+    "Request failed with status code 400"
+   ],
+   "request": [
+    "POST /hr/contracts 400"
+   ],
+   "response": "{\"error\":\"pq: value too long for type character varying(10)\"}",
+   "request_body": "{\"employee_id\":12,\"contract_type\":\"R5 85027063\",\"contract_number\":\"R5 85027063\",\"start_date\":\"2026-11-20\",\"end_date\":\"1900-01-01\",\"salary_amount\":12,\"currency\":\"R5 85027063\",\"status\":\"expired\",\"notes\"",
+   "rows_created": 0,
+   "outcome": "REJECTED-BY-SERVER(400)"
+  },
+  {
+   "form": "contracts",
+   "field_index": 4,
+   "field": "date",
+   "placeholder": "",
+   "input_type": "date",
+   "maxlength_attr": null,
+   "kind": "date",
+   "case": "future2999",
+   "value_sent": "2999-12-31",
+   "submit_found": true,
+   "submit_disabled": false,
+   "html5_invalid": 0,
+   "messages": [
+    "Runtime AxiosError",
+    "Request failed with status code 400"
+   ],
+   "request": [
+    "POST /hr/contracts 400"
+   ],
+   "response": "{\"error\":\"pq: value too long for type character varying(10)\"}",
+   "request_body": "{\"employee_id\":12,\"contract_type\":\"R5 85034528\",\"contract_number\":\"R5 85034528\",\"start_date\":\"2026-11-20\",\"end_date\":\"2999-12-31\",\"salary_amount\":12,\"currency\":\"R5 85034528\",\"status\":\"expired\",\"notes\"",
+   "rows_created": 0,
+   "outcome": "REJECTED-BY-SERVER(400)"
+  },
+  {
+   "form": "contracts",
+   "field_index": 5,
+   "field": "Salary amount",
+   "placeholder": "Salary amount",
+   "input_type": "number",
+   "maxlength_attr": null,
+   "kind": "number",
+   "case": "empty",
+   "value_sent": "",
+   "submit_found": true,
+   "submit_disabled": false,
+   "html5_invalid": 0,
+   "messages": [
+    "Runtime AxiosError",
+    "Request failed with status code 400"
+   ],
+   "request": [
+    "POST /hr/contracts 400"
+   ],
+   "response": "{\"error\":\"pq: value too long for type character varying(10)\"}",
+   "request_body": "{\"employee_id\":12,\"contract_type\":\"R5 85042534\",\"contract_number\":\"R5 85042534\",\"start_date\":\"2026-11-20\",\"end_date\":\"2026-11-20\",\"salary_amount\":0,\"currency\":\"R5 85042534\",\"status\":\"expired\",\"notes\":",
+   "rows_created": 0,
+   "outcome": "REJECTED-BY-SERVER(400)"
+  },
+  {
+   "form": "contracts",
+   "field_index": 5,
+   "field": "Salary amount",
+   "placeholder": "Salary amount",
+   "input_type": "number",
+   "maxlength_attr": null,
+   "kind": "number",
+   "case": "negative",
+   "value_sent": "-5",
+   "submit_found": true,
+   "submit_disabled": false,
+   "html5_invalid": 0,
+   "messages": [
+    "Runtime AxiosError",
+    "Request failed with status code 400"
+   ],
+   "request": [
+    "POST /hr/contracts 400"
+   ],
+   "response": "{\"error\":\"pq: value too long for type character varying(10)\"}",
+   "request_body": "{\"employee_id\":12,\"contract_type\":\"R5 85049968\",\"contract_number\":\"R5 85049968\",\"start_date\":\"2026-11-20\",\"end_date\":\"2026-11-20\",\"salary_amount\":-5,\"currency\":\"R5 85049968\",\"status\":\"expired\",\"notes\"",
+   "rows_created": 0,
+   "outcome": "REJECTED-BY-SERVER(400)"
+  },
+  {
+   "form": "contracts",
+   "field_index": 5,
+   "field": "Salary amount",
+   "placeholder": "Salary amount",
+   "input_type": "number",
+   "maxlength_attr": null,
+   "kind": "number",
+   "case": "zero",
+   "value_sent": "0",
+   "submit_found": true,
+   "submit_disabled": false,
+   "html5_invalid": 0,
+   "messages": [
+    "Runtime AxiosError",
+    "Request failed with status code 400"
+   ],
+   "request": [
+    "POST /hr/contracts 400"
+   ],
+   "response": "{\"error\":\"pq: value too long for type character varying(10)\"}",
+   "request_body": "{\"employee_id\":12,\"contract_type\":\"R5 85057751\",\"contract_number\":\"R5 85057751\",\"start_date\":\"2026-11-20\",\"end_date\":\"2026-11-20\",\"salary_amount\":0,\"currency\":\"R5 85057751\",\"status\":\"expired\",\"notes\":",
+   "rows_created": 0,
+   "outcome": "REJECTED-BY-SERVER(400)"
+  },
+  {
+   "form": "contracts",
+   "field_index": 5,
+   "field": "Salary amount",
+   "placeholder": "Salary amount",
+   "input_type": "number",
+   "maxlength_attr": null,
+   "kind": "number",
+   "case": "decimal6",
+   "value_sent": "12.345678",
+   "submit_found": true,
+   "submit_disabled": false,
+   "html5_invalid": 0,
+   "messages": [
+    "Runtime AxiosError",
+    "Request failed with status code 400"
+   ],
+   "request": [
+    "POST /hr/contracts 400"
+   ],
+   "response": "{\"error\":\"pq: value too long for type character varying(10)\"}",
+   "request_body": "{\"employee_id\":12,\"contract_type\":\"R5 85065328\",\"contract_number\":\"R5 85065328\",\"start_date\":\"2026-11-20\",\"end_date\":\"2026-11-20\",\"salary_amount\":12.345678,\"currency\":\"R5 85065328\",\"status\":\"expired\",",
+   "rows_created": 0,
+   "outcome": "REJECTED-BY-SERVER(400)"
+  },
+  {
+   "form": "contracts",
+   "field_index": 5,
+   "field": "Salary amount",
+   "placeholder": "Salary amount",
+   "input_type": "number",
+   "maxlength_attr": null,
+   "kind": "number",
+   "case": "huge",
+   "value_sent": "99999999999",
+   "submit_found": true,
+   "submit_disabled": false,
+   "html5_invalid": 0,
+   "messages": [
+    "Runtime AxiosError",
+    "Request failed with status code 400"
+   ],
+   "request": [
+    "POST /hr/contracts 400"
+   ],
+   "response": "{\"error\":\"pq: numeric field overflow\"}",
+   "request_body": "{\"employee_id\":12,\"contract_type\":\"R5 85072788\",\"contract_number\":\"R5 85072788\",\"start_date\":\"2026-11-20\",\"end_date\":\"2026-11-20\",\"salary_amount\":99999999999,\"currency\":\"R5 85072788\",\"status\":\"expired",
+   "rows_created": 0,
+   "outcome": "REJECTED-BY-SERVER(400)"
+  },
+  {
+   "form": "contracts",
+   "field_index": 5,
+   "field": "Salary amount",
+   "placeholder": "Salary amount",
+   "input_type": "number",
+   "maxlength_attr": null,
+   "kind": "number",
+   "case": "tiny",
+   "value_sent": "0.001",
+   "submit_found": true,
+   "submit_disabled": false,
+   "html5_invalid": 0,
+   "messages": [
+    "Runtime AxiosError",
+    "Request failed with status code 400"
+   ],
+   "request": [
+    "POST /hr/contracts 400"
+   ],
+   "response": "{\"error\":\"pq: value too long for type character varying(10)\"}",
+   "request_body": "{\"employee_id\":12,\"contract_type\":\"R5 85080394\",\"contract_number\":\"R5 85080394\",\"start_date\":\"2026-11-20\",\"end_date\":\"2026-11-20\",\"salary_amount\":0.001,\"currency\":\"R5 85080394\",\"status\":\"expired\",\"not",
+   "rows_created": 0,
+   "outcome": "REJECTED-BY-SERVER(400)"
+  },
+  {
+   "form": "contracts",
+   "field_index": 6,
+   "field": "Currency",
+   "placeholder": "Currency",
+   "input_type": "text",
+   "maxlength_attr": null,
+   "kind": "text",
+   "case": "empty",
+   "value_sent": "",
+   "submit_found": true,
+   "submit_disabled": false,
+   "html5_invalid": 0,
+   "messages": [
+    "Runtime AxiosError",
+    "Request failed with status code 400"
+   ],
+   "request": [
+    "POST /hr/contracts 400"
+   ],
+   "response": "{\"error\":\"employee is outside tenant and restaurant scope\"}",
+   "request_body": "{\"employee_id\":12,\"contract_type\":\"R5 85087483\",\"contract_number\":\"R5 85087483\",\"start_date\":\"2026-11-20\",\"end_date\":\"2026-11-20\",\"salary_amount\":12,\"currency\":\"\",\"status\":\"expired\",\"notes\":\"R5 850874",
+   "rows_created": 0,
+   "outcome": "REJECTED-BY-SERVER(400)"
+  },
+  {
+   "form": "contracts",
+   "field_index": 6,
+   "field": "Currency",
+   "placeholder": "Currency",
+   "input_type": "text",
+   "maxlength_attr": null,
+   "kind": "text",
+   "case": "whitespace",
+   "value_sent": "   ",
+   "submit_found": true,
+   "submit_disabled": false,
+   "html5_invalid": 0,
+   "messages": [
+    "Runtime AxiosError",
+    "Request failed with status code 400"
+   ],
+   "request": [
+    "POST /hr/contracts 400"
+   ],
+   "response": "{\"error\":\"employee is outside tenant and restaurant scope\"}",
+   "request_body": "{\"employee_id\":12,\"contract_type\":\"R5 85094811\",\"contract_number\":\"R5 85094811\",\"start_date\":\"2026-11-20\",\"end_date\":\"2026-11-20\",\"salary_amount\":12,\"currency\":\"   \",\"status\":\"expired\",\"notes\":\"R5 850",
+   "rows_created": 0,
+   "outcome": "REJECTED-BY-SERVER(400)"
+  },
+  {
+   "form": "contracts",
+   "field_index": 6,
+   "field": "Currency",
+   "placeholder": "Currency",
+   "input_type": "text",
+   "maxlength_attr": null,
+   "kind": "text",
+   "case": "long300",
+   "value_sent": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX...(300)",
+   "submit_found": true,
+   "submit_disabled": false,
+   "html5_invalid": 0,
+   "messages": [
+    "Runtime AxiosError",
+    "Request failed with status code 400"
+   ],
+   "request": [
+    "POST /hr/contracts 400"
+   ],
+   "response": "{\"error\":\"pq: value too long for type character varying(10)\"}",
+   "request_body": "{\"employee_id\":12,\"contract_type\":\"R5 85102403\",\"contract_number\":\"R5 85102403\",\"start_date\":\"2026-11-20\",\"end_date\":\"2026-11-20\",\"salary_amount\":12,\"currency\":\"XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+   "rows_created": 0,
+   "outcome": "REJECTED-BY-SERVER(400)"
+  },
+  {
+   "form": "contracts",
+   "field_index": 6,
+   "field": "Currency",
+   "placeholder": "Currency",
+   "input_type": "text",
+   "maxlength_attr": null,
+   "kind": "text",
+   "case": "arabic",
+   "value_sent": "اختبار عربي ٧٧",
+   "submit_found": true,
+   "submit_disabled": false,
+   "html5_invalid": 0,
+   "messages": [
+    "Runtime AxiosError",
+    "Request failed with status code 400"
+   ],
+   "request": [
+    "POST /hr/contracts 400"
+   ],
+   "response": "{\"error\":\"pq: value too long for type character varying(10)\"}",
+   "request_body": "{\"employee_id\":12,\"contract_type\":\"R5 85110003\",\"contract_number\":\"R5 85110003\",\"start_date\":\"2026-11-20\",\"end_date\":\"2026-11-20\",\"salary_amount\":12,\"currency\":\"اختبار عربي ٧٧\",\"status\":\"expired\",\"not",
+   "rows_created": 0,
+   "outcome": "REJECTED-BY-SERVER(400)"
+  },
+  {
+   "form": "contracts",
+   "field_index": 6,
+   "field": "Currency",
+   "placeholder": "Currency",
+   "input_type": "text",
+   "maxlength_attr": null,
+   "kind": "text",
+   "case": "special",
+   "value_sent": "<b>x</b>'; -- &amp;",
+   "submit_found": true,
+   "submit_disabled": false,
+   "html5_invalid": 0,
+   "messages": [
+    "Runtime AxiosError",
+    "Request failed with status code 400"
+   ],
+   "request": [
+    "POST /hr/contracts 400"
+   ],
+   "response": "{\"error\":\"pq: value too long for type character varying(10)\"}",
+   "request_body": "{\"employee_id\":12,\"contract_type\":\"R5 85117146\",\"contract_number\":\"R5 85117146\",\"start_date\":\"2026-11-20\",\"end_date\":\"2026-11-20\",\"salary_amount\":12,\"currency\":\"<b>x</b>'; -- &amp;\",\"status\":\"expired\"",
+   "rows_created": 0,
+   "outcome": "REJECTED-BY-SERVER(400)"
+  },
+  {
+   "form": "contracts",
+   "field_index": 7,
+   "field": "Notes",
+   "placeholder": "Notes",
+   "input_type": "textarea",
+   "maxlength_attr": null,
+   "kind": "textarea",
+   "case": "empty",
+   "value_sent": "",
+   "submit_found": true,
+   "submit_disabled": false,
+   "html5_invalid": 0,
+   "messages": [
+    "Runtime AxiosError",
+    "Request failed with status code 400"
+   ],
+   "request": [
+    "POST /hr/contracts 400"
+   ],
+   "response": "{\"error\":\"pq: value too long for type character varying(10)\"}",
+   "request_body": "{\"employee_id\":12,\"contract_type\":\"R5 85124728\",\"contract_number\":\"R5 85124728\",\"start_date\":\"2026-11-20\",\"end_date\":\"2026-11-20\",\"salary_amount\":12,\"currency\":\"R5 85124728\",\"status\":\"expired\",\"notes\"",
+   "rows_created": 0,
+   "outcome": "REJECTED-BY-SERVER(400)"
+  },
+  {
+   "form": "contracts",
+   "field_index": 7,
+   "field": "Notes",
+   "placeholder": "Notes",
+   "input_type": "textarea",
+   "maxlength_attr": null,
+   "kind": "textarea",
+   "case": "long300",
+   "value_sent": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX...(300)",
+   "submit_found": true,
+   "submit_disabled": false,
+   "html5_invalid": 0,
+   "messages": [
+    "Runtime AxiosError",
+    "Request failed with status code 400"
+   ],
+   "request": [
+    "POST /hr/contracts 400"
+   ],
+   "response": "{\"error\":\"pq: value too long for type character varying(10)\"}",
+   "request_body": "{\"employee_id\":12,\"contract_type\":\"R5 85132027\",\"contract_number\":\"R5 85132027\",\"start_date\":\"2026-11-20\",\"end_date\":\"2026-11-20\",\"salary_amount\":12,\"currency\":\"R5 85132027\",\"status\":\"expired\",\"notes\"",
+   "rows_created": 0,
+   "outcome": "REJECTED-BY-SERVER(400)"
+  },
+  {
+   "form": "contracts",
+   "field_index": 7,
+   "field": "Notes",
+   "placeholder": "Notes",
+   "input_type": "textarea",
+   "maxlength_attr": null,
+   "kind": "textarea",
+   "case": "arabic",
+   "value_sent": "اختبار عربي ٧٧",
+   "submit_found": true,
+   "submit_disabled": false,
+   "html5_invalid": 0,
+   "messages": [
+    "Runtime AxiosError",
+    "Request failed with status code 400"
+   ],
+   "request": [
+    "POST /hr/contracts 400"
+   ],
+   "response": "{\"error\":\"pq: value too long for type character varying(10)\"}",
+   "request_body": "{\"employee_id\":12,\"contract_type\":\"R5 85139786\",\"contract_number\":\"R5 85139786\",\"start_date\":\"2026-11-20\",\"end_date\":\"2026-11-20\",\"salary_amount\":12,\"currency\":\"R5 85139786\",\"status\":\"expired\",\"notes\"",
+   "rows_created": 0,
+   "outcome": "REJECTED-BY-SERVER(400)"
+  },
+  {
+   "form": "contracts",
+   "field_index": 7,
+   "field": "Notes",
+   "placeholder": "Notes",
+   "input_type": "textarea",
+   "maxlength_attr": null,
+   "kind": "textarea",
+   "case": "special",
+   "value_sent": "<b>x</b>'; --",
+   "submit_found": true,
+   "submit_disabled": false,
+   "html5_invalid": 0,
+   "messages": [
+    "Runtime AxiosError",
+    "Request failed with status code 400"
+   ],
+   "request": [
+    "POST /hr/contracts 400"
+   ],
+   "response": "{\"error\":\"pq: value too long for type character varying(10)\"}",
+   "request_body": "{\"employee_id\":12,\"contract_type\":\"R5 85147289\",\"contract_number\":\"R5 85147289\",\"start_date\":\"2026-11-20\",\"end_date\":\"2026-11-20\",\"salary_amount\":12,\"currency\":\"R5 85147289\",\"status\":\"expired\",\"notes\"",
+   "rows_created": 0,
+   "outcome": "REJECTED-BY-SERVER(400)"
+  }
+ ]
+}

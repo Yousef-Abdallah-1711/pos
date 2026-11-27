@@ -1,0 +1,75 @@
+{
+ "run": "RUN-005",
+ "tag": "R5DEL53785",
+ "tenant": 4,
+ "note": "disposable entities named R5DEL-*; isolated stack",
+ "log": [
+  {
+   "id": "ROWBTN",
+   "what": "no matching row control",
+   "text": "R5DEL53785",
+   "label": "/delete|remove|disable/i",
+   "row_buttons": []
+  },
+  {
+   "id": "95",
+   "what": "delete clean customer",
+   "clicked": false,
+   "confirmed": false,
+   "calls": [],
+   "after": "true"
+  },
+  {
+   "id": "ROWBTN",
+   "what": "no matching row control",
+   "text": "R5DEL53785 custinv",
+   "label": "/delete|remove|disable/i",
+   "row_buttons": []
+  },
+  {
+   "id": 96,
+   "what": "delete customer with an invoice",
+   "invoice_http": 201,
+   "clicked": false,
+   "confirmed": false,
+   "calls": [],
+   "after": "t",
+   "invoices_remaining": "1"
+  },
+  {
+   "id": "ROWBTN",
+   "what": "no matching row control",
+   "text": "R5DEL53785",
+   "label": "/delete|remove|disable/i",
+   "row_buttons": []
+  },
+  {
+   "id": "83",
+   "what": "delete clean supplier",
+   "clicked": false,
+   "confirmed": false,
+   "calls": [],
+   "after": "t"
+  },
+  {
+   "id": "DIALOG",
+   "what": "browser dialog",
+   "type": "prompt",
+   "message": "Enter a reason for voiding this entry:"
+  },
+  {
+   "id": 44792,
+   "what": "post then void journal",
+   "create_http": 201,
+   "gl_rows_before": "0",
+   "post_clicked": true,
+   "status_after_post": "posted",
+   "gl_rows_after_post": "2",
+   "void_clicked": true,
+   "void_confirmed": false,
+   "status_after_void": "void",
+   "gl_rows_after_void": "4",
+   "net_cash_effect": "0.00"
+  }
+ ]
+}

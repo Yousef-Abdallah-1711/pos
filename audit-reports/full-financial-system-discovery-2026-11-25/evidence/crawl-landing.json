@@ -1,0 +1,272 @@
+[
+ {
+  "route": "/",
+  "url": "/",
+  "status": 200,
+  "finalUrl": "/ar",
+  "marker": "OK",
+  "inputs": 2,
+  "buttons": 15,
+  "tables": 0,
+  "forms": 0,
+  "apiFail": [
+   "GET /auth/session 401"
+  ],
+  "pageErrors": [],
+  "snippet": "تجاوز إلى المحتوى SERVIO المنصة كيف يعمل الأسعار جولة في المنتج خيارات العرض التوضيحي English تسجيل الدخول ابدأ تجربتك المجانية لمدة 14 يومًا تشغيل المطعم، ضمن "
+ },
+ {
+  "route": "/[locale]",
+  "url": "/en",
+  "status": 200,
+  "finalUrl": "/en",
+  "marker": "OK",
+  "inputs": 2,
+  "buttons": 15,
+  "tables": 0,
+  "forms": 0,
+  "apiFail": [
+   "GET /auth/session 401"
+  ],
+  "pageErrors": [],
+  "snippet": "Skip to content SERVIO Platform How it works Pricing Product tour Demo options العربية Log in Start your 14-day free trial RESTAURANT OPERATIONS, CONNECTED One "
+ },
+ {
+  "route": "/[locale]/auth/login",
+  "url": "/en/auth/login",
+  "status": 200,
+  "finalUrl": "/en/auth/login",
+  "marker": "OK",
+  "inputs": 2,
+  "buttons": 10,
+  "tables": 0,
+  "forms": 1,
+  "apiFail": [
+   "GET /auth/session 401"
+  ],
+  "pageErrors": [],
+  "snippet": "Skip to content SERVIO Platform How it works Pricing Product tour Demo options العربية Log in Start your 14-day free trial Your restaurant, in one view. All-in-"
+ },
+ {
+  "route": "/[locale]/auth/register",
+  "url": "/en/auth/register",
+  "status": 200,
+  "finalUrl": "/en/auth/register",
+  "marker": "OK",
+  "inputs": 7,
+  "buttons": 11,
+  "tables": 0,
+  "forms": 1,
+  "apiFail": [
+   "GET /auth/session 401"
+  ],
+  "pageErrors": [],
+  "snippet": "Skip to content SERVIO Platform How it works Pricing Product tour Demo options العربية Log in Start your 14-day free trial Set up your restaurant workspace. All"
+ },
+ {
+  "route": "/[locale]/auth/super-admin-login",
+  "url": "/en/auth/super-admin-login",
+  "status": 200,
+  "finalUrl": "/en/auth/super-admin-login",
+  "marker": "OK",
+  "inputs": 0,
+  "buttons": 1,
+  "tables": 0,
+  "forms": 0,
+  "apiFail": [
+   "GET /auth/session 401"
+  ],
+  "pageErrors": [],
+  "snippet": "Access Failed An error occurred during authentication Go to Login"
+ },
+ {
+  "route": "/[locale]/contact",
+  "url": "/en/contact",
+  "status": 200,
+  "finalUrl": "/en/contact",
+  "marker": "OK",
+  "inputs": 0,
+  "buttons": 8,
+  "tables": 0,
+  "forms": 0,
+  "apiFail": [
+   "GET /auth/session 401"
+  ],
+  "pageErrors": [],
+  "snippet": "Skip to content SERVIO Platform How it works Pricing Product tour Demo options العربية Log in Start your 14-day free trial Explore SERVIO with a product walkthr"
+ },
+ {
+  "route": "/[locale]/demo",
+  "url": "/en/demo",
+  "status": 200,
+  "finalUrl": "/en/demo",
+  "marker": "OK",
+  "inputs": 0,
+  "buttons": 15,
+  "tables": 0,
+  "forms": 0,
+  "apiFail": [
+   "GET /auth/session 401"
+  ],
+  "pageErrors": [],
+  "snippet": "Skip to content SERVIO Platform How it works Pricing Product tour Demo options العربية Log in Start your 14-day free trial PRODUCT WALKTHROUGH The product, with"
+ },
+ {
+  "route": "/[locale]/features",
+  "url": "/en/features",
+  "status": 200,
+  "finalUrl": "/en/features",
+  "marker": "OK",
+  "inputs": 0,
+  "buttons": 8,
+  "tables": 0,
+  "forms": 0,
+  "apiFail": [
+   "GET /auth/session 401"
+  ],
+  "pageErrors": [],
+  "snippet": "Skip to content SERVIO Platform How it works Pricing Product tour Demo options العربية Log in Start your 14-day free trial ONE CONNECTED RESTAURANT WORKFLOW Eve"
+ },
+ {
+  "route": "/[locale]/features/[slug]",
+  "url": "/en/features/menu-items",
+  "status": 200,
+  "finalUrl": "/en/features/menu-items",
+  "marker": "404",
+  "inputs": 0,
+  "buttons": 0,
+  "tables": 0,
+  "forms": 0,
+  "apiFail": [],
+  "pageErrors": [],
+  "snippet": "404 This page could not be found."
+ },
+ {
+  "route": "/[locale]/how-it-works",
+  "url": "/en/how-it-works",
+  "status": 200,
+  "finalUrl": "/en/how-it-works",
+  "marker": "OK",
+  "inputs": 0,
+  "buttons": 8,
+  "tables": 0,
+  "forms": 0,
+  "apiFail": [
+   "GET /auth/session 401"
+  ],
+  "pageErrors": [],
+  "snippet": "Skip to content SERVIO Platform How it works Pricing Product tour Demo options العربية Log in Start your 14-day free trial HOW IT WORKS A shared thread through "
+ },
+ {
+  "route": "/[locale]/pricing",
+  "url": "/en/pricing",
+  "status": 200,
+  "finalUrl": "/en/pricing",
+  "marker": "OK",
+  "inputs": 2,
+  "buttons": 8,
+  "tables": 0,
+  "forms": 0,
+  "apiFail": [
+   "GET /auth/session 401"
+  ],
+  "pageErrors": [],
+  "snippet": "Skip to content SERVIO Platform How it works Pricing Product tour Demo options العربية Log in Start your 14-day free trial ONE SUBSCRIPTION. TWO BILLING FREQUEN"
+ },
+ {
+  "route": "/[locale]/privacy",
+  "url": "/en/privacy",
+  "status": 200,
+  "finalUrl": "/en/privacy",
+  "marker": "OK",
+  "inputs": 0,
+  "buttons": 8,
+  "tables": 0,
+  "forms": 0,
+  "apiFail": [
+   "GET /auth/session 401"
+  ],
+  "pageErrors": [],
+  "snippet": "Skip to content SERVIO Platform How it works Pricing Product tour Demo options العربية Log in Start your 14-day free trial Privacy information for this website "
+ },
+ {
+  "route": "/auth/login",
+  "url": "/auth/login",
+  "status": 200,
+  "finalUrl": "/ar/auth/login",
+  "marker": "OK",
+  "inputs": 2,
+  "buttons": 10,
+  "tables": 0,
+  "forms": 1,
+  "apiFail": [
+   "GET /auth/session 401"
+  ],
+  "pageErrors": [],
+  "snippet": "تجاوز إلى المحتوى SERVIO المنصة كيف يعمل الأسعار جولة في المنتج خيارات العرض التوضيحي English تسجيل الدخول ابدأ تجربتك المجانية لمدة 14 يومًا إدارة مطعمك في صور"
+ },
+ {
+  "route": "/auth/register",
+  "url": "/auth/register",
+  "status": 200,
+  "finalUrl": "/ar/auth/register",
+  "marker": "OK",
+  "inputs": 7,
+  "buttons": 11,
+  "tables": 0,
+  "forms": 1,
+  "apiFail": [
+   "GET /auth/session 401"
+  ],
+  "pageErrors": [],
+  "snippet": "تجاوز إلى المحتوى SERVIO المنصة كيف يعمل الأسعار جولة في المنتج خيارات العرض التوضيحي English تسجيل الدخول ابدأ تجربتك المجانية لمدة 14 يومًا ابدأ مساحة عمل مطع"
+ },
+ {
+  "route": "/auth/super-admin-login",
+  "url": "/auth/super-admin-login",
+  "status": 200,
+  "finalUrl": "/ar/auth/super-admin-login",
+  "marker": "OK",
+  "inputs": 0,
+  "buttons": 1,
+  "tables": 0,
+  "forms": 0,
+  "apiFail": [
+   "GET /auth/session 401"
+  ],
+  "pageErrors": [],
+  "snippet": "فشل الوصول حدث خطأ أثناء المصادقة الذهاب لتسجيل الدخول"
+ },
+ {
+  "route": "/login",
+  "url": "/login",
+  "status": 200,
+  "finalUrl": "/ar/auth/login",
+  "marker": "OK",
+  "inputs": 2,
+  "buttons": 10,
+  "tables": 0,
+  "forms": 1,
+  "apiFail": [
+   "GET /auth/session 401"
+  ],
+  "pageErrors": [],
+  "snippet": "تجاوز إلى المحتوى SERVIO المنصة كيف يعمل الأسعار جولة في المنتج خيارات العرض التوضيحي English تسجيل الدخول ابدأ تجربتك المجانية لمدة 14 يومًا إدارة مطعمك في صور"
+ },
+ {
+  "route": "/register",
+  "url": "/register",
+  "status": 200,
+  "finalUrl": "/ar/auth/register",
+  "marker": "OK",
+  "inputs": 7,
+  "buttons": 11,
+  "tables": 0,
+  "forms": 1,
+  "apiFail": [
+   "GET /auth/session 401"
+  ],
+  "pageErrors": [],
+  "snippet": "تجاوز إلى المحتوى SERVIO المنصة كيف يعمل الأسعار جولة في المنتج خيارات العرض التوضيحي English تسجيل الدخول ابدأ تجربتك المجانية لمدة 14 يومًا ابدأ مساحة عمل مطع"
+ }
+]

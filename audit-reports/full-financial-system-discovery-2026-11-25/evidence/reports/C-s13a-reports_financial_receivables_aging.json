@@ -1,0 +1,16 @@
+{
+ "page": "reports/financial/receivables-aging",
+ "text": "POS Dashboard\nDashboard\nCashier POS\nKitchen Display\nOrders\nProducts\nHuman Resources\nAccounting\nSuppliers\nFinancial Reports\nReports\nTheme Builder\nSettings\nEnglish\nA\n\nAudit Owner C\n\nOwner\n\nReceivables Aging\n\nOutstanding customer balances grouped by age buckets.\n\nRefresh\nExport PDF\nReceivables Aging\nEntity\tCurrent\t30\t60\t90\t90+\tTotal\nNo data available\nTotal\t\tEGP 0.00",
+ "calls": [
+  {
+   "u": "/reports/financial/receivables-aging?as_of=2026-11-25",
+   "s": 200,
+   "body": "{\"data\":{\"as_of_date\":\"2026-11-25\",\"rows\":[],\"total\":0},\"success\":true}"
+  },
+  {
+   "u": "/reports/financial/receivables-aging?as_of=2026-11-25",
+   "s": 200,
+   "body": "{\"data\":{\"as_of_date\":\"2026-11-25\",\"rows\":[],\"total\":0},\"success\":true}"
+  }
+ ]
+}

@@ -1,0 +1,4 @@
+# Bank account opening balance 50,000 (UI create) vs GL
+KPI summary: {'cash_position': 50000, 'expenses': 69000, 'net_profit': 85000, 'revenue': 154000}
+GL 1111 net (dr-cr): -10000.00
+journals referencing the opening: 1

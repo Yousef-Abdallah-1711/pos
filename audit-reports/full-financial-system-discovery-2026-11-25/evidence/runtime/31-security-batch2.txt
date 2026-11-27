@@ -1,0 +1,14 @@
+# SEC-003 tenant override (owner A, tenant 2; tenant C=4 has product id 2 'Audit Burger')
+GET /products with header [X-Tenant-ID: 4] -> count 1 ['Audit Burger'] tenant_ids {2}
+GET /products with header [X-Restaurant-ID: 4] -> count 1 ['Audit Burger'] tenant_ids {2}
+POST journal body tenant_id=4 as owner A -> 400  (tenant C accounts 70/93; A has its own COA)
+
+# SEC-011 tokens
+tampered cookie -> 401
+no cookie -> 401
+bearer garbage -> 401
+# SEC-012 origin + rate limit
+login without Origin -> Forbidden - invalid request origin
+ [403]
+login with evil Origin -> 403
+25 rapid bad logins ->  401 401 401 401 401 401 401 401 401 401 401 401 401 401 401 401 401 401 429 429 429 429 429 429 429

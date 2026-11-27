@@ -1,0 +1,166 @@
+{
+ "run": "RUN-003",
+ "tenant": 4,
+ "role": "owner",
+ "log": [
+  {
+   "id": "SET-REST-before",
+   "db": "audit.c.contact@example.test|+201000000444",
+   "email": "audit.c.contact@example.test",
+   "phone": "+201000000444"
+  },
+  {
+   "id": "AUD-SET-001-invalid-email",
+   "input": {
+    "e": "not-an-email",
+    "p": "+201000000444"
+   },
+   "calls": [
+    "PUT /tenant/contact-info 200 {\"data\":{\"email\":\"not-an-email\",\"phone\":\"+201000000444\"},\"success\":true}\n"
+   ],
+   "dbAfter": "not-an-email|+201000000444",
+   "nativeInvalid": true
+  },
+  {
+   "id": "AUD-SET-002-invalid-phone",
+   "input": {
+    "e": "ok4@example.test",
+    "p": "abc-###"
+   },
+   "calls": [
+    "PUT /tenant/contact-info 200 {\"data\":{\"email\":\"ok4@example.test\",\"phone\":\"abc-###\"},\"success\":true}\n"
+   ],
+   "dbAfter": "ok4@example.test|abc-###",
+   "nativeInvalid": false
+  },
+  {
+   "id": "AUD-SET-003-empty",
+   "input": {
+    "e": "",
+    "p": ""
+   },
+   "calls": [
+    "PUT /tenant/contact-info 200 {\"data\":{\"email\":\"\",\"phone\":\"\"},\"success\":true}\n"
+   ],
+   "dbAfter": "|",
+   "nativeInvalid": false
+  },
+  {
+   "id": "AUD-SET-004-valid",
+   "input": {
+    "e": "audit.c.contact@example.test",
+    "p": "+201000000444"
+   },
+   "calls": [
+    "PUT /tenant/contact-info 200 {\"data\":{\"email\":\"audit.c.contact@example.test\",\"phone\":\"+201000000444\"},\"success\":true}\n"
+   ],
+   "dbAfter": "audit.c.contact@example.test|+201000000444",
+   "nativeInvalid": false
+  },
+  {
+   "id": "AUD-SET-005-persist-reload",
+   "emailShown": "audit.c.contact@example.test",
+   "phoneShown": "+201000000444",
+   "db": "audit.c.contact@example.test|+201000000444"
+  },
+  {
+   "id": "AUD-SET-006-kds-inverted",
+   "input": {
+    "warn": "30",
+    "danger": "5"
+   },
+   "saveEnabled": false,
+   "calls": [],
+   "validationHint": "Danger threshold must be greater than warning threshold."
+  },
+  {
+   "id": "AUD-SET-007-kds-negative",
+   "input": {
+    "warn": "-5",
+    "danger": "-10"
+   },
+   "saveEnabled": false,
+   "calls": [],
+   "validationHint": "Danger threshold must be greater than warning threshold."
+  },
+  {
+   "id": "AUD-SET-008-kds-huge",
+   "input": {
+    "warn": "999999",
+    "danger": "9999999"
+   },
+   "saveEnabled": true,
+   "calls": [
+    "PUT /kds/settings 200 {\"data\":{\"id\":1,\"tenant_id\":4,\"restaurant_id\":4,\"auto_bump_minutes\":0,\"alert_sound_enabled\":true,\"show_analytics_panel\":false,\"display_density\":\"comfortable\",\"c"
+   ],
+   "validationHint": "Danger threshold must be greater than warning threshold."
+  },
+  {
+   "id": "AUD-SET-009-kds-valid",
+   "input": {
+    "warn": "12",
+    "danger": "25"
+   },
+   "saveEnabled": true,
+   "calls": [
+    "PUT /kds/settings 200 {\"data\":{\"id\":1,\"tenant_id\":4,\"restaurant_id\":4,\"auto_bump_minutes\":0,\"alert_sound_enabled\":true,\"show_analytics_panel\":false,\"display_density\":\"comfortable\",\"c"
+   ],
+   "validationHint": "Danger threshold must be greater than warning threshold."
+  },
+  {
+   "id": "AUD-SET-010-kds-persist",
+   "warn": "12",
+   "danger": "25",
+   "kdsTable": true
+  },
+  {
+   "id": "AUD-SET-011-pos-autoprint-toggle",
+   "wasChecked": false,
+   "mutatingApiCalls": []
+  }
+ ],
+ "allMutations": [
+  {
+   "method": "PUT",
+   "url": "/tenant/contact-info",
+   "status": 200,
+   "request": "{\"email\":\"not-an-email\",\"phone\":\"+201000000444\"}",
+   "response": "{\"data\":{\"email\":\"not-an-email\",\"phone\":\"+201000000444\"},\"success\":true}\n"
+  },
+  {
+   "method": "PUT",
+   "url": "/tenant/contact-info",
+   "status": 200,
+   "request": "{\"email\":\"ok4@example.test\",\"phone\":\"abc-###\"}",
+   "response": "{\"data\":{\"email\":\"ok4@example.test\",\"phone\":\"abc-###\"},\"success\":true}\n"
+  },
+  {
+   "method": "PUT",
+   "url": "/tenant/contact-info",
+   "status": 200,
+   "request": "{\"email\":\"\",\"phone\":\"\"}",
+   "response": "{\"data\":{\"email\":\"\",\"phone\":\"\"},\"success\":true}\n"
+  },
+  {
+   "method": "PUT",
+   "url": "/tenant/contact-info",
+   "status": 200,
+   "request": "{\"email\":\"audit.c.contact@example.test\",\"phone\":\"+201000000444\"}",
+   "response": "{\"data\":{\"email\":\"audit.c.contact@example.test\",\"phone\":\"+201000000444\"},\"success\":true}\n"
+  },
+  {
+   "method": "PUT",
+   "url": "/kds/settings",
+   "status": 200,
+   "request": "{\"auto_bump_minutes\":0,\"alert_sound_enabled\":true,\"show_analytics_panel\":false,\"display_density\":\"comfortable\",\"color_warning_minutes\":999999,\"color_danger_minutes\":9999999}",
+   "response": "{\"data\":{\"id\":1,\"tenant_id\":4,\"restaurant_id\":4,\"auto_bump_minutes\":0,\"alert_sound_enabled\":true,\"show_analytics_panel\":false,\"display_density\":\"comfortable\",\"color_warning_minutes\":999999,\"color_danger_minutes\":9999999,\"created_at\":\"2026-11-26T17:07:08.811668Z\",\"updated_at\":\"2026-11-26T17:07:08.811668Z\"},\"success\":true}"
+  },
+  {
+   "method": "PUT",
+   "url": "/kds/settings",
+   "status": 200,
+   "request": "{\"auto_bump_minutes\":0,\"alert_sound_enabled\":true,\"show_analytics_panel\":false,\"display_density\":\"comfortable\",\"color_warning_minutes\":12,\"color_danger_minutes\":25}",
+   "response": "{\"data\":{\"id\":1,\"tenant_id\":4,\"restaurant_id\":4,\"auto_bump_minutes\":0,\"alert_sound_enabled\":true,\"show_analytics_panel\":false,\"display_density\":\"comfortable\",\"color_warning_minutes\":12,\"color_danger_minutes\":25,\"created_at\":\"2026-11-26T17:07:08.811668Z\",\"updated_at\":\"2026-11-26T17:07:12.993316Z\"},\"success\":true}"
+  }
+ ]
+}

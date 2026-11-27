@@ -1,0 +1,10 @@
+{
+ "run": "RUN-003",
+ "tenant": 4,
+ "ar": "Receivables Aging\n\nOutstanding customer balances grouped by age buckets.\n\nRefresh\nExport PDF\nReceivables Aging\nEntity\tCurrent\t30\t60\t90\t90+\tTotal\nAudit Customer Co\tEGP 8,320.00\tEGP 0.00\tEGP 0.00\tEGP 0.00\tEGP 0.00\tEGP 8,320.00\nTotal\t\tEGP 8,320.00",
+ "ap": "Payables Aging\n\nOutstanding supplier balances grouped by age buckets.\n\nRefresh\nExport PDF\nPayables Aging\nEntity\tCurrent\t30\t60\t90\t90+\tTotal\nAudit Supplier Co\tEGP 0.00\tEGP 800.00\tEGP 0.00\tEGP 0.00\tEGP 0.00\tEGP 800.00\nTotal\t\tEGP 800.00",
+ "bodies": {
+  "/reports/financial/receivables-aging?as_of=2026-11-26": "{\"data\":{\"as_of_date\":\"2026-11-26\",\"rows\":[{\"entity_id\":1,\"entity_name\":\"Audit Customer Co\",\"current\":8320,\"days_30\":0,\"days_60\":0,\"days_90\":0,\"days_90_plus\":0,\"total\":8320}],\"total\":8320},\"success\":true}",
+  "/reports/financial/payables-aging?as_of=2026-11-26": "{\"data\":{\"as_of_date\":\"2026-11-26\",\"rows\":[{\"entity_id\":1,\"entity_name\":\"Audit Supplier Co\",\"current\":0,\"days_30\":800,\"days_60\":0,\"days_90\":0,\"days_90_plus\":0,\"total\":800}],\"total\":800},\"success\":true}"
+ }
+}

@@ -1,0 +1,32 @@
+{
+ "run": "RUN-004",
+ "before": "4:Default Theme primary=#3b82f6 active=true upd=2026-11-27 03:32:21.239625 ; 13:Default Theme (Copy) primary=#ff0000 active=false upd=2026-11-27 03:32:20.723863",
+ "after": "4:Default Theme primary=#3b82f6 active=true upd=2026-11-27 03:33:22.565407 ; 13:Default Theme (Copy) primary=#ff0000 active=false upd=2026-11-27 03:32:20.723863",
+ "controls": [
+  "Help & Support\n\nContact administrator",
+  "Light",
+  "Dark",
+  "System",
+  "Theme",
+  "Primary",
+  "Secondary",
+  "Accent",
+  "Theme Colors"
+ ],
+ "calls": [
+  {
+   "m": "PUT",
+   "u": "/users/4/settings/theme-colors",
+   "s": 200,
+   "req": "{\"primary_color\":\"#3b82f6\",\"secondary_color\":\"#6366f1\",\"accent_color\":\"#10b981\"}",
+   "b": "{\"id\":5,\"user_id\":4,\"language\":\"en\",\"theme\":\"system\",\"primary_color\":\"#3b82f6\",\"secondary_color\":\"#6366f1\",\"accent_color\":\"#10b981\",\"notifications_enabled\":true"
+  },
+  {
+   "m": "PUT",
+   "u": "/admin/themes/4",
+   "s": 200,
+   "req": "{\"name\":\"Default Theme\",\"slug\":\"default-theme\",\"description\":\"Default theme for Audit C Diagnostic\",\"colors\":{\"primary\":\"#3b82f6\",\"secondary\":\"#6366f1\",\"accent\":\"#10b981\",\"background\":\"#ffffff\",\"text\":\"#1f2937\",\"border\":\"#e5e7eb\",\"shadow\":\"",
+   "b": "{\"id\":4,\"tenant_id\":4,\"restaurant_id\":4,\"name\":\"Default Theme\",\"slug\":\"default-theme\",\"config\":{\"colors\":{\"primary\":\"#3b82f6\",\"secondary\":\"#6366f1\",\"accent\":\"#1"
+  }
+ ]
+}

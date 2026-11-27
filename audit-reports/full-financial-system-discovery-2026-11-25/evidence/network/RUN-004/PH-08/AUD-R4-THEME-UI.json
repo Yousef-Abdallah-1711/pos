@@ -1,0 +1,103 @@
+{
+ "run": "RUN-004",
+ "tenant": 4,
+ "themeId": "13",
+ "log": [
+  {
+   "id": "TH-00",
+   "desc": "themes before",
+   "themesBefore": "4:Default Theme:true ; 11:RUN3 <img src=x onerror=alert(1)> (Copy):false"
+  },
+  {
+   "id": "TH-01",
+   "desc": "Export dialog -> Download",
+   "download": "default-theme-theme.json"
+  },
+  {
+   "id": "TH-01b",
+   "desc": "export contents",
+   "bytes": 1612,
+   "head": "{\n  \"name\": \"Default Theme\",\n  \"version\": \"1.0.0\",\n  \"exportedAt\": \"2026-11-27T03:17:41.814Z\",\n  \"colors\": {\n    \"primary\": \"#3b82f6\",\n    \"secondary\": \"#1e40af\",\n    \"accent\": \"#0ea5e9\",\n    \"backgro"
+  },
+  {
+   "id": "TH-01c",
+   "desc": "Escape closes the export dialog?",
+   "stillOpen": false
+  },
+  {
+   "id": "TH-02",
+   "desc": "Copy the default theme",
+   "calls": [
+    "POST /admin/themes/4/duplicate 201"
+   ],
+   "themes": "4:Default Theme:true ; 11:RUN3 <img src=x onerror=alert(1)> (Copy):false ; 13:Default Theme (Copy):false"
+  },
+  {
+   "id": "TH-03",
+   "desc": "Editor opened",
+   "url": "/en/dashboard/theme-builder/editor/11",
+   "buttons": [
+    "Orders",
+    "Products",
+    "Human Resources",
+    "Accounting",
+    "Suppliers",
+    "Financial Reports",
+    "Reports",
+    "English",
+    "Switch to dark mode",
+    "A\n\nAudit Owner C\n\nOwner",
+    "Colors",
+    "Homepage",
+    "Header",
+    "Footer",
+    "Settings",
+    "History",
+    "All Palettes",
+    "Professional",
+    "Creative",
+    "Minimal",
+    "Bold",
+    "Apply",
+    "Apply",
+    "Apply",
+    "Apply",
+    "Apply",
+    "Apply",
+    "Apply",
+    "Apply",
+    "Copy",
+    "Copy",
+    "Copy",
+    "Copy",
+    "Copy",
+    "Copy",
+    "Copy",
+    "EN",
+    "Arabic",
+    "Desktop",
+    "Tablet"
+   ],
+   "colorInputs": 7,
+   "textInputs": [
+    "#000000",
+    "#000000",
+    "#000000",
+    "#000000",
+    "#000000",
+    "#000000",
+    "#000000"
+   ],
+   "tabs": []
+  }
+ ],
+ "calls": [
+  {
+   "m": "POST",
+   "u": "/admin/themes/4/duplicate",
+   "s": 201,
+   "req": "{\"name\":\"Default Theme (Copy)\"}",
+   "b": "{\"id\":13,\"tenant_id\":4,\"restaurant_id\":4,\"name\":\"Default Theme (Copy)\",\"slug\":\"default-theme-copy-1795749476\",\"config\":{\"colors\":{\"text\":\"#1f2937\",\"accent\":\"#10b981\",\"border\":\"#e5e7eb\",\"shadow\":\"#0000"
+  }
+ ]
+}

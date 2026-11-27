@@ -1,0 +1,17 @@
+AUD-MET-PCF-VAT-INV oracles tenant 4 2026-11-26T20:02:40Z
+ cash_in_receipts | cash_out_payments | pos_orders_paid_not_in_forecast 
+------------------+-------------------+---------------------------------
+         13000.00 |          32400.00 |                       319660.00
+(1 row)
+
+ account_code | credit_balance 
+--------------+----------------
+ 1150         |       -4200.00
+ 2120         |       30880.00
+(2 rows)
+
+ inv_value_sql |  gl_1130  
+---------------+-----------
+     132840.00 | -96120.00
+(1 row)
+

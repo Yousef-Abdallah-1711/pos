@@ -1,0 +1,540 @@
+{
+ "run": "RUN-005",
+ "form": "attendance",
+ "tenant": 4,
+ "results": [
+  {
+   "form": "attendance",
+   "field_index": 0,
+   "field": "clock_in",
+   "placeholder": "",
+   "input_type": "datetime-local",
+   "maxlength_attr": null,
+   "kind": "datetime",
+   "case": "empty",
+   "value_sent": "",
+   "submit_found": true,
+   "submit_disabled": false,
+   "html5_invalid": 0,
+   "html5_message": "",
+   "messages": [
+    "Clock in time is required",
+    "[3:32:58 PM] Error: Clock in time is required"
+   ],
+   "request": [],
+   "response": "",
+   "request_body": "",
+   "rows_created": 0,
+   "outcome": "REJECTED-BY-CLIENT"
+  },
+  {
+   "form": "attendance",
+   "field_index": 0,
+   "field": "clock_in",
+   "placeholder": "",
+   "input_type": "datetime-local",
+   "maxlength_attr": null,
+   "kind": "datetime",
+   "case": "before-clock-in",
+   "value_sent": "2026-11-20T08:00",
+   "submit_found": true,
+   "submit_disabled": false,
+   "html5_invalid": 0,
+   "html5_message": "",
+   "messages": [
+    "Console Error"
+   ],
+   "request": [
+    "POST /hr/attendance/clock-in 201"
+   ],
+   "response": "{\"data\":{\"clock_in\":\"2026-11-27T13:33:06.689778349Z\",\"employee_id\":10,\"id\":12,\"status\":\"present\"},\"success\":true}\n",
+   "request_body": "{\"employee_id\":10,\"clock_in\":\"2026-11-20T06:00:00.000Z\",\"scheduled_clock_in\":\"09:00\",\"scheduled_clock_out\":\"17:00\",\"total_break_minutes\":30,\"status\":\"absent\",\"notes\":\"R5 86381201\",\"admin_notes\":\"R5 86",
+   "rows_created": 0,
+   "outcome": "REJECTED-BY-SERVER(201)"
+  },
+  {
+   "form": "attendance",
+   "field_index": 0,
+   "field": "clock_in",
+   "placeholder": "",
+   "input_type": "datetime-local",
+   "maxlength_attr": null,
+   "kind": "datetime",
+   "case": "future2999",
+   "value_sent": "2999-12-31T09:00",
+   "submit_found": true,
+   "submit_disabled": false,
+   "html5_invalid": 0,
+   "html5_message": "",
+   "messages": [
+    "Console Error"
+   ],
+   "request": [
+    "POST /hr/attendance/clock-in 201"
+   ],
+   "response": "{\"data\":{\"clock_in\":\"2026-11-27T13:33:14.262043721Z\",\"employee_id\":10,\"id\":12,\"status\":\"present\"},\"success\":true}\n",
+   "request_body": "{\"employee_id\":10,\"clock_in\":\"2999-12-31T07:00:00.000Z\",\"scheduled_clock_in\":\"09:00\",\"scheduled_clock_out\":\"17:00\",\"total_break_minutes\":30,\"status\":\"absent\",\"notes\":\"R5 86389194\",\"admin_notes\":\"R5 86",
+   "rows_created": 0,
+   "outcome": "REJECTED-BY-SERVER(201)"
+  },
+  {
+   "form": "attendance",
+   "field_index": 1,
+   "field": "clock_out",
+   "placeholder": "",
+   "input_type": "datetime-local",
+   "maxlength_attr": null,
+   "kind": "datetime",
+   "case": "empty",
+   "value_sent": "",
+   "submit_found": true,
+   "submit_disabled": false,
+   "html5_invalid": 0,
+   "html5_message": "",
+   "messages": [
+    "Console Error"
+   ],
+   "request": [
+    "POST /hr/attendance/clock-in 201"
+   ],
+   "response": "{\"data\":{\"clock_in\":\"2026-11-27T13:33:22.456052785Z\",\"employee_id\":10,\"id\":12,\"status\":\"present\"},\"success\":true}\n",
+   "request_body": "{\"employee_id\":10,\"clock_in\":\"2026-11-27T11:33:00.000Z\",\"scheduled_clock_in\":\"09:00\",\"scheduled_clock_out\":\"17:00\",\"total_break_minutes\":30,\"status\":\"absent\",\"notes\":\"R5 86396882\",\"admin_notes\":\"R5 86",
+   "rows_created": 0,
+   "outcome": "REJECTED-BY-SERVER(201)"
+  },
+  {
+   "form": "attendance",
+   "field_index": 1,
+   "field": "clock_out",
+   "placeholder": "",
+   "input_type": "datetime-local",
+   "maxlength_attr": null,
+   "kind": "datetime",
+   "case": "before-clock-in",
+   "value_sent": "2026-11-20T08:00",
+   "submit_found": true,
+   "submit_disabled": false,
+   "html5_invalid": 0,
+   "html5_message": "",
+   "messages": [
+    "Console Error"
+   ],
+   "request": [
+    "POST /hr/attendance/clock-in 201"
+   ],
+   "response": "{\"data\":{\"clock_in\":\"2026-11-27T13:33:30.648651443Z\",\"employee_id\":10,\"id\":12,\"status\":\"present\"},\"success\":true}\n",
+   "request_body": "{\"employee_id\":10,\"clock_in\":\"2026-11-27T11:33:00.000Z\",\"clock_out\":\"2026-11-20T06:00:00.000Z\",\"scheduled_clock_in\":\"09:00\",\"scheduled_clock_out\":\"17:00\",\"total_break_minutes\":30,\"status\":\"absent\",\"no",
+   "rows_created": 0,
+   "outcome": "REJECTED-BY-SERVER(201)"
+  },
+  {
+   "form": "attendance",
+   "field_index": 1,
+   "field": "clock_out",
+   "placeholder": "",
+   "input_type": "datetime-local",
+   "maxlength_attr": null,
+   "kind": "datetime",
+   "case": "future2999",
+   "value_sent": "2999-12-31T09:00",
+   "submit_found": true,
+   "submit_disabled": false,
+   "html5_invalid": 0,
+   "html5_message": "",
+   "messages": [
+    "Console Error"
+   ],
+   "request": [
+    "POST /hr/attendance/clock-in 201"
+   ],
+   "response": "{\"data\":{\"clock_in\":\"2026-11-27T13:33:38.537521962Z\",\"employee_id\":10,\"id\":12,\"status\":\"present\"},\"success\":true}\n",
+   "request_body": "{\"employee_id\":10,\"clock_in\":\"2026-11-27T11:33:00.000Z\",\"clock_out\":\"2999-12-31T07:00:00.000Z\",\"scheduled_clock_in\":\"09:00\",\"scheduled_clock_out\":\"17:00\",\"total_break_minutes\":30,\"status\":\"absent\",\"no",
+   "rows_created": 0,
+   "outcome": "REJECTED-BY-SERVER(201)"
+  },
+  {
+   "form": "attendance",
+   "field_index": 2,
+   "field": "scheduled_clock_in",
+   "placeholder": "08:00",
+   "input_type": "time",
+   "maxlength_attr": null,
+   "kind": "time",
+   "case": "empty",
+   "value_sent": "",
+   "submit_found": true,
+   "submit_disabled": false,
+   "html5_invalid": 0,
+   "html5_message": "",
+   "messages": [
+    "Console Error"
+   ],
+   "request": [
+    "POST /hr/attendance/clock-in 201"
+   ],
+   "response": "{\"data\":{\"clock_in\":\"2026-11-27T13:33:46.686168816Z\",\"employee_id\":10,\"id\":12,\"status\":\"present\"},\"success\":true}\n",
+   "request_body": "{\"employee_id\":10,\"clock_in\":\"2026-11-27T11:33:00.000Z\",\"scheduled_clock_in\":\"\",\"scheduled_clock_out\":\"17:00\",\"total_break_minutes\":30,\"status\":\"absent\",\"notes\":\"R5 86421250\",\"admin_notes\":\"R5 8642125",
+   "rows_created": 0,
+   "outcome": "REJECTED-BY-SERVER(201)"
+  },
+  {
+   "form": "attendance",
+   "field_index": 3,
+   "field": "scheduled_clock_out",
+   "placeholder": "17:00",
+   "input_type": "time",
+   "maxlength_attr": null,
+   "kind": "time",
+   "case": "empty",
+   "value_sent": "",
+   "submit_found": true,
+   "submit_disabled": false,
+   "html5_invalid": 0,
+   "html5_message": "",
+   "messages": [
+    "Console Error"
+   ],
+   "request": [
+    "POST /hr/attendance/clock-in 201"
+   ],
+   "response": "{\"data\":{\"clock_in\":\"2026-11-27T13:33:54.297486304Z\",\"employee_id\":10,\"id\":12,\"status\":\"present\"},\"success\":true}\n",
+   "request_body": "{\"employee_id\":10,\"clock_in\":\"2026-11-27T11:33:00.000Z\",\"scheduled_clock_in\":\"09:00\",\"scheduled_clock_out\":\"\",\"total_break_minutes\":30,\"status\":\"absent\",\"notes\":\"R5 86429213\",\"admin_notes\":\"R5 8642921",
+   "rows_created": 0,
+   "outcome": "REJECTED-BY-SERVER(201)"
+  },
+  {
+   "form": "attendance",
+   "field_index": 4,
+   "field": "total_break_minutes",
+   "placeholder": "0",
+   "input_type": "number",
+   "maxlength_attr": null,
+   "kind": "number",
+   "case": "empty",
+   "value_sent": "",
+   "submit_found": true,
+   "submit_disabled": false,
+   "html5_invalid": 0,
+   "html5_message": "",
+   "messages": [
+    "Console Error"
+   ],
+   "request": [
+    "POST /hr/attendance/clock-in 201"
+   ],
+   "response": "{\"data\":{\"clock_in\":\"2026-11-27T13:34:02.160157485Z\",\"employee_id\":10,\"id\":12,\"status\":\"present\"},\"success\":true}\n",
+   "request_body": "{\"employee_id\":10,\"clock_in\":\"2026-11-27T11:34:00.000Z\",\"scheduled_clock_in\":\"09:00\",\"scheduled_clock_out\":\"17:00\",\"total_break_minutes\":0,\"status\":\"absent\",\"notes\":\"R5 86436802\",\"admin_notes\":\"R5 864",
+   "rows_created": 0,
+   "outcome": "REJECTED-BY-SERVER(201)"
+  },
+  {
+   "form": "attendance",
+   "field_index": 4,
+   "field": "total_break_minutes",
+   "placeholder": "0",
+   "input_type": "number",
+   "maxlength_attr": null,
+   "kind": "number",
+   "case": "negative",
+   "value_sent": "-5",
+   "submit_found": true,
+   "submit_disabled": false,
+   "html5_invalid": 1,
+   "html5_message": "0: Value must be greater than or equal to 0.",
+   "messages": [],
+   "request": [],
+   "response": "",
+   "request_body": "",
+   "rows_created": 0,
+   "outcome": "REJECTED-BY-CLIENT"
+  },
+  {
+   "form": "attendance",
+   "field_index": 4,
+   "field": "total_break_minutes",
+   "placeholder": "0",
+   "input_type": "number",
+   "maxlength_attr": null,
+   "kind": "number",
+   "case": "zero",
+   "value_sent": "0",
+   "submit_found": true,
+   "submit_disabled": false,
+   "html5_invalid": 0,
+   "html5_message": "",
+   "messages": [
+    "Console Error"
+   ],
+   "request": [
+    "POST /hr/attendance/clock-in 201"
+   ],
+   "response": "{\"data\":{\"clock_in\":\"2026-11-27T13:34:17.449970857Z\",\"employee_id\":10,\"id\":12,\"status\":\"present\"},\"success\":true}\n",
+   "request_body": "{\"employee_id\":10,\"clock_in\":\"2026-11-27T11:34:00.000Z\",\"scheduled_clock_in\":\"09:00\",\"scheduled_clock_out\":\"17:00\",\"total_break_minutes\":0,\"status\":\"absent\",\"notes\":\"R5 86452041\",\"admin_notes\":\"R5 864",
+   "rows_created": 0,
+   "outcome": "REJECTED-BY-SERVER(201)"
+  },
+  {
+   "form": "attendance",
+   "field_index": 4,
+   "field": "total_break_minutes",
+   "placeholder": "0",
+   "input_type": "number",
+   "maxlength_attr": null,
+   "kind": "number",
+   "case": "decimal6",
+   "value_sent": "12.345678",
+   "submit_found": true,
+   "submit_disabled": false,
+   "html5_invalid": 1,
+   "html5_message": "0: Please enter a valid value. The two nearest valid values are 0 and 15.",
+   "messages": [],
+   "request": [],
+   "response": "",
+   "request_body": "",
+   "rows_created": 0,
+   "outcome": "REJECTED-BY-CLIENT"
+  },
+  {
+   "form": "attendance",
+   "field_index": 4,
+   "field": "total_break_minutes",
+   "placeholder": "0",
+   "input_type": "number",
+   "maxlength_attr": null,
+   "kind": "number",
+   "case": "huge",
+   "value_sent": "99999999999",
+   "submit_found": true,
+   "submit_disabled": false,
+   "html5_invalid": 1,
+   "html5_message": "0: Please enter a valid value. The two nearest valid values are 99999999990 and 100",
+   "messages": [],
+   "request": [],
+   "response": "",
+   "request_body": "",
+   "rows_created": 0,
+   "outcome": "REJECTED-BY-CLIENT"
+  },
+  {
+   "form": "attendance",
+   "field_index": 4,
+   "field": "total_break_minutes",
+   "placeholder": "0",
+   "input_type": "number",
+   "maxlength_attr": null,
+   "kind": "number",
+   "case": "tiny",
+   "value_sent": "0.001",
+   "submit_found": true,
+   "submit_disabled": false,
+   "html5_invalid": 1,
+   "html5_message": "0: Please enter a valid value. The two nearest valid values are 0 and 15.",
+   "messages": [],
+   "request": [],
+   "response": "",
+   "request_body": "",
+   "rows_created": 0,
+   "outcome": "REJECTED-BY-CLIENT"
+  },
+  {
+   "form": "attendance",
+   "field_index": 5,
+   "field": "notes",
+   "placeholder": "Any notes about this attendance...",
+   "input_type": "textarea",
+   "maxlength_attr": null,
+   "kind": "textarea",
+   "case": "empty",
+   "value_sent": "",
+   "submit_found": true,
+   "submit_disabled": false,
+   "html5_invalid": 0,
+   "html5_message": "",
+   "messages": [
+    "Console Error"
+   ],
+   "request": [
+    "POST /hr/attendance/clock-in 201"
+   ],
+   "response": "{\"data\":{\"clock_in\":\"2026-11-27T13:34:48.547043478Z\",\"employee_id\":10,\"id\":12,\"status\":\"present\"},\"success\":true}\n",
+   "request_body": "{\"employee_id\":10,\"clock_in\":\"2026-11-27T11:34:00.000Z\",\"scheduled_clock_in\":\"09:00\",\"scheduled_clock_out\":\"17:00\",\"total_break_minutes\":30,\"status\":\"absent\",\"notes\":\"\",\"admin_notes\":\"R5 86483103\"}",
+   "rows_created": 0,
+   "outcome": "REJECTED-BY-SERVER(201)"
+  },
+  {
+   "form": "attendance",
+   "field_index": 5,
+   "field": "notes",
+   "placeholder": "Any notes about this attendance...",
+   "input_type": "textarea",
+   "maxlength_attr": null,
+   "kind": "textarea",
+   "case": "long300",
+   "value_sent": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX...(300)",
+   "submit_found": true,
+   "submit_disabled": false,
+   "html5_invalid": 0,
+   "html5_message": "",
+   "messages": [
+    "Console Error"
+   ],
+   "request": [
+    "POST /hr/attendance/clock-in 201"
+   ],
+   "response": "{\"data\":{\"clock_in\":\"2026-11-27T13:34:56.47946661Z\",\"employee_id\":10,\"id\":12,\"status\":\"present\"},\"success\":true}\n",
+   "request_body": "{\"employee_id\":10,\"clock_in\":\"2026-11-27T11:34:00.000Z\",\"scheduled_clock_in\":\"09:00\",\"scheduled_clock_out\":\"17:00\",\"total_break_minutes\":30,\"status\":\"absent\",\"notes\":\"XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+   "rows_created": 0,
+   "outcome": "REJECTED-BY-SERVER(201)"
+  },
+  {
+   "form": "attendance",
+   "field_index": 5,
+   "field": "notes",
+   "placeholder": "Any notes about this attendance...",
+   "input_type": "textarea",
+   "maxlength_attr": null,
+   "kind": "textarea",
+   "case": "arabic",
+   "value_sent": "اختبار عربي ٧٧",
+   "submit_found": true,
+   "submit_disabled": false,
+   "html5_invalid": 0,
+   "html5_message": "",
+   "messages": [
+    "Console Error"
+   ],
+   "request": [
+    "POST /hr/attendance/clock-in 201"
+   ],
+   "response": "{\"data\":{\"clock_in\":\"2026-11-27T13:35:04.265987964Z\",\"employee_id\":10,\"id\":12,\"status\":\"present\"},\"success\":true}\n",
+   "request_body": "{\"employee_id\":10,\"clock_in\":\"2026-11-27T11:35:00.000Z\",\"scheduled_clock_in\":\"09:00\",\"scheduled_clock_out\":\"17:00\",\"total_break_minutes\":30,\"status\":\"absent\",\"notes\":\"اختبار عربي ٧٧\",\"admin_notes\":\"R5",
+   "rows_created": 0,
+   "outcome": "REJECTED-BY-SERVER(201)"
+  },
+  {
+   "form": "attendance",
+   "field_index": 5,
+   "field": "notes",
+   "placeholder": "Any notes about this attendance...",
+   "input_type": "textarea",
+   "maxlength_attr": null,
+   "kind": "textarea",
+   "case": "special",
+   "value_sent": "<b>x</b>'; --",
+   "submit_found": true,
+   "submit_disabled": false,
+   "html5_invalid": 0,
+   "html5_message": "",
+   "messages": [
+    "Console Error"
+   ],
+   "request": [
+    "POST /hr/attendance/clock-in 201"
+   ],
+   "response": "{\"data\":{\"clock_in\":\"2026-11-27T13:35:12.248892302Z\",\"employee_id\":10,\"id\":12,\"status\":\"present\"},\"success\":true}\n",
+   "request_body": "{\"employee_id\":10,\"clock_in\":\"2026-11-27T11:35:00.000Z\",\"scheduled_clock_in\":\"09:00\",\"scheduled_clock_out\":\"17:00\",\"total_break_minutes\":30,\"status\":\"absent\",\"notes\":\"<b>x</b>'; --\",\"admin_notes\":\"R5 ",
+   "rows_created": 0,
+   "outcome": "REJECTED-BY-SERVER(201)"
+  },
+  {
+   "form": "attendance",
+   "field_index": 6,
+   "field": "admin_notes",
+   "placeholder": "Administrative notes...",
+   "input_type": "textarea",
+   "maxlength_attr": null,
+   "kind": "textarea",
+   "case": "empty",
+   "value_sent": "",
+   "submit_found": true,
+   "submit_disabled": false,
+   "html5_invalid": 0,
+   "html5_message": "",
+   "messages": [
+    "Console Error"
+   ],
+   "request": [
+    "POST /hr/attendance/clock-in 201"
+   ],
+   "response": "{\"data\":{\"clock_in\":\"2026-11-27T13:35:20.109259032Z\",\"employee_id\":10,\"id\":12,\"status\":\"present\"},\"success\":true}\n",
+   "request_body": "{\"employee_id\":10,\"clock_in\":\"2026-11-27T11:35:00.000Z\",\"scheduled_clock_in\":\"09:00\",\"scheduled_clock_out\":\"17:00\",\"total_break_minutes\":30,\"status\":\"absent\",\"notes\":\"R5 86515050\",\"admin_notes\":\"\"}",
+   "rows_created": 0,
+   "outcome": "REJECTED-BY-SERVER(201)"
+  },
+  {
+   "form": "attendance",
+   "field_index": 6,
+   "field": "admin_notes",
+   "placeholder": "Administrative notes...",
+   "input_type": "textarea",
+   "maxlength_attr": null,
+   "kind": "textarea",
+   "case": "long300",
+   "value_sent": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX...(300)",
+   "submit_found": true,
+   "submit_disabled": false,
+   "html5_invalid": 0,
+   "html5_message": "",
+   "messages": [
+    "Console Error"
+   ],
+   "request": [
+    "POST /hr/attendance/clock-in 201"
+   ],
+   "response": "{\"data\":{\"clock_in\":\"2026-11-27T13:35:28.23002958Z\",\"employee_id\":10,\"id\":12,\"status\":\"present\"},\"success\":true}\n",
+   "request_body": "{\"employee_id\":10,\"clock_in\":\"2026-11-27T11:35:00.000Z\",\"scheduled_clock_in\":\"09:00\",\"scheduled_clock_out\":\"17:00\",\"total_break_minutes\":30,\"status\":\"absent\",\"notes\":\"R5 86522793\",\"admin_notes\":\"XXXXX",
+   "rows_created": 0,
+   "outcome": "REJECTED-BY-SERVER(201)"
+  },
+  {
+   "form": "attendance",
+   "field_index": 6,
+   "field": "admin_notes",
+   "placeholder": "Administrative notes...",
+   "input_type": "textarea",
+   "maxlength_attr": null,
+   "kind": "textarea",
+   "case": "arabic",
+   "value_sent": "اختبار عربي ٧٧",
+   "submit_found": true,
+   "submit_disabled": false,
+   "html5_invalid": 0,
+   "html5_message": "",
+   "messages": [
+    "Console Error"
+   ],
+   "request": [
+    "POST /hr/attendance/clock-in 201"
+   ],
+   "response": "{\"data\":{\"clock_in\":\"2026-11-27T13:35:35.763498471Z\",\"employee_id\":10,\"id\":12,\"status\":\"present\"},\"success\":true}\n",
+   "request_body": "{\"employee_id\":10,\"clock_in\":\"2026-11-27T11:35:00.000Z\",\"scheduled_clock_in\":\"09:00\",\"scheduled_clock_out\":\"17:00\",\"total_break_minutes\":30,\"status\":\"absent\",\"notes\":\"R5 86530791\",\"admin_notes\":\"اختبا",
+   "rows_created": 0,
+   "outcome": "REJECTED-BY-SERVER(201)"
+  },
+  {
+   "form": "attendance",
+   "field_index": 6,
+   "field": "admin_notes",
+   "placeholder": "Administrative notes...",
+   "input_type": "textarea",
+   "maxlength_attr": null,
+   "kind": "textarea",
+   "case": "special",
+   "value_sent": "<b>x</b>'; --",
+   "submit_found": true,
+   "submit_disabled": false,
+   "html5_invalid": 0,
+   "html5_message": "",
+   "messages": [
+    "Console Error"
+   ],
+   "request": [
+    "POST /hr/attendance/clock-in 201"
+   ],
+   "response": "{\"data\":{\"clock_in\":\"2026-11-27T13:35:43.476102673Z\",\"employee_id\":10,\"id\":12,\"status\":\"present\"},\"success\":true}\n",
+   "request_body": "{\"employee_id\":10,\"clock_in\":\"2026-11-27T11:35:00.000Z\",\"scheduled_clock_in\":\"09:00\",\"scheduled_clock_out\":\"17:00\",\"total_break_minutes\":30,\"status\":\"absent\",\"notes\":\"R5 86538585\",\"admin_notes\":\"<b>x<",
+   "rows_created": 0,
+   "outcome": "REJECTED-BY-SERVER(201)"
+  }
+ ]
+}

@@ -1,0 +1,58 @@
+{
+ "run": "RUN-005",
+ "tag": "000R5DEL63639",
+ "tenant": 4,
+ "note": "disposable entities named R5DEL-*; isolated stack",
+ "log": [
+  {
+   "id": "DIALOG",
+   "what": "browser dialog",
+   "type": "confirm",
+   "message": "Delete customer 000R5DEL63639 cust?"
+  },
+  {
+   "id": "99",
+   "what": "delete clean customer",
+   "clicked": true,
+   "confirmed": false,
+   "calls": [
+    "DELETE /accounting/customers/99 200 {\"success\":true}\n"
+   ],
+   "after": "row gone"
+  },
+  {
+   "id": "DIALOG",
+   "what": "browser dialog",
+   "type": "confirm",
+   "message": "Delete customer 000R5DEL63639 custinv?"
+  },
+  {
+   "id": 100,
+   "what": "delete customer with an invoice",
+   "invoice_http": 201,
+   "clicked": true,
+   "confirmed": false,
+   "calls": [
+    "DELETE /accounting/customers/100 400 {\"error\":\"pq: update or delete on table \\\"customers_accounting\\\" violates foreign key constraint \\\"invoices_customer_customer_id_fkey\\\" on table \\\"invoices_cust"
+   ],
+   "after": "t",
+   "invoices_remaining": "1"
+  },
+  {
+   "id": "DIALOG",
+   "what": "browser dialog",
+   "type": "confirm",
+   "message": "Delete supplier 000R5DEL63639 supp?"
+  },
+  {
+   "id": "85",
+   "what": "delete clean supplier",
+   "clicked": true,
+   "confirmed": false,
+   "calls": [
+    "DELETE /suppliers/85 200 {\"success\":true}\n"
+   ],
+   "after": "row gone"
+  }
+ ]
+}

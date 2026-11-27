@@ -1,0 +1,41 @@
+{
+ "prof": {
+  "api_summary": {
+   "total_revenue": 482630.36,
+   "total_cogs": 193040,
+   "gross_profit": 289590.36,
+   "gross_margin_pct": 60.00251621137137,
+   "food_cost_pct": 39.99748378862863,
+   "units_missing_cost": 4,
+   "products_missing_cost_rows": 2
+  },
+  "sql_rev": "482630.36",
+  "sql_cogs": "193040.00",
+  "n_items_sql": 5,
+  "n_top_api": 5,
+  "n_low_api": 0
+ },
+ "cf": {
+  "api": {
+   "date_from": "2026-10-29",
+   "date_to": "2026-11-27",
+   "operating_cash_flow": 155170.36,
+   "investing_cash_flow": 20000,
+   "financing_cash_flow": 42060.01,
+   "net_cash_flow": 217230.37
+  },
+  "sql_investing_debit_minus_credit": "20000.00",
+  "lines": [
+   [
+    "93",
+    "JE-2026-00082",
+    "2026-11-26",
+    "posted",
+    "1250",
+    "Delivery Van",
+    "20000.00",
+    "0.00"
+   ]
+  ]
+ }
+}

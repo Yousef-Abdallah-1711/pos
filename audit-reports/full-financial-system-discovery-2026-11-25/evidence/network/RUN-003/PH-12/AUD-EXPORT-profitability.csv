@@ -1,0 +1,12 @@
+﻿section,product,quantity,revenue,cogs,gross_profit,gross_margin_pct,food_cost_pct,missing_cost_data
+summary,TOTAL,,482630.36,193040.00,289590.36,60.00,40.00,
+top_items,Audit Burger,48,480000.00,192000.00,288000.00,60.00,40.00,false
+top_items,Audit Inv Probe B,22,2200.00,880.00,1320.00,60.00,40.00,false
+top_items,Audit Inv Probe A,4,400.00,160.00,240.00,60.00,40.00,false
+top_items,MD probe,3,30.36,0.00,30.36,100.00,0.00,true
+top_items,MD probe,1,0.00,0.00,0.00,0.00,0.00,true
+lowest_margin_items,MD probe,1,0.00,0.00,0.00,0.00,0.00,true
+lowest_margin_items,MD probe,3,30.36,0.00,30.36,100.00,0.00,true
+lowest_margin_items,Audit Inv Probe A,4,400.00,160.00,240.00,60.00,40.00,false
+lowest_margin_items,Audit Inv Probe B,22,2200.00,880.00,1320.00,60.00,40.00,false
+lowest_margin_items,Audit Burger,48,480000.00,192000.00,288000.00,60.00,40.00,false

@@ -1,0 +1,194 @@
+{
+ "run": "RUN-003",
+ "kind": "API-DIAGNOSTIC",
+ "tenant": 4,
+ "log": [
+  {
+   "id": "ACC-01",
+   "desc": "create equity account 3150 Owner Drawings",
+   "status": 201,
+   "resp": "{\"data\":{\"id\":187,\"tenant_id\":4,\"restaurant_id\":4,\"account_code\":\"3150\",\"account_name\":\"Owner Drawings\",\"account_type\":\"equity\",\"normal_balance\":\"debit\",\"level\":1,\"is_header\":false,\"current_balance\":0,\"currency\":\"EGP\",\"is_active\":true,\"is_system\":false,\"is_rec"
+  },
+  {
+   "id": "ACC-02",
+   "desc": "duplicate account code rejected?",
+   "status": 400,
+   "resp": "{\"error\":\"pq: duplicate key value violates unique constraint \\\"chart_of_accounts_tenant_id_restaurant_id_account_code_key\\\"\",\"success\":false}"
+  },
+  {
+   "id": "ACC-03",
+   "desc": "invalid account_type rejected?",
+   "status": 400,
+   "resp": "{\"error\":\"account_type must be one of: asset, liability, equity, revenue, expense\",\"success\":false}"
+  },
+  {
+   "id": "ACC-04",
+   "desc": "create asset account 1250",
+   "status": 201,
+   "resp": "{\"data\":{\"id\":189,\"tenant_id\":4,\"restaurant_id\":4,\"account_code\":\"1250\",\"account_name\":\"Delivery Van\",\"account_type\":\"asset\",\"normal_balance\":\"debit\",\"level\":1,\"is_header\":false,\"current_balance\":0,\"currency\":\"EGP\",\"is_active\":true,\"is_system\":false,\"is_reconc"
+  },
+  {
+   "id": "JE-01",
+   "desc": "unbalanced journal rejected?",
+   "status": 400,
+   "resp": "{\"error\":\"journal entry is not balanced\",\"success\":false}"
+  },
+  {
+   "id": "JE-02",
+   "desc": "line with debit and credit both set / zero line",
+   "status": 400,
+   "resp": "{\"error\":\"a journal line cannot be both debit and credit\",\"success\":false}"
+  },
+  {
+   "id": "JE-03",
+   "desc": "negative amounts rejected?",
+   "status": 400,
+   "resp": "{\"error\":\"journal amounts cannot be negative\",\"success\":false}"
+  },
+  {
+   "id": "JE-04",
+   "desc": "capital contribution draft",
+   "status": 201,
+   "resp": "{\"data\":{\"id\":91,\"tenant_id\":4,\"restaurant_id\":4,\"entry_number\":\"JE-2026-00080\",\"entry_date\":\"2026-11-26T00:00:00Z\",\"fiscal_period\":\"2026-11\",\"description\":\"Capital contribution probe\",\"entry_type\":\"manual\",\"total_debit\":50000,\"total_credit\":50000,\"status\":\"dr",
+   "status_after": "draft"
+  },
+  {
+   "id": "JE-05",
+   "desc": "post capital contribution",
+   "status": 200,
+   "resp": "{\"data\":{\"id\":91,\"tenant_id\":4,\"restaurant_id\":4,\"entry_number\":\"JE-2026-00080\",\"entry_date\":\"2026-11-26T00:00:00Z\",\"fiscal_period\":\"2026-11\",\"description\":\"Capital contribution probe\",\"entry_type\":\"manual\",\"total_debit\":50000,\"total_credit\":50000,\"status\":\"po",
+   "cashDelta": 50000
+  },
+  {
+   "id": "JE-06",
+   "desc": "post owner withdrawal via custom 3150",
+   "status": 200,
+   "resp": "{\"data\":{\"id\":92,\"tenant_id\":4,\"restaurant_id\":4,\"entry_number\":\"JE-2026-00081\",\"entry_date\":\"2026-11-26T00:00:00Z\",\"fiscal_period\":\"2026-11\",\"description\":\"Owner withdrawal probe\",\"entry_type\":\"manual\",\"total_debit\":8000,\"total_credit\":8000,\"status\":\"posted\",",
+   "cashDelta": -8000
+  },
+  {
+   "id": "JE-07",
+   "desc": "post fixed-asset purchase",
+   "status": 200,
+   "resp": "{\"data\":{\"id\":93,\"tenant_id\":4,\"restaurant_id\":4,\"entry_number\":\"JE-2026-00082\",\"entry_date\":\"2026-11-26T00:00:00Z\",\"fiscal_period\":\"2026-11\",\"description\":\"Van purchase probe\",\"entry_type\":\"manual\",\"total_debit\":20000,\"total_credit\":20000,\"status\":\"posted\",\"p",
+   "van": 20000
+  },
+  {
+   "id": "CF-INV",
+   "desc": "cash-flow investing after asset purchase (cash fell by 20,000)",
+   "status": 200,
+   "resp": "{\"data\":{\"date_from\":\"2026-10-28\",\"date_to\":\"2026-11-26\",\"operating_cash_flow\":167180,\"investing_cash_flow\":20000,\"financing_cash_flow\":42010.01,\"net_cash_flow\":229190.01},\"success\":true}",
+   "investing": 20000,
+   "net": 229190.01
+  },
+  {
+   "id": "JE-08",
+   "desc": "post rent expense",
+   "status": 200,
+   "resp": "{\"data\":{\"id\":94,\"tenant_id\":4,\"restaurant_id\":4,\"entry_number\":\"JE-2026-00083\",\"entry_date\":\"2026-11-26T00:00:00Z\",\"fiscal_period\":\"2026-11\",\"description\":\"Rent probe\",\"entry_type\":\"manual\",\"total_debit\":1500,\"total_credit\":1500,\"status\":\"posted\",\"posted_at\":"
+  },
+  {
+   "id": "JE-09",
+   "desc": "edit a POSTED journal rejected?",
+   "status": 400,
+   "resp": "{\"error\":\"only draft journal entries can be updated\",\"success\":false}",
+   "rentNow": 4500
+  },
+  {
+   "id": "JE-10",
+   "desc": "post an already posted journal (idempotency)",
+   "status": 400,
+   "resp": "{\"error\":\"only draft journal entries can be posted\",\"success\":false}",
+   "rentAfter": 4500
+  },
+  {
+   "id": "JE-11",
+   "desc": "void posted journal creates reversal",
+   "status": "void",
+   "resp": "{\"data\":{\"id\":94,\"tenant_id\":4,\"restaurant_id\":4,\"entry_number\":\"JE-2026-00083\",\"entry_date\":\"2026-11-26T00:00:00Z\",\"fiscal_period\":\"2026-11\",\"description\":\"Rent probe\",\"entry_type\":\"manual\",\"total_debit\":1500,\"total_credit\":1500,\"status\":\"void\",\"posted_at\":\"2",
+   "rentAfterVoid": 3000,
+   "delta": -1500
+  },
+  {
+   "id": "JE-12",
+   "desc": "void an already void journal",
+   "status": 400,
+   "resp": "{\"error\":\"journal entry is already void\",\"success\":false}"
+  },
+  {
+   "id": "JE-13",
+   "desc": "post a journal dated 2019 (no fiscal period)",
+   "status": "posted",
+   "resp": "{\"data\":{\"id\":95,\"tenant_id\":4,\"restaurant_id\":4,\"entry_number\":\"JE-2019-00001\",\"entry_date\":\"2019-01-15T00:00:00Z\",\"fiscal_period\":\"2019-01\",\"description\":\"backdated 2019 probe\",\"entry_type\":\"manual\",\"total_debit\":10,\"total_credit\":10,\"status\":\"posted\",\"poste"
+  },
+  {
+   "id": "JE-14",
+   "desc": "post a journal dated 2030",
+   "status": "posted",
+   "resp": "{\"data\":{\"id\":96,\"tenant_id\":4,\"restaurant_id\":4,\"entry_number\":\"JE-2030-00001\",\"entry_date\":\"2030-06-01T00:00:00Z\",\"fiscal_period\":\"2030-06\",\"description\":\"future 2030 probe\",\"entry_type\":\"manual\",\"total_debit\":10,\"total_credit\":10,\"status\":\"posted\",\"posted_a"
+  },
+  {
+   "id": "JE-15",
+   "desc": "post to a header (non-postable) account",
+   "status": 400,
+   "resp": "{\"error\":\"account 63 is a header account and cannot be posted to\",\"success\":false}",
+   "created": 400
+  },
+  {
+   "id": "PER-01",
+   "desc": "list fiscal periods",
+   "status": 404,
+   "resp": "\"404 page not found\\n\""
+  },
+  {
+   "id": "BNK-01",
+   "desc": "create bank account opening 12,000 linked to GL 1112",
+   "status": 201,
+   "resp": "{\"data\":{\"id\":2,\"tenant_id\":4,\"restaurant_id\":4,\"account_name\":\"Audit Savings B\",\"bank_name\":\"Audit Bank\",\"account_number\":\"900100\",\"currency\":\"EGP\",\"account_type\":\"savings\",\"opening_balance\":12000,\"current_balance\":12000,\"opening_date\":\"2026-11-26T00:00:00Z\",",
+   "gl1112": 0,
+   "journalsForBank": "0"
+  },
+  {
+   "id": "BNK-02",
+   "desc": "bank transactions list",
+   "status": 200,
+   "resp": "{\"data\":[],\"success\":true}"
+  },
+  {
+   "id": "REC-01",
+   "desc": "create recurring journal",
+   "status": 400,
+   "resp": "{\"error\":\"template_code and template_name are required\",\"success\":false}"
+  },
+  {
+   "id": "BUD-01",
+   "desc": "create budget",
+   "status": 400,
+   "resp": "{\"error\":\"account_id, fiscal_year, and period_month are required\",\"success\":false}"
+  },
+  {
+   "id": "FX-01",
+   "desc": "create exchange rate",
+   "status": 400,
+   "resp": "{\"error\":\"base_currency, quote_currency and positive rate are required\",\"success\":false}"
+  },
+  {
+   "id": "FX-02",
+   "desc": "convert 100 USD",
+   "status": 400,
+   "resp": "{\"error\":\"base_currency and quote_currency are required\",\"success\":false}"
+  },
+  {
+   "id": "TB-01",
+   "desc": "trial balance balanced after all postings",
+   "status": 200,
+   "resp": "{\"data\":{\"as_of\":\"2026-11-26\",\"is_balanced\":true,\"rows\":[{\"account_id\":68,\"account_code\":\"1101\",\"account_name\":\"Petty Cash\",\"account_type\":\"asset\",\"normal_balance\":\"debit\",\"debit_balance\":0,\"credit_balance\":0,\"net_balance\":0,\"as_of_date\":\"2026-11-26T20:09:27.4",
+   "balanced": true,
+   "debit": 493120.01,
+   "credit": 493120.01
+  },
+  {
+   "glTotals": "824930.01|824930.01"
+  }
+ ]
+}

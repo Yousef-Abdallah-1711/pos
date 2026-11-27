@@ -1,0 +1,18 @@
+# REL-007 5 parallel supplier payments of 3,000 vs balance 12,800 (total attempted 15,000)
+      4 201
+      1 400
+ invoice_number  | amount_paid | balance_due |     status     
+-----------------+-------------+-------------+----------------
+ PINV-2026-00001 |    22000.00 |      800.00 | partially_paid
+(1 row)
+
+ account_code | net_dr  
+--------------+---------
+ 2101         | -800.00
+(1 row)
+
+ current_balance 
+-----------------
+       -22000.00
+(1 row)
+

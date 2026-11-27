@@ -1,0 +1,58 @@
+{
+ "run": "RUN-003",
+ "kind": "API-DIAGNOSTIC",
+ "log": [
+  {
+   "id": "CON-01",
+   "desc": "contract end before start",
+   "http": 400,
+   "resp": "{\"error\":\"invalid request body: json: unknown field \\\"base_salary\\\"\"}"
+  },
+  {
+   "desc": "valid contract",
+   "http": 400
+  },
+  {
+   "id": "CON-03",
+   "desc": "duplicate contract number",
+   "http": 400,
+   "resp": "{\"error\":\"invalid request body: json: unknown field \\\"base_salary\\\"\"}"
+  },
+  {
+   "id": 1,
+   "desc": "valid insurance policy monthly premium 600",
+   "http": 201
+  },
+  {
+   "id": "INS-02",
+   "desc": "HR cost report insurance term (oracle: 600 x ceil(30/30)=600 for a 30-day window)",
+   "summary": "{\"estimated_insurance_cost\":600,\"labor_cost_pct_of_revenue\":1.748852315667843,\"overtime_cost\":0,\"payroll_cost\":5000,\"revenue\":320210,\"total_hr_cost\":5600}"
+  },
+  {
+   "id": "INS-03",
+   "desc": "HR cost insurance over 61 days (oracle 600 x ceil(61/30)=1800)",
+   "summary": "{\"estimated_insurance_cost\":1800,\"labor_cost_pct_of_revenue\":3.6850816651572407,\"overtime_cost\":0,\"payroll_cost\":10000,\"revenue\":320210,\"total_hr_cost\":11800}"
+  },
+  {
+   "desc": "training completed with certificate",
+   "http": 400
+  },
+  {
+   "id": "TRN-02",
+   "desc": "compliance report (oracle 1 certified of 1 active = 100%)",
+   "summary": "{\"active_employees\":1,\"certified_employees\":0,\"compliance_rate\":0}"
+  },
+  {
+   "id": "PRF-01",
+   "desc": "performance review rating 9 (scale check)",
+   "http": 400,
+   "resp": "{\"error\":\"invalid request body: json: unknown field \\\"overall_rating\\\"\"}"
+  },
+  {
+   "id": "RES-01",
+   "desc": "resignation last_working_date before resignation_date",
+   "http": 201,
+   "resp": "{\"data\":{\"id\":1,\"tenant_id\":4,\"restaurant_id\":4,\"employee_id\":4,\"resignation_date\":\"2026-11-26T00:00:00Z\",\"last_working_date\":\"2026-11-01T00:00:00Z\",\"reason\":\"probe: last working day before resignatio"
+  }
+ ]
+}

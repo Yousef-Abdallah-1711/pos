@@ -1,0 +1,59 @@
+{
+ "run": "RUN-005",
+ "finding": "F-021",
+ "supplier_id": 8,
+ "log": [
+  {
+   "step": "created supplier",
+   "supplier_current_balance": "0.00",
+   "invoices_balance_due_sum": "0",
+   "ap_2101_credit_balance_all_suppliers": "800.00",
+   "http": 201,
+   "id": 8
+  },
+  {
+   "step": "invoice 10,000 created (draft)",
+   "supplier_current_balance": "0.00",
+   "invoices_balance_due_sum": "0",
+   "ap_2101_credit_balance_all_suppliers": "800.00",
+   "http": 201,
+   "inv": 6
+  },
+  {
+   "step": "invoice approved (AP posted)",
+   "supplier_current_balance": "0.00",
+   "invoices_balance_due_sum": "10000.00",
+   "ap_2101_credit_balance_all_suppliers": "10800.00",
+   "http": 200
+  },
+  {
+   "step": "payment 4,000",
+   "supplier_current_balance": "-4000.00",
+   "invoices_balance_due_sum": "6000.00",
+   "ap_2101_credit_balance_all_suppliers": "6800.00",
+   "http": 201
+  },
+  {
+   "step": "payment 6,000 (invoice fully paid)",
+   "supplier_current_balance": "-10000.00",
+   "invoices_balance_due_sum": "0.00",
+   "ap_2101_credit_balance_all_suppliers": "800.00",
+   "http": 201
+  },
+  {
+   "step": "PUT supplier (name edit, client sends current_balance 777)",
+   "supplier_current_balance": "-10000.00",
+   "invoices_balance_due_sum": "0.00",
+   "ap_2101_credit_balance_all_suppliers": "800.00",
+   "http": 400,
+   "resp": "{\"error\":\"Invalid request body\",\"success\":false}"
+  },
+  {
+   "step": "PUT supplier again WITHOUT the field being changed by the user (re-sends the value it read)",
+   "supplier_current_balance": "-10000.00",
+   "invoices_balance_due_sum": "0.00",
+   "ap_2101_credit_balance_all_suppliers": "800.00",
+   "http": 400
+  }
+ ]
+}

@@ -1,0 +1,125 @@
+{
+ "run": "RUN-004",
+ "kind": "API-DIAGNOSTIC load",
+ "note": "isolated stack, tenant 4 fixture, headless fetch clients on the same host as the stack; not a production capacity claim",
+ "before": {
+  "orders": 59,
+  "paid": 26,
+  "stock4": 12,
+  "journals": 17108,
+  "outbox": "completed:25,retryable:1"
+ },
+ "stages": [
+  {
+   "vu": 10,
+   "requests": 2344,
+   "rps": 117.2,
+   "server_errors_or_neterr": 0,
+   "errorRate": 0,
+   "p50": 66,
+   "p95": 184,
+   "p99": 448,
+   "max": 2473,
+   "codes": {
+    "GET200": 411,
+    "POST201": 1262,
+    "POST400": 614,
+    "GET429": 57
+   },
+   "peak_pg_connections": 6,
+   "docker_samples": [
+    "pos-p2a-ws05-e2e-api-1=0.00%/40.99MiB / 7.677GiB | pos-p2a-ws05-e2e-postgres-1=0.76%/69.17MiB / 7.677GiB | pos-p2a-ws05-e2e-redis-1=1.88%/13.84MiB / 7.677GiB",
+    "pos-p2a-ws05-e2e-api-1=4.23%/42.46MiB / 7.677GiB | pos-p2a-ws05-e2e-postgres-1=4.34%/71.85MiB / 7.677GiB | pos-p2a-ws05-e2e-redis-1=1.61%/14.14MiB / 7.677GiB"
+   ],
+   "free_mb_after": 2088
+  },
+  {
+   "vu": 25,
+   "requests": 2480,
+   "rps": 124,
+   "server_errors_or_neterr": 0,
+   "errorRate": 0,
+   "p50": 164,
+   "p95": 420,
+   "p99": 2287,
+   "max": 2594,
+   "codes": {
+    "GET429": 124,
+    "GET200": 372,
+    "POST400": 661,
+    "POST201": 1323
+   },
+   "peak_pg_connections": 6,
+   "docker_samples": [
+    "pos-p2a-ws05-e2e-api-1=0.00%/44.01MiB / 7.677GiB | pos-p2a-ws05-e2e-postgres-1=0.03%/74.48MiB / 7.677GiB | pos-p2a-ws05-e2e-redis-1=14.00%/14.79MiB / 7.677GiB",
+    "pos-p2a-ws05-e2e-api-1=0.00%/45.03MiB / 7.677GiB | pos-p2a-ws05-e2e-postgres-1=0.03%/74.63MiB / 7.677GiB | pos-p2a-ws05-e2e-redis-1=8.06%/14.25MiB / 7.677GiB"
+   ],
+   "free_mb_after": 2173
+  },
+  {
+   "vu": 50,
+   "requests": 2798,
+   "rps": 139.9,
+   "server_errors_or_neterr": 0,
+   "errorRate": 0,
+   "p50": 313,
+   "p95": 634,
+   "p99": 2557,
+   "max": 2854,
+   "codes": {
+    "GET200": 480,
+    "GET429": 80,
+    "POST400": 746,
+    "POST201": 1492
+   },
+   "peak_pg_connections": 16,
+   "docker_samples": [
+    "pos-p2a-ws05-e2e-api-1=16.48%/49.11MiB / 7.677GiB | pos-p2a-ws05-e2e-postgres-1=0.12%/77.91MiB / 7.677GiB | pos-p2a-ws05-e2e-redis-1=13.43%/13.77MiB / 7.677GiB",
+    "pos-p2a-ws05-e2e-api-1=10.11%/49.89MiB / 7.677GiB | pos-p2a-ws05-e2e-postgres-1=0.05%/79.56MiB / 7.677GiB | pos-p2a-ws05-e2e-redis-1=1.55%/13.78MiB / 7.677GiB"
+   ],
+   "free_mb_after": 2144
+  },
+  {
+   "vu": 100,
+   "requests": 3080,
+   "rps": 154,
+   "server_errors_or_neterr": 0,
+   "errorRate": 0,
+   "p50": 544,
+   "p95": 2454,
+   "p99": 2930,
+   "max": 3613,
+   "codes": {
+    "POST400": 822,
+    "GET429": 154,
+    "GET200": 462,
+    "POST201": 1642
+   },
+   "peak_pg_connections": 16,
+   "docker_samples": [
+    "pos-p2a-ws05-e2e-api-1=0.30%/57.56MiB / 7.677GiB | pos-p2a-ws05-e2e-postgres-1=0.03%/82.75MiB / 7.677GiB | pos-p2a-ws05-e2e-redis-1=1.39%/14.13MiB / 7.677GiB",
+    "pos-p2a-ws05-e2e-api-1=17.43%/56.92MiB / 7.677GiB | pos-p2a-ws05-e2e-postgres-1=0.08%/83.5MiB / 7.677GiB | pos-p2a-ws05-e2e-redis-1=1.42%/14.04MiB / 7.677GiB"
+   ],
+   "free_mb_after": 2180
+  }
+ ],
+ "after": {
+  "orders": 5779,
+  "paid": 26,
+  "stock4": 0,
+  "journals": 17108,
+  "outbox": "completed:25,retryable:1"
+ },
+ "checks": {
+  "new_orders": 5720,
+  "duplicate_order_numbers": "0",
+  "tracked_orders_201": 12,
+  "stock_decrease": 12,
+  "stock_ne_ledger_note": "stock decrease should equal accepted tracked orders (each qty 1)",
+  "new_paid": 0,
+  "new_journals": 0,
+  "paid_orders_without_sales_journal": "0",
+  "unbalanced_journals": "0",
+  "tb_total_debit_minus_credit": "0.00"
+ }
+}

@@ -1,0 +1,202 @@
+app,page_route,form,field_name,type,required,validation,maps_to_api_field,tested_status
+dashboard,/[locale]/dashboard/accounting/journal-entries,JournalEntryForm (create/edit draft),entry_date,date,unspecified,UI-unchecked (no explicit check; JournalEntryForm.tsx:117-140),entry_date,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/journal-entries,JournalEntryForm,entry_type,text,unspecified,default 'manual' (JournalEntryForm.tsx:151),entry_type,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/journal-entries,JournalEntryForm,description,text,yes,required; trim non-empty (JournalEntryForm.tsx:117),description,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/journal-entries,JournalEntryForm,description_ar,text,no,optional,description_ar,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/journal-entries,JournalEntryForm,reference_type,text,no,optional free text,reference_type,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/journal-entries,JournalEntryForm,reference_number,text,no,optional,reference_number,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/journal-entries,JournalEntryForm,notes,textarea,no,optional,notes,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/journal-entries,JournalEntryForm line[],account_id,select,unspecified,line kept only if account_id>0 and amount>0; >=2 lines (JournalEntryForm.tsx:129-141),lines[].account_id,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/journal-entries,JournalEntryForm line[],debit_amount,number min=0 step=0.01,unspecified,total debit must equal total credit client-side (JournalEntryForm.tsx:122); server re-validates at post (journal_entry_repo.go:358-395 tolerance 0.009),lines[].debit_amount,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/journal-entries,JournalEntryForm line[],credit_amount,number min=0 step=0.01,unspecified,same as debit_amount,lines[].credit_amount,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/journal-entries,JournalEntryForm line[],description,text,no,optional,lines[].description,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/journal-entries/[id],Post action (button),post,action,unspecified,requires ACCOUNTING:WRITE (page checkPermission),POST /accounting/journal-entries/{id}/post,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/journal-entries/[id],Void action,reason,text,unspecified,UI prompt UNVERIFIED (see accountingApi voidJournalEntry),POST /accounting/journal-entries/{id}/void body.reason,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/journal-entries,Filters,start_date,date,no,optional,query start_date,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/journal-entries,Filters,end_date,date,no,optional,query end_date,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/journal-entries,Filters,status,select,no,optional,query status,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/journal-entries,Filters,entry_type,select,no,optional,query entry_type,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/supplier-invoices,InvoiceForm mode=supplier,supplier_id,select,yes,required: 'Supplier is required.' (InvoiceForm.tsx:138),supplier_id,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/supplier-invoices,InvoiceForm mode=supplier,supplier_ref,text,no,optional,supplier_ref,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/supplier-invoices,InvoiceForm mode=supplier,invoice_date,date,unspecified,server parse parseAccountingInputDate; UI no explicit check,invoice_date,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/supplier-invoices,InvoiceForm mode=supplier,due_date,date,unspecified,server parse; UI no explicit check,due_date,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/supplier-invoices,InvoiceForm mode=supplier,currency,text/select,unspecified,default 'EGP' (InvoiceForm.tsx:173),currency,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/supplier-invoices,InvoiceForm mode=supplier,status,select draft/sent,unspecified,default draft,status,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/supplier-invoices,InvoiceForm mode=supplier,notes,textarea,no,optional,notes,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/supplier-invoices,InvoiceForm mode=supplier,internal_notes,textarea,no,optional,internal_notes,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/supplier-invoices,InvoiceForm line[] mode=supplier,description,text,yes,lines with blank description dropped; >=1 line required (InvoiceForm.tsx:142-146),lines[].description,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/supplier-invoices,InvoiceForm line[],description_ar,text,no,optional,lines[].description_ar,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/supplier-invoices,InvoiceForm line[],account_id,select (expense/inventory account),no,optional; blank=system default (InvoiceForm.tsx:377),lines[].account_id,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/supplier-invoices,InvoiceForm line[],quantity,number min=0 step=0.01,unspecified,min=0 only (zero allowed); DB trigger recomputes totals,lines[].quantity,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/supplier-invoices,InvoiceForm line[],unit_price,number min=0 step=0.01,unspecified,min=0,lines[].unit_price,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/supplier-invoices,InvoiceForm line[],tax_rate,number min=0 step=0.01,unspecified,min=0; no max,lines[].tax_rate,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/supplier-invoices,InvoiceForm line[],discount_rate,number min=0 step=0.01,unspecified,min=0; no max (DB trigger computes discount_amount; max<=100 UNVERIFIED),lines[].discount_rate,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/supplier-invoices,InvoiceForm line[],tax_amount (client computed),computed,unspecified,client-sent but overwritten by DB trigger recalculate_invoice_*_line_total (supplier trigger UNVERIFIED; customer verified 141_create_invoices_customer.sql:76-84),lines[].tax_amount,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/supplier-invoices,InvoiceForm line[],discount_amount (client computed),computed,unspecified,as above,lines[].discount_amount,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/supplier-invoices,InvoiceForm line[],line_total (client computed),computed,unspecified,as above,lines[].line_total,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/customer-invoices,InvoiceForm mode=customer,customer_id,select,yes,required: 'Customer is required.' (InvoiceForm.tsx:134); server customer_id>0 (invoice_customer_handler.go:322),customer_id,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/customer-invoices,InvoiceForm mode=customer,order_id,number min=1,no,optional; link validity vs tenant UNVERIFIED,order_id,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/customer-invoices,InvoiceForm mode=customer,invoice_date,date,unspecified,server parse,invoice_date,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/customer-invoices,InvoiceForm mode=customer,due_date,date,unspecified,server parse; defaults to invoice_date if zero (invoice_customer_repo.go:455),due_date,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/customer-invoices,InvoiceForm mode=customer,currency,text/select,unspecified,default EGP,currency,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/customer-invoices,InvoiceForm mode=customer,status,select draft/sent,unspecified,NOTE: backend posts journal on create regardless of status (invoice_customer_repo.go:507-521),status,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/customer-invoices,InvoiceForm mode=customer,terms,textarea,no,optional,terms,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/customer-invoices,InvoiceForm mode=customer,notes,textarea,no,optional,notes,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/customer-invoices,InvoiceForm mode=customer,internal_notes,textarea,no,optional,internal_notes,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/customer-invoices,InvoiceForm line[] mode=customer,description,text,yes,>=1 non-blank line,lines[].description,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/customer-invoices,InvoiceForm line[],description_ar,text,no,optional,lines[].description_ar,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/customer-invoices,InvoiceForm line[],account_id (revenue account),select,no,optional; blank=system default,lines[].account_id,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/customer-invoices,InvoiceForm line[],quantity,number min=0 step=0.01,unspecified,min=0,lines[].quantity,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/customer-invoices,InvoiceForm line[],unit_price,number min=0 step=0.01,unspecified,min=0,lines[].unit_price,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/customer-invoices,InvoiceForm line[],tax_rate,number min=0 step=0.01,unspecified,min=0,lines[].tax_rate,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/customer-invoices,InvoiceForm line[],discount_rate,number min=0 step=0.01,unspecified,min=0,lines[].discount_rate,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/customer-invoices,InvoiceForm line[],tax_amount/discount_amount/line_total (client computed),computed,unspecified,overwritten by DB trigger (141_create_invoices_customer.sql:76-84),"lines[].tax_amount, discount_amount, line_total",NOT TESTED
+dashboard,/[locale]/dashboard/accounting/customer-invoices,Void action,reason,text,unspecified,server blocks void when amount_paid>0 (invoice_customer_repo.go:335),POST /accounting/customer-invoices/{id}/void body.reason,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/customer-invoices,Payment received (PaymentForm mode=received),payment_date,date,unspecified,UI no explicit check,payment_date,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/customer-invoices,PaymentForm mode=received,invoice_id,select open invoices,yes,optional; either customer or invoice required (PaymentForm.tsx:112),invoice_id,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/customer-invoices,PaymentForm mode=received,customer_id,select,yes,required if no invoice,customer_id,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/customer-invoices,PaymentForm mode=received,amount,number min=0 step=0.01,yes,"must be >0 (PaymentForm.tsx:103); server >0 and <= invoice balance+0.009 (payment_acct_repo.go:~33,~65)",amount,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/customer-invoices,PaymentForm mode=received,payment_method,select cash/card/bank_transfer/...,yes,required (PaymentForm.tsx:107); options accounting-utils.ts:66,payment_method,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/customer-invoices,PaymentForm mode=received,bank_account_id,select,no,optional; blank=system default account,bank_account_id,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/customer-invoices,PaymentForm mode=received,reference,text,no,optional,reference,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/customer-invoices,PaymentForm mode=received,notes,textarea,no,optional,notes,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/supplier-invoices,Payment made (PaymentForm mode=made),payment_date,date,unspecified,UI no explicit check,payment_date,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/supplier-invoices,PaymentForm mode=made,invoice_id,select,yes,optional; supplier or invoice required (PaymentForm.tsx:116),invoice_id,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/supplier-invoices,PaymentForm mode=made,supplier_id,select,yes,required if no invoice,supplier_id,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/supplier-invoices,PaymentForm mode=made,amount,number min=0 step=0.01,unspecified,>0 client; server cap vs invoice balance UNVERIFIED for made path,amount,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/supplier-invoices,PaymentForm mode=made,payment_method,select,yes,required,payment_method,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/supplier-invoices,PaymentForm mode=made,bank_account_id,select,no,optional,bank_account_id,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/supplier-invoices,PaymentForm mode=made,reference,text,no,optional,reference,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/supplier-invoices,PaymentForm mode=made,notes,textarea,no,optional,notes,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/supplier-invoices,Approve action,approve,action,unspecified,posts AP journal in one tx (invoice_supplier_repo.go:295),POST /accounting/supplier-invoices/{id}/approve,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/bank-accounts,BankAccountForm,account_name,text,yes,required (BankAccountForm.tsx:73),account_name,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/bank-accounts,BankAccountForm,account_name_ar,text,no,optional,account_name_ar,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/bank-accounts,BankAccountForm,bank_name,text,yes,required (BankAccountForm.tsx:77),bank_name,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/bank-accounts,BankAccountForm,bank_branch,text,no,optional,bank_branch,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/bank-accounts,BankAccountForm,account_number,text,yes,required (BankAccountForm.tsx:81); no format check,account_number,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/bank-accounts,BankAccountForm,iban,text,no,optional; no checksum validation in UI,iban,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/bank-accounts,BankAccountForm,swift_code,text,no,optional,swift_code,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/bank-accounts,BankAccountForm,currency,text,unspecified,default EGP,currency,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/bank-accounts,BankAccountForm,account_type,select,unspecified,enum BankAccountType,account_type,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/bank-accounts,BankAccountForm,opening_balance,number step=0.01,unspecified,Number(),,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/bank-accounts,BankAccountForm,opening_date,date,unspecified,no explicit check,opening_date,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/bank-accounts,BankAccountForm,gl_account_id,select,no,optional link to chart of accounts,gl_account_id,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/bank-accounts,BankAccountForm,is_primary,checkbox,unspecified,bool,is_primary,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/bank-accounts,BankAccountForm,is_active,checkbox,unspecified,bool,is_active,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/chart-of-accounts,AccountForm,account_code,text,yes,required; unique per case-insens. list check client (AccountForm.tsx:85-95),account_code,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/chart-of-accounts,AccountForm,account_name,text,yes,required (AccountForm.tsx:88),account_name,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/chart-of-accounts,AccountForm,account_name_ar,text,no,optional,account_name_ar,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/chart-of-accounts,AccountForm,description / description_ar,text,no,optional,"description, description_ar",NOT TESTED
+dashboard,/[locale]/dashboard/accounting/chart-of-accounts,AccountForm,account_type,select,unspecified,enum AccountType,account_type,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/chart-of-accounts,AccountForm,account_subtype,text,no,optional,account_subtype,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/chart-of-accounts,AccountForm,normal_balance,select debit/credit,unspecified,"cannot change after ledger history (trigger cfr003, migration 190)",normal_balance,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/chart-of-accounts,AccountForm,parent_id,select,unspecified,parent validation client (AccountForm.tsx:102),parent_id,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/chart-of-accounts,AccountForm,currency,text,unspecified,default EGP,currency,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/chart-of-accounts,AccountForm,tax_rate,number step=0.01,unspecified,blank=>null; no range check,tax_rate,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/chart-of-accounts,AccountForm,is_header,checkbox,unspecified,bool,is_header,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/chart-of-accounts,AccountForm,is_reconcilable,checkbox,unspecified,bool,is_reconcilable,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/chart-of-accounts,AccountForm,is_active,checkbox,unspecified,bool,is_active,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/suppliers,SupplierForm,company_name,text,yes,required (SupplierForm.tsx:79),company_name,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/suppliers,SupplierForm,company_name_ar,text,no,optional,company_name_ar,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/suppliers,SupplierForm,contact_person,text,no,optional,contact_person,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/suppliers,SupplierForm,email,email,unspecified,html type=email only,email,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/suppliers,SupplierForm,phone / mobile,text,no,optional,"phone, mobile",NOT TESTED
+dashboard,/[locale]/dashboard/accounting/suppliers,SupplierForm,website,text,no,optional,website,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/suppliers,SupplierForm,tax_number,text,no,optional; no format check,tax_number,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/suppliers,SupplierForm,category,select,no,optional,category,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/suppliers,SupplierForm,payment_terms,select,no,optional,payment_terms,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/suppliers,SupplierForm,credit_limit,number min=0 step=0.01,unspecified,Number(),,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/suppliers,SupplierForm,currency,text,unspecified,default,currency,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/suppliers,SupplierForm,payable_account_id,select,no,optional AP account,payable_account_id,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/suppliers,SupplierForm,"address,address_ar,city,state,postal_code,country",text,no,optional,"address,address_ar,city,state,postal_code,country",NOT TESTED
+dashboard,/[locale]/dashboard/accounting/suppliers,SupplierForm,bank_name / bank_account / iban,text,no,optional,"bank_name, bank_account, iban",NOT TESTED
+dashboard,/[locale]/dashboard/accounting/suppliers,SupplierForm,notes / is_active,textarea/checkbox,no,optional,"notes, is_active",NOT TESTED
+dashboard,/[locale]/dashboard/accounting/customers,CustomerForm,customer_name,text,yes,required (CustomerForm.tsx:73),customer_name,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/customers,CustomerForm,customer_name_ar,text,no,optional,customer_name_ar,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/customers,CustomerForm,customer_type,select,no,optional,customer_type,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/customers,CustomerForm,payment_terms,select,no,optional,payment_terms,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/customers,CustomerForm,"contact_person,email,phone,mobile",text/email,unspecified,email html type only,"contact_person,email,phone,mobile",NOT TESTED
+dashboard,/[locale]/dashboard/accounting/customers,CustomerForm,credit_limit,number min=0 step=0.01,unspecified,Number(),,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/customers,CustomerForm,currency,text,unspecified,default,currency,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/customers,CustomerForm,receivable_account_id,select,no,optional AR account,receivable_account_id,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/customers,CustomerForm,"country,tax_number,city,address,address_ar",text,no,optional,"country,tax_number,city,address,address_ar",NOT TESTED
+dashboard,/[locale]/dashboard/accounting/customers,CustomerForm,notes / is_active,textarea/checkbox,no,optional,"notes,is_active",NOT TESTED
+dashboard,/[locale]/dashboard/accounting/advanced,Bank reconciliation session form,bank_account_id,number (raw ID),unspecified,no validation; raw numeric ID input,bank_account_id,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/advanced,Bank reconciliation session form,statement_date,date,unspecified,none,statement_date,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/advanced,Bank reconciliation session form,statement_balance,number,unspecified,none,statement_balance,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/advanced,Bank reconciliation session form,book_balance,number,unspecified,none (client-supplied book balance),book_balance,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/advanced,Budget form,account_id / year / month,number,unspecified,none,"account_id,year,month",NOT TESTED
+dashboard,/[locale]/dashboard/accounting/advanced,Budget form,budget_amount,number,unspecified,none,budget_amount,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/advanced,Budget form,currency,text,unspecified,none,currency,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/advanced,Exchange rate form,base_currency / quote_currency,text,unspecified,none,"base_currency, quote_currency",NOT TESTED
+dashboard,/[locale]/dashboard/accounting/advanced,Exchange rate form,rate,number,unspecified,none (financial: FX rate manual),rate,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/advanced,Exchange rate form,effective_date,date,unspecified,none,effective_date,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/advanced,Supplier payment schedule form,supplier_id,number (raw ID),unspecified,none,supplier_id,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/advanced,Supplier payment schedule form,scheduled_date,date,unspecified,none,scheduled_date,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/advanced,Supplier payment schedule form,amount,number,unspecified,none,amount,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/advanced,Supplier payment schedule form,reminder_days,number,unspecified,none,reminder_days,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/advanced,Supplier payment schedule form,currency,text,unspecified,none,currency,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/advanced,E-invoice submit,invoiceId,number (default 1),unspecified,default value 1 (page.tsx:75); no validation,POST /accounting/einvoice/{id}/submit,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/advanced,CSV import COA,file,file .csv,unspecified,accept=.csv only,multipart POST /accounting/csv/chart-of-accounts/import,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/advanced,CSV import journal entries,file,file .csv,unspecified,accept=.csv only; creates entries (autoPost param UNVERIFIED in UI),multipart POST /accounting/csv/journal-entries/import,NOT TESTED
+dashboard,/[locale]/dashboard/hr/payroll,SalaryForm,employee_id,select,yes,required (SalaryForm.tsx:87),employee_id,NOT TESTED
+dashboard,/[locale]/dashboard/hr/payroll,SalaryForm,pay_period_start,date,yes,required,pay_period_start,NOT TESTED
+dashboard,/[locale]/dashboard/hr/payroll,SalaryForm,pay_period_end,date,yes,required; end>=start not checked client,pay_period_end,NOT TESTED
+dashboard,/[locale]/dashboard/hr/payroll,SalaryForm,base_salary,number step=0.01,unspecified,parseFloat,,NOT TESTED
+dashboard,/[locale]/dashboard/hr/payroll,SalaryForm,overtime_hours,number step=0.5,unspecified,parseFloat,,NOT TESTED
+dashboard,/[locale]/dashboard/hr/payroll,SalaryForm,overtime_rate,number,unspecified,parseFloat,,NOT TESTED
+dashboard,/[locale]/dashboard/hr/payroll,SalaryForm,bonus,number step=0.01,unspecified,parseFloat,,NOT TESTED
+dashboard,/[locale]/dashboard/hr/payroll,SalaryForm,commission,number,unspecified,parseFloat,,NOT TESTED
+dashboard,/[locale]/dashboard/hr/payroll,SalaryForm,allowances,number step=0.01,unspecified,parseFloat,,NOT TESTED
+dashboard,/[locale]/dashboard/hr/payroll,SalaryForm,tips,number,unspecified,parseFloat,,NOT TESTED
+dashboard,/[locale]/dashboard/hr/payroll,SalaryForm,tax,number step=0.01,unspecified,parseFloat,,NOT TESTED
+dashboard,/[locale]/dashboard/hr/payroll,SalaryForm,social_insurance,number step=0.01,unspecified,parseFloat,,NOT TESTED
+dashboard,/[locale]/dashboard/hr/payroll,SalaryForm,health_insurance,number,unspecified,parseFloat,,NOT TESTED
+dashboard,/[locale]/dashboard/hr/payroll,SalaryForm,pension,number,unspecified,parseFloat,,NOT TESTED
+dashboard,/[locale]/dashboard/hr/payroll,SalaryForm,loan_deduction,number step=0.01,unspecified,parseFloat,,NOT TESTED
+dashboard,/[locale]/dashboard/hr/payroll,SalaryForm,total_hours_worked,number step=0.5,unspecified,default '160',total_hours_worked,NOT TESTED
+dashboard,/[locale]/dashboard/hr/payroll,Mark paid (row action),payment_reference,auto-generated string,unspecified,client sends PAY-<Date.now()> (payroll/page.tsx:209); backend max 120 chars (hr_salary_handler.go:~490),POST /hr/salaries/{id}/mark-paid body.payment_reference,NOT TESTED
+dashboard,/[locale]/dashboard/hr/employees,EmployeeForm,salary/pay related fields,see EmployeeForm.tsx,unspecified,financial fields (base salary / bank details) not enumerated in this pass - UNVERIFIED,employees API,NOT TESTED
+dashboard,/[locale]/dashboard/products/new,ProductForm,name_en,text,yes,required (ProductForm.tsx:168),name_en,NOT TESTED
+dashboard,/[locale]/dashboard/products/new,ProductForm,name_ar,text,no,optional,name_ar,NOT TESTED
+dashboard,/[locale]/dashboard/products/new,ProductForm,category_id,select,unspecified,see ProductForm.tsx:189,category_id,NOT TESTED
+dashboard,/[locale]/dashboard/products/new,ProductForm,price,number step=0.01,yes,required; min 0.01 (ProductForm.tsx:266),price,NOT TESTED
+dashboard,/[locale]/dashboard/products/new,ProductForm,cost,number step=0.01,no,optional; no min; feeds COGS via GetProductCost (UNVERIFIED source),cost,NOT TESTED
+dashboard,/[locale]/dashboard/products/new,ProductForm,discount_price,number step=0.01,no,optional; no cross-check vs price,discount_price,NOT TESTED
+dashboard,/[locale]/dashboard/products/new,ProductForm,track_inventory,checkbox,unspecified,bool,track_inventory,NOT TESTED
+dashboard,/[locale]/dashboard/products/new,ProductForm,quantity_in_stock,number min=0,unspecified,toInt; edit sends only if changed (ProductForm.tsx:97),quantity_in_stock,NOT TESTED
+dashboard,/[locale]/dashboard/products/new,ProductForm,low_stock_threshold,number min=0,unspecified,toInt,low_stock_threshold,NOT TESTED
+dashboard,/[locale]/dashboard/products/new,ProductForm,is_available,checkbox,unspecified,bool,is_available,NOT TESTED
+dashboard,/[locale]/dashboard/products/new,ProductForm,"featured, is_vegetarian, is_vegan, is_spicy, is_gluten_free",checkbox,unspecified,bool,same names,NOT TESTED
+dashboard,/[locale]/dashboard/products/new,ProductForm,description_en / description_ar,textarea,no,optional,"description_en, description_ar",NOT TESTED
+dashboard,/[locale]/dashboard/inventory,Inventory adjust (POST /inventory/adjust),product_id,number,yes,server: >0 (inventory_adjustment_handler.go:47),product_id,NOT TESTED
+dashboard,/[locale]/dashboard/inventory,Inventory adjust,quantity_change,number (int),unspecified,server: non-zero; result cannot be negative; NO unit cost captured,quantity_change,NOT TESTED
+dashboard,/[locale]/dashboard/inventory,Inventory adjust,reason,select purchase/sale/adjustment/waste/return,unspecified,server enum (inventory_adjustment_handler.go:~115),reason,NOT TESTED
+dashboard,/[locale]/dashboard/inventory,Inventory adjust,notes,text,no,optional,notes,NOT TESTED
+dashboard,/[locale]/dashboard/pos,POS cart,items[].product_id,from product grid,unspecified,sanitized: product_id>0 (posApi.ts:195-199),items[].product_id,NOT TESTED
+dashboard,/[locale]/dashboard/pos,POS cart,items[].quantity,number,unspecified,"Math.max(1, floor)",items[].quantity,NOT TESTED
+dashboard,/[locale]/dashboard/pos,POS cart,items[].special_instructions,text,no,optional,items[].special_instructions,NOT TESTED
+dashboard,/[locale]/dashboard/pos,POS customer,customer_name,text,unspecified,default 'Walk-in',customer_name,NOT TESTED
+dashboard,/[locale]/dashboard/pos,POS customer,customer_phone,text,no,optional for pos source (order_usecase.go:596),customer_phone,NOT TESTED
+dashboard,/[locale]/dashboard/pos,POSPaymentSelector,payment_method,select cash/card,unspecified,enum cash/card in UI; backend allows cash/card/online/wallet (order_usecase.go:605),payment_method,NOT TESTED
+dashboard,/[locale]/dashboard/pos,POSTableSelector,table_id,select,no,optional,table_id,NOT TESTED
+dashboard,/[locale]/dashboard/pos,POS notes,notes,text,no,optional,notes,NOT TESTED
+dashboard,/[locale]/dashboard/pos,POS payment confirm (post-create),payment_status,PUT /admin/orders/{id}/payment-status,unspecified,"UI displays tax 14% (posStore.ts:107) but backend computes 10% (order_pricing.go:11,46)",payment_status,NOT TESTED
+dashboard,/[locale]/dashboard/orders/[id],Order payment status update,payment_status,select pending/paid/failed,unspecified,backend transition rules (domain/order.go:219-229); paid triggers outbox,payment_status,NOT TESTED
+dashboard,/[locale]/dashboard/settings/restaurant,Restaurant info form,name,text,unspecified,no tax/VAT field exists in this form,name,NOT TESTED
+dashboard,/[locale]/dashboard/settings/restaurant,Restaurant info form,email,text,unspecified,none,email,NOT TESTED
+dashboard,/[locale]/dashboard/settings/restaurant,Restaurant info form,phone,text,unspecified,none,phone,NOT TESTED
+dashboard,/[locale]/dashboard/settings/billing,PaymentModal (SaaS subscription),plan selection,select,unspecified,"SaaS platform billing, not restaurant ledger",POST /subscription/initiate,NOT TESTED
+dashboard,/[locale]/dashboard/accounting/*,(tax settings),vat rate,n/a,unspecified,NO tax-rate setting UI found; tax rate hard-coded 10% in backend order_pricing.go:11 and 14% in POS UI posStore.ts:107,n/a,NOT TESTED
+restaurant-website,/[locale]/checkout,Checkout form,customerName,text,yes,"optional (required in-code if delivery: length>=2, checkout-page-content.tsx:129)",customer_name,NOT TESTED
+restaurant-website,/[locale]/checkout,Checkout form,customerEmail,email,no,optional; regex /\S+@\S+\.\S+/ (checkout-page-content.tsx:26),customer_email,NOT TESTED
+restaurant-website,/[locale]/checkout,Checkout form,customerPhone,tel,yes,zod min(10) (checkout-page-content.tsx:27),customer_phone,NOT TESTED
+restaurant-website,/[locale]/checkout,Checkout form,deliveryAddress,textarea,yes,"required if not dine-in, length>=5 (checkout-page-content.tsx:139)",delivery_address,NOT TESTED
+restaurant-website,/[locale]/checkout,Checkout form,specialInstructions,textarea,no,optional,notes,NOT TESTED
+restaurant-website,/[locale]/checkout,Checkout form,paymentMethod,hidden literal 'cash',unspecified,z.literal('cash') (checkout-page-content.tsx:30); cash only,payment_method,NOT TESTED
+restaurant-website,/[locale]/checkout,Checkout submit,expected_total,computed from quote,unspecified,server compares abs diff>0.004 (order_usecase.go:163),expected_total,NOT TESTED
+restaurant-website,/[locale]/checkout,Checkout submit,order_source,computed,unspecified,'dine_in' or 'website',order_source,NOT TESTED
+restaurant-website,/[locale]/checkout,Checkout submit,table_id,from route,unspecified,dine-in only,table_id,NOT TESTED
+restaurant-website,/[locale]/checkout,Checkout submit,items[].product_id / quantity / special_instructions,cart,unspecified,server reprices from DB (order_pricing.go:13-39),items[],NOT TESTED
+restaurant-website,/[locale]/cart,Cart,item quantity / notes,number/text,unspecified,client cart state; no price sent,items[],NOT TESTED
+restaurant-website,/[locale]/orders/track,Track form,order number / phone,text,unspecified,public lookup rate-limited 60/min (main.go:602),GET /public/orders/number/{number}/lookup,NOT TESTED

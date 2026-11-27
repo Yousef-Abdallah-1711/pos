@@ -1,0 +1,79 @@
+{
+ "run": "RUN-005",
+ "finding": "F-074",
+ "build": "Next dev (isolated stack)",
+ "out": [
+  {
+   "form": "customers",
+   "request": [
+    "POST /accounting/customers 400 {\"error\":\"pq: value too long for type character varying(100)\",\"success\":false}\n"
+   ],
+   "toast": "pq: value too long for type character varying(100)",
+   "inlineAlerts": [
+    ""
+   ],
+   "devOverlay": ":host {\n  all: initial;\n\n  /* the direction property is not reset by 'all' */\n  direction: ltr;\n}\n\n/*!\n * Bootstrap Reboot v4.4.1 (https://g",
+   "unhandledRejections": [
+    "Request failed with status code 400"
+   ],
+   "pageErrors": [
+    "console: Failed to load resource: the server responded with a status of 400 (Bad Request)",
+    "pageerror: Request failed with status code 400"
+   ]
+  },
+  {
+   "form": "suppliers",
+   "request": [
+    "POST /suppliers 400 {\"error\":\"pq: value too long for type character varying(100)\",\"success\":false}\n"
+   ],
+   "toast": "pq: value too long for type character varying(100)",
+   "inlineAlerts": [
+    ""
+   ],
+   "devOverlay": ":host {\n  all: initial;\n\n  /* the direction property is not reset by 'all' */\n  direction: ltr;\n}\n\n/*!\n * Bootstrap Reboot v4.4.1 (https://g",
+   "unhandledRejections": [
+    "Request failed with status code 400"
+   ],
+   "pageErrors": [
+    "console: Failed to load resource: the server responded with a status of 400 (Bad Request)",
+    "pageerror: Request failed with status code 400"
+   ]
+  },
+  {
+   "form": "accounts",
+   "request": [
+    "POST /accounting/accounts 400 {\"error\":\"pq: value too long for type character varying(20)\",\"success\":false}\n"
+   ],
+   "toast": "pq: value too long for type character varying(20)",
+   "inlineAlerts": [
+    ""
+   ],
+   "devOverlay": ":host {\n  all: initial;\n\n  /* the direction property is not reset by 'all' */\n  direction: ltr;\n}\n\n/*!\n * Bootstrap Reboot v4.4.1 (https://g",
+   "unhandledRejections": [
+    "Request failed with status code 400"
+   ],
+   "pageErrors": [
+    "console: Failed to load resource: the server responded with a status of 400 (Bad Request)",
+    "pageerror: Request failed with status code 400"
+   ]
+  },
+  {
+   "form": "contracts",
+   "request": [
+    "POST /hr/contracts 400 {\"error\":\"pq: value too long for type character varying(50)\"}"
+   ],
+   "toast": "",
+   "inlineAlerts": [
+    ""
+   ],
+   "devOverlay": ":host {\n  all: initial;\n\n  /* the direction property is not reset by 'all' */\n  direction: ltr;\n}\n\n/*!\n * Bootstrap Reboot v4.4.1 (https://g",
+   "unhandledRejections": [
+    "Request failed with status code 400"
+   ],
+   "pageErrors": [
+    "console: Failed to load resource: the server responded with a status of 400 (Bad Request)",
+    "pageerror: Request failed with status code 400"
+   ]
+  }
+ ]
+}

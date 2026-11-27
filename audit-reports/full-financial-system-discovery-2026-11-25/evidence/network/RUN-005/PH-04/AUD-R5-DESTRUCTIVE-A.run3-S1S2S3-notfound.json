@@ -1,0 +1,55 @@
+{
+ "run": "RUN-005",
+ "tag": "R5DEL73912",
+ "tenant": 4,
+ "note": "disposable entities named R5DEL-*; isolated stack",
+ "log": [
+  {
+   "id": "ROWBTN",
+   "what": "no matching row control",
+   "text": "R5DEL73912",
+   "label": "/delete|remove|disable/i",
+   "row_buttons": []
+  },
+  {
+   "id": "97",
+   "what": "delete clean customer",
+   "clicked": false,
+   "confirmed": false,
+   "calls": [],
+   "after": "true"
+  },
+  {
+   "id": "ROWBTN",
+   "what": "no matching row control",
+   "text": "R5DEL73912 custinv",
+   "label": "/delete|remove|disable/i",
+   "row_buttons": []
+  },
+  {
+   "id": 98,
+   "what": "delete customer with an invoice",
+   "invoice_http": 201,
+   "clicked": false,
+   "confirmed": false,
+   "calls": [],
+   "after": "t",
+   "invoices_remaining": "1"
+  },
+  {
+   "id": "ROWBTN",
+   "what": "no matching row control",
+   "text": "R5DEL73912",
+   "label": "/delete|remove|disable/i",
+   "row_buttons": []
+  },
+  {
+   "id": "84",
+   "what": "delete clean supplier",
+   "clicked": false,
+   "confirmed": false,
+   "calls": [],
+   "after": "t"
+  }
+ ]
+}

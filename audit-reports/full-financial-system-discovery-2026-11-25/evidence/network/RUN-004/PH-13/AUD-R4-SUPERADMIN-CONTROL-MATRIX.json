@@ -1,0 +1,283 @@
+{
+ "run": "RUN-004",
+ "tenant": 4,
+ "role": "owner",
+ "viewport": "1440x900 EN",
+ "results": [
+  {
+   "route": "",
+   "control": "link:View All Tenants",
+   "type": "link",
+   "navigated": "/dashboard/tenants",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "",
+   "control": "link:View All Users",
+   "type": "link",
+   "navigated": "/dashboard/users",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "",
+   "control": "link:View Audit Logs",
+   "type": "link",
+   "navigated": "/dashboard/audit-logs",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "",
+   "control": "link:Payment Health",
+   "type": "link",
+   "navigated": "/dashboard/payments",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "",
+   "control": "link:Manage Settings",
+   "type": "link",
+   "navigated": "/dashboard/settings",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "tenants",
+   "control": "link:View",
+   "type": "link",
+   "navigated": "/dashboard/tenants/10",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "tenants",
+   "control": "link:View",
+   "type": "link",
+   "detail": "locator.click: Timeout 4000ms exceeded.",
+   "status": "BLOCKED"
+  },
+  {
+   "route": "tenants",
+   "control": "link:View",
+   "type": "link",
+   "detail": "locator.click: Timeout 4000ms exceeded.",
+   "status": "BLOCKED"
+  },
+  {
+   "route": "tenants",
+   "control": "link:View",
+   "type": "link",
+   "detail": "locator.click: Timeout 4000ms exceeded.",
+   "status": "BLOCKED"
+  },
+  {
+   "route": "tenants",
+   "control": "link:View",
+   "type": "link",
+   "detail": "locator.click: Timeout 4000ms exceeded.",
+   "status": "BLOCKED"
+  },
+  {
+   "route": "tenants",
+   "control": "link:View",
+   "type": "link",
+   "detail": "locator.click: Timeout 4000ms exceeded.",
+   "status": "BLOCKED"
+  },
+  {
+   "route": "tenants",
+   "control": "link:View",
+   "type": "link",
+   "detail": "locator.click: Timeout 4000ms exceeded.",
+   "status": "BLOCKED"
+  },
+  {
+   "route": "tenants",
+   "control": "link:View",
+   "type": "link",
+   "detail": "locator.click: Timeout 4000ms exceeded.",
+   "status": "BLOCKED"
+  },
+  {
+   "route": "tenants",
+   "control": "link:View",
+   "type": "link",
+   "detail": "locator.click: Timeout 4000ms exceeded.",
+   "status": "BLOCKED"
+  },
+  {
+   "route": "tenants",
+   "control": "link:View",
+   "type": "link",
+   "detail": "locator.click: Timeout 4000ms exceeded.",
+   "status": "BLOCKED"
+  },
+  {
+   "route": "tenants",
+   "control": "search:Search tenants by name or slug...",
+   "type": "search",
+   "status": "BLOCKED",
+   "detail": "locator.fill: Timeout 4000ms exceeded."
+  },
+  {
+   "route": "payments",
+   "control": "button:Refresh",
+   "type": "button",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "payments",
+   "control": "select:(unlabelled)",
+   "type": "select",
+   "detail": "selected 2nd option",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "users",
+   "control": "link:View",
+   "type": "link",
+   "navigated": "/dashboard/users/16",
+   "changed": true,
+   "errors": [
+    "console: Failed to load resource: the server responded with a status of 404 (Not Found)"
+   ],
+   "status": "ERROR"
+  },
+  {
+   "route": "users",
+   "control": "link:View",
+   "type": "link",
+   "navigated": "/dashboard/users/15",
+   "changed": true,
+   "errors": [
+    "console: Failed to load resource: the server responded with a status of 404 (Not Found)"
+   ],
+   "status": "ERROR"
+  },
+  {
+   "route": "users",
+   "control": "link:View",
+   "type": "link",
+   "navigated": "/dashboard/users/14",
+   "changed": true,
+   "errors": [
+    "console: Failed to load resource: the server responded with a status of 404 (Not Found)"
+   ],
+   "status": "ERROR"
+  },
+  {
+   "route": "users",
+   "control": "link:View",
+   "type": "link",
+   "navigated": "/dashboard/users/13",
+   "changed": true,
+   "errors": [
+    "console: Failed to load resource: the server responded with a status of 404 (Not Found)"
+   ],
+   "status": "ERROR"
+  },
+  {
+   "route": "users",
+   "control": "link:View",
+   "type": "link",
+   "navigated": "/dashboard/users/12",
+   "changed": true,
+   "errors": [
+    "console: Failed to load resource: the server responded with a status of 404 (Not Found)"
+   ],
+   "status": "ERROR"
+  },
+  {
+   "route": "users",
+   "control": "link:View",
+   "type": "link",
+   "navigated": "/dashboard/users/11",
+   "changed": true,
+   "errors": [
+    "console: Failed to load resource: the server responded with a status of 404 (Not Found)"
+   ],
+   "status": "ERROR"
+  },
+  {
+   "route": "users",
+   "control": "link:View",
+   "type": "link",
+   "navigated": "/dashboard/users/10",
+   "changed": true,
+   "errors": [
+    "console: Failed to load resource: the server responded with a status of 404 (Not Found)"
+   ],
+   "status": "ERROR"
+  },
+  {
+   "route": "users",
+   "control": "link:View",
+   "type": "link",
+   "detail": "locator.click: Timeout 4000ms exceeded.",
+   "status": "BLOCKED"
+  },
+  {
+   "route": "users",
+   "control": "link:View",
+   "type": "link",
+   "detail": "locator.click: Timeout 4000ms exceeded.",
+   "status": "BLOCKED"
+  },
+  {
+   "route": "users",
+   "control": "link:View",
+   "type": "link",
+   "detail": "locator.click: Target crashed ",
+   "status": "BLOCKED"
+  },
+  {
+   "route": "users",
+   "control": "link:View",
+   "type": "link",
+   "status": "BLOCKED",
+   "detail": "locator.count: Target crashed "
+  },
+  {
+   "route": "users",
+   "control": "link:View",
+   "type": "link",
+   "status": "BLOCKED",
+   "detail": "locator.count: Target crashed "
+  },
+  {
+   "route": "users",
+   "control": "link:View",
+   "type": "link",
+   "status": "BLOCKED",
+   "detail": "locator.count: Target crashed "
+  },
+  {
+   "route": "users",
+   "control": "link:View",
+   "type": "link",
+   "status": "BLOCKED",
+   "detail": "locator.count: Target crashed "
+  },
+  {
+   "route": "users",
+   "control": "link:View",
+   "type": "link",
+   "status": "BLOCKED",
+   "detail": "locator.count: Target crashed "
+  },
+  {
+   "route": "users",
+   "control": "search:Search users by name or email...",
+   "type": "search",
+   "status": "BLOCKED",
+   "detail": "locator.count: Target crashed "
+  }
+ ]
+}

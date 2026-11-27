@@ -1,0 +1,5 @@
+# SCN-16/17 inventory adjustment & waste (API diagnostic) stock before=48 journals before=52
+adjust -2 count_shortage -> {"error":"A product, non-zero quantity change, and valid reason are required"} [400]
+adjust -1 waste -> {"message":"Inventory adjusted successfully","quantity_after":47} [200]
+stock after=47 journals after=52 (no journal expected => ledger inventory not reduced)
+turnover waste_qty seen by report: [0]

@@ -1,0 +1,442 @@
+[
+ [
+  "MET-TB-001",
+  "all account debit balances equal GL net",
+  1,
+  1,
+  "PASS",
+  "rows checked: 48"
+ ],
+ [
+  "MET-TB-002",
+  "all account credit balances equal GL net",
+  1,
+  1,
+  "PASS",
+  ""
+ ],
+ [
+  "MET-TB-004",
+  "total credits",
+  443110.01,
+  443110.01,
+  "PASS",
+  ""
+ ],
+ [
+  "MET-PNL-002",
+  "revenue 4100",
+  305300,
+  305300.0,
+  "PASS",
+  ""
+ ],
+ [
+  "MET-PNL-004",
+  "expense 5110",
+  125120,
+  125120.0,
+  "PASS",
+  ""
+ ],
+ [
+  "MET-PNL-004",
+  "expense 5210",
+  10000,
+  10000.0,
+  "PASS",
+  ""
+ ],
+ [
+  "MET-PNL-004",
+  "expense 5310",
+  3000,
+  3000.0,
+  "PASS",
+  ""
+ ],
+ [
+  "MET-PNL-006",
+  "comparison % when prior period is zero (convention 100%)",
+  100,
+  100,
+  "PASS",
+  "POLICY: zero-base shows 100%"
+ ],
+ [
+  "MET-BS-005",
+  "asset 1110",
+  286270.01,
+  286270.01,
+  "PASS",
+  ""
+ ],
+ [
+  "MET-BS-005",
+  "asset 1111",
+  -10000,
+  -10000.0,
+  "PASS",
+  ""
+ ],
+ [
+  "MET-BS-005",
+  "asset 1113",
+  11000,
+  11000.0,
+  "PASS",
+  ""
+ ],
+ [
+  "MET-BS-005",
+  "asset 1120",
+  3520,
+  3520.0,
+  "PASS",
+  ""
+ ],
+ [
+  "MET-BS-005",
+  "asset 1130",
+  -96120,
+  -96120.0,
+  "PASS",
+  ""
+ ],
+ [
+  "MET-BS-005",
+  "asset 1150",
+  4200,
+  4200.0,
+  "PASS",
+  ""
+ ],
+ [
+  "MET-GL-001",
+  "ledger 1110 debit sum",
+  421670.01,
+  321670.01,
+  "FAIL",
+  ""
+ ],
+ [
+  "MET-GL-001",
+  "ledger 1110 credit sum",
+  135400,
+  35400.0,
+  "FAIL",
+  ""
+ ],
+ [
+  "MET-GL-002",
+  "ledger 1110 last running_balance",
+  11000,
+  286270.01,
+  "FAIL",
+  "ordering: JE-2026-00079 first"
+ ],
+ [
+  "MET-GL-003",
+  "chart current_balance cache 1110",
+  286270.01,
+  286270.01,
+  "PASS",
+  ""
+ ],
+ [
+  "MET-GL-001",
+  "ledger 1111 debit sum",
+  0,
+  0.0,
+  "PASS",
+  ""
+ ],
+ [
+  "MET-GL-001",
+  "ledger 1111 credit sum",
+  10000,
+  10000.0,
+  "PASS",
+  ""
+ ],
+ [
+  "MET-GL-002",
+  "ledger 1111 last running_balance",
+  -5000,
+  -10000.0,
+  "FAIL",
+  "ordering: JE-2026-00049 first"
+ ],
+ [
+  "MET-GL-003",
+  "chart current_balance cache 1111",
+  -10000.0,
+  -10000.0,
+  "PASS",
+  ""
+ ],
+ [
+  "MET-TURN-002",
+  "avg qty product 2",
+  33,
+  33.0,
+  "PASS",
+  "opening_stock_qty reported 33 = current stock (legacy inventory table empty)"
+ ],
+ [
+  "MET-TURN-003",
+  "avg value product 2",
+  132000,
+  132000.0,
+  "PASS",
+  ""
+ ],
+ [
+  "MET-TURN-005",
+  "turnover product 2",
+  1.424242,
+  1.424242,
+  "PASS",
+  ""
+ ],
+ [
+  "MET-TURN-006",
+  "monthly turnover product 2",
+  1.424242,
+  1.424242,
+  "PASS",
+  ""
+ ],
+ [
+  "MET-TURN-007",
+  "slow-moving flag product 2",
+  1,
+  1,
+  "PASS",
+  ""
+ ],
+ [
+  "MET-TURN-008",
+  "waste qty product 2",
+  0,
+  1.0,
+  "FAIL",
+  "report reads legacy inventory table; movements ledger holds waste"
+ ],
+ [
+  "MET-TURN-002",
+  "avg qty product 4",
+  21,
+  21.0,
+  "PASS",
+  "opening_stock_qty reported 21 = current stock (legacy inventory table empty)"
+ ],
+ [
+  "MET-TURN-003",
+  "avg value product 4",
+  840,
+  840.0,
+  "PASS",
+  ""
+ ],
+ [
+  "MET-TURN-005",
+  "turnover product 4",
+  0.142857,
+  0.142857,
+  "PASS",
+  ""
+ ],
+ [
+  "MET-TURN-006",
+  "monthly turnover product 4",
+  0.142857,
+  0.142857,
+  "PASS",
+  ""
+ ],
+ [
+  "MET-TURN-007",
+  "slow-moving flag product 4",
+  1,
+  1,
+  "PASS",
+  ""
+ ],
+ [
+  "MET-TURN-008",
+  "waste qty product 4",
+  0,
+  1.0,
+  "FAIL",
+  "report reads legacy inventory table; movements ledger holds waste"
+ ],
+ [
+  "MET-OVR-001",
+  "overview sales total_revenue",
+  517660,
+  517660,
+  "PASS",
+  ""
+ ],
+ [
+  "MET-OVR-001",
+  "overview profitability total_revenue",
+  470600,
+  470600,
+  "PASS",
+  ""
+ ],
+ [
+  "MET-SALES-007",
+  "top item revenue Audit Burger",
+  470000,
+  470000.0,
+  "PASS",
+  ""
+ ],
+ [
+  "MET-SALES-006",
+  "top item qty Audit Burger",
+  47,
+  47.0,
+  "PASS",
+  ""
+ ],
+ [
+  "MET-SALES-007",
+  "top item revenue Audit Inv Probe A",
+  300,
+  300.0,
+  "PASS",
+  ""
+ ],
+ [
+  "MET-SALES-006",
+  "top item qty Audit Inv Probe A",
+  3,
+  3.0,
+  "PASS",
+  ""
+ ],
+ [
+  "MET-SALES-007",
+  "top item revenue Audit Inv Probe B",
+  300,
+  300.0,
+  "PASS",
+  ""
+ ],
+ [
+  "MET-SALES-006",
+  "top item qty Audit Inv Probe B",
+  3,
+  3.0,
+  "PASS",
+  ""
+ ],
+ [
+  "MET-SALES-008",
+  "category revenue Audit Mains",
+  470600,
+  470600.0,
+  "PASS",
+  ""
+ ],
+ [
+  "MET-HRC-002",
+  "overtime cost",
+  0,
+  0.0,
+  "PASS",
+  "window to 11-30: handler semantics"
+ ],
+ [
+  "MET-HRC-003",
+  "insurance cost",
+  0,
+  0,
+  "PASS",
+  "no insurance policies in dataset (vacuous)"
+ ],
+ [
+  "MET-HRC-005",
+  "labor % of revenue",
+  1.5642,
+  1.5642,
+  "PASS",
+  ""
+ ],
+ [
+  "MET-HRC-006",
+  "cost by department Kitchen",
+  5000,
+  5000,
+  "PASS",
+  ""
+ ],
+ [
+  "MET-DASH-001",
+  "orders list total",
+  41,
+  41.0,
+  "PASS",
+  ""
+ ],
+ [
+  "MET-DASH-002",
+  "products total",
+  3,
+  3.0,
+  "PASS",
+  ""
+ ],
+ [
+  "MET-DASH-002",
+  "categories",
+  1,
+  1.0,
+  "PASS",
+  ""
+ ],
+ [
+  "MET-DASH-002",
+  "employees",
+  1,
+  1.0,
+  "PASS",
+  ""
+ ],
+ [
+  "MET-DASH-002",
+  "drivers",
+  1,
+  1.0,
+  "PASS",
+  ""
+ ],
+ [
+  "MET-DASH-003",
+  "tables total",
+  1,
+  1.0,
+  "PASS",
+  ""
+ ],
+ [
+  "MET-VAT-004",
+  "tax periods listed",
+  0,
+  0.0,
+  "PASS",
+  "no periods exist; creation flow pending T-P11"
+ ],
+ [
+  "MET-KDS-002",
+  "kds stats active",
+  25,
+  25.0,
+  "PASS",
+  "includes cancelled orders (F-044)"
+ ]
+]

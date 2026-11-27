@@ -1,0 +1,22 @@
+AUD-INV-COGS-UNTRACKED (F-040) tenant 4 isolated DB 2026-11-26T19:56:12Z
+ id |      name_en      |  cost   | track_inventory | quantity_in_stock 
+----+-------------------+---------+-----------------+-------------------
+  2 | Audit Burger      | 4000.00 | t               |                33
+  3 | Audit Inv Probe A |   40.00 | f               |                20
+  4 | Audit Inv Probe B |   40.00 | t               |                21
+(3 rows)
+
+-- order 39: paid, product 3 (track_inventory=false, cost 40) qty 3 ; order 41: paid, product 4 (track_inventory=true, cost 40) qty 3
+ entry_number  | order_id | account_code | debit_amount | credit_amount 
+---------------+----------+--------------+--------------+---------------
+ JE-2026-00064 |       39 | 1110         |       330.00 |          0.00
+ JE-2026-00064 |       39 | 4100         |         0.00 |        300.00
+ JE-2026-00064 |       39 | 2120         |         0.00 |         30.00
+ JE-2026-00065 |       41 | 1110         |       330.00 |          0.00
+ JE-2026-00065 |       41 | 4100         |         0.00 |        300.00
+ JE-2026-00065 |       41 | 2120         |         0.00 |         30.00
+ JE-2026-00066 |       41 | 5110         |       120.00 |          0.00
+ JE-2026-00066 |       41 | 1130         |         0.00 |        120.00
+(8 rows)
+
+Profitability API (headed-equivalent session): Audit Inv Probe A qty 3 revenue 300 cogs 120 (report counts COGS from products.cost); GL has no COGS/inventory line for order 39 => report COGS exceeds GL COGS by 120 for this product

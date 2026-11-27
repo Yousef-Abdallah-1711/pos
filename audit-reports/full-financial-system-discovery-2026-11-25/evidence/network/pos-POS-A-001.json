@@ -1,0 +1,29 @@
+{
+ "id": "POS-A-001",
+ "tag": "A",
+ "product": "Audit Burger",
+ "method": "Cash",
+ "qty": "1",
+ "display": {
+  "subtotal": "$10,000.00",
+  "tax": "$1,400.00",
+  "total": "$11,400.00"
+ },
+ "ui_after": "12:27:05 AM | Cashier: | Audit Owner A | Online | Exit POS | Shortcut: Ctrl+F or / | All | F1 | A | Audit Burger | $10,000.00 | Cart | 0 | Hold (Ctrl+H) | Clear (Esc) | Cart is empty | Tap a product to add it | POS Perf | order-submit | 509ms | add-t",
+ "net": [
+  {
+   "m": "POST",
+   "u": "/pos/orders",
+   "s": 201,
+   "body": "{\"data\":{\"created_at\":\"2026-11-25T22:27:01.093643Z\",\"customer_name\":\"Walk-in\",\"id\":1,\"order_number\":\"ORD-2026-5f61f71a-a2e0-403a-9f73-4fce8a40ce0d\",\"status\":\"confirmed\",\"table_id\":null,\"total_amount\":11000,\"tracking_token\":\"yTW6d_oHCviQlH61FlzM-5PeZbLbAi9EZ9CGGcK_WEQ\"},\"success\":true}",
+   "req": "{\"order_source\":\"pos\",\"customer_name\":\"Walk-in\",\"customer_phone\":\"0000000000\",\"payment_method\":\"cash\",\"items\":[{\"product_id\":1,\"quantity\":1}]}"
+  },
+  {
+   "m": "PUT",
+   "u": "/admin/orders/1/payment-status",
+   "s": 200,
+   "body": "{\"accounting_intent\":\"persisted\",\"success\":true}",
+   "req": "{\"payment_status\":\"paid\"}"
+  }
+ ]
+}

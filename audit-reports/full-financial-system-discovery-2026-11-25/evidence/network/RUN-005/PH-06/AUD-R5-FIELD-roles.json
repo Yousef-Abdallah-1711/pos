@@ -1,0 +1,215 @@
+{
+ "run": "RUN-005",
+ "form": "roles",
+ "tenant": 4,
+ "results": [
+  {
+   "form": "roles",
+   "field_index": 0,
+   "field": "e.g., Manager, Editor, Viewer",
+   "placeholder": "e.g., Manager, Editor, Viewer",
+   "input_type": "text",
+   "maxlength_attr": null,
+   "kind": "text",
+   "case": "empty",
+   "value_sent": "",
+   "submit_found": true,
+   "submit_disabled": false,
+   "html5_invalid": 0,
+   "messages": [
+    "Role name is required"
+   ],
+   "request": [],
+   "response": "",
+   "request_body": "",
+   "rows_created": 0,
+   "outcome": "REJECTED-BY-CLIENT"
+  },
+  {
+   "form": "roles",
+   "field_index": 0,
+   "field": "e.g., Manager, Editor, Viewer",
+   "placeholder": "e.g., Manager, Editor, Viewer",
+   "input_type": "text",
+   "maxlength_attr": null,
+   "kind": "text",
+   "case": "whitespace",
+   "value_sent": "   ",
+   "submit_found": true,
+   "submit_disabled": false,
+   "html5_invalid": 0,
+   "messages": [
+    "Request failed with status code 400"
+   ],
+   "request": [
+    "POST /rbac/roles 400"
+   ],
+   "response": "{\"error\":\"Role name is required\"}",
+   "request_body": "{\"role_name\":\"   \",\"description\":\"R5 84522991\"}",
+   "rows_created": 0,
+   "outcome": "REJECTED-BY-SERVER(400)"
+  },
+  {
+   "form": "roles",
+   "field_index": 0,
+   "field": "e.g., Manager, Editor, Viewer",
+   "placeholder": "e.g., Manager, Editor, Viewer",
+   "input_type": "text",
+   "maxlength_attr": null,
+   "kind": "text",
+   "case": "long300",
+   "value_sent": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX...(300)",
+   "submit_found": true,
+   "submit_disabled": false,
+   "html5_invalid": 0,
+   "messages": [
+    "Request failed with status code 500"
+   ],
+   "request": [
+    "POST /rbac/roles 500"
+   ],
+   "response": "{\"error\":\"Failed to create role\"}",
+   "request_body": "{\"role_name\":\"XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+   "rows_created": 0,
+   "outcome": "REJECTED-BY-SERVER(500)"
+  },
+  {
+   "form": "roles",
+   "field_index": 0,
+   "field": "e.g., Manager, Editor, Viewer",
+   "placeholder": "e.g., Manager, Editor, Viewer",
+   "input_type": "text",
+   "maxlength_attr": null,
+   "kind": "text",
+   "case": "arabic",
+   "value_sent": "اختبار عربي ٧٧",
+   "submit_found": true,
+   "submit_disabled": false,
+   "html5_invalid": 0,
+   "messages": [],
+   "request": [
+    "POST /rbac/roles 201"
+   ],
+   "response": "{\"data\":{\"id\":45,\"name\":\"اختبار عربي ٧٧\",\"role_name\":\"اختبار عربي ٧٧\",\"role_code\":\"ROLE\",\"description\":\"R5 84537612\",\"is_system\":false,\"created_at\":\"2",
+   "request_body": "{\"role_name\":\"اختبار عربي ٧٧\",\"description\":\"R5 84537612\"}",
+   "rows_created": 1,
+   "persisted": "{\"id\":45,\"tenant_id\":4,\"restaurant_id\":4,\"role_name\":\"اختبار عربي ٧٧\",\"role_name_ar\":null,\"description\":\"R5 84537612\",\"description_ar\":null,\"role_code\":\"ROLE\",\"permissions\":{},\"access_level\":\"basic\",\"can_approve_leaves\":false,\"can_approve_overtime\":false,\"can_manage_payroll\":false,\"can_view_reports\":false,\"min_salary\":null,\"max_salary\":null,\"is_active\":true,\"is_system_role\":false,\"display_order\":0,\"created_at\":\"2026-",
+   "outcome": "ACCEPTED-PERSISTED"
+  },
+  {
+   "form": "roles",
+   "field_index": 0,
+   "field": "e.g., Manager, Editor, Viewer",
+   "placeholder": "e.g., Manager, Editor, Viewer",
+   "input_type": "text",
+   "maxlength_attr": null,
+   "kind": "text",
+   "case": "special",
+   "value_sent": "<b>x</b>'; -- &amp;",
+   "submit_found": true,
+   "submit_disabled": false,
+   "html5_invalid": 0,
+   "messages": [],
+   "request": [
+    "POST /rbac/roles 201"
+   ],
+   "response": "{\"data\":{\"id\":46,\"name\":\"\\u003cb\\u003ex\\u003c/b\\u003e'; -- \\u0026amp;\",\"role_name\":\"\\u003cb\\u003ex\\u003c/b\\u003e'; -- \\u0026amp;\",\"role_code\":\"BXB____",
+   "request_body": "{\"role_name\":\"<b>x</b>'; -- &amp;\",\"description\":\"R5 84545547\"}",
+   "rows_created": 1,
+   "persisted": "{\"id\":46,\"tenant_id\":4,\"restaurant_id\":4,\"role_name\":\"<b>x</b>'; -- &amp;\",\"role_name_ar\":null,\"description\":\"R5 84545547\",\"description_ar\":null,\"role_code\":\"BXB____AMP\",\"permissions\":{},\"access_level\":\"basic\",\"can_approve_leaves\":false,\"can_approve_overtime\":false,\"can_manage_payroll\":false,\"can_view_reports\":false,\"min_salary\":null,\"max_salary\":null,\"is_active\":true,\"is_system_role\":false,\"display_order\":0,\"created",
+   "outcome": "ACCEPTED-PERSISTED"
+  },
+  {
+   "form": "roles",
+   "field_index": 1,
+   "field": "Describe this role's purpose...",
+   "placeholder": "Describe this role's purpose...",
+   "input_type": "textarea",
+   "maxlength_attr": null,
+   "kind": "textarea",
+   "case": "empty",
+   "value_sent": "",
+   "submit_found": true,
+   "submit_disabled": false,
+   "html5_invalid": 0,
+   "messages": [],
+   "request": [
+    "POST /rbac/roles 201"
+   ],
+   "response": "{\"data\":{\"id\":47,\"name\":\"R5 84553623\",\"role_name\":\"R5 84553623\",\"role_code\":\"R5_84553623\",\"description\":\"\",\"is_system\":false,\"created_at\":\"2026-11-27T",
+   "request_body": "{\"role_name\":\"R5 84553623\",\"description\":\"\"}",
+   "rows_created": 1,
+   "persisted": "{\"id\":47,\"tenant_id\":4,\"restaurant_id\":4,\"role_name\":\"R5 84553623\",\"role_name_ar\":null,\"description\":\"\",\"description_ar\":null,\"role_code\":\"R5_84553623\",\"permissions\":{},\"access_level\":\"basic\",\"can_approve_leaves\":false,\"can_approve_overtime\":false,\"can_manage_payroll\":false,\"can_view_reports\":false,\"min_salary\":null,\"max_salary\":null,\"is_active\":true,\"is_system_role\":false,\"display_order\":0,\"created_at\":\"2026-11-27T1",
+   "outcome": "ACCEPTED-PERSISTED"
+  },
+  {
+   "form": "roles",
+   "field_index": 1,
+   "field": "Describe this role's purpose...",
+   "placeholder": "Describe this role's purpose...",
+   "input_type": "textarea",
+   "maxlength_attr": null,
+   "kind": "textarea",
+   "case": "long300",
+   "value_sent": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX...(300)",
+   "submit_found": true,
+   "submit_disabled": false,
+   "html5_invalid": 0,
+   "messages": [],
+   "request": [
+    "POST /rbac/roles 201"
+   ],
+   "response": "{\"data\":{\"id\":48,\"name\":\"R5 84561650\",\"role_name\":\"R5 84561650\",\"role_code\":\"R5_84561650\",\"description\":\"XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+   "request_body": "{\"role_name\":\"R5 84561650\",\"description\":\"XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+   "rows_created": 1,
+   "persisted": "{\"id\":48,\"tenant_id\":4,\"restaurant_id\":4,\"role_name\":\"R5 84561650\",\"role_name_ar\":null,\"description\":\"XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\",\"description_ar\"",
+   "outcome": "ACCEPTED-PERSISTED"
+  },
+  {
+   "form": "roles",
+   "field_index": 1,
+   "field": "Describe this role's purpose...",
+   "placeholder": "Describe this role's purpose...",
+   "input_type": "textarea",
+   "maxlength_attr": null,
+   "kind": "textarea",
+   "case": "arabic",
+   "value_sent": "اختبار عربي ٧٧",
+   "submit_found": true,
+   "submit_disabled": false,
+   "html5_invalid": 0,
+   "messages": [],
+   "request": [
+    "POST /rbac/roles 201"
+   ],
+   "response": "{\"data\":{\"id\":49,\"name\":\"R5 84569616\",\"role_name\":\"R5 84569616\",\"role_code\":\"R5_84569616\",\"description\":\"اختبار عربي ٧٧\",\"is_system\":false,\"created_at",
+   "request_body": "{\"role_name\":\"R5 84569616\",\"description\":\"اختبار عربي ٧٧\"}",
+   "rows_created": 1,
+   "persisted": "{\"id\":49,\"tenant_id\":4,\"restaurant_id\":4,\"role_name\":\"R5 84569616\",\"role_name_ar\":null,\"description\":\"اختبار عربي ٧٧\",\"description_ar\":null,\"role_code\":\"R5_84569616\",\"permissions\":{},\"access_level\":\"basic\",\"can_approve_leaves\":false,\"can_approve_overtime\":false,\"can_manage_payroll\":false,\"can_view_reports\":false,\"min_salary\":null,\"max_salary\":null,\"is_active\":true,\"is_system_role\":false,\"display_order\":0,\"created_at\"",
+   "outcome": "ACCEPTED-PERSISTED"
+  },
+  {
+   "form": "roles",
+   "field_index": 1,
+   "field": "Describe this role's purpose...",
+   "placeholder": "Describe this role's purpose...",
+   "input_type": "textarea",
+   "maxlength_attr": null,
+   "kind": "textarea",
+   "case": "special",
+   "value_sent": "<b>x</b>'; --",
+   "submit_found": true,
+   "submit_disabled": false,
+   "html5_invalid": 0,
+   "messages": [],
+   "request": [
+    "POST /rbac/roles 201"
+   ],
+   "response": "{\"data\":{\"id\":50,\"name\":\"R5 84577575\",\"role_name\":\"R5 84577575\",\"role_code\":\"R5_84577575\",\"description\":\"\\u003cb\\u003ex\\u003c/b\\u003e'; --\",\"is_system",
+   "request_body": "{\"role_name\":\"R5 84577575\",\"description\":\"<b>x</b>'; --\"}",
+   "rows_created": 1,
+   "persisted": "{\"id\":50,\"tenant_id\":4,\"restaurant_id\":4,\"role_name\":\"R5 84577575\",\"role_name_ar\":null,\"description\":\"<b>x</b>'; --\",\"description_ar\":null,\"role_code\":\"R5_84577575\",\"permissions\":{},\"access_level\":\"basic\",\"can_approve_leaves\":false,\"can_approve_overtime\":false,\"can_manage_payroll\":false,\"can_view_reports\":false,\"min_salary\":null,\"max_salary\":null,\"is_active\":true,\"is_system_role\":false,\"display_order\":0,\"created_at\":",
+   "outcome": "ACCEPTED-PERSISTED"
+  }
+ ]
+}
