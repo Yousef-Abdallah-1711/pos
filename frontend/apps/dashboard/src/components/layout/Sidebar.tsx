@@ -327,6 +327,7 @@ export function Sidebar({ isMobileOpen, onMobileToggle, isCollapsed, onCollapsed
   if (permissionsLoading) {
     return (
       <aside
+        style={{ backgroundColor: 'var(--workspace-surface)', borderColor: 'var(--workspace-border)' }}
         className={`fixed inset-y-0 ${locale === 'ar' ? 'right-0' : 'left-0'} z-40 ${isCollapsed ? 'w-20' : 'w-64'} bg-white dark:bg-gray-800 ${locale === 'ar' ? 'border-l' : 'border-r'} border-gray-200 dark:border-gray-700 transform ${isMobileOpen ? 'translate-x-0' : locale === 'ar' ? 'translate-x-full' : '-translate-x-full'} md:translate-x-0 transition-all duration-300 ease-in-out`}
       >
         <div className={`flex h-[89px] items-center border-b border-gray-200 p-4 dark:border-gray-700 ${isCollapsed ? 'justify-center' : 'justify-between'}`}>
@@ -365,6 +366,7 @@ export function Sidebar({ isMobileOpen, onMobileToggle, isCollapsed, onCollapsed
   if (permissionsLoading) {
     return (
       <aside
+        style={{ backgroundColor: 'var(--workspace-surface)', borderColor: 'var(--workspace-border)' }}
         className={`fixed inset-y-0 ${locale === 'ar' ? 'right-0' : 'left-0'} z-40 ${isCollapsed ? 'w-20' : 'w-64'} bg-white dark:bg-gray-800 ${locale === 'ar' ? 'border-l' : 'border-r'} border-gray-200 dark:border-gray-700 transform ${isMobileOpen ? 'translate-x-0' : locale === 'ar' ? 'translate-x-full' : '-translate-x-full'} md:translate-x-0 transition-all duration-300 ease-in-out`}
       >
         <div className="p-4 border-b border-gray-200 dark:border-gray-700">
@@ -399,6 +401,7 @@ export function Sidebar({ isMobileOpen, onMobileToggle, isCollapsed, onCollapsed
     <>
       {/* Sidebar */}
       <aside
+        style={{ backgroundColor: 'var(--workspace-surface)', borderColor: 'var(--workspace-border)' }}
         className={`fixed inset-y-0 ${isRTL ? 'right-0' : 'left-0'} z-40 ${isCollapsed ? 'w-20' : 'w-64'} bg-white dark:bg-gray-800 ${isRTL ? 'border-l' : 'border-r'} border-gray-200 dark:border-gray-700 transform ${isMobileOpen ? 'translate-x-0' : isRTL ? 'translate-x-full' : '-translate-x-full'} md:translate-x-0 transition-all duration-300 ease-in-out`}
       >
         <div className={`flex h-[89px] items-center ${isCollapsed ? 'justify-center' : 'justify-between'} p-4 border-b border-gray-200 dark:border-gray-700`}>
@@ -407,8 +410,8 @@ export function Sidebar({ isMobileOpen, onMobileToggle, isCollapsed, onCollapsed
             className={`flex items-center ${isCollapsed ? 'justify-center' : 'gap-2'} hover:opacity-80 transition ${isRTL && !isCollapsed ? 'flex-row-reverse' : ''}`}
             title={t('navigation.dashboard')}
           >
-            <ChefHat className="h-8 w-8 text-primary-600 dark:text-primary-400" />
-            {!isCollapsed && <span className="text-xl font-bold text-gray-900 dark:text-white">
+            <ChefHat className="h-8 w-8" style={{ color: 'var(--workspace-primary)' }} />
+            {!isCollapsed && <span className="text-xl font-bold" style={{ color: 'var(--workspace-foreground)' }}>
               POS Dashboard
             </span>}
           </Link>
@@ -432,7 +435,7 @@ export function Sidebar({ isMobileOpen, onMobileToggle, isCollapsed, onCollapsed
                     <button
                       onClick={() => toggleExpanded(item.label)}
                       title={item.label}
-                      className={`w-full flex items-center ${isCollapsed ? 'justify-center' : 'justify-between'} gap-3 ${isCollapsed ? 'px-2 py-3' : 'px-4 py-3'} rounded-lg transition text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 ${isRTL && !isCollapsed ? 'text-right' : 'text-left'}`}
+                      className={`w-full flex items-center ${isCollapsed ? 'justify-center' : 'justify-between'} gap-3 ${isCollapsed ? 'px-2 py-3' : 'px-4 py-3'} rounded-lg transition text-[color:var(--workspace-foreground)] hover:bg-black/5 dark:hover:bg-white/10 ${isRTL && !isCollapsed ? 'text-right' : 'text-left'}`}
                     >
                       <div className={`flex items-center gap-3 ${isRTL && !isCollapsed ? 'flex-row-reverse' : ''}`}>
                         {item.icon}
@@ -453,8 +456,8 @@ export function Sidebar({ isMobileOpen, onMobileToggle, isCollapsed, onCollapsed
                             <Link
                               href={`/${locale}${child.href}`}
                               className={`flex items-center gap-3 px-4 py-2 rounded-lg transition text-sm ${isChildActive(child.href)
-                                ? 'bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 font-medium'
-                                : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
+                                ? 'bg-[color:var(--workspace-primary)] text-[color:var(--workspace-on-primary)] font-medium'
+                                : 'text-[color:var(--workspace-foreground)] hover:bg-black/5 dark:hover:bg-white/10'
                                 } ${isRTL ? 'justify-end text-right' : ''}`}
                               onClick={() => {
                                 if (isMobileOpen) onMobileToggle()
@@ -472,8 +475,8 @@ export function Sidebar({ isMobileOpen, onMobileToggle, isCollapsed, onCollapsed
                     href={`/${locale}${item.href}`}
                     title={item.label}
                     className={`flex items-center ${isCollapsed ? 'justify-center' : 'gap-3'} ${isCollapsed ? 'px-2 py-3' : 'px-4 py-3'} rounded-lg transition ${pathname === `/${locale}${item.href}`
-                      ? 'bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400'
-                      : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                      ? 'bg-[color:var(--workspace-primary)] text-[color:var(--workspace-on-primary)]'
+                      : 'text-[color:var(--workspace-foreground)] hover:bg-black/5 dark:hover:bg-white/10'
                       } ${isRTL && !isCollapsed ? 'flex-row-reverse text-right' : ''}`}
                     onClick={() => {
                       if (isMobileOpen) onMobileToggle()

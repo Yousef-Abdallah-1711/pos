@@ -63,6 +63,10 @@ body {
   flex-direction: row;
 }
 
+.dashboard-layout[data-locale='en'] h1 {
+  font-family: var(--workspace-font-heading, inherit);
+}
+
 .dashboard-layout:not([data-fullscreen='true']) {
   padding-left: 16rem;
 }

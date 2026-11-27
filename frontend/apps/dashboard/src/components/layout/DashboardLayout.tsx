@@ -20,6 +20,8 @@ import { TrialWarningBanner } from '@/components/layout/TrialWarningBanner'
 import { useTenantStatus } from '@/hooks/useTenantStatus'
 import { BlockedOverlay } from '@/components/blocked/BlockedOverlay'
 import { toast } from 'sonner'
+import { useWorkspaceAppearance } from '@/hooks/useWorkspaceAppearance'
+import { workspaceAppearanceVariables } from '@/lib/workspaceAppearance'
 
 export default function DashboardLayout({
   children,
@@ -41,6 +43,7 @@ export default function DashboardLayout({
   const dropdownRef = useRef<HTMLDivElement>(null)
   const isLoggingOut = useRef(false)
   const { isBlocked, blockReason } = useTenantStatus()
+  const workspaceAppearance = useWorkspaceAppearance(user?.tenant_id ?? user?.tenantId, user?.id)
 
   const isLoggedIn = !!(user && token)
 
@@ -170,6 +173,7 @@ export default function DashboardLayout({
       data-locale={locale}
       data-sidebar-collapsed={isSidebarCollapsed}
       data-fullscreen={isFullscreenRoute}
+      style={{ ...workspaceAppearanceVariables(workspaceAppearance, effectiveTheme), backgroundColor: 'var(--workspace-background)', color: 'var(--workspace-foreground)', fontFamily: locale === 'ar' ? 'var(--workspace-font-ar)' : 'var(--workspace-font-en)', fontSize: 'var(--workspace-base-size)' } as React.CSSProperties}
       className={`dashboard-layout min-h-screen flex ${isFullscreenRoute ? 'bg-gray-50 text-gray-900 dark:bg-slate-950 dark:text-slate-100' : 'bg-gray-50 dark:bg-gray-900'}`}
     >
       {/* Sidebar */}
@@ -189,7 +193,7 @@ export default function DashboardLayout({
       >
         {/* Header */}
         {!isFullscreenRoute && (
-          <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-30">
+          <header style={{ backgroundColor: 'var(--workspace-surface)', borderColor: 'var(--workspace-border)' }} className="border-b sticky top-0 z-30">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               <div className={`flex items-center justify-between h-16 gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
                 {/* Mobile menu button */}

@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
+import { Inter, Manrope, Fraunces, IBM_Plex_Sans_Arabic } from 'next/font/google'
 import { Suspense } from 'react'
 import '../globals.css'
 import '@/styles/rtl.css'
@@ -13,6 +13,9 @@ import subscriptionEn from '@pos-saas/i18n/locales/en/subscription.json'
 import subscriptionAr from '@pos-saas/i18n/locales/ar/subscription.json'
 
 const inter = Inter({ subsets: ['latin'] })
+const manrope = Manrope({ subsets: ['latin'], display: 'swap', variable: '--font-workspace-manrope' })
+const fraunces = Fraunces({ subsets: ['latin'], display: 'swap', variable: '--font-workspace-fraunces' })
+const plex = IBM_Plex_Sans_Arabic({ subsets: ['arabic', 'latin'], weight: ['400', '600', '700'], display: 'swap', preload: false, variable: '--font-workspace-arabic' })
 
 export const metadata: Metadata = {
   title: 'Dashboard - Restaurant POS SaaS',
@@ -57,7 +60,7 @@ export default async function LocaleLayout({
           <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
             <WebVitalsProvider />
             <PerformanceMonitor />
-            <div lang={locale} dir={dir} className={inter.className}>
+            <div lang={locale} dir={dir} className={`${inter.className} ${manrope.variable} ${fraunces.variable} ${plex.variable}`}>
               {children}
             </div>
             <Toaster position={isRTL ? 'top-left' : 'top-right'} richColors />

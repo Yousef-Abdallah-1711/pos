@@ -7,9 +7,9 @@ import { usePreferencesStore } from '@/stores/preferencesStore'
 import { Save, Loader2, Check } from 'lucide-react'
 import { createTranslator, getLocaleFromPath } from '@/lib/translations'
 import { usePathname } from 'next/navigation'
-import * as themeApi from '@/lib/api/themeApi'
 import { getConfig } from '@/lib/config'
 import { authFetch } from '@/lib/authFetch'
+import { WorkspaceAppearanceEditor } from '@/components/settings/WorkspaceAppearanceEditor'
 
 export default function AppearanceSettingsPage() {
   const pathname = usePathname()
@@ -34,61 +34,6 @@ export default function AppearanceSettingsPage() {
     .appearance-preview-secondary { background-color: ${appearanceForm.secondaryColor}; }
     .appearance-preview-accent { background-color: ${appearanceForm.accentColor}; }
   `
-
-  const syncBrandColorsToActiveTheme = async () => {
-    const themes = await themeApi.getThemes()
-    const activeTheme = themes.find((theme) => theme.isActive)
-    if (!activeTheme) return
-
-    const mergedColors = {
-      ...activeTheme.colors,
-      primary: appearanceForm.primaryColor,
-      secondary: appearanceForm.secondaryColor,
-      accent: appearanceForm.accentColor,
-    }
-
-    const components = (activeTheme.components || []).map((component, index) => {
-      const order = typeof component.displayOrder === 'number' ? component.displayOrder : index
-      const config = component.config || component.settings || {}
-      return {
-        id: String(component.id),
-        type: component.type,
-        title: {
-          en: config.title_en || config.title || component.title || '',
-          ar: config.title_ar || '',
-        },
-        order,
-        displayOrder: order,
-        enabled: component.enabled !== false,
-        config,
-        settings: config,
-      }
-    })
-
-    const config = {
-      colors: mergedColors,
-      typography: activeTheme.typography,
-      identity: activeTheme.identity,
-      header: activeTheme.header,
-      footer: activeTheme.footer,
-      components,
-      customCss: activeTheme.customCss || '',
-    }
-
-    await themeApi.updateTheme(activeTheme.id, {
-      name: activeTheme.name,
-      slug: activeTheme.slug,
-      description: activeTheme.description,
-      colors: mergedColors,
-      typography: activeTheme.typography,
-      identity: activeTheme.identity,
-      header_config: activeTheme.header,
-      footer_config: activeTheme.footer,
-      components: components as any,
-      customCss: activeTheme.customCss || '',
-      config,
-    } as any)
-  }
 
   // Initialize form when settings are loaded
   useEffect(() => {
@@ -162,11 +107,6 @@ export default function AppearanceSettingsPage() {
           }
           setSettings(updatedSettings)
           }
-          try {
-            await syncBrandColorsToActiveTheme()
-          } catch (syncError) {
-            console.warn('Failed to sync colors to active website theme', syncError)
-          }
           setSaveStatus('success')
           setTimeout(() => setSaveStatus('idle'), 2000)
         } else {
@@ -207,6 +147,7 @@ export default function AppearanceSettingsPage() {
 
   return (
     <div className="space-y-8">
+      <WorkspaceAppearanceEditor key={`${user?.tenant_id ?? user?.tenantId}:${user?.id}`} locale={locale} />
       {/* Theme Section */}
       <div>
         <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">{t('settings.theme')}</h2>
