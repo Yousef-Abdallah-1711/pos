@@ -16,4 +16,6 @@ Most frequent matched utilities include `text-gray-900` (798), `bg-gray-700` (78
 
 `src/app/globals.css` defines initial `--primary-500: #3b82f6`, `--secondary-500: #6366f1`, and `--accent-500: #22c55e`; its dark class changes the base `--background`/`--foreground` HSL values, while `body` uses explicit gray Tailwind utilities. The original personal-settings migration and preferences-store fallback use `#10b981` for the accent instead of the initial CSS accent. The resulting first-paint and restored-state behavior needs runtime verification; do not assume the two defaults are interchangeable or that all structural colors inherit the CSS variables.
 
+The preference store's shade generator retains the selected color's hue and saturation but sets the 500 shade's HSL lightness to 50%. Consequently, the generated `--primary-500`, `--secondary-500`, or `--accent-500` can differ from the selected input color. A future migration should explicitly decide whether to preserve this behavior or preserve the exact selected color.
+
 The provisional [token registry](proposed-token-registry.json) is a design proposal, not a completed mapping or approved accessible palette. Complete source classification, computed-style checks, chart and third-party review, tenant isolation, and visual comparison before global rollout.
