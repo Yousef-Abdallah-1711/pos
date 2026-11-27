@@ -1,0 +1,13 @@
+# F-055 — Evidence index
+
+- Register evidence status: **REPRODUCED**
+- Evidence verification (file 55): see 55-finding-evidence-and-root-cause-verification.csv
+- Executed tests: EX-RUN003-AUD-SAAS-005
+
+## Evidence files (relative to the audit folder)
+| path | status |
+|---|---|
+| evidence/database/RUN-003/PH-13/AUD-SAAS-MATRIX.json | exists |
+| tests/runtime/ph13_saas.mjs | exists |
+
+State files `evidence/state-*.json` are session cookies and are intentionally not referenced.
