@@ -429,6 +429,22 @@
       "status": 200,
       "heading": "QR Builder",
       "fixture": "synthetic table"
+    },
+    {
+      "path": "/en/dashboard/drivers/1",
+      "route_template": "/[locale]/dashboard/drivers/[id]",
+      "url": "http://localhost:3002/en/dashboard/drivers/1",
+      "status": 200,
+      "heading": "Synthetic Driver",
+      "fixture": "synthetic driver or seeded Manager role; no save submitted"
+    },
+    {
+      "path": "/en/dashboard/settings/roles/7/edit",
+      "route_template": "/[locale]/dashboard/settings/roles/[id]/edit",
+      "url": "http://localhost:3002/en/dashboard/settings/roles/7/edit",
+      "status": 200,
+      "heading": "Settings",
+      "fixture": "synthetic driver or seeded Manager role; no save submitted"
     }
   ]
 }

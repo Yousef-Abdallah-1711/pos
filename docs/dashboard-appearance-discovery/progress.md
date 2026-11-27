@@ -2,7 +2,7 @@
 
 | Area | Status | Evidence and remaining work |
 | --- | --- | --- |
-| Source inventory | IN PROGRESS | Raw routes, colors, typography and SERVIO PNG CSVs generated; 63 static and six synthetic-ID dashboard URLs visited as an English owner. Classification, other roles, remaining dynamic routes, active asset usage and full application coverage remain. |
+| Source inventory | IN PROGRESS | Raw routes, colors, typography and SERVIO PNG CSVs generated; 63 static and eight synthetic-ID dashboard URLs visited as an English owner. Classification, other roles, remaining dynamic routes, active asset usage and full application coverage remain. |
 | Shell and sidebar | IN PROGRESS | Source behavior documented; authenticated desktop/mobile, RTL, permission and keyboard observation remains. |
 | Appearance lifecycle | IN PROGRESS | Personal settings and implicit storefront sync traced; tenant switching, caching and failure behavior remain unverified. |
 | Database/API | IN PROGRESS | User settings, RLS and site-theme endpoints identified; full schemas, effective role mapping and runtime isolation need review. |
