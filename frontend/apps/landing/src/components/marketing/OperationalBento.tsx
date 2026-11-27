@@ -47,6 +47,11 @@ export function OperationalBento({ locale }: { locale: Locale }) {
           <div className="cv-bento-media">
             <ProductCapture image={images[index]} alt={item.alt} locale={locale} />
           </div>
+          <div className="cv-bento-sample" data-step={steps[index]}>
+            <span>{c.problemSample}</span>
+            <strong>{c.problemSampleDetails[index][steps[index]]}</strong>
+            <span className="cv-bento-sample-indicator" aria-hidden="true">{steps[index] === 2 ? '✓' : `0${steps[index] + 1}`}</span>
+          </div>
           <div className="cv-bento-story">
             <div className="cv-bento-story-state">
               <span>{c.problemIllustration} · {String(steps[index] + 1).padStart(2, '0')} / 03</span>

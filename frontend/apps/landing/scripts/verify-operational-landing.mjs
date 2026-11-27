@@ -168,9 +168,11 @@ for (const [engineName, engine] of Object.entries({ chromium, firefox, webkit })
       }
 
       if (engineName === 'chromium' && profile.width === 390) {
+        const beforeSample = await page.locator('.cv-bento-card--1 .cv-bento-sample strong').textContent()
         await page.locator('.cv-bento-story-controls button').nth(2).click()
         const pressed = await page.locator('.cv-bento-card--1 .cv-bento-story-controls button').nth(2).getAttribute('aria-pressed')
         if (pressed !== 'true') issues.push('bento step selection')
+        if ((await page.locator('.cv-bento-card--1 .cv-bento-sample strong').textContent()) === beforeSample) issues.push('bento sample state')
         await page.locator('.cv-bento-card--1 .cv-bento-replay').click()
         const reset = await page.locator('.cv-bento-card--1 .cv-bento-story-controls button').first().getAttribute('aria-pressed')
         if (reset !== 'true') issues.push('bento replay')

@@ -134,6 +134,11 @@ html:not(.light) .cv-hero .cv-button-outline:hover { color:#2b211d; }
 .cv-bento-card--2 .cv-bento-media .sv-capture-image,.cv-bento-card--3 .cv-bento-media .sv-capture-image { max-height:105px; }
 .cv-bento-card--2 .cv-bento-media img,.cv-bento-card--3 .cv-bento-media img { width:125%; max-width:none; margin-inline-start:-12.5%; }
 .cv-bento-media figcaption { padding:7px 9px; font-size:10px; }
+.cv-bento-sample { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:4px 12px; align-items:center; margin-top:12px; padding:12px 14px; border:1px solid var(--cv-rule); border-radius:8px; background:var(--cv-paper); color:var(--cv-ink); }
+.cv-bento-sample>span:first-child { grid-column:1; color:var(--cv-ink-2); font-size:10px; font-weight:700; }
+.cv-bento-sample strong { grid-column:1; font-size:13px; line-height:1.4; }
+.cv-bento-sample-indicator { grid-column:2; grid-row:1 / span 2; display:grid; place-items:center; width:32px; height:32px; border:1px solid var(--cv-rule); border-radius:50%; color:var(--cv-accent); font-size:11px; font-weight:800; }
+.cv-bento-sample[data-step="2"] .cv-bento-sample-indicator { background:var(--cv-accent); border-color:var(--cv-accent); color:var(--cv-accent-ink); }
 .cv-bento-story { display:flex; align-items:center; justify-content:space-between; gap:12px; min-height:68px; padding-top:14px; }
 .cv-bento-card--2 .cv-bento-story,.cv-bento-card--3 .cv-bento-story { min-height:50px; }
 .cv-bento-card--1 .cv-bento-story { margin-top:auto; }

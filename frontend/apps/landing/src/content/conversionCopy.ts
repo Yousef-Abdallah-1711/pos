@@ -13,6 +13,12 @@ const english = {
   problemBody: 'From the first order to the next shift, every handoff matters.',
   problemReplay: 'Restart this story',
   problemIllustration: 'Illustrative step',
+  problemSample: 'Sample workflow',
+  problemSampleDetails: [
+    ['Menu item', '1 item selected', 'Cashier order sent'],
+    ['Online request', 'Pending staff review', 'Confirmed by staff'],
+    ['New ticket', 'In preparation', 'Ready for fulfillment'],
+  ],
   problemBridge: 'See how everything connects',
   problems: [
     { kind: 'At the counter', title: 'Orders keep coming.', body: 'Build the order from your menu and keep guest or table details close.', alt: 'Actual Servio cashier POS screen', stages: ['Choose from the menu', 'Keep the order details together', 'Send the confirmed cashier order'] },
@@ -80,6 +86,12 @@ const arabic: typeof english = {
   problemBody: 'من أول طلب لحد الوردية اللي بعدها، كل خطوة بتفرق.',
   problemReplay: 'ابدأ القصة من جديد',
   problemIllustration: 'خطوة توضيحية',
+  problemSample: 'مثال توضيحي',
+  problemSampleDetails: [
+    ['صنف من المنيو', 'تم اختيار صنف واحد', 'تم إرسال طلب الكاشير'],
+    ['طلب أونلاين', 'بانتظار مراجعة الفريق', 'أكّده الفريق'],
+    ['تذكرة جديدة', 'جارٍ التحضير', 'جاهز للتسليم'],
+  ],
   problemBridge: 'شوف إزاي كل خطوة بتوصل للي بعدها',
   problems: [
     { kind: 'عند الكاشير', title: 'الطلبات مش بتقف.', body: 'سجّل الطلب من المنيو وخلي بيانات الضيف أو الترابيزة واضحة.', alt: 'لقطة فعلية من نقطة بيع سيرفيو', stages: ['اختار من المنيو', 'راجع تفاصيل الطلب', 'أرسل طلب الكاشير المؤكد'] },
