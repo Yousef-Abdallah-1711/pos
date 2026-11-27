@@ -1,6 +1,6 @@
 # Authenticated synthetic visual baseline
 
-Captured 2026-11-27 using the actual local dashboard in a Playwright-controlled browser and a fresh disposable `pos-test` PostgreSQL/backend stack. The tenant and account were created solely for this audit; displayed owner, restaurant and data are synthetic. Dashboard ran in development mode from the local `servio-landing-qa:20261127` image; exact image source commit was not independently recorded. Captures show default empty data and a trial owner, not representative populated orders or restricted permissions. The Next.js development badge is visible. No cookies, authentication credentials or database files are stored here.
+Captured 2026-11-27 using the actual local dashboard in a Playwright-controlled browser and a fresh disposable `pos-test` PostgreSQL/backend stack. The tenant and account were created solely for this audit; displayed owner, restaurant and data are synthetic. Dashboard ran in development mode from the local `servio-landing-qa:20261127` image; exact image source commit was not independently recorded. Most captures show default empty data and a trial owner, not representative populated orders or restricted permissions. The Next.js development badge is visible. No cookies, authentication credentials or database files are stored here.
 
 | File | Route / state | Viewport |
 | --- | --- | --- |
@@ -11,6 +11,7 @@ Captured 2026-11-27 using the actual local dashboard in a Playwright-controlled 
 | [dashboard-ar-dark-expanded.png](dashboard-ar-dark-expanded.png) | `/ar/dashboard`, dark, expanded | 1440 × 900 CSS pixels |
 | [dashboard-ar-light-mobile-menu.png](dashboard-ar-light-mobile-menu.png) | `/ar/dashboard`, light, open mobile drawer | 390 × 844 CSS pixels |
 | [dashboard-en-pos-light.png](dashboard-en-pos-light.png) | `/en/dashboard/pos`, light, empty cart | 1440 × 900 CSS pixels |
+| [dashboard-en-pos-synthetic-cart-light.png](dashboard-en-pos-synthetic-cart-light.png) | `/en/dashboard/pos`, light, one synthetic product in cart; developer performance overlay obscures part of the submit button | 1440 × 900 CSS pixels |
 | [dashboard-en-kds-light.png](dashboard-en-kds-light.png) | `/en/dashboard/kds`, light, empty queue | 1440 × 900 CSS pixels |
 | [dashboard-en-orders-light.png](dashboard-en-orders-light.png) | `/en/dashboard/orders`, light, empty list | 1440 × 900 CSS pixels |
 | [dashboard-en-products-light.png](dashboard-en-products-light.png) | `/en/dashboard/products`, light, empty list | 1440 × 900 CSS pixels |
@@ -20,3 +21,5 @@ Captured 2026-11-27 using the actual local dashboard in a Playwright-controlled 
 | [dashboard-en-settings-light.png](dashboard-en-settings-light.png) | `/en/dashboard/settings`, light, account settings | 1440 × 900 CSS pixels |
 
 The captures are visual baseline evidence, not proof that every control, permission, locale, dark mode, or screen reader works. Capture further routes, populated realistic synthetic data, restricted roles, and remaining viewport/theme combinations before approving a future rebrand. Physical devices were not used.
+
+For the populated POS example, a synthetic category and product were inserted only into the fresh disposable test database; the product was selected in the actual POS UI. No order was submitted. This image is discovery evidence and has not replaced any marketing image.
