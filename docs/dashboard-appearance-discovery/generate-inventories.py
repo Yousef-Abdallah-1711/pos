@@ -65,16 +65,19 @@ write('color-inventory.csv', ['source', 'line', 'value', 'classification', 'prop
 write('typography-inventory.csv', ['source', 'line', 'excerpt', 'classification'], typography)
 
 components = []
-for component in sorted((dashboard / 'src/components').rglob('*.tsx')):
-    if '__tests__' in component.parts or component.name.endswith('.test.tsx'): continue
+component_dirs = [dashboard / 'src/components', dashboard / 'src/app', dashboard / 'components']
+component_files = sorted(component for directory in component_dirs if directory.exists() for component in directory.rglob('*.tsx'))
+for component in component_files:
+    if '__tests__' in component.parts or component.name.endswith(('.test.tsx', '.spec.tsx')) or component.name in {'page.tsx', 'layout.tsx', 'loading.tsx', 'error.tsx', 'not-found.tsx'}: continue
     source = component.read_text(encoding='utf-8', errors='replace')
     components.append({'source': component.relative_to(root).as_posix(),
+                       'scope': ('Shared src/components' if dashboard / 'src/components' in component.parents else 'Route-local src/app' if dashboard / 'src/app' in component.parents else 'Legacy/root components'),
                        'primary_token_mentions': len(re.findall(r'(?:primary-\d+|--primary)', source)),
                        'blue_utility_mentions': len(re.findall(r'\b(?:bg|text|border|ring)-blue-\d+', source)),
                        'dark_utility_mentions': len(re.findall(r'\bdark:', source)),
                        'font_utility_mentions': len(re.findall(r'\bfont-(?:normal|medium|semibold|bold)', source)),
                        'review_status': 'Unreviewed; inspect actual role and accessibility'})
-write('component-appearance-inventory.csv', ['source', 'primary_token_mentions', 'blue_utility_mentions', 'dark_utility_mentions', 'font_utility_mentions', 'review_status'], components)
+write('component-appearance-inventory.csv', ['source', 'scope', 'primary_token_mentions', 'blue_utility_mentions', 'dark_utility_mentions', 'font_utility_mentions', 'review_status'], components)
 
 impact = [{'route': row['route'], 'source': row['source'], 'current_behavior': 'Not individually verified',
            'proposed_behavior': 'Inherit validated tenant workspace tokens where applicable',
