@@ -1,15 +1,11 @@
 'use client'
 
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { ArrowUpRight } from 'lucide-react'
-import { useGSAP } from '@gsap/react'
-import gsap from 'gsap'
-import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import type { Locale } from '@/content/site'
 import { getFeatures } from '@/content/features'
-
-gsap.registerPlugin(useGSAP, ScrollTrigger)
+import { startDesktopMotion } from './desktopMotion'
 
 const copy = {
   en: { eyebrow: 'A connected workspace', title: 'The work belongs together.', body: 'These tools live in the same restaurant workspace. The lines show shared context, not automatic data transfer between every module.', explore: 'Explore this area', member: 'Workspace module', center: 'SERVIO workspace' },
@@ -22,18 +18,16 @@ export function BusinessEcosystem({ locale }: { locale: Locale }) {
   const features = getFeatures(locale)
   const c = copy[locale]
 
-  useGSAP(() => {
+  useEffect(() => startDesktopMotion(({ gsap }) => {
     if (!root.current) return
-    const media = gsap.matchMedia()
-    media.add('(min-width: 901px) and (prefers-reduced-motion: no-preference)', () => {
+    const context = gsap.context(() => {
       const lines = root.current!.querySelectorAll('.cv-ecosystem-lines line')
-      const tween = gsap.fromTo(lines,
+      gsap.fromTo(lines,
         { strokeDasharray: 150, strokeDashoffset: 150 },
         { strokeDashoffset: 0, stagger: .08, ease: 'none', scrollTrigger: { trigger: root.current, start: 'top 70%', end: 'center 35%', scrub: .7 } })
-      return () => tween.kill()
-    })
-    return () => media.revert()
-  }, { scope: root, dependencies: [locale] })
+    }, root.current)
+    return () => context.revert()
+  }), [locale])
 
   return <section className="cv-section cv-ecosystem" ref={root} aria-labelledby="cv-ecosystem-title">
     <div className="cv-wrap">

@@ -1,13 +1,9 @@
 'use client'
 
-import { useRef, useState } from 'react'
-import { useGSAP } from '@gsap/react'
-import gsap from 'gsap'
-import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import { useEffect, useRef, useState } from 'react'
 import type { Locale } from '@/content/site'
 import { ProductCapture } from './ProductCapture'
-
-gsap.registerPlugin(useGSAP, ScrollTrigger)
+import { startDesktopMotion } from './desktopMotion'
 
 const copy = {
   en: {
@@ -42,14 +38,16 @@ export function ManagementExperience({ locale }: { locale: Locale }) {
   const c = copy[locale]
   const view = c.views[active]
 
-  useGSAP(() => {
-    if (!root.current || !orders.current || !revenue.current || matchMedia('(prefers-reduced-motion: reduce)').matches) return
-    const tween = gsap.from([orders.current, revenue.current], {
-      y: 14, duration: .8, stagger: .12, ease: 'power2.out',
-      scrollTrigger: { trigger: root.current, start: 'top 70%', once: true },
-    })
-    return () => tween.kill()
-  }, { scope: root })
+  useEffect(() => startDesktopMotion(({ gsap }) => {
+    if (!root.current || !orders.current || !revenue.current) return
+    const context = gsap.context(() => {
+      gsap.from([orders.current, revenue.current], {
+        y: 14, duration: .8, stagger: .12, ease: 'power2.out',
+        scrollTrigger: { trigger: root.current, start: 'top 70%', once: true },
+      })
+    }, root.current)
+    return () => context.revert()
+  }), [])
 
   return <section className="cv-section cv-management" aria-labelledby="cv-management-title" ref={root}>
     <div className="cv-wrap cv-management-layout">

@@ -1,8 +1,6 @@
 'use client'
 
-import { useRef, useState } from 'react'
-import { useGSAP } from '@gsap/react'
-import gsap from 'gsap'
+import { useEffect, useRef, useState } from 'react'
 import type { Locale } from '@/content/site'
 import { ProductCapture } from './ProductCapture'
 
@@ -63,12 +61,19 @@ export function WorkflowDemo({ locale, kind }: { locale: Locale; kind: Kind }) {
   const c = copy[locale][kind]
   const current = c.stages[active]
 
-  useGSAP(() => {
-    if (!root.current || matchMedia('(prefers-reduced-motion: reduce)').matches) return
-    const state = root.current.querySelector('.cv-demo-state')
-    if (!state) return
-    gsap.fromTo(state, { y: 8, opacity: .65 }, { y: 0, opacity: 1, duration: .32, ease: 'power2.out' })
-  }, { scope: root, dependencies: [active, locale, kind] })
+  useEffect(() => {
+    if (active === 0 || matchMedia('(prefers-reduced-motion: reduce)').matches) return
+    let current = true
+    let cleanup: (() => void) | undefined
+    void import('gsap').then(({ default: gsap }) => {
+      if (!current || !root.current) return
+      const state = root.current.querySelector('.cv-demo-state')
+      if (!state) return
+      const tween = gsap.fromTo(state, { y: 8, opacity: .65 }, { y: 0, opacity: 1, duration: .32, ease: 'power2.out' })
+      cleanup = () => tween.revert()
+    })
+    return () => { current = false; cleanup?.() }
+  }, [active, locale, kind])
 
   return <div className={`cv-workflow-demo cv-workflow-demo--${kind}`} ref={root}>
     <div className="cv-demo-screen"><ProductCapture image={kind === 'online' ? 'checkout' : 'kitchen'} alt={c.alt} locale={locale} /></div>

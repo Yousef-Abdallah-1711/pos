@@ -1,17 +1,14 @@
 'use client'
 
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { ArrowUpRight, ChevronLeft, ChevronRight } from 'lucide-react'
-import { useGSAP } from '@gsap/react'
-import gsap from 'gsap'
-import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import type { ScrollTrigger } from 'gsap/ScrollTrigger'
 import type { Locale } from '@/content/site'
 import { getConversionCopy } from '@/content/conversionCopy'
 import { getFeatures } from '@/content/features'
 import { ProductCapture } from './ProductCapture'
-
-gsap.registerPlugin(useGSAP, ScrollTrigger)
+import { startDesktopMotion } from './desktopMotion'
 
 const controls = {
   en: { previous: 'Previous feature', next: 'Next feature', explore: 'Explore feature', sample: 'Actual product screen · synthetic data' },
@@ -28,10 +25,9 @@ export function FeatureShowcase({ locale }: { locale: Locale }) {
   const c = getConversionCopy(locale)
   const ui = controls[locale]
 
-  useGSAP(() => {
+  useEffect(() => startDesktopMotion(({ gsap }) => {
     if (!root.current || !viewport.current || !track.current) return
-    const media = gsap.matchMedia()
-    media.add('(min-width: 901px) and (prefers-reduced-motion: no-preference)', () => {
+    const context = gsap.context(() => {
       const distance = () => Math.max(0, track.current!.scrollWidth - viewport.current!.clientWidth)
       const tween = gsap.to(track.current, {
         x: () => (locale === 'ar' ? 1 : -1) * distance(),
@@ -47,13 +43,12 @@ export function FeatureShowcase({ locale }: { locale: Locale }) {
         },
       })
       scrollTrigger.current = tween.scrollTrigger ?? null
-      return () => { scrollTrigger.current = null; tween.kill() }
-    })
-    media.add('(max-width: 900px), (prefers-reduced-motion: reduce)', () => {
-      gsap.set(track.current, { clearProps: 'transform' })
-    })
-    return () => media.revert()
-  }, { scope: root, dependencies: [locale] })
+    }, root.current)
+    return () => {
+      scrollTrigger.current = null
+      context.revert()
+    }
+  }), [locale, features.length])
 
   const goTo = (index: number) => {
     const next = Math.max(0, Math.min(features.length - 1, index))

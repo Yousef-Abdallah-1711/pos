@@ -25,6 +25,9 @@ export function DesktopMegaMenu({ locale, pathname }: { locale: Locale; pathname
     const onPointerDown = (event: PointerEvent) => {
       if (event.target instanceof Node && !rootRef.current?.contains(event.target)) closeMenu()
     }
+    const onFocusIn = (event: FocusEvent) => {
+      if (event.target instanceof Node && !rootRef.current?.contains(event.target)) closeMenu()
+    }
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key !== 'Escape') return
       event.preventDefault()
@@ -32,9 +35,11 @@ export function DesktopMegaMenu({ locale, pathname }: { locale: Locale; pathname
       triggerRef.current?.focus()
     }
     document.addEventListener('pointerdown', onPointerDown)
+    document.addEventListener('focusin', onFocusIn)
     document.addEventListener('keydown', onKeyDown)
     return () => {
       document.removeEventListener('pointerdown', onPointerDown)
+      document.removeEventListener('focusin', onFocusIn)
       document.removeEventListener('keydown', onKeyDown)
     }
   }, [open, closeMenu])

@@ -46,6 +46,16 @@ describe('marketing navigation interactions', () => {
     expect(trigger).toHaveFocus()
   })
 
+  it('closes the desktop disclosure when focus leaves the menu', () => {
+    render(<><DesktopMegaMenu locale="en" pathname="/en" /><button type="button">Outside menu</button></>)
+    const trigger = screen.getByRole('button', { name: /open platform features/i })
+    fireEvent.click(trigger)
+    expect(trigger).toHaveAttribute('aria-expanded', 'true')
+
+    fireEvent.focusIn(screen.getByRole('button', { name: 'Outside menu' }))
+    expect(trigger).toHaveAttribute('aria-expanded', 'false')
+  })
+
   it('expands the mobile feature group and closes the drawer on Escape', async () => {
     const onClose = vi.fn()
     const onToggleTheme = vi.fn()

@@ -1,15 +1,11 @@
 'use client'
 
-import { useRef, useState } from 'react'
-import { useGSAP } from '@gsap/react'
-import gsap from 'gsap'
-import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import { useEffect, useRef, useState } from 'react'
 import type { Locale } from '@/content/site'
 import { getConversionCopy } from '@/content/conversionCopy'
 import { getOrderStoryCopy } from '@/content/orderStoryCopy'
 import { ProductCapture } from './ProductCapture'
-
-gsap.registerPlugin(useGSAP, ScrollTrigger)
+import { startDesktopMotion } from './desktopMotion'
 
 export function OrderStory({ locale }: { locale: Locale }) {
   const root = useRef<HTMLElement>(null)
@@ -19,21 +15,17 @@ export function OrderStory({ locale }: { locale: Locale }) {
   const story = getOrderStoryCopy(locale)
   const current = story.stages[active]
 
-  useGSAP(() => {
+  useEffect(() => startDesktopMotion(({ ScrollTrigger }) => {
     if (!root.current || !stage.current) return
-    const media = gsap.matchMedia()
-    media.add('(min-width: 901px) and (prefers-reduced-motion: no-preference)', () => {
-      const trigger = ScrollTrigger.create({
-        trigger: root.current,
-        start: 'top top+=96',
-        end: 'bottom bottom',
-        invalidateOnRefresh: true,
-        onUpdate: self => setActive(Math.min(story.stages.length - 1, Math.floor(self.progress * story.stages.length))),
-      })
-      return () => trigger.kill()
+    const trigger = ScrollTrigger.create({
+      trigger: root.current,
+      start: 'top top+=96',
+      end: 'bottom bottom',
+      invalidateOnRefresh: true,
+      onUpdate: self => setActive(Math.min(story.stages.length - 1, Math.floor(self.progress * story.stages.length))),
     })
-    return () => media.revert()
-  }, { scope: root, dependencies: [locale] })
+    return () => trigger.kill()
+  }), [locale, story.stages.length])
 
   const selectStage = (index: number) => {
     setActive(index)

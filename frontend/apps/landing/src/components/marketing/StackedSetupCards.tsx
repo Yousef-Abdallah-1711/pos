@@ -1,32 +1,27 @@
 'use client'
 
-import { useRef } from 'react'
-import { useGSAP } from '@gsap/react'
-import gsap from 'gsap'
-import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import { useEffect, useRef } from 'react'
 import type { Locale } from '@/content/site'
 import { getConversionCopy } from '@/content/conversionCopy'
 import { TrialLink } from './TrialLink'
-
-gsap.registerPlugin(useGSAP, ScrollTrigger)
+import { startDesktopMotion } from './desktopMotion'
 
 export function StackedSetupCards({ locale }: { locale: Locale }) {
   const root = useRef<HTMLElement>(null)
   const c = getConversionCopy(locale)
 
-  useGSAP(() => {
+  useEffect(() => startDesktopMotion(({ gsap, ScrollTrigger }) => {
     if (!root.current) return
-    const media = gsap.matchMedia()
-    media.add('(min-width: 901px) and (prefers-reduced-motion: no-preference)', () => {
-      const cards = gsap.utils.toArray<HTMLElement>('.cv-setup-card')
-      const triggers = cards.slice(0, -1).map((card, index) => ScrollTrigger.create({
-        trigger: cards[index + 1], start: 'top center', end: 'top 20%', scrub: .5,
-        onUpdate: self => gsap.set(card, { scale: 1 - self.progress * .035, opacity: 1 - self.progress * .15 }),
-      }))
-      return () => triggers.forEach(trigger => trigger.kill())
-    })
-    return () => media.revert()
-  }, { scope: root, dependencies: [locale] })
+    const cards = [...root.current.querySelectorAll<HTMLElement>('.cv-setup-card')]
+    const triggers = cards.slice(0, -1).map((card, index) => ScrollTrigger.create({
+      trigger: cards[index + 1], start: 'top center', end: 'top 20%', scrub: .5,
+      onUpdate: self => gsap.set(card, { scale: 1 - self.progress * .035, opacity: 1 - self.progress * .15 }),
+    }))
+    return () => {
+      triggers.forEach(trigger => trigger.kill())
+      gsap.set(cards, { clearProps: 'transform,opacity' })
+    }
+  }), [locale])
 
   return <section id="getting-started" className="cv-section cv-setup cv-setup-stacked" aria-labelledby="cv-setup-title" ref={root}>
     <div className="cv-wrap">
