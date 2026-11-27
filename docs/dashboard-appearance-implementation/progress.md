@@ -13,7 +13,7 @@ Status: **IN PROGRESS — not release ready**. Branch: `feature/servio-tenant-wo
 ## Tested
 
 - `node --test frontend/apps/dashboard/src/lib/workspaceAppearance.test.mjs`: four focused tests passed for inheritance, unsafe values, contrast and variable mapping.
-- `go test ./internal/workspaceappearance`: passed using Go 1.27.4 in a container. With a disposable PostgreSQL 15 fixture, tested defaults, save/reset, stale revisions, two simultaneous saves, tenant isolation and rejection of an actor belonging to another tenant.
+- `go test ./internal/workspaceappearance`: passed using Go 1.27.4 in a container. With a disposable PostgreSQL 15 fixture, tested defaults, save/reset, stale revisions, two simultaneous saves, tenant isolation, rejection of an actor belonging to another tenant, and rollback of the publication when the audit insert is denied.
 - Migration forward, rollback and reapplication passed in a disposable PostgreSQL fixture; SQL isolation checks passed using the restricted `pos_app` role. This fixture uses minimal synthetic tenant/user tables and is not a production-schema migration test.
 - Backend handler focused tests cover invalid requests, tenant mismatch and conflict; handler and API packages compiled in the Go container. Existing RBAC middleware tests and a full authenticated route test remain necessary.
 - Dashboard typecheck passed in a cached container with source mounted. Targeted ESLint reported no errors and three existing hook warnings in the legacy appearance page and shell; rerun after subsequent changes.

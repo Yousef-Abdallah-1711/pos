@@ -71,4 +71,29 @@ func TestRepositoryIsolationAndRevision(t *testing.T) {
 	if successes != 1 || conflicts != 1 {
 		t.Fatalf("concurrency: successes=%d conflicts=%d", successes, conflicts)
 	}
+	adminDSN := os.Getenv("WORKSPACE_APPEARANCE_TEST_ADMIN_URL")
+	if adminDSN == "" {
+		t.Log("audit rollback test skipped: disposable admin URL not configured")
+		return
+	}
+	admin, err := sql.Open("postgres", adminDSN)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer admin.Close()
+	if _, err := admin.ExecContext(ctx, `REVOKE INSERT ON tenant_workspace_appearance_audit FROM pos_app`); err != nil {
+		t.Fatal(err)
+	}
+	defer func() {
+		if _, err := admin.ExecContext(ctx, `GRANT INSERT ON tenant_workspace_appearance_audit TO pos_app`); err != nil {
+			t.Errorf("restore fixture grant: %v", err)
+		}
+	}()
+	if _, err := r.Save(ctx, 1, 11, 3, json.RawMessage(`{}`)); err == nil {
+		t.Fatal("save succeeded with audit unavailable")
+	}
+	after, err := r.Get(ctx, 1, 11)
+	if err != nil || after.Revision != 3 {
+		t.Fatalf("audit failure did not roll back publication: %+v %v", after, err)
+	}
 }
