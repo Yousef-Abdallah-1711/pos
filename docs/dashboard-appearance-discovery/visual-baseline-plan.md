@@ -1,0 +1,3 @@
+# Visual baseline plan
+
+No authenticated dashboard screenshots were collected in this discovery. Before capturing, establish a disposable environment and confirm that tenant and transaction fixtures are synthetic; never copy cookies, credentials or real operational records into evidence. Capture dashboard, shell expanded/collapsed/mobile, POS, KDS, orders, products, inventory, staff, reports, appearance and storefront in applicable EN/AR × light/dark variants. Record route, source commit, timestamp, viewport, device scale, data provenance and redactions for each image. Do not mistake existing marketing captures or WebKit emulation for current physical-device evidence.

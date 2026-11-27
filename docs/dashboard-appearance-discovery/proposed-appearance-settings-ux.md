@@ -1,0 +1,3 @@
+# Proposed workspace appearance UX (future; not implemented)
+
+Settings → Workspace appearance should show the active preset and revision, then sections for light/dark brand and surface colors, locale-specific body and heading fonts, bounded text scale, line height, shape and density. Preview actual shared buttons, input, table, sidebar, dialog and status components inside a scoped container. Show explicit contrast feedback and preserve non-color status cues. Expose save/publish, discard and reset only to authorized users; personal mode remains a separate preference. Handle loading, invalid input, server errors, stale revision, pending changes, keyboard access, focus return, RTL and narrow screens. The preview must not mutate storefront or other users' active settings.

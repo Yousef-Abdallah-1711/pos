@@ -2,6 +2,8 @@
 
 Updated 2026-11-27. Repository: `C:/Users/Yousef/Desktop/Projects/POSS`. App: `frontend/apps/landing`. Continue in **this worktree**. The landing implementation and evidence were prepared for integration through a pull request. Unrelated working files in other apps and local browser/audit artifacts were excluded; preserve them. No deployment was performed.
 
+Repository remote: `https://github.com/Yousef-Abdallah-1711/pos`. Landing branch: `feature/servio-bento-showcase-20261127`, head `b52745b01f56d87d3a1946407537c9798ef9984b`, [PR #137](https://github.com/Yousef-Abdallah-1711/pos/pull/137). At this update the PR is open and its application-images CI check is still running; verify the PR and remote main before claiming a merge. After integration, replace this paragraph with the verified merge commit and current branch. Do not interpret the commit SHA as the final remote `main` SHA.
+
 ## First steps for the next agent
 
 1. Read `CODING_STANDARDS.md` in full. It is the repository's primary code policy.
@@ -32,6 +34,28 @@ The old static concept HTML pages (`coral.html`, `hybrid.html`, `ultraviolet.htm
 | 11 | Pricing bridge | `LandingPricing.tsx` | Open the real pricing route or register. No unsupported price or payment promise is hardcoded here. |
 | 12 | FAQ | `ConversionLanding.tsx` | Expand native `details` answers. |
 | 13 | Final CTA | `ConversionLanding.tsx` | Register a restaurant account through the real localized form. |
+
+## Section implementation map
+
+All section routes are `/{locale}`. Shared Coral tokens, typography, responsive breakpoints and RTL selectors are in `frontend/apps/landing/src/styles/marketing-coral.css`; interactive layout and motion fallbacks are in `src/styles/marketing-interactive.css`. `src/content/conversionCopy.ts` supplies EN/AR copy except the order story (`src/content/orderStoryCopy.ts`), feature showcase (`src/content/features.ts` and `src/i18n/messages/{en,ar}/features.json`), and other component-local labels. Product captures are selected by `src/components/marketing/{ProductCapture,CaptureMedia}.tsx` from `public/images/product/servio/matrix/`; hero photography is `public/images/marketing/cafe-interior.jpg`. The matrix has English/Arabic and light/dark variants with synthetic data and a full-capture link. The script `src/components/marketing/desktopMotion.ts` lazily loads GSAP for eligible media queries and cleans up on changes.
+
+| Section and anchor | Component / selectors | Motion and fallback |
+| --- | --- | --- |
+| Hero / `#cv-hero-title` | `ConversionLanding.tsx`, `HeroCaptureMotion.tsx`; `.cv-hero`, `.cv-hero-capture` | Desktop capture motion; static on narrow or reduced-motion displays. |
+| Problems / `#cv-problem-title` | `OperationalBento.tsx`; `.cv-problem`, `.cv-bento-*` | Local card timelines and illustrative step controls; no pin. Mobile/reduced motion keeps manual controls. The actual POS screenshot remains static. |
+| Order journey / `#how-orders-move` | `OrderStory.tsx`; `.cv-story-*` | Desktop CSS sticky stage with ScrollTrigger state synchronization; narrow layout stacks stage and steps. |
+| Online / `#online-ordering` | `ConversionLanding.tsx`, `WorkflowDemo.tsx`; `.cv-online`, `.cv-workflow-demo--online` | Selectable illustrative states; no API mutation. |
+| Kitchen / `#kitchen` | `ConversionLanding.tsx`, `WorkflowDemo.tsx`; `.cv-kitchen`, `.cv-workflow-demo--kitchen` | Selectable illustrative preparation states; no API mutation. |
+| Layered statement | `LayeredTypography.tsx`; `.cv-layered-*` | Scoped desktop parallax; static fallback. |
+| Showcase / `#capabilities` | `FeatureShowcase.tsx`; `.cv-showcase-*`, `.cv-feature-slide-*` | Desktop stage-only ScrollTrigger pin starts below the measured header; track travel is measured overflow. Width ≤900px, height <760px, and reduced motion use native scroll snap. RTL direction is handled explicitly. |
+| Ecosystem | `BusinessEcosystem.tsx`; `.cv-ecosystem-*` | Selectable module nodes; desktop line animation and stacked mobile layout. |
+| Management | `ManagementExperience.tsx`; `.cv-management-*` | Selectable real capture views and labeled sample metrics; reduced motion avoids nonessential effects. |
+| Setup / `#getting-started` | `StackedSetupCards.tsx`; `.cv-setup-*` | Desktop sticky cards with scoped scroll effect; static stack on narrow screens. |
+| Pricing | `LandingPricing.tsx`; `.cv-pricing-*` | Links to pricing and registration; responsive split stacks. |
+| FAQ | `ConversionLanding.tsx`; `.cv-faq-*` | Native `details` disclosure; no animation dependency. |
+| Final CTA | `ConversionLanding.tsx`, `TrialLink.tsx`; `.cv-close` | Localized registration link with funnel attribution. |
+
+The shared `Navbar.tsx`/`Footer.tsx` and `src/styles/marketing-navigation.css` provide the header, locale and theme controls, mobile menu and footer. RTL and light/dark use the root `lang`, `dir`, and theme class. Test the complete page using `scripts/verify-operational-landing.mjs` with `SERVIO_QA_URL`, and the shared routes and forms with the other scripts and `tests/registration-e2e/`. Motion details and current verification gaps are documented in `.gsap/current-state.md` and `docs/landing-interactive-experience/operational-bento-showcase-report.md`.
 
 English and Arabic content have equal priority. The route sets `lang` and `dir`; `next-themes` stores the choice under `servio-marketing-theme`. The hero and footer retain espresso treatment in both modes. Arabic copy is real Arabic, not auto-translation at runtime.
 

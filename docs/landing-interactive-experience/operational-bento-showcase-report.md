@@ -57,4 +57,8 @@ The production-container rerun passed 120 browser cases (104 Chromium and eight 
 
 Following that matrix, the sample POS fragment was added. A representative Chromium/WebKit rerun passed 16 locale/theme/viewport cases, four reduced-motion checks and 32 routes, including assertions for the sample cart and highlighted submit state; see `pos-fragment-results.json`. The full production and CI gates must be rerun for the new fragment.
 
+On the later POS-fragment source, a full container unit-suite run had one failure (92/93 passed): a multi-tenant login test could not find its organization-selection dialog while other browser tests were running. Its isolated rerun passed 8/8. A subsequent complete run without the browser matrix running concurrently passed 17 files and 93/93 tests. The earlier failure remains a possible timing-sensitive test.
+
+The final POS-fragment source also passed a clean production build and a development-container browser matrix of 120 cases (104 Chromium, eight Firefox, eight WebKit), four reduced-motion checks and 32 localized routes. The earlier production-container matrix predates the final fragment, which was separately checked in representative Chromium/WebKit cases. These do not replace physical-device or assistive-technology testing.
+
 Current verdict: **CONDITIONAL GO for the two revised sections; CI and new performance measurements remain pending.**

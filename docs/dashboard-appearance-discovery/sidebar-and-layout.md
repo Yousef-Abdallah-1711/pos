@@ -1,0 +1,25 @@
+# Sidebar and shell evidence
+
+`frontend/apps/dashboard/src/components/layout/Sidebar.tsx` defines the navigation items inline. It uses locale-aware labels, Lucide icons, pathname/search parameters, `useUserPermissions`, `MODULE_IDS` and `PERMISSION_LEVELS`; `useTenantStatus` can substitute blocked navigation. Groups include orders, products, HR, accounting, suppliers, financial reports, reports, theme builder and settings. Visibility checks do not substitute for server-side authorization; route-level enforcement requires independent review.
+
+The sidebar uses fixed `w-64` expanded and `w-20` collapsed widths, gray surfaces and borders, primary-color logo accents, responsive transforms for a mobile drawer, and locale-dependent left/right alignment. `DashboardLayout.tsx` owns open/collapsed state and persists `dashboard.sidebar.collapsed` in localStorage. `src/app/globals.css` coordinates 16rem/5rem content padding and RTL on desktop. The shell has a sticky 64px header, notifications, locale switcher, mode toggle and user menu. POS/KDS fullscreen routes skip header and sidebar; review their distinct surfaces and controls separately. Portal styling and keyboard behavior remain unverified.
+
+`isChildActive` matches the localized pathname and optional `tab` query; groups are expanded by label in local component state. The source returns early from `toggleExpanded` when collapsed and only renders nested links when expanded. Assess discoverability and keyboard access of nested destinations in collapsed mode during a real interaction audit. There are special visibility fallbacks for orders/tables, suppliers/accounting, financial reports/general reports, and advanced HR; record these as compatibility behavior before changing navigation. The loading/blocked branches and their duplicated source blocks also need review rather than assuming the normal sidebar covers every state.
+
+Relevant shared paths: `src/components/layout/{DashboardLayout,Sidebar,SidebarSubscriptionBadge,LanguageSwitcher}.tsx`, `src/components/blocked/BlockedSidebar.tsx`, `src/hooks/useRbac.ts`, `src/lib/rbac.ts`, `src/app/globals.css`, and `src/styles/rtl.css`. Color roles to migrate include shell surface, foreground, muted foreground, active/hover, icon, border, focus and badge states. Preserve semantic subscription and permission indications. Actual captures and detailed keyboard checks are still required.
+
+## Specific source anchors and proposed migration roles
+
+Paths below are relative to `frontend/apps/dashboard/`; line numbers describe the inspected revision and may move.
+
+| Current dependency | Source | Current mechanism | Candidate role / review |
+| --- | --- | --- | --- |
+| Sidebar width, surface, divider, mobile transform | `src/components/layout/Sidebar.tsx:402` | `w-20` / `w-64`, white/gray Tailwind classes, side switches for RTL; `md` changes drawer behavior | Sidebar surface and border tokens; preserve width and focus behavior. |
+| Logo icon / title | `src/components/layout/Sidebar.tsx:410` | `text-primary-600` / `dark:text-primary-400` and gray/white title | Brand icon and sidebar foreground; do not recolor semantic icons globally. |
+| Group hover and nested navigation | `src/components/layout/Sidebar.tsx:433` | Gray foreground/hover utilities, conditional collapse and directional chevrons | Sidebar hover and foreground; check expanded state and keyboard operation. |
+| Active child / main link | `src/components/layout/Sidebar.tsx:455` and `:475` | Primary utility classes for active, gray for inactive | Selection background/foreground, test both modes and contrast. |
+| Skeleton and blocked branches | `src/components/layout/Sidebar.tsx:330`, `:360` | Separate branch with fixed gray Tailwind utilities / separate blocked sidebar | Map loading and blocked surfaces explicitly; do not assume the normal branch covers them. |
+| Shell, header and profile menu | `src/components/layout/DashboardLayout.tsx:171`, `:192`, `:240`, `:258` | Gray/white Tailwind utilities and local theme toggle; profile popover rendered in shell | Workspace background, header, popover, borders and controls; confirm portal behavior separately. |
+| Collapse preference and page offset | `src/components/layout/DashboardLayout.tsx:59`, `:66`; `src/app/globals.css:93` | Local storage plus layout data attributes and CSS padding | Preserve preference, responsive thresholds and RTL content offsets. |
+
+Focus indicators, subscription badge colors, tooltips, mobile overlay accessibility, workspace switching, search and breadcrumbs require individual source and runtime verification; absence from this table is not evidence they are unsupported.
