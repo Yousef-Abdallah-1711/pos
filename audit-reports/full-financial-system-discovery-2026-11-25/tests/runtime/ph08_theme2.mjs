@@ -1,0 +1,11 @@
+import fs from 'fs';
+import { API, PASSWORD, evidenceDirs } from './chrome_lib.mjs';
+const d = evidenceDirs('PH-08'); const O = 'http://localhost:13112';
+const r0 = await fetch(API + '/auth/login', { method: 'POST', headers: { Origin: O, 'Content-Type': 'application/json' }, body: JSON.stringify({ email: 'audit.c.owner@example.test', password: PASSWORD }) });
+const ck = r0.headers.getSetCookie().map((c) => c.split(';')[0]).join('; ');
+const A = async (m, p, b) => { const x = await fetch(API + p, { method: m, headers: { Origin: O, Cookie: ck, 'Content-Type': 'application/json' }, body: b ? JSON.stringify(b) : undefined }); const t = await x.text(); let j; try { j = JSON.parse(t); } catch { j = t.slice(0, 200); } return { status: x.status, body: j }; };
+const log = []; const rec = (id, desc, extra = {}) => { log.push({ id, desc, ...extra }); console.log(id, desc, JSON.stringify(extra).slice(0, 400)); };
+const cfg = { colors: { primary: 'not-a-color', text: 'url(javascript:alert(1))' }, rtl: { enabled: false } };
+let r = await A('POST', '/admin/themes', { name: 'RUN3 <img src=x onerror=alert(1)>', slug: 'run3-theme', config: cfg }); const tid = r.body?.data?.id ?? r.body?.theme?.id ?? r.body?.id; rec('THM-04b', 'theme with invalid colors and HTML name', { http: r.status, id: tid, resp: JSON.stringify(r.body).slice(0, 260) });
+if (tid) { r = await A('POST', `/admin/themes/${tid}/duplicate`, {}); rec('THM-05', 'duplicate', { http: r.status }); r = await A('POST', `/admin/themes/${tid}/activate`, {}); rec('THM-06', 'activate theme with invalid colors', { http: r.status, resp: JSON.stringify(r.body).slice(0, 160) }); r = await A('GET', '/public/restaurants/audit-c-diag/theme'.replace('/public', '/public')); rec('THM-06b', 'public theme output', { http: r.status, body: JSON.stringify(r.body).slice(0, 300) }); r = await A('GET', `/admin/themes/${tid}/history`); rec('THM-07', 'history', { http: r.status, n: JSON.stringify(r.body).length }); r = await A('DELETE', `/admin/themes/${tid}`); rec('THM-08', 'delete ACTIVE theme', { http: r.status, resp: JSON.stringify(r.body).slice(0, 160) }); const def = await A('POST', '/admin/themes/4/activate', {}); rec('THM-09', 'restore Default Theme (id 4)', { http: def.status }); }
+fs.writeFileSync(`${d.db}/AUD-THEME2.json`, JSON.stringify({ run: 'RUN-003', kind: 'API-DIAGNOSTIC', log }, null, 1));

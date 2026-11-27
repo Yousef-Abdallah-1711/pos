@@ -1,0 +1,12 @@
+import { login, EV, DASH, netLog } from './lib.mjs';
+const [tag, email, name] = process.argv.slice(2);
+const { b, ctx } = await login(email, tag);
+const p = await ctx.newPage(); const net = []; netLog(p, net);
+await p.goto(DASH + '/en/dashboard/accounting/customers', { waitUntil: 'networkidle' }); await p.waitForTimeout(2000);
+await p.click('button:has-text("New customer")'); await p.waitForTimeout(800);
+await p.fill('input[placeholder="Corporate Catering Client"]', name);
+await p.fill('input[placeholder="Mona Ali"]', 'Audit Buyer'); await p.fill('input[placeholder="finance@client.com"]', 'buyer@example.test');
+const s = p.locator('select:has(option:text-is("Select receivable account"))'); const v = await s.locator('option').evaluateAll(os => os.find(o => o.textContent.trim().startsWith('1120 '))?.value); await s.selectOption(v);
+await p.click('button:has-text("Create customer")'); await p.waitForTimeout(3000);
+console.log(JSON.stringify(net.filter(x => x.m !== 'GET').map(x => `${x.m} ${x.u} ${x.s} resp=${x.body.slice(0, 200)}`), null, 1));
+await b.close();

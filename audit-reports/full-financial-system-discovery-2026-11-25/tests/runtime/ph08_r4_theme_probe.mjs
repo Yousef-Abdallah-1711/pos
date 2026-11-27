@@ -1,0 +1,12 @@
+import fs from 'fs';
+import { openChrome, ensureLoggedIn, evidenceDirs, DASH } from './chrome_lib.mjs';
+const d = evidenceDirs('PH-08');
+const { ctx, page } = await openChrome();
+const calls = []; page.on('response', async (r) => { if (r.url().includes(':18082') && /theme/i.test(r.url())) { let b = ''; try { b = (await r.text()).slice(0, 300); } catch {} calls.push({ m: r.request().method(), u: r.url().replace('http://localhost:18082/api/v1', ''), s: r.status(), b }); } });
+await ensureLoggedIn(page, 'audit.c.owner@example.test', `${DASH}/en/dashboard/theme-builder`);
+await page.waitForTimeout(10000);
+await page.screenshot({ path: `${d.shot}/AUD-R4-THEME-main.png`, fullPage: true }).catch(() => {});
+const info = await page.evaluate(() => ({ text: document.body.innerText.slice(0, 2500), buttons: [...document.querySelectorAll('main button')].map((b) => (b.innerText || b.getAttribute('aria-label') || '').trim().slice(0, 40)).filter(Boolean), tabs: [...document.querySelectorAll('[role=tab]')].map((t) => t.innerText.trim()), inputs: [...document.querySelectorAll('main input')].map((i) => i.type + ':' + (i.name || i.placeholder || i.getAttribute('aria-label') || '')).slice(0, 40) }));
+fs.writeFileSync(`${d.net}/AUD-R4-THEME-probe.json`, JSON.stringify({ info, calls }, null, 1));
+console.log(JSON.stringify(info, null, 1).slice(0, 3500)); console.log(calls.map((c) => c.m + ' ' + c.u + ' ' + c.s).join('\n'));
+await ctx.close();

@@ -1,0 +1,25 @@
+// RUN-003 / PH-19 / HC-10 part 2 + REFUND-01: can a PAID order be cancelled / item-cancelled / status-changed, and what accounting results? API-DIAGNOSTIC, tenant 4.
+import fs from 'fs';
+import { sql, API, PASSWORD, evidenceDirs } from './chrome_lib.mjs';
+const d = evidenceDirs('PH-19'); let cookie = '';
+const call = async (method, path, body) => { const r = await fetch(API + path, { method, headers: { Origin: 'http://localhost:13112', Cookie: cookie, 'Content-Type': 'application/json' }, body: body ? JSON.stringify(body) : undefined }); const sc = r.headers.getSetCookie?.() ?? []; if (sc.length) cookie = sc.map((c) => c.split(';')[0]).join('; '); const t = await r.text(); let j; try { j = JSON.parse(t); } catch { j = t.slice(0, 200); } return { status: r.status, body: j }; };
+await call('POST', '/auth/login', { email: 'audit.c.owner@example.test', password: PASSWORD });
+const sleep = (ms) => new Promise((x) => setTimeout(x, ms));
+const out = [];
+const mk = async (q) => (await call('POST', '/pos/orders', { order_source: 'pos', customer_name: 'REF', customer_phone: '0000000000', payment_method: 'cash', items: [{ product_id: 4, quantity: q }] })).body?.data?.id;
+const st = (id) => sql(`select status||'/'||payment_status from orders where id=${id}`);
+const gl = () => sql("select round(coalesce(sum(debit_amount-credit_amount),0),2) from general_ledger g join chart_of_accounts a on a.id=g.account_id where g.tenant_id=4 and a.account_code in ('1110')");
+const stock = () => sql('select quantity_in_stock from products where id=4');
+const id = await mk(3); await call('PUT', `/admin/orders/${id}/payment-status`, { payment_status: 'paid' }); await sleep(4000);
+const before = { state: st(id), cash: gl(), stock: stock(), journals: sql(`select count(*) from journal_entries where tenant_id=4 and reference_id=${id} and reference_type='order'`) };
+const cancel = await call('DELETE', `/admin/orders/${id}`);
+await sleep(3000);
+const afterCancel = { http: cancel.status, resp: JSON.stringify(cancel.body).slice(0, 160), state: st(id), cash: gl(), stock: stock(), journals: sql(`select count(*) from journal_entries where tenant_id=4 and reference_id=${id} and reference_type='order'`), reversalOrVoid: sql(`select string_agg(entry_number||':'||status,',') from journal_entries where tenant_id=4 and reference_id=${id}`) };
+const itemId = sql(`select id from order_items where order_id=${id} limit 1`);
+const ic = await call('POST', `/admin/orders/${id}/items/${itemId}/cancel`, { quantity: 1, reason: 'probe' });
+const afterItem = { http: ic.status, resp: JSON.stringify(ic.body).slice(0, 160), state: st(id), stock: stock() };
+const sc = await call('PUT', `/admin/orders/${id}/status`, { status: 'cancelled' });
+const afterStatus = { http: sc.status, resp: JSON.stringify(sc.body).slice(0, 160), state: st(id), cash: gl(), stock: stock() };
+out.push({ before, afterCancel, afterItem, afterStatus });
+console.log(JSON.stringify(out, null, 1));
+fs.writeFileSync(`${d.db}/AUD-REFUND-01-paid-order-cancel.json`, JSON.stringify({ run: 'RUN-003', order: id, out }, null, 1));

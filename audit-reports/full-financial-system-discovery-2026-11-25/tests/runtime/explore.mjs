@@ -1,0 +1,12 @@
+import { login, EV, DASH, netLog } from './lib.mjs';
+const [tag, email, path] = process.argv.slice(2);
+const { b, ctx } = await login(email, tag);
+const p = await ctx.newPage(); const net = []; netLog(p, net);
+await p.goto(DASH + '/' + path, { waitUntil: 'networkidle' }).catch(e => console.log('goto', e.message)); await p.waitForTimeout(3000);
+console.log('URL', p.url());
+console.log((await p.locator('body').innerText()).slice(0, 900).replace(/\n+/g, ' | '));
+const f = await p.$$eval('input,select,textarea', els => els.map(e => `${e.tagName}[${e.type}] name=${e.name} id=${e.id} ph=${e.placeholder}`));
+console.log(f.join('\n'));
+console.log(net.map(n => `${n.m} ${n.u} ${n.s}`).join('\n'));
+await p.screenshot({ path: `${EV}/screenshots/explore-${tag}-${path.replace(/\W+/g, '_')}.png` });
+await b.close();

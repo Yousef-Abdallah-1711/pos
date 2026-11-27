@@ -1,0 +1,15 @@
+import { login, EV, DASH, netLog } from './lib.mjs';
+const [tag, email, name] = process.argv.slice(2);
+const { b, ctx } = await login(email, tag);
+const p = await ctx.newPage(); const net = []; netLog(p, net);
+await p.goto(DASH + '/en/dashboard/accounting/suppliers', { waitUntil: 'networkidle' }); await p.waitForTimeout(2000);
+await p.click('button:has-text("New supplier")'); await p.waitForTimeout(1000);
+await p.fill('input[placeholder="Fresh Produce Co."]', name);
+await p.fill('input[placeholder="Ahmed Hassan"]', 'Audit Contact');
+await p.fill('input[placeholder="purchasing@supplier.com"]', 'supplier@example.test');
+const cat = p.locator('select:has(option:text-is("Select category"))'); await cat.selectOption({ label: 'food' });
+const pay = p.locator('select:has(option:text-is("Select payable account"))');
+const v = await pay.locator('option').evaluateAll(os => os.find(o => o.textContent.trim().startsWith('2101 '))?.value); await pay.selectOption(v);
+await p.click('button:has-text("Create supplier")'); await p.waitForTimeout(3000);
+console.log(JSON.stringify(net.filter(n => n.m !== 'GET').map(n => `${n.m} ${n.u} ${n.s} req=${n.req.slice(0,120)} ${n.body.slice(0, 200)}`), null, 1));
+await b.close();

@@ -1,0 +1,24 @@
+import os, re
+os.chdir(r'C:\Users\Yousef\Desktop\Projects\POSS\audit-reports\full-financial-system-discovery-2026-11-25')
+p = 'tests/build_closure_report.py'
+s = open(p, encoding='utf-8').read()
+def rep(old, new, count=1):
+    global s
+    assert old in s, old[:60]
+    s = s.replace(old, new, count)
+rep('(Master Prompt 05 / RUN-003)', '(Master Prompt 05, RUN-003 and RUN-004)')
+rep('| UI controls inventoried individually | NOT DONE (file 53 not created) | — |', '| UI controls | counts per route in 53 (59 routes); one safe interaction per control for 644 controls in 53b (cap 22 per route; destructive controls skipped) | 53, 53b |')
+s = re.sub(r'\*\*Performance:\*\* latency on small data only; 100-VU load and 50k-line benchmark NOT executed\.', '**Performance (RUN-004):** write load 10-100 virtual users (5,719 orders, 0 server errors), 600-payment burst with outbox drain (56 s), and a 54,000-line synthetic benchmark (reports 33-235 ms, exact to the cent) executed; not production capacity claims; browser rendering latency on the large tenant not measured.', s)
+rep('- New in RUN-003: F-037 … F-056 (F-051 unused).', '- New in RUN-003: F-037 … F-065; new in RUN-004: F-066 … F-079 (F-051 unused). RUN-004 also retracted one RUN-003 claim: the duplicate-table-number part of F-064 (duplicates return 409).')
+rep('- Policy decisions: 15 in [56](56-accounting-policy-decision-package.md) (none approved).', '- Policy decisions: 19 in [56](56-accounting-policy-decision-package.md): POL-01..POL-15 plus proposed POL-16..POL-19 added in RUN-004 (none approved; all OPEN).')
+rep('| All discovered feasible tests executed | NOT MET | listed in 48 §B: SEC-013, 100-VU load, 50k-line benchmark, theme builder, delivery UI, bank reconciliation, depreciation, import/export, per-field UI matrices |', '| All discovered feasible tests executed | NOT MET | executed in RUN-004: SEC-013, 100-VU load, 54k-line benchmark, theme builder UI, bank reconciliation, form matrices, control matrix; still open: field-level isolation tests, Arabic/mobile interaction, invoice/payment/POS/settings form matrices, destructive-control fixtures (45 addendum) |')
+rep('| All logical forms explicit coverage | NOT MET | 128 forms; about 10 submitted through the UI |', '| All logical forms explicit coverage | NOT MET | 116 forms in the dashboard-heavy inventory; 13 exercised through the UI at form level (54b), 17 form targets in the matrix incl. forms missing from the inventory |')
+rep('| All fields and controls explicit test statuses | NOT MET | 627 fields / controls inventory (53) not executed per field |', '| All fields and controls explicit test statuses | NOT MET | 531 logical fields: 94 at form level, 0 at field level (54b); 644 controls interacted once (53b), 88 skipped, 58 tooling-blocked |')
+rep('| Report metrics explicit verification statuses | MET (30c) | every row has a status; 6 rows still NOT EXECUTED |', '| Report metrics explicit verification statuses | MET (30c, 43) | all 119 rows executed (RUN-004); results include FAIL rows with findings |')
+rep('| Root causes have confidence classifications | PARTIAL | confidence recorded for most; UNSTATED ones listed in §4 |', '| Root causes have confidence classifications | MET | every finding classified: CONFIRMED or PROBABLE with the exact investigation gap (F-018, F-021, F-038, F-074) |')
+rep('1. System discovery completeness — **PARTIAL-HIGH** (static discovery and lineage complete; no per-control inventory).', '1. System discovery completeness — **PARTIAL-HIGH** (static discovery and lineage complete; per-control counts for 59 routes; the field inventory misses some forms, see 54b).')
+rep('2. Functional UI testing completeness — **PARTIAL** (route matrix in 3 modes; limited UI form submissions; many flows API-diagnostic).', '2. Functional UI testing completeness — **PARTIAL** (route matrix in 3 modes; 644 control interactions; 17 form targets x 5 modes; field-level and Arabic/mobile interaction not done; many flows still API-diagnostic).')
+rep('5. Security verification completeness — **PARTIAL** (tenant isolation, session, role and input probes done; no TLS/production-environment checks, no SEC-013).', '5. Security verification completeness — **PARTIAL** (tenant isolation, session, role, input probes and SEC-013 staging comparison done; no TLS/production-environment checks).')
+s = re.sub(r'7\. Remediation specification readiness — \*\*HIGH for the 56 findings\*\*[^\n]*', '7. Remediation specification readiness — **MEDIUM-HIGH**: every finding has a hand-written design, measurable acceptance criteria and policy references (RUN-004), tasks apply only the phases that fit and shared root causes point at one owner task; designs are still proposals to be confirmed by engineers (F-018, F-021, F-038, F-074 need a root-cause confirmation step first).', s)
+open(p, 'w', encoding='utf-8').write(s)
+print('patched')

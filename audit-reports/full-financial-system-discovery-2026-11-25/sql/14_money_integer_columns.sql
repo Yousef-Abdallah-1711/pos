@@ -1,0 +1,1 @@
+SELECT table_name,column_name,data_type FROM information_schema.columns WHERE table_schema='public' AND data_type IN ('integer','bigint','smallint') AND column_name ~* '(amount|price|cents|cost|total|balance|salary|fee|premium)' ORDER BY 1,2;

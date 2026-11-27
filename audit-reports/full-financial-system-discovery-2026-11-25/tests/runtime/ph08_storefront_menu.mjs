@@ -1,0 +1,13 @@
+import fs from 'fs';
+import { chromium } from 'file:///C:/Users/Yousef/Desktop/Projects/POSS/node_modules/playwright/index.mjs';
+import { evidenceDirs } from './chrome_lib.mjs';
+const d = evidenceDirs('PH-08');
+const browser = await chromium.launch({ channel: 'chrome', headless: false });
+const page = await (await browser.newContext({ viewport: { width: 1280, height: 900 } })).newPage();
+await page.goto('http://audit-c-diag.localhost:13113/en/menu', { waitUntil: 'domcontentloaded', timeout: 120000 });
+await page.waitForTimeout(12000);
+const text = (await page.locator('body').innerText()).replace(/\n+/g, ' | ').slice(0, 900);
+await page.screenshot({ path: `${d.shot}/AUD-STORE-004-menu-C-with-wildcard-cors.png`, fullPage: true, timeout: 40000 }).catch(() => {});
+fs.writeFileSync(`${d.net}/AUD-STORE-004.json`, JSON.stringify({ run: 'RUN-003', url: page.url(), text }, null, 1));
+console.log(text);
+await browser.close();
