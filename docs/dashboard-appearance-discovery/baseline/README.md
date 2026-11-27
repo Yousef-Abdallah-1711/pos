@@ -2,6 +2,8 @@
 
 Captured 2026-11-27 using the actual local dashboard in a Playwright-controlled browser and a fresh disposable `pos-test` PostgreSQL/backend stack. The tenant and account were created solely for this audit; displayed owner, restaurant and data are synthetic. Dashboard ran in development mode from the local `servio-landing-qa:20261127` image; exact image source commit was not independently recorded. Most captures show default empty data and a trial owner, not representative populated orders or restricted permissions. The Next.js development badge is visible. No cookies, authentication credentials or database files are stored here.
 
+Screenshots are saved at CSS-pixel scale; their device pixel ratio was not recorded for every capture and should not be inferred from image dimensions. The URL in each row identifies the application route in the local test environment, not a production deployment.
+
 | File | Route / state | Viewport |
 | --- | --- | --- |
 | [dashboard-en-light-expanded.png](dashboard-en-light-expanded.png) | `/en/dashboard`, light, expanded | 1440 × 900 CSS pixels |
