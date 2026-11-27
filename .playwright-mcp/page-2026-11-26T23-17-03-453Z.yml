@@ -1,0 +1,11 @@
+- generic [active] [ref=f29e1]:
+  - button "Open Next.js Dev Tools" [ref=f29e292] [cursor=pointer]:
+    - generic [ref=f29e295]:
+      - text: Rendering
+      - generic [ref=f29e296]:
+        - generic [ref=f29e297]: .
+        - generic [ref=f29e298]: .
+        - generic [ref=f29e299]: .
+  - alert [ref=f29e291]
+  - main [ref=f29e300]:
+    - status [ref=f29e301]: جارٍ التحميل…

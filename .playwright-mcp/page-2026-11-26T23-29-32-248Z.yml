@@ -1,0 +1,162 @@
+- generic [active] [ref=f36e1]:
+  - link "Skip to content" [ref=f36e2] [cursor=pointer]:
+    - /url: "#main-content"
+  - banner [ref=f36e3]:
+    - generic [ref=f36e4]:
+      - link "SERVIO" [ref=f36e5] [cursor=pointer]:
+        - /url: /en
+      - navigation "Main navigation" [ref=f36e11]:
+        - button "Open platform features" [ref=f36e13] [cursor=pointer]: Platform
+        - link "How it works" [ref=f36e16] [cursor=pointer]:
+          - /url: /en/how-it-works
+        - link "Pricing" [ref=f36e17] [cursor=pointer]:
+          - /url: /en/pricing
+        - link "Product tour" [ref=f36e18] [cursor=pointer]:
+          - /url: /en/demo
+        - link "Demo options" [ref=f36e19] [cursor=pointer]:
+          - /url: /en/contact
+      - generic [ref=f36e20]:
+        - link "Switch to Arabic" [ref=f36e21] [cursor=pointer]:
+          - /url: /ar/features/online-ordering
+          - generic [ref=f36e27]: العربية
+        - button "Switch to dark mode" [ref=f36e28] [cursor=pointer]
+        - status [ref=f36e32]: Checking sign-in
+  - main [ref=f36e33]:
+    - generic [ref=f36e35]:
+      - link "The platform" [ref=f36e36] [cursor=pointer]:
+        - /url: /en/features
+      - paragraph [ref=f36e37]: The guest experience
+      - heading "From your guest’s menu to your team’s queue." [level=1] [ref=f36e38]
+      - paragraph [ref=f36e39]: Guests browse a restaurant storefront, review a cash-on-delivery checkout and receive an order confirmation.
+      - link "Create your restaurant account" [ref=f36e40] [cursor=pointer]:
+        - /url: /en/auth/register?billing=monthly
+      - 'figure "English, light-theme application screen · synthetic data; QA identifiers redacted Open the full capture : Online ordering" [ref=f36e44]':
+        - img "Online ordering — English, light-theme application screen · synthetic data; QA identifiers redacted" [ref=f36e46]
+        - generic [ref=f36e47]:
+          - generic [ref=f36e48]: English, light-theme application screen · synthetic data; QA identifiers redacted
+          - 'link "Open the full capture : Online ordering" [ref=f36e49] [cursor=pointer]':
+            - /url: /images/product/servio/matrix/checkout-en-light.png
+            - text: Open the full capture
+            - generic [ref=f36e50]: ": Online ordering"
+      - region "Online ordering" [ref=f36e51]:
+        - paragraph [ref=f36e52]: What your team can do
+        - heading "Online ordering" [level=2] [ref=f36e53]
+        - list [ref=f36e54]:
+          - listitem [ref=f36e55]:
+            - generic [ref=f36e56]: "01"
+            - heading "Choose from the restaurant menu" [level=3] [ref=f36e57]
+            - paragraph [ref=f36e58]: The guest adds a product and reviews the cart.
+          - listitem [ref=f36e59]:
+            - generic [ref=f36e60]: "02"
+            - heading "Send a cash order" [level=3] [ref=f36e61]
+            - paragraph [ref=f36e62]: Checkout creates a pending order and returns its confirmation.
+          - listitem [ref=f36e63]:
+            - generic [ref=f36e64]: "03"
+            - heading "Let staff confirm" [level=3] [ref=f36e65]
+            - paragraph [ref=f36e66]: Staff confirmation sends the order into the kitchen preparation queue.
+        - paragraph [ref=f36e67]: The demonstrated flow uses the configured demo storefront and cash on delivery. Online card processing and instant availability of newly registered public hostnames are not promised.
+      - region "Related workflows" [ref=f36e68]:
+        - heading "Related workflows" [level=2] [ref=f36e69]
+        - navigation "Related workflows" [ref=f36e70]:
+          - link "Cashier POS" [ref=f36e71] [cursor=pointer]:
+            - /url: /en/features/pos
+          - link "Kitchen display" [ref=f36e72] [cursor=pointer]:
+            - /url: /en/features/kitchen-display
+          - link "Storefront customization" [ref=f36e73] [cursor=pointer]:
+            - /url: /en/features/website-builder
+      - region [ref=f36e74]:
+        - paragraph [ref=f36e75]: Frequently asked questions
+        - generic [ref=f36e76]:
+          - group [ref=f36e77]:
+            - generic "Can guests pay online by card?" [ref=f36e78] [cursor=pointer]:
+              - text: Can guests pay online by card?
+              - generic [aria-hidden] [ref=f36e79]: +
+          - group [ref=f36e80]:
+            - generic "When does an online order reach the kitchen?" [ref=f36e81] [cursor=pointer]:
+              - text: When does an online order reach the kitchen?
+              - generic [aria-hidden] [ref=f36e82]: +
+    - generic [ref=f36e84]:
+      - paragraph [ref=f36e85]: Give the next order a clear path
+      - heading "Bring the counter and kitchen into the same conversation." [level=2] [ref=f36e86]
+      - generic [ref=f36e87]:
+        - paragraph [ref=f36e88]: Explore the workflow, set up your restaurant and try a real order handoff during your 14-day trial.
+        - generic [ref=f36e89]:
+          - link "Create your restaurant account" [ref=f36e90] [cursor=pointer]:
+            - /url: /en/auth/register?billing=monthly
+          - link "View pricing details" [ref=f36e94] [cursor=pointer]:
+            - /url: /en/pricing
+  - contentinfo [ref=f36e95]:
+    - generic [ref=f36e96]:
+      - generic [ref=f36e97]:
+        - generic [ref=f36e98]:
+          - link "SERVIO" [ref=f36e99] [cursor=pointer]:
+            - /url: /en
+          - paragraph [ref=f36e105]: Restaurant operations, thoughtfully connected.
+          - link "Get started" [ref=f36e106] [cursor=pointer]:
+            - /url: /en/auth/register?billing=monthly
+        - navigation "Footer navigation" [ref=f36e110]:
+          - generic [ref=f36e111]:
+            - generic [ref=f36e112]:
+              - heading "Product" [level=2] [ref=f36e113]
+              - list [ref=f36e114]:
+                - listitem [ref=f36e115]:
+                  - link "Explore all features" [ref=f36e116] [cursor=pointer]:
+                    - /url: /en/features
+                - listitem [ref=f36e117]:
+                  - link "Cashier POS" [ref=f36e118] [cursor=pointer]:
+                    - /url: /en/features/pos
+                - listitem [ref=f36e119]:
+                  - link "Kitchen display" [ref=f36e120] [cursor=pointer]:
+                    - /url: /en/features/kitchen-display
+                - listitem [ref=f36e121]:
+                  - link "Online ordering" [ref=f36e122] [cursor=pointer]:
+                    - /url: /en/features/online-ordering
+                - listitem [ref=f36e123]:
+                  - link "Inventory" [ref=f36e124] [cursor=pointer]:
+                    - /url: /en/features/inventory
+                - listitem [ref=f36e125]:
+                  - link "Staff records" [ref=f36e126] [cursor=pointer]:
+                    - /url: /en/features/hr
+                - listitem [ref=f36e127]:
+                  - link "Operational overview" [ref=f36e128] [cursor=pointer]:
+                    - /url: /en/features/analytics
+                - listitem [ref=f36e129]:
+                  - link "Storefront customization" [ref=f36e130] [cursor=pointer]:
+                    - /url: /en/features/website-builder
+            - generic [ref=f36e131]:
+              - heading "Explore" [level=2] [ref=f36e132]
+              - list [ref=f36e133]:
+                - listitem [ref=f36e134]:
+                  - link "How it works" [ref=f36e135] [cursor=pointer]:
+                    - /url: /en/how-it-works
+                - listitem [ref=f36e136]:
+                  - link "Product tour" [ref=f36e137] [cursor=pointer]:
+                    - /url: /en/demo
+                - listitem [ref=f36e138]:
+                  - link "Demo options" [ref=f36e139] [cursor=pointer]:
+                    - /url: /en/contact
+                - listitem [ref=f36e140]:
+                  - link "Pricing" [ref=f36e141] [cursor=pointer]:
+                    - /url: /en/pricing
+            - generic [ref=f36e142]:
+              - heading "Account" [level=2] [ref=f36e143]
+              - list [ref=f36e144]:
+                - listitem [ref=f36e145]:
+                  - link "Log in" [ref=f36e146] [cursor=pointer]:
+                    - /url: /en/auth/login
+                - listitem [ref=f36e147]:
+                  - link "Create your restaurant account" [ref=f36e148] [cursor=pointer]:
+                    - /url: /en/auth/register
+            - generic [ref=f36e149]:
+              - heading "Company" [level=2] [ref=f36e150]
+              - list [ref=f36e151]:
+                - listitem [ref=f36e152]:
+                  - link "Privacy" [ref=f36e153] [cursor=pointer]:
+                    - /url: /en/privacy
+                - listitem [ref=f36e154]:
+                  - link "Demo information" [ref=f36e155] [cursor=pointer]:
+                    - /url: /en/contact
+      - generic [ref=f36e156]:
+        - paragraph [ref=f36e157]: Product screens use synthetic data. Availability and setup requirements are described on each feature page.
+        - generic [ref=f36e158]: © 2026 SERVIO
+  - button "Open Next.js Dev Tools" [ref=f36e164] [cursor=pointer]

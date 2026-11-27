@@ -1,0 +1,132 @@
+- generic [ref=f6e2]:
+  - generic [ref=f6e3]:
+    - link "Skip to content" [ref=f6e4] [cursor=pointer]:
+      - /url: "#start-of-content"
+    - banner [ref=f6e9]:
+      - heading "Navigation Menu" [level=2] [ref=f6e10]
+      - generic [ref=f6e11]:
+        - link "Homepage" [ref=f6e14] [cursor=pointer]:
+          - /url: /
+        - generic [ref=f6e17]:
+          - navigation "Global" [ref=f6e18]:
+            - list [ref=f6e19]:
+              - listitem [ref=f6e20]:
+                - button "Products" [ref=f6e22] [cursor=pointer]
+              - listitem [ref=f6e25]:
+                - button "Developers" [ref=f6e27] [cursor=pointer]
+              - listitem [ref=f6e30]:
+                - button "Businesses" [ref=f6e32] [cursor=pointer]
+              - listitem [ref=f6e35]:
+                - button "Resources" [ref=f6e37] [cursor=pointer]
+              - listitem [ref=f6e40]:
+                - link "Pricing" [ref=f6e41] [cursor=pointer]:
+                  - /url: https://github.com/pricing
+          - generic [ref=f6e42]:
+            - button "Search or jump to, type / to search" [ref=f6e44] [cursor=pointer]:
+              - generic [ref=f6e47]:
+                - generic [ref=f6e48]: Search
+                - generic [aria-hidden] [ref=f6e49]: /
+            - generic [ref=f6e50]:
+              - link "Sign in" [ref=f6e52] [cursor=pointer]:
+                - /url: /login?return_to=https%3A%2F%2Fgithub.com%2FYousef-Abdallah-1711%2Fpos%2Factions%2Fruns%2F45939385900%2Fjob%2F140310608106
+              - link "Sign up" [ref=f6e55] [cursor=pointer]:
+                - /url: /signup?ref_cta=Sign+up&ref_loc=header+logged+out&ref_page=%2F%3Cuser-name%3E%2F%3Crepo-name%3E%2Factions%2Fjob%2Findex&source=header-repo&source_repo=Yousef-Abdallah-1711%2Fpos
+              - button "Appearance settings" [ref=f6e58] [cursor=pointer]
+  - main [ref=f6e65]:
+    - generic [ref=f6e66]:
+      - generic "Global navigation menu" [ref=f6e69]:
+        - navigation "Breadcrumbs" [ref=f6e72]:
+          - list [ref=f6e73]:
+            - listitem [ref=f6e74]:
+              - link "Yousef-Abdallah-1711" [ref=f6e75] [cursor=pointer]:
+                - /url: /Yousef-Abdallah-1711
+            - listitem [ref=f6e77]:
+              - link "pos" [ref=f6e78] [cursor=pointer]:
+                - /url: /Yousef-Abdallah-1711/pos
+        - heading "Repository navigation" [level=2] [ref=f6e81]
+        - navigation "Repository" [ref=f6e82]:
+          - list [ref=f6e83]:
+            - listitem [ref=f6e84]:
+              - link "Code" [ref=f6e85] [cursor=pointer]:
+                - /url: /Yousef-Abdallah-1711/pos
+            - listitem [ref=f6e90]:
+              - link "Issues" [ref=f6e91] [cursor=pointer]:
+                - /url: /Yousef-Abdallah-1711/pos/issues
+            - listitem [ref=f6e97]:
+              - link "Pull requests (2)" [ref=f6e98] [cursor=pointer]:
+                - /url: /Yousef-Abdallah-1711/pos/pulls
+                - generic [ref=f6e102]: Pull requests
+                - generic [ref=f6e103]:
+                  - generic [aria-hidden] [ref=f6e104]: "2"
+                  - generic [ref=f6e105]: (2)
+            - listitem [ref=f6e106]:
+              - link "Actions" [ref=f6e107] [cursor=pointer]:
+                - /url: /Yousef-Abdallah-1711/pos/actions
+            - listitem [ref=f6e112]:
+              - link "Projects" [ref=f6e113] [cursor=pointer]:
+                - /url: /Yousef-Abdallah-1711/pos/projects
+            - listitem [ref=f6e118]:
+              - link "Security and quality" [ref=f6e119] [cursor=pointer]:
+                - /url: /Yousef-Abdallah-1711/pos/security
+            - listitem [ref=f6e124]:
+              - link "Insights" [ref=f6e125] [cursor=pointer]:
+                - /url: /Yousef-Abdallah-1711/pos/pulse
+      - generic [ref=f6e134]:
+        - generic [ref=f6e137]:
+          - link "SERVIO verified CI" [ref=f6e140] [cursor=pointer]:
+            - /url: /Yousef-Abdallah-1711/pos/actions/workflows/production-ci.yml
+          - generic [ref=f6e144]:
+            - generic [ref=f6e145]:
+              - img "currently running:" [ref=f6e150]
+              - 'heading "feat(landing): launch interactive SERVIO conversion page #744" [level=1] [ref=f6e154]'
+            - link "Sign in to view logs" [ref=f6e158] [cursor=pointer]:
+              - /url: /login?return_to=https%3A%2F%2Fgithub.com%2FYousef-Abdallah-1711%2Fpos%2Factions%2Fruns%2F45939385900%2Fjob%2F140310608106
+        - region "Check run summary" [ref=f6e162]:
+          - generic [ref=f6e164]:
+            - generic [ref=f6e166]:
+              - link "application-images" [ref=f6e169] [cursor=pointer]:
+                - /url: "#logs"
+              - generic [ref=f6e171]: Started 57m 2s ago
+            - generic [ref=f6e173]:
+              - generic [ref=f6e174]:
+                - group:
+                  - generic "Set up job"
+              - generic [ref=f6e175]:
+                - group:
+                  - generic "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1"
+              - generic [ref=f6e176]:
+                - group:
+                  - generic "Run actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1"
+              - generic [ref=f6e177]:
+                - group:
+                  - generic "Install browser dependencies on the isolated runner"
+              - generic [ref=f6e178]:
+                - group:
+                  - generic "Validate disposable acceptance target guards"
+              - generic [ref=f6e179]:
+                - group:
+                  - generic "Validate acceptance runner boundary"
+              - generic [ref=f6e180]:
+                - group:
+                  - generic "Build all five immutable application images"
+              - generic [ref=f6e181]:
+                - group:
+                  - generic "In progress Chromium smoke against built frontend images":
+                    - generic:
+                      - img "In progress"
+                      - generic: Chromium smoke against built frontend images
+              - generic [ref=f6e182]:
+                - group:
+                  - generic "Stage immutable release inputs for exact main CI"
+              - generic [ref=f6e183]:
+                - group:
+                  - generic "Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02"
+              - generic [ref=f6e184]:
+                - group:
+                  - generic "Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02"
+              - generic [ref=f6e185]:
+                - group:
+                  - generic "Post Run actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1"
+              - generic [ref=f6e186]:
+                - group:
+                  - generic "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1"

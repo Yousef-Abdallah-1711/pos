@@ -1,0 +1,126 @@
+- generic [active] [ref=f32e1]:
+  - link "Skip to content" [ref=f32e2] [cursor=pointer]:
+    - /url: "#main-content"
+  - banner [ref=f32e3]:
+    - generic [ref=f32e4]:
+      - link "SERVIO" [ref=f32e5] [cursor=pointer]:
+        - /url: /en
+      - navigation "Main navigation" [ref=f32e11]:
+        - button "Open platform features" [ref=f32e13] [cursor=pointer]: Platform
+        - link "How it works" [ref=f32e16] [cursor=pointer]:
+          - /url: /en/how-it-works
+        - link "Pricing" [ref=f32e17] [cursor=pointer]:
+          - /url: /en/pricing
+        - link "Product tour" [ref=f32e18] [cursor=pointer]:
+          - /url: /en/demo
+        - link "Demo options" [ref=f32e19] [cursor=pointer]:
+          - /url: /en/contact
+      - generic [ref=f32e20]:
+        - link "Switch to Arabic" [ref=f32e21] [cursor=pointer]:
+          - /url: /ar/auth/login
+          - generic [ref=f32e27]: العربية
+        - button "Switch to dark mode" [ref=f32e28] [cursor=pointer]
+        - status [ref=f32e32]: Checking sign-in
+  - main [ref=f32e33]:
+    - generic [ref=f32e34]:
+      - region "About SERVIO" [ref=f32e35]:
+        - generic [ref=f32e36]:
+          - heading "Your restaurant, in one view." [level=1] [ref=f32e37]
+          - paragraph [ref=f32e38]: All-in-one restaurant management. One platform for front and back of house.
+        - generic [ref=f32e39]: One platform for front- and back-of-house work.
+      - region "Sign in to your account" [ref=f32e40]:
+        - generic [ref=f32e41]:
+          - link "Back to SERVIO" [ref=f32e42] [cursor=pointer]:
+            - /url: /en
+          - heading "Sign in to your account" [level=2] [ref=f32e43]
+          - paragraph [ref=f32e44]: Enter your account details to continue.
+          - generic [ref=f32e45]:
+            - generic [ref=f32e46]:
+              - generic [ref=f32e47]: Email*
+              - textbox "Email" [ref=f32e48]:
+                - /placeholder: your@email.com
+            - generic [ref=f32e49]:
+              - generic [ref=f32e50]: Password*
+              - generic [ref=f32e52]:
+                - textbox "Password" [ref=f32e53]:
+                  - /placeholder: Enter your password
+                - 'button "Show password: Password" [ref=f32e54] [cursor=pointer]'
+            - button "Sign in" [ref=f32e58] [cursor=pointer]
+          - link "Create account" [ref=f32e59] [cursor=pointer]:
+            - /url: /en/auth/register
+  - contentinfo [ref=f32e60]:
+    - generic [ref=f32e61]:
+      - generic [ref=f32e62]:
+        - generic [ref=f32e63]:
+          - link "SERVIO" [ref=f32e64] [cursor=pointer]:
+            - /url: /en
+          - paragraph [ref=f32e70]: Restaurant operations, thoughtfully connected.
+          - link "Get started" [ref=f32e71] [cursor=pointer]:
+            - /url: /en/auth/register?billing=monthly
+        - navigation "Footer navigation" [ref=f32e75]:
+          - generic [ref=f32e76]:
+            - generic [ref=f32e77]:
+              - heading "Product" [level=2] [ref=f32e78]
+              - list [ref=f32e79]:
+                - listitem [ref=f32e80]:
+                  - link "Explore all features" [ref=f32e81] [cursor=pointer]:
+                    - /url: /en/features
+                - listitem [ref=f32e82]:
+                  - link "Cashier POS" [ref=f32e83] [cursor=pointer]:
+                    - /url: /en/features/pos
+                - listitem [ref=f32e84]:
+                  - link "Kitchen display" [ref=f32e85] [cursor=pointer]:
+                    - /url: /en/features/kitchen-display
+                - listitem [ref=f32e86]:
+                  - link "Online ordering" [ref=f32e87] [cursor=pointer]:
+                    - /url: /en/features/online-ordering
+                - listitem [ref=f32e88]:
+                  - link "Inventory" [ref=f32e89] [cursor=pointer]:
+                    - /url: /en/features/inventory
+                - listitem [ref=f32e90]:
+                  - link "Staff records" [ref=f32e91] [cursor=pointer]:
+                    - /url: /en/features/hr
+                - listitem [ref=f32e92]:
+                  - link "Operational overview" [ref=f32e93] [cursor=pointer]:
+                    - /url: /en/features/analytics
+                - listitem [ref=f32e94]:
+                  - link "Storefront customization" [ref=f32e95] [cursor=pointer]:
+                    - /url: /en/features/website-builder
+            - generic [ref=f32e96]:
+              - heading "Explore" [level=2] [ref=f32e97]
+              - list [ref=f32e98]:
+                - listitem [ref=f32e99]:
+                  - link "How it works" [ref=f32e100] [cursor=pointer]:
+                    - /url: /en/how-it-works
+                - listitem [ref=f32e101]:
+                  - link "Product tour" [ref=f32e102] [cursor=pointer]:
+                    - /url: /en/demo
+                - listitem [ref=f32e103]:
+                  - link "Demo options" [ref=f32e104] [cursor=pointer]:
+                    - /url: /en/contact
+                - listitem [ref=f32e105]:
+                  - link "Pricing" [ref=f32e106] [cursor=pointer]:
+                    - /url: /en/pricing
+            - generic [ref=f32e107]:
+              - heading "Account" [level=2] [ref=f32e108]
+              - list [ref=f32e109]:
+                - listitem [ref=f32e110]:
+                  - link "Log in" [ref=f32e111] [cursor=pointer]:
+                    - /url: /en/auth/login
+                - listitem [ref=f32e112]:
+                  - link "Create your restaurant account" [ref=f32e113] [cursor=pointer]:
+                    - /url: /en/auth/register
+            - generic [ref=f32e114]:
+              - heading "Company" [level=2] [ref=f32e115]
+              - list [ref=f32e116]:
+                - listitem [ref=f32e117]:
+                  - link "Privacy" [ref=f32e118] [cursor=pointer]:
+                    - /url: /en/privacy
+                - listitem [ref=f32e119]:
+                  - link "Demo information" [ref=f32e120] [cursor=pointer]:
+                    - /url: /en/contact
+      - generic [ref=f32e121]:
+        - paragraph [ref=f32e122]: Product screens use synthetic data. Availability and setup requirements are described on each feature page.
+        - generic [ref=f32e123]: © 2026 SERVIO
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=f32e129] [cursor=pointer]

@@ -1,0 +1,116 @@
+- generic [active] [ref=f17e1]:
+  - generic "Concept preview controls" [ref=f17e2]:
+    - strong [ref=f17e3]: Concept 04 / Coral + Ultraviolet
+    - navigation "Preview screens" [ref=f17e4]:
+      - link "Landing" [ref=f17e5] [cursor=pointer]:
+        - /url: "?view=landing"
+      - link "Login" [ref=f17e6] [cursor=pointer]:
+        - /url: "?view=login"
+      - link "Register" [ref=f17e7] [cursor=pointer]:
+        - /url: "?view=register"
+    - button "Switch color mode" [ref=f17e8] [cursor=pointer]: Dark mode
+  - generic [ref=f17e9]:
+    - banner [ref=f17e10]:
+      - generic [ref=f17e11]:
+        - link "✳servio" [ref=f17e12] [cursor=pointer]:
+          - /url: "?view=landing"
+        - navigation "Main navigation" [ref=f17e13]:
+          - link "Platform" [ref=f17e14] [cursor=pointer]:
+            - /url: "#platform"
+          - link "How it works" [ref=f17e15] [cursor=pointer]:
+            - /url: "#workflow"
+          - link "Features" [ref=f17e16] [cursor=pointer]:
+            - /url: "#features"
+        - generic [ref=f17e17]:
+          - link "Log in" [ref=f17e18] [cursor=pointer]:
+            - /url: "?view=login"
+          - link "Get started" [ref=f17e19] [cursor=pointer]:
+            - /url: "?view=register"
+    - main [ref=f17e20]:
+      - generic [ref=f17e22]:
+        - heading "Everything in service, together." [level=1] [ref=f17e23]
+        - paragraph [ref=f17e24]: Orders, kitchen work, and daily operations move in one shared rhythm.
+        - generic [ref=f17e25]:
+          - link "Create your workspace" [ref=f17e26] [cursor=pointer]:
+            - /url: "?view=register"
+          - link "See the workflow" [ref=f17e27] [cursor=pointer]:
+            - /url: "#workflow"
+        - figure [ref=f17e28]:
+          - img "Actual Servio dashboard showing restaurant orders, products and staff navigation" [ref=f17e29]
+      - generic [ref=f17e31]:
+        - generic [ref=f17e32]:
+          - heading "A better rhythm for every order." [level=2] [ref=f17e33]
+          - paragraph [ref=f17e34]: A clear place for the counter, kitchen, and the next handoff.
+        - generic [ref=f17e35]:
+          - article [ref=f17e36]:
+            - heading "Take the order." [level=3] [ref=f17e37]
+            - paragraph [ref=f17e38]: Build an order with menu and guest context.
+          - article [ref=f17e39]:
+            - heading "Keep it moving." [level=3] [ref=f17e40]
+            - paragraph [ref=f17e41]: Confirmed orders arrive as preparation tickets.
+          - article [ref=f17e42]:
+            - heading "Close the loop." [level=3] [ref=f17e43]
+            - paragraph [ref=f17e44]: Track preparation separately from fulfillment.
+      - generic [ref=f17e46]:
+        - generic [ref=f17e47]:
+          - heading "See what needs you next." [level=2] [ref=f17e48]
+          - paragraph [ref=f17e49]: A focused kitchen queue gives the team a clear view of each ticket and its preparation state.
+          - link "Explore Servio" [ref=f17e50] [cursor=pointer]:
+            - /url: "?view=register"
+        - figure "Actual product capture with synthetic data" [ref=f17e51]:
+          - img "Actual Servio kitchen display with active order and preparation states" [ref=f17e52]
+      - generic [ref=f17e54]:
+        - generic [ref=f17e55]:
+          - heading "One workspace, many moving parts." [level=2] [ref=f17e56]
+          - paragraph [ref=f17e57]: Practical tools for the people running service and the work around it.
+        - generic [ref=f17e58]:
+          - article [ref=f17e59]:
+            - heading "Cashier POS" [level=3] [ref=f17e60]
+            - generic [ref=f17e61]: "01"
+            - paragraph [ref=f17e62]: Take the next order with the details your team needs.
+          - article [ref=f17e63]:
+            - heading "Kitchen display" [level=3] [ref=f17e64]
+            - generic [ref=f17e65]: "02"
+            - paragraph [ref=f17e66]: See and update preparation tickets.
+          - article [ref=f17e67]:
+            - heading "Inventory" [level=3] [ref=f17e68]
+            - generic [ref=f17e69]: "03"
+            - paragraph [ref=f17e70]: Follow tracked quantities as orders change.
+          - article [ref=f17e71]:
+            - heading "Team records" [level=3] [ref=f17e72]
+            - generic [ref=f17e73]: "04"
+            - paragraph [ref=f17e74]: Keep staff, attendance, and leave organized.
+      - generic [ref=f17e76]:
+        - heading "Make room for smoother service." [level=2] [ref=f17e77]
+        - link "Create your account" [ref=f17e78] [cursor=pointer]:
+          - /url: "?view=register"
+    - contentinfo [ref=f17e79]:
+      - generic [ref=f17e80]:
+        - generic [ref=f17e81]:
+          - link "✳servio" [ref=f17e82] [cursor=pointer]:
+            - /url: "?view=landing"
+          - paragraph [ref=f17e83]: A warmer way to keep service connected.
+        - generic [ref=f17e84]:
+          - heading "Discover" [level=3] [ref=f17e85]
+          - link "Platform" [ref=f17e86] [cursor=pointer]:
+            - /url: "#platform"
+          - link "How it works" [ref=f17e87] [cursor=pointer]:
+            - /url: "#workflow"
+          - link "Features" [ref=f17e88] [cursor=pointer]:
+            - /url: "#features"
+        - generic [ref=f17e89]:
+          - heading "Your account" [level=3] [ref=f17e90]
+          - link "Log in" [ref=f17e91] [cursor=pointer]:
+            - /url: "?view=login"
+          - link "Get started" [ref=f17e92] [cursor=pointer]:
+            - /url: "?view=register"
+        - generic [ref=f17e93]:
+          - heading "Information" [level=3] [ref=f17e94]
+          - link "Contact" [ref=f17e95] [cursor=pointer]:
+            - /url: /en/contact
+          - link "Privacy" [ref=f17e96] [cursor=pointer]:
+            - /url: /en/privacy
+        - generic [ref=f17e97]:
+          - generic [ref=f17e98]: Servio / Restaurant operations
+          - generic [ref=f17e99]: Design preview using actual product captures and an existing cafe photo
+  - text: ✳ ✳

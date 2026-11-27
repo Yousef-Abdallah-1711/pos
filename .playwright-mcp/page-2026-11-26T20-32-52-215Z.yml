@@ -1,0 +1,520 @@
+- generic [active] [ref=f12e1]:
+  - link "Skip to content" [ref=f12e2] [cursor=pointer]:
+    - /url: "#main-content"
+  - banner [ref=f12e3]:
+    - generic [ref=f12e4]:
+      - link "SERVIO" [ref=f12e5] [cursor=pointer]:
+        - /url: /en
+      - navigation "Main navigation" [ref=f12e11]:
+        - button "Open platform features" [ref=f12e13] [cursor=pointer]: Platform
+        - link "How it works" [ref=f12e16] [cursor=pointer]:
+          - /url: /en/how-it-works
+        - link "Pricing" [ref=f12e17] [cursor=pointer]:
+          - /url: /en/pricing
+        - link "Product tour" [ref=f12e18] [cursor=pointer]:
+          - /url: /en/demo
+        - link "Demo options" [ref=f12e19] [cursor=pointer]:
+          - /url: /en/contact
+      - generic [ref=f12e20]:
+        - link "Switch to Arabic" [ref=f12e21] [cursor=pointer]:
+          - /url: /ar
+          - generic [ref=f12e27]: العربية
+        - button "Switch to light mode" [ref=f12e28] [cursor=pointer]
+        - status [ref=f12e36]: Checking sign-in
+  - main [ref=f12e37]:
+    - region "Restaurant operations, connected" [ref=f12e38]:
+      - generic [ref=f12e39]:
+        - generic [ref=f12e40]:
+          - heading "One restaurant. Every order, connected." [level=1] [ref=f12e41]
+          - paragraph [ref=f12e42]: From the first tap at the counter to the next ticket in the kitchen. Give your team one place to coordinate the work of service.
+          - generic [ref=f12e43]:
+            - link "Start your 14-day free trial" [ref=f12e44] [cursor=pointer]:
+              - /url: /en/auth/register?billing=monthly
+            - link "See the order journey" [ref=f12e48] [cursor=pointer]:
+              - /url: "#order-journey"
+        - generic "Connected workflow from order to preparation" [ref=f12e51]:
+          - generic [ref=f12e52]:
+            - generic [ref=f12e53]: 01 / AT THE COUNTER
+            - generic [ref=f12e54]: 02 / IN THE KITCHEN
+          - paragraph [ref=f12e55]: Actual POS and kitchen screens · synthetic data; QA identifiers redacted
+          - 'figure "English, dark-theme application screen · synthetic data; QA identifiers redacted Open the full capture : Cashier menu with synthetic items and an empty cart" [ref=f12e56]':
+            - img "Cashier menu with synthetic items and an empty cart — English, dark-theme application screen · synthetic data; QA identifiers redacted" [ref=f12e58]
+          - generic [ref=f12e59]: Confirmed order → kitchen ticket
+          - 'figure "English, dark-theme application screen · synthetic data; QA identifiers redacted Open the full capture : A synthetic incoming order ticket in the kitchen display" [ref=f12e60]':
+            - img "A synthetic incoming order ticket in the kitchen display — English, dark-theme application screen · synthetic data; QA identifiers redacted" [ref=f12e62]
+      - generic [ref=f12e63]:
+        - paragraph [ref=f12e64]: Cashier orders are confirmed on submission. Online orders wait for your team’s confirmation.
+        - link "How it works" [ref=f12e65] [cursor=pointer]:
+          - /url: /en/how-it-works
+    - generic [ref=f12e69]:
+      - generic [ref=f12e70]:
+        - paragraph [ref=f12e71]: Follow the order, not the paperwork
+        - heading "A shared thread through service." [level=2] [ref=f12e72]
+        - paragraph [ref=f12e73]: Two ways in. One preparation workflow. See what happens at each handoff.
+      - generic [ref=f12e74]:
+        - group [ref=f12e75]:
+          - generic "01 Take the order" [ref=f12e76] [cursor=pointer]:
+            - generic [ref=f12e77]: "01"
+            - heading "Take the order" [level=3] [ref=f12e78]
+            - generic [aria-hidden] [ref=f12e79]: +
+          - paragraph [ref=f12e80]: A cashier selects menu items, or a guest sends an order from the restaurant storefront.
+        - group [ref=f12e81]:
+          - generic "02 Confirm the handoff" [ref=f12e82] [cursor=pointer]:
+            - generic [ref=f12e83]: "02"
+            - heading "Confirm the handoff" [level=3] [ref=f12e84]
+            - generic [aria-hidden] [ref=f12e85]: +
+        - group [ref=f12e86]:
+          - generic "03 Prepare in the kitchen" [ref=f12e87] [cursor=pointer]:
+            - generic [ref=f12e88]: "03"
+            - heading "Prepare in the kitchen" [level=3] [ref=f12e89]
+            - generic [aria-hidden] [ref=f12e90]: +
+        - group [ref=f12e91]:
+          - generic "04 Mark it ready" [ref=f12e92] [cursor=pointer]:
+            - generic [ref=f12e93]: "04"
+            - heading "Mark it ready" [level=3] [ref=f12e94]
+            - generic [aria-hidden] [ref=f12e95]: +
+        - group [ref=f12e96]:
+          - generic "05 Coordinate fulfillment" [ref=f12e97] [cursor=pointer]:
+            - generic [ref=f12e98]: "05"
+            - heading "Coordinate fulfillment" [level=3] [ref=f12e99]
+            - generic [aria-hidden] [ref=f12e100]: +
+        - generic [ref=f12e101]:
+          - link "Start your 14-day free trial" [ref=f12e102] [cursor=pointer]:
+            - /url: /en/auth/register?billing=monthly
+          - link "How it works" [ref=f12e106] [cursor=pointer]:
+            - /url: /en/how-it-works
+            - text: How it works
+            - generic [aria-hidden] [ref=f12e107]: ↗
+    - article [ref=f12e108]:
+      - generic [ref=f12e109]:
+        - generic [ref=f12e110]:
+          - paragraph [ref=f12e111]: The work behind every service
+          - heading "Make room for the moments that matter." [level=2] [ref=f12e112]
+          - paragraph [ref=f12e113]: Keep order taking, kitchen preparation and daily operations connected, so your team can stay focused on welcoming guests.
+        - figure "Photo by Julen Rey Azcona on Unsplash" [ref=f12e114]:
+          - img "Sunlight falling across the tables and chairs of a quiet neighborhood cafe." [ref=f12e116]
+          - generic [ref=f12e117]:
+            - text: Photo by Julen Rey Azcona on
+            - link "Unsplash" [ref=f12e118] [cursor=pointer]:
+              - /url: https://unsplash.com/photos/sunlight-streams-into-a-modern-cafe-interior-U_lZQfczRRw
+    - region "01 / Cashier POS" [ref=f12e119]:
+      - article [ref=f12e120]:
+        - generic [ref=f12e121]:
+          - generic [ref=f12e122]:
+            - generic [ref=f12e123]:
+              - paragraph [ref=f12e124]: 01 / Cashier POS
+              - heading "A familiar place to take the next order." [level=2] [ref=f12e125]
+              - paragraph [ref=f12e126]: Browse the menu, select a dish and add the table or guest context. The confirmed order becomes a kitchen ticket.
+            - list [ref=f12e127]:
+              - listitem [ref=f12e128]:
+                - generic [ref=f12e129]: "01"
+                - text: Menu and category selection
+              - listitem [ref=f12e130]:
+                - generic [ref=f12e131]: "02"
+                - text: An order with table and guest context
+              - listitem [ref=f12e132]:
+                - generic [ref=f12e133]: "03"
+                - text: A connected kitchen handoff
+          - 'figure "English, dark-theme application screen · synthetic data; QA identifiers redacted Open the full capture : A familiar place to take the next order." [ref=f12e134]':
+            - img "A familiar place to take the next order. — English, dark-theme application screen · synthetic data; QA identifiers redacted" [ref=f12e136]
+            - generic [ref=f12e137]:
+              - generic [ref=f12e138]: English, dark-theme application screen · synthetic data; QA identifiers redacted
+              - 'link "Open the full capture : A familiar place to take the next order." [ref=f12e139] [cursor=pointer]':
+                - /url: /images/product/servio/matrix/pos-en-dark.png
+                - text: Open the full capture
+                - generic [ref=f12e140]: ": A familiar place to take the next order."
+          - generic [ref=f12e141]:
+            - link "Start your 14-day free trial" [ref=f12e142] [cursor=pointer]:
+              - /url: /en/auth/register?billing=monthly
+            - link "Explore cashier POS" [ref=f12e146] [cursor=pointer]:
+              - /url: /en/features/pos
+              - text: Explore cashier POS
+              - generic [aria-hidden] [ref=f12e147]: ↗
+      - article [ref=f12e148]:
+        - generic [ref=f12e149]:
+          - generic [ref=f12e150]:
+            - generic [ref=f12e151]:
+              - paragraph [ref=f12e152]: 02 / Kitchen display
+              - heading "From incoming ticket to ready." [level=2] [ref=f12e153]
+              - paragraph [ref=f12e154]: A focused preparation queue for the kitchen. Move a ticket forward, view completed tickets, or recall one when needed.
+            - generic [ref=f12e155]:
+              - link "Start your 14-day free trial" [ref=f12e156] [cursor=pointer]:
+                - /url: /en/auth/register?billing=monthly
+              - link "Explore the kitchen display" [ref=f12e160] [cursor=pointer]:
+                - /url: /en/features/kitchen-display
+                - text: Explore the kitchen display
+                - generic [aria-hidden] [ref=f12e161]: ↗
+          - generic [ref=f12e162]:
+            - 'figure "English, dark-theme application screen · synthetic data; QA identifiers redacted Open the full capture : From incoming ticket to ready." [ref=f12e163]':
+              - img "From incoming ticket to ready. — English, dark-theme application screen · synthetic data; QA identifiers redacted" [ref=f12e165]
+              - generic [ref=f12e166]:
+                - generic [ref=f12e167]: English, dark-theme application screen · synthetic data; QA identifiers redacted
+                - 'link "Open the full capture : From incoming ticket to ready." [ref=f12e168] [cursor=pointer]':
+                  - /url: /images/product/servio/matrix/kitchen-en-dark.png
+                  - text: Open the full capture
+                  - generic [ref=f12e169]: ": From incoming ticket to ready."
+            - generic [ref=f12e170]:
+              - paragraph [ref=f12e171]:
+                - generic [ref=f12e172]: "01"
+                - text: New
+              - paragraph [ref=f12e173]:
+                - generic [ref=f12e174]: "02"
+                - text: In progress
+              - paragraph [ref=f12e175]:
+                - generic [ref=f12e176]: "03"
+                - text: Ready
+              - paragraph [ref=f12e177]:
+                - generic [ref=f12e178]: "04"
+                - text: Completed
+          - paragraph [ref=f12e179]: Preparation states are shown here. A completed kitchen ticket does not mean an order has been delivered or paid.
+      - article [ref=f12e180]:
+        - generic [ref=f12e181]:
+          - generic [ref=f12e182]:
+            - generic [ref=f12e183]:
+              - paragraph [ref=f12e184]: 03 / Online ordering
+              - heading "The guest’s first step. Your team’s next ticket." [level=2] [ref=f12e185]
+              - paragraph [ref=f12e186]: Let guests browse the restaurant menu and send a cash-on-delivery order. Your team confirms it before preparation starts.
+            - list [ref=f12e187]:
+              - listitem [ref=f12e188]:
+                - generic [ref=f12e189]: "01"
+                - text: Browse the menu
+              - listitem [ref=f12e190]:
+                - generic [ref=f12e191]: "02"
+                - text: Review the cash checkout
+              - listitem [ref=f12e192]:
+                - generic [ref=f12e193]: "03"
+                - text: Receive an order confirmation
+            - generic [ref=f12e194]:
+              - link "Start your 14-day free trial" [ref=f12e195] [cursor=pointer]:
+                - /url: /en/auth/register?billing=monthly
+              - link "Explore online ordering" [ref=f12e199] [cursor=pointer]:
+                - /url: /en/features/online-ordering
+                - text: Explore online ordering
+                - generic [aria-hidden] [ref=f12e200]: ↗
+          - 'figure "English, dark-theme application screen · synthetic data; QA identifiers redacted Open the full capture : Synthetic cash-on-delivery checkout in the restaurant storefront" [ref=f12e202]':
+            - img "Synthetic cash-on-delivery checkout in the restaurant storefront — English, dark-theme application screen · synthetic data; QA identifiers redacted" [ref=f12e204]
+            - generic [ref=f12e205]:
+              - generic [ref=f12e206]: English, dark-theme application screen · synthetic data; QA identifiers redacted
+              - 'link "Open the full capture : Synthetic cash-on-delivery checkout in the restaurant storefront" [ref=f12e207] [cursor=pointer]':
+                - /url: /images/product/servio/matrix/checkout-en-dark.png
+                - text: Open the full capture
+                - generic [ref=f12e208]: ": Synthetic cash-on-delivery checkout in the restaurant storefront"
+    - region "04 / Storefront customization" [ref=f12e209]:
+      - article [ref=f12e210]:
+        - generic [ref=f12e211]:
+          - generic [ref=f12e212]:
+            - generic [ref=f12e213]:
+              - paragraph [ref=f12e214]: 04 / Storefront customization
+              - heading "Make the menu feel like your restaurant." [level=2] [ref=f12e215]
+              - paragraph [ref=f12e216]: Adjust a theme’s colors, save the configuration and preview the result. Keep your restaurant’s presentation connected to its menu.
+            - generic [ref=f12e217]:
+              - link "Start your 14-day free trial" [ref=f12e218] [cursor=pointer]:
+                - /url: /en/auth/register?billing=monthly
+              - link "Explore storefront customization" [ref=f12e222] [cursor=pointer]:
+                - /url: /en/features/website-builder
+                - text: Explore storefront customization
+                - generic [aria-hidden] [ref=f12e223]: ↗
+          - 'figure "English, dark-theme application screen · synthetic data; QA identifiers redacted Open the full capture : Storefront theme editor with a saved color and sample preview" [ref=f12e224]':
+            - img "Storefront theme editor with a saved color and sample preview — English, dark-theme application screen · synthetic data; QA identifiers redacted" [ref=f12e226]
+            - generic [ref=f12e227]:
+              - generic [ref=f12e228]: English, dark-theme application screen · synthetic data; QA identifiers redacted
+              - 'link "Open the full capture : Storefront theme editor with a saved color and sample preview" [ref=f12e229] [cursor=pointer]':
+                - /url: /images/product/servio/matrix/theme-en-dark.png
+                - text: Open the full capture
+                - generic [ref=f12e230]: ": Storefront theme editor with a saved color and sample preview"
+          - paragraph [ref=f12e231]: Theme editing and saved configuration are demonstrated. Public hostname setup is a separate onboarding step; instant publishing is not promised.
+      - article [ref=f12e232]:
+        - generic [ref=f12e233]:
+          - generic [ref=f12e234]:
+            - generic [ref=f12e235]:
+              - paragraph [ref=f12e236]: 05 / Stock lifecycle
+              - heading "Know when an order changes stock." [level=2] [ref=f12e237]
+              - paragraph [ref=f12e238]: Tracked product quantities change when an order is confirmed. An eligible unfulfilled cancellation releases the reserved quantity.
+            - generic [ref=f12e239]:
+              - link "Start your 14-day free trial" [ref=f12e240] [cursor=pointer]:
+                - /url: /en/auth/register?billing=monthly
+              - link "Explore inventory" [ref=f12e244] [cursor=pointer]:
+                - /url: /en/features/inventory
+                - text: Explore inventory
+                - generic [aria-hidden] [ref=f12e245]: ↗
+          - generic [ref=f12e246]:
+            - list [ref=f12e247]:
+              - listitem [ref=f12e248]:
+                - generic [ref=f12e249]: Before confirmation
+                - strong [ref=f12e250]: "20"
+                - generic [ref=f12e251]: units
+              - listitem [ref=f12e252]:
+                - generic [ref=f12e253]: After confirmation
+                - strong [ref=f12e254]: "19"
+                - generic [ref=f12e255]: units
+              - listitem [ref=f12e256]:
+                - generic [ref=f12e257]: After eligible cancellation
+                - strong [ref=f12e258]: "20"
+                - generic [ref=f12e259]: units
+            - paragraph [ref=f12e260]: "Demonstrated fixture: one item, starting stock 20. Cancellation, a monetary refund and a physical return are different events."
+      - article [ref=f12e261]:
+        - generic [ref=f12e262]:
+          - generic [ref=f12e263]:
+            - paragraph [ref=f12e264]: 06 / The people behind service
+            - heading "Keep the daily details together." [level=2] [ref=f12e265]
+            - paragraph [ref=f12e266]: Employee information, attendance records and leave decisions belong alongside the work your team manages.
+          - generic [ref=f12e267]:
+            - 'figure "English, dark-theme application screen · synthetic data; QA identifiers redacted Open the full capture : Keep the daily details together." [ref=f12e268]':
+              - img "Keep the daily details together. — English, dark-theme application screen · synthetic data; QA identifiers redacted" [ref=f12e270]
+              - generic [ref=f12e271]:
+                - generic [ref=f12e272]: English, dark-theme application screen · synthetic data; QA identifiers redacted
+                - 'link "Open the full capture : Keep the daily details together." [ref=f12e273] [cursor=pointer]':
+                  - /url: /images/product/servio/matrix/staff-en-dark.png
+                  - text: Open the full capture
+                  - generic [ref=f12e274]: ": Keep the daily details together."
+            - generic [ref=f12e275]:
+              - article [ref=f12e276]:
+                - heading "Employee records" [level=3] [ref=f12e277]
+                - paragraph [ref=f12e278]: Keep employee information organized.
+              - article [ref=f12e279]:
+                - heading "Attendance" [level=3] [ref=f12e280]
+                - paragraph [ref=f12e281]: Record clock-in and maintain clock-out records.
+              - article [ref=f12e282]:
+                - heading "Leave decisions" [level=3] [ref=f12e283]
+                - paragraph [ref=f12e284]: Review requests and record approval or rejection.
+              - generic [ref=f12e285]:
+                - link "Start your 14-day free trial" [ref=f12e286] [cursor=pointer]:
+                  - /url: /en/auth/register?billing=monthly
+                - link "Explore staff records" [ref=f12e290] [cursor=pointer]:
+                  - /url: /en/features/hr
+                  - text: Explore staff records
+                  - generic [aria-hidden] [ref=f12e291]: ↗
+      - article [ref=f12e292]:
+        - generic [ref=f12e293]:
+          - generic [ref=f12e294]:
+            - generic [ref=f12e295]:
+              - paragraph [ref=f12e296]: 07 / Operational overview
+              - heading "A useful view of the work in front of you." [level=2] [ref=f12e297]
+              - paragraph [ref=f12e298]: Review recent orders, pending work and workspace status. The overview identifies unavailable data sources and when data was loaded.
+            - paragraph [ref=f12e299]: Recent paid revenue uses the latest loaded orders. It is not a complete financial statement or a consolidated group report.
+            - generic [ref=f12e300]:
+              - link "Start your 14-day free trial" [ref=f12e301] [cursor=pointer]:
+                - /url: /en/auth/register?billing=monthly
+              - link "Explore operational visibility" [ref=f12e305] [cursor=pointer]:
+                - /url: /en/features/analytics
+                - text: Explore operational visibility
+                - generic [aria-hidden] [ref=f12e306]: ↗
+          - 'figure "English, dark-theme application screen · synthetic data; QA identifiers redacted Open the full capture : Synthetic restaurant overview with recent orders and workspace status" [ref=f12e307]':
+            - img "Synthetic restaurant overview with recent orders and workspace status — English, dark-theme application screen · synthetic data; QA identifiers redacted" [ref=f12e309]
+            - generic [ref=f12e310]:
+              - generic [ref=f12e311]: English, dark-theme application screen · synthetic data; QA identifiers redacted
+              - 'link "Open the full capture : Synthetic restaurant overview with recent orders and workspace status" [ref=f12e312] [cursor=pointer]':
+                - /url: /images/product/servio/matrix/dashboard-en-dark.png
+                - text: Open the full capture
+                - generic [ref=f12e313]: ": Synthetic restaurant overview with recent orders and workspace status"
+    - generic [ref=f12e315]:
+      - generic [ref=f12e316]:
+        - paragraph [ref=f12e317]: A closer look
+        - heading "The product, without the guesswork." [level=2] [ref=f12e318]
+        - paragraph [ref=f12e319]: Select an area to inspect an authentic screen and the task it supports. This is a product tour, not a live restaurant account.
+      - generic [ref=f12e320]:
+        - tablist "Explore the product" [ref=f12e321]:
+          - tab "Cashier POS" [selected] [ref=f12e322] [cursor=pointer]
+          - tab "Kitchen display" [ref=f12e323] [cursor=pointer]
+          - tab "Online ordering" [ref=f12e324] [cursor=pointer]
+          - tab "Storefront customization" [ref=f12e325] [cursor=pointer]
+          - tab "Inventory" [ref=f12e326] [cursor=pointer]
+          - tab "Staff records" [ref=f12e327] [cursor=pointer]
+          - tab "Operational overview" [ref=f12e328] [cursor=pointer]
+        - tabpanel "Cashier POS" [ref=f12e329]:
+          - generic [ref=f12e330]:
+            - 'figure "English, dark-theme application screen · synthetic data; QA identifiers redacted Open the full capture : Cashier POS" [ref=f12e331]':
+              - img "Cashier POS — English, dark-theme application screen · synthetic data; QA identifiers redacted" [ref=f12e333]
+              - generic [ref=f12e334]:
+                - generic [ref=f12e335]: English, dark-theme application screen · synthetic data; QA identifiers redacted
+                - 'link "Open the full capture : Cashier POS" [ref=f12e336] [cursor=pointer]':
+                  - /url: /images/product/servio/matrix/pos-en-dark.png
+                  - text: Open the full capture
+                  - generic [ref=f12e337]: ": Cashier POS"
+            - generic [ref=f12e338]:
+              - paragraph [ref=f12e339]: The counter
+              - heading "Take the order. Keep the context." [level=3] [ref=f12e340]
+              - paragraph [ref=f12e341]: A menu-led cashier workspace for selecting products and sending confirmed orders into kitchen preparation.
+              - link "Explore this feature" [ref=f12e342] [cursor=pointer]:
+                - /url: /en/features/pos
+                - text: Explore this feature
+                - generic [aria-hidden] [ref=f12e343]: ↗
+      - link "Start your 14-day free trial" [ref=f12e344] [cursor=pointer]:
+        - /url: /en/auth/register?billing=monthly
+    - article [ref=f12e348]:
+      - generic [ref=f12e349]:
+        - generic [ref=f12e350]:
+          - paragraph [ref=f12e351]: Getting started
+          - heading "Your first service starts with a few clear steps." [level=2] [ref=f12e352]
+        - list [ref=f12e353]:
+          - listitem [ref=f12e354]:
+            - generic [ref=f12e355]: "01"
+            - heading "Create your account" [level=3] [ref=f12e356]
+            - paragraph [ref=f12e357]: Start a 14-day trial with your restaurant details.
+          - listitem [ref=f12e358]:
+            - generic [ref=f12e359]: "02"
+            - heading "Set up the restaurant" [level=3] [ref=f12e360]
+            - paragraph [ref=f12e361]: Review the restaurant information and staff access.
+          - listitem [ref=f12e362]:
+            - generic [ref=f12e363]: "03"
+            - heading "Build your menu" [level=3] [ref=f12e364]
+            - paragraph [ref=f12e365]: Add categories and products for your team to use.
+          - listitem [ref=f12e366]:
+            - generic [ref=f12e367]: "04"
+            - heading "Run a supported order" [level=3] [ref=f12e368]
+            - paragraph [ref=f12e369]: Try the cashier-to-kitchen workflow with your own menu.
+        - generic [ref=f12e370]:
+          - paragraph [ref=f12e371]:
+            - text: Storefront hostname provisioning and paid billing activation are separate from creating your trial account.
+            - link "How it works" [ref=f12e372] [cursor=pointer]:
+              - /url: /en/how-it-works
+          - link "Start your 14-day free trial" [ref=f12e373] [cursor=pointer]:
+            - /url: /en/auth/register?billing=monthly
+    - generic [ref=f12e378]:
+      - generic [ref=f12e379]:
+        - paragraph [ref=f12e380]: One subscription. Two billing frequencies.
+        - heading "Clear pricing. Room to get familiar." [level=2] [ref=f12e381]
+        - paragraph [ref=f12e382]: Start with a 14-day free trial. Choose your preferred billing period for a future paid subscription.
+        - paragraph [ref=f12e383]: Two billing frequencies for the same subscription. No extra feature tiers are implied.
+        - link "View pricing details" [ref=f12e384] [cursor=pointer]:
+          - /url: /en/pricing
+          - text: View pricing details
+          - generic [aria-hidden] [ref=f12e385]: ↗
+      - generic [ref=f12e386]:
+        - group "Billing preference" [ref=f12e387]:
+          - generic [ref=f12e389] [cursor=pointer]:
+            - radio "Monthly" [checked] [ref=f12e390]
+            - text: Monthly
+          - generic [ref=f12e391] [cursor=pointer]:
+            - radio "Annual" [ref=f12e392]
+            - text: Annual
+        - generic [ref=f12e393]:
+          - paragraph [ref=f12e394]:
+            - strong [ref=f12e395]: "750"
+            - generic [ref=f12e396]: EGP
+          - text: per month
+          - paragraph [ref=f12e397]: 750 EGP billed monthly.
+        - link "Start your 14-day free trial" [ref=f12e398] [cursor=pointer]:
+          - /url: /en/auth/register?billing=monthly
+        - paragraph [ref=f12e402]: Paid checkout is not available here. Selecting a preference starts trial registration and does not authorize a charge. Payment and tax terms are confirmed before paid activation.
+    - generic [ref=f12e404]:
+      - generic [ref=f12e405]:
+        - paragraph [ref=f12e406]: Before you begin
+        - heading "Questions about the verified product" [level=2] [ref=f12e407]
+      - generic [ref=f12e408]:
+        - group [ref=f12e409]:
+          - generic "How do the cashier and kitchen connect?" [ref=f12e410] [cursor=pointer]:
+            - text: How do the cashier and kitchen connect?
+            - generic [aria-hidden] [ref=f12e411]: +
+        - group [ref=f12e412]:
+          - generic "Can guests order online?" [ref=f12e413] [cursor=pointer]:
+            - text: Can guests order online?
+            - generic [aria-hidden] [ref=f12e414]: +
+        - group [ref=f12e415]:
+          - generic "What can I customize on my storefront?" [ref=f12e416] [cursor=pointer]:
+            - text: What can I customize on my storefront?
+            - generic [aria-hidden] [ref=f12e417]: +
+        - group [ref=f12e418]:
+          - generic "How does the free trial start?" [ref=f12e419] [cursor=pointer]:
+            - text: How does the free trial start?
+            - generic [aria-hidden] [ref=f12e420]: +
+        - group [ref=f12e421]:
+          - generic "Does selecting annual billing charge me?" [ref=f12e422] [cursor=pointer]:
+            - text: Does selecting annual billing charge me?
+            - generic [aria-hidden] [ref=f12e423]: +
+        - group [ref=f12e424]:
+          - generic "Are Arabic and English available?" [ref=f12e425] [cursor=pointer]:
+            - text: Are Arabic and English available?
+            - generic [aria-hidden] [ref=f12e426]: +
+        - generic [ref=f12e427]:
+          - link "Start your 14-day free trial" [ref=f12e428] [cursor=pointer]:
+            - /url: /en/auth/register?billing=monthly
+          - link "Demonstration options" [ref=f12e432] [cursor=pointer]:
+            - /url: /en/contact
+            - text: Demonstration options
+            - generic [aria-hidden] [ref=f12e433]: ↗
+    - generic [ref=f12e435]:
+      - paragraph [ref=f12e436]: Give the next order a clear path
+      - heading "Bring the counter and kitchen into the same conversation." [level=2] [ref=f12e437]
+      - generic [ref=f12e438]:
+        - paragraph [ref=f12e439]: Explore the workflow, set up your restaurant and try a real order handoff during your 14-day trial.
+        - generic [ref=f12e440]:
+          - link "Start your 14-day free trial" [ref=f12e441] [cursor=pointer]:
+            - /url: /en/auth/register?billing=monthly
+          - link "View pricing details" [ref=f12e445] [cursor=pointer]:
+            - /url: /en/pricing
+  - contentinfo [ref=f12e446]:
+    - generic [ref=f12e447]:
+      - generic [ref=f12e448]:
+        - generic [ref=f12e449]:
+          - link "SERVIO" [ref=f12e450] [cursor=pointer]:
+            - /url: /en
+          - paragraph [ref=f12e456]: Restaurant operations, thoughtfully connected.
+          - link "Start your 14-day free trial" [ref=f12e457] [cursor=pointer]:
+            - /url: /en/auth/register?billing=monthly
+        - navigation "Footer navigation" [ref=f12e461]:
+          - generic [ref=f12e462]:
+            - generic [ref=f12e463]:
+              - heading "Product" [level=2] [ref=f12e464]
+              - list [ref=f12e465]:
+                - listitem [ref=f12e466]:
+                  - link "Explore all features" [ref=f12e467] [cursor=pointer]:
+                    - /url: /en/features
+                - listitem [ref=f12e468]:
+                  - link "Cashier POS" [ref=f12e469] [cursor=pointer]:
+                    - /url: /en/features/pos
+                - listitem [ref=f12e470]:
+                  - link "Kitchen display" [ref=f12e471] [cursor=pointer]:
+                    - /url: /en/features/kitchen-display
+                - listitem [ref=f12e472]:
+                  - link "Online ordering" [ref=f12e473] [cursor=pointer]:
+                    - /url: /en/features/online-ordering
+                - listitem [ref=f12e474]:
+                  - link "Inventory" [ref=f12e475] [cursor=pointer]:
+                    - /url: /en/features/inventory
+                - listitem [ref=f12e476]:
+                  - link "Staff records" [ref=f12e477] [cursor=pointer]:
+                    - /url: /en/features/hr
+                - listitem [ref=f12e478]:
+                  - link "Operational overview" [ref=f12e479] [cursor=pointer]:
+                    - /url: /en/features/analytics
+                - listitem [ref=f12e480]:
+                  - link "Storefront customization" [ref=f12e481] [cursor=pointer]:
+                    - /url: /en/features/website-builder
+            - generic [ref=f12e482]:
+              - heading "Explore" [level=2] [ref=f12e483]
+              - list [ref=f12e484]:
+                - listitem [ref=f12e485]:
+                  - link "How it works" [ref=f12e486] [cursor=pointer]:
+                    - /url: /en/how-it-works
+                - listitem [ref=f12e487]:
+                  - link "Product tour" [ref=f12e488] [cursor=pointer]:
+                    - /url: /en/demo
+                - listitem [ref=f12e489]:
+                  - link "Demo options" [ref=f12e490] [cursor=pointer]:
+                    - /url: /en/contact
+                - listitem [ref=f12e491]:
+                  - link "Pricing" [ref=f12e492] [cursor=pointer]:
+                    - /url: /en/pricing
+            - generic [ref=f12e493]:
+              - heading "Account" [level=2] [ref=f12e494]
+              - list [ref=f12e495]:
+                - listitem [ref=f12e496]:
+                  - link "Log in" [ref=f12e497] [cursor=pointer]:
+                    - /url: /en/auth/login
+                - listitem [ref=f12e498]:
+                  - link "Start your 14-day free trial" [ref=f12e499] [cursor=pointer]:
+                    - /url: /en/auth/register
+            - generic [ref=f12e500]:
+              - heading "Company" [level=2] [ref=f12e501]
+              - list [ref=f12e502]:
+                - listitem [ref=f12e503]:
+                  - link "Privacy" [ref=f12e504] [cursor=pointer]:
+                    - /url: /en/privacy
+                - listitem [ref=f12e505]:
+                  - link "Demo information" [ref=f12e506] [cursor=pointer]:
+                    - /url: /en/contact
+      - generic [ref=f12e507]:
+        - paragraph [ref=f12e508]: Product screens use synthetic data. Availability and setup requirements are described on each feature page.
+        - generic [ref=f12e509]: © 2026 SERVIO
+  - button "Open Next.js Dev Tools" [ref=f12e515] [cursor=pointer]

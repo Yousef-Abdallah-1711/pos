@@ -1,0 +1,521 @@
+- generic [active] [ref=f11e1]:
+  - link "تجاوز إلى المحتوى" [ref=f11e2] [cursor=pointer]:
+    - /url: "#main-content"
+  - banner [ref=f11e3]:
+    - generic [ref=f11e4]:
+      - link "SERVIO" [ref=f11e5] [cursor=pointer]:
+        - /url: /ar
+      - navigation "التنقل الرئيسي" [ref=f11e11]:
+        - button "فتح ميزات المنصة" [ref=f11e13] [cursor=pointer]: المنصة
+        - link "كيف يعمل" [ref=f11e16] [cursor=pointer]:
+          - /url: /ar/how-it-works
+        - link "الأسعار" [ref=f11e17] [cursor=pointer]:
+          - /url: /ar/pricing
+        - link "جولة في المنتج" [ref=f11e18] [cursor=pointer]:
+          - /url: /ar/demo
+        - link "خيارات العرض التوضيحي" [ref=f11e19] [cursor=pointer]:
+          - /url: /ar/contact
+      - generic [ref=f11e20]:
+        - link "التغيير إلى الإنجليزية" [ref=f11e21] [cursor=pointer]:
+          - /url: /en
+          - generic [ref=f11e27]: English
+        - button "التبديل إلى الوضع الفاتح" [ref=f11e28] [cursor=pointer]
+        - status [ref=f11e36]: جارٍ التحقق من تسجيل الدخول
+  - main [ref=f11e37]:
+    - region "تشغيل المطعم، ضمن مسار واحد" [ref=f11e38]:
+      - generic [ref=f11e39]:
+        - generic [ref=f11e40]:
+          - heading "مطعم واحد. وكل طلب، في مساره." [level=1] [ref=f11e41]
+          - paragraph [ref=f11e42]: من أول اختيار عند الكاشير إلى تذكرة الطلب في المطبخ. مساحة واحدة تساعد فريقك على تنسيق خطوات الخدمة.
+          - generic [ref=f11e43]:
+            - link "ابدأ تجربتك المجانية لمدة 14 يومًا" [ref=f11e44] [cursor=pointer]:
+              - /url: /ar/auth/register?billing=monthly
+            - link "شاهد رحلة الطلب" [ref=f11e48] [cursor=pointer]:
+              - /url: "#order-journey"
+        - generic "مسار عمل مترابط من الطلب إلى التجهيز" [ref=f11e51]:
+          - generic [ref=f11e52]:
+            - generic [ref=f11e53]: 01 / عند الكاشير
+            - generic [ref=f11e54]: 02 / داخل المطبخ
+          - paragraph [ref=f11e55]: لقطات فعلية من نظام الكاشير والمطبخ · بيانات تجريبية مع إخفاء معرّفات الاختبار
+          - 'figure "لقطة تطبيق فعلية بالعربية والوضع الداكن · بيانات تجريبية مع إخفاء معرّفات الاختبار افتح الشاشة كاملة : قائمة الكاشير التجريبية مع سلة فارغة" [ref=f11e56]':
+            - img "قائمة الكاشير التجريبية مع سلة فارغة — لقطة تطبيق فعلية بالعربية والوضع الداكن · بيانات تجريبية مع إخفاء معرّفات الاختبار" [ref=f11e58]
+          - generic [ref=f11e59]: طلب مؤكد ← تذكرة مطبخ
+          - 'figure "لقطة تطبيق فعلية بالعربية والوضع الداكن · بيانات تجريبية مع إخفاء معرّفات الاختبار افتح الشاشة كاملة : تذكرة طلب تجريبي واردة في شاشة المطبخ" [ref=f11e60]':
+            - img "تذكرة طلب تجريبي واردة في شاشة المطبخ — لقطة تطبيق فعلية بالعربية والوضع الداكن · بيانات تجريبية مع إخفاء معرّفات الاختبار" [ref=f11e62]
+      - generic [ref=f11e63]:
+        - paragraph [ref=f11e64]: تُؤكَّد طلبات الكاشير عند إرسالها. أما الطلبات الإلكترونية فتنتظر تأكيد فريق المطعم.
+        - link "كيف يعمل" [ref=f11e65] [cursor=pointer]:
+          - /url: /ar/how-it-works
+    - generic [ref=f11e69]:
+      - generic [ref=f11e70]:
+        - paragraph [ref=f11e71]: تابع الطلب عبر مراحل الخدمة
+        - heading "رابط واضح بين كل خطوة والتي تليها." [level=2] [ref=f11e72]
+        - paragraph [ref=f11e73]: بدايتان للطلب، ومسار واحد للتجهيز. تعرّف على ما يحدث عند انتقاله بين أفراد الفريق.
+      - generic [ref=f11e74]:
+        - group [ref=f11e75]:
+          - generic "01 سجّل الطلب" [ref=f11e76] [cursor=pointer]:
+            - generic [ref=f11e77]: "01"
+            - heading "سجّل الطلب" [level=3] [ref=f11e78]
+            - generic [aria-hidden] [ref=f11e79]: +
+          - paragraph [ref=f11e80]: يختار الكاشير الأصناف، أو يرسل الضيف طلبه من موقع المطعم.
+        - group [ref=f11e81]:
+          - generic "02 أكّد انتقاله للمطبخ" [ref=f11e82] [cursor=pointer]:
+            - generic [ref=f11e83]: "02"
+            - heading "أكّد انتقاله للمطبخ" [level=3] [ref=f11e84]
+            - generic [aria-hidden] [ref=f11e85]: +
+        - group [ref=f11e86]:
+          - generic "03 ابدأ التجهيز" [ref=f11e87] [cursor=pointer]:
+            - generic [ref=f11e88]: "03"
+            - heading "ابدأ التجهيز" [level=3] [ref=f11e89]
+            - generic [aria-hidden] [ref=f11e90]: +
+        - group [ref=f11e91]:
+          - generic "04 حدّد الجاهزية" [ref=f11e92] [cursor=pointer]:
+            - generic [ref=f11e93]: "04"
+            - heading "حدّد الجاهزية" [level=3] [ref=f11e94]
+            - generic [aria-hidden] [ref=f11e95]: +
+        - group [ref=f11e96]:
+          - generic "05 نسّق التسليم" [ref=f11e97] [cursor=pointer]:
+            - generic [ref=f11e98]: "05"
+            - heading "نسّق التسليم" [level=3] [ref=f11e99]
+            - generic [aria-hidden] [ref=f11e100]: +
+        - generic [ref=f11e101]:
+          - link "ابدأ تجربتك المجانية لمدة 14 يومًا" [ref=f11e102] [cursor=pointer]:
+            - /url: /ar/auth/register?billing=monthly
+          - link "كيف يعمل" [ref=f11e106] [cursor=pointer]:
+            - /url: /ar/how-it-works
+            - text: كيف يعمل
+            - generic [aria-hidden] [ref=f11e107]: ↗
+    - article [ref=f11e108]:
+      - generic [ref=f11e109]:
+        - generic [ref=f11e110]:
+          - paragraph [ref=f11e111]: العمل وراء كل تجربة ضيافة
+          - heading "اترك مساحة للحظات الأهم." [level=2] [ref=f11e112]
+          - paragraph [ref=f11e113]: اربط تسجيل الطلبات وتجهيزها وإدارة تفاصيل العمل اليومي، ليبقى تركيز فريقك على حسن استقبال الضيوف.
+        - figure "الصورة لـ Julen Rey Azcona على Unsplash" [ref=f11e114]:
+          - img "أشعة الشمس تضيء الطاولات والكراسي في مقهى هادئ." [ref=f11e116]
+          - generic [ref=f11e117]:
+            - text: الصورة لـ Julen Rey Azcona على
+            - link "Unsplash" [ref=f11e118] [cursor=pointer]:
+              - /url: https://unsplash.com/photos/sunlight-streams-into-a-modern-cafe-interior-U_lZQfczRRw
+    - region "01 / نقاط البيع" [ref=f11e119]:
+      - article [ref=f11e120]:
+        - generic [ref=f11e121]:
+          - generic [ref=f11e122]:
+            - generic [ref=f11e123]:
+              - paragraph [ref=f11e124]: 01 / نقاط البيع
+              - heading "مكان واضح لتسجيل الطلب التالي." [level=2] [ref=f11e125]
+              - paragraph [ref=f11e126]: تصفّح القائمة، واختر الأصناف، وأضف بيانات الطاولة أو الضيف. ينتقل الطلب المؤكد إلى شاشة المطبخ.
+            - list [ref=f11e127]:
+              - listitem [ref=f11e128]:
+                - generic [ref=f11e129]: "01"
+                - text: تصفّح الأصناف والتصنيفات
+              - listitem [ref=f11e130]:
+                - generic [ref=f11e131]: "02"
+                - text: بيانات الطاولة والضيف ضمن الطلب
+              - listitem [ref=f11e132]:
+                - generic [ref=f11e133]: "03"
+                - text: انتقال الطلب إلى المطبخ
+          - 'figure "لقطة تطبيق فعلية بالعربية والوضع الداكن · بيانات تجريبية مع إخفاء معرّفات الاختبار افتح الشاشة كاملة : مكان واضح لتسجيل الطلب التالي." [ref=f11e134]':
+            - img "مكان واضح لتسجيل الطلب التالي. — لقطة تطبيق فعلية بالعربية والوضع الداكن · بيانات تجريبية مع إخفاء معرّفات الاختبار" [ref=f11e136]
+            - generic [ref=f11e137]:
+              - generic [ref=f11e138]: لقطة تطبيق فعلية بالعربية والوضع الداكن · بيانات تجريبية مع إخفاء معرّفات الاختبار
+              - 'link "افتح الشاشة كاملة : مكان واضح لتسجيل الطلب التالي." [ref=f11e139] [cursor=pointer]':
+                - /url: /images/product/servio/matrix/pos-ar-dark.png
+                - text: افتح الشاشة كاملة
+                - generic [ref=f11e140]: ": مكان واضح لتسجيل الطلب التالي."
+          - generic [ref=f11e141]:
+            - link "ابدأ تجربتك المجانية لمدة 14 يومًا" [ref=f11e142] [cursor=pointer]:
+              - /url: /ar/auth/register?billing=monthly
+            - link "استكشف نقاط البيع" [ref=f11e146] [cursor=pointer]:
+              - /url: /ar/features/pos
+              - text: استكشف نقاط البيع
+              - generic [aria-hidden] [ref=f11e147]: ↗
+      - article [ref=f11e148]:
+        - generic [ref=f11e149]:
+          - generic [ref=f11e150]:
+            - generic [ref=f11e151]:
+              - paragraph [ref=f11e152]: 02 / شاشة المطبخ
+              - heading "من تذكرة جديدة إلى طلب جاهز." [level=2] [ref=f11e153]
+              - paragraph [ref=f11e154]: قائمة تجهيز واضحة للمطبخ. انقل التذكرة إلى مرحلتها التالية، وراجع التذاكر المكتملة، أو استدعِ إحداها عند الحاجة.
+            - generic [ref=f11e155]:
+              - link "ابدأ تجربتك المجانية لمدة 14 يومًا" [ref=f11e156] [cursor=pointer]:
+                - /url: /ar/auth/register?billing=monthly
+              - link "استكشف شاشة المطبخ" [ref=f11e160] [cursor=pointer]:
+                - /url: /ar/features/kitchen-display
+                - text: استكشف شاشة المطبخ
+                - generic [aria-hidden] [ref=f11e161]: ↗
+          - generic [ref=f11e162]:
+            - 'figure "لقطة تطبيق فعلية بالعربية والوضع الداكن · بيانات تجريبية مع إخفاء معرّفات الاختبار افتح الشاشة كاملة : من تذكرة جديدة إلى طلب جاهز." [ref=f11e163]':
+              - img "من تذكرة جديدة إلى طلب جاهز. — لقطة تطبيق فعلية بالعربية والوضع الداكن · بيانات تجريبية مع إخفاء معرّفات الاختبار" [ref=f11e165]
+              - generic [ref=f11e166]:
+                - generic [ref=f11e167]: لقطة تطبيق فعلية بالعربية والوضع الداكن · بيانات تجريبية مع إخفاء معرّفات الاختبار
+                - 'link "افتح الشاشة كاملة : من تذكرة جديدة إلى طلب جاهز." [ref=f11e168] [cursor=pointer]':
+                  - /url: /images/product/servio/matrix/kitchen-ar-dark.png
+                  - text: افتح الشاشة كاملة
+                  - generic [ref=f11e169]: ": من تذكرة جديدة إلى طلب جاهز."
+            - generic [ref=f11e170]:
+              - paragraph [ref=f11e171]:
+                - generic [ref=f11e172]: "01"
+                - text: جديد
+              - paragraph [ref=f11e173]:
+                - generic [ref=f11e174]: "02"
+                - text: قيد التجهيز
+              - paragraph [ref=f11e175]:
+                - generic [ref=f11e176]: "03"
+                - text: جاهز
+              - paragraph [ref=f11e177]:
+                - generic [ref=f11e178]: "04"
+                - text: مكتمل
+          - paragraph [ref=f11e179]: المعروض هنا حالات التجهيز. اكتمال تذكرة المطبخ لا يعني تسليم الطلب أو تحصيل قيمته.
+      - article [ref=f11e180]:
+        - generic [ref=f11e181]:
+          - generic [ref=f11e182]:
+            - generic [ref=f11e183]:
+              - paragraph [ref=f11e184]: 03 / الطلب الإلكتروني
+              - heading "خطوة يبدأها الضيف، ويتابعها فريقك." [level=2] [ref=f11e185]
+              - paragraph [ref=f11e186]: يستعرض الضيف قائمة المطعم ويرسل طلبه للدفع نقدًا عند الاستلام. يؤكد فريقك الطلب قبل بدء تجهيزه.
+            - list [ref=f11e187]:
+              - listitem [ref=f11e188]:
+                - generic [ref=f11e189]: "01"
+                - text: تصفّح القائمة
+              - listitem [ref=f11e190]:
+                - generic [ref=f11e191]: "02"
+                - text: مراجعة طلب الدفع النقدي
+              - listitem [ref=f11e192]:
+                - generic [ref=f11e193]: "03"
+                - text: استلام تأكيد الطلب
+            - generic [ref=f11e194]:
+              - link "ابدأ تجربتك المجانية لمدة 14 يومًا" [ref=f11e195] [cursor=pointer]:
+                - /url: /ar/auth/register?billing=monthly
+              - link "استكشف الطلب الإلكتروني" [ref=f11e199] [cursor=pointer]:
+                - /url: /ar/features/online-ordering
+                - text: استكشف الطلب الإلكتروني
+                - generic [aria-hidden] [ref=f11e200]: ↗
+          - 'figure "لقطة تطبيق فعلية بالعربية والوضع الداكن · بيانات تجريبية مع إخفاء معرّفات الاختبار افتح الشاشة كاملة : إتمام طلب تجريبي نقدي عند الاستلام في موقع المطعم" [ref=f11e202]':
+            - img "إتمام طلب تجريبي نقدي عند الاستلام في موقع المطعم — لقطة تطبيق فعلية بالعربية والوضع الداكن · بيانات تجريبية مع إخفاء معرّفات الاختبار" [ref=f11e204]
+            - generic [ref=f11e205]:
+              - generic [ref=f11e206]: لقطة تطبيق فعلية بالعربية والوضع الداكن · بيانات تجريبية مع إخفاء معرّفات الاختبار
+              - 'link "افتح الشاشة كاملة : إتمام طلب تجريبي نقدي عند الاستلام في موقع المطعم" [ref=f11e207] [cursor=pointer]':
+                - /url: /images/product/servio/matrix/checkout-ar-dark.png
+                - text: افتح الشاشة كاملة
+                - generic [ref=f11e208]: ": إتمام طلب تجريبي نقدي عند الاستلام في موقع المطعم"
+    - region "04 / تخصيص موقع المطعم" [ref=f11e209]:
+      - article [ref=f11e210]:
+        - generic [ref=f11e211]:
+          - generic [ref=f11e212]:
+            - generic [ref=f11e213]:
+              - paragraph [ref=f11e214]: 04 / تخصيص موقع المطعم
+              - heading "امنح قائمتك طابع مطعمك." [level=2] [ref=f11e215]
+              - paragraph [ref=f11e216]: عدّل ألوان القالب، واحفظ الإعدادات، وعاين النتيجة. قدّم هوية مطعمك مع قائمته في تجربة متسقة.
+            - generic [ref=f11e217]:
+              - link "ابدأ تجربتك المجانية لمدة 14 يومًا" [ref=f11e218] [cursor=pointer]:
+                - /url: /ar/auth/register?billing=monthly
+              - link "استكشف تخصيص الموقع" [ref=f11e222] [cursor=pointer]:
+                - /url: /ar/features/website-builder
+                - text: استكشف تخصيص الموقع
+                - generic [aria-hidden] [ref=f11e223]: ↗
+          - 'figure "لقطة تطبيق فعلية بالعربية والوضع الداكن · بيانات تجريبية مع إخفاء معرّفات الاختبار افتح الشاشة كاملة : محرر قالب موقع المطعم مع لون محفوظ ومعاينة تجريبية" [ref=f11e224]':
+            - img "محرر قالب موقع المطعم مع لون محفوظ ومعاينة تجريبية — لقطة تطبيق فعلية بالعربية والوضع الداكن · بيانات تجريبية مع إخفاء معرّفات الاختبار" [ref=f11e226]
+            - generic [ref=f11e227]:
+              - generic [ref=f11e228]: لقطة تطبيق فعلية بالعربية والوضع الداكن · بيانات تجريبية مع إخفاء معرّفات الاختبار
+              - 'link "افتح الشاشة كاملة : محرر قالب موقع المطعم مع لون محفوظ ومعاينة تجريبية" [ref=f11e229] [cursor=pointer]':
+                - /url: /images/product/servio/matrix/theme-ar-dark.png
+                - text: افتح الشاشة كاملة
+                - generic [ref=f11e230]: ": محرر قالب موقع المطعم مع لون محفوظ ومعاينة تجريبية"
+          - paragraph [ref=f11e231]: تم التحقق من تحرير القالب وحفظ إعداداته. تجهيز عنوان الموقع العام خطوة مستقلة؛ لا نعد بالنشر الفوري.
+      - article [ref=f11e232]:
+        - generic [ref=f11e233]:
+          - generic [ref=f11e234]:
+            - generic [ref=f11e235]:
+              - paragraph [ref=f11e236]: 05 / حركة المخزون
+              - heading "اعرف متى يغيّر الطلب كمية المخزون." [level=2] [ref=f11e237]
+              - paragraph [ref=f11e238]: تتغير كمية الصنف المتتبَّع عند تأكيد الطلب. ويعيد إلغاء طلب غير منفّذ، متى كان مؤهلًا، الكمية المحجوزة.
+            - generic [ref=f11e239]:
+              - link "ابدأ تجربتك المجانية لمدة 14 يومًا" [ref=f11e240] [cursor=pointer]:
+                - /url: /ar/auth/register?billing=monthly
+              - link "استكشف المخزون" [ref=f11e244] [cursor=pointer]:
+                - /url: /ar/features/inventory
+                - text: استكشف المخزون
+                - generic [aria-hidden] [ref=f11e245]: ↗
+          - generic [ref=f11e246]:
+            - list [ref=f11e247]:
+              - listitem [ref=f11e248]:
+                - generic [ref=f11e249]: قبل تأكيد الطلب
+                - strong [ref=f11e250]: "20"
+                - generic [ref=f11e251]: وحدة
+              - listitem [ref=f11e252]:
+                - generic [ref=f11e253]: بعد التأكيد
+                - strong [ref=f11e254]: "19"
+                - generic [ref=f11e255]: وحدة
+              - listitem [ref=f11e256]:
+                - generic [ref=f11e257]: بعد الإلغاء المؤهل
+                - strong [ref=f11e258]: "20"
+                - generic [ref=f11e259]: وحدة
+            - paragraph [ref=f11e260]: "مثال موثّق: صنف واحد يبدأ بمخزون 20 وحدة. إلغاء الطلب ورد المبلغ وإرجاع الصنف أحداث مختلفة."
+      - article [ref=f11e261]:
+        - generic [ref=f11e262]:
+          - generic [ref=f11e263]:
+            - paragraph [ref=f11e264]: 06 / الفريق الذي يصنع الخدمة
+            - heading "التفاصيل اليومية، في مكان واحد." [level=2] [ref=f11e265]
+            - paragraph [ref=f11e266]: نظّم بيانات الموظفين وسجلات الحضور وقرارات الإجازات بجانب العمل الذي يديره فريقك.
+          - generic [ref=f11e267]:
+            - 'figure "لقطة تطبيق فعلية بالعربية والوضع الداكن · بيانات تجريبية مع إخفاء معرّفات الاختبار افتح الشاشة كاملة : التفاصيل اليومية، في مكان واحد." [ref=f11e268]':
+              - img "التفاصيل اليومية، في مكان واحد. — لقطة تطبيق فعلية بالعربية والوضع الداكن · بيانات تجريبية مع إخفاء معرّفات الاختبار" [ref=f11e270]
+              - generic [ref=f11e271]:
+                - generic [ref=f11e272]: لقطة تطبيق فعلية بالعربية والوضع الداكن · بيانات تجريبية مع إخفاء معرّفات الاختبار
+                - 'link "افتح الشاشة كاملة : التفاصيل اليومية، في مكان واحد." [ref=f11e273] [cursor=pointer]':
+                  - /url: /images/product/servio/matrix/staff-ar-dark.png
+                  - text: افتح الشاشة كاملة
+                  - generic [ref=f11e274]: ": التفاصيل اليومية، في مكان واحد."
+            - generic [ref=f11e275]:
+              - article [ref=f11e276]:
+                - heading "بيانات الموظفين" [level=3] [ref=f11e277]
+                - paragraph [ref=f11e278]: احتفظ بمعلومات الموظفين بصورة منظّمة.
+              - article [ref=f11e279]:
+                - heading "سجلات الحضور" [level=3] [ref=f11e280]
+                - paragraph [ref=f11e281]: سجّل الحضور وحدّث بيانات الانصراف.
+              - article [ref=f11e282]:
+                - heading "قرارات الإجازة" [level=3] [ref=f11e283]
+                - paragraph [ref=f11e284]: راجع الطلبات وسجّل الموافقة أو الرفض.
+              - generic [ref=f11e285]:
+                - link "ابدأ تجربتك المجانية لمدة 14 يومًا" [ref=f11e286] [cursor=pointer]:
+                  - /url: /ar/auth/register?billing=monthly
+                - link "استكشف سجلات الفريق" [ref=f11e290] [cursor=pointer]:
+                  - /url: /ar/features/hr
+                  - text: استكشف سجلات الفريق
+                  - generic [aria-hidden] [ref=f11e291]: ↗
+      - article [ref=f11e292]:
+        - generic [ref=f11e293]:
+          - generic [ref=f11e294]:
+            - generic [ref=f11e295]:
+              - paragraph [ref=f11e296]: 07 / نظرة تشغيلية
+              - heading "صورة مفيدة للعمل الذي يحتاج متابعتك." [level=2] [ref=f11e297]
+              - paragraph [ref=f11e298]: راجع أحدث الطلبات والعمل المعلّق وحالة مساحة المطعم. توضّح اللوحة مصادر البيانات غير المتاحة ووقت تحميل البيانات.
+            - paragraph [ref=f11e299]: الإيراد المدفوع الأخير محسوب من أحدث الطلبات المحمّلة؛ ليس قائمة مالية شاملة أو تقريرًا مجمّعًا لمجموعة مطاعم.
+            - generic [ref=f11e300]:
+              - link "ابدأ تجربتك المجانية لمدة 14 يومًا" [ref=f11e301] [cursor=pointer]:
+                - /url: /ar/auth/register?billing=monthly
+              - link "استكشف النظرة التشغيلية" [ref=f11e305] [cursor=pointer]:
+                - /url: /ar/features/analytics
+                - text: استكشف النظرة التشغيلية
+                - generic [aria-hidden] [ref=f11e306]: ↗
+          - 'figure "لقطة تطبيق فعلية بالعربية والوضع الداكن · بيانات تجريبية مع إخفاء معرّفات الاختبار افتح الشاشة كاملة : لوحة مطعم تجريبي تعرض أحدث الطلبات وحالة مساحة العمل" [ref=f11e307]':
+            - img "لوحة مطعم تجريبي تعرض أحدث الطلبات وحالة مساحة العمل — لقطة تطبيق فعلية بالعربية والوضع الداكن · بيانات تجريبية مع إخفاء معرّفات الاختبار" [ref=f11e309]
+            - generic [ref=f11e310]:
+              - generic [ref=f11e311]: لقطة تطبيق فعلية بالعربية والوضع الداكن · بيانات تجريبية مع إخفاء معرّفات الاختبار
+              - 'link "افتح الشاشة كاملة : لوحة مطعم تجريبي تعرض أحدث الطلبات وحالة مساحة العمل" [ref=f11e312] [cursor=pointer]':
+                - /url: /images/product/servio/matrix/dashboard-ar-dark.png
+                - text: افتح الشاشة كاملة
+                - generic [ref=f11e313]: ": لوحة مطعم تجريبي تعرض أحدث الطلبات وحالة مساحة العمل"
+    - generic [ref=f11e315]:
+      - generic [ref=f11e316]:
+        - paragraph [ref=f11e317]: نظرة أقرب
+        - heading "تعرّف على المنتج كما هو." [level=2] [ref=f11e318]
+        - paragraph [ref=f11e319]: اختر أحد المجالات لترى شاشة فعلية والمهمة التي تدعمها. هذه جولة تعريفية، وليست حساب مطعم حيًا.
+      - generic [ref=f11e320]:
+        - tablist "استكشف المنصة" [ref=f11e321]:
+          - tab "نقاط البيع" [selected] [ref=f11e322] [cursor=pointer]
+          - tab "شاشة المطبخ" [ref=f11e323] [cursor=pointer]
+          - tab "الطلب الإلكتروني" [ref=f11e324] [cursor=pointer]
+          - tab "تخصيص موقع المطعم" [ref=f11e325] [cursor=pointer]
+          - tab "المخزون" [ref=f11e326] [cursor=pointer]
+          - tab "سجلات الفريق" [ref=f11e327] [cursor=pointer]
+          - tab "النظرة التشغيلية" [ref=f11e328] [cursor=pointer]
+        - tabpanel "نقاط البيع" [ref=f11e329]:
+          - generic [ref=f11e330]:
+            - 'figure "لقطة تطبيق فعلية بالعربية والوضع الداكن · بيانات تجريبية مع إخفاء معرّفات الاختبار افتح الشاشة كاملة : نقاط البيع" [ref=f11e331]':
+              - img "نقاط البيع — لقطة تطبيق فعلية بالعربية والوضع الداكن · بيانات تجريبية مع إخفاء معرّفات الاختبار" [ref=f11e333]
+              - generic [ref=f11e334]:
+                - generic [ref=f11e335]: لقطة تطبيق فعلية بالعربية والوضع الداكن · بيانات تجريبية مع إخفاء معرّفات الاختبار
+                - 'link "افتح الشاشة كاملة : نقاط البيع" [ref=f11e336] [cursor=pointer]':
+                  - /url: /images/product/servio/matrix/pos-ar-dark.png
+                  - text: افتح الشاشة كاملة
+                  - generic [ref=f11e337]: ": نقاط البيع"
+            - generic [ref=f11e338]:
+              - paragraph [ref=f11e339]: عند الكاشير
+              - heading "سجّل الطلب مع تفاصيل الخدمة." [level=3] [ref=f11e340]
+              - paragraph [ref=f11e341]: مساحة عمل تبدأ من القائمة لاختيار الأصناف وإرسال الطلبات المؤكدة إلى المطبخ.
+              - link "استكشف هذه الميزة" [ref=f11e342] [cursor=pointer]:
+                - /url: /ar/features/pos
+                - text: استكشف هذه الميزة
+                - generic [aria-hidden] [ref=f11e343]: ↗
+      - link "ابدأ تجربتك المجانية لمدة 14 يومًا" [ref=f11e344] [cursor=pointer]:
+        - /url: /ar/auth/register?billing=monthly
+    - article [ref=f11e348]:
+      - generic [ref=f11e349]:
+        - generic [ref=f11e350]:
+          - paragraph [ref=f11e351]: خطوات البداية
+          - heading "بداية واضحة قبل أول طلب." [level=2] [ref=f11e352]
+        - list [ref=f11e353]:
+          - listitem [ref=f11e354]:
+            - generic [ref=f11e355]: "01"
+            - heading "أنشئ حسابك" [level=3] [ref=f11e356]
+            - paragraph [ref=f11e357]: ابدأ تجربة لمدة 14 يومًا ببيانات مطعمك.
+          - listitem [ref=f11e358]:
+            - generic [ref=f11e359]: "02"
+            - heading "اضبط بيانات المطعم" [level=3] [ref=f11e360]
+            - paragraph [ref=f11e361]: راجع معلومات المطعم وصلاحيات الفريق.
+          - listitem [ref=f11e362]:
+            - generic [ref=f11e363]: "03"
+            - heading "أضف قائمتك" [level=3] [ref=f11e364]
+            - paragraph [ref=f11e365]: أنشئ التصنيفات والأصناف التي سيستخدمها فريقك.
+          - listitem [ref=f11e366]:
+            - generic [ref=f11e367]: "04"
+            - heading "جرّب مسار الطلب" [level=3] [ref=f11e368]
+            - paragraph [ref=f11e369]: نفّذ تجربة من الكاشير إلى المطبخ باستخدام قائمتك.
+        - generic [ref=f11e370]:
+          - paragraph [ref=f11e371]:
+            - text: تجهيز عنوان موقع المطعم وتفعيل الاشتراك المدفوع خطوتان منفصلتان عن إنشاء حساب التجربة.
+            - link "كيف يعمل" [ref=f11e372] [cursor=pointer]:
+              - /url: /ar/how-it-works
+          - link "ابدأ تجربتك المجانية لمدة 14 يومًا" [ref=f11e373] [cursor=pointer]:
+            - /url: /ar/auth/register?billing=monthly
+    - generic [ref=f11e378]:
+      - generic [ref=f11e379]:
+        - paragraph [ref=f11e380]: اشتراك واحد، وطريقتان للفوترة.
+        - heading "سعر واضح، ووقت لتتعرّف على المنصة." [level=2] [ref=f11e381]
+        - paragraph [ref=f11e382]: ابدأ بتجربة مجانية لمدة 14 يومًا، واختر فترة الفوترة المفضّلة للاشتراك المدفوع لاحقًا.
+        - paragraph [ref=f11e383]: فترتا فوترة للاشتراك نفسه، وليستا باقتين بمزايا مختلفة.
+        - link "تعرّف على تفاصيل الأسعار" [ref=f11e384] [cursor=pointer]:
+          - /url: /ar/pricing
+          - text: تعرّف على تفاصيل الأسعار
+          - generic [aria-hidden] [ref=f11e385]: ↗
+      - generic [ref=f11e386]:
+        - group "فترة الفوترة المفضّلة" [ref=f11e387]:
+          - generic [ref=f11e389] [cursor=pointer]:
+            - radio "شهري" [checked] [ref=f11e390]
+            - text: شهري
+          - generic [ref=f11e391] [cursor=pointer]:
+            - radio "سنوي" [ref=f11e392]
+            - text: سنوي
+        - generic [ref=f11e393]:
+          - paragraph [ref=f11e394]:
+            - strong [ref=f11e395]: ٧٥٠
+            - generic [ref=f11e396]: جنيه مصري
+          - text: شهريًا
+          - paragraph [ref=f11e397]: 750 جنيهًا، تُدفع شهريًا.
+        - link "ابدأ تجربتك المجانية لمدة 14 يومًا" [ref=f11e398] [cursor=pointer]:
+          - /url: /ar/auth/register?billing=monthly
+        - paragraph [ref=f11e402]: الدفع للاشتراك غير متاح هنا حاليًا. اختيار الفترة ينقلك إلى تسجيل التجربة ولا يُعد تفويضًا بالتحصيل. تُؤكَّد شروط الدفع والضرائب قبل التفعيل المدفوع.
+    - generic [ref=f11e404]:
+      - generic [ref=f11e405]:
+        - paragraph [ref=f11e406]: قبل البداية
+        - heading "أسئلة عن المنتج الموثّق" [level=2] [ref=f11e407]
+      - generic [ref=f11e408]:
+        - group [ref=f11e409]:
+          - generic "كيف يتصل الكاشير بالمطبخ؟" [ref=f11e410] [cursor=pointer]:
+            - text: كيف يتصل الكاشير بالمطبخ؟
+            - generic [aria-hidden] [ref=f11e411]: +
+        - group [ref=f11e412]:
+          - generic "هل يمكن للضيف إرسال طلب إلكتروني؟" [ref=f11e413] [cursor=pointer]:
+            - text: هل يمكن للضيف إرسال طلب إلكتروني؟
+            - generic [aria-hidden] [ref=f11e414]: +
+        - group [ref=f11e415]:
+          - generic "ما الذي يمكن تخصيصه في الموقع؟" [ref=f11e416] [cursor=pointer]:
+            - text: ما الذي يمكن تخصيصه في الموقع؟
+            - generic [aria-hidden] [ref=f11e417]: +
+        - group [ref=f11e418]:
+          - generic "كيف تبدأ التجربة المجانية؟" [ref=f11e419] [cursor=pointer]:
+            - text: كيف تبدأ التجربة المجانية؟
+            - generic [aria-hidden] [ref=f11e420]: +
+        - group [ref=f11e421]:
+          - generic "هل اختيار الفترة السنوية يخصم المبلغ؟" [ref=f11e422] [cursor=pointer]:
+            - text: هل اختيار الفترة السنوية يخصم المبلغ؟
+            - generic [aria-hidden] [ref=f11e423]: +
+        - group [ref=f11e424]:
+          - generic "هل يتوفر الموقع بالعربية والإنجليزية؟" [ref=f11e425] [cursor=pointer]:
+            - text: هل يتوفر الموقع بالعربية والإنجليزية؟
+            - generic [aria-hidden] [ref=f11e426]: +
+        - generic [ref=f11e427]:
+          - link "ابدأ تجربتك المجانية لمدة 14 يومًا" [ref=f11e428] [cursor=pointer]:
+            - /url: /ar/auth/register?billing=monthly
+          - link "خيارات العرض التوضيحي" [ref=f11e432] [cursor=pointer]:
+            - /url: /ar/contact
+            - text: خيارات العرض التوضيحي
+            - generic [aria-hidden] [ref=f11e433]: ↗
+    - generic [ref=f11e435]:
+      - paragraph [ref=f11e436]: امنح الطلب التالي مسارًا واضحًا
+      - heading "اجمع الكاشير والمطبخ على متابعة واحدة." [level=2] [ref=f11e437]
+      - generic [ref=f11e438]:
+        - paragraph [ref=f11e439]: استكشف المسار، واضبط بيانات مطعمك، وجرّب انتقال طلب فعلي خلال تجربتك المجانية لمدة 14 يومًا.
+        - generic [ref=f11e440]:
+          - link "ابدأ تجربتك المجانية لمدة 14 يومًا" [ref=f11e441] [cursor=pointer]:
+            - /url: /ar/auth/register?billing=monthly
+          - link "تعرّف على تفاصيل الأسعار" [ref=f11e445] [cursor=pointer]:
+            - /url: /ar/pricing
+  - contentinfo [ref=f11e446]:
+    - generic [ref=f11e447]:
+      - generic [ref=f11e448]:
+        - generic [ref=f11e449]:
+          - link "SERVIO" [ref=f11e450] [cursor=pointer]:
+            - /url: /ar
+          - paragraph [ref=f11e456]: تشغيل المطعم، بمسارات مترابطة بعناية.
+          - link "ابدأ تجربتك المجانية لمدة 14 يومًا" [ref=f11e457] [cursor=pointer]:
+            - /url: /ar/auth/register?billing=monthly
+        - navigation "روابط تذييل الصفحة" [ref=f11e461]:
+          - generic [ref=f11e462]:
+            - generic [ref=f11e463]:
+              - heading "المنتج" [level=2] [ref=f11e464]
+              - list [ref=f11e465]:
+                - listitem [ref=f11e466]:
+                  - link "استكشف جميع الميزات" [ref=f11e467] [cursor=pointer]:
+                    - /url: /ar/features
+                - listitem [ref=f11e468]:
+                  - link "نقاط البيع للكاشير" [ref=f11e469] [cursor=pointer]:
+                    - /url: /ar/features/pos
+                - listitem [ref=f11e470]:
+                  - link "شاشة المطبخ" [ref=f11e471] [cursor=pointer]:
+                    - /url: /ar/features/kitchen-display
+                - listitem [ref=f11e472]:
+                  - link "الطلب الإلكتروني" [ref=f11e473] [cursor=pointer]:
+                    - /url: /ar/features/online-ordering
+                - listitem [ref=f11e474]:
+                  - link "المخزون" [ref=f11e475] [cursor=pointer]:
+                    - /url: /ar/features/inventory
+                - listitem [ref=f11e476]:
+                  - link "سجلات الفريق" [ref=f11e477] [cursor=pointer]:
+                    - /url: /ar/features/hr
+                - listitem [ref=f11e478]:
+                  - link "النظرة التشغيلية" [ref=f11e479] [cursor=pointer]:
+                    - /url: /ar/features/analytics
+                - listitem [ref=f11e480]:
+                  - link "تخصيص موقع المطعم" [ref=f11e481] [cursor=pointer]:
+                    - /url: /ar/features/website-builder
+            - generic [ref=f11e482]:
+              - heading "استكشف" [level=2] [ref=f11e483]
+              - list [ref=f11e484]:
+                - listitem [ref=f11e485]:
+                  - link "كيف يعمل" [ref=f11e486] [cursor=pointer]:
+                    - /url: /ar/how-it-works
+                - listitem [ref=f11e487]:
+                  - link "جولة في المنتج" [ref=f11e488] [cursor=pointer]:
+                    - /url: /ar/demo
+                - listitem [ref=f11e489]:
+                  - link "خيارات العرض التوضيحي" [ref=f11e490] [cursor=pointer]:
+                    - /url: /ar/contact
+                - listitem [ref=f11e491]:
+                  - link "الأسعار" [ref=f11e492] [cursor=pointer]:
+                    - /url: /ar/pricing
+            - generic [ref=f11e493]:
+              - heading "الحساب" [level=2] [ref=f11e494]
+              - list [ref=f11e495]:
+                - listitem [ref=f11e496]:
+                  - link "تسجيل الدخول" [ref=f11e497] [cursor=pointer]:
+                    - /url: /ar/auth/login
+                - listitem [ref=f11e498]:
+                  - link "ابدأ تجربتك المجانية لمدة 14 يومًا" [ref=f11e499] [cursor=pointer]:
+                    - /url: /ar/auth/register
+            - generic [ref=f11e500]:
+              - heading "الشركة" [level=2] [ref=f11e501]
+              - list [ref=f11e502]:
+                - listitem [ref=f11e503]:
+                  - link "الخصوصية" [ref=f11e504] [cursor=pointer]:
+                    - /url: /ar/privacy
+                - listitem [ref=f11e505]:
+                  - link "معلومات العرض التوضيحي" [ref=f11e506] [cursor=pointer]:
+                    - /url: /ar/contact
+      - generic [ref=f11e507]:
+        - paragraph [ref=f11e508]: تعرض شاشات المنتج بيانات تجريبية. توضح صفحات الميزات نطاق الإتاحة ومتطلبات الإعداد.
+        - generic [ref=f11e509]: © 2026 SERVIO
+  - button "Open Next.js Dev Tools" [ref=f11e515] [cursor=pointer]
+  - alert [ref=f11e519]
