@@ -20,12 +20,12 @@ The old static concept HTML pages (`coral.html`, `hybrid.html`, `ultraviolet.htm
 | # | Section / anchor | Component or source | What visitors can do |
 | --- | --- | --- | --- |
 | 1 | Hero | `ConversionLanding.tsx`, `HeroCaptureMotion.tsx` | See the real dashboard capture over a credited café photo; register or jump to order story. Desktop capture settles with scroll. |
-| 2 | Service-day problems | `ConversionLanding.tsx` | Read the counter, online request, and shift handoff pains. |
+| 2 | Operational bento | `OperationalBento.tsx`, `conversionCopy.ts` | Explore three local illustrative steps in each asymmetric product card, open the actual localized capture, or continue to the order story. No order or payment mutation occurs. |
 | 3 | Order story / `#how-orders-move` | `OrderStory.tsx`, `orderStoryCopy.ts` | Select seven stages or scroll through them; see actual screen areas with clearly labeled sample order and separate order/kitchen states. CSS sticky stage on desktop. |
 | 4 | Storefront / `#online-ordering` | `ConversionLanding.tsx`, `WorkflowDemo.tsx` | Select Browse, Review, Submit, Confirm to see an explanatory customer-order sequence and open the feature details. |
 | 5 | Kitchen / `#kitchen` | `ConversionLanding.tsx`, `WorkflowDemo.tsx` | Select New, In progress, Ready, Completed ticket states and open the kitchen feature. |
 | 6 | Layered product statement | `LayeredTypography.tsx` | See the POS screen and restrained desktop text/capture parallax. |
-| 7 | Feature showcase / `#capabilities` | `FeatureShowcase.tsx`, `src/content/features.ts` | Explore seven linked real-capture slides. Desktop uses a GSAP horizontal pin; mobile and reduced-motion desktop use native scroll snap and previous/next controls. |
+| 7 | Feature showcase / `#capabilities` | `FeatureShowcase.tsx`, `src/content/features.ts` | Explore seven linked real-capture slides. A dedicated desktop stage pins beneath the measured header; the introduction scrolls normally. Narrow, short-height, and reduced-motion viewports use native scroll snap and previous/next controls. |
 | 8 | Ecosystem | `BusinessEcosystem.tsx` | Select seven workspace modules and open the corresponding feature route. Lines show grouping, not invented automatic data transfer. |
 | 9 | Management | `ManagementExperience.tsx` | Switch between overview, inventory, and team captures; sample numbers are labeled as sample data. |
 | 10 | Getting started / `#getting-started` | `StackedSetupCards.tsx` | Read account, menu, and team setup steps and start registration. Cards stack with restrained desktop scroll treatment. |
@@ -41,7 +41,7 @@ English and Arabic content have equal priority. The route sets `lang` and `dir`;
 | --- | --- |
 | Homepage route and metadata | `frontend/apps/landing/src/app/[locale]/page.tsx`, `src/app/[locale]/layout.tsx`, `src/components/RootDocument.tsx` |
 | Section composition | `src/components/marketing/ConversionLanding.tsx` |
-| Interactive sections | `src/components/marketing/{HeroCaptureMotion,OrderStory,WorkflowDemo,LayeredTypography,FeatureShowcase,BusinessEcosystem,ManagementExperience,StackedSetupCards,LandingPricing}.tsx` |
+| Interactive sections | `src/components/marketing/{HeroCaptureMotion,OperationalBento,OrderStory,WorkflowDemo,LayeredTypography,FeatureShowcase,BusinessEcosystem,ManagementExperience,StackedSetupCards,LandingPricing}.tsx` |
 | Main homepage copy | `src/content/conversionCopy.ts`, `src/content/orderStoryCopy.ts` |
 | Feature definitions and detail copy | `src/content/features.ts`, `src/i18n/messages/{en,ar}/features.json`, and related marketing JSON |
 | Shared header and footer | `src/components/Navbar.tsx`, `src/components/Footer.tsx`, `src/components/navigation/`, `src/content/navigation.ts` |
@@ -52,10 +52,10 @@ English and Arabic content have equal priority. The route sets `lang` and `dir`;
 | Coral and interactive styling | `src/styles/marketing-coral.css`, `src/styles/marketing-interactive.css`, `src/styles/marketing-conversion.css`, `src/styles/marketing-captures.css`, `src/styles/marketing-workflows.css` |
 | Auth screen copy and behavior | `src/app/[locale]/auth/{login,register}/page.tsx`, `src/i18n/messages/{en,ar}/legacy.json`, `src/lib/api.ts`, `src/lib/auth-session.ts`, `src/lib/config.ts`, shared form foundation package |
 | Auth handoff and integration QA | `frontend/apps/dashboard/src/lib/{api,authSession}.ts`, `frontend/apps/landing/playwright.registration.config.ts`, `frontend/apps/landing/tests/registration-e2e/`, `docs/landing-interactive-experience/compose-auth-qa.override.yml` |
-| Browser and performance evidence | `frontend/apps/landing/scripts/{verify-interactive-landing,smoke-marketing-routes}.mjs`, `docs/landing-interactive-experience/artifacts/acceptance/`, `artifacts/route-smoke.json`, `artifacts/lighthouse-*-final.json` |
+| Browser and performance evidence | `frontend/apps/landing/scripts/{verify-interactive-landing,verify-operational-landing,smoke-marketing-routes}.mjs`, `docs/landing-interactive-experience/artifacts/{acceptance,operational-revision}/`, `artifacts/route-smoke.json`, `artifacts/lighthouse-*-final.json` |
 | Design and motion decisions | `frontend/apps/landing/DESIGN.md`, `.gsap/current-state.md` |
 
-CSS class ownership: `cv-*` is homepage composition and the new interactive system; `sv-*` is the shared marketing shell, capture, header, and footer; `auth-*` styles the account screens. The footer is a real grid (`.sv-footer-top`, `.sv-footer-groups`) with four navigation groups and `.sv-footer-signature` oversized brand text. Keep the feature showcase viewport's `contain: layout paint`; removing it caused Chrome to expose the entire off-screen track as page width. The desktop order-story panel is `.cv-story-stage-slot` with CSS `position: sticky`; pinning it with GSAP previously distorted the grid.
+CSS class ownership: `cv-*` is homepage composition and the interactive system; `sv-*` is the shared marketing shell, capture, header, and footer; `auth-*` styles the account screens. The bento classes are `.cv-bento-*` in `marketing-coral.css`; obsolete `.cv-problem-grid` styles were removed. The footer is a real grid (`.sv-footer-top`, `.sv-footer-groups`) with four navigation groups and `.sv-footer-signature` oversized brand text. Keep the feature showcase viewport's `contain: layout paint`; removing it caused Chrome to expose the off-screen track as page width. The dedicated `.cv-showcase-stage` is the desktop GSAP pin target; its introduction is outside the pin. The desktop order-story panel is `.cv-story-stage-slot` with CSS `position: sticky`; pinning it with GSAP previously distorted the grid.
 
 ## Routes and destination ownership
 
@@ -83,7 +83,7 @@ CSS class ownership: `cv-*` is homepage composition and the new interactive syst
 
 ## Motion and fallback rules
 
-`gsap` and `@gsap/react` are direct landing dependencies in `frontend/apps/landing/package.json` and `frontend/pnpm-lock.yaml`. Client islands register `ScrollTrigger`, use `useGSAP` scoped to their root, and revert contexts on cleanup. Motion uses transform/opacity. Native scrolling stays intact. At widths ≤900px, the feature showcase becomes a touch-friendly horizontal scroll container; the order story becomes a static stage above selectable steps and setup cards stop sticking. With `prefers-reduced-motion: reduce`, the desktop pin is removed and the same native feature scrolling is available. No essential content is hidden behind animation.
+`gsap` and `@gsap/react` are direct landing dependencies in `frontend/apps/landing/package.json` and `frontend/pnpm-lock.yaml`. Client islands register `ScrollTrigger`, scope contexts to their root, and revert them on cleanup. The bento has short local timelines plus keyboard/touch step buttons; no backend call. The showcase measures header height and `track.scrollWidth - viewport.clientWidth`, pins only the stage at widths >900px and heights ≥760px, and tracks the nearest actual slide offset. At widths ≤900px, heights <760px, or `prefers-reduced-motion: reduce`, it becomes a touch-friendly native horizontal scroll container. The order story becomes a static stage above selectable steps on narrow screens, and setup cards stop sticking. No essential content is hidden behind animation.
 
 ## Commands and verification
 

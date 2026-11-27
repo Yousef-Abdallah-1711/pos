@@ -1,5 +1,9 @@
 > Archived generator scaffold. For the implemented homepage, use `.gsap/current-state.md`, `DESIGN.md`, and `docs/landing-handoff.md`. This scaffold contains unverified guesses.
 
+## Current homepage status, 2026-11-27
+
+The actual homepage route is `/[locale]`, composed by `ConversionLanding.tsx`. The operational bento and horizontal showcase refactors are implemented. Bento motion is local, brief, and optional; all three explanatory states remain manually selectable. The showcase pins only a stage beneath the measured header on sufficiently tall desktop viewports. Mobile, short-height, and reduced-motion users receive native horizontal scrolling with every link reachable. The earlier guessed `/homepage` path and unrelated phase list below remain archival only.
+
 # Page Animation Spec - homepage
 
 ## Page

@@ -4,7 +4,7 @@ export default defineConfig([
   ...nextVitals,
   // React Compiler is not enabled. Preserve the enforced semantic Hooks rules;
   // report the newly introduced compiler-compatibility diagnostics as warnings.
-  { rules: {
+  { files: ['**/*.{js,jsx,mjs,ts,tsx,mts,cts}'], rules: {
     'react-hooks/set-state-in-effect': 'warn',
     'react-hooks/preserve-manual-memoization': 'warn',
     'react-hooks/error-boundaries': 'warn',

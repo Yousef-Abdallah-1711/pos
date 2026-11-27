@@ -1,5 +1,9 @@
 > Archived generator scaffold. For the implemented homepage, use `.gsap/current-state.md`, `DESIGN.md`, and `docs/landing-handoff.md`. This scaffold contains unverified guesses.
 
+## Current P12 implementation
+
+Status: implemented, browser QA in progress. `FeatureShowcase.tsx` pins `.cv-showcase-stage` after its separate introduction. The stage uses a measured header offset and `100svh`; horizontal travel is `track.scrollWidth - viewport.clientWidth`. Progress selects the nearest actual slide offset. At ≤900px, <760px viewport height, or reduced motion, the pin is absent and the viewport scrolls natively. Verification covers first/second/final/reverse positions, Arabic RTL, themes, and 104 Chromium viewport cases; final production checks remain.
+
 # Phase P12 - Showcase
 
 ## Scope
