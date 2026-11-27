@@ -1,0 +1,295 @@
+{
+  "sourceCommit": "unknown",
+  "screenshots": [
+    {
+      "variant": "desktop-mega-menu-open",
+      "application": "public marketing website",
+      "route": "/en",
+      "sourceEnvironment": "https://localhost:3001",
+      "sourceCommit": "unknown",
+      "userRole": "anonymous public visitor",
+      "authenticationVerified": false,
+      "dataSanitized": true,
+      "locale": "en",
+      "direction": "ltr",
+      "theme": "light",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "timestamp": "2026-11-27T04:32:04.018Z",
+      "screenshot": "navigation\\en-light-desktop-mega-menu-open-1440x1000.png",
+      "frame": "navigation\\en-light-desktop-mega-menu-open-1440x1000-framed.png"
+    },
+    {
+      "variant": "desktop-mega-menu-keyboard-focused",
+      "application": "public marketing website",
+      "route": "/en",
+      "sourceEnvironment": "https://localhost:3001",
+      "sourceCommit": "unknown",
+      "userRole": "anonymous public visitor",
+      "authenticationVerified": false,
+      "dataSanitized": true,
+      "locale": "en",
+      "direction": "ltr",
+      "theme": "light",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "timestamp": "2026-11-27T04:32:04.699Z",
+      "screenshot": "navigation\\en-light-desktop-mega-menu-keyboard-focused-1440x1000.png",
+      "frame": "navigation\\en-light-desktop-mega-menu-keyboard-focused-1440x1000-framed.png"
+    },
+    {
+      "variant": "mobile-features-expanded",
+      "application": "public marketing website",
+      "route": "/en",
+      "sourceEnvironment": "https://localhost:3001",
+      "sourceCommit": "unknown",
+      "userRole": "anonymous public visitor",
+      "authenticationVerified": false,
+      "dataSanitized": true,
+      "locale": "en",
+      "direction": "ltr",
+      "theme": "light",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "timestamp": "2026-11-27T04:32:53.887Z",
+      "screenshot": "navigation\\en-light-mobile-features-expanded-390x844.png",
+      "frame": "navigation\\en-light-mobile-features-expanded-390x844-framed.png"
+    },
+    {
+      "variant": "tablet-portrait",
+      "application": "public marketing website",
+      "route": "/en",
+      "sourceEnvironment": "https://localhost:3001",
+      "sourceCommit": "unknown",
+      "userRole": "anonymous public visitor",
+      "authenticationVerified": false,
+      "dataSanitized": true,
+      "locale": "en",
+      "direction": "ltr",
+      "theme": "light",
+      "viewport": {
+        "width": 768,
+        "height": 1024
+      },
+      "timestamp": "2026-11-27T04:32:57.420Z",
+      "screenshot": "navigation\\en-light-tablet-portrait-768x1024.png",
+      "frame": "navigation\\en-light-tablet-portrait-768x1024-framed.png"
+    },
+    {
+      "application": "public marketing website",
+      "route": "/en",
+      "sourceEnvironment": "https://localhost:3001",
+      "variant": "mobile-footer",
+      "sourceCommit": "unknown",
+      "userRole": "anonymous public visitor",
+      "authenticationVerified": false,
+      "dataSanitized": true,
+      "locale": "en",
+      "direction": "ltr",
+      "theme": "light",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "timestamp": "2026-11-27T04:33:00.732Z",
+      "screenshot": "navigation\\en-light-mobile-footer.png",
+      "frame": null
+    },
+    {
+      "application": "public marketing website",
+      "route": "/en",
+      "sourceEnvironment": "https://localhost:3001",
+      "variant": "desktop-footer",
+      "sourceCommit": "unknown",
+      "userRole": "anonymous public visitor",
+      "authenticationVerified": false,
+      "dataSanitized": true,
+      "locale": "en",
+      "direction": "ltr",
+      "theme": "light",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "timestamp": "2026-11-27T04:33:02.162Z",
+      "screenshot": "navigation\\en-light-desktop-footer.png",
+      "frame": null
+    },
+    {
+      "variant": "desktop-mega-menu-open",
+      "application": "public marketing website",
+      "route": "/ar",
+      "sourceEnvironment": "https://localhost:3001",
+      "sourceCommit": "unknown",
+      "userRole": "anonymous public visitor",
+      "authenticationVerified": false,
+      "dataSanitized": true,
+      "locale": "ar",
+      "direction": "rtl",
+      "theme": "light",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "timestamp": "2026-11-27T04:36:34.793Z",
+      "screenshot": "navigation\\ar-light-desktop-mega-menu-open-1440x1000.png",
+      "frame": "navigation\\ar-light-desktop-mega-menu-open-1440x1000-framed.png"
+    },
+    {
+      "variant": "desktop-mega-menu-keyboard-focused",
+      "application": "public marketing website",
+      "route": "/ar",
+      "sourceEnvironment": "https://localhost:3001",
+      "sourceCommit": "unknown",
+      "userRole": "anonymous public visitor",
+      "authenticationVerified": false,
+      "dataSanitized": true,
+      "locale": "ar",
+      "direction": "rtl",
+      "theme": "light",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "timestamp": "2026-11-27T04:36:35.578Z",
+      "screenshot": "navigation\\ar-light-desktop-mega-menu-keyboard-focused-1440x1000.png",
+      "frame": "navigation\\ar-light-desktop-mega-menu-keyboard-focused-1440x1000-framed.png"
+    },
+    {
+      "variant": "mobile-features-expanded",
+      "application": "public marketing website",
+      "route": "/ar",
+      "sourceEnvironment": "https://localhost:3001",
+      "sourceCommit": "unknown",
+      "userRole": "anonymous public visitor",
+      "authenticationVerified": false,
+      "dataSanitized": true,
+      "locale": "ar",
+      "direction": "rtl",
+      "theme": "light",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "timestamp": "2026-11-27T04:37:23.412Z",
+      "screenshot": "navigation\\ar-light-mobile-features-expanded-390x844.png",
+      "frame": "navigation\\ar-light-mobile-features-expanded-390x844-framed.png"
+    },
+    {
+      "variant": "tablet-portrait",
+      "application": "public marketing website",
+      "route": "/ar",
+      "sourceEnvironment": "https://localhost:3001",
+      "sourceCommit": "unknown",
+      "userRole": "anonymous public visitor",
+      "authenticationVerified": false,
+      "dataSanitized": true,
+      "locale": "ar",
+      "direction": "rtl",
+      "theme": "light",
+      "viewport": {
+        "width": 768,
+        "height": 1024
+      },
+      "timestamp": "2026-11-27T04:37:25.961Z",
+      "screenshot": "navigation\\ar-light-tablet-portrait-768x1024.png",
+      "frame": "navigation\\ar-light-tablet-portrait-768x1024-framed.png"
+    },
+    {
+      "application": "public marketing website",
+      "route": "/ar",
+      "sourceEnvironment": "https://localhost:3001",
+      "variant": "mobile-footer",
+      "sourceCommit": "unknown",
+      "userRole": "anonymous public visitor",
+      "authenticationVerified": false,
+      "dataSanitized": true,
+      "locale": "ar",
+      "direction": "rtl",
+      "theme": "light",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "timestamp": "2026-11-27T04:37:29.063Z",
+      "screenshot": "navigation\\ar-light-mobile-footer.png",
+      "frame": null
+    },
+    {
+      "application": "public marketing website",
+      "route": "/ar",
+      "sourceEnvironment": "https://localhost:3001",
+      "variant": "desktop-footer",
+      "sourceCommit": "unknown",
+      "userRole": "anonymous public visitor",
+      "authenticationVerified": false,
+      "dataSanitized": true,
+      "locale": "ar",
+      "direction": "rtl",
+      "theme": "light",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "timestamp": "2026-11-27T04:37:30.387Z",
+      "screenshot": "navigation\\ar-light-desktop-footer.png",
+      "frame": null
+    },
+    {
+      "application": "public marketing website",
+      "variant": "mobile-tablet-desktop-comparison-board",
+      "route": "/en",
+      "sourceEnvironment": "https://localhost:3001",
+      "sourceCommit": "unknown",
+      "userRole": "anonymous public visitor",
+      "authenticationVerified": false,
+      "dataSanitized": true,
+      "locale": "en",
+      "direction": "ltr",
+      "theme": "light",
+      "viewport": {
+        "width": 2000,
+        "height": 1200
+      },
+      "timestamp": "2026-11-27T04:37:52.999Z",
+      "screenshot": "navigation\\en-light-mobile-tablet-desktop-comparison-board.png",
+      "frame": null,
+      "sourceScreenshots": [
+        "navigation\\en-light-mobile-features-expanded-390x844.png",
+        "navigation\\en-light-tablet-portrait-768x1024.png",
+        "navigation\\en-light-desktop-mega-menu-open-1440x1000.png"
+      ]
+    },
+    {
+      "application": "public marketing website",
+      "variant": "mobile-tablet-desktop-comparison-board",
+      "route": "/ar",
+      "sourceEnvironment": "https://localhost:3001",
+      "sourceCommit": "unknown",
+      "userRole": "anonymous public visitor",
+      "authenticationVerified": false,
+      "dataSanitized": true,
+      "locale": "ar",
+      "direction": "rtl",
+      "theme": "light",
+      "viewport": {
+        "width": 2000,
+        "height": 1200
+      },
+      "timestamp": "2026-11-27T04:37:53.420Z",
+      "screenshot": "navigation\\ar-light-mobile-tablet-desktop-comparison-board.png",
+      "frame": null,
+      "sourceScreenshots": [
+        "navigation\\ar-light-mobile-features-expanded-390x844.png",
+        "navigation\\ar-light-tablet-portrait-768x1024.png",
+        "navigation\\ar-light-desktop-mega-menu-open-1440x1000.png"
+      ]
+    }
+  ]
+}
