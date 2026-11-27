@@ -1,0 +1,125 @@
+{
+  "sourceCommit": "unknown",
+  "screenshots": [
+    {
+      "variant": "desktop-mega-menu-open",
+      "application": "public marketing website",
+      "route": "/en",
+      "sourceEnvironment": "http://localhost:3001",
+      "sourceCommit": "unknown",
+      "userRole": "anonymous public visitor",
+      "authenticationVerified": false,
+      "dataSanitized": true,
+      "locale": "en",
+      "direction": "ltr",
+      "theme": "light",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "timestamp": "2026-11-27T03:18:26.253Z",
+      "screenshot": "navigation\\en-light-desktop-mega-menu-open-1440x1000.png",
+      "frame": "navigation\\en-light-desktop-mega-menu-open-1440x1000-framed.png"
+    },
+    {
+      "variant": "desktop-mega-menu-keyboard-focused",
+      "application": "public marketing website",
+      "route": "/en",
+      "sourceEnvironment": "http://localhost:3001",
+      "sourceCommit": "unknown",
+      "userRole": "anonymous public visitor",
+      "authenticationVerified": false,
+      "dataSanitized": true,
+      "locale": "en",
+      "direction": "ltr",
+      "theme": "light",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "timestamp": "2026-11-27T03:18:27.638Z",
+      "screenshot": "navigation\\en-light-desktop-mega-menu-keyboard-focused-1440x1000.png",
+      "frame": "navigation\\en-light-desktop-mega-menu-keyboard-focused-1440x1000-framed.png"
+    },
+    {
+      "variant": "mobile-features-expanded",
+      "application": "public marketing website",
+      "route": "/en",
+      "sourceEnvironment": "http://localhost:3001",
+      "sourceCommit": "unknown",
+      "userRole": "anonymous public visitor",
+      "authenticationVerified": false,
+      "dataSanitized": true,
+      "locale": "en",
+      "direction": "ltr",
+      "theme": "light",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "timestamp": "2026-11-27T03:19:22.659Z",
+      "screenshot": "navigation\\en-light-mobile-features-expanded-390x844.png",
+      "frame": "navigation\\en-light-mobile-features-expanded-390x844-framed.png"
+    },
+    {
+      "variant": "tablet-portrait",
+      "application": "public marketing website",
+      "route": "/en",
+      "sourceEnvironment": "http://localhost:3001",
+      "sourceCommit": "unknown",
+      "userRole": "anonymous public visitor",
+      "authenticationVerified": false,
+      "dataSanitized": true,
+      "locale": "en",
+      "direction": "ltr",
+      "theme": "light",
+      "viewport": {
+        "width": 768,
+        "height": 1024
+      },
+      "timestamp": "2026-11-27T03:19:25.160Z",
+      "screenshot": "navigation\\en-light-tablet-portrait-768x1024.png",
+      "frame": "navigation\\en-light-tablet-portrait-768x1024-framed.png"
+    },
+    {
+      "application": "public marketing website",
+      "route": "/en",
+      "sourceEnvironment": "http://localhost:3001",
+      "variant": "mobile-footer",
+      "sourceCommit": "unknown",
+      "userRole": "anonymous public visitor",
+      "authenticationVerified": false,
+      "dataSanitized": true,
+      "locale": "en",
+      "direction": "ltr",
+      "theme": "light",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "timestamp": "2026-11-27T03:19:30.469Z",
+      "screenshot": "navigation\\en-light-mobile-footer.png",
+      "frame": null
+    },
+    {
+      "application": "public marketing website",
+      "route": "/en",
+      "sourceEnvironment": "http://localhost:3001",
+      "variant": "desktop-footer",
+      "sourceCommit": "unknown",
+      "userRole": "anonymous public visitor",
+      "authenticationVerified": false,
+      "dataSanitized": true,
+      "locale": "en",
+      "direction": "ltr",
+      "theme": "light",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "timestamp": "2026-11-27T03:19:31.929Z",
+      "screenshot": "navigation\\en-light-desktop-footer.png",
+      "frame": null
+    }
+  ]
+}
