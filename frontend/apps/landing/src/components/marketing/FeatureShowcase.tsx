@@ -110,7 +110,20 @@ export function FeatureShowcase({ locale }: { locale: Locale }) {
           <button type="button" onClick={() => goTo(active + 1)} disabled={active === features.length - 1} aria-label={ui.next}><ChevronRight aria-hidden="true" /></button>
         </div>
       </div>
-      <div className="cv-showcase-viewport" ref={viewport}>
+      <div className="cv-showcase-viewport" ref={viewport} onScroll={() => {
+        if (scrollTrigger.current || !viewport.current || !track.current) return
+        const bounds = viewport.current.getBoundingClientRect()
+        const slides = Array.from(track.current.children) as HTMLElement[]
+        const edge = locale === 'ar' ? bounds.right : bounds.left
+        const nearest = slides.reduce((best, slide, index) => {
+          const rect = slide.getBoundingClientRect()
+          const bestRect = slides[best].getBoundingClientRect()
+          const position = locale === 'ar' ? rect.right : rect.left
+          const bestPosition = locale === 'ar' ? bestRect.right : bestRect.left
+          return Math.abs(position - edge) < Math.abs(bestPosition - edge) ? index : best
+        }, 0)
+        setActive(nearest)
+      }}>
         <div className="cv-showcase-track" ref={track}>
           {features.map((feature, index) => <article className="cv-feature-slide" key={feature.slug} id={`feature-slide-${feature.slug}`}>
             <div className="cv-feature-slide-copy">

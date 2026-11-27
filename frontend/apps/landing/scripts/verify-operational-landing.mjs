@@ -30,7 +30,7 @@ for (const [engineName, engine] of Object.entries({ chromium, firefox, webkit })
   const executablePath = process.env[`SERVIO_QA_${engineName.toUpperCase()}_EXECUTABLE`]
   const browser = await engine.launch({ headless: true, ...(executablePath ? { executablePath } : {}) })
   try {
-    const cases = engineName === 'chromium' ? profiles : [profiles[4], profiles[16]]
+    const cases = engineName === 'chromium' && !process.env.SERVIO_QA_QUICK ? profiles : [profiles[4], profiles[16]]
     for (const locale of ['en', 'ar']) for (const theme of ['light', 'dark']) for (const profile of cases) {
       const context = await browser.newContext({ viewport: profile, reducedMotion: 'no-preference' })
       await context.addInitScript(value => localStorage.setItem('servio-marketing-theme', value), theme)
@@ -97,11 +97,13 @@ for (const [engineName, engine] of Object.entries({ chromium, firefox, webkit })
             header: rect('.sv-header'), stage: rect('.cv-showcase-stage'),
             slide: rect('.cv-feature-slide'), copy: rect('.cv-feature-slide-copy'),
             action: rect('.cv-feature-slide-copy a'), capture: rect('.cv-feature-slide-capture'),
+            image: rect('.cv-feature-slide-capture img'), imageFrame: rect('.cv-feature-slide-capture .sv-capture-image'),
             pinSpacers: document.querySelectorAll('.pin-spacer').length,
           }
         })
         if (showcase.pinSpacers !== 1) issues.push('pin spacer count')
         if (showcase.stage.top < showcase.header.bottom - 2 || showcase.slide.bottom > profile.height + 2 || showcase.copy.top < showcase.slide.top - 2 || showcase.action.bottom > showcase.slide.bottom + 2 || showcase.capture.top < showcase.slide.top - 2 || showcase.capture.bottom > profile.height + 2) issues.push('pinned slide clipped')
+        if (showcase.image.top < showcase.imageFrame.top - 2 || showcase.image.bottom > showcase.imageFrame.bottom + 2 || showcase.image.left < showcase.imageFrame.left - 2 || showcase.image.right > showcase.imageFrame.right + 2) issues.push('product image cropped')
         if (engineName === 'chromium' && profile.width === 1440) {
           await page.screenshot({ path: path.join(evidence, `${locale}-${theme}-showcase-first.png`) })
         }
@@ -155,6 +157,14 @@ for (const [engineName, engine] of Object.entries({ chromium, firefox, webkit })
         const native = await page.evaluate(() => ({ pinSpacers: document.querySelectorAll('.pin-spacer').length, overflow: getComputedStyle(document.querySelector('.cv-showcase-viewport')).overflowX }))
         showcase = native
         if (native.pinSpacers !== 0 || native.overflow !== 'auto') issues.push('native showcase fallback')
+        if (profile.width === 390 && profile.height === 844) {
+          const step = page.locator('.cv-bento-card--1 .cv-bento-story-controls button').nth(1)
+          await step.click()
+          await page.waitForFunction(() => document.querySelectorAll('.cv-bento-card--1 .cv-bento-story-controls button')[1]?.getAttribute('aria-pressed') === 'true')
+          await page.locator('.cv-feature-slide:nth-child(2)').evaluate(slide => slide.scrollIntoView({ behavior: 'instant', block: 'nearest', inline: 'start' }))
+          await page.waitForTimeout(1200)
+          if (!(await page.locator('.cv-showcase-controls span').textContent())?.includes('02 / 07')) issues.push('native scroll progress')
+        }
       }
 
       if (engineName === 'chromium' && profile.width === 390) {
