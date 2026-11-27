@@ -1,0 +1,3 @@
+employee_code,employee_name,national_id,base_salary,social_insurance_deduction,health_insurance_deduction,policy_number,provider_name
+EMP-1795646162644,Audit Cook,,5000.00,0.00,0.00,POL-RUN3-1,Audit Insurer
+EMP-1795646162644,Audit Cook,,5000.00,0.00,0.00,POL-R4-2,Audit Insurer 2

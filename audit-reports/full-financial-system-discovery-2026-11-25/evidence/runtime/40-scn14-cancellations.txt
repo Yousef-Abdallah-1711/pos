@@ -1,0 +1,6 @@
+# SCN-14 cancellations (API diagnostic) unpaid=34 paid=33 stock before=47
+cancel UNPAID order 34 -> {"success":true} [200]
+stock after unpaid cancel: 48 (released if +1 or +qty)
+cancel PAID order 33 -> {"error":"Failed to update order status"} [500]
+paid order state: confirmed|paid  journals referencing it still posted: 2
+item-level cancel of paid order item -> {"error":"Cancellation conflicts with order state, quantity or idempotency key"} [409]

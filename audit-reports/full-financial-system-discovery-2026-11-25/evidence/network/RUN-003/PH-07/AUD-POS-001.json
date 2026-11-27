@@ -1,0 +1,26 @@
+{
+ "run": "RUN-003",
+ "tenant": 4,
+ "role": "owner",
+ "ui": [
+  "Subtotal",
+  "Tax (14%)",
+  "Total"
+ ],
+ "calls": [
+  {
+   "method": "POST",
+   "url": "/pos/orders",
+   "status": 201,
+   "request": "{\"order_source\":\"pos\",\"customer_name\":\"Walk-in\",\"customer_phone\":\"0000000000\",\"payment_method\":\"cash\",\"items\":[{\"product_id\":2,\"quantity\":6}]}",
+   "response": "{\"data\":{\"created_at\":\"2026-11-26T17:46:32.666259Z\",\"customer_name\":\"Walk-in\",\"id\":38,\"order_number\":\"ORD-2026-ed52631d-3244-425f-beda-da0db3d5bc3a\",\"status\":\"confirmed\",\"table_id\":null,\"total_amount\":66000,\"tracking_token\":\"FMI-AJiz8O5BCGfk5BUA0kd_mFMVbvb79bsDHoGgwtM\"},\"success\":true}"
+  },
+  {
+   "method": "PUT",
+   "url": "/admin/orders/38/payment-status",
+   "status": 200,
+   "request": "{\"payment_status\":\"paid\"}",
+   "response": "{\"accounting_intent\":\"persisted\",\"success\":true}"
+  }
+ ]
+}

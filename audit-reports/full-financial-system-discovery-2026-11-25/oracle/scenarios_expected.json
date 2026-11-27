@@ -1,0 +1,3176 @@
+{
+ "SCN-01": {
+  "title": "Opening balances",
+  "policy_ids": [
+   "OPEN-01"
+  ],
+  "assumptions": [
+   {
+    "tag": "PROVISIONAL",
+    "text": "OPEN-01: opening balances posted as ONE journal offset to Opening Balance Equity (evidence-backed)"
+   },
+   {
+    "tag": "PROVISIONAL",
+    "text": "Inventory opening value 10,000 taken at book cost; AP opening 8,000"
+   },
+   {
+    "tag": "PROMPT",
+    "text": "Accrual basis; purchase (input) VAT recoverable (existing oracle assumption)"
+   }
+  ],
+  "journals": [
+   {
+    "name": "Opening balances",
+    "cf": "opening",
+    "lines": [
+     {
+      "account": "Cash",
+      "debit": 5000000,
+      "credit": 0
+     },
+     {
+      "account": "Inventory",
+      "debit": 1000000,
+      "credit": 0
+     },
+     {
+      "account": "Accounts Payable",
+      "debit": 0,
+      "credit": 800000
+     },
+     {
+      "account": "Opening Balance Equity",
+      "debit": 0,
+      "credit": 5200000
+     }
+    ]
+   }
+  ],
+  "ending_balances_piasters": {
+   "Cash": 5000000,
+   "Inventory": 1000000,
+   "Accounts Payable": 800000,
+   "Opening Balance Equity": 5200000
+  },
+  "statements_piasters": {
+   "net_revenue": 0,
+   "gross_revenue": 0,
+   "contra_revenue": 0,
+   "cogs": 0,
+   "gross_profit": 0,
+   "opex": 0,
+   "net_profit": 0,
+   "assets": 6000000,
+   "liabilities": 800000,
+   "equity_booked": 5200000,
+   "equity_incl_current_earnings": 5200000,
+   "bs_residual": 0,
+   "tb_debits": 6000000,
+   "tb_credits": 6000000,
+   "cash_flow": {
+    "opening": 5000000
+   },
+   "cash_net_change_in_cf": 5000000,
+   "closing_cash_and_bank": 5000000,
+   "vat_input": 0,
+   "vat_output": 0,
+   "vat_net_payable": 0
+  },
+  "self_consistency": "PASS"
+ },
+ "SCN-02": {
+  "title": "Capital contribution",
+  "policy_ids": [
+   "N4"
+  ],
+  "assumptions": [
+   {
+    "tag": "PROVISIONAL",
+    "text": "Capital contribution of 100,000 into Bank is financing cash flow, equity credit to Owner Capital"
+   },
+   {
+    "tag": "PROMPT",
+    "text": "Accrual basis; purchase (input) VAT recoverable (existing oracle assumption)"
+   }
+  ],
+  "journals": [
+   {
+    "name": "Capital contribution",
+    "cf": "financing",
+    "lines": [
+     {
+      "account": "Bank",
+      "debit": 10000000,
+      "credit": 0
+     },
+     {
+      "account": "Owner Capital",
+      "debit": 0,
+      "credit": 10000000
+     }
+    ]
+   }
+  ],
+  "ending_balances_piasters": {
+   "Bank": 10000000,
+   "Owner Capital": 10000000
+  },
+  "statements_piasters": {
+   "net_revenue": 0,
+   "gross_revenue": 0,
+   "contra_revenue": 0,
+   "cogs": 0,
+   "gross_profit": 0,
+   "opex": 0,
+   "net_profit": 0,
+   "assets": 10000000,
+   "liabilities": 0,
+   "equity_booked": 10000000,
+   "equity_incl_current_earnings": 10000000,
+   "bs_residual": 0,
+   "tb_debits": 10000000,
+   "tb_credits": 10000000,
+   "cash_flow": {
+    "financing": 10000000
+   },
+   "cash_net_change_in_cf": 10000000,
+   "closing_cash_and_bank": 10000000,
+   "vat_input": 0,
+   "vat_output": 0,
+   "vat_net_payable": 0
+  },
+  "self_consistency": "PASS"
+ },
+ "SCN-03": {
+  "title": "Cash purchase of inventory",
+  "policy_ids": [
+   "INV-01",
+   "TAX-01"
+  ],
+  "assumptions": [
+   {
+    "tag": "PROVISIONAL",
+    "text": "INV purchase capitalised to Inventory (not expensed); input VAT recoverable and held in Input VAT asset"
+   },
+   {
+    "tag": "PROMPT",
+    "text": "VAT 14% exclusive on net price; EGP (existing oracle test assumption, not asserted as law)"
+   },
+   {
+    "tag": "PROVISIONAL",
+    "text": "ROUND-01: VAT rounded half-up to the piaster per document; chosen only for computation"
+   }
+  ],
+  "journals": [
+   {
+    "name": "Capital contribution",
+    "cf": "financing",
+    "lines": [
+     {
+      "account": "Cash",
+      "debit": 1000000,
+      "credit": 0
+     },
+     {
+      "account": "Owner Capital",
+      "debit": 0,
+      "credit": 1000000
+     }
+    ]
+   },
+   {
+    "name": "Cash purchase",
+    "cf": "operating",
+    "lines": [
+     {
+      "account": "Inventory",
+      "debit": 500000,
+      "credit": 0
+     },
+     {
+      "account": "Input VAT",
+      "debit": 70000,
+      "credit": 0
+     },
+     {
+      "account": "Cash",
+      "debit": 0,
+      "credit": 570000
+     }
+    ]
+   }
+  ],
+  "ending_balances_piasters": {
+   "Cash": 430000,
+   "Inventory": 500000,
+   "Input VAT": 70000,
+   "Owner Capital": 1000000
+  },
+  "statements_piasters": {
+   "net_revenue": 0,
+   "gross_revenue": 0,
+   "contra_revenue": 0,
+   "cogs": 0,
+   "gross_profit": 0,
+   "opex": 0,
+   "net_profit": 0,
+   "assets": 1000000,
+   "liabilities": 0,
+   "equity_booked": 1000000,
+   "equity_incl_current_earnings": 1000000,
+   "bs_residual": 0,
+   "tb_debits": 1000000,
+   "tb_credits": 1000000,
+   "cash_flow": {
+    "financing": 1000000,
+    "operating": -570000
+   },
+   "cash_net_change_in_cf": 430000,
+   "closing_cash_and_bank": 430000,
+   "vat_input": 70000,
+   "vat_output": 0,
+   "vat_net_payable": -70000
+  },
+  "self_consistency": "PASS"
+ },
+ "SCN-04": {
+  "title": "Credit purchase and part supplier payment",
+  "policy_ids": [
+   "INV-01",
+   "TAX-01"
+  ],
+  "assumptions": [
+   {
+    "tag": "PROVISIONAL",
+    "text": "Purchase capitalised to Inventory; AP carries gross incl. VAT; supplier paid by Bank"
+   },
+   {
+    "tag": "PROMPT",
+    "text": "VAT 14% exclusive on net price; EGP (existing oracle test assumption, not asserted as law)"
+   },
+   {
+    "tag": "PROMPT",
+    "text": "Accrual basis; purchase (input) VAT recoverable (existing oracle assumption)"
+   }
+  ],
+  "journals": [
+   {
+    "name": "Capital contribution",
+    "cf": "financing",
+    "lines": [
+     {
+      "account": "Bank",
+      "debit": 10000000,
+      "credit": 0
+     },
+     {
+      "account": "Owner Capital",
+      "debit": 0,
+      "credit": 10000000
+     }
+    ]
+   },
+   {
+    "name": "Credit purchase",
+    "cf": "noncash",
+    "lines": [
+     {
+      "account": "Inventory",
+      "debit": 2000000,
+      "credit": 0
+     },
+     {
+      "account": "Input VAT",
+      "debit": 280000,
+      "credit": 0
+     },
+     {
+      "account": "Accounts Payable",
+      "debit": 0,
+      "credit": 2280000
+     }
+    ]
+   },
+   {
+    "name": "Supplier payment",
+    "cf": "operating",
+    "lines": [
+     {
+      "account": "Accounts Payable",
+      "debit": 1000000,
+      "credit": 0
+     },
+     {
+      "account": "Bank",
+      "debit": 0,
+      "credit": 1000000
+     }
+    ]
+   }
+  ],
+  "ending_balances_piasters": {
+   "Bank": 9000000,
+   "Inventory": 2000000,
+   "Input VAT": 280000,
+   "Accounts Payable": 1280000,
+   "Owner Capital": 10000000
+  },
+  "statements_piasters": {
+   "net_revenue": 0,
+   "gross_revenue": 0,
+   "contra_revenue": 0,
+   "cogs": 0,
+   "gross_profit": 0,
+   "opex": 0,
+   "net_profit": 0,
+   "assets": 11280000,
+   "liabilities": 1280000,
+   "equity_booked": 10000000,
+   "equity_incl_current_earnings": 10000000,
+   "bs_residual": 0,
+   "tb_debits": 11280000,
+   "tb_credits": 11280000,
+   "cash_flow": {
+    "financing": 10000000,
+    "operating": -1000000
+   },
+   "cash_net_change_in_cf": 9000000,
+   "closing_cash_and_bank": 9000000,
+   "vat_input": 280000,
+   "vat_output": 0,
+   "vat_net_payable": -280000
+  },
+  "self_consistency": "PASS"
+ },
+ "SCN-05": {
+  "title": "Purchase return to supplier",
+  "policy_ids": [
+   "N16",
+   "N7"
+  ],
+  "assumptions": [
+   {
+    "tag": "PROVISIONAL",
+    "text": "Return of goods reverses Inventory, Input VAT and AP at original cost (no restocking fee)"
+   },
+   {
+    "tag": "PROMPT",
+    "text": "VAT 14% exclusive on net price; EGP (existing oracle test assumption, not asserted as law)"
+   },
+   {
+    "tag": "PROMPT",
+    "text": "Accrual basis; purchase (input) VAT recoverable (existing oracle assumption)"
+   }
+  ],
+  "journals": [
+   {
+    "name": "Credit purchase",
+    "cf": "noncash",
+    "lines": [
+     {
+      "account": "Inventory",
+      "debit": 2000000,
+      "credit": 0
+     },
+     {
+      "account": "Input VAT",
+      "debit": 280000,
+      "credit": 0
+     },
+     {
+      "account": "Accounts Payable",
+      "debit": 0,
+      "credit": 2280000
+     }
+    ]
+   },
+   {
+    "name": "Purchase return to supplier",
+    "cf": "noncash",
+    "lines": [
+     {
+      "account": "Accounts Payable",
+      "debit": 456000,
+      "credit": 0
+     },
+     {
+      "account": "Inventory",
+      "debit": 0,
+      "credit": 400000
+     },
+     {
+      "account": "Input VAT",
+      "debit": 0,
+      "credit": 56000
+     }
+    ]
+   }
+  ],
+  "ending_balances_piasters": {
+   "Inventory": 1600000,
+   "Input VAT": 224000,
+   "Accounts Payable": 1824000
+  },
+  "statements_piasters": {
+   "net_revenue": 0,
+   "gross_revenue": 0,
+   "contra_revenue": 0,
+   "cogs": 0,
+   "gross_profit": 0,
+   "opex": 0,
+   "net_profit": 0,
+   "assets": 1824000,
+   "liabilities": 1824000,
+   "equity_booked": 0,
+   "equity_incl_current_earnings": 0,
+   "bs_residual": 0,
+   "tb_debits": 1824000,
+   "tb_credits": 1824000,
+   "cash_flow": {},
+   "cash_net_change_in_cf": 0,
+   "closing_cash_and_bank": 0,
+   "vat_input": 224000,
+   "vat_output": 0,
+   "vat_net_payable": -224000
+  },
+  "self_consistency": "PASS"
+ },
+ "SCN-06": {
+  "title": "Card sale",
+  "policy_ids": [
+   "REV",
+   "N21"
+  ],
+  "assumptions": [
+   {
+    "tag": "PROVISIONAL",
+    "text": "Card receipt settles directly into Bank at sale time, no processor fee / chargeback / settlement lag"
+   },
+   {
+    "tag": "PROMPT",
+    "text": "VAT 14% exclusive on net price; EGP (existing oracle test assumption, not asserted as law)"
+   },
+   {
+    "tag": "PROMPT",
+    "text": "No payment-processor fees, no discounts unless the scenario states otherwise"
+   },
+   {
+    "tag": "PROVISIONAL",
+    "text": "ROUND-01: VAT rounded half-up to the piaster per document; chosen only for computation"
+   }
+  ],
+  "journals": [
+   {
+    "name": "Capital contribution",
+    "cf": "financing",
+    "lines": [
+     {
+      "account": "Cash",
+      "debit": 500000,
+      "credit": 0
+     },
+     {
+      "account": "Owner Capital",
+      "debit": 0,
+      "credit": 500000
+     }
+    ]
+   },
+   {
+    "name": "Stock",
+    "cf": "operating",
+    "lines": [
+     {
+      "account": "Inventory",
+      "debit": 40000,
+      "credit": 0
+     },
+     {
+      "account": "Cash",
+      "debit": 0,
+      "credit": 40000
+     }
+    ]
+   },
+   {
+    "name": "Card sale",
+    "cf": "operating",
+    "lines": [
+     {
+      "account": "Revenue",
+      "debit": 0,
+      "credit": 100000
+     },
+     {
+      "account": "Output VAT",
+      "debit": 0,
+      "credit": 14000
+     },
+     {
+      "account": "Bank",
+      "debit": 114000,
+      "credit": 0
+     }
+    ]
+   },
+   {
+    "name": "Card sale COGS",
+    "cf": "noncash",
+    "lines": [
+     {
+      "account": "COGS",
+      "debit": 40000,
+      "credit": 0
+     },
+     {
+      "account": "Inventory",
+      "debit": 0,
+      "credit": 40000
+     }
+    ]
+   }
+  ],
+  "ending_balances_piasters": {
+   "Cash": 460000,
+   "Bank": 114000,
+   "Output VAT": 14000,
+   "Owner Capital": 500000,
+   "Revenue": 100000,
+   "COGS": 40000
+  },
+  "statements_piasters": {
+   "net_revenue": 100000,
+   "gross_revenue": 100000,
+   "contra_revenue": 0,
+   "cogs": 40000,
+   "gross_profit": 60000,
+   "opex": 0,
+   "net_profit": 60000,
+   "assets": 574000,
+   "liabilities": 14000,
+   "equity_booked": 500000,
+   "equity_incl_current_earnings": 560000,
+   "bs_residual": 0,
+   "tb_debits": 614000,
+   "tb_credits": 614000,
+   "cash_flow": {
+    "financing": 500000,
+    "operating": 74000
+   },
+   "cash_net_change_in_cf": 574000,
+   "closing_cash_and_bank": 574000,
+   "vat_input": 0,
+   "vat_output": 14000,
+   "vat_net_payable": 14000
+  },
+  "self_consistency": "PASS"
+ },
+ "SCN-07": {
+  "title": "Wallet sale with provider payout",
+  "policy_ids": [
+   "N21"
+  ],
+  "assumptions": [
+   {
+    "tag": "PROVISIONAL",
+    "text": "Wallet funds held in Wallet Clearing asset until payout; payout to Bank is operating cash; no fee"
+   },
+   {
+    "tag": "PROMPT",
+    "text": "VAT 14% exclusive on net price; EGP (existing oracle test assumption, not asserted as law)"
+   },
+   {
+    "tag": "PROMPT",
+    "text": "No payment-processor fees, no discounts unless the scenario states otherwise"
+   },
+   {
+    "tag": "PROVISIONAL",
+    "text": "ROUND-01: VAT rounded half-up to the piaster per document; chosen only for computation"
+   }
+  ],
+  "journals": [
+   {
+    "name": "Wallet sale",
+    "cf": "noncash",
+    "lines": [
+     {
+      "account": "Revenue",
+      "debit": 0,
+      "credit": 100000
+     },
+     {
+      "account": "Output VAT",
+      "debit": 0,
+      "credit": 14000
+     },
+     {
+      "account": "Wallet Clearing",
+      "debit": 114000,
+      "credit": 0
+     }
+    ]
+   },
+   {
+    "name": "Wallet payout",
+    "cf": "operating",
+    "lines": [
+     {
+      "account": "Bank",
+      "debit": 114000,
+      "credit": 0
+     },
+     {
+      "account": "Wallet Clearing",
+      "debit": 0,
+      "credit": 114000
+     }
+    ]
+   }
+  ],
+  "ending_balances_piasters": {
+   "Bank": 114000,
+   "Output VAT": 14000,
+   "Revenue": 100000
+  },
+  "statements_piasters": {
+   "net_revenue": 100000,
+   "gross_revenue": 100000,
+   "contra_revenue": 0,
+   "cogs": 0,
+   "gross_profit": 100000,
+   "opex": 0,
+   "net_profit": 100000,
+   "assets": 114000,
+   "liabilities": 14000,
+   "equity_booked": 0,
+   "equity_incl_current_earnings": 100000,
+   "bs_residual": 0,
+   "tb_debits": 114000,
+   "tb_credits": 114000,
+   "cash_flow": {
+    "operating": 114000
+   },
+   "cash_net_change_in_cf": 114000,
+   "closing_cash_and_bank": 114000,
+   "vat_input": 0,
+   "vat_output": 14000,
+   "vat_net_payable": 14000
+  },
+  "self_consistency": "PASS"
+ },
+ "SCN-08": {
+  "title": "Split cash + card sale",
+  "policy_ids": [
+   "ROUND-01"
+  ],
+  "assumptions": [
+   {
+    "tag": "PROVISIONAL",
+    "text": "Split tender: 1,000 cash + remainder card; whole-order VAT computed once on net, not per tender"
+   },
+   {
+    "tag": "PROMPT",
+    "text": "VAT 14% exclusive on net price; EGP (existing oracle test assumption, not asserted as law)"
+   },
+   {
+    "tag": "PROMPT",
+    "text": "No payment-processor fees, no discounts unless the scenario states otherwise"
+   },
+   {
+    "tag": "PROVISIONAL",
+    "text": "ROUND-01: VAT rounded half-up to the piaster per document; chosen only for computation"
+   }
+  ],
+  "journals": [
+   {
+    "name": "Split sale",
+    "cf": "operating",
+    "lines": [
+     {
+      "account": "Revenue",
+      "debit": 0,
+      "credit": 200000
+     },
+     {
+      "account": "Output VAT",
+      "debit": 0,
+      "credit": 28000
+     },
+     {
+      "account": "Cash",
+      "debit": 100000,
+      "credit": 0
+     },
+     {
+      "account": "Bank",
+      "debit": 128000,
+      "credit": 0
+     }
+    ]
+   }
+  ],
+  "ending_balances_piasters": {
+   "Cash": 100000,
+   "Bank": 128000,
+   "Output VAT": 28000,
+   "Revenue": 200000
+  },
+  "statements_piasters": {
+   "net_revenue": 200000,
+   "gross_revenue": 200000,
+   "contra_revenue": 0,
+   "cogs": 0,
+   "gross_profit": 200000,
+   "opex": 0,
+   "net_profit": 200000,
+   "assets": 228000,
+   "liabilities": 28000,
+   "equity_booked": 0,
+   "equity_incl_current_earnings": 200000,
+   "bs_residual": 0,
+   "tb_debits": 228000,
+   "tb_credits": 228000,
+   "cash_flow": {
+    "operating": 228000
+   },
+   "cash_net_change_in_cf": 228000,
+   "closing_cash_and_bank": 228000,
+   "vat_input": 0,
+   "vat_output": 28000,
+   "vat_net_payable": 28000
+  },
+  "self_consistency": "PASS"
+ },
+ "SCN-09": {
+  "title": "Online prepaid order (card via gateway)",
+  "policy_ids": [
+   "N21",
+   "N22"
+  ],
+  "assumptions": [
+   {
+    "tag": "PROVISIONAL",
+    "text": "Online capture recognises revenue at capture; delivery fee 0 (matches current app forced-0 fee, not a policy)"
+   },
+   {
+    "tag": "PROMPT",
+    "text": "VAT 14% exclusive on net price; EGP (existing oracle test assumption, not asserted as law)"
+   },
+   {
+    "tag": "PROMPT",
+    "text": "No payment-processor fees, no discounts unless the scenario states otherwise"
+   }
+  ],
+  "journals": [
+   {
+    "name": "Online prepaid order",
+    "cf": "operating",
+    "lines": [
+     {
+      "account": "Revenue",
+      "debit": 0,
+      "credit": 200000
+     },
+     {
+      "account": "Output VAT",
+      "debit": 0,
+      "credit": 28000
+     },
+     {
+      "account": "Bank",
+      "debit": 228000,
+      "credit": 0
+     }
+    ]
+   }
+  ],
+  "ending_balances_piasters": {
+   "Bank": 228000,
+   "Output VAT": 28000,
+   "Revenue": 200000
+  },
+  "statements_piasters": {
+   "net_revenue": 200000,
+   "gross_revenue": 200000,
+   "contra_revenue": 0,
+   "cogs": 0,
+   "gross_profit": 200000,
+   "opex": 0,
+   "net_profit": 200000,
+   "assets": 228000,
+   "liabilities": 28000,
+   "equity_booked": 0,
+   "equity_incl_current_earnings": 200000,
+   "bs_residual": 0,
+   "tb_debits": 228000,
+   "tb_credits": 228000,
+   "cash_flow": {
+    "operating": 228000
+   },
+   "cash_net_change_in_cf": 228000,
+   "closing_cash_and_bank": 228000,
+   "vat_input": 0,
+   "vat_output": 28000,
+   "vat_net_payable": 28000
+  },
+  "self_consistency": "PASS"
+ },
+ "SCN-10": {
+  "title": "Online order cash-on-delivery with delivery fee",
+  "policy_ids": [
+   "N20",
+   "N21"
+  ],
+  "assumptions": [
+   {
+    "tag": "PROVISIONAL",
+    "text": "Delivery fee is separate revenue and VAT-able at 14%"
+   },
+   {
+    "tag": "PROVISIONAL",
+    "text": "COD cash held by driver in Courier Cash Receivable until settled; revenue at delivery"
+   },
+   {
+    "tag": "PROMPT",
+    "text": "VAT 14% exclusive on net price; EGP (existing oracle test assumption, not asserted as law)"
+   },
+   {
+    "tag": "PROVISIONAL",
+    "text": "ROUND-01: VAT rounded half-up to the piaster per document; chosen only for computation"
+   }
+  ],
+  "journals": [
+   {
+    "name": "COD delivered",
+    "cf": "noncash",
+    "lines": [
+     {
+      "account": "Revenue",
+      "debit": 0,
+      "credit": 300000
+     },
+     {
+      "account": "Output VAT",
+      "debit": 0,
+      "credit": 42000
+     },
+     {
+      "account": "Delivery Revenue",
+      "debit": 0,
+      "credit": 20000
+     },
+     {
+      "account": "Output VAT",
+      "debit": 0,
+      "credit": 2800
+     },
+     {
+      "account": "Courier Cash Receivable",
+      "debit": 364800,
+      "credit": 0
+     }
+    ]
+   },
+   {
+    "name": "Courier cash settlement",
+    "cf": "operating",
+    "lines": [
+     {
+      "account": "Cash",
+      "debit": 364800,
+      "credit": 0
+     },
+     {
+      "account": "Courier Cash Receivable",
+      "debit": 0,
+      "credit": 364800
+     }
+    ]
+   }
+  ],
+  "ending_balances_piasters": {
+   "Cash": 364800,
+   "Output VAT": 44800,
+   "Revenue": 300000,
+   "Delivery Revenue": 20000
+  },
+  "statements_piasters": {
+   "net_revenue": 320000,
+   "gross_revenue": 320000,
+   "contra_revenue": 0,
+   "cogs": 0,
+   "gross_profit": 320000,
+   "opex": 0,
+   "net_profit": 320000,
+   "assets": 364800,
+   "liabilities": 44800,
+   "equity_booked": 0,
+   "equity_incl_current_earnings": 320000,
+   "bs_residual": 0,
+   "tb_debits": 364800,
+   "tb_credits": 364800,
+   "cash_flow": {
+    "operating": 364800
+   },
+   "cash_net_change_in_cf": 364800,
+   "closing_cash_and_bank": 364800,
+   "vat_input": 0,
+   "vat_output": 44800,
+   "vat_net_payable": 44800
+  },
+  "self_consistency": "PASS"
+ },
+ "SCN-11": {
+  "title": "Customer invoice and partial receipt",
+  "policy_ids": [
+   "N22"
+  ],
+  "assumptions": [
+   {
+    "tag": "PROVISIONAL",
+    "text": "Revenue recognised at invoice date (accrual); receipts clear AR; 5,400 remains in AR"
+   },
+   {
+    "tag": "PROMPT",
+    "text": "VAT 14% exclusive on net price; EGP (existing oracle test assumption, not asserted as law)"
+   },
+   {
+    "tag": "PROMPT",
+    "text": "Accrual basis; purchase (input) VAT recoverable (existing oracle assumption)"
+   }
+  ],
+  "journals": [
+   {
+    "name": "Customer invoice",
+    "cf": "noncash",
+    "lines": [
+     {
+      "account": "Accounts Receivable",
+      "debit": 1140000,
+      "credit": 0
+     },
+     {
+      "account": "Revenue",
+      "debit": 0,
+      "credit": 1000000
+     },
+     {
+      "account": "Output VAT",
+      "debit": 0,
+      "credit": 140000
+     }
+    ]
+   },
+   {
+    "name": "Customer receipt (bank)",
+    "cf": "operating",
+    "lines": [
+     {
+      "account": "Bank",
+      "debit": 600000,
+      "credit": 0
+     },
+     {
+      "account": "Accounts Receivable",
+      "debit": 0,
+      "credit": 600000
+     }
+    ]
+   }
+  ],
+  "ending_balances_piasters": {
+   "Bank": 600000,
+   "Accounts Receivable": 540000,
+   "Output VAT": 140000,
+   "Revenue": 1000000
+  },
+  "statements_piasters": {
+   "net_revenue": 1000000,
+   "gross_revenue": 1000000,
+   "contra_revenue": 0,
+   "cogs": 0,
+   "gross_profit": 1000000,
+   "opex": 0,
+   "net_profit": 1000000,
+   "assets": 1140000,
+   "liabilities": 140000,
+   "equity_booked": 0,
+   "equity_incl_current_earnings": 1000000,
+   "bs_residual": 0,
+   "tb_debits": 1140000,
+   "tb_credits": 1140000,
+   "cash_flow": {
+    "operating": 600000
+   },
+   "cash_net_change_in_cf": 600000,
+   "closing_cash_and_bank": 600000,
+   "vat_input": 0,
+   "vat_output": 140000,
+   "vat_net_payable": 140000
+  },
+  "self_consistency": "PASS"
+ },
+ "SCN-12": {
+  "title": "Order-level discount",
+  "policy_ids": [
+   "N17",
+   "TAX-01"
+  ],
+  "assumptions": [
+   {
+    "tag": "PROVISIONAL",
+    "text": "Discount ordering: VAT computed AFTER discount; discount shown in contra-revenue Sales Discounts (gross revenue 1,000)"
+   },
+   {
+    "tag": "PROVISIONAL",
+    "text": "NOTE conflicting implementation: customer-invoice trigger taxes gross before discount (04 section 3)"
+   },
+   {
+    "tag": "PROMPT",
+    "text": "VAT 14% exclusive on net price; EGP (existing oracle test assumption, not asserted as law)"
+   },
+   {
+    "tag": "PROVISIONAL",
+    "text": "ROUND-01: VAT rounded half-up to the piaster per document; chosen only for computation"
+   }
+  ],
+  "journals": [
+   {
+    "name": "Discounted sale",
+    "cf": "operating",
+    "lines": [
+     {
+      "account": "Revenue",
+      "debit": 0,
+      "credit": 100000
+     },
+     {
+      "account": "Output VAT",
+      "debit": 0,
+      "credit": 12600
+     },
+     {
+      "account": "Sales Discounts",
+      "debit": 10000,
+      "credit": 0
+     },
+     {
+      "account": "Cash",
+      "debit": 102600,
+      "credit": 0
+     }
+    ]
+   }
+  ],
+  "ending_balances_piasters": {
+   "Cash": 102600,
+   "Output VAT": 12600,
+   "Revenue": 100000,
+   "Sales Discounts": 10000
+  },
+  "statements_piasters": {
+   "net_revenue": 90000,
+   "gross_revenue": 100000,
+   "contra_revenue": 10000,
+   "cogs": 0,
+   "gross_profit": 90000,
+   "opex": 0,
+   "net_profit": 90000,
+   "assets": 102600,
+   "liabilities": 12600,
+   "equity_booked": 0,
+   "equity_incl_current_earnings": 90000,
+   "bs_residual": 0,
+   "tb_debits": 112600,
+   "tb_credits": 112600,
+   "cash_flow": {
+    "operating": 102600
+   },
+   "cash_net_change_in_cf": 102600,
+   "closing_cash_and_bank": 102600,
+   "vat_input": 0,
+   "vat_output": 12600,
+   "vat_net_payable": 12600
+  },
+  "self_consistency": "PASS"
+ },
+ "SCN-13": {
+  "title": "Partial refund of a paid cash order",
+  "policy_ids": [
+   "N2",
+   "REFUND-01"
+  ],
+  "assumptions": [
+   {
+    "tag": "PROVISIONAL",
+    "text": "Refund is a linked reversal posted at refund date to Sales Returns (contra-revenue) and Output VAT"
+   },
+   {
+    "tag": "PROVISIONAL",
+    "text": "Returned goods are resalable and restocked at original cost (no write-off)"
+   },
+   {
+    "tag": "PROMPT",
+    "text": "VAT 14% exclusive on net price; EGP (existing oracle test assumption, not asserted as law)"
+   },
+   {
+    "tag": "PROVISIONAL",
+    "text": "ROUND-01: VAT rounded half-up to the piaster per document; chosen only for computation"
+   }
+  ],
+  "journals": [
+   {
+    "name": "Stock",
+    "cf": "noncash",
+    "lines": [
+     {
+      "account": "Inventory",
+      "debit": 40000,
+      "credit": 0
+     },
+     {
+      "account": "Owner Capital",
+      "debit": 0,
+      "credit": 40000
+     }
+    ]
+   },
+   {
+    "name": "Sale 2 items",
+    "cf": "operating",
+    "lines": [
+     {
+      "account": "Revenue",
+      "debit": 0,
+      "credit": 100000
+     },
+     {
+      "account": "Output VAT",
+      "debit": 0,
+      "credit": 14000
+     },
+     {
+      "account": "Cash",
+      "debit": 114000,
+      "credit": 0
+     }
+    ]
+   },
+   {
+    "name": "Sale 2 items COGS",
+    "cf": "noncash",
+    "lines": [
+     {
+      "account": "COGS",
+      "debit": 40000,
+      "credit": 0
+     },
+     {
+      "account": "Inventory",
+      "debit": 0,
+      "credit": 40000
+     }
+    ]
+   },
+   {
+    "name": "Refund 1 of 2 items",
+    "cf": "operating",
+    "lines": [
+     {
+      "account": "Sales Returns",
+      "debit": 50000,
+      "credit": 0
+     },
+     {
+      "account": "Output VAT",
+      "debit": 7000,
+      "credit": 0
+     },
+     {
+      "account": "Cash",
+      "debit": 0,
+      "credit": 57000
+     }
+    ]
+   },
+   {
+    "name": "Restock refunded item",
+    "cf": "noncash",
+    "lines": [
+     {
+      "account": "Inventory",
+      "debit": 20000,
+      "credit": 0
+     },
+     {
+      "account": "COGS",
+      "debit": 0,
+      "credit": 20000
+     }
+    ]
+   }
+  ],
+  "ending_balances_piasters": {
+   "Cash": 57000,
+   "Inventory": 20000,
+   "Output VAT": 7000,
+   "Owner Capital": 40000,
+   "Revenue": 100000,
+   "Sales Returns": 50000,
+   "COGS": 20000
+  },
+  "statements_piasters": {
+   "net_revenue": 50000,
+   "gross_revenue": 100000,
+   "contra_revenue": 50000,
+   "cogs": 20000,
+   "gross_profit": 30000,
+   "opex": 0,
+   "net_profit": 30000,
+   "assets": 77000,
+   "liabilities": 7000,
+   "equity_booked": 40000,
+   "equity_incl_current_earnings": 70000,
+   "bs_residual": 0,
+   "tb_debits": 147000,
+   "tb_credits": 147000,
+   "cash_flow": {
+    "operating": 57000
+   },
+   "cash_net_change_in_cf": 57000,
+   "closing_cash_and_bank": 57000,
+   "vat_input": 0,
+   "vat_output": 7000,
+   "vat_net_payable": 7000
+  },
+  "self_consistency": "PASS"
+ },
+ "SCN-14": {
+  "title": "Cancellation: unpaid order and paid-before-delivery order",
+  "policy_ids": [
+   "N3",
+   "REFUND-01"
+  ],
+  "assumptions": [
+   {
+    "tag": "PROVISIONAL",
+    "text": "Unpaid cancellation has NO journal (matches 11-posting-matrix current behaviour, but it is a policy default)"
+   },
+   {
+    "tag": "PROVISIONAL",
+    "text": "Paid-order cancellation = full refund with stock return"
+   },
+   {
+    "tag": "PROMPT",
+    "text": "VAT 14% exclusive on net price; EGP (existing oracle test assumption, not asserted as law)"
+   },
+   {
+    "tag": "PROVISIONAL",
+    "text": "ROUND-01: VAT rounded half-up to the piaster per document; chosen only for computation"
+   }
+  ],
+  "journals": [
+   {
+    "name": "Stock",
+    "cf": "noncash",
+    "lines": [
+     {
+      "account": "Inventory",
+      "debit": 40000,
+      "credit": 0
+     },
+     {
+      "account": "Owner Capital",
+      "debit": 0,
+      "credit": 40000
+     }
+    ]
+   },
+   {
+    "name": "Paid order",
+    "cf": "operating",
+    "lines": [
+     {
+      "account": "Revenue",
+      "debit": 0,
+      "credit": 100000
+     },
+     {
+      "account": "Output VAT",
+      "debit": 0,
+      "credit": 14000
+     },
+     {
+      "account": "Cash",
+      "debit": 114000,
+      "credit": 0
+     }
+    ]
+   },
+   {
+    "name": "Paid order COGS",
+    "cf": "noncash",
+    "lines": [
+     {
+      "account": "COGS",
+      "debit": 40000,
+      "credit": 0
+     },
+     {
+      "account": "Inventory",
+      "debit": 0,
+      "credit": 40000
+     }
+    ]
+   },
+   {
+    "name": "Cancel paid order - refund",
+    "cf": "operating",
+    "lines": [
+     {
+      "account": "Sales Returns",
+      "debit": 100000,
+      "credit": 0
+     },
+     {
+      "account": "Output VAT",
+      "debit": 14000,
+      "credit": 0
+     },
+     {
+      "account": "Cash",
+      "debit": 0,
+      "credit": 114000
+     }
+    ]
+   },
+   {
+    "name": "Cancel paid order - restock",
+    "cf": "noncash",
+    "lines": [
+     {
+      "account": "Inventory",
+      "debit": 40000,
+      "credit": 0
+     },
+     {
+      "account": "COGS",
+      "debit": 0,
+      "credit": 40000
+     }
+    ]
+   }
+  ],
+  "ending_balances_piasters": {
+   "Inventory": 40000,
+   "Owner Capital": 40000,
+   "Revenue": 100000,
+   "Sales Returns": 100000
+  },
+  "statements_piasters": {
+   "net_revenue": 0,
+   "gross_revenue": 100000,
+   "contra_revenue": 100000,
+   "cogs": 0,
+   "gross_profit": 0,
+   "opex": 0,
+   "net_profit": 0,
+   "assets": 40000,
+   "liabilities": 0,
+   "equity_booked": 40000,
+   "equity_incl_current_earnings": 40000,
+   "bs_residual": 0,
+   "tb_debits": 140000,
+   "tb_credits": 140000,
+   "cash_flow": {
+    "operating": 0
+   },
+   "cash_net_change_in_cf": 0,
+   "closing_cash_and_bank": 0,
+   "vat_input": 0,
+   "vat_output": 0,
+   "vat_net_payable": 0
+  },
+  "self_consistency": "PASS"
+ },
+ "SCN-15": {
+  "title": "Inventory consumption by sale (weighted average)",
+  "policy_ids": [
+   "INV-01",
+   "COGS"
+  ],
+  "assumptions": [
+   {
+    "tag": "PROVISIONAL",
+    "text": "INV-01: weighted-average cost, perpetual; COGS at sale = qty * (inventory value / qty on hand), half-up"
+   },
+   {
+    "tag": "PROVISIONAL",
+    "text": "Purchases: 10 units at EGP 100 then 10 at EGP 120, both cash, VAT 14% recoverable"
+   },
+   {
+    "tag": "PROMPT",
+    "text": "VAT 14% exclusive on net price; EGP (existing oracle test assumption, not asserted as law)"
+   },
+   {
+    "tag": "PROVISIONAL",
+    "text": "ROUND-01: VAT rounded half-up to the piaster per document; chosen only for computation"
+   }
+  ],
+  "journals": [
+   {
+    "name": "Capital contribution",
+    "cf": "financing",
+    "lines": [
+     {
+      "account": "Cash",
+      "debit": 1000000,
+      "credit": 0
+     },
+     {
+      "account": "Owner Capital",
+      "debit": 0,
+      "credit": 1000000
+     }
+    ]
+   },
+   {
+    "name": "Cash purchase",
+    "cf": "operating",
+    "lines": [
+     {
+      "account": "Inventory",
+      "debit": 100000,
+      "credit": 0
+     },
+     {
+      "account": "Input VAT",
+      "debit": 14000,
+      "credit": 0
+     },
+     {
+      "account": "Cash",
+      "debit": 0,
+      "credit": 114000
+     }
+    ]
+   },
+   {
+    "name": "Cash purchase",
+    "cf": "operating",
+    "lines": [
+     {
+      "account": "Inventory",
+      "debit": 120000,
+      "credit": 0
+     },
+     {
+      "account": "Input VAT",
+      "debit": 16800,
+      "credit": 0
+     },
+     {
+      "account": "Cash",
+      "debit": 0,
+      "credit": 136800
+     }
+    ]
+   },
+   {
+    "name": "Sale of 5 units @200",
+    "cf": "operating",
+    "lines": [
+     {
+      "account": "Revenue",
+      "debit": 0,
+      "credit": 100000
+     },
+     {
+      "account": "Output VAT",
+      "debit": 0,
+      "credit": 14000
+     },
+     {
+      "account": "Cash",
+      "debit": 114000,
+      "credit": 0
+     }
+    ]
+   },
+   {
+    "name": "Sale of 5 units @200 COGS",
+    "cf": "noncash",
+    "lines": [
+     {
+      "account": "COGS",
+      "debit": 55000,
+      "credit": 0
+     },
+     {
+      "account": "Inventory",
+      "debit": 0,
+      "credit": 55000
+     }
+    ]
+   }
+  ],
+  "ending_balances_piasters": {
+   "Cash": 863200,
+   "Inventory": 165000,
+   "Input VAT": 30800,
+   "Output VAT": 14000,
+   "Owner Capital": 1000000,
+   "Revenue": 100000,
+   "COGS": 55000
+  },
+  "statements_piasters": {
+   "net_revenue": 100000,
+   "gross_revenue": 100000,
+   "contra_revenue": 0,
+   "cogs": 55000,
+   "gross_profit": 45000,
+   "opex": 0,
+   "net_profit": 45000,
+   "assets": 1059000,
+   "liabilities": 14000,
+   "equity_booked": 1000000,
+   "equity_incl_current_earnings": 1045000,
+   "bs_residual": 0,
+   "tb_debits": 1114000,
+   "tb_credits": 1114000,
+   "cash_flow": {
+    "financing": 1000000,
+    "operating": -136800
+   },
+   "cash_net_change_in_cf": 863200,
+   "closing_cash_and_bank": 863200,
+   "vat_input": 30800,
+   "vat_output": 14000,
+   "vat_net_payable": -16800
+  },
+  "self_consistency": "PASS"
+ },
+ "SCN-16": {
+  "title": "Inventory adjustment (count shortage)",
+  "policy_ids": [
+   "N13",
+   "N14",
+   "INV-01"
+  ],
+  "assumptions": [
+   {
+    "tag": "PROVISIONAL",
+    "text": "Physical count short by 2 units valued at weighted-average 110 each -> Inventory Shrinkage expense"
+   },
+   {
+    "tag": "PROVISIONAL",
+    "text": "No VAT adjustment on shrinkage (accountant question)"
+   },
+   {
+    "tag": "PROMPT",
+    "text": "Accrual basis; purchase (input) VAT recoverable (existing oracle assumption)"
+   }
+  ],
+  "journals": [
+   {
+    "name": "Stock 15 units @110",
+    "cf": "noncash",
+    "lines": [
+     {
+      "account": "Inventory",
+      "debit": 165000,
+      "credit": 0
+     },
+     {
+      "account": "Owner Capital",
+      "debit": 0,
+      "credit": 165000
+     }
+    ]
+   },
+   {
+    "name": "Count shortage 2 units",
+    "cf": "noncash",
+    "lines": [
+     {
+      "account": "Inventory Shrinkage",
+      "debit": 22000,
+      "credit": 0
+     },
+     {
+      "account": "Inventory",
+      "debit": 0,
+      "credit": 22000
+     }
+    ]
+   }
+  ],
+  "ending_balances_piasters": {
+   "Inventory": 143000,
+   "Owner Capital": 165000,
+   "Inventory Shrinkage": 22000
+  },
+  "statements_piasters": {
+   "net_revenue": 0,
+   "gross_revenue": 0,
+   "contra_revenue": 0,
+   "cogs": 0,
+   "gross_profit": 0,
+   "opex": 22000,
+   "net_profit": -22000,
+   "assets": 143000,
+   "liabilities": 0,
+   "equity_booked": 165000,
+   "equity_incl_current_earnings": 143000,
+   "bs_residual": 0,
+   "tb_debits": 165000,
+   "tb_credits": 165000,
+   "cash_flow": {},
+   "cash_net_change_in_cf": 0,
+   "closing_cash_and_bank": 0,
+   "vat_input": 0,
+   "vat_output": 0,
+   "vat_net_payable": 0
+  },
+  "self_consistency": "PASS"
+ },
+ "SCN-17": {
+  "title": "Waste / spoilage",
+  "policy_ids": [
+   "N13",
+   "INV-01"
+  ],
+  "assumptions": [
+   {
+    "tag": "PROVISIONAL",
+    "text": "3 spoiled units at weighted-average 110 expensed to Waste Expense (separate from shrinkage)"
+   },
+   {
+    "tag": "PROVISIONAL",
+    "text": "Input VAT previously claimed is NOT reversed (accountant question)"
+   },
+   {
+    "tag": "PROMPT",
+    "text": "Accrual basis; purchase (input) VAT recoverable (existing oracle assumption)"
+   }
+  ],
+  "journals": [
+   {
+    "name": "Stock 15 units @110",
+    "cf": "noncash",
+    "lines": [
+     {
+      "account": "Inventory",
+      "debit": 165000,
+      "credit": 0
+     },
+     {
+      "account": "Owner Capital",
+      "debit": 0,
+      "credit": 165000
+     }
+    ]
+   },
+   {
+    "name": "Waste 3 units",
+    "cf": "noncash",
+    "lines": [
+     {
+      "account": "Waste Expense",
+      "debit": 33000,
+      "credit": 0
+     },
+     {
+      "account": "Inventory",
+      "debit": 0,
+      "credit": 33000
+     }
+    ]
+   }
+  ],
+  "ending_balances_piasters": {
+   "Inventory": 132000,
+   "Owner Capital": 165000,
+   "Waste Expense": 33000
+  },
+  "statements_piasters": {
+   "net_revenue": 0,
+   "gross_revenue": 0,
+   "contra_revenue": 0,
+   "cogs": 0,
+   "gross_profit": 0,
+   "opex": 33000,
+   "net_profit": -33000,
+   "assets": 132000,
+   "liabilities": 0,
+   "equity_booked": 165000,
+   "equity_incl_current_earnings": 132000,
+   "bs_residual": 0,
+   "tb_debits": 165000,
+   "tb_credits": 165000,
+   "cash_flow": {},
+   "cash_net_change_in_cf": 0,
+   "closing_cash_and_bank": 0,
+   "vat_input": 0,
+   "vat_output": 0,
+   "vat_net_payable": 0
+  },
+  "self_consistency": "PASS"
+ },
+ "SCN-18": {
+  "title": "Payroll accrual, settlement and withholding remittance",
+  "policy_ids": [
+   "PAY-01",
+   "N11",
+   "N12"
+  ],
+  "assumptions": [
+   {
+    "tag": "PROVISIONAL",
+    "text": "PAY-01: gross pay accrued to Payroll Expense when earned; employee deduction 800 (ILLUSTRATIVE, not a statutory rate) to Withholding Payable"
+   },
+   {
+    "tag": "PROVISIONAL",
+    "text": "Net pay 9,200 settled by Bank; deduction remitted later; employer contributions and tips excluded"
+   },
+   {
+    "tag": "PROMPT",
+    "text": "Accrual basis; purchase (input) VAT recoverable (existing oracle assumption)"
+   }
+  ],
+  "journals": [
+   {
+    "name": "Capital contribution",
+    "cf": "financing",
+    "lines": [
+     {
+      "account": "Bank",
+      "debit": 5000000,
+      "credit": 0
+     },
+     {
+      "account": "Owner Capital",
+      "debit": 0,
+      "credit": 5000000
+     }
+    ]
+   },
+   {
+    "name": "Payroll accrual",
+    "cf": "noncash",
+    "lines": [
+     {
+      "account": "Payroll Expense",
+      "debit": 1000000,
+      "credit": 0
+     },
+     {
+      "account": "Payroll Payable",
+      "debit": 0,
+      "credit": 920000
+     },
+     {
+      "account": "Withholding Payable",
+      "debit": 0,
+      "credit": 80000
+     }
+    ]
+   },
+   {
+    "name": "Net pay settlement",
+    "cf": "operating",
+    "lines": [
+     {
+      "account": "Payroll Payable",
+      "debit": 920000,
+      "credit": 0
+     },
+     {
+      "account": "Bank",
+      "debit": 0,
+      "credit": 920000
+     }
+    ]
+   },
+   {
+    "name": "Withholding remittance",
+    "cf": "operating",
+    "lines": [
+     {
+      "account": "Withholding Payable",
+      "debit": 80000,
+      "credit": 0
+     },
+     {
+      "account": "Bank",
+      "debit": 0,
+      "credit": 80000
+     }
+    ]
+   }
+  ],
+  "ending_balances_piasters": {
+   "Bank": 4000000,
+   "Owner Capital": 5000000,
+   "Payroll Expense": 1000000
+  },
+  "statements_piasters": {
+   "net_revenue": 0,
+   "gross_revenue": 0,
+   "contra_revenue": 0,
+   "cogs": 0,
+   "gross_profit": 0,
+   "opex": 1000000,
+   "net_profit": -1000000,
+   "assets": 4000000,
+   "liabilities": 0,
+   "equity_booked": 5000000,
+   "equity_incl_current_earnings": 4000000,
+   "bs_residual": 0,
+   "tb_debits": 5000000,
+   "tb_credits": 5000000,
+   "cash_flow": {
+    "financing": 5000000,
+    "operating": -1000000
+   },
+   "cash_net_change_in_cf": 4000000,
+   "closing_cash_and_bank": 4000000,
+   "vat_input": 0,
+   "vat_output": 0,
+   "vat_net_payable": 0
+  },
+  "self_consistency": "PASS"
+ },
+ "SCN-19": {
+  "title": "Operating expense (utilities) paid in cash",
+  "policy_ids": [
+   "N8",
+   "TAX-01"
+  ],
+  "assumptions": [
+   {
+    "tag": "PROVISIONAL",
+    "text": "Expense 1,000 + recoverable input VAT 140 (14%) paid in cash; expense recognised when incurred"
+   },
+   {
+    "tag": "PROMPT",
+    "text": "VAT 14% exclusive on net price; EGP (existing oracle test assumption, not asserted as law)"
+   },
+   {
+    "tag": "PROVISIONAL",
+    "text": "ROUND-01: VAT rounded half-up to the piaster per document; chosen only for computation"
+   }
+  ],
+  "journals": [
+   {
+    "name": "Capital contribution",
+    "cf": "financing",
+    "lines": [
+     {
+      "account": "Cash",
+      "debit": 500000,
+      "credit": 0
+     },
+     {
+      "account": "Owner Capital",
+      "debit": 0,
+      "credit": 500000
+     }
+    ]
+   },
+   {
+    "name": "Utilities expense",
+    "cf": "operating",
+    "lines": [
+     {
+      "account": "Utilities Expense",
+      "debit": 100000,
+      "credit": 0
+     },
+     {
+      "account": "Input VAT",
+      "debit": 14000,
+      "credit": 0
+     },
+     {
+      "account": "Cash",
+      "debit": 0,
+      "credit": 114000
+     }
+    ]
+   }
+  ],
+  "ending_balances_piasters": {
+   "Cash": 386000,
+   "Input VAT": 14000,
+   "Owner Capital": 500000,
+   "Utilities Expense": 100000
+  },
+  "statements_piasters": {
+   "net_revenue": 0,
+   "gross_revenue": 0,
+   "contra_revenue": 0,
+   "cogs": 0,
+   "gross_profit": 0,
+   "opex": 100000,
+   "net_profit": -100000,
+   "assets": 400000,
+   "liabilities": 0,
+   "equity_booked": 500000,
+   "equity_incl_current_earnings": 400000,
+   "bs_residual": 0,
+   "tb_debits": 500000,
+   "tb_credits": 500000,
+   "cash_flow": {
+    "financing": 500000,
+    "operating": -114000
+   },
+   "cash_net_change_in_cf": 386000,
+   "closing_cash_and_bank": 386000,
+   "vat_input": 14000,
+   "vat_output": 0,
+   "vat_net_payable": -14000
+  },
+  "self_consistency": "PASS"
+ },
+ "SCN-20": {
+  "title": "Bank transfer (cash to bank)",
+  "policy_ids": [
+   "N9",
+   "CF-01"
+  ],
+  "assumptions": [
+   {
+    "tag": "PROVISIONAL",
+    "text": "CF-01: Cash and Bank are both cash equivalents; internal transfer has zero cash-flow effect and no P&L effect; no fee"
+   },
+   {
+    "tag": "PROMPT",
+    "text": "Accrual basis; purchase (input) VAT recoverable (existing oracle assumption)"
+   }
+  ],
+  "journals": [
+   {
+    "name": "Capital contribution",
+    "cf": "financing",
+    "lines": [
+     {
+      "account": "Cash",
+      "debit": 2000000,
+      "credit": 0
+     },
+     {
+      "account": "Owner Capital",
+      "debit": 0,
+      "credit": 2000000
+     }
+    ]
+   },
+   {
+    "name": "Deposit cash to bank",
+    "cf": "noncash",
+    "lines": [
+     {
+      "account": "Bank",
+      "debit": 500000,
+      "credit": 0
+     },
+     {
+      "account": "Cash",
+      "debit": 0,
+      "credit": 500000
+     }
+    ]
+   }
+  ],
+  "ending_balances_piasters": {
+   "Cash": 1500000,
+   "Bank": 500000,
+   "Owner Capital": 2000000
+  },
+  "statements_piasters": {
+   "net_revenue": 0,
+   "gross_revenue": 0,
+   "contra_revenue": 0,
+   "cogs": 0,
+   "gross_profit": 0,
+   "opex": 0,
+   "net_profit": 0,
+   "assets": 2000000,
+   "liabilities": 0,
+   "equity_booked": 2000000,
+   "equity_incl_current_earnings": 2000000,
+   "bs_residual": 0,
+   "tb_debits": 2000000,
+   "tb_credits": 2000000,
+   "cash_flow": {
+    "financing": 2000000
+   },
+   "cash_net_change_in_cf": 2000000,
+   "closing_cash_and_bank": 2000000,
+   "vat_input": 0,
+   "vat_output": 0,
+   "vat_net_payable": 0
+  },
+  "self_consistency": "PASS"
+ },
+ "SCN-21": {
+  "title": "Owner withdrawal",
+  "policy_ids": [
+   "N4",
+   "CLOSE-01"
+  ],
+  "assumptions": [
+   {
+    "tag": "PROVISIONAL",
+    "text": "Withdrawal debits Owner Drawings (contra-equity), financing outflow; not an expense; closed to Retained Earnings at close"
+   },
+   {
+    "tag": "PROMPT",
+    "text": "Accrual basis; purchase (input) VAT recoverable (existing oracle assumption)"
+   }
+  ],
+  "journals": [
+   {
+    "name": "Capital contribution",
+    "cf": "financing",
+    "lines": [
+     {
+      "account": "Bank",
+      "debit": 10000000,
+      "credit": 0
+     },
+     {
+      "account": "Owner Capital",
+      "debit": 0,
+      "credit": 10000000
+     }
+    ]
+   },
+   {
+    "name": "Owner withdrawal",
+    "cf": "financing",
+    "lines": [
+     {
+      "account": "Owner Drawings",
+      "debit": 1000000,
+      "credit": 0
+     },
+     {
+      "account": "Bank",
+      "debit": 0,
+      "credit": 1000000
+     }
+    ]
+   }
+  ],
+  "ending_balances_piasters": {
+   "Bank": 9000000,
+   "Owner Capital": 10000000,
+   "Owner Drawings": 1000000
+  },
+  "statements_piasters": {
+   "net_revenue": 0,
+   "gross_revenue": 0,
+   "contra_revenue": 0,
+   "cogs": 0,
+   "gross_profit": 0,
+   "opex": 0,
+   "net_profit": 0,
+   "assets": 9000000,
+   "liabilities": 0,
+   "equity_booked": 9000000,
+   "equity_incl_current_earnings": 9000000,
+   "bs_residual": 0,
+   "tb_debits": 10000000,
+   "tb_credits": 10000000,
+   "cash_flow": {
+    "financing": 9000000
+   },
+   "cash_net_change_in_cf": 9000000,
+   "closing_cash_and_bank": 9000000,
+   "vat_input": 0,
+   "vat_output": 0,
+   "vat_net_payable": 0
+  },
+  "self_consistency": "PASS"
+ },
+ "SCN-22": {
+  "title": "Service charge and card tip",
+  "policy_ids": [
+   "N18",
+   "TAX-01"
+  ],
+  "assumptions": [
+   {
+    "tag": "PROVISIONAL",
+    "text": "Service charge 100 is revenue and VAT-able at 14%; tip 50 is a liability (pass-through), no VAT, paid out in cash"
+   },
+   {
+    "tag": "PROMPT",
+    "text": "VAT 14% exclusive on net price; EGP (existing oracle test assumption, not asserted as law)"
+   },
+   {
+    "tag": "PROVISIONAL",
+    "text": "ROUND-01: VAT rounded half-up to the piaster per document; chosen only for computation"
+   }
+  ],
+  "journals": [
+   {
+    "name": "Capital contribution",
+    "cf": "financing",
+    "lines": [
+     {
+      "account": "Cash",
+      "debit": 100000,
+      "credit": 0
+     },
+     {
+      "account": "Owner Capital",
+      "debit": 0,
+      "credit": 100000
+     }
+    ]
+   },
+   {
+    "name": "Card sale with service charge and tip",
+    "cf": "operating",
+    "lines": [
+     {
+      "account": "Revenue",
+      "debit": 0,
+      "credit": 100000
+     },
+     {
+      "account": "Output VAT",
+      "debit": 0,
+      "credit": 14000
+     },
+     {
+      "account": "Service Charge Revenue",
+      "debit": 0,
+      "credit": 10000
+     },
+     {
+      "account": "Output VAT",
+      "debit": 0,
+      "credit": 1400
+     },
+     {
+      "account": "Tips Payable",
+      "debit": 0,
+      "credit": 5000
+     },
+     {
+      "account": "Bank",
+      "debit": 130400,
+      "credit": 0
+     }
+    ]
+   },
+   {
+    "name": "Tip payout to staff",
+    "cf": "operating",
+    "lines": [
+     {
+      "account": "Tips Payable",
+      "debit": 5000,
+      "credit": 0
+     },
+     {
+      "account": "Cash",
+      "debit": 0,
+      "credit": 5000
+     }
+    ]
+   }
+  ],
+  "ending_balances_piasters": {
+   "Cash": 95000,
+   "Bank": 130400,
+   "Output VAT": 15400,
+   "Owner Capital": 100000,
+   "Revenue": 100000,
+   "Service Charge Revenue": 10000
+  },
+  "statements_piasters": {
+   "net_revenue": 110000,
+   "gross_revenue": 110000,
+   "contra_revenue": 0,
+   "cogs": 0,
+   "gross_profit": 110000,
+   "opex": 0,
+   "net_profit": 110000,
+   "assets": 225400,
+   "liabilities": 15400,
+   "equity_booked": 100000,
+   "equity_incl_current_earnings": 210000,
+   "bs_residual": 0,
+   "tb_debits": 225400,
+   "tb_credits": 225400,
+   "cash_flow": {
+    "financing": 100000,
+    "operating": 125400
+   },
+   "cash_net_change_in_cf": 225400,
+   "closing_cash_and_bank": 225400,
+   "vat_input": 0,
+   "vat_output": 15400,
+   "vat_net_payable": 15400
+  },
+  "self_consistency": "PASS"
+ },
+ "SCN-23": {
+  "title": "Financial close (period closing to retained earnings)",
+  "policy_ids": [
+   "CLOSE-01",
+   "EARN-01"
+  ],
+  "assumptions": [
+   {
+    "tag": "PROVISIONAL",
+    "text": "CLOSE-01: P&L closed via Income Summary to Retained Earnings; hard-close; no VAT settlement journal"
+   },
+   {
+    "tag": "PROVISIONAL",
+    "text": "Uses the same transactions as the existing deterministic control (T1..T8); close result must equal its -2,000 loss"
+   },
+   {
+    "tag": "PROMPT",
+    "text": "VAT 14% exclusive on net price; EGP (existing oracle test assumption, not asserted as law)"
+   },
+   {
+    "tag": "PROMPT",
+    "text": "Accrual basis; purchase (input) VAT recoverable (existing oracle assumption)"
+   }
+  ],
+  "journals": [
+   {
+    "name": "Capital contribution",
+    "cf": "financing",
+    "lines": [
+     {
+      "account": "Cash",
+      "debit": 10000000,
+      "credit": 0
+     },
+     {
+      "account": "Owner Capital",
+      "debit": 0,
+      "credit": 10000000
+     }
+    ]
+   },
+   {
+    "name": "Credit purchase",
+    "cf": "noncash",
+    "lines": [
+     {
+      "account": "Inventory",
+      "debit": 2000000,
+      "credit": 0
+     },
+     {
+      "account": "Input VAT",
+      "debit": 280000,
+      "credit": 0
+     },
+     {
+      "account": "Accounts Payable",
+      "debit": 0,
+      "credit": 2280000
+     }
+    ]
+   },
+   {
+    "name": "Supplier payment",
+    "cf": "operating",
+    "lines": [
+     {
+      "account": "Accounts Payable",
+      "debit": 1000000,
+      "credit": 0
+     },
+     {
+      "account": "Cash",
+      "debit": 0,
+      "credit": 1000000
+     }
+    ]
+   },
+   {
+    "name": "Cash sale",
+    "cf": "operating",
+    "lines": [
+     {
+      "account": "Revenue",
+      "debit": 0,
+      "credit": 1000000
+     },
+     {
+      "account": "Output VAT",
+      "debit": 0,
+      "credit": 140000
+     },
+     {
+      "account": "Cash",
+      "debit": 1140000,
+      "credit": 0
+     }
+    ]
+   },
+   {
+    "name": "Cash sale COGS",
+    "cf": "noncash",
+    "lines": [
+     {
+      "account": "COGS",
+      "debit": 400000,
+      "credit": 0
+     },
+     {
+      "account": "Inventory",
+      "debit": 0,
+      "credit": 400000
+     }
+    ]
+   },
+   {
+    "name": "Rent",
+    "cf": "operating",
+    "lines": [
+     {
+      "account": "Rent Expense",
+      "debit": 300000,
+      "credit": 0
+     },
+     {
+      "account": "Cash",
+      "debit": 0,
+      "credit": 300000
+     }
+    ]
+   },
+   {
+    "name": "Payroll accrual",
+    "cf": "noncash",
+    "lines": [
+     {
+      "account": "Payroll Expense",
+      "debit": 500000,
+      "credit": 0
+     },
+     {
+      "account": "Payroll Payable",
+      "debit": 0,
+      "credit": 500000
+     }
+    ]
+   },
+   {
+    "name": "Payroll payment",
+    "cf": "operating",
+    "lines": [
+     {
+      "account": "Payroll Payable",
+      "debit": 300000,
+      "credit": 0
+     },
+     {
+      "account": "Cash",
+      "debit": 0,
+      "credit": 300000
+     }
+    ]
+   },
+   {
+    "name": "Close P&L to Income Summary",
+    "cf": "noncash",
+    "lines": [
+     {
+      "account": "Revenue",
+      "debit": 1000000,
+      "credit": 0
+     },
+     {
+      "account": "COGS",
+      "debit": 0,
+      "credit": 400000
+     },
+     {
+      "account": "Rent Expense",
+      "debit": 0,
+      "credit": 300000
+     },
+     {
+      "account": "Payroll Expense",
+      "debit": 0,
+      "credit": 500000
+     },
+     {
+      "account": "Income Summary",
+      "debit": 200000,
+      "credit": 0
+     }
+    ]
+   },
+   {
+    "name": "Close Income Summary to Retained Earnings",
+    "cf": "noncash",
+    "lines": [
+     {
+      "account": "Income Summary",
+      "debit": 0,
+      "credit": 200000
+     },
+     {
+      "account": "Retained Earnings",
+      "debit": 200000,
+      "credit": 0
+     }
+    ]
+   }
+  ],
+  "ending_balances_piasters": {
+   "Cash": 9540000,
+   "Inventory": 1600000,
+   "Input VAT": 280000,
+   "Accounts Payable": 1280000,
+   "Output VAT": 140000,
+   "Payroll Payable": 200000,
+   "Owner Capital": 10000000,
+   "Retained Earnings": -200000
+  },
+  "statements_piasters": {
+   "net_revenue": 0,
+   "gross_revenue": 0,
+   "contra_revenue": 0,
+   "cogs": 0,
+   "gross_profit": 0,
+   "opex": 0,
+   "net_profit": 0,
+   "assets": 11420000,
+   "liabilities": 1620000,
+   "equity_booked": 9800000,
+   "equity_incl_current_earnings": 9800000,
+   "bs_residual": 0,
+   "tb_debits": 11620000,
+   "tb_credits": 11620000,
+   "cash_flow": {
+    "financing": 10000000,
+    "operating": -460000
+   },
+   "cash_net_change_in_cf": 9540000,
+   "closing_cash_and_bank": 9540000,
+   "vat_input": 280000,
+   "vat_output": 140000,
+   "vat_net_payable": -140000
+  },
+  "self_consistency": "PASS"
+ },
+ "SCN-24": {
+  "title": "Full operating month",
+  "policy_ids": [
+   "OPEN-01",
+   "CLOSE-01",
+   "INV-01",
+   "PAY-01"
+  ],
+  "assumptions": [
+   {
+    "tag": "PROVISIONAL",
+    "text": "Composite of SCN-01..22 policies on one ledger; every PROVISIONAL tag of those scenarios applies"
+   },
+   {
+    "tag": "PROVISIONAL",
+    "text": "Bank funded by capital 30,000; month ends with hard close to Retained Earnings"
+   },
+   {
+    "tag": "PROMPT",
+    "text": "VAT 14% exclusive on net price; EGP (existing oracle test assumption, not asserted as law)"
+   },
+   {
+    "tag": "PROMPT",
+    "text": "Accrual basis; purchase (input) VAT recoverable (existing oracle assumption)"
+   },
+   {
+    "tag": "PROVISIONAL",
+    "text": "ROUND-01: VAT rounded half-up to the piaster per document; chosen only for computation"
+   }
+  ],
+  "journals": [
+   {
+    "name": "Opening balances",
+    "cf": "opening",
+    "lines": [
+     {
+      "account": "Cash",
+      "debit": 5000000,
+      "credit": 0
+     },
+     {
+      "account": "Inventory",
+      "debit": 1000000,
+      "credit": 0
+     },
+     {
+      "account": "Accounts Payable",
+      "debit": 0,
+      "credit": 800000
+     },
+     {
+      "account": "Opening Balance Equity",
+      "debit": 0,
+      "credit": 5200000
+     }
+    ]
+   },
+   {
+    "name": "Capital contribution",
+    "cf": "financing",
+    "lines": [
+     {
+      "account": "Bank",
+      "debit": 3000000,
+      "credit": 0
+     },
+     {
+      "account": "Owner Capital",
+      "debit": 0,
+      "credit": 3000000
+     }
+    ]
+   },
+   {
+    "name": "Credit purchase",
+    "cf": "noncash",
+    "lines": [
+     {
+      "account": "Inventory",
+      "debit": 2000000,
+      "credit": 0
+     },
+     {
+      "account": "Input VAT",
+      "debit": 280000,
+      "credit": 0
+     },
+     {
+      "account": "Accounts Payable",
+      "debit": 0,
+      "credit": 2280000
+     }
+    ]
+   },
+   {
+    "name": "Cash purchase",
+    "cf": "operating",
+    "lines": [
+     {
+      "account": "Inventory",
+      "debit": 200000,
+      "credit": 0
+     },
+     {
+      "account": "Input VAT",
+      "debit": 28000,
+      "credit": 0
+     },
+     {
+      "account": "Cash",
+      "debit": 0,
+      "credit": 228000
+     }
+    ]
+   },
+   {
+    "name": "Purchase return to supplier",
+    "cf": "noncash",
+    "lines": [
+     {
+      "account": "Accounts Payable",
+      "debit": 114000,
+      "credit": 0
+     },
+     {
+      "account": "Inventory",
+      "debit": 0,
+      "credit": 100000
+     },
+     {
+      "account": "Input VAT",
+      "debit": 0,
+      "credit": 14000
+     }
+    ]
+   },
+   {
+    "name": "Supplier payment",
+    "cf": "operating",
+    "lines": [
+     {
+      "account": "Accounts Payable",
+      "debit": 1500000,
+      "credit": 0
+     },
+     {
+      "account": "Bank",
+      "debit": 0,
+      "credit": 1500000
+     }
+    ]
+   },
+   {
+    "name": "Cash sales day 1",
+    "cf": "operating",
+    "lines": [
+     {
+      "account": "Revenue",
+      "debit": 0,
+      "credit": 400000
+     },
+     {
+      "account": "Output VAT",
+      "debit": 0,
+      "credit": 56000
+     },
+     {
+      "account": "Cash",
+      "debit": 456000,
+      "credit": 0
+     }
+    ]
+   },
+   {
+    "name": "Cash sales day 1 COGS",
+    "cf": "noncash",
+    "lines": [
+     {
+      "account": "COGS",
+      "debit": 160000,
+      "credit": 0
+     },
+     {
+      "account": "Inventory",
+      "debit": 0,
+      "credit": 160000
+     }
+    ]
+   },
+   {
+    "name": "Card sales",
+    "cf": "operating",
+    "lines": [
+     {
+      "account": "Revenue",
+      "debit": 0,
+      "credit": 300000
+     },
+     {
+      "account": "Output VAT",
+      "debit": 0,
+      "credit": 42000
+     },
+     {
+      "account": "Bank",
+      "debit": 342000,
+      "credit": 0
+     }
+    ]
+   },
+   {
+    "name": "Card sales COGS",
+    "cf": "noncash",
+    "lines": [
+     {
+      "account": "COGS",
+      "debit": 120000,
+      "credit": 0
+     },
+     {
+      "account": "Inventory",
+      "debit": 0,
+      "credit": 120000
+     }
+    ]
+   },
+   {
+    "name": "Split sale",
+    "cf": "operating",
+    "lines": [
+     {
+      "account": "Revenue",
+      "debit": 0,
+      "credit": 200000
+     },
+     {
+      "account": "Output VAT",
+      "debit": 0,
+      "credit": 28000
+     },
+     {
+      "account": "Cash",
+      "debit": 100000,
+      "credit": 0
+     },
+     {
+      "account": "Bank",
+      "debit": 128000,
+      "credit": 0
+     }
+    ]
+   },
+   {
+    "name": "Split sale COGS",
+    "cf": "noncash",
+    "lines": [
+     {
+      "account": "COGS",
+      "debit": 80000,
+      "credit": 0
+     },
+     {
+      "account": "Inventory",
+      "debit": 0,
+      "credit": 80000
+     }
+    ]
+   },
+   {
+    "name": "Discounted sale",
+    "cf": "operating",
+    "lines": [
+     {
+      "account": "Revenue",
+      "debit": 0,
+      "credit": 100000
+     },
+     {
+      "account": "Output VAT",
+      "debit": 0,
+      "credit": 12600
+     },
+     {
+      "account": "Sales Discounts",
+      "debit": 10000,
+      "credit": 0
+     },
+     {
+      "account": "Cash",
+      "debit": 102600,
+      "credit": 0
+     }
+    ]
+   },
+   {
+    "name": "Discounted sale COGS",
+    "cf": "noncash",
+    "lines": [
+     {
+      "account": "COGS",
+      "debit": 40000,
+      "credit": 0
+     },
+     {
+      "account": "Inventory",
+      "debit": 0,
+      "credit": 40000
+     }
+    ]
+   },
+   {
+    "name": "COD order",
+    "cf": "noncash",
+    "lines": [
+     {
+      "account": "Revenue",
+      "debit": 0,
+      "credit": 300000
+     },
+     {
+      "account": "Output VAT",
+      "debit": 0,
+      "credit": 42000
+     },
+     {
+      "account": "Delivery Revenue",
+      "debit": 0,
+      "credit": 20000
+     },
+     {
+      "account": "Output VAT",
+      "debit": 0,
+      "credit": 2800
+     },
+     {
+      "account": "Courier Cash Receivable",
+      "debit": 364800,
+      "credit": 0
+     }
+    ]
+   },
+   {
+    "name": "COD order COGS",
+    "cf": "noncash",
+    "lines": [
+     {
+      "account": "COGS",
+      "debit": 120000,
+      "credit": 0
+     },
+     {
+      "account": "Inventory",
+      "debit": 0,
+      "credit": 120000
+     }
+    ]
+   },
+   {
+    "name": "Courier settlement",
+    "cf": "operating",
+    "lines": [
+     {
+      "account": "Cash",
+      "debit": 364800,
+      "credit": 0
+     },
+     {
+      "account": "Courier Cash Receivable",
+      "debit": 0,
+      "credit": 364800
+     }
+    ]
+   },
+   {
+    "name": "Customer invoice",
+    "cf": "noncash",
+    "lines": [
+     {
+      "account": "Accounts Receivable",
+      "debit": 1140000,
+      "credit": 0
+     },
+     {
+      "account": "Revenue",
+      "debit": 0,
+      "credit": 1000000
+     },
+     {
+      "account": "Output VAT",
+      "debit": 0,
+      "credit": 140000
+     }
+    ]
+   },
+   {
+    "name": "Customer receipt",
+    "cf": "operating",
+    "lines": [
+     {
+      "account": "Bank",
+      "debit": 600000,
+      "credit": 0
+     },
+     {
+      "account": "Accounts Receivable",
+      "debit": 0,
+      "credit": 600000
+     }
+    ]
+   },
+   {
+    "name": "Refund 1 item",
+    "cf": "operating",
+    "lines": [
+     {
+      "account": "Sales Returns",
+      "debit": 50000,
+      "credit": 0
+     },
+     {
+      "account": "Output VAT",
+      "debit": 7000,
+      "credit": 0
+     },
+     {
+      "account": "Cash",
+      "debit": 0,
+      "credit": 57000
+     }
+    ]
+   },
+   {
+    "name": "Restock",
+    "cf": "noncash",
+    "lines": [
+     {
+      "account": "Inventory",
+      "debit": 20000,
+      "credit": 0
+     },
+     {
+      "account": "COGS",
+      "debit": 0,
+      "credit": 20000
+     }
+    ]
+   },
+   {
+    "name": "Count shortage",
+    "cf": "noncash",
+    "lines": [
+     {
+      "account": "Inventory Shrinkage",
+      "debit": 22000,
+      "credit": 0
+     },
+     {
+      "account": "Inventory",
+      "debit": 0,
+      "credit": 22000
+     }
+    ]
+   },
+   {
+    "name": "Waste",
+    "cf": "noncash",
+    "lines": [
+     {
+      "account": "Waste Expense",
+      "debit": 33000,
+      "credit": 0
+     },
+     {
+      "account": "Inventory",
+      "debit": 0,
+      "credit": 33000
+     }
+    ]
+   },
+   {
+    "name": "Rent",
+    "cf": "operating",
+    "lines": [
+     {
+      "account": "Rent Expense",
+      "debit": 400000,
+      "credit": 0
+     },
+     {
+      "account": "Bank",
+      "debit": 0,
+      "credit": 400000
+     }
+    ]
+   },
+   {
+    "name": "Utilities",
+    "cf": "operating",
+    "lines": [
+     {
+      "account": "Utilities Expense",
+      "debit": 100000,
+      "credit": 0
+     },
+     {
+      "account": "Input VAT",
+      "debit": 14000,
+      "credit": 0
+     },
+     {
+      "account": "Cash",
+      "debit": 0,
+      "credit": 114000
+     }
+    ]
+   },
+   {
+    "name": "Payroll accrual",
+    "cf": "noncash",
+    "lines": [
+     {
+      "account": "Payroll Expense",
+      "debit": 1000000,
+      "credit": 0
+     },
+     {
+      "account": "Payroll Payable",
+      "debit": 0,
+      "credit": 920000
+     },
+     {
+      "account": "Withholding Payable",
+      "debit": 0,
+      "credit": 80000
+     }
+    ]
+   },
+   {
+    "name": "Net pay",
+    "cf": "operating",
+    "lines": [
+     {
+      "account": "Payroll Payable",
+      "debit": 920000,
+      "credit": 0
+     },
+     {
+      "account": "Bank",
+      "debit": 0,
+      "credit": 920000
+     }
+    ]
+   },
+   {
+    "name": "Deposit cash to bank",
+    "cf": "noncash",
+    "lines": [
+     {
+      "account": "Bank",
+      "debit": 500000,
+      "credit": 0
+     },
+     {
+      "account": "Cash",
+      "debit": 0,
+      "credit": 500000
+     }
+    ]
+   },
+   {
+    "name": "Owner withdrawal",
+    "cf": "financing",
+    "lines": [
+     {
+      "account": "Owner Drawings",
+      "debit": 200000,
+      "credit": 0
+     },
+     {
+      "account": "Bank",
+      "debit": 0,
+      "credit": 200000
+     }
+    ]
+   },
+   {
+    "name": "Close P&L to Income Summary",
+    "cf": "noncash",
+    "lines": [
+     {
+      "account": "Revenue",
+      "debit": 2300000,
+      "credit": 0
+     },
+     {
+      "account": "Delivery Revenue",
+      "debit": 20000,
+      "credit": 0
+     },
+     {
+      "account": "Sales Discounts",
+      "debit": 0,
+      "credit": 10000
+     },
+     {
+      "account": "Sales Returns",
+      "debit": 0,
+      "credit": 50000
+     },
+     {
+      "account": "COGS",
+      "debit": 0,
+      "credit": 500000
+     },
+     {
+      "account": "Inventory Shrinkage",
+      "debit": 0,
+      "credit": 22000
+     },
+     {
+      "account": "Waste Expense",
+      "debit": 0,
+      "credit": 33000
+     },
+     {
+      "account": "Utilities Expense",
+      "debit": 0,
+      "credit": 100000
+     },
+     {
+      "account": "Rent Expense",
+      "debit": 0,
+      "credit": 400000
+     },
+     {
+      "account": "Payroll Expense",
+      "debit": 0,
+      "credit": 1000000
+     },
+     {
+      "account": "Income Summary",
+      "debit": 0,
+      "credit": 205000
+     }
+    ]
+   },
+   {
+    "name": "Close Income Summary to Retained Earnings",
+    "cf": "noncash",
+    "lines": [
+     {
+      "account": "Income Summary",
+      "debit": 205000,
+      "credit": 0
+     },
+     {
+      "account": "Retained Earnings",
+      "debit": 0,
+      "credit": 205000
+     }
+    ]
+   }
+  ],
+  "ending_balances_piasters": {
+   "Cash": 5124400,
+   "Bank": 1550000,
+   "Accounts Receivable": 540000,
+   "Inventory": 2545000,
+   "Input VAT": 308000,
+   "Accounts Payable": 1466000,
+   "Output VAT": 316400,
+   "Withholding Payable": 80000,
+   "Owner Capital": 3000000,
+   "Opening Balance Equity": 5200000,
+   "Retained Earnings": 205000,
+   "Owner Drawings": 200000
+  },
+  "statements_piasters": {
+   "net_revenue": 0,
+   "gross_revenue": 0,
+   "contra_revenue": 0,
+   "cogs": 0,
+   "gross_profit": 0,
+   "opex": 0,
+   "net_profit": 0,
+   "assets": 10067400,
+   "liabilities": 1862400,
+   "equity_booked": 8205000,
+   "equity_incl_current_earnings": 8205000,
+   "bs_residual": 0,
+   "tb_debits": 10267400,
+   "tb_credits": 10267400,
+   "cash_flow": {
+    "opening": 5000000,
+    "financing": 2800000,
+    "operating": -1125600
+   },
+   "cash_net_change_in_cf": 6674400,
+   "closing_cash_and_bank": 6674400,
+   "vat_input": 308000,
+   "vat_output": 316400,
+   "vat_net_payable": 8400
+  },
+  "self_consistency": "PASS"
+ }
+}

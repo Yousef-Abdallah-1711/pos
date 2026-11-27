@@ -1,0 +1,11 @@
+import { login, EV, DASH } from './lib.mjs';
+import fs from 'fs';
+const { b, ctx } = await login('audit.c.owner@example.test', 'C');
+const p = await ctx.newPage(); const calls = [];
+p.on('response', async r => { const u = r.url(); if (u.includes(':18082') && r.request().method() === 'GET' && /reports/.test(u)) { try { calls.push({ u: u.replace('http://localhost:18082/api/v1', ''), s: r.status(), body: await r.text() }); } catch {} } });
+await p.goto(DASH + '/en/dashboard/reports/financial/advanced', { waitUntil: 'networkidle' }); await p.waitForTimeout(1500);
+await p.click('button:has-text("Refresh")'); await p.waitForTimeout(6000);
+fs.writeFileSync(`${EV}/reports/C-s13c-advanced.json`, JSON.stringify({ text: (await p.locator('main, body').first().innerText()).slice(0, 5000), calls }, null, 1));
+await p.screenshot({ path: `${EV}/screenshots/rep-C-advanced.png`, fullPage: true });
+console.log(calls.map(c => `${c.s} ${c.u.slice(0, 80)} ${c.body.slice(0, 80).replace(/\n/g, ' ')}`).join('\n'));
+await b.close();

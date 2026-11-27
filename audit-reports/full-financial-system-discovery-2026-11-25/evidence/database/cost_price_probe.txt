@@ -1,0 +1,3 @@
+ERROR:  column p.cost_price does not exist
+LINE 1: ...((oi.quantity - oi.cancelled_quantity) * COALESCE(p.cost_pri...
+                                                             ^

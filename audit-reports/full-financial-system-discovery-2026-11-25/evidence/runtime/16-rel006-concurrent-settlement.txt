@@ -1,0 +1,17 @@
+# REL-006 5 parallel receipts of 1,000 vs balance 3,200
+      5 201
+ invoice_number | amount_paid | balance_due | status 
+----------------+-------------+-------------+--------
+ INV-2026-00001 |     7000.00 |        0.00 | paid
+(1 row)
+
+ count |   sum   
+-------+---------
+     6 | 7000.00
+(1 row)
+
+ account_code |    account_name     |  net_dr  
+--------------+---------------------+----------
+ 1120         | Accounts Receivable | -1800.00
+(1 row)
+

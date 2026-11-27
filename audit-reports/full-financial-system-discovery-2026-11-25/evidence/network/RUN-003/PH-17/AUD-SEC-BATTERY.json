@@ -1,0 +1,153 @@
+{
+ "run": "RUN-003",
+ "kind": "API-DIAGNOSTIC",
+ "log": [
+  {
+   "id": "LOGIN",
+   "desc": "sessions",
+   "owner4": true,
+   "ownerE": 200,
+   "cashier": 200
+  },
+  {
+   "id": "SEC-014",
+   "desc": "stub-mode credentials password123",
+   "unknownUser": 401,
+   "knownOwnerWrongPw": 401
+  },
+  {
+   "id": "SEC-COOKIE",
+   "desc": "Set-Cookie attributes",
+   "setCookie": [
+    "poos_session=<redacted>; Path=/; HttpOnly; SameSite=Lax"
+   ]
+  },
+  {
+   "id": "SEC-011",
+   "desc": "tampered/empty/garbage session cookie on financial route",
+   "tampered": 401,
+   "empty": 401,
+   "garbage": 401
+  },
+  {
+   "id": "SEC-IDOR-READ",
+   "desc": "tenant E reads tenant 4 objects by id",
+   "/accounting/customer-invoices/4": {
+    "status": 404,
+    "leaked": false
+   },
+   "/admin/orders/42": {
+    "status": 404,
+    "leaked": false
+   },
+   "/accounting/journal-entries/105": {
+    "status": 404,
+    "leaked": false
+   },
+   "/suppliers/2": {
+    "status": 404,
+    "leaked": false
+   },
+   "/products/2": {
+    "status": 404,
+    "leaked": false
+   },
+   "/accounting/ledger?account_id=70": {
+    "status": 200,
+    "leaked": false
+   },
+   "/accounting/accounts/70": {
+    "status": 404,
+    "leaked": false
+   },
+   "/admin/orders/42/history": {
+    "status": 200,
+    "leaked": false
+   }
+  },
+  {
+   "id": "SEC-IDOR-WRITE",
+   "desc": "tenant E writes to tenant 4 objects",
+   "PUT product": 400,
+   "void foreign journal": 404,
+   "pay foreign order": 404,
+   "receipt on foreign invoice": 404,
+   "delete foreign supplier": 404,
+   "productNameNow": "Audit Burger",
+   "foreignReceiptRows": "0"
+  },
+  {
+   "id": "SEC-MASS",
+   "desc": "tenant E creates product with tenant_id=4 in body",
+   "status": 201,
+   "tenantOfCreated": "8"
+  },
+  {
+   "id": "SEC-009",
+   "desc": "cashier role on accounting/HR/admin routes",
+   "GET /accounting/trial-balance": 403,
+   "POST /accounting/journal-entries": 403,
+   "GET /reports/financial/profit-loss": 403,
+   "GET /hr/employees": 200,
+   "POST /accounting/accounts": 403,
+   "GET /accounting/paid-order-events/failed": 403,
+   "GET /super-admin/dashboard/stats": 401
+  },
+  {
+   "id": "SEC-012a",
+   "desc": "login without Origin",
+   "status": 403
+  },
+  {
+   "id": "SEC-012b",
+   "desc": "login with foreign Origin",
+   "status": 403
+  },
+  {
+   "id": "SEC-012c",
+   "desc": "30 rapid failed logins for a nonexistent email",
+   "statusCounts": {
+    "401": 14,
+    "429": 16
+   }
+  },
+  {
+   "id": "SEC-SQLI",
+   "desc": "quote/injection payloads in list filters (tenant 4)",
+   "/products?search=' OR 1=1--": {
+    "status": 200,
+    "body": "{\"pagination\":{\"page\":1,\"page_size\":20,\"total\":0,\"total_pages\":0},\"products\":[]}"
+   },
+   "/admin/orders?search=%27%3B+DROP+TABLE+orders%3B": {
+    "status": 200,
+    "body": "{\"limit\":20,\"orders\":[],\"page\":1,\"pages\":0,\"total\":0}"
+   },
+   "/accounting/customers?search=' UNION SELECT 1--": {
+    "status": 200,
+    "body": "{\"data\":[{\"id\":2,\"tenant_id\":4,\"restaurant_id\":4,\"customer_code\":\"CUST-0002\",\"cu"
+   },
+   "/suppliers?search=\\": {
+    "status": 200,
+    "body": "{\"data\":[{\"id\":2,\"tenant_id\":4,\"restaurant_id\":4,\"supplier_code\":\"SUP-0002\",\"com"
+   },
+   "/accounting/journal-entries?status=posted' OR '1": {
+    "status": 200,
+    "body": "{\"data\":[],\"pagination\":{\"page\":1,\"page_size\":20,\"total\":0},\"success\":true}"
+   }
+  },
+  {
+   "id": "SEC-SQLI-DB",
+   "desc": "orders table intact",
+   "orders": "46"
+  },
+  {
+   "id": "SEC-HDR",
+   "desc": "API security headers",
+   "hsts": null,
+   "csp": false,
+   "xcto": null,
+   "xfo": null,
+   "server": null
+  }
+ ]
+}

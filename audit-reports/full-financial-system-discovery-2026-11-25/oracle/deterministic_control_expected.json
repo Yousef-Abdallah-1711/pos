@@ -1,0 +1,46 @@
+{
+  "ending_balances_egp": {
+    "Cash": "95,400.00",
+    "Inventory": "16,000.00",
+    "Input VAT": "2,800.00",
+    "Accounts Payable": "12,800.00",
+    "Output VAT": "1,400.00",
+    "Payroll Payable": "2,000.00",
+    "Owner Capital": "100,000.00",
+    "Revenue": "10,000.00",
+    "COGS": "4,000.00",
+    "Rent Expense": "3,000.00",
+    "Payroll Expense": "5,000.00"
+  },
+  "net_profit_egp": "-2,000.00",
+  "pnl": {
+    "revenue": "10,000.00",
+    "cogs": "4,000.00",
+    "gross_profit": "6,000.00",
+    "opex": "8,000.00",
+    "net": "-2,000.00"
+  },
+  "balance_sheet": {
+    "assets": "114,200.00",
+    "liabilities": "16,200.00",
+    "equity_incl_current_period": "98,000.00",
+    "residual": "0.00"
+  },
+  "trial_balance": {
+    "debits": "126,200.00",
+    "credits": "126,200.00",
+    "difference": "0.00"
+  },
+  "cash_flow": {
+    "operating": "-4,600.00",
+    "investing": "0.00",
+    "financing": "100,000.00",
+    "net_change": "95,400.00",
+    "closing_cash": "95,400.00"
+  },
+  "vat": {
+    "input": "2,800.00",
+    "output": "1,400.00",
+    "net_recoverable": "1,400.00"
+  }
+}

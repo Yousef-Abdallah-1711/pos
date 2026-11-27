@@ -1,0 +1,66 @@
+{
+ "page": "reports/hr",
+ "text": "POS Dashboard\nDashboard\nCashier POS\nKitchen Display\nOrders\nProducts\nHuman Resources\nAccounting\nSuppliers\nFinancial Reports\nReports\nTheme Builder\nSettings\nEnglish\nA\n\nAudit Owner C\n\nOwner\n\nHR Reports\n\nHeadcount, turnover, absenteeism, overtime, leave balances, and training compliance.\n\nRefresh\nDate from\nDate to\nYear\nGenerated\n11/26/2026, 12:51:02 AM\nTotal Employees\n1\nTurnover Rate\n0%\nAbsenteeism Rate\n0%\nOvertime Cost\nEGP 0.00\nHeadcount by Department\nDepartment\tEmployees\nKitchen\t1\nTurnover Trend\nMonth\tHires\tDepartures\n2026-10\t0\t0\n2026-11\t1\t0\nTop Absentees\nNo absences\nOvertime by Employee\nNo overtime\nLeave Balances\nEmployee\tAnnual Used\tAnnual Remaining\nAudit Cook\t0\t21\nTraining Compliance by Department\nDepartment\tCertified\tTotal\tRate\nKitchen\t0\t1\t0%\nTraining Compliance Summary\nCertified employees: 0 of 1 (0%)",
+ "calls": [
+  {
+   "u": "/reports/hr/headcount",
+   "s": 200,
+   "body": "{\"data\":{\"by_department\":[{\"count\":1,\"department\":\"Kitchen\"}],\"by_employment_type\":[{\"count\":1,\"employment_type\":\"full_time\"}],\"by_status\":[{\"count\":1,\"status\":\"active\"}],\"filters\":{\"department\":\"\",\"employment_type\":\"\",\"status\":\"\"},\"generated_at\":\"2026-11-25T22:51:01Z\",\"summary\":{\"total_employees\":1}},\"success\":true}"
+  },
+  {
+   "u": "/reports/hr/turnover?date_from=2026-10-27&date_to=2026-11-25",
+   "s": 200,
+   "body": "{\"data\":{\"filters\":{\"date_from\":\"2026-10-27\",\"date_to\":\"2026-11-25\"},\"generated_at\":\"2026-11-25T22:51:01Z\",\"summary\":{\"average_headcount\":0.5,\"departures\":0,\"hires\":1,\"turnover_rate\":0},\"trend\":[{\"departures\":0,\"hires\":0,\"month\":\"2026-10\"},{\"departures\":0,\"hires\":1,\"month\":\"2026-11\"}]},\"success\":true}"
+  },
+  {
+   "u": "/reports/hr/absenteeism?date_from=2026-10-27&date_to=2026-11-25",
+   "s": 200,
+   "body": "{\"data\":{\"filters\":{\"date_from\":\"2026-10-27\",\"date_to\":\"2026-11-25\"},\"generated_at\":\"2026-11-25T22:51:01Z\",\"patterns\":[],\"summary\":{\"absent_records\":0,\"absenteeism_rate\":0,\"total_records\":0},\"top_absentees\":[]},\"success\":true}"
+  },
+  {
+   "u": "/reports/hr/overtime?date_from=2026-10-27&date_to=2026-11-25",
+   "s": 200,
+   "body": "{\"data\":{\"filters\":{\"date_from\":\"2026-10-27\",\"date_to\":\"2026-11-25\"},\"generated_at\":\"2026-11-25T22:51:01Z\",\"items\":[],\"pagination\":{\"page\":1,\"page_size\":20},\"summary\":{\"employees_count\":0,\"total_overtime_cost\":0,\"total_overtime_hours\":0}},\"success\":true}"
+  },
+  {
+   "u": "/reports/hr/leave-balances?year=2026",
+   "s": 200,
+   "body": "{\"data\":{\"filters\":{\"year\":2026},\"generated_at\":\"2026-11-25T22:51:01Z\",\"items\":[{\"annual_leave_allowance\":21,\"annual_leave_remaining\":21,\"annual_leave_used\":0,\"approved_leave_days\":0,\"department\":\"Kitchen\",\"employee_id\":4,\"employee_name\":\"Audit Cook\"}],\"pagination\":{\"page\":1,\"page_size\":50},\"summary\":{\"annual_leave_allowance\":21,\"employees_count\":1,\"total_remaining_annual\":21}},\"success\":true}"
+  },
+  {
+   "u": "/reports/hr/training-compliance",
+   "s": 200,
+   "body": "{\"data\":{\"by_department\":[{\"certified_employees\":0,\"compliance_rate\":0,\"department\":\"Kitchen\",\"total_employees\":1}],\"by_training_type\":[],\"generated_at\":\"2026-11-25T22:51:01Z\",\"summary\":{\"active_employees\":1,\"certified_employees\":0,\"compliance_rate\":0}},\"success\":true}"
+  },
+  {
+   "u": "/reports/hr/turnover?date_from=2026-10-27&date_to=2026-11-25",
+   "s": 200,
+   "body": "{\"data\":{\"filters\":{\"date_from\":\"2026-10-27\",\"date_to\":\"2026-11-25\"},\"generated_at\":\"2026-11-25T22:51:02Z\",\"summary\":{\"average_headcount\":0.5,\"departures\":0,\"hires\":1,\"turnover_rate\":0},\"trend\":[{\"departures\":0,\"hires\":0,\"month\":\"2026-10\"},{\"departures\":0,\"hires\":1,\"month\":\"2026-11\"}]},\"success\":true}"
+  },
+  {
+   "u": "/reports/hr/headcount",
+   "s": 200,
+   "body": "{\"data\":{\"by_department\":[{\"count\":1,\"department\":\"Kitchen\"}],\"by_employment_type\":[{\"count\":1,\"employment_type\":\"full_time\"}],\"by_status\":[{\"count\":1,\"status\":\"active\"}],\"filters\":{\"department\":\"\",\"employment_type\":\"\",\"status\":\"\"},\"generated_at\":\"2026-11-25T22:51:02Z\",\"summary\":{\"total_employees\":1}},\"success\":true}"
+  },
+  {
+   "u": "/reports/hr/training-compliance",
+   "s": 200,
+   "body": "{\"data\":{\"by_department\":[{\"certified_employees\":0,\"compliance_rate\":0,\"department\":\"Kitchen\",\"total_employees\":1}],\"by_training_type\":[],\"generated_at\":\"2026-11-25T22:51:02Z\",\"summary\":{\"active_employees\":1,\"certified_employees\":0,\"compliance_rate\":0}},\"success\":true}"
+  },
+  {
+   "u": "/reports/hr/overtime?date_from=2026-10-27&date_to=2026-11-25",
+   "s": 200,
+   "body": "{\"data\":{\"filters\":{\"date_from\":\"2026-10-27\",\"date_to\":\"2026-11-25\"},\"generated_at\":\"2026-11-25T22:51:02Z\",\"items\":[],\"pagination\":{\"page\":1,\"page_size\":20},\"summary\":{\"employees_count\":0,\"total_overtime_cost\":0,\"total_overtime_hours\":0}},\"success\":true}"
+  },
+  {
+   "u": "/reports/hr/leave-balances?year=2026",
+   "s": 200,
+   "body": "{\"data\":{\"filters\":{\"year\":2026},\"generated_at\":\"2026-11-25T22:51:02Z\",\"items\":[{\"annual_leave_allowance\":21,\"annual_leave_remaining\":21,\"annual_leave_used\":0,\"approved_leave_days\":0,\"department\":\"Kitchen\",\"employee_id\":4,\"employee_name\":\"Audit Cook\"}],\"pagination\":{\"page\":1,\"page_size\":50},\"summary\":{\"annual_leave_allowance\":21,\"employees_count\":1,\"total_remaining_annual\":21}},\"success\":true}"
+  },
+  {
+   "u": "/reports/hr/absenteeism?date_from=2026-10-27&date_to=2026-11-25",
+   "s": 200,
+   "body": "{\"data\":{\"filters\":{\"date_from\":\"2026-10-27\",\"date_to\":\"2026-11-25\"},\"generated_at\":\"2026-11-25T22:51:02Z\",\"patterns\":[],\"summary\":{\"absent_records\":0,\"absenteeism_rate\":0,\"total_records\":0},\"top_absentees\":[]},\"success\":true}"
+  }
+ ]
+}

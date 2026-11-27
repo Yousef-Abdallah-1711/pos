@@ -1,0 +1,143 @@
+{
+ "run": "RUN-003",
+ "kind": "API-DIAGNOSTIC",
+ "log": [
+  {
+   "id": "HC10-ORDER",
+   "desc": "paid order -> refunded/voided/failed/pending transitions",
+   "seq": [
+    {
+     "to": "paid",
+     "http": 200,
+     "resp": "{\"accounting_intent\":\"persisted\",\"success\":true}",
+     "now": "paid/confirmed"
+    },
+    {
+     "journalsAfterPaid": "0"
+    },
+    {
+     "to": "refunded",
+     "http": 400,
+     "resp": "{\"error\":\"failed to update payment status: invalid order payment status transition from paid to refunded for o",
+     "now": "paid/confirmed"
+    },
+    {
+     "to": "voided",
+     "http": 400,
+     "resp": "{\"error\":\"invalid payment status\"}",
+     "now": "paid/confirmed"
+    },
+    {
+     "to": "failed",
+     "http": 400,
+     "resp": "{\"error\":\"failed to update payment status: invalid order payment status transition from paid to failed for ord",
+     "now": "paid/confirmed"
+    },
+    {
+     "to": "pending",
+     "http": 400,
+     "resp": "{\"error\":\"failed to update payment status: invalid order payment status transition from paid to pending for or",
+     "now": "paid/confirmed"
+    },
+    {
+     "journalsAfterAttempts": "2",
+     "finalState": "paid/confirmed"
+    }
+   ]
+  },
+  {
+   "id": "HC10-UNPAID",
+   "desc": "pending order -> refunded/voided/failed",
+   "seq2": [
+    {
+     "to": "refunded",
+     "http": 400,
+     "resp": "{\"error\":\"failed to update payment status: invalid order payment status transition from pending to refunded fo",
+     "now": "pending/confirmed"
+    },
+    {
+     "to": "voided",
+     "http": 400,
+     "resp": "{\"error\":\"invalid payment status\"}",
+     "now": "pending/confirmed"
+    },
+    {
+     "to": "failed",
+     "http": 200,
+     "resp": "{\"accounting_intent\":\"not_applicable\",\"success\":true}",
+     "now": "failed/confirmed"
+    }
+   ]
+  },
+  {
+   "id": "FIN019-CSV",
+   "desc": "COA CSV export formula-injection cells",
+   "status": 200,
+   "ctype": "text/csv; charset=utf-8",
+   "rows": 68,
+   "injectedRows": [
+    "5997,'@SUM(A1:A2),,expense,debit,EGP,,'+cmd|calc!A0,true",
+    "5998,'=1+1 injected,,expense,debit,EGP,,,true"
+   ],
+   "escaped": true
+  },
+  {
+   "id": "FIN019-JE",
+   "desc": "journal CSV export",
+   "status": 200,
+   "ctype": "text/csv; charset=utf-8",
+   "rows": 201,
+   "jeDbCount": "92"
+  },
+  {
+   "id": "FIN019-XLSX",
+   "desc": "COA excel export",
+   "status": 200,
+   "ctype": "text/csv; charset=utf-8",
+   "disp": "attachment; filename=\"chart-of-accounts-export.csv\"",
+   "bytes": 3871
+  },
+  {
+   "id": "FIN019-ORD",
+   "desc": "orders export",
+   "status": 200,
+   "ctype": "text/csv",
+   "rows": 45,
+   "ordersDb": "43"
+  },
+  {
+   "id": "CFR006",
+   "desc": "report latency ms on current dataset (8 runs each, cache may apply)",
+   "/reports/financial/profit-loss": {
+    "p50": 15,
+    "max": 20,
+    "glLines": 191
+   },
+   "/reports/financial/cash-flow": {
+    "p50": 14,
+    "max": 15,
+    "glLines": 191
+   },
+   "/reports/financial/balance-sheet": {
+    "p50": 12,
+    "max": 14,
+    "glLines": 191
+   },
+   "/accounting/trial-balance": {
+    "p50": 14,
+    "max": 17,
+    "glLines": 191
+   },
+   "/reports/sales": {
+    "p50": 22,
+    "max": 45,
+    "glLines": 191
+   },
+   "/reports/financial/receivables-aging": {
+    "p50": 12,
+    "max": 19,
+    "glLines": 191
+   }
+  }
+ ]
+}

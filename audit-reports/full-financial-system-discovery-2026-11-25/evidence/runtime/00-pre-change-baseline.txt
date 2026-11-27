@@ -1,0 +1,80 @@
+== time 2026-11-25T22:07:22Z
+133260db66b1143c254d79476daa7650b41a33f0
+ M frontend/apps/dashboard/tsconfig.json
+ M frontend/apps/landing/tsconfig.json
+ M frontend/apps/restaurant-website/next-env.d.ts
+ M frontend/apps/restaurant-website/tsconfig.json
+ M frontend/apps/super-admin/next-env.d.ts
+ M frontend/apps/super-admin/tsconfig.json
+?? audit-reports/full-financial-system-discovery-2026-11-25/
+?? writing-block.md
+stash@{0}: On master: local edits before reset to origin/master 2026-11-25
+stash@{1}: On master: pre-pull local changes 2026-11-25
+== containers
+pos-landing|pos-dev-landing|Up 3 hours|
+pos-dashboard|pos-dev-dashboard|Up 3 hours|
+pos-restaurant-website|pos-dev-restaurant-website|Up 3 hours|
+pos-super-admin|pos-dev-super-admin|Up 3 hours|
+pos-backend|pos-backend:dev|Up 3 hours|0.0.0.0:3001-3004->3001-3004/tcp, [::]:3001-3004->3001-3004/tcp, 0.0.0.0:8080->8080/tcp, [::]:8080->8080/tcp
+pos-postgres|postgres:15-alpine|Up 3 hours (healthy)|0.0.0.0:5432->5432/tcp, [::]:5432->5432/tcp
+pos-dev-frontend-install-1|pos-dev-frontend-install|Exited (0) 3 hours ago|
+== volumes
+poos_go_build_cache
+poos_go_mod_cache
+poos_next_dashboard
+poos_next_landing
+poos_next_restaurant
+poos_next_super_admin
+poos_node_modules_dashboard
+poos_node_modules_landing
+poos_node_modules_layer_shared
+poos_node_modules_layer_themes
+poos_node_modules_pkg_theme
+poos_node_modules_pkg_ui
+poos_node_modules_pkg_ui_components
+poos_node_modules_restaurant
+poos_node_modules_root
+poos_node_modules_super_admin
+poos_pnpm_store
+poos_postgres_data
+poos_uploads_data
+pos2a_gobuild
+pos2a_gomod
+pos-dev_go_build_cache
+pos-dev_go_mod_cache
+pos-dev_next_dashboard
+pos-dev_next_landing
+pos-dev_next_restaurant
+pos-dev_next_super_admin
+pos-dev_node_modules_dashboard
+pos-dev_node_modules_landing
+pos-dev_node_modules_layer_shared
+pos-dev_node_modules_layer_themes
+pos-dev_node_modules_pkg_theme
+pos-dev_node_modules_pkg_ui
+pos-dev_node_modules_pkg_ui_components
+pos-dev_node_modules_restaurant
+pos-dev_node_modules_root
+pos-dev_node_modules_super_admin
+pos-dev_pnpm_store
+pos-dev_postgres_data
+== networks
+bridge
+host
+none
+pos-dev_pos-network
+== docker info mem
+MemTotal=8243548160 CPUs=8
+== stats
+pos-landing 702.2MiB / 7.677GiB
+pos-dashboard 673.3MiB / 7.677GiB
+pos-restaurant-website 562.1MiB / 7.677GiB
+pos-super-admin 312.2MiB / 7.677GiB
+pos-backend 126.2MiB / 7.677GiB
+pos-postgres 43.89MiB / 7.677GiB
+== disk
+TYPE            TOTAL     ACTIVE    SIZE      RECLAIMABLE
+Images          24        7         22.6GB    20.42GB (90%)
+Containers      7         6         44.86MB   978.9kB (2%)
+Local Volumes   39        18        8.213GB   3.318GB (40%)
+Build Cache     167       0         20.94GB   1.192GB

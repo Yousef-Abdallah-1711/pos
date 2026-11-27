@@ -1,0 +1,32 @@
+{
+ "run": "RUN-004",
+ "log": [
+  {
+   "k": "S0",
+   "desc": "before",
+   "row": "#3b82f6 | col #3b82f6 | updated 2026-11-27 03:31:38.934761"
+  },
+  {
+   "k": "S1",
+   "desc": "after editor Save",
+   "row": "#ff0000 | col #3b82f6 | updated 2026-11-27 03:32:16.644952"
+  },
+  {
+   "k": "S2",
+   "desc": "API activate theme 13",
+   "http": 200,
+   "row": "#ff0000 | col #3b82f6 | updated 2026-11-27 03:32:20.723863"
+  },
+  {
+   "k": "S3",
+   "desc": "public API after activation",
+   "primary": "#3b82f6"
+  },
+  {
+   "k": "S4",
+   "desc": "restored",
+   "active": "11:false 4:true 13:false",
+   "row13": "#ff0000 | col #3b82f6 | updated 2026-11-27 03:32:20.723863"
+  }
+ ]
+}

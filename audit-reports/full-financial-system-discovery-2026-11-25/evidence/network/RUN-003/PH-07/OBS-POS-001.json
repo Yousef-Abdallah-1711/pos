@@ -1,0 +1,17 @@
+{
+ "run": "RUN-003",
+ "cartLines": [
+  "Audit Burger",
+  "0"
+ ],
+ "localStorageKeys": [
+  "pos-products-cache",
+  "pos-categories-cache",
+  "pos-storage"
+ ],
+ "localStorage": {
+  "pos-products-cache": "{\"data\":[{\"id\":2,\"name\":\"Audit Burger\",\"name_ar\":\"burger\",\"price\":10000,\"category_id\":1,\"is_available\":true,\"track_inventory\":true,\"quantity_in_stock\":33}],\"savedAt\":1795715251445}",
+  "pos-categories-cache": "{\"data\":[],\"savedAt\":1795715251445}",
+  "pos-storage": "{\"state\":{\"items\":[],\"tableId\":null,\"tableName\":null,\"customerName\":\"\",\"customerPhone\":\"\",\"paymentMethod\":\"cash\",\"heldOrders\":[],\"soundEnabled\":true,\"autoPrintEnabled\":true,\"focusModeEnabled\":false,\"hideOutOfStockProducts\":false,\"productCardSize\":\"small\"},\"version\":0}"
+ }
+}

@@ -1,0 +1,15 @@
+import { login, EV, DASH, netLog } from './lib.mjs';
+const [tag, email, id, customer, desc, qty, unit, tax, disc, date] = process.argv.slice(2);
+const { b, ctx } = await login(email, tag);
+const p = await ctx.newPage(); const net = []; netLog(p, net);
+await p.goto(DASH + '/en/dashboard/accounting/customer-invoices', { waitUntil: 'networkidle' }); await p.waitForTimeout(2000);
+await p.click('button:has-text("New customer invoice")'); await p.waitForTimeout(1000);
+const dates = p.locator('input[type=date]'); const n = await dates.count(); await dates.nth(n - 2).fill(date); await dates.nth(n - 1).fill(date);
+await p.locator('select:has(option:text-is("Select customer"))').selectOption({ label: customer }).catch(async () => { const s = p.locator('select').filter({ hasText: customer }).first(); await s.selectOption({ label: customer }); });
+await p.fill('input[placeholder="Consulting services / Raw materials"]', desc);
+const nums = p.locator('input[type=number]'); const m = await nums.count();
+await nums.nth(m - 4).fill(qty); await nums.nth(m - 3).fill(unit); await nums.nth(m - 2).fill(tax); await nums.nth(m - 1).fill(disc);
+await p.screenshot({ path: `${EV}/screenshots/${id}-form.png` });
+await p.click('button:has-text("Create customer invoice")'); await p.waitForTimeout(3500);
+console.log(JSON.stringify(net.filter(x => x.m !== 'GET').map(x => `${x.m} ${x.u} ${x.s} req=${x.req.slice(0, 450)} resp=${x.body.slice(0, 380)}`), null, 1));
+await b.close();

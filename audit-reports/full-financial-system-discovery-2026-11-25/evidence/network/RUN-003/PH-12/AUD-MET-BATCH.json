@@ -1,0 +1,1236 @@
+{
+ "run": "RUN-003",
+ "tenant": 4,
+ "kind": "API-DIAGNOSTIC",
+ "out": {
+  "vat": {
+   "path": "/accounting/tax/vat-report?date_from=2026-10-28&date_to=2026-11-26",
+   "status": 200,
+   "body": {
+    "data": {
+     "date_from": "2026-10-28",
+     "date_to": "2026-11-26",
+     "output_vat": 1820,
+     "input_vat": 4200,
+     "net_vat": -2380
+    },
+    "success": true
+   }
+  },
+  "invval": {
+   "path": "/reports/financial/inventory-valuation",
+   "status": 200,
+   "body": {
+    "data": {
+     "as_of_date": "2026-11-26",
+     "rows": [
+      {
+       "product_id": 2,
+       "product_name": "Audit Burger",
+       "quantity": 33,
+       "cost_per_unit": 4000,
+       "total_value": 132000
+      },
+      {
+       "product_id": 4,
+       "product_name": "Audit Inv Probe B",
+       "quantity": 21,
+       "cost_per_unit": 40,
+       "total_value": 840
+      }
+     ],
+     "total_value": 132840
+    },
+    "success": true
+   }
+  },
+  "kpis": {
+   "path": "/reports/financial/kpis?date_from=2026-10-28&date_to=2026-11-26",
+   "status": 200,
+   "body": {
+    "data": {
+     "expense_breakdown": [
+      {
+       "amount": 125120,
+       "label": "cogs"
+      },
+      {
+       "amount": 10000,
+       "label": "payroll"
+      },
+      {
+       "amount": 3000,
+       "label": "occupancy"
+      }
+     ],
+     "generated_at": "2026-11-26T19:59:42.344636086Z",
+     "revenue_trend": [
+      {
+       "month": "2026-11",
+       "revenue": 319660
+      }
+     ],
+     "summary": {
+      "cash_position": 50000,
+      "expenses": 138120,
+      "net_profit": 181540,
+      "revenue": 319660
+     }
+    },
+    "success": true
+   }
+  },
+  "menu": {
+   "path": "/reports/financial/menu-profitability?date_from=2026-10-28&date_to=2026-11-26",
+   "status": 500,
+   "body": {
+    "error": "Failed to generate menu profitability",
+    "success": false
+   }
+  },
+  "be": {
+   "path": "/reports/financial/break-even?date_from=2026-10-28&date_to=2026-11-26",
+   "status": 500,
+   "body": {
+    "error": "Failed to generate break-even analysis",
+    "success": false
+   }
+  },
+  "pcf": {
+   "path": "/reports/financial/predictive-cash-flow",
+   "status": 200,
+   "body": {
+    "data": {
+     "assumptions": {
+      "average_net_cash": -3233.3333333333335,
+      "forecast_months": 3,
+      "history_months": 6,
+      "trend_slope": -3880
+     },
+     "forecast": [
+      {
+       "month": "2026-12",
+       "projected_net_cash": -18430
+      },
+      {
+       "month": "2027-01",
+       "projected_net_cash": -22310
+      },
+      {
+       "month": "2027-02",
+       "projected_net_cash": -26190
+      }
+     ],
+     "generated_at": "2026-11-26T19:59:42.386673563Z",
+     "history": [
+      {
+       "cash_in": 0,
+       "cash_out": 0,
+       "month": "2026-06",
+       "net_cash": 0
+      },
+      {
+       "cash_in": 0,
+       "cash_out": 0,
+       "month": "2026-07",
+       "net_cash": 0
+      },
+      {
+       "cash_in": 0,
+       "cash_out": 0,
+       "month": "2026-08",
+       "net_cash": 0
+      },
+      {
+       "cash_in": 0,
+       "cash_out": 0,
+       "month": "2026-09",
+       "net_cash": 0
+      },
+      {
+       "cash_in": 0,
+       "cash_out": 0,
+       "month": "2026-10",
+       "net_cash": 0
+      },
+      {
+       "cash_in": 13000,
+       "cash_out": 32400,
+       "month": "2026-11",
+       "net_cash": -19400
+      }
+     ]
+    },
+    "success": true
+   }
+  },
+  "hrcost": {
+   "path": "/reports/hr/cost-analysis?date_from=2026-10-28&date_to=2026-11-26",
+   "status": 200,
+   "body": {
+    "data": {
+     "by_department": [],
+     "generated_at": "2026-11-26T19:59:42.426801841Z",
+     "summary": {
+      "estimated_insurance_cost": 0,
+      "labor_cost_pct_of_revenue": 0,
+      "overtime_cost": 0,
+      "payroll_cost": 0,
+      "revenue": 319660,
+      "total_hr_cost": 0
+     }
+    },
+    "success": true
+   }
+  },
+  "hrhead": {
+   "path": "/reports/hr/headcount?date_from=2026-10-28&date_to=2026-11-26",
+   "status": 200,
+   "body": {
+    "data": {
+     "by_department": [
+      {
+       "count": 1,
+       "department": "Kitchen"
+      }
+     ],
+     "by_employment_type": [
+      {
+       "count": 1,
+       "employment_type": "full_time"
+      }
+     ],
+     "by_status": [
+      {
+       "count": 1,
+       "status": "active"
+      }
+     ],
+     "filters": {
+      "department": "",
+      "employment_type": "",
+      "status": ""
+     },
+     "generated_at": "2026-11-26T19:59:42Z",
+     "summary": {
+      "total_employees": 1
+     }
+    },
+    "success": true
+   }
+  },
+  "hrturn": {
+   "path": "/reports/hr/turnover?date_from=2026-10-28&date_to=2026-11-26",
+   "status": 200,
+   "body": {
+    "data": {
+     "filters": {
+      "date_from": "2026-10-28",
+      "date_to": "2026-11-26"
+     },
+     "generated_at": "2026-11-26T19:59:42Z",
+     "summary": {
+      "average_headcount": 0.5,
+      "departures": 0,
+      "hires": 1,
+      "turnover_rate": 0
+     },
+     "trend": [
+      {
+       "departures": 0,
+       "hires": 0,
+       "month": "2026-10"
+      },
+      {
+       "departures": 0,
+       "hires": 1,
+       "month": "2026-11"
+      }
+     ]
+    },
+    "success": true
+   }
+  },
+  "hrabs": {
+   "path": "/reports/hr/absenteeism?date_from=2026-10-28&date_to=2026-11-26",
+   "status": 200,
+   "body": {
+    "data": {
+     "filters": {
+      "date_from": "2026-10-28",
+      "date_to": "2026-11-26"
+     },
+     "generated_at": "2026-11-26T19:59:42Z",
+     "patterns": [],
+     "summary": {
+      "absent_records": 0,
+      "absenteeism_rate": 0,
+      "total_records": 0
+     },
+     "top_absentees": []
+    },
+    "success": true
+   }
+  },
+  "hrot": {
+   "path": "/reports/hr/overtime?date_from=2026-10-28&date_to=2026-11-26",
+   "status": 200,
+   "body": {
+    "data": {
+     "filters": {
+      "date_from": "2026-10-28",
+      "date_to": "2026-11-26"
+     },
+     "generated_at": "2026-11-26T19:59:42Z",
+     "items": [],
+     "pagination": {
+      "page": 1,
+      "page_size": 20
+     },
+     "summary": {
+      "employees_count": 0,
+      "total_overtime_cost": 0,
+      "total_overtime_hours": 0
+     }
+    },
+    "success": true
+   }
+  },
+  "hrleave": {
+   "path": "/reports/hr/leave-balances",
+   "status": 200,
+   "body": {
+    "data": {
+     "filters": {
+      "year": 2026
+     },
+     "generated_at": "2026-11-26T19:59:42Z",
+     "items": [
+      {
+       "annual_leave_allowance": 21,
+       "annual_leave_remaining": 21,
+       "annual_leave_used": 0,
+       "approved_leave_days": 0,
+       "department": "Kitchen",
+       "employee_id": 4,
+       "employee_name": "Audit Cook"
+      }
+     ],
+     "pagination": {
+      "page": 1,
+      "page_size": 50
+     },
+     "summary": {
+      "annual_leave_allowance": 21,
+      "employees_count": 1,
+      "total_remaining_annual": 21
+     }
+    },
+    "success": true
+   }
+  },
+  "hrtrain": {
+   "path": "/reports/hr/training-compliance",
+   "status": 200,
+   "body": {
+    "data": {
+     "by_department": [
+      {
+       "certified_employees": 0,
+       "compliance_rate": 0,
+       "department": "Kitchen",
+       "total_employees": 1
+      }
+     ],
+     "by_training_type": [],
+     "generated_at": "2026-11-26T19:59:42Z",
+     "summary": {
+      "active_employees": 1,
+      "certified_employees": 0,
+      "compliance_rate": 0
+     }
+    },
+    "success": true
+   }
+  },
+  "ordstats": {
+   "path": "/admin/orders/stats",
+   "status": 200,
+   "body": {
+    "total_orders": 41,
+    "total_revenue": 529100,
+    "average_order_value": 12904.878048780489,
+    "orders_by_status": {
+     "cancelled": 3,
+     "confirmed": 21,
+     "pending": 15,
+     "preparing": 1,
+     "ready": 1
+    },
+    "orders_by_payment_method": {
+     "card": 1,
+     "cash": 39,
+     "wallet": 1
+    },
+    "orders_by_date": null,
+    "delivered_today": 30,
+    "delivered_count": 0,
+    "pending_count": 15
+   }
+  },
+  "kds": {
+   "path": "/kds/analytics",
+   "status": 200,
+   "body": {
+    "data": {
+     "average_prep_minutes": 187.22730075,
+     "total_completed_orders": 1,
+     "prep_time_trend": [
+      {
+       "date": "2026-11-20",
+       "avg_prep_minutes": 0,
+       "completed_orders": 0
+      },
+      {
+       "date": "2026-11-21",
+       "avg_prep_minutes": 0,
+       "completed_orders": 0
+      },
+      {
+       "date": "2026-11-22",
+       "avg_prep_minutes": 0,
+       "completed_orders": 0
+      },
+      {
+       "date": "2026-11-23",
+       "avg_prep_minutes": 0,
+       "completed_orders": 0
+      },
+      {
+       "date": "2026-11-24",
+       "avg_prep_minutes": 0,
+       "completed_orders": 0
+      },
+      {
+       "date": "2026-11-25",
+       "avg_prep_minutes": 0,
+       "completed_orders": 0
+      },
+      {
+       "date": "2026-11-26",
+       "avg_prep_minutes": 187.22730075,
+       "completed_orders": 1
+      }
+     ],
+     "busiest_hours": [
+      {
+       "hour": 0,
+       "order_count": 0
+      },
+      {
+       "hour": 1,
+       "order_count": 7
+      },
+      {
+       "hour": 2,
+       "order_count": 0
+      },
+      {
+       "hour": 3,
+       "order_count": 0
+      },
+      {
+       "hour": 4,
+       "order_count": 0
+      },
+      {
+       "hour": 5,
+       "order_count": 0
+      },
+      {
+       "hour": 6,
+       "order_count": 0
+      },
+      {
+       "hour": 7,
+       "order_count": 0
+      },
+      {
+       "hour": 8,
+       "order_count": 0
+      },
+      {
+       "hour": 9,
+       "order_count": 0
+      },
+      {
+       "hour": 10,
+       "order_count": 0
+      },
+      {
+       "hour": 11,
+       "order_count": 0
+      },
+      {
+       "hour": 12,
+       "order_count": 0
+      },
+      {
+       "hour": 13,
+       "order_count": 0
+      },
+      {
+       "hour": 14,
+       "order_count": 0
+      },
+      {
+       "hour": 15,
+       "order_count": 0
+      },
+      {
+       "hour": 16,
+       "order_count": 0
+      },
+      {
+       "hour": 17,
+       "order_count": 4
+      },
+      {
+       "hour": 18,
+       "order_count": 0
+      },
+      {
+       "hour": 19,
+       "order_count": 4
+      },
+      {
+       "hour": 20,
+       "order_count": 0
+      },
+      {
+       "hour": 21,
+       "order_count": 0
+      },
+      {
+       "hour": 22,
+       "order_count": 11
+      },
+      {
+       "hour": 23,
+       "order_count": 0
+      }
+     ]
+    },
+    "success": true
+   }
+  },
+  "tables": {
+   "path": "/tables/stats",
+   "status": 200,
+   "body": {
+    "data": {
+     "total_tables": 1,
+     "available": 1,
+     "occupied": 0,
+     "reserved": 0,
+     "maintenance": 0,
+     "total_capacity": 1
+    },
+    "success": true
+   }
+  },
+  "bs": {
+   "path": "/reports/financial/balance-sheet?as_of=2026-11-26",
+   "status": 200,
+   "body": {
+    "data": {
+     "as_of_date": "2026-11-26",
+     "assets": [
+      {
+       "account_code": "1101",
+       "account_name": "Petty Cash",
+       "amount": 0
+      },
+      {
+       "account_code": "1110",
+       "account_name": "Cash on Hand",
+       "amount": 286270.01
+      },
+      {
+       "account_code": "1111",
+       "account_name": "Main Bank Account",
+       "amount": -10000
+      },
+      {
+       "account_code": "1112",
+       "account_name": "Savings Account",
+       "amount": 0
+      },
+      {
+       "account_code": "1113",
+       "account_name": "Card Payment Clearing",
+       "amount": 11000
+      },
+      {
+       "account_code": "1120",
+       "account_name": "Accounts Receivable",
+       "amount": 3520
+      },
+      {
+       "account_code": "1121",
+       "account_name": "Employee Advances",
+       "amount": 0
+      },
+      {
+       "account_code": "1130",
+       "account_name": "Inventory",
+       "amount": -96120
+      },
+      {
+       "account_code": "1140",
+       "account_name": "Prepaid Expenses",
+       "amount": 0
+      },
+      {
+       "account_code": "1150",
+       "account_name": "Input VAT Receivable",
+       "amount": 4200
+      },
+      {
+       "account_code": "1210",
+       "account_name": "Kitchen Equipment",
+       "amount": 0
+      },
+      {
+       "account_code": "1220",
+       "account_name": "Furniture and Fixtures",
+       "amount": 0
+      },
+      {
+       "account_code": "1230",
+       "account_name": "Leasehold Improvements",
+       "amount": 0
+      },
+      {
+       "account_code": "1240",
+       "account_name": "Accumulated Depreciation",
+       "amount": 0
+      }
+     ],
+     "liabilities": [
+      {
+       "account_code": "2101",
+       "account_name": "Accounts Payable",
+       "amount": 800
+      },
+      {
+       "account_code": "2110",
+       "account_name": "Accrued Expenses",
+       "amount": 0
+      },
+      {
+       "account_code": "2120",
+       "account_name": "VAT Payable",
+       "amount": 30880
+      },
+      {
+       "account_code": "2130",
+       "account_name": "Salaries Payable",
+       "amount": 0
+      },
+      {
+       "account_code": "2140",
+       "account_name": "Tips Payable",
+       "amount": 0
+      },
+      {
+       "account_code": "2150",
+       "account_name": "Gift Card Liability",
+       "amount": 0
+      },
+      {
+       "account_code": "2210",
+       "account_name": "Loans Payable",
+       "amount": 0
+      }
+     ],
+     "equity": [
+      {
+       "account_code": "3100",
+       "account_name": "Owner Capital",
+       "amount": 10.01
+      },
+      {
+       "account_code": "3200",
+       "account_name": "Retained Earnings",
+       "amount": 0
+      },
+      {
+       "account_code": "3300",
+       "account_name": "Current Year Earnings",
+       "amount": 0
+      }
+     ],
+     "total_assets": 198870.01,
+     "total_liabilities": 31680,
+     "total_equity": 10.01,
+     "equation_balanced": false,
+     "integrity_status": "UNRECONCILED",
+     "equation_difference": 167180,
+     "integrity_check_basis": "existing_round2_equation_check"
+    },
+    "success": true
+   }
+  },
+  "ledger": {
+   "path": "/accounting/ledger?limit=500",
+   "status": 400,
+   "body": {
+    "error": "Valid account_id is required"
+   }
+  },
+  "tb": {
+   "path": "/accounting/trial-balance",
+   "status": 200,
+   "body": {
+    "data": {
+     "as_of": "2026-11-26",
+     "is_balanced": true,
+     "rows": [
+      {
+       "account_id": 68,
+       "account_code": "1101",
+       "account_name": "Petty Cash",
+       "account_type": "asset",
+       "normal_balance": "debit",
+       "debit_balance": 0,
+       "credit_balance": 0,
+       "net_balance": 0,
+       "as_of_date": "2026-11-26T19:59:42.672217562Z"
+      },
+      {
+       "account_id": 70,
+       "account_code": "1110",
+       "account_name": "Cash on Hand",
+       "account_type": "asset",
+       "normal_balance": "debit",
+       "debit_balance": 286270.01,
+       "credit_balance": 0,
+       "net_balance": 286270.01,
+       "as_of_date": "2026-11-26T19:59:42.672217562Z"
+      },
+      {
+       "account_id": 71,
+       "account_code": "1111",
+       "account_name": "Main Bank Account",
+       "account_type": "asset",
+       "normal_balance": "debit",
+       "debit_balance": 0,
+       "credit_balance": 10000,
+       "net_balance": -10000,
+       "as_of_date": "2026-11-26T19:59:42.672217562Z"
+      },
+      {
+       "account_id": 72,
+       "account_code": "1112",
+       "account_name": "Savings Account",
+       "account_type": "asset",
+       "normal_balance": "debit",
+       "debit_balance": 0,
+       "credit_balance": 0,
+       "net_balance": 0,
+       "as_of_date": "2026-11-26T19:59:42.672217562Z"
+      },
+      {
+       "account_id": 73,
+       "account_code": "1113",
+       "account_name": "Card Payment Clearing",
+       "account_type": "asset",
+       "normal_balance": "debit",
+       "debit_balance": 11000,
+       "credit_balance": 0,
+       "net_balance": 11000,
+       "as_of_date": "2026-11-26T19:59:42.672217562Z"
+      },
+      {
+       "account_id": 74,
+       "account_code": "1120",
+       "account_name": "Accounts Receivable",
+       "account_type": "asset",
+       "normal_balance": "debit",
+       "debit_balance": 3520,
+       "credit_balance": 0,
+       "net_balance": 3520,
+       "as_of_date": "2026-11-26T19:59:42.672217562Z"
+      },
+      {
+       "account_id": 75,
+       "account_code": "1121",
+       "account_name": "Employee Advances",
+       "account_type": "asset",
+       "normal_balance": "debit",
+       "debit_balance": 0,
+       "credit_balance": 0,
+       "net_balance": 0,
+       "as_of_date": "2026-11-26T19:59:42.672217562Z"
+      },
+      {
+       "account_id": 76,
+       "account_code": "1130",
+       "account_name": "Inventory",
+       "account_type": "asset",
+       "normal_balance": "debit",
+       "debit_balance": 0,
+       "credit_balance": 96120,
+       "net_balance": -96120,
+       "as_of_date": "2026-11-26T19:59:42.672217562Z"
+      },
+      {
+       "account_id": 77,
+       "account_code": "1140",
+       "account_name": "Prepaid Expenses",
+       "account_type": "asset",
+       "normal_balance": "debit",
+       "debit_balance": 0,
+       "credit_balance": 0,
+       "net_balance": 0,
+       "as_of_date": "2026-11-26T19:59:42.672217562Z"
+      },
+      {
+       "account_id": 78,
+       "account_code": "1150",
+       "account_name": "Input VAT Receivable",
+       "account_type": "asset",
+       "normal_balance": "debit",
+       "debit_balance": 4200,
+       "credit_balance": 0,
+       "net_balance": 4200,
+       "as_of_date": "2026-11-26T19:59:42.672217562Z"
+      },
+      {
+       "account_id": 80,
+       "account_code": "1210",
+       "account_name": "Kitchen Equipment",
+       "account_type": "asset",
+       "normal_balance": "debit",
+       "debit_balance": 0,
+       "credit_balance": 0,
+       "net_balance": 0,
+       "as_of_date": "2026-11-26T19:59:42.672217562Z"
+      },
+      {
+       "account_id": 81,
+       "account_code": "1220",
+       "account_name": "Furniture and Fixtures",
+       "account_type": "asset",
+       "normal_balance": "debit",
+       "debit_balance": 0,
+       "credit_balance": 0,
+       "net_balance": 0,
+       "as_of_date": "2026-11-26T19:59:42.672217562Z"
+      },
+      {
+       "account_id": 82,
+       "account_code": "1230",
+       "account_name": "Leasehold Improvements",
+       "account_type": "asset",
+       "normal_balance": "debit",
+       "debit_balance": 0,
+       "credit_balance": 0,
+       "net_balance": 0,
+       "as_of_date": "2026-11-26T19:59:42.672217562Z"
+      },
+      {
+       "account_id": 83,
+       "account_code": "1240",
+       "account_name": "Accumulated Depreciation",
+       "account_type": "asset",
+       "normal_balance": "credit",
+       "debit_balance": 0,
+       "credit_balance": 0,
+       "net_balance": 0,
+       "as_of_date": "2026-11-26T19:59:42.672217562Z"
+      },
+      {
+       "account_id": 85,
+       "account_code": "2101",
+       "account_name": "Accounts Payable",
+       "account_type": "liability",
+       "normal_balance": "credit",
+       "debit_balance": 0,
+       "credit_balance": 800,
+       "net_balance": 800,
+       "as_of_date": "2026-11-26T19:59:42.672217562Z"
+      },
+      {
+       "account_id": 86,
+       "account_code": "2110",
+       "account_name": "Accrued Expenses",
+       "account_type": "liability",
+       "normal_balance": "credit",
+       "debit_balance": 0,
+       "credit_balance": 0,
+       "net_balance": 0,
+       "as_of_date": "2026-11-26T19:59:42.672217562Z"
+      },
+      {
+       "account_id": 87,
+       "account_code": "2120",
+       "account_name": "VAT Payable",
+       "account_type": "liability",
+       "normal_balance": "credit",
+       "debit_balance": 0,
+       "credit_balance": 30880,
+       "net_balance": 30880,
+       "as_of_date": "2026-11-26T19:59:42.672217562Z"
+      },
+      {
+       "account_id": 88,
+       "account_code": "2130",
+       "account_name": "Salaries Payable",
+       "account_type": "liability",
+       "normal_balance": "credit",
+       "debit_balance": 0,
+       "credit_balance": 0,
+       "net_balance": 0,
+       "as_of_date": "2026-11-26T19:59:42.672217562Z"
+      },
+      {
+       "account_id": 89,
+       "account_code": "2140",
+       "account_name": "Tips Payable",
+       "account_type": "liability",
+       "normal_balance": "credit",
+       "debit_balance": 0,
+       "credit_balance": 0,
+       "net_balance": 0,
+       "as_of_date": "2026-11-26T19:59:42.672217562Z"
+      },
+      {
+       "account_id": 90,
+       "account_code": "2150",
+       "account_name": "Gift Card Liability",
+       "account_type": "liability",
+       "normal_balance": "credit",
+       "debit_balance": 0,
+       "credit_balance": 0,
+       "net_balance": 0,
+       "as_of_date": "2026-11-26T19:59:42.672217562Z"
+      },
+      {
+       "account_id": 92,
+       "account_code": "2210",
+       "account_name": "Loans Payable",
+       "account_type": "liability",
+       "normal_balance": "credit",
+       "debit_balance": 0,
+       "credit_balance": 0,
+       "net_balance": 0,
+       "as_of_date": "2026-11-26T19:59:42.672217562Z"
+      },
+      {
+       "account_id": 93,
+       "account_code": "3100",
+       "account_name": "Owner Capital",
+       "account_type": "equity",
+       "normal_balance": "credit",
+       "debit_balance": 0,
+       "credit_balance": 10.01,
+       "net_balance": 10.01,
+       "as_of_date": "2026-11-26T19:59:42.672217562Z"
+      },
+      {
+       "account_id": 94,
+       "account_code": "3200",
+       "account_name": "Retained Earnings",
+       "account_type": "equity",
+       "normal_balance": "credit",
+       "debit_balance": 0,
+       "credit_balance": 0,
+       "net_balance": 0,
+       "as_of_date": "2026-11-26T19:59:42.672217562Z"
+      },
+      {
+       "account_id": 95,
+       "account_code": "3300",
+       "account_name": "Current Year Earnings",
+       "account_type": "equity",
+       "normal_balance": "credit",
+       "debit_balance": 0,
+       "credit_balance": 0,
+       "net_balance": 0,
+       "as_of_date": "2026-11-26T19:59:42.672217562Z"
+      },
+      {
+       "account_id": 96,
+       "account_code": "4100",
+       "account_name": "Food Sales",
+       "account_type": "revenue",
+       "normal_balance": "credit",
+       "debit_balance": 0,
+       "credit_balance": 305300,
+       "net_balance": 305300,
+       "as_of_date": "2026-11-26T19:59:42.672217562Z"
+      },
+      {
+       "account_id": 97,
+       "account_code": "4110",
+       "account_name": "Beverage Sales",
+       "account_type": "revenue",
+       "normal_balance": "credit",
+       "debit_balance": 0,
+       "credit_balance": 0,
+       "net_balance": 0,
+       "as_of_date": "2026-11-26T19:59:42.672217562Z"
+      },
+      {
+       "account_id": 98,
+       "account_code": "4120",
+       "account_name": "Delivery Sales",
+       "account_type": "revenue",
+       "normal_balance": "credit",
+       "debit_balance": 0,
+       "credit_balance": 0,
+       "net_balance": 0,
+       "as_of_date": "2026-11-26T19:59:42.672217562Z"
+      },
+      {
+       "account_id": 99,
+       "account_code": "4130",
+       "account_name": "Catering Sales",
+       "account_type": "revenue",
+       "normal_balance": "credit",
+       "debit_balance": 0,
+       "credit_balance": 0,
+       "net_balance": 0,
+       "as_of_date": "2026-11-26T19:59:42.672217562Z"
+      },
+      {
+       "account_id": 100,
+       "account_code": "4140",
+       "account_name": "Service Charge Revenue",
+       "account_type": "revenue",
+       "normal_balance": "credit",
+       "debit_balance": 0,
+       "credit_balance": 0,
+       "net_balance": 0,
+       "as_of_date": "2026-11-26T19:59:42.672217562Z"
+      },
+      {
+       "account_id": 101,
+       "account_code": "4150",
+       "account_name": "Sales Discounts",
+       "account_type": "revenue",
+       "normal_balance": "debit",
+       "debit_balance": 0,
+       "credit_balance": 0,
+       "net_balance": 0,
+       "as_of_date": "2026-11-26T19:59:42.672217562Z"
+      },
+      {
+       "account_id": 103,
+       "account_code": "5110",
+       "account_name": "Food COGS",
+       "account_type": "expense",
+       "normal_balance": "debit",
+       "debit_balance": 125120,
+       "credit_balance": 0,
+       "net_balance": 125120,
+       "as_of_date": "2026-11-26T19:59:42.672217562Z"
+      },
+      {
+       "account_id": 104,
+       "account_code": "5120",
+       "account_name": "Beverage COGS",
+       "account_type": "expense",
+       "normal_balance": "debit",
+       "debit_balance": 0,
+       "credit_balance": 0,
+       "net_balance": 0,
+       "as_of_date": "2026-11-26T19:59:42.672217562Z"
+      },
+      {
+       "account_id": 105,
+       "account_code": "5130",
+       "account_name": "Packaging COGS",
+       "account_type": "expense",
+       "normal_balance": "debit",
+       "debit_balance": 0,
+       "credit_balance": 0,
+       "net_balance": 0,
+       "as_of_date": "2026-11-26T19:59:42.672217562Z"
+      },
+      {
+       "account_id": 107,
+       "account_code": "5210",
+       "account_name": "Salaries Expense",
+       "account_type": "expense",
+       "normal_balance": "debit",
+       "debit_balance": 10000,
+       "credit_balance": 0,
+       "net_balance": 10000,
+       "as_of_date": "2026-11-26T19:59:42.672217562Z"
+      },
+      {
+       "account_id": 108,
+       "account_code": "5220",
+       "account_name": "Overtime Expense",
+       "account_type": "expense",
+       "normal_balance": "debit",
+       "debit_balance": 0,
+       "credit_balance": 0,
+       "net_balance": 0,
+       "as_of_date": "2026-11-26T19:59:42.672217562Z"
+      },
+      {
+       "account_id": 109,
+       "account_code": "5230",
+       "account_name": "Benefits Expense",
+       "account_type": "expense",
+       "normal_balance": "debit",
+       "debit_balance": 0,
+       "credit_balance": 0,
+       "net_balance": 0,
+       "as_of_date": "2026-11-26T19:59:42.672217562Z"
+      },
+      {
+       "account_id": 111,
+       "account_code": "5310",
+       "account_name": "Rent Expense",
+       "account_type": "expense",
+       "normal_balance": "debit",
+       "debit_balance": 3000,
+       "credit_balance": 0,
+       "net_balance": 3000,
+       "as_of_date": "2026-11-26T19:59:42.672217562Z"
+      },
+      {
+       "account_id": 112,
+       "account_code": "5320",
+       "account_name": "Utilities Expense",
+       "account_type": "expense",
+       "normal_balance": "debit",
+       "debit_balance": 0,
+       "credit_balance": 0,
+       "net_balance": 0,
+       "as_of_date": "2026-11-26T19:59:42.672217562Z"
+      },
+      {
+       "account_id": 113,
+       "account_code": "5330",
+       "account_name": "Cleaning Expense",
+       "account_type": "expense",
+       "normal_balance": "debit",
+       "debit_balance": 0,
+       "credit_balance": 0,
+       "net_balance": 0,
+       "as_of_date": "2026-11-26T19:59:42.672217562Z"
+      },
+      {
+       "account_id": 115,
+       "account_code": "5410",
+       "account_name": "Advertising Expense",
+       "account_type": "expense",
+       "normal_balance": "debit",
+       "debit_balance": 0,
+       "credit_balance": 0,
+       "net_balance": 0,
+       "as_of_date": "2026-11-26T19:59:42.672217562Z"
+      },
+      {
+       "account_id": 116,
+       "account_code": "5420",
+       "account_name": "Promotions Expense",
+       "account_type": "expense",
+       "normal_balance": "debit",
+       "debit_balance": 0,
+       "credit_balance": 0,
+       "net_balance": 0,
+       "as_of_date": "2026-11-26T19:59:42.672217562Z"
+      },
+      {
+       "account_id": 118,
+       "account_code": "5510",
+       "account_name": "Office Supplies",
+       "account_type": "expense",
+       "normal_balance": "debit",
+       "debit_balance": 0,
+       "credit_balance": 0,
+       "net_balance": 0,
+       "as_of_date": "2026-11-26T19:59:42.672217562Z"
+      },
+      {
+       "account_id": 119,
+       "account_code": "5520",
+       "account_name": "Bank Fees",
+       "account_type": "expense",
+       "normal_balance": "debit",
+       "debit_balance": 0,
+       "credit_balance": 0,
+       "net_balance": 0,
+       "as_of_date": "2026-11-26T19:59:42.672217562Z"
+      },
+      {
+       "account_id": 120,
+       "account_code": "5530",
+       "account_name": "Repairs and Maintenance",
+       "account_type": "expense",
+       "normal_balance": "debit",
+       "debit_balance": 0,
+       "credit_balance": 0,
+       "net_balance": 0,
+       "as_of_date": "2026-11-26T19:59:42.672217562Z"
+      },
+      {
+       "account_id": 121,
+       "account_code": "5540",
+       "account_name": "Insurance Expense",
+       "account_type": "expense",
+       "normal_balance": "debit",
+       "debit_balance": 0,
+       "credit_balance": 0,
+       "net_balance": 0,
+       "as_of_date": "2026-11-26T19:59:42.672217562Z"
+      },
+      {
+       "account_id": 122,
+       "account_code": "5550",
+       "account_name": "Depreciation Expense",
+       "account_type": "expense",
+       "normal_balance": "debit",
+       "debit_balance": 0,
+       "credit_balance": 0,
+       "net_balance": 0,
+       "as_of_date": "2026-11-26T19:59:42.672217562Z"
+      },
+      {
+       "account_id": 123,
+       "account_code": "5560",
+       "account_name": "Delivery Commission Expense",
+       "account_type": "expense",
+       "normal_balance": "debit",
+       "debit_balance": 0,
+       "credit_balance": 0,
+       "net_balance": 0,
+       "as_of_date": "2026-11-26T19:59:42.672217562Z"
+      },
+      {
+       "account_id": 124,
+       "account_code": "5570",
+       "account_name": "Miscellaneous Expense",
+       "account_type": "expense",
+       "normal_balance": "debit",
+       "debit_balance": 0,
+       "credit_balance": 0,
+       "net_balance": 0,
+       "as_of_date": "2026-11-26T19:59:42.672217562Z"
+      }
+     ],
+     "total_credit": 443110.01,
+     "total_debit": 443110.01
+    },
+    "success": true
+   }
+  }
+ }
+}

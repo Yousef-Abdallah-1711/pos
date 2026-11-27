@@ -1,0 +1,16 @@
+tenants=2
+users=6
+restaurants=2
+orders=0
+journal_entries=0
+general_ledger=0
+products=6
+chart_of_accounts=62
+schema_migrations=145
+1||2026-11-01 20:31:53.982731
+2|yoseabdallah8666@gmail.com|2026-11-25 19:27:40.991073
+172.18.0.0/16
+pos-dev_postgres_data->/var/lib/postgresql/data 
+ENV=development
+DB_NAME=pos_saas
+DB_USER=postgres

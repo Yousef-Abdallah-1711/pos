@@ -1,0 +1,11 @@
+R4 = {}
+R4['F-077'] = dict(
+    design='Proposed: remove syncBrandColorsToActiveTheme (frontend/apps/dashboard/src/app/[locale]/dashboard/settings/appearance/page.tsx:38-95) from the personal Appearance save; keep the per-user light/dark preference only. If brand colours must stay in step with the public theme, expose them as one tenant-level setting inside the Theme Builder (permission: theme edit) and have the Appearance page link to it. The backend PUT /admin/themes/{id} should require the theme module WRITE permission (check the wrapWithPermission for the route) and record who changed the theme.',
+    alternatives='A: single owner of brand colours in the Theme Builder (recommended). B: keep the sync but ask for confirmation and show the diff (still two writers).',
+    acceptance=['Saving Appearance leaves the active themes_v2 row (config and updated_at) unchanged.', 'A colour saved in the Theme Builder persists after any Appearance save.', 'A user without theme-edit permission cannot change public colours through any screen.'],
+    proposed_files=[], api=['no API change; PUT /admin/themes/{id} is no longer called from Appearance'], policy='Who may change public branding (owner decision).', migration='No.', historical='None.')
+R4['F-078'] = dict(
+    design='Proposed: call invalidatePublicThemeCacheByRestaurant(restaurantID) (backend/internal/handler/http/theme_public_cache.go:45) from the theme activate, update, delete and restore handlers after the database commit; replace the storefront fixed revalidate (frontend/apps/restaurant-website/app/[locale]/page.tsx:75,131, 3,600 s) with tag-based revalidation triggered by the same events (or reduce it to 60 s); keep Cache-Control max-age small (<= 60 s) for the theme endpoint.',
+    alternatives='A: invalidate on write + short HTTP cache (recommended). B: shorten the TTL only (still stale for the TTL).',
+    acceptance=['After activate or save the public theme endpoint returns the new values within 2 s (test polls at 1 s).', 'The storefront shows the new theme within 60 s.', 'No stale payload survives a deleted theme.'],
+    proposed_files=[], api=['unchanged'], policy='None.', migration='No.', historical='None.')

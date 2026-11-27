@@ -1,0 +1,149 @@
+{
+ "run": "RUN-003",
+ "results": [
+  {
+   "route": "categories/new",
+   "label": "category",
+   "fieldCount": 5,
+   "filled": [
+    "name=Audit UI category",
+    "name_ar=Audit UI category",
+    "description=Audit UI category",
+    "description_ar=Audit UI category",
+    "display_order=12"
+   ],
+   "submitClicked": true,
+   "toast": "",
+   "mutations": [
+    {
+     "m": "POST",
+     "u": "/categories",
+     "s": 400,
+     "req": "{\"name\":\"Audit UI category\",\"name_ar\":\"Audit UI category\",\"description\":\"Audit UI category\",\"description_ar\":\"Audit UI category\",\"display_order\":\"12\",\"is_active\":true}",
+     "b": "{\"error\":\"Invalid request body\"}"
+    }
+   ]
+  },
+  {
+   "route": "products/new",
+   "label": "product",
+   "fieldCount": 9,
+   "filled": [
+    "name_en=Audit UI product",
+    "name_ar=Audit UI product",
+    "description_en=Audit UI product",
+    "description_ar=Audit UI product",
+    "price=12",
+    "cost=12",
+    "discount_price=12",
+    "quantity_in_stock=12",
+    "low_stock_threshold=12"
+   ],
+   "submitClicked": true,
+   "toast": "Products",
+   "mutations": [
+    {
+     "m": "POST",
+     "u": "/products",
+     "s": 201,
+     "req": "------WebKitFormBoundaryEfyYA8aODIWiP0Gd\r\nContent-Disposition: form-data; name=\"data\"\r\n\r\n{\"name_en\":\"Audit UI product\",\"name_ar\":\"Audit UI product\",\"category_id\":0,\"description_en\":\"Audit UI product\",\"description_ar\":\"Audit UI product\",\"price\":12,\"cost\":12,\"discount_price\":12,\"quantity_in_stock\":12,",
+     "b": "{\"id\":18,\"tenant_id\":4,\"restaurant_id\":4,\"category_id\":0,\"name_en\":\"Audit UI product\",\"name_ar\":\"Audit UI product\",\"description_en\":\"Audit UI product\",\"description_ar\":\"Audit UI product\",\"price\":12,\"cost\":12,\"discount_pr"
+    }
+   ]
+  },
+  {
+   "route": "drivers/new",
+   "label": "driver",
+   "fieldCount": 12,
+   "filled": [
+    "first_name=Audit UI driver",
+    "last_name=Audit UI driver",
+    "email=ui.driver@example.test",
+    "phone_number=+201000000555",
+    "license_number=UI475867",
+    "vehicle_number=UI475886",
+    "date_of_birth=2026-11-26",
+    "address=Audit UI driver",
+    "city=Audit UI driver",
+    "state=Audit UI driver",
+    "zip_code=UI475972",
+    "notes=Audit UI driver"
+   ],
+   "submitClicked": true,
+   "toast": "",
+   "mutations": []
+  },
+  {
+   "route": "accounting/customers",
+   "label": "customer",
+   "fieldCount": 1,
+   "filled": [
+    "Search customers by code, name, or contact=UI488797"
+   ],
+   "submitClicked": false,
+   "toast": "",
+   "mutations": []
+  },
+  {
+   "route": "accounting/suppliers",
+   "label": "supplier",
+   "fieldCount": 1,
+   "filled": [
+    "Search suppliers by code, name, or contact=UI500727"
+   ],
+   "submitClicked": false,
+   "toast": "",
+   "mutations": []
+  },
+  {
+   "route": "accounting/bank-accounts",
+   "label": "bank account",
+   "fieldCount": 10,
+   "filled": [
+    "Main operating account=Audit UI bank account",
+    "الحساب البنكي الرئيسي=Audit UI bank account",
+    "National Bank of Egypt=Audit UI bank account",
+    "Maadi branch=Audit UI bank account",
+    "001234567890=Audit UI bank account",
+    "EG380019000500000000263180002=Audit UI bank account",
+    "NBEGEGCX=Audit UI bank account",
+    "EGP=Audit UI bank account",
+    "0.00=12",
+    "date=2026-11-26"
+   ],
+   "submitClicked": true,
+   "toast": "",
+   "mutations": [
+    {
+     "m": "POST",
+     "u": "/accounting/bank-accounts",
+     "s": 400,
+     "req": "{\"account_name\":\"Audit UI bank account\",\"account_name_ar\":\"Audit UI bank account\",\"bank_name\":\"Audit UI bank account\",\"bank_branch\":\"Audit UI bank account\",\"account_number\":\"Audit UI bank account\",\"iban\":\"Audit UI bank account\",\"swift_code\":\"Audit UI bank account\",\"currency\":\"Audit UI bank account\",",
+     "b": "{\"error\":\"pq: value too long for type character varying(11)\",\"success\":false}\n"
+    }
+   ]
+  },
+  {
+   "route": "tables",
+   "label": "table",
+   "fieldCount": 4,
+   "filled": [
+    "table_number=12",
+    "capacity=12",
+    "name=Audit UI table",
+    "description=Audit UI table"
+   ],
+   "submitClicked": true,
+   "toast": "",
+   "mutations": [
+    {
+     "m": "POST",
+     "u": "/tables",
+     "s": 201,
+     "req": "{\"table_number\":12,\"name\":\"Audit UI table\",\"capacity\":12,\"location\":\"indoor\",\"shape\":\"square\",\"description\":\"Audit UI table\"}",
+     "b": "{\"data\":{\"id\":3,\"tenant_id\":4,\"restaurant_id\":4,\"table_number\":12,\"name\":\"Audit UI table\",\"capacity\":12,\"location\":\"indoor\",\"status\":\"available\",\"description\":\"Audit UI table\",\"qr_code_config\":{},\"position_x\":0,\"position"
+    }
+   ]
+  }
+ ]
+}

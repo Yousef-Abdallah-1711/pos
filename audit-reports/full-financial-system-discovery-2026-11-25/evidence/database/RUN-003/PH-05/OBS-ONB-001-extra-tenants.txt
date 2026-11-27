@@ -1,0 +1,2 @@
+6|probe.s2-click-450ms-after-typing@example.test|0|0|0
+7|probe.s3-click-1500ms-wait-for-check@example.test|0|0|0

@@ -1,0 +1,9 @@
+# REL-026 Redis stopped
+health -> {"db_healthy":true,"db_status":"ok","status":"ok","uptime_sec":61}
+ [200]
+login (existing cookie jar) session check -> 000
+new login -> 000
+POS order create -> 000
+mark paid order 6 -> 000
+after restart health: 200
+fresh login -> 200

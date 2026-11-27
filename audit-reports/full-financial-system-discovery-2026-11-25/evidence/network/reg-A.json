@@ -1,0 +1,26 @@
+[
+ {
+  "m": "GET",
+  "u": "/api/v1/auth/check-subdomain?slug=audit-a-resto",
+  "s": 200,
+  "body": "{\"available\":true,\"message\":\"Subdomain is available\",\"slug\":\"audit-a-resto\"}"
+ },
+ {
+  "m": "POST",
+  "u": "/api/v1/auth/register",
+  "s": 201,
+  "body": ""
+ },
+ {
+  "m": "GET",
+  "u": "/api/v1/auth/session",
+  "s": 401,
+  "body": ""
+ },
+ {
+  "m": "GET",
+  "u": "/api/v1/auth/session",
+  "s": 200,
+  "body": "{\"email\":\"audit.a.owner@example.test\",\"id\":2,\"is_super_admin\":false,\"name\":\"Audit Owner A\",\"restaurant_id\":2,\"restaurant_name\":\"Audit A Restaurant\",\"role\":\"owner\",\"tenant_id\":2,\"user_id\":2}"
+ }
+]

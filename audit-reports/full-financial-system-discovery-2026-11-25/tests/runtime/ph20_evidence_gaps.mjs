@@ -1,0 +1,20 @@
+// RUN-003 / PH-20: raw evidence for F-010 (VAT report), F-011 (inventory valuation), F-016 (payroll default window), F-023 (POS currency symbol). Read-only. Tenant 4 owner, HEADED Chrome.
+import fs from 'fs';
+import { openChrome, ensureLoggedIn, evidenceDirs, DASH } from './chrome_lib.mjs';
+const d = evidenceDirs('PH-20');
+const { ctx, page } = await openChrome();
+await ensureLoggedIn(page, 'audit.c.owner@example.test', `${DASH}/en/dashboard/reports/financial`);
+const bodies = {}; const want = /vat|valuation|salar|payroll/i;
+page.on('response', async (r) => { const u = r.url(); if (u.includes(':18082') && r.request().method() === 'GET' && want.test(u)) { try { bodies[u.replace('http://localhost:18082/api/v1', '')] = { status: r.status(), body: (await r.text()).slice(0, 6000) }; } catch {} } });
+const visit = async (id, path, wait = 6000) => { await page.goto(`${DASH}/en/dashboard/${path}`, { waitUntil: 'domcontentloaded', timeout: 120000 }); await page.waitForTimeout(wait); await page.screenshot({ path: `${d.shot}/${id}.png`, fullPage: true }); return (await page.locator('body').innerText()); };
+const out = {};
+out.pos = await visit('AUD-EVD-F023-pos', 'pos'); out.pos_dollar = (out.pos.match(/[^\n]*\$[^\n]*/g) || []).slice(0, 8); out.pos_egp = /EGP|ج\.م/.test(out.pos);
+out.vat = await visit('AUD-EVD-F010-vat-report', 'reports/financial/vat');
+out.inv = await visit('AUD-EVD-F011-inventory-valuation', 'reports/financial/inventory-valuation');
+out.pay = await visit('AUD-EVD-F016-payroll-default', 'hr/payroll');
+for (const k of ['vat', 'inv', 'pay']) out[k] = out[k].slice(0, 1800);
+out.pos = out.pos.slice(0, 600);
+fs.writeFileSync(`${d.net}/AUD-EVD-gaps.json`, JSON.stringify({ run: 'RUN-003', tenant: 4, role: 'owner', visibleText: out, apiBodies: bodies }, null, 1));
+console.log(JSON.stringify({ pos_dollar: out.pos_dollar, pos_egp: out.pos_egp, apis: Object.keys(bodies) }, null, 1));
+console.log('--VAT--\n' + out.vat.slice(0, 700)); console.log('--INV--\n' + out.inv.slice(0, 700)); console.log('--PAY--\n' + out.pay.slice(0, 700));
+await ctx.close();

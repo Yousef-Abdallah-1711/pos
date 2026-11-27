@@ -1,0 +1,9 @@
+tenants before=4 after=5
+new tenant_id=5
+BOOTSTRAP STATE AFTER REGISTRATION (no seeding performed)
+coa|0
+auto_posting_rules|0
+fiscal_periods|0
+tax_periods|0
+users|1
+restaurants|1

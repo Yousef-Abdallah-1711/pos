@@ -1,0 +1,16 @@
+tenantA COA fixture applied 22:46:46
+# REL-020 tenant A recovery: COA fixture applied 22:46:46Z; retry window 22:58:54Z
+ order_id |  status   | attempts | err |         updated_at         
+----------+-----------+----------+-----+----------------------------
+        1 | completed |        6 |     | 2026-11-25 22:59:09.813216
+(1 row)
+
+ entry_number  | entry_type | entry_date | account_code | debit_amount | credit_amount 
+---------------+------------+------------+--------------+--------------+---------------
+ JE-2026-00001 | auto_sales | 2026-11-25 | 1110         |     11000.00 |          0.00
+ JE-2026-00001 | auto_sales | 2026-11-25 | 2120         |         0.00 |       1000.00
+ JE-2026-00001 | auto_sales | 2026-11-25 | 4100         |         0.00 |      10000.00
+ JE-2026-00002 | auto_cogs  | 2026-11-25 | 1130         |         0.00 |       4000.00
+ JE-2026-00002 | auto_cogs  | 2026-11-25 | 5110         |      4000.00 |          0.00
+(5 rows)
+

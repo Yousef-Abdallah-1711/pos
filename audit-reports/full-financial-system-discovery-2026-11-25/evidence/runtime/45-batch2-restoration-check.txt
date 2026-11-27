@@ -1,0 +1,32 @@
+== batch2 restoration 2026-11-26T01:43:47Z
+133260db66b1143c254d79476daa7650b41a33f0
+ M frontend/apps/dashboard/tsconfig.json
+ M frontend/apps/landing/tsconfig.json
+ M frontend/apps/restaurant-website/next-env.d.ts
+ M frontend/apps/restaurant-website/tsconfig.json
+ M frontend/apps/super-admin/next-env.d.ts
+ M frontend/apps/super-admin/tsconfig.json
+?? writing-block.md
+stash@{0}: On master: local edits before reset to origin/master 2026-11-25
+stash@{1}: On master: pre-pull local changes 2026-11-25
+3001 307
+3002 307
+3003 307
+3004 200
+8080 404
+tenants=2
+users=6
+restaurants=2
+orders=0
+journal_entries=0
+general_ledger=0
+products=6
+chart_of_accounts=62
+schema_migrations=145
+pos-landing Up 35 seconds
+pos-dashboard Up 34 seconds
+pos-restaurant-website Up 34 seconds
+pos-super-admin Up 34 seconds
+pos-backend Up 56 seconds
+pos-postgres Up 46 minutes (healthy)
+18

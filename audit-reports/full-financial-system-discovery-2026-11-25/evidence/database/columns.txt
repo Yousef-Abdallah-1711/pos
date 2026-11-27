@@ -1,0 +1,870 @@
+account_budgets|id|integer|32|0|NO|nextval('account_budgets_id_seq'::regclass)
+account_budgets|tenant_id|integer|32|0|NO|
+account_budgets|restaurant_id|integer|32|0|NO|
+account_budgets|account_id|integer|32|0|NO|
+account_budgets|fiscal_year|integer|32|0|NO|
+account_budgets|period_month|integer|32|0|NO|
+account_budgets|budget_amount|numeric|15|2|NO|0
+account_budgets|actual_amount|numeric|15|2|NO|0
+account_budgets|currency|character varying|||NO|'EGP'::character varying
+account_budgets|notes|text|||YES|
+account_budgets|created_at|timestamp without time zone|||NO|CURRENT_TIMESTAMP
+account_budgets|updated_at|timestamp without time zone|||NO|CURRENT_TIMESTAMP
+accounting_event_outbox|id|bigint|64|0|NO|nextval('accounting_event_outbox_id_seq'::regclass)
+accounting_event_outbox|event_id|character varying|||NO|
+accounting_event_outbox|event_type|character varying|||NO|
+accounting_event_outbox|tenant_id|bigint|64|0|NO|
+accounting_event_outbox|restaurant_id|bigint|64|0|NO|
+accounting_event_outbox|order_id|bigint|64|0|NO|
+accounting_event_outbox|posted_by|bigint|64|0|YES|
+accounting_event_outbox|status|character varying|||NO|'pending'::character varying
+accounting_event_outbox|attempts|smallint|16|0|NO|0
+accounting_event_outbox|max_attempts|smallint|16|0|NO|8
+accounting_event_outbox|next_attempt_at|timestamp without time zone|||NO|CURRENT_TIMESTAMP
+accounting_event_outbox|lease_expires_at|timestamp without time zone|||YES|
+accounting_event_outbox|last_error|text|||YES|
+accounting_event_outbox|created_at|timestamp without time zone|||NO|CURRENT_TIMESTAMP
+accounting_event_outbox|updated_at|timestamp without time zone|||NO|CURRENT_TIMESTAMP
+accounting_event_outbox|completed_at|timestamp without time zone|||YES|
+accounting_event_outbox|lease_generation|bigint|64|0|NO|0
+accounting_event_redrive_audit|id|bigint|64|0|NO|nextval('accounting_event_redrive_audit_id_seq'::regclass)
+accounting_event_redrive_audit|outbox_id|bigint|64|0|NO|
+accounting_event_redrive_audit|actor_user_id|bigint|64|0|NO|
+accounting_event_redrive_audit|previous_attempts|smallint|16|0|NO|
+accounting_event_redrive_audit|previous_error|text|||NO|
+accounting_event_redrive_audit|reason|text|||NO|
+accounting_event_redrive_audit|created_at|timestamp without time zone|||NO|CURRENT_TIMESTAMP
+accounting_inventory_movement_events|tenant_id|bigint|64|0|NO|
+accounting_inventory_movement_events|restaurant_id|bigint|64|0|NO|
+accounting_inventory_movement_events|order_id|bigint|64|0|NO|
+accounting_inventory_movement_events|product_id|bigint|64|0|NO|
+accounting_inventory_movement_events|created_at|timestamp without time zone|||NO|CURRENT_TIMESTAMP
+audit_export_logs|id|integer|32|0|NO|nextval('audit_export_logs_id_seq'::regclass)
+audit_export_logs|tenant_id|integer|32|0|NO|
+audit_export_logs|restaurant_id|integer|32|0|NO|
+audit_export_logs|export_type|character varying|||NO|
+audit_export_logs|export_format|character varying|||NO|
+audit_export_logs|params_json|jsonb|||NO|'{}'::jsonb
+audit_export_logs|row_count|integer|32|0|NO|0
+audit_export_logs|generated_at|timestamp without time zone|||NO|CURRENT_TIMESTAMP
+audit_export_logs|generated_by|integer|32|0|YES|
+auto_posting_rules|id|integer|32|0|NO|nextval('auto_posting_rules_id_seq'::regclass)
+auto_posting_rules|tenant_id|integer|32|0|NO|
+auto_posting_rules|restaurant_id|integer|32|0|NO|
+auto_posting_rules|rule_code|character varying|||NO|
+auto_posting_rules|rule_name|character varying|||NO|
+auto_posting_rules|description|text|||YES|
+auto_posting_rules|is_active|boolean|||NO|true
+auto_posting_rules|default_accounts|jsonb|||NO|'{}'::jsonb
+auto_posting_rules|created_at|timestamp without time zone|||NO|CURRENT_TIMESTAMP
+auto_posting_rules|updated_at|timestamp without time zone|||NO|CURRENT_TIMESTAMP
+bank_accounts_ledger|id|integer|32|0|NO|nextval('bank_accounts_ledger_id_seq'::regclass)
+bank_accounts_ledger|tenant_id|integer|32|0|NO|
+bank_accounts_ledger|restaurant_id|integer|32|0|NO|
+bank_accounts_ledger|account_name|character varying|||NO|
+bank_accounts_ledger|account_name_ar|character varying|||YES|
+bank_accounts_ledger|bank_name|character varying|||NO|
+bank_accounts_ledger|bank_branch|character varying|||YES|
+bank_accounts_ledger|account_number|character varying|||NO|
+bank_accounts_ledger|iban|character varying|||YES|
+bank_accounts_ledger|swift_code|character varying|||YES|
+bank_accounts_ledger|currency|character varying|||NO|'EGP'::character varying
+bank_accounts_ledger|account_type|character varying|||NO|'checking'::character varying
+bank_accounts_ledger|opening_balance|numeric|15|2|NO|0.00
+bank_accounts_ledger|current_balance|numeric|15|2|NO|0.00
+bank_accounts_ledger|opening_date|date|||NO|
+bank_accounts_ledger|gl_account_id|integer|32|0|YES|
+bank_accounts_ledger|is_active|boolean|||NO|true
+bank_accounts_ledger|is_primary|boolean|||NO|false
+bank_accounts_ledger|last_reconciled_date|date|||YES|
+bank_accounts_ledger|last_reconciled_balance|numeric|15|2|YES|
+bank_accounts_ledger|created_at|timestamp without time zone|||NO|CURRENT_TIMESTAMP
+bank_accounts_ledger|updated_at|timestamp without time zone|||NO|CURRENT_TIMESTAMP
+bank_accounts_ledger|created_by|integer|32|0|YES|
+bank_accounts_ledger|updated_by|integer|32|0|YES|
+bank_reconciliation_lines|id|integer|32|0|NO|nextval('bank_reconciliation_lines_id_seq'::regclass)
+bank_reconciliation_lines|reconciliation_id|integer|32|0|NO|
+bank_reconciliation_lines|tenant_id|integer|32|0|NO|
+bank_reconciliation_lines|journal_entry_id|integer|32|0|YES|
+bank_reconciliation_lines|line_description|text|||YES|
+bank_reconciliation_lines|statement_amount|numeric|15|2|NO|
+bank_reconciliation_lines|book_amount|numeric|15|2|NO|
+bank_reconciliation_lines|match_status|character varying|||NO|'matched'::character varying
+bank_reconciliation_lines|created_at|timestamp without time zone|||NO|CURRENT_TIMESTAMP
+bank_reconciliation_sessions|id|integer|32|0|NO|nextval('bank_reconciliation_sessions_id_seq'::regclass)
+bank_reconciliation_sessions|tenant_id|integer|32|0|NO|
+bank_reconciliation_sessions|restaurant_id|integer|32|0|NO|
+bank_reconciliation_sessions|bank_account_id|integer|32|0|NO|
+bank_reconciliation_sessions|statement_date|date|||NO|
+bank_reconciliation_sessions|statement_balance|numeric|15|2|NO|
+bank_reconciliation_sessions|book_balance|numeric|15|2|NO|0
+bank_reconciliation_sessions|difference|numeric|15|2|NO|0
+bank_reconciliation_sessions|status|character varying|||NO|'draft'::character varying
+bank_reconciliation_sessions|notes|text|||YES|
+bank_reconciliation_sessions|completed_at|timestamp without time zone|||YES|
+bank_reconciliation_sessions|completed_by|integer|32|0|YES|
+bank_reconciliation_sessions|created_at|timestamp without time zone|||NO|CURRENT_TIMESTAMP
+bank_reconciliation_sessions|updated_at|timestamp without time zone|||NO|CURRENT_TIMESTAMP
+bank_reconciliation_sessions|created_by|integer|32|0|YES|
+bank_reconciliation_sessions|updated_by|integer|32|0|YES|
+chart_of_accounts|id|integer|32|0|NO|nextval('chart_of_accounts_id_seq'::regclass)
+chart_of_accounts|tenant_id|integer|32|0|NO|
+chart_of_accounts|restaurant_id|integer|32|0|NO|
+chart_of_accounts|account_code|character varying|||NO|
+chart_of_accounts|account_name|character varying|||NO|
+chart_of_accounts|account_name_ar|character varying|||YES|
+chart_of_accounts|description|text|||YES|
+chart_of_accounts|description_ar|text|||YES|
+chart_of_accounts|account_type|character varying|||NO|
+chart_of_accounts|account_subtype|character varying|||YES|
+chart_of_accounts|normal_balance|character varying|||NO|'debit'::character varying
+chart_of_accounts|parent_id|integer|32|0|YES|
+chart_of_accounts|level|integer|32|0|NO|1
+chart_of_accounts|is_header|boolean|||NO|false
+chart_of_accounts|current_balance|numeric|15|2|NO|0.00
+chart_of_accounts|currency|character varying|||NO|'EGP'::character varying
+chart_of_accounts|is_active|boolean|||NO|true
+chart_of_accounts|is_system|boolean|||NO|false
+chart_of_accounts|is_reconcilable|boolean|||NO|false
+chart_of_accounts|tax_rate|numeric|5|2|YES|
+chart_of_accounts|created_at|timestamp without time zone|||NO|CURRENT_TIMESTAMP
+chart_of_accounts|updated_at|timestamp without time zone|||NO|CURRENT_TIMESTAMP
+chart_of_accounts|created_by|integer|32|0|YES|
+chart_of_accounts|updated_by|integer|32|0|YES|
+customers_accounting|id|integer|32|0|NO|nextval('customers_accounting_id_seq'::regclass)
+customers_accounting|tenant_id|integer|32|0|NO|
+customers_accounting|restaurant_id|integer|32|0|NO|
+customers_accounting|customer_code|character varying|||NO|
+customers_accounting|customer_name|character varying|||NO|
+customers_accounting|customer_name_ar|character varying|||YES|
+customers_accounting|customer_type|character varying|||YES|'individual'::character varying
+customers_accounting|contact_person|character varying|||YES|
+customers_accounting|email|character varying|||YES|
+customers_accounting|phone|character varying|||YES|
+customers_accounting|mobile|character varying|||YES|
+customers_accounting|address|text|||YES|
+customers_accounting|address_ar|text|||YES|
+customers_accounting|city|character varying|||YES|
+customers_accounting|country|character varying|||YES|'Egypt'::character varying
+customers_accounting|tax_number|character varying|||YES|
+customers_accounting|payment_terms|character varying|||YES|'immediate'::character varying
+customers_accounting|credit_limit|numeric|15|2|YES|0.00
+customers_accounting|current_balance|numeric|15|2|YES|0.00
+customers_accounting|currency|character varying|||YES|'EGP'::character varying
+customers_accounting|receivable_account_id|integer|32|0|YES|
+customers_accounting|notes|text|||YES|
+customers_accounting|is_active|boolean|||NO|true
+customers_accounting|created_at|timestamp without time zone|||NO|CURRENT_TIMESTAMP
+customers_accounting|updated_at|timestamp without time zone|||NO|CURRENT_TIMESTAMP
+customers_accounting|created_by|integer|32|0|YES|
+customers_accounting|updated_by|integer|32|0|YES|
+e_invoice_submissions|id|integer|32|0|NO|nextval('e_invoice_submissions_id_seq'::regclass)
+e_invoice_submissions|tenant_id|integer|32|0|NO|
+e_invoice_submissions|restaurant_id|integer|32|0|NO|
+e_invoice_submissions|invoice_type|character varying|||NO|
+e_invoice_submissions|invoice_id|integer|32|0|NO|
+e_invoice_submissions|eta_uuid|character varying|||YES|
+e_invoice_submissions|status|character varying|||NO|'pending'::character varying
+e_invoice_submissions|submitted_at|timestamp without time zone|||NO|CURRENT_TIMESTAMP
+e_invoice_submissions|response_payload|jsonb|||NO|'{}'::jsonb
+e_invoice_submissions|error_message|text|||YES|
+e_invoice_submissions|created_by|integer|32|0|YES|
+employees|id|integer|32|0|NO|nextval('employees_id_seq'::regclass)
+employees|tenant_id|integer|32|0|NO|
+employees|restaurant_id|integer|32|0|NO|
+employees|employee_code|character varying|||NO|
+employees|first_name|character varying|||NO|
+employees|last_name|character varying|||NO|
+employees|first_name_ar|character varying|||YES|
+employees|last_name_ar|character varying|||YES|
+employees|email|character varying|||NO|
+employees|phone|character varying|||YES|
+employees|date_of_birth|date|||YES|
+employees|gender|character varying|||YES|
+employees|national_id|character varying|||YES|
+employees|address|text|||YES|
+employees|city|character varying|||YES|
+employees|state|character varying|||YES|
+employees|postal_code|character varying|||YES|
+employees|country|character varying|||YES|'Egypt'::character varying
+employees|hire_date|date|||NO|
+employees|termination_date|date|||YES|
+employees|employment_type|character varying|||NO|
+employees|employment_status|character varying|||NO|'active'::character varying
+employees|position|character varying|||NO|
+employees|department|character varying|||YES|
+employees|manager_id|integer|32|0|YES|
+employees|base_salary|numeric|10|2|NO|0
+employees|salary_currency|character varying|||YES|'EGP'::character varying
+employees|payment_frequency|character varying|||YES|'monthly'::character varying
+employees|working_hours_per_week|numeric|5|2|YES|40.00
+employees|shift_type|character varying|||YES|'day'::character varying
+employees|emergency_contact_name|character varying|||YES|
+employees|emergency_contact_phone|character varying|||YES|
+employees|emergency_contact_relationship|character varying|||YES|
+employees|profile_image_url|text|||YES|
+employees|documents|jsonb|||YES|'[]'::jsonb
+employees|notes|text|||YES|
+employees|is_active|boolean|||NO|true
+employees|created_at|timestamp with time zone|||YES|CURRENT_TIMESTAMP
+employees|updated_at|timestamp with time zone|||YES|CURRENT_TIMESTAMP
+employees|created_by|integer|32|0|YES|
+employees|updated_by|integer|32|0|YES|
+employment_contracts|id|integer|32|0|NO|nextval('employment_contracts_id_seq'::regclass)
+employment_contracts|tenant_id|integer|32|0|NO|
+employment_contracts|restaurant_id|integer|32|0|NO|
+employment_contracts|employee_id|integer|32|0|NO|
+employment_contracts|contract_type|character varying|||NO|
+employment_contracts|contract_number|character varying|||NO|
+employment_contracts|start_date|date|||NO|
+employment_contracts|end_date|date|||YES|
+employment_contracts|salary_amount|numeric|12|2|NO|0
+employment_contracts|currency|character varying|||NO|'EGP'::character varying
+employment_contracts|status|character varying|||NO|'active'::character varying
+employment_contracts|renewed_from_id|integer|32|0|YES|
+employment_contracts|notes|text|||YES|
+employment_contracts|created_at|timestamp without time zone|||NO|CURRENT_TIMESTAMP
+employment_contracts|updated_at|timestamp without time zone|||NO|CURRENT_TIMESTAMP
+employment_contracts|created_by|integer|32|0|YES|
+employment_contracts|updated_by|integer|32|0|YES|
+exchange_rates|id|integer|32|0|NO|nextval('exchange_rates_id_seq'::regclass)
+exchange_rates|tenant_id|integer|32|0|NO|
+exchange_rates|restaurant_id|integer|32|0|NO|
+exchange_rates|base_currency|character varying|||NO|
+exchange_rates|quote_currency|character varying|||NO|
+exchange_rates|rate|numeric|18|8|NO|
+exchange_rates|effective_date|date|||NO|
+exchange_rates|source|character varying|||YES|
+exchange_rates|is_active|boolean|||NO|true
+exchange_rates|created_at|timestamp without time zone|||NO|CURRENT_TIMESTAMP
+exchange_rates|updated_at|timestamp without time zone|||NO|CURRENT_TIMESTAMP
+fiscal_periods|id|integer|32|0|NO|nextval('fiscal_periods_id_seq'::regclass)
+fiscal_periods|tenant_id|integer|32|0|NO|
+fiscal_periods|restaurant_id|integer|32|0|NO|
+fiscal_periods|period_name|character varying|||NO|
+fiscal_periods|period_type|character varying|||NO|
+fiscal_periods|start_date|date|||NO|
+fiscal_periods|end_date|date|||NO|
+fiscal_periods|status|character varying|||NO|'open'::character varying
+fiscal_periods|closed_at|timestamp without time zone|||YES|
+fiscal_periods|closed_by|integer|32|0|YES|
+fiscal_periods|created_at|timestamp without time zone|||NO|CURRENT_TIMESTAMP
+fixed_assets|id|integer|32|0|NO|nextval('fixed_assets_id_seq'::regclass)
+fixed_assets|tenant_id|integer|32|0|NO|
+fixed_assets|restaurant_id|integer|32|0|NO|
+fixed_assets|asset_code|character varying|||NO|
+fixed_assets|asset_name|character varying|||NO|
+fixed_assets|category|character varying|||NO|'general'::character varying
+fixed_assets|purchase_date|date|||NO|
+fixed_assets|capitalization_date|date|||YES|
+fixed_assets|purchase_cost|numeric|14|2|NO|
+fixed_assets|salvage_value|numeric|14|2|NO|0
+fixed_assets|useful_life_months|integer|32|0|NO|
+fixed_assets|depreciation_method|character varying|||NO|'straight_line'::character varying
+fixed_assets|depreciation_start_date|date|||YES|
+fixed_assets|accumulated_depreciation|numeric|14|2|NO|0
+fixed_assets|is_active|boolean|||NO|true
+fixed_assets|notes|text|||YES|
+fixed_assets|created_at|timestamp without time zone|||NO|CURRENT_TIMESTAMP
+fixed_assets|updated_at|timestamp without time zone|||NO|CURRENT_TIMESTAMP
+general_ledger|id|integer|32|0|NO|nextval('general_ledger_id_seq'::regclass)
+general_ledger|tenant_id|integer|32|0|NO|
+general_ledger|restaurant_id|integer|32|0|NO|
+general_ledger|account_id|integer|32|0|NO|
+general_ledger|journal_entry_id|integer|32|0|NO|
+general_ledger|journal_line_id|integer|32|0|NO|
+general_ledger|entry_date|date|||NO|
+general_ledger|fiscal_period|character varying|||NO|
+general_ledger|debit_amount|numeric|15|2|YES|0.00
+general_ledger|credit_amount|numeric|15|2|YES|0.00
+general_ledger|running_balance|numeric|15|2|NO|0.00
+general_ledger|created_at|timestamp without time zone|||NO|CURRENT_TIMESTAMP
+hr_audit_logs|id|integer|32|0|NO|nextval('hr_audit_logs_id_seq'::regclass)
+hr_audit_logs|tenant_id|integer|32|0|NO|
+hr_audit_logs|restaurant_id|integer|32|0|NO|
+hr_audit_logs|entity_type|character varying|||NO|
+hr_audit_logs|entity_id|integer|32|0|NO|
+hr_audit_logs|entity_name|character varying|||YES|
+hr_audit_logs|action|character varying|||NO|
+hr_audit_logs|action_description|text|||YES|
+hr_audit_logs|old_values|jsonb|||YES|
+hr_audit_logs|new_values|jsonb|||YES|
+hr_audit_logs|changed_fields|ARRAY|||YES|
+hr_audit_logs|user_id|integer|32|0|YES|
+hr_audit_logs|user_name|character varying|||YES|
+hr_audit_logs|user_email|character varying|||YES|
+hr_audit_logs|user_role|character varying|||YES|
+hr_audit_logs|ip_address|character varying|||YES|
+hr_audit_logs|user_agent|text|||YES|
+hr_audit_logs|request_method|character varying|||YES|
+hr_audit_logs|request_url|text|||YES|
+hr_audit_logs|reason|text|||YES|
+hr_audit_logs|notes|text|||YES|
+hr_audit_logs|metadata|jsonb|||YES|'{}'::jsonb
+hr_audit_logs|created_at|timestamp with time zone|||YES|CURRENT_TIMESTAMP
+inventory|id|integer|32|0|NO|nextval('inventory_id_seq'::regclass)
+inventory|product_id|integer|32|0|NO|
+inventory|quantity_change|integer|32|0|NO|
+inventory|quantity_after|integer|32|0|NO|
+inventory|reason|character varying|||NO|
+inventory|notes|text|||YES|
+inventory|created_by|integer|32|0|YES|
+inventory|created_at|timestamp without time zone|||YES|CURRENT_TIMESTAMP
+inventory_movements|id|integer|32|0|NO|nextval('inventory_movements_id_seq'::regclass)
+inventory_movements|tenant_id|integer|32|0|NO|
+inventory_movements|restaurant_id|integer|32|0|NO|
+inventory_movements|product_id|integer|32|0|NO|
+inventory_movements|order_id|bigint|64|0|YES|
+inventory_movements|reference_type|character varying|||YES|
+inventory_movements|reference_id|integer|32|0|YES|
+inventory_movements|movement_type|character varying|||NO|
+inventory_movements|quantity|numeric|12|3|NO|
+inventory_movements|unit_cost|numeric|15|2|NO|0.00
+inventory_movements|total_cost|numeric|15|2|NO|0.00
+inventory_movements|notes|text|||YES|
+inventory_movements|created_at|timestamp without time zone|||NO|CURRENT_TIMESTAMP
+inventory_movements|created_by|integer|32|0|YES|
+invoice_customer_lines|id|integer|32|0|NO|nextval('invoice_customer_lines_id_seq'::regclass)
+invoice_customer_lines|invoice_id|integer|32|0|NO|
+invoice_customer_lines|tenant_id|integer|32|0|NO|
+invoice_customer_lines|description|character varying|||NO|
+invoice_customer_lines|description_ar|character varying|||YES|
+invoice_customer_lines|quantity|numeric|10|3|NO|1
+invoice_customer_lines|unit_price|numeric|15|2|NO|0.00
+invoice_customer_lines|tax_rate|numeric|5|2|NO|0.00
+invoice_customer_lines|tax_amount|numeric|15|2|NO|0.00
+invoice_customer_lines|discount_rate|numeric|5|2|NO|0.00
+invoice_customer_lines|discount_amount|numeric|15|2|NO|0.00
+invoice_customer_lines|line_total|numeric|15|2|NO|0.00
+invoice_customer_lines|account_id|integer|32|0|YES|
+invoice_customer_lines|line_order|integer|32|0|NO|0
+invoice_customer_lines|created_at|timestamp without time zone|||NO|CURRENT_TIMESTAMP
+invoice_supplier_lines|id|integer|32|0|NO|nextval('invoice_supplier_lines_id_seq'::regclass)
+invoice_supplier_lines|invoice_id|integer|32|0|NO|
+invoice_supplier_lines|tenant_id|integer|32|0|NO|
+invoice_supplier_lines|description|character varying|||NO|
+invoice_supplier_lines|description_ar|character varying|||YES|
+invoice_supplier_lines|quantity|numeric|10|3|NO|1
+invoice_supplier_lines|unit_price|numeric|15|2|NO|0.00
+invoice_supplier_lines|tax_rate|numeric|5|2|NO|0.00
+invoice_supplier_lines|tax_amount|numeric|15|2|NO|0.00
+invoice_supplier_lines|discount_rate|numeric|5|2|NO|0.00
+invoice_supplier_lines|discount_amount|numeric|15|2|NO|0.00
+invoice_supplier_lines|line_total|numeric|15|2|NO|0.00
+invoice_supplier_lines|account_id|integer|32|0|YES|
+invoice_supplier_lines|line_order|integer|32|0|NO|0
+invoice_supplier_lines|created_at|timestamp without time zone|||NO|CURRENT_TIMESTAMP
+invoices_customer|id|integer|32|0|NO|nextval('invoices_customer_id_seq'::regclass)
+invoices_customer|tenant_id|integer|32|0|NO|
+invoices_customer|restaurant_id|integer|32|0|NO|
+invoices_customer|invoice_number|character varying|||NO|
+invoices_customer|invoice_date|date|||NO|
+invoices_customer|due_date|date|||NO|
+invoices_customer|customer_id|integer|32|0|NO|
+invoices_customer|order_id|bigint|64|0|YES|
+invoices_customer|subtotal|numeric|15|2|NO|0.00
+invoices_customer|tax_amount|numeric|15|2|NO|0.00
+invoices_customer|discount_amount|numeric|15|2|NO|0.00
+invoices_customer|total_amount|numeric|15|2|NO|0.00
+invoices_customer|amount_paid|numeric|15|2|NO|0.00
+invoices_customer|balance_due|numeric|15|2|NO|0.00
+invoices_customer|currency|character varying|||NO|'EGP'::character varying
+invoices_customer|status|character varying|||NO|'draft'::character varying
+invoices_customer|notes|text|||YES|
+invoices_customer|terms|text|||YES|
+invoices_customer|internal_notes|text|||YES|
+invoices_customer|journal_entry_id|integer|32|0|YES|
+invoices_customer|created_at|timestamp without time zone|||NO|CURRENT_TIMESTAMP
+invoices_customer|updated_at|timestamp without time zone|||NO|CURRENT_TIMESTAMP
+invoices_customer|created_by|integer|32|0|YES|
+invoices_customer|updated_by|integer|32|0|YES|
+invoices_supplier|id|integer|32|0|NO|nextval('invoices_supplier_id_seq'::regclass)
+invoices_supplier|tenant_id|integer|32|0|NO|
+invoices_supplier|restaurant_id|integer|32|0|NO|
+invoices_supplier|invoice_number|character varying|||NO|
+invoices_supplier|supplier_ref|character varying|||YES|
+invoices_supplier|invoice_date|date|||NO|
+invoices_supplier|due_date|date|||NO|
+invoices_supplier|supplier_id|integer|32|0|NO|
+invoices_supplier|subtotal|numeric|15|2|NO|0.00
+invoices_supplier|tax_amount|numeric|15|2|NO|0.00
+invoices_supplier|discount_amount|numeric|15|2|NO|0.00
+invoices_supplier|total_amount|numeric|15|2|NO|0.00
+invoices_supplier|amount_paid|numeric|15|2|NO|0.00
+invoices_supplier|balance_due|numeric|15|2|NO|0.00
+invoices_supplier|currency|character varying|||NO|'EGP'::character varying
+invoices_supplier|status|character varying|||NO|'draft'::character varying
+invoices_supplier|notes|text|||YES|
+invoices_supplier|internal_notes|text|||YES|
+invoices_supplier|journal_entry_id|integer|32|0|YES|
+invoices_supplier|created_at|timestamp without time zone|||NO|CURRENT_TIMESTAMP
+invoices_supplier|updated_at|timestamp without time zone|||NO|CURRENT_TIMESTAMP
+invoices_supplier|created_by|integer|32|0|YES|
+invoices_supplier|updated_by|integer|32|0|YES|
+journal_entries|id|integer|32|0|NO|nextval('journal_entries_id_seq'::regclass)
+journal_entries|tenant_id|integer|32|0|NO|
+journal_entries|restaurant_id|integer|32|0|NO|
+journal_entries|entry_number|character varying|||NO|
+journal_entries|entry_date|date|||NO|
+journal_entries|fiscal_period|character varying|||YES|
+journal_entries|description|text|||NO|
+journal_entries|description_ar|text|||YES|
+journal_entries|reference_type|character varying|||YES|
+journal_entries|reference_id|integer|32|0|YES|
+journal_entries|reference_number|character varying|||YES|
+journal_entries|entry_type|character varying|||NO|'manual'::character varying
+journal_entries|total_debit|numeric|15|2|NO|0.00
+journal_entries|total_credit|numeric|15|2|NO|0.00
+journal_entries|status|character varying|||NO|'draft'::character varying
+journal_entries|posted_at|timestamp without time zone|||YES|
+journal_entries|posted_by|integer|32|0|YES|
+journal_entries|voided_at|timestamp without time zone|||YES|
+journal_entries|voided_by|integer|32|0|YES|
+journal_entries|void_reason|text|||YES|
+journal_entries|is_approved|boolean|||NO|false
+journal_entries|approved_by|integer|32|0|YES|
+journal_entries|approved_at|timestamp without time zone|||YES|
+journal_entries|notes|text|||YES|
+journal_entries|attachments|jsonb|||YES|
+journal_entries|created_at|timestamp without time zone|||NO|CURRENT_TIMESTAMP
+journal_entries|updated_at|timestamp without time zone|||NO|CURRENT_TIMESTAMP
+journal_entries|created_by|integer|32|0|YES|
+journal_entries|updated_by|integer|32|0|YES|
+journal_entry_lines|id|integer|32|0|NO|nextval('journal_entry_lines_id_seq'::regclass)
+journal_entry_lines|journal_entry_id|integer|32|0|NO|
+journal_entry_lines|tenant_id|integer|32|0|NO|
+journal_entry_lines|account_id|integer|32|0|NO|
+journal_entry_lines|account_code|character varying|||NO|
+journal_entry_lines|debit_amount|numeric|15|2|NO|0.00
+journal_entry_lines|credit_amount|numeric|15|2|NO|0.00
+journal_entry_lines|description|text|||YES|
+journal_entry_lines|description_ar|text|||YES|
+journal_entry_lines|line_order|integer|32|0|NO|0
+journal_entry_lines|tax_code|character varying|||YES|
+journal_entry_lines|tax_amount|numeric|15|2|YES|0.00
+journal_entry_lines|created_at|timestamp without time zone|||NO|CURRENT_TIMESTAMP
+order_item_cancellations|tenant_id|bigint|64|0|NO|
+order_item_cancellations|restaurant_id|bigint|64|0|NO|
+order_item_cancellations|order_id|bigint|64|0|NO|
+order_item_cancellations|item_id|bigint|64|0|NO|
+order_item_cancellations|request_key|uuid|||NO|
+order_item_cancellations|quantity|integer|32|0|NO|
+order_item_cancellations|reason|text|||NO|
+order_item_cancellations|actor_id|bigint|64|0|NO|
+order_item_cancellations|created_at|timestamp with time zone|||NO|CURRENT_TIMESTAMP
+order_items|id|bigint|64|0|NO|nextval('order_items_id_seq'::regclass)
+order_items|order_id|bigint|64|0|NO|
+order_items|product_id|bigint|64|0|NO|
+order_items|variant_id|bigint|64|0|YES|
+order_items|product_name|character varying|||NO|
+order_items|variant_name|character varying|||YES|
+order_items|quantity|integer|32|0|NO|1
+order_items|unit_price|numeric|10|2|NO|
+order_items|discount_amount|numeric|10|2|YES|0
+order_items|total_price|numeric|10|2|NO|
+order_items|special_instructions|text|||YES|
+order_items|addons|json|||YES|
+order_items|created_at|timestamp without time zone|||YES|CURRENT_TIMESTAMP
+order_items|updated_at|timestamp without time zone|||YES|CURRENT_TIMESTAMP
+order_items|restaurant_id|bigint|64|0|NO|
+order_items|tenant_id|bigint|64|0|NO|
+order_items|cancelled_quantity|integer|32|0|NO|0
+order_status_history|id|bigint|64|0|NO|nextval('order_status_history_id_seq'::regclass)
+order_status_history|order_id|bigint|64|0|NO|
+order_status_history|old_status|character varying|||YES|
+order_status_history|new_status|character varying|||NO|
+order_status_history|changed_by|bigint|64|0|YES|
+order_status_history|change_reason|text|||YES|
+order_status_history|created_at|timestamp without time zone|||YES|CURRENT_TIMESTAMP
+order_stock_reservations|order_id|bigint|64|0|NO|
+order_stock_reservations|tenant_id|bigint|64|0|NO|
+order_stock_reservations|restaurant_id|bigint|64|0|NO|
+order_stock_reservations|product_id|bigint|64|0|NO|
+order_stock_reservations|quantity|bigint|64|0|NO|
+order_stock_reservations|released|boolean|||NO|false
+order_stock_reservations|released_quantity|bigint|64|0|NO|0
+order_stock_reservations|reserved_at|timestamp with time zone|||NO|CURRENT_TIMESTAMP
+order_stock_reservations|released_at|timestamp with time zone|||YES|
+orders|id|bigint|64|0|NO|nextval('orders_id_seq'::regclass)
+orders|tenant_id|bigint|64|0|NO|
+orders|restaurant_id|bigint|64|0|NO|
+orders|order_number|character varying|||NO|
+orders|customer_name|character varying|||NO|
+orders|customer_email|character varying|||YES|
+orders|customer_phone|character varying|||NO|
+orders|delivery_address|text|||YES|
+orders|delivery_city|character varying|||YES|
+orders|delivery_area|character varying|||YES|
+orders|delivery_zip_code|character varying|||YES|
+orders|delivery_latitude|numeric|10|8|YES|
+orders|delivery_longitude|numeric|11|8|YES|
+orders|delivery_instructions|text|||YES|
+orders|subtotal|numeric|10|2|NO|
+orders|tax_amount|numeric|10|2|YES|0
+orders|discount_amount|numeric|10|2|YES|0
+orders|delivery_fee|numeric|10|2|YES|0
+orders|total_amount|numeric|10|2|NO|
+orders|payment_method|character varying|||YES|
+orders|payment_status|character varying|||YES|'pending'::character varying
+orders|status|character varying|||YES|'pending'::character varying
+orders|estimated_delivery_time|timestamp without time zone|||YES|
+orders|actual_delivery_time|timestamp without time zone|||YES|
+orders|notes|text|||YES|
+orders|order_source|character varying|||YES|'website'::character varying
+orders|created_at|timestamp without time zone|||YES|CURRENT_TIMESTAMP
+orders|updated_at|timestamp without time zone|||YES|CURRENT_TIMESTAMP
+orders|table_id|bigint|64|0|YES|
+orders|public_token_hash|character varying|||YES|
+payments|id|bigint|64|0|NO|nextval('payments_id_seq'::regclass)
+payments|tenant_id|bigint|64|0|NO|
+payments|user_id|bigint|64|0|YES|
+payments|amount_cents|integer|32|0|NO|
+payments|currency|character varying|||NO|'EGP'::character varying
+payments|status|character varying|||NO|'pending'::character varying
+payments|paymob_order_id|bigint|64|0|YES|
+payments|paymob_transaction_id|bigint|64|0|YES|
+payments|paymob_auth_token|text|||YES|
+payments|payment_method|character varying|||YES|
+payments|card_last_four|character varying|||YES|
+payments|card_brand|character varying|||YES|
+payments|billing_name|character varying|||YES|
+payments|billing_email|character varying|||YES|
+payments|billing_phone|character varying|||YES|
+payments|plan_id|character varying|||YES|'monthly'::character varying
+payments|plan_period_start|timestamp without time zone|||YES|
+payments|plan_period_end|timestamp without time zone|||YES|
+payments|error_message|text|||YES|
+payments|error_code|character varying|||YES|
+payments|merchant_order_id|character varying|||YES|
+payments|metadata|jsonb|||YES|'{}'::jsonb
+payments|created_at|timestamp without time zone|||YES|CURRENT_TIMESTAMP
+payments|updated_at|timestamp without time zone|||YES|CURRENT_TIMESTAMP
+payments|paid_at|timestamp without time zone|||YES|
+payments|refund_state|text|||NO|'none'::text
+payments|refund_error|text|||YES|
+payments_made|id|integer|32|0|NO|nextval('payments_made_id_seq'::regclass)
+payments_made|tenant_id|integer|32|0|NO|
+payments_made|restaurant_id|integer|32|0|NO|
+payments_made|payment_number|character varying|||NO|
+payments_made|payment_date|date|||NO|
+payments_made|supplier_id|integer|32|0|NO|
+payments_made|invoice_id|integer|32|0|YES|
+payments_made|amount|numeric|15|2|NO|
+payments_made|payment_method|character varying|||NO|
+payments_made|reference|character varying|||YES|
+payments_made|bank_account_id|integer|32|0|YES|
+payments_made|notes|text|||YES|
+payments_made|journal_entry_id|integer|32|0|YES|
+payments_made|status|character varying|||NO|'completed'::character varying
+payments_made|created_at|timestamp without time zone|||NO|CURRENT_TIMESTAMP
+payments_made|updated_at|timestamp without time zone|||NO|CURRENT_TIMESTAMP
+payments_made|created_by|integer|32|0|YES|
+payments_received|id|integer|32|0|NO|nextval('payments_received_id_seq'::regclass)
+payments_received|tenant_id|integer|32|0|NO|
+payments_received|restaurant_id|integer|32|0|NO|
+payments_received|payment_number|character varying|||NO|
+payments_received|payment_date|date|||NO|
+payments_received|customer_id|integer|32|0|NO|
+payments_received|invoice_id|integer|32|0|YES|
+payments_received|amount|numeric|15|2|NO|
+payments_received|payment_method|character varying|||NO|
+payments_received|reference|character varying|||YES|
+payments_received|bank_account_id|integer|32|0|YES|
+payments_received|notes|text|||YES|
+payments_received|journal_entry_id|integer|32|0|YES|
+payments_received|status|character varying|||NO|'completed'::character varying
+payments_received|created_at|timestamp without time zone|||NO|CURRENT_TIMESTAMP
+payments_received|updated_at|timestamp without time zone|||NO|CURRENT_TIMESTAMP
+payments_received|created_by|integer|32|0|YES|
+permission_audit_logs|id|bigint|64|0|NO|nextval('permission_audit_logs_id_seq'::regclass)
+permission_audit_logs|tenant_id|bigint|64|0|NO|
+permission_audit_logs|admin_id|bigint|64|0|NO|
+permission_audit_logs|user_id|bigint|64|0|YES|
+permission_audit_logs|role_id|bigint|64|0|YES|
+permission_audit_logs|module_id|bigint|64|0|YES|
+permission_audit_logs|action|character varying|||NO|
+permission_audit_logs|details|jsonb|||YES|'{}'::jsonb
+permission_audit_logs|ip_address|inet|||YES|
+permission_audit_logs|user_agent|text|||YES|
+permission_audit_logs|created_at|timestamp without time zone|||YES|CURRENT_TIMESTAMP
+product_audit_log|id|integer|32|0|NO|nextval('product_audit_log_id_seq'::regclass)
+product_audit_log|product_id|integer|32|0|YES|
+product_audit_log|category_id|integer|32|0|YES|
+product_audit_log|action|character varying|||NO|
+product_audit_log|old_values|jsonb|||YES|
+product_audit_log|new_values|jsonb|||YES|
+product_audit_log|changed_fields|ARRAY|||YES|
+product_audit_log|changed_by|integer|32|0|NO|
+product_audit_log|ip_address|character varying|||YES|
+product_audit_log|user_agent|text|||YES|
+product_audit_log|created_at|timestamp without time zone|||YES|CURRENT_TIMESTAMP
+products|id|integer|32|0|NO|nextval('products_id_seq'::regclass)
+products|tenant_id|integer|32|0|NO|
+products|restaurant_id|integer|32|0|NO|
+products|category_id|integer|32|0|YES|
+products|name|character varying|||NO|
+products|description|text|||YES|
+products|price|numeric|10|2|NO|
+products|cost|numeric|10|2|YES|
+products|image_url|character varying|||YES|
+products|calories|integer|32|0|YES|
+products|ingredients|text|||YES|
+products|allergens|text|||YES|
+products|is_vegetarian|boolean|||YES|false
+products|is_vegan|boolean|||YES|false
+products|available|boolean|||YES|true
+products|display_order|integer|32|0|YES|0
+products|created_at|timestamp without time zone|||YES|CURRENT_TIMESTAMP
+products|updated_at|timestamp without time zone|||YES|CURRENT_TIMESTAMP
+products|name_en|character varying|||YES|
+products|name_ar|character varying|||YES|
+products|description_en|text|||YES|
+products|description_ar|text|||YES|
+products|sku|character varying|||YES|
+products|barcode|character varying|||YES|
+products|discount_price|numeric|10|2|YES|
+products|discount_percentage|numeric|5|2|YES|
+products|protein_g|numeric|6|2|YES|
+products|carbs_g|numeric|6|2|YES|
+products|fat_g|numeric|6|2|YES|
+products|fiber_g|numeric|6|2|YES|
+products|is_spicy|boolean|||YES|false
+products|is_gluten_free|boolean|||YES|false
+products|is_available|boolean|||YES|true
+products|available_from|time without time zone|||YES|
+products|available_until|time without time zone|||YES|
+products|available_days|json|||YES|
+products|track_inventory|boolean|||YES|true
+products|quantity_in_stock|integer|32|0|YES|0
+products|low_stock_threshold|integer|32|0|YES|10
+products|reorder_quantity|integer|32|0|YES|50
+products|featured|boolean|||YES|false
+products|main_image_url|character varying|||YES|
+products|status|character varying|||YES|'active'::character varying
+products|created_by|integer|32|0|YES|
+products|updated_by|integer|32|0|YES|
+recurring_journal_templates|id|integer|32|0|NO|nextval('recurring_journal_templates_id_seq'::regclass)
+recurring_journal_templates|tenant_id|integer|32|0|NO|
+recurring_journal_templates|restaurant_id|integer|32|0|NO|
+recurring_journal_templates|template_code|character varying|||NO|
+recurring_journal_templates|template_name|character varying|||NO|
+recurring_journal_templates|description|text|||YES|
+recurring_journal_templates|frequency|character varying|||NO|
+recurring_journal_templates|start_date|date|||NO|
+recurring_journal_templates|next_run_date|date|||NO|
+recurring_journal_templates|last_run_date|date|||YES|
+recurring_journal_templates|is_active|boolean|||NO|true
+recurring_journal_templates|auto_post|boolean|||NO|false
+recurring_journal_templates|lines_json|jsonb|||NO|'[]'::jsonb
+recurring_journal_templates|created_at|timestamp without time zone|||NO|CURRENT_TIMESTAMP
+recurring_journal_templates|updated_at|timestamp without time zone|||NO|CURRENT_TIMESTAMP
+recurring_journal_templates|created_by|integer|32|0|YES|
+recurring_journal_templates|updated_by|integer|32|0|YES|
+report_export_audit_logs|id|bigint|64|0|NO|nextval('report_export_audit_logs_id_seq'::regclass)
+report_export_audit_logs|tenant_id|bigint|64|0|NO|
+report_export_audit_logs|restaurant_id|bigint|64|0|NO|
+report_export_audit_logs|user_id|bigint|64|0|NO|
+report_export_audit_logs|report_type|character varying|||NO|
+report_export_audit_logs|format|character varying|||NO|
+report_export_audit_logs|file_name|character varying|||YES|
+report_export_audit_logs|exported_bytes|integer|32|0|NO|0
+report_export_audit_logs|filters|jsonb|||NO|'{}'::jsonb
+report_export_audit_logs|request_path|text|||YES|
+report_export_audit_logs|user_agent|text|||YES|
+report_export_audit_logs|ip_address|character varying|||YES|
+report_export_audit_logs|created_at|timestamp without time zone|||NO|CURRENT_TIMESTAMP
+restaurant_settings|id|bigint|64|0|NO|nextval('restaurant_settings_id_seq'::regclass)
+restaurant_settings|restaurant_id|bigint|64|0|NO|
+restaurant_settings|created_at|timestamp without time zone|||YES|CURRENT_TIMESTAMP
+restaurant_settings|updated_at|timestamp without time zone|||YES|CURRENT_TIMESTAMP
+restaurant_settings|enable_orders|boolean|||YES|true
+restaurant_settings|enable_delivery|boolean|||YES|false
+restaurant_settings|enable_takeaway|boolean|||YES|true
+restaurant_settings|enable_reservations|boolean|||YES|false
+restaurant_settings|delivery_fee|numeric|10|2|YES|0
+restaurant_settings|min_order_value|numeric|10|2|YES|0
+restaurant_settings|max_order_value|numeric|10|2|YES|
+restaurant_settings|estimated_prep_time|integer|32|0|YES|30
+restaurant_settings|default_language|character varying|||YES|'en'::character varying
+restaurant_settings|opening_time|time without time zone|||YES|
+restaurant_settings|closing_time|time without time zone|||YES|
+restaurant_settings|closed_days|json|||YES|
+restaurant_settings|enable_order_notifications|boolean|||YES|true
+restaurant_settings|order_notification_email|character varying|||YES|
+restaurant_settings|enable_sms_notifications|boolean|||YES|false
+restaurant_settings|sms_notification_number|character varying|||YES|
+restaurants|id|integer|32|0|NO|nextval('restaurants_id_seq'::regclass)
+restaurants|tenant_id|integer|32|0|NO|
+restaurants|name|character varying|||NO|
+restaurants|slug|character varying|||NO|
+restaurants|description|text|||YES|
+restaurants|logo_url|character varying|||YES|
+restaurants|hero_image_url|character varying|||YES|
+restaurants|email|character varying|||YES|
+restaurants|phone|character varying|||YES|
+restaurants|address|text|||NO|
+restaurants|city|character varying|||YES|
+restaurants|latitude|numeric|10|8|YES|
+restaurants|longitude|numeric|11|8|YES|
+restaurants|opening_time|time without time zone|||YES|
+restaurants|closing_time|time without time zone|||YES|
+restaurants|cuisine_type|character varying|||YES|
+restaurants|website_url|character varying|||YES|
+restaurants|theme|character varying|||YES|'modern-default'::character varying
+restaurants|website_enabled|boolean|||YES|true
+restaurants|pos_enabled|boolean|||YES|true
+restaurants|delivery_enabled|boolean|||YES|true
+restaurants|reservation_enabled|boolean|||YES|true
+restaurants|status|character varying|||YES|'active'::character varying
+restaurants|created_at|timestamp without time zone|||YES|CURRENT_TIMESTAMP
+restaurants|updated_at|timestamp without time zone|||YES|CURRENT_TIMESTAMP
+salaries|id|integer|32|0|NO|nextval('salaries_id_seq'::regclass)
+salaries|tenant_id|integer|32|0|NO|
+salaries|restaurant_id|integer|32|0|NO|
+salaries|employee_id|integer|32|0|NO|
+salaries|pay_period_start|date|||NO|
+salaries|pay_period_end|date|||NO|
+salaries|payment_date|date|||YES|
+salaries|month|integer|32|0|NO|
+salaries|year|integer|32|0|NO|
+salaries|base_salary|numeric|10|2|NO|0
+salaries|currency|character varying|||YES|'EGP'::character varying
+salaries|overtime_hours|numeric|5|2|YES|0
+salaries|overtime_rate|numeric|10|2|YES|0
+salaries|overtime_amount|numeric|10|2|YES|0
+salaries|bonus|numeric|10|2|YES|0
+salaries|commission|numeric|10|2|YES|0
+salaries|allowances|numeric|10|2|YES|0
+salaries|tips|numeric|10|2|YES|0
+salaries|other_earnings|numeric|10|2|YES|0
+salaries|earnings_details|jsonb|||YES|'{}'::jsonb
+salaries|tax|numeric|10|2|YES|0
+salaries|social_insurance|numeric|10|2|YES|0
+salaries|health_insurance|numeric|10|2|YES|0
+salaries|pension|numeric|10|2|YES|0
+salaries|loan_deduction|numeric|10|2|YES|0
+salaries|advance_deduction|numeric|10|2|YES|0
+salaries|other_deductions|numeric|10|2|YES|0
+salaries|deductions_details|jsonb|||YES|'{}'::jsonb
+salaries|gross_salary|numeric|10|2|NO|0
+salaries|total_deductions|numeric|10|2|NO|0
+salaries|net_salary|numeric|10|2|NO|0
+salaries|days_worked|integer|32|0|YES|0
+salaries|days_absent|integer|32|0|YES|0
+salaries|total_hours_worked|numeric|8|2|YES|0
+salaries|total_overtime_hours|numeric|8|2|YES|0
+salaries|payment_method|character varying|||YES|'bank_transfer'::character varying
+salaries|payment_reference|character varying|||YES|
+salaries|bank_account_number|character varying|||YES|
+salaries|bank_name|character varying|||YES|
+salaries|status|character varying|||NO|'pending'::character varying
+salaries|is_paid|boolean|||YES|false
+salaries|paid_at|timestamp with time zone|||YES|
+salaries|paid_by|integer|32|0|YES|
+salaries|is_approved|boolean|||YES|false
+salaries|approved_by|integer|32|0|YES|
+salaries|approved_at|timestamp with time zone|||YES|
+salaries|approval_notes|text|||YES|
+salaries|notes|text|||YES|
+salaries|calculation_notes|text|||YES|
+salaries|created_at|timestamp with time zone|||YES|CURRENT_TIMESTAMP
+salaries|updated_at|timestamp with time zone|||YES|CURRENT_TIMESTAMP
+salaries|created_by|integer|32|0|YES|
+salaries|updated_by|integer|32|0|YES|
+supplier_payment_schedules|id|integer|32|0|NO|nextval('supplier_payment_schedules_id_seq'::regclass)
+supplier_payment_schedules|tenant_id|integer|32|0|NO|
+supplier_payment_schedules|restaurant_id|integer|32|0|NO|
+supplier_payment_schedules|supplier_invoice_id|integer|32|0|YES|
+supplier_payment_schedules|supplier_id|integer|32|0|NO|
+supplier_payment_schedules|scheduled_date|date|||NO|
+supplier_payment_schedules|amount|numeric|15|2|NO|
+supplier_payment_schedules|currency|character varying|||NO|'EGP'::character varying
+supplier_payment_schedules|reminder_days|integer|32|0|NO|7
+supplier_payment_schedules|status|character varying|||NO|'scheduled'::character varying
+supplier_payment_schedules|reminder_sent_at|timestamp without time zone|||YES|
+supplier_payment_schedules|notes|text|||YES|
+supplier_payment_schedules|created_at|timestamp without time zone|||NO|CURRENT_TIMESTAMP
+supplier_payment_schedules|updated_at|timestamp without time zone|||NO|CURRENT_TIMESTAMP
+supplier_payment_schedules|created_by|integer|32|0|YES|
+supplier_payment_schedules|updated_by|integer|32|0|YES|
+suppliers|id|integer|32|0|NO|nextval('suppliers_id_seq'::regclass)
+suppliers|tenant_id|integer|32|0|NO|
+suppliers|restaurant_id|integer|32|0|NO|
+suppliers|supplier_code|character varying|||NO|
+suppliers|company_name|character varying|||NO|
+suppliers|company_name_ar|character varying|||YES|
+suppliers|contact_person|character varying|||YES|
+suppliers|email|character varying|||YES|
+suppliers|phone|character varying|||YES|
+suppliers|mobile|character varying|||YES|
+suppliers|website|character varying|||YES|
+suppliers|address|text|||YES|
+suppliers|address_ar|text|||YES|
+suppliers|city|character varying|||YES|
+suppliers|state|character varying|||YES|
+suppliers|postal_code|character varying|||YES|
+suppliers|country|character varying|||YES|'Egypt'::character varying
+suppliers|tax_number|character varying|||YES|
+suppliers|payment_terms|character varying|||YES|'net_30'::character varying
+suppliers|credit_limit|numeric|15|2|YES|0.00
+suppliers|current_balance|numeric|15|2|YES|0.00
+suppliers|currency|character varying|||YES|'EGP'::character varying
+suppliers|payable_account_id|integer|32|0|YES|
+suppliers|category|character varying|||YES|
+suppliers|bank_name|character varying|||YES|
+suppliers|bank_account|character varying|||YES|
+suppliers|iban|character varying|||YES|
+suppliers|notes|text|||YES|
+suppliers|is_active|boolean|||NO|true
+suppliers|created_at|timestamp without time zone|||NO|CURRENT_TIMESTAMP
+suppliers|updated_at|timestamp without time zone|||NO|CURRENT_TIMESTAMP
+suppliers|created_by|integer|32|0|YES|
+suppliers|updated_by|integer|32|0|YES|
+tax_periods|id|integer|32|0|NO|nextval('tax_periods_id_seq'::regclass)
+tax_periods|tenant_id|integer|32|0|NO|
+tax_periods|restaurant_id|integer|32|0|NO|
+tax_periods|period_name|character varying|||NO|
+tax_periods|period_start|date|||NO|
+tax_periods|period_end|date|||NO|
+tax_periods|output_vat|numeric|15|2|NO|0.00
+tax_periods|input_vat|numeric|15|2|NO|0.00
+tax_periods|net_vat|numeric|15|2|NO|0.00
+tax_periods|status|character varying|||NO|'open'::character varying
+tax_periods|closed_at|timestamp without time zone|||YES|
+tax_periods|closed_by|integer|32|0|YES|
+tax_periods|notes|text|||YES|
+tax_periods|created_at|timestamp without time zone|||NO|CURRENT_TIMESTAMP
+tax_periods|updated_at|timestamp without time zone|||NO|CURRENT_TIMESTAMP
+tenants|id|integer|32|0|NO|nextval('tenants_id_seq'::regclass)
+tenants|name|character varying|||NO|
+tenants|slug|character varying|||NO|
+tenants|domain|character varying|||NO|
+tenants|email|character varying|||YES|
+tenants|phone|character varying|||YES|
+tenants|logo_url|character varying|||YES|
+tenants|subscription_plan|character varying|||YES|'free'::character varying
+tenants|max_restaurants|integer|32|0|YES|1
+tenants|max_users|integer|32|0|YES|5
+tenants|features|jsonb|||YES|'{}'::jsonb
+tenants|settings|jsonb|||YES|'{}'::jsonb
+tenants|is_active|boolean|||YES|true
+tenants|created_at|timestamp without time zone|||YES|CURRENT_TIMESTAMP
+tenants|updated_at|timestamp without time zone|||YES|CURRENT_TIMESTAMP
+tenants|subscription_status|character varying|||YES|'trial'::character varying
+tenants|trial_start_date|timestamp without time zone|||YES|
+tenants|trial_end_date|timestamp without time zone|||YES|
+tenants|trial_days|integer|32|0|YES|14
+tenants|is_disabled|boolean|||YES|false
+tenants|disabled_at|timestamp without time zone|||YES|
+tenants|disabled_by|bigint|64|0|YES|
+tenants|disabled_reason|text|||YES|
+tenants|enabled_at|timestamp without time zone|||YES|
+tenants|grace_period_days|integer|32|0|YES|30
+tenants|deletion_scheduled_at|timestamp without time zone|||YES|
+tenants|subscription_expires_at|timestamp without time zone|||YES|
+tenants|last_payment_at|timestamp without time zone|||YES|
+tenants|last_payment_amount|integer|32|0|YES|
+tenants|last_payment_currency|character varying|||YES|'EGP'::character varying
+tenants|paymob_customer_id|character varying|||YES|
+tenants|subscription_cancelled_at|timestamp without time zone|||YES|
+tenants|preferred_billing_period|character varying|||YES|

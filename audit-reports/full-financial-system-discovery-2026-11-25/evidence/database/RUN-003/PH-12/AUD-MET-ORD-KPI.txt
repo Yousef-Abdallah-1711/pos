@@ -1,0 +1,26 @@
+AUD-MET-ORD-KPI oracles tenant 4 isolated DB 2026-11-26T20:02:04Z
+ all_orders |  sum_all  | cancelled_n | cancelled_sum | delivered_n | created_today 
+------------+-----------+-------------+---------------+-------------+---------------
+         41 | 529100.00 |           3 |      11440.00 |           0 |            30
+(1 row)
+
+-- paid orders (tax-incl) vs GL revenue vs expenses
+ paid_orders_total_taxincl | gl_revenue | gl_expenses 
+---------------------------+------------+-------------
+                 319660.00 |  305300.00 |   138120.00
+(1 row)
+
+-- bank ledger vs GL cash accounts
+ bank_ledger | gl_cash_and_bank 
+-------------+------------------
+    50000.00 |        276270.01
+(1 row)
+
+-- cancelled orders still queued on KDS
+ id | order_status | kds_status 
+----+--------------+------------
+ 42 | cancelled    | new
+ 34 | cancelled    | new
+ 40 | cancelled    | new
+(3 rows)
+

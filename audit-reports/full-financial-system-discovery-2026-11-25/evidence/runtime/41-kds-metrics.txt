@@ -1,0 +1,11 @@
+# KDS metrics (tenant C) API vs DB
+GET /kds/stats -> {"data":{"active_orders":17,"avg_prep_minutes":187.22730075,"completed_today":1,"new_orders":16,"in_progress":1,"ready":0},"success":true}
+GET /kds/analytics -> {"data":{"average_prep_minutes":187.22730075,"total_completed_orders":1,"prep_time_trend":[{"date":"2026-11-20","avg_prep_minutes":0,"completed_orders":0},{"date":"2026-11-21","avg_prep_minutes":0,"completed_orders":0},{"date":"2026-11-22","avg_prep_minutes":0,"completed_orders":0},{"date":"2026-11-23","avg_prep_minutes":0,"completed_orders":0},{"date":"2026-11-24","avg_prep_minutes":0,"completed_orders":0},{"date":"2026-11-25","avg_prep_minutes":0,"completed_orders":0},{"date":"2026-11-26","avg_prep_minutes":187.22730075,"completed_orders":1}],"busiest_hours":[{"hour":0,"order_count":0},{"hou
+DB: kds_orders by status:
+ERROR:  relation "kds_orders" does not exist
+LINE 1: select status,count(*) from kds_orders where tenant_id=4 gro...
+                                    ^
+DB: orders by status: cancelled=1,confirmed=15,pending=15,preparing=1,ready=1
+DB: kds avg prep (completed-started):
+ERROR:  relation "kds_orders" does not exist
+LINE 1: ...m (completed_at-started_at))/60)::numeric,2) from kds_orders...

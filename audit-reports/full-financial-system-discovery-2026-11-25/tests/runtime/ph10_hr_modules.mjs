@@ -1,0 +1,20 @@
+// RUN-003 / PH-10 part 3: contracts, insurance (HR cost), training (compliance), performance, resignations. API-DIAGNOSTIC tenant 4, employee 4.
+import fs from 'fs';
+import { sql, API, PASSWORD, evidenceDirs } from './chrome_lib.mjs';
+const d = evidenceDirs('PH-10'); const O = 'http://localhost:13112';
+const r0 = await fetch(API + '/auth/login', { method: 'POST', headers: { Origin: O, 'Content-Type': 'application/json' }, body: JSON.stringify({ email: 'audit.c.owner@example.test', password: PASSWORD }) });
+const ck = r0.headers.getSetCookie().map((c) => c.split(';')[0]).join('; ');
+const A = async (m, p, b) => { const x = await fetch(API + p, { method: m, headers: { Origin: O, Cookie: ck, 'Content-Type': 'application/json' }, body: b ? JSON.stringify(b) : undefined }); const t = await x.text(); let j; try { j = JSON.parse(t); } catch { j = t.slice(0, 200); } return { status: x.status, body: j }; };
+const log = []; const rec = (id, desc, extra = {}) => { log.push({ id, desc, ...extra }); console.log(id, desc, JSON.stringify(extra).slice(0, 360)); };
+const idOf = (r) => r.body?.data?.id ?? r.body?.id;
+let r = await A('POST', '/hr/contracts', { employee_id: 4, contract_type: 'permanent', contract_number: 'CT-RUN3-1', start_date: '2026-11-01', end_date: '2026-10-01', base_salary: 5000 }); rec('CON-01', 'contract end before start', { http: r.status, resp: JSON.stringify(r.body).slice(0, 200) });
+r = await A('POST', '/hr/contracts', { employee_id: 4, contract_type: 'permanent', contract_number: 'CT-RUN3-2', start_date: '2026-11-01', base_salary: 5000 }); const cid = idOf(r); rec('CON-02', 'valid contract', { http: r.status, id: cid });
+r = await A('POST', '/hr/contracts', { employee_id: 4, contract_type: 'permanent', contract_number: 'CT-RUN3-2', start_date: '2026-11-01', base_salary: 5000 }); rec('CON-03', 'duplicate contract number', { http: r.status, resp: JSON.stringify(r.body).slice(0, 200) });
+r = await A('POST', '/hr/insurance', { employee_id: 4, policy_type: 'health', provider_name: 'Audit Insurer', policy_number: 'POL-RUN3-1', coverage_start: '2026-11-01', coverage_end: '2027-10-31', monthly_premium: 600 }); const iid = idOf(r); rec('INS-01', 'valid insurance policy monthly premium 600', { http: r.status, id: iid });
+const hc = await A('GET', '/reports/hr/cost-analysis?date_from=2026-11-01&date_to=2026-11-30'); rec('INS-02', 'HR cost report insurance term (oracle: 600 x ceil(30/30)=600 for a 30-day window)', { summary: JSON.stringify(hc.body?.data?.summary) });
+const hc2 = await A('GET', '/reports/hr/cost-analysis?date_from=2026-11-01&date_to=2026-12-31'); rec('INS-03', 'HR cost insurance over 61 days (oracle 600 x ceil(61/30)=1800)', { summary: JSON.stringify(hc2.body?.data?.summary) });
+r = await A('POST', '/hr/training', { employee_id: 4, training_title: 'Food safety', training_type: 'certification', start_date: '2026-11-10', end_date: '2026-11-12', status: 'completed', certificate_issued: true }); const tid = idOf(r); rec('TRN-01', 'training completed with certificate', { http: r.status, id: tid });
+const tc = await A('GET', '/reports/hr/training-compliance'); rec('TRN-02', 'compliance report (oracle 1 certified of 1 active = 100%)', { summary: JSON.stringify(tc.body?.data?.summary) });
+r = await A('POST', '/hr/performance', { employee_id: 4, reviewer_id: 4, review_period_start: '2026-10-01', review_period_end: '2026-10-31', overall_rating: 9 }); rec('PRF-01', 'performance review rating 9 (scale check)', { http: r.status, resp: JSON.stringify(r.body).slice(0, 200) });
+r = await A('POST', '/hr/resignations', { employee_id: 4, resignation_date: '2026-11-26', last_working_date: '2026-11-01', reason: 'probe: last working day before resignation' }); rec('RES-01', 'resignation last_working_date before resignation_date', { http: r.status, resp: JSON.stringify(r.body).slice(0, 200) });
+fs.writeFileSync(`${d.db}/AUD-HR-MODULES.json`, JSON.stringify({ run: 'RUN-003', kind: 'API-DIAGNOSTIC', log }, null, 1));

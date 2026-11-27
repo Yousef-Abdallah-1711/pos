@@ -1,0 +1,44 @@
+git status mid-run 2026-11-26T20:50:00Z (HEAD 133260db66b1143c254d79476daa7650b41a33f0); stashes: 2
+ M frontend/apps/dashboard/tsconfig.json
+ M frontend/apps/landing/src/app/marketing.css
+ M frontend/apps/landing/src/components/marketing/CaptureMedia.tsx
+ M frontend/apps/landing/src/components/marketing/ClosingSections.tsx
+ M frontend/apps/landing/src/components/marketing/HomeHero.tsx
+ M frontend/apps/landing/src/components/marketing/HospitalityStory.tsx
+ M frontend/apps/landing/src/components/marketing/ManagementSections.tsx
+ M frontend/apps/landing/src/components/marketing/OperationsSections.tsx
+ M frontend/apps/landing/src/styles/marketing-base.css
+ M frontend/apps/landing/src/styles/marketing-conversion.css
+ M frontend/apps/landing/src/styles/marketing-hero.css
+ M frontend/apps/landing/src/styles/marketing-navigation.css
+ M frontend/apps/landing/src/styles/marketing-product.css
+ M frontend/apps/landing/src/styles/marketing-responsive.css
+ M frontend/apps/landing/tsconfig.json
+ M frontend/apps/restaurant-website/next-env.d.ts
+ M frontend/apps/restaurant-website/tsconfig.json
+ M frontend/apps/super-admin/next-env.d.ts
+ M frontend/apps/super-admin/tsconfig.json
+?? .hallmark/
+?? .playwright-mcp/page-2026-11-26T20-10-18-019Z.yml
+?? .playwright-mcp/page-2026-11-26T20-18-36-921Z.yml
+?? .playwright-mcp/page-2026-11-26T20-18-40-208Z.png
+?? .playwright-mcp/page-2026-11-26T20-18-50-337Z.png
+?? .playwright-mcp/page-2026-11-26T20-19-43-177Z.png
+?? .playwright-mcp/page-2026-11-26T20-20-05-394Z.yml
+?? .playwright-mcp/page-2026-11-26T20-21-02-380Z.yml
+?? .playwright-mcp/page-2026-11-26T20-23-11-515Z.yml
+?? .playwright-mcp/page-2026-11-26T20-24-16-085Z.png
+?? .playwright-mcp/page-2026-11-26T20-30-20-686Z.yml
+?? .playwright-mcp/page-2026-11-26T20-30-33-779Z.png
+?? .playwright-mcp/page-2026-11-26T20-30-59-282Z.yml
+?? .playwright-mcp/page-2026-11-26T20-31-09-751Z.png
+?? .playwright-mcp/page-2026-11-26T20-31-46-101Z.png
+?? .playwright-mcp/page-2026-11-26T20-32-52-215Z.yml
+?? .playwright-mcp/page-2026-11-26T20-38-36-601Z.yml
+?? .playwright-mcp/page-2026-11-26T20-38-50-332Z.png
+?? audit-reports/full-financial-system-discovery-2026-11-25/
+?? docs/superpowers/
+?? frontend/apps/landing/.hallmark/
+?? writing-block.md
+
+Files NOT touched by the audit scripts; landing marketing/.hallmark changes appeared at 22:04-22:38 local time during the run (concurrent edits by another actor/tool). Audit scripts write only under audit-reports/.

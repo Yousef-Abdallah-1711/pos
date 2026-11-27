@@ -1,0 +1,3187 @@
+[
+ {
+  "app": "dashboard",
+  "url": "/",
+  "file": "src/app/page.tsx",
+  "endpoints": [],
+  "unmatched": [],
+  "perms": [],
+  "layouts": [
+   "src/app/layout.tsx"
+  ],
+  "nfiles": 1
+ },
+ {
+  "app": "dashboard",
+  "url": "/[locale]",
+  "file": "src/app/[locale]/page.tsx",
+  "endpoints": [],
+  "unmatched": [],
+  "perms": [],
+  "layouts": [
+   "src/app/[locale]/layout.tsx",
+   "src/app/layout.tsx"
+  ],
+  "nfiles": 17
+ },
+ {
+  "app": "dashboard",
+  "url": "/[locale]/auth/callback",
+  "file": "src/app/[locale]/auth/callback/page.tsx",
+  "endpoints": [],
+  "unmatched": [],
+  "perms": [],
+  "layouts": [
+   "src/app/[locale]/layout.tsx",
+   "src/app/layout.tsx"
+  ],
+  "nfiles": 18
+ },
+ {
+  "app": "dashboard",
+  "url": "/[locale]/auth/super-admin-login",
+  "file": "src/app/[locale]/auth/super-admin-login/page.tsx",
+  "endpoints": [
+   "? /auth/login",
+   "DELETE /rbac/permissions/{}/{}",
+   "DELETE /rbac/roles/{}",
+   "DELETE /rbac/users-by-email/{}/roles/{}",
+   "DELETE /rbac/users/{}/roles/{}",
+   "GET /auth/session",
+   "GET /rbac/check-permission",
+   "GET /rbac/me/permissions",
+   "GET /rbac/me/roles",
+   "GET /rbac/roles",
+   "GET /rbac/roles/{}",
+   "GET /rbac/roles/{}/permissions",
+   "GET /rbac/users-by-email/{}/roles",
+   "GET /rbac/users/{}/roles",
+   "POST /rbac/permissions/assign",
+   "POST /rbac/roles",
+   "POST /rbac/users-by-email/{}/roles",
+   "POST /rbac/users/{}/roles",
+   "PUT /rbac/roles/{}"
+  ],
+  "unmatched": [
+   "? /auth/"
+  ],
+  "perms": [],
+  "layouts": [
+   "src/app/[locale]/layout.tsx",
+   "src/app/layout.tsx"
+  ],
+  "nfiles": 22
+ },
+ {
+  "app": "dashboard",
+  "url": "/[locale]/dashboard",
+  "file": "src/app/[locale]/dashboard/page.tsx",
+  "endpoints": [
+   "? /auth/login",
+   "? /notifications/stats",
+   "DELETE /rbac/permissions/{}/{}",
+   "DELETE /rbac/roles/{}",
+   "DELETE /rbac/users-by-email/{}/roles/{}",
+   "DELETE /rbac/users/{}/roles/{}",
+   "GET /admin/drivers",
+   "GET /admin/orders",
+   "GET /categories",
+   "GET /hr/employees",
+   "GET /products",
+   "GET /rbac/check-permission",
+   "GET /rbac/me/permissions",
+   "GET /rbac/me/roles",
+   "GET /rbac/roles",
+   "GET /rbac/roles/{}",
+   "GET /rbac/roles/{}/permissions",
+   "GET /rbac/users-by-email/{}/roles",
+   "GET /rbac/users/{}/roles",
+   "GET /tables/stats",
+   "GET /tenant/status",
+   "POST /rbac/permissions/assign",
+   "POST /rbac/roles",
+   "POST /rbac/users-by-email/{}/roles",
+   "POST /rbac/users/{}/roles",
+   "PUT /rbac/roles/{}"
+  ],
+  "unmatched": [
+   "? /auth/"
+  ],
+  "perms": [],
+  "layouts": [
+   "src/app/[locale]/dashboard/layout.tsx",
+   "src/app/[locale]/layout.tsx",
+   "src/app/layout.tsx"
+  ],
+  "nfiles": 35
+ },
+ {
+  "app": "dashboard",
+  "url": "/[locale]/dashboard/accounting/advanced",
+  "file": "src/app/[locale]/dashboard/accounting/advanced/page.tsx",
+  "endpoints": [
+   "? /accounting/csv/chart-of-accounts/export",
+   "? /accounting/csv/chart-of-accounts/import",
+   "? /accounting/csv/journal-entries/export",
+   "? /accounting/csv/journal-entries/import",
+   "? /auth/login",
+   "GET /accounting/bank-reconciliation/sessions",
+   "GET /accounting/budgets",
+   "GET /accounting/einvoice/submissions",
+   "GET /accounting/exchange-rates",
+   "GET /accounting/recurring-journals",
+   "GET /accounting/supplier-payment-reminders",
+   "GET /accounting/supplier-payment-schedules",
+   "POST /accounting/bank-reconciliation/sessions",
+   "POST /accounting/budgets",
+   "POST /accounting/einvoice/{}/submit",
+   "POST /accounting/exchange-rates",
+   "POST /accounting/recurring-journals",
+   "POST /accounting/recurring-journals/{}/run",
+   "POST /accounting/supplier-payment-schedules",
+   "POST /accounting/supplier-payment-schedules/{}/send-reminder"
+  ],
+  "unmatched": [
+   "? /auth/"
+  ],
+  "perms": [],
+  "layouts": [
+   "src/app/[locale]/dashboard/layout.tsx",
+   "src/app/[locale]/layout.tsx",
+   "src/app/layout.tsx"
+  ],
+  "nfiles": 17
+ },
+ {
+  "app": "dashboard",
+  "url": "/[locale]/dashboard/accounting/bank-accounts",
+  "file": "src/app/[locale]/dashboard/accounting/bank-accounts/page.tsx",
+  "endpoints": [
+   "? /auth/login",
+   "DELETE /accounting/bank-accounts/{}",
+   "DELETE /rbac/permissions/{}/{}",
+   "DELETE /rbac/roles/{}",
+   "DELETE /rbac/users-by-email/{}/roles/{}",
+   "DELETE /rbac/users/{}/roles/{}",
+   "GET /accounting/accounts",
+   "GET /accounting/bank-accounts",
+   "GET /accounting/bank-accounts/{}/transactions",
+   "GET /rbac/check-permission",
+   "GET /rbac/me/permissions",
+   "GET /rbac/me/roles",
+   "GET /rbac/roles",
+   "GET /rbac/roles/{}",
+   "GET /rbac/roles/{}/permissions",
+   "GET /rbac/users-by-email/{}/roles",
+   "GET /rbac/users/{}/roles",
+   "POST /accounting/bank-accounts",
+   "POST /rbac/permissions/assign",
+   "POST /rbac/roles",
+   "POST /rbac/users-by-email/{}/roles",
+   "POST /rbac/users/{}/roles",
+   "PUT /accounting/bank-accounts/{}",
+   "PUT /rbac/roles/{}"
+  ],
+  "unmatched": [
+   "? /auth/"
+  ],
+  "perms": [
+   "ACCOUNTING:DELETE",
+   "ACCOUNTING:READ",
+   "ACCOUNTING:WRITE"
+  ],
+  "layouts": [
+   "src/app/[locale]/dashboard/layout.tsx",
+   "src/app/[locale]/layout.tsx",
+   "src/app/layout.tsx"
+  ],
+  "nfiles": 47
+ },
+ {
+  "app": "dashboard",
+  "url": "/[locale]/dashboard/accounting/chart-of-accounts",
+  "file": "src/app/[locale]/dashboard/accounting/chart-of-accounts/page.tsx",
+  "endpoints": [
+   "? /auth/login",
+   "DELETE /accounting/accounts/{}",
+   "DELETE /rbac/permissions/{}/{}",
+   "DELETE /rbac/roles/{}",
+   "DELETE /rbac/users-by-email/{}/roles/{}",
+   "DELETE /rbac/users/{}/roles/{}",
+   "GET /accounting/accounts",
+   "GET /rbac/check-permission",
+   "GET /rbac/me/permissions",
+   "GET /rbac/me/roles",
+   "GET /rbac/roles",
+   "GET /rbac/roles/{}",
+   "GET /rbac/roles/{}/permissions",
+   "GET /rbac/users-by-email/{}/roles",
+   "GET /rbac/users/{}/roles",
+   "POST /accounting/accounts",
+   "POST /rbac/permissions/assign",
+   "POST /rbac/roles",
+   "POST /rbac/users-by-email/{}/roles",
+   "POST /rbac/users/{}/roles",
+   "PUT /accounting/accounts/{}",
+   "PUT /rbac/roles/{}"
+  ],
+  "unmatched": [
+   "? /auth/"
+  ],
+  "perms": [
+   "ACCOUNTING:DELETE",
+   "ACCOUNTING:READ",
+   "ACCOUNTING:WRITE"
+  ],
+  "layouts": [
+   "src/app/[locale]/dashboard/layout.tsx",
+   "src/app/[locale]/layout.tsx",
+   "src/app/layout.tsx"
+  ],
+  "nfiles": 45
+ },
+ {
+  "app": "dashboard",
+  "url": "/[locale]/dashboard/accounting/customer-invoices",
+  "file": "src/app/[locale]/dashboard/accounting/customer-invoices/page.tsx",
+  "endpoints": [
+   "? /auth/login",
+   "DELETE /rbac/permissions/{}/{}",
+   "DELETE /rbac/roles/{}",
+   "DELETE /rbac/users-by-email/{}/roles/{}",
+   "DELETE /rbac/users/{}/roles/{}",
+   "GET /accounting/accounts",
+   "GET /accounting/bank-accounts",
+   "GET /accounting/customer-invoices",
+   "GET /accounting/customer-invoices/overdue",
+   "GET /accounting/customers",
+   "GET /accounting/payments/received",
+   "GET /rbac/check-permission",
+   "GET /rbac/me/permissions",
+   "GET /rbac/me/roles",
+   "GET /rbac/roles",
+   "GET /rbac/roles/{}",
+   "GET /rbac/roles/{}/permissions",
+   "GET /rbac/users-by-email/{}/roles",
+   "GET /rbac/users/{}/roles",
+   "POST /accounting/customer-invoices",
+   "POST /accounting/customer-invoices/{}/send",
+   "POST /accounting/customer-invoices/{}/void",
+   "POST /accounting/payments/received",
+   "POST /rbac/permissions/assign",
+   "POST /rbac/roles",
+   "POST /rbac/users-by-email/{}/roles",
+   "POST /rbac/users/{}/roles",
+   "PUT /accounting/customer-invoices/{}",
+   "PUT /rbac/roles/{}"
+  ],
+  "unmatched": [
+   "? /auth/"
+  ],
+  "perms": [
+   "ACCOUNTING:READ",
+   "ACCOUNTING:WRITE"
+  ],
+  "layouts": [
+   "src/app/[locale]/dashboard/layout.tsx",
+   "src/app/[locale]/layout.tsx",
+   "src/app/layout.tsx"
+  ],
+  "nfiles": 56
+ },
+ {
+  "app": "dashboard",
+  "url": "/[locale]/dashboard/accounting/customers",
+  "file": "src/app/[locale]/dashboard/accounting/customers/page.tsx",
+  "endpoints": [
+   "? /auth/login",
+   "DELETE /accounting/customers/{}",
+   "DELETE /rbac/permissions/{}/{}",
+   "DELETE /rbac/roles/{}",
+   "DELETE /rbac/users-by-email/{}/roles/{}",
+   "DELETE /rbac/users/{}/roles/{}",
+   "GET /accounting/accounts",
+   "GET /accounting/customers",
+   "GET /accounting/customers/{}/statement",
+   "GET /rbac/check-permission",
+   "GET /rbac/me/permissions",
+   "GET /rbac/me/roles",
+   "GET /rbac/roles",
+   "GET /rbac/roles/{}",
+   "GET /rbac/roles/{}/permissions",
+   "GET /rbac/users-by-email/{}/roles",
+   "GET /rbac/users/{}/roles",
+   "POST /accounting/customers",
+   "POST /rbac/permissions/assign",
+   "POST /rbac/roles",
+   "POST /rbac/users-by-email/{}/roles",
+   "POST /rbac/users/{}/roles",
+   "PUT /accounting/customers/{}",
+   "PUT /rbac/roles/{}"
+  ],
+  "unmatched": [
+   "? /auth/"
+  ],
+  "perms": [
+   "ACCOUNTING:DELETE",
+   "ACCOUNTING:READ",
+   "ACCOUNTING:WRITE"
+  ],
+  "layouts": [
+   "src/app/[locale]/dashboard/layout.tsx",
+   "src/app/[locale]/layout.tsx",
+   "src/app/layout.tsx"
+  ],
+  "nfiles": 48
+ },
+ {
+  "app": "dashboard",
+  "url": "/[locale]/dashboard/accounting/general-ledger",
+  "file": "src/app/[locale]/dashboard/accounting/general-ledger/page.tsx",
+  "endpoints": [
+   "? /auth/login",
+   "DELETE /rbac/permissions/{}/{}",
+   "DELETE /rbac/roles/{}",
+   "DELETE /rbac/users-by-email/{}/roles/{}",
+   "DELETE /rbac/users/{}/roles/{}",
+   "GET /accounting/accounts",
+   "GET /accounting/ledger",
+   "GET /accounting/trial-balance",
+   "GET /rbac/check-permission",
+   "GET /rbac/me/permissions",
+   "GET /rbac/me/roles",
+   "GET /rbac/roles",
+   "GET /rbac/roles/{}",
+   "GET /rbac/roles/{}/permissions",
+   "GET /rbac/users-by-email/{}/roles",
+   "GET /rbac/users/{}/roles",
+   "POST /rbac/permissions/assign",
+   "POST /rbac/roles",
+   "POST /rbac/users-by-email/{}/roles",
+   "POST /rbac/users/{}/roles",
+   "PUT /rbac/roles/{}"
+  ],
+  "unmatched": [
+   "? /auth/"
+  ],
+  "perms": [
+   "ACCOUNTING:READ"
+  ],
+  "layouts": [
+   "src/app/[locale]/dashboard/layout.tsx",
+   "src/app/[locale]/layout.tsx",
+   "src/app/layout.tsx"
+  ],
+  "nfiles": 49
+ },
+ {
+  "app": "dashboard",
+  "url": "/[locale]/dashboard/accounting/journal-entries",
+  "file": "src/app/[locale]/dashboard/accounting/journal-entries/page.tsx",
+  "endpoints": [
+   "? /auth/login",
+   "DELETE /rbac/permissions/{}/{}",
+   "DELETE /rbac/roles/{}",
+   "DELETE /rbac/users-by-email/{}/roles/{}",
+   "DELETE /rbac/users/{}/roles/{}",
+   "GET /accounting/accounts",
+   "GET /accounting/journal-entries",
+   "GET /rbac/check-permission",
+   "GET /rbac/me/permissions",
+   "GET /rbac/me/roles",
+   "GET /rbac/roles",
+   "GET /rbac/roles/{}",
+   "GET /rbac/roles/{}/permissions",
+   "GET /rbac/users-by-email/{}/roles",
+   "GET /rbac/users/{}/roles",
+   "POST /accounting/journal-entries",
+   "POST /rbac/permissions/assign",
+   "POST /rbac/roles",
+   "POST /rbac/users-by-email/{}/roles",
+   "POST /rbac/users/{}/roles",
+   "PUT /rbac/roles/{}"
+  ],
+  "unmatched": [
+   "? /auth/"
+  ],
+  "perms": [
+   "ACCOUNTING:READ",
+   "ACCOUNTING:WRITE"
+  ],
+  "layouts": [
+   "src/app/[locale]/dashboard/layout.tsx",
+   "src/app/[locale]/layout.tsx",
+   "src/app/layout.tsx"
+  ],
+  "nfiles": 45
+ },
+ {
+  "app": "dashboard",
+  "url": "/[locale]/dashboard/accounting/journal-entries/[id]",
+  "file": "src/app/[locale]/dashboard/accounting/journal-entries/[id]/page.tsx",
+  "endpoints": [
+   "? /auth/login",
+   "DELETE /rbac/permissions/{}/{}",
+   "DELETE /rbac/roles/{}",
+   "DELETE /rbac/users-by-email/{}/roles/{}",
+   "DELETE /rbac/users/{}/roles/{}",
+   "GET /accounting/accounts",
+   "GET /accounting/journal-entries/{}",
+   "GET /rbac/check-permission",
+   "GET /rbac/me/permissions",
+   "GET /rbac/me/roles",
+   "GET /rbac/roles",
+   "GET /rbac/roles/{}",
+   "GET /rbac/roles/{}/permissions",
+   "GET /rbac/users-by-email/{}/roles",
+   "GET /rbac/users/{}/roles",
+   "POST /accounting/journal-entries/{}/post",
+   "POST /accounting/journal-entries/{}/void",
+   "POST /rbac/permissions/assign",
+   "POST /rbac/roles",
+   "POST /rbac/users-by-email/{}/roles",
+   "POST /rbac/users/{}/roles",
+   "PUT /accounting/journal-entries/{}",
+   "PUT /rbac/roles/{}"
+  ],
+  "unmatched": [
+   "? /auth/"
+  ],
+  "perms": [
+   "ACCOUNTING:READ",
+   "ACCOUNTING:WRITE"
+  ],
+  "layouts": [
+   "src/app/[locale]/dashboard/layout.tsx",
+   "src/app/[locale]/layout.tsx",
+   "src/app/layout.tsx"
+  ],
+  "nfiles": 40
+ },
+ {
+  "app": "dashboard",
+  "url": "/[locale]/dashboard/accounting/supplier-invoices",
+  "file": "src/app/[locale]/dashboard/accounting/supplier-invoices/page.tsx",
+  "endpoints": [
+   "? /auth/login",
+   "DELETE /rbac/permissions/{}/{}",
+   "DELETE /rbac/roles/{}",
+   "DELETE /rbac/users-by-email/{}/roles/{}",
+   "DELETE /rbac/users/{}/roles/{}",
+   "GET /accounting/accounts",
+   "GET /accounting/bank-accounts",
+   "GET /accounting/payments/made",
+   "GET /accounting/supplier-invoices",
+   "GET /rbac/check-permission",
+   "GET /rbac/me/permissions",
+   "GET /rbac/me/roles",
+   "GET /rbac/roles",
+   "GET /rbac/roles/{}",
+   "GET /rbac/roles/{}/permissions",
+   "GET /rbac/users-by-email/{}/roles",
+   "GET /rbac/users/{}/roles",
+   "GET /suppliers",
+   "POST /accounting/payments/made",
+   "POST /accounting/supplier-invoices",
+   "POST /accounting/supplier-invoices/{}/approve",
+   "POST /accounting/supplier-invoices/{}/void",
+   "POST /rbac/permissions/assign",
+   "POST /rbac/roles",
+   "POST /rbac/users-by-email/{}/roles",
+   "POST /rbac/users/{}/roles",
+   "PUT /accounting/supplier-invoices/{}",
+   "PUT /rbac/roles/{}"
+  ],
+  "unmatched": [
+   "? /auth/"
+  ],
+  "perms": [
+   "ACCOUNTING:READ",
+   "ACCOUNTING:WRITE"
+  ],
+  "layouts": [
+   "src/app/[locale]/dashboard/layout.tsx",
+   "src/app/[locale]/layout.tsx",
+   "src/app/layout.tsx"
+  ],
+  "nfiles": 56
+ },
+ {
+  "app": "dashboard",
+  "url": "/[locale]/dashboard/accounting/suppliers",
+  "file": "src/app/[locale]/dashboard/accounting/suppliers/page.tsx",
+  "endpoints": [
+   "? /auth/login",
+   "DELETE /rbac/permissions/{}/{}",
+   "DELETE /rbac/roles/{}",
+   "DELETE /rbac/users-by-email/{}/roles/{}",
+   "DELETE /rbac/users/{}/roles/{}",
+   "DELETE /suppliers/{}",
+   "GET /accounting/accounts",
+   "GET /rbac/check-permission",
+   "GET /rbac/me/permissions",
+   "GET /rbac/me/roles",
+   "GET /rbac/roles",
+   "GET /rbac/roles/{}",
+   "GET /rbac/roles/{}/permissions",
+   "GET /rbac/users-by-email/{}/roles",
+   "GET /rbac/users/{}/roles",
+   "GET /suppliers",
+   "POST /rbac/permissions/assign",
+   "POST /rbac/roles",
+   "POST /rbac/users-by-email/{}/roles",
+   "POST /rbac/users/{}/roles",
+   "POST /suppliers",
+   "PUT /rbac/roles/{}",
+   "PUT /suppliers/{}"
+  ],
+  "unmatched": [
+   "? /auth/"
+  ],
+  "perms": [
+   "SUPPLIERS:DELETE",
+   "SUPPLIERS:READ",
+   "SUPPLIERS:WRITE"
+  ],
+  "layouts": [
+   "src/app/[locale]/dashboard/layout.tsx",
+   "src/app/[locale]/layout.tsx",
+   "src/app/layout.tsx"
+  ],
+  "nfiles": 48
+ },
+ {
+  "app": "dashboard",
+  "url": "/[locale]/dashboard/categories",
+  "file": "src/app/[locale]/dashboard/categories/page.tsx",
+  "endpoints": [
+   "? /auth/login",
+   "DELETE /categories/{}",
+   "GET /categories"
+  ],
+  "unmatched": [
+   "? /auth/"
+  ],
+  "perms": [],
+  "layouts": [
+   "src/app/[locale]/dashboard/layout.tsx",
+   "src/app/[locale]/layout.tsx",
+   "src/app/layout.tsx"
+  ],
+  "nfiles": 18
+ },
+ {
+  "app": "dashboard",
+  "url": "/[locale]/dashboard/categories/[id]/edit",
+  "file": "src/app/[locale]/dashboard/categories/[id]/edit/page.tsx",
+  "endpoints": [
+   "? /auth/login",
+   "GET /categories/{}",
+   "PUT /categories/{}"
+  ],
+  "unmatched": [
+   "? /auth/"
+  ],
+  "perms": [],
+  "layouts": [
+   "src/app/[locale]/dashboard/layout.tsx",
+   "src/app/[locale]/layout.tsx",
+   "src/app/layout.tsx"
+  ],
+  "nfiles": 26
+ },
+ {
+  "app": "dashboard",
+  "url": "/[locale]/dashboard/categories/new",
+  "file": "src/app/[locale]/dashboard/categories/new/page.tsx",
+  "endpoints": [
+   "? /auth/login",
+   "POST /categories"
+  ],
+  "unmatched": [
+   "? /auth/"
+  ],
+  "perms": [],
+  "layouts": [
+   "src/app/[locale]/dashboard/layout.tsx",
+   "src/app/[locale]/layout.tsx",
+   "src/app/layout.tsx"
+  ],
+  "nfiles": 24
+ },
+ {
+  "app": "dashboard",
+  "url": "/[locale]/dashboard/drivers",
+  "file": "src/app/[locale]/dashboard/drivers/page.tsx",
+  "endpoints": [
+   "? /auth/login",
+   "DELETE /admin/drivers/{}",
+   "GET /admin/drivers",
+   "PUT /admin/drivers/{}/status"
+  ],
+  "unmatched": [
+   "? /auth/"
+  ],
+  "perms": [],
+  "layouts": [
+   "src/app/[locale]/dashboard/layout.tsx",
+   "src/app/[locale]/layout.tsx",
+   "src/app/layout.tsx"
+  ],
+  "nfiles": 30
+ },
+ {
+  "app": "dashboard",
+  "url": "/[locale]/dashboard/drivers/[id]",
+  "file": "src/app/[locale]/dashboard/drivers/[id]/page.tsx",
+  "endpoints": [
+   "? /auth/login",
+   "GET /admin/drivers/{}",
+   "PUT /admin/drivers/{}"
+  ],
+  "unmatched": [
+   "? /auth/"
+  ],
+  "perms": [],
+  "layouts": [
+   "src/app/[locale]/dashboard/layout.tsx",
+   "src/app/[locale]/layout.tsx",
+   "src/app/layout.tsx"
+  ],
+  "nfiles": 30
+ },
+ {
+  "app": "dashboard",
+  "url": "/[locale]/dashboard/drivers/new",
+  "file": "src/app/[locale]/dashboard/drivers/new/page.tsx",
+  "endpoints": [
+   "? /auth/login",
+   "POST /admin/drivers"
+  ],
+  "unmatched": [
+   "? /auth/"
+  ],
+  "perms": [],
+  "layouts": [
+   "src/app/[locale]/dashboard/layout.tsx",
+   "src/app/[locale]/layout.tsx",
+   "src/app/layout.tsx"
+  ],
+  "nfiles": 30
+ },
+ {
+  "app": "dashboard",
+  "url": "/[locale]/dashboard/hr/attendance",
+  "file": "src/app/[locale]/dashboard/hr/attendance/page.tsx",
+  "endpoints": [
+   "? /auth/login",
+   "DELETE /hr/attendance/{}",
+   "DELETE /rbac/permissions/{}/{}",
+   "DELETE /rbac/roles/{}",
+   "DELETE /rbac/users-by-email/{}/roles/{}",
+   "DELETE /rbac/users/{}/roles/{}",
+   "GET /hr/attendance",
+   "GET /hr/employees",
+   "GET /rbac/check-permission",
+   "GET /rbac/me/permissions",
+   "GET /rbac/me/roles",
+   "GET /rbac/roles",
+   "GET /rbac/roles/{}",
+   "GET /rbac/roles/{}/permissions",
+   "GET /rbac/users-by-email/{}/roles",
+   "GET /rbac/users/{}/roles",
+   "POST /hr/attendance/clock-in",
+   "POST /rbac/permissions/assign",
+   "POST /rbac/roles",
+   "POST /rbac/users-by-email/{}/roles",
+   "POST /rbac/users/{}/roles",
+   "PUT /hr/attendance/{}",
+   "PUT /rbac/roles/{}"
+  ],
+  "unmatched": [
+   "? /auth/"
+  ],
+  "perms": [
+   "HR:READ",
+   "HR:WRITE"
+  ],
+  "layouts": [
+   "src/app/[locale]/dashboard/layout.tsx",
+   "src/app/[locale]/layout.tsx",
+   "src/app/layout.tsx"
+  ],
+  "nfiles": 43
+ },
+ {
+  "app": "dashboard",
+  "url": "/[locale]/dashboard/hr/contracts",
+  "file": "src/app/[locale]/dashboard/hr/contracts/page.tsx",
+  "endpoints": [
+   "? /auth/login",
+   "DELETE /hr/contracts/{}",
+   "GET /hr/contracts",
+   "GET /hr/contracts/expiring",
+   "POST /hr/contracts",
+   "POST /hr/contracts/{}/renew",
+   "PUT /hr/contracts/{}"
+  ],
+  "unmatched": [
+   "? /auth/"
+  ],
+  "perms": [],
+  "layouts": [
+   "src/app/[locale]/dashboard/layout.tsx",
+   "src/app/[locale]/layout.tsx",
+   "src/app/layout.tsx"
+  ],
+  "nfiles": 15
+ },
+ {
+  "app": "dashboard",
+  "url": "/[locale]/dashboard/hr/employees",
+  "file": "src/app/[locale]/dashboard/hr/employees/page.tsx",
+  "endpoints": [
+   "? /auth/login",
+   "DELETE /hr/employees/{}",
+   "DELETE /rbac/permissions/{}/{}",
+   "DELETE /rbac/roles/{}",
+   "DELETE /rbac/users-by-email/{}/roles/{}",
+   "DELETE /rbac/users/{}/roles/{}",
+   "GET /hr/employees",
+   "GET /rbac/check-permission",
+   "GET /rbac/me/permissions",
+   "GET /rbac/me/roles",
+   "GET /rbac/roles",
+   "GET /rbac/roles/{}",
+   "GET /rbac/roles/{}/permissions",
+   "GET /rbac/users-by-email/{}/roles",
+   "GET /rbac/users/{}/roles",
+   "POST /hr/employees",
+   "POST /rbac/permissions/assign",
+   "POST /rbac/roles",
+   "POST /rbac/users-by-email/{}/roles",
+   "POST /rbac/users/{}/roles",
+   "PUT /hr/employees/{}",
+   "PUT /rbac/roles/{}"
+  ],
+  "unmatched": [
+   "? /auth/"
+  ],
+  "perms": [
+   "HR:DELETE",
+   "HR:READ",
+   "HR:WRITE"
+  ],
+  "layouts": [
+   "src/app/[locale]/dashboard/layout.tsx",
+   "src/app/[locale]/layout.tsx",
+   "src/app/layout.tsx"
+  ],
+  "nfiles": 48
+ },
+ {
+  "app": "dashboard",
+  "url": "/[locale]/dashboard/hr/insurance",
+  "file": "src/app/[locale]/dashboard/hr/insurance/page.tsx",
+  "endpoints": [
+   "? /auth/login",
+   "DELETE /hr/insurance/{}",
+   "GET /hr/insurance",
+   "GET /hr/insurance/expiring",
+   "POST /hr/insurance",
+   "PUT /hr/insurance/{}"
+  ],
+  "unmatched": [
+   "? /auth/"
+  ],
+  "perms": [],
+  "layouts": [
+   "src/app/[locale]/dashboard/layout.tsx",
+   "src/app/[locale]/layout.tsx",
+   "src/app/layout.tsx"
+  ],
+  "nfiles": 15
+ },
+ {
+  "app": "dashboard",
+  "url": "/[locale]/dashboard/hr/leaves",
+  "file": "src/app/[locale]/dashboard/hr/leaves/page.tsx",
+  "endpoints": [
+   "? /auth/login",
+   "DELETE /hr/leaves/{}",
+   "DELETE /rbac/permissions/{}/{}",
+   "DELETE /rbac/roles/{}",
+   "DELETE /rbac/users-by-email/{}/roles/{}",
+   "DELETE /rbac/users/{}/roles/{}",
+   "GET /hr/employees",
+   "GET /hr/leaves",
+   "GET /rbac/check-permission",
+   "GET /rbac/me/permissions",
+   "GET /rbac/me/roles",
+   "GET /rbac/roles",
+   "GET /rbac/roles/{}",
+   "GET /rbac/roles/{}/permissions",
+   "GET /rbac/users-by-email/{}/roles",
+   "GET /rbac/users/{}/roles",
+   "POST /hr/leaves",
+   "POST /hr/leaves/{}/approve",
+   "POST /hr/leaves/{}/reject",
+   "POST /rbac/permissions/assign",
+   "POST /rbac/roles",
+   "POST /rbac/users-by-email/{}/roles",
+   "POST /rbac/users/{}/roles",
+   "PUT /hr/leaves/{}",
+   "PUT /rbac/roles/{}"
+  ],
+  "unmatched": [
+   "? /auth/"
+  ],
+  "perms": [
+   "LEAVES:READ",
+   "LEAVES:WRITE"
+  ],
+  "layouts": [
+   "src/app/[locale]/dashboard/layout.tsx",
+   "src/app/[locale]/layout.tsx",
+   "src/app/layout.tsx"
+  ],
+  "nfiles": 42
+ },
+ {
+  "app": "dashboard",
+  "url": "/[locale]/dashboard/hr/payroll",
+  "file": "src/app/[locale]/dashboard/hr/payroll/page.tsx",
+  "endpoints": [
+   "? /auth/login",
+   "DELETE /hr/salaries/{}",
+   "DELETE /rbac/permissions/{}/{}",
+   "DELETE /rbac/roles/{}",
+   "DELETE /rbac/users-by-email/{}/roles/{}",
+   "DELETE /rbac/users/{}/roles/{}",
+   "GET /hr/employees",
+   "GET /hr/salaries",
+   "GET /rbac/check-permission",
+   "GET /rbac/me/permissions",
+   "GET /rbac/me/roles",
+   "GET /rbac/roles",
+   "GET /rbac/roles/{}",
+   "GET /rbac/roles/{}/permissions",
+   "GET /rbac/users-by-email/{}/roles",
+   "GET /rbac/users/{}/roles",
+   "POST /hr/salaries",
+   "POST /hr/salaries/{}/mark-paid",
+   "POST /rbac/permissions/assign",
+   "POST /rbac/roles",
+   "POST /rbac/users-by-email/{}/roles",
+   "POST /rbac/users/{}/roles",
+   "PUT /hr/salaries/{}",
+   "PUT /rbac/roles/{}"
+  ],
+  "unmatched": [
+   "? /auth/"
+  ],
+  "perms": [
+   "SALARIES:READ",
+   "SALARIES:WRITE"
+  ],
+  "layouts": [
+   "src/app/[locale]/dashboard/layout.tsx",
+   "src/app/[locale]/layout.tsx",
+   "src/app/layout.tsx"
+  ],
+  "nfiles": 41
+ },
+ {
+  "app": "dashboard",
+  "url": "/[locale]/dashboard/hr/performance",
+  "file": "src/app/[locale]/dashboard/hr/performance/page.tsx",
+  "endpoints": [
+   "? /auth/login",
+   "DELETE /hr/performance/{}",
+   "GET /hr/performance",
+   "POST /hr/performance",
+   "POST /hr/performance/{}/acknowledge",
+   "POST /hr/performance/{}/complete",
+   "PUT /hr/performance/{}"
+  ],
+  "unmatched": [
+   "? /auth/"
+  ],
+  "perms": [],
+  "layouts": [
+   "src/app/[locale]/dashboard/layout.tsx",
+   "src/app/[locale]/layout.tsx",
+   "src/app/layout.tsx"
+  ],
+  "nfiles": 15
+ },
+ {
+  "app": "dashboard",
+  "url": "/[locale]/dashboard/hr/resignations",
+  "file": "src/app/[locale]/dashboard/hr/resignations/page.tsx",
+  "endpoints": [
+   "? /auth/login",
+   "DELETE /hr/resignations/{}",
+   "GET /hr/resignations",
+   "GET /hr/resignations/{}/settlement",
+   "POST /hr/resignations",
+   "POST /hr/resignations/{}/acknowledge",
+   "POST /hr/resignations/{}/complete",
+   "PUT /hr/resignations/{}"
+  ],
+  "unmatched": [
+   "? /auth/"
+  ],
+  "perms": [],
+  "layouts": [
+   "src/app/[locale]/dashboard/layout.tsx",
+   "src/app/[locale]/layout.tsx",
+   "src/app/layout.tsx"
+  ],
+  "nfiles": 16
+ },
+ {
+  "app": "dashboard",
+  "url": "/[locale]/dashboard/hr/training",
+  "file": "src/app/[locale]/dashboard/hr/training/page.tsx",
+  "endpoints": [
+   "? /auth/login",
+   "DELETE /hr/training/{}",
+   "GET /hr/training",
+   "GET /hr/training/expiring",
+   "POST /hr/training",
+   "PUT /hr/training/{}"
+  ],
+  "unmatched": [
+   "? /auth/"
+  ],
+  "perms": [],
+  "layouts": [
+   "src/app/[locale]/dashboard/layout.tsx",
+   "src/app/[locale]/layout.tsx",
+   "src/app/layout.tsx"
+  ],
+  "nfiles": 15
+ },
+ {
+  "app": "dashboard",
+  "url": "/[locale]/dashboard/inventory",
+  "file": "src/app/[locale]/dashboard/inventory/page.tsx",
+  "endpoints": [
+   "? /auth/login",
+   "GET /products",
+   "POST /inventory/adjust"
+  ],
+  "unmatched": [
+   "? /auth/"
+  ],
+  "perms": [],
+  "layouts": [
+   "src/app/[locale]/dashboard/layout.tsx",
+   "src/app/[locale]/layout.tsx",
+   "src/app/layout.tsx"
+  ],
+  "nfiles": 20
+ },
+ {
+  "app": "dashboard",
+  "url": "/[locale]/dashboard/kds",
+  "file": "src/app/[locale]/dashboard/kds/page.tsx",
+  "endpoints": [
+   "? /auth/login",
+   "DELETE /rbac/permissions/{}/{}",
+   "DELETE /rbac/roles/{}",
+   "DELETE /rbac/users-by-email/{}/roles/{}",
+   "DELETE /rbac/users/{}/roles/{}",
+   "GET /kds/analytics",
+   "GET /kds/queue",
+   "GET /kds/settings",
+   "GET /kds/stats",
+   "GET /rbac/check-permission",
+   "GET /rbac/me/permissions",
+   "GET /rbac/me/roles",
+   "GET /rbac/roles",
+   "GET /rbac/roles/{}",
+   "GET /rbac/roles/{}/permissions",
+   "GET /rbac/users-by-email/{}/roles",
+   "GET /rbac/users/{}/roles",
+   "POST /rbac/permissions/assign",
+   "POST /rbac/roles",
+   "POST /rbac/users-by-email/{}/roles",
+   "POST /rbac/users/{}/roles",
+   "PUT /kds/orders/{}/bump",
+   "PUT /kds/orders/{}/recall",
+   "PUT /rbac/roles/{}"
+  ],
+  "unmatched": [
+   "? /auth/"
+  ],
+  "perms": [],
+  "layouts": [
+   "src/app/[locale]/dashboard/kds/layout.tsx",
+   "src/app/[locale]/dashboard/layout.tsx",
+   "src/app/[locale]/layout.tsx",
+   "src/app/layout.tsx"
+  ],
+  "nfiles": 47
+ },
+ {
+  "app": "dashboard",
+  "url": "/[locale]/dashboard/kds/settings",
+  "file": "src/app/[locale]/dashboard/kds/settings/page.tsx",
+  "endpoints": [
+   "? /auth/login",
+   "DELETE /rbac/permissions/{}/{}",
+   "DELETE /rbac/roles/{}",
+   "DELETE /rbac/users-by-email/{}/roles/{}",
+   "DELETE /rbac/users/{}/roles/{}",
+   "GET /kds/queue",
+   "GET /kds/settings",
+   "GET /kds/stats",
+   "GET /rbac/check-permission",
+   "GET /rbac/me/permissions",
+   "GET /rbac/me/roles",
+   "GET /rbac/roles",
+   "GET /rbac/roles/{}",
+   "GET /rbac/roles/{}/permissions",
+   "GET /rbac/users-by-email/{}/roles",
+   "GET /rbac/users/{}/roles",
+   "POST /rbac/permissions/assign",
+   "POST /rbac/roles",
+   "POST /rbac/users-by-email/{}/roles",
+   "POST /rbac/users/{}/roles",
+   "PUT /kds/settings",
+   "PUT /rbac/roles/{}"
+  ],
+  "unmatched": [
+   "? /auth/"
+  ],
+  "perms": [
+   "KDS:ADMIN"
+  ],
+  "layouts": [
+   "src/app/[locale]/dashboard/kds/layout.tsx",
+   "src/app/[locale]/dashboard/layout.tsx",
+   "src/app/[locale]/layout.tsx",
+   "src/app/layout.tsx"
+  ],
+  "nfiles": 29
+ },
+ {
+  "app": "dashboard",
+  "url": "/[locale]/dashboard/notifications",
+  "file": "src/app/[locale]/dashboard/notifications/page.tsx",
+  "endpoints": [
+   "? /auth/login",
+   "DELETE /notifications/{}",
+   "DELETE /rbac/permissions/{}/{}",
+   "DELETE /rbac/roles/{}",
+   "DELETE /rbac/users-by-email/{}/roles/{}",
+   "DELETE /rbac/users/{}/roles/{}",
+   "GET /notifications",
+   "GET /notifications/unread-count",
+   "GET /rbac/check-permission",
+   "GET /rbac/me/permissions",
+   "GET /rbac/me/roles",
+   "GET /rbac/roles",
+   "GET /rbac/roles/{}",
+   "GET /rbac/roles/{}/permissions",
+   "GET /rbac/users-by-email/{}/roles",
+   "GET /rbac/users/{}/roles",
+   "POST /notifications/mark-all-read",
+   "POST /notifications/{}/read",
+   "POST /notifications/{}/unread",
+   "POST /rbac/permissions/assign",
+   "POST /rbac/roles",
+   "POST /rbac/users-by-email/{}/roles",
+   "POST /rbac/users/{}/roles",
+   "PUT /rbac/roles/{}"
+  ],
+  "unmatched": [
+   "? /auth/"
+  ],
+  "perms": [
+   "NOTIFICATIONS:DELETE",
+   "NOTIFICATIONS:READ"
+  ],
+  "layouts": [
+   "src/app/[locale]/dashboard/layout.tsx",
+   "src/app/[locale]/layout.tsx",
+   "src/app/layout.tsx"
+  ],
+  "nfiles": 29
+ },
+ {
+  "app": "dashboard",
+  "url": "/[locale]/dashboard/orders",
+  "file": "src/app/[locale]/dashboard/orders/page.tsx",
+  "endpoints": [
+   "? /auth/login",
+   "DELETE /admin/orders/{}",
+   "DELETE /rbac/permissions/{}/{}",
+   "DELETE /rbac/roles/{}",
+   "DELETE /rbac/users-by-email/{}/roles/{}",
+   "DELETE /rbac/users/{}/roles/{}",
+   "GET /admin/drivers/available",
+   "GET /admin/orders",
+   "GET /rbac/check-permission",
+   "GET /rbac/me/permissions",
+   "GET /rbac/me/roles",
+   "GET /rbac/roles",
+   "GET /rbac/roles/{}",
+   "GET /rbac/roles/{}/permissions",
+   "GET /rbac/users-by-email/{}/roles",
+   "GET /rbac/users/{}/roles",
+   "POST /admin/orders/{}/assign",
+   "POST /rbac/permissions/assign",
+   "POST /rbac/roles",
+   "POST /rbac/users-by-email/{}/roles",
+   "POST /rbac/users/{}/roles",
+   "PUT /rbac/roles/{}"
+  ],
+  "unmatched": [
+   "? /auth/"
+  ],
+  "perms": [
+   "ORDERS:DELETE",
+   "ORDERS:READ"
+  ],
+  "layouts": [
+   "src/app/[locale]/dashboard/layout.tsx",
+   "src/app/[locale]/layout.tsx",
+   "src/app/layout.tsx"
+  ],
+  "nfiles": 36
+ },
+ {
+  "app": "dashboard",
+  "url": "/[locale]/dashboard/orders/[id]",
+  "file": "src/app/[locale]/dashboard/orders/[id]/page.tsx",
+  "endpoints": [
+   "? /auth/login",
+   "DELETE /rbac/permissions/{}/{}",
+   "DELETE /rbac/roles/{}",
+   "DELETE /rbac/users-by-email/{}/roles/{}",
+   "DELETE /rbac/users/{}/roles/{}",
+   "GET /admin/drivers/available",
+   "GET /admin/orders/{}",
+   "GET /rbac/check-permission",
+   "GET /rbac/me/permissions",
+   "GET /rbac/me/roles",
+   "GET /rbac/roles",
+   "GET /rbac/roles/{}",
+   "GET /rbac/roles/{}/permissions",
+   "GET /rbac/users-by-email/{}/roles",
+   "GET /rbac/users/{}/roles",
+   "POST /admin/orders/{}/assign",
+   "POST /rbac/permissions/assign",
+   "POST /rbac/roles",
+   "POST /rbac/users-by-email/{}/roles",
+   "POST /rbac/users/{}/roles",
+   "PUT /admin/orders/{}/status",
+   "PUT /rbac/roles/{}"
+  ],
+  "unmatched": [
+   "? /auth/"
+  ],
+  "perms": [
+   "ORDERS:READ",
+   "ORDERS:WRITE"
+  ],
+  "layouts": [
+   "src/app/[locale]/dashboard/layout.tsx",
+   "src/app/[locale]/layout.tsx",
+   "src/app/layout.tsx"
+  ],
+  "nfiles": 36
+ },
+ {
+  "app": "dashboard",
+  "url": "/[locale]/dashboard/pos",
+  "file": "src/app/[locale]/dashboard/pos/page.tsx",
+  "endpoints": [
+   "? /auth/login",
+   "DELETE /rbac/permissions/{}/{}",
+   "DELETE /rbac/roles/{}",
+   "DELETE /rbac/users-by-email/{}/roles/{}",
+   "DELETE /rbac/users/{}/roles/{}",
+   "DELETE /tables/{}",
+   "GET /categories",
+   "GET /products",
+   "GET /rbac/check-permission",
+   "GET /rbac/me/permissions",
+   "GET /rbac/me/roles",
+   "GET /rbac/roles",
+   "GET /rbac/roles/{}",
+   "GET /rbac/roles/{}/permissions",
+   "GET /rbac/users-by-email/{}/roles",
+   "GET /rbac/users/{}/roles",
+   "GET /tables",
+   "GET /tables/layouts",
+   "GET /tables/stats",
+   "GET /tables/{}",
+   "POST /pos/orders",
+   "POST /rbac/permissions/assign",
+   "POST /rbac/roles",
+   "POST /rbac/users-by-email/{}/roles",
+   "POST /rbac/users/{}/roles",
+   "POST /tables",
+   "POST /tables/layouts",
+   "PUT /admin/orders/{}/payment-status",
+   "PUT /rbac/roles/{}",
+   "PUT /tables/positions",
+   "PUT /tables/{}",
+   "PUT /tables/{}/status"
+  ],
+  "unmatched": [
+   "? /auth/"
+  ],
+  "perms": [
+   "ORDERS:WRITE"
+  ],
+  "layouts": [
+   "src/app/[locale]/dashboard/pos/layout.tsx",
+   "src/app/[locale]/dashboard/layout.tsx",
+   "src/app/[locale]/layout.tsx",
+   "src/app/layout.tsx"
+  ],
+  "nfiles": 68
+ },
+ {
+  "app": "dashboard",
+  "url": "/[locale]/dashboard/pos/settings",
+  "file": "src/app/[locale]/dashboard/pos/settings/page.tsx",
+  "endpoints": [
+   "? /auth/login",
+   "DELETE /rbac/permissions/{}/{}",
+   "DELETE /rbac/roles/{}",
+   "DELETE /rbac/users-by-email/{}/roles/{}",
+   "DELETE /rbac/users/{}/roles/{}",
+   "GET /rbac/check-permission",
+   "GET /rbac/me/permissions",
+   "GET /rbac/me/roles",
+   "GET /rbac/roles",
+   "GET /rbac/roles/{}",
+   "GET /rbac/roles/{}/permissions",
+   "GET /rbac/users-by-email/{}/roles",
+   "GET /rbac/users/{}/roles",
+   "POST /rbac/permissions/assign",
+   "POST /rbac/roles",
+   "POST /rbac/users-by-email/{}/roles",
+   "POST /rbac/users/{}/roles",
+   "PUT /rbac/roles/{}"
+  ],
+  "unmatched": [
+   "? /auth/"
+  ],
+  "perms": [
+   "ORDERS:WRITE"
+  ],
+  "layouts": [
+   "src/app/[locale]/dashboard/pos/layout.tsx",
+   "src/app/[locale]/dashboard/layout.tsx",
+   "src/app/[locale]/layout.tsx",
+   "src/app/layout.tsx"
+  ],
+  "nfiles": 24
+ },
+ {
+  "app": "dashboard",
+  "url": "/[locale]/dashboard/products",
+  "file": "src/app/[locale]/dashboard/products/page.tsx",
+  "endpoints": [
+   "? /auth/login",
+   "DELETE /products/{}",
+   "DELETE /rbac/permissions/{}/{}",
+   "DELETE /rbac/roles/{}",
+   "DELETE /rbac/users-by-email/{}/roles/{}",
+   "DELETE /rbac/users/{}/roles/{}",
+   "GET /categories",
+   "GET /products",
+   "GET /rbac/check-permission",
+   "GET /rbac/me/permissions",
+   "GET /rbac/me/roles",
+   "GET /rbac/roles",
+   "GET /rbac/roles/{}",
+   "GET /rbac/roles/{}/permissions",
+   "GET /rbac/users-by-email/{}/roles",
+   "GET /rbac/users/{}/roles",
+   "POST /rbac/permissions/assign",
+   "POST /rbac/roles",
+   "POST /rbac/users-by-email/{}/roles",
+   "POST /rbac/users/{}/roles",
+   "PUT /rbac/roles/{}"
+  ],
+  "unmatched": [
+   "? /auth/"
+  ],
+  "perms": [],
+  "layouts": [
+   "src/app/[locale]/dashboard/layout.tsx",
+   "src/app/[locale]/layout.tsx",
+   "src/app/layout.tsx"
+  ],
+  "nfiles": 40
+ },
+ {
+  "app": "dashboard",
+  "url": "/[locale]/dashboard/products/[id]/edit",
+  "file": "src/app/[locale]/dashboard/products/[id]/edit/page.tsx",
+  "endpoints": [
+   "? /auth/login",
+   "DELETE /rbac/permissions/{}/{}",
+   "DELETE /rbac/roles/{}",
+   "DELETE /rbac/users-by-email/{}/roles/{}",
+   "DELETE /rbac/users/{}/roles/{}",
+   "GET /categories",
+   "GET /products/{}",
+   "GET /rbac/check-permission",
+   "GET /rbac/me/permissions",
+   "GET /rbac/me/roles",
+   "GET /rbac/roles",
+   "GET /rbac/roles/{}",
+   "GET /rbac/roles/{}/permissions",
+   "GET /rbac/users-by-email/{}/roles",
+   "GET /rbac/users/{}/roles",
+   "POST /rbac/permissions/assign",
+   "POST /rbac/roles",
+   "POST /rbac/users-by-email/{}/roles",
+   "POST /rbac/users/{}/roles",
+   "PUT /products/{}",
+   "PUT /rbac/roles/{}"
+  ],
+  "unmatched": [
+   "? /auth/"
+  ],
+  "perms": [],
+  "layouts": [
+   "src/app/[locale]/dashboard/layout.tsx",
+   "src/app/[locale]/layout.tsx",
+   "src/app/layout.tsx"
+  ],
+  "nfiles": 40
+ },
+ {
+  "app": "dashboard",
+  "url": "/[locale]/dashboard/products/new",
+  "file": "src/app/[locale]/dashboard/products/new/page.tsx",
+  "endpoints": [
+   "? /auth/login",
+   "DELETE /rbac/permissions/{}/{}",
+   "DELETE /rbac/roles/{}",
+   "DELETE /rbac/users-by-email/{}/roles/{}",
+   "DELETE /rbac/users/{}/roles/{}",
+   "GET /categories",
+   "GET /rbac/check-permission",
+   "GET /rbac/me/permissions",
+   "GET /rbac/me/roles",
+   "GET /rbac/roles",
+   "GET /rbac/roles/{}",
+   "GET /rbac/roles/{}/permissions",
+   "GET /rbac/users-by-email/{}/roles",
+   "GET /rbac/users/{}/roles",
+   "POST /products",
+   "POST /rbac/permissions/assign",
+   "POST /rbac/roles",
+   "POST /rbac/users-by-email/{}/roles",
+   "POST /rbac/users/{}/roles",
+   "PUT /rbac/roles/{}"
+  ],
+  "unmatched": [
+   "? /auth/"
+  ],
+  "perms": [],
+  "layouts": [
+   "src/app/[locale]/dashboard/layout.tsx",
+   "src/app/[locale]/layout.tsx",
+   "src/app/layout.tsx"
+  ],
+  "nfiles": 40
+ },
+ {
+  "app": "dashboard",
+  "url": "/[locale]/dashboard/rbac/roles",
+  "file": "src/app/[locale]/dashboard/rbac/roles/page.tsx",
+  "endpoints": [
+   "? /auth/login",
+   "DELETE /rbac/permissions/{}/{}",
+   "DELETE /rbac/roles/{}",
+   "DELETE /rbac/users-by-email/{}/roles/{}",
+   "DELETE /rbac/users/{}/roles/{}",
+   "GET /rbac/check-permission",
+   "GET /rbac/me/permissions",
+   "GET /rbac/me/roles",
+   "GET /rbac/roles",
+   "GET /rbac/roles/{}",
+   "GET /rbac/roles/{}/permissions",
+   "GET /rbac/users-by-email/{}/roles",
+   "GET /rbac/users/{}/roles",
+   "POST /rbac/permissions/assign",
+   "POST /rbac/roles",
+   "POST /rbac/users-by-email/{}/roles",
+   "POST /rbac/users/{}/roles",
+   "PUT /rbac/roles/{}"
+  ],
+  "unmatched": [
+   "? /auth/"
+  ],
+  "perms": [],
+  "layouts": [
+   "src/app/[locale]/dashboard/layout.tsx",
+   "src/app/[locale]/layout.tsx",
+   "src/app/layout.tsx"
+  ],
+  "nfiles": 34
+ },
+ {
+  "app": "dashboard",
+  "url": "/[locale]/dashboard/reports",
+  "file": "src/app/[locale]/dashboard/reports/page.tsx",
+  "endpoints": [],
+  "unmatched": [],
+  "perms": [],
+  "layouts": [
+   "src/app/[locale]/dashboard/layout.tsx",
+   "src/app/[locale]/layout.tsx",
+   "src/app/layout.tsx"
+  ],
+  "nfiles": 1
+ },
+ {
+  "app": "dashboard",
+  "url": "/[locale]/dashboard/reports/financial",
+  "file": "src/app/[locale]/dashboard/reports/financial/page.tsx",
+  "endpoints": [
+   "? /auth/login",
+   "GET /accounting/tax/vat-report"
+  ],
+  "unmatched": [
+   "? /auth/"
+  ],
+  "perms": [],
+  "layouts": [
+   "src/app/[locale]/dashboard/layout.tsx",
+   "src/app/[locale]/layout.tsx",
+   "src/app/layout.tsx"
+  ],
+  "nfiles": 15
+ },
+ {
+  "app": "dashboard",
+  "url": "/[locale]/dashboard/reports/financial/advanced",
+  "file": "src/app/[locale]/dashboard/reports/financial/advanced/page.tsx",
+  "endpoints": [
+   "? /audit/export",
+   "? /auth/login",
+   "? /reports/hr/social-insurance",
+   "GET /reports/financial/break-even",
+   "GET /reports/financial/kpis",
+   "GET /reports/financial/menu-profitability",
+   "GET /reports/financial/predictive-cash-flow",
+   "GET /reports/hr/cost-analysis"
+  ],
+  "unmatched": [
+   "? /auth/"
+  ],
+  "perms": [],
+  "layouts": [
+   "src/app/[locale]/dashboard/layout.tsx",
+   "src/app/[locale]/layout.tsx",
+   "src/app/layout.tsx"
+  ],
+  "nfiles": 17
+ },
+ {
+  "app": "dashboard",
+  "url": "/[locale]/dashboard/reports/financial/balance-sheet",
+  "file": "src/app/[locale]/dashboard/reports/financial/balance-sheet/page.tsx",
+  "endpoints": [
+   "? /auth/login",
+   "GET /reports/financial/balance-sheet"
+  ],
+  "unmatched": [
+   "? /auth/"
+  ],
+  "perms": [],
+  "layouts": [
+   "src/app/[locale]/dashboard/layout.tsx",
+   "src/app/[locale]/layout.tsx",
+   "src/app/layout.tsx"
+  ],
+  "nfiles": 24
+ },
+ {
+  "app": "dashboard",
+  "url": "/[locale]/dashboard/reports/financial/cash-flow",
+  "file": "src/app/[locale]/dashboard/reports/financial/cash-flow/page.tsx",
+  "endpoints": [
+   "? /auth/login",
+   "GET /reports/financial/cash-flow"
+  ],
+  "unmatched": [
+   "? /auth/"
+  ],
+  "perms": [],
+  "layouts": [
+   "src/app/[locale]/dashboard/layout.tsx",
+   "src/app/[locale]/layout.tsx",
+   "src/app/layout.tsx"
+  ],
+  "nfiles": 23
+ },
+ {
+  "app": "dashboard",
+  "url": "/[locale]/dashboard/reports/financial/inventory-valuation",
+  "file": "src/app/[locale]/dashboard/reports/financial/inventory-valuation/page.tsx",
+  "endpoints": [
+   "? /auth/login",
+   "GET /reports/financial/inventory-valuation"
+  ],
+  "unmatched": [
+   "? /auth/"
+  ],
+  "perms": [],
+  "layouts": [
+   "src/app/[locale]/dashboard/layout.tsx",
+   "src/app/[locale]/layout.tsx",
+   "src/app/layout.tsx"
+  ],
+  "nfiles": 23
+ },
+ {
+  "app": "dashboard",
+  "url": "/[locale]/dashboard/reports/financial/payables-aging",
+  "file": "src/app/[locale]/dashboard/reports/financial/payables-aging/page.tsx",
+  "endpoints": [
+   "? /auth/login",
+   "GET /reports/financial/payables-aging"
+  ],
+  "unmatched": [
+   "? /auth/"
+  ],
+  "perms": [],
+  "layouts": [
+   "src/app/[locale]/dashboard/layout.tsx",
+   "src/app/[locale]/layout.tsx",
+   "src/app/layout.tsx"
+  ],
+  "nfiles": 23
+ },
+ {
+  "app": "dashboard",
+  "url": "/[locale]/dashboard/reports/financial/profit-loss",
+  "file": "src/app/[locale]/dashboard/reports/financial/profit-loss/page.tsx",
+  "endpoints": [
+   "? /auth/login",
+   "GET /reports/financial/profit-loss"
+  ],
+  "unmatched": [
+   "? /auth/"
+  ],
+  "perms": [],
+  "layouts": [
+   "src/app/[locale]/dashboard/layout.tsx",
+   "src/app/[locale]/layout.tsx",
+   "src/app/layout.tsx"
+  ],
+  "nfiles": 23
+ },
+ {
+  "app": "dashboard",
+  "url": "/[locale]/dashboard/reports/financial/receivables-aging",
+  "file": "src/app/[locale]/dashboard/reports/financial/receivables-aging/page.tsx",
+  "endpoints": [
+   "? /auth/login",
+   "GET /reports/financial/receivables-aging"
+  ],
+  "unmatched": [
+   "? /auth/"
+  ],
+  "perms": [],
+  "layouts": [
+   "src/app/[locale]/dashboard/layout.tsx",
+   "src/app/[locale]/layout.tsx",
+   "src/app/layout.tsx"
+  ],
+  "nfiles": 23
+ },
+ {
+  "app": "dashboard",
+  "url": "/[locale]/dashboard/reports/financial/vat",
+  "file": "src/app/[locale]/dashboard/reports/financial/vat/page.tsx",
+  "endpoints": [
+   "? /auth/login",
+   "GET /accounting/tax/vat-report"
+  ],
+  "unmatched": [
+   "? /auth/"
+  ],
+  "perms": [],
+  "layouts": [
+   "src/app/[locale]/dashboard/layout.tsx",
+   "src/app/[locale]/layout.tsx",
+   "src/app/layout.tsx"
+  ],
+  "nfiles": 23
+ },
+ {
+  "app": "dashboard",
+  "url": "/[locale]/dashboard/reports/hr",
+  "file": "src/app/[locale]/dashboard/reports/hr/page.tsx",
+  "endpoints": [
+   "? /auth/login",
+   "DELETE /rbac/permissions/{}/{}",
+   "DELETE /rbac/roles/{}",
+   "DELETE /rbac/users-by-email/{}/roles/{}",
+   "DELETE /rbac/users/{}/roles/{}",
+   "GET /rbac/check-permission",
+   "GET /rbac/me/permissions",
+   "GET /rbac/me/roles",
+   "GET /rbac/roles",
+   "GET /rbac/roles/{}",
+   "GET /rbac/roles/{}/permissions",
+   "GET /rbac/users-by-email/{}/roles",
+   "GET /rbac/users/{}/roles",
+   "GET /reports/hr/absenteeism",
+   "GET /reports/hr/headcount",
+   "GET /reports/hr/leave-balances",
+   "GET /reports/hr/overtime",
+   "GET /reports/hr/training-compliance",
+   "GET /reports/hr/turnover",
+   "POST /rbac/permissions/assign",
+   "POST /rbac/roles",
+   "POST /rbac/users-by-email/{}/roles",
+   "POST /rbac/users/{}/roles",
+   "PUT /rbac/roles/{}"
+  ],
+  "unmatched": [
+   "? /auth/"
+  ],
+  "perms": [
+   "REPORTS:READ"
+  ],
+  "layouts": [
+   "src/app/[locale]/dashboard/layout.tsx",
+   "src/app/[locale]/layout.tsx",
+   "src/app/layout.tsx"
+  ],
+  "nfiles": 30
+ },
+ {
+  "app": "dashboard",
+  "url": "/[locale]/dashboard/reports/inventory",
+  "file": "src/app/[locale]/dashboard/reports/inventory/page.tsx",
+  "endpoints": [
+   "? /auth/login",
+   "DELETE /rbac/permissions/{}/{}",
+   "DELETE /rbac/roles/{}",
+   "DELETE /rbac/users-by-email/{}/roles/{}",
+   "DELETE /rbac/users/{}/roles/{}",
+   "GET /rbac/check-permission",
+   "GET /rbac/me/permissions",
+   "GET /rbac/me/roles",
+   "GET /rbac/roles",
+   "GET /rbac/roles/{}",
+   "GET /rbac/roles/{}/permissions",
+   "GET /rbac/users-by-email/{}/roles",
+   "GET /rbac/users/{}/roles",
+   "GET /reports/inventory",
+   "POST /rbac/permissions/assign",
+   "POST /rbac/roles",
+   "POST /rbac/users-by-email/{}/roles",
+   "POST /rbac/users/{}/roles",
+   "POST /reports/export",
+   "PUT /rbac/roles/{}"
+  ],
+  "unmatched": [
+   "? /auth/"
+  ],
+  "perms": [
+   "REPORTS:READ"
+  ],
+  "layouts": [
+   "src/app/[locale]/dashboard/layout.tsx",
+   "src/app/[locale]/layout.tsx",
+   "src/app/layout.tsx"
+  ],
+  "nfiles": 39
+ },
+ {
+  "app": "dashboard",
+  "url": "/[locale]/dashboard/reports/overview",
+  "file": "src/app/[locale]/dashboard/reports/overview/page.tsx",
+  "endpoints": [
+   "? /auth/login",
+   "DELETE /rbac/permissions/{}/{}",
+   "DELETE /rbac/roles/{}",
+   "DELETE /rbac/users-by-email/{}/roles/{}",
+   "DELETE /rbac/users/{}/roles/{}",
+   "GET /rbac/check-permission",
+   "GET /rbac/me/permissions",
+   "GET /rbac/me/roles",
+   "GET /rbac/roles",
+   "GET /rbac/roles/{}",
+   "GET /rbac/roles/{}/permissions",
+   "GET /rbac/users-by-email/{}/roles",
+   "GET /rbac/users/{}/roles",
+   "GET /reports/overview",
+   "POST /rbac/permissions/assign",
+   "POST /rbac/roles",
+   "POST /rbac/users-by-email/{}/roles",
+   "POST /rbac/users/{}/roles",
+   "PUT /rbac/roles/{}"
+  ],
+  "unmatched": [
+   "? /auth/"
+  ],
+  "perms": [
+   "REPORTS:READ"
+  ],
+  "layouts": [
+   "src/app/[locale]/dashboard/layout.tsx",
+   "src/app/[locale]/layout.tsx",
+   "src/app/layout.tsx"
+  ],
+  "nfiles": 34
+ },
+ {
+  "app": "dashboard",
+  "url": "/[locale]/dashboard/reports/profitability",
+  "file": "src/app/[locale]/dashboard/reports/profitability/page.tsx",
+  "endpoints": [
+   "? /auth/login",
+   "DELETE /rbac/permissions/{}/{}",
+   "DELETE /rbac/roles/{}",
+   "DELETE /rbac/users-by-email/{}/roles/{}",
+   "DELETE /rbac/users/{}/roles/{}",
+   "GET /rbac/check-permission",
+   "GET /rbac/me/permissions",
+   "GET /rbac/me/roles",
+   "GET /rbac/roles",
+   "GET /rbac/roles/{}",
+   "GET /rbac/roles/{}/permissions",
+   "GET /rbac/users-by-email/{}/roles",
+   "GET /rbac/users/{}/roles",
+   "GET /reports/profitability",
+   "POST /rbac/permissions/assign",
+   "POST /rbac/roles",
+   "POST /rbac/users-by-email/{}/roles",
+   "POST /rbac/users/{}/roles",
+   "POST /reports/export",
+   "PUT /rbac/roles/{}"
+  ],
+  "unmatched": [
+   "? /auth/"
+  ],
+  "perms": [
+   "REPORTS:READ"
+  ],
+  "layouts": [
+   "src/app/[locale]/dashboard/layout.tsx",
+   "src/app/[locale]/layout.tsx",
+   "src/app/layout.tsx"
+  ],
+  "nfiles": 39
+ },
+ {
+  "app": "dashboard",
+  "url": "/[locale]/dashboard/reports/sales",
+  "file": "src/app/[locale]/dashboard/reports/sales/page.tsx",
+  "endpoints": [
+   "? /auth/login",
+   "DELETE /rbac/permissions/{}/{}",
+   "DELETE /rbac/roles/{}",
+   "DELETE /rbac/users-by-email/{}/roles/{}",
+   "DELETE /rbac/users/{}/roles/{}",
+   "GET /rbac/check-permission",
+   "GET /rbac/me/permissions",
+   "GET /rbac/me/roles",
+   "GET /rbac/roles",
+   "GET /rbac/roles/{}",
+   "GET /rbac/roles/{}/permissions",
+   "GET /rbac/users-by-email/{}/roles",
+   "GET /rbac/users/{}/roles",
+   "GET /reports/sales",
+   "POST /rbac/permissions/assign",
+   "POST /rbac/roles",
+   "POST /rbac/users-by-email/{}/roles",
+   "POST /rbac/users/{}/roles",
+   "POST /reports/export",
+   "PUT /rbac/roles/{}"
+  ],
+  "unmatched": [
+   "? /auth/"
+  ],
+  "perms": [
+   "REPORTS:READ"
+  ],
+  "layouts": [
+   "src/app/[locale]/dashboard/layout.tsx",
+   "src/app/[locale]/layout.tsx",
+   "src/app/layout.tsx"
+  ],
+  "nfiles": 39
+ },
+ {
+  "app": "dashboard",
+  "url": "/[locale]/dashboard/settings",
+  "file": "src/app/[locale]/dashboard/settings/page.tsx",
+  "endpoints": [],
+  "unmatched": [],
+  "perms": [],
+  "layouts": [
+   "src/app/[locale]/dashboard/settings/layout.tsx",
+   "src/app/[locale]/dashboard/layout.tsx",
+   "src/app/[locale]/layout.tsx",
+   "src/app/layout.tsx"
+  ],
+  "nfiles": 1
+ },
+ {
+  "app": "dashboard",
+  "url": "/[locale]/dashboard/settings/access-control",
+  "file": "src/app/[locale]/dashboard/settings/access-control/page.tsx",
+  "endpoints": [
+   "? /auth/login",
+   "DELETE /rbac/permissions/{}/{}",
+   "DELETE /rbac/roles/{}",
+   "DELETE /rbac/users-by-email/{}/roles/{}",
+   "DELETE /rbac/users/{}/roles/{}",
+   "GET /rbac/check-permission",
+   "GET /rbac/me/permissions",
+   "GET /rbac/me/roles",
+   "GET /rbac/roles",
+   "GET /rbac/roles/{}",
+   "GET /rbac/roles/{}/permissions",
+   "GET /rbac/users-by-email/{}/roles",
+   "GET /rbac/users/{}/roles",
+   "POST /rbac/permissions/assign",
+   "POST /rbac/roles",
+   "POST /rbac/users-by-email/{}/roles",
+   "POST /rbac/users/{}/roles",
+   "PUT /rbac/roles/{}"
+  ],
+  "unmatched": [
+   "? /auth/"
+  ],
+  "perms": [],
+  "layouts": [
+   "src/app/[locale]/dashboard/settings/layout.tsx",
+   "src/app/[locale]/dashboard/layout.tsx",
+   "src/app/[locale]/layout.tsx",
+   "src/app/layout.tsx"
+  ],
+  "nfiles": 31
+ },
+ {
+  "app": "dashboard",
+  "url": "/[locale]/dashboard/settings/account",
+  "file": "src/app/[locale]/dashboard/settings/account/page.tsx",
+  "endpoints": [],
+  "unmatched": [],
+  "perms": [],
+  "layouts": [
+   "src/app/[locale]/dashboard/settings/layout.tsx",
+   "src/app/[locale]/dashboard/layout.tsx",
+   "src/app/[locale]/layout.tsx",
+   "src/app/layout.tsx"
+  ],
+  "nfiles": 20
+ },
+ {
+  "app": "dashboard",
+  "url": "/[locale]/dashboard/settings/appearance",
+  "file": "src/app/[locale]/dashboard/settings/appearance/page.tsx",
+  "endpoints": [
+   "? /admin/themes/{}/history",
+   "DELETE /admin/themes/{}",
+   "GET /admin/theme-presets",
+   "GET /admin/themes",
+   "GET /admin/themes/{}",
+   "POST /admin/themes",
+   "POST /admin/themes/{}/activate",
+   "POST /admin/themes/{}/duplicate",
+   "PUT /admin/themes/{}"
+  ],
+  "unmatched": [
+   "? /admin/themes/{}/components",
+   "? /admin/themes/{}/components/{}",
+   "? /public/component-library",
+   "DELETE /admin/themes/{}/components/{}",
+   "POST /admin/themes/import",
+   "POST /admin/themes/{}/components/reorder",
+   "POST /admin/themes/{}/export"
+  ],
+  "perms": [],
+  "layouts": [
+   "src/app/[locale]/dashboard/settings/layout.tsx",
+   "src/app/[locale]/dashboard/layout.tsx",
+   "src/app/[locale]/layout.tsx",
+   "src/app/layout.tsx"
+  ],
+  "nfiles": 23
+ },
+ {
+  "app": "dashboard",
+  "url": "/[locale]/dashboard/settings/billing",
+  "file": "src/app/[locale]/dashboard/settings/billing/page.tsx",
+  "endpoints": [
+   "? /auth/login",
+   "GET /subscription/current",
+   "GET /subscription/payments",
+   "GET /subscription/plans",
+   "POST /subscription/cancel",
+   "POST /subscription/initiate"
+  ],
+  "unmatched": [
+   "? /auth/"
+  ],
+  "perms": [],
+  "layouts": [
+   "src/app/[locale]/dashboard/settings/layout.tsx",
+   "src/app/[locale]/dashboard/layout.tsx",
+   "src/app/[locale]/layout.tsx",
+   "src/app/layout.tsx"
+  ],
+  "nfiles": 31
+ },
+ {
+  "app": "dashboard",
+  "url": "/[locale]/dashboard/settings/restaurant",
+  "file": "src/app/[locale]/dashboard/settings/restaurant/page.tsx",
+  "endpoints": [
+   "? /auth/login",
+   "GET /tenant/contact-info",
+   "PUT /tenant/contact-info"
+  ],
+  "unmatched": [
+   "? /auth/"
+  ],
+  "perms": [],
+  "layouts": [
+   "src/app/[locale]/dashboard/settings/layout.tsx",
+   "src/app/[locale]/dashboard/layout.tsx",
+   "src/app/[locale]/layout.tsx",
+   "src/app/layout.tsx"
+  ],
+  "nfiles": 28
+ },
+ {
+  "app": "dashboard",
+  "url": "/[locale]/dashboard/settings/roles",
+  "file": "src/app/[locale]/dashboard/settings/roles/page.tsx",
+  "endpoints": [
+   "? /auth/login",
+   "DELETE /rbac/permissions/{}/{}",
+   "DELETE /rbac/roles/{}",
+   "DELETE /rbac/users-by-email/{}/roles/{}",
+   "DELETE /rbac/users/{}/roles/{}",
+   "GET /rbac/check-permission",
+   "GET /rbac/me/permissions",
+   "GET /rbac/me/roles",
+   "GET /rbac/roles",
+   "GET /rbac/roles/{}",
+   "GET /rbac/roles/{}/permissions",
+   "GET /rbac/users-by-email/{}/roles",
+   "GET /rbac/users/{}/roles",
+   "POST /rbac/permissions/assign",
+   "POST /rbac/roles",
+   "POST /rbac/users-by-email/{}/roles",
+   "POST /rbac/users/{}/roles",
+   "PUT /rbac/roles/{}"
+  ],
+  "unmatched": [
+   "? /auth/"
+  ],
+  "perms": [
+   "SETTINGS:WRITE"
+  ],
+  "layouts": [
+   "src/app/[locale]/dashboard/settings/layout.tsx",
+   "src/app/[locale]/dashboard/layout.tsx",
+   "src/app/[locale]/layout.tsx",
+   "src/app/layout.tsx"
+  ],
+  "nfiles": 28
+ },
+ {
+  "app": "dashboard",
+  "url": "/[locale]/dashboard/settings/roles/[id]/edit",
+  "file": "src/app/[locale]/dashboard/settings/roles/[id]/edit/page.tsx",
+  "endpoints": [
+   "? /auth/login",
+   "DELETE /rbac/permissions/{}/{}",
+   "DELETE /rbac/roles/{}",
+   "DELETE /rbac/users-by-email/{}/roles/{}",
+   "DELETE /rbac/users/{}/roles/{}",
+   "GET /rbac/check-permission",
+   "GET /rbac/me/permissions",
+   "GET /rbac/me/roles",
+   "GET /rbac/roles",
+   "GET /rbac/roles/{}",
+   "GET /rbac/roles/{}/permissions",
+   "GET /rbac/users-by-email/{}/roles",
+   "GET /rbac/users/{}/roles",
+   "POST /rbac/permissions/assign",
+   "POST /rbac/roles",
+   "POST /rbac/users-by-email/{}/roles",
+   "POST /rbac/users/{}/roles",
+   "PUT /rbac/roles/{}"
+  ],
+  "unmatched": [
+   "? /auth/"
+  ],
+  "perms": [
+   "SETTINGS:WRITE"
+  ],
+  "layouts": [
+   "src/app/[locale]/dashboard/settings/layout.tsx",
+   "src/app/[locale]/dashboard/layout.tsx",
+   "src/app/[locale]/layout.tsx",
+   "src/app/layout.tsx"
+  ],
+  "nfiles": 28
+ },
+ {
+  "app": "dashboard",
+  "url": "/[locale]/dashboard/settings/roles/new",
+  "file": "src/app/[locale]/dashboard/settings/roles/new/page.tsx",
+  "endpoints": [
+   "? /auth/login",
+   "DELETE /rbac/permissions/{}/{}",
+   "DELETE /rbac/roles/{}",
+   "DELETE /rbac/users-by-email/{}/roles/{}",
+   "DELETE /rbac/users/{}/roles/{}",
+   "GET /rbac/check-permission",
+   "GET /rbac/me/permissions",
+   "GET /rbac/me/roles",
+   "GET /rbac/roles",
+   "GET /rbac/roles/{}",
+   "GET /rbac/roles/{}/permissions",
+   "GET /rbac/users-by-email/{}/roles",
+   "GET /rbac/users/{}/roles",
+   "POST /rbac/permissions/assign",
+   "POST /rbac/roles",
+   "POST /rbac/users-by-email/{}/roles",
+   "POST /rbac/users/{}/roles",
+   "PUT /rbac/roles/{}"
+  ],
+  "unmatched": [
+   "? /auth/"
+  ],
+  "perms": [
+   "SETTINGS:WRITE"
+  ],
+  "layouts": [
+   "src/app/[locale]/dashboard/settings/layout.tsx",
+   "src/app/[locale]/dashboard/layout.tsx",
+   "src/app/[locale]/layout.tsx",
+   "src/app/layout.tsx"
+  ],
+  "nfiles": 28
+ },
+ {
+  "app": "dashboard",
+  "url": "/[locale]/dashboard/settings/users",
+  "file": "src/app/[locale]/dashboard/settings/users/page.tsx",
+  "endpoints": [
+   "? /auth/login",
+   "DELETE /rbac/permissions/{}/{}",
+   "DELETE /rbac/roles/{}",
+   "DELETE /rbac/users-by-email/{}/roles/{}",
+   "DELETE /rbac/users/{}/roles/{}",
+   "GET /rbac/check-permission",
+   "GET /rbac/me/permissions",
+   "GET /rbac/me/roles",
+   "GET /rbac/roles",
+   "GET /rbac/roles/{}",
+   "GET /rbac/roles/{}/permissions",
+   "GET /rbac/users-by-email/{}/roles",
+   "GET /rbac/users/{}/roles",
+   "POST /rbac/permissions/assign",
+   "POST /rbac/roles",
+   "POST /rbac/users-by-email/{}/roles",
+   "POST /rbac/users/{}/roles",
+   "PUT /rbac/roles/{}"
+  ],
+  "unmatched": [
+   "? /auth/"
+  ],
+  "perms": [
+   "SETTINGS:WRITE"
+  ],
+  "layouts": [
+   "src/app/[locale]/dashboard/settings/layout.tsx",
+   "src/app/[locale]/dashboard/layout.tsx",
+   "src/app/[locale]/layout.tsx",
+   "src/app/layout.tsx"
+  ],
+  "nfiles": 28
+ },
+ {
+  "app": "dashboard",
+  "url": "/[locale]/dashboard/tables",
+  "file": "src/app/[locale]/dashboard/tables/page.tsx",
+  "endpoints": [
+   "? /auth/login",
+   "DELETE /rbac/permissions/{}/{}",
+   "DELETE /rbac/roles/{}",
+   "DELETE /rbac/users-by-email/{}/roles/{}",
+   "DELETE /rbac/users/{}/roles/{}",
+   "DELETE /tables/{}",
+   "GET /rbac/check-permission",
+   "GET /rbac/me/permissions",
+   "GET /rbac/me/roles",
+   "GET /rbac/roles",
+   "GET /rbac/roles/{}",
+   "GET /rbac/roles/{}/permissions",
+   "GET /rbac/users-by-email/{}/roles",
+   "GET /rbac/users/{}/roles",
+   "GET /tables",
+   "GET /tables/layouts",
+   "GET /tables/stats",
+   "GET /tables/{}",
+   "POST /rbac/permissions/assign",
+   "POST /rbac/roles",
+   "POST /rbac/users-by-email/{}/roles",
+   "POST /rbac/users/{}/roles",
+   "POST /tables",
+   "POST /tables/layouts",
+   "PUT /rbac/roles/{}",
+   "PUT /tables/positions",
+   "PUT /tables/{}",
+   "PUT /tables/{}/status"
+  ],
+  "unmatched": [
+   "? /auth/"
+  ],
+  "perms": [
+   "TABLES:DELETE",
+   "TABLES:READ",
+   "TABLES:WRITE"
+  ],
+  "layouts": [
+   "src/app/[locale]/dashboard/layout.tsx",
+   "src/app/[locale]/layout.tsx",
+   "src/app/layout.tsx"
+  ],
+  "nfiles": 36
+ },
+ {
+  "app": "dashboard",
+  "url": "/[locale]/dashboard/tables/[id]",
+  "file": "src/app/[locale]/dashboard/tables/[id]/page.tsx",
+  "endpoints": [
+   "? /auth/login",
+   "DELETE /rbac/permissions/{}/{}",
+   "DELETE /rbac/roles/{}",
+   "DELETE /rbac/users-by-email/{}/roles/{}",
+   "DELETE /rbac/users/{}/roles/{}",
+   "DELETE /tables/{}",
+   "GET /rbac/check-permission",
+   "GET /rbac/me/permissions",
+   "GET /rbac/me/roles",
+   "GET /rbac/roles",
+   "GET /rbac/roles/{}",
+   "GET /rbac/roles/{}/permissions",
+   "GET /rbac/users-by-email/{}/roles",
+   "GET /rbac/users/{}/roles",
+   "GET /tables",
+   "GET /tables/layouts",
+   "GET /tables/stats",
+   "GET /tables/{}",
+   "POST /rbac/permissions/assign",
+   "POST /rbac/roles",
+   "POST /rbac/users-by-email/{}/roles",
+   "POST /rbac/users/{}/roles",
+   "POST /tables",
+   "POST /tables/layouts",
+   "PUT /rbac/roles/{}",
+   "PUT /tables/positions",
+   "PUT /tables/{}",
+   "PUT /tables/{}/status"
+  ],
+  "unmatched": [
+   "? /auth/"
+  ],
+  "perms": [
+   "TABLES:READ",
+   "TABLES:WRITE"
+  ],
+  "layouts": [
+   "src/app/[locale]/dashboard/layout.tsx",
+   "src/app/[locale]/layout.tsx",
+   "src/app/layout.tsx"
+  ],
+  "nfiles": 29
+ },
+ {
+  "app": "dashboard",
+  "url": "/[locale]/dashboard/tables/[id]/edit",
+  "file": "src/app/[locale]/dashboard/tables/[id]/edit/page.tsx",
+  "endpoints": [
+   "? /auth/login",
+   "DELETE /rbac/permissions/{}/{}",
+   "DELETE /rbac/roles/{}",
+   "DELETE /rbac/users-by-email/{}/roles/{}",
+   "DELETE /rbac/users/{}/roles/{}",
+   "DELETE /tables/{}",
+   "GET /rbac/check-permission",
+   "GET /rbac/me/permissions",
+   "GET /rbac/me/roles",
+   "GET /rbac/roles",
+   "GET /rbac/roles/{}",
+   "GET /rbac/roles/{}/permissions",
+   "GET /rbac/users-by-email/{}/roles",
+   "GET /rbac/users/{}/roles",
+   "GET /tables",
+   "GET /tables/layouts",
+   "GET /tables/stats",
+   "GET /tables/{}",
+   "POST /rbac/permissions/assign",
+   "POST /rbac/roles",
+   "POST /rbac/users-by-email/{}/roles",
+   "POST /rbac/users/{}/roles",
+   "POST /tables",
+   "POST /tables/layouts",
+   "PUT /rbac/roles/{}",
+   "PUT /tables/positions",
+   "PUT /tables/{}",
+   "PUT /tables/{}/status"
+  ],
+  "unmatched": [
+   "? /auth/"
+  ],
+  "perms": [
+   "TABLES:READ",
+   "TABLES:WRITE"
+  ],
+  "layouts": [
+   "src/app/[locale]/dashboard/layout.tsx",
+   "src/app/[locale]/layout.tsx",
+   "src/app/layout.tsx"
+  ],
+  "nfiles": 29
+ },
+ {
+  "app": "dashboard",
+  "url": "/[locale]/dashboard/tables/[id]/qr",
+  "file": "src/app/[locale]/dashboard/tables/[id]/qr/page.tsx",
+  "endpoints": [
+   "? /auth/login",
+   "DELETE /rbac/permissions/{}/{}",
+   "DELETE /rbac/roles/{}",
+   "DELETE /rbac/users-by-email/{}/roles/{}",
+   "DELETE /rbac/users/{}/roles/{}",
+   "DELETE /tables/{}",
+   "GET /rbac/check-permission",
+   "GET /rbac/me/permissions",
+   "GET /rbac/me/roles",
+   "GET /rbac/roles",
+   "GET /rbac/roles/{}",
+   "GET /rbac/roles/{}/permissions",
+   "GET /rbac/users-by-email/{}/roles",
+   "GET /rbac/users/{}/roles",
+   "GET /tables",
+   "GET /tables/layouts",
+   "GET /tables/stats",
+   "GET /tables/{}",
+   "POST /rbac/permissions/assign",
+   "POST /rbac/roles",
+   "POST /rbac/users-by-email/{}/roles",
+   "POST /rbac/users/{}/roles",
+   "POST /tables",
+   "POST /tables/layouts",
+   "PUT /rbac/roles/{}",
+   "PUT /tables/positions",
+   "PUT /tables/{}",
+   "PUT /tables/{}/status"
+  ],
+  "unmatched": [
+   "? /auth/"
+  ],
+  "perms": [
+   "TABLES:READ"
+  ],
+  "layouts": [
+   "src/app/[locale]/dashboard/layout.tsx",
+   "src/app/[locale]/layout.tsx",
+   "src/app/layout.tsx"
+  ],
+  "nfiles": 32
+ },
+ {
+  "app": "dashboard",
+  "url": "/[locale]/dashboard/tables/layout",
+  "file": "src/app/[locale]/dashboard/tables/layout/page.tsx",
+  "endpoints": [
+   "? /auth/login",
+   "DELETE /rbac/permissions/{}/{}",
+   "DELETE /rbac/roles/{}",
+   "DELETE /rbac/users-by-email/{}/roles/{}",
+   "DELETE /rbac/users/{}/roles/{}",
+   "DELETE /tables/{}",
+   "GET /rbac/check-permission",
+   "GET /rbac/me/permissions",
+   "GET /rbac/me/roles",
+   "GET /rbac/roles",
+   "GET /rbac/roles/{}",
+   "GET /rbac/roles/{}/permissions",
+   "GET /rbac/users-by-email/{}/roles",
+   "GET /rbac/users/{}/roles",
+   "GET /tables",
+   "GET /tables/layouts",
+   "GET /tables/stats",
+   "GET /tables/{}",
+   "POST /rbac/permissions/assign",
+   "POST /rbac/roles",
+   "POST /rbac/users-by-email/{}/roles",
+   "POST /rbac/users/{}/roles",
+   "POST /tables",
+   "POST /tables/layouts",
+   "PUT /rbac/roles/{}",
+   "PUT /tables/positions",
+   "PUT /tables/{}",
+   "PUT /tables/{}/status"
+  ],
+  "unmatched": [
+   "? /auth/"
+  ],
+  "perms": [
+   "TABLES:READ",
+   "TABLES:WRITE"
+  ],
+  "layouts": [
+   "src/app/[locale]/dashboard/layout.tsx",
+   "src/app/[locale]/layout.tsx",
+   "src/app/layout.tsx"
+  ],
+  "nfiles": 39
+ },
+ {
+  "app": "dashboard",
+  "url": "/[locale]/dashboard/theme-builder",
+  "file": "src/app/[locale]/dashboard/theme-builder/page.tsx",
+  "endpoints": [
+   "? /admin/themes/{}/history",
+   "? /auth/login",
+   "DELETE /admin/themes/{}",
+   "GET /admin/theme-presets",
+   "GET /admin/themes",
+   "GET /admin/themes/{}",
+   "POST /admin/themes",
+   "POST /admin/themes/{}/activate",
+   "POST /admin/themes/{}/duplicate",
+   "PUT /admin/themes/{}"
+  ],
+  "unmatched": [
+   "? /admin/themes/{}/components",
+   "? /admin/themes/{}/components/{}",
+   "? /auth/",
+   "? /public/component-library",
+   "DELETE /admin/themes/{}/components/{}",
+   "POST /admin/themes/import",
+   "POST /admin/themes/{}/components/reorder",
+   "POST /admin/themes/{}/export"
+  ],
+  "perms": [],
+  "layouts": [
+   "src/app/[locale]/dashboard/theme-builder/layout.tsx",
+   "src/app/[locale]/dashboard/layout.tsx",
+   "src/app/[locale]/layout.tsx",
+   "src/app/layout.tsx"
+  ],
+  "nfiles": 29
+ },
+ {
+  "app": "dashboard",
+  "url": "/[locale]/dashboard/theme-builder/editor/[id]",
+  "file": "src/app/[locale]/dashboard/theme-builder/editor/[id]/page.tsx",
+  "endpoints": [
+   "? /admin/themes/{}/history",
+   "? /auth/login",
+   "DELETE /admin/themes/{}",
+   "GET /admin/theme-presets",
+   "GET /admin/themes",
+   "GET /admin/themes/{}",
+   "POST /admin/themes",
+   "POST /admin/themes/{}/activate",
+   "POST /admin/themes/{}/duplicate",
+   "PUT /admin/themes/{}"
+  ],
+  "unmatched": [
+   "? /admin/themes/{}/components",
+   "? /admin/themes/{}/components/{}",
+   "? /auth/",
+   "? /orders",
+   "? /public/component-library",
+   "DELETE /admin/themes/{}/components/{}",
+   "POST /admin/themes/import",
+   "POST /admin/themes/{}/components/reorder",
+   "POST /admin/themes/{}/export"
+  ],
+  "perms": [],
+  "layouts": [
+   "src/app/[locale]/dashboard/theme-builder/editor/layout.tsx",
+   "src/app/[locale]/dashboard/theme-builder/layout.tsx",
+   "src/app/[locale]/dashboard/layout.tsx",
+   "src/app/[locale]/layout.tsx",
+   "src/app/layout.tsx"
+  ],
+  "nfiles": 80
+ },
+ {
+  "app": "dashboard",
+  "url": "/[locale]/dashboard/theme-builder/import",
+  "file": "src/app/[locale]/dashboard/theme-builder/import/page.tsx",
+  "endpoints": [
+   "? /admin/themes/{}/history",
+   "DELETE /admin/themes/{}",
+   "GET /admin/theme-presets",
+   "GET /admin/themes",
+   "GET /admin/themes/{}",
+   "POST /admin/themes",
+   "POST /admin/themes/{}/activate",
+   "POST /admin/themes/{}/duplicate",
+   "PUT /admin/themes/{}"
+  ],
+  "unmatched": [
+   "? /admin/themes/{}/components",
+   "? /admin/themes/{}/components/{}",
+   "? /public/component-library",
+   "DELETE /admin/themes/{}/components/{}",
+   "POST /admin/themes/import",
+   "POST /admin/themes/{}/components/reorder",
+   "POST /admin/themes/{}/export"
+  ],
+  "perms": [],
+  "layouts": [
+   "src/app/[locale]/dashboard/theme-builder/layout.tsx",
+   "src/app/[locale]/dashboard/layout.tsx",
+   "src/app/[locale]/layout.tsx",
+   "src/app/layout.tsx"
+  ],
+  "nfiles": 10
+ },
+ {
+  "app": "dashboard",
+  "url": "/[locale]/dashboard/theme-builder/presets",
+  "file": "src/app/[locale]/dashboard/theme-builder/presets/page.tsx",
+  "endpoints": [
+   "? /admin/themes/{}/history",
+   "DELETE /admin/themes/{}",
+   "GET /admin/theme-presets",
+   "GET /admin/themes",
+   "GET /admin/themes/{}",
+   "POST /admin/themes",
+   "POST /admin/themes/{}/activate",
+   "POST /admin/themes/{}/duplicate",
+   "PUT /admin/themes/{}"
+  ],
+  "unmatched": [
+   "? /admin/themes/{}/components",
+   "? /admin/themes/{}/components/{}",
+   "? /public/component-library",
+   "DELETE /admin/themes/{}/components/{}",
+   "POST /admin/themes/import",
+   "POST /admin/themes/{}/components/reorder",
+   "POST /admin/themes/{}/export"
+  ],
+  "perms": [],
+  "layouts": [
+   "src/app/[locale]/dashboard/theme-builder/layout.tsx",
+   "src/app/[locale]/dashboard/layout.tsx",
+   "src/app/[locale]/layout.tsx",
+   "src/app/layout.tsx"
+  ],
+  "nfiles": 17
+ },
+ {
+  "app": "dashboard",
+  "url": "/[locale]/dashboard/theme-builder/qr",
+  "file": "src/app/[locale]/dashboard/theme-builder/qr/page.tsx",
+  "endpoints": [
+   "? /admin/themes/{}/history",
+   "? /auth/login",
+   "DELETE /admin/themes/{}",
+   "GET /admin/theme-presets",
+   "GET /admin/themes",
+   "GET /admin/themes/{}",
+   "POST /admin/themes",
+   "POST /admin/themes/{}/activate",
+   "POST /admin/themes/{}/duplicate",
+   "PUT /admin/themes/{}"
+  ],
+  "unmatched": [
+   "? /admin/themes/{}/components",
+   "? /admin/themes/{}/components/{}",
+   "? /auth/",
+   "? /public/component-library",
+   "DELETE /admin/themes/{}/components/{}",
+   "POST /admin/themes/import",
+   "POST /admin/themes/{}/components/reorder",
+   "POST /admin/themes/{}/export"
+  ],
+  "perms": [],
+  "layouts": [
+   "src/app/[locale]/dashboard/theme-builder/layout.tsx",
+   "src/app/[locale]/dashboard/layout.tsx",
+   "src/app/[locale]/layout.tsx",
+   "src/app/layout.tsx"
+  ],
+  "nfiles": 33
+ },
+ {
+  "app": "dashboard",
+  "url": "/[locale]/test-url",
+  "file": "src/app/[locale]/test-url/page.tsx",
+  "endpoints": [],
+  "unmatched": [],
+  "perms": [],
+  "layouts": [
+   "src/app/[locale]/layout.tsx",
+   "src/app/layout.tsx"
+  ],
+  "nfiles": 1
+ },
+ {
+  "app": "dashboard",
+  "url": "/auth/callback",
+  "file": "src/app/auth/callback/page.tsx",
+  "endpoints": [],
+  "unmatched": [
+   "? /auth/callback"
+  ],
+  "perms": [],
+  "layouts": [
+   "src/app/layout.tsx"
+  ],
+  "nfiles": 18
+ },
+ {
+  "app": "landing",
+  "url": "/",
+  "file": "src/app/(entry)/page.tsx",
+  "endpoints": [],
+  "unmatched": [],
+  "perms": [],
+  "layouts": [
+   "src/app/(entry)/layout.tsx"
+  ],
+  "nfiles": 1
+ },
+ {
+  "app": "landing",
+  "url": "/[locale]",
+  "file": "src/app/[locale]/page.tsx",
+  "endpoints": [],
+  "unmatched": [],
+  "perms": [],
+  "layouts": [
+   "src/app/[locale]/layout.tsx"
+  ],
+  "nfiles": 54
+ },
+ {
+  "app": "landing",
+  "url": "/[locale]/auth/login",
+  "file": "src/app/[locale]/auth/login/page.tsx",
+  "endpoints": [
+   "? /auth/login",
+   "POST /auth/login"
+  ],
+  "unmatched": [
+   "? /auth/"
+  ],
+  "perms": [],
+  "layouts": [
+   "src/app/[locale]/auth/layout.tsx",
+   "src/app/[locale]/layout.tsx"
+  ],
+  "nfiles": 39
+ },
+ {
+  "app": "landing",
+  "url": "/[locale]/auth/register",
+  "file": "src/app/[locale]/auth/register/page.tsx",
+  "endpoints": [
+   "? /auth/login",
+   "GET /auth/check-subdomain",
+   "POST /auth/register"
+  ],
+  "unmatched": [
+   "? /auth/"
+  ],
+  "perms": [],
+  "layouts": [
+   "src/app/[locale]/auth/layout.tsx",
+   "src/app/[locale]/layout.tsx"
+  ],
+  "nfiles": 36
+ },
+ {
+  "app": "landing",
+  "url": "/[locale]/auth/super-admin-login",
+  "file": "src/app/[locale]/auth/super-admin-login/page.tsx",
+  "endpoints": [
+   "? /auth/login"
+  ],
+  "unmatched": [
+   "? /auth/"
+  ],
+  "perms": [],
+  "layouts": [
+   "src/app/[locale]/auth/layout.tsx",
+   "src/app/[locale]/layout.tsx"
+  ],
+  "nfiles": 10
+ },
+ {
+  "app": "landing",
+  "url": "/[locale]/contact",
+  "file": "src/app/[locale]/contact/page.tsx",
+  "endpoints": [],
+  "unmatched": [],
+  "perms": [],
+  "layouts": [
+   "src/app/[locale]/layout.tsx"
+  ],
+  "nfiles": 35
+ },
+ {
+  "app": "landing",
+  "url": "/[locale]/demo",
+  "file": "src/app/[locale]/demo/page.tsx",
+  "endpoints": [],
+  "unmatched": [],
+  "perms": [],
+  "layouts": [
+   "src/app/[locale]/layout.tsx"
+  ],
+  "nfiles": 47
+ },
+ {
+  "app": "landing",
+  "url": "/[locale]/features",
+  "file": "src/app/[locale]/features/page.tsx",
+  "endpoints": [],
+  "unmatched": [],
+  "perms": [],
+  "layouts": [
+   "src/app/[locale]/layout.tsx"
+  ],
+  "nfiles": 44
+ },
+ {
+  "app": "landing",
+  "url": "/[locale]/features/[slug]",
+  "file": "src/app/[locale]/features/[slug]/page.tsx",
+  "endpoints": [],
+  "unmatched": [],
+  "perms": [],
+  "layouts": [
+   "src/app/[locale]/layout.tsx"
+  ],
+  "nfiles": 45
+ },
+ {
+  "app": "landing",
+  "url": "/[locale]/how-it-works",
+  "file": "src/app/[locale]/how-it-works/page.tsx",
+  "endpoints": [],
+  "unmatched": [],
+  "perms": [],
+  "layouts": [
+   "src/app/[locale]/layout.tsx"
+  ],
+  "nfiles": 38
+ },
+ {
+  "app": "landing",
+  "url": "/[locale]/pricing",
+  "file": "src/app/[locale]/pricing/page.tsx",
+  "endpoints": [],
+  "unmatched": [],
+  "perms": [],
+  "layouts": [
+   "src/app/[locale]/layout.tsx"
+  ],
+  "nfiles": 40
+ },
+ {
+  "app": "landing",
+  "url": "/[locale]/privacy",
+  "file": "src/app/[locale]/privacy/page.tsx",
+  "endpoints": [],
+  "unmatched": [],
+  "perms": [],
+  "layouts": [
+   "src/app/[locale]/layout.tsx"
+  ],
+  "nfiles": 34
+ },
+ {
+  "app": "landing",
+  "url": "/auth/login",
+  "file": "src/app/(entry)/auth/login/page.tsx",
+  "endpoints": [],
+  "unmatched": [],
+  "perms": [],
+  "layouts": [
+   "src/app/(entry)/layout.tsx"
+  ],
+  "nfiles": 1
+ },
+ {
+  "app": "landing",
+  "url": "/auth/register",
+  "file": "src/app/(entry)/auth/register/page.tsx",
+  "endpoints": [],
+  "unmatched": [],
+  "perms": [],
+  "layouts": [
+   "src/app/(entry)/layout.tsx"
+  ],
+  "nfiles": 1
+ },
+ {
+  "app": "landing",
+  "url": "/auth/super-admin-login",
+  "file": "src/app/(entry)/auth/super-admin-login/page.tsx",
+  "endpoints": [],
+  "unmatched": [],
+  "perms": [],
+  "layouts": [
+   "src/app/(entry)/layout.tsx"
+  ],
+  "nfiles": 1
+ },
+ {
+  "app": "landing",
+  "url": "/login",
+  "file": "src/app/(entry)/login/page.tsx",
+  "endpoints": [],
+  "unmatched": [],
+  "perms": [],
+  "layouts": [
+   "src/app/(entry)/layout.tsx"
+  ],
+  "nfiles": 1
+ },
+ {
+  "app": "landing",
+  "url": "/register",
+  "file": "src/app/(entry)/register/page.tsx",
+  "endpoints": [],
+  "unmatched": [],
+  "perms": [],
+  "layouts": [
+   "src/app/(entry)/layout.tsx"
+  ],
+  "nfiles": 1
+ },
+ {
+  "app": "restaurant-website",
+  "url": "/",
+  "file": "app/page.tsx",
+  "endpoints": [],
+  "unmatched": [],
+  "perms": [],
+  "layouts": [
+   "app/layout.tsx"
+  ],
+  "nfiles": 1
+ },
+ {
+  "app": "restaurant-website",
+  "url": "/[locale]",
+  "file": "app/[locale]/page.tsx",
+  "endpoints": [],
+  "unmatched": [
+   "? /orders"
+  ],
+  "perms": [],
+  "layouts": [
+   "app/[locale]/layout.tsx",
+   "app/layout.tsx"
+  ],
+  "nfiles": 46
+ },
+ {
+  "app": "restaurant-website",
+  "url": "/[locale]/cart",
+  "file": "app/[locale]/cart/page.tsx",
+  "endpoints": [
+   "POST /public/orders/quote"
+  ],
+  "unmatched": [
+   "? /orders"
+  ],
+  "perms": [],
+  "layouts": [
+   "app/[locale]/layout.tsx",
+   "app/layout.tsx"
+  ],
+  "nfiles": 25
+ },
+ {
+  "app": "restaurant-website",
+  "url": "/[locale]/checkout",
+  "file": "app/[locale]/checkout/page.tsx",
+  "endpoints": [
+   "GET /public/orders/{}",
+   "POST /public/orders",
+   "POST /public/orders/quote"
+  ],
+  "unmatched": [
+   "? /orders"
+  ],
+  "perms": [],
+  "layouts": [
+   "app/[locale]/layout.tsx",
+   "app/layout.tsx"
+  ],
+  "nfiles": 27
+ },
+ {
+  "app": "restaurant-website",
+  "url": "/[locale]/menu",
+  "file": "app/[locale]/menu/page.tsx",
+  "endpoints": [
+   "? /public/orders/12/track",
+   "? /public/orders/number/ORD-1/lookup",
+   "GET /public/orders/{}",
+   "GET /public/restaurants/{}/products",
+   "POST /public/orders/quote"
+  ],
+  "unmatched": [
+   "? /orders"
+  ],
+  "perms": [],
+  "layouts": [
+   "app/[locale]/layout.tsx",
+   "app/layout.tsx"
+  ],
+  "nfiles": 41
+ },
+ {
+  "app": "restaurant-website",
+  "url": "/[locale]/orders",
+  "file": "app/[locale]/orders/page.tsx",
+  "endpoints": [
+   "? /public/orders/12/track",
+   "? /public/orders/number/ORD-1/lookup",
+   "GET /public/orders/{}"
+  ],
+  "unmatched": [
+   "? /orders"
+  ],
+  "perms": [],
+  "layouts": [
+   "app/[locale]/layout.tsx",
+   "app/layout.tsx"
+  ],
+  "nfiles": 22
+ },
+ {
+  "app": "restaurant-website",
+  "url": "/[locale]/orders/[id]",
+  "file": "app/[locale]/orders/[id]/page.tsx",
+  "endpoints": [
+   "? /public/orders/12/track",
+   "? /public/orders/number/ORD-1/lookup",
+   "DELETE /public/orders/{}",
+   "GET /public/orders/{}"
+  ],
+  "unmatched": [],
+  "perms": [],
+  "layouts": [
+   "app/[locale]/layout.tsx",
+   "app/layout.tsx"
+  ],
+  "nfiles": 17
+ },
+ {
+  "app": "restaurant-website",
+  "url": "/[locale]/orders/track",
+  "file": "app/[locale]/orders/track/page.tsx",
+  "endpoints": [
+   "? /public/orders/12/track",
+   "? /public/orders/number/ORD-1/lookup",
+   "GET /public/orders/number/{}/lookup",
+   "GET /public/orders/{}/track"
+  ],
+  "unmatched": [
+   "? /orders",
+   "GET /public/themes",
+   "GET /public/themes/{}"
+  ],
+  "perms": [],
+  "layouts": [
+   "app/[locale]/layout.tsx",
+   "app/layout.tsx"
+  ],
+  "nfiles": 21
+ },
+ {
+  "app": "restaurant-website",
+  "url": "/[locale]/orders/track/[orderNumber]",
+  "file": "app/[locale]/orders/track/[orderNumber]/page.tsx",
+  "endpoints": [
+   "? /public/orders/12/track",
+   "? /public/orders/number/ORD-1/lookup",
+   "GET /public/orders/number/{}/lookup",
+   "GET /public/orders/{}/track"
+  ],
+  "unmatched": [
+   "? /orders",
+   "GET /public/themes",
+   "GET /public/themes/{}"
+  ],
+  "perms": [],
+  "layouts": [
+   "app/[locale]/layout.tsx",
+   "app/layout.tsx"
+  ],
+  "nfiles": 21
+ },
+ {
+  "app": "restaurant-website",
+  "url": "/[locale]/settings",
+  "file": "app/[locale]/settings/page.tsx",
+  "endpoints": [],
+  "unmatched": [
+   "? /orders"
+  ],
+  "perms": [],
+  "layouts": [
+   "app/[locale]/layout.tsx",
+   "app/layout.tsx"
+  ],
+  "nfiles": 12
+ },
+ {
+  "app": "restaurant-website",
+  "url": "/[locale]/table/[tableId]/menu",
+  "file": "app/[locale]/table/[tableId]/menu/page.tsx",
+  "endpoints": [
+   "? /public/orders/12/track",
+   "? /public/orders/number/ORD-1/lookup",
+   "GET /public/orders/{}",
+   "GET /public/restaurants/{}/products",
+   "POST /public/orders/quote"
+  ],
+  "unmatched": [
+   "? /orders"
+  ],
+  "perms": [],
+  "layouts": [
+   "app/[locale]/layout.tsx",
+   "app/layout.tsx"
+  ],
+  "nfiles": 43
+ },
+ {
+  "app": "restaurant-website",
+  "url": "/api/metrics",
+  "file": "app/api/metrics/route.ts",
+  "endpoints": [],
+  "unmatched": [],
+  "perms": [],
+  "layouts": [
+   "app/layout.tsx"
+  ],
+  "nfiles": 2
+ },
+ {
+  "app": "restaurant-website",
+  "url": "/maintenance",
+  "file": "app/maintenance/page.tsx",
+  "endpoints": [],
+  "unmatched": [],
+  "perms": [],
+  "layouts": [
+   "app/layout.tsx"
+  ],
+  "nfiles": 7
+ },
+ {
+  "app": "super-admin",
+  "url": "/",
+  "file": "src/app/page.tsx",
+  "endpoints": [],
+  "unmatched": [],
+  "perms": [],
+  "layouts": [
+   "src/app/layout.tsx"
+  ],
+  "nfiles": 6
+ },
+ {
+  "app": "super-admin",
+  "url": "/dashboard",
+  "file": "src/app/dashboard/page.tsx",
+  "endpoints": [
+   "? /auth/login",
+   "? /auth/session",
+   "? /users/{}",
+   "GET /users",
+   "POST /auth/logout"
+  ],
+  "unmatched": [],
+  "perms": [],
+  "layouts": [
+   "src/app/dashboard/layout.tsx",
+   "src/app/layout.tsx"
+  ],
+  "nfiles": 10
+ },
+ {
+  "app": "super-admin",
+  "url": "/dashboard/audit-logs",
+  "file": "src/app/dashboard/audit-logs/page.tsx",
+  "endpoints": [
+   "? /auth/login",
+   "? /auth/session",
+   "? /users/{}",
+   "GET /users",
+   "POST /auth/logout"
+  ],
+  "unmatched": [],
+  "perms": [],
+  "layouts": [
+   "src/app/dashboard/layout.tsx",
+   "src/app/layout.tsx"
+  ],
+  "nfiles": 9
+ },
+ {
+  "app": "super-admin",
+  "url": "/dashboard/payments",
+  "file": "src/app/dashboard/payments/page.tsx",
+  "endpoints": [
+   "? /auth/login",
+   "? /auth/session",
+   "? /users/{}",
+   "GET /users",
+   "POST /auth/logout"
+  ],
+  "unmatched": [],
+  "perms": [],
+  "layouts": [
+   "src/app/dashboard/layout.tsx",
+   "src/app/layout.tsx"
+  ],
+  "nfiles": 8
+ },
+ {
+  "app": "super-admin",
+  "url": "/dashboard/settings",
+  "file": "src/app/dashboard/settings/page.tsx",
+  "endpoints": [
+   "? /auth/login",
+   "? /auth/session",
+   "? /users/{}",
+   "GET /users",
+   "POST /auth/logout"
+  ],
+  "unmatched": [],
+  "perms": [],
+  "layouts": [
+   "src/app/dashboard/layout.tsx",
+   "src/app/layout.tsx"
+  ],
+  "nfiles": 9
+ },
+ {
+  "app": "super-admin",
+  "url": "/dashboard/tenants",
+  "file": "src/app/dashboard/tenants/page.tsx",
+  "endpoints": [
+   "? /auth/login",
+   "? /auth/session",
+   "? /users/{}",
+   "GET /users",
+   "POST /auth/logout"
+  ],
+  "unmatched": [],
+  "perms": [],
+  "layouts": [
+   "src/app/dashboard/layout.tsx",
+   "src/app/layout.tsx"
+  ],
+  "nfiles": 8
+ },
+ {
+  "app": "super-admin",
+  "url": "/dashboard/tenants/[id]",
+  "file": "src/app/dashboard/tenants/[id]/page.tsx",
+  "endpoints": [
+   "? /auth/login",
+   "? /auth/session",
+   "? /super-admin/tenants/{}/subscription-history",
+   "? /users/{}",
+   "DELETE /super-admin/tenants/{}",
+   "GET /users",
+   "POST /auth/logout",
+   "POST /super-admin/tenants/{}/disable",
+   "POST /super-admin/tenants/{}/enable"
+  ],
+  "unmatched": [],
+  "perms": [],
+  "layouts": [
+   "src/app/dashboard/layout.tsx",
+   "src/app/layout.tsx"
+  ],
+  "nfiles": 23
+ },
+ {
+  "app": "super-admin",
+  "url": "/dashboard/users",
+  "file": "src/app/dashboard/users/page.tsx",
+  "endpoints": [
+   "? /auth/login",
+   "? /auth/session",
+   "? /users/{}",
+   "GET /users",
+   "POST /auth/logout"
+  ],
+  "unmatched": [],
+  "perms": [],
+  "layouts": [
+   "src/app/dashboard/layout.tsx",
+   "src/app/layout.tsx"
+  ],
+  "nfiles": 8
+ },
+ {
+  "app": "super-admin",
+  "url": "/favicon.ico",
+  "file": "src/app/favicon.ico/route.ts",
+  "endpoints": [],
+  "unmatched": [],
+  "perms": [],
+  "layouts": [
+   "src/app/layout.tsx"
+  ],
+  "nfiles": 1
+ },
+ {
+  "app": "super-admin",
+  "url": "/login",
+  "file": "src/app/login/page.tsx",
+  "endpoints": [
+   "? /auth/login",
+   "? /auth/session",
+   "? /users/{}",
+   "GET /users",
+   "POST /auth/logout"
+  ],
+  "unmatched": [],
+  "perms": [],
+  "layouts": [
+   "src/app/layout.tsx"
+  ],
+  "nfiles": 11
+ }
+]

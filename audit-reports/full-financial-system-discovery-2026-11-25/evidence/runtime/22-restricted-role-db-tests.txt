@@ -1,0 +1,21 @@
+# SEC-004/005/006 as pos_app (no tenant GUC set). Mutations wrapped in BEGIN..ROLLBACK
+whoami: pos_app|f|f
+count journal_entries (no tenant context): 30
+count general_ledger (no tenant context): 56
+count orders (no tenant context): 12
+count payments_received (no tenant context): 6
+count customer_invoices (no tenant context): ERROR:  relation "customer_invoices" does not exist
+count invoices_supplier (no tenant context): 1
+count salaries (no tenant context): 1
+count products (no tenant context): 2
+count chart_of_accounts (no tenant context): 186
+count users (no tenant context): 5
+count tenants (no tenant context): 4
+count refresh_tokens (no tenant context): ERROR:  relation "refresh_tokens" does not exist
+--- immutability attempts (rolled back)
+UPDATE general_ledger: BEGIN ERROR:  permission denied for table general_ledger 
+DELETE journal_entry_lines: BEGIN ERROR:  permission denied for table journal_entry_lines 
+TRUNCATE general_ledger: BEGIN ERROR:  permission denied for table general_ledger 
+UPDATE orders (paid) total: BEGIN UPDATE 3 ROLLBACK 
+UPDATE payments_received amount: BEGIN UPDATE 6 ROLLBACK 
+CREATE TABLE as pos_app: ERROR:  permission denied for schema public

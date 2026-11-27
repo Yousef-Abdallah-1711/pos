@@ -1,0 +1,4580 @@
+{
+ "run": "RUN-004",
+ "tenant": 4,
+ "role": "owner",
+ "viewport": "1440x900 EN",
+ "results": [
+  {
+   "route": "(home)",
+   "control": "button:Cashier POS",
+   "type": "button",
+   "navigated": "/en/dashboard/pos",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "(home)",
+   "control": "button:Kitchen Display",
+   "type": "button",
+   "navigated": "/en/dashboard/kds",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "(home)",
+   "control": "button:View Orders",
+   "type": "button",
+   "navigated": "/en/dashboard/orders",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "(home)",
+   "control": "button:Add Product",
+   "type": "button",
+   "navigated": "/en/dashboard/products/new",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "(home)",
+   "control": "button:Add Category",
+   "type": "button",
+   "navigated": "/en/dashboard/categories/new",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "(home)",
+   "control": "button:Theme Builder",
+   "type": "button",
+   "navigated": "/en/dashboard/theme-builder",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "(home)",
+   "control": "button:Team",
+   "type": "button",
+   "navigated": "/en/dashboard/hr/employees",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "(home)",
+   "control": "button:Settings",
+   "type": "button",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "(home)",
+   "control": "button:View all orders",
+   "type": "button",
+   "navigated": "/en/dashboard/orders",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "(home)",
+   "control": "button:Open",
+   "type": "button",
+   "navigated": "/en/dashboard/orders/5794",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "(home)",
+   "control": "button:Open",
+   "type": "button",
+   "navigated": "/en/dashboard/orders/5793",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "(home)",
+   "control": "button:Open",
+   "type": "button",
+   "navigated": "/en/dashboard/orders/5792",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "(home)",
+   "control": "button:Open",
+   "type": "button",
+   "navigated": "/en/dashboard/orders/5791",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "(home)",
+   "control": "button:Open",
+   "type": "button",
+   "navigated": "/en/dashboard/orders/5789",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "(home)",
+   "control": "button:Manage Tables",
+   "type": "button",
+   "navigated": "/en/dashboard/tables",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "(home)",
+   "control": "link:Cashier POS",
+   "type": "link",
+   "navigated": "/en/dashboard/pos",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "(home)",
+   "control": "link:Kitchen Display",
+   "type": "link",
+   "navigated": "/en/dashboard/kds",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "(home)",
+   "control": "link:View Orders",
+   "type": "link",
+   "navigated": "/en/dashboard/orders",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "(home)",
+   "control": "link:Add Product",
+   "type": "link",
+   "navigated": "/en/dashboard/products/new",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "(home)",
+   "control": "link:Add Category",
+   "type": "link",
+   "navigated": "/en/dashboard/categories/new",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "(home)",
+   "control": "link:Theme Builder",
+   "type": "link",
+   "navigated": "/en/dashboard/theme-builder",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "(home)",
+   "control": "link:Team",
+   "type": "link",
+   "navigated": "/en/dashboard/hr/employees",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "accounting/advanced",
+   "control": "button:Export COA CSV",
+   "type": "button",
+   "detail": "download: chart-of-accounts-export.csv",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "accounting/advanced",
+   "control": "button:Export Journals CSV",
+   "type": "button",
+   "detail": "download: journal-entries-export.csv",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "accounting/advanced",
+   "control": "button:Refresh",
+   "type": "button",
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "accounting/advanced",
+   "control": "button:Create Session",
+   "type": "button",
+   "navigated": null,
+   "changed": true,
+   "mutations": [
+    "POST /accounting/bank-reconciliation/sessions 201"
+   ],
+   "status": "FLAG-MUTATION"
+  },
+  {
+   "route": "accounting/advanced",
+   "control": "button:Create Sample Template",
+   "type": "button",
+   "navigated": null,
+   "changed": true,
+   "mutations": [
+    "POST /accounting/recurring-journals 201"
+   ],
+   "status": "FLAG-MUTATION"
+  },
+  {
+   "route": "accounting/advanced",
+   "control": "button:Save Budget",
+   "type": "button",
+   "status": "SKIPPED-DESTRUCTIVE",
+   "detail": "money-moving or state-changing label; needs a purpose-built fixture"
+  },
+  {
+   "route": "accounting/advanced",
+   "control": "button:Save FX Rate",
+   "type": "button",
+   "status": "SKIPPED-DESTRUCTIVE",
+   "detail": "money-moving or state-changing label; needs a purpose-built fixture"
+  },
+  {
+   "route": "accounting/advanced",
+   "control": "button:Create Schedule",
+   "type": "button",
+   "navigated": null,
+   "changed": false,
+   "mutations": [
+    "POST /accounting/supplier-payment-schedules 400"
+   ],
+   "errors": [
+    "console: Failed to load resource: the server responded with a status of 400 (Bad Request)",
+    "pageerror: Request failed with status code 400"
+   ],
+   "status": "ERROR"
+  },
+  {
+   "route": "accounting/advanced",
+   "control": "button:Submit E-Invoice (Customer)",
+   "type": "button",
+   "status": "SKIPPED-DESTRUCTIVE",
+   "detail": "money-moving or state-changing label; needs a purpose-built fixture"
+  },
+  {
+   "route": "accounting/bank-accounts",
+   "control": "button:New bank account",
+   "type": "button",
+   "dialog": true,
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "accounting/bank-accounts",
+   "control": "button:Audit Operating Account Audit Test Bank Checking B",
+   "type": "button",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "accounting/bank-accounts",
+   "control": "button:Edit",
+   "type": "button",
+   "dialog": true,
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "accounting/bank-accounts",
+   "control": "button:Delete",
+   "type": "button",
+   "status": "SKIPPED-DESTRUCTIVE",
+   "detail": "money-moving or state-changing label; needs a purpose-built fixture"
+  },
+  {
+   "route": "accounting/bank-accounts",
+   "control": "button:Audit Savings B Audit Bank Savings Balance EGP 12,",
+   "type": "button",
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "accounting/bank-accounts",
+   "control": "button:Edit",
+   "type": "button",
+   "dialog": true,
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "accounting/bank-accounts",
+   "control": "button:Delete",
+   "type": "button",
+   "status": "SKIPPED-DESTRUCTIVE",
+   "detail": "money-moving or state-changing label; needs a purpose-built fixture"
+  },
+  {
+   "route": "accounting/chart-of-accounts",
+   "control": "button:New account",
+   "type": "button",
+   "dialog": true,
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "accounting/chart-of-accounts",
+   "control": "button:(unlabelled)",
+   "type": "button",
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "accounting/chart-of-accounts",
+   "control": "button:Edit",
+   "type": "button",
+   "dialog": true,
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "accounting/chart-of-accounts",
+   "control": "button:Delete",
+   "type": "button",
+   "status": "SKIPPED-DESTRUCTIVE",
+   "detail": "money-moving or state-changing label; needs a purpose-built fixture"
+  },
+  {
+   "route": "accounting/chart-of-accounts",
+   "control": "button:(unlabelled)",
+   "type": "button",
+   "dialog": true,
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "accounting/chart-of-accounts",
+   "control": "button:Edit",
+   "type": "button",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "accounting/chart-of-accounts",
+   "control": "button:Delete",
+   "type": "button",
+   "status": "SKIPPED-DESTRUCTIVE",
+   "detail": "money-moving or state-changing label; needs a purpose-built fixture"
+  },
+  {
+   "route": "accounting/chart-of-accounts",
+   "control": "button:(unlabelled)",
+   "type": "button",
+   "dialog": true,
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "accounting/chart-of-accounts",
+   "control": "button:Edit",
+   "type": "button",
+   "status": "DISABLED",
+   "detail": "control disabled in this state (precondition not met)"
+  },
+  {
+   "route": "accounting/chart-of-accounts",
+   "control": "button:Delete",
+   "type": "button",
+   "status": "SKIPPED-DESTRUCTIVE",
+   "detail": "money-moving or state-changing label; needs a purpose-built fixture"
+  },
+  {
+   "route": "accounting/chart-of-accounts",
+   "control": "button:Edit",
+   "type": "button",
+   "dialog": true,
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "accounting/chart-of-accounts",
+   "control": "button:Delete",
+   "type": "button",
+   "status": "SKIPPED-DESTRUCTIVE",
+   "detail": "money-moving or state-changing label; needs a purpose-built fixture"
+  },
+  {
+   "route": "accounting/chart-of-accounts",
+   "control": "button:(unlabelled)",
+   "type": "button",
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "accounting/chart-of-accounts",
+   "control": "button:Edit",
+   "type": "button",
+   "dialog": true,
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "accounting/chart-of-accounts",
+   "control": "button:Delete",
+   "type": "button",
+   "status": "SKIPPED-DESTRUCTIVE",
+   "detail": "money-moving or state-changing label; needs a purpose-built fixture"
+  },
+  {
+   "route": "accounting/chart-of-accounts",
+   "control": "button:(unlabelled)",
+   "type": "button",
+   "dialog": true,
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "accounting/chart-of-accounts",
+   "control": "button:Edit",
+   "type": "button",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "accounting/chart-of-accounts",
+   "control": "button:Delete",
+   "type": "button",
+   "status": "SKIPPED-DESTRUCTIVE",
+   "detail": "money-moving or state-changing label; needs a purpose-built fixture"
+  },
+  {
+   "route": "accounting/chart-of-accounts",
+   "control": "button:(unlabelled)",
+   "type": "button",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "accounting/chart-of-accounts",
+   "control": "button:Edit",
+   "type": "button",
+   "dialog": true,
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "accounting/chart-of-accounts",
+   "control": "button:Delete",
+   "type": "button",
+   "status": "SKIPPED-DESTRUCTIVE",
+   "detail": "money-moving or state-changing label; needs a purpose-built fixture"
+  },
+  {
+   "route": "accounting/chart-of-accounts",
+   "control": "button:Edit",
+   "type": "button",
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "accounting/customer-invoices",
+   "control": "tab:Invoices",
+   "type": "tab",
+   "detail": "locator.click: Timeout 4000ms exceeded.",
+   "status": "BLOCKED"
+  },
+  {
+   "route": "accounting/customer-invoices",
+   "control": "tab:Overdue",
+   "type": "tab",
+   "detail": "locator.click: Timeout 4000ms exceeded.",
+   "status": "BLOCKED"
+  },
+  {
+   "route": "accounting/customer-invoices",
+   "control": "tab:Received Payments",
+   "type": "tab",
+   "detail": "locator.click: Timeout 4000ms exceeded.",
+   "status": "BLOCKED"
+  },
+  {
+   "route": "accounting/customer-invoices",
+   "control": "button:Record payment",
+   "type": "button",
+   "dialog": true,
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "accounting/customer-invoices",
+   "control": "button:New customer invoice",
+   "type": "button",
+   "dialog": true,
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "accounting/customer-invoices",
+   "control": "button:Invoices",
+   "type": "button",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "accounting/customer-invoices",
+   "control": "button:Overdue",
+   "type": "button",
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "accounting/customer-invoices",
+   "control": "button:Received Payments",
+   "type": "button",
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "accounting/customer-invoices",
+   "control": "button:Edit",
+   "type": "button",
+   "detail": "locator.click: Timeout 4000ms exceeded.",
+   "status": "BLOCKED"
+  },
+  {
+   "route": "accounting/customer-invoices",
+   "control": "button:Void",
+   "type": "button",
+   "status": "SKIPPED-DESTRUCTIVE",
+   "detail": "money-moving or state-changing label; needs a purpose-built fixture"
+  },
+  {
+   "route": "accounting/customer-invoices",
+   "control": "button:Edit",
+   "type": "button",
+   "detail": "locator.click: Timeout 4000ms exceeded.",
+   "status": "BLOCKED"
+  },
+  {
+   "route": "accounting/customer-invoices",
+   "control": "button:Send",
+   "type": "button",
+   "detail": "locator.click: Timeout 4000ms exceeded.",
+   "status": "BLOCKED"
+  },
+  {
+   "route": "accounting/customer-invoices",
+   "control": "button:Void",
+   "type": "button",
+   "status": "SKIPPED-DESTRUCTIVE",
+   "detail": "money-moving or state-changing label; needs a purpose-built fixture"
+  },
+  {
+   "route": "accounting/customer-invoices",
+   "control": "select:(unlabelled)",
+   "type": "select",
+   "detail": "selected 2nd option",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "accounting/customer-invoices",
+   "control": "search:Search customer invoices by number, party, or note",
+   "type": "search",
+   "status": "BLOCKED",
+   "detail": "locator.fill: Timeout 4000ms exceeded."
+  },
+  {
+   "route": "accounting/customers",
+   "control": "button:New customer",
+   "type": "button",
+   "dialog": true,
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "accounting/customers",
+   "control": "button:Statement",
+   "type": "button",
+   "dialog": true,
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "accounting/customers",
+   "control": "button:Edit",
+   "type": "button",
+   "dialog": true,
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "accounting/customers",
+   "control": "button:(unlabelled)",
+   "type": "button",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "accounting/customers",
+   "control": "button:Statement",
+   "type": "button",
+   "dialog": true,
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "accounting/customers",
+   "control": "button:Edit",
+   "type": "button",
+   "dialog": true,
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "accounting/customers",
+   "control": "button:(unlabelled)",
+   "type": "button",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "accounting/customers",
+   "control": "button:Statement",
+   "type": "button",
+   "dialog": true,
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "accounting/customers",
+   "control": "button:Edit",
+   "type": "button",
+   "dialog": true,
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "accounting/customers",
+   "control": "button:(unlabelled)",
+   "type": "button",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "accounting/customers",
+   "control": "button:Statement",
+   "type": "button",
+   "dialog": true,
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "accounting/customers",
+   "control": "button:Edit",
+   "type": "button",
+   "dialog": true,
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "accounting/customers",
+   "control": "button:(unlabelled)",
+   "type": "button",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "accounting/customers",
+   "control": "button:Statement",
+   "type": "button",
+   "dialog": true,
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "accounting/customers",
+   "control": "button:Edit",
+   "type": "button",
+   "dialog": true,
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "accounting/customers",
+   "control": "button:(unlabelled)",
+   "type": "button",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "accounting/customers",
+   "control": "button:Statement",
+   "type": "button",
+   "dialog": true,
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "accounting/customers",
+   "control": "button:Edit",
+   "type": "button",
+   "dialog": true,
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "accounting/customers",
+   "control": "button:(unlabelled)",
+   "type": "button",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "accounting/customers",
+   "control": "button:Statement",
+   "type": "button",
+   "dialog": true,
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "accounting/customers",
+   "control": "button:Edit",
+   "type": "button",
+   "dialog": true,
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "accounting/customers",
+   "control": "button:(unlabelled)",
+   "type": "button",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "accounting/general-ledger",
+   "control": "tab:Ledger",
+   "type": "tab",
+   "detail": "locator.click: Timeout 4000ms exceeded.",
+   "status": "BLOCKED"
+  },
+  {
+   "route": "accounting/general-ledger",
+   "control": "tab:Trial Balance",
+   "type": "tab",
+   "detail": "locator.click: Timeout 4000ms exceeded.",
+   "status": "BLOCKED"
+  },
+  {
+   "route": "accounting/general-ledger",
+   "control": "button:Ledger",
+   "type": "button",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "accounting/general-ledger",
+   "control": "button:Trial Balance",
+   "type": "button",
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "accounting/general-ledger",
+   "control": "button:1101 - Petty Cash",
+   "type": "button",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "accounting/general-ledger",
+   "control": "button:Filter",
+   "type": "button",
+   "detail": "locator.click: Timeout 4000ms exceeded.",
+   "status": "BLOCKED"
+  },
+  {
+   "route": "accounting/journal-entries",
+   "control": "button:New journal entry",
+   "type": "button",
+   "dialog": true,
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "accounting/journal-entries",
+   "control": "link:Open",
+   "type": "link",
+   "navigated": "/en/dashboard/accounting/journal-entries/96",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "accounting/journal-entries",
+   "control": "link:Open",
+   "type": "link",
+   "navigated": "/en/dashboard/accounting/journal-entries/18",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "accounting/journal-entries",
+   "control": "link:Open",
+   "type": "link",
+   "navigated": "/en/dashboard/accounting/journal-entries/17775",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "accounting/journal-entries",
+   "control": "link:Open",
+   "type": "link",
+   "navigated": "/en/dashboard/accounting/journal-entries/17774",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "accounting/journal-entries",
+   "control": "link:Open",
+   "type": "link",
+   "navigated": "/en/dashboard/accounting/journal-entries/17773",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "accounting/journal-entries",
+   "control": "link:Open",
+   "type": "link",
+   "navigated": "/en/dashboard/accounting/journal-entries/17772",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "accounting/journal-entries",
+   "control": "link:Open",
+   "type": "link",
+   "navigated": "/en/dashboard/accounting/journal-entries/17771",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "accounting/journal-entries",
+   "control": "link:Open",
+   "type": "link",
+   "navigated": "/en/dashboard/accounting/journal-entries/17770",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "accounting/journal-entries",
+   "control": "link:Open",
+   "type": "link",
+   "navigated": "/en/dashboard/accounting/journal-entries/17769",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "accounting/journal-entries",
+   "control": "link:Open",
+   "type": "link",
+   "navigated": "/en/dashboard/accounting/journal-entries/17768",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "accounting/journal-entries",
+   "control": "link:Open",
+   "type": "link",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "accounting/journal-entries",
+   "control": "link:Open",
+   "type": "link",
+   "navigated": "/en/dashboard/accounting/journal-entries/17766",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "accounting/journal-entries",
+   "control": "link:Open",
+   "type": "link",
+   "navigated": "/en/dashboard/accounting/journal-entries/17765",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "accounting/journal-entries",
+   "control": "link:Open",
+   "type": "link",
+   "navigated": "/en/dashboard/accounting/journal-entries/17764",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "accounting/journal-entries",
+   "control": "link:Open",
+   "type": "link",
+   "navigated": "/en/dashboard/accounting/journal-entries/17763",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "accounting/journal-entries",
+   "control": "link:Open",
+   "type": "link",
+   "navigated": "/en/dashboard/accounting/journal-entries/17762",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "accounting/journal-entries",
+   "control": "link:Open",
+   "type": "link",
+   "navigated": "/en/dashboard/accounting/journal-entries/17761",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "accounting/journal-entries",
+   "control": "link:Open",
+   "type": "link",
+   "navigated": "/en/dashboard/accounting/journal-entries/17760",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "accounting/journal-entries",
+   "control": "link:Open",
+   "type": "link",
+   "navigated": "/en/dashboard/accounting/journal-entries/17759",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "accounting/journal-entries",
+   "control": "link:Open",
+   "type": "link",
+   "navigated": "/en/dashboard/accounting/journal-entries/17758",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "accounting/journal-entries",
+   "control": "select:(unlabelled)",
+   "type": "select",
+   "detail": "selected 2nd option",
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "accounting/supplier-invoices",
+   "control": "tab:Invoices",
+   "type": "tab",
+   "detail": "locator.click: Timeout 4000ms exceeded.",
+   "status": "BLOCKED"
+  },
+  {
+   "route": "accounting/supplier-invoices",
+   "control": "tab:Payments Made",
+   "type": "tab",
+   "detail": "locator.click: Timeout 4000ms exceeded.",
+   "status": "BLOCKED"
+  },
+  {
+   "route": "accounting/supplier-invoices",
+   "control": "button:Record payment",
+   "type": "button",
+   "dialog": true,
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "accounting/supplier-invoices",
+   "control": "button:New supplier invoice",
+   "type": "button",
+   "dialog": true,
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "accounting/supplier-invoices",
+   "control": "button:Invoices",
+   "type": "button",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "accounting/supplier-invoices",
+   "control": "button:Payments Made",
+   "type": "button",
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "accounting/supplier-invoices",
+   "control": "button:Void",
+   "type": "button",
+   "status": "SKIPPED-DESTRUCTIVE",
+   "detail": "money-moving or state-changing label; needs a purpose-built fixture"
+  },
+  {
+   "route": "accounting/supplier-invoices",
+   "control": "select:(unlabelled)",
+   "type": "select",
+   "detail": "selected 2nd option",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "accounting/supplier-invoices",
+   "control": "search:Search supplier invoices by number, party, or note",
+   "type": "search",
+   "status": "BLOCKED",
+   "detail": "locator.fill: Timeout 4000ms exceeded."
+  },
+  {
+   "route": "accounting/suppliers",
+   "control": "tab:Suppliers",
+   "type": "tab",
+   "detail": "locator.click: Timeout 4000ms exceeded.",
+   "status": "BLOCKED"
+  },
+  {
+   "route": "accounting/suppliers",
+   "control": "tab:Purchase Invoices",
+   "type": "tab",
+   "detail": "locator.click: Timeout 4000ms exceeded.",
+   "status": "BLOCKED"
+  },
+  {
+   "route": "accounting/suppliers",
+   "control": "button:New supplier",
+   "type": "button",
+   "dialog": true,
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "accounting/suppliers",
+   "control": "button:Suppliers",
+   "type": "button",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "accounting/suppliers",
+   "control": "button:Purchase Invoices",
+   "type": "button",
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "accounting/suppliers",
+   "control": "button:Edit",
+   "type": "button",
+   "navigated": "/en/dashboard/accounting/supplier-invoices",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "accounting/suppliers",
+   "control": "button:(unlabelled)",
+   "type": "button",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "accounting/suppliers",
+   "control": "button:Edit",
+   "type": "button",
+   "dialog": true,
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "accounting/suppliers",
+   "control": "button:(unlabelled)",
+   "type": "button",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "accounting/suppliers",
+   "control": "button:Edit",
+   "type": "button",
+   "dialog": true,
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "accounting/suppliers",
+   "control": "button:(unlabelled)",
+   "type": "button",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "accounting/suppliers",
+   "control": "button:Edit",
+   "type": "button",
+   "dialog": true,
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "accounting/suppliers",
+   "control": "button:(unlabelled)",
+   "type": "button",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "accounting/suppliers",
+   "control": "button:Edit",
+   "type": "button",
+   "dialog": true,
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "accounting/suppliers",
+   "control": "button:(unlabelled)",
+   "type": "button",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "accounting/suppliers",
+   "control": "button:Edit",
+   "type": "button",
+   "dialog": true,
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "accounting/suppliers",
+   "control": "button:(unlabelled)",
+   "type": "button",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "accounting/suppliers",
+   "control": "link:Supplier invoices",
+   "type": "link",
+   "navigated": "/en/dashboard/accounting/supplier-invoices",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "accounting/suppliers",
+   "control": "select:(unlabelled)",
+   "type": "select",
+   "detail": "selected 2nd option",
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "accounting/suppliers",
+   "control": "search:Search suppliers by code, name, or contact",
+   "type": "search",
+   "detail": "typed no-match query",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "categories",
+   "control": "button:Add Category",
+   "type": "button",
+   "navigated": "/en/dashboard/categories/new",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "categories",
+   "control": "button:Edit",
+   "type": "button",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "categories",
+   "control": "button:Delete",
+   "type": "button",
+   "status": "SKIPPED-DESTRUCTIVE",
+   "detail": "money-moving or state-changing label; needs a purpose-built fixture"
+  },
+  {
+   "route": "categories",
+   "control": "button:Edit",
+   "type": "button",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "categories",
+   "control": "button:Delete",
+   "type": "button",
+   "status": "SKIPPED-DESTRUCTIVE",
+   "detail": "money-moving or state-changing label; needs a purpose-built fixture"
+  },
+  {
+   "route": "categories",
+   "control": "link:Add Category",
+   "type": "link",
+   "navigated": "/en/dashboard/categories/new",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "categories",
+   "control": "link:Edit",
+   "type": "link",
+   "navigated": "/en/dashboard/categories/1/edit",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "categories",
+   "control": "link:Edit",
+   "type": "link",
+   "navigated": "/en/dashboard/categories/5/edit",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "drivers",
+   "control": "button:Add Driver",
+   "type": "button",
+   "navigated": "/en/dashboard/drivers/new",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "drivers",
+   "control": "button:All Drivers",
+   "type": "button",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "drivers",
+   "control": "button:Active",
+   "type": "button",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "drivers",
+   "control": "button:Available",
+   "type": "button",
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "drivers",
+   "control": "button:(unlabelled)",
+   "type": "button",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "drivers",
+   "control": "button:Deactivate",
+   "type": "button",
+   "status": "SKIPPED-DESTRUCTIVE",
+   "detail": "money-moving or state-changing label; needs a purpose-built fixture"
+  },
+  {
+   "route": "drivers",
+   "control": "button:(unlabelled)",
+   "type": "button",
+   "navigated": "/en/dashboard/drivers/4",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "drivers",
+   "control": "button:(unlabelled)",
+   "type": "button",
+   "navigated": "/en/dashboard/drivers/3",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "drivers",
+   "control": "button:Deactivate",
+   "type": "button",
+   "status": "SKIPPED-DESTRUCTIVE",
+   "detail": "money-moving or state-changing label; needs a purpose-built fixture"
+  },
+  {
+   "route": "drivers",
+   "control": "button:(unlabelled)",
+   "type": "button",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "drivers",
+   "control": "button:(unlabelled)",
+   "type": "button",
+   "navigated": "/en/dashboard/drivers/2",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "drivers",
+   "control": "button:Deactivate",
+   "type": "button",
+   "status": "SKIPPED-DESTRUCTIVE",
+   "detail": "money-moving or state-changing label; needs a purpose-built fixture"
+  },
+  {
+   "route": "drivers",
+   "control": "button:(unlabelled)",
+   "type": "button",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "drivers",
+   "control": "button:(unlabelled)",
+   "type": "button",
+   "navigated": "/en/dashboard/drivers/1",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "drivers",
+   "control": "button:Deactivate",
+   "type": "button",
+   "status": "SKIPPED-DESTRUCTIVE",
+   "detail": "money-moving or state-changing label; needs a purpose-built fixture"
+  },
+  {
+   "route": "drivers",
+   "control": "button:(unlabelled)",
+   "type": "button",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "drivers",
+   "control": "link:Add Driver",
+   "type": "link",
+   "navigated": "/en/dashboard/drivers/new",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "drivers",
+   "control": "link:(unlabelled)",
+   "type": "link",
+   "navigated": "/en/dashboard/drivers/4",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "drivers",
+   "control": "link:(unlabelled)",
+   "type": "link",
+   "navigated": "/en/dashboard/drivers/3",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "drivers",
+   "control": "link:(unlabelled)",
+   "type": "link",
+   "navigated": "/en/dashboard/drivers/2",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "drivers",
+   "control": "link:(unlabelled)",
+   "type": "link",
+   "navigated": "/en/dashboard/drivers/1",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "hr/attendance",
+   "control": "button:Record Attendance",
+   "type": "button",
+   "dialog": true,
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "hr/attendance",
+   "control": "button:Edit",
+   "type": "button",
+   "dialog": true,
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "hr/attendance",
+   "control": "button:(unlabelled)",
+   "type": "button",
+   "dialog": true,
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "hr/attendance",
+   "control": "button:Edit",
+   "type": "button",
+   "dialog": true,
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "hr/attendance",
+   "control": "button:(unlabelled)",
+   "type": "button",
+   "dialog": true,
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "hr/attendance",
+   "control": "button:Edit",
+   "type": "button",
+   "dialog": true,
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "hr/attendance",
+   "control": "button:(unlabelled)",
+   "type": "button",
+   "dialog": true,
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "hr/attendance",
+   "control": "button:Edit",
+   "type": "button",
+   "dialog": true,
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "hr/attendance",
+   "control": "button:(unlabelled)",
+   "type": "button",
+   "dialog": true,
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "hr/attendance",
+   "control": "button:Edit",
+   "type": "button",
+   "dialog": true,
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "hr/attendance",
+   "control": "button:(unlabelled)",
+   "type": "button",
+   "dialog": true,
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "hr/attendance",
+   "control": "button:Edit",
+   "type": "button",
+   "dialog": true,
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "hr/attendance",
+   "control": "button:(unlabelled)",
+   "type": "button",
+   "dialog": true,
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "hr/attendance",
+   "control": "search:Search by name or status...",
+   "type": "search",
+   "detail": "typed no-match query",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "hr/contracts",
+   "control": "button:Add Contract",
+   "type": "button",
+   "dialog": true,
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "hr/contracts",
+   "control": "button:Edit",
+   "type": "button",
+   "dialog": true,
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "hr/contracts",
+   "control": "button:Renew",
+   "type": "button",
+   "navigated": null,
+   "changed": true,
+   "mutations": [
+    "POST /hr/contracts/2/renew 200"
+   ],
+   "status": "FLAG-MUTATION"
+  },
+  {
+   "route": "hr/contracts",
+   "control": "button:Delete",
+   "type": "button",
+   "status": "SKIPPED-DESTRUCTIVE",
+   "detail": "money-moving or state-changing label; needs a purpose-built fixture"
+  },
+  {
+   "route": "hr/contracts",
+   "control": "button:Edit",
+   "type": "button",
+   "dialog": true,
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "hr/contracts",
+   "control": "button:Renew",
+   "type": "button",
+   "navigated": null,
+   "changed": true,
+   "mutations": [
+    "POST /hr/contracts/1/renew 200"
+   ],
+   "status": "FLAG-MUTATION"
+  },
+  {
+   "route": "hr/contracts",
+   "control": "button:Delete",
+   "type": "button",
+   "status": "SKIPPED-DESTRUCTIVE",
+   "detail": "money-moving or state-changing label; needs a purpose-built fixture"
+  },
+  {
+   "route": "hr/employees",
+   "control": "button:Add Employee",
+   "type": "button",
+   "dialog": true,
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "hr/employees",
+   "control": "button:Table",
+   "type": "button",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "hr/employees",
+   "control": "button:Cards",
+   "type": "button",
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "hr/employees",
+   "control": "button:Edit",
+   "type": "button",
+   "dialog": true,
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "hr/employees",
+   "control": "button:(unlabelled)",
+   "type": "button",
+   "dialog": true,
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "hr/employees",
+   "control": "search:Search by name, email, or code...",
+   "type": "search",
+   "detail": "typed no-match query",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "hr/insurance",
+   "control": "button:Add Policy",
+   "type": "button",
+   "dialog": true,
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "hr/insurance",
+   "control": "button:Edit",
+   "type": "button",
+   "dialog": true,
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "hr/insurance",
+   "control": "button:Delete",
+   "type": "button",
+   "status": "SKIPPED-DESTRUCTIVE",
+   "detail": "money-moving or state-changing label; needs a purpose-built fixture"
+  },
+  {
+   "route": "hr/insurance",
+   "control": "button:Edit",
+   "type": "button",
+   "dialog": true,
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "hr/insurance",
+   "control": "button:Delete",
+   "type": "button",
+   "status": "SKIPPED-DESTRUCTIVE",
+   "detail": "money-moving or state-changing label; needs a purpose-built fixture"
+  },
+  {
+   "route": "hr/leaves",
+   "control": "button:Request Leave",
+   "type": "button",
+   "dialog": true,
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "hr/leaves",
+   "control": "button:Approve",
+   "type": "button",
+   "status": "SKIPPED-DESTRUCTIVE",
+   "detail": "money-moving or state-changing label; needs a purpose-built fixture"
+  },
+  {
+   "route": "hr/leaves",
+   "control": "button:Reject",
+   "type": "button",
+   "status": "SKIPPED-DESTRUCTIVE",
+   "detail": "money-moving or state-changing label; needs a purpose-built fixture"
+  },
+  {
+   "route": "hr/leaves",
+   "control": "button:Edit",
+   "type": "button",
+   "dialog": true,
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "hr/leaves",
+   "control": "button:(unlabelled)",
+   "type": "button",
+   "dialog": true,
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "hr/leaves",
+   "control": "button:(unlabelled)",
+   "type": "button",
+   "dialog": true,
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "hr/leaves",
+   "control": "search:Search by name, type, or status...",
+   "type": "search",
+   "detail": "typed no-match query",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "hr/payroll",
+   "control": "button:Create Salary",
+   "type": "button",
+   "dialog": true,
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "hr/performance",
+   "control": "button:Add Review",
+   "type": "button",
+   "dialog": true,
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "hr/resignations",
+   "control": "button:Add Resignation",
+   "type": "button",
+   "dialog": true,
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "hr/resignations",
+   "control": "button:Edit",
+   "type": "button",
+   "dialog": true,
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "hr/resignations",
+   "control": "button:Delete",
+   "type": "button",
+   "status": "SKIPPED-DESTRUCTIVE",
+   "detail": "money-moving or state-changing label; needs a purpose-built fixture"
+  },
+  {
+   "route": "hr/resignations",
+   "control": "button:Acknowledge",
+   "type": "button",
+   "navigated": null,
+   "changed": true,
+   "mutations": [
+    "POST /hr/resignations/1/acknowledge 200"
+   ],
+   "status": "FLAG-MUTATION"
+  },
+  {
+   "route": "hr/resignations",
+   "control": "button:Complete",
+   "type": "button",
+   "status": "SKIPPED-DESTRUCTIVE",
+   "detail": "money-moving or state-changing label; needs a purpose-built fixture"
+  },
+  {
+   "route": "hr/resignations",
+   "control": "button:Calculate Settlement",
+   "type": "button",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "hr/resignations",
+   "control": "button:Edit",
+   "type": "button",
+   "dialog": true,
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "hr/resignations",
+   "control": "button:Delete",
+   "type": "button",
+   "status": "SKIPPED-DESTRUCTIVE",
+   "detail": "money-moving or state-changing label; needs a purpose-built fixture"
+  },
+  {
+   "route": "hr/resignations",
+   "control": "button:Acknowledge",
+   "type": "button",
+   "navigated": null,
+   "changed": true,
+   "mutations": [
+    "POST /hr/resignations/2/acknowledge 200"
+   ],
+   "status": "FLAG-MUTATION"
+  },
+  {
+   "route": "hr/resignations",
+   "control": "button:Complete",
+   "type": "button",
+   "status": "SKIPPED-DESTRUCTIVE",
+   "detail": "money-moving or state-changing label; needs a purpose-built fixture"
+  },
+  {
+   "route": "hr/resignations",
+   "control": "button:Calculate Settlement",
+   "type": "button",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "hr/resignations",
+   "control": "toggle:(unlabelled)",
+   "type": "toggle",
+   "detail": "toggled twice (restored)",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "hr/resignations",
+   "control": "toggle:(unlabelled)",
+   "type": "toggle",
+   "detail": "toggled twice (restored)",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "hr/resignations",
+   "control": "toggle:(unlabelled)",
+   "type": "toggle",
+   "detail": "toggled twice (restored)",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "hr/training",
+   "control": "button:Add Training",
+   "type": "button",
+   "dialog": true,
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "hr/training",
+   "control": "button:Edit",
+   "type": "button",
+   "dialog": true,
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "hr/training",
+   "control": "button:Delete",
+   "type": "button",
+   "status": "SKIPPED-DESTRUCTIVE",
+   "detail": "money-moving or state-changing label; needs a purpose-built fixture"
+  },
+  {
+   "route": "inventory",
+   "control": "button:Adjust Stock",
+   "type": "button",
+   "dialog": true,
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "inventory",
+   "control": "button:Adjust Stock",
+   "type": "button",
+   "dialog": true,
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "inventory",
+   "control": "button:Adjust Stock",
+   "type": "button",
+   "dialog": true,
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "inventory",
+   "control": "button:Adjust Stock",
+   "type": "button",
+   "dialog": true,
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "inventory",
+   "control": "button:Adjust Stock",
+   "type": "button",
+   "dialog": true,
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "inventory",
+   "control": "button:Adjust Stock",
+   "type": "button",
+   "dialog": true,
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "inventory",
+   "control": "button:Adjust Stock",
+   "type": "button",
+   "dialog": true,
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "inventory",
+   "control": "button:Adjust Stock",
+   "type": "button",
+   "dialog": true,
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "inventory",
+   "control": "button:Adjust Stock",
+   "type": "button",
+   "dialog": true,
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "inventory",
+   "control": "button:Adjust Stock",
+   "type": "button",
+   "dialog": true,
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "inventory",
+   "control": "button:Adjust Stock",
+   "type": "button",
+   "dialog": true,
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "inventory",
+   "control": "button:Adjust Stock",
+   "type": "button",
+   "dialog": true,
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "inventory",
+   "control": "button:Adjust Stock",
+   "type": "button",
+   "dialog": true,
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "inventory",
+   "control": "button:Adjust Stock",
+   "type": "button",
+   "dialog": true,
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "kds",
+   "control": "button:Sound on",
+   "type": "button",
+   "detail": "locator.click: Timeout 4000ms exceeded.",
+   "status": "BLOCKED"
+  },
+  {
+   "route": "kds",
+   "control": "button:Dark Mode",
+   "type": "button",
+   "detail": "locator.click: Timeout 4000ms exceeded.",
+   "status": "BLOCKED"
+  },
+  {
+   "route": "kds",
+   "control": "button:Fullscreen",
+   "type": "button",
+   "detail": "locator.click: Timeout 4000ms exceeded.",
+   "status": "BLOCKED"
+  },
+  {
+   "route": "kds",
+   "control": "button:All",
+   "type": "button",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "kds",
+   "control": "button:New",
+   "type": "button",
+   "detail": "locator.click: Timeout 4000ms exceeded.",
+   "status": "BLOCKED"
+  },
+  {
+   "route": "kds",
+   "control": "button:In Progress",
+   "type": "button",
+   "detail": "locator.click: Timeout 4000ms exceeded.",
+   "status": "BLOCKED"
+  },
+  {
+   "route": "kds",
+   "control": "button:Ready",
+   "type": "button",
+   "detail": "forced click (covered or animating)",
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "kds",
+   "control": "button:Completed",
+   "type": "button",
+   "status": "SKIPPED-DESTRUCTIVE",
+   "detail": "money-moving or state-changing label; needs a purpose-built fixture"
+  },
+  {
+   "route": "kds",
+   "control": "button:Refreshing...",
+   "type": "button",
+   "status": "DISABLED",
+   "detail": "control disabled in this state (precondition not met)"
+  },
+  {
+   "route": "kds",
+   "control": "button:Bump",
+   "type": "button",
+   "status": "SKIPPED-DESTRUCTIVE",
+   "detail": "money-moving or state-changing label; needs a purpose-built fixture"
+  },
+  {
+   "route": "kds",
+   "control": "button:Bump",
+   "type": "button",
+   "status": "SKIPPED-DESTRUCTIVE",
+   "detail": "money-moving or state-changing label; needs a purpose-built fixture"
+  },
+  {
+   "route": "kds",
+   "control": "button:Bump",
+   "type": "button",
+   "status": "SKIPPED-DESTRUCTIVE",
+   "detail": "money-moving or state-changing label; needs a purpose-built fixture"
+  },
+  {
+   "route": "kds",
+   "control": "button:Bump",
+   "type": "button",
+   "status": "SKIPPED-DESTRUCTIVE",
+   "detail": "money-moving or state-changing label; needs a purpose-built fixture"
+  },
+  {
+   "route": "kds",
+   "control": "button:Bump",
+   "type": "button",
+   "status": "SKIPPED-DESTRUCTIVE",
+   "detail": "money-moving or state-changing label; needs a purpose-built fixture"
+  },
+  {
+   "route": "kds",
+   "control": "button:Bump",
+   "type": "button",
+   "status": "SKIPPED-DESTRUCTIVE",
+   "detail": "money-moving or state-changing label; needs a purpose-built fixture"
+  },
+  {
+   "route": "kds",
+   "control": "button:Bump",
+   "type": "button",
+   "status": "SKIPPED-DESTRUCTIVE",
+   "detail": "money-moving or state-changing label; needs a purpose-built fixture"
+  },
+  {
+   "route": "kds",
+   "control": "button:Bump",
+   "type": "button",
+   "status": "SKIPPED-DESTRUCTIVE",
+   "detail": "money-moving or state-changing label; needs a purpose-built fixture"
+  },
+  {
+   "route": "kds",
+   "control": "button:Bump",
+   "type": "button",
+   "status": "SKIPPED-DESTRUCTIVE",
+   "detail": "money-moving or state-changing label; needs a purpose-built fixture"
+  },
+  {
+   "route": "kds",
+   "control": "button:Bump",
+   "type": "button",
+   "status": "SKIPPED-DESTRUCTIVE",
+   "detail": "money-moving or state-changing label; needs a purpose-built fixture"
+  },
+  {
+   "route": "kds",
+   "control": "button:Bump",
+   "type": "button",
+   "status": "SKIPPED-DESTRUCTIVE",
+   "detail": "money-moving or state-changing label; needs a purpose-built fixture"
+  },
+  {
+   "route": "kds",
+   "control": "button:Bump",
+   "type": "button",
+   "status": "SKIPPED-DESTRUCTIVE",
+   "detail": "money-moving or state-changing label; needs a purpose-built fixture"
+  },
+  {
+   "route": "kds",
+   "control": "button:Bump",
+   "type": "button",
+   "status": "SKIPPED-DESTRUCTIVE",
+   "detail": "money-moving or state-changing label; needs a purpose-built fixture"
+  },
+  {
+   "route": "kds/settings",
+   "control": "button:Reset",
+   "type": "button",
+   "status": "SKIPPED-DESTRUCTIVE",
+   "detail": "money-moving or state-changing label; needs a purpose-built fixture"
+  },
+  {
+   "route": "kds/settings",
+   "control": "button:Save settings",
+   "type": "button",
+   "status": "SKIPPED-DESTRUCTIVE",
+   "detail": "money-moving or state-changing label; needs a purpose-built fixture"
+  },
+  {
+   "route": "kds/settings",
+   "control": "link:Back to KDS",
+   "type": "link",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "kds/settings",
+   "control": "select:(unlabelled)",
+   "type": "select",
+   "detail": "selected 2nd option",
+   "navigated": "/en/dashboard/kds",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "kds/settings",
+   "control": "select:(unlabelled)",
+   "type": "select",
+   "detail": "selected 2nd option",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "kds/settings",
+   "control": "toggle:(unlabelled)",
+   "type": "toggle",
+   "detail": "toggled twice (restored)",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "kds/settings",
+   "control": "toggle:(unlabelled)",
+   "type": "toggle",
+   "detail": "toggled twice (restored)",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "notifications",
+   "control": "button:Mark All as Read",
+   "type": "button",
+   "navigated": null,
+   "changed": true,
+   "mutations": [
+    "POST /notifications/mark-all-read 200"
+   ],
+   "status": "FLAG-MUTATION"
+  },
+  {
+   "route": "notifications",
+   "control": "button:Actions",
+   "type": "button",
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "notifications",
+   "control": "select:(unlabelled)",
+   "type": "select",
+   "detail": "selected 2nd option",
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "notifications",
+   "control": "select:(unlabelled)",
+   "type": "select",
+   "detail": "selected 2nd option",
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "notifications",
+   "control": "select:(unlabelled)",
+   "type": "select",
+   "detail": "selected 2nd option",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "notifications",
+   "control": "select:(unlabelled)",
+   "type": "select",
+   "detail": "selected 2nd option",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "orders",
+   "control": "button:CSV",
+   "type": "button",
+   "detail": "download: orders-export-2026-11-27.csv",
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "orders",
+   "control": "button:View Details",
+   "type": "button",
+   "navigated": "/en/dashboard/orders/5794",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "orders",
+   "control": "button:Assign Driver",
+   "type": "button",
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "orders",
+   "control": "button:Cancel Order",
+   "type": "button",
+   "status": "SKIPPED-DESTRUCTIVE",
+   "detail": "money-moving or state-changing label; needs a purpose-built fixture"
+  },
+  {
+   "route": "orders",
+   "control": "button:View Details",
+   "type": "button",
+   "detail": "forced click (covered or animating)",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "orders",
+   "control": "button:Assign Driver",
+   "type": "button",
+   "detail": "forced click (covered or animating)",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "orders",
+   "control": "button:Cancel Order",
+   "type": "button",
+   "status": "SKIPPED-DESTRUCTIVE",
+   "detail": "money-moving or state-changing label; needs a purpose-built fixture"
+  },
+  {
+   "route": "orders",
+   "control": "button:View Details",
+   "type": "button",
+   "detail": "forced click (covered or animating)",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "orders",
+   "control": "button:Assign Driver",
+   "type": "button",
+   "detail": "forced click (covered or animating)",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "orders",
+   "control": "button:Cancel Order",
+   "type": "button",
+   "status": "SKIPPED-DESTRUCTIVE",
+   "detail": "money-moving or state-changing label; needs a purpose-built fixture"
+  },
+  {
+   "route": "orders",
+   "control": "button:View Details",
+   "type": "button",
+   "detail": "forced click (covered or animating)",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "orders",
+   "control": "button:Assign Driver",
+   "type": "button",
+   "detail": "forced click (covered or animating)",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "orders",
+   "control": "button:Cancel Order",
+   "type": "button",
+   "status": "SKIPPED-DESTRUCTIVE",
+   "detail": "money-moving or state-changing label; needs a purpose-built fixture"
+  },
+  {
+   "route": "orders",
+   "control": "button:View Details",
+   "type": "button",
+   "detail": "forced click (covered or animating)",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "orders",
+   "control": "button:Assign Driver",
+   "type": "button",
+   "detail": "forced click (covered or animating)",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "orders",
+   "control": "button:Cancel Order",
+   "type": "button",
+   "status": "SKIPPED-DESTRUCTIVE",
+   "detail": "money-moving or state-changing label; needs a purpose-built fixture"
+  },
+  {
+   "route": "orders",
+   "control": "button:View Details",
+   "type": "button",
+   "detail": "forced click (covered or animating)",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "orders",
+   "control": "button:Assign Driver",
+   "type": "button",
+   "detail": "forced click (covered or animating)",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "orders",
+   "control": "button:Cancel Order",
+   "type": "button",
+   "status": "SKIPPED-DESTRUCTIVE",
+   "detail": "money-moving or state-changing label; needs a purpose-built fixture"
+  },
+  {
+   "route": "orders",
+   "control": "button:View Details",
+   "type": "button",
+   "detail": "forced click (covered or animating)",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "orders",
+   "control": "button:Assign Driver",
+   "type": "button",
+   "detail": "forced click (covered or animating)",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "orders",
+   "control": "button:Cancel Order",
+   "type": "button",
+   "status": "SKIPPED-DESTRUCTIVE",
+   "detail": "money-moving or state-changing label; needs a purpose-built fixture"
+  },
+  {
+   "route": "pos",
+   "control": "button:Sound on",
+   "type": "button",
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "pos",
+   "control": "button:Auto print off",
+   "type": "button",
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "pos",
+   "control": "button:Fullscreen",
+   "type": "button",
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "pos",
+   "control": "button:Light Mode",
+   "type": "button",
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "pos",
+   "control": "button:Focus mode disabled",
+   "type": "button",
+   "status": "SKIPPED-DESTRUCTIVE",
+   "detail": "money-moving or state-changing label; needs a purpose-built fixture"
+  },
+  {
+   "route": "pos",
+   "control": "button:Exit POS",
+   "type": "button",
+   "navigated": "/en/dashboard",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "pos",
+   "control": "button:All",
+   "type": "button",
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "pos",
+   "control": "button:F1 R R4UI alid074183 $12.00",
+   "type": "button",
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "pos",
+   "control": "button:F2 R R4 عربي 1208 $12.00",
+   "type": "button",
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "pos",
+   "control": "button:F3 M MD probe $10.00 Out of stock",
+   "type": "button",
+   "status": "DISABLED",
+   "detail": "control disabled in this state (precondition not met)"
+  },
+  {
+   "route": "pos",
+   "control": "button:F4 M MD probe $10.12 Out of stock",
+   "type": "button",
+   "status": "DISABLED",
+   "detail": "control disabled in this state (precondition not met)"
+  },
+  {
+   "route": "pos",
+   "control": "button:F5 M MD probe $10.00 Out of stock",
+   "type": "button",
+   "status": "DISABLED",
+   "detail": "control disabled in this state (precondition not met)"
+  },
+  {
+   "route": "pos",
+   "control": "button:F6 M MD probe $10.00 Out of stock",
+   "type": "button",
+   "status": "DISABLED",
+   "detail": "control disabled in this state (precondition not met)"
+  },
+  {
+   "route": "pos",
+   "control": "button:F7 M MD probe $10.00 Out of stock",
+   "type": "button",
+   "status": "DISABLED",
+   "detail": "control disabled in this state (precondition not met)"
+  },
+  {
+   "route": "pos",
+   "control": "button:F8 M MD probe $10.00 Out of stock",
+   "type": "button",
+   "status": "DISABLED",
+   "detail": "control disabled in this state (precondition not met)"
+  },
+  {
+   "route": "pos",
+   "control": "button:F9 M MD probe $0.00 Out of stock",
+   "type": "button",
+   "status": "DISABLED",
+   "detail": "control disabled in this state (precondition not met)"
+  },
+  {
+   "route": "pos",
+   "control": "button:F10 A Audit Inv Probe B $100.00 Out of stock",
+   "type": "button",
+   "status": "DISABLED",
+   "detail": "control disabled in this state (precondition not met)"
+  },
+  {
+   "route": "pos",
+   "control": "button:F11 A Audit Inv Probe A $100.00",
+   "type": "button",
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "pos",
+   "control": "button:F12 A Audit Burger $10,000.00",
+   "type": "button",
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "pos",
+   "control": "button:Hold (Ctrl+H)",
+   "type": "button",
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "pos",
+   "control": "button:Clear (Esc)",
+   "type": "button",
+   "status": "SKIPPED-DESTRUCTIVE",
+   "detail": "money-moving or state-changing label; needs a purpose-built fixture"
+  },
+  {
+   "route": "pos",
+   "control": "link:(unlabelled)",
+   "type": "link",
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "pos/settings",
+   "control": "button:Save",
+   "type": "button",
+   "status": "SKIPPED-DESTRUCTIVE",
+   "detail": "money-moving or state-changing label; needs a purpose-built fixture"
+  },
+  {
+   "route": "pos/settings",
+   "control": "button:Small",
+   "type": "button",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "pos/settings",
+   "control": "button:Large",
+   "type": "button",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "pos/settings",
+   "control": "button:Light Mode",
+   "type": "button",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "pos/settings",
+   "control": "button:Dark Mode",
+   "type": "button",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "pos/settings",
+   "control": "link:Back to POS",
+   "type": "link",
+   "navigated": "/en/dashboard/pos",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "pos/settings",
+   "control": "toggle:(unlabelled)",
+   "type": "toggle",
+   "detail": "toggled twice (restored)",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "pos/settings",
+   "control": "toggle:(unlabelled)",
+   "type": "toggle",
+   "detail": "toggled twice (restored)",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "pos/settings",
+   "control": "toggle:(unlabelled)",
+   "type": "toggle",
+   "detail": "toggled twice (restored)",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "pos/settings",
+   "control": "toggle:(unlabelled)",
+   "type": "toggle",
+   "detail": "toggled twice (restored)",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "products",
+   "control": "button:Add Product",
+   "type": "button",
+   "navigated": "/en/dashboard/products/new",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "products",
+   "control": "button:All categories",
+   "type": "button",
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "products",
+   "control": "button:Edit",
+   "type": "button",
+   "detail": "forced click (covered or animating)",
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "products",
+   "control": "button:Delete",
+   "type": "button",
+   "status": "SKIPPED-DESTRUCTIVE",
+   "detail": "money-moving or state-changing label; needs a purpose-built fixture"
+  },
+  {
+   "route": "products",
+   "control": "button:Edit",
+   "type": "button",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "products",
+   "control": "button:Delete",
+   "type": "button",
+   "status": "SKIPPED-DESTRUCTIVE",
+   "detail": "money-moving or state-changing label; needs a purpose-built fixture"
+  },
+  {
+   "route": "products",
+   "control": "button:Edit",
+   "type": "button",
+   "navigated": "/en/dashboard/products/16/edit",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "products",
+   "control": "button:Delete",
+   "type": "button",
+   "status": "SKIPPED-DESTRUCTIVE",
+   "detail": "money-moving or state-changing label; needs a purpose-built fixture"
+  },
+  {
+   "route": "products",
+   "control": "button:Edit",
+   "type": "button",
+   "navigated": "/en/dashboard/products/15/edit",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "products",
+   "control": "button:Delete",
+   "type": "button",
+   "status": "SKIPPED-DESTRUCTIVE",
+   "detail": "money-moving or state-changing label; needs a purpose-built fixture"
+  },
+  {
+   "route": "products",
+   "control": "button:Edit",
+   "type": "button",
+   "navigated": "/en/dashboard/products/14/edit",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "products",
+   "control": "button:Delete",
+   "type": "button",
+   "status": "SKIPPED-DESTRUCTIVE",
+   "detail": "money-moving or state-changing label; needs a purpose-built fixture"
+  },
+  {
+   "route": "products",
+   "control": "button:Edit",
+   "type": "button",
+   "navigated": "/en/dashboard/products/13/edit",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "products",
+   "control": "button:Delete",
+   "type": "button",
+   "status": "SKIPPED-DESTRUCTIVE",
+   "detail": "money-moving or state-changing label; needs a purpose-built fixture"
+  },
+  {
+   "route": "products",
+   "control": "button:Edit",
+   "type": "button",
+   "navigated": "/en/dashboard/products/12/edit",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "products",
+   "control": "button:Delete",
+   "type": "button",
+   "status": "SKIPPED-DESTRUCTIVE",
+   "detail": "money-moving or state-changing label; needs a purpose-built fixture"
+  },
+  {
+   "route": "products",
+   "control": "button:Edit",
+   "type": "button",
+   "navigated": "/en/dashboard/products/11/edit",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "products",
+   "control": "button:Delete",
+   "type": "button",
+   "status": "SKIPPED-DESTRUCTIVE",
+   "detail": "money-moving or state-changing label; needs a purpose-built fixture"
+  },
+  {
+   "route": "products",
+   "control": "button:Edit",
+   "type": "button",
+   "navigated": "/en/dashboard/products/10/edit",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "products",
+   "control": "button:Delete",
+   "type": "button",
+   "status": "SKIPPED-DESTRUCTIVE",
+   "detail": "money-moving or state-changing label; needs a purpose-built fixture"
+  },
+  {
+   "route": "products",
+   "control": "button:Edit",
+   "type": "button",
+   "navigated": "/en/dashboard/products/9/edit",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "products",
+   "control": "button:Delete",
+   "type": "button",
+   "status": "SKIPPED-DESTRUCTIVE",
+   "detail": "money-moving or state-changing label; needs a purpose-built fixture"
+  },
+  {
+   "route": "products/new",
+   "control": "button:Select category",
+   "type": "button",
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "products/new",
+   "control": "button:(unlabelled)",
+   "type": "button",
+   "detail": "forced click (covered or animating)",
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "products/new",
+   "control": "button:(unlabelled)",
+   "type": "button",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "products/new",
+   "control": "button:(unlabelled)",
+   "type": "button",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "products/new",
+   "control": "button:(unlabelled)",
+   "type": "button",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "products/new",
+   "control": "button:(unlabelled)",
+   "type": "button",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "products/new",
+   "control": "button:(unlabelled)",
+   "type": "button",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "products/new",
+   "control": "button:(unlabelled)",
+   "type": "button",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "products/new",
+   "control": "button:Cancel",
+   "type": "button",
+   "status": "SKIPPED-DESTRUCTIVE",
+   "detail": "money-moving or state-changing label; needs a purpose-built fixture"
+  },
+  {
+   "route": "products/new",
+   "control": "button:Create Product",
+   "type": "button",
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "products/new",
+   "control": "link:Products",
+   "type": "link",
+   "navigated": "/en/dashboard/products",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "products/new",
+   "control": "toggle:(unlabelled)",
+   "type": "toggle",
+   "status": "BLOCKED",
+   "detail": "locator.click: Timeout 4000ms exceeded."
+  },
+  {
+   "route": "products/new",
+   "control": "toggle:(unlabelled)",
+   "type": "toggle",
+   "status": "BLOCKED",
+   "detail": "locator.click: Timeout 4000ms exceeded."
+  },
+  {
+   "route": "products/new",
+   "control": "toggle:(unlabelled)",
+   "type": "toggle",
+   "status": "BLOCKED",
+   "detail": "locator.click: Timeout 4000ms exceeded."
+  },
+  {
+   "route": "products/new",
+   "control": "toggle:(unlabelled)",
+   "type": "toggle",
+   "status": "BLOCKED",
+   "detail": "locator.click: Timeout 4000ms exceeded."
+  },
+  {
+   "route": "products/new",
+   "control": "toggle:(unlabelled)",
+   "type": "toggle",
+   "status": "BLOCKED",
+   "detail": "locator.click: Timeout 4000ms exceeded."
+  },
+  {
+   "route": "products/new",
+   "control": "toggle:(unlabelled)",
+   "type": "toggle",
+   "status": "BLOCKED",
+   "detail": "locator.click: Timeout 4000ms exceeded."
+  },
+  {
+   "route": "products/new",
+   "control": "toggle:(unlabelled)",
+   "type": "toggle",
+   "status": "BLOCKED",
+   "detail": "locator.click: Timeout 4000ms exceeded."
+  },
+  {
+   "route": "rbac/roles",
+   "control": "button:Create Role",
+   "type": "button",
+   "dialog": true,
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "reports",
+   "control": "link:Overview Quick snapshot across sales, profitabilit",
+   "type": "link",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "reports",
+   "control": "link:Sales Analytics Order and revenue trends for selec",
+   "type": "link",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "reports",
+   "control": "link:Profitability Margin-focused analysis by product p",
+   "type": "link",
+   "navigated": "/en/dashboard/reports/profitability",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "reports",
+   "control": "link:Financial Reports P&L, balance sheet, cash flow, V",
+   "type": "link",
+   "navigated": "/en/dashboard/reports/financial",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "reports",
+   "control": "link:HR Reports Headcount, turnover, absenteeism, overt",
+   "type": "link",
+   "navigated": "/en/dashboard/reports/hr",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "reports/financial",
+   "control": "link:Profit & Loss Revenue, expense, and net profit by ",
+   "type": "link",
+   "navigated": "/en/dashboard/reports/financial/profit-loss",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "reports/financial",
+   "control": "link:Balance Sheet Assets, liabilities, and equity as-o",
+   "type": "link",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "reports/financial",
+   "control": "link:Cash Flow Operating, investing, and financing cash",
+   "type": "link",
+   "navigated": "/en/dashboard/reports/financial/cash-flow",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "reports/financial",
+   "control": "link:VAT Report Output VAT, input VAT, and net payable ",
+   "type": "link",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "reports/financial",
+   "control": "link:Receivables Aging Outstanding customer balances by",
+   "type": "link",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "reports/financial",
+   "control": "link:Payables Aging Outstanding supplier balances by ag",
+   "type": "link",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "reports/financial",
+   "control": "link:Inventory Valuation Quantity and cost-based stock ",
+   "type": "link",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "reports/financial",
+   "control": "link:Advanced Insights KPI dashboard, break-even, predi",
+   "type": "link",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "reports/financial/advanced",
+   "control": "button:Export Audit CSV",
+   "type": "button",
+   "detail": "download: audit-trail-2026-10-29-to-2026-11-27.csv",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "reports/financial/advanced",
+   "control": "button:Export Social Insurance CSV",
+   "type": "button",
+   "detail": "download: social-insurance-2026-10.csv",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "reports/financial/advanced",
+   "control": "button:Refresh",
+   "type": "button",
+   "navigated": null,
+   "changed": true,
+   "badGet": [
+    "GET /reports/financial/menu-profitability?date_from=2026-10-29&date_to=2026-11-27&limit=10 500",
+    "GET /reports/financial/break-even?date_from=2026-10-29&date_to=2026-11-27 500"
+   ],
+   "errors": [
+    "console: Failed to load resource: the server responded with a status of 500 (Internal Server Error)",
+    "console: Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+   ],
+   "status": "ERROR"
+  },
+  {
+   "route": "reports/financial/balance-sheet",
+   "control": "button:Refresh",
+   "type": "button",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "reports/financial/cash-flow",
+   "control": "button:Refresh",
+   "type": "button",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "reports/financial/cash-flow",
+   "control": "button:Export PDF",
+   "type": "button",
+   "detail": "download: cash-flow-2026-10-29-to-2026-11-27.pdf",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "reports/financial/inventory-valuation",
+   "control": "button:Refresh",
+   "type": "button",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "reports/financial/inventory-valuation",
+   "control": "button:Export PDF",
+   "type": "button",
+   "detail": "download: inventory-valuation-2026-11-27.pdf",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "reports/financial/payables-aging",
+   "control": "button:Refresh",
+   "type": "button",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "reports/financial/payables-aging",
+   "control": "button:Export PDF",
+   "type": "button",
+   "detail": "download: payables-aging-2026-11-27.pdf",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "reports/financial/profit-loss",
+   "control": "button:Refresh",
+   "type": "button",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "reports/financial/profit-loss",
+   "control": "button:Export PDF",
+   "type": "button",
+   "detail": "download: profit-loss-2026-10-29-to-2026-11-27.pdf",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "reports/financial/profit-loss",
+   "control": "button:Revenue Accounts Hide",
+   "type": "button",
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "reports/financial/profit-loss",
+   "control": "button:Expense Accounts Hide",
+   "type": "button",
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "reports/financial/receivables-aging",
+   "control": "button:Refresh",
+   "type": "button",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "reports/financial/receivables-aging",
+   "control": "button:Export PDF",
+   "type": "button",
+   "detail": "download: receivables-aging-2026-11-27.pdf",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "reports/financial/vat",
+   "control": "button:Refresh",
+   "type": "button",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "reports/financial/vat",
+   "control": "button:Export PDF",
+   "type": "button",
+   "detail": "download: vat-2026-10-29-to-2026-11-27.pdf",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "reports/hr",
+   "control": "button:Refresh",
+   "type": "button",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "reports/inventory",
+   "control": "button:Refresh",
+   "type": "button",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "reports/inventory",
+   "control": "button:Download CSV",
+   "type": "button",
+   "detail": "download: inventory-report-2026-10-29-to-2026-11-27.csv",
+   "navigated": null,
+   "changed": true,
+   "mutations": [
+    "POST /reports/export 200"
+   ],
+   "status": "FLAG-MUTATION"
+  },
+  {
+   "route": "reports/inventory",
+   "control": "button:Download PDF",
+   "type": "button",
+   "detail": "download: inventory-report-2026-10-29-to-2026-11-27.pdf",
+   "navigated": null,
+   "changed": true,
+   "mutations": [
+    "POST /reports/export 200"
+   ],
+   "status": "FLAG-MUTATION"
+  },
+  {
+   "route": "reports/overview",
+   "control": "button:Refresh",
+   "type": "button",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "reports/overview",
+   "control": "link:View Details",
+   "type": "link",
+   "navigated": "/en/dashboard/reports/sales",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "reports/overview",
+   "control": "link:View Details",
+   "type": "link",
+   "navigated": "/en/dashboard/reports/profitability",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "reports/overview",
+   "control": "link:View Details",
+   "type": "link",
+   "navigated": "/en/dashboard/reports/inventory",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "reports/profitability",
+   "control": "button:Refresh",
+   "type": "button",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "reports/profitability",
+   "control": "button:Download CSV",
+   "type": "button",
+   "detail": "download: profitability-report-2026-10-29-to-2026-11-27.csv",
+   "navigated": null,
+   "changed": true,
+   "mutations": [
+    "POST /reports/export 200"
+   ],
+   "status": "FLAG-MUTATION"
+  },
+  {
+   "route": "reports/profitability",
+   "control": "button:Download PDF",
+   "type": "button",
+   "detail": "download: profitability-report-2026-10-29-to-2026-11-27.pdf",
+   "navigated": null,
+   "changed": true,
+   "mutations": [
+    "POST /reports/export 200"
+   ],
+   "status": "FLAG-MUTATION"
+  },
+  {
+   "route": "reports/sales",
+   "control": "button:Refresh",
+   "type": "button",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "reports/sales",
+   "control": "button:Download CSV",
+   "type": "button",
+   "detail": "download: sales-report-2026-10-29-to-2026-11-27.csv",
+   "navigated": null,
+   "changed": true,
+   "mutations": [
+    "POST /reports/export 200"
+   ],
+   "status": "FLAG-MUTATION"
+  },
+  {
+   "route": "reports/sales",
+   "control": "button:Download PDF",
+   "type": "button",
+   "detail": "download: sales-report-2026-10-29-to-2026-11-27.pdf",
+   "navigated": null,
+   "changed": true,
+   "mutations": [
+    "POST /reports/export 200"
+   ],
+   "status": "FLAG-MUTATION"
+  },
+  {
+   "route": "reports/sales",
+   "control": "select:(unlabelled)",
+   "type": "select",
+   "detail": "selected 2nd option",
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "settings",
+   "control": "button:Help & Support Contact administrator",
+   "type": "button",
+   "navigated": "/en/dashboard/settings/account",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "settings",
+   "control": "link:Account Settings Profile, security, preferences",
+   "type": "link",
+   "navigated": null,
+   "changed": false,
+   "mutations": [
+    "PUT /users/4/profile 200"
+   ],
+   "status": "FLAG-MUTATION"
+  },
+  {
+   "route": "settings",
+   "control": "link:Restaurant Contact info, maintenance page",
+   "type": "link",
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "settings",
+   "control": "link:Appearance Theme and colors",
+   "type": "link",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "settings",
+   "control": "link:Access Control View your roles and permissions",
+   "type": "link",
+   "navigated": "/en/dashboard/settings/restaurant",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "settings",
+   "control": "link:Billing & Subscription Manage plans and payments",
+   "type": "link",
+   "navigated": "/en/dashboard/settings/appearance",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "settings",
+   "control": "link:Role Management Create and manage roles",
+   "type": "link",
+   "navigated": "/en/dashboard/settings/access-control",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "settings",
+   "control": "link:User Assignments Assign roles to users",
+   "type": "link",
+   "navigated": "/en/dashboard/settings/billing",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "settings/access-control",
+   "control": "button:Help & Support Contact administrator",
+   "type": "button",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "settings/access-control",
+   "control": "button:Assign Role",
+   "type": "button",
+   "dialog": true,
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "settings/access-control",
+   "control": "button:System roles cannot be removed",
+   "type": "button",
+   "status": "SKIPPED-DESTRUCTIVE",
+   "detail": "money-moving or state-changing label; needs a purpose-built fixture"
+  },
+  {
+   "route": "settings/access-control",
+   "control": "link:Account Settings Profile, security, preferences",
+   "type": "link",
+   "navigated": "/en/dashboard/settings/account",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "settings/access-control",
+   "control": "link:Restaurant Contact info, maintenance page",
+   "type": "link",
+   "navigated": "/en/dashboard/settings/restaurant",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "settings/access-control",
+   "control": "link:Appearance Theme and colors",
+   "type": "link",
+   "navigated": "/en/dashboard/settings/appearance",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "settings/access-control",
+   "control": "link:Access Control View your roles and permissions",
+   "type": "link",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "settings/access-control",
+   "control": "link:Billing & Subscription Manage plans and payments",
+   "type": "link",
+   "navigated": "/en/dashboard/settings/billing",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "settings/access-control",
+   "control": "link:Role Management Create and manage roles",
+   "type": "link",
+   "navigated": "/en/dashboard/settings/roles",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "settings/access-control",
+   "control": "link:User Assignments Assign roles to users",
+   "type": "link",
+   "navigated": "/en/dashboard/settings/users",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "settings/account",
+   "control": "button:Help & Support Contact administrator",
+   "type": "button",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "settings/account",
+   "control": "button:Update Profile",
+   "type": "button",
+   "navigated": null,
+   "changed": false,
+   "mutations": [
+    "PUT /users/4/profile 200"
+   ],
+   "status": "FLAG-MUTATION"
+  },
+  {
+   "route": "settings/account",
+   "control": "button:Change Password",
+   "type": "button",
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "settings/account",
+   "control": "link:Account Settings Profile, security, preferences",
+   "type": "link",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "settings/account",
+   "control": "link:Restaurant Contact info, maintenance page",
+   "type": "link",
+   "navigated": "/en/dashboard/settings/restaurant",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "settings/account",
+   "control": "link:Appearance Theme and colors",
+   "type": "link",
+   "navigated": "/en/dashboard/settings/appearance",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "settings/account",
+   "control": "link:Access Control View your roles and permissions",
+   "type": "link",
+   "navigated": "/en/dashboard/settings/access-control",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "settings/account",
+   "control": "link:Billing & Subscription Manage plans and payments",
+   "type": "link",
+   "navigated": "/en/dashboard/settings/billing",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "settings/account",
+   "control": "link:Role Management Create and manage roles",
+   "type": "link",
+   "navigated": "/en/dashboard/settings/roles",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "settings/account",
+   "control": "link:User Assignments Assign roles to users",
+   "type": "link",
+   "navigated": "/en/dashboard/settings/users",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "settings/appearance",
+   "control": "button:Help & Support Contact administrator",
+   "type": "button",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "settings/appearance",
+   "control": "button:Light",
+   "type": "button",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "settings/appearance",
+   "control": "button:Dark",
+   "type": "button",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "settings/appearance",
+   "control": "button:System",
+   "type": "button",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "settings/appearance",
+   "control": "button:Theme",
+   "type": "button",
+   "navigated": null,
+   "changed": false,
+   "mutations": [
+    "PUT /users/4/settings/theme 200"
+   ],
+   "status": "FLAG-MUTATION"
+  },
+  {
+   "route": "settings/appearance",
+   "control": "button:Primary",
+   "type": "button",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "settings/appearance",
+   "control": "button:Secondary",
+   "type": "button",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "settings/appearance",
+   "control": "button:Accent",
+   "type": "button",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "settings/appearance",
+   "control": "button:Theme Colors",
+   "type": "button",
+   "navigated": null,
+   "changed": false,
+   "mutations": [
+    "PUT /users/4/settings/theme-colors 200",
+    "PUT /admin/themes/13 200"
+   ],
+   "status": "FLAG-MUTATION"
+  },
+  {
+   "route": "settings/appearance",
+   "control": "link:Account Settings Profile, security, preferences",
+   "type": "link",
+   "navigated": "/en/dashboard/settings/account",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "settings/appearance",
+   "control": "link:Restaurant Contact info, maintenance page",
+   "type": "link",
+   "navigated": "/en/dashboard/settings/restaurant",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "settings/appearance",
+   "control": "link:Appearance Theme and colors",
+   "type": "link",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "settings/appearance",
+   "control": "link:Access Control View your roles and permissions",
+   "type": "link",
+   "navigated": "/en/dashboard/settings/access-control",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "settings/appearance",
+   "control": "link:Billing & Subscription Manage plans and payments",
+   "type": "link",
+   "navigated": "/en/dashboard/settings/billing",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "settings/appearance",
+   "control": "link:Role Management Create and manage roles",
+   "type": "link",
+   "navigated": "/en/dashboard/settings/roles",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "settings/appearance",
+   "control": "link:User Assignments Assign roles to users",
+   "type": "link",
+   "navigated": "/en/dashboard/settings/users",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "settings/billing",
+   "control": "button:Help & Support Contact administrator",
+   "type": "button",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "settings/billing",
+   "control": "button:SERVIO Monthly EGP 750.00 / month",
+   "type": "button",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "settings/billing",
+   "control": "button:SERVIO Annual EGP 5,000.00 / year Save approximate",
+   "type": "button",
+   "status": "SKIPPED-DESTRUCTIVE",
+   "detail": "money-moving or state-changing label; needs a purpose-built fixture"
+  },
+  {
+   "route": "settings/billing",
+   "control": "button:Paid checkout unavailable",
+   "type": "button",
+   "status": "SKIPPED-DESTRUCTIVE",
+   "detail": "money-moving or state-changing label; needs a purpose-built fixture"
+  },
+  {
+   "route": "settings/billing",
+   "control": "link:Account Settings Profile, security, preferences",
+   "type": "link",
+   "navigated": "/en/dashboard/settings/account",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "settings/billing",
+   "control": "link:Restaurant Contact info, maintenance page",
+   "type": "link",
+   "navigated": "/en/dashboard/settings/restaurant",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "settings/billing",
+   "control": "link:Appearance Theme and colors",
+   "type": "link",
+   "navigated": "/en/dashboard/settings/appearance",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "settings/billing",
+   "control": "link:Access Control View your roles and permissions",
+   "type": "link",
+   "navigated": "/en/dashboard/settings/access-control",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "settings/billing",
+   "control": "link:Billing & Subscription Manage plans and payments",
+   "type": "link",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "settings/billing",
+   "control": "link:Role Management Create and manage roles",
+   "type": "link",
+   "navigated": "/en/dashboard/settings/roles",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "settings/billing",
+   "control": "link:User Assignments Assign roles to users",
+   "type": "link",
+   "navigated": "/en/dashboard/settings/users",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "settings/restaurant",
+   "control": "button:Help & Support Contact administrator",
+   "type": "button",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "settings/restaurant",
+   "control": "button:Save Changes",
+   "type": "button",
+   "status": "SKIPPED-DESTRUCTIVE",
+   "detail": "money-moving or state-changing label; needs a purpose-built fixture"
+  },
+  {
+   "route": "settings/restaurant",
+   "control": "link:Account Settings Profile, security, preferences",
+   "type": "link",
+   "navigated": "/en/dashboard/settings/account",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "settings/restaurant",
+   "control": "link:Restaurant Contact info, maintenance page",
+   "type": "link",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "settings/restaurant",
+   "control": "link:Appearance Theme and colors",
+   "type": "link",
+   "navigated": "/en/dashboard/settings/appearance",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "settings/restaurant",
+   "control": "link:Access Control View your roles and permissions",
+   "type": "link",
+   "navigated": "/en/dashboard/settings/access-control",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "settings/restaurant",
+   "control": "link:Billing & Subscription Manage plans and payments",
+   "type": "link",
+   "navigated": "/en/dashboard/settings/billing",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "settings/restaurant",
+   "control": "link:Role Management Create and manage roles",
+   "type": "link",
+   "navigated": "/en/dashboard/settings/roles",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "settings/restaurant",
+   "control": "link:User Assignments Assign roles to users",
+   "type": "link",
+   "navigated": "/en/dashboard/settings/users",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "settings/roles",
+   "control": "button:Help & Support Contact administrator",
+   "type": "button",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "settings/roles",
+   "control": "button:Delete",
+   "type": "button",
+   "status": "SKIPPED-DESTRUCTIVE",
+   "detail": "money-moving or state-changing label; needs a purpose-built fixture"
+  },
+  {
+   "route": "settings/roles",
+   "control": "button:Delete",
+   "type": "button",
+   "status": "SKIPPED-DESTRUCTIVE",
+   "detail": "money-moving or state-changing label; needs a purpose-built fixture"
+  },
+  {
+   "route": "settings/roles",
+   "control": "button:Delete",
+   "type": "button",
+   "status": "SKIPPED-DESTRUCTIVE",
+   "detail": "money-moving or state-changing label; needs a purpose-built fixture"
+  },
+  {
+   "route": "settings/roles",
+   "control": "button:Delete",
+   "type": "button",
+   "status": "SKIPPED-DESTRUCTIVE",
+   "detail": "money-moving or state-changing label; needs a purpose-built fixture"
+  },
+  {
+   "route": "settings/roles",
+   "control": "link:Account Settings Profile, security, preferences",
+   "type": "link",
+   "navigated": "/en/dashboard/settings/account",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "settings/roles",
+   "control": "link:Restaurant Contact info, maintenance page",
+   "type": "link",
+   "navigated": "/en/dashboard/settings/restaurant",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "settings/roles",
+   "control": "link:Appearance Theme and colors",
+   "type": "link",
+   "navigated": "/en/dashboard/settings/appearance",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "settings/roles",
+   "control": "link:Access Control View your roles and permissions",
+   "type": "link",
+   "navigated": "/en/dashboard/settings/access-control",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "settings/roles",
+   "control": "link:Billing & Subscription Manage plans and payments",
+   "type": "link",
+   "navigated": "/en/dashboard/settings/billing",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "settings/roles",
+   "control": "link:Role Management Create and manage roles",
+   "type": "link",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "settings/roles",
+   "control": "link:User Assignments Assign roles to users",
+   "type": "link",
+   "navigated": "/en/dashboard/settings/users",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "settings/roles",
+   "control": "link:New Role",
+   "type": "link",
+   "navigated": "/en/dashboard/settings/roles/new",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "settings/roles",
+   "control": "link:Edit",
+   "type": "link",
+   "navigated": "/en/dashboard/settings/roles/14/edit",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "settings/roles",
+   "control": "link:Edit",
+   "type": "link",
+   "navigated": "/en/dashboard/settings/roles/17/edit",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "settings/roles",
+   "control": "link:Edit",
+   "type": "link",
+   "navigated": "/en/dashboard/settings/roles/16/edit",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "settings/roles",
+   "control": "link:Edit",
+   "type": "link",
+   "navigated": "/en/dashboard/settings/roles/15/edit",
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "settings/users",
+   "control": "button:Help & Support Contact administrator",
+   "type": "button",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "settings/users",
+   "control": "button:Add New User",
+   "type": "button",
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "settings/users",
+   "control": "button:Roles",
+   "type": "button",
+   "detail": "forced click (covered or animating)",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "settings/users",
+   "control": "button:Edit user",
+   "type": "button",
+   "detail": "forced click (covered or animating)",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "settings/users",
+   "control": "button:Delete user",
+   "type": "button",
+   "status": "SKIPPED-DESTRUCTIVE",
+   "detail": "money-moving or state-changing label; needs a purpose-built fixture"
+  },
+  {
+   "route": "settings/users",
+   "control": "button:Roles",
+   "type": "button",
+   "detail": "forced click (covered or animating)",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "settings/users",
+   "control": "button:Edit user",
+   "type": "button",
+   "detail": "forced click (covered or animating)",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "settings/users",
+   "control": "button:Delete user",
+   "type": "button",
+   "status": "SKIPPED-DESTRUCTIVE",
+   "detail": "money-moving or state-changing label; needs a purpose-built fixture"
+  },
+  {
+   "route": "settings/users",
+   "control": "button:Roles",
+   "type": "button",
+   "detail": "forced click (covered or animating)",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "settings/users",
+   "control": "button:Edit user",
+   "type": "button",
+   "detail": "forced click (covered or animating)",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "settings/users",
+   "control": "button:Delete user",
+   "type": "button",
+   "status": "SKIPPED-DESTRUCTIVE",
+   "detail": "money-moving or state-changing label; needs a purpose-built fixture"
+  },
+  {
+   "route": "settings/users",
+   "control": "button:Roles",
+   "type": "button",
+   "detail": "forced click (covered or animating)",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "settings/users",
+   "control": "button:Edit user",
+   "type": "button",
+   "detail": "forced click (covered or animating)",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "settings/users",
+   "control": "button:Delete user",
+   "type": "button",
+   "status": "SKIPPED-DESTRUCTIVE",
+   "detail": "money-moving or state-changing label; needs a purpose-built fixture"
+  },
+  {
+   "route": "settings/users",
+   "control": "button:Roles",
+   "type": "button",
+   "detail": "forced click (covered or animating)",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "settings/users",
+   "control": "button:Edit user",
+   "type": "button",
+   "detail": "forced click (covered or animating)",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "settings/users",
+   "control": "button:Delete user",
+   "type": "button",
+   "status": "SKIPPED-DESTRUCTIVE",
+   "detail": "money-moving or state-changing label; needs a purpose-built fixture"
+  },
+  {
+   "route": "settings/users",
+   "control": "button:Roles",
+   "type": "button",
+   "detail": "forced click (covered or animating)",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "settings/users",
+   "control": "button:Edit user",
+   "type": "button",
+   "detail": "forced click (covered or animating)",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "settings/users",
+   "control": "button:Delete user",
+   "type": "button",
+   "status": "SKIPPED-DESTRUCTIVE",
+   "detail": "money-moving or state-changing label; needs a purpose-built fixture"
+  },
+  {
+   "route": "settings/users",
+   "control": "link:Account Settings Profile, security, preferences",
+   "type": "link",
+   "detail": "forced click (covered or animating)",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "settings/users",
+   "control": "link:Restaurant Contact info, maintenance page",
+   "type": "link",
+   "detail": "forced click (covered or animating)",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "tables",
+   "control": "button:Add Table",
+   "type": "button",
+   "navigated": null,
+   "changed": true,
+   "status": "PASS"
+  },
+  {
+   "route": "tables",
+   "control": "button:Refresh",
+   "type": "button",
+   "detail": "forced click (covered or animating)",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "tables",
+   "control": "button:Print All QR Codes",
+   "type": "button",
+   "detail": "forced click (covered or animating)",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "tables",
+   "control": "button:Layout View",
+   "type": "button",
+   "detail": "forced click (covered or animating)",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "tables",
+   "control": "button:All",
+   "type": "button",
+   "detail": "forced click (covered or animating)",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "tables",
+   "control": "button:Available",
+   "type": "button",
+   "detail": "forced click (covered or animating)",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "tables",
+   "control": "button:Occupied",
+   "type": "button",
+   "detail": "forced click (covered or animating)",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "tables",
+   "control": "button:Reserved",
+   "type": "button",
+   "detail": "forced click (covered or animating)",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "tables",
+   "control": "button:Maintenance",
+   "type": "button",
+   "detail": "forced click (covered or animating)",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "tables",
+   "control": "button:View Details",
+   "type": "button",
+   "detail": "forced click (covered or animating)",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "tables",
+   "control": "button:QR Code",
+   "type": "button",
+   "detail": "forced click (covered or animating)",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "tables",
+   "control": "button:Assign in POS",
+   "type": "button",
+   "detail": "forced click (covered or animating)",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "tables",
+   "control": "button:(unlabelled)",
+   "type": "button",
+   "detail": "forced click (covered or animating)",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "tables",
+   "control": "button:(unlabelled)",
+   "type": "button",
+   "detail": "forced click (covered or animating)",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "tables",
+   "control": "button:Free Table",
+   "type": "button",
+   "detail": "forced click (covered or animating)",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "tables",
+   "control": "button:View Details",
+   "type": "button",
+   "detail": "forced click (covered or animating)",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "tables",
+   "control": "button:QR Code",
+   "type": "button",
+   "detail": "forced click (covered or animating)",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "tables",
+   "control": "button:Assign in POS",
+   "type": "button",
+   "detail": "forced click (covered or animating)",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "tables",
+   "control": "button:(unlabelled)",
+   "type": "button",
+   "detail": "forced click (covered or animating)",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "tables",
+   "control": "button:(unlabelled)",
+   "type": "button",
+   "detail": "forced click (covered or animating)",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "tables",
+   "control": "button:Free Table",
+   "type": "button",
+   "detail": "forced click (covered or animating)",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  },
+  {
+   "route": "tables",
+   "control": "button:View Details",
+   "type": "button",
+   "detail": "forced click (covered or animating)",
+   "navigated": null,
+   "changed": false,
+   "status": "NO-EFFECT"
+  }
+ ]
+}

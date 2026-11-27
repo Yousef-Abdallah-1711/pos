@@ -1,0 +1,66 @@
+{
+ "run": "RUN-003",
+ "customer_id": 2,
+ "invoice_id": 4,
+ "log": [
+  {
+   "step": "create customer",
+   "status": 201,
+   "resp": "{\"data\":{\"id\":2,\"tenant_id\":4,\"restaurant_id\":4,\"customer_code\":\"CUST-0002\",\"customer_name\":\"Audit Customer B\",\"customer_type\":\"individual\",\"email\":\"custb@example.test\",\"phone\":\"+201000000091\",\"country\":\"Egypt\",\"payment_terms\":\"immediate\",\"credit_limit\":0,\"current_balance\":0,\"currency\":\"EGP\",\"is_act",
+   "arDebitBalance": "6520.00"
+  },
+  {
+   "step": "create invoice sent 3000 no tax",
+   "status": 201,
+   "resp": "{\"data\":{\"id\":4,\"tenant_id\":4,\"restaurant_id\":4,\"invoice_number\":\"INV-2026-00003\",\"invoice_date\":\"2026-11-26T00:00:00Z\",\"due_date\":\"2026-12-26T00:00:00Z\",\"customer_id\":2,\"customer_name\":\"Audit Customer B\",\"subtotal\":3000,\"tax_amount\":0,\"discount_amount\":0,\"total_amount\":3000,\"amount_paid\":0,\"balance",
+   "arDebitBalance": "9520.00"
+  },
+  {
+   "step": "single overpayment 5000 on 3000",
+   "status": 400,
+   "resp": "{\"error\":\"payment amount exceeds invoice balance\",\"success\":false}",
+   "arDebitBalance": "9520.00"
+  },
+  {
+   "step": "partial receipt 1000",
+   "status": 201,
+   "resp": "{\"data\":{\"id\":7},\"success\":true}",
+   "arDebitBalance": "8520.00"
+  },
+  {
+   "concurrent5x1000_on_balance2000": [
+    201,
+    201,
+    201,
+    201,
+    201
+   ]
+  },
+  {
+   "step": "after 5 concurrent receipts of 1000 on balance 2000",
+   "status": 201,
+   "resp": "{\"data\":{\"id\":8},\"success\":true}",
+   "arDebitBalance": "3520.00",
+   "statuses": [
+    201,
+    201,
+    201,
+    201,
+    201
+   ]
+  },
+  {
+   "final": "paid paid=6000.00 bal=0.00 total=3000.00",
+   "receiptsSum": "6000.00"
+  },
+  {
+   "step": "void paid invoice",
+   "status": 400,
+   "resp": "{\"error\":\"customer invoice with payments cannot be voided\",\"success\":false}",
+   "arDebitBalance": "3520.00"
+  },
+  {
+   "afterVoid": "paid paid=6000.00 bal=0.00"
+  }
+ ]
+}

@@ -1,0 +1,82 @@
+{
+ "run": "RUN-003",
+ "kind": "API-DIAGNOSTIC",
+ "note": "transcribed from the console output of tests/runtime/ph11_import.mjs, which stopped at IMP-11 (socket closed) before it could write its own file",
+ "log": [
+  {
+   "id": "IMP-01",
+   "desc": "balanced journal (draft)",
+   "http": 200,
+   "resp": "created_entries 1 failed 0",
+   "newJournals": 1
+  },
+  {
+   "id": "IMP-02",
+   "desc": "unbalanced journal",
+   "http": 200,
+   "resp": "created_entries 0 failed_entries 1 success:true",
+   "newJournals": 0
+  },
+  {
+   "id": "IMP-03",
+   "desc": "re-import identical file",
+   "http": 200,
+   "resp": "created_entries 1",
+   "newJournals": 1
+  },
+  {
+   "id": "IMP-04",
+   "desc": "formula characters in description",
+   "http": 200,
+   "stored": "=HYPERLINK(\"http://evil\")"
+  },
+  {
+   "id": "IMP-05",
+   "desc": "unknown account code",
+   "http": 200,
+   "resp": "created 0 failed 1 success:true",
+   "newJournals": 0
+  },
+  {
+   "id": "IMP-06",
+   "desc": "invalid date",
+   "http": 200,
+   "resp": "created 0 failed 1 success:true",
+   "newJournals": 0
+  },
+  {
+   "id": "IMP-07",
+   "desc": "wrong header",
+   "http": 200,
+   "resp": "created 0 failed 1 success:true"
+  },
+  {
+   "id": "IMP-08",
+   "desc": "empty file",
+   "http": 400,
+   "resp": "No journal entry rows found"
+  },
+  {
+   "id": "IMP-09",
+   "desc": "auto_post=true",
+   "http": 200,
+   "status": "posted"
+  },
+  {
+   "id": "IMP-10",
+   "desc": "negative amounts",
+   "http": 200,
+   "resp": "created 0 failed 1 success:true",
+   "newJournals": 0
+  },
+  {
+   "id": "IMP-11",
+   "desc": "6,000 journals (617 KB): client got UND_ERR_SOCKET (other side closed) after ~122 s; server completed all 6,000 (SQL count of 'Bulk %' journals = 17,000 after the 500/1500/3000/6000 probes + this run)",
+   "error": "UND_ERR_SOCKET"
+  },
+  {
+   "id": "SIZE-PROBE",
+   "desc": "separate probe: 500 journals 48 KB 10.8 s, 1,500 journals 151 KB 26.2 s, 3,000 journals 306 KB 52.2 s, 6,000 journals 617 KB client socket closed at 122 s; throughput ~17 ms per journal"
+  }
+ ]
+}

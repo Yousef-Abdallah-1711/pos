@@ -1,0 +1,35 @@
+﻿section,label_1,label_2,revenue,orders,quantity
+summary,Total Revenue,,530893.40,56,
+summary,Average Ticket,,9480.24,,
+trend,2026-11-25,,121000.00,11,
+trend,2026-11-26,,409893.40,45,
+hourly,0,,0.00,0,
+hourly,1,,231000.00,21,
+hourly,2,,0.00,0,
+hourly,3,,0.00,0,
+hourly,4,,0.00,0,
+hourly,5,,0.00,0,
+hourly,6,,0.00,0,
+hourly,7,,0.00,0,
+hourly,8,,0.00,0,
+hourly,9,,0.00,0,
+hourly,10,,0.00,0,
+hourly,11,,0.00,0,
+hourly,12,,0.00,0,
+hourly,13,,0.00,0,
+hourly,14,,0.00,0,
+hourly,15,,0.00,0,
+hourly,16,,0.00,0,
+hourly,17,,165000.00,4,
+hourly,18,,0.00,0,
+hourly,19,,660.00,2,
+hourly,20,,13233.40,18,
+hourly,21,,0.00,0,
+hourly,22,,121000.00,11,
+hourly,23,,0.00,0,
+top_items,Audit Burger,,480000.00,,48
+top_items,Audit Inv Probe B,,2200.00,,22
+top_items,Audit Inv Probe A,,400.00,,4
+top_items,MD probe,,30.36,,3
+top_items,MD probe,,0.00,,1
+top_categories,Audit Mains,,482630.36,,78

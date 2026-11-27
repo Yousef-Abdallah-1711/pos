@@ -1,0 +1,36 @@
+{
+ "run": "RUN-003",
+ "order": 46,
+ "out": [
+  {
+   "before": {
+    "state": "confirmed/paid",
+    "cash": "307330.01",
+    "stock": "16",
+    "journals": "2"
+   },
+   "afterCancel": {
+    "http": 400,
+    "resp": "{\"error\":\"cannot cancel paid or refunded order before a supported refund and accounting reversal workflow exists\"}",
+    "state": "confirmed/paid",
+    "cash": "307330.01",
+    "stock": "16",
+    "journals": "2",
+    "reversalOrVoid": "JE-2026-00088:posted,JE-2026-00089:posted"
+   },
+   "afterItem": {
+    "http": 400,
+    "resp": "{\"error\":\"A UUID Idempotency-Key and a reason of 1–500 characters are required\"}",
+    "state": "confirmed/paid",
+    "stock": "16"
+   },
+   "afterStatus": {
+    "http": 500,
+    "resp": "{\"error\":\"Failed to update order status\"}",
+    "state": "confirmed/paid",
+    "cash": "307330.01",
+    "stock": "16"
+   }
+  }
+ ]
+}

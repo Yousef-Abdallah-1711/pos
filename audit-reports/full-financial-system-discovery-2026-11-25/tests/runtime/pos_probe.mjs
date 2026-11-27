@@ -1,0 +1,10 @@
+import { login, EV, DASH, netLog } from './lib.mjs';
+const { b, ctx } = await login('audit.a.owner@example.test', 'A');
+const p = await ctx.newPage(); const net = []; netLog(p, net);
+await p.goto(DASH + '/en/dashboard/pos', { waitUntil: 'networkidle' }); await p.waitForTimeout(2500);
+await p.click('text=Audit Burger'); await p.waitForTimeout(1200);
+console.log((await p.locator('body').innerText()).replace(/\n+/g, ' | ').slice(0, 900));
+const btns = await p.$$eval('button', els => els.map(e => (e.innerText || e.getAttribute('aria-label') || '').trim().slice(0, 30)).filter(Boolean));
+console.log('BUTTONS', btns.join(' || '));
+await p.screenshot({ path: `${EV}/screenshots/pos-A-cart.png` });
+await b.close();

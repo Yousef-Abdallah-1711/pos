@@ -1,0 +1,65 @@
+{
+ "run": "RUN-003",
+ "tenant": 8,
+ "order": 43,
+ "restaurant": "8",
+ "log": [
+  {
+   "id": "REG",
+   "desc": "register diagnostic tenant E",
+   "status": 201
+  },
+  {
+   "id": "LOGIN",
+   "desc": "login",
+   "status": 200
+  },
+  {
+   "id": "TID",
+   "desc": "tenant id",
+   "tid": 8
+  },
+  {
+   "id": "CAT",
+   "desc": "category",
+   "status": 201,
+   "cat": 2
+  },
+  {
+   "id": "PROD",
+   "desc": "tracked product",
+   "status": 201,
+   "pid": 5
+  },
+  {
+   "id": "ORDER",
+   "desc": "POS order",
+   "status": 201,
+   "oid": 43
+  },
+  {
+   "id": "PAID",
+   "desc": "mark paid with NO COA",
+   "status": 200,
+   "resp": "{\"accounting_intent\":\"persisted\",\"success\":true}"
+  },
+  {
+   "id": "S1",
+   "desc": "outbox after payment (no COA)",
+   "outbox": "41 status=retryable attempts=1/8 err=account not found for candidates [1110 1110]\naccount not found for candidates [5",
+   "journals": "0",
+   "orderPaid": "paid"
+  },
+  {
+   "id": "S2",
+   "desc": "outbox after API restart (durability of pending event)",
+   "outbox": "41 status=retryable attempts=1/8 err=account not found for candidates [1110 1110]\naccount not found for candidates [5",
+   "journals": "0"
+  },
+  {
+   "id": "S3",
+   "desc": "restaurant id",
+   "restId": "8"
+  }
+ ]
+}

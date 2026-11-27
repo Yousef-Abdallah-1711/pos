@@ -1,0 +1,13 @@
+import fs from 'fs';
+import { sql, API, PASSWORD, evidenceDirs } from './chrome_lib.mjs';
+const d = evidenceDirs('PH-08'); const O = 'http://localhost:13112';
+const r0 = await fetch(API + '/auth/login', { method: 'POST', headers: { Origin: O, 'Content-Type': 'application/json' }, body: JSON.stringify({ email: 'audit.c.owner@example.test', password: PASSWORD }) });
+const ck = r0.headers.getSetCookie().map((c) => c.split(';')[0]).join('; ');
+const act = async (id) => (await fetch(`${API}/admin/themes/${id}/activate`, { method: 'POST', headers: { Origin: O, Cookie: ck } })).status;
+await act(13);
+const t = await (await fetch(API + '/public/restaurants/audit-c-diag/theme', { headers: { Origin: 'http://localhost:13113' } })).text();
+const occ = [...t.matchAll(/"primary[a-z_]*":\s*"([^"]+)"/g)].map((m) => m[0]);
+const cfg = sql("select config::text from themes_v2 where id=13");
+console.log('active', sql("select string_agg(id||':'||is_active,' ') from themes_v2 where tenant_id=4"), 'bytes', t.length, 'occurrences', JSON.stringify(occ)); console.log('payload head', t.slice(0, 500)); console.log('config13 head', cfg.slice(0, 300));
+fs.writeFileSync(`${d.net}/AUD-R4-THEME-PAYLOAD.json`, JSON.stringify({ occ, payload: t.slice(0, 3000), config13: cfg.slice(0, 1500) }, null, 1));
+await act(4); console.log('restored', sql("select string_agg(id||':'||is_active,' ') from themes_v2 where tenant_id=4"));
