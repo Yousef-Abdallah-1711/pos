@@ -22,6 +22,7 @@ test('rejects unknown tokens, unsafe colors, unsupported fonts and typography bo
 
 test('rejects inaccessible resolved text combinations', () => {
   assert.throws(() => resolveWorkspaceAppearance({ colors: { light: { foreground: '#F8F2E8' } } }))
+  assert.throws(() => resolveWorkspaceAppearance({ colors: { light: { background: '#3B3B3B', surface: '#3B3B3B', foreground: '#FFFFFF', muted: '#FFFFFF', primary: '#3B3B3B' } } }))
 })
 
 test('maps the selected mode to scoped semantic variables', () => {

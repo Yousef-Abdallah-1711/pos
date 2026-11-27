@@ -22,6 +22,7 @@ Status: **IN PROGRESS — not release ready**. Branch: `feature/servio-tenant-wo
 ## Blocked / not verified
 
 - Previous clean landing image build failed fetching npm packages with connection resets. Landing image acceptance on dependency PRs remains failed; no CI gate has been bypassed.
+- PR #139 CI also reported a localhost guardrail failure in `frontend/apps/landing/test-results/dark-contrast-check.cjs`, a generated artifact present in the simulated base; do not remove or rewrite unrelated changes without reviewing the dependency branch. The backend integration-suite job failed with its JSON test output redirected to an artifact that was not published for this repository, so its exact failing test is not yet established. Investigate rather than treating either result as a pass.
 - No full backend suite, production frontend build, actual browser acceptance, role matrix, live preview interaction test, accessibility audit, or physical-device/screen-reader test for this implementation has passed yet.
 - The workspace editor does not yet guard in-app navigation against unsaved changes, and its preview covers a small sample rather than all shared operational components.
 - Font loading, RTL rendering, reset, tenant switching, error handling, permissions and preference/storefront behavior need end-to-end verification. Existing user-color overrides still control old primary/secondary/accent consumers, so the transition is incomplete.

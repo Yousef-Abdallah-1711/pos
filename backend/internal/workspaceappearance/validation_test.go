@@ -13,6 +13,7 @@ func TestValidateOverrides(t *testing.T) {
 		{"unsafe CSS", `{"colors":{"light":{"primary":"url(evil)"}}}`, false},
 		{"unknown font", `{"typography":{"english":"remote"}}`, false},
 		{"unreadable", `{"colors":{"light":{"foreground":"#F8F2E8"}}}`, false},
+		{"unreadable link", `{"colors":{"light":{"background":"#3B3B3B","surface":"#3B3B3B","foreground":"#FFFFFF","muted":"#FFFFFF","primary":"#3B3B3B"}}}`, false},
 		{"null root", `null`, false},
 		{"extra document", `{} {}`, false},
 	}

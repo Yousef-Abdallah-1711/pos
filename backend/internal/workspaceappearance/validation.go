@@ -85,6 +85,9 @@ func validateColors(raw any) error {
 			if contrast(resolved["foreground"], resolved[surface]) < 4.5 || contrast(resolved["muted"], resolved[surface]) < 4.5 {
 				return errors.New("insufficient text contrast")
 			}
+			if contrast(resolved["primary"], resolved[surface]) < 4.5 {
+				return errors.New("insufficient link contrast")
+			}
 		}
 		onPrimary := "#FFFFFF"
 		if mode == "dark" {

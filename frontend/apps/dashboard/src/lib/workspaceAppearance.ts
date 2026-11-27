@@ -45,6 +45,7 @@ function resolveColors(input: unknown): Colors {
     }
     const c = colors[mode]
     if ([c.background, c.surface].some(surface => contrast(c.foreground, surface) < 4.5 || contrast(c.muted, surface) < 4.5)) throw new Error('Insufficient text contrast')
+    if ([c.background, c.surface].some(surface => contrast(c.primary, surface) < 4.5)) throw new Error('Insufficient link contrast')
     if (contrast(c.primary, mode === 'light' ? '#FFFFFF' : '#211B18') < 4.5) throw new Error('Insufficient primary contrast')
   }
   return colors
