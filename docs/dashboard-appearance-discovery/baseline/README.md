@@ -12,5 +12,11 @@ Captured 2026-11-27 using the actual local dashboard in a Playwright-controlled 
 | [dashboard-ar-light-mobile-menu.png](dashboard-ar-light-mobile-menu.png) | `/ar/dashboard`, light, open mobile drawer | 390 × 844 CSS pixels |
 | [dashboard-en-pos-light.png](dashboard-en-pos-light.png) | `/en/dashboard/pos`, light, empty cart | 1440 × 900 CSS pixels |
 | [dashboard-en-kds-light.png](dashboard-en-kds-light.png) | `/en/dashboard/kds`, light, empty queue | 1440 × 900 CSS pixels |
+| [dashboard-en-orders-light.png](dashboard-en-orders-light.png) | `/en/dashboard/orders`, light, empty list | 1440 × 900 CSS pixels |
+| [dashboard-en-products-light.png](dashboard-en-products-light.png) | `/en/dashboard/products`, light, empty list | 1440 × 900 CSS pixels |
+| [dashboard-en-inventory-light.png](dashboard-en-inventory-light.png) | `/en/dashboard/inventory`, light, empty stock | 1440 × 900 CSS pixels |
+| [dashboard-en-hr-employees-light.png](dashboard-en-hr-employees-light.png) | `/en/dashboard/hr/employees`, light, empty list | 1440 × 900 CSS pixels |
+| [dashboard-en-reports-light.png](dashboard-en-reports-light.png) | `/en/dashboard/reports`, light, reports center | 1440 × 900 CSS pixels |
+| [dashboard-en-settings-light.png](dashboard-en-settings-light.png) | `/en/dashboard/settings`, light, account settings | 1440 × 900 CSS pixels |
 
 The captures are visual baseline evidence, not proof that every control, permission, locale, dark mode, or screen reader works. Capture further routes, populated realistic synthetic data, restricted roles, and remaining viewport/theme combinations before approving a future rebrand. Physical devices were not used.
