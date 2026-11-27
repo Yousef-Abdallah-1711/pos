@@ -2,7 +2,8 @@ import { mkdir, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import { chromium, firefox, webkit } from 'playwright'
 
-const baseURL = process.env.SERVIO_QA_URL ?? 'http://localhost:3001'
+const baseURL = process.env.SERVIO_QA_URL
+if (!baseURL) throw new Error('Set SERVIO_QA_URL to the landing application under test')
 const evidence = path.resolve(process.env.SERVIO_QA_EVIDENCE ?? '../../../docs/landing-interactive-experience/artifacts/operational-revision')
 await mkdir(evidence, { recursive: true })
 
