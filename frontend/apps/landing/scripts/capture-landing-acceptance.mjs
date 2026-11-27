@@ -59,16 +59,21 @@ try {
   for (const locale of ['en', 'ar']) {
     for (const route of routes) {
       for (const width of viewports) {
+        process.stdout.write(`Capturing ${route.name}-${locale}-${width}\n`)
         await page.setViewportSize({ width, height: 900 })
         const response = await page.goto(`${baseURL}${route.path(locale)}`, { waitUntil: 'domcontentloaded', timeout: 45_000 })
         await page.locator('main h1').first().waitFor({ state: 'visible', timeout: 45_000 })
-        await page.evaluate(() => document.fonts.ready)
+        await page.evaluate(() => Promise.race([
+          document.fonts.ready,
+          new Promise(resolve => setTimeout(resolve, 10_000)),
+        ]))
         await page.evaluate(async () => {
-          for (const image of document.images) {
-            if (image.closest('[hidden]')) continue
-            image.scrollIntoView()
-            try { await image.decode() } catch { /* Failed decoding is recorded below. */ }
-          }
+          const images = [...document.images].filter(image => !image.closest('[hidden]'))
+          for (const image of images) image.loading = 'eager'
+          await Promise.race([
+            Promise.allSettled(images.map(image => image.decode())),
+            new Promise(resolve => setTimeout(resolve, 10_000)),
+          ])
           window.scrollTo(0, 0)
           await new Promise(resolve => requestAnimationFrame(resolve))
         })
@@ -105,6 +110,7 @@ try {
         })
         const filename = `${route.name}-${locale}-${width}.png`
         await page.screenshot({ path: path.join(evidenceRoot, filename), fullPage: true, animations: 'disabled' })
+        process.stdout.write(`Captured ${route.name}-${locale}-${width}\n`)
         const failedImages = checks.images.filter((image) => !image.loaded)
         const result = {
           route: route.path(locale),
