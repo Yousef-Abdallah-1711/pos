@@ -85,6 +85,24 @@ impact = [{'route': row['route'], 'source': row['source'], 'current_behavior': '
            'capture_impact': 'Determine active marketing usage'} for row in routes]
 write('migration-impact-map.csv', ['route', 'source', 'current_behavior', 'proposed_behavior', 'dependencies', 'risk', 'tests', 'capture_impact'], impact)
 
+migration_rows = []
+for migration in sorted((root / 'backend/migrations').glob('*.sql')):
+    sql = migration.read_text(encoding='utf-8', errors='replace')
+    terms = sorted({match.group().lower() for match in re.finditer(r'\b(?:themes_v2|themes|user_settings|tenant_settings|restaurant_settings|branding|theme_history)\b', sql, re.I)})
+    if terms:
+        migration_rows.append({'source': migration.relative_to(root).as_posix(), 'matched_terms': '; '.join(terms),
+                               'review_status': 'Candidate only; inspect statements, order, policies and active usage'})
+write('appearance-migration-inventory.csv', ['source', 'matched_terms', 'review_status'], migration_rows)
+
+api_source = root / 'backend/cmd/api/main.go'
+api_rows = []
+for line_no, line in enumerate(api_source.read_text(encoding='utf-8').splitlines(), 1):
+    match = re.search(r'mux\.Handle(?:Func)?\("(GET|POST|PUT|PATCH|DELETE)\s+([^\"]+)"', line)
+    if match and re.search(r'theme|setting|appearance|brand', match.group(2), re.I):
+        api_rows.append({'method': match.group(1), 'path': match.group(2), 'source': api_source.relative_to(root).as_posix(),
+                         'line': line_no, 'registration': line.strip(), 'review_status': 'Candidate; trace active handler, authorization and data scope'})
+write('appearance-api-inventory.csv', ['method', 'path', 'source', 'line', 'registration', 'review_status'], api_rows)
+
 matrix = root / 'frontend/apps/landing/public/images/product/servio'
 metadata = json.loads((matrix / 'screenshot-matrix.json').read_text(encoding='utf-8'))
 captures = {item['file']: item for item in metadata['captures']}
@@ -125,4 +143,4 @@ for image in sorted([*product_assets.rglob('*'), external_capture]):
                    'animation_geometry': 'Review hero, bento, story and showcase frame and scroll geometry' if record else 'Needs verification',
                    'mobile_crop': 'Review responsive frame; dedicated crop not yet established', 'regeneration': 'Review after rebrand'})
 write('marketing-screenshot-inventory.csv', ['path', 'absolute_path', 'bytes', 'feature', 'locale', 'theme', 'width', 'height', 'aspect_ratio', 'source_app', 'source_route', 'capture_method', 'source_release', 'legacy_branding', 'usage', 'rendering_component', 'animation_geometry', 'mobile_crop', 'regeneration'], assets)
-print(f'routes={len(routes)} components={len(components)} color_occurrences={len(colors)} typography_lines={len(typography)} product_image_assets={len(assets)}')
+print(f'routes={len(routes)} components={len(components)} color_occurrences={len(colors)} typography_lines={len(typography)} product_image_assets={len(assets)} candidate_migrations={len(migration_rows)} candidate_api_routes={len(api_rows)}')

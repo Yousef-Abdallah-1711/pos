@@ -50,6 +50,7 @@ Focus indicators, subscription badge colors, tooltips, mobile overlay accessibil
 - Group buttons in `Sidebar.tsx:432` use a `title` and toggle nested content, but the inspected markup does not set `aria-expanded` or `aria-controls`. The overlay at `:494` is a clickable `div`; verify Escape handling, focus containment, dismissal and focus return using keyboard and assistive technology before selecting a replacement.
 - Collapsed icon links/buttons use `title` for labels; test touch and keyboard discoverability rather than treating a native title as a fully accessible tooltip. The source does not itself establish screen-reader support.
 - In one Chromium synthetic-owner test at 390×844, opening the mobile drawer and pressing Escape left its open transform in place. This is a reproducible observation for that local development setup, not a complete keyboard audit; verify focus management and other browsers before designing the correction.
+- In one Chromium synthetic-owner desktop test, clicking the collapsed Orders group left the sidebar collapsed, exposed no Orders child link, and the group had no `aria-expanded` attribute. Verify alternative access paths and keyboard/screen-reader behavior before changing this interaction.
 
 These are source and limited browser observations, not an exhaustive WCAG audit. Do not modify dashboard behavior as part of this discovery.
 
