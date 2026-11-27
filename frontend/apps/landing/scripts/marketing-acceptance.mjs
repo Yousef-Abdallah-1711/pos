@@ -9,7 +9,7 @@ import fs from 'node:fs/promises'
 import path from 'node:path'
 const colorScheme = process.env.SERVIO_COLOR_SCHEME || 'light'
 if (!['light', 'dark'].includes(colorScheme)) throw new Error('Unsupported browser color scheme')
-const expectedTheme = process.env.SERVIO_THEME || 'dark'
+const expectedTheme = process.env.SERVIO_THEME || 'light'
 if (!['light', 'dark'].includes(expectedTheme)) throw new Error('Unsupported marketing theme')
 const base = process.env.SERVIO_MARKETING_URL
 if (!base) throw new Error('Set SERVIO_MARKETING_URL to the intended preview or deployment URL')
@@ -99,7 +99,7 @@ async function load(page, locale, route) {
  const schema = JSON.parse(await page.locator('script[type="application/ld+json"]').textContent())
  check(`structured data ${locale}${route}`, schema['@type'] === 'WebSite' && schema.name === 'SERVIO')
  check(`heading ${locale}${route}`, await page.locator('main h1').count() === 1)
- check(`shared header and footer ${locale}${route}`, await page.locator('.sv-desktop-links[aria-label]').count() === 1 && await page.locator('.sv-mobile-navigation nav[aria-label]').count() === 1 && await page.locator('.sv-footer nav[aria-label]').count() === 1)
+ check(`shared header and footer ${locale}${route}`, await page.locator('.sv-desktop-links[aria-label]').count() === 1 && await page.locator('.sv-mobile-navigation nav:not(.sv-mobile-account-entry)[aria-label]').count() === 1 && await page.locator('.sv-footer nav[aria-label]').count() === 1)
  const overflow = await page.evaluate(() => {
   const viewportWidth = document.documentElement.clientWidth || innerWidth
   const documentWidth = document.documentElement.scrollWidth
@@ -195,10 +195,10 @@ async function captureNavigationEvidence(browser, page, { locale, variant, viewp
 async function focusChecks(page, locale) {
  await load(page, locale, '')
  await page.keyboard.press('Tab')
- for (const [name, selector] of [['light', '.sv-hero .sv-button'], ['dark', '#kitchen .sv-section-actions a'], ['final', '.sv-final .sv-button'], ['footer', '.sv-footer nav a']]) {
+ for (const [name, selector] of [['light', '.cv-hero .sv-button'], ['dark', '#kitchen .cv-text-link'], ['final', '.cv-close .sv-button'], ['footer', '.sv-footer nav a']]) {
   const target = page.locator(selector).first()
-  await target.focus()
   await target.scrollIntoViewIfNeeded()
+  await target.focus()
   const result = await target.evaluate(element => {
    const luminance = color => {
     const channels = color.match(/[\d.]+/g).slice(0, 3).map(Number).map(value => value / 255).map(value => value <= .04045 ? value / 12.92 : ((value + .055) / 1.055) ** 2.4)
@@ -252,7 +252,7 @@ async function interactions(browser, page, locale) {
  check(`registration contrast ${locale}`, registrationContrast.length === 0, JSON.stringify(registrationContrast))
  await capture(page, `register-annual-${locale}-390`)
  await load(page, locale, '')
- const faq = page.locator('#faq details').first()
+ const faq = page.locator('.cv-faq details').first()
  await faq.locator('summary').click()
  check(`FAQ opens ${locale}`, await faq.getAttribute('open') !== null)
  await page.locator('.sv-language').click()
@@ -558,7 +558,7 @@ async function main() {
     const { width, height } = viewport
     await page.setViewportSize(viewport)
     await load(page, locale, '')
-    check(`sections ${locale}/${width}x${height}`, await page.locator('main section').count() === 15)
+    check(`sections ${locale}/${width}x${height}`, await page.locator('main section').count() === 13)
     await capture(page, `${locale}-${width}x${height}`)
     for (const route of routes.slice(1)) await load(page, locale, route)
     await page.close()
