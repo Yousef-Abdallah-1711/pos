@@ -6,6 +6,26 @@ The sidebar uses fixed `w-64` expanded and `w-20` collapsed widths, gray surface
 
 `isChildActive` matches the localized pathname and optional `tab` query; groups are expanded by label in local component state. The source returns early from `toggleExpanded` when collapsed and only renders nested links when expanded. Assess discoverability and keyboard access of nested destinations in collapsed mode during a real interaction audit. There are special visibility fallbacks for orders/tables, suppliers/accounting, financial reports/general reports, and advanced HR; record these as compatibility behavior before changing navigation. The loading/blocked branches and their duplicated source blocks also need review rather than assuming the normal sidebar covers every state.
 
+## Sidebar groups and source-level visibility
+
+These are navigation-display rules from `Sidebar.tsx:45`–`:320`, not a guarantee of backend authorization. Child routes may have additional checks.
+
+| Entry | Destination or children | Visibility evidence |
+| --- | --- | --- |
+| Dashboard / Settings | `/dashboard`, `/dashboard/settings` | No module ID in the normal sidebar; shown unconditionally by its filter. |
+| Cashier POS | `/dashboard/pos` | Orders WRITE. |
+| Kitchen Display | `/dashboard/kds` | KDS READ. |
+| Orders | Orders, tables, drivers | Parent visible for Orders READ or Tables READ; children with module IDs filtered separately. |
+| Products | Products, categories, inventory | Products READ parent; categories use Categories READ, inventory uses Products READ. |
+| Human Resources | Employees, attendance, leaves, payroll, performance, training, insurance, contracts, resignations | HR READ parent; Leaves and Salaries have individual checks; performance/training/contracts children also have an HR compatibility fallback. |
+| Accounting | Chart of accounts, journals, ledger, bank accounts, advanced tools, customers, customer invoices and payment tab | Accounting READ. |
+| Suppliers | Suppliers, supplier invoices and payment tab | Supplier READ or Accounting READ parent; individual child module checks still apply. |
+| Financial Reports | Financial hub, P&L, balance sheet, cash flow, VAT, aging, valuation, advanced | Financial Reports READ or Reports READ compatibility fallback. |
+| Reports | Overview, sales, profitability, inventory and HR reports | Reports READ. |
+| Theme Builder | `/dashboard/theme-builder` | Themes READ; this is the storefront builder. |
+
+The source marks a group active by matching child pathname and optional `tab` search parameter. Its navigation definitions use Lucide React icons and locale-prefixed links at render time. Blocked tenants render `BlockedSidebar`; loading and fullscreen POS/KDS bypass the ordinary final navigation state. Subscription badges and the blocked state require their own future capture matrix.
+
 Relevant shared paths: `src/components/layout/{DashboardLayout,Sidebar,SidebarSubscriptionBadge,LanguageSwitcher}.tsx`, `src/components/blocked/BlockedSidebar.tsx`, `src/hooks/useRbac.ts`, `src/lib/rbac.ts`, `src/app/globals.css`, and `src/styles/rtl.css`. Color roles to migrate include shell surface, foreground, muted foreground, active/hover, icon, border, focus and badge states. Preserve semantic subscription and permission indications. Actual captures and detailed keyboard checks are still required.
 
 ## Specific source anchors and proposed migration roles
