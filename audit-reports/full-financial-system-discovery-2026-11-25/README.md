@@ -1,6 +1,7 @@
 # Full Financial System Discovery — Audit Package
 
 Baseline: `Yousef-Abdallah-1711/pos` `main` @ `133260db66b1143c254d79476daa7650b41a33f0`.
+**ONE-FILE MAP (phases + tasks + Definition of Done + every issue): [73-SINGLE-FILE-PHASE-TASK-ISSUE-MAP.md](73-SINGLE-FILE-PHASE-TASK-ISSUE-MAP.md).**
 **CURRENT MAIN ENTRYPOINT: [65-AUDIT-MASTER-OVERVIEW.md](65-AUDIT-MASTER-OVERVIEW.md)** (then [68](68-LOW-COST-AGENT-EXECUTION-GUIDE.md), queue [66](66-remaining-audit-execution-queue.csv), file map [67](67-audit-file-and-artifact-map.md), future remediation [69](69-FUTURE-REMEDIATION-OVERVIEW.md), evidence guide [70](70-EVIDENCE-AND-TRACEABILITY-GUIDE.md), acceptance checklist [71](71-FINAL-AUDIT-ACCEPTANCE-CHECKLIST.md), next-agent prompt [72](72-NEXT-AGENT-START-PROMPT.md)).
 Older start point: [00-executive-summary.md](00-executive-summary.md) (discovery completion report) → [progress.md](progress.md) (single central tracker).
 
