@@ -1,0 +1,25 @@
+scenario,title,status,evidence_and_reason,findings
+SCN-01,Opening balances,EXECUTED-FAIL,"Bank account opening balance 50,000 created via UI posted no journal (F-029); opening-balance journal workflow absent (N5)",F-029
+SCN-02,Capital contribution,EXECUTED-PASS (diagnostic manual journal),No capital workflow (N4); manual journal posted correctly,
+SCN-03,Cash purchase of inventory,NOT EXECUTED,Feasible via supplier invoice + immediate payment; not run,
+SCN-04,Credit purchase and part supplier payment,EXECUTED-PASS,"Invoice with account 1130: Dr 1130 20,000 / Dr 1150 2,800 / Cr 2101 22,800; payment 10,000 posted; default account (5110) not run",
+SCN-05,Purchase return to supplier,BLOCKED-capability,No credit notes / purchase returns (N16),
+SCN-06,Card sale,EXECUTED-FAIL,"Order stays pending; no capture, no journal (F-005)",F-005
+SCN-07,Wallet sale with provider payout,EXECUTED-FAIL,Same as card; no payout/clearing flow (F-026),F-005 F-026
+SCN-08,Split cash + card sale,BLOCKED-capability,No split tender (N21),
+SCN-09,Online prepaid order (card via gateway),BLOCKED-defect,No order gateway; storefront renders 0 items even with a valid category (F-022),F-022
+SCN-10,Online order cash-on-delivery with delivery fee,BLOCKED-defect,Storefront blocked (F-022); delivery completion/COD settlement absent (N20),F-022
+SCN-11,Customer invoice and partial receipt,EXECUTED-FAIL,"Tax 700/total 5,200 vs UI 630/5,130 (F-007); posted at draft (F-008); concurrent receipts over-collect (F-006); sequential receipt PASS",F-006 F-007 F-008
+SCN-12,Order-level discount,BLOCKED-capability,No discount capability on orders (N17),
+SCN-13,Partial refund of a paid cash order,BLOCKED-capability,No refund flow (N2); paid order cancel returns 500 (F-031),F-031
+SCN-14,Cancellation: unpaid and paid-before-delivery,EXECUTED-PARTIAL,"Unpaid cancel PASS (stock released 47->48); paid-order cancel 500 (F-031), item cancel 409; no reversal flow",F-031
+SCN-15,Inventory consumption by sale (weighted average),EXECUTED-FAIL,"Consumption works; COGS uses products.cost, no weighted average; inventory not tied to GL (F-011)",F-011
+SCN-16,Inventory adjustment (count shortage),EXECUTED-FAIL,"Stock changes, no journal; reason set limited (F-034)",F-034
+SCN-17,Waste / spoilage,EXECUTED-FAIL,"Stock -1, no journal, turnover waste_qty 0 (F-034)",F-034
+SCN-18,"Payroll accrual, settlement and withholding",EXECUTED-FAIL,UI employee creation fails (F-014); no accrual/partial payment/withholding (F-015); payment posted as direct expense,F-014 F-015
+SCN-19,Operating expense (utilities) paid in cash,EXECUTED-PASS (diagnostic manual journal),No expense module (N8); rent journal posted correctly,
+SCN-20,Bank transfer (cash to bank),BLOCKED-capability,No transfers (N9); bank account/transaction views exist but opening unposted (F-029),F-029
+SCN-21,Owner withdrawal,NOT EXECUTED,Feasible only as manual journal (N4); not run,
+SCN-22,Service charge and card tip,BLOCKED-capability,No tips/service charge on orders (N18),
+SCN-23,Financial close (period closing to retained earnings),BLOCKED-capability,"No close function (N10, FIN-018); no fiscal period API",
+SCN-24,Full operating month,NOT EXECUTED,Partly blocked by SCN-05/08/09/10/12/13/20/22/23; remaining parts not run,

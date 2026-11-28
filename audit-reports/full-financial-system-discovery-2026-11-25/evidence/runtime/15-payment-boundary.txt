@@ -1,0 +1,5 @@
+# overpayment / invalid payment tests (tenant C)
+customer overpay 99,999 on invoice with balance 3,200 -> 400 {"error":"payment amount exceeds invoice balance","success":false} 
+customer zero payment -> 400 {"error":"amount must be greater than zero","success":false} 
+customer negative payment -> 400 {"error":"amount must be greater than zero","success":false} 
+supplier overpay 99,999 (balance 12,800) -> 400 {"error":"payment amount exceeds invoice balance","success":false} 

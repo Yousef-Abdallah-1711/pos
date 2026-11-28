@@ -1,0 +1,4 @@
+# FIN-001 fiscal period (fixture: closed period 2026-11 inserted by SQL because NO API creates periods)
+post draft JE16 into CLOSED period -> 400 {"error":"fiscal period is closed; posting is not allowed","success":false} 
+create new manual JE in closed period -> 201 {"data":{"id":20,"tenant_id":4,"restaurant_id":4,"entry_number":"JE-2026-00013","entry_date":"2026-11-25T00:00:00Z","fiscal_period":"2026-11","description":"closed-period test","entry_type":"manual","
+VOID posted JE3 (closed period) -> 200 {"data":{"id":3,"tenant_id":4,"restaurant_id":4,"entry_number":"JE-2026-00003","entry_date":"2026-11-25T00:00:00Z","fiscal_period":"2026-11","description":"Capital contribution by owner","entry_type":

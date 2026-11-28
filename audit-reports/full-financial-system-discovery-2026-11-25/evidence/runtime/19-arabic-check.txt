@@ -1,0 +1,6 @@
+ar/dashboard dir/lang=rtl/ar arabicChars=1385 englishLeftover=false pageerrors=0
+ar/dashboard/pos dir/lang=rtl/ar arabicChars=95 englishLeftover=false pageerrors=0
+ar/dashboard/accounting/journal-entries dir/lang=rtl/ar arabicChars=784 englishLeftover=false pageerrors=0
+ar/dashboard/reports/financial/balance-sheet dir/lang=rtl/ar arabicChars=673 englishLeftover=false pageerrors=0
+ar/dashboard/hr/employees dir/lang=rtl/ar arabicChars=170 englishLeftover=false pageerrors=0
+ar/dashboard/products dir/lang=rtl/ar arabicChars=177 englishLeftover=false pageerrors=0

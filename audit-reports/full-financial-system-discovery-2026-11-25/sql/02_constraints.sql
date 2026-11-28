@@ -1,0 +1,1 @@
+SELECT conrelid::regclass AS tbl, conname, contype, pg_get_constraintdef(oid) AS def FROM pg_constraint WHERE connamespace='public'::regnamespace AND contype IN ('p','f','u','c') ORDER BY 1::text,contype,conname;

@@ -1,0 +1,46 @@
+{
+ "run": "RUN-003",
+ "kind": "API-DIAGNOSTIC",
+ "log": [
+  {
+   "id": 10,
+   "desc": "theme with invalid colors and HTML name",
+   "http": 201,
+   "resp": "{\"id\":10,\"tenant_id\":4,\"restaurant_id\":4,\"name\":\"RUN3 <img src=x onerror=alert(1)>\",\"slug\":\"run3-theme\",\"config\":{\"colors\":{\"primary\":\"not-a-color\",\"text\":\"url(javascript:alert(1))\"},\"rtl\":{\"enabled\":false}},\"is_active\":false,\"is_published\":false,\"version\":1,\""
+  },
+  {
+   "id": "THM-05",
+   "desc": "duplicate",
+   "http": 201
+  },
+  {
+   "id": "THM-06",
+   "desc": "activate theme with invalid colors",
+   "http": 200,
+   "resp": "{\"message\":\"theme activated successfully\"}"
+  },
+  {
+   "id": "THM-06b",
+   "desc": "public theme output",
+   "http": 200,
+   "body": "{\"success\":true,\"data\":{\"data\":{\"colors\":{\"primary\":\"not-a-color\",\"text\":\"url(javascript:alert(1))\"},\"rtl\":{\"enabled\":false}},\"success\":true}}"
+  },
+  {
+   "id": "THM-07",
+   "desc": "history",
+   "http": 501,
+   "n": 54
+  },
+  {
+   "id": "THM-08",
+   "desc": "delete ACTIVE theme",
+   "http": 204,
+   "resp": "\"\""
+  },
+  {
+   "id": "THM-09",
+   "desc": "restore Default Theme (id 4)",
+   "http": 200
+  }
+ ]
+}

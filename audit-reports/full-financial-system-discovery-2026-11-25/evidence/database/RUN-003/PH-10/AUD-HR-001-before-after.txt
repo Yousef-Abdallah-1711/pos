@@ -1,0 +1,71 @@
+BEFORE
+employees_t4|1
+users_t4|3
+journals_t4|52
+
+AFTER
+employees_t4|1
+users_t4|3
+journals_t4|52
+
+VISIBLE_TEXT_AFTER_SUBMIT (first 1500 chars)
+POS Dashboard
+Dashboard
+Cashier POS
+Kitchen Display
+Orders
+Products
+Human Resources
+Accounting
+Suppliers
+Financial Reports
+Reports
+Theme Builder
+Settings
+English
+A
+
+Audit Owner C
+
+Owner
+
+Employees
+
+Manage your employee information and records
+
+Add Employee
+
+Successfully loaded 1 employees at 6:35:34 PM
+
+Table
+Cards
+Name	Email	Position	Code	Status	Actions
+
+AC
+Audit Cook
+Kitchen
+	cook@example.test	Chef	EMP-1795646162644	
+	
+Edit
+Request failed with status code 500
+Request failed with status code 500
+Create New Employee
+Error Saving Employee
+
+Request failed with status code 500
+
+Personal
+Employment
+Compensation
+Contact
+Monthly Salary
+Currency
+Egyptian Pound (EGP)
+Egyptian Pound (EGP)
+US Dollar (USD)
+Euro (EUR)
+Saudi Riyal (SAR)
+Weekly Hours
+Cancel
+Create Employee
+Close

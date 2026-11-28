@@ -1,0 +1,21 @@
+# Historical-regression targeted runtime checks
+CFR-009 PUT paid salary 1 -> {"error":"Paid salary records are immutable","success":false}
+ [409]
+CFR-009 DELETE paid salary 1 -> {"error":"Paid salary records cannot be deleted","success":false}
+ [409]
+CFR-009 duplicate mark-paid salary 2 -> {"success":true}
+ [200]
+payroll journals total (expect 2 = one per salary): 2
+salary 1 now: paid|5000.00
+CFR-002 unbalanced insert as pos_accounting (deferred trigger): BEGIN INSERT 0 1 COMMIT 
+left over test row: 1
+CFR-003 duplicate entry numbers per tenant: 0  total journals 54
+GL running-balance/line sums: lines debit-credit = 0.00 ; GL = 0.00
+CFR-002 follow-up: promote the unbalanced, line-less draft to posted as pos_accounting:
+BEGIN ERROR:  posting requires posted_at and posted_by audit fields CONTEXT:  PL/pgSQL function cfr002_guard_journal_header_write() line 36 at RAISE 
+
+status now: draft|10.00|5.00
+retry with posted_by:
+BEGIN UPDATE 1 ERROR:  posted journal 60 must contain at least two exactly balanced lines matching its header CONTEXT:  PL/pgSQL function cfr002_assert_journal_integrity_deferred() line 49 at RAISE 
+
+status now: draft|10.00|5.00

@@ -14,6 +14,7 @@ import { BusinessEcosystem } from './BusinessEcosystem'
 import { ManagementExperience } from './ManagementExperience'
 import { StackedSetupCards } from './StackedSetupCards'
 import { LandingPricing } from './LandingPricing'
+import { OperationalBento } from './OperationalBento'
 
 export function ConversionLanding({ locale }: { locale: Locale }) {
   const c = getConversionCopy(locale)
@@ -34,19 +35,7 @@ export function ConversionLanding({ locale }: { locale: Locale }) {
       </div>
     </section>
 
-    <section className="cv-section cv-problem" aria-labelledby="cv-problem-title">
-      <div className="cv-wrap">
-        <div className="cv-section-heading">
-          <div><p className="cv-eyebrow">{c.problemEyebrow}</p><h2 id="cv-problem-title">{c.problemTitle}</h2></div>
-          <p>{c.problemBody}</p>
-        </div>
-        <div className="cv-problem-grid">
-          {c.problems.map((item, index) => <article key={item.title}>
-            <span className="cv-index">0{index + 1}</span><h3>{item.title}</h3><p>{item.body}</p>
-          </article>)}
-        </div>
-      </div>
-    </section>
+    <OperationalBento locale={locale} />
 
     <OrderStory locale={locale} />
 

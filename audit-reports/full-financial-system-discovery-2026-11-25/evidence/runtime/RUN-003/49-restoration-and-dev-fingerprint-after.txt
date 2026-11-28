@@ -1,0 +1,7 @@
+RESTORATION 2026-11-26T21:46:07Z
+isolated stack stopped (volumes kept, no down -v)
+docker start pos-backend pos-landing pos-dashboard pos-restaurant-website pos-super-admin -> FAILED: host port 3001 is held by a non-audit host process (node.exe pid 6068, C:\nvm4w\nodejs\node.exe, likely the user's own dev server). Not killed.
+tenants|2 users|6 orders|0 journals|0 coa|62 migrations|145 
+baseline: tenants 2, users 6, orders 0, journals 0, coa 62, migrations 145 (46-dev-db-fingerprint-before.txt)
+133260db66b1143c254d79476daa7650b41a33f0
+2

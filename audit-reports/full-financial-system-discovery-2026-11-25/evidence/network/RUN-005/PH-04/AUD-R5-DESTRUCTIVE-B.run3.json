@@ -1,0 +1,114 @@
+{
+ "run": "RUN-005",
+ "tag": "000R5B77147",
+ "tenant": 4,
+ "log": [
+  {
+   "id": "B3",
+   "what": "delete a disposable bank account",
+   "fixture": {
+    "id": 5,
+    "name": "000R5B77147 bank",
+    "http": 201
+   },
+   "before": "1",
+   "row_found": true,
+   "control_found": true,
+   "control_disabled": false,
+   "control_label": "Delete",
+   "dialog": "confirm: Delete bank account 000R5B77147 bank?",
+   "calls": [
+    "DELETE /accounting/bank-accounts/5 200 {\"success\":true} "
+   ],
+   "after": "0"
+  },
+  {
+   "id": "B7",
+   "what": "deactivate a disposable driver",
+   "fixture": {
+    "id": 46,
+    "name": "000R5B77147",
+    "http": 201
+   },
+   "before": "active|available",
+   "row_found": true,
+   "control_found": true,
+   "control_disabled": false,
+   "control_label": "Deactivate",
+   "dialog": "",
+   "calls": [
+    "PUT /admin/drivers/46/status 200 {\"success\":true}"
+   ],
+   "after": "inactive|available"
+  },
+  {
+   "id": "B8",
+   "what": "approve a disposable leave request (created by API because the UI form cannot, F-079)",
+   "fixture": {
+    "id": 12,
+    "create_body": "{\"data\":{\"id\":12,\"tenant_id\":4,\"restaurant_id\":4,\"employee_id\":4,\"start_date\":\"2028-07-05T00:00:00Z\",\"end_date\":\"2028-07",
+    "name": "000R5B77147L",
+    "http": 201
+   },
+   "before": "pending",
+   "row_found": false,
+   "dialog": "",
+   "calls": [],
+   "after": "pending"
+  },
+  {
+   "id": "B9",
+   "what": "reject a disposable leave request",
+   "fixture": {
+    "id": 13,
+    "create_body": "{\"data\":{\"id\":13,\"tenant_id\":4,\"restaurant_id\":4,\"employee_id\":4,\"start_date\":\"2028-09-12T00:00:00Z\",\"end_date\":\"2028-09",
+    "name": "000R5B77147M",
+    "http": 201
+   },
+   "before": "pending",
+   "row_found": false,
+   "dialog": "",
+   "calls": [],
+   "after": "pending"
+  },
+  {
+   "id": "B10",
+   "what": "complete a disposable resignation (F-069)",
+   "fixture": {
+    "id": 7,
+    "name": "Employee #12",
+    "http": 201,
+    "employee": 12
+   },
+   "before": "acknowledged|employee active|termination -",
+   "row_found": true,
+   "control_found": false,
+   "row_buttons": [
+    "Edit",
+    "Delete"
+   ],
+   "dialog": "",
+   "calls": [],
+   "after": "acknowledged|employee active|termination -"
+  },
+  {
+   "id": "B11",
+   "what": "delete a disposable resignation",
+   "fixture": {
+    "id": 8,
+    "name": "Employee #13",
+    "http": 201
+   },
+   "before": "1",
+   "row_found": true,
+   "control_found": true,
+   "control_disabled": false,
+   "control_label": "Delete",
+   "dialog": "",
+   "calls": [
+    "DELETE /hr/resignations/8 200 {\"success\":true}"
+   ],
+   "after": "0"
+  }
+ ]
+}

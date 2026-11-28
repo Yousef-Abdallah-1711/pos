@@ -1,5 +1,13 @@
 > Archived generator scaffold. For the implemented homepage, use `.gsap/current-state.md`, `DESIGN.md`, and `docs/landing-handoff.md`. This scaffold contains unverified guesses.
 
+## Current queue, 2026-11-27
+
+| Phase | Scope | Status | Evidence |
+| --- | --- | --- | --- |
+| P13 | Operational bento and local step controls | Implemented; browser QA in progress | `OperationalBento.tsx`, `marketing-coral.css`, `operational-revision/results.json` |
+| P12 | Dedicated viewport-fitted showcase stage and slide-offset progress | Implemented; browser QA in progress | `FeatureShowcase.tsx`, `marketing-interactive.css`, `operational-revision/results.json` |
+| Release | Clean build, full route smoke, CI and merge | Pending | `docs/landing-interactive-experience/operational-bento-showcase-report.md` |
+
 # Animation Tasks - landing
 
 ## Workflow Rules

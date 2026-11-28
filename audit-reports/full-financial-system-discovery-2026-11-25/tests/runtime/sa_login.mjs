@@ -1,0 +1,11 @@
+import { chromium } from 'file:///C:/Users/Yousef/Desktop/Projects/POSS/node_modules/playwright/index.mjs';
+import fs from 'fs';
+const EV = 'C:/Users/Yousef/Desktop/Projects/POSS/audit-reports/full-financial-system-discovery-2026-11-25/evidence';
+const b = await chromium.launch({ headless: true }); const ctx = await b.newContext({ viewport: { width: 1440, height: 900 } }); const p = await ctx.newPage();
+const net = []; p.on('response', r => { if (r.url().includes(':18082') && r.request().method() !== 'OPTIONS') net.push(`${r.request().method()} ${r.url().replace('http://localhost:18082/api/v1', '')} ${r.status()}`); });
+await p.goto('http://localhost:13114/login', { waitUntil: 'networkidle' }); await p.waitForTimeout(1500);
+const f = await p.$$eval('input,button', els => els.map(e => `${e.tagName}[${e.type}] name=${e.name} ph=${e.placeholder} txt=${(e.innerText||'').slice(0,20)}`)); console.log(f.join('\n'));
+await p.fill('input[type=email], input[name=email]', 'superadmin@pos-saas.com'); await p.fill('input[type=password]', 'AuditPass#2026A');
+await p.click('button[type=submit]'); await p.waitForTimeout(5000);
+console.log('URL', p.url()); console.log((await p.locator('body').innerText()).replace(/\n+/g, ' | ').slice(0, 500)); console.log(net.join('\n'));
+await ctx.storageState({ path: `${EV}/state-SA.json` }); await b.close();

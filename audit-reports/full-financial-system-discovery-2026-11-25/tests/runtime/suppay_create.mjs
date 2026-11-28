@@ -1,0 +1,15 @@
+import { login, EV, DASH, netLog } from './lib.mjs';
+const [tag, email, id, amount, method, date] = process.argv.slice(2);
+const { b, ctx } = await login(email, tag);
+const p = await ctx.newPage(); const net = []; netLog(p, net);
+await p.goto(DASH + '/en/dashboard/accounting/supplier-invoices', { waitUntil: 'networkidle' }); await p.waitForTimeout(2000);
+await p.click('button:has-text("Record payment")'); await p.waitForTimeout(1200);
+await p.locator('input[type=date]').last().fill(date);
+const inv = p.locator('select:has(option:text-is("No linked invoice"))'); const iv = await inv.locator('option').evaluateAll(os => os.find(o => o.textContent.includes('PINV-'))?.value); await inv.selectOption(iv);
+const sup = p.locator('select:has(option:text-is("Select supplier"))').last(); await sup.selectOption({ label: 'Audit Supplier Co' }).catch(() => {});
+await p.locator('input[type=number]').last().fill(amount);
+await p.locator('select:has(option:text-is("bank_transfer"))').selectOption(method);
+await p.screenshot({ path: `${EV}/screenshots/${id}-form.png` });
+await p.click('button:has-text("Record payment made")'); await p.waitForTimeout(3500);
+console.log(JSON.stringify(net.filter(x => x.m !== 'GET').map(x => `${x.m} ${x.u} ${x.s} req=${x.req.slice(0, 250)} resp=${x.body.slice(0, 300)}`), null, 1));
+await b.close();

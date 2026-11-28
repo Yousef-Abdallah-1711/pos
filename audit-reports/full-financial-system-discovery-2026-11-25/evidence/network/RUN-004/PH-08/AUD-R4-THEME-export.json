@@ -1,0 +1,70 @@
+{
+  "name": "Default Theme",
+  "version": "1.0.0",
+  "exportedAt": "2026-11-27T03:17:41.814Z",
+  "colors": {
+    "primary": "#3b82f6",
+    "secondary": "#1e40af",
+    "accent": "#0ea5e9",
+    "background": "#ffffff",
+    "text": "#1f2937",
+    "border": "#e5e7eb",
+    "shadow": "#000000"
+  },
+  "typography": {
+    "fontFamily": "Inter, Arial, sans-serif",
+    "baseFontSize": 14,
+    "borderRadius": 8,
+    "lineHeight": 1.5,
+    "fontWeights": [
+      400,
+      700
+    ],
+    "fontSize": 14,
+    "fontStyle": "normal"
+  },
+  "identity": {
+    "siteTitle": "Audit C Diagnostic",
+    "logoUrl": "",
+    "faviconUrl": "",
+    "domain": "audit-c-diag.localhost:13113"
+  },
+  "header": {
+    "logoUrl": "",
+    "logoText": "Audit C Diagnostic",
+    "logoHeight": 40,
+    "showLogo": true,
+    "navigationItems": [],
+    "navPosition": "right",
+    "navAlignment": "horizontal",
+    "backgroundColor": "#3b82f6",
+    "textColor": "#ffffff",
+    "height": 80,
+    "padding": 16,
+    "stickyHeader": true,
+    "showShadow": true,
+    "hideNavOnMobile": false
+  },
+  "footer": {
+    "companyName": "Audit C Diagnostic",
+    "companyDescription": "",
+    "address": "",
+    "phone": "",
+    "email": "",
+    "copyrightText": "© 2026 Audit C Diagnostic. All rights reserved.",
+    "socialLinks": [],
+    "footerSections": [],
+    "legalLinks": [],
+    "backgroundColor": "#111827",
+    "textColor": "#f3f4f6",
+    "linkColor": "#0ea5e9",
+    "padding": 48,
+    "showLinks": true,
+    "showLegal": true,
+    "showBackToTop": true,
+    "columns": 3,
+    "layout": "expanded"
+  },
+  "customCss": "",
+  "components": []
+}

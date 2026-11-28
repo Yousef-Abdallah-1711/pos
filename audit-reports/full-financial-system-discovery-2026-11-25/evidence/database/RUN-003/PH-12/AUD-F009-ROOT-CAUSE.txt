@@ -1,0 +1,9 @@
+AUD-F009-ROOT-CAUSE 2026-11-26T20:00:12Z isolated DB
+ERROR:  column p.cost_price does not exist
+LINE 1: select p.cost_price from products p limit 1
+               ^
+  cost   
+---------
+ 4000.00
+(1 row)
+

@@ -1,0 +1,224 @@
+{
+ "run": "RUN-004",
+ "label": "SYNTHETIC BENCHMARK FIXTURE",
+ "tenant": "10",
+ "sizes": {
+  "journals": "27000",
+  "posted": "27000",
+  "lines": "54000",
+  "gl_rows": "54000"
+ },
+ "load": {
+  "concurrent_audit_node_processes": "2",
+  "free_mb": "3981"
+ },
+ "oracle": {
+  "revenue": "10941426.00",
+  "expense": "2703789.00",
+  "net": "8237637.00",
+  "cash_1110": "8237637.00",
+  "note": "valid only while journals == generated count (27,000)"
+ },
+ "results": {
+  "trial_balance": [
+   {
+    "st": 200,
+    "ms": 59,
+    "bytes": 11283
+   },
+   {
+    "st": 200,
+    "ms": 46,
+    "bytes": 11283
+   },
+   {
+    "st": 200,
+    "ms": 46,
+    "bytes": 11283
+   }
+  ],
+  "profit_loss": [
+   {
+    "st": 200,
+    "ms": 77,
+    "bytes": 467
+   },
+   {
+    "st": 200,
+    "ms": 63,
+    "bytes": 467
+   },
+   {
+    "st": 200,
+    "ms": 64,
+    "bytes": 467
+   }
+  ],
+  "balance_sheet": [
+   {
+    "st": 200,
+    "ms": 38,
+    "bytes": 2105
+   },
+   {
+    "st": 200,
+    "ms": 33,
+    "bytes": 2105
+   },
+   {
+    "st": 200,
+    "ms": 33,
+    "bytes": 2105
+   }
+  ],
+  "cash_flow": [
+   {
+    "st": 200,
+    "ms": 65,
+    "bytes": 175
+   },
+   {
+    "st": 200,
+    "ms": 70,
+    "bytes": 175
+   },
+   {
+    "st": 200,
+    "ms": 62,
+    "bytes": 175
+   }
+  ],
+  "ledger_1110_page": [
+   {
+    "st": 200,
+    "ms": 235,
+    "bytes": 32389
+   },
+   {
+    "st": 200,
+    "ms": 209,
+    "bytes": 32389
+   },
+   {
+    "st": 200,
+    "ms": 223,
+    "bytes": 32389
+   }
+  ],
+  "journals_first_page": [
+   {
+    "st": 200,
+    "ms": 17,
+    "bytes": 8986
+   },
+   {
+    "st": 200,
+    "ms": 16,
+    "bytes": 8986
+   },
+   {
+    "st": 200,
+    "ms": 18,
+    "bytes": 8986
+   }
+  ],
+  "journals_export_csv": [
+   {
+    "st": 200,
+    "ms": 115,
+    "bytes": 337881
+   },
+   {
+    "st": 200,
+    "ms": 117,
+    "bytes": 337881
+   },
+   {
+    "st": 200,
+    "ms": 121,
+    "bytes": 337881
+   }
+  ]
+ },
+ "correctness": {
+  "pl": {
+   "total_revenue": 10941426,
+   "total_expenses": 2703789,
+   "net_income": 8237637,
+   "oracle_revenue": "10941426.00",
+   "oracle_expense": "2703789.00"
+  },
+  "tb": {
+   "keys": [
+    "as_of",
+    "is_balanced",
+    "rows",
+    "total_credit",
+    "total_debit"
+   ],
+   "total_debit": 10941426,
+   "total_credit": 10941426
+  },
+  "sql_cash_1110": "8237637.00",
+  "sql_revenue_4100": "10941426.00",
+  "sql_unbalanced_journals": "0",
+  "duplicate_entry_numbers": "0"
+ },
+ "explain": [
+  "HashAggregate  (cost=4091.96..4092.02 rows=5 width=39) (actual rows=3 loops=1)",
+  "  Group Key: a.account_type",
+  "  Batches: 1  Memory Usage: 24kB",
+  "  Buffers: shared hit=1712",
+  "  ->  Hash Join  (cost=1707.18..3846.43 rows=32738 width=15) (actual rows=54000 loops=1)",
+  "        Hash Cond: (l.account_id = a.id)",
+  "        Buffers: shared hit=1712",
+  "        ->  Hash Join  (cost=1690.43..3742.80 rows=32738 width=12) (actual rows=54000 loops=1)",
+  "              Hash Cond: (l.journal_entry_id = j.id)",
+  "              Buffers: shared hit=1704",
+  "              ->  Seq Scan on journal_entry_lines l  (cost=0.00..1815.25 rows=90325 width=16) (actual rows=90191 loops=1)",
+  "                    Buffers: shared hit=912",
+  "              ->  Hash  (cost=1487.17..1487.17 rows=16261 width=4) (actual rows=27000 loops=1)",
+  "                    Buckets: 32768 (originally 16384)  Batches: 1 (originally 1)  Memory Usage: 1206kB",
+  "                    Buffers: shared hit=792",
+  "                    ->  Bitmap Heap Scan on journal_entries j  (cost=259.63..1487.17 rows=16261 width=4) (actual rows=27000 loops=1)",
+  "                          Recheck Cond: ((tenant_id = 10) AND ((status)::text = 'posted'::text))",
+  "                          Filter: ((entry_date >= '2026-01-01'::date) AND (entry_date <= '2026-12-31'::date))",
+  "                          Heap Blocks: exact=759",
+  "                          Buffers: shared hit=792",
+  "                          ->  Bitmap Index Scan on idx_je_status  (cost=0.00..255.56 rows=16327 width=0) (actual rows=27000 loops=1)",
+  "                                Index Cond: ((tenant_id = 10) AND ((status)::text = 'posted'::text))",
+  "                                Buffers: shared hit=33",
+  "        ->  Hash  (cost=11.89..11.89 rows=389 width=11) (actual rows=389 loops=1)",
+  "              Buckets: 1024  Batches: 1  Memory Usage: 25kB",
+  "              Buffers: shared hit=8",
+  "              ->  Seq Scan on chart_of_accounts a  (cost=0.00..11.89 rows=389 width=11) (actual rows=389 loops=1)",
+  "                    Buffers: shared hit=8",
+  "Planning:",
+  "  Buffers: shared hit=585",
+  "Planning Time: 23.436 ms",
+  "Execution Time: 175.926 ms"
+ ],
+ "indexes": [
+  "general_ledger.general_ledger_pkey : CREATE UNIQUE INDEX general_ledger_pkey ON public.general_ledger USING btree (id)",
+  "general_ledger.idx_general_ledger_journal_line : CREATE INDEX idx_general_ledger_journal_line ON public.general_ledger USING btree (journal_entry_id, journal_line_id)",
+  "general_ledger.idx_gl_account : CREATE INDEX idx_gl_account ON public.general_ledger USING btree (account_id, entry_date)",
+  "general_ledger.idx_gl_date : CREATE INDEX idx_gl_date ON public.general_ledger USING btree (tenant_id, entry_date)",
+  "general_ledger.idx_gl_period : CREATE INDEX idx_gl_period ON public.general_ledger USING btree (tenant_id, fiscal_period)",
+  "general_ledger.idx_gl_scope_account_date_desc : CREATE INDEX idx_gl_scope_account_date_desc ON public.general_ledger USING btree (tenant_id, restaurant_id, account_id, entry_date DESC, id DESC)",
+  "general_ledger.idx_gl_scope_date_desc : CREATE INDEX idx_gl_scope_date_desc ON public.general_ledger USING btree (tenant_id, restaurant_id, entry_date DESC, id DESC)",
+  "general_ledger.idx_gl_tenant : CREATE INDEX idx_gl_tenant ON public.general_ledger USING btree (tenant_id, restaurant_id)",
+  "journal_entries.idx_je_date : CREATE INDEX idx_je_date ON public.journal_entries USING btree (tenant_id, entry_date)",
+  "journal_entries.idx_je_posted_scope_date_desc : CREATE INDEX idx_je_posted_scope_date_desc ON public.journal_entries USING btree (tenant_id, restaurant_id, entry_date DESC, id DESC) WHERE ((status)::t",
+  "journal_entries.idx_je_ref : CREATE INDEX idx_je_ref ON public.journal_entries USING btree (tenant_id, reference_type, reference_id)",
+  "journal_entries.idx_je_scope_status_date_desc : CREATE INDEX idx_je_scope_status_date_desc ON public.journal_entries USING btree (tenant_id, restaurant_id, status, entry_date DESC, id DESC)",
+  "journal_entries.idx_je_status : CREATE INDEX idx_je_status ON public.journal_entries USING btree (tenant_id, status)",
+  "journal_entries.idx_je_tenant : CREATE INDEX idx_je_tenant ON public.journal_entries USING btree (tenant_id, restaurant_id)",
+  "journal_entries.idx_je_type : CREATE INDEX idx_je_type ON public.journal_entries USING btree (tenant_id, entry_type)",
+  "journal_entries.journal_entries_pkey : CREATE UNIQUE INDEX journal_entries_pkey ON public.journal_entries USING btree (id)",
+  "journal_entries.journal_entries_tenant_id_restaurant_id_entry_number_key : CREATE UNIQUE INDEX journal_entries_tenant_id_restaurant_id_entry_number_key ON public.journal_entries USING btree (tenant_id",
+  "journal_entry_lines.idx_jel_account : CREATE INDEX idx_jel_account ON public.journal_entry_lines USING btree (account_id)",
+  "journal_entry_lines.idx_jel_entry : CREATE INDEX idx_jel_entry ON public.journal_entry_lines USING btree (journal_entry_id)",
+  "journal_entry_lines.idx_jel_journal_account : CREATE INDEX idx_jel_journal_account ON public.journal_entry_lines USING btree (journal_entry_id, account_id)",
+  "journal_entry_lines.journal_entry_lines_pkey : CREATE UNIQUE INDEX journal_entry_lines_pkey ON public.journal_entry_lines USING btree (id)"
+ ]
+}

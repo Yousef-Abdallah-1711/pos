@@ -1,0 +1,3049 @@
+[
+ {
+  "route": "settings",
+  "finalUrl": "http://localhost:13112/en/dashboard/settings/account",
+  "h1": "Settings",
+  "controls": [
+   {
+    "tag": "button",
+    "type": "button",
+    "name": "",
+    "label": "",
+    "text": "",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "Orders",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "Products",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "Human Resources",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "Accounting",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "Suppliers",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "Financial Reports",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "Reports",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "Change language",
+    "text": "English",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "Switch to dark mode",
+    "text": "",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "A\n\nAudit Owner C\n\nOwner",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "Help & Support\n\nContact administrator",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "input",
+    "type": "text",
+    "name": "profile-name",
+    "label": "Name*",
+    "text": "",
+    "value": "Audit Owner C",
+    "disabled": false
+   },
+   {
+    "tag": "input",
+    "type": "email",
+    "name": "",
+    "label": "",
+    "text": "",
+    "value": "audit.c.owner@example.test",
+    "disabled": true
+   },
+   {
+    "tag": "input",
+    "type": "text",
+    "name": "",
+    "label": "",
+    "text": "",
+    "value": "owner",
+    "disabled": true
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "Update Profile",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "input",
+    "type": "password",
+    "name": "",
+    "label": "",
+    "text": "",
+    "value": "<hidden>",
+    "disabled": false
+   },
+   {
+    "tag": "input",
+    "type": "password",
+    "name": "",
+    "label": "",
+    "text": "",
+    "value": "<hidden>",
+    "disabled": false
+   },
+   {
+    "tag": "input",
+    "type": "password",
+    "name": "",
+    "label": "",
+    "text": "",
+    "value": "<hidden>",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "Change Password",
+    "value": "",
+    "disabled": false
+   }
+  ],
+  "apiGets": [
+   "200 /auth/session",
+   "200 /rbac/me/permissions",
+   "200 /rbac/check-permission?moduleId=5&permissionLevel=WRITE",
+   "200 /rbac/check-permission?moduleId=9&permissionLevel=WRITE",
+   "200 /notifications?",
+   "200 /notifications?limit=5",
+   "200 /tenant/status",
+   "200 /rbac/me/permissions",
+   "200 /rbac/check-permission?moduleId=7&permissionLevel=WRITE",
+   "200 /rbac/check-permission?moduleId=6&permissionLevel=WRITE",
+   "200 /rbac/check-permission?moduleId=5&permissionLevel=WRITE",
+   "200 /rbac/check-permission?moduleId=9&permissionLevel=WRITE",
+   "200 /rbac/check-permission?moduleId=7&permissionLevel=WRITE",
+   "200 /notifications/unread-count",
+   "200 /rbac/check-permission?moduleId=6&permissionLevel=WRITE",
+   "200 /notifications/stats"
+  ]
+ },
+ {
+  "route": "settings/restaurant",
+  "finalUrl": "http://localhost:13112/en/dashboard/settings/restaurant",
+  "h1": "Settings",
+  "controls": [
+   {
+    "tag": "button",
+    "type": "button",
+    "name": "",
+    "label": "",
+    "text": "",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "Orders",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "Products",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "Human Resources",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "Accounting",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "Suppliers",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "Financial Reports",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "Reports",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "Change language",
+    "text": "English",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "Switch to dark mode",
+    "text": "",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "A\n\nAudit Owner C\n\nOwner",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "Help & Support\n\nContact administrator",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "input",
+    "type": "text",
+    "name": "",
+    "label": "",
+    "text": "",
+    "value": "Audit C Diagnostic",
+    "disabled": true
+   },
+   {
+    "tag": "input",
+    "type": "email",
+    "name": "",
+    "label": "",
+    "text": "",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "input",
+    "type": "tel",
+    "name": "",
+    "label": "",
+    "text": "",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "Save Changes",
+    "value": "",
+    "disabled": false
+   }
+  ],
+  "apiGets": [
+   "200 /auth/session",
+   "200 /rbac/me/permissions",
+   "200 /rbac/check-permission?moduleId=5&permissionLevel=WRITE",
+   "200 /rbac/check-permission?moduleId=9&permissionLevel=WRITE",
+   "200 /rbac/check-permission?moduleId=7&permissionLevel=WRITE",
+   "200 /rbac/check-permission?moduleId=6&permissionLevel=WRITE",
+   "200 /tenant/status",
+   "200 /notifications/unread-count",
+   "200 /notifications/stats",
+   "200 /notifications?",
+   "200 /rbac/me/permissions",
+   "200 /notifications?limit=5",
+   "200 /tenant/contact-info",
+   "200 /rbac/check-permission?moduleId=5&permissionLevel=WRITE",
+   "200 /rbac/check-permission?moduleId=9&permissionLevel=WRITE",
+   "200 /rbac/check-permission?moduleId=7&permissionLevel=WRITE",
+   "200 /rbac/check-permission?moduleId=6&permissionLevel=WRITE",
+   "200 /tenant/contact-info"
+  ]
+ },
+ {
+  "route": "settings/account",
+  "finalUrl": "http://localhost:13112/en/dashboard/settings/account",
+  "h1": "Settings",
+  "controls": [
+   {
+    "tag": "button",
+    "type": "button",
+    "name": "",
+    "label": "",
+    "text": "",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "Orders",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "Products",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "Human Resources",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "Accounting",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "Suppliers",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "Financial Reports",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "Reports",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "Change language",
+    "text": "English",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "Switch to dark mode",
+    "text": "",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "A\n\nAudit Owner C\n\nOwner",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "Help & Support\n\nContact administrator",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "input",
+    "type": "text",
+    "name": "profile-name",
+    "label": "Name*",
+    "text": "",
+    "value": "Audit Owner C",
+    "disabled": false
+   },
+   {
+    "tag": "input",
+    "type": "email",
+    "name": "",
+    "label": "",
+    "text": "",
+    "value": "audit.c.owner@example.test",
+    "disabled": true
+   },
+   {
+    "tag": "input",
+    "type": "text",
+    "name": "",
+    "label": "",
+    "text": "",
+    "value": "owner",
+    "disabled": true
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "Update Profile",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "input",
+    "type": "password",
+    "name": "",
+    "label": "",
+    "text": "",
+    "value": "<hidden>",
+    "disabled": false
+   },
+   {
+    "tag": "input",
+    "type": "password",
+    "name": "",
+    "label": "",
+    "text": "",
+    "value": "<hidden>",
+    "disabled": false
+   },
+   {
+    "tag": "input",
+    "type": "password",
+    "name": "",
+    "label": "",
+    "text": "",
+    "value": "<hidden>",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "Change Password",
+    "value": "",
+    "disabled": false
+   }
+  ],
+  "apiGets": [
+   "200 /auth/session",
+   "200 /rbac/check-permission?moduleId=5&permissionLevel=WRITE",
+   "200 /rbac/check-permission?moduleId=6&permissionLevel=WRITE",
+   "200 /rbac/check-permission?moduleId=7&permissionLevel=WRITE",
+   "200 /rbac/me/permissions",
+   "200 /rbac/check-permission?moduleId=9&permissionLevel=WRITE",
+   "200 /tenant/status",
+   "200 /notifications/unread-count",
+   "200 /rbac/check-permission?moduleId=5&permissionLevel=WRITE",
+   "200 /notifications?limit=5",
+   "200 /rbac/check-permission?moduleId=6&permissionLevel=WRITE",
+   "200 /notifications/stats",
+   "200 /rbac/check-permission?moduleId=9&permissionLevel=WRITE",
+   "200 /rbac/check-permission?moduleId=7&permissionLevel=WRITE",
+   "200 /rbac/me/permissions",
+   "200 /notifications?"
+  ]
+ },
+ {
+  "route": "settings/appearance",
+  "finalUrl": "http://localhost:13112/en/dashboard/settings/appearance",
+  "h1": "Settings",
+  "controls": [
+   {
+    "tag": "button",
+    "type": "button",
+    "name": "",
+    "label": "",
+    "text": "",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "Orders",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "Products",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "Human Resources",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "Accounting",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "Suppliers",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "Financial Reports",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "Reports",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "Change language",
+    "text": "English",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "Switch to dark mode",
+    "text": "",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "A\n\nAudit Owner C\n\nOwner",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "Help & Support\n\nContact administrator",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "Light",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "Dark",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "System",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "Theme",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "input",
+    "type": "color",
+    "name": "",
+    "label": "",
+    "text": "",
+    "value": "#3b82f6",
+    "disabled": false
+   },
+   {
+    "tag": "input",
+    "type": "text",
+    "name": "",
+    "label": "",
+    "text": "",
+    "value": "#3b82f6",
+    "disabled": false
+   },
+   {
+    "tag": "input",
+    "type": "color",
+    "name": "",
+    "label": "",
+    "text": "",
+    "value": "#6366f1",
+    "disabled": false
+   },
+   {
+    "tag": "input",
+    "type": "text",
+    "name": "",
+    "label": "",
+    "text": "",
+    "value": "#6366f1",
+    "disabled": false
+   },
+   {
+    "tag": "input",
+    "type": "color",
+    "name": "",
+    "label": "",
+    "text": "",
+    "value": "#10b981",
+    "disabled": false
+   },
+   {
+    "tag": "input",
+    "type": "text",
+    "name": "",
+    "label": "",
+    "text": "",
+    "value": "#10b981",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "Primary",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "Secondary",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "Accent",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "Theme Colors",
+    "value": "",
+    "disabled": false
+   }
+  ],
+  "apiGets": [
+   "200 /auth/session",
+   "200 /rbac/check-permission?moduleId=5&permissionLevel=WRITE",
+   "200 /rbac/me/permissions",
+   "200 /rbac/check-permission?moduleId=6&permissionLevel=WRITE",
+   "200 /rbac/check-permission?moduleId=9&permissionLevel=WRITE",
+   "200 /rbac/check-permission?moduleId=7&permissionLevel=WRITE",
+   "200 /rbac/check-permission?moduleId=5&permissionLevel=WRITE",
+   "200 /notifications/unread-count",
+   "200 /notifications?",
+   "200 /rbac/me/permissions",
+   "200 /notifications/stats",
+   "200 /rbac/check-permission?moduleId=6&permissionLevel=WRITE",
+   "200 /tenant/status",
+   "200 /rbac/check-permission?moduleId=9&permissionLevel=WRITE",
+   "200 /notifications?limit=5",
+   "200 /rbac/check-permission?moduleId=7&permissionLevel=WRITE"
+  ]
+ },
+ {
+  "route": "settings/billing",
+  "finalUrl": "http://localhost:13112/en/dashboard/settings/billing",
+  "h1": "Settings",
+  "controls": [
+   {
+    "tag": "button",
+    "type": "button",
+    "name": "",
+    "label": "",
+    "text": "",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "Orders",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "Products",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "Human Resources",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "Accounting",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "Suppliers",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "Financial Reports",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "Reports",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "Change language",
+    "text": "English",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "Switch to dark mode",
+    "text": "",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "A\n\nAudit Owner C\n\nOwner",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "Help & Support\n\nContact administrator",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "button",
+    "name": "",
+    "label": "",
+    "text": "SERVIO Monthly\n\nEGP 750.00 / month",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "button",
+    "name": "",
+    "label": "",
+    "text": "SERVIO Annual\n\nEGP 5,000.00 / year\n\nSave",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "Paid checkout unavailable",
+    "value": "",
+    "disabled": true
+   }
+  ],
+  "apiGets": [
+   "200 /auth/session",
+   "200 /rbac/me/permissions",
+   "200 /rbac/check-permission?moduleId=5&permissionLevel=WRITE",
+   "200 /rbac/check-permission?moduleId=7&permissionLevel=WRITE",
+   "200 /rbac/check-permission?moduleId=6&permissionLevel=WRITE",
+   "200 /rbac/check-permission?moduleId=9&permissionLevel=WRITE",
+   "200 /subscription/plans",
+   "200 /subscription/current",
+   "200 /notifications?",
+   "200 /rbac/check-permission?moduleId=5&permissionLevel=WRITE",
+   "200 /notifications/stats",
+   "200 /tenant/status",
+   "200 /rbac/check-permission?moduleId=7&permissionLevel=WRITE",
+   "200 /notifications/unread-count",
+   "200 /subscription/plans",
+   "200 /rbac/me/permissions",
+   "200 /subscription/payments?page=1&page_size=10",
+   "200 /rbac/check-permission?moduleId=6&permissionLevel=WRITE",
+   "200 /rbac/check-permission?moduleId=9&permissionLevel=WRITE",
+   "200 /subscription/current",
+   "200 /notifications?limit=5",
+   "200 /subscription/payments?page=1&page_size=10"
+  ]
+ },
+ {
+  "route": "settings/access-control",
+  "finalUrl": "http://localhost:13112/en/dashboard/settings/access-control",
+  "h1": "Settings",
+  "controls": [
+   {
+    "tag": "button",
+    "type": "button",
+    "name": "",
+    "label": "",
+    "text": "",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "Orders",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "Products",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "Human Resources",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "Accounting",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "Suppliers",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "Financial Reports",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "Reports",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "Change language",
+    "text": "English",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "Switch to dark mode",
+    "text": "",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "A\n\nAudit Owner C\n\nOwner",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "Help & Support\n\nContact administrator",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "Assign Role",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "",
+    "value": "",
+    "disabled": false
+   }
+  ],
+  "apiGets": [
+   "200 /auth/session",
+   "200 /rbac/me/permissions",
+   "200 /rbac/check-permission?moduleId=5&permissionLevel=WRITE",
+   "200 /rbac/check-permission?moduleId=9&permissionLevel=WRITE",
+   "200 /rbac/check-permission?moduleId=6&permissionLevel=WRITE",
+   "200 /rbac/check-permission?moduleId=7&permissionLevel=WRITE",
+   "200 /tenant/status",
+   "200 /notifications/unread-count",
+   "200 /rbac/me/permissions",
+   "200 /notifications?",
+   "200 /notifications/stats",
+   "200 /rbac/users/4/roles",
+   "200 /rbac/check-permission?moduleId=6&permissionLevel=WRITE",
+   "200 /rbac/me/permissions",
+   "200 /rbac/check-permission?moduleId=5&permissionLevel=WRITE",
+   "200 /rbac/check-permission?moduleId=9&permissionLevel=WRITE",
+   "200 /notifications?limit=5",
+   "200 /rbac/me/permissions",
+   "200 /rbac/users/4/roles",
+   "200 /rbac/me/permissions",
+   "200 /rbac/users/4/roles",
+   "200 /rbac/me/permissions",
+   "200 /rbac/check-permission?moduleId=7&permissionLevel=WRITE",
+   "200 /rbac/users/4/roles"
+  ]
+ },
+ {
+  "route": "settings/roles",
+  "finalUrl": "http://localhost:13112/en/dashboard/settings/roles",
+  "h1": "Settings",
+  "controls": [
+   {
+    "tag": "button",
+    "type": "button",
+    "name": "",
+    "label": "",
+    "text": "",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "Orders",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "Products",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "Human Resources",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "Accounting",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "Suppliers",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "Financial Reports",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "Reports",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "Change language",
+    "text": "English",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "Switch to dark mode",
+    "text": "",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "A\n\nAudit Owner C\n\nOwner",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "Help & Support\n\nContact administrator",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "Delete",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "Delete",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "Delete",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "Delete",
+    "value": "",
+    "disabled": false
+   }
+  ],
+  "apiGets": [
+   "200 /auth/session",
+   "200 /rbac/check-permission?moduleId=5&permissionLevel=WRITE",
+   "200 /rbac/me/permissions",
+   "200 /rbac/check-permission?moduleId=6&permissionLevel=WRITE",
+   "200 /rbac/check-permission?moduleId=9&permissionLevel=WRITE",
+   "200 /rbac/check-permission?moduleId=7&permissionLevel=WRITE",
+   "200 /rbac/check-permission?moduleId=5&permissionLevel=WRITE",
+   "200 /tenant/status",
+   "200 /notifications?",
+   "200 /rbac/check-permission?moduleId=6&permissionLevel=WRITE",
+   "200 /notifications?limit=5",
+   "200 /notifications/unread-count",
+   "200 /notifications/stats",
+   "200 /rbac/check-permission?moduleId=9&permissionLevel=WRITE",
+   "200 /rbac/check-permission?moduleId=7&permissionLevel=WRITE",
+   "200 /rbac/me/permissions",
+   "200 /rbac/me/permissions",
+   "200 /rbac/me/permissions",
+   "200 /rbac/roles",
+   "200 /rbac/roles"
+  ]
+ },
+ {
+  "route": "settings/roles/new",
+  "finalUrl": "http://localhost:13112/en/dashboard/settings/roles/new",
+  "h1": "Settings",
+  "controls": [
+   {
+    "tag": "button",
+    "type": "button",
+    "name": "",
+    "label": "",
+    "text": "",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "Orders",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "Products",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "Human Resources",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "Accounting",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "Suppliers",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "Financial Reports",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "Reports",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "Change language",
+    "text": "English",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "Switch to dark mode",
+    "text": "",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "A\n\nAudit Owner C\n\nOwner",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "Help & Support\n\nContact administrator",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "input",
+    "type": "text",
+    "name": "",
+    "label": "",
+    "text": "",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "textarea",
+    "type": "textarea",
+    "name": "",
+    "label": "",
+    "text": "",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "button",
+    "name": "",
+    "label": "",
+    "text": "Read\n\nView only",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "button",
+    "name": "",
+    "label": "",
+    "text": "Write\n\nView and edit",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "button",
+    "name": "",
+    "label": "",
+    "text": "Delete\n\nView, edit, and delete",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "button",
+    "name": "",
+    "label": "",
+    "text": "Admin\n\nFull access (admin)",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "button",
+    "name": "",
+    "label": "",
+    "text": "Read\n\nView only",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "button",
+    "name": "",
+    "label": "",
+    "text": "Write\n\nView and edit",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "button",
+    "name": "",
+    "label": "",
+    "text": "Delete\n\nView, edit, and delete",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "button",
+    "name": "",
+    "label": "",
+    "text": "Admin\n\nFull access (admin)",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "button",
+    "name": "",
+    "label": "",
+    "text": "Read\n\nView only",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "button",
+    "name": "",
+    "label": "",
+    "text": "Write\n\nView and edit",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "button",
+    "name": "",
+    "label": "",
+    "text": "Delete\n\nView, edit, and delete",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "button",
+    "name": "",
+    "label": "",
+    "text": "Admin\n\nFull access (admin)",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "button",
+    "name": "",
+    "label": "",
+    "text": "Read\n\nView only",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "button",
+    "name": "",
+    "label": "",
+    "text": "Write\n\nView and edit",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "button",
+    "name": "",
+    "label": "",
+    "text": "Delete\n\nView, edit, and delete",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "button",
+    "name": "",
+    "label": "",
+    "text": "Admin\n\nFull access (admin)",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "button",
+    "name": "",
+    "label": "",
+    "text": "Read\n\nView only",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "button",
+    "name": "",
+    "label": "",
+    "text": "Write\n\nView and edit",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "button",
+    "name": "",
+    "label": "",
+    "text": "Delete\n\nView, edit, and delete",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "button",
+    "name": "",
+    "label": "",
+    "text": "Admin\n\nFull access (admin)",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "button",
+    "name": "",
+    "label": "",
+    "text": "Read\n\nView only",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "button",
+    "name": "",
+    "label": "",
+    "text": "Write\n\nView and edit",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "button",
+    "name": "",
+    "label": "",
+    "text": "Delete\n\nView, edit, and delete",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "button",
+    "name": "",
+    "label": "",
+    "text": "Admin\n\nFull access (admin)",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "button",
+    "name": "",
+    "label": "",
+    "text": "Read\n\nView only",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "button",
+    "name": "",
+    "label": "",
+    "text": "Write\n\nView and edit",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "button",
+    "name": "",
+    "label": "",
+    "text": "Delete\n\nView, edit, and delete",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "button",
+    "name": "",
+    "label": "",
+    "text": "Admin\n\nFull access (admin)",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "button",
+    "name": "",
+    "label": "",
+    "text": "Read\n\nView only",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "button",
+    "name": "",
+    "label": "",
+    "text": "Write\n\nView and edit",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "button",
+    "name": "",
+    "label": "",
+    "text": "Delete\n\nView, edit, and delete",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "button",
+    "name": "",
+    "label": "",
+    "text": "Admin\n\nFull access (admin)",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "button",
+    "name": "",
+    "label": "",
+    "text": "Read\n\nView only",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "button",
+    "name": "",
+    "label": "",
+    "text": "Write\n\nView and edit",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "button",
+    "name": "",
+    "label": "",
+    "text": "Delete\n\nView, edit, and delete",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "button",
+    "name": "",
+    "label": "",
+    "text": "Admin\n\nFull access (admin)",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "button",
+    "name": "",
+    "label": "",
+    "text": "Read\n\nView only",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "button",
+    "name": "",
+    "label": "",
+    "text": "Write\n\nView and edit",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "button",
+    "name": "",
+    "label": "",
+    "text": "Delete\n\nView, edit, and delete",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "button",
+    "name": "",
+    "label": "",
+    "text": "Admin\n\nFull access (admin)",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "button",
+    "name": "",
+    "label": "",
+    "text": "Read\n\nView only",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "button",
+    "name": "",
+    "label": "",
+    "text": "Write\n\nView and edit",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "button",
+    "name": "",
+    "label": "",
+    "text": "Delete\n\nView, edit, and delete",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "button",
+    "name": "",
+    "label": "",
+    "text": "Admin\n\nFull access (admin)",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "button",
+    "name": "",
+    "label": "",
+    "text": "Read\n\nView only",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "button",
+    "name": "",
+    "label": "",
+    "text": "Write\n\nView and edit",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "button",
+    "name": "",
+    "label": "",
+    "text": "Delete\n\nView, edit, and delete",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "button",
+    "name": "",
+    "label": "",
+    "text": "Admin\n\nFull access (admin)",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "button",
+    "name": "",
+    "label": "",
+    "text": "Read\n\nView only",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "button",
+    "name": "",
+    "label": "",
+    "text": "Write\n\nView and edit",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "button",
+    "name": "",
+    "label": "",
+    "text": "Delete\n\nView, edit, and delete",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "button",
+    "name": "",
+    "label": "",
+    "text": "Admin\n\nFull access (admin)",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "button",
+    "name": "",
+    "label": "",
+    "text": "Read\n\nView only",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "button",
+    "name": "",
+    "label": "",
+    "text": "Write\n\nView and edit",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "button",
+    "name": "",
+    "label": "",
+    "text": "Delete\n\nView, edit, and delete",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "button",
+    "name": "",
+    "label": "",
+    "text": "Admin\n\nFull access (admin)",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "button",
+    "name": "",
+    "label": "",
+    "text": "Read\n\nView only",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "button",
+    "name": "",
+    "label": "",
+    "text": "Write\n\nView and edit",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "button",
+    "name": "",
+    "label": "",
+    "text": "Delete\n\nView, edit, and delete",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "button",
+    "name": "",
+    "label": "",
+    "text": "Admin\n\nFull access (admin)",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "button",
+    "name": "",
+    "label": "",
+    "text": "Read\n\nView only",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "button",
+    "name": "",
+    "label": "",
+    "text": "Write\n\nView and edit",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "button",
+    "name": "",
+    "label": "",
+    "text": "Delete\n\nView, edit, and delete",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "button",
+    "name": "",
+    "label": "",
+    "text": "Admin\n\nFull access (admin)",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "button",
+    "name": "",
+    "label": "",
+    "text": "Read\n\nView only",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "button",
+    "name": "",
+    "label": "",
+    "text": "Write\n\nView and edit",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "button",
+    "name": "",
+    "label": "",
+    "text": "Delete\n\nView, edit, and delete",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "button",
+    "name": "",
+    "label": "",
+    "text": "Admin\n\nFull access (admin)",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "button",
+    "name": "",
+    "label": "",
+    "text": "Read\n\nView only",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "button",
+    "name": "",
+    "label": "",
+    "text": "Write\n\nView and edit",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "button",
+    "name": "",
+    "label": "",
+    "text": "Delete\n\nView, edit, and delete",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "button",
+    "name": "",
+    "label": "",
+    "text": "Admin\n\nFull access (admin)",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "button",
+    "name": "",
+    "label": "",
+    "text": "Read\n\nView only",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "button",
+    "name": "",
+    "label": "",
+    "text": "Write\n\nView and edit",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "button",
+    "name": "",
+    "label": "",
+    "text": "Delete\n\nView, edit, and delete",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "button",
+    "name": "",
+    "label": "",
+    "text": "Admin\n\nFull access (admin)",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "button",
+    "name": "",
+    "label": "",
+    "text": "Read\n\nView only",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "button",
+    "name": "",
+    "label": "",
+    "text": "Write\n\nView and edit",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "button",
+    "name": "",
+    "label": "",
+    "text": "Delete\n\nView, edit, and delete",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "button",
+    "name": "",
+    "label": "",
+    "text": "Admin\n\nFull access (admin)",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "Create Role",
+    "value": "",
+    "disabled": false
+   }
+  ],
+  "apiGets": [
+   "200 /auth/session",
+   "200 /rbac/me/permissions",
+   "200 /rbac/check-permission?moduleId=7&permissionLevel=WRITE",
+   "200 /rbac/check-permission?moduleId=5&permissionLevel=WRITE",
+   "200 /rbac/check-permission?moduleId=9&permissionLevel=WRITE",
+   "200 /rbac/check-permission?moduleId=6&permissionLevel=WRITE",
+   "200 /rbac/me/permissions",
+   "200 /notifications/stats",
+   "200 /notifications/unread-count",
+   "200 /notifications?",
+   "200 /rbac/check-permission?moduleId=7&permissionLevel=WRITE",
+   "200 /notifications?limit=5",
+   "200 /rbac/check-permission?moduleId=6&permissionLevel=WRITE",
+   "200 /rbac/check-permission?moduleId=5&permissionLevel=WRITE",
+   "200 /rbac/check-permission?moduleId=9&permissionLevel=WRITE",
+   "200 /tenant/status",
+   "200 /rbac/me/permissions",
+   "200 /rbac/me/permissions"
+  ]
+ },
+ {
+  "route": "settings/users",
+  "finalUrl": "http://localhost:13112/en/dashboard/settings/users",
+  "h1": "Settings",
+  "controls": [
+   {
+    "tag": "button",
+    "type": "button",
+    "name": "",
+    "label": "",
+    "text": "",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "Orders",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "Products",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "Human Resources",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "Accounting",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "Suppliers",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "Financial Reports",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "Reports",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "Change language",
+    "text": "English",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "Switch to dark mode",
+    "text": "",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "A\n\nAudit Owner C\n\nOwner",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "Help & Support\n\nContact administrator",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "Add New User",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "input",
+    "type": "text",
+    "name": "",
+    "label": "",
+    "text": "",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "Roles",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "Roles",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "Roles",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "",
+    "value": "",
+    "disabled": false
+   }
+  ],
+  "apiGets": [
+   "200 /auth/session",
+   "200 /users",
+   "200 /users",
+   "200 /rbac/check-permission?moduleId=6&permissionLevel=WRITE",
+   "200 /rbac/check-permission?moduleId=5&permissionLevel=WRITE",
+   "200 /rbac/me/permissions",
+   "200 /rbac/check-permission?moduleId=9&permissionLevel=WRITE",
+   "200 /tenant/status",
+   "200 /notifications/stats",
+   "200 /notifications?",
+   "200 /notifications?limit=5",
+   "200 /notifications/unread-count",
+   "200 /rbac/check-permission?moduleId=5&permissionLevel=WRITE",
+   "200 /rbac/check-permission?moduleId=7&permissionLevel=WRITE",
+   "200 /rbac/check-permission?moduleId=9&permissionLevel=WRITE",
+   "200 /rbac/me/permissions",
+   "200 /rbac/check-permission?moduleId=7&permissionLevel=WRITE",
+   "200 /rbac/me/permissions",
+   "200 /rbac/me/permissions",
+   "200 /rbac/check-permission?moduleId=6&permissionLevel=WRITE",
+   "200 /rbac/roles",
+   "200 /rbac/roles"
+  ]
+ },
+ {
+  "route": "pos/settings",
+  "finalUrl": "http://localhost:13112/en/dashboard/pos/settings",
+  "h1": "POS Settings",
+  "controls": [
+   {
+    "tag": "button",
+    "type": "button",
+    "name": "",
+    "label": "",
+    "text": "",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "Orders",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "Products",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "Human Resources",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "Accounting",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "Suppliers",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "Financial Reports",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "Reports",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "Change language",
+    "text": "English",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "Switch to dark mode",
+    "text": "",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "A\n\nAudit Owner C\n\nOwner",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "button",
+    "name": "",
+    "label": "",
+    "text": "Save",
+    "value": "",
+    "disabled": true
+   },
+   {
+    "tag": "input",
+    "type": "checkbox",
+    "name": "",
+    "label": "Focus mode\n\nHide non-essential overlays such as the POS perf",
+    "text": "",
+    "value": "on",
+    "disabled": false
+   },
+   {
+    "tag": "input",
+    "type": "checkbox",
+    "name": "",
+    "label": "Hide out-of-stock products\n\nKeep only available products vis",
+    "text": "",
+    "value": "on",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "button",
+    "name": "",
+    "label": "",
+    "text": "Small",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "button",
+    "name": "",
+    "label": "",
+    "text": "Large",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "input",
+    "type": "checkbox",
+    "name": "",
+    "label": "Sound alerts\n\nPlay sounds for add/remove, success, and error",
+    "text": "",
+    "value": "on",
+    "disabled": false
+   },
+   {
+    "tag": "input",
+    "type": "checkbox",
+    "name": "",
+    "label": "Auto print receipts\n\nAutomatically print receipt after succe",
+    "text": "",
+    "value": "on",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "button",
+    "name": "",
+    "label": "",
+    "text": "Light Mode",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "button",
+    "name": "",
+    "label": "",
+    "text": "Dark Mode",
+    "value": "",
+    "disabled": false
+   }
+  ],
+  "apiGets": [
+   "200 /auth/session",
+   "200 /tenant/status",
+   "200 /rbac/me/permissions",
+   "200 /notifications?",
+   "200 /rbac/me/permissions",
+   "200 /notifications/stats",
+   "200 /notifications?limit=5",
+   "200 /rbac/me/permissions",
+   "200 /rbac/me/permissions",
+   "200 /notifications/unread-count"
+  ]
+ },
+ {
+  "route": "kds/settings",
+  "finalUrl": "http://localhost:13112/en/dashboard/kds/settings",
+  "h1": "KDS Settings",
+  "controls": [
+   {
+    "tag": "button",
+    "type": "button",
+    "name": "",
+    "label": "",
+    "text": "",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "Orders",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "Products",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "Human Resources",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "Accounting",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "Suppliers",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "Financial Reports",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "Reports",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "Change language",
+    "text": "English",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "Switch to dark mode",
+    "text": "",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "submit",
+    "name": "",
+    "label": "",
+    "text": "A\n\nAudit Owner C\n\nOwner",
+    "value": "",
+    "disabled": false
+   },
+   {
+    "tag": "select",
+    "type": "select-one",
+    "name": "",
+    "label": "Auto bump timer\nDisabled (0 minutes)\n5 minutes\n10 minutes\n15",
+    "text": "",
+    "value": "0",
+    "disabled": false
+   },
+   {
+    "tag": "select",
+    "type": "select-one",
+    "name": "",
+    "label": "Display density\nCompact\nComfortable\nSpacious",
+    "text": "",
+    "value": "comfortable",
+    "disabled": false
+   },
+   {
+    "tag": "input",
+    "type": "number",
+    "name": "",
+    "label": "Warning threshold (minutes)",
+    "text": "",
+    "value": "10",
+    "disabled": false
+   },
+   {
+    "tag": "input",
+    "type": "number",
+    "name": "",
+    "label": "Danger threshold (minutes)",
+    "text": "",
+    "value": "20",
+    "disabled": false
+   },
+   {
+    "tag": "input",
+    "type": "checkbox",
+    "name": "",
+    "label": "Enable alert sound\n\nPlay a sound when a new order arrives",
+    "text": "",
+    "value": "on",
+    "disabled": false
+   },
+   {
+    "tag": "input",
+    "type": "checkbox",
+    "name": "",
+    "label": "Show kitchen analytics panel\n\nDisable this for a distraction",
+    "text": "",
+    "value": "on",
+    "disabled": false
+   },
+   {
+    "tag": "button",
+    "type": "button",
+    "name": "",
+    "label": "",
+    "text": "Reset",
+    "value": "",
+    "disabled": true
+   },
+   {
+    "tag": "button",
+    "type": "button",
+    "name": "",
+    "label": "",
+    "text": "Save settings",
+    "value": "",
+    "disabled": true
+   }
+  ],
+  "apiGets": [
+   "200 /auth/session",
+   "200 /rbac/me/permissions",
+   "200 /tenant/status",
+   "200 /kds/settings",
+   "200 /notifications?",
+   "200 /notifications?limit=5",
+   "200 /notifications/stats",
+   "200 /rbac/me/permissions",
+   "200 /kds/settings",
+   "200 /rbac/me/permissions",
+   "200 /rbac/me/permissions",
+   "200 /notifications/unread-count"
+  ]
+ }
+]

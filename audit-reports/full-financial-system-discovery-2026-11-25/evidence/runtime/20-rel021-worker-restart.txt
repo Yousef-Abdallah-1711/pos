@@ -1,0 +1,12 @@
+# REL-021: mark order 5 paid then restart API container immediately
+ order_id |  status   | attempts 
+----------+-----------+----------
+        5 | completed |        1
+(1 row)
+
+ entry_type | count 
+------------+-------
+ auto_cogs  |     1
+ auto_sales |     1
+(2 rows)
+

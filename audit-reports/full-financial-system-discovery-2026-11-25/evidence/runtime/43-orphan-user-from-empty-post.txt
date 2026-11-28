@@ -1,0 +1,12 @@
+-[ RECORD 1 ]--------------------------
+id         | 6
+tenant_id  | 4
+email      | 
+name       | 
+role       | user
+status     | active
+pwlen      | 60
+created_at | 2026-11-26 01:18:33.259914
+
+1
+can that user log in with empty creds? -> 422

@@ -1,0 +1,73 @@
+{
+ "run": "RUN-005",
+ "finding": "F-018",
+ "out": [
+  {
+   "label": "login (Redis up)",
+   "ms": 256,
+   "status": 200,
+   "retryAfter": null,
+   "body": "{\"user\":{\"id\":4,\"tenant_id\":4,\"restaurant_id\":4,\"email\":\"audit.c.owner@example.test\",\"name\":\"Audit O"
+  },
+  {
+   "label": "GET /products (Redis up)",
+   "ms": 30,
+   "status": 200,
+   "retryAfter": null,
+   "body": "{\"pagination\":{\"page\":1,\"page_size\":1,\"total\":14,\"total_pages\":14},\"products\":[{\"id\":20,\"tenant_id\":"
+  },
+  {
+   "label": "REDIS STOPPED",
+   "at": "2026-11-27T11:55:22.961Z"
+  },
+  {
+   "label": "GET /health (Redis down)",
+   "ms": 5,
+   "status": 200,
+   "retryAfter": null,
+   "body": "{\"db_healthy\":true,\"db_status\":\"ok\",\"status\":\"ok\",\"uptime_sec\":56}\n"
+  },
+  {
+   "label": "GET /products with valid cookie (Redis down)",
+   "ms": 68179,
+   "error": "TypeError: fetch failed"
+  },
+  {
+   "label": "POST /auth/login (Redis down)",
+   "ms": 68650,
+   "error": "TypeError: fetch failed"
+  },
+  {
+   "label": "GET public menu (Redis down)",
+   "ms": 45,
+   "status": 200,
+   "retryAfter": null,
+   "body": "{\"success\":true,\"data\":{\"data\":{\"colors\":{\"accent\":\"#10b981\",\"background\":\"#ffffff\",\"border\":\"#e5e7e"
+  },
+  {
+   "label": "REDIS STARTED",
+   "at": "2026-11-27T11:57:40.156Z"
+  },
+  {
+   "label": "GET /products with the OLD cookie after Redis restart",
+   "ms": 29,
+   "status": 401,
+   "retryAfter": null,
+   "body": "Unauthorized\n"
+  },
+  {
+   "label": "POST /auth/login after Redis restart",
+   "ms": 230,
+   "status": 200,
+   "retryAfter": null,
+   "body": "{\"user\":{\"id\":4,\"tenant_id\":4,\"restaurant_id\":4,\"email\":\"audit.c.owner@example.test\",\"name\":\"Audit O"
+  },
+  {
+   "label": "GET /products with a NEW cookie",
+   "ms": 11,
+   "status": 200,
+   "retryAfter": null,
+   "body": "{\"pagination\":{\"page\":1,\"page_size\":1,\"total\":14,\"total_pages\":14},\"products\":[{\"id\":20,\"tenant_id\":"
+  }
+ ]
+}

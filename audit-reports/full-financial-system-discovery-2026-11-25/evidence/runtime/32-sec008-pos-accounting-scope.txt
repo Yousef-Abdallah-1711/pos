@@ -1,0 +1,23 @@
+# SEC-008 pos_accounting scope
+whoami: pos_accounting
+SELECT general_ledger -> 56
+SELECT journal_entries -> 30
+SELECT journal_entry_lines -> 66
+SELECT chart_of_accounts -> 186
+SELECT orders -> 12
+SELECT products -> 2
+SELECT users -> 6
+SELECT tenants -> 4
+SELECT salaries -> 1
+SELECT accounting_event_outbox -> ERROR:  permission denied for table accounting_event_outbox
+SELECT payments_received -> 6
+[update products set price=price] -> BEGIN ERROR:  permission denied for table products 
+[update orders set total_amount=total_amount] -> ERROR:  permission denied for table orders BEGIN 
+[update users set name=name] -> ERROR:  permission denied for table users BEGIN 
+[delete from tenants where id=-1] -> BEGIN ERROR:  permission denied for table tenants 
+[update general_ledger set debit_amount=debit_amount] -> ERROR:  General Ledger rows are immutable; record corrections through an audited journal reversal CONTEXT:  PL
+[update journal_entries set description=description where id=-1] -> BEGIN UPDATE 0 ROLLBACK 
+[truncate general_ledger] -> ERROR:  permission denied for table general_ledger BEGIN 
+[create table x(i int)] -> BEGIN ERROR:  permission denied for schema public LINE 1: begin; create table x(i int); rollback;             
+pos_accounting select length(password_hash) from users -> ERROR:  permission denied for table users (length only; hashes not printed)
+60|6

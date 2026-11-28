@@ -1,0 +1,154 @@
+- generic [active] [ref=e1]:
+  - link "Skip to content" [ref=e2] [cursor=pointer]:
+    - /url: "#main-content"
+  - banner [ref=e3]:
+    - generic [ref=e4]:
+      - link "SERVIO" [ref=e5] [cursor=pointer]:
+        - /url: /en
+      - navigation "Main navigation" [ref=e11]:
+        - button "Open platform features" [ref=e13] [cursor=pointer]: Platform
+        - link "How it works" [ref=e16] [cursor=pointer]:
+          - /url: /en/how-it-works
+        - link "Pricing" [ref=e17] [cursor=pointer]:
+          - /url: /en/pricing
+        - link "Product tour" [ref=e18] [cursor=pointer]:
+          - /url: /en/demo
+        - link "Demo options" [ref=e19] [cursor=pointer]:
+          - /url: /en/contact
+      - generic [ref=e20]:
+        - link "Switch to Arabic" [ref=e21] [cursor=pointer]:
+          - /url: /ar/auth/register
+        - button "Switch to dark mode" [ref=e27] [cursor=pointer]
+        - status [ref=e31]: Checking sign-in
+  - main [ref=e32]:
+    - generic [ref=e33]:
+      - region "About SERVIO" [ref=e34]:
+        - generic [ref=e35]:
+          - heading "Set up your restaurant workspace." [level=1] [ref=e36]
+          - paragraph [ref=e37]: All-in-one restaurant management. One platform for front and back of house.
+        - generic [ref=e38]: One platform for front- and back-of-house work.
+      - region "Create your account and start managing your restaurant" [ref=e39]:
+        - generic [ref=e40]:
+          - link "Back to SERVIO" [ref=e41] [cursor=pointer]:
+            - /url: /en
+          - heading "Create your account and start managing your restaurant" [level=2] [ref=e42]
+          - paragraph [ref=e43]: Enter your details and restaurant information to create an account.
+          - generic [ref=e44]:
+            - paragraph [ref=e45]: "14-day trial. Billing preference: Monthly. Registration does not charge you."
+            - generic [ref=e46]:
+              - generic [ref=e47]: Full Name*
+              - textbox "Full Name" [ref=e48]:
+                - /placeholder: John Doe
+            - generic [ref=e49]:
+              - generic [ref=e50]: Email*
+              - textbox "Email" [ref=e51]:
+                - /placeholder: your@email.com
+            - generic [ref=e52]:
+              - generic [ref=e53]: Restaurant Name*
+              - textbox "Restaurant Name" [ref=e54]:
+                - /placeholder: My Restaurant
+            - generic [ref=e55]:
+              - generic [ref=e56]: Website Subdomain*
+              - textbox "Website Subdomain" [ref=e57]:
+                - /placeholder: my-restaurant
+              - paragraph [ref=e58]: "Requested address; storefront activation is a separate setup step: your-subdomain.localhost:3003"
+            - generic [ref=e59]:
+              - generic [ref=e60]:
+                - text: Phone
+                - generic [ref=e61]: (Optional)
+              - textbox "Phone(Optional)" [ref=e62]:
+                - /placeholder: "+201012345678"
+            - generic [ref=e63]:
+              - generic [ref=e64]: Password*
+              - generic [ref=e66]:
+                - textbox "Password" [ref=e67]:
+                  - /placeholder: At least 6 characters
+                - 'button "Show password: Password" [ref=e68] [cursor=pointer]'
+              - paragraph [ref=e72]: At least 6 characters; maximum 72 UTF-8 bytes.
+            - generic [ref=e73]:
+              - generic [ref=e74]: Confirm Password*
+              - generic [ref=e76]:
+                - textbox "Confirm Password" [ref=e77]:
+                  - /placeholder: Confirm your password
+                - 'button "Show password: Confirm Password" [ref=e78] [cursor=pointer]'
+            - button "Create account" [ref=e82] [cursor=pointer]
+  - contentinfo [ref=e84]:
+    - generic [ref=e85]:
+      - generic [ref=e86]:
+        - generic [ref=e87]:
+          - link "SERVIO" [ref=e88] [cursor=pointer]:
+            - /url: /en
+          - paragraph [ref=e94]: Restaurant operations, thoughtfully connected.
+          - link "Get started" [ref=e95] [cursor=pointer]:
+            - /url: /en/auth/register?billing=monthly
+        - navigation "Footer navigation" [ref=e99]:
+          - generic [ref=e100]:
+            - generic [ref=e101]:
+              - heading "Product" [level=2] [ref=e102]
+              - list [ref=e103]:
+                - listitem [ref=e104]:
+                  - link "Explore all features" [ref=e105] [cursor=pointer]:
+                    - /url: /en/features
+                - listitem [ref=e106]:
+                  - link "Cashier POS" [ref=e107] [cursor=pointer]:
+                    - /url: /en/features/pos
+                - listitem [ref=e108]:
+                  - link "Kitchen display" [ref=e109] [cursor=pointer]:
+                    - /url: /en/features/kitchen-display
+                - listitem [ref=e110]:
+                  - link "Online ordering" [ref=e111] [cursor=pointer]:
+                    - /url: /en/features/online-ordering
+                - listitem [ref=e112]:
+                  - link "Inventory" [ref=e113] [cursor=pointer]:
+                    - /url: /en/features/inventory
+                - listitem [ref=e114]:
+                  - link "Staff records" [ref=e115] [cursor=pointer]:
+                    - /url: /en/features/hr
+                - listitem [ref=e116]:
+                  - link "Operational overview" [ref=e117] [cursor=pointer]:
+                    - /url: /en/features/analytics
+                - listitem [ref=e118]:
+                  - link "Storefront customization" [ref=e119] [cursor=pointer]:
+                    - /url: /en/features/website-builder
+            - generic [ref=e120]:
+              - heading "Explore" [level=2] [ref=e121]
+              - list [ref=e122]:
+                - listitem [ref=e123]:
+                  - link "How it works" [ref=e124] [cursor=pointer]:
+                    - /url: /en/how-it-works
+                - listitem [ref=e125]:
+                  - link "Product tour" [ref=e126] [cursor=pointer]:
+                    - /url: /en/demo
+                - listitem [ref=e127]:
+                  - link "Demo options" [ref=e128] [cursor=pointer]:
+                    - /url: /en/contact
+                - listitem [ref=e129]:
+                  - link "Pricing" [ref=e130] [cursor=pointer]:
+                    - /url: /en/pricing
+            - generic [ref=e131]:
+              - heading "Account" [level=2] [ref=e132]
+              - list [ref=e133]:
+                - listitem [ref=e134]:
+                  - link "Log in" [ref=e135] [cursor=pointer]:
+                    - /url: /en/auth/login
+                - listitem [ref=e136]:
+                  - link "Create your restaurant account" [ref=e137] [cursor=pointer]:
+                    - /url: /en/auth/register
+            - generic [ref=e138]:
+              - heading "Company" [level=2] [ref=e139]
+              - list [ref=e140]:
+                - listitem [ref=e141]:
+                  - link "Privacy" [ref=e142] [cursor=pointer]:
+                    - /url: /en/privacy
+                - listitem [ref=e143]:
+                  - link "Demo information" [ref=e144] [cursor=pointer]:
+                    - /url: /en/contact
+      - generic [aria-hidden] [ref=e145]: SERVIO
+      - generic [ref=e146]:
+        - paragraph [ref=e147]: Product screens use synthetic data. Availability and setup requirements are described on each feature page.
+        - generic [ref=e148]:
+          - link "Privacy" [ref=e149] [cursor=pointer]:
+            - /url: /en/privacy
+          - generic [ref=e150]: © 2026 SERVIO
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=e156] [cursor=pointer]

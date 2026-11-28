@@ -1,0 +1,17 @@
+{
+ "run": "RUN-003",
+ "order": 71,
+ "out": {
+  "orders": {
+   "textShowsRawTag": true,
+   "htmlHasLiveScriptNode": false,
+   "htmlEscaped": true
+  },
+  "kds": {
+   "textShowsRawTag": true,
+   "htmlHasLiveScriptNode": false,
+   "htmlEscaped": true
+  },
+  "dialogsFired": []
+ }
+}

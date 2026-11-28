@@ -1,0 +1,24 @@
+# Cross-tenant probes: owner A/B (tenants 2/3) vs tenant C (4) resources; expect 404/403/empty
+ownerA GET /orders/2 -> 404 404 page not found 
+ownerA GET /admin/orders/2 -> 404 {"error":"Order not found"}
+ownerA GET /products/2 -> 404 {"error":"product not found"}
+ownerA GET /suppliers/1 -> 404 {"error":"Supplier not found","success":false} 
+ownerA GET /accounting/journal-entries/3 -> 404 {"error":"Journal entry not found","success":false} 
+ownerA GET /accounting/supplier-invoices/1 -> 404 {"error":"Supplier invoice not found","success":false} 
+ownerA GET /hr/employees/4 -> 404 {"error":"Employee not found","success":false} 
+ownerA GET /hr/salaries/1 -> 404 {"error":"Salary record not found","success":false} 
+ownerA GET /accounting/accounts -> 200 {"data":[],"pagination":{"page":1,"page_size":50,"total":0},"success":true} 
+ownerB GET /orders/2 -> 404 404 page not found 
+ownerB GET /admin/orders/2 -> 404 {"error":"Order not found"}
+ownerB GET /products/2 -> 404 {"error":"product not found"}
+ownerB GET /suppliers/1 -> 404 {"error":"Supplier not found","success":false} 
+ownerB GET /accounting/journal-entries/3 -> 404 {"error":"Journal entry not found","success":false} 
+ownerB GET /accounting/supplier-invoices/1 -> 404 {"error":"Supplier invoice not found","success":false} 
+ownerB GET /hr/employees/4 -> 404 {"error":"Employee not found","success":false} 
+ownerB GET /hr/salaries/1 -> 404 {"error":"Salary record not found","success":false} 
+ownerB GET /accounting/accounts -> 200 {"data":[],"pagination":{"page":1,"page_size":50,"total":0},"success":true} 
+# self-access sanity (owner C)
+ownerC /admin/orders/2 -> 200
+ownerC /products/2 -> 200
+ownerC /suppliers/1 -> 200
+ownerC /accounting/journal-entries/3 -> 200

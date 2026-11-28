@@ -1,0 +1,35 @@
+### order
+ id | tenant_id | subtotal | tax_amount | discount_amount | delivery_fee | total_amount |  status   | payment_status | payment_method |         created_at         
+----+-----------+----------+------------+-----------------+--------------+--------------+-----------+----------------+----------------+----------------------------
+  1 |         2 | 10000.00 |    1000.00 |            0.00 |         0.00 |     11000.00 | confirmed | paid           | cash           | 2026-11-25 22:27:01.093643
+(1 row)
+
+### items
+ order_id | product_id | quantity | unit_price | total_price 
+----------+------------+----------+------------+-------------
+        1 |          1 |        1 |   10000.00 |    10000.00
+(1 row)
+
+### outbox
+ id |     event_id     | event_type | tenant_id | restaurant_id | order_id | posted_by |  status   | attempts | max_attempts |      next_attempt_at      | lease_expires_at |                  last_error                  |         created_at         |        updated_at         | completed_at | lease_generation 
+----+------------------+------------+-----------+---------------+----------+-----------+-----------+----------+--------------+---------------------------+------------------+----------------------------------------------+----------------------------+---------------------------+--------------+------------------
+  1 | paid-order:2:2:1 | paid_order |         2 |             2 |        1 |         2 | retryable |        1 |            8 | 2026-11-25 22:28:10.00844 |                  | account not found for candidates [1110 1110]+| 2026-11-25 22:27:01.181622 | 2026-11-25 22:27:10.00844 |              |                1
+    |                  |            |           |               |          |           |           |          |              |                           |                  | account not found for candidates [5110 5110] |                            |                           |              | 
+(1 row)
+
+### journals
+ journals 
+----------
+        0
+(1 row)
+
+ tenant_id | count 
+-----------+-------
+(0 rows)
+
+### stock
+ id | quantity_in_stock 
+----+-------------------
+  1 |                49
+(1 row)
+

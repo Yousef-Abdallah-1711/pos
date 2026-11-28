@@ -1,0 +1,104 @@
+{
+ "run": "RUN-005",
+ "tag": "R5DEL71981",
+ "tenant": 4,
+ "note": "disposable entities named R5DEL-*; isolated stack",
+ "log": [
+  {
+   "id": "93",
+   "what": "delete clean customer",
+   "clicked": false,
+   "confirmed": false,
+   "calls": [],
+   "after": "true"
+  },
+  {
+   "id": 94,
+   "what": "delete customer with an invoice",
+   "invoice_http": 201,
+   "clicked": false,
+   "confirmed": false,
+   "calls": [],
+   "after": "t",
+   "invoices_remaining": "1"
+  },
+  {
+   "id": "82",
+   "what": "delete clean supplier",
+   "clicked": false,
+   "confirmed": false,
+   "calls": [],
+   "after": "t"
+  },
+  {
+   "id": "DIALOG",
+   "what": "browser dialog",
+   "type": "confirm",
+   "message": "Are you sure you want to cancel this order?"
+  },
+  {
+   "id": "S5",
+   "what": "cancel unpaid tracked order",
+   "order": 5796,
+   "product": "2",
+   "stock_before": "32",
+   "stock_after_order": "30",
+   "clicked": true,
+   "confirmed": false,
+   "calls": [
+    "DELETE /admin/orders/5796 200 {\"success\":true}"
+   ],
+   "status_after": "cancelled|pending",
+   "stock_after_cancel": "32",
+   "kds_rows_after": "new"
+  },
+  {
+   "id": "DIALOG",
+   "what": "browser dialog",
+   "type": "confirm",
+   "message": "Are you sure you want to cancel this order?"
+  },
+  {
+   "id": "S6",
+   "what": "cancel paid order",
+   "order": 5797,
+   "clicked": true,
+   "confirmed": false,
+   "calls": [
+    "DELETE /admin/orders/5797 400 {\"error\":\"cannot cancel paid or refunded order before a supported refund and accounting reversal workflow exists\"}"
+   ],
+   "status_after": "confirmed|paid",
+   "toast": "Failed to cancel order"
+  },
+  {
+   "id": 44790,
+   "what": "post then void journal",
+   "create_http": 201,
+   "gl_rows_before": "0",
+   "post_clicked": false,
+   "status_after_post": "draft",
+   "gl_rows_after_post": "0",
+   "void_clicked": false,
+   "void_confirmed": false,
+   "status_after_void": "draft",
+   "gl_rows_after_void": "0",
+   "net_cash_effect": "0"
+  },
+  {
+   "id": "DIALOG",
+   "what": "browser dialog",
+   "type": "confirm",
+   "message": "Are you sure you want to delete this theme?"
+  },
+  {
+   "id": "S8",
+   "what": "duplicate then delete theme copy",
+   "themes_before": "3",
+   "after_copy": "4",
+   "delete_clicked": true,
+   "confirmed": false,
+   "themes_after_delete": "3",
+   "active_theme_intact": "4:true"
+  }
+ ]
+}

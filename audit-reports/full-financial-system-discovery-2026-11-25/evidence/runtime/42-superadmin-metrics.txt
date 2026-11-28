@@ -1,0 +1,4 @@
+# Super Admin dashboard metrics API vs DB
+API stats: {"data":{"total_tenants":4,"active_tenants":4,"total_users":6,"total_orders":34,"new_tenants_today":0,"new_users_today":1,"active_impersonations":0,"last_updated":"2026-11-26T01:38:08.750835715Z"},"success":true}
+DB tenants=4 active=4 users=6 audit_logs=ERROR:  relation "audit_logs" does not exist subs_active=0
+users list: 1|1|superadmin@pos-saas.com|2026-11-25 22:12:55.871536;2|2|audit.a.owner@example.test|2026-11-25 22:24:07.740232;3|3|audit.b.owner@example.test|2026-11-25 22:24:41.827961;4|4|audit.c.owner@example.test|2026-11-25 22:27:50.002483;5|4|cashier.c@example.test|2026-11-25 22:43:24.834459;6|4||2026-11-26 01:18:33.259914;

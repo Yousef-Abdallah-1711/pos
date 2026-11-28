@@ -10,6 +10,7 @@ const plex = IBM_Plex_Sans_Arabic({
   weight: ['400', '600', '700'],
   subsets: ['arabic', 'latin'],
   display: 'swap',
+  preload: false,
   variable: '--font-plex',
 })
 const manrope = Manrope({ subsets: ['latin'], display: 'swap', variable: '--font-manrope' })

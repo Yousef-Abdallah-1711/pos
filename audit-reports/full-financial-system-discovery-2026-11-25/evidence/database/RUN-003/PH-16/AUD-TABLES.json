@@ -1,0 +1,53 @@
+{
+ "run": "RUN-003",
+ "kind": "API-DIAGNOSTIC",
+ "log": [
+  {
+   "id": "TBL-01",
+   "desc": "duplicate table number 1",
+   "http": 201,
+   "resp": "{\"data\":{\"id\":2,\"tenant_id\":4,\"restaurant_id\":4,\"table_number\":1,\"name\":\"dup\",\"capacity\":4,\"location\":\"indoor\",\"status\":\"available\",\"qr_code_config\":{},\"positio"
+  },
+  {
+   "id": "TBL-02",
+   "desc": "negative capacity",
+   "http": 400,
+   "resp": "{\"error\":\"capacity must be between 1 and 50\"}"
+  },
+  {
+   "id": "TBL-03",
+   "desc": "zero capacity",
+   "http": 400
+  },
+  {
+   "id": "TBL-04",
+   "desc": "capacity int max",
+   "http": 400,
+   "resp": "{\"error\":\"capacity must be between 1 and 50\"}"
+  },
+  {
+   "id": "TBL-05",
+   "desc": "negative table number",
+   "http": 400,
+   "resp": "{\"error\":\"table_number must be greater than 0\"}"
+  },
+  {
+   "id": "TBL-06",
+   "desc": "name 1,800 chars with HTML",
+   "http": 500,
+   "resp": "{\"error\":\"Failed to create table\"}"
+  },
+  {
+   "id": "TBL-07",
+   "desc": "table 1 state after dine-in tests",
+   "occ": "1|occupied"
+  },
+  {
+   "id": "TBL-08",
+   "desc": "delete table that has orders / is occupied",
+   "http": 409,
+   "resp": "{\"error\":\"cannot delete table with active orders\"}",
+   "exists": "1"
+  }
+ ]
+}

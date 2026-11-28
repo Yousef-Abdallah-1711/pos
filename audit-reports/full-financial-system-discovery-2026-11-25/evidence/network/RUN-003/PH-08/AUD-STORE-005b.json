@@ -1,0 +1,38 @@
+{
+ "run": "RUN-003",
+ "url": "http://audit-c-diag.localhost:13113/en/checkout",
+ "resultText": "Audit C Diagnostic | Menu | Orders | Cart | Search products... | EN | Order placed successfully! |  | Order Number: |  | ORD-2026-627f2842-42d6-4404-b0c1-a11702fcaefc |  | Menu | Track your order | Audit C Diagnostic |  | Quick Links | Hours |  | Contact the restaurant for opening hours |  | Contact |  | (c) 2026 Audit C Diagnostic. All rights reserved. |  | Top",
+ "before": "51|55",
+ "after": "52|57",
+ "last": "57|website|pending|pending|cash|100.00|10.00|110.00",
+ "calls": [
+  {
+   "m": "POST",
+   "u": "/public/orders/quote",
+   "s": 200,
+   "req": "{\"items\":[{\"product_id\":4,\"quantity\":1}]}",
+   "b": "{\"data\":{\"items\":[{\"product_id\":4,\"quantity\":1,\"unit_price\":100,\"total_price\":100}],\"subtotal\":100,\"tax_amount\":10,\"delivery_fee\":0,\"total_amount\":110,\"currency\":\"EGP\"},\"success\":true}"
+  },
+  {
+   "m": "POST",
+   "u": "/public/orders/quote",
+   "s": 200,
+   "req": "{\"items\":[{\"product_id\":4,\"quantity\":1}]}",
+   "b": "{\"data\":{\"items\":[{\"product_id\":4,\"quantity\":1,\"unit_price\":100,\"total_price\":100}],\"subtotal\":100,\"tax_amount\":10,\"delivery_fee\":0,\"total_amount\":110,\"currency\":\"EGP\"},\"success\":true}"
+  },
+  {
+   "m": "POST",
+   "u": "/public/orders/quote",
+   "s": 200,
+   "req": "{\"items\":[{\"product_id\":4,\"quantity\":1}]}",
+   "b": "{\"data\":{\"items\":[{\"product_id\":4,\"quantity\":1,\"unit_price\":100,\"total_price\":100}],\"subtotal\":100,\"tax_amount\":10,\"delivery_fee\":0,\"total_amount\":110,\"currency\":\"EGP\"},\"success\":true}"
+  },
+  {
+   "m": "POST",
+   "u": "/public/orders",
+   "s": 201,
+   "req": "{\"expected_total\":110,\"customer_name\":\"Audit Web Customer\",\"customer_email\":\"webcust@example.test\",\"customer_phone\":\"+201000000077\",\"delivery_address\":\"1 Audit Street, Cairo\",\"payment_method\":\"cash\",\"notes\":\"\",\"items\":[{\"product_id\":4,\"quantity\":1,\"special_instructions\":\"\"}],\"order_source\":\"website\"}",
+   "b": "{\"data\":{\"created_at\":\"2026-11-26T20:41:24.272235Z\",\"customer_name\":\"Audit Web Customer\",\"id\":57,\"order_number\":\"ORD-2026-627f2842-42d6-4404-b0c1-a11702fcaefc\",\"status\":\"pending\",\"table_id\":null,\"total_amount\":110,\"tracking_token\":\"Awtk-lAJXRuAW10cqfjSS6yiEyspmzHYBME5DSSZi0M\"},\"success\":true}"
+  }
+ ]
+}

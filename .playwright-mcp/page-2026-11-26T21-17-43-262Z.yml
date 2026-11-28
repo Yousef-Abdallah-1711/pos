@@ -1,0 +1,41 @@
+- generic [active] [ref=f18e1]:
+  - generic "Concept preview controls" [ref=f18e2]:
+    - strong [ref=f18e3]: Concept 04 / Coral + Ultraviolet
+    - navigation "Preview screens" [ref=f18e4]:
+      - link "Landing" [ref=f18e5] [cursor=pointer]:
+        - /url: "?view=landing"
+      - link "Login" [ref=f18e6] [cursor=pointer]:
+        - /url: "?view=login"
+      - link "Register" [ref=f18e7] [cursor=pointer]:
+        - /url: "?view=register"
+    - button "Switch color mode" [ref=f18e8] [cursor=pointer]: Light mode
+  - text: ✳ ✳
+  - generic [ref=f18e10]:
+    - main [ref=f18e11]:
+      - generic [ref=f18e12]:
+        - link "✳servio" [ref=f18e13] [cursor=pointer]:
+          - /url: "?view=landing"
+        - heading "Welcome back." [level=1] [ref=f18e14]
+        - paragraph [ref=f18e15]: Return to your restaurant workspace.
+        - generic [ref=f18e16]:
+          - generic [ref=f18e17]: Email address
+          - textbox "Email address" [ref=f18e18]:
+            - /placeholder: you@restaurant.com
+        - generic [ref=f18e19]:
+          - generic [ref=f18e20]: Password
+          - textbox "Password" [ref=f18e21]
+        - generic [ref=f18e22]:
+          - generic [ref=f18e23]:
+            - checkbox "Remember me" [ref=f18e24]
+            - text: Remember me
+          - link "Forgot password?" [ref=f18e25] [cursor=pointer]:
+            - /url: /en/auth/forgot-password
+        - button "Log in" [ref=f18e26] [cursor=pointer]
+        - paragraph [ref=f18e27]:
+          - text: New to Servio?
+          - link "Create an account" [ref=f18e28] [cursor=pointer]:
+            - /url: "?view=register"
+        - paragraph [ref=f18e29]: Visual preview. This form does not submit.
+    - figure "Ready for the next good day of service." [ref=f18e30]:
+      - img "Sunlit seating area in a quiet cafe" [ref=f18e31]
+  - text: ✳

@@ -1,0 +1,24 @@
+e0567de30dc94eeec9966c17fe684b73b4017ac95b51f4660d1333d5889181ef *evidence/database/isolated-audit-run003-start-2026-11-26.dump
+db=pos_phase2a_e2e
+migrations|145|999_theme_migration_legacy.sql
+tenants|5
+orders|34
+journals|54
+gl|115
+546f025bb15901c6bb1dbab3c0abcaf296e34f6ceed043ec7d7184e086b34466 *evidence/database/isolated-audit-run003-mid-2026-11-26.dump
+
+FINAL dump isolated-audit-run003-final-2026-11-26.dump taken 2026-11-26T21:08:31Z
+sha256 5cdd58941e03dc39770878b913a943289b36bc7ec377cc8cabb57fa695a3e3f0
+tenants 9 users 11 orders 74 journals 17155 gl_lines 343 migrations 145 rls_tables 20
+tenant 5 (protected, F-001 evidence): coa 0 rules 0 periods 0
+tenants 3,6,7 coa: 
+tenant ids: 
+1=test-tenant coa=62
+2=audit-a-resto coa=62
+3=audit-b-bistro coa=0
+4=audit-c-diag coa=66
+5=audit-d-onboarding coa=0
+6=obs-s2-probe coa=0
+7=obs-s3-probe coa=0
+8=audit-e-outbox coa=64
+9=audit-f-month coa=66

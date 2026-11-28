@@ -1,0 +1,36 @@
+== GL net balances tenant C (natural sign: dr-cr)
+1110|Cash on Hand|4000.00
+1111|Main Bank Account|-5000.00
+1113|Card Payment Clearing|11000.00
+1120|Accounts Receivable|-1800.00
+1130|Inventory|8000.00
+1150|Input VAT Receivable|2800.00
+2101|Accounts Payable|-800.00
+2120|VAT Payable|-3700.00
+3100|Owner Capital|0.00
+4100|Food Sales|-34500.00
+5110|Food COGS|12000.00
+5210|Salaries Expense|5000.00
+5310|Rent Expense|3000.00
+== operational
+orders_paid_subtotal|30000.00
+orders_paid_tax|3000.00
+orders_unpaid_total|88000.00|8
+cogs_expected_paid_orders|12000
+customer_inv_balance|0.00
+supplier_inv_balance|800.00
+stock_qty_x_cost|156000.00
+cash_received_payments|7000.00
+== journals by status/type
+auto_cogs|posted|3
+auto_payroll|posted|1
+auto_sales|posted|3
+customer_invoice|posted|1
+manual|draft|6
+manual|posted|1
+manual|void|1
+payment_made|posted|5
+payment_received|posted|6
+supplier_invoice|posted|1
+== TB check
+310000.00|310000.00

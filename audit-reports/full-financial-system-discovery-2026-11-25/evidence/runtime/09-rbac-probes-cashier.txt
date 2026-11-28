@@ -1,0 +1,19 @@
+# RBAC probes: cashier (Employee role, tenant C), RBAC_ENFORCEMENT=enforce
+cashier GET /accounting/accounts -> 403 Insufficient permissions 
+cashier GET /accounting/journal-entries -> 403 Insufficient permissions 
+cashier GET /reports/financial/profit-loss -> 403 Insufficient permissions 
+cashier GET /reports/financial/balance-sheet -> 403 Insufficient permissions 
+cashier GET /hr/salaries -> 403 Insufficient permissions 
+cashier GET /hr/employees -> 200 {"data":[{"id":4,"tenant_id":4,"restaurant_id":4,"employee_code":"EMP-1795646162
+cashier GET /suppliers -> 403 Insufficient permissions 
+cashier GET /accounting/supplier-invoices -> 403 Insufficient permissions 
+cashier GET /users -> 403 Insufficient permissions 
+cashier GET /rbac/roles -> 403 Insufficient permissions 
+cashier GET /admin/orders -> 200 {"limit":20,"orders":[{"id":4,"order_number":"ORD-2026-8188c639-6477-4316-ab5c-6
+cashier GET /products -> 200 {"pagination":{"page":1,"page_size":20,"total":1,"total_pages":1},"products":[{"
+cashier POST /accounting/journal-entries -> 403 Insufficient permissions 
+cashier POST /accounting/supplier-invoices/1/approve -> 403 Insufficient permissions 
+cashier POST /hr/salaries/1/mark-paid -> 403 Insufficient permissions 
+cashier POST /accounting/journal-entries/3/post -> 403 Insufficient permissions 
+cashier PUT /admin/orders/3/payment-status -> 403 Insufficient permissions 
+cashier POST /accounting/paid-order-events/1/redrive -> 403 Insufficient permissions 

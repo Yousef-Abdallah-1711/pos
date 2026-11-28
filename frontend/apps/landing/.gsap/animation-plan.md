@@ -1,5 +1,9 @@
 > Archived generator scaffold. For the implemented homepage, use `.gsap/current-state.md`, `DESIGN.md`, and `docs/landing-handoff.md`. This scaffold contains unverified guesses.
 
+## Active 2026-11-27 refactor plan
+
+The archival scaffold below predates the implemented page. Current phases are P13 Operational Bento and P12 Feature Showcase. P13 replaces three equal text cards with a compact editorial introduction, a dominant POS card, two supporting product captures, and local three-step GSAP timelines. Mobile and reduced-motion states remain static with manual step buttons. P12 separates introduction from the pinned stage, measures the header and track overflow, maps progress to slide offsets, and disables pinning for narrow/short/reduced-motion viewports. These two phases were implemented sequentially and browser-measured. See `.gsap/current-state.md` and `docs/landing-interactive-experience/operational-bento-showcase-report.md` for current evidence.
+
 # Animation Plan - landing
 
 ## Workflow State

@@ -5,9 +5,9 @@ type MotionModules = {
 
 const desktopMotionQuery = '(min-width: 901px) and (prefers-reduced-motion: no-preference)'
 
-export function startDesktopMotion(setup: (modules: MotionModules) => void | (() => void)) {
+export function startDesktopMotion(setup: (modules: MotionModules) => void | (() => void), query = desktopMotionQuery) {
   if (typeof window.matchMedia !== 'function') return () => undefined
-  const media = window.matchMedia(desktopMotionQuery)
+  const media = window.matchMedia(query)
   let generation = 0
   let cleanup: (() => void) | undefined
 

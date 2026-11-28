@@ -1,0 +1,3 @@
+# Existing appearance settings
+
+`frontend/apps/dashboard/src/app/[locale]/dashboard/settings/appearance/page.tsx` loads the Zustand `preferencesStore`, displays personal theme and color controls, and saves through user settings endpoints. It generates preview CSS from form values and calls `syncBrandColorsToActiveTheme` after saving colors. The latter changes active site theme configuration through `src/lib/api/themeApi.ts`. The current behavior, validation, failure semantics, and existing stored values must be tested before separating scopes. `backend/internal/handler/http/user_settings_handler.go` applies user-scoped authorization and repositories enforce tenant-scoped access. The new tenant workspace settings page is not implemented.

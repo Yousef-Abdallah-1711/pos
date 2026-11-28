@@ -1,0 +1,19 @@
+# REL-023/024 accounting pool interruption (ALTER ROLE pos_accounting NOLOGIN + terminate backends) at 01:21:48
+ALTER ROLE
+2
+mark order 33 paid -> {"accounting_intent":"persisted","success":true} [200]
+mark salary 2 paid -> {"error":"Failed to start salary payment","success":false}
+ [500]
+salary 2 status after failed pay: pending|f  journals for salary: 1
+customer receipt during outage -> {"error":"pq: role \"pos_accounting\" is not permitted to log in","success":false}
+ [400]
+outbox for order 33: retryable attempts=1 err=pq: role "pos_accounting" is not permitted to log in
+pq: role "pos_acc
+journals for order: 0
+role restored 01:22:47
+outbox order 33 final: completed attempts=2 at 01:23:20
+journals for order 33: auto_sales,auto_cogs
+salary 2 pay after recovery -> {"success":true}
+ [200]
+payroll journals now: 2 (was 1)
+customer receipt after recovery -> 400 (invoice already paid: 400 expected)

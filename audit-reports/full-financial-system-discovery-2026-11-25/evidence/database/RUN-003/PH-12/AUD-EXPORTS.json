@@ -1,0 +1,126 @@
+{
+ "run": "RUN-003",
+ "kind": "API-DIAGNOSTIC",
+ "log": [
+  {
+   "id": "EXP-sales-csv-en",
+   "desc": "sales export",
+   "http": 200,
+   "ctype": "text/csv; charset=utf-8",
+   "disp": "attachment; filename=\"sales-report-2026-10-28-to-2026-11-26.csv\"",
+   "bytes": 908,
+   "apiTotal": 530893.4,
+   "totalInFile": false,
+   "bom": true,
+   "head": "﻿section,label_1,label_2,revenue,orders,quantity\r // summary,Total Revenue,,530893.40,56,\r // summary,Average Ticket,,9480.24,,\r"
+  },
+  {
+   "id": "EXP-sales-csv-ar",
+   "desc": "sales export",
+   "http": 200,
+   "ctype": "text/csv; charset=utf-8",
+   "disp": "attachment; filename=\"sales-report-2026-10-28-to-2026-11-26.csv\"",
+   "bytes": 1277,
+   "apiTotal": 530893.4,
+   "totalInFile": false,
+   "bom": true,
+   "head": "﻿القسم,التسمية_1,التسمية_2,الإيراد,الطلبات,الكمية\r // ملخص,إجمالي الإيراد,,530893.40,56,\r // ملخص,متوسط قيمة الطلب,,9480.24,,\r"
+  },
+  {
+   "id": "EXP-sales-pdf-en",
+   "desc": "sales export",
+   "http": 200,
+   "ctype": "application/pdf",
+   "disp": "attachment; filename=\"sales-report-summary-2026-10-28-to-2026-11-26.pdf\"",
+   "bytes": 17154,
+   "apiTotal": 530893.4,
+   "totalInFile": "pdf-not-parsed",
+   "pdfMagic": "%PDF-"
+  },
+  {
+   "id": "EXP-profitability-csv-en",
+   "desc": "profitability export",
+   "http": 200,
+   "ctype": "text/csv; charset=utf-8",
+   "disp": "attachment; filename=\"profitability-report-2026-10-28-to-2026-11-26.csv\"",
+   "bytes": 865,
+   "apiTotal": 482630.36,
+   "totalInFile": false,
+   "bom": true,
+   "head": "﻿section,product,quantity,revenue,cogs,gross_profit,gross_margin_pct,food_cost_pct,missing_cost_data\r // summary,TOTAL,,482630.36,193040.00,289590.36,60.00,40.00,\r // top_items,Audit Burger,48,480000."
+  },
+  {
+   "id": "EXP-profitability-csv-ar",
+   "desc": "profitability export",
+   "http": 200,
+   "ctype": "text/csv; charset=utf-8",
+   "disp": "attachment; filename=\"profitability-report-2026-10-28-to-2026-11-26.csv\"",
+   "bytes": 1104,
+   "apiTotal": 482630.36,
+   "totalInFile": false,
+   "bom": true,
+   "head": "﻿القسم,المنتج,الكمية,الإيراد,تكلفة_البضاعة_المباعة,الربح_الإجمالي,نسبة_الهامش_الإجمالي,نسبة_تكلفة_الطعام,بيانات_تكلفة_مفقودة\r // ملخص,الإجمالي,,482630.36,193040.00,289590.36,60.00,40.00,\r // أفضل_المن"
+  },
+  {
+   "id": "EXP-profitability-pdf-en",
+   "desc": "profitability export",
+   "http": 200,
+   "ctype": "application/pdf",
+   "disp": "attachment; filename=\"profitability-report-summary-2026-10-28-to-2026-11-26.pdf\"",
+   "bytes": 17840,
+   "apiTotal": 482630.36,
+   "totalInFile": "pdf-not-parsed",
+   "pdfMagic": "%PDF-"
+  },
+  {
+   "id": "EXP-inventory-csv-en",
+   "desc": "inventory export",
+   "http": 200,
+   "ctype": "text/csv; charset=utf-8",
+   "disp": "attachment; filename=\"inventory-report-2026-10-28-to-2026-11-26.csv\"",
+   "bytes": 343,
+   "apiTotal": 128480,
+   "totalInFile": false,
+   "bom": true,
+   "head": "﻿section,product,current_stock_qty,sold_qty,waste_qty,avg_inventory_value,estimated_cogs,monthly_turnover_ratio,is_slow_moving\r // summary,TOTAL,,,,128480.00,192880.00,1.67,\r // items,Audit Burger,32."
+  },
+  {
+   "id": "EXP-inventory-csv-ar",
+   "desc": "inventory export",
+   "http": 200,
+   "ctype": "text/csv; charset=utf-8",
+   "disp": "attachment; filename=\"inventory-report-2026-10-28-to-2026-11-26.csv\"",
+   "bytes": 518,
+   "apiTotal": 128480,
+   "totalInFile": false,
+   "bom": true,
+   "head": "﻿القسم,المنتج,كمية_المخزون_الحالي,الكمية_المباعة,كمية_الهدر,متوسط_قيمة_المخزون,تكلفة_تقديرية_للبضاعة_المباعة,معدل_الدوران_الشهري,بطيء_الحركة\r // ملخص,الإجمالي,,,,128480.00,192880.00,1.67,\r // العناصر,"
+  },
+  {
+   "id": "EXP-inventory-pdf-en",
+   "desc": "inventory export",
+   "http": 200,
+   "ctype": "application/pdf",
+   "disp": "attachment; filename=\"inventory-report-summary-2026-10-28-to-2026-11-26.pdf\"",
+   "bytes": 17469,
+   "apiTotal": 128480,
+   "totalInFile": "pdf-not-parsed",
+   "pdfMagic": "%PDF-"
+  },
+  {
+   "id": "EXP-unsupported",
+   "desc": "unsupported report type (financial statements)",
+   "http": 400,
+   "resp": "{\"error\":\"Unsupported report_type (expected sales, profitability, or inventory)\"}"
+  },
+  {
+   "id": "EXP-INV-PDF",
+   "desc": "customer invoice PDF",
+   "http": 200,
+   "ctype": "application/pdf",
+   "bytes": 1666,
+   "magic": "%PDF-",
+   "totalInDb": "1000.00"
+  }
+ ]
+}

@@ -1,0 +1,11 @@
+import { login, EV, DASH, netLog } from './lib.mjs';
+const [tag, email, name, uemail, phone] = process.argv.slice(2);
+const { b, ctx } = await login(email, tag);
+const p = await ctx.newPage(); const net = []; netLog(p, net);
+await p.goto(DASH + '/en/dashboard/settings/users', { waitUntil: 'networkidle' }); await p.waitForTimeout(2000);
+await p.click('button:has-text("Add New User")'); await p.waitForTimeout(800);
+await p.fill('input[placeholder="John Doe"]', name); await p.fill('input[placeholder="john@example.com"]', uemail); await p.fill('input[placeholder="+1 (555) 123-4567"]', phone); await p.fill('input[type=password]', 'AuditPass#2026A');
+await p.click('button:has-text("Create User")'); await p.waitForTimeout(3000);
+console.log(JSON.stringify(net.filter(x => x.m !== 'GET').map(x => `${x.m} ${x.u} ${x.s} req=${x.req.replace(/"password":"[^"]*"/,'').slice(0,200)} resp=${x.body.slice(0, 300)}`), null, 1));
+const rb = await p.locator(`tr:has-text("${uemail}") button`).evaluateAll(els => els.map(e => (e.innerText || e.title || e.getAttribute('aria-label') || '').trim())); console.log('ROW BTNS', JSON.stringify(rb));
+await b.close();

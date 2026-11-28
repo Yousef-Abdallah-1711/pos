@@ -1,0 +1,116 @@
+{
+ "run": "RUN-003",
+ "kind": "API-DIAGNOSTIC",
+ "log": [
+  {
+   "id": "ATT-01",
+   "desc": "attendance 09:00-19:30",
+   "http": 500,
+   "row": "{\"error\":\"Failed to create attendance record: pq: duplicate key value violates unique constraint \\\"unique_employee_attendance_date\\\"\",\"success\":false}",
+   "db": ""
+  },
+  {
+   "id": "ATT-02",
+   "desc": "clock_out before clock_in",
+   "http": 500,
+   "resp": "{\"error\":\"Failed to create attendance record: pq: duplicate key value violates unique constraint \\\"unique_employee_attendance_date\\\"\",\"success\":false}"
+  },
+  {
+   "id": "ATT-03",
+   "desc": "duplicate attendance same employee/day",
+   "http": 500,
+   "resp": "{\"error\":\"Failed to create attendance record: pq: duplicate key value violates unique constraint \\\"unique_employee_attendance_date\\\"\",\"success\":false}",
+   "rows": "1"
+  },
+  {
+   "id": "ATT-04",
+   "desc": "unknown employee id",
+   "http": 500,
+   "resp": "{\"error\":\"Failed to create attendance record: sql: no rows in result set\",\"success\":false}"
+  },
+  {
+   "id": "LEV-01",
+   "desc": "annual leave 30 days vs allowance 21",
+   "http": 500,
+   "resp": "{\"error\":\"Failed to create leave request: pq: Employee already has a leave request for overlapping dates\",\"success\":false}"
+  },
+  {
+   "id": "LEV-03",
+   "desc": "leave end before start",
+   "http": 500,
+   "resp": "{\"error\":\"Failed to create leave request: pq: Employee already has a leave request for overlapping dates\",\"success\":false}"
+  },
+  {
+   "id": "LEV-04",
+   "desc": "overlapping leave request",
+   "http": 500,
+   "resp": "{\"error\":\"Failed to create leave request: pq: Employee already has a leave request for overlapping dates\",\"success\":false}"
+  },
+  {
+   "id": "SAL-01",
+   "desc": "salary create: base 5000 + ot 10x50 + bonus 300 + allow 200 - tax 400 - ins 250 - other 100 (oracle gross 6000 net 5250)",
+   "http": 201,
+   "row": "500.00|5500.00|750.00|4750.00"
+  },
+  {
+   "id": "SAL-02",
+   "desc": "duplicate salary same employee/period",
+   "http": 500,
+   "resp": "{\"error\":\"Failed to create salary record: pq: duplicate key value violates unique constraint \\\"unique_employee_salary_period\\\"\",\"success\":false}",
+   "rows": "1"
+  },
+  {
+   "id": "SAL-03",
+   "desc": "pay period end before start",
+   "http": 500,
+   "resp": "{\"error\":\"Failed to create salary record: pq: new row for relation \\\"salaries\\\" violates check constraint \\\"valid_pay_period\\\"\",\"success\":false}"
+  },
+  {
+   "id": "SAL-04",
+   "desc": "negative base salary",
+   "http": 500,
+   "resp": "{\"error\":\"Failed to create salary record: pq: new row for relation \\\"salaries\\\" violates check constraint \\\"positive_amounts\\\"\",\"success\":false}"
+  },
+  {
+   "id": "SAL-05",
+   "desc": "mark-paid without approval",
+   "http": 200,
+   "resp": "{\"success\":true}",
+   "approved": "f",
+   "expenseDelta": 5500,
+   "cashDelta": -5250
+  },
+  {
+   "id": "SAL-06",
+   "desc": "mark-paid twice",
+   "http": 200,
+   "resp": "{\"success\":true}",
+   "expenseDeltaTotal": 5500
+  },
+  {
+   "id": "SAL-07",
+   "desc": "three concurrent mark-paid after paid",
+   "http": [
+    200,
+    200,
+    200
+   ]
+  },
+  {
+   "id": "SAL-08",
+   "desc": "3 concurrent mark-paid on a fresh salary (expect exactly one expense posting of net 5250)",
+   "http": [
+    200,
+    200,
+    200
+   ],
+   "expenseDelta": 5500,
+   "net": "5250.00"
+  },
+  {
+   "id": "HRC-X",
+   "desc": "HR cost report over 2027-01..06 after salaries",
+   "summary": "{\"estimated_insurance_cost\":0,\"labor_cost_pct_of_revenue\":0,\"overtime_cost\":1000,\"payroll_cost\":10500,\"revenue\":0,\"total_hr_cost\":10500}"
+  }
+ ]
+}

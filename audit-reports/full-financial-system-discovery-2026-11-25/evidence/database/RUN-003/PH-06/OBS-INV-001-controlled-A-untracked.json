@@ -1,0 +1,89 @@
+{
+ "run": "RUN-003",
+ "test": "OBS-INV-001-controlled",
+ "product_id": "3",
+ "orders": [
+  39,
+  40
+ ],
+ "log": [
+  {
+   "step": "create",
+   "status": 201,
+   "body": "{\"id\":3,\"tenant_id\":4,\"restaurant_id\":4,\"category_id\":1,\"name_en\":\"Audit Inv Probe A\",\"name_ar\":\"\",\"price\":100,\"cost\":40,\"is_vegetarian\":false,\"is_vegan\":false,\"is_spicy\":false,\"is_gluten_free\":false,\"is_available\":true,\"track_inventory\":false,\"quantity_in_stock\":20,\"low_stock_threshold\":0,\"reorder_"
+  },
+  {
+   "step": "S0 after create(20)",
+   "stock": "20",
+   "movementsByType": "adjustment:20.000",
+   "ledgerNetExcludingSaleRows": "20.000"
+  },
+  {
+   "step": "order qty3",
+   "status": 201,
+   "id": 39
+  },
+  {
+   "step": "S1 after order qty3 (unpaid)",
+   "stock": "20",
+   "movementsByType": "adjustment:20.000",
+   "ledgerNetExcludingSaleRows": "20.000"
+  },
+  {
+   "step": "pay o1",
+   "status": 200
+  },
+  {
+   "step": "S2 after paying o1",
+   "stock": "20",
+   "movementsByType": "adjustment:20.000",
+   "ledgerNetExcludingSaleRows": "20.000"
+  },
+  {
+   "step": "S3 after order qty2 (unpaid)",
+   "stock": "20",
+   "movementsByType": "adjustment:20.000",
+   "ledgerNetExcludingSaleRows": "20.000"
+  },
+  {
+   "step": "cancel o2",
+   "status": 200,
+   "body": "{\"success\":true}"
+  },
+  {
+   "step": "S4 after cancelling o2",
+   "stock": "20",
+   "movementsByType": "adjustment:20.000",
+   "ledgerNetExcludingSaleRows": "20.000"
+  },
+  {
+   "step": "waste -1",
+   "status": 404
+  },
+  {
+   "step": "S5 after waste -1",
+   "stock": "20",
+   "movementsByType": "adjustment:20.000",
+   "ledgerNetExcludingSaleRows": "20.000"
+  },
+  {
+   "step": "purchase +5",
+   "status": 404
+  },
+  {
+   "step": "S6 after purchase +5",
+   "stock": "20",
+   "movementsByType": "adjustment:20.000",
+   "ledgerNetExcludingSaleRows": "20.000"
+  }
+ ],
+ "journalsMentioningInventoryAdjust": "0",
+ "latestJournals": [
+  "JE-2026-00063 order 17:46:35",
+  "JE-2026-00062 order 17:46:35",
+  "JE-2026-00061 order 17:44:20",
+  "JE-2026-00060 order 17:44:20",
+  "JE-2026-00059 order 17:43:35",
+  "JE-2026-00058 order 17:43:35"
+ ]
+}

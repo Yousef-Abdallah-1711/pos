@@ -1,0 +1,13 @@
+# REL-022 DB interruption (persistent volume) 01:23:31; before orders/journals/gl/outbox=33/53/115/15
+postgres stopped
+health -> {"db_healthy":false,"db_status":"driver: bad connection","status":"degraded","uptime_sec":1501}
+ [200]
+order create during outage -> {"error":{"code":"TENANT_ACCESS_BLOCKED","details":{"contact_support":true,"support_email":"support@pos-saas.com"},"message":"Unable to verify access","reason":
+authenticated GET during outage -> 403 3.338524s
+api container after restart with DB down: Up 25 seconds (health: starting)
+postgres back: healthy 01:24:10
+api after DB back: healthy 01:24:33
+data after: orders/journals/gl/outbox=33/53/115/15 (before 33/53/115/15)
+authenticated GET after recovery -> 200
+order create after recovery -> 201
+pg_stat roles: pos_accounting=1 pos_app=2 postgres=1 

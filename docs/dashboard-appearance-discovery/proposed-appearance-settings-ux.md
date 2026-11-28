@@ -1,0 +1,13 @@
+# Proposed workspace appearance UX (future; not implemented)
+
+Settings → Workspace appearance should show the active preset and revision, then sections for light/dark brand and surface colors, locale-specific body and heading fonts, bounded text scale, line height, shape and density. Preview actual shared buttons, input, table, sidebar, dialog and status components inside a scoped container. Show explicit contrast feedback and preserve non-color status cues. Expose save/publish, discard and reset only to authorized users; personal mode remains a separate preference. Handle loading, invalid input, server errors, stale revision, pending changes, keyboard access, focus return, RTL and narrow screens. The preview must not mutate storefront or other users' active settings.
+
+## Proposed user flow
+
+1. **View.** Load the current tenant identity, published revision, active defaults and explicit override indicators. Non-admin users may see the published summary if policy allows, but have no editable controls. On a read failure show a clear retry state and do not present an empty form as saved configuration.
+2. **Edit.** Authorized staff choose a built-in preset or adjust supported fields. Each control has a localized label, current value, validation text and a reset-to-default action. Font choices come from a bundled allowlist; numeric controls show permitted bounds. Invalid values remain local and block publish.
+3. **Preview.** Show the same sample sidebar, table, form, status and dialog components in a bounded local preview. Offer EN/AR and light/dark preview controls without changing the user's personal mode or anyone else's published appearance. Display both text/background contrast and non-color state cues, with an accessible explanation if a combination fails.
+4. **Publish.** Review changed values and scope before saving. Send the current revision with validated overrides, disable duplicate submission, and show success only after the server confirms the new revision. A failed request keeps the draft and offers retry; no cross-app theme synchronization happens implicitly.
+5. **Recover.** If another administrator has published a newer revision, explain the conflict, show current and draft values, and provide reload or an explicit reapply/review path. Discard restores the latest published configuration. Reset is a distinct confirmed action that restores platform defaults for this workspace only, with revision checking and an audit record. Warn before navigation with unsaved changes.
+
+The exact entry point, field set, permission and visual layout require stakeholder and accessibility review. No screenshot or implementation in this package should be interpreted as a completed settings UI.

@@ -1,0 +1,25 @@
+{
+ "run": "RUN-003",
+ "test": "AUD-POS-002",
+ "overlayElementsHidden": 1,
+ "ui": [
+  "$100.00",
+  "$100.00",
+  "$10,000.00",
+  "$10,000.00",
+  "$20,000.00",
+  "Customer phone",
+  "Payment method",
+  "Cash",
+  "Card",
+  "Wallet",
+  "Order notes",
+  "Subtotal",
+  "$20,000.00",
+  "Tax (14%)",
+  "$2,800.00",
+  "Total",
+  "$22,800.00",
+  "Place Order (2)"
+ ]
+}

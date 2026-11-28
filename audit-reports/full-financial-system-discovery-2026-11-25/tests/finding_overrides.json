@@ -1,0 +1,85 @@
+{
+  "F-001": {
+    "design": "Proposed: perform tenant accounting bootstrap inside the same transaction as registration (backend/internal/repository/auth_repo.go CreateTenantWithUserContext, before commit): insert the default chart of accounts (62 accounts as in backend/migrations/156_seed_chart_of_accounts.sql), the six auto_posting_rules (152_create_auto_posting_rules.sql), the current fiscal_period and a default tax configuration for the new tenant+restaurant. Extract the seed into one reusable function (proposed backend/internal/repository/accounting_bootstrap.go) so a repair command can re-run it idempotently for existing tenants (2 and 3 in the audit database).",
+    "alternatives": "A: seed in the registration transaction (recommended, atomic). B: lazy bootstrap on first accounting request (hides failures until first sale; rejected because the first paid order already failed in the audit). C: background job after registration (non-atomic; leaves a window with no books).",
+    "acceptance": ["A tenant registered through the UI (POST /auth/register 201) has chart_of_accounts >= 62, auto_posting_rules = 6, fiscal_periods >= 1 and tax configuration without any manual step.", "First POS cash order paid by that tenant produces its sales and COGS journals within 10 s (outbox completed, attempts = 1).", "Registering 20 tenants concurrently leaves each with exactly one bootstrap set (no duplicates, no cross-tenant rows).", "Re-running the repair function on an already seeded tenant changes nothing."],
+    "proposed_files": ["backend/internal/repository/accounting_bootstrap.go (new)", "backend/internal/repository/accounting_bootstrap_integration_test.go (new)", "backend/migrations/<next>_backfill_tenant_accounting_bootstrap.sql (optional backfill for unseeded tenants)"],
+    "api": ["POST /api/v1/auth/register response unchanged; no new endpoint required"],
+    "financial_notes": "Until fixed every tenant that sells before manual seeding accumulates failing outbox events; revenue is absent from the books for the duration (32 minutes in the original reproduction).",
+    "policy": "Decide the default chart of accounts and tax rate for new tenants (POL-02, POL-05, POL-11 in 56)."
+  },
+  "F-003": {
+    "design": "Proposed: rewrite GenerateCashFlow (backend/internal/usecase/financial_report_usecase.go:366-399) as an indirect-method statement derived from the GL: net income + non-cash items +/- change in working-capital accounts (1120, 1130, 1150, 2101, 2120, others by account range) = operating; asset account movements (12xx) with the correct sign = investing; equity and long-term liability movements (3xxx, 22xx) = financing; closing check: opening cash + net change = closing balance of cash accounts (1110, 1111, 1112, 1113 per policy POL-04). Return the reconciliation line so a mismatch is visible instead of silent.",
+    "alternatives": "A: indirect method from GL account ranges (recommended). B: direct method from cash/bank account movements grouped by counter-account. C: keep formula and rename the report 'profit and capital summary' (does not solve the defect).",
+    "acceptance": ["For the clean-tenant month dataset (evidence PH-14) the report net change equals the GL cash change 74,480.00 exactly.", "Posting a 20,000 asset purchase (Dr 1250 / Cr 1110) reduces net cash flow by 20,000 and shows investing -20,000.", "The report includes closing-balance reconciliation with difference 0.00; a deliberately inconsistent dataset shows a non-zero difference."],
+    "proposed_files": ["backend/internal/usecase/financial_report_usecase_cashflow_test.go (new)"],
+    "api": ["GET /api/v1/reports/financial/cash-flow: add fields opening_cash, closing_cash, reconciliation_difference, working_capital_lines[] additively"],
+    "financial_notes": "Measured residuals: 32,300.00 earlier, 107,300.00 on the busy tenant, 5,190.00 on the clean tenant; all equal the omitted working-capital terms listed in evidence AUD-CF-TRACE.txt and AUD-MONTH.json.",
+    "policy": "POL-04 (method and classification) in 56."
+  },
+  "F-006": {
+    "design": "Proposed: in PaymentAccountingRepository.CreatePaymentReceived (backend/internal/repository/payment_acct_repo.go:29) lock the invoice row with SELECT ... FOR UPDATE inside the same transaction (mirror payment_acct_repo.go:499-503 for suppliers), compare amount with the locked balance_due and reject with a 409 'payment amount exceeds invoice balance'; make applyCustomerInvoicePaymentTx (:569-582) conditional (UPDATE ... WHERE balance_due >= amount) and check RowsAffected; remove the silent GREATEST clamp. Add a CHECK (amount_paid <= total_amount) as a safety net after the data pre-check.",
+    "alternatives": "A: row lock + conditional update (recommended). B: serializable transaction with retry (heavier). C: accept the overpayment as customer credit (needs policy POL-10 and a credit account).",
+    "acceptance": ["5 parallel receipts of 1,000 on a 2,000 balance: exactly 2 return 201, 3 return 409; invoice amount_paid = 2,000 and balance 0.", "GL 1120 for the invoice equals invoice total minus receipts (no negative AR).", "Sequential overpayment still returns 400/409 and creates no receipt."],
+    "proposed_files": ["backend/internal/repository/payment_acct_repo_concurrency_integration_test.go (new)"],
+    "depends": "F-052 (idempotency) can be implemented independently; both touch payment_acct_repo.go so schedule together.",
+    "financial_notes": "Evidence of over-collection: tenant 4 invoice 2 (7,000 on 5,200 -> AR residual 1,800) and fresh invoice 4 (6,000 on 3,000)."
+  },
+  "F-052": {
+    "design": "Proposed: add an idempotency layer for money-creating POST endpoints (receipts, supplier payments, journal create/post, orders, imports): table idempotency_keys(tenant_id, key, endpoint, request_hash, response_status, response_body, created_at) with a unique (tenant_id, key, endpoint); middleware reads the Idempotency-Key header already advertised by CORS, replays the stored response for an identical key+hash, returns 422 when the key is reused with a different body, and requires the key on the listed endpoints. Reuse the idempotent pattern already present in order_cancellation_handler.go:36.",
+    "alternatives": "A: generic middleware + table (recommended). B: per-endpoint natural keys (reference numbers) - weaker for payments with free-text references. C: client-side double-submit prevention only (not sufficient for retries).",
+    "acceptance": ["Two identical POST /accounting/payments/received with the same key create exactly one payment and return the same body/ids.", "Same key with a different amount returns 422 and creates nothing.", "Concurrent duplicates (10 parallel, same key) create exactly one payment."],
+    "proposed_files": ["backend/internal/middleware/idempotency.go (new)", "backend/migrations/<next>_create_idempotency_keys.sql (new)"],
+    "api": ["All money-creating POSTs: header Idempotency-Key (UUID) required; documented in 08-api-inventory.csv"]
+  },
+  "F-049": {
+    "design": "Proposed: introduce a refund/void workflow as a first-class use case: new table order_refunds(order_id, amount, reason, status, journal_entry_id, created_by), endpoint POST /admin/orders/{id}/refunds (full and partial, idempotent), allowed payment-status transition paid -> refunded (update domain/order.go:215-240), reversing journals generated by the posting engine (Dr 4100 revenue, Dr 2120 VAT, Cr tender account; and Dr 1130 / Cr 5110 when goods are returned to stock), stock return through inventory movement, KDS removal, permission FINANCIAL refund WRITE, and an audit log row.",
+    "alternatives": "A: dedicated refund entity with reversing journals (recommended). B: negative orders (credit-note style) - simpler schema, harder reporting. C: manual journal only (current workaround, not controllable).",
+    "acceptance": ["Full refund of a paid cash order: revenue, VAT, COGS and cash return to pre-sale values; order shows refunded; stock restored when flagged.", "Partial refund of one line reverses only that line's revenue/VAT/COGS.", "Refund endpoint retried with the same key creates one refund; refund above paid amount is rejected."],
+    "proposed_files": ["backend/migrations/<next>_create_order_refunds.sql (new)", "backend/internal/usecase/order_refund_usecase.go (new)", "backend/internal/handler/http/order_refund_handler.go (new)"],
+    "api": ["POST /api/v1/admin/orders/{id}/refunds (new)", "GET /api/v1/admin/orders/{id}/refunds (new)"],
+    "policy": "POL-06 and POL-07 in 56 (tender-specific reversal, restock, period of the reversal)."
+  },
+  "F-007": {
+    "design": "Proposed: change the line trigger recalculate_invoice_customer_line_total (backend/migrations/141_create_invoices_customer.sql:79-83) so that tax_amount = ROUND((quantity*unit_price - discount_amount) * tax_rate/100, 2) with discount_amount computed first; deliver as a new migration that replaces the function (never edit the applied migration) and recalculates draft invoices only; posted invoices are corrected through reversing journals approved by the accountant. Make the frontend InvoiceForm use the same formula or display the server preview.",
+    "alternatives": "A: fix the trigger (recommended, covers every writer). B: fix only the application layer (leaves direct SQL and imports wrong). C: switch to tax-inclusive pricing (policy change).",
+    "acceptance": ["Line 5,000 with 10% discount and 14% VAT stores tax 630.00 and total 5,130.00; UI preview equals stored values.", "Existing posted invoices are unchanged; an exception report lists invoices whose tax differs from the discount-first calculation.", "Customer and supplier triggers produce identical results for identical inputs (see F-041)."],
+    "proposed_files": ["backend/migrations/<next>_fix_invoice_line_tax_discount_order.sql (new)"],
+    "policy": "POL-02 in 56."
+  },
+  "F-041": {
+    "design": "Proposed: same trigger correction for backend/migrations/142_create_invoices_supplier.sql:75-79 as F-007, delivered in the same new migration; add a regression test comparing both triggers with the oracle (gross 10,000, discount 10%, tax 14% -> tax 1,260, total 10,260).",
+    "acceptance": ["Supplier invoice 10 x 1,000, discount 10%, tax 14% stores tax 1,260.00 total 10,260.00; JE debits 5110 9,000 and 1150 1,260; AP credit 10,260.", "Input VAT in the VAT report equals GL 1150 for the dataset."],
+    "depends": "F-007 (shared migration); POL-02."
+  },
+  "F-002": {
+    "design": "Proposed: in the balance-sheet query (backend/internal/usecase/financial_report_usecase.go:285-306) add a computed equity line 'Current period earnings' = SUM(revenue) - SUM(expense) up to the as-of date (and prior-year retained earnings when a closed fiscal year exists), include it in total_equity and in the equation check; keep account-level rows unchanged.",
+    "acceptance": ["Clean-tenant month: equation_balanced = true and equation_difference = 0.00 (currently -27,710.00).", "Trial balance and balance sheet agree for every as-of date in the dataset."],
+    "policy": "Retained-earnings and year-end closing treatment (POL-05)."
+  },
+  "F-010": {
+    "design": "Proposed: derive the VAT report from the GL (credits to 2120 / debits to 1150 within the period, net of reversals) rather than from invoice tables (backend/internal/repository/tax_repo.go:260-291), and keep an invoice-level drill-down. This includes POS/online order VAT and excludes draft documents once F-008 is fixed.",
+    "acceptance": ["Output VAT in the report equals GL 2120 credit movement for the window (30,880 vs 1,820 in the audit dataset before the fix).", "Input VAT equals GL 1150 debit movement.", "Net VAT equals output minus input."],
+    "policy": "POL-02."
+  },
+  "F-011": {
+    "design": "Proposed: choose perpetual inventory (POL-03): opening stock creates Dr 1130 / Cr opening-balance equity journal; supplier invoice lines for inventory items debit 1130 (not 5110) and increase product stock through an inventory movement; COGS relieves 1130 at weighted-average cost; the valuation report reads GL 1130 and reconciles to quantity x cost with the difference displayed.",
+    "acceptance": ["After opening stock 48 x 4,000 and purchases, GL 1130 equals SUM(quantity_in_stock x average cost) within 0.01.", "Inventory valuation report shows GL balance and a reconciliation difference of 0.00."],
+    "policy": "POL-03."
+  },
+  "F-013": {
+    "design": "Proposed: add fiscal-period endpoints (list/create/close/reopen) and enforce an open period in ensureFiscalPeriodOpenTx (backend/internal/repository/journal_entry_repo.go:813-842): reject posting when no period exists for the entry date (instead of returning nil), apply the same check to voids and draft creation, and require an accountant-level permission for close/reopen with an audit log.",
+    "acceptance": ["POST journal dated 2019-01-15 or 2030-06-01 without a period returns 4xx.", "After closing 2026-11, posting, voiding and creating drafts dated in November are rejected; reopening permits them.", "GET /accounting/fiscal-periods returns the periods (currently 404)."],
+    "api": ["GET/POST /api/v1/accounting/fiscal-periods (new)", "POST /api/v1/accounting/fiscal-periods/{id}/close and /reopen (new)"],
+    "policy": "POL-05."
+  },
+  "F-014": {
+    "design": "Proposed: align the EmployeeForm payload with the backend contract (frontend/apps/dashboard/src/components/hr/EmployeeForm.tsx:76-77 vs backend/internal/handler/http/hr_employee_handler.go:139-150) and make the handler return 400 with the offending field instead of a 500 with raw database text; add a contract test that posts the form's actual payload.",
+    "acceptance": ["Creating an employee through the real UI in headed Chrome returns 201 and the employee appears in the list.", "Invalid payloads return 400 naming the field; no raw DB error text in any response."]
+  },
+  "F-040": {
+    "design": "Proposed: remove the track_inventory guard at backend/internal/usecase/auto_posting_engine.go:173 for COGS (post cost-of-goods for any sold item with a cost, relieving 1130 only when tracked, otherwise a configurable 'cost of non-stocked items' account), default track_inventory to true in the product form or make its effect explicit, and align the profitability report with the GL.",
+    "acceptance": ["Order of an untracked product with cost 40 x 3 posts COGS 120 to the configured account; Profitability COGS equals GL COGS for the period."],
+    "policy": "POL-03."
+  }
+}

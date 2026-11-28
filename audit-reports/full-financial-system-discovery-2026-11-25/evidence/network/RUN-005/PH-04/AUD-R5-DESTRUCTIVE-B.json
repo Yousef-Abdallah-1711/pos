@@ -1,0 +1,46 @@
+{
+ "run": "RUN-005",
+ "tag": "000R5B66083",
+ "tenant": 4,
+ "log": [
+  {
+   "id": "B4",
+   "what": "delete a disposable contract",
+   "error": "Command failed: docker exec pos-p2a-ws05-e2e-postgres-1 psql -U postgres -d pos_phase2a_e2e -Atc \"select count(*) from employment_contracts "
+  },
+  {
+   "id": "B12",
+   "what": "delete a disposable user",
+   "fixture": {
+    "id": "27",
+    "name": "000R5B66083 user",
+    "http": 200
+   },
+   "before": "1|status=active",
+   "row_found": true,
+   "control_found": true,
+   "control_disabled": false,
+   "control_label": "Delete user",
+   "dialog": "",
+   "calls": [],
+   "after": "1|status=active"
+  },
+  {
+   "id": "B13",
+   "what": "delete a disposable role",
+   "fixture": {
+    "id": "51",
+    "name": "000R5B66083 role",
+    "http": 201
+   },
+   "before": "1",
+   "row_found": true,
+   "control_found": true,
+   "control_disabled": false,
+   "control_label": "Delete",
+   "dialog": "",
+   "calls": [],
+   "after": "1"
+  }
+ ]
+}

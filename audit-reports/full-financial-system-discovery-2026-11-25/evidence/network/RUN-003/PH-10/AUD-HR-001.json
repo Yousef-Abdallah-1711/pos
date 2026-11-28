@@ -1,0 +1,23 @@
+{
+  "run": "RUN-003",
+  "test": "AUD-HR-001",
+  "finding": "F-014",
+  "tenant": 4,
+  "role": "owner",
+  "calls": [
+    {
+      "method": "POST",
+      "url": "/auth/login",
+      "status": 200,
+      "request": "{\"email\":\"audit.c.owner@example.test\",\"password\":\"AuditPass#2026A\"}",
+      "response": ""
+    },
+    {
+      "method": "POST",
+      "url": "/hr/employees",
+      "status": 500,
+      "request": "{\"first_name\":\"Headed\",\"first_name_ar\":\"\",\"last_name\":\"Repro\",\"last_name_ar\":\"\",\"email\":\"headed.repro@example.test\",\"phone\":\"+201000000199\",\"employee_code\":\"\",\"position\":\"Chef\",\"position_ar\":\"\",\"department\":\"Kitchen\",\"department_ar\":\"\",\"hire_date\":\"2026-11-01T00:00:00.000Z\",\"status\":\"active\",\"employment_type\":\"full_time\",\"salary_currency\":\"EGP\",\"monthly_salary\":9000,\"weekly_hours\":40,\"address\":\"\",\"address_ar\":\"\",\"city\":\"\",\"country\":\"\",\"emergency_contact_name\":\"\",\"emergency_contact_phone\":\"\",\"is_active\":true}",
+      "response": "{\"error\":\"Failed to create employee: pq: new row for relation \\\"employees\\\" violates check constraint \\\"positive_working_hours\\\"\",\"success\":false}\n"
+    }
+  ]
+}

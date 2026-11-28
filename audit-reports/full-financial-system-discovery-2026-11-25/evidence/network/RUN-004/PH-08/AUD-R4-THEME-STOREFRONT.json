@@ -1,0 +1,30 @@
+{
+ "run": "RUN-004",
+ "log": [
+  {
+   "k": "A1",
+   "desc": "active themes",
+   "active": "11:false 4:false 13:true"
+  },
+  {
+   "k": "A2",
+   "desc": "storefront applied theme",
+   "vars": {
+    "--primary": "221 83% 53%",
+    "--theme-primary": "221 83% 53%",
+    "--color-primary": "",
+    "--primary-color": "",
+    "--brand": ""
+   },
+   "sheets": 3,
+   "mentionsFF0000": false,
+   "title": "Restaurant | Order Online",
+   "len": 320
+  },
+  {
+   "k": "R1",
+   "desc": "restored",
+   "active": "11:false 4:true 13:false"
+  }
+ ]
+}

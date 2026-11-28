@@ -1,0 +1,318 @@
+{
+  "result": {
+    "browserVersion": "150.0.7871.124",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36",
+    "headed": true,
+    "finalUrl": "http://localhost:13112/en/dashboard/reports/financial",
+    "apiCalls": 60,
+    "failedCalls": [
+      {
+        "method": "GET",
+        "url": "/auth/session",
+        "status": 401
+      }
+    ]
+  },
+  "calls": [
+    {
+      "method": "GET",
+      "url": "/auth/session",
+      "status": 401
+    },
+    {
+      "method": "POST",
+      "url": "/auth/login",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/auth/session",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/auth/session",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/users/4/settings",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/users/4/settings",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/rbac/me/permissions",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/rbac/check-permission?moduleId=8&permissionLevel=READ",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/rbac/check-permission?moduleId=10&permissionLevel=READ",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/rbac/check-permission?moduleId=1&permissionLevel=READ",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/rbac/check-permission?moduleId=2&permissionLevel=READ",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/rbac/check-permission?moduleId=3&permissionLevel=READ",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/rbac/check-permission?moduleId=14&permissionLevel=READ",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/rbac/check-permission?moduleId=13&permissionLevel=READ",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/rbac/check-permission?moduleId=10&permissionLevel=WRITE",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/admin/orders?page=1&page_size=5",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/admin/orders?page=1&page_size=1&status=pending",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/products?page=1&page_size=1",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/admin/drivers",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/categories",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/notifications/unread-count",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/notifications/stats",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/notifications?limit=5",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/tenant/status",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/notifications?",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/hr/employees",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/rbac/check-permission?moduleId=8&permissionLevel=READ",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/rbac/me/permissions",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/rbac/check-permission?moduleId=10&permissionLevel=READ",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/rbac/check-permission?moduleId=1&permissionLevel=READ",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/rbac/check-permission?moduleId=2&permissionLevel=READ",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/rbac/check-permission?moduleId=3&permissionLevel=READ",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/rbac/check-permission?moduleId=13&permissionLevel=READ",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/rbac/check-permission?moduleId=14&permissionLevel=READ",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/rbac/check-permission?moduleId=10&permissionLevel=WRITE",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/categories",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/products?page=1&page_size=1",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/admin/drivers",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/hr/employees",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/admin/orders?page=1&page_size=5",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/admin/orders?page=1&page_size=1&status=pending",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/categories",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/admin/orders?page=1&page_size=1&status=pending",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/hr/employees",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/products?page=1&page_size=1",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/tenant/status",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/tables/stats",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/admin/orders?page=1&page_size=5",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/notifications/stats",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/admin/drivers",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/auth/session",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/rbac/me/permissions",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/tenant/status",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/notifications?",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/notifications/stats",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/rbac/me/permissions",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/notifications?limit=5",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/notifications/unread-count",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/accounting/tax/vat-report?date_from=2026-10-28&date_to=2026-11-26",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/accounting/tax/vat-report?date_from=2026-10-28&date_to=2026-11-26",
+      "status": 200
+    }
+  ]
+}

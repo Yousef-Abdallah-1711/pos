@@ -1,0 +1,1083 @@
+exec_id,type,subject,role,result,detail
+EX-PG-dash-owner-001,PAGE-LOAD,/,owner,PASS,status=200 marker=OK inputs=2 buttons=13 tables=0 apiFail=0 pageErrors=0
+EX-PG-dash-owner-002,PAGE-LOAD,/[locale],owner,PASS,status=200 marker=OK inputs=2 buttons=13 tables=0 apiFail=0 pageErrors=0
+EX-PG-dash-owner-003,PAGE-LOAD,/[locale]/auth/callback,owner,PASS,status=200 marker=OK inputs=0 buttons=28 tables=0 apiFail=0 pageErrors=0
+EX-PG-dash-owner-004,PAGE-LOAD,/[locale]/auth/super-admin-login,owner,PASS,status=200 marker=OK inputs=0 buttons=28 tables=0 apiFail=0 pageErrors=0
+EX-PG-dash-owner-005,PAGE-LOAD,/[locale]/dashboard,owner,PASS,status=200 marker=OK inputs=0 buttons=28 tables=0 apiFail=0 pageErrors=0
+EX-PG-dash-owner-006,PAGE-LOAD,/[locale]/dashboard/accounting/advanced,owner,PASS,status=200 marker=OK inputs=21 buttons=22 tables=0 apiFail=0 pageErrors=0
+EX-PG-dash-owner-007,PAGE-LOAD,/[locale]/dashboard/accounting/bank-accounts,owner,PASS,status=200 marker=OK inputs=0 buttons=14 tables=0 apiFail=0 pageErrors=0
+EX-PG-dash-owner-008,PAGE-LOAD,/[locale]/dashboard/accounting/chart-of-accounts,owner,PASS,status=200 marker=OK inputs=2 buttons=74 tables=0 apiFail=0 pageErrors=0
+EX-PG-dash-owner-009,PAGE-LOAD,/[locale]/dashboard/accounting/customer-invoices,owner,PASS,status=200 marker=OK inputs=2 buttons=18 tables=1 apiFail=0 pageErrors=0
+EX-PG-dash-owner-010,PAGE-LOAD,/[locale]/dashboard/accounting/customers,owner,PASS,status=200 marker=OK inputs=1 buttons=17 tables=1 apiFail=0 pageErrors=0
+EX-PG-dash-owner-011,PAGE-LOAD,/[locale]/dashboard/accounting/general-ledger,owner,PASS,status=200 marker=OK inputs=2 buttons=17 tables=1 apiFail=0 pageErrors=0
+EX-PG-dash-owner-012,PAGE-LOAD,/[locale]/dashboard/accounting/journal-entries,owner,PASS,status=200 marker=OK inputs=4 buttons=14 tables=1 apiFail=0 pageErrors=0
+EX-PG-dash-owner-013,PAGE-LOAD,/[locale]/dashboard/accounting/journal-entries/[id],owner,PASS,status=200 marker=OK inputs=0 buttons=14 tables=1 apiFail=0 pageErrors=0
+EX-PG-dash-owner-014,PAGE-LOAD,/[locale]/dashboard/accounting/supplier-invoices,owner,PASS,status=200 marker=OK inputs=2 buttons=18 tables=1 apiFail=0 pageErrors=0
+EX-PG-dash-owner-015,PAGE-LOAD,/[locale]/dashboard/accounting/suppliers,owner,PASS,status=200 marker=OK inputs=2 buttons=18 tables=1 apiFail=0 pageErrors=0
+EX-PG-dash-owner-016,PAGE-LOAD,/[locale]/dashboard/categories,owner,PASS,status=200 marker=OK inputs=0 buttons=14 tables=1 apiFail=0 pageErrors=0
+EX-PG-dash-owner-017,PAGE-LOAD,/[locale]/dashboard/categories/[id]/edit,owner,PASS (expected not-found handling for id=1),status=200 marker=ERROR_TEXT inputs=0 buttons=14 tables=1 apiFail=2 pageErrors=0
+EX-PG-dash-owner-018,PAGE-LOAD,/[locale]/dashboard/categories/new,owner,PASS,status=200 marker=OK inputs=6 buttons=16 tables=0 apiFail=0 pageErrors=0
+EX-PG-dash-owner-019,PAGE-LOAD,/[locale]/dashboard/drivers,owner,PASS,status=200 marker=OK inputs=0 buttons=17 tables=0 apiFail=0 pageErrors=0
+EX-PG-dash-owner-020,PAGE-LOAD,/[locale]/dashboard/drivers/[id],owner,PASS (expected not-found handling for id=1),status=200 marker=ERROR_TEXT inputs=0 buttons=17 tables=0 apiFail=2 pageErrors=0
+EX-PG-dash-owner-021,PAGE-LOAD,/[locale]/dashboard/drivers/new,owner,PASS,status=200 marker=OK inputs=13 buttons=16 tables=0 apiFail=0 pageErrors=0
+EX-PG-dash-owner-022,PAGE-LOAD,/[locale]/dashboard/hr/attendance,owner,PASS,status=200 marker=OK inputs=2 buttons=14 tables=0 apiFail=0 pageErrors=0
+EX-PG-dash-owner-023,PAGE-LOAD,/[locale]/dashboard/hr/contracts,owner,PASS,status=200 marker=OK inputs=0 buttons=14 tables=1 apiFail=0 pageErrors=0
+EX-PG-dash-owner-024,PAGE-LOAD,/[locale]/dashboard/hr/employees,owner,PASS,status=200 marker=OK inputs=1 buttons=18 tables=1 apiFail=0 pageErrors=0
+EX-PG-dash-owner-025,PAGE-LOAD,/[locale]/dashboard/hr/insurance,owner,PASS,status=200 marker=OK inputs=0 buttons=14 tables=1 apiFail=0 pageErrors=0
+EX-PG-dash-owner-026,PAGE-LOAD,/[locale]/dashboard/hr/leaves,owner,PASS,status=200 marker=OK inputs=2 buttons=14 tables=0 apiFail=0 pageErrors=0
+EX-PG-dash-owner-027,PAGE-LOAD,/[locale]/dashboard/hr/payroll,owner,PASS,status=200 marker=OK inputs=2 buttons=14 tables=0 apiFail=0 pageErrors=0
+EX-PG-dash-owner-028,PAGE-LOAD,/[locale]/dashboard/hr/performance,owner,PASS,status=200 marker=OK inputs=0 buttons=14 tables=1 apiFail=0 pageErrors=0
+EX-PG-dash-owner-029,PAGE-LOAD,/[locale]/dashboard/hr/resignations,owner,PASS,status=200 marker=OK inputs=3 buttons=14 tables=0 apiFail=0 pageErrors=0
+EX-PG-dash-owner-030,PAGE-LOAD,/[locale]/dashboard/hr/training,owner,PASS,status=200 marker=OK inputs=0 buttons=14 tables=1 apiFail=0 pageErrors=0
+EX-PG-dash-owner-031,PAGE-LOAD,/[locale]/dashboard/inventory,owner,PASS,status=200 marker=OK inputs=0 buttons=14 tables=1 apiFail=0 pageErrors=0
+EX-PG-dash-owner-032,PAGE-LOAD,/[locale]/dashboard/kds,owner,PASS,status=200 marker=OK inputs=0 buttons=19 tables=0 apiFail=0 pageErrors=0
+EX-PG-dash-owner-033,PAGE-LOAD,/[locale]/dashboard/kds/settings,owner,PASS,status=200 marker=OK inputs=6 buttons=15 tables=0 apiFail=0 pageErrors=0
+EX-PG-dash-owner-034,PAGE-LOAD,/[locale]/dashboard/notifications,owner,PASS,status=200 marker=OK inputs=4 buttons=13 tables=0 apiFail=0 pageErrors=0
+EX-PG-dash-owner-035,PAGE-LOAD,/[locale]/dashboard/orders,owner,PASS,status=200 marker=OK inputs=4 buttons=47 tables=1 apiFail=0 pageErrors=0
+EX-PG-dash-owner-036,PAGE-LOAD,/[locale]/dashboard/orders/[id],owner,PASS,status=200 marker=OK inputs=0 buttons=13 tables=0 apiFail=5 pageErrors=0
+EX-PG-dash-owner-037,PAGE-LOAD,/[locale]/dashboard/pos,owner,PASS,status=200 marker=OK inputs=1 buttons=10 tables=0 apiFail=0 pageErrors=0
+EX-PG-dash-owner-038,PAGE-LOAD,/[locale]/dashboard/pos/settings,owner,PASS,status=200 marker=OK inputs=4 buttons=18 tables=0 apiFail=0 pageErrors=0
+EX-PG-dash-owner-039,PAGE-LOAD,/[locale]/dashboard/products,owner,PASS,status=200 marker=OK inputs=1 buttons=17 tables=1 apiFail=0 pageErrors=0
+EX-PG-dash-owner-040,PAGE-LOAD,/[locale]/dashboard/products/[id]/edit,owner,PASS (expected not-found handling for id=1),status=200 marker=ERROR_TEXT inputs=1 buttons=17 tables=1 apiFail=2 pageErrors=0
+EX-PG-dash-owner-041,PAGE-LOAD,/[locale]/dashboard/products/new,owner,PASS,status=200 marker=OK inputs=18 buttons=23 tables=0 apiFail=0 pageErrors=0
+EX-PG-dash-owner-042,PAGE-LOAD,/[locale]/dashboard/rbac/roles,owner,PASS,status=200 marker=OK inputs=0 buttons=14 tables=0 apiFail=0 pageErrors=0
+EX-PG-dash-owner-043,PAGE-LOAD,/[locale]/dashboard/reports,owner,PASS,status=200 marker=OK inputs=0 buttons=13 tables=0 apiFail=0 pageErrors=0
+EX-PG-dash-owner-044,PAGE-LOAD,/[locale]/dashboard/reports/financial,owner,PASS,status=200 marker=OK inputs=0 buttons=13 tables=0 apiFail=0 pageErrors=0
+EX-PG-dash-owner-045,PAGE-LOAD,/[locale]/dashboard/reports/financial/advanced,owner,PASS,status=200 marker=OK inputs=2 buttons=16 tables=0 apiFail=0 pageErrors=0
+EX-PG-dash-owner-046,PAGE-LOAD,/[locale]/dashboard/reports/financial/balance-sheet,owner,PASS,status=200 marker=OK inputs=1 buttons=14 tables=3 apiFail=0 pageErrors=0
+EX-PG-dash-owner-047,PAGE-LOAD,/[locale]/dashboard/reports/financial/cash-flow,owner,PASS,status=200 marker=OK inputs=2 buttons=15 tables=0 apiFail=0 pageErrors=0
+EX-PG-dash-owner-048,PAGE-LOAD,/[locale]/dashboard/reports/financial/inventory-valuation,owner,PASS,status=200 marker=OK inputs=1 buttons=15 tables=1 apiFail=0 pageErrors=0
+EX-PG-dash-owner-049,PAGE-LOAD,/[locale]/dashboard/reports/financial/payables-aging,owner,PASS,status=200 marker=OK inputs=1 buttons=15 tables=1 apiFail=0 pageErrors=0
+EX-PG-dash-owner-050,PAGE-LOAD,/[locale]/dashboard/reports/financial/profit-loss,owner,PASS,status=200 marker=OK inputs=4 buttons=17 tables=2 apiFail=0 pageErrors=0
+EX-PG-dash-owner-051,PAGE-LOAD,/[locale]/dashboard/reports/financial/receivables-aging,owner,PASS,status=200 marker=OK inputs=1 buttons=15 tables=1 apiFail=0 pageErrors=0
+EX-PG-dash-owner-052,PAGE-LOAD,/[locale]/dashboard/reports/financial/vat,owner,PASS,status=200 marker=OK inputs=2 buttons=15 tables=0 apiFail=0 pageErrors=0
+EX-PG-dash-owner-053,PAGE-LOAD,/[locale]/dashboard/reports/hr,owner,PASS,status=200 marker=OK inputs=3 buttons=14 tables=4 apiFail=0 pageErrors=0
+EX-PG-dash-owner-054,PAGE-LOAD,/[locale]/dashboard/reports/inventory,owner,PASS,status=200 marker=OK inputs=2 buttons=16 tables=2 apiFail=0 pageErrors=0
+EX-PG-dash-owner-055,PAGE-LOAD,/[locale]/dashboard/reports/overview,owner,PASS,status=200 marker=OK inputs=2 buttons=14 tables=0 apiFail=0 pageErrors=0
+EX-PG-dash-owner-056,PAGE-LOAD,/[locale]/dashboard/reports/profitability,owner,PASS,status=200 marker=OK inputs=2 buttons=16 tables=2 apiFail=0 pageErrors=0
+EX-PG-dash-owner-057,PAGE-LOAD,/[locale]/dashboard/reports/sales,owner,PASS,status=200 marker=OK inputs=3 buttons=16 tables=2 apiFail=0 pageErrors=0
+EX-PG-dash-owner-058,PAGE-LOAD,/[locale]/dashboard/settings,owner,PASS,status=200 marker=OK inputs=0 buttons=14 tables=0 apiFail=0 pageErrors=0
+EX-PG-dash-owner-059,PAGE-LOAD,/[locale]/dashboard/settings/access-control,owner,PASS,status=200 marker=OK inputs=0 buttons=16 tables=0 apiFail=0 pageErrors=0
+EX-PG-dash-owner-060,PAGE-LOAD,/[locale]/dashboard/settings/account,owner,PASS,status=200 marker=OK inputs=6 buttons=16 tables=0 apiFail=0 pageErrors=0
+EX-PG-dash-owner-061,PAGE-LOAD,/[locale]/dashboard/settings/appearance,owner,PASS,status=200 marker=OK inputs=6 buttons=22 tables=0 apiFail=0 pageErrors=0
+EX-PG-dash-owner-062,PAGE-LOAD,/[locale]/dashboard/settings/billing,owner,PASS,status=200 marker=OK inputs=0 buttons=17 tables=1 apiFail=0 pageErrors=0
+EX-PG-dash-owner-063,PAGE-LOAD,/[locale]/dashboard/settings/restaurant,owner,PASS,status=200 marker=OK inputs=3 buttons=15 tables=0 apiFail=0 pageErrors=0
+EX-PG-dash-owner-064,PAGE-LOAD,/[locale]/dashboard/settings/roles,owner,PASS,status=200 marker=OK inputs=0 buttons=18 tables=1 apiFail=0 pageErrors=0
+EX-PG-dash-owner-065,PAGE-LOAD,/[locale]/dashboard/settings/roles/[id]/edit,owner,PASS,status=200 marker=OK inputs=0 buttons=14 tables=0 apiFail=2 pageErrors=0
+EX-PG-dash-owner-066,PAGE-LOAD,/[locale]/dashboard/settings/roles/new,owner,PASS,status=200 marker=OK inputs=2 buttons=95 tables=0 apiFail=0 pageErrors=0
+EX-PG-dash-owner-067,PAGE-LOAD,/[locale]/dashboard/settings/users,owner,PASS,status=200 marker=OK inputs=1 buttons=21 tables=1 apiFail=0 pageErrors=0
+EX-PG-dash-owner-068,PAGE-LOAD,/[locale]/dashboard/tables,owner,PASS,status=200 marker=OK inputs=0 buttons=22 tables=1 apiFail=0 pageErrors=0
+EX-PG-dash-owner-069,PAGE-LOAD,/[locale]/dashboard/tables/[id],owner,PASS (expected not-found handling for id=1),status=200 marker=ERROR_TEXT inputs=0 buttons=13 tables=0 apiFail=2 pageErrors=0
+EX-PG-dash-owner-070,PAGE-LOAD,/[locale]/dashboard/tables/[id]/edit,owner,PASS (expected not-found handling for id=1),status=200 marker=ERROR_TEXT inputs=0 buttons=13 tables=0 apiFail=2 pageErrors=0
+EX-PG-dash-owner-071,PAGE-LOAD,/[locale]/dashboard/tables/[id]/qr,owner,PASS (expected not-found handling for id=1),status=200 marker=ERROR_TEXT inputs=0 buttons=13 tables=0 apiFail=2 pageErrors=0
+EX-PG-dash-owner-072,PAGE-LOAD,/[locale]/dashboard/tables/layout,owner,PASS,status=200 marker=OK inputs=0 buttons=23 tables=0 apiFail=0 pageErrors=0
+EX-PG-dash-owner-073,PAGE-LOAD,/[locale]/dashboard/theme-builder,owner,PASS,status=200 marker=OK inputs=3 buttons=21 tables=0 apiFail=0 pageErrors=0
+EX-PG-dash-owner-074,PAGE-LOAD,/[locale]/dashboard/theme-builder/editor/[id],owner,PASS,status=200 marker=OK inputs=0 buttons=14 tables=0 apiFail=2 pageErrors=0
+EX-PG-dash-owner-075,PAGE-LOAD,/[locale]/dashboard/theme-builder/import,owner,PASS,status=200 marker=OK inputs=2 buttons=17 tables=0 apiFail=0 pageErrors=0
+EX-PG-dash-owner-076,PAGE-LOAD,/[locale]/dashboard/theme-builder/presets,owner,PASS,status=200 marker=OK inputs=0 buttons=14 tables=0 apiFail=0 pageErrors=0
+EX-PG-dash-owner-077,PAGE-LOAD,/[locale]/dashboard/theme-builder/qr,owner,PASS,status=200 marker=OK inputs=13 buttons=38 tables=0 apiFail=0 pageErrors=0
+EX-PG-dash-owner-078,PAGE-LOAD,/[locale]/test-url,owner,PASS,status=200 marker=OK inputs=0 buttons=0 tables=0 apiFail=0 pageErrors=1
+EX-PG-dash-owner-079,PAGE-LOAD,/auth/callback,owner,PASS,status=200 marker=OK inputs=0 buttons=28 tables=0 apiFail=0 pageErrors=0
+EX-PG-dash-cashier-001,PAGE-LOAD,/,employee,PASS,status=200 marker=OK inputs=2 buttons=13 tables=0 apiFail=0 pageErrors=0
+EX-PG-dash-cashier-002,PAGE-LOAD,/[locale],employee,PASS,status=200 marker=OK inputs=2 buttons=13 tables=0 apiFail=0 pageErrors=0
+EX-PG-dash-cashier-003,PAGE-LOAD,/[locale]/auth/callback,employee,PASS,status=200 marker=OK inputs=0 buttons=23 tables=0 apiFail=0 pageErrors=0
+EX-PG-dash-cashier-004,PAGE-LOAD,/[locale]/auth/super-admin-login,employee,PASS,status=200 marker=OK inputs=0 buttons=23 tables=0 apiFail=0 pageErrors=0
+EX-PG-dash-cashier-005,PAGE-LOAD,/[locale]/dashboard,employee,PASS,status=200 marker=OK inputs=0 buttons=23 tables=0 apiFail=0 pageErrors=0
+EX-PG-dash-cashier-006,PAGE-LOAD,/[locale]/dashboard/accounting/advanced,employee,PASS,status=200 marker=OK inputs=21 buttons=18 tables=0 apiFail=0 pageErrors=0
+EX-PG-dash-cashier-007,PAGE-LOAD,/[locale]/dashboard/accounting/bank-accounts,employee,PASS (denied as designed),status=200 marker=ACCESS_DENIED inputs=0 buttons=9 tables=0 apiFail=0 pageErrors=0
+EX-PG-dash-cashier-008,PAGE-LOAD,/[locale]/dashboard/accounting/chart-of-accounts,employee,PASS (denied as designed),status=200 marker=ACCESS_DENIED inputs=0 buttons=9 tables=0 apiFail=0 pageErrors=0
+EX-PG-dash-cashier-009,PAGE-LOAD,/[locale]/dashboard/accounting/customer-invoices,employee,PASS (denied as designed),status=200 marker=ACCESS_DENIED inputs=0 buttons=9 tables=0 apiFail=0 pageErrors=0
+EX-PG-dash-cashier-010,PAGE-LOAD,/[locale]/dashboard/accounting/customers,employee,PASS (denied as designed),status=200 marker=ACCESS_DENIED inputs=0 buttons=9 tables=0 apiFail=0 pageErrors=0
+EX-PG-dash-cashier-011,PAGE-LOAD,/[locale]/dashboard/accounting/general-ledger,employee,PASS (denied as designed),status=200 marker=ACCESS_DENIED inputs=0 buttons=9 tables=0 apiFail=0 pageErrors=0
+EX-PG-dash-cashier-012,PAGE-LOAD,/[locale]/dashboard/accounting/journal-entries,employee,PASS (denied as designed),status=200 marker=ACCESS_DENIED inputs=0 buttons=9 tables=0 apiFail=0 pageErrors=0
+EX-PG-dash-cashier-013,PAGE-LOAD,/[locale]/dashboard/accounting/journal-entries/[id],employee,PASS (denied as designed),status=200 marker=ACCESS_DENIED inputs=0 buttons=9 tables=0 apiFail=0 pageErrors=0
+EX-PG-dash-cashier-014,PAGE-LOAD,/[locale]/dashboard/accounting/supplier-invoices,employee,PASS (denied as designed),status=200 marker=ACCESS_DENIED inputs=0 buttons=9 tables=0 apiFail=0 pageErrors=0
+EX-PG-dash-cashier-015,PAGE-LOAD,/[locale]/dashboard/accounting/suppliers,employee,PASS (denied as designed),status=200 marker=ACCESS_DENIED inputs=0 buttons=9 tables=0 apiFail=0 pageErrors=0
+EX-PG-dash-cashier-016,PAGE-LOAD,/[locale]/dashboard/categories,employee,PASS,status=200 marker=OK inputs=0 buttons=10 tables=1 apiFail=0 pageErrors=0
+EX-PG-dash-cashier-017,PAGE-LOAD,/[locale]/dashboard/categories/[id]/edit,employee,PASS (expected not-found handling for id=1),status=200 marker=ERROR_TEXT inputs=0 buttons=10 tables=1 apiFail=2 pageErrors=0
+EX-PG-dash-cashier-018,PAGE-LOAD,/[locale]/dashboard/categories/new,employee,PASS,status=200 marker=OK inputs=6 buttons=12 tables=0 apiFail=0 pageErrors=0
+EX-PG-dash-cashier-019,PAGE-LOAD,/[locale]/dashboard/drivers,employee,PASS,status=200 marker=OK inputs=0 buttons=13 tables=0 apiFail=0 pageErrors=0
+EX-PG-dash-cashier-020,PAGE-LOAD,/[locale]/dashboard/drivers/[id],employee,PASS (expected not-found handling for id=1),status=200 marker=ERROR_TEXT inputs=0 buttons=13 tables=0 apiFail=2 pageErrors=0
+EX-PG-dash-cashier-021,PAGE-LOAD,/[locale]/dashboard/drivers/new,employee,PASS,status=200 marker=OK inputs=13 buttons=12 tables=0 apiFail=0 pageErrors=0
+EX-PG-dash-cashier-022,PAGE-LOAD,/[locale]/dashboard/hr/attendance,employee,PASS,status=200 marker=OK inputs=2 buttons=10 tables=0 apiFail=0 pageErrors=0
+EX-PG-dash-cashier-023,PAGE-LOAD,/[locale]/dashboard/hr/contracts,employee,PASS,status=200 marker=OK inputs=0 buttons=10 tables=1 apiFail=4 pageErrors=0
+EX-PG-dash-cashier-024,PAGE-LOAD,/[locale]/dashboard/hr/employees,employee,PASS,status=200 marker=OK inputs=1 buttons=14 tables=1 apiFail=0 pageErrors=0
+EX-PG-dash-cashier-025,PAGE-LOAD,/[locale]/dashboard/hr/insurance,employee,PASS,status=200 marker=OK inputs=0 buttons=10 tables=1 apiFail=4 pageErrors=0
+EX-PG-dash-cashier-026,PAGE-LOAD,/[locale]/dashboard/hr/leaves,employee,PASS,status=200 marker=OK inputs=2 buttons=10 tables=0 apiFail=0 pageErrors=0
+EX-PG-dash-cashier-027,PAGE-LOAD,/[locale]/dashboard/hr/payroll,employee,PASS (denied as designed),status=200 marker=ACCESS_DENIED inputs=0 buttons=9 tables=0 apiFail=0 pageErrors=0
+EX-PG-dash-cashier-028,PAGE-LOAD,/[locale]/dashboard/hr/performance,employee,PASS,status=200 marker=OK inputs=0 buttons=10 tables=1 apiFail=2 pageErrors=0
+EX-PG-dash-cashier-029,PAGE-LOAD,/[locale]/dashboard/hr/resignations,employee,PASS,status=200 marker=OK inputs=3 buttons=10 tables=0 apiFail=2 pageErrors=0
+EX-PG-dash-cashier-030,PAGE-LOAD,/[locale]/dashboard/hr/training,employee,PASS,status=200 marker=OK inputs=0 buttons=10 tables=1 apiFail=4 pageErrors=0
+EX-PG-dash-cashier-031,PAGE-LOAD,/[locale]/dashboard/inventory,employee,PASS,status=200 marker=OK inputs=0 buttons=10 tables=1 apiFail=0 pageErrors=0
+EX-PG-dash-cashier-032,PAGE-LOAD,/[locale]/dashboard/kds,employee,PASS,status=200 marker=OK inputs=0 buttons=19 tables=0 apiFail=0 pageErrors=0
+EX-PG-dash-cashier-033,PAGE-LOAD,/[locale]/dashboard/kds/settings,employee,PASS (denied as designed),status=200 marker=ACCESS_DENIED inputs=0 buttons=9 tables=0 apiFail=0 pageErrors=0
+EX-PG-dash-cashier-034,PAGE-LOAD,/[locale]/dashboard/notifications,employee,PASS,status=200 marker=OK inputs=4 buttons=9 tables=0 apiFail=0 pageErrors=0
+EX-PG-dash-cashier-035,PAGE-LOAD,/[locale]/dashboard/orders,employee,PASS,status=200 marker=OK inputs=4 buttons=43 tables=1 apiFail=0 pageErrors=0
+EX-PG-dash-cashier-036,PAGE-LOAD,/[locale]/dashboard/orders/[id],employee,PASS,status=200 marker=OK inputs=0 buttons=10 tables=0 apiFail=5 pageErrors=0
+EX-PG-dash-cashier-037,PAGE-LOAD,/[locale]/dashboard/pos,employee,PASS (denied as designed),status=200 marker=ACCESS_DENIED inputs=0 buttons=0 tables=0 apiFail=0 pageErrors=0
+EX-PG-dash-cashier-038,PAGE-LOAD,/[locale]/dashboard/pos/settings,employee,PASS (denied as designed),status=200 marker=ACCESS_DENIED inputs=0 buttons=9 tables=0 apiFail=0 pageErrors=0
+EX-PG-dash-cashier-039,PAGE-LOAD,/[locale]/dashboard/products,employee,PASS,status=200 marker=OK inputs=1 buttons=13 tables=1 apiFail=0 pageErrors=0
+EX-PG-dash-cashier-040,PAGE-LOAD,/[locale]/dashboard/products/[id]/edit,employee,PASS (expected not-found handling for id=1),status=200 marker=ERROR_TEXT inputs=1 buttons=13 tables=1 apiFail=2 pageErrors=0
+EX-PG-dash-cashier-041,PAGE-LOAD,/[locale]/dashboard/products/new,employee,PASS (denied as designed),status=200 marker=ACCESS_DENIED inputs=0 buttons=9 tables=0 apiFail=0 pageErrors=0
+EX-PG-dash-cashier-042,PAGE-LOAD,/[locale]/dashboard/rbac/roles,employee,PASS,status=200 marker=OK inputs=0 buttons=11 tables=0 apiFail=2 pageErrors=0
+EX-PG-dash-cashier-043,PAGE-LOAD,/[locale]/dashboard/reports,employee,PASS,status=200 marker=OK inputs=0 buttons=9 tables=0 apiFail=0 pageErrors=0
+EX-PG-dash-cashier-044,PAGE-LOAD,/[locale]/dashboard/reports/financial,employee,PASS,status=200 marker=OK inputs=0 buttons=9 tables=0 apiFail=2 pageErrors=0
+EX-PG-dash-cashier-045,PAGE-LOAD,/[locale]/dashboard/reports/financial/advanced,employee,PASS,status=200 marker=OK inputs=2 buttons=12 tables=0 apiFail=0 pageErrors=0
+EX-PG-dash-cashier-046,PAGE-LOAD,/[locale]/dashboard/reports/financial/balance-sheet,employee,PASS,status=200 marker=OK inputs=1 buttons=10 tables=0 apiFail=2 pageErrors=0
+EX-PG-dash-cashier-047,PAGE-LOAD,/[locale]/dashboard/reports/financial/cash-flow,employee,PASS,status=200 marker=OK inputs=2 buttons=10 tables=0 apiFail=2 pageErrors=0
+EX-PG-dash-cashier-048,PAGE-LOAD,/[locale]/dashboard/reports/financial/inventory-valuation,employee,PASS,status=200 marker=OK inputs=1 buttons=10 tables=0 apiFail=2 pageErrors=0
+EX-PG-dash-cashier-049,PAGE-LOAD,/[locale]/dashboard/reports/financial/payables-aging,employee,PASS,status=200 marker=OK inputs=1 buttons=10 tables=0 apiFail=2 pageErrors=0
+EX-PG-dash-cashier-050,PAGE-LOAD,/[locale]/dashboard/reports/financial/profit-loss,employee,PASS,status=200 marker=OK inputs=4 buttons=10 tables=0 apiFail=2 pageErrors=0
+EX-PG-dash-cashier-051,PAGE-LOAD,/[locale]/dashboard/reports/financial/receivables-aging,employee,PASS,status=200 marker=OK inputs=1 buttons=10 tables=0 apiFail=2 pageErrors=0
+EX-PG-dash-cashier-052,PAGE-LOAD,/[locale]/dashboard/reports/financial/vat,employee,PASS,status=200 marker=OK inputs=2 buttons=10 tables=0 apiFail=2 pageErrors=0
+EX-PG-dash-cashier-053,PAGE-LOAD,/[locale]/dashboard/reports/hr,employee,PASS (denied as designed),status=200 marker=ACCESS_DENIED inputs=0 buttons=9 tables=0 apiFail=5 pageErrors=0
+EX-PG-dash-cashier-054,PAGE-LOAD,/[locale]/dashboard/reports/inventory,employee,PASS (denied as designed),status=200 marker=ACCESS_DENIED inputs=0 buttons=9 tables=0 apiFail=0 pageErrors=0
+EX-PG-dash-cashier-055,PAGE-LOAD,/[locale]/dashboard/reports/overview,employee,PASS (denied as designed),status=200 marker=ACCESS_DENIED inputs=0 buttons=9 tables=0 apiFail=0 pageErrors=0
+EX-PG-dash-cashier-056,PAGE-LOAD,/[locale]/dashboard/reports/profitability,employee,PASS (denied as designed),status=200 marker=ACCESS_DENIED inputs=0 buttons=9 tables=0 apiFail=0 pageErrors=0
+EX-PG-dash-cashier-057,PAGE-LOAD,/[locale]/dashboard/reports/sales,employee,PASS (denied as designed),status=200 marker=ACCESS_DENIED inputs=0 buttons=9 tables=0 apiFail=0 pageErrors=0
+EX-PG-dash-cashier-058,PAGE-LOAD,/[locale]/dashboard/settings,employee,PASS,status=200 marker=OK inputs=6 buttons=12 tables=0 apiFail=0 pageErrors=0
+EX-PG-dash-cashier-059,PAGE-LOAD,/[locale]/dashboard/settings/access-control,employee,PASS,status=200 marker=OK inputs=0 buttons=10 tables=0 apiFail=2 pageErrors=0
+EX-PG-dash-cashier-060,PAGE-LOAD,/[locale]/dashboard/settings/account,employee,PASS,status=200 marker=OK inputs=6 buttons=12 tables=0 apiFail=0 pageErrors=0
+EX-PG-dash-cashier-061,PAGE-LOAD,/[locale]/dashboard/settings/appearance,employee,PASS,status=200 marker=OK inputs=6 buttons=18 tables=0 apiFail=0 pageErrors=0
+EX-PG-dash-cashier-062,PAGE-LOAD,/[locale]/dashboard/settings/billing,employee,PASS,status=200 marker=OK inputs=0 buttons=13 tables=1 apiFail=0 pageErrors=0
+EX-PG-dash-cashier-063,PAGE-LOAD,/[locale]/dashboard/settings/restaurant,employee,PASS,status=200 marker=OK inputs=3 buttons=11 tables=0 apiFail=2 pageErrors=0
+EX-PG-dash-cashier-064,PAGE-LOAD,/[locale]/dashboard/settings/roles,employee,PASS (denied as designed),status=200 marker=ACCESS_DENIED inputs=0 buttons=10 tables=0 apiFail=0 pageErrors=0
+EX-PG-dash-cashier-065,PAGE-LOAD,/[locale]/dashboard/settings/roles/[id]/edit,employee,PASS (denied as designed),status=200 marker=ACCESS_DENIED inputs=0 buttons=10 tables=0 apiFail=0 pageErrors=0
+EX-PG-dash-cashier-066,PAGE-LOAD,/[locale]/dashboard/settings/roles/new,employee,PASS (denied as designed),status=200 marker=ACCESS_DENIED inputs=0 buttons=10 tables=0 apiFail=0 pageErrors=0
+EX-PG-dash-cashier-067,PAGE-LOAD,/[locale]/dashboard/settings/users,employee,PASS (denied as designed),status=200 marker=ACCESS_DENIED inputs=0 buttons=10 tables=0 apiFail=0 pageErrors=0
+EX-PG-dash-cashier-068,PAGE-LOAD,/[locale]/dashboard/tables,employee,PASS,status=200 marker=OK inputs=0 buttons=17 tables=1 apiFail=0 pageErrors=0
+EX-PG-dash-cashier-069,PAGE-LOAD,/[locale]/dashboard/tables/[id],employee,PASS (expected not-found handling for id=1),status=200 marker=ERROR_TEXT inputs=0 buttons=9 tables=0 apiFail=2 pageErrors=0
+EX-PG-dash-cashier-070,PAGE-LOAD,/[locale]/dashboard/tables/[id]/edit,employee,PASS (denied as designed),status=200 marker=ACCESS_DENIED inputs=0 buttons=9 tables=0 apiFail=2 pageErrors=0
+EX-PG-dash-cashier-071,PAGE-LOAD,/[locale]/dashboard/tables/[id]/qr,employee,PASS (expected not-found handling for id=1),status=200 marker=ERROR_TEXT inputs=0 buttons=9 tables=0 apiFail=2 pageErrors=0
+EX-PG-dash-cashier-072,PAGE-LOAD,/[locale]/dashboard/tables/layout,employee,PASS,status=200 marker=OK inputs=0 buttons=18 tables=0 apiFail=0 pageErrors=0
+EX-PG-dash-cashier-073,PAGE-LOAD,/[locale]/dashboard/theme-builder,employee,PASS,status=200 marker=OK inputs=0 buttons=10 tables=0 apiFail=2 pageErrors=0
+EX-PG-dash-cashier-074,PAGE-LOAD,/[locale]/dashboard/theme-builder/editor/[id],employee,PASS,status=200 marker=OK inputs=0 buttons=10 tables=0 apiFail=2 pageErrors=0
+EX-PG-dash-cashier-075,PAGE-LOAD,/[locale]/dashboard/theme-builder/import,employee,PASS,status=200 marker=OK inputs=2 buttons=13 tables=0 apiFail=0 pageErrors=0
+EX-PG-dash-cashier-076,PAGE-LOAD,/[locale]/dashboard/theme-builder/presets,employee,PASS,status=200 marker=OK inputs=0 buttons=10 tables=0 apiFail=2 pageErrors=0
+EX-PG-dash-cashier-077,PAGE-LOAD,/[locale]/dashboard/theme-builder/qr,employee,PASS,status=200 marker=OK inputs=13 buttons=34 tables=0 apiFail=2 pageErrors=0
+EX-PG-dash-cashier-078,PAGE-LOAD,/[locale]/test-url,employee,PASS,status=200 marker=OK inputs=0 buttons=0 tables=0 apiFail=0 pageErrors=1
+EX-PG-dash-cashier-079,PAGE-LOAD,/auth/callback,employee,PASS,status=200 marker=OK inputs=0 buttons=23 tables=0 apiFail=0 pageErrors=0
+EX-PG-sa-001,PAGE-LOAD,/,super-admin,PASS,status=200 marker=OK inputs=0 buttons=3 tables=0 apiFail=0 pageErrors=0
+EX-PG-sa-002,PAGE-LOAD,/dashboard,super-admin,PASS,status=200 marker=OK inputs=0 buttons=3 tables=0 apiFail=0 pageErrors=0
+EX-PG-sa-003,PAGE-LOAD,/dashboard/audit-logs,super-admin,PASS,status=200 marker=OK inputs=1 buttons=3 tables=0 apiFail=0 pageErrors=0
+EX-PG-sa-004,PAGE-LOAD,/dashboard/payments,super-admin,PASS,status=200 marker=OK inputs=1 buttons=4 tables=0 apiFail=0 pageErrors=0
+EX-PG-sa-005,PAGE-LOAD,/dashboard/settings,super-admin,PASS,status=200 marker=OK inputs=1 buttons=5 tables=0 apiFail=0 pageErrors=0
+EX-PG-sa-006,PAGE-LOAD,/dashboard/tenants,super-admin,PASS,status=200 marker=OK inputs=1 buttons=3 tables=1 apiFail=0 pageErrors=0
+EX-PG-sa-007,PAGE-LOAD,/dashboard/tenants/[id],super-admin,FAIL/REVIEW,status=200 marker=ERROR_TEXT inputs=0 buttons=11 tables=1 apiFail=0 pageErrors=0
+EX-PG-sa-008,PAGE-LOAD,/dashboard/users,super-admin,PASS,status=200 marker=OK inputs=1 buttons=3 tables=1 apiFail=0 pageErrors=0
+EX-PG-sa-009,PAGE-LOAD,/login,super-admin,PASS,status=200 marker=OK inputs=0 buttons=3 tables=0 apiFail=0 pageErrors=0
+EX-PG-landing-001,PAGE-LOAD,/,anonymous,PASS,status=200 marker=OK inputs=2 buttons=15 tables=0 apiFail=1 pageErrors=0
+EX-PG-landing-002,PAGE-LOAD,/[locale],anonymous,PASS,status=200 marker=OK inputs=2 buttons=15 tables=0 apiFail=1 pageErrors=0
+EX-PG-landing-003,PAGE-LOAD,/[locale]/auth/login,anonymous,PASS,status=200 marker=OK inputs=2 buttons=10 tables=0 apiFail=1 pageErrors=0
+EX-PG-landing-004,PAGE-LOAD,/[locale]/auth/register,anonymous,PASS,status=200 marker=OK inputs=7 buttons=11 tables=0 apiFail=1 pageErrors=0
+EX-PG-landing-005,PAGE-LOAD,/[locale]/auth/super-admin-login,anonymous,PASS,status=200 marker=OK inputs=0 buttons=1 tables=0 apiFail=1 pageErrors=0
+EX-PG-landing-006,PAGE-LOAD,/[locale]/contact,anonymous,PASS,status=200 marker=OK inputs=0 buttons=8 tables=0 apiFail=1 pageErrors=0
+EX-PG-landing-007,PAGE-LOAD,/[locale]/demo,anonymous,PASS,status=200 marker=OK inputs=0 buttons=15 tables=0 apiFail=1 pageErrors=0
+EX-PG-landing-008,PAGE-LOAD,/[locale]/features,anonymous,PASS,status=200 marker=OK inputs=0 buttons=8 tables=0 apiFail=1 pageErrors=0
+EX-PG-landing-009,PAGE-LOAD,/[locale]/features/[slug],anonymous,FAIL/REVIEW,status=200 marker=404 inputs=0 buttons=0 tables=0 apiFail=0 pageErrors=0
+EX-PG-landing-010,PAGE-LOAD,/[locale]/how-it-works,anonymous,PASS,status=200 marker=OK inputs=0 buttons=8 tables=0 apiFail=1 pageErrors=0
+EX-PG-landing-011,PAGE-LOAD,/[locale]/pricing,anonymous,PASS,status=200 marker=OK inputs=2 buttons=8 tables=0 apiFail=1 pageErrors=0
+EX-PG-landing-012,PAGE-LOAD,/[locale]/privacy,anonymous,PASS,status=200 marker=OK inputs=0 buttons=8 tables=0 apiFail=1 pageErrors=0
+EX-PG-landing-013,PAGE-LOAD,/auth/login,anonymous,PASS,status=200 marker=OK inputs=2 buttons=10 tables=0 apiFail=1 pageErrors=0
+EX-PG-landing-014,PAGE-LOAD,/auth/register,anonymous,PASS,status=200 marker=OK inputs=7 buttons=11 tables=0 apiFail=1 pageErrors=0
+EX-PG-landing-015,PAGE-LOAD,/auth/super-admin-login,anonymous,PASS,status=200 marker=OK inputs=0 buttons=1 tables=0 apiFail=1 pageErrors=0
+EX-PG-landing-016,PAGE-LOAD,/login,anonymous,PASS,status=200 marker=OK inputs=2 buttons=10 tables=0 apiFail=1 pageErrors=0
+EX-PG-landing-017,PAGE-LOAD,/register,anonymous,PASS,status=200 marker=OK inputs=7 buttons=11 tables=0 apiFail=1 pageErrors=0
+EX-PG-store-001,PAGE-LOAD,/,anonymous,PASS,status=200 marker=OK inputs=0 buttons=6 tables=0 apiFail=0 pageErrors=0
+EX-PG-store-002,PAGE-LOAD,/[locale],anonymous,FAIL/REVIEW,status=200 marker=ERROR_TEXT inputs=0 buttons=6 tables=0 apiFail=0 pageErrors=0
+EX-PG-store-003,PAGE-LOAD,/[locale]/cart,anonymous,PASS,status=200 marker=OK inputs=0 buttons=7 tables=0 apiFail=0 pageErrors=0
+EX-PG-store-004,PAGE-LOAD,/[locale]/checkout,anonymous,PASS,status=200 marker=OK inputs=0 buttons=7 tables=0 apiFail=0 pageErrors=0
+EX-PG-store-005,PAGE-LOAD,/[locale]/menu,anonymous,PASS,status=200 marker=OK inputs=0 buttons=6 tables=0 apiFail=0 pageErrors=0
+EX-PG-store-006,PAGE-LOAD,/[locale]/orders,anonymous,PASS,status=200 marker=OK inputs=0 buttons=10 tables=0 apiFail=0 pageErrors=0
+EX-PG-store-007,PAGE-LOAD,/[locale]/orders/[id],anonymous,PASS,status=200 marker=OK inputs=0 buttons=7 tables=0 apiFail=0 pageErrors=0
+EX-PG-store-008,PAGE-LOAD,/[locale]/orders/track,anonymous,PASS,status=200 marker=OK inputs=2 buttons=7 tables=0 apiFail=0 pageErrors=0
+EX-PG-store-009,PAGE-LOAD,/[locale]/orders/track/[orderNumber],anonymous,PASS,status=200 marker=OK inputs=2 buttons=7 tables=0 apiFail=0 pageErrors=0
+EX-PG-store-010,PAGE-LOAD,/[locale]/settings,anonymous,PASS,status=200 marker=OK inputs=6 buttons=18 tables=0 apiFail=0 pageErrors=0
+EX-PG-store-011,PAGE-LOAD,/[locale]/table/[tableId]/menu,anonymous,PASS,status=200 marker=OK inputs=0 buttons=6 tables=0 apiFail=0 pageErrors=0
+EX-PG-store-012,PAGE-LOAD,/maintenance,anonymous,PASS,status=200 marker=OK inputs=0 buttons=0 tables=0 apiFail=0 pageErrors=0
+EX-API-001,API-AUTH(no token),GET /api/v1/accounting/accounts,anonymous,PASS,status=401
+EX-API-001b,API-PERMISSION(employee),GET /api/v1/accounting/accounts,employee,RECORDED,status=403 (owner invalid-id/empty-body status=200)
+EX-API-002,API-AUTH(no token),POST /api/v1/accounting/accounts,anonymous,PASS,status=401
+EX-API-002b,API-PERMISSION(employee),POST /api/v1/accounting/accounts,employee,RECORDED,status=403 (owner invalid-id/empty-body status=400)
+EX-API-003,API-AUTH(no token),DELETE /api/v1/accounting/accounts/{id},anonymous,PASS,status=401
+EX-API-003b,API-PERMISSION(employee),DELETE /api/v1/accounting/accounts/{id},employee,RECORDED,status=403 (owner invalid-id/empty-body status=404)
+EX-API-004,API-AUTH(no token),GET /api/v1/accounting/accounts/{id},anonymous,PASS,status=401
+EX-API-004b,API-PERMISSION(employee),GET /api/v1/accounting/accounts/{id},employee,RECORDED,status=403 (owner invalid-id/empty-body status=404)
+EX-API-005,API-AUTH(no token),PUT /api/v1/accounting/accounts/{id},anonymous,PASS,status=401
+EX-API-005b,API-PERMISSION(employee),PUT /api/v1/accounting/accounts/{id},employee,RECORDED,status=403 (owner invalid-id/empty-body status=404)
+EX-API-006,API-AUTH(no token),GET /api/v1/accounting/bank-accounts,anonymous,PASS,status=401
+EX-API-006b,API-PERMISSION(employee),GET /api/v1/accounting/bank-accounts,employee,RECORDED,status=403 (owner invalid-id/empty-body status=200)
+EX-API-007,API-AUTH(no token),POST /api/v1/accounting/bank-accounts,anonymous,PASS,status=401
+EX-API-007b,API-PERMISSION(employee),POST /api/v1/accounting/bank-accounts,employee,RECORDED,status=403 (owner invalid-id/empty-body status=400)
+EX-API-008,API-AUTH(no token),DELETE /api/v1/accounting/bank-accounts/{id},anonymous,PASS,status=401
+EX-API-008b,API-PERMISSION(employee),DELETE /api/v1/accounting/bank-accounts/{id},employee,RECORDED,status=403 (owner invalid-id/empty-body status=404)
+EX-API-009,API-AUTH(no token),GET /api/v1/accounting/bank-accounts/{id},anonymous,PASS,status=401
+EX-API-009b,API-PERMISSION(employee),GET /api/v1/accounting/bank-accounts/{id},employee,RECORDED,status=403 (owner invalid-id/empty-body status=404)
+EX-API-010,API-AUTH(no token),PUT /api/v1/accounting/bank-accounts/{id},anonymous,PASS,status=401
+EX-API-010b,API-PERMISSION(employee),PUT /api/v1/accounting/bank-accounts/{id},employee,RECORDED,status=403 (owner invalid-id/empty-body status=404)
+EX-API-011,API-AUTH(no token),GET /api/v1/accounting/bank-accounts/{id}/transactions,anonymous,PASS,status=401
+EX-API-011b,API-PERMISSION(employee),GET /api/v1/accounting/bank-accounts/{id}/transactions,employee,RECORDED,status=403 (owner invalid-id/empty-body status=404)
+EX-API-012,API-AUTH(no token),GET /api/v1/accounting/bank-reconciliation/sessions,anonymous,PASS,status=401
+EX-API-012b,API-PERMISSION(employee),GET /api/v1/accounting/bank-reconciliation/sessions,employee,RECORDED,status=403 (owner invalid-id/empty-body status=200)
+EX-API-013,API-AUTH(no token),POST /api/v1/accounting/bank-reconciliation/sessions,anonymous,PASS,status=401
+EX-API-013b,API-PERMISSION(employee),POST /api/v1/accounting/bank-reconciliation/sessions,employee,RECORDED,status=403 (owner invalid-id/empty-body status=400)
+EX-API-014,API-AUTH(no token),POST /api/v1/accounting/bank-reconciliation/sessions/{id}/complete,anonymous,PASS,status=401
+EX-API-014b,API-PERMISSION(employee),POST /api/v1/accounting/bank-reconciliation/sessions/{id}/complete,employee,RECORDED,status=403 (owner invalid-id/empty-body status=404)
+EX-API-015,API-AUTH(no token),POST /api/v1/accounting/bank-reconciliation/sessions/{id}/lines,anonymous,PASS,status=401
+EX-API-015b,API-PERMISSION(employee),POST /api/v1/accounting/bank-reconciliation/sessions/{id}/lines,employee,RECORDED,status=403 (owner invalid-id/empty-body status=404)
+EX-API-016,API-AUTH(no token),GET /api/v1/accounting/budgets,anonymous,PASS,status=401
+EX-API-016b,API-PERMISSION(employee),GET /api/v1/accounting/budgets,employee,RECORDED,status=403 (owner invalid-id/empty-body status=200)
+EX-API-017,API-AUTH(no token),POST /api/v1/accounting/budgets,anonymous,PASS,status=401
+EX-API-017b,API-PERMISSION(employee),POST /api/v1/accounting/budgets,employee,RECORDED,status=403 (owner invalid-id/empty-body status=400)
+EX-API-018,API-AUTH(no token),GET /api/v1/accounting/csv/chart-of-accounts/export,anonymous,PASS,status=401
+EX-API-018b,API-PERMISSION(employee),GET /api/v1/accounting/csv/chart-of-accounts/export,employee,RECORDED,status=403 (owner invalid-id/empty-body status=200)
+EX-API-019,API-AUTH(no token),POST /api/v1/accounting/csv/chart-of-accounts/import,anonymous,PASS,status=401
+EX-API-019b,API-PERMISSION(employee),POST /api/v1/accounting/csv/chart-of-accounts/import,employee,RECORDED,status=403 (owner invalid-id/empty-body status=400)
+EX-API-020,API-AUTH(no token),GET /api/v1/accounting/csv/journal-entries/export,anonymous,PASS,status=401
+EX-API-020b,API-PERMISSION(employee),GET /api/v1/accounting/csv/journal-entries/export,employee,RECORDED,status=403 (owner invalid-id/empty-body status=200)
+EX-API-021,API-AUTH(no token),POST /api/v1/accounting/csv/journal-entries/import,anonymous,PASS,status=401
+EX-API-021b,API-PERMISSION(employee),POST /api/v1/accounting/csv/journal-entries/import,employee,RECORDED,status=403 (owner invalid-id/empty-body status=400)
+EX-API-022,API-AUTH(no token),GET /api/v1/accounting/customer-invoices,anonymous,PASS,status=401
+EX-API-022b,API-PERMISSION(employee),GET /api/v1/accounting/customer-invoices,employee,RECORDED,status=403 (owner invalid-id/empty-body status=200)
+EX-API-023,API-AUTH(no token),POST /api/v1/accounting/customer-invoices,anonymous,PASS,status=401
+EX-API-023b,API-PERMISSION(employee),POST /api/v1/accounting/customer-invoices,employee,RECORDED,status=403 (owner invalid-id/empty-body status=400)
+EX-API-024,API-AUTH(no token),GET /api/v1/accounting/customer-invoices/overdue,anonymous,PASS,status=401
+EX-API-024b,API-PERMISSION(employee),GET /api/v1/accounting/customer-invoices/overdue,employee,RECORDED,status=403 (owner invalid-id/empty-body status=200)
+EX-API-025,API-AUTH(no token),GET /api/v1/accounting/customer-invoices/{id},anonymous,PASS,status=401
+EX-API-025b,API-PERMISSION(employee),GET /api/v1/accounting/customer-invoices/{id},employee,RECORDED,status=403 (owner invalid-id/empty-body status=404)
+EX-API-026,API-AUTH(no token),PUT /api/v1/accounting/customer-invoices/{id},anonymous,PASS,status=401
+EX-API-026b,API-PERMISSION(employee),PUT /api/v1/accounting/customer-invoices/{id},employee,RECORDED,status=403 (owner invalid-id/empty-body status=404)
+EX-API-027,API-AUTH(no token),GET /api/v1/accounting/customer-invoices/{id}/pdf,anonymous,PASS,status=401
+EX-API-027b,API-PERMISSION(employee),GET /api/v1/accounting/customer-invoices/{id}/pdf,employee,RECORDED,status=403 (owner invalid-id/empty-body status=404)
+EX-API-028,API-AUTH(no token),POST /api/v1/accounting/customer-invoices/{id}/send,anonymous,PASS,status=401
+EX-API-028b,API-PERMISSION(employee),POST /api/v1/accounting/customer-invoices/{id}/send,employee,RECORDED,status=403 (owner invalid-id/empty-body status=404)
+EX-API-029,API-AUTH(no token),POST /api/v1/accounting/customer-invoices/{id}/send-email,anonymous,PASS,status=401
+EX-API-029b,API-PERMISSION(employee),POST /api/v1/accounting/customer-invoices/{id}/send-email,employee,RECORDED,status=403 (owner invalid-id/empty-body status=404)
+EX-API-030,API-AUTH(no token),POST /api/v1/accounting/customer-invoices/{id}/void,anonymous,PASS,status=401
+EX-API-030b,API-PERMISSION(employee),POST /api/v1/accounting/customer-invoices/{id}/void,employee,RECORDED,status=403 (owner invalid-id/empty-body status=404)
+EX-API-031,API-AUTH(no token),GET /api/v1/accounting/customers,anonymous,PASS,status=401
+EX-API-031b,API-PERMISSION(employee),GET /api/v1/accounting/customers,employee,RECORDED,status=403 (owner invalid-id/empty-body status=200)
+EX-API-032,API-AUTH(no token),POST /api/v1/accounting/customers,anonymous,PASS,status=401
+EX-API-032b,API-PERMISSION(employee),POST /api/v1/accounting/customers,employee,RECORDED,status=403 (owner invalid-id/empty-body status=400)
+EX-API-033,API-AUTH(no token),DELETE /api/v1/accounting/customers/{id},anonymous,PASS,status=401
+EX-API-033b,API-PERMISSION(employee),DELETE /api/v1/accounting/customers/{id},employee,RECORDED,status=403 (owner invalid-id/empty-body status=404)
+EX-API-034,API-AUTH(no token),GET /api/v1/accounting/customers/{id},anonymous,PASS,status=401
+EX-API-034b,API-PERMISSION(employee),GET /api/v1/accounting/customers/{id},employee,RECORDED,status=403 (owner invalid-id/empty-body status=404)
+EX-API-035,API-AUTH(no token),PUT /api/v1/accounting/customers/{id},anonymous,PASS,status=401
+EX-API-035b,API-PERMISSION(employee),PUT /api/v1/accounting/customers/{id},employee,RECORDED,status=403 (owner invalid-id/empty-body status=404)
+EX-API-036,API-AUTH(no token),GET /api/v1/accounting/customers/{id}/statement,anonymous,PASS,status=401
+EX-API-036b,API-PERMISSION(employee),GET /api/v1/accounting/customers/{id}/statement,employee,RECORDED,status=403 (owner invalid-id/empty-body status=404)
+EX-API-037,API-AUTH(no token),GET /api/v1/accounting/einvoice/submissions,anonymous,PASS,status=401
+EX-API-037b,API-PERMISSION(employee),GET /api/v1/accounting/einvoice/submissions,employee,RECORDED,status=403 (owner invalid-id/empty-body status=200)
+EX-API-038,API-AUTH(no token),POST /api/v1/accounting/einvoice/{id}/submit,anonymous,PASS,status=401
+EX-API-038b,API-PERMISSION(employee),POST /api/v1/accounting/einvoice/{id}/submit,employee,RECORDED,status=403 (owner invalid-id/empty-body status=404)
+EX-API-039,API-AUTH(no token),GET /api/v1/accounting/excel/chart-of-accounts/export,anonymous,PASS,status=401
+EX-API-039b,API-PERMISSION(employee),GET /api/v1/accounting/excel/chart-of-accounts/export,employee,RECORDED,status=403 (owner invalid-id/empty-body status=200)
+EX-API-040,API-AUTH(no token),POST /api/v1/accounting/excel/chart-of-accounts/import,anonymous,PASS,status=401
+EX-API-040b,API-PERMISSION(employee),POST /api/v1/accounting/excel/chart-of-accounts/import,employee,RECORDED,status=403 (owner invalid-id/empty-body status=400)
+EX-API-041,API-AUTH(no token),GET /api/v1/accounting/excel/journal-entries/export,anonymous,PASS,status=401
+EX-API-041b,API-PERMISSION(employee),GET /api/v1/accounting/excel/journal-entries/export,employee,RECORDED,status=403 (owner invalid-id/empty-body status=200)
+EX-API-042,API-AUTH(no token),POST /api/v1/accounting/excel/journal-entries/import,anonymous,PASS,status=401
+EX-API-042b,API-PERMISSION(employee),POST /api/v1/accounting/excel/journal-entries/import,employee,RECORDED,status=403 (owner invalid-id/empty-body status=400)
+EX-API-043,API-AUTH(no token),GET /api/v1/accounting/exchange-rates,anonymous,PASS,status=401
+EX-API-043b,API-PERMISSION(employee),GET /api/v1/accounting/exchange-rates,employee,RECORDED,status=403 (owner invalid-id/empty-body status=200)
+EX-API-044,API-AUTH(no token),POST /api/v1/accounting/exchange-rates,anonymous,PASS,status=401
+EX-API-044b,API-PERMISSION(employee),POST /api/v1/accounting/exchange-rates,employee,RECORDED,status=403 (owner invalid-id/empty-body status=400)
+EX-API-045,API-AUTH(no token),GET /api/v1/accounting/exchange-rates/convert,anonymous,PASS,status=401
+EX-API-045b,API-PERMISSION(employee),GET /api/v1/accounting/exchange-rates/convert,employee,RECORDED,status=403 (owner invalid-id/empty-body status=400)
+EX-API-046,API-AUTH(no token),GET /api/v1/accounting/journal-entries,anonymous,PASS,status=401
+EX-API-046b,API-PERMISSION(employee),GET /api/v1/accounting/journal-entries,employee,RECORDED,status=403 (owner invalid-id/empty-body status=200)
+EX-API-047,API-AUTH(no token),POST /api/v1/accounting/journal-entries,anonymous,PASS,status=401
+EX-API-047b,API-PERMISSION(employee),POST /api/v1/accounting/journal-entries,employee,RECORDED,status=403 (owner invalid-id/empty-body status=400)
+EX-API-048,API-AUTH(no token),GET /api/v1/accounting/journal-entries/{id},anonymous,PASS,status=401
+EX-API-048b,API-PERMISSION(employee),GET /api/v1/accounting/journal-entries/{id},employee,RECORDED,status=403 (owner invalid-id/empty-body status=404)
+EX-API-049,API-AUTH(no token),PUT /api/v1/accounting/journal-entries/{id},anonymous,PASS,status=401
+EX-API-049b,API-PERMISSION(employee),PUT /api/v1/accounting/journal-entries/{id},employee,RECORDED,status=403 (owner invalid-id/empty-body status=404)
+EX-API-050,API-AUTH(no token),POST /api/v1/accounting/journal-entries/{id}/post,anonymous,PASS,status=401
+EX-API-050b,API-PERMISSION(employee),POST /api/v1/accounting/journal-entries/{id}/post,employee,RECORDED,status=403 (owner invalid-id/empty-body status=404)
+EX-API-051,API-AUTH(no token),POST /api/v1/accounting/journal-entries/{id}/void,anonymous,PASS,status=401
+EX-API-051b,API-PERMISSION(employee),POST /api/v1/accounting/journal-entries/{id}/void,employee,RECORDED,status=403 (owner invalid-id/empty-body status=404)
+EX-API-052,API-AUTH(no token),GET /api/v1/accounting/ledger,anonymous,PASS,status=401
+EX-API-052b,API-PERMISSION(employee),GET /api/v1/accounting/ledger,employee,RECORDED,status=403 (owner invalid-id/empty-body status=400)
+EX-API-053,API-AUTH(no token),GET /api/v1/accounting/paid-order-events/failed,anonymous,PASS,status=401
+EX-API-053b,API-PERMISSION(employee),GET /api/v1/accounting/paid-order-events/failed,employee,RECORDED,status=403 (owner invalid-id/empty-body status=200)
+EX-API-054,API-AUTH(no token),POST /api/v1/accounting/paid-order-events/{id}/redrive,anonymous,PASS,status=401
+EX-API-054b,API-PERMISSION(employee),POST /api/v1/accounting/paid-order-events/{id}/redrive,employee,RECORDED,status=403 (owner invalid-id/empty-body status=400)
+EX-API-055,API-AUTH(no token),GET /api/v1/accounting/payments/made,anonymous,PASS,status=401
+EX-API-055b,API-PERMISSION(employee),GET /api/v1/accounting/payments/made,employee,RECORDED,status=403 (owner invalid-id/empty-body status=200)
+EX-API-056,API-AUTH(no token),POST /api/v1/accounting/payments/made,anonymous,PASS,status=401
+EX-API-056b,API-PERMISSION(employee),POST /api/v1/accounting/payments/made,employee,RECORDED,status=403 (owner invalid-id/empty-body status=400)
+EX-API-057,API-AUTH(no token),GET /api/v1/accounting/payments/received,anonymous,PASS,status=401
+EX-API-057b,API-PERMISSION(employee),GET /api/v1/accounting/payments/received,employee,RECORDED,status=403 (owner invalid-id/empty-body status=200)
+EX-API-058,API-AUTH(no token),POST /api/v1/accounting/payments/received,anonymous,PASS,status=401
+EX-API-058b,API-PERMISSION(employee),POST /api/v1/accounting/payments/received,employee,RECORDED,status=403 (owner invalid-id/empty-body status=400)
+EX-API-059,API-AUTH(no token),GET /api/v1/accounting/recurring-journals,anonymous,PASS,status=401
+EX-API-059b,API-PERMISSION(employee),GET /api/v1/accounting/recurring-journals,employee,RECORDED,status=403 (owner invalid-id/empty-body status=200)
+EX-API-060,API-AUTH(no token),POST /api/v1/accounting/recurring-journals,anonymous,PASS,status=401
+EX-API-060b,API-PERMISSION(employee),POST /api/v1/accounting/recurring-journals,employee,RECORDED,status=403 (owner invalid-id/empty-body status=400)
+EX-API-061,API-AUTH(no token),DELETE /api/v1/accounting/recurring-journals/{id},anonymous,PASS,status=401
+EX-API-061b,API-PERMISSION(employee),DELETE /api/v1/accounting/recurring-journals/{id},employee,RECORDED,status=403 (owner invalid-id/empty-body status=404)
+EX-API-062,API-AUTH(no token),PUT /api/v1/accounting/recurring-journals/{id},anonymous,PASS,status=401
+EX-API-062b,API-PERMISSION(employee),PUT /api/v1/accounting/recurring-journals/{id},employee,RECORDED,status=403 (owner invalid-id/empty-body status=404)
+EX-API-063,API-AUTH(no token),POST /api/v1/accounting/recurring-journals/{id}/run,anonymous,PASS,status=401
+EX-API-063b,API-PERMISSION(employee),POST /api/v1/accounting/recurring-journals/{id}/run,employee,RECORDED,status=403 (owner invalid-id/empty-body status=404)
+EX-API-064,API-AUTH(no token),GET /api/v1/accounting/supplier-invoices,anonymous,PASS,status=401
+EX-API-064b,API-PERMISSION(employee),GET /api/v1/accounting/supplier-invoices,employee,RECORDED,status=403 (owner invalid-id/empty-body status=200)
+EX-API-065,API-AUTH(no token),POST /api/v1/accounting/supplier-invoices,anonymous,PASS,status=401
+EX-API-065b,API-PERMISSION(employee),POST /api/v1/accounting/supplier-invoices,employee,RECORDED,status=403 (owner invalid-id/empty-body status=400)
+EX-API-066,API-AUTH(no token),GET /api/v1/accounting/supplier-invoices/{id},anonymous,PASS,status=401
+EX-API-066b,API-PERMISSION(employee),GET /api/v1/accounting/supplier-invoices/{id},employee,RECORDED,status=403 (owner invalid-id/empty-body status=404)
+EX-API-067,API-AUTH(no token),PUT /api/v1/accounting/supplier-invoices/{id},anonymous,PASS,status=401
+EX-API-067b,API-PERMISSION(employee),PUT /api/v1/accounting/supplier-invoices/{id},employee,RECORDED,status=403 (owner invalid-id/empty-body status=404)
+EX-API-068,API-AUTH(no token),POST /api/v1/accounting/supplier-invoices/{id}/approve,anonymous,PASS,status=401
+EX-API-068b,API-PERMISSION(employee),POST /api/v1/accounting/supplier-invoices/{id}/approve,employee,RECORDED,status=403 (owner invalid-id/empty-body status=404)
+EX-API-069,API-AUTH(no token),POST /api/v1/accounting/supplier-invoices/{id}/void,anonymous,PASS,status=401
+EX-API-069b,API-PERMISSION(employee),POST /api/v1/accounting/supplier-invoices/{id}/void,employee,RECORDED,status=403 (owner invalid-id/empty-body status=404)
+EX-API-070,API-AUTH(no token),GET /api/v1/accounting/supplier-payment-reminders,anonymous,PASS,status=401
+EX-API-070b,API-PERMISSION(employee),GET /api/v1/accounting/supplier-payment-reminders,employee,RECORDED,status=403 (owner invalid-id/empty-body status=200)
+EX-API-071,API-AUTH(no token),GET /api/v1/accounting/supplier-payment-schedules,anonymous,PASS,status=401
+EX-API-071b,API-PERMISSION(employee),GET /api/v1/accounting/supplier-payment-schedules,employee,RECORDED,status=403 (owner invalid-id/empty-body status=200)
+EX-API-072,API-AUTH(no token),POST /api/v1/accounting/supplier-payment-schedules,anonymous,PASS,status=401
+EX-API-072b,API-PERMISSION(employee),POST /api/v1/accounting/supplier-payment-schedules,employee,RECORDED,status=403 (owner invalid-id/empty-body status=400)
+EX-API-073,API-AUTH(no token),POST /api/v1/accounting/supplier-payment-schedules/{id}/send-reminder,anonymous,PASS,status=401
+EX-API-073b,API-PERMISSION(employee),POST /api/v1/accounting/supplier-payment-schedules/{id}/send-reminder,employee,RECORDED,status=403 (owner invalid-id/empty-body status=404)
+EX-API-074,API-AUTH(no token),GET /api/v1/accounting/tax/periods,anonymous,PASS,status=401
+EX-API-074b,API-PERMISSION(employee),GET /api/v1/accounting/tax/periods,employee,RECORDED,status=403 (owner invalid-id/empty-body status=200)
+EX-API-075,API-AUTH(no token),POST /api/v1/accounting/tax/periods,anonymous,PASS,status=401
+EX-API-075b,API-PERMISSION(employee),POST /api/v1/accounting/tax/periods,employee,RECORDED,status=403 (owner invalid-id/empty-body status=400)
+EX-API-076,API-AUTH(no token),DELETE /api/v1/accounting/tax/periods/{id},anonymous,PASS,status=401
+EX-API-076b,API-PERMISSION(employee),DELETE /api/v1/accounting/tax/periods/{id},employee,RECORDED,status=403 (owner invalid-id/empty-body status=400)
+EX-API-077,API-AUTH(no token),GET /api/v1/accounting/tax/periods/{id},anonymous,PASS,status=401
+EX-API-077b,API-PERMISSION(employee),GET /api/v1/accounting/tax/periods/{id},employee,RECORDED,status=403 (owner invalid-id/empty-body status=404)
+EX-API-078,API-AUTH(no token),PUT /api/v1/accounting/tax/periods/{id},anonymous,PASS,status=401
+EX-API-078b,API-PERMISSION(employee),PUT /api/v1/accounting/tax/periods/{id},employee,RECORDED,status=403 (owner invalid-id/empty-body status=400)
+EX-API-079,API-AUTH(no token),POST /api/v1/accounting/tax/periods/{id}/close,anonymous,PASS,status=401
+EX-API-079b,API-PERMISSION(employee),POST /api/v1/accounting/tax/periods/{id}/close,employee,RECORDED,status=403 (owner invalid-id/empty-body status=400)
+EX-API-080,API-AUTH(no token),GET /api/v1/accounting/tax/vat-report,anonymous,PASS,status=401
+EX-API-080b,API-PERMISSION(employee),GET /api/v1/accounting/tax/vat-report,employee,RECORDED,status=403 (owner invalid-id/empty-body status=200)
+EX-API-081,API-AUTH(no token),GET /api/v1/accounting/trial-balance,anonymous,PASS,status=401
+EX-API-081b,API-PERMISSION(employee),GET /api/v1/accounting/trial-balance,employee,RECORDED,status=403 (owner invalid-id/empty-body status=200)
+EX-API-082,API-AUTH(no token),GET /api/v1/admin/drivers,anonymous,PASS,status=401
+EX-API-082b,API-PERMISSION(employee),GET /api/v1/admin/drivers,employee,RECORDED,status=200 (owner invalid-id/empty-body status=200)
+EX-API-083,API-AUTH(no token),POST /api/v1/admin/drivers,anonymous,PASS,status=401
+EX-API-083b,API-PERMISSION(employee),POST /api/v1/admin/drivers,employee,RECORDED,status=403 (owner invalid-id/empty-body status=400)
+EX-API-084,API-AUTH(no token),GET /api/v1/admin/drivers/available,anonymous,PASS,status=401
+EX-API-084b,API-PERMISSION(employee),GET /api/v1/admin/drivers/available,employee,RECORDED,status=200 (owner invalid-id/empty-body status=200)
+EX-API-085,API-AUTH(no token),DELETE /api/v1/admin/drivers/{id},anonymous,PASS,status=401
+EX-API-085b,API-PERMISSION(employee),DELETE /api/v1/admin/drivers/{id},employee,RECORDED,status=403 (owner invalid-id/empty-body status=404)
+EX-API-086,API-AUTH(no token),GET /api/v1/admin/drivers/{id},anonymous,PASS,status=401
+EX-API-086b,API-PERMISSION(employee),GET /api/v1/admin/drivers/{id},employee,RECORDED,status=404 (owner invalid-id/empty-body status=404)
+EX-API-087,API-AUTH(no token),PUT /api/v1/admin/drivers/{id},anonymous,PASS,status=401
+EX-API-087b,API-PERMISSION(employee),PUT /api/v1/admin/drivers/{id},employee,RECORDED,status=403 (owner invalid-id/empty-body status=404)
+EX-API-088,API-AUTH(no token),PUT /api/v1/admin/drivers/{id}/status,anonymous,PASS,status=401
+EX-API-088b,API-PERMISSION(employee),PUT /api/v1/admin/drivers/{id}/status,employee,RECORDED,status=403 (owner invalid-id/empty-body status=404)
+EX-API-089,API-AUTH(no token),GET /api/v1/admin/orders,anonymous,PASS,status=401
+EX-API-089b,API-PERMISSION(employee),GET /api/v1/admin/orders,employee,RECORDED,status=200 (owner invalid-id/empty-body status=200)
+EX-API-090,API-AUTH(no token),GET /api/v1/admin/orders/export,anonymous,PASS,status=401
+EX-API-090b,API-PERMISSION(employee),GET /api/v1/admin/orders/export,employee,RECORDED,status=200 (owner invalid-id/empty-body status=200)
+EX-API-091,API-AUTH(no token),GET /api/v1/admin/orders/stats,anonymous,PASS,status=401
+EX-API-091b,API-PERMISSION(employee),GET /api/v1/admin/orders/stats,employee,RECORDED,status=200 (owner invalid-id/empty-body status=200)
+EX-API-092,API-AUTH(no token),DELETE /api/v1/admin/orders/{id},anonymous,PASS,status=401
+EX-API-092b,API-PERMISSION(employee),DELETE /api/v1/admin/orders/{id},employee,RECORDED,status=403 (owner invalid-id/empty-body status=404)
+EX-API-093,API-AUTH(no token),GET /api/v1/admin/orders/{id},anonymous,PASS,status=401
+EX-API-093b,API-PERMISSION(employee),GET /api/v1/admin/orders/{id},employee,RECORDED,status=404 (owner invalid-id/empty-body status=404)
+EX-API-094,API-AUTH(no token),GET /api/v1/admin/orders/{id}/history,anonymous,PASS,status=401
+EX-API-094b,API-PERMISSION(employee),GET /api/v1/admin/orders/{id}/history,employee,RECORDED,status=200 (owner invalid-id/empty-body status=200)
+EX-API-095,API-AUTH(no token),POST /api/v1/admin/orders/{id}/items/{item_id}/cancel,anonymous,PASS,status=401
+EX-API-095b,API-PERMISSION(employee),POST /api/v1/admin/orders/{id}/items/{item_id}/cancel,employee,RECORDED,status=403 (owner invalid-id/empty-body status=400)
+EX-API-096,API-AUTH(no token),PUT /api/v1/admin/orders/{id}/payment-status,anonymous,PASS,status=401
+EX-API-096b,API-PERMISSION(employee),PUT /api/v1/admin/orders/{id}/payment-status,employee,RECORDED,status=403 (owner invalid-id/empty-body status=400)
+EX-API-097,API-AUTH(no token),PUT /api/v1/admin/orders/{id}/status,anonymous,PASS,status=401
+EX-API-097b,API-PERMISSION(employee),PUT /api/v1/admin/orders/{id}/status,employee,RECORDED,status=403 (owner invalid-id/empty-body status=400)
+EX-API-098,API-AUTH(no token),POST /api/v1/admin/orders/{orderId}/assign,anonymous,PASS,status=401
+EX-API-098b,API-PERMISSION(employee),POST /api/v1/admin/orders/{orderId}/assign,employee,RECORDED,status=403 (owner invalid-id/empty-body status=400)
+EX-API-099,API-AUTH(no token),GET /api/v1/admin/theme-presets,anonymous,PASS,status=401
+EX-API-099b,API-PERMISSION(employee),GET /api/v1/admin/theme-presets,employee,RECORDED,status=403 (owner invalid-id/empty-body status=200)
+EX-API-100,API-AUTH(no token),GET /api/v1/admin/themes,anonymous,PASS,status=401
+EX-API-100b,API-PERMISSION(employee),GET /api/v1/admin/themes,employee,RECORDED,status=403 (owner invalid-id/empty-body status=200)
+EX-API-101,API-AUTH(no token),POST /api/v1/admin/themes,anonymous,PASS,status=401
+EX-API-101b,API-PERMISSION(employee),POST /api/v1/admin/themes,employee,RECORDED,status=403 (owner invalid-id/empty-body status=400)
+EX-API-102,API-AUTH(no token),DELETE /api/v1/admin/themes/{id},anonymous,PASS,status=401
+EX-API-102b,API-PERMISSION(employee),DELETE /api/v1/admin/themes/{id},employee,RECORDED,status=403 (owner invalid-id/empty-body status=404)
+EX-API-103,API-AUTH(no token),GET /api/v1/admin/themes/{id},anonymous,PASS,status=401
+EX-API-103b,API-PERMISSION(employee),GET /api/v1/admin/themes/{id},employee,RECORDED,status=403 (owner invalid-id/empty-body status=404)
+EX-API-104,API-AUTH(no token),PUT /api/v1/admin/themes/{id},anonymous,PASS,status=401
+EX-API-104b,API-PERMISSION(employee),PUT /api/v1/admin/themes/{id},employee,RECORDED,status=403 (owner invalid-id/empty-body status=404)
+EX-API-105,API-AUTH(no token),POST /api/v1/admin/themes/{id}/activate,anonymous,PASS,status=401
+EX-API-105b,API-PERMISSION(employee),POST /api/v1/admin/themes/{id}/activate,employee,RECORDED,status=403 (owner invalid-id/empty-body status=404)
+EX-API-106,API-AUTH(no token),POST /api/v1/admin/themes/{id}/duplicate,anonymous,PASS,status=401
+EX-API-106b,API-PERMISSION(employee),POST /api/v1/admin/themes/{id}/duplicate,employee,RECORDED,status=403 (owner invalid-id/empty-body status=404)
+EX-API-107,API-AUTH(no token),GET /api/v1/admin/themes/{id}/history,anonymous,PASS,status=401
+EX-API-107b,API-PERMISSION(employee),GET /api/v1/admin/themes/{id}/history,employee,RECORDED,status=403 (owner invalid-id/empty-body status=501)
+EX-API-108,API-AUTH(no token),GET /api/v1/audit/export,anonymous,PASS,status=401
+EX-API-108b,API-PERMISSION(employee),GET /api/v1/audit/export,employee,RECORDED,status=403 (owner invalid-id/empty-body status=200)
+EX-API-109,API-AUTH(no token),GET /api/v1/auth/check-subdomain,anonymous,PASS,status=400
+EX-API-109b,API-PERMISSION(employee),GET /api/v1/auth/check-subdomain,employee,RECORDED,status=400 (owner invalid-id/empty-body status=400)
+EX-API-110,API-AUTH(no token),POST /api/v1/auth/forgot-password,anonymous,PASS,status=400
+EX-API-110b,API-PERMISSION(employee),POST /api/v1/auth/forgot-password,employee,RECORDED,status=400 (owner invalid-id/empty-body status=429)
+EX-API-111,API-AUTH,POST /api/v1/auth/login,all,NOT EXECUTED (skipped: session-altering/destructive),
+EX-API-112,API-AUTH,POST /api/v1/auth/login/confirm,all,NOT EXECUTED (skipped: session-altering/destructive),
+EX-API-113,API-AUTH,POST /api/v1/auth/logout,all,NOT EXECUTED (skipped: session-altering/destructive),
+EX-API-114,API-AUTH,POST /api/v1/auth/refresh,all,NOT EXECUTED (skipped: session-altering/destructive),
+EX-API-115,API-AUTH,POST /api/v1/auth/register,all,NOT EXECUTED (skipped: session-altering/destructive),
+EX-API-116,API-AUTH(no token),GET /api/v1/auth/session,anonymous,PASS,status=401
+EX-API-116b,API-PERMISSION(employee),GET /api/v1/auth/session,employee,RECORDED,status=200 (owner invalid-id/empty-body status=200)
+EX-API-117,API-AUTH(no token),GET /api/v1/categories,anonymous,PASS,status=401
+EX-API-117b,API-PERMISSION(employee),GET /api/v1/categories,employee,RECORDED,status=200 (owner invalid-id/empty-body status=200)
+EX-API-118,API-AUTH(no token),POST /api/v1/categories,anonymous,PASS,status=401
+EX-API-118b,API-PERMISSION(employee),POST /api/v1/categories,employee,RECORDED,status=403 (owner invalid-id/empty-body status=400)
+EX-API-119,API-AUTH(no token),DELETE /api/v1/categories/{id},anonymous,PASS,status=401
+EX-API-119b,API-PERMISSION(employee),DELETE /api/v1/categories/{id},employee,RECORDED,status=403 (owner invalid-id/empty-body status=404)
+EX-API-120,API-AUTH(no token),GET /api/v1/categories/{id},anonymous,PASS,status=401
+EX-API-120b,API-PERMISSION(employee),GET /api/v1/categories/{id},employee,RECORDED,status=404 (owner invalid-id/empty-body status=404)
+EX-API-121,API-AUTH(no token),PUT /api/v1/categories/{id},anonymous,PASS,status=401
+EX-API-121b,API-PERMISSION(employee),PUT /api/v1/categories/{id},employee,RECORDED,status=403 (owner invalid-id/empty-body status=400)
+EX-API-122,API-AUTH(no token),GET /api/v1/health,anonymous,PASS,status=200
+EX-API-122b,API-PERMISSION(employee),GET /api/v1/health,employee,RECORDED,status=200 (owner invalid-id/empty-body status=200)
+EX-API-123,API-AUTH(no token),GET /api/v1/health/metrics,anonymous,PASS,status=200
+EX-API-123b,API-PERMISSION(employee),GET /api/v1/health/metrics,employee,RECORDED,status=200 (owner invalid-id/empty-body status=200)
+EX-API-124,API-AUTH(no token),GET /api/v1/health/ready,anonymous,PASS,status=200
+EX-API-124b,API-PERMISSION(employee),GET /api/v1/health/ready,employee,RECORDED,status=200 (owner invalid-id/empty-body status=200)
+EX-API-125,API-AUTH(no token),GET /api/v1/hr/attendance,anonymous,PASS,status=401
+EX-API-125b,API-PERMISSION(employee),GET /api/v1/hr/attendance,employee,RECORDED,status=200 (owner invalid-id/empty-body status=200)
+EX-API-126,API-AUTH(no token),POST /api/v1/hr/attendance,anonymous,PASS,status=401
+EX-API-126b,API-PERMISSION(employee),POST /api/v1/hr/attendance,employee,RECORDED,status=403 (owner invalid-id/empty-body status=400)
+EX-API-127,API-AUTH(no token),POST /api/v1/hr/attendance/clock-in,anonymous,PASS,status=401
+EX-API-127b,API-PERMISSION(employee),POST /api/v1/hr/attendance/clock-in,employee,RECORDED,status=403 (owner invalid-id/empty-body status=400)
+EX-API-128,API-AUTH(no token),DELETE /api/v1/hr/attendance/{id},anonymous,PASS,status=401
+EX-API-128b,API-PERMISSION(employee),DELETE /api/v1/hr/attendance/{id},employee,RECORDED,status=403 (owner invalid-id/empty-body status=200)
+EX-API-129,API-AUTH(no token),GET /api/v1/hr/attendance/{id},anonymous,PASS,status=401
+EX-API-129b,API-PERMISSION(employee),GET /api/v1/hr/attendance/{id},employee,RECORDED,status=404 (owner invalid-id/empty-body status=404)
+EX-API-130,API-AUTH(no token),PUT /api/v1/hr/attendance/{id},anonymous,PASS,status=401
+EX-API-130b,API-PERMISSION(employee),PUT /api/v1/hr/attendance/{id},employee,RECORDED,status=403 (owner invalid-id/empty-body status=404)
+EX-API-131,API-AUTH(no token),GET /api/v1/hr/contracts,anonymous,PASS,status=401
+EX-API-131b,API-PERMISSION(employee),GET /api/v1/hr/contracts,employee,RECORDED,status=403 (owner invalid-id/empty-body status=200)
+EX-API-132,API-AUTH(no token),POST /api/v1/hr/contracts,anonymous,PASS,status=401
+EX-API-132b,API-PERMISSION(employee),POST /api/v1/hr/contracts,employee,RECORDED,status=403 (owner invalid-id/empty-body status=400)
+EX-API-133,API-AUTH(no token),GET /api/v1/hr/contracts/expiring,anonymous,PASS,status=401
+EX-API-133b,API-PERMISSION(employee),GET /api/v1/hr/contracts/expiring,employee,RECORDED,status=403 (owner invalid-id/empty-body status=200)
+EX-API-134,API-AUTH(no token),DELETE /api/v1/hr/contracts/{id},anonymous,PASS,status=401
+EX-API-134b,API-PERMISSION(employee),DELETE /api/v1/hr/contracts/{id},employee,RECORDED,status=403 (owner invalid-id/empty-body status=400)
+EX-API-135,API-AUTH(no token),GET /api/v1/hr/contracts/{id},anonymous,PASS,status=401
+EX-API-135b,API-PERMISSION(employee),GET /api/v1/hr/contracts/{id},employee,RECORDED,status=403 (owner invalid-id/empty-body status=404)
+EX-API-136,API-AUTH(no token),PUT /api/v1/hr/contracts/{id},anonymous,PASS,status=401
+EX-API-136b,API-PERMISSION(employee),PUT /api/v1/hr/contracts/{id},employee,RECORDED,status=403 (owner invalid-id/empty-body status=400)
+EX-API-137,API-AUTH(no token),POST /api/v1/hr/contracts/{id}/renew,anonymous,PASS,status=401
+EX-API-137b,API-PERMISSION(employee),POST /api/v1/hr/contracts/{id}/renew,employee,RECORDED,status=403 (owner invalid-id/empty-body status=400)
+EX-API-138,API-AUTH(no token),GET /api/v1/hr/employees,anonymous,PASS,status=401
+EX-API-138b,API-PERMISSION(employee),GET /api/v1/hr/employees,employee,RECORDED,status=200 (owner invalid-id/empty-body status=200)
+EX-API-139,API-AUTH(no token),POST /api/v1/hr/employees,anonymous,PASS,status=401
+EX-API-139b,API-PERMISSION(employee),POST /api/v1/hr/employees,employee,RECORDED,status=403 (owner invalid-id/empty-body status=400)
+EX-API-140,API-AUTH(no token),DELETE /api/v1/hr/employees/{id},anonymous,PASS,status=401
+EX-API-140b,API-PERMISSION(employee),DELETE /api/v1/hr/employees/{id},employee,RECORDED,status=403 (owner invalid-id/empty-body status=200)
+EX-API-141,API-AUTH(no token),GET /api/v1/hr/employees/{id},anonymous,PASS,status=401
+EX-API-141b,API-PERMISSION(employee),GET /api/v1/hr/employees/{id},employee,RECORDED,status=404 (owner invalid-id/empty-body status=404)
+EX-API-142,API-AUTH(no token),PUT /api/v1/hr/employees/{id},anonymous,PASS,status=401
+EX-API-142b,API-PERMISSION(employee),PUT /api/v1/hr/employees/{id},employee,RECORDED,status=403 (owner invalid-id/empty-body status=404)
+EX-API-143,API-AUTH(no token),GET /api/v1/hr/insurance,anonymous,PASS,status=401
+EX-API-143b,API-PERMISSION(employee),GET /api/v1/hr/insurance,employee,RECORDED,status=403 (owner invalid-id/empty-body status=200)
+EX-API-144,API-AUTH(no token),POST /api/v1/hr/insurance,anonymous,PASS,status=401
+EX-API-144b,API-PERMISSION(employee),POST /api/v1/hr/insurance,employee,RECORDED,status=403 (owner invalid-id/empty-body status=400)
+EX-API-145,API-AUTH(no token),GET /api/v1/hr/insurance/expiring,anonymous,PASS,status=401
+EX-API-145b,API-PERMISSION(employee),GET /api/v1/hr/insurance/expiring,employee,RECORDED,status=403 (owner invalid-id/empty-body status=200)
+EX-API-146,API-AUTH(no token),DELETE /api/v1/hr/insurance/{id},anonymous,PASS,status=401
+EX-API-146b,API-PERMISSION(employee),DELETE /api/v1/hr/insurance/{id},employee,RECORDED,status=403 (owner invalid-id/empty-body status=400)
+EX-API-147,API-AUTH(no token),GET /api/v1/hr/insurance/{id},anonymous,PASS,status=401
+EX-API-147b,API-PERMISSION(employee),GET /api/v1/hr/insurance/{id},employee,RECORDED,status=403 (owner invalid-id/empty-body status=404)
+EX-API-148,API-AUTH(no token),PUT /api/v1/hr/insurance/{id},anonymous,PASS,status=401
+EX-API-148b,API-PERMISSION(employee),PUT /api/v1/hr/insurance/{id},employee,RECORDED,status=403 (owner invalid-id/empty-body status=400)
+EX-API-149,API-AUTH(no token),GET /api/v1/hr/leaves,anonymous,PASS,status=401
+EX-API-149b,API-PERMISSION(employee),GET /api/v1/hr/leaves,employee,RECORDED,status=200 (owner invalid-id/empty-body status=200)
+EX-API-150,API-AUTH(no token),POST /api/v1/hr/leaves,anonymous,PASS,status=401
+EX-API-150b,API-PERMISSION(employee),POST /api/v1/hr/leaves,employee,RECORDED,status=403 (owner invalid-id/empty-body status=400)
+EX-API-151,API-AUTH(no token),DELETE /api/v1/hr/leaves/{id},anonymous,PASS,status=401
+EX-API-151b,API-PERMISSION(employee),DELETE /api/v1/hr/leaves/{id},employee,RECORDED,status=403 (owner invalid-id/empty-body status=200)
+EX-API-152,API-AUTH(no token),GET /api/v1/hr/leaves/{id},anonymous,PASS,status=401
+EX-API-152b,API-PERMISSION(employee),GET /api/v1/hr/leaves/{id},employee,RECORDED,status=404 (owner invalid-id/empty-body status=404)
+EX-API-153,API-AUTH(no token),PUT /api/v1/hr/leaves/{id},anonymous,PASS,status=401
+EX-API-153b,API-PERMISSION(employee),PUT /api/v1/hr/leaves/{id},employee,RECORDED,status=403 (owner invalid-id/empty-body status=404)
+EX-API-154,API-AUTH(no token),POST /api/v1/hr/leaves/{id}/approve,anonymous,PASS,status=401
+EX-API-154b,API-PERMISSION(employee),POST /api/v1/hr/leaves/{id}/approve,employee,RECORDED,status=403 (owner invalid-id/empty-body status=200)
+EX-API-155,API-AUTH(no token),POST /api/v1/hr/leaves/{id}/reject,anonymous,PASS,status=401
+EX-API-155b,API-PERMISSION(employee),POST /api/v1/hr/leaves/{id}/reject,employee,RECORDED,status=403 (owner invalid-id/empty-body status=200)
+EX-API-156,API-AUTH(no token),GET /api/v1/hr/performance,anonymous,PASS,status=401
+EX-API-156b,API-PERMISSION(employee),GET /api/v1/hr/performance,employee,RECORDED,status=403 (owner invalid-id/empty-body status=200)
+EX-API-157,API-AUTH(no token),POST /api/v1/hr/performance,anonymous,PASS,status=401
+EX-API-157b,API-PERMISSION(employee),POST /api/v1/hr/performance,employee,RECORDED,status=403 (owner invalid-id/empty-body status=400)
+EX-API-158,API-AUTH(no token),GET /api/v1/hr/performance/employee/{employeeId},anonymous,PASS,status=401
+EX-API-158b,API-PERMISSION(employee),GET /api/v1/hr/performance/employee/{employeeId},employee,RECORDED,status=403 (owner invalid-id/empty-body status=200)
+EX-API-159,API-AUTH(no token),DELETE /api/v1/hr/performance/{id},anonymous,PASS,status=401
+EX-API-159b,API-PERMISSION(employee),DELETE /api/v1/hr/performance/{id},employee,RECORDED,status=403 (owner invalid-id/empty-body status=400)
+EX-API-160,API-AUTH(no token),GET /api/v1/hr/performance/{id},anonymous,PASS,status=401
+EX-API-160b,API-PERMISSION(employee),GET /api/v1/hr/performance/{id},employee,RECORDED,status=403 (owner invalid-id/empty-body status=404)
+EX-API-161,API-AUTH(no token),PUT /api/v1/hr/performance/{id},anonymous,PASS,status=401
+EX-API-161b,API-PERMISSION(employee),PUT /api/v1/hr/performance/{id},employee,RECORDED,status=403 (owner invalid-id/empty-body status=400)
+EX-API-162,API-AUTH(no token),POST /api/v1/hr/performance/{id}/acknowledge,anonymous,PASS,status=401
+EX-API-162b,API-PERMISSION(employee),POST /api/v1/hr/performance/{id}/acknowledge,employee,RECORDED,status=403 (owner invalid-id/empty-body status=400)
+EX-API-163,API-AUTH(no token),POST /api/v1/hr/performance/{id}/complete,anonymous,PASS,status=401
+EX-API-163b,API-PERMISSION(employee),POST /api/v1/hr/performance/{id}/complete,employee,RECORDED,status=403 (owner invalid-id/empty-body status=400)
+EX-API-164,API-AUTH(no token),GET /api/v1/hr/resignations,anonymous,PASS,status=401
+EX-API-164b,API-PERMISSION(employee),GET /api/v1/hr/resignations,employee,RECORDED,status=403 (owner invalid-id/empty-body status=200)
+EX-API-165,API-AUTH(no token),POST /api/v1/hr/resignations,anonymous,PASS,status=401
+EX-API-165b,API-PERMISSION(employee),POST /api/v1/hr/resignations,employee,RECORDED,status=403 (owner invalid-id/empty-body status=400)
+EX-API-166,API-AUTH(no token),DELETE /api/v1/hr/resignations/{id},anonymous,PASS,status=401
+EX-API-166b,API-PERMISSION(employee),DELETE /api/v1/hr/resignations/{id},employee,RECORDED,status=403 (owner invalid-id/empty-body status=400)
+EX-API-167,API-AUTH(no token),GET /api/v1/hr/resignations/{id},anonymous,PASS,status=401
+EX-API-167b,API-PERMISSION(employee),GET /api/v1/hr/resignations/{id},employee,RECORDED,status=403 (owner invalid-id/empty-body status=404)
+EX-API-168,API-AUTH(no token),PUT /api/v1/hr/resignations/{id},anonymous,PASS,status=401
+EX-API-168b,API-PERMISSION(employee),PUT /api/v1/hr/resignations/{id},employee,RECORDED,status=403 (owner invalid-id/empty-body status=400)
+EX-API-169,API-AUTH(no token),POST /api/v1/hr/resignations/{id}/acknowledge,anonymous,PASS,status=401
+EX-API-169b,API-PERMISSION(employee),POST /api/v1/hr/resignations/{id}/acknowledge,employee,RECORDED,status=403 (owner invalid-id/empty-body status=400)
+EX-API-170,API-AUTH(no token),POST /api/v1/hr/resignations/{id}/complete,anonymous,PASS,status=401
+EX-API-170b,API-PERMISSION(employee),POST /api/v1/hr/resignations/{id}/complete,employee,RECORDED,status=403 (owner invalid-id/empty-body status=404)
+EX-API-171,API-AUTH(no token),GET /api/v1/hr/resignations/{id}/settlement,anonymous,PASS,status=401
+EX-API-171b,API-PERMISSION(employee),GET /api/v1/hr/resignations/{id}/settlement,employee,RECORDED,status=403 (owner invalid-id/empty-body status=404)
+EX-API-172,API-AUTH(no token),GET /api/v1/hr/roles,anonymous,PASS,status=401
+EX-API-172b,API-PERMISSION(employee),GET /api/v1/hr/roles,employee,RECORDED,status=200 (owner invalid-id/empty-body status=200)
+EX-API-173,API-AUTH(no token),POST /api/v1/hr/roles,anonymous,PASS,status=401
+EX-API-173b,API-PERMISSION(employee),POST /api/v1/hr/roles,employee,RECORDED,status=403 (owner invalid-id/empty-body status=400)
+EX-API-174,API-AUTH(no token),DELETE /api/v1/hr/roles/{id},anonymous,PASS,status=401
+EX-API-174b,API-PERMISSION(employee),DELETE /api/v1/hr/roles/{id},employee,RECORDED,status=403 (owner invalid-id/empty-body status=200)
+EX-API-175,API-AUTH(no token),PUT /api/v1/hr/roles/{id},anonymous,PASS,status=401
+EX-API-175b,API-PERMISSION(employee),PUT /api/v1/hr/roles/{id},employee,RECORDED,status=403 (owner invalid-id/empty-body status=200)
+EX-API-176,API-AUTH(no token),GET /api/v1/hr/salaries,anonymous,PASS,status=401
+EX-API-176b,API-PERMISSION(employee),GET /api/v1/hr/salaries,employee,RECORDED,status=403 (owner invalid-id/empty-body status=200)
+EX-API-177,API-AUTH(no token),POST /api/v1/hr/salaries,anonymous,PASS,status=401
+EX-API-177b,API-PERMISSION(employee),POST /api/v1/hr/salaries,employee,RECORDED,status=403 (owner invalid-id/empty-body status=400)
+EX-API-178,API-AUTH(no token),DELETE /api/v1/hr/salaries/{id},anonymous,PASS,status=401
+EX-API-178b,API-PERMISSION(employee),DELETE /api/v1/hr/salaries/{id},employee,RECORDED,status=403 (owner invalid-id/empty-body status=404)
+EX-API-179,API-AUTH(no token),GET /api/v1/hr/salaries/{id},anonymous,PASS,status=401
+EX-API-179b,API-PERMISSION(employee),GET /api/v1/hr/salaries/{id},employee,RECORDED,status=403 (owner invalid-id/empty-body status=404)
+EX-API-180,API-AUTH(no token),PUT /api/v1/hr/salaries/{id},anonymous,PASS,status=401
+EX-API-180b,API-PERMISSION(employee),PUT /api/v1/hr/salaries/{id},employee,RECORDED,status=403 (owner invalid-id/empty-body status=404)
+EX-API-181,API-AUTH(no token),POST /api/v1/hr/salaries/{id}/mark-paid,anonymous,PASS,status=401
+EX-API-181b,API-PERMISSION(employee),POST /api/v1/hr/salaries/{id}/mark-paid,employee,RECORDED,status=403 (owner invalid-id/empty-body status=404)
+EX-API-182,API-AUTH(no token),GET /api/v1/hr/training,anonymous,PASS,status=401
+EX-API-182b,API-PERMISSION(employee),GET /api/v1/hr/training,employee,RECORDED,status=403 (owner invalid-id/empty-body status=200)
+EX-API-183,API-AUTH(no token),POST /api/v1/hr/training,anonymous,PASS,status=401
+EX-API-183b,API-PERMISSION(employee),POST /api/v1/hr/training,employee,RECORDED,status=403 (owner invalid-id/empty-body status=400)
+EX-API-184,API-AUTH(no token),GET /api/v1/hr/training/expiring,anonymous,PASS,status=401
+EX-API-184b,API-PERMISSION(employee),GET /api/v1/hr/training/expiring,employee,RECORDED,status=403 (owner invalid-id/empty-body status=200)
+EX-API-185,API-AUTH(no token),DELETE /api/v1/hr/training/{id},anonymous,PASS,status=401
+EX-API-185b,API-PERMISSION(employee),DELETE /api/v1/hr/training/{id},employee,RECORDED,status=403 (owner invalid-id/empty-body status=400)
+EX-API-186,API-AUTH(no token),GET /api/v1/hr/training/{id},anonymous,PASS,status=401
+EX-API-186b,API-PERMISSION(employee),GET /api/v1/hr/training/{id},employee,RECORDED,status=403 (owner invalid-id/empty-body status=404)
+EX-API-187,API-AUTH(no token),PUT /api/v1/hr/training/{id},anonymous,PASS,status=401
+EX-API-187b,API-PERMISSION(employee),PUT /api/v1/hr/training/{id},employee,RECORDED,status=403 (owner invalid-id/empty-body status=400)
+EX-API-188,API-AUTH(no token),GET /api/v1/impersonation/check,anonymous,PASS,status=200
+EX-API-188b,API-PERMISSION(employee),GET /api/v1/impersonation/check,employee,RECORDED,status=200 (owner invalid-id/empty-body status=200)
+EX-API-189,API-AUTH(no token),POST /api/v1/impersonation/end,anonymous,PASS,status=400
+EX-API-189b,API-PERMISSION(employee),POST /api/v1/impersonation/end,employee,RECORDED,status=400 (owner invalid-id/empty-body status=400)
+EX-API-190,API-AUTH(no token),GET /api/v1/impersonation/validate,anonymous,PASS,status=400
+EX-API-190b,API-PERMISSION(employee),GET /api/v1/impersonation/validate,employee,RECORDED,status=400 (owner invalid-id/empty-body status=400)
+EX-API-191,API-AUTH(no token),POST /api/v1/inventory/adjust,anonymous,PASS,status=401
+EX-API-191b,API-PERMISSION(employee),POST /api/v1/inventory/adjust,employee,RECORDED,status=403 (owner invalid-id/empty-body status=400)
+EX-API-192,API-AUTH(no token),GET /api/v1/kds/analytics,anonymous,PASS,status=401
+EX-API-192b,API-PERMISSION(employee),GET /api/v1/kds/analytics,employee,RECORDED,status=403 (owner invalid-id/empty-body status=200)
+EX-API-193,API-AUTH(no token),PUT /api/v1/kds/orders/{id}/bump,anonymous,PASS,status=401
+EX-API-193b,API-PERMISSION(employee),PUT /api/v1/kds/orders/{id}/bump,employee,RECORDED,status=404 (owner invalid-id/empty-body status=404)
+EX-API-194,API-AUTH(no token),PUT /api/v1/kds/orders/{id}/recall,anonymous,PASS,status=401
+EX-API-194b,API-PERMISSION(employee),PUT /api/v1/kds/orders/{id}/recall,employee,RECORDED,status=404 (owner invalid-id/empty-body status=404)
+EX-API-195,API-AUTH(no token),GET /api/v1/kds/queue,anonymous,PASS,status=401
+EX-API-195b,API-PERMISSION(employee),GET /api/v1/kds/queue,employee,RECORDED,status=200 (owner invalid-id/empty-body status=200)
+EX-API-196,API-AUTH(no token),GET /api/v1/kds/settings,anonymous,PASS,status=401
+EX-API-196b,API-PERMISSION(employee),GET /api/v1/kds/settings,employee,RECORDED,status=200 (owner invalid-id/empty-body status=200)
+EX-API-197,API-AUTH(no token),PUT /api/v1/kds/settings,anonymous,PASS,status=401
+EX-API-197b,API-PERMISSION(employee),PUT /api/v1/kds/settings,employee,RECORDED,status=403 (owner invalid-id/empty-body status=400)
+EX-API-198,API-AUTH(no token),GET /api/v1/kds/stats,anonymous,PASS,status=401
+EX-API-198b,API-PERMISSION(employee),GET /api/v1/kds/stats,employee,RECORDED,status=200 (owner invalid-id/empty-body status=200)
+EX-API-199,API-AUTH(no token),GET /api/v1/kds/ws,anonymous,PASS,status=401
+EX-API-199b,API-PERMISSION(employee),GET /api/v1/kds/ws,employee,RECORDED,status=400 (owner invalid-id/empty-body status=400)
+EX-API-200,API-AUTH(no token),GET /api/v1/me,anonymous,PASS,status=401
+EX-API-200b,API-PERMISSION(employee),GET /api/v1/me,employee,RECORDED,status=200 (owner invalid-id/empty-body status=200)
+EX-API-201,API-AUTH(no token),GET /api/v1/mock/paymob/iframe,anonymous,PASS,status=400
+EX-API-201b,API-PERMISSION(employee),GET /api/v1/mock/paymob/iframe,employee,RECORDED,status=400 (owner invalid-id/empty-body status=400)
+EX-API-202,API-AUTH(no token),POST /api/v1/mock/paymob/process,anonymous,PASS,status=400
+EX-API-202b,API-PERMISSION(employee),POST /api/v1/mock/paymob/process,employee,RECORDED,status=400 (owner invalid-id/empty-body status=400)
+EX-API-203,API-AUTH(no token),GET /api/v1/notifications,anonymous,PASS,status=401
+EX-API-203b,API-PERMISSION(employee),GET /api/v1/notifications,employee,RECORDED,status=200 (owner invalid-id/empty-body status=200)
+EX-API-204,API-AUTH(no token),GET /api/v1/notifications,anonymous,PASS,status=401
+EX-API-204b,API-PERMISSION(employee),GET /api/v1/notifications,employee,RECORDED,status=200 (owner invalid-id/empty-body status=200)
+EX-API-205,API-AUTH(no token),POST /api/v1/notifications,anonymous,PASS,status=401
+EX-API-205b,API-PERMISSION(employee),POST /api/v1/notifications,employee,RECORDED,status=403 (owner invalid-id/empty-body status=500)
+EX-API-206,API-AUTH(no token),POST /api/v1/notifications,anonymous,PASS,status=401
+EX-API-206b,API-PERMISSION(employee),POST /api/v1/notifications,employee,RECORDED,status=403 (owner invalid-id/empty-body status=500)
+EX-API-207,API-AUTH(no token),POST /api/v1/notifications/mark-all-read,anonymous,PASS,status=401
+EX-API-207b,API-PERMISSION(employee),POST /api/v1/notifications/mark-all-read,employee,RECORDED,status=200 (owner invalid-id/empty-body status=200)
+EX-API-208,API-AUTH(no token),POST /api/v1/notifications/mark-all-read,anonymous,PASS,status=401
+EX-API-208b,API-PERMISSION(employee),POST /api/v1/notifications/mark-all-read,employee,RECORDED,status=200 (owner invalid-id/empty-body status=200)
+EX-API-209,API-AUTH(no token),GET /api/v1/notifications/stats,anonymous,PASS,status=401
+EX-API-209b,API-PERMISSION(employee),GET /api/v1/notifications/stats,employee,RECORDED,status=200 (owner invalid-id/empty-body status=200)
+EX-API-210,API-AUTH(no token),GET /api/v1/notifications/stats,anonymous,PASS,status=401
+EX-API-210b,API-PERMISSION(employee),GET /api/v1/notifications/stats,employee,RECORDED,status=200 (owner invalid-id/empty-body status=200)
+EX-API-211,API-AUTH(no token),GET /api/v1/notifications/unread-count,anonymous,PASS,status=401
+EX-API-211b,API-PERMISSION(employee),GET /api/v1/notifications/unread-count,employee,RECORDED,status=200 (owner invalid-id/empty-body status=200)
+EX-API-212,API-AUTH(no token),GET /api/v1/notifications/unread-count,anonymous,PASS,status=401
+EX-API-212b,API-PERMISSION(employee),GET /api/v1/notifications/unread-count,employee,RECORDED,status=200 (owner invalid-id/empty-body status=200)
+EX-API-213,API-AUTH(no token),DELETE /api/v1/notifications/{id},anonymous,PASS,status=401
+EX-API-213b,API-PERMISSION(employee),DELETE /api/v1/notifications/{id},employee,RECORDED,status=403 (owner invalid-id/empty-body status=404)
+EX-API-214,API-AUTH(no token),DELETE /api/v1/notifications/{id},anonymous,PASS,status=401
+EX-API-214b,API-PERMISSION(employee),DELETE /api/v1/notifications/{id},employee,RECORDED,status=403 (owner invalid-id/empty-body status=404)
+EX-API-215,API-AUTH(no token),GET /api/v1/notifications/{id},anonymous,PASS,status=401
+EX-API-215b,API-PERMISSION(employee),GET /api/v1/notifications/{id},employee,RECORDED,status=404 (owner invalid-id/empty-body status=404)
+EX-API-216,API-AUTH(no token),GET /api/v1/notifications/{id},anonymous,PASS,status=401
+EX-API-216b,API-PERMISSION(employee),GET /api/v1/notifications/{id},employee,RECORDED,status=404 (owner invalid-id/empty-body status=404)
+EX-API-217,API-AUTH(no token),POST /api/v1/notifications/{id}/read,anonymous,PASS,status=401
+EX-API-217b,API-PERMISSION(employee),POST /api/v1/notifications/{id}/read,employee,RECORDED,status=404 (owner invalid-id/empty-body status=404)
+EX-API-218,API-AUTH(no token),POST /api/v1/notifications/{id}/read,anonymous,PASS,status=401
+EX-API-218b,API-PERMISSION(employee),POST /api/v1/notifications/{id}/read,employee,RECORDED,status=404 (owner invalid-id/empty-body status=404)
+EX-API-219,API-AUTH(no token),POST /api/v1/notifications/{id}/unread,anonymous,PASS,status=401
+EX-API-219b,API-PERMISSION(employee),POST /api/v1/notifications/{id}/unread,employee,RECORDED,status=404 (owner invalid-id/empty-body status=404)
+EX-API-220,API-AUTH(no token),POST /api/v1/notifications/{id}/unread,anonymous,PASS,status=401
+EX-API-220b,API-PERMISSION(employee),POST /api/v1/notifications/{id}/unread,employee,RECORDED,status=404 (owner invalid-id/empty-body status=404)
+EX-API-221,API-AUTH(no token),POST /api/v1/pos/orders,anonymous,PASS,status=401
+EX-API-221b,API-PERMISSION(employee),POST /api/v1/pos/orders,employee,RECORDED,status=403 (owner invalid-id/empty-body status=400)
+EX-API-222,API-AUTH(no token),GET /api/v1/products,anonymous,PASS,status=401
+EX-API-222b,API-PERMISSION(employee),GET /api/v1/products,employee,RECORDED,status=200 (owner invalid-id/empty-body status=200)
+EX-API-223,API-AUTH(no token),POST /api/v1/products,anonymous,PASS,status=401
+EX-API-223b,API-PERMISSION(employee),POST /api/v1/products,employee,RECORDED,status=403 (owner invalid-id/empty-body status=400)
+EX-API-224,API-AUTH(no token),GET /api/v1/products/alerts/low-stock,anonymous,PASS,status=401
+EX-API-224b,API-PERMISSION(employee),GET /api/v1/products/alerts/low-stock,employee,RECORDED,status=200 (owner invalid-id/empty-body status=200)
+EX-API-225,API-AUTH(no token),DELETE /api/v1/products/{id},anonymous,PASS,status=401
+EX-API-225b,API-PERMISSION(employee),DELETE /api/v1/products/{id},employee,RECORDED,status=403 (owner invalid-id/empty-body status=404)
+EX-API-226,API-AUTH(no token),GET /api/v1/products/{id},anonymous,PASS,status=401
+EX-API-226b,API-PERMISSION(employee),GET /api/v1/products/{id},employee,RECORDED,status=404 (owner invalid-id/empty-body status=404)
+EX-API-227,API-AUTH(no token),PUT /api/v1/products/{id},anonymous,PASS,status=401
+EX-API-227b,API-PERMISSION(employee),PUT /api/v1/products/{id},employee,RECORDED,status=403 (owner invalid-id/empty-body status=400)
+EX-API-228,API-AUTH(no token),GET /api/v1/public/commercial-offer,anonymous,PASS,status=200
+EX-API-228b,API-PERMISSION(employee),GET /api/v1/public/commercial-offer,employee,RECORDED,status=200 (owner invalid-id/empty-body status=200)
+EX-API-229,API-AUTH(no token),POST /api/v1/public/orders,anonymous,PASS,status=400
+EX-API-229b,API-PERMISSION(employee),POST /api/v1/public/orders,employee,RECORDED,status=400 (owner invalid-id/empty-body status=400)
+EX-API-230,API-AUTH(no token),GET /api/v1/public/orders/number/{number}/lookup,anonymous,PASS,status=400
+EX-API-230b,API-PERMISSION(employee),GET /api/v1/public/orders/number/{number}/lookup,employee,RECORDED,status=400 (owner invalid-id/empty-body status=400)
+EX-API-231,API-AUTH(no token),POST /api/v1/public/orders/quote,anonymous,PASS,status=400
+EX-API-231b,API-PERMISSION(employee),POST /api/v1/public/orders/quote,employee,RECORDED,status=400 (owner invalid-id/empty-body status=400)
+EX-API-232,API-AUTH(no token),POST /api/v1/public/orders/validate,anonymous,PASS,status=400
+EX-API-232b,API-PERMISSION(employee),POST /api/v1/public/orders/validate,employee,RECORDED,status=400 (owner invalid-id/empty-body status=400)
+EX-API-233,API-AUTH(no token),DELETE /api/v1/public/orders/{id},anonymous,PASS,status=400
+EX-API-233b,API-PERMISSION(employee),DELETE /api/v1/public/orders/{id},employee,RECORDED,status=400 (owner invalid-id/empty-body status=400)
+EX-API-234,API-AUTH(no token),GET /api/v1/public/orders/{id},anonymous,PASS,status=400
+EX-API-234b,API-PERMISSION(employee),GET /api/v1/public/orders/{id},employee,RECORDED,status=400 (owner invalid-id/empty-body status=400)
+EX-API-235,API-AUTH(no token),GET /api/v1/public/orders/{id}/status,anonymous,PASS,status=400
+EX-API-235b,API-PERMISSION(employee),GET /api/v1/public/orders/{id}/status,employee,RECORDED,status=400 (owner invalid-id/empty-body status=400)
+EX-API-236,API-AUTH(no token),GET /api/v1/public/orders/{id}/track,anonymous,PASS,status=400
+EX-API-236b,API-PERMISSION(employee),GET /api/v1/public/orders/{id}/track,employee,RECORDED,status=400 (owner invalid-id/empty-body status=400)
+EX-API-237,API-AUTH(no token),GET /api/v1/public/restaurants/{slug}/categories,anonymous,PASS,status=200
+EX-API-237b,API-PERMISSION(employee),GET /api/v1/public/restaurants/{slug}/categories,employee,RECORDED,status=200 (owner invalid-id/empty-body status=200)
+EX-API-238,API-AUTH(no token),GET /api/v1/public/restaurants/{slug}/categories/{categoryId}/products,anonymous,PASS,status=200
+EX-API-238b,API-PERMISSION(employee),GET /api/v1/public/restaurants/{slug}/categories/{categoryId}/products,employee,RECORDED,status=200 (owner invalid-id/empty-body status=200)
+EX-API-239,API-AUTH(no token),GET /api/v1/public/restaurants/{slug}/homepage,anonymous,PASS,status=200
+EX-API-239b,API-PERMISSION(employee),GET /api/v1/public/restaurants/{slug}/homepage,employee,RECORDED,status=200 (owner invalid-id/empty-body status=200)
+EX-API-240,API-AUTH(no token),GET /api/v1/public/restaurants/{slug}/info,anonymous,PASS,status=200
+EX-API-240b,API-PERMISSION(employee),GET /api/v1/public/restaurants/{slug}/info,employee,RECORDED,status=200 (owner invalid-id/empty-body status=200)
+EX-API-241,API-AUTH(no token),GET /api/v1/public/restaurants/{slug}/menu,anonymous,PASS,status=500
+EX-API-241b,API-PERMISSION(employee),GET /api/v1/public/restaurants/{slug}/menu,employee,RECORDED,status=500 (owner invalid-id/empty-body status=500)
+EX-API-242,API-AUTH(no token),GET /api/v1/public/restaurants/{slug}/products,anonymous,PASS,status=500
+EX-API-242b,API-PERMISSION(employee),GET /api/v1/public/restaurants/{slug}/products,employee,RECORDED,status=500 (owner invalid-id/empty-body status=500)
+EX-API-243,API-AUTH(no token),GET /api/v1/public/restaurants/{slug}/products/{productId},anonymous,PASS,status=404
+EX-API-243b,API-PERMISSION(employee),GET /api/v1/public/restaurants/{slug}/products/{productId},employee,RECORDED,status=404 (owner invalid-id/empty-body status=404)
+EX-API-244,API-AUTH(no token),GET /api/v1/public/restaurants/{slug}/search,anonymous,PASS,status=400
+EX-API-244b,API-PERMISSION(employee),GET /api/v1/public/restaurants/{slug}/search,employee,RECORDED,status=400 (owner invalid-id/empty-body status=400)
+EX-API-245,API-AUTH(no token),GET /api/v1/public/restaurants/{slug}/sections,anonymous,PASS,status=200
+EX-API-245b,API-PERMISSION(employee),GET /api/v1/public/restaurants/{slug}/sections,employee,RECORDED,status=200 (owner invalid-id/empty-body status=200)
+EX-API-246,API-AUTH(no token),GET /api/v1/public/restaurants/{slug}/settings,anonymous,PASS,status=200
+EX-API-246b,API-PERMISSION(employee),GET /api/v1/public/restaurants/{slug}/settings,employee,RECORDED,status=200 (owner invalid-id/empty-body status=200)
+EX-API-247,API-AUTH(no token),GET /api/v1/public/restaurants/{slug}/theme,anonymous,PASS,status=200
+EX-API-247b,API-PERMISSION(employee),GET /api/v1/public/restaurants/{slug}/theme,employee,RECORDED,status=200 (owner invalid-id/empty-body status=200)
+EX-API-248,API-AUTH(no token),GET /api/v1/public/table/{id}/info,anonymous,PASS,status=404
+EX-API-248b,API-PERMISSION(employee),GET /api/v1/public/table/{id}/info,employee,RECORDED,status=404 (owner invalid-id/empty-body status=404)
+EX-API-249,API-AUTH(no token),GET /api/v1/public/tenant-status/{slug},anonymous,PASS,status=200
+EX-API-249b,API-PERMISSION(employee),GET /api/v1/public/tenant-status/{slug},employee,RECORDED,status=200 (owner invalid-id/empty-body status=200)
+EX-API-250,API-AUTH(no token),GET /api/v1/public/test-routing/{slug},anonymous,PASS,status=200
+EX-API-250b,API-PERMISSION(employee),GET /api/v1/public/test-routing/{slug},employee,RECORDED,status=200 (owner invalid-id/empty-body status=200)
+EX-API-251,API-AUTH(no token),GET /api/v1/rbac/check-permission,anonymous,PASS,status=401
+EX-API-251b,API-PERMISSION(employee),GET /api/v1/rbac/check-permission,employee,RECORDED,status=400 (owner invalid-id/empty-body status=400)
+EX-API-252,API-AUTH(no token),GET /api/v1/rbac/check-permission,anonymous,PASS,status=401
+EX-API-252b,API-PERMISSION(employee),GET /api/v1/rbac/check-permission,employee,RECORDED,status=400 (owner invalid-id/empty-body status=400)
+EX-API-253,API-AUTH(no token),GET /api/v1/rbac/me/permissions,anonymous,PASS,status=401
+EX-API-253b,API-PERMISSION(employee),GET /api/v1/rbac/me/permissions,employee,RECORDED,status=200 (owner invalid-id/empty-body status=200)
+EX-API-254,API-AUTH(no token),GET /api/v1/rbac/me/permissions,anonymous,PASS,status=401
+EX-API-254b,API-PERMISSION(employee),GET /api/v1/rbac/me/permissions,employee,RECORDED,status=200 (owner invalid-id/empty-body status=200)
+EX-API-255,API-AUTH(no token),GET /api/v1/rbac/me/roles,anonymous,PASS,status=401
+EX-API-255b,API-PERMISSION(employee),GET /api/v1/rbac/me/roles,employee,RECORDED,status=200 (owner invalid-id/empty-body status=200)
+EX-API-256,API-AUTH(no token),GET /api/v1/rbac/me/roles,anonymous,PASS,status=401
+EX-API-256b,API-PERMISSION(employee),GET /api/v1/rbac/me/roles,employee,RECORDED,status=200 (owner invalid-id/empty-body status=200)
+EX-API-257,API-AUTH(no token),POST /api/v1/rbac/permissions/assign,anonymous,PASS,status=401
+EX-API-257b,API-PERMISSION(employee),POST /api/v1/rbac/permissions/assign,employee,RECORDED,status=403 (owner invalid-id/empty-body status=400)
+EX-API-258,API-AUTH(no token),DELETE /api/v1/rbac/permissions/{roleId}/{moduleId},anonymous,PASS,status=401
+EX-API-258b,API-PERMISSION(employee),DELETE /api/v1/rbac/permissions/{roleId}/{moduleId},employee,RECORDED,status=403 (owner invalid-id/empty-body status=404)
+EX-API-259,API-AUTH(no token),GET /api/v1/rbac/roles,anonymous,PASS,status=401
+EX-API-259b,API-PERMISSION(employee),GET /api/v1/rbac/roles,employee,RECORDED,status=403 (owner invalid-id/empty-body status=200)
+EX-API-260,API-AUTH(no token),GET /api/v1/rbac/roles,anonymous,PASS,status=401
+EX-API-260b,API-PERMISSION(employee),GET /api/v1/rbac/roles,employee,RECORDED,status=403 (owner invalid-id/empty-body status=200)
+EX-API-261,API-AUTH(no token),POST /api/v1/rbac/roles,anonymous,PASS,status=401
+EX-API-261b,API-PERMISSION(employee),POST /api/v1/rbac/roles,employee,RECORDED,status=403 (owner invalid-id/empty-body status=400)
+EX-API-262,API-AUTH(no token),POST /api/v1/rbac/roles,anonymous,PASS,status=401
+EX-API-262b,API-PERMISSION(employee),POST /api/v1/rbac/roles,employee,RECORDED,status=403 (owner invalid-id/empty-body status=400)
+EX-API-263,API-AUTH(no token),DELETE /api/v1/rbac/roles/{id},anonymous,PASS,status=401
+EX-API-263b,API-PERMISSION(employee),DELETE /api/v1/rbac/roles/{id},employee,RECORDED,status=403 (owner invalid-id/empty-body status=404)
+EX-API-264,API-AUTH(no token),DELETE /api/v1/rbac/roles/{id},anonymous,PASS,status=401
+EX-API-264b,API-PERMISSION(employee),DELETE /api/v1/rbac/roles/{id},employee,RECORDED,status=403 (owner invalid-id/empty-body status=404)
+EX-API-265,API-AUTH(no token),GET /api/v1/rbac/roles/{id},anonymous,PASS,status=401
+EX-API-265b,API-PERMISSION(employee),GET /api/v1/rbac/roles/{id},employee,RECORDED,status=403 (owner invalid-id/empty-body status=404)
+EX-API-266,API-AUTH(no token),GET /api/v1/rbac/roles/{id},anonymous,PASS,status=401
+EX-API-266b,API-PERMISSION(employee),GET /api/v1/rbac/roles/{id},employee,RECORDED,status=403 (owner invalid-id/empty-body status=404)
+EX-API-267,API-AUTH(no token),PUT /api/v1/rbac/roles/{id},anonymous,PASS,status=401
+EX-API-267b,API-PERMISSION(employee),PUT /api/v1/rbac/roles/{id},employee,RECORDED,status=403 (owner invalid-id/empty-body status=404)
+EX-API-268,API-AUTH(no token),PUT /api/v1/rbac/roles/{id},anonymous,PASS,status=401
+EX-API-268b,API-PERMISSION(employee),PUT /api/v1/rbac/roles/{id},employee,RECORDED,status=403 (owner invalid-id/empty-body status=404)
+EX-API-269,API-AUTH(no token),GET /api/v1/rbac/roles/{roleId}/permissions,anonymous,PASS,status=401
+EX-API-269b,API-PERMISSION(employee),GET /api/v1/rbac/roles/{roleId}/permissions,employee,RECORDED,status=403 (owner invalid-id/empty-body status=200)
+EX-API-270,API-AUTH(no token),GET /api/v1/rbac/users-by-email/{email}/roles,anonymous,PASS,status=401
+EX-API-270b,API-PERMISSION(employee),GET /api/v1/rbac/users-by-email/{email}/roles,employee,RECORDED,status=403 (owner invalid-id/empty-body status=404)
+EX-API-271,API-AUTH(no token),POST /api/v1/rbac/users-by-email/{email}/roles,anonymous,PASS,status=401
+EX-API-271b,API-PERMISSION(employee),POST /api/v1/rbac/users-by-email/{email}/roles,employee,RECORDED,status=403 (owner invalid-id/empty-body status=400)
+EX-API-272,API-AUTH(no token),DELETE /api/v1/rbac/users-by-email/{email}/roles/{roleId},anonymous,PASS,status=401
+EX-API-272b,API-PERMISSION(employee),DELETE /api/v1/rbac/users-by-email/{email}/roles/{roleId},employee,RECORDED,status=403 (owner invalid-id/empty-body status=404)
+EX-API-273,API-AUTH(no token),GET /api/v1/rbac/users/{userId}/roles,anonymous,PASS,status=401
+EX-API-273b,API-PERMISSION(employee),GET /api/v1/rbac/users/{userId}/roles,employee,RECORDED,status=403 (owner invalid-id/empty-body status=200)
+EX-API-274,API-AUTH(no token),GET /api/v1/rbac/users/{userId}/roles,anonymous,PASS,status=401
+EX-API-274b,API-PERMISSION(employee),GET /api/v1/rbac/users/{userId}/roles,employee,RECORDED,status=403 (owner invalid-id/empty-body status=200)
+EX-API-275,API-AUTH(no token),POST /api/v1/rbac/users/{userId}/roles,anonymous,PASS,status=401
+EX-API-275b,API-PERMISSION(employee),POST /api/v1/rbac/users/{userId}/roles,employee,RECORDED,status=403 (owner invalid-id/empty-body status=400)
+EX-API-276,API-AUTH(no token),POST /api/v1/rbac/users/{userId}/roles,anonymous,PASS,status=401
+EX-API-276b,API-PERMISSION(employee),POST /api/v1/rbac/users/{userId}/roles,employee,RECORDED,status=403 (owner invalid-id/empty-body status=400)
+EX-API-277,API-AUTH(no token),DELETE /api/v1/rbac/users/{userId}/roles/{roleId},anonymous,PASS,status=401
+EX-API-277b,API-PERMISSION(employee),DELETE /api/v1/rbac/users/{userId}/roles/{roleId},employee,RECORDED,status=403 (owner invalid-id/empty-body status=404)
+EX-API-278,API-AUTH(no token),DELETE /api/v1/rbac/users/{userId}/roles/{roleId},anonymous,PASS,status=401
+EX-API-278b,API-PERMISSION(employee),DELETE /api/v1/rbac/users/{userId}/roles/{roleId},employee,RECORDED,status=403 (owner invalid-id/empty-body status=404)
+EX-API-279,API-AUTH(no token),POST /api/v1/reports/export,anonymous,PASS,status=401
+EX-API-279b,API-PERMISSION(employee),POST /api/v1/reports/export,employee,RECORDED,status=403 (owner invalid-id/empty-body status=200)
+EX-API-280,API-AUTH(no token),GET /api/v1/reports/financial/balance-sheet,anonymous,PASS,status=401
+EX-API-280b,API-PERMISSION(employee),GET /api/v1/reports/financial/balance-sheet,employee,RECORDED,status=403 (owner invalid-id/empty-body status=200)
+EX-API-281,API-AUTH(no token),GET /api/v1/reports/financial/break-even,anonymous,PASS,status=401
+EX-API-281b,API-PERMISSION(employee),GET /api/v1/reports/financial/break-even,employee,RECORDED,status=403 (owner invalid-id/empty-body status=500)
+EX-API-282,API-AUTH(no token),GET /api/v1/reports/financial/cash-flow,anonymous,PASS,status=401
+EX-API-282b,API-PERMISSION(employee),GET /api/v1/reports/financial/cash-flow,employee,RECORDED,status=403 (owner invalid-id/empty-body status=200)
+EX-API-283,API-AUTH(no token),GET /api/v1/reports/financial/inventory-valuation,anonymous,PASS,status=401
+EX-API-283b,API-PERMISSION(employee),GET /api/v1/reports/financial/inventory-valuation,employee,RECORDED,status=403 (owner invalid-id/empty-body status=200)
+EX-API-284,API-AUTH(no token),GET /api/v1/reports/financial/kpis,anonymous,PASS,status=401
+EX-API-284b,API-PERMISSION(employee),GET /api/v1/reports/financial/kpis,employee,RECORDED,status=403 (owner invalid-id/empty-body status=200)
+EX-API-285,API-AUTH(no token),GET /api/v1/reports/financial/menu-profitability,anonymous,PASS,status=401
+EX-API-285b,API-PERMISSION(employee),GET /api/v1/reports/financial/menu-profitability,employee,RECORDED,status=403 (owner invalid-id/empty-body status=500)
+EX-API-286,API-AUTH(no token),GET /api/v1/reports/financial/payables-aging,anonymous,PASS,status=401
+EX-API-286b,API-PERMISSION(employee),GET /api/v1/reports/financial/payables-aging,employee,RECORDED,status=403 (owner invalid-id/empty-body status=200)
+EX-API-287,API-AUTH(no token),GET /api/v1/reports/financial/predictive-cash-flow,anonymous,PASS,status=401
+EX-API-287b,API-PERMISSION(employee),GET /api/v1/reports/financial/predictive-cash-flow,employee,RECORDED,status=403 (owner invalid-id/empty-body status=200)
+EX-API-288,API-AUTH(no token),GET /api/v1/reports/financial/profit-loss,anonymous,PASS,status=401
+EX-API-288b,API-PERMISSION(employee),GET /api/v1/reports/financial/profit-loss,employee,RECORDED,status=403 (owner invalid-id/empty-body status=200)
+EX-API-289,API-AUTH(no token),GET /api/v1/reports/financial/receivables-aging,anonymous,PASS,status=401
+EX-API-289b,API-PERMISSION(employee),GET /api/v1/reports/financial/receivables-aging,employee,RECORDED,status=403 (owner invalid-id/empty-body status=200)
+EX-API-290,API-AUTH(no token),GET /api/v1/reports/financial/trial-balance,anonymous,PASS,status=401
+EX-API-290b,API-PERMISSION(employee),GET /api/v1/reports/financial/trial-balance,employee,RECORDED,status=403 (owner invalid-id/empty-body status=200)
+EX-API-291,API-AUTH(no token),GET /api/v1/reports/hr/absenteeism,anonymous,PASS,status=401
+EX-API-291b,API-PERMISSION(employee),GET /api/v1/reports/hr/absenteeism,employee,RECORDED,status=403 (owner invalid-id/empty-body status=200)
+EX-API-292,API-AUTH(no token),GET /api/v1/reports/hr/cost-analysis,anonymous,PASS,status=401
+EX-API-292b,API-PERMISSION(employee),GET /api/v1/reports/hr/cost-analysis,employee,RECORDED,status=403 (owner invalid-id/empty-body status=200)
+EX-API-293,API-AUTH(no token),GET /api/v1/reports/hr/headcount,anonymous,PASS,status=401
+EX-API-293b,API-PERMISSION(employee),GET /api/v1/reports/hr/headcount,employee,RECORDED,status=403 (owner invalid-id/empty-body status=200)
+EX-API-294,API-AUTH(no token),GET /api/v1/reports/hr/leave-balances,anonymous,PASS,status=401
+EX-API-294b,API-PERMISSION(employee),GET /api/v1/reports/hr/leave-balances,employee,RECORDED,status=403 (owner invalid-id/empty-body status=200)
+EX-API-295,API-AUTH(no token),GET /api/v1/reports/hr/overtime,anonymous,PASS,status=401
+EX-API-295b,API-PERMISSION(employee),GET /api/v1/reports/hr/overtime,employee,RECORDED,status=403 (owner invalid-id/empty-body status=200)
+EX-API-296,API-AUTH(no token),GET /api/v1/reports/hr/social-insurance,anonymous,PASS,status=401
+EX-API-296b,API-PERMISSION(employee),GET /api/v1/reports/hr/social-insurance,employee,RECORDED,status=403 (owner invalid-id/empty-body status=200)
+EX-API-297,API-AUTH(no token),GET /api/v1/reports/hr/training-compliance,anonymous,PASS,status=401
+EX-API-297b,API-PERMISSION(employee),GET /api/v1/reports/hr/training-compliance,employee,RECORDED,status=403 (owner invalid-id/empty-body status=200)
+EX-API-298,API-AUTH(no token),GET /api/v1/reports/hr/turnover,anonymous,PASS,status=401
+EX-API-298b,API-PERMISSION(employee),GET /api/v1/reports/hr/turnover,employee,RECORDED,status=403 (owner invalid-id/empty-body status=200)
+EX-API-299,API-AUTH(no token),GET /api/v1/reports/inventory,anonymous,PASS,status=401
+EX-API-299b,API-PERMISSION(employee),GET /api/v1/reports/inventory,employee,RECORDED,status=403 (owner invalid-id/empty-body status=200)
+EX-API-300,API-AUTH(no token),GET /api/v1/reports/overview,anonymous,PASS,status=401
+EX-API-300b,API-PERMISSION(employee),GET /api/v1/reports/overview,employee,RECORDED,status=403 (owner invalid-id/empty-body status=200)
+EX-API-301,API-AUTH(no token),GET /api/v1/reports/profitability,anonymous,PASS,status=401
+EX-API-301b,API-PERMISSION(employee),GET /api/v1/reports/profitability,employee,RECORDED,status=403 (owner invalid-id/empty-body status=200)
+EX-API-302,API-AUTH(no token),GET /api/v1/reports/sales,anonymous,PASS,status=401
+EX-API-302b,API-PERMISSION(employee),GET /api/v1/reports/sales,employee,RECORDED,status=403 (owner invalid-id/empty-body status=200)
+EX-API-303,API-AUTH,POST /api/v1/subscription/cancel,all,NOT EXECUTED (skipped: session-altering/destructive),
+EX-API-304,API-AUTH(no token),GET /api/v1/subscription/current,anonymous,PASS,status=401
+EX-API-304b,API-PERMISSION(employee),GET /api/v1/subscription/current,employee,RECORDED,status=200 (owner invalid-id/empty-body status=200)
+EX-API-305,API-AUTH(no token),POST /api/v1/subscription/initiate,anonymous,PASS,status=401
+EX-API-305b,API-PERMISSION(employee),POST /api/v1/subscription/initiate,employee,RECORDED,status=503 (owner invalid-id/empty-body status=503)
+EX-API-306,API-AUTH(no token),GET /api/v1/subscription/payments,anonymous,PASS,status=401
+EX-API-306b,API-PERMISSION(employee),GET /api/v1/subscription/payments,employee,RECORDED,status=200 (owner invalid-id/empty-body status=200)
+EX-API-307,API-AUTH(no token),GET /api/v1/subscription/plans,anonymous,PASS,status=200
+EX-API-307b,API-PERMISSION(employee),GET /api/v1/subscription/plans,employee,RECORDED,status=200 (owner invalid-id/empty-body status=200)
+EX-API-308,API-AUTH(no token),GET /api/v1/super-admin/audit-logs,anonymous,PASS,status=401
+EX-API-308b,API-PERMISSION(employee),GET /api/v1/super-admin/audit-logs,employee,RECORDED,status=401 (owner invalid-id/empty-body status=401)
+EX-API-309,API-AUTH,POST /api/v1/super-admin/auth/login,all,NOT EXECUTED (skipped: session-altering/destructive),
+EX-API-310,API-AUTH,POST /api/v1/super-admin/auth/logout,all,NOT EXECUTED (skipped: session-altering/destructive),
+EX-API-311,API-AUTH(no token),GET /api/v1/super-admin/auth/session,anonymous,PASS,status=401
+EX-API-311b,API-PERMISSION(employee),GET /api/v1/super-admin/auth/session,employee,RECORDED,status=401 (owner invalid-id/empty-body status=401)
+EX-API-312,API-AUTH(no token),GET /api/v1/super-admin/dashboard/stats,anonymous,PASS,status=401
+EX-API-312b,API-PERMISSION(employee),GET /api/v1/super-admin/dashboard/stats,employee,RECORDED,status=401 (owner invalid-id/empty-body status=401)
+EX-API-313,API-AUTH(no token),POST /api/v1/super-admin/impersonate/end,anonymous,PASS,status=401
+EX-API-313b,API-PERMISSION(employee),POST /api/v1/super-admin/impersonate/end,employee,RECORDED,status=401 (owner invalid-id/empty-body status=401)
+EX-API-314,API-AUTH(no token),GET /api/v1/super-admin/impersonate/status,anonymous,PASS,status=401
+EX-API-314b,API-PERMISSION(employee),GET /api/v1/super-admin/impersonate/status,employee,RECORDED,status=401 (owner invalid-id/empty-body status=401)
+EX-API-315,API-AUTH(no token),POST /api/v1/super-admin/impersonate/{userID},anonymous,PASS,status=401
+EX-API-315b,API-PERMISSION(employee),POST /api/v1/super-admin/impersonate/{userID},employee,RECORDED,status=401 (owner invalid-id/empty-body status=401)
+EX-API-316,API-AUTH(no token),GET /api/v1/super-admin/payment-metrics,anonymous,PASS,status=401
+EX-API-316b,API-PERMISSION(employee),GET /api/v1/super-admin/payment-metrics,employee,RECORDED,status=401 (owner invalid-id/empty-body status=401)
+EX-API-317,API-AUTH(no token),POST /api/v1/super-admin/payments/{id}/refund,anonymous,PASS,status=401
+EX-API-317b,API-PERMISSION(employee),POST /api/v1/super-admin/payments/{id}/refund,employee,RECORDED,status=401 (owner invalid-id/empty-body status=401)
+EX-API-318,API-AUTH(no token),PUT /api/v1/super-admin/settings/ip-whitelist,anonymous,PASS,status=401
+EX-API-318b,API-PERMISSION(employee),PUT /api/v1/super-admin/settings/ip-whitelist,employee,RECORDED,status=401 (owner invalid-id/empty-body status=401)
+EX-API-319,API-AUTH(no token),GET /api/v1/super-admin/tenants,anonymous,PASS,status=401
+EX-API-319b,API-PERMISSION(employee),GET /api/v1/super-admin/tenants,employee,RECORDED,status=401 (owner invalid-id/empty-body status=401)
+EX-API-320,API-AUTH(no token),DELETE /api/v1/super-admin/tenants/{id},anonymous,PASS,status=401
+EX-API-320b,API-PERMISSION(employee),DELETE /api/v1/super-admin/tenants/{id},employee,RECORDED,status=401 (owner invalid-id/empty-body status=401)
+EX-API-321,API-AUTH(no token),GET /api/v1/super-admin/tenants/{id},anonymous,PASS,status=401
+EX-API-321b,API-PERMISSION(employee),GET /api/v1/super-admin/tenants/{id},employee,RECORDED,status=401 (owner invalid-id/empty-body status=401)
+EX-API-322,API-AUTH(no token),POST /api/v1/super-admin/tenants/{id}/dashboard-login,anonymous,PASS,status=401
+EX-API-322b,API-PERMISSION(employee),POST /api/v1/super-admin/tenants/{id}/dashboard-login,employee,RECORDED,status=401 (owner invalid-id/empty-body status=401)
+EX-API-323,API-AUTH(no token),POST /api/v1/super-admin/tenants/{id}/disable,anonymous,PASS,status=401
+EX-API-323b,API-PERMISSION(employee),POST /api/v1/super-admin/tenants/{id}/disable,employee,RECORDED,status=401 (owner invalid-id/empty-body status=401)
+EX-API-324,API-AUTH(no token),PUT /api/v1/super-admin/tenants/{id}/disable,anonymous,PASS,status=401
+EX-API-324b,API-PERMISSION(employee),PUT /api/v1/super-admin/tenants/{id}/disable,employee,RECORDED,status=401 (owner invalid-id/empty-body status=401)
+EX-API-325,API-AUTH(no token),POST /api/v1/super-admin/tenants/{id}/enable,anonymous,PASS,status=401
+EX-API-325b,API-PERMISSION(employee),POST /api/v1/super-admin/tenants/{id}/enable,employee,RECORDED,status=401 (owner invalid-id/empty-body status=401)
+EX-API-326,API-AUTH(no token),PUT /api/v1/super-admin/tenants/{id}/enable,anonymous,PASS,status=401
+EX-API-326b,API-PERMISSION(employee),PUT /api/v1/super-admin/tenants/{id}/enable,employee,RECORDED,status=401 (owner invalid-id/empty-body status=401)
+EX-API-327,API-AUTH(no token),POST /api/v1/super-admin/tenants/{id}/extend-trial,anonymous,PASS,status=401
+EX-API-327b,API-PERMISSION(employee),POST /api/v1/super-admin/tenants/{id}/extend-trial,employee,RECORDED,status=401 (owner invalid-id/empty-body status=401)
+EX-API-328,API-AUTH(no token),GET /api/v1/super-admin/tenants/{id}/subscription,anonymous,PASS,status=401
+EX-API-328b,API-PERMISSION(employee),GET /api/v1/super-admin/tenants/{id}/subscription,employee,RECORDED,status=401 (owner invalid-id/empty-body status=401)
+EX-API-329,API-AUTH(no token),GET /api/v1/super-admin/tenants/{id}/subscription-history,anonymous,PASS,status=401
+EX-API-329b,API-PERMISSION(employee),GET /api/v1/super-admin/tenants/{id}/subscription-history,employee,RECORDED,status=401 (owner invalid-id/empty-body status=401)
+EX-API-330,API-AUTH(no token),GET /api/v1/super-admin/tenants/{id}/users,anonymous,PASS,status=401
+EX-API-330b,API-PERMISSION(employee),GET /api/v1/super-admin/tenants/{id}/users,employee,RECORDED,status=401 (owner invalid-id/empty-body status=401)
+EX-API-331,API-AUTH(no token),GET /api/v1/super-admin/users,anonymous,PASS,status=401
+EX-API-331b,API-PERMISSION(employee),GET /api/v1/super-admin/users,employee,RECORDED,status=401 (owner invalid-id/empty-body status=401)
+EX-API-332,API-AUTH(no token),GET /api/v1/super-admin/users/{id},anonymous,PASS,status=401
+EX-API-332b,API-PERMISSION(employee),GET /api/v1/super-admin/users/{id},employee,RECORDED,status=401 (owner invalid-id/empty-body status=401)
+EX-API-333,API-AUTH(no token),GET /api/v1/super-admin/webhook-health,anonymous,PASS,status=401
+EX-API-333b,API-PERMISSION(employee),GET /api/v1/super-admin/webhook-health,employee,RECORDED,status=401 (owner invalid-id/empty-body status=401)
+EX-API-334,API-AUTH(no token),GET /api/v1/suppliers,anonymous,PASS,status=401
+EX-API-334b,API-PERMISSION(employee),GET /api/v1/suppliers,employee,RECORDED,status=403 (owner invalid-id/empty-body status=200)
+EX-API-335,API-AUTH(no token),POST /api/v1/suppliers,anonymous,PASS,status=401
+EX-API-335b,API-PERMISSION(employee),POST /api/v1/suppliers,employee,RECORDED,status=403 (owner invalid-id/empty-body status=400)
+EX-API-336,API-AUTH(no token),DELETE /api/v1/suppliers/{id},anonymous,PASS,status=401
+EX-API-336b,API-PERMISSION(employee),DELETE /api/v1/suppliers/{id},employee,RECORDED,status=403 (owner invalid-id/empty-body status=404)
+EX-API-337,API-AUTH(no token),GET /api/v1/suppliers/{id},anonymous,PASS,status=401
+EX-API-337b,API-PERMISSION(employee),GET /api/v1/suppliers/{id},employee,RECORDED,status=403 (owner invalid-id/empty-body status=404)
+EX-API-338,API-AUTH(no token),PUT /api/v1/suppliers/{id},anonymous,PASS,status=401
+EX-API-338b,API-PERMISSION(employee),PUT /api/v1/suppliers/{id},employee,RECORDED,status=403 (owner invalid-id/empty-body status=404)
+EX-API-339,API-AUTH(no token),GET /api/v1/tables,anonymous,PASS,status=401
+EX-API-339b,API-PERMISSION(employee),GET /api/v1/tables,employee,RECORDED,status=200 (owner invalid-id/empty-body status=200)
+EX-API-340,API-AUTH(no token),POST /api/v1/tables,anonymous,PASS,status=401
+EX-API-340b,API-PERMISSION(employee),POST /api/v1/tables,employee,RECORDED,status=403 (owner invalid-id/empty-body status=400)
+EX-API-341,API-AUTH(no token),GET /api/v1/tables/layouts,anonymous,PASS,status=401
+EX-API-341b,API-PERMISSION(employee),GET /api/v1/tables/layouts,employee,RECORDED,status=200 (owner invalid-id/empty-body status=200)
+EX-API-342,API-AUTH(no token),POST /api/v1/tables/layouts,anonymous,PASS,status=401
+EX-API-342b,API-PERMISSION(employee),POST /api/v1/tables/layouts,employee,RECORDED,status=403 (owner invalid-id/empty-body status=400)
+EX-API-343,API-AUTH(no token),PUT /api/v1/tables/positions,anonymous,PASS,status=401
+EX-API-343b,API-PERMISSION(employee),PUT /api/v1/tables/positions,employee,RECORDED,status=403 (owner invalid-id/empty-body status=400)
+EX-API-344,API-AUTH(no token),GET /api/v1/tables/stats,anonymous,PASS,status=401
+EX-API-344b,API-PERMISSION(employee),GET /api/v1/tables/stats,employee,RECORDED,status=200 (owner invalid-id/empty-body status=200)
+EX-API-345,API-AUTH(no token),DELETE /api/v1/tables/{id},anonymous,PASS,status=401
+EX-API-345b,API-PERMISSION(employee),DELETE /api/v1/tables/{id},employee,RECORDED,status=403 (owner invalid-id/empty-body status=404)
+EX-API-346,API-AUTH(no token),GET /api/v1/tables/{id},anonymous,PASS,status=401
+EX-API-346b,API-PERMISSION(employee),GET /api/v1/tables/{id},employee,RECORDED,status=404 (owner invalid-id/empty-body status=404)
+EX-API-347,API-AUTH(no token),PUT /api/v1/tables/{id},anonymous,PASS,status=401
+EX-API-347b,API-PERMISSION(employee),PUT /api/v1/tables/{id},employee,RECORDED,status=403 (owner invalid-id/empty-body status=404)
+EX-API-348,API-AUTH(no token),PUT /api/v1/tables/{id}/status,anonymous,PASS,status=401
+EX-API-348b,API-PERMISSION(employee),PUT /api/v1/tables/{id}/status,employee,RECORDED,status=403 (owner invalid-id/empty-body status=400)
+EX-API-349,API-AUTH(no token),GET /api/v1/tenant/contact-info,anonymous,PASS,status=401
+EX-API-349b,API-PERMISSION(employee),GET /api/v1/tenant/contact-info,employee,RECORDED,status=403 (owner invalid-id/empty-body status=200)
+EX-API-350,API-AUTH(no token),PUT /api/v1/tenant/contact-info,anonymous,PASS,status=401
+EX-API-350b,API-PERMISSION(employee),PUT /api/v1/tenant/contact-info,employee,RECORDED,status=403 (owner invalid-id/empty-body status=200)
+EX-API-351,API-AUTH(no token),GET /api/v1/tenant/status,anonymous,PASS,status=401
+EX-API-351b,API-PERMISSION(employee),GET /api/v1/tenant/status,employee,RECORDED,status=200 (owner invalid-id/empty-body status=200)
+EX-API-352,API-AUTH(no token),GET /api/v1/tenant/status,anonymous,PASS,status=401
+EX-API-352b,API-PERMISSION(employee),GET /api/v1/tenant/status,employee,RECORDED,status=200 (owner invalid-id/empty-body status=200)
+EX-API-353,API-AUTH(no token),GET /api/v1/translations/health,anonymous,PASS,status=200
+EX-API-353b,API-PERMISSION(employee),GET /api/v1/translations/health,employee,RECORDED,status=200 (owner invalid-id/empty-body status=200)
+EX-API-354,API-AUTH(no token),GET /api/v1/translations/languages,anonymous,PASS,status=200
+EX-API-354b,API-PERMISSION(employee),GET /api/v1/translations/languages,employee,RECORDED,status=200 (owner invalid-id/empty-body status=200)
+EX-API-355,API-AUTH(no token),GET /api/v1/translations/{language},anonymous,PASS,status=400
+EX-API-355b,API-PERMISSION(employee),GET /api/v1/translations/{language},employee,RECORDED,status=400 (owner invalid-id/empty-body status=400)
+EX-API-356,API-AUTH(no token),POST /api/v1/translations/{language}/upload,anonymous,PASS,status=401
+EX-API-356b,API-PERMISSION(employee),POST /api/v1/translations/{language}/upload,employee,RECORDED,status=401 (owner invalid-id/empty-body status=401)
+EX-API-357,API-AUTH(no token),GET /api/v1/translations/{language}/{namespace}/{key},anonymous,PASS,status=400
+EX-API-357b,API-PERMISSION(employee),GET /api/v1/translations/{language}/{namespace}/{key},employee,RECORDED,status=400 (owner invalid-id/empty-body status=400)
+EX-API-358,API-AUTH(no token),GET /api/v1/users,anonymous,PASS,status=401
+EX-API-358b,API-PERMISSION(employee),GET /api/v1/users,employee,RECORDED,status=403 (owner invalid-id/empty-body status=200)
+EX-API-359,API-AUTH(no token),GET /api/v1/users,anonymous,PASS,status=401
+EX-API-359b,API-PERMISSION(employee),GET /api/v1/users,employee,RECORDED,status=403 (owner invalid-id/empty-body status=200)
+EX-API-360,API-AUTH(no token),POST /api/v1/users,anonymous,PASS,status=401
+EX-API-360b,API-PERMISSION(employee),POST /api/v1/users,employee,RECORDED,status=403 (owner invalid-id/empty-body status=200)
+EX-API-361,API-AUTH(no token),POST /api/v1/users,anonymous,PASS,status=401
+EX-API-361b,API-PERMISSION(employee),POST /api/v1/users,employee,RECORDED,status=403 (owner invalid-id/empty-body status=500)
+EX-API-362,API-AUTH(no token),DELETE /api/v1/users/{id},anonymous,PASS,status=401
+EX-API-362b,API-PERMISSION(employee),DELETE /api/v1/users/{id},employee,RECORDED,status=403 (owner invalid-id/empty-body status=404)
+EX-API-363,API-AUTH(no token),DELETE /api/v1/users/{id},anonymous,PASS,status=401
+EX-API-363b,API-PERMISSION(employee),DELETE /api/v1/users/{id},employee,RECORDED,status=403 (owner invalid-id/empty-body status=404)
+EX-API-364,API-AUTH(no token),PUT /api/v1/users/{id},anonymous,PASS,status=401
+EX-API-364b,API-PERMISSION(employee),PUT /api/v1/users/{id},employee,RECORDED,status=403 (owner invalid-id/empty-body status=500)
+EX-API-365,API-AUTH(no token),PUT /api/v1/users/{id},anonymous,PASS,status=401
+EX-API-365b,API-PERMISSION(employee),PUT /api/v1/users/{id},employee,RECORDED,status=403 (owner invalid-id/empty-body status=500)
+EX-API-366,API-AUTH(no token),GET /api/v1/users/{userId}/profile,anonymous,PASS,status=401
+EX-API-366b,API-PERMISSION(employee),GET /api/v1/users/{userId}/profile,employee,RECORDED,status=403 (owner invalid-id/empty-body status=403)
+EX-API-367,API-AUTH(no token),PUT /api/v1/users/{userId}/profile,anonymous,PASS,status=401
+EX-API-367b,API-PERMISSION(employee),PUT /api/v1/users/{userId}/profile,employee,RECORDED,status=403 (owner invalid-id/empty-body status=403)
+EX-API-368,API-AUTH(no token),GET /api/v1/users/{userId}/settings,anonymous,PASS,status=401
+EX-API-368b,API-PERMISSION(employee),GET /api/v1/users/{userId}/settings,employee,RECORDED,status=403 (owner invalid-id/empty-body status=403)
+EX-API-369,API-AUTH(no token),POST /api/v1/users/{userId}/settings/change-password,anonymous,PASS,status=401
+EX-API-369b,API-PERMISSION(employee),POST /api/v1/users/{userId}/settings/change-password,employee,RECORDED,status=403 (owner invalid-id/empty-body status=403)
+EX-API-370,API-AUTH(no token),PUT /api/v1/users/{userId}/settings/language,anonymous,PASS,status=401
+EX-API-370b,API-PERMISSION(employee),PUT /api/v1/users/{userId}/settings/language,employee,RECORDED,status=403 (owner invalid-id/empty-body status=403)
+EX-API-371,API-AUTH(no token),PUT /api/v1/users/{userId}/settings/theme,anonymous,PASS,status=401
+EX-API-371b,API-PERMISSION(employee),PUT /api/v1/users/{userId}/settings/theme,employee,RECORDED,status=403 (owner invalid-id/empty-body status=403)
+EX-API-372,API-AUTH(no token),PUT /api/v1/users/{userId}/settings/theme-colors,anonymous,PASS,status=401
+EX-API-372b,API-PERMISSION(employee),PUT /api/v1/users/{userId}/settings/theme-colors,employee,RECORDED,status=403 (owner invalid-id/empty-body status=403)
+EX-API-373,API-AUTH(no token),POST /api/v1/webhook/paymob,anonymous,PASS,status=400
+EX-API-373b,API-PERMISSION(employee),POST /api/v1/webhook/paymob,employee,RECORDED,status=400 (owner invalid-id/empty-body status=400)
+EX-API-374,API-AUTH(no token),GET /uploads/{path...},anonymous,PASS,status=404
+EX-API-374b,API-PERMISSION(employee),GET /uploads/{path...},employee,RECORDED,status=404 (owner invalid-id/empty-body status=404)
+EX-RUN003-AUD-ENV-001,UI-HEADED-CHROME,login + /en/dashboard/reports/financial (isolated stack),owner,PASS,"Chrome 150.0.7871.124 headed; login via real UI; financial hub rendered; 60 API calls, only anonymous /auth/session 401; evidence/screenshots/RUN-003/PH-02/"
+EX-RUN003-AUD-HR-001,UI-HEADED-CHROME,Create Employee form submit (F-014 revalidation),owner,FAIL,POST /hr/employees 500 (positive_working_hours); DB unchanged; evidence/network/RUN-003/PH-10/AUD-HR-001.json
+EX-RUN003-AUD-ONB-001,UI-HEADED-CHROME,"Register new tenant 5 via UI, no seeding (F-001 revalidation)",anonymous->owner,FAIL,"POST /auth/register 201; coa 0, auto_posting_rules 0, fiscal_periods 0, tax_periods 0; evidence/*/RUN-003/PH-05/AUD-ONB-001*"
+EX-RUN003-OBS-ONB-001,UI-HEADED-CHROME,Register form: submit before debounced subdomain check returns,anonymous,OBSERVED,"0 POST sent; red 'Please choose an available subdomain' shown while the same field shows 'Subdomain is available' (stale validation); seen once under automation, needs human-paced repro; evidence/screenshots/RUN-003/PH-05/AUD-ONB-001-probe1-fast-submit.png"
+EX-RUN003-AUD-SET-000,UI-HEADED-CHROME,Enumerate controls on 11 settings/pos/kds routes (read-only),owner,OBSERVED,No tax-rate/currency control exists in any settings page; restaurant page = name(disabled)/email/phone; billing 'Paid checkout unavailable'; evidence/network/RUN-003/PH-05/AUD-SET-000-controls.json
+EX-RUN003-AUD-SET-001,UI-HEADED-CHROME,Restaurant contact: invalid email,owner,FAIL,"PUT 200, stored 'not-an-email' (F-037)"
+EX-RUN003-AUD-SET-002,UI-HEADED-CHROME,Restaurant contact: invalid phone,owner,FAIL,"PUT 200, stored 'abc-###' (F-037)"
+EX-RUN003-AUD-SET-003,UI-HEADED-CHROME,Restaurant contact: empty values,owner,OBSERVED,"PUT 200, blanks stored (F-037)"
+EX-RUN003-AUD-SET-004,UI-HEADED-CHROME,Restaurant contact: valid values persist after reload,owner,PASS,"UI, API and DB agree"
+EX-RUN003-AUD-SET-006,UI-HEADED-CHROME,KDS thresholds inverted (warn 30 > danger 5),owner,PASS,Save disabled; message 'Danger threshold must be greater than warning threshold.' (client-side only; server not tested)
+EX-RUN003-AUD-SET-007,UI-HEADED-CHROME,KDS thresholds negative,owner,PASS,Save disabled (client-side only)
+EX-RUN003-AUD-SET-008,UI-HEADED-CHROME,KDS thresholds 999999 / 9999999,owner,OBSERVED,"Save enabled, PUT 200; no upper bound"
+EX-RUN003-AUD-SET-009,UI-HEADED-CHROME,KDS thresholds valid 12/25 persist,owner,PASS,persisted after reload
+EX-RUN003-AUD-SET-011,UI-HEADED-CHROME,POS settings toggle Auto print + Save,owner,OBSERVED,"No API call: POS settings are browser-side preferences, not server-persisted"
+EX-RUN003-OBS-ONB-001-S1,UI-HEADED-CHROME,Subdomain race: click 200ms after typing,anonymous,FAIL,stale error >=8s while 'available' shown (F-038); 0 POST
+EX-RUN003-OBS-ONB-001-S2,UI-HEADED-CHROME,Subdomain race: click 450ms after typing,anonymous,PASS,registered (tenant 6 created as side effect)
+EX-RUN003-OBS-ONB-001-S3,UI-HEADED-CHROME,Subdomain race: wait 1500ms then click,anonymous,PASS,registered (tenant 7 created as side effect)
+EX-RUN003-OBS-ONB-001-S4,UI-HEADED-CHROME,Subdomain race: check-subdomain delayed 3s,anonymous,FAIL,stale error persists after availability shown (F-038)
+EX-RUN003-OBS-ONB-001-S5,UI-HEADED-CHROME,Subdomain race: edit slug after validation then click,anonymous,FAIL,stale error with availability text shown (F-038)
+EX-RUN003-AUD-CINV-001,UI-HEADED-CHROME,"Create draft customer invoice 8,000/-10%/+14%",owner,FAIL,"F-008 reproduced (draft + JE-2026-00050 posted); F-007 reproduced UI tax 1,008 vs stored 1,120 (+112); evidence/*/RUN-003/PH-09/AUD-CINV-001*"
+EX-RUN003-AUD-REG-HC04,UI-HEADED-CHROME,HC-04 Balance Sheet equation check,owner,FAIL,"difference 82,700.00 (unclosed earnings); UI shows UNRECONCILED"
+EX-RUN003-AUD-REG-HC05,API-IN-BROWSER-SESSION,HC-05 journal attachment validation (5 variants),owner,FAIL,all accepted 201 (F-039)
+EX-RUN003-AUD-REG-FIN016,STATIC+OBSERVED,FIN-016 gift card / deferred revenue,owner,OBSERVED,"account 2150 exists, no lifecycle code"
+EX-RUN003-AUD-REG-FIN020,STATIC+OBSERVED,FIN-020 currency/FX policy,owner,OBSERVED,no currency setting; hard-coded EGP
+EX-RUN003-AUD-MET-AGE,UI-HEADED-CHROME,AR/AP aging reports vs SQL and GL,owner,FAIL,"buckets match SQL; AR subledger 8,320 vs GL 6,520 (residual 1,800); AP ties; evidence/*/RUN-003/PH-12/AUD-MET-AGE*"
+EX-RUN003-AUD-MET-OPS,UI-HEADED-CHROME,Sales/Profitability/Inventory turnover report metrics vs SQL,owner,PARTIAL,"arithmetic matches SQL; definitions policy-dependent (tax-inclusive, unpaid included, current cost, UTC hours); opening qty unexplained (OBS-INV-001)"
+EX-RUN003-AUD-MET-FIN,UI-HEADED-CHROME,"P&L, trial balance, cash flow vs GL SQL",owner,FAIL,"P&L and TB tie; cash flow net 82,710.01 vs actual cash 115,010.01 (F-003, residual 32,300.00); dashboard routes /accounting/trial-balance and /accounting/ledger do not exist (TB is a tab on /accounting/general-ledger)"
+EX-RUN003-AUD-POS-001,UI-HEADED-CHROME,"POS cash order, 6 units x 10,000 (order 38)",owner,PARTIAL,"POST /pos/orders 201 then PUT payment-status 200; stored subtotal 60,000 tax 6,000 (10%) total 66,000 vs UI label ""Tax (14%)"" (displayed tax value hidden by POS Perf overlay, not legible); JE-2026-00062 revenue/VAT 66,000 and JE-2026-00063 COGS 24,000 (6 x 4,000) posted; stock 39->33; ""$"" currency symbol (F-023); F-004 label/stored-rate mismatch reproduced; after-submit screenshot timed out (recorded)"
+EX-RUN003-OBS-POS-001,UI-HEADED-CHROME,POS cart cleared after successful order?,owner,PASS,"cart empty on next open (localStorage pos-storage items=[]); orders 35-38 (2,3,4,6 units) were caused by my script locator text=Audit Burger matching cart row as well as product card - script artifact, NOT a product defect"
+EX-RUN003-AUD-CF-TRACE,SQL+SOURCE,F-003 cash-flow residual decomposition,analyst,FAIL,"report 172,710.01 vs GL cash 280,010.01; 107,300 explained term-by-term; evidence/database/RUN-003/PH-12/AUD-CF-TRACE.txt"
+EX-RUN003-AUD-AR-RESIDUAL,SQL+SOURCE,"AR aging 8,320 vs GL 1120 6,520 residual trace",analyst,FAIL,"residual 1,800 = receipts 7,000 - invoice 5,200 (F-006 over-settlement, root cause payment_acct_repo.go:445-449 no FOR UPDATE; :569-582 GREATEST clamp); evidence/database/RUN-003/PH-09/AUD-AR-RESIDUAL-trace.txt"
+EX-RUN003-AUD-REV-TRACE,SQL+UI-HEADED,Sales vs Profitability vs GL revenue bridge,owner,PASS,"all three revenue figures reconciled term-by-term (tax 47,000; unpaid 180,000); classification POLICY-DEPENDENT, not a defect by itself; evidence/database/RUN-003/PH-12/AUD-REV-TRACE.txt"
+EX-RUN003-OBS-INV-001,API-DIAGNOSTIC+SQL,Controlled fresh-product stock vs movement-ledger identity,owner,PASS,"Fresh tracked product: stock equals sum(adjustment,reservation,release,waste,purchase) after create/order/pay/cancel/waste/purchase (20,17,17,15,17,16,21). OBS-INV-001 (Audit Burger stock 33 vs ledger 17 excl. sale rows) NOT reproduced on a clean product; gap 16 attributed to earlier diagnostic fixtures (UNPROVEN, no product defect established). Side finding F-040 (untracked product posts no COGS). evidence/database/RUN-003/PH-06/OBS-INV-001-controlled.json"
+EX-RUN003-AUD-INV-COGS-UNTRACKED,API-DIAGNOSTIC+SQL,Untracked vs tracked product COGS posting,owner,FAIL,F-040 reproduced: no COGS journal for track_inventory=false; report COGS 120 vs GL 0; evidence/database/RUN-003/PH-06/AUD-INV-COGS-UNTRACKED.txt
+EX-RUN003-AUD-SUP-001,API-DIAGNOSTIC+SQL,Supplier invoice with discount and tax: totals and posting,owner,FAIL,"F-041: tax 1,400/total 10,400 vs discount-first 1,260/10,260; evidence/database/RUN-003/PH-06/AUD-SUP-FLOW.json"
+EX-RUN003-AUD-SUP-002,API-DIAGNOSTIC+SQL,"Supplier payments: partial, overpayment guard, concurrency, void-with-payments",owner,PASS,"overpayment 3,400 on balance 2,400 rejected 400; 4 concurrent payments of 800 on balance 2,400 -> 3 accepted + 1 rejected (serialized, FOR UPDATE at payment_acct_repo.go:503); void of invoice with payments rejected; final invoice paid 10,400/0 balance. Contrast F-006 (customer side unserialized)"
+EX-RUN003-OBS-PUR-001,SQL,Where does a supplier purchase of goods post?,owner,OBSERVED,"supplier invoice line without account_id debits 5110 Food COGS (9,000) not Inventory 1130: purchases are expensed at invoice time and inventory asset is never debited by purchases (relates to F-011; policy decision for 56)"
+EX-RUN003-AUD-CINV-FLOW,API-DIAGNOSTIC+SQL,"Customer receipts: overpayment guard, partial, 5 concurrent on fresh invoice, void-with-payments",owner,FAIL,"F-006 re-reproduced: 5/5 concurrent receipts accepted on balance 2,000 (paid 6,000 on 3,000 invoice); sequential overpayment rejected; void of paid invoice rejected; evidence/database/RUN-003/PH-09/AUD-CINV-FLOW.json"
+EX-RUN003-AUD-POS-002,UI-HEADED-CHROME,"POS cart displayed subtotal/tax/total/currency (overlay hidden, no order placed)",owner,FAIL,"UI: Subtotal $20,000.00 / Tax (14%) $2,800.00 / Total $22,800.00 vs server 10%: 2,000 / 22,000; currency symbol $ for EGP data (F-004, F-023 reproduced with legible values); evidence/screenshots/RUN-003/PH-07/AUD-POS-002-cart-totals-overlay-hidden.png"
+EX-RUN003-AUD-ACC-001,API-DIAGNOSTIC+SQL,"Account create: valid, duplicate code, invalid type, asset account",owner,PASS,valid 201; duplicate 400 (raw pq text -> F-031); invalid type 400; evidence/database/RUN-003/PH-11/AUD-ACC-FLOW(2).json
+EX-RUN003-AUD-ACC-002,API-DIAGNOSTIC+SQL,"Journal validation: unbalanced, debit+credit same line, negative",owner,PASS,all rejected 400 with clear messages; evidence/database/RUN-003/PH-11/AUD-ACC-FLOW(2).json
+EX-RUN003-AUD-ACC-003,API-DIAGNOSTIC+SQL,"Capital contribution 50,000 and owner withdrawal 8,000 (custom account 3150)",owner,PASS,"cash +50,000 / -8,000 exact; NOTE seeded COA has no owner-drawings account (capability gap, custom account needed); evidence/database/RUN-003/PH-11/AUD-ACC-FLOW(2).json"
+EX-RUN003-AUD-ACC-004,API-DIAGNOSTIC+SQL,"Fixed asset purchase 20,000 and cash-flow investing sign",owner,FAIL,"F-003: investing +20,000 and net cash flow rises although cash falls; evidence/database/RUN-003/PH-11/AUD-ACC-FLOW(2).json"
+EX-RUN003-AUD-ACC-005,API-DIAGNOSTIC+SQL,Edit/re-post posted journal; void and reversal; double void,owner,PASS,"edit & re-post rejected; void creates reversal (rent 4,500 -> 3,000); second void rejected; evidence/database/RUN-003/PH-11/AUD-ACC-FLOW(2).json"
+EX-RUN003-AUD-ACC-006,API-DIAGNOSTIC+SQL,Backdated (2019) and future (2030) postings; fiscal period API,owner,FAIL,both posted and auto-created periods; no fiscal-periods API (404) - F-013; evidence/database/RUN-003/PH-11/AUD-ACC-FLOW(2).json
+EX-RUN003-AUD-ACC-007,API-DIAGNOSTIC+SQL,Post to header account,owner,PASS,rejected: account is a header account; evidence/database/RUN-003/PH-11/AUD-ACC-FLOW(2).json
+EX-RUN003-AUD-ACC-008,API-DIAGNOSTIC+SQL,"Bank account with opening balance 12,000 linked to GL 1112",owner,FAIL,"no journal, GL 1112 = 0 (F-029 reproduced); evidence/database/RUN-003/PH-11/AUD-ACC-FLOW(2).json"
+EX-RUN003-AUD-ACC-009,API-DIAGNOSTIC+SQL,Recurring journal run twice same period,owner,FAIL,F-047 duplicate journal; evidence/database/RUN-003/PH-11/AUD-ACC-FLOW(2).json
+EX-RUN003-AUD-ACC-010,API-DIAGNOSTIC+SQL,Budget create/list variance vs GL actual,owner,PASS,"budget 3,000; actual 4,400 equals GL rent (void excluded); evidence/database/RUN-003/PH-11/AUD-ACC-FLOW(2).json"
+EX-RUN003-AUD-ACC-011,API-DIAGNOSTIC+SQL,Exchange rate create/convert/negative/same-currency,owner,PARTIAL,"convert 100 USD = 4,850 correct; negative rejected; USD/USD accepted (F-048); evidence/database/RUN-003/PH-11/AUD-ACC-FLOW(2).json"
+EX-RUN003-AUD-CFR004,API-DIAGNOSTIC+DOCKER,"CFR-004 durable outbox: paid order with no COA, API restart, seeded COA",owner,PASS,outbox event 41 retryable attempts 1/8 survived API restart; after COA seed completed attempts 2; JE sales Dr1110 220/Cr4100 200/Cr2120 20 and COGS 80 correct; evidence/database/RUN-003/PH-19/CFR-004-outcome.txt (provider settlement not covered)
+EX-RUN003-AUD-HC10,API-DIAGNOSTIC+SQL,HC-10 order payment transitions and paid-order cancellation,owner,FAIL,F-049/F-050; evidence/database/RUN-003/PH-19/AUD-REFUND-01-paid-order-cancel.json
+EX-RUN003-AUD-FIN019,API-DIAGNOSTIC,FIN-019 export formula-injection and parity,owner,PARTIAL,CSV cells starting with = @ + prefixed with apostrophe (safe); excel/export returns text/csv named .csv (no native XLSX); orders export 43 rows = DB; evidence/database/RUN-003/PH-19/AUD-REG-HC10-FIN019-CFR006.json
+EX-RUN003-AUD-CFR006,API-DIAGNOSTIC,CFR-006 report latency on current dataset,owner,PARTIAL,"p50 12-22 ms at 191 GL lines (cache may apply); NO scale test, no SLO exists (scale test pending Phase 18)"
+EX-RUN003-SEC-014,API-DIAGNOSTIC,Stub-mode login password123 against DB-backed stack,mixed,PASS,"unknown user 401; known owner with password123 401 (stub path requires db==nil, repository/auth_repo.go:252, unreachable with DB); evidence/network/RUN-003/PH-17/AUD-SEC-BATTERY.json; tests/runtime/ph17_security.mjs"
+EX-RUN003-SEC-011,API-DIAGNOSTIC,Tampered/empty/garbage session cookie on financial route,mixed,PASS,401 for all three; evidence/network/RUN-003/PH-17/AUD-SEC-BATTERY.json; tests/runtime/ph17_security.mjs
+EX-RUN003-SEC-IDOR,API-DIAGNOSTIC,Cross-tenant read/write by id (tenant E owner vs tenant 4 objects),mixed,PASS,"reads 404 (ledger of foreign account id returns empty 200, no data); writes 404/400; no foreign rows created or changed; mass-assignment tenant_id ignored (created under tenant 8); evidence/network/RUN-003/PH-17/AUD-SEC-BATTERY.json; tests/runtime/ph17_security.mjs"
+EX-RUN003-SEC-009,API-DIAGNOSTIC,Cashier (default Employee role) on accounting/HR/admin routes,mixed,FAIL,accounting/reports/outbox 403; GET /hr/employees 200 incl base_salary (F-020/F-033 reproduced); evidence/network/RUN-003/PH-17/AUD-SEC-BATTERY.json; tests/runtime/ph17_security.mjs
+EX-RUN003-SEC-012,API-DIAGNOSTIC,Origin check and login rate limit,mixed,PASS,no/foreign Origin 403; 30 rapid failed logins -> 14x401 then 16x429; evidence/network/RUN-003/PH-17/AUD-SEC-BATTERY.json; tests/runtime/ph17_security.mjs
+EX-RUN003-SEC-SQLI,API-DIAGNOSTIC,Injection payloads in list filters,mixed,PASS,quotes/UNION/DROP payloads return empty 200 lists; orders table intact (46); evidence/network/RUN-003/PH-17/AUD-SEC-BATTERY.json; tests/runtime/ph17_security.mjs
+EX-RUN003-SEC-COOKIE,API-DIAGNOSTIC,Session cookie attributes,mixed,OBSERVED,poos_session: HttpOnly; SameSite=Lax; Path=/; NO Secure flag observed over HTTP in isolated stack (production behaviour unknown - verify behind TLS); evidence/network/RUN-003/PH-17/AUD-SEC-BATTERY.json; tests/runtime/ph17_security.mjs
+EX-RUN003-REL-004,API-DIAGNOSTIC+DOCKER,Two concurrent redrives of one failed outbox event,owner,PASS,HTTP 202 + 409; one redrive audit row; journals stayed 2 (event forced failed by SQL fixture after posting); evidence/database/RUN-003/PH-18/AUD-REL-BATTERY.json; tests/runtime/ph18_reliability.mjs
+EX-RUN003-REL-009,API-DIAGNOSTIC+DOCKER,Concurrent 5 stock adjustments (+2) and 5 one-unit orders,owner,PASS,stock 16 -> 21 = expected 16+10-5; ledger net 21 equals stock; evidence/database/RUN-003/PH-18/AUD-REL-BATTERY.json; tests/runtime/ph18_reliability.mjs
+EX-RUN003-REL-025,API-DIAGNOSTIC+DOCKER,Payment POST retry with identical Idempotency-Key,owner,FAIL,F-052: 2 receipts recorded; evidence/database/RUN-003/PH-18/AUD-REL-BATTERY.json; tests/runtime/ph18_reliability.mjs
+EX-RUN003-REL-001,API-DIAGNOSTIC+DOCKER,Order POST twice with identical Idempotency-Key,owner,FAIL,F-017 reproduced: 2 orders; evidence/database/RUN-003/PH-18/AUD-REL-BATTERY.json; tests/runtime/ph18_reliability.mjs
+EX-RUN003-REL-027,API-DIAGNOSTIC+DOCKER,API restart while event in processing with lease,owner,PARTIAL,after restart event completed attempts=1 and 2 journals exist; fixture raced the worker (journals were 0 when set to processing) so lease-expiry recovery itself is not isolated; evidence/database/RUN-003/PH-18/AUD-REL-BATTERY.json; tests/runtime/ph18_reliability.mjs
+EX-RUN003-AUD-ATT-001,API-DIAGNOSTIC+SQL,"Attendance create (simple vs RFC3339 times), duplicate day, unknown employee, reversed times",owner,FAIL,F-053; duplicate/unknown/constraint errors surface as 500 + raw pq text (F-031); evidence/database/RUN-003/PH-10/AUD-HR-MATRIX.json
+EX-RUN003-AUD-LEV-001,API-DIAGNOSTIC+SQL,Leave over allowance / total_days mismatch / end before start / overlap,owner,FAIL,F-054; overlap and period check return 500 + raw text (F-031); evidence/database/RUN-003/PH-10/AUD-HR-MATRIX.json
+EX-RUN003-AUD-SAL-001,API-DIAGNOSTIC+SQL,Salary arithmetic (base 5000+OT 500+bonus 300+allow 200-ded 750),owner,PASS,"gross 6,000 net 5,250 equal oracle; DB trigger finalises values (a read taken milliseconds after create showed 5,500/4,750 before recalculation); duplicate period and invalid period/negative blocked by constraints (500 text); evidence/database/RUN-003/PH-10/AUD-HR-MATRIX.json"
+EX-RUN003-AUD-SAL-002,API-DIAGNOSTIC+SQL,Salary mark-paid idempotency and posting (single/twice/3 concurrent),owner,PASS,"exactly one journal per salary: Dr 5210 5,500 + Dr 5220 500 / Cr 2110 750 / Cr 1111 5,250 (balanced); repeated and concurrent mark-paid return 200 without extra journals; paid with is_approved=false (F-015); evidence/database/RUN-003/PH-10/AUD-HR-MATRIX.json"
+EX-RUN003-AUD-HRC-002,API-DIAGNOSTIC+SQL,HR cost report after salaries (2027 window),owner,PASS,"payroll_cost 10,500 = 2 x net 5,250 and overtime_cost 1,000 = 2 x 500 equal SQL over salaries (pay_period_end in window); evidence/database/RUN-003/PH-10/AUD-HR-MATRIX.json"
+EX-RUN003-AUD-SAAS-001,API-DIAGNOSTIC,Plans list and current subscription (tenant on trial),super-admin/owner,PASS,"plans servio-monthly-v1 750 EGP and annual; trial 14 days, can_access true; evidence/database/RUN-003/PH-13/AUD-SAAS-MATRIX.json"
+EX-RUN003-AUD-SAAS-002,API-DIAGNOSTIC,Initiate paid subscription checkout,super-admin/owner,BLOCKED-CAPABILITY,"503 ""Paid checkout is not available."" (checkout_available=false in this environment); paid flow, webhook settlement and refund success path not executable; evidence/database/RUN-003/PH-13/AUD-SAAS-MATRIX.json"
+EX-RUN003-AUD-SAAS-003,API-DIAGNOSTIC,Super Admin stats/payment metrics/tenant list vs SQL,super-admin/owner,PASS,tenants 8 = SQL 8; payment metrics all zero (no subscription payments) - vacuous; evidence/database/RUN-003/PH-13/AUD-SAAS-MATRIX.json
+EX-RUN003-AUD-SAAS-004,API-DIAGNOSTIC,"Disable/enable tenant, session and login behaviour",super-admin/owner,PASS,disable 200; existing session API -> 403; login still returns 200 for the owner (observation); enable 200; evidence/database/RUN-003/PH-13/AUD-SAAS-MATRIX.json
+EX-RUN003-AUD-SAAS-005,API-DIAGNOSTIC,Extend trial validation,super-admin/owner,FAIL,negative rejected; 100000 days accepted (F-055); evidence/database/RUN-003/PH-13/AUD-SAAS-MATRIX.json
+EX-RUN003-AUD-SAAS-006,API-DIAGNOSTIC,Webhook unsigned payload / refund unknown payment / mock process without token,super-admin/owner,PARTIAL,"mock process 400 payment_token required; unsigned webhook 500; refund unknown 500 (error mapping, F-050 class); evidence/database/RUN-003/PH-13/AUD-SAAS-MATRIX.json"
+EX-RUN003-AUD-STORE-001,UI-HEADED-CHROME,Storefront menu on tenant subdomain with default isolated CORS,customer(public),FAIL-ENVIRONMENT,"menu shows ""0 items / No items found"" while public API returns 3 products: browser blocks Origin http://audit-c-diag.localhost:13113 because CORS_ORIGINS has no wildcard (isolated compose default); evidence/network/RUN-003/PH-08/AUD-STORE-002-public-api.txt, AUD-STORE-003.json"
+EX-RUN003-AUD-STORE-004,UI-HEADED-CHROME,Storefront menu after allowing http://*.localhost:13113 (middleware/cors.go:66-92 supports wildcard),customer(public),PASS,"3 items with EGP prices; F-022 UI cause = environment CORS configuration, API 500 for uncategorised product remains a product defect; evidence/screenshots/RUN-003/PH-08/AUD-STORE-004-menu-C-with-wildcard-cors.png"
+EX-RUN003-AUD-STORE-005,UI-HEADED-CHROME,"Storefront online order (cash, pickup/delivery form) end to end",customer(public),PASS,order 57 source=website pending/pending cash subtotal 100 tax 10 total 110 (10% equals server rule; no 14% mismatch on storefront); no journal until paid (expected); evidence/screenshots/RUN-003/PH-08/AUD-STORE-005-after-place.png; evidence/network/RUN-003/PH-08/AUD-STORE-005b.json; tests/runtime/ph08_storefront_order.mjs
+EX-RUN003-AUD-STORE-006,API-DIAGNOSTIC+SQL,Website order lifecycle: pending -> confirm (KDS entry) -> paid (journals),owner,PASS,order 57: no KDS row while pending; confirm creates KDS row status new; paid posts JE-2026-00095 (sales) and JE-2026-00096 (COGS)
+EX-RUN003-AUD-MONTH-001,API-DIAGNOSTIC+ORACLE,"Compressed operating month on fresh tenant F (capital, 3 supplier invoices/payments, 2 customer invoices/receipts, 4 expenses, withdrawal, 10 POS sales)",owner,PARTIAL,"independent integer-cents ledger equals system GL on every account (0 diffs); P&L equals oracle; BS equation off by exactly net loss (F-002); cash flow off by 5,190.00 working-capital terms (F-003); payroll not executable (F-014); evidence/database/RUN-003/PH-14/AUD-MONTH.json; 42 section appended"
+EX-RUN003-AUD-INS-001,API-DIAGNOSTIC+SQL,Insurance policy and HR cost insurance term,owner,PASS,"premium 600/month: report insurance 600 for 30 days and 1,800 for 61 days equal oracle 600 x ceil(days/30); evidence/database/RUN-003/PH-10/AUD-HR-MODULES.json"
+EX-RUN003-AUD-CON-001,API-DIAGNOSTIC+SQL,Contract/resignation date ordering and duplicate number,owner,FAIL,F-056; duplicate contract number returns raw pq text (F-031); evidence/database/RUN-003/PH-10/AUD-HR-MODULES.json
+EX-RUN003-AUD-TRN-001,API-DIAGNOSTIC+SQL,Training create (scheduled) and compliance report,owner,PASS-VACUOUS,training created scheduled; compliance 0 of 1 active (no certified record created; completion/certificate path not executed); evidence/database/RUN-003/PH-10/AUD-HR-MODULES.json
+EX-RUN003-AUD-REL-REDIS,API-DIAGNOSTIC+DOCKER,"Redis outage: authenticated request, login, health, public menu",owner,FAIL,"F-018 reproduced: auth and login hang >30 s, /health 200; public menu unaffected; sessions invalid after restart; evidence/network/RUN-003/PH-18/AUD-REL-REDIS.json; tests/runtime/ph18_redis_outage.mjs"
+EX-RUN003-AUD-OT-001,API-DIAGNOSTIC+SQL,Dine-in order with table; delivery-address order and paid posting,owner,PASS,table 1 becomes occupied; totals 200/20/220 and 100/10/110; delivery order posts Dr 1110 110 / Cr 4100 100 / Cr 2120 10 / COGS 40; no delivery fee exists on POS orders (fee 0); evidence/database/RUN-003/PH-07/AUD-ORDER-TYPES.json
+EX-RUN003-AUD-OT-002,API-DIAGNOSTIC+SQL,"Order boundary/negative: quantity 0/-3/100000, unknown payment method, XSS/SQL text",owner,PASS,"0/-3 and bitcoin rejected 400 with clear text; 100000 rejected ""insufficient inventory""; script/SQL strings stored verbatim (output-encoding must be verified per renderer) and orders table intact (71 rows); evidence/database/RUN-003/PH-07/AUD-ORDER-TYPES.json"
+EX-RUN003-AUD-OT-003,API-DIAGNOSTIC+SQL,Order create with expected_total mismatch and unknown product id,owner,FAIL,"both return 500 ""Failed to create order"" (F-050 class error mapping); evidence/database/RUN-003/PH-07/AUD-ORDER-TYPES.json"
+EX-RUN003-AUD-XSS-001,UI-HEADED-CHROME,Stored <script> customer name rendered by orders page and KDS board,owner,PASS,"text shown literally, HTML escaped (&lt;script&gt;), no live script node, no dialog fired; evidence/network/RUN-003/PH-17/AUD-XSS-001.json and screenshots PH-17/AUD-XSS-001-orders.png / -kds.png (print/receipt renderers not tested)"
+EX-RUN003-AUD-DRV-001,API-DIAGNOSTIC+SQL,"Driver assignment, double assignment, status lifecycle to delivered, COD settlement",owner,FAIL,assignment 200 and double assignment 409; delivered order remains payment pending with 0 journals (F-057); evidence/database/RUN-003/PH-08/AUD-THEME-DRIVER.json
+EX-RUN003-AUD-DRV-002,API-DIAGNOSTIC+SQL,Driver phone validation,owner,FAIL,non-numeric phone accepted (F-058); evidence/database/RUN-003/PH-08/AUD-THEME-DRIVER.json
+EX-RUN003-AUD-THM-001,API-DIAGNOSTIC+SQL,"Theme builder: create/duplicate/activate invalid config, public output, history, delete active",owner,FAIL,"F-059, F-060; default theme re-activated after the test; evidence/database/RUN-003/PH-08/AUD-THEME-DRIVER.json"
+EX-RUN003-AUD-MD-001,API-DIAGNOSTIC+SQL,"Master-data validation battery: products, categories, suppliers, customers",owner,FAIL,F-062: 12 of 16 invalid inputs accepted; overflow/over-length/duplicate SKU return 500 (F-031 class); evidence/database/RUN-003/PH-16/AUD-MASTERDATA.json
+EX-RUN003-AUD-MD-002,API-DIAGNOSTIC+SQL,"Selling negative, zero and 5-decimal priced products",owner,PARTIAL,negative price blocked at order time (400 invalid product price); zero price sellable and its paid event cannot post (F-061); 3 x 10.12345 stored 30.36/3.04/33.40 (unit price rounded to cents); evidence/database/RUN-003/PH-16/AUD-MASTERDATA.json
+EX-RUN003-AUD-IMP-001,API-DIAGNOSTIC+SQL,"CSV journal import: valid, unbalanced, duplicate, formula, unknown account, bad date, wrong header, empty, negative, auto_post, bulk 500-6000",owner,FAIL,"F-063; unbalanced/unknown/date/negative rejected per entry; auto_post=true posts; throughput about 17 ms per journal (3,000 in 52 s); evidence/database/RUN-003/PH-11/AUD-IMPORT.json"
+EX-RUN003-AUD-SCALE-001,API-DIAGNOSTIC+SQL,"Latency with 17,108 journals / 34,251 lines in tenant 4",owner,PASS,"journal list 37-48 ms (paged), CSV export 2.2 MB in 242 ms, TB 16 ms, P&L 24 ms (drafts only; posted GL unchanged); not a full 50k-line posted benchmark; evidence/database/RUN-003/PH-11/AUD-IMPORT.json"
+EX-RUN003-AUD-EXP-001,API-DIAGNOSTIC,"Report export parity: sales, profitability, inventory x csv EN/AR and pdf",owner,PASS,"CSV totals equal report API (sales 530,893.40; profitability 482,630.36 with COGS 193,040.00; inventory value 128,480.00); UTF-8 BOM present; Arabic headers in AR; PDF generated (%PDF- magic, contents not parsed); evidence/database/RUN-003/PH-12/AUD-EXPORTS.json; tests/runtime/ph12_exports.mjs"
+EX-RUN003-AUD-EXP-002,API-DIAGNOSTIC,"Export of financial statements (P&L, balance sheet, trial balance, cash flow, VAT)",owner,OBSERVED,"report export endpoint accepts only sales, profitability and inventory (400 otherwise); no export for GL-based statements; customer invoice PDF generated (1,666 bytes); evidence/database/RUN-003/PH-12/AUD-EXPORTS.json; tests/runtime/ph12_exports.mjs"
+EX-RUN003-AUD-LOAD-001,API-DIAGNOSTIC,"Incremental read load 10/25/50 VU x 15 s (6 read endpoints, one session) with headed Chrome runs on the same host",owner,PARTIAL,"~126-146 rps; 50 VU p50 299 ms p95 749 ms max 1.7 s; only errors are 429 from the /kds/queue limiter (a KDS board polling faster than the limiter would be throttled); 0 errors on other endpoints; NOT 100 VU, no write/POS load, no production capacity claim; evidence/network/RUN-003/PH-18/AUD-LOAD.json"
+EX-RUN003-AUD-TBL-001,API-DIAGNOSTIC+SQL,"Tables validation: duplicate number, capacity bounds, negative number, long name, delete occupied",owner,FAIL,"F-064; capacity 1-50, negative number and delete-with-active-orders correctly rejected; evidence/database/RUN-003/PH-16/AUD-TABLES.json"
+EX-RUN003-AUD-UIFORM-001,UI-HEADED-CHROME,"Real UI submission of category, product, driver, bank account, table forms (generic filler)",owner,PARTIAL,category with display order 400 (F-065); product 201 but uncategorised -> public menu 500 (F-022); bank account 400 with raw pq text for an over-long field (F-031; UI has no maxlength); table 201; driver form submitted without a mutation (not diagnosed); customer/supplier add dialogs not opened by the filler; evidence/network/RUN-003/PH-06/AUD-UIFORMS.json
+EX-RUN003-AUD-UIFORM-002,UI-HEADED-CHROME,Category form variants: name only vs name + display order,owner,FAIL,name only 201; display order 7 -> string payload -> 400 Invalid request body (F-065); evidence/network/RUN-003/PH-06/AUD-UIFORM-CATEGORY.json
+EX-RUN003-AUD-UI-MATRIX-EN,UI-HEADED-CHROME,Dashboard route matrix EN desktop: 59 routes,owner,PARTIAL,first 35 routes valid (no 404/error/overflow); later routes hit an environment fault (dashboard module-resolution error after frontend-install) so the EN run was only valid for the first 35 routes; see AUD-UI-MATRIX.run1-en-valid.json
+EX-RUN003-AUD-UI-MATRIX-ARMOB,UI-HEADED-CHROME,Dashboard route matrix AR (RTL) desktop and EN mobile 390px: 59 routes each,owner,PASS,"AR: 59/59 dir=rtl, 0 404, 0 error text, 0 overflow; mobile: 0 404/error, 1 horizontal overflow (notifications 414px > 390px, low-severity UI observation); screenshots PH-04/AUD-UI-ar-*.png and -en-mobile-*.png"
+EX-RUN003-AUD-UIFORM-003,UI-HEADED-CHROME,"Real UI submission: customer, supplier, account, journal, supplier invoice, leave, attendance, contract, training, user forms",owner,PARTIAL,"customer/supplier/account/contract forms -> 400 raw pq ""value too long"" (artificial long values; F-025/F-031 exposure, no maxlength); training -> 400 scope error (filler wrote employee id 12); user created 200; journal/supplier-invoice/leave/attendance forms not submitted by the generic filler (need field-specific handling); evidence/network/RUN-003/PH-06/AUD-UIFORMS2.json"
+EX-RUN004-MET-CF002,UI-HEADED-CHROME+SQL,MET-CF-002 investing cash flow vs ledger,owner,FAIL,"report +20,000 vs ledger cash movement -20,000 (F-003 family)"
+EX-RUN004-MET-PROF007,UI-HEADED-CHROME+SQL,MET-PROF-007 profitability top/lowest items,owner,FAIL,top list = SQL; lowest_margin list ranks by profit (F-067)
+EX-RUN004-MET-DASH004,UI-HEADED-CHROME+SQL,MET-DASH-004 dashboard tiles vs API/SQL,owner,FAIL,recent paid revenue 33.40 correct per label; Products tile 1 vs 12 (F-066)
+EX-RUN004-MET-KDS003,UI-HEADED-CHROME+SQL,MET-KDS-003 KDS analytics after UI bump to completed,owner,PARTIAL,averages/totals = SQL; hours are UTC buckets (F-070); no late-orders metric exists
+EX-RUN004-MET-HRR002,API-DIAGNOSTIC+HEADED-CHROME,MET-HRR-002 turnover through resignation lifecycle,owner,FAIL,completed resignation not counted as departure; employee stays active (F-069)
+EX-RUN004-MET-HRR007,API-DIAGNOSTIC,MET-HRR-007 social insurance export duplicates,owner,FAIL,one salary row gives two CSV rows with two active policies (F-068)
+EX-RUN004-SEC013,API-DIAGNOSTIC,SEC-013 ENV=staging vs enforce-mode API (cashier matrix) and production startup probe,cashier,FAIL,staging default: 6 finance/HR/user endpoints 200 for cashier (enforce: 403); mock Paymob allowed; metrics open; cookie not Secure (F-071)
+EX-RUN004-BANKRECON,API-DIAGNOSTIC,"Bank reconciliation: invented amounts, cross-tenant journal, completion with difference (BR-01..BR-10)",owner,FAIL,"invented 777,777.77 line completes the session and stamps last_reconciled_balance (F-072); other-tenant journal accepted (F-073); FK errors leak constraint text"
+EX-RUN004-DEPRECIATION,SOURCE+SQL,Depreciation / fixed assets capability,owner,BLOCKED-CAPABILITY,fixed_assets table (migration 145) has 0 rows; no route or UI; PostDepreciationEntries has no caller; not implemented (see 33 N23)
+EX-RUN004-WRITELOAD,API-DIAGNOSTIC load,"Incremental write load 10/25/50/100 virtual users x 20 s, POS orders (untracked and tracked product) mixed with reads, tenant 4 fixture",owner,PASS,"5,719 orders created, 0 server errors or network errors at every stage; p95 184/420/634/2,454 ms; ~117-154 req/s; peak 16 PG connections; GET 429 rate limiting 12%-5%; tracked stock 12 -> 0 equals 12 accepted tracked orders; 0 duplicate order numbers; no orphan rows; evidence evidence/network/RUN-004/PH-18/AUD-R4-WRITE-LOAD.json. Client and server on the same host; not a capacity claim"
+EX-RUN004-PAIDBURST,API-DIAGNOSTIC load,600 concurrent payment confirmations (50 clients) then outbox drain,owner,PASS,"all 600 returned 200 in 2.0 s (p95 311 ms); outbox drained in 56 s (~10.6 events/s, ledger lags up to a minute for a 600-event burst); one sales journal per order, 13 extra COGS journals for tracked orders (not duplicates), revenue delta exactly 60,000.00, 0 unbalanced journals; evidence evidence/network/RUN-004/PH-18/AUD-R4-PAID-BURST.json"
+EX-RUN004-BENCH-50K,API-DIAGNOSTIC + SYNTHETIC FIXTURE,"54,000 posted journal lines (27,000 journals via CSV import auto_post, tenant 10) report benchmark and correctness vs integer-cents oracle",owner,PASS,"P&L revenue 10,941,426.00 and expenses 2,703,789.00 equal the oracle; TB balanced; cash 1110 8,237,637.00; all report APIs 33-235 ms (ledger page 100 rows 209-235 ms; CSV export 337 KB 115 ms); P&L aggregation scans journal_entry_lines sequentially (planner choice at this size). Import itself: 1,500 journals took 58 s at 3k journals and 104 s at 24k and the client connection closed at ~60 s while the server completed (F-063). Browser rendering latency not measured here; evidence evidence/network/RUN-004/PH-18/AUD-R4-BENCH-MEASURE.json"
+EX-RUN004-FORMMATRIX,UI-HEADED-CHROME,"Real UI form matrix: 14 targets x 5 modes (empty, invalid, arabic, long, valid) = 70 runs; customers, suppliers, accounts, journal, attendance, contracts, users, drivers, tables, categories, products exercised; employees (route renders no form), leaves (no add control found) and roles (no add control found) NOT exercised",owner,PARTIAL,"valid and Arabic input persisted for customers, suppliers, accounts, drivers, products; empty submits show required messages; long values: 400 raw pq text (customers/suppliers/accounts/contracts, F-074) and 500 (drivers, tables, products, F-031/F-062/F-064); account code accepts HTML/SQL characters (F-075); categories with display order 400 (F-065 reconfirmed); journal counts in this matrix are distorted by the concurrent benchmark; evidence evidence/network/RUN-004/PH-06/AUD-R4-FORM-MATRIX.json"
+EX-RUN004-LANDING-SMOKE,UI-HEADED-CHROME,"Landing smoke on the current uncommitted working tree: 12 routes x desktop and 390px, EN/AR, language switch, no form submitted",anonymous,PASS,"all routes 200 (unknown path 404), RTL on /ar, no horizontal overflow, language switch /en -> /ar works; OBSERVATION OBS-LAND-001: a React hydration mismatch warning on /en and /ar auth/register in the dev build (landing is under separate development; not a finding); evidence evidence/network/RUN-004/PH-00/AUD-R4-LANDING-SMOKE.json"
+EX-RUN004-SUPERADMIN-UI,UI-HEADED-CHROME,"Super Admin app control matrix: dashboard, tenants, payments, users (audit-logs and settings not reached: run cut at the time limit)",super-admin,PARTIAL,"dashboard 5/5 controls PASS; tenants/payments partly; users View links 404 (F-076); several controls BLOCKED by click timeouts and a Chrome tab crash on the users page (tooling, not attributed to the product); paid checkout is disabled by the embedded offer (checkout_available=false) so billing lifecycle cannot run"
+EX-RUN004-THEMEBUILDER-UI,UI-HEADED-CHROME,"Theme Builder through the real UI: export dialog and download, duplicate, editor colour edit (invalid input blocked client-side, valid saved to config), activation, storefront and public API effect, Appearance coupling, restore",owner,PARTIAL,"export 1,612-byte JSON works; duplicate POST 201; invalid colour text sends no request (client validation); valid colour saved into config JSON not the primary_color column; activation works; public theme stale for about 4 min (F-078); Appearance save overwrites the active theme (F-077); history tab text only (API 501 known F-060); deletion of the active theme and import not exercised; evidence evidence/network/RUN-004/PH-08/"
+EX-RUN004-FORMMATRIX2,UI-HEADED-CHROME,"Real UI form matrix part 2: employees, leaves, roles x 5 modes (15 runs)",owner,FAIL,employees valid -> 500 positive_working_hours (F-014 reconfirmed on the current tree); empty employee submit sends nothing and shows no message; leave requests always 400 date format (F-079); roles accept HTML/SQL characters in the name (201) and an over-long name returns 500 (F-062/F-031 class); evidence evidence/network/RUN-004/PH-06/AUD-R4-FORM-MATRIX-employees_leaves_roles.json
+EX-RUN004-LANDING-SMOKE-HEAD,UI-HEADED-CHROME,"Landing smoke repeated against HEAD 0de839b (final committed tree), same 12 routes x desktop/390px",anonymous,PASS,"identical results to the pre-commit run (same status codes, text lengths, directions, no overflow); hydration warning on register pages unchanged (OBS-LAND-001); evidence evidence/network/RUN-004/PH-00/AUD-R4-LANDING-SMOKE.json (pre-commit copy: ...pre-commit-tree.json)"
+EX-RUN005-F018-REDIS-TIMING,API-DIAGNOSTIC+DOCKER,"F-018 Redis outage timing: authenticated request, login, health, public endpoint, recovery",owner,FAIL,"authenticated request and login failed after about 68 s with no HTTP response (WriteTimeout 60 s), /health 200 in 5 ms, public endpoint fine; after restart old cookie 401, new login works (sessions lost); root cause CONFIRMED; evidence evidence/network/RUN-005/PH-18/AUD-R5-F018-REDIS-TIMING.json"
+EX-RUN005-F021-SUPPLIER-BALANCE,API-DIAGNOSTIC,"F-021 supplier balance replay: invoice, two payments, balance versus AP",owner,FAIL,"current_balance 0 after a 10,000 invoice, -10,000 after payments while invoice balance_due 0: balance equals minus payments; root cause CONFIRMED; evidence evidence/database/RUN-005/PH-06/AUD-R5-F021-SUPPLIER-BALANCE.json"
+EX-RUN005-F074-UNHANDLED,UI-HEADED-CHROME,"F-074 unhandled rejection on four forms (customer, supplier, account, contract) with an over-long value",owner,FAIL,"all four raise an unhandled rejection; three toast raw pq text, contracts shows nothing; root cause CONFIRMED; evidence evidence/network/RUN-005/PH-06/AUD-R5-F074-UNHANDLED.json"
+EX-RUN005-OBSERVED-REPRO,API-DIAGNOSTIC + UI-HEADED-CHROME,"Reproduction of OBSERVED findings F-023, F-026, F-035, F-036 (F-024 pending the invoice form run)",owner/anonymous,FAIL,all four reproduced: POS shows $ vs EGP; card payment debits 1113 with no settlement; login limit 20/min and CSP with unsafe-eval; mock Paymob routes execute without a session; evidence evidence/network/RUN-005/PH-17/AUD-R5-OBSERVED-REPRO.json and evidence/network/RUN-005/PH-07/AUD-R5-POS-CURRENCY.json
+EX-RUN005-RBAC-MATRIX,API-DIAGNOSTIC,Authorization matrix: roles ADMIN/MANAGER/EMPLOYEE/DRIVER x 28 GET + 8 write probes on the enforce-mode API and on an ENV=staging API (actual returned data inspected),admin/manager/employee/driver,FAIL,"enforce: ADMIN 27, MANAGER 15, EMPLOYEE 10, DRIVER 3 of 28 GETs; staging: every role 27/28 GET and 8/8 write probes authorised, salary fields exposed to all (F-071); employee reads base_salary (F-020); evidence evidence/network/RUN-005/PH-17/AUD-R5-RBAC-MATRIX-*.json"
+EX-RUN005-INVOICE-UI,UI-HEADED-CHROME,"Customer and invoice forms through the real UI: valid customer with receivable 1120; invoice 1 x 5,000, 10% discount, 14% VAT; dropdown counts; header-account failure",owner,FAIL,"customer created (id with AR 74); invoice 201 with payload tax 630.0000000000001 (F-024), stored tax 700.00 vs UI 630.00 (F-007), draft journal posted (F-008); customer dropdown 20 of 91 (F-081); header receivable account accepted then invoice 400 (F-080); evidence evidence/network/RUN-005/PH-09/AUD-R5-INVOICE-FORM-RESULT.json"
+EX-RUN005-ARABIC-RTL,UI-HEADED-CHROME,"Arabic functional pass at 1440 px and 390 px on 15 representative routes: html direction, dialog direction and fit, submit reachability, overflow, Arabic search round trip (no data saved)",owner,PASS,"html dir=rtl on 30 of 30 Arabic checks (the earlier ""0/59"" in report 61 was a generator bug, fixed); no overflow, dialogs fit, Arabic text retained; evidence evidence/network/RUN-005/PH-04/AUD-R5-LANG-VIEWPORT.json"
+EX-RUN005-MOBILE-TABLET,UI-HEADED-CHROME,"Mobile and tablet pass at 360, 390, 768 and 1024 px on 15 routes: menu button, overflow, off-screen controls, dialog fit and submit reachability, touch targets",owner,PARTIAL,"mobile menu button present on all 60 mobile/tablet checks; 16 dialogs measured, none clipped, 0 unreachable submit buttons; horizontal overflow only on P&L at 768 px (F-082); orders and chart of accounts have more than 12 touch targets under 32 px at 360 and 390 px (OBSERVATION OBS-A11Y-001, not registered as a finding); 15 routes only, not the full route set; evidence evidence/network/RUN-005/PH-04/AUD-R5-LANG-VIEWPORT.json"
+EX-RUN005-DESTR-CUSTOMER-SUPPLIER,UI-HEADED-CHROME,Delete controls on disposable customers and suppliers (clean and with an invoice),owner,PASS,"clean customer 99 and clean supplier 85: browser confirm dialog, DELETE 200, row gone; customer 100 with an invoice: DELETE 400 with the raw foreign-key text ""pq: update or delete on table customers_accounting violates foreign key constraint invoices_customer_customer_id_fkey"" (data protected, message leak F-025); evidence evidence/network/RUN-005/PH-04/AUD-R5-DESTRUCTIVE-A.run1.json; AUD-R5-DESTRUCTIVE-A.run2-S1S2S3S7.json; AUD-R5-DESTRUCTIVE-A.run4-S1S2S3.json; AUD-R5-DESTRUCTIVE-A.json (S4)"
+EX-RUN005-DESTR-PRODUCT,UI-HEADED-CHROME,Delete control on a disposable product,owner,PASS,"confirm dialog, DELETE /products/51 200, status=deleted (soft delete); evidence evidence/network/RUN-005/PH-04/AUD-R5-DESTRUCTIVE-A.json"
+EX-RUN005-DESTR-ORDER-CANCEL,UI-HEADED-CHROME,Cancel Order on an unpaid tracked order and on a paid order,owner,FAIL,"unpaid order 5796 (qty 2 of product 2): DELETE 200, status cancelled, stock 32 -> 30 at order -> 32 after cancel (restored), BUT the KDS queue row stays ""new"" (F-044 reproduced through the UI); paid order 5797: DELETE 400 ""cannot cancel paid or refunded order before a supported refund and accounting reversal workflow exists"", the UI shows only the generic toast ""Failed to cancel order"" (F-049, F-050); evidence evidence/network/RUN-005/PH-04/AUD-R5-DESTRUCTIVE-A.run1.json"
+EX-RUN005-DESTR-JOURNAL,UI-HEADED-CHROME,Post and Void on a disposable journal (detail page),owner,PASS,"journal 44792 draft -> Post: status posted, 2 general-ledger rows; Void (browser prompt for a reason accepted empty): status void, void_reason ""Voided by user"", 4 general-ledger rows (2 original + 2 reversal), net cash effect 0.00; evidence evidence/network/RUN-005/PH-04/AUD-R5-DESTRUCTIVE-A.run2-S1S2S3S7.json"
+EX-RUN005-DESTR-THEME,UI-HEADED-CHROME,Duplicate then Delete a theme copy; active theme untouched,owner,PASS,"themes 3 -> 4 -> 3, confirm dialog, active theme 4 intact; deleting the ACTIVE theme through the UI was not offered a Delete button (API-level deletion of the active theme is F-060); evidence evidence/network/RUN-005/PH-04/AUD-R5-DESTRUCTIVE-A.run1.json"
+EX-RUN005-DESTR-ACCOUNT,UI-HEADED-CHROME,Delete on a disposable chart-of-accounts account,owner,PASS,"confirm dialog, DELETE /accounting/accounts/419 200, row removed; evidence evidence/network/RUN-005/PH-04/AUD-R5-DESTRUCTIVE-B.run1.json .. run4-leave-resign.json; AUD-R5-DESTRUCTIVE-B.json (B4/B12/B13 rerun)"
+EX-RUN005-DESTR-CATEGORY,UI-HEADED-CHROME,Delete on a disposable category,owner,PASS,"confirm dialog ""Are you sure you want to delete this category?"", DELETE /categories/8 200; soft delete (row kept, active=false); evidence evidence/network/RUN-005/PH-04/AUD-R5-DESTRUCTIVE-B.run1.json .. run4-leave-resign.json; AUD-R5-DESTRUCTIVE-B.json (B4/B12/B13 rerun)"
+EX-RUN005-DESTR-BANK-ACCOUNT,UI-HEADED-CHROME,Delete on a disposable bank account (card),owner,PASS,"confirm ""Delete bank account ...?"", DELETE /accounting/bank-accounts/5 200, row removed; evidence evidence/network/RUN-005/PH-04/AUD-R5-DESTRUCTIVE-B.run1.json .. run4-leave-resign.json; AUD-R5-DESTRUCTIVE-B.json (B4/B12/B13 rerun)"
+EX-RUN005-DESTR-HR-INSURANCE-TRAINING,UI-HEADED-CHROME,Delete on disposable HR insurance and training records,owner,PASS,"DELETE /hr/insurance/3 200 and DELETE /hr/training/2 200, rows removed; evidence evidence/network/RUN-005/PH-04/AUD-R5-DESTRUCTIVE-B.run1.json .. run4-leave-resign.json; AUD-R5-DESTRUCTIVE-B.json (B4/B12/B13 rerun)"
+EX-RUN005-DESTR-DRIVER-DEACTIVATE,UI-HEADED-CHROME,Deactivate on a disposable driver,owner,PASS,"PUT /admin/drivers/46/status 200, status active -> inactive; evidence evidence/network/RUN-005/PH-04/AUD-R5-DESTRUCTIVE-B.run1.json .. run4-leave-resign.json; AUD-R5-DESTRUCTIVE-B.json (B4/B12/B13 rerun)"
+EX-RUN005-DESTR-LEAVE,UI-HEADED-CHROME,Approve and Reject on disposable pending leave requests,owner,PASS,modal confirm; POST /hr/leaves/14/approve 200 -> approved; POST /hr/leaves/15/reject 200 -> rejected; evidence evidence/network/RUN-005/PH-04/AUD-R5-DESTRUCTIVE-B.run1.json .. run4-leave-resign.json; AUD-R5-DESTRUCTIVE-B.json (B4/B12/B13 rerun)
+EX-RUN005-DESTR-RESIGNATION,UI-HEADED-CHROME,Complete and Delete on disposable resignations,owner,FAIL,Complete: POST /hr/resignations/9/complete 200 with settlement_amount 0 and the employee stays active with no termination date (F-069 reproduced through the UI); Delete: DELETE /hr/resignations/8 200; evidence evidence/network/RUN-005/PH-04/AUD-R5-DESTRUCTIVE-B.run1.json .. run4-leave-resign.json; AUD-R5-DESTRUCTIVE-B.json (B4/B12/B13 rerun)
+EX-RUN005-DESTR-INVOICE-VOID,UI-HEADED-CHROME,Void on a disposable draft customer invoice,owner,PASS,prompt for reason; POST /accounting/customer-invoices/20/void 200; the draft invoice journal 44795 reversed (see journal checks); evidence evidence/network/RUN-005/PH-04/AUD-R5-DESTRUCTIVE-B.run1.json .. run4-leave-resign.json; AUD-R5-DESTRUCTIVE-B.json (B4/B12/B13 rerun)
+EX-RUN005-DESTR-CONTRACT-USER-ROLE,UI-HEADED-CHROME,"Delete on a disposable contract, user and role",owner,PARTIAL,"contract: fixture creation did not return an id in the runner (not executed); user and role: row and Delete control found but the click produced no confirmation dialog and no request (rows unchanged, 1 each); not classified as a product defect without a manual check; evidence evidence/network/RUN-005/PH-04/AUD-R5-DESTRUCTIVE-B.json"

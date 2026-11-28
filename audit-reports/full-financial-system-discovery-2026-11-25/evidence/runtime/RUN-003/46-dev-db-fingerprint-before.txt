@@ -1,0 +1,17 @@
+Thu Nov 26 16:22:24 UTC 2026
+133260db66b1143c254d79476daa7650b41a33f0
+                                                  List of databases
+   Name    |  Owner   | Encoding |  Collate   |   Ctype    | ICU Locale | Locale Provider |     Access privileges     
+-----------+----------+----------+------------+------------+------------+-----------------+---------------------------
+ pos_saas  | postgres | UTF8     | en_US.utf8 | en_US.utf8 |            | libc            | =Tc/postgres             +
+           |          |          |            |            |            |                 | postgres=CTc/postgres    +
+           |          |          |            |            |            |                 | pos_accounting=c/postgres
+ postgres  | postgres | UTF8     | en_US.utf8 | en_US.utf8 |            | libc            | 
+ template0 | postgres | UTF8     | en_US.utf8 | en_US.utf8 |            | libc            | =c/postgres              +
+devdb=pos_saas
+tenants|2
+users|6
+orders|0
+journals|0
+coa|62
+migrations|145

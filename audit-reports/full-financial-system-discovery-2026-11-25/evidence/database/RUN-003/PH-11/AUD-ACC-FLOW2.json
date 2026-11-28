@@ -1,0 +1,63 @@
+{
+ "run": "RUN-003",
+ "kind": "API-DIAGNOSTIC",
+ "log": [
+  {
+   "id": "REC-01",
+   "desc": "create recurring template (auto_post true)",
+   "status": 201,
+   "resp": "{\"data\":{\"id\":1,\"tenant_id\":4,\"restaurant_id\":4,\"template_code\":\"RENT-M\",\"template_name\":\"Monthly rent probe\",\"description\":\"\",\"frequency\":\"monthly\",\"start_date\":\"2026-11-26T00:00:00Z\",\"next_run_date\":\"2026-11-26T00:00:00Z\",\"is_active\":true,\"auto_post\":true,\"lines_json\":\"W3sidGF4X2NvZGUiOiAiIiwgImFj"
+  },
+  {
+   "id": "REC-02",
+   "desc": "run recurring template",
+   "status": 200,
+   "resp": "{\"data\":{\"journal_entry_id\":98,\"run_date\":\"2026-11-26\"},\"success\":true}",
+   "rentDelta": 700
+  },
+  {
+   "id": "REC-03",
+   "desc": "run again same period (duplicate run guard?)",
+   "status": 200,
+   "resp": "{\"data\":{\"journal_entry_id\":99,\"run_date\":\"2026-11-26\"},\"success\":true}",
+   "rentDelta": 1400
+  },
+  {
+   "id": "BUD-01",
+   "desc": "create budget rent Nov 3000",
+   "status": 200,
+   "resp": "{\"data\":{\"id\":1},\"success\":true}"
+  },
+  {
+   "id": "BUD-02",
+   "desc": "list budgets (variance vs GL actual)",
+   "status": 200,
+   "resp": "{\"data\":[{\"id\":1,\"tenant_id\":4,\"restaurant_id\":4,\"account_id\":111,\"account_code\":\"5310\",\"account_name\":\"Rent Expense\",\"fiscal_year\":2026,\"period_month\":11,\"budget_amount\":3000,\"actual_amount\":4400,\"variance_amount\":1400,\"variance_pct\":46.666666666666664,\"currency\":\"EGP\",\"notes\":\"\",\"created_at\":\"2026",
+   "glRent": 4400
+  },
+  {
+   "id": "FX-01",
+   "desc": "create USD/EGP 48.5",
+   "status": 200,
+   "resp": "{\"data\":{\"id\":1},\"success\":true}"
+  },
+  {
+   "id": "FX-02",
+   "desc": "convert 100 USD (oracle 4,850)",
+   "status": 200,
+   "resp": "{\"data\":{\"amount\":100,\"as_of\":\"2026-11-26\",\"base_currency\":\"USD\",\"converted\":4850,\"quote_currency\":\"EGP\",\"rate\":48.5},\"success\":true}"
+  },
+  {
+   "id": "FX-03",
+   "desc": "negative rate rejected?",
+   "status": 400,
+   "resp": "{\"error\":\"base_currency, quote_currency and positive rate are required\",\"success\":false}"
+  },
+  {
+   "id": "FX-04",
+   "desc": "same-currency pair rejected?",
+   "status": 200,
+   "resp": "{\"data\":{\"id\":2},\"success\":true}"
+  }
+ ]
+}

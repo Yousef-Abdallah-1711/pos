@@ -1,0 +1,331 @@
+{
+ "run": "RUN-004",
+ "note": "working tree contains uncommitted landing changes",
+ "langSwitch": "after click url=/ar dir=rtl",
+ "results": [
+  {
+   "viewport": "desktop",
+   "path": "/en",
+   "status": 200,
+   "title": "More time for the table. | SERVIO",
+   "h1": "More time for the table.",
+   "dir": "ltr",
+   "lang": "en",
+   "overflow": false,
+   "len": 8119,
+   "links": 76,
+   "errors": []
+  },
+  {
+   "viewport": "desktop",
+   "path": "/ar",
+   "status": 200,
+   "title": "وقت أكتر لضيوفك. | SERVIO",
+   "h1": "وقت أكتر لضيوفك.",
+   "dir": "rtl",
+   "lang": "ar",
+   "overflow": false,
+   "len": 6670,
+   "links": 76,
+   "errors": []
+  },
+  {
+   "viewport": "desktop",
+   "path": "/en/auth/login",
+   "status": 200,
+   "title": "SERVIO | Connected restaurant management",
+   "h1": "Your restaurant, in one view.",
+   "dir": "ltr",
+   "lang": "en",
+   "overflow": false,
+   "len": 864,
+   "links": 50,
+   "errors": []
+  },
+  {
+   "viewport": "desktop",
+   "path": "/en/auth/register",
+   "status": 200,
+   "title": "SERVIO | Connected restaurant management",
+   "h1": "Set up your restaurant workspace.",
+   "dir": "ltr",
+   "lang": "en",
+   "overflow": false,
+   "len": 1227,
+   "links": 49,
+   "errors": [
+    "console: A tree hydrated but some attributes of the server rendered HTML didn't match the client properties. This won't be patched up. This can happe"
+   ]
+  },
+  {
+   "viewport": "desktop",
+   "path": "/ar/auth/login",
+   "status": 200,
+   "title": "SERVIO | إدارة متصلة لكل تفاصيل مطعمك",
+   "h1": "إدارة مطعمك في صورة واحدة.",
+   "dir": "rtl",
+   "lang": "ar",
+   "overflow": false,
+   "len": 812,
+   "links": 50,
+   "errors": []
+  },
+  {
+   "viewport": "desktop",
+   "path": "/ar/auth/register",
+   "status": 200,
+   "title": "SERVIO | إدارة متصلة لكل تفاصيل مطعمك",
+   "h1": "ابدأ مساحة عمل مطعمك.",
+   "dir": "rtl",
+   "lang": "ar",
+   "overflow": false,
+   "len": 1105,
+   "links": 49,
+   "errors": [
+    "console: A tree hydrated but some attributes of the server rendered HTML didn't match the client properties. This won't be patched up. This can happe"
+   ]
+  },
+  {
+   "viewport": "desktop",
+   "path": "/en/pricing",
+   "status": 200,
+   "title": "Pricing | SERVIO",
+   "h1": "Clear pricing. Room to get familiar.",
+   "dir": "ltr",
+   "lang": "en",
+   "overflow": false,
+   "len": 2380,
+   "links": 51,
+   "errors": []
+  },
+  {
+   "viewport": "desktop",
+   "path": "/en/features",
+   "status": 200,
+   "title": "Every role sees the next step. | SERVIO",
+   "h1": "Every role sees the next step.",
+   "dir": "ltr",
+   "lang": "en",
+   "overflow": false,
+   "len": 7985,
+   "links": 66,
+   "errors": []
+  },
+  {
+   "viewport": "desktop",
+   "path": "/en/demo",
+   "status": 200,
+   "title": "Product walkthrough | SERVIO",
+   "h1": "The product, without the guesswork.",
+   "dir": "ltr",
+   "lang": "en",
+   "overflow": false,
+   "len": 1434,
+   "links": 52,
+   "errors": []
+  },
+  {
+   "viewport": "desktop",
+   "path": "/en/how-it-works",
+   "status": 200,
+   "title": "How it works | SERVIO",
+   "h1": "A shared thread through service.",
+   "dir": "ltr",
+   "lang": "en",
+   "overflow": false,
+   "len": 1889,
+   "links": 54,
+   "errors": []
+  },
+  {
+   "viewport": "desktop",
+   "path": "/en/contact",
+   "status": 200,
+   "title": "Explore SERVIO with a product walkthrough | SERVIO",
+   "h1": "Explore SERVIO with a product walkthrough",
+   "dir": "ltr",
+   "lang": "en",
+   "overflow": false,
+   "len": 910,
+   "links": 50,
+   "errors": []
+  },
+  {
+   "viewport": "desktop",
+   "path": "/en/does-not-exist",
+   "status": 404,
+   "title": "404: This page could not be found.",
+   "h1": "404",
+   "dir": "",
+   "lang": "",
+   "overflow": false,
+   "len": 33,
+   "links": 0,
+   "errors": [
+    "console: Failed to load resource: the server responded with a status of 404 (Not Found)"
+   ]
+  },
+  {
+   "viewport": "mobile",
+   "path": "/en",
+   "status": 200,
+   "title": "More time for the table. | SERVIO",
+   "h1": "More time for the table.",
+   "dir": "ltr",
+   "lang": "en",
+   "overflow": false,
+   "len": 8025,
+   "links": 76,
+   "errors": []
+  },
+  {
+   "viewport": "mobile",
+   "path": "/ar",
+   "status": 200,
+   "title": "وقت أكتر لضيوفك. | SERVIO",
+   "h1": "وقت أكتر لضيوفك.",
+   "dir": "rtl",
+   "lang": "ar",
+   "overflow": false,
+   "len": 6571,
+   "links": 76,
+   "errors": []
+  },
+  {
+   "viewport": "mobile",
+   "path": "/en/auth/login",
+   "status": 200,
+   "title": "SERVIO | Connected restaurant management",
+   "h1": "Your restaurant, in one view.",
+   "dir": "ltr",
+   "lang": "en",
+   "overflow": false,
+   "len": 791,
+   "links": 50,
+   "errors": []
+  },
+  {
+   "viewport": "mobile",
+   "path": "/en/auth/register",
+   "status": 200,
+   "title": "SERVIO | Connected restaurant management",
+   "h1": "Set up your restaurant workspace.",
+   "dir": "ltr",
+   "lang": "en",
+   "overflow": false,
+   "len": 1154,
+   "links": 49,
+   "errors": [
+    "console: A tree hydrated but some attributes of the server rendered HTML didn't match the client properties. This won't be patched up. This can happe"
+   ]
+  },
+  {
+   "viewport": "mobile",
+   "path": "/ar/auth/login",
+   "status": 200,
+   "title": "SERVIO | إدارة متصلة لكل تفاصيل مطعمك",
+   "h1": "إدارة مطعمك في صورة واحدة.",
+   "dir": "rtl",
+   "lang": "ar",
+   "overflow": false,
+   "len": 734,
+   "links": 50,
+   "errors": []
+  },
+  {
+   "viewport": "mobile",
+   "path": "/ar/auth/register",
+   "status": 200,
+   "title": "SERVIO | إدارة متصلة لكل تفاصيل مطعمك",
+   "h1": "ابدأ مساحة عمل مطعمك.",
+   "dir": "rtl",
+   "lang": "ar",
+   "overflow": false,
+   "len": 1027,
+   "links": 49,
+   "errors": [
+    "console: A tree hydrated but some attributes of the server rendered HTML didn't match the client properties. This won't be patched up. This can happe"
+   ]
+  },
+  {
+   "viewport": "mobile",
+   "path": "/en/pricing",
+   "status": 200,
+   "title": "Pricing | SERVIO",
+   "h1": "Clear pricing. Room to get familiar.",
+   "dir": "ltr",
+   "lang": "en",
+   "overflow": false,
+   "len": 2307,
+   "links": 51,
+   "errors": []
+  },
+  {
+   "viewport": "mobile",
+   "path": "/en/features",
+   "status": 200,
+   "title": "Every role sees the next step. | SERVIO",
+   "h1": "Every role sees the next step.",
+   "dir": "ltr",
+   "lang": "en",
+   "overflow": false,
+   "len": 7912,
+   "links": 66,
+   "errors": []
+  },
+  {
+   "viewport": "mobile",
+   "path": "/en/demo",
+   "status": 200,
+   "title": "Product walkthrough | SERVIO",
+   "h1": "The product, without the guesswork.",
+   "dir": "ltr",
+   "lang": "en",
+   "overflow": false,
+   "len": 1361,
+   "links": 52,
+   "errors": []
+  },
+  {
+   "viewport": "mobile",
+   "path": "/en/how-it-works",
+   "status": 200,
+   "title": "How it works | SERVIO",
+   "h1": "A shared thread through service.",
+   "dir": "ltr",
+   "lang": "en",
+   "overflow": false,
+   "len": 1816,
+   "links": 54,
+   "errors": []
+  },
+  {
+   "viewport": "mobile",
+   "path": "/en/contact",
+   "status": 200,
+   "title": "Explore SERVIO with a product walkthrough | SERVIO",
+   "h1": "Explore SERVIO with a product walkthrough",
+   "dir": "ltr",
+   "lang": "en",
+   "overflow": false,
+   "len": 837,
+   "links": 50,
+   "errors": []
+  },
+  {
+   "viewport": "mobile",
+   "path": "/en/does-not-exist",
+   "status": 404,
+   "title": "404: This page could not be found.",
+   "h1": "404",
+   "dir": "",
+   "lang": "",
+   "overflow": false,
+   "len": 33,
+   "links": 0,
+   "errors": [
+    "console: Failed to load resource: the server responded with a status of 404 (Not Found)"
+   ]
+  }
+ ]
+}

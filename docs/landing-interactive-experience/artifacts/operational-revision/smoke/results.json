@@ -1,0 +1,315 @@
+{
+  "baseURL": "http://localhost:3001",
+  "capturedAt": "2026-11-27T11:25:17.932Z",
+  "results": [],
+  "reducedResults": [
+    {
+      "locale": "en",
+      "theme": "light",
+      "state": {
+        "pinSpacers": 0,
+        "overflow": "auto"
+      },
+      "focus": {
+        "linkLeft": 171,
+        "linkRight": 317.765625,
+        "viewportLeft": 0,
+        "viewportRight": 1440
+      },
+      "issues": []
+    },
+    {
+      "locale": "en",
+      "theme": "dark",
+      "state": {
+        "pinSpacers": 0,
+        "overflow": "auto"
+      },
+      "focus": {
+        "linkLeft": 171,
+        "linkRight": 317.765625,
+        "viewportLeft": 0,
+        "viewportRight": 1440
+      },
+      "issues": []
+    },
+    {
+      "locale": "ar",
+      "theme": "light",
+      "state": {
+        "pinSpacers": 0,
+        "overflow": "auto"
+      },
+      "focus": {
+        "linkLeft": 1156.234375,
+        "linkRight": 1269,
+        "viewportLeft": 0,
+        "viewportRight": 1440
+      },
+      "issues": []
+    },
+    {
+      "locale": "ar",
+      "theme": "dark",
+      "state": {
+        "pinSpacers": 0,
+        "overflow": "auto"
+      },
+      "focus": {
+        "linkLeft": 1156.234375,
+        "linkRight": 1269,
+        "viewportLeft": 0,
+        "viewportRight": 1440
+      },
+      "issues": []
+    }
+  ],
+  "routeResults": [
+    {
+      "locale": "en",
+      "route": "/en",
+      "status": 200,
+      "width": 390,
+      "viewport": 390,
+      "heading": true,
+      "footer": true,
+      "issues": []
+    },
+    {
+      "locale": "en",
+      "route": "/en/features/pos",
+      "status": 200,
+      "width": 390,
+      "viewport": 390,
+      "heading": true,
+      "footer": true,
+      "issues": []
+    },
+    {
+      "locale": "en",
+      "route": "/en/features/kitchen-display",
+      "status": 200,
+      "width": 390,
+      "viewport": 390,
+      "heading": true,
+      "footer": true,
+      "issues": []
+    },
+    {
+      "locale": "en",
+      "route": "/en/features/online-ordering",
+      "status": 200,
+      "width": 390,
+      "viewport": 390,
+      "heading": true,
+      "footer": true,
+      "issues": []
+    },
+    {
+      "locale": "en",
+      "route": "/en/features/inventory",
+      "status": 200,
+      "width": 390,
+      "viewport": 390,
+      "heading": true,
+      "footer": true,
+      "issues": []
+    },
+    {
+      "locale": "en",
+      "route": "/en/features/hr",
+      "status": 200,
+      "width": 390,
+      "viewport": 390,
+      "heading": true,
+      "footer": true,
+      "issues": []
+    },
+    {
+      "locale": "en",
+      "route": "/en/features/analytics",
+      "status": 200,
+      "width": 390,
+      "viewport": 390,
+      "heading": true,
+      "footer": true,
+      "issues": []
+    },
+    {
+      "locale": "en",
+      "route": "/en/features/website-builder",
+      "status": 200,
+      "width": 390,
+      "viewport": 390,
+      "heading": true,
+      "footer": true,
+      "issues": []
+    },
+    {
+      "locale": "en",
+      "route": "/en/features",
+      "status": 200,
+      "width": 390,
+      "viewport": 390,
+      "heading": true,
+      "footer": true,
+      "issues": []
+    },
+    {
+      "locale": "en",
+      "route": "/en/demo",
+      "status": 200,
+      "width": 390,
+      "viewport": 390,
+      "heading": true,
+      "footer": true,
+      "issues": []
+    },
+    {
+      "locale": "en",
+      "route": "/en/auth/register",
+      "status": 500,
+      "width": 390,
+      "viewport": 390,
+      "heading": false,
+      "footer": false,
+      "issues": [
+        "route response/layout"
+      ]
+    },
+    {
+      "locale": "en",
+      "route": "/en/how-it-works",
+      "status": 500,
+      "width": 390,
+      "viewport": 390,
+      "heading": false,
+      "footer": false,
+      "issues": [
+        "route response/layout"
+      ]
+    },
+    {
+      "locale": "en",
+      "route": "/en/pricing",
+      "status": 500,
+      "width": 390,
+      "viewport": 390,
+      "heading": false,
+      "footer": false,
+      "issues": [
+        "route response/layout"
+      ]
+    },
+    {
+      "locale": "en",
+      "route": "/en/contact",
+      "status": 500,
+      "width": 390,
+      "viewport": 390,
+      "heading": false,
+      "footer": false,
+      "issues": [
+        "route response/layout"
+      ]
+    },
+    {
+      "locale": "en",
+      "route": "/en/privacy",
+      "status": 500,
+      "width": 390,
+      "viewport": 390,
+      "heading": false,
+      "footer": false,
+      "issues": [
+        "route response/layout"
+      ]
+    },
+    {
+      "locale": "en",
+      "route": "/en/auth/login",
+      "status": 500,
+      "width": 390,
+      "viewport": 390,
+      "heading": false,
+      "footer": false,
+      "issues": [
+        "route response/layout"
+      ]
+    }
+  ],
+  "failures": [
+    {
+      "locale": "en",
+      "route": "/en/auth/register",
+      "status": 500,
+      "width": 390,
+      "viewport": 390,
+      "heading": false,
+      "footer": false,
+      "issues": [
+        "route response/layout"
+      ]
+    },
+    {
+      "locale": "en",
+      "route": "/en/how-it-works",
+      "status": 500,
+      "width": 390,
+      "viewport": 390,
+      "heading": false,
+      "footer": false,
+      "issues": [
+        "route response/layout"
+      ]
+    },
+    {
+      "locale": "en",
+      "route": "/en/pricing",
+      "status": 500,
+      "width": 390,
+      "viewport": 390,
+      "heading": false,
+      "footer": false,
+      "issues": [
+        "route response/layout"
+      ]
+    },
+    {
+      "locale": "en",
+      "route": "/en/contact",
+      "status": 500,
+      "width": 390,
+      "viewport": 390,
+      "heading": false,
+      "footer": false,
+      "issues": [
+        "route response/layout"
+      ]
+    },
+    {
+      "locale": "en",
+      "route": "/en/privacy",
+      "status": 500,
+      "width": 390,
+      "viewport": 390,
+      "heading": false,
+      "footer": false,
+      "issues": [
+        "route response/layout"
+      ]
+    },
+    {
+      "locale": "en",
+      "route": "/en/auth/login",
+      "status": 500,
+      "width": 390,
+      "viewport": 390,
+      "heading": false,
+      "footer": false,
+      "issues": [
+        "route response/layout"
+      ]
+    }
+  ]
+}

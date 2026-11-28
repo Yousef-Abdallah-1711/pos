@@ -1,0 +1,16 @@
+{
+ "page": "reports/financial/profit-loss",
+ "text": "POS Dashboard\nDashboard\nCashier POS\nKitchen Display\nOrders\nProducts\nHuman Resources\nAccounting\nSuppliers\nFinancial Reports\nReports\nTheme Builder\nSettings\nEnglish\nA\n\nAudit Owner C\n\nOwner\n\nProfit & Loss\n\nRevenue and expense performance for the selected period.\n\nRefresh\nExport PDF\nTotal Revenue\nEGP 10,000.00\nTotal Expenses\nEGP 12,000.00\nNet Profit\n-EGP 2,000.00\nRevenue Accounts\nHide\nCode\tAccount\tAmount\n4100\tFood Sales\tEGP 10,000.00\nExpense Accounts\nHide\nCode\tAccount\tAmount\n5110\tFood COGS\tEGP 4,000.00\n5210\tSalaries Expense\tEGP 5,000.00\n5310\tRent Expense\tEGP 3,000.00",
+ "calls": [
+  {
+   "u": "/reports/financial/profit-loss?date_from=2026-10-27&date_to=2026-11-25&compare_date_from=2026-09-27&compare_date_to=2026-10-26",
+   "s": 200,
+   "body": "{\"data\":{\"date_from\":\"2026-10-27\",\"date_to\":\"2026-11-25\",\"revenue\":[{\"account_code\":\"4100\",\"account_name\":\"Food Sales\",\"amount\":10000}],\"expenses\":[{\"account_code\":\"5110\",\"account_name\":\"Food COGS\",\"amount\":4000},{\"account_code\":\"5210\",\"account_name\":\"Salaries Expense\",\"amount\":5000},{\"account_code\":\"5310\",\"account_name\":\"Rent Expense\",\"amount\":3000}],\"total_revenue\":10000,\"total_expenses\":12000,\"net_profit\":-2000,\"comparison_date_from\":\"2026-09-27\",\"comparison_date_to\":\"2026-10-26\",\"revenue_change_percent\":100,\"expense_change_percent\":100,\"net_profit_change_percent\":100},\"success\":true}"
+  },
+  {
+   "u": "/reports/financial/profit-loss?date_from=2026-10-27&date_to=2026-11-25&compare_date_from=2026-09-27&compare_date_to=2026-10-26",
+   "s": 200,
+   "body": "{\"data\":{\"date_from\":\"2026-10-27\",\"date_to\":\"2026-11-25\",\"revenue\":[{\"account_code\":\"4100\",\"account_name\":\"Food Sales\",\"amount\":10000}],\"expenses\":[{\"account_code\":\"5110\",\"account_name\":\"Food COGS\",\"amount\":4000},{\"account_code\":\"5210\",\"account_name\":\"Salaries Expense\",\"amount\":5000},{\"account_code\":\"5310\",\"account_name\":\"Rent Expense\",\"amount\":3000}],\"total_revenue\":10000,\"total_expenses\":12000,\"net_profit\":-2000,\"comparison_date_from\":\"2026-09-27\",\"comparison_date_to\":\"2026-10-26\",\"revenue_change_percent\":100,\"expense_change_percent\":100,\"net_profit_change_percent\":100},\"success\":true}"
+  }
+ ]
+}

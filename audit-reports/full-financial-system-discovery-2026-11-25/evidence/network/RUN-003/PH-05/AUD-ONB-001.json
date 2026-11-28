@@ -1,0 +1,314 @@
+{
+  "run": "RUN-003",
+  "test": "AUD-ONB-001",
+  "finding": "F-001",
+  "finalUrl": "http://localhost:13112/en/dashboard",
+  "calls": [
+    {
+      "method": "GET",
+      "url": "/auth/check-subdomain?slug=audit-d-onboarding",
+      "status": 200,
+      "response": "{\"available\":true,\"message\":\"Subdomain is available\",\"slug\":\"audit-d-onboarding\"}"
+    },
+    {
+      "method": "POST",
+      "url": "/auth/register",
+      "status": 201,
+      "response": ""
+    },
+    {
+      "method": "GET",
+      "url": "/auth/session",
+      "status": 401,
+      "response": ""
+    },
+    {
+      "method": "GET",
+      "url": "/auth/session",
+      "status": 200,
+      "response": "{\"email\":\"audit.d.owner@example.test\",\"id\":8,\"is_super_admin\":false,\"name\":\"Audit Owner D\",\"restaurant_id\":5,\"restaurant_name\":\"Audit D Onboarding\",\"role\":\"owner\",\"tenant_id\":5,\"user_id\":8}"
+    },
+    {
+      "method": "GET",
+      "url": "/auth/session",
+      "status": 200,
+      "response": "{\"email\":\"audit.d.owner@example.test\",\"id\":8,\"is_super_admin\":false,\"name\":\"Audit Owner D\",\"restaurant_id\":5,\"restaurant_name\":\"Audit D Onboarding\",\"role\":\"owner\",\"tenant_id\":5,\"user_id\":8}"
+    },
+    {
+      "method": "GET",
+      "url": "/rbac/me/permissions",
+      "status": 200,
+      "response": "{\"1\":\"ADMIN\",\"10\":\"ADMIN\",\"11\":\"ADMIN\",\"12\":\"ADMIN\",\"13\":\"ADMIN\",\"14\":\"ADMIN\",\"15\":\"ADMIN\",\"16\":\"ADMIN\",\"17\":\"ADMIN\",\"18\":\"ADMIN\",\"19\":\"ADMIN\",\"2\":\"ADMIN\",\"20\":\"ADMIN\",\"3\":\"ADMIN\",\"4\":\"ADMIN\",\"5\":\"ADMIN\",\"6\":\"ADMIN\",\"7\":\"ADMIN\",\"8\":\"ADMIN\",\"9\":\"ADMIN\"}"
+    },
+    {
+      "method": "GET",
+      "url": "/rbac/check-permission?moduleId=8&permissionLevel=READ",
+      "status": 200,
+      "response": "{\"has_permission\":true,\"module_id\":8,\"permission_level\":\"ADMIN\"}"
+    },
+    {
+      "method": "GET",
+      "url": "/rbac/check-permission?moduleId=10&permissionLevel=READ",
+      "status": 200,
+      "response": "{\"has_permission\":true,\"module_id\":10,\"permission_level\":\"ADMIN\"}"
+    },
+    {
+      "method": "GET",
+      "url": "/rbac/check-permission?moduleId=1&permissionLevel=READ",
+      "status": 200,
+      "response": "{\"has_permission\":true,\"module_id\":1,\"permission_level\":\"ADMIN\"}"
+    },
+    {
+      "method": "GET",
+      "url": "/rbac/check-permission?moduleId=2&permissionLevel=READ",
+      "status": 200,
+      "response": "{\"has_permission\":true,\"module_id\":2,\"permission_level\":\"ADMIN\"}"
+    },
+    {
+      "method": "GET",
+      "url": "/users/8/settings",
+      "status": 200,
+      "response": "{\"id\":23,\"user_id\":8,\"language\":\"en\",\"theme\":\"light\",\"primary_color\":\"#3b82f6\",\"secondary_color\":\"#6366f1\",\"accent_color\":\"#10b981\",\"notifications_enabled\":true,\"email_notifications\":true,\"sms_notifications\":false,\"created_at\":\"2026-11-26T16:38:32.503871Z\",\"updated_at\":\"2026-11-26T16:38:32.503871Z\"}"
+    },
+    {
+      "method": "GET",
+      "url": "/users/8/settings",
+      "status": 200,
+      "response": "{\"id\":23,\"user_id\":8,\"language\":\"en\",\"theme\":\"light\",\"primary_color\":\"#3b82f6\",\"secondary_color\":\"#6366f1\",\"accent_color\":\"#10b981\",\"notifications_enabled\":true,\"email_notifications\":true,\"sms_notifications\":false,\"created_at\":\"2026-11-26T16:38:32.503871Z\",\"updated_at\":\"2026-11-26T16:38:32.503871Z\"}"
+    },
+    {
+      "method": "GET",
+      "url": "/rbac/check-permission?moduleId=3&permissionLevel=READ",
+      "status": 200,
+      "response": "{\"has_permission\":true,\"module_id\":3,\"permission_level\":\"ADMIN\"}"
+    },
+    {
+      "method": "GET",
+      "url": "/rbac/check-permission?moduleId=14&permissionLevel=READ",
+      "status": 200,
+      "response": "{\"has_permission\":true,\"module_id\":14,\"permission_level\":\"ADMIN\"}"
+    },
+    {
+      "method": "GET",
+      "url": "/rbac/check-permission?moduleId=13&permissionLevel=READ",
+      "status": 200,
+      "response": "{\"has_permission\":true,\"module_id\":13,\"permission_level\":\"ADMIN\"}"
+    },
+    {
+      "method": "GET",
+      "url": "/rbac/check-permission?moduleId=10&permissionLevel=WRITE",
+      "status": 200,
+      "response": "{\"has_permission\":true,\"module_id\":10,\"permission_level\":\"ADMIN\"}"
+    },
+    {
+      "method": "GET",
+      "url": "/admin/orders?page=1&page_size=5",
+      "status": 200,
+      "response": "{\"limit\":5,\"orders\":[],\"page\":1,\"pages\":0,\"total\":0}"
+    },
+    {
+      "method": "GET",
+      "url": "/admin/orders?page=1&page_size=1&status=pending",
+      "status": 200,
+      "response": "{\"limit\":1,\"orders\":[],\"page\":1,\"pages\":0,\"total\":0}"
+    },
+    {
+      "method": "GET",
+      "url": "/products?page=1&page_size=1",
+      "status": 200,
+      "response": "{\"pagination\":{\"page\":1,\"page_size\":1,\"total\":0,\"total_pages\":0},\"products\":[]}"
+    },
+    {
+      "method": "GET",
+      "url": "/categories",
+      "status": 200,
+      "response": "[]"
+    },
+    {
+      "method": "GET",
+      "url": "/hr/employees",
+      "status": 200,
+      "response": "{\"data\":[],\"pagination\":{\"page\":1,\"page_size\":20,\"total\":0,\"total_pages\":0},\"success\":true}\n"
+    },
+    {
+      "method": "GET",
+      "url": "/admin/drivers",
+      "status": 200,
+      "response": "{\"drivers\":[]}"
+    },
+    {
+      "method": "GET",
+      "url": "/notifications?",
+      "status": 200,
+      "response": "{\"total\":0,\"unread\":0,\"page\":1,\"page_size\":20,\"notifications\":[]}"
+    },
+    {
+      "method": "GET",
+      "url": "/rbac/me/permissions",
+      "status": 200,
+      "response": "{\"1\":\"ADMIN\",\"10\":\"ADMIN\",\"11\":\"ADMIN\",\"12\":\"ADMIN\",\"13\":\"ADMIN\",\"14\":\"ADMIN\",\"15\":\"ADMIN\",\"16\":\"ADMIN\",\"17\":\"ADMIN\",\"18\":\"ADMIN\",\"19\":\"ADMIN\",\"2\":\"ADMIN\",\"20\":\"ADMIN\",\"3\":\"ADMIN\",\"4\":\"ADMIN\",\"5\":\"ADMIN\",\"6\":\"ADMIN\",\"7\":\"ADMIN\",\"8\":\"ADMIN\",\"9\":\"ADMIN\"}"
+    },
+    {
+      "method": "GET",
+      "url": "/notifications/unread-count",
+      "status": 200,
+      "response": "{\"unread\":0}"
+    },
+    {
+      "method": "GET",
+      "url": "/tenant/status",
+      "status": 200,
+      "response": "{\"success\":true,\"data\":{\"preferred_billing_period\":\"monthly\",\"is_active\":true,\"tenant_id\":5,\"tenant_name\":\"Audit D Onboarding\",\"slug\":\"audit-d-onboarding\",\"subscription_status\":\"trial\",\"subscription_plan\":\"free\",\"trial_start_date\":\"2026-11-26T16:38:29.986503Z\",\"trial_end_date\":\"2026-12-10T16:38:29.986503Z\",\"subscription_expires_at\":null,\"last_payment_at\":null,\"trial_days\":14,\"days_remaining\":14,\"is_disabled\":false,\"can_access\":true,\"plan\":{\"id\":\"free\",\"name\":\"Free Trial\",\"price\":0,\"price_cents\":0,\"currency\":\"EGP\",\"period\":\"\"},\"contact_email\":\"audit.d.owner@example.test\",\"contact_phone\":\"+20100"
+    },
+    {
+      "method": "GET",
+      "url": "/rbac/check-permission?moduleId=1&permissionLevel=READ",
+      "status": 200,
+      "response": "{\"has_permission\":true,\"module_id\":1,\"permission_level\":\"ADMIN\"}"
+    },
+    {
+      "method": "GET",
+      "url": "/rbac/check-permission?moduleId=10&permissionLevel=READ",
+      "status": 200,
+      "response": "{\"has_permission\":true,\"module_id\":10,\"permission_level\":\"ADMIN\"}"
+    },
+    {
+      "method": "GET",
+      "url": "/rbac/check-permission?moduleId=3&permissionLevel=READ",
+      "status": 200,
+      "response": "{\"has_permission\":true,\"module_id\":3,\"permission_level\":\"ADMIN\"}"
+    },
+    {
+      "method": "GET",
+      "url": "/rbac/check-permission?moduleId=14&permissionLevel=READ",
+      "status": 200,
+      "response": "{\"has_permission\":true,\"module_id\":14,\"permission_level\":\"ADMIN\"}"
+    },
+    {
+      "method": "GET",
+      "url": "/rbac/check-permission?moduleId=8&permissionLevel=READ",
+      "status": 200,
+      "response": "{\"has_permission\":true,\"module_id\":8,\"permission_level\":\"ADMIN\"}"
+    },
+    {
+      "method": "GET",
+      "url": "/rbac/check-permission?moduleId=2&permissionLevel=READ",
+      "status": 200,
+      "response": "{\"has_permission\":true,\"module_id\":2,\"permission_level\":\"ADMIN\"}"
+    },
+    {
+      "method": "GET",
+      "url": "/rbac/check-permission?moduleId=13&permissionLevel=READ",
+      "status": 200,
+      "response": "{\"has_permission\":true,\"module_id\":13,\"permission_level\":\"ADMIN\"}"
+    },
+    {
+      "method": "GET",
+      "url": "/notifications/stats",
+      "status": 200,
+      "response": "{\"total\":0,\"unread\":0,\"read\":0,\"by_module\":{},\"by_priority\":{}}"
+    },
+    {
+      "method": "GET",
+      "url": "/rbac/check-permission?moduleId=10&permissionLevel=WRITE",
+      "status": 200,
+      "response": "{\"has_permission\":true,\"module_id\":10,\"permission_level\":\"ADMIN\"}"
+    },
+    {
+      "method": "GET",
+      "url": "/notifications?limit=5",
+      "status": 200,
+      "response": "{\"total\":0,\"unread\":0,\"page\":1,\"page_size\":5,\"notifications\":[]}"
+    },
+    {
+      "method": "GET",
+      "url": "/admin/orders?page=1&page_size=1&status=pending",
+      "status": 200,
+      "response": "{\"limit\":1,\"orders\":[],\"page\":1,\"pages\":0,\"total\":0}"
+    },
+    {
+      "method": "GET",
+      "url": "/admin/orders?page=1&page_size=5",
+      "status": 200,
+      "response": "{\"limit\":5,\"orders\":[],\"page\":1,\"pages\":0,\"total\":0}"
+    },
+    {
+      "method": "GET",
+      "url": "/products?page=1&page_size=1",
+      "status": 200,
+      "response": "{\"pagination\":{\"page\":1,\"page_size\":1,\"total\":0,\"total_pages\":0},\"products\":[]}"
+    },
+    {
+      "method": "GET",
+      "url": "/categories",
+      "status": 200,
+      "response": "[]"
+    },
+    {
+      "method": "GET",
+      "url": "/admin/drivers",
+      "status": 200,
+      "response": "{\"drivers\":[]}"
+    },
+    {
+      "method": "GET",
+      "url": "/hr/employees",
+      "status": 200,
+      "response": "{\"data\":[],\"pagination\":{\"page\":1,\"page_size\":20,\"total\":0,\"total_pages\":0},\"success\":true}\n"
+    },
+    {
+      "method": "GET",
+      "url": "/products?page=1&page_size=1",
+      "status": 200,
+      "response": "{\"pagination\":{\"page\":1,\"page_size\":1,\"total\":0,\"total_pages\":0},\"products\":[]}"
+    },
+    {
+      "method": "GET",
+      "url": "/hr/employees",
+      "status": 200,
+      "response": "{\"data\":[],\"pagination\":{\"page\":1,\"page_size\":20,\"total\":0,\"total_pages\":0},\"success\":true}\n"
+    },
+    {
+      "method": "GET",
+      "url": "/categories",
+      "status": 200,
+      "response": "[]"
+    },
+    {
+      "method": "GET",
+      "url": "/tenant/status",
+      "status": 200,
+      "response": "{\"success\":true,\"data\":{\"preferred_billing_period\":\"monthly\",\"is_active\":true,\"tenant_id\":5,\"tenant_name\":\"Audit D Onboarding\",\"slug\":\"audit-d-onboarding\",\"subscription_status\":\"trial\",\"subscription_plan\":\"free\",\"trial_start_date\":\"2026-11-26T16:38:29.986503Z\",\"trial_end_date\":\"2026-12-10T16:38:29.986503Z\",\"subscription_expires_at\":null,\"last_payment_at\":null,\"trial_days\":14,\"days_remaining\":14,\"is_disabled\":false,\"can_access\":true,\"plan\":{\"id\":\"free\",\"name\":\"Free Trial\",\"price\":0,\"price_cents\":0,\"currency\":\"EGP\",\"period\":\"\"},\"contact_email\":\"audit.d.owner@example.test\",\"contact_phone\":\"+20100"
+    },
+    {
+      "method": "GET",
+      "url": "/admin/orders?page=1&page_size=1&status=pending",
+      "status": 200,
+      "response": "{\"limit\":1,\"orders\":[],\"page\":1,\"pages\":0,\"total\":0}"
+    },
+    {
+      "method": "GET",
+      "url": "/admin/orders?page=1&page_size=5",
+      "status": 200,
+      "response": "{\"limit\":5,\"orders\":[],\"page\":1,\"pages\":0,\"total\":0}"
+    },
+    {
+      "method": "GET",
+      "url": "/tables/stats",
+      "status": 200,
+      "response": "{\"data\":{\"total_tables\":0,\"available\":0,\"occupied\":0,\"reserved\":0,\"maintenance\":0,\"total_capacity\":0},\"success\":true}"
+    },
+    {
+      "method": "GET",
+      "url": "/notifications/stats",
+      "status": 200,
+      "response": "{\"total\":0,\"unread\":0,\"read\":0,\"by_module\":{},\"by_priority\":{}}"
+    },
+    {
+      "method": "GET",
+      "url": "/admin/drivers",
+      "status": 200,
+      "response": "{\"drivers\":[]}"
+    }
+  ]
+}

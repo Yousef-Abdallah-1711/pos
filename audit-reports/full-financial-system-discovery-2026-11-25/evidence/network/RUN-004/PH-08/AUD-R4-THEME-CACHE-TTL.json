@@ -1,0 +1,51 @@
+{
+ "run": "RUN-004",
+ "samples": [
+  {
+   "s": 0,
+   "event": "before (theme 4 active)",
+   "primary": "#3b82f6"
+  },
+  {
+   "s": 0,
+   "event": "activate theme 13",
+   "status": 200,
+   "primary": "#3b82f6"
+  },
+  {
+   "s": 60,
+   "primary": "#3b82f6",
+   "active": "11:false 4:false 13:true"
+  },
+  {
+   "s": 121,
+   "primary": "#3b82f6",
+   "active": "11:false 4:false 13:true"
+  },
+  {
+   "s": 181,
+   "primary": "#3b82f6",
+   "active": "11:false 4:false 13:true"
+  },
+  {
+   "s": 241,
+   "primary": "#3b82f6",
+   "active": "11:false 4:false 13:true"
+  },
+  {
+   "s": 302,
+   "primary": "#3b82f6",
+   "active": "11:false 4:false 13:true"
+  },
+  {
+   "s": 362,
+   "primary": "#3b82f6",
+   "active": "11:false 4:false 13:true"
+  },
+  {
+   "event": "restore theme 4",
+   "status": 200,
+   "primary": "#3b82f6"
+  }
+ ]
+}

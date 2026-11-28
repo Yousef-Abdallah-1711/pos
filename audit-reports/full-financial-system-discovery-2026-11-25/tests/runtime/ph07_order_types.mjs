@@ -1,0 +1,24 @@
+// RUN-003 / PH-07: order variants (dine-in with table, delivery with address, expected_total mismatch, large quantity, notes) on tenant 4. API-DIAGNOSTIC.
+import fs from 'fs';
+import { sql, API, PASSWORD, evidenceDirs } from './chrome_lib.mjs';
+const d = evidenceDirs('PH-07'); const O = 'http://localhost:13112';
+const r0 = await fetch(API + '/auth/login', { method: 'POST', headers: { Origin: O, 'Content-Type': 'application/json' }, body: JSON.stringify({ email: 'audit.c.owner@example.test', password: PASSWORD }) });
+const ck = r0.headers.getSetCookie().map((c) => c.split(';')[0]).join('; ');
+const A = async (m, p, b) => { const x = await fetch(API + p, { method: m, headers: { Origin: O, Cookie: ck, 'Content-Type': 'application/json' }, body: b ? JSON.stringify(b) : undefined }); const t = await x.text(); let j; try { j = JSON.parse(t); } catch { j = t.slice(0, 200); } return { status: x.status, body: j }; };
+const sleep = (ms) => new Promise((x) => setTimeout(x, ms));
+const log = []; const rec = (id, desc, extra = {}) => { log.push({ id, desc, ...extra }); console.log(id, desc, JSON.stringify(extra).slice(0, 400)); };
+const base = { order_source: 'pos', customer_name: 'OT', customer_phone: '0000000000', payment_method: 'cash' };
+const row = (id) => sql(`select order_source||'|'||coalesce(table_id::text,'-')||'|'||status||'|'||subtotal||'|'||tax_amount||'|'||coalesce(delivery_fee,0)||'|'||total_amount from orders where id=${id}`);
+let r = await A('POST', '/pos/orders', { ...base, table_id: 1, items: [{ product_id: 4, quantity: 2 }] }); let id = r.body?.data?.id; rec('OT-01', 'dine-in with table 1', { http: r.status, id, row: id && row(id), tableStatus: sql('select status from restaurant_tables where id=1') });
+r = await A('POST', '/pos/orders', { ...base, delivery_address: '5 Probe St', delivery_city: 'Cairo', items: [{ product_id: 4, quantity: 1 }] }); id = r.body?.data?.id; rec('OT-02', 'delivery order with address', { http: r.status, id, row: id && row(id) });
+const od = id; await A('PUT', `/admin/orders/${od}/payment-status`, { payment_status: 'paid' }); await sleep(3500);
+rec('OT-03', 'delivery order paid: journal lines (is a delivery fee posted/taxed?)', { lines: sql(`select string_agg(a.account_code||':'||l.debit_amount||'/'||l.credit_amount,' ') from journal_entries j join journal_entry_lines l on l.journal_entry_id=j.id join chart_of_accounts a on a.id=l.account_id where j.tenant_id=4 and j.reference_type='order' and j.reference_id=${od}`) });
+r = await A('POST', '/pos/orders', { ...base, expected_total: 1, items: [{ product_id: 4, quantity: 1 }] }); rec('OT-04', 'expected_total mismatch (1 vs 110)', { http: r.status, resp: JSON.stringify(r.body).slice(0, 200) });
+r = await A('POST', '/pos/orders', { ...base, items: [{ product_id: 4, quantity: 0 }] }); rec('OT-05', 'quantity 0', { http: r.status, resp: JSON.stringify(r.body).slice(0, 160) });
+r = await A('POST', '/pos/orders', { ...base, items: [{ product_id: 4, quantity: -3 }] }); rec('OT-06', 'quantity -3', { http: r.status, resp: JSON.stringify(r.body).slice(0, 160) });
+r = await A('POST', '/pos/orders', { ...base, items: [{ product_id: 4, quantity: 100000 }] }); rec('OT-07', 'quantity 100000 (insufficient stock)', { http: r.status, resp: JSON.stringify(r.body).slice(0, 160) });
+r = await A('POST', '/pos/orders', { ...base, items: [{ product_id: 99999, quantity: 1 }] }); rec('OT-08', 'unknown product', { http: r.status, resp: JSON.stringify(r.body).slice(0, 160) });
+r = await A('POST', '/pos/orders', { ...base, items: [{ product_id: 2, quantity: 1 }, { product_id: 4, quantity: 1 }, { product_id: 3, quantity: 1 }] }); id = r.body?.data?.id; rec('OT-09', 'mixed items incl. untracked product', { http: r.status, id, row: id && row(id) });
+r = await A('POST', '/pos/orders', { ...base, customer_name: '<script>alert(1)</script>', notes: "x'; DROP TABLE orders;--", items: [{ product_id: 4, quantity: 1 }] }); id = r.body?.data?.id; rec('OT-10', 'script/SQL text in customer_name and notes', { http: r.status, id, stored: id && sql(`select customer_name||' / '||coalesce(notes,'') from orders where id=${id}`), ordersTable: sql('select count(*) from orders') });
+r = await A('POST', '/pos/orders', { ...base, payment_method: 'bitcoin', items: [{ product_id: 4, quantity: 1 }] }); rec('OT-11', 'unknown payment method', { http: r.status, resp: JSON.stringify(r.body).slice(0, 160) });
+fs.writeFileSync(`${d.db}/AUD-ORDER-TYPES.json`, JSON.stringify({ run: 'RUN-003', kind: 'API-DIAGNOSTIC', log }, null, 1));

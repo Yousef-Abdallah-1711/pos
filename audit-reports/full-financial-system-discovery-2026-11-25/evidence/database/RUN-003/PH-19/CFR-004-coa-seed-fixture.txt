@@ -1,0 +1,2 @@
+CFR-004 diagnostic seeding of tenant 8 COA by copying tenant 4 rows (fixture; recorded) 2026-11-26T20:11:47Z
+INSERT 0 64

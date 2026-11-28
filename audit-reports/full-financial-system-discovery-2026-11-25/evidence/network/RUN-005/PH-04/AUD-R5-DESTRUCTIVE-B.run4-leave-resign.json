@@ -1,0 +1,71 @@
+{
+ "run": "RUN-005",
+ "tag": "000R5B35920",
+ "tenant": 4,
+ "log": [
+  {
+   "id": "B8",
+   "what": "approve a disposable leave request (created by API because the UI form cannot, F-079)",
+   "fixture": {
+    "id": 14,
+    "name": "000R5B35920LV",
+    "http": 201,
+    "employee": 14
+   },
+   "before": "pending",
+   "row_found": true,
+   "control_found": true,
+   "control_disabled": false,
+   "control_label": "Approve",
+   "modal_confirm": "Approve Leave",
+   "dialog": "",
+   "calls": [
+    "POST /hr/leaves/14/approve 200 {\"success\":true} "
+   ],
+   "after": "approved",
+   "toast": "Leave request approved"
+  },
+  {
+   "id": "B9",
+   "what": "reject a disposable leave request",
+   "fixture": {
+    "id": 15,
+    "name": "000R5B35920LV",
+    "http": 201,
+    "employee": 15
+   },
+   "before": "pending",
+   "row_found": true,
+   "control_found": true,
+   "control_disabled": false,
+   "control_label": "Reject",
+   "modal_confirm": "Reject Leave Request",
+   "dialog": "",
+   "calls": [
+    "POST /hr/leaves/15/reject 200 {\"success\":true} "
+   ],
+   "after": "rejected",
+   "toast": "Leave request rejected"
+  },
+  {
+   "id": "B10",
+   "what": "complete a disposable resignation (F-069)",
+   "fixture": {
+    "id": 9,
+    "name": "Employee #16",
+    "http": 201,
+    "employee": 16
+   },
+   "before": "acknowledged|employee active|termination -",
+   "row_found": true,
+   "control_found": true,
+   "control_disabled": false,
+   "control_label": "Complete",
+   "dialog": "",
+   "calls": [
+    "POST /hr/resignations/9/complete 200 {\"data\":{\"settlement_amount\":0,\"status\":\"completed\"},\"success\":true}"
+   ],
+   "after": "completed|employee active|termination -"
+  }
+ ]
+}

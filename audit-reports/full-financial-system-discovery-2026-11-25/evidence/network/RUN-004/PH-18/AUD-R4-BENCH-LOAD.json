@@ -1,0 +1,127 @@
+{
+ "run": "RUN-004",
+ "label": "SYNTHETIC BENCHMARK FIXTURE",
+ "oracle": {
+  "sales": "10941426.00",
+  "expense": "2703789.00",
+  "journals": 27000
+ },
+ "totalMs": 1824364,
+ "timings": [
+  {
+   "from": 0,
+   "status": "ERR",
+   "resp": "TypeError",
+   "ms": 60616
+  },
+  {
+   "from": 1500,
+   "status": 200,
+   "resp": "{\"data\":{\"created_entries\":1500,\"failed_entries\":0,\"processed_entries\":1500},\"success\":true}\n",
+   "ms": 52079
+  },
+  {
+   "from": 3000,
+   "status": 200,
+   "resp": "{\"data\":{\"created_entries\":1500,\"failed_entries\":0,\"processed_entries\":1500},\"success\":true}\n",
+   "ms": 57938
+  },
+  {
+   "from": 4500,
+   "status": 200,
+   "resp": "{\"data\":{\"created_entries\":1500,\"failed_entries\":0,\"processed_entries\":1500},\"success\":true}\n",
+   "ms": 59144
+  },
+  {
+   "from": 6000,
+   "status": "ERR",
+   "resp": "TypeError",
+   "ms": 62901
+  },
+  {
+   "from": 7500,
+   "status": "ERR",
+   "resp": "TypeError",
+   "ms": 63392
+  },
+  {
+   "from": 9000,
+   "status": "ERR",
+   "resp": "TypeError",
+   "ms": 68270
+  },
+  {
+   "from": 10500,
+   "status": "ERR",
+   "resp": "TypeError",
+   "ms": 71645
+  },
+  {
+   "from": 12000,
+   "status": "ERR",
+   "resp": "TypeError",
+   "ms": 79749
+  },
+  {
+   "from": 13500,
+   "status": "ERR",
+   "resp": "TypeError",
+   "ms": 85510
+  },
+  {
+   "from": 15000,
+   "status": "ERR",
+   "resp": "TypeError",
+   "ms": 91265
+  },
+  {
+   "from": 16500,
+   "status": "ERR",
+   "resp": "TypeError",
+   "ms": 112641
+  },
+  {
+   "from": 18000,
+   "status": "ERR",
+   "resp": "TypeError",
+   "ms": 106508
+  },
+  {
+   "from": 19500,
+   "status": "ERR",
+   "resp": "TypeError",
+   "ms": 127674
+  },
+  {
+   "from": 21000,
+   "status": "ERR",
+   "resp": "TypeError",
+   "ms": 119997
+  },
+  {
+   "from": 22500,
+   "status": "ERR",
+   "resp": "TypeError",
+   "ms": 100093
+  },
+  {
+   "from": 24000,
+   "status": "ERR",
+   "resp": "TypeError",
+   "ms": 104418
+  },
+  {
+   "from": 25500,
+   "status": "ERR",
+   "resp": "TypeError",
+   "ms": 98712
+  }
+ ],
+ "st": {
+  "tenant": "10",
+  "journals": "27000",
+  "posted": "27000",
+  "lines": "54000",
+  "gl_rows": "54000"
+ }
+}

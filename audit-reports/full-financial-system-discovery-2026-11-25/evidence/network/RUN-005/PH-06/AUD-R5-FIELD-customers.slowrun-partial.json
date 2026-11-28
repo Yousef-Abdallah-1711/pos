@@ -1,0 +1,291 @@
+{
+ "run": "RUN-005",
+ "form": "customers",
+ "tenant": 4,
+ "results": [
+  {
+   "form": "customers",
+   "field_index": 0,
+   "field": "Corporate Catering Client",
+   "placeholder": "Corporate Catering Client",
+   "input_type": "text",
+   "maxlength_attr": null,
+   "kind": "text",
+   "case": "empty",
+   "value_sent": "",
+   "submit_found": true,
+   "submit_disabled": false,
+   "html5_invalid": 0,
+   "messages": [
+    "Disabled customer accounts remain visible for reporting but cannot be reused.",
+    "Customer name is required."
+   ],
+   "request": [],
+   "response": "",
+   "request_body": "",
+   "rows_created": 0,
+   "outcome": "REJECTED-BY-CLIENT"
+  },
+  {
+   "form": "customers",
+   "field_index": 0,
+   "field": "Corporate Catering Client",
+   "placeholder": "Corporate Catering Client",
+   "input_type": "text",
+   "maxlength_attr": null,
+   "kind": "text",
+   "case": "whitespace",
+   "value_sent": "   ",
+   "submit_found": true,
+   "submit_disabled": false,
+   "html5_invalid": 0,
+   "messages": [
+    "Disabled customer accounts remain visible for reporting but cannot be reused.",
+    "Customer name is required."
+   ],
+   "request": [],
+   "response": "",
+   "request_body": "",
+   "rows_created": 0,
+   "outcome": "REJECTED-BY-CLIENT"
+  },
+  {
+   "form": "customers",
+   "field_index": 0,
+   "field": "Corporate Catering Client",
+   "placeholder": "Corporate Catering Client",
+   "input_type": "text",
+   "maxlength_attr": null,
+   "kind": "text",
+   "case": "long300",
+   "value_sent": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX...(300)",
+   "submit_found": true,
+   "submit_disabled": false,
+   "html5_invalid": 0,
+   "messages": [
+    "pq: value too long for type character varying(100)",
+    "Runtime AxiosError",
+    "Request failed with status code 400",
+    "Disabled customer accounts remain visible for reporting but cannot be reused."
+   ],
+   "request": [
+    "POST /accounting/customers 400"
+   ],
+   "response": "{\"error\":\"pq: value too long for type character varying(100)\",\"success\":false}\n",
+   "request_body": "{\"customer_name\":\"XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+   "rows_created": 0,
+   "outcome": "REJECTED-BY-SERVER(400)"
+  },
+  {
+   "form": "customers",
+   "field_index": 0,
+   "field": "Corporate Catering Client",
+   "placeholder": "Corporate Catering Client",
+   "input_type": "text",
+   "maxlength_attr": null,
+   "kind": "text",
+   "case": "arabic",
+   "value_sent": "اختبار عربي ٧٧",
+   "submit_found": true,
+   "submit_disabled": false,
+   "html5_invalid": 0,
+   "messages": [],
+   "request": [
+    "POST /accounting/customers 201"
+   ],
+   "response": "{\"data\":{\"id\":33,\"tenant_id\":4,\"restaurant_id\":4,\"customer_code\":\"CUST-0032\",\"customer_name\":\"اختبار عربي ٧٧\",\"customer_name_ar\":\"اختبار 6450\",\"custom",
+   "request_body": "{\"customer_name\":\"اختبار عربي ٧٧\",\"customer_name_ar\":\"اختبار 6450\",\"customer_type\":\"corporate\",\"contact_person\":\"R5 81746450\",\"email\":\"r5.81746450@example.test\",\"phone\":\"+201000000888\",\"mobile\":\"+2010",
+   "rows_created": 1,
+   "persisted": "{\"id\":33,\"tenant_id\":4,\"restaurant_id\":4,\"customer_code\":\"CUST-0032\",\"customer_name\":\"اختبار عربي ٧٧\",\"customer_name_ar\":\"اختبار 6450\",\"customer_type\":\"corporate\",\"contact_person\":\"R5 81746450\",\"email\":\"r5.81746450@example.test\",\"phone\":\"+201000000888\",\"mobile\":\"+201000000888\",\"address\":\"R5 81746450\",\"address_ar\":\"اختبار 6450\",\"city\":\"R5 81746450\",\"country\":\"R5 81746450\",\"tax_number\":\"R581746450\",\"payment_terms\":\"net",
+   "outcome": "ACCEPTED-PERSISTED"
+  },
+  {
+   "form": "customers",
+   "field_index": 0,
+   "field": "Corporate Catering Client",
+   "placeholder": "Corporate Catering Client",
+   "input_type": "text",
+   "maxlength_attr": null,
+   "kind": "text",
+   "case": "special",
+   "value_sent": "<b>x</b>'; -- &amp;",
+   "submit_found": true,
+   "submit_disabled": false,
+   "html5_invalid": 0,
+   "messages": [],
+   "request": [
+    "POST /accounting/customers 201"
+   ],
+   "response": "{\"data\":{\"id\":34,\"tenant_id\":4,\"restaurant_id\":4,\"customer_code\":\"CUST-0033\",\"customer_name\":\"\\u003cb\\u003ex\\u003c/b\\u003e'; -- \\u0026amp;\",\"customer_",
+   "request_body": "{\"customer_name\":\"<b>x</b>'; -- &amp;\",\"customer_name_ar\":\"اختبار 9345\",\"customer_type\":\"corporate\",\"contact_person\":\"R5 81759345\",\"email\":\"r5.81759345@example.test\",\"phone\":\"+201000000888\",\"mobile\":\"",
+   "rows_created": 1,
+   "persisted": "{\"id\":34,\"tenant_id\":4,\"restaurant_id\":4,\"customer_code\":\"CUST-0033\",\"customer_name\":\"<b>x</b>'; -- &amp;\",\"customer_name_ar\":\"اختبار 9345\",\"customer_type\":\"corporate\",\"contact_person\":\"R5 81759345\",\"email\":\"r5.81759345@example.test\",\"phone\":\"+201000000888\",\"mobile\":\"+201000000888\",\"address\":\"R5 81759345\",\"address_ar\":\"اختبار 9345\",\"city\":\"R5 81759345\",\"country\":\"R5 81759345\",\"tax_number\":\"R581759345\",\"payment_terms\"",
+   "outcome": "ACCEPTED-PERSISTED"
+  },
+  {
+   "form": "customers",
+   "field_index": 0,
+   "field": "Corporate Catering Client",
+   "placeholder": "Corporate Catering Client",
+   "input_type": "text",
+   "maxlength_attr": null,
+   "kind": "text",
+   "case": "unicode",
+   "value_sent": "Café ☕ 测试",
+   "submit_found": true,
+   "submit_disabled": false,
+   "html5_invalid": 0,
+   "messages": [],
+   "request": [
+    "POST /accounting/customers 201"
+   ],
+   "response": "{\"data\":{\"id\":35,\"tenant_id\":4,\"restaurant_id\":4,\"customer_code\":\"CUST-0034\",\"customer_name\":\"Café ☕ 测试\",\"customer_name_ar\":\"اختبار 1705\",\"customer_ty",
+   "request_body": "{\"customer_name\":\"Café ☕ 测试\",\"customer_name_ar\":\"اختبار 1705\",\"customer_type\":\"corporate\",\"contact_person\":\"R5 81771705\",\"email\":\"r5.81771705@example.test\",\"phone\":\"+201000000888\",\"mobile\":\"+201000000",
+   "rows_created": 1,
+   "persisted": "{\"id\":35,\"tenant_id\":4,\"restaurant_id\":4,\"customer_code\":\"CUST-0034\",\"customer_name\":\"Café ☕ 测试\",\"customer_name_ar\":\"اختبار 1705\",\"customer_type\":\"corporate\",\"contact_person\":\"R5 81771705\",\"email\":\"r5.81771705@example.test\",\"phone\":\"+201000000888\",\"mobile\":\"+201000000888\",\"address\":\"R5 81771705\",\"address_ar\":\"اختبار 1705\",\"city\":\"R5 81771705\",\"country\":\"R5 81771705\",\"tax_number\":\"R581771705\",\"payment_terms\":\"net_7\",\"",
+   "outcome": "ACCEPTED-PERSISTED"
+  },
+  {
+   "form": "customers",
+   "field_index": 1,
+   "field": "عميل تموين الشركات",
+   "placeholder": "عميل تموين الشركات",
+   "input_type": "text",
+   "maxlength_attr": null,
+   "kind": "text",
+   "case": "empty",
+   "value_sent": "",
+   "submit_found": true,
+   "submit_disabled": false,
+   "html5_invalid": 0,
+   "messages": [],
+   "request": [
+    "POST /accounting/customers 201"
+   ],
+   "response": "{\"data\":{\"id\":36,\"tenant_id\":4,\"restaurant_id\":4,\"customer_code\":\"CUST-0035\",\"customer_name\":\"R5 81783916\",\"customer_type\":\"corporate\",\"contact_person",
+   "request_body": "{\"customer_name\":\"R5 81783916\",\"customer_type\":\"corporate\",\"contact_person\":\"R5 81783916\",\"email\":\"r5.81783916@example.test\",\"phone\":\"+201000000888\",\"mobile\":\"+201000000888\",\"address\":\"R5 81783916\",\"a",
+   "rows_created": 1,
+   "persisted": "{\"id\":36,\"tenant_id\":4,\"restaurant_id\":4,\"customer_code\":\"CUST-0035\",\"customer_name\":\"R5 81783916\",\"customer_name_ar\":\"\",\"customer_type\":\"corporate\",\"contact_person\":\"R5 81783916\",\"email\":\"r5.81783916@example.test\",\"phone\":\"+201000000888\",\"mobile\":\"+201000000888\",\"address\":\"R5 81783916\",\"address_ar\":\"اختبار 3916\",\"city\":\"R5 81783916\",\"country\":\"R5 81783916\",\"tax_number\":\"R581783916\",\"payment_terms\":\"net_7\",\"credit_li",
+   "outcome": "ACCEPTED-PERSISTED"
+  },
+  {
+   "form": "customers",
+   "field_index": 1,
+   "field": "عميل تموين الشركات",
+   "placeholder": "عميل تموين الشركات",
+   "input_type": "text",
+   "maxlength_attr": null,
+   "kind": "text",
+   "case": "whitespace",
+   "value_sent": "   ",
+   "submit_found": true,
+   "submit_disabled": false,
+   "html5_invalid": 0,
+   "messages": [],
+   "request": [
+    "POST /accounting/customers 201"
+   ],
+   "response": "{\"data\":{\"id\":37,\"tenant_id\":4,\"restaurant_id\":4,\"customer_code\":\"CUST-0036\",\"customer_name\":\"R5 81796927\",\"customer_type\":\"corporate\",\"contact_person",
+   "request_body": "{\"customer_name\":\"R5 81796927\",\"customer_type\":\"corporate\",\"contact_person\":\"R5 81796927\",\"email\":\"r5.81796927@example.test\",\"phone\":\"+201000000888\",\"mobile\":\"+201000000888\",\"address\":\"R5 81796927\",\"a",
+   "rows_created": 1,
+   "persisted": "{\"id\":37,\"tenant_id\":4,\"restaurant_id\":4,\"customer_code\":\"CUST-0036\",\"customer_name\":\"R5 81796927\",\"customer_name_ar\":\"\",\"customer_type\":\"corporate\",\"contact_person\":\"R5 81796927\",\"email\":\"r5.81796927@example.test\",\"phone\":\"+201000000888\",\"mobile\":\"+201000000888\",\"address\":\"R5 81796927\",\"address_ar\":\"اختبار 6927\",\"city\":\"R5 81796927\",\"country\":\"R5 81796927\",\"tax_number\":\"R581796927\",\"payment_terms\":\"net_7\",\"credit_li",
+   "outcome": "ACCEPTED-PERSISTED"
+  },
+  {
+   "form": "customers",
+   "field_index": 1,
+   "field": "عميل تموين الشركات",
+   "placeholder": "عميل تموين الشركات",
+   "input_type": "text",
+   "maxlength_attr": null,
+   "kind": "text",
+   "case": "long300",
+   "value_sent": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX...(300)",
+   "submit_found": true,
+   "submit_disabled": false,
+   "html5_invalid": 0,
+   "messages": [
+    "pq: value too long for type character varying(100)",
+    "Runtime AxiosError",
+    "Request failed with status code 400",
+    "Disabled customer accounts remain visible for reporting but cannot be reused."
+   ],
+   "request": [
+    "POST /accounting/customers 400"
+   ],
+   "response": "{\"error\":\"pq: value too long for type character varying(100)\",\"success\":false}\n",
+   "request_body": "{\"customer_name\":\"R5 81809554\",\"customer_name_ar\":\"XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+   "rows_created": 0,
+   "outcome": "REJECTED-BY-SERVER(400)"
+  },
+  {
+   "form": "customers",
+   "field_index": 1,
+   "field": "عميل تموين الشركات",
+   "placeholder": "عميل تموين الشركات",
+   "input_type": "text",
+   "maxlength_attr": null,
+   "kind": "text",
+   "case": "arabic",
+   "value_sent": "اختبار عربي ٧٧",
+   "submit_found": true,
+   "submit_disabled": false,
+   "html5_invalid": 0,
+   "messages": [],
+   "request": [
+    "POST /accounting/customers 201"
+   ],
+   "response": "{\"data\":{\"id\":38,\"tenant_id\":4,\"restaurant_id\":4,\"customer_code\":\"CUST-0037\",\"customer_name\":\"R5 81821082\",\"customer_name_ar\":\"اختبار عربي ٧٧\",\"custom",
+   "request_body": "{\"customer_name\":\"R5 81821082\",\"customer_name_ar\":\"اختبار عربي ٧٧\",\"customer_type\":\"corporate\",\"contact_person\":\"R5 81821082\",\"email\":\"r5.81821082@example.test\",\"phone\":\"+201000000888\",\"mobile\":\"+2010",
+   "rows_created": 1,
+   "persisted": "{\"id\":38,\"tenant_id\":4,\"restaurant_id\":4,\"customer_code\":\"CUST-0037\",\"customer_name\":\"R5 81821082\",\"customer_name_ar\":\"اختبار عربي ٧٧\",\"customer_type\":\"corporate\",\"contact_person\":\"R5 81821082\",\"email\":\"r5.81821082@example.test\",\"phone\":\"+201000000888\",\"mobile\":\"+201000000888\",\"address\":\"R5 81821082\",\"address_ar\":\"اختبار 1082\",\"city\":\"R5 81821082\",\"country\":\"R5 81821082\",\"tax_number\":\"R581821082\",\"payment_terms\":\"net",
+   "outcome": "ACCEPTED-PERSISTED"
+  },
+  {
+   "form": "customers",
+   "field_index": 1,
+   "field": "عميل تموين الشركات",
+   "placeholder": "عميل تموين الشركات",
+   "input_type": "text",
+   "maxlength_attr": null,
+   "kind": "text",
+   "case": "special",
+   "value_sent": "<b>x</b>'; -- &amp;",
+   "submit_found": true,
+   "submit_disabled": false,
+   "html5_invalid": 0,
+   "messages": [],
+   "request": [
+    "POST /accounting/customers 201"
+   ],
+   "response": "{\"data\":{\"id\":39,\"tenant_id\":4,\"restaurant_id\":4,\"customer_code\":\"CUST-0038\",\"customer_name\":\"R5 81833451\",\"customer_name_ar\":\"\\u003cb\\u003ex\\u003c/b\\",
+   "request_body": "{\"customer_name\":\"R5 81833451\",\"customer_name_ar\":\"<b>x</b>'; -- &amp;\",\"customer_type\":\"corporate\",\"contact_person\":\"R5 81833451\",\"email\":\"r5.81833451@example.test\",\"phone\":\"+201000000888\",\"mobile\":\"",
+   "rows_created": 1,
+   "persisted": "{\"id\":39,\"tenant_id\":4,\"restaurant_id\":4,\"customer_code\":\"CUST-0038\",\"customer_name\":\"R5 81833451\",\"customer_name_ar\":\"<b>x</b>'; -- &amp;\",\"customer_type\":\"corporate\",\"contact_person\":\"R5 81833451\",\"email\":\"r5.81833451@example.test\",\"phone\":\"+201000000888\",\"mobile\":\"+201000000888\",\"address\":\"R5 81833451\",\"address_ar\":\"اختبار 3451\",\"city\":\"R5 81833451\",\"country\":\"R5 81833451\",\"tax_number\":\"R581833451\",\"payment_terms\"",
+   "outcome": "ACCEPTED-PERSISTED"
+  },
+  {
+   "form": "customers",
+   "field_index": 1,
+   "field": "عميل تموين الشركات",
+   "placeholder": "عميل تموين الشركات",
+   "input_type": "text",
+   "maxlength_attr": null,
+   "kind": "text",
+   "case": "unicode",
+   "value_sent": "Café ☕ 测试",
+   "submit_found": true,
+   "submit_disabled": false,
+   "html5_invalid": 0,
+   "messages": [],
+   "request": [
+    "POST /accounting/customers 201"
+   ],
+   "response": "{\"data\":{\"id\":40,\"tenant_id\":4,\"restaurant_id\":4,\"customer_code\":\"CUST-0039\",\"customer_name\":\"R5 81845477\",\"customer_name_ar\":\"Café ☕ 测试\",\"customer_ty",
+   "request_body": "{\"customer_name\":\"R5 81845477\",\"customer_name_ar\":\"Café ☕ 测试\",\"customer_type\":\"corporate\",\"contact_person\":\"R5 81845477\",\"email\":\"r5.81845477@example.test\",\"phone\":\"+201000000888\",\"mobile\":\"+201000000",
+   "rows_created": 1,
+   "persisted": "{\"id\":40,\"tenant_id\":4,\"restaurant_id\":4,\"customer_code\":\"CUST-0039\",\"customer_name\":\"R5 81845477\",\"customer_name_ar\":\"Café ☕ 测试\",\"customer_type\":\"corporate\",\"contact_person\":\"R5 81845477\",\"email\":\"r5.81845477@example.test\",\"phone\":\"+201000000888\",\"mobile\":\"+201000000888\",\"address\":\"R5 81845477\",\"address_ar\":\"اختبار 5477\",\"city\":\"R5 81845477\",\"country\":\"R5 81845477\",\"tax_number\":\"R581845477\",\"payment_terms\":\"net_7\",\"",
+   "outcome": "ACCEPTED-PERSISTED"
+  }
+ ]
+}

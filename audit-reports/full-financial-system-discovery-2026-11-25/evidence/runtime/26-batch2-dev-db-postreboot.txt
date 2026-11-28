@@ -1,0 +1,10 @@
+== post-reboot dev check 2026-11-26T00:57:23Z
+tenants=2
+users=6
+restaurants=2
+orders=0
+journal_entries=0
+general_ledger=0
+products=6
+chart_of_accounts=62
+schema_migrations=145

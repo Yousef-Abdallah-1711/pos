@@ -1,0 +1,18 @@
+== audit-c-diag menu
+{"categories":[{"id":1,"tenant_id":4,"restaurant_id":4,"name":"Audit Mains","name_ar":"","display_order":0,"is_active":true,"language":"","created_by":0,"created_at":"2026-11-26T01:28:36.12408Z","updated_at":"2026-11-26T01:28:36.12408Z"}],"products":[{"id":4,"tenant_id":4,"restaurant_id":4,"category_id":1,"name_en":"Audit Inv Probe B","name_ar":"","price":100,"is_vegetarian":false,"is_vegan":false,"is_spicy":false,"i
+HTTP 200
+== audit-c-diag products
+{"products":[{"id":4,"tenant_id":4,"restaurant_id":4,"category_id":1,"name_en":"Audit Inv Probe B","name_ar":"","price":100,"is_vegetarian":false,"is_vegan":false,"is_spicy":false,"is_gluten_free":false,"is_available":true,"track_inventory":true,"quantity_in_stock":19,"low_stock_threshold":0,"reorder_quantity":0,"display_order":0,"featured":false,"status":"active","created_by":0,"created_at":"2026-11-26T19:55:32.2963
+HTTP 200
+== audit-c-diag categories
+{"categories":[{"id":1,"tenant_id":4,"restaurant_id":4,"name":"Audit Mains","name_ar":"","display_order":0,"is_active":true,"language":"","created_by":0,"created_at":"2026-11-26T01:28:36.12408Z","updated_at":"2026-11-26T01:28:36.12408Z"}]}
+HTTP 200
+== audit-e-outbox menu
+{"categories":[],"products":[{"id":5,"tenant_id":8,"restaurant_id":8,"category_id":2,"name_en":"Outbox Probe Item","name_ar":"","price":100,"is_vegetarian":false,"is_vegan":false,"is_spicy":false,"is_gluten_free":false,"is_available":true,"track_inventory":true,"quantity_in_stock":45,"low_stock_threshold":0,"reorder_quantity":0,"display_order":0,"featured":false,"status":"active","created_by":0,"created_at":"2026-11-
+HTTP 200
+== audit-e-outbox products
+{"products":[{"id":5,"tenant_id":8,"restaurant_id":8,"category_id":2,"name_en":"Outbox Probe Item","name_ar":"","price":100,"is_vegetarian":false,"is_vegan":false,"is_spicy":false,"is_gluten_free":false,"is_available":true,"track_inventory":true,"quantity_in_stock":45,"low_stock_threshold":0,"reorder_quantity":0,"display_order":0,"featured":false,"status":"active","created_by":0,"created_at":"2026-11-26T20:11:13.1661
+HTTP 200
+== audit-e-outbox categories
+{"categories":[]}
+HTTP 200

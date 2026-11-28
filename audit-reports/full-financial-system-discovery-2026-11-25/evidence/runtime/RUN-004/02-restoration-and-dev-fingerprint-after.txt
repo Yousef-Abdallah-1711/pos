@@ -1,0 +1,22 @@
+RESTORATION ATTEMPT 2026-11-27T03:55:00Z
+isolated stack stopped (volumes kept, no down -v); final dump evidence/database/isolated-audit-run004-final-2026-11-27.dump
+HEAD 0de839b665982a2072f520c20a1aaf9f502f4bea
+stashes 2
+ M frontend/apps/dashboard/tsconfig.json
+ M frontend/apps/landing/tsconfig.json
+ M frontend/apps/restaurant-website/next-env.d.ts
+ M frontend/apps/restaurant-website/tsconfig.json
+ M frontend/apps/super-admin/next-env.d.ts
+ M frontend/apps/super-admin/tsconfig.json
+--- dev DB fingerprint (pos_saas)
+tenants|2 users|6 orders|0 journals|0 coa|62 migrations|145 
+baseline (46): tenants 2, users 6, orders 0, journals 0, coa 62, migrations 145
+--- dev containers
+pos-landing-ci-recheck|Up 40 minutes
+pos-landing-ci-check|Up 53 minutes
+pos-landing|Exited (137) 12 hours ago
+pos-dashboard|Exited (137) 12 hours ago
+pos-restaurant-website|Exited (137) 12 hours ago
+pos-super-admin|Exited (137) 12 hours ago
+pos-backend|Exited (128) 12 hours ago
+--- blocker: docker start pos-backend failed: Bind for 127.0.0.1:3001 failed: port is already allocated; holders: containers pos-landing-ci-check (3001) and pos-landing-ci-recheck (3004), image pos-landing-build-check/recheck, cmd pnpm --filter ./apps/landing start, started 03:01Z and 03:14Z, idle >15 min, belonging to the finished landing workstream. The attempt to stop them was declined by the permission classifier and was NOT retried; they are untouched.

@@ -1,0 +1,16 @@
+{
+ "run": "RUN-005",
+ "finding": "F-023",
+ "pos_tokens": [
+  "$12.00",
+  "$10.00",
+  "$10.12",
+  "$0.00",
+  "$100.00",
+  "$10,000.00"
+ ],
+ "dashboard_tokens": [
+  "EGP 110.00"
+ ],
+ "tenant_currency_column": "EGP"
+}

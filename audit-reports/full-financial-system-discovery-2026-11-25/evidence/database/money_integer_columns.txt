@@ -1,0 +1,6 @@
+attendance|total_break_minutes|integer
+drivers|total_deliveries|integer
+leaves|total_days|integer
+payments|amount_cents|integer
+subscription_plans|price_cents|integer
+tenants|last_payment_amount|integer

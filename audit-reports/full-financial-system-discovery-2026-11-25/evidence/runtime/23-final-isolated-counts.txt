@@ -1,0 +1,5 @@
+tenants|4
+orders|12
+journals|30
+gl|56
+outbox|4

@@ -1,0 +1,86 @@
+{
+ "run": "RUN-004",
+ "kind": "API-DIAGNOSTIC",
+ "tenant": 4,
+ "log": [
+  {
+   "id": "HRR007-01",
+   "desc": "social insurance CSV before",
+   "http": 200,
+   "lines": 2,
+   "head": "employee_code,employee_name,national_id,base_salary,social_insurance_deduction,health_insurance_deduction,policy_number,provider_name / EMP-1795646162644,Audit Cook,,5000.00,0.00,0.00,POL-RUN3-1,Audit Insurer / "
+  },
+  {
+   "id": "HRR007-02",
+   "desc": "SQL oracle: salary rows for 2026-11",
+   "salaries": "1",
+   "active_policies_emp4": "1"
+  },
+  {
+   "id": "HRR007-03",
+   "desc": "add second active policy for the same employee",
+   "http": 201,
+   "resp": "{\"data\":{\"id\":2,\"tenant_id\":4,\"restaurant_id\":4,\"employee_id\":4,\"policy_type\":\"life\",\"provider_name\":\"Audit Insurer 2\",\"policy_number\":\"POL-R4-2\",\"coverage_start\":\"2026-11-01T00:00:00Z\",\"coverage_end\":\"2027-10-31T00:00:00Z\",\"monthly_premium\":100,\"status\":\"active\",\"created_at\":\"0001-01-01T00:00:00Z\","
+  },
+  {
+   "id": "HRR007-04",
+   "desc": "CSV after second active policy (oracle: one row per employee salary row)",
+   "http": 200,
+   "lines": 3,
+   "sql_salary_rows": "1",
+   "body": "employee_code,employee_name,national_id,base_salary,social_insurance_deduction,health_insurance_deduction,policy_number,provider_name / EMP-1795646162644,Audit Cook,,5000.00,0.00,0.00,POL-RUN3-1,Audit Insurer / EMP-1795646162644,Audit Cook,,5000.00,0.00,0.00,POL-R4-2,Audit Insurer 2 / "
+  },
+  {
+   "id": "HRR002-01",
+   "desc": "turnover before",
+   "summary": "{\"average_headcount\":0.5,\"departures\":0,\"hires\":1,\"turnover_rate\":0}",
+   "employees": "1"
+  },
+  {
+   "id": 6,
+   "desc": "create employee with backend-native keys (F-014 workaround, diagnostic)",
+   "http": 201,
+   "resp": "{\"data\":{\"id\":6,\"tenant_id\":4,\"restaurant_id\":4,\"employee_code\":\"EMP-R4-1795745308069\",\"first_name\":\"Audit\",\"last_name\":\"Leaver\",\"email\":\"leaver.1795745308069@example.test\",\"hire_date\":\"2026-10-01T00:00:00Z\",\"employment_type\":\"full_time\",\"employment_status\":\"active\",\"position\":\"Cook\",\"department\":\"K"
+  },
+  {
+   "id": 2,
+   "desc": "create resignation",
+   "http": 201
+  },
+  {
+   "id": "HRR002-04",
+   "desc": "acknowledge",
+   "http": 200
+  },
+  {
+   "id": "HRR002-05",
+   "desc": "complete",
+   "http": 200,
+   "resp": "{\"data\":{\"settlement_amount\":0,\"status\":\"completed\"},\"success\":true}"
+  },
+  {
+   "id": "HRR002-06",
+   "desc": "employee row after completed resignation (oracle: terminated + termination_date 2026-11-25)",
+   "row": "active|t|"
+  },
+  {
+   "id": "HRR002-07",
+   "desc": "turnover after completed resignation (oracle: departures 1)",
+   "summary": "{\"average_headcount\":1.5,\"departures\":0,\"hires\":1,\"turnover_rate\":0}"
+  },
+  {
+   "id": "HRR002-08",
+   "desc": "DELETE employee (the only path that sets termination_date)",
+   "http": 200
+  },
+  {
+   "id": "HRR002-09",
+   "desc": "turnover after delete",
+   "summary": "{\"average_headcount\":1,\"departures\":1,\"hires\":1,\"turnover_rate\":100}",
+   "row": "terminated|2026-11-27",
+   "headcount_start_sql": "1",
+   "headcount_end_sql": "1",
+   "departures_sql": "1"
+  }
+ ]
+}

@@ -1,0 +1,20 @@
+== F-008 invoices_customer tenant 4
+2|INV-2026-00001|paid|5000.00|700.00|5200.00
+== journals referencing customer invoices (reference_type/id)
+5|JE-2026-00005|supplier_invoice|1|posted|22800.00|22800.00|2026-11-25 22:33:16.786267
+22|JE-2026-00014|customer_invoice|2|posted|5200.00|5200.00|2026-11-25 22:49:27.574748
+== lines
+22|1120|5200.00|0.00
+22|2120|0.00|700.00
+22|4100|0.00|4500.00
+== F-015 salaries tenant 4
+1|paid|f||5000.00|
+2|paid|f||5000.00|
+== journals referencing salaries
+7|JE-2026-00007|salary|1|posted|5000.00|5000.00
+59|JE-2026-00049|salary|2|posted|5000.00|5000.00
+== salary journal lines
+7|1111|Main Bank Account|0.00|5000.00
+7|5210|Salaries Expense|5000.00|0.00
+59|1111|Main Bank Account|0.00|5000.00
+59|5210|Salaries Expense|5000.00|0.00

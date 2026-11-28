@@ -1,0 +1,248 @@
+{
+ "run": "RUN-003",
+ "results": [
+  {
+   "route": "accounting/customers",
+   "label": "customer",
+   "fieldCount": 15,
+   "filled": [
+    "Search customers by code, name, or contact=UI723466",
+    "Corporate Catering Client=12",
+    "عميل تموين الشركات=Audit UI customer",
+    "Mona Ali=Audit UI customer",
+    "finance@client.com=ui.customer@example.test",
+    "+20 2 1234 5678=Audit UI customer",
+    "+20 101 000 0000=Audit UI customer",
+    "0.00=12",
+    "EGP=Audit UI customer",
+    "Egypt=Audit UI customer",
+    "123-456-789=Audit UI customer",
+    "Alexandria=Audit UI customer",
+    "Customer billing address=Audit UI customer",
+    "عنوان العميل=Audit UI customer"
+   ],
+   "submitClicked": true,
+   "toast": "",
+   "mutations": [
+    {
+     "m": "POST",
+     "u": "/accounting/customers",
+     "s": 400,
+     "req": "{\"customer_name\":\"12\",\"customer_name_ar\":\"Audit UI customer\",\"customer_type\":\"individual\",\"contact_person\":\"Audit UI customer\",\"email\":\"ui.customer@example.test\",\"phone\":\"Audit UI customer\",\"mobile\":\"Audit UI customer\",\"address\":\"Audit UI customer\",\"address_ar\":\"Audit UI customer\",\"city\":\"Audit UI c",
+     "b": "{\"error\":\"pq: value too long for type character varying(3)\",\"success\":false}\n"
+    }
+   ]
+  },
+  {
+   "route": "accounting/suppliers",
+   "label": "supplier",
+   "fieldCount": 21,
+   "filled": [
+    "Search suppliers by code, name, or contact=UI738588",
+    "Fresh Produce Co.=Audit UI supplier",
+    "شركة الخضروات الطازجة=Audit UI supplier",
+    "Ahmed Hassan=Audit UI supplier",
+    "purchasing@supplier.com=ui.supplier@example.test",
+    "+20 2 1234 5678=Audit UI supplier",
+    "+20 100 000 0000=Audit UI supplier",
+    "https://supplier.example=Audit UI supplier",
+    "123-456-789=Audit UI supplier",
+    "0.00=12",
+    "EGP=Audit UI supplier",
+    "Egypt=Audit UI supplier",
+    "Supplier office address=Audit UI supplier",
+    "عنوان المورد=Audit UI supplier"
+   ],
+   "submitClicked": true,
+   "toast": "",
+   "mutations": [
+    {
+     "m": "POST",
+     "u": "/suppliers",
+     "s": 400,
+     "req": "{\"company_name\":\"Audit UI supplier\",\"company_name_ar\":\"Audit UI supplier\",\"contact_person\":\"Audit UI supplier\",\"email\":\"ui.supplier@example.test\",\"phone\":\"Audit UI supplier\",\"mobile\":\"Audit UI supplier\",\"website\":\"Audit UI supplier\",\"address\":\"Audit UI supplier\",\"address_ar\":\"Audit UI supplier\",\"cit",
+     "b": "{\"error\":\"pq: value too long for type character varying(10)\",\"success\":false}\n"
+    }
+   ]
+  },
+  {
+   "route": "accounting/chart-of-accounts",
+   "label": "account",
+   "fieldCount": 9,
+   "filled": [
+    "Search accounts by code or name=UI754143",
+    "e.g. 1100=Audit UI account",
+    "EGP=Audit UI account",
+    "Cash on Hand=Audit UI account",
+    "النقدية بالصندوق=Audit UI account",
+    "Current asset=Audit UI account",
+    "14=12",
+    "Used for till cash, petty cash, or bank float.=Audit UI account",
+    "يستخدم للنقدية أو العهدة أو رصيد الصندوق.=Audit UI account"
+   ],
+   "submitClicked": true,
+   "toast": "",
+   "mutations": [
+    {
+     "m": "POST",
+     "u": "/accounting/accounts",
+     "s": 400,
+     "req": "{\"account_code\":\"Audit UI account\",\"account_name\":\"Audit UI account\",\"account_name_ar\":\"Audit UI account\",\"description\":\"Audit UI account\",\"description_ar\":\"Audit UI account\",\"account_type\":\"asset\",\"account_subtype\":\"Audit UI account\",\"normal_balance\":\"debit\",\"parent_id\":null,\"is_header\":false,\"curr",
+     "b": "{\"error\":\"pq: value too long for type character varying(3)\",\"success\":false}\n"
+    }
+   ]
+  },
+  {
+   "route": "accounting/journal-entries",
+   "label": "journal",
+   "fieldCount": 16,
+   "filled": [
+    "date=2026-11-26",
+    "date=2026-11-26",
+    "Filter by entry type=Audit UI journal",
+    "date=2026-11-26",
+    "manual=Audit UI journal",
+    "Record petty cash replenishment=Audit UI journal",
+    "قيد تغذية عهدة المصروفات=Audit UI journal",
+    "expense_claim=Audit UI journal",
+    "EXP-2026-0012=Audit UI journal",
+    "Optional notes for approvers or auditors.=Audit UI journal",
+    "Optional line memo=Audit UI journal",
+    "0.00=12",
+    "0.00=12",
+    "Optional line memo=Audit UI journal"
+   ],
+   "submitClicked": true,
+   "toast": "",
+   "mutations": []
+  },
+  {
+   "route": "accounting/supplier-invoices",
+   "label": "supplier invoice",
+   "fieldCount": 5,
+   "filled": [
+    "Search supplier invoices by number, party, or note=UI784816",
+    "date=2026-11-26",
+    "0.00=12",
+    "Transfer reference / cheque number=UI784948",
+    "Internal notes about this payment.=Audit UI supplier invoice"
+   ],
+   "submitClicked": false,
+   "toast": "",
+   "mutations": []
+  },
+  {
+   "route": "hr/leaves",
+   "label": "leave",
+   "fieldCount": 3,
+   "filled": [
+    "date=2026-11-26",
+    "date=2026-11-26"
+   ],
+   "submitClicked": false,
+   "toast": "",
+   "mutations": []
+  },
+  {
+   "route": "hr/attendance",
+   "label": "attendance",
+   "fieldCount": 10,
+   "filled": [
+    "date=2026-11-26",
+    "date=2026-11-26",
+    "Search by name or status...=Audit UI attendance",
+    "total_break_minutes=12",
+    "notes=Audit UI attendance",
+    "admin_notes=Audit UI attendance"
+   ],
+   "submitClicked": false,
+   "toast": "",
+   "mutations": []
+  },
+  {
+   "route": "hr/contracts",
+   "label": "contract",
+   "fieldCount": 8,
+   "filled": [
+    "Employee ID=12",
+    "Contract type=Audit UI contract",
+    "Contract number=UI831476",
+    "date=2026-11-26",
+    "date=2026-11-26",
+    "Salary amount=12",
+    "Currency=Audit UI contract",
+    "Notes=Audit UI contract"
+   ],
+   "submitClicked": true,
+   "toast": "",
+   "mutations": [
+    {
+     "m": "POST",
+     "u": "/hr/contracts",
+     "s": 400,
+     "req": "{\"employee_id\":12,\"contract_type\":\"Audit UI contract\",\"contract_number\":\"UI831476\",\"start_date\":\"2026-11-26\",\"end_date\":\"2026-11-26\",\"salary_amount\":12,\"currency\":\"Audit UI contract\",\"status\":\"active\",\"notes\":\"Audit UI contract\"}",
+     "b": "{\"error\":\"pq: value too long for type character varying(10)\"}"
+    }
+   ]
+  },
+  {
+   "route": "hr/training",
+   "label": "training",
+   "fieldCount": 9,
+   "filled": [
+    "Employee ID=12",
+    "Training title=Audit UI training",
+    "Provider=Audit UI training",
+    "Type=Audit UI training",
+    "date=2026-11-26",
+    "date=2026-11-26",
+    "Certificate #=Audit UI training",
+    "date=2026-11-26",
+    "Notes=Audit UI training"
+   ],
+   "submitClicked": true,
+   "toast": "",
+   "mutations": [
+    {
+     "m": "POST",
+     "u": "/hr/training",
+     "s": 400,
+     "req": "{\"employee_id\":12,\"training_title\":\"Audit UI training\",\"training_provider\":\"Audit UI training\",\"training_type\":\"Audit UI training\",\"start_date\":\"2026-11-26\",\"end_date\":\"2026-11-26\",\"status\":\"scheduled\",\"certificate_number\":\"Audit UI training\",\"certificate_expiry\":\"2026-11-26\",\"notes\":\"Audit UI train",
+     "b": "{\"error\":\"employee is outside tenant and restaurant scope\"}"
+    }
+   ]
+  },
+  {
+   "route": "settings/users",
+   "label": "user",
+   "fieldCount": 5,
+   "filled": [
+    "Search users by name or email...=ui.user@example.test",
+    "John Doe=Audit UI user",
+    "john@example.com=ui.user@example.test",
+    "+1 (555) 123-4567=+201000000555",
+    "••••••••=Audit UI user"
+   ],
+   "submitClicked": true,
+   "toast": "",
+   "mutations": []
+  },
+  {
+   "route": "inventory",
+   "label": "inventory",
+   "fieldCount": 0,
+   "filled": [],
+   "submitClicked": false,
+   "toast": "",
+   "mutations": [
+    {
+     "m": "POST",
+     "u": "/users",
+     "s": 200,
+     "req": "{\"name\":\"Audit UI user\",\"email\":\"ui.user@example.test\",\"phone\":\"+201000000555\",\"password\":\"<redacted>\"}",
+     "b": ""
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,150 @@
+{
+ "run": "RUN-005",
+ "tag": "000R5B67106",
+ "tenant": 4,
+ "log": [
+  {
+   "id": "B1",
+   "what": "delete a disposable account (chart of accounts)",
+   "fixture": {
+    "id": 419,
+    "name": "000R5B67106 acct",
+    "http": 201
+   },
+   "before": "1",
+   "row_found": true,
+   "control_found": true,
+   "dialog": "confirm: Delete account 995283 - 000R5B67106 acct?",
+   "calls": [
+    "DELETE /accounting/accounts/419 200 {\"success\":true} "
+   ],
+   "after": "0"
+  },
+  {
+   "id": "B2",
+   "what": "delete a disposable category",
+   "fixture": {
+    "id": 7,
+    "name": "000R5B67106 cat",
+    "http": 201
+   },
+   "before": "1|active=false",
+   "row_found": false,
+   "dialog": "",
+   "calls": [],
+   "after": "1|active=false"
+  },
+  {
+   "id": "B3",
+   "what": "delete a disposable bank account",
+   "fixture": {
+    "id": 3,
+    "name": "000R5B67106 bank",
+    "http": 201
+   },
+   "before": "1",
+   "row_found": true,
+   "control_found": true,
+   "dialog": "",
+   "calls": [],
+   "after": "1"
+  },
+  {
+   "id": "B5",
+   "what": "delete a disposable insurance record",
+   "fixture": {
+    "id": 3,
+    "name": "000R5B67106I",
+    "http": 201
+   },
+   "before": "1",
+   "row_found": true,
+   "control_found": true,
+   "dialog": "",
+   "calls": [
+    "DELETE /hr/insurance/3 200 {\"success\":true}"
+   ],
+   "after": "0"
+  },
+  {
+   "id": "B6",
+   "what": "delete a disposable training record",
+   "fixture": {
+    "id": 2,
+    "name": "000R5B67106T",
+    "http": 201
+   },
+   "before": "1",
+   "row_found": true,
+   "control_found": true,
+   "dialog": "",
+   "calls": [
+    "DELETE /hr/training/2 200 {\"success\":true}"
+   ],
+   "after": "0"
+  },
+  {
+   "id": "B7",
+   "what": "deactivate a disposable driver",
+   "error": "Command failed: docker exec pos-p2a-ws05-e2e-postgres-1 psql -U postgres -d pos_phase2a_e2e -Atc \"select coalesce(is_active::text,'-')||'|'|"
+  },
+  {
+   "id": "B8",
+   "what": "approve a disposable leave request (created by API because the UI form cannot, F-079)",
+   "error": "Command failed: docker exec pos-p2a-ws05-e2e-postgres-1 psql -U postgres -d pos_phase2a_e2e -Atc \"select status from leaves where id=undefin"
+  },
+  {
+   "id": "B9",
+   "what": "reject a disposable leave request",
+   "error": "Command failed: docker exec pos-p2a-ws05-e2e-postgres-1 psql -U postgres -d pos_phase2a_e2e -Atc \"select status from leaves where id=undefin"
+  },
+  {
+   "id": "B10",
+   "what": "complete a disposable resignation (F-069)",
+   "fixture": {
+    "id": 3,
+    "name": "000R5B67106R",
+    "http": 201,
+    "employee": 9
+   },
+   "before": "acknowledged|employee active|termination -",
+   "row_found": false,
+   "dialog": "",
+   "calls": [],
+   "after": "acknowledged|employee active|termination -"
+  },
+  {
+   "id": "B11",
+   "what": "delete a disposable resignation",
+   "fixture": {
+    "id": 4,
+    "name": "000R5B67106D",
+    "http": 201
+   },
+   "before": "1",
+   "row_found": false,
+   "dialog": "",
+   "calls": [],
+   "after": "1"
+  },
+  {
+   "id": "B14",
+   "what": "void a draft customer invoice (it already has a posted journal, F-008)",
+   "fixture": {
+    "id": 20,
+    "name": "INV-2026-00010",
+    "http": 201,
+    "invoice_number": "INV-2026-00010",
+    "je": "44795"
+   },
+   "before": "draft|je 44795|je_status posted",
+   "row_found": true,
+   "control_found": true,
+   "dialog": "prompt: Reason for voiding this invoice?",
+   "calls": [
+    "POST /accounting/customer-invoices/20/void 200 {\"data\":{\"id\":20,\"tenant_id\":4,\"restaurant_id\":4,\"invoice_number\":\"INV-2026-00010\",\"invoice_date\":\"2026-11-27T00:00:00Z\",\"due_date\":\"2026-12-27T00:00:"
+   ],
+   "after": "void|je 44795|je_status void"
+  }
+ ]
+}

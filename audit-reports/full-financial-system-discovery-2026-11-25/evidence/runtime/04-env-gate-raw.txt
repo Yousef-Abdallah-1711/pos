@@ -1,0 +1,43 @@
+== roles
+postgres|t|t|t
+pos_migrator|f|f|t
+pos_app|f|f|t
+pos_accounting|f|f|t
+pos_auth_lookup|f|f|f
+== migrations
+145
+== api env
+ENV=phase2a-e2e
+RBAC_ENFORCEMENT=enforce
+POS_TEST_SEED=true
+DB_HOST=postgres
+DB_NAME=pos_phase2a_e2e
+ACCOUNTING_DB_USER=pos_accounting
+DB_USER=pos_app
+== connections by user
+pos_accounting|1
+pos_app|2
+postgres|1
+== counts
+tenants=1
+users=1
+orders=0
+journal_entries=0
+chart_of_accounts=62
+== rls
+20|20
+== health
+{"db_healthy":true,"db_status":"ok","status":"ok","uptime_sec":27}
+
+2026/11/25 22:12:54 Running migration: 001_create_tenants.sql
+2026/11/25 22:12:54 Running migration: 002_create_restaurants.sql
+2026/11/25 22:12:54 Running migration: 003_create_users.sql
+2026/11/25 22:12:54 Running migration: 004_create_categories.sql
+2026/11/25 22:12:54 Running migration: 005_create_products.sql
+2026/11/25 22:12:54 Running migration: 012_update_categories_for_product_module.sql
+2026/11/25 22:12:54 Running migration: 013_update_products_for_product_module.sql
+2026/11/25 22:12:54 Running migration: 014_create_product_images.sql
+2026/11/25 22:12:54 Running migration: 015_create_inventory.sql
+2026/11/25 22:12:54 Running migration: 016_create_low_stock_alerts.sql
+2026/11/25 22:12:54 Running migration: 017_create_product_audit_log.sql
+2026/11/25 22:12:54 Running migration: 020_create_employees_table.sql

@@ -1,0 +1,618 @@
+accounting_event_outbox|accounting_event_outbox_attempts_check|c|CHECK ((attempts >= 0))
+accounting_event_outbox|accounting_event_outbox_event_type_check|c|CHECK (((event_type)::text = 'paid_order'::text))
+accounting_event_outbox|accounting_event_outbox_max_attempts_check|c|CHECK ((max_attempts > 0))
+accounting_event_outbox|accounting_event_outbox_status_check|c|CHECK (((status)::text = ANY ((ARRAY['pending'::character varying, 'processing'::character varying, 'retryable'::character varying, 'completed'::character varying, 'failed'::character varying])::text[])))
+accounting_event_redrive_audit|accounting_event_redrive_audit_actor_user_id_check|c|CHECK ((actor_user_id > 0))
+accounting_event_redrive_audit|accounting_event_redrive_audit_previous_attempts_check|c|CHECK ((previous_attempts >= 0))
+accounting_event_redrive_audit|accounting_event_redrive_audit_reason_check|c|CHECK (((char_length(btrim(reason)) >= 1) AND (char_length(btrim(reason)) <= 1000)))
+attendance|attendance_status_check|c|CHECK (((status)::text = ANY ((ARRAY['present'::character varying, 'absent'::character varying, 'late'::character varying, 'half_day'::character varying, 'on_leave'::character varying, 'holiday'::character varying, 'weekend'::character varying])::text[])))
+auth_identities|auth_identities_check|c|CHECK (((status <> 'active'::text) OR (email_verified_at IS NOT NULL)))
+auth_identities|auth_identities_normalized_email_check|c|CHECK (((normalized_email = lower(btrim(normalized_email))) AND ((length(normalized_email) >= 3) AND (length(normalized_email) <= 320))))
+auth_identities|auth_identities_security_version_check|c|CHECK ((security_version > 0))
+auth_identities|auth_identities_status_check|c|CHECK ((status = ANY (ARRAY['pending'::text, 'active'::text, 'suspended'::text, 'revoked'::text])))
+chart_of_accounts|chart_of_accounts_account_type_check|c|CHECK (((account_type)::text = ANY ((ARRAY['asset'::character varying, 'liability'::character varying, 'equity'::character varying, 'revenue'::character varying, 'expense'::character varying])::text[])))
+chart_of_accounts|chart_of_accounts_level_check|c|CHECK ((level >= 1))
+chart_of_accounts|chart_of_accounts_normal_balance_check|c|CHECK (((normal_balance)::text = ANY ((ARRAY['debit'::character varying, 'credit'::character varying])::text[])))
+super_admin_audit_logs|check_action|c|CHECK (((action)::text = ANY ((ARRAY['LOGIN_SUCCESS'::character varying, 'LOGIN_FAILED'::character varying, 'LOGOUT'::character varying, 'IMPERSONATE_START'::character varying, 'IMPERSONATE_END'::character varying, 'VIEW_TENANT'::character varying, 'VIEW_USER'::character varying, 'VIEW_TENANT_LIST'::character varying, 'VIEW_USER_LIST'::character varying, 'ACCESS_DASHBOARD'::character varying, 'DISABLE_TENANT'::character varying, 'ENABLE_TENANT'::character varying, 'VIEW_AUDIT_LOGS'::character varying, 'EXPORT_DATA'::character varying, 'UPDATE_IP_WHITELIST'::character varying, 'UPDATE_SETTINGS'::character varying])::text[])))
+tenant_subscription_history|check_action|c|CHECK (((action)::text = ANY ((ARRAY['TRIAL_STARTED'::character varying, 'TRIAL_EXTENDED'::character varying, 'TRIAL_EXPIRED'::character varying, 'TENANT_DISABLED'::character varying, 'TENANT_ENABLED'::character varying, 'DELETION_SCHEDULED'::character varying, 'DELETION_CANCELLED'::character varying, 'TENANT_DELETED'::character varying, 'STATUS_CHANGED'::character varying, 'PAYMENT_INITIATED'::character varying, 'PAYMENT_SUCCESS'::character varying, 'PAYMENT_FAILED'::character varying, 'SUBSCRIPTION_ACTIVATED'::character varying, 'SUBSCRIPTION_EXPIRED'::character varying, 'PAYMENT_REFUNDED'::character varying, 'SUBSCRIPTION_CANCELLED'::character varying, 'PAYMENT_VOIDED'::character varying])::text[])))
+impersonation_sessions|check_end_reason|c|CHECK (((end_reason)::text = ANY ((ARRAY['MANUAL'::character varying, 'EXPIRED'::character varying, 'FORCED'::character varying, NULL::character varying])::text[])))
+payments|check_payment_refund_state|c|CHECK ((refund_state = ANY (ARRAY['none'::text, 'pending'::text, 'refunded'::text])))
+payments|check_payment_status|c|CHECK (((status)::text = ANY ((ARRAY['pending'::character varying, 'success'::character varying, 'failed'::character varying, 'refunded'::character varying, 'voided'::character varying])::text[])))
+tenants|check_subscription_status|c|CHECK (((subscription_status)::text = ANY ((ARRAY['trial'::character varying, 'active'::character varying, 'expired'::character varying, 'suspended'::character varying, 'disabled'::character varying])::text[])))
+super_admin_audit_logs|check_target_type|c|CHECK (((target_type)::text = ANY ((ARRAY['TENANT'::character varying, 'USER'::character varying, 'SYSTEM'::character varying, 'IMPERSONATION'::character varying, NULL::character varying])::text[])))
+webhook_retry_queue|check_webhook_retry_status|c|CHECK (((status)::text = ANY ((ARRAY['pending'::character varying, 'processing'::character varying, 'success'::character varying, 'failed'::character varying])::text[])))
+restaurant_config|chk_accent_color_format|c|CHECK (((accent_color)::text ~ '^#[0-9A-Fa-f]{6}$'::text))
+account_budgets|chk_account_budgets_month|c|CHECK (((period_month >= 1) AND (period_month <= 12)))
+restaurant_config|chk_background_color_format|c|CHECK (((background_color)::text ~ '^#[0-9A-Fa-f]{6}$'::text))
+bank_accounts_ledger|chk_bank_account_type|c|CHECK (((account_type)::text = ANY ((ARRAY['checking'::character varying, 'savings'::character varying, 'credit_card'::character varying, 'petty_cash'::character varying])::text[])))
+bank_reconciliation_lines|chk_bank_reconciliation_line_status|c|CHECK (((match_status)::text = ANY ((ARRAY['matched'::character varying, 'unmatched'::character varying, 'manual'::character varying])::text[])))
+bank_reconciliation_sessions|chk_bank_reconciliation_status|c|CHECK (((status)::text = ANY ((ARRAY['draft'::character varying, 'in_progress'::character varying, 'completed'::character varying, 'cancelled'::character varying])::text[])))
+restaurant_config|chk_border_radius_valid|c|CHECK (((border_radius >= 0) AND (border_radius <= 20)))
+invoices_customer|chk_customer_invoice_status|c|CHECK (((status)::text = ANY ((ARRAY['draft'::character varying, 'sent'::character varying, 'partially_paid'::character varying, 'paid'::character varying, 'overdue'::character varying, 'void'::character varying])::text[])))
+restaurant_settings|chk_default_language|c|CHECK (((default_language)::text = ANY ((ARRAY['en'::character varying, 'ar'::character varying])::text[])))
+restaurant_settings|chk_delivery_fee_non_negative|c|CHECK ((delivery_fee >= (0)::numeric))
+e_invoice_submissions|chk_e_invoice_submissions_status|c|CHECK (((status)::text = ANY ((ARRAY['pending'::character varying, 'accepted'::character varying, 'rejected'::character varying, 'error'::character varying])::text[])))
+e_invoice_submissions|chk_e_invoice_submissions_type|c|CHECK (((invoice_type)::text = ANY ((ARRAY['customer'::character varying, 'supplier'::character varying])::text[])))
+exchange_rates|chk_exchange_rates_rate_positive|c|CHECK ((rate > (0)::numeric))
+restaurant_config|chk_font_size_valid|c|CHECK (((font_size_base >= 10) AND (font_size_base <= 24)))
+invoice_delivery_logs|chk_invoice_delivery_status|c|CHECK (((status)::text = ANY ((ARRAY['sent'::character varying, 'queued'::character varying, 'failed'::character varying])::text[])))
+restaurant_settings|chk_max_order_positive|c|CHECK (((max_order_value IS NULL) OR (max_order_value > (0)::numeric)))
+restaurant_settings|chk_min_order_non_negative|c|CHECK ((min_order_value >= (0)::numeric))
+order_status_history|chk_new_status_not_empty|c|CHECK (((new_status)::text <> ''::text))
+restaurant_settings|chk_opening_before_closing|c|CHECK (((opening_time IS NULL) OR (closing_time IS NULL) OR (opening_time < closing_time)))
+orders|chk_order_status|c|CHECK (((status)::text = ANY ((ARRAY['pending'::character varying, 'confirmed'::character varying, 'preparing'::character varying, 'ready'::character varying, 'out_for_delivery'::character varying, 'delivered'::character varying, 'cancelled'::character varying])::text[])))
+orders|chk_order_totals|c|CHECK (((total_amount >= (0)::numeric) AND (subtotal >= (0)::numeric)))
+payments_made|chk_payment_made_status|c|CHECK (((status)::text = ANY ((ARRAY['completed'::character varying, 'void'::character varying])::text[])))
+payments_received|chk_payment_received_status|c|CHECK (((status)::text = ANY ((ARRAY['completed'::character varying, 'void'::character varying])::text[])))
+orders|chk_payment_status|c|CHECK (((payment_status)::text = ANY ((ARRAY['pending'::character varying, 'paid'::character varying, 'failed'::character varying, 'refunded'::character varying])::text[])))
+orders|chk_phone_not_empty|c|CHECK (((customer_phone)::text <> ''::text))
+restaurant_settings|chk_prep_time_positive|c|CHECK ((estimated_prep_time > 0))
+order_items|chk_prices_non_negative|c|CHECK (((unit_price >= (0)::numeric) AND (total_price >= (0)::numeric)))
+restaurant_config|chk_primary_color_format|c|CHECK (((primary_color)::text ~ '^#[0-9A-Fa-f]{6}$'::text))
+order_items|chk_quantity_positive|c|CHECK ((quantity > 0))
+recurring_journal_templates|chk_recurring_journal_frequency|c|CHECK (((frequency)::text = ANY ((ARRAY['weekly'::character varying, 'monthly'::character varying, 'quarterly'::character varying, 'yearly'::character varying])::text[])))
+restaurant_tables|chk_restaurant_tables_capacity|c|CHECK (((capacity > 0) AND (capacity <= 50)))
+restaurant_tables|chk_restaurant_tables_location|c|CHECK (((location)::text = ANY ((ARRAY['indoor'::character varying, 'outdoor'::character varying, 'vip'::character varying, 'rooftop'::character varying, 'private'::character varying])::text[])))
+restaurant_tables|chk_restaurant_tables_shape|c|CHECK (((shape)::text = ANY ((ARRAY['square'::character varying, 'circle'::character varying, 'rectangle'::character varying])::text[])))
+restaurant_tables|chk_restaurant_tables_status|c|CHECK (((status)::text = ANY ((ARRAY['available'::character varying, 'occupied'::character varying, 'reserved'::character varying, 'maintenance'::character varying])::text[])))
+restaurant_config|chk_secondary_color_format|c|CHECK (((secondary_color)::text ~ '^#[0-9A-Fa-f]{6}$'::text))
+order_status_history|chk_status_transition|c|CHECK (((new_status)::text = ANY ((ARRAY['pending'::character varying, 'confirmed'::character varying, 'preparing'::character varying, 'ready'::character varying, 'out_for_delivery'::character varying, 'delivered'::character varying, 'cancelled'::character varying])::text[])))
+invoices_supplier|chk_supplier_invoice_status|c|CHECK (((status)::text = ANY ((ARRAY['draft'::character varying, 'approved'::character varying, 'partially_paid'::character varying, 'paid'::character varying, 'overdue'::character varying, 'void'::character varying])::text[])))
+supplier_payment_schedules|chk_supplier_payment_schedule_amount|c|CHECK ((amount > (0)::numeric))
+supplier_payment_schedules|chk_supplier_payment_schedule_status|c|CHECK (((status)::text = ANY ((ARRAY['scheduled'::character varying, 'reminded'::character varying, 'paid'::character varying, 'cancelled'::character varying])::text[])))
+restaurant_config|chk_text_color_format|c|CHECK (((text_color)::text ~ '^#[0-9A-Fa-f]{6}$'::text))
+employees|employees_employment_status_check|c|CHECK (((employment_status)::text = ANY ((ARRAY['active'::character varying, 'on_leave'::character varying, 'suspended'::character varying, 'terminated'::character varying])::text[])))
+employees|employees_employment_type_check|c|CHECK (((employment_type)::text = ANY ((ARRAY['full_time'::character varying, 'part_time'::character varying, 'contract'::character varying, 'intern'::character varying])::text[])))
+employees|employees_gender_check|c|CHECK (((gender)::text = ANY ((ARRAY['male'::character varying, 'female'::character varying, 'other'::character varying])::text[])))
+employees|employees_payment_frequency_check|c|CHECK (((payment_frequency)::text = ANY ((ARRAY['hourly'::character varying, 'daily'::character varying, 'weekly'::character varying, 'bi_weekly'::character varying, 'monthly'::character varying])::text[])))
+employees|employees_shift_type_check|c|CHECK (((shift_type)::text = ANY ((ARRAY['day'::character varying, 'night'::character varying, 'rotating'::character varying])::text[])))
+fixed_assets|fixed_assets_accumulated_depreciation_check|c|CHECK ((accumulated_depreciation >= (0)::numeric))
+fixed_assets|fixed_assets_purchase_cost_check|c|CHECK ((purchase_cost >= (0)::numeric))
+fixed_assets|fixed_assets_salvage_value_check|c|CHECK ((salvage_value >= (0)::numeric))
+fixed_assets|fixed_assets_useful_life_months_check|c|CHECK ((useful_life_months > 0))
+hr_audit_logs|hr_audit_logs_action_check|c|CHECK (((action)::text = ANY ((ARRAY['create'::character varying, 'update'::character varying, 'delete'::character varying, 'approve'::character varying, 'reject'::character varying, 'cancel'::character varying])::text[])))
+hr_audit_logs|hr_audit_logs_entity_type_check|c|CHECK (((entity_type)::text = ANY ((ARRAY['employee'::character varying, 'role'::character varying, 'attendance'::character varying, 'salary'::character varying, 'leave'::character varying, 'performance_review'::character varying, 'employee_role'::character varying])::text[])))
+identity_email_challenges|identity_email_challenges_attempt_count_check|c|CHECK (((attempt_count >= 0) AND (attempt_count <= 10)))
+identity_email_challenges|identity_email_challenges_check|c|CHECK ((expires_at > created_at))
+identity_email_challenges|identity_email_challenges_email_check|c|CHECK (((email = lower(btrim(email))) AND ((length(email) >= 3) AND (length(email) <= 320))))
+identity_email_challenges|identity_email_challenges_purpose_check|c|CHECK ((purpose = 'verify_email'::text))
+identity_email_challenges|identity_email_challenges_token_hash_check|c|CHECK ((octet_length(token_hash) = 32))
+journal_entries|journal_entries_status_check|c|CHECK (((status)::text = ANY ((ARRAY['draft'::character varying, 'posted'::character varying, 'void'::character varying])::text[])))
+journal_entry_lines|journal_entry_lines_check|c|CHECK ((NOT ((debit_amount > (0)::numeric) AND (credit_amount > (0)::numeric))))
+journal_entry_lines|journal_entry_lines_check1|c|CHECK (((debit_amount > (0)::numeric) OR (credit_amount > (0)::numeric)))
+journal_entry_lines|journal_entry_lines_credit_amount_check|c|CHECK ((credit_amount >= (0)::numeric))
+journal_entry_lines|journal_entry_lines_debit_amount_check|c|CHECK ((debit_amount >= (0)::numeric))
+kds_queue|kds_queue_priority_check|c|CHECK ((priority = ANY (ARRAY[0, 1])))
+kds_queue|kds_queue_station_id_check|c|CHECK (((station_id)::text <> ''::text))
+kds_queue|kds_queue_status_check|c|CHECK (((status)::text = ANY ((ARRAY['new'::character varying, 'in_progress'::character varying, 'ready'::character varying, 'completed'::character varying, 'recalled'::character varying])::text[])))
+kds_settings|kds_settings_auto_bump_minutes_check|c|CHECK ((auto_bump_minutes >= 0))
+kds_settings|kds_settings_check|c|CHECK ((color_danger_minutes > color_warning_minutes))
+kds_settings|kds_settings_color_warning_minutes_check|c|CHECK ((color_warning_minutes > 0))
+kds_settings|kds_settings_display_density_check|c|CHECK (((display_density)::text = ANY ((ARRAY['compact'::character varying, 'comfortable'::character varying, 'spacious'::character varying])::text[])))
+leaves|leaves_half_day_period_check|c|CHECK (((half_day_period)::text = ANY ((ARRAY['morning'::character varying, 'afternoon'::character varying, NULL::character varying])::text[])))
+leaves|leaves_leave_category_check|c|CHECK (((leave_category)::text = ANY ((ARRAY['paid'::character varying, 'unpaid'::character varying])::text[])))
+leaves|leaves_leave_type_check|c|CHECK (((leave_type)::text = ANY ((ARRAY['annual'::character varying, 'sick'::character varying, 'casual'::character varying, 'maternity'::character varying, 'paternity'::character varying, 'unpaid'::character varying, 'compensatory'::character varying, 'emergency'::character varying, 'bereavement'::character varying, 'study'::character varying, 'other'::character varying])::text[])))
+leaves|leaves_status_check|c|CHECK (((status)::text = ANY ((ARRAY['pending'::character varying, 'approved'::character varying, 'rejected'::character varying, 'cancelled'::character varying, 'on_hold'::character varying])::text[])))
+membership_restaurant_grants|membership_restaurant_grants_check|c|CHECK (((state = 'revoked'::text) = (revoked_at IS NOT NULL)))
+membership_restaurant_grants|membership_restaurant_grants_state_check|c|CHECK ((state = ANY (ARRAY['pending'::text, 'active'::text, 'revoked'::text])))
+membership_role_grants|membership_role_grants_check|c|CHECK (((state = 'revoked'::text) = (revoked_at IS NOT NULL)))
+membership_role_grants|membership_role_grants_state_check|c|CHECK ((state = ANY (ARRAY['pending'::text, 'active'::text, 'revoked'::text])))
+modules|modules_display_name_check|c|CHECK (((display_name)::text <> ''::text))
+modules|modules_name_check|c|CHECK (((name)::text <> ''::text))
+order_item_cancellations|order_item_cancellations_quantity_check|c|CHECK ((quantity > 0))
+order_items|order_items_check|c|CHECK (((cancelled_quantity >= 0) AND (cancelled_quantity <= quantity)))
+order_stock_reservations|order_stock_reservations_check|c|CHECK (((released_quantity >= 0) AND (released_quantity <= quantity)))
+order_stock_reservations|order_stock_reservations_quantity_check|c|CHECK ((quantity > 0))
+performance_reviews|performance_reviews_adaptability_check|c|CHECK (((adaptability >= (0)::numeric) AND (adaptability <= (5)::numeric)))
+performance_reviews|performance_reviews_attendance_check|c|CHECK (((attendance >= (0)::numeric) AND (attendance <= (5)::numeric)))
+performance_reviews|performance_reviews_communication_check|c|CHECK (((communication >= (0)::numeric) AND (communication <= (5)::numeric)))
+performance_reviews|performance_reviews_customer_service_check|c|CHECK (((customer_service >= (0)::numeric) AND (customer_service <= (5)::numeric)))
+performance_reviews|performance_reviews_initiative_check|c|CHECK (((initiative >= (0)::numeric) AND (initiative <= (5)::numeric)))
+performance_reviews|performance_reviews_leadership_check|c|CHECK (((leadership >= (0)::numeric) AND (leadership <= (5)::numeric)))
+performance_reviews|performance_reviews_overall_rating_check|c|CHECK (((overall_rating >= (0)::numeric) AND (overall_rating <= (5)::numeric)))
+performance_reviews|performance_reviews_problem_solving_check|c|CHECK (((problem_solving >= (0)::numeric) AND (problem_solving <= (5)::numeric)))
+performance_reviews|performance_reviews_productivity_check|c|CHECK (((productivity >= (0)::numeric) AND (productivity <= (5)::numeric)))
+performance_reviews|performance_reviews_punctuality_check|c|CHECK (((punctuality >= (0)::numeric) AND (punctuality <= (5)::numeric)))
+performance_reviews|performance_reviews_quality_of_work_check|c|CHECK (((quality_of_work >= (0)::numeric) AND (quality_of_work <= (5)::numeric)))
+performance_reviews|performance_reviews_review_type_check|c|CHECK (((review_type)::text = ANY ((ARRAY['probation'::character varying, 'annual'::character varying, 'mid_year'::character varying, 'quarterly'::character varying, 'ad_hoc'::character varying])::text[])))
+performance_reviews|performance_reviews_status_check|c|CHECK (((status)::text = ANY ((ARRAY['draft'::character varying, 'submitted'::character varying, 'acknowledged'::character varying, 'disputed'::character varying, 'finalized'::character varying])::text[])))
+performance_reviews|performance_reviews_teamwork_check|c|CHECK (((teamwork >= (0)::numeric) AND (teamwork <= (5)::numeric)))
+performance_reviews|performance_reviews_technical_skills_check|c|CHECK (((technical_skills >= (0)::numeric) AND (technical_skills <= (5)::numeric)))
+permission_audit_logs|permission_audit_logs_action_check|c|CHECK (((action)::text = ANY ((ARRAY['CREATE_ROLE'::character varying, 'UPDATE_ROLE'::character varying, 'DELETE_ROLE'::character varying, 'ASSIGN_PERMISSION'::character varying, 'REVOKE_PERMISSION'::character varying, 'ASSIGN_USER_ROLE'::character varying, 'REVOKE_USER_ROLE'::character varying, 'CREATE_MODULE'::character varying, 'UPDATE_MODULE'::character varying, 'DELETE_MODULE'::character varying])::text[])))
+permission_levels|permission_levels_name_check|c|CHECK (((name)::text <> ''::text))
+permission_levels|permission_levels_value_check|c|CHECK ((value >= 0))
+salaries|positive_amounts|c|CHECK (((base_salary >= (0)::numeric) AND (gross_salary >= (0)::numeric) AND (total_deductions >= (0)::numeric) AND (net_salary >= (0)::numeric)))
+employees|positive_salary|c|CHECK ((base_salary >= (0)::numeric))
+employees|positive_working_hours|c|CHECK (((working_hours_per_week > (0)::numeric) AND (working_hours_per_week <= (168)::numeric)))
+report_export_audit_logs|report_export_audit_logs_exported_bytes_check|c|CHECK ((exported_bytes >= 0))
+report_export_audit_logs|report_export_audit_logs_format_check|c|CHECK (((format)::text = ANY ((ARRAY['csv'::character varying, 'pdf'::character varying])::text[])))
+report_export_audit_logs|report_export_audit_logs_report_type_check|c|CHECK (((report_type)::text = ANY ((ARRAY['sales'::character varying, 'profitability'::character varying, 'inventory'::character varying])::text[])))
+role_permissions|role_permissions_permission_level_check|c|CHECK (((permission_level)::text = ANY ((ARRAY['NONE'::character varying, 'READ'::character varying, 'EXPORT'::character varying, 'WRITE'::character varying, 'DELETE'::character varying, 'ADMIN'::character varying])::text[])))
+roles|roles_access_level_check|c|CHECK (((access_level)::text = ANY ((ARRAY['basic'::character varying, 'supervisor'::character varying, 'manager'::character varying, 'admin'::character varying, 'owner'::character varying])::text[])))
+salaries|salaries_month_check|c|CHECK (((month >= 1) AND (month <= 12)))
+salaries|salaries_payment_method_check|c|CHECK (((payment_method)::text = ANY ((ARRAY['cash'::character varying, 'bank_transfer'::character varying, 'check'::character varying, 'mobile_money'::character varying])::text[])))
+salaries|salaries_status_check|c|CHECK (((status)::text = ANY ((ARRAY['pending'::character varying, 'processing'::character varying, 'paid'::character varying, 'cancelled'::character varying, 'on_hold'::character varying])::text[])))
+salaries|salaries_year_check|c|CHECK ((year >= 2000))
+tenant_memberships|tenant_memberships_check|c|CHECK (((state <> ALL (ARRAY['active'::text, 'suspended'::text])) OR (accepted_at IS NOT NULL)))
+tenant_memberships|tenant_memberships_state_check|c|CHECK ((state = ANY (ARRAY['pending'::text, 'active'::text, 'suspended'::text, 'revoked'::text])))
+tenants|tenants_preferred_billing_period_check|c|CHECK (((preferred_billing_period)::text = ANY ((ARRAY['monthly'::character varying, 'annual'::character varying])::text[])))
+user_auth_audit_logs|user_auth_audit_logs_action_check|c|CHECK (((action)::text = ANY ((ARRAY['login'::character varying, 'logout'::character varying, 'refresh'::character varying])::text[])))
+user_auth_audit_logs|user_auth_audit_logs_status_check|c|CHECK (((status)::text = 'success'::text))
+user_settings|valid_accent_color|c|CHECK (((accent_color)::text ~ '^#[0-9a-fA-F]{6}$'::text))
+attendance|valid_break_times|c|CHECK (((break_end IS NULL) OR (break_end > break_start)))
+attendance|valid_clock_times|c|CHECK (((clock_out IS NULL) OR (clock_out > clock_in)))
+attendance|valid_early_departure_minutes|c|CHECK ((early_departure_minutes >= 0))
+employee_roles|valid_effective_dates|c|CHECK (((effective_to IS NULL) OR (effective_to >= effective_from)))
+leaves|valid_half_day|c|CHECK ((((is_half_day = false) AND (half_day_period IS NULL)) OR ((is_half_day = true) AND (half_day_period IS NOT NULL))))
+employees|valid_hire_date|c|CHECK ((hire_date <= CURRENT_DATE))
+performance_reviews|valid_increase_percentage|c|CHECK (((recommended_increase_percentage IS NULL) OR (recommended_increase_percentage >= (0)::numeric)))
+user_settings|valid_language|c|CHECK (((language)::text = ANY ((ARRAY['en'::character varying, 'ar'::character varying])::text[])))
+attendance|valid_late_minutes|c|CHECK ((late_by_minutes >= 0))
+leaves|valid_leave_period|c|CHECK ((end_date >= start_date))
+attendance|valid_overtime_hours|c|CHECK ((overtime_hours >= (0)::numeric))
+salaries|valid_pay_period|c|CHECK ((pay_period_end >= pay_period_start))
+salaries|valid_payment_date|c|CHECK (((payment_date IS NULL) OR (payment_date >= pay_period_end)))
+user_settings|valid_primary_color|c|CHECK (((primary_color)::text ~ '^#[0-9a-fA-F]{6}$'::text))
+performance_reviews|valid_review_date|c|CHECK ((review_date >= review_period_end))
+performance_reviews|valid_review_period|c|CHECK ((review_period_end >= review_period_start))
+roles|valid_salary_range|c|CHECK (((min_salary IS NULL) OR (max_salary IS NULL) OR (min_salary <= max_salary)))
+user_settings|valid_secondary_color|c|CHECK (((secondary_color)::text ~ '^#[0-9a-fA-F]{6}$'::text))
+theme_sections|valid_section_type|c|CHECK (((section_type)::text = ANY ((ARRAY['hero'::character varying, 'featured_items'::character varying, 'why_choose_us'::character varying, 'info_cards'::character varying, 'cta'::character varying, 'testimonials'::character varying])::text[])))
+employees|valid_termination_date|c|CHECK (((termination_date IS NULL) OR (termination_date >= hire_date)))
+user_settings|valid_theme|c|CHECK (((theme)::text = ANY ((ARRAY['light'::character varying, 'dark'::character varying, 'system'::character varying])::text[])))
+leaves|valid_total_days|c|CHECK ((total_days > 0))
+attendance|valid_total_hours|c|CHECK (((total_hours IS NULL) OR (total_hours >= (0)::numeric)))
+account_budgets|account_budgets_account_id_fkey|f|FOREIGN KEY (account_id) REFERENCES chart_of_accounts(id) ON DELETE CASCADE
+account_budgets|account_budgets_restaurant_id_fkey|f|FOREIGN KEY (restaurant_id) REFERENCES restaurants(id) ON DELETE CASCADE
+account_budgets|account_budgets_tenant_id_fkey|f|FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE
+accounting_event_outbox|accounting_event_outbox_order_id_fkey|f|FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE RESTRICT
+accounting_event_redrive_audit|accounting_event_redrive_audit_outbox_id_fkey|f|FOREIGN KEY (outbox_id) REFERENCES accounting_event_outbox(id) ON DELETE RESTRICT
+accounting_inventory_movement_events|accounting_inventory_movement_events_order_id_fkey|f|FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE RESTRICT
+attendance|attendance_approved_by_fkey|f|FOREIGN KEY (approved_by) REFERENCES users(id) ON DELETE SET NULL
+attendance|attendance_created_by_fkey|f|FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
+attendance|attendance_employee_id_fkey|f|FOREIGN KEY (employee_id) REFERENCES employees(id) ON DELETE CASCADE
+attendance|attendance_overtime_approved_by_fkey|f|FOREIGN KEY (overtime_approved_by) REFERENCES users(id) ON DELETE SET NULL
+attendance|attendance_restaurant_id_fkey|f|FOREIGN KEY (restaurant_id) REFERENCES restaurants(id) ON DELETE CASCADE
+attendance|attendance_tenant_id_fkey|f|FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE
+attendance|attendance_updated_by_fkey|f|FOREIGN KEY (updated_by) REFERENCES users(id) ON DELETE SET NULL
+audit_export_logs|audit_export_logs_generated_by_fkey|f|FOREIGN KEY (generated_by) REFERENCES users(id) ON DELETE SET NULL
+audit_export_logs|audit_export_logs_restaurant_id_fkey|f|FOREIGN KEY (restaurant_id) REFERENCES restaurants(id) ON DELETE CASCADE
+audit_export_logs|audit_export_logs_tenant_id_fkey|f|FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE
+auto_posting_rules|auto_posting_rules_restaurant_id_fkey|f|FOREIGN KEY (restaurant_id) REFERENCES restaurants(id)
+auto_posting_rules|auto_posting_rules_tenant_id_fkey|f|FOREIGN KEY (tenant_id) REFERENCES tenants(id)
+bank_accounts_ledger|bank_accounts_ledger_gl_account_id_fkey|f|FOREIGN KEY (gl_account_id) REFERENCES chart_of_accounts(id)
+bank_accounts_ledger|bank_accounts_ledger_restaurant_id_fkey|f|FOREIGN KEY (restaurant_id) REFERENCES restaurants(id)
+bank_accounts_ledger|bank_accounts_ledger_tenant_id_fkey|f|FOREIGN KEY (tenant_id) REFERENCES tenants(id)
+bank_reconciliation_lines|bank_reconciliation_lines_journal_entry_id_fkey|f|FOREIGN KEY (journal_entry_id) REFERENCES journal_entries(id) ON DELETE SET NULL
+bank_reconciliation_lines|bank_reconciliation_lines_reconciliation_id_fkey|f|FOREIGN KEY (reconciliation_id) REFERENCES bank_reconciliation_sessions(id) ON DELETE CASCADE
+bank_reconciliation_lines|bank_reconciliation_lines_tenant_id_fkey|f|FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE
+bank_reconciliation_sessions|bank_reconciliation_sessions_bank_account_id_fkey|f|FOREIGN KEY (bank_account_id) REFERENCES bank_accounts_ledger(id) ON DELETE CASCADE
+bank_reconciliation_sessions|bank_reconciliation_sessions_completed_by_fkey|f|FOREIGN KEY (completed_by) REFERENCES users(id) ON DELETE SET NULL
+bank_reconciliation_sessions|bank_reconciliation_sessions_created_by_fkey|f|FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
+bank_reconciliation_sessions|bank_reconciliation_sessions_restaurant_id_fkey|f|FOREIGN KEY (restaurant_id) REFERENCES restaurants(id) ON DELETE CASCADE
+bank_reconciliation_sessions|bank_reconciliation_sessions_tenant_id_fkey|f|FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE
+bank_reconciliation_sessions|bank_reconciliation_sessions_updated_by_fkey|f|FOREIGN KEY (updated_by) REFERENCES users(id) ON DELETE SET NULL
+categories|categories_created_by_fkey|f|FOREIGN KEY (created_by) REFERENCES users(id)
+categories|categories_restaurant_id_fkey|f|FOREIGN KEY (restaurant_id) REFERENCES restaurants(id) ON DELETE CASCADE
+categories|categories_tenant_id_fkey|f|FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE
+categories|categories_updated_by_fkey|f|FOREIGN KEY (updated_by) REFERENCES users(id)
+chart_of_accounts|chart_of_accounts_parent_id_fkey|f|FOREIGN KEY (parent_id) REFERENCES chart_of_accounts(id)
+chart_of_accounts|chart_of_accounts_restaurant_id_fkey|f|FOREIGN KEY (restaurant_id) REFERENCES restaurants(id)
+chart_of_accounts|chart_of_accounts_tenant_id_fkey|f|FOREIGN KEY (tenant_id) REFERENCES tenants(id)
+customers_accounting|customers_accounting_receivable_account_id_fkey|f|FOREIGN KEY (receivable_account_id) REFERENCES chart_of_accounts(id)
+customers_accounting|customers_accounting_restaurant_id_fkey|f|FOREIGN KEY (restaurant_id) REFERENCES restaurants(id)
+customers_accounting|customers_accounting_tenant_id_fkey|f|FOREIGN KEY (tenant_id) REFERENCES tenants(id)
+driver_assignments|driver_assignments_driver_id_fkey|f|FOREIGN KEY (driver_id) REFERENCES drivers(id) ON DELETE CASCADE
+driver_assignments|driver_assignments_order_id_fkey|f|FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE
+driver_location_history|driver_location_history_driver_id_fkey|f|FOREIGN KEY (driver_id) REFERENCES drivers(id) ON DELETE CASCADE
+driver_location_history|driver_location_history_order_id_fkey|f|FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE SET NULL
+drivers|drivers_restaurant_id_fkey|f|FOREIGN KEY (restaurant_id) REFERENCES restaurants(id) ON DELETE CASCADE
+drivers|drivers_tenant_id_fkey|f|FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE
+e_invoice_submissions|e_invoice_submissions_created_by_fkey|f|FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
+e_invoice_submissions|e_invoice_submissions_restaurant_id_fkey|f|FOREIGN KEY (restaurant_id) REFERENCES restaurants(id) ON DELETE CASCADE
+e_invoice_submissions|e_invoice_submissions_tenant_id_fkey|f|FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE
+email_change_requests|email_change_requests_user_id_fkey|f|FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+employee_roles|employee_roles_assigned_by_fkey|f|FOREIGN KEY (assigned_by) REFERENCES users(id) ON DELETE SET NULL
+employee_roles|employee_roles_employee_id_fkey|f|FOREIGN KEY (employee_id) REFERENCES employees(id) ON DELETE CASCADE
+employee_roles|employee_roles_role_id_fkey|f|FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE CASCADE
+employee_roles|employee_roles_tenant_id_fkey|f|FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE
+employees|employees_created_by_fkey|f|FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
+employees|employees_manager_id_fkey|f|FOREIGN KEY (manager_id) REFERENCES employees(id) ON DELETE SET NULL
+employees|employees_restaurant_id_fkey|f|FOREIGN KEY (restaurant_id) REFERENCES restaurants(id) ON DELETE CASCADE
+employees|employees_tenant_id_fkey|f|FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE
+employees|employees_updated_by_fkey|f|FOREIGN KEY (updated_by) REFERENCES users(id) ON DELETE SET NULL
+employment_contracts|employment_contracts_created_by_fkey|f|FOREIGN KEY (created_by) REFERENCES users(id)
+employment_contracts|employment_contracts_employee_id_fkey|f|FOREIGN KEY (employee_id) REFERENCES employees(id)
+employment_contracts|employment_contracts_renewed_from_id_fkey|f|FOREIGN KEY (renewed_from_id) REFERENCES employment_contracts(id)
+employment_contracts|employment_contracts_restaurant_id_fkey|f|FOREIGN KEY (restaurant_id) REFERENCES restaurants(id)
+employment_contracts|employment_contracts_tenant_id_fkey|f|FOREIGN KEY (tenant_id) REFERENCES tenants(id)
+employment_contracts|employment_contracts_updated_by_fkey|f|FOREIGN KEY (updated_by) REFERENCES users(id)
+exchange_rates|exchange_rates_restaurant_id_fkey|f|FOREIGN KEY (restaurant_id) REFERENCES restaurants(id) ON DELETE CASCADE
+exchange_rates|exchange_rates_tenant_id_fkey|f|FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE
+fiscal_periods|fiscal_periods_closed_by_fkey|f|FOREIGN KEY (closed_by) REFERENCES users(id)
+fiscal_periods|fiscal_periods_restaurant_id_fkey|f|FOREIGN KEY (restaurant_id) REFERENCES restaurants(id)
+fiscal_periods|fiscal_periods_tenant_id_fkey|f|FOREIGN KEY (tenant_id) REFERENCES tenants(id)
+fixed_assets|fixed_assets_restaurant_id_fkey|f|FOREIGN KEY (restaurant_id) REFERENCES restaurants(id)
+fixed_assets|fixed_assets_tenant_id_fkey|f|FOREIGN KEY (tenant_id) REFERENCES tenants(id)
+identity_email_challenges|fk_identity_email_challenge_identity_email|f|FOREIGN KEY (identity_id, email) REFERENCES auth_identities(id, normalized_email)
+membership_restaurant_grants|fk_membership_restaurant_grant_actor|f|FOREIGN KEY (tenant_id, granted_by_user_id) REFERENCES users(tenant_id, id)
+membership_restaurant_grants|fk_membership_restaurant_grant_membership|f|FOREIGN KEY (membership_id, tenant_id) REFERENCES tenant_memberships(id, tenant_id)
+membership_restaurant_grants|fk_membership_restaurant_grant_restaurant|f|FOREIGN KEY (tenant_id, restaurant_id) REFERENCES restaurants(tenant_id, id)
+membership_role_grants|fk_membership_role_grant_actor|f|FOREIGN KEY (tenant_id, granted_by_user_id) REFERENCES users(tenant_id, id)
+membership_role_grants|fk_membership_role_grant_membership|f|FOREIGN KEY (membership_id, tenant_id) REFERENCES tenant_memberships(id, tenant_id)
+membership_role_grants|fk_membership_role_grant_restaurant_scope|f|FOREIGN KEY (membership_id, tenant_id, restaurant_id) REFERENCES membership_restaurant_grants(membership_id, tenant_id, restaurant_id)
+membership_role_grants|fk_membership_role_grant_role|f|FOREIGN KEY (tenant_id, restaurant_id, role_id) REFERENCES roles(tenant_id, restaurant_id, id)
+notifications|fk_notification_restaurant|f|FOREIGN KEY (restaurant_id) REFERENCES restaurants(id)
+notifications|fk_notification_tenant|f|FOREIGN KEY (tenant_id) REFERENCES tenants(id)
+notifications|fk_notification_user|f|FOREIGN KEY (user_id) REFERENCES users(id)
+order_status_history|fk_order_history_order|f|FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE
+order_status_history|fk_order_history_user|f|FOREIGN KEY (changed_by) REFERENCES users(id) ON DELETE SET NULL
+order_items|fk_order_items_order|f|FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE
+order_items|fk_order_items_product|f|FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE RESTRICT
+order_items|fk_order_items_restaurant|f|FOREIGN KEY (restaurant_id) REFERENCES restaurants(id) ON DELETE CASCADE
+order_items|fk_order_items_tenant|f|FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE
+orders|fk_orders_restaurant|f|FOREIGN KEY (restaurant_id) REFERENCES restaurants(id) ON DELETE CASCADE
+orders|fk_orders_table|f|FOREIGN KEY (table_id) REFERENCES restaurant_tables(id) ON DELETE SET NULL
+orders|fk_orders_tenant|f|FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE
+restaurant_tables|fk_restaurant_tables_layout_id|f|FOREIGN KEY (layout_id) REFERENCES table_layouts(id) ON DELETE SET NULL
+restaurant_tables|fk_restaurant_tables_restaurant|f|FOREIGN KEY (restaurant_id) REFERENCES restaurants(id) ON DELETE CASCADE
+restaurant_tables|fk_restaurant_tables_tenant|f|FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE
+restaurant_themes|fk_restaurant_themes_restaurant_id|f|FOREIGN KEY (restaurant_id) REFERENCES restaurants(id) ON DELETE CASCADE
+restaurant_themes|fk_restaurant_themes_tenant_id|f|FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE
+theme_snapshots|fk_snapshots_history|f|FOREIGN KEY (theme_id, version_number) REFERENCES theme_history(theme_id, version)
+theme_snapshots|fk_snapshots_theme|f|FOREIGN KEY (theme_id) REFERENCES themes_v2(id) ON DELETE CASCADE
+tenant_subscription_history|fk_subscription_history_tenant|f|FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE
+table_layouts|fk_table_layouts_restaurant|f|FOREIGN KEY (restaurant_id) REFERENCES restaurants(id) ON DELETE CASCADE
+table_layouts|fk_table_layouts_tenant|f|FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE
+tenant_memberships|fk_tenant_memberships_legacy_user_tenant|f|FOREIGN KEY (tenant_id, legacy_user_id) REFERENCES users(tenant_id, id)
+tenants|fk_tenants_disabled_by|f|FOREIGN KEY (disabled_by) REFERENCES users(id) ON DELETE SET NULL
+theme_components|fk_theme_components_theme|f|FOREIGN KEY (theme_id) REFERENCES themes_v2(id) ON DELETE CASCADE
+theme_history|fk_theme_history_theme|f|FOREIGN KEY (theme_id) REFERENCES themes_v2(id) ON DELETE CASCADE
+theme_sections|fk_theme_sections_theme_id|f|FOREIGN KEY (theme_id) REFERENCES restaurant_themes(id) ON DELETE CASCADE
+themes_v2|fk_themes_v2_restaurant|f|FOREIGN KEY (restaurant_id) REFERENCES restaurants(id) ON DELETE CASCADE
+general_ledger|general_ledger_account_id_fkey|f|FOREIGN KEY (account_id) REFERENCES chart_of_accounts(id)
+general_ledger|general_ledger_journal_entry_id_fkey|f|FOREIGN KEY (journal_entry_id) REFERENCES journal_entries(id)
+general_ledger|general_ledger_journal_line_id_fkey|f|FOREIGN KEY (journal_line_id) REFERENCES journal_entry_lines(id)
+general_ledger|general_ledger_restaurant_id_fkey|f|FOREIGN KEY (restaurant_id) REFERENCES restaurants(id)
+general_ledger|general_ledger_tenant_id_fkey|f|FOREIGN KEY (tenant_id) REFERENCES tenants(id)
+homepage_sections|homepage_sections_restaurant_id_fkey|f|FOREIGN KEY (restaurant_id) REFERENCES restaurants(id) ON DELETE CASCADE
+homepage_sections|homepage_sections_tenant_id_fkey|f|FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE
+hr_audit_logs|hr_audit_logs_restaurant_id_fkey|f|FOREIGN KEY (restaurant_id) REFERENCES restaurants(id) ON DELETE CASCADE
+hr_audit_logs|hr_audit_logs_tenant_id_fkey|f|FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE
+hr_audit_logs|hr_audit_logs_user_id_fkey|f|FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
+impersonation_sessions|impersonation_sessions_super_admin_id_fkey|f|FOREIGN KEY (super_admin_id) REFERENCES super_admins(id) ON DELETE CASCADE
+impersonation_sessions|impersonation_sessions_target_tenant_id_fkey|f|FOREIGN KEY (target_tenant_id) REFERENCES tenants(id) ON DELETE CASCADE
+impersonation_sessions|impersonation_sessions_target_user_id_fkey|f|FOREIGN KEY (target_user_id) REFERENCES users(id) ON DELETE CASCADE
+insurance_tracking|insurance_tracking_created_by_fkey|f|FOREIGN KEY (created_by) REFERENCES users(id)
+insurance_tracking|insurance_tracking_employee_id_fkey|f|FOREIGN KEY (employee_id) REFERENCES employees(id)
+insurance_tracking|insurance_tracking_restaurant_id_fkey|f|FOREIGN KEY (restaurant_id) REFERENCES restaurants(id)
+insurance_tracking|insurance_tracking_tenant_id_fkey|f|FOREIGN KEY (tenant_id) REFERENCES tenants(id)
+insurance_tracking|insurance_tracking_updated_by_fkey|f|FOREIGN KEY (updated_by) REFERENCES users(id)
+inventory|inventory_created_by_fkey|f|FOREIGN KEY (created_by) REFERENCES users(id)
+inventory_movements|inventory_movements_created_by_fkey|f|FOREIGN KEY (created_by) REFERENCES users(id)
+inventory_movements|inventory_movements_order_id_fkey|f|FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE SET NULL
+inventory_movements|inventory_movements_product_id_fkey|f|FOREIGN KEY (product_id) REFERENCES products(id)
+inventory_movements|inventory_movements_restaurant_id_fkey|f|FOREIGN KEY (restaurant_id) REFERENCES restaurants(id)
+inventory_movements|inventory_movements_tenant_id_fkey|f|FOREIGN KEY (tenant_id) REFERENCES tenants(id)
+inventory|inventory_product_id_fkey|f|FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
+invoice_customer_lines|invoice_customer_lines_account_id_fkey|f|FOREIGN KEY (account_id) REFERENCES chart_of_accounts(id)
+invoice_customer_lines|invoice_customer_lines_invoice_id_fkey|f|FOREIGN KEY (invoice_id) REFERENCES invoices_customer(id) ON DELETE CASCADE
+invoice_delivery_logs|invoice_delivery_logs_created_by_fkey|f|FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
+invoice_delivery_logs|invoice_delivery_logs_invoice_id_fkey|f|FOREIGN KEY (invoice_id) REFERENCES invoices_customer(id) ON DELETE CASCADE
+invoice_delivery_logs|invoice_delivery_logs_restaurant_id_fkey|f|FOREIGN KEY (restaurant_id) REFERENCES restaurants(id) ON DELETE CASCADE
+invoice_delivery_logs|invoice_delivery_logs_tenant_id_fkey|f|FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE
+invoice_supplier_lines|invoice_supplier_lines_account_id_fkey|f|FOREIGN KEY (account_id) REFERENCES chart_of_accounts(id)
+invoice_supplier_lines|invoice_supplier_lines_invoice_id_fkey|f|FOREIGN KEY (invoice_id) REFERENCES invoices_supplier(id) ON DELETE CASCADE
+invoices_customer|invoices_customer_customer_id_fkey|f|FOREIGN KEY (customer_id) REFERENCES customers_accounting(id)
+invoices_customer|invoices_customer_journal_entry_id_fkey|f|FOREIGN KEY (journal_entry_id) REFERENCES journal_entries(id)
+invoices_customer|invoices_customer_order_id_fkey|f|FOREIGN KEY (order_id) REFERENCES orders(id)
+invoices_customer|invoices_customer_restaurant_id_fkey|f|FOREIGN KEY (restaurant_id) REFERENCES restaurants(id)
+invoices_customer|invoices_customer_tenant_id_fkey|f|FOREIGN KEY (tenant_id) REFERENCES tenants(id)
+invoices_supplier|invoices_supplier_journal_entry_id_fkey|f|FOREIGN KEY (journal_entry_id) REFERENCES journal_entries(id)
+invoices_supplier|invoices_supplier_restaurant_id_fkey|f|FOREIGN KEY (restaurant_id) REFERENCES restaurants(id)
+invoices_supplier|invoices_supplier_supplier_id_fkey|f|FOREIGN KEY (supplier_id) REFERENCES suppliers(id)
+invoices_supplier|invoices_supplier_tenant_id_fkey|f|FOREIGN KEY (tenant_id) REFERENCES tenants(id)
+journal_entries|journal_entries_restaurant_id_fkey|f|FOREIGN KEY (restaurant_id) REFERENCES restaurants(id)
+journal_entries|journal_entries_tenant_id_fkey|f|FOREIGN KEY (tenant_id) REFERENCES tenants(id)
+journal_entry_lines|journal_entry_lines_account_id_fkey|f|FOREIGN KEY (account_id) REFERENCES chart_of_accounts(id)
+journal_entry_lines|journal_entry_lines_journal_entry_id_fkey|f|FOREIGN KEY (journal_entry_id) REFERENCES journal_entries(id) ON DELETE CASCADE
+kds_queue|kds_queue_bumped_by_fkey|f|FOREIGN KEY (bumped_by) REFERENCES users(id) ON DELETE SET NULL
+kds_queue|kds_queue_order_id_fkey|f|FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE
+kds_queue|kds_queue_restaurant_id_fkey|f|FOREIGN KEY (restaurant_id) REFERENCES restaurants(id) ON DELETE CASCADE
+kds_queue|kds_queue_tenant_id_fkey|f|FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE
+kds_settings|kds_settings_restaurant_id_fkey|f|FOREIGN KEY (restaurant_id) REFERENCES restaurants(id) ON DELETE CASCADE
+kds_settings|kds_settings_tenant_id_fkey|f|FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE
+leaves|leaves_approved_by_fkey|f|FOREIGN KEY (approved_by) REFERENCES users(id) ON DELETE SET NULL
+leaves|leaves_cancelled_by_fkey|f|FOREIGN KEY (cancelled_by) REFERENCES users(id) ON DELETE SET NULL
+leaves|leaves_created_by_fkey|f|FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
+leaves|leaves_employee_id_fkey|f|FOREIGN KEY (employee_id) REFERENCES employees(id) ON DELETE CASCADE
+leaves|leaves_rejected_by_fkey|f|FOREIGN KEY (rejected_by) REFERENCES users(id) ON DELETE SET NULL
+leaves|leaves_replacement_employee_id_fkey|f|FOREIGN KEY (replacement_employee_id) REFERENCES employees(id) ON DELETE SET NULL
+leaves|leaves_restaurant_id_fkey|f|FOREIGN KEY (restaurant_id) REFERENCES restaurants(id) ON DELETE CASCADE
+leaves|leaves_tenant_id_fkey|f|FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE
+leaves|leaves_updated_by_fkey|f|FOREIGN KEY (updated_by) REFERENCES users(id) ON DELETE SET NULL
+low_stock_alerts|low_stock_alerts_acknowledged_by_fkey|f|FOREIGN KEY (acknowledged_by) REFERENCES users(id)
+low_stock_alerts|low_stock_alerts_product_id_fkey|f|FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
+notification_preferences|notification_preferences_user_id_fkey|f|FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+notification_read_tracking|notification_read_tracking_notification_id_fkey|f|FOREIGN KEY (notification_id) REFERENCES notifications(id) ON DELETE CASCADE
+notification_read_tracking|notification_read_tracking_user_id_fkey|f|FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+notifications|notifications_restaurant_id_fkey|f|FOREIGN KEY (restaurant_id) REFERENCES restaurants(id) ON DELETE CASCADE
+notifications|notifications_tenant_id_fkey|f|FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE
+notifications|notifications_user_id_fkey|f|FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+order_item_cancellations|order_item_cancellations_actor_id_fkey|f|FOREIGN KEY (actor_id) REFERENCES users(id)
+order_item_cancellations|order_item_cancellations_item_id_fkey|f|FOREIGN KEY (item_id) REFERENCES order_items(id)
+order_item_cancellations|order_item_cancellations_order_id_fkey|f|FOREIGN KEY (order_id) REFERENCES orders(id)
+order_item_cancellations|order_item_cancellations_restaurant_id_fkey|f|FOREIGN KEY (restaurant_id) REFERENCES restaurants(id)
+order_item_cancellations|order_item_cancellations_tenant_id_fkey|f|FOREIGN KEY (tenant_id) REFERENCES tenants(id)
+order_stock_reservations|order_stock_reservations_order_id_fkey|f|FOREIGN KEY (order_id) REFERENCES orders(id)
+order_stock_reservations|order_stock_reservations_product_id_fkey|f|FOREIGN KEY (product_id) REFERENCES products(id)
+order_stock_reservations|order_stock_reservations_restaurant_id_fkey|f|FOREIGN KEY (restaurant_id) REFERENCES restaurants(id)
+order_stock_reservations|order_stock_reservations_tenant_id_fkey|f|FOREIGN KEY (tenant_id) REFERENCES tenants(id)
+password_change_history|password_change_history_user_id_fkey|f|FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+payments_made|payments_made_bank_account_id_fkey|f|FOREIGN KEY (bank_account_id) REFERENCES bank_accounts_ledger(id)
+payments_made|payments_made_invoice_id_fkey|f|FOREIGN KEY (invoice_id) REFERENCES invoices_supplier(id)
+payments_made|payments_made_journal_entry_id_fkey|f|FOREIGN KEY (journal_entry_id) REFERENCES journal_entries(id)
+payments_made|payments_made_restaurant_id_fkey|f|FOREIGN KEY (restaurant_id) REFERENCES restaurants(id)
+payments_made|payments_made_supplier_id_fkey|f|FOREIGN KEY (supplier_id) REFERENCES suppliers(id)
+payments_made|payments_made_tenant_id_fkey|f|FOREIGN KEY (tenant_id) REFERENCES tenants(id)
+payments_received|payments_received_bank_account_id_fkey|f|FOREIGN KEY (bank_account_id) REFERENCES bank_accounts_ledger(id)
+payments_received|payments_received_customer_id_fkey|f|FOREIGN KEY (customer_id) REFERENCES customers_accounting(id)
+payments_received|payments_received_invoice_id_fkey|f|FOREIGN KEY (invoice_id) REFERENCES invoices_customer(id)
+payments_received|payments_received_journal_entry_id_fkey|f|FOREIGN KEY (journal_entry_id) REFERENCES journal_entries(id)
+payments_received|payments_received_restaurant_id_fkey|f|FOREIGN KEY (restaurant_id) REFERENCES restaurants(id)
+payments_received|payments_received_tenant_id_fkey|f|FOREIGN KEY (tenant_id) REFERENCES tenants(id)
+payments|payments_tenant_id_fkey|f|FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE
+payments|payments_user_id_fkey|f|FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
+performance_reviews|performance_reviews_created_by_fkey|f|FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
+performance_reviews|performance_reviews_employee_id_fkey|f|FOREIGN KEY (employee_id) REFERENCES employees(id) ON DELETE CASCADE
+performance_reviews|performance_reviews_finalized_by_fkey|f|FOREIGN KEY (finalized_by) REFERENCES users(id) ON DELETE SET NULL
+performance_reviews|performance_reviews_restaurant_id_fkey|f|FOREIGN KEY (restaurant_id) REFERENCES restaurants(id) ON DELETE CASCADE
+performance_reviews|performance_reviews_reviewer_id_fkey|f|FOREIGN KEY (reviewer_id) REFERENCES users(id) ON DELETE SET NULL
+performance_reviews|performance_reviews_tenant_id_fkey|f|FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE
+performance_reviews|performance_reviews_updated_by_fkey|f|FOREIGN KEY (updated_by) REFERENCES users(id) ON DELETE SET NULL
+permission_audit_logs|permission_audit_logs_admin_id_fkey|f|FOREIGN KEY (admin_id) REFERENCES users(id) ON DELETE RESTRICT
+permission_audit_logs|permission_audit_logs_module_id_fkey|f|FOREIGN KEY (module_id) REFERENCES modules(id) ON DELETE SET NULL
+permission_audit_logs|permission_audit_logs_role_id_fkey|f|FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE SET NULL
+permission_audit_logs|permission_audit_logs_tenant_id_fkey|f|FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE
+permission_audit_logs|permission_audit_logs_user_id_fkey|f|FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
+product_audit_log|product_audit_log_category_id_fkey|f|FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE SET NULL
+product_audit_log|product_audit_log_changed_by_fkey|f|FOREIGN KEY (changed_by) REFERENCES users(id)
+product_audit_log|product_audit_log_product_id_fkey|f|FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE SET NULL
+product_images|product_images_product_id_fkey|f|FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
+products|products_category_id_fkey|f|FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE SET NULL
+products|products_created_by_fkey|f|FOREIGN KEY (created_by) REFERENCES users(id)
+products|products_restaurant_id_fkey|f|FOREIGN KEY (restaurant_id) REFERENCES restaurants(id) ON DELETE CASCADE
+products|products_tenant_id_fkey|f|FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE
+products|products_updated_by_fkey|f|FOREIGN KEY (updated_by) REFERENCES users(id)
+recurring_journal_templates|recurring_journal_templates_created_by_fkey|f|FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
+recurring_journal_templates|recurring_journal_templates_restaurant_id_fkey|f|FOREIGN KEY (restaurant_id) REFERENCES restaurants(id) ON DELETE CASCADE
+recurring_journal_templates|recurring_journal_templates_tenant_id_fkey|f|FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE
+recurring_journal_templates|recurring_journal_templates_updated_by_fkey|f|FOREIGN KEY (updated_by) REFERENCES users(id) ON DELETE SET NULL
+report_export_audit_logs|report_export_audit_logs_restaurant_id_fkey|f|FOREIGN KEY (restaurant_id) REFERENCES restaurants(id) ON DELETE CASCADE
+report_export_audit_logs|report_export_audit_logs_tenant_id_fkey|f|FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE
+report_export_audit_logs|report_export_audit_logs_user_id_fkey|f|FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+resignations|resignations_created_by_fkey|f|FOREIGN KEY (created_by) REFERENCES users(id)
+resignations|resignations_employee_id_fkey|f|FOREIGN KEY (employee_id) REFERENCES employees(id)
+resignations|resignations_restaurant_id_fkey|f|FOREIGN KEY (restaurant_id) REFERENCES restaurants(id)
+resignations|resignations_tenant_id_fkey|f|FOREIGN KEY (tenant_id) REFERENCES tenants(id)
+resignations|resignations_updated_by_fkey|f|FOREIGN KEY (updated_by) REFERENCES users(id)
+restaurant_config|restaurant_config_restaurant_id_fkey|f|FOREIGN KEY (restaurant_id) REFERENCES restaurants(id) ON DELETE CASCADE
+restaurant_settings|restaurant_settings_restaurant_id_fkey|f|FOREIGN KEY (restaurant_id) REFERENCES restaurants(id) ON DELETE CASCADE
+restaurants|restaurants_tenant_id_fkey|f|FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE
+role_permissions|role_permissions_module_id_fkey|f|FOREIGN KEY (module_id) REFERENCES modules(id) ON DELETE CASCADE
+role_permissions|role_permissions_role_id_fkey|f|FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE CASCADE
+role_permissions|role_permissions_tenant_id_fkey|f|FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE
+roles|roles_created_by_fkey|f|FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
+roles|roles_restaurant_id_fkey|f|FOREIGN KEY (restaurant_id) REFERENCES restaurants(id) ON DELETE CASCADE
+roles|roles_tenant_id_fkey|f|FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE
+roles|roles_updated_by_fkey|f|FOREIGN KEY (updated_by) REFERENCES users(id) ON DELETE SET NULL
+salaries|salaries_approved_by_fkey|f|FOREIGN KEY (approved_by) REFERENCES users(id) ON DELETE SET NULL
+salaries|salaries_created_by_fkey|f|FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
+salaries|salaries_employee_id_fkey|f|FOREIGN KEY (employee_id) REFERENCES employees(id) ON DELETE CASCADE
+salaries|salaries_paid_by_fkey|f|FOREIGN KEY (paid_by) REFERENCES users(id) ON DELETE SET NULL
+salaries|salaries_restaurant_id_fkey|f|FOREIGN KEY (restaurant_id) REFERENCES restaurants(id) ON DELETE CASCADE
+salaries|salaries_tenant_id_fkey|f|FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE
+salaries|salaries_updated_by_fkey|f|FOREIGN KEY (updated_by) REFERENCES users(id) ON DELETE SET NULL
+super_admin_audit_logs|super_admin_audit_logs_super_admin_id_fkey|f|FOREIGN KEY (super_admin_id) REFERENCES super_admins(id)
+super_admins|super_admins_user_id_fkey|f|FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+supplier_payment_schedules|supplier_payment_schedules_created_by_fkey|f|FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
+supplier_payment_schedules|supplier_payment_schedules_restaurant_id_fkey|f|FOREIGN KEY (restaurant_id) REFERENCES restaurants(id) ON DELETE CASCADE
+supplier_payment_schedules|supplier_payment_schedules_supplier_id_fkey|f|FOREIGN KEY (supplier_id) REFERENCES suppliers(id) ON DELETE CASCADE
+supplier_payment_schedules|supplier_payment_schedules_supplier_invoice_id_fkey|f|FOREIGN KEY (supplier_invoice_id) REFERENCES invoices_supplier(id) ON DELETE SET NULL
+supplier_payment_schedules|supplier_payment_schedules_tenant_id_fkey|f|FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE
+supplier_payment_schedules|supplier_payment_schedules_updated_by_fkey|f|FOREIGN KEY (updated_by) REFERENCES users(id) ON DELETE SET NULL
+suppliers|suppliers_payable_account_id_fkey|f|FOREIGN KEY (payable_account_id) REFERENCES chart_of_accounts(id)
+suppliers|suppliers_restaurant_id_fkey|f|FOREIGN KEY (restaurant_id) REFERENCES restaurants(id)
+suppliers|suppliers_tenant_id_fkey|f|FOREIGN KEY (tenant_id) REFERENCES tenants(id)
+tax_periods|tax_periods_closed_by_fkey|f|FOREIGN KEY (closed_by) REFERENCES users(id)
+tax_periods|tax_periods_restaurant_id_fkey|f|FOREIGN KEY (restaurant_id) REFERENCES restaurants(id)
+tax_periods|tax_periods_tenant_id_fkey|f|FOREIGN KEY (tenant_id) REFERENCES tenants(id)
+tenant_memberships|tenant_memberships_identity_id_fkey|f|FOREIGN KEY (identity_id) REFERENCES auth_identities(id)
+tenant_memberships|tenant_memberships_tenant_id_fkey|f|FOREIGN KEY (tenant_id) REFERENCES tenants(id)
+themes|themes_restaurant_id_fkey|f|FOREIGN KEY (restaurant_id) REFERENCES restaurants(id) ON DELETE CASCADE
+themes|themes_tenant_id_fkey|f|FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE
+training_records|training_records_created_by_fkey|f|FOREIGN KEY (created_by) REFERENCES users(id)
+training_records|training_records_employee_id_fkey|f|FOREIGN KEY (employee_id) REFERENCES employees(id)
+training_records|training_records_restaurant_id_fkey|f|FOREIGN KEY (restaurant_id) REFERENCES restaurants(id)
+training_records|training_records_tenant_id_fkey|f|FOREIGN KEY (tenant_id) REFERENCES tenants(id)
+training_records|training_records_updated_by_fkey|f|FOREIGN KEY (updated_by) REFERENCES users(id)
+user_auth_audit_logs|user_auth_audit_logs_tenant_id_fkey|f|FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE SET NULL
+user_auth_audit_logs|user_auth_audit_logs_user_id_fkey|f|FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
+user_roles|user_roles_assigned_by_fkey|f|FOREIGN KEY (assigned_by) REFERENCES users(id) ON DELETE SET NULL
+user_roles|user_roles_role_id_fkey|f|FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE CASCADE
+user_roles|user_roles_tenant_id_fkey|f|FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE
+user_roles|user_roles_user_id_fkey|f|FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+user_settings_audit_log|user_settings_audit_log_changed_by_fkey|f|FOREIGN KEY (changed_by) REFERENCES users(id) ON DELETE SET NULL
+user_settings_audit_log|user_settings_audit_log_user_id_fkey|f|FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+user_settings|user_settings_user_id_fkey|f|FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+users|users_restaurant_id_fkey|f|FOREIGN KEY (restaurant_id) REFERENCES restaurants(id) ON DELETE SET NULL
+users|users_tenant_id_fkey|f|FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE
+website_settings|website_settings_restaurant_id_fkey|f|FOREIGN KEY (restaurant_id) REFERENCES restaurants(id) ON DELETE CASCADE
+website_settings|website_settings_tenant_id_fkey|f|FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE
+account_budgets|account_budgets_pkey|p|PRIMARY KEY (id)
+accounting_event_outbox|accounting_event_outbox_pkey|p|PRIMARY KEY (id)
+accounting_event_redrive_audit|accounting_event_redrive_audit_pkey|p|PRIMARY KEY (id)
+accounting_inventory_movement_events|accounting_inventory_movement_events_pkey|p|PRIMARY KEY (tenant_id, restaurant_id, order_id, product_id)
+attendance|attendance_pkey|p|PRIMARY KEY (id)
+audit_export_logs|audit_export_logs_pkey|p|PRIMARY KEY (id)
+auth_identities|auth_identities_pkey|p|PRIMARY KEY (id)
+auto_posting_rules|auto_posting_rules_pkey|p|PRIMARY KEY (id)
+bank_accounts_ledger|bank_accounts_ledger_pkey|p|PRIMARY KEY (id)
+bank_reconciliation_lines|bank_reconciliation_lines_pkey|p|PRIMARY KEY (id)
+bank_reconciliation_sessions|bank_reconciliation_sessions_pkey|p|PRIMARY KEY (id)
+categories|categories_pkey|p|PRIMARY KEY (id)
+chart_of_accounts|chart_of_accounts_pkey|p|PRIMARY KEY (id)
+customers_accounting|customers_accounting_pkey|p|PRIMARY KEY (id)
+driver_assignments|driver_assignments_pkey|p|PRIMARY KEY (id)
+driver_location_history|driver_location_history_pkey|p|PRIMARY KEY (id)
+drivers|drivers_pkey|p|PRIMARY KEY (id)
+e_invoice_submissions|e_invoice_submissions_pkey|p|PRIMARY KEY (id)
+email_change_requests|email_change_requests_pkey|p|PRIMARY KEY (id)
+employee_roles|employee_roles_pkey|p|PRIMARY KEY (id)
+employees|employees_pkey|p|PRIMARY KEY (id)
+employment_contracts|employment_contracts_pkey|p|PRIMARY KEY (id)
+exchange_rates|exchange_rates_pkey|p|PRIMARY KEY (id)
+fiscal_periods|fiscal_periods_pkey|p|PRIMARY KEY (id)
+fixed_assets|fixed_assets_pkey|p|PRIMARY KEY (id)
+general_ledger|general_ledger_pkey|p|PRIMARY KEY (id)
+homepage_sections|homepage_sections_pkey|p|PRIMARY KEY (id)
+hr_audit_logs|hr_audit_logs_pkey|p|PRIMARY KEY (id)
+identity_email_challenges|identity_email_challenges_pkey|p|PRIMARY KEY (id)
+impersonation_sessions|impersonation_sessions_pkey|p|PRIMARY KEY (id)
+insurance_tracking|insurance_tracking_pkey|p|PRIMARY KEY (id)
+inventory_movements|inventory_movements_pkey|p|PRIMARY KEY (id)
+inventory|inventory_pkey|p|PRIMARY KEY (id)
+invoice_customer_lines|invoice_customer_lines_pkey|p|PRIMARY KEY (id)
+invoice_delivery_logs|invoice_delivery_logs_pkey|p|PRIMARY KEY (id)
+invoice_supplier_lines|invoice_supplier_lines_pkey|p|PRIMARY KEY (id)
+invoices_customer|invoices_customer_pkey|p|PRIMARY KEY (id)
+invoices_supplier|invoices_supplier_pkey|p|PRIMARY KEY (id)
+journal_entries|journal_entries_pkey|p|PRIMARY KEY (id)
+journal_entry_lines|journal_entry_lines_pkey|p|PRIMARY KEY (id)
+kds_queue|kds_queue_pkey|p|PRIMARY KEY (id)
+kds_settings|kds_settings_pkey|p|PRIMARY KEY (id)
+leaves|leaves_pkey|p|PRIMARY KEY (id)
+low_stock_alerts|low_stock_alerts_pkey|p|PRIMARY KEY (id)
+membership_restaurant_grants|membership_restaurant_grants_pkey|p|PRIMARY KEY (id)
+membership_role_grants|membership_role_grants_pkey|p|PRIMARY KEY (id)
+modules|modules_pkey|p|PRIMARY KEY (id)
+notification_preferences|notification_preferences_pkey|p|PRIMARY KEY (id)
+notification_read_tracking|notification_read_tracking_pkey|p|PRIMARY KEY (id)
+notifications|notifications_pkey|p|PRIMARY KEY (id)
+order_item_cancellations|order_item_cancellations_pkey|p|PRIMARY KEY (tenant_id, restaurant_id, order_id, request_key)
+order_items|order_items_pkey|p|PRIMARY KEY (id)
+order_status_history|order_status_history_pkey|p|PRIMARY KEY (id)
+order_stock_reservations|order_stock_reservations_pkey|p|PRIMARY KEY (order_id, product_id)
+orders|orders_pkey|p|PRIMARY KEY (id)
+password_change_history|password_change_history_pkey|p|PRIMARY KEY (id)
+payments_made|payments_made_pkey|p|PRIMARY KEY (id)
+payments|payments_pkey|p|PRIMARY KEY (id)
+payments_received|payments_received_pkey|p|PRIMARY KEY (id)
+performance_reviews|performance_reviews_pkey|p|PRIMARY KEY (id)
+permission_audit_logs|permission_audit_logs_pkey|p|PRIMARY KEY (id)
+permission_levels|permission_levels_pkey|p|PRIMARY KEY (id)
+product_audit_log|product_audit_log_pkey|p|PRIMARY KEY (id)
+product_images|product_images_pkey|p|PRIMARY KEY (id)
+products|products_pkey|p|PRIMARY KEY (id)
+recurring_journal_templates|recurring_journal_templates_pkey|p|PRIMARY KEY (id)
+report_export_audit_logs|report_export_audit_logs_pkey|p|PRIMARY KEY (id)
+resignations|resignations_pkey|p|PRIMARY KEY (id)
+restaurant_config|restaurant_config_pkey|p|PRIMARY KEY (id)
+restaurant_settings|restaurant_settings_pkey|p|PRIMARY KEY (id)
+restaurant_tables|restaurant_tables_pkey|p|PRIMARY KEY (id)
+restaurant_themes|restaurant_themes_pkey|p|PRIMARY KEY (id)
+restaurants|restaurants_pkey|p|PRIMARY KEY (id)
+role_permissions|role_permissions_pkey|p|PRIMARY KEY (id)
+roles|roles_pkey|p|PRIMARY KEY (id)
+salaries|salaries_pkey|p|PRIMARY KEY (id)
+schema_migrations|schema_migrations_pkey|p|PRIMARY KEY (version)
+subscription_plans|subscription_plans_pkey|p|PRIMARY KEY (id)
+super_admin_audit_logs|super_admin_audit_logs_pkey|p|PRIMARY KEY (id)
+super_admins|super_admins_pkey|p|PRIMARY KEY (id)
+supplier_payment_schedules|supplier_payment_schedules_pkey|p|PRIMARY KEY (id)
+suppliers|suppliers_pkey|p|PRIMARY KEY (id)
+table_layouts|table_layouts_pkey|p|PRIMARY KEY (id)
+tax_periods|tax_periods_pkey|p|PRIMARY KEY (id)
+tenant_memberships|tenant_memberships_pkey|p|PRIMARY KEY (id)
+tenant_subscription_history|tenant_subscription_history_pkey|p|PRIMARY KEY (id)
+tenants|tenants_pkey|p|PRIMARY KEY (id)
+theme_components|theme_components_pkey|p|PRIMARY KEY (id)
+theme_history|theme_history_pkey|p|PRIMARY KEY (id)
+theme_presets|theme_presets_pkey|p|PRIMARY KEY (id)
+theme_sections|theme_sections_pkey|p|PRIMARY KEY (id)
+theme_snapshots|theme_snapshots_pkey|p|PRIMARY KEY (id)
+themes|themes_pkey|p|PRIMARY KEY (id)
+themes_v2|themes_v2_pkey|p|PRIMARY KEY (id)
+training_records|training_records_pkey|p|PRIMARY KEY (id)
+user_auth_audit_logs|user_auth_audit_logs_pkey|p|PRIMARY KEY (id)
+user_roles|user_roles_pkey|p|PRIMARY KEY (id)
+user_settings_audit_log|user_settings_audit_log_pkey|p|PRIMARY KEY (id)
+user_settings|user_settings_pkey|p|PRIMARY KEY (id)
+users|users_pkey|p|PRIMARY KEY (id)
+webhook_retry_queue|webhook_retry_queue_pkey|p|PRIMARY KEY (id)
+website_settings|website_settings_pkey|p|PRIMARY KEY (id)
+account_budgets|account_budgets_tenant_id_restaurant_id_account_id_fiscal_y_key|u|UNIQUE (tenant_id, restaurant_id, account_id, fiscal_year, period_month)
+accounting_event_outbox|accounting_event_outbox_event_id_key|u|UNIQUE (event_id)
+chart_of_accounts|chart_of_accounts_tenant_id_restaurant_id_account_code_key|u|UNIQUE (tenant_id, restaurant_id, account_code)
+customers_accounting|customers_accounting_tenant_id_restaurant_id_customer_code_key|u|UNIQUE (tenant_id, restaurant_id, customer_code)
+driver_assignments|driver_assignments_order_id_driver_id_status_key|u|UNIQUE (order_id, driver_id, status)
+drivers|drivers_email_key|u|UNIQUE (email)
+drivers|drivers_license_number_key|u|UNIQUE (license_number)
+email_change_requests|email_change_requests_verification_token_key|u|UNIQUE (verification_token)
+employment_contracts|employment_contracts_tenant_id_restaurant_id_contract_numbe_key|u|UNIQUE (tenant_id, restaurant_id, contract_number)
+exchange_rates|exchange_rates_tenant_id_restaurant_id_base_currency_quote__key|u|UNIQUE (tenant_id, restaurant_id, base_currency, quote_currency, effective_date)
+fiscal_periods|fiscal_periods_tenant_id_restaurant_id_period_name_key|u|UNIQUE (tenant_id, restaurant_id, period_name)
+fixed_assets|fixed_assets_tenant_id_restaurant_id_asset_code_key|u|UNIQUE (tenant_id, restaurant_id, asset_code)
+identity_email_challenges|identity_email_challenges_token_hash_key|u|UNIQUE (token_hash)
+impersonation_sessions|impersonation_sessions_impersonation_token_key|u|UNIQUE (impersonation_token)
+insurance_tracking|insurance_tracking_tenant_id_restaurant_id_policy_number_key|u|UNIQUE (tenant_id, restaurant_id, policy_number)
+journal_entries|journal_entries_tenant_id_restaurant_id_entry_number_key|u|UNIQUE (tenant_id, restaurant_id, entry_number)
+kds_queue|kds_queue_tenant_id_restaurant_id_order_id_key|u|UNIQUE (tenant_id, restaurant_id, order_id)
+kds_settings|kds_settings_tenant_id_restaurant_id_key|u|UNIQUE (tenant_id, restaurant_id)
+modules|modules_name_key|u|UNIQUE (name)
+notification_preferences|notification_preferences_user_id_key|u|UNIQUE (user_id)
+notification_read_tracking|notification_read_tracking_user_id_notification_id_key|u|UNIQUE (user_id, notification_id)
+orders|orders_order_number_key|u|UNIQUE (order_number)
+payments|payments_merchant_order_id_key|u|UNIQUE (merchant_order_id)
+permission_levels|permission_levels_name_key|u|UNIQUE (name)
+permission_levels|permission_levels_value_key|u|UNIQUE (value)
+recurring_journal_templates|recurring_journal_templates_tenant_id_restaurant_id_templat_key|u|UNIQUE (tenant_id, restaurant_id, template_code)
+restaurant_config|restaurant_config_restaurant_id_key|u|UNIQUE (restaurant_id)
+restaurant_settings|restaurant_settings_restaurant_id_key|u|UNIQUE (restaurant_id)
+restaurants|restaurants_tenant_id_slug_key|u|UNIQUE (tenant_id, slug)
+role_permissions|role_permissions_tenant_id_role_id_module_id_key|u|UNIQUE (tenant_id, role_id, module_id)
+super_admins|super_admins_user_id_key|u|UNIQUE (user_id)
+suppliers|suppliers_tenant_id_restaurant_id_supplier_code_key|u|UNIQUE (tenant_id, restaurant_id, supplier_code)
+tax_periods|tax_periods_tenant_id_restaurant_id_period_name_key|u|UNIQUE (tenant_id, restaurant_id, period_name)
+tenant_memberships|tenant_memberships_legacy_user_id_key|u|UNIQUE (legacy_user_id)
+tenants|tenants_domain_key|u|UNIQUE (domain)
+tenants|tenants_name_key|u|UNIQUE (name)
+tenants|tenants_slug_key|u|UNIQUE (slug)
+theme_presets|theme_presets_slug_key|u|UNIQUE (slug)
+themes|themes_restaurant_id_key|u|UNIQUE (restaurant_id)
+theme_history|uk_theme_history_theme_version|u|UNIQUE (theme_id, version)
+themes_v2|uk_themes_v2_restaurant_slug|u|UNIQUE (restaurant_id, slug)
+attendance|unique_employee_attendance_date|u|UNIQUE (employee_id, attendance_date)
+employees|unique_employee_code_per_tenant|u|UNIQUE (tenant_id, employee_code)
+employees|unique_employee_email_per_tenant|u|UNIQUE (tenant_id, email)
+salaries|unique_employee_salary_period|u|UNIQUE (employee_id, pay_period_start, pay_period_end)
+restaurant_themes|unique_restaurant_theme|u|UNIQUE (restaurant_id, tenant_id)
+roles|unique_role_code_per_tenant|u|UNIQUE (tenant_id, role_code)
+roles|unique_role_name_per_tenant|u|UNIQUE (tenant_id, restaurant_id, role_name)
+accounting_event_outbox|uq_accounting_event_order|u|UNIQUE (event_type, tenant_id, restaurant_id, order_id)
+auth_identities|uq_auth_identities_id_email|u|UNIQUE (id, normalized_email)
+auto_posting_rules|uq_auto_posting_rule|u|UNIQUE (tenant_id, restaurant_id, rule_code)
+bank_accounts_ledger|uq_bank_accounts_unique_number|u|UNIQUE (tenant_id, restaurant_id, account_number)
+invoices_customer|uq_customer_invoice_number|u|UNIQUE (tenant_id, restaurant_id, invoice_number)
+membership_restaurant_grants|uq_membership_restaurant_grant_scope|u|UNIQUE (membership_id, tenant_id, restaurant_id)
+membership_role_grants|uq_membership_role_grant_scope|u|UNIQUE (membership_id, tenant_id, restaurant_id, role_id)
+payments_made|uq_payment_made_number|u|UNIQUE (tenant_id, restaurant_id, payment_number)
+payments_received|uq_payment_received_number|u|UNIQUE (tenant_id, restaurant_id, payment_number)
+restaurant_tables|uq_restaurant_tables_number|u|UNIQUE (restaurant_id, table_number)
+invoices_supplier|uq_supplier_invoice_number|u|UNIQUE (tenant_id, restaurant_id, invoice_number)
+tenant_memberships|uq_tenant_memberships_id_tenant|u|UNIQUE (id, tenant_id)
+tenant_memberships|uq_tenant_memberships_identity_tenant|u|UNIQUE (identity_id, tenant_id)
+user_roles|user_roles_tenant_id_user_id_role_id_key|u|UNIQUE (tenant_id, user_id, role_id)
+user_settings|user_settings_user_id_key|u|UNIQUE (user_id)
+users|users_tenant_id_email_key|u|UNIQUE (tenant_id, email)
+website_settings|website_settings_restaurant_id_key|u|UNIQUE (restaurant_id)

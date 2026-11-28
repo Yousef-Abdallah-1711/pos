@@ -1,5 +1,19 @@
 # Interactive landing implementation progress
 
+## Application appearance expansion — discovery in progress (2026-11-27)
+
+The subsequent approved brief expands the scope to application-wide Coral branding, tenant-scoped persisted appearance, capture regeneration, and full regression. Status: IN PROGRESS; no production migration or tenant settings changes have been made. The current worktree also contains the unmerged operational bento/showcase work below and unrelated local edits; preserve both.
+
+Initial verified inventory: dashboard `src/app/globals.css` defines blue `--primary-*` shades and gray body surfaces; `tailwind.config.js` maps primary, secondary, and accent utilities to those variables. `src/stores/preferencesStore.ts` writes color shades onto the document, and `src/components/layout/DashboardLayout.tsx` loads user-specific colors with a blue fallback. `backend/migrations/040_create_user_settings.sql` stores user-level theme and colors, so this preference cannot serve as tenant-level workspace configuration. Existing restaurant theme endpoints and theme-builder code concern a separate restaurant/storefront theme scope; inspect their ownership and authorization before reuse. Existing dashboard components also use many hardcoded `blue-*` utilities, requiring classification rather than a global replacement. Existing user preferences and storefront branding must be preserved.
+
+Further ownership finding: `src/app/[locale]/dashboard/settings/appearance/page.tsx` currently saves personal colors and then calls `syncBrandColorsToActiveTheme`, modifying the active website theme. This existing coupling conflicts with the new requirement to keep tenant workspace appearance and storefront branding independent. A safe migration must account for it explicitly and preserve existing stored themes. The settings repository uses tenant-scoped transactions; migration `165_rls_user_settings.sql` enforces tenant ownership through the users table. A new tenant-level configuration must provide equivalent RLS, authorization, concurrency, and audit guarantees rather than relying on the user settings table.
+
+Next: map tenant context, database transaction/RLS conventions, permission checks, appearance page and preference precedence; capture a real dashboard baseline; design and implement validated workspace-specific persistence and its tests before changing runtime token ownership. The full requested rebrand, isolation verification, screenshot regeneration, and engineering gates remain NOT STARTED.
+
+## 2026-11-27 operational bento and showcase revision
+
+The two supplemental directives are implemented on `feature/servio-bento-showcase-20261127` in the same worktree. The old three-card `.cv-problem-grid` is gone; `OperationalBento.tsx` provides the asymmetrical product evidence, local illustrative steps, and order-story bridge. `FeatureShowcase.tsx` now pins only a viewport-fitted stage beneath the measured header, while the introduction scrolls normally. At ≤900px, <760px height, or reduced motion, it uses native horizontal scrolling. The current architecture, measurements, file map, browser matrix, and release status are in `operational-bento-showcase-report.md`. The earlier completed work below remains intact.
+
 Updated 2026-11-27. Worktree: `C:/Users/Yousef/Desktop/Projects/POSS`. The user's attached 43-section brief is the approved scope. Landing changes are being integrated through a pull request in this same worktree; unrelated edits are preserved. No deployment was performed.
 
 ## Completed

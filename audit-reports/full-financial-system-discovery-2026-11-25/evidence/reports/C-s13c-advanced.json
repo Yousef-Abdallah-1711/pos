@@ -1,0 +1,30 @@
+{
+ "text": "POS Dashboard\nDashboard\nCashier POS\nKitchen Display\nOrders\nProducts\nHuman Resources\nAccounting\nSuppliers\nFinancial Reports\nReports\nTheme Builder\nSettings\nEnglish\nA\n\nAudit Owner C\n\nOwner\n\nAdvanced Financial Insights\n\nPhase 8 analytics + Phase 9 compliance export center.\n\nExport Audit CSV\nExport Social Insurance CSV\nRefresh\nFailed to generate menu profitability\nClick refresh to load the advanced reports.",
+ "calls": [
+  {
+   "u": "/reports/financial/menu-profitability?date_from=2026-10-27&date_to=2026-11-25&limit=10",
+   "s": 500,
+   "body": "{\"error\":\"Failed to generate menu profitability\",\"success\":false}\n"
+  },
+  {
+   "u": "/reports/financial/kpis?date_from=2026-10-27&date_to=2026-11-25",
+   "s": 200,
+   "body": "{\"data\":{\"expense_breakdown\":[{\"amount\":8000,\"label\":\"cogs\"},{\"amount\":5000,\"label\":\"payroll\"},{\"amount\":3000,\"label\":\"occupancy\"}],\"generated_at\":\"2026-11-25T22:52:25.716395832Z\",\"revenue_trend\":[{\"month\":\"2026-11\",\"revenue\":22000}],\"summary\":{\"cash_position\":0,\"expenses\":16000,\"net_profit\":6000,\"revenue\":22000}},\"success\":true}\n"
+  },
+  {
+   "u": "/reports/financial/break-even?date_from=2026-10-27&date_to=2026-11-25",
+   "s": 500,
+   "body": "{\"error\":\"Failed to generate break-even analysis\",\"success\":false}\n"
+  },
+  {
+   "u": "/reports/financial/predictive-cash-flow?history_months=6&forecast_months=3",
+   "s": 200,
+   "body": "{\"data\":{\"assumptions\":{\"average_net_cash\":-2500,\"forecast_months\":3,\"history_months\":6,\"trend_slope\":-3000},\"forecast\":[{\"month\":\"2026-12\",\"projected_net_cash\":-14250},{\"month\":\"2027-01\",\"projected_net_cash\":-17250},{\"month\":\"2027-02\",\"projected_net_cash\":-20250}],\"generated_at\":\"2026-11-25T22:52:25.729849966Z\",\"history\":[{\"cash_in\":0,\"cash_out\":0,\"month\":\"2026-06\",\"net_cash\":0},{\"cash_in\":0,\"cash_out\":0,\"month\":\"2026-07\",\"net_cash\":0},{\"cash_in\":0,\"cash_out\":0,\"month\":\"2026-08\",\"net_cash\":0},{\"cash_in\":0,\"cash_out\":0,\"month\":\"2026-09\",\"net_cash\":0},{\"cash_in\":0,\"cash_out\":0,\"month\":\"2026-10\",\"net_cash\":0},{\"cash_in\":7000,\"cash_out\":22000,\"month\":\"2026-11\",\"net_cash\":-15000}]},\"success\":true}\n"
+  },
+  {
+   "u": "/reports/hr/cost-analysis?date_from=2026-10-27&date_to=2026-11-25",
+   "s": 200,
+   "body": "{\"data\":{\"by_department\":[],\"generated_at\":\"2026-11-25T22:52:25.748326797Z\",\"summary\":{\"estimated_insurance_cost\":0,\"labor_cost_pct_of_revenue\":0,\"overtime_cost\":0,\"payroll_cost\":0,\"revenue\":22000,\"total_hr_cost\":0}},\"success\":true}\n"
+  }
+ ]
+}

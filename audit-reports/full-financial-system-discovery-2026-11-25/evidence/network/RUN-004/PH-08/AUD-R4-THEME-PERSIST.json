@@ -1,0 +1,76 @@
+{
+ "run": "RUN-004",
+ "tenant": 4,
+ "themeId": "13",
+ "log": [
+  {
+   "k": "P1",
+   "desc": "save primary colour \"not-a-color\"",
+   "calls": [],
+   "persisted": false,
+   "snippet": "primary\": \"#ff0000\", \"secondary\": \"#6366f1\", \"background\": \"#ffffff\"}, \"footer\":"
+  },
+  {
+   "k": "P2",
+   "desc": "save primary colour \"url(javascript:alert(1))\"",
+   "calls": [],
+   "persisted": false,
+   "snippet": "primary\": \"#ff0000\", \"secondary\": \"#6366f1\", \"background\": \"#ffffff\"}, \"footer\":"
+  },
+  {
+   "k": "P3",
+   "desc": "save primary colour \"#ff0000\"",
+   "calls": [
+    "PUT /admin/themes/13 200 {\"id\":13,\"tenant_id\":4,\"restaurant_id\":4,\"name\":\"Default Theme (Copy)\",\"slug\":\"d"
+   ],
+   "persisted": true,
+   "snippet": "primary\": \"#ff0000\", \"secondary\": \"#6366f1\", \"background\": \"#ffffff\"}, \"footer\":"
+  },
+  {
+   "k": "A1",
+   "desc": "activated",
+   "active": "11:true 4:false 13:false"
+  },
+  {
+   "k": "A2",
+   "desc": "storefront in Chrome while the edited copy is active",
+   "vars": [
+    "--primary=221 83% 53%",
+    "--color-primary=",
+    "--theme-primary=221 83% 53%",
+    "--primary-color="
+   ],
+   "btnBg": "rgba(0, 0, 0, 0)",
+   "title": "Restaurant | Order Online",
+   "len": 320
+  },
+  {
+   "k": "R1",
+   "desc": "restore Default Theme active",
+   "active": "11:false 4:true 13:false"
+  }
+ ],
+ "calls": [
+  {
+   "m": "PUT",
+   "u": "/admin/themes/13",
+   "s": 200,
+   "req": "{\"name\":\"Default Theme (Copy)\",\"slug\":\"default-theme-copy-1795749476\",\"description\":\"Default theme for Audit C Diagnostic\",\"colors\":{\"primary\":\"#ff0000\",\"secondary\":\"#6366f1\",\"accent\":\"#10b981\",\"background\":\"#ffffff\",\"text\":\"#1f2937\",\"border\":\"#e5e7eb\",\"shadow\":\"#000000\"},\"typography\":{\"fontFamily\":",
+   "b": "{\"id\":13,\"tenant_id\":4,\"restaurant_id\":4,\"name\":\"Default Theme (Copy)\",\"slug\":\"default-theme-copy-1795749476\",\"config\":{\"colors\":{\"primary\":\"#ff0000\",\"secondary\":\"#6366f1\",\"accent\":\"#10b981\",\"backgrou"
+  },
+  {
+   "m": "POST",
+   "u": "/admin/themes/11/activate",
+   "s": 200,
+   "req": "",
+   "b": "{\"message\":\"theme activated successfully\"}"
+  },
+  {
+   "m": "POST",
+   "u": "/admin/themes/4/activate",
+   "s": 200,
+   "req": "",
+   "b": "{\"message\":\"theme activated successfully\"}"
+  }
+ ]
+}

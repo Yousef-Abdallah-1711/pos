@@ -1,5 +1,12 @@
 > Archived generator scaffold. For the implemented homepage, use `.gsap/current-state.md`, `DESIGN.md`, and `docs/landing-handoff.md`. This scaffold contains unverified guesses.
 
+## Current audit, 2026-11-27
+
+- The old `.cv-problem-grid` showed three identical text cards and no product evidence. It has been removed; the asymmetric bento uses the existing four-way capture matrix and local illustrative states.
+- In Chrome at 1440×900, the old showcase pinned the whole section at 78px. Its slide ran from 441px to 1083px, below the 900px viewport. The heading and 124px section padding consumed usable height. The new pin target is only `.cv-showcase-stage`; it measured 90px to 889px at the same viewport, with one spacer and a fully contained first slide.
+- The old active counter rounded global ScrollTrigger progress. The new counter finds the nearest measured slide offset. The last slide and reverse travel are included in browser checks.
+- Remaining release checks: clean production build, full route smoke, CI, and PR merge. The host `form-foundation/node_modules` links are damaged and block host typecheck/lint/auth routes; use the clean container build for final integration evidence.
+
 # Animation Audit Report - landing
 
 ## Workflow State
