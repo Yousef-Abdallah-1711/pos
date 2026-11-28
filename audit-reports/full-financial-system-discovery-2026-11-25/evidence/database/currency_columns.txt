@@ -1,0 +1,16 @@
+account_budgets|currency|'EGP'::character varying
+bank_accounts_ledger|currency|'EGP'::character varying
+chart_of_accounts|currency|'EGP'::character varying
+customers_accounting|currency|'EGP'::character varying
+employees|salary_currency|'EGP'::character varying
+employment_contracts|currency|'EGP'::character varying
+exchange_rates|base_currency|
+exchange_rates|quote_currency|
+invoices_customer|currency|'EGP'::character varying
+invoices_supplier|currency|'EGP'::character varying
+payments|currency|'EGP'::character varying
+salaries|currency|'EGP'::character varying
+subscription_plans|currency|'EGP'::character varying
+supplier_payment_schedules|currency|'EGP'::character varying
+suppliers|currency|'EGP'::character varying
+tenants|last_payment_currency|'EGP'::character varying

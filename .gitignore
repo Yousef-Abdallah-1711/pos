@@ -83,3 +83,6 @@ __pycache__/
 /backend/pos-api.exe
 /backend/pos-api
 /backend/app
+
+# local browser-test scratch output (contains localhost scripts; keep out of CI guardrail)
+frontend/apps/landing/test-results/

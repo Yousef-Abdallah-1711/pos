@@ -1,0 +1,25 @@
+AUD-REV-TRACE tenant 4 isolated DB EGP 2026-11-26T19:53:28Z window 2026-10-28..2026-11-26
+Reports (headed Chrome, AUD-MET-OPS.json): Sales total_revenue 517,000 (36 orders, all_except_cancelled); Profitability total_revenue 470,000, COGS 188,000; Overview mirrors both.
+  status   | payment_status | n  | subtotal  |   tax    | discount |   total   
+-----------+----------------+----+-----------+----------+----------+-----------
+ cancelled | pending        |  1 |  10000.00 |  1000.00 |     0.00 |  11000.00
+ confirmed | paid           |  6 | 170000.00 | 17000.00 |     0.00 | 187000.00
+ confirmed | pending        | 13 | 130000.00 | 13000.00 |     0.00 | 143000.00
+ pending   | paid           | 10 | 100000.00 | 10000.00 |     0.00 | 110000.00
+ pending   | pending        |  5 |  50000.00 |  5000.00 |     0.00 |  55000.00
+ preparing | paid           |  1 |  10000.00 |  1000.00 |     0.00 |  11000.00
+ ready     | paid           |  1 |  10000.00 |  1000.00 |     0.00 |  11000.00
+(7 rows)
+
+                 k                  |    sum    
+------------------------------------+-----------
+ sum(total) non-cancelled           | 517000.00
+ sum(subtotal) non-cancelled        | 470000.00
+ sum(subtotal) paid                 | 290000.00
+ sum(subtotal) unpaid non-cancelled | 180000.00
+ sum(tax) non-cancelled             |  47000.00
+(5 rows)
+
+GL 4100 from order journals (reference_type=order): 290,000 ; customer_invoice: 11,700 ; total 301,700
+BRIDGE (policy-neutral): Sales 517,000 - tax 47,000 = 470,000 = Profitability. 470,000 - unpaid orders 180,000 (13 confirmed + 5 pending, payment_status pending) = 290,000 = GL 4100 order revenue (posted at payment). Cancelled order 1 (10,000 net / 11,000 gross) excluded from all three. No discounts, no refunds in dataset (discount sum 0).
+POLICY NOT SELECTED: Sales report = gross incl. tax and unpaid (order-taking basis); Profitability = net of tax, unpaid included (order basis); GL = net, paid only (cash/payment-recognition basis). Decision required in 56 (revenue recognition basis).

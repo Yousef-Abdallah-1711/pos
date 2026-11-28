@@ -1,0 +1,43 @@
+{
+ "run": "RUN-003",
+ "out": {
+  "before": {
+   "auth": {
+    "status": 200,
+    "ms": 68
+   },
+   "health": {
+    "status": 200,
+    "ms": 10
+   }
+  },
+  "during": {
+   "auth": {
+    "error": "TimeoutError",
+    "ms": 30003
+   },
+   "health": {
+    "status": 200,
+    "ms": 6
+   },
+   "publicMenu": {
+    "status": 200,
+    "ms": 11
+   },
+   "loginAttempt": {
+    "error": "TimeoutError",
+    "ms": 30005
+   }
+  },
+  "after": {
+   "auth": {
+    "status": 401,
+    "ms": 40
+   },
+   "health": {
+    "status": 200,
+    "ms": 53
+   }
+  }
+ }
+}

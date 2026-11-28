@@ -1,0 +1,11 @@
+import { login, EV, DASH, netLog } from './lib.mjs';
+const { b, ctx } = await login('audit.c.owner@example.test', 'C');
+const p = await ctx.newPage(); const net = []; netLog(p, net);
+await p.goto(DASH + '/en/dashboard/accounting/journal-entries', { waitUntil: 'networkidle' }); await p.waitForTimeout(2500);
+console.log((await p.locator('body').innerText()).replace(/\n+/g, ' | ').slice(0, 500));
+const btns = await p.$$eval('button', els => els.map(e => (e.innerText || '').trim().slice(0, 30)).filter(Boolean)); console.log('BTN', btns.join(' || '));
+await p.click('button:has-text("New")').catch(async () => { await p.click('button:has-text("Create")').catch(() => {}); }); await p.waitForTimeout(1500);
+console.log((await p.locator('body').innerText()).replace(/\n+/g, ' | ').slice(0, 1200));
+const f = await p.$$eval('input,select,textarea,button', els => els.map(e => `${e.tagName}[${e.type}] name=${e.name} id=${e.id} ph=${e.placeholder} txt=${(e.innerText||'').slice(0,20)}`)); console.log(f.join('\n'));
+await p.screenshot({ path: `${EV}/screenshots/je-form.png` });
+await b.close();

@@ -1,0 +1,540 @@
+{
+ "run": "RUN-004",
+ "tenant": 4,
+ "results": [
+  {
+   "target": "employees",
+   "route": "hr/employees",
+   "mode": "empty",
+   "tag": "employeesempty018638",
+   "fieldCount": 6,
+   "fields": [
+    "first_name",
+    "first_name_ar",
+    "last_name",
+    "last_name_ar",
+    "email",
+    "phone"
+   ],
+   "selects": 0,
+   "filled": [],
+   "submitFound": true,
+   "submitDisabled": false,
+   "submitClicked": true,
+   "validationMessages": [],
+   "toast": "",
+   "dialogOpen": true,
+   "url": "/en/dashboard/hr/employees",
+   "invalidFields": 0,
+   "mutations": [],
+   "dbRowDelta": 0
+  },
+  {
+   "target": "employees",
+   "route": "hr/employees",
+   "mode": "invalid",
+   "tag": "employeesinvalid032295",
+   "fieldCount": 6,
+   "fields": [
+    "first_name",
+    "first_name_ar",
+    "last_name",
+    "last_name_ar",
+    "email",
+    "phone"
+   ],
+   "selects": 0,
+   "filled": [
+    "first_name=<b>x</b>'; --",
+    "first_name_ar=<b>x</b>'; --",
+    "last_name=<b>x</b>'; --",
+    "last_name_ar=<b>x</b>'; --",
+    "email=not-an-email",
+    "phone=abc"
+   ],
+   "submitFound": true,
+   "submitDisabled": false,
+   "submitClicked": true,
+   "validationMessages": [],
+   "toast": "",
+   "dialogOpen": true,
+   "url": "/en/dashboard/hr/employees",
+   "invalidFields": 0,
+   "mutations": [],
+   "dbRowDelta": 0
+  },
+  {
+   "target": "employees",
+   "route": "hr/employees",
+   "mode": "arabic",
+   "tag": "employeesarabic046272",
+   "fieldCount": 6,
+   "fields": [
+    "first_name",
+    "first_name_ar",
+    "last_name",
+    "last_name_ar",
+    "email",
+    "phone"
+   ],
+   "selects": 0,
+   "filled": [
+    "first_name=R4 عربي 6272",
+    "first_name_ar=اختبار عربي 6272",
+    "last_name=R4 عربي 6272",
+    "last_name_ar=اختبار عربي 6272",
+    "email=r4.abic046272@example.te",
+    "phone=+201000000777"
+   ],
+   "submitFound": true,
+   "submitDisabled": false,
+   "submitClicked": true,
+   "validationMessages": [
+    "Request failed with status code 500"
+   ],
+   "toast": "Request failed with status code 500 | Request failed with status code 500",
+   "dialogOpen": true,
+   "url": "/en/dashboard/hr/employees",
+   "invalidFields": 0,
+   "mutations": [
+    {
+     "m": "POST",
+     "u": "/hr/employees",
+     "s": 500,
+     "req": "{\"first_name\":\"R4 عربي 6272\",\"first_name_ar\":\"اختبار عربي 6272\",\"last_name\":\"R4 عربي 6272\",\"last_name_ar\":\"اختبار عربي 6272\",\"email\":\"r4.abic046272@example.test\",\"phone\":\"+201000000777\",\"employee_code",
+     "b": "{\"error\":\"Failed to create employee: pq: new row for relation \\\"employees\\\" violates check constraint \\\"positive_working_hours\\\"\",\"success\":false}\n"
+    }
+   ],
+   "dbRowDelta": 0
+  },
+  {
+   "target": "employees",
+   "route": "hr/employees",
+   "mode": "long",
+   "tag": "employeeslong060080",
+   "fieldCount": 6,
+   "fields": [
+    "first_name",
+    "first_name_ar",
+    "last_name",
+    "last_name_ar",
+    "email",
+    "phone"
+   ],
+   "selects": 0,
+   "filled": [
+    "first_name=XXXXXXXXXXXXXXXXXXXXXXXX",
+    "first_name_ar=XXXXXXXXXXXXXXXXXXXXXXXX",
+    "last_name=XXXXXXXXXXXXXXXXXXXXXXXX",
+    "last_name_ar=XXXXXXXXXXXXXXXXXXXXXXXX",
+    "email=r4.long060080@example.te",
+    "phone=+201000000777"
+   ],
+   "submitFound": true,
+   "submitDisabled": false,
+   "submitClicked": true,
+   "validationMessages": [
+    "Request failed with status code 400"
+   ],
+   "toast": "",
+   "dialogOpen": true,
+   "url": "/en/dashboard/hr/employees",
+   "invalidFields": 0,
+   "mutations": [
+    {
+     "m": "POST",
+     "u": "/hr/employees",
+     "s": 400,
+     "req": "{\"first_name\":\"XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+     "b": "{\"error\":\"first_name exceeds the maximum length of 100 characters\",\"success\":false}\n"
+    }
+   ],
+   "dbRowDelta": 0
+  },
+  {
+   "target": "employees",
+   "route": "hr/employees",
+   "mode": "valid",
+   "tag": "employeesvalid074042",
+   "fieldCount": 6,
+   "fields": [
+    "first_name",
+    "first_name_ar",
+    "last_name",
+    "last_name_ar",
+    "email",
+    "phone"
+   ],
+   "selects": 0,
+   "filled": [
+    "first_name=R4UI alid074042",
+    "first_name_ar=اختبار 4042",
+    "last_name=R4UI alid074042",
+    "last_name_ar=اختبار 4042",
+    "email=r4.alid074042@example.te",
+    "phone=+201000000777"
+   ],
+   "submitFound": true,
+   "submitDisabled": false,
+   "submitClicked": true,
+   "validationMessages": [
+    "Request failed with status code 500"
+   ],
+   "toast": "",
+   "dialogOpen": true,
+   "url": "/en/dashboard/hr/employees",
+   "invalidFields": 0,
+   "mutations": [
+    {
+     "m": "POST",
+     "u": "/hr/employees",
+     "s": 500,
+     "req": "{\"first_name\":\"R4UI alid074042\",\"first_name_ar\":\"اختبار 4042\",\"last_name\":\"R4UI alid074042\",\"last_name_ar\":\"اختبار 4042\",\"email\":\"r4.alid074042@example.test\",\"phone\":\"+201000000777\",\"employee_code\":\"\"",
+     "b": "{\"error\":\"Failed to create employee: pq: new row for relation \\\"employees\\\" violates check constraint \\\"positive_working_hours\\\"\",\"success\":false}\n"
+    }
+   ],
+   "dbRowDelta": 0
+  },
+  {
+   "target": "leaves",
+   "route": "hr/leaves",
+   "mode": "empty",
+   "tag": "leavesempty087397",
+   "fieldCount": 3,
+   "fields": [
+    "start_date",
+    "end_date",
+    "reason"
+   ],
+   "selects": 3,
+   "filled": [],
+   "submitFound": true,
+   "submitDisabled": false,
+   "submitClicked": true,
+   "validationMessages": [],
+   "toast": "",
+   "dialogOpen": true,
+   "url": "/en/dashboard/hr/leaves",
+   "invalidFields": 0,
+   "mutations": [],
+   "dbRowDelta": 0
+  },
+  {
+   "target": "leaves",
+   "route": "hr/leaves",
+   "mode": "invalid",
+   "tag": "leavesinvalid100976",
+   "fieldCount": 3,
+   "fields": [
+    "start_date",
+    "end_date",
+    "reason"
+   ],
+   "selects": 3,
+   "filled": [
+    "start_date=2026-11-20",
+    "end_date=2026-11-20",
+    "reason=<b>x</b>'; --"
+   ],
+   "submitFound": true,
+   "submitDisabled": false,
+   "submitClicked": true,
+   "validationMessages": [
+    "Request failed with status code 400",
+    "[5:45:09 AM] Error: Request failed with status code 400"
+   ],
+   "toast": "",
+   "dialogOpen": true,
+   "url": "/en/dashboard/hr/leaves",
+   "invalidFields": 0,
+   "mutations": [
+    {
+     "m": "POST",
+     "u": "/hr/leaves",
+     "s": 400,
+     "req": "{\"employee_id\":4,\"start_date\":\"2026-11-20T00:00:00.000Z\",\"end_date\":\"2026-11-20T00:00:00.000Z\",\"leave_type\":\"sick\",\"leave_category\":\"half_day_morning\",\"reason\":\"<b>x</b>'; --\",\"contact_number\":\"\",\"con",
+     "b": "{\"error\":\"Invalid start_date format (expected YYYY-MM-DD)\",\"success\":false}\n"
+    }
+   ],
+   "dbRowDelta": 0
+  },
+  {
+   "target": "leaves",
+   "route": "hr/leaves",
+   "mode": "arabic",
+   "tag": "leavesarabic114808",
+   "fieldCount": 3,
+   "fields": [
+    "start_date",
+    "end_date",
+    "reason"
+   ],
+   "selects": 3,
+   "filled": [
+    "start_date=2026-11-20",
+    "end_date=2026-11-20",
+    "reason=R4 عربي 4808"
+   ],
+   "submitFound": true,
+   "submitDisabled": false,
+   "submitClicked": true,
+   "validationMessages": [
+    "Request failed with status code 400",
+    "[5:45:23 AM] Error: Request failed with status code 400"
+   ],
+   "toast": "",
+   "dialogOpen": true,
+   "url": "/en/dashboard/hr/leaves",
+   "invalidFields": 0,
+   "mutations": [
+    {
+     "m": "POST",
+     "u": "/hr/leaves",
+     "s": 400,
+     "req": "{\"employee_id\":4,\"start_date\":\"2026-11-20T00:00:00.000Z\",\"end_date\":\"2026-11-20T00:00:00.000Z\",\"leave_type\":\"sick\",\"leave_category\":\"half_day_morning\",\"reason\":\"R4 عربي 4808\",\"contact_number\":\"\",\"cont",
+     "b": "{\"error\":\"Invalid start_date format (expected YYYY-MM-DD)\",\"success\":false}\n"
+    }
+   ],
+   "dbRowDelta": 0
+  },
+  {
+   "target": "leaves",
+   "route": "hr/leaves",
+   "mode": "long",
+   "tag": "leaveslong128026",
+   "fieldCount": 3,
+   "fields": [
+    "start_date",
+    "end_date",
+    "reason"
+   ],
+   "selects": 3,
+   "filled": [
+    "start_date=2026-11-20",
+    "end_date=2026-11-20",
+    "reason=XXXXXXXXXXXXXXXXXXXXXXXX"
+   ],
+   "submitFound": true,
+   "submitDisabled": false,
+   "submitClicked": true,
+   "validationMessages": [
+    "Request failed with status code 400",
+    "[5:45:36 AM] Error: Request failed with status code 400"
+   ],
+   "toast": "",
+   "dialogOpen": true,
+   "url": "/en/dashboard/hr/leaves",
+   "invalidFields": 0,
+   "mutations": [
+    {
+     "m": "POST",
+     "u": "/hr/leaves",
+     "s": 400,
+     "req": "{\"employee_id\":4,\"start_date\":\"2026-11-20T00:00:00.000Z\",\"end_date\":\"2026-11-20T00:00:00.000Z\",\"leave_type\":\"sick\",\"leave_category\":\"half_day_morning\",\"reason\":\"XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+     "b": "{\"error\":\"Invalid start_date format (expected YYYY-MM-DD)\",\"success\":false}\n"
+    }
+   ],
+   "dbRowDelta": 0
+  },
+  {
+   "target": "leaves",
+   "route": "hr/leaves",
+   "mode": "valid",
+   "tag": "leavesvalid141769",
+   "fieldCount": 3,
+   "fields": [
+    "start_date",
+    "end_date",
+    "reason"
+   ],
+   "selects": 3,
+   "filled": [
+    "start_date=2026-11-20",
+    "end_date=2026-11-20",
+    "reason=R4UI alid141769"
+   ],
+   "submitFound": true,
+   "submitDisabled": false,
+   "submitClicked": true,
+   "validationMessages": [
+    "Request failed with status code 400",
+    "[5:45:50 AM] Error: Request failed with status code 400"
+   ],
+   "toast": "",
+   "dialogOpen": true,
+   "url": "/en/dashboard/hr/leaves",
+   "invalidFields": 0,
+   "mutations": [
+    {
+     "m": "POST",
+     "u": "/hr/leaves",
+     "s": 400,
+     "req": "{\"employee_id\":4,\"start_date\":\"2026-11-20T00:00:00.000Z\",\"end_date\":\"2026-11-20T00:00:00.000Z\",\"leave_type\":\"sick\",\"leave_category\":\"half_day_morning\",\"reason\":\"R4UI alid141769\",\"contact_number\":\"\",\"c",
+     "b": "{\"error\":\"Invalid start_date format (expected YYYY-MM-DD)\",\"success\":false}\n"
+    }
+   ],
+   "dbRowDelta": 0
+  },
+  {
+   "target": "roles",
+   "route": "rbac/roles",
+   "mode": "empty",
+   "tag": "rolesempty155641",
+   "fieldCount": 2,
+   "fields": [
+    "e.g., Manager, Editor, Viewer",
+    "Describe this role's purpose..."
+   ],
+   "selects": 0,
+   "filled": [],
+   "submitFound": true,
+   "submitDisabled": false,
+   "submitClicked": true,
+   "validationMessages": [],
+   "toast": "",
+   "dialogOpen": true,
+   "url": "/en/dashboard/rbac/roles",
+   "invalidFields": 0,
+   "mutations": [],
+   "dbRowDelta": 0
+  },
+  {
+   "target": "roles",
+   "route": "rbac/roles",
+   "mode": "invalid",
+   "tag": "rolesinvalid168685",
+   "fieldCount": 2,
+   "fields": [
+    "e.g., Manager, Editor, Viewer",
+    "Describe this role's purpose..."
+   ],
+   "selects": 0,
+   "filled": [
+    "text=<b>x</b>'; --",
+    "textarea=<b>x</b>'; --"
+   ],
+   "submitFound": true,
+   "submitDisabled": false,
+   "submitClicked": true,
+   "validationMessages": [],
+   "toast": "",
+   "dialogOpen": false,
+   "url": "/en/dashboard/rbac/roles",
+   "invalidFields": 0,
+   "mutations": [
+    {
+     "m": "POST",
+     "u": "/rbac/roles",
+     "s": 201,
+     "req": "{\"role_name\":\"<b>x</b>'; --\",\"description\":\"<b>x</b>'; --\"}",
+     "b": "{\"data\":{\"id\":42,\"name\":\"\\u003cb\\u003ex\\u003c/b\\u003e'; --\",\"role_name\":\"\\u003cb\\u003ex\\u003c/b\\u003e'; --\",\"role_code\":\"BXB\",\"description\":\"\\u003cb\\u003ex\\u003"
+    }
+   ],
+   "dbRowDelta": 1
+  },
+  {
+   "target": "roles",
+   "route": "rbac/roles",
+   "mode": "arabic",
+   "tag": "rolesarabic182250",
+   "fieldCount": 2,
+   "fields": [
+    "e.g., Manager, Editor, Viewer",
+    "Describe this role's purpose..."
+   ],
+   "selects": 0,
+   "filled": [
+    "text=R4 عربي 2250",
+    "textarea=R4 عربي 2250"
+   ],
+   "submitFound": true,
+   "submitDisabled": false,
+   "submitClicked": true,
+   "validationMessages": [],
+   "toast": "",
+   "dialogOpen": false,
+   "url": "/en/dashboard/rbac/roles",
+   "invalidFields": 0,
+   "mutations": [
+    {
+     "m": "POST",
+     "u": "/rbac/roles",
+     "s": 201,
+     "req": "{\"role_name\":\"R4 عربي 2250\",\"description\":\"R4 عربي 2250\"}",
+     "b": "{\"data\":{\"id\":43,\"name\":\"R4 عربي 2250\",\"role_name\":\"R4 عربي 2250\",\"role_code\":\"R4__2250\",\"description\":\"R4 عربي 2250\",\"is_system\":false,\"created_at\":\"2026-11-27"
+    }
+   ],
+   "dbRowDelta": 1
+  },
+  {
+   "target": "roles",
+   "route": "rbac/roles",
+   "mode": "long",
+   "tag": "roleslong196050",
+   "fieldCount": 2,
+   "fields": [
+    "e.g., Manager, Editor, Viewer",
+    "Describe this role's purpose..."
+   ],
+   "selects": 0,
+   "filled": [
+    "text=XXXXXXXXXXXXXXXXXXXXXXXX",
+    "textarea=XXXXXXXXXXXXXXXXXXXXXXXX"
+   ],
+   "submitFound": true,
+   "submitDisabled": false,
+   "submitClicked": true,
+   "validationMessages": [
+    "Request failed with status code 500"
+   ],
+   "toast": "",
+   "dialogOpen": true,
+   "url": "/en/dashboard/rbac/roles",
+   "invalidFields": 0,
+   "mutations": [
+    {
+     "m": "POST",
+     "u": "/rbac/roles",
+     "s": 500,
+     "req": "{\"role_name\":\"XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+     "b": "{\"error\":\"Failed to create role\"}"
+    }
+   ],
+   "dbRowDelta": 0
+  },
+  {
+   "target": "roles",
+   "route": "rbac/roles",
+   "mode": "valid",
+   "tag": "rolesvalid209652",
+   "fieldCount": 2,
+   "fields": [
+    "e.g., Manager, Editor, Viewer",
+    "Describe this role's purpose..."
+   ],
+   "selects": 0,
+   "filled": [
+    "text=R4UI alid209652",
+    "textarea=R4UI alid209652"
+   ],
+   "submitFound": true,
+   "submitDisabled": false,
+   "submitClicked": true,
+   "validationMessages": [],
+   "toast": "",
+   "dialogOpen": false,
+   "url": "/en/dashboard/rbac/roles",
+   "invalidFields": 0,
+   "mutations": [
+    {
+     "m": "POST",
+     "u": "/rbac/roles",
+     "s": 201,
+     "req": "{\"role_name\":\"R4UI alid209652\",\"description\":\"R4UI alid209652\"}",
+     "b": "{\"data\":{\"id\":44,\"name\":\"R4UI alid209652\",\"role_name\":\"R4UI alid209652\",\"role_code\":\"R4UI_ALID209652\",\"description\":\"R4UI alid209652\",\"is_system\":false,\"created"
+    }
+   ],
+   "dbRowDelta": 1
+  }
+ ]
+}

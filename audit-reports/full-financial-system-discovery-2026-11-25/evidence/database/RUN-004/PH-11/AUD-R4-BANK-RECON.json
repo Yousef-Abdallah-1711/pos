@@ -1,0 +1,75 @@
+{
+ "run": "RUN-004",
+ "kind": "API-DIAGNOSTIC",
+ "tenant": 4,
+ "log": [
+  {
+   "id": "BR-00",
+   "desc": "bank accounts (tenant 4)",
+   "bank": "1|Audit Operating Account|50000.00|71\n2|Audit Savings B|12000.00|72"
+  },
+  {
+   "id": "BR-01",
+   "desc": "bank account reconciliation state before",
+   "bid": 1,
+   "lrBefore": "-|-",
+   "glNote": "ledger balance of the linked GL account is the true book balance"
+  },
+  {
+   "id": "BR-02",
+   "desc": "create session with arbitrary statement balance 123,456.78",
+   "http": 201,
+   "sid": 1,
+   "resp": "{\"data\":{\"id\":1,\"tenant_id\":4,\"restaurant_id\":4,\"bank_account_id\":1,\"statement_date\":\"2026-11-26T00:00:00Z\",\"statement_balance\":123456.78,\"book_balance\":0,\"difference\":123456.78,\"status\":\"draft\",\"notes\":\"RUN-004 probe\",\""
+  },
+  {
+   "id": "BR-03",
+   "desc": "add line with NONEXISTENT journal_entry_id and invented book_amount",
+   "http": 400,
+   "resp": "{\"error\":\"pq: insert or update on table \\\"bank_reconciliation_lines\\\" violates foreign key constraint \\\"bank_reconciliation_lines_journal_entry_id_fkey\\\"\",\"success\":false}"
+  },
+  {
+   "id": "BR-04",
+   "desc": "add line referencing ANOTHER TENANT journal",
+   "http": 200,
+   "foreignJournal": "33",
+   "resp": "{\"data\":{\"id\":1,\"tenant_id\":4,\"restaurant_id\":4,\"bank_account_id\":1,\"statement_date\":\"2026-11-26T00:00:00Z\",\"statement_balance\":123456.78,\"book_balance\":0,\"difference\":123456.78,\"status\":\"in_progress\""
+  },
+  {
+   "id": "BR-05",
+   "desc": "session after lines (book balance from client-supplied amounts?)",
+   "row": "123456.78|0.00|123456.78|in_progress"
+  },
+  {
+   "id": "BR-06",
+   "desc": "complete the session",
+   "http": 200,
+   "resp": "{\"data\":{\"id\":1,\"tenant_id\":4,\"restaurant_id\":4,\"bank_account_id\":1,\"statement_date\":\"2026-11-26T00:00:00Z\",\"statement_balance\":123456.78,\"book_balance\":0,\"difference\":123456.78,\"status\":\"in_progress\"",
+   "session": "in_progress|2026-11-27 02:47:39.034657",
+   "bankAfter": "-|-"
+  },
+  {
+   "id": "BR-07",
+   "desc": "true ledger balance of the bank GL account vs reconciled balance",
+   "gl": "-20500.00"
+  },
+  {
+   "id": "BR-08",
+   "desc": "complete a session with difference <> 0 (no lines)",
+   "http": 200,
+   "session": "in_progress|500.00|2026-11-27 02:47:40.389903"
+  },
+  {
+   "id": "BR-09",
+   "desc": "session for a bank account that does not exist / other tenant",
+   "http": 400,
+   "resp": "{\"error\":\"pq: insert or update on table \\\"bank_reconciliation_sessions\\\" violates foreign key constraint \\\"bank_reconciliation_sessions_bank_account_id_fkey\\\"\",\"success\":false}"
+  },
+  {
+   "id": "DEP-01",
+   "desc": "depreciation capability",
+   "fixed_assets_table_rows": "0",
+   "routes": "no /fixed-assets or /depreciation route registered in cmd/api/main.go (grep asset = 0 hits); PostDepreciationEntries has no caller outside the engine definition"
+  }
+ ]
+}

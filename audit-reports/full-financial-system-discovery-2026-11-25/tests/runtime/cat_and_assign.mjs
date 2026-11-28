@@ -1,0 +1,16 @@
+import { login, EV, DASH, netLog } from './lib.mjs';
+const { b, ctx } = await login('audit.c.owner@example.test', 'C');
+const p = await ctx.newPage(); const net = []; netLog(p, net);
+await p.goto(DASH + '/en/dashboard/categories', { waitUntil: 'networkidle' }); await p.waitForTimeout(2000);
+await p.click('button:has-text("Add Category")'); await p.waitForTimeout(800);
+await p.fill('input[placeholder="e.g., Main Dishes"]', 'Audit Mains');
+await p.click('button:has-text("Create Category")'); await p.waitForTimeout(3000);
+console.log('category:', JSON.stringify(net.filter(x => x.m !== 'GET').map(x => `${x.m} ${x.u} ${x.s} ${x.body.slice(0, 120)}`)));
+net.length = 0;
+await p.goto(DASH + '/en/dashboard/products/2/edit', { waitUntil: 'networkidle' }); await p.waitForTimeout(2500);
+const sel = p.locator('select:has(option:text-is("Audit Mains"))').first();
+await sel.selectOption({ label: 'Audit Mains' });
+await p.click('button:has-text("Update Product"), button:has-text("Save"), button:has-text("Update")'.split(',')[0]).catch(async () => { await p.click('button[type=submit]:has-text("Update"), button[type=submit]:has-text("Save")'); });
+await p.waitForTimeout(3500);
+console.log('product update:', JSON.stringify(net.filter(x => x.m !== 'GET').map(x => `${x.m} ${x.u} ${x.s} ${x.body.slice(0, 150)}`)));
+await b.close();

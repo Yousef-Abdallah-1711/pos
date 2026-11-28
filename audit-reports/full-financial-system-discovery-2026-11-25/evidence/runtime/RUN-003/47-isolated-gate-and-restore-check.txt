@@ -1,0 +1,25 @@
+Thu Nov 26 16:23:30 UTC 2026
+== env
+phase2a-e2e
+enforce
+pos_app
+pos_accounting
+== roles
+postgres|t|t
+pos_migrator|f|f
+pos_app|f|f
+pos_accounting|f|f
+pos_auth_lookup|f|f
+== counts
+tenants|4
+users|6
+orders|34
+journals|54
+gl_lines|115
+migrations|145
+== rls
+20
+== pg_stat_activity users
+pos_accounting|1
+pos_app|2
+postgres|1

@@ -1,0 +1,59 @@
+{
+ "stats": {
+  "active_orders": 42,
+  "avg_prep_minutes": 1648.4457545,
+  "completed_today": 1,
+  "new_orders": 42,
+  "in_progress": 0,
+  "ready": 0
+ },
+ "analytics_overview": {
+  "avg": 917.836527625,
+  "total": 2
+ },
+ "trend_nonzero": [
+  {
+   "date": "2026-11-26",
+   "avg_prep_minutes": 187.22730075,
+   "completed_orders": 1
+  },
+  {
+   "date": "2026-11-27",
+   "avg_prep_minutes": 1648.4457545,
+   "completed_orders": 1
+  }
+ ],
+ "busiest": [
+  {
+   "hour": 1,
+   "order_count": 7
+  },
+  {
+   "hour": 17,
+   "order_count": 4
+  },
+  {
+   "hour": 19,
+   "order_count": 4
+  },
+  {
+   "hour": 20,
+   "order_count": 18
+  },
+  {
+   "hour": 22,
+   "order_count": 11
+  }
+ ],
+ "sql": {
+  "avg_all": "917.8365",
+  "total_completed": "2",
+  "completed_today_utc": "1",
+  "completed_today_cairo": "1",
+  "active": "42",
+  "hours_utc": "1|7\n17|4\n19|4\n20|18\n22|11",
+  "hours_cairo": "0|11\n3|7\n19|4\n21|4\n22|18",
+  "cancelled_orders_still_active": "3",
+  "col_type": "timestamp without time zone"
+ }
+}

@@ -1,0 +1,15 @@
+BEFORE
+invoices|1|2
+journals|52|60
+gl_lines|110|0
+AFTER
+invoices|2|3
+journals|53|61
+gl_lines|113|0
+INVOICE: 3|INV-2026-00002|draft|8000.00|1120.00|8320.00
+JOURNAL: 61|JE-2026-00050|customer_invoice|3|posted|8320.00
+LINES(account|debit|credit):
+1120|8320.00|0.00
+2120|0.00|1120.00
+4100|0.00|7200.00
+ORACLE(EGP): {"subtotal":8000,"discount":800,"base":7200,"tax_discount_first":1008,"total_discount_first":8208,"tax_before_discount":1120}

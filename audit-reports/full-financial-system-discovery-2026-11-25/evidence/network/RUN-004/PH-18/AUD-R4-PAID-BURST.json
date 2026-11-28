@@ -1,0 +1,35 @@
+{
+ "run": "RUN-004",
+ "kind": "API-DIAGNOSTIC",
+ "orders": 600,
+ "order_sums_count_total_subtotal_tax": "600|66000.00|60000.00|6000.00",
+ "expected_revenue_delta": "60000.00",
+ "before": {
+  "journals": 17108,
+  "outbox": "completed:25,retryable:1",
+  "gl_rev": "306930.36"
+ },
+ "burst": {
+  "clients": 50,
+  "ms": 2027,
+  "rps": 296,
+  "codes": {
+   "200": 600
+  },
+  "p50": 147,
+  "p95": 311,
+  "max": 493
+ },
+ "drained": true,
+ "drainMs": 56442,
+ "after": {
+  "paid_now": "600",
+  "order_journals": "613",
+  "orders_with_2plus_journals": "13",
+  "orders_without_journal": "0",
+  "outbox": "completed:625,retryable:1",
+  "unbalanced": "0",
+  "gl_rev": "366930.36",
+  "cash_debit_for_these": "66520.00"
+ }
+}

@@ -1,0 +1,139 @@
+{
+ "run": "RUN-003",
+ "kind": "API-DIAGNOSTIC",
+ "log": [
+  {
+   "id": "MD-P1",
+   "desc": "negative price",
+   "http": 201,
+   "resp": "{\"id\":8,\"tenant_id\":4,\"restaurant_id\":4,\"category_id\":1,\"name_en\":\"MD probe\",\"name_ar\":\"\",\"price\":-5,\"is_vegetarian\":false,\"is_vegan\":false,\"is_spicy\""
+  },
+  {
+   "id": "MD-P2",
+   "desc": "price 0",
+   "http": 201,
+   "resp": "{\"id\":9,\"tenant_id\":4,\"restaurant_id\":4,\"category_id\":1,\"name_en\":\"MD probe\",\"name_ar\":\"\",\"price\":0,\"is_vegetarian\":false,\"is_vegan\":false,\"is_spicy\":"
+  },
+  {
+   "id": "MD-P3",
+   "desc": "price 1e12",
+   "http": 500,
+   "resp": "{\"error\":\"failed to create product: pq: numeric field overflow\"}"
+  },
+  {
+   "id": "MD-P4",
+   "desc": "price 99999999999999999999",
+   "http": 500,
+   "resp": "{\"error\":\"failed to create product: pq: numeric field overflow\"}"
+  },
+  {
+   "id": "MD-P5",
+   "desc": "cost above price (negative margin)",
+   "http": 201,
+   "resp": "{\"id\":10,\"tenant_id\":4,\"restaurant_id\":4,\"category_id\":1,\"name_en\":\"MD probe\",\"name_ar\":\"\",\"price\":10,\"cost\":50,\"is_vegetarian\":false,\"is_vegan\":false"
+  },
+  {
+   "id": "MD-P6",
+   "desc": "negative cost",
+   "http": 201,
+   "resp": "{\"id\":11,\"tenant_id\":4,\"restaurant_id\":4,\"category_id\":1,\"name_en\":\"MD probe\",\"name_ar\":\"\",\"price\":10,\"cost\":-1,\"is_vegetarian\":false,\"is_vegan\":false"
+  },
+  {
+   "id": "MD-P7",
+   "desc": "empty name",
+   "http": 201,
+   "resp": "{\"id\":12,\"tenant_id\":4,\"restaurant_id\":4,\"category_id\":1,\"name_en\":\"\",\"name_ar\":\"\",\"price\":10,\"is_vegetarian\":false,\"is_vegan\":false,\"is_spicy\":false,"
+  },
+  {
+   "id": "MD-P8",
+   "desc": "name 10,000 chars",
+   "http": 500,
+   "resp": "{\"error\":\"failed to create product: pq: value too long for type character varying(255)\"}"
+  },
+  {
+   "id": "MD-P9",
+   "desc": "negative stock",
+   "http": 201,
+   "resp": "{\"id\":13,\"tenant_id\":4,\"restaurant_id\":4,\"category_id\":1,\"name_en\":\"MD probe\",\"name_ar\":\"\",\"price\":10,\"is_vegetarian\":false,\"is_vegan\":false,\"is_spicy"
+  },
+  {
+   "id": "MD-P10",
+   "desc": "duplicate SKU (2nd)",
+   "http": 201,
+   "resp": "{\"id\":14,\"tenant_id\":4,\"restaurant_id\":4,\"category_id\":1,\"sku\":\"DUP-SKU-1\",\"name_en\":\"MD probe\",\"name_ar\":\"\",\"price\":10,\"is_vegetarian\":false,\"is_vega"
+  },
+  {
+   "id": "MD-P11",
+   "desc": "unknown category",
+   "http": 404,
+   "resp": "{\"error\":\"Restaurant or category not found\"}"
+  },
+  {
+   "id": "MD-P12",
+   "desc": "price with 5 decimals",
+   "http": 201,
+   "resp": "{\"id\":15,\"tenant_id\":4,\"restaurant_id\":4,\"category_id\":1,\"name_en\":\"MD probe\",\"name_ar\":\"\",\"price\":10.12345,\"is_vegetarian\":false,\"is_vegan\":false,\"is"
+  },
+  {
+   "id": "MD-P13",
+   "desc": "discount price above price",
+   "http": 201,
+   "resp": "{\"id\":16,\"tenant_id\":4,\"restaurant_id\":4,\"category_id\":1,\"name_en\":\"MD probe\",\"name_ar\":\"\",\"price\":10,\"discount_price\":15,\"is_vegetarian\":false,\"is_ve"
+  },
+  {
+   "id": "MD-P10b",
+   "desc": "duplicate SKU 3rd attempt",
+   "http": 500,
+   "resp": "{\"error\":\"product with this SKU already exists\"}",
+   "count": "1"
+  },
+  {
+   "id": "MD-C1",
+   "desc": "duplicate category name",
+   "http": 201,
+   "resp": "{\"id\":4,\"tenant_id\":4,\"restaurant_id\":4,\"name\":\"Audit Mains\",\"name_ar\":\"\",\"display_order\":0,\"is_active\":false,\"language\":\"\",\"created_by\":0,\"created_at"
+  },
+  {
+   "id": "MD-C2",
+   "desc": "empty category name",
+   "http": 400,
+   "resp": "{\"error\":\"Name is required\"}"
+  },
+  {
+   "id": "MD-S1",
+   "desc": "supplier invalid email/phone",
+   "http": 201,
+   "resp": "{\"data\":{\"id\":4,\"tenant_id\":4,\"restaurant_id\":4,\"supplier_code\":\"SUP-0003\",\"company_name\":\"Bad Email Co\",\"email\":\"not-an-email\",\"phone\":\"x\",\"country\":"
+  },
+  {
+   "id": "MD-S2",
+   "desc": "duplicate supplier name/email",
+   "http": 201,
+   "resp": "{\"data\":{\"id\":5,\"tenant_id\":4,\"restaurant_id\":4,\"supplier_code\":\"SUP-0004\",\"company_name\":\"Audit Supplier B\",\"email\":\"supb@example.test\",\"country\":\"Eg"
+  },
+  {
+   "id": "MD-U1",
+   "desc": "duplicate customer",
+   "http": 201,
+   "resp": "{\"data\":{\"id\":4,\"tenant_id\":4,\"restaurant_id\":4,\"customer_code\":\"CUST-0003\",\"customer_name\":\"Audit Customer B\",\"customer_type\":\"individual\",\"email\":\"c"
+  },
+  {
+   "id": "MD-U2",
+   "desc": "customer invalid email and negative credit limit",
+   "http": 201,
+   "resp": "{\"data\":{\"id\":5,\"tenant_id\":4,\"restaurant_id\":4,\"customer_code\":\"CUST-0004\",\"customer_name\":\"Bad Email\",\"customer_type\":\"individual\",\"email\":\"nope\",\"c"
+  },
+  {
+   "id": "MD-T1",
+   "desc": "duplicate table number",
+   "http": 400,
+   "resp": "{\"error\":\"Invalid request body\"}"
+  },
+  {
+   "id": "MD-T2",
+   "desc": "negative table capacity",
+   "http": 400,
+   "resp": "{\"error\":\"Invalid request body\"}"
+  }
+ ]
+}

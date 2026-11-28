@@ -1,0 +1,6 @@
+p31|1|1|1240|Accumulated Depreciation|asset|credit
+p31|1|1|4150|Sales Discounts|revenue|debit
+p33|2|2|yoseabdallah8666@gmail.com
+coa_per_restaurant|1|1|62
+tenants|2
+restaurants|2

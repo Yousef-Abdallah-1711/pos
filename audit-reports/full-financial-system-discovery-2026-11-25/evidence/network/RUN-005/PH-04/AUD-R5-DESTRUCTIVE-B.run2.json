@@ -1,0 +1,87 @@
+{
+ "run": "RUN-005",
+ "tag": "000R5B19572",
+ "tenant": 4,
+ "log": [
+  {
+   "id": "B2",
+   "what": "delete a disposable category",
+   "fixture": {
+    "id": 8,
+    "name": "000R5B19572 cat",
+    "http": 201
+   },
+   "before": "1|active=true",
+   "row_found": true,
+   "control_found": true,
+   "control_disabled": false,
+   "control_label": "Delete",
+   "dialog": "confirm: Are you sure you want to delete this category?",
+   "calls": [
+    "DELETE /categories/8 200 {\"message\":\"Category deleted successfully\"}"
+   ],
+   "after": "1|active=false"
+  },
+  {
+   "id": "B3",
+   "what": "delete a disposable bank account",
+   "fixture": {
+    "id": 4,
+    "name": "000R5B19572 bank",
+    "http": 201
+   },
+   "before": "1",
+   "row_found": true,
+   "control_found": true,
+   "control_disabled": false,
+   "control_label": "000R5B19572 bank\nR5 Bank\nChecking\nBalanc",
+   "dialog": "",
+   "calls": [],
+   "after": "1"
+  },
+  {
+   "id": "B7",
+   "what": "deactivate a disposable driver",
+   "error": "Command failed: docker exec pos-p2a-ws05-e2e-postgres-1 psql -U postgres -d pos_phase2a_e2e -Atc \"select coalesce(status,'-')||'|'||coalesce"
+  },
+  {
+   "id": "B8",
+   "what": "approve a disposable leave request (created by API because the UI form cannot, F-079)",
+   "error": "Command failed: docker exec pos-p2a-ws05-e2e-postgres-1 psql -U postgres -d pos_phase2a_e2e -Atc \"select status from leaves where id=\""
+  },
+  {
+   "id": "B9",
+   "what": "reject a disposable leave request",
+   "error": "Command failed: docker exec pos-p2a-ws05-e2e-postgres-1 psql -U postgres -d pos_phase2a_e2e -Atc \"select status from leaves where id=\""
+  },
+  {
+   "id": "B10",
+   "what": "complete a disposable resignation (F-069)",
+   "fixture": {
+    "id": 5,
+    "name": "000R5B19572Q",
+    "http": 201,
+    "employee": 10
+   },
+   "before": "acknowledged|employee active|termination -",
+   "row_found": false,
+   "dialog": "",
+   "calls": [],
+   "after": "acknowledged|employee active|termination -"
+  },
+  {
+   "id": "B11",
+   "what": "delete a disposable resignation",
+   "fixture": {
+    "id": 6,
+    "name": "000R5B19572W",
+    "http": 201
+   },
+   "before": "1",
+   "row_found": false,
+   "dialog": "",
+   "calls": [],
+   "after": "1"
+  }
+ ]
+}

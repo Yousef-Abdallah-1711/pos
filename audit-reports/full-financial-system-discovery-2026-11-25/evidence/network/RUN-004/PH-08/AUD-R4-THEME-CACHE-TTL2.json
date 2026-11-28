@@ -1,0 +1,47 @@
+{
+ "run": "RUN-004",
+ "samples": [
+  {
+   "s": 0,
+   "event": "primed before edit",
+   "primary": "#3b82f6",
+   "db13": "#00ff00"
+  },
+  {
+   "s": 0,
+   "event": "activate 13",
+   "http": 200,
+   "primary": "#3b82f6"
+  },
+  {
+   "s": 45,
+   "primary": "#3b82f6",
+   "db13": "#00ff00"
+  },
+  {
+   "s": 91,
+   "primary": "#3b82f6",
+   "db13": "#00ff00"
+  },
+  {
+   "s": 136,
+   "primary": "#3b82f6",
+   "db13": "#00ff00"
+  },
+  {
+   "s": 182,
+   "primary": "#3b82f6",
+   "db13": "#00ff00"
+  },
+  {
+   "s": 227,
+   "primary": "#00ff00",
+   "db13": "#00ff00"
+  },
+  {
+   "event": "restore theme 4",
+   "http": 200,
+   "active": "11:false 4:true 13:false"
+  }
+ ]
+}

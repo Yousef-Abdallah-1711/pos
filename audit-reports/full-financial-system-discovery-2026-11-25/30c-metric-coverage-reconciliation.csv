@@ -1,0 +1,120 @@
+metric_id,report,display_label,runtime_row_in_43,runtime_status,coverage_class,verification_class
+MET-PNL-001,PNL,Total revenue,YES,PASS,MEASURED vs independent value,1 independently verified and correct
+MET-PNL-002,PNL,Revenue line per account,YES,PASS,MEASURED vs independent value (RUN-003),1 independently verified and correct
+MET-PNL-003,PNL,Total expenses,YES,PASS,MEASURED vs independent value,1 independently verified and correct
+MET-PNL-004,PNL,Expense line per account,YES,PASS,MEASURED vs independent value (RUN-003),1 independently verified and correct
+MET-PNL-005,PNL,Net profit,YES,PASS (offsetting vs oracle),MEASURED vs independent value,1 independently verified and correct
+MET-PNL-006,PNL,Comparison % change,YES,PASS,MEASURED vs independent value (RUN-003),1 independently verified and correct
+MET-TB-001,TB,Account debit column,YES,PASS,MEASURED vs independent value (RUN-003),1 independently verified and correct
+MET-TB-002,TB,Account credit column,YES,PASS,MEASURED vs independent value (RUN-003),1 independently verified and correct
+MET-TB-003,TB,Total debits,YES,PASS,MEASURED vs independent value,1 independently verified and correct
+MET-TB-004,TB,Total credits,YES,PASS,MEASURED vs independent value (RUN-003),1 independently verified and correct
+MET-TB-005,TB,Is balanced flag,YES,PASS,MEASURED vs independent value,1 independently verified and correct
+MET-BS-001,BS,Total assets,YES,"PASS vs GL (differs from S13 oracle 114,200 for known causes)",MEASURED vs independent value,1 independently verified and correct
+MET-BS-002,BS,Total liabilities,YES,PASS vs GL,MEASURED vs independent value,1 independently verified and correct
+MET-BS-003,BS,Total equity,YES,FAIL,MEASURED vs independent value,2 independently verified and incorrect
+MET-BS-004,BS,Equation balanced / difference / status,YES,FAIL,MEASURED vs independent value,2 independently verified and incorrect
+MET-BS-005,BS,Account balance row,YES,PASS,MEASURED vs independent value (RUN-003),1 independently verified and correct
+MET-CF-001,CF,Operating cash flow,YES,FAIL,MEASURED vs independent value,2 independently verified and incorrect
+MET-CF-002,CF,Investing cash flow,YES,EXECUTED (RUN-004): FAIL,"MEASURED vs independent value (RUN-004, headed Chrome + SQL)",2 independently verified and incorrect
+MET-CF-003,CF,Financing cash flow,YES,PASS,MEASURED vs independent value,1 independently verified and correct
+MET-CF-004,CF,Net cash flow,YES,FAIL,MEASURED vs independent value,2 independently verified and incorrect
+MET-GL-001,GL,Entry debit / credit,YES,PASS,MEASURED vs independent value (RUN-003),1 independently verified and correct
+MET-GL-002,GL,Running balance (stored),YES,PASS,MEASURED vs independent value (RUN-003),1 independently verified and correct
+MET-GL-003,GL,Account current_balance cache,YES,PASS,MEASURED vs independent value (RUN-003),1 independently verified and correct
+MET-AGE-001,AGE,Receivables aging bucket Current,YES,PASS (see 43; one bucket populated),"MEASURED vs independent value (RUN-003, partial: boundaries untested)",5 policy dependent
+MET-AGE-002,AGE,Receivables aging bucket 1-30,YES,PASS (see 43; one bucket populated),"MEASURED vs independent value (RUN-003, partial: boundaries untested)",3 measured without sufficient independent verification
+MET-AGE-003,AGE,Receivables aging bucket 31-60,YES,PASS (see 43; one bucket populated),"MEASURED vs independent value (RUN-003, partial: boundaries untested)",3 measured without sufficient independent verification
+MET-AGE-004,AGE,Receivables aging bucket 61-90,YES,PASS (see 43; one bucket populated),"MEASURED vs independent value (RUN-003, partial: boundaries untested)",3 measured without sufficient independent verification
+MET-AGE-005,AGE,Receivables aging bucket >90,YES,PASS (see 43; one bucket populated),"MEASURED vs independent value (RUN-003, partial: boundaries untested)",3 measured without sufficient independent verification
+MET-AGE-006,AGE,Payables aging bucket Current,YES,PASS (see 43; one bucket populated),"MEASURED vs independent value (RUN-003, partial: boundaries untested)",3 measured without sufficient independent verification
+MET-AGE-007,AGE,Payables aging bucket 1-30,YES,PASS (see 43; one bucket populated),"MEASURED vs independent value (RUN-003, partial: boundaries untested)",3 measured without sufficient independent verification
+MET-AGE-008,AGE,Payables aging bucket 31-60,YES,PASS (see 43; one bucket populated),"MEASURED vs independent value (RUN-003, partial: boundaries untested)",3 measured without sufficient independent verification
+MET-AGE-009,AGE,Payables aging bucket 61-90,YES,PASS (see 43; one bucket populated),"MEASURED vs independent value (RUN-003, partial: boundaries untested)",3 measured without sufficient independent verification
+MET-AGE-010,AGE,Payables aging bucket >90,YES,PASS (see 43; one bucket populated),"MEASURED vs independent value (RUN-003, partial: boundaries untested)",3 measured without sufficient independent verification
+MET-AGE-011,AGE,Aging total per party / grand total,YES,PASS (see 43; one bucket populated),"MEASURED vs independent value (RUN-003, partial: boundaries untested)",3 measured without sufficient independent verification
+MET-VAT-001,VAT,Output VAT,YES,FAIL,MEASURED vs independent value,2 independently verified and incorrect
+MET-VAT-002,VAT,Input VAT,YES,PASS,MEASURED vs independent value,1 independently verified and correct
+MET-VAT-003,VAT,Net VAT,YES,FAIL,MEASURED vs independent value (RUN-003),2 independently verified and incorrect
+MET-VAT-004,VAT,Tax period values,YES,PASS,MEASURED vs independent value (RUN-003),1 independently verified and correct
+MET-INV-001,INV,Item value,YES,PASS,MEASURED vs independent value (RUN-003),1 independently verified and correct
+MET-INV-002,INV,Total inventory value,YES,FAIL,MEASURED vs independent value,2 independently verified and incorrect
+MET-INV-003,INV,Item quantity,YES,PASS,MEASURED vs independent value (RUN-003),1 independently verified and correct
+MET-KPI-001,KPI,Revenue (KPI),YES,INCONSISTENT,MEASURED vs independent value,2 independently verified and incorrect
+MET-KPI-002,KPI,Expenses (KPI),YES,PASS,MEASURED vs independent value,1 independently verified and correct
+MET-KPI-003,KPI,Net profit (KPI),YES,FAIL,MEASURED vs independent value,2 independently verified and incorrect
+MET-KPI-004,KPI,Cash position,YES,FAIL,MEASURED vs independent value,2 independently verified and incorrect
+MET-KPI-005,KPI,Revenue trend (monthly),YES,PASS,MEASURED vs independent value (RUN-003),1 independently verified and correct
+MET-KPI-006,KPI,Expense breakdown (top 10),YES,PASS,MEASURED vs independent value (RUN-003),1 independently verified and correct
+MET-MENU-001,MENU,Item quantity,YES,BLOCKED-DEFECT,ATTEMPTED - BLOCKED BY DEFECT F-009 (HTTP 500),4 attempted but blocked
+MET-MENU-002,MENU,Item revenue,YES,BLOCKED-DEFECT,ATTEMPTED - BLOCKED BY DEFECT F-009 (HTTP 500),4 attempted but blocked
+MET-MENU-003,MENU,Item COGS,YES,BLOCKED-DEFECT,ATTEMPTED - BLOCKED BY DEFECT F-009 (HTTP 500),4 attempted but blocked
+MET-MENU-004,MENU,Item gross profit,YES,BLOCKED-DEFECT,ATTEMPTED - BLOCKED BY DEFECT F-009 (HTTP 500),4 attempted but blocked
+MET-MENU-005,MENU,Item margin %,YES,BLOCKED-DEFECT,ATTEMPTED - BLOCKED BY DEFECT F-009 (HTTP 500),4 attempted but blocked
+MET-BE-001,BE,Fixed costs,YES,BLOCKED-DEFECT,ATTEMPTED - BLOCKED BY DEFECT F-009 (HTTP 500),4 attempted but blocked
+MET-BE-002,BE,Variable costs,YES,BLOCKED-DEFECT,ATTEMPTED - BLOCKED BY DEFECT F-009 (HTTP 500),4 attempted but blocked
+MET-BE-003,BE,Contribution margin,YES,BLOCKED-DEFECT,ATTEMPTED - BLOCKED BY DEFECT F-009 (HTTP 500),4 attempted but blocked
+MET-BE-004,BE,CM ratio,YES,BLOCKED-DEFECT,ATTEMPTED - BLOCKED BY DEFECT F-009 (HTTP 500),4 attempted but blocked
+MET-BE-005,BE,Break-even revenue,YES,BLOCKED-DEFECT,ATTEMPTED - BLOCKED BY DEFECT F-009 (HTTP 500),4 attempted but blocked
+MET-PCF-001,PCF,Historical monthly receipts,YES,PASS,MEASURED vs independent value (RUN-003),1 independently verified and correct
+MET-PCF-002,PCF,Historical monthly payments,YES,PASS,MEASURED vs independent value (RUN-003),1 independently verified and correct
+MET-PCF-003,PCF,Projected net,YES,FAIL,MEASURED vs independent value (RUN-003),2 independently verified and incorrect
+MET-HRC-001,HRC,Payroll cost,YES,FAIL,MEASURED vs independent value,2 independently verified and incorrect
+MET-HRC-002,HRC,Overtime cost,YES,PASS,MEASURED vs independent value (RUN-003),1 independently verified and correct
+MET-HRC-003,HRC,Insurance cost,YES,PASS,MEASURED vs independent value (RUN-003),3 measured without sufficient independent verification
+MET-HRC-004,HRC,Total HR cost,YES,FAIL,MEASURED vs independent value (RUN-003),2 independently verified and incorrect
+MET-HRC-005,HRC,Labor % of revenue,YES,PASS,MEASURED vs independent value (RUN-003),1 independently verified and correct
+MET-HRC-006,HRC,Cost by department,YES,PASS,MEASURED vs independent value (RUN-003),1 independently verified and correct
+MET-SALES-001,SALES,Total revenue,YES,PASS (policy-dependent),MEASURED vs independent value (RUN-003),5 policy dependent
+MET-SALES-002,SALES,Total orders,YES,PASS,MEASURED vs independent value (RUN-003),1 independently verified and correct
+MET-SALES-003,SALES,Average ticket,YES,PASS,MEASURED vs independent value (RUN-003),1 independently verified and correct
+MET-SALES-004,SALES,Revenue trend (day/week/month),YES,PASS,MEASURED vs independent value (RUN-003),1 independently verified and correct
+MET-SALES-005,SALES,Hourly distribution,YES,OBSERVED,MEASURED vs independent value (RUN-003),3 measured without sufficient independent verification
+MET-SALES-006,SALES,Top items quantity,YES,PASS,MEASURED vs independent value (RUN-003),1 independently verified and correct
+MET-SALES-007,SALES,Top items revenue,YES,PASS,MEASURED vs independent value (RUN-003),1 independently verified and correct
+MET-SALES-008,SALES,Top categories qty/revenue,YES,PASS,MEASURED vs independent value (RUN-003),1 independently verified and correct
+MET-PROF-001,PROF,Revenue (item),YES,PASS (policy-dependent),MEASURED vs independent value (RUN-003),5 policy dependent
+MET-PROF-002,PROF,COGS (current cost),YES,PASS (policy-dependent),MEASURED vs independent value (RUN-003),5 policy dependent
+MET-PROF-003,PROF,Gross profit,YES,PASS,MEASURED vs independent value (RUN-003),5 policy dependent
+MET-PROF-004,PROF,Gross margin %,YES,PASS,MEASURED vs independent value (RUN-003),1 independently verified and correct
+MET-PROF-005,PROF,Food cost %,YES,PASS,MEASURED vs independent value (RUN-003),1 independently verified and correct
+MET-PROF-006,PROF,Units missing cost,YES,PASS,MEASURED vs independent value (RUN-003),1 independently verified and correct
+MET-PROF-007,PROF,Top / lowest profitable items,YES,EXECUTED (RUN-004): PASS (top) / FAIL (lowest),"MEASURED vs independent value (RUN-004, headed Chrome + SQL)",1 independently verified and correct
+MET-TURN-001,TURN,Opening qty,YES,OBSERVED-DISCREPANCY,MEASURED vs independent value (RUN-003),3 measured without sufficient independent verification
+MET-TURN-002,TURN,Average inventory qty,YES,PASS,MEASURED vs independent value (RUN-003),1 independently verified and correct
+MET-TURN-003,TURN,Average inventory value,YES,PASS,MEASURED vs independent value (RUN-003),1 independently verified and correct
+MET-TURN-004,TURN,Estimated COGS,YES,PASS (policy-dependent),MEASURED vs independent value (RUN-003),5 policy dependent
+MET-TURN-005,TURN,Turnover,YES,PASS,MEASURED vs independent value (RUN-003),1 independently verified and correct
+MET-TURN-006,TURN,Monthly turnover,YES,PASS,MEASURED vs independent value (RUN-003),1 independently verified and correct
+MET-TURN-007,TURN,Slow-moving flag,YES,PASS,MEASURED vs independent value (RUN-003),1 independently verified and correct
+MET-TURN-008,TURN,Waste qty,YES,FAIL,MEASURED vs independent value (RUN-003),2 independently verified and incorrect
+MET-TURN-009,TURN,Total current inventory value,YES,PASS vs products table / FAIL vs GL (F-011),MEASURED vs independent value (RUN-003),1 independently verified and correct
+MET-OVR-001,OVR,Overview composite,YES,PASS,MEASURED vs independent value (RUN-003),1 independently verified and correct
+MET-ORD-001,ORD,Order stats total revenue,YES,FAIL,MEASURED vs independent value (RUN-003),2 independently verified and incorrect
+MET-ORD-002,ORD,Delivered today,YES,FAIL,MEASURED vs independent value (RUN-003),2 independently verified and incorrect
+MET-ORD-003,ORD,Counts by status,YES,PASS,MEASURED vs independent value (RUN-003),1 independently verified and correct
+MET-DASH-001,DASH,Order counts,YES,PASS,MEASURED vs independent value (RUN-003),1 independently verified and correct
+MET-DASH-002,DASH,Product/category/employee/driver counts,YES,PASS,MEASURED vs independent value (RUN-003),1 independently verified and correct
+MET-DASH-003,DASH,Table stats,YES,PASS,MEASURED vs independent value (RUN-003),1 independently verified and correct
+MET-DASH-004,DASH,Paid revenue of recent list (if shown),YES,EXECUTED (RUN-004): PASS (revenue per its label) / FAIL (products),"MEASURED vs independent value (RUN-004, headed Chrome + SQL)",1 independently verified and correct
+MET-KDS-001,KDS,Average prep time (label indicative; formula unread),YES,PASS vs formula; MISLEADING label,MEASURED vs independent value,2 independently verified and incorrect
+MET-KDS-002,KDS,Orders per station (label indicative; formula unread),YES,FAIL (off by 1),MEASURED vs independent value,2 independently verified and incorrect
+MET-KDS-003,KDS,Late orders (label indicative; formula unread),YES,EXECUTED (RUN-004): PASS (arithmetic) / FAIL (time zone),"MEASURED vs independent value (RUN-004, headed Chrome + SQL)",1 independently verified and correct
+MET-HRR-001,HRR,Headcount,YES,PASS,MEASURED vs independent value (RUN-003),1 independently verified and correct
+MET-HRR-002,HRR,Turnover %,YES,EXECUTED (RUN-004): FAIL,"MEASURED vs independent value (RUN-004, headed Chrome + SQL)",2 independently verified and incorrect
+MET-HRR-003,HRR,Absenteeism rate %,YES,PASS-VACUOUS,MEASURED (vacuous: no data; flow pending),3 measured without sufficient independent verification
+MET-HRR-004,HRR,Overtime cost (estimate),YES,PASS-VACUOUS,MEASURED (vacuous: no data; flow pending),3 measured without sufficient independent verification
+MET-HRR-005,HRR,Leave balance,YES,PASS,MEASURED vs independent value (RUN-003),1 independently verified and correct
+MET-HRR-006,HRR,Training compliance %,YES,PASS-VACUOUS,MEASURED (vacuous: no data; flow pending),3 measured without sufficient independent verification
+MET-HRR-007,HRR,Social insurance export,YES,EXECUTED (RUN-004): FAIL,"MEASURED vs independent value (RUN-004, headed Chrome + SQL)",2 independently verified and incorrect
+MET-SADM-001,SADM,Total tenants (label indicative; formula unread),YES,PASS,MEASURED vs independent value,1 independently verified and correct
+MET-SADM-002,SADM,Active subscriptions (label indicative; formula unread),YES,PASS,MEASURED vs independent value,1 independently verified and correct
+MET-SADM-003,SADM,Platform revenue as shown (label indicative; formula unread),YES,PASS vs DB (value includes defect row),MEASURED vs independent value,1 independently verified and correct
+MET-SADM-004,SADM,Trial/expired counts (label indicative; formula unread),YES,NOT FULLY VERIFIED,MEASURED vs independent value,1 independently verified and correct
+MET-AGE-xx,Payables aging,total,YES,PASS,MEASURED (not in 30 inventory: added in 43),1 independently verified and correct
+MET-BE-xx,Break-even,endpoint,YES,BLOCKED-DEFECT,ATTEMPTED - BLOCKED BY DEFECT F-009 (HTTP 500),4 attempted but blocked
+MET-INV-xx,Inventory turnover,waste_qty,YES,FAIL,MEASURED (not in 30 inventory: added in 43),2 independently verified and incorrect
+MET-MENU-xx,Menu profitability,endpoint,YES,BLOCKED-DEFECT,ATTEMPTED - BLOCKED BY DEFECT F-009 (HTTP 500),4 attempted but blocked
+MET-PCF-xx,Predictive cash flow,forecast,YES,NOT VERIFIED,MEASURED (not in 30 inventory: added in 43),3 measured without sufficient independent verification
+MET-SADM-005,Super Admin,active_impersonations,YES,PASS (impersonate click produced no observable write),MEASURED (not in 30 inventory: added in 43),1 independently verified and correct
+MET-TURN-xx,Inventory turnover,total_current_inventory_value,YES,FAIL,MEASURED (not in 30 inventory: added in 43),2 independently verified and incorrect

@@ -1,0 +1,14 @@
+# REL-005 10 parallel posts of draft JE id 17
+      1 200
+      9 400
+GL rows for JE17: 2 (expect 2)
+status: posted
+
+# REL-008 stock oversell: stock set to 5 (SQL fixture), 20 parallel POS orders qty 1
+      5 201
+     15 400
+final stock: 0  orders created in last minute: 20
+5|confirmed|pending
+15|pending|pending
+20
+15

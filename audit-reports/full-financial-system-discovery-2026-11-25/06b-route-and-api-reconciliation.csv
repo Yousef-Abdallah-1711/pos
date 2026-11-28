@@ -1,0 +1,120 @@
+app,route_pattern,kind,static_or_dynamic,in_53_control_inventory,in_53b_interaction_results,source_file
+dashboard,/,page,static,outside the dashboard control inventory (loaded in RUN-003; interaction per app: see 34b),outside the dashboard control inventory (loaded in RUN-003; interaction per app: see 34b),frontend/apps/dashboard/src/app/page.tsx
+dashboard,/auth/callback,page,static,outside the dashboard control inventory (loaded in RUN-003; interaction per app: see 34b),outside the dashboard control inventory (loaded in RUN-003; interaction per app: see 34b),frontend/apps/dashboard/src/app/auth/callback/page.tsx
+dashboard,/[locale],page,static,outside the dashboard control inventory (loaded in RUN-003; interaction per app: see 34b),outside the dashboard control inventory (loaded in RUN-003; interaction per app: see 34b),frontend/apps/dashboard/src/app/[locale]/page.tsx
+dashboard,/[locale]/auth/callback,page,static,outside the dashboard control inventory (loaded in RUN-003; interaction per app: see 34b),outside the dashboard control inventory (loaded in RUN-003; interaction per app: see 34b),frontend/apps/dashboard/src/app/[locale]/auth/callback/page.tsx
+dashboard,/[locale]/auth/super-admin-login,page,static,outside the dashboard control inventory (loaded in RUN-003; interaction per app: see 34b),outside the dashboard control inventory (loaded in RUN-003; interaction per app: see 34b),frontend/apps/dashboard/src/app/[locale]/auth/super-admin-login/page.tsx
+dashboard,/[locale]/dashboard,page,static,yes,yes,frontend/apps/dashboard/src/app/[locale]/dashboard/page.tsx
+dashboard,/[locale]/dashboard/accounting/advanced,page,static,yes,yes,frontend/apps/dashboard/src/app/[locale]/dashboard/accounting/advanced/page.tsx
+dashboard,/[locale]/dashboard/accounting/bank-accounts,page,static,yes,yes,frontend/apps/dashboard/src/app/[locale]/dashboard/accounting/bank-accounts/page.tsx
+dashboard,/[locale]/dashboard/accounting/chart-of-accounts,page,static,yes,yes,frontend/apps/dashboard/src/app/[locale]/dashboard/accounting/chart-of-accounts/page.tsx
+dashboard,/[locale]/dashboard/accounting/customer-invoices,page,static,yes,yes,frontend/apps/dashboard/src/app/[locale]/dashboard/accounting/customer-invoices/page.tsx
+dashboard,/[locale]/dashboard/accounting/customers,page,static,yes,yes,frontend/apps/dashboard/src/app/[locale]/dashboard/accounting/customers/page.tsx
+dashboard,/[locale]/dashboard/accounting/general-ledger,page,static,yes,yes,frontend/apps/dashboard/src/app/[locale]/dashboard/accounting/general-ledger/page.tsx
+dashboard,/[locale]/dashboard/accounting/journal-entries,page,static,yes,yes,frontend/apps/dashboard/src/app/[locale]/dashboard/accounting/journal-entries/page.tsx
+dashboard,/[locale]/dashboard/accounting/journal-entries/[id],page,dynamic,n/a (dynamic: needs a valid id),n/a (dynamic),frontend/apps/dashboard/src/app/[locale]/dashboard/accounting/journal-entries/[id]/page.tsx
+dashboard,/[locale]/dashboard/accounting/supplier-invoices,page,static,yes,yes,frontend/apps/dashboard/src/app/[locale]/dashboard/accounting/supplier-invoices/page.tsx
+dashboard,/[locale]/dashboard/accounting/suppliers,page,static,yes,yes,frontend/apps/dashboard/src/app/[locale]/dashboard/accounting/suppliers/page.tsx
+dashboard,/[locale]/dashboard/categories,page,static,yes,yes,frontend/apps/dashboard/src/app/[locale]/dashboard/categories/page.tsx
+dashboard,/[locale]/dashboard/categories/new,page,static,NO,NO,frontend/apps/dashboard/src/app/[locale]/dashboard/categories/new/page.tsx
+dashboard,/[locale]/dashboard/categories/[id]/edit,page,dynamic,n/a (dynamic: needs a valid id),n/a (dynamic),frontend/apps/dashboard/src/app/[locale]/dashboard/categories/[id]/edit/page.tsx
+dashboard,/[locale]/dashboard/drivers,page,static,yes,yes,frontend/apps/dashboard/src/app/[locale]/dashboard/drivers/page.tsx
+dashboard,/[locale]/dashboard/drivers/new,page,static,NO,NO,frontend/apps/dashboard/src/app/[locale]/dashboard/drivers/new/page.tsx
+dashboard,/[locale]/dashboard/drivers/[id],page,dynamic,n/a (dynamic: needs a valid id),n/a (dynamic),frontend/apps/dashboard/src/app/[locale]/dashboard/drivers/[id]/page.tsx
+dashboard,/[locale]/dashboard/hr/attendance,page,static,yes,yes,frontend/apps/dashboard/src/app/[locale]/dashboard/hr/attendance/page.tsx
+dashboard,/[locale]/dashboard/hr/contracts,page,static,yes,yes,frontend/apps/dashboard/src/app/[locale]/dashboard/hr/contracts/page.tsx
+dashboard,/[locale]/dashboard/hr/employees,page,static,yes,yes,frontend/apps/dashboard/src/app/[locale]/dashboard/hr/employees/page.tsx
+dashboard,/[locale]/dashboard/hr/insurance,page,static,yes,yes,frontend/apps/dashboard/src/app/[locale]/dashboard/hr/insurance/page.tsx
+dashboard,/[locale]/dashboard/hr/leaves,page,static,yes,yes,frontend/apps/dashboard/src/app/[locale]/dashboard/hr/leaves/page.tsx
+dashboard,/[locale]/dashboard/hr/payroll,page,static,yes,yes,frontend/apps/dashboard/src/app/[locale]/dashboard/hr/payroll/page.tsx
+dashboard,/[locale]/dashboard/hr/performance,page,static,yes,yes,frontend/apps/dashboard/src/app/[locale]/dashboard/hr/performance/page.tsx
+dashboard,/[locale]/dashboard/hr/resignations,page,static,yes,yes,frontend/apps/dashboard/src/app/[locale]/dashboard/hr/resignations/page.tsx
+dashboard,/[locale]/dashboard/hr/training,page,static,yes,yes,frontend/apps/dashboard/src/app/[locale]/dashboard/hr/training/page.tsx
+dashboard,/[locale]/dashboard/inventory,page,static,yes,yes,frontend/apps/dashboard/src/app/[locale]/dashboard/inventory/page.tsx
+dashboard,/[locale]/dashboard/kds,page,static,yes,yes,frontend/apps/dashboard/src/app/[locale]/dashboard/kds/page.tsx
+dashboard,/[locale]/dashboard/kds/settings,page,static,yes,yes,frontend/apps/dashboard/src/app/[locale]/dashboard/kds/settings/page.tsx
+dashboard,/[locale]/dashboard/notifications,page,static,yes,yes,frontend/apps/dashboard/src/app/[locale]/dashboard/notifications/page.tsx
+dashboard,/[locale]/dashboard/orders,page,static,yes,yes,frontend/apps/dashboard/src/app/[locale]/dashboard/orders/page.tsx
+dashboard,/[locale]/dashboard/orders/[id],page,dynamic,n/a (dynamic: needs a valid id),n/a (dynamic),frontend/apps/dashboard/src/app/[locale]/dashboard/orders/[id]/page.tsx
+dashboard,/[locale]/dashboard/pos,page,static,yes,yes,frontend/apps/dashboard/src/app/[locale]/dashboard/pos/page.tsx
+dashboard,/[locale]/dashboard/pos/settings,page,static,yes,yes,frontend/apps/dashboard/src/app/[locale]/dashboard/pos/settings/page.tsx
+dashboard,/[locale]/dashboard/products,page,static,yes,yes,frontend/apps/dashboard/src/app/[locale]/dashboard/products/page.tsx
+dashboard,/[locale]/dashboard/products/new,page,static,yes,yes,frontend/apps/dashboard/src/app/[locale]/dashboard/products/new/page.tsx
+dashboard,/[locale]/dashboard/products/[id]/edit,page,dynamic,n/a (dynamic: needs a valid id),n/a (dynamic),frontend/apps/dashboard/src/app/[locale]/dashboard/products/[id]/edit/page.tsx
+dashboard,/[locale]/dashboard/rbac/roles,page,static,yes,yes,frontend/apps/dashboard/src/app/[locale]/dashboard/rbac/roles/page.tsx
+dashboard,/[locale]/dashboard/reports,page,static,yes,yes,frontend/apps/dashboard/src/app/[locale]/dashboard/reports/page.tsx
+dashboard,/[locale]/dashboard/reports/financial,page,static,yes,yes,frontend/apps/dashboard/src/app/[locale]/dashboard/reports/financial/page.tsx
+dashboard,/[locale]/dashboard/reports/financial/advanced,page,static,yes,yes,frontend/apps/dashboard/src/app/[locale]/dashboard/reports/financial/advanced/page.tsx
+dashboard,/[locale]/dashboard/reports/financial/balance-sheet,page,static,yes,yes,frontend/apps/dashboard/src/app/[locale]/dashboard/reports/financial/balance-sheet/page.tsx
+dashboard,/[locale]/dashboard/reports/financial/cash-flow,page,static,yes,yes,frontend/apps/dashboard/src/app/[locale]/dashboard/reports/financial/cash-flow/page.tsx
+dashboard,/[locale]/dashboard/reports/financial/inventory-valuation,page,static,yes,yes,frontend/apps/dashboard/src/app/[locale]/dashboard/reports/financial/inventory-valuation/page.tsx
+dashboard,/[locale]/dashboard/reports/financial/payables-aging,page,static,yes,yes,frontend/apps/dashboard/src/app/[locale]/dashboard/reports/financial/payables-aging/page.tsx
+dashboard,/[locale]/dashboard/reports/financial/profit-loss,page,static,yes,yes,frontend/apps/dashboard/src/app/[locale]/dashboard/reports/financial/profit-loss/page.tsx
+dashboard,/[locale]/dashboard/reports/financial/receivables-aging,page,static,yes,yes,frontend/apps/dashboard/src/app/[locale]/dashboard/reports/financial/receivables-aging/page.tsx
+dashboard,/[locale]/dashboard/reports/financial/vat,page,static,yes,yes,frontend/apps/dashboard/src/app/[locale]/dashboard/reports/financial/vat/page.tsx
+dashboard,/[locale]/dashboard/reports/hr,page,static,yes,yes,frontend/apps/dashboard/src/app/[locale]/dashboard/reports/hr/page.tsx
+dashboard,/[locale]/dashboard/reports/inventory,page,static,yes,yes,frontend/apps/dashboard/src/app/[locale]/dashboard/reports/inventory/page.tsx
+dashboard,/[locale]/dashboard/reports/overview,page,static,yes,yes,frontend/apps/dashboard/src/app/[locale]/dashboard/reports/overview/page.tsx
+dashboard,/[locale]/dashboard/reports/profitability,page,static,yes,yes,frontend/apps/dashboard/src/app/[locale]/dashboard/reports/profitability/page.tsx
+dashboard,/[locale]/dashboard/reports/sales,page,static,yes,yes,frontend/apps/dashboard/src/app/[locale]/dashboard/reports/sales/page.tsx
+dashboard,/[locale]/dashboard/settings,page,static,yes,yes,frontend/apps/dashboard/src/app/[locale]/dashboard/settings/page.tsx
+dashboard,/[locale]/dashboard/settings/access-control,page,static,yes,yes,frontend/apps/dashboard/src/app/[locale]/dashboard/settings/access-control/page.tsx
+dashboard,/[locale]/dashboard/settings/account,page,static,yes,yes,frontend/apps/dashboard/src/app/[locale]/dashboard/settings/account/page.tsx
+dashboard,/[locale]/dashboard/settings/appearance,page,static,yes,yes,frontend/apps/dashboard/src/app/[locale]/dashboard/settings/appearance/page.tsx
+dashboard,/[locale]/dashboard/settings/billing,page,static,yes,yes,frontend/apps/dashboard/src/app/[locale]/dashboard/settings/billing/page.tsx
+dashboard,/[locale]/dashboard/settings/restaurant,page,static,yes,yes,frontend/apps/dashboard/src/app/[locale]/dashboard/settings/restaurant/page.tsx
+dashboard,/[locale]/dashboard/settings/roles,page,static,yes,yes,frontend/apps/dashboard/src/app/[locale]/dashboard/settings/roles/page.tsx
+dashboard,/[locale]/dashboard/settings/roles/new,page,static,NO,NO,frontend/apps/dashboard/src/app/[locale]/dashboard/settings/roles/new/page.tsx
+dashboard,/[locale]/dashboard/settings/roles/[id]/edit,page,dynamic,n/a (dynamic: needs a valid id),n/a (dynamic),frontend/apps/dashboard/src/app/[locale]/dashboard/settings/roles/[id]/edit/page.tsx
+dashboard,/[locale]/dashboard/settings/users,page,static,yes,yes,frontend/apps/dashboard/src/app/[locale]/dashboard/settings/users/page.tsx
+dashboard,/[locale]/dashboard/tables,page,static,yes,yes,frontend/apps/dashboard/src/app/[locale]/dashboard/tables/page.tsx
+dashboard,/[locale]/dashboard/tables/layout,page,static,yes,yes,frontend/apps/dashboard/src/app/[locale]/dashboard/tables/layout/page.tsx
+dashboard,/[locale]/dashboard/tables/[id],page,dynamic,n/a (dynamic: needs a valid id),n/a (dynamic),frontend/apps/dashboard/src/app/[locale]/dashboard/tables/[id]/page.tsx
+dashboard,/[locale]/dashboard/tables/[id]/edit,page,dynamic,n/a (dynamic: needs a valid id),n/a (dynamic),frontend/apps/dashboard/src/app/[locale]/dashboard/tables/[id]/edit/page.tsx
+dashboard,/[locale]/dashboard/tables/[id]/qr,page,dynamic,n/a (dynamic: needs a valid id),n/a (dynamic),frontend/apps/dashboard/src/app/[locale]/dashboard/tables/[id]/qr/page.tsx
+dashboard,/[locale]/dashboard/theme-builder,page,static,yes,yes,frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/page.tsx
+dashboard,/[locale]/dashboard/theme-builder/editor/[id],page,dynamic,n/a (dynamic: needs a valid id),n/a (dynamic),frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/editor/[id]/page.tsx
+dashboard,/[locale]/dashboard/theme-builder/import,page,static,NO,NO,frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/import/page.tsx
+dashboard,/[locale]/dashboard/theme-builder/presets,page,static,yes,yes,frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/presets/page.tsx
+dashboard,/[locale]/dashboard/theme-builder/qr,page,static,yes,yes,frontend/apps/dashboard/src/app/[locale]/dashboard/theme-builder/qr/page.tsx
+dashboard,/[locale]/test-url,page,static,outside the dashboard control inventory (loaded in RUN-003; interaction per app: see 34b),outside the dashboard control inventory (loaded in RUN-003; interaction per app: see 34b),frontend/apps/dashboard/src/app/[locale]/test-url/page.tsx
+landing,/,page,static,outside the dashboard control inventory (loaded in RUN-003; interaction per app: see 34b),outside the dashboard control inventory (loaded in RUN-003; interaction per app: see 34b),frontend/apps/landing/src/app/(entry)/page.tsx
+landing,/auth/login,page,static,outside the dashboard control inventory (loaded in RUN-003; interaction per app: see 34b),outside the dashboard control inventory (loaded in RUN-003; interaction per app: see 34b),frontend/apps/landing/src/app/(entry)/auth/login/page.tsx
+landing,/auth/register,page,static,outside the dashboard control inventory (loaded in RUN-003; interaction per app: see 34b),outside the dashboard control inventory (loaded in RUN-003; interaction per app: see 34b),frontend/apps/landing/src/app/(entry)/auth/register/page.tsx
+landing,/auth/super-admin-login,page,static,outside the dashboard control inventory (loaded in RUN-003; interaction per app: see 34b),outside the dashboard control inventory (loaded in RUN-003; interaction per app: see 34b),frontend/apps/landing/src/app/(entry)/auth/super-admin-login/page.tsx
+landing,/login,page,static,outside the dashboard control inventory (loaded in RUN-003; interaction per app: see 34b),outside the dashboard control inventory (loaded in RUN-003; interaction per app: see 34b),frontend/apps/landing/src/app/(entry)/login/page.tsx
+landing,/register,page,static,outside the dashboard control inventory (loaded in RUN-003; interaction per app: see 34b),outside the dashboard control inventory (loaded in RUN-003; interaction per app: see 34b),frontend/apps/landing/src/app/(entry)/register/page.tsx
+landing,/[locale],page,static,outside the dashboard control inventory (loaded in RUN-003; interaction per app: see 34b),outside the dashboard control inventory (loaded in RUN-003; interaction per app: see 34b),frontend/apps/landing/src/app/[locale]/page.tsx
+landing,/[locale]/auth/login,page,static,outside the dashboard control inventory (loaded in RUN-003; interaction per app: see 34b),outside the dashboard control inventory (loaded in RUN-003; interaction per app: see 34b),frontend/apps/landing/src/app/[locale]/auth/login/page.tsx
+landing,/[locale]/auth/register,page,static,outside the dashboard control inventory (loaded in RUN-003; interaction per app: see 34b),outside the dashboard control inventory (loaded in RUN-003; interaction per app: see 34b),frontend/apps/landing/src/app/[locale]/auth/register/page.tsx
+landing,/[locale]/auth/super-admin-login,page,static,outside the dashboard control inventory (loaded in RUN-003; interaction per app: see 34b),outside the dashboard control inventory (loaded in RUN-003; interaction per app: see 34b),frontend/apps/landing/src/app/[locale]/auth/super-admin-login/page.tsx
+landing,/[locale]/contact,page,static,outside the dashboard control inventory (loaded in RUN-003; interaction per app: see 34b),outside the dashboard control inventory (loaded in RUN-003; interaction per app: see 34b),frontend/apps/landing/src/app/[locale]/contact/page.tsx
+landing,/[locale]/demo,page,static,outside the dashboard control inventory (loaded in RUN-003; interaction per app: see 34b),outside the dashboard control inventory (loaded in RUN-003; interaction per app: see 34b),frontend/apps/landing/src/app/[locale]/demo/page.tsx
+landing,/[locale]/features,page,static,outside the dashboard control inventory (loaded in RUN-003; interaction per app: see 34b),outside the dashboard control inventory (loaded in RUN-003; interaction per app: see 34b),frontend/apps/landing/src/app/[locale]/features/page.tsx
+landing,/[locale]/features/[slug],page,dynamic,outside the dashboard control inventory (loaded in RUN-003; interaction per app: see 34b),outside the dashboard control inventory (loaded in RUN-003; interaction per app: see 34b),frontend/apps/landing/src/app/[locale]/features/[slug]/page.tsx
+landing,/[locale]/how-it-works,page,static,outside the dashboard control inventory (loaded in RUN-003; interaction per app: see 34b),outside the dashboard control inventory (loaded in RUN-003; interaction per app: see 34b),frontend/apps/landing/src/app/[locale]/how-it-works/page.tsx
+landing,/[locale]/pricing,page,static,outside the dashboard control inventory (loaded in RUN-003; interaction per app: see 34b),outside the dashboard control inventory (loaded in RUN-003; interaction per app: see 34b),frontend/apps/landing/src/app/[locale]/pricing/page.tsx
+landing,/[locale]/privacy,page,static,outside the dashboard control inventory (loaded in RUN-003; interaction per app: see 34b),outside the dashboard control inventory (loaded in RUN-003; interaction per app: see 34b),frontend/apps/landing/src/app/[locale]/privacy/page.tsx
+super-admin,/,page,static,outside the dashboard control inventory (loaded in RUN-003; interaction per app: see 34b),outside the dashboard control inventory (loaded in RUN-003; interaction per app: see 34b),frontend/apps/super-admin/src/app/page.tsx
+super-admin,/dashboard,page,static,outside the dashboard control inventory (loaded in RUN-003; interaction per app: see 34b),NO (audit-logs/settings not reached in RUN-004),frontend/apps/super-admin/src/app/dashboard/page.tsx
+super-admin,/dashboard/audit-logs,page,static,outside the dashboard control inventory (loaded in RUN-003; interaction per app: see 34b),NO (audit-logs/settings not reached in RUN-004),frontend/apps/super-admin/src/app/dashboard/audit-logs/page.tsx
+super-admin,/dashboard/payments,page,static,outside the dashboard control inventory (loaded in RUN-003; interaction per app: see 34b),yes,frontend/apps/super-admin/src/app/dashboard/payments/page.tsx
+super-admin,/dashboard/settings,page,static,outside the dashboard control inventory (loaded in RUN-003; interaction per app: see 34b),NO (audit-logs/settings not reached in RUN-004),frontend/apps/super-admin/src/app/dashboard/settings/page.tsx
+super-admin,/dashboard/tenants,page,static,outside the dashboard control inventory (loaded in RUN-003; interaction per app: see 34b),yes,frontend/apps/super-admin/src/app/dashboard/tenants/page.tsx
+super-admin,/dashboard/tenants/[id],page,dynamic,outside the dashboard control inventory (loaded in RUN-003; interaction per app: see 34b),n/a (dynamic),frontend/apps/super-admin/src/app/dashboard/tenants/[id]/page.tsx
+super-admin,/dashboard/users,page,static,outside the dashboard control inventory (loaded in RUN-003; interaction per app: see 34b),yes,frontend/apps/super-admin/src/app/dashboard/users/page.tsx
+super-admin,/favicon.ico,route-handler,static,outside the dashboard control inventory (loaded in RUN-003; interaction per app: see 34b),outside the dashboard control inventory (loaded in RUN-003; interaction per app: see 34b),frontend/apps/super-admin/src/app/favicon.ico/route.ts
+super-admin,/login,page,static,outside the dashboard control inventory (loaded in RUN-003; interaction per app: see 34b),outside the dashboard control inventory (loaded in RUN-003; interaction per app: see 34b),frontend/apps/super-admin/src/app/login/page.tsx
+restaurant-website,/,page,static,outside the dashboard control inventory (loaded in RUN-003; interaction per app: see 34b),outside the dashboard control inventory (loaded in RUN-003; interaction per app: see 34b),frontend/apps/restaurant-website/app/page.tsx
+restaurant-website,/api/metrics,route-handler,static,outside the dashboard control inventory (loaded in RUN-003; interaction per app: see 34b),outside the dashboard control inventory (loaded in RUN-003; interaction per app: see 34b),frontend/apps/restaurant-website/app/api/metrics/route.ts
+restaurant-website,/maintenance,page,static,outside the dashboard control inventory (loaded in RUN-003; interaction per app: see 34b),outside the dashboard control inventory (loaded in RUN-003; interaction per app: see 34b),frontend/apps/restaurant-website/app/maintenance/page.tsx
+restaurant-website,/[locale],page,static,outside the dashboard control inventory (loaded in RUN-003; interaction per app: see 34b),outside the dashboard control inventory (loaded in RUN-003; interaction per app: see 34b),frontend/apps/restaurant-website/app/[locale]/page.tsx
+restaurant-website,/[locale]/cart,page,static,outside the dashboard control inventory (loaded in RUN-003; interaction per app: see 34b),outside the dashboard control inventory (loaded in RUN-003; interaction per app: see 34b),frontend/apps/restaurant-website/app/[locale]/cart/page.tsx
+restaurant-website,/[locale]/checkout,page,static,outside the dashboard control inventory (loaded in RUN-003; interaction per app: see 34b),outside the dashboard control inventory (loaded in RUN-003; interaction per app: see 34b),frontend/apps/restaurant-website/app/[locale]/checkout/page.tsx
+restaurant-website,/[locale]/menu,page,static,outside the dashboard control inventory (loaded in RUN-003; interaction per app: see 34b),outside the dashboard control inventory (loaded in RUN-003; interaction per app: see 34b),frontend/apps/restaurant-website/app/[locale]/menu/page.tsx
+restaurant-website,/[locale]/orders,page,static,outside the dashboard control inventory (loaded in RUN-003; interaction per app: see 34b),outside the dashboard control inventory (loaded in RUN-003; interaction per app: see 34b),frontend/apps/restaurant-website/app/[locale]/orders/page.tsx
+restaurant-website,/[locale]/orders/track,page,static,outside the dashboard control inventory (loaded in RUN-003; interaction per app: see 34b),outside the dashboard control inventory (loaded in RUN-003; interaction per app: see 34b),frontend/apps/restaurant-website/app/[locale]/orders/track/page.tsx
+restaurant-website,/[locale]/orders/track/[orderNumber],page,dynamic,outside the dashboard control inventory (loaded in RUN-003; interaction per app: see 34b),outside the dashboard control inventory (loaded in RUN-003; interaction per app: see 34b),frontend/apps/restaurant-website/app/[locale]/orders/track/[orderNumber]/page.tsx
+restaurant-website,/[locale]/orders/[id],page,dynamic,outside the dashboard control inventory (loaded in RUN-003; interaction per app: see 34b),outside the dashboard control inventory (loaded in RUN-003; interaction per app: see 34b),frontend/apps/restaurant-website/app/[locale]/orders/[id]/page.tsx
+restaurant-website,/[locale]/settings,page,static,outside the dashboard control inventory (loaded in RUN-003; interaction per app: see 34b),outside the dashboard control inventory (loaded in RUN-003; interaction per app: see 34b),frontend/apps/restaurant-website/app/[locale]/settings/page.tsx
+restaurant-website,/[locale]/table/[tableId]/menu,page,dynamic,outside the dashboard control inventory (loaded in RUN-003; interaction per app: see 34b),outside the dashboard control inventory (loaded in RUN-003; interaction per app: see 34b),frontend/apps/restaurant-website/app/[locale]/table/[tableId]/menu/page.tsx

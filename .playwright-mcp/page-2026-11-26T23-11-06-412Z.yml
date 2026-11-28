@@ -1,0 +1,250 @@
+- generic [active] [ref=f25e1]:
+  - link "Skip to content" [ref=f25e2] [cursor=pointer]:
+    - /url: "#main-content"
+  - banner [ref=f25e3]:
+    - generic [ref=f25e4]:
+      - link "SERVIO" [ref=f25e5] [cursor=pointer]:
+        - /url: /en
+      - navigation "Main navigation" [ref=f25e11]:
+        - button "Open platform features" [ref=f25e13] [cursor=pointer]: Platform
+        - link "How it works" [ref=f25e16] [cursor=pointer]:
+          - /url: /en/how-it-works
+        - link "Pricing" [ref=f25e17] [cursor=pointer]:
+          - /url: /en/pricing
+        - link "Product tour" [ref=f25e18] [cursor=pointer]:
+          - /url: /en/demo
+        - link "Demo options" [ref=f25e19] [cursor=pointer]:
+          - /url: /en/contact
+      - generic [ref=f25e20]:
+        - link "Switch to Arabic" [ref=f25e21] [cursor=pointer]:
+          - /url: /ar
+          - generic [ref=f25e27]: العربية
+        - button "Switch to dark mode" [ref=f25e28] [cursor=pointer]
+        - status [ref=f25e32]: Checking sign-in
+  - main [ref=f25e33]:
+    - generic [ref=f25e34]:
+      - region "More time for the table." [ref=f25e35]:
+        - generic [ref=f25e36]:
+          - paragraph [ref=f25e37]: For restaurants and cafés in Egypt
+          - heading "More time for the table." [level=1] [ref=f25e38]
+          - paragraph [ref=f25e39]: Bring counter orders, online requests, kitchen tickets and the work behind service into one clear flow.
+          - generic [ref=f25e40]:
+            - link "Create your restaurant account" [ref=f25e41] [cursor=pointer]:
+              - /url: /en/auth/register?billing=monthly
+            - link "See how orders move" [ref=f25e45] [cursor=pointer]:
+              - /url: "#how-orders-move"
+          - 'figure "English, light-theme application screen · synthetic data; QA identifiers redacted Open the full capture : Actual Servio dashboard showing restaurant orders and operations" [ref=f25e49]':
+            - img "Actual Servio dashboard showing restaurant orders and operations — English, light-theme application screen · synthetic data; QA identifiers redacted" [ref=f25e51]
+          - paragraph [ref=f25e52]: "Café photo: Julen Rey Azcona"
+      - region "When orders arrive from everywhere, the handoff is the hard part." [ref=f25e53]:
+        - generic [ref=f25e54]:
+          - generic [ref=f25e55]:
+            - generic [ref=f25e56]:
+              - paragraph [ref=f25e57]: A familiar service day
+              - heading "When orders arrive from everywhere, the handoff is the hard part." [level=2] [ref=f25e58]
+            - paragraph [ref=f25e59]: A guest orders at the counter. Another places an order online. The kitchen needs the right ticket, and the owner needs to know what happened. Servio gives each step a place to live.
+          - generic [ref=f25e60]:
+            - article [ref=f25e61]:
+              - generic [ref=f25e62]: "01"
+              - heading "The counter is busy." [level=3] [ref=f25e63]
+              - paragraph [ref=f25e64]: Build an order from your menu with the table or guest details your team needs.
+            - article [ref=f25e65]:
+              - generic [ref=f25e66]: "02"
+              - heading "An online order comes in." [level=3] [ref=f25e67]
+              - paragraph [ref=f25e68]: Review the request and confirm it before the kitchen starts preparing it.
+            - article [ref=f25e69]:
+              - generic [ref=f25e70]: "03"
+              - heading "The next shift needs context." [level=3] [ref=f25e71]
+              - paragraph [ref=f25e72]: See order states and the day’s work in the same restaurant workspace.
+      - region "A better rhythm for every order." [ref=f25e73]:
+        - generic [ref=f25e74]:
+          - generic [ref=f25e75]:
+            - generic [ref=f25e76]:
+              - paragraph [ref=f25e77]: One order journey
+              - heading "A better rhythm for every order." [level=2] [ref=f25e78]
+            - paragraph [ref=f25e79]: A clear path from the guest or cashier to preparation and fulfillment.
+          - generic [ref=f25e80]:
+            - article [ref=f25e81]:
+              - generic [ref=f25e82]: "01"
+              - heading "Take the order." [level=3] [ref=f25e83]
+              - paragraph [ref=f25e84]: Enter it at the cashier, or let a guest submit it through your storefront.
+            - article [ref=f25e85]:
+              - generic [ref=f25e86]: "02"
+              - heading "Keep it moving." [level=3] [ref=f25e87]
+              - paragraph [ref=f25e88]: Cashier orders confirm on submission. Your team confirms online orders before they reach the kitchen.
+            - article [ref=f25e89]:
+              - generic [ref=f25e90]: "03"
+              - heading "Close the loop." [level=3] [ref=f25e91]
+              - paragraph [ref=f25e92]: The kitchen updates preparation. Your team handles fulfillment as a separate step.
+      - region "Let guests order from your own menu." [ref=f25e93]:
+        - generic [ref=f25e94]:
+          - generic [ref=f25e95]:
+            - paragraph [ref=f25e96]: Your online storefront
+            - heading "Let guests order from your own menu." [level=2] [ref=f25e97]
+            - paragraph [ref=f25e98]: Guests can browse your storefront and submit a cash on delivery order. Your staff reviews and confirms it before preparation starts, so a new request never silently becomes a kitchen ticket.
+            - list [ref=f25e99]:
+              - listitem [ref=f25e100]: A restaurant menu guests can browse
+              - listitem [ref=f25e103]: Order details arrive for staff review
+              - listitem [ref=f25e106]: Staff confirmation before the kitchen queue
+            - link "Explore online ordering" [ref=f25e109] [cursor=pointer]:
+              - /url: /en/features/online-ordering
+          - 'figure "English, light-theme application screen · synthetic data; QA identifiers redacted Open the full capture : Actual guest checkout screen for a restaurant storefront" [ref=f25e114]':
+            - img "Actual guest checkout screen for a restaurant storefront — English, light-theme application screen · synthetic data; QA identifiers redacted" [ref=f25e116]
+            - generic [ref=f25e117]:
+              - generic [ref=f25e118]: English, light-theme application screen · synthetic data; QA identifiers redacted
+              - 'link "Open the full capture : Actual guest checkout screen for a restaurant storefront" [ref=f25e119] [cursor=pointer]':
+                - /url: /images/product/servio/matrix/checkout-en-light.png
+                - text: Open the full capture
+                - generic [ref=f25e120]: ": Actual guest checkout screen for a restaurant storefront"
+      - region "See what needs you next." [ref=f25e121]:
+        - generic [ref=f25e122]:
+          - generic [ref=f25e123]:
+            - paragraph [ref=f25e124]: Inside the kitchen
+            - heading "See what needs you next." [level=2] [ref=f25e125]
+            - paragraph [ref=f25e126]: A focused queue shows active tickets and their preparation states. The team can move a ticket from new to in progress to ready without losing the order context.
+            - link "Explore the kitchen display" [ref=f25e127] [cursor=pointer]:
+              - /url: /en/features/kitchen-display
+          - 'figure "English, light-theme application screen · synthetic data; QA identifiers redacted Open the full capture : Actual Servio kitchen display with order tickets and preparation states" [ref=f25e131]':
+            - img "Actual Servio kitchen display with order tickets and preparation states — English, light-theme application screen · synthetic data; QA identifiers redacted" [ref=f25e133]
+            - generic [ref=f25e134]:
+              - generic [ref=f25e135]: English, light-theme application screen · synthetic data; QA identifiers redacted
+              - 'link "Open the full capture : Actual Servio kitchen display with order tickets and preparation states" [ref=f25e136] [cursor=pointer]':
+                - /url: /images/product/servio/matrix/kitchen-en-light.png
+                - text: Open the full capture
+                - generic [ref=f25e137]: ": Actual Servio kitchen display with order tickets and preparation states"
+      - region "One workspace, many moving parts." [ref=f25e138]:
+        - generic [ref=f25e139]:
+          - generic [ref=f25e140]:
+            - generic [ref=f25e141]:
+              - paragraph [ref=f25e142]: Beyond the ticket
+              - heading "One workspace, many moving parts." [level=2] [ref=f25e143]
+            - paragraph [ref=f25e144]: Practical tools for the people running service and the work around it.
+          - generic [ref=f25e145]:
+            - article [ref=f25e146]:
+              - heading "Cashier POS" [level=3] [ref=f25e147]
+              - generic [ref=f25e148]: "01"
+              - paragraph [ref=f25e149]: Take the next order from your menu with guest or table context.
+            - article [ref=f25e150]:
+              - heading "Kitchen display" [level=3] [ref=f25e151]
+              - generic [ref=f25e152]: "02"
+              - paragraph [ref=f25e153]: See and update preparation tickets in one queue.
+            - article [ref=f25e154]:
+              - heading "Inventory" [level=3] [ref=f25e155]
+              - generic [ref=f25e156]: "03"
+              - paragraph [ref=f25e157]: Keep tracked quantities visible as the business moves.
+            - article [ref=f25e158]:
+              - heading "Team records" [level=3] [ref=f25e159]
+              - generic [ref=f25e160]: "04"
+              - paragraph [ref=f25e161]: Organize staff, attendance and leave information.
+      - region "Set up the space your team will use." [ref=f25e162]:
+        - generic [ref=f25e163]:
+          - paragraph [ref=f25e164]: Getting started
+          - heading "Set up the space your team will use." [level=2] [ref=f25e165]
+          - list [ref=f25e166]:
+            - listitem [ref=f25e167]:
+              - generic [ref=f25e168]: "01"
+              - heading "Create an account" [level=3] [ref=f25e169]
+              - paragraph [ref=f25e170]: Register your restaurant and choose its workspace address.
+            - listitem [ref=f25e171]:
+              - generic [ref=f25e172]: "02"
+              - heading "Build your menu" [level=3] [ref=f25e173]
+              - paragraph [ref=f25e174]: Add the items and categories your team sells.
+            - listitem [ref=f25e175]:
+              - generic [ref=f25e176]: "03"
+              - heading "Bring in your team" [level=3] [ref=f25e177]
+              - paragraph [ref=f25e178]: Set up the people who take, prepare and manage orders.
+          - link "Create your restaurant account" [ref=f25e179] [cursor=pointer]:
+            - /url: /en/auth/register?billing=monthly
+      - region "Questions before you begin." [ref=f25e183]:
+        - generic [ref=f25e184]:
+          - generic [ref=f25e185]:
+            - paragraph [ref=f25e186]: Good to know
+            - heading "Questions before you begin." [level=2] [ref=f25e187]
+          - generic [ref=f25e188]:
+            - group [ref=f25e189]:
+              - generic "Can guests place orders online? +" [ref=f25e190] [cursor=pointer]
+            - group [ref=f25e191]:
+              - generic "Does the kitchen receive cashier orders too? +" [ref=f25e192] [cursor=pointer]
+            - group [ref=f25e193]:
+              - generic "Can I use Servio in Arabic? +" [ref=f25e194] [cursor=pointer]
+      - region "Make room for smoother service." [ref=f25e195]:
+        - generic [ref=f25e196]:
+          - heading "Make room for smoother service." [level=2] [ref=f25e197]
+          - paragraph [ref=f25e198]: Start with the restaurant workspace your team can grow into.
+          - link "Create your restaurant account" [ref=f25e199] [cursor=pointer]:
+            - /url: /en/auth/register?billing=monthly
+  - contentinfo [ref=f25e203]:
+    - generic [ref=f25e204]:
+      - generic [ref=f25e205]:
+        - generic [ref=f25e206]:
+          - link "SERVIO" [ref=f25e207] [cursor=pointer]:
+            - /url: /en
+          - paragraph [ref=f25e213]: Restaurant operations, thoughtfully connected.
+          - link "Create your restaurant account" [ref=f25e214] [cursor=pointer]:
+            - /url: /en/auth/register?billing=monthly
+        - navigation "Footer navigation" [ref=f25e218]:
+          - generic [ref=f25e219]:
+            - generic [ref=f25e220]:
+              - heading "Product" [level=2] [ref=f25e221]
+              - list [ref=f25e222]:
+                - listitem [ref=f25e223]:
+                  - link "Explore all features" [ref=f25e224] [cursor=pointer]:
+                    - /url: /en/features
+                - listitem [ref=f25e225]:
+                  - link "Cashier POS" [ref=f25e226] [cursor=pointer]:
+                    - /url: /en/features/pos
+                - listitem [ref=f25e227]:
+                  - link "Kitchen display" [ref=f25e228] [cursor=pointer]:
+                    - /url: /en/features/kitchen-display
+                - listitem [ref=f25e229]:
+                  - link "Online ordering" [ref=f25e230] [cursor=pointer]:
+                    - /url: /en/features/online-ordering
+                - listitem [ref=f25e231]:
+                  - link "Inventory" [ref=f25e232] [cursor=pointer]:
+                    - /url: /en/features/inventory
+                - listitem [ref=f25e233]:
+                  - link "Staff records" [ref=f25e234] [cursor=pointer]:
+                    - /url: /en/features/hr
+                - listitem [ref=f25e235]:
+                  - link "Operational overview" [ref=f25e236] [cursor=pointer]:
+                    - /url: /en/features/analytics
+                - listitem [ref=f25e237]:
+                  - link "Storefront customization" [ref=f25e238] [cursor=pointer]:
+                    - /url: /en/features/website-builder
+            - generic [ref=f25e239]:
+              - heading "Explore" [level=2] [ref=f25e240]
+              - list [ref=f25e241]:
+                - listitem [ref=f25e242]:
+                  - link "How it works" [ref=f25e243] [cursor=pointer]:
+                    - /url: /en/how-it-works
+                - listitem [ref=f25e244]:
+                  - link "Product tour" [ref=f25e245] [cursor=pointer]:
+                    - /url: /en/demo
+                - listitem [ref=f25e246]:
+                  - link "Demo options" [ref=f25e247] [cursor=pointer]:
+                    - /url: /en/contact
+                - listitem [ref=f25e248]:
+                  - link "Pricing" [ref=f25e249] [cursor=pointer]:
+                    - /url: /en/pricing
+            - generic [ref=f25e250]:
+              - heading "Account" [level=2] [ref=f25e251]
+              - list [ref=f25e252]:
+                - listitem [ref=f25e253]:
+                  - link "Log in" [ref=f25e254] [cursor=pointer]:
+                    - /url: /en/auth/login
+                - listitem [ref=f25e255]:
+                  - link "Create your restaurant account" [ref=f25e256] [cursor=pointer]:
+                    - /url: /en/auth/register
+            - generic [ref=f25e257]:
+              - heading "Company" [level=2] [ref=f25e258]
+              - list [ref=f25e259]:
+                - listitem [ref=f25e260]:
+                  - link "Privacy" [ref=f25e261] [cursor=pointer]:
+                    - /url: /en/privacy
+                - listitem [ref=f25e262]:
+                  - link "Demo information" [ref=f25e263] [cursor=pointer]:
+                    - /url: /en/contact
+      - generic [ref=f25e264]:
+        - paragraph [ref=f25e265]: Product screens use synthetic data. Availability and setup requirements are described on each feature page.
+        - generic [ref=f25e266]: © 2026 SERVIO
+  - button "Open Next.js Dev Tools" [ref=f25e272] [cursor=pointer]

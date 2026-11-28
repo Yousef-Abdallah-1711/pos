@@ -2,12 +2,16 @@
 
 Updated 2026-11-27. Repository: `C:/Users/Yousef/Desktop/Projects/POSS`. App: `frontend/apps/landing`. Continue in **this worktree**. The landing implementation and evidence were prepared for integration through a pull request. Unrelated working files in other apps and local browser/audit artifacts were excluded; preserve them. No deployment was performed.
 
+Repository remote: `https://github.com/Yousef-Abdallah-1711/pos`. Landing branch: `feature/servio-bento-showcase-20261127`, head `8be2a08b`, [PR #137](https://github.com/Yousef-Abdallah-1711/pos/pull/137). At this update the PR is open. An earlier image CI failed performance; the font-loading change passed Lighthouse on the next run, which failed Firefox acceptance because navigation canceled font requests. The acceptance script now waits for font completion and new CI is pending. Verify the PR and remote main before claiming a merge. After integration, replace this paragraph with the verified merge commit and current branch. Do not interpret the commit SHA as the final remote `main` SHA.
+
 ## First steps for the next agent
 
 1. Read `CODING_STANDARDS.md` in full. It is the repository's primary code policy.
 2. Read `frontend/apps/landing/AGENTS.md`; for Next.js API/convention changes, read the relevant installed guide under `frontend/apps/landing/node_modules/next/dist/docs/`.
 3. Read `frontend/apps/landing/DESIGN.md`, `.gsap/current-state.md`, and `docs/landing-interactive-experience/product-capability-register.md` before altering layout, motion, or product claims.
 4. Run `git status --short` and protect existing user work. The local landing preview is available at `http://localhost:3001/en` and `/ar` when the dev or production server is running.
+
+During this handoff session the verified production preview was also running at `http://localhost:3016/en` and `/ar` in `servio-landing-font-test`; availability depends on that local container remaining active. The unrelated host process at port 3001 displayed the unresolved Windows dependency-link error, so do not assume port 3001 is healthy without checking it.
 
 ## What is live
 
@@ -32,6 +36,30 @@ The old static concept HTML pages (`coral.html`, `hybrid.html`, `ultraviolet.htm
 | 11 | Pricing bridge | `LandingPricing.tsx` | Open the real pricing route or register. No unsupported price or payment promise is hardcoded here. |
 | 12 | FAQ | `ConversionLanding.tsx` | Expand native `details` answers. |
 | 13 | Final CTA | `ConversionLanding.tsx` | Register a restaurant account through the real localized form. |
+
+## Section implementation map
+
+All section routes are `/{locale}`. Shared Coral tokens, typography, responsive breakpoints and RTL selectors are in `frontend/apps/landing/src/styles/marketing-coral.css`; interactive layout and motion fallbacks are in `src/styles/marketing-interactive.css`. `src/content/conversionCopy.ts` supplies EN/AR copy except the order story (`src/content/orderStoryCopy.ts`), feature showcase (`src/content/features.ts` and `src/i18n/messages/{en,ar}/features.json`), and other component-local labels. Product captures are selected by `src/components/marketing/{ProductCapture,CaptureMedia}.tsx` from `public/images/product/servio/matrix/`; hero photography is `public/images/marketing/cafe-interior.jpg`. The matrix has English/Arabic and light/dark variants with synthetic data and a full-capture link. The script `src/components/marketing/desktopMotion.ts` lazily loads GSAP for eligible media queries and cleans up on changes.
+
+| Section and anchor | Component / selectors | Motion and fallback |
+| --- | --- | --- |
+| Hero / `#cv-hero-title` | `ConversionLanding.tsx`, `HeroCaptureMotion.tsx`; `.cv-hero`, `.cv-hero-capture` | Desktop capture motion; static on narrow or reduced-motion displays. |
+| Problems / `#cv-problem-title` | `OperationalBento.tsx`; `.cv-problem`, `.cv-bento-*` | Local card timelines and illustrative step controls; no pin. Mobile/reduced motion keeps manual controls. The actual POS screenshot remains static. |
+| Order journey / `#how-orders-move` | `OrderStory.tsx`; `.cv-story-*` | Desktop CSS sticky stage with ScrollTrigger state synchronization; narrow layout stacks stage and steps. |
+| Online / `#online-ordering` | `ConversionLanding.tsx`, `WorkflowDemo.tsx`; `.cv-online`, `.cv-workflow-demo--online` | Selectable illustrative states; no API mutation. |
+| Kitchen / `#kitchen` | `ConversionLanding.tsx`, `WorkflowDemo.tsx`; `.cv-kitchen`, `.cv-workflow-demo--kitchen` | Selectable illustrative preparation states; no API mutation. |
+| Layered statement | `LayeredTypography.tsx`; `.cv-layered-*` | Scoped desktop parallax; static fallback. |
+| Showcase / `#capabilities` | `FeatureShowcase.tsx`; `.cv-showcase-*`, `.cv-feature-slide-*` | Desktop stage-only ScrollTrigger pin starts below the measured header; track travel is measured overflow. Width ≤900px, height <760px, and reduced motion use native scroll snap. RTL direction is handled explicitly. |
+| Ecosystem | `BusinessEcosystem.tsx`; `.cv-ecosystem-*` | Selectable module nodes; desktop line animation and stacked mobile layout. |
+| Management | `ManagementExperience.tsx`; `.cv-management-*` | Selectable real capture views and labeled sample metrics; reduced motion avoids nonessential effects. |
+| Setup / `#getting-started` | `StackedSetupCards.tsx`; `.cv-setup-*` | Desktop sticky cards with scoped scroll effect; static stack on narrow screens. |
+| Pricing | `LandingPricing.tsx`; `.cv-pricing-*` | Links to pricing and registration; responsive split stacks. |
+| FAQ | `ConversionLanding.tsx`; `.cv-faq-*` | Native `details` disclosure; no animation dependency. |
+| Final CTA | `ConversionLanding.tsx`, `TrialLink.tsx`; `.cv-close` | Localized registration link with funnel attribution. |
+
+The shared `Navbar.tsx`/`Footer.tsx` and `src/styles/marketing-navigation.css` provide the header, locale and theme controls, mobile menu and footer. RTL and light/dark use the root `lang`, `dir`, and theme class. Test the complete page using `scripts/verify-operational-landing.mjs` with `SERVIO_QA_URL`, and the shared routes and forms with the other scripts and `tests/registration-e2e/`. Motion details and current verification gaps are documented in `.gsap/current-state.md` and `docs/landing-interactive-experience/operational-bento-showcase-report.md`.
+
+`src/components/RootDocument.tsx` loads Manrope, Fraunces and IBM Plex Sans Arabic. The landing performance change disables automatic preloading for Plex so English does not fetch unused Arabic font variants; the browser still loads it when needed. See `docs/landing-interactive-experience/performance-and-accessibility.md` for the measured tradeoff and pending CI result. Do not assume the 2.5-second LCP goal has passed.
 
 English and Arabic content have equal priority. The route sets `lang` and `dir`; `next-themes` stores the choice under `servio-marketing-theme`. The hero and footer retain espresso treatment in both modes. Arabic copy is real Arabic, not auto-translation at runtime.
 
@@ -115,7 +143,11 @@ docker compose -f docker-compose.pos-test.yml -f docs/landing-interactive-experi
 npx pnpm --filter @pos-saas/dashboard dev
 ```
 
-With landing on port 3001 and dashboard on 3002, set `REG_E2E_LANDING_URL=http://localhost:3001`, `REG_E2E_DASHBOARD_URL=http://localhost:3002`, `REG_E2E_API_URL=http://localhost:8080/api/v1`, and `REG_E2E_BROWSER_CHANNEL=chrome`; run `npx pnpm --filter @pos-saas/landing exec playwright test --config playwright.registration.config.ts tests/registration-e2e --reporter=line`. After testing, `docker compose -f docker-compose.pos-test.yml -f docs/landing-interactive-experience/compose-auth-qa.override.yml down -v` removes the disposable services and database. Check `docker ps -a --filter name=pos-test` afterward; a detached one-off `backend migrate` container remained in this run and had to be removed separately before its Docker network could be removed. The unrelated `pos-postgres` container was left running. The registration suite writes accounts to its temporary database.
+With landing on port 3001 and dashboard on 3002, set `REG_E2E_LANDING_URL=http://localhost:3001`, `REG_E2E_DASHBOARD_URL=http://localhost:3002`, `REG_E2E_API_URL=http://localhost:8080/api/v1`, and `REG_E2E_BROWSER_CHANNEL=chrome`; run `npx pnpm --filter @pos-saas/landing exec playwright test --config playwright.registration.config.ts tests/registration-e2e --reporter=line`. The suite writes accounts to its temporary database. Before any cleanup, confirm the `pos-test` project and its data were created for your own disposable run and are not in use by another task. Only then does `docker compose -f docker-compose.pos-test.yml -f docs/landing-interactive-experience/compose-auth-qa.override.yml down -v` remove those services and their database. Do not remove unrelated containers or volumes.
+
+### Historical verification (not the final-source verdict)
+
+The following paragraphs record earlier runs and must not be mistaken for the latest source or current CI. The latest source passed 93 unit tests and a 120-case Chromium/Firefox/WebKit operational matrix with four reduced-motion and 32 route checks; see `docs/dashboard-appearance-discovery/progress.md` and `docs/landing-interactive-experience/artifacts/operational-revision/font-final-results.json`. The most recent completed image CI passed Lighthouse performance but failed Firefox acceptance because navigation canceled font requests; a test synchronization fix is awaiting a fresh CI result. The separate PR authentication job was skipped. The latest sampled Arabic CI LCP was 2.86 s, above the 2.5 s target.
 
 The production build, typecheck, and lint passed. Lint had 11 existing warnings in auth/API code and zero errors. Vitest passed **17 files / 92 tests**; jsdom prints its known unsupported navigation messages during otherwise passing auth tests. The production Chrome matrix passed **12/12** EN/AR × light/dark × 1440/768/390 cases with full-page PNGs and interactions. Firefox and WebKit passed **8/8 each** for EN/AR × light/dark × 390/1440 layout checks. The route/width sweep passed **44/44**: 30 localized marketing/auth routes at 390px and 14 localized homepage widths from 320px to 1920px. Evidence: `docs/landing-interactive-experience/artifacts/acceptance/results.json`, its twelve PNGs, and `docs/landing-interactive-experience/artifacts/route-smoke.json`. A manual reduced-motion desktop check found zero pin spacers and a native horizontally scrollable showcase. The local machine has Node 24.15.0 while the workspace declares ≥24.22.3; build and tests still completed.
 

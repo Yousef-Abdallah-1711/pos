@@ -1,0 +1,31 @@
+test_id,scenario,metric,prompt_stated_piasters,oracle_expected_piasters,oracle_vs_prompt,app_actual_piasters,difference_piasters,status,notes
+ORC-001,S13-deterministic-control,ending Cash,9540000,9540000,PASS,,,NOT TESTED,app actual pending runtime test
+ORC-002,S13-deterministic-control,ending Inventory,1600000,1600000,PASS,,,NOT TESTED,app actual pending runtime test
+ORC-003,S13-deterministic-control,ending Input VAT,280000,280000,PASS,,,NOT TESTED,app actual pending runtime test
+ORC-004,S13-deterministic-control,ending Accounts Payable,1280000,1280000,PASS,,,NOT TESTED,app actual pending runtime test
+ORC-005,S13-deterministic-control,ending Output VAT,140000,140000,PASS,,,NOT TESTED,app actual pending runtime test
+ORC-006,S13-deterministic-control,ending Payroll Payable,200000,200000,PASS,,,NOT TESTED,app actual pending runtime test
+ORC-007,S13-deterministic-control,ending Owner Capital,10000000,10000000,PASS,,,NOT TESTED,app actual pending runtime test
+ORC-008,S13-deterministic-control,ending Revenue,1000000,1000000,PASS,,,NOT TESTED,app actual pending runtime test
+ORC-009,S13-deterministic-control,ending COGS,400000,400000,PASS,,,NOT TESTED,app actual pending runtime test
+ORC-010,S13-deterministic-control,ending Rent Expense,300000,300000,PASS,,,NOT TESTED,app actual pending runtime test
+ORC-011,S13-deterministic-control,ending Payroll Expense,500000,500000,PASS,,,NOT TESTED,app actual pending runtime test
+ORC-012,S13-deterministic-control,net profit (loss),-200000,-200000,PASS,,,NOT TESTED,app actual pending runtime test
+ORC-013,S13-deterministic-control,gross profit,600000,600000,PASS,,,NOT TESTED,app actual pending runtime test
+ORC-014,S13-deterministic-control,opex,800000,800000,PASS,,,NOT TESTED,app actual pending runtime test
+ORC-015,S13-deterministic-control,total assets,11420000,11420000,PASS,,,NOT TESTED,app actual pending runtime test
+ORC-016,S13-deterministic-control,total liabilities,1620000,1620000,PASS,,,NOT TESTED,app actual pending runtime test
+ORC-017,S13-deterministic-control,total equity incl. current-period,9800000,9800000,PASS,,,NOT TESTED,app actual pending runtime test
+ORC-018,S13-deterministic-control,BS residual,0,0,PASS,,,NOT TESTED,app actual pending runtime test
+ORC-019,S13-deterministic-control,TB debits,12620000,12620000,PASS,,,NOT TESTED,app actual pending runtime test
+ORC-020,S13-deterministic-control,TB credits,12620000,12620000,PASS,,,NOT TESTED,app actual pending runtime test
+ORC-021,S13-deterministic-control,TB difference,0,0,PASS,,,NOT TESTED,app actual pending runtime test
+ORC-022,S13-deterministic-control,CF operating,-460000,-460000,PASS,,,NOT TESTED,app actual pending runtime test
+ORC-023,S13-deterministic-control,CF investing,0,0,PASS,,,NOT TESTED,app actual pending runtime test
+ORC-024,S13-deterministic-control,CF financing,10000000,10000000,PASS,,,NOT TESTED,app actual pending runtime test
+ORC-025,S13-deterministic-control,CF net change,9540000,9540000,PASS,,,NOT TESTED,app actual pending runtime test
+ORC-026,S13-deterministic-control,CF closing cash,9540000,9540000,PASS,,,NOT TESTED,app actual pending runtime test
+ORC-027,S13-deterministic-control,VAT input,280000,280000,PASS,,,NOT TESTED,app actual pending runtime test
+ORC-028,S13-deterministic-control,VAT output,140000,140000,PASS,,,NOT TESTED,app actual pending runtime test
+ORC-029,S13-deterministic-control,VAT net recoverable,140000,140000,PASS,,,NOT TESTED,app actual pending runtime test
+ORC-030,S13-deterministic-control,invariant: opening cash(0)+net movement = closing,9540000,9540000,PASS,,,NOT TESTED,app actual pending runtime test

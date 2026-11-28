@@ -1,0 +1,21 @@
+{
+ "run": "RUN-004",
+ "log": [
+  {
+   "n": 4,
+   "http": 409,
+   "resp": "{\"error\":\"table number already exists for this restaurant\"}"
+  },
+  {
+   "n": 1,
+   "http": 409,
+   "resp": "{\"error\":\"table number already exists for this restaurant\"}"
+  },
+  {
+   "n": 12,
+   "http": 409,
+   "resp": "{\"error\":\"table number already exists for this restaurant\"}"
+  }
+ ],
+ "tables": "1|4|2026-11-26 01:34:37.096313\n2|1|2026-11-26 21:10:52.421009\n3|12|2026-11-26 21:12:11.481773"
+}

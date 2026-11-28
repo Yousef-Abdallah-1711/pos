@@ -1,0 +1,16 @@
+{
+ "page": "reports/financial/inventory-valuation",
+ "text": "POS Dashboard\nDashboard\nCashier POS\nKitchen Display\nOrders\nProducts\nHuman Resources\nAccounting\nSuppliers\nFinancial Reports\nReports\nTheme Builder\nSettings\nEnglish\nA\n\nAudit Owner C\n\nOwner\n\nInventory Valuation\n\nInventory quantity and cost valuation as of a selected date.\n\nRefresh\nExport PDF\nInventory Valuation\nProduct\tQty\tCost / Unit\tTotal Value\nAudit Burger\t49.00\tEGP 4,000.00\tEGP 196,000.00\nTotal\t\tEGP 196,000.00",
+ "calls": [
+  {
+   "u": "/reports/financial/inventory-valuation?as_of=2026-11-25",
+   "s": 200,
+   "body": "{\"data\":{\"as_of_date\":\"2026-11-25\",\"rows\":[{\"product_id\":2,\"product_name\":\"Audit Burger\",\"quantity\":49,\"cost_per_unit\":4000,\"total_value\":196000}],\"total_value\":196000},\"success\":true}"
+  },
+  {
+   "u": "/reports/financial/inventory-valuation?as_of=2026-11-25",
+   "s": 200,
+   "body": "{\"data\":{\"as_of_date\":\"2026-11-25\",\"rows\":[{\"product_id\":2,\"product_name\":\"Audit Burger\",\"quantity\":49,\"cost_per_unit\":4000,\"total_value\":196000}],\"total_value\":196000},\"success\":true}"
+  }
+ ]
+}

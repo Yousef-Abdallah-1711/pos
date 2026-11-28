@@ -1,0 +1,34 @@
+{
+ "run": "RUN-003",
+ "note": "read endpoints only; concurrent headed-Chrome sessions were running on the same host",
+ "out": {
+  "10": {
+   "requests": 1894,
+   "rps": 126,
+   "errors": 255,
+   "errorRate": 13.46,
+   "p50": 63,
+   "p95": 189,
+   "max": 787
+  },
+  "25": {
+   "requests": 1883,
+   "rps": 126,
+   "errors": 312,
+   "errorRate": 16.57,
+   "p50": 175,
+   "p95": 416,
+   "max": 654
+  },
+  "50": {
+   "requests": 2184,
+   "rps": 146,
+   "errors": 363,
+   "errorRate": 16.62,
+   "p50": 299,
+   "p95": 749,
+   "max": 1697
+  }
+ },
+ "analysis": "All counted errors are HTTP 429 from the /kds/queue rate limiter (retry-after 6 s) - verified with a per-endpoint status breakdown (25 VU x 40 requests: /products, /admin/orders, /accounting/trial-balance, /reports/* all 200; /kds/queue 150 x 429). Excluding the KDS endpoint the error rate is 0."
+}

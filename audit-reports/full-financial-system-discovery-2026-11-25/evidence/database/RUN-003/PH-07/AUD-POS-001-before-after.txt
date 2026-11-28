@@ -1,0 +1,16 @@
+BEFORE
+orders|36|37
+journals|64|72
+stock|39|0
+outbox|17|0
+AFTER
+orders|37|38
+journals|66|74
+stock|33|0
+outbox|18|0
+ORDER: 38|confirmed|paid|cash|60000.00|6000.00|66000.00
+LATEST JOURNAL: 74|JE-2026-00063|order|posted|24000.00
+LINES:
+1130|0.00|24000.00
+5110|24000.00|0.00
+ORACLE: subtotal 20000; tax10%=2000 total 22000; tax14%=2800 total 22800

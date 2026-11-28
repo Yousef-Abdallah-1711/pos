@@ -1,0 +1,207 @@
+account_budgets|f|f
+accounting_event_outbox|f|f
+accounting_event_redrive_audit|f|f
+accounting_inventory_movement_events|f|f
+attendance|f|f
+audit_export_logs|t|t
+auth_identities|t|t
+auto_posting_rules|f|f
+bank_accounts_ledger|f|f
+bank_reconciliation_lines|f|f
+bank_reconciliation_sessions|f|f
+categories|f|f
+chart_of_accounts|f|f
+customers_accounting|f|f
+driver_assignments|f|f
+driver_location_history|f|f
+drivers|f|f
+e_invoice_submissions|t|t
+email_change_requests|t|t
+employee_roles|f|f
+employees|f|f
+employment_contracts|f|f
+exchange_rates|f|f
+fiscal_periods|f|f
+fixed_assets|f|f
+general_ledger|f|f
+homepage_sections|f|f
+hr_audit_logs|f|f
+identity_email_challenges|t|t
+impersonation_sessions|f|f
+insurance_tracking|f|f
+inventory|f|f
+inventory_movements|f|f
+invoice_customer_lines|f|f
+invoice_delivery_logs|t|t
+invoice_supplier_lines|f|f
+invoices_customer|f|f
+invoices_supplier|f|f
+journal_entries|f|f
+journal_entry_lines|f|f
+kds_queue|f|f
+kds_settings|f|f
+leaves|f|f
+low_stock_alerts|f|f
+membership_restaurant_grants|t|t
+membership_role_grants|t|t
+modules|f|f
+notification_preferences|t|t
+notification_read_tracking|f|f
+notifications|t|t
+order_item_cancellations|f|f
+order_items|f|f
+order_status_history|f|f
+order_stock_reservations|f|f
+orders|f|f
+password_change_history|t|t
+payments|t|t
+payments_made|f|f
+payments_received|f|f
+performance_reviews|f|f
+permission_audit_logs|t|t
+permission_levels|f|f
+product_audit_log|f|f
+product_images|f|f
+products|f|f
+recurring_journal_templates|f|f
+report_export_audit_logs|t|t
+resignations|f|f
+restaurant_config|f|f
+restaurant_settings|f|f
+restaurant_tables|f|f
+restaurant_themes|f|f
+restaurants|f|f
+role_permissions|t|t
+roles|f|f
+salaries|f|f
+schema_migrations|f|f
+subscription_plans|f|f
+super_admin_audit_logs|f|f
+super_admins|f|f
+supplier_payment_schedules|f|f
+suppliers|f|f
+table_layouts|f|f
+tax_periods|f|f
+tenant_memberships|t|t
+tenant_subscription_history|f|f
+tenants|f|f
+theme_components|f|f
+theme_history|f|f
+theme_presets|f|f
+theme_sections|f|f
+theme_snapshots|f|f
+themes|f|f
+themes_v2|f|f
+training_records|f|f
+user_auth_audit_logs|t|t
+user_roles|t|t
+user_settings|t|t
+user_settings_audit_log|t|t
+users|f|f
+webhook_retry_queue|f|f
+website_settings|f|f
+public|audit_export_logs|audit_export_logs_tenant_restaurant_scope|PERMISSIVE|{pos_app}|ALL|((tenant_id = (NULLIF(current_setting('app.tenant_id'::text, true), ''::text))::bigint) AND (restaurant_id = (NULLIF(current_setting('app.restaurant_id'::text, true), ''::text))::bigint) AND ((generated_by IS NULL) OR (EXISTS ( SELECT 1
+   FROM users actor
+  WHERE ((actor.id = audit_export_logs.generated_by) AND (actor.tenant_id = audit_export_logs.tenant_id) AND ((actor.restaurant_id IS NULL) OR (actor.restaurant_id = audit_export_logs.restaurant_id)))))))|((tenant_id = (NULLIF(current_setting('app.tenant_id'::text, true), ''::text))::bigint) AND (restaurant_id = (NULLIF(current_setting('app.restaurant_id'::text, true), ''::text))::bigint) AND ((generated_by IS NULL) OR (EXISTS ( SELECT 1
+   FROM users actor
+  WHERE ((actor.id = audit_export_logs.generated_by) AND (actor.tenant_id = audit_export_logs.tenant_id) AND ((actor.restaurant_id IS NULL) OR (actor.restaurant_id = audit_export_logs.restaurant_id)))))))
+public|auth_identities|auth_identities_migrator_only|PERMISSIVE|{pos_migrator}|ALL|true|true
+public|e_invoice_submissions|e_invoice_submissions_tenant_restaurant_scope|PERMISSIVE|{pos_accounting,pos_app}|ALL|((tenant_id = (NULLIF(current_setting('app.tenant_id'::text, true), ''::text))::bigint) AND (restaurant_id = (NULLIF(current_setting('app.restaurant_id'::text, true), ''::text))::bigint) AND ((((invoice_type)::text = 'customer'::text) AND (EXISTS ( SELECT 1
+   FROM invoices_customer invoice
+  WHERE ((invoice.id = e_invoice_submissions.invoice_id) AND (invoice.tenant_id = e_invoice_submissions.tenant_id) AND (invoice.restaurant_id = e_invoice_submissions.restaurant_id))))) OR (((invoice_type)::text = 'supplier'::text) AND (EXISTS ( SELECT 1
+   FROM invoices_supplier invoice
+  WHERE ((invoice.id = e_invoice_submissions.invoice_id) AND (invoice.tenant_id = e_invoice_submissions.tenant_id) AND (invoice.restaurant_id = e_invoice_submissions.restaurant_id)))))) AND ((created_by IS NULL) OR (EXISTS ( SELECT 1
+   FROM users actor
+  WHERE ((actor.id = e_invoice_submissions.created_by) AND (actor.tenant_id = e_invoice_submissions.tenant_id) AND ((actor.restaurant_id IS NULL) OR (actor.restaurant_id = e_invoice_submissions.restaurant_id)))))))|((tenant_id = (NULLIF(current_setting('app.tenant_id'::text, true), ''::text))::bigint) AND (restaurant_id = (NULLIF(current_setting('app.restaurant_id'::text, true), ''::text))::bigint) AND ((((invoice_type)::text = 'customer'::text) AND (EXISTS ( SELECT 1
+   FROM invoices_customer invoice
+  WHERE ((invoice.id = e_invoice_submissions.invoice_id) AND (invoice.tenant_id = e_invoice_submissions.tenant_id) AND (invoice.restaurant_id = e_invoice_submissions.restaurant_id))))) OR (((invoice_type)::text = 'supplier'::text) AND (EXISTS ( SELECT 1
+   FROM invoices_supplier invoice
+  WHERE ((invoice.id = e_invoice_submissions.invoice_id) AND (invoice.tenant_id = e_invoice_submissions.tenant_id) AND (invoice.restaurant_id = e_invoice_submissions.restaurant_id)))))) AND ((created_by IS NULL) OR (EXISTS ( SELECT 1
+   FROM users actor
+  WHERE ((actor.id = e_invoice_submissions.created_by) AND (actor.tenant_id = e_invoice_submissions.tenant_id) AND ((actor.restaurant_id IS NULL) OR (actor.restaurant_id = e_invoice_submissions.restaurant_id)))))))
+public|email_change_requests|email_change_requests_tenant_scope|PERMISSIVE|{pos_app}|ALL|(EXISTS ( SELECT 1
+   FROM users owner_user
+  WHERE ((owner_user.id = email_change_requests.user_id) AND (owner_user.tenant_id = (NULLIF(current_setting('app.tenant_id'::text, true), ''::text))::bigint))))|(EXISTS ( SELECT 1
+   FROM users owner_user
+  WHERE ((owner_user.id = email_change_requests.user_id) AND (owner_user.tenant_id = (NULLIF(current_setting('app.tenant_id'::text, true), ''::text))::bigint))))
+public|identity_email_challenges|identity_email_challenges_migrator_only|PERMISSIVE|{pos_migrator}|ALL|true|true
+public|invoice_delivery_logs|invoice_delivery_logs_tenant_restaurant_scope|PERMISSIVE|{pos_app}|ALL|((tenant_id = (NULLIF(current_setting('app.tenant_id'::text, true), ''::text))::bigint) AND (restaurant_id = (NULLIF(current_setting('app.restaurant_id'::text, true), ''::text))::bigint) AND (EXISTS ( SELECT 1
+   FROM invoices_customer invoice
+  WHERE ((invoice.id = invoice_delivery_logs.invoice_id) AND (invoice.tenant_id = invoice_delivery_logs.tenant_id) AND (invoice.restaurant_id = invoice_delivery_logs.restaurant_id)))) AND ((created_by IS NULL) OR (EXISTS ( SELECT 1
+   FROM users actor
+  WHERE ((actor.id = invoice_delivery_logs.created_by) AND (actor.tenant_id = invoice_delivery_logs.tenant_id) AND ((actor.restaurant_id IS NULL) OR (actor.restaurant_id = invoice_delivery_logs.restaurant_id)))))))|((tenant_id = (NULLIF(current_setting('app.tenant_id'::text, true), ''::text))::bigint) AND (restaurant_id = (NULLIF(current_setting('app.restaurant_id'::text, true), ''::text))::bigint) AND (EXISTS ( SELECT 1
+   FROM invoices_customer invoice
+  WHERE ((invoice.id = invoice_delivery_logs.invoice_id) AND (invoice.tenant_id = invoice_delivery_logs.tenant_id) AND (invoice.restaurant_id = invoice_delivery_logs.restaurant_id)))) AND ((created_by IS NULL) OR (EXISTS ( SELECT 1
+   FROM users actor
+  WHERE ((actor.id = invoice_delivery_logs.created_by) AND (actor.tenant_id = invoice_delivery_logs.tenant_id) AND ((actor.restaurant_id IS NULL) OR (actor.restaurant_id = invoice_delivery_logs.restaurant_id)))))))
+public|membership_restaurant_grants|membership_restaurant_grants_migrator_only|PERMISSIVE|{pos_migrator}|ALL|true|true
+public|membership_role_grants|membership_role_grants_migrator_only|PERMISSIVE|{pos_migrator}|ALL|true|true
+public|notification_preferences|notification_preferences_tenant_scope|PERMISSIVE|{pos_app}|ALL|(EXISTS ( SELECT 1
+   FROM users owner_user
+  WHERE ((owner_user.id = notification_preferences.user_id) AND (owner_user.tenant_id = (NULLIF(current_setting('app.tenant_id'::text, true), ''::text))::bigint))))|(EXISTS ( SELECT 1
+   FROM users owner_user
+  WHERE ((owner_user.id = notification_preferences.user_id) AND (owner_user.tenant_id = (NULLIF(current_setting('app.tenant_id'::text, true), ''::text))::bigint))))
+public|notifications|notifications_user_tenant_restaurant_scope|PERMISSIVE|{pos_app}|ALL|((tenant_id = (NULLIF(current_setting('app.tenant_id'::text, true), ''::text))::bigint) AND (restaurant_id = (NULLIF(current_setting('app.restaurant_id'::text, true), ''::text))::bigint) AND (user_id = (NULLIF(current_setting('app.user_id'::text, true), ''::text))::bigint) AND (EXISTS ( SELECT 1
+   FROM restaurants owner_restaurant
+  WHERE ((owner_restaurant.id = notifications.restaurant_id) AND (owner_restaurant.tenant_id = notifications.tenant_id)))) AND (EXISTS ( SELECT 1
+   FROM users owner_user
+  WHERE ((owner_user.id = notifications.user_id) AND (owner_user.tenant_id = notifications.tenant_id) AND (owner_user.restaurant_id = notifications.restaurant_id)))))|((tenant_id = (NULLIF(current_setting('app.tenant_id'::text, true), ''::text))::bigint) AND (restaurant_id = (NULLIF(current_setting('app.restaurant_id'::text, true), ''::text))::bigint) AND (user_id = (NULLIF(current_setting('app.user_id'::text, true), ''::text))::bigint) AND (EXISTS ( SELECT 1
+   FROM restaurants owner_restaurant
+  WHERE ((owner_restaurant.id = notifications.restaurant_id) AND (owner_restaurant.tenant_id = notifications.tenant_id)))) AND (EXISTS ( SELECT 1
+   FROM users owner_user
+  WHERE ((owner_user.id = notifications.user_id) AND (owner_user.tenant_id = notifications.tenant_id) AND (owner_user.restaurant_id = notifications.restaurant_id)))))
+public|password_change_history|password_change_history_tenant_scope|PERMISSIVE|{pos_app}|ALL|(EXISTS ( SELECT 1
+   FROM users owner_user
+  WHERE ((owner_user.id = password_change_history.user_id) AND (owner_user.tenant_id = (NULLIF(current_setting('app.tenant_id'::text, true), ''::text))::bigint))))|(EXISTS ( SELECT 1
+   FROM users owner_user
+  WHERE ((owner_user.id = password_change_history.user_id) AND (owner_user.tenant_id = (NULLIF(current_setting('app.tenant_id'::text, true), ''::text))::bigint))))
+public|payments|payments_migrator_access|PERMISSIVE|{pos_migrator}|ALL|true|true
+public|payments|payments_tenant_isolation|PERMISSIVE|{pos_app}|ALL|(tenant_id = (NULLIF(current_setting('app.tenant_id'::text, true), ''::text))::bigint)|(tenant_id = (NULLIF(current_setting('app.tenant_id'::text, true), ''::text))::bigint)
+public|permission_audit_logs|permission_audit_logs_tenant_scope|PERMISSIVE|{pos_accounting,pos_app}|SELECT|((tenant_id = (NULLIF(current_setting('app.tenant_id'::text, true), ''::text))::bigint) AND (EXISTS ( SELECT 1
+   FROM users actor
+  WHERE ((actor.id = permission_audit_logs.admin_id) AND (actor.tenant_id = permission_audit_logs.tenant_id)))))|
+public|report_export_audit_logs|report_export_audit_logs_tenant_restaurant_scope|PERMISSIVE|{pos_app}|ALL|((tenant_id = (NULLIF(current_setting('app.tenant_id'::text, true), ''::text))::bigint) AND (restaurant_id = (NULLIF(current_setting('app.restaurant_id'::text, true), ''::text))::bigint) AND (EXISTS ( SELECT 1
+   FROM users actor
+  WHERE ((actor.id = report_export_audit_logs.user_id) AND (actor.tenant_id = report_export_audit_logs.tenant_id) AND ((actor.restaurant_id IS NULL) OR (actor.restaurant_id = report_export_audit_logs.restaurant_id))))))|((tenant_id = (NULLIF(current_setting('app.tenant_id'::text, true), ''::text))::bigint) AND (restaurant_id = (NULLIF(current_setting('app.restaurant_id'::text, true), ''::text))::bigint) AND (EXISTS ( SELECT 1
+   FROM users actor
+  WHERE ((actor.id = report_export_audit_logs.user_id) AND (actor.tenant_id = report_export_audit_logs.tenant_id) AND ((actor.restaurant_id IS NULL) OR (actor.restaurant_id = report_export_audit_logs.restaurant_id))))))
+public|role_permissions|role_permissions_migrator_access|PERMISSIVE|{pos_migrator}|ALL|true|true
+public|role_permissions|role_permissions_restaurant_scope|PERMISSIVE|{pos_app}|ALL|((tenant_id = (NULLIF(current_setting('app.tenant_id'::text, true), ''::text))::bigint) AND (EXISTS ( SELECT 1
+   FROM roles scoped_role
+  WHERE ((scoped_role.id = role_permissions.role_id) AND (scoped_role.tenant_id = role_permissions.tenant_id) AND (scoped_role.restaurant_id = (NULLIF(current_setting('app.restaurant_id'::text, true), ''::text))::bigint)))))|((tenant_id = (NULLIF(current_setting('app.tenant_id'::text, true), ''::text))::bigint) AND (EXISTS ( SELECT 1
+   FROM roles scoped_role
+  WHERE ((scoped_role.id = role_permissions.role_id) AND (scoped_role.tenant_id = role_permissions.tenant_id) AND (scoped_role.restaurant_id = (NULLIF(current_setting('app.restaurant_id'::text, true), ''::text))::bigint)))))
+public|tenant_memberships|tenant_memberships_migrator_only|PERMISSIVE|{pos_migrator}|ALL|true|true
+public|user_auth_audit_logs|user_auth_audit_tenant_scope|PERMISSIVE|{pos_app}|ALL|((tenant_id = (NULLIF(current_setting('app.tenant_id'::text, true), ''::text))::bigint) AND ((user_id IS NULL) OR (EXISTS ( SELECT 1
+   FROM users audit_user
+  WHERE ((audit_user.id = user_auth_audit_logs.user_id) AND (audit_user.tenant_id = user_auth_audit_logs.tenant_id))))))|((tenant_id = (NULLIF(current_setting('app.tenant_id'::text, true), ''::text))::bigint) AND ((user_id IS NULL) OR (EXISTS ( SELECT 1
+   FROM users audit_user
+  WHERE ((audit_user.id = user_auth_audit_logs.user_id) AND (audit_user.tenant_id = user_auth_audit_logs.tenant_id))))))
+public|user_roles|user_roles_migrator_access|PERMISSIVE|{pos_migrator}|ALL|true|true
+public|user_roles|user_roles_restaurant_scope|PERMISSIVE|{pos_app}|ALL|((tenant_id = (NULLIF(current_setting('app.tenant_id'::text, true), ''::text))::bigint) AND (EXISTS ( SELECT 1
+   FROM roles scoped_role
+  WHERE ((scoped_role.id = user_roles.role_id) AND (scoped_role.tenant_id = user_roles.tenant_id) AND (scoped_role.restaurant_id = (NULLIF(current_setting('app.restaurant_id'::text, true), ''::text))::bigint)))) AND (EXISTS ( SELECT 1
+   FROM users subject_user
+  WHERE ((subject_user.id = user_roles.user_id) AND (subject_user.tenant_id = user_roles.tenant_id) AND ((subject_user.restaurant_id IS NULL) OR (subject_user.restaurant_id = (NULLIF(current_setting('app.restaurant_id'::text, true), ''::text))::bigint))))) AND ((assigned_by IS NULL) OR (EXISTS ( SELECT 1
+   FROM users assigning_user
+  WHERE ((assigning_user.id = user_roles.assigned_by) AND (assigning_user.tenant_id = user_roles.tenant_id) AND ((assigning_user.restaurant_id IS NULL) OR (assigning_user.restaurant_id = (NULLIF(current_setting('app.restaurant_id'::text, true), ''::text))::bigint)))))))|((tenant_id = (NULLIF(current_setting('app.tenant_id'::text, true), ''::text))::bigint) AND (EXISTS ( SELECT 1
+   FROM roles scoped_role
+  WHERE ((scoped_role.id = user_roles.role_id) AND (scoped_role.tenant_id = user_roles.tenant_id) AND (scoped_role.restaurant_id = (NULLIF(current_setting('app.restaurant_id'::text, true), ''::text))::bigint)))) AND (EXISTS ( SELECT 1
+   FROM users subject_user
+  WHERE ((subject_user.id = user_roles.user_id) AND (subject_user.tenant_id = user_roles.tenant_id) AND ((subject_user.restaurant_id IS NULL) OR (subject_user.restaurant_id = (NULLIF(current_setting('app.restaurant_id'::text, true), ''::text))::bigint))))) AND ((assigned_by IS NULL) OR (EXISTS ( SELECT 1
+   FROM users assigning_user
+  WHERE ((assigning_user.id = user_roles.assigned_by) AND (assigning_user.tenant_id = user_roles.tenant_id) AND ((assigning_user.restaurant_id IS NULL) OR (assigning_user.restaurant_id = (NULLIF(current_setting('app.restaurant_id'::text, true), ''::text))::bigint)))))))
+public|user_settings|user_settings_tenant_scope|PERMISSIVE|{pos_app}|ALL|(EXISTS ( SELECT 1
+   FROM users owner_user
+  WHERE ((owner_user.id = user_settings.user_id) AND (owner_user.tenant_id = (NULLIF(current_setting('app.tenant_id'::text, true), ''::text))::bigint))))|(EXISTS ( SELECT 1
+   FROM users owner_user
+  WHERE ((owner_user.id = user_settings.user_id) AND (owner_user.tenant_id = (NULLIF(current_setting('app.tenant_id'::text, true), ''::text))::bigint))))
+public|user_settings_audit_log|user_settings_audit_tenant_scope|PERMISSIVE|{pos_app}|ALL|((EXISTS ( SELECT 1
+   FROM users subject_user
+  WHERE ((subject_user.id = user_settings_audit_log.user_id) AND (subject_user.tenant_id = (NULLIF(current_setting('app.tenant_id'::text, true), ''::text))::bigint)))) AND (EXISTS ( SELECT 1
+   FROM users actor_user
+  WHERE ((actor_user.id = user_settings_audit_log.changed_by) AND (actor_user.tenant_id = (NULLIF(current_setting('app.tenant_id'::text, true), ''::text))::bigint)))))|((EXISTS ( SELECT 1
+   FROM users subject_user
+  WHERE ((subject_user.id = user_settings_audit_log.user_id) AND (subject_user.tenant_id = (NULLIF(current_setting('app.tenant_id'::text, true), ''::text))::bigint)))) AND (EXISTS ( SELECT 1
+   FROM users actor_user
+  WHERE ((actor_user.id = user_settings_audit_log.changed_by) AND (actor_user.tenant_id = (NULLIF(current_setting('app.tenant_id'::text, true), ''::text))::bigint)))))

@@ -1,0 +1,174 @@
+- generic [active] [ref=f40e1]:
+  - link "Skip to content" [ref=f40e2] [cursor=pointer]:
+    - /url: "#main-content"
+  - banner [ref=f40e3]:
+    - generic [ref=f40e4]:
+      - link "SERVIO" [ref=f40e5] [cursor=pointer]:
+        - /url: /en
+      - navigation "Main navigation" [ref=f40e11]:
+        - button "Open platform features" [ref=f40e13] [cursor=pointer]: Platform
+        - link "How it works" [ref=f40e16] [cursor=pointer]:
+          - /url: /en/how-it-works
+        - link "Pricing" [ref=f40e17] [cursor=pointer]:
+          - /url: /en/pricing
+        - link "Product tour" [ref=f40e18] [cursor=pointer]:
+          - /url: /en/demo
+        - link "Demo options" [ref=f40e19] [cursor=pointer]:
+          - /url: /en/contact
+      - generic [ref=f40e20]:
+        - link "Switch to Arabic" [ref=f40e21] [cursor=pointer]:
+          - /url: /ar/pricing
+          - generic [ref=f40e27]: العربية
+        - button "Switch to dark mode" [ref=f40e28] [cursor=pointer]
+        - status [ref=f40e32]: Checking sign-in
+  - main [ref=f40e33]:
+    - generic [ref=f40e35]:
+      - generic [ref=f40e36]:
+        - paragraph [ref=f40e37]: One subscription. Two billing frequencies.
+        - heading "Clear pricing. Room to get familiar." [level=1] [ref=f40e38]
+        - paragraph [ref=f40e39]: Start with a 14-day free trial. Choose your preferred billing period for a future paid subscription.
+        - paragraph [ref=f40e40]: Two billing frequencies for the same subscription. No extra feature tiers are implied.
+      - generic [ref=f40e41]:
+        - group "Billing preference" [ref=f40e42]:
+          - generic [ref=f40e44] [cursor=pointer]:
+            - radio "Monthly" [checked] [ref=f40e45]
+            - text: Monthly
+          - generic [ref=f40e46] [cursor=pointer]:
+            - radio "Annual" [ref=f40e47]
+            - text: Annual
+        - generic [ref=f40e48]:
+          - paragraph [ref=f40e49]:
+            - strong [ref=f40e50]: "750"
+            - generic [ref=f40e51]: EGP
+          - text: per month
+          - paragraph [ref=f40e52]: 750 EGP billed monthly.
+        - link "Create your restaurant account" [ref=f40e53] [cursor=pointer]:
+          - /url: /en/auth/register?billing=monthly
+        - paragraph [ref=f40e57]: Paid checkout is not available here. Selecting a preference starts trial registration and does not authorize a charge. Payment and tax terms are confirmed before paid activation.
+    - generic [ref=f40e59]:
+      - paragraph [ref=f40e60]: Subscription details
+      - heading "Know what starts now, and what comes later." [level=2] [ref=f40e61]
+      - generic [ref=f40e62]:
+        - article [ref=f40e63]:
+          - heading "Your trial begins when the account is created" [level=3] [ref=f40e64]
+          - paragraph [ref=f40e65]: Create a restaurant workspace with a 14-day trial. The server determines the expiry time and enforces the access boundary when that time is reached.
+        - article [ref=f40e66]:
+          - heading "Monthly and annual are the same subscription" [level=3] [ref=f40e67]
+          - paragraph [ref=f40e68]: 750 EGP billed monthly, or 5,000 EGP billed annually. Choosing annual billing does not imply an additional feature tier.
+        - article [ref=f40e69]:
+          - heading "How the annual comparison works" [level=3] [ref=f40e70]
+          - paragraph [ref=f40e71]: Twelve monthly payments total 9,000 EGP. The annual price saves 4,000 EGP, approximately 44.44%. Its equivalent monthly average is 416.67 EGP, billed annually.
+        - article [ref=f40e72]:
+          - heading "A billing preference is not a payment" [level=3] [ref=f40e73]
+          - paragraph [ref=f40e74]: Your preference is saved with the new restaurant account. Paid checkout is currently unavailable; payment and tax terms must be confirmed before paid activation. This offer does not rewrite existing trial dates or payment records.
+    - generic [ref=f40e76]:
+      - generic [ref=f40e77]:
+        - paragraph [ref=f40e78]: Before you begin
+        - heading "Questions about the verified product" [level=2] [ref=f40e79]
+      - generic [ref=f40e80]:
+        - group [ref=f40e81]:
+          - generic "How do the cashier and kitchen connect?" [ref=f40e82] [cursor=pointer]:
+            - text: How do the cashier and kitchen connect?
+            - generic [aria-hidden] [ref=f40e83]: +
+        - group [ref=f40e84]:
+          - generic "Can guests order online?" [ref=f40e85] [cursor=pointer]:
+            - text: Can guests order online?
+            - generic [aria-hidden] [ref=f40e86]: +
+        - group [ref=f40e87]:
+          - generic "What can I customize on my storefront?" [ref=f40e88] [cursor=pointer]:
+            - text: What can I customize on my storefront?
+            - generic [aria-hidden] [ref=f40e89]: +
+        - group [ref=f40e90]:
+          - generic "How does the free trial start?" [ref=f40e91] [cursor=pointer]:
+            - text: How does the free trial start?
+            - generic [aria-hidden] [ref=f40e92]: +
+        - group [ref=f40e93]:
+          - generic "Does selecting annual billing charge me?" [ref=f40e94] [cursor=pointer]:
+            - text: Does selecting annual billing charge me?
+            - generic [aria-hidden] [ref=f40e95]: +
+        - group [ref=f40e96]:
+          - generic "Are Arabic and English available?" [ref=f40e97] [cursor=pointer]:
+            - text: Are Arabic and English available?
+            - generic [aria-hidden] [ref=f40e98]: +
+        - generic [ref=f40e99]:
+          - link "Create your restaurant account" [ref=f40e100] [cursor=pointer]:
+            - /url: /en/auth/register?billing=monthly
+          - link "Demonstration options" [ref=f40e104] [cursor=pointer]:
+            - /url: /en/contact
+            - text: Demonstration options
+            - generic [aria-hidden] [ref=f40e105]: ↗
+  - contentinfo [ref=f40e106]:
+    - generic [ref=f40e107]:
+      - generic [ref=f40e108]:
+        - generic [ref=f40e109]:
+          - link "SERVIO" [ref=f40e110] [cursor=pointer]:
+            - /url: /en
+          - paragraph [ref=f40e116]: Restaurant operations, thoughtfully connected.
+          - link "Get started" [ref=f40e117] [cursor=pointer]:
+            - /url: /en/auth/register?billing=monthly
+        - navigation "Footer navigation" [ref=f40e121]:
+          - generic [ref=f40e122]:
+            - generic [ref=f40e123]:
+              - heading "Product" [level=2] [ref=f40e124]
+              - list [ref=f40e125]:
+                - listitem [ref=f40e126]:
+                  - link "Explore all features" [ref=f40e127] [cursor=pointer]:
+                    - /url: /en/features
+                - listitem [ref=f40e128]:
+                  - link "Cashier POS" [ref=f40e129] [cursor=pointer]:
+                    - /url: /en/features/pos
+                - listitem [ref=f40e130]:
+                  - link "Kitchen display" [ref=f40e131] [cursor=pointer]:
+                    - /url: /en/features/kitchen-display
+                - listitem [ref=f40e132]:
+                  - link "Online ordering" [ref=f40e133] [cursor=pointer]:
+                    - /url: /en/features/online-ordering
+                - listitem [ref=f40e134]:
+                  - link "Inventory" [ref=f40e135] [cursor=pointer]:
+                    - /url: /en/features/inventory
+                - listitem [ref=f40e136]:
+                  - link "Staff records" [ref=f40e137] [cursor=pointer]:
+                    - /url: /en/features/hr
+                - listitem [ref=f40e138]:
+                  - link "Operational overview" [ref=f40e139] [cursor=pointer]:
+                    - /url: /en/features/analytics
+                - listitem [ref=f40e140]:
+                  - link "Storefront customization" [ref=f40e141] [cursor=pointer]:
+                    - /url: /en/features/website-builder
+            - generic [ref=f40e142]:
+              - heading "Explore" [level=2] [ref=f40e143]
+              - list [ref=f40e144]:
+                - listitem [ref=f40e145]:
+                  - link "How it works" [ref=f40e146] [cursor=pointer]:
+                    - /url: /en/how-it-works
+                - listitem [ref=f40e147]:
+                  - link "Product tour" [ref=f40e148] [cursor=pointer]:
+                    - /url: /en/demo
+                - listitem [ref=f40e149]:
+                  - link "Demo options" [ref=f40e150] [cursor=pointer]:
+                    - /url: /en/contact
+                - listitem [ref=f40e151]:
+                  - link "Pricing" [ref=f40e152] [cursor=pointer]:
+                    - /url: /en/pricing
+            - generic [ref=f40e153]:
+              - heading "Account" [level=2] [ref=f40e154]
+              - list [ref=f40e155]:
+                - listitem [ref=f40e156]:
+                  - link "Log in" [ref=f40e157] [cursor=pointer]:
+                    - /url: /en/auth/login
+                - listitem [ref=f40e158]:
+                  - link "Create your restaurant account" [ref=f40e159] [cursor=pointer]:
+                    - /url: /en/auth/register
+            - generic [ref=f40e160]:
+              - heading "Company" [level=2] [ref=f40e161]
+              - list [ref=f40e162]:
+                - listitem [ref=f40e163]:
+                  - link "Privacy" [ref=f40e164] [cursor=pointer]:
+                    - /url: /en/privacy
+                - listitem [ref=f40e165]:
+                  - link "Demo information" [ref=f40e166] [cursor=pointer]:
+                    - /url: /en/contact
+      - generic [ref=f40e167]:
+        - paragraph [ref=f40e168]: Product screens use synthetic data. Availability and setup requirements are described on each feature page.
+        - generic [ref=f40e169]: © 2026 SERVIO
+  - button "Open Next.js Dev Tools" [ref=f40e175] [cursor=pointer]

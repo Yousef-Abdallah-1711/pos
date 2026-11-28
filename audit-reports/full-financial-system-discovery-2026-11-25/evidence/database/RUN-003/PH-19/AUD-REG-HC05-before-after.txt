@@ -1,0 +1,7 @@
+journals before=53 after=58
+stored(id|status|attachments_prefix|len):
+62|draft|[{"url": "https://example.test/a.pdf", "name": "a.pdf", "siz|68
+63|draft|{"evil": true}|14
+64|draft|"<script>alert(1)</script>"|27
+65|draft|[{"url": "javascript:alert(1)", "name": "x"}]|45
+66|draft|[{"data": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA|1048605

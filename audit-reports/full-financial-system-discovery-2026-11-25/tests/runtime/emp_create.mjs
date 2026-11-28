@@ -1,0 +1,12 @@
+import { login, EV, DASH, netLog } from './lib.mjs';
+const [tag, email, first, last, empEmail, salary, hire] = process.argv.slice(2);
+const { b, ctx } = await login(email, tag);
+const p = await ctx.newPage(); const net = []; netLog(p, net);
+await p.goto(DASH + '/en/dashboard/hr/employees', { waitUntil: 'networkidle' }); await p.waitForTimeout(2000);
+await p.click('button:has-text("Add Employee")'); await p.waitForTimeout(1000);
+await p.fill('[name=first_name]', first); await p.fill('[name=last_name]', last); await p.fill('[name=email]', empEmail); await p.fill('[name=phone]', '+201000000100');
+await p.click('button:has-text("Employment")'); await p.fill('[name=hire_date]', hire); await p.fill('[name=position]', 'Chef'); await p.fill('[name=department]', 'Kitchen');
+await p.click('button:has-text("Compensation")'); await p.fill('[name=monthly_salary]', salary); if (process.env.HOURS) await p.fill('[name=weekly_hours]', process.env.HOURS);
+await p.click('button:has-text("Create Employee")'); await p.waitForTimeout(3500);
+console.log(JSON.stringify(net.filter(x => x.m !== 'GET').map(x => `${x.m} ${x.u} ${x.s} req=${x.req.slice(0, 1200)} resp=${x.body.slice(0, 400)}`), null, 1));
+await b.close();

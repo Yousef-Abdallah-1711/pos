@@ -1,0 +1,4 @@
+# Session cookies from the audit's real-UI logins: never commit.
+evidence/state-*.json
+# Isolated-database snapshots (binary, large, contain synthetic account hashes); kept locally with sha256 files in evidence/database/**/T-*-checkpoint*.txt
+*.dump

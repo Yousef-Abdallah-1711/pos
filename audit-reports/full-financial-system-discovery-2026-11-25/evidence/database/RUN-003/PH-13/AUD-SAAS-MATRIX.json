@@ -1,0 +1,118 @@
+{
+ "run": "RUN-003",
+ "kind": "API-DIAGNOSTIC",
+ "log": [
+  {
+   "id": "SUB-01",
+   "desc": "plans",
+   "http": 200,
+   "plans": "{\"plans\":[{\"id\":\"servio-monthly-v1\",\"name\":\"SERVIO Monthly\",\"name_ar\":\"سيرفيو شهري\",\"price\":750,\"price_cents\":75000,\"currency\":\"EGP\",\"period\":\"month\",\"features\":[\"Cashier POS\",\"Kitchen display\",\"Cash ordering\",\"Theme configuration\"],\"features_ar\":[\"نقاط البيع\",\"شاشة المطبخ\",\"الطلبات النقدية\",\"إعداد القالب\"]},{\"id\":\"servio-annual-v1\",\"name\":\"SERVIO Annual\",\"name_ar\":\"سيرفيو سنوي"
+  },
+  {
+   "id": "SUB-02",
+   "desc": "current subscription of tenant E",
+   "http": 200,
+   "body": "{\"success\":true,\"data\":{\"preferred_billing_period\":\"monthly\",\"checkout_available\":false,\"subscription_status\":\"trial\",\"trial_end_date\":\"2026-12-10T20:11:12.108686Z\",\"cancel_at_period_end\":false,\"days_remaining\":14,\"can_access\":true,\"plan\":{\"id\":\"servio-monthly-v1\",\"name\":\"SERVIO Monthly\",\"price\":750"
+  },
+  {
+   "id": "SUB-03",
+   "desc": "initiate subscription payment",
+   "http": 503,
+   "body": "{\"error\":\"Paid checkout is not available.\",\"code\":\"checkout_unavailable\"}"
+  },
+  {
+   "id": "SUB-04",
+   "desc": "latest subscription payment row",
+   "pay": "SQL-ERROR: ERROR:  relation \"subscription_payments\" does not exist\nLINE 1: ...|amount||'|'||coalesce(provider_order_id,'') from sub"
+  },
+  {
+   "id": "SA-01",
+   "desc": "dashboard stats",
+   "http": 200,
+   "body": "{\"total_tenants\":8,\"active_tenants\":8,\"total_users\":10,\"total_orders\":56,\"new_tenants_today\":4,\"new_users_today\":5,\"active_impersonations\":0,\"last_updated\":\"2026-11-26T20:22:20.667820178Z\"}",
+   "sql": "SQL-ERROR: ERROR:  column \"status\" does not exist\nLINE 1: ...ts; active='||(select count(*) from tenants where status='ac...\n      "
+  },
+  {
+   "id": "SA-02",
+   "desc": "payment metrics",
+   "http": 200,
+   "body": "{\"avg_processing_time_ms\":0,\"failed_payments\":0,\"generated_at\":\"2026-11-26T20:22:20Z\",\"period\":\"month\",\"success_rate\":0,\"successful_payments\":0,\"total_payments\":0,\"total_revenue_cents\":0,\"total_revenue_formatted\":\"0.00 EGP\"}",
+   "sql": [
+    "SQL-ERROR: ERROR:  relation \"subscription_payments\" does not exist",
+    "LINE 1: ...|':'||count(*)||':'||coalesce(sum(amount),0) from sub"
+   ]
+  },
+  {
+   "id": "SA-03",
+   "desc": "tenant list",
+   "http": 200,
+   "count": 8,
+   "sqlTenants": "8"
+  },
+  {
+   "id": "SA-04",
+   "desc": "disable tenant 8",
+   "http": 200,
+   "body": "{\"success\":true,\"data\":{\"disabled_at\":\"2026-11-26T20:22:21.262384Z\",\"previous_status\":\"disabled\"}}",
+   "status": "SQL-ERROR: ERROR:  column \"status\" does not exist\nLINE 1: select status from tenants where id=8\n               ^\n"
+  },
+  {
+   "id": "SA-05",
+   "desc": "login of owner of a disabled tenant",
+   "http": 200
+  },
+  {
+   "id": "SA-06",
+   "desc": "existing session of disabled tenant still works?",
+   "http": 403
+  },
+  {
+   "id": "SA-07",
+   "desc": "enable tenant 8",
+   "http": 200,
+   "status": "SQL-ERROR: ERROR:  column \"status\" does not exist\nLINE 1: select status from tenants where id=8\n               ^\n"
+  },
+  {
+   "id": "SA-08",
+   "desc": "extend trial 7 days",
+   "http": 200,
+   "body": "{\"success\":true,\"data\":{\"days_added\":7,\"new_trial_end_date\":\"2026-12-17T20:11:12.108686Z\",\"total_trial_days\":21}}"
+  },
+  {
+   "id": "SA-09",
+   "desc": "extend trial by -30 days (validation)",
+   "http": 400,
+   "body": "{\"success\":false,\"error\":\"days must be greater than 0\",\"status\":400}"
+  },
+  {
+   "id": "SA-10",
+   "desc": "extend trial by 100000 days",
+   "http": 200,
+   "body": "{\"success\":true,\"data\":{\"days_added\":100000,\"new_trial_end_date\":\"2300-10-02T20:11:12.108686Z\",\"total_trial_days\":100021}}"
+  },
+  {
+   "id": "PAY-01",
+   "desc": "mock paymob process unauthenticated",
+   "http": 400,
+   "body": "{\"success\":false,\"error\":\"payment_token is required\",\"status\":400}\n"
+  },
+  {
+   "id": "PAY-02",
+   "desc": "webhook with unsigned payload",
+   "http": 500,
+   "body": "{\"success\":false,\"error\":\"failed to process webhook\",\"status\":500}\n"
+  },
+  {
+   "id": "PAY-03",
+   "desc": "refund unknown payment",
+   "http": 500,
+   "body": "{\"success\":false,\"error\":\"failed to refund payment\",\"status\":500}"
+  },
+  {
+   "id": "SA-11",
+   "desc": "audit logs list",
+   "http": 200,
+   "count": 5709
+  }
+ ]
+}

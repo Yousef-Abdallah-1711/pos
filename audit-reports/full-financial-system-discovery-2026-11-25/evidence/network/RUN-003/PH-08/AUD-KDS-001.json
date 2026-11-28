@@ -1,0 +1,25 @@
+{
+ "run": "RUN-003",
+ "test": "AUD-KDS-001",
+ "cancelledOrdersAndKdsRows": [
+  {
+   "orderId": "34",
+   "orderNumber": "ORD-2026-579ea006-b009-4be0-8558-5a3171841936",
+   "kdsStatus": "new",
+   "visibleOnBoard": true
+  },
+  {
+   "orderId": "40",
+   "orderNumber": "ORD-2026-5dd3909d-90ef-47cb-a887-78eb4155904a",
+   "kdsStatus": "new",
+   "visibleOnBoard": true
+  },
+  {
+   "orderId": "42",
+   "orderNumber": "ORD-2026-85ce3e39-4789-45f4-9bbf-7abc57805971",
+   "kdsStatus": "new",
+   "visibleOnBoard": true
+  }
+ ],
+ "boardTextSample": "Kitchen Display\n\nLive kitchen queue\n\nConnected\n\nACTIVE ORDERS\n\n25\n\nNEW\n\n24\n\nIN PROGRESS\n\n1\n\nAVG PREP\n\n187.2m\n\nAll\nNew\nIn Progress\nReady\nCompleted\n#ORD-2026-863e52a9-c776-494b-b453-6d34ee4e402a\n\nCustomer: Walk-in\n\n1280:53\nIn Progress\n\n1x Audit Burger\n\nBump\n\nIn Progress -> Ready\n\n#ORD-2026-8188c639-6477-4316-ab5c-69a029c3fc3a\n\nCustomer: Walk-in\n\n1280:40\nNew\n\n1x Audit Burger\n\nBump\n\nNew -> In Progress\n\n#ORD-2026-ae041f8b-a711-4713-bbf5-9b69603824c6\n\nCustomer: Walk-in\n\n1275:31\nNew\n\n1x Audit Burger\n\nBump\n\nNew -> In Progress\n\n#ORD-2026-8a9b1ed5-6560-46a6-a966-8518e09df8e8\n\nCustomer: Walk-in\n\n1275:31\nNew\n\n1x Audit Burger\n\nBump\n\nNew -> In Progress\n\n#ORD-2026-c9bfcab3-87bf-42e7-be05-af732d30bcfd\n\nCustomer: Walk-in\n\n1275:31\nNew\n\n1x Audit Burger\n\nBump\n\nNew -> In Progress\n\n#ORD-2026-b6d27ad4-4762-4a4c-9617-4e86b82f2cc9\n\nCustomer: Walk-in\n\n1275:31\nNew\n\n1x Audit Burger\n\nBump\n\nNew -> In Progress\n\n#ORD-2026-23c1c796-f71b-4d76-a6c4-b487b5239996\n\nCustomer: Walk-in\n\n1275:31\nNew\n\n1x Audit Burger\n\nBump\n\nNew -> In Progress\n\n#ORD-2026-5b4b441f-1e80-48e9-9ab9-c12ed61da71b\n\nCustomer: Walk-in\n\n1275:25\nNew\n\n1x Audit Burger\n\nBump\n\nNew -> In Progress\n\n#ORD-2026-759cee42-7ae9-4bdc-9d3f-6c7600f196f1\n\nCustomer: Walk-in\n\n1275:25\nNew\n\n1x Audit Burger\n\nBump\n\nNew -> In Progress\n\n#ORD-2026-5bde08b4-2db6-453c-84d7-6425ff26a7cf\n\nCustomer: Walk-in\n\n1275:25\nNew\n\n1x Audit Burger\n\nBump\n\nNew -> In Progress\n\n#ORD-2026-254389a5-08f9-4d73-a179-0a6e5c253fa8\n\nCustomer: Walk-in\n\n1122:07\nNew\n\n1x Audit Burger\n\nBump\n\nNew -> In Progress\n\n#ORD-2026-68eb94a9-3819-4f20-a1de-04f75b65c891\n\nCustomer: Walk-in\n\n1122:06\nNew\n\n1x Audit Burger\n\nBump\n\nNew -> In Progress\n\n#ORD-2026-1725bb89-1cb8-40d0-9d78-a945afe87cf0\n\nCustomer: Walk-in\n\n1122:06\nNew\n\n1x Audit Burger\n\nBump\n\nNew -> In Progress\n\n#ORD-2026-ab670978-e2dc-4453-ac8f-6d87fdaa193"
+}

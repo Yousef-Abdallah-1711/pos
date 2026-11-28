@@ -1,0 +1,22 @@
+// usage: node register_tenant.mjs <tag> <slug> <email> <restaurantName> ; UI registration on isolated landing (13111)
+import { chromium } from 'file:///C:/Users/Yousef/Desktop/Projects/POSS/node_modules/playwright/index.mjs';
+import fs from 'fs';
+const [tag, slug, email, rname] = process.argv.slice(2);
+const EV = 'C:/Users/Yousef/Desktop/Projects/POSS/audit-reports/full-financial-system-discovery-2026-11-25/evidence';
+const pw = 'AuditPass#2026A';
+const b = await chromium.launch({ headless: true }); const p = await (await b.newContext()).newPage();
+const net = [];
+p.on('response', async r => { if (r.url().includes(':18082') && r.request().method() !== 'OPTIONS') { let body = ''; try { body = (await r.text()).slice(0, 600).replace(/"(token|password|access_token|refresh_token)":"[^"]+"/g, '"$1":"<redacted>"'); } catch {} net.push({ m: r.request().method(), u: r.url().replace('http://localhost:18082', ''), s: r.status(), body }); } });
+await p.goto('http://localhost:13111/en/auth/register', { waitUntil: 'networkidle' }); await p.waitForTimeout(1500);
+await p.fill('#name', 'Audit Owner ' + tag); await p.fill('#email', email); await p.fill('#restaurantName', rname);
+await p.fill('#restaurantSlug', slug); await p.fill('#phone', '+201000000' + (tag === 'A' ? '001' : '002'));
+await p.fill('#password', pw); await p.fill('#confirmPassword', pw);
+await p.screenshot({ path: `${EV}/screenshots/reg-${tag}-filled.png` });
+await p.click('button[type=submit]:has-text("Create account")');
+await p.waitForTimeout(8000);
+console.log('URL after submit:', p.url());
+console.log((await p.locator('body').innerText()).slice(0, 400).replace(/\n+/g, ' | '));
+await p.screenshot({ path: `${EV}/screenshots/reg-${tag}-after.png` });
+fs.writeFileSync(`${EV}/network/reg-${tag}.json`, JSON.stringify(net, null, 1));
+console.log(net.map(n => `${n.m} ${n.u} ${n.s}`).join('\n'));
+await b.close();

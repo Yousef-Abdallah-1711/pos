@@ -1,0 +1,590 @@
+{
+ "run": "RUN-005",
+ "form": "categories",
+ "tenant": 4,
+ "results": [
+  {
+   "form": "categories",
+   "field_index": 0,
+   "field": "name",
+   "placeholder": "e.g., Main Dishes",
+   "input_type": "text",
+   "maxlength_attr": null,
+   "kind": "text",
+   "case": "empty",
+   "value_sent": "",
+   "submit_found": true,
+   "submit_disabled": true,
+   "html5_invalid": 0,
+   "html5_message": "",
+   "messages": [],
+   "request": [],
+   "response": "",
+   "request_body": "",
+   "rows_created": 0,
+   "outcome": "NO-REQUEST-NO-MESSAGE"
+  },
+  {
+   "form": "categories",
+   "field_index": 0,
+   "field": "name",
+   "placeholder": "e.g., Main Dishes",
+   "input_type": "text",
+   "maxlength_attr": null,
+   "kind": "text",
+   "case": "whitespace",
+   "value_sent": "   ",
+   "submit_found": true,
+   "submit_disabled": false,
+   "html5_invalid": 0,
+   "html5_message": "",
+   "messages": [
+    "Failed to create category"
+   ],
+   "request": [
+    "POST /categories 400"
+   ],
+   "response": "{\"error\":\"Invalid request body\"}",
+   "request_body": "{\"name\":\"   \",\"name_ar\":\"اختبار 5991\",\"description\":\"R5 85645991\",\"description_ar\":\"اختبار 5991\",\"display_order\":\"\",\"is_active\":true}",
+   "rows_created": 0,
+   "outcome": "REJECTED-BY-SERVER(400)"
+  },
+  {
+   "form": "categories",
+   "field_index": 0,
+   "field": "name",
+   "placeholder": "e.g., Main Dishes",
+   "input_type": "text",
+   "maxlength_attr": null,
+   "kind": "text",
+   "case": "long300",
+   "value_sent": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX...(300)",
+   "submit_found": true,
+   "submit_disabled": false,
+   "html5_invalid": 0,
+   "html5_message": "",
+   "messages": [
+    "Failed to create category"
+   ],
+   "request": [
+    "POST /categories 400"
+   ],
+   "response": "{\"error\":\"Invalid request body\"}",
+   "request_body": "{\"name\":\"XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+   "rows_created": 0,
+   "outcome": "REJECTED-BY-SERVER(400)"
+  },
+  {
+   "form": "categories",
+   "field_index": 0,
+   "field": "name",
+   "placeholder": "e.g., Main Dishes",
+   "input_type": "text",
+   "maxlength_attr": null,
+   "kind": "text",
+   "case": "arabic",
+   "value_sent": "اختبار عربي ٧٧",
+   "submit_found": true,
+   "submit_disabled": false,
+   "html5_invalid": 0,
+   "html5_message": "",
+   "messages": [
+    "Failed to create category"
+   ],
+   "request": [
+    "POST /categories 400"
+   ],
+   "response": "{\"error\":\"Invalid request body\"}",
+   "request_body": "{\"name\":\"اختبار عربي ٧٧\",\"name_ar\":\"اختبار 8144\",\"description\":\"R5 85658144\",\"description_ar\":\"اختبار 8144\",\"display_order\":\"\",\"is_active\":true}",
+   "rows_created": 0,
+   "outcome": "REJECTED-BY-SERVER(400)"
+  },
+  {
+   "form": "categories",
+   "field_index": 0,
+   "field": "name",
+   "placeholder": "e.g., Main Dishes",
+   "input_type": "text",
+   "maxlength_attr": null,
+   "kind": "text",
+   "case": "special",
+   "value_sent": "<b>x</b>'; -- &amp;",
+   "submit_found": true,
+   "submit_disabled": false,
+   "html5_invalid": 0,
+   "html5_message": "",
+   "messages": [
+    "Failed to create category"
+   ],
+   "request": [
+    "POST /categories 400"
+   ],
+   "response": "{\"error\":\"Invalid request body\"}",
+   "request_body": "{\"name\":\"<b>x</b>'; -- &amp;\",\"name_ar\":\"اختبار 4559\",\"description\":\"R5 85664559\",\"description_ar\":\"اختبار 4559\",\"display_order\":\"\",\"is_active\":true}",
+   "rows_created": 0,
+   "outcome": "REJECTED-BY-SERVER(400)"
+  },
+  {
+   "form": "categories",
+   "field_index": 1,
+   "field": "name_ar",
+   "placeholder": "e.g., الأطباق الرئيسية",
+   "input_type": "text",
+   "maxlength_attr": null,
+   "kind": "text",
+   "case": "empty",
+   "value_sent": "",
+   "submit_found": true,
+   "submit_disabled": false,
+   "html5_invalid": 0,
+   "html5_message": "",
+   "messages": [
+    "Failed to create category"
+   ],
+   "request": [
+    "POST /categories 400"
+   ],
+   "response": "{\"error\":\"Invalid request body\"}",
+   "request_body": "{\"name\":\"R5 85670344\",\"name_ar\":\"\",\"description\":\"R5 85670344\",\"description_ar\":\"اختبار 0344\",\"display_order\":\"\",\"is_active\":true}",
+   "rows_created": 0,
+   "outcome": "REJECTED-BY-SERVER(400)"
+  },
+  {
+   "form": "categories",
+   "field_index": 1,
+   "field": "name_ar",
+   "placeholder": "e.g., الأطباق الرئيسية",
+   "input_type": "text",
+   "maxlength_attr": null,
+   "kind": "text",
+   "case": "whitespace",
+   "value_sent": "   ",
+   "submit_found": true,
+   "submit_disabled": false,
+   "html5_invalid": 0,
+   "html5_message": "",
+   "messages": [
+    "Failed to create category"
+   ],
+   "request": [
+    "POST /categories 400"
+   ],
+   "response": "{\"error\":\"Invalid request body\"}",
+   "request_body": "{\"name\":\"R5 85676380\",\"name_ar\":\"   \",\"description\":\"R5 85676380\",\"description_ar\":\"اختبار 6380\",\"display_order\":\"\",\"is_active\":true}",
+   "rows_created": 0,
+   "outcome": "REJECTED-BY-SERVER(400)"
+  },
+  {
+   "form": "categories",
+   "field_index": 1,
+   "field": "name_ar",
+   "placeholder": "e.g., الأطباق الرئيسية",
+   "input_type": "text",
+   "maxlength_attr": null,
+   "kind": "text",
+   "case": "long300",
+   "value_sent": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX...(300)",
+   "submit_found": true,
+   "submit_disabled": false,
+   "html5_invalid": 0,
+   "html5_message": "",
+   "messages": [
+    "Failed to create category"
+   ],
+   "request": [
+    "POST /categories 400"
+   ],
+   "response": "{\"error\":\"Invalid request body\"}",
+   "request_body": "{\"name\":\"R5 85682567\",\"name_ar\":\"XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+   "rows_created": 0,
+   "outcome": "REJECTED-BY-SERVER(400)"
+  },
+  {
+   "form": "categories",
+   "field_index": 1,
+   "field": "name_ar",
+   "placeholder": "e.g., الأطباق الرئيسية",
+   "input_type": "text",
+   "maxlength_attr": null,
+   "kind": "text",
+   "case": "arabic",
+   "value_sent": "اختبار عربي ٧٧",
+   "submit_found": true,
+   "submit_disabled": false,
+   "html5_invalid": 0,
+   "html5_message": "",
+   "messages": [
+    "Failed to create category"
+   ],
+   "request": [
+    "POST /categories 400"
+   ],
+   "response": "{\"error\":\"Invalid request body\"}",
+   "request_body": "{\"name\":\"R5 85688809\",\"name_ar\":\"اختبار عربي ٧٧\",\"description\":\"R5 85688809\",\"description_ar\":\"اختبار 8809\",\"display_order\":\"\",\"is_active\":true}",
+   "rows_created": 0,
+   "outcome": "REJECTED-BY-SERVER(400)"
+  },
+  {
+   "form": "categories",
+   "field_index": 1,
+   "field": "name_ar",
+   "placeholder": "e.g., الأطباق الرئيسية",
+   "input_type": "text",
+   "maxlength_attr": null,
+   "kind": "text",
+   "case": "special",
+   "value_sent": "<b>x</b>'; -- &amp;",
+   "submit_found": true,
+   "submit_disabled": false,
+   "html5_invalid": 0,
+   "html5_message": "",
+   "messages": [
+    "Failed to create category"
+   ],
+   "request": [
+    "POST /categories 400"
+   ],
+   "response": "{\"error\":\"Invalid request body\"}",
+   "request_body": "{\"name\":\"R5 85694913\",\"name_ar\":\"<b>x</b>'; -- &amp;\",\"description\":\"R5 85694913\",\"description_ar\":\"اختبار 4913\",\"display_order\":\"\",\"is_active\":true}",
+   "rows_created": 0,
+   "outcome": "REJECTED-BY-SERVER(400)"
+  },
+  {
+   "form": "categories",
+   "field_index": 2,
+   "field": "description",
+   "placeholder": "Describe this category...",
+   "input_type": "textarea",
+   "maxlength_attr": null,
+   "kind": "textarea",
+   "case": "empty",
+   "value_sent": "",
+   "submit_found": true,
+   "submit_disabled": false,
+   "html5_invalid": 0,
+   "html5_message": "",
+   "messages": [
+    "Failed to create category"
+   ],
+   "request": [
+    "POST /categories 400"
+   ],
+   "response": "{\"error\":\"Invalid request body\"}",
+   "request_body": "{\"name\":\"R5 85700721\",\"name_ar\":\"اختبار 0721\",\"description\":\"\",\"description_ar\":\"اختبار 0721\",\"display_order\":\"\",\"is_active\":true}",
+   "rows_created": 0,
+   "outcome": "REJECTED-BY-SERVER(400)"
+  },
+  {
+   "form": "categories",
+   "field_index": 2,
+   "field": "description",
+   "placeholder": "Describe this category...",
+   "input_type": "textarea",
+   "maxlength_attr": null,
+   "kind": "textarea",
+   "case": "long300",
+   "value_sent": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX...(300)",
+   "submit_found": true,
+   "submit_disabled": false,
+   "html5_invalid": 0,
+   "html5_message": "",
+   "messages": [
+    "Failed to create category"
+   ],
+   "request": [
+    "POST /categories 400"
+   ],
+   "response": "{\"error\":\"Invalid request body\"}",
+   "request_body": "{\"name\":\"R5 85706652\",\"name_ar\":\"اختبار 6652\",\"description\":\"XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+   "rows_created": 0,
+   "outcome": "REJECTED-BY-SERVER(400)"
+  },
+  {
+   "form": "categories",
+   "field_index": 2,
+   "field": "description",
+   "placeholder": "Describe this category...",
+   "input_type": "textarea",
+   "maxlength_attr": null,
+   "kind": "textarea",
+   "case": "arabic",
+   "value_sent": "اختبار عربي ٧٧",
+   "submit_found": true,
+   "submit_disabled": false,
+   "html5_invalid": 0,
+   "html5_message": "",
+   "messages": [
+    "Failed to create category"
+   ],
+   "request": [
+    "POST /categories 400"
+   ],
+   "response": "{\"error\":\"Invalid request body\"}",
+   "request_body": "{\"name\":\"R5 85712689\",\"name_ar\":\"اختبار 2689\",\"description\":\"اختبار عربي ٧٧\",\"description_ar\":\"اختبار 2689\",\"display_order\":\"\",\"is_active\":true}",
+   "rows_created": 0,
+   "outcome": "REJECTED-BY-SERVER(400)"
+  },
+  {
+   "form": "categories",
+   "field_index": 2,
+   "field": "description",
+   "placeholder": "Describe this category...",
+   "input_type": "textarea",
+   "maxlength_attr": null,
+   "kind": "textarea",
+   "case": "special",
+   "value_sent": "<b>x</b>'; --",
+   "submit_found": true,
+   "submit_disabled": false,
+   "html5_invalid": 0,
+   "html5_message": "",
+   "messages": [
+    "Failed to create category"
+   ],
+   "request": [
+    "POST /categories 400"
+   ],
+   "response": "{\"error\":\"Invalid request body\"}",
+   "request_body": "{\"name\":\"R5 85718640\",\"name_ar\":\"اختبار 8640\",\"description\":\"<b>x</b>'; --\",\"description_ar\":\"اختبار 8640\",\"display_order\":\"\",\"is_active\":true}",
+   "rows_created": 0,
+   "outcome": "REJECTED-BY-SERVER(400)"
+  },
+  {
+   "form": "categories",
+   "field_index": 3,
+   "field": "description_ar",
+   "placeholder": "صف هذه الفئة...",
+   "input_type": "textarea",
+   "maxlength_attr": null,
+   "kind": "textarea",
+   "case": "empty",
+   "value_sent": "",
+   "submit_found": true,
+   "submit_disabled": false,
+   "html5_invalid": 0,
+   "html5_message": "",
+   "messages": [
+    "Failed to create category"
+   ],
+   "request": [
+    "POST /categories 400"
+   ],
+   "response": "{\"error\":\"Invalid request body\"}",
+   "request_body": "{\"name\":\"R5 85724746\",\"name_ar\":\"اختبار 4746\",\"description\":\"R5 85724746\",\"description_ar\":\"\",\"display_order\":\"\",\"is_active\":true}",
+   "rows_created": 0,
+   "outcome": "REJECTED-BY-SERVER(400)"
+  },
+  {
+   "form": "categories",
+   "field_index": 3,
+   "field": "description_ar",
+   "placeholder": "صف هذه الفئة...",
+   "input_type": "textarea",
+   "maxlength_attr": null,
+   "kind": "textarea",
+   "case": "long300",
+   "value_sent": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX...(300)",
+   "submit_found": true,
+   "submit_disabled": false,
+   "html5_invalid": 0,
+   "html5_message": "",
+   "messages": [
+    "Failed to create category"
+   ],
+   "request": [
+    "POST /categories 400"
+   ],
+   "response": "{\"error\":\"Invalid request body\"}",
+   "request_body": "{\"name\":\"R5 85730925\",\"name_ar\":\"اختبار 0925\",\"description\":\"R5 85730925\",\"description_ar\":\"XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+   "rows_created": 0,
+   "outcome": "REJECTED-BY-SERVER(400)"
+  },
+  {
+   "form": "categories",
+   "field_index": 3,
+   "field": "description_ar",
+   "placeholder": "صف هذه الفئة...",
+   "input_type": "textarea",
+   "maxlength_attr": null,
+   "kind": "textarea",
+   "case": "arabic",
+   "value_sent": "اختبار عربي ٧٧",
+   "submit_found": true,
+   "submit_disabled": false,
+   "html5_invalid": 0,
+   "html5_message": "",
+   "messages": [
+    "Failed to create category"
+   ],
+   "request": [
+    "POST /categories 400"
+   ],
+   "response": "{\"error\":\"Invalid request body\"}",
+   "request_body": "{\"name\":\"R5 85737088\",\"name_ar\":\"اختبار 7088\",\"description\":\"R5 85737088\",\"description_ar\":\"اختبار عربي ٧٧\",\"display_order\":\"\",\"is_active\":true}",
+   "rows_created": 0,
+   "outcome": "REJECTED-BY-SERVER(400)"
+  },
+  {
+   "form": "categories",
+   "field_index": 3,
+   "field": "description_ar",
+   "placeholder": "صف هذه الفئة...",
+   "input_type": "textarea",
+   "maxlength_attr": null,
+   "kind": "textarea",
+   "case": "special",
+   "value_sent": "<b>x</b>'; --",
+   "submit_found": true,
+   "submit_disabled": false,
+   "html5_invalid": 0,
+   "html5_message": "",
+   "messages": [
+    "Failed to create category"
+   ],
+   "request": [
+    "POST /categories 400"
+   ],
+   "response": "{\"error\":\"Invalid request body\"}",
+   "request_body": "{\"name\":\"R5 85743166\",\"name_ar\":\"اختبار 3166\",\"description\":\"R5 85743166\",\"description_ar\":\"<b>x</b>'; --\",\"display_order\":\"\",\"is_active\":true}",
+   "rows_created": 0,
+   "outcome": "REJECTED-BY-SERVER(400)"
+  },
+  {
+   "form": "categories",
+   "field_index": 4,
+   "field": "display_order",
+   "placeholder": "0",
+   "input_type": "number",
+   "maxlength_attr": null,
+   "kind": "number",
+   "case": "empty",
+   "value_sent": "",
+   "submit_found": true,
+   "submit_disabled": false,
+   "html5_invalid": 0,
+   "html5_message": "",
+   "messages": [
+    "Failed to create category"
+   ],
+   "request": [
+    "POST /categories 400"
+   ],
+   "response": "{\"error\":\"Invalid request body\"}",
+   "request_body": "{\"name\":\"R5 85749153\",\"name_ar\":\"اختبار 9153\",\"description\":\"R5 85749153\",\"description_ar\":\"اختبار 9153\",\"display_order\":\"\",\"is_active\":true}",
+   "rows_created": 0,
+   "outcome": "REJECTED-BY-SERVER(400)"
+  },
+  {
+   "form": "categories",
+   "field_index": 4,
+   "field": "display_order",
+   "placeholder": "0",
+   "input_type": "number",
+   "maxlength_attr": null,
+   "kind": "number",
+   "case": "negative",
+   "value_sent": "-5",
+   "submit_found": true,
+   "submit_disabled": false,
+   "html5_invalid": 1,
+   "html5_message": "0: Value must be greater than or equal to 0.",
+   "messages": [],
+   "request": [],
+   "response": "",
+   "request_body": "",
+   "rows_created": 0,
+   "outcome": "REJECTED-BY-CLIENT"
+  },
+  {
+   "form": "categories",
+   "field_index": 4,
+   "field": "display_order",
+   "placeholder": "0",
+   "input_type": "number",
+   "maxlength_attr": null,
+   "kind": "number",
+   "case": "zero",
+   "value_sent": "0",
+   "submit_found": true,
+   "submit_disabled": false,
+   "html5_invalid": 0,
+   "html5_message": "",
+   "messages": [],
+   "request": [
+    "POST /categories 201"
+   ],
+   "response": "{\"id\":9,\"tenant_id\":4,\"restaurant_id\":4,\"name\":\"R5 85761554\",\"name_ar\":\"اختبار 1554\",\"description\":\"R5 85761554\",\"description_ar\":\"اختبار 1554\",\"displ",
+   "request_body": "{\"name\":\"R5 85761554\",\"name_ar\":\"اختبار 1554\",\"description\":\"R5 85761554\",\"description_ar\":\"اختبار 1554\",\"display_order\":0,\"is_active\":true}",
+   "rows_created": 1,
+   "persisted": "{\"id\":9,\"tenant_id\":4,\"restaurant_id\":4,\"name\":\"R5 85761554\",\"description\":\"R5 85761554\",\"icon_url\":null,\"display_order\":0,\"is_active\":true,\"created_at\":\"2026-11-27T13:22:45.424369\",\"updated_at\":\"2026-11-27T13:22:45.424369\",\"name_en\":null,\"name_ar\":\"اختبار 1554\",\"description_ar\":\"اختبار 1554\",\"language\":\"en\",\"created_by\":null,\"updated_by\":null}",
+   "outcome": "ACCEPTED-PERSISTED"
+  },
+  {
+   "form": "categories",
+   "field_index": 4,
+   "field": "display_order",
+   "placeholder": "0",
+   "input_type": "number",
+   "maxlength_attr": null,
+   "kind": "number",
+   "case": "decimal6",
+   "value_sent": "12.345678",
+   "submit_found": true,
+   "submit_disabled": false,
+   "html5_invalid": 1,
+   "html5_message": "0: Please enter a valid value. The two nearest valid values are 12 and 13.",
+   "messages": [],
+   "request": [],
+   "response": "",
+   "request_body": "",
+   "rows_created": 0,
+   "outcome": "REJECTED-BY-CLIENT"
+  },
+  {
+   "form": "categories",
+   "field_index": 4,
+   "field": "display_order",
+   "placeholder": "0",
+   "input_type": "number",
+   "maxlength_attr": null,
+   "kind": "number",
+   "case": "huge",
+   "value_sent": "99999999999",
+   "submit_found": true,
+   "submit_disabled": false,
+   "html5_invalid": 0,
+   "html5_message": "",
+   "messages": [
+    "Failed to create category"
+   ],
+   "request": [
+    "POST /categories 400"
+   ],
+   "response": "{\"error\":\"Invalid request body\"}",
+   "request_body": "{\"name\":\"R5 85774002\",\"name_ar\":\"اختبار 4002\",\"description\":\"R5 85774002\",\"description_ar\":\"اختبار 4002\",\"display_order\":\"99999999999\",\"is_active\":true}",
+   "rows_created": 0,
+   "outcome": "REJECTED-BY-SERVER(400)"
+  },
+  {
+   "form": "categories",
+   "field_index": 4,
+   "field": "display_order",
+   "placeholder": "0",
+   "input_type": "number",
+   "maxlength_attr": null,
+   "kind": "number",
+   "case": "tiny",
+   "value_sent": "0.001",
+   "submit_found": true,
+   "submit_disabled": false,
+   "html5_invalid": 1,
+   "html5_message": "0: Please enter a valid value. The two nearest valid values are 0 and 1.",
+   "messages": [],
+   "request": [],
+   "response": "",
+   "request_body": "",
+   "rows_created": 0,
+   "outcome": "REJECTED-BY-CLIENT"
+  }
+ ]
+}

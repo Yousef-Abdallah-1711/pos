@@ -1,0 +1,20 @@
+import { login, EV, DASH, netLog } from './lib.mjs';
+const { b, ctx } = await login('audit.c.owner@example.test', 'C');
+const p = await ctx.newPage(); const net = []; netLog(p, net);
+await p.goto(DASH + '/en/dashboard/accounting/bank-accounts', { waitUntil: 'networkidle' }); await p.waitForTimeout(2000);
+await p.click('button:has-text("New bank account")'); await p.waitForTimeout(800);
+// first visible text input in the form is the account name; the rest are identified by placeholder
+await p.locator('form').last().locator('input').first().fill('Audit Operating Account');
+await p.fill('input[placeholder="National Bank of Egypt"]', 'Audit Test Bank');
+await p.fill('input[placeholder="001234567890"]', '000111222333');
+await p.locator('input[type=number]').last().fill('50000');
+await p.locator('input[type=date]').last().fill('2026-11-26');
+const gl = p.locator('select:has(option:text-is("Select ledger account"))');
+const v = await gl.locator('option').evaluateAll(os => os.find(o => o.textContent.trim().startsWith('1111 '))?.value);
+await gl.selectOption(v);
+await p.click('button:has-text("Create bank account")'); await p.waitForTimeout(3500);
+const bt = (await p.locator('body').innerText()).split(String.fromCharCode(10)).join(' | ');
+console.log(bt.slice(-500));
+console.log(JSON.stringify(net.filter(x => x.m !== 'GET').map(x => `${x.m} ${x.u} ${x.s} req=${x.req.slice(0, 300)} resp=${x.body.slice(0, 250)}`), null, 1));
+await p.screenshot({ path: `${EV}/screenshots/bank-create.png` });
+await b.close();

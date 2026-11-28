@@ -1,0 +1,16 @@
+{
+ "page": "reports/financial",
+ "text": "POS Dashboard\nDashboard\nCashier POS\nKitchen Display\nOrders\nProducts\nHuman Resources\nAccounting\nSuppliers\nFinancial Reports\nReports\nTheme Builder\nSettings\nEnglish\nA\n\nAudit Owner C\n\nOwner\n\nFinancial Reports\n\nProfit and loss, balance sheet, cash flow, VAT, aging, and inventory valuation.\n\nNet VAT\n-EGP 2,100.00\nOutput VAT\nEGP 700.00\nInput VAT\nEGP 2,800.00\nProfit & Loss\n\nRevenue, expense, and net profit by date range.\n\nBalance Sheet\n\nAssets, liabilities, and equity as-of a selected date.\n\nCash Flow\n\nOperating, investing, and financing cash movement.\n\nVAT Report\n\nOutput VAT, input VAT, and net payable amount.\n\nReceivables Aging\n\nOutstanding customer balances by aging buckets.\n\nPayables Aging\n\nOutstanding supplier balances by aging buckets.\n\nInventory Valuation\n\nQuantity and cost-based stock valuation.\n\nAdvanced Insights\n\nKPI dashboard, break-even, predictive cash flow, and labor cost analytics.",
+ "calls": [
+  {
+   "u": "/accounting/tax/vat-report?date_from=2026-10-27&date_to=2026-11-25",
+   "s": 200,
+   "body": "{\"data\":{\"date_from\":\"2026-10-27\",\"date_to\":\"2026-11-25\",\"output_vat\":700,\"input_vat\":2800,\"net_vat\":-2100},\"success\":true}"
+  },
+  {
+   "u": "/accounting/tax/vat-report?date_from=2026-10-27&date_to=2026-11-25",
+   "s": 200,
+   "body": "{\"data\":{\"date_from\":\"2026-10-27\",\"date_to\":\"2026-11-25\",\"output_vat\":700,\"input_vat\":2800,\"net_vat\":-2100},\"success\":true}"
+  }
+ ]
+}

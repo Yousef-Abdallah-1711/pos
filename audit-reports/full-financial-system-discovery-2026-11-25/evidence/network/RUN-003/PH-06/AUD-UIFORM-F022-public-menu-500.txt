@@ -1,0 +1,12 @@
+AUD-UIFORM-F022 2026-11-26T21:12:50Z
+Product created through the real product form (headed Chrome) without choosing a category: POST /products 201 category_id 0 (evidence AUD-UIFORMS.json)
+ id | category_id |     name_en      | status 
+----+-------------+------------------+--------
+ 18 |             | Audit UI product | active
+(1 row)
+
+Public API afterwards:
+{"error":"Failed to load products"}
+HTTP 500
+{"error":"Failed to load products"}
+HTTP 500

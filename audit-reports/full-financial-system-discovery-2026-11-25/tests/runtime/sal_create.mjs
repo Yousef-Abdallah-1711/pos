@@ -1,0 +1,14 @@
+import { login, EV, DASH, netLog } from './lib.mjs';
+const [tag, email, id, emp, base, start, end] = process.argv.slice(2);
+const { b, ctx } = await login(email, tag);
+const p = await ctx.newPage(); const net = []; netLog(p, net);
+await p.goto(DASH + '/en/dashboard/hr/payroll', { waitUntil: 'networkidle' }); await p.waitForTimeout(2000);
+await p.click('button:has-text("Create Salary")'); await p.waitForTimeout(1000);
+await p.locator('select:has(option:text-is("Select employee..."))').selectOption({ label: emp });
+const d = p.locator('input[type=date]'); const n = await d.count();
+await d.nth(n - 2).fill(start); await d.nth(n - 1).fill(end);
+await p.fill('[name=base_salary]', base);
+await p.screenshot({ path: `${EV}/screenshots/${id}-form.png` });
+await p.click('button:has-text("Create Salary Record")'); await p.waitForTimeout(3500);
+console.log(JSON.stringify(net.filter(x => x.m !== 'GET').map(x => `${x.m} ${x.u} ${x.s} req=${x.req.slice(0, 700)} resp=${x.body.slice(0, 400)}`), null, 1));
+await b.close();

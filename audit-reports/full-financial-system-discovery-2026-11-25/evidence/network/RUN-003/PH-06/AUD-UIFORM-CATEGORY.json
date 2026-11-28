@@ -1,0 +1,29 @@
+{
+ "run": "RUN-003",
+ "out": [
+  {
+   "variant": "name-only",
+   "calls": [
+    {
+     "u": "/categories",
+     "s": 201,
+     "req": "{\"name\":\"UI Cat name-only\",\"name_ar\":\"\",\"description\":\"\",\"description_ar\":\"\",\"display_order\":0,\"is_active\":true}",
+     "b": "{\"id\":5,\"tenant_id\":4,\"restaurant_id\":4,\"name\":\"UI Cat name-only\",\"name_ar\":\"\",\"display_order\":0,\"is_active\":true,\"language\":\"\",\"created_by\":0,\"created_at\":\"0001-01-01T00:00:00Z\",\"updated_at\":\"0001-01"
+    }
+   ],
+   "displayOrderDefault": "n/a"
+  },
+  {
+   "variant": "name+display-order",
+   "calls": [
+    {
+     "u": "/categories",
+     "s": 400,
+     "req": "{\"name\":\"UI Cat name+display-order\",\"name_ar\":\"\",\"description\":\"\",\"description_ar\":\"\",\"display_order\":\"7\",\"is_active\":true}",
+     "b": "{\"error\":\"Invalid request body\"}"
+    }
+   ],
+   "displayOrderDefault": "7"
+  }
+ ]
+}

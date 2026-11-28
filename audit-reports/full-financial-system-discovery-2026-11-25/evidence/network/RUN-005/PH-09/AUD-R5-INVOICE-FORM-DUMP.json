@@ -1,0 +1,27 @@
+{
+ "inputs": [
+  "0|INPUT|date|||",
+  "1|INPUT|date|||",
+  "2|SELECT|select-one|||",
+  "3|INPUT|number||Linked order id|",
+  "4|INPUT|text||EGP|",
+  "5|SELECT|select-one|||",
+  "6|INPUT|text||Consulting services / Raw materials|",
+  "7|INPUT|text||وصف البند|",
+  "8|SELECT|select-one|||",
+  "9|INPUT|number|||",
+  "10|INPUT|number|||",
+  "11|INPUT|number|||",
+  "12|INPUT|number|||",
+  "13|TEXTAREA|textarea||Payment terms, invoice delivery terms, or commercial notes.|",
+  "14|TEXTAREA|textarea||Visible notes for the invoice.|",
+  "15|TEXTAREA|textarea||Back-office comments, approval notes, or follow-up items.|"
+ ],
+ "buttons": [
+  "Add line",
+  "Remove",
+  "Cancel",
+  "Create customer invoice",
+  "Close"
+ ]
+}

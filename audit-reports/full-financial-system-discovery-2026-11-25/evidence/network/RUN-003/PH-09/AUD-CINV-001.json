@@ -1,0 +1,49 @@
+{
+ "run": "RUN-003",
+ "tenant": 4,
+ "role": "owner",
+ "calls": [
+  {
+   "method": "POST",
+   "url": "/accounting/customer-invoices",
+   "status": 201,
+   "request": "{\"invoice_date\":\"2026-11-26\",\"due_date\":\"2026-11-26\",\"customer_id\":1,\"order_id\":null,\"currency\":\"EGP\",\"status\":\"draft\",\"lines\":[{\"description\":\"AUD-CINV-001 draft check\",\"quantity\":1,\"unit_price\":8000,\"tax_rate\":14,\"tax_amount\":1008.0000000000001,\"discount_rate\":10,\"discount_amount\":800,\"line_total\":8208,\"account_id\":null,\"line_order\":1}]}",
+   "response": "{\"data\":{\"id\":3,\"tenant_id\":4,\"restaurant_id\":4,\"invoice_number\":\"INV-2026-00002\",\"invoice_date\":\"2026-11-26T00:00:00Z\",\"due_date\":\"2026-11-26T00:00:00Z\",\"customer_id\":1,\"customer_name\":\"Audit Customer Co\",\"subtotal\":8000,\"tax_amount\":1120,\"discount_amount\":800,\"total_amount\":8320,\"amount_paid\":0,\"balance_due\":8320,\"currency\":\"EGP\",\"status\":\"draft\",\"journal_entry_id\":61,\"created_at\":\"2026-11-26T17:12:14.228546Z\",\"updated_at\":\"2026-11-26T17:12:14.228546Z\",\"created_by\":4,\"updated_by\":4,\"lines\":[{\"id\":3,\"invoice_id\":3,\"tenant_id\":4,\"description\":\"AUD-CINV-001 draft check\",\"quantity\":1,\"unit_price"
+  }
+ ],
+ "formTextExcerpt": [
+  "Total receivables",
+  "Invoice\tParty\tInvoice date\tDue date\tTotal\tBalance due\tStatus\tActions",
+  "Capture line descriptions, account mapping, and tax/discount percentages. Totals are calculated automatically.",
+  "4150 - Sales Discounts",
+  "Tax rate %",
+  "Discount rate %",
+  "Subtotal: EGP 8,000.00",
+  "Discount: EGP 800.00",
+  "Tax: EGP 1,008.00",
+  "Total: EGP 8,208.00",
+  "Totals",
+  "Subtotal",
+  "Discount",
+  "Tax",
+  "Grand total"
+ ],
+ "statusControl": [
+  {
+   "opts": "All statuses|Draft|Sent|Approved|Partially paid|Paid|Overdue|Void",
+   "val": ""
+  },
+  {
+   "opts": "Select customer|Audit Customer Co",
+   "val": "1"
+  },
+  {
+   "opts": "Draft|Sent",
+   "val": "draft"
+  },
+  {
+   "opts": "Use system default|4100 - Food Sales|4110 - Beverage Sales|4120 - Delivery Sales|4130 - Catering Sales|4140 - Service Charge Revenue|4150 - Sales Discounts",
+   "val": ""
+  }
+ ]
+}

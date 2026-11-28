@@ -1,0 +1,35 @@
+{
+ "run": "RUN-003",
+ "out": [
+  {
+   "tag": "negative-price",
+   "pid": 8,
+   "q": 1,
+   "http": 400,
+   "resp": "{\"error\":\"invalid product price\"}",
+   "totals": null,
+   "payHttp": null,
+   "journal": null
+  },
+  {
+   "tag": "zero-price",
+   "pid": 9,
+   "q": 1,
+   "http": 201,
+   "order": 73,
+   "totals": "0.00|0.00|0.00",
+   "payHttp": 200,
+   "journal": ""
+  },
+  {
+   "tag": "five-decimal-price",
+   "pid": 15,
+   "q": 3,
+   "http": 201,
+   "order": 74,
+   "totals": "30.36|3.04|33.40",
+   "payHttp": 200,
+   "journal": ""
+  }
+ ]
+}

@@ -1,0 +1,67 @@
+account_code,account_name,account_name_ar,account_type,normal_balance,currency,account_subtype,description,is_active
+1000,Assets,,asset,debit,EGP,assets,,true
+1100,Current Assets,,asset,debit,EGP,current_asset,,true
+1101,Petty Cash,,asset,debit,EGP,cash,,true
+1110,Cash on Hand,,asset,debit,EGP,cash,,true
+1111,Main Bank Account,,asset,debit,EGP,bank,,true
+1112,Savings Account,,asset,debit,EGP,bank,,true
+1113,Card Payment Clearing,,asset,debit,EGP,clearing,,true
+1120,Accounts Receivable,,asset,debit,EGP,receivable,,true
+1121,Employee Advances,,asset,debit,EGP,advance,,true
+1130,Inventory,,asset,debit,EGP,inventory,,true
+1140,Prepaid Expenses,,asset,debit,EGP,prepaid,,true
+1150,Input VAT Receivable,,asset,debit,EGP,tax,,true
+1200,Fixed Assets,,asset,debit,EGP,fixed_asset,,true
+1210,Kitchen Equipment,,asset,debit,EGP,fixed_asset,,true
+1220,Furniture and Fixtures,,asset,debit,EGP,fixed_asset,,true
+1230,Leasehold Improvements,,asset,debit,EGP,fixed_asset,,true
+1240,Accumulated Depreciation,,asset,credit,EGP,contra_asset,,true
+1250,Delivery Van,,asset,debit,EGP,,,true
+2000,Liabilities,,liability,credit,EGP,liabilities,,true
+2100,Current Liabilities,,liability,credit,EGP,current_liability,,true
+2101,Accounts Payable,,liability,credit,EGP,payable,,true
+2110,Accrued Expenses,,liability,credit,EGP,accrual,,true
+2120,VAT Payable,,liability,credit,EGP,tax,,true
+2130,Salaries Payable,,liability,credit,EGP,payroll,,true
+2140,Tips Payable,,liability,credit,EGP,payroll,,true
+2150,Gift Card Liability,,liability,credit,EGP,deferred_revenue,,true
+2200,Long-Term Liabilities,,liability,credit,EGP,long_term_liability,,true
+2210,Loans Payable,,liability,credit,EGP,loan,,true
+3000,Equity,,equity,credit,EGP,equity,,true
+3100,Owner Capital,,equity,credit,EGP,capital,,true
+3150,Owner Drawings,,equity,debit,EGP,,,true
+3200,Retained Earnings,,equity,credit,EGP,retained_earnings,,true
+3300,Current Year Earnings,,equity,credit,EGP,current_year_earnings,,true
+4000,Revenue,,revenue,credit,EGP,revenue,,true
+4100,Food Sales,,revenue,credit,EGP,food_sales,,true
+4110,Beverage Sales,,revenue,credit,EGP,beverage_sales,,true
+4120,Delivery Sales,,revenue,credit,EGP,delivery_sales,,true
+4130,Catering Sales,,revenue,credit,EGP,catering_sales,,true
+4140,Service Charge Revenue,,revenue,credit,EGP,service_charge,,true
+4150,Sales Discounts,,revenue,debit,EGP,contra_revenue,,true
+5000,Expenses,,expense,debit,EGP,expenses,,true
+5100,Cost of Goods Sold,,expense,debit,EGP,cogs,,true
+5110,Food COGS,,expense,debit,EGP,cogs,,true
+5120,Beverage COGS,,expense,debit,EGP,cogs,,true
+5130,Packaging COGS,,expense,debit,EGP,cogs,,true
+5200,Payroll Expenses,,expense,debit,EGP,payroll,,true
+5210,Salaries Expense,,expense,debit,EGP,payroll,,true
+5220,Overtime Expense,,expense,debit,EGP,payroll,,true
+5230,Benefits Expense,,expense,debit,EGP,payroll,,true
+5300,Occupancy Expenses,,expense,debit,EGP,occupancy,,true
+5310,Rent Expense,,expense,debit,EGP,occupancy,,true
+5320,Utilities Expense,,expense,debit,EGP,occupancy,,true
+5330,Cleaning Expense,,expense,debit,EGP,occupancy,,true
+5400,Marketing Expenses,,expense,debit,EGP,marketing,,true
+5410,Advertising Expense,,expense,debit,EGP,marketing,,true
+5420,Promotions Expense,,expense,debit,EGP,marketing,,true
+5500,Administrative Expenses,,expense,debit,EGP,administrative,,true
+5510,Office Supplies,,expense,debit,EGP,administrative,,true
+5520,Bank Fees,,expense,debit,EGP,administrative,,true
+5530,Repairs and Maintenance,,expense,debit,EGP,administrative,,true
+5540,Insurance Expense,,expense,debit,EGP,administrative,,true
+5550,Depreciation Expense,,expense,debit,EGP,administrative,,true
+5560,Delivery Commission Expense,,expense,debit,EGP,administrative,,true
+5570,Miscellaneous Expense,,expense,debit,EGP,administrative,,true
+5997,'@SUM(A1:A2),,expense,debit,EGP,,'+cmd|calc!A0,true
+5998,'=1+1 injected,,expense,debit,EGP,,,true

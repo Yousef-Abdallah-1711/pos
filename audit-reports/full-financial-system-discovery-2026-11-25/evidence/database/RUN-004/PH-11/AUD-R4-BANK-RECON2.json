@@ -1,0 +1,11 @@
+{
+ "run": "RUN-004",
+ "bank": 2,
+ "ownJournal": "1",
+ "glBalanceOfBankAccount": "0",
+ "lineHttp": 200,
+ "completeHttp": 200,
+ "session": "completed|stmt 777777.77|book 777777.77|diff 0.00|completed_at 2026-11-27 02:48:00.420264",
+ "bankAfter": "2026-11-27|777777.77|ledger current_balance 12000.00",
+ "journalBankLines": "0"
+}

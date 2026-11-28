@@ -1,0 +1,16 @@
+{
+ "page": "reports/financial/payables-aging",
+ "text": "POS Dashboard\nDashboard\nCashier POS\nKitchen Display\nOrders\nProducts\nHuman Resources\nAccounting\nSuppliers\nFinancial Reports\nReports\nTheme Builder\nSettings\nEnglish\nA\n\nAudit Owner C\n\nOwner\n\nPayables Aging\n\nOutstanding supplier balances grouped by age buckets.\n\nRefresh\nExport PDF\nPayables Aging\nEntity\tCurrent\t30\t60\t90\t90+\tTotal\nAudit Supplier Co\tEGP 12,800.00\tEGP 0.00\tEGP 0.00\tEGP 0.00\tEGP 0.00\tEGP 12,800.00\nTotal\t\tEGP 12,800.00",
+ "calls": [
+  {
+   "u": "/reports/financial/payables-aging?as_of=2026-11-25",
+   "s": 200,
+   "body": "{\"data\":{\"as_of_date\":\"2026-11-25\",\"rows\":[{\"entity_id\":1,\"entity_name\":\"Audit Supplier Co\",\"current\":12800,\"days_30\":0,\"days_60\":0,\"days_90\":0,\"days_90_plus\":0,\"total\":12800}],\"total\":12800},\"success\":true}"
+  },
+  {
+   "u": "/reports/financial/payables-aging?as_of=2026-11-25",
+   "s": 200,
+   "body": "{\"data\":{\"as_of_date\":\"2026-11-25\",\"rows\":[{\"entity_id\":1,\"entity_name\":\"Audit Supplier Co\",\"current\":12800,\"days_30\":0,\"days_60\":0,\"days_90\":0,\"days_90_plus\":0,\"total\":12800}],\"total\":12800},\"success\":true}"
+  }
+ ]
+}

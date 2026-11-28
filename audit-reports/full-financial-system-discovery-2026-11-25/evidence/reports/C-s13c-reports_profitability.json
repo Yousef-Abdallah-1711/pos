@@ -1,0 +1,16 @@
+{
+ "page": "reports/profitability",
+ "text": "POS Dashboard\nDashboard\nCashier POS\nKitchen Display\nOrders\nProducts\nHuman Resources\nAccounting\nSuppliers\nFinancial Reports\nReports\nTheme Builder\nSettings\nEnglish\nA\n\nAudit Owner C\n\nOwner\n\nProduct Profitability\n\nTop and low-margin items by gross profit and food cost\n\nRefresh\nDownload CSV\nDownload PDF\nDate From\nDate To\nGross Margin %\n60.0%\nLast updated\n11/26/2026, 12:52:07 AM\nLast updated (dashboard refresh)\n11/26/2026, 12:52:07 AM\nTotal Revenue\nEGP 110,000.00\nTotal COGS\nEGP 44,000.00\nGross Profit\nEGP 66,000.00\nFood Cost %\n40.0%\nTop Profitable Items\nAudit Burger\n0\n20000\n40000\n60000\n80000\n0\n15\n30\n45\n60\nMargin %Profit\nTop Profitable Items\nProduct\tQty\tRevenue\tCOGS\tProfit\tMargin %\nAudit Burger\t11\tEGP 110,000.00\tEGP 44,000.00\tEGP 66,000.00\t60.0%\nLowest Margin Items\nProduct\tQty\tRevenue\tCOGS\tProfit\tMargin %\nAudit Burger\t11\tEGP 110,000.00\tEGP 44,000.00\tEGP 66,000.00\t60.0%\n15",
+ "calls": [
+  {
+   "u": "/reports/profitability?date_from=2026-10-27&date_to=2026-11-25&granularity=day",
+   "s": 200,
+   "body": "{\"data\":{\"filters\":{\"cost_field\":\"products.cost\",\"date_from\":\"2026-10-27\",\"date_to\":\"2026-11-25\",\"top_limit\":10},\"summary\":{\"total_revenue\":110000,\"total_cogs\":44000,\"gross_profit\":66000,\"gross_margin_pct\":60,\"food_cost_pct\":40,\"units_missing_cost\":0,\"products_missing_cost_rows\":0},\"top_items\":[{\"product_id\":2,\"name\":\"Audit Burger\",\"quantity\":11,\"revenue\":110000,\"cogs\":44000,\"gross_profit\":66000,\"gross_margin_pct\":60,\"food_cost_pct\":40,\"cost_per_unit\":4000,\"missing_cost_data\":false}],\"lowest_margin_items\":[{\"product_id\":2,\"name\":\"Audit Burger\",\"quantity\":11,\"revenue\":110000,\"cogs\":44000,\"gross_profit\":66000,\"gross_margin_pct\":60,\"food_cost_pct\":40,\"cost_per_unit\":4000,\"missing_cost_data\":false}],\"generated_at\":\"2026-11-25T22:52:07Z\"},\"success\":true}"
+  },
+  {
+   "u": "/reports/profitability?date_from=2026-10-27&date_to=2026-11-25&granularity=day",
+   "s": 200,
+   "body": "{\"data\":{\"filters\":{\"cost_field\":\"products.cost\",\"date_from\":\"2026-10-27\",\"date_to\":\"2026-11-25\",\"top_limit\":10},\"summary\":{\"total_revenue\":110000,\"total_cogs\":44000,\"gross_profit\":66000,\"gross_margin_pct\":60,\"food_cost_pct\":40,\"units_missing_cost\":0,\"products_missing_cost_rows\":0},\"top_items\":[{\"product_id\":2,\"name\":\"Audit Burger\",\"quantity\":11,\"revenue\":110000,\"cogs\":44000,\"gross_profit\":66000,\"gross_margin_pct\":60,\"food_cost_pct\":40,\"cost_per_unit\":4000,\"missing_cost_data\":false}],\"lowest_margin_items\":[{\"product_id\":2,\"name\":\"Audit Burger\",\"quantity\":11,\"revenue\":110000,\"cogs\":44000,\"gross_profit\":66000,\"gross_margin_pct\":60,\"food_cost_pct\":40,\"cost_per_unit\":4000,\"missing_cost_data\":false}],\"generated_at\":\"2026-11-25T22:52:07Z\"},\"success\":true}"
+  }
+ ]
+}

@@ -1,0 +1,94 @@
+{
+ "run": "RUN-004",
+ "tenant": 4,
+ "themeId": "13",
+ "log": [
+  {
+   "k": "E0",
+   "desc": "before",
+   "row": "#3b82f6|false|false"
+  },
+  {
+   "k": "E1",
+   "desc": "type invalid colour text into primary field",
+   "calls": [],
+   "row": "#3b82f6|false|false",
+   "value": "not-a-color"
+  },
+  {
+   "k": "E2",
+   "desc": "type valid #ff0000",
+   "calls": [],
+   "row": "#3b82f6|false|false"
+  },
+  {
+   "k": "E3",
+   "desc": "explicit Save/Publish control present",
+   "present": true
+  },
+  {
+   "k": "E3b",
+   "desc": "clicked save",
+   "calls": [
+    "PUT /admin/themes/13 200"
+   ],
+   "row": "#3b82f6|false|false"
+  },
+  {
+   "k": "E4",
+   "desc": "History tab text",
+   "text": "Default Theme (Copy) |  | Editing theme |  | Colors | Homepage | Header | Footer | Settings | History | Theme Version History | Version History |  | Version history is automatically tracked when you save changes to your theme. Previous versions w"
+  },
+  {
+   "k": "A1",
+   "desc": "Activate the edited copy via UI",
+   "calls": [
+    "POST /admin/themes/13/activate 200"
+   ],
+   "active": "11:false 4:false 13:true"
+  },
+  {
+   "k": "A2",
+   "desc": "storefront HTML mentions the new colour",
+   "has_ff0000": false,
+   "bytes": 0
+  },
+  {
+   "k": "A2b",
+   "desc": "public theme API mentions the colour",
+   "has_ff0000": false,
+   "head": "404 page not found\n"
+  },
+  {
+   "k": "R1",
+   "desc": "restore Default Theme active",
+   "calls": [
+    "POST /admin/themes/4/activate 200"
+   ],
+   "active": "11:false 4:true 13:false"
+  }
+ ],
+ "calls": [
+  {
+   "m": "PUT",
+   "u": "/admin/themes/13",
+   "s": 200,
+   "req": "{\"name\":\"Default Theme (Copy)\",\"slug\":\"default-theme-copy-1795749476\",\"description\":\"Default theme for Audit C Diagnostic\",\"colors\":{\"primary\":\"#ff0000\",\"secondary\":\"#6366f1\",\"accent\":\"#10b981\",\"backg",
+   "b": "{\"id\":13,\"tenant_id\":4,\"restaurant_id\":4,\"name\":\"Default Theme (Copy)\",\"slug\":\"default-theme-copy-1795749476\",\"config\":{\"colors\":{\"primary\":\"#ff0000\",\"secondary\":\"#6366f1\",\"accent\":\"#10b981\",\"backgrou"
+  },
+  {
+   "m": "POST",
+   "u": "/admin/themes/13/activate",
+   "s": 200,
+   "req": "",
+   "b": "{\"message\":\"theme activated successfully\"}"
+  },
+  {
+   "m": "POST",
+   "u": "/admin/themes/4/activate",
+   "s": 200,
+   "req": "",
+   "b": "{\"message\":\"theme activated successfully\"}"
+  }
+ ]
+}

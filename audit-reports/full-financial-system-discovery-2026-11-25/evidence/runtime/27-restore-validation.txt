@@ -1,0 +1,8 @@
+# Restore validation 2026-11-26T00:58:17Z: snapshot isolated-audit-final-2026-11-25.dump -> persistent volume
+tenants|4
+orders|12
+journals|30
+gl|56
+outbox|4
+310000.00|310000.00
+IDENTICAL=yes

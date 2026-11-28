@@ -1,0 +1,32 @@
+{
+ "run": "RUN-003",
+ "out": {
+  "journals": "17108",
+  "lines": "34251",
+  "/accounting/journal-entries": {
+   "status": 200,
+   "bytes": 7574,
+   "ms": 48
+  },
+  "/accounting/journal-entries?page=1&limit=50": {
+   "status": 200,
+   "bytes": 7574,
+   "ms": 37
+  },
+  "/accounting/csv/journal-entries/export": {
+   "status": 200,
+   "bytes": 2238072,
+   "ms": 242
+  },
+  "/accounting/trial-balance": {
+   "status": 200,
+   "bytes": 11900,
+   "ms": 16
+  },
+  "/reports/financial/profit-loss?date_from=2026-01-01&date_to=2026-12-31": {
+   "status": 200,
+   "bytes": 682,
+   "ms": 24
+  }
+ }
+}

@@ -1,0 +1,24 @@
+// RUN-003 / PH-11 / FIN-019: CSV import of journals and chart of accounts (valid, unbalanced, duplicate, formula chars, wrong header, empty, oversize, auto_post). Tenant 4. API-DIAGNOSTIC.
+import fs from 'fs';
+import { sql, API, PASSWORD, evidenceDirs } from './chrome_lib.mjs';
+const d = evidenceDirs('PH-11'); const O = 'http://localhost:13112';
+const r0 = await fetch(API + '/auth/login', { method: 'POST', headers: { Origin: O, 'Content-Type': 'application/json' }, body: JSON.stringify({ email: 'audit.c.owner@example.test', password: PASSWORD }) });
+const ck = r0.headers.getSetCookie().map((c) => c.split(';')[0]).join('; ');
+const up = async (path, csv) => { const fd = new FormData(); fd.append('file', new Blob([csv], { type: 'text/csv' }), 'import.csv'); const x = await fetch(API + path, { method: 'POST', headers: { Origin: O, Cookie: ck }, body: fd }); const t = await x.text(); return { status: x.status, body: t.slice(0, 260) }; };
+const log = []; const rec = (id, desc, extra = {}) => { log.push({ id, desc, ...extra }); console.log(id, desc, JSON.stringify(extra).slice(0, 380)); };
+const H = 'entry_key,entry_date,description,entry_type,account_code,line_description,debit_amount,credit_amount\n';
+const cnt = () => Number(sql("select count(*) from journal_entries where tenant_id=4"));
+let c0 = cnt();
+let r = await up('/accounting/csv/journal-entries/import', H + 'K1,2026-11-26,Import valid,manual,1110,l1,500,0\nK1,2026-11-26,Import valid,manual,3100,l2,0,500\n'); rec('IMP-01', 'balanced journal (draft)', { http: r.status, resp: r.body, newJournals: cnt() - c0 });
+c0 = cnt(); r = await up('/accounting/csv/journal-entries/import', H + 'K2,2026-11-26,Unbalanced,manual,1110,l1,500,0\nK2,2026-11-26,Unbalanced,manual,3100,l2,0,400\n'); rec('IMP-02', 'unbalanced journal', { http: r.status, resp: r.body, newJournals: cnt() - c0 });
+c0 = cnt(); r = await up('/accounting/csv/journal-entries/import', H + 'K1,2026-11-26,Import valid,manual,1110,l1,500,0\nK1,2026-11-26,Import valid,manual,3100,l2,0,500\n'); rec('IMP-03', 're-import identical file (duplicate guard?)', { http: r.status, resp: r.body, newJournals: cnt() - c0 });
+c0 = cnt(); r = await up('/accounting/csv/journal-entries/import', H + 'K3,2026-11-26,"=HYPERLINK(""http://evil"")",manual,1110,@cmd,100,0\nK3,2026-11-26,x,manual,3100,+1,0,100\n'); rec('IMP-04', 'formula characters in description', { http: r.status, resp: r.body, stored: sql("select description from journal_entries where tenant_id=4 order by id desc limit 1") });
+c0 = cnt(); r = await up('/accounting/csv/journal-entries/import', H + 'K4,2026-11-26,Bad account,manual,9999,l1,100,0\nK4,2026-11-26,Bad account,manual,3100,l2,0,100\n'); rec('IMP-05', 'unknown account code', { http: r.status, resp: r.body, newJournals: cnt() - c0 });
+c0 = cnt(); r = await up('/accounting/csv/journal-entries/import', H + 'K5,2026-13-45,Bad date,manual,1110,l1,100,0\nK5,2026-13-45,Bad date,manual,3100,l2,0,100\n'); rec('IMP-06', 'invalid date', { http: r.status, resp: r.body, newJournals: cnt() - c0 });
+r = await up('/accounting/csv/journal-entries/import', 'a,b,c\n1,2,3\n'); rec('IMP-07', 'wrong header', { http: r.status, resp: r.body });
+r = await up('/accounting/csv/journal-entries/import', ''); rec('IMP-08', 'empty file', { http: r.status, resp: r.body });
+c0 = cnt(); r = await up('/accounting/csv/journal-entries/import?auto_post=true', H + 'K6,2026-11-26,Auto post import,manual,1110,l1,50,0\nK6,2026-11-26,Auto post import,manual,3100,l2,0,50\n'); rec('IMP-09', 'auto_post=true', { http: r.status, resp: r.body, status: sql("select status from journal_entries where tenant_id=4 order by id desc limit 1") });
+c0 = cnt(); r = await up('/accounting/csv/journal-entries/import', H + 'K7,2026-11-26,Negative,manual,1110,l1,-100,0\nK7,2026-11-26,Negative,manual,3100,l2,0,-100\n'); rec('IMP-10', 'negative amounts', { http: r.status, resp: r.body, newJournals: cnt() - c0 });
+const big = H + Array.from({ length: 6000 }, (_, i) => `BIG${i},2026-11-26,Bulk ${i},manual,1110,l,1,0\nBIG${i},2026-11-26,Bulk ${i},manual,3100,l,0,1`).join('\n') + '\n';
+const t0 = performance.now(); c0 = cnt(); r = await up('/accounting/csv/journal-entries/import', big); rec('IMP-11', '6,000 journals (12,000 rows) bulk import', { http: r.status, resp: r.body.slice(0, 160), ms: Math.round(performance.now() - t0), newJournals: cnt() - c0 });
+fs.writeFileSync(`${d.db}/AUD-IMPORT.json`, JSON.stringify({ run: 'RUN-003', kind: 'API-DIAGNOSTIC', log }, null, 1));

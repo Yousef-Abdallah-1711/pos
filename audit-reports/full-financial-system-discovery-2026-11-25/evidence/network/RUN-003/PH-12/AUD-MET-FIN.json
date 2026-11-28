@@ -1,0 +1,14 @@
+{
+ "run": "RUN-003",
+ "tenant": 4,
+ "visible": {
+  "tb": "404\nThis page could not be found.",
+  "ledger": "404\nThis page could not be found.",
+  "pnl": "POS Dashboard\nDashboard\nCashier POS\nKitchen Display\nOrders\nProducts\nHuman Resources\nAccounting\nSuppliers\nFinancial Reports\nReports\nTheme Builder\nSettings\nEnglish\nA\n\nAudit Owner C\n\nOwner\n\nProfit & Loss\n\nRevenue and expense performance for the selected period.\n\nRefresh\nExport PDF\nTotal Revenue\nEGP 301,700.00\nTotal Expenses\nEGP 129,000.00\nNet Profit\nEGP 172,700.00\nRevenue Accounts\nHide\nCode\tAccount\tAmount\n4100\tFood Sales\tEGP 301,700.00\nExpense Accounts\nHide\nCode\tAccount\tAmount\n5110\tFood COGS\tEGP 116,000.00\n5210\tSalaries Expense\tEGP 10,000.00\n5310\tRent Expense\tEGP 3,000.00",
+  "cf": "POS Dashboard\nDashboard\nCashier POS\nKitchen Display\nOrders\nProducts\nHuman Resources\nAccounting\nSuppliers\nFinancial Reports\nReports\nTheme Builder\nSettings\nEnglish\nA\n\nAudit Owner C\n\nOwner\n\nCash Flow Statement\n\nCash movement grouped by operating, investing, and financing activity.\n\nRefresh\nExport PDF\nOperating Cash Flow\nEGP 172,700.00\nInvesting Cash Flow\nEGP 0.00\nFinancing Cash Flow\nEGP 10.01\nNet Cash Flow\nEGP 172,710.01"
+ },
+ "bodies": {
+  "/reports/financial/profit-loss?date_from=2026-10-28&date_to=2026-11-26&compare_date_from=2026-09-28&compare_date_to=2026-10-27": "{\"data\":{\"date_from\":\"2026-10-28\",\"date_to\":\"2026-11-26\",\"revenue\":[{\"account_code\":\"4100\",\"account_name\":\"Food Sales\",\"amount\":301700}],\"expenses\":[{\"account_code\":\"5110\",\"account_name\":\"Food COGS\",\"amount\":116000},{\"account_code\":\"5210\",\"account_name\":\"Salaries Expense\",\"amount\":10000},{\"account_code\":\"5310\",\"account_name\":\"Rent Expense\",\"amount\":3000}],\"total_revenue\":301700,\"total_expenses\":129000,\"net_profit\":172700,\"comparison_date_from\":\"2026-09-28\",\"comparison_date_to\":\"2026-10-27\",\"revenue_change_percent\":100,\"expense_change_percent\":100,\"net_profit_change_percent\":100},\"success\":true}",
+  "/reports/financial/cash-flow?date_from=2026-10-28&date_to=2026-11-26": "{\"data\":{\"date_from\":\"2026-10-28\",\"date_to\":\"2026-11-26\",\"operating_cash_flow\":172700,\"investing_cash_flow\":0,\"financing_cash_flow\":10.01,\"net_cash_flow\":172710.01},\"success\":true}"
+ }
+}

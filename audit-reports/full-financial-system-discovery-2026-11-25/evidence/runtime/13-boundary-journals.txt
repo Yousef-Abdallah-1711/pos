@@ -1,0 +1,17 @@
+# FIN boundary tests (journal create) tenant C owner
+BND-01 unbalanced 100 vs 99.99 -> 400 {"error":"journal entry is not balanced","success":false} 
+BND-02 negative amount -> 400 {"error":"journal amounts cannot be negative","success":false} 
+BND-03 zero amounts -> 400 {"error":"a journal line must have a debit or credit amount","success":false} 
+BND-04 header account 1000 -> 201 {"data":{"id":10,"tenant_id":4,"restaurant_id":4,"entry_number":"JE-2026-00010","entry_date":"2026-11-25T00:00:00Z","fiscal_period":"2026-11","descrip
+BND-05 other-tenant account -> 400 {"error":"account 4 not found","success":false} 
+BND-06 three-decimal 0.005 -> 400 {"error":"account 63 is a header account and cannot be posted to","success":false} 
+BND-07 huge 1e15 -> 400 {"error":"pq: numeric field overflow","success":false} 
+BND-08 single line -> 400 {"error":"journal entry must contain at least two lines","success":false} 
+BND-09 future date 2027-01-01 -> 400 {"error":"account 63 is a header account and cannot be posted to","success":false} 
+BND-10 backdated 2020-01-01 -> 400 {"error":"account 63 is a header account and cannot be posted to","success":false} 
+# CORRECTED rerun (ids: header=63 cash=70 capital=93). NOTE BND-04 earlier call created stray DRAFT JE-2026-00010 (cash 10 / capital 10) - draft only
+BND-04 header account 1000 -> 400 {"error":"account 63 is a header account and cannot be posted to","success":false} 
+BND-06 0.005 amounts -> 201 {"data":{"id":16,"tenant_id":4,"restaurant_id":4,"entry_number":"JE-2026-00011","entry_date":"2026-11-25T00:00:00Z","fiscal_period":"2026-11","description":"rounding","en
+BND-06b 10.005 vs 10.005 (3 decimals) -> 201 {"data":{"id":17,"tenant_id":4,"restaurant_id":4,"entry_number":"JE-2026-00012","entry_date":"2026-11-25T00:00:00Z","fiscal_period":"2026-11","description":"rounding2","e
+BND-09 future 2027-01-01 -> 201 {"data":{"id":18,"tenant_id":4,"restaurant_id":4,"entry_number":"JE-2027-00001","entry_date":"2027-01-01T00:00:00Z","fiscal_period":"2027-01","description":"future","entr
+BND-10 backdated 2020-01-01 -> 201 {"data":{"id":19,"tenant_id":4,"restaurant_id":4,"entry_number":"JE-2020-00001","entry_date":"2020-01-01T00:00:00Z","fiscal_period":"2020-01","description":"backdated","e

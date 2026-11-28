@@ -1,0 +1,16 @@
+{
+ "page": "reports/financial/vat",
+ "text": "POS Dashboard\nDashboard\nCashier POS\nKitchen Display\nOrders\nProducts\nHuman Resources\nAccounting\nSuppliers\nFinancial Reports\nReports\nTheme Builder\nSettings\nEnglish\nA\n\nAudit Owner C\n\nOwner\n\nVAT Report\n\nOutput VAT vs input VAT for the selected date range.\n\nRefresh\nExport PDF\nOutput VAT\nEGP 0.00\nInput VAT\nEGP 2,800.00\nNet VAT\n-EGP 2,800.00",
+ "calls": [
+  {
+   "u": "/accounting/tax/vat-report?date_from=2026-10-27&date_to=2026-11-25",
+   "s": 200,
+   "body": "{\"data\":{\"date_from\":\"2026-10-27\",\"date_to\":\"2026-11-25\",\"output_vat\":0,\"input_vat\":2800,\"net_vat\":-2800},\"success\":true}"
+  },
+  {
+   "u": "/accounting/tax/vat-report?date_from=2026-10-27&date_to=2026-11-25",
+   "s": 200,
+   "body": "{\"data\":{\"date_from\":\"2026-10-27\",\"date_to\":\"2026-11-25\",\"output_vat\":0,\"input_vat\":2800,\"net_vat\":-2800},\"success\":true}"
+  }
+ ]
+}

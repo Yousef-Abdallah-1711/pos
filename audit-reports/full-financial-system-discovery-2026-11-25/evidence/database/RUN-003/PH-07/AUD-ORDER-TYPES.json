@@ -1,0 +1,73 @@
+{
+ "run": "RUN-003",
+ "kind": "API-DIAGNOSTIC",
+ "log": [
+  {
+   "id": 68,
+   "desc": "dine-in with table 1",
+   "http": 201,
+   "row": "pos|1|confirmed|200.00|20.00|0.00|220.00",
+   "tableStatus": "occupied"
+  },
+  {
+   "id": 69,
+   "desc": "delivery order with address",
+   "http": 201,
+   "row": "pos|-|confirmed|100.00|10.00|0.00|110.00"
+  },
+  {
+   "id": "OT-03",
+   "desc": "delivery order paid: journal lines (is a delivery fee posted/taxed?)",
+   "lines": "1110:110.00/0.00 4100:0.00/100.00 2120:0.00/10.00 5110:40.00/0.00 1130:0.00/40.00"
+  },
+  {
+   "id": "OT-04",
+   "desc": "expected_total mismatch (1 vs 110)",
+   "http": 500,
+   "resp": "{\"error\":\"Failed to create order\"}"
+  },
+  {
+   "id": "OT-05",
+   "desc": "quantity 0",
+   "http": 400,
+   "resp": "{\"error\":\"order validation failed: item 0: quantity must be greater than 0\"}"
+  },
+  {
+   "id": "OT-06",
+   "desc": "quantity -3",
+   "http": 400,
+   "resp": "{\"error\":\"order validation failed: item 0: quantity must be greater than 0\"}"
+  },
+  {
+   "id": "OT-07",
+   "desc": "quantity 100000 (insufficient stock)",
+   "http": 400,
+   "resp": "{\"error\":\"insufficient inventory for product Audit Inv Probe B\"}"
+  },
+  {
+   "id": "OT-08",
+   "desc": "unknown product",
+   "http": 500,
+   "resp": "{\"error\":\"Failed to create order\"}"
+  },
+  {
+   "id": 70,
+   "desc": "mixed items incl. untracked product",
+   "http": 201,
+   "row": "pos|-|confirmed|10200.00|1020.00|0.00|11220.00"
+  },
+  {
+   "id": 71,
+   "desc": "script/SQL text in customer_name and notes",
+   "http": 201,
+   "stored": "<script>alert(1)</script> / x'; DROP TABLE orders;--",
+   "ordersTable": "71"
+  },
+  {
+   "id": "OT-11",
+   "desc": "unknown payment method",
+   "http": 400,
+   "resp": "{\"error\":\"order validation failed: invalid payment method: bitcoin\"}"
+  }
+ ]
+}

@@ -1,0 +1,33 @@
+AUD-CF-TRACE (F-003) tenant 4 isolated DB, window 2026-10-28..2026-11-26, EGP, 2026-11-26T19:51:43Z
+Report (headed Chrome, evidence/network/RUN-003/PH-12/AUD-MET-FIN.json): operating 172,700.00 investing 0 financing 10.01 net 172,710.01
+-- posted GL net debit by account (all dates in window; all journals dated within window)
+ account_code |     account_name      | account_type | net_debit  
+--------------+-----------------------+--------------+------------
+ 1110         | Cash on Hand          | asset        |  290010.01
+ 1111         | Main Bank Account     | asset        |  -10000.00
+ 1113         | Card Payment Clearing | asset        |   11000.00
+ 1120         | Accounts Receivable   | asset        |    6520.00
+ 1130         | Inventory             | asset        |  -96000.00
+ 1150         | Input VAT Receivable  | asset        |    2800.00
+ 2101         | Accounts Payable      | liability    |    -800.00
+ 2120         | VAT Payable           | liability    |  -30820.00
+ 3100         | Owner Capital         | equity       |     -10.01
+ 4100         | Food Sales            | revenue      | -301700.00
+ 5110         | Food COGS             | expense      |  116000.00
+ 5210         | Salaries Expense      | expense      |   10000.00
+ 5310         | Rent Expense          | expense      |    3000.00
+(13 rows)
+
+-- journals outside window / non-posted
+ status |    min     |    max     | count 
+--------+------------+------------+-------
+ posted | 2026-11-25 | 2026-11-26 |    54
+ void   | 2026-11-25 | 2026-11-25 |     1
+ draft  | 2020-01-01 | 2027-01-01 |    11
+(3 rows)
+
+-- Independent cash-bridge (integer EGP): cash change = NI + equity - delta(non-cash assets) + delta(liabilities)
+-- NI 172,700.00 ; equity credits 10.01 ; AR -6,520 ; Inventory +96,000 (credit balance) ; Input VAT -2,800 ; Card clearing -11,000 ; AP +800 ; VAT payable +30,820
+-- = 172,700.00 + 10.01 - 6,520 + 96,000 - 2,800 - 11,000 + 800 + 30,820 = 280,010.01 = GL 1110 (290,010.01) + 1111 (-10,000.00)
+-- Report omits every working-capital term: -6,520 +96,000 -2,800 -11,000 +800 +30,820 = +107,300.00 (residual)
+-- Formula defects (usecase/financial_report_usecase.go:366-399): (1) 'operating' = revenue/expense P&L only; (2) 'investing' = account_code LIKE '12%' debit-credit (sign inverted: an asset purchase would INCREASE cash flow) ; accounts 1200-1240 exist but have no postings in this dataset; (3) 'financing' = equity or '22%' liabilities (21xx AP / 2120 VAT excluded; 2200/2210 exist but have no postings); (4) no cash/bank account is read at all.

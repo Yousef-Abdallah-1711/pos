@@ -1,0 +1,256 @@
+{
+  "status": "proposal; NOT IMPLEMENTED; contrast and bounds require verification",
+  "schemaVersion": 1,
+  "colors": {
+    "background": {
+      "light": "#F8F2E8",
+      "dark": "#211B18",
+      "purpose": "workspace background",
+      "tenantConfigurable": true
+    },
+    "surface": {
+      "light": "#EFE4D5",
+      "dark": "#2D2520",
+      "purpose": "primary surface",
+      "tenantConfigurable": true
+    },
+    "surfaceRaised": {
+      "light": "#E6D6C3",
+      "dark": "#3A2E27",
+      "purpose": "raised surface",
+      "tenantConfigurable": true
+    },
+    "foreground": {
+      "light": "#2B201C",
+      "dark": "#F2E9DC",
+      "purpose": "primary text",
+      "tenantConfigurable": true
+    },
+    "foregroundSecondary": {
+      "light": "#5A4941",
+      "dark": "#D0C1B1",
+      "purpose": "supporting text",
+      "tenantConfigurable": true
+    },
+    "border": {
+      "light": "#D8C8B6",
+      "dark": "#514237",
+      "purpose": "dividers and borders",
+      "tenantConfigurable": true
+    },
+    "primary": {
+      "light": "#A13224",
+      "dark": "#E17861",
+      "purpose": "brand action",
+      "tenantConfigurable": true
+    },
+    "primaryHover": {
+      "light": "#8D291C",
+      "dark": "#F0937D",
+      "purpose": "hover state",
+      "tenantConfigurable": true
+    },
+    "foregroundInverse": {
+      "light": "#FFF8EE",
+      "dark": "#211B18",
+      "purpose": "text on strong surfaces",
+      "tenantConfigurable": true,
+      "validation": "Provisional; verify pair contrast and state differentiation"
+    },
+    "surfaceOverlay": {
+      "light": "#FFF9F1",
+      "dark": "#3A2E27",
+      "purpose": "menus and dialogs",
+      "tenantConfigurable": true,
+      "validation": "Provisional; verify pair contrast and state differentiation"
+    },
+    "surfaceDisabled": {
+      "light": "#E6D6C3",
+      "dark": "#514237",
+      "purpose": "disabled controls",
+      "tenantConfigurable": true,
+      "validation": "Provisional; verify pair contrast and state differentiation"
+    },
+    "borderStrong": {
+      "light": "#AD9888",
+      "dark": "#8D7667",
+      "purpose": "interactive boundaries",
+      "tenantConfigurable": true,
+      "validation": "Provisional; verify pair contrast and state differentiation"
+    },
+    "primaryForeground": {
+      "light": "#FFFFFF",
+      "dark": "#211B18",
+      "purpose": "text and icons on primary",
+      "tenantConfigurable": true,
+      "validation": "Provisional; verify pair contrast and state differentiation"
+    },
+    "primaryActive": {
+      "light": "#722116",
+      "dark": "#F0937D",
+      "purpose": "pressed primary",
+      "tenantConfigurable": true,
+      "validation": "Provisional; verify pair contrast and state differentiation"
+    },
+    "focusRing": {
+      "light": "#A13224",
+      "dark": "#F0937D",
+      "purpose": "keyboard focus",
+      "tenantConfigurable": true,
+      "validation": "Provisional; verify pair contrast and state differentiation"
+    },
+    "selectionBackground": {
+      "light": "#F3D2C6",
+      "dark": "#633A30",
+      "purpose": "selected navigation and rows",
+      "tenantConfigurable": true,
+      "validation": "Provisional; verify pair contrast and state differentiation"
+    },
+    "selectionForeground": {
+      "light": "#722116",
+      "dark": "#FFF1E9",
+      "purpose": "selected navigation text",
+      "tenantConfigurable": true,
+      "validation": "Provisional; verify pair contrast and state differentiation"
+    },
+    "sidebarBackground": {
+      "light": "#EFE4D5",
+      "dark": "#2D2520",
+      "purpose": "sidebar surface",
+      "tenantConfigurable": true,
+      "validation": "Provisional; verify pair contrast and state differentiation"
+    },
+    "sidebarForeground": {
+      "light": "#2B201C",
+      "dark": "#F2E9DC",
+      "purpose": "sidebar text and icons",
+      "tenantConfigurable": true,
+      "validation": "Provisional; verify pair contrast and state differentiation"
+    },
+    "headerBackground": {
+      "light": "#F8F2E8",
+      "dark": "#211B18",
+      "purpose": "header surface",
+      "tenantConfigurable": true,
+      "validation": "Provisional; verify pair contrast and state differentiation"
+    },
+    "success": {
+      "light": "#176B47",
+      "dark": "#83D7A8",
+      "purpose": "positive semantic state",
+      "tenantConfigurable": false,
+      "validation": "Provisional; verify pair contrast and state differentiation"
+    },
+    "warning": {
+      "light": "#805500",
+      "dark": "#F6CB75",
+      "purpose": "warning semantic state",
+      "tenantConfigurable": false,
+      "validation": "Provisional; verify pair contrast and state differentiation"
+    },
+    "danger": {
+      "light": "#A12222",
+      "dark": "#FF9992",
+      "purpose": "destructive semantic state",
+      "tenantConfigurable": false,
+      "validation": "Provisional; verify pair contrast and state differentiation"
+    },
+    "information": {
+      "light": "#285EA8",
+      "dark": "#9AC4FF",
+      "purpose": "informational semantic state",
+      "tenantConfigurable": false,
+      "validation": "Provisional; verify pair contrast and state differentiation"
+    }
+  },
+  "typography": {
+    "enBody": "Manrope",
+    "enSelectedHeading": "Fraunces",
+    "arBody": "IBM Plex Sans Arabic",
+    "sizes": "To be established from operational density testing",
+    "proposedScalePx": {
+      "caption": 12,
+      "small": 14,
+      "body": 16,
+      "lead": 18,
+      "headingSmall": 24,
+      "headingMedium": 32,
+      "headingLarge": 40
+    },
+    "proposedWeights": {
+      "regular": 400,
+      "medium": 600,
+      "strong": 700
+    },
+    "proposedLineHeight": {
+      "compact": 1.3,
+      "body": 1.5,
+      "relaxed": 1.6
+    },
+    "proposedBounds": {
+      "bodyScalePercent": [
+        90,
+        115
+      ],
+      "lineHeight": [
+        1.3,
+        1.8
+      ]
+    }
+  },
+  "unresolved": [
+    "all color pairs and WCAG contrast",
+    "chart palette and differentiation",
+    "disabled state contrast and semantics",
+    "font registry and numeric bounds",
+    "density and radius",
+    "whether tenants may alter focus, selected, or sidebar aliases",
+    "forced-colors handling",
+    "dark hover measured in real screens"
+  ],
+  "componentAliases": {
+    "buttonPrimary": [
+      "primary",
+      "primaryForeground",
+      "primaryHover",
+      "primaryActive",
+      "focusRing"
+    ],
+    "navigation": [
+      "sidebarBackground",
+      "sidebarForeground",
+      "selectionBackground",
+      "selectionForeground",
+      "focusRing"
+    ],
+    "dialog": [
+      "surfaceOverlay",
+      "foreground",
+      "borderStrong",
+      "focusRing"
+    ],
+    "table": [
+      "surface",
+      "foreground",
+      "foregroundSecondary",
+      "border",
+      "selectionBackground"
+    ],
+    "status": [
+      "success",
+      "warning",
+      "danger",
+      "information"
+    ]
+  },
+  "validationProposal": {
+    "allowedColorSyntax": "#RRGGBB only; opaque",
+    "unknownKeys": "reject",
+    "customCssOrUrls": "reject",
+    "fontSource": "bundled, audited allowlist only",
+    "overrides": "validate resolved pairs after inheritance for each mode",
+    "contrast": "normal text >=4.5:1; large text and relevant non-text controls >=3:1; review other accessibility criteria",
+    "sizeValues": "bounded enumerations or server-validated numbers; confirm exact bounds in usability review",
+    "revision": "nonnegative integer with optimistic concurrency"
+  }
+}

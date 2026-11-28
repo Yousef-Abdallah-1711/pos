@@ -1,0 +1,181 @@
+- generic [active] [ref=f39e1]:
+  - link "Skip to content" [ref=f39e2] [cursor=pointer]:
+    - /url: "#main-content"
+  - banner [ref=f39e3]:
+    - generic [ref=f39e4]:
+      - link "SERVIO" [ref=f39e5] [cursor=pointer]:
+        - /url: /en
+      - navigation "Main navigation" [ref=f39e11]:
+        - button "Open platform features" [ref=f39e13] [cursor=pointer]: Platform
+        - link "How it works" [ref=f39e16] [cursor=pointer]:
+          - /url: /en/how-it-works
+        - link "Pricing" [ref=f39e17] [cursor=pointer]:
+          - /url: /en/pricing
+        - link "Product tour" [ref=f39e18] [cursor=pointer]:
+          - /url: /en/demo
+        - link "Demo options" [ref=f39e19] [cursor=pointer]:
+          - /url: /en/contact
+      - generic [ref=f39e20]:
+        - link "Switch to Arabic" [ref=f39e21] [cursor=pointer]:
+          - /url: /ar/how-it-works
+          - generic [ref=f39e27]: العربية
+        - button "Switch to dark mode" [ref=f39e28] [cursor=pointer]
+        - status [ref=f39e32]: Checking sign-in
+  - main [ref=f39e33]:
+    - generic [ref=f39e35]:
+      - paragraph [ref=f39e36]: How it works
+      - heading "A shared thread through service." [level=1] [ref=f39e37]
+      - paragraph [ref=f39e38]: Two ways in. One preparation workflow. See what happens at each handoff.
+    - generic [ref=f39e40]:
+      - generic [ref=f39e41]:
+        - paragraph [ref=f39e42]: Follow the order, not the paperwork
+        - heading "A shared thread through service." [level=2] [ref=f39e43]
+        - paragraph [ref=f39e44]: Two ways in. One preparation workflow. See what happens at each handoff.
+      - generic [ref=f39e45]:
+        - group [ref=f39e46]:
+          - generic "01 Take the order" [ref=f39e47] [cursor=pointer]:
+            - generic [ref=f39e48]: "01"
+            - heading "Take the order" [level=3] [ref=f39e49]
+            - generic [aria-hidden] [ref=f39e50]: +
+          - paragraph [ref=f39e51]: A cashier selects menu items, or a guest sends an order from the restaurant storefront.
+        - group [ref=f39e52]:
+          - generic "02 Confirm the handoff" [ref=f39e53] [cursor=pointer]:
+            - generic [ref=f39e54]: "02"
+            - heading "Confirm the handoff" [level=3] [ref=f39e55]
+            - generic [aria-hidden] [ref=f39e56]: +
+        - group [ref=f39e57]:
+          - generic "03 Prepare in the kitchen" [ref=f39e58] [cursor=pointer]:
+            - generic [ref=f39e59]: "03"
+            - heading "Prepare in the kitchen" [level=3] [ref=f39e60]
+            - generic [aria-hidden] [ref=f39e61]: +
+        - group [ref=f39e62]:
+          - generic "04 Mark it ready" [ref=f39e63] [cursor=pointer]:
+            - generic [ref=f39e64]: "04"
+            - heading "Mark it ready" [level=3] [ref=f39e65]
+            - generic [aria-hidden] [ref=f39e66]: +
+        - group [ref=f39e67]:
+          - generic "05 Coordinate fulfillment" [ref=f39e68] [cursor=pointer]:
+            - generic [ref=f39e69]: "05"
+            - heading "Coordinate fulfillment" [level=3] [ref=f39e70]
+            - generic [aria-hidden] [ref=f39e71]: +
+        - generic [ref=f39e72]:
+          - link "Create your restaurant account" [ref=f39e73] [cursor=pointer]:
+            - /url: /en/auth/register?billing=monthly
+          - link "How it works" [ref=f39e77] [cursor=pointer]:
+            - /url: /en/how-it-works
+            - text: How it works
+            - generic [aria-hidden] [ref=f39e78]: ↗
+    - article [ref=f39e79]:
+      - generic [ref=f39e80]:
+        - generic [ref=f39e81]:
+          - paragraph [ref=f39e82]: Getting started
+          - heading "Your first service starts with a few clear steps." [level=2] [ref=f39e83]
+        - list [ref=f39e84]:
+          - listitem [ref=f39e85]:
+            - generic [ref=f39e86]: "01"
+            - heading "Create your account" [level=3] [ref=f39e87]
+            - paragraph [ref=f39e88]: Start a 14-day trial with your restaurant details.
+          - listitem [ref=f39e89]:
+            - generic [ref=f39e90]: "02"
+            - heading "Set up the restaurant" [level=3] [ref=f39e91]
+            - paragraph [ref=f39e92]: Review the restaurant information and staff access.
+          - listitem [ref=f39e93]:
+            - generic [ref=f39e94]: "03"
+            - heading "Build your menu" [level=3] [ref=f39e95]
+            - paragraph [ref=f39e96]: Add categories and products for your team to use.
+          - listitem [ref=f39e97]:
+            - generic [ref=f39e98]: "04"
+            - heading "Run a supported order" [level=3] [ref=f39e99]
+            - paragraph [ref=f39e100]: Try the cashier-to-kitchen workflow with your own menu.
+        - generic [ref=f39e101]:
+          - paragraph [ref=f39e102]:
+            - text: Storefront hostname provisioning and paid billing activation are separate from creating your trial account.
+            - link "How it works" [ref=f39e103] [cursor=pointer]:
+              - /url: /en/how-it-works
+          - link "Create your restaurant account" [ref=f39e104] [cursor=pointer]:
+            - /url: /en/auth/register?billing=monthly
+    - generic [ref=f39e109]:
+      - paragraph [ref=f39e110]: Give the next order a clear path
+      - heading "Bring the counter and kitchen into the same conversation." [level=2] [ref=f39e111]
+      - generic [ref=f39e112]:
+        - paragraph [ref=f39e113]: Explore the workflow, set up your restaurant and try a real order handoff during your 14-day trial.
+        - generic [ref=f39e114]:
+          - link "Create your restaurant account" [ref=f39e115] [cursor=pointer]:
+            - /url: /en/auth/register?billing=monthly
+          - link "View pricing details" [ref=f39e119] [cursor=pointer]:
+            - /url: /en/pricing
+  - contentinfo [ref=f39e120]:
+    - generic [ref=f39e121]:
+      - generic [ref=f39e122]:
+        - generic [ref=f39e123]:
+          - link "SERVIO" [ref=f39e124] [cursor=pointer]:
+            - /url: /en
+          - paragraph [ref=f39e130]: Restaurant operations, thoughtfully connected.
+          - link "Get started" [ref=f39e131] [cursor=pointer]:
+            - /url: /en/auth/register?billing=monthly
+        - navigation "Footer navigation" [ref=f39e135]:
+          - generic [ref=f39e136]:
+            - generic [ref=f39e137]:
+              - heading "Product" [level=2] [ref=f39e138]
+              - list [ref=f39e139]:
+                - listitem [ref=f39e140]:
+                  - link "Explore all features" [ref=f39e141] [cursor=pointer]:
+                    - /url: /en/features
+                - listitem [ref=f39e142]:
+                  - link "Cashier POS" [ref=f39e143] [cursor=pointer]:
+                    - /url: /en/features/pos
+                - listitem [ref=f39e144]:
+                  - link "Kitchen display" [ref=f39e145] [cursor=pointer]:
+                    - /url: /en/features/kitchen-display
+                - listitem [ref=f39e146]:
+                  - link "Online ordering" [ref=f39e147] [cursor=pointer]:
+                    - /url: /en/features/online-ordering
+                - listitem [ref=f39e148]:
+                  - link "Inventory" [ref=f39e149] [cursor=pointer]:
+                    - /url: /en/features/inventory
+                - listitem [ref=f39e150]:
+                  - link "Staff records" [ref=f39e151] [cursor=pointer]:
+                    - /url: /en/features/hr
+                - listitem [ref=f39e152]:
+                  - link "Operational overview" [ref=f39e153] [cursor=pointer]:
+                    - /url: /en/features/analytics
+                - listitem [ref=f39e154]:
+                  - link "Storefront customization" [ref=f39e155] [cursor=pointer]:
+                    - /url: /en/features/website-builder
+            - generic [ref=f39e156]:
+              - heading "Explore" [level=2] [ref=f39e157]
+              - list [ref=f39e158]:
+                - listitem [ref=f39e159]:
+                  - link "How it works" [ref=f39e160] [cursor=pointer]:
+                    - /url: /en/how-it-works
+                - listitem [ref=f39e161]:
+                  - link "Product tour" [ref=f39e162] [cursor=pointer]:
+                    - /url: /en/demo
+                - listitem [ref=f39e163]:
+                  - link "Demo options" [ref=f39e164] [cursor=pointer]:
+                    - /url: /en/contact
+                - listitem [ref=f39e165]:
+                  - link "Pricing" [ref=f39e166] [cursor=pointer]:
+                    - /url: /en/pricing
+            - generic [ref=f39e167]:
+              - heading "Account" [level=2] [ref=f39e168]
+              - list [ref=f39e169]:
+                - listitem [ref=f39e170]:
+                  - link "Log in" [ref=f39e171] [cursor=pointer]:
+                    - /url: /en/auth/login
+                - listitem [ref=f39e172]:
+                  - link "Create your restaurant account" [ref=f39e173] [cursor=pointer]:
+                    - /url: /en/auth/register
+            - generic [ref=f39e174]:
+              - heading "Company" [level=2] [ref=f39e175]
+              - list [ref=f39e176]:
+                - listitem [ref=f39e177]:
+                  - link "Privacy" [ref=f39e178] [cursor=pointer]:
+                    - /url: /en/privacy
+                - listitem [ref=f39e179]:
+                  - link "Demo information" [ref=f39e180] [cursor=pointer]:
+                    - /url: /en/contact
+      - generic [ref=f39e181]:
+        - paragraph [ref=f39e182]: Product screens use synthetic data. Availability and setup requirements are described on each feature page.
+        - generic [ref=f39e183]: © 2026 SERVIO
+  - button "Open Next.js Dev Tools" [ref=f39e189] [cursor=pointer]

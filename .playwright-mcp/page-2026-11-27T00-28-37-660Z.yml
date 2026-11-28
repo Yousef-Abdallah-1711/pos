@@ -1,0 +1,500 @@
+- generic [ref=e1]:
+  - link "تجاوز إلى المحتوى" [ref=e2] [cursor=pointer]:
+    - /url: "#main-content"
+  - banner [ref=e3]:
+    - generic [ref=e4]:
+      - link "SERVIO" [ref=e5] [cursor=pointer]:
+        - /url: /ar
+      - generic [ref=e20]:
+        - link "التغيير إلى الإنجليزية" [ref=e21] [cursor=pointer]:
+          - /url: /en
+          - generic [ref=e571]: English
+        - button "التبديل إلى الوضع الفاتح" [active] [ref=e574] [cursor=pointer]
+        - button "فتح القائمة" [ref=e572] [cursor=pointer]
+  - main [ref=e32]:
+    - generic [ref=e33]:
+      - region "وقت أكتر لضيوفك." [ref=e34]:
+        - generic [ref=e35]:
+          - paragraph [ref=e36]: للمطاعم والكافيهات في مصر
+          - heading "وقت أكتر لضيوفك." [level=1] [ref=e37]
+          - paragraph [ref=e38]: اجمع طلبات الكاشير والطلبات الأونلاين وتذاكر المطبخ وشغل اليوم في مسار واحد واضح.
+          - generic [ref=e39]:
+            - link "أنشئ حساب مطعمك" [ref=e40] [cursor=pointer]:
+              - /url: /ar/auth/register?billing=monthly
+            - link "شاهد مسار الطلب" [ref=e44] [cursor=pointer]:
+              - /url: "#how-orders-move"
+          - 'figure "لقطة تطبيق فعلية بالعربية والوضع الداكن · بيانات تجريبية مع إخفاء معرّفات الاختبار افتح الشاشة كاملة : لقطة فعلية من لوحة سيرفيو تعرض الطلبات وعمليات المطعم" [ref=e581]':
+            - img "لقطة فعلية من لوحة سيرفيو تعرض الطلبات وعمليات المطعم — لقطة تطبيق فعلية بالعربية والوضع الداكن · بيانات تجريبية مع إخفاء معرّفات الاختبار" [ref=e582]
+          - paragraph [ref=e52]: "صورة المقهى: Julen Rey Azcona"
+      - region "الطلبات جاية من كل مكان. التحدي في تسليمها للخطوة اللي بعدها." [ref=e53]:
+        - generic [ref=e54]:
+          - generic [ref=e55]:
+            - generic [ref=e56]:
+              - paragraph [ref=e57]: يوم شغل تعرفه كويس
+              - heading "الطلبات جاية من كل مكان. التحدي في تسليمها للخطوة اللي بعدها." [level=2] [ref=e58]
+            - paragraph [ref=e59]: ضيف يطلب عند الكاشير، وضيف تاني يطلب أونلاين. المطبخ محتاج التذكرة الصحيحة، وصاحب المكان محتاج يعرف اللي حصل. سيرفيو يوضح مكان كل خطوة.
+          - generic [ref=e60]:
+            - article [ref=e61]:
+              - generic [ref=e62]: "01"
+              - heading "الكاشير مشغول." [level=3] [ref=e63]
+              - paragraph [ref=e64]: سجّل الطلب من المنيو مع بيانات الترابيزة أو الضيف اللي يحتاجها الفريق.
+            - article [ref=e65]:
+              - generic [ref=e66]: "02"
+              - heading "طلب أونلاين وصل." [level=3] [ref=e67]
+              - paragraph [ref=e68]: راجع الطلب وأكّده قبل ما يبدأ المطبخ تجهيزه.
+            - article [ref=e69]:
+              - generic [ref=e70]: "03"
+              - heading "الوردية محتاجة تعرف." [level=3] [ref=e71]
+              - paragraph [ref=e72]: تابع حالة الطلبات وشغل اليوم من مساحة عمل المطعم.
+      - region "مسار أوضح لكل طلب." [ref=e73]:
+        - generic [ref=e74]:
+          - generic [ref=e75]:
+            - generic [ref=e76]:
+              - paragraph [ref=e77]: رحلة طلب واحدة
+              - heading "مسار أوضح لكل طلب." [level=2] [ref=e78]
+            - paragraph [ref=e79]: من الضيف أو الكاشير، للتجهيز، ثم تسليم الطلب.
+          - generic [ref=e80]:
+            - generic [ref=e81]:
+              - article [ref=e82]:
+                - button "01 تصفح المنيو الضيف يختار الأصناف من موقع المطعم." [ref=e83] [cursor=pointer]:
+                  - generic [ref=e84]: "01"
+                  - generic [ref=e85]:
+                    - strong [ref=e86]: تصفح المنيو
+                    - generic [ref=e87]: الضيف يختار الأصناف من موقع المطعم.
+              - article [ref=e88]:
+                - button "02 إرسال الطلب الضيف يرسل طلب الدفع عند الاستلام مع بياناته." [ref=e89] [cursor=pointer]:
+                  - generic [ref=e90]: "02"
+                  - generic [ref=e91]:
+                    - strong [ref=e92]: إرسال الطلب
+                    - generic [ref=e93]: الضيف يرسل طلب الدفع عند الاستلام مع بياناته.
+              - article [ref=e94]:
+                - button "03 تأكيد الفريق أحد أفراد الفريق يراجع الطلب الأونلاين ويؤكده." [ref=e95] [cursor=pointer]:
+                  - generic [ref=e96]: "03"
+                  - generic [ref=e97]:
+                    - strong [ref=e98]: تأكيد الفريق
+                    - generic [ref=e99]: أحد أفراد الفريق يراجع الطلب الأونلاين ويؤكده.
+              - article [ref=e100]:
+                - button "04 وصوله للمطبخ الطلب المؤكد يظهر في قائمة تذاكر المطبخ." [ref=e101] [cursor=pointer]:
+                  - generic [ref=e102]: "04"
+                  - generic [ref=e103]:
+                    - strong [ref=e104]: وصوله للمطبخ
+                    - generic [ref=e105]: الطلب المؤكد يظهر في قائمة تذاكر المطبخ.
+              - article [ref=e106]:
+                - button "05 بدء التحضير الفريق ينقل التذكرة إلى حالة جارٍ التحضير." [ref=e107] [cursor=pointer]:
+                  - generic [ref=e108]: "05"
+                  - generic [ref=e109]:
+                    - strong [ref=e110]: بدء التحضير
+                    - generic [ref=e111]: الفريق ينقل التذكرة إلى حالة جارٍ التحضير.
+              - article [ref=e112]:
+                - button "06 جاهز للتسليم المطبخ يحدد أن التحضير انتهى، والتسليم خطوة منفصلة." [ref=e113] [cursor=pointer]:
+                  - generic [ref=e114]: "06"
+                  - generic [ref=e115]:
+                    - strong [ref=e116]: جاهز للتسليم
+                    - generic [ref=e117]: المطبخ يحدد أن التحضير انتهى، والتسليم خطوة منفصلة.
+              - article [ref=e118]:
+                - button "07 اكتمال الدورة الفريق يتابع التوصيل ويرى الحالة النهائية في مساحة العمل." [ref=e119] [cursor=pointer]:
+                  - generic [ref=e120]: "07"
+                  - generic [ref=e121]:
+                    - strong [ref=e122]: اكتمال الدورة
+                    - generic [ref=e123]: الفريق يتابع التوصيل ويرى الحالة النهائية في مساحة العمل.
+            - generic [ref=e125]:
+              - generic [ref=e126]:
+                - generic [ref=e127]: رحلة طلب توضيحية · بيانات تجريبية
+                - generic [ref=e128]: 01 / 07
+              - 'figure "لقطة تطبيق فعلية بالعربية والوضع الداكن · بيانات تجريبية مع إخفاء معرّفات الاختبار افتح الشاشة كاملة : تصفح المنيو" [ref=e583]':
+                - img "تصفح المنيو — لقطة تطبيق فعلية بالعربية والوضع الداكن · بيانات تجريبية مع إخفاء معرّفات الاختبار" [ref=e584]
+              - generic [ref=e133]:
+                - generic [ref=e134]:
+                  - generic [ref=e135]: حالة الطلب
+                  - strong [ref=e136]: لم يُرسل
+                - generic [ref=e137]:
+                  - generic [ref=e138]: تذكرة المطبخ
+                  - strong [ref=e139]: لم تُنشأ
+              - paragraph [ref=e140]:
+                - strong [ref=e141]: "ملاحظة توضيحية:"
+                - text: الموقع متاح للضيف، والفريق لم يبدأ أي خطوة بعد.
+              - paragraph [ref=e142]: شاشة فعلية من سيرفيو؛ بيانات الطلب التجريبي موضحة فوقها.
+              - progressbar "مسار أوضح لكل طلب." [ref=e143]
+      - region "خلّي ضيوفك يطلبوا من منيو مطعمك." [ref=e145]:
+        - generic [ref=e146]:
+          - generic [ref=e147]:
+            - paragraph [ref=e148]: موقع طلبات مطعمك
+            - heading "خلّي ضيوفك يطلبوا من منيو مطعمك." [level=2] [ref=e149]
+            - paragraph [ref=e150]: الضيف يقدر يتصفح المنيو ويرسل طلب دفع عند الاستلام. فريقك يراجع الطلب ويؤكده قبل بدء التجهيز، فلا يتحول طلب جديد إلى تذكرة مطبخ من غير مراجعة.
+            - list [ref=e151]:
+              - listitem [ref=e152]: منيو يقدر الضيف يتصفحه
+              - listitem [ref=e155]: تفاصيل الطلب تصل للفريق للمراجعة
+              - listitem [ref=e158]: تأكيد من الفريق قبل دخول المطبخ
+            - link "اكتشف الطلبات الأونلاين" [ref=e161] [cursor=pointer]:
+              - /url: /ar/features/online-ordering
+          - generic [ref=e165]:
+            - 'figure "لقطة تطبيق فعلية بالعربية والوضع الداكن · بيانات تجريبية مع إخفاء معرّفات الاختبار افتح الشاشة كاملة : شاشة فعلية لإتمام طلب المطعم في سيرفيو" [ref=e585]':
+              - img "شاشة فعلية لإتمام طلب المطعم في سيرفيو — لقطة تطبيق فعلية بالعربية والوضع الداكن · بيانات تجريبية مع إخفاء معرّفات الاختبار" [ref=e586]
+            - generic [ref=e170]:
+              - paragraph [ref=e171]: عرض توضيحي · بيانات تجريبية
+              - heading "من طلب الموقع إلى تأكيد الفريق" [level=3] [ref=e172]
+              - group "من طلب الموقع إلى تأكيد الفريق" [ref=e173]:
+                - button "تصفح" [pressed] [ref=e174] [cursor=pointer]
+                - button "مراجعة" [ref=e175] [cursor=pointer]
+                - button "إرسال" [ref=e176] [cursor=pointer]
+                - button "تأكيد" [ref=e177] [cursor=pointer]
+              - generic [ref=e178]:
+                - strong [ref=e179]: اختيار من المنيو
+                - paragraph [ref=e180]: الضيف يستكشف منيو المطعم قبل إرسال أي طلب.
+      - region "اعرف إيه اللي محتاج يتعمل دلوقتي." [ref=e183]:
+        - generic [ref=e184]:
+          - generic [ref=e185]:
+            - paragraph [ref=e186]: داخل المطبخ
+            - heading "اعرف إيه اللي محتاج يتعمل دلوقتي." [level=2] [ref=e187]
+            - paragraph [ref=e188]: قائمة واضحة تعرض التذاكر النشطة وحالة تجهيزها. يقدر الفريق ينقل التذكرة من جديد إلى جارٍ التجهيز ثم جاهز مع بقاء تفاصيل الطلب أمامه.
+            - link "اكتشف شاشة المطبخ" [ref=e189] [cursor=pointer]:
+              - /url: /ar/features/kitchen-display
+          - generic [ref=e193]:
+            - 'figure "لقطة تطبيق فعلية بالعربية والوضع الداكن · بيانات تجريبية مع إخفاء معرّفات الاختبار افتح الشاشة كاملة : شاشة فعلية لمطبخ سيرفيو" [ref=e587]':
+              - img "شاشة فعلية لمطبخ سيرفيو — لقطة تطبيق فعلية بالعربية والوضع الداكن · بيانات تجريبية مع إخفاء معرّفات الاختبار" [ref=e588]
+            - generic [ref=e198]:
+              - paragraph [ref=e199]: عرض توضيحي · بيانات تجريبية
+              - heading "حركة التذكرة داخل المطبخ" [level=3] [ref=e200]
+              - group "حركة التذكرة داخل المطبخ" [ref=e201]:
+                - button "جديدة" [pressed] [ref=e202] [cursor=pointer]
+                - button "جارٍ التحضير" [ref=e203] [cursor=pointer]
+                - button "جاهزة" [ref=e204] [cursor=pointer]
+                - button "مكتملة" [ref=e205] [cursor=pointer]
+              - generic [ref=e206]:
+                - strong [ref=e207]: تذكرة جديدة
+                - paragraph [ref=e208]: الطلب المؤكد يظهر في قائمة المطبخ.
+      - region "يوم الشغل كله في مسار واضح." [ref=e211]:
+        - generic [aria-hidden] [ref=e212]: كل طلب في مسار واحد
+        - generic [ref=e213]:
+          - generic [ref=e214]:
+            - heading "يوم الشغل كله في مسار واضح." [level=2] [ref=e215]
+            - paragraph [ref=e216]: الكاشير والمطبخ وإدارة المطعم يقدروا يتابعوا خطوات الشغل من مساحة عمل واحدة.
+          - 'figure "لقطة تطبيق فعلية بالعربية والوضع الداكن · بيانات تجريبية مع إخفاء معرّفات الاختبار افتح الشاشة كاملة : شاشة فعلية لنقطة بيع سيرفيو" [ref=e589]':
+            - img "شاشة فعلية لنقطة بيع سيرفيو — لقطة تطبيق فعلية بالعربية والوضع الداكن · بيانات تجريبية مع إخفاء معرّفات الاختبار" [ref=e590]
+            - generic [ref=e221]:
+              - generic [ref=e222]: لقطة تطبيق فعلية بالعربية والوضع الداكن · بيانات تجريبية مع إخفاء معرّفات الاختبار
+              - 'link "افتح الشاشة كاملة : شاشة فعلية لنقطة بيع سيرفيو" [ref=e223] [cursor=pointer]':
+                - /url: /images/product/servio/matrix/pos-ar-dark.png
+                - text: افتح الشاشة كاملة
+                - generic [ref=e224]: ": شاشة فعلية لنقطة بيع سيرفيو"
+      - region "مساحة واحدة لأجزاء الشغل كلها." [ref=e225]:
+        - generic [ref=e226]:
+          - generic [ref=e227]:
+            - paragraph [ref=e228]: أكتر من تذكرة طلب
+            - heading "مساحة واحدة لأجزاء الشغل كلها." [level=2] [ref=e229]
+          - generic [ref=e230]:
+            - paragraph [ref=e231]: أدوات عملية للناس اللي بتشغّل الخدمة وتتابع ما وراءها.
+            - generic [ref=e232]:
+              - button "الميزة السابقة" [disabled] [ref=e233]
+              - generic [ref=e236]: 01 / 07
+              - button "الميزة التالية" [ref=e237] [cursor=pointer]
+        - generic [ref=e241]:
+          - article [ref=e242]:
+            - generic [ref=e243]:
+              - paragraph [ref=e244]: 01 / 07
+              - paragraph [ref=e245]: عند الكاشير
+              - heading "سجّل الطلب مع تفاصيل الخدمة." [level=3] [ref=e246]
+              - paragraph [ref=e247]: مساحة عمل تبدأ من القائمة لاختيار الأصناف وإرسال الطلبات المؤكدة إلى المطبخ.
+              - link "اكتشف الميزة" [ref=e248] [cursor=pointer]:
+                - /url: /ar/features/pos
+            - generic [ref=e252]:
+              - 'figure "لقطة تطبيق فعلية بالعربية والوضع الداكن · بيانات تجريبية مع إخفاء معرّفات الاختبار افتح الشاشة كاملة : نقاط البيع" [ref=e591]':
+                - img "نقاط البيع — لقطة تطبيق فعلية بالعربية والوضع الداكن · بيانات تجريبية مع إخفاء معرّفات الاختبار" [ref=e592]
+                - generic [ref=e256]:
+                  - generic [ref=e257]: لقطة تطبيق فعلية بالعربية والوضع الداكن · بيانات تجريبية مع إخفاء معرّفات الاختبار
+                  - 'link "افتح الشاشة كاملة : نقاط البيع" [ref=e258] [cursor=pointer]':
+                    - /url: /images/product/servio/matrix/pos-ar-dark.png
+                    - text: افتح الشاشة كاملة
+                    - generic [ref=e259]: ": نقاط البيع"
+              - generic [ref=e260]: شاشة فعلية من المنتج · بيانات تجريبية
+          - article [ref=e261]:
+            - generic [ref=e262]:
+              - paragraph [ref=e263]: 02 / 07
+              - paragraph [ref=e264]: داخل المطبخ
+              - heading "خطوة تالية واضحة لكل تذكرة." [level=3] [ref=e265]
+              - paragraph [ref=e266]: تابع الطلبات الواردة وتقدّم تجهيزها عبر حالات جديد وقيد التجهيز وجاهز ومكتمل.
+              - link "اكتشف الميزة" [ref=e267] [cursor=pointer]:
+                - /url: /ar/features/kitchen-display
+            - generic [ref=e271]:
+              - 'figure "لقطة تطبيق فعلية بالعربية والوضع الداكن · بيانات تجريبية مع إخفاء معرّفات الاختبار افتح الشاشة كاملة : شاشة المطبخ" [ref=e593]':
+                - img "شاشة المطبخ — لقطة تطبيق فعلية بالعربية والوضع الداكن · بيانات تجريبية مع إخفاء معرّفات الاختبار" [ref=e594]
+                - generic [ref=e275]:
+                  - generic [ref=e276]: لقطة تطبيق فعلية بالعربية والوضع الداكن · بيانات تجريبية مع إخفاء معرّفات الاختبار
+                  - 'link "افتح الشاشة كاملة : شاشة المطبخ" [ref=e277] [cursor=pointer]':
+                    - /url: /images/product/servio/matrix/kitchen-ar-dark.png
+                    - text: افتح الشاشة كاملة
+                    - generic [ref=e278]: ": شاشة المطبخ"
+              - generic [ref=e279]: شاشة فعلية من المنتج · بيانات تجريبية
+          - article [ref=e280]:
+            - generic [ref=e281]:
+              - paragraph [ref=e282]: 03 / 07
+              - paragraph [ref=e283]: تجربة الضيف
+              - heading "من قائمة الضيف إلى قائمة عمل فريقك." [level=3] [ref=e284]
+              - paragraph [ref=e285]: يتصفّح الضيف موقع المطعم ويراجع طلب الدفع النقدي عند الاستلام، ثم يحصل على تأكيد الطلب.
+              - link "اكتشف الميزة" [ref=e286] [cursor=pointer]:
+                - /url: /ar/features/online-ordering
+            - generic [ref=e290]:
+              - 'figure "لقطة تطبيق فعلية بالعربية والوضع الداكن · بيانات تجريبية مع إخفاء معرّفات الاختبار افتح الشاشة كاملة : الطلب الإلكتروني" [ref=e595]':
+                - img "الطلب الإلكتروني — لقطة تطبيق فعلية بالعربية والوضع الداكن · بيانات تجريبية مع إخفاء معرّفات الاختبار" [ref=e596]
+                - generic [ref=e294]:
+                  - generic [ref=e295]: لقطة تطبيق فعلية بالعربية والوضع الداكن · بيانات تجريبية مع إخفاء معرّفات الاختبار
+                  - 'link "افتح الشاشة كاملة : الطلب الإلكتروني" [ref=e296] [cursor=pointer]':
+                    - /url: /images/product/servio/matrix/checkout-ar-dark.png
+                    - text: افتح الشاشة كاملة
+                    - generic [ref=e297]: ": الطلب الإلكتروني"
+              - generic [ref=e298]: شاشة فعلية من المنتج · بيانات تجريبية
+          - article [ref=e299]:
+            - generic [ref=e300]:
+              - paragraph [ref=e301]: 04 / 07
+              - paragraph [ref=e302]: هوية مطعمك
+              - heading "ألوانك، وقائمة تحمل طابعك." [level=3] [ref=e303]
+              - paragraph [ref=e304]: اضبط الألوان في محرر القالب، واحفظ الإعدادات، وعاينها، ثم فعّل قالب المطعم.
+              - link "اكتشف الميزة" [ref=e305] [cursor=pointer]:
+                - /url: /ar/features/website-builder
+            - generic [ref=e309]:
+              - 'figure "لقطة تطبيق فعلية بالعربية والوضع الداكن · بيانات تجريبية مع إخفاء معرّفات الاختبار افتح الشاشة كاملة : تخصيص موقع المطعم" [ref=e597]':
+                - img "تخصيص موقع المطعم — لقطة تطبيق فعلية بالعربية والوضع الداكن · بيانات تجريبية مع إخفاء معرّفات الاختبار" [ref=e598]
+                - generic [ref=e313]:
+                  - generic [ref=e314]: لقطة تطبيق فعلية بالعربية والوضع الداكن · بيانات تجريبية مع إخفاء معرّفات الاختبار
+                  - 'link "افتح الشاشة كاملة : تخصيص موقع المطعم" [ref=e315] [cursor=pointer]':
+                    - /url: /images/product/servio/matrix/theme-ar-dark.png
+                    - text: افتح الشاشة كاملة
+                    - generic [ref=e316]: ": تخصيص موقع المطعم"
+              - generic [ref=e317]: شاشة فعلية من المنتج · بيانات تجريبية
+          - article [ref=e318]:
+            - generic [ref=e319]:
+              - paragraph [ref=e320]: 05 / 07
+              - paragraph [ref=e321]: كميات الأصناف المتتبَّعة
+              - heading "تابع أثر الطلب المؤكد على المخزون." [level=3] [ref=e322]
+              - paragraph [ref=e323]: اربط كميات الأصناف بتأكيد الطلبات وإلغاء الطلبات غير المنفّذة متى كانت مؤهلة.
+              - link "اكتشف الميزة" [ref=e324] [cursor=pointer]:
+                - /url: /ar/features/inventory
+            - generic [ref=e328]:
+              - 'figure "لقطة تطبيق فعلية بالعربية والوضع الداكن · بيانات تجريبية مع إخفاء معرّفات الاختبار افتح الشاشة كاملة : المخزون" [ref=e599]':
+                - img "المخزون — لقطة تطبيق فعلية بالعربية والوضع الداكن · بيانات تجريبية مع إخفاء معرّفات الاختبار" [ref=e600]
+                - generic [ref=e332]:
+                  - generic [ref=e333]: لقطة تطبيق فعلية بالعربية والوضع الداكن · بيانات تجريبية مع إخفاء معرّفات الاختبار
+                  - 'link "افتح الشاشة كاملة : المخزون" [ref=e334] [cursor=pointer]':
+                    - /url: /images/product/servio/matrix/inventory-ar-dark.png
+                    - text: افتح الشاشة كاملة
+                    - generic [ref=e335]: ": المخزون"
+              - generic [ref=e336]: شاشة فعلية من المنتج · بيانات تجريبية
+          - article [ref=e337]:
+            - generic [ref=e338]:
+              - paragraph [ref=e339]: 06 / 07
+              - paragraph [ref=e340]: الفريق خلف الخدمة
+              - heading "نظّم الحضور وقرارات الإجازة." [level=3] [ref=e341]
+              - paragraph [ref=e342]: احتفظ ببيانات الموظفين وسجلات الحضور وطلبات الإجازة ضمن مساحة المطعم.
+              - link "اكتشف الميزة" [ref=e343] [cursor=pointer]:
+                - /url: /ar/features/hr
+            - generic [ref=e347]:
+              - 'figure "لقطة تطبيق فعلية بالعربية والوضع الداكن · بيانات تجريبية مع إخفاء معرّفات الاختبار افتح الشاشة كاملة : سجلات الفريق" [ref=e601]':
+                - img "سجلات الفريق — لقطة تطبيق فعلية بالعربية والوضع الداكن · بيانات تجريبية مع إخفاء معرّفات الاختبار" [ref=e602]
+                - generic [ref=e351]:
+                  - generic [ref=e352]: لقطة تطبيق فعلية بالعربية والوضع الداكن · بيانات تجريبية مع إخفاء معرّفات الاختبار
+                  - 'link "افتح الشاشة كاملة : سجلات الفريق" [ref=e353] [cursor=pointer]':
+                    - /url: /images/product/servio/matrix/staff-ar-dark.png
+                    - text: افتح الشاشة كاملة
+                    - generic [ref=e354]: ": سجلات الفريق"
+              - generic [ref=e355]: شاشة فعلية من المنتج · بيانات تجريبية
+          - article [ref=e356]:
+            - generic [ref=e357]:
+              - paragraph [ref=e358]: 07 / 07
+              - paragraph [ref=e359]: متابعة العمل اليومي
+              - heading "اعرف ما يحتاج اهتمامك الآن." [level=3] [ref=e360]
+              - paragraph [ref=e361]: راجع أحدث الطلبات والعمل المعلق والأعداد الأساسية وحالة الاشتراك من لوحة تشغيلية.
+              - link "اكتشف الميزة" [ref=e362] [cursor=pointer]:
+                - /url: /ar/features/analytics
+            - generic [ref=e366]:
+              - 'figure "لقطة تطبيق فعلية بالعربية والوضع الداكن · بيانات تجريبية مع إخفاء معرّفات الاختبار افتح الشاشة كاملة : النظرة التشغيلية" [ref=e603]':
+                - img "النظرة التشغيلية — لقطة تطبيق فعلية بالعربية والوضع الداكن · بيانات تجريبية مع إخفاء معرّفات الاختبار" [ref=e604]
+                - generic [ref=e370]:
+                  - generic [ref=e371]: لقطة تطبيق فعلية بالعربية والوضع الداكن · بيانات تجريبية مع إخفاء معرّفات الاختبار
+                  - 'link "افتح الشاشة كاملة : النظرة التشغيلية" [ref=e372] [cursor=pointer]':
+                    - /url: /images/product/servio/matrix/dashboard-ar-dark.png
+                    - text: افتح الشاشة كاملة
+                    - generic [ref=e373]: ": النظرة التشغيلية"
+              - generic [ref=e374]: شاشة فعلية من المنتج · بيانات تجريبية
+      - region "أجزاء الشغل مكانها مع بعض." [ref=e375]:
+        - generic [ref=e376]:
+          - generic [ref=e377]:
+            - generic [ref=e378]:
+              - paragraph [ref=e379]: مساحة عمل مترابطة
+              - heading "أجزاء الشغل مكانها مع بعض." [level=2] [ref=e380]
+            - paragraph [ref=e381]: الأدوات دي موجودة في مساحة عمل المطعم نفسها. الخطوط توضح انتماءها للمساحة، مش انتقال بيانات تلقائي بين كل جزء والتاني.
+          - generic [ref=e382]:
+            - generic [ref=e383]:
+              - generic "مساحة عمل سيرفيو" [ref=e389]: SERVIO
+              - button "نقاط البيع" [pressed] [ref=e390] [cursor=pointer]
+              - button "شاشة المطبخ" [ref=e391] [cursor=pointer]
+              - button "الطلب الإلكتروني" [ref=e392] [cursor=pointer]
+              - button "تخصيص موقع المطعم" [ref=e393] [cursor=pointer]
+              - button "المخزون" [ref=e394] [cursor=pointer]
+              - button "سجلات الفريق" [ref=e395] [cursor=pointer]
+              - button "النظرة التشغيلية" [ref=e396] [cursor=pointer]
+            - generic [ref=e397]:
+              - paragraph [ref=e398]: جزء من مساحة العمل
+              - heading "نقاط البيع" [level=3] [ref=e399]
+              - paragraph [ref=e400]: مساحة عمل تبدأ من القائمة لاختيار الأصناف وإرسال الطلبات المؤكدة إلى المطبخ.
+              - link "اكتشف الجزء ده" [ref=e401] [cursor=pointer]:
+                - /url: /ar/features/pos
+      - region "شوف اليوم كله، مش تذكرة واحدة." [ref=e405]:
+        - generic [ref=e406]:
+          - generic [ref=e407]:
+            - paragraph [ref=e408]: رؤية أوضح للشغل
+            - heading "شوف اليوم كله، مش تذكرة واحدة." [level=2] [ref=e409]
+            - paragraph [ref=e410]: انتقل بين لوحة التحكم والمخزون المسجل وبيانات الفريق من مساحة عمل المطعم.
+            - generic "بيانات مساحة عمل تجريبية، وليست نتائج عملاء" [ref=e411]:
+              - generic [ref=e412]:
+                - strong [ref=e413]: "0"
+                - generic [ref=e414]: طلبات تجريبية
+              - generic [ref=e415]:
+                - strong [ref=e416]: 0 جنيه
+                - generic [ref=e417]: إيراد مدفوع تجريبي
+            - text: بيانات مساحة عمل تجريبية، وليست نتائج عملاء
+          - generic [ref=e418]:
+            - group "شوف اليوم كله، مش تذكرة واحدة." [ref=e419]:
+              - button "نظرة عامة" [pressed] [ref=e420] [cursor=pointer]
+              - button "المخزون" [ref=e421] [cursor=pointer]
+              - button "الفريق" [ref=e422] [cursor=pointer]
+            - 'figure "لقطة تطبيق فعلية بالعربية والوضع الداكن · بيانات تجريبية مع إخفاء معرّفات الاختبار افتح الشاشة كاملة : لوحة تحكم فعلية من سيرفيو" [ref=e605]':
+              - img "لوحة تحكم فعلية من سيرفيو — لقطة تطبيق فعلية بالعربية والوضع الداكن · بيانات تجريبية مع إخفاء معرّفات الاختبار" [ref=e606]
+              - generic [ref=e426]:
+                - generic [ref=e427]: لقطة تطبيق فعلية بالعربية والوضع الداكن · بيانات تجريبية مع إخفاء معرّفات الاختبار
+                - 'link "افتح الشاشة كاملة : لوحة تحكم فعلية من سيرفيو" [ref=e428] [cursor=pointer]':
+                  - /url: /images/product/servio/matrix/dashboard-ar-dark.png
+                  - text: افتح الشاشة كاملة
+                  - generic [ref=e429]: ": لوحة تحكم فعلية من سيرفيو"
+            - paragraph [ref=e430]: لوحة التحكم تجمع أجزاء الشغل في عرض واحد.
+      - region "جهّز مساحة الشغل لفريقك." [ref=e431]:
+        - generic [ref=e432]:
+          - paragraph [ref=e433]: ابدأ بسهولة
+          - heading "جهّز مساحة الشغل لفريقك." [level=2] [ref=e434]
+          - list [ref=e435]:
+            - listitem [ref=e436]:
+              - generic [ref=e437]: 01 / 03
+              - generic [ref=e438]:
+                - heading "أنشئ حسابك" [level=3] [ref=e439]
+                - paragraph [ref=e440]: سجّل مطعمك واختر عنوان مساحة عمله.
+            - listitem [ref=e442]:
+              - generic [ref=e443]: 02 / 03
+              - generic [ref=e444]:
+                - heading "جهّز المنيو" [level=3] [ref=e445]
+                - paragraph [ref=e446]: أضف الأصناف والتصنيفات اللي بتبيعها.
+            - listitem [ref=e448]:
+              - generic [ref=e449]: 03 / 03
+              - generic [ref=e450]:
+                - heading "أضف فريقك" [level=3] [ref=e451]
+                - paragraph [ref=e452]: جهّز الأشخاص اللي يستقبلون الطلبات ويحضّرونها ويديرونها.
+          - link "أنشئ حساب مطعمك" [ref=e454] [cursor=pointer]:
+            - /url: /ar/auth/register?billing=monthly
+      - region "راجع الخطة وابدأ على راحتك." [ref=e458]:
+        - generic [ref=e459]:
+          - generic [ref=e460]:
+            - paragraph [ref=e461]: التفاصيل قبل البداية
+            - heading "راجع الخطة وابدأ على راحتك." [level=2] [ref=e462]
+          - generic [ref=e463]:
+            - paragraph [ref=e464]: اطلع على تفاصيل التجربة والفواتير الحالية في صفحة الأسعار قبل إنشاء مساحة عمل مطعمك.
+            - generic [ref=e465]:
+              - link "شوف الأسعار" [ref=e466] [cursor=pointer]:
+                - /url: /ar/pricing
+              - link "أنشئ حساب مطعمك" [ref=e470] [cursor=pointer]:
+                - /url: /ar/auth/register?billing=monthly
+      - region "أسئلة مهمة." [ref=e474]:
+        - generic [ref=e475]:
+          - generic [ref=e476]:
+            - paragraph [ref=e477]: قبل ما تبدأ
+            - heading "أسئلة مهمة." [level=2] [ref=e478]
+          - generic [ref=e479]:
+            - group [ref=e480]:
+              - generic "هل الضيوف يقدروا يطلبوا أونلاين؟ +" [ref=e481] [cursor=pointer]
+            - group [ref=e482]:
+              - generic "هل طلبات الكاشير بتوصل للمطبخ؟ +" [ref=e483] [cursor=pointer]
+            - group [ref=e484]:
+              - generic "هل أقدر أستخدم سيرفيو بالعربي؟ +" [ref=e485] [cursor=pointer]
+      - region "خلّي الخدمة تمشي بسلاسة." [ref=e486]:
+        - generic [ref=e487]:
+          - heading "خلّي الخدمة تمشي بسلاسة." [level=2] [ref=e488]
+          - paragraph [ref=e489]: ابدأ بمساحة عمل يقدر فريق مطعمك يكبر معاها.
+          - link "أنشئ حساب مطعمك" [ref=e490] [cursor=pointer]:
+            - /url: /ar/auth/register?billing=monthly
+  - contentinfo [ref=e494]:
+    - generic [ref=e495]:
+      - generic [ref=e496]:
+        - generic [ref=e497]:
+          - link "SERVIO" [ref=e498] [cursor=pointer]:
+            - /url: /ar
+          - paragraph [ref=e504]: تشغيل المطعم، بمسارات مترابطة بعناية.
+          - link "ابدأ الآن" [ref=e505] [cursor=pointer]:
+            - /url: /ar/auth/register?billing=monthly
+        - navigation "روابط تذييل الصفحة" [ref=e509]:
+          - generic [ref=e510]:
+            - generic [ref=e511]:
+              - heading "المنتج" [level=2] [ref=e512]
+              - list [ref=e513]:
+                - listitem [ref=e514]:
+                  - link "استكشف جميع الميزات" [ref=e515] [cursor=pointer]:
+                    - /url: /ar/features
+                - listitem [ref=e516]:
+                  - link "نقاط البيع للكاشير" [ref=e517] [cursor=pointer]:
+                    - /url: /ar/features/pos
+                - listitem [ref=e518]:
+                  - link "شاشة المطبخ" [ref=e519] [cursor=pointer]:
+                    - /url: /ar/features/kitchen-display
+                - listitem [ref=e520]:
+                  - link "الطلب الإلكتروني" [ref=e521] [cursor=pointer]:
+                    - /url: /ar/features/online-ordering
+                - listitem [ref=e522]:
+                  - link "المخزون" [ref=e523] [cursor=pointer]:
+                    - /url: /ar/features/inventory
+                - listitem [ref=e524]:
+                  - link "سجلات الفريق" [ref=e525] [cursor=pointer]:
+                    - /url: /ar/features/hr
+                - listitem [ref=e526]:
+                  - link "النظرة التشغيلية" [ref=e527] [cursor=pointer]:
+                    - /url: /ar/features/analytics
+                - listitem [ref=e528]:
+                  - link "تخصيص موقع المطعم" [ref=e529] [cursor=pointer]:
+                    - /url: /ar/features/website-builder
+            - generic [ref=e530]:
+              - heading "استكشف" [level=2] [ref=e531]
+              - list [ref=e532]:
+                - listitem [ref=e533]:
+                  - link "كيف يعمل" [ref=e534] [cursor=pointer]:
+                    - /url: /ar/how-it-works
+                - listitem [ref=e535]:
+                  - link "جولة في المنتج" [ref=e536] [cursor=pointer]:
+                    - /url: /ar/demo
+                - listitem [ref=e537]:
+                  - link "خيارات العرض التوضيحي" [ref=e538] [cursor=pointer]:
+                    - /url: /ar/contact
+                - listitem [ref=e539]:
+                  - link "الأسعار" [ref=e540] [cursor=pointer]:
+                    - /url: /ar/pricing
+            - generic [ref=e541]:
+              - heading "الحساب" [level=2] [ref=e542]
+              - list [ref=e543]:
+                - listitem [ref=e544]:
+                  - link "تسجيل الدخول" [ref=e545] [cursor=pointer]:
+                    - /url: /ar/auth/login
+                - listitem [ref=e546]:
+                  - link "أنشئ حساب مطعمك" [ref=e547] [cursor=pointer]:
+                    - /url: /ar/auth/register
+            - generic [ref=e548]:
+              - heading "الشركة" [level=2] [ref=e549]
+              - list [ref=e550]:
+                - listitem [ref=e551]:
+                  - link "الخصوصية" [ref=e552] [cursor=pointer]:
+                    - /url: /ar/privacy
+                - listitem [ref=e553]:
+                  - link "معلومات العرض التوضيحي" [ref=e554] [cursor=pointer]:
+                    - /url: /ar/contact
+      - generic [aria-hidden] [ref=e555]: SERVIO
+      - generic [ref=e556]:
+        - paragraph [ref=e557]: تعرض شاشات المنتج بيانات تجريبية. توضح صفحات الميزات نطاق الإتاحة ومتطلبات الإعداد.
+        - generic [ref=e558]:
+          - link "الخصوصية" [ref=e559] [cursor=pointer]:
+            - /url: /ar/privacy
+          - generic [ref=e560]: © 2026 SERVIO
+  - button "Open Next.js Dev Tools" [ref=e566] [cursor=pointer]
+  - alert [ref=e570]

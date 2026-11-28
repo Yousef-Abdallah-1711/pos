@@ -1,0 +1,210 @@
+captured 2026-11-27T01:59:51Z
+133260db66b1143c254d79476daa7650b41a33f0
+master
+origin	https://github.com/yousefabdallah171/POSS.git (fetch)
+origin	https://github.com/yousefabdallah171/POSS.git (push)
+stash@{0}: On master: local edits before reset to origin/master 2026-11-25
+stash@{1}: On master: pre-pull local changes 2026-11-25
+--- status
+ M frontend/apps/dashboard/src/lib/api.ts
+ M frontend/apps/dashboard/tsconfig.json
+ M frontend/apps/landing/DESIGN.md
+ M frontend/apps/landing/next.config.js
+ M frontend/apps/landing/package.json
+ M frontend/apps/landing/playwright.registration.config.ts
+ M frontend/apps/landing/src/app/[locale]/page.tsx
+ M frontend/apps/landing/src/app/marketing.css
+ M frontend/apps/landing/src/components/Footer.tsx
+ M frontend/apps/landing/src/components/Navbar.tsx
+ M frontend/apps/landing/src/components/RootDocument.tsx
+ M frontend/apps/landing/src/components/marketing/CaptureMedia.tsx
+ M frontend/apps/landing/src/components/marketing/ClosingSections.tsx
+ D frontend/apps/landing/src/components/marketing/HomeHero.tsx
+ D frontend/apps/landing/src/components/marketing/HospitalityStory.tsx
+ D frontend/apps/landing/src/components/marketing/ManagementSections.tsx
+ D frontend/apps/landing/src/components/marketing/OperationsSections.tsx
+ M frontend/apps/landing/src/components/marketing/TrialLink.tsx
+ M frontend/apps/landing/src/components/marketing/__tests__/TrialLink.test.tsx
+ M frontend/apps/landing/src/components/marketing/__tests__/offer.test.tsx
+ M frontend/apps/landing/src/components/navigation/LandingAccountActions.tsx
+ M frontend/apps/landing/src/i18n/messages/ar/legacy.json
+ M frontend/apps/landing/src/i18n/messages/ar/marketing.json
+ M frontend/apps/landing/src/i18n/messages/en/legacy.json
+ M frontend/apps/landing/src/i18n/messages/en/marketing.json
+ M frontend/apps/landing/src/styles/marketing-base.css
+ M frontend/apps/landing/src/styles/marketing-conversion.css
+ D frontend/apps/landing/src/styles/marketing-hero.css
+ M frontend/apps/landing/src/styles/marketing-navigation.css
+ D frontend/apps/landing/src/styles/marketing-product.css
+ M frontend/apps/landing/src/styles/marketing-responsive.css
+ M frontend/apps/landing/tests/registration-e2e/auth-session-island.spec.ts
+ M frontend/apps/landing/tests/registration-e2e/registration-accessibility.spec.ts
+ M frontend/apps/landing/tsconfig.json
+ M frontend/apps/landing/vitest.config.mts
+ M frontend/apps/restaurant-website/next-env.d.ts
+ M frontend/apps/restaurant-website/tsconfig.json
+ M frontend/apps/super-admin/next-env.d.ts
+ M frontend/apps/super-admin/tsconfig.json
+ M frontend/pnpm-lock.yaml
+?? .playwright-mcp/after-cleanup-home.png
+?? .playwright-mcp/before-cleanup-demo.png
+?? .playwright-mcp/before-cleanup-features-online-ordering.png
+?? .playwright-mcp/before-cleanup-how-it-works.png
+?? .playwright-mcp/before-cleanup-pricing.png
+?? .playwright-mcp/hybrid-dark-desktop.png
+?? .playwright-mcp/hybrid-restored-dark-hero.png
+?? .playwright-mcp/live-coral-ar-desktop.png
+?? .playwright-mcp/live-coral-ar-mobile-dark.png
+?? .playwright-mcp/live-coral-ar-mobile.png
+?? .playwright-mcp/live-coral-en-desktop.png
+?? .playwright-mcp/live-coral-en-verified.png
+?? .playwright-mcp/live-coral-login-en-desktop.png
+?? .playwright-mcp/live-coral-register-ar-mobile-dark.png
+?? .playwright-mcp/page-2026-11-26T20-10-18-019Z.yml
+?? .playwright-mcp/page-2026-11-26T20-18-36-921Z.yml
+?? .playwright-mcp/page-2026-11-26T20-18-40-208Z.png
+?? .playwright-mcp/page-2026-11-26T20-18-50-337Z.png
+?? .playwright-mcp/page-2026-11-26T20-19-43-177Z.png
+?? .playwright-mcp/page-2026-11-26T20-20-05-394Z.yml
+?? .playwright-mcp/page-2026-11-26T20-21-02-380Z.yml
+?? .playwright-mcp/page-2026-11-26T20-23-11-515Z.yml
+?? .playwright-mcp/page-2026-11-26T20-24-16-085Z.png
+?? .playwright-mcp/page-2026-11-26T20-30-20-686Z.yml
+?? .playwright-mcp/page-2026-11-26T20-30-33-779Z.png
+?? .playwright-mcp/page-2026-11-26T20-30-59-282Z.yml
+?? .playwright-mcp/page-2026-11-26T20-31-09-751Z.png
+?? .playwright-mcp/page-2026-11-26T20-31-46-101Z.png
+?? .playwright-mcp/page-2026-11-26T20-32-52-215Z.yml
+?? .playwright-mcp/page-2026-11-26T20-38-36-601Z.yml
+?? .playwright-mcp/page-2026-11-26T20-38-50-332Z.png
+?? .playwright-mcp/page-2026-11-26T21-07-34-328Z.yml
+?? .playwright-mcp/page-2026-11-26T21-07-43-358Z.yml
+?? .playwright-mcp/page-2026-11-26T21-07-51-206Z.yml
+?? .playwright-mcp/page-2026-11-26T21-07-59-315Z.yml
+?? .playwright-mcp/page-2026-11-26T21-17-24-679Z.yml
+?? .playwright-mcp/page-2026-11-26T21-17-32-963Z.yml
+?? .playwright-mcp/page-2026-11-26T21-17-43-262Z.yml
+?? .playwright-mcp/page-2026-11-26T21-17-50-233Z.yml
+?? .playwright-mcp/page-2026-11-26T21-18-35-825Z.yml
+?? .playwright-mcp/page-2026-11-26T21-25-54-479Z.yml
+?? .playwright-mcp/page-2026-11-26T21-30-01-355Z.yml
+?? .playwright-mcp/page-2026-11-26T23-07-56-442Z.yml
+?? .playwright-mcp/page-2026-11-26T23-10-40-017Z.yml
+?? .playwright-mcp/page-2026-11-26T23-11-06-412Z.yml
+?? .playwright-mcp/page-2026-11-26T23-13-01-491Z.yml
+?? .playwright-mcp/page-2026-11-26T23-14-06-671Z.yml
+?? .playwright-mcp/page-2026-11-26T23-15-04-580Z.yml
+?? .playwright-mcp/page-2026-11-26T23-15-59-575Z.yml
+?? .playwright-mcp/page-2026-11-26T23-16-40-296Z.yml
+?? .playwright-mcp/page-2026-11-26T23-17-03-453Z.yml
+?? .playwright-mcp/page-2026-11-26T23-19-14-721Z.yml
+?? .playwright-mcp/page-2026-11-26T23-21-11-690Z.yml
+?? .playwright-mcp/page-2026-11-26T23-29-18-832Z.yml
+?? .playwright-mcp/page-2026-11-26T23-29-28-014Z.yml
+?? .playwright-mcp/page-2026-11-26T23-29-32-248Z.yml
+?? .playwright-mcp/page-2026-11-26T23-37-02-196Z.yml
+?? .playwright-mcp/page-2026-11-26T23-37-06-813Z.yml
+?? .playwright-mcp/page-2026-11-26T23-37-11-401Z.yml
+?? .playwright-mcp/page-2026-11-26T23-37-18-626Z.yml
+?? .playwright-mcp/page-2026-11-26T23-37-23-132Z.yml
+?? .playwright-mcp/page-2026-11-26T23-37-27-533Z.yml
+?? .playwright-mcp/page-2026-11-26T23-37-32-441Z.yml
+?? .playwright-mcp/page-2026-11-26T23-37-39-999Z.yml
+?? .playwright-mcp/page-2026-11-26T23-37-52-382Z.yml
+?? .playwright-mcp/page-2026-11-27T00-03-27-343Z.yml
+?? .playwright-mcp/page-2026-11-27T00-10-08-840Z.yml
+?? .playwright-mcp/page-2026-11-27T00-10-35-332Z.yml
+?? .playwright-mcp/page-2026-11-27T00-11-08-377Z.yml
+?? .playwright-mcp/page-2026-11-27T00-12-37-196Z.yml
+?? .playwright-mcp/page-2026-11-27T00-13-18-764Z.yml
+?? .playwright-mcp/page-2026-11-27T00-14-17-619Z.yml
+?? .playwright-mcp/page-2026-11-27T00-14-52-748Z.yml
+?? .playwright-mcp/page-2026-11-27T00-15-15-976Z.yml
+?? .playwright-mcp/page-2026-11-27T00-19-29-478Z.yml
+?? .playwright-mcp/page-2026-11-27T00-24-19-956Z.yml
+?? .playwright-mcp/page-2026-11-27T00-26-10-094Z.yml
+?? .playwright-mcp/page-2026-11-27T00-27-55-401Z.yml
+?? .playwright-mcp/page-2026-11-27T00-28-16-860Z.yml
+?? .playwright-mcp/page-2026-11-27T00-28-37-660Z.yml
+?? audit-reports/full-financial-system-discovery-2026-11-25/
+?? docs/landing-handoff.md
+?? docs/landing-interactive-experience/
+?? docs/superpowers/
+?? frontend/apps/landing/.gsap/
+?? frontend/apps/landing/.hallmark/
+?? frontend/apps/landing/public/previews/
+?? frontend/apps/landing/scripts/smoke-marketing-routes.mjs
+?? frontend/apps/landing/scripts/verify-interactive-landing.mjs
+?? frontend/apps/landing/src/components/marketing/BusinessEcosystem.tsx
+?? frontend/apps/landing/src/components/marketing/ConversionLanding.tsx
+?? frontend/apps/landing/src/components/marketing/FeatureShowcase.tsx
+?? frontend/apps/landing/src/components/marketing/HeroCaptureMotion.tsx
+?? frontend/apps/landing/src/components/marketing/LandingPricing.tsx
+?? frontend/apps/landing/src/components/marketing/LayeredTypography.tsx
+?? frontend/apps/landing/src/components/marketing/ManagementExperience.tsx
+?? frontend/apps/landing/src/components/marketing/OrderStory.tsx
+?? frontend/apps/landing/src/components/marketing/StackedSetupCards.tsx
+?? frontend/apps/landing/src/components/marketing/WorkflowDemo.tsx
+?? frontend/apps/landing/src/content/conversionCopy.ts
+?? frontend/apps/landing/src/content/orderStoryCopy.ts
+?? frontend/apps/landing/src/styles/marketing-captures.css
+?? frontend/apps/landing/src/styles/marketing-coral.css
+?? frontend/apps/landing/src/styles/marketing-interactive.css
+?? frontend/apps/landing/src/styles/marketing-workflows.css
+?? frontend/apps/landing/test-results/
+?? writing-block.md
+--- diff stat (tracked, working tree vs HEAD)
+warning: in the working copy of 'frontend/apps/dashboard/tsconfig.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'frontend/apps/landing/DESIGN.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'frontend/apps/landing/package.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'frontend/apps/landing/src/app/marketing.css', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'frontend/apps/landing/src/styles/marketing-base.css', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'frontend/apps/landing/src/styles/marketing-conversion.css', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'frontend/apps/landing/src/styles/marketing-navigation.css', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'frontend/apps/landing/src/styles/marketing-responsive.css', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'frontend/apps/landing/tsconfig.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'frontend/apps/restaurant-website/tsconfig.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'frontend/apps/super-admin/tsconfig.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'frontend/pnpm-lock.yaml', LF will be replaced by CRLF the next time Git touches it
+ frontend/apps/dashboard/src/lib/api.ts             |  12 +-
+ frontend/apps/dashboard/tsconfig.json              |   5 +-
+ frontend/apps/landing/DESIGN.md                    | 234 ++++----------------
+ frontend/apps/landing/next.config.js               |   6 +-
+ frontend/apps/landing/package.json                 |   6 +-
+ .../apps/landing/playwright.registration.config.ts |   1 +
+ frontend/apps/landing/src/app/[locale]/page.tsx    |  28 +--
+ frontend/apps/landing/src/app/marketing.css        | 154 ++++++-------
+ frontend/apps/landing/src/components/Footer.tsx    |   9 +-
+ frontend/apps/landing/src/components/Navbar.tsx    |   4 +-
+ .../apps/landing/src/components/RootDocument.tsx   |  11 +-
+ .../src/components/marketing/CaptureMedia.tsx      |  13 +-
+ .../src/components/marketing/ClosingSections.tsx   |   4 +-
+ .../landing/src/components/marketing/HomeHero.tsx  |  31 ---
+ .../src/components/marketing/HospitalityStory.tsx  |  29 ---
+ .../components/marketing/ManagementSections.tsx    |  32 ---
+ .../components/marketing/OperationsSections.tsx    |  34 ---
+ .../landing/src/components/marketing/TrialLink.tsx |   7 +-
+ .../marketing/__tests__/TrialLink.test.tsx         |   4 +-
+ .../components/marketing/__tests__/offer.test.tsx  |   2 +-
+ .../navigation/LandingAccountActions.tsx           |   1 +
+ .../apps/landing/src/i18n/messages/ar/legacy.json  |   2 +-
+ .../landing/src/i18n/messages/ar/marketing.json    | 105 +--------
+ .../apps/landing/src/i18n/messages/en/legacy.json  |   2 +-
+ .../landing/src/i18n/messages/en/marketing.json    | 105 +--------
+ .../apps/landing/src/styles/marketing-base.css     | 146 ++++++++++---
+ .../landing/src/styles/marketing-conversion.css    |  34 +--
+ .../apps/landing/src/styles/marketing-hero.css     | 114 ----------
+ .../landing/src/styles/marketing-navigation.css    |  60 +++--
+ .../apps/landing/src/styles/marketing-product.css  | 242 ---------------------
+ .../landing/src/styles/marketing-responsive.css    |  83 +------
+ .../registration-e2e/auth-session-island.spec.ts   |   8 +-
+ .../registration-accessibility.spec.ts             |   5 +-
+ frontend/apps/landing/vitest.config.mts            |   1 +
+ frontend/apps/restaurant-website/next-env.d.ts     |   3 +-
+ frontend/apps/restaurant-website/tsconfig.json     |   5 +-
+ frontend/apps/super-admin/next-env.d.ts            |   3 +-
+ frontend/apps/super-admin/tsconfig.json            |   5 +-
+ frontend/pnpm-lock.yaml                            |  34 ++-
+ 39 files changed, 398 insertions(+), 1186 deletions(-)
+--- HEAD vs audit SHA
+0

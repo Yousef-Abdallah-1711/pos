@@ -1,0 +1,18 @@
+# 71 - Final audit acceptance checklist
+
+The final evaluation of these 12 verdicts has NOT been executed. The column "Current known status" is the state of knowledge at 2026-11-27, not a verdict. Evaluate in Q-ENV-002 / Phase 22 after the queue is exhausted.
+
+| # | Verdict | Inputs / documents | Required completed tasks | Acceptance condition | Failure condition | Blocked condition | Known limitations | Phase | Current known status |
+|---|---|---|---|---|---|---|---|---|---|
+| 1 | System discovery completeness | 03, 06, 06b, 07, 08, 09, 25 | Phase 00-03 tasks executed | inventories reconciled (119 routes, 355 APIs, 627 field rows) | any surface undiscovered | none | API functional coverage and 438 untested fields are execution gaps, not discovery gaps | 03 | EVALUATED-PARTIAL (discovery largely complete; not formally closed) |
+| 2 | Functional UI testing completeness | Phase 04-08 results, 53b | Q-DST-*, Q-BLK-*, Q-FRM-*, Q-MAT-001 | every control executed or BLOCKED with proof | controls still SKIPPED/BLOCKED without proof | billing checkout, E-Invoice | 44 skipped, 58 blocked | 04 | NOT MET |
+| 3 | Field-level validation completeness | 07, 54b, 54c, 66b | Q-FLD-*, Q-USR-001, Q-F065-001 | every logical field has isolated results with a valid baseline | 437 fields untested | none | users form inconclusive; select/checkbox/file not covered by the runner | 04 | NOT MET |
+| 4 | Financial transaction verification | 10, 15, 16, 35b, 44 | Phase 06-11, 14, 15 tasks incl. Q-FRM-001..003, Q-CON-001 | each money flow reconciled to the oracle | unexplained discrepancy | period close (F-013), new tenant bootstrap (F-001) | payments, bank, POS payment types, concurrency | 11 | PARTIAL |
+| 5 | Reporting verification | 30, 30c, 30d, 43 | Q-RPT-001..005 | 119 metrics classified; boundaries and exports checked | metrics unmeasured | depreciation (no UI) | 61 correct, 23 incorrect, 6 policy-dependent, 17 insufficient, 12 blocked | 12 | PARTIAL |
+| 6 | Security verification | 19, 36, F-071 package | Phase 17 tasks | RBAC enforce matrix for all roles; secrets, session, rate limit checked | unauthorised access found (it is, F-071) | none | matrices on 28 GET and 8 write probes per role only | 17 | PARTIAL (defects found) |
+| 7 | Reliability verification | 18, 36, F-018 package | Phase 18 tasks, Q-CON-001, Q-RPT-005 | outage, restart, load and concurrency tests done | unrecovered failure | none | concurrency and browser benchmark not done | 18 | PARTIAL |
+| 8 | Evidence completeness | 55, 60, 70 | all | every result cites existing evidence | unresolved refs | none | 0 unresolved refs in 55 at last generation | 20 | MET for executed work; NOT MET for unexecuted work |
+| 9 | Remediation specification readiness | 57, 58, 58b, 59, findings/ | Phase 21 | 81 packages complete, tasks have acceptance | incomplete package | policy decisions open | 58b validator: 1 finding with issues at last run; F-082 root cause PROBABLE | 21 | MOSTLY MET (verify 58b) |
+| 10 | Overall audit completeness | 65, 66, 71 | all queue rows | all feasible tasks executed | any feasible task left | blocked rows proven | 181 queue tasks remain | 22 | NOT MET (PARTIAL) |
+| 11 | Financial integrity | 20, 24, 42, 44 | Phase 11, 14, 15 | ledger equals operational data for every flow | drift (F-021, F-044, F-049, others) | policy decisions | multiple confirmed integrity defects | 14/15 | FAIL (defects confirmed) |
+| 12 | Financial release readiness | 24, 61 | verdicts 4 and 11 | no Critical/High financial defect open and bootstrap works | Critical F-001 open | none | 1 Critical, 20 High findings | 22 | NO-GO |

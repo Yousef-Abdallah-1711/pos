@@ -1,0 +1,43 @@
+{
+ "run": "RUN-005",
+ "findings": [
+  "F-026",
+  "F-035",
+  "F-036"
+ ],
+ "out": {
+  "F036_get_iframe_noauth": {
+   "status": 400,
+   "bytes": 67
+  },
+  "F036_post_process_noauth": {
+   "status": 400,
+   "body": "{\"success\":false,\"error\":\"payment_token is required\",\"status\":400}\n"
+  },
+  "F035_csp_api_health": {
+   "status": 200,
+   "csp": "none"
+  },
+  "F035_csp_dashboard": {
+   "status": 200,
+   "csp": "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://va.vercel-scripts.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; connect-src 'self' https: http: ws: wss:; font-src 'self' data:; frame-src 'self' http://loc"
+  },
+  "F035_csp_landing": {
+   "status": 200,
+   "csp": "none"
+  },
+  "F026": {
+   "order": 5795,
+   "product": "3",
+   "order_row": "card|paid|110.00",
+   "paid_http": 200,
+   "journals_before": "0",
+   "lines": "1113 Card Payment Clearing D110.00 C0.00 ; 4100 Food Sales D0.00 C100.00 ; 2120 VAT Payable D0.00 C10.00",
+   "settlement_routes": "none (no route or caller references account 1113 except the posting rule; see root cause F-026)"
+  },
+  "F035_25_bad_logins": {
+   "statuses": "401,401,401,401,401,401,401,401,401,401,401,401,401,401,401,401,401,401,401,429,429,429,429,429,429",
+   "first429_at_attempt": 20
+  }
+ }
+}

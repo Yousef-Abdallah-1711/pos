@@ -1,0 +1,53 @@
+{
+ "run": "RUN-003",
+ "kind": "API-DIAGNOSTIC",
+ "log": [
+  {
+   "id": "LEV-ROW",
+   "desc": "existing 30-day leave",
+   "row": "1|approved|30|annual"
+  },
+  {
+   "id": "LEV-02",
+   "desc": "approve 30-day annual leave over allowance 21",
+   "http": 200,
+   "resp": "{\"success\":true}",
+   "status": "approved"
+  },
+  {
+   "id": "LEV-BAL",
+   "desc": "leave balance after approval",
+   "item": "{\"annual_leave_allowance\":21,\"annual_leave_remaining\":0,\"annual_leave_used\":30,\"approved_leave_days\":30,\"department\":\"Kitchen\",\"employee_id\":4,\"employee_name\":\"Audit Cook\"}"
+  },
+  {
+   "id": "LEV-03b",
+   "desc": "leave end before start (no overlap)",
+   "http": 500,
+   "resp": "{\"error\":\"Failed to create leave request: pq: new row for relation \\\"leaves\\\" violates check constraint \\\"valid_leave_period\\\"\",\"success\":false}"
+  },
+  {
+   "id": "LEV-05",
+   "desc": "total_days 40 for a 3-day range",
+   "http": 201,
+   "resp": "{\"data\":{\"id\":6,\"tenant_id\":4,\"restaurant_id\":4,\"employee_id\":4,\"start_date\":\"2027-01-10T00:00:00Z\",\"end_date\":\"2027-01-12T00:00:00Z\",\"total_days\":40,\"is_half_day\":false,\"leave_type\":\"annual\",\"leave_c",
+   "stored": "40"
+  },
+  {
+   "id": "ATT-05",
+   "desc": "clock-in API",
+   "http": 201,
+   "resp": "{\"data\":{\"clock_in\":\"2026-11-26T20:20:51.358757032Z\",\"employee_id\":4,\"id\":7,\"status\":\"present\"},\"success\":true}"
+  },
+  {
+   "id": "ATT-06",
+   "desc": "attendance 09:00-19:30 hours computed?",
+   "http": 201,
+   "row": ""
+  },
+  {
+   "id": "ATT-OT",
+   "desc": "overtime report for November",
+   "summary": "{\"employees_count\":0,\"total_overtime_cost\":0,\"total_overtime_hours\":0}"
+  }
+ ]
+}

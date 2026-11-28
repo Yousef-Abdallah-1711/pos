@@ -1,0 +1,16 @@
+{
+ "run": "RUN-003",
+ "out": {
+  "C": {
+   "url": "http://audit-c-diag.localhost:13113/en",
+   "text": "Audit C Diagnostic | Menu | Orders | Cart | Search products... | EN | Fast Delivery | Audit C Diagnostic | Order your favorite dishes in minutes. | Order via WhatsApp | Order Now | audit-c-diag | Audit C Diagnostic | Quick Links | Hours | Contact the restaurant for opening hours | Contact | (c) 2026 Audit C Diagnostic. All rights reserved. | Top",
+   "products": "Audit Burger(cat=1,avail=true), Audit Inv Probe A(cat=1,avail=true), Audit Inv Probe B(cat=1,avail=true)"
+  },
+  "E": {
+   "url": "http://audit-e-outbox.localhost:13113/en",
+   "text": "Audit E Outbox | Menu | Orders | Cart | Search products... | EN | Fast Delivery | Audit E Outbox | Order your favorite dishes in minutes. | Order via WhatsApp | Order Now | audit-e-outbox | Audit E Outbox | Quick Links | Hours | Contact the restaurant for opening hours | Contact | (c) 2026 Audit E Outbox. All rights reserved. | Top",
+   "products": "Outbox Probe Item(cat=2,avail=true), MassAssign(cat=2,avail=false)"
+  },
+  "apiCalls": []
+ }
+}

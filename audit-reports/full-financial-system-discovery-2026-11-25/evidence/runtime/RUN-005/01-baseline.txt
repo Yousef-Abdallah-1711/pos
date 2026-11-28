@@ -1,0 +1,14 @@
+captured 2026-11-27T11:54:42Z
+35100f76efd12268077e1791689d1fd7523c7866
+feature/servio-bento-showcase-20261127
+ M docs/landing-handoff.md
+ M docs/landing-interactive-experience/progress.md
+ M frontend/apps/dashboard/tsconfig.json
+ M frontend/apps/landing/.gsap/animation-plan.md
+ M frontend/apps/landing/.gsap/audit-report.md
+ M frontend/apps/landing/.gsap/current-state.md
+ M frontend/apps/landing/.gsap/pages/homepage.animation.md
+ M frontend/apps/landing/.gsap/phases/homepage/p12-showcase.md
+ M frontend/apps/landing/.gsap/tasks/homepage.tasks.md
+ M frontend/apps/landing/DESIGN.md
+0

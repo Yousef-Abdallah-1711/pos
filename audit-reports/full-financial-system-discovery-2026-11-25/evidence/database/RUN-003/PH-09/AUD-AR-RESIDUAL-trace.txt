@@ -1,0 +1,29 @@
+AUD-AR-RESIDUAL trace (tenant 4, isolated DB, EGP, as of 2026-11-26T19:44:43Z)
+-- account identity: 1120 is the account_code of Accounts Receivable (not an amount)
+ id | account_code |    account_name     
+----+--------------+---------------------
+ 74 | 1120         | Accounts Receivable
+(1 row)
+
+-- GL lines on 1120
+ id  | entry_number  |  reference_type  | reference_id | debit_amount | credit_amount 
+-----+---------------+------------------+--------------+--------------+---------------
+  24 | JE-2026-00014 | customer_invoice |            2 |      5200.00 |          0.00
+  28 | JE-2026-00015 | payment_received |            1 |         0.00 |       2000.00
+  30 | JE-2026-00016 | payment_received |            2 |         0.00 |       1000.00
+  32 | JE-2026-00017 | payment_received |            3 |         0.00 |       1000.00
+  34 | JE-2026-00018 | payment_received |            4 |         0.00 |       1000.00
+  36 | JE-2026-00019 | payment_received |            5 |         0.00 |       1000.00
+  38 | JE-2026-00020 | payment_received |            6 |         0.00 |       1000.00
+ 116 | JE-2026-00050 | customer_invoice |            3 |      8320.00 |          0.00
+(8 rows)
+
+-- invoices
+ id | invoice_number | status | total_amount | amount_paid | balance_due | journal_entry_id 
+----+----------------+--------+--------------+-------------+-------------+------------------
+  2 | INV-2026-00001 | paid   |      5200.00 |     7000.00 |        0.00 |               22
+  3 | INV-2026-00002 | draft  |      8320.00 |        0.00 |     8320.00 |               61
+(2 rows)
+
+-- decomposition: GL 6520 = 5200 + 8320 - 7000. Aging 8320 = open balance_due (invoice 3 draft; invoice 2 balance clamped to 0 by GREATEST). Residual 8320-6520 = 1800 = receipts 7000 - invoice 5200 (over-settlement, F-006)
+7000.00
