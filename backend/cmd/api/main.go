@@ -28,6 +28,7 @@ import (
 	"pos-saas/internal/repository"
 	"pos-saas/internal/service"
 	"pos-saas/internal/usecase"
+	"pos-saas/internal/workspaceappearance"
 )
 
 const (
@@ -177,6 +178,7 @@ func main() {
 	categoryRepo := repository.NewCategoryRepository(db)
 	userRepo := repository.NewUserRepository(db)
 	userSettingsRepo := repository.NewUserSettingsRepository(db)
+	workspaceAppearanceHandler := handler.NewWorkspaceAppearanceHandler(workspaceappearance.Repository{DB: db})
 
 	// Order Management repositories
 	orderRepo := repository.NewOrderRepository(db)
@@ -736,6 +738,11 @@ func main() {
 		wrapped = authenticateRequest(wrapped) // outermost (auth first)
 		return wrapped
 	}
+	// Appearance writes change the entire tenant workspace, so enforce settings
+	// permission even when legacy route auditing is enabled in development.
+	appearanceWritePermission := middleware.NewPermissionMiddleware(permissionEvaluator, middleware.PermissionModeEnforce)(5, "WRITE")
+	mux.Handle("GET /api/v1/workspace-appearance", wrapProtected(http.HandlerFunc(workspaceAppearanceHandler.Get)))
+	mux.Handle("PUT /api/v1/workspace-appearance", wrapProtected(appearanceWritePermission(http.HandlerFunc(workspaceAppearanceHandler.Put))))
 
 	// wrapAuthPermission: auth + permission check WITHOUT tenant-context middleware, for the RBAC
 	// endpoints that read claims.TenantID directly (the permission evaluator only needs the claims).
